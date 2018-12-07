@@ -1,0 +1,3 @@
+[submodule "skia"]
+	path = skia
+	url = https://github.com/google/skia.git

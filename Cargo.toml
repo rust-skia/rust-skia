@@ -1,0 +1,16 @@
+[package]
+name = "rust-skia"
+version = "0.1.0"
+authors = ["LongYinan <lynweklm@gmail.com>"]
+edition = "2018"
+build = "build.rs"
+links = "skia"
+
+[dependencies]
+
+[dev-dependencies]
+image = "0.20"
+
+[build-dependencies]
+cc = "1"
+bindgen = "0.43"
