@@ -13,4 +13,4 @@ image = "0.20"
 
 [build-dependencies]
 cc = "1"
-bindgen = "0.43"
+bindgen = "0.44"

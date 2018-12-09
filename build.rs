@@ -2,10 +2,9 @@ extern crate bindgen;
 extern crate cc;
 
 use std::env;
-use std::process::Command;
+use std::process::{Command, Stdio};
 use std::path::PathBuf;
-use std::io::Write;
-use std::fs::{read_dir, File};
+use std::fs::{read_dir};
 
 use cc::Build;
 
@@ -13,16 +12,22 @@ fn main() {
   Command::new("git")
     .arg("submodule")
     .arg("init")
-    .output()
+    .stdout(Stdio::inherit())
+    .stderr(Stdio::inherit())
+    .status()
     .unwrap();
 
   Command::new("git")
     .args(&["submodule", "update", "--recursive"])
-    .output()
+    .stdout(Stdio::inherit())
+    .stderr(Stdio::inherit())
+    .status()
     .unwrap();
 
   Command::new("python")
     .arg("skia/tools/git-sync-deps")
+    .stdout(Stdio::inherit())
+    .stderr(Stdio::inherit())
     .status()
     .unwrap();
 
@@ -34,6 +39,8 @@ fn main() {
     ])
     .envs(env::vars())
     .current_dir(PathBuf::from("./skia"))
+    .stdout(Stdio::inherit())
+    .stderr(Stdio::inherit())
     .output()
     .expect("gn error");
 
@@ -44,7 +51,9 @@ fn main() {
   Command::new("ninja")
     .current_dir(PathBuf::from("./skia"))
     .args(&["-C", "out/Static"])
-    .output()
+    .stdout(Stdio::inherit())
+    .stderr(Stdio::inherit())
+    .status()
     .expect("ninja error");
 
   let current_dir = env::current_dir().unwrap();
@@ -83,14 +92,19 @@ fn main() {
 fn bindgen_gen(current_dir_name: &str) {
   let mut builder = bindgen::Builder::default()
     .generate_inline_functions(true)
-    .clang_arg("-std=c++17")
+    .clang_arg("-std=c++14")
     .whitelist_type("SkCanvas")
     .whitelist_type("SkSurface")
     .whitelist_type("SkImage")
     .whitelist_type("SkImageInfo")
+    .whitelist_type("SkPath")
+    .whitelist_type("SkRect")
+    .whitelist_type("SkColor")
     .whitelist_function("SkiaCreateCanvas")
-    .whitelist_function("SkiaCreateImageInfo")
-    .whitelist_function("SkiaCreateSurface")
+    .whitelist_function("SkColorSetARGB")
+    .whitelist_function("SkiaCreateRect")
+    .whitelist_function("SkiaClearCanvas")
+    .whitelist_var("SkColorSetARGB")
     .blacklist_function("SkSTArenaAlloc_SkSTArenaAlloc<InlineStorageSize>");
 
   let mut cc_build = Build::new();
@@ -106,7 +120,7 @@ fn bindgen_gen(current_dir_name: &str) {
 
   cc_build
     .cpp(true)
-    .flag("-std=c++17")
+    .flag("-std=c++14")
     .file("src/bindings.cc")
     .out_dir("skia/out/Static")
     .compile("skiabinding");

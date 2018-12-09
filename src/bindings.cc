@@ -3,6 +3,11 @@
 #include "SkCanvas.h"
 #include "SkImageInfo.h"
 #include "SkSurface.h"
+#include "SkPath.h"
+#include "SkRect.h"
+#include "SkColor.h"
+#include "SkPaint.h"
+#include "SkTypes.h"
 
 #include "./bindings.hpp"
 
@@ -26,4 +31,12 @@ extern "C" SkCanvasBindings SkiaCreateCanvas(int width, int height) {
   SkCanvasBindings release_holder = { ptr, canvas, &info, rowBytes, size, data_ptr };
   surface->ref();
   return release_holder;
+}
+
+extern "C" SkRect SkiaCreateRect(float width, float height) {
+  return SkRect::MakeWH(width, height);
+}
+
+extern "C" void SkiaClearCanvas(SkCanvas* canvas, SkColor color) {
+  canvas->clear(color);
 }

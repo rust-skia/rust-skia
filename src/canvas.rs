@@ -5,18 +5,18 @@ mod raw {
   include!("./bindings.rs");
 }
 
-use std::ptr;
 use std::mem;
 use std::slice;
-use std::os::raw::c_void;
 
 use self::raw::*;
 
 struct ReleaseSurface(unsafe extern "C" fn());
 
-pub struct Canvas{
+pub struct Canvas {
   sk_canvas: &'static mut SkCanvas,
   sk_path: SkPath,
+  sk_rect: SkRect,
+  sk_paint: SkPaint,
   sk_image_info: &'static mut SkImageInfo,
   release_surface: ReleaseSurface,
   row_bytes: usize,
@@ -26,22 +26,40 @@ pub struct Canvas{
   data_ptr: *mut u8,
 }
 
+#[inline]
+pub fn set_a_rgb(a: U8CPU, r: U8CPU, g: U8CPU, b: U8CPU) -> SkColor {
+  debug_assert!(a <= 255);
+  debug_assert!(r <= 255);
+  debug_assert!(g <= 255);
+  debug_assert!(b <= 255);
+  (a << 24) | (r << 16) | (g << 8) | (b << 0)
+}
+
 impl Canvas {
   pub fn new(width: i32, height: i32) -> Canvas {
     unsafe {
       let sk_canvas_bindings = SkiaCreateCanvas(width, height);
       let sk_canvas = mem::transmute::<*mut SkCanvas, &mut SkCanvas>(sk_canvas_bindings.canvas);
-      let sk_image_info = mem::transmute::<*mut SkImageInfo, &mut SkImageInfo>(sk_canvas_bindings.info);
+      let sk_image_info =
+        mem::transmute::<*mut SkImageInfo, &mut SkImageInfo>(sk_canvas_bindings.info);
       let sk_path = SkPath::new();
+      let sk_rect = SkiaCreateRect(width as f32, height as f32);
+      let mut sk_paint = SkPaint::new();
+      sk_paint.setARGB(255, 0, 0, 0);
+      sk_paint.setStrokeWidth(1.0);
+      SkiaClearCanvas(sk_canvas as *mut _, set_a_rgb(255, 255, 255, 255));
       Canvas {
         sk_canvas,
         sk_path,
+        sk_rect,
+        sk_paint,
         sk_image_info,
         release_surface: ReleaseSurface(sk_canvas_bindings.release_fn.unwrap()),
         row_bytes: sk_canvas_bindings.rowBytes,
         size: sk_canvas_bindings.size,
         data_ptr: sk_canvas_bindings.data_ptr as *mut u8,
-        width, height,
+        width,
+        height,
       }
     }
   }
@@ -89,10 +107,38 @@ impl Canvas {
   }
 
   #[inline]
-  pub fn data(&mut self) -> &'static [u8] {
+  pub fn begin_path(&mut self) {
     unsafe {
-      slice::from_raw_parts(self.data_ptr, self.row_bytes * self.width as usize)
+      let new_path = SkPath::new();
+      self.sk_canvas.drawPath(
+        &mut self.sk_path as *const _,
+        &mut self.sk_paint as *const _,
+      );
+      mem::replace(&mut self.sk_path, new_path);
     }
+  }
+
+  #[inline]
+  pub fn stroke(&mut self) {
+    unsafe {
+      self.sk_paint.setStyle(SkPaint_Style_kStroke_Style);
+      self.sk_canvas.drawPath(
+        &mut self.sk_path as *const _,
+        &mut self.sk_paint as *const _,
+      );
+    };
+  }
+
+  #[inline]
+  pub fn set_line_width(&mut self, width: f32) {
+    unsafe {
+      self.sk_paint.setStrokeWidth(width);
+    };
+  }
+
+  #[inline]
+  pub fn data(&mut self) -> &'static [u8] {
+    unsafe { slice::from_raw_parts(self.data_ptr, self.row_bytes * self.width as usize) }
   }
 }
 
