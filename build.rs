@@ -92,20 +92,10 @@ fn main() {
 fn bindgen_gen(current_dir_name: &str) {
   let mut builder = bindgen::Builder::default()
     .generate_inline_functions(true)
-    .clang_arg("-std=c++14")
-    .whitelist_type("SkCanvas")
-    .whitelist_type("SkSurface")
-    .whitelist_type("SkImage")
-    .whitelist_type("SkImageInfo")
-    .whitelist_type("SkPath")
-    .whitelist_type("SkRect")
-    .whitelist_type("SkColor")
     .whitelist_function("SkiaCreateCanvas")
-    .whitelist_function("SkColorSetARGB")
     .whitelist_function("SkiaCreateRect")
     .whitelist_function("SkiaClearCanvas")
-    .whitelist_var("SkColorSetARGB")
-    .blacklist_function("SkSTArenaAlloc_SkSTArenaAlloc<InlineStorageSize>");
+    .clang_arg("-std=c++14");
 
   let mut cc_build = Build::new();
 

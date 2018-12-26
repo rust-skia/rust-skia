@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 mod raw {
   #![allow(non_upper_case_globals)]
   #![allow(non_camel_case_types)]
@@ -47,6 +48,7 @@ impl Canvas {
       let mut sk_paint = SkPaint::new();
       sk_paint.setARGB(255, 0, 0, 0);
       sk_paint.setStrokeWidth(1.0);
+      sk_paint.setStyle(SkPaint_Style_kStroke_Style);
       SkiaClearCanvas(sk_canvas as *mut _, set_a_rgb(255, 255, 255, 255));
       Canvas {
         sk_canvas,
@@ -121,7 +123,6 @@ impl Canvas {
   #[inline]
   pub fn stroke(&mut self) {
     unsafe {
-      self.sk_paint.setStyle(SkPaint_Style_kStroke_Style);
       self.sk_canvas.drawPath(
         &mut self.sk_path as *const _,
         &mut self.sk_paint as *const _,
