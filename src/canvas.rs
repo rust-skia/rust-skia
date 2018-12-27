@@ -14,17 +14,14 @@ use self::raw::*;
 struct ReleaseSurface(unsafe extern "C" fn());
 
 pub struct Canvas {
+  sk_surface: &'static mut SkSurface,
   sk_canvas: &'static mut SkCanvas,
   sk_path: SkPath,
   sk_rect: SkRect,
   sk_paint: SkPaint,
-  sk_image_info: &'static mut SkImageInfo,
   release_surface: ReleaseSurface,
-  row_bytes: usize,
-  size: usize,
   width: i32,
   height: i32,
-  data_ptr: *mut u8,
 }
 
 #[inline]
@@ -40,26 +37,23 @@ impl Canvas {
   pub fn new(width: i32, height: i32) -> Canvas {
     unsafe {
       let sk_canvas_bindings = SkiaCreateCanvas(width, height);
+      let sk_surface = mem::transmute::<*mut SkSurface, &mut SkSurface>(sk_canvas_bindings.surface);
       let sk_canvas = mem::transmute::<*mut SkCanvas, &mut SkCanvas>(sk_canvas_bindings.canvas);
-      let sk_image_info =
-        mem::transmute::<*mut SkImageInfo, &mut SkImageInfo>(sk_canvas_bindings.info);
       let sk_path = SkPath::new();
       let sk_rect = SkiaCreateRect(width as f32, height as f32);
       let mut sk_paint = SkPaint::new();
-      sk_paint.setARGB(255, 0, 0, 0);
-      sk_paint.setStrokeWidth(1.0);
+      sk_paint.setColor(SK_ColorBLUE);
+      sk_paint.setAntiAlias(true);
+      sk_paint.setStrokeWidth(10.0);
       sk_paint.setStyle(SkPaint_Style_kStroke_Style);
-      SkiaClearCanvas(sk_canvas as *mut _, set_a_rgb(255, 255, 255, 255));
+      SkiaClearCanvas(sk_canvas as *mut _, SK_ColorWHITE);
       Canvas {
         sk_canvas,
+        sk_surface,
         sk_path,
         sk_rect,
         sk_paint,
-        sk_image_info,
         release_surface: ReleaseSurface(sk_canvas_bindings.release_fn.unwrap()),
-        row_bytes: sk_canvas_bindings.rowBytes,
-        size: sk_canvas_bindings.size,
-        data_ptr: sk_canvas_bindings.data_ptr as *mut u8,
         width,
         height,
       }
@@ -102,6 +96,13 @@ impl Canvas {
   }
 
   #[inline]
+  pub fn quad_to(&mut self, x: f32, y: f32, cpx: f32, cpy: f32) {
+    unsafe {
+      self.sk_path.quadTo(x, y, cpx, cpy);
+    }
+  }
+
+  #[inline]
   pub fn close_path(&mut self) {
     unsafe {
       self.sk_path.close();
@@ -139,7 +140,10 @@ impl Canvas {
 
   #[inline]
   pub fn data(&mut self) -> &'static [u8] {
-    unsafe { slice::from_raw_parts(self.data_ptr, self.row_bytes * self.width as usize) }
+    unsafe {
+      let surface_data = SkiaGetSurfaceData(self.sk_surface as *mut SkSurface);
+      slice::from_raw_parts(surface_data.data, surface_data.size)
+    }
   }
 }
 

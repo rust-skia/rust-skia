@@ -2,9 +2,9 @@ extern crate bindgen;
 extern crate cc;
 
 use std::env;
-use std::process::{Command, Stdio};
+use std::fs::read_dir;
 use std::path::PathBuf;
-use std::fs::{read_dir};
+use std::process::{Command, Stdio};
 
 use cc::Build;
 
@@ -60,7 +60,10 @@ fn main() {
   let current_dir_name = current_dir.to_str().unwrap();
 
   println!("cargo:include={}/skia/include/c", &current_dir_name);
-  println!("cargo:rustc-link-search={}/skia/out/Static", &current_dir_name);
+  println!(
+    "cargo:rustc-link-search={}/skia/out/Static",
+    &current_dir_name
+  );
   println!("cargo:rustc-link-lib=static=skia");
   println!("cargo:rustc-link-lib=static=skiabinding");
 
@@ -95,6 +98,9 @@ fn bindgen_gen(current_dir_name: &str) {
     .whitelist_function("SkiaCreateCanvas")
     .whitelist_function("SkiaCreateRect")
     .whitelist_function("SkiaClearCanvas")
+    .whitelist_function("SkiaGetSurfaceData")
+    .whitelist_var("SK_ColorWHITE")
+    .whitelist_var("SK_ColorBLUE")
     .clang_arg("-std=c++14");
 
   let mut cc_build = Build::new();
@@ -115,9 +121,7 @@ fn bindgen_gen(current_dir_name: &str) {
     .out_dir("skia/out/Static")
     .compile("skiabinding");
 
-  let bindings = builder
-    .generate()
-    .expect("Unable to generate bindings");
+  let bindings = builder.generate().expect("Unable to generate bindings");
 
   let out_path = PathBuf::from("src");
   bindings
