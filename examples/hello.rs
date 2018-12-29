@@ -1,7 +1,7 @@
 extern crate rust_skia;
 
-use std::io::Write;
 use std::fs::File;
+use std::io::Write;
 
 use rust_skia::Canvas;
 
@@ -11,6 +11,7 @@ fn main() {
   canvas.move_to(36.0, 48.0);
   canvas.quad_to(660.0, 880.0, 1200.0, 360.0);
   canvas.translate(10.0, 10.0);
+  canvas.set_line_width(20.0);
   canvas.stroke();
   canvas.save();
   let d = canvas.data();

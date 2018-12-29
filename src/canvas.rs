@@ -6,8 +6,8 @@ mod raw {
   include!("./bindings.rs");
 }
 
-use std::mem;
-use std::slice;
+use core::mem;
+use core::slice;
 
 use self::raw::*;
 
@@ -42,10 +42,9 @@ impl Canvas {
       let sk_path = SkPath::new();
       let sk_rect = SkiaCreateRect(width as f32, height as f32);
       let mut sk_paint = SkPaint::new();
-      sk_paint.setColor(SK_ColorBLUE);
+      sk_paint.setColor(SK_ColorBLACK);
       sk_paint.setAntiAlias(true);
-      sk_paint.setStrokeWidth(10.0);
-      sk_paint.setStyle(SkPaint_Style_kStroke_Style);
+      sk_paint.setStrokeWidth(1.0);
       SkiaClearCanvas(sk_canvas as *mut _, SK_ColorWHITE);
       Canvas {
         sk_canvas,
@@ -96,9 +95,16 @@ impl Canvas {
   }
 
   #[inline]
-  pub fn quad_to(&mut self, x: f32, y: f32, cpx: f32, cpy: f32) {
+  pub fn quad_to(&mut self, cpx: f32, cpy: f32, x: f32, y: f32) {
     unsafe {
-      self.sk_path.quadTo(x, y, cpx, cpy);
+      self.sk_path.quadTo(cpx, cpy, x, y);
+    }
+  }
+
+  #[inline]
+  pub fn bezier_curve_to(&mut self, cp1x: f32, cp1y: f32, cp2x: f32, cp2y: f32, x: f32, y: f32) {
+    unsafe {
+      self.sk_path.cubicTo(cp1x, cp1y, cp2x, cp2y, x, y);
     }
   }
 
@@ -124,6 +130,7 @@ impl Canvas {
   #[inline]
   pub fn stroke(&mut self) {
     unsafe {
+      self.sk_paint.setStyle(SkPaint_Style_kStroke_Style);
       self.sk_canvas.drawPath(
         &mut self.sk_path as *const _,
         &mut self.sk_paint as *const _,
