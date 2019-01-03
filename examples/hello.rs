@@ -14,6 +14,13 @@ fn main() {
   canvas.set_line_width(20.0);
   canvas.stroke();
   canvas.save();
+  canvas.move_to(30.0, 90.0);
+  canvas.line_to(110.0, 20.0);
+  canvas.line_to(240.0, 130.0);
+  canvas.line_to(60.0, 130.0);
+  canvas.line_to(190.0, 20.0);
+  canvas.line_to(270.0, 90.0);
+  canvas.fill(None);
   let d = canvas.data();
   let mut file = File::create("test.png").unwrap();
   file.write_all(d).unwrap();

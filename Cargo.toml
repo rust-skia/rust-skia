@@ -10,4 +10,4 @@ links = "skia"
 
 [build-dependencies]
 cc = "1"
-bindgen = "0.45"
+bindgen = "0.46"

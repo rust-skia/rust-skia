@@ -82,6 +82,7 @@ impl Canvas {
 
   #[inline]
   pub fn move_to(&mut self, x: f32, y: f32) {
+    self.begin_path();
     unsafe {
       self.sk_path.moveTo(x, y);
     }
@@ -139,6 +140,19 @@ impl Canvas {
   }
 
   #[inline]
+  pub fn fill(&mut self, fill_rule: Option<FillRule>) {
+    let rule = fill_rule.unwrap_or(FillRule::default());
+    unsafe {
+      self.sk_paint.setStyle(SkPaint_Style_kFill_Style);
+      // self.sk_path.setFillType(rule.to_skia_type());
+      self.sk_canvas.drawPath(
+        &mut self.sk_path as *const _,
+        &mut self.sk_paint as *const _,
+      );
+    };
+  }
+
+  #[inline]
   pub fn set_line_width(&mut self, width: f32) {
     unsafe {
       self.sk_paint.setStrokeWidth(width);
@@ -159,5 +173,35 @@ impl Drop for Canvas {
     unsafe {
       self.release_surface.0();
     };
+  }
+}
+
+pub trait ToSkiaType {
+  type SkType;
+
+  fn to_skia_type(&self) -> Self::SkType;
+}
+
+#[derive(Debug)]
+pub enum FillRule {
+  Nonzero,
+  Evenodd,
+}
+
+impl ToSkiaType for FillRule {
+  type SkType = SkPath_FillType;
+
+  #[inline]
+  fn to_skia_type(&self) -> SkPath_FillType {
+    match self {
+      FillRule::Nonzero => SkPath_FillType_kWinding_FillType,
+      FillRule::Evenodd => SkPath_FillType_kEvenOdd_FillType,
+    }
+  }
+}
+
+impl Default for FillRule {
+  fn default() -> Self {
+    FillRule::Nonzero
   }
 }
