@@ -1,7 +1,6 @@
 FROM rust:latest
 
-RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list && \
-  apt-get update && \
+RUN apt-get update && \
   apt-get install \
     apt-transport-https \
     curl \
