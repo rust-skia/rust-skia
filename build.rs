@@ -15,27 +15,35 @@ fn main() {
     .stdout(Stdio::inherit())
     .stderr(Stdio::inherit())
     .status()
-    .unwrap();
+    .expect("git submodule init fail");
 
   Command::new("git")
-    .args(&["submodule", "update", "--remote", "--recursive"])
+    .args(&["submodule", "update"])
     .stdout(Stdio::inherit())
     .stderr(Stdio::inherit())
     .status()
-    .unwrap();
+    .expect("git submodule update fail");
 
   Command::new("python")
     .arg("skia/tools/git-sync-deps")
     .stdout(Stdio::inherit())
     .stderr(Stdio::inherit())
     .status()
-    .unwrap();
+    .expect("git sync deps fail");
+
+  let gn_arg = if cfg!(windows) {
+    r#"--args=is_official_build=true cc="clang" cxx="clang++" clang_win="C:\Program Files\LLVM""#
+  } else {
+    r#"--args=is_official_build=true skia_use_system_expat=false skia_use_system_icu=false skia_use_system_libjpeg_turbo=false skia_use_system_libpng=false skia_use_system_libwebp=false skia_use_system_zlib=false cc="clang" cxx="clang++""#
+  };
+
+  println!("{}", gn_arg);
 
   let output = Command::new("bin/gn")
     .args(&[
       "gen",
       "out/Static",
-      r#"--args=is_official_build=true skia_use_system_expat=false skia_use_system_icu=false skia_use_system_libjpeg_turbo=false skia_use_system_libpng=false skia_use_system_libwebp=false skia_use_system_zlib=false cc="clang" cxx="clang++""#
+      gn_arg
     ])
     .envs(env::vars())
     .current_dir(PathBuf::from("./skia"))
