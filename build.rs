@@ -18,7 +18,7 @@ fn main() {
     .unwrap();
 
   Command::new("git")
-    .args(&["submodule", "update", "--recursive"])
+    .args(&["submodule", "update", "--remote", "--recursive"])
     .stdout(Stdio::inherit())
     .stderr(Stdio::inherit())
     .status()
