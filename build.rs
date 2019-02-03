@@ -95,6 +95,7 @@ fn main() {
     }
     println!("cargo:rustc-link-lib=usp10");
     println!("cargo:rustc-link-lib=ole32");
+    println!("cargo:rustc-link-lib=user32");
   }
 
   if env::var("INIT_SKIA").is_ok() {
