@@ -42,8 +42,7 @@ fn main() {
 
     if cfg!(windows) {
       base_args + r#" clang_win="C:\Program Files\LLVM" extra_cflags=["/MD"]"#
-    }
-    else {
+    } else {
       base_args
     }
   };
