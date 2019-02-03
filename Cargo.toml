@@ -6,6 +6,10 @@ edition = "2018"
 build = "build.rs"
 links = "skia"
 
+[features]
+default = []
+vulkan = []
+
 [dependencies]
 
 [build-dependencies]

@@ -36,15 +36,24 @@ fn main() {
 
 
   let gn_args = {
-    let base_args =
+    let mut args =
       r#"--args=is_official_build=true skia_use_system_expat=false skia_use_system_icu=false skia_use_system_libjpeg_turbo=false skia_use_system_libpng=false skia_use_system_libwebp=false skia_use_system_zlib=false cc="clang" cxx="clang++""#
       .to_owned();
 
-    if cfg!(windows) {
-      base_args + r#" clang_win="C:\Program Files\LLVM" extra_cflags=["/MD"]"#
-    } else {
-      base_args
+    if cfg!(feature="vulkan") {
+      args.push_str(" skia_use_vulkan=true skia_enable_spirv_validation=false");
     }
+
+    if cfg!(windows) {
+      args.push_str(r#" clang_win="C:\Program Files\LLVM""#);
+      if cfg!(build="debug") {
+        args.push_str(r#" extra_cflags=["/MTd"]"#);
+      } else {
+        args.push_str(r#" extra_cflags=["/MD"]"#);
+      }
+    }
+
+    args
   };
 
   let gn_command = if cfg!(windows) {
