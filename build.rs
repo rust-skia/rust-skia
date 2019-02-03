@@ -160,6 +160,10 @@ fn bindgen_gen(current_dir_name: &str) {
     cc_build.include(&include_path);
   }
 
+  if cfg!(feature="vulkan") {
+    cc_build.define("FEATURE_VULKAN", "1");
+  }
+
   cc_build
     .cpp(true)
     .flag("-std=c++14")

@@ -7,6 +7,11 @@
 #include "SkPaint.h"
 #include "SkTypes.h"
 
+#if defined(FEATURE_VULKAN)
+  #include "GrContext.h"
+  #include "vk/GrVkBackendContext.h"
+#endif
+
 typedef struct SkCanvasBindings {
   SkSurface* surface;
   void (*release_fn)();
