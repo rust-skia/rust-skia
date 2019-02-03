@@ -44,11 +44,7 @@ fn main() {
   };
 
   let output = Command::new(gn_command)
-    .args(&[
-      "gen",
-      "out/Static",
-      gn_arg
-    ])
+    .args(&["gen", "out/Static", gn_arg])
     .envs(env::vars())
     .current_dir(PathBuf::from("./skia"))
     .stdout(Stdio::inherit())
