@@ -103,8 +103,11 @@ fn main() {
 }
 
 fn bindgen_gen(current_dir_name: &str) {
+
+  let inline_functions = !cfg!(windows);
+
   let mut builder = bindgen::Builder::default()
-    .generate_inline_functions(true)
+    .generate_inline_functions(inline_functions)
     .whitelist_function("SkiaCreateCanvas")
     .whitelist_function("SkiaCreateRect")
     .whitelist_function("SkiaClearCanvas")
