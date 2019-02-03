@@ -13,8 +13,8 @@ jobs:
   steps:
   - task: UsePythonVersion@0
     inputs:
-      versionSpec: '2.x' 
-      addToPath: true 
+      versionSpec: '2.x'
+      addToPath: true
       architecture: 'x64'
   - ${{ if eq(parameters.name, 'macOS') }}:
     - script: |
@@ -36,6 +36,7 @@ jobs:
         set PATH=%PATH%;%USERPROFILE%\.cargo\bin;%USERPROFILE%\depot_tools
         echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin;%USERPROFILE%\depot_tools"
         choco install llvm
+        git submodule update --init --recursive
       displayName: Install rust (windows)
   # All platforms.
   - script: |

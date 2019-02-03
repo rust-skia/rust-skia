@@ -9,20 +9,23 @@ use std::process::{Command, Stdio};
 use cc::Build;
 
 fn main() {
-  Command::new("git")
-    .arg("submodule")
-    .arg("init")
-    .stdout(Stdio::inherit())
-    .stderr(Stdio::inherit())
-    .status()
-    .expect("git submodule init fail");
 
-  Command::new("git")
-    .args(&["submodule", "update"])
-    .stdout(Stdio::inherit())
-    .stderr(Stdio::inherit())
-    .status()
-    .expect("git submodule update fail");
+  if !cfg!(windows) {
+    Command::new("git")
+      .arg("submodule")
+      .arg("init")
+      .stdout(Stdio::inherit())
+      .stderr(Stdio::inherit())
+      .status()
+      .expect("git submodule init fail");
+
+    Command::new("git")
+      .args(&["submodule", "update"])
+      .stdout(Stdio::inherit())
+      .stderr(Stdio::inherit())
+      .status()
+      .expect("git submodule update fail");
+  }
 
   Command::new("python")
     .arg("skia/tools/git-sync-deps")
