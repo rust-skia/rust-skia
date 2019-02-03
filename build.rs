@@ -162,6 +162,7 @@ fn bindgen_gen(current_dir_name: &str) {
 
   if cfg!(feature="vulkan") {
     cc_build.define("FEATURE_VULKAN", "1");
+    builder = builder.clang_arg("-DFEATURE_VULKAN=1");
   }
 
   cc_build
