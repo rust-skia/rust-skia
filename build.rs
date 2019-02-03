@@ -89,6 +89,8 @@ fn main() {
     println!("cargo:rustc-link-lib=stdc++");
     println!("cargo:rustc-link-lib=bz2");
     println!("cargo:rustc-link-lib=GL");
+    println!("cargo:rustc-link-lib=fontconfig");
+    println!("cargo:rustc-link-lib=freetype");
   } else if target.contains("eabi") {
     println!("cargo:rustc-link-lib=stdc++");
     println!("cargo:rustc-link-lib=GLESv2");
