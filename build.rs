@@ -34,10 +34,18 @@ fn main() {
     .status()
     .expect("git sync deps fail");
 
-  let gn_arg = if cfg!(windows) {
-    r#"--args=is_official_build=true cc="clang" cxx="clang++" clang_win="C:\Program Files\LLVM""#
-  } else {
-    r#"--args=is_official_build=true skia_use_system_expat=false skia_use_system_icu=false skia_use_system_libjpeg_turbo=false skia_use_system_libpng=false skia_use_system_libwebp=false skia_use_system_zlib=false cc="clang" cxx="clang++""#
+
+  let gn_args = {
+    let base_args =
+      r#"--args=is_official_build=true skia_use_system_expat=false skia_use_system_icu=false skia_use_system_libjpeg_turbo=false skia_use_system_libpng=false skia_use_system_libwebp=false skia_use_system_zlib=false cc="clang" cxx="clang++""#
+      .to_owned();
+
+    if cfg!(windows) {
+      base_args + r#" clang_win="C:\Program Files\LLVM" extra_cflags=["/MD"]"#
+    }
+    else {
+      base_args
+    }
   };
 
   let gn_command = if cfg!(windows) {
@@ -47,7 +55,7 @@ fn main() {
   };
 
   let output = Command::new(gn_command)
-    .args(&["gen", "out/Static", gn_arg])
+    .args(&["gen", "out/Static", &gn_args])
     .envs(env::vars())
     .current_dir(PathBuf::from("./skia"))
     .stdout(Stdio::inherit())
