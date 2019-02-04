@@ -9,34 +9,52 @@ use std::process::{Command, Stdio};
 use cc::Build;
 
 fn main() {
-  Command::new("git")
-    .arg("submodule")
-    .arg("init")
-    .stdout(Stdio::inherit())
-    .stderr(Stdio::inherit())
-    .status()
-    .unwrap();
 
-  Command::new("git")
-    .args(&["submodule", "update", "--remote", "--recursive"])
-    .stdout(Stdio::inherit())
-    .stderr(Stdio::inherit())
-    .status()
-    .unwrap();
+  if !cfg!(windows) {
+    Command::new("git")
+      .arg("submodule")
+      .arg("init")
+      .stdout(Stdio::inherit())
+      .stderr(Stdio::inherit())
+      .status()
+      .expect("git submodule init fail");
+
+    Command::new("git")
+      .args(&["submodule", "update"])
+      .stdout(Stdio::inherit())
+      .stderr(Stdio::inherit())
+      .status()
+      .expect("git submodule update fail");
+  }
 
   Command::new("python")
     .arg("skia/tools/git-sync-deps")
     .stdout(Stdio::inherit())
     .stderr(Stdio::inherit())
     .status()
-    .unwrap();
+    .expect("git sync deps fail");
 
-  let output = Command::new("bin/gn")
-    .args(&[
-      "gen",
-      "out/Static",
+
+  let gn_args = {
+    let base_args =
       r#"--args=is_official_build=true skia_use_system_expat=false skia_use_system_icu=false skia_use_system_libjpeg_turbo=false skia_use_system_libpng=false skia_use_system_libwebp=false skia_use_system_zlib=false cc="clang" cxx="clang++""#
-    ])
+      .to_owned();
+
+    if cfg!(windows) {
+      base_args + r#" clang_win="C:\Program Files\LLVM" extra_cflags=["/MD"]"#
+    } else {
+      base_args
+    }
+  };
+
+  let gn_command = if cfg!(windows) {
+    "skia/bin/gn"
+  } else {
+    "bin/gn"
+  };
+
+  let output = Command::new(gn_command)
+    .args(&["gen", "out/Static", &gn_args])
     .envs(env::vars())
     .current_dir(PathBuf::from("./skia"))
     .stdout(Stdio::inherit())
@@ -71,6 +89,8 @@ fn main() {
     println!("cargo:rustc-link-lib=stdc++");
     println!("cargo:rustc-link-lib=bz2");
     println!("cargo:rustc-link-lib=GL");
+    println!("cargo:rustc-link-lib=fontconfig");
+    println!("cargo:rustc-link-lib=freetype");
   } else if target.contains("eabi") {
     println!("cargo:rustc-link-lib=stdc++");
     println!("cargo:rustc-link-lib=GLESv2");
@@ -84,6 +104,7 @@ fn main() {
     }
     println!("cargo:rustc-link-lib=usp10");
     println!("cargo:rustc-link-lib=ole32");
+    println!("cargo:rustc-link-lib=user32");
   }
 
   if env::var("INIT_SKIA").is_ok() {
@@ -92,8 +113,14 @@ fn main() {
 }
 
 fn bindgen_gen(current_dir_name: &str) {
+
+  // don't generate inline function on windows,
+  // bindgen produces the following error:
+  // "std__Atomic_impl__Atomic_impl<_Bytes>" is not a valid Ident
+  let inline_functions = !cfg!(windows);
+
   let mut builder = bindgen::Builder::default()
-    .generate_inline_functions(true)
+    .generate_inline_functions(inline_functions)
     .whitelist_function("SkiaCreateCanvas")
     .whitelist_function("SkiaCreateRect")
     .whitelist_function("SkiaClearCanvas")

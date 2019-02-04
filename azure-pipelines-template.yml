@@ -1,0 +1,54 @@
+jobs:
+- job: ${{ parameters.name }}
+  pool:
+    vmImage: ${{ parameters.vmImage }}
+  strategy:
+    matrix:
+      stable:
+        rustup_toolchain: stable
+      beta:
+        rustup_toolchain: beta
+      nightly:
+        rustup_toolchain: nightly
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '2.x'
+      addToPath: true
+      architecture: 'x64'
+  - ${{ if eq(parameters.name, 'macOS') }}:
+    - script: |
+        brew update && brew install llvm
+      displayName: Install llvm
+  - ${{ if ne(parameters.name, 'Windows') }}:
+    # Linux and macOS.
+    - script: |
+        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUSTUP_TOOLCHAIN
+        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git $HOME/depot_tools
+        echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin:$HOME/depot_tools"
+      displayName: Install rust
+  - ${{ if eq(parameters.name, 'Windows') }}:
+    # Windows.
+    - script: |
+        curl -sSf -o rustup-init.exe https://win.rustup.rs
+        rustup-init.exe -y --default-toolchain %RUSTUP_TOOLCHAIN%
+        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git %USERPROFILE%\depot_tools
+        set PATH=%PATH%;%USERPROFILE%\.cargo\bin;%USERPROFILE%\depot_tools
+        echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin;%USERPROFILE%\depot_tools"
+        choco install llvm
+        git submodule update --init --recursive
+      displayName: Install rust (windows)
+  # All platforms.
+  - script: |
+        rustc -Vv
+        cargo -V
+        ninja --version
+    displayName: Print versions
+  - script: cargo build --release --all-targets -vvv
+    env: { INIT_SKIA: true }
+    displayName: Build rust-skia
+  - script: |
+      rustup target add wasm32-unknown-unknown
+      cargo check --target wasm32-unknown-unknown
+    displayName: Check WebAssembly target
+    condition: eq(variables['rustup_toolchain'], 'stable')
