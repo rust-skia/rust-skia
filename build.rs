@@ -123,17 +123,16 @@ fn main() {
 
 fn bindgen_gen(current_dir_name: &str) {
 
-  // don't generate inline function on windows,
-  // bindgen produces the following error:
-  // "std__Atomic_impl__Atomic_impl<_Bytes>" is not a valid Ident
-  let inline_functions = !cfg!(windows);
-
   let mut builder = bindgen::Builder::default()
-    .generate_inline_functions(inline_functions)
+    .generate_inline_functions(true)
+
+    .whitelist_function("C_.*")
+
     .whitelist_function("SkiaCreateCanvas")
     .whitelist_function("SkiaCreateRect")
     .whitelist_function("SkiaClearCanvas")
     .whitelist_function("SkiaGetSurfaceData")
+
     .whitelist_var("SK_ColorTRANSPARENT")
     .whitelist_var("SK_ColorBLACK")
     .whitelist_var("SK_ColorDKGRAY")
