@@ -1,15 +1,6 @@
-#[allow(dead_code)]
-mod raw {
-  #![allow(non_upper_case_globals)]
-  #![allow(non_camel_case_types)]
-  #![allow(non_snake_case)]
-  include!("./bindings.rs");
-}
-
 use core::mem;
 use core::slice;
-
-use self::raw::*;
+use crate::bindings::*;
 
 struct ReleaseSurface(unsafe extern "C" fn());
 
