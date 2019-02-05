@@ -1,5 +1,6 @@
 use core::mem;
 use skia_safe::*;
+use skia_safe::bindings::*;
 
 pub struct Canvas {
     surface: skia::Surface,
