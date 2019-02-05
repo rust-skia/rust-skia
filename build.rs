@@ -116,9 +116,7 @@ fn main() {
     println!("cargo:rustc-link-lib=user32");
   }
 
-  if env::var("INIT_SKIA").is_ok() {
-    bindgen_gen(&current_dir_name);
-  }
+  bindgen_gen(&current_dir_name);
 }
 
 fn bindgen_gen(current_dir_name: &str) {
