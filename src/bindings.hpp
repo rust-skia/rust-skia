@@ -36,6 +36,37 @@ extern "C" void C_SkPath_destruct(const SkPath* self) {
     self->~SkPath();
 }
 
+#if defined(FEATURE_VULKAN)
+
+// The GrVkBackendContext struct binding's length is too short
+// because of the std::function that is used in it.
+
+extern "C" void* C_GrVkBackendContext_New(
+        void* instance,
+        void* physicalDevice,
+        void* device,
+        void* queue,
+        uint32_t graphicsQueueIndex) {
+
+    auto& context = *new GrVkBackendContext();
+    context.fInstance = static_cast<VkInstance>(instance);
+    context.fPhysicalDevice = static_cast<VkPhysicalDevice>(physicalDevice);
+    context.fDevice = static_cast<VkDevice>(device);
+    context.fQueue = static_cast<VkQueue>(queue);
+    context.fGraphicsQueueIndex = graphicsQueueIndex;
+    return &context;
+}
+
+extern "C" void C_GrVkBackendContext_Delete(void* vkBackendContext) {
+    delete static_cast<GrVkBackendContext*>(vkBackendContext);
+}
+
+extern "C" GrContext* C_GrContext_MakeVulkan(const void* vkBackendContext) {
+    return GrContext::MakeVulkan(*static_cast<const GrVkBackendContext*>(vkBackendContext)).release();
+}
+
+#endif
+
 
 typedef struct SkCanvasBindings {
   SkSurface* surface;

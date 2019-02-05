@@ -114,6 +114,11 @@ fn main() {
     println!("cargo:rustc-link-lib=usp10");
     println!("cargo:rustc-link-lib=ole32");
     println!("cargo:rustc-link-lib=user32");
+
+    // required since GrContext::MakeVulkan is linked.
+    if cfg!(feature="vulkan") {
+      println!("cargo:rustc-link-lib=opengl32");
+    }
   }
 
   bindgen_gen(&current_dir_name);
