@@ -1,15 +1,7 @@
+#include "./bindings.hpp"
+
 #include <iostream>
 #include <vector>
-#include "SkCanvas.h"
-#include "SkImageInfo.h"
-#include "SkSurface.h"
-#include "SkPath.h"
-#include "SkRect.h"
-#include "SkColor.h"
-#include "SkPaint.h"
-#include "SkTypes.h"
-
-#include "./bindings.hpp"
 
 using namespace std;
 
