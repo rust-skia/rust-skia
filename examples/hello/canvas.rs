@@ -5,7 +5,7 @@ use skia_safe::bindings::*;
 pub struct Canvas {
     surface: skia::Surface,
     path: skia::Path,
-    rect: SkRect,
+    rect: skia::Rect,
     paint: skia::Paint,
     width: i32,
     height: i32,
@@ -25,7 +25,7 @@ impl Canvas {
     pub fn new(width: i32, height: i32) -> Canvas {
         let surface = skia::Surface::new_raster_n32_premul(width, height);
         let path = skia::Path::new();
-        let rect = unsafe { SkRect::MakeWH(width as f32, height as f32) };
+        let rect = skia::Rect::new_iwh(width, height);
         let mut paint = skia::Paint::new();
         paint.set_color(SK_ColorBLACK);
         paint.set_anti_alias(true);
