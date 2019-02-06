@@ -7,8 +7,13 @@
 #include "SkPaint.h"
 #include "SkTypes.h"
 
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
 #if defined(SK_VULKAN)
-  #include "GrContext.h"
+#include "GrContext.h"
   #include "GrBackendSurface.h"
   #include "vk/GrVkBackendContext.h"
 #endif
@@ -77,20 +82,42 @@ extern "C" GrContext* C_GrContext_MakeVulkan(const void* vkBackendContext) {
 #endif
 
 typedef struct SkCanvasBindings {
-  SkSurface* surface;
-  void (*release_fn)();
-  SkCanvas* canvas;
+    SkSurface* surface;
+    void (*release_fn)();
+    SkCanvas* canvas;
 } SkCanvasBindings;
 
 typedef struct SkSurfaceData {
-  const unsigned char* data;
-  size_t size;
+    const unsigned char* data;
+    size_t size;
 } SkSurfaceData;
 
-extern "C" SkCanvasBindings SkiaCreateCanvas(int width, int height);
+extern "C" SkCanvasBindings SkiaCreateCanvas(int width, int height) {
+  auto surface = SkSurface::MakeRasterN32Premul(width, height);
+  auto canvas = surface->getCanvas();
+  auto release = [surface]() {
+    surface->unref();
+  };
+  static auto static_release = release;
+  void (*ptr)() = []() { static_release(); };
+  SkCanvasBindings sk_canvas_bindings = { surface.get(), ptr, canvas };
+  surface->ref();
+  return sk_canvas_bindings;
+}
 
-extern "C" SkRect SkiaCreateRect(float width, float height);
+extern "C" SkRect SkiaCreateRect(float width, float height) {
+  return SkRect::MakeWH(width, height);
+}
 
-extern "C" void SkiaClearCanvas(SkCanvas* canvas, SkColor color);
+extern "C" void SkiaClearCanvas(SkCanvas* canvas, SkColor color) {
+  canvas->clear(color);
+}
 
-extern "C" SkSurfaceData SkiaGetSurfaceData(SkSurface* surface);
+extern "C" SkSurfaceData SkiaGetSurfaceData(SkSurface* surface) {
+  sk_sp<SkImage> img(surface->makeImageSnapshot());
+  if (!img) { return { nullptr, 0 }; }
+  sk_sp<SkData> png(img->encodeToData());
+  if (!png) { return { nullptr, 0 }; }
+  SkSurfaceData result = { png->bytes(), png->size() };
+  return result;
+}
