@@ -187,6 +187,11 @@ fn bindgen_gen(current_dir_name: &str) {
   */
 
   if cfg!(feature="vulkan") {
+	builder = builder
+      .rustified_enum("VkImageTiling")
+      .rustified_enum("VkImageLayout")
+      .rustified_enum("VkFormat");
+	
     cc_build.define("SK_VULKAN", "1");
     builder = builder.clang_arg("-DSK_VULKAN");
     cc_build.define("SKIA_IMPLEMENTATION", "1");
