@@ -1,6 +1,6 @@
 use std::ptr;
 use std::marker::PhantomData;
-use rust_skia::{SkSurface, C_SkSurface_MakeRasterN32Premul, C_SkSurface_makeImageSnapshot};
+use rust_skia::{SkSurface, C_SkSurface_MakeRasterN32Premul, C_SkSurface_makeImageSnapshot, C_SkSurface_MakeRenderTarget };
 use super::image::Image;
 use super::canvas::Canvas;
 

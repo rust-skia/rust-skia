@@ -6,6 +6,9 @@ mod path;
 mod rect;
 mod surface;
 
+#[cfg(feature = "vulkan")]
+mod vulkan;
+
 pub use canvas::*;
 pub use data::*;
 pub use image::*;
