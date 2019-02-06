@@ -2,9 +2,11 @@ extern crate bindgen;
 extern crate cc;
 
 use std::env;
-use std::fs::read_dir;
+use std::fs::{File, read_dir};
+use std::io::prelude::*;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
+use regex::Regex;
 
 use cc::Build;
 
@@ -162,9 +164,33 @@ fn bindgen_gen(current_dir_name: &str) {
     cc_build.include(&include_path);
   }
 
+  // WIP: extract all the preprocessor definitions ninja was
+  // using to build skia.
+
+  /*
+  let ninja_config = {
+    let mut file =
+        File::open("skia/out/Static/obj/skia.ninja")
+            .expect("ninja configuration file not found (did skia build?)");
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)
+        .expect("failed to read ninja configuration file");
+    contents
+  };
+
+  let defines : String = {
+    let re = Regex::new("(?m)^defines = (.*)$").unwrap();
+    let captures =
+        re.captures(ninja_config.as_str()).unwrap();
+    captures.get(1).unwrap().as_str().into()
+  };
+  */
+
   if cfg!(feature="vulkan") {
-    cc_build.define("FEATURE_VULKAN", "1");
-    builder = builder.clang_arg("-DFEATURE_VULKAN=1");
+    cc_build.define("SK_VULKAN", "1");
+    builder = builder.clang_arg("-DSK_VULKAN");
+    cc_build.define("SKIA_IMPLEMENTATION", "1");
+    builder = builder.clang_arg("-DSKIA_IMPLEMENTATION=1");
   }
 
   cc_build

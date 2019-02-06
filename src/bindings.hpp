@@ -7,8 +7,9 @@
 #include "SkPaint.h"
 #include "SkTypes.h"
 
-#if defined(FEATURE_VULKAN)
+#if defined(SK_VULKAN)
   #include "GrContext.h"
+  #include "GrBackendSurface.h"
   #include "vk/GrVkBackendContext.h"
 #endif
 
@@ -36,7 +37,15 @@ extern "C" void C_SkPath_destruct(const SkPath* self) {
     self->~SkPath();
 }
 
-#if defined(FEATURE_VULKAN)
+#if defined(SK_VULKAN)
+
+extern "C" SkSurface* C_SkSurface_MakeRenderTarget(
+        GrContext* context,
+        SkBudgeted budgeted,
+        const SkImageInfo* imageInfo)
+{
+    return SkSurface::MakeRenderTarget(context, budgeted, *imageInfo).release();
+}
 
 // The GrVkBackendContext struct binding's length is too short
 // because of the std::function that is used in it.
@@ -66,7 +75,6 @@ extern "C" GrContext* C_GrContext_MakeVulkan(const void* vkBackendContext) {
 }
 
 #endif
-
 
 typedef struct SkCanvasBindings {
   SkSurface* surface;
