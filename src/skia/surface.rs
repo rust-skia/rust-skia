@@ -17,11 +17,22 @@ impl Drop for Surface {
 impl Surface {
 
     // tbd: use Option as a return type.
-    pub fn new_raster_n32_premul(width: i32, height: i32) -> Surface {
-        Surface {
-            native: unsafe { C_SkSurface_MakeRasterN32Premul(width, height, ptr::null()) }
-        }
+    pub fn new_raster_n32_premul(width: i32, height: i32) -> Option<Surface> {
+        let native = unsafe { C_SkSurface_MakeRasterN32Premul(width, height, ptr::null()) };
+        if native.is_null()
+            { None }
+        else
+            { Some (Surface { native }) }
     }
+
+    /*
+
+    pub fn new_render_target() -> Option<Surface> {
+        let native = unsafe { C_SkSurface_MakeRenderTarget()}
+
+    }
+
+    */
 
     pub fn canvas(&self) -> Canvas
     {

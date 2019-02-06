@@ -23,7 +23,9 @@ pub fn set_a_rgb(a: U8CPU, r: U8CPU, g: U8CPU, b: U8CPU) -> SkColor {
 impl Canvas {
 
     pub fn new(width: i32, height: i32) -> Canvas {
-        let surface = skia::Surface::new_raster_n32_premul(width, height);
+        let surface =
+            skia::Surface::new_raster_n32_premul(width, height)
+                .expect("no surface!");
         let path = skia::Path::new();
         let rect = skia::Rect::new_iwh(width, height);
         let mut paint = skia::Paint::new();
