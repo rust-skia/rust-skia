@@ -142,7 +142,7 @@ fn bindgen_gen(current_dir_name: &str) {
 
   let mut cc_build = Build::new();
 
-  builder = builder.header("src/bindings.hpp");
+  builder = builder.header("src/bindings.cpp");
 
   for include_dir in read_dir("skia/include").expect("Unable to read skia/include") {
     let dir = include_dir.unwrap();
@@ -154,7 +154,7 @@ fn bindgen_gen(current_dir_name: &str) {
   cc_build
     .cpp(true)
     .flag("-std=c++14")
-    .file("src/bindings.cc")
+    .file("src/bindings.cpp")
     .out_dir("skia/out/Static")
     .compile("skiabinding");
 
