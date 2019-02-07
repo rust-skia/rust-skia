@@ -133,6 +133,9 @@ fn bindgen_gen(current_dir_name: &str) {
 
     .whitelist_function("C_.*")
 
+    .rustified_enum("GrSurfaceOrigin")
+    .rustified_enum("SkColorType")
+
     .whitelist_function("SkiaCreateCanvas")
     .whitelist_function("SkiaCreateRect")
     .whitelist_function("SkiaClearCanvas")
