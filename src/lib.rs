@@ -5,7 +5,6 @@ pub mod bindings {
 
 // the safe bindings one are accessible with skia::.
 pub mod skia {
-
     mod canvas;
     pub use canvas::*;
 
@@ -26,10 +25,17 @@ pub mod skia {
 
     mod surface;
     pub use surface::*;
+}
+
+pub mod graphics {
 
     #[cfg(feature = "vulkan")]
     mod vulkan;
+    #[cfg(feature = "vulkan")]
     pub use vulkan::*;
+
+    mod context;
+    pub use context::*;
 
     mod backend_texture;
     pub use backend_texture::*;

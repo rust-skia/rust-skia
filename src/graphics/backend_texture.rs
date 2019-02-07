@@ -16,7 +16,7 @@ impl Drop for BackendTexture {
 impl BackendTexture {
 
     #[cfg(feature = "vulkan")]
-    pub fn new_vulkan(width: i32, height: i32, vk_info: vulkan::ImageInfo) -> BackendTexture
+    pub fn new_vulkan(width: i32, height: i32, vk_info: &vulkan::ImageInfo) -> BackendTexture
     {
         BackendTexture {
             native: unsafe { GrBackendTexture::new2(width, height, &vk_info.native) }

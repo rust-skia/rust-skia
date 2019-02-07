@@ -1,8 +1,15 @@
 use std::ptr;
 use std::marker::PhantomData;
-use rust_skia::{SkSurface, C_SkSurface_MakeRasterN32Premul, C_SkSurface_makeImageSnapshot, C_SkSurface_MakeRenderTarget };
+use rust_skia::{
+    SkSurface, SkColorType, GrSurfaceOrigin,
+    C_SkSurface_MakeRasterN32Premul,
+    C_SkSurface_MakeRenderTarget,
+    C_SkSurface_MakeFromBackendTexture,
+    C_SkSurface_makeImageSnapshot,
+};
 use super::image::Image;
 use super::canvas::Canvas;
+use crate::graphics::{Context, BackendTexture};
 
 pub struct Surface {
     native: *mut SkSurface
@@ -16,7 +23,6 @@ impl Drop for Surface {
 
 impl Surface {
 
-    // tbd: use Option as a return type.
     pub fn new_raster_n32_premul(width: i32, height: i32) -> Option<Surface> {
         let native = unsafe { C_SkSurface_MakeRasterN32Premul(width, height, ptr::null()) };
         if native.is_null()
@@ -25,14 +31,17 @@ impl Surface {
             { Some (Surface { native }) }
     }
 
-    /*
-
-    pub fn new_render_target() -> Option<Surface> {
-        let native = unsafe { C_SkSurface_MakeRenderTarget()}
-
+    pub fn new_from_backend_texture(
+        context: &mut Context,
+        backend_texture: &BackendTexture,
+        origin: GrSurfaceOrigin,
+        sample_count: i32,
+        color_type: SkColorType) -> Surface {
+        Surface {
+            native:
+                unsafe { C_SkSurface_MakeFromBackendTexture(context.native, &backend_texture.native, origin, sample_count, color_type) }
+        }
     }
-
-    */
 
     pub fn canvas(&self) -> Canvas
     {
