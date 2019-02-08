@@ -60,11 +60,11 @@ extern "C" void C_SkPath_destruct(const SkPath* self) {
     self->~SkPath();
 }
 
+#if defined(SK_VULKAN)
+
 extern "C" void C_GrBackendTexture_destruct(const GrBackendTexture* self) {
     self->~GrBackendTexture();
 }
-
-#if defined(SK_VULKAN)
 
 // The GrVkBackendContext struct binding's length is too short
 // because of the std::function that is used in it.
