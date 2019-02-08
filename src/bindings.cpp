@@ -7,16 +7,18 @@
 #include "SkPaint.h"
 #include "SkTypes.h"
 
+#if defined(SK_VULKAN)
+
+#include "GrContext.h"
+#include "GrBackendSurface.h"
+#include "vk/GrVkBackendContext.h"
+
+#endif
+
 #include <iostream>
 #include <vector>
 
 using namespace std;
-
-#if defined(SK_VULKAN)
-#include "GrContext.h"
-  #include "GrBackendSurface.h"
-  #include "vk/GrVkBackendContext.h"
-#endif
 
 extern "C" SkSurface* C_SkSurface_MakeRasterN32Premul(int width, int height, const SkSurfaceProps* surfaceProps) {
     return SkSurface::MakeRasterN32Premul(width, height, surfaceProps).release();
