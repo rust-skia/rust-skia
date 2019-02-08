@@ -1,5 +1,3 @@
-#include <iostream>
-#include <vector>
 #include "SkCanvas.h"
 #include "SkImageInfo.h"
 #include "SkSurface.h"
@@ -9,9 +7,21 @@
 #include "SkPaint.h"
 #include "SkTypes.h"
 
-#include "./bindings.hpp"
+#include <iostream>
+#include <vector>
 
 using namespace std;
+
+typedef struct SkCanvasBindings {
+    SkSurface* surface;
+    void (*release_fn)();
+    SkCanvas* canvas;
+} SkCanvasBindings;
+
+typedef struct SkSurfaceData {
+    const unsigned char* data;
+    size_t size;
+} SkSurfaceData;
 
 extern "C" SkCanvasBindings SkiaCreateCanvas(int width, int height) {
   auto surface = SkSurface::MakeRasterN32Premul(width, height);
