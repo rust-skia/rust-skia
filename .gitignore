@@ -1,3 +1,4 @@
 /target
 Cargo.lock
 *.png
+/src/bindings.rs

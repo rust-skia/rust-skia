@@ -2,9 +2,9 @@ extern crate bindgen;
 extern crate cc;
 
 use std::env;
-use std::fs::{File, read_dir};
+use std::fs;
 use std::io::prelude::*;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use regex::Regex;
 
@@ -123,7 +123,26 @@ fn main() {
     }
   }
 
-  bindgen_gen(&current_dir_name);
+  // regenerate bindings?
+  //
+  // note: the bindings are generated into the src directory to support
+  // IDE based symbol lookup in dependent projects.
+
+  let skia_lib = "skia/out/Static/skia.lib";
+  let generated_bindings = "src/bindings.rs";
+
+  fn mtime(path: &str) -> std::time::SystemTime {
+    fs::metadata(path).unwrap().modified().unwrap()
+  }
+
+  let regenerate_bindings =
+    !Path::new(generated_bindings).exists()
+    || mtime(skia_lib) > mtime(generated_bindings)
+    || mtime("src/bindings.cpp") > mtime(generated_bindings);
+
+  if regenerate_bindings {
+    bindgen_gen(&current_dir_name)
+  }
 }
 
 fn bindgen_gen(current_dir_name: &str) {
@@ -160,7 +179,7 @@ fn bindgen_gen(current_dir_name: &str) {
 
   builder = builder.header("src/bindings.cpp");
 
-  for include_dir in read_dir("skia/include").expect("Unable to read skia/include") {
+  for include_dir in fs::read_dir("skia/include").expect("Unable to read skia/include") {
     let dir = include_dir.unwrap();
     let include_path = format!("{}/{}", &current_dir_name, &dir.path().to_str().unwrap());
     builder = builder.clang_arg(format!("-I{}", &include_path));
@@ -210,7 +229,7 @@ fn bindgen_gen(current_dir_name: &str) {
 
   let bindings = builder.generate().expect("Unable to generate bindings");
 
-  let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+  let out_path = PathBuf::from("src");
   bindings
     .write_to_file(out_path.join("bindings.rs"))
     .expect("Couldn't write bindings!");
