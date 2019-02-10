@@ -10,7 +10,7 @@ impl ImageInfo {
 
     pub unsafe fn new(
         image: *mut c_void,
-        alloc: &mut Alloc,
+        alloc: &Alloc,
         image_tiling: VkImageTiling,
         image_layout: VkImageLayout,
         format: VkFormat,
