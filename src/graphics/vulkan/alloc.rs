@@ -1,6 +1,7 @@
 use rust_skia::{GrVkAlloc, VkDeviceMemory};
 use std::ffi::c_void;
 
+#[derive(Debug)]
 pub struct Alloc {
     pub(crate) native: GrVkAlloc
 }

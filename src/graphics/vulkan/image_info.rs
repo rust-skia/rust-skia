@@ -2,6 +2,7 @@ use rust_skia::{GrVkImageInfo, VkImage, VkImageTiling, VkImageLayout, VkFormat, 
 use std::ffi::c_void;
 use super::alloc::Alloc;
 
+#[derive(Debug)]
 pub struct ImageInfo {
     pub(crate) native: GrVkImageInfo
 }

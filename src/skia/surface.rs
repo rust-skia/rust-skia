@@ -12,6 +12,7 @@ use super::canvas::Canvas;
 use crate::graphics::{Context, BackendTexture};
 use crate::prelude::*;
 
+#[derive(Debug)]
 pub struct Surface {
     native: *mut SkSurface
 }

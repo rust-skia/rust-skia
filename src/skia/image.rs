@@ -1,6 +1,7 @@
 use rust_skia::{SkImage, C_SkImage_encodeToData};
 use super::data::Data;
 
+#[derive(Debug)]
 pub struct Image {
     pub(crate) native: *mut SkImage
 }

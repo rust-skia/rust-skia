@@ -1,6 +1,6 @@
 use rust_skia::{SkRect};
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct Rect {
     pub(crate) native: SkRect
 }

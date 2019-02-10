@@ -1,6 +1,8 @@
 use rust_skia::{GrContext, C_GrContext_MakeVulkan};
 use super::vulkan;
+use crate::prelude::*;
 
+#[derive(Debug)]
 pub struct Context {
     pub(crate) native: *mut GrContext
 }

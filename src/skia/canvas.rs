@@ -3,6 +3,7 @@ use rust_skia::{SkCanvas, SkColor};
 use super::path::Path;
 use super::paint::Paint;
 
+#[derive(Debug)]
 pub struct Canvas<'a> {
     pub(crate) native: *mut SkCanvas,
     pub(crate) phantom: PhantomData<&'a SkCanvas>

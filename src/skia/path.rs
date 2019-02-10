@@ -1,5 +1,6 @@
 use rust_skia::{SkPath, C_SkPath_destruct};
 
+#[derive(Debug)]
 pub struct Path {
     pub (crate) native: SkPath
 }

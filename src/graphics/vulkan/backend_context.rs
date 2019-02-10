@@ -1,6 +1,7 @@
 use std::ffi::c_void;
 use rust_skia::{C_GrVkBackendContext_New, C_GrVkBackendContext_Delete};
 
+#[derive(Debug)]
 pub struct BackendContext {
     pub (crate) native: *mut c_void
 }

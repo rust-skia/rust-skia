@@ -1,6 +1,7 @@
 use std::slice;
 use rust_skia::{SkData, C_SkData_unref};
 
+#[derive(Debug)]
 pub struct Data {
     pub(crate) native: *mut SkData
 }
