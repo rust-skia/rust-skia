@@ -15,10 +15,9 @@ impl Drop for Context {
 
 impl Context {
 
-    pub fn new_vulkan(backend_context: &vulkan::BackendContext) -> Context {
-        Context {
-            native:
-                unsafe { C_GrContext_MakeVulkan(backend_context.native) }
-        }
+    pub fn new_vulkan(backend_context: &vulkan::BackendContext) -> Option<Context> {
+        unsafe { C_GrContext_MakeVulkan(backend_context.native) }
+            .to_option()
+            .map(|native| Context { native })
     }
 }
