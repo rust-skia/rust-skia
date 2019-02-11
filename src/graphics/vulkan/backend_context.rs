@@ -1,5 +1,6 @@
 use std::ffi::c_void;
-use rust_skia::{C_GrVkBackendContext_New, C_GrVkBackendContext_Delete};
+use std::os::raw;
+use rust_skia::{C_GrVkBackendContext_New, C_GrVkBackendContext_Delete, VkInstance, VkDevice };
 
 #[derive(Debug)]
 pub struct BackendContext {
@@ -12,6 +13,9 @@ impl Drop for BackendContext {
     }
 }
 
+// A proper Option<fn()> return type here makes trouble on the Rust side, so we keep that a void* for now.
+type GetProc = Option<unsafe extern "C" fn (*const raw::c_char, VkInstance, VkDevice) -> *const raw::c_void>;
+
 impl BackendContext {
 
     pub unsafe fn new(
@@ -19,7 +23,8 @@ impl BackendContext {
         physical_device: *mut c_void,
         device: *mut c_void,
         queue: *mut c_void,
-        graphics_queue_index: u32
+        graphics_queue_index: u32,
+        get_proc: GetProc
         ) -> BackendContext {
 
         BackendContext {
@@ -28,6 +33,7 @@ impl BackendContext {
                 physical_device,
                 device,
                 queue,
-                graphics_queue_index) }
+                graphics_queue_index,
+                get_proc) }
     }
 }
