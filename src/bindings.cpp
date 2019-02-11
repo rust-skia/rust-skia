@@ -69,12 +69,18 @@ extern "C" void C_GrBackendTexture_destruct(const GrBackendTexture* self) {
 // The GrVkBackendContext struct binding's length is too short
 // because of the std::function that is used in it.
 
+typedef PFN_vkVoidFunction (*GetProcFn)(const char* name, VkInstance instance, VkDevice device);
+typedef const void* (*GetProcFnVoidPtr)(const char* name, VkInstance instance, VkDevice device);
+
 extern "C" void* C_GrVkBackendContext_New(
         void* instance,
         void* physicalDevice,
         void* device,
         void* queue,
-        uint32_t graphicsQueueIndex) {
+        uint32_t graphicsQueueIndex,
+
+        /* PFN_vkVoidFunction makes us trouble on the Rust side */
+        GetProcFnVoidPtr getProc) {
 
     auto& context = *new GrVkBackendContext();
     context.fInstance = static_cast<VkInstance>(instance);
@@ -82,6 +88,8 @@ extern "C" void* C_GrVkBackendContext_New(
     context.fDevice = static_cast<VkDevice>(device);
     context.fQueue = static_cast<VkQueue>(queue);
     context.fGraphicsQueueIndex = graphicsQueueIndex;
+
+    context.fGetProc = *(reinterpret_cast<GetProcFn*>(&getProc));
     return &context;
 }
 
