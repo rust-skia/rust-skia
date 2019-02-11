@@ -2,3 +2,4 @@
 Cargo.lock
 *.png
 /src/bindings.rs
+/src/bindings.rs.bk
