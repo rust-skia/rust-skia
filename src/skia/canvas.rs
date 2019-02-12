@@ -31,4 +31,8 @@ impl<'a> Canvas<'a> {
     pub fn draw_path(&mut self, path: &Path, paint: &Paint) {
         unsafe { (*self.native).drawPath(&path.native, &paint.native) }
     }
+
+    pub fn flush(&mut self) {
+        unsafe { (*self.native).flush(); }
+    }
 }

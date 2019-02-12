@@ -52,4 +52,10 @@ impl Surface {
     pub fn make_image_snapshot(&mut self) -> Image {
         Image { native: unsafe { C_SkSurface_makeImageSnapshot(self.native) } }
     }
+
+    pub fn flush(&mut self) {
+        unsafe {
+            (*self.native).flush();
+        }
+    }
 }
