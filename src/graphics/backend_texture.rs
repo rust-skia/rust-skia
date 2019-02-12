@@ -1,7 +1,10 @@
-use rust_skia::{GrBackendTexture, C_GrBackendTexture_destruct};
+use std::mem;
+use rust_skia::{GrBackendTexture, C_GrBackendTexture_destruct, GrVkImageInfo};
+
 
 #[cfg(feature = "vulkan")]
 use super::vulkan;
+use rust_skia::GrMipMapped_kYes;
 
 pub struct BackendTexture {
     pub(crate) native: GrBackendTexture
@@ -18,14 +21,51 @@ impl BackendTexture {
     #[cfg(feature = "vulkan")]
     pub unsafe fn new_vulkan(
         (width, height): (u32, u32),
-        vk_info: &vulkan::ImageInfo) -> BackendTexture
-    {
-        BackendTexture {
-            native: {
+        vk_info: &vulkan::ImageInfo) -> BackendTexture {
+        unsafe {
+            Self::from_raw(
                 GrBackendTexture::new2(
                     width as i32,
                     height as i32,
-                    &vk_info.native) }
+                    &vk_info.native))
+        }.unwrap()
+    }
+
+    pub (crate) unsafe fn from_raw(backend_texture: GrBackendTexture) -> Option<BackendTexture> {
+        if backend_texture.fIsValid {
+            Some (BackendTexture {
+                native: backend_texture
+            })
+        } else {
+            None
+        }
+    }
+
+    #[cfg(feature = "vulkan")]
+    pub fn width(&self) -> u32 {
+        unsafe { self.native.fWidth as u32 }
+    }
+
+    #[cfg(feature = "vulkan")]
+    pub fn height(&self) -> u32 {
+        unsafe { self.native.fHeight as u32 }
+    }
+
+    #[cfg(feature = "vulkan")]
+    pub fn has_mip_maps(&self) -> bool {
+        unsafe { self.native.fMipMapped == GrMipMapped_kYes }
+    }
+
+    #[cfg(feature = "vulkan")]
+    pub fn get_image_info(&self) -> Option<vulkan::ImageInfo> {
+        unsafe {
+            // constructor not available.
+            let mut image_info : GrVkImageInfo = mem::zeroed();
+            if self.native.getVkImageInfo(&mut image_info as _) {
+                Some(vulkan::ImageInfo::from_raw(image_info))
+            } else {
+                None
+            }
         }
     }
 }

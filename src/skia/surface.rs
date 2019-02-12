@@ -6,6 +6,9 @@ use rust_skia::{
     C_SkSurface_MakeRenderTarget,
     C_SkSurface_MakeFromBackendTexture,
     C_SkSurface_makeImageSnapshot,
+    SkSurface_BackendHandleAccess,
+    C_SkSurface_getBackendTexture,
+    GrBackendTexture
 };
 use super::image::Image;
 use super::canvas::Canvas;
@@ -56,6 +59,18 @@ impl Surface {
     pub fn flush(&mut self) {
         unsafe {
             (*self.native).flush();
+        }
+    }
+
+    pub fn get_backend_texture(&mut self, handle_access: SkSurface_BackendHandleAccess) -> Option<BackendTexture> {
+        unsafe {
+            let mut backend_texture = GrBackendTexture::new();
+            C_SkSurface_getBackendTexture(
+                self.native,
+                handle_access,
+                &mut backend_texture as _);
+
+            BackendTexture::from_raw(backend_texture)
         }
     }
 }

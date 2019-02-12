@@ -1,4 +1,11 @@
-use rust_skia::{GrVkImageInfo, VkImage, VkImageTiling, VkImageLayout, VkFormat, GrVkYcbcrConversionInfo};
+use rust_skia::{
+    GrVkImageInfo,
+    VkImage,
+    VkImageTiling,
+    VkImageLayout,
+    VkFormat,
+    GrVkYcbcrConversionInfo,
+    GrVkAlloc };
 use std::ffi::c_void;
 use super::alloc::Alloc;
 
@@ -21,7 +28,7 @@ impl ImageInfo {
         // and therefore not present in the bindings.
         const VK_QUEUE_FAMILY_IGNORED : u32 = 0;
 
-        ImageInfo { native: GrVkImageInfo {
+        Self::from_raw(GrVkImageInfo {
             fImage: image as VkImage,
             fAlloc: alloc.native,
             fImageTiling: image_tiling,
@@ -39,6 +46,50 @@ impl ImageInfo {
                 fExternalFormat: 0,
                 fExternalFormatFeatures: 0
             }
-        }}
+        })
+    }
+
+    pub(crate) unsafe fn from_raw(image_info: GrVkImageInfo) -> ImageInfo {
+        ImageInfo { native: image_info }
+    }
+
+    #[inline]
+    pub fn image(&self) -> VkImage {
+        self.native.fImage
+    }
+
+    #[inline]
+    pub fn alloc(&self) -> GrVkAlloc {
+        self.native.fAlloc
+    }
+
+    #[inline]
+    pub fn tiling(&self) -> VkImageTiling {
+        self.native.fImageTiling
+    }
+
+    #[inline]
+    pub fn layout(&self) -> VkImageLayout {
+        self.native.fImageLayout
+    }
+
+    #[inline]
+    pub fn format(&self) -> VkFormat {
+        self.native.fFormat
+    }
+
+    #[inline]
+    pub fn level_count(&self) -> u32 {
+        self.native.fLevelCount
+    }
+
+    #[inline]
+    pub fn current_queue_family(&self) -> u32 {
+        self.native.fCurrentQueueFamily
+    }
+
+    #[inline]
+    pub fn ycbcr_conversion_info(&self) -> GrVkYcbcrConversionInfo {
+        self.native.fYcbcrConversionInfo
     }
 }
