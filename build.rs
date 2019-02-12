@@ -53,8 +53,13 @@ fn main() {
     "bin/gn"
   };
 
+  let skia_out_dir : String =
+    PathBuf::from(env::var("OUT_DIR").unwrap())
+      .join("skia/Static")
+      .to_str().unwrap().into();
+
   let output = Command::new(gn_command)
-    .args(&["gen", "out/Static", &gn_args])
+    .args(&["gen", &skia_out_dir, &gn_args])
     .envs(env::vars())
     .current_dir(PathBuf::from("./skia"))
     .stdout(Stdio::inherit())
@@ -68,7 +73,7 @@ fn main() {
 
   Command::new("ninja")
     .current_dir(PathBuf::from("./skia"))
-    .args(&["-C", "out/Static"])
+    .args(&["-C", &skia_out_dir])
     .stdout(Stdio::inherit())
     .stderr(Stdio::inherit())
     .status()
@@ -77,10 +82,7 @@ fn main() {
   let current_dir = env::current_dir().unwrap();
   let current_dir_name = current_dir.to_str().unwrap();
 
-  println!(
-    "cargo:rustc-link-search={}/skia/out/Static",
-    &current_dir_name
-  );
+  println!("cargo:rustc-link-search={}", &skia_out_dir);
   println!("cargo:rustc-link-lib=static=skia");
   println!("cargo:rustc-link-lib=static=skiabinding");
 
@@ -108,11 +110,11 @@ fn main() {
   }
 
   if env::var("INIT_SKIA").is_ok() {
-    bindgen_gen(&current_dir_name);
+    bindgen_gen(&current_dir_name, &skia_out_dir)
   }
 }
 
-fn bindgen_gen(current_dir_name: &str) {
+fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
 
   let mut builder = bindgen::Builder::default()
     .generate_inline_functions(true)
@@ -151,7 +153,7 @@ fn bindgen_gen(current_dir_name: &str) {
     .cpp(true)
     .flag("-std=c++14")
     .file("src/bindings.cpp")
-    .out_dir("skia/out/Static")
+    .out_dir(skia_out_dir)
     .compile("skiabinding");
 
   let bindings = builder.generate().expect("Unable to generate bindings");
