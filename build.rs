@@ -45,9 +45,9 @@ fn main() {
     if cfg!(windows) {
       args.push_str(r#" clang_win="C:\Program Files\LLVM""#);
       if cfg!(build="debug") {
-        args.push_str(r#" extra_cflags=["/MTd"]"#);
+        args.push_str(r#" extra_cflags=["/MTd","/Ob0"]"#);
       } else {
-        args.push_str(r#" extra_cflags=["/MD"]"#);
+        args.push_str(r#" extra_cflags=["/MD","/Ob0"]"#);
       }
     }
 
