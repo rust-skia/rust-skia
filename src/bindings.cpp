@@ -40,6 +40,13 @@ extern "C" SkSurface* C_SkSurface_MakeFromBackendTexture(
     return SkSurface::MakeFromBackendTexture(context, *backendTexture, origin, sampleCnt, colorType, nullptr, nullptr).release();
 }
 
+extern "C" void C_SkSurface_getBackendTexture(
+        SkSurface* self,
+        SkSurface::BackendHandleAccess handleAccess,
+        GrBackendTexture* backendTexture) {
+    *backendTexture = self->getBackendTexture(handleAccess);
+}
+
 extern "C" SkImage* C_SkSurface_makeImageSnapshot(SkSurface* self) {
     return self->makeImageSnapshot().release();
 }
