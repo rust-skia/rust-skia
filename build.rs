@@ -11,29 +11,25 @@ use cc::Build;
 fn main() {
 
   if !cfg!(windows) {
-    Command::new("git")
+    assert!(Command::new("git")
       .arg("submodule")
       .arg("init")
       .stdout(Stdio::inherit())
       .stderr(Stdio::inherit())
-      .status()
-      .expect("git submodule init fail");
+      .status().unwrap().success(), "git submodule init fail");
 
-    Command::new("git")
+    assert!(Command::new("git")
       .args(&["submodule", "update"])
       .stdout(Stdio::inherit())
       .stderr(Stdio::inherit())
-      .status()
-      .expect("git submodule update fail");
+      .status().unwrap().success(), "git submodule update fail");
   }
 
-  Command::new("python")
+  assert!(Command::new("python")
     .arg("skia/tools/git-sync-deps")
     .stdout(Stdio::inherit())
     .stderr(Stdio::inherit())
-    .status()
-    .expect("git sync deps fail");
-
+    .status().unwrap().success(), "git sync deps fail");
 
   let gn_args = {
     let base_args =
@@ -66,13 +62,12 @@ fn main() {
     panic!("{:?}", String::from_utf8(output.stdout).unwrap());
   }
 
-  Command::new("ninja")
+  assert!(Command::new("ninja")
     .current_dir(PathBuf::from("./skia"))
     .args(&["-C", "out/Static"])
     .stdout(Stdio::inherit())
     .stderr(Stdio::inherit())
-    .status()
-    .expect("ninja error");
+    .status().unwrap().success(), "ninja error");
 
   let current_dir = env::current_dir().unwrap();
   let current_dir_name = current_dir.to_str().unwrap();
