@@ -3,8 +3,4 @@
 #![allow(non_snake_case)]
 
 mod bindings;
-
-mod canvas;
-pub use canvas::Canvas;
-
 pub use bindings::*;
