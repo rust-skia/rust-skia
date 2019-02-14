@@ -7,6 +7,7 @@ use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use regex::Regex;
+use std::slice;
 
 use cc::Build;
 
@@ -34,6 +35,9 @@ fn main() {
     .status().unwrap().success(), "git sync deps fail");
 
   let gn_args = {
+
+    let keep_inline_functions = true;
+
     let mut args =
       r#"--args=is_official_build=true skia_use_system_expat=false skia_use_system_icu=false skia_use_system_libjpeg_turbo=false skia_use_system_libpng=false skia_use_system_libwebp=false skia_use_system_zlib=false cc="clang" cxx="clang++""#
       .to_owned();
@@ -43,11 +47,28 @@ fn main() {
     }
 
     if cfg!(windows) {
+
+      let mut flags : Vec<&str> = vec![];
+      flags.push(if cfg!(build="debug") { "/MTd" } else { "/MD" });
+
+      if keep_inline_functions {
+        // sadly, this also disables inlining completely and is probably a real performance bummer.
+        flags.push("/Ob0")
+      };
+
+      let flags : String = {
+        fn quote(s: &str) -> String { String::from("\"") + s + "\"" }
+
+        let v : Vec<String> =
+            flags.into_iter().map(quote).collect();
+        v.join(",")
+      };
+
       args.push_str(r#" clang_win="C:\Program Files\LLVM""#);
-      if cfg!(build="debug") {
-        args.push_str(r#" extra_cflags=["/MTd","/Ob0"]"#);
-      } else {
-        args.push_str(r#" extra_cflags=["/MD","/Ob0"]"#);
+      args.push_str(&format!(" extra_cflags=[{}]", flags));
+    } else {
+      if keep_inline_functions {
+        args.push_str(r#" extra_cflags=["-fkeep-inline-functions"]"#)
       }
     }
 
