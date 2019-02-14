@@ -7,7 +7,6 @@ pub mod bindings {
 }
 
 mod prelude {
-    use std::ops::Deref;
 
     pub trait ToOption {
         type Target;

@@ -1,7 +1,6 @@
 use std::marker::PhantomData;
-use rust_skia::{SkCanvas, SkColor};
-use super::path::Path;
-use super::paint::Paint;
+use rust_skia::{SkCanvas};
+use super::{Path, Paint, Color};
 
 #[derive(Debug)]
 pub struct Canvas<'a> {
@@ -12,8 +11,8 @@ pub struct Canvas<'a> {
 impl<'a> Canvas<'a> {
 
     #[inline]
-    pub fn clear(&mut self, color: SkColor) {
-        unsafe { (*self.native).clear(color) }
+    pub fn clear(&mut self, color: Color) {
+        unsafe { (*self.native).clear(color.0) }
     }
 
     pub fn save(&mut self) -> i32 {

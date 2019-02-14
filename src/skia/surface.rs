@@ -3,7 +3,7 @@ use std::marker::PhantomData;
 use rust_skia::{
     SkSurface, SkColorType, GrSurfaceOrigin,
     C_SkSurface_MakeRasterN32Premul,
-    C_SkSurface_MakeRenderTarget,
+    // C_SkSurface_MakeRenderTarget,
     C_SkSurface_MakeFromBackendTexture,
     C_SkSurface_makeImageSnapshot,
     SkSurface_BackendHandleAccess,

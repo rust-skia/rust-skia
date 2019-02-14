@@ -1,6 +1,9 @@
 mod canvas;
 pub use self::canvas::*;
 
+mod color;
+pub use self::color::*;
+
 mod data;
 pub use self::data::*;
 

@@ -1,10 +1,8 @@
 use std::mem;
 use rust_skia::{GrBackendTexture, C_GrBackendTexture_destruct, GrVkImageInfo};
 
-
 #[cfg(feature = "vulkan")]
 use super::vulkan;
-use rust_skia::GrMipMapped_kYes;
 
 pub struct BackendTexture {
     pub(crate) native: GrBackendTexture
@@ -22,13 +20,12 @@ impl BackendTexture {
     pub unsafe fn new_vulkan(
         (width, height): (u32, u32),
         vk_info: &vulkan::ImageInfo) -> BackendTexture {
-        unsafe {
-            Self::from_raw(
-                GrBackendTexture::new2(
-                    width as i32,
-                    height as i32,
-                    &vk_info.native))
-        }.unwrap()
+        Self::from_raw(
+            GrBackendTexture::new2(
+                width as i32,
+                height as i32,
+                &vk_info.native))
+            .unwrap()
     }
 
     pub (crate) unsafe fn from_raw(backend_texture: GrBackendTexture) -> Option<BackendTexture> {
@@ -43,17 +40,17 @@ impl BackendTexture {
 
     #[cfg(feature = "vulkan")]
     pub fn width(&self) -> u32 {
-        unsafe { self.native.fWidth as u32 }
+        unsafe { self.native.width() as u32 }
     }
 
     #[cfg(feature = "vulkan")]
     pub fn height(&self) -> u32 {
-        unsafe { self.native.fHeight as u32 }
+        unsafe { self.native.height() as u32 }
     }
 
     #[cfg(feature = "vulkan")]
     pub fn has_mip_maps(&self) -> bool {
-        unsafe { self.native.fMipMapped == GrMipMapped_kYes }
+        unsafe { self.native.hasMipMaps() }
     }
 
     #[cfg(feature = "vulkan")]

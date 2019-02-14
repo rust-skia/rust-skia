@@ -1,4 +1,5 @@
-use rust_skia::{SkPaint, C_SkPaint_destruct, SkPaint_Style, SkColor};
+use rust_skia::{SkPaint, C_SkPaint_destruct, SkPaint_Style};
+use super::Color;
 
 pub struct Paint {
     pub(crate) native: SkPaint
@@ -15,8 +16,8 @@ impl Paint {
         Paint { native: unsafe { SkPaint::new() }}
     }
 
-    pub fn set_color(&mut self, color: SkColor) {
-        unsafe { self.native.setColor(color) }
+    pub fn set_color(&mut self, color: Color) {
+        unsafe { self.native.setColor(color.0) }
     }
 
     pub fn set_anti_alias(&mut self, anti_alias: bool) {
@@ -27,7 +28,16 @@ impl Paint {
         unsafe { self.native.setStrokeWidth(width) }
     }
 
-    pub fn set_style(&mut self, style: SkPaint_Style) {
-        unsafe { self.native.setStyle(style) }
+    pub fn set_style(&mut self, style: PaintStyle) {
+        unsafe { self.native.setStyle(style.0) }
     }
+}
+
+pub struct PaintStyle(SkPaint_Style);
+
+#[allow(non_upper_case_globals)]
+impl PaintStyle {
+    pub const Stroke: PaintStyle = PaintStyle(SkPaint_Style::kStroke_Style);
+    pub const Fill: PaintStyle = PaintStyle(SkPaint_Style::kFill_Style);
+    pub const StrokeAndFill: PaintStyle = PaintStyle(SkPaint_Style::kStrokeAndFill_Style);
 }

@@ -1,6 +1,6 @@
 use core::mem;
 use skia_safe::skia;
-use skia_safe::bindings::*;
+use skia_safe::skia::Color;
 
 pub struct Canvas {
     surface: skia::Surface,
@@ -9,15 +9,6 @@ pub struct Canvas {
     paint: skia::Paint,
     width: u32,
     height: u32,
-}
-
-#[inline]
-pub fn set_a_rgb(a: U8CPU, r: U8CPU, g: U8CPU, b: U8CPU) -> SkColor {
-    debug_assert!(a <= 255);
-    debug_assert!(r <= 255);
-    debug_assert!(g <= 255);
-    debug_assert!(b <= 255);
-    (a << 24) | (r << 16) | (g << 8) | (b << 0)
 }
 
 impl Canvas {
@@ -29,10 +20,10 @@ impl Canvas {
         let path = skia::Path::new();
         let rect = skia::Rect::new_iwh(width as i32, height as i32);
         let mut paint = skia::Paint::new();
-        paint.set_color(SK_ColorBLACK);
+        paint.set_color(Color::BLACK);
         paint.set_anti_alias(true);
         paint.set_stroke_width(1.0);
-        surface.canvas().clear(SK_ColorWHITE);
+        surface.canvas().clear(Color::WHITE);
         Canvas {
             surface,
             path,
@@ -93,15 +84,13 @@ impl Canvas {
 
     #[inline]
     pub fn stroke(&mut self) {
-        self.paint.set_style(SkPaint_Style_kStroke_Style);
+        self.paint.set_style(skia::PaintStyle::Stroke);
         self.canvas().draw_path(&self.path, &self.paint);
     }
 
     #[inline]
-    pub fn fill(&mut self, fill_rule: Option<FillRule>) {
-        let rule = fill_rule.unwrap_or(FillRule::default());
-        self.paint.set_style(SkPaint_Style_kFill_Style);
-        // self.sk_path.setFillType(rule.to_skia_type());
+    pub fn fill(&mut self) {
+        self.paint.set_style(skia::PaintStyle::Fill);
         self.canvas().draw_path(&self.path, &self.paint);
     }
 
@@ -119,35 +108,5 @@ impl Canvas {
     #[inline]
     fn canvas(&self) -> skia::Canvas {
         self.surface.canvas()
-    }
-}
-
-pub trait ToSkiaType {
-    type SkType;
-
-    fn to_skia_type(&self) -> Self::SkType;
-}
-
-#[derive(Debug)]
-pub enum FillRule {
-    Nonzero,
-    Evenodd,
-}
-
-impl ToSkiaType for FillRule {
-    type SkType = SkPath_FillType;
-
-    #[inline]
-    fn to_skia_type(&self) -> SkPath_FillType {
-        match self {
-            FillRule::Nonzero => SkPath_FillType_kWinding_FillType,
-            FillRule::Evenodd => SkPath_FillType_kEvenOdd_FillType,
-        }
-    }
-}
-
-impl Default for FillRule {
-    fn default() -> Self {
-        FillRule::Nonzero
     }
 }

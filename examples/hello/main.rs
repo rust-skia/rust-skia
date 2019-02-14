@@ -21,7 +21,7 @@ fn main() {
     canvas.line_to(60.0, 130.0);
     canvas.line_to(190.0, 20.0);
     canvas.line_to(270.0, 90.0);
-    canvas.fill(None);
+    canvas.fill();
     let d = canvas.data();
     let mut file = File::create("test.png").unwrap();
     let bytes = d.bytes();
