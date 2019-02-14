@@ -178,6 +178,8 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .rustified_enum("SkPaint_Style")
     .rustified_enum("SkPaint_Cap")
     .rustified_enum("SkPaint_Join")
+    .rustified_enum("SkColorSpace_RenderTargetGamma")
+    .rustified_enum("SkColorSpace_Gamut")
 
     .whitelist_function("SkiaCreateCanvas")
     .whitelist_function("SkiaCreateRect")
