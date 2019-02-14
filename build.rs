@@ -149,6 +149,7 @@ fn main() {
   let skia_lib = PathBuf::from(&skia_out_dir).join("skia.lib");
   let generated_bindings = PathBuf::from("src/bindings.rs");
   let bindings_cpp_src = PathBuf::from("src/bindings.cpp");
+  let us = PathBuf::from("build.rs");
 
   fn mtime(path: &Path) -> std::time::SystemTime {
     fs::metadata(path).unwrap().modified().unwrap()
@@ -157,7 +158,8 @@ fn main() {
   let regenerate_bindings =
     !generated_bindings.exists()
     || mtime(&skia_lib) > mtime(&generated_bindings)
-    || mtime(&bindings_cpp_src) > mtime(&generated_bindings);
+    || mtime(&bindings_cpp_src) > mtime(&generated_bindings)
+    || mtime(&us) > mtime(&generated_bindings);
 
   if regenerate_bindings {
     bindgen_gen(&current_dir_name, &skia_out_dir)
