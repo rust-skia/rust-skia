@@ -2,29 +2,20 @@ use rust_skia::{GrContext, C_GrContext_MakeVulkan};
 use super::vulkan;
 use crate::prelude::*;
 
-#[derive(Clone)]
 pub struct Context {
-    pub(crate) inner: RefCounted<Inner>
+    pub(crate) native: *mut GrContext
 }
 
-impl Native<*mut GrContext> for Context {
-    fn native(&self) -> *mut GrContext {
-        self.inner.0
-    }
-}
-
-#[derive(Clone)]
-pub (crate) struct Inner(*mut GrContext);
-
-impl RefCount for Inner {
-    fn refer(&self) {
-        unsafe { (*self.0)._base._base.ref_() }
-    }
-}
-
-impl Drop for Inner {
+impl Drop for Context {
     fn drop(&mut self) {
-        unsafe { (*self.0)._base._base.unref(); }
+        unsafe { (*self.native)._base._base.unref(); }
+    }
+}
+
+impl Clone for Context {
+    fn clone(&self) -> Self {
+        unsafe { (*self.native)._base._base.ref_() }
+        Context { native: self.native }
     }
 }
 
@@ -32,6 +23,6 @@ impl Context {
     pub fn new_vulkan(backend_context: &vulkan::BackendContext) -> Option<Context> {
        unsafe { C_GrContext_MakeVulkan(backend_context.native) }
            .to_option()
-           .map(|native| Context{ inner: Inner(native).into() })
+           .map(|native| Context{ native })
     }
 }

@@ -15,29 +15,20 @@ use super::canvas::Canvas;
 use crate::graphics::{Context, BackendTexture};
 use crate::prelude::*;
 
-#[derive(Clone)]
 pub struct Surface {
-    inner: RefCounted<Inner>
+    pub(crate) native: *mut SkSurface
 }
 
-impl Native<*mut SkSurface> for Surface {
-    fn native(&self) -> *mut SkSurface {
-        self.inner.0
+impl Clone for Surface {
+    fn clone(&self) -> Self {
+        unsafe { (*self.native)._base._base.ref_() }
+        Surface { native: self.native }
     }
 }
 
-#[derive(Clone)]
-struct Inner(*mut SkSurface);
-
-impl RefCount for Inner {
-    fn refer(&self) {
-        unsafe { (*self.0)._base._base.unref() }
-    }
-}
-
-impl Drop for Inner {
+impl Drop for Surface {
     fn drop(&mut self) {
-        unsafe { (*self.0)._base._base.unref() }
+        unsafe { (*self.native)._base._base.unref() }
     }
 }
 
@@ -46,7 +37,7 @@ impl Surface {
     pub fn new_raster_n32_premul(width: u32, height: u32) -> Option<Surface> {
         unsafe { C_SkSurface_MakeRasterN32Premul(width as i32, height as i32, ptr::null()) }
             .to_option()
-            .map(|native| Surface { inner: Inner(native).into() })
+            .map(|native| Surface { native })
     }
 
     pub fn new_from_backend_texture(
@@ -55,25 +46,25 @@ impl Surface {
         origin: GrSurfaceOrigin,
         sample_count: u32,
         color_type: SkColorType) -> Option<Surface> {
-        unsafe { C_SkSurface_MakeFromBackendTexture(context.native(), &backend_texture.native, origin, sample_count as i32, color_type) }
+        unsafe { C_SkSurface_MakeFromBackendTexture(context.native, &backend_texture.native, origin, sample_count as i32, color_type) }
             .to_option()
-            .map(|native| Surface { inner: Inner(native).into() })
+            .map(|native| Surface { native })
     }
 
     pub fn canvas(&self) -> Canvas {
         Canvas {
-            native: unsafe { (*self.inner.0).getCanvas() },
+            native: unsafe { (*self.native).getCanvas() },
             phantom: PhantomData
         }
     }
 
     pub fn make_image_snapshot(&mut self) -> Image {
-        Image { native: unsafe { C_SkSurface_makeImageSnapshot(self.native()) } }
+        Image { native: unsafe { C_SkSurface_makeImageSnapshot(self.native) } }
     }
 
     pub fn flush(&mut self) {
         unsafe {
-            (*self.native()).flush();
+            (*self.native).flush();
         }
     }
 
@@ -81,7 +72,7 @@ impl Surface {
         unsafe {
             let mut backend_texture = GrBackendTexture::new();
             C_SkSurface_getBackendTexture(
-                self.native(),
+                self.native,
                 handle_access,
                 &mut backend_texture as _);
 
