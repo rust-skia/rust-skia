@@ -175,24 +175,16 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
 
     .rustified_enum("GrSurfaceOrigin")
     .rustified_enum("SkColorType")
+    .rustified_enum("SkPaint_Style")
+    .rustified_enum("SkPaint_Cap")
+    .rustified_enum("SkPaint_Join")
 
     .whitelist_function("SkiaCreateCanvas")
     .whitelist_function("SkiaCreateRect")
     .whitelist_function("SkiaClearCanvas")
     .whitelist_function("SkiaGetSurfaceData")
 
-    .whitelist_var("SK_ColorTRANSPARENT")
-    .whitelist_var("SK_ColorBLACK")
-    .whitelist_var("SK_ColorDKGRAY")
-    .whitelist_var("SK_ColorGRAY")
-    .whitelist_var("SK_ColorLTGRAY")
-    .whitelist_var("SK_ColorWHITE")
-    .whitelist_var("SK_ColorRED")
-    .whitelist_var("SK_ColorGREEN")
-    .whitelist_var("SK_ColorBLUE")
-    .whitelist_var("SK_ColorYELLOW")
-    .whitelist_var("SK_ColorCYAN")
-    .whitelist_var("SK_ColorMAGENTA")
+    .whitelist_var("SK_Color.*")
     .use_core()
     .clang_arg("-std=c++14");
 
