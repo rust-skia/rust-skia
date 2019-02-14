@@ -68,7 +68,7 @@ fn main() {
       args.push_str(&format!(" extra_cflags=[{}]", flags));
     } else {
       if keep_inline_functions {
-        args.push_str(r#" extra_cflags=["-fkeep-inline-functions"]"#)
+        args.push_str(r#" extra_cflags=["-fno-inline-functions"]"#)
       }
     }
 
