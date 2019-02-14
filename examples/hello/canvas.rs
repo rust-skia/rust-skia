@@ -7,8 +7,8 @@ pub struct Canvas {
     path: skia::Path,
     rect: skia::Rect,
     paint: skia::Paint,
-    width: i32,
-    height: i32,
+    width: u32,
+    height: u32,
 }
 
 #[inline]
@@ -22,12 +22,12 @@ pub fn set_a_rgb(a: U8CPU, r: U8CPU, g: U8CPU, b: U8CPU) -> SkColor {
 
 impl Canvas {
 
-    pub fn new(width: i32, height: i32) -> Canvas {
+    pub fn new(width: u32, height: u32) -> Canvas {
         let surface =
             skia::Surface::new_raster_n32_premul(width, height)
                 .expect("no surface!");
         let path = skia::Path::new();
-        let rect = skia::Rect::new_iwh(width, height);
+        let rect = skia::Rect::new_iwh(width as i32, height as i32);
         let mut paint = skia::Paint::new();
         paint.set_color(SK_ColorBLACK);
         paint.set_anti_alias(true);
