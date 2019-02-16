@@ -1,5 +1,4 @@
 use std::ptr;
-use std::marker::PhantomData;
 use rust_skia::{
     SkSurface, SkColorType, GrSurfaceOrigin,
     C_SkSurface_MakeRasterN32Premul,
@@ -54,7 +53,7 @@ impl Surface {
     pub fn canvas(&self) -> Canvas {
         Canvas {
             native: unsafe { (*self.native).getCanvas() },
-            phantom: PhantomData
+            owner: Some(self.clone())
         }
     }
 

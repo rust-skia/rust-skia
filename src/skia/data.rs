@@ -1,5 +1,5 @@
 use std::slice;
-use rust_skia::{SkData, C_SkData_unref};
+use rust_skia::{SkData, C_SkData_unref, C_SkData_ref};
 
 #[derive(Debug)]
 pub struct Data {
@@ -12,7 +12,15 @@ impl Drop for Data {
     }
 }
 
+impl Clone for Data {
+    fn clone(&self) -> Self {
+        unsafe { C_SkData_ref(&*self.native) };
+        Data{ native: self.native }
+    }
+}
+
 impl Data {
+
     pub fn bytes(&self) -> &[u8] {
         unsafe {
             let bytes = (*self.native).bytes();

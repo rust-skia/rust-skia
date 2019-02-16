@@ -1,14 +1,21 @@
-use std::marker::PhantomData;
-use rust_skia::{SkCanvas};
-use super::{Path, Paint, Color};
+use rust_skia::{SkCanvas, C_SkCanvas_destruct};
+use super::{Path, Paint, Color, Surface};
 
-#[derive(Debug)]
-pub struct Canvas<'a> {
+pub struct Canvas {
     pub(crate) native: *mut SkCanvas,
-    pub(crate) phantom: PhantomData<&'a SkCanvas>
+    pub(crate) owner: Option<Surface>
 }
 
-impl<'a> Canvas<'a> {
+impl Drop for Canvas {
+    fn drop (&mut self) {
+        match &self.owner {
+            Some(_) => {},
+            None => { unsafe { C_SkCanvas_destruct(self.native) } }
+        }
+    }
+}
+
+impl Canvas {
 
     #[inline]
     pub fn clear(&mut self, color: Color) {
