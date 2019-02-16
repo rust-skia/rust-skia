@@ -45,7 +45,7 @@ jobs:
         ninja --version
     displayName: Print versions
   - script: cargo build --release --all-targets -vvv
-    env: { INIT_SKIA: true }
+    env: { INIT_SKIA: true, RUST_BACKTRACE: 1 }
     displayName: Build rust-skia
   - script: |
       rustup target add wasm32-unknown-unknown
