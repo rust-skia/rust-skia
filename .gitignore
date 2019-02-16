@@ -1,5 +1,5 @@
 /target
-**/*.rs.bk
-src/bindings.rs
 Cargo.lock
 *.png
+/src/bindings.rs
+/src/bindings.rs.bk

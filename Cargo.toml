@@ -6,9 +6,15 @@ edition = "2018"
 build = "build.rs"
 links = "skia"
 
+[features]
+default = []
+vulkan = []
+
 [dependencies]
 
 [build-dependencies]
 cc = "1"
 # temporary, 47.2 will contain the changes that are required to support inline functions on windows.
 bindgen = { git = "https://github.com/rust-lang/rust-bindgen", rev = "49b74244f7db8618b9a1b135ce2659751636c59c" } 
+regex = "1.1"
+
