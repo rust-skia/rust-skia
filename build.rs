@@ -146,6 +146,8 @@ fn main() {
   // note: the bindings are generated into the src directory to support
   // IDE based symbol lookup in dependent projects.
 
+/*
+
   let skia_lib = PathBuf::from(&skia_out_dir).join("skia.lib");
   let generated_bindings = PathBuf::from("src/bindings.rs");
   let bindings_cpp_src = PathBuf::from("src/bindings.cpp");
@@ -160,6 +162,9 @@ fn main() {
     || mtime(&skia_lib) > mtime(&generated_bindings)
     || mtime(&bindings_cpp_src) > mtime(&generated_bindings)
     || mtime(&us) > mtime(&generated_bindings);
+*/
+
+  let regenerate_bindings = true;
 
   if regenerate_bindings {
     bindgen_gen(&current_dir_name, &skia_out_dir)
