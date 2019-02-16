@@ -5,10 +5,7 @@ use skia_safe::skia::Color;
 pub struct Canvas {
     surface: skia::Surface,
     path: skia::Path,
-    rect: skia::Rect,
     paint: skia::Paint,
-    width: u32,
-    height: u32,
 }
 
 impl Canvas {
@@ -18,7 +15,6 @@ impl Canvas {
             skia::Surface::new_raster_n32_premul(width, height)
                 .expect("no surface!");
         let path = skia::Path::new();
-        let rect = skia::Rect::new_iwh(width as i32, height as i32);
         let mut paint = skia::Paint::new();
         paint.set_color(Color::BLACK);
         paint.set_anti_alias(true);
@@ -27,10 +23,7 @@ impl Canvas {
         Canvas {
             surface,
             path,
-            rect,
             paint,
-            width,
-            height,
         }
     }
 
