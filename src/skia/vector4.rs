@@ -1,4 +1,4 @@
-use rust_skia::*;
+use rust_skia::SkVector4;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Vector4 {

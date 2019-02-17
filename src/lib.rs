@@ -11,8 +11,15 @@ pub mod bindings {
 }
 
 mod prelude {
-    use rust_skia::*;
     use std::intrinsics::transmute;
+    use rust_skia::{
+        SkSurface,
+        SkData,
+        SkNVRefCnt,
+        SkRefCnt,
+        SkRefCntBase,
+        SkColorSpace
+    };
 
     pub trait ToOption {
         type Target;
@@ -80,8 +87,19 @@ mod prelude {
     /// can convert to and from it. This is for cases in which we
     /// can't use the From / Into traits, because we pull in the
     /// rust type from another crate.
-    pub(crate) trait NativeRepresentation<N> {
+    pub trait NativeRepresentation<N> {
         fn to_native(&self) -> N;
         fn from_native(native: &N) -> Self;
     }
+
+    // export all traits for the use of points / vectors, sizes,
+    // etc. into the prelude.
+    pub use crate::skia_euclid::{
+        SkiaPoint,
+        SkiaPointFloat,
+        SkiaSize,
+        SkiaSizeFloat,
+        SkiaRect,
+        SkiaRectFloat
+    };
 }

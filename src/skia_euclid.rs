@@ -1,12 +1,13 @@
 use rust_skia::{
     SkIRect,
-    SkIPoint
+    SkIPoint,
+    SkISize,
+    SkPoint,
+    SkSize,
+    SkRect
 };
 use crate::prelude::*;
-use rust_skia::SkISize;
-use rust_skia::SkPoint;
-use rust_skia::SkSize;
-use rust_skia::SkRect;
+use euclid::num::Zero;
 
 pub struct Skia;
 
@@ -21,30 +22,45 @@ pub type Size = euclid::Size2D<f32>;
 pub type Rect = euclid::Rect<f32>;
 
 pub trait SkiaPoint<S> : Sized {
-    fn new(x: S, y: S) -> Self;
-    fn x(&self) -> S;
-    fn y(&self) -> S;
     fn is_zero(&self) -> bool;
-    fn abs(&self) -> Self;
-    fn negate(&self) -> Self;
 }
 
 pub trait SkiaPointFloat<S> {
     fn length(&self) -> S;
+
+    #[must_use]
     fn normalize(&self) -> Self;
+    #[must_use]
     fn scale(&self, scale: S) -> Self;
+
     fn is_finite(&self) -> bool;
     fn distance(a: &Self, b: &Self) -> S;
     fn dot_product(a: &Self, b: &Self) -> S;
     fn cross_product(a: &Self, b: &Self) -> S;
 }
 
+pub trait SkiaSize<S> {
+    fn new_empty() -> Self;
+    fn is_zero(&self) -> bool;
+    fn is_empty(&self) -> bool;
+}
+
+pub trait SkiaSizeFloat<S> {
+    #[must_use]
+    fn to_round(&self) -> ISize;
+    #[must_use]
+    fn to_ceil(&self) -> ISize;
+    #[must_use]
+    fn to_floor(&self) -> ISize;
+}
+
 pub trait SkiaRect<S> : Sized {
     fn new_empty() -> Self;
-    fn new_wh(w: S, h: S) -> Self;
-    fn new_size(size: euclid::Size2D<S>) -> Self;
-    fn new_ltrb(l: S, t: S, r: S, b: S) -> Self;
-    fn new_xywh(x: S, y: S, w: S, h: S) -> Self;
+    fn from_wh(w: S, h: S) -> Self;
+    // exists:
+    // fn from_size(size: euclid::Size2D<S>) -> Self;
+    fn from_ltrb(l: S, t: S, r: S, b: S) -> Self;
+    fn from_xywh(x: S, y: S, w: S, h: S) -> Self;
 
     fn left(&self) -> S;
     fn right(&self) -> S;
@@ -61,16 +77,26 @@ pub trait SkiaRect<S> : Sized {
     fn is_empty(&self) -> bool;
     fn is_sorted(&self) -> bool;
 
+    #[must_use]
     fn offset(&self, dx: S, dy: S) -> Self;
+    #[must_use]
     fn offset_to(&self, new_x: S, new_y: S) -> Self;
+    #[must_use]
     fn inset(&self, dx: S, dy: S) -> Self;
+    #[must_use]
     fn outset(&self, dx: S, dy: S) -> Self;
 
+    #[must_use]
     fn intersect(&self, r: &Self) -> Option<Self>;
+    #[must_use]
     fn insersect_no_empty_check(&self, r: &Self) -> Option<Self>;
+
     fn intersects(a: &Self, b: &Self) -> bool;
     fn intersects_no_empty_check(a: &Self, b: &Self) -> bool;
+
+    #[must_use]
     fn join(&self, r: &euclid::Rect<S>) -> Self;
+    #[must_use]
     fn sort(&self) -> Self;
 
     const EMPTY: Self;
@@ -92,8 +118,12 @@ pub trait SkiaRectFloat<S> {
     fn new_bounds(points: &[euclid::Point2D<S>]) -> Self;
     fn new_bounds_check(points: &[euclid::Point2D<S>]) -> Self;
     fn new_bounds_no_check(points: &[euclid::Point2D<S>]) -> Self;
+
+    #[must_use]
     fn round(&self) -> Self;
+    #[must_use]
     fn round_out(&self) -> Self;
+    #[must_use]
     fn round_in(&self) -> Self;
 }
 
@@ -101,6 +131,27 @@ pub trait SkiaRectContains<T, A> {
     fn contains(&self, arg: A) -> bool;
     fn contains_no_empty_check(&self, arg: A) -> bool;
 }
+
+impl SkiaPoint<i32> for IPoint {
+    fn is_zero(&self) -> bool {
+        self.x == 0 && self.y == 0
+    }
+}
+
+impl SkiaSize<i32> for ISize {
+    fn new_empty() -> Self {
+        Self::zero()
+    }
+
+    fn is_zero(&self) -> bool {
+        *self == Self::new_empty()
+    }
+
+    fn is_empty(&self) -> bool {
+        self.is_empty_or_negative()
+    }
+}
+
 
 impl NativeRepresentation<SkIPoint> for IPoint {
     fn to_native(&self) -> SkIPoint {
@@ -174,6 +225,9 @@ impl NativeRepresentation<SkRect> for Rect {
     fn from_native(native: &SkRect) -> Self {
         Rect::new(
             Point::new(native.fLeft, native.fTop),
-            Size::new(unsafe { native.width() }, unsafe { native.height() }))
+            Size::new(
+                unsafe { native.width() },
+                unsafe { native.height() }))
     }
 }
+

@@ -1,6 +1,16 @@
-use rust_skia::*;
 use std::{mem, ops};
 use super::{Matrix, MatrixTypeMask, Vector4};
+use rust_skia::{
+    C_SkMatrix44_Equals,
+    C_SkMatrix44_Destruct,
+    SkMatrix44,
+    C_SkMatrix44_SkMatrix,
+    C_SkMatrix44_Mul,
+    SkVector4,
+    C_SkMatrix44_MulV4,
+    C_SkMatrix44_Construct,
+    SkMatrix44_Identity_Constructor_kIdentity_Constructor
+};
 
 pub struct Matrix44(pub(crate) SkMatrix44);
 
@@ -56,7 +66,7 @@ impl Matrix44 {
     pub const COLUMNS : u32 = 4;
 
     pub fn new() -> Matrix44 {
-        let mut m : SkMatrix44 = unsafe {mem::zeroed()};
+        let mut m : SkMatrix44 = unsafe { mem::uninitialized() };
         unsafe { C_SkMatrix44_Construct(&mut m) };
         Matrix44(m)
     }

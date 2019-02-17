@@ -1,7 +1,14 @@
 use std::mem;
-use rust_skia::*;
 use super::{Matrix44, Data};
 use crate::prelude::*;
+use rust_skia::{
+    SkColorSpaceTransferFn,
+    SkColorSpace,
+    SkColorSpacePrimaries,
+    SkGammaNamed,
+    SkColorSpace_Gamut,
+    SkColorSpace_RenderTargetGamma,
+};
 
 pub struct GammaNamed(pub (crate) SkGammaNamed);
 
@@ -144,34 +151,34 @@ pub struct ColorSpace(pub(crate) *mut SkColorSpace);
 
 impl Drop for ColorSpace {
     fn drop(&mut self) {
-        unsafe { C_SkColorSpace_unref(self.0) }
+        unsafe { rust_skia::C_SkColorSpace_unref(self.0) }
     }
 }
 
 impl Clone for ColorSpace {
     fn clone(&self) -> Self {
-        unsafe { C_SkColorSpace_ref(self.0) };
+        self.add_ref();
         ColorSpace(self.0)
     }
 }
 
 impl PartialEq for ColorSpace {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { SkColorSpace_Equals(self.0, rhs.0) }
+        unsafe { rust_skia::SkColorSpace_Equals(self.0, rhs.0) }
     }
 }
 
 impl ColorSpace {
     pub fn new_srgb() -> ColorSpace {
-        ColorSpace(unsafe { C_SkColorSpace_MakeSRGB() })
+        ColorSpace(unsafe { rust_skia::C_SkColorSpace_MakeSRGB() })
     }
 
     pub fn new_srgb_linear() -> ColorSpace {
-        ColorSpace(unsafe { C_SkColorSpace_MakeSRGBLinear() })
+        ColorSpace(unsafe { rust_skia::C_SkColorSpace_MakeSRGBLinear() })
     }
 
     pub fn gamma_named(&self) -> GammaNamed {
-        GammaNamed(unsafe { C_SkColorSpace_gammaNamed(self.0) })
+        GammaNamed(unsafe { rust_skia::C_SkColorSpace_gammaNamed(self.0) })
     }
 
     pub fn gamma_close_to_srgb(&self) -> bool {
@@ -196,15 +203,15 @@ impl ColorSpace {
     }
 
     pub fn with_linear_gamma(&self) -> ColorSpace {
-        ColorSpace(unsafe { C_SkColorSpace_makeLinearGamma(self.0) })
+        ColorSpace(unsafe { rust_skia::C_SkColorSpace_makeLinearGamma(self.0) })
     }
 
     pub fn with_srgb_gamma(&self) -> ColorSpace {
-        ColorSpace(unsafe { C_SkColorSpace_makeSRGBGamma(self.0) })
+        ColorSpace(unsafe { rust_skia::C_SkColorSpace_makeSRGBGamma(self.0) })
     }
 
     pub fn with_color_spin(&self) -> ColorSpace {
-        ColorSpace(unsafe { C_SkColorSpace_makeColorSpin(self.0) })
+        ColorSpace(unsafe { rust_skia::C_SkColorSpace_makeColorSpin(self.0) })
     }
 
     pub fn is_srgb(&self) -> bool {
@@ -212,12 +219,16 @@ impl ColorSpace {
     }
 
     pub fn serialize(&self) -> Data {
-        Data(unsafe { C_SkColorSpace_serialize(self.0)})
+        Data(unsafe { rust_skia::C_SkColorSpace_serialize(self.0)})
     }
 
     pub fn deserialize(data: Data) -> ColorSpace {
         let bytes = data.bytes();
-        ColorSpace(unsafe { C_SkColorSpace_Deserialize(bytes.as_ptr() as _, bytes.len()) })
+        ColorSpace(unsafe { rust_skia::C_SkColorSpace_Deserialize(bytes.as_ptr() as _, bytes.len()) })
+    }
+
+    pub (crate) fn add_ref(&self) {
+        unsafe { rust_skia::C_SkColorSpace_ref(self.0) };
     }
 }
 
@@ -233,31 +244,31 @@ type RGB5 = (GammaNamed, Matrix44);
 
 impl NewRGB<RGB1> for ColorSpace {
     fn new_rgb(v: RGB1) -> Self {
-        ColorSpace(unsafe{C_SkColorSpace_MakeRGB((v.0).0, (v.1).0)})
+        ColorSpace(unsafe { rust_skia::C_SkColorSpace_MakeRGB((v.0).0, (v.1).0) })
     }
 }
 
 impl NewRGB<RGB2> for ColorSpace {
     fn new_rgb(v: RGB2) -> Self {
-        ColorSpace(unsafe{C_SkColorSpace_MakeRGB2((v.0).0, &(v.1).0)})
+        ColorSpace(unsafe { rust_skia::C_SkColorSpace_MakeRGB2((v.0).0, &(v.1).0) })
     }
 }
 
 impl NewRGB<RGB3> for ColorSpace {
     fn new_rgb(v: RGB3) -> Self {
-        ColorSpace(unsafe{C_SkColorSpace_MakeRGB3(&v.0.into(), (v.1).0)})
+        ColorSpace(unsafe { rust_skia::C_SkColorSpace_MakeRGB3(&v.0.into(), (v.1).0) })
     }
 }
 
 impl NewRGB<RGB4> for ColorSpace {
     fn new_rgb(v: RGB4) -> Self {
-        ColorSpace(unsafe{C_SkColorSpace_MakeRGB4(&v.0.into(), &(v.1).0)})
+        ColorSpace(unsafe { rust_skia::C_SkColorSpace_MakeRGB4(&v.0.into(), &(v.1).0) })
     }
 }
 
 impl NewRGB<RGB5> for ColorSpace {
     fn new_rgb(v: RGB5) -> Self {
-        ColorSpace(unsafe{C_SkColorSpace_MakeRGB5((v.0).0, &(v.1).0)})
+        ColorSpace(unsafe { rust_skia::C_SkColorSpace_MakeRGB5((v.0).0, &(v.1).0) })
     }
 }
 
@@ -280,6 +291,13 @@ impl ColorSpaceGamut {
 }
 
 pub struct XYZD50Hash(pub u32);
+
+#[cfg(test)]
+impl RefCount for ColorSpace {
+    fn ref_cnt(&self) -> i32 {
+        unsafe { (*self.0).ref_cnt() }
+    }
+}
 
 #[test]
 pub fn create_and_clone_colorspaces() {

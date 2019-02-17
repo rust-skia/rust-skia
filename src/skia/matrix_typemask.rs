@@ -1,4 +1,7 @@
-use rust_skia::*;
+use rust_skia::{
+    SkMatrix_TypeMask,
+    SkMatrix44_TypeMask
+};
 
 bitflags! {
     pub struct MatrixTypeMask: u32 {

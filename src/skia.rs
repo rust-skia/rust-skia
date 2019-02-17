@@ -31,9 +31,6 @@ pub use self::paint::*;
 mod path;
 pub use self::path::*;
 
-mod rect;
-pub use self::rect::*;
-
 mod surface;
 pub use self::surface::*;
 

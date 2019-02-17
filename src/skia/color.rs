@@ -1,4 +1,4 @@
-use rust_skia::*;
+use rust_skia::SkColor;
 
 #[derive(Copy, Clone)]
 pub struct Color(pub(crate) SkColor);
@@ -40,16 +40,16 @@ impl Color {
         Self::from_argb(a, self.r(), self.g(), self.b())
     }
 
-    pub const TRANSPARENT: Color = Color(SK_ColorTRANSPARENT);
-    pub const BLACK: Color = Color(SK_ColorBLACK);
-    pub const DARK_GRAY: Color = Color(SK_ColorDKGRAY);
-    pub const GRAY: Color = Color(SK_ColorLTGRAY);
-    pub const LIGHT_GRAY: Color = Color(SK_ColorLTGRAY);
-    pub const WHITE: Color = Color(SK_ColorWHITE);
-    pub const RED: Color = Color(SK_ColorRED);
-    pub const GREEN: Color = Color(SK_ColorGREEN);
-    pub const BLUE: Color = Color(SK_ColorBLUE);
-    pub const YELLOW: Color = Color(SK_ColorYELLOW);
-    pub const CYAN: Color = Color(SK_ColorCYAN);
-    pub const MAGENTA: Color = Color(SK_ColorMAGENTA);
+    pub const TRANSPARENT: Color = Color(rust_skia::SK_ColorTRANSPARENT);
+    pub const BLACK: Color = Color(rust_skia::SK_ColorBLACK);
+    pub const DARK_GRAY: Color = Color(rust_skia::SK_ColorDKGRAY);
+    pub const GRAY: Color = Color(rust_skia::SK_ColorLTGRAY);
+    pub const LIGHT_GRAY: Color = Color(rust_skia::SK_ColorLTGRAY);
+    pub const WHITE: Color = Color(rust_skia::SK_ColorWHITE);
+    pub const RED: Color = Color(rust_skia::SK_ColorRED);
+    pub const GREEN: Color = Color(rust_skia::SK_ColorGREEN);
+    pub const BLUE: Color = Color(rust_skia::SK_ColorBLUE);
+    pub const YELLOW: Color = Color(rust_skia::SK_ColorYELLOW);
+    pub const CYAN: Color = Color(rust_skia::SK_ColorCYAN);
+    pub const MAGENTA: Color = Color(rust_skia::SK_ColorMAGENTA);
 }

@@ -1,12 +1,12 @@
 use std::mem;
-use rust_skia::*;
+use rust_skia::SkMatrix;
 
 #[derive(Copy, Clone)]
 pub struct Matrix(pub(crate) SkMatrix);
 
 impl PartialEq for Matrix {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { C_SkMatrix_Equals(&self.0, &rhs.0) }
+        unsafe { rust_skia::C_SkMatrix_Equals(&self.0, &rhs.0) }
     }
 }
 
