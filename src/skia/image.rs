@@ -15,6 +15,6 @@ impl Drop for Image {
 impl Image {
 
     pub fn encode_to_data(&self) -> Data {
-        Data { native: unsafe { C_SkImage_encodeToData(self.native) } }
+        Data(unsafe { C_SkImage_encodeToData(self.native) })
     }
 }

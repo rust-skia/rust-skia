@@ -1,6 +1,7 @@
 use std::mem;
 use rust_skia::*;
 use super::{Matrix44, Data};
+use crate::prelude::*;
 
 pub struct GammaNamed(pub (crate) SkGammaNamed);
 
@@ -211,7 +212,7 @@ impl ColorSpace {
     }
 
     pub fn serialize(&self) -> Data {
-        Data { native: unsafe { C_SkColorSpace_serialize(self.0) } }
+        Data(unsafe { C_SkColorSpace_serialize(self.0)})
     }
 
     pub fn deserialize(data: Data) -> ColorSpace {
@@ -290,7 +291,10 @@ pub fn create_and_clone_colorspaces() {
 #[test]
 pub fn serialize_and_deserialize() {
     let original = ColorSpace::new_rgb((ColorSpaceRenderTargetGamma::Linear, ColorSpaceGamut::AdobeRGB));
+    unsafe { assert_eq!(1, (*original.0).ref_cnt()) };
     let serialized = original.serialize();
+    unsafe { assert_eq!(1, (*serialized.0).ref_cnt()) };
     let deserialized = ColorSpace::deserialize(serialized);
+    unsafe { assert_eq!(1, (*deserialized.0).ref_cnt()) };
     assert!(original == deserialized);
 }
