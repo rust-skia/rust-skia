@@ -177,21 +177,24 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .generate_inline_functions(true)
 
     .whitelist_function("C_.*")
+    .whitelist_type("SkColorSpacePrimaries")
+    .whitelist_type("SkVector4")
 
     .rustified_enum("GrSurfaceOrigin")
-    .rustified_enum("SkColorType")
     .rustified_enum("SkPaint_Style")
     .rustified_enum("SkPaint_Cap")
     .rustified_enum("SkPaint_Join")
+    .rustified_enum("SkGammaNamed")
     .rustified_enum("SkColorSpace_RenderTargetGamma")
     .rustified_enum("SkColorSpace_Gamut")
-
-    .whitelist_function("SkiaCreateCanvas")
-    .whitelist_function("SkiaCreateRect")
-    .whitelist_function("SkiaClearCanvas")
-    .whitelist_function("SkiaGetSurfaceData")
+    .rustified_enum("SkMatrix44_TypeMask")
+    .rustified_enum("SkMatrix_TypeMask")
+    .rustified_enum("SkAlphaType")
+    .rustified_enum("SkColorType")
+    .rustified_enum("SkYUVColorSpace")
 
     .whitelist_var("SK_Color.*")
+
     .use_core()
     .clang_arg("-std=c++14");
 
