@@ -58,7 +58,7 @@ impl Into<Option<Matrix44>> for ColorSpacePrimaries {
     fn into(self) -> Option<Matrix44> {
         let mut matrix = Matrix44::new();
         let primaries : SkColorSpacePrimaries = self.into();
-        if unsafe { primaries.toXYZD50(&mut matrix.0 as _) } {
+        if unsafe { primaries.toXYZD50(&mut matrix.0) } {
             Some(matrix)
         } else {
             None
@@ -170,7 +170,7 @@ impl ColorSpace {
     }
 
     pub fn gamma_named(&self) -> GammaNamed {
-        GammaNamed(unsafe { C_SkColorSpace_gammaNamed(self.0 as _) })
+        GammaNamed(unsafe { C_SkColorSpace_gammaNamed(self.0) })
     }
 
     pub fn gamma_close_to_srgb(&self) -> bool {
@@ -183,7 +183,7 @@ impl ColorSpace {
 
     pub fn is_numerical_transfer_fn(&self) -> Option<ColorSpaceTransferFn> {
         let mut tfn : SkColorSpaceTransferFn = unsafe { mem::zeroed() };
-        if unsafe { (*self.0).isNumericalTransferFn(&mut tfn as _)} {
+        if unsafe { (*self.0).isNumericalTransferFn(&mut tfn) } {
             Some (tfn.into())
         } else {
             None
@@ -238,7 +238,7 @@ impl NewRGB<RGB1> for ColorSpace {
 
 impl NewRGB<RGB2> for ColorSpace {
     fn new_rgb(v: RGB2) -> Self {
-        ColorSpace(unsafe{C_SkColorSpace_MakeRGB2((v.0).0, &(v.1).0 as _)})
+        ColorSpace(unsafe{C_SkColorSpace_MakeRGB2((v.0).0, &(v.1).0)})
     }
 }
 
@@ -250,13 +250,13 @@ impl NewRGB<RGB3> for ColorSpace {
 
 impl NewRGB<RGB4> for ColorSpace {
     fn new_rgb(v: RGB4) -> Self {
-        ColorSpace(unsafe{C_SkColorSpace_MakeRGB4(&v.0.into(), &(v.1).0 as _)})
+        ColorSpace(unsafe{C_SkColorSpace_MakeRGB4(&v.0.into(), &(v.1).0)})
     }
 }
 
 impl NewRGB<RGB5> for ColorSpace {
     fn new_rgb(v: RGB5) -> Self {
-        ColorSpace(unsafe{C_SkColorSpace_MakeRGB5((v.0).0, &(v.1).0 as _)})
+        ColorSpace(unsafe{C_SkColorSpace_MakeRGB5((v.0).0, &(v.1).0)})
     }
 }
 
