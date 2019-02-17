@@ -187,6 +187,9 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .generate_inline_functions(true)
 
     .whitelist_function("C_.*")
+    .whitelist_function("SkColorTypeBytesPerPixel")
+    .whitelist_function("SkColorTypeIsAlwaysOpaque")
+    .whitelist_function("SkColorTypeValidateAlphaType")
     .whitelist_type("SkColorSpacePrimaries")
     .whitelist_type("SkVector4")
 

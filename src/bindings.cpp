@@ -64,20 +64,31 @@ extern "C" void C_SkCanvas_destruct(const SkCanvas* self) {
 
 // SkImageInfo
 
+extern "C" void C_SkImageInfo_Construct(SkImageInfo* uninitialized) {
+    new (uninitialized) SkImageInfo();
+}
+
+extern "C" void C_SkImageInfo_Destruct(SkImageInfo* self) {
+    self->~SkImageInfo();
+}
+
+extern "C" void C_SkImageInfo_Copy(const SkImageInfo* from, SkImageInfo* to) {
+    *to = *from;
+}
+
 extern "C" void C_SkImageInfo_Make(SkImageInfo* self, int width, int height, SkColorType ct, SkAlphaType at, SkColorSpace* cs) {
     *self = SkImageInfo::Make(width, height, ct, at, sk_sp<SkColorSpace>(cs));
 }
 
-extern "C" void C_SkImageInfo_MakeN32(SkImageInfo* self, int width, int height, SkAlphaType at, SkColorSpace* cs) {
-    *self = SkImageInfo::MakeN32(width, height, at, sk_sp<SkColorSpace>(cs));
+extern "C" void C_SkImageInfo_MakeS32(SkImageInfo* self, int width, int height, SkAlphaType at) {
+    *self = SkImageInfo::MakeS32(width, height, at);
 }
 
-extern "C" void C_SkImageInfo_MakeN32Premul(SkImageInfo* self, int width, int height, SkColorSpace* cs) {
-    *self = SkImageInfo::MakeN32Premul(width, height, sk_sp<SkColorSpace>(cs));
-}
-
-extern "C" void C_SkImageInfo_destruct(SkImageInfo* self) {
-    self->~SkImageInfo();
+extern "C" SkColorSpace* C_SkImageInfo_colorSpace(const SkImageInfo* self) {
+    // note: colorSpace returns just a pointer without increasing the reference counter.
+    SkColorSpace* cs = self->colorSpace();
+    if (cs) cs->ref();
+    return cs;
 }
 
 // SkColorSpace
@@ -146,8 +157,8 @@ extern "C" SkGammaNamed C_SkColorSpace_gammaNamed(const SkColorSpace* self) {
 // SkMatrix44
 
 // calling SkMatrix44::new(Uninitialized) leads to linker error.
-extern "C" void C_SkMatrix44_Construct(SkMatrix44* self) {
-    new(self) SkMatrix44();
+extern "C" void C_SkMatrix44_Construct(SkMatrix44* uninitialized) {
+    new(uninitialized) SkMatrix44();
 }
 
 extern "C" void C_SkMatrix44_Destruct(SkMatrix44* self) {
