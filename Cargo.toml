@@ -11,3 +11,4 @@ vulkan = ["rust-skia/vulkan"]
 [dependencies]
 rust-skia = { path = "../rust-skia" }
 bitflags = "1.0"
+euclid = "0.19"

@@ -39,3 +39,5 @@ pub use self::surface::*;
 
 mod vector4;
 pub use self::vector4::*;
+
+pub use crate::skia_euclid::*;

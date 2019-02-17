@@ -1,5 +1,7 @@
 pub mod graphics;
 pub mod skia;
+mod skia_euclid;
+
 #[macro_use]
 extern crate bitflags;
 
@@ -72,5 +74,14 @@ mod prelude {
         fn ref_cnt(&self) -> i32 {
             self._base.ref_cnt()
         }
+    }
+
+    /// Indicates that the type has a native representation and
+    /// can convert to and from it. This is for cases in which we
+    /// can't use the From / Into traits, because we pull in the
+    /// rust type from another crate.
+    pub(crate) trait NativeRepresentation<N> {
+        fn to_native(&self) -> N;
+        fn from_native(native: &N) -> Self;
     }
 }
