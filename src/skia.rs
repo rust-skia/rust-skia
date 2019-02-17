@@ -16,8 +16,14 @@ pub use self::image::*;
 mod image_info;
 pub use self::image_info::*;
 
+mod matrix;
+pub use self::matrix::*;
+
 mod matrix44;
 pub use self::matrix44::*;
+
+mod matrix_typemask;
+pub use self::matrix_typemask::*;
 
 mod paint;
 pub use self::paint::*;
@@ -30,3 +36,6 @@ pub use self::rect::*;
 
 mod surface;
 pub use self::surface::*;
+
+mod vector4;
+pub use self::vector4::*;

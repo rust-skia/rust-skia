@@ -1,5 +1,7 @@
 pub mod graphics;
 pub mod skia;
+#[macro_use]
+extern crate bitflags;
 
 // temporariliy required for the canvas example.
 pub mod bindings {
