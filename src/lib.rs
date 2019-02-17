@@ -1,3 +1,5 @@
+mod bindings;
 mod canvas;
 
-pub use self::canvas::*;
+pub use canvas::*;
+pub use bindings::*;

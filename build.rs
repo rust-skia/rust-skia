@@ -3,7 +3,9 @@ extern crate cc;
 
 use std::env;
 use std::fs::read_dir;
-use std::path::PathBuf;
+use std::fs;
+use std::io::prelude::*;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 use cc::Build;
@@ -104,7 +106,26 @@ fn main() {
     println!("cargo:rustc-link-lib=user32");
   }
 
-  bindgen_gen(&current_dir_name, &skia_out_dir);
+  // regenerate bindings?
+  //
+  // note: the bindings are generated into the src directory to support
+  // IDE based symbol lookup in dependent projects.
+
+  let skia_lib = "skia/out/Static/skia.lib";
+  let generated_bindings = "src/bindings.rs";
+
+  fn mtime(path: &str) -> std::time::SystemTime {
+    fs::metadata(path).unwrap().modified().unwrap()
+  }
+
+  let regenerate_bindings =
+    !Path::new(generated_bindings).exists()
+    || mtime(skia_lib) > mtime(generated_bindings)
+    || mtime("src/bindings.cpp") > mtime(generated_bindings);
+
+  if regenerate_bindings {
+    bindgen_gen(&current_dir_name, &skia_out_dir)
+  }
 }
 
 fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
@@ -135,7 +156,7 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
 
   builder = builder.header("src/bindings.cpp");
 
-  for include_dir in read_dir("skia/include").expect("Unable to read skia/include") {
+  for include_dir in fs::read_dir("skia/include").expect("Unable to read skia/include") {
     let dir = include_dir.unwrap();
     let include_path = format!("{}/{}", &current_dir_name, &dir.path().to_str().unwrap());
     builder = builder.clang_arg(format!("-I{}", &include_path));
