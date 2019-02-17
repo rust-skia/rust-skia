@@ -111,17 +111,20 @@ fn main() {
   // note: the bindings are generated into the src directory to support
   // IDE based symbol lookup in dependent projects.
 
-  let skia_lib = "skia/out/Static/skia.lib";
-  let generated_bindings = "src/bindings.rs";
+  let skia_lib = PathBuf::from(&skia_out_dir).join("skia.lib");
+  let generated_bindings = PathBuf::from("src/bindings.rs");
+  let bindings_cpp_src = PathBuf::from("src/bindings.cpp");
+  let us = PathBuf::from("build.rs");
 
   fn mtime(path: &str) -> std::time::SystemTime {
     fs::metadata(path).unwrap().modified().unwrap()
   }
 
   let regenerate_bindings =
-    !Path::new(generated_bindings).exists()
-    || mtime(skia_lib) > mtime(generated_bindings)
-    || mtime("src/bindings.cpp") > mtime(generated_bindings);
+    !generated_bindings.exists()
+    || mtime(&skia_lib) > mtime(&generated_bindings)
+    || mtime(&bindings_cpp_src) > mtime(&generated_bindings)
+    || mtime(&us) > mtime(&generated_bindings);
 
   if regenerate_bindings {
     bindgen_gen(&current_dir_name, &skia_out_dir)
