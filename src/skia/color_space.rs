@@ -20,7 +20,6 @@ impl GammaNamed {
     pub const NonStandard: GammaNamed = GammaNamed(SkGammaNamed::kNonStandard_SkGammaNamed);
 }
 
-#[derive(Clone, Copy)]
 pub struct ColorSpacePrimaries {
     rx: f32,
     ry: f32,

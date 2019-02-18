@@ -17,7 +17,6 @@ impl Drop for Canvas {
 
 impl Canvas {
 
-    #[inline]
     pub fn clear(&mut self, color: Color) {
         unsafe { (*self.native).clear(color.0) }
     }

@@ -34,6 +34,9 @@ pub use self::path::*;
 mod surface;
 pub use self::surface::*;
 
+mod surface_props;
+pub use self::surface_props::*;
+
 mod vector4;
 pub use self::vector4::*;
 
