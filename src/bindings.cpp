@@ -189,6 +189,26 @@ extern "C" bool C_SkMatrix_Equals(const SkMatrix* self, const SkMatrix* rhs) {
     return *self == *rhs;
 }
 
+// SkSurfaceProps
+
+extern "C" bool C_SkSurfaceProps_Equals(const SkSurfaceProps* self, const SkSurfaceProps* rhs) {
+    return *self == *rhs;
+}
+
+// SkBitmap
+
+extern "C" void C_SkBitmap_Construct(SkBitmap* uninitialized) {
+    new (uninitialized) SkBitmap();
+}
+
+extern "C" void C_SkBitmap_Destruct(SkBitmap* self) {
+    self->~SkBitmap();
+}
+
+extern "C" void C_SkBitmap_Copy(const SkBitmap* from, SkBitmap* to) {
+    *to = *from;
+}
+
 #if defined(SK_VULKAN)
 
 extern "C" SkSurface* C_SkSurface_MakeFromBackendTexture(

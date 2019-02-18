@@ -205,6 +205,9 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .rustified_enum("SkAlphaType")
     .rustified_enum("SkColorType")
     .rustified_enum("SkYUVColorSpace")
+    .rustified_enum("SkPixelGeometry")
+    .rustified_enum("SkSurfaceProps_Flags")
+    .rustified_enum("SkBitmap_AllocFlags")
 
     .whitelist_var("SK_Color.*")
 
