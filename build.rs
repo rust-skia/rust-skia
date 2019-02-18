@@ -3,7 +3,9 @@ extern crate cc;
 
 use std::env;
 use std::fs::read_dir;
-use std::path::PathBuf;
+use std::fs;
+use std::io::prelude::*;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 use cc::Build;
@@ -104,7 +106,42 @@ fn main() {
     println!("cargo:rustc-link-lib=user32");
   }
 
-  if env::var("INIT_SKIA").is_ok() {
+  // regenerate bindings?
+  //
+  // The bindings are generated into the src directory to support
+  // IDE based symbol lookup in dependent projects, but this has the consequence
+  // that the IDE and corgo might be confused by its datestamp, so we
+  // avoid the regeneration if possible by implementing our own dependency checks.
+  // The results of this is hard to reproduce. What can be said is that CLion's
+  // cargo check invocation does from time to time takes a lot longer than expected
+  // in dependent projects even though the bindings were not updated.
+
+  let regenerate_bindings = {
+    let generated_bindings = PathBuf::from("src/bindings.rs");
+    if !generated_bindings.exists() { true } else {
+
+      let skia_lib_filename =
+          if cfg!(windows) { "skia.lib" } else { "libskia.a" };
+
+      let skia_lib = PathBuf::from(&skia_out_dir).join(skia_lib_filename);
+      let bindings_cpp_src = PathBuf::from("src/bindings.cpp");
+      let us = PathBuf::from("build.rs");
+      let config = PathBuf::from("Cargo.toml");
+
+      fn mtime(path: &Path) -> std::time::SystemTime {
+        fs::metadata(path).unwrap().modified().unwrap()
+      }
+
+      let gen_time = mtime(&generated_bindings);
+
+      mtime(&config) > gen_time
+      || mtime(&skia_lib) > gen_time
+      || mtime(&bindings_cpp_src) > gen_time
+      || mtime(&us) > gen_time
+    }
+  };
+
+  if regenerate_bindings {
     bindgen_gen(&current_dir_name, &skia_out_dir)
   }
 }
@@ -137,7 +174,7 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
 
   builder = builder.header("src/bindings.cpp");
 
-  for include_dir in read_dir("skia/include").expect("Unable to read skia/include") {
+  for include_dir in fs::read_dir("skia/include").expect("Unable to read skia/include") {
     let dir = include_dir.unwrap();
     let include_path = format!("{}/{}", &current_dir_name, &dir.path().to_str().unwrap());
     builder = builder.clang_arg(format!("-I{}", &include_path));
