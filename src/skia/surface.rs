@@ -52,7 +52,7 @@ impl Surface {
     }
 
     pub fn make_image_snapshot(&mut self) -> Image {
-        Image { native: unsafe { rust_skia::C_SkSurface_makeImageSnapshot(self.0) } }
+        Image(unsafe { rust_skia::C_SkSurface_makeImageSnapshot(self.0) })
     }
 
     pub fn flush(&mut self) {
