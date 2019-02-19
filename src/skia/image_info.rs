@@ -98,7 +98,7 @@ impl ImageInfo {
 
     pub fn new(dimensions: ISize, ct: ColorType, at: AlphaType, cs: Option<ColorSpace>) -> ImageInfo {
         let mut image_info = Self::new_empty();
-        let mut cs_ptr = match cs {
+        let cs_ptr = match cs {
             Some(cs) => { cs.add_ref(); cs.0 },
             None => ptr::null_mut()
         };

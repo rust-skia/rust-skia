@@ -1,3 +1,9 @@
+#[allow(non_camel_case_types)]
+pub type u8cpu = rust_skia::U8CPU;
+
+mod bitmap;
+pub use self::bitmap::*;
+
 mod canvas;
 pub use self::canvas::*;
 

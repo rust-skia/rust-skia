@@ -7,7 +7,6 @@ use rust_skia::{
     SkRect
 };
 use crate::prelude::*;
-use euclid::num::Zero;
 
 pub struct Skia;
 
