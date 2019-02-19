@@ -209,6 +209,41 @@ extern "C" void C_SkBitmap_Copy(const SkBitmap* from, SkBitmap* to) {
     *to = *from;
 }
 
+extern "C" SkColorSpace* C_SkBitmap_colorSpace(const SkBitmap* self) {
+    // note: colorSpace returns a pointer without increasing the reference counter.
+    SkColorSpace* cs = self->colorSpace();
+    if (cs) cs->ref();
+    return cs;
+}
+
+extern "C" bool C_SkBitmap_ComputeIsOpaque(const SkBitmap* self) {
+    return SkBitmap::ComputeIsOpaque(*self);
+}
+
+extern "C" bool C_SkBitmap_tryAllocN32Pixels(SkBitmap* self, int width, int height, bool isOpaque) {
+    return self->tryAllocN32Pixels(width, height, isOpaque);
+}
+
+extern "C" bool C_SkBitmap_tryAllocPixels(SkBitmap* self) {
+    return self->tryAllocPixels();
+}
+
+extern "C" bool C_SkBitmap_readyToDraw(const SkBitmap* self) {
+    return self->readyToDraw();
+}
+
+extern "C" void C_SkBitmap_eraseARGB(const SkBitmap* self, U8CPU a, U8CPU r, U8CPU g, U8CPU b) {
+    self->eraseARGB(a, r, g, b);
+}
+
+extern "C" float C_SkBitmap_getAlphaf(const SkBitmap* self, int x, int y) {
+    return self->getAlphaf(x, y);
+}
+
+extern "C" bool C_SkBitmap_extractAlpha(const SkBitmap* self, SkBitmap* dst, const SkPaint* paint, SkIPoint* offset) {
+    return self->extractAlpha(dst, paint, offset);
+}
+
 #if defined(SK_VULKAN)
 
 extern "C" SkSurface* C_SkSurface_MakeFromBackendTexture(
