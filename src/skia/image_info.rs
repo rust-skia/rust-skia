@@ -166,7 +166,7 @@ impl ImageInfo {
     }
 
     pub fn dimensions(&self) -> ISize {
-        ISize::from_native(&self.0.fDimensions)
+        ISize::from_native(self.0.fDimensions)
     }
 
     pub fn bounds(&self) -> IRect {

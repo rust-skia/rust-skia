@@ -152,29 +152,28 @@ impl SkiaSize<i32> for ISize {
     }
 }
 
-
 impl NativeRepresentation<SkIPoint> for IPoint {
-    fn to_native(&self) -> SkIPoint {
+    fn to_native(self) -> SkIPoint {
         SkIPoint { fX: self.x, fY: self.y }
     }
 
-    fn from_native(native: &SkIPoint) -> Self {
+    fn from_native(native: SkIPoint) -> Self {
         IPoint::new(native.fX, native.fY)
     }
 }
 
 impl NativeRepresentation<SkISize> for ISize {
-    fn to_native(&self) -> SkISize {
+    fn to_native(self) -> SkISize {
         SkISize { fWidth: self.width, fHeight: self.height }
     }
 
-    fn from_native(native: &SkISize) -> Self {
+    fn from_native(native: SkISize) -> Self {
         ISize::new(native.fWidth, native.fHeight)
     }
 }
 
 impl NativeRepresentation<SkIRect> for IRect {
-    fn to_native(&self) -> SkIRect {
+    fn to_native(self) -> SkIRect {
         let br = self.bottom_right();
         SkIRect{
             fLeft: self.origin.x,
@@ -184,7 +183,7 @@ impl NativeRepresentation<SkIRect> for IRect {
         }
     }
 
-    fn from_native(native: &SkIRect) -> Self {
+    fn from_native(native: SkIRect) -> Self {
         IRect::new(
             IPoint::new(native.fLeft, native.fTop),
             ISize::new(unsafe { native.width() }, unsafe { native.height() }))
@@ -192,27 +191,27 @@ impl NativeRepresentation<SkIRect> for IRect {
 }
 
 impl NativeRepresentation<SkPoint> for Point {
-    fn to_native(&self) -> SkPoint {
+    fn to_native(self) -> SkPoint {
         SkPoint { fX: self.x, fY: self.y }
     }
 
-    fn from_native(native: &SkPoint) -> Self {
+    fn from_native(native: SkPoint) -> Self {
         Point::new(native.fX, native.fY)
     }
 }
 
 impl NativeRepresentation<SkSize> for Size {
-    fn to_native(&self) -> SkSize {
+    fn to_native(self) -> SkSize {
         SkSize { fWidth: self.width, fHeight: self.height }
     }
 
-    fn from_native(native: &SkSize) -> Self {
+    fn from_native(native: SkSize) -> Self {
         Size::new(native.fWidth, native.fHeight)
     }
 }
 
 impl NativeRepresentation<SkRect> for Rect {
-    fn to_native(&self) -> SkRect {
+    fn to_native(self) -> SkRect {
         let br = self.bottom_right();
         SkRect {
             fLeft: self.origin.x,
@@ -222,7 +221,7 @@ impl NativeRepresentation<SkRect> for Rect {
         }
     }
 
-    fn from_native(native: &SkRect) -> Self {
+    fn from_native(native: SkRect) -> Self {
         Rect::new(
             Point::new(native.fLeft, native.fTop),
             Size::new(

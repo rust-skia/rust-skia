@@ -87,9 +87,9 @@ mod prelude {
     /// can convert to and from it. This is for cases in which we
     /// can't use the From / Into traits, because we pull in the
     /// rust type from another crate.
-    pub trait NativeRepresentation<N> {
-        fn to_native(&self) -> N;
-        fn from_native(native: &N) -> Self;
+    pub trait NativeRepresentation<Native> {
+        fn to_native(self) -> Native;
+        fn from_native(native: Native) -> Self;
     }
 
     // export all traits for the use of points / vectors, sizes,
