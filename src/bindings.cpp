@@ -6,16 +6,20 @@
 #include "SkPath.h"
 #include "SkRect.h"
 #include "SkSurface.h"
+#include "SkPicture.h"
+
+#include "GrContext.h"
 
 #if defined(SK_VULKAN)
 
-#include "GrContext.h"
 #include "GrBackendSurface.h"
 #include "vk/GrVkBackendContext.h"
 
 #endif
 
+//
 // SkSurface
+//
 
 extern "C" SkSurface* C_SkSurface_MakeRasterN32Premul(int width, int height, const SkSurfaceProps* surfaceProps) {
     return SkSurface::MakeRasterN32Premul(width, height, surfaceProps).release();
@@ -28,17 +32,159 @@ extern "C" SkSurface* C_SkSurface_MakeRenderTarget(
     return SkSurface::MakeRenderTarget(context, budgeted, *imageInfo).release();
 }
 
-// SkImage
-
 extern "C" SkImage* C_SkSurface_makeImageSnapshot(SkSurface* self) {
     return self->makeImageSnapshot().release();
 }
 
-// SkData
+//
+// SkImage
+//
 
-extern "C" SkData* C_SkImage_encodeToData(SkImage* self) {
+extern "C" SkImage* C_SkImage_MakeRasterData(const SkImageInfo* info, SkData* pixels, size_t rowBytes) {
+    return SkImage::MakeRasterData(*info, sk_sp<SkData>(pixels), rowBytes).release();
+}
+
+extern "C" SkImage* C_SkImage_MakeFromBitmap(const SkBitmap* bitmap) {
+    return SkImage::MakeFromBitmap(*bitmap).release();
+}
+
+extern "C" SkImage* C_SkImage_MakeFromEncoded(SkData* encoded, const SkIRect* subset) {
+    return SkImage::MakeFromEncoded(sk_sp<SkData>(encoded), subset).release();
+}
+
+extern "C" SkImage* C_SkImage_MakeFromTexture(
+        GrContext* context,
+        const GrBackendTexture* backendTexture,
+        GrSurfaceOrigin origin,
+        SkColorType colorType,
+        SkAlphaType alphaType,
+        SkColorSpace* colorSpace) {
+    return SkImage::MakeFromTexture(context, *backendTexture, origin, colorType, alphaType, sk_sp<SkColorSpace>(colorSpace)).release();
+}
+
+extern "C" SkImage* C_SkImage_MakeCrossContextFromEncoded(
+        GrContext* context,
+        SkData* data,
+        bool buildMips,
+        SkColorSpace* dstColorSpace,
+        bool limitToMaxTextureSize
+        ) {
+    return SkImage::MakeCrossContextFromEncoded(context, sk_sp<SkData>(data), buildMips, dstColorSpace, limitToMaxTextureSize).release();
+}
+
+extern "C" SkImage* C_SkImage_MakeFromAdoptedTexture(
+        GrContext* context,
+        const GrBackendTexture* backendTexture,
+        GrSurfaceOrigin origin,
+        SkColorType colorType,
+        SkAlphaType alphaType,
+        SkColorSpace* colorSpace) {
+    return SkImage::MakeFromAdoptedTexture(context, *backendTexture, origin, colorType, alphaType, sk_sp<SkColorSpace>(colorSpace)).release();
+}
+
+extern "C" SkImage* C_SkImage_MakeFromYUVATexturesCopy(
+        GrContext* context,
+        SkYUVColorSpace yuvColorSpace,
+        const GrBackendTexture yuvaTextures[],
+        const SkYUVAIndex yuvaIndices[4],
+        SkISize imageSize,
+        GrSurfaceOrigin imageOrigin,
+        SkColorSpace* colorSpace) {
+    return SkImage::MakeFromYUVATexturesCopy(context, yuvColorSpace, yuvaTextures, yuvaIndices, imageSize, imageOrigin, sk_sp<SkColorSpace>(colorSpace)).release();
+}
+
+extern "C" SkImage* C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend(
+        GrContext* context,
+        SkYUVColorSpace yuvColorSpace,
+        const GrBackendTexture yuvaTextures[],
+        const SkYUVAIndex yuvaIndices[4],
+        SkISize imageSize,
+        GrSurfaceOrigin imageOrigin,
+        const GrBackendTexture& backendTexture,
+        SkColorSpace* colorSpace) {
+    return SkImage::MakeFromYUVATexturesCopyWithExternalBackend(context, yuvColorSpace, yuvaTextures, yuvaIndices, imageSize, imageOrigin, backendTexture, sk_sp<SkColorSpace>(colorSpace)).release();
+}
+
+extern "C" SkImage* C_SkImage_MakeFromYUVATextures(
+        GrContext* context,
+        SkYUVColorSpace yuvColorSpace,
+        const GrBackendTexture yuvaTextures[],
+        const SkYUVAIndex yuvaIndices[4],
+        SkISize imageSize,
+        GrSurfaceOrigin imageOrigin,
+        SkColorSpace* colorSpace) {
+    return SkImage::MakeFromYUVATextures(context, yuvColorSpace, yuvaTextures, yuvaIndices, imageSize, imageOrigin, sk_sp<SkColorSpace>(colorSpace)).release();
+}
+
+extern "C" SkImage* C_SkImage_MakeFromNV12TexturesCopy(
+        GrContext* context,
+        SkYUVColorSpace yuvColorSpace,
+        const GrBackendTexture nv12Textures[2],
+        GrSurfaceOrigin imageOrigin,
+        SkColorSpace* imageColorSpace) {
+    return SkImage::MakeFromNV12TexturesCopy(context, yuvColorSpace, nv12Textures, imageOrigin, sk_sp<SkColorSpace>(imageColorSpace)).release();
+}
+
+extern "C" SkImage* C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
+        GrContext* context,
+        SkYUVColorSpace yuvColorSpace,
+        const GrBackendTexture nv12Textures[2],
+        GrSurfaceOrigin imageOrigin,
+        const GrBackendTexture* backendTexture,
+        SkColorSpace* imageColorSpace) {
+    return SkImage::MakeFromNV12TexturesCopyWithExternalBackend(context, yuvColorSpace, nv12Textures, imageOrigin, *backendTexture, sk_sp<SkColorSpace>(imageColorSpace)).release();
+}
+
+extern "C" SkImage* C_SkImage_MakeFromPicture(
+        SkPicture* picture,
+        const SkISize* dimensions,
+        const SkMatrix* matrix,
+        const SkPaint* paint,
+        SkImage::BitDepth bitDepth,
+        SkColorSpace* colorSpace) {
+    return SkImage::MakeFromPicture(sk_sp<SkPicture>(picture), *dimensions, matrix, paint, bitDepth, sk_sp<SkColorSpace>(colorSpace)).release();
+}
+
+extern "C" void C_SkImage_getBackendTexture(
+        const SkImage* self,
+        bool flushPendingGrContextIO,
+        GrSurfaceOrigin* origin,
+        GrBackendTexture* result)
+{
+    *result = self->getBackendTexture(flushPendingGrContextIO, origin);
+}
+
+extern "C" SkData* C_SkImage_encodeToData(const SkImage* self) {
     return self->encodeToData().release();
 }
+
+extern "C" SkData* C_SkImage_refEncodedData(const SkImage* self) {
+    return self->refEncodedData().release();
+}
+
+extern "C" SkImage* C_SkImage_makeSubset(const SkImage* self, const SkIRect* subset) {
+    return self->makeSubset(*subset).release();
+}
+
+extern "C" SkImage* C_SkImage_makeTextureImage(const SkImage* self, GrContext* context, SkColorSpace* dstColorSpace, GrMipMapped mipMapped) {
+    return self->makeTextureImage(context, dstColorSpace, mipMapped).release();
+}
+
+extern "C" SkImage* C_SkImage_makeNonTextureImage(const SkImage* self) {
+    return self->makeNonTextureImage().release();
+}
+
+extern "C" SkImage* C_SkImage_makeRasterImage(const SkImage* self) {
+    return self->makeRasterImage().release();
+}
+
+extern "C" SkImage* C_SkImage_makeColorSpace(const SkImage* self, SkColorSpace* target) {
+    return self->makeColorSpace(sk_sp<SkColorSpace>(target)).release();
+}
+
+//
+// SkData
+//
 
 extern "C" void C_SkData_ref(const SkData* self) {
     self->ref();
@@ -48,7 +194,9 @@ extern "C" void C_SkData_unref(const SkData* self) {
     self->unref();
 }
 
+//
 // SkPaint
+//
 
 extern "C" void C_SkPaint_destruct(const SkPaint* self) {
     self->~SkPaint();
@@ -62,7 +210,9 @@ extern "C" void C_SkCanvas_destruct(const SkCanvas* self) {
     self->~SkCanvas();
 }
 
+//
 // SkImageInfo
+//
 
 extern "C" void C_SkImageInfo_Construct(SkImageInfo* uninitialized) {
     new (uninitialized) SkImageInfo();
@@ -91,7 +241,9 @@ extern "C" SkColorSpace* C_SkImageInfo_colorSpace(const SkImageInfo* self) {
     return cs;
 }
 
+//
 // SkColorSpace
+//
 
 extern "C" void C_SkColorSpace_ref(const SkColorSpace* self) {
     self->ref();
@@ -149,12 +301,13 @@ extern "C" SkColorSpace* C_SkColorSpace_Deserialize(const void* data, size_t len
     return SkColorSpace::Deserialize(data, length).release();
 }
 
-// not linkable for some reason.
 extern "C" SkGammaNamed C_SkColorSpace_gammaNamed(const SkColorSpace* self) {
     return self->gammaNamed();
 }
 
+//
 // SkMatrix44
+//
 
 // calling SkMatrix44::new(Uninitialized) leads to linker error.
 extern "C" void C_SkMatrix44_Construct(SkMatrix44* uninitialized) {
@@ -183,13 +336,17 @@ extern "C" void C_SkMatrix44_MulV4(const SkMatrix44* self, const SkVector4* rhs,
     *result = *self * *rhs;
 }
 
+//
 // SkMatrix
+//
 
 extern "C" bool C_SkMatrix_Equals(const SkMatrix* self, const SkMatrix* rhs) {
     return *self == *rhs;
 }
 
+//
 // SkSurfaceProps
+//
 
 extern "C" bool C_SkSurfaceProps_Equals(const SkSurfaceProps* self, const SkSurfaceProps* rhs) {
     return *self == *rhs;
