@@ -9,6 +9,7 @@ default = []
 vulkan = ["rust-skia/vulkan"]
 
 [dependencies]
-rust-skia = { path = "../rust-skia" }
 bitflags = "1.0"
 euclid = "0.19"
+rust-skia = { path = "../rust-skia" }
+ref-counted = { path = "ref-counted" }

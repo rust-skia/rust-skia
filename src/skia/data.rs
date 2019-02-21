@@ -1,24 +1,21 @@
 use std::slice;
 use rust_skia::{SkData, C_SkData_unref, C_SkData_ref};
+use crate::prelude::RefCounted;
 
-#[derive(Debug)]
+#[derive(Debug, RCCopyClone)]
 pub struct Data(pub(crate) *mut SkData);
 
-impl Drop for Data {
-    fn drop(&mut self) {
+impl RefCounted for Data {
+    fn _ref(&self) {
+        unsafe { C_SkData_ref(self.0) }
+    }
+
+    fn _unref(&self) {
         unsafe { C_SkData_unref(self.0) }
     }
 }
 
-impl Clone for Data {
-    fn clone(&self) -> Self {
-        unsafe { C_SkData_ref(self.0) };
-        Data(self.0)
-    }
-}
-
 impl Data {
-
     pub fn bytes(&self) -> &[u8] {
         unsafe {
             let bytes = (*self.0).bytes();
@@ -30,4 +27,3 @@ impl Data {
         unsafe { (*self.0).size() }
     }
 }
-

@@ -4,6 +4,8 @@ mod skia_euclid;
 
 #[macro_use]
 extern crate bitflags;
+#[macro_use]
+extern crate ref_counted;
 
 // temporariliy required for the canvas example.
 pub mod bindings {
@@ -80,6 +82,16 @@ mod prelude {
     impl RefCount for SkColorSpace {
         fn ref_cnt(&self) -> i32 {
             self._base.ref_cnt()
+        }
+    }
+
+    /// Supporting trait for the derive Macro RCCopyClone.
+    pub trait RefCounted : Sized {
+        fn _ref(&self);
+        fn _unref(&self);
+        #[deprecated]
+        fn add_ref(&self) {
+            self._ref();
         }
     }
 
