@@ -14,13 +14,12 @@ pub mod bindings {
 
 mod prelude {
     use std::intrinsics::transmute;
+    #[cfg(test)]
+    use rust_skia::{SkSurface, SkData, SkColorSpace};
     use rust_skia::{
-        SkSurface,
-        SkData,
         SkNVRefCnt,
         SkRefCnt,
         SkRefCntBase,
-        SkColorSpace
     };
 
     pub trait ToOption {
@@ -85,14 +84,10 @@ mod prelude {
         }
     }
 
-    /// Supporting trait for the derive Macro RCCopyClone.
+    /// Supporting trait for the derive macro RCCloneDrop.
     pub trait RefCounted : Sized {
         fn _ref(&self);
         fn _unref(&self);
-        #[deprecated]
-        fn add_ref(&self) {
-            self._ref();
-        }
     }
 
     /// Indicates that the type has a native representation and

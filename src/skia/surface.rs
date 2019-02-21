@@ -10,17 +10,15 @@ use rust_skia::{
     GrBackendTexture
 };
 
+#[derive(RCCloneDrop)]
 pub struct Surface(pub(crate) *mut SkSurface);
 
-impl Clone for Surface {
-    fn clone(&self) -> Self {
+impl RefCounted for Surface {
+    fn _ref(&self) {
         unsafe { (*self.0)._base._base.ref_() }
-        Surface(self.0)
     }
-}
 
-impl Drop for Surface {
-    fn drop(&mut self) {
+    fn _unref(&self) {
         unsafe { (*self.0)._base._base.unref() }
     }
 }
@@ -39,7 +37,7 @@ impl Surface {
         origin: GrSurfaceOrigin,
         sample_count: u32,
         color_type: SkColorType) -> Option<Surface> {
-        unsafe { rust_skia::C_SkSurface_MakeFromBackendTexture(context.native, &backend_texture.native, origin, sample_count as i32, color_type) }
+        unsafe { rust_skia::C_SkSurface_MakeFromBackendTexture(context.0, &backend_texture.0, origin, sample_count as i32, color_type) }
             .to_option()
             .map(Surface)
     }
@@ -47,7 +45,7 @@ impl Surface {
     pub fn canvas(&self) -> Canvas {
         Canvas {
             native: unsafe { (*self.0).getCanvas() },
-            owner: Some(self.clone())
+            owner: Some((*self).clone())
         }
     }
 

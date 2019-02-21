@@ -4,13 +4,11 @@ use rust_skia::{GrBackendTexture, C_GrBackendTexture_destruct, GrVkImageInfo};
 #[cfg(feature = "vulkan")]
 use super::vulkan;
 
-pub struct BackendTexture {
-    pub(crate) native: GrBackendTexture
-}
+pub struct BackendTexture (pub(crate) GrBackendTexture);
 
 impl Drop for BackendTexture {
     fn drop(&mut self) {
-        unsafe { C_GrBackendTexture_destruct(&self.native) }
+        unsafe { C_GrBackendTexture_destruct(&self.0) }
     }
 }
 
@@ -30,9 +28,7 @@ impl BackendTexture {
 
     pub (crate) unsafe fn from_raw(backend_texture: GrBackendTexture) -> Option<BackendTexture> {
         if backend_texture.fIsValid {
-            Some (BackendTexture {
-                native: backend_texture
-            })
+            Some (BackendTexture(backend_texture))
         } else {
             None
         }
@@ -40,17 +36,17 @@ impl BackendTexture {
 
     #[cfg(feature = "vulkan")]
     pub fn width(&self) -> u32 {
-        unsafe { self.native.width() as u32 }
+        unsafe { self.0.width() as u32 }
     }
 
     #[cfg(feature = "vulkan")]
     pub fn height(&self) -> u32 {
-        unsafe { self.native.height() as u32 }
+        unsafe { self.0.height() as u32 }
     }
 
     #[cfg(feature = "vulkan")]
     pub fn has_mip_maps(&self) -> bool {
-        unsafe { self.native.hasMipMaps() }
+        unsafe { self.0.hasMipMaps() }
     }
 
     #[cfg(feature = "vulkan")]
@@ -58,7 +54,7 @@ impl BackendTexture {
         unsafe {
             // constructor not available.
             let mut image_info : GrVkImageInfo = mem::zeroed();
-            if self.native.getVkImageInfo(&mut image_info as _) {
+            if self.0.getVkImageInfo(&mut image_info as _) {
                 Some(vulkan::ImageInfo::from_raw(image_info))
             } else {
                 None

@@ -1,4 +1,3 @@
-use crate::prelude::*;
 use std::mem::uninitialized;
 use std::ptr;
 use rust_skia::{
@@ -8,11 +7,14 @@ use rust_skia::{
     SkYUVColorSpace,
 };
 use crate::{
-    skia::ColorSpace,
-    skia::ISize
+    skia::{
+        ColorSpace,
+        IRect,
+        ISize,
+        IPoint
+    },
+    prelude::*,
 };
-use crate::skia::{ IRect };
-use crate::skia::IPoint;
 
 #[derive(Copy, Clone, PartialEq)]
 pub struct AlphaType(pub(crate) SkAlphaType);
@@ -99,7 +101,7 @@ impl ImageInfo {
     pub fn new(dimensions: ISize, ct: ColorType, at: AlphaType, cs: Option<ColorSpace>) -> ImageInfo {
         let mut image_info = Self::new_empty();
         let cs_ptr = match cs {
-            Some(cs) => { cs.add_ref(); cs.0 },
+            Some(cs) => { cs._ref(); cs.0 },
             None => ptr::null_mut()
         };
 

@@ -146,18 +146,16 @@ impl NamedTransferFn {
     };
 }
 
+#[derive(RCCloneDrop)]
 pub struct ColorSpace(pub(crate) *mut SkColorSpace);
 
-impl Drop for ColorSpace {
-    fn drop(&mut self) {
-        unsafe { rust_skia::C_SkColorSpace_unref(self.0) }
+impl RefCounted for ColorSpace {
+    fn _ref(&self) {
+        unsafe { rust_skia::C_SkColorSpace_ref(self.0) };
     }
-}
 
-impl Clone for ColorSpace {
-    fn clone(&self) -> Self {
-        self.add_ref();
-        ColorSpace(self.0)
+    fn _unref(&self) {
+        unsafe { rust_skia::C_SkColorSpace_unref(self.0) }
     }
 }
 
@@ -224,10 +222,6 @@ impl ColorSpace {
     pub fn deserialize(data: Data) -> ColorSpace {
         let bytes = data.bytes();
         ColorSpace(unsafe { rust_skia::C_SkColorSpace_Deserialize(bytes.as_ptr() as _, bytes.len()) })
-    }
-
-    pub (crate) fn add_ref(&self) {
-        unsafe { rust_skia::C_SkColorSpace_ref(self.0) };
     }
 }
 

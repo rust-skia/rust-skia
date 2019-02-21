@@ -95,7 +95,7 @@ impl Canvas {
     #[inline]
     pub fn data(&mut self) -> skia::Data {
         let image = self.surface.make_image_snapshot();
-        image.encode_to_data()
+        image.encode_to_data().unwrap()
     }
 
     #[inline]
