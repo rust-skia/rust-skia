@@ -2,7 +2,7 @@ use std::slice;
 use rust_skia::{SkData, C_SkData_unref, C_SkData_ref};
 use crate::prelude::RefCounted;
 
-#[derive(Debug, RCCopyClone)]
+#[derive(Debug, RCCloneDrop)]
 pub struct Data(pub(crate) *mut SkData);
 
 impl RefCounted for Data {
