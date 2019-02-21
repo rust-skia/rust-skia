@@ -193,6 +193,7 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .whitelist_type("SkColorSpacePrimaries")
     .whitelist_type("SkVector4")
 
+    .rustified_enum("GrMipMapped")
     .rustified_enum("GrSurfaceOrigin")
     .rustified_enum("SkPaint_Style")
     .rustified_enum("SkPaint_Cap")
