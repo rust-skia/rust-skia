@@ -46,4 +46,7 @@ pub use self::surface_props::*;
 mod vector4;
 pub use self::vector4::*;
 
+mod yuva_index;
+pub use self::yuva_index::*;
+
 pub use crate::skia_euclid::*;

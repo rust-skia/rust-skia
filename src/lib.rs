@@ -99,6 +99,11 @@ mod prelude {
         fn from_native(native: Native) -> Self;
     }
 
+    /// Clone for bindings types we can not implement Clone for.
+    pub trait InternalClone {
+        fn clone(&self) -> Self;
+    }
+
     // export all traits for the use of points / vectors, sizes,
     // etc. into the prelude.
     pub use crate::skia_euclid::{

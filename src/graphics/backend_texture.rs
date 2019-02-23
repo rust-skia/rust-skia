@@ -1,3 +1,4 @@
+use crate::prelude::*;
 use std::mem;
 use rust_skia::{GrBackendTexture, C_GrBackendTexture_destruct, GrVkImageInfo};
 
@@ -9,6 +10,18 @@ pub struct BackendTexture (pub(crate) GrBackendTexture);
 impl Drop for BackendTexture {
     fn drop(&mut self) {
         unsafe { C_GrBackendTexture_destruct(&self.0) }
+    }
+}
+
+impl Clone for BackendTexture {
+    fn clone(&self) -> Self {
+        BackendTexture(self.0.clone())
+    }
+}
+
+impl InternalClone for GrBackendTexture {
+    fn clone(&self) -> Self {
+        unsafe { GrBackendTexture::new4(self) }
     }
 }
 

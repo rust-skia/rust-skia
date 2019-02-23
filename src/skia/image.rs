@@ -1,27 +1,39 @@
+use std::ptr;
 use rust_skia::{
+    C_SkImage_MakeFromTexture,
     C_SkImage_MakeFromEncoded,
     C_SkImage_MakeFromBitmap,
     SkImage,
     C_SkImage_encodeToData,
     C_SkImage_MakeRasterData,
-    SkIRect
+    SkIRect,
+    SkColorSpace,
+    C_SkImage_MakeCrossContextFromEncoded,
+    C_SkImage_MakeFromAdoptedTexture,
+    C_SkImage_MakeFromYUVATexturesCopy,
+    GrBackendTexture,
+    SkYUVAIndex,
+    C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend,
+    C_SkImage_MakeFromYUVATextures,
+    C_SkImage_MakeFromNV12TexturesCopy,
+    C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend
 };
-use std::ptr;
-use crate::graphics;
 use crate::{
-    skia::IRect,
-    skia::Bitmap,
     prelude::*,
-    skia::Data,
-    skia::ImageInfo,
-    skia::ColorType,
-    skia::AlphaType,
-    skia::ColorSpace
+    skia::{
+        ColorType,
+        ImageInfo,
+        Data,
+        Bitmap,
+        IRect,
+        YUVColorSpace,
+        AlphaType,
+        ColorSpace,
+        YUVAIndex,
+        ISize
+    },
+    graphics
 };
-use rust_skia::C_SkImage_MakeFromTexture;
-use rust_skia::SkColorSpace;
-use rust_skia::C_SkImage_MakeCrossContextFromEncoded;
-use rust_skia::C_SkImage_MakeFromAdoptedTexture;
 
 #[derive(RCCloneDrop)]
 pub struct Image(pub (crate) *mut SkImage);
@@ -118,6 +130,166 @@ impl Image {
 
         unsafe { C_SkImage_MakeFromAdoptedTexture(
             context.0, &backend_texture.0, origin.0, color_type.0, alpha_type.0, cs_ptr) }
+            .to_option()
+            .map(Image)
+    }
+
+    pub fn from_yuva_textures_copy(
+        context: &mut graphics::Context,
+        yuv_color_space: YUVColorSpace,
+        yuva_textures: &[graphics::BackendTexture],
+        yuva_indices: &[YUVAIndex; 4],
+        image_size: ISize,
+        image_origin: graphics::SurfaceOrigin,
+        image_color_space: Option<ColorSpace>) -> Option<Image> {
+
+        let yuva_textures : Vec<GrBackendTexture> =
+            yuva_textures.iter().map(|t| t.0.clone()).collect();
+
+        let yuva_indices : Vec<SkYUVAIndex> =
+            yuva_indices.iter().map(|i| i.0).collect();
+
+        let image_color_space : *mut SkColorSpace = {
+            match image_color_space {
+                Some (cs) => { cs._ref(); cs.0 },
+                None => ptr::null_mut()
+            }
+        };
+
+        unsafe { C_SkImage_MakeFromYUVATexturesCopy(
+            context.0,
+            yuv_color_space.0,
+            yuva_textures.as_ptr(),
+            yuva_indices.as_ptr(),
+            image_size.to_native(),
+            image_origin.0,
+            image_color_space) }
+            .to_option()
+            .map(Image)
+    }
+
+    pub fn from_yuva_textures_copy_with_external_backend(
+        context: &mut graphics::Context,
+        yuv_color_space: YUVColorSpace,
+        yuva_textures: &[graphics::BackendTexture],
+        yuva_indices: &[YUVAIndex; 4],
+        image_size: ISize,
+        image_origin: graphics::SurfaceOrigin,
+        backend_texture: &graphics::BackendTexture,
+        image_color_space: Option<ColorSpace>) -> Option<Image> {
+
+        let yuva_textures : Vec<GrBackendTexture> =
+            yuva_textures.iter().map(|t| t.0.clone()).collect();
+
+        let yuva_indices : Vec<SkYUVAIndex> =
+            yuva_indices.iter().map(|i| i.0).collect();
+
+        let image_color_space : *mut SkColorSpace = {
+            match image_color_space {
+                Some (cs) => { cs._ref(); cs.0 },
+                None => ptr::null_mut()
+            }
+        };
+
+        unsafe { C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend(
+            context.0,
+            yuv_color_space.0,
+            yuva_textures.as_ptr(),
+            yuva_indices.as_ptr(),
+            image_size.to_native(),
+            image_origin.0,
+            &backend_texture.0,
+            image_color_space) }
+            .to_option()
+            .map(Image)
+    }
+
+    pub fn from_yuva_textures(
+        context: &mut graphics::Context,
+        yuv_color_space: YUVColorSpace,
+        yuva_textures: &[graphics::BackendTexture],
+        yuva_indices: &[YUVAIndex; 4],
+        image_size: ISize,
+        image_origin: graphics::SurfaceOrigin,
+        image_color_space: Option<ColorSpace>) -> Option<Image> {
+
+        let yuva_textures : Vec<GrBackendTexture> =
+            yuva_textures.iter().map(|t| t.0.clone()).collect();
+
+        let yuva_indices : Vec<SkYUVAIndex> =
+            yuva_indices.iter().map(|i| i.0).collect();
+
+        let image_color_space : *mut SkColorSpace = {
+            match image_color_space {
+                Some (cs) => { cs._ref(); cs.0 },
+                None => ptr::null_mut()
+            }
+        };
+
+        unsafe { C_SkImage_MakeFromYUVATextures(
+            context.0,
+            yuv_color_space.0,
+            yuva_textures.as_ptr(),
+            yuva_indices.as_ptr(),
+            image_size.to_native(),
+            image_origin.0,
+            image_color_space) }
+            .to_option()
+            .map(Image)
+    }
+
+    pub fn from_nv12_textures_copy(
+        context: &mut graphics::Context,
+        yuv_color_space: YUVColorSpace,
+        nv12_textures: &[graphics::BackendTexture; 2],
+        image_origin: graphics::SurfaceOrigin,
+        image_color_space: Option<ColorSpace>) -> Option<Image> {
+
+        let nv12_textures : Vec<GrBackendTexture> =
+            nv12_textures.iter().map(|t| t.0.clone()).collect();
+
+        let image_color_space : *mut SkColorSpace = {
+            match image_color_space {
+                Some (cs) => { cs._ref(); cs.0 },
+                None => ptr::null_mut()
+            }
+        };
+
+        unsafe { C_SkImage_MakeFromNV12TexturesCopy(
+            context.0,
+            yuv_color_space.0,
+            nv12_textures.as_ptr(),
+            image_origin.0,
+            image_color_space) }
+            .to_option()
+            .map(Image)
+    }
+
+    pub fn from_nv12_textures_copy_with_external_backend(
+        context: &mut graphics::Context,
+        yuv_color_space: YUVColorSpace,
+        nv12_textures: &[graphics::BackendTexture; 2],
+        image_origin: graphics::SurfaceOrigin,
+        backend_texture: &graphics::BackendTexture,
+        image_color_space: Option<ColorSpace>) -> Option<Image> {
+
+        let nv12_textures : Vec<GrBackendTexture> =
+            nv12_textures.iter().map(|t| t.0.clone()).collect();
+
+        let image_color_space : *mut SkColorSpace = {
+            match image_color_space {
+                Some (cs) => { cs._ref(); cs.0 },
+                None => ptr::null_mut()
+            }
+        };
+
+        unsafe { C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
+            context.0,
+            yuv_color_space.0,
+            nv12_textures.as_ptr(),
+            image_origin.0,
+            &backend_texture.0,
+            image_color_space) }
             .to_option()
             .map(Image)
     }
