@@ -40,7 +40,7 @@ impl YUVAIndex {
 
         let mut num_planes = 0;
 
-        if (unsafe { SkYUVAIndex::AreValidIndices(index_slice.as_ptr(), &mut num_planes) }) {
+        if unsafe { SkYUVAIndex::AreValidIndices(index_slice.as_ptr(), &mut num_planes) } {
             Some(num_planes as usize)
         } else {
             None
