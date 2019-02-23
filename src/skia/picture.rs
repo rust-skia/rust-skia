@@ -30,11 +30,15 @@ impl RefCounted for SkPicture {
 
 impl Picture {
     pub fn from_data(data: &Data) -> Picture {
-        Picture::from_ptr(unsafe { C_SkPicture_MakeFromData(data.native()) }).unwrap()
+        Picture::from_ptr(unsafe {
+            C_SkPicture_MakeFromData(data.native())
+        }).unwrap()
     }
 
     pub fn new_placeholder(cull: &Rect) -> Picture {
-        Picture::from_ptr(unsafe { C_SkPicture_MakePlaceholder(&cull.to_native()) }).unwrap()
+        Picture::from_ptr(unsafe {
+            C_SkPicture_MakePlaceholder(&cull.to_native())
+        }).unwrap()
     }
 
     pub fn playback(&self, canvas: &Canvas) {
@@ -42,7 +46,9 @@ impl Picture {
     }
 
     pub fn cull_rect(&self) -> Rect {
-        Rect::from_native(unsafe { C_SkPicture_cullRect(self.native()) })
+        Rect::from_native(unsafe {
+            C_SkPicture_cullRect(self.native())
+        })
     }
 
     pub fn unique_id(&self) -> u32 {
@@ -50,6 +56,8 @@ impl Picture {
     }
 
     pub fn serialize(&self) -> Data {
-        Data::from_ptr(unsafe { C_SkPicture_serialize(self.native()) }).unwrap()
+        Data::from_ptr(unsafe {
+            C_SkPicture_serialize(self.native())
+        }).unwrap()
     }
 }
