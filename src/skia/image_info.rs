@@ -1,4 +1,5 @@
 use std::mem::uninitialized;
+use crate::prelude::*;
 use std::ptr;
 use rust_skia::{
     SkAlphaType,
@@ -100,13 +101,9 @@ impl ImageInfo {
 
     pub fn new(dimensions: ISize, ct: ColorType, at: AlphaType, cs: Option<ColorSpace>) -> ImageInfo {
         let mut image_info = Self::new_empty();
-        let cs_ptr = match cs {
-            Some(cs) => { cs._ref(); cs.0 },
-            None => ptr::null_mut()
-        };
 
         unsafe {
-            rust_skia::C_SkImageInfo_Make(&mut image_info.0, dimensions.width, dimensions.height, ct.0, at.0, cs_ptr)
+            rust_skia::C_SkImageInfo_Make(&mut image_info.0, dimensions.width, dimensions.height, ct.0, at.0, cs.shared_ptr())
         }
         image_info
     }
@@ -154,9 +151,7 @@ impl ImageInfo {
     }
 
     pub fn color_space(&self) -> Option<ColorSpace> {
-        unsafe { rust_skia::C_SkImageInfo_colorSpace(&self.0) }
-            .to_option()
-            .map(ColorSpace)
+        ColorSpace::from_ptr(unsafe { rust_skia::C_SkImageInfo_colorSpace(&self.0) })
     }
 
     pub fn is_empty(&self) -> bool {

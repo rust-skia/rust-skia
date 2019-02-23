@@ -99,9 +99,7 @@ impl Bitmap {
     }
 
     pub fn color_space(&self) -> Option<ColorSpace> {
-        unsafe { rust_skia::C_SkBitmap_colorSpace(&self.0) }
-            .to_option()
-            .map(ColorSpace)
+        ColorSpace::from_ptr(unsafe { rust_skia::C_SkBitmap_colorSpace(&self.0) })
     }
 
     pub fn bytes_per_pixel(&self) -> usize {
@@ -274,7 +272,7 @@ impl Bitmap {
     pub fn extract_alpha(&self, dst: &mut Bitmap, paint: Option<&Paint>) -> Option<IPoint> {
         let paint_ptr =
             paint
-                .map(|p| &p.native as *const SkPaint)
+                .map(|p| &p.0 as *const SkPaint)
                 .unwrap_or(ptr::null());
 
         let mut offset : SkIPoint = unsafe { uninitialized() };

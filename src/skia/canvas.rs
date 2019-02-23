@@ -34,7 +34,7 @@ impl Canvas {
     }
 
     pub fn draw_path(&mut self, path: &Path, paint: &Paint) {
-        unsafe { (*self.native).drawPath(&path.native, &paint.native) }
+        unsafe { (*self.native).drawPath(&path.native, &paint.0) }
     }
 
     pub fn flush(&mut self) {

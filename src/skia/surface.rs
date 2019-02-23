@@ -32,12 +32,12 @@ impl Surface {
     }
 
     pub fn new_from_backend_texture(
-        context: Context,
+        context: &mut Context,
         backend_texture: &BackendTexture,
         origin: GrSurfaceOrigin,
         sample_count: u32,
         color_type: SkColorType) -> Option<Surface> {
-        unsafe { rust_skia::C_SkSurface_MakeFromBackendTexture(context.0, &backend_texture.0, origin, sample_count as i32, color_type) }
+        unsafe { rust_skia::C_SkSurface_MakeFromBackendTexture(context.native_mut(), &backend_texture.0, origin, sample_count as i32, color_type) }
             .to_option()
             .map(Surface)
     }

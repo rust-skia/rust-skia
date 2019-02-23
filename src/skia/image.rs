@@ -1,5 +1,26 @@
 use std::ptr;
+use crate::{
+    skia::{
+        Picture,
+        Matrix,
+        ColorType,
+        ImageInfo,
+        Data,
+        Bitmap,
+        IRect,
+        YUVColorSpace,
+        AlphaType,
+        ColorSpace,
+        YUVAIndex,
+        ISize,
+        Paint
+    },
+    prelude::*,
+    graphics,
+};
 use rust_skia::{
+    SkMatrix,
+    C_SkImage_MakeFromPicture,
     C_SkImage_MakeFromTexture,
     C_SkImage_MakeFromEncoded,
     C_SkImage_MakeFromBitmap,
@@ -16,24 +37,18 @@ use rust_skia::{
     C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend,
     C_SkImage_MakeFromYUVATextures,
     C_SkImage_MakeFromNV12TexturesCopy,
-    C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend
+    C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend,
+    SkImage_BitDepth,
+    SkPaint
 };
-use crate::{
-    prelude::*,
-    skia::{
-        ColorType,
-        ImageInfo,
-        Data,
-        Bitmap,
-        IRect,
-        YUVColorSpace,
-        AlphaType,
-        ColorSpace,
-        YUVAIndex,
-        ISize
-    },
-    graphics
-};
+
+#[derive(Copy, Clone)]
+pub struct ImageBitDepth(pub(crate) SkImage_BitDepth);
+
+impl ImageBitDepth {
+    pub const U8: ImageBitDepth = ImageBitDepth(SkImage_BitDepth::kU8);
+    pub const F16: ImageBitDepth = ImageBitDepth(SkImage_BitDepth::kF16);
+}
 
 #[derive(RCCloneDrop)]
 pub struct Image(pub (crate) *mut SkImage);
@@ -50,9 +65,8 @@ impl RefCounted for Image {
 
 impl Image {
 
-    pub fn from_raster_data(info: &ImageInfo, pixels: &mut Data, row_bytes: usize) -> Option<Image> {
-        pixels._ref();
-        unsafe { C_SkImage_MakeRasterData(&info.0, pixels.0, row_bytes) }
+    pub fn from_raster_data(info: &ImageInfo, pixels: Data, row_bytes: usize) -> Option<Image> {
+        unsafe { C_SkImage_MakeRasterData(&info.0, pixels.shared_native(), row_bytes) }
             .to_option()
             .map(Image)
     }
@@ -72,8 +86,7 @@ impl Image {
             }
         };
 
-        data._ref();
-        unsafe { C_SkImage_MakeFromEncoded(data.0, subset_ptr) }
+        unsafe { C_SkImage_MakeFromEncoded(data.shared_native(), subset_ptr) }
             .to_option()
             .map(Image)
     }
@@ -86,15 +99,13 @@ impl Image {
         alpha_type: AlphaType,
         color_space: Option<&ColorSpace>) -> Option<Image> {
 
-        let cs_ptr : *mut SkColorSpace = {
-            match color_space {
-                Some (cs) => { cs._ref(); cs.0 },
-                None => ptr::null_mut()
-            }
-        };
-
         unsafe { C_SkImage_MakeFromTexture(
-            context.0, &backend_texture.0, origin.0, color_type.0, alpha_type.0, cs_ptr) }
+            context.native_mut(),
+            &backend_texture.0,
+            origin.0,
+            color_type.0,
+            alpha_type.0,
+            color_space.shared_ptr()) }
             .to_option()
             .map(Image)
     }
@@ -106,9 +117,11 @@ impl Image {
         color_space: &mut ColorSpace,
         limit_to_max_texture_size: bool) -> Option<Image> {
 
-        data._ref();
         unsafe { C_SkImage_MakeCrossContextFromEncoded(
-            context.0, data.0, build_mips, color_space.0, limit_to_max_texture_size)}
+            context.native_mut(),
+            data.shared_native(),
+            build_mips,
+            color_space.native_mut(), limit_to_max_texture_size)}
             .to_option()
             .map(Image)
     }
@@ -121,15 +134,13 @@ impl Image {
         alpha_type: AlphaType,
         color_space: Option<&ColorSpace>) -> Option<Image> {
 
-        let cs_ptr : *mut SkColorSpace = {
-            match color_space {
-                Some (cs) => { cs._ref(); cs.0 },
-                None => ptr::null_mut()
-            }
-        };
-
         unsafe { C_SkImage_MakeFromAdoptedTexture(
-            context.0, &backend_texture.0, origin.0, color_type.0, alpha_type.0, cs_ptr) }
+            context.native_mut(),
+            &backend_texture.0,
+            origin.0,
+            color_type.0,
+            alpha_type.0,
+            color_space.shared_ptr()) }
             .to_option()
             .map(Image)
     }
@@ -149,21 +160,14 @@ impl Image {
         let yuva_indices : Vec<SkYUVAIndex> =
             yuva_indices.iter().map(|i| i.0).collect();
 
-        let image_color_space : *mut SkColorSpace = {
-            match image_color_space {
-                Some (cs) => { cs._ref(); cs.0 },
-                None => ptr::null_mut()
-            }
-        };
-
         unsafe { C_SkImage_MakeFromYUVATexturesCopy(
-            context.0,
+            context.native_mut(),
             yuv_color_space.0,
             yuva_textures.as_ptr(),
             yuva_indices.as_ptr(),
             image_size.to_native(),
             image_origin.0,
-            image_color_space) }
+            image_color_space.shared_ptr()) }
             .to_option()
             .map(Image)
     }
@@ -184,22 +188,15 @@ impl Image {
         let yuva_indices : Vec<SkYUVAIndex> =
             yuva_indices.iter().map(|i| i.0).collect();
 
-        let image_color_space : *mut SkColorSpace = {
-            match image_color_space {
-                Some (cs) => { cs._ref(); cs.0 },
-                None => ptr::null_mut()
-            }
-        };
-
         unsafe { C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend(
-            context.0,
+            context.native_mut(),
             yuv_color_space.0,
             yuva_textures.as_ptr(),
             yuva_indices.as_ptr(),
             image_size.to_native(),
             image_origin.0,
             &backend_texture.0,
-            image_color_space) }
+            image_color_space.shared_ptr()) }
             .to_option()
             .map(Image)
     }
@@ -219,21 +216,14 @@ impl Image {
         let yuva_indices : Vec<SkYUVAIndex> =
             yuva_indices.iter().map(|i| i.0).collect();
 
-        let image_color_space : *mut SkColorSpace = {
-            match image_color_space {
-                Some (cs) => { cs._ref(); cs.0 },
-                None => ptr::null_mut()
-            }
-        };
-
         unsafe { C_SkImage_MakeFromYUVATextures(
-            context.0,
+            context.native_mut(),
             yuv_color_space.0,
             yuva_textures.as_ptr(),
             yuva_indices.as_ptr(),
             image_size.to_native(),
             image_origin.0,
-            image_color_space) }
+            image_color_space.shared_ptr()) }
             .to_option()
             .map(Image)
     }
@@ -248,19 +238,12 @@ impl Image {
         let nv12_textures : Vec<GrBackendTexture> =
             nv12_textures.iter().map(|t| t.0.clone()).collect();
 
-        let image_color_space : *mut SkColorSpace = {
-            match image_color_space {
-                Some (cs) => { cs._ref(); cs.0 },
-                None => ptr::null_mut()
-            }
-        };
-
         unsafe { C_SkImage_MakeFromNV12TexturesCopy(
-            context.0,
+            context.native_mut(),
             yuv_color_space.0,
             nv12_textures.as_ptr(),
             image_origin.0,
-            image_color_space) }
+            image_color_space.shared_ptr()) }
             .to_option()
             .map(Image)
     }
@@ -276,27 +259,52 @@ impl Image {
         let nv12_textures : Vec<GrBackendTexture> =
             nv12_textures.iter().map(|t| t.0.clone()).collect();
 
-        let image_color_space : *mut SkColorSpace = {
-            match image_color_space {
-                Some (cs) => { cs._ref(); cs.0 },
-                None => ptr::null_mut()
-            }
-        };
-
         unsafe { C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
-            context.0,
+            context.native_mut(),
             yuv_color_space.0,
             nv12_textures.as_ptr(),
             image_origin.0,
             &backend_texture.0,
-            image_color_space) }
+            image_color_space.shared_ptr()) }
             .to_option()
             .map(Image)
     }
 
+    pub fn from_picture(
+        picture: Picture,
+        dimensions: ISize,
+        matrix: Option<Matrix>,
+        paint: Option<Paint>,
+        bit_depth: ImageBitDepth,
+        color_space: Option<ColorSpace>) -> Option<Image> {
+
+        let matrix : *const SkMatrix =
+            match matrix {
+                Some(matrix) => &matrix.0,
+                None => ptr::null()
+            };
+
+        let paint : *const SkPaint =
+            match paint {
+                Some(paint) => &paint.0,
+                None => ptr::null()
+            };
+
+        picture._ref();
+
+        unsafe {
+            C_SkImage_MakeFromPicture(
+                picture.0,
+                &dimensions.to_native(),
+                matrix,
+                paint,
+                bit_depth.0,
+                color_space.shared_ptr()
+            )
+        }.to_option().map(Image)
+    }
+
     pub fn encode_to_data(&self) -> Option<Data> {
-        unsafe { C_SkImage_encodeToData(self.0) }
-            .to_option()
-            .map(Data)
+        Data::from_ptr(unsafe { C_SkImage_encodeToData(self.0) })
     }
 }

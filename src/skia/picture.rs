@@ -31,7 +31,7 @@ impl RefCounted for Picture {
 
 impl Picture {
     pub fn from_data(data: &Data) -> Picture {
-        Picture(unsafe { C_SkPicture_MakeFromData(data.0) })
+        Picture(unsafe { C_SkPicture_MakeFromData(data.native()) })
     }
 
     pub fn new_placeholder(cull: &Rect) -> Picture {
@@ -51,6 +51,6 @@ impl Picture {
     }
 
     pub fn serialize(&self) -> Data {
-        Data(unsafe { C_SkPicture_serialize(self.0) })
+        Data::from_ptr(unsafe { C_SkPicture_serialize(self.0) }).unwrap()
     }
 }

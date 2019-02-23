@@ -146,49 +146,48 @@ impl NamedTransferFn {
     };
 }
 
-#[derive(RCCloneDrop)]
-pub struct ColorSpace(pub(crate) *mut SkColorSpace);
+pub type ColorSpace = RCHandle<SkColorSpace>;
 
-impl RefCounted for ColorSpace {
+impl RefCounted for SkColorSpace {
     fn _ref(&self) {
-        unsafe { rust_skia::C_SkColorSpace_ref(self.0) };
+        unsafe { rust_skia::C_SkColorSpace_ref(self) };
     }
 
     fn _unref(&self) {
-        unsafe { rust_skia::C_SkColorSpace_unref(self.0) }
+        unsafe { rust_skia::C_SkColorSpace_unref(self) }
     }
 }
 
 impl PartialEq for ColorSpace {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { rust_skia::SkColorSpace_Equals(self.0, rhs.0) }
+        unsafe { rust_skia::SkColorSpace_Equals(self.native(), rhs.native()) }
     }
 }
 
 impl ColorSpace {
     pub fn new_srgb() -> ColorSpace {
-        ColorSpace(unsafe { rust_skia::C_SkColorSpace_MakeSRGB() })
+        ColorSpace::from_ptr(unsafe { rust_skia::C_SkColorSpace_MakeSRGB() }).unwrap()
     }
 
     pub fn new_srgb_linear() -> ColorSpace {
-        ColorSpace(unsafe { rust_skia::C_SkColorSpace_MakeSRGBLinear() })
+        ColorSpace::from_ptr(unsafe { rust_skia::C_SkColorSpace_MakeSRGBLinear() }).unwrap()
     }
 
     pub fn gamma_named(&self) -> GammaNamed {
-        GammaNamed(unsafe { rust_skia::C_SkColorSpace_gammaNamed(self.0) })
+        GammaNamed(unsafe { rust_skia::C_SkColorSpace_gammaNamed(self.native()) })
     }
 
     pub fn gamma_close_to_srgb(&self) -> bool {
-        unsafe { (*self.0).gammaCloseToSRGB() }
+        unsafe { self.native().gammaCloseToSRGB() }
     }
 
     pub fn gamma_is_linear(&self) -> bool {
-        unsafe { (*self.0).gammaIsLinear() }
+        unsafe { self.native().gammaIsLinear() }
     }
 
     pub fn is_numerical_transfer_fn(&self) -> Option<ColorSpaceTransferFn> {
         let mut tfn : SkColorSpaceTransferFn = unsafe { mem::zeroed() };
-        if unsafe { (*self.0).isNumericalTransferFn(&mut tfn) } {
+        if unsafe { self.native().isNumericalTransferFn(&mut tfn) } {
             Some (tfn.into())
         } else {
             None
@@ -196,32 +195,32 @@ impl ColorSpace {
     }
 
     pub fn to_xyzd50_hash(&self) -> XYZD50Hash {
-        XYZD50Hash(unsafe { (*self.0).toXYZD50Hash() })
+        XYZD50Hash(unsafe { self.native().toXYZD50Hash() })
     }
 
     pub fn with_linear_gamma(&self) -> ColorSpace {
-        ColorSpace(unsafe { rust_skia::C_SkColorSpace_makeLinearGamma(self.0) })
+        ColorSpace::from_ptr(unsafe { rust_skia::C_SkColorSpace_makeLinearGamma(self.native()) }).unwrap()
     }
 
     pub fn with_srgb_gamma(&self) -> ColorSpace {
-        ColorSpace(unsafe { rust_skia::C_SkColorSpace_makeSRGBGamma(self.0) })
+        ColorSpace::from_ptr(unsafe { rust_skia::C_SkColorSpace_makeSRGBGamma(self.native()) }).unwrap()
     }
 
     pub fn with_color_spin(&self) -> ColorSpace {
-        ColorSpace(unsafe { rust_skia::C_SkColorSpace_makeColorSpin(self.0) })
+        ColorSpace::from_ptr(unsafe { rust_skia::C_SkColorSpace_makeColorSpin(self.native()) }).unwrap()
     }
 
     pub fn is_srgb(&self) -> bool {
-        unsafe { (*self.0).isSRGB() }
+        unsafe { self.native().isSRGB() }
     }
 
     pub fn serialize(&self) -> Data {
-        Data(unsafe { rust_skia::C_SkColorSpace_serialize(self.0)})
+        Data::from_ptr(unsafe { rust_skia::C_SkColorSpace_serialize(self.native())}).unwrap()
     }
 
     pub fn deserialize(data: Data) -> ColorSpace {
         let bytes = data.bytes();
-        ColorSpace(unsafe { rust_skia::C_SkColorSpace_Deserialize(bytes.as_ptr() as _, bytes.len()) })
+        ColorSpace::from_ptr(unsafe { rust_skia::C_SkColorSpace_Deserialize(bytes.as_ptr() as _, bytes.len()) }).unwrap()
     }
 }
 
@@ -237,31 +236,31 @@ type RGB5 = (GammaNamed, Matrix44);
 
 impl NewRGB<RGB1> for ColorSpace {
     fn new_rgb(v: RGB1) -> Self {
-        ColorSpace(unsafe { rust_skia::C_SkColorSpace_MakeRGB((v.0).0, (v.1).0) })
+        ColorSpace::from_ptr(unsafe { rust_skia::C_SkColorSpace_MakeRGB((v.0).0, (v.1).0) }).unwrap()
     }
 }
 
 impl NewRGB<RGB2> for ColorSpace {
     fn new_rgb(v: RGB2) -> Self {
-        ColorSpace(unsafe { rust_skia::C_SkColorSpace_MakeRGB2((v.0).0, &(v.1).0) })
+        ColorSpace::from_ptr(unsafe { rust_skia::C_SkColorSpace_MakeRGB2((v.0).0, &(v.1).0) }).unwrap()
     }
 }
 
 impl NewRGB<RGB3> for ColorSpace {
     fn new_rgb(v: RGB3) -> Self {
-        ColorSpace(unsafe { rust_skia::C_SkColorSpace_MakeRGB3(&v.0.into(), (v.1).0) })
+        ColorSpace::from_ptr(unsafe { rust_skia::C_SkColorSpace_MakeRGB3(&v.0.into(), (v.1).0) }).unwrap()
     }
 }
 
 impl NewRGB<RGB4> for ColorSpace {
     fn new_rgb(v: RGB4) -> Self {
-        ColorSpace(unsafe { rust_skia::C_SkColorSpace_MakeRGB4(&v.0.into(), &(v.1).0) })
+        ColorSpace::from_ptr(unsafe { rust_skia::C_SkColorSpace_MakeRGB4(&v.0.into(), &(v.1).0) }).unwrap()
     }
 }
 
 impl NewRGB<RGB5> for ColorSpace {
     fn new_rgb(v: RGB5) -> Self {
-        ColorSpace(unsafe { rust_skia::C_SkColorSpace_MakeRGB5((v.0).0, &(v.1).0) })
+        ColorSpace::from_ptr(unsafe { rust_skia::C_SkColorSpace_MakeRGB5((v.0).0, &(v.1).0) }).unwrap()
     }
 }
 
@@ -288,7 +287,7 @@ pub struct XYZD50Hash(pub u32);
 #[cfg(test)]
 impl RefCount for ColorSpace {
     fn ref_cnt(&self) -> i32 {
-        unsafe { (*self.0).ref_cnt() }
+        unsafe { self.native().ref_cnt() }
     }
 }
 
@@ -302,10 +301,10 @@ pub fn create_and_clone_colorspaces() {
 #[test]
 pub fn serialize_and_deserialize() {
     let original = ColorSpace::new_rgb((ColorSpaceRenderTargetGamma::Linear, ColorSpaceGamut::AdobeRGB));
-    unsafe { assert_eq!(1, (*original.0).ref_cnt()) };
+    unsafe { assert_eq!(1, original.native().ref_cnt()) };
     let serialized = original.serialize();
-    unsafe { assert_eq!(1, (*serialized.0).ref_cnt()) };
+    unsafe { assert_eq!(1, serialized.native().ref_cnt()) };
     let deserialized = ColorSpace::deserialize(serialized);
-    unsafe { assert_eq!(1, (*deserialized.0).ref_cnt()) };
+    unsafe { assert_eq!(1, deserialized.native().ref_cnt()) };
     assert!(original == deserialized);
 }

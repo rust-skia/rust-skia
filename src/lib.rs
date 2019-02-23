@@ -21,6 +21,16 @@ mod prelude {
         SkRefCnt,
         SkRefCntBase,
     };
+    // export all traits for the use of points / vectors, sizes,
+    // etc. into the prelude.
+    pub use crate::skia_euclid::{
+        SkiaPoint,
+        SkiaPointFloat,
+        SkiaSize,
+        SkiaSizeFloat,
+        SkiaRect,
+        SkiaRectFloat
+    };
 
     pub trait ToOption {
         type Target;
@@ -99,19 +109,78 @@ mod prelude {
         fn from_native(native: Native) -> Self;
     }
 
+    /// A representation type for by directly embedding the underlying native type.
+    pub struct Handle<Native>(Native);
+
+    /// A representation type represented by a refcounted pointer to the native type.
+    pub struct RCHandle<Native: RefCounted>(*mut Native);
+
+    impl<N: RefCounted> RCHandle<N> {
+        /// Increases the reference counter of the native type
+        /// and returns a mutable reference.
+        pub fn shared_native(&self) -> &mut N {
+            (unsafe { &*self.0 })._ref();
+            unsafe { &mut *self.0 }
+        }
+
+        /// Returns a reference to the native representation.
+        pub fn native(&self) -> &N {
+            unsafe { &*self.0 }
+        }
+
+        /// Returns a mutable reference to the native representation.
+        pub fn native_mut(&mut self) -> &mut N {
+            unsafe { &mut *self.0 }
+        }
+
+        /// Constructs from a pointer. Returns None if the pointer is None.
+        /// Does not increase the reference count.
+        pub fn from_ptr(ptr: *mut N) -> Option<Self> {
+            if !ptr.is_null() {
+                Some(RCHandle(ptr))
+            } else {
+                None
+            }
+        }
+    }
+
+    impl<N: RefCounted> Clone for RCHandle<N> {
+        fn clone(&self) -> Self {
+            RCHandle(self.shared_native())
+        }
+    }
+
+    impl <N: RefCounted> Drop for RCHandle<N> {
+        fn drop(&mut self) {
+            unsafe { &*self.0 }._unref();
+        }
+    }
+
+    /// A trait for types that can be converted to a shared pointer that may be null.
+    pub trait ToSharedPointer<N> {
+        fn shared_ptr(&self) -> *mut N;
+    }
+
+    impl<N: RefCounted> ToSharedPointer<N> for Option<RCHandle<N>> {
+        fn shared_ptr(&self) -> *mut N {
+            match self {
+                Some(handle) => handle.shared_native(),
+                None => ptr::null_mut()
+            }
+        }
+    }
+
+    impl<N: RefCounted> ToSharedPointer<N> for Option<&RCHandle<N>> {
+        fn shared_ptr(&self) -> *mut N {
+            match self {
+                Some(handle) => handle.shared_native(),
+                None => ptr::null_mut()
+            }
+        }
+    }
+
     /// Clone for bindings types we can not implement Clone for.
     pub trait InternalClone {
         fn clone(&self) -> Self;
     }
-
-    // export all traits for the use of points / vectors, sizes,
-    // etc. into the prelude.
-    pub use crate::skia_euclid::{
-        SkiaPoint,
-        SkiaPointFloat,
-        SkiaSize,
-        SkiaSizeFloat,
-        SkiaRect,
-        SkiaRectFloat
-    };
 }
