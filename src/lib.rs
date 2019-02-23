@@ -31,6 +31,7 @@ mod prelude {
         SkiaRect,
         SkiaRectFloat
     };
+    use std::ptr;
 
     pub trait ToOption {
         type Target;
