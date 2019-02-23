@@ -16,41 +16,40 @@ use rust_skia::{
     C_SkPicture_serialize
 };
 
-#[derive(RCCloneDrop)]
-pub struct Picture(pub(crate) *mut SkPicture);
+pub type Picture = RCHandle<SkPicture>;
 
-impl RefCounted for Picture {
+impl RefCounted for SkPicture {
     fn _ref(&self) {
-        unsafe { (*self.0)._base._base.ref_(); }
+        unsafe { self._base._base.ref_(); }
     }
 
     fn _unref(&self) {
-        unsafe { (*self.0)._base._base.unref(); }
+        unsafe { self._base._base.unref(); }
     }
 }
 
 impl Picture {
     pub fn from_data(data: &Data) -> Picture {
-        Picture(unsafe { C_SkPicture_MakeFromData(data.native()) })
+        Picture::from_ptr(unsafe { C_SkPicture_MakeFromData(data.native()) }).unwrap()
     }
 
     pub fn new_placeholder(cull: &Rect) -> Picture {
-        Picture(unsafe { C_SkPicture_MakePlaceholder(&cull.to_native()) })
+        Picture::from_ptr(unsafe { C_SkPicture_MakePlaceholder(&cull.to_native()) }).unwrap()
     }
 
     pub fn playback(&self, canvas: &Canvas) {
-        unsafe { C_SkPicture_playback(self.0, canvas.native) }
+        unsafe { C_SkPicture_playback(self.native(), canvas.native) }
     }
 
     pub fn cull_rect(&self) -> Rect {
-        Rect::from_native(unsafe { C_SkPicture_cullRect(self.0) })
+        Rect::from_native(unsafe { C_SkPicture_cullRect(self.native()) })
     }
 
     pub fn unique_id(&self) -> u32 {
-        unsafe { (*self.0).uniqueID() }
+        unsafe { self.native().uniqueID() }
     }
 
     pub fn serialize(&self) -> Data {
-        Data::from_ptr(unsafe { C_SkPicture_serialize(self.0) }).unwrap()
+        Data::from_ptr(unsafe { C_SkPicture_serialize(self.native()) }).unwrap()
     }
 }

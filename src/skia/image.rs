@@ -50,31 +50,26 @@ impl ImageBitDepth {
     pub const F16: ImageBitDepth = ImageBitDepth(SkImage_BitDepth::kF16);
 }
 
-#[derive(RCCloneDrop)]
-pub struct Image(pub (crate) *mut SkImage);
+pub type Image = RCHandle<SkImage>;
 
-impl RefCounted for Image {
+impl RefCounted for SkImage {
     fn _ref(&self) {
-        unsafe { (*self.0)._base._base.ref_() }
+        unsafe { self._base._base.ref_() }
     }
 
     fn _unref(&self) {
-        unsafe { (*self.0)._base._base.unref() }
+        unsafe { self._base._base.unref() }
     }
 }
 
 impl Image {
 
     pub fn from_raster_data(info: &ImageInfo, pixels: Data, row_bytes: usize) -> Option<Image> {
-        unsafe { C_SkImage_MakeRasterData(&info.0, pixels.shared_native(), row_bytes) }
-            .to_option()
-            .map(Image)
+        Image::from_ptr(unsafe { C_SkImage_MakeRasterData(&info.0, pixels.shared_native(), row_bytes) })
     }
 
     pub fn from_bitmap(bitmap: &Bitmap) -> Option<Image> {
-        unsafe { C_SkImage_MakeFromBitmap(&bitmap.0) }
-            .to_option()
-            .map(Image)
+        Image::from_ptr(unsafe { C_SkImage_MakeFromBitmap(&bitmap.0) })
     }
 
     pub fn from_encoded(data: &Data, subset: Option<IRect>) -> Option<Image> {
@@ -86,9 +81,11 @@ impl Image {
             }
         };
 
-        unsafe { C_SkImage_MakeFromEncoded(data.shared_native(), subset_ptr) }
-            .to_option()
-            .map(Image)
+        Image::from_ptr(unsafe {
+            C_SkImage_MakeFromEncoded(
+                data.shared_native(),
+                subset_ptr)
+        })
     }
 
     pub fn from_texture(
@@ -99,15 +96,15 @@ impl Image {
         alpha_type: AlphaType,
         color_space: Option<&ColorSpace>) -> Option<Image> {
 
-        unsafe { C_SkImage_MakeFromTexture(
-            context.native_mut(),
-            &backend_texture.0,
-            origin.0,
-            color_type.0,
-            alpha_type.0,
-            color_space.shared_ptr()) }
-            .to_option()
-            .map(Image)
+        Image::from_ptr(unsafe {
+            C_SkImage_MakeFromTexture(
+                context.native_mut(),
+                &backend_texture.0,
+                origin.0,
+                color_type.0,
+                alpha_type.0,
+                color_space.shared_ptr())
+        })
     }
 
     pub fn from_encoded_cross_context(
@@ -117,13 +114,13 @@ impl Image {
         color_space: &mut ColorSpace,
         limit_to_max_texture_size: bool) -> Option<Image> {
 
-        unsafe { C_SkImage_MakeCrossContextFromEncoded(
-            context.native_mut(),
-            data.shared_native(),
-            build_mips,
-            color_space.native_mut(), limit_to_max_texture_size)}
-            .to_option()
-            .map(Image)
+        Image::from_ptr(unsafe {
+            C_SkImage_MakeCrossContextFromEncoded(
+                context.native_mut(),
+                data.shared_native(),
+                build_mips,
+                color_space.native_mut(), limit_to_max_texture_size)
+        })
     }
 
     pub fn from_adopted_texture(
@@ -134,15 +131,15 @@ impl Image {
         alpha_type: AlphaType,
         color_space: Option<&ColorSpace>) -> Option<Image> {
 
-        unsafe { C_SkImage_MakeFromAdoptedTexture(
-            context.native_mut(),
-            &backend_texture.0,
-            origin.0,
-            color_type.0,
-            alpha_type.0,
-            color_space.shared_ptr()) }
-            .to_option()
-            .map(Image)
+        Image::from_ptr(unsafe {
+            C_SkImage_MakeFromAdoptedTexture(
+                context.native_mut(),
+                &backend_texture.0,
+                origin.0,
+                color_type.0,
+                alpha_type.0,
+                color_space.shared_ptr())
+        })
     }
 
     pub fn from_yuva_textures_copy(
@@ -160,16 +157,16 @@ impl Image {
         let yuva_indices : Vec<SkYUVAIndex> =
             yuva_indices.iter().map(|i| i.0).collect();
 
-        unsafe { C_SkImage_MakeFromYUVATexturesCopy(
-            context.native_mut(),
-            yuv_color_space.0,
-            yuva_textures.as_ptr(),
-            yuva_indices.as_ptr(),
-            image_size.to_native(),
-            image_origin.0,
-            image_color_space.shared_ptr()) }
-            .to_option()
-            .map(Image)
+        Image::from_ptr(unsafe {
+            C_SkImage_MakeFromYUVATexturesCopy(
+                context.native_mut(),
+                yuv_color_space.0,
+                yuva_textures.as_ptr(),
+                yuva_indices.as_ptr(),
+                image_size.to_native(),
+                image_origin.0,
+                image_color_space.shared_ptr())
+        })
     }
 
     pub fn from_yuva_textures_copy_with_external_backend(
@@ -188,17 +185,17 @@ impl Image {
         let yuva_indices : Vec<SkYUVAIndex> =
             yuva_indices.iter().map(|i| i.0).collect();
 
-        unsafe { C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend(
-            context.native_mut(),
-            yuv_color_space.0,
-            yuva_textures.as_ptr(),
-            yuva_indices.as_ptr(),
-            image_size.to_native(),
-            image_origin.0,
-            &backend_texture.0,
-            image_color_space.shared_ptr()) }
-            .to_option()
-            .map(Image)
+        Image::from_ptr(unsafe {
+            C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend(
+                context.native_mut(),
+                yuv_color_space.0,
+                yuva_textures.as_ptr(),
+                yuva_indices.as_ptr(),
+                image_size.to_native(),
+                image_origin.0,
+                &backend_texture.0,
+                image_color_space.shared_ptr())
+        })
     }
 
     pub fn from_yuva_textures(
@@ -216,16 +213,16 @@ impl Image {
         let yuva_indices : Vec<SkYUVAIndex> =
             yuva_indices.iter().map(|i| i.0).collect();
 
-        unsafe { C_SkImage_MakeFromYUVATextures(
-            context.native_mut(),
-            yuv_color_space.0,
-            yuva_textures.as_ptr(),
-            yuva_indices.as_ptr(),
-            image_size.to_native(),
-            image_origin.0,
-            image_color_space.shared_ptr()) }
-            .to_option()
-            .map(Image)
+        Image::from_ptr(unsafe {
+            C_SkImage_MakeFromYUVATextures(
+                context.native_mut(),
+                yuv_color_space.0,
+                yuva_textures.as_ptr(),
+                yuva_indices.as_ptr(),
+                image_size.to_native(),
+                image_origin.0,
+                image_color_space.shared_ptr())
+        })
     }
 
     pub fn from_nv12_textures_copy(
@@ -238,14 +235,14 @@ impl Image {
         let nv12_textures : Vec<GrBackendTexture> =
             nv12_textures.iter().map(|t| t.0.clone()).collect();
 
-        unsafe { C_SkImage_MakeFromNV12TexturesCopy(
-            context.native_mut(),
-            yuv_color_space.0,
-            nv12_textures.as_ptr(),
-            image_origin.0,
-            image_color_space.shared_ptr()) }
-            .to_option()
-            .map(Image)
+        Image::from_ptr(unsafe {
+            C_SkImage_MakeFromNV12TexturesCopy(
+                context.native_mut(),
+                yuv_color_space.0,
+                nv12_textures.as_ptr(),
+                image_origin.0,
+                image_color_space.shared_ptr())
+        })
     }
 
     pub fn from_nv12_textures_copy_with_external_backend(
@@ -259,15 +256,15 @@ impl Image {
         let nv12_textures : Vec<GrBackendTexture> =
             nv12_textures.iter().map(|t| t.0.clone()).collect();
 
-        unsafe { C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
-            context.native_mut(),
-            yuv_color_space.0,
-            nv12_textures.as_ptr(),
-            image_origin.0,
-            &backend_texture.0,
-            image_color_space.shared_ptr()) }
-            .to_option()
-            .map(Image)
+        Image::from_ptr(unsafe {
+            C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
+                context.native_mut(),
+                yuv_color_space.0,
+                nv12_textures.as_ptr(),
+                image_origin.0,
+                &backend_texture.0,
+                image_color_space.shared_ptr())
+        })
     }
 
     pub fn from_picture(
@@ -290,21 +287,18 @@ impl Image {
                 None => ptr::null()
             };
 
-        picture._ref();
-
-        unsafe {
+        Image::from_ptr(unsafe {
             C_SkImage_MakeFromPicture(
-                picture.0,
+                picture.shared_native(),
                 &dimensions.to_native(),
                 matrix,
                 paint,
                 bit_depth.0,
-                color_space.shared_ptr()
-            )
-        }.to_option().map(Image)
+                color_space.shared_ptr())
+        })
     }
 
     pub fn encode_to_data(&self) -> Option<Data> {
-        Data::from_ptr(unsafe { C_SkImage_encodeToData(self.0) })
+        Data::from_ptr(unsafe { C_SkImage_encodeToData(self.native()) })
     }
 }

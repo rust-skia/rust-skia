@@ -11,7 +11,7 @@ pub struct Canvas {
 impl Canvas {
 
     pub fn new(width: u32, height: u32) -> Canvas {
-        let surface =
+        let mut surface =
             skia::Surface::new_raster_n32_premul(width, height)
                 .expect("no surface!");
         let path = skia::Path::new();
@@ -99,7 +99,7 @@ impl Canvas {
     }
 
     #[inline]
-    fn canvas(&self) -> skia::Canvas {
+    fn canvas(&mut self) -> skia::Canvas {
         self.surface.canvas()
     }
 }
