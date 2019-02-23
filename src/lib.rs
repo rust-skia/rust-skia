@@ -161,11 +161,24 @@ mod prelude {
             unsafe { &mut *self.0 }
         }
 
-        /// Constructs from a pointer. Returns None if the pointer is None.
+        /// Creates an RCHandle from a pointer.
+        /// Returns None if the pointer is null.
         /// Does not increase the reference count.
         #[inline]
         pub fn from_ptr(ptr: *mut N) -> Option<Self> {
             if !ptr.is_null() {
+                Some(RCHandle(ptr))
+            } else {
+                None
+            }
+        }
+
+        /// Creates an RCHandle from a pointer.
+        /// Returns None if the pointer is null.
+        /// Increases the reference count.
+        pub fn from_unshared_ptr(ptr: *mut N) -> Option<Self> {
+            if !ptr.is_null() {
+                (unsafe { (*ptr)._ref() });
                 Some(RCHandle(ptr))
             } else {
                 None

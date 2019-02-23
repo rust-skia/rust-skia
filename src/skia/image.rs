@@ -286,6 +286,56 @@ impl Image {
         })
     }
 
+    pub fn width(&self) -> i32 {
+        unsafe { self.native().width() }
+    }
+
+    pub fn height(&self) -> i32 {
+        unsafe { self.native().height() }
+    }
+
+    pub fn dimensions(&self) -> ISize {
+        ISize::from_native(unsafe { self.native().dimensions() })
+    }
+
+    pub fn bounds(&self) -> IRect {
+        IRect::from_native(unsafe { self.native().bounds() })
+    }
+
+    pub fn unique_id(&self) -> u32 {
+        unsafe { self.native().uniqueID() }
+    }
+
+    pub fn alpha_type(&self) -> AlphaType {
+        AlphaType(unsafe { self.native().alphaType() })
+    }
+
+    pub fn color_type(&self) -> ColorType {
+        ColorType(unsafe { self.native().colorType() })
+    }
+
+    pub fn color_space(&self) -> ColorSpace {
+        ColorSpace::from_unshared_ptr(unsafe {
+            self.native().colorSpace()
+        }).unwrap()
+    }
+
+    pub fn is_alpha_only(&self) -> bool {
+        unsafe { self.native().isAlphaOnly() }
+    }
+
+    pub fn is_opaque(&self) -> bool {
+        unsafe { self.native().isOpaque() }
+    }
+
+    pub fn is_texture_backed(&self) -> bool {
+        unsafe { self.native().isTextureBacked() }
+    }
+
+    pub fn is_valid(&self, context: &mut graphics::Context) -> bool {
+        unsafe { self.native().isValid(context.native_mut()) }
+    }
+
     pub fn encode_to_data(&self) -> Option<Data> {
         Data::from_ptr(unsafe { C_SkImage_encodeToData(self.native()) })
     }
