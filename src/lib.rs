@@ -4,13 +4,6 @@ mod skia_euclid;
 
 #[macro_use]
 extern crate bitflags;
-#[macro_use]
-extern crate ref_counted;
-
-// temporariliy required for the canvas example.
-pub mod bindings {
-    pub use rust_skia::*;
-}
 
 mod prelude {
     use std::intrinsics::transmute;
