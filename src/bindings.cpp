@@ -403,14 +403,41 @@ extern "C" bool C_SkBitmap_extractAlpha(const SkBitmap* self, SkBitmap* dst, con
 }
 
 //
+// SkPicture
+//
+
+extern "C" SkPicture* C_SkPicture_MakeFromData(const SkData* data) {
+    return SkPicture::MakeFromData(data).release();
+}
+
+extern "C" SkData* C_SkPicture_serialize(const SkPicture* self) {
+    return self->serialize().release();
+}
+
+extern "C" SkPicture* C_SkPicture_MakePlaceholder(const SkRect& cull) {
+    return SkPicture::MakePlaceholder(cull).release();
+}
+
+extern "C" void C_SkPicture_playback(const SkPicture* self, SkCanvas* canvas) {
+    self->playback(canvas);
+}
+/*
+extern "C" void C_SkPicture_cullRect(const SkPicture* self, SkRect* result) {
+    *result = self->cullRect();
+}
+*/
+
+extern "C" SkRect C_SkPicture_cullRect(const SkPicture* self) {
+    return self->cullRect();
+}
+
+//
 // GrBackendTexture
 //
 
 extern "C" void C_GrBackendTexture_destruct(const GrBackendTexture* self) {
     self->~GrBackendTexture();
 }
-
-
 
 #if defined(SK_VULKAN)
 
