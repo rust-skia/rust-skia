@@ -103,8 +103,51 @@ mod prelude {
         fn from_native(native: Native) -> Self;
     }
 
-    /// A representation type for by directly embedding the underlying native type.
-    pub struct Handle<Native>(Native);
+    /// Trait that enables access to a native representation by reference.
+    pub trait NativeAccess<N> {
+        fn native(&self) -> &N;
+        fn native_mut(&mut self) -> &mut N;
+    }
+
+    /// Every handle's native type needs to imlement this trait.
+    pub trait NativeDrop {
+        fn drop(&mut self);
+    }
+
+    /// A representation type for a native type that needs a destructor to be called.
+    pub struct Handle<N: NativeDrop>(N);
+
+    impl<N: NativeDrop> Handle<N> {
+        #[inline]
+        pub fn from_native(n: N) -> Handle<N> {
+            Handle(n)
+        }
+    }
+
+    impl<N: NativeDrop> NativeAccess<N> for Handle<N> {
+        fn native(&self) -> &N {
+            &self.0
+        }
+
+        fn native_mut(&mut self) -> &mut N {
+            &mut self.0
+        }
+    }
+
+    /// A trait that supports retrieving a pointer from an Option<Handle<Native>>
+    pub trait NativePointer<N> {
+        fn native_ptr(&self) -> *const N;
+    }
+
+    impl<N: NativeDrop> NativePointer<N> for Option<Handle<N>> {
+        #[inline]
+        fn native_ptr(&self) -> *const N {
+            match self {
+                Some(handle) => handle.native(),
+                None => ptr::null()
+            }
+        }
+    }
 
     /// A representation type represented by a refcounted pointer to the native type.
     pub struct RCHandle<Native: RefCounted>(*mut Native);
@@ -112,23 +155,15 @@ mod prelude {
     impl<N: RefCounted> RCHandle<N> {
         /// Increases the reference counter of the native type
         /// and returns a mutable reference.
+        #[inline]
         pub fn shared_native(&self) -> &mut N {
             (unsafe { &*self.0 })._ref();
             unsafe { &mut *self.0 }
         }
 
-        /// Returns a reference to the native representation.
-        pub fn native(&self) -> &N {
-            unsafe { &*self.0 }
-        }
-
-        /// Returns a mutable reference to the native representation.
-        pub fn native_mut(&mut self) -> &mut N {
-            unsafe { &mut *self.0 }
-        }
-
         /// Constructs from a pointer. Returns None if the pointer is None.
         /// Does not increase the reference count.
+        #[inline]
         pub fn from_ptr(ptr: *mut N) -> Option<Self> {
             if !ptr.is_null() {
                 Some(RCHandle(ptr))
@@ -138,13 +173,29 @@ mod prelude {
         }
     }
 
+    impl<N: RefCounted> NativeAccess<N> for RCHandle<N> {
+        /// Returns a reference to the native representation.
+        #[inline]
+        fn native(&self) -> &N {
+            unsafe { &*self.0 }
+        }
+
+        /// Returns a mutable reference to the native representation.
+        #[inline]
+        fn native_mut(&mut self) -> &mut N {
+            unsafe { &mut *self.0 }
+        }
+    }
+
     impl<N: RefCounted> Clone for RCHandle<N> {
+        #[inline]
         fn clone(&self) -> Self {
             RCHandle(self.shared_native())
         }
     }
 
     impl <N: RefCounted> Drop for RCHandle<N> {
+        #[inline]
         fn drop(&mut self) {
             unsafe { &*self.0 }._unref();
         }
@@ -156,6 +207,7 @@ mod prelude {
     }
 
     impl<N: RefCounted> ToSharedPointer<N> for Option<RCHandle<N>> {
+        #[inline]
         fn shared_ptr(&self) -> *mut N {
             match self {
                 Some(handle) => handle.shared_native(),
@@ -165,6 +217,7 @@ mod prelude {
     }
 
     impl<N: RefCounted> ToSharedPointer<N> for Option<&RCHandle<N>> {
+        #[inline]
         fn shared_ptr(&self) -> *mut N {
             match self {
                 Some(handle) => handle.shared_native(),

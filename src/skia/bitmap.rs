@@ -272,7 +272,7 @@ impl Bitmap {
     pub fn extract_alpha(&self, dst: &mut Bitmap, paint: Option<&Paint>) -> Option<IPoint> {
         let paint_ptr =
             paint
-                .map(|p| &p.0 as *const SkPaint)
+                .map(|p| p.native() as *const SkPaint)
                 .unwrap_or(ptr::null());
 
         let mut offset : SkIPoint = unsafe { uninitialized() };

@@ -1,33 +1,34 @@
+use crate::prelude::*;
 use rust_skia::{SkPaint, C_SkPaint_destruct, SkPaint_Style};
 use super::Color;
 
-pub struct Paint(pub(crate) SkPaint);
+pub type Paint = Handle<SkPaint>;
 
-impl Drop for Paint {
+impl NativeDrop for SkPaint {
     fn drop(&mut self) {
-        unsafe { C_SkPaint_destruct(&self.0) }
+        unsafe { C_SkPaint_destruct(self) }
     }
 }
 
 impl Paint {
     pub fn new() -> Paint {
-        Paint(unsafe { SkPaint::new() })
+        Paint::from_native(unsafe { SkPaint::new() })
     }
 
     pub fn set_color(&mut self, color: Color) {
-        unsafe { self.0.setColor(color.0) }
+        unsafe { self.native_mut().setColor(color.0) }
     }
 
     pub fn set_anti_alias(&mut self, anti_alias: bool) {
-        unsafe { self.0.setAntiAlias(anti_alias) }
+        unsafe { self.native_mut().setAntiAlias(anti_alias) }
     }
 
     pub fn set_stroke_width(&mut self, width: f32) {
-        unsafe { self.0.setStrokeWidth(width) }
+        unsafe { self.native_mut().setStrokeWidth(width) }
     }
 
     pub fn set_style(&mut self, style: PaintStyle) {
-        unsafe { self.0.setStyle(style.0) }
+        unsafe { self.native_mut().setStyle(style.0) }
     }
 }
 

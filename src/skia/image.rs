@@ -275,24 +275,12 @@ impl Image {
         bit_depth: ImageBitDepth,
         color_space: Option<ColorSpace>) -> Option<Image> {
 
-        let matrix : *const SkMatrix =
-            match matrix {
-                Some(matrix) => &matrix.0,
-                None => ptr::null()
-            };
-
-        let paint : *const SkPaint =
-            match paint {
-                Some(paint) => &paint.0,
-                None => ptr::null()
-            };
-
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromPicture(
                 picture.shared_native(),
                 &dimensions.to_native(),
-                matrix,
-                paint,
+                matrix.native_ptr(),
+                paint.native_ptr(),
                 bit_depth.0,
                 color_space.shared_ptr())
         })

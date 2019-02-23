@@ -1,3 +1,4 @@
+use crate::prelude::*;
 use std::{mem, ops};
 use super::{Matrix, MatrixTypeMask, Vector4};
 use rust_skia::{
@@ -35,7 +36,7 @@ impl PartialEq for Matrix44 {
 impl Into<Matrix> for Matrix44 {
     fn into(self) -> Matrix {
         let mut m = Matrix::new();
-        unsafe { C_SkMatrix44_SkMatrix(&self.0, &mut m.0) };
+        unsafe { C_SkMatrix44_SkMatrix(&self.0, m.native_mut()) };
         m
     }
 }

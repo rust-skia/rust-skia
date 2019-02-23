@@ -41,8 +41,8 @@ impl Picture {
         }).unwrap()
     }
 
-    pub fn playback(&self, canvas: &Canvas) {
-        unsafe { C_SkPicture_playback(self.native(), canvas.native) }
+    pub fn playback(&self, canvas: &mut Canvas) {
+        unsafe { C_SkPicture_playback(self.native(), canvas.native_mut()) }
     }
 
     pub fn cull_rect(&self) -> Rect {

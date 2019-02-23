@@ -42,10 +42,7 @@ impl Surface {
     }
 
     pub fn canvas(&mut self) -> Canvas {
-        Canvas {
-            native: unsafe { self.native_mut().getCanvas() },
-            owner: Some((*self).clone())
-        }
+        Canvas::from_surface(self)
     }
 
     pub fn make_image_snapshot(&mut self) -> Image {
