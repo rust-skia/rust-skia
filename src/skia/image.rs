@@ -69,7 +69,7 @@ impl Image {
     }
 
     pub fn from_bitmap(bitmap: &Bitmap) -> Option<Image> {
-        Image::from_ptr(unsafe { C_SkImage_MakeFromBitmap(&bitmap.0) })
+        Image::from_ptr(unsafe { C_SkImage_MakeFromBitmap(bitmap.native()) })
     }
 
     pub fn from_encoded(data: &Data, subset: Option<IRect>) -> Option<Image> {

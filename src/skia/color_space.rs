@@ -295,7 +295,7 @@ impl RefCount for ColorSpace {
 pub fn create_and_clone_colorspaces() {
     ColorSpace::new_rgb((ColorSpaceRenderTargetGamma::Linear, ColorSpaceGamut::AdobeRGB));
     let x = ColorSpace::new_rgb((ColorSpaceRenderTargetGamma::Linear, Matrix44::new_identity()));
-    x.clone();
+    let r = x.clone();
 }
 
 #[test]
