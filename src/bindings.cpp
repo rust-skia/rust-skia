@@ -7,6 +7,7 @@
 #include "SkRect.h"
 #include "SkSurface.h"
 #include "SkPicture.h"
+#include "SkYUVAIndex.h"
 
 #include "GrContext.h"
 
@@ -401,6 +402,16 @@ extern "C" bool C_SkBitmap_extractAlpha(const SkBitmap* self, SkBitmap* dst, con
     return self->extractAlpha(dst, paint, offset);
 }
 
+//
+// GrBackendTexture
+//
+
+extern "C" void C_GrBackendTexture_destruct(const GrBackendTexture* self) {
+    self->~GrBackendTexture();
+}
+
+
+
 #if defined(SK_VULKAN)
 
 extern "C" SkSurface* C_SkSurface_MakeFromBackendTexture(
@@ -417,10 +428,6 @@ extern "C" void C_SkSurface_getBackendTexture(
         SkSurface::BackendHandleAccess handleAccess,
         GrBackendTexture* backendTexture) {
     *backendTexture = self->getBackendTexture(handleAccess);
-}
-
-extern "C" void C_GrBackendTexture_destruct(const GrBackendTexture* self) {
-    self->~GrBackendTexture();
 }
 
 // The GrVkBackendContext struct binding's length is too short
