@@ -1,6 +1,8 @@
 use crate::prelude::*;
-use rust_skia::GrSurfaceOrigin;
-use rust_skia::GrMipMapped;
+use rust_skia::{
+    GrSurfaceOrigin,
+    GrMipMapped
+};
 
 pub type MipMapped = EnumHandle<GrMipMapped>;
 

@@ -7,6 +7,7 @@ use rust_skia::{
     SkRect
 };
 use crate::prelude::*;
+use rust_skia::SkPoint3;
 
 pub struct Skia;
 
@@ -19,6 +20,10 @@ pub type Point = euclid::Point2D<f32>;
 pub type Vector = Point;
 pub type Size = euclid::Size2D<f32>;
 pub type Rect = euclid::Rect<f32>;
+
+pub type Point3 = euclid::Point3D<f32>;
+pub type Vector3 = Point3;
+pub type Color3f = Point3;
 
 pub trait SkiaPoint<S> : Sized {
     fn is_zero(&self) -> bool;
@@ -229,3 +234,75 @@ impl NativeRepresentation<SkRect> for Rect {
     }
 }
 
+impl NativeRepresentation<SkPoint3> for Point3 {
+    fn to_native(self) -> SkPoint3 {
+        SkPoint3 {
+            fX: self.x,
+            fY: self.y,
+            fZ: self.z
+        }
+    }
+
+    fn from_native(native: SkPoint3) -> Self {
+        Point3::new(native.fX, native.fY, native.fZ)
+    }
+}
+
+//
+// Liftable
+//
+
+impl Liftable<(i32, i32)> for IPoint {
+    fn lift_from(source: (i32, i32)) -> Self {
+        IPoint::new(source.0, source.1)
+    }
+}
+
+impl Liftable<(i32, i32)> for ISize {
+    fn lift_from(source: (i32, i32)) -> Self {
+        ISize::new(source.0, source.1)
+    }
+}
+
+impl Liftable<(IPoint, ISize)> for IRect {
+    fn lift_from(source: (IPoint, ISize)) -> Self {
+        IRect::new(source.0, source.1)
+    }
+}
+
+impl Liftable<(i32, i32, i32, i32)> for IRect {
+    fn lift_from(source: (i32, i32, i32, i32)) -> Self {
+        ((source.0, source.1).lift(), (source.2, source.3).lift()).lift()
+    }
+}
+
+impl Liftable<(f32, f32)> for Point {
+    fn lift_from(source: (f32, f32)) -> Self {
+        Point::new(source.0, source.1)
+    }
+}
+
+impl Liftable<(f32, f32)> for Size {
+    fn lift_from(source: (f32, f32)) -> Self {
+        Size::new(source.0, source.1)
+    }
+}
+
+impl Liftable<(Point, Size)> for Rect {
+    fn lift_from(source: (Point, Size)) -> Self {
+        Rect::new(source.0, source.1)
+    }
+}
+
+impl Liftable<(f32, f32, f32, f32)> for Rect {
+    fn lift_from(source: (f32, f32, f32, f32)) -> Self {
+        ((source.0, source.1).lift(), (source.2, source.3).lift()).lift()
+    }
+}
+
+
+impl Liftable<(f32, f32, f32)> for Point3 {
+    fn lift_from(source: (f32, f32, f32)) -> Self {
+        Point3::new(source.0, source.1, source.2)
+    }
+}

@@ -35,7 +35,7 @@ impl PartialEq for Matrix44 {
 
 impl Into<Matrix> for Matrix44 {
     fn into(self) -> Matrix {
-        let mut m = Matrix::new();
+        let mut m = Matrix::new_identity();
         unsafe { C_SkMatrix44_SkMatrix(&self.0, m.native_mut()) };
         m
     }

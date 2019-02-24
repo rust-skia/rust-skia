@@ -26,6 +26,8 @@ mod prelude {
     };
     use std::ptr;
     use std::mem;
+    use std::ops::Index;
+    use std::ops::IndexMut;
 
     pub trait ToOption {
         type Target;
@@ -144,6 +146,22 @@ mod prelude {
         where H: FromNative<N> {
         fn into_handle(self) -> H {
             H::from_native(self)
+        }
+    }
+
+    /// A trait to support conversions from tuples.
+    pub trait Liftable<S> {
+        fn lift_from(source: S) -> Self;
+    }
+
+    pub trait Lift<T> {
+        fn lift(self) -> T;
+    }
+
+    impl<V, T> Lift<T> for V
+        where T: Liftable<V> {
+        fn lift(self) -> T {
+            T::lift_from(self)
         }
     }
 
@@ -346,8 +364,9 @@ mod prelude {
         }
     }
 
+
+    /// Trait to compute the size this type occupies in memory in bytes.
     pub trait SizeOf {
-        /// Returns the size this type occupies in memory in bytes.
         fn size_of(&self) -> usize;
     }
 
@@ -360,6 +379,38 @@ mod prelude {
     impl<N: Sized> SizeOf for [N] {
         fn size_of(&self) -> usize {
             mem::size_of::<N>() * self.len()
+        }
+    }
+
+    /// Tag the type to automatically implement get() functions for
+    /// all Index implementations.
+    pub trait IndexGet {}
+
+    /// Tag the type to automatically implement get() and set() functions
+    /// for all Index & IndexMut implementation for that type.
+    pub trait IndexSet {}
+
+    pub trait IndexGetter<I, O : Copy> {
+        fn get(&self, index: I) -> O;
+    }
+
+    impl<T, I, O: Copy> IndexGetter<I, O> for T
+        where T: Index<I, Output=O> + IndexGet
+    {
+        fn get(&self, index: I) -> O {
+            self[index]
+        }
+    }
+
+    pub trait IndexSetter<I, O: Copy> {
+        fn set(&mut self, index: I, value: O);
+    }
+
+    impl<T, I, O: Copy> IndexSetter<I, O> for T
+        where T: IndexMut<I, Output=O> + IndexSet
+    {
+        fn set(&mut self, index: I, value: O) {
+            self[index] = value
         }
     }
 }

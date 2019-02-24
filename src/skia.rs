@@ -46,6 +46,9 @@ pub use self::picture::*;
 mod rrect;
 pub use self::rrect::*;
 
+mod scalar;
+pub use self::scalar::*;
+
 mod surface;
 pub use self::surface::*;
 
