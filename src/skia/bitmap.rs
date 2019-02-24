@@ -1,11 +1,7 @@
-use std::{
-    ffi::c_void,
-    mem::uninitialized,
-    ptr
-};
+use crate::prelude::*;
 use crate::{
-    prelude::*,
     skia::{
+        Paint,
         Color,
         ColorType,
         AlphaType,
@@ -17,7 +13,11 @@ use crate::{
         u8cpu
     }
 };
-use crate::skia::Paint;
+use std::{
+    ffi::c_void,
+    mem::uninitialized,
+    ptr
+};
 use rust_skia::{
     SkPaint,
     SkIPoint,

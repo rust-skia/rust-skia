@@ -170,6 +170,10 @@ mod prelude {
     /// comparison may need to be customized.
     pub trait NativePartialEq {
         fn eq(&self, rhs: &Self) -> bool;
+
+        fn neq(&self, rhs: &Self) -> bool {
+            !self.eq(rhs)
+        }
     }
 
     /// A representation type for a native type that has full Copy & Clone value semantics.
