@@ -1,20 +1,19 @@
+use crate::prelude::*;
 use rust_skia::GrSurfaceOrigin;
 use rust_skia::GrMipMapped;
 
-#[derive(Copy, Clone, PartialEq)]
-pub struct MipMapped(pub(crate) GrMipMapped);
+pub type MipMapped = EnumHandle<GrMipMapped>;
 
 #[allow(non_upper_case_globals)]
-impl MipMapped {
-    pub const No: MipMapped = MipMapped(GrMipMapped::kNo);
-    pub const Yes: MipMapped = MipMapped(GrMipMapped::kYes);
+impl EnumHandle<GrMipMapped> {
+    pub const No: MipMapped = EnumHandle(GrMipMapped::kNo);
+    pub const Yes: MipMapped = EnumHandle(GrMipMapped::kYes);
 }
 
-#[derive(Copy, Clone, PartialEq)]
-pub struct SurfaceOrigin(pub(crate) GrSurfaceOrigin);
+pub type SurfaceOrigin = EnumHandle<GrSurfaceOrigin>;
 
 #[allow(non_upper_case_globals)]
-impl SurfaceOrigin {
-    pub const TopLeft: SurfaceOrigin = SurfaceOrigin(GrSurfaceOrigin::kTopLeft_GrSurfaceOrigin);
-    pub const BottomLeft: SurfaceOrigin = SurfaceOrigin(GrSurfaceOrigin::kBottomLeft_GrSurfaceOrigin);
+impl EnumHandle<GrSurfaceOrigin> {
+    pub const TopLeft: SurfaceOrigin = EnumHandle(GrSurfaceOrigin::kTopLeft_GrSurfaceOrigin);
+    pub const BottomLeft: SurfaceOrigin = EnumHandle(GrSurfaceOrigin::kBottomLeft_GrSurfaceOrigin);
 }

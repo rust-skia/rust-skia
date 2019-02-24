@@ -25,6 +25,7 @@ mod prelude {
         SkiaRectFloat
     };
     use std::ptr;
+    use std::mem;
 
     pub trait ToOption {
         type Target;
@@ -109,6 +110,11 @@ mod prelude {
         fn native_mut(&mut self) -> &mut N;
     }
 
+    /// Trait that enables access to a native representation by value.
+    pub trait NativeAccessValue<N> {
+        fn native(&self) -> N;
+    }
+
     /// Implements Drop for native types we can not implement Drop for.
     pub trait NativeDrop {
         fn drop(&mut self);
@@ -125,6 +131,41 @@ mod prelude {
         }
     }
 
+    /// A trait allowing a conversion from a native type to a handle type.
+    pub trait FromNative<N> {
+        fn from_native(native: N) -> Self;
+    }
+
+    pub trait IntoHandle<H> {
+        fn into_handle(self) -> H;
+    }
+
+    impl<H, N> IntoHandle<H> for N
+        where H: FromNative<N> {
+        fn into_handle(self) -> H {
+            H::from_native(self)
+        }
+    }
+
+    /// A representation type for a native enum type.
+    pub struct EnumHandle<N: Clone + PartialEq>(pub(crate) N);
+
+    impl<N: Clone + PartialEq> FromNative<N> for EnumHandle<N> {
+        fn from_native(n: N) -> EnumHandle<N> {
+            EnumHandle(n)
+        }
+    }
+
+    impl<N: Clone + PartialEq> NativeAccess<N> for EnumHandle<N> {
+        fn native(&self) -> &N {
+            &self.0
+        }
+
+        fn native_mut(&mut self) -> &mut N {
+            &mut self.0
+        }
+    }
+
     /// Even though some types may have complete value semantics, equality
     /// comparison may need to be customized.
     pub trait NativePartialEq {
@@ -135,8 +176,8 @@ mod prelude {
     #[derive(Copy, Clone)]
     pub struct ValueHandle<N: Clone>(N);
 
-    impl<N: Clone> ValueHandle<N> {
-        pub fn from_native(n: N) -> ValueHandle<N> {
+    impl<N: Clone> FromNative<N> for ValueHandle<N> {
+        fn from_native(n: N) -> ValueHandle<N> {
             ValueHandle(n)
         }
     }
@@ -161,9 +202,8 @@ mod prelude {
     /// requires a destructor.
     pub struct Handle<N: NativeDrop>(N);
 
-    impl<N: NativeDrop> Handle<N> {
-        #[inline]
-        pub fn from_native(n: N) -> Handle<N> {
+    impl<N: NativeDrop> FromNative<N> for Handle<N> {
+        fn from_native(n: N) -> Handle<N> {
             Handle(n)
         }
     }
@@ -299,6 +339,23 @@ mod prelude {
                 Some(handle) => handle.shared_native(),
                 None => ptr::null_mut()
             }
+        }
+    }
+
+    pub trait SizeOf {
+        /// Returns the size this type occupies in memory in bytes.
+        fn size_of(&self) -> usize;
+    }
+
+    impl<N: Sized> SizeOf for N {
+        fn size_of(&self) -> usize {
+            mem::size_of::<N>()
+        }
+    }
+
+    impl<N: Sized> SizeOf for [N] {
+        fn size_of(&self) -> usize {
+            mem::size_of::<N>() * self.len()
         }
     }
 }

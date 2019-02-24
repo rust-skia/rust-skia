@@ -76,7 +76,7 @@ impl Bitmap {
         // we contain ImageInfo in a struct, so we have to copy it.
         let ptr = unsafe { self.native().info() };
         let mut image_info = ImageInfo::new_empty();
-        unsafe { C_SkImageInfo_Copy(ptr, &mut image_info.0) }
+        unsafe { C_SkImageInfo_Copy(ptr, image_info.native_mut()) }
         image_info
     }
 
@@ -182,21 +182,21 @@ impl Bitmap {
     }
 
     pub fn set_info(&mut self, image_info: &ImageInfo, row_bytes: Option<usize>) -> bool {
-        unsafe { self.native_mut().setInfo(&image_info.0, row_bytes.unwrap_or(0)) }
+        unsafe { self.native_mut().setInfo(image_info.native(), row_bytes.unwrap_or(0)) }
     }
 
     #[must_use]
     pub fn try_alloc_pixels_flags(&mut self, image_info: &ImageInfo, flags: BitmapAllocFlags) -> bool {
-        unsafe { self.native_mut().tryAllocPixelsFlags(&image_info.0, flags.bits()) }
+        unsafe { self.native_mut().tryAllocPixelsFlags(image_info.native(), flags.bits()) }
     }
 
     #[must_use]
     pub fn try_alloc_pixels_info(&mut self, image_info: &ImageInfo, row_bytes: Option<usize>) -> bool {
         match row_bytes {
             Some(row_bytes) =>
-                unsafe { self.native_mut().tryAllocPixels(&image_info.0, row_bytes) },
+                unsafe { self.native_mut().tryAllocPixels(image_info.native(), row_bytes) },
             None =>
-                unsafe { self.native_mut().tryAllocPixels1(&image_info.0) },
+                unsafe { self.native_mut().tryAllocPixels1(image_info.native()) },
         }
     }
 
@@ -207,7 +207,7 @@ impl Bitmap {
     }
 
     pub unsafe fn install_pixels(&mut self, image_info: &ImageInfo, pixels: *mut c_void, row_bytes: usize) -> bool {
-        self.native_mut().installPixels1(&image_info.0, pixels, row_bytes)
+        self.native_mut().installPixels1(image_info.native(), pixels, row_bytes)
     }
 
     #[must_use]
@@ -264,7 +264,7 @@ impl Bitmap {
     }
 
     pub unsafe fn read_pixels(&self, dst_info: &ImageInfo, dst_pixels: *mut c_void, dst_row_bytes: usize, src_x: i32, src_y: i32) -> bool {
-        self.native().readPixels(&dst_info.0, dst_pixels, dst_row_bytes, src_x, src_y)
+        self.native().readPixels(dst_info.native(), dst_pixels, dst_row_bytes, src_x, src_y)
     }
 
     pub fn extract_alpha(&self, dst: &mut Bitmap, paint: Option<&Paint>) -> Option<IPoint> {

@@ -17,6 +17,9 @@ use crate::{
     },
     prelude::*,
     graphics,
+    graphics::SurfaceOrigin,
+    graphics::BackendTexture,
+    skia::EncodedImageFormat
 };
 use rust_skia::{
     SkMatrix,
@@ -39,15 +42,30 @@ use rust_skia::{
     C_SkImage_MakeFromNV12TexturesCopy,
     C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend,
     SkImage_BitDepth,
-    SkPaint
+    SkPaint,
+    GrSurfaceOrigin,
+    SkImage_CachingHint
 };
+use rust_skia::C_SkImage_refEncodedData;
+use rust_skia::C_SkImage_makeSubset;
+use rust_skia::C_SkImage_makeTextureImage;
+use rust_skia::C_SkImage_makeNonTextureImage;
+use rust_skia::C_SkImage_makeRasterImage;
+use rust_skia::C_SkImage_makeColorSpace;
 
-#[derive(Copy, Clone)]
-pub struct ImageBitDepth(pub(crate) SkImage_BitDepth);
+pub type ImageBitDepth = EnumHandle<SkImage_BitDepth>;
 
 impl ImageBitDepth {
-    pub const U8: ImageBitDepth = ImageBitDepth(SkImage_BitDepth::kU8);
-    pub const F16: ImageBitDepth = ImageBitDepth(SkImage_BitDepth::kF16);
+    pub const U8: ImageBitDepth = EnumHandle(SkImage_BitDepth::kU8);
+    pub const F16: ImageBitDepth = EnumHandle(SkImage_BitDepth::kF16);
+}
+
+pub type CachingHint = EnumHandle<SkImage_CachingHint>;
+
+#[allow(non_upper_case_globals)]
+impl CachingHint {
+    pub const Allow : CachingHint = EnumHandle(SkImage_CachingHint::kAllow_CachingHint);
+    pub const Disallow : CachingHint = EnumHandle(SkImage_CachingHint::kDisallow_CachingHint);
 }
 
 pub type Image = RCHandle<SkImage>;
@@ -65,7 +83,7 @@ impl RefCounted for SkImage {
 impl Image {
 
     pub fn from_raster_data(info: &ImageInfo, pixels: Data, row_bytes: usize) -> Option<Image> {
-        Image::from_ptr(unsafe { C_SkImage_MakeRasterData(&info.0, pixels.shared_native(), row_bytes) })
+        Image::from_ptr(unsafe { C_SkImage_MakeRasterData(info.native(), pixels.shared_native(), row_bytes) })
     }
 
     pub fn from_bitmap(bitmap: &Bitmap) -> Option<Image> {
@@ -100,7 +118,7 @@ impl Image {
             C_SkImage_MakeFromTexture(
                 context.native_mut(),
                 backend_texture.native(),
-                origin.0,
+                *origin.native(),
                 color_type.0,
                 alpha_type.0,
                 color_space.shared_ptr())
@@ -135,7 +153,7 @@ impl Image {
             C_SkImage_MakeFromAdoptedTexture(
                 context.native_mut(),
                 backend_texture.native(),
-                origin.0,
+                *origin.native(),
                 color_type.0,
                 alpha_type.0,
                 color_space.shared_ptr())
@@ -161,7 +179,7 @@ impl Image {
                 yuva_textures.native().as_ptr(),
                 yuva_indices.as_ptr(),
                 image_size.to_native(),
-                image_origin.0,
+                *image_origin.native(),
                 image_color_space.shared_ptr())
         })
     }
@@ -186,7 +204,7 @@ impl Image {
                 yuva_textures.native().as_ptr(),
                 yuva_indices.as_ptr(),
                 image_size.to_native(),
-                image_origin.0,
+                *image_origin.native(),
                 backend_texture.native(),
                 image_color_space.shared_ptr())
         })
@@ -211,7 +229,7 @@ impl Image {
                 yuva_textures.native().as_ptr(),
                 yuva_indices.as_ptr(),
                 image_size.to_native(),
-                image_origin.0,
+                *image_origin.native(),
                 image_color_space.shared_ptr())
         })
     }
@@ -228,7 +246,7 @@ impl Image {
                 context.native_mut(),
                 yuv_color_space.0,
                 nv12_textures.native().as_ptr(),
-                image_origin.0,
+                *image_origin.native(),
                 image_color_space.shared_ptr())
         })
     }
@@ -246,7 +264,7 @@ impl Image {
                 context.native_mut(),
                 yuv_color_space.0,
                 nv12_textures.native().as_ptr(),
-                image_origin.0,
+                *image_origin.native(),
                 backend_texture.native(),
                 image_color_space.shared_ptr())
         })
@@ -321,7 +339,92 @@ impl Image {
         unsafe { self.native().isValid(context.native_mut()) }
     }
 
-    pub fn encode_to_data(&self) -> Option<Data> {
-        Data::from_ptr(unsafe { C_SkImage_encodeToData(self.native()) })
+    pub fn backend_texture(
+        &self,
+        flush_pending_gr_context_io: bool) -> (BackendTexture, SurfaceOrigin) {
+
+        let mut origin = GrSurfaceOrigin::kTopLeft_GrSurfaceOrigin;
+        let texture = unsafe {
+            self.native()
+                .getBackendTexture(flush_pending_gr_context_io, &mut origin)
+                .into_handle()
+        };
+        (texture, origin.into_handle())
+    }
+
+    pub fn read_pixels<P>(
+        &self,
+        dst_info: &ImageInfo,
+        pixels: &mut[P],
+        dst_row_bytes: usize,
+        src_x: i32, src_y: i32,
+        caching_hint: CachingHint) -> bool {
+
+        if pixels.size_of() != (dst_info.height() as usize) * dst_row_bytes {
+            return false
+        }
+
+        unsafe {
+            self.native().readPixels(
+                dst_info.native(),
+                pixels.as_mut_ptr() as _, dst_row_bytes,
+                src_x, src_y,
+                caching_hint.native().to_owned())
+        }
+    }
+
+    pub fn encode_to_data(&self, image_format: EncodedImageFormat) -> Option<Data> {
+        Data::from_ptr(unsafe {
+            C_SkImage_encodeToData(self.native())
+        })
+    }
+
+    pub fn ref_encoded_data(&self) -> Option<Data> {
+        Data::from_ptr(unsafe {
+            C_SkImage_refEncodedData(self.native())
+        })
+    }
+
+    pub fn new_subset(&self, rect: IRect) -> Option<Image> {
+        Image::from_ptr(unsafe {
+            C_SkImage_makeSubset(self.native(), &rect.to_native())
+        })
+    }
+
+    pub fn new_texture_image(
+        &self,
+        context: &mut graphics::Context,
+        dst_color_space: &mut ColorSpace,
+        mip_mapped: graphics::MipMapped) -> Option<Image> {
+
+        Image::from_ptr(unsafe {
+            C_SkImage_makeTextureImage(
+                self.native(),
+                context.native_mut(),
+                dst_color_space.native_mut(),
+                mip_mapped.native().to_owned())
+        })
+    }
+
+    pub fn new_non_texture_image(&self) -> Option<Image> {
+        Image::from_ptr(unsafe {
+            C_SkImage_makeNonTextureImage(self.native())
+        })
+    }
+
+    pub fn new_raster_image(&self) -> Option<Image> {
+        Image::from_ptr(unsafe {
+            C_SkImage_makeRasterImage(self.native())
+        })
+    }
+
+    pub fn is_lazy_generated(&self) -> bool {
+        unsafe { self.native().isLazyGenerated() }
+    }
+
+    pub fn new_color_space(&self, color_space: Option<&ColorSpace>) -> Option<Image> {
+        Image::from_ptr(unsafe {
+            C_SkImage_makeColorSpace(self.native(), color_space.shared_ptr())
+        })
     }
 }

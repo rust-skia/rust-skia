@@ -1,6 +1,7 @@
 use core::mem;
 use skia_safe::skia;
 use skia_safe::skia::Color;
+use skia_safe::skia::EncodedImageFormat;
 
 pub struct Canvas {
     surface: skia::Surface,
@@ -95,7 +96,7 @@ impl Canvas {
     #[inline]
     pub fn data(&mut self) -> skia::Data {
         let image = self.surface.make_image_snapshot();
-        image.encode_to_data().unwrap()
+        image.encode_to_data(EncodedImageFormat::PNG).unwrap()
     }
 
     #[inline]

@@ -76,34 +76,34 @@ impl YUVColorSpace {
     pub const Rec709: YUVColorSpace = YUVColorSpace(SkYUVColorSpace::kRec709_SkYUVColorSpace);
 }
 
-pub struct ImageInfo(pub(crate) SkImageInfo);
+pub type ImageInfo = Handle<SkImageInfo>;
 
-impl Drop for ImageInfo {
+impl NativeDrop for SkImageInfo {
     fn drop(&mut self) {
-        unsafe { rust_skia::C_SkImageInfo_Destruct(&mut self.0) }
+        unsafe { rust_skia::C_SkImageInfo_Destruct(self) }
     }
 }
 
-impl Clone for ImageInfo {
+impl NativeClone for SkImageInfo {
     fn clone(&self) -> Self {
-        let mut image_info = ImageInfo::new_empty();
-        unsafe { rust_skia::C_SkImageInfo_Copy(&self.0, &mut image_info.0); }
+        let mut image_info = unsafe { SkImageInfo::new() };
+        unsafe { rust_skia::C_SkImageInfo_Copy(self, &mut image_info); }
         image_info
     }
 }
 
 impl ImageInfo {
     pub fn new_empty() -> ImageInfo {
-        let mut image_info = ImageInfo(unsafe { uninitialized() });
-        unsafe { rust_skia::C_SkImageInfo_Construct(&mut image_info.0); }
-        image_info
+        let mut image_info : SkImageInfo = unsafe { uninitialized() };
+        unsafe { rust_skia::C_SkImageInfo_Construct(&mut image_info); }
+        ImageInfo::from_native(image_info)
     }
 
     pub fn new(dimensions: ISize, ct: ColorType, at: AlphaType, cs: Option<ColorSpace>) -> ImageInfo {
         let mut image_info = Self::new_empty();
 
         unsafe {
-            rust_skia::C_SkImageInfo_Make(&mut image_info.0, dimensions.width, dimensions.height, ct.0, at.0, cs.shared_ptr())
+            rust_skia::C_SkImageInfo_Make(image_info.native_mut(), dimensions.width, dimensions.height, ct.0, at.0, cs.shared_ptr())
         }
         image_info
     }
@@ -114,7 +114,7 @@ impl ImageInfo {
 
     pub fn new_s32(dimensions: ISize, at: AlphaType) -> ImageInfo {
         let mut image_info = Self::new_empty();
-        unsafe { rust_skia::C_SkImageInfo_MakeS32(&mut image_info.0, dimensions.width, dimensions.height, at.0); }
+        unsafe { rust_skia::C_SkImageInfo_MakeS32(image_info.native_mut(), dimensions.width, dimensions.height, at.0); }
         image_info
     }
 
@@ -143,15 +143,15 @@ impl ImageInfo {
     }
 
     pub fn color_type(&self) -> ColorType {
-        ColorType(self.0.fColorType)
+        ColorType(self.native().fColorType)
     }
 
     pub fn alpha_type(&self) -> AlphaType {
-        AlphaType(self.0.fAlphaType)
+        AlphaType(self.native().fAlphaType)
     }
 
     pub fn color_space(&self) -> Option<ColorSpace> {
-        ColorSpace::from_ptr(unsafe { rust_skia::C_SkImageInfo_colorSpace(&self.0) })
+        ColorSpace::from_ptr(unsafe { rust_skia::C_SkImageInfo_colorSpace(self.native()) })
     }
 
     pub fn is_empty(&self) -> bool {
@@ -163,7 +163,7 @@ impl ImageInfo {
     }
 
     pub fn dimensions(&self) -> ISize {
-        ISize::from_native(self.0.fDimensions)
+        ISize::from_native(self.native().fDimensions)
     }
 
     pub fn bounds(&self) -> IRect {
@@ -193,27 +193,27 @@ impl ImageInfo {
     }
 
     pub fn bytes_per_pixel(&self) -> usize {
-        unsafe { self.0.bytesPerPixel() as _ }
+        unsafe { self.native().bytesPerPixel() as _ }
     }
 
     pub fn shift_per_pixel(&self) -> usize {
-        unsafe { self.0.shiftPerPixel() as _ }
+        unsafe { self.native().shiftPerPixel() as _ }
     }
 
     pub fn min_row_bytes(&self) -> usize {
-        unsafe { self.0.minRowBytes() }
+        unsafe { self.native().minRowBytes() }
     }
 
     pub fn compute_offset(&self, point: IPoint, row_bytes: usize) -> usize {
-        unsafe { self.0.computeOffset(point.x, point.y, row_bytes) }
+        unsafe { self.native().computeOffset(point.x, point.y, row_bytes) }
     }
 
     pub fn compute_byte_size(&self, row_bytes: usize) -> usize {
-        unsafe { self.0.computeByteSize(row_bytes) }
+        unsafe { self.native().computeByteSize(row_bytes) }
     }
 
     pub fn valid_row_bytes(&self, row_bytes: usize) -> bool {
-        unsafe { self.0.validRowBytes(row_bytes) }
+        unsafe { self.native().validRowBytes(row_bytes) }
     }
 }
 

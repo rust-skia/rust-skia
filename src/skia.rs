@@ -16,6 +16,9 @@ pub use self::color_space::*;
 mod data;
 pub use self::data::*;
 
+mod encoded_image_format;
+pub use self::encoded_image_format::*;
+
 mod image;
 pub use self::image::*;
 
