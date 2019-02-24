@@ -213,6 +213,7 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .rustified_enum("SkImage_CachingHint")
     .rustified_enum("SkColorChannel")
     .rustified_enum("SkYUVAIndex_Index")
+    .rustified_enum("SkEncodedImageFormat")
 
     .whitelist_var("SK_Color.*")
 
