@@ -5,21 +5,15 @@ use rust_skia::{GrBackendTexture, C_GrBackendTexture_destruct, GrVkImageInfo};
 #[cfg(feature = "vulkan")]
 use super::vulkan;
 
-pub struct BackendTexture (pub(crate) GrBackendTexture);
+pub type BackendTexture = Handle<GrBackendTexture>;
 
-impl Drop for BackendTexture {
+impl NativeDrop for GrBackendTexture {
     fn drop(&mut self) {
-        unsafe { C_GrBackendTexture_destruct(&self.0) }
+        unsafe { C_GrBackendTexture_destruct(self) }
     }
 }
 
-impl Clone for BackendTexture {
-    fn clone(&self) -> Self {
-        BackendTexture(self.0.clone())
-    }
-}
-
-impl InternalClone for GrBackendTexture {
+impl NativeClone for GrBackendTexture {
     fn clone(&self) -> Self {
         unsafe { GrBackendTexture::new4(self) }
     }
@@ -41,7 +35,7 @@ impl BackendTexture {
 
     pub (crate) unsafe fn from_raw(backend_texture: GrBackendTexture) -> Option<BackendTexture> {
         if backend_texture.fIsValid {
-            Some (BackendTexture(backend_texture))
+            Some (BackendTexture::from_native(backend_texture))
         } else {
             None
         }
@@ -49,17 +43,17 @@ impl BackendTexture {
 
     #[cfg(feature = "vulkan")]
     pub fn width(&self) -> u32 {
-        unsafe { self.0.width() as u32 }
+        unsafe { self.native().width() as u32 }
     }
 
     #[cfg(feature = "vulkan")]
     pub fn height(&self) -> u32 {
-        unsafe { self.0.height() as u32 }
+        unsafe { self.native().height() as u32 }
     }
 
     #[cfg(feature = "vulkan")]
     pub fn has_mip_maps(&self) -> bool {
-        unsafe { self.0.hasMipMaps() }
+        unsafe { self.native().hasMipMaps() }
     }
 
     #[cfg(feature = "vulkan")]
@@ -67,7 +61,7 @@ impl BackendTexture {
         unsafe {
             // constructor not available.
             let mut image_info : GrVkImageInfo = mem::zeroed();
-            if self.0.getVkImageInfo(&mut image_info as _) {
+            if self.native().getVkImageInfo(&mut image_info as _) {
                 Some(vulkan::ImageInfo::from_raw(image_info))
             } else {
                 None

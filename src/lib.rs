@@ -109,18 +109,68 @@ mod prelude {
         fn native_mut(&mut self) -> &mut N;
     }
 
-    /// Every handle's native type needs to imlement this trait.
+    /// Implements Drop for native types we can not implement Drop for.
     pub trait NativeDrop {
         fn drop(&mut self);
     }
 
-    /// A representation type for a native type that needs a destructor to be called.
+    /// Clone for bindings types we can not implement Clone for.
+    pub trait NativeClone {
+        fn clone(&self) -> Self;
+    }
+
+    impl<N: NativeDrop + NativeClone> Clone for Handle<N> {
+        fn clone(&self) -> Self {
+            Self::from_native(self.0.clone())
+        }
+    }
+
+    /// Even though some types may have complete value semantics, equality
+    /// comparison may need to be customized.
+    pub trait NativePartialEq {
+        fn eq(&self, rhs: &Self) -> bool;
+    }
+
+    /// A representation type for a native type that has full Copy & Clone value semantics.
+    #[derive(Copy, Clone)]
+    pub struct ValueHandle<N: Clone>(N);
+
+    impl<N: Clone> ValueHandle<N> {
+        pub fn from_native(n: N) -> ValueHandle<N> {
+            ValueHandle(n)
+        }
+    }
+
+    impl<N: Clone> NativeAccess<N> for ValueHandle<N> {
+        fn native(&self) -> &N {
+            &self.0
+        }
+
+        fn native_mut(&mut self) -> &mut N {
+            &mut self.0
+        }
+    }
+
+    impl<N: NativePartialEq + Clone> PartialEq for ValueHandle<N> {
+        fn eq(&self, rhs: &Self) -> bool {
+            self.0.eq(&rhs.0)
+        }
+    }
+
+    /// A representation type for a native type that has value semantics but
+    /// requires a destructor.
     pub struct Handle<N: NativeDrop>(N);
 
     impl<N: NativeDrop> Handle<N> {
         #[inline]
         pub fn from_native(n: N) -> Handle<N> {
             Handle(n)
+        }
+    }
+
+    impl<N: NativeDrop> Drop for Handle<N> {
+        fn drop(&mut self) {
+            self.0.drop()
         }
     }
 
@@ -134,13 +184,26 @@ mod prelude {
         }
     }
 
-    /// A trait that supports retrieving a pointer from an Option<Handle<Native>>
+    pub trait NativeSliceAccess<N: NativeDrop + NativeClone> {
+        fn native(&self) -> Vec<N>;
+    }
+
+    impl<N> NativeSliceAccess<N> for [Handle<N>]
+        where N: NativeDrop + NativeClone {
+        fn native(&self) -> Vec<N> {
+            self.iter().map(|v| (v.native().clone())).collect()
+        }
+    }
+
+    /// A trait that supports retrieving a pointer from an Option<Handle<Native>>.
+    /// Returns a null pointer if the Option is None.
     pub trait NativePointer<N> {
         fn native_ptr(&self) -> *const N;
     }
 
-    impl<N: NativeDrop> NativePointer<N> for Option<Handle<N>> {
-        #[inline]
+    impl<H, N> NativePointer<N> for Option<H>
+        where H: NativeAccess<N>
+    {
         fn native_ptr(&self) -> *const N {
             match self {
                 Some(handle) => handle.native(),
@@ -237,10 +300,5 @@ mod prelude {
                 None => ptr::null_mut()
             }
         }
-    }
-
-    /// Clone for bindings types we can not implement Clone for.
-    pub trait InternalClone {
-        fn clone(&self) -> Self;
     }
 }

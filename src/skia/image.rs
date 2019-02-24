@@ -99,7 +99,7 @@ impl Image {
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromTexture(
                 context.native_mut(),
-                &backend_texture.0,
+                backend_texture.native(),
                 origin.0,
                 color_type.0,
                 alpha_type.0,
@@ -134,7 +134,7 @@ impl Image {
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromAdoptedTexture(
                 context.native_mut(),
-                &backend_texture.0,
+                backend_texture.native(),
                 origin.0,
                 color_type.0,
                 alpha_type.0,
@@ -151,9 +151,6 @@ impl Image {
         image_origin: graphics::SurfaceOrigin,
         image_color_space: Option<ColorSpace>) -> Option<Image> {
 
-        let yuva_textures : Vec<GrBackendTexture> =
-            yuva_textures.iter().map(|t| t.0.clone()).collect();
-
         let yuva_indices : Vec<SkYUVAIndex> =
             yuva_indices.iter().map(|i| i.0).collect();
 
@@ -161,7 +158,7 @@ impl Image {
             C_SkImage_MakeFromYUVATexturesCopy(
                 context.native_mut(),
                 yuv_color_space.0,
-                yuva_textures.as_ptr(),
+                yuva_textures.native().as_ptr(),
                 yuva_indices.as_ptr(),
                 image_size.to_native(),
                 image_origin.0,
@@ -179,9 +176,6 @@ impl Image {
         backend_texture: &graphics::BackendTexture,
         image_color_space: Option<ColorSpace>) -> Option<Image> {
 
-        let yuva_textures : Vec<GrBackendTexture> =
-            yuva_textures.iter().map(|t| t.0.clone()).collect();
-
         let yuva_indices : Vec<SkYUVAIndex> =
             yuva_indices.iter().map(|i| i.0).collect();
 
@@ -189,11 +183,11 @@ impl Image {
             C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend(
                 context.native_mut(),
                 yuv_color_space.0,
-                yuva_textures.as_ptr(),
+                yuva_textures.native().as_ptr(),
                 yuva_indices.as_ptr(),
                 image_size.to_native(),
                 image_origin.0,
-                &backend_texture.0,
+                backend_texture.native(),
                 image_color_space.shared_ptr())
         })
     }
@@ -207,9 +201,6 @@ impl Image {
         image_origin: graphics::SurfaceOrigin,
         image_color_space: Option<ColorSpace>) -> Option<Image> {
 
-        let yuva_textures : Vec<GrBackendTexture> =
-            yuva_textures.iter().map(|t| t.0.clone()).collect();
-
         let yuva_indices : Vec<SkYUVAIndex> =
             yuva_indices.iter().map(|i| i.0).collect();
 
@@ -217,7 +208,7 @@ impl Image {
             C_SkImage_MakeFromYUVATextures(
                 context.native_mut(),
                 yuv_color_space.0,
-                yuva_textures.as_ptr(),
+                yuva_textures.native().as_ptr(),
                 yuva_indices.as_ptr(),
                 image_size.to_native(),
                 image_origin.0,
@@ -232,14 +223,11 @@ impl Image {
         image_origin: graphics::SurfaceOrigin,
         image_color_space: Option<ColorSpace>) -> Option<Image> {
 
-        let nv12_textures : Vec<GrBackendTexture> =
-            nv12_textures.iter().map(|t| t.0.clone()).collect();
-
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromNV12TexturesCopy(
                 context.native_mut(),
                 yuv_color_space.0,
-                nv12_textures.as_ptr(),
+                nv12_textures.native().as_ptr(),
                 image_origin.0,
                 image_color_space.shared_ptr())
         })
@@ -253,16 +241,13 @@ impl Image {
         backend_texture: &graphics::BackendTexture,
         image_color_space: Option<ColorSpace>) -> Option<Image> {
 
-        let nv12_textures : Vec<GrBackendTexture> =
-            nv12_textures.iter().map(|t| t.0.clone()).collect();
-
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
                 context.native_mut(),
                 yuv_color_space.0,
-                nv12_textures.as_ptr(),
+                nv12_textures.native().as_ptr(),
                 image_origin.0,
-                &backend_texture.0,
+                backend_texture.native(),
                 image_color_space.shared_ptr())
         })
     }

@@ -55,11 +55,9 @@ impl NativeDrop for SkBitmap {
     }
 }
 
-impl Clone for Bitmap {
+impl NativeClone for SkBitmap {
     fn clone(&self) -> Self {
-        let mut bitmap = Bitmap::new();
-        unsafe { C_SkBitmap_Copy(self.native(), bitmap.native_mut()) }
-        bitmap
+        return unsafe { SkBitmap::new1(self) };
     }
 }
 

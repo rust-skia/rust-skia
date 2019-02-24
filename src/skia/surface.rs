@@ -37,7 +37,12 @@ impl Surface {
         sample_count: u32,
         color_type: SkColorType) -> Option<Surface> {
         Surface::from_ptr(unsafe {
-            rust_skia::C_SkSurface_MakeFromBackendTexture(context.native_mut(), &backend_texture.0, origin, sample_count as i32, color_type)
+            rust_skia::C_SkSurface_MakeFromBackendTexture(
+                context.native_mut(),
+                backend_texture.native(),
+                origin,
+                sample_count as i32,
+                color_type)
         })
     }
 
