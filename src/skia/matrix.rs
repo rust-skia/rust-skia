@@ -1,16 +1,30 @@
-use std::mem;
-use rust_skia::SkMatrix;
-use rust_skia::SkMatrix_TypeMask;
+use std::{
+    ops::Index,
+    iter,
+    iter::Enumerate,
+    mem,
+    ops::IndexMut,
+    ptr
+};
 use crate::prelude::*;
-use crate::skia::MatrixTypeMask;
-use crate::skia::Scalar;
-use std::ops::Index;
-use std::ops::IndexMut;
-use crate::skia::Vector;
-use crate::skia::Point;
-use rust_skia::SkMatrix_ScaleToFit;
-use crate::skia::Rect;
-use rust_skia::SkPoint;
+use crate::{
+    skia::Vector,
+    skia::Scalar,
+    skia::MatrixTypeMask,
+    skia::Point,
+    skia::Rect,
+    skia::Point3,
+    skia::Size
+};
+use rust_skia::{
+    SkPoint,
+    SkMatrix_ScaleToFit,
+    SkMatrix_TypeMask,
+    SkMatrix,
+    SkPoint3,
+    SkRect,
+    SkSize
+};
 
 pub type MatrixScaleToFit = EnumHandle<SkMatrix_ScaleToFit>;
 
@@ -364,10 +378,164 @@ impl Matrix {
         m
     }
 
-    
+    pub fn map_points(&self, dst: &mut [Point], src: &[Point]) {
+        assert!(dst.len() >= src.len());
+        assert!(src.len() <= i32::max_value() as usize);
 
+        let src_native : Vec<SkPoint> = src.iter().map(|p| p.to_native()).collect();
+        let mut dst_native : Vec<SkPoint> = iter::repeat(SkPoint { fX: 0.0, fY: 0.0 }).take(src.len()).collect();
+        unsafe { self.native().mapPoints(dst_native.as_mut_ptr(), src_native.as_ptr(), src.len() as i32) }
+        dst_native
+            .iter()
+            .enumerate()
+            .for_each(|(i, p)| dst[i] = Point::from_native(*p));
+    }
 
+    pub fn map_points_inplace(&self, pts: &mut[Point]) {
+        assert!(pts.len() <= i32::max_value() as usize);
 
+        let mut pts_native : Vec<SkPoint> = pts.iter().map(|p| p.to_native()).collect();
+        unsafe { self.native().mapPoints1(pts_native.as_mut_ptr(), pts_native.len() as i32) }
+        pts_native
+            .iter()
+            .enumerate()
+            .for_each(|(i, p)| pts[i] = Point::from_native(*p));
+    }
+
+    pub fn map_homogeneous_points(&self, dst: &mut[Point3], src: &[Point3]) {
+        assert!(dst.len() >= src.len());
+        assert!(src.len() <= i32::max_value() as usize);
+
+        let src_native : Vec<SkPoint3> = src.iter().map(|p| p.to_native()).collect();
+        let mut dst_native : Vec<SkPoint3> = iter::repeat(SkPoint3 { fX: 0.0, fY: 0.0, fZ: 0.0}).take(src.len()).collect();
+
+        unsafe { self.native().mapHomogeneousPoints(dst_native.as_mut_ptr(), src_native.as_ptr(), src.len() as i32) }
+        dst_native
+            .iter()
+            .enumerate()
+            .for_each(|(i, p)| dst[i] = Point3::from_native(*p));
+    }
+
+    pub fn map_xy(&self, x: f32, y: f32) -> Point {
+        Point::from_native(unsafe { self.native().mapXY1(x, y) })
+    }
+
+    pub fn map_vectors(&self, dst: &mut[Vector], src: &[Vector]) {
+        assert!(dst.len() >= src.len());
+        assert!(src.len() <= i32::max_value() as usize);
+
+        let src_native : Vec<SkPoint> = src.iter().map(|p| p.to_native()).collect();
+        let mut dst_native : Vec<SkPoint> = iter::repeat(SkPoint { fX: 0.0, fY: 0.0 }).take(src.len()).collect();
+        unsafe { self.native().mapVectors(dst_native.as_mut_ptr(), src_native.as_ptr(), src.len() as i32) }
+        dst_native
+            .iter()
+            .enumerate()
+            .for_each(|(i, p)| dst[i] = Point::from_native(*p));
+    }
+
+    pub fn map_vectors_inplace(&self, vecs: &mut[Vector]) {
+        assert!(vecs.len() <= i32::max_value() as usize);
+
+        let mut vecs_native : Vec<SkPoint> = vecs.iter().map(|p| p.to_native()).collect();
+        unsafe { self.native().mapVectors1(vecs_native.as_mut_ptr(), vecs_native.len() as i32) }
+        vecs_native
+            .iter()
+            .enumerate()
+            .for_each(|(i, p)| vecs[i] = Point::from_native(*p));
+    }
+
+    pub fn map_vector(&self, vec: Vector) -> Vector {
+        Vector::from_native(unsafe { self.native().mapVector1(vec.x, vec.y) })
+    }
+
+    pub fn map_rect(&self, rect: Rect) -> (Rect, bool) {
+        let mut rect : SkRect = rect.to_native();
+        let rect_stays_rect = unsafe { self.native().mapRect1(&mut rect) };
+        (Rect::from_native(rect), rect_stays_rect)
+    }
+
+    pub fn map_rect_to_quad(&self, rect: Rect) -> [Point; 4] {
+        let mut points = [SkPoint { fX: 0.0, fY: 0.0 }; 4];
+        unsafe { self.native().mapRectToQuad(points.as_mut_ptr(), &rect.to_native()) };
+        let mut r = [Point::new(0.0, 0.0); 4];
+        points
+            .iter()
+            .enumerate()
+            .for_each(|(i, p)| r[i] = Point::from_native(*p));
+        r
+    }
+
+    pub fn map_radius(&self, radius: f32) -> f32 {
+        unsafe { self.native().mapRadius(radius) }
+    }
+
+    pub fn is_fixed_step_in_x(&self) -> bool {
+        unsafe { self.native().isFixedStepInX() }
+    }
+
+    pub fn fixed_step_in_x(&self, y: f32) -> Vector {
+        Vector::from_native(unsafe { self.native().fixedStepInX(y) })
+    }
+
+    pub fn cheap_equal_to(&self, other: &Matrix) -> bool {
+        unsafe { self.native().cheapEqualTo(other.native()) }
+    }
+
+    pub fn min_scale(&self) -> f32 {
+        unsafe { self.native().getMinScale() }
+    }
+
+    pub fn max_scale(&self) -> f32 {
+        unsafe { self.native().getMaxScale() }
+    }
+
+    pub fn min_max_scales(&self) -> (f32, f32) {
+        let mut r: [f32; 2] = Default::default();
+        unsafe { self.native().getMinMaxScales(r.as_mut_ptr()) };
+        (r[0], r[1])
+    }
+
+    pub fn decompose_scale(&self, remaining: Option<&mut SkMatrix>) -> Option<Size> {
+        let mut size = SkSize { fWidth: 0.0, fHeight: 0.0 };
+        let remaining =
+            match remaining {
+                Some(remaining) => remaining as _,
+                None => ptr::null_mut()
+            };
+        if unsafe { self.native().decomposeScale(&mut size, remaining) } {
+            Some (Size::from_native(size))
+        } else {
+            None
+        }
+    }
+
+    pub fn i() -> &'static Matrix {
+        &IDENTITY
+    }
+
+    pub fn invalid_matrix() -> &'static Matrix {
+        &INVALID
+    }
+
+    pub fn concat(a: &Matrix, b: &Matrix) -> Matrix {
+        let mut m = Matrix::new_identity();
+        unsafe { m.native_mut().setConcat(a.native(), b.native()) };
+        m
+    }
+
+    pub fn dirty_matrix_type_cache(&mut self) {
+        // does not link:
+        // unsafe { self.native_mut().dirtyMatrixTypeCache() }
+        self.native_mut().fTypeMask = 0x80;
+    }
+
+    pub fn set_scale_translate(&mut self, sx: f32, sy: f32, tx: f32, ty: f32) {
+        unsafe { self.native_mut().setScaleTranslate(sx, sy, tx, ty) }
+    }
+
+    pub fn is_finite(&self) -> bool {
+        unsafe { self.native().isFinite() }
+    }
 
     pub fn new_identity() -> Matrix {
         // SkMatrix contains no C++ types, so this is safe:
@@ -379,6 +547,11 @@ impl Matrix {
 
 impl IndexGet for Matrix {}
 impl IndexSet for Matrix {}
+
+lazy_static! {
+    static ref IDENTITY : Matrix = Matrix::new_identity();
+    static ref INVALID : Matrix = unsafe { *SkMatrix::InvalidMatrix() }.into_handle();
+}
 
 #[test]
 fn test_get_set_trait_compilation() {

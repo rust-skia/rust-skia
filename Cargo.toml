@@ -12,4 +12,4 @@ vulkan = ["rust-skia/vulkan"]
 bitflags = "1.0"
 euclid = "0.19"
 rust-skia = { path = "../rust-skia" }
-
+lazy_static = "1.2"
