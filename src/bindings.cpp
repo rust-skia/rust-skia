@@ -9,6 +9,7 @@
 #include "SkPicture.h"
 #include "SkYUVAIndex.h"
 #include "SkPoint3.h"
+#include "SkRegion.h"
 
 #include "GrContext.h"
 
@@ -447,6 +448,18 @@ extern "C" bool C_SkRRect_not_equals(const SkRRect* lhs, const SkRRect* rhs) {
 
 extern "C" void C_GrBackendTexture_destruct(const GrBackendTexture* self) {
     self->~GrBackendTexture();
+}
+
+//
+// SkRegion
+//
+
+extern "C" void C_SkRegion_destruct(SkRegion* region) {
+    region->~SkRegion();
+}
+
+extern "C" bool C_SkRegion_equals(const SkRegion* lhs, const SkRegion* rhs) {
+    return *lhs == *rhs;
 }
 
 #if defined(SK_VULKAN)
