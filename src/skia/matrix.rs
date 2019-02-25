@@ -7,14 +7,14 @@ use std::{
     ptr
 };
 use crate::prelude::*;
-use crate::{
-    skia::Vector,
-    skia::Scalar,
-    skia::MatrixTypeMask,
-    skia::Point,
-    skia::Rect,
-    skia::Point3,
-    skia::Size
+use crate::skia::{
+    Vector,
+    Scalar,
+    MatrixTypeMask,
+    Point,
+    Rect,
+    Point3,
+    Size
 };
 use rust_skia::{
     SkPoint,
@@ -325,7 +325,7 @@ impl Matrix {
 
     pub fn new_rect_to_rect(src: &Rect, dst: &Rect, stf: MatrixScaleToFit) -> Option<Matrix> {
         let mut m = Matrix::new_identity();
-        if unsafe { m.native_mut().setRectToRect(&src.to_native(), &dst.to_native(), stf.native().to_owned()) } {
+        if unsafe { m.native_mut().setRectToRect(&src.into_native(), &dst.into_native(), stf.native().to_owned()) } {
             Some(m)
         } else {
             None
@@ -337,8 +337,8 @@ impl Matrix {
             return None
         }
 
-        let src : Vec<SkPoint> = src.iter().map(|p| p.to_native()).collect();
-        let dst : Vec<SkPoint> = dst.iter().map(|p| p.to_native()).collect();
+        let src : Vec<SkPoint> = src.to_native();
+        let dst : Vec<SkPoint> = dst.to_native();
 
         let mut m = Matrix::new_identity();
         if unsafe { m.native_mut().setPolyToPoly(src.as_ptr(), dst.as_ptr(), src.len() as _) } {
@@ -382,7 +382,7 @@ impl Matrix {
         assert!(dst.len() >= src.len());
         assert!(src.len() <= i32::max_value() as usize);
 
-        let src_native : Vec<SkPoint> = src.iter().map(|p| p.to_native()).collect();
+        let src_native = src.to_native();
         let mut dst_native : Vec<SkPoint> = iter::repeat(SkPoint { fX: 0.0, fY: 0.0 }).take(src.len()).collect();
         unsafe { self.native().mapPoints(dst_native.as_mut_ptr(), src_native.as_ptr(), src.len() as i32) }
         dst_native
@@ -394,7 +394,7 @@ impl Matrix {
     pub fn map_points_inplace(&self, pts: &mut[Point]) {
         assert!(pts.len() <= i32::max_value() as usize);
 
-        let mut pts_native : Vec<SkPoint> = pts.iter().map(|p| p.to_native()).collect();
+        let mut pts_native = pts.to_native();
         unsafe { self.native().mapPoints1(pts_native.as_mut_ptr(), pts_native.len() as i32) }
         pts_native
             .iter()
@@ -406,7 +406,7 @@ impl Matrix {
         assert!(dst.len() >= src.len());
         assert!(src.len() <= i32::max_value() as usize);
 
-        let src_native : Vec<SkPoint3> = src.iter().map(|p| p.to_native()).collect();
+        let src_native : Vec<SkPoint3> = src.to_native();
         let mut dst_native : Vec<SkPoint3> = iter::repeat(SkPoint3 { fX: 0.0, fY: 0.0, fZ: 0.0}).take(src.len()).collect();
 
         unsafe { self.native().mapHomogeneousPoints(dst_native.as_mut_ptr(), src_native.as_ptr(), src.len() as i32) }
@@ -424,7 +424,7 @@ impl Matrix {
         assert!(dst.len() >= src.len());
         assert!(src.len() <= i32::max_value() as usize);
 
-        let src_native : Vec<SkPoint> = src.iter().map(|p| p.to_native()).collect();
+        let src_native = src.to_native();
         let mut dst_native : Vec<SkPoint> = iter::repeat(SkPoint { fX: 0.0, fY: 0.0 }).take(src.len()).collect();
         unsafe { self.native().mapVectors(dst_native.as_mut_ptr(), src_native.as_ptr(), src.len() as i32) }
         dst_native
@@ -436,7 +436,7 @@ impl Matrix {
     pub fn map_vectors_inplace(&self, vecs: &mut[Vector]) {
         assert!(vecs.len() <= i32::max_value() as usize);
 
-        let mut vecs_native : Vec<SkPoint> = vecs.iter().map(|p| p.to_native()).collect();
+        let mut vecs_native = vecs.to_native();
         unsafe { self.native().mapVectors1(vecs_native.as_mut_ptr(), vecs_native.len() as i32) }
         vecs_native
             .iter()
@@ -449,14 +449,14 @@ impl Matrix {
     }
 
     pub fn map_rect(&self, rect: Rect) -> (Rect, bool) {
-        let mut rect : SkRect = rect.to_native();
+        let mut rect = rect.into_native();
         let rect_stays_rect = unsafe { self.native().mapRect1(&mut rect) };
         (Rect::from_native(rect), rect_stays_rect)
     }
 
     pub fn map_rect_to_quad(&self, rect: Rect) -> [Point; 4] {
         let mut points = [SkPoint { fX: 0.0, fY: 0.0 }; 4];
-        unsafe { self.native().mapRectToQuad(points.as_mut_ptr(), &rect.to_native()) };
+        unsafe { self.native().mapRectToQuad(points.as_mut_ptr(), &rect.into_native()) };
         let mut r = [Point::new(0.0, 0.0); 4];
         points
             .iter()

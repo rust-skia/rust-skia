@@ -94,7 +94,7 @@ impl Image {
 
         let subset_ptr : *const SkIRect = {
             match subset {
-                Some(subset) => &(subset.to_native()) as _,
+                Some(subset) => &(subset.into_native()) as _,
                 None => ptr::null()
             }
         };
@@ -178,7 +178,7 @@ impl Image {
                 yuv_color_space.0,
                 yuva_textures.native().as_ptr(),
                 yuva_indices.as_ptr(),
-                image_size.to_native(),
+                image_size.into_native(),
                 *image_origin.native(),
                 image_color_space.shared_ptr())
         })
@@ -203,7 +203,7 @@ impl Image {
                 yuv_color_space.0,
                 yuva_textures.native().as_ptr(),
                 yuva_indices.as_ptr(),
-                image_size.to_native(),
+                image_size.into_native(),
                 *image_origin.native(),
                 backend_texture.native(),
                 image_color_space.shared_ptr())
@@ -228,7 +228,7 @@ impl Image {
                 yuv_color_space.0,
                 yuva_textures.native().as_ptr(),
                 yuva_indices.as_ptr(),
-                image_size.to_native(),
+                image_size.into_native(),
                 *image_origin.native(),
                 image_color_space.shared_ptr())
         })
@@ -281,7 +281,7 @@ impl Image {
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromPicture(
                 picture.shared_native(),
-                &dimensions.to_native(),
+                &dimensions.into_native(),
                 matrix.native_ptr(),
                 paint.native_ptr(),
                 bit_depth.0,
@@ -387,7 +387,7 @@ impl Image {
 
     pub fn new_subset(&self, rect: IRect) -> Option<Image> {
         Image::from_ptr(unsafe {
-            C_SkImage_makeSubset(self.native(), &rect.to_native())
+            C_SkImage_makeSubset(self.native(), &rect.into_native())
         })
     }
 

@@ -37,7 +37,7 @@ impl Picture {
 
     pub fn new_placeholder(cull: &Rect) -> Picture {
         Picture::from_ptr(unsafe {
-            C_SkPicture_MakePlaceholder(&cull.to_native())
+            C_SkPicture_MakePlaceholder(&cull.into_native())
         }).unwrap()
     }
 

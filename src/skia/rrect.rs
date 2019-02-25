@@ -45,7 +45,7 @@ impl NativePartialEq for RRect {
         unsafe { C_SkRRect_equals(self.native(), rhs.native()) }
     }
 
-    fn neq(&self, rhs: &Self) -> bool {
+    fn ne(&self, rhs: &Self) -> bool {
         unsafe { C_SkRRect_not_equals(self.native(), rhs.native()) }
     }
 }
@@ -99,17 +99,17 @@ impl RRect {
     }
 
     pub fn new_rect(rect: &Rect) -> Self {
-        unsafe { SkRRect::MakeRect(&rect.to_native()) }
+        unsafe { SkRRect::MakeRect(&rect.into_native()) }
             .into_handle()
     }
 
     pub fn new_oval(oval: &Rect) -> Self {
-        unsafe { SkRRect::MakeOval(&oval.to_native()) }
+        unsafe { SkRRect::MakeOval(&oval.into_native()) }
             .into_handle()
     }
 
     pub fn new_rect_xy(rect: &Rect, x_rad: f32, y_rad: f32) -> Self {
-        unsafe { SkRRect::MakeRectXY(&rect.to_native(), x_rad, y_rad) }
+        unsafe { SkRRect::MakeRectXY(&rect.into_native(), x_rad, y_rad) }
             .into_handle()
     }
 
@@ -118,7 +118,7 @@ impl RRect {
         unsafe {
             r.native_mut()
                 .setNinePatch(
-                    &rect.to_native(),
+                    &rect.into_native(),
                     left_rad, top_rad, right_rad, bottom_rad)
         }
         r
@@ -127,9 +127,9 @@ impl RRect {
     pub fn new_rect_radii(rect: &Rect, radii: &[Vector; 4]) -> Self {
         let mut r = Self::new_empty();
         unsafe {
-            let v : Vec<SkVector> = radii.iter().map(|v| v.to_native()).collect();
+            let v : Vec<SkVector> = radii.iter().map(|v| v.into_native()).collect();
             r.native_mut()
-                .setRectRadii(&rect.to_native(), v.as_ptr())
+                .setRectRadii(&rect.into_native(), v.as_ptr())
         }
         r
     }
@@ -173,7 +173,7 @@ impl RRect {
     }
 
     pub fn contains(&self, rect: &Rect) -> bool {
-        unsafe { self.native().contains(&rect.to_native()) }
+        unsafe { self.native().contains(&rect.into_native()) }
     }
 
     pub fn is_valid(&self) -> bool {

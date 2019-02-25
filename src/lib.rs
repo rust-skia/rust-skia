@@ -103,9 +103,19 @@ mod prelude {
     /// can convert to and from it. This is for cases in which we
     /// can't use the From / Into traits, because we pull in the
     /// rust type from another crate.
-    pub trait NativeRepresentation<Native> {
-        fn to_native(self) -> Native;
-        fn from_native(native: Native) -> Self;
+    pub trait NativeRepresentation<NT> {
+        fn into_native(self) -> NT;
+        fn from_native(native: NT) -> Self;
+    }
+
+    pub trait ToNative<NT> {
+        fn to_native(&self) -> NT;
+    }
+
+    impl<NT, RT: Copy + NativeRepresentation<NT>> ToNative<Vec<NT>> for [RT] {
+        fn to_native(&self) -> Vec<NT> {
+            self.iter().map(|v| v.into_native()).collect()
+        }
     }
 
     /// Trait that enables access to a native representation by reference.
@@ -191,7 +201,7 @@ mod prelude {
     pub trait NativePartialEq {
         fn eq(&self, rhs: &Self) -> bool;
 
-        fn neq(&self, rhs: &Self) -> bool {
+        fn ne(&self, rhs: &Self) -> bool {
             !self.eq(rhs)
         }
     }
@@ -245,6 +255,16 @@ mod prelude {
 
         fn native_mut(&mut self) -> &mut N {
             &mut self.0
+        }
+    }
+
+    impl<N: NativeDrop + NativePartialEq > PartialEq for Handle<N> {
+        fn eq(&self, rhs: &Self) -> bool {
+            self.0.eq(&rhs.0)
+        }
+
+        fn ne(&self, rhs: &Self) -> bool {
+            self.0.ne(&rhs.0)
         }
     }
 

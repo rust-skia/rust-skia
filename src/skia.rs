@@ -43,6 +43,9 @@ pub use self::path::*;
 mod picture;
 pub use self::picture::*;
 
+mod region;
+pub use self::region::*;
+
 mod rrect;
 pub use self::rrect::*;
 

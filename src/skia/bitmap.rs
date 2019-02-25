@@ -241,7 +241,7 @@ impl Bitmap {
     }
 
     pub fn erase(&self, c: Color, area: &IRect) {
-        unsafe { self.native().erase(c.0, &area.to_native()) }
+        unsafe { self.native().erase(c.0, &area.into_native()) }
     }
 
     #[inline]
@@ -260,7 +260,7 @@ impl Bitmap {
     }
 
     pub fn extract_subset(&self, dst: &mut Bitmap, subset: &IRect) -> bool {
-        unsafe { self.native().extractSubset(dst.native_mut(), &subset.to_native() ) }
+        unsafe { self.native().extractSubset(dst.native_mut(), &subset.into_native() ) }
     }
 
     pub unsafe fn read_pixels(&self, dst_info: &ImageInfo, dst_pixels: *mut c_void, dst_row_bytes: usize, src_x: i32, src_y: i32) -> bool {
