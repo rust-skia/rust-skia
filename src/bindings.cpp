@@ -8,6 +8,7 @@
 #include "SkSurface.h"
 #include "SkPicture.h"
 #include "SkYUVAIndex.h"
+#include "SkPoint3.h"
 
 #include "GrContext.h"
 
@@ -353,7 +354,9 @@ extern "C" bool C_SkSurfaceProps_Equals(const SkSurfaceProps* self, const SkSurf
     return *self == *rhs;
 }
 
+//
 // SkBitmap
+//
 
 extern "C" void C_SkBitmap_Construct(SkBitmap* uninitialized) {
     new (uninitialized) SkBitmap();
@@ -421,14 +424,21 @@ extern "C" SkPicture* C_SkPicture_MakePlaceholder(const SkRect& cull) {
 extern "C" void C_SkPicture_playback(const SkPicture* self, SkCanvas* canvas) {
     self->playback(canvas);
 }
-/*
-extern "C" void C_SkPicture_cullRect(const SkPicture* self, SkRect* result) {
-    *result = self->cullRect();
-}
-*/
 
 extern "C" SkRect C_SkPicture_cullRect(const SkPicture* self) {
     return self->cullRect();
+}
+
+//
+// SkRRect
+//
+
+extern "C" bool C_SkRRect_equals(const SkRRect* lhs, const SkRRect* rhs) {
+    return *lhs == *rhs;
+}
+
+extern "C" bool C_SkRRect_not_equals(const SkRRect* lhs, const SkRRect* rhs) {
+    return *lhs != *rhs;
 }
 
 //

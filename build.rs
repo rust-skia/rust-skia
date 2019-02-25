@@ -203,6 +203,7 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .rustified_enum("SkColorSpace_Gamut")
     .rustified_enum("SkMatrix44_TypeMask")
     .rustified_enum("SkMatrix_TypeMask")
+    .rustified_enum("SkMatrix_ScaleToFit")
     .rustified_enum("SkAlphaType")
     .rustified_enum("SkColorType")
     .rustified_enum("SkYUVColorSpace")
@@ -214,6 +215,8 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .rustified_enum("SkColorChannel")
     .rustified_enum("SkYUVAIndex_Index")
     .rustified_enum("SkEncodedImageFormat")
+    .rustified_enum("SkRRect_Type")
+    .rustified_enum("SkRRect_Corner")
 
     .whitelist_var("SK_Color.*")
 
