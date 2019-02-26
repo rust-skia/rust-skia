@@ -4,7 +4,7 @@ use crate::prelude::*;
 
 pub type Context = RCHandle<GrContext>;
 
-impl RefCounted for GrContext {
+impl NativeRefCounted for GrContext {
     fn _ref(&self) {
         unsafe { self._base._base.ref_() }
     }

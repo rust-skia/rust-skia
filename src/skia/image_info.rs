@@ -1,6 +1,5 @@
 use std::mem::uninitialized;
 use crate::prelude::*;
-use std::ptr;
 use rust_skia::{
     SkAlphaType,
     SkImageInfo,
@@ -14,7 +13,6 @@ use crate::{
         ISize,
         IPoint
     },
-    prelude::*,
 };
 
 #[derive(Copy, Clone, PartialEq)]

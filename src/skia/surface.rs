@@ -12,7 +12,7 @@ use rust_skia::{
 
 pub type Surface = RCHandle<SkSurface>;
 
-impl RefCounted for SkSurface {
+impl NativeRefCounted for SkSurface {
     fn _ref(&self) {
         unsafe { self._base._base.ref_() }
     }

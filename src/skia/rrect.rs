@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use std::mem;
 use rust_skia::{
     C_SkRRect_equals,
     SkRRect,

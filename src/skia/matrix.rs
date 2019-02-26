@@ -1,7 +1,6 @@
 use std::{
     ops::Index,
     iter,
-    iter::Enumerate,
     mem,
     ops::IndexMut,
     ptr
@@ -19,10 +18,8 @@ use crate::skia::{
 use rust_skia::{
     SkPoint,
     SkMatrix_ScaleToFit,
-    SkMatrix_TypeMask,
     SkMatrix,
     SkPoint3,
-    SkRect,
     SkSize
 };
 

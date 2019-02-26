@@ -1,4 +1,5 @@
 use std::ptr;
+use crate::prelude::*;
 use crate::{
     skia::{
         Picture,
@@ -13,16 +14,12 @@ use crate::{
         ColorSpace,
         YUVAIndex,
         ISize,
-        Paint
+        Paint,
+        EncodedImageFormat
     },
-    prelude::*,
-    graphics,
-    graphics::SurfaceOrigin,
-    graphics::BackendTexture,
-    skia::EncodedImageFormat
+    graphics
 };
 use rust_skia::{
-    SkMatrix,
     C_SkImage_MakeFromPicture,
     C_SkImage_MakeFromTexture,
     C_SkImage_MakeFromEncoded,
@@ -31,18 +28,15 @@ use rust_skia::{
     C_SkImage_encodeToData,
     C_SkImage_MakeRasterData,
     SkIRect,
-    SkColorSpace,
     C_SkImage_MakeCrossContextFromEncoded,
     C_SkImage_MakeFromAdoptedTexture,
     C_SkImage_MakeFromYUVATexturesCopy,
-    GrBackendTexture,
     SkYUVAIndex,
     C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend,
     C_SkImage_MakeFromYUVATextures,
     C_SkImage_MakeFromNV12TexturesCopy,
     C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend,
     SkImage_BitDepth,
-    SkPaint,
     GrSurfaceOrigin,
     SkImage_CachingHint
 };
@@ -70,7 +64,7 @@ impl CachingHint {
 
 pub type Image = RCHandle<SkImage>;
 
-impl RefCounted for SkImage {
+impl NativeRefCounted for SkImage {
     fn _ref(&self) {
         unsafe { self._base._base.ref_() }
     }
@@ -118,7 +112,7 @@ impl Image {
             C_SkImage_MakeFromTexture(
                 context.native_mut(),
                 backend_texture.native(),
-                *origin.native(),
+                origin.native(),
                 color_type.0,
                 alpha_type.0,
                 color_space.shared_ptr())
@@ -153,7 +147,7 @@ impl Image {
             C_SkImage_MakeFromAdoptedTexture(
                 context.native_mut(),
                 backend_texture.native(),
-                *origin.native(),
+                origin.native(),
                 color_type.0,
                 alpha_type.0,
                 color_space.shared_ptr())
@@ -179,7 +173,7 @@ impl Image {
                 yuva_textures.native().as_ptr(),
                 yuva_indices.as_ptr(),
                 image_size.into_native(),
-                *image_origin.native(),
+                image_origin.native(),
                 image_color_space.shared_ptr())
         })
     }
@@ -204,7 +198,7 @@ impl Image {
                 yuva_textures.native().as_ptr(),
                 yuva_indices.as_ptr(),
                 image_size.into_native(),
-                *image_origin.native(),
+                image_origin.native(),
                 backend_texture.native(),
                 image_color_space.shared_ptr())
         })
@@ -229,7 +223,7 @@ impl Image {
                 yuva_textures.native().as_ptr(),
                 yuva_indices.as_ptr(),
                 image_size.into_native(),
-                *image_origin.native(),
+                image_origin.native(),
                 image_color_space.shared_ptr())
         })
     }
@@ -246,7 +240,7 @@ impl Image {
                 context.native_mut(),
                 yuv_color_space.0,
                 nv12_textures.native().as_ptr(),
-                *image_origin.native(),
+                image_origin.native(),
                 image_color_space.shared_ptr())
         })
     }
@@ -264,7 +258,7 @@ impl Image {
                 context.native_mut(),
                 yuv_color_space.0,
                 nv12_textures.native().as_ptr(),
-                *image_origin.native(),
+                image_origin.native(),
                 backend_texture.native(),
                 image_color_space.shared_ptr())
         })
@@ -339,9 +333,8 @@ impl Image {
         unsafe { self.native().isValid(context.native_mut()) }
     }
 
-    pub fn backend_texture(
-        &self,
-        flush_pending_gr_context_io: bool) -> (BackendTexture, SurfaceOrigin) {
+    pub fn backend_texture(&self, flush_pending_gr_context_io: bool)
+        -> (graphics::BackendTexture, graphics::SurfaceOrigin) {
 
         let mut origin = GrSurfaceOrigin::kTopLeft_GrSurfaceOrigin;
         let texture = unsafe {

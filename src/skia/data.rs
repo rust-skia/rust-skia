@@ -6,13 +6,13 @@ use rust_skia::{
     C_SkData_ref
 };
 use crate::{
-    prelude::RefCounted,
+    prelude::NativeRefCounted,
     prelude::RCHandle
 };
 
 pub type Data = RCHandle<SkData>;
 
-impl RefCounted for SkData {
+impl NativeRefCounted for SkData {
     fn _ref(&self) {
         unsafe { C_SkData_ref(self) }
     }

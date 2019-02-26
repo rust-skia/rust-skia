@@ -11,14 +11,13 @@ use rust_skia::{
     SkPicture,
     C_SkPicture_MakeFromData,
     C_SkPicture_cullRect,
-    SkRect,
     C_SkPicture_MakePlaceholder,
     C_SkPicture_serialize
 };
 
 pub type Picture = RCHandle<SkPicture>;
 
-impl RefCounted for SkPicture {
+impl NativeRefCounted for SkPicture {
     fn _ref(&self) {
         unsafe { self._base._base.ref_(); }
     }

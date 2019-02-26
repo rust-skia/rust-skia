@@ -148,7 +148,7 @@ impl NamedTransferFn {
 
 pub type ColorSpace = RCHandle<SkColorSpace>;
 
-impl RefCounted for SkColorSpace {
+impl NativeRefCounted for SkColorSpace {
     fn _ref(&self) {
         unsafe { rust_skia::C_SkColorSpace_ref(self) };
     }

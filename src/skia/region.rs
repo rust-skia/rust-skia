@@ -8,8 +8,6 @@ use rust_skia::{
     C_SkRegion_destruct,
     C_SkRegion_equals,
     SkRegion,
-    SkRect,
-    SkIRect,
     SkRegion_Op
 };
 

@@ -94,7 +94,7 @@ mod prelude {
     }
 
     /// Supporting trait for the derive macro RCCloneDrop.
-    pub trait RefCounted : Sized {
+    pub trait NativeRefCounted: Sized {
         fn _ref(&self);
         fn _unref(&self);
     }
@@ -178,25 +178,21 @@ mod prelude {
     }
 
     /// A representation type for a native enum type.
-    pub struct EnumHandle<N: Clone + PartialEq>(pub(crate) N);
+    pub struct EnumHandle<N: Copy + PartialEq>(pub(crate) N);
 
-    impl<N: Clone + PartialEq> FromNative<N> for EnumHandle<N> {
+    impl<N: Copy + PartialEq> FromNative<N> for EnumHandle<N> {
         fn from_native(n: N) -> EnumHandle<N> {
             EnumHandle(n)
         }
     }
 
-    impl<N: Clone + PartialEq> NativeAccess<N> for EnumHandle<N> {
-        fn native(&self) -> &N {
-            &self.0
-        }
-
-        fn native_mut(&mut self) -> &mut N {
-            &mut self.0
+    impl<N: Copy + PartialEq> NativeAccessValue<N> for EnumHandle<N> {
+        fn native(&self) -> N {
+            self.0
         }
     }
 
-    /// Even though some types may have complete value semantics, equality
+    /// Even though some types may have value semantics, equality
     /// comparison may need to be customized.
     pub trait NativePartialEq {
         fn eq(&self, rhs: &Self) -> bool;
@@ -297,9 +293,9 @@ mod prelude {
     }
 
     /// A representation type represented by a refcounted pointer to the native type.
-    pub struct RCHandle<Native: RefCounted>(*mut Native);
+    pub struct RCHandle<Native: NativeRefCounted>(*mut Native);
 
-    impl<N: RefCounted> RCHandle<N> {
+    impl<N: NativeRefCounted> RCHandle<N> {
         /// Increases the reference counter of the native type
         /// and returns a mutable reference.
         #[inline]
@@ -333,7 +329,7 @@ mod prelude {
         }
     }
 
-    impl<N: RefCounted> NativeAccess<N> for RCHandle<N> {
+    impl<N: NativeRefCounted> NativeAccess<N> for RCHandle<N> {
         /// Returns a reference to the native representation.
         #[inline]
         fn native(&self) -> &N {
@@ -347,14 +343,14 @@ mod prelude {
         }
     }
 
-    impl<N: RefCounted> Clone for RCHandle<N> {
+    impl<N: NativeRefCounted> Clone for RCHandle<N> {
         #[inline]
         fn clone(&self) -> Self {
             RCHandle(self.shared_native())
         }
     }
 
-    impl <N: RefCounted> Drop for RCHandle<N> {
+    impl <N: NativeRefCounted> Drop for RCHandle<N> {
         #[inline]
         fn drop(&mut self) {
             unsafe { &*self.0 }._unref();
@@ -366,7 +362,7 @@ mod prelude {
         fn shared_ptr(&self) -> *mut N;
     }
 
-    impl<N: RefCounted> ToSharedPointer<N> for Option<RCHandle<N>> {
+    impl<N: NativeRefCounted> ToSharedPointer<N> for Option<RCHandle<N>> {
         #[inline]
         fn shared_ptr(&self) -> *mut N {
             match self {
@@ -376,7 +372,7 @@ mod prelude {
         }
     }
 
-    impl<N: RefCounted> ToSharedPointer<N> for Option<&RCHandle<N>> {
+    impl<N: NativeRefCounted> ToSharedPointer<N> for Option<&RCHandle<N>> {
         #[inline]
         fn shared_ptr(&self) -> *mut N {
             match self {
