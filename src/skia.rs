@@ -22,6 +22,9 @@ pub use self::data::*;
 mod encoded_image_format;
 pub use self::encoded_image_format::*;
 
+mod font_metrics;
+pub use self::font_metrics::*;
+
 mod font_style;
 pub use self::font_style::*;
 

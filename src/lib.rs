@@ -26,10 +26,8 @@ mod prelude {
         SkiaRect,
         SkiaRectFloat
     };
-    use std::ptr;
-    use std::mem;
-    use std::ops::Index;
-    use std::ops::IndexMut;
+    use std::{ptr, mem};
+    use std::ops::{Index, IndexMut};
 
     pub trait ToOption {
         type Target;
@@ -430,6 +428,25 @@ mod prelude {
     {
         fn set(&mut self, index: I, value: O) {
             self[index] = value
+        }
+    }
+
+    //
+    // Native types that are represented with another type
+    // _inplace_ of the same size and field layout in Rust.
+    //
+
+    pub trait NativeTransmutable<NT: Sized> : Sized {
+        fn native(&self) -> &NT {
+            unsafe { mem::transmute::<&Self, &NT>(&self) }
+        }
+
+        fn from_native(nt: &NT) -> &Self {
+            unsafe { mem::transmute::<&NT, &Self>(&nt) }
+        }
+
+        fn test_layout() {
+            assert_eq!(mem::size_of::<Self>(), mem::size_of::<NT>());
         }
     }
 }
