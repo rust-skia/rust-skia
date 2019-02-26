@@ -10,6 +10,9 @@
 #include "SkYUVAIndex.h"
 #include "SkPoint3.h"
 #include "SkRegion.h"
+#include "SkFont.h"
+#include "SkTypeface.h"
+#include "SkFontMetrics.h"
 
 #include "GrContext.h"
 
@@ -459,6 +462,14 @@ extern "C" void C_SkRegion_destruct(SkRegion* region) {
 }
 
 extern "C" bool C_SkRegion_equals(const SkRegion* lhs, const SkRegion* rhs) {
+    return *lhs == *rhs;
+}
+
+//
+// SkFontStyle
+//
+
+extern "C" bool C_SkFontStyle_equals(const SkFontStyle* lhs, const SkFontStyle* rhs) {
     return *lhs == *rhs;
 }
 
