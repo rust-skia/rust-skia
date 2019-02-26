@@ -106,19 +106,19 @@ impl ValueHandle<SkFontStyle> {
         unsafe { self.native().slant() }.into_handle()
     }
 
-    pub fn Normal() -> FontStyle {
+    pub fn normal() -> FontStyle {
         *FontStyle_Normal
     }
 
-    pub fn Bold() -> FontStyle {
+    pub fn bold() -> FontStyle {
         *FontStyle_Bold
     }
 
-    pub fn Italic() -> FontStyle {
+    pub fn italic() -> FontStyle {
         *FontStyle_Italic
     }
 
-    pub fn BoldItalic() -> FontStyle {
+    pub fn bold_italic() -> FontStyle {
         *FontStyle_BoldItalic
     }
 }
