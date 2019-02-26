@@ -157,8 +157,8 @@ extern "C" void C_SkImage_getBackendTexture(
     *result = self->getBackendTexture(flushPendingGrContextIO, origin);
 }
 
-extern "C" SkData* C_SkImage_encodeToData(const SkImage* self) {
-    return self->encodeToData().release();
+extern "C" SkData* C_SkImage_encodeToData(const SkImage* self, SkEncodedImageFormat imageFormat) {
+    return self->encodeToData(imageFormat, 100).release();
 }
 
 extern "C" SkData* C_SkImage_refEncodedData(const SkImage* self) {
