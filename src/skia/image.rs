@@ -368,7 +368,7 @@ impl Image {
 
     pub fn encode_to_data(&self, image_format: EncodedImageFormat) -> Option<Data> {
         Data::from_ptr(unsafe {
-            C_SkImage_encodeToData(self.native())
+            C_SkImage_encodeToData(self.native(), image_format.native())
         })
     }
 
