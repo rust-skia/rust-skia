@@ -178,6 +178,7 @@ mod prelude {
     }
 
     /// A representation type for a native enum type.
+    #[derive(Copy, Clone, PartialEq)]
     pub struct EnumHandle<N: Copy + PartialEq>(pub(crate) N);
 
     impl<N: Copy + PartialEq> FromNative<N> for EnumHandle<N> {

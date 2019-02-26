@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use rust_skia::{
     SkFontStyle_Width,
+    SkTypeface,
     SkFontStyle_Weight,
     SkFontStyle_Slant,
     SkFontStyle,
@@ -8,6 +9,7 @@ use rust_skia::{
 };
 
 #[derive(Copy, Clone, PartialEq, PartialOrd)]
+#[repr(transparent)]
 pub struct FontStyleWeight(i32);
 
 impl FromNative<i32> for FontStyleWeight {
@@ -17,7 +19,7 @@ impl FromNative<i32> for FontStyleWeight {
 }
 
 impl NativeAccessValue<i32> for FontStyleWeight {
-    fn  native(&self) -> i32 {
+    fn native(&self) -> i32 {
         self.0
     }
 }

@@ -1,5 +1,8 @@
 #[allow(non_camel_case_types)]
 pub type u8cpu = rust_skia::U8CPU;
+pub type GlyphId = rust_skia::SkGlyphID;
+pub type Unichar = rust_skia::SkUnichar;
+pub type FontTableTag = rust_skia::SkFontTableTag;
 
 mod bitmap;
 pub use self::bitmap::*;
@@ -60,6 +63,9 @@ pub use self::surface::*;
 
 mod surface_props;
 pub use self::surface_props::*;
+
+mod typeface;
+pub use self::typeface::*;
 
 mod vector4;
 pub use self::vector4::*;
