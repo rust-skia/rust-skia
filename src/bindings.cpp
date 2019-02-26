@@ -473,6 +473,30 @@ extern "C" bool C_SkFontStyle_equals(const SkFontStyle* lhs, const SkFontStyle* 
     return *lhs == *rhs;
 }
 
+//
+// SkTypeface
+//
+
+extern "C" SkTypeface* C_SkTypeface_MakeDefault() {
+    return SkTypeface::MakeDefault().release();
+}
+
+extern "C" SkTypeface* C_SkTypeface_MakeFromName(const char familyName[], SkFontStyle fontStyle) {
+    return SkTypeface::MakeFromName(familyName, fontStyle).release();
+}
+
+extern "C" SkTypeface* C_SkTypeface_MakeFromFile(const char path[], int index) {
+    return SkTypeface::MakeFromFile(path, index).release();
+}
+
+extern "C" SkTypeface* C_SkTypeface_MakeFromData(SkData* data, int index) {
+    return SkTypeface::MakeFromData(sk_sp<SkData>(data), index).release();
+}
+
+extern "C" SkData* C_SkTypeface_serialize(const SkTypeface* self, SkTypeface::SerializeBehavior behavior) {
+    return self->serialize(behavior).release();
+}
+
 #if defined(SK_VULKAN)
 
 extern "C" SkSurface* C_SkSurface_MakeFromBackendTexture(
