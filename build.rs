@@ -3,11 +3,8 @@ extern crate cc;
 
 use std::env;
 use std::fs;
-use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
-use regex::Regex;
-use std::slice;
 
 use cc::Build;
 
@@ -241,28 +238,6 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     builder = builder.clang_arg(format!("-I{}", &include_path));
     cc_build.include(&include_path);
   }
-
-  // WIP: extract all the preprocessor definitions ninja was
-  // using to build skia.
-
-  /*
-  let ninja_config = {
-    let mut file =
-        File::open("skia/out/Static/obj/skia.ninja")
-            .expect("ninja configuration file not found (did skia build?)");
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)
-        .expect("failed to read ninja configuration file");
-    contents
-  };
-
-  let defines : String = {
-    let re = Regex::new("(?m)^defines = (.*)$").unwrap();
-    let captures =
-        re.captures(ninja_config.as_str()).unwrap();
-    captures.get(1).unwrap().as_str().into()
-  };
-  */
 
   if cfg!(feature="vulkan") {
 	builder = builder
