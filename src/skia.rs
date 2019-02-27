@@ -28,6 +28,9 @@ pub use self::font_metrics::*;
 mod font_style;
 pub use self::font_style::*;
 
+mod font_types;
+pub use self::font_types::*;
+
 mod image;
 pub use self::image::*;
 
