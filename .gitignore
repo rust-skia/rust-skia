@@ -1,5 +1,5 @@
-/target
-**/*.rs.bk
+/Cargo.lock
 /src/bindings.rs
-Cargo.lock
-*.png
+/src/bindings.rs.bk
+/target/
+/cmake-build-debug/

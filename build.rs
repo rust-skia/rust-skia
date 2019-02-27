@@ -2,7 +2,6 @@ extern crate bindgen;
 extern crate cc;
 
 use std::env;
-use std::fs::read_dir;
 use std::fs;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
@@ -34,15 +33,44 @@ fn main() {
     .status().unwrap().success(), "git sync deps fail");
 
   let gn_args = {
-    let base_args =
+
+    let keep_inline_functions = true;
+
+    let mut args =
       r#"--args=is_official_build=true skia_use_system_expat=false skia_use_system_icu=false skia_use_system_libjpeg_turbo=false skia_use_system_libpng=false skia_use_system_libwebp=false skia_use_system_zlib=false cc="clang" cxx="clang++""#
       .to_owned();
 
-    if cfg!(windows) {
-      base_args + r#" clang_win="C:\Program Files\LLVM" extra_cflags=["/MD"]"#
-    } else {
-      base_args
+    if cfg!(feature="vulkan") {
+      args.push_str(" skia_use_vulkan=true skia_enable_spirv_validation=false");
     }
+
+    if cfg!(windows) {
+
+      let mut flags : Vec<&str> = vec![];
+      flags.push(if cfg!(build="debug") { "/MTd" } else { "/MD" });
+
+      if keep_inline_functions {
+        // sadly, this also disables inlining completely and is probably a real performance bummer.
+        flags.push("/Ob0")
+      };
+
+      let flags : String = {
+        fn quote(s: &str) -> String { String::from("\"") + s + "\"" }
+
+        let v : Vec<String> =
+            flags.into_iter().map(quote).collect();
+        v.join(",")
+      };
+
+      args.push_str(r#" clang_win="C:\Program Files\LLVM""#);
+      args.push_str(&format!(" extra_cflags=[{}]", flags));
+    } else {
+      if keep_inline_functions {
+        args.push_str(r#" extra_cflags=["-fno-inline-functions"]"#)
+      }
+    }
+
+    args
   };
 
   let gn_command = if cfg!(windows) {
@@ -104,6 +132,11 @@ fn main() {
     println!("cargo:rustc-link-lib=usp10");
     println!("cargo:rustc-link-lib=ole32");
     println!("cargo:rustc-link-lib=user32");
+
+    // required since GrContext::MakeVulkan is linked.
+    if cfg!(feature="vulkan") {
+      println!("cargo:rustc-link-lib=opengl32");
+    }
   }
 
   // regenerate bindings?
@@ -151,22 +184,48 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
   let mut builder = bindgen::Builder::default()
     .generate_inline_functions(true)
 
-    .whitelist_function("SkiaCreateCanvas")
-    .whitelist_function("SkiaCreateRect")
-    .whitelist_function("SkiaClearCanvas")
-    .whitelist_function("SkiaGetSurfaceData")
-    .whitelist_var("SK_ColorTRANSPARENT")
-    .whitelist_var("SK_ColorBLACK")
-    .whitelist_var("SK_ColorDKGRAY")
-    .whitelist_var("SK_ColorGRAY")
-    .whitelist_var("SK_ColorLTGRAY")
-    .whitelist_var("SK_ColorWHITE")
-    .whitelist_var("SK_ColorRED")
-    .whitelist_var("SK_ColorGREEN")
-    .whitelist_var("SK_ColorBLUE")
-    .whitelist_var("SK_ColorYELLOW")
-    .whitelist_var("SK_ColorCYAN")
-    .whitelist_var("SK_ColorMAGENTA")
+    .whitelist_function("C_.*")
+    .whitelist_function("SkColorTypeBytesPerPixel")
+    .whitelist_function("SkColorTypeIsAlwaysOpaque")
+    .whitelist_function("SkColorTypeValidateAlphaType")
+    .whitelist_type("SkColorSpacePrimaries")
+    .whitelist_type("SkVector4")
+
+    .rustified_enum("GrMipMapped")
+    .rustified_enum("GrSurfaceOrigin")
+    .rustified_enum("SkPaint_Style")
+    .rustified_enum("SkPaint_Cap")
+    .rustified_enum("SkPaint_Join")
+    .rustified_enum("SkGammaNamed")
+    .rustified_enum("SkColorSpace_RenderTargetGamma")
+    .rustified_enum("SkColorSpace_Gamut")
+    .rustified_enum("SkMatrix44_TypeMask")
+    .rustified_enum("SkMatrix_TypeMask")
+    .rustified_enum("SkMatrix_ScaleToFit")
+    .rustified_enum("SkAlphaType")
+    .rustified_enum("SkColorType")
+    .rustified_enum("SkYUVColorSpace")
+    .rustified_enum("SkPixelGeometry")
+    .rustified_enum("SkSurfaceProps_Flags")
+    .rustified_enum("SkBitmap_AllocFlags")
+    .rustified_enum("SkImage_BitDepth")
+    .rustified_enum("SkImage_CachingHint")
+    .rustified_enum("SkColorChannel")
+    .rustified_enum("SkYUVAIndex_Index")
+    .rustified_enum("SkEncodedImageFormat")
+    .rustified_enum("SkRRect_Type")
+    .rustified_enum("SkRRect_Corner")
+    .rustified_enum("SkRegion_Op")
+    .rustified_enum("SkFont_Edging")
+    .rustified_enum("SkFontMetrics_FontMetricsFlags")
+    .rustified_enum("SkTypeface_SerializeBehavior")
+    .rustified_enum("SkTypeface_Encoding")
+    .rustified_enum("SkFontStyle_Weight")
+    .rustified_enum("SkFontStyle_Width")
+    .rustified_enum("SkFontStyle_Slant")
+
+    .whitelist_var("SK_Color.*")
+
     .use_core()
     .clang_arg("-std=c++14");
 
@@ -179,6 +238,18 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     let include_path = format!("{}/{}", &current_dir_name, &dir.path().to_str().unwrap());
     builder = builder.clang_arg(format!("-I{}", &include_path));
     cc_build.include(&include_path);
+  }
+
+  if cfg!(feature="vulkan") {
+	builder = builder
+      .rustified_enum("VkImageTiling")
+      .rustified_enum("VkImageLayout")
+      .rustified_enum("VkFormat");
+	
+    cc_build.define("SK_VULKAN", "1");
+    builder = builder.clang_arg("-DSK_VULKAN");
+    cc_build.define("SKIA_IMPLEMENTATION", "1");
+    builder = builder.clang_arg("-DSKIA_IMPLEMENTATION=1");
   }
 
   cc_build
