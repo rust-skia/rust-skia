@@ -74,6 +74,6 @@ impl FontMetrics {
 }
 
 #[test]
-fn layout_test() {
+fn test_layout() {
     FontMetrics::test_layout();
 }
