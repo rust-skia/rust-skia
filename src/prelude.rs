@@ -372,19 +372,14 @@ impl<N: NativeRefCounted> ToSharedPointer<N> for Option<&RCHandle<N>> {
 }
 
 
-/// Trait to compute the size this type occupies in memory in bytes.
-pub trait SizeOf {
-    fn size_of(&self) -> usize;
+/// Trait to compute the elements of this type occupy memory in bytes.
+pub trait ElementsSizeOf {
+    fn elements_size_of(&self) -> usize;
 }
 
-impl<N: Sized> SizeOf for N {
-    fn size_of(&self) -> usize {
-        mem::size_of::<N>()
-    }
-}
 
-impl<N: Sized> SizeOf for [N] {
-    fn size_of(&self) -> usize {
+impl<N: Sized> ElementsSizeOf for [N] {
+    fn elements_size_of(&self) -> usize {
         mem::size_of::<N>() * self.len()
     }
 }
