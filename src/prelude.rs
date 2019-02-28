@@ -25,12 +25,27 @@ pub trait ToOption {
     fn to_option(self) -> Option<Self::Target>;
 }
 
+impl<T> ToOption for *const T {
+    type Target = *const T;
+
+    fn to_option(self) -> Option<Self::Target> {
+        if !self.is_null() {
+            Some(self)
+        } else {
+            None
+        }
+    }
+}
+
 impl<T> ToOption for *mut T {
     type Target = *mut T;
 
     fn to_option(self) -> Option<Self::Target> {
-        if self.is_null()
-        { None } else { Some(self) }
+        if !self.is_null() {
+            Some(self)
+        } else {
+            None
+        }
     }
 }
 
@@ -417,8 +432,8 @@ impl<T, I, O: Copy> IndexSetter<I, O> for T
 }
 
 //
-// Native types that are represented with another type
-// _inplace_ of the same size and field layout in Rust.
+// Native types that are represented with a rust type
+// _inplace_ with the same size and field layout.
 //
 
 pub trait NativeTransmutable<NT: Sized> : Sized {
@@ -436,6 +451,23 @@ pub trait NativeTransmutable<NT: Sized> : Sized {
 
     fn test_layout() {
         assert_eq!(mem::size_of::<Self>(), mem::size_of::<NT>());
+    }
+}
+
+pub trait NativeTransmutableSliceAccess<NT: Sized> {
+    fn native(&self) -> &[NT];
+    fn native_mut(&mut self) -> &mut [NT];
+}
+
+impl<NT, ElementT> NativeTransmutableSliceAccess<NT> for [ElementT]
+    where ElementT: NativeTransmutable<NT> {
+
+    fn native(&self) -> &[NT] {
+        unsafe { mem::transmute::<&Self, &[NT]>(self) }
+    }
+
+    fn native_mut(&mut self) -> &mut [NT] {
+        unsafe { mem::transmute::<&mut Self, &mut [NT]>(self) }
     }
 }
 

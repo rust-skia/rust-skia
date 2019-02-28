@@ -1,12 +1,16 @@
 use std::ops::{DerefMut,Deref};
-use std::{ptr, mem};
+use std::{ptr, mem, slice};
 use crate::prelude::*;
 use crate::skia::{
     Point,
     Rect,
-    Color
+    Color,
+    Data
 };
 use rust_skia::{
+    C_SkVertices_Decode,
+    C_SkVertices_applyBones,
+    C_SkVertices_Builder_detach,
     C_SkVertices_Builder_destruct,
     SkVertices_Builder,
     SkVertices_BoneIndices,
@@ -19,7 +23,8 @@ use rust_skia::{
     C_SkVertices_unref,
     SkVertices_Bone,
     SkVertices_VertexMode,
-    SkVertices_BuilderFlags
+    SkVertices_BuilderFlags,
+    C_SkVertices_encode
 };
 
 pub type BoneIndices = [u32; 4];
@@ -139,7 +144,120 @@ impl RCHandle<SkVertices> {
                 is_volatile
             )}).unwrap()
     }
+
+    pub fn unique_id(&self) -> u32 {
+        unsafe { self.native().uniqueID() }
+    }
+
+    pub fn mode(&self) -> VerticesVertexMode {
+        unsafe { self.native().mode() }.into_handle()
+    }
+
+    pub fn bounds(&self) -> Rect {
+        Rect::from_native(unsafe { *self.native().bounds() })
+    }
+
+    pub fn has_colors(&self) -> bool {
+        unsafe { self.native().hasColors() }
+    }
+
+    pub fn has_tex_coords(&self) -> bool {
+        unsafe { self.native().hasTexCoords() }
+    }
+
+    pub fn has_bones(&self) -> bool {
+        unsafe { self.native().hasBones() }
+    }
+
+    pub fn has_indices(&self) -> bool {
+        unsafe { self.native().hasIndices() }
+    }
+
+    pub fn vertex_count(&self) -> usize {
+        unsafe { self.native().vertexCount().try_into().unwrap() }
+    }
+
+    // TODO: use wrapper type as soon we can transmute points
+    pub fn positions(&self) -> &[SkPoint] {
+        unsafe {
+            let ptr = self.native().positions();
+            slice::from_raw_parts(ptr, self.vertex_count())
+        }
+    }
+
+    // TODO: use wrapper type as soon we can transmute points
+    pub fn tex_coords(&self) -> Option<&[SkPoint]> {
+        unsafe {
+            let ptr = self.native().positions().to_option()?;
+            Some(slice::from_raw_parts(ptr, self.vertex_count()))
+        }
+    }
+
+    // TODO: use wrapper type as soon we can transmute colors
+    pub fn colors(&self) -> Option<&[SkColor]> {
+        unsafe {
+            let ptr = self.native().colors().to_option()?;
+            Some(slice::from_raw_parts(ptr, self.vertex_count()))
+        }
+    }
+
+    pub fn bone_indices(&self) -> Option<&[BoneIndices]> {
+        unsafe {
+            let indices = self.native().boneIndices().to_option()?;
+            Some(slice::from_raw_parts_mut(indices as _, self.vertex_count()))
+        }
+    }
+
+    pub fn bone_weights(&self) -> Option<&[BoneWeights]> {
+        unsafe {
+            let weights = self.native().boneWeights().to_option()?;
+            Some(slice::from_raw_parts_mut(weights as _, self.vertex_count()))
+        }
+    }
+
+    pub fn index_count(&self) -> usize {
+        unsafe { self.native().indexCount().try_into().unwrap() }
+    }
+
+    pub fn indices(&self) -> Option<&[u16]> {
+        unsafe {
+            let indices = self.native().indices().to_option()?;
+            Some(slice::from_raw_parts_mut(indices as _, self.index_count()))
+        }
+    }
+
+    pub fn is_volatile(&self) -> bool {
+        unsafe {
+            self.native().isVolatile()
+        }
+    }
+
+    pub fn apply_bones(&self, bones: &[Bone]) -> Vertices {
+        Vertices::from_ptr(unsafe {
+            C_SkVertices_applyBones(
+                self.native(),
+                bones.native().as_ptr(),
+                bones.len().try_into().unwrap())
+        }).unwrap()
+    }
+
+    pub fn approximate_size(&self) -> usize {
+        unsafe { self.native().approximateSize() }
+    }
+
+    pub fn decode(buffer: &[u8]) -> Option<Vertices> {
+        Vertices::from_ptr(unsafe {
+            C_SkVertices_Decode(buffer.as_ptr() as _, buffer.len())
+        })
+    }
+
+    pub fn encode(&self) -> Data {
+        Data::from_ptr(unsafe {
+            C_SkVertices_encode(self.native())
+        }).unwrap()
+    }
 }
+
 bitflags! {
     pub struct VerticesBuilderFlags: u32 {
         const HasTexCoords = SkVertices_BuilderFlags::kHasTexCoords_BuilderFlag as u32;
@@ -157,7 +275,6 @@ impl NativeDrop for SkVertices_Builder {
     }
 }
 
-
 impl Handle<SkVertices_Builder> {
     pub fn new(mode: VerticesVertexMode, vertex_count: usize, index_count: usize, flags: VerticesBuilderFlags) -> VerticesBuilder {
         unsafe {
@@ -167,5 +284,75 @@ impl Handle<SkVertices_Builder> {
                 index_count.try_into().unwrap(),
                 flags.bits())
         }.into_handle()
+    }
+
+    pub fn is_valid(&self) -> bool {
+        // does not link
+        // unsafe { self.native().isValid() }
+        // TODO: write a C wrapper function in case the implementation changes
+        self.native().fVertices.fPtr != ptr::null_mut()
+    }
+
+    pub fn vertex_count(&self) -> usize {
+        unsafe { self.native().vertexCount() }.try_into().unwrap()
+    }
+
+    pub fn index_count(&self) -> usize {
+        unsafe { self.native().indexCount() }.try_into().unwrap()
+    }
+
+    pub fn is_volatile(&self) -> bool {
+        unsafe { self.native().isVolatile() }
+    }
+
+    // TODO: implement this with the proper return type as soon we can transmute points.
+    pub fn positions(&mut self) -> &mut [SkPoint] {
+        unsafe {
+            let positions = self.native_mut().positions();
+            slice::from_raw_parts_mut(positions, self.vertex_count())
+        }
+    }
+
+    // TODO: implement this with the proper return type as soon we can transmute points.
+    pub fn tex_coords(&mut self) -> Option<&mut [SkPoint]> {
+        unsafe {
+            let coords = self.native_mut().texCoords().to_option()?;
+            Some(slice::from_raw_parts_mut(coords, self.vertex_count()))
+        }
+    }
+
+    // TODO: implement this with the proper return type as soon we can transmute points.
+    pub fn colors(&mut self) -> Option<&mut [SkColor]> {
+        unsafe {
+            let colors = self.native_mut().colors().to_option()?;
+            Some(slice::from_raw_parts_mut(colors, self.vertex_count()))
+        }
+    }
+
+    pub fn bone_indices(&mut self) -> Option<&mut [BoneIndices]> {
+        unsafe {
+            let indices = self.native_mut().boneIndices().to_option()?;
+            Some(slice::from_raw_parts_mut(indices as _, self.vertex_count()))
+        }
+    }
+
+    pub fn bone_weights(&mut self) -> Option<&mut [BoneWeights]> {
+        unsafe {
+            let weights = self.native_mut().boneWeights().to_option()?;
+            Some(slice::from_raw_parts_mut(weights as _, self.vertex_count()))
+        }
+    }
+
+    pub fn indices(&mut self) -> Option<&mut [u16]> {
+        unsafe {
+            let indices = self.native_mut().indices().to_option()?;
+            Some(slice::from_raw_parts_mut(indices as _, self.index_count()))
+        }
+    }
+
+    pub fn detach(mut self) -> Vertices {
+        Vertices::from_ptr(unsafe {
+            C_SkVertices_Builder_detach(self.native_mut())
+        }).unwrap()
     }
 }
