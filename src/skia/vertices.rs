@@ -1,15 +1,17 @@
-use crate::prelude::*;
 use std::ops::{DerefMut,Deref};
+use crate::prelude::*;
+use crate::skia::{
+    Point,
+    Rect
+};
 use rust_skia::{
     C_SkVertices_ref,
     SkVertices,
     C_SkVertices_unref,
     SkVertices_BoneIndices,
-    SkVertices_Bone
+    SkVertices_Bone,
+    SkVertices_VertexMode
 };
-use crate::skia::Point;
-use crate::skia::Rect;
-use rust_skia::SkVertices_VertexMode;
 
 pub type BoneIndices = [u32; 4];
 pub type BoneWeights = [u32; 4];
