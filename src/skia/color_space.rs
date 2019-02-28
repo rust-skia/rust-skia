@@ -287,7 +287,7 @@ pub struct XYZD50Hash(pub u32);
 #[cfg(test)]
 impl RefCount for ColorSpace {
     fn ref_cnt(&self) -> i32 {
-        unsafe { self.native().ref_cnt() }
+        self.native().ref_cnt()
     }
 }
 
@@ -301,10 +301,10 @@ pub fn create_and_clone_colorspaces() {
 #[test]
 pub fn serialize_and_deserialize() {
     let original = ColorSpace::new_rgb((ColorSpaceRenderTargetGamma::Linear, ColorSpaceGamut::AdobeRGB));
-    unsafe { assert_eq!(1, original.native().ref_cnt()) };
+    assert_eq!(1, original.native().ref_cnt());
     let serialized = original.serialize();
-    unsafe { assert_eq!(1, serialized.native().ref_cnt()) };
+    assert_eq!(1, serialized.native().ref_cnt());
     let deserialized = ColorSpace::deserialize(serialized);
-    unsafe { assert_eq!(1, deserialized.native().ref_cnt()) };
+    assert_eq!(1, deserialized.native().ref_cnt());
     assert!(original == deserialized);
 }

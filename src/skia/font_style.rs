@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use rust_skia::{
     SkFontStyle_Width,
-    SkTypeface,
     SkFontStyle_Weight,
     SkFontStyle_Slant,
     SkFontStyle,

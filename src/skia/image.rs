@@ -267,8 +267,8 @@ impl Image {
     pub fn from_picture(
         picture: Picture,
         dimensions: ISize,
-        matrix: Option<Matrix>,
-        paint: Option<Paint>,
+        matrix: Option<&Matrix>,
+        paint: Option<&Paint>,
         bit_depth: ImageBitDepth,
         color_space: Option<ColorSpace>) -> Option<Image> {
 

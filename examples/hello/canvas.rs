@@ -1,7 +1,6 @@
 use core::mem;
 use skia_safe::skia;
-use skia_safe::skia::Color;
-use skia_safe::skia::EncodedImageFormat;
+use skia_safe::skia::{Color, EncodedImageFormat};
 
 pub struct Canvas {
     surface: skia::Surface,

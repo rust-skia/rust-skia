@@ -17,7 +17,6 @@ use rust_skia::{
     C_SkTypeface_MakeFromData,
     SkTypeface_SerializeBehavior,
     C_SkTypeface_serialize,
-    SkTypeface_Encoding
 };
 
 pub type TypefaceSerializeBehavior = EnumHandle<SkTypeface_SerializeBehavior>;
