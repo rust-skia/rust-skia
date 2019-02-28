@@ -267,13 +267,13 @@ impl<N> NativeSliceAccess<N> for [Handle<N>]
 /// A trait that supports retrieving a pointer from an Option<Handle<Native>>.
 /// Returns a null pointer if the Option is None.
 pub trait NativePointer<N> {
-    fn native_ptr(&self) -> *const N;
+    fn native_ptr_or_null(&self) -> *const N;
 }
 
-impl<H, N> NativePointer<N> for Option<H>
+impl<H, N> NativePointer<N> for Option<&H>
     where H: NativeAccess<N>
 {
-    fn native_ptr(&self) -> *const N {
+    fn native_ptr_or_null(&self) -> *const N {
         match self {
             Some(handle) => handle.native(),
             None => ptr::null()
@@ -431,11 +431,79 @@ pub trait NativeTransmutable<NT: Sized> : Sized {
         unsafe { mem::transmute::<&Self, &NT>(&self) }
     }
 
-    fn from_native(nt: &NT) -> &Self {
-        unsafe { mem::transmute::<&NT, &Self>(&nt) }
+    fn from_native(nt: NT) -> Self {
+        unsafe { mem::transmute_copy::<NT, Self>(&nt) }
+    }
+
+    fn into_native(self) -> NT {
+        unsafe { mem::transmute_copy::<Self, NT>(&self) }
     }
 
     fn test_layout() {
         assert_eq!(mem::size_of::<Self>(), mem::size_of::<NT>());
+    }
+}
+
+//
+// Convenience functions to access Option<&[]> as optional ptr (opt_ptr)
+// that may be null.
+//
+
+pub trait AsPointerOrNull<PointerT> {
+    fn as_ptr_or_null(&self) -> *const PointerT;
+}
+
+pub trait AsPointerOrNullMut<PointerT> {
+    fn as_ptr_or_null(&self) -> *const PointerT;
+    fn as_ptr_or_null_mut(&mut self) -> *mut PointerT;
+}
+
+impl<E> AsPointerOrNull<E> for Option<&[E]> {
+    fn as_ptr_or_null(&self) -> *const E {
+        match self {
+            Some(slice) => slice.as_ptr(),
+            None => ptr::null()
+        }
+    }
+}
+
+impl<E> AsPointerOrNullMut<E> for Option<&mut [E]> {
+    fn as_ptr_or_null(&self) -> *const E {
+        match self {
+            Some(slice) => slice.as_ptr(),
+            None => ptr::null()
+        }
+    }
+
+    fn as_ptr_or_null_mut(&mut self) -> *mut E {
+        match self {
+            Some(slice) => slice.as_mut_ptr(),
+            None => ptr::null_mut()
+        }
+    }
+}
+
+impl<E> AsPointerOrNull<E> for Option<&Vec<E>> {
+    fn as_ptr_or_null(&self) -> *const E {
+        match self {
+            Some(v) => v.as_ptr(),
+            None => ptr::null()
+        }
+    }
+}
+
+impl<E> AsPointerOrNullMut<E> for Option<Vec<E>> {
+    fn as_ptr_or_null(&self) -> *const E {
+        match self {
+            Some(v) => v.as_ptr(),
+            None => ptr::null()
+        }
+    }
+
+    fn as_ptr_or_null_mut(&mut self) -> *mut E {
+        match self {
+            Some(v) => v.as_mut_ptr(),
+            None => ptr::null_mut()
+        }
     }
 }

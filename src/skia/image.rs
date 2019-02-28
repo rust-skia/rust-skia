@@ -276,8 +276,8 @@ impl Image {
             C_SkImage_MakeFromPicture(
                 picture.shared_native(),
                 &dimensions.into_native(),
-                matrix.native_ptr(),
-                paint.native_ptr(),
+                matrix.native_ptr_or_null(),
+                paint.native_ptr_or_null(),
                 bit_depth.0,
                 color_space.shared_ptr())
         })
