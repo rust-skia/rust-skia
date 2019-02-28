@@ -529,6 +529,47 @@ extern "C" void C_SkFont_Destruct(SkFont* self) {
     self->~SkFont();
 }
 
+//
+// SkVertices
+//
+
+extern "C" void C_SkVertices_ref(const SkVertices* self) {
+    self->ref();
+}
+
+extern "C" void C_SkVertices_unref(const SkVertices* self) {
+    self->unref();
+}
+
+extern "C" SkVertices* C_SkVertices_MakeCopy(
+    SkVertices::VertexMode mode, int vertexCount,
+    const SkPoint positions[],
+    const SkPoint texs[],
+    const SkColor colors[],
+    const SkVertices::BoneIndices boneIndices[],
+    const SkVertices::BoneWeights boneWeights[],
+    int indexCount,
+    const uint16_t indices[],
+    bool isVolatile) {
+    return SkVertices::MakeCopy(mode, vertexCount, positions, texs, colors, boneIndices, boneWeights, indexCount, indices, isVolatile).release();
+}
+
+extern "C" SkVertices* C_SkVertices_Builder_detach(SkVertices::Builder* builder) {
+    return builder->detach().release();
+}
+
+extern "C" SkVertices* C_SkVertices_applyBones(const SkVertices* self, const SkVertices::Bone bones[], int boneCount) {
+    return self->applyBones(bones, boneCount).release();
+}
+
+extern "C" SkVertices* C_SkVertices_Decode(const void* buffer, size_t length) {
+    return SkVertices::Decode(buffer, length).release();
+}
+
+extern "C" SkData* C_SkVertices_encode(const SkVertices* self) {
+    return self->encode().release();
+}
+
 #if defined(SK_VULKAN)
 
 extern "C" SkSurface* C_SkSurface_MakeFromBackendTexture(

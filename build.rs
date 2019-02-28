@@ -224,6 +224,8 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .rustified_enum("SkFont_Edging")
     .rustified_enum("SkTextEncoding")
     .rustified_enum("SkFontHinting")
+    .rustified_enum("SkVertices_VertexMode")
+    .rustified_enum("SkVertices_BuilderFlags")
 
     .whitelist_var("SK_Color.*")
 
