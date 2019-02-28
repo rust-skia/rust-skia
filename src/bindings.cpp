@@ -554,10 +554,6 @@ extern "C" SkVertices* C_SkVertices_MakeCopy(
     return SkVertices::MakeCopy(mode, vertexCount, positions, texs, colors, boneIndices, boneWeights, indexCount, indices, isVolatile).release();
 }
 
-extern "C" SkVertices* C_SkVertices_Builder_detach(SkVertices::Builder* builder) {
-    return builder->detach().release();
-}
-
 extern "C" SkVertices* C_SkVertices_applyBones(const SkVertices* self, const SkVertices::Bone bones[], int boneCount) {
     return self->applyBones(bones, boneCount).release();
 }
@@ -568,6 +564,18 @@ extern "C" SkVertices* C_SkVertices_Decode(const void* buffer, size_t length) {
 
 extern "C" SkData* C_SkVertices_encode(const SkVertices* self) {
     return self->encode().release();
+}
+
+//
+// SkVertices::Builder
+//
+
+extern "C" void C_SkVertices_Builder_destruct(SkVertices::Builder* builder) {
+    builder->~Builder();
+}
+
+extern "C" SkVertices* C_SkVertices_Builder_detach(SkVertices::Builder* builder) {
+    return builder->detach().release();
 }
 
 #if defined(SK_VULKAN)
