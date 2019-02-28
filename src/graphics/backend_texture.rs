@@ -23,12 +23,12 @@ impl BackendTexture {
 
     #[cfg(feature = "vulkan")]
     pub unsafe fn new_vulkan(
-        (width, height): (u32, u32),
+        (width, height): (i32, i32),
         vk_info: &vulkan::ImageInfo) -> BackendTexture {
         Self::from_raw(
             GrBackendTexture::new2(
-                width as i32,
-                height as i32,
+                width,
+                height,
                 &vk_info.native))
             .unwrap()
     }
@@ -42,13 +42,13 @@ impl BackendTexture {
     }
 
     #[cfg(feature = "vulkan")]
-    pub fn width(&self) -> u32 {
-        unsafe { self.native().width() as u32 }
+    pub fn width(&self) -> i32 {
+        unsafe { self.native().width() }
     }
 
     #[cfg(feature = "vulkan")]
-    pub fn height(&self) -> u32 {
-        unsafe { self.native().height() as u32 }
+    pub fn height(&self) -> i32 {
+        unsafe { self.native().height() }
     }
 
     #[cfg(feature = "vulkan")]

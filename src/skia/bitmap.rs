@@ -93,15 +93,15 @@ impl Handle<SkBitmap> {
     }
 
     pub fn bytes_per_pixel(&self) -> usize {
-        unsafe { self.native().bytesPerPixel() as usize }
+        unsafe { self.native().bytesPerPixel().try_into().unwrap() }
     }
 
     pub fn row_bytes_as_pixels(&self) -> usize {
-        unsafe { self.native().rowBytesAsPixels() as usize }
+        unsafe { self.native().rowBytesAsPixels().try_into().unwrap() }
     }
 
     pub fn shift_per_pixel(&self) -> usize {
-        unsafe { self.native().shiftPerPixel() as usize }
+        unsafe { self.native().shiftPerPixel().try_into().unwrap() }
     }
 
     pub fn empty(&self) -> bool {

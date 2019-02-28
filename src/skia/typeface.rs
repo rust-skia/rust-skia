@@ -109,11 +109,11 @@ impl RCHandle<SkTypeface> {
     }
 
     pub fn count_glyphs(&self) -> usize {
-        unsafe { self.native().countGlyphs() as usize }
+        unsafe { self.native().countGlyphs().try_into().unwrap() }
     }
 
     pub fn count_tables(&self) -> usize {
-        unsafe { self.native().countTables() as usize }
+        unsafe { self.native().countTables().try_into().unwrap() }
     }
 
     pub fn table_tags(&self) -> Option<Vec<FontTableTag>> {
@@ -126,7 +126,7 @@ impl RCHandle<SkTypeface> {
     }
 
     pub fn table_size(&self, tag: FontTableTag) -> Option<usize> {
-        let size = unsafe { self.native().getTableSize(tag) as usize };
+        let size = unsafe { self.native().getTableSize(tag) };
         if size != 0 {
             Some(size)
         } else {
@@ -147,17 +147,21 @@ impl RCHandle<SkTypeface> {
         }
     }
 
+    // TODO: implement this
     pub fn may_support_kerning(&self) -> bool {
         true
     }
 
     // note: adjustments slice length must be equal to glyph's len - 1.
     pub fn kerning_pair_adjustments(&self, glyphs: &[GlyphId], adjustments: &mut [i32]) -> bool {
-        if glyphs.len() <= (i32::max_value() as _) && adjustments.len() == glyphs.len() + 1 {
-            unsafe { self.native().
-                getKerningPairAdjustments(glyphs.as_ptr(), glyphs.len() as i32, adjustments.as_mut_ptr()) }
-        } else {
-            false
+        (adjustments.len() == glyphs.len() + 1)
+        &&
+        unsafe {
+            self.native().
+                getKerningPairAdjustments(
+                    glyphs.as_ptr(),
+                    glyphs.len().try_into().unwrap(),
+                    adjustments.as_mut_ptr())
         }
     }
 

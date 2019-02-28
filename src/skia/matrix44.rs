@@ -265,7 +265,7 @@ impl Map2<(&[f32], &mut[f32])> for Matrix44 {
     fn map2(&self, (src2, dst4): (&[f32], &mut[f32])) {
         assert_eq!(0, (src2.len() % 2) & 1);
         assert_eq!(src2.len() * 2, dst4.len());
-        unsafe { self.0.map2(src2.as_ptr(), (src2.len() / 2) as i32, dst4.as_mut_ptr()) }
+        unsafe { self.0.map2(src2.as_ptr(), (src2.len() / 2).try_into().unwrap(), dst4.as_mut_ptr()) }
     }
 }
 
@@ -273,7 +273,7 @@ impl Map2<(&[f64], &mut[f64])> for Matrix44 {
     fn map2(&self, (src2, dst4): (&[f64], &mut[f64])) {
         assert_eq!(0, (src2.len() % 2) & 1);
         assert_eq!(src2.len() * 2, dst4.len());
-        unsafe { self.0.map21(src2.as_ptr(), (src2.len() / 2) as i32, dst4.as_mut_ptr()) }
+        unsafe { self.0.map21(src2.as_ptr(), (src2.len() / 2).try_into().unwrap(), dst4.as_mut_ptr()) }
     }
 }
 

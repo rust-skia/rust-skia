@@ -24,9 +24,9 @@ impl NativeRefCounted for SkSurface {
 
 impl RCHandle<SkSurface> {
 
-    pub fn new_raster_n32_premul(width: u32, height: u32) -> Option<Self> {
+    pub fn new_raster_n32_premul(width: i32, height: i32) -> Option<Self> {
         Self::from_ptr(unsafe {
-            rust_skia::C_SkSurface_MakeRasterN32Premul(width as i32, height as i32, ptr::null())
+            rust_skia::C_SkSurface_MakeRasterN32Premul(width, height, ptr::null())
         })
     }
 
@@ -34,14 +34,14 @@ impl RCHandle<SkSurface> {
         context: &mut Context,
         backend_texture: &BackendTexture,
         origin: GrSurfaceOrigin,
-        sample_count: u32,
+        sample_count: usize,
         color_type: SkColorType) -> Option<Self> {
         Self::from_ptr(unsafe {
             rust_skia::C_SkSurface_MakeFromBackendTexture(
                 context.native_mut(),
                 backend_texture.native(),
                 origin,
-                sample_count as i32,
+                sample_count.try_into().unwrap(),
                 color_type)
         })
     }

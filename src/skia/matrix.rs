@@ -377,11 +377,15 @@ impl Matrix {
 
     pub fn map_points(&self, dst: &mut [Point], src: &[Point]) {
         assert!(dst.len() >= src.len());
-        assert!(src.len() <= i32::max_value() as usize);
 
         let src_native = src.to_native();
         let mut dst_native : Vec<SkPoint> = iter::repeat(SkPoint { fX: 0.0, fY: 0.0 }).take(src.len()).collect();
-        unsafe { self.native().mapPoints(dst_native.as_mut_ptr(), src_native.as_ptr(), src.len() as i32) }
+        unsafe {
+            self.native().mapPoints(
+                dst_native.as_mut_ptr(),
+                src_native.as_ptr(),
+                src.len().try_into().unwrap())
+        }
         dst_native
             .iter()
             .enumerate()
@@ -389,10 +393,12 @@ impl Matrix {
     }
 
     pub fn map_points_inplace(&self, pts: &mut[Point]) {
-        assert!(pts.len() <= i32::max_value() as usize);
-
         let mut pts_native = pts.to_native();
-        unsafe { self.native().mapPoints1(pts_native.as_mut_ptr(), pts_native.len() as i32) }
+        unsafe {
+            self.native().mapPoints1(
+                pts_native.as_mut_ptr(),
+                pts_native.len().try_into().unwrap())
+        }
         pts_native
             .iter()
             .enumerate()
@@ -401,12 +407,16 @@ impl Matrix {
 
     pub fn map_homogeneous_points(&self, dst: &mut[Point3], src: &[Point3]) {
         assert!(dst.len() >= src.len());
-        assert!(src.len() <= i32::max_value() as usize);
 
         let src_native : Vec<SkPoint3> = src.to_native();
         let mut dst_native : Vec<SkPoint3> = iter::repeat(SkPoint3 { fX: 0.0, fY: 0.0, fZ: 0.0}).take(src.len()).collect();
 
-        unsafe { self.native().mapHomogeneousPoints(dst_native.as_mut_ptr(), src_native.as_ptr(), src.len() as i32) }
+        unsafe {
+            self.native().mapHomogeneousPoints(
+                dst_native.as_mut_ptr(),
+                src_native.as_ptr(),
+                src.len().try_into().unwrap())
+        }
         dst_native
             .iter()
             .enumerate()
@@ -419,11 +429,15 @@ impl Matrix {
 
     pub fn map_vectors(&self, dst: &mut[Vector], src: &[Vector]) {
         assert!(dst.len() >= src.len());
-        assert!(src.len() <= i32::max_value() as usize);
 
         let src_native = src.to_native();
         let mut dst_native : Vec<SkPoint> = iter::repeat(SkPoint { fX: 0.0, fY: 0.0 }).take(src.len()).collect();
-        unsafe { self.native().mapVectors(dst_native.as_mut_ptr(), src_native.as_ptr(), src.len() as i32) }
+        unsafe {
+            self.native().mapVectors(
+                dst_native.as_mut_ptr(),
+                src_native.as_ptr(),
+                src.len().try_into().unwrap())
+        }
         dst_native
             .iter()
             .enumerate()
@@ -431,10 +445,12 @@ impl Matrix {
     }
 
     pub fn map_vectors_inplace(&self, vecs: &mut[Vector]) {
-        assert!(vecs.len() <= i32::max_value() as usize);
-
         let mut vecs_native = vecs.to_native();
-        unsafe { self.native().mapVectors1(vecs_native.as_mut_ptr(), vecs_native.len() as i32) }
+        unsafe {
+            self.native().mapVectors1(
+                vecs_native.as_mut_ptr(),
+                vecs_native.len().try_into().unwrap())
+        }
         vecs_native
             .iter()
             .enumerate()

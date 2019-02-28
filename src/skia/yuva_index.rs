@@ -1,3 +1,4 @@
+use crate::prelude::*;
 use rust_skia::{
     SkYUVAIndex,
     SkColorChannel
@@ -22,7 +23,7 @@ impl YUVAIndex {
             Some((index, channel)) => {
                 assert!(index < 4);
                 YUVAIndex(SkYUVAIndex {
-                    fIndex: index as i32,
+                    fIndex: index.try_into().unwrap(),
                     fChannel: channel.0
                 })
             },
@@ -39,9 +40,8 @@ impl YUVAIndex {
         let index_slice : Vec<SkYUVAIndex> = indices.iter().map(|i| i.0).collect();
 
         let mut num_planes = 0;
-
         if unsafe { SkYUVAIndex::AreValidIndices(index_slice.as_ptr(), &mut num_planes) } {
-            Some(num_planes as usize)
+            Some(num_planes.try_into().unwrap())
         } else {
             None
         }

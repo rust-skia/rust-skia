@@ -353,7 +353,7 @@ impl Image {
         src_x: i32, src_y: i32,
         caching_hint: CachingHint) -> bool {
 
-        if pixels.elements_size_of() != (dst_info.height() as usize) * dst_row_bytes {
+        if pixels.elements_size_of() != (usize::try_from(dst_info.height()).unwrap() * dst_row_bytes) {
             return false
         }
 

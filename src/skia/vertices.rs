@@ -7,6 +7,10 @@ use crate::skia::{
     Color
 };
 use rust_skia::{
+    C_SkVertices_Builder_destruct,
+    SkVertices_Builder,
+    SkVertices_BoneIndices,
+    SkVertices_BoneWeights,
     SkColor,
     SkPoint,
     C_SkVertices_MakeCopy,
@@ -15,11 +19,7 @@ use rust_skia::{
     C_SkVertices_unref,
     SkVertices_Bone,
     SkVertices_VertexMode,
-};
-#[cfg(test)]
-use rust_skia:: {
-    SkVertices_BoneIndices,
-    SkVertices_BoneWeights
+    SkVertices_BuilderFlags
 };
 
 pub type BoneIndices = [u32; 4];
@@ -75,8 +75,8 @@ fn test_bone_layout() {
     Bone::test_layout();
 }
 
-    // TODO: think about renaming EnumHandle to EnumWrapper (and others?)
-pub type VertexMode = EnumHandle<SkVertices_VertexMode>;
+// TODO: think about renaming EnumHandle to EnumWrapper (and others?)
+pub type VerticesVertexMode = EnumHandle<SkVertices_VertexMode>;
 
 #[allow(non_upper_case_globals)]
 impl EnumHandle<SkVertices_VertexMode> {
@@ -100,7 +100,7 @@ impl NativeRefCounted for SkVertices {
 impl RCHandle<SkVertices> {
 
     pub fn new_copy(
-        mode: VertexMode,
+        mode: VerticesVertexMode,
         positions: &[Point],
         texs: &[Point],
         colors: &[Color],
@@ -111,8 +111,6 @@ impl RCHandle<SkVertices> {
         let vertex_count = positions.len();
         assert_eq!(vertex_count, texs.len());
         assert_eq!(vertex_count, colors.len());
-        // TODO: consider to use crate as_num
-        assert!(vertex_count <= i32::max_value() as _);
 
         let bone_indices = bone_indices_and_weights.map(|t| t.0);
         let bone_weights = bone_indices_and_weights.map(|t| t.1);
@@ -136,9 +134,38 @@ impl RCHandle<SkVertices> {
                 colors.as_ptr(),
                 bone_indices_ptr as _,
                 bone_weights_ptr as _,
-                indices_count as _,
+                indices_count.try_into().unwrap(),
                 indices_ptr,
                 is_volatile
             )}).unwrap()
+    }
+}
+bitflags! {
+    pub struct VerticesBuilderFlags: u32 {
+        const HasTexCoords = SkVertices_BuilderFlags::kHasTexCoords_BuilderFlag as u32;
+        const HasColors = SkVertices_BuilderFlags::kHasColors_BuilderFlag as u32;
+        const HasBones = SkVertices_BuilderFlags::kHasBones_BuilderFlag as u32;
+        const IsNonVolatile = SkVertices_BuilderFlags::kIsNonVolatile_BuilderFlag as u32;
+    }
+}
+
+pub type VerticesBuilder = Handle<SkVertices_Builder>;
+
+impl NativeDrop for SkVertices_Builder {
+    fn drop(&mut self) {
+        unsafe { C_SkVertices_Builder_destruct(self) }
+    }
+}
+
+
+impl Handle<SkVertices_Builder> {
+    pub fn new(mode: VerticesVertexMode, vertex_count: usize, index_count: usize, flags: VerticesBuilderFlags) -> VerticesBuilder {
+        unsafe {
+            SkVertices_Builder::new(
+                mode.native(),
+                vertex_count.try_into().unwrap(),
+                index_count.try_into().unwrap(),
+                flags.bits())
+        }.into_handle()
     }
 }

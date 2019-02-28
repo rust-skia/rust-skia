@@ -80,7 +80,7 @@ impl Handle<SkRegion> {
     }
 
     pub fn compute_region_complexity(&self) -> usize {
-        unsafe { self.native().computeRegionComplexity() as usize }
+        unsafe { self.native().computeRegionComplexity().try_into().unwrap() }
     }
 
     pub fn boundary_path(&self, path: &mut Path) -> bool {
@@ -96,9 +96,12 @@ impl Handle<SkRegion> {
     }
 
     pub fn set_rects(&mut self, rects: &[IRect]) -> bool {
-        assert!(rects.len() <= i32::max_value() as usize);
         let native_rects = rects.to_native();
-        unsafe { self.native_mut().setRects(native_rects.as_ptr(), native_rects.len() as i32) }
+        unsafe {
+            self.native_mut().setRects(
+                native_rects.as_ptr(),
+                native_rects.len().try_into().unwrap())
+        }
     }
 
     pub fn set_region(&mut self, region: &Region) -> bool {

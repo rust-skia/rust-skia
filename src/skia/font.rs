@@ -179,38 +179,36 @@ impl Handle<SkFont> {
     }
 
     // we support only UTF8 for now.
-    pub fn str_to_glyphs(&self, str: &str, glyphs: &mut[GlyphId]) -> Option<usize> {
+    pub fn str_to_glyphs(&self, str: &str, glyphs: &mut[GlyphId]) -> usize {
         let bytes = str.as_bytes();
-        if bytes.len() > i32::max_value() as usize {
-            return None;
-        }
 
-        Some(unsafe { self.native().textToGlyphs(
+        unsafe { self.native().textToGlyphs(
             bytes.as_ptr() as _,
             bytes.len(),
             TextEncoding::UTF8.native(),
-            glyphs.as_mut_ptr(), glyphs.len().max(i32::max_value() as usize) as i32) as usize })
+            glyphs.as_mut_ptr(),
+            glyphs.len().max(i32::max_value().try_into().unwrap()).try_into().unwrap())
+            .try_into().unwrap()
+        }
     }
 
-    pub fn count_str(&self, str: &str) -> Option<usize> {
+    pub fn count_str(&self, str: &str) -> usize {
         let bytes = str.as_bytes();
-        if bytes.len() > i32::max_value() as usize {
-            return None;
-        }
-        Some(unsafe { self.native().textToGlyphs(
+        unsafe { self.native().textToGlyphs(
             bytes.as_ptr() as _,
             bytes.len(),
             TextEncoding::UTF8.native(),
-            ptr::null_mut(), i32::max_value()) as usize })
+            ptr::null_mut(), i32::max_value()).try_into().unwrap()
+        }
     }
 
     // slower, but sooo convenient.
-    pub fn str_to_glyphs_vec(&self, str: &str) -> Option<Vec<GlyphId>> {
-        let count = self.count_str(str)?;
+    pub fn str_to_glyphs_vec(&self, str: &str) -> Vec<GlyphId> {
+        let count = self.count_str(str);
         let mut glyphs : Vec<GlyphId> = vec![Default::default(); count];
-        let resulting_count = self.str_to_glyphs(str, glyphs.as_mut_slice())?;
+        let resulting_count = self.str_to_glyphs(str, glyphs.as_mut_slice());
         assert_eq!(count, resulting_count);
-        Some(glyphs)
+        glyphs
     }
 
     pub fn unichar_to_glyph(&self, uni: Unichar) -> u16 {
@@ -219,18 +217,14 @@ impl Handle<SkFont> {
 
     pub fn contains_str(&self, str: &str) -> bool {
         let bytes = str.as_bytes();
-        if bytes.len() > i32::max_value() as usize {
-            return false;
+        unsafe {
+            self.native().containsText(bytes.as_ptr() as _, bytes.len(), TextEncoding::UTF8.native())
         }
-        unsafe { self.native().containsText(bytes.as_ptr() as _, bytes.len(), TextEncoding::UTF8.native()) }
     }
 
     // note that the returned usize value is the bytes of the str that fits and not the characters.
-    pub fn break_str(&self, str: &str, max_width: f32) -> Option<(usize, f32)> {
+    pub fn break_str(&self, str: &str, max_width: f32) -> (usize, f32) {
         let bytes = str.as_bytes();
-        if bytes.len() > i32::max_value() as usize {
-            return None;
-        }
 
         let mut measured_width = 0.0;
         let bytes_fit = unsafe { self.native()
@@ -238,15 +232,11 @@ impl Handle<SkFont> {
                 bytes.as_ptr() as _, bytes.len(), TextEncoding::UTF8.native(),
                 max_width, &mut measured_width) };
 
-        Some((bytes_fit, measured_width))
+        (bytes_fit, measured_width)
     }
 
-    pub fn measure_str(&self, str: &str, paint: Option<&Paint>) -> Option<(f32, Rect)> {
+    pub fn measure_str(&self, str: &str, paint: Option<&Paint>) -> (f32, Rect) {
         let bytes = str.as_bytes();
-        if bytes.len() > i32::max_value() as usize {
-            return None;
-        }
-
         let mut bounds = SkRect {
             fLeft: 0.0,
             fTop: 0.0,
@@ -259,7 +249,7 @@ impl Handle<SkFont> {
                 bytes.as_ptr() as _, bytes.len(), TextEncoding::UTF8.native(),
                 &mut bounds, paint.native_ptr_or_null()) };
 
-        Some((width, Rect::from_native(bounds)))
+        (width, Rect::from_native(bounds))
     }
 
     pub fn widths_bounds(
@@ -268,9 +258,6 @@ impl Handle<SkFont> {
         widths: Option<&mut [f32]>,
         bounds: Option<&mut [Rect]>,
         paint: Option<&Paint>) {
-        // TODO: if we assert here when we go over i32::max_value() elements, we should probably
-        //       assert anywhere else, too. Chunking would be an option.
-        assert!(glyphs.len() <= i32::max_value() as usize);
         let count = glyphs.len();
         let mut widths = widths;
         let mut bounds = bounds;
@@ -294,7 +281,12 @@ impl Handle<SkFont> {
         let widths_ptr = widths.as_ptr_or_null_mut();
         let paint_ptr = paint.native_ptr_or_null();
 
-        unsafe { self.native().getWidthsBounds(glyphs.as_ptr(), count as i32, widths_ptr, bounds_ptr, paint_ptr) }
+        unsafe {
+            self.native().getWidthsBounds(
+                glyphs.as_ptr(),
+                count.try_into().unwrap(),
+                widths_ptr, bounds_ptr, paint_ptr)
+        }
 
         if let (Some(vec), Some(bounds)) = (&bounds_vec, &mut bounds) {
             vec.iter().enumerate().for_each(|(i, r)| bounds[i] = Rect::from_native(*r))
@@ -302,7 +294,6 @@ impl Handle<SkFont> {
     }
 
     pub fn pos(&self, glyphs: &[u16], pos: &mut [Point], origin: Option<Point>) {
-        assert!(glyphs.len() <= i32::max_value() as usize);
         let count = glyphs.len();
         assert_eq!(count, pos.len());
 
@@ -312,11 +303,15 @@ impl Handle<SkFont> {
                 fY: 0.0
             }; count];
 
-        let pos_ptr = pos_vec.as_mut_ptr();
-
         let origin = origin.map(|p| p.into_native()).unwrap_or(SkPoint { fX: 0.0, fY: 0.0 });
 
-        unsafe { self.native().getPos(glyphs.as_ptr(), count as i32, pos_vec.as_mut_ptr(), origin) }
+        unsafe {
+            self.native().getPos(
+                glyphs.as_ptr(),
+                count.try_into().unwrap(),
+                pos_vec.as_mut_ptr(),
+                origin)
+        }
 
         pos_vec
             .iter()
@@ -325,12 +320,13 @@ impl Handle<SkFont> {
     }
 
     pub fn x_pos(&self, glyphs: &[u16], xpos: &mut [f32], origin: Option<f32>) {
-        assert!(glyphs.len() <= i32::max_value() as usize);
         let count = glyphs.len();
         assert_eq!(count, xpos.len());
         let origin = origin.unwrap_or_default();
 
-        unsafe { self.native().getXPos(glyphs.as_ptr(), count as i32, xpos.as_mut_ptr(), origin) }
+        unsafe {
+            self.native().getXPos(glyphs.as_ptr(), count.try_into().unwrap(), xpos.as_mut_ptr(), origin)
+        }
     }
 
     pub fn path(&self, glyph_id: u16) -> Option<Path> {

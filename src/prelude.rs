@@ -502,3 +502,43 @@ impl<E> AsPointerOrNullMut<E> for Option<Vec<E>> {
         }
     }
 }
+
+//
+// Safe Conversions from to until try_from / try_into is stabalized.
+//
+
+pub trait TryFrom<FromT> : Sized {
+    fn try_from(from: FromT) -> Option<Self>;
+}
+
+pub trait TryInto<IntoT> : Sized {
+    fn try_into(self) -> Option<IntoT>;
+}
+
+impl<IntoT, T> TryInto<IntoT> for T
+    where IntoT: TryFrom<T> {
+
+    fn try_into(self) -> Option<IntoT> {
+        IntoT::try_from(self)
+    }
+}
+
+impl TryFrom<usize> for i32 {
+    fn try_from(from: usize) -> Option<Self> {
+        if from <= i32::max_value() as usize {
+            Some(from as i32)
+        } else {
+            None
+        }
+    }
+}
+
+impl TryFrom<i32> for usize {
+    fn try_from(from: i32) -> Option<Self> {
+        if from >= 0 {
+            Some(from as usize)
+        } else {
+            None
+        }
+    }
+}
