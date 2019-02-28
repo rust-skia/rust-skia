@@ -3,7 +3,6 @@ extern crate cc;
 
 use std::env;
 use std::fs;
-use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
