@@ -268,8 +268,8 @@ impl Handle<SkFont> {
         widths: Option<&mut [f32]>,
         bounds: Option<&mut [Rect]>,
         paint: Option<&Paint>) {
-        // tbd: if we assert here when we go over i32::max_value() elements, we should problem
-        // assert anywhere else, too. Chunking would be an option.
+        // TODO: if we assert here when we go over i32::max_value() elements, we should probably
+        //       assert anywhere else, too. Chunking would be an option.
         assert!(glyphs.len() <= i32::max_value() as usize);
         let count = glyphs.len();
         let mut widths = widths;

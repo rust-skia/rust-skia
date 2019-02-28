@@ -79,6 +79,9 @@ pub use self::typeface::*;
 mod vector4;
 pub use self::vector4::*;
 
+mod vertices;
+pub use self::vertices::*;
+
 mod yuva_index;
 pub use self::yuva_index::*;
 
