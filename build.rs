@@ -215,13 +215,15 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .rustified_enum("SkRRect_Type")
     .rustified_enum("SkRRect_Corner")
     .rustified_enum("SkRegion_Op")
-    .rustified_enum("SkFont_Edging")
     .rustified_enum("SkFontMetrics_FontMetricsFlags")
     .rustified_enum("SkTypeface_SerializeBehavior")
     .rustified_enum("SkTypeface_Encoding")
     .rustified_enum("SkFontStyle_Weight")
     .rustified_enum("SkFontStyle_Width")
     .rustified_enum("SkFontStyle_Slant")
+    .rustified_enum("SkFont_Edging")
+    .rustified_enum("SkTextEncoding")
+    .rustified_enum("SkFontHinting")
 
     .whitelist_var("SK_Color.*")
 

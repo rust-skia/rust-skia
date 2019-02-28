@@ -497,6 +497,38 @@ extern "C" SkData* C_SkTypeface_serialize(const SkTypeface* self, SkTypeface::Se
     return self->serialize(behavior).release();
 }
 
+//
+// SkFont
+//
+
+extern "C" void C_SkFont_ConstructFromTypeface(SkFont* uninitialized, SkTypeface* typeface) {
+    new(uninitialized) SkFont(sk_sp<SkTypeface>(typeface));
+}
+
+extern "C" void C_SkFont_ConstructFromTypefaceWithSize(SkFont* uninitialized, SkTypeface* typeface, SkScalar size) {
+    new(uninitialized) SkFont(sk_sp<SkTypeface>(typeface), size);
+}
+
+extern "C" void C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(SkFont* uninitialized, SkTypeface* typeface, SkScalar size, SkScalar scaleX, SkScalar skewX) {
+    new(uninitialized) SkFont(sk_sp<SkTypeface>(typeface), size, scaleX, skewX);
+}
+
+extern "C" bool C_SkFont_equals(const SkFont* self, const SkFont* other) {
+    return *self == *other;
+}
+
+extern "C" void C_SkFont_makeWithSize(const SkFont* self, SkScalar size, SkFont* result) {
+    *result = self->makeWithSize(size);
+}
+
+extern "C" void C_SkFont_setTypeface(SkFont* self, SkTypeface* tf) {
+    self->setTypeface(sk_sp<SkTypeface>(tf));
+}
+
+extern "C" void C_SkFont_Destruct(SkFont* self) {
+    self->~SkFont();
+}
+
 #if defined(SK_VULKAN)
 
 extern "C" SkSurface* C_SkSurface_MakeFromBackendTexture(
