@@ -1,22 +1,16 @@
 use crate::prelude::*;
-use crate::{
-    skia::{
-        Paint,
-        Color,
-        ColorType,
-        AlphaType,
-        ColorSpace,
-        IRect,
-        ImageInfo,
-        ISize,
-        IPoint,
-        u8cpu
-    }
-};
-use std::{
-    ffi::c_void,
-    mem::uninitialized,
-    ptr
+use std::{ffi, mem, ptr};
+use crate::skia::{
+    Paint,
+    Color,
+    ColorType,
+    AlphaType,
+    ColorSpace,
+    IRect,
+    ImageInfo,
+    ISize,
+    IPoint,
+    u8cpu
 };
 use rust_skia::{
     SkPaint,
@@ -61,7 +55,7 @@ impl NativeClone for SkBitmap {
 
 impl Handle<SkBitmap> {
     pub fn new() -> Self {
-        let mut bitmap : Self = unsafe { uninitialized() };
+        let mut bitmap : Self = unsafe { mem::uninitialized() };
         unsafe { C_SkBitmap_Construct(bitmap.native_mut()) }
         bitmap
     }
@@ -130,7 +124,7 @@ impl Handle<SkBitmap> {
         unsafe { self.native_mut().setAlphaType(alpha_type.0) }
     }
 
-    pub unsafe fn get_pixels(&mut self) -> *mut c_void {
+    pub unsafe fn get_pixels(&mut self) -> *mut ffi::c_void {
         self.native_mut().getPixels()
     }
 
@@ -204,7 +198,7 @@ impl Handle<SkBitmap> {
         unsafe { C_SkBitmap_tryAllocN32Pixels(self.native_mut(), width, height, is_opaque) }
     }
 
-    pub unsafe fn install_pixels(&mut self, image_info: &ImageInfo, pixels: *mut c_void, row_bytes: usize) -> bool {
+    pub unsafe fn install_pixels(&mut self, image_info: &ImageInfo, pixels: *mut ffi::c_void, row_bytes: usize) -> bool {
         self.native_mut().installPixels1(image_info.native(), pixels, row_bytes)
     }
 
@@ -253,7 +247,7 @@ impl Handle<SkBitmap> {
     }
 
     #[inline]
-    pub unsafe fn get_addr(&self, x: i32, y: i32) -> *const c_void {
+    pub unsafe fn get_addr(&self, x: i32, y: i32) -> *const ffi::c_void {
         self.native().getAddr(x, y)
     }
 
@@ -261,7 +255,7 @@ impl Handle<SkBitmap> {
         unsafe { self.native().extractSubset(dst.native_mut(), &subset.into_native() ) }
     }
 
-    pub unsafe fn read_pixels(&self, dst_info: &ImageInfo, dst_pixels: *mut c_void, dst_row_bytes: usize, src_x: i32, src_y: i32) -> bool {
+    pub unsafe fn read_pixels(&self, dst_info: &ImageInfo, dst_pixels: *mut ffi::c_void, dst_row_bytes: usize, src_x: i32, src_y: i32) -> bool {
         self.native().readPixels(dst_info.native(), dst_pixels, dst_row_bytes, src_x, src_y)
     }
 
@@ -271,7 +265,7 @@ impl Handle<SkBitmap> {
                 .map(|p| p.native() as *const SkPaint)
                 .unwrap_or(ptr::null());
 
-        let mut offset : SkIPoint = unsafe { uninitialized() };
+        let mut offset : SkIPoint = unsafe { mem::uninitialized() };
         if unsafe { C_SkBitmap_extractAlpha(self.native(), dst.native_mut(), paint_ptr, &mut offset) } {
             Some(IPoint::from_native(offset))
         } else {
