@@ -84,7 +84,7 @@ impl Handle<SkRegion> {
     }
 
     pub fn boundary_path(&self, path: &mut Path) -> bool {
-        unsafe { self.native().getBoundaryPath(&mut path.native) }
+        unsafe { self.native().getBoundaryPath(path.native_mut()) }
     }
 
     pub fn set_empty(&mut self) -> bool {
@@ -106,7 +106,7 @@ impl Handle<SkRegion> {
     }
 
     pub fn set_path(&mut self, path: &Path, clip: &Region) -> bool {
-        unsafe { self.native_mut().setPath(&path.native, clip.native()) }
+        unsafe { self.native_mut().setPath(path.native(), clip.native()) }
     }
 
     pub fn intersects_rect(&self, rect: &IRect) -> bool {
