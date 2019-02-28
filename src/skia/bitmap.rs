@@ -59,9 +59,9 @@ impl NativeClone for SkBitmap {
     }
 }
 
-impl Bitmap {
-    pub fn new() -> Bitmap {
-        let mut bitmap : Bitmap = unsafe { uninitialized() };
+impl Handle<SkBitmap> {
+    pub fn new() -> Self {
+        let mut bitmap : Self = unsafe { uninitialized() };
         unsafe { C_SkBitmap_Construct(bitmap.native_mut()) }
         bitmap
     }
@@ -257,7 +257,7 @@ impl Bitmap {
         self.native().getAddr(x, y)
     }
 
-    pub fn extract_subset(&self, dst: &mut Bitmap, subset: &IRect) -> bool {
+    pub fn extract_subset(&self, dst: &mut Self, subset: &IRect) -> bool {
         unsafe { self.native().extractSubset(dst.native_mut(), &subset.into_native() ) }
     }
 
@@ -265,7 +265,7 @@ impl Bitmap {
         self.native().readPixels(dst_info.native(), dst_pixels, dst_row_bytes, src_x, src_y)
     }
 
-    pub fn extract_alpha(&self, dst: &mut Bitmap, paint: Option<&Paint>) -> Option<IPoint> {
+    pub fn extract_alpha(&self, dst: &mut Self, paint: Option<&Paint>) -> Option<IPoint> {
         let paint_ptr =
             paint
                 .map(|p| p.native() as *const SkPaint)
