@@ -5,12 +5,14 @@ use crate::skia::{
     Rect
 };
 use rust_skia::{
+    C_SkPicture_approximateOpCount,
     C_SkPicture_playback,
     SkPicture,
     C_SkPicture_MakeFromData,
     C_SkPicture_cullRect,
     C_SkPicture_MakePlaceholder,
-    C_SkPicture_serialize
+    C_SkPicture_serialize,
+    C_SkPicture_approximateBytesUsed
 };
 
 pub type Picture = RCHandle<SkPicture>;
@@ -25,16 +27,10 @@ impl NativeRefCounted for SkPicture {
     }
 }
 
-impl Picture {
+impl RCHandle<SkPicture> {
     pub fn from_data(data: &Data) -> Picture {
         Picture::from_ptr(unsafe {
             C_SkPicture_MakeFromData(data.native())
-        }).unwrap()
-    }
-
-    pub fn new_placeholder(cull: &Rect) -> Picture {
-        Picture::from_ptr(unsafe {
-            C_SkPicture_MakePlaceholder(&cull.into_native())
         }).unwrap()
     }
 
@@ -56,5 +52,23 @@ impl Picture {
         Data::from_ptr(unsafe {
             C_SkPicture_serialize(self.native())
         }).unwrap()
+    }
+
+    pub fn new_placeholder(cull: &Rect) -> Picture {
+        Picture::from_ptr(unsafe {
+            C_SkPicture_MakePlaceholder(&cull.into_native())
+        }).unwrap()
+    }
+
+    pub fn approximate_op_count(&self) -> usize {
+        unsafe {
+            C_SkPicture_approximateOpCount(self.native()).try_into().unwrap()
+        }
+    }
+
+    pub fn approximate_bytes_used(&self) -> usize {
+        unsafe {
+            C_SkPicture_approximateBytesUsed(self.native())
+        }
     }
 }
