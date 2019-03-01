@@ -189,6 +189,7 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .whitelist_function("SkColorTypeValidateAlphaType")
     .whitelist_type("SkColorSpacePrimaries")
     .whitelist_type("SkVector4")
+    .whitelist_type("SkPictureRecorder")
 
     .rustified_enum("GrMipMapped")
     .rustified_enum("GrSurfaceOrigin")
@@ -226,6 +227,7 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .rustified_enum("SkFontHinting")
     .rustified_enum("SkVertices_VertexMode")
     .rustified_enum("SkVertices_BuilderFlags")
+    .rustified_enum("SkPictureRecorder_RecordFlags")
 
     .whitelist_var("SK_Color.*")
 

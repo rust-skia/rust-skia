@@ -13,6 +13,7 @@
 #include "SkFont.h"
 #include "SkTypeface.h"
 #include "SkFontMetrics.h"
+#include "SkPictureRecorder.h"
 
 #include "GrContext.h"
 
@@ -576,6 +577,18 @@ extern "C" void C_SkVertices_Builder_destruct(SkVertices::Builder* builder) {
 
 extern "C" SkVertices* C_SkVertices_Builder_detach(SkVertices::Builder* builder) {
     return builder->detach().release();
+}
+
+//
+// SkPictureRecorder
+//
+
+extern "C" SkPicture* C_SkPictureRecorder_finishRecordingAsPicture(SkPictureRecorder* self, const SkRect* cullRect) {
+    if (cullRect){
+        return self->finishRecordingAsPictureWithCull(*cullRect).release();
+    } else {
+        return self->finishRecordingAsPicture().release();
+    }
 }
 
 #if defined(SK_VULKAN)
