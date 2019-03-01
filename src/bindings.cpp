@@ -438,8 +438,9 @@ extern "C" int C_SkPicture_approximateOpCount(const SkPicture* self) {
     return self->approximateOpCount();
 }
 
-extern "C" size_t C_SkPicture_approximateBytesUsed(const SkPicture* self) {
-    return self->approximateBytesUsed();
+// note: returning size_t produces a linker error.
+extern "C" void C_SkPicture_approximateBytesUsed(const SkPicture* self, size_t* out) {
+    *out = self->approximateBytesUsed();
 }
 
 //
