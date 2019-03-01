@@ -282,17 +282,31 @@ impl<N> NativeSliceAccess<N> for [Handle<N>]
 
 /// A trait that supports retrieving a pointer from an Option<Handle<Native>>.
 /// Returns a null pointer if the Option is None.
-pub trait NativePointer<N> {
+pub trait NativePointerOrNull<N> {
     fn native_ptr_or_null(&self) -> *const N;
 }
 
-impl<H, N> NativePointer<N> for Option<&H>
+pub trait NativePointerOrNullMut<N> {
+    fn native_ptr_or_null_mut(&mut self) -> *mut N;
+}
+
+impl<H, N> NativePointerOrNull<N> for Option<&H>
     where H: NativeAccess<N>
 {
     fn native_ptr_or_null(&self) -> *const N {
         match self {
             Some(handle) => handle.native(),
             None => ptr::null()
+        }
+    }
+}
+
+impl<H, N> NativePointerOrNullMut<N> for Option<&mut H>
+    where H: NativeAccess<N> {
+    fn native_ptr_or_null_mut(&mut self) -> *mut N {
+        match self {
+            Some(handle) => handle.native_mut(),
+            None => ptr::null_mut()
         }
     }
 }

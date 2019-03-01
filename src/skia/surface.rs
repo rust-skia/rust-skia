@@ -47,7 +47,8 @@ impl RCHandle<SkSurface> {
     }
 
     pub fn canvas(&mut self) -> &mut Canvas {
-        Canvas::borrow_from_surface(self)
+        let canvas_ref = unsafe { &mut *self.native_mut().getCanvas() };
+        Canvas::borrow_from_native(canvas_ref)
     }
 
     pub fn make_image_snapshot(&mut self) -> Image {

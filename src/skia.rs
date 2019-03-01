@@ -4,6 +4,9 @@ pub type GlyphId = rust_skia::SkGlyphID;
 pub type Unichar = rust_skia::SkUnichar;
 pub type FontTableTag = rust_skia::SkFontTableTag;
 
+mod bbh_factory;
+pub use self::bbh_factory::*;
+
 mod bitmap;
 pub use self::bitmap::*;
 

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use std::mem;
 use rust_skia::SkCanvas;
-use super::{Path, Paint, Color, Surface};
+use super::{Path, Paint, Color};
 
 // Note: References to a canvas are exposed bound to the lifetime of
 // the owning instance.
@@ -11,9 +11,8 @@ pub struct Canvas(SkCanvas);
 
 impl Canvas {
 
-    pub(crate) fn borrow_from_surface(surface: &mut Surface) -> &mut Self {
-        let sk_canvas_ref = unsafe { &mut *surface.native_mut().getCanvas() };
-        unsafe { mem::transmute::<&mut SkCanvas, &mut Self>(sk_canvas_ref) }
+    pub(crate) fn borrow_from_native(native: &mut SkCanvas) -> &mut Self {
+        unsafe { mem::transmute::<&mut SkCanvas, &mut Self>(native) }
     }
 
     pub fn clear(&mut self, color: Color) {
