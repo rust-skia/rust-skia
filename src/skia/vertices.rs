@@ -42,7 +42,7 @@ fn bone_weights_layout() {
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
-#[repr(C)]
+#[repr(transparent)]
 pub struct Bone([u32; 6]);
 
 impl Deref for Bone {

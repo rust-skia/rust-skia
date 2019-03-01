@@ -6,7 +6,7 @@ use super::{Path, Paint, Color, Surface};
 // Note: References to a canvas are exposed bound to the lifetime of
 // the owning instance.
 
-#[repr(C)]
+#[repr(transparent)]
 pub struct Canvas(SkCanvas);
 
 impl Canvas {

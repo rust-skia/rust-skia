@@ -234,7 +234,7 @@ impl<N: NativePartialEq + Clone> PartialEq for ValueHandle<N> {
 
 /// Wraps a native type that can be represented as a value
 /// and needs a destructor.
-#[repr(C)]
+#[repr(transparent)]
 pub struct Handle<N: NativeDrop>(N);
 
 impl<N: NativeDrop> FromNative<N> for Handle<N> {
