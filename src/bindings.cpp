@@ -583,6 +583,10 @@ extern "C" SkVertices* C_SkVertices_Builder_detach(SkVertices::Builder* builder)
 // SkPictureRecorder
 //
 
+extern "C" void C_SkPictureRecorder_destruct(SkPictureRecorder *self) {
+    self->~SkPictureRecorder();
+}
+
 extern "C" SkPicture* C_SkPictureRecorder_finishRecordingAsPicture(SkPictureRecorder* self, const SkRect* cullRect) {
     if (cullRect){
         return self->finishRecordingAsPictureWithCull(*cullRect).release();
