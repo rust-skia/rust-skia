@@ -58,6 +58,9 @@ pub use self::path::*;
 mod picture;
 pub use self::picture::*;
 
+mod picture_recorder;
+pub use self::picture_recorder::*;
+
 mod region;
 pub use self::region::*;
 

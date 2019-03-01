@@ -1,10 +1,8 @@
-use crate::{
-    prelude::*,
-    skia::{
-        Data,
-        Canvas,
-        Rect
-    }
+use crate::prelude::*;
+use crate::skia::{
+    Data,
+    Canvas,
+    Rect
 };
 use rust_skia::{
     C_SkPicture_playback,
