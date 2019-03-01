@@ -232,8 +232,9 @@ impl<N: NativePartialEq + Clone> PartialEq for ValueHandle<N> {
     }
 }
 
-/// A representation type for a native type that has value semantics but
-/// requires a destructor.
+/// Wraps a native type that can be represented as a value
+/// and needs a destructor.
+#[repr(C)]
 pub struct Handle<N: NativeDrop>(N);
 
 impl<N: NativeDrop> FromNative<N> for Handle<N> {

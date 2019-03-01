@@ -46,8 +46,8 @@ impl RCHandle<SkSurface> {
         })
     }
 
-    pub fn canvas(&mut self) -> Canvas {
-        Canvas::from_surface(self)
+    pub fn canvas(&mut self) -> &mut Canvas {
+        Canvas::borrow_from_surface(self)
     }
 
     pub fn make_image_snapshot(&mut self) -> Image {

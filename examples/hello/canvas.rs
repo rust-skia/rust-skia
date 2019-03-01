@@ -71,20 +71,20 @@ impl Canvas {
     #[inline]
     pub fn begin_path(&mut self) {
         let new_path = skia::Path::new();
-        self.canvas().draw_path(&self.path, &self.paint);
+        self.surface.canvas().draw_path(&self.path, &self.paint);
         mem::replace(&mut self.path, new_path);
     }
 
     #[inline]
     pub fn stroke(&mut self) {
         self.paint.set_style(skia::PaintStyle::Stroke);
-        self.canvas().draw_path(&self.path, &self.paint);
+        self.surface.canvas().draw_path(&self.path, &self.paint);
     }
 
     #[inline]
     pub fn fill(&mut self) {
         self.paint.set_style(skia::PaintStyle::Fill);
-        self.canvas().draw_path(&self.path, &self.paint);
+        self.surface.canvas().draw_path(&self.path, &self.paint);
     }
 
     #[inline]
@@ -99,7 +99,7 @@ impl Canvas {
     }
 
     #[inline]
-    fn canvas(&mut self) -> skia::Canvas {
+    fn canvas(&mut self) -> &mut skia::Canvas {
         self.surface.canvas()
     }
 }
