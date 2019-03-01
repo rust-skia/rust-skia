@@ -68,7 +68,9 @@ impl RCHandle<SkPicture> {
 
     pub fn approximate_bytes_used(&self) -> usize {
         unsafe {
-            C_SkPicture_approximateBytesUsed(self.native())
+            let mut value = 0;
+            C_SkPicture_approximateBytesUsed(self.native(), &mut value);
+            value
         }
     }
 }
