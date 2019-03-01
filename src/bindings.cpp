@@ -434,6 +434,14 @@ extern "C" SkRect C_SkPicture_cullRect(const SkPicture* self) {
     return self->cullRect();
 }
 
+extern "C" int C_SkPicture_approximateOpCount(const SkPicture* self) {
+    return self->approximateOpCount();
+}
+
+extern "C" size_t C_SkPicture_approximateBytesUsed(const SkPicture* self) {
+    return self->approximateBytesUsed();
+}
+
 //
 // SkRRect
 //
