@@ -1,6 +1,18 @@
 use crate::prelude::*;
-use rust_skia::{SkPaint, C_SkPaint_destruct, SkPaint_Style};
-use super::Color;
+use crate::skia::Color;
+use rust_skia::{
+    SkPaint,
+    C_SkPaint_destruct,
+    SkPaint_Style};
+
+pub type PaintStyle = EnumHandle<SkPaint_Style>;
+
+#[allow(non_upper_case_globals)]
+impl EnumHandle<SkPaint_Style> {
+    pub const Stroke: Self = Self(SkPaint_Style::kStroke_Style);
+    pub const Fill: Self = Self(SkPaint_Style::kFill_Style);
+    pub const StrokeAndFill: Self = Self(SkPaint_Style::kStrokeAndFill_Style);
+}
 
 pub type Paint = Handle<SkPaint>;
 
@@ -10,10 +22,13 @@ impl NativeDrop for SkPaint {
     }
 }
 
-impl Paint {
-    pub fn new() -> Paint {
+impl Default for Handle<SkPaint> {
+    fn default() -> Self {
         Paint::from_native(unsafe { SkPaint::new() })
     }
+}
+
+impl Handle<SkPaint> {
 
     pub fn set_color(&mut self, color: Color) {
         unsafe { self.native_mut().setColor(color.0) }
@@ -32,12 +47,3 @@ impl Paint {
     }
 }
 
-#[derive(Copy, Clone)]
-pub struct PaintStyle(pub(crate) SkPaint_Style);
-
-#[allow(non_upper_case_globals)]
-impl PaintStyle {
-    pub const Stroke: PaintStyle = PaintStyle(SkPaint_Style::kStroke_Style);
-    pub const Fill: PaintStyle = PaintStyle(SkPaint_Style::kFill_Style);
-    pub const StrokeAndFill: PaintStyle = PaintStyle(SkPaint_Style::kStrokeAndFill_Style);
-}
