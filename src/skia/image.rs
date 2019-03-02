@@ -42,7 +42,8 @@ use rust_skia::{
     C_SkImage_makeTextureImage,
     C_SkImage_makeNonTextureImage,
     C_SkImage_makeRasterImage,
-    C_SkImage_makeColorSpace
+    C_SkImage_makeColorSpace,
+    SkRefCntBase
 };
 
 pub type ImageBitDepth = EnumHandle<SkImage_BitDepth>;
@@ -62,13 +63,11 @@ impl CachingHint {
 
 pub type Image = RCHandle<SkImage>;
 
-impl NativeRefCounted for SkImage {
-    fn _ref(&self) {
-        unsafe { self._base._base.ref_() }
-    }
+impl NativeRefCountedBase for SkImage {
+    type Base = SkRefCntBase;
 
-    fn _unref(&self) {
-        unsafe { self._base._base.unref() }
+    fn ref_counted_base(&self) -> &Self::Base {
+        &self._base._base
     }
 }
 

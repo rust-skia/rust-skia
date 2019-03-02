@@ -7,18 +7,17 @@ use rust_skia::{
     SkSurface,
     GrSurfaceOrigin,
     SkSurface_BackendHandleAccess,
-    GrBackendTexture
+    GrBackendTexture,
+    SkRefCntBase
 };
 
 pub type Surface = RCHandle<SkSurface>;
 
-impl NativeRefCounted for SkSurface {
-    fn _ref(&self) {
-        unsafe { self._base._base.ref_() }
-    }
+impl NativeRefCountedBase for SkSurface {
+    type Base = SkRefCntBase;
 
-    fn _unref(&self) {
-        unsafe { self._base._base.unref() }
+    fn ref_counted_base(&self) -> &Self::Base {
+        &self._base._base
     }
 }
 

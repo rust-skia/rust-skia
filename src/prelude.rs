@@ -96,7 +96,6 @@ impl RefCount for SkColorSpace {
     }
 }
 
-/// Supporting trait for the derive macro RCCloneDrop.
 pub trait NativeRefCounted: Sized {
     fn _ref(&self);
     fn _unref(&self);

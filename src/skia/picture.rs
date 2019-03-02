@@ -12,18 +12,17 @@ use rust_skia::{
     C_SkPicture_cullRect,
     C_SkPicture_MakePlaceholder,
     C_SkPicture_serialize,
-    C_SkPicture_approximateBytesUsed
+    C_SkPicture_approximateBytesUsed,
+    SkRefCntBase
 };
 
 pub type Picture = RCHandle<SkPicture>;
 
-impl NativeRefCounted for SkPicture {
-    fn _ref(&self) {
-        unsafe { self._base._base.ref_(); }
-    }
+impl NativeRefCountedBase for SkPicture {
+    type Base = SkRefCntBase;
 
-    fn _unref(&self) {
-        unsafe { self._base._base.unref(); }
+    fn ref_counted_base(&self) -> &Self::Base {
+        &self._base._base
     }
 }
 

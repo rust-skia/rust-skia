@@ -17,6 +17,7 @@ use rust_skia::{
     C_SkTypeface_MakeFromData,
     SkTypeface_SerializeBehavior,
     C_SkTypeface_serialize,
+    SkRefCntBase
 };
 
 pub type TypefaceSerializeBehavior = EnumHandle<SkTypeface_SerializeBehavior>;
@@ -41,13 +42,11 @@ impl EnumHandle<SkTypeface_Encoding> {
 
 pub type Typeface = RCHandle<SkTypeface>;
 
-impl NativeRefCounted for SkTypeface {
-    fn _ref(&self) {
-        unsafe { self._base._base._base.ref_() }
-    }
+impl NativeRefCountedBase for SkTypeface {
+    type Base = SkRefCntBase;
 
-    fn _unref(&self) {
-        unsafe { self._base._base._base.unref() }
+    fn ref_counted_base(&self) -> &Self::Base {
+        &self._base._base._base
     }
 }
 
