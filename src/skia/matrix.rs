@@ -322,11 +322,8 @@ impl Matrix {
 
     pub fn new_rect_to_rect(src: &Rect, dst: &Rect, stf: MatrixScaleToFit) -> Option<Matrix> {
         let mut m = Matrix::new_identity();
-        if unsafe { m.native_mut().setRectToRect(&src.into_native(), &dst.into_native(), stf.native().to_owned()) } {
-            Some(m)
-        } else {
-            None
-        }
+        unsafe { m.native_mut().setRectToRect(&src.into_native(), &dst.into_native(), stf.native().to_owned()) }
+            .if_true_some(m)
     }
 
     pub fn new_poly_to_poly(src: &[Point], dst: &[Point]) -> Option<Matrix> {
@@ -338,21 +335,16 @@ impl Matrix {
         let dst : Vec<SkPoint> = dst.to_native();
 
         let mut m = Matrix::new_identity();
-        if unsafe { m.native_mut().setPolyToPoly(src.as_ptr(), dst.as_ptr(), src.len() as _) } {
-            Some(m)
-        } else {
-            None
-        }
+        unsafe {
+            m.native_mut().setPolyToPoly(src.as_ptr(), dst.as_ptr(), src.len() as _)
+        }.if_true_some(m)
     }
 
     #[warn(unused)]
     pub fn invert(&self) -> Option<Matrix> {
         let mut m = Matrix::new_identity();
-        if unsafe { self.native().invert(m.native_mut()) } {
-            Some(m)
-        } else {
-            None
-        }
+        unsafe { self.native().invert(m.native_mut()) }
+            .if_true_some(m)
     }
 
     pub fn set_affine_identity(affine: &mut [f32; 6]) {
@@ -362,11 +354,8 @@ impl Matrix {
     #[warn(unused)]
     pub fn as_affine(&mut self) -> Option<[f32; 6]> {
         let mut affine = [0.0; 6];
-        if unsafe { self.native_mut().asAffine(affine.as_mut_ptr()) } {
-            Some(affine)
-        } else {
-            None
-        }
+        unsafe { self.native_mut().asAffine(affine.as_mut_ptr()) }
+            .if_true_some(affine)
     }
 
     pub fn new_affine(affine: &[f32; 6]) -> Matrix {
@@ -515,11 +504,8 @@ impl Matrix {
                 Some(remaining) => remaining as _,
                 None => ptr::null_mut()
             };
-        if unsafe { self.native().decomposeScale(&mut size, remaining) } {
-            Some (Size::from_native(size))
-        } else {
-            None
-        }
+        unsafe { self.native().decomposeScale(&mut size, remaining) }
+            .if_true_some(Size::from_native(size))
     }
 
     pub fn i() -> &'static Matrix {

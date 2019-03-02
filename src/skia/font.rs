@@ -331,11 +331,8 @@ impl Handle<SkFont> {
 
     pub fn path(&self, glyph_id: u16) -> Option<Path> {
         let mut path = Path::new();
-        if unsafe { self.native().getPath(glyph_id, path.native_mut())} {
-            Some(path)
-        } else {
-            None
-        }
+        unsafe { self.native().getPath(glyph_id, path.native_mut())}
+            .if_true_some(path)
     }
 
     pub fn metrics(&self) -> (f32, FontMetrics) {

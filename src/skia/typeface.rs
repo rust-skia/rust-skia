@@ -117,11 +117,8 @@ impl RCHandle<SkTypeface> {
 
     pub fn table_tags(&self) -> Option<Vec<FontTableTag>> {
         let mut v: Vec<FontTableTag> = vec![0; self.count_tables()];
-        if unsafe { self.native().getTableTags(v.as_mut_ptr()) } != 0 {
-            Some(v)
-        } else {
-            None
-        }
+        (unsafe { self.native().getTableTags(v.as_mut_ptr()) } != 0)
+            .if_true_some(v)
     }
 
     pub fn table_size(&self, tag: FontTableTag) -> Option<usize> {
@@ -134,7 +131,9 @@ impl RCHandle<SkTypeface> {
     }
 
     pub fn table_data(&self, tag: FontTableTag, data: &mut [u8]) -> usize {
-        unsafe { self.native().getTableData(tag, 0, data.len(), data.as_mut_ptr() as _) }
+        unsafe {
+            self.native().getTableData(tag, 0, data.len(), data.as_mut_ptr() as _)
+        }
     }
 
     pub fn units_per_em(&self) -> Option<i32> {

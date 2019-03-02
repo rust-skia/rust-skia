@@ -260,11 +260,8 @@ impl Handle<SkBitmap> {
                 .unwrap_or(ptr::null());
 
         let mut offset : SkIPoint = unsafe { mem::uninitialized() };
-        if unsafe { C_SkBitmap_extractAlpha(self.native(), dst.native_mut(), paint_ptr, &mut offset) } {
-            Some(IPoint::from_native(offset))
-        } else {
-            None
-        }
+        unsafe { C_SkBitmap_extractAlpha(self.native(), dst.native_mut(), paint_ptr, &mut offset) }
+            .if_true_some(IPoint::from_native(offset))
     }
 }
 

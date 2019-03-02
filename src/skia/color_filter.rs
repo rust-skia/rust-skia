@@ -44,29 +44,20 @@ impl RCHandle<SkColorFilter> {
     pub fn as_color_mode(&self) -> Option<(Color, BlendMode)> {
         let mut color : SkColor = unsafe { mem::uninitialized() };
         let mut mode: SkBlendMode = unsafe { mem::uninitialized() };
-        if unsafe { C_SkColorFilter_asColorMode(self.native(), &mut color, &mut mode) } {
-            Some((Color::from_native(color), BlendMode::from_native(mode)))
-        } else {
-            None
-        }
+        unsafe { C_SkColorFilter_asColorMode(self.native(), &mut color, &mut mode) }
+            .if_true_some((Color::from_native(color), BlendMode::from_native(mode)))
     }
 
     pub fn as_color_matrix(&self) -> Option<[f32; 20]> {
         let mut matrix : [f32; 20] = unsafe { mem::uninitialized() };
-        if unsafe { C_SkColorFilter_asColorMatrix(self.native(), matrix.as_mut_ptr())} {
-            Some(matrix)
-        } else {
-            None
-        }
+        unsafe { C_SkColorFilter_asColorMatrix(self.native(), matrix.as_mut_ptr())}
+            .if_true_some(matrix)
     }
 
     pub fn as_component_table(&self) -> Option<Bitmap> {
         let mut bitmap = Bitmap::new();
-        if unsafe { C_SkColorFilter_asComponentTable(self.native(), bitmap.native_mut())} {
-            Some(bitmap)
-        } else {
-            None
-        }
+        unsafe { C_SkColorFilter_asComponentTable(self.native(), bitmap.native_mut())}
+            .if_true_some(bitmap)
     }
 
     pub fn flags(&self) -> ColorFilterFlags {

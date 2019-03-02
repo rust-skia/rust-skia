@@ -21,7 +21,6 @@ use std::ops::{Index, IndexMut};
 
 pub trait ToOption {
     type Target;
-
     fn to_option(self) -> Option<Self::Target>;
 }
 
@@ -46,6 +45,29 @@ impl<T> ToOption for *mut T {
         } else {
             None
         }
+    }
+}
+
+impl ToOption for bool {
+    type Target = ();
+
+    fn to_option(self) -> Option<Self::Target> {
+        if self { Some(()) } else { None }
+    }
+}
+
+pub trait IfBoolSome {
+    fn if_true_some<V>(self, v: V) -> Option<V>;
+    fn if_false_some<V>(self, v: V) -> Option<V>;
+}
+
+impl IfBoolSome for bool {
+    fn if_true_some<V>(self, v: V) -> Option<V> {
+        self.to_option().and(Some(v))
+    }
+
+    fn if_false_some<V>(self, v: V) -> Option<V> {
+        (!self).if_true_some(v)
     }
 }
 

@@ -40,11 +40,8 @@ impl YUVAIndex {
         let index_slice : Vec<SkYUVAIndex> = indices.iter().map(|i| i.0).collect();
 
         let mut num_planes = 0;
-        if unsafe { SkYUVAIndex::AreValidIndices(index_slice.as_ptr(), &mut num_planes) } {
-            Some(num_planes.try_into().unwrap())
-        } else {
-            None
-        }
+        unsafe { SkYUVAIndex::AreValidIndices(index_slice.as_ptr(), &mut num_planes) }
+            .if_true_some(num_planes.try_into().unwrap())
     }
 }
 

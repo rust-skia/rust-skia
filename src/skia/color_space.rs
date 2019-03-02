@@ -65,11 +65,8 @@ impl Into<Option<Matrix44>> for ColorSpacePrimaries {
     fn into(self) -> Option<Matrix44> {
         let mut matrix = Matrix44::new();
         let primaries : SkColorSpacePrimaries = self.into();
-        if unsafe { primaries.toXYZD50(&mut matrix.0) } {
-            Some(matrix)
-        } else {
-            None
-        }
+        unsafe { primaries.toXYZD50(&mut matrix.0) }
+            .if_true_some(matrix)
     }
 }
 
@@ -187,11 +184,8 @@ impl ColorSpace {
 
     pub fn is_numerical_transfer_fn(&self) -> Option<ColorSpaceTransferFn> {
         let mut tfn : SkColorSpaceTransferFn = unsafe { mem::zeroed() };
-        if unsafe { self.native().isNumericalTransferFn(&mut tfn) } {
-            Some (tfn.into())
-        } else {
-            None
-        }
+        unsafe { self.native().isNumericalTransferFn(&mut tfn) }
+            .if_true_some(tfn.into())
     }
 
     pub fn to_xyzd50_hash(&self) -> XYZD50Hash {

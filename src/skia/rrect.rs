@@ -182,10 +182,7 @@ impl RRect {
     #[warn(unused)]
     pub fn transform(&self, matrix: &Matrix) -> Option<Self> {
         let mut r = Self::new_empty();
-        if unsafe { self.native().transform(matrix.native(), r.native_mut()) } {
-            Some(r)
-        } else {
-            None
-        }
+        unsafe { self.native().transform(matrix.native(), r.native_mut()) }
+            .if_true_some(r)
     }
 }

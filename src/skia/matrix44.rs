@@ -189,11 +189,8 @@ impl Matrix44 {
 
     pub fn inverse(&self) -> Option<Matrix44> {
         let mut r = Matrix44::new();
-        if unsafe { self.0.invert(&mut r.0) } {
-            Some(r)
-        } else {
-            None
-        }
+        unsafe { self.0.invert(&mut r.0) }
+            .if_true_some(r)
     }
 
     pub fn transpose(&mut self) {
