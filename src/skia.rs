@@ -11,6 +11,9 @@ pub use self::bbh_factory::*;
 mod bitmap;
 pub use self::bitmap::*;
 
+mod blend_mode;
+pub use self::blend_mode::*;
+
 mod canvas;
 pub use self::canvas::*;
 
