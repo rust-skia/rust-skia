@@ -239,6 +239,8 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .rustified_enum("SkPictureRecorder_RecordFlags")
     .rustified_enum("SkColorFilter_Flags")
     .rustified_enum("SkBlendMode")
+    .rustified_enum("SkStrokeRec_InitStyle")
+    .rustified_enum("SkStrokeRec_Style")
 
     .whitelist_var("SK_Color.*")
 

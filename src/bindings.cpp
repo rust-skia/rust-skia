@@ -15,6 +15,7 @@
 #include "SkFontMetrics.h"
 #include "SkPictureRecorder.h"
 #include "SkColorFilter.h"
+#include "SkStrokeRec.h"
 
 #include "GrContext.h"
 
@@ -661,6 +662,22 @@ extern "C" bool C_SkColorFilter_asComponentTable(const SkColorFilter* self, SkBi
 
 extern "C" uint32_t C_SkColorFilter_getFlags(const SkColorFilter* self) {
     return self->getFlags();
+}
+
+//
+// SkStrokeRec
+//
+
+extern "C" void C_SkStrokeRec_destruct(SkStrokeRec* self) {
+    self->~SkStrokeRec();
+}
+
+extern "C" void C_SkStrokeRec_copy(const SkStrokeRec* self, SkStrokeRec* other) {
+    *other = *self;
+}
+
+extern "C" bool C_SkStrokeRec_hasEqualEffect(const SkStrokeRec* self, const SkStrokeRec* other) {
+    return self->hasEqualEffect(*other);
 }
 
 #if defined(SK_VULKAN)
