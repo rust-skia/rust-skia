@@ -1,10 +1,12 @@
 use crate::prelude::*;
 use crate::skia::Color;
 use rust_skia::{
+    SkPaint_Cap,
     SkPaint,
     C_SkPaint_destruct,
     SkPaint_Style,
-    SkPaint_Flags
+    SkPaint_Flags,
+    SkPaint_Join
 };
 
 pub type PaintFlags = EnumHandle<SkPaint_Flags>;
@@ -28,6 +30,36 @@ impl EnumHandle<SkPaint_Style> {
     pub const Stroke: Self = Self(SkPaint_Style::kStroke_Style);
     pub const Fill: Self = Self(SkPaint_Style::kFill_Style);
     pub const StrokeAndFill: Self = Self(SkPaint_Style::kStrokeAndFill_Style);
+}
+
+pub type PaintCap = EnumHandle<SkPaint_Cap>;
+
+#[allow(non_upper_case_globals)]
+impl EnumHandle<SkPaint_Cap> {
+    pub const Butt: Self = Self(SkPaint_Cap::kButt_Cap);
+    pub const Round: Self = Self(SkPaint_Cap::kRound_Cap);
+    pub const Square: Self = Self(SkPaint_Cap::kSquare_Cap);
+}
+
+impl Default for EnumHandle<SkPaint_Cap> {
+    fn default() -> Self {
+        Self(SkPaint_Cap::kDefault_Cap)
+    }
+}
+
+pub type PaintJoin = EnumHandle<SkPaint_Join>;
+
+#[allow(non_upper_case_globals)]
+impl EnumHandle<SkPaint_Join> {
+    pub const Miter: Self = Self(SkPaint_Join::kMiter_Join);
+    pub const Round: Self = Self(SkPaint_Join::kRound_Join);
+    pub const Bevel: Self = Self(SkPaint_Join::kBevel_Join);
+}
+
+impl Default for EnumHandle<SkPaint_Join> {
+    fn default() -> Self {
+        Self(SkPaint_Join::kDefault_Join)
+    }
 }
 
 pub type Paint = Handle<SkPaint>;
