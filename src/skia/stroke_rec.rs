@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::skia::{
-  Path,
+    Path,
     PaintJoin,
     PaintCap,
     PaintStyle,
