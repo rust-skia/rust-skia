@@ -3,7 +3,23 @@ use crate::skia::Color;
 use rust_skia::{
     SkPaint,
     C_SkPaint_destruct,
-    SkPaint_Style};
+    SkPaint_Style,
+    SkPaint_Flags
+};
+
+pub type PaintFlags = EnumHandle<SkPaint_Flags>;
+
+#[allow(non_upper_case_globals)]
+impl EnumHandle<SkPaint_Flags> {
+    pub const AntiAlias: Self = Self(SkPaint_Flags::kAntiAlias_Flag);
+    pub const Dither: Self = Self(SkPaint_Flags::kDither_Flag);
+    pub const FakeBoldText: Self = Self(SkPaint_Flags::kFakeBoldText_Flag);
+    pub const LinearText: Self = Self(SkPaint_Flags::kLinearText_Flag);
+    pub const SubpixelText: Self = Self(SkPaint_Flags::kSubpixelText_Flag);
+    pub const LCDRenderText: Self = Self(SkPaint_Flags::kLCDRenderText_Flag);
+    pub const EmbeddedBitmapText: Self = Self(SkPaint_Flags::kEmbeddedBitmapText_Flag);
+    pub const AutoHinting: Self = Self(SkPaint_Flags::kAutoHinting_Flag);
+}
 
 pub type PaintStyle = EnumHandle<SkPaint_Style>;
 
