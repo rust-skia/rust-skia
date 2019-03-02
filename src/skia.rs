@@ -79,6 +79,9 @@ pub use self::paint::*;
 mod path;
 pub use self::path::*;
 
+mod path_effect;
+pub use self::path_effect::*;
+
 mod picture;
 pub use self::picture::*;
 
