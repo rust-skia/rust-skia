@@ -91,8 +91,8 @@ pub use self::region::*;
 mod rrect;
 pub use self::rrect::*;
 
-mod scalar;
-pub use self::scalar::*;
+mod stroke_rec;
+pub use self::stroke_rec::*;
 
 mod surface;
 pub use self::surface::*;
