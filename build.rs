@@ -200,6 +200,7 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
 
     .rustified_enum("GrMipMapped")
     .rustified_enum("GrSurfaceOrigin")
+    .rustified_enum("SkPaint_Flags")
     .rustified_enum("SkPaint_Style")
     .rustified_enum("SkPaint_Cap")
     .rustified_enum("SkPaint_Join")

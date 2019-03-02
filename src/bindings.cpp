@@ -209,13 +209,31 @@ extern "C" void C_SkPaint_destruct(const SkPaint* self) {
     self->~SkPaint();
 }
 
+extern "C" void C_SkPaint_copy(SkPaint* self, const SkPaint* rhs) {
+    *self = *rhs;
+}
+
+extern "C" bool C_SkPaint_Equals(const SkPaint* lhs, const SkPaint* rhs) {
+    return *lhs == *rhs;
+}
+
+//
+// SkPath
+//
+
 extern "C" void C_SkPath_destruct(const SkPath* self) {
     self->~SkPath();
 }
 
+//
+// SkCanvas
+//
+
 extern "C" void C_SkCanvas_destruct(const SkCanvas* self) {
     self->~SkCanvas();
 }
+
+
 
 //
 // SkImageInfo
