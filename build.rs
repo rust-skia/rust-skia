@@ -187,6 +187,13 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .whitelist_function("SkColorTypeBytesPerPixel")
     .whitelist_function("SkColorTypeIsAlwaysOpaque")
     .whitelist_function("SkColorTypeValidateAlphaType")
+    .whitelist_function("SkRGBToHSV")
+    // this function does not whitelist (probably because of inlining):
+    .whitelist_function("SkColorToHSV")
+    .whitelist_function("SkHSVToColor")
+    .whitelist_function("SkPreMultiplyARGB")
+    .whitelist_function("SkPreMultiplyColor")
+
     .whitelist_type("SkColorSpacePrimaries")
     .whitelist_type("SkVector4")
     .whitelist_type("SkPictureRecorder")
