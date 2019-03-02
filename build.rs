@@ -193,6 +193,7 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .whitelist_function("SkHSVToColor")
     .whitelist_function("SkPreMultiplyARGB")
     .whitelist_function("SkPreMultiplyColor")
+    .whitelist_function("SkBlendMode_Name")
 
     .whitelist_type("SkColorSpacePrimaries")
     .whitelist_type("SkVector4")
@@ -236,6 +237,8 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .rustified_enum("SkVertices_VertexMode")
     .rustified_enum("SkVertices_BuilderFlags")
     .rustified_enum("SkPictureRecorder_RecordFlags")
+    .rustified_enum("SkColorFilter_Flags")
+    .rustified_enum("SkBlendMode")
 
     .whitelist_var("SK_Color.*")
 
