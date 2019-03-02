@@ -1,23 +1,21 @@
 use std::ptr;
 use crate::prelude::*;
-use crate::{
-    skia::{
-        Picture,
-        Matrix,
-        ColorType,
-        ImageInfo,
-        Data,
-        Bitmap,
-        IRect,
-        YUVColorSpace,
-        AlphaType,
-        ColorSpace,
-        YUVAIndex,
-        ISize,
-        Paint,
-        EncodedImageFormat
-    },
-    graphics
+use crate::graphics;
+use crate::skia::{
+    Picture,
+    Matrix,
+    ColorType,
+    ImageInfo,
+    Data,
+    Bitmap,
+    IRect,
+    YUVColorSpace,
+    AlphaType,
+    ColorSpace,
+    YUVAIndex,
+    ISize,
+    Paint,
+    EncodedImageFormat
 };
 use rust_skia::{
     C_SkImage_MakeFromPicture,
@@ -38,14 +36,14 @@ use rust_skia::{
     C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend,
     SkImage_BitDepth,
     GrSurfaceOrigin,
-    SkImage_CachingHint
+    SkImage_CachingHint,
+    C_SkImage_refEncodedData,
+    C_SkImage_makeSubset,
+    C_SkImage_makeTextureImage,
+    C_SkImage_makeNonTextureImage,
+    C_SkImage_makeRasterImage,
+    C_SkImage_makeColorSpace
 };
-use rust_skia::C_SkImage_refEncodedData;
-use rust_skia::C_SkImage_makeSubset;
-use rust_skia::C_SkImage_makeTextureImage;
-use rust_skia::C_SkImage_makeNonTextureImage;
-use rust_skia::C_SkImage_makeRasterImage;
-use rust_skia::C_SkImage_makeColorSpace;
 
 pub type ImageBitDepth = EnumHandle<SkImage_BitDepth>;
 
