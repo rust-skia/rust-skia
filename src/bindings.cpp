@@ -14,6 +14,7 @@
 #include "SkTypeface.h"
 #include "SkFontMetrics.h"
 #include "SkPictureRecorder.h"
+#include "SkColorFilter.h"
 
 #include "GrContext.h"
 
@@ -620,6 +621,46 @@ extern "C" SkPicture* C_SkPictureRecorder_finishRecordingAsPicture(SkPictureReco
     } else {
         return self->finishRecordingAsPicture().release();
     }
+}
+
+//
+// SkColorFilter
+//
+
+extern "C" SkColorFilter* C_SkColorFilter_MakeModeFilter(const SkColor* c, const SkBlendMode* blendMode) {
+    return SkColorFilter::MakeModeFilter(*c, *blendMode).release();
+}
+
+extern "C" SkColorFilter* C_SkColorFilter_makeComposed(const SkColorFilter* self, SkColorFilter* inner) {
+    return self->makeComposed(sk_sp<SkColorFilter>(inner)).release();
+}
+
+extern "C" SkColorFilter* C_SkColorFilter_MakeMatrixFilterRowMajor255(const SkScalar array[20]) {
+    return SkColorFilter::MakeMatrixFilterRowMajor255(array).release();
+}
+
+extern "C" SkColorFilter* C_SkColorFilter_MakeLinearToSRGBGamma() {
+    return SkColorFilter::MakeLinearToSRGBGamma().release();
+}
+
+extern "C" SkColorFilter* C_SkColorFilter_MakeSRGBToLinearGamma() {
+    return SkColorFilter::MakeSRGBToLinearGamma().release();
+}
+
+extern "C" bool C_SkColorFilter_asColorMode(const SkColorFilter* self, SkColor* color, SkBlendMode* mode) {
+    return self->asColorMode(color, mode);
+}
+
+extern "C" bool C_SkColorFilter_asColorMatrix(const SkColorFilter* self, SkScalar matrix[20]) {
+    return self->asColorMatrix(matrix);
+}
+
+extern "C" bool C_SkColorFilter_asComponentTable(const SkColorFilter* self, SkBitmap* table) {
+    return self->asComponentTable(table);
+}
+
+extern "C" uint32_t C_SkColorFilter_getFlags(const SkColorFilter* self) {
+    return self->getFlags();
 }
 
 #if defined(SK_VULKAN)
