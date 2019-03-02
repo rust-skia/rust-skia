@@ -5,7 +5,8 @@ use std::ops::{Index,Mul,IndexMut};
 use rust_skia::{
     SkColor,
     SkRGBToHSV,
-    SkHSVToColor
+    SkHSVToColor,
+    SkColor4f
 };
 
 // TODO: What should we do with Alpha?
@@ -137,6 +138,8 @@ impl HSV {
 #[derive(Copy, Clone, PartialEq, Debug)]
 #[repr(C)]
 pub struct Color4f { pub r: f32, pub g: f32, pub b: f32, pub a: f32 }
+
+impl NativeTransmutable<SkColor4f> for Color4f {}
 
 impl Mul<f32> for Color4f {
     type Output = Color4f;
