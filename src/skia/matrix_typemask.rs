@@ -12,15 +12,3 @@ bitflags! {
         const Perspective = SkMatrix_TypeMask::kPerspective_Mask as u32;
     }
 }
-
-impl From<SkMatrix_TypeMask> for MatrixTypeMask {
-    fn from(mask: SkMatrix_TypeMask) -> MatrixTypeMask {
-        MatrixTypeMask::from_bits(mask as u32).unwrap()
-    }
-}
-
-impl From<SkMatrix44_TypeMask> for MatrixTypeMask {
-    fn from(mask: SkMatrix44_TypeMask) -> MatrixTypeMask {
-        MatrixTypeMask::from_bits(mask as u32).unwrap()
-    }
-}

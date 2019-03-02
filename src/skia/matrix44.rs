@@ -77,7 +77,7 @@ impl Matrix44 {
     }
 
     pub fn get_type(&self) -> MatrixTypeMask {
-        unsafe { self.0.getType().into() }
+        MatrixTypeMask::from_bits_truncate(unsafe { self.0.getType() } as _)
     }
 
     pub fn is_identity(&self) -> bool {

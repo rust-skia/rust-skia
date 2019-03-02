@@ -37,12 +37,6 @@ bitflags! {
     }
 }
 
-impl From<SkSurfaceProps_Flags> for SurfacePropsFlags {
-    fn from(flags: SkSurfaceProps_Flags) -> Self {
-        SurfacePropsFlags::from_bits(flags as u32).unwrap()
-    }
-}
-
 #[derive(Copy)]
 pub struct SurfaceProps(pub(crate) SkSurfaceProps);
 
@@ -64,7 +58,7 @@ impl SurfaceProps {
     }
 
     pub fn flags(&self) -> SurfacePropsFlags {
-        SurfacePropsFlags::from_bits(unsafe { self.0.flags() }).unwrap()
+        SurfacePropsFlags::from_bits_truncate(unsafe { self.0.flags() })
     }
 
     pub fn pixel_geometry(&self) -> PixelGeometry {

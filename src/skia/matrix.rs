@@ -126,7 +126,7 @@ impl Matrix {
     }
 
     pub fn get_type(&self) -> MatrixTypeMask {
-        unsafe { self.native().getType() }.into()
+        MatrixTypeMask::from_bits_truncate(unsafe { self.native().getType() } as _)
     }
 
     pub fn is_identity(&self) -> bool {

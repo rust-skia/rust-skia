@@ -33,12 +33,6 @@ bitflags! {
     }
 }
 
-impl From<SkBitmap_AllocFlags> for BitmapAllocFlags {
-    fn from(flags: SkBitmap_AllocFlags) -> BitmapAllocFlags {
-        BitmapAllocFlags::from_bits(flags as u32).unwrap()
-    }
-}
-
 pub type Bitmap = Handle<SkBitmap>;
 
 impl NativeDrop for SkBitmap {
