@@ -680,6 +680,23 @@ extern "C" bool C_SkStrokeRec_hasEqualEffect(const SkStrokeRec* self, const SkSt
     return self->hasEqualEffect(*other);
 }
 
+//
+// SkPathEffect
+//
+
+extern "C" SkPathEffect* C_SkPathEffect_MakeSum(SkPathEffect* first, SkPathEffect* second) {
+    return SkPathEffect::MakeSum(sk_sp<SkPathEffect>(first), sk_sp<SkPathEffect>(second)).release();
+}
+
+extern "C" SkPathEffect* C_SkPathEffect_MakeCompose(SkPathEffect* outer, SkPathEffect* inner) {
+    return SkPathEffect::MakeCompose(sk_sp<SkPathEffect>(outer), sk_sp<SkPathEffect>(inner)).release();
+}
+
+extern "C" void C_SkPathEffect_PointData_deletePoints(SkPathEffect::PointData* self) {
+    delete [] self->fPoints;
+    self->fPoints = nullptr;
+}
+
 #if defined(SK_VULKAN)
 
 extern "C" SkSurface* C_SkSurface_MakeFromBackendTexture(
