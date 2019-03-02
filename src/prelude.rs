@@ -518,10 +518,16 @@ pub trait NativeTransmutable<NT: Sized> : Sized {
         unsafe { mem::transmute::<&Self, &NT>(&self) }
     }
 
+    fn native_mut(&mut self) -> &mut NT {
+        unsafe { mem::transmute::<&mut Self, &mut NT>(self) }
+    }
+
+    // TODO: this seems to actually copy, which is probably not what we want.
     fn from_native(nt: NT) -> Self {
         unsafe { mem::transmute_copy::<NT, Self>(&nt) }
     }
 
+    // TODO: this seems to actually copy, which is probably not what we want.
     fn into_native(self) -> NT {
         unsafe { mem::transmute_copy::<Self, NT>(&self) }
     }
