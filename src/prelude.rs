@@ -100,6 +100,47 @@ impl RefCount for SkColorSpace {
 pub trait NativeRefCounted: Sized {
     fn _ref(&self);
     fn _unref(&self);
+    fn _ref_cnt(&self) -> usize {
+        unimplemented!();
+    }
+}
+
+impl NativeRefCounted for SkRefCntBase {
+    fn _ref(&self) {
+        unsafe { self.ref_() }
+    }
+
+    fn _unref(&self) {
+        unsafe { self.unref() }
+    }
+
+    fn _ref_cnt(&self) -> usize {
+        let ptr: *const i32 = unsafe { transmute(&self.fRefCnt) };
+        unsafe { *ptr as usize }
+    }
+}
+
+
+/// Implements NativeRefCounted by just providing a reference to the base class
+/// that implements a RefCount.
+pub trait NativeRefCountedBase {
+    type Base: NativeRefCounted;
+    fn ref_counted_base(&self) -> &Self::Base;
+}
+
+impl<Native, Base: NativeRefCounted> NativeRefCounted for Native
+    where Native: NativeRefCountedBase<Base=Base> {
+    fn _ref(&self) {
+        self.ref_counted_base()._ref();
+    }
+
+    fn _unref(&self) {
+        self.ref_counted_base()._unref();
+    }
+
+    fn _ref_cnt(&self) -> usize {
+        self.ref_counted_base()._ref_cnt()
+    }
 }
 
 /// Indicates that the type has a native representation and
