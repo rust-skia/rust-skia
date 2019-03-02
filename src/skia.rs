@@ -1,5 +1,6 @@
 #[allow(non_camel_case_types)]
-pub type u8cpu = rust_skia::U8CPU;
+
+pub(crate) type u8cpu = rust_skia::U8CPU;
 pub type GlyphId = rust_skia::SkGlyphID;
 pub type Unichar = rust_skia::SkUnichar;
 pub type FontTableTag = rust_skia::SkFontTableTag;

@@ -26,7 +26,7 @@ impl AlphaType {
     pub const Unpremul: AlphaType = AlphaType(SkAlphaType::kUnpremul_SkAlphaType);
 
     pub fn is_opaque(self) -> bool {
-        Self::Opaque == self
+        self == Self::Opaque
     }
 }
 

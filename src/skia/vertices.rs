@@ -128,7 +128,7 @@ impl RCHandle<SkVertices> {
 
         let positions: Vec<SkPoint> = positions.iter().map(|p| p.into_native()).collect();
         let texs: Vec<SkPoint> = texs.iter().map(|p| p.into_native()).collect();
-        let colors: Vec<SkColor> = colors.iter().map(|c| c.0).collect();
+        let colors: Vec<SkColor> = colors.iter().map(|c| c.into_native()).collect();
 
         Vertices::from_ptr(unsafe {
             C_SkVertices_MakeCopy(

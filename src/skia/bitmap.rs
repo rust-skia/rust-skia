@@ -225,20 +225,20 @@ impl Handle<SkBitmap> {
     }
 
     pub fn erase_color(&self, c: Color) {
-        unsafe { self.native().eraseColor(c.0) }
+        unsafe { self.native().eraseColor(c.into_native()) }
     }
 
-    pub fn erase_argb(&self, a: u8cpu, r: u8cpu, g: u8cpu, b: u8cpu) {
-        unsafe { C_SkBitmap_eraseARGB(self.native(), a, r, g, b) }
+    pub fn erase_argb(&self, a: u8, r: u8, g: u8, b: u8) {
+        unsafe { C_SkBitmap_eraseARGB(self.native(), a as u8cpu, r as u8cpu, g as u8cpu, b as u8cpu) }
     }
 
     pub fn erase(&self, c: Color, area: &IRect) {
-        unsafe { self.native().erase(c.0, &area.into_native()) }
+        unsafe { self.native().erase(c.into_native(), &area.into_native()) }
     }
 
     #[inline]
     pub fn get_color(&self, x: i32, y: i32) -> Color {
-        Color(unsafe { self.native().getColor(x, y) })
+        Color::from_native(unsafe { self.native().getColor(x, y) })
     }
 
     #[inline]

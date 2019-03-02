@@ -16,7 +16,7 @@ impl Canvas {
     }
 
     pub fn clear(&mut self, color: Color) {
-        unsafe { self.native_mut().clear(color.0) }
+        unsafe { self.native_mut().clear(color.into_native()) }
     }
 
     pub fn save(&mut self) -> i32 {

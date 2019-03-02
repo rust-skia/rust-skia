@@ -31,7 +31,7 @@ impl Default for Handle<SkPaint> {
 impl Handle<SkPaint> {
 
     pub fn set_color(&mut self, color: Color) {
-        unsafe { self.native_mut().setColor(color.0) }
+        unsafe { self.native_mut().setColor(color.into_native()) }
     }
 
     pub fn set_anti_alias(&mut self, anti_alias: bool) {
