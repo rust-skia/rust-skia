@@ -20,6 +20,9 @@ pub use self::canvas::*;
 mod color;
 pub use self::color::*;
 
+mod color_filter;
+pub use self::color_filter::*;
+
 mod color_space;
 pub use self::color_space::*;
 
