@@ -1,5 +1,19 @@
 #[allow(non_camel_case_types)]
 
+pub type scalar = rust_skia::SkScalar;
+
+pub trait Scalar {
+    const NEARLY_ZERO: Self;
+    const ONE: Self;
+    const HALF: Self;
+}
+
+impl Scalar for scalar {
+    const NEARLY_ZERO: Self = 1.0 / ((1 << 12) as Self);
+    const ONE: Self = 1.0;
+    const HALF: Self = 0.5;
+}
+
 pub(crate) type u8cpu = rust_skia::U8CPU;
 pub type GlyphId = rust_skia::SkGlyphID;
 pub type Unichar = rust_skia::SkUnichar;
