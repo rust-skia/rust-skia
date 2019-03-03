@@ -14,7 +14,7 @@ use std::ops::{
 pub type IVector = IPoint;
 
 #[repr(C)]
-#[derive(Copy, Clone, PartialEq, Hash, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct IPoint {
     pub x: i32,
     pub y: i32

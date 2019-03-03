@@ -103,11 +103,17 @@ pub use self::picture_recorder::*;
 mod point;
 pub use self::point::*;
 
+mod rect;
+pub use self::rect::*;
+
 mod region;
 pub use self::region::*;
 
 mod rrect;
 pub use self::rrect::*;
+
+mod size;
+pub use self::size::*;
 
 mod stroke_rec;
 pub use self::stroke_rec::*;

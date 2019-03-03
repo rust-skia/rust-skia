@@ -9,16 +9,6 @@ use rust_skia::{
     SkRefCnt,
     SkRefCntBase,
 };
-// export all traits for the use of points / vectors, sizes,
-// etc. into the prelude.
-pub use crate::skia_euclid::{
-    SkiaPoint,
-    SkiaPointFloat,
-    SkiaSize,
-    SkiaSizeFloat,
-    SkiaRect,
-    SkiaRectFloat
-};
 
 pub trait ToOption {
     type Target;

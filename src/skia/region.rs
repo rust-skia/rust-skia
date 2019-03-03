@@ -96,11 +96,10 @@ impl Handle<SkRegion> {
     }
 
     pub fn set_rects(&mut self, rects: &[IRect]) -> bool {
-        let native_rects = rects.to_native();
         unsafe {
             self.native_mut().setRects(
-                native_rects.as_ptr(),
-                native_rects.len().try_into().unwrap())
+                rects.native().as_ptr(),
+                rects.len().try_into().unwrap())
         }
     }
 
