@@ -8,6 +8,11 @@ use rust_skia::{
     SkPaint_Flags,
     SkPaint_Join
 };
+use rust_skia::C_SkPaint_Equals;
+use std::hash::{
+    Hash,
+    Hasher
+};
 
 pub type PaintFlags = EnumHandle<SkPaint_Flags>;
 
@@ -67,6 +72,24 @@ pub type Paint = Handle<SkPaint>;
 impl NativeDrop for SkPaint {
     fn drop(&mut self) {
         unsafe { C_SkPaint_destruct(self) }
+    }
+}
+
+impl NativeClone for SkPaint {
+    fn clone(&self) -> Self {
+        unsafe { SkPaint::new1(self) }
+    }
+}
+
+impl NativePartialEq for SkPaint {
+    fn eq(&self, rhs: &Self) -> bool {
+        unsafe { C_SkPaint_Equals(self, rhs) }
+    }
+}
+
+impl NativeHash for SkPaint {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        unsafe { self.getHash() }.hash(state)
     }
 }
 

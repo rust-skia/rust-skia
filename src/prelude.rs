@@ -1,4 +1,7 @@
 use std::intrinsics::transmute;
+use std::{ptr, mem};
+use std::ops::{Index, IndexMut};
+use std::hash::{Hasher, Hash};
 #[cfg(test)]
 use rust_skia::{SkSurface, SkData, SkColorSpace};
 use rust_skia::{
@@ -16,8 +19,6 @@ pub use crate::skia_euclid::{
     SkiaRect,
     SkiaRectFloat
 };
-use std::{ptr, mem};
-use std::ops::{Index, IndexMut};
 
 pub trait ToOption {
     type Target;
@@ -204,10 +205,20 @@ pub trait NativeClone {
     fn clone(&self) -> Self;
 }
 
-impl<N: NativeDrop + NativeClone> Clone for Handle<N> {
-    fn clone(&self) -> Self {
-        Self::from_native(self.0.clone())
+/// Even though some types may have value semantics, equality
+/// comparison may need to be customized.
+pub trait NativePartialEq {
+    fn eq(&self, rhs: &Self) -> bool;
+
+    fn ne(&self, rhs: &Self) -> bool {
+        !self.eq(rhs)
     }
+}
+
+/// Implements Hash for the native type so that the wrapper type
+/// can derive it from.
+pub trait NativeHash {
+    fn hash<H: Hasher>(&self, state: &mut H);
 }
 
 /// A trait allowing a conversion from a native type to a handle type.
@@ -255,16 +266,6 @@ impl<N: Copy + PartialEq> FromNative<N> for EnumHandle<N> {
 impl<N: Copy + PartialEq> NativeAccessValue<N> for EnumHandle<N> {
     fn native(&self) -> N {
         self.0
-    }
-}
-
-/// Even though some types may have value semantics, equality
-/// comparison may need to be customized.
-pub trait NativePartialEq {
-    fn eq(&self, rhs: &Self) -> bool;
-
-    fn ne(&self, rhs: &Self) -> bool {
-        !self.eq(rhs)
     }
 }
 
@@ -321,13 +322,25 @@ impl<N: NativeDrop> NativeAccess<N> for Handle<N> {
     }
 }
 
-impl<N: NativeDrop + NativePartialEq > PartialEq for Handle<N> {
+impl<N: NativeDrop + NativeClone> Clone for Handle<N> {
+    fn clone(&self) -> Self {
+        Self::from_native(self.0.clone())
+    }
+}
+
+impl<N: NativeDrop + NativePartialEq> PartialEq for Handle<N> {
     fn eq(&self, rhs: &Self) -> bool {
         self.0.eq(&rhs.0)
     }
 
     fn ne(&self, rhs: &Self) -> bool {
         self.0.ne(&rhs.0)
+    }
+}
+
+impl<N: NativeDrop + NativeHash> Hash for Handle<N> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.native().hash(state);
     }
 }
 
