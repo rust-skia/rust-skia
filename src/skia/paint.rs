@@ -1,31 +1,37 @@
+use std::hash::{
+    Hash,
+    Hasher
+};
 use crate::prelude::*;
-use crate::skia::Color;
+use crate::skia::{
+    Color,
+    FontHinting,
+    FilterQuality,
+    Color4f,
+    ColorSpace,
+    scalar
+};
 use rust_skia::{
     SkPaint_Cap,
     SkPaint,
     C_SkPaint_destruct,
     SkPaint_Style,
     SkPaint_Flags,
-    SkPaint_Join
-};
-use rust_skia::C_SkPaint_Equals;
-use std::hash::{
-    Hash,
-    Hasher
+    SkPaint_Join,
+    C_SkPaint_Equals
 };
 
-pub type PaintFlags = EnumHandle<SkPaint_Flags>;
-
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkPaint_Flags> {
-    pub const AntiAlias: Self = Self(SkPaint_Flags::kAntiAlias_Flag);
-    pub const Dither: Self = Self(SkPaint_Flags::kDither_Flag);
-    pub const FakeBoldText: Self = Self(SkPaint_Flags::kFakeBoldText_Flag);
-    pub const LinearText: Self = Self(SkPaint_Flags::kLinearText_Flag);
-    pub const SubpixelText: Self = Self(SkPaint_Flags::kSubpixelText_Flag);
-    pub const LCDRenderText: Self = Self(SkPaint_Flags::kLCDRenderText_Flag);
-    pub const EmbeddedBitmapText: Self = Self(SkPaint_Flags::kEmbeddedBitmapText_Flag);
-    pub const AutoHinting: Self = Self(SkPaint_Flags::kAutoHinting_Flag);
+bitflags! {
+    pub struct PaintFlags: u32 {
+        const AntiAlias = SkPaint_Flags::kAntiAlias_Flag as _;
+        const Dither = SkPaint_Flags::kDither_Flag as _;
+        const FakeBoldText = SkPaint_Flags::kFakeBoldText_Flag as _;
+        const LinearText = SkPaint_Flags::kLinearText_Flag as _;
+        const SubpixelText = SkPaint_Flags::kSubpixelText_Flag as _;
+        const LCDRenderText = SkPaint_Flags::kLCDRenderText_Flag as _;
+        const EmbeddedBitmapText = SkPaint_Flags::kEmbeddedBitmapText_Flag as _;
+        const AutoHinting = SkPaint_Flags::kAutoHinting_Flag as _;
+    }
 }
 
 pub type PaintStyle = EnumHandle<SkPaint_Style>;
@@ -101,20 +107,187 @@ impl Default for Handle<SkPaint> {
 
 impl Handle<SkPaint> {
 
-    pub fn set_color(&mut self, color: Color) {
-        unsafe { self.native_mut().setColor(color.into_native()) }
+    pub fn reset(&mut self) {
+        unsafe { self.native_mut().reset() }
+    }
+
+    pub fn set_hinting(&mut self, hinting_level: FontHinting) {
+        unsafe { self.native_mut().setHinting(hinting_level.native()) }
+    }
+
+    pub fn hinting(&self) -> FontHinting {
+        unsafe { self.native().getHinting() }
+            .into_handle()
+    }
+
+    pub fn flags(&self) -> PaintFlags {
+        PaintFlags::from_bits_truncate(unsafe {
+            self.native().getFlags()
+        })
+    }
+
+    pub fn set_flags(&mut self, flags: PaintFlags) {
+        unsafe { self.native_mut().setFlags(flags.bits()) }
+    }
+
+    pub fn anti_alias(&self) -> bool {
+        unsafe { self.native().isAntiAlias() }
     }
 
     pub fn set_anti_alias(&mut self, anti_alias: bool) {
         unsafe { self.native_mut().setAntiAlias(anti_alias) }
     }
 
-    pub fn set_stroke_width(&mut self, width: f32) {
-        unsafe { self.native_mut().setStrokeWidth(width) }
+    pub fn dither(&self) -> bool {
+        unsafe { self.native().isDither() }
+    }
+
+    pub fn set_dither(&mut self, dither: bool) {
+        unsafe { self.native_mut().setDither(dither) }
+    }
+
+    pub fn linear_text(&self) -> bool {
+        // does not link
+        // unsafe { self.native().isLinearText() }
+        self.flags().contains(PaintFlags::LinearText)
+    }
+
+    pub fn set_linear_text(&mut self, linear_text: bool) {
+        unsafe { self.native_mut().setLinearText(linear_text) }
+    }
+
+    pub fn subpixel_text(&self) -> bool {
+        // does not link
+        // unsafe { self.native().isSubpixelText() }
+        self.flags().contains(PaintFlags::SubpixelText)
+    }
+
+    pub fn set_subpixel_text(&mut self, subpixel_text: bool) {
+        unsafe { self.native_mut().setSubpixelText(subpixel_text) }
+    }
+
+    pub fn lcd_render_text(&self) -> bool {
+        // does not link:
+        // unsafe { self.native().isLCDRenderText() }
+        self.flags().contains(PaintFlags::LCDRenderText)
+    }
+
+    pub fn set_lcd_render_text(&mut self, lcd_text: bool) {
+        unsafe { self.native_mut().setLCDRenderText(lcd_text) }
+    }
+
+    pub fn embedded_bitmap_text(&self) -> bool {
+        // does not link:
+        // unsafe { self.native().isEmbeddedBitmapText() }
+        self.flags().contains(PaintFlags::EmbeddedBitmapText)
+    }
+
+    pub fn set_embedded_bitmap_text(&mut self, use_embedded_bitmap_text: bool) {
+        unsafe { self.native_mut().setEmbeddedBitmapText(use_embedded_bitmap_text) }
+    }
+
+    pub fn autohinted(&self) -> bool {
+        // does not link:
+        // unsafe { self.native().isAutohinted() }
+        self.flags().contains(PaintFlags::AutoHinting)
+    }
+
+    pub fn set_autohinted(&mut self, use_autohinter: bool) {
+        unsafe { self.native_mut().setAutohinted(use_autohinter) }
+    }
+
+    pub fn fake_bold_text(&self) -> bool {
+        // does not link:
+        // unsafe { self.native().isFakeBoldText() }
+        self.flags().contains(PaintFlags::FakeBoldText)
+    }
+
+    pub fn set_fake_bold_text(&mut self, fake_bold_text: bool) {
+        unsafe { self.native_mut().setFakeBoldText(fake_bold_text) }
+    }
+
+    pub fn filter_quality(&self) -> FilterQuality {
+        unsafe { self.native().getFilterQuality() }
+            .into_handle()
+    }
+
+    pub fn set_filter_quality(&mut self, quality: FilterQuality) {
+        unsafe { self.native_mut().setFilterQuality(quality.native()) }
+    }
+
+    pub fn style(&self) -> PaintStyle {
+        unsafe { self.native().getStyle() }.into_handle()
     }
 
     pub fn set_style(&mut self, style: PaintStyle) {
-        unsafe { self.native_mut().setStyle(style.0) }
+        unsafe { self.native_mut().setStyle(style.native()) }
+    }
+
+    pub fn color(&self) -> Color {
+        Color::from_native(unsafe { self.native().getColor() })
+    }
+
+    pub fn color4f(&self) -> Color4f {
+        Color4f::from_native(unsafe { self.native().getColor4f() })
+    }
+
+    pub fn set_color(&mut self, color: Color) {
+        unsafe { self.native_mut().setColor(color.into_native()) }
+    }
+
+    // TODO: why is ColorSpace mutable?
+    pub fn set_color4f(&mut self, color: Color4f, color_space: &mut ColorSpace) {
+        unsafe {
+            self.native_mut().setColor4f(
+                &color.into_native(),
+                color_space.native_mut() )
+        }
+    }
+
+    pub fn alpha(&self) -> u8 {
+        unsafe { self.native().getAlpha() }
+    }
+
+    pub fn set_alpha(&mut self, alpha: u8) {
+        unsafe { self.native_mut().setAlpha(alpha as _) }
+    }
+
+    pub fn set_argb(&mut self, a: u8, r: u8, g: u8, b: u8) {
+        unsafe { self.native_mut().setARGB(a as _, r as _, g as _, b as _)}
+    }
+
+    pub fn stroke_width(&self) -> scalar {
+        unsafe { self.native().getStrokeWidth() }
+    }
+
+    pub fn set_stroke_width(&mut self, width: scalar) {
+        unsafe { self.native_mut().setStrokeWidth(width) }
+    }
+
+    pub fn stroke_miter(&self) -> scalar {
+        unsafe { self.native().getStrokeMiter() }
+    }
+
+    pub fn set_stroke_miter(&mut self, miter: scalar) {
+        unsafe { self.native_mut().setStrokeMiter(miter) }
+    }
+
+    pub fn stroke_cap(&self) -> PaintCap {
+        unsafe { self.native().getStrokeCap() }
+            .into_handle()
+    }
+
+    pub fn set_stroke_cap(&mut self, cap: PaintCap) {
+        unsafe { self.native_mut().setStrokeCap(cap.native()) }
+    }
+
+    pub fn stroke_join(&self) -> PaintJoin {
+        unsafe { self.native().getStrokeJoin() }
+            .into_handle()
+    }
+
+    pub fn set_stroke_join(&mut self, join: PaintJoin) {
+        unsafe { self.native_mut().setStrokeJoin(join.native()) }
     }
 }
 

@@ -52,6 +52,9 @@ pub use self::data::*;
 mod encoded_image_format;
 pub use self::encoded_image_format::*;
 
+mod filter_quality;
+pub use self::filter_quality::*;
+
 mod font;
 pub use self::font::*;
 
