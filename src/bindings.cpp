@@ -746,8 +746,13 @@ extern "C" SkMaskFilter* C_SkMaskFilter_makeWithMatrix(const SkMaskFilter* self,
     return self->makeWithMatrix(*matrix).release();
 }
 
+//
+// SkSize
+//
 
-
+extern "C" SkISize C_SkSize_toFloor(const SkSize* size) {
+    return size->toFloor();
+}
 
 #if defined(SK_VULKAN)
 
