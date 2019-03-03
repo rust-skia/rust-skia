@@ -1,3 +1,4 @@
+use std::ptr;
 use std::hash::{
     Hash,
     Hasher
@@ -9,16 +10,28 @@ use crate::skia::{
     FilterQuality,
     Color4f,
     ColorSpace,
-    scalar
+    scalar,
+    Path,
+    Rect,
+    ColorFilter,
+    BlendMode,
+    PathEffect,
+    MaskFilter,
+    Typeface
 };
 use rust_skia::{
+    C_SkPaint_setMaskFilter,
+    C_SkPaint_setPathEffect,
+    C_SkPaint_setColorFilter,
+    SkRect,
     SkPaint_Cap,
     SkPaint,
     C_SkPaint_destruct,
     SkPaint_Style,
     SkPaint_Flags,
     SkPaint_Join,
-    C_SkPaint_Equals
+    C_SkPaint_Equals,
+    C_SkPaint_setTypeface
 };
 
 bitflags! {
@@ -289,5 +302,136 @@ impl Handle<SkPaint> {
     pub fn set_stroke_join(&mut self, join: PaintJoin) {
         unsafe { self.native_mut().setStrokeJoin(join.native()) }
     }
-}
 
+    pub fn fill_path(&self, src: &Path, cull_rect: Option<&Rect>, res_scale: Option<scalar>) -> Option<Path> {
+        let mut r = Path::new();
+
+        let cull_rect_ptr : *const SkRect =
+            cull_rect
+                .map(|r| &r.into_native() as _)
+                .unwrap_or(ptr::null());
+
+        unsafe { self.native().getFillPath(
+            src.native(),
+            r.native_mut(),
+            cull_rect_ptr,
+            res_scale.unwrap_or(1.0))
+        }
+        .if_true_some(r)
+    }
+
+    pub fn color_filter(&self) -> Option<ColorFilter> {
+        ColorFilter::from_unshared_ptr(unsafe {
+            self.native().getColorFilter()
+        })
+    }
+
+
+    pub fn set_color_filter(&mut self, color_filter: Option<&ColorFilter>) {
+        unsafe {
+            C_SkPaint_setColorFilter(self.native_mut(), color_filter.shared_ptr())
+        }
+    }
+
+    pub fn blend_mode(&self) -> BlendMode {
+        unsafe {
+            self.native().getBlendMode()
+        }.into_handle()
+    }
+
+    pub fn src_over(&self) -> bool {
+        unsafe {
+            self.native().isSrcOver()
+        }
+    }
+
+    pub fn set_blend_mode(&mut self, mode: BlendMode) {
+        unsafe {
+            self.native_mut().setBlendMode(mode.native())
+        }
+    }
+
+    pub fn path_effect(&self) -> Option<PathEffect> {
+        PathEffect::from_unshared_ptr(unsafe {
+            self.native().getPathEffect()
+        })
+    }
+
+    pub fn set_path_effect(&mut self, path_effect: Option<&PathEffect>) {
+        unsafe {
+            C_SkPaint_setPathEffect(self.native_mut(), path_effect.shared_ptr())
+        }
+    }
+
+    pub fn mask_filter(&self) -> Option<MaskFilter> {
+        MaskFilter::from_unshared_ptr(unsafe {
+            self.native().getMaskFilter()
+        })
+    }
+
+    pub fn set_mask_filter(&mut self, mask_filter: Option<&MaskFilter>) {
+        unsafe {
+            C_SkPaint_setMaskFilter(self.native_mut(), mask_filter.shared_ptr())
+        }
+    }
+
+    pub fn typeface(&self) -> Option<Typeface> {
+        Typeface::from_unshared_ptr(unsafe {
+            self.native().getTypeface()
+        })
+    }
+
+    pub fn set_typeface(&mut self, typeface: Option<&Typeface>) {
+        unsafe {
+            C_SkPaint_setTypeface(self.native_mut(), typeface.shared_ptr())
+        }
+    }
+
+    /* TODO: ImageFilter postponed
+
+    pub fn image_filter(&self) -> Option<ImageFilter> {
+        ImageFilter::from_unshared_ptr(unsafe {
+            self.native().getImageFilter()
+        })
+    }
+
+    pub fn set_image_filter(&mut self, image_filter: Option<&ImageFilter>) {
+        unsafe {
+            C_SkPaint_setImageFilter(self.native_mut(), image_filter.shared_ptr())
+        }
+    }
+
+    */
+
+    // TODO: getDrawLooper, setDrawLooper
+
+    pub fn text_size(&self) -> scalar {
+        unsafe { self.native().getTextSize() }
+    }
+
+    pub fn set_text_size(&mut self, text_size: scalar) {
+        unsafe { self.native_mut().setTextSize(text_size) }
+    }
+
+    pub fn text_scale_x(&self) -> scalar {
+        unsafe { self.native().getTextScaleX() }
+    }
+
+    pub fn set_text_scale_x(&mut self, scale_x: scalar) {
+        unsafe { self.native_mut().setTextScaleX(scale_x) }
+    }
+
+    pub fn text_skew_x(&self) -> scalar {
+        unsafe { self.native().getTextSkewX() }
+    }
+
+    pub fn set_text_skew_x(&mut self, skew_x: scalar) {
+        unsafe { self.native_mut().setTextSkewX(skew_x) }
+    }
+
+    // TODO: getTextBlobIntercepts
+
+    pub fn nothing_to_draw(&self) -> bool {
+        unsafe { self.native().nothingToDraw() }
+    }
+}

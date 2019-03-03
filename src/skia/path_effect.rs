@@ -92,7 +92,7 @@ pub struct PathEffectDashInfo {
     phase: scalar
 }
 
-type PathEffect = RCHandle<SkPathEffect>;
+pub type PathEffect = RCHandle<SkPathEffect>;
 
 impl NativeRefCountedBase for SkPathEffect {
     type Base = SkRefCntBase;
