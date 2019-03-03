@@ -82,6 +82,12 @@ fn point_layout() {
     Point::test_layout()
 }
 
+impl Default for Point {
+    fn default() -> Self {
+        Self::new(0.0, 0.0)
+    }
+}
+
 impl Neg for Point {
     type Output = Point;
     fn neg(self) -> Self::Output {
@@ -166,17 +172,23 @@ impl Point {
 }
 
 //
-// Liftable
+// From
 //
 
-impl Liftable<(i32, i32)> for IPoint {
-    fn lift_from(source: (i32, i32)) -> Self {
+impl From<(i32, i32)> for IPoint {
+    fn from(source: (i32, i32)) -> Self {
         IPoint::new(source.0, source.1)
     }
 }
 
-impl Liftable<(scalar, scalar)> for Point {
-    fn lift_from(source: (scalar, scalar)) -> Self {
+impl From<(scalar, scalar)> for Point {
+    fn from(source: (scalar, scalar)) -> Self {
         Point::new(source.0, source.1)
+    }
+}
+
+impl From<IPoint> for Point {
+    fn from(source: IPoint) -> Self {
+        Self::new(source.x as _, source.y as _)
     }
 }

@@ -137,3 +137,11 @@ mod yuva_index;
 pub use self::yuva_index::*;
 
 pub use crate::skia_euclid::*;
+
+//
+// Skia specific traits used for overloading.
+//
+
+pub trait Contains<T> {
+    fn contains(&self, other: T) -> bool;
+}

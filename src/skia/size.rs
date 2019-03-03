@@ -95,17 +95,23 @@ impl Size {
 }
 
 //
-// Liftable
+// From
 //
 
-impl Liftable<(i32, i32)> for ISize {
-    fn lift_from(source: (i32, i32)) -> Self {
+impl From<(i32, i32)> for ISize {
+    fn from(source: (i32, i32)) -> Self {
         Self::new(source.0, source.1)
     }
 }
 
-impl Liftable<(scalar, scalar)> for Size {
-    fn lift_from(source: (scalar, scalar)) -> Self {
+impl From<(scalar, scalar)> for Size {
+    fn from(source: (scalar, scalar)) -> Self {
         Self::new(source.0, source.1)
+    }
+}
+
+impl From<ISize> for Size {
+    fn from(size: ISize) -> Self {
+        Self::new(size.width as _, size.height as _)
     }
 }

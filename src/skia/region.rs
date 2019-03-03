@@ -2,7 +2,8 @@ use crate::prelude::*;
 use crate::skia::{
     IRect,
     Path,
-    IPoint
+    IPoint,
+    Contains
 };
 use rust_skia::{
     C_SkRegion_destruct,
@@ -248,23 +249,19 @@ impl Intersects<Region> for Region {
 // contains overloads
 //
 
-pub trait Contains<T> {
-    fn contains(&self, other: &T) -> bool;
-}
-
 impl Contains<IPoint> for Region {
-    fn contains(&self, point: &IPoint) -> bool {
-        self.contains_point(point)
+    fn contains(&self, point: IPoint) -> bool {
+        self.contains_point(&point)
     }
 }
 
-impl Contains<IRect> for Region {
+impl Contains<&IRect> for Region {
     fn contains(&self, rect: &IRect) -> bool {
         self.contains_rect(rect)
     }
 }
 
-impl Contains<Region> for Region {
+impl Contains<&Region> for Region {
     fn contains(&self, other: &Region) -> bool {
         self.contains_region(other)
     }

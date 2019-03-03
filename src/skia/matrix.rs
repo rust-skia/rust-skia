@@ -535,5 +535,5 @@ fn test_get_set_trait_compilation() {
 
 fn test_tuple_to_vector() {
     let mut m = Matrix::new_identity();
-    m.set_translate((10.0, 10.0).lift())
+    m.set_translate((10.0, 10.0).into())
 }
