@@ -146,7 +146,7 @@ impl Handle<SkPaint> {
         self
     }
 
-    pub fn anti_alias(&self) -> bool {
+    pub fn is_anti_alias(&self) -> bool {
         unsafe { self.native().isAntiAlias() }
     }
 
@@ -155,7 +155,7 @@ impl Handle<SkPaint> {
         self
     }
 
-    pub fn dither(&self) -> bool {
+    pub fn is_dither(&self) -> bool {
         unsafe { self.native().isDither() }
     }
 
@@ -164,7 +164,7 @@ impl Handle<SkPaint> {
         self
     }
 
-    pub fn linear_text(&self) -> bool {
+    pub fn is_linear_text(&self) -> bool {
         // does not link
         // unsafe { self.native().isLinearText() }
         self.flags().contains(PaintFlags::LinearText)
@@ -175,7 +175,7 @@ impl Handle<SkPaint> {
         self
     }
 
-    pub fn subpixel_text(&self) -> bool {
+    pub fn is_subpixel_text(&self) -> bool {
         // does not link
         // unsafe { self.native().isSubpixelText() }
         self.flags().contains(PaintFlags::SubpixelText)
@@ -186,7 +186,7 @@ impl Handle<SkPaint> {
         self
     }
 
-    pub fn lcd_render_text(&self) -> bool {
+    pub fn is_lcd_render_text(&self) -> bool {
         // does not link:
         // unsafe { self.native().isLCDRenderText() }
         self.flags().contains(PaintFlags::LCDRenderText)
@@ -197,7 +197,7 @@ impl Handle<SkPaint> {
         self
     }
 
-    pub fn embedded_bitmap_text(&self) -> bool {
+    pub fn is_embedded_bitmap_text(&self) -> bool {
         // does not link:
         // unsafe { self.native().isEmbeddedBitmapText() }
         self.flags().contains(PaintFlags::EmbeddedBitmapText)
@@ -208,7 +208,7 @@ impl Handle<SkPaint> {
         self
     }
 
-    pub fn autohinted(&self) -> bool {
+    pub fn is_autohinted(&self) -> bool {
         // does not link:
         // unsafe { self.native().isAutohinted() }
         self.flags().contains(PaintFlags::AutoHinting)
@@ -219,7 +219,7 @@ impl Handle<SkPaint> {
         self
     }
 
-    pub fn fake_bold_text(&self) -> bool {
+    pub fn is_fake_bold_text(&self) -> bool {
         // does not link:
         // unsafe { self.native().isFakeBoldText() }
         self.flags().contains(PaintFlags::FakeBoldText)
@@ -361,7 +361,7 @@ impl Handle<SkPaint> {
         }.into_handle()
     }
 
-    pub fn src_over(&self) -> bool {
+    pub fn is_src_over(&self) -> bool {
         unsafe {
             self.native().isSrcOver()
         }
