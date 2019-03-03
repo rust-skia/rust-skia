@@ -220,6 +220,30 @@ extern "C" bool C_SkPaint_Equals(const SkPaint* lhs, const SkPaint* rhs) {
     return *lhs == *rhs;
 }
 
+extern "C" void C_SkPaint_setColorFilter(SkPaint* self, SkColorFilter* colorFilter) {
+    self->setColorFilter(sk_sp<SkColorFilter>(colorFilter));
+}
+
+extern "C" void C_SkPaint_setPathEffect(SkPaint* self, SkPathEffect* pathEffect) {
+    self->setPathEffect(sk_sp<SkPathEffect>(pathEffect));
+}
+
+extern "C" void C_SkPaint_setMaskFilter(SkPaint* self, SkMaskFilter* maskFilter) {
+    self->setMaskFilter(sk_sp<SkMaskFilter>(maskFilter));
+}
+
+extern "C" void C_SkPaint_setTypeface(SkPaint* self, SkTypeface* typeface) {
+    self->setTypeface(sk_sp<SkTypeface>(typeface));
+}
+
+// postponed
+
+/*
+extern "C" void C_SkPaint_setImageFilter(SkPaint* self, SkImageFilter* imageFilter) {
+    self->setImageFilter(sk_sp<SkImageFilter>(imageFilter));
+}
+*/
+
 //
 // SkPath
 //
