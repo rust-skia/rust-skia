@@ -243,6 +243,8 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .rustified_enum("SkStrokeRec_Style")
     .rustified_enum("SkPathEffect_PointData_PointFlags")
     .rustified_enum("SkPathEffect_DashType")
+    .rustified_enum("SkBlurStyle")
+    .rustified_enum("SkCoverageMode")
 
     .whitelist_var("SK_Color.*")
 

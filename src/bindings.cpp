@@ -16,6 +16,7 @@
 #include "SkPictureRecorder.h"
 #include "SkColorFilter.h"
 #include "SkStrokeRec.h"
+#include "SkMaskFilter.h"
 
 #include "GrContext.h"
 
@@ -696,6 +697,29 @@ extern "C" void C_SkPathEffect_PointData_deletePoints(SkPathEffect::PointData* s
     delete [] self->fPoints;
     self->fPoints = nullptr;
 }
+
+//
+// SkMaskFilter
+//
+
+extern "C" SkMaskFilter* C_SkMaskFilter_MakeBlur(SkBlurStyle style, SkScalar sigma, bool respectCTM) {
+    return SkMaskFilter::MakeBlur(style, sigma, respectCTM).release();
+}
+
+extern "C" SkMaskFilter* C_SkMaskFilter_Compose(SkMaskFilter* outer, SkMaskFilter* inner) {
+    return SkMaskFilter::MakeCompose(sk_sp<SkMaskFilter>(outer), sk_sp<SkMaskFilter>(inner)).release();
+}
+
+extern "C" SkMaskFilter* C_SkMaskFilter_Combine(SkMaskFilter* filterA, SkMaskFilter* filterB, SkCoverageMode coverageMode) {
+    return SkMaskFilter::MakeCombine(sk_sp<SkMaskFilter>(filterA), sk_sp<SkMaskFilter>(filterB), coverageMode).release();
+}
+
+extern "C" SkMaskFilter* C_SkMaskFilter_makeWithMatrix(const SkMaskFilter* self, const SkMatrix* matrix) {
+    return self->makeWithMatrix(*matrix).release();
+}
+
+
+
 
 #if defined(SK_VULKAN)
 
