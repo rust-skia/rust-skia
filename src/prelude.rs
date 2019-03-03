@@ -378,7 +378,7 @@ pub struct RCHandle<Native: NativeRefCounted>(*mut Native);
 
 impl<N: NativeRefCounted> RCHandle<N> {
     /// Increases the reference counter of the native type
-    /// and returns a mutable reference.
+    /// and returns a mutable reference to it.
     #[inline]
     pub fn shared_native(&self) -> &mut N {
         (unsafe { &*self.0 })._ref();

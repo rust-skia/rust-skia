@@ -28,6 +28,9 @@ pub use self::bitmap::*;
 mod blend_mode;
 pub use self::blend_mode::*;
 
+mod blur_types;
+pub use self::blur_types::*;
+
 mod canvas;
 pub use self::canvas::*;
 
@@ -39,6 +42,9 @@ pub use self::color_filter::*;
 
 mod color_space;
 pub use self::color_space::*;
+
+mod coverage_mode;
+pub use self::coverage_mode::*;
 
 mod data;
 pub use self::data::*;
@@ -63,6 +69,9 @@ pub use self::image::*;
 
 mod image_info;
 pub use self::image_info::*;
+
+mod mask_filter;
+pub use self::mask_filter::*;
 
 mod matrix;
 pub use self::matrix::*;
