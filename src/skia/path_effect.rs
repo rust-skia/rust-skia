@@ -3,7 +3,9 @@ use crate::prelude::*;
 use crate::skia::{
     Rect,
     StrokeRec,
-    Path
+    Path,
+    Matrix,
+    scalar
 };
 use rust_skia::{
     SkPathEffect_PointData,
@@ -15,7 +17,9 @@ use rust_skia::{
     C_SkPathEffect_MakeSum,
     SkRefCntBase,
     SkPathEffect,
-    C_SkPathEffect_PointData_deletePoints
+    C_SkPathEffect_PointData_deletePoints,
+    SkPathEffect_DashInfo,
+    SkPathEffect_DashType
 };
 
 bitflags! {
@@ -72,6 +76,22 @@ fn point_data_layout() {
     PathEffectPointData::test_layout();
 }
 
+/*
+pub type DashType = EnumHandle<SkPathEffect_DashType>;
+
+#[allow(non_upper_case_globals)]
+impl EnumHandle<SkPathEffect_DashType> {
+    pub const None: Self = Self(SkPathEffect_DashType::kNone_DashType);
+    pub const Dash: Self = Self(SkPathEffect_DashType::kDash_DashType);
+}
+*/
+
+#[derive(Clone, PartialEq, Debug)]
+pub struct PathEffectDashInfo {
+    intervals: Vec<scalar>,
+    phase: scalar
+}
+
 type PathEffect = RCHandle<SkPathEffect>;
 
 impl NativeRefCountedBase for SkPathEffect {
@@ -119,5 +139,45 @@ impl RCHandle<SkPathEffect> {
         let mut r : SkRect = unsafe { mem::zeroed() };
         unsafe { self.native().computeFastBounds(&mut r, &src.into_native()) };
         Rect::from_native(r)
+    }
+
+    pub fn as_points(
+        &self,
+        src: &Path,
+        stroke_rect: &StrokeRec,
+        matrix: &Matrix,
+        cull_rect: &Rect)
+        -> Option<PathEffectPointData> {
+        let mut point_data = PathEffectPointData::new();
+        unsafe {
+            self.native().asPoints(
+                point_data.native_mut(),
+                src.native(),
+                stroke_rect.native(),
+                matrix.native(),
+                &cull_rect.into_native())
+        }.if_true_some(point_data)
+    }
+
+    pub fn as_dash(&self) -> Option<PathEffectDashInfo> {
+        let mut dash_info = unsafe { SkPathEffect_DashInfo::new() };
+
+        let dash_type = unsafe {
+            self.native().asADash(&mut dash_info)
+        };
+
+        match dash_type {
+            SkPathEffect_DashType::kDash_DashType => {
+                let mut v: Vec<scalar> = vec![0.0; dash_info.fCount.try_into().unwrap()];
+                dash_info.fIntervals = v.as_mut_ptr();
+                unsafe {
+                    assert_eq!(dash_type, self.native().asADash(&mut dash_info));
+                }
+                Some(PathEffectDashInfo { intervals: v, phase: dash_info.fPhase })
+            },
+            SkPathEffect_DashType::kNone_DashType => {
+                None
+            }
+        }
     }
 }

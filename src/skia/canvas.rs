@@ -6,6 +6,9 @@ use super::{Path, Paint, Color};
 // Note: References to a canvas are exposed bound to the lifetime of
 // the owning instance.
 
+// Warning: do never access SkCanvas from Rust, bindgen generates a wrong layout
+// as of version 0.47
+
 #[repr(transparent)]
 pub struct Canvas(SkCanvas);
 
