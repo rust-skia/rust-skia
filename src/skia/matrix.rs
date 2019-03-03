@@ -331,12 +331,9 @@ impl Matrix {
             return None
         }
 
-        let src : Vec<SkPoint> = src.to_native();
-        let dst : Vec<SkPoint> = dst.to_native();
-
         let mut m = Matrix::new_identity();
         unsafe {
-            m.native_mut().setPolyToPoly(src.as_ptr(), dst.as_ptr(), src.len() as _)
+            m.native_mut().setPolyToPoly(src.native().as_ptr(), dst.native().as_ptr(), src.len() as _)
         }.if_true_some(m)
     }
 
@@ -367,31 +364,20 @@ impl Matrix {
     pub fn map_points(&self, dst: &mut [Point], src: &[Point]) {
         assert!(dst.len() >= src.len());
 
-        let src_native = src.to_native();
-        let mut dst_native : Vec<SkPoint> = iter::repeat(SkPoint { fX: 0.0, fY: 0.0 }).take(src.len()).collect();
         unsafe {
             self.native().mapPoints(
-                dst_native.as_mut_ptr(),
-                src_native.as_ptr(),
+                dst.native_mut().as_mut_ptr(),
+                src.native().as_ptr(),
                 src.len().try_into().unwrap())
         }
-        dst_native
-            .iter()
-            .enumerate()
-            .for_each(|(i, p)| dst[i] = Point::from_native(*p));
     }
 
     pub fn map_points_inplace(&self, pts: &mut[Point]) {
-        let mut pts_native = pts.to_native();
         unsafe {
             self.native().mapPoints1(
-                pts_native.as_mut_ptr(),
-                pts_native.len().try_into().unwrap())
+                pts.native_mut().as_mut_ptr(),
+                pts.len().try_into().unwrap())
         }
-        pts_native
-            .iter()
-            .enumerate()
-            .for_each(|(i, p)| pts[i] = Point::from_native(*p));
     }
 
     pub fn map_homogeneous_points(&self, dst: &mut[Point3], src: &[Point3]) {
@@ -418,32 +404,20 @@ impl Matrix {
 
     pub fn map_vectors(&self, dst: &mut[Vector], src: &[Vector]) {
         assert!(dst.len() >= src.len());
-
-        let src_native = src.to_native();
-        let mut dst_native : Vec<SkPoint> = iter::repeat(SkPoint { fX: 0.0, fY: 0.0 }).take(src.len()).collect();
         unsafe {
             self.native().mapVectors(
-                dst_native.as_mut_ptr(),
-                src_native.as_ptr(),
+                dst.native_mut().as_mut_ptr(),
+                src.native().as_ptr(),
                 src.len().try_into().unwrap())
         }
-        dst_native
-            .iter()
-            .enumerate()
-            .for_each(|(i, p)| dst[i] = Point::from_native(*p));
     }
 
     pub fn map_vectors_inplace(&self, vecs: &mut[Vector]) {
-        let mut vecs_native = vecs.to_native();
         unsafe {
             self.native().mapVectors1(
-                vecs_native.as_mut_ptr(),
-                vecs_native.len().try_into().unwrap())
+                vecs.native_mut().as_mut_ptr(),
+                vecs.len().try_into().unwrap())
         }
-        vecs_native
-            .iter()
-            .enumerate()
-            .for_each(|(i, p)| vecs[i] = Point::from_native(*p));
     }
 
     pub fn map_vector(&self, vec: Vector) -> Vector {

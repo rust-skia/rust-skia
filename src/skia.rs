@@ -100,6 +100,9 @@ pub use self::picture::*;
 mod picture_recorder;
 pub use self::picture_recorder::*;
 
+mod point;
+pub use self::point::*;
+
 mod region;
 pub use self::region::*;
 

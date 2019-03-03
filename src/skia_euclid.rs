@@ -11,13 +11,13 @@ use rust_skia::SkPoint3;
 
 pub struct Skia;
 
-pub type IPoint = euclid::Point2D<i32>;
-pub type IVector = IPoint;
+type IPoint = euclid::Point2D<i32>;
+type IVector = Point;
 pub type ISize = euclid::Size2D<i32>;
 pub type IRect = euclid::Rect<i32>;
 
-pub type Point = euclid::Point2D<f32>;
-pub type Vector = Point;
+type Point = euclid::Point2D<f32>;
+type Vector = Point;
 pub type Size = euclid::Size2D<f32>;
 pub type Rect = euclid::Rect<f32>;
 
@@ -156,6 +156,8 @@ impl SkiaSize<i32> for ISize {
     }
 }
 
+/*
+
 impl NativeRepresentation<SkIPoint> for IPoint {
     fn into_native(self) -> SkIPoint {
         SkIPoint { fX: self.x, fY: self.y }
@@ -165,6 +167,8 @@ impl NativeRepresentation<SkIPoint> for IPoint {
         IPoint::new(native.fX, native.fY)
     }
 }
+
+*/
 
 impl NativeRepresentation<SkISize> for ISize {
     fn into_native(self) -> SkISize {
