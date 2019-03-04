@@ -1,4 +1,3 @@
-use std::mem;
 use crate::prelude::*;
 use rust_skia::{
     SkAlphaType,
@@ -75,14 +74,18 @@ pub type ImageInfo = Handle<SkImageInfo>;
 
 impl NativeDrop for SkImageInfo {
     fn drop(&mut self) {
-        unsafe { rust_skia::C_SkImageInfo_Destruct(self) }
+        unsafe {
+            rust_skia::C_SkImageInfo_destruct(self)
+        }
     }
 }
 
 impl NativeClone for SkImageInfo {
     fn clone(&self) -> Self {
         let mut image_info = unsafe { SkImageInfo::new() };
-        unsafe { rust_skia::C_SkImageInfo_Copy(self, &mut image_info); }
+        unsafe {
+            rust_skia::C_SkImageInfo_Copy(self, &mut image_info);
+        }
         image_info
     }
 }
@@ -113,7 +116,9 @@ impl Handle<SkImageInfo> {
 
     pub fn new_s32(dimensions: ISize, at: AlphaType) -> ImageInfo {
         let mut image_info = Self::default();
-        unsafe { rust_skia::C_SkImageInfo_MakeS32(image_info.native_mut(), dimensions.width, dimensions.height, at.0); }
+        unsafe {
+            rust_skia::C_SkImageInfo_MakeS32(image_info.native_mut(), dimensions.width, dimensions.height, at.0);
+        }
         image_info
     }
 
@@ -150,7 +155,9 @@ impl Handle<SkImageInfo> {
     }
 
     pub fn color_space(&self) -> Option<ColorSpace> {
-        ColorSpace::from_ptr(unsafe { rust_skia::C_SkImageInfo_colorSpace(self.native()) })
+        ColorSpace::from_ptr(unsafe {
+            rust_skia::C_SkImageInfo_colorSpace(self.native())
+        })
     }
 
     pub fn is_empty(&self) -> bool {
@@ -192,27 +199,39 @@ impl Handle<SkImageInfo> {
     }
 
     pub fn bytes_per_pixel(&self) -> usize {
-        unsafe { self.native().bytesPerPixel() as _ }
+        unsafe {
+            self.native().bytesPerPixel() as _
+        }
     }
 
     pub fn shift_per_pixel(&self) -> usize {
-        unsafe { self.native().shiftPerPixel() as _ }
+        unsafe {
+            self.native().shiftPerPixel() as _
+        }
     }
 
     pub fn min_row_bytes(&self) -> usize {
-        unsafe { self.native().minRowBytes() }
+        unsafe {
+            self.native().minRowBytes()
+        }
     }
 
     pub fn compute_offset(&self, point: IPoint, row_bytes: usize) -> usize {
-        unsafe { self.native().computeOffset(point.x, point.y, row_bytes) }
+        unsafe {
+            self.native().computeOffset(point.x, point.y, row_bytes)
+        }
     }
 
     pub fn compute_byte_size(&self, row_bytes: usize) -> usize {
-        unsafe { self.native().computeByteSize(row_bytes) }
+        unsafe {
+            self.native().computeByteSize(row_bytes)
+        }
     }
 
     pub fn valid_row_bytes(&self, row_bytes: usize) -> bool {
-        unsafe { self.native().validRowBytes(row_bytes) }
+        unsafe {
+            self.native().validRowBytes(row_bytes)
+        }
     }
 }
 

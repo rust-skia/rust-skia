@@ -29,6 +29,7 @@ use rust_skia::{SkVertices_BoneIndices, SkVertices_BoneWeights};
 #[cfg(test)]
 use std::mem;
 
+// TODO: review naming
 pub type BoneIndices = [u32; 4];
 
 #[test]
@@ -36,6 +37,7 @@ fn bone_indices_layout() {
     assert_eq!(mem::size_of::<BoneIndices>(), mem::size_of::<SkVertices_BoneIndices>());
 }
 
+// TODO: review naming
 pub type BoneWeights = [u32; 4];
 
 #[test]
@@ -45,9 +47,9 @@ fn bone_weights_layout() {
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 #[repr(transparent)]
-pub struct Bone([u32; 6]);
+pub struct VerticesBone([u32; 6]);
 
-impl Deref for Bone {
+impl Deref for VerticesBone {
     type Target = [u32; 6];
 
     fn deref(&self) -> &Self::Target {
@@ -55,15 +57,15 @@ impl Deref for Bone {
     }
 }
 
-impl DerefMut for Bone {
+impl DerefMut for VerticesBone {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
 }
 
-impl NativeTransmutable<SkVertices_Bone> for Bone {}
+impl NativeTransmutable<SkVertices_Bone> for VerticesBone {}
 
-impl Bone {
+impl VerticesBone {
     pub fn map_point(&self, point: &Point) -> Point {
         Point::from_native(unsafe {
             self.native().mapPoint(&point.into_native())
@@ -79,7 +81,7 @@ impl Bone {
 
 #[test]
 fn test_bone_layout() {
-    Bone::test_layout();
+    VerticesBone::test_layout();
 }
 
 // TODO: think about renaming EnumHandle to EnumWrapper (and others?)
@@ -234,7 +236,7 @@ impl RCHandle<SkVertices> {
         }
     }
 
-    pub fn apply_bones(&self, bones: &[Bone]) -> Vertices {
+    pub fn apply_bones(&self, bones: &[VerticesBone]) -> Vertices {
         Vertices::from_ptr(unsafe {
             C_SkVertices_applyBones(
                 self.native(),

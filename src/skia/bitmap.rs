@@ -16,7 +16,7 @@ use rust_skia::{
     SkPaint,
     SkIPoint,
     C_SkImageInfo_Copy,
-    C_SkBitmap_Destruct,
+    C_SkBitmap_destruct,
     SkBitmap,
     C_SkBitmap_Construct,
     C_SkBitmap_readyToDraw,
@@ -37,13 +37,13 @@ pub type Bitmap = Handle<SkBitmap>;
 
 impl NativeDrop for SkBitmap {
     fn drop(&mut self) {
-        unsafe { C_SkBitmap_Destruct(self) }
+        unsafe { C_SkBitmap_destruct(self) }
     }
 }
 
 impl NativeClone for SkBitmap {
     fn clone(&self) -> Self {
-        return unsafe { SkBitmap::new1(self) };
+        unsafe { SkBitmap::new1(self) }
     }
 }
 

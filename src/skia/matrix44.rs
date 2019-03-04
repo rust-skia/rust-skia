@@ -3,7 +3,7 @@ use std::{mem, ops};
 use super::{Matrix, MatrixTypeMask, Vector4};
 use rust_skia::{
     C_SkMatrix44_Equals,
-    C_SkMatrix44_Destruct,
+    C_SkMatrix44_destruct,
     SkMatrix44,
     C_SkMatrix44_SkMatrix,
     C_SkMatrix44_Mul,
@@ -17,7 +17,7 @@ pub struct Matrix44(pub(crate) SkMatrix44);
 
 impl Drop for Matrix44 {
     fn drop(&mut self) {
-        unsafe { C_SkMatrix44_Destruct(&mut self.0) }
+        unsafe { C_SkMatrix44_destruct(&mut self.0) }
     }
 }
 

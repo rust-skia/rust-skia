@@ -7,7 +7,7 @@ use rust_skia::{
     C_SkFont_equals,
     SkFont,
     SkFont_Edging,
-    C_SkFont_Destruct,
+    C_SkFont_destruct,
     C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew,
     C_SkFont_setTypeface,
     SkRect,
@@ -39,7 +39,7 @@ pub type Font = Handle<SkFont>;
 
 impl NativeDrop for SkFont {
     fn drop(&mut self) {
-        unsafe { C_SkFont_Destruct(self) }
+        unsafe { C_SkFont_destruct(self) }
     }
 }
 
