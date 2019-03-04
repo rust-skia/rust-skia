@@ -49,6 +49,14 @@ impl NativePartialEq for RRect {
     }
 }
 
+impl Default for RRect {
+    fn default() -> Self {
+        // SkRRect::MakeEmpty does not link, so we use new().
+        unsafe { SkRRect::new() }
+            .into_handle()
+    }
+}
+
 impl RRect {
 
     pub fn get_type(&self) -> RRectType {
@@ -91,29 +99,23 @@ impl RRect {
         Vector::from_native(unsafe { self.native().getSimpleRadii() })
     }
 
-    pub fn new_empty() -> Self {
-        // SkRRect::MakeEmpty does not link, so we use new().
-        unsafe { SkRRect::new() }
-            .into_handle()
-    }
-
-    pub fn new_rect(rect: &Rect) -> Self {
+    pub fn from_rect(rect: &Rect) -> Self {
         unsafe { SkRRect::MakeRect(&rect.into_native()) }
             .into_handle()
     }
 
-    pub fn new_oval(oval: &Rect) -> Self {
+    pub fn from_oval(oval: &Rect) -> Self {
         unsafe { SkRRect::MakeOval(&oval.into_native()) }
             .into_handle()
     }
 
-    pub fn new_rect_xy(rect: &Rect, x_rad: f32, y_rad: f32) -> Self {
+    pub fn from_rect_xy(rect: &Rect, x_rad: f32, y_rad: f32) -> Self {
         unsafe { SkRRect::MakeRectXY(&rect.into_native(), x_rad, y_rad) }
             .into_handle()
     }
 
-    pub fn new_nine_patch(rect: &Rect, left_rad: f32, top_rad: f32, right_rad: f32, bottom_rad: f32) -> Self {
-        let mut r = Self::new_empty();
+    pub fn from_nine_patch(rect: &Rect, left_rad: f32, top_rad: f32, right_rad: f32, bottom_rad: f32) -> Self {
+        let mut r = Self::default();
         unsafe {
             r.native_mut()
                 .setNinePatch(
@@ -123,8 +125,8 @@ impl RRect {
         r
     }
 
-    pub fn new_rect_radii(rect: &Rect, radii: &[Vector; 4]) -> Self {
-        let mut r = Self::new_empty();
+    pub fn from_rect_radii(rect: &Rect, radii: &[Vector; 4]) -> Self {
+        let mut r = Self::default();
         unsafe {
             let v : Vec<SkVector> = radii.iter().map(|v| v.into_native()).collect();
             r.native_mut()
@@ -152,7 +154,7 @@ impl RRect {
     #[warn(unused)]
     pub fn inset(&self, dx: f32, dy: f32) -> Self {
         // inset1 does not link.
-        let mut r = Self::new_empty();
+        let mut r = Self::default();
         unsafe { self.native().inset(dx, dy, r.native_mut()) };
         r
     }
@@ -181,7 +183,7 @@ impl RRect {
 
     #[warn(unused)]
     pub fn transform(&self, matrix: &Matrix) -> Option<Self> {
-        let mut r = Self::new_empty();
+        let mut r = Self::default();
         unsafe { self.native().transform(matrix.native(), r.native_mut()) }
             .if_true_some(r)
     }

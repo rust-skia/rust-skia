@@ -45,22 +45,22 @@ impl Canvas {
     #[inline]
     pub fn move_to(&mut self, x: f32, y: f32) {
         self.begin_path();
-        self.path.move_to(x, y);
+        self.path.move_to((x, y).into());
     }
 
     #[inline]
     pub fn line_to(&mut self, x: f32, y: f32) {
-        self.path.line_to(x, y);
+        self.path.line_to((x, y).into());
     }
 
     #[inline]
     pub fn quad_to(&mut self, cpx: f32, cpy: f32, x: f32, y: f32) {
-        self.path.quad_to(cpx, cpy, x, y);
+        self.path.quad_to((cpx, cpy).into(), (x, y).into());
     }
 
     #[inline]
     pub fn bezier_curve_to(&mut self, cp1x: f32, cp1y: f32, cp2x: f32, cp2y: f32, x: f32, y: f32) {
-        self.path.cubic_to(cp1x, cp1y, cp2x, cp2y, x, y);
+        self.path.cubic_to((cp1x, cp1y).into(), (cp2x, cp2y).into(), (x, y).into());
     }
 
     #[inline]
