@@ -235,7 +235,9 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     "SkBlurStyle",
     "SkCoverageMode",
     "SkFilterQuality",
-    "SkPath_Direction", "SkPath_FillType", "SkPath_Convexity", "SkPath_ArcSize", "SkPath_AddPathMode", "SkPath_SegmentMask", "SkPath_Verb"
+    "SkPath_Direction", "SkPath_FillType", "SkPath_Convexity", "SkPath_ArcSize", "SkPath_AddPathMode", "SkPath_SegmentMask", "SkPath_Verb",
+    "SkCanvas_SaveLayerFlags", "SkCanvas_PointMode", "SkCanvas_SrcRectConstraint",
+    "SkClipOp"
   ];
 
   builder = enums.iter().fold(builder, |b, e| b.rustified_enum(e) );

@@ -266,13 +266,56 @@ extern "C" SkPath::FillType C_SkPath_ConvertToNonInverseFillType(SkPath::FillTyp
 
 //
 // SkCanvas
+// Note: bindgen layout is broken, so we are forced to allocate Canvas instances on the heap only.
 //
 
-extern "C" void C_SkCanvas_destruct(const SkCanvas* self) {
-    self->~SkCanvas();
+extern "C" SkCanvas* C_SkCanvas_newEmpty() {
+    return new SkCanvas();
 }
 
+extern "C" SkCanvas* C_SkCanvas_newWidthHeightAndProps(int width, int height, const SkSurfaceProps* props) {
+    return new SkCanvas(width, height, props);
+}
 
+extern "C" SkCanvas* C_SkCanvas_newFromBitmap(const SkBitmap* bitmap) {
+    return new SkCanvas(*bitmap);
+}
+
+extern "C" SkCanvas* C_SkCanvas_newFromBitmapAndProps(const SkBitmap* bitmap, const SkSurfaceProps* props) {
+    return new SkCanvas(*bitmap, *props);
+}
+
+extern "C" void C_SkCanvas_delete(const SkCanvas* self) {
+    delete self;
+}
+
+extern "C" SkCanvas* C_SkCanvas_MakeRasterDirect(const SkImageInfo* info, void* pixels, size_t row_bytes, const SkSurfaceProps* props) {
+    return SkCanvas::MakeRasterDirect(*info, pixels, row_bytes, props).release();
+}
+
+extern "C" void C_SkCanvas_imageInfo(const SkCanvas* self, SkImageInfo* info) {
+    *info = self->imageInfo();
+}
+
+extern "C" void C_SkCanvas_getBaseLayerSize(const SkCanvas* self, SkISize* size) {
+    *size = self->getBaseLayerSize();
+}
+
+extern "C" SkSurface* C_SkCanvas_makeSurface(SkCanvas* self, const SkImageInfo* info, const SkSurfaceProps* props) {
+    return self->makeSurface(*info, props).release();
+}
+
+extern "C" GrContext* C_SkCanvas_getGrContext(SkCanvas* self) {
+    return self->getGrContext();
+}
+
+extern "C" bool C_SkCanvas_isClipEmpty(const SkCanvas* self) {
+    return self->isClipEmpty();
+}
+
+extern "C" bool C_SkCanvas_isClipRect(const SkCanvas* self) {
+    return self->isClipRect();
+}
 
 //
 // SkImageInfo
