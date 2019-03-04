@@ -1,4 +1,4 @@
-use std::{slice, mem};
+use std::slice;
 use crate::prelude::*;
 use crate::skia::{
     Rect,

@@ -1,7 +1,9 @@
 use rust_skia::SkPixelGeometry;
 use rust_skia::SkSurfaceProps;
 use rust_skia::SkSurfaceProps_Flags;
+use crate::prelude::NativeAccess;
 
+// TODO: use EnumHandle
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct PixelGeometry(pub(crate) SkPixelGeometry);
 
@@ -30,6 +32,12 @@ impl PixelGeometry {
     }
 }
 
+impl Default for PixelGeometry {
+    fn default() -> Self {
+        PixelGeometry::Unknown
+    }
+}
+
 bitflags! {
     pub struct SurfacePropsFlags: u32 {
         const UseDeviceIndependentFonts =
@@ -37,18 +45,43 @@ bitflags! {
     }
 }
 
+impl Default for SurfacePropsFlags {
+    fn default() -> Self {
+        SurfacePropsFlags::empty()
+    }
+}
+
+/// TODO: use Handle
 #[derive(Copy)]
 pub struct SurfaceProps(pub(crate) SkSurfaceProps);
 
+impl NativeAccess<SkSurfaceProps> for SurfaceProps {
+    fn native(&self) -> &SkSurfaceProps {
+        &self.0
+    }
+
+    fn native_mut(&mut self) -> &mut SkSurfaceProps {
+        &mut self.0
+    }
+}
+
+// TODO: use Handle together with NativeClone
 impl Clone for SurfaceProps {
     fn clone(&self) -> Self {
         SurfaceProps(unsafe { SkSurfaceProps::new3(&self.0) })
     }
 }
 
+// TODO: use Handle together with NativePartialEq
 impl PartialEq for SurfaceProps {
     fn eq(&self, other: &SurfaceProps) -> bool {
         unsafe { rust_skia::C_SkSurfaceProps_Equals(&self.0, &other.0) }
+    }
+}
+
+impl Default for SurfaceProps {
+    fn default() -> Self {
+        SurfaceProps::new(Default::default(), Default::default())
     }
 }
 

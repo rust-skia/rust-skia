@@ -61,7 +61,7 @@ impl Handle<SkBitmap> {
     pub fn info(&self) -> ImageInfo {
         // we contain ImageInfo in a struct, so we have to copy it.
         let ptr = unsafe { self.native().info() };
-        let mut image_info = ImageInfo::new_empty();
+        let mut image_info = ImageInfo::default();
         unsafe { C_SkImageInfo_Copy(ptr, image_info.native_mut()) }
         image_info
     }

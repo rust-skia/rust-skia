@@ -34,7 +34,7 @@ impl Canvas {
 
     #[inline]
     pub fn translate(&mut self, dx: f32, dy: f32) {
-        self.canvas().translate(dx, dy);
+        self.canvas().translate((dx, dy).into());
     }
 
     #[inline]

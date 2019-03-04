@@ -35,7 +35,6 @@ use rust_skia::{
     C_SkImage_MakeFromNV12TexturesCopy,
     C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend,
     SkImage_BitDepth,
-    GrSurfaceOrigin,
     SkImage_CachingHint,
     C_SkImage_refEncodedData,
     C_SkImage_makeSubset,

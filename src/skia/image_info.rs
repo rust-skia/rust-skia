@@ -1,4 +1,4 @@
-use std::mem::uninitialized;
+use std::mem;
 use crate::prelude::*;
 use rust_skia::{
     SkAlphaType,
@@ -6,13 +6,11 @@ use rust_skia::{
     SkColorType,
     SkYUVColorSpace,
 };
-use crate::{
-    skia::{
-        ColorSpace,
-        IRect,
-        ISize,
-        IPoint
-    },
+use crate::skia::{
+    ColorSpace,
+    IRect,
+    ISize,
+    IPoint
 };
 
 #[derive(Copy, Clone, PartialEq)]
@@ -89,15 +87,19 @@ impl NativeClone for SkImageInfo {
     }
 }
 
-impl ImageInfo {
-    pub fn new_empty() -> ImageInfo {
-        let mut image_info : SkImageInfo = unsafe { uninitialized() };
-        unsafe { rust_skia::C_SkImageInfo_Construct(&mut image_info); }
-        ImageInfo::from_native(image_info)
-    }
+// TODO: NativePartialEq
 
-    pub fn new(dimensions: ISize, ct: ColorType, at: AlphaType, cs: Option<ColorSpace>) -> ImageInfo {
-        let mut image_info = Self::new_empty();
+impl Default for Handle<SkImageInfo> {
+    fn default() -> Self {
+        // TODO: remove C_SkImageInfo_destruct function definition in rust_skia.
+        unsafe { SkImageInfo::new() }.into_handle()
+    }
+}
+
+impl Handle<SkImageInfo> {
+
+    pub fn new(dimensions: ISize, ct: ColorType, at: AlphaType, cs: Option<ColorSpace>) -> Self {
+        let mut image_info = Self::default();
 
         unsafe {
             rust_skia::C_SkImageInfo_Make(image_info.native_mut(), dimensions.width, dimensions.height, ct.0, at.0, cs.shared_ptr())
@@ -110,7 +112,7 @@ impl ImageInfo {
     }
 
     pub fn new_s32(dimensions: ISize, at: AlphaType) -> ImageInfo {
-        let mut image_info = Self::new_empty();
+        let mut image_info = Self::default();
         unsafe { rust_skia::C_SkImageInfo_MakeS32(image_info.native_mut(), dimensions.width, dimensions.height, at.0); }
         image_info
     }

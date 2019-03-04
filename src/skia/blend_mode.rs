@@ -53,4 +53,3 @@ impl EnumHandle<SkBlendMode> {
         }
     }
 }
-

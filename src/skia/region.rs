@@ -1,9 +1,12 @@
-use crate::prelude::*;
-use crate::skia::{
-    IRect,
-    Path,
-    IPoint,
-    Contains
+use crate::{
+    skia::{
+        IRect,
+        Path,
+        IPoint,
+        Contains
+    },
+    prelude::*,
+    skia::QuickReject
 };
 use rust_skia::{
     C_SkRegion_destruct,
@@ -270,10 +273,6 @@ impl Contains<&Region> for Region {
 //
 // quick_reject overloads
 //
-
-pub trait QuickReject<T> {
-    fn quick_reject(&self, other: &T) -> bool;
-}
 
 impl QuickReject<IRect> for Region {
     fn quick_reject(&self, rect: &IRect) -> bool {

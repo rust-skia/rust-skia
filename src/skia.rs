@@ -75,6 +75,9 @@ pub use self::font_types::*;
 mod image;
 pub use self::image::*;
 
+mod image_filter;
+pub use self::image_filter::*;
+
 mod image_info;
 pub use self::image_info::*;
 
@@ -150,4 +153,8 @@ pub use self::yuva_index::*;
 
 pub trait Contains<T> {
     fn contains(&self, other: T) -> bool;
+}
+
+pub trait QuickReject<T> {
+    fn quick_reject(&self, other: &T) -> bool;
 }

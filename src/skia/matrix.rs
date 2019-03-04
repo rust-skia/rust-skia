@@ -56,7 +56,7 @@ pub enum AffineMatrixMember {
     TransY = 5
 }
 
-impl Index<MatrixMember> for Matrix {
+impl Index<MatrixMember> for ValueHandle<SkMatrix> {
     type Output = f32;
 
     fn index(&self, index: MatrixMember) -> &Self::Output {
@@ -64,7 +64,7 @@ impl Index<MatrixMember> for Matrix {
     }
 }
 
-impl Index<AffineMatrixMember> for Matrix {
+impl Index<AffineMatrixMember> for ValueHandle<SkMatrix> {
     type Output = f32;
 
     fn index(&self, index: AffineMatrixMember) -> &Self::Output {
@@ -72,7 +72,7 @@ impl Index<AffineMatrixMember> for Matrix {
     }
 }
 
-impl Index<usize> for Matrix {
+impl Index<usize> for ValueHandle<SkMatrix> {
     type Output = f32;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -80,25 +80,31 @@ impl Index<usize> for Matrix {
     }
 }
 
-impl IndexMut<MatrixMember> for Matrix {
+impl IndexMut<MatrixMember> for ValueHandle<SkMatrix> {
     fn index_mut(&mut self, index: MatrixMember) -> &mut Self::Output {
         self.index_mut(index as usize)
     }
 }
 
-impl IndexMut<AffineMatrixMember> for Matrix {
+impl IndexMut<AffineMatrixMember> for ValueHandle<SkMatrix> {
     fn index_mut(&mut self, index: AffineMatrixMember) -> &mut Self::Output {
         self.index_mut(index as usize)
     }
 }
 
-impl IndexMut<usize> for Matrix {
+impl IndexMut<usize> for ValueHandle<SkMatrix> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         self.native_mut().fMat.index_mut(index)
     }
 }
 
-impl Matrix {
+impl Default for ValueHandle<SkMatrix> {
+    fn default() -> Self {
+        Matrix::new_identity()
+    }
+}
+
+impl ValueHandle<SkMatrix> {
 
     pub fn new_scale(sx: f32, sy: f32) -> Matrix {
         unsafe { SkMatrix::MakeScale(sx, sy) }.into_handle()
