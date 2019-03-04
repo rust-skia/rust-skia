@@ -260,6 +260,10 @@ extern "C" SkData* C_SkPath_serialize(const SkPath* self) {
     return self->serialize().release();
 }
 
+extern "C" SkPath::FillType C_SkPath_ConvertToNonInverseFillType(SkPath::FillType fill) {
+    return SkPath::ConvertToNonInverseFillType(fill);
+}
+
 //
 // SkCanvas
 //
