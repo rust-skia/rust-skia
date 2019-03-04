@@ -7,11 +7,16 @@ use rust_skia::{
     C_SkFontStyle_equals
 };
 
-#[derive(Copy, Clone, PartialEq, PartialOrd)]
 #[repr(transparent)]
+#[derive(Copy, Clone, PartialEq, PartialOrd)]
 pub struct FontStyleWeight(i32);
 
 impl NativeTransmutable<i32> for FontStyleWeight {}
+
+#[test]
+fn test_font_style_weight_layout() {
+    FontStyleWeight::test_layout()
+}
 
 #[allow(non_upper_case_globals)]
 impl FontStyleWeight {
@@ -28,10 +33,16 @@ impl FontStyleWeight {
     pub const ExtraBlack: Self = Self(SkFontStyle_Weight::kExtraBlack_Weight as _);
 }
 
+#[repr(transparent)]
 #[derive(Copy, Clone, PartialEq, PartialOrd)]
 pub struct FontStyleWidth(i32);
 
 impl NativeTransmutable<i32> for FontStyleWidth {}
+
+#[test]
+fn test_font_style_width_layout() {
+    FontStyleWidth::test_layout()
+}
 
 #[allow(non_upper_case_globals)]
 impl FontStyleWidth {
