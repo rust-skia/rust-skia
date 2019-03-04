@@ -7,7 +7,7 @@ use super::{Path, Paint, Color};
 // the owning instance.
 
 // Warning: do never access SkCanvas from Rust, bindgen generates a wrong layout
-// as of version 0.47
+// as of version 0.47.3
 
 #[repr(transparent)]
 pub struct Canvas(SkCanvas);

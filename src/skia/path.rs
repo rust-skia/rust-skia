@@ -477,9 +477,6 @@ impl Handle<SkPath> {
         self
     }
 
-    // TODO: I am thinking, what would be the difference between passing and returning
-    // references of self and moving self through the function.
-
     pub fn reverse_add_path(&mut self, src: &Path) -> &mut Self {
         unsafe {
             self.native_mut().reverseAddPath(src.native())
