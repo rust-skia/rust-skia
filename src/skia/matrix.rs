@@ -1,10 +1,5 @@
-use std::{
-    ops::Index,
-    iter,
-    mem,
-    ops::IndexMut,
-    ptr
-};
+use std::{iter, mem, ptr};
+use std::ops::{Index, IndexMut};
 use crate::prelude::*;
 use crate::skia::{
     Vector,
@@ -383,19 +378,12 @@ impl Matrix {
     pub fn map_homogeneous_points(&self, dst: &mut[Point3], src: &[Point3]) {
         assert!(dst.len() >= src.len());
 
-        let src_native : Vec<SkPoint3> = src.to_native();
-        let mut dst_native : Vec<SkPoint3> = iter::repeat(SkPoint3 { fX: 0.0, fY: 0.0, fZ: 0.0}).take(src.len()).collect();
-
         unsafe {
             self.native().mapHomogeneousPoints(
-                dst_native.as_mut_ptr(),
-                src_native.as_ptr(),
+                dst.native_mut().as_mut_ptr(),
+                src.native().as_ptr(),
                 src.len().try_into().unwrap())
         }
-        dst_native
-            .iter()
-            .enumerate()
-            .for_each(|(i, p)| dst[i] = Point3::from_native(*p));
     }
 
     pub fn map_xy(&self, x: f32, y: f32) -> Point {

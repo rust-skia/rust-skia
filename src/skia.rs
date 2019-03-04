@@ -103,6 +103,9 @@ pub use self::picture_recorder::*;
 mod point;
 pub use self::point::*;
 
+mod point3;
+pub use self::point3::*;
+
 mod rect;
 pub use self::rect::*;
 
@@ -135,8 +138,6 @@ pub use self::vertices::*;
 
 mod yuva_index;
 pub use self::yuva_index::*;
-
-pub use crate::skia_euclid::*;
 
 //
 // Skia specific traits used for overloading.

@@ -148,7 +148,7 @@ impl Point {
     }
 
     #[warn(unused)]
-    pub fn scaled_with(&self, scale: scalar) -> Self {
+    pub fn scaled(&self, scale: scalar) -> Self {
         let mut cloned = self.clone();
         unsafe { cloned.native_mut().scale1(scale) }
         cloned

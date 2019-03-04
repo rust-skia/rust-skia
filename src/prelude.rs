@@ -155,25 +155,6 @@ impl<Native, Base: NativeRefCounted> NativeRefCounted for Native
     }
 }
 
-/// Indicates that the type has a native representation and
-/// can convert to and from it. This is for cases in which we
-/// can't use the From / Into traits, because we pull in the
-/// rust type from another crate.
-pub trait NativeRepresentation<NT> {
-    fn into_native(self) -> NT;
-    fn from_native(native: NT) -> Self;
-}
-
-pub trait ToNative<NT> {
-    fn to_native(&self) -> NT;
-}
-
-impl<NT, RT: Copy + NativeRepresentation<NT>> ToNative<Vec<NT>> for [RT] {
-    fn to_native(&self) -> Vec<NT> {
-        self.iter().map(|v| v.into_native()).collect()
-    }
-}
-
 /// Trait that enables access to a native representation by reference.
 pub trait NativeAccess<N> {
     fn native(&self) -> &N;
@@ -224,22 +205,6 @@ impl<H, N> IntoHandle<H> for N
     where H: FromNative<N> {
     fn into_handle(self) -> H {
         H::from_native(self)
-    }
-}
-
-/// A trait to support conversions from tuples.
-pub trait Liftable<S> {
-    fn lift_from(source: S) -> Self;
-}
-
-pub trait Lift<T> {
-    fn lift(self) -> T;
-}
-
-impl<V, T> Lift<T> for V
-    where T: Liftable<V> {
-    fn lift(self) -> T {
-        T::lift_from(self)
     }
 }
 

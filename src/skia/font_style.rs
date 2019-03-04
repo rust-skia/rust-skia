@@ -48,7 +48,7 @@ impl FromNative<i32> for FontStyleWidth {
 }
 
 impl NativeAccessValue<i32> for FontStyleWidth {
-    fn  native(&self) -> i32 {
+    fn native(&self) -> i32 {
         self.0
     }
 }
