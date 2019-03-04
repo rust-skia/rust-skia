@@ -1,0 +1,10 @@
+use crate::prelude::*;
+use rust_skia::SkClipOp;
+
+pub type ClipOp = EnumHandle<SkClipOp>;
+
+#[allow(non_upper_case_globals)]
+impl EnumHandle<SkClipOp> {
+    pub const Difference: Self = Self(SkClipOp::kDifference);
+    pub const Intersect: Self = Self(SkClipOp::kIntersect);
+}

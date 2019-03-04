@@ -36,6 +36,9 @@ pub use self::blur_types::*;
 mod canvas;
 pub use self::canvas::*;
 
+mod clip_op;
+pub use self::clip_op::*;
+
 mod color;
 pub use self::color::*;
 
