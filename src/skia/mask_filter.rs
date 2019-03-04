@@ -10,7 +10,6 @@ use rust_skia::{
     C_SkMaskFilter_Compose,
     C_SkMaskFilter_MakeBlur,
     SkRefCntBase,
-    SkMask,
     SkMaskFilter,
     C_SkMaskFilter_makeWithMatrix
 };

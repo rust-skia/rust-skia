@@ -14,6 +14,8 @@ impl Scalar for scalar {
     const HALF: Self = 0.5;
 }
 
+
+#[allow(non_camel_case_types)]
 pub(crate) type u8cpu = rust_skia::U8CPU;
 pub type GlyphId = rust_skia::SkGlyphID;
 pub type Unichar = rust_skia::SkUnichar;

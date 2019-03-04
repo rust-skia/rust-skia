@@ -278,5 +278,5 @@ impl Map2<(&[f64], &mut[f64])> for Matrix44 {
 fn create_identity_and_clone() {
     Matrix44::new();
     let identity = Matrix44::new_identity();
-    identity.clone();
+    let _cloned = identity.clone();
 }

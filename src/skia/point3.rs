@@ -3,6 +3,9 @@ use crate::skia::scalar;
 use rust_skia::SkPoint3;
 use std::ops::{Add, Sub, Neg};
 
+pub type Vector3 = Point3;
+pub type Color3f = Point3;
+
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Point3 {

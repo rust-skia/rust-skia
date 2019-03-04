@@ -1,5 +1,5 @@
 use std::ops::{DerefMut,Deref};
-use std::{ptr, mem, slice};
+use std::{ptr, slice};
 use crate::prelude::*;
 use crate::skia::{
     Point,
@@ -13,8 +13,6 @@ use rust_skia::{
     C_SkVertices_Builder_detach,
     C_SkVertices_Builder_destruct,
     SkVertices_Builder,
-    SkVertices_BoneIndices,
-    SkVertices_BoneWeights,
     SkColor,
     SkPoint,
     C_SkVertices_MakeCopy,
@@ -26,6 +24,10 @@ use rust_skia::{
     SkVertices_BuilderFlags,
     C_SkVertices_encode
 };
+#[cfg(test)]
+use rust_skia::{SkVertices_BoneIndices, SkVertices_BoneWeights};
+#[cfg(test)]
+use std::mem;
 
 pub type BoneIndices = [u32; 4];
 

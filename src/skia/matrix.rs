@@ -1,4 +1,4 @@
-use std::{iter, mem, ptr};
+use std::{mem, ptr};
 use std::ops::{Index, IndexMut};
 use crate::prelude::*;
 use crate::skia::{
@@ -14,7 +14,6 @@ use rust_skia::{
     SkPoint,
     SkMatrix_ScaleToFit,
     SkMatrix,
-    SkPoint3,
     SkSize
 };
 

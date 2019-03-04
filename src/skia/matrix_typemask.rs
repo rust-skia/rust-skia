@@ -1,6 +1,5 @@
 use rust_skia::{
-    SkMatrix_TypeMask,
-    SkMatrix44_TypeMask
+    SkMatrix_TypeMask
 };
 
 bitflags! {

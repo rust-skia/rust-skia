@@ -58,9 +58,9 @@ impl ColorType {
     }
 
     pub fn validate_alpha_type(self, alpha_type: AlphaType) -> Option<AlphaType> {
-        let mut alpha_type = AlphaType::Unknown;
-        unsafe { rust_skia::SkColorTypeValidateAlphaType(self.0, alpha_type.0, &mut alpha_type.0) }
-            .if_true_some(alpha_type)
+        let mut alpha_type_r = AlphaType::Unknown;
+        unsafe { rust_skia::SkColorTypeValidateAlphaType(self.0, alpha_type.0, &mut alpha_type_r.0) }
+            .if_true_some(alpha_type_r)
     }
 }
 

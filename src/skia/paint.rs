@@ -471,7 +471,8 @@ fn default_creation() {
     let mut paint = Paint::default();
 }
 
+#[test]
 fn method_chaining_compiles() {
     let mut paint = Paint::default();
-    let paint = paint.reset().reset();
+    let _paint = paint.reset().reset();
 }
