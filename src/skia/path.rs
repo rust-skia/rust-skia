@@ -1,28 +1,38 @@
-use std::mem;
 use crate::prelude::*;
 use crate::skia::{
     Point,
     RRect,
     Rect,
     scalar,
-    Vector
+    Vector,
+    Data,
+    Matrix
 };
 use rust_skia::{
+    SkPath_AddPathMode,
+    SkPath_ArcSize,
     C_SkPath_Equals,
     SkPath_Direction,
     SkPath,
     C_SkPath_destruct,
     SkPath_FillType,
-    SkPath_Convexity
+    SkPath_Convexity,
+    C_SkPath_ConvertToNonInverseFillType,
+    SkPath_SegmentMask,
+    C_SkPath_serialize
 };
-use rust_skia::SkPath_ArcSize;
-use rust_skia::C_SkPath_ConvertToNonInverseFillType;
 
 pub type PathDirection = EnumHandle<SkPath_Direction>;
 
 impl EnumHandle<SkPath_Direction> {
     pub const CW: Self = Self(SkPath_Direction::kCW_Direction);
     pub const CCW: Self = Self(SkPath_Direction::kCCW_Direction);
+}
+
+impl Default for EnumHandle<SkPath_Direction> {
+    fn default() -> Self {
+        PathDirection::CW
+    }
 }
 
 pub type PathFillType = EnumHandle<SkPath_FillType>;
@@ -63,6 +73,23 @@ pub type PathArcSize = EnumHandle<SkPath_ArcSize>;
 impl EnumHandle<SkPath_ArcSize> {
     pub const Small: Self = Self(SkPath_ArcSize::kSmall_ArcSize);
     pub const Large: Self = Self(SkPath_ArcSize::kLarge_ArcSize);
+}
+
+pub type AddPathMode = EnumHandle<SkPath_AddPathMode>;
+
+#[allow(non_upper_case_globals)]
+impl EnumHandle<SkPath_AddPathMode> {
+    pub const Append: Self = Self(SkPath_AddPathMode::kAppend_AddPathMode);
+    pub const Extend: Self = Self(SkPath_AddPathMode::kExtend_AddPathMode);
+}
+
+bitflags! {
+    pub struct PathSegmentMask: u32 {
+        const Line = SkPath_SegmentMask::kLine_SegmentMask as _;
+        const Quad = SkPath_SegmentMask::kQuad_SegmentMask as _;
+        const Conic = SkPath_SegmentMask::kConic_SegmentMask as _;
+        const Cubic = SkPath_SegmentMask::kCubic_SegmentMask as _;
+    }
 }
 
 pub type Path = Handle<SkPath>;
@@ -362,7 +389,7 @@ impl Handle<SkPath> {
     pub fn is_rect(&self) -> Option<(Rect, bool, PathDirection)> {
         let mut rect = Rect::default();
         let mut is_closed = Default::default();
-        let mut direction = PathDirection::CW;
+        let mut direction = PathDirection::default();
 
         unsafe { self.native().isRect(rect.native_mut(), &mut is_closed, direction.native_mut()) }
             .if_true_some((rect, is_closed, direction))
@@ -371,12 +398,169 @@ impl Handle<SkPath> {
     // TODO: return type is probably worth a struct.
     pub fn is_nested_fill_rects(&self) -> Option<([Rect;2], [PathDirection;2])> {
         let mut rects = [Rect::default(); 2];
-        let mut dirs = [SkPath_Direction::kCW_Direction; 2];
-        /*
-        if unsafe { self.native().isNestedFillRects(rects.native_mut().as_mut_ptr(), dirs.as_mut_ptr()) }
-        {
-        } else { None }
-        */
-        None
+        let mut dirs = [PathDirection::CW; 2];
+        unsafe { self.native().isNestedFillRects(rects.native_mut().as_mut_ptr(), dirs.native_mut().as_mut_ptr()) }
+            .if_true_some((rects, dirs))
+    }
+
+    // TODO: add some convience overloads (but how?)
+    // current idea is to combine dir _and_ start into one option.
+    pub fn add_rect(&mut self, rect: &Rect, dir: PathDirection, start: usize) -> &mut Self {
+        unsafe {
+            self.native_mut().addRect1(rect.native(), dir.into_native(), start.try_into().unwrap())
+        };
+        self
+    }
+
+    // TODO: add some convience overloads (but how?)
+    // current idea is to combine dir _and_ start into one option.
+    pub fn add_oval(&mut self, oval: &Rect, dir: PathDirection, start: usize) -> &mut Self {
+        unsafe {
+            self.native_mut().addOval1(oval.native(), dir.into_native(), start.try_into().unwrap())
+        };
+        self
+    }
+
+    // TODO: make path direction optional, or add a _direction variant.
+    pub fn add_circle(&mut self, p: Point, radius: scalar, dir: PathDirection) -> &mut Self {
+        unsafe {
+            self.native_mut().addCircle(p.x, p.y, radius, dir.into_native())
+        };
+        self
+    }
+
+    pub fn add_arc(&mut self, oval: &Rect, start_angle: scalar, sweep_angle: scalar) -> &mut Self {
+        unsafe {
+            self.native_mut().addArc(oval.native(), start_angle, sweep_angle)
+        };
+        self
+    }
+
+    // decided to use the simpler variant of the two, if more radii need to be specified,
+    // add_rrect can be used.
+    // TODO: dir
+    pub fn add_round_rect(&mut self, rect: &Rect, rx: scalar, ry: scalar, dir: PathDirection) -> &mut Self {
+        unsafe {
+            self.native_mut().addRoundRect(rect.native(), rx, ry, dir.into_native())
+        };
+        self
+    }
+
+    // TODO: dir / start
+    pub fn add_rrect(&mut self, rrect: &RRect, dir: PathDirection, start: usize) -> &mut Self {
+        unsafe {
+            self.native_mut().addRRect1(rrect.native(), dir.into_native(), start.try_into().unwrap())
+        };
+        self
+    }
+
+    pub fn add_poly(&mut self, pts: &[Point], close: bool) -> &mut Self {
+        unsafe {
+            self.native_mut().addPoly(pts.native().as_ptr(), pts.len().try_into().unwrap(), close)
+        };
+        self
+    }
+
+    // TODO: mode
+    pub fn add_path(&mut self, src: &Path, d: Vector, mode: AddPathMode) -> &mut Self {
+        unsafe {
+            self.native_mut().addPath(src.native(), d.x, d.y, mode.into_native())
+        };
+        self
+    }
+
+    // TODO: mode
+    pub fn add_path_matrix(&mut self, src: &Path, matrix: &Matrix, mode: AddPathMode) -> &mut Self {
+        unsafe {
+            self.native_mut().addPath2(src.native(), matrix.native(), mode.into_native())
+        };
+        self
+    }
+
+    // TODO: I am thinking, what would be the difference between passing and returning
+    // references of self and moving self through the function.
+
+    pub fn reverse_add_path(&mut self, src: &Path) -> &mut Self {
+        unsafe {
+            self.native_mut().reverseAddPath(src.native())
+        };
+        self
+    }
+
+    pub fn offset(&mut self, d: Vector) -> &mut Self {
+        unsafe {
+            self.native_mut().offset1(d.x, d.y)
+        };
+        self
+    }
+
+    #[warn(unused)]
+    pub fn with_offset(&self, d: Vector) -> Path {
+        let mut path = Path::default();
+        unsafe {
+            self.native().offset(d.x, d.y, path.native_mut())
+        };
+        path
+    }
+
+    pub fn transform(&mut self, matrix: &Matrix) -> &mut Self {
+        unsafe {
+            self.native_mut().transform1(matrix.native())
+        };
+        self
+    }
+
+    #[warn(unused)]
+    pub fn with_transform(&self, matrix: &Matrix) -> Path {
+        let mut path = Path::default();
+        unsafe {
+            self.native().transform(matrix.native(), path.native_mut())
+        };
+        path
+    }
+
+    pub fn last_pt(&self) -> Option<Point> {
+        let mut last_pt = Point::default();
+        unsafe {
+            self.native().getLastPt(last_pt.native_mut())
+        }.if_true_some(last_pt)
+    }
+
+    pub fn set_last_pt(&mut self, p: Point) -> &mut Self {
+        unsafe {
+            // does not link:
+            // self.native_mut().setLastPt1(p.native())
+            self.native_mut().setLastPt(p.x, p.y)
+        };
+        self
+    }
+
+    pub fn segment_masks(&self) -> PathSegmentMask {
+        PathSegmentMask::from_bits_truncate(unsafe {
+            self.native().getSegmentMasks()
+        })
+    }
+
+    // TODO: Iter
+    // TODO: RawIter
+
+    pub fn contains(&self, p: Point) -> bool {
+        unsafe { self.native().contains(p.x, p.y) }
+    }
+
+    pub fn serialize(&self) -> Data {
+        Data::from_ptr(unsafe {
+            C_SkPath_serialize(self.native())
+        }).unwrap()
+    }
+
+    pub fn deserialize(data: &Data) -> Option<Path> {
+        let mut path = Path::default();
+        let bytes = data.bytes();
+        unsafe {
+            path.native_mut().readFromMemory(
+                bytes.as_ptr() as _,
+                bytes.len()) > 0
+        }.if_true_some(path)
     }
 }
