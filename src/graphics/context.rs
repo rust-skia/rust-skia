@@ -1,16 +1,17 @@
-use rust_skia::{GrContext, C_GrContext_MakeVulkan};
 use super::vulkan;
 use crate::prelude::*;
+use rust_skia::{
+    GrContext,
+    C_GrContext_MakeVulkan,
+    SkRefCntBase
+};
 
 pub type Context = RCHandle<GrContext>;
 
-impl NativeRefCounted for GrContext {
-    fn _ref(&self) {
-        unsafe { self._base._base.ref_() }
-    }
-
-    fn _unref(&self) {
-        unsafe { self._base._base.unref(); }
+impl NativeRefCountedBase for GrContext {
+    type Base = SkRefCntBase;
+    fn ref_counted_base(&self) -> &Self::Base {
+        &self._base._base
     }
 }
 
