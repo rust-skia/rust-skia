@@ -199,6 +199,7 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .whitelist_type("SkColorSpacePrimaries")
     .whitelist_type("SkVector4")
     .whitelist_type("SkPictureRecorder")
+    .whitelist_type("SkAutoCanvasRestore")
     .whitelist_var("SK_Color.*")
     .use_core()
     .clang_arg("-std=c++14");
@@ -236,7 +237,7 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     "SkCoverageMode",
     "SkFilterQuality",
     "SkPath_Direction", "SkPath_FillType", "SkPath_Convexity", "SkPath_ArcSize", "SkPath_AddPathMode", "SkPath_SegmentMask", "SkPath_Verb",
-    "SkCanvas_SaveLayerFlags", "SkCanvas_PointMode", "SkCanvas_SrcRectConstraint",
+    "SkCanvas_SaveLayerFlagsSet", "SkCanvas_PointMode", "SkCanvas_SrcRectConstraint",
     "SkClipOp"
   ];
 

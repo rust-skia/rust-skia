@@ -17,6 +17,7 @@
 #include "SkColorFilter.h"
 #include "SkStrokeRec.h"
 #include "SkMaskFilter.h"
+#include "SkImageFilter.h"
 
 #include "GrContext.h"
 
@@ -208,7 +209,7 @@ extern "C" void C_SkData_unref(const SkData* self) {
 // SkPaint
 //
 
-extern "C" void C_SkPaint_destruct(const SkPaint* self) {
+extern "C" void C_SkPaint_destruct(SkPaint* self) {
     self->~SkPaint();
 }
 
@@ -317,6 +318,24 @@ extern "C" bool C_SkCanvas_isClipRect(const SkCanvas* self) {
     return self->isClipRect();
 }
 
+extern "C" void C_SkCanvas_discard(SkCanvas* self) {
+    self->discard();
+}
+
+//
+// SkAutoCanvasRestore
+//
+
+#undef SkAutoCanvasRestore
+
+extern "C" void C_SkAutoCanvasRestore_destruct(const SkAutoCanvasRestore* self) {
+    self->~SkAutoCanvasRestore();
+}
+
+extern "C" void C_SkAutoCanvasRestore_restore(SkAutoCanvasRestore* self) {
+    self->restore();
+}
+
 //
 // SkImageInfo
 //
@@ -325,7 +344,7 @@ extern "C" void C_SkImageInfo_Construct(SkImageInfo* uninitialized) {
     new (uninitialized) SkImageInfo();
 }
 
-extern "C" void C_SkImageInfo_Destruct(SkImageInfo* self) {
+extern "C" void C_SkImageInfo_destruct(SkImageInfo* self) {
     self->~SkImageInfo();
 }
 
@@ -421,7 +440,7 @@ extern "C" void C_SkMatrix44_Construct(SkMatrix44* uninitialized) {
     new(uninitialized) SkMatrix44();
 }
 
-extern "C" void C_SkMatrix44_Destruct(SkMatrix44* self) {
+extern "C" void C_SkMatrix44_destruct(SkMatrix44* self) {
     self->~SkMatrix44();
 }
 
@@ -467,7 +486,7 @@ extern "C" void C_SkBitmap_Construct(SkBitmap* uninitialized) {
     new (uninitialized) SkBitmap();
 }
 
-extern "C" void C_SkBitmap_Destruct(SkBitmap* self) {
+extern "C" void C_SkBitmap_destruct(SkBitmap* self) {
     self->~SkBitmap();
 }
 
@@ -635,7 +654,7 @@ extern "C" void C_SkFont_setTypeface(SkFont* self, SkTypeface* tf) {
     self->setTypeface(sk_sp<SkTypeface>(tf));
 }
 
-extern "C" void C_SkFont_Destruct(SkFont* self) {
+extern "C" void C_SkFont_destruct(SkFont* self) {
     self->~SkFont();
 }
 
