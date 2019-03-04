@@ -252,6 +252,10 @@ extern "C" void C_SkPath_destruct(const SkPath* self) {
     self->~SkPath();
 }
 
+extern "C" bool C_SkPath_Equals(const SkPath* lhs, const SkPath* rhs) {
+    return *lhs == *rhs;
+}
+
 extern "C" SkData* C_SkPath_serialize(const SkPath* self) {
     return self->serialize().release();
 }
