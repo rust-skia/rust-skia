@@ -126,13 +126,12 @@ impl Handle<SkPaint> {
     }
 
     pub fn set_hinting(&mut self, hinting_level: FontHinting) -> &mut Self {
-        unsafe { self.native_mut().setHinting(hinting_level.native()) }
+        unsafe { self.native_mut().setHinting(hinting_level.into_native()) }
         self
     }
 
     pub fn hinting(&self) -> FontHinting {
-        unsafe { self.native().getHinting() }
-            .into_handle()
+        FontHinting::from_native(unsafe { self.native().getHinting() })
     }
 
     pub fn flags(&self) -> PaintFlags {
@@ -231,21 +230,20 @@ impl Handle<SkPaint> {
     }
 
     pub fn filter_quality(&self) -> FilterQuality {
-        unsafe { self.native().getFilterQuality() }
-            .into_handle()
+        FilterQuality::from_native(unsafe { self.native().getFilterQuality() })
     }
 
     pub fn set_filter_quality(&mut self, quality: FilterQuality) -> &mut Self {
-        unsafe { self.native_mut().setFilterQuality(quality.native()) }
+        unsafe { self.native_mut().setFilterQuality(quality.into_native()) }
         self
     }
 
     pub fn style(&self) -> PaintStyle {
-        unsafe { self.native().getStyle() }.into_handle()
+        PaintStyle::from_native(unsafe { self.native().getStyle() })
     }
 
     pub fn set_style(&mut self, style: PaintStyle) -> &mut Self {
-        unsafe { self.native_mut().setStyle(style.native()) }
+        unsafe { self.native_mut().setStyle(style.into_native()) }
         self
     }
 
@@ -305,27 +303,25 @@ impl Handle<SkPaint> {
     }
 
     pub fn stroke_cap(&self) -> PaintCap {
-        unsafe { self.native().getStrokeCap() }
-            .into_handle()
+        PaintCap::from_native(unsafe { self.native().getStrokeCap() })
     }
 
     pub fn set_stroke_cap(&mut self, cap: PaintCap) -> &mut Self {
-        unsafe { self.native_mut().setStrokeCap(cap.native()) }
+        unsafe { self.native_mut().setStrokeCap(cap.into_native()) }
         self
     }
 
     pub fn stroke_join(&self) -> PaintJoin {
-        unsafe { self.native().getStrokeJoin() }
-            .into_handle()
+        PaintJoin::from_native(unsafe { self.native().getStrokeJoin() })
     }
 
     pub fn set_stroke_join(&mut self, join: PaintJoin) -> &mut Self {
-        unsafe { self.native_mut().setStrokeJoin(join.native()) }
+        unsafe { self.native_mut().setStrokeJoin(join.into_native()) }
         self
     }
 
     pub fn fill_path(&self, src: &Path, cull_rect: Option<&Rect>, res_scale: Option<scalar>) -> Option<Path> {
-        let mut r = Path::new();
+        let mut r = Path::default();
 
         let cull_rect_ptr : *const SkRect =
             cull_rect
@@ -356,9 +352,9 @@ impl Handle<SkPaint> {
     }
 
     pub fn blend_mode(&self) -> BlendMode {
-        unsafe {
+        BlendMode::from_native(unsafe {
             self.native().getBlendMode()
-        }.into_handle()
+        })
     }
 
     pub fn is_src_over(&self) -> bool {
@@ -369,7 +365,7 @@ impl Handle<SkPaint> {
 
     pub fn set_blend_mode(&mut self, mode: BlendMode) -> &mut Self {
         unsafe {
-            self.native_mut().setBlendMode(mode.native())
+            self.native_mut().setBlendMode(mode.into_native())
         }
         self
     }

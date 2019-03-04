@@ -48,7 +48,7 @@ impl EnumHandle<SkBlendMode> {
 
     pub fn name(&self) -> &'static str {
         unsafe {
-            let name_ptr = SkBlendMode_Name(self.native());
+            let name_ptr = SkBlendMode_Name(self.into_native());
             CStr::from_ptr(name_ptr).to_str().unwrap()
         }
     }

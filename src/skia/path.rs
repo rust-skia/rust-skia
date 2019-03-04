@@ -15,8 +15,10 @@ use rust_skia::{
     SkPath_FillType,
     SkPath_Convexity
 };
+use rust_skia::SkPath_ArcSize;
+use rust_skia::C_SkPath_ConvertToNonInverseFillType;
 
-pub type CountourDirection = EnumHandle<SkPath_Direction>;
+pub type PathDirection = EnumHandle<SkPath_Direction>;
 
 impl EnumHandle<SkPath_Direction> {
     pub const CW: Self = Self(SkPath_Direction::kCW_Direction);
@@ -31,6 +33,19 @@ impl EnumHandle<SkPath_FillType> {
     pub const EventOdd: Self = Self(SkPath_FillType::kEvenOdd_FillType);
     pub const InverseWinding: Self = Self(SkPath_FillType::kInverseWinding_FillType);
     pub const InverseEvenOdd: Self = Self(SkPath_FillType::kInverseEvenOdd_FillType);
+
+    pub fn is_inverse(&self) -> bool {
+        unsafe { SkPath::IsInverseFillType(self.into_native()) }
+    }
+
+    pub fn to_non_inverse(&self) -> Self {
+        // does not link:
+        // unsafe { SkPath::ConvertToNonInverseFillType(self.native()) }
+        //     .into_handle()
+        Self::from_native(unsafe {
+            C_SkPath_ConvertToNonInverseFillType(self.into_native())
+        })
+    }
 }
 
 pub type PathConvexity = EnumHandle<SkPath_Convexity>;
@@ -40,6 +55,14 @@ impl EnumHandle<SkPath_Convexity> {
     pub const Unknown: Self = Self(SkPath_Convexity::kUnknown_Convexity);
     pub const Convex: Self = Self(SkPath_Convexity::kConvex_Convexity);
     pub const Concave: Self = Self(SkPath_Convexity::kConcave_Convexity);
+}
+
+pub type PathArcSize = EnumHandle<SkPath_ArcSize>;
+
+#[allow(non_upper_case_globals)]
+impl EnumHandle<SkPath_ArcSize> {
+    pub const Small: Self = Self(SkPath_ArcSize::kSmall_ArcSize);
+    pub const Large: Self = Self(SkPath_ArcSize::kLarge_ArcSize);
 }
 
 pub type Path = Handle<SkPath>;
@@ -62,10 +85,16 @@ impl NativePartialEq for SkPath {
     }
 }
 
+impl Default for Handle<SkPath> {
+    fn default() -> Self {
+        unsafe { SkPath::new() }.into_handle()
+    }
+}
+
 impl Handle<SkPath> {
 
-    pub fn new() -> Path {
-        unsafe { SkPath::new() }.into_handle()
+    pub fn new() -> Self {
+        Self::default()
     }
 
     pub fn is_interpolatable(&self, compare: &Path) -> bool {
@@ -73,7 +102,7 @@ impl Handle<SkPath> {
     }
 
     pub fn interpolate(&self, ending: &Path, weight: scalar) -> Option<Path> {
-        let mut out = Path::new();
+        let mut out = Path::default();
         unsafe { self.native().interpolate(ending.native(), weight, out.native_mut()) }
             .if_true_some(out)
     }
@@ -85,7 +114,7 @@ impl Handle<SkPath> {
     }
 
     pub fn set_fill_type(&mut self, ft: PathFillType) -> &mut Self {
-        unsafe { self.native_mut().setFillType(ft.native()) }
+        unsafe { self.native_mut().setFillType(ft.into_native()) }
         self
     }
 
@@ -99,17 +128,15 @@ impl Handle<SkPath> {
     }
 
     pub fn convexity(&self) -> PathConvexity {
-        unsafe { self.native().getConvexity() }
-            .into_handle()
+        PathConvexity::from_native(unsafe { self.native().getConvexity() })
     }
 
     pub fn convexity_or_unknown(&self) -> PathConvexity {
-        unsafe { self.native().getConvexityOrUnknown() }
-            .into_handle()
+        PathConvexity::from_native(unsafe { self.native().getConvexityOrUnknown() })
     }
 
     pub fn set_convexity(&mut self, convexity: PathConvexity) -> &mut Self {
-        unsafe { self.native_mut().setConvexity(convexity.native()) }
+        unsafe { self.native_mut().setConvexity(convexity.into_native()) }
         self
     }
 
@@ -292,15 +319,64 @@ impl Handle<SkPath> {
         self
     }
 
-    /*
     pub fn arc_to(&mut self, oval: &Rect, start_angle: scalar, sweep_angle: scalar, force_move_to: bool) -> &mut Self {
-        unsafe { self.native_mut().arcTo(d1.x, d1.y, d2.x, d2.y, d3.x, d3.y) };
-
+        unsafe { self.native_mut().arcTo(oval.native(), start_angle, sweep_angle, force_move_to) };
+        self
     }
-    */
+
+    pub fn arc_to_tangent(&mut self, p1: Point, p2: Point, radius: scalar) -> &mut Self {
+        // does not link:
+        // unsafe { self.native_mut().arcTo2(*p1.native(), *p2.native(), radius) };
+        unsafe { self.native_mut().arcTo1(p1.x, p1.y, p2.x, p2.y, radius) };
+        self
+    }
+
+    pub fn arc_to_rotated(&mut self, r: Point, x_axis_rotate: scalar, large_arc: PathArcSize, sweep: PathDirection, xy: Point) -> &mut Self {
+        unsafe { self.native_mut().arcTo4(*r.native(), x_axis_rotate, large_arc.into_native(), sweep.into_native(), *xy.native()) };
+        self
+    }
+
+    pub fn r_arc_to_rotated(&mut self, r: Point, x_axis_rotate: scalar, large_arc: PathArcSize, sweep: PathDirection, xy: Point) -> &mut Self {
+        unsafe { self.native_mut().rArcTo(r.x, r.y, x_axis_rotate, large_arc.into_native(), sweep.into_native(), xy.x, xy.y) };
+        self
+    }
 
     pub fn close(&mut self) -> &mut Self {
         unsafe { self.native_mut().close(); }
         self
+    }
+
+    pub fn convert_conic_to_quads(p0: Point, p1: Point, p2: Point, w: scalar, pts: &mut [Point], pow2: usize) -> Option<usize> {
+        let max_pts_storage = 1 + 2 * (1 << pow2);
+        if max_pts_storage <= pts.len() {
+            Some(unsafe {
+                SkPath::ConvertConicToQuads(p0.native(), p1.native(), p2.native(), w, pts.native_mut().as_mut_ptr(), pow2.try_into().unwrap())
+                    .try_into().unwrap()
+            })
+        } else {
+            None
+        }
+    }
+
+    // TODO: return type is probably worth a struct.
+    pub fn is_rect(&self) -> Option<(Rect, bool, PathDirection)> {
+        let mut rect = Rect::default();
+        let mut is_closed = Default::default();
+        let mut direction = PathDirection::CW;
+
+        unsafe { self.native().isRect(rect.native_mut(), &mut is_closed, direction.native_mut()) }
+            .if_true_some((rect, is_closed, direction))
+    }
+
+    // TODO: return type is probably worth a struct.
+    pub fn is_nested_fill_rects(&self) -> Option<([Rect;2], [PathDirection;2])> {
+        let mut rects = [Rect::default(); 2];
+        let mut dirs = [SkPath_Direction::kCW_Direction; 2];
+        /*
+        if unsafe { self.native().isNestedFillRects(rects.native_mut().as_mut_ptr(), dirs.as_mut_ptr()) }
+        {
+        } else { None }
+        */
+        None
     }
 }

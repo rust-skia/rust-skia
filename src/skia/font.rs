@@ -120,19 +120,19 @@ impl Handle<SkFont> {
     }
 
     pub fn edging(&self) -> FontEdging {
-        unsafe { self.native().getEdging() }.into_handle()
+        FontEdging::from_native(unsafe { self.native().getEdging() })
     }
 
     pub fn set_edging(&mut self, edging: FontEdging) {
-        unsafe { self.native_mut().setEdging(edging.native()) }
+        unsafe { self.native_mut().setEdging(edging.into_native()) }
     }
 
     pub fn set_hinting(&mut self, hinting: FontHinting) {
-        unsafe { self.native_mut().setHinting(hinting.native()) }
+        unsafe { self.native_mut().setHinting(hinting.into_native()) }
     }
 
     pub fn hinting(&self) -> FontHinting {
-        unsafe { self.native().getHinting() }.into_handle()
+        FontHinting::from_native(unsafe { self.native().getHinting() })
     }
 
     #[warn(unused)]
@@ -185,7 +185,7 @@ impl Handle<SkFont> {
         unsafe { self.native().textToGlyphs(
             bytes.as_ptr() as _,
             bytes.len(),
-            TextEncoding::UTF8.native(),
+            TextEncoding::UTF8.into_native(),
             glyphs.as_mut_ptr(),
             glyphs.len().max(i32::max_value().try_into().unwrap()).try_into().unwrap())
             .try_into().unwrap()
@@ -197,7 +197,7 @@ impl Handle<SkFont> {
         unsafe { self.native().textToGlyphs(
             bytes.as_ptr() as _,
             bytes.len(),
-            TextEncoding::UTF8.native(),
+            TextEncoding::UTF8.into_native(),
             ptr::null_mut(), i32::max_value()).try_into().unwrap()
         }
     }
@@ -218,7 +218,7 @@ impl Handle<SkFont> {
     pub fn contains_str(&self, str: &str) -> bool {
         let bytes = str.as_bytes();
         unsafe {
-            self.native().containsText(bytes.as_ptr() as _, bytes.len(), TextEncoding::UTF8.native())
+            self.native().containsText(bytes.as_ptr() as _, bytes.len(), TextEncoding::UTF8.into_native())
         }
     }
 
@@ -229,7 +229,7 @@ impl Handle<SkFont> {
         let mut measured_width = 0.0;
         let bytes_fit = unsafe { self.native()
             .breakText(
-                bytes.as_ptr() as _, bytes.len(), TextEncoding::UTF8.native(),
+                bytes.as_ptr() as _, bytes.len(), TextEncoding::UTF8.into_native(),
                 max_width, &mut measured_width) };
 
         (bytes_fit, measured_width)
@@ -246,7 +246,7 @@ impl Handle<SkFont> {
 
         let width = unsafe { self.native()
             .measureText1(
-                bytes.as_ptr() as _, bytes.len(), TextEncoding::UTF8.native(),
+                bytes.as_ptr() as _, bytes.len(), TextEncoding::UTF8.into_native(),
                 &mut bounds, paint.native_ptr_or_null()) };
 
         (width, Rect::from_native(bounds))
@@ -330,7 +330,7 @@ impl Handle<SkFont> {
     }
 
     pub fn path(&self, glyph_id: u16) -> Option<Path> {
-        let mut path = Path::new();
+        let mut path = Path::default();
         unsafe { self.native().getPath(glyph_id, path.native_mut())}
             .if_true_some(path)
     }

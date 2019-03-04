@@ -161,11 +161,6 @@ pub trait NativeAccess<N> {
     fn native_mut(&mut self) -> &mut N;
 }
 
-/// Trait that enables access to a native representation by value.
-pub trait NativeAccessValue<N> {
-    fn native(&self) -> N;
-}
-
 /// Implements Drop for native types we can not implement Drop for.
 pub trait NativeDrop {
     fn drop(&mut self);
@@ -209,22 +204,15 @@ impl<H, N> IntoHandle<H> for N
 }
 
 /// A representation type for a native enum type.
+#[repr(transparent)]
 #[derive(Copy, Clone, PartialEq)]
 pub struct EnumHandle<N: Copy + PartialEq>(pub(crate) N);
 
-impl<N: Copy + PartialEq> FromNative<N> for EnumHandle<N> {
-    fn from_native(n: N) -> EnumHandle<N> {
-        EnumHandle(n)
-    }
-}
-
-impl<N: Copy + PartialEq> NativeAccessValue<N> for EnumHandle<N> {
-    fn native(&self) -> N {
-        self.0
-    }
-}
+/// All EnumHandles can be transmuted to it's native representation.
+impl<N: Copy + PartialEq> NativeTransmutable<N> for EnumHandle<N> {}
 
 /// A representation type for a native type that has full Copy & Clone value semantics.
+#[repr(transparent)]
 #[derive(Copy, Clone)]
 pub struct ValueHandle<N: Clone>(N);
 

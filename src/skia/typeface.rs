@@ -95,7 +95,7 @@ impl RCHandle<SkTypeface> {
 
     pub fn serialize(&self, behavior: TypefaceSerializeBehavior) -> Data {
         Data::from_ptr(unsafe {
-            C_SkTypeface_serialize(self.native(), behavior.native())
+            C_SkTypeface_serialize(self.native(), behavior.into_native())
         }).unwrap()
     }
 

@@ -134,7 +134,7 @@ impl RCHandle<SkVertices> {
 
         Vertices::from_ptr(unsafe {
             C_SkVertices_MakeCopy(
-                mode.native(),
+                mode.into_native(),
                 vertex_count as _,
                 positions.as_ptr(),
                 texs.as_ptr(),
@@ -152,7 +152,7 @@ impl RCHandle<SkVertices> {
     }
 
     pub fn mode(&self) -> VerticesVertexMode {
-        unsafe { self.native().mode() }.into_handle()
+        VerticesVertexMode::from_native(unsafe { self.native().mode() })
     }
 
     pub fn bounds(&self) -> Rect {
@@ -281,7 +281,7 @@ impl Handle<SkVertices_Builder> {
     pub fn new(mode: VerticesVertexMode, vertex_count: usize, index_count: usize, flags: VerticesBuilderFlags) -> VerticesBuilder {
         unsafe {
             SkVertices_Builder::new(
-                mode.native(),
+                mode.into_native(),
                 vertex_count.try_into().unwrap(),
                 index_count.try_into().unwrap(),
                 flags.bits())

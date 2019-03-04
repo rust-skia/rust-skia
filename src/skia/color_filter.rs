@@ -81,7 +81,7 @@ impl RCHandle<SkColorFilter> {
 
     pub fn new_mode_filter(c: Color, mode: BlendMode) -> Option<Self> {
         ColorFilter::from_ptr(unsafe {
-            C_SkColorFilter_MakeModeFilter(c.native(), &mode.native())
+            C_SkColorFilter_MakeModeFilter(c.native(), mode.native())
         })
     }
 

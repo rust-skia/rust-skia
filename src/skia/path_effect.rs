@@ -128,17 +128,16 @@ impl RCHandle<SkPathEffect> {
     // for convenience
     pub fn filter_path(&self, src: &Path, stroke_rec: &StrokeRec, cull_rect: &Rect)
         -> Option<(Path, StrokeRec)> {
-        let mut dst = Path::new();
+        let mut dst = Path::default();
         let mut stroke_rec_r = stroke_rec.clone();
         self.filter_path_inplace(&mut dst, src, &mut stroke_rec_r, &cull_rect)
             .if_true_some((dst, stroke_rec_r))
     }
 
     pub fn compute_fast_bounds(&self, src: &Rect) -> Rect {
-        // TODO: use Rect::empty() as soon it's available.
-        let mut r : SkRect = unsafe { mem::zeroed() };
-        unsafe { self.native().computeFastBounds(&mut r, &src.into_native()) };
-        Rect::from_native(r)
+        let mut r : Rect = Rect::default();
+        unsafe { self.native().computeFastBounds(r.native_mut(), &src.into_native()) };
+        r
     }
 
     pub fn as_points(

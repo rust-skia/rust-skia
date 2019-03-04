@@ -109,7 +109,7 @@ impl Image {
             C_SkImage_MakeFromTexture(
                 context.native_mut(),
                 backend_texture.native(),
-                origin.native(),
+                origin.into_native(),
                 color_type.0,
                 alpha_type.0,
                 color_space.shared_ptr())
@@ -144,7 +144,7 @@ impl Image {
             C_SkImage_MakeFromAdoptedTexture(
                 context.native_mut(),
                 backend_texture.native(),
-                origin.native(),
+                origin.into_native(),
                 color_type.0,
                 alpha_type.0,
                 color_space.shared_ptr())
@@ -170,7 +170,7 @@ impl Image {
                 yuva_textures.native().as_ptr(),
                 yuva_indices.as_ptr(),
                 image_size.into_native(),
-                image_origin.native(),
+                image_origin.into_native(),
                 image_color_space.shared_ptr())
         })
     }
@@ -195,7 +195,7 @@ impl Image {
                 yuva_textures.native().as_ptr(),
                 yuva_indices.as_ptr(),
                 image_size.into_native(),
-                image_origin.native(),
+                image_origin.into_native(),
                 backend_texture.native(),
                 image_color_space.shared_ptr())
         })
@@ -220,7 +220,7 @@ impl Image {
                 yuva_textures.native().as_ptr(),
                 yuva_indices.as_ptr(),
                 image_size.into_native(),
-                image_origin.native(),
+                image_origin.into_native(),
                 image_color_space.shared_ptr())
         })
     }
@@ -237,7 +237,7 @@ impl Image {
                 context.native_mut(),
                 yuv_color_space.0,
                 nv12_textures.native().as_ptr(),
-                image_origin.native(),
+                image_origin.into_native(),
                 image_color_space.shared_ptr())
         })
     }
@@ -255,7 +255,7 @@ impl Image {
                 context.native_mut(),
                 yuv_color_space.0,
                 nv12_textures.native().as_ptr(),
-                image_origin.native(),
+                image_origin.into_native(),
                 backend_texture.native(),
                 image_color_space.shared_ptr())
         })
@@ -333,13 +333,13 @@ impl Image {
     pub fn backend_texture(&self, flush_pending_gr_context_io: bool)
         -> (graphics::BackendTexture, graphics::SurfaceOrigin) {
 
-        let mut origin = GrSurfaceOrigin::kTopLeft_GrSurfaceOrigin;
+        let mut origin = graphics::SurfaceOrigin::TopLeft;
         let texture = unsafe {
             self.native()
-                .getBackendTexture(flush_pending_gr_context_io, &mut origin)
+                .getBackendTexture(flush_pending_gr_context_io, origin.native_mut())
                 .into_handle()
         };
-        (texture, origin.into_handle())
+        (texture, origin)
     }
 
     pub fn read_pixels<P>(
@@ -365,7 +365,7 @@ impl Image {
 
     pub fn encode_to_data(&self, image_format: EncodedImageFormat) -> Option<Data> {
         Data::from_ptr(unsafe {
-            C_SkImage_encodeToData(self.native(), image_format.native())
+            C_SkImage_encodeToData(self.native(), image_format.into_native())
         })
     }
 

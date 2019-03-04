@@ -28,7 +28,7 @@ impl RCHandle<SkMaskFilter> {
 
     pub fn blur(style: BlurStyle, sigma: scalar, respect_ctm: Option<bool>) -> Self {
         Self::from_ptr(unsafe {
-            C_SkMaskFilter_MakeBlur(style.native(), sigma, respect_ctm.unwrap_or(true))
+            C_SkMaskFilter_MakeBlur(style.into_native(), sigma, respect_ctm.unwrap_or(true))
         }).unwrap()
     }
 
@@ -40,7 +40,7 @@ impl RCHandle<SkMaskFilter> {
 
     pub fn combine(filter_a: &Self, filter_b: &Self, mode: CoverageMode) -> Option<Self> {
         Self::from_ptr(unsafe {
-            C_SkMaskFilter_Combine(filter_a.shared_native(), filter_b.shared_native(), mode.native())
+            C_SkMaskFilter_Combine(filter_a.shared_native(), filter_b.shared_native(), mode.into_native())
         })
     }
 

@@ -60,7 +60,7 @@ impl Default for RRect {
 impl RRect {
 
     pub fn get_type(&self) -> RRectType {
-        unsafe { self.native().getType() }.into_handle()
+        RRectType::from_native(unsafe { self.native().getType() })
     }
 
     pub fn is_empty(&self) -> bool {

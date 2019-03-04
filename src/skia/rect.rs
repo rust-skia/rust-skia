@@ -365,6 +365,14 @@ impl Contains<IRect> for Rect {
     }
 }
 
+#[test]
+fn contains_overloads_compile() {
+    let r = Rect::default();
+    r.contains(Point::default());
+    r.contains(Rect::default());
+    r.contains(IRect::default());
+}
+
 pub trait RoundOut<R> {
     fn round_out(&self) -> R;
 }

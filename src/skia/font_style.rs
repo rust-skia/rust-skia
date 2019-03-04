@@ -11,17 +11,7 @@ use rust_skia::{
 #[repr(transparent)]
 pub struct FontStyleWeight(i32);
 
-impl FromNative<i32> for FontStyleWeight {
-    fn from_native(native: i32) -> Self {
-        FontStyleWeight(native)
-    }
-}
-
-impl NativeAccessValue<i32> for FontStyleWeight {
-    fn native(&self) -> i32 {
-        self.0
-    }
-}
+impl NativeTransmutable<i32> for FontStyleWeight {}
 
 #[allow(non_upper_case_globals)]
 impl FontStyleWeight {
@@ -41,17 +31,7 @@ impl FontStyleWeight {
 #[derive(Copy, Clone, PartialEq, PartialOrd)]
 pub struct FontStyleWidth(i32);
 
-impl FromNative<i32> for FontStyleWidth {
-    fn from_native(native: i32) -> Self {
-        FontStyleWidth(native)
-    }
-}
-
-impl NativeAccessValue<i32> for FontStyleWidth {
-    fn native(&self) -> i32 {
-        self.0
-    }
-}
+impl NativeTransmutable<i32> for FontStyleWidth {}
 
 #[allow(non_upper_case_globals)]
 impl FontStyleWidth {
@@ -91,20 +71,20 @@ impl Default for ValueHandle<SkFontStyle> {
 
 impl ValueHandle<SkFontStyle> {
     pub fn new(weight: FontStyleWeight, width: FontStyleWidth, slant: FontStyleSlant) -> Self {
-        unsafe { SkFontStyle::new(weight.native() as _, width.native() as _, slant.native()) }
+        unsafe { SkFontStyle::new(*weight.native(), *width.native(), *slant.native()) }
             .into_handle()
     }
 
     pub fn weight(&self) -> FontStyleWeight {
-        unsafe { self.native().weight() }.into_handle()
+        FontStyleWeight::from_native(unsafe { self.native().weight() })
     }
 
     pub fn width(&self) -> FontStyleWidth {
-        unsafe { self.native().width() }.into_handle()
+        FontStyleWidth::from_native(unsafe { self.native().width() })
     }
 
     pub fn slant(&self) -> FontStyleSlant {
-        unsafe { self.native().slant() }.into_handle()
+        FontStyleSlant::from_native(unsafe { self.native().slant() })
     }
 
     pub fn normal() -> FontStyle {

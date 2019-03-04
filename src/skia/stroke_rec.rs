@@ -52,7 +52,7 @@ impl NativeClone for SkStrokeRec {
 
 impl Handle<SkStrokeRec> {
     pub fn new(init_style: StrokeRecInitStyle) -> Self {
-        unsafe { SkStrokeRec::new(init_style.native() )}
+        unsafe { SkStrokeRec::new(init_style.into_native() )}
             .into_handle()
     }
 
@@ -70,7 +70,7 @@ impl Handle<SkStrokeRec> {
         let res_scale = res_scale.unwrap_or(1.0);
         match style {
             Some(style) => {
-                unsafe { SkStrokeRec::new1(paint.native(), style.native(), res_scale)}
+                unsafe { SkStrokeRec::new1(paint.native(), style.into_native(), res_scale)}
                     .into_handle()
             },
             None => {
@@ -81,8 +81,7 @@ impl Handle<SkStrokeRec> {
     }
 
     pub fn style(&self) -> StrokeRecStyle {
-        unsafe { self.native().getStyle() }
-            .into_handle()
+        StrokeRecStyle::from_native(unsafe { self.native().getStyle() })
     }
 
     pub fn width(&self) -> scalar {
@@ -94,13 +93,11 @@ impl Handle<SkStrokeRec> {
     }
 
     pub fn cap(&self) -> PaintCap {
-        unsafe { self.native().getCap() }
-            .into_handle()
+        PaintCap::from_native(unsafe { self.native().getCap() })
     }
 
     pub fn join(&self) -> PaintJoin {
-        unsafe { self.native().getJoin() }
-            .into_handle()
+        PaintJoin::from_native(unsafe { self.native().getJoin() })
     }
 
     pub fn is_hairline_style(&self) -> bool {
@@ -126,7 +123,7 @@ impl Handle<SkStrokeRec> {
 
     pub fn set_stroke_params(&mut self, cap: PaintCap, join: PaintJoin, miter_limit: scalar) {
         unsafe {
-            self.native_mut().setStrokeParams(cap.native(), join.native(), miter_limit)
+            self.native_mut().setStrokeParams(cap.into_native(), join.into_native(), miter_limit)
         }
     }
 
@@ -155,15 +152,15 @@ impl Handle<SkStrokeRec> {
     }
 
     pub fn inflation_radius_from_paint_and_style(paint: &Paint, style: PaintStyle) -> scalar {
-        unsafe { SkStrokeRec::GetInflationRadius(paint.native(), style.native() ) }
+        unsafe { SkStrokeRec::GetInflationRadius(paint.native(), style.into_native() ) }
     }
 
     pub fn inflation_radius_from_params(join: PaintJoin, miter_limit: scalar, cap: PaintCap, stroke_width: scalar) -> scalar {
         unsafe {
             SkStrokeRec::GetInflationRadius1(
-                join.native(),
+                join.into_native(),
                 miter_limit,
-                cap.native(),
+                cap.into_native(),
                 stroke_width)
         }
     }
