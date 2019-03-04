@@ -2,6 +2,7 @@ use std::mem;
 use std::ops::{Deref, DerefMut};
 use std::marker::PhantomData;
 use std::slice;
+use std::ffi::CString;
 use crate::graphics;
 use crate::prelude::*;
 use crate::skia::{
@@ -28,9 +29,19 @@ use crate::skia::{
     Paint,
     Color,
     Matrix,
-    BlendMode
+    BlendMode,
+    Font,
+    TextEncoding,
+    Picture,
+    Vertices,
+    VerticesBone,
+    Data
 };
 use rust_skia::{
+    C_SkAutoCanvasRestore_destruct,
+    SkAutoCanvasRestore_SkAutoCanvasRestore_destructor,
+    SkAutoCanvasRestore,
+    C_SkCanvas_isClipEmpty,
     C_SkCanvas_discard,
     SkCanvas_PointMode,
     SkImage,
@@ -51,7 +62,8 @@ use rust_skia::{
     SkCanvas_SaveLayerRec,
     SkCanvas_SaveLayerFlagsSet,
     SkMatrix,
-    SkCanvas_SrcRectConstraint
+    SkCanvas_SrcRectConstraint,
+    C_SkAutoCanvasRestore_restore
 };
 
 bitflags! {
@@ -241,9 +253,13 @@ impl Canvas {
         let props_ptr = props.native_ptr_or_null();
         let ptr =
             if props_ptr.is_null() {
-                unsafe { C_SkCanvas_newFromBitmap(bitmap.native()) }
+                unsafe {
+                    C_SkCanvas_newFromBitmap(bitmap.native())
+                }
             } else {
-                unsafe { C_SkCanvas_newFromBitmapAndProps(bitmap.native(), props_ptr) }
+                unsafe {
+                    C_SkCanvas_newFromBitmapAndProps(bitmap.native(), props_ptr)
+                }
             };
         Canvas::own_from_native_ptr(ptr).unwrap()
     }
@@ -252,18 +268,23 @@ impl Canvas {
 
     pub fn image_info(&self) -> ImageInfo {
         let mut ii = ImageInfo::default();
-        unsafe { C_SkCanvas_imageInfo(self.native(), ii.native_mut()) };
+        unsafe {
+            C_SkCanvas_imageInfo(self.native(), ii.native_mut())
+        };
         ii
     }
 
     pub fn props(&self) -> Option<SurfaceProps> {
         let mut sp = SurfaceProps::default();
-        unsafe { self.native().getProps(sp.native_mut()) }
-            .if_true_some(sp)
+        unsafe {
+            self.native().getProps(sp.native_mut())
+        }.if_true_some(sp)
     }
 
     pub fn flush(&mut self) -> &mut Self {
-        unsafe { self.native_mut().flush(); }
+        unsafe {
+            self.native_mut().flush();
+        }
         self
     }
 
@@ -294,7 +315,7 @@ impl Canvas {
         })
     }
 
-    // TODO: think about a using a struct for the return value zoo.
+    // TODO: think about a using a struct for the return value tuple zoo.
     pub fn access_top_layer_pixels(&mut self) -> Option<(&mut [u8], ImageInfo, usize, IPoint)> {
         let mut info = ImageInfo::default();
         let mut row_bytes = 0;
@@ -307,7 +328,9 @@ impl Canvas {
         };
         if !ptr.is_null() {
             let size = info.compute_byte_size(row_bytes);
-            let slice = unsafe { slice::from_raw_parts_mut(ptr as _, size) };
+            let slice = unsafe {
+                slice::from_raw_parts_mut(ptr as _, size)
+            };
             Some((slice, info, row_bytes, origin))
         } else {
             None
@@ -388,7 +411,7 @@ impl Canvas {
     pub fn restore_to_count(&mut self, count: usize) -> &mut Self {
         unsafe {
             self.native_mut().restoreToCount(count.try_into().unwrap())
-        };
+        }
         self
     }
 
@@ -716,8 +739,107 @@ impl Canvas {
 
     // TODO: Lattice, drawBitmapLattice, drawImageLattice
 
+    // TODO: drawSimpleText
 
+    // rust specific, based on drawSimpleText with fixed UTF8 encoding,
+    // implementation is similar to Font's *_str methods.
+    pub fn draw_str(&mut self, str: &str, origin: Point, font: &Font, paint: &Paint) -> &mut Self {
+        let bytes = str.as_bytes();
+        unsafe {
+            self.native_mut().drawSimpleText(
+                bytes.as_ptr() as _, bytes.len(), TextEncoding::UTF8.into_native(),
+                origin.x, origin.y, font.native(), paint.native())
+        }
+        self
+    }
 
+    // TODO: drawTextBlob
+
+    pub fn draw_picture(&mut self, picture: &Picture, matrix: Option<&Matrix>, paint: Option<&Paint>) -> &mut Self {
+        unsafe {
+            self.native_mut().drawPicture2(
+                picture.native(),
+                matrix.native_ptr_or_null(),
+                paint.native_ptr_or_null())
+        }
+        self
+    }
+
+    pub fn draw_vertices(
+        &mut self,
+        vertices: &Vertices, bones: Option<&[VerticesBone]>, mode: BlendMode, paint: &Paint) -> &mut Self {
+        match bones {
+            Some(bones) => unsafe {
+                self.native_mut().drawVertices2(
+                    vertices.native(),
+                    bones.native().as_ptr(),
+                    bones.len().try_into().unwrap(),
+                    mode.into_native(),
+                    paint.native())
+            },
+            None => unsafe {
+                self.native_mut().drawVertices(
+                    vertices.native(),
+                    mode.into_native(),
+                    paint.native())
+            }
+        }
+        self
+    }
+
+    pub fn draw_patch(
+        &mut self,
+        cubics: &[Point;12],
+        colors: &[Color;4],
+        tex_coords: &[Point;4],
+        mode: BlendMode,
+        paint: &Paint) -> &mut Self {
+        unsafe {
+            self.native_mut().drawPatch(
+                cubics.native().as_ptr(),
+                colors.native().as_ptr(),
+                tex_coords.native().as_ptr(),
+                mode.into_native(),
+                paint.native())
+        }
+        self
+    }
+
+    // TODO: drawAtlas
+    // TODO: drawDrawable
+
+    // TODO: why is Data mutable here?
+    pub fn draw_annotation(&mut self, rect: &Rect, key: &str, value: &mut Data) -> &mut Self {
+        let key = CString::new(key).unwrap();
+        unsafe {
+            self.native_mut().drawAnnotation(
+                rect.native(),
+                key.as_ptr(),
+                value.native_mut() )
+        }
+        self
+    }
+
+    pub fn is_clip_empty(&self) -> bool {
+        unsafe {
+            C_SkCanvas_isClipEmpty(self.native())
+        }
+    }
+
+    pub fn is_clip_rect(&self) -> bool {
+        unsafe {
+            C_SkCanvas_isClipEmpty(self.native())
+        }
+    }
+
+    pub fn total_matrix(&self) -> &Matrix {
+        // TODO: make this official, transmutation of a Matrix is not actually supported.
+        // TODO: test this, does it even work?
+        let matrix = unsafe {
+            &*self.native().getTotalMatrix()
+        };
+        unsafe { mem::transmute::<&SkMatrix, &Matrix>(matrix) }
+    }
     //
     // internal helper
     //
@@ -725,15 +847,18 @@ impl Canvas {
     pub(crate) fn own_from_native_ptr<'lt>(native: *mut SkCanvas) -> Option<OwnedCanvas<'lt>> {
         if !native.is_null() {
             Some(OwnedCanvas::<'lt>(
-                Self::borrow_from_native(unsafe { &mut *native }),
-                PhantomData))
+                Self::borrow_from_native(unsafe {
+                    &mut *native
+                }), PhantomData))
         } else {
             None
         }
     }
 
     pub(crate) fn borrow_from_native(native: &mut SkCanvas) -> &mut Self {
-        unsafe { mem::transmute::<&mut SkCanvas, &mut Self>(native) }
+        unsafe {
+            mem::transmute::<&mut SkCanvas, &mut Self>(native)
+        }
     }
 }
 
@@ -753,6 +878,41 @@ impl QuickReject<Path> for Canvas {
     }
 }
 
+pub struct AutoCanvasRestore<'a>(SkAutoCanvasRestore, PhantomData<&'a ()>);
+
+impl<'a> NativeAccess<SkAutoCanvasRestore> for AutoCanvasRestore<'a> {
+    fn native(&self) -> &SkAutoCanvasRestore {
+        &self.0
+    }
+    fn native_mut(&mut self) -> &mut SkAutoCanvasRestore {
+        &mut self.0
+    }
+}
+
+impl<'a> Drop for AutoCanvasRestore<'a> {
+    fn drop(&mut self) {
+        unsafe {
+            C_SkAutoCanvasRestore_destruct(&self.0)
+        }
+    }
+}
+
+impl<'a> AutoCanvasRestore<'a> {
+    // TODO: test, scary looking lifetime requirements.
+    pub fn guard(canvas: &mut Canvas, do_save: bool) -> AutoCanvasRestore<'_> {
+        AutoCanvasRestore(unsafe {
+            SkAutoCanvasRestore::new(canvas.native_mut(), do_save)
+        }, PhantomData)
+    }
+
+    pub fn restore(&mut self) {
+        unsafe {
+            // does not link:
+            // self.native_mut().restore()
+            C_SkAutoCanvasRestore_restore(self.native_mut())
+        }
+    }
+}
 
 #[test]
 fn test_raster_direct_creation_and_clear_in_memory() {
@@ -789,7 +949,6 @@ fn test_empty_canvas_creation() {
     let canvas = OwnedCanvas::default();
     drop(canvas)
 }
-
 
 #[test]
 fn test_save_layer_rec_lifetimes() {
