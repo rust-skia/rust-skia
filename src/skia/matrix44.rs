@@ -185,10 +185,13 @@ impl Handle<SkMatrix44> {
         self
     }
 
+    // TODO: implement
+
+    /*
     pub fn set_rotate_degrees_about(&mut self, v: Vector3, degrees: scalar) -> &mut Self {
-        // TODO
         unimplemented!("linker error");
     }
+    */
 
     pub fn set_rotate_about(&mut self, v: Vector3, radians: scalar) -> &mut Self {
         unsafe {

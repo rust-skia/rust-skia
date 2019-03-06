@@ -1,11 +1,11 @@
 use crate::prelude::*;
 use rust_skia::SkBBHFactory;
 
+// TODO: complete the implementation
 pub type BBHFactory = Handle<SkBBHFactory>;
 
 impl NativeDrop for SkBBHFactory {
     fn drop(&mut self) {
-        // TODO: complete the implementation
         unimplemented!()
     }
 }
