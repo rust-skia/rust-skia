@@ -5,10 +5,6 @@ use rust_skia::{
     C_SkData_unref,
     C_SkData_ref
 };
-use crate::{
-    prelude::NativeRefCounted,
-    prelude::RCHandle
-};
 
 pub type Data = RCHandle<SkData>;
 
@@ -22,7 +18,9 @@ impl NativeRefCounted for SkData {
     }
 }
 
-impl Data {
+// TODO: complete the implementation.
+impl RCHandle<SkData> {
+    
     pub fn bytes(&self) -> &[u8] {
         unsafe {
             let bytes = self.native().bytes();
