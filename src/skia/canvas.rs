@@ -39,7 +39,6 @@ use crate::skia::{
 };
 use rust_skia::{
     C_SkAutoCanvasRestore_destruct,
-    SkAutoCanvasRestore_SkAutoCanvasRestore_destructor,
     SkAutoCanvasRestore,
     C_SkCanvas_isClipEmpty,
     C_SkCanvas_discard,
@@ -74,7 +73,7 @@ bitflags! {
 
 #[allow(dead_code)]
 pub struct SaveLayerRec<'a> {
-    // note: we _must_ store references to the
+    // note: we _must_ store _references_ to the
     // native types here, because not all of them
     // are native transmutable, like ImageFilter or Image,
     // which are represented as ref counted pointers and
@@ -110,6 +109,7 @@ impl<'a> Default for SaveLayerRec<'a> {
 }
 
 impl<'a> SaveLayerRec<'a> {
+
     pub fn bounds(self, bounds: &'a Rect) -> Self {
         Self { bounds: Some(bounds.native()), ..self }
     }
@@ -152,6 +152,31 @@ impl EnumHandle<SkCanvas_SrcRectConstraint> {
     pub const Fast: Self = Self(SkCanvas_SrcRectConstraint::kFast_SrcRectConstraint);
 }
 
+/// Provides access to Canvas's pixels.
+/// Returned by Canvas::access_top_layer_pixels()
+pub struct CanvasTopLayerPixels<'a> {
+    pub pixels: &'a mut [u8],
+    pub info: ImageInfo,
+    pub row_bytes: usize,
+    pub origin: IPoint
+}
+
+/// Additional options to Canvas's clip functions.
+/// use default() for Intersect / no anti alias.
+
+#[derive(Copy, Clone, PartialEq, Default, Debug)]
+pub struct CanvasClipOptions {
+    pub op: ClipOp,
+    pub do_anti_alias: bool
+}
+
+#[test]
+pub fn canvas_clip_options_defaults() {
+    let cco = CanvasClipOptions::default();
+    assert_eq!(ClipOp::Intersect, cco.op);
+    assert_eq!(false, cco.do_anti_alias);
+}
+
 // Warning: do never access SkCanvas fields from Rust, bindgen generates a wrong layout
 // as of version 0.47.3.
 
@@ -173,7 +198,8 @@ impl NativeAccess<SkCanvas> for Canvas {
 }
 
 /// This is the type representing a canvas that is owned and destructed
-/// when it goes out of scope _and_ is bound to a specific lifetime.
+/// when it goes out of scope _and_ is bound to a the lifetime of another
+/// instance. Function resolvement is done via the Deref trait.
 pub struct OwnedCanvas<'lt>(*mut Canvas, PhantomData<&'lt ()>);
 
 impl<'lt> Deref for OwnedCanvas<'lt> {
@@ -237,7 +263,8 @@ impl Canvas {
         Self::from_raster_direct(&info, pixels_u8, row_bytes, None)
     }
 
-    pub fn of_size<'lt>(size: ISize, props: Option<&SurfaceProps>) -> Option<OwnedCanvas<'lt>> {
+    // Decided to call this variant new, because it seems to be the simplest reasonable one.
+    pub fn new<'lt>(size: ISize, props: Option<&SurfaceProps>) -> Option<OwnedCanvas<'lt>> {
         if size.width >= 0 && size.height >= 0 {
             let ptr = unsafe {
                 C_SkCanvas_newWidthHeightAndProps(
@@ -298,7 +325,7 @@ impl Canvas {
 
     // TODO: check if the lifetime requirements are met (in relation to Surface::canvas()).
     // (we might need to consume self here and prevent the drop(), and also support
-    // this function only on OwnedCanvas).
+    // this function on OwnedCanvas only).
     pub fn make_surface(&mut self, info: &ImageInfo, props: Option<&SurfaceProps>) -> Option<Surface> {
         Surface::from_ptr(unsafe {
             C_SkCanvas_makeSurface(
@@ -308,15 +335,14 @@ impl Canvas {
         })
     }
 
-    // TODO: test ref count consistency assuming it is not incrased in the native part.
+    // TODO: test ref count consistency assuming it is not increased in the native part.
     pub fn graphics_context(&mut self) -> Option<graphics::Context> {
         graphics::Context::from_unshared_ptr(unsafe {
             C_SkCanvas_getGrContext(self.native_mut())
         })
     }
 
-    // TODO: think about a using a struct for the return value tuple zoo.
-    pub fn access_top_layer_pixels(&mut self) -> Option<(&mut [u8], ImageInfo, usize, IPoint)> {
+    pub fn access_top_layer_pixels(&mut self) -> Option<CanvasTopLayerPixels> {
         let mut info = ImageInfo::default();
         let mut row_bytes = 0;
         let mut origin = IPoint::default();
@@ -328,10 +354,10 @@ impl Canvas {
         };
         if !ptr.is_null() {
             let size = info.compute_byte_size(row_bytes);
-            let slice = unsafe {
+            let pixels = unsafe {
                 slice::from_raw_parts_mut(ptr as _, size)
             };
-            Some((slice, info, row_bytes, origin))
+            Some(CanvasTopLayerPixels{pixels, info, row_bytes, origin})
         } else {
             None
         }
@@ -377,12 +403,15 @@ impl Canvas {
         }
     }
 
+    #[warn(unused)]
     pub fn write_pixels_from_bitmap(&mut self, bitmap: &Bitmap, offset: IPoint) -> bool {
         unsafe {
             self.native_mut().writePixels1(bitmap.native(), offset.x, offset.y)
         }
     }
 
+    // TODO: (usability) think about _not_ returning usize here and instead &mut Self.
+    // The count can be read via save_count() at any time.
     pub fn save(&mut self) -> usize {
         unsafe {
             self.native_mut().save().try_into().unwrap()
@@ -469,31 +498,33 @@ impl Canvas {
         self
     }
 
-    // TODO: make op and / or do_anti_alias optional (defaults are Intersect and false)?
-    pub fn clip_rect(&mut self, rect: &Rect, op: ClipOp, do_anti_alias: bool) -> &mut Self {
+    pub fn clip_rect(&mut self, rect: &Rect, options: CanvasClipOptions) -> &mut Self {
         unsafe {
-            self.native_mut().clipRect(rect.native(), op.into_native(), do_anti_alias)
+            self.native_mut().clipRect(
+                rect.native(),
+                options.op.into_native(), options.do_anti_alias)
         }
         self
     }
 
-    // TODO: make op and / or do_anti_alias optional (defaults are Intersect and false)?
-    pub fn clip_rrect(&mut self, rrect: &RRect, op: ClipOp, do_anti_alias: bool) -> &mut Self {
+    pub fn clip_rrect(&mut self, rrect: &RRect, options: CanvasClipOptions) -> &mut Self {
         unsafe {
-            self.native_mut().clipRRect(rrect.native(), op.into_native(), do_anti_alias)
+            self.native_mut().clipRRect(
+                rrect.native(),
+                options.op.into_native(), options.do_anti_alias)
         }
         self
     }
 
-    // TODO: make op and / or do_anti_alias optional (defaults are Intersect and false)?
-    pub fn clip_path(&mut self, path: &Path, op: ClipOp, do_anti_alias: bool) -> &mut Self {
+    pub fn clip_path(&mut self, path: &Path, options: CanvasClipOptions) -> &mut Self {
         unsafe {
-            self.native_mut().clipPath(path.native(), op.into_native(), do_anti_alias)
+            self.native_mut().clipPath(
+                path.native(),
+                options.op.into_native(), options.do_anti_alias)
         }
         self
     }
 
-    // TODO: make op optional (default is Intersect)?
     pub fn clip_region(&mut self, device_rgn: &Region, op: ClipOp) -> &mut Self {
         unsafe {
             self.native_mut().clipRegion(device_rgn.native(), op.into_native())

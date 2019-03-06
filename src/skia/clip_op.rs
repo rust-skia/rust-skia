@@ -8,3 +8,10 @@ impl EnumHandle<SkClipOp> {
     pub const Difference: Self = Self(SkClipOp::kDifference);
     pub const Intersect: Self = Self(SkClipOp::kIntersect);
 }
+
+// This is the default for the canvas's clip functions.
+impl Default for EnumHandle<SkClipOp> {
+    fn default() -> Self {
+        ClipOp::Intersect
+    }
+}
