@@ -864,12 +864,12 @@ impl Canvas {
 
     pub fn total_matrix(&self) -> &Matrix {
         // TODO: make this official, transmutation of a Matrix is not actually supported.
-        // TODO: test this, does it even work?
         let matrix = unsafe {
             &*self.native().getTotalMatrix()
         };
         unsafe { mem::transmute::<&SkMatrix, &Matrix>(matrix) }
     }
+
     //
     // internal helper
     //
@@ -990,4 +990,14 @@ fn test_save_layer_rec_lifetimes() {
             .clip_matrix(&matrix)
             .bounds(&rect);
     }
+}
+
+#[test]
+fn test_total_matrix_transmutation() {
+    let mut c = Canvas::new((2, 2).into(), None).unwrap();
+    let matrix_ref = c.total_matrix();
+    assert!(Matrix::default() == *matrix_ref);
+    c.rotate(0.1, None);
+    let matrix_ref = c.total_matrix();
+    assert!(Matrix::default() != *matrix_ref);
 }
