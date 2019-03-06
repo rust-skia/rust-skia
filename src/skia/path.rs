@@ -226,10 +226,10 @@ impl Handle<SkPath> {
         unsafe { SkPath::IsCubicDegenerate(p1.native(), p2.native(), p3.native(), p4.native(), exact) }
     }
 
-    pub fn is_line(&self) -> Option<[Point; 2]> {
+    pub fn is_line(&self) -> Option<(Point, Point)> {
         let mut line = [Point::default(); 2];
         unsafe { self.native().isLine(line.native_mut().as_mut_ptr()) }
-            .if_true_some(line)
+            .if_true_some((line[0], line[1]))
     }
 
     pub fn count_points(&self) -> usize {
@@ -403,7 +403,7 @@ impl Handle<SkPath> {
             .if_true_some((rects, dirs))
     }
 
-    // TODO: add some convience overloads (but how?)
+    // TODO: add some convenience overloads (but how?)
     // current idea is to combine dir _and_ start into one option.
     pub fn add_rect(&mut self, rect: &Rect, dir: PathDirection, start: usize) -> &mut Self {
         unsafe {
