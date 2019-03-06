@@ -288,13 +288,10 @@ impl Handle<SkFont> {
     pub fn widths_bounds(
         &self,
         glyphs: &[u16],
-        widths: Option<&mut [scalar]>,
-        bounds: Option<&mut [Rect]>,
+        mut widths: Option<&mut [scalar]>,
+        mut bounds: Option<&mut [Rect]>,
         paint: Option<&Paint>) {
         let count = glyphs.len();
-
-        let mut bounds = bounds;
-        let mut widths = widths;
 
         {
             if let Some(slice) = &widths { assert_eq!(count, slice.len()) };
