@@ -1,11 +1,22 @@
 use rust_skia::SkVector4;
+use crate::prelude::NativeTransmutable;
 
+// TODO: complete the implementation
+
+#[repr(C)]
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Vector4 {
     x: f32,
     y: f32,
     z: f32,
     w: f32
+}
+
+impl NativeTransmutable<SkVector4> for Vector4 {}
+
+#[test]
+fn test_vector4_layout() {
+    Vector4::test_layout()
 }
 
 impl From<(f32, f32, f32, f32)> for Vector4 {
@@ -32,21 +43,8 @@ impl From<[f32; 3]> for Vector4 {
     }
 }
 
-impl From<SkVector4> for Vector4 {
-    fn from(v4: SkVector4) -> Self {
-        let d = &v4.fData;
-        Vector4::from((d[0], d[1], d[2], d[3]))
-    }
-}
-
-impl Into<SkVector4> for Vector4 {
-    fn into(self) -> SkVector4 {
-        SkVector4 { fData: [self.x, self.y, self.z, self.w]}
-    }
-}
-
-impl Vector4 {
-    pub fn new() -> Vector4 {
-        Vector4::from((0.0, 0.0, 0.0, 1.0))
+impl Default for Vector4 {
+    fn default() -> Self {
+        (0.0, 0.0, 0.0).into()
     }
 }

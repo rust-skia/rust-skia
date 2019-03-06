@@ -43,7 +43,7 @@ impl ColorSpacePrimaries {
 
     pub fn to_xyzd50(&self) -> Option<Matrix44> {
         let mut matrix = Matrix44::new();
-        unsafe { self.native().toXYZD50(&mut matrix.0) }
+        unsafe { self.native().toXYZD50(matrix.native_mut()) }
             .if_true_some(matrix)
     }
 }
@@ -151,7 +151,7 @@ impl ColorSpace {
 
     pub fn to_xyzd50(&self) -> Option<Matrix44> {
         let mut matrix = Matrix44::new();
-        unsafe { self.native().toXYZD50(&mut matrix.0) }
+        unsafe { self.native().toXYZD50(matrix.native_mut()) }
             .if_true_some(matrix)
     }
 
@@ -201,6 +201,8 @@ pub trait NewRGB<T> {
     fn new_rgb(v: T) -> Self;
 }
 
+// TODO: should we use references for the heavier types?
+
 type RGB1 = (ColorSpaceRenderTargetGamma, ColorSpaceGamut);
 type RGB2 = (ColorSpaceRenderTargetGamma, Matrix44);
 type RGB3 = (ColorSpaceTransferFn, ColorSpaceGamut);
@@ -218,7 +220,7 @@ impl NewRGB<RGB1> for RCHandle<SkColorSpace> {
 impl NewRGB<RGB2> for RCHandle<SkColorSpace> {
     fn new_rgb(v: RGB2) -> Self {
         ColorSpace::from_ptr(unsafe {
-            rust_skia::C_SkColorSpace_MakeRGB2((v.0).0, &(v.1).0)
+            rust_skia::C_SkColorSpace_MakeRGB2((v.0).0, v.1.native())
         }).unwrap()
     }
 }
@@ -226,7 +228,7 @@ impl NewRGB<RGB2> for RCHandle<SkColorSpace> {
 impl NewRGB<RGB3> for RCHandle<SkColorSpace> {
     fn new_rgb(v: RGB3) -> Self {
         ColorSpace::from_ptr(unsafe {
-            rust_skia::C_SkColorSpace_MakeRGB3(v.0.native(), (v.1).0)
+            rust_skia::C_SkColorSpace_MakeRGB3(v.0.native(), v.1.into_native())
         }).unwrap()
     }
 }
@@ -234,7 +236,7 @@ impl NewRGB<RGB3> for RCHandle<SkColorSpace> {
 impl NewRGB<RGB4> for RCHandle<SkColorSpace> {
     fn new_rgb(v: RGB4) -> Self {
         ColorSpace::from_ptr(unsafe {
-            rust_skia::C_SkColorSpace_MakeRGB4(v.0.native(), &(v.1).0)
+            rust_skia::C_SkColorSpace_MakeRGB4(v.0.native(), v.1.native())
         }).unwrap()
     }
 }
@@ -242,7 +244,7 @@ impl NewRGB<RGB4> for RCHandle<SkColorSpace> {
 impl NewRGB<RGB5> for RCHandle<SkColorSpace> {
     fn new_rgb(v: RGB5) -> Self {
         ColorSpace::from_ptr(unsafe {
-            rust_skia::C_SkColorSpace_MakeRGB5((v.0).0, &(v.1).0)
+            rust_skia::C_SkColorSpace_MakeRGB5((v.0).0, v.1.native())
         }).unwrap()
     }
 }
