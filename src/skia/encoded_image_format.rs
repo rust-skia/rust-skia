@@ -4,16 +4,16 @@ use rust_skia::SkEncodedImageFormat;
 pub type EncodedImageFormat = EnumHandle<SkEncodedImageFormat>;
 
 impl EnumHandle<SkEncodedImageFormat> {
-    pub const BMP: EncodedImageFormat = EnumHandle(SkEncodedImageFormat::kBMP);
-    pub const GIF: EncodedImageFormat = EnumHandle(SkEncodedImageFormat::kGIF);
-    pub const ICO: EncodedImageFormat = EnumHandle(SkEncodedImageFormat::kICO);
-    pub const JPEG: EncodedImageFormat = EnumHandle(SkEncodedImageFormat::kJPEG);
-    pub const PNG: EncodedImageFormat = EnumHandle(SkEncodedImageFormat::kPNG);
-    pub const WBMP: EncodedImageFormat = EnumHandle(SkEncodedImageFormat::kWBMP);
-    pub const WEBP: EncodedImageFormat = EnumHandle(SkEncodedImageFormat::kWEBP);
-    pub const PKM: EncodedImageFormat = EnumHandle(SkEncodedImageFormat::kPKM);
-    pub const KTX: EncodedImageFormat = EnumHandle(SkEncodedImageFormat::kKTX);
-    pub const ASTC: EncodedImageFormat = EnumHandle(SkEncodedImageFormat::kASTC);
-    pub const DNG: EncodedImageFormat = EnumHandle(SkEncodedImageFormat::kDNG);
-    pub const HEIF: EncodedImageFormat = EnumHandle(SkEncodedImageFormat::kHEIF);
+    pub const BMP: Self = Self(SkEncodedImageFormat::kBMP);
+    pub const GIF: Self = Self(SkEncodedImageFormat::kGIF);
+    pub const ICO: Self = Self(SkEncodedImageFormat::kICO);
+    pub const JPEG: Self = Self(SkEncodedImageFormat::kJPEG);
+    pub const PNG: Self = Self(SkEncodedImageFormat::kPNG);
+    pub const WBMP: Self = Self(SkEncodedImageFormat::kWBMP);
+    pub const WEBP: Self = Self(SkEncodedImageFormat::kWEBP);
+    pub const PKM: Self = Self(SkEncodedImageFormat::kPKM);
+    pub const KTX: Self = Self(SkEncodedImageFormat::kKTX);
+    pub const ASTC: Self = Self(SkEncodedImageFormat::kASTC);
+    pub const DNG: Self = Self(SkEncodedImageFormat::kDNG);
+    pub const HEIF: Self = Self(SkEncodedImageFormat::kHEIF);
 }

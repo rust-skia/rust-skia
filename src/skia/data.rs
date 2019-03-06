@@ -20,7 +20,7 @@ impl NativeRefCounted for SkData {
 
 // TODO: complete the implementation.
 impl RCHandle<SkData> {
-    
+
     pub fn bytes(&self) -> &[u8] {
         unsafe {
             let bytes = self.native().bytes();
