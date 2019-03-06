@@ -17,10 +17,10 @@ pub struct AlphaType(pub(crate) SkAlphaType);
 
 #[allow(non_upper_case_globals)]
 impl AlphaType {
-    pub const Unknown: AlphaType = AlphaType(SkAlphaType::kUnknown_SkAlphaType);
-    pub const Opaque: AlphaType = AlphaType(SkAlphaType::kOpaque_SkAlphaType);
-    pub const Premul: AlphaType = AlphaType(SkAlphaType::kPremul_SkAlphaType);
-    pub const Unpremul: AlphaType = AlphaType(SkAlphaType::kUnpremul_SkAlphaType);
+    pub const Unknown: Self = Self(SkAlphaType::kUnknown_SkAlphaType);
+    pub const Opaque: Self = Self(SkAlphaType::kOpaque_SkAlphaType);
+    pub const Premul: Self = Self(SkAlphaType::kPremul_SkAlphaType);
+    pub const Unpremul: Self = Self(SkAlphaType::kUnpremul_SkAlphaType);
 
     pub fn is_opaque(self) -> bool {
         self == Self::Opaque
@@ -32,19 +32,19 @@ pub struct ColorType(pub(crate) SkColorType);
 
 #[allow(non_upper_case_globals)]
 impl ColorType {
-    pub const Unknown: ColorType = ColorType(SkColorType::kUnknown_SkColorType);
-    pub const Alpha8: ColorType = ColorType(SkColorType::kAlpha_8_SkColorType);
-    pub const RGB565: ColorType = ColorType(SkColorType::kRGB_565_SkColorType);
-    pub const ARGB4444: ColorType = ColorType(SkColorType::kARGB_4444_SkColorType);
-    pub const RGBA8888: ColorType = ColorType(SkColorType::kRGBA_8888_SkColorType);
-    pub const RGB888x: ColorType = ColorType(SkColorType::kRGB_888x_SkColorType);
-    pub const BRGA8888: ColorType = ColorType(SkColorType::kBGRA_8888_SkColorType);
-    pub const RGBA1010102: ColorType = ColorType(SkColorType::kRGBA_1010102_SkColorType);
-    pub const RGB101010x: ColorType = ColorType(SkColorType::kRGB_101010x_SkColorType);
-    pub const Gray8: ColorType = ColorType(SkColorType::kGray_8_SkColorType);
-    pub const RGBAF16: ColorType = ColorType(SkColorType::kRGBA_F16_SkColorType);
-    pub const RGBAF32: ColorType = ColorType(SkColorType::kRGBA_F32_SkColorType);
-    pub const N32: ColorType = ColorType(SkColorType::kN32_SkColorType);
+    pub const Unknown: Self = Self(SkColorType::kUnknown_SkColorType);
+    pub const Alpha8: Self = Self(SkColorType::kAlpha_8_SkColorType);
+    pub const RGB565: Self = Self(SkColorType::kRGB_565_SkColorType);
+    pub const ARGB4444: Self = Self(SkColorType::kARGB_4444_SkColorType);
+    pub const RGBA8888: Self = Self(SkColorType::kRGBA_8888_SkColorType);
+    pub const RGB888x: Self = Self(SkColorType::kRGB_888x_SkColorType);
+    pub const BRGA8888: Self = Self(SkColorType::kBGRA_8888_SkColorType);
+    pub const RGBA1010102: Self = Self(SkColorType::kRGBA_1010102_SkColorType);
+    pub const RGB101010x: Self = Self(SkColorType::kRGB_101010x_SkColorType);
+    pub const Gray8: Self = Self(SkColorType::kGray_8_SkColorType);
+    pub const RGBAF16: Self = Self(SkColorType::kRGBA_F16_SkColorType);
+    pub const RGBAF32: Self = Self(SkColorType::kRGBA_F32_SkColorType);
+    pub const N32: Self = Self(SkColorType::kN32_SkColorType);
 
     pub fn bytes_per_pixel(self) -> usize {
         unsafe { rust_skia::SkColorTypeBytesPerPixel(self.0) as _ }
@@ -65,9 +65,9 @@ pub struct YUVColorSpace(pub(crate) SkYUVColorSpace);
 #[allow(non_upper_case_globals)]
 
 impl YUVColorSpace {
-    pub const JPEG: YUVColorSpace = YUVColorSpace(SkYUVColorSpace::kJPEG_SkYUVColorSpace);
-    pub const Rec601: YUVColorSpace = YUVColorSpace(SkYUVColorSpace::kRec601_SkYUVColorSpace);
-    pub const Rec709: YUVColorSpace = YUVColorSpace(SkYUVColorSpace::kRec709_SkYUVColorSpace);
+    pub const JPEG: Self = Self(SkYUVColorSpace::kJPEG_SkYUVColorSpace);
+    pub const Rec601: Self = Self(SkYUVColorSpace::kRec601_SkYUVColorSpace);
+    pub const Rec709: Self = Self(SkYUVColorSpace::kRec709_SkYUVColorSpace);
 }
 
 pub type ImageInfo = Handle<SkImageInfo>;
@@ -182,31 +182,31 @@ impl Handle<SkImageInfo> {
             .unwrap_or(false)
     }
 
-    pub fn with_dimensions(&self, new_dimensions: ISize) -> ImageInfo {
-        ImageInfo::new(new_dimensions, self.color_type(), self.alpha_type(), self.color_space())
+    pub fn with_dimensions(&self, new_dimensions: ISize) -> Self {
+        Self::new(new_dimensions, self.color_type(), self.alpha_type(), self.color_space())
     }
 
-    pub fn with_alpha_type(&self, new_alpha_type: AlphaType) -> ImageInfo {
-        ImageInfo::new(self.dimensions(), self.color_type(), new_alpha_type, self.color_space())
+    pub fn with_alpha_type(&self, new_alpha_type: AlphaType) -> Self {
+        Self::new(self.dimensions(), self.color_type(), new_alpha_type, self.color_space())
     }
 
-    pub fn with_color_type(&self, new_color_type: ColorType) -> ImageInfo {
-        ImageInfo::new(self.dimensions(), new_color_type, self.alpha_type(), self.color_space())
+    pub fn with_color_type(&self, new_color_type: ColorType) -> Self {
+        Self::new(self.dimensions(), new_color_type, self.alpha_type(), self.color_space())
     }
 
-    pub fn with_color_space(&self, new_color_space: Option<ColorSpace>) -> ImageInfo {
-        ImageInfo::new(self.dimensions(), self.color_type(), self.alpha_type(), new_color_space)
+    pub fn with_color_space(&self, new_color_space: Option<ColorSpace>) -> Self {
+        Self::new(self.dimensions(), self.color_type(), self.alpha_type(), new_color_space)
     }
 
     pub fn bytes_per_pixel(&self) -> usize {
         unsafe {
-            self.native().bytesPerPixel() as _
+            self.native().bytesPerPixel().try_into().unwrap()
         }
     }
 
     pub fn shift_per_pixel(&self) -> usize {
         unsafe {
-            self.native().shiftPerPixel() as _
+            self.native().shiftPerPixel().try_into().unwrap()
         }
     }
 
@@ -233,6 +233,14 @@ impl Handle<SkImageInfo> {
             self.native().validRowBytes(row_bytes)
         }
     }
+
+    /* TODO: does not link, create a C wrapper function for that.
+    pub fn reset(&mut self) -> &mut Self {
+        unsafe {
+            self.native_mut().reset()
+        }
+        self
+    } */
 }
 
 #[test]
