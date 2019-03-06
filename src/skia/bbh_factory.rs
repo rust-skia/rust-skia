@@ -5,11 +5,11 @@ pub type BBHFactory = Handle<SkBBHFactory>;
 
 impl NativeDrop for SkBBHFactory {
     fn drop(&mut self) {
-        // TODO: make implementation complete
+        // TODO: complete the implementation
         unimplemented!()
     }
 }
 
-// TODO: make implementation complete
+// TODO: complete the implementation
 impl Handle<SkBBHFactory> {
 }

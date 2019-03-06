@@ -118,7 +118,7 @@ impl Handle<SkBitmap> {
         unsafe { self.native_mut().setAlphaType(alpha_type.0) }
     }
 
-    pub unsafe fn get_pixels(&mut self) -> *mut ffi::c_void {
+    pub unsafe fn pixels(&mut self) -> *mut ffi::c_void {
         self.native_mut().getPixels()
     }
 
@@ -167,6 +167,7 @@ impl Handle<SkBitmap> {
         IRect::from_native(unsafe { self.native().getSubset() })
     }
 
+    #[must_use]
     pub fn set_info(&mut self, image_info: &ImageInfo, row_bytes: Option<usize>) -> bool {
         unsafe { self.native_mut().setInfo(image_info.native(), row_bytes.unwrap_or(0)) }
     }
@@ -210,7 +211,7 @@ impl Handle<SkBitmap> {
         unsafe { C_SkBitmap_readyToDraw(self.native()) }
     }
 
-    pub fn get_generation_id(&self) -> u32 {
+    pub fn generation_id(&self) -> u32 {
         unsafe { self.native().getGenerationID() }
     }
 
@@ -230,19 +231,17 @@ impl Handle<SkBitmap> {
         unsafe { self.native().erase(c.into_native(), &area.into_native()) }
     }
 
-    #[inline]
-    pub fn get_color(&self, x: i32, y: i32) -> Color {
-        Color::from_native(unsafe { self.native().getColor(x, y) })
+    pub fn get_color(&self, p: IPoint) -> Color {
+        Color::from_native(unsafe { self.native().getColor(p.x, p.y) })
+    }
+
+    pub fn get_alpha_f(&self, p: IPoint) -> f32 {
+        unsafe { self.native().getAlphaf(p.x, p.y) }
     }
 
     #[inline]
-    pub fn get_alpha_f(&self, x: i32, y: i32) -> f32 {
-        unsafe { self.native().getAlphaf(x, y) }
-    }
-
-    #[inline]
-    pub unsafe fn get_addr(&self, x: i32, y: i32) -> *const ffi::c_void {
-        self.native().getAddr(x, y)
+    pub unsafe fn get_addr(&self, p: IPoint) -> *const ffi::c_void {
+        self.native().getAddr(p.x, p.y)
     }
 
     pub fn extract_subset(&self, dst: &mut Self, subset: &IRect) -> bool {
