@@ -527,6 +527,9 @@ impl<NT, ElementT> NativeTransmutableSliceAccess<NT> for [ElementT]
     }
 }
 
+impl<NT, ElementT> NativeTransmutable<Option<NT>> for Option<ElementT>
+    where ElementT: NativeTransmutable<NT> {}
+
 impl<NT, ElementT> NativeTransmutable<Option<&[NT]>> for Option<&[ElementT]>
     where ElementT: NativeTransmutable<NT> {}
 
@@ -556,6 +559,15 @@ pub trait AsPointerOrNull<PointerT> {
 pub trait AsPointerOrNullMut<PointerT> {
     fn as_ptr_or_null(&self) -> *const PointerT;
     fn as_ptr_or_null_mut(&mut self) -> *mut PointerT;
+}
+
+impl<E> AsPointerOrNull<E> for Option<E> {
+    fn as_ptr_or_null(&self) -> *const E {
+        match self {
+            Some(e) => e,
+            None => ptr::null()
+        }
+    }
 }
 
 impl<E> AsPointerOrNull<E> for Option<&[E]> {

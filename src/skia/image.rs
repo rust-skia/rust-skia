@@ -15,7 +15,8 @@ use crate::skia::{
     YUVAIndex,
     ISize,
     Paint,
-    EncodedImageFormat
+    EncodedImageFormat,
+    IPoint
 };
 use rust_skia::{
     C_SkImage_MakeFromPicture,
@@ -47,24 +48,23 @@ use rust_skia::{
 
 pub type ImageBitDepth = EnumHandle<SkImage_BitDepth>;
 
-impl ImageBitDepth {
-    pub const U8: ImageBitDepth = EnumHandle(SkImage_BitDepth::kU8);
-    pub const F16: ImageBitDepth = EnumHandle(SkImage_BitDepth::kF16);
+impl EnumHandle<SkImage_BitDepth> {
+    pub const U8: Self = Self(SkImage_BitDepth::kU8);
+    pub const F16: Self = Self(SkImage_BitDepth::kF16);
 }
 
 pub type CachingHint = EnumHandle<SkImage_CachingHint>;
 
 #[allow(non_upper_case_globals)]
-impl CachingHint {
-    pub const Allow : CachingHint = EnumHandle(SkImage_CachingHint::kAllow_CachingHint);
-    pub const Disallow : CachingHint = EnumHandle(SkImage_CachingHint::kDisallow_CachingHint);
+impl EnumHandle<SkImage_CachingHint> {
+    pub const Allow: Self = Self(SkImage_CachingHint::kAllow_CachingHint);
+    pub const Disallow: Self = Self(SkImage_CachingHint::kDisallow_CachingHint);
 }
 
 pub type Image = RCHandle<SkImage>;
 
 impl NativeRefCountedBase for SkImage {
     type Base = SkRefCntBase;
-
     fn ref_counted_base(&self) -> &Self::Base {
         &self._base._base
     }
@@ -73,26 +73,22 @@ impl NativeRefCountedBase for SkImage {
 impl Image {
 
     pub fn from_raster_data(info: &ImageInfo, pixels: Data, row_bytes: usize) -> Option<Image> {
-        Image::from_ptr(unsafe { C_SkImage_MakeRasterData(info.native(), pixels.shared_native(), row_bytes) })
+        Image::from_ptr(unsafe {
+            C_SkImage_MakeRasterData(info.native(), pixels.shared_native(), row_bytes)
+        })
     }
 
     pub fn from_bitmap(bitmap: &Bitmap) -> Option<Image> {
-        Image::from_ptr(unsafe { C_SkImage_MakeFromBitmap(bitmap.native()) })
+        Image::from_ptr(unsafe {
+            C_SkImage_MakeFromBitmap(bitmap.native())
+        })
     }
 
     pub fn from_encoded(data: &Data, subset: Option<IRect>) -> Option<Image> {
-
-        let subset_ptr : *const SkIRect = {
-            match subset {
-                Some(subset) => &(subset.into_native()) as _,
-                None => ptr::null()
-            }
-        };
-
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromEncoded(
                 data.shared_native(),
-                subset_ptr)
+                subset.native().as_ptr_or_null())
         })
     }
 
@@ -159,15 +155,12 @@ impl Image {
         image_origin: graphics::SurfaceOrigin,
         image_color_space: Option<ColorSpace>) -> Option<Image> {
 
-        let yuva_indices : Vec<SkYUVAIndex> =
-            yuva_indices.iter().map(|i| i.0).collect();
-
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromYUVATexturesCopy(
                 context.native_mut(),
                 yuv_color_space.0,
                 yuva_textures.native().as_ptr(),
-                yuva_indices.as_ptr(),
+                yuva_indices.native().as_ptr(),
                 image_size.into_native(),
                 image_origin.into_native(),
                 image_color_space.shared_ptr())
@@ -346,10 +339,11 @@ impl Image {
         dst_info: &ImageInfo,
         pixels: &mut[P],
         dst_row_bytes: usize,
-        src_x: i32, src_y: i32,
+        src: IPoint,
         caching_hint: CachingHint) -> bool {
 
-        if pixels.elements_size_of() != (usize::try_from(dst_info.height()).unwrap() * dst_row_bytes) {
+        if pixels.elements_size_of() !=
+            (usize::try_from(dst_info.height()).unwrap() * dst_row_bytes) {
             return false
         }
 
@@ -357,7 +351,7 @@ impl Image {
             self.native().readPixels(
                 dst_info.native(),
                 pixels.as_mut_ptr() as _, dst_row_bytes,
-                src_x, src_y,
+                src.x, src.y,
                 caching_hint.native().to_owned())
         }
     }
@@ -376,7 +370,7 @@ impl Image {
 
     pub fn new_subset(&self, rect: IRect) -> Option<Image> {
         Image::from_ptr(unsafe {
-            C_SkImage_makeSubset(self.native(), &rect.into_native())
+            C_SkImage_makeSubset(self.native(), rect.native())
         })
     }
 
