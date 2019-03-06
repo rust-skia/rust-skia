@@ -205,7 +205,7 @@ impl<H, N> IntoHandle<H> for N
 
 /// A representation type for a native enum type.
 #[repr(transparent)]
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct EnumHandle<N: Copy + PartialEq>(pub(crate) N);
 
 /// All EnumHandles can be transmuted to it's native representation.
