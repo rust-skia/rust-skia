@@ -16,7 +16,7 @@ use rust_skia::{
 };
 
 #[repr(C)]
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct IRect {
     pub left: i32,
     pub top: i32,
@@ -29,12 +29,6 @@ impl NativeTransmutable<SkIRect> for IRect {}
 #[test]
 fn test_irect_layout() {
     IRect::test_layout();
-}
-
-impl Default for IRect {
-    fn default() -> Self {
-        Self::new(0, 0, 0, 0)
-    }
 }
 
 impl IRect {
@@ -189,7 +183,7 @@ impl Contains<&Rect> for IRect {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct Rect {
     pub left: scalar,
     pub top: scalar,
@@ -204,12 +198,6 @@ fn test_rect_layout() {
     Rect::test_layout();
 }
 
-impl Default for Rect {
-    fn default() -> Self {
-        Self::new(0.0, 0.0, 0.0, 0.0)
-    }
-}
-
 impl Rect {
     pub fn new(left: scalar, top: scalar, right: scalar, bottom: scalar) -> Self {
         Self { left, top, right, bottom }
@@ -219,7 +207,8 @@ impl Rect {
         (Point::default(), size).into()
     }
 
-    pub fn from_isize(size: ISize) -> Self {
+    // TODO: do we need that?
+    pub fn from_isize(size: ISize) -> Rect {
         Self::from_size(size.into())
     }
 
@@ -388,9 +377,6 @@ impl RoundOut<IRect> for Rect {
 impl RoundOut<Rect> for Rect {
     fn round_out(&self) -> Rect {
         let mut r = Rect::default();
-        /* note: for some reason this causes a linker error that
-           can be resolved by linking against gdi32 under windows.
-        */
         unsafe { self.native().roundOut1(r.native_mut()) };
         r
     }

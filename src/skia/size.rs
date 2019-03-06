@@ -7,7 +7,7 @@ use rust_skia::{
 };
 
 #[repr(C)]
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct ISize {
     pub width: i32,
     pub height: i32
@@ -18,12 +18,6 @@ impl NativeTransmutable<SkISize> for ISize {}
 #[test]
 fn isize_layout() {
     ISize::test_layout()
-}
-
-impl Default for ISize {
-    fn default() -> Self {
-        Self::new(0, 0)
-    }
 }
 
 impl ISize {
@@ -41,7 +35,7 @@ impl ISize {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct Size {
     pub width: scalar,
     pub height: scalar
@@ -50,14 +44,8 @@ pub struct Size {
 impl NativeTransmutable<SkSize> for Size {}
 
 #[test]
-fn size_layout() {
+fn test_size_layout() {
    Size::test_layout()
-}
-
-impl Default for Size {
-    fn default() -> Self {
-        Size::new(0.0, 0.0)
-    }
 }
 
 impl Size {

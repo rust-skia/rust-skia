@@ -11,6 +11,7 @@ use rust_skia::{
     SkRefCntBase
 };
 
+// TODO: complete the implementation.
 pub type Surface = RCHandle<SkSurface>;
 
 impl NativeRefCountedBase for SkSurface {
@@ -23,13 +24,14 @@ impl NativeRefCountedBase for SkSurface {
 
 impl RCHandle<SkSurface> {
 
+    // TODO: use ISize?
     pub fn new_raster_n32_premul(width: i32, height: i32) -> Option<Self> {
         Self::from_ptr(unsafe {
             rust_skia::C_SkSurface_MakeRasterN32Premul(width, height, ptr::null())
         })
     }
 
-    pub fn new_from_backend_texture(
+    pub fn from_backend_texture(
         context: &mut Context,
         backend_texture: &BackendTexture,
         origin: GrSurfaceOrigin,

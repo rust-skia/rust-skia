@@ -37,10 +37,8 @@ impl Handle<SkPictureRecorder> {
     pub fn begin_recording(
         &mut self,
         bounds: &Rect,
-        bbh_factory: Option<&mut BBHFactory>,
+        mut bbh_factory: Option<&mut BBHFactory>,
         record_flags: PictureRecorderRecordFlags) -> &mut Canvas {
-
-        let mut bbh_factory = bbh_factory;
 
         let canvas_ref = unsafe {
             &mut *self.native_mut().beginRecording(
@@ -60,11 +58,11 @@ impl Handle<SkPictureRecorder> {
         Canvas::borrow_from_native(canvas_ref)
     }
 
-    pub fn finish_recording_as_picture(&mut self, cull_rect: Option<Rect>) -> Picture {
+    pub fn finish_recording_as_picture(&mut self, cull_rect: Option<&Rect>) -> Picture {
 
         let cull_rect_ptr : *const SkRect =
             cull_rect
-                .map(|r| &r.into_native() as _)
+                .map(|r| r.native() as _)
                 .unwrap_or(ptr::null());
 
         let picture_ptr = unsafe {

@@ -7,7 +7,7 @@ pub type Vector3 = Point3;
 pub type Color3f = Point3;
 
 #[repr(C)]
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct Point3 {
     pub x: scalar,
     pub y: scalar,
@@ -19,12 +19,6 @@ impl NativeTransmutable<SkPoint3> for Point3 {}
 #[test]
 fn test_layout() {
     Point3::test_layout()
-}
-
-impl Default for Point3 {
-    fn default() -> Self {
-        Self::new(0.0, 0.0, 0.0)
-    }
 }
 
 impl From<(f32, f32, f32)> for Point3 {

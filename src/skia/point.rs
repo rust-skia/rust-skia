@@ -10,11 +10,13 @@ use std::ops::{
     Neg,
     Mul
 };
+use crate::skia::ISize;
+use crate::skia::Size;
 
 pub type IVector = IPoint;
 
 #[repr(C)]
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct IPoint {
     pub x: i32,
     pub y: i32
@@ -25,12 +27,6 @@ impl NativeTransmutable<SkIPoint> for IPoint {}
 #[test]
 fn test_layout() {
     IPoint::test_layout()
-}
-
-impl Default for IPoint {
-    fn default() -> Self {
-        IPoint::new(0, 0)
-    }
 }
 
 impl Neg for IPoint {
@@ -47,10 +43,24 @@ impl Add for IPoint {
     }
 }
 
+impl Add<ISize> for IPoint {
+    type Output = IPoint;
+    fn add(self, rhs: ISize) -> Self::Output {
+        IPoint::new(self.x + rhs.width, self.y + rhs.height)
+    }
+}
+
 impl Sub for IPoint {
     type Output = IPoint;
     fn sub(self, rhs: Self) -> Self::Output {
         IPoint::new(self.x - rhs.x, self.y - rhs.y)
+    }
+}
+
+impl Sub<ISize> for IPoint {
+    type Output = IPoint;
+    fn sub(self, rhs: ISize) -> Self::Output {
+        IPoint::new(self.x - rhs.width, self.y - rhs.height)
     }
 }
 
@@ -69,7 +79,7 @@ impl IPoint {
 pub type Vector = Point;
 
 #[repr(C)]
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct Point {
     pub x: scalar,
     pub y: scalar
@@ -80,12 +90,6 @@ impl NativeTransmutable<SkPoint> for Point {}
 #[test]
 fn point_layout() {
     Point::test_layout()
-}
-
-impl Default for Point {
-    fn default() -> Self {
-        Self::new(0.0, 0.0)
-    }
 }
 
 impl Neg for Point {
@@ -102,10 +106,24 @@ impl Add for Point {
     }
 }
 
+impl Add<Size> for Point {
+    type Output = Self;
+    fn add(self, rhs: Size) -> Self {
+        Point::new(self.x + rhs.width, self.y + rhs.height)
+    }
+}
+
 impl Sub for Point {
     type Output = Self;
-   fn sub(self, rhs: Self) -> Self {
+    fn sub(self, rhs: Self) -> Self {
         Point::new(self.x - rhs.x, self.y - rhs.y)
+    }
+}
+
+impl Sub<Size> for Point {
+    type Output = Self;
+    fn sub(self, rhs: Size) -> Self {
+        Point::new(self.x - rhs.width, self.y - rhs.height)
     }
 }
 

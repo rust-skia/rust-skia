@@ -1,11 +1,14 @@
 use std::slice;
+use std::os::raw;
 use crate::prelude::*;
 use crate::skia::{
     Rect,
     StrokeRec,
     Path,
     Matrix,
-    scalar
+    scalar,
+    Vector,
+    Point
 };
 use rust_skia::{
     SkPathEffect_PointData,
@@ -30,20 +33,27 @@ bitflags! {
     }
 }
 
-/// TODO: review as soon we support transmutable Point, Vector, and Rect.
 #[repr(C)]
 pub struct PathEffectPointData {
     pub flags: PointDataPointFlags,
-    points: *const SkPoint,
-    num_points: i32,
-    pub size: SkVector,
-    pub clip_rect: SkRect,
+    points: *const Point,
+    num_points: raw::c_int,
+    pub size: Vector,
+    pub clip_rect: Rect,
     pub path: Path,
     pub first: Path,
-    pub last: Path
+    pub last: Path,
 }
 
 impl NativeTransmutable<SkPathEffect_PointData> for PathEffectPointData {}
+
+#[test]
+fn test_point_data_layout() {
+    Point::test_layout();
+    Vector::test_layout();
+    Rect::test_layout();
+    PathEffectPointData::test_layout();
+}
 
 impl Drop for PathEffectPointData {
     fn drop(&mut self) {
@@ -63,17 +73,11 @@ impl PathEffectPointData {
         })
     }
 
-    /// TODO: review as soon we support transmutable Points.
-    pub fn points(&self) -> &[SkPoint] {
+    pub fn points(&self) -> &[Point] {
         unsafe {
             slice::from_raw_parts(self.points, self.num_points.try_into().unwrap())
         }
     }
-}
-
-#[test]
-fn point_data_layout() {
-    PathEffectPointData::test_layout();
 }
 
 /*
@@ -88,8 +92,8 @@ impl EnumHandle<SkPathEffect_DashType> {
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct PathEffectDashInfo {
-    intervals: Vec<scalar>,
-    phase: scalar
+    pub intervals: Vec<scalar>,
+    pub phase: scalar
 }
 
 pub type PathEffect = RCHandle<SkPathEffect>;
@@ -179,4 +183,10 @@ impl RCHandle<SkPathEffect> {
             }
         }
     }
+}
+
+#[test]
+fn create_and_drop_point_data() {
+    let data = PathEffectPointData::new();
+    drop(data)
 }

@@ -130,17 +130,13 @@ impl RCHandle<SkVertices> {
         let indices_ptr = indices.map(|i| i.as_ptr()).unwrap_or(ptr::null());
         let indices_count = indices.map(|i| i.len()).unwrap_or(0);
 
-        let positions: Vec<SkPoint> = positions.iter().map(|p| p.into_native()).collect();
-        let texs: Vec<SkPoint> = texs.iter().map(|p| p.into_native()).collect();
-        let colors: Vec<SkColor> = colors.iter().map(|c| c.into_native()).collect();
-
         Vertices::from_ptr(unsafe {
             C_SkVertices_MakeCopy(
                 mode.into_native(),
                 vertex_count as _,
-                positions.as_ptr(),
-                texs.as_ptr(),
-                colors.as_ptr(),
+                positions.native().as_ptr(),
+                texs.native().as_ptr(),
+                colors.native().as_ptr(),
                 bone_indices_ptr as _,
                 bone_weights_ptr as _,
                 indices_count.try_into().unwrap(),
@@ -181,27 +177,25 @@ impl RCHandle<SkVertices> {
         unsafe { self.native().vertexCount().try_into().unwrap() }
     }
 
-    // TODO: use wrapper type as soon we can transmute points
-    pub fn positions(&self) -> &[SkPoint] {
+    pub fn positions(&self) -> &[Point] {
         unsafe {
-            let ptr = self.native().positions();
-            slice::from_raw_parts(ptr, self.vertex_count())
+            let ptr : *const SkPoint = self.native().positions();
+            slice::from_raw_parts(ptr as _, self.vertex_count())
         }
     }
 
-    // TODO: use wrapper type as soon we can transmute points
-    pub fn tex_coords(&self) -> Option<&[SkPoint]> {
+    pub fn tex_coords(&self) -> Option<&[Point]> {
         unsafe {
-            let ptr = self.native().positions().to_option()?;
-            Some(slice::from_raw_parts(ptr, self.vertex_count()))
+            let ptr : *const SkPoint = self.native().positions().to_option()?;
+            Some(slice::from_raw_parts(ptr as _, self.vertex_count()))
         }
     }
 
     // TODO: use wrapper type as soon we can transmute colors
-    pub fn colors(&self) -> Option<&[SkColor]> {
+    pub fn colors(&self) -> Option<&[Color]> {
         unsafe {
-            let ptr = self.native().colors().to_option()?;
-            Some(slice::from_raw_parts(ptr, self.vertex_count()))
+            let ptr : *const SkColor = self.native().colors().to_option()?;
+            Some(slice::from_raw_parts(ptr as _, self.vertex_count()))
         }
     }
 
@@ -309,27 +303,24 @@ impl Handle<SkVertices_Builder> {
         unsafe { self.native().isVolatile() }
     }
 
-    // TODO: implement this with the proper return type as soon we can transmute points.
-    pub fn positions(&mut self) -> &mut [SkPoint] {
+    pub fn positions(&mut self) -> &mut [Point] {
         unsafe {
-            let positions = self.native_mut().positions();
-            slice::from_raw_parts_mut(positions, self.vertex_count())
+            let positions: *mut SkPoint = self.native_mut().positions();
+            slice::from_raw_parts_mut(positions as _, self.vertex_count())
         }
     }
 
-    // TODO: implement this with the proper return type as soon we can transmute points.
-    pub fn tex_coords(&mut self) -> Option<&mut [SkPoint]> {
+    pub fn tex_coords(&mut self) -> Option<&mut [Point]> {
         unsafe {
-            let coords = self.native_mut().texCoords().to_option()?;
-            Some(slice::from_raw_parts_mut(coords, self.vertex_count()))
+            let coords: *mut SkPoint = self.native_mut().texCoords().to_option()?;
+            Some(slice::from_raw_parts_mut(coords as _, self.vertex_count()))
         }
     }
 
-    // TODO: implement this with the proper return type as soon we can transmute points.
-    pub fn colors(&mut self) -> Option<&mut [SkColor]> {
+    pub fn colors(&mut self) -> Option<&mut [Color]> {
         unsafe {
-            let colors = self.native_mut().colors().to_option()?;
-            Some(slice::from_raw_parts_mut(colors, self.vertex_count()))
+            let colors: *mut SkColor = self.native_mut().colors().to_option()?;
+            Some(slice::from_raw_parts_mut(colors as _, self.vertex_count()))
         }
     }
 

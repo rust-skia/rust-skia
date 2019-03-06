@@ -1,12 +1,10 @@
-use crate::{
-    skia::{
-        IRect,
-        Path,
-        IPoint,
-        Contains
-    },
-    prelude::*,
-    skia::QuickReject
+use crate::prelude::*;
+use crate::skia::{
+    IRect,
+    Path,
+    IPoint,
+    Contains,
+    QuickReject
 };
 use rust_skia::{
     C_SkRegion_destruct,
@@ -14,6 +12,7 @@ use rust_skia::{
     SkRegion,
     SkRegion_Op
 };
+use crate::skia::IVector;
 
 pub type Region = Handle<SkRegion>;
 
@@ -151,8 +150,8 @@ impl Handle<SkRegion> {
             || !IRect::intersects(&self.bounds(), &other.bounds())
     }
 
-    pub fn translate(&mut self, dx: i32, dy: i32) {
-        unsafe { self.native_mut().translate(dx, dy) }
+    pub fn translate(&mut self, d: IVector) {
+        unsafe { self.native_mut().translate(d.x, d.y) }
     }
 
     pub fn op_rect(&mut self, rect: &IRect, op: RegionOp) -> bool {

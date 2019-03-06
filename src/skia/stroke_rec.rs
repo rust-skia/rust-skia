@@ -108,23 +108,29 @@ impl Handle<SkStrokeRec> {
         unsafe { self.native().isFillStyle() }
     }
 
-    pub fn set_fill_style(&mut self) {
+    pub fn set_fill_style(&mut self) -> &mut Self {
         unsafe { self.native_mut().setFillStyle() }
+        self
     }
 
-    pub fn set_hairline_style(&mut self) {
+    pub fn set_hairline_style(&mut self) -> &mut Self {
         unsafe { self.native_mut().setHairlineStyle() }
+        self
     }
 
-    pub fn set_stroke_style(&mut self, width: scalar, stroke_and_fill: Option<bool>) {
+    pub fn set_stroke_style(&mut self, width: scalar, stroke_and_fill: Option<bool>) -> &mut Self {
         let stroke_and_fill = stroke_and_fill.unwrap_or(false);
-        unsafe { self.native_mut().setStrokeStyle(width, stroke_and_fill )}
+        unsafe {
+            self.native_mut().setStrokeStyle(width, stroke_and_fill )
+        }
+        self
     }
 
-    pub fn set_stroke_params(&mut self, cap: PaintCap, join: PaintJoin, miter_limit: scalar) {
+    pub fn set_stroke_params(&mut self, cap: PaintCap, join: PaintJoin, miter_limit: scalar) -> &mut Self {
         unsafe {
             self.native_mut().setStrokeParams(cap.into_native(), join.into_native(), miter_limit)
         }
+        self
     }
 
     pub fn res_scale(&self) -> scalar {

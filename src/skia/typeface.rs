@@ -50,6 +50,12 @@ impl NativeRefCountedBase for SkTypeface {
     }
 }
 
+impl Default for RCHandle<SkTypeface> {
+    fn default() -> Self {
+        Typeface::from_ptr(unsafe { C_SkTypeface_MakeDefault() }).unwrap()
+    }
+}
+
 impl RCHandle<SkTypeface> {
     pub fn font_style(&self) -> FontStyle {
         unsafe { FontStyle::from_native(self.native().fontStyle()) }
@@ -70,8 +76,8 @@ impl RCHandle<SkTypeface> {
         unsafe { self.native().isFixedPitch() }
     }
 
-    pub fn equal(facea: &Typeface, faceb: &Typeface) -> bool {
-        unsafe { SkTypeface::Equal(facea.native(), faceb.native()) }
+    pub fn equal(face_a: &Typeface, face_b: &Typeface) -> bool {
+        unsafe { SkTypeface::Equal(face_a.native(), face_b.native()) }
     }
 
     pub fn from_name(familiy_name: &str, font_style: FontStyle) -> Option<Typeface> {
@@ -85,12 +91,12 @@ impl RCHandle<SkTypeface> {
         }
     }
 
-    // from_file is unsupported, because it is unclear what's the
-    // encoding of the path name. from_data can be used instead.
+    // from_file is unsupported, because it is unclear what the
+    // encoding of the path name is. from_data can be used instead.
 
-    pub fn from_data(data: &Data, index: i32) {
+    pub fn from_data(data: &Data, index: usize) {
         Typeface::from_ptr(
-            unsafe { C_SkTypeface_MakeFromData(data.shared_native(), index) } );
+            unsafe { C_SkTypeface_MakeFromData(data.shared_native(), index.try_into().unwrap()) } );
     }
 
     pub fn serialize(&self, behavior: TypefaceSerializeBehavior) -> Data {
@@ -100,7 +106,7 @@ impl RCHandle<SkTypeface> {
     }
 
     // chars_to_glyphs is unsupported, because the documentation does not make sense to me:
-    // The returnvalue does not seem to actually count the required elements of the array.
+    // The return value does not seem to actually count the required elements of the array.
     // Use Font's text_to_glyphs 's function instead.
 
     pub fn unichar_to_glyph(&self, unichar: Unichar) -> GlyphId {
@@ -165,11 +171,5 @@ impl RCHandle<SkTypeface> {
 
     pub fn bounds(&self) -> Rect {
         Rect::from_native(unsafe { self.native().getBounds() })
-    }
-}
-
-impl Default for RCHandle<SkTypeface> {
-    fn default() -> Self {
-        Typeface::from_ptr(unsafe { C_SkTypeface_MakeDefault() }).unwrap()
     }
 }

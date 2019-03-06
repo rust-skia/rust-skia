@@ -1,19 +1,19 @@
-use rust_skia::SkPixelGeometry;
-use rust_skia::SkSurfaceProps;
-use rust_skia::SkSurfaceProps_Flags;
-use crate::prelude::NativeAccess;
+use crate::prelude::*;
+use rust_skia::{
+    SkPixelGeometry,
+    SkSurfaceProps,
+    SkSurfaceProps_Flags
+};
 
-// TODO: use EnumHandle
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub struct PixelGeometry(pub(crate) SkPixelGeometry);
+pub type PixelGeometry = EnumHandle<SkPixelGeometry>;
 
 #[allow(non_upper_case_globals)]
-impl PixelGeometry {
-    pub const Unknown: PixelGeometry = PixelGeometry(SkPixelGeometry::kUnknown_SkPixelGeometry);
-    pub const RGBH: PixelGeometry = PixelGeometry(SkPixelGeometry::kRGB_H_SkPixelGeometry);
-    pub const BGRH: PixelGeometry = PixelGeometry(SkPixelGeometry::kBGR_H_SkPixelGeometry);
-    pub const RGBV: PixelGeometry = PixelGeometry(SkPixelGeometry::kRGB_V_SkPixelGeometry);
-    pub const BGRV: PixelGeometry = PixelGeometry(SkPixelGeometry::kBGR_V_SkPixelGeometry);
+impl EnumHandle<SkPixelGeometry> {
+    pub const Unknown: Self = Self(SkPixelGeometry::kUnknown_SkPixelGeometry);
+    pub const RGBH: Self = Self(SkPixelGeometry::kRGB_H_SkPixelGeometry);
+    pub const BGRH: Self = Self(SkPixelGeometry::kBGR_H_SkPixelGeometry);
+    pub const RGBV: Self = Self(SkPixelGeometry::kRGB_V_SkPixelGeometry);
+    pub const BGRV: Self = Self(SkPixelGeometry::kBGR_V_SkPixelGeometry);
 
     pub fn is_rgb(&self) -> bool {
         *self == Self::RGBH || *self == Self::RGBV
@@ -32,7 +32,7 @@ impl PixelGeometry {
     }
 }
 
-impl Default for PixelGeometry {
+impl Default for EnumHandle<SkPixelGeometry> {
     fn default() -> Self {
         PixelGeometry::Unknown
     }
@@ -51,55 +51,47 @@ impl Default for SurfacePropsFlags {
     }
 }
 
-/// TODO: use Handle
-#[derive(Copy)]
-pub struct SurfaceProps(pub(crate) SkSurfaceProps);
+pub type SurfaceProps = ValueHandle<SkSurfaceProps>;
 
-impl NativeAccess<SkSurfaceProps> for SurfaceProps {
-    fn native(&self) -> &SkSurfaceProps {
-        &self.0
-    }
-
-    fn native_mut(&mut self) -> &mut SkSurfaceProps {
-        &mut self.0
-    }
-}
-
-// TODO: use Handle together with NativeClone
-impl Clone for SurfaceProps {
+impl NativeClone for SkSurfaceProps {
     fn clone(&self) -> Self {
-        SurfaceProps(unsafe { SkSurfaceProps::new3(&self.0) })
+        unsafe { SkSurfaceProps::new3(self) }
     }
 }
 
-// TODO: use Handle together with NativePartialEq
-impl PartialEq for SurfaceProps {
-    fn eq(&self, other: &SurfaceProps) -> bool {
-        unsafe { rust_skia::C_SkSurfaceProps_Equals(&self.0, &other.0) }
+impl NativePartialEq for SkSurfaceProps {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe { rust_skia::C_SkSurfaceProps_Equals(self, other) }
     }
 }
 
-impl Default for SurfaceProps {
+impl Default for ValueHandle<SkSurfaceProps> {
     fn default() -> Self {
         SurfaceProps::new(Default::default(), Default::default())
     }
 }
 
-impl SurfaceProps {
+impl ValueHandle<SkSurfaceProps> {
     pub fn new(flags: SurfacePropsFlags, pixel_geometry: PixelGeometry) -> SurfaceProps {
-        SurfaceProps(unsafe { SkSurfaceProps::new(flags.bits(), pixel_geometry.0) })
+        SurfaceProps::from_native(unsafe {
+            SkSurfaceProps::new(flags.bits(), pixel_geometry.into_native())
+        })
     }
 
     pub fn flags(&self) -> SurfacePropsFlags {
-        SurfacePropsFlags::from_bits_truncate(unsafe { self.0.flags() })
+        SurfacePropsFlags::from_bits_truncate(unsafe {
+            self.native().flags()
+        })
     }
 
     pub fn pixel_geometry(&self) -> PixelGeometry {
-        PixelGeometry(unsafe { self.0.pixelGeometry() })
+        PixelGeometry::from_native(unsafe {
+            self.native().pixelGeometry()
+        })
     }
 
-    pub fn is_use_device_independnet_fonts(&self) -> bool {
-        unsafe { self.0.isUseDeviceIndependentFonts() }
+    pub fn is_use_device_independent_fonts(&self) -> bool {
+        unsafe { self.native().isUseDeviceIndependentFonts() }
     }
 }
 
@@ -108,6 +100,6 @@ fn create() {
     let props = SurfaceProps::new(SurfacePropsFlags::UseDeviceIndependentFonts, PixelGeometry::RGBH);
     assert_eq!(SurfacePropsFlags::UseDeviceIndependentFonts, props.flags());
     assert_eq!(PixelGeometry::RGBH, props.pixel_geometry());
-    assert_eq!(true, props.is_use_device_independnet_fonts());
+    assert_eq!(true, props.is_use_device_independent_fonts());
 }
 

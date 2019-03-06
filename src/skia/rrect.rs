@@ -7,12 +7,11 @@ use rust_skia::{
     SkRRect_Corner,
     SkVector
 };
-use crate::{
-    skia::{
-        Rect,
-        Vector,
-        Matrix
-    }
+use crate::skia::{
+    Rect,
+    Vector,
+    Matrix,
+    scalar
 };
 
 pub type RRectType = EnumHandle<SkRRect_Type>;
@@ -87,11 +86,11 @@ impl RRect {
         unsafe { self.native().isComplex() }
     }
 
-    pub fn width(&self) -> f32 {
+    pub fn width(&self) -> scalar {
         unsafe { self.native().width() }
     }
 
-    pub fn height(&self) -> f32 {
+    pub fn height(&self) -> scalar {
         unsafe { self.native().height() }
     }
 
@@ -109,12 +108,12 @@ impl RRect {
             .into_handle()
     }
 
-    pub fn from_rect_xy(rect: &Rect, x_rad: f32, y_rad: f32) -> Self {
+    pub fn from_rect_xy(rect: &Rect, x_rad: scalar, y_rad: scalar) -> Self {
         unsafe { SkRRect::MakeRectXY(&rect.into_native(), x_rad, y_rad) }
             .into_handle()
     }
 
-    pub fn from_nine_patch(rect: &Rect, left_rad: f32, top_rad: f32, right_rad: f32, bottom_rad: f32) -> Self {
+    pub fn from_nine_patch(rect: &Rect, left_rad: scalar, top_rad: scalar, right_rad: scalar, bottom_rad: scalar) -> Self {
         let mut r = Self::default();
         unsafe {
             r.native_mut()
@@ -128,9 +127,8 @@ impl RRect {
     pub fn from_rect_radii(rect: &Rect, radii: &[Vector; 4]) -> Self {
         let mut r = Self::default();
         unsafe {
-            let v : Vec<SkVector> = radii.iter().map(|v| v.into_native()).collect();
             r.native_mut()
-                .setRectRadii(&rect.into_native(), v.as_ptr())
+                .setRectRadii(rect.native(), radii.native().as_ptr())
         }
         r
     }
@@ -151,22 +149,26 @@ impl RRect {
         })
     }
 
+    // TODO: use Vector for dx, dy?
     #[warn(unused)]
-    pub fn inset(&self, dx: f32, dy: f32) -> Self {
+    pub fn inset(&self, dx: scalar, dy: scalar) -> Self {
         // inset1 does not link.
         let mut r = Self::default();
         unsafe { self.native().inset(dx, dy, r.native_mut()) };
         r
     }
 
+
+    // TODO: use Vector for dx, dy?
     #[warn(unused)]
-    pub fn outset(&self, dx: f32, dy: f32) -> Self {
+    pub fn outset(&self, dx: scalar, dy: scalar) -> Self {
         // outset and outset1 does not link.
         self.inset(-dx, -dy)
     }
 
+    // TODO: use Vector for dx, dy?
     #[warn(unused)]
-    pub fn offset(&self, dx: f32, dy: f32) -> Self {
+    pub fn offset(&self, dx: scalar, dy: scalar) -> Self {
         // makeOffset and offset does not link.
         let mut cloned = self.clone();
         unsafe { cloned.native_mut().fRect.offset(dx, dy) }
