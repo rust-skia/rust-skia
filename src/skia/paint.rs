@@ -323,9 +323,10 @@ impl Handle<SkPaint> {
     pub fn fill_path(&self, src: &Path, cull_rect: Option<&Rect>, res_scale: Option<scalar>) -> Option<Path> {
         let mut r = Path::default();
 
-        let cull_rect_ptr : *const SkRect =
+
+        let cull_rect_ptr =
             cull_rect
-                .map(|r| &r.into_native() as _)
+                .map(|r| r.native() as *const _)
                 .unwrap_or(ptr::null());
 
         unsafe { self.native().getFillPath(
