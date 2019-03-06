@@ -234,7 +234,10 @@ impl<N: Clone> NativeAccess<N> for ValueHandle<N> {
 
 impl<N: NativePartialEq + Clone> PartialEq for ValueHandle<N> {
     fn eq(&self, rhs: &Self) -> bool {
-        self.0.eq(&rhs.0)
+        self.native().eq(rhs.native())
+    }
+    fn ne(&self, rhs: &Self) -> bool {
+        self.native().ne(rhs.native())
     }
 }
 
@@ -273,11 +276,11 @@ impl<N: NativeDrop + NativeClone> Clone for Handle<N> {
 
 impl<N: NativeDrop + NativePartialEq> PartialEq for Handle<N> {
     fn eq(&self, rhs: &Self) -> bool {
-        self.0.eq(&rhs.0)
+        self.native().eq(rhs.native())
     }
 
     fn ne(&self, rhs: &Self) -> bool {
-        self.0.ne(&rhs.0)
+        self.native().ne(rhs.native())
     }
 }
 
@@ -391,6 +394,16 @@ impl <N: NativeRefCounted> Drop for RCHandle<N> {
     #[inline]
     fn drop(&mut self) {
         unsafe { &*self.0 }._unref();
+    }
+}
+
+impl<N: NativeRefCounted + NativePartialEq> PartialEq for RCHandle<N> {
+    fn eq(&self, rhs: &Self) -> bool {
+        self.native().eq(rhs.native())
+    }
+
+    fn ne(&self, rhs: &Self) -> bool {
+        self.native().ne(rhs.native())
     }
 }
 
