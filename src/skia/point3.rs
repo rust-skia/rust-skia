@@ -21,8 +21,8 @@ fn test_layout() {
     Point3::test_layout()
 }
 
-impl From<(f32, f32, f32)> for Point3 {
-    fn from((x, y, z): (f32, f32, f32)) -> Self {
+impl From<(scalar, scalar, scalar)> for Point3 {
+    fn from((x, y, z): (scalar, scalar, scalar)) -> Self {
         Self::new(x, y, z)
     }
 }
