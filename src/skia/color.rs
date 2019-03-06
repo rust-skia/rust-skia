@@ -9,11 +9,13 @@ use rust_skia::{
     SkColor4f
 };
 
-// TODO: What should we do with Alpha?
+// TODO: What should we do with SkAlpha?
 // It does not seem to be used, but if we want to export it, we'd
 // like to define Alpha::TRANSPARENT and Alpha::OPAQUE.
 // pub type Alpha = u8;
 
+// note: SkColor _is_ a u32, and therefore its components are
+// endian dependent, so we can't expose it as (transmuted) fields.
 #[derive(Copy, Clone, PartialEq)]
 #[repr(transparent)]
 pub struct Color(SkColor);
@@ -67,7 +69,8 @@ impl Color {
     }
 
     #[inline]
-    pub fn set_a(&self, a: u8) -> Self {
+    #[warn(unused)]
+    pub fn with_a(&self, a: u8) -> Self {
         Self::from_argb(a, self.r(), self.g(), self.b())
     }
 
@@ -181,8 +184,11 @@ impl From<Color> for Color4f {
 }
 
 impl Color4f {
+
     pub fn vec(&self) -> &[f32; 4] {
-        unsafe { mem::transmute::<&Self, &[f32; 4]>(self) }
+        unsafe {
+            mem::transmute::<&Self, &[f32; 4]>(self)
+        }
     }
 
     pub fn vec_mut(&mut self) -> &mut[f32; 4] {
@@ -205,7 +211,7 @@ impl Color4f {
     }
 
     pub fn make_opaque(&self) -> Self {
-        Self { r: self.r, g: self.g, b: self.b, a: 1.0 }
+        Self { a: 1.0, .. *self }
     }
 }
 
