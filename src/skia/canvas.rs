@@ -552,7 +552,6 @@ impl Canvas {
         r.is_empty().if_false_some(r)
     }
 
-    // TODO: make mode optional, or add a second function (default is SrcOver)?
     pub fn draw_color(&mut self, color: Color, mode: BlendMode) -> &mut Self {
         unsafe {
             self.native_mut().drawColor(color.into_native(), mode.into_native())

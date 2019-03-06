@@ -53,3 +53,9 @@ impl EnumHandle<SkBlendMode> {
         }
     }
 }
+
+impl Default for EnumHandle<SkBlendMode> {
+    fn default() -> Self {
+        BlendMode::SrcOver
+    }
+}
