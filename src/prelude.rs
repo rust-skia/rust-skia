@@ -492,11 +492,15 @@ pub trait NativeTransmutable<NT: Sized> : Sized {
     }
 
     // TODO: this seems to actually copy, which is probably not what we want.
+    // TODO: this should only be possible for transmutable pairs that are
+    // both Copy
     fn from_native(nt: NT) -> Self {
         unsafe { mem::transmute_copy::<NT, Self>(&nt) }
     }
 
     // TODO: this seems to actually copy, which is probably not what we want.
+    // TODO: this should only be possible for transmutable pairs that are
+    // both Copy
     fn into_native(self) -> NT {
         unsafe { mem::transmute_copy::<Self, NT>(&self) }
     }
@@ -520,6 +524,23 @@ impl<NT, ElementT> NativeTransmutableSliceAccess<NT> for [ElementT]
 
     fn native_mut(&mut self) -> &mut [NT] {
         unsafe { mem::transmute::<&mut Self, &mut [NT]>(self) }
+    }
+}
+
+impl<NT, ElementT> NativeTransmutable<Option<&[NT]>> for Option<&[ElementT]>
+    where ElementT: NativeTransmutable<NT> {}
+
+pub trait NativeTransmutableOptionSliceAccessMut<NT: Sized> {
+    fn native_mut(&mut self) -> &mut Option<&mut [NT]>;
+}
+
+impl<NT, ElementT> NativeTransmutableOptionSliceAccessMut<NT> for Option<&mut [ElementT]>
+    where ElementT: NativeTransmutable<NT> {
+
+    fn native_mut(&mut self) -> &mut Option<&mut [NT]> {
+        unsafe {
+            mem::transmute::<&mut Option<&mut [ElementT]>, &mut Option<&mut [NT]>>(self)
+        }
     }
 }
 
