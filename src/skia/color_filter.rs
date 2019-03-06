@@ -4,8 +4,9 @@ use crate::skia::{
     Color,
     BlendMode,
     Bitmap,
-    color::Color4f,
-    ColorSpace
+    Color4f,
+    ColorSpace,
+    scalar
 };
 use rust_skia::{
     C_SkColorFilter_MakeLinearToSRGBGamma,
@@ -48,8 +49,8 @@ impl RCHandle<SkColorFilter> {
             .if_true_some((Color::from_native(color), BlendMode::from_native(mode)))
     }
 
-    pub fn as_color_matrix(&self) -> Option<[f32; 20]> {
-        let mut matrix : [f32; 20] = unsafe { mem::uninitialized() };
+    pub fn as_color_matrix(&self) -> Option<[scalar; 20]> {
+        let mut matrix : [scalar; 20] = unsafe { mem::uninitialized() };
         unsafe { C_SkColorFilter_asColorMatrix(self.native(), matrix.as_mut_ptr())}
             .if_true_some(matrix)
     }
@@ -92,18 +93,20 @@ impl RCHandle<SkColorFilter> {
         })
     }
 
-    pub fn from_matrix_row_major_255(matrix: [f32; 20]) -> ColorFilter {
+    pub fn from_matrix_row_major_255(matrix: [scalar; 20]) -> ColorFilter {
         ColorFilter::from_ptr(unsafe {
             C_SkColorFilter_MakeMatrixFilterRowMajor255(matrix.as_ptr())
         }).unwrap()
     }
 
+    // TODO: not sure if we need the new_ prefix here.
     pub fn new_linear_to_srgb_gamma() -> ColorFilter {
         ColorFilter::from_ptr(unsafe {
             C_SkColorFilter_MakeLinearToSRGBGamma()
         }).unwrap()
     }
 
+    // TODO: not sure if we need the new_ prefix here.
     pub fn new_srgb_to_linear_gamma() -> ColorFilter {
         ColorFilter::from_ptr(unsafe {
             C_SkColorFilter_MakeSRGBToLinearGamma()
@@ -118,7 +121,7 @@ fn color_mode_roundtrip() {
     let cf = ColorFilter::new_mode_filter(color, mode).unwrap();
     let (c, m) = cf.as_color_mode().unwrap();
     assert!(color == c);
-    assert!(mode == m);
+    assert_eq!(mode, m);
 }
 
 #[test]
