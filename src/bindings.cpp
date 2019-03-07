@@ -28,6 +28,11 @@
 
 #endif
 
+template<typename T>
+inline sk_sp<T> spFromConst(const T* pt) {
+    return sk_sp<T>(const_cast<T*>(pt));
+}
+
 //
 // SkSurface
 //
@@ -59,8 +64,8 @@ extern "C" SkImage* C_SkImage_MakeFromBitmap(const SkBitmap* bitmap) {
     return SkImage::MakeFromBitmap(*bitmap).release();
 }
 
-extern "C" SkImage* C_SkImage_MakeFromEncoded(SkData* encoded, const SkIRect* subset) {
-    return SkImage::MakeFromEncoded(sk_sp<SkData>(encoded), subset).release();
+extern "C" SkImage* C_SkImage_MakeFromEncoded(const SkData* encoded, const SkIRect* subset) {
+    return SkImage::MakeFromEncoded(spFromConst(encoded), subset).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromTexture(
@@ -69,18 +74,18 @@ extern "C" SkImage* C_SkImage_MakeFromTexture(
         GrSurfaceOrigin origin,
         SkColorType colorType,
         SkAlphaType alphaType,
-        SkColorSpace* colorSpace) {
-    return SkImage::MakeFromTexture(context, *backendTexture, origin, colorType, alphaType, sk_sp<SkColorSpace>(colorSpace)).release();
+        const SkColorSpace* colorSpace) {
+    return SkImage::MakeFromTexture(context, *backendTexture, origin, colorType, alphaType, spFromConst(colorSpace)).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeCrossContextFromEncoded(
         GrContext* context,
-        SkData* data,
+        const SkData* data,
         bool buildMips,
-        SkColorSpace* dstColorSpace,
+        const SkColorSpace* dstColorSpace,
         bool limitToMaxTextureSize
         ) {
-    return SkImage::MakeCrossContextFromEncoded(context, sk_sp<SkData>(data), buildMips, dstColorSpace, limitToMaxTextureSize).release();
+    return SkImage::MakeCrossContextFromEncoded(context, spFromConst(data), buildMips, const_cast<SkColorSpace*>(dstColorSpace), limitToMaxTextureSize).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromAdoptedTexture(
@@ -89,8 +94,8 @@ extern "C" SkImage* C_SkImage_MakeFromAdoptedTexture(
         GrSurfaceOrigin origin,
         SkColorType colorType,
         SkAlphaType alphaType,
-        SkColorSpace* colorSpace) {
-    return SkImage::MakeFromAdoptedTexture(context, *backendTexture, origin, colorType, alphaType, sk_sp<SkColorSpace>(colorSpace)).release();
+        const SkColorSpace* colorSpace) {
+    return SkImage::MakeFromAdoptedTexture(context, *backendTexture, origin, colorType, alphaType, spFromConst(colorSpace)).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromYUVATexturesCopy(
@@ -100,8 +105,11 @@ extern "C" SkImage* C_SkImage_MakeFromYUVATexturesCopy(
         const SkYUVAIndex yuvaIndices[4],
         SkISize imageSize,
         GrSurfaceOrigin imageOrigin,
-        SkColorSpace* colorSpace) {
-    return SkImage::MakeFromYUVATexturesCopy(context, yuvColorSpace, yuvaTextures, yuvaIndices, imageSize, imageOrigin, sk_sp<SkColorSpace>(colorSpace)).release();
+        const SkColorSpace* colorSpace) {
+    return SkImage::MakeFromYUVATexturesCopy(
+            context,
+            yuvColorSpace, yuvaTextures, yuvaIndices,
+            imageSize, imageOrigin, spFromConst(colorSpace)).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend(
@@ -112,8 +120,12 @@ extern "C" SkImage* C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend(
         SkISize imageSize,
         GrSurfaceOrigin imageOrigin,
         const GrBackendTexture& backendTexture,
-        SkColorSpace* colorSpace) {
-    return SkImage::MakeFromYUVATexturesCopyWithExternalBackend(context, yuvColorSpace, yuvaTextures, yuvaIndices, imageSize, imageOrigin, backendTexture, sk_sp<SkColorSpace>(colorSpace)).release();
+        const SkColorSpace* colorSpace) {
+    return SkImage::MakeFromYUVATexturesCopyWithExternalBackend(
+            context,
+            yuvColorSpace, yuvaTextures, yuvaIndices,
+            imageSize, imageOrigin, backendTexture,
+            spFromConst(colorSpace)).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromYUVATextures(
@@ -123,8 +135,11 @@ extern "C" SkImage* C_SkImage_MakeFromYUVATextures(
         const SkYUVAIndex yuvaIndices[4],
         SkISize imageSize,
         GrSurfaceOrigin imageOrigin,
-        SkColorSpace* colorSpace) {
-    return SkImage::MakeFromYUVATextures(context, yuvColorSpace, yuvaTextures, yuvaIndices, imageSize, imageOrigin, sk_sp<SkColorSpace>(colorSpace)).release();
+        const SkColorSpace* colorSpace) {
+    return SkImage::MakeFromYUVATextures(
+            context,
+            yuvColorSpace, yuvaTextures, yuvaIndices,
+            imageSize, imageOrigin, spFromConst(colorSpace)).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromNV12TexturesCopy(
@@ -132,8 +147,10 @@ extern "C" SkImage* C_SkImage_MakeFromNV12TexturesCopy(
         SkYUVColorSpace yuvColorSpace,
         const GrBackendTexture nv12Textures[2],
         GrSurfaceOrigin imageOrigin,
-        SkColorSpace* imageColorSpace) {
-    return SkImage::MakeFromNV12TexturesCopy(context, yuvColorSpace, nv12Textures, imageOrigin, sk_sp<SkColorSpace>(imageColorSpace)).release();
+        const SkColorSpace* imageColorSpace) {
+    return SkImage::MakeFromNV12TexturesCopy(
+            context, yuvColorSpace, nv12Textures, imageOrigin,
+            spFromConst(imageColorSpace)).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
@@ -142,18 +159,21 @@ extern "C" SkImage* C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
         const GrBackendTexture nv12Textures[2],
         GrSurfaceOrigin imageOrigin,
         const GrBackendTexture* backendTexture,
-        SkColorSpace* imageColorSpace) {
-    return SkImage::MakeFromNV12TexturesCopyWithExternalBackend(context, yuvColorSpace, nv12Textures, imageOrigin, *backendTexture, sk_sp<SkColorSpace>(imageColorSpace)).release();
+        const SkColorSpace* imageColorSpace) {
+    return SkImage::MakeFromNV12TexturesCopyWithExternalBackend(
+            context,
+            yuvColorSpace, nv12Textures, imageOrigin, *backendTexture,
+            spFromConst(imageColorSpace)).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromPicture(
-        SkPicture* picture,
+        const SkPicture* picture,
         const SkISize* dimensions,
         const SkMatrix* matrix,
         const SkPaint* paint,
         SkImage::BitDepth bitDepth,
-        SkColorSpace* colorSpace) {
-    return SkImage::MakeFromPicture(sk_sp<SkPicture>(picture), *dimensions, matrix, paint, bitDepth, sk_sp<SkColorSpace>(colorSpace)).release();
+        const SkColorSpace* colorSpace) {
+    return SkImage::MakeFromPicture(spFromConst(picture), *dimensions, matrix, paint, bitDepth, spFromConst(colorSpace)).release();
 }
 
 extern "C" void C_SkImage_getBackendTexture(
@@ -177,8 +197,12 @@ extern "C" SkImage* C_SkImage_makeSubset(const SkImage* self, const SkIRect* sub
     return self->makeSubset(*subset).release();
 }
 
-extern "C" SkImage* C_SkImage_makeTextureImage(const SkImage* self, GrContext* context, SkColorSpace* dstColorSpace, GrMipMapped mipMapped) {
-    return self->makeTextureImage(context, dstColorSpace, mipMapped).release();
+extern "C" SkImage* C_SkImage_makeTextureImage(
+        const SkImage* self,
+        GrContext* context,
+        const SkColorSpace* dstColorSpace,
+        GrMipMapped mipMapped) {
+    return self->makeTextureImage(context, const_cast<SkColorSpace*>(dstColorSpace), mipMapped).release();
 }
 
 extern "C" SkImage* C_SkImage_makeNonTextureImage(const SkImage* self) {
@@ -189,8 +213,8 @@ extern "C" SkImage* C_SkImage_makeRasterImage(const SkImage* self) {
     return self->makeRasterImage().release();
 }
 
-extern "C" SkImage* C_SkImage_makeColorSpace(const SkImage* self, SkColorSpace* target) {
-    return self->makeColorSpace(sk_sp<SkColorSpace>(target)).release();
+extern "C" SkImage* C_SkImage_makeColorSpace(const SkImage* self, const SkColorSpace* target) {
+    return self->makeColorSpace(spFromConst(target)).release();
 }
 
 //
@@ -221,20 +245,20 @@ extern "C" bool C_SkPaint_Equals(const SkPaint* lhs, const SkPaint* rhs) {
     return *lhs == *rhs;
 }
 
-extern "C" void C_SkPaint_setColorFilter(SkPaint* self, SkColorFilter* colorFilter) {
-    self->setColorFilter(sk_sp<SkColorFilter>(colorFilter));
+extern "C" void C_SkPaint_setColorFilter(SkPaint* self, const SkColorFilter* colorFilter) {
+    self->setColorFilter(spFromConst(colorFilter));
 }
 
-extern "C" void C_SkPaint_setPathEffect(SkPaint* self, SkPathEffect* pathEffect) {
-    self->setPathEffect(sk_sp<SkPathEffect>(pathEffect));
+extern "C" void C_SkPaint_setPathEffect(SkPaint* self, const SkPathEffect* pathEffect) {
+    self->setPathEffect(spFromConst(pathEffect));
 }
 
-extern "C" void C_SkPaint_setMaskFilter(SkPaint* self, SkMaskFilter* maskFilter) {
-    self->setMaskFilter(sk_sp<SkMaskFilter>(maskFilter));
+extern "C" void C_SkPaint_setMaskFilter(SkPaint* self, const SkMaskFilter* maskFilter) {
+    self->setMaskFilter(spFromConst(maskFilter));
 }
 
-extern "C" void C_SkPaint_setTypeface(SkPaint* self, SkTypeface* typeface) {
-    self->setTypeface(sk_sp<SkTypeface>(typeface));
+extern "C" void C_SkPaint_setTypeface(SkPaint* self, const SkTypeface* typeface) {
+    self->setTypeface(spFromConst(typeface));
 }
 
 // postponed
@@ -352,8 +376,8 @@ extern "C" void C_SkImageInfo_Copy(const SkImageInfo* from, SkImageInfo* to) {
     *to = *from;
 }
 
-extern "C" void C_SkImageInfo_Make(SkImageInfo* self, int width, int height, SkColorType ct, SkAlphaType at, SkColorSpace* cs) {
-    *self = SkImageInfo::Make(width, height, ct, at, sk_sp<SkColorSpace>(cs));
+extern "C" void C_SkImageInfo_Make(SkImageInfo* self, int width, int height, SkColorType ct, SkAlphaType at, const SkColorSpace* cs) {
+    *self = SkImageInfo::Make(width, height, ct, at, spFromConst(cs));
 }
 
 extern "C" void C_SkImageInfo_MakeS32(SkImageInfo* self, int width, int height, SkAlphaType at) {
@@ -618,8 +642,8 @@ extern "C" SkTypeface* C_SkTypeface_MakeFromFile(const char path[], int index) {
     return SkTypeface::MakeFromFile(path, index).release();
 }
 
-extern "C" SkTypeface* C_SkTypeface_MakeFromData(SkData* data, int index) {
-    return SkTypeface::MakeFromData(sk_sp<SkData>(data), index).release();
+extern "C" SkTypeface* C_SkTypeface_MakeFromData(const SkData* data, int index) {
+    return SkTypeface::MakeFromData(sk_sp<SkData>(const_cast<SkData*>(data)), index).release();
 }
 
 extern "C" SkData* C_SkTypeface_serialize(const SkTypeface* self, SkTypeface::SerializeBehavior behavior) {
@@ -630,16 +654,16 @@ extern "C" SkData* C_SkTypeface_serialize(const SkTypeface* self, SkTypeface::Se
 // SkFont
 //
 
-extern "C" void C_SkFont_ConstructFromTypeface(SkFont* uninitialized, SkTypeface* typeface) {
-    new(uninitialized) SkFont(sk_sp<SkTypeface>(typeface));
+extern "C" void C_SkFont_ConstructFromTypeface(SkFont* uninitialized, const SkTypeface* typeface) {
+    new(uninitialized) SkFont(spFromConst(typeface));
 }
 
-extern "C" void C_SkFont_ConstructFromTypefaceWithSize(SkFont* uninitialized, SkTypeface* typeface, SkScalar size) {
-    new(uninitialized) SkFont(sk_sp<SkTypeface>(typeface), size);
+extern "C" void C_SkFont_ConstructFromTypefaceWithSize(SkFont* uninitialized, const SkTypeface* typeface, SkScalar size) {
+    new(uninitialized) SkFont(spFromConst(typeface), size);
 }
 
-extern "C" void C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(SkFont* uninitialized, SkTypeface* typeface, SkScalar size, SkScalar scaleX, SkScalar skewX) {
-    new(uninitialized) SkFont(sk_sp<SkTypeface>(typeface), size, scaleX, skewX);
+extern "C" void C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(SkFont* uninitialized, const SkTypeface* typeface, SkScalar size, SkScalar scaleX, SkScalar skewX) {
+    new(uninitialized) SkFont(spFromConst(typeface), size, scaleX, skewX);
 }
 
 extern "C" bool C_SkFont_equals(const SkFont* self, const SkFont* other) {
@@ -650,8 +674,8 @@ extern "C" void C_SkFont_makeWithSize(const SkFont* self, SkScalar size, SkFont*
     *result = self->makeWithSize(size);
 }
 
-extern "C" void C_SkFont_setTypeface(SkFont* self, SkTypeface* tf) {
-    self->setTypeface(sk_sp<SkTypeface>(tf));
+extern "C" void C_SkFont_setTypeface(SkFont* self, const SkTypeface* tf) {
+    self->setTypeface(spFromConst(tf));
 }
 
 extern "C" void C_SkFont_destruct(SkFont* self) {
@@ -731,8 +755,8 @@ extern "C" SkColorFilter* C_SkColorFilter_MakeModeFilter(const SkColor* c, const
     return SkColorFilter::MakeModeFilter(*c, *blendMode).release();
 }
 
-extern "C" SkColorFilter* C_SkColorFilter_makeComposed(const SkColorFilter* self, SkColorFilter* inner) {
-    return self->makeComposed(sk_sp<SkColorFilter>(inner)).release();
+extern "C" SkColorFilter* C_SkColorFilter_makeComposed(const SkColorFilter* self, const SkColorFilter* inner) {
+    return self->makeComposed(spFromConst(inner)).release();
 }
 
 extern "C" SkColorFilter* C_SkColorFilter_MakeMatrixFilterRowMajor255(const SkScalar array[20]) {
@@ -783,12 +807,12 @@ extern "C" bool C_SkStrokeRec_hasEqualEffect(const SkStrokeRec* self, const SkSt
 // SkPathEffect
 //
 
-extern "C" SkPathEffect* C_SkPathEffect_MakeSum(SkPathEffect* first, SkPathEffect* second) {
-    return SkPathEffect::MakeSum(sk_sp<SkPathEffect>(first), sk_sp<SkPathEffect>(second)).release();
+extern "C" SkPathEffect* C_SkPathEffect_MakeSum(const SkPathEffect* first, const SkPathEffect* second) {
+    return SkPathEffect::MakeSum(spFromConst(first), spFromConst(second)).release();
 }
 
-extern "C" SkPathEffect* C_SkPathEffect_MakeCompose(SkPathEffect* outer, SkPathEffect* inner) {
-    return SkPathEffect::MakeCompose(sk_sp<SkPathEffect>(outer), sk_sp<SkPathEffect>(inner)).release();
+extern "C" SkPathEffect* C_SkPathEffect_MakeCompose(const SkPathEffect* outer, const SkPathEffect* inner) {
+    return SkPathEffect::MakeCompose(spFromConst(outer), spFromConst(inner)).release();
 }
 
 extern "C" void C_SkPathEffect_PointData_deletePoints(SkPathEffect::PointData* self) {
@@ -804,12 +828,12 @@ extern "C" SkMaskFilter* C_SkMaskFilter_MakeBlur(SkBlurStyle style, SkScalar sig
     return SkMaskFilter::MakeBlur(style, sigma, respectCTM).release();
 }
 
-extern "C" SkMaskFilter* C_SkMaskFilter_Compose(SkMaskFilter* outer, SkMaskFilter* inner) {
-    return SkMaskFilter::MakeCompose(sk_sp<SkMaskFilter>(outer), sk_sp<SkMaskFilter>(inner)).release();
+extern "C" SkMaskFilter* C_SkMaskFilter_Compose(const SkMaskFilter* outer, const SkMaskFilter* inner) {
+    return SkMaskFilter::MakeCompose(spFromConst(outer), spFromConst(inner)).release();
 }
 
-extern "C" SkMaskFilter* C_SkMaskFilter_Combine(SkMaskFilter* filterA, SkMaskFilter* filterB, SkCoverageMode coverageMode) {
-    return SkMaskFilter::MakeCombine(sk_sp<SkMaskFilter>(filterA), sk_sp<SkMaskFilter>(filterB), coverageMode).release();
+extern "C" SkMaskFilter* C_SkMaskFilter_Combine(const SkMaskFilter* filterA, const SkMaskFilter* filterB, SkCoverageMode coverageMode) {
+    return SkMaskFilter::MakeCombine(spFromConst(filterA), spFromConst(filterB), coverageMode).release();
 }
 
 extern "C" SkMaskFilter* C_SkMaskFilter_makeWithMatrix(const SkMaskFilter* self, const SkMatrix* matrix) {
