@@ -5,7 +5,6 @@ use rust_skia::{
     C_SkRRect_not_equals,
     SkRRect_Type,
     SkRRect_Corner,
-    SkVector
 };
 use crate::skia::{
     Rect,

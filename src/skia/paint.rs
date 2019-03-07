@@ -23,7 +23,6 @@ use rust_skia::{
     C_SkPaint_setMaskFilter,
     C_SkPaint_setPathEffect,
     C_SkPaint_setColorFilter,
-    SkRect,
     SkPaint_Cap,
     SkPaint,
     C_SkPaint_destruct,
@@ -465,7 +464,8 @@ impl Handle<SkPaint> {
 
 #[test]
 fn default_creation() {
-    let mut paint = Paint::default();
+    let paint = Paint::default();
+    drop(paint)
 }
 
 #[test]

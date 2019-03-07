@@ -20,8 +20,6 @@ use crate::skia::{
     IPoint,
     Surface,
     Bitmap,
-    AlphaType,
-    ColorType,
     ISize,
     SurfaceProps,
     ImageInfo,
@@ -944,60 +942,65 @@ impl<'a> AutoCanvasRestore<'a> {
     }
 }
 
-#[test]
-fn test_raster_direct_creation_and_clear_in_memory() {
-    let info = ImageInfo::new((2, 2).into(), ColorType::RGBA8888, AlphaType::Unpremul, None);
-    assert_eq!(8, info.min_row_bytes());
-    let mut bytes : [u8; 8*2] = Default::default();
-    {
-        let mut canvas = Canvas::from_raster_direct(&info, bytes.as_mut(), None, None).unwrap();
-        canvas.clear(Color::RED);
+#[cfg(test)]
+mod tests {
+    use crate::skia::*;
+
+    #[test]
+    fn test_raster_direct_creation_and_clear_in_memory() {
+        let info = ImageInfo::new((2, 2).into(), ColorType::RGBA8888, AlphaType::Unpremul, None);
+        assert_eq!(8, info.min_row_bytes());
+        let mut bytes: [u8; 8 * 2] = Default::default();
+        {
+            let mut canvas = Canvas::from_raster_direct(&info, bytes.as_mut(), None, None).unwrap();
+            canvas.clear(Color::RED);
+        }
+
+        assert_eq!(0xff, bytes[0]);
+        assert_eq!(0x00, bytes[1]);
+        assert_eq!(0x00, bytes[2]);
+        assert_eq!(0xff, bytes[3]);
     }
 
-    assert_eq!(0xff, bytes[0]);
-    assert_eq!(0x00, bytes[1]);
-    assert_eq!(0x00, bytes[2]);
-    assert_eq!(0xff, bytes[3]);
-}
+    #[test]
+    fn test_raster_direct_n32_creation_and_clear_in_memory() {
+        let mut pixels: [u32; 4] = Default::default();
+        {
+            let mut canvas = Canvas::from_raster_direct_n32(
+                (2, 2).into(),
+                pixels.as_mut(),
+                None).unwrap();
+            canvas.clear(Color::RED);
+        }
 
-#[test]
-fn test_raster_direct_n32_creation_and_clear_in_memory() {
-    let mut pixels : [u32; 4] = Default::default();
-    {
-        let mut canvas = Canvas::from_raster_direct_n32(
-            (2,2).into(),
-            pixels.as_mut(),
-            None).unwrap();
-        canvas.clear(Color::RED);
+        assert_eq!(0xffff0000, pixels[0]);
     }
 
-    assert_eq!(0xffff0000, pixels[0]);
-}
-
-#[test]
-fn test_empty_canvas_creation() {
-    let canvas = OwnedCanvas::default();
-    drop(canvas)
-}
-
-#[test]
-fn test_save_layer_rec_lifetimes() {
-    let rect = Rect::default();
-    {
-        let matrix = Matrix::default();
-
-        let rec = SaveLayerRec::default()
-            .clip_matrix(&matrix)
-            .bounds(&rect);
+    #[test]
+    fn test_empty_canvas_creation() {
+        let canvas = OwnedCanvas::default();
+        drop(canvas)
     }
-}
 
-#[test]
-fn test_total_matrix_transmutation() {
-    let mut c = Canvas::new((2, 2).into(), None).unwrap();
-    let matrix_ref = c.total_matrix();
-    assert!(Matrix::default() == *matrix_ref);
-    c.rotate(0.1, None);
-    let matrix_ref = c.total_matrix();
-    assert!(Matrix::default() != *matrix_ref);
+    #[test]
+    fn test_save_layer_rec_lifetimes() {
+        let rect = Rect::default();
+        {
+            let matrix = Matrix::default();
+
+            let _rec = SaveLayerRec::default()
+                .clip_matrix(&matrix)
+                .bounds(&rect);
+        }
+    }
+
+    #[test]
+    fn test_total_matrix_transmutation() {
+        let mut c = Canvas::new((2, 2).into(), None).unwrap();
+        let matrix_ref = c.total_matrix();
+        assert!(Matrix::default() == *matrix_ref);
+        c.rotate(0.1, None);
+        let matrix_ref = c.total_matrix();
+        assert!(Matrix::default() != *matrix_ref);
+    }
 }

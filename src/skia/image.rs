@@ -1,4 +1,3 @@
-use std::ptr;
 use crate::prelude::*;
 use crate::graphics;
 use crate::skia::{
@@ -26,7 +25,6 @@ use rust_skia::{
     SkImage,
     C_SkImage_encodeToData,
     C_SkImage_MakeRasterData,
-    SkIRect,
     C_SkImage_MakeCrossContextFromEncoded,
     C_SkImage_MakeFromAdoptedTexture,
     C_SkImage_MakeFromYUVATexturesCopy,

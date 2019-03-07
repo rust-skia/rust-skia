@@ -58,11 +58,13 @@ impl Canvas {
         self.path.quad_to((cpx, cpy).into(), (x, y).into());
     }
 
+    #[allow(dead_code)]
     #[inline]
     pub fn bezier_curve_to(&mut self, cp1x: f32, cp1y: f32, cp2x: f32, cp2y: f32, x: f32, y: f32) {
         self.path.cubic_to((cp1x, cp1y).into(), (cp2x, cp2y).into(), (x, y).into());
     }
 
+    #[allow(dead_code)]
     #[inline]
     pub fn close_path(&mut self) {
         self.path.close();

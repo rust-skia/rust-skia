@@ -10,8 +10,6 @@ use rust_skia::{
     C_SkFont_destruct,
     C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew,
     C_SkFont_setTypeface,
-    SkRect,
-    SkPoint
 };
 use crate::skia::{
     Path,

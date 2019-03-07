@@ -267,11 +267,11 @@ impl Handle<SkBitmap> {
 #[test]
 fn create_clone_and_drop() {
     let bm = Bitmap::new();
-    let bm2 = bm.clone();
+    let _bm2 = bm.clone();
 }
 
 #[test]
 fn get_info() {
     let bm = Bitmap::new();
-    let info = bm.info();
+    let _info = bm.info();
 }

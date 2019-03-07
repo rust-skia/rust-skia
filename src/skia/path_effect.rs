@@ -12,10 +12,7 @@ use crate::skia::{
 };
 use rust_skia::{
     SkPathEffect_PointData,
-    SkVector,
-    SkPoint,
     SkPathEffect_PointData_PointFlags,
-    SkRect,
     C_SkPathEffect_MakeCompose,
     C_SkPathEffect_MakeSum,
     SkRefCntBase,

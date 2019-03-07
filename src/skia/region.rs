@@ -288,7 +288,7 @@ impl QuickReject<Region> for Region {
 #[test]
 fn new_clone_drop() {
     let region = Region::new();
-    let cloned = region.clone();
+    let _cloned = region.clone();
 }
 
 #[test]

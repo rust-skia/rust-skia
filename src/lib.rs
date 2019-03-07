@@ -8,6 +8,7 @@ extern crate bitflags;
 extern crate lazy_static;
 
 
+#[cfg(test)]
 mod transmutation_tests {
 
     use crate::prelude::NativeTransmutableSliceAccess;

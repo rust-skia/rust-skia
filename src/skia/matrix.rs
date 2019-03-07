@@ -1,4 +1,4 @@
-use std::{mem, ptr};
+use std::mem;
 use std::ops::{Index, IndexMut};
 use crate::prelude::*;
 use crate::skia::{
@@ -12,10 +12,8 @@ use crate::skia::{
     scalar
 };
 use rust_skia::{
-    SkPoint,
     SkMatrix_ScaleToFit,
     SkMatrix,
-    SkSize
 };
 
 pub type MatrixScaleToFit = EnumHandle<SkMatrix_ScaleToFit>;
@@ -538,7 +536,7 @@ lazy_static! {
 #[test]
 fn test_get_set_trait_compilation() {
     let mut m = Matrix::new_identity();
-    let x = m.get(AffineMatrixMember::ScaleX);
+    let _x = m.get(AffineMatrixMember::ScaleX);
     m.set(AffineMatrixMember::ScaleX, 1.0);
 }
 
