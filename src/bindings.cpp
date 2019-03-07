@@ -594,10 +594,6 @@ extern "C" bool C_SkRRect_equals(const SkRRect* lhs, const SkRRect* rhs) {
     return *lhs == *rhs;
 }
 
-extern "C" bool C_SkRRect_not_equals(const SkRRect* lhs, const SkRRect* rhs) {
-    return *lhs != *rhs;
-}
-
 //
 // GrBackendTexture
 //
