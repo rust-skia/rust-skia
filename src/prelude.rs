@@ -1,4 +1,3 @@
-use std::intrinsics::transmute;
 use std::{ptr, mem};
 use std::ops::{Index, IndexMut};
 use std::hash::{Hasher, Hash};
@@ -9,6 +8,19 @@ use rust_skia::{
     SkRefCnt,
     SkRefCntBase,
 };
+
+/// Swiss army knife to convert any reference into any other.
+pub unsafe fn transmute_ref<FromT, ToT>(from: &FromT) -> &ToT {
+    // TODO: can we do this statically for all instantiations of transmute_ref?
+    debug_assert_eq!(mem::size_of::<FromT>(), mem::size_of::<ToT>());
+    &*(from as *const FromT as *const ToT)
+}
+
+pub unsafe fn transmute_ref_mut<FromT, ToT>(from: &mut FromT) -> &mut ToT {
+    // TODO: can we do this statically for all instantiations of transmute_ref_mut?
+    debug_assert_eq!(mem::size_of::<FromT>(), mem::size_of::<ToT>());
+    &mut *(from as *mut FromT as *mut ToT)
+}
 
 pub trait ToOption {
     type Target;
@@ -63,48 +75,59 @@ impl IfBoolSome for bool {
 }
 
 pub trait RefCount {
-    fn ref_cnt(&self) -> i32;
+    fn ref_cnt(&self) -> usize;
 }
 
 impl RefCount for SkRefCntBase {
+
     // the problem here is that the binding generator represents std::atomic as an u8 (we
     // are lucky that the C alignment rules make space for an i32), so to get the ref
     // counter, we need to get the u8 pointer to fRefCnt and interpret it as an i32 pointer.
-    fn ref_cnt(&self) -> i32 {
-        let ptr: *const i32 = unsafe { transmute(&self.fRefCnt) };
-        unsafe { *ptr }
+    #[allow(clippy::cast_ptr_alignment)]
+    fn ref_cnt(&self) -> usize {
+        unsafe {
+            let ptr: *const i32 =
+                &self.fRefCnt as *const rust_skia::std_atomic as *const i32;
+            (*ptr).try_into().unwrap()
+        }
     }
 }
 impl RefCount for SkRefCnt {
-    fn ref_cnt(&self) -> i32 {
+
+    fn ref_cnt(&self) -> usize {
         self._base.ref_cnt()
     }
 }
 
 impl RefCount for SkNVRefCnt {
-    fn ref_cnt(&self) -> i32 {
-        let ptr: *const i32 = unsafe { transmute(&self.fRefCnt) };
-        unsafe { *ptr }
+
+    #[allow(clippy::cast_ptr_alignment)]
+    fn ref_cnt(&self) -> usize {
+        unsafe {
+            let ptr: *const i32 =
+                &self.fRefCnt as *const rust_skia::std_atomic as *const i32;
+            (*ptr).try_into().unwrap()
+        }
     }
 }
 
 #[cfg(test)]
 impl RefCount for SkData {
-    fn ref_cnt(&self) -> i32 {
+    fn ref_cnt(&self) -> usize {
         self._base.ref_cnt()
     }
 }
 
 #[cfg(test)]
 impl RefCount for SkSurface {
-    fn ref_cnt(&self) -> i32 {
+    fn ref_cnt(&self) -> usize {
         self._base.ref_cnt()
     }
 }
 
 #[cfg(test)]
 impl RefCount for SkColorSpace {
-    fn ref_cnt(&self) -> i32 {
+    fn ref_cnt(&self) -> usize {
         self._base.ref_cnt()
     }
 }
@@ -126,9 +149,14 @@ impl NativeRefCounted for SkRefCntBase {
         unsafe { self.unref() }
     }
 
+    #[allow(clippy::cast_ptr_alignment)]
     fn _ref_cnt(&self) -> usize {
-        let ptr: *const i32 = unsafe { transmute(&self.fRefCnt) };
-        unsafe { *ptr as usize }
+        unsafe {
+            let ptr: *const i32 =
+                &self.fRefCnt as *const rust_skia::std_atomic as *const i32;
+
+            (*ptr).try_into().unwrap()
+        }
     }
 }
 
@@ -175,10 +203,6 @@ pub trait NativeClone {
 /// comparison may need to be customized.
 pub trait NativePartialEq {
     fn eq(&self, rhs: &Self) -> bool;
-
-    fn ne(&self, rhs: &Self) -> bool {
-        !self.eq(rhs)
-    }
 }
 
 /// Implements Hash for the native type so that the wrapper type
@@ -236,9 +260,6 @@ impl<N: NativePartialEq + Clone> PartialEq for ValueHandle<N> {
     fn eq(&self, rhs: &Self) -> bool {
         self.native().eq(rhs.native())
     }
-    fn ne(&self, rhs: &Self) -> bool {
-        self.native().ne(rhs.native())
-    }
 }
 
 /// Wraps a native type that can be represented as a value
@@ -277,10 +298,6 @@ impl<N: NativeDrop + NativeClone> Clone for Handle<N> {
 impl<N: NativeDrop + NativePartialEq> PartialEq for Handle<N> {
     fn eq(&self, rhs: &Self) -> bool {
         self.native().eq(rhs.native())
-    }
-
-    fn ne(&self, rhs: &Self) -> bool {
-        self.native().ne(rhs.native())
     }
 }
 
@@ -336,10 +353,19 @@ impl<H, N> NativePointerOrNullMut<N> for Option<&mut H>
 pub struct RCHandle<Native: NativeRefCounted>(*mut Native);
 
 impl<N: NativeRefCounted> RCHandle<N> {
+
     /// Increases the reference counter of the native type
-    /// and returns a mutable reference to it.
+    /// and returns a reference to it.
     #[inline]
-    pub fn shared_native(&self) -> &mut N {
+    pub fn shared_native(&self) -> &N {
+        (unsafe { &*self.0 })._ref();
+        unsafe { &mut *self.0 }
+    }
+
+    /// Increases the reference counter of the native type
+    /// and returns a reference to it.
+    #[inline]
+    pub fn shared_native_mut(&mut self) -> &mut N {
         (unsafe { &*self.0 })._ref();
         unsafe { &mut *self.0 }
     }
@@ -370,23 +396,27 @@ impl<N: NativeRefCounted> RCHandle<N> {
 }
 
 impl<N: NativeRefCounted> NativeAccess<N> for RCHandle<N> {
+
     /// Returns a reference to the native representation.
-    #[inline]
     fn native(&self) -> &N {
         unsafe { &*self.0 }
     }
 
     /// Returns a mutable reference to the native representation.
-    #[inline]
     fn native_mut(&mut self) -> &mut N {
         unsafe { &mut *self.0 }
     }
 }
 
 impl<N: NativeRefCounted> Clone for RCHandle<N> {
-    #[inline]
+
+
     fn clone(&self) -> Self {
-        RCHandle(self.shared_native())
+
+        // yes, we _do_ support shared mutability when
+        // a ref-counted handle is cloned, so beware of spooky action at
+        // a distance.
+        RCHandle(self.shared_native() as *const N as _)
     }
 }
 
@@ -401,39 +431,56 @@ impl<N: NativeRefCounted + NativePartialEq> PartialEq for RCHandle<N> {
     fn eq(&self, rhs: &Self) -> bool {
         self.native().eq(rhs.native())
     }
-
-    fn ne(&self, rhs: &Self) -> bool {
-        self.native().ne(rhs.native())
-    }
 }
 
 /// A trait for types that can be converted to a shared pointer that may be null.
 pub trait ToSharedPointer<N> {
-    fn shared_ptr(&self) -> *mut N;
+    fn shared_ptr(&self) -> *const N;
+}
+
+pub trait ToSharedPointerMut<N> {
+    fn shared_ptr_mut(&mut self) -> *mut N;
 }
 
 impl<N: NativeRefCounted> ToSharedPointer<N> for Option<RCHandle<N>> {
-    #[inline]
-    fn shared_ptr(&self) -> *mut N {
+
+    fn shared_ptr(&self) -> *const N {
         match self {
             Some(handle) => handle.shared_native(),
+            None => ptr::null()
+        }
+    }
+}
+
+impl<N: NativeRefCounted> ToSharedPointerMut<N> for Option<RCHandle<N>> {
+    fn shared_ptr_mut(&mut self) -> *mut N {
+        match self {
+            Some(handle) => handle.shared_native_mut(),
             None => ptr::null_mut()
         }
     }
 }
 
 impl<N: NativeRefCounted> ToSharedPointer<N> for Option<&RCHandle<N>> {
-    #[inline]
-    fn shared_ptr(&self) -> *mut N {
+
+    fn shared_ptr(&self) -> *const N {
         match self {
             Some(handle) => handle.shared_native(),
+            None => ptr::null()
+        }
+    }
+}
+
+impl<N: NativeRefCounted> ToSharedPointerMut<N> for Option<&mut RCHandle<N>> {
+    fn shared_ptr_mut(&mut self) -> *mut N {
+        match self {
+            Some(handle) => handle.shared_native_mut(),
             None => ptr::null_mut()
         }
     }
 }
 
-
-/// Trait to compute the elements of this type occupy memory in bytes.
+    /// Trait to compute the elements of this type occupy memory in bytes.
 pub trait ElementsSizeOf {
     fn elements_size_of(&self) -> usize;
 }
@@ -484,11 +531,11 @@ impl<T, I, O: Copy> IndexSetter<I, O> for T
 
 pub trait NativeTransmutable<NT: Sized> : Sized {
     fn native(&self) -> &NT {
-        unsafe { mem::transmute::<&Self, &NT>(&self) }
+        unsafe { transmute_ref(self) }
     }
 
     fn native_mut(&mut self) -> &mut NT {
-        unsafe { mem::transmute::<&mut Self, &mut NT>(self) }
+        unsafe { transmute_ref_mut(self) }
     }
 
     // TODO: this seems to actually copy, which is probably not what we want.
@@ -519,11 +566,11 @@ impl<NT, ElementT> NativeTransmutableSliceAccess<NT> for [ElementT]
     where ElementT: NativeTransmutable<NT> {
 
     fn native(&self) -> &[NT] {
-        unsafe { mem::transmute::<&Self, &[NT]>(self) }
+        unsafe { &*(self as *const [ElementT] as *const [NT]) }
     }
 
     fn native_mut(&mut self) -> &mut [NT] {
-        unsafe { mem::transmute::<&mut Self, &mut [NT]>(self) }
+        unsafe { &mut *(self as *mut [ElementT] as *mut [NT]) }
     }
 }
 
@@ -541,9 +588,7 @@ impl<NT, ElementT> NativeTransmutableOptionSliceAccessMut<NT> for Option<&mut [E
     where ElementT: NativeTransmutable<NT> {
 
     fn native_mut(&mut self) -> &mut Option<&mut [NT]> {
-        unsafe {
-            mem::transmute::<&mut Option<&mut [ElementT]>, &mut Option<&mut [NT]>>(self)
-        }
+        unsafe { transmute_ref_mut(self) }
     }
 }
 

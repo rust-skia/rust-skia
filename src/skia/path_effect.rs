@@ -63,12 +63,15 @@ impl Drop for PathEffectPointData {
     }
 }
 
-impl PathEffectPointData {
-    pub fn new() -> Self {
+impl Default for PathEffectPointData {
+    fn default() -> Self {
         PathEffectPointData::from_native(unsafe {
             SkPathEffect_PointData::new()
         })
     }
+}
+
+impl PathEffectPointData {
 
     pub fn points(&self) -> &[Point] {
         unsafe {
@@ -148,7 +151,7 @@ impl RCHandle<SkPathEffect> {
         matrix: &Matrix,
         cull_rect: &Rect)
         -> Option<PathEffectPointData> {
-        let mut point_data = PathEffectPointData::new();
+        let mut point_data = PathEffectPointData::default();
         unsafe {
             self.native().asPoints(
                 point_data.native_mut(),
@@ -184,6 +187,6 @@ impl RCHandle<SkPathEffect> {
 
 #[test]
 fn create_and_drop_point_data() {
-    let data = PathEffectPointData::new();
+    let data = PathEffectPointData::default();
     drop(data)
 }

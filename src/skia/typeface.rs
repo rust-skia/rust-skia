@@ -96,7 +96,9 @@ impl RCHandle<SkTypeface> {
 
     pub fn from_data(data: &Data, index: usize) {
         Typeface::from_ptr(
-            unsafe { C_SkTypeface_MakeFromData(data.shared_native(), index.try_into().unwrap()) } );
+            unsafe {
+                C_SkTypeface_MakeFromData(data.shared_native(), index.try_into().unwrap())
+            } );
     }
 
     pub fn serialize(&self, behavior: TypefaceSerializeBehavior) -> Data {

@@ -10,7 +10,6 @@ use crate::skia::{
     ImageInfo,
     ISize,
     IPoint,
-    u8cpu
 };
 use rust_skia::{
     SkPaint,
@@ -224,7 +223,7 @@ impl Handle<SkBitmap> {
     }
 
     pub fn erase_argb(&self, a: u8, r: u8, g: u8, b: u8) {
-        unsafe { C_SkBitmap_eraseARGB(self.native(), a as u8cpu, r as u8cpu, g as u8cpu, b as u8cpu) }
+        unsafe { C_SkBitmap_eraseARGB(self.native(), a.into(), r.into(), g.into(), b.into()) }
     }
 
     pub fn erase(&self, c: Color, area: &IRect) {

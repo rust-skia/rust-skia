@@ -46,7 +46,7 @@ impl EnumHandle<SkBlendMode> {
     pub const LastSeparableMode: Self = Self(SkBlendMode::kLastSeparableMode);
     pub const LastMode: Self = Self(SkBlendMode::kLastMode);
 
-    pub fn name(&self) -> &'static str {
+    pub fn name(self) -> &'static str {
         unsafe {
             let name_ptr = SkBlendMode_Name(self.into_native());
             CStr::from_ptr(name_ptr).to_str().unwrap()

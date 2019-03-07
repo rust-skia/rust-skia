@@ -66,7 +66,7 @@ impl DerefMut for VerticesBone {
 impl NativeTransmutable<SkVertices_Bone> for VerticesBone {}
 
 impl VerticesBone {
-    pub fn map_point(&self, point: &Point) -> Point {
+    pub fn map_point(&self, point: Point) -> Point {
         Point::from_native(unsafe {
             self.native().mapPoint(&point.into_native())
         })
@@ -288,7 +288,7 @@ impl Handle<SkVertices_Builder> {
         // does not link
         // unsafe { self.native().isValid() }
         // TODO: write a C wrapper function in case the implementation changes
-        self.native().fVertices.fPtr != ptr::null_mut()
+        !self.native().fVertices.fPtr.is_null()
     }
 
     pub fn vertex_count(&self) -> usize {

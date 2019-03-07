@@ -122,7 +122,7 @@ impl Handle<SkRegion> {
         unsafe { self.native().intersects1(other.native()) }
     }
 
-    pub fn contains_point(&self, point: &IPoint) -> bool {
+    pub fn contains_point(&self, point: IPoint) -> bool {
         unsafe { self.native().contains(point.x, point.y) }
     }
 
@@ -253,7 +253,7 @@ impl Intersects<Region> for Region {
 
 impl Contains<IPoint> for Region {
     fn contains(&self, point: IPoint) -> bool {
-        self.contains_point(&point)
+        self.contains_point(point)
     }
 }
 

@@ -69,7 +69,7 @@ impl IPoint {
         IPoint { x, y }
     }
 
-    pub fn is_zero(&self) -> bool {
+    pub fn is_zero(self) -> bool {
         // does not link:
         // unsafe { self.native().isZero() }
         (self.x | self.y) == 0
@@ -135,56 +135,54 @@ impl Mul<scalar> for Point {
 }
 
 impl Point {
+
     pub fn new(x: scalar, y: scalar) -> Self {
         Point { x, y }
     }
 
-    pub fn is_zero(&self) -> bool {
+    pub fn is_zero(self) -> bool {
         self.x == 0.0 && self.y == 0.0
     }
 
-    pub fn length(&self) -> scalar {
+    pub fn length(self) -> scalar {
         unsafe { self.native().length() }
     }
 
-    pub fn distance_to_origin(&self) -> scalar {
+    pub fn distance_to_origin(self) -> scalar {
         self.length()
     }
 
     #[warn(unused)]
-    pub fn normalized(&self) -> Option<Self> {
-        let mut cloned = self.clone();
-        unsafe { cloned.native_mut().normalize() }
-            .if_true_some(cloned)
+    pub fn normalized(mut self) -> Option<Self> {
+        unsafe { self.native_mut().normalize() }
+            .if_true_some(self)
     }
 
     #[warn(unused)]
-    pub fn with_length(&self, length: scalar) -> Option<Self> {
-        let mut cloned = self.clone();
-        unsafe { cloned.native_mut().setLength(length) }
-            .if_true_some(cloned)
+    pub fn with_length(mut self, length: scalar) -> Option<Self> {
+        unsafe { self.native_mut().setLength(length) }
+            .if_true_some(self)
     }
 
     #[warn(unused)]
-    pub fn scaled(&self, scale: scalar) -> Self {
-        let mut cloned = self.clone();
-        unsafe { cloned.native_mut().scale1(scale) }
-        cloned
+    pub fn scaled(mut self, scale: scalar) -> Self {
+        unsafe { self.native_mut().scale1(scale) }
+        self
     }
 
-    pub fn is_finite(&self) -> bool {
+    pub fn is_finite(self) -> bool {
         unsafe { self.native().isFinite() }
     }
 
-    pub fn distance(a: &Self, b: &Self) -> scalar {
+    pub fn distance(a: Self, b: Self) -> scalar {
         unsafe { SkPoint::Distance(a.native(), b.native()) }
     }
 
-    pub fn dot_product(a: &Self, b: &Self) -> scalar {
+    pub fn dot_product(a: Self, b: Self) -> scalar {
         unsafe { SkPoint::DotProduct(a.native(), b.native()) }
     }
 
-    pub fn cross_product(a: &Self, b: &Self) -> scalar {
+    pub fn cross_product(a: Self, b: Self) -> scalar {
         unsafe { SkPoint::CrossProduct(a.native(), b.native() )}
     }
 }

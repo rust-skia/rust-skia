@@ -15,20 +15,20 @@ impl EnumHandle<SkPixelGeometry> {
     pub const RGBV: Self = Self(SkPixelGeometry::kRGB_V_SkPixelGeometry);
     pub const BGRV: Self = Self(SkPixelGeometry::kBGR_V_SkPixelGeometry);
 
-    pub fn is_rgb(&self) -> bool {
-        *self == Self::RGBH || *self == Self::RGBV
+    pub fn is_rgb(self) -> bool {
+        self == Self::RGBH || self == Self::RGBV
     }
 
-    pub fn is_bgr(&self) -> bool {
-        *self == Self::BGRH || *self == Self::BGRV
+    pub fn is_bgr(self) -> bool {
+        self == Self::BGRH || self == Self::BGRV
     }
 
-    pub fn is_h(&self) -> bool {
-        *self == Self::RGBH || *self == Self::BGRH
+    pub fn is_h(self) -> bool {
+        self == Self::RGBH || self == Self::BGRH
     }
 
-    pub fn is_v(&self) -> bool {
-        *self == Self::RGBV || *self == Self::BGRV
+    pub fn is_v(self) -> bool {
+        self == Self::RGBV || self == Self::BGRV
     }
 }
 
@@ -78,19 +78,19 @@ impl ValueHandle<SkSurfaceProps> {
         })
     }
 
-    pub fn flags(&self) -> SurfacePropsFlags {
+    pub fn flags(self) -> SurfacePropsFlags {
         SurfacePropsFlags::from_bits_truncate(unsafe {
             self.native().flags()
         })
     }
 
-    pub fn pixel_geometry(&self) -> PixelGeometry {
+    pub fn pixel_geometry(self) -> PixelGeometry {
         PixelGeometry::from_native(unsafe {
             self.native().pixelGeometry()
         })
     }
 
-    pub fn is_use_device_independent_fonts(&self) -> bool {
+    pub fn is_use_device_independent_fonts(self) -> bool {
         unsafe { self.native().isUseDeviceIndependentFonts() }
     }
 }

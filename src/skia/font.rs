@@ -312,7 +312,7 @@ impl Handle<SkFont> {
         let count = glyphs.len();
         assert_eq!(count, pos.len());
 
-        let origin = origin.unwrap_or(Point::default());
+        let origin = origin.unwrap_or_default();
 
         unsafe {
             self.native().getPos(

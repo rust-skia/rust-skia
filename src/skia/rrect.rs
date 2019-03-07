@@ -2,7 +2,6 @@ use crate::prelude::*;
 use rust_skia::{
     C_SkRRect_equals,
     SkRRect,
-    C_SkRRect_not_equals,
     SkRRect_Type,
     SkRRect_Corner,
 };
@@ -40,10 +39,6 @@ pub type RRect = ValueHandle<SkRRect>;
 impl NativePartialEq for RRect {
     fn eq(&self, rhs: &Self) -> bool {
         unsafe { C_SkRRect_equals(self.native(), rhs.native()) }
-    }
-
-    fn ne(&self, rhs: &Self) -> bool {
-        unsafe { C_SkRRect_not_equals(self.native(), rhs.native()) }
     }
 }
 
@@ -169,9 +164,9 @@ impl RRect {
     #[warn(unused)]
     pub fn offset(&self, dx: scalar, dy: scalar) -> Self {
         // makeOffset and offset does not link.
-        let mut cloned = self.clone();
-        unsafe { cloned.native_mut().fRect.offset(dx, dy) }
-        cloned
+        let mut copied = *self;
+        unsafe { copied.native_mut().fRect.offset(dx, dy) }
+        copied
     }
 
     pub fn contains(&self, rect: &Rect) -> bool {

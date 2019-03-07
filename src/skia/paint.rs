@@ -274,12 +274,12 @@ impl Handle<SkPaint> {
     }
 
     pub fn set_alpha(&mut self, alpha: u8) -> &mut Self {
-        unsafe { self.native_mut().setAlpha(alpha as _) }
+        unsafe { self.native_mut().setAlpha(alpha.into()) }
         self
     }
 
     pub fn set_argb(&mut self, a: u8, r: u8, g: u8, b: u8) -> &mut Self {
-        unsafe { self.native_mut().setARGB(a as _, r as _, g as _, b as _)}
+        unsafe { self.native_mut().setARGB(a.into(), r.into(), g.into(), b.into())}
         self
     }
 

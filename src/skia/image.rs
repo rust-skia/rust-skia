@@ -70,9 +70,9 @@ impl NativeRefCountedBase for SkImage {
 
 impl Image {
 
-    pub fn from_raster_data(info: &ImageInfo, pixels: Data, row_bytes: usize) -> Option<Image> {
+    pub fn from_raster_data(info: &ImageInfo, pixels: &mut Data, row_bytes: usize) -> Option<Image> {
         Image::from_ptr(unsafe {
-            C_SkImage_MakeRasterData(info.native(), pixels.shared_native(), row_bytes)
+            C_SkImage_MakeRasterData(info.native(), pixels.shared_native_mut(), row_bytes)
         })
     }
 
@@ -113,7 +113,9 @@ impl Image {
         context: &mut graphics::Context,
         data: &Data,
         build_mips: bool,
-        color_space: &mut ColorSpace,
+        // not mentions in the docs, but implementation indicates that
+        // this can be null.
+        color_space: Option<&ColorSpace>,
         limit_to_max_texture_size: bool) -> Option<Image> {
 
         Image::from_ptr(unsafe {
@@ -121,7 +123,7 @@ impl Image {
                 context.native_mut(),
                 data.shared_native(),
                 build_mips,
-                color_space.native_mut(), limit_to_max_texture_size)
+                color_space.native_ptr_or_null(), limit_to_max_texture_size)
         })
     }
 
@@ -165,6 +167,8 @@ impl Image {
         })
     }
 
+    // TODO: consider clippy!
+    #[allow(clippy::too_many_arguments)]
     pub fn from_yuva_textures_copy_with_external_backend(
         context: &mut graphics::Context,
         yuv_color_space: YUVColorSpace,

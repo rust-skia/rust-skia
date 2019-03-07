@@ -132,7 +132,7 @@ impl Handle<SkImageInfo> {
 
     pub fn new_unknown(dimensions: Option<ISize>) -> ImageInfo {
         Self::new(
-            dimensions.unwrap_or(ISize::new(0, 0)),
+            dimensions.unwrap_or_default(),
             ColorType::Unknown,
             AlphaType::Unknown,
             None)

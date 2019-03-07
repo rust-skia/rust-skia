@@ -2,7 +2,7 @@
 
 pub type scalar = rust_skia::SkScalar;
 
-pub trait Scalar {
+pub trait Scalar : Copy {
     const NEARLY_ZERO: Self;
     const ONE: Self;
     const HALF: Self;

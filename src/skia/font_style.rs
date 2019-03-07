@@ -88,15 +88,15 @@ impl ValueHandle<SkFontStyle> {
         }.into_handle()
     }
 
-    pub fn weight(&self) -> FontStyleWeight {
+    pub fn weight(self) -> FontStyleWeight {
         FontStyleWeight::from_native(unsafe { self.native().weight() })
     }
 
-    pub fn width(&self) -> FontStyleWidth {
+    pub fn width(self) -> FontStyleWidth {
         FontStyleWidth::from_native(unsafe { self.native().width() })
     }
 
-    pub fn slant(&self) -> FontStyleSlant {
+    pub fn slant(self) -> FontStyleSlant {
         FontStyleSlant::from_native(unsafe { self.native().slant() })
     }
 

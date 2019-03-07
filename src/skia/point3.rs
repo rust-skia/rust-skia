@@ -61,7 +61,7 @@ impl Point3 {
 
     #[warn(unused)]
     pub fn normalized(&self) -> Option<Self> {
-        let mut normalized = self.clone();
+        let mut normalized = *self;
         unsafe { normalized.native_mut().normalize() }
             .if_true_some(normalized)
     }

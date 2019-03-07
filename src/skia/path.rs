@@ -44,11 +44,11 @@ impl EnumHandle<SkPath_FillType> {
     pub const InverseWinding: Self = Self(SkPath_FillType::kInverseWinding_FillType);
     pub const InverseEvenOdd: Self = Self(SkPath_FillType::kInverseEvenOdd_FillType);
 
-    pub fn is_inverse(&self) -> bool {
+    pub fn is_inverse(self) -> bool {
         unsafe { SkPath::IsInverseFillType(self.into_native()) }
     }
 
-    pub fn to_non_inverse(&self) -> Self {
+    pub fn to_non_inverse(self) -> Self {
         // does not link:
         // unsafe { SkPath::ConvertToNonInverseFillType(self.native()) }
         //     .into_handle()

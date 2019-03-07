@@ -1,4 +1,3 @@
-use std::mem;
 use std::ops::{Deref, DerefMut};
 use std::marker::PhantomData;
 use std::slice;
@@ -234,7 +233,7 @@ impl Canvas {
         pixels: &'pixels mut [u8],
         row_bytes: Option<usize>,
         props: Option<&SurfaceProps>) -> Option<OwnedCanvas<'pixels>> {
-        let row_bytes = row_bytes.unwrap_or(info.min_row_bytes());
+        let row_bytes = row_bytes.unwrap_or_else(|| info.min_row_bytes());
         if row_bytes >= info.min_row_bytes() && pixels.len() >= info.compute_byte_size(row_bytes) {
             let ptr = unsafe {
                 C_SkCanvas_MakeRasterDirect(
@@ -261,6 +260,7 @@ impl Canvas {
         Self::from_raster_direct(&info, pixels_u8, row_bytes, None)
     }
 
+    #[allow(clippy::new_ret_no_self)]
     // Decided to call this variant new, because it seems to be the simplest reasonable one.
     pub fn new<'lt>(size: ISize, props: Option<&SurfaceProps>) -> Option<OwnedCanvas<'lt>> {
         if size.width >= 0 && size.height >= 0 {
@@ -862,10 +862,7 @@ impl Canvas {
 
     pub fn total_matrix(&self) -> &Matrix {
         // TODO: make this official, transmutation of a Matrix is not actually supported.
-        let matrix = unsafe {
-            &*self.native().getTotalMatrix()
-        };
-        unsafe { mem::transmute::<&SkMatrix, &Matrix>(matrix) }
+        unsafe { transmute_ref(&*self.native().getTotalMatrix()) }
     }
 
     //
@@ -884,9 +881,7 @@ impl Canvas {
     }
 
     pub(crate) fn borrow_from_native(native: &mut SkCanvas) -> &mut Self {
-        unsafe {
-            mem::transmute::<&mut SkCanvas, &mut Self>(native)
-        }
+        unsafe { transmute_ref_mut(native) }
     }
 }
 

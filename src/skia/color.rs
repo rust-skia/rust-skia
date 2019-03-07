@@ -1,6 +1,5 @@
 use crate::prelude::*;
 use crate::skia::u8cpu;
-use std::mem;
 use std::ops::{Index,Mul,IndexMut};
 use rust_skia::{
     SkColor,
@@ -40,7 +39,12 @@ impl Color {
 
     #[inline]
     pub fn from_argb(a: u8, r: u8, g: u8, b:u8) -> Color {
-        Self(((a as u8cpu) << 24) | ((r as u8cpu) << 16) | ((g as u8cpu) << 8) | (b as u8cpu))
+        Self(
+            (u8cpu::from(a) << 24) |
+            (u8cpu::from(r) << 16) |
+            (u8cpu::from(g) << 8) |
+            (u8cpu::from(b))
+        )
     }
 
     #[inline]
@@ -49,28 +53,28 @@ impl Color {
     }
 
     #[inline]
-    pub fn a(&self) -> u8 {
+    pub fn a(self) -> u8 {
         (self.into_native() >> 24) as _
     }
 
     #[inline]
-    pub fn r(&self) -> u8 {
+    pub fn r(self) -> u8 {
         (self.into_native() >> 16) as _
     }
 
     #[inline]
-    pub fn g(&self) -> u8 {
+    pub fn g(self) -> u8 {
         (self.into_native() >> 8) as _
     }
 
     #[inline]
-    pub fn b(&self) -> u8 {
+    pub fn b(self) -> u8 {
         self.into_native() as _
     }
 
     #[inline]
     #[warn(unused)]
-    pub fn with_a(&self, a: u8) -> Self {
+    pub fn with_a(self, a: u8) -> Self {
         Self::from_argb(a, self.r(), self.g(), self.b())
     }
 
@@ -86,11 +90,11 @@ impl Color {
     pub const CYAN: Self = Self(rust_skia::SK_ColorCYAN);
     pub const MAGENTA: Self = Self(rust_skia::SK_ColorMAGENTA);
 
-    pub fn to_rgb(&self) -> RGB {
+    pub fn to_rgb(self) -> RGB {
         (self.r(), self.g(), self.b()).into()
     }
 
-    pub fn to_hsv(&self) -> HSV {
+    pub fn to_hsv(self) -> HSV {
         self.to_rgb().to_hsv()
     }
 
@@ -106,10 +110,14 @@ impl From<(u8, u8, u8)> for RGB {
 }
 
 impl RGB {
-    pub fn to_hsv(&self) -> HSV {
+    pub fn to_hsv(self) -> HSV {
         let mut hsv: [f32; 3] = Default::default();
         unsafe {
-            SkRGBToHSV(self.r as u8cpu, self.g as u8cpu, self.b as u8cpu, hsv.as_mut_ptr());
+            SkRGBToHSV(
+                self.r.into(),
+                self.g.into(),
+                self.b.into(),
+                hsv.as_mut_ptr());
         }
         HSV { h: hsv[0], s: hsv[1], v: hsv[2] }
     }
@@ -127,7 +135,7 @@ impl From<(f32, f32, f32)> for HSV {
 impl HSV {
     pub fn to_color(&self, alpha: u8) -> Color {
         Color::from_native(unsafe {
-            SkHSVToColor(alpha as u8cpu, [self.h, self.s, self.v].as_ptr())
+            SkHSVToColor(alpha.into(), [self.h, self.s, self.v].as_ptr())
         })
     }
 }
@@ -173,7 +181,7 @@ impl IndexMut<usize> for Color4f {
 impl From<Color> for Color4f {
     fn from(color: Color) -> Self {
         fn c(c: u8) -> f32 {
-            (c as f32) * (1.0 / 255.0)
+            (f32::from(c)) * (1.0 / 255.0)
         }
         let r = c(color.r());
         let g = c(color.g());
@@ -186,15 +194,14 @@ impl From<Color> for Color4f {
 impl Color4f {
 
     pub fn vec(&self) -> &[f32; 4] {
-        unsafe {
-            mem::transmute::<&Self, &[f32; 4]>(self)
-        }
+        unsafe { transmute_ref(self) }
     }
 
     pub fn vec_mut(&mut self) -> &mut[f32; 4] {
-        unsafe { mem::transmute::<&mut Self, &mut [f32; 4]>(self) }
+        unsafe { transmute_ref_mut(self) }
     }
 
+    #[allow(clippy::float_cmp)]
     pub fn is_opaque(&self) -> bool {
         self.a == 1.0
     }

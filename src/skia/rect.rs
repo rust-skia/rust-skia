@@ -1,4 +1,3 @@
-use std::mem;
 use crate::prelude::*;
 use crate::skia::{
     scalar,
@@ -83,7 +82,7 @@ impl IRect {
 
     #[warn(unused)]
     pub fn with_offset(&self, delta: IVector) -> Self {
-        let cloned = self.clone();
+        let cloned = *self;
         Self::from_native(unsafe {
             cloned.native().makeOffset(delta.x, delta.y)
         })
@@ -100,28 +99,27 @@ impl IRect {
 
     #[warn(unused)]
     pub fn with_outset(&self, delta: IVector) -> Self {
-        let cloned = self.clone();
         Self::from_native(unsafe {
-            cloned.native().makeOutset(delta.x, delta.y)
+            self.native().makeOutset(delta.x, delta.y)
         })
     }
 
     #[warn(unused)]
     pub fn with_offset_to(&self, new_x: i32, new_y: i32) -> Self {
-        let mut cloned = self.clone();
+        let mut copied = *self;
         unsafe {
-            cloned.native_mut().offsetTo(new_x, new_y)
+            copied.native_mut().offsetTo(new_x, new_y)
         }
-        cloned
+        copied
     }
 
     #[warn(unused)]
     pub fn with_adjustment(&self, d_l: i32, d_t: i32, d_r: i32, d_b: i32) -> Self {
-        let mut cloned = self.clone();
+        let mut copied = *self;
         unsafe {
-            cloned.native_mut().adjust(d_l, d_t, d_r, d_b)
+            copied.native_mut().adjust(d_l, d_t, d_r, d_b)
         }
-        cloned
+        copied
     }
 
     pub fn contains_no_empty_check(&self, r: &Self) -> bool {
@@ -149,18 +147,18 @@ impl IRect {
     }
 
     pub fn join(a: &Self, b: &Self) -> Self {
-        let mut cloned = a.clone();
-        unsafe { cloned.native_mut().join1(b.native()) }
-        cloned
+        let mut copied = *a;
+        unsafe { copied.native_mut().join1(b.native()) }
+        copied
     }
 
     #[warn(unused)]
     pub fn sorted(&self) -> Self {
-        let mut cloned = self.clone();
+        let mut copied = *self;
         // makeSorted does not link:
         // IRect::from_native(unsafe { self.native().makeSorted() })
-        unsafe { cloned.native_mut().sort() }
-        cloned
+        unsafe { copied.native_mut().sort() }
+        copied
     }
 }
 
@@ -302,7 +300,7 @@ impl Rect {
     }
 
     pub fn join(a: &Rect, b: &Rect) -> Rect {
-        let mut joined = a.clone();
+        let mut joined = *a;
         unsafe { joined.native_mut().join1(b.native()) }
         joined
     }
@@ -327,7 +325,7 @@ impl Rect {
     }
 
     pub fn as_scalars(&self) -> &[scalar; 4] {
-        unsafe { mem::transmute::<&Self, &[scalar; 4]>(self) }
+        unsafe { transmute_ref(self) }
     }
 }
 

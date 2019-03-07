@@ -113,6 +113,7 @@ impl ValueHandle<SkMatrix> {
         unsafe { SkMatrix::MakeTrans(d.x, d.y) }.into_handle()
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn new_all(
         scale_x: scalar, skew_x: scalar, trans_x: scalar,
         skew_y: scalar, scale_y: scalar, trans_y: scalar,
