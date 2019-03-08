@@ -22,7 +22,7 @@ impl NativeClone for GrBackendTexture {
     }
 }
 
-impl BackendTexture {
+impl Handle<GrBackendTexture> {
 
     #[cfg(feature = "vulkan")]
     pub unsafe fn new_vulkan(

@@ -17,9 +17,10 @@ impl NativeRefCountedBase for GrContext {
     }
 }
 
-impl Context {
+impl RCHandle<GrContext> {
+
     #[cfg(feature = "vulkan")]
-    pub fn new_vulkan(backend_context: &vulkan::BackendContext) -> Option<Context> {
+    pub fn from_vulkan(backend_context: &vulkan::BackendContext) -> Option<Context> {
        Context::from_ptr(unsafe { C_GrContext_MakeVulkan(backend_context.native) })
     }
 }
