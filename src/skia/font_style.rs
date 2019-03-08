@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rust_skia::{
+use skia_bindings::{
     SkFontStyle_Width,
     SkFontStyle_Weight,
     SkFontStyle_Slant,

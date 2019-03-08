@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rust_skia::SkCoverageMode;
+use skia_bindings::SkCoverageMode;
 
 pub type CoverageMode = EnumHandle<SkCoverageMode>;
 

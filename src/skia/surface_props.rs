@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rust_skia::{
+use skia_bindings::{
     SkPixelGeometry,
     SkSurfaceProps,
     SkSurfaceProps_Flags
@@ -61,7 +61,7 @@ impl NativeClone for SkSurfaceProps {
 
 impl NativePartialEq for SkSurfaceProps {
     fn eq(&self, other: &Self) -> bool {
-        unsafe { rust_skia::C_SkSurfaceProps_Equals(self, other) }
+        unsafe { skia_bindings::C_SkSurfaceProps_Equals(self, other) }
     }
 }
 

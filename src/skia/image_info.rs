@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rust_skia::{
+use skia_bindings::{
     SkAlphaType,
     SkImageInfo,
     SkColorType,
@@ -47,16 +47,16 @@ impl ColorType {
     pub const N32: Self = Self(SkColorType::kN32_SkColorType);
 
     pub fn bytes_per_pixel(self) -> usize {
-        unsafe { rust_skia::SkColorTypeBytesPerPixel(self.0) as _ }
+        unsafe { skia_bindings::SkColorTypeBytesPerPixel(self.0) as _ }
     }
 
     pub fn is_always_opaque(self) -> bool {
-        unsafe { rust_skia::SkColorTypeIsAlwaysOpaque(self.0) }
+        unsafe { skia_bindings::SkColorTypeIsAlwaysOpaque(self.0) }
     }
 
     pub fn validate_alpha_type(self, alpha_type: AlphaType) -> Option<AlphaType> {
         let mut alpha_type_r = AlphaType::Unknown;
-        unsafe { rust_skia::SkColorTypeValidateAlphaType(self.0, alpha_type.0, &mut alpha_type_r.0) }
+        unsafe { skia_bindings::SkColorTypeValidateAlphaType(self.0, alpha_type.0, &mut alpha_type_r.0) }
             .if_true_some(alpha_type_r)
     }
 }
@@ -75,7 +75,7 @@ pub type ImageInfo = Handle<SkImageInfo>;
 impl NativeDrop for SkImageInfo {
     fn drop(&mut self) {
         unsafe {
-            rust_skia::C_SkImageInfo_destruct(self)
+            skia_bindings::C_SkImageInfo_destruct(self)
         }
     }
 }
@@ -84,7 +84,7 @@ impl NativeClone for SkImageInfo {
     fn clone(&self) -> Self {
         let mut image_info = unsafe { SkImageInfo::new() };
         unsafe {
-            rust_skia::C_SkImageInfo_Copy(self, &mut image_info);
+            skia_bindings::C_SkImageInfo_Copy(self, &mut image_info);
         }
         image_info
     }
@@ -94,7 +94,7 @@ impl NativeClone for SkImageInfo {
 
 impl Default for Handle<SkImageInfo> {
     fn default() -> Self {
-        // TODO: remove C_SkImageInfo_destruct function definition in rust_skia.
+        // TODO: remove C_SkImageInfo_destruct function definition in skia_bindings.
         unsafe { SkImageInfo::new() }.into_handle()
     }
 }
@@ -105,7 +105,7 @@ impl Handle<SkImageInfo> {
         let mut image_info = Self::default();
 
         unsafe {
-            rust_skia::C_SkImageInfo_Make(image_info.native_mut(), dimensions.width, dimensions.height, ct.0, at.0, cs.shared_ptr())
+            skia_bindings::C_SkImageInfo_Make(image_info.native_mut(), dimensions.width, dimensions.height, ct.0, at.0, cs.shared_ptr())
         }
         image_info
     }
@@ -117,7 +117,7 @@ impl Handle<SkImageInfo> {
     pub fn new_s32(dimensions: ISize, at: AlphaType) -> ImageInfo {
         let mut image_info = Self::default();
         unsafe {
-            rust_skia::C_SkImageInfo_MakeS32(image_info.native_mut(), dimensions.width, dimensions.height, at.0);
+            skia_bindings::C_SkImageInfo_MakeS32(image_info.native_mut(), dimensions.width, dimensions.height, at.0);
         }
         image_info
     }
@@ -156,7 +156,7 @@ impl Handle<SkImageInfo> {
 
     pub fn color_space(&self) -> Option<ColorSpace> {
         ColorSpace::from_ptr(unsafe {
-            rust_skia::C_SkImageInfo_colorSpace(self.native())
+            skia_bindings::C_SkImageInfo_colorSpace(self.native())
         })
     }
 

@@ -34,7 +34,7 @@ use crate::skia::{
     VerticesBone,
     Data
 };
-use rust_skia::{
+use skia_bindings::{
     C_SkAutoCanvasRestore_destruct,
     SkAutoCanvasRestore,
     C_SkCanvas_isClipEmpty,

@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rust_skia::SkClipOp;
+use skia_bindings::SkClipOp;
 
 pub type ClipOp = EnumHandle<SkClipOp>;
 

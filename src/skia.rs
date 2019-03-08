@@ -1,6 +1,6 @@
 #[allow(non_camel_case_types)]
 
-pub type scalar = rust_skia::SkScalar;
+pub type scalar = skia_bindings::SkScalar;
 
 pub trait Scalar : Copy {
     const NEARLY_ZERO: Self;
@@ -16,10 +16,10 @@ impl Scalar for scalar {
 
 
 #[allow(non_camel_case_types)]
-pub(crate) type u8cpu = rust_skia::U8CPU;
-pub type GlyphId = rust_skia::SkGlyphID;
-pub type Unichar = rust_skia::SkUnichar;
-pub type FontTableTag = rust_skia::SkFontTableTag;
+pub(crate) type u8cpu = skia_bindings::U8CPU;
+pub type GlyphId = skia_bindings::SkGlyphID;
+pub type Unichar = skia_bindings::SkUnichar;
+pub type FontTableTag = skia_bindings::SkFontTableTag;
 
 mod bbh_factory;
 pub use self::bbh_factory::*;

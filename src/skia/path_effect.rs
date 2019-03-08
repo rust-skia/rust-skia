@@ -10,7 +10,7 @@ use crate::skia::{
     Vector,
     Point
 };
-use rust_skia::{
+use skia_bindings::{
     SkPathEffect_PointData,
     SkPathEffect_PointData_PointFlags,
     C_SkPathEffect_MakeCompose,

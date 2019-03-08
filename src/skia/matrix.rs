@@ -11,7 +11,7 @@ use crate::skia::{
     Size,
     scalar
 };
-use rust_skia::{
+use skia_bindings::{
     SkMatrix_ScaleToFit,
     SkMatrix,
 };
@@ -30,7 +30,7 @@ pub type Matrix = ValueHandle<SkMatrix>;
 
 impl NativePartialEq for SkMatrix {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { rust_skia::C_SkMatrix_Equals(self, rhs) }
+        unsafe { skia_bindings::C_SkMatrix_Equals(self, rhs) }
     }
 }
 

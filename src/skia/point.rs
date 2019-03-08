@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::skia::scalar;
-use rust_skia::{
+use skia_bindings::{
     SkIPoint,
     SkPoint
 };

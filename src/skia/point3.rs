@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::skia::scalar;
-use rust_skia::SkPoint3;
+use skia_bindings::SkPoint3;
 use std::ops::{Add, Sub, Neg};
 
 pub type Vector3 = Point3;

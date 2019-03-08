@@ -10,7 +10,7 @@ use crate::skia::{
     FontTableTag,
     Rect
 };
-use rust_skia::{
+use skia_bindings::{
     C_SkTypeface_MakeDefault,
     SkTypeface,
     C_SkTypeface_MakeFromName,

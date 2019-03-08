@@ -1,4 +1,4 @@
-use rust_skia::{
+use skia_bindings::{
     SkMatrix_TypeMask
 };
 

@@ -1,4 +1,4 @@
-use rust_skia::SkVector4;
+use skia_bindings::SkVector4;
 use crate::prelude::NativeTransmutable;
 use crate::skia::scalar;
 

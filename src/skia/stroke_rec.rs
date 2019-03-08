@@ -7,7 +7,7 @@ use crate::skia::{
     Paint,
     scalar
 };
-use rust_skia::{
+use skia_bindings::{
     SkStrokeRec_InitStyle,
     SkStrokeRec,
     SkStrokeRec_Style,

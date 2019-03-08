@@ -1,6 +1,6 @@
 use std::ffi;
 use std::os::raw;
-use rust_skia::{C_GrVkBackendContext_New, C_GrVkBackendContext_Delete, VkInstance, VkDevice };
+use skia_bindings::{C_GrVkBackendContext_New, C_GrVkBackendContext_Delete, VkInstance, VkDevice };
 
 #[derive(Debug)]
 pub struct BackendContext {

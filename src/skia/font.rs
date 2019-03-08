@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use std::{mem, ptr};
-use rust_skia::{
+use skia_bindings::{
     C_SkFont_makeWithSize,
     C_SkFont_ConstructFromTypefaceWithSize,
     C_SkFont_ConstructFromTypeface,

@@ -19,7 +19,7 @@ use crate::skia::{
     MaskFilter,
     Typeface
 };
-use rust_skia::{
+use skia_bindings::{
     C_SkPaint_setMaskFilter,
     C_SkPaint_setPathEffect,
     C_SkPaint_setColorFilter,

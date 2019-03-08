@@ -8,7 +8,7 @@ use crate::skia::{
     Data,
     Matrix
 };
-use rust_skia::{
+use skia_bindings::{
     SkPath_AddPathMode,
     SkPath_ArcSize,
     C_SkPath_Equals,

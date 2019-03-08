@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rust_skia::SkEncodedImageFormat;
+use skia_bindings::SkEncodedImageFormat;
 
 pub type EncodedImageFormat = EnumHandle<SkEncodedImageFormat>;
 
