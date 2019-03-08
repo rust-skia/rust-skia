@@ -1,3 +1,4 @@
-/target/
 /test.png
-/Cargo.lock
+Cargo.lock
+.idea/
+target/
