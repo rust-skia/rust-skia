@@ -3,7 +3,6 @@ extern crate cc;
 
 use std::env;
 use std::fs;
-use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
@@ -132,6 +131,8 @@ fn main() {
     println!("cargo:rustc-link-lib=usp10");
     println!("cargo:rustc-link-lib=ole32");
     println!("cargo:rustc-link-lib=user32");
+    println!("cargo:rustc-link-lib=gdi32");
+    println!("cargo:rustc-link-lib=fontsub");
 
     // required since GrContext::MakeVulkan is linked.
     if cfg!(feature="vulkan") {
@@ -188,46 +189,60 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .whitelist_function("SkColorTypeBytesPerPixel")
     .whitelist_function("SkColorTypeIsAlwaysOpaque")
     .whitelist_function("SkColorTypeValidateAlphaType")
+    .whitelist_function("SkRGBToHSV")
+    // this function does not whitelist (probably because of inlining):
+    .whitelist_function("SkColorToHSV")
+    .whitelist_function("SkHSVToColor")
+    .whitelist_function("SkPreMultiplyARGB")
+    .whitelist_function("SkPreMultiplyColor")
+    .whitelist_function("SkBlendMode_Name")
+
     .whitelist_type("SkColorSpacePrimaries")
     .whitelist_type("SkVector4")
-
-    .rustified_enum("GrMipMapped")
-    .rustified_enum("GrSurfaceOrigin")
-    .rustified_enum("SkPaint_Style")
-    .rustified_enum("SkPaint_Cap")
-    .rustified_enum("SkPaint_Join")
-    .rustified_enum("SkGammaNamed")
-    .rustified_enum("SkColorSpace_RenderTargetGamma")
-    .rustified_enum("SkColorSpace_Gamut")
-    .rustified_enum("SkMatrix44_TypeMask")
-    .rustified_enum("SkMatrix_TypeMask")
-    .rustified_enum("SkMatrix_ScaleToFit")
-    .rustified_enum("SkAlphaType")
-    .rustified_enum("SkColorType")
-    .rustified_enum("SkYUVColorSpace")
-    .rustified_enum("SkPixelGeometry")
-    .rustified_enum("SkSurfaceProps_Flags")
-    .rustified_enum("SkBitmap_AllocFlags")
-    .rustified_enum("SkImage_BitDepth")
-    .rustified_enum("SkImage_CachingHint")
-    .rustified_enum("SkColorChannel")
-    .rustified_enum("SkYUVAIndex_Index")
-    .rustified_enum("SkEncodedImageFormat")
-    .rustified_enum("SkRRect_Type")
-    .rustified_enum("SkRRect_Corner")
-    .rustified_enum("SkRegion_Op")
-    .rustified_enum("SkFont_Edging")
-    .rustified_enum("SkFontMetrics_FontMetricsFlags")
-    .rustified_enum("SkTypeface_SerializeBehavior")
-    .rustified_enum("SkTypeface_Encoding")
-    .rustified_enum("SkFontStyle_Weight")
-    .rustified_enum("SkFontStyle_Width")
-    .rustified_enum("SkFontStyle_Slant")
-
+    .whitelist_type("SkPictureRecorder")
+    .whitelist_type("SkAutoCanvasRestore")
     .whitelist_var("SK_Color.*")
-
     .use_core()
     .clang_arg("-std=c++14");
+
+  let enums = [
+    "GrMipMapped", "GrSurfaceOrigin",
+    "SkPaint_Flags", "SkPaint_Style", "SkPaint_Cap", "SkPaint_Join",
+    "SkGammaNamed",
+    "SkColorSpace_RenderTargetGamma", "SkColorSpace_Gamut",
+    "SkMatrix44_TypeMask", "SkMatrix_TypeMask", "SkMatrix_ScaleToFit",
+    "SkAlphaType", "SkColorType",
+    "SkYUVColorSpace",
+    "SkPixelGeometry",
+    "SkSurfaceProps_Flags",
+    "SkBitmap_AllocFlags",
+    "SkImage_BitDepth", "SkImage_CachingHint",
+    "SkColorChannel",
+    "SkYUVAIndex_Index",
+    "SkEncodedImageFormat",
+    "SkRRect_Type", "SkRRect_Corner",
+    "SkRegion_Op",
+    "SkFontMetrics_FontMetricsFlags",
+    "SkTypeface_SerializeBehavior", "SkTypeface_Encoding",
+    "SkFontStyle_Weight", "SkFontStyle_Width", "SkFontStyle_Slant",
+    "SkFont_Edging",
+    "SkTextEncoding",
+    "SkFontHinting",
+    "SkVertices_VertexMode", "SkVertices_BuilderFlags",
+    "SkPictureRecorder_RecordFlags",
+    "SkColorFilter_Flags",
+    "SkBlendMode",
+    "SkStrokeRec_InitStyle", "SkStrokeRec_Style",
+    "SkPathEffect_PointData_PointFlags", "SkPathEffect_DashType",
+    "SkBlurStyle",
+    "SkCoverageMode",
+    "SkFilterQuality",
+    "SkPath_Direction", "SkPath_FillType", "SkPath_Convexity", "SkPath_ArcSize", "SkPath_AddPathMode", "SkPath_SegmentMask", "SkPath_Verb",
+    "SkCanvas_SaveLayerFlagsSet", "SkCanvas_PointMode", "SkCanvas_SrcRectConstraint",
+    "SkClipOp"
+  ];
+
+  builder = enums.iter().fold(builder, |b, e| b.rustified_enum(e) );
 
   let mut cc_build = Build::new();
 
