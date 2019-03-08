@@ -1,18 +1,5 @@
-[package]
-name = "rust-skia"
-version = "0.1.0"
-authors = ["LongYinan <lynweklm@gmail.com>"]
-edition = "2018"
-build = "build.rs"
-links = "skia"
+[workspace]
 
-[features]
-default = []
-vulkan = []
-
-[dependencies]
-
-[build-dependencies]
-cc = "1"
-bindgen = "0.47.3"
-
+members = [
+    "skia-bindings"
+]

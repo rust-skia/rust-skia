@@ -1,5 +1,6 @@
-/Cargo.lock
-/src/bindings.rs
-/src/bindings.rs.bk
-/target/
-/cmake-build-debug/
+Cargo.lock
+/skia-bindings/src/bindings.rs
+/skia-bindings/src/bindings.rs.bk
+target/
+cmake-build-debug/
+.idea/
