@@ -1,81 +1,83 @@
 use std::ptr;
-use rust_skia::{
-    SkSurface, SkColorType, GrSurfaceOrigin,
-    C_SkSurface_MakeRasterN32Premul,
-    // C_SkSurface_MakeRenderTarget,
-    C_SkSurface_MakeFromBackendTexture,
-    C_SkSurface_makeImageSnapshot,
-    SkSurface_BackendHandleAccess,
-    C_SkSurface_getBackendTexture,
-    GrBackendTexture
-};
-use super::image::Image;
-use super::canvas::Canvas;
+use super::{Image, Canvas};
 use crate::graphics::{Context, BackendTexture};
 use crate::prelude::*;
+use rust_skia::{
+    SkColorType,
+    SkSurface,
+    GrSurfaceOrigin,
+    SkSurface_BackendHandleAccess,
+    GrBackendTexture,
+    SkRefCntBase
+};
 
-pub struct Surface {
-    pub(crate) native: *mut SkSurface
-}
+// TODO: complete the implementation.
+pub type Surface = RCHandle<SkSurface>;
 
-impl Clone for Surface {
-    fn clone(&self) -> Self {
-        unsafe { (*self.native)._base._base.ref_() }
-        Surface { native: self.native }
+impl NativeRefCountedBase for SkSurface {
+    type Base = SkRefCntBase;
+
+    fn ref_counted_base(&self) -> &Self::Base {
+        &self._base._base
     }
 }
 
-impl Drop for Surface {
-    fn drop(&mut self) {
-        unsafe { (*self.native)._base._base.unref() }
-    }
-}
+impl RCHandle<SkSurface> {
 
-impl Surface {
-
-    pub fn new_raster_n32_premul(width: u32, height: u32) -> Option<Surface> {
-        unsafe { C_SkSurface_MakeRasterN32Premul(width as i32, height as i32, ptr::null()) }
-            .to_option()
-            .map(|native| Surface { native })
+    // TODO: use ISize?
+    pub fn new_raster_n32_premul(width: i32, height: i32) -> Option<Self> {
+        Self::from_ptr(unsafe {
+            rust_skia::C_SkSurface_MakeRasterN32Premul(width, height, ptr::null())
+        })
     }
 
-    pub fn new_from_backend_texture(
-        context: Context,
+    pub fn from_backend_texture(
+        context: &mut Context,
         backend_texture: &BackendTexture,
         origin: GrSurfaceOrigin,
-        sample_count: u32,
-        color_type: SkColorType) -> Option<Surface> {
-        unsafe { C_SkSurface_MakeFromBackendTexture(context.native, &backend_texture.native, origin, sample_count as i32, color_type) }
-            .to_option()
-            .map(|native| Surface { native })
+        sample_count: usize,
+        color_type: SkColorType) -> Option<Self> {
+        Self::from_ptr(unsafe {
+            rust_skia::C_SkSurface_MakeFromBackendTexture(
+                context.native_mut(),
+                backend_texture.native(),
+                origin,
+                sample_count.try_into().unwrap(),
+                color_type)
+        })
     }
 
-    pub fn canvas(&self) -> Canvas {
-        Canvas {
-            native: unsafe { (*self.native).getCanvas() },
-            owner: Some(self.clone())
-        }
+    pub fn canvas(&mut self) -> &mut Canvas {
+        let canvas_ref = unsafe { &mut *self.native_mut().getCanvas() };
+        Canvas::borrow_from_native(canvas_ref)
     }
 
     pub fn make_image_snapshot(&mut self) -> Image {
-        Image { native: unsafe { C_SkSurface_makeImageSnapshot(self.native) } }
+        Image::from_ptr(unsafe {
+            rust_skia::C_SkSurface_makeImageSnapshot(self.native_mut())
+        }).unwrap()
     }
 
     pub fn flush(&mut self) {
-        unsafe {
-            (*self.native).flush();
-        }
+        unsafe { self.native_mut().flush(); }
     }
 
     pub fn get_backend_texture(&mut self, handle_access: SkSurface_BackendHandleAccess) -> Option<BackendTexture> {
         unsafe {
             let mut backend_texture = GrBackendTexture::new();
-            C_SkSurface_getBackendTexture(
-                self.native,
+            rust_skia::C_SkSurface_getBackendTexture(
+                self.native_mut(),
                 handle_access,
                 &mut backend_texture as _);
 
             BackendTexture::from_raw(backend_texture)
         }
     }
+}
+
+#[test]
+fn create() {
+    assert!(Surface::new_raster_n32_premul(0, 0).is_none());
+    let surface = Surface::new_raster_n32_premul(1, 1).unwrap();
+    assert_eq!(1, surface.native().ref_cnt())
 }

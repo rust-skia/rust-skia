@@ -1,16 +1,24 @@
+use crate::prelude::*;
+#[cfg(feature = "vulkan")]
 use std::mem;
-use rust_skia::{GrBackendTexture, C_GrBackendTexture_destruct, GrVkImageInfo};
+#[cfg(feature = "vulkan")]
+use rust_skia::GrVkImageInfo;
+use rust_skia::{GrBackendTexture, C_GrBackendTexture_destruct};
 
 #[cfg(feature = "vulkan")]
 use super::vulkan;
 
-pub struct BackendTexture {
-    pub(crate) native: GrBackendTexture
+pub type BackendTexture = Handle<GrBackendTexture>;
+
+impl NativeDrop for GrBackendTexture {
+    fn drop(&mut self) {
+        unsafe { C_GrBackendTexture_destruct(self) }
+    }
 }
 
-impl Drop for BackendTexture {
-    fn drop(&mut self) {
-        unsafe { C_GrBackendTexture_destruct(&self.native) }
+impl NativeClone for GrBackendTexture {
+    fn clone(&self) -> Self {
+        unsafe { GrBackendTexture::new4(self) }
     }
 }
 
@@ -18,39 +26,37 @@ impl BackendTexture {
 
     #[cfg(feature = "vulkan")]
     pub unsafe fn new_vulkan(
-        (width, height): (u32, u32),
+        (width, height): (i32, i32),
         vk_info: &vulkan::ImageInfo) -> BackendTexture {
         Self::from_raw(
             GrBackendTexture::new2(
-                width as i32,
-                height as i32,
+                width,
+                height,
                 &vk_info.native))
             .unwrap()
     }
 
     pub (crate) unsafe fn from_raw(backend_texture: GrBackendTexture) -> Option<BackendTexture> {
         if backend_texture.fIsValid {
-            Some (BackendTexture {
-                native: backend_texture
-            })
+            Some (BackendTexture::from_native(backend_texture))
         } else {
             None
         }
     }
 
     #[cfg(feature = "vulkan")]
-    pub fn width(&self) -> u32 {
-        unsafe { self.native.width() as u32 }
+    pub fn width(&self) -> i32 {
+        unsafe { self.native().width() }
     }
 
     #[cfg(feature = "vulkan")]
-    pub fn height(&self) -> u32 {
-        unsafe { self.native.height() as u32 }
+    pub fn height(&self) -> i32 {
+        unsafe { self.native().height() }
     }
 
     #[cfg(feature = "vulkan")]
     pub fn has_mip_maps(&self) -> bool {
-        unsafe { self.native.hasMipMaps() }
+        unsafe { self.native().hasMipMaps() }
     }
 
     #[cfg(feature = "vulkan")]
@@ -58,7 +64,7 @@ impl BackendTexture {
         unsafe {
             // constructor not available.
             let mut image_info : GrVkImageInfo = mem::zeroed();
-            if self.native.getVkImageInfo(&mut image_info as _) {
+            if self.native().getVkImageInfo(&mut image_info as _) {
                 Some(vulkan::ImageInfo::from_raw(image_info))
             } else {
                 None

@@ -1,35 +1,34 @@
+use crate::prelude::*;
 use std::slice;
-use rust_skia::{SkData, C_SkData_unref, C_SkData_ref};
+use rust_skia::{
+    SkData,
+    C_SkData_unref,
+    C_SkData_ref
+};
 
-#[derive(Debug)]
-pub struct Data {
-    pub(crate) native: *mut SkData
-}
+pub type Data = RCHandle<SkData>;
 
-impl Drop for Data {
-    fn drop(&mut self) {
-        unsafe { C_SkData_unref(&*self.native) }
+impl NativeRefCounted for SkData {
+    fn _ref(&self) {
+        unsafe { C_SkData_ref(self) }
+    }
+
+    fn _unref(&self) {
+        unsafe { C_SkData_unref(self) }
     }
 }
 
-impl Clone for Data {
-    fn clone(&self) -> Self {
-        unsafe { C_SkData_ref(&*self.native) };
-        Data{ native: self.native }
-    }
-}
-
-impl Data {
+// TODO: complete the implementation.
+impl RCHandle<SkData> {
 
     pub fn bytes(&self) -> &[u8] {
         unsafe {
-            let bytes = (*self.native).bytes();
+            let bytes = self.native().bytes();
             slice::from_raw_parts(bytes, self.size())
         }
     }
 
     pub fn size(&self) -> usize {
-        unsafe { (*self.native).size() }
+        unsafe { self.native().size() }
     }
 }
-

@@ -1,28 +1,25 @@
-use rust_skia::{GrContext, C_GrContext_MakeVulkan};
+#[cfg(feature = "vulkan")]
 use super::vulkan;
 use crate::prelude::*;
+use rust_skia::{
+    GrContext,
+    SkRefCntBase
+};
+#[cfg(feature = "vulkan")]
+use rust_skia::C_GrContext_MakeVulkan;
 
-pub struct Context {
-    pub(crate) native: *mut GrContext
-}
+pub type Context = RCHandle<GrContext>;
 
-impl Drop for Context {
-    fn drop(&mut self) {
-        unsafe { (*self.native)._base._base.unref(); }
-    }
-}
-
-impl Clone for Context {
-    fn clone(&self) -> Self {
-        unsafe { (*self.native)._base._base.ref_() }
-        Context { native: self.native }
+impl NativeRefCountedBase for GrContext {
+    type Base = SkRefCntBase;
+    fn ref_counted_base(&self) -> &Self::Base {
+        &self._base._base
     }
 }
 
 impl Context {
+    #[cfg(feature = "vulkan")]
     pub fn new_vulkan(backend_context: &vulkan::BackendContext) -> Option<Context> {
-       unsafe { C_GrContext_MakeVulkan(backend_context.native) }
-           .to_option()
-           .map(|native| Context{ native })
+       Context::from_ptr(unsafe { C_GrContext_MakeVulkan(backend_context.native) })
     }
 }

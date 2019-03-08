@@ -1,25 +1,29 @@
 pub mod graphics;
 pub mod skia;
+mod prelude;
 
-// temporariliy required for the canvas example.
-pub mod bindings {
-    pub use rust_skia::*;
-}
+#[macro_use]
+extern crate bitflags;
+#[macro_use]
+extern crate lazy_static;
 
-mod prelude {
 
-    pub trait ToOption {
-        type Target;
+#[cfg(test)]
+mod transmutation_tests {
 
-        fn to_option(self) -> Option<Self::Target>;
-    }
+    use crate::prelude::NativeTransmutableSliceAccess;
+    use crate::skia::Point;
+    use rust_skia::SkPoint;
 
-    impl<T> ToOption for *mut T {
-        type Target = *mut T;
+    #[test]
+    fn test_transmutation_of_fixed_size_arrays_to_slice() {
+        let mut points = [Point::default(); 4];
 
-        fn to_option(self) -> Option<Self::Target> {
-            if self.is_null()
-            { None } else { Some(self) }
-        }
+        let points_native = points.native_mut();
+        let native_point = SkPoint { fX: 10.0, fY: 11.0 };
+        points_native[1] = native_point;
+
+        assert_eq!(points[1].x, native_point.fX);
+        assert_eq!(points[1].y, native_point.fY);
     }
 }
