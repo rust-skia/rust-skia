@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use std::slice;
-use rust_skia::{
+use skia_bindings::{
     SkData,
     C_SkData_unref,
     C_SkData_ref

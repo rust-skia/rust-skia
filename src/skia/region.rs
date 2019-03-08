@@ -6,7 +6,7 @@ use crate::skia::{
     Contains,
     QuickReject
 };
-use rust_skia::{
+use skia_bindings::{
     C_SkRegion_destruct,
     C_SkRegion_equals,
     SkRegion,

@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rust_skia::SkBlurStyle;
+use skia_bindings::SkBlurStyle;
 
 pub type BlurStyle = EnumHandle<SkBlurStyle>;
 

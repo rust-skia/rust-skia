@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rust_skia::SkFilterQuality;
+use skia_bindings::SkFilterQuality;
 
 pub type FilterQuality = EnumHandle<SkFilterQuality>;
 

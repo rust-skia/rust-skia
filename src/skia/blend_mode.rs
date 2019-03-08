@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use std::ffi::CStr;
-use rust_skia::{
+use skia_bindings::{
     SkBlendMode,
     SkBlendMode_Name
 };

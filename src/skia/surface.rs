@@ -2,7 +2,7 @@ use std::ptr;
 use super::{Image, Canvas};
 use crate::graphics::{Context, BackendTexture};
 use crate::prelude::*;
-use rust_skia::{
+use skia_bindings::{
     SkColorType,
     SkSurface,
     GrSurfaceOrigin,
@@ -27,7 +27,7 @@ impl RCHandle<SkSurface> {
     // TODO: use ISize?
     pub fn new_raster_n32_premul(width: i32, height: i32) -> Option<Self> {
         Self::from_ptr(unsafe {
-            rust_skia::C_SkSurface_MakeRasterN32Premul(width, height, ptr::null())
+            skia_bindings::C_SkSurface_MakeRasterN32Premul(width, height, ptr::null())
         })
     }
 
@@ -38,7 +38,7 @@ impl RCHandle<SkSurface> {
         sample_count: usize,
         color_type: SkColorType) -> Option<Self> {
         Self::from_ptr(unsafe {
-            rust_skia::C_SkSurface_MakeFromBackendTexture(
+            skia_bindings::C_SkSurface_MakeFromBackendTexture(
                 context.native_mut(),
                 backend_texture.native(),
                 origin,
@@ -54,7 +54,7 @@ impl RCHandle<SkSurface> {
 
     pub fn make_image_snapshot(&mut self) -> Image {
         Image::from_ptr(unsafe {
-            rust_skia::C_SkSurface_makeImageSnapshot(self.native_mut())
+            skia_bindings::C_SkSurface_makeImageSnapshot(self.native_mut())
         }).unwrap()
     }
 
@@ -65,7 +65,7 @@ impl RCHandle<SkSurface> {
     pub fn get_backend_texture(&mut self, handle_access: SkSurface_BackendHandleAccess) -> Option<BackendTexture> {
         unsafe {
             let mut backend_texture = GrBackendTexture::new();
-            rust_skia::C_SkSurface_getBackendTexture(
+            skia_bindings::C_SkSurface_getBackendTexture(
                 self.native_mut(),
                 handle_access,
                 &mut backend_texture as _);

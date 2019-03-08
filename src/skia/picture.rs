@@ -4,7 +4,7 @@ use crate::skia::{
     Canvas,
     Rect
 };
-use rust_skia::{
+use skia_bindings::{
     C_SkPicture_approximateOpCount,
     C_SkPicture_playback,
     SkPicture,

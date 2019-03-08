@@ -2,8 +2,8 @@ use crate::prelude::*;
 #[cfg(feature = "vulkan")]
 use std::mem;
 #[cfg(feature = "vulkan")]
-use rust_skia::GrVkImageInfo;
-use rust_skia::{GrBackendTexture, C_GrBackendTexture_destruct};
+use skia_bindings::GrVkImageInfo;
+use skia_bindings::{GrBackendTexture, C_GrBackendTexture_destruct};
 
 #[cfg(feature = "vulkan")]
 use super::vulkan;

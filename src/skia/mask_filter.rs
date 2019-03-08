@@ -5,7 +5,7 @@ use crate::skia::{
     Matrix,
     CoverageMode
 };
-use rust_skia::{
+use skia_bindings::{
     C_SkMaskFilter_Combine,
     C_SkMaskFilter_Compose,
     C_SkMaskFilter_MakeBlur,

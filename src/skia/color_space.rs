@@ -1,7 +1,7 @@
 use std::mem;
 use super::{Matrix44, Data};
 use crate::prelude::*;
-use rust_skia::{
+use skia_bindings::{
     SkColorSpaceTransferFn,
     SkColorSpace,
     SkColorSpacePrimaries,
@@ -105,32 +105,32 @@ pub type ColorSpace = RCHandle<SkColorSpace>;
 
 impl NativeRefCounted for SkColorSpace {
     fn _ref(&self) {
-        unsafe { rust_skia::C_SkColorSpace_ref(self) };
+        unsafe { skia_bindings::C_SkColorSpace_ref(self) };
     }
 
     fn _unref(&self) {
-        unsafe { rust_skia::C_SkColorSpace_unref(self) }
+        unsafe { skia_bindings::C_SkColorSpace_unref(self) }
     }
 }
 
 impl NativePartialEq for SkColorSpace {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { rust_skia::SkColorSpace_Equals(self, rhs) }
+        unsafe { skia_bindings::SkColorSpace_Equals(self, rhs) }
     }
 }
 
 impl ColorSpace {
     pub fn new_srgb() -> ColorSpace {
-        ColorSpace::from_ptr(unsafe { rust_skia::C_SkColorSpace_MakeSRGB() }).unwrap()
+        ColorSpace::from_ptr(unsafe { skia_bindings::C_SkColorSpace_MakeSRGB() }).unwrap()
     }
 
     pub fn new_srgb_linear() -> ColorSpace {
-        ColorSpace::from_ptr(unsafe { rust_skia::C_SkColorSpace_MakeSRGBLinear() }).unwrap()
+        ColorSpace::from_ptr(unsafe { skia_bindings::C_SkColorSpace_MakeSRGBLinear() }).unwrap()
     }
 
     pub fn gamma_named(&self) -> GammaNamed {
         GammaNamed::from_native(unsafe {
-            rust_skia::C_SkColorSpace_gammaNamed(self.native())
+            skia_bindings::C_SkColorSpace_gammaNamed(self.native())
         })
     }
 
@@ -162,20 +162,20 @@ impl ColorSpace {
     #[warn(unused)]
     pub fn with_linear_gamma(&self) -> ColorSpace {
         ColorSpace::from_ptr(unsafe {
-            rust_skia::C_SkColorSpace_makeLinearGamma(self.native())
+            skia_bindings::C_SkColorSpace_makeLinearGamma(self.native())
         }).unwrap()
     }
 
     #[warn(unused)]
     pub fn with_srgb_gamma(&self) -> ColorSpace {
         ColorSpace::from_ptr(unsafe {
-            rust_skia::C_SkColorSpace_makeSRGBGamma(self.native())
+            skia_bindings::C_SkColorSpace_makeSRGBGamma(self.native())
         }).unwrap()
     }
 
     pub fn with_color_spin(&self) -> ColorSpace {
         ColorSpace::from_ptr(unsafe {
-            rust_skia::C_SkColorSpace_makeColorSpin(self.native())
+            skia_bindings::C_SkColorSpace_makeColorSpin(self.native())
         }).unwrap()
     }
 
@@ -185,14 +185,14 @@ impl ColorSpace {
 
     pub fn serialize(&self) -> Data {
         Data::from_ptr(unsafe {
-            rust_skia::C_SkColorSpace_serialize(self.native())
+            skia_bindings::C_SkColorSpace_serialize(self.native())
         }).unwrap()
     }
 
     pub fn deserialize(data: Data) -> ColorSpace {
         let bytes = data.bytes();
         ColorSpace::from_ptr(unsafe {
-            rust_skia::C_SkColorSpace_Deserialize(bytes.as_ptr() as _, bytes.len())
+            skia_bindings::C_SkColorSpace_Deserialize(bytes.as_ptr() as _, bytes.len())
         }).unwrap()
     }
 }
@@ -212,7 +212,7 @@ type RGB5 = (GammaNamed, Matrix44);
 impl NewRGB<RGB1> for RCHandle<SkColorSpace> {
     fn new_rgb(v: RGB1) -> Self {
         ColorSpace::from_ptr(unsafe {
-            rust_skia::C_SkColorSpace_MakeRGB((v.0).0, (v.1).0)
+            skia_bindings::C_SkColorSpace_MakeRGB((v.0).0, (v.1).0)
         }).unwrap()
     }
 }
@@ -220,7 +220,7 @@ impl NewRGB<RGB1> for RCHandle<SkColorSpace> {
 impl NewRGB<RGB2> for RCHandle<SkColorSpace> {
     fn new_rgb(v: RGB2) -> Self {
         ColorSpace::from_ptr(unsafe {
-            rust_skia::C_SkColorSpace_MakeRGB2((v.0).0, v.1.native())
+            skia_bindings::C_SkColorSpace_MakeRGB2((v.0).0, v.1.native())
         }).unwrap()
     }
 }
@@ -228,7 +228,7 @@ impl NewRGB<RGB2> for RCHandle<SkColorSpace> {
 impl NewRGB<RGB3> for RCHandle<SkColorSpace> {
     fn new_rgb(v: RGB3) -> Self {
         ColorSpace::from_ptr(unsafe {
-            rust_skia::C_SkColorSpace_MakeRGB3(v.0.native(), v.1.into_native())
+            skia_bindings::C_SkColorSpace_MakeRGB3(v.0.native(), v.1.into_native())
         }).unwrap()
     }
 }
@@ -236,7 +236,7 @@ impl NewRGB<RGB3> for RCHandle<SkColorSpace> {
 impl NewRGB<RGB4> for RCHandle<SkColorSpace> {
     fn new_rgb(v: RGB4) -> Self {
         ColorSpace::from_ptr(unsafe {
-            rust_skia::C_SkColorSpace_MakeRGB4(v.0.native(), v.1.native())
+            skia_bindings::C_SkColorSpace_MakeRGB4(v.0.native(), v.1.native())
         }).unwrap()
     }
 }
@@ -244,7 +244,7 @@ impl NewRGB<RGB4> for RCHandle<SkColorSpace> {
 impl NewRGB<RGB5> for RCHandle<SkColorSpace> {
     fn new_rgb(v: RGB5) -> Self {
         ColorSpace::from_ptr(unsafe {
-            rust_skia::C_SkColorSpace_MakeRGB5((v.0).0, v.1.native())
+            skia_bindings::C_SkColorSpace_MakeRGB5((v.0).0, v.1.native())
         }).unwrap()
     }
 }

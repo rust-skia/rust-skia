@@ -1,4 +1,4 @@
-use rust_skia::{GrVkAlloc, VkDeviceMemory, VkDeviceSize};
+use skia_bindings::{GrVkAlloc, VkDeviceMemory, VkDeviceSize};
 use std::ffi::c_void;
 
 #[derive(Debug)]

@@ -7,7 +7,7 @@ use crate::skia::{
     Color,
     Data
 };
-use rust_skia::{
+use skia_bindings::{
     C_SkVertices_Decode,
     C_SkVertices_applyBones,
     C_SkVertices_Builder_detach,
@@ -25,7 +25,7 @@ use rust_skia::{
     C_SkVertices_encode
 };
 #[cfg(test)]
-use rust_skia::{SkVertices_BoneIndices, SkVertices_BoneWeights};
+use skia_bindings::{SkVertices_BoneIndices, SkVertices_BoneWeights};
 #[cfg(test)]
 use std::mem;
 

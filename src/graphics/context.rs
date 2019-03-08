@@ -1,12 +1,12 @@
 #[cfg(feature = "vulkan")]
 use super::vulkan;
 use crate::prelude::*;
-use rust_skia::{
+use skia_bindings::{
     GrContext,
     SkRefCntBase
 };
 #[cfg(feature = "vulkan")]
-use rust_skia::C_GrContext_MakeVulkan;
+use skia_bindings::C_GrContext_MakeVulkan;
 
 pub type Context = RCHandle<GrContext>;
 

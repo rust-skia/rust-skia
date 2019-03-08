@@ -11,7 +11,7 @@ use crate::skia::{
     ISize,
     IPoint,
 };
-use rust_skia::{
+use skia_bindings::{
     SkPaint,
     SkIPoint,
     C_SkImageInfo_Copy,
@@ -82,7 +82,7 @@ impl Handle<SkBitmap> {
     }
 
     pub fn color_space(&self) -> Option<ColorSpace> {
-        ColorSpace::from_ptr(unsafe { rust_skia::C_SkBitmap_colorSpace(self.native()) })
+        ColorSpace::from_ptr(unsafe { skia_bindings::C_SkBitmap_colorSpace(self.native()) })
     }
 
     pub fn bytes_per_pixel(&self) -> usize {
@@ -151,7 +151,7 @@ impl Handle<SkBitmap> {
 
     pub fn compute_is_opaque(bm: &Self) -> bool {
         // well, the binding's version causes a linker error.
-        unsafe { rust_skia::C_SkBitmap_ComputeIsOpaque(bm.native()) }
+        unsafe { skia_bindings::C_SkBitmap_ComputeIsOpaque(bm.native()) }
     }
 
     pub fn bounds(&self) -> IRect {

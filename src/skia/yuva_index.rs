@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rust_skia::{
+use skia_bindings::{
     SkYUVAIndex,
     SkColorChannel
 };

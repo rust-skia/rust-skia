@@ -17,7 +17,7 @@ use crate::skia::{
     EncodedImageFormat,
     IPoint
 };
-use rust_skia::{
+use skia_bindings::{
     C_SkImage_MakeFromPicture,
     C_SkImage_MakeFromTexture,
     C_SkImage_MakeFromEncoded,

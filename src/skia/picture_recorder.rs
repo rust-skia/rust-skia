@@ -6,7 +6,7 @@ use crate::skia::{
     Canvas,
     Picture
 };
-use rust_skia::{
+use skia_bindings::{
     C_SkPictureRecorder_finishRecordingAsPicture,
     C_SkPictureRecorder_destruct,
     SkPictureRecorder_RecordFlags,

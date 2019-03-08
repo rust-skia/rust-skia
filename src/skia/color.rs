@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::skia::u8cpu;
 use std::ops::{Index,Mul,IndexMut};
-use rust_skia::{
+use skia_bindings::{
     SkColor,
     SkRGBToHSV,
     SkHSVToColor,
@@ -78,17 +78,17 @@ impl Color {
         Self::from_argb(a, self.r(), self.g(), self.b())
     }
 
-    pub const BLACK: Self = Self(rust_skia::SK_ColorBLACK);
-    pub const DARK_GRAY: Self = Self(rust_skia::SK_ColorDKGRAY);
-    pub const GRAY: Self = Self(rust_skia::SK_ColorLTGRAY);
-    pub const LIGHT_GRAY: Self = Self(rust_skia::SK_ColorLTGRAY);
-    pub const WHITE: Self = Self(rust_skia::SK_ColorWHITE);
-    pub const RED: Self = Self(rust_skia::SK_ColorRED);
-    pub const GREEN: Self = Self(rust_skia::SK_ColorGREEN);
-    pub const BLUE: Self = Self(rust_skia::SK_ColorBLUE);
-    pub const YELLOW: Self = Self(rust_skia::SK_ColorYELLOW);
-    pub const CYAN: Self = Self(rust_skia::SK_ColorCYAN);
-    pub const MAGENTA: Self = Self(rust_skia::SK_ColorMAGENTA);
+    pub const BLACK: Self = Self(skia_bindings::SK_ColorBLACK);
+    pub const DARK_GRAY: Self = Self(skia_bindings::SK_ColorDKGRAY);
+    pub const GRAY: Self = Self(skia_bindings::SK_ColorLTGRAY);
+    pub const LIGHT_GRAY: Self = Self(skia_bindings::SK_ColorLTGRAY);
+    pub const WHITE: Self = Self(skia_bindings::SK_ColorWHITE);
+    pub const RED: Self = Self(skia_bindings::SK_ColorRED);
+    pub const GREEN: Self = Self(skia_bindings::SK_ColorGREEN);
+    pub const BLUE: Self = Self(skia_bindings::SK_ColorBLUE);
+    pub const YELLOW: Self = Self(skia_bindings::SK_ColorYELLOW);
+    pub const CYAN: Self = Self(skia_bindings::SK_ColorCYAN);
+    pub const MAGENTA: Self = Self(skia_bindings::SK_ColorMAGENTA);
 
     pub fn to_rgb(self) -> RGB {
         (self.r(), self.g(), self.b()).into()

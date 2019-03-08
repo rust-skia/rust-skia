@@ -8,7 +8,7 @@ use crate::skia::{
     ColorSpace,
     scalar
 };
-use rust_skia::{
+use skia_bindings::{
     C_SkColorFilter_MakeLinearToSRGBGamma,
     C_SkColorFilter_MakeMatrixFilterRowMajor255,
     C_SkColorFilter_makeComposed,

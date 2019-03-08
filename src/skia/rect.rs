@@ -9,7 +9,7 @@ use crate::skia::{
     Contains,
     Vector
 };
-use rust_skia::{
+use skia_bindings::{
     SkIRect,
     SkRect,
 };

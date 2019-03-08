@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rust_skia::SkBBHFactory;
+use skia_bindings::SkBBHFactory;
 
 // TODO: complete the implementation
 pub type BBHFactory = Handle<SkBBHFactory>;

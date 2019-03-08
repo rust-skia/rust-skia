@@ -13,7 +13,7 @@ mod transmutation_tests {
 
     use crate::prelude::NativeTransmutableSliceAccess;
     use crate::skia::Point;
-    use rust_skia::SkPoint;
+    use skia_bindings::SkPoint;
 
     #[test]
     fn test_transmutation_of_fixed_size_arrays_to_slice() {
