@@ -87,7 +87,7 @@ impl RefCount for SkRefCntBase {
     fn ref_cnt(&self) -> usize {
         unsafe {
             let ptr: *const i32 =
-                &self.fRefCnt as *const skia_bindings::std_atomic as *const i32;
+                &self.fRefCnt as *const _ as *const i32;
             (*ptr).try_into().unwrap()
         }
     }
@@ -105,7 +105,7 @@ impl RefCount for SkNVRefCnt {
     fn ref_cnt(&self) -> usize {
         unsafe {
             let ptr: *const i32 =
-                &self.fRefCnt as *const skia_bindings::std_atomic as *const i32;
+                &self.fRefCnt as *const _ as *const i32;
             (*ptr).try_into().unwrap()
         }
     }
@@ -153,7 +153,7 @@ impl NativeRefCounted for SkRefCntBase {
     fn _ref_cnt(&self) -> usize {
         unsafe {
             let ptr: *const i32 =
-                &self.fRefCnt as *const skia_bindings::std_atomic as *const i32;
+                &self.fRefCnt as *const _ as *const i32;
 
             (*ptr).try_into().unwrap()
         }
