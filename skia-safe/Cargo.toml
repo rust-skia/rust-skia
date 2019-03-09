@@ -1,0 +1,14 @@
+[package]
+name = "skia-safe"
+version = "0.1.0"
+authors = ["Armin Sander <armin@replicator.org>"]
+edition = "2018"
+
+[features]
+default = []
+vulkan = ["skia-bindings/vulkan"]
+
+[dependencies]
+bitflags = "1.0"
+skia-bindings = { path = "../../rust-skia/skia-bindings" }
+lazy_static = "1.2"
