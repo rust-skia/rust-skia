@@ -44,6 +44,7 @@ jobs:
         cargo -V
         ninja --version
     displayName: Print versions
-  - script: cargo build --release --all-targets -vvv
-    env: { INIT_SKIA: true }
-    displayName: Build rust-skia
+  - script: cargo build --release --all-targets -vv
+    displayName: Build all targets
+  - script: cargo test --release -p skia-safe -vv
+    displayName: Test skia-safe

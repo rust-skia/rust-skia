@@ -5,6 +5,7 @@ authors = ["LongYinan <lynweklm@gmail.com>"]
 edition = "2018"
 build = "build.rs"
 links = "skia"
+exclude = [ "src/bindings.rs", "src/bindings.rs.bk", "skia/buildtools/**" ]
 
 [features]
 default = []
