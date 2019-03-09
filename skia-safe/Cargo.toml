@@ -10,5 +10,5 @@ vulkan = ["skia-bindings/vulkan"]
 
 [dependencies]
 bitflags = "1.0"
-skia-bindings = { path = "../../rust-skia/skia-bindings" }
+skia-bindings = { path = "../skia-bindings" }
 lazy_static = "1.2"
