@@ -1,9 +1,11 @@
+use std::mem;
 use crate::prelude::*;
 use skia_bindings::{
     SkFontStyle_Width,
     SkFontStyle_Weight,
     SkFontStyle_Slant,
     SkFontStyle,
+    C_SkFontStyle_Construct,
     C_SkFontStyle_equals
 };
 
@@ -76,7 +78,14 @@ impl NativePartialEq for SkFontStyle {
 
 impl Default for ValueHandle<SkFontStyle> {
     fn default() -> Self {
-        unsafe { SkFontStyle::new1() }.into_handle()
+        // does not link under Linux:
+        // unsafe { SkFontStyle::new1() }.into_handle()
+        FontStyle::from_native(unsafe {
+            let mut font_style = mem::uninitialized();
+            C_SkFontStyle_Construct(&mut font_style);
+            font_style
+        })
+
     }
 }
 

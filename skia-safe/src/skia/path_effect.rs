@@ -1,4 +1,4 @@
-use std::slice;
+use std::{slice, mem};
 use std::os::raw;
 use crate::prelude::*;
 use crate::skia::{
@@ -17,6 +17,7 @@ use skia_bindings::{
     C_SkPathEffect_MakeSum,
     SkRefCntBase,
     SkPathEffect,
+    C_SkPathEffect_PointData_Construct,
     C_SkPathEffect_PointData_deletePoints,
     SkPathEffect_DashInfo,
     SkPathEffect_DashType
@@ -66,7 +67,11 @@ impl Drop for PathEffectPointData {
 impl Default for PathEffectPointData {
     fn default() -> Self {
         PathEffectPointData::from_native(unsafe {
-            SkPathEffect_PointData::new()
+            // does not link under Linux:
+            // SkPathEffect_PointData::new()
+            let mut point_data = mem::uninitialized();
+            C_SkPathEffect_PointData_Construct(&mut point_data);
+            point_data
         })
     }
 }

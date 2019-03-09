@@ -459,9 +459,16 @@ extern "C" SkGammaNamed C_SkColorSpace_gammaNamed(const SkColorSpace* self) {
 // SkMatrix44
 //
 
-// calling SkMatrix44::new(Uninitialized) leads to linker error.
 extern "C" void C_SkMatrix44_Construct(SkMatrix44* uninitialized) {
     new(uninitialized) SkMatrix44();
+}
+
+extern "C" void C_SkMatrix44_CopyConstruct(SkMatrix44* uninitialized, const SkMatrix44* source) {
+    new(uninitialized) SkMatrix44(*source);
+}
+
+extern "C" void C_SkMatrix44_ConstructIdentity(SkMatrix44* uninitialized) {
+    new(uninitialized) SkMatrix44(SkMatrix44::kIdentity_Constructor);
 }
 
 extern "C" void C_SkMatrix44_destruct(SkMatrix44* self) {
@@ -617,6 +624,10 @@ extern "C" bool C_SkRegion_equals(const SkRegion* lhs, const SkRegion* rhs) {
 //
 // SkFontStyle
 //
+
+extern "C" void C_SkFontStyle_Construct(SkFontStyle* uninitialized) {
+    new(uninitialized) SkFontStyle();
+}
 
 extern "C" bool C_SkFontStyle_equals(const SkFontStyle* lhs, const SkFontStyle* rhs) {
     return *lhs == *rhs;
@@ -809,6 +820,10 @@ extern "C" SkPathEffect* C_SkPathEffect_MakeSum(const SkPathEffect* first, const
 
 extern "C" SkPathEffect* C_SkPathEffect_MakeCompose(const SkPathEffect* outer, const SkPathEffect* inner) {
     return SkPathEffect::MakeCompose(spFromConst(outer), spFromConst(inner)).release();
+}
+
+extern "C" void C_SkPathEffect_PointData_Construct(SkPathEffect::PointData* unitialized) {
+    new(unitialized) SkPathEffect::PointData();
 }
 
 extern "C" void C_SkPathEffect_PointData_deletePoints(SkPathEffect::PointData* self) {

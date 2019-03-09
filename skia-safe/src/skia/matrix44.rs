@@ -9,7 +9,8 @@ use skia_bindings::{
     C_SkMatrix44_Mul,
     C_SkMatrix44_MulV4,
     C_SkMatrix44_Construct,
-    SkMatrix44_Identity_Constructor_kIdentity_Constructor,
+    C_SkMatrix44_ConstructIdentity,
+    C_SkMatrix44_CopyConstruct
 };
 
 pub type Matrix44 = Handle<SkMatrix44>;
@@ -22,7 +23,13 @@ impl NativeDrop for SkMatrix44 {
 
 impl NativeClone for SkMatrix44 {
     fn clone(&self) -> Self {
-        unsafe { SkMatrix44::new3(self) }
+        // does not link under Linux:
+        // unsafe { SkMatrix44::new3(self) }
+        unsafe {
+            let mut matrix = mem::uninitialized();
+            C_SkMatrix44_CopyConstruct(&mut matrix, self);
+            matrix
+        }
     }
 }
 
@@ -76,15 +83,19 @@ impl Handle<SkMatrix44> {
     pub const COLUMNS : usize = 4;
 
     pub fn new() -> Self {
-        let mut m : SkMatrix44 = unsafe { mem::uninitialized() };
-        unsafe { C_SkMatrix44_Construct(&mut m) };
-        Self::from_native(m)
+        Matrix44::from_native(unsafe {
+            let mut matrix: SkMatrix44 = mem::uninitialized();
+            C_SkMatrix44_Construct(&mut matrix);
+            matrix
+        })
     }
 
     pub fn new_identity() -> Self {
-        Self::from_native(unsafe {
-            SkMatrix44::new1(SkMatrix44_Identity_Constructor_kIdentity_Constructor)
-        } )
+        Matrix44::from_native(unsafe {
+            let mut matrix: SkMatrix44 = mem::uninitialized();
+            C_SkMatrix44_ConstructIdentity(&mut matrix);
+            matrix
+        })
     }
 
     pub fn get_type(&self) -> MatrixTypeMask {
