@@ -1,6 +1,6 @@
 [workspace]
 
 members = [
-    "skia-safe",
-    "skia-bindings"
+    "skia-bindings",
+    "skia-safe"
 ]
