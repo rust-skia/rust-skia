@@ -844,8 +844,6 @@ extern "C" SkISize C_SkSize_toFloor(const SkSize* size) {
     return size->toFloor();
 }
 
-#if defined(SK_VULKAN)
-
 extern "C" SkSurface* C_SkSurface_MakeFromBackendTexture(
     GrContext* context,
     const GrBackendTexture* backendTexture,
@@ -861,6 +859,8 @@ extern "C" void C_SkSurface_getBackendTexture(
         GrBackendTexture* backendTexture) {
     *backendTexture = self->getBackendTexture(handleAccess);
 }
+
+#if defined(SK_VULKAN)
 
 // The GrVkBackendContext struct binding's length is too short
 // because of the std::function that is used in it.
