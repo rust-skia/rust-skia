@@ -36,13 +36,13 @@ impl EnumHandle<SkRRect_Corner> {
 
 pub type RRect = ValueHandle<SkRRect>;
 
-impl NativePartialEq for RRect {
+impl NativePartialEq for SkRRect {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { C_SkRRect_equals(self.native(), rhs.native()) }
+        unsafe { C_SkRRect_equals(self, rhs) }
     }
 }
 
-impl Default for RRect {
+impl Default for ValueHandle<SkRRect> {
     fn default() -> Self {
         // SkRRect::MakeEmpty does not link, so we use new().
         unsafe { SkRRect::new() }
@@ -50,7 +50,7 @@ impl Default for RRect {
     }
 }
 
-impl RRect {
+impl ValueHandle<SkRRect> {
 
     pub fn get_type(&self) -> RRectType {
         RRectType::from_native(unsafe { self.native().getType() })
@@ -143,29 +143,26 @@ impl RRect {
         })
     }
 
-    // TODO: use Vector for dx, dy?
     #[warn(unused)]
-    pub fn inset(&self, dx: scalar, dy: scalar) -> Self {
+    pub fn inset(&self, delta: Vector) -> Self {
         // inset1 does not link.
         let mut r = Self::default();
-        unsafe { self.native().inset(dx, dy, r.native_mut()) };
+        unsafe { self.native().inset(delta.x, delta.y, r.native_mut()) };
         r
     }
 
 
-    // TODO: use Vector for dx, dy?
     #[warn(unused)]
-    pub fn outset(&self, dx: scalar, dy: scalar) -> Self {
+    pub fn outset(&self, delta: Vector) -> Self {
         // outset and outset1 does not link.
-        self.inset(-dx, -dy)
+        self.inset(-delta)
     }
 
-    // TODO: use Vector for dx, dy?
     #[warn(unused)]
-    pub fn offset(&self, dx: scalar, dy: scalar) -> Self {
+    pub fn offset(&self, delta: Vector) -> Self {
         // makeOffset and offset does not link.
         let mut copied = *self;
-        unsafe { copied.native_mut().fRect.offset(dx, dy) }
+        unsafe { copied.native_mut().fRect.offset(delta.x, delta.y) }
         copied
     }
 
