@@ -167,7 +167,7 @@ impl ValueHandle<SkRRect> {
     }
 
     pub fn contains<R: AsRef<Rect>>(&self, rect: R) -> bool {
-        unsafe { self.native().contains(rect.as_ref().into_native()) }
+        unsafe { self.native().contains(rect.as_ref().native()) }
     }
 
     pub fn is_valid(&self) -> bool {
