@@ -196,6 +196,12 @@ fn test_rect_layout() {
     Rect::test_layout();
 }
 
+impl AsRef<Rect> for Rect {
+    fn as_ref(&self) -> &Rect {
+        self
+    }
+}
+
 impl Rect {
     pub fn new(left: scalar, top: scalar, right: scalar, bottom: scalar) -> Self {
         Self { left, top, right, bottom }

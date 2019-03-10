@@ -92,37 +92,37 @@ impl ValueHandle<SkRRect> {
         Vector::from_native(unsafe { self.native().getSimpleRadii() })
     }
 
-    pub fn from_rect(rect: &Rect) -> Self {
-        unsafe { SkRRect::MakeRect(&rect.into_native()) }
+    pub fn new_rect<R: AsRef<Rect>>(rect: R) -> Self {
+        unsafe { SkRRect::MakeRect(rect.as_ref().native()) }
             .into_handle()
     }
 
-    pub fn from_oval(oval: &Rect) -> Self {
-        unsafe { SkRRect::MakeOval(&oval.into_native()) }
+    pub fn new_oval<R: AsRef<Rect>>(oval: R) -> Self {
+        unsafe { SkRRect::MakeOval(oval.as_ref().native()) }
             .into_handle()
     }
 
-    pub fn from_rect_xy(rect: &Rect, x_rad: scalar, y_rad: scalar) -> Self {
-        unsafe { SkRRect::MakeRectXY(&rect.into_native(), x_rad, y_rad) }
+    pub fn new_rect_xy<R: AsRef<Rect>>(rect: R, x_rad: scalar, y_rad: scalar) -> Self {
+        unsafe { SkRRect::MakeRectXY(rect.as_ref().native(), x_rad, y_rad) }
             .into_handle()
     }
 
-    pub fn from_nine_patch(rect: &Rect, left_rad: scalar, top_rad: scalar, right_rad: scalar, bottom_rad: scalar) -> Self {
+    pub fn new_nine_patch<R: AsRef<Rect>>(rect: R, left_rad: scalar, top_rad: scalar, right_rad: scalar, bottom_rad: scalar) -> Self {
         let mut r = Self::default();
         unsafe {
             r.native_mut()
                 .setNinePatch(
-                    &rect.into_native(),
+                    rect.as_ref().native(),
                     left_rad, top_rad, right_rad, bottom_rad)
         }
         r
     }
 
-    pub fn from_rect_radii(rect: &Rect, radii: &[Vector; 4]) -> Self {
+    pub fn new_rect_radii<R: AsRef<Rect>>(rect: R, radii: &[Vector; 4]) -> Self {
         let mut r = Self::default();
         unsafe {
             r.native_mut()
-                .setRectRadii(rect.native(), radii.native().as_ptr())
+                .setRectRadii(rect.as_ref().native(), radii.native().as_ptr())
         }
         r
     }
@@ -166,8 +166,8 @@ impl ValueHandle<SkRRect> {
         copied
     }
 
-    pub fn contains(&self, rect: &Rect) -> bool {
-        unsafe { self.native().contains(&rect.into_native()) }
+    pub fn contains<R: AsRef<Rect>>(&self, rect: R) -> bool {
+        unsafe { self.native().contains(rect.as_ref().into_native()) }
     }
 
     pub fn is_valid(&self) -> bool {
