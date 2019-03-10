@@ -34,7 +34,7 @@ jobs:
         set PATH=%PATH%;%USERPROFILE%\.cargo\bin;%USERPROFILE%\depot_tools
         echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin;%USERPROFILE%\depot_tools"
         choco install llvm
-        git submodule update --init --recursive
+        git submodule update --init --recursive --depth 1
       displayName: Install rust (windows)
   # All platforms.
   - script: |
