@@ -356,7 +356,7 @@ impl ValueHandle<SkMatrix> {
         }.if_true_some(m)
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn invert(&self) -> Option<Matrix> {
         let mut m = Matrix::new_identity();
         unsafe { self.native().invert(m.native_mut()) }
@@ -367,7 +367,7 @@ impl ValueHandle<SkMatrix> {
         unsafe { SkMatrix::SetAffineIdentity(affine.as_mut_ptr()) }
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn as_affine(&mut self) -> Option<[scalar; 6]> {
         let mut affine = [scalar::default(); 6];
         unsafe { self.native_mut().asAffine(affine.as_mut_ptr()) }

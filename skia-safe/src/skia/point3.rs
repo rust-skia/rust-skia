@@ -59,14 +59,14 @@ impl Point3 {
         unsafe { SkPoint3::Length(self.x, self.y, self.z) }
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn normalized(&self) -> Option<Self> {
         let mut normalized = *self;
         unsafe { normalized.native_mut().normalize() }
             .if_true_some(normalized)
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn scaled(&self, scale: scalar) -> Self {
         // scale() does not link.
         Self::from_native(unsafe { self.native().makeScale(scale) })

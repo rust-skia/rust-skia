@@ -86,7 +86,7 @@ impl RCHandle<SkColorFilter> {
         })
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn composed(&self, inner: &ColorFilter) -> Option<ColorFilter> {
         ColorFilter::from_ptr(unsafe {
             C_SkColorFilter_makeComposed(self.native(), inner.shared_native() )

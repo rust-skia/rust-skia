@@ -80,7 +80,7 @@ impl IRect {
         unsafe { self.native().isEmpty() }
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn with_offset(&self, delta: IVector) -> Self {
         let cloned = *self;
         Self::from_native(unsafe {
@@ -88,7 +88,7 @@ impl IRect {
         })
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn with_inset(&self, delta: IVector) -> Self {
         /* does not link:
         Self::from_native(unsafe {
@@ -97,14 +97,14 @@ impl IRect {
         self.with_outset(-delta)
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn with_outset(&self, delta: IVector) -> Self {
         Self::from_native(unsafe {
             self.native().makeOutset(delta.x, delta.y)
         })
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn with_offset_to(&self, new_x: i32, new_y: i32) -> Self {
         let mut copied = *self;
         unsafe {
@@ -113,7 +113,7 @@ impl IRect {
         copied
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn with_adjustment(&self, d_l: i32, d_t: i32, d_r: i32, d_b: i32) -> Self {
         let mut copied = *self;
         unsafe {
@@ -152,7 +152,7 @@ impl IRect {
         copied
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn sorted(&self) -> Self {
         let mut copied = *self;
         // makeSorted does not link:
@@ -305,21 +305,21 @@ impl Rect {
         joined
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn round(&self) -> IRect {
         let mut r = IRect::default();
         unsafe { self.native().round(r.native_mut()) };
         r
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn round_in(&self) -> IRect {
         let mut r = IRect::default();
         unsafe { self.native().roundIn(r.native_mut()) };
         r
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn sorted(&self) -> Rect {
         Rect::from_native(unsafe { self.native().makeSorted() })
     }

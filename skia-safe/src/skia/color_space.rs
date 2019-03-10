@@ -159,14 +159,14 @@ impl ColorSpace {
         XYZD50Hash(unsafe { self.native().toXYZD50Hash() })
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn with_linear_gamma(&self) -> ColorSpace {
         ColorSpace::from_ptr(unsafe {
             skia_bindings::C_SkColorSpace_makeLinearGamma(self.native())
         }).unwrap()
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn with_srgb_gamma(&self) -> ColorSpace {
         ColorSpace::from_ptr(unsafe {
             skia_bindings::C_SkColorSpace_makeSRGBGamma(self.native())

@@ -491,7 +491,7 @@ impl Handle<SkPath> {
         self
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn with_offset(&self, d: Vector) -> Path {
         let mut path = Path::default();
         unsafe {
@@ -507,7 +507,7 @@ impl Handle<SkPath> {
         self
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn with_transform(&self, matrix: &Matrix) -> Path {
         let mut path = Path::default();
         unsafe {

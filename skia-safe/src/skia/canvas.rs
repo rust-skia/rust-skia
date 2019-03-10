@@ -364,7 +364,7 @@ impl Canvas {
     // TODO: accessTopRasterHandle()
     // TODO: peekPixels()
 
-    #[warn(unused)]
+    #[must_use]
     pub fn read_pixels(
         &mut self,
         info: &ImageInfo,
@@ -382,7 +382,7 @@ impl Canvas {
 
     // TODO: read_pixels(Pixmap).
 
-    #[warn(unused)]
+    #[must_use]
     pub fn read_pixels_to_bitmap(&mut self, bitmap: &mut Bitmap, src: IPoint) -> bool {
         unsafe {
             self.native_mut().readPixels2(bitmap.native(), src.x, src.y)
@@ -390,7 +390,7 @@ impl Canvas {
     }
 
     // TODO: that (pixels, row_bytes) pair is probably worth abstracting over.
-    #[warn(unused)]
+    #[must_use]
     pub fn write_pixels(&mut self, info: &ImageInfo, pixels: &[u8], row_bytes: usize, offset: IPoint) -> bool {
         let required_size = info.compute_byte_size(row_bytes);
         (pixels.len() >= required_size) && unsafe {
@@ -401,7 +401,7 @@ impl Canvas {
         }
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn write_pixels_from_bitmap(&mut self, bitmap: &Bitmap, offset: IPoint) -> bool {
         unsafe {
             self.native_mut().writePixels1(bitmap.native(), offset.x, offset.y)
