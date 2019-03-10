@@ -12,7 +12,7 @@ impl Canvas {
 
     pub fn new(width: i32, height: i32) -> Canvas {
         let mut surface =
-            skia::Surface::new_raster_n32_premul(width, height)
+            skia::Surface::new_raster_n32_premul((width, height).into())
                 .expect("no surface!");
         let path = skia::Path::new();
         let mut paint = skia::Paint::default();
