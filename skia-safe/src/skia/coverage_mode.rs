@@ -1,13 +1,13 @@
 use crate::prelude::*;
 use skia_bindings::SkCoverageMode;
 
-pub type CoverageMode = EnumHandle<SkCoverageMode>;
-
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkCoverageMode> {
-    pub const Union: Self = Self(SkCoverageMode::kUnion);
-    pub const Intersect: Self = Self(SkCoverageMode::kIntersect);
-    pub const Difference: Self = Self(SkCoverageMode::kDifference);
-    pub const ReverseDifference: Self = Self(SkCoverageMode::kReverseDifference);
-    pub const Xor: Self = Self(SkCoverageMode::kXor);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+pub enum CoverageMode {
+    Union = SkCoverageMode::kUnion as _,
+    Intersect = SkCoverageMode::kIntersect as _,
+    Difference = SkCoverageMode::kDifference as _,
+    ReverseDifference = SkCoverageMode::kReverseDifference as _,
+    Xor = SkCoverageMode::kXor as _
 }
+
+impl NativeTransmutable<SkCoverageMode> for CoverageMode {}

@@ -1,12 +1,13 @@
 use crate::prelude::*;
 use skia_bindings::SkBlurStyle;
 
-pub type BlurStyle = EnumHandle<SkBlurStyle>;
-
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkBlurStyle> {
-    pub const Normal: Self = Self(SkBlurStyle::kNormal_SkBlurStyle);
-    pub const Solid: Self = Self(SkBlurStyle::kSolid_SkBlurStyle);
-    pub const Outer: Self = Self(SkBlurStyle::kOuter_SkBlurStyle);
-    pub const Inner: Self = Self(SkBlurStyle::kInner_SkBlurStyle);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum BlurStyle {
+    Normal = SkBlurStyle::kNormal_SkBlurStyle as _,
+    Solid = SkBlurStyle::kSolid_SkBlurStyle as _,
+    Outer = SkBlurStyle::kOuter_SkBlurStyle as _,
+    Inner = SkBlurStyle::kInner_SkBlurStyle as _
 }
+
+impl NativeTransmutable<SkBlurStyle> for BlurStyle {}

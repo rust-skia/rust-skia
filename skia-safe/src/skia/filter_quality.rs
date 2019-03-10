@@ -1,12 +1,13 @@
 use crate::prelude::*;
 use skia_bindings::SkFilterQuality;
 
-pub type FilterQuality = EnumHandle<SkFilterQuality>;
-
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkFilterQuality> {
-    pub const None: Self = Self(SkFilterQuality::kNone_SkFilterQuality);
-    pub const Low: Self = Self(SkFilterQuality::kLow_SkFilterQuality);
-    pub const Medium: Self = Self(SkFilterQuality::kMedium_SkFilterQuality);
-    pub const High: Self = Self(SkFilterQuality::kHigh_SkFilterQuality);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum FilterQuality {
+    None = SkFilterQuality::kNone_SkFilterQuality as _,
+    Low = SkFilterQuality::kLow_SkFilterQuality as _,
+    Medium = SkFilterQuality::kMedium_SkFilterQuality as _,
+    High = SkFilterQuality::kHigh_SkFilterQuality as _
 }
+
+impl NativeTransmutable<SkFilterQuality> for FilterQuality {}

@@ -10,15 +10,15 @@ use skia_bindings::{
     SkColorSpace_RenderTargetGamma,
 };
 
-pub type GammaNamed = EnumHandle<SkGammaNamed>;
-
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkGammaNamed> {
-    pub const Linear: Self = Self(SkGammaNamed::kLinear_SkGammaNamed);
-    pub const SRGB: Self = Self(SkGammaNamed::kSRGB_SkGammaNamed);
-    pub const Curve2Dot2: Self = Self(SkGammaNamed::k2Dot2Curve_SkGammaNamed);
-    pub const NonStandard: Self = Self(SkGammaNamed::kNonStandard_SkGammaNamed);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+pub enum GammaNamed {
+    Linear = SkGammaNamed::kLinear_SkGammaNamed as _,
+    SRGB = SkGammaNamed::kSRGB_SkGammaNamed as _,
+    Curve2Dot2 = SkGammaNamed::k2Dot2Curve_SkGammaNamed as _,
+    NonStandard = SkGammaNamed::kNonStandard_SkGammaNamed as _
 }
+
+impl NativeTransmutable<SkGammaNamed> for GammaNamed {}
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct ColorSpacePrimaries {
@@ -212,7 +212,7 @@ type RGB5 = (GammaNamed, Matrix44);
 impl NewRGB<RGB1> for RCHandle<SkColorSpace> {
     fn new_rgb(v: RGB1) -> Self {
         ColorSpace::from_ptr(unsafe {
-            skia_bindings::C_SkColorSpace_MakeRGB((v.0).0, (v.1).0)
+            skia_bindings::C_SkColorSpace_MakeRGB((v.0).into_native(), (v.1).into_native())
         }).unwrap()
     }
 }
@@ -220,7 +220,7 @@ impl NewRGB<RGB1> for RCHandle<SkColorSpace> {
 impl NewRGB<RGB2> for RCHandle<SkColorSpace> {
     fn new_rgb(v: RGB2) -> Self {
         ColorSpace::from_ptr(unsafe {
-            skia_bindings::C_SkColorSpace_MakeRGB2((v.0).0, v.1.native())
+            skia_bindings::C_SkColorSpace_MakeRGB2((v.0).into_native(), v.1.native())
         }).unwrap()
     }
 }
@@ -244,28 +244,31 @@ impl NewRGB<RGB4> for RCHandle<SkColorSpace> {
 impl NewRGB<RGB5> for RCHandle<SkColorSpace> {
     fn new_rgb(v: RGB5) -> Self {
         ColorSpace::from_ptr(unsafe {
-            skia_bindings::C_SkColorSpace_MakeRGB5((v.0).0, v.1.native())
+            skia_bindings::C_SkColorSpace_MakeRGB5((v.0).into_native(), v.1.native())
         }).unwrap()
     }
 }
 
-pub type ColorSpaceRenderTargetGamma = EnumHandle<SkColorSpace_RenderTargetGamma>;
 
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkColorSpace_RenderTargetGamma> {
-    pub const Linear: Self = Self(SkColorSpace_RenderTargetGamma::kLinear_RenderTargetGamma);
-    pub const SRGB: Self = Self(SkColorSpace_RenderTargetGamma::kSRGB_RenderTargetGamma);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(u8)]
+pub enum ColorSpaceRenderTargetGamma {
+    Linear = SkColorSpace_RenderTargetGamma::kLinear_RenderTargetGamma as _,
+    SRGB = SkColorSpace_RenderTargetGamma::kSRGB_RenderTargetGamma as _
 }
 
-pub type ColorSpaceGamut = EnumHandle<SkColorSpace_Gamut>;
+impl NativeTransmutable<SkColorSpace_RenderTargetGamma> for ColorSpaceRenderTargetGamma {}
 
-#[allow(non_upper_case_globals)]
-impl ColorSpaceGamut {
-    pub const SRGB: Self = Self(SkColorSpace_Gamut::kSRGB_Gamut);
-    pub const AdobeRGB: Self = Self(SkColorSpace_Gamut::kAdobeRGB_Gamut);
-    pub const DCIP3_D65: Self = Self(SkColorSpace_Gamut::kDCIP3_D65_Gamut);
-    pub const Rec2020: Self = Self(SkColorSpace_Gamut::kRec2020_Gamut);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+enum ColorSpaceGamut {
+    SRGB = SkColorSpace_Gamut::kSRGB_Gamut as _,
+    AdobeRGB = SkColorSpace_Gamut::kAdobeRGB_Gamut as _,
+    DCIP3D65 = SkColorSpace_Gamut::kDCIP3_D65_Gamut as _,
+    Rec2020 = SkColorSpace_Gamut::kRec2020_Gamut as _
 }
+
+impl NativeTransmutable<SkColorSpace_Gamut> for ColorSpaceGamut {}
 
 pub struct XYZD50Hash(pub u32);
 

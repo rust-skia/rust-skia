@@ -5,57 +5,57 @@ use skia_bindings::{
     SkBlendMode_Name
 };
 
-pub type BlendMode = EnumHandle<SkBlendMode>;
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum BlendMode {
 
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkBlendMode> {
+    Clear = SkBlendMode::kClear as _,
+    Src = SkBlendMode::kSrc as _,
+    Dst = SkBlendMode::kDst as _,
+    SrcOver = SkBlendMode::kSrcOver as _,
+    DstOver = SkBlendMode::kDstOver as _,
+    SrcIn = SkBlendMode::kSrcIn as _,
+    DstIn = SkBlendMode::kDstIn as _,
+    SrcOut = SkBlendMode::kSrcOut as _,
+    DstOut = SkBlendMode::kDstOut as _,
+    SrcATop = SkBlendMode::kSrcATop as _,
+    DstATop = SkBlendMode::kDstATop as _,
+    Xor = SkBlendMode::kXor as _,
+    Plus = SkBlendMode::kPlus as _,
+    Modulate = SkBlendMode::kModulate as _,
+    Screen = SkBlendMode::kScreen as _,
 
-    pub const Clear: Self = Self(SkBlendMode::kClear);
-    pub const Src: Self = Self(SkBlendMode::kSrc);
-    pub const Dst: Self = Self(SkBlendMode::kDst);
-    pub const SrcOver: Self = Self(SkBlendMode::kSrcOver);
-    pub const DstOver: Self = Self(SkBlendMode::kDstOver);
-    pub const SrcIn: Self = Self(SkBlendMode::kSrcIn);
-    pub const DstIn: Self = Self(SkBlendMode::kDstIn);
-    pub const SrcOut: Self = Self(SkBlendMode::kSrcOut);
-    pub const DstOut: Self = Self(SkBlendMode::kDstOut);
-    pub const SrcATop: Self = Self(SkBlendMode::kSrcATop);
-    pub const DstATop: Self = Self(SkBlendMode::kDstATop);
-    pub const Xor: Self = Self(SkBlendMode::kXor);
-    pub const Plus: Self = Self(SkBlendMode::kPlus);
-    pub const Modulate: Self = Self(SkBlendMode::kModulate);
-    pub const Screen: Self = Self(SkBlendMode::kScreen);
+    Overlay = SkBlendMode::kOverlay as _,
+    Darken = SkBlendMode::kDarken as _,
+    Lighten = SkBlendMode::kLighten as _,
+    ColorDodge = SkBlendMode::kColorDodge as _,
+    ColorBurn = SkBlendMode::kColorBurn as _,
+    HardLight = SkBlendMode::kHardLight as _,
+    SoftLight = SkBlendMode::kSoftLight as _,
+    Difference = SkBlendMode::kDifference as _,
+    Exclusion = SkBlendMode::kExclusion as _,
+    Multiply = SkBlendMode::kMultiply as _,
 
-    pub const Overlay: Self = Self(SkBlendMode::kOverlay);
-    pub const Darken: Self = Self(SkBlendMode::kDarken);
-    pub const Lighten: Self = Self(SkBlendMode::kLighten);
-    pub const ColorDodge: Self = Self(SkBlendMode::kColorDodge);
-    pub const ColorBurn: Self = Self(SkBlendMode::kColorBurn);
-    pub const HardLight: Self = Self(SkBlendMode::kHardLight);
-    pub const SoftLight: Self = Self(SkBlendMode::kSoftLight);
-    pub const Difference: Self = Self(SkBlendMode::kDifference);
-    pub const Exclusion: Self = Self(SkBlendMode::kExclusion);
-    pub const Multiply: Self = Self(SkBlendMode::kMultiply);
+    Hue = SkBlendMode::kHue as _,
+    Saturation = SkBlendMode::kSaturation as _,
+    Color = SkBlendMode::kColor as _,
+    Luminosity = SkBlendMode::kLuminosity as _,
+}
 
-    pub const Hue: Self = Self(SkBlendMode::kHue);
-    pub const Saturation: Self = Self(SkBlendMode::kSaturation);
-    pub const Color: Self = Self(SkBlendMode::kColor);
-    pub const Luminosity: Self = Self(SkBlendMode::kLuminosity);
+impl NativeTransmutable<SkBlendMode> for BlendMode {}
 
-    pub const LastCoeffMode: Self = Self(SkBlendMode::kLastCoeffMode);
-    pub const LastSeparableMode: Self = Self(SkBlendMode::kLastSeparableMode);
-    pub const LastMode: Self = Self(SkBlendMode::kLastMode);
+impl Default for BlendMode {
+    fn default() -> Self {
+        BlendMode::SrcOver
+    }
+}
+
+impl BlendMode {
 
     pub fn name(self) -> &'static str {
         unsafe {
             let name_ptr = SkBlendMode_Name(self.into_native());
             CStr::from_ptr(name_ptr).to_str().unwrap()
         }
-    }
-}
-
-impl Default for EnumHandle<SkBlendMode> {
-    fn default() -> Self {
-        BlendMode::SrcOver
     }
 }

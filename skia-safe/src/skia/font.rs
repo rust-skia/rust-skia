@@ -25,14 +25,15 @@ use crate::skia::{
     scalar
 };
 
-pub type FontEdging = EnumHandle<SkFont_Edging>;
-
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkFont_Edging> {
-    pub const Alias: Self = Self(SkFont_Edging::kAlias);
-    pub const AntiAlias: Self = Self(SkFont_Edging::kAntiAlias);
-    pub const SubpixelAntiAlias: Self = Self(SkFont_Edging::kSubpixelAntiAlias);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum FontEdging {
+    Alias = SkFont_Edging::kAlias as _,
+    AntiAlias = SkFont_Edging::kAntiAlias as _,
+    SubpixelAntiAlias = SkFont_Edging::kSubpixelAntiAlias as _
 }
+
+impl NativeTransmutable<SkFont_Edging> for FontEdging {}
 
 pub type Font = Handle<SkFont>;
 

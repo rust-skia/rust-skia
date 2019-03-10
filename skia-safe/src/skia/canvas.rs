@@ -132,22 +132,25 @@ impl<'a> SaveLayerRec<'a> {
     }
 }
 
-pub type CanvasPointMode = EnumHandle<SkCanvas_PointMode>;
 
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkCanvas_PointMode> {
-    pub const Points: Self = Self(SkCanvas_PointMode::kPoints_PointMode);
-    pub const Lines: Self = Self(SkCanvas_PointMode::kLines_PointMode);
-    pub const Polygon: Self = Self(SkCanvas_PointMode::kPolygon_PointMode);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum CanvasPointMode {
+    Points = SkCanvas_PointMode::kPoints_PointMode as _,
+    Lines = SkCanvas_PointMode::kLines_PointMode as _,
+    Polygon = SkCanvas_PointMode::kPolygon_PointMode as _
 }
 
-pub type SrcRectConstraint = EnumHandle<SkCanvas_SrcRectConstraint>;
+impl NativeTransmutable<SkCanvas_PointMode> for CanvasPointMode {}
 
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkCanvas_SrcRectConstraint> {
-    pub const Strict: Self = Self(SkCanvas_SrcRectConstraint::kStrict_SrcRectConstraint);
-    pub const Fast: Self = Self(SkCanvas_SrcRectConstraint::kFast_SrcRectConstraint);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum SrcRectConstraint {
+    Strict = SkCanvas_SrcRectConstraint::kStrict_SrcRectConstraint as _,
+    Fast = SkCanvas_SrcRectConstraint::kFast_SrcRectConstraint as _
 }
+
+impl NativeTransmutable<SkCanvas_SrcRectConstraint> for SrcRectConstraint {}
 
 /// Provides access to Canvas's pixels.
 /// Returned by Canvas::access_top_layer_pixels()
