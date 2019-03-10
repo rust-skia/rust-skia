@@ -35,7 +35,7 @@ fn draw_rotated_rectangle(canvas: &mut Canvas) {
     let rect = Rect::from_point_and_size((-90.5, -90.5).into(), (181.0, 181.0).into());
     let mut paint = Paint::default();
     paint.set_color(Color::BLUE);
-    canvas.draw_rect(&rect, &paint);
+    canvas.draw_rect(rect, &paint);
     canvas.restore();
 }
 
