@@ -19,7 +19,7 @@ fn main() {
       .status().unwrap().success(), "git submodule init fail");
 
     assert!(Command::new("git")
-      .args(&["submodule", "update"])
+      .args(&["submodule", "update", "--depth 1"])
       .stdout(Stdio::inherit())
       .stderr(Stdio::inherit())
       .status().unwrap().success(), "git submodule update fail");
