@@ -211,6 +211,11 @@ impl Rect {
         (Point::default(), size).into()
     }
 
+    // replacement for new_xywh
+    pub fn from_point_and_size(p: Point, sz: Size) -> Self {
+        (p, sz).into()
+    }
+
     // TODO: do we need that?
     pub fn from_isize(size: ISize) -> Rect {
         Self::from_size(size.into())
