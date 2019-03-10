@@ -27,7 +27,7 @@ use skia_bindings::{
 
 bitflags! {
     pub struct ColorFilterFlags: u32 {
-        const AlphaUnchanged = SkColorFilter_Flags::kAlphaUnchanged_Flag as u32;
+        const ALPHA_UNCHANGED = SkColorFilter_Flags::kAlphaUnchanged_Flag as u32;
     }
 }
 

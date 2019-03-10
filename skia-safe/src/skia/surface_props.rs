@@ -40,7 +40,7 @@ impl Default for EnumHandle<SkPixelGeometry> {
 
 bitflags! {
     pub struct SurfacePropsFlags: u32 {
-        const UseDeviceIndependentFonts =
+        const USE_DEVICE_INDEPENDENT_FONTS =
             (SkSurfaceProps_Flags::kUseDeviceIndependentFonts_Flag) as u32;
     }
 }

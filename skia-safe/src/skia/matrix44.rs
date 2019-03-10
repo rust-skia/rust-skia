@@ -119,12 +119,12 @@ impl Handle<SkMatrix44> {
     pub fn is_scale(&self) -> bool {
         // linker error:
         // unsafe { self.0.isScale() }
-        (self.get_type() & !MatrixTypeMask::Scale).is_empty()
+        (self.get_type() & !MatrixTypeMask::SCALE).is_empty()
     }
 
     pub fn has_perspective(&self) -> bool {
         // would cause a linker error
-        self.get_type().contains(MatrixTypeMask::Perspective)
+        self.get_type().contains(MatrixTypeMask::PERSPECTIVE)
     }
 
     pub fn set_identity(&mut self) -> &mut Self {

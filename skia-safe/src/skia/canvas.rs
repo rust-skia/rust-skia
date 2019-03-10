@@ -64,7 +64,7 @@ use skia_bindings::{
 
 bitflags! {
     pub struct SaveLayerFlags: u32 {
-        const InitWithPrevious = SkCanvas_SaveLayerFlagsSet::kInitWithPrevious_SaveLayerFlag as _;
+        const INIT_WITH_PREVIOUS = SkCanvas_SaveLayerFlagsSet::kInitWithPrevious_SaveLayerFlag as _;
     }
 }
 

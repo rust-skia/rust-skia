@@ -7,10 +7,10 @@ use skia_bindings::{
 
 bitflags! {
     pub struct FontMetricsFlags: u32 {
-        const UnderlineThicknessIsValid = SkFontMetrics_FontMetricsFlags::kUnderlineThicknessIsValid_Flag as _;
-        const UnderlinePositionIsValid = SkFontMetrics_FontMetricsFlags::kUnderlinePositionIsValid_Flag as _;
-        const StrikeoutThicknessIsValid = SkFontMetrics_FontMetricsFlags::kStrikeoutThicknessIsValid_Flag as _;
-        const StrikeoutPositionIsValid = SkFontMetrics_FontMetricsFlags::kStrikeoutPositionIsValid_Flag as _;
+        const UNDERLINE_THICKNESS_IS_VALID = SkFontMetrics_FontMetricsFlags::kUnderlineThicknessIsValid_Flag as _;
+        const UNDERLINE_POSITION_IS_VALID = SkFontMetrics_FontMetricsFlags::kUnderlinePositionIsValid_Flag as _;
+        const STRIKEOUT_THICKNESS_IS_VALID = SkFontMetrics_FontMetricsFlags::kStrikeoutThicknessIsValid_Flag as _;
+        const STRIKEOUT_POSITION_IS_VALID = SkFontMetrics_FontMetricsFlags::kStrikeoutPositionIsValid_Flag as _;
     }
 }
 
@@ -48,25 +48,25 @@ impl FontMetrics {
 
     pub fn underline_thickness(&self) -> Option<scalar> {
         self.if_valid(
-            FontMetricsFlags::UnderlineThicknessIsValid,
+            FontMetricsFlags::UNDERLINE_THICKNESS_IS_VALID,
             self.underline_thickness)
     }
 
     pub fn underline_position(&self) -> Option<scalar> {
         self.if_valid(
-            FontMetricsFlags::UnderlinePositionIsValid,
+            FontMetricsFlags::UNDERLINE_POSITION_IS_VALID,
             self.underline_position)
     }
 
     pub fn strikeout_thickness(&self) -> Option<scalar> {
         self.if_valid(
-            FontMetricsFlags::StrikeoutThicknessIsValid,
+            FontMetricsFlags::STRIKEOUT_THICKNESS_IS_VALID,
             self.strikeout_thickness)
     }
 
     pub fn strikeout_position(&self) -> Option<scalar> {
         self.if_valid(
-            FontMetricsFlags::StrikeoutPositionIsValid,
+            FontMetricsFlags::STRIKEOUT_POSITION_IS_VALID,
             self.strikeout_position)
     }
 

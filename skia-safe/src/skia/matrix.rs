@@ -141,7 +141,7 @@ impl ValueHandle<SkMatrix> {
 
     pub fn is_translate(&self) -> bool {
         // isTranslate does not link
-        (self.get_type() & !MatrixTypeMask::Translate).is_empty()
+        (self.get_type() & !MatrixTypeMask::TRANSLATE).is_empty()
     }
 
     pub fn rect_stays_rect(&self) -> bool {
