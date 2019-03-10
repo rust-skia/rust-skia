@@ -41,7 +41,7 @@ fn draw_rotated_rectangle(canvas: &mut Canvas) {
 
 fn draw_hello_skia(canvas: &mut Canvas) {
 
-    let bytes = include_bytes!("5.png");
+    let bytes = include_bytes!("color_wheel.png");
     let data = Data::new_copy(bytes);
     let image = Image::from_encoded(&data, None).unwrap();
 
