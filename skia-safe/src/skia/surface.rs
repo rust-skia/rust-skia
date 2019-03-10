@@ -76,7 +76,7 @@ impl RCHandle<SkSurface> {
 
 #[test]
 fn create() {
-    assert!(Surface::new_raster_n32_premul(0, 0).is_none());
-    let surface = Surface::new_raster_n32_premul(1, 1).unwrap();
+    assert!(Surface::new_raster_n32_premul((0, 0).into()).is_none());
+    let surface = Surface::new_raster_n32_premul((1, 1).into()).unwrap();
     assert_eq!(1, surface.native().ref_cnt())
 }
