@@ -10,7 +10,6 @@ use cc::Build;
 
 fn main() {
 
-  if !cfg!(windows) {
     assert!(Command::new("git")
       .arg("submodule")
       .arg("init")
@@ -23,7 +22,6 @@ fn main() {
       .stdout(Stdio::inherit())
       .stderr(Stdio::inherit())
       .status().unwrap().success(), "git submodule update fail");
-  }
 
   assert!(Command::new("python")
     .arg("skia/tools/git-sync-deps")
