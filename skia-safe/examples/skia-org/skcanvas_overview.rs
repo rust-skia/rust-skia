@@ -30,18 +30,16 @@ fn draw_rotated_rectangle(canvas: &mut Canvas) {
     canvas.save();
     canvas.translate((128.0, 128.0).into());
     canvas.rotate(45.0, None);
-    // TODO: should we add a function Rect::from_point_and_size() ?
-    // also this could be ambiguous, Rects can also be described as two Points!
     let rect = Rect::from_point_and_size((-90.5, -90.5).into(), (181.0, 181.0).into());
     let mut paint = Paint::default();
     paint.set_color(Color::BLUE);
-    canvas.draw_rect(&rect, &paint);
+    canvas.draw_rect(rect, &paint);
     canvas.restore();
 }
 
 fn draw_hello_skia(canvas: &mut Canvas) {
 
-    let bytes = include_bytes!("5.png");
+    let bytes = include_bytes!("color_wheel.png");
     let data = Data::new_copy(bytes);
     let image = Image::from_encoded(&data, None).unwrap();
 
