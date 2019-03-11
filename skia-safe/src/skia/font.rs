@@ -34,6 +34,7 @@ pub enum FontEdging {
 }
 
 impl NativeTransmutable<SkFont_Edging> for FontEdging {}
+#[test] fn test_font_edging_layout() { FontEdging::test_layout() }
 
 pub type Font = Handle<SkFont>;
 

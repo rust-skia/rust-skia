@@ -11,3 +11,4 @@ pub enum FilterQuality {
 }
 
 impl NativeTransmutable<SkFilterQuality> for FilterQuality {}
+#[test] fn test_filter_quality_layout() { FilterQuality::test_layout() }

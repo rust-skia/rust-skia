@@ -142,6 +142,7 @@ pub enum CanvasPointMode {
 }
 
 impl NativeTransmutable<SkCanvas_PointMode> for CanvasPointMode {}
+#[test] fn test_canvas_point_mode_layout() { CanvasPointMode::test_layout() }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -151,6 +152,7 @@ pub enum SrcRectConstraint {
 }
 
 impl NativeTransmutable<SkCanvas_SrcRectConstraint> for SrcRectConstraint {}
+#[test] fn test_src_rect_constraint_layout() { SrcRectConstraint::test_layout() }
 
 /// Provides access to Canvas's pixels.
 /// Returned by Canvas::access_top_layer_pixels()

@@ -20,23 +20,25 @@ use skia_bindings::{
     SkRefCntBase
 };
 
-pub type TypefaceSerializeBehavior = EnumHandle<SkTypeface_SerializeBehavior>;
-
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkTypeface_SerializeBehavior> {
-    pub const DoIncludeData: Self = Self(SkTypeface_SerializeBehavior::kDoIncludeData);
-    pub const DontIncludeData: Self = Self(SkTypeface_SerializeBehavior::kDontIncludeData);
-    pub const IncludeDataIfLocal: Self = Self(SkTypeface_SerializeBehavior::kIncludeDataIfLocal);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum TypefaceSerializeBehavior {
+    DoIncludeData = SkTypeface_SerializeBehavior::kDoIncludeData as _,
+    DontIncludeData = SkTypeface_SerializeBehavior::kDontIncludeData as _,
+    IncludeDataIfLocal = SkTypeface_SerializeBehavior::kIncludeDataIfLocal as _
 }
 
-/*
-// not sure if we need to export that yet.
-type TypefaceEncoding = EnumHandle<SkTypeface_Encoding>;
+impl NativeTransmutable<SkTypeface_SerializeBehavior> for TypefaceSerializeBehavior {}
+#[test] fn test_typeface_serialize_behavior_layout() { TypefaceSerializeBehavior::test_layout() }
 
-impl EnumHandle<SkTypeface_Encoding> {
-    pub const UTF8: Self = Self(SkTypeface_Encoding::kUTF8_Encoding);
-    pub const UTF16: Self = Self(SkTypeface_Encoding::kUTF16_Encoding);
-    pub const UTF32: Self = Self(SkTypeface_Encoding::kUTF32_Encoding);
+// not sure if we need to export that yet.
+/*
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum TypefaceEncoding  {
+    UTF8 = SkTypeface_Encoding::kUTF8_Encoding as _,
+    UTF16 = SkTypeface_Encoding::kUTF16_Encoding as _,
+    UTF32 = SkTypeface_Encoding::kUTF32_Encoding as _
 }
 */
 

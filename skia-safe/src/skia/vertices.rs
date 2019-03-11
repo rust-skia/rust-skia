@@ -84,15 +84,16 @@ fn test_bone_layout() {
     VerticesBone::test_layout();
 }
 
-// TODO: think about renaming EnumHandle to EnumWrapper (and others?)
-pub type VerticesVertexMode = EnumHandle<SkVertices_VertexMode>;
-
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkVertices_VertexMode> {
-    pub const Triangles: Self = Self(SkVertices_VertexMode::kTriangles_VertexMode);
-    pub const TriangleStrip: Self = Self(SkVertices_VertexMode::kTriangleStrip_VertexMode);
-    pub const TriangleFan: Self = Self(SkVertices_VertexMode::kTriangleFan_VertexMode);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum VerticesVertexMode {
+    Triangles =  SkVertices_VertexMode::kTriangles_VertexMode as _,
+    TriangleStrip = SkVertices_VertexMode::kTriangleStrip_VertexMode as _,
+    TriangleFan = SkVertices_VertexMode::kTriangleFan_VertexMode as _
 }
+
+impl NativeTransmutable<SkVertices_VertexMode> for VerticesVertexMode {}
+#[test] fn test_vertices_vertex_mode_layout() { VerticesVertexMode::test_layout() }
 
 pub type Vertices = RCHandle<SkVertices>;
 

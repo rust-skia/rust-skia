@@ -4,22 +4,26 @@ use skia_bindings::{
     SkFontHinting
 };
 
-pub type TextEncoding = EnumHandle<SkTextEncoding>;
-
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkTextEncoding> {
-    pub const UTF8: Self = Self(SkTextEncoding::kUTF8);
-    pub const UTF16: Self = Self(SkTextEncoding::kUTF16);
-    pub const UTF32: Self = Self(SkTextEncoding::kUTF32);
-    pub const GlyphId: Self = Self(SkTextEncoding::kGlyphID);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum TextEncoding {
+    UTF8 = SkTextEncoding::kUTF8 as _,
+    UTF16 = SkTextEncoding::kUTF16 as _,
+    UTF32 = SkTextEncoding::kUTF32 as _,
+    GlyphId = SkTextEncoding::kGlyphID as _
 }
 
-pub type FontHinting = EnumHandle<SkFontHinting>;
+impl NativeTransmutable<SkTextEncoding> for TextEncoding {}
+#[test] fn test_text_encoding_layout() { TextEncoding::test_layout() }
 
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkFontHinting> {
-    pub const None: Self = Self(SkFontHinting::kNone);
-    pub const Slight: Self = Self(SkFontHinting::kSlight);
-    pub const Normal: Self = Self(SkFontHinting::kNormal);
-    pub const Full: Self = Self(SkFontHinting::kFull);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum FontHinting {
+    None = SkFontHinting::kNone as _,
+    Slight = SkFontHinting::kSlight as _,
+    Normal = SkFontHinting::kNormal as _,
+    Full = SkFontHinting::kFull as _
 }
+
+impl NativeTransmutable<SkFontHinting> for FontHinting {}
+#[test] fn test_font_hinting_layout() { FontHinting::test_layout(); }

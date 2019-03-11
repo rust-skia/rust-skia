@@ -8,7 +8,6 @@ use skia_bindings::{
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
 pub enum BlendMode {
-
     Clear = SkBlendMode::kClear as _,
     Src = SkBlendMode::kSrc as _,
     Dst = SkBlendMode::kDst as _,
@@ -43,6 +42,7 @@ pub enum BlendMode {
 }
 
 impl NativeTransmutable<SkBlendMode> for BlendMode {}
+#[test] fn test_blend_mode_layout() { BlendMode::test_layout() }
 
 impl Default for BlendMode {
     fn default() -> Self {

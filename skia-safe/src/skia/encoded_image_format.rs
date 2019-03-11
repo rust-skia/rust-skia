@@ -19,3 +19,4 @@ pub enum EncodedImageFormat {
 }
 
 impl NativeTransmutable<SkEncodedImageFormat> for EncodedImageFormat {}
+#[test] fn test_encoded_image_format_layout() { EncodedImageFormat::test_layout() }

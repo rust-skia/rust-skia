@@ -16,15 +16,17 @@ use skia_bindings::{
     SkMatrix,
 };
 
-pub type MatrixScaleToFit = EnumHandle<SkMatrix_ScaleToFit>;
-
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkMatrix_ScaleToFit> {
-    pub const Fill: Self = Self(SkMatrix_ScaleToFit::kFill_ScaleToFit);
-    pub const Start: Self = Self(SkMatrix_ScaleToFit::kStart_ScaleToFit);
-    pub const Center: Self = Self(SkMatrix_ScaleToFit::kCenter_ScaleToFit);
-    pub const End: Self = Self(SkMatrix_ScaleToFit::kEnd_ScaleToFit);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum MatrixScaleToFit {
+    Fill = SkMatrix_ScaleToFit::kFill_ScaleToFit as _,
+    Start = SkMatrix_ScaleToFit::kStart_ScaleToFit as _,
+    Center = SkMatrix_ScaleToFit::kCenter_ScaleToFit as _,
+    End = SkMatrix_ScaleToFit::kEnd_ScaleToFit as _
 }
+
+impl NativeTransmutable<SkMatrix_ScaleToFit> for MatrixScaleToFit {}
+#[test] fn test_matrix_scale_to_fit_layout() { MatrixScaleToFit::test_layout() }
 
 pub type Matrix = ValueHandle<SkMatrix>;
 
@@ -34,6 +36,7 @@ impl NativePartialEq for SkMatrix {
     }
 }
 
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum MatrixMember {
     ScaleX = 0,
     SkewX = 1,
@@ -46,6 +49,7 @@ pub enum MatrixMember {
     Persp2 = 8
 }
 
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum AffineMatrixMember {
     ScaleX = 0,
     SkewY = 1,

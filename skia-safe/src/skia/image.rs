@@ -44,20 +44,26 @@ use skia_bindings::{
     SkRefCntBase
 };
 
-pub type ImageBitDepth = EnumHandle<SkImage_BitDepth>;
-
-impl EnumHandle<SkImage_BitDepth> {
-    pub const U8: Self = Self(SkImage_BitDepth::kU8);
-    pub const F16: Self = Self(SkImage_BitDepth::kF16);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum ImageBitDepth {
+    U8 = SkImage_BitDepth::kU8 as _,
+    F16 = SkImage_BitDepth::kF16 as _
 }
 
-pub type CachingHint = EnumHandle<SkImage_CachingHint>;
+impl NativeTransmutable<SkImage_BitDepth> for ImageBitDepth {}
+#[test] fn test_image_bit_depth_layout() { ImageBitDepth::test_layout() }
 
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkImage_CachingHint> {
-    pub const Allow: Self = Self(SkImage_CachingHint::kAllow_CachingHint);
-    pub const Disallow: Self = Self(SkImage_CachingHint::kDisallow_CachingHint);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum ImageCachingHint {
+    Allow = SkImage_CachingHint::kAllow_CachingHint as _,
+    Disallow = SkImage_CachingHint::kDisallow_CachingHint as _
 }
+
+impl NativeTransmutable<SkImage_CachingHint> for ImageCachingHint {}
+
+#[test] fn test_caching_hint_layout() { ImageCachingHint::test_layout() }
 
 pub type Image = RCHandle<SkImage>;
 
@@ -269,7 +275,7 @@ impl RCHandle<SkImage> {
                 &dimensions.into_native(),
                 matrix.native_ptr_or_null(),
                 paint.native_ptr_or_null(),
-                bit_depth.0,
+                bit_depth.into_native(),
                 color_space.shared_ptr())
         })
     }
@@ -342,7 +348,7 @@ impl RCHandle<SkImage> {
         pixels: &mut[P],
         dst_row_bytes: usize,
         src: IPoint,
-        caching_hint: CachingHint) -> bool {
+        caching_hint: ImageCachingHint) -> bool {
 
         if pixels.elements_size_of() !=
             (usize::try_from(dst_info.height()).unwrap() * dst_row_bytes) {

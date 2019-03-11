@@ -11,6 +11,7 @@ use skia_bindings::{
 };
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
 pub enum GammaNamed {
     Linear = SkGammaNamed::kLinear_SkGammaNamed as _,
     SRGB = SkGammaNamed::kSRGB_SkGammaNamed as _,
@@ -19,6 +20,7 @@ pub enum GammaNamed {
 }
 
 impl NativeTransmutable<SkGammaNamed> for GammaNamed {}
+#[test] fn test_gamma_named_layout() { GammaNamed::test_layout() }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct ColorSpacePrimaries {
@@ -258,10 +260,11 @@ pub enum ColorSpaceRenderTargetGamma {
 }
 
 impl NativeTransmutable<SkColorSpace_RenderTargetGamma> for ColorSpaceRenderTargetGamma {}
+#[test] fn test_color_space_render_target_gamma_layout() { ColorSpaceRenderTargetGamma::test_layout() }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-enum ColorSpaceGamut {
+pub enum ColorSpaceGamut {
     SRGB = SkColorSpace_Gamut::kSRGB_Gamut as _,
     AdobeRGB = SkColorSpace_Gamut::kAdobeRGB_Gamut as _,
     DCIP3D65 = SkColorSpace_Gamut::kDCIP3_D65_Gamut as _,
@@ -269,6 +272,7 @@ enum ColorSpaceGamut {
 }
 
 impl NativeTransmutable<SkColorSpace_Gamut> for ColorSpaceGamut {}
+#[test] fn test_color_space_gamut_layout () { ColorSpaceGamut::test_layout() }
 
 pub struct XYZD50Hash(pub u32);
 

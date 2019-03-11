@@ -40,11 +40,7 @@ impl FontStyleWeight {
 pub struct FontStyleWidth(i32);
 
 impl NativeTransmutable<i32> for FontStyleWidth {}
-
-#[test]
-fn test_font_style_width_layout() {
-    FontStyleWidth::test_layout()
-}
+#[test] fn test_font_style_width_layout() { FontStyleWidth::test_layout() }
 
 #[allow(non_upper_case_globals)]
 impl FontStyleWidth {
@@ -59,14 +55,16 @@ impl FontStyleWidth {
     pub const UltraExpanded: Self = Self(SkFontStyle_Width::kUltraExpanded_Width as _);
 }
 
-pub type FontStyleSlant = EnumHandle<SkFontStyle_Slant>;
-
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkFontStyle_Slant> {
-    pub const Upright: Self = Self(SkFontStyle_Slant::kUpright_Slant);
-    pub const Italic: Self = Self(SkFontStyle_Slant::kItalic_Slant);
-    pub const Oblique: Self = Self(SkFontStyle_Slant::kOblique_Slant);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum FontStyleSlant {
+    Upright = SkFontStyle_Slant::kUpright_Slant as _,
+    Italic = SkFontStyle_Slant::kItalic_Slant as _,
+    Oblique = SkFontStyle_Slant::kOblique_Slant as _
 }
+
+impl NativeTransmutable<SkFontStyle_Slant> for FontStyleSlant {}
+#[test] fn test_font_style_slant_layout() { FontStyleSlant::test_layout() }
 
 pub type FontStyle = ValueHandle<SkFontStyle>;
 

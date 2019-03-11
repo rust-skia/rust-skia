@@ -11,3 +11,4 @@ pub enum BlurStyle {
 }
 
 impl NativeTransmutable<SkBlurStyle> for BlurStyle {}
+#[test] fn test_blur_style_layout() { BlurStyle::test_layout() }

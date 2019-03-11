@@ -227,14 +227,6 @@ impl<H, N> IntoHandle<H> for N
     }
 }
 
-/// A representation type for a native enum type.
-#[repr(transparent)]
-#[derive(Copy, Clone, PartialEq, Debug)]
-pub struct EnumHandle<N: Copy + PartialEq>(pub(crate) N);
-
-/// All EnumHandles can be transmuted to it's native representation.
-impl<N: Copy + PartialEq> NativeTransmutable<N> for EnumHandle<N> {}
-
 /// A representation type for a native type that has full Copy & Clone value semantics.
 #[repr(transparent)]
 #[derive(Copy, Clone)]
