@@ -220,7 +220,6 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     cc_build.include(&include_path);
   }
 
-
   if cfg!(feature="vulkan") {
 	builder = builder
       .rustified_enum("VkImageTiling")
