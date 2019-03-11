@@ -9,7 +9,7 @@ pub(crate) mod artifact {
 
     pub fn draw_canvas_256<F>(name: &str, func: F)
         where F: Fn(&mut Canvas) -> () {
-        let mut surface = Surface::new_raster_n32_premul((512, 512).into()).unwrap();
+        let mut surface = Surface::new_raster_n32_premul((512, 512)).unwrap();
         let mut canvas = surface.canvas();
         canvas.scale(2.0, 2.0);
         func(&mut canvas);

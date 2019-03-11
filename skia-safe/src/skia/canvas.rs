@@ -248,8 +248,8 @@ impl Canvas {
         }
     }
 
-    pub fn from_raster_direct_n32<'pixels>(
-        size: ISize,
+    pub fn from_raster_direct_n32<'pixels, IS: Into<ISize>>(
+        size: IS,
         pixels: &'pixels mut [u32 /* PMColor */],
         row_bytes: Option<usize>) -> Option<OwnedCanvas<'pixels>> {
         let info = ImageInfo::new_n32_premul(size, None);
@@ -262,7 +262,8 @@ impl Canvas {
 
     #[allow(clippy::new_ret_no_self)]
     // Decided to call this variant new, because it seems to be the simplest reasonable one.
-    pub fn new<'lt>(size: ISize, props: Option<&SurfaceProps>) -> Option<OwnedCanvas<'lt>> {
+    pub fn new<'lt, IS: Into<ISize>>(size: IS, props: Option<&SurfaceProps>) -> Option<OwnedCanvas<'lt>> {
+        let size = size.into();
         if size.width >= 0 && size.height >= 0 {
             let ptr = unsafe {
                 C_SkCanvas_newWidthHeightAndProps(
@@ -365,11 +366,12 @@ impl Canvas {
     // TODO: peekPixels()
 
     #[must_use]
-    pub fn read_pixels(
+    pub fn read_pixels<IP: Into<IPoint>>(
         &mut self,
         info: &ImageInfo,
         dst_pixels: &mut [u8], dst_row_bytes: usize,
-        src_point: IPoint) -> bool {
+        src_point: IP) -> bool {
+        let src_point = src_point.into();
         let required_size = info.compute_byte_size(dst_row_bytes);
         (dst_pixels.len() >= required_size) &&
         unsafe {
@@ -383,7 +385,8 @@ impl Canvas {
     // TODO: read_pixels(Pixmap).
 
     #[must_use]
-    pub fn read_pixels_to_bitmap(&mut self, bitmap: &mut Bitmap, src: IPoint) -> bool {
+    pub fn read_pixels_to_bitmap<IP: Into<IPoint>>(&mut self, bitmap: &mut Bitmap, src: IP) -> bool {
+        let src = src.into();
         unsafe {
             self.native_mut().readPixels2(bitmap.native(), src.x, src.y)
         }
@@ -391,7 +394,8 @@ impl Canvas {
 
     // TODO: that (pixels, row_bytes) pair is probably worth abstracting over.
     #[must_use]
-    pub fn write_pixels(&mut self, info: &ImageInfo, pixels: &[u8], row_bytes: usize, offset: IPoint) -> bool {
+    pub fn write_pixels<IP: Into<IPoint>>(&mut self, info: &ImageInfo, pixels: &[u8], row_bytes: usize, offset: IP) -> bool {
+        let offset = offset.into();
         let required_size = info.compute_byte_size(row_bytes);
         (pixels.len() >= required_size) && unsafe {
             self.native_mut().writePixels(
@@ -402,7 +406,8 @@ impl Canvas {
     }
 
     #[must_use]
-    pub fn write_pixels_from_bitmap(&mut self, bitmap: &Bitmap, offset: IPoint) -> bool {
+    pub fn write_pixels_from_bitmap<IP: Into<IPoint>>(&mut self, bitmap: &Bitmap, offset: IP) -> bool {
+        let offset = offset.into();
         unsafe {
             self.native_mut().writePixels1(bitmap.native(), offset.x, offset.y)
         }
@@ -442,7 +447,8 @@ impl Canvas {
         self
     }
 
-    pub fn translate(&mut self, d: Vector) -> &mut Self {
+    pub fn translate<V: Into<Vector>>(&mut self, d: V) -> &mut Self {
+        let d = d.into();
         unsafe {
             self.native_mut().translate(d.x, d.y)
         }
@@ -588,14 +594,16 @@ impl Canvas {
         self
     }
 
-    pub fn draw_point(&mut self, p: Point, paint: &Paint) -> &mut Self {
+    pub fn draw_point<P: Into<Point>>(&mut self, p: P, paint: &Paint) -> &mut Self {
+        let p = p.into();
         unsafe {
             self.native_mut().drawPoint(p.x, p.y, paint.native())
         }
         self
     }
 
-    pub fn draw_line(&mut self, p1: Point, p2: Point, paint: &Paint) -> &mut Self {
+    pub fn draw_line<P: Into<Point>>(&mut self, p1: P, p2: P, paint: &Paint) -> &mut Self {
+        let (p1, p2) = (p1.into(), p2.into());
         unsafe {
             self.native_mut().drawLine(p1.x, p1.y, p2.x, p2.y, paint.native())
         }
@@ -644,7 +652,8 @@ impl Canvas {
         self
     }
 
-    pub fn draw_circle(&mut self, center: Point, radius: scalar, paint: &Paint) -> &mut Self {
+    pub fn draw_circle<P: Into<Point>>(&mut self, center: P, radius: scalar, paint: &Paint) -> &mut Self {
+        let center = center.into();
         unsafe {
             // does not link:
             // self.native_mut().drawCircle1(center.into_native(), radius, paint.native())
@@ -677,7 +686,8 @@ impl Canvas {
         self
     }
 
-    pub fn draw_image(&mut self, image: &Image, left_top: Point, paint: Option<&Paint>) -> &mut Self {
+    pub fn draw_image<P: Into<Point>>(&mut self, image: &Image, left_top: P, paint: Option<&Paint>) -> &mut Self {
+        let left_top = left_top.into();
         unsafe {
             self.native_mut().drawImage(
                 image.native(), left_top.x, left_top.y,
@@ -720,7 +730,8 @@ impl Canvas {
         self
     }
 
-    pub fn draw_bitmap(&mut self, bitmap: &Bitmap, left_top: Point, paint: Option<&Paint>) -> &mut Self {
+    pub fn draw_bitmap<P: Into<Point>>(&mut self, bitmap: &Bitmap, left_top: P, paint: Option<&Paint>) -> &mut Self {
+        let left_top = left_top.into();
         unsafe {
             self.native_mut().drawBitmap(
                 bitmap.native(), left_top.x, left_top.y,
@@ -771,7 +782,8 @@ impl Canvas {
 
     // rust specific, based on drawSimpleText with fixed UTF8 encoding,
     // implementation is similar to Font's *_str methods.
-    pub fn draw_str(&mut self, str: &str, origin: Point, font: &Font, paint: &Paint) -> &mut Self {
+    pub fn draw_str<P: Into<Point>>(&mut self, str: &str, origin: P, font: &Font, paint: &Paint) -> &mut Self {
+        let origin = origin.into();
         let bytes = str.as_bytes();
         unsafe {
             self.native_mut().drawSimpleText(
@@ -944,7 +956,7 @@ mod tests {
 
     #[test]
     fn test_raster_direct_creation_and_clear_in_memory() {
-        let info = ImageInfo::new((2, 2).into(), ColorType::RGBA8888, AlphaType::Unpremul, None);
+        let info = ImageInfo::new((2, 2), ColorType::RGBA8888, AlphaType::Unpremul, None);
         assert_eq!(8, info.min_row_bytes());
         let mut bytes: [u8; 8 * 2] = Default::default();
         {
@@ -963,7 +975,7 @@ mod tests {
         let mut pixels: [u32; 4] = Default::default();
         {
             let mut canvas = Canvas::from_raster_direct_n32(
-                (2, 2).into(),
+                (2, 2),
                 pixels.as_mut(),
                 None).unwrap();
             canvas.clear(Color::RED);
@@ -993,7 +1005,7 @@ mod tests {
 
     #[test]
     fn test_total_matrix_transmutation() {
-        let mut c = Canvas::new((2, 2).into(), None).unwrap();
+        let mut c = Canvas::new((2, 2), None).unwrap();
         let matrix_ref = c.total_matrix();
         assert!(Matrix::default() == *matrix_ref);
         c.rotate(0.1, None);

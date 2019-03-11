@@ -12,7 +12,7 @@ impl Canvas {
 
     pub fn new(width: i32, height: i32) -> Canvas {
         let mut surface =
-            skia::Surface::new_raster_n32_premul((width, height).into())
+            skia::Surface::new_raster_n32_premul((width, height))
                 .expect("no surface!");
         let path = skia::Path::new();
         let mut paint = skia::Paint::default();
@@ -34,7 +34,7 @@ impl Canvas {
 
     #[inline]
     pub fn translate(&mut self, dx: f32, dy: f32) {
-        self.canvas().translate((dx, dy).into());
+        self.canvas().translate((dx, dy));
     }
 
     #[inline]
@@ -45,23 +45,23 @@ impl Canvas {
     #[inline]
     pub fn move_to(&mut self, x: f32, y: f32) {
         self.begin_path();
-        self.path.move_to((x, y).into());
+        self.path.move_to((x, y));
     }
 
     #[inline]
     pub fn line_to(&mut self, x: f32, y: f32) {
-        self.path.line_to((x, y).into());
+        self.path.line_to((x, y));
     }
 
     #[inline]
     pub fn quad_to(&mut self, cpx: f32, cpy: f32, x: f32, y: f32) {
-        self.path.quad_to((cpx, cpy).into(), (x, y).into());
+        self.path.quad_to((cpx, cpy), (x, y));
     }
 
     #[allow(dead_code)]
     #[inline]
     pub fn bezier_curve_to(&mut self, cp1x: f32, cp1y: f32, cp2x: f32, cp2y: f32, x: f32, y: f32) {
-        self.path.cubic_to((cp1x, cp1y).into(), (cp2x, cp2y).into(), (x, y).into());
+        self.path.cubic_to((cp1x, cp1y), (cp2x, cp2y), (x, y));
     }
 
     #[allow(dead_code)]

@@ -144,7 +144,8 @@ impl ValueHandle<SkRRect> {
     }
 
     #[must_use]
-    pub fn inset(&self, delta: Vector) -> Self {
+    pub fn inset<V: Into<Vector>>(&self, delta: V) -> Self {
+        let delta = delta.into();
         // inset1 does not link.
         let mut r = Self::default();
         unsafe { self.native().inset(delta.x, delta.y, r.native_mut()) };
@@ -153,13 +154,14 @@ impl ValueHandle<SkRRect> {
 
 
     #[must_use]
-    pub fn outset(&self, delta: Vector) -> Self {
+    pub fn outset<V: Into<Vector>>(&self, delta: V) -> Self {
         // outset and outset1 does not link.
-        self.inset(-delta)
+        self.inset(-delta.into())
     }
 
     #[must_use]
-    pub fn offset(&self, delta: Vector) -> Self {
+    pub fn offset<V: Into<Vector>>(&self, delta: V) -> Self {
+        let delta = delta.into();
         // makeOffset and offset does not link.
         let mut copied = *self;
         unsafe { copied.native_mut().fRect.offset(delta.x, delta.y) }
