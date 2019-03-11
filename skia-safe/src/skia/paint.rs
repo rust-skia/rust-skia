@@ -35,14 +35,14 @@ use skia_bindings::{
 
 bitflags! {
     pub struct PaintFlags: u32 {
-        const AntiAlias = SkPaint_Flags::kAntiAlias_Flag as _;
-        const Dither = SkPaint_Flags::kDither_Flag as _;
-        const FakeBoldText = SkPaint_Flags::kFakeBoldText_Flag as _;
-        const LinearText = SkPaint_Flags::kLinearText_Flag as _;
-        const SubpixelText = SkPaint_Flags::kSubpixelText_Flag as _;
-        const LCDRenderText = SkPaint_Flags::kLCDRenderText_Flag as _;
-        const EmbeddedBitmapText = SkPaint_Flags::kEmbeddedBitmapText_Flag as _;
-        const AutoHinting = SkPaint_Flags::kAutoHinting_Flag as _;
+        const ANTI_ALIAS = SkPaint_Flags::kAntiAlias_Flag as _;
+        const DITHER = SkPaint_Flags::kDither_Flag as _;
+        const FAKE_BOLD_TEXT = SkPaint_Flags::kFakeBoldText_Flag as _;
+        const LINEAR_TEXT = SkPaint_Flags::kLinearText_Flag as _;
+        const SUBPIXEL_TEXT = SkPaint_Flags::kSubpixelText_Flag as _;
+        const LCD_RENDER_TEXT = SkPaint_Flags::kLCDRenderText_Flag as _;
+        const EMBEDDED_BITMAP_TEXT = SkPaint_Flags::kEmbeddedBitmapText_Flag as _;
+        const AUTO_HINTING = SkPaint_Flags::kAutoHinting_Flag as _;
     }
 }
 
@@ -165,7 +165,7 @@ impl Handle<SkPaint> {
     pub fn is_linear_text(&self) -> bool {
         // does not link
         // unsafe { self.native().isLinearText() }
-        self.flags().contains(PaintFlags::LinearText)
+        self.flags().contains(PaintFlags::LINEAR_TEXT)
     }
 
     pub fn set_linear_text(&mut self, linear_text: bool) -> &mut Self {
@@ -176,7 +176,7 @@ impl Handle<SkPaint> {
     pub fn is_subpixel_text(&self) -> bool {
         // does not link
         // unsafe { self.native().isSubpixelText() }
-        self.flags().contains(PaintFlags::SubpixelText)
+        self.flags().contains(PaintFlags::SUBPIXEL_TEXT)
     }
 
     pub fn set_subpixel_text(&mut self, subpixel_text: bool) -> &mut Self {
@@ -187,7 +187,7 @@ impl Handle<SkPaint> {
     pub fn is_lcd_render_text(&self) -> bool {
         // does not link:
         // unsafe { self.native().isLCDRenderText() }
-        self.flags().contains(PaintFlags::LCDRenderText)
+        self.flags().contains(PaintFlags::LCD_RENDER_TEXT)
     }
 
     pub fn set_lcd_render_text(&mut self, lcd_text: bool) -> &mut Self {
@@ -198,7 +198,7 @@ impl Handle<SkPaint> {
     pub fn is_embedded_bitmap_text(&self) -> bool {
         // does not link:
         // unsafe { self.native().isEmbeddedBitmapText() }
-        self.flags().contains(PaintFlags::EmbeddedBitmapText)
+        self.flags().contains(PaintFlags::EMBEDDED_BITMAP_TEXT)
     }
 
     pub fn set_embedded_bitmap_text(&mut self, use_embedded_bitmap_text: bool) -> &mut Self {
@@ -209,7 +209,7 @@ impl Handle<SkPaint> {
     pub fn is_autohinted(&self) -> bool {
         // does not link:
         // unsafe { self.native().isAutohinted() }
-        self.flags().contains(PaintFlags::AutoHinting)
+        self.flags().contains(PaintFlags::AUTO_HINTING)
     }
 
     pub fn set_autohinted(&mut self, use_autohinter: bool) -> &mut Self {
@@ -220,7 +220,7 @@ impl Handle<SkPaint> {
     pub fn is_fake_bold_text(&self) -> bool {
         // does not link:
         // unsafe { self.native().isFakeBoldText() }
-        self.flags().contains(PaintFlags::FakeBoldText)
+        self.flags().contains(PaintFlags::FAKE_BOLD_TEXT)
     }
 
     pub fn set_fake_bold_text(&mut self, fake_bold_text: bool) -> &mut Self {

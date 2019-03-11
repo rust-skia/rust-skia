@@ -1,5 +1,5 @@
 use std::ptr;
-use super::{Image, Canvas};
+use super::{Image, Canvas, ISize};
 use crate::graphics::{Context, BackendTexture};
 use crate::prelude::*;
 use skia_bindings::{
@@ -24,10 +24,9 @@ impl NativeRefCountedBase for SkSurface {
 
 impl RCHandle<SkSurface> {
 
-    // TODO: use ISize?
-    pub fn new_raster_n32_premul(width: i32, height: i32) -> Option<Self> {
+    pub fn new_raster_n32_premul(size: ISize) -> Option<Self> {
         Self::from_ptr(unsafe {
-            skia_bindings::C_SkSurface_MakeRasterN32Premul(width, height, ptr::null())
+            skia_bindings::C_SkSurface_MakeRasterN32Premul(size.width, size.height, ptr::null())
         })
     }
 
@@ -77,7 +76,7 @@ impl RCHandle<SkSurface> {
 
 #[test]
 fn create() {
-    assert!(Surface::new_raster_n32_premul(0, 0).is_none());
-    let surface = Surface::new_raster_n32_premul(1, 1).unwrap();
+    assert!(Surface::new_raster_n32_premul((0, 0).into()).is_none());
+    let surface = Surface::new_raster_n32_premul((1, 1).into()).unwrap();
     assert_eq!(1, surface.native().ref_cnt())
 }

@@ -68,7 +68,7 @@ impl NativeRefCountedBase for SkImage {
     }
 }
 
-impl Image {
+impl RCHandle<SkImage> {
 
     pub fn from_raster_data(info: &ImageInfo, pixels: &mut Data, row_bytes: usize) -> Option<Image> {
         Image::from_ptr(unsafe {

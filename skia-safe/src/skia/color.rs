@@ -73,7 +73,7 @@ impl Color {
     }
 
     #[inline]
-    #[warn(unused)]
+    #[must_use]
     pub fn with_a(self, a: u8) -> Self {
         Self::from_argb(a, self.r(), self.g(), self.b())
     }

@@ -3,7 +3,8 @@ use std::slice;
 use skia_bindings::{
     SkData,
     C_SkData_unref,
-    C_SkData_ref
+    C_SkData_ref,
+    C_SkData_MakeWithCopy
 };
 
 pub type Data = RCHandle<SkData>;
@@ -19,7 +20,15 @@ impl NativeRefCounted for SkData {
 }
 
 // TODO: complete the implementation.
+// TODO: think about if we should support Data at all, Rust arrays and slices seem to
+// cover that.
 impl RCHandle<SkData> {
+
+    pub fn new_copy(data: &[u8]) -> Self {
+        Data::from_ptr(unsafe {
+            C_SkData_MakeWithCopy(data.as_ptr() as _, data.len())
+        }).unwrap()
+    }
 
     pub fn bytes(&self) -> &[u8] {
         unsafe {

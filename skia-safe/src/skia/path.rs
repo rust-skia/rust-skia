@@ -85,10 +85,10 @@ impl EnumHandle<SkPath_AddPathMode> {
 
 bitflags! {
     pub struct PathSegmentMask: u32 {
-        const Line = SkPath_SegmentMask::kLine_SegmentMask as _;
-        const Quad = SkPath_SegmentMask::kQuad_SegmentMask as _;
-        const Conic = SkPath_SegmentMask::kConic_SegmentMask as _;
-        const Cubic = SkPath_SegmentMask::kCubic_SegmentMask as _;
+        const LINE = SkPath_SegmentMask::kLine_SegmentMask as _;
+        const QUAD = SkPath_SegmentMask::kQuad_SegmentMask as _;
+        const CONIC = SkPath_SegmentMask::kConic_SegmentMask as _;
+        const CUBIC = SkPath_SegmentMask::kCubic_SegmentMask as _;
     }
 }
 
@@ -491,7 +491,7 @@ impl Handle<SkPath> {
         self
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn with_offset(&self, d: Vector) -> Path {
         let mut path = Path::default();
         unsafe {
@@ -507,7 +507,7 @@ impl Handle<SkPath> {
         self
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn with_transform(&self, matrix: &Matrix) -> Path {
         let mut path = Path::default();
         unsafe {

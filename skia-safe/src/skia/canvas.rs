@@ -64,7 +64,7 @@ use skia_bindings::{
 
 bitflags! {
     pub struct SaveLayerFlags: u32 {
-        const InitWithPrevious = SkCanvas_SaveLayerFlagsSet::kInitWithPrevious_SaveLayerFlag as _;
+        const INIT_WITH_PREVIOUS = SkCanvas_SaveLayerFlagsSet::kInitWithPrevious_SaveLayerFlag as _;
     }
 }
 
@@ -364,7 +364,7 @@ impl Canvas {
     // TODO: accessTopRasterHandle()
     // TODO: peekPixels()
 
-    #[warn(unused)]
+    #[must_use]
     pub fn read_pixels(
         &mut self,
         info: &ImageInfo,
@@ -382,7 +382,7 @@ impl Canvas {
 
     // TODO: read_pixels(Pixmap).
 
-    #[warn(unused)]
+    #[must_use]
     pub fn read_pixels_to_bitmap(&mut self, bitmap: &mut Bitmap, src: IPoint) -> bool {
         unsafe {
             self.native_mut().readPixels2(bitmap.native(), src.x, src.y)
@@ -390,7 +390,7 @@ impl Canvas {
     }
 
     // TODO: that (pixels, row_bytes) pair is probably worth abstracting over.
-    #[warn(unused)]
+    #[must_use]
     pub fn write_pixels(&mut self, info: &ImageInfo, pixels: &[u8], row_bytes: usize, offset: IPoint) -> bool {
         let required_size = info.compute_byte_size(row_bytes);
         (pixels.len() >= required_size) && unsafe {
@@ -401,7 +401,7 @@ impl Canvas {
         }
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn write_pixels_from_bitmap(&mut self, bitmap: &Bitmap, offset: IPoint) -> bool {
         unsafe {
             self.native_mut().writePixels1(bitmap.native(), offset.x, offset.y)
@@ -496,10 +496,10 @@ impl Canvas {
         self
     }
 
-    pub fn clip_rect(&mut self, rect: &Rect, options: CanvasClipOptions) -> &mut Self {
+    pub fn clip_rect<R: AsRef<Rect>>(&mut self, rect: R, options: CanvasClipOptions) -> &mut Self {
         unsafe {
             self.native_mut().clipRect(
-                rect.native(),
+                rect.as_ref().native(),
                 options.op.into_native(), options.do_anti_alias)
         }
         self
@@ -602,9 +602,9 @@ impl Canvas {
         self
     }
 
-    pub fn draw_rect(&mut self, rect: &Rect, paint: &Paint) -> &mut Self {
+    pub fn draw_rect<R: AsRef<Rect>>(&mut self, rect: R, paint: &Paint) -> &mut Self {
         unsafe {
-            self.native_mut().drawRect(rect.native(), paint.native())
+            self.native_mut().drawRect(rect.as_ref().native(), paint.native())
         }
         self
     }
@@ -623,9 +623,9 @@ impl Canvas {
         self
     }
 
-    pub fn draw_oval(&mut self, oval: &Rect, paint: &Paint) -> &mut Self {
+    pub fn draw_oval<R: AsRef<Rect>>(&mut self, oval: R, paint: &Paint) -> &mut Self {
         unsafe {
-            self.native_mut().drawOval(oval.native(), paint.native())
+            self.native_mut().drawOval(oval.as_ref().native(), paint.native())
         }
         self
     }
@@ -653,19 +653,19 @@ impl Canvas {
         self
     }
 
-    pub fn draw_arc(&mut self, oval: &Rect, start_angle: scalar, sweep_angle: scalar, use_center: bool, paint: &Paint) -> &mut Self {
+    pub fn draw_arc<R: AsRef<Rect>>(&mut self, oval: R, start_angle: scalar, sweep_angle: scalar, use_center: bool, paint: &Paint) -> &mut Self {
         unsafe {
             self.native_mut().drawArc(
-                oval.native(),
+                oval.as_ref().native(),
                 start_angle, sweep_angle,
                 use_center, paint.native())
         }
         self
     }
 
-    pub fn draw_round_rect(&mut self, rect: &Rect, rx: scalar, ry: scalar, paint: &Paint) -> &mut Self {
+    pub fn draw_round_rect<R: AsRef<Rect>>(&mut self, rect: R, rx: scalar, ry: scalar, paint: &Paint) -> &mut Self {
         unsafe {
-            self.native_mut().drawRoundRect(rect.native(), rx, ry, paint.native())
+            self.native_mut().drawRoundRect(rect.as_ref().native(), rx, ry, paint.native())
         }
         self
     }
@@ -686,36 +686,36 @@ impl Canvas {
         self
     }
 
-    pub fn draw_image_rect(
+    pub fn draw_image_rect<DR: AsRef<Rect>>(
         &mut self,
         image: &Image,
         src: Option<(&Rect, SrcRectConstraint)>,
-        dst: &Rect,
+        dst: DR,
         paint: &Paint) -> &mut Self {
         match src {
             Some((src, constraint)) => unsafe {
                 self.native_mut().drawImageRect(
                     image.native(),
-                    src.native(), dst.native(),
+                    src.native(), dst.as_ref().native(),
                     paint.native(), constraint.into_native())
             },
             None => unsafe {
                 self.native_mut().drawImageRect2(
                     image.native(),
-                    dst.native(),
+                    dst.as_ref().native(),
                     paint.native())
             }
         }
         self
     }
 
-    pub fn draw_image_nine(
+    pub fn draw_image_nine<R: AsRef<Rect>>(
         &mut self, image: &Image, center: &IRect,
-        dst: &Rect, paint: Option<&Paint>) -> &mut Self {
+        dst: R, paint: Option<&Paint>) -> &mut Self {
         unsafe {
             self.native_mut().drawImageNine(
                 image.native(), center.native(),
-                dst.native(), paint.native_ptr_or_null())
+                dst.as_ref().native(), paint.native_ptr_or_null())
         }
         self
     }
@@ -729,24 +729,24 @@ impl Canvas {
         self
     }
 
-    pub fn draw_bitmap_rect(
+    pub fn draw_bitmap_rect<R: AsRef<Rect>>(
         &mut self,
         bitmap: &Bitmap,
         src: Option<&Rect>,
-        dst: &Rect,
+        dst: R,
         paint: &Paint,
         constraint: SrcRectConstraint) -> &mut Self {
         match src {
             Some(src) => unsafe {
                 self.native_mut().drawBitmapRect(
                     bitmap.native(),
-                    src.native(), dst.native(),
+                    src.as_ref().native(), dst.as_ref().native(),
                     paint.native(), constraint.into_native())
             },
             None => unsafe {
                 self.native_mut().drawBitmapRect2(
                     bitmap.native(),
-                    dst.native(),
+                    dst.as_ref().native(),
                     paint.native(),
                     constraint.into_native())
             }
@@ -754,13 +754,13 @@ impl Canvas {
         self
     }
 
-    pub fn draw_bitmap_nine(
+    pub fn draw_bitmap_nine<DR: AsRef<Rect>>(
         &mut self, bitmap: &Bitmap, center: &IRect,
-        dst: &Rect, paint: Option<&Paint>) -> &mut Self {
+        dst: DR, paint: Option<&Paint>) -> &mut Self {
         unsafe {
             self.native_mut().drawBitmapNine(
                 bitmap.native(), center.native(),
-                dst.native(), paint.native_ptr_or_null())
+                dst.as_ref().native(), paint.native_ptr_or_null())
         }
         self
     }
@@ -837,11 +837,11 @@ impl Canvas {
     // TODO: drawDrawable
 
     // TODO: why is Data mutable here?
-    pub fn draw_annotation(&mut self, rect: &Rect, key: &str, value: &mut Data) -> &mut Self {
+    pub fn draw_annotation<R: AsRef<Rect>>(&mut self, rect: R, key: &str, value: &mut Data) -> &mut Self {
         let key = CString::new(key).unwrap();
         unsafe {
             self.native_mut().drawAnnotation(
-                rect.native(),
+                rect.as_ref().native(),
                 key.as_ptr(),
                 value.native_mut() )
         }
@@ -886,6 +886,7 @@ impl Canvas {
 }
 
 impl QuickReject<Rect> for Canvas {
+    // TODO: can we support AsRef<Rect> here?
     fn quick_reject(&self, other: &Rect) -> bool {
         unsafe {
             self.native().quickReject(other.native())

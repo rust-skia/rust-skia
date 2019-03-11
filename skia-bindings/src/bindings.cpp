@@ -229,6 +229,22 @@ extern "C" void C_SkData_unref(const SkData* self) {
     self->unref();
 }
 
+extern "C" SkData* C_SkData_MakeWithCopy(const void* data, size_t length) {
+    return SkData::MakeWithCopy(data, length).release();
+}
+
+extern "C" SkData* C_SkData_MakeWithoutCopy(const void* data, size_t length) {
+    return SkData::MakeWithoutCopy(data, length).release();
+}
+
+extern "C" SkData* C_SkData_MakeSubset(const SkData* src, size_t offset, size_t length) {
+    return SkData::MakeSubset(src, offset, length).release();
+}
+
+extern "C" SkData* C_SkData_MakeEmpty() {
+    return SkData::MakeEmpty().release();
+}
+
 //
 // SkPaint
 //

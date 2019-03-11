@@ -110,27 +110,31 @@ impl ValueHandle<SkFontStyle> {
     }
 
     pub fn normal() -> FontStyle {
-        *FontStyle_Normal
+        *font_style_static::NORMAL
     }
 
     pub fn bold() -> FontStyle {
-        *FontStyle_Bold
+        *font_style_static::BOLD
     }
 
     pub fn italic() -> FontStyle {
-        *FontStyle_Italic
+        *font_style_static::ITALIC
     }
 
     pub fn bold_italic() -> FontStyle {
-        *FontStyle_BoldItalic
+        *font_style_static::BOLD_ITALIC
     }
 }
 
-lazy_static! {
-    static ref FontStyle_Normal : FontStyle = FontStyle::new(FontStyleWeight::Normal, FontStyleWidth::Normal, FontStyleSlant::Upright);
-    static ref FontStyle_Bold : FontStyle = FontStyle::new(FontStyleWeight::Bold, FontStyleWidth::Normal, FontStyleSlant::Upright);
-    static ref FontStyle_Italic : FontStyle = FontStyle::new(FontStyleWeight::Normal, FontStyleWidth::Normal, FontStyleSlant::Italic);
-    static ref FontStyle_BoldItalic : FontStyle = FontStyle::new(FontStyleWeight::Bold , FontStyleWidth::Normal, FontStyleSlant::Italic);
+mod font_style_static {
+    use super::{FontStyle, FontStyleWeight, FontStyleWidth, FontStyleSlant};
+
+    lazy_static! {
+        pub static ref NORMAL: FontStyle = FontStyle::new(FontStyleWeight::Normal, FontStyleWidth::Normal, FontStyleSlant::Upright);
+        pub static ref BOLD: FontStyle = FontStyle::new(FontStyleWeight::Bold, FontStyleWidth::Normal, FontStyleSlant::Upright);
+        pub static ref ITALIC: FontStyle = FontStyle::new(FontStyleWeight::Normal, FontStyleWidth::Normal, FontStyleSlant::Italic);
+        pub static ref BOLD_ITALIC: FontStyle = FontStyle::new(FontStyleWeight::Bold , FontStyleWidth::Normal, FontStyleSlant::Italic);
+    }
 }
 
 

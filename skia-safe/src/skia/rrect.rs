@@ -36,13 +36,13 @@ impl EnumHandle<SkRRect_Corner> {
 
 pub type RRect = ValueHandle<SkRRect>;
 
-impl NativePartialEq for RRect {
+impl NativePartialEq for SkRRect {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { C_SkRRect_equals(self.native(), rhs.native()) }
+        unsafe { C_SkRRect_equals(self, rhs) }
     }
 }
 
-impl Default for RRect {
+impl Default for ValueHandle<SkRRect> {
     fn default() -> Self {
         // SkRRect::MakeEmpty does not link, so we use new().
         unsafe { SkRRect::new() }
@@ -50,7 +50,7 @@ impl Default for RRect {
     }
 }
 
-impl RRect {
+impl ValueHandle<SkRRect> {
 
     pub fn get_type(&self) -> RRectType {
         RRectType::from_native(unsafe { self.native().getType() })
@@ -92,37 +92,37 @@ impl RRect {
         Vector::from_native(unsafe { self.native().getSimpleRadii() })
     }
 
-    pub fn from_rect(rect: &Rect) -> Self {
-        unsafe { SkRRect::MakeRect(&rect.into_native()) }
+    pub fn new_rect<R: AsRef<Rect>>(rect: R) -> Self {
+        unsafe { SkRRect::MakeRect(rect.as_ref().native()) }
             .into_handle()
     }
 
-    pub fn from_oval(oval: &Rect) -> Self {
-        unsafe { SkRRect::MakeOval(&oval.into_native()) }
+    pub fn new_oval<R: AsRef<Rect>>(oval: R) -> Self {
+        unsafe { SkRRect::MakeOval(oval.as_ref().native()) }
             .into_handle()
     }
 
-    pub fn from_rect_xy(rect: &Rect, x_rad: scalar, y_rad: scalar) -> Self {
-        unsafe { SkRRect::MakeRectXY(&rect.into_native(), x_rad, y_rad) }
+    pub fn new_rect_xy<R: AsRef<Rect>>(rect: R, x_rad: scalar, y_rad: scalar) -> Self {
+        unsafe { SkRRect::MakeRectXY(rect.as_ref().native(), x_rad, y_rad) }
             .into_handle()
     }
 
-    pub fn from_nine_patch(rect: &Rect, left_rad: scalar, top_rad: scalar, right_rad: scalar, bottom_rad: scalar) -> Self {
+    pub fn new_nine_patch<R: AsRef<Rect>>(rect: R, left_rad: scalar, top_rad: scalar, right_rad: scalar, bottom_rad: scalar) -> Self {
         let mut r = Self::default();
         unsafe {
             r.native_mut()
                 .setNinePatch(
-                    &rect.into_native(),
+                    rect.as_ref().native(),
                     left_rad, top_rad, right_rad, bottom_rad)
         }
         r
     }
 
-    pub fn from_rect_radii(rect: &Rect, radii: &[Vector; 4]) -> Self {
+    pub fn new_rect_radii<R: AsRef<Rect>>(rect: R, radii: &[Vector; 4]) -> Self {
         let mut r = Self::default();
         unsafe {
             r.native_mut()
-                .setRectRadii(rect.native(), radii.native().as_ptr())
+                .setRectRadii(rect.as_ref().native(), radii.native().as_ptr())
         }
         r
     }
@@ -143,41 +143,38 @@ impl RRect {
         })
     }
 
-    // TODO: use Vector for dx, dy?
-    #[warn(unused)]
-    pub fn inset(&self, dx: scalar, dy: scalar) -> Self {
+    #[must_use]
+    pub fn inset(&self, delta: Vector) -> Self {
         // inset1 does not link.
         let mut r = Self::default();
-        unsafe { self.native().inset(dx, dy, r.native_mut()) };
+        unsafe { self.native().inset(delta.x, delta.y, r.native_mut()) };
         r
     }
 
 
-    // TODO: use Vector for dx, dy?
-    #[warn(unused)]
-    pub fn outset(&self, dx: scalar, dy: scalar) -> Self {
+    #[must_use]
+    pub fn outset(&self, delta: Vector) -> Self {
         // outset and outset1 does not link.
-        self.inset(-dx, -dy)
+        self.inset(-delta)
     }
 
-    // TODO: use Vector for dx, dy?
-    #[warn(unused)]
-    pub fn offset(&self, dx: scalar, dy: scalar) -> Self {
+    #[must_use]
+    pub fn offset(&self, delta: Vector) -> Self {
         // makeOffset and offset does not link.
         let mut copied = *self;
-        unsafe { copied.native_mut().fRect.offset(dx, dy) }
+        unsafe { copied.native_mut().fRect.offset(delta.x, delta.y) }
         copied
     }
 
-    pub fn contains(&self, rect: &Rect) -> bool {
-        unsafe { self.native().contains(&rect.into_native()) }
+    pub fn contains<R: AsRef<Rect>>(&self, rect: R) -> bool {
+        unsafe { self.native().contains(rect.as_ref().native()) }
     }
 
     pub fn is_valid(&self) -> bool {
         unsafe { self.native().isValid() }
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn transform(&self, matrix: &Matrix) -> Option<Self> {
         let mut r = Self::default();
         unsafe { self.native().transform(matrix.native(), r.native_mut()) }

@@ -40,7 +40,7 @@ impl Default for EnumHandle<SkPixelGeometry> {
 
 bitflags! {
     pub struct SurfacePropsFlags: u32 {
-        const UseDeviceIndependentFonts =
+        const USE_DEVICE_INDEPENDENT_FONTS =
             (SkSurfaceProps_Flags::kUseDeviceIndependentFonts_Flag) as u32;
     }
 }
@@ -97,8 +97,8 @@ impl ValueHandle<SkSurfaceProps> {
 
 #[test]
 fn create() {
-    let props = SurfaceProps::new(SurfacePropsFlags::UseDeviceIndependentFonts, PixelGeometry::RGBH);
-    assert_eq!(SurfacePropsFlags::UseDeviceIndependentFonts, props.flags());
+    let props = SurfaceProps::new(SurfacePropsFlags::USE_DEVICE_INDEPENDENT_FONTS, PixelGeometry::RGBH);
+    assert_eq!(SurfacePropsFlags::USE_DEVICE_INDEPENDENT_FONTS, props.flags());
     assert_eq!(PixelGeometry::RGBH, props.pixel_geometry());
     assert_eq!(true, props.is_use_device_independent_fonts());
 }

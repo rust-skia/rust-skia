@@ -256,12 +256,14 @@ impl RCHandle<SkVertices> {
     }
 }
 
+
+
 bitflags! {
     pub struct VerticesBuilderFlags: u32 {
-        const HasTexCoords = SkVertices_BuilderFlags::kHasTexCoords_BuilderFlag as u32;
-        const HasColors = SkVertices_BuilderFlags::kHasColors_BuilderFlag as u32;
-        const HasBones = SkVertices_BuilderFlags::kHasBones_BuilderFlag as u32;
-        const IsNonVolatile = SkVertices_BuilderFlags::kIsNonVolatile_BuilderFlag as u32;
+        const HAS_TEX_COORDS = SkVertices_BuilderFlags::kHasTexCoords_BuilderFlag as u32;
+        const HAS_COLORS = SkVertices_BuilderFlags::kHasColors_BuilderFlag as u32;
+        const HAS_BONES = SkVertices_BuilderFlags::kHasBones_BuilderFlag as u32;
+        const IS_NON_VOLATILE = SkVertices_BuilderFlags::kIsNonVolatile_BuilderFlag as u32;
     }
 }
 

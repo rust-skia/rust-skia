@@ -152,19 +152,19 @@ impl Point {
         self.length()
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn normalized(mut self) -> Option<Self> {
         unsafe { self.native_mut().normalize() }
             .if_true_some(self)
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn with_length(mut self, length: scalar) -> Option<Self> {
         unsafe { self.native_mut().setLength(length) }
             .if_true_some(self)
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn scaled(mut self, scale: scalar) -> Self {
         unsafe { self.native_mut().scale1(scale) }
         self

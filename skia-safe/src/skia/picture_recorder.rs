@@ -16,7 +16,7 @@ use skia_bindings::{
 
 bitflags! {
     pub struct PictureRecorderRecordFlags: u32 {
-        const PlaybackDrawPicture = SkPictureRecorder_RecordFlags::kPlaybackDrawPicture_RecordFlag as _;
+        const PLAYBACK_DRAW_PICTURE = SkPictureRecorder_RecordFlags::kPlaybackDrawPicture_RecordFlag as _;
     }
 }
 

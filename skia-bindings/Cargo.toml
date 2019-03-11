@@ -5,7 +5,7 @@ authors = ["LongYinan <lynweklm@gmail.com>"]
 edition = "2018"
 build = "build.rs"
 links = "skia"
-exclude = [ "src/bindings.rs", "src/bindings.rs.bk", "skia/buildtools/**" ]
+include = [ "Cargo.toml", "build.rs", "src/**/*.cpp", "src/lib.rs", "skia/include/**/*", "skia/src/**/*" ]
 
 [features]
 default = []

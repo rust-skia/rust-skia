@@ -162,7 +162,7 @@ impl Handle<SkFont> {
         })
     }
 
-    #[warn(unused)]
+    #[must_use]
     pub fn with_size(&self, size: scalar) -> Option<Self> {
         if size >= 0.0 && !size.is_infinite() && !size.is_nan() {
             let mut font = unsafe { SkFont::new() };

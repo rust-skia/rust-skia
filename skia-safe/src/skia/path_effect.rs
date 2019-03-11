@@ -25,9 +25,9 @@ use skia_bindings::{
 
 bitflags! {
     pub struct PointDataPointFlags: u32 {
-        const Circles = SkPathEffect_PointData_PointFlags::kCircles_PointFlag as _;
-        const UsePath = SkPathEffect_PointData_PointFlags::kUsePath_PointFlag as _;
-        const UseClip = SkPathEffect_PointData_PointFlags::kUseClip_PointFlag as _;
+        const CIRCLES = SkPathEffect_PointData_PointFlags::kCircles_PointFlag as _;
+        const USE_PATH = SkPathEffect_PointData_PointFlags::kUsePath_PointFlag as _;
+        const USE_CLIP = SkPathEffect_PointData_PointFlags::kUseClip_PointFlag as _;
     }
 }
 

@@ -28,7 +28,7 @@ use skia_bindings::{
 
 bitflags! {
     pub struct BitmapAllocFlags: u32 {
-        const ZeroPixels = SkBitmap_AllocFlags::kZeroPixels_AllocFlag as u32;
+        const ZERO_PIXELS = SkBitmap_AllocFlags::kZeroPixels_AllocFlag as u32;
     }
 }
 
