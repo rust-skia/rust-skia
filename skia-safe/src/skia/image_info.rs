@@ -84,14 +84,16 @@ impl ColorType {
     }
 }
 
-pub struct YUVColorSpace(pub(crate) SkYUVColorSpace);
-#[allow(non_upper_case_globals)]
-
-impl YUVColorSpace {
-    pub const JPEG: Self = Self(SkYUVColorSpace::kJPEG_SkYUVColorSpace);
-    pub const Rec601: Self = Self(SkYUVColorSpace::kRec601_SkYUVColorSpace);
-    pub const Rec709: Self = Self(SkYUVColorSpace::kRec709_SkYUVColorSpace);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum YUVColorSpace {
+    JPEG = SkYUVColorSpace::kJPEG_SkYUVColorSpace as _,
+    Rec601 = SkYUVColorSpace::kRec601_SkYUVColorSpace as _,
+    Rec709 = SkYUVColorSpace::kRec709_SkYUVColorSpace as _
 }
+
+impl NativeTransmutable<SkYUVColorSpace> for YUVColorSpace {}
+#[test] fn test_yuv_color_space_layout() { YUVColorSpace::test_layout() }
 
 pub type ImageInfo = Handle<SkImageInfo>;
 

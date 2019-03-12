@@ -164,7 +164,7 @@ impl RCHandle<SkImage> {
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromYUVATexturesCopy(
                 context.native_mut(),
-                yuv_color_space.0,
+                yuv_color_space.into_native(),
                 yuva_textures.native().as_ptr(),
                 yuva_indices.native().as_ptr(),
                 image_size.into_native(),
@@ -191,7 +191,7 @@ impl RCHandle<SkImage> {
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend(
                 context.native_mut(),
-                yuv_color_space.0,
+                yuv_color_space.into_native(),
                 yuva_textures.native().as_ptr(),
                 yuva_indices.as_ptr(),
                 image_size.into_native(),
@@ -216,7 +216,7 @@ impl RCHandle<SkImage> {
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromYUVATextures(
                 context.native_mut(),
-                yuv_color_space.0,
+                yuv_color_space.into_native(),
                 yuva_textures.native().as_ptr(),
                 yuva_indices.as_ptr(),
                 image_size.into_native(),
@@ -235,7 +235,7 @@ impl RCHandle<SkImage> {
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromNV12TexturesCopy(
                 context.native_mut(),
-                yuv_color_space.0,
+                yuv_color_space.into_native(),
                 nv12_textures.native().as_ptr(),
                 image_origin.into_native(),
                 image_color_space.shared_ptr())
@@ -253,7 +253,7 @@ impl RCHandle<SkImage> {
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
                 context.native_mut(),
-                yuv_color_space.0,
+                yuv_color_space.into_native(),
                 nv12_textures.native().as_ptr(),
                 image_origin.into_native(),
                 backend_texture.native(),
