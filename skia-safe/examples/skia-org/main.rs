@@ -1,6 +1,7 @@
 extern crate skia_safe;
 
 mod skcanvas_overview;
+mod skpath_overview;
 
 pub(crate) mod artifact {
     use skia_safe::skia::{Canvas, EncodedImageFormat, Surface};
@@ -24,4 +25,5 @@ pub(crate) mod artifact {
 
 fn main() {
     skcanvas_overview::draw();
+    skpath_overview::draw();
 }
