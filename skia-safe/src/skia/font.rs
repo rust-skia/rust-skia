@@ -229,7 +229,8 @@ impl Handle<SkFont> {
             bytes.len(),
             TextEncoding::UTF8.into_native(),
             glyphs.as_mut_ptr(),
-            glyphs.len().try_into().unwrap())
+            // don't fail if glyphs.len() is too large to fit into an i32.
+            glyphs.len().min(i32::max_value().try_into().unwrap()).try_into().unwrap())
             .try_into().unwrap()
         }
     }
