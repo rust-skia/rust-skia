@@ -74,7 +74,7 @@ impl Handle<SkBitmap> {
     }
 
     pub fn color_type(&self) -> ColorType {
-        ColorType(unsafe { self.native().colorType() })
+        ColorType::from_native(unsafe { self.native().colorType() })
     }
 
     pub fn alpha_type(&self) -> AlphaType {
