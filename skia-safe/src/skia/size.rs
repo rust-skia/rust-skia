@@ -103,3 +103,10 @@ impl From<ISize> for Size {
         Self::new(size.width as _, size.height as _)
     }
 }
+
+// TODO: this is experimental.
+impl From<(i32, i32)> for Size {
+    fn from(source: (i32, i32)) -> Self {
+        (source.0 as scalar, source.1 as scalar).into()
+    }
+}
