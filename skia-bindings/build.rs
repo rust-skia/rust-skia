@@ -177,7 +177,7 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     "SkPixelGeometry",
     "SkSurfaceProps_Flags",
     "SkBitmap_AllocFlags",
-    "SkImage_BitDepth", "SkImage_CachingHint",
+    "SkImage_BitDepth", "SkImage_CachingHint", "SkImage_CompressionType",
     "SkColorChannel",
     "SkYUVAIndex_Index",
     "SkEncodedImageFormat",

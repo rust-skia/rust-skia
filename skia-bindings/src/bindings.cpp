@@ -68,6 +68,10 @@ extern "C" SkImage* C_SkImage_MakeFromEncoded(const SkData* encoded, const SkIRe
     return SkImage::MakeFromEncoded(spFromConst(encoded), subset).release();
 }
 
+extern "C" SkImage* C_SkImage_MakeFromCompressed(GrContext* context, const SkData* encoded, int width, int height, SkImage::CompressionType type) {
+    return SkImage::MakeFromCompressed(context, spFromConst(encoded), width, height, type).release();
+}
+
 extern "C" SkImage* C_SkImage_MakeFromTexture(
         GrContext* context,
         const GrBackendTexture* backendTexture,
