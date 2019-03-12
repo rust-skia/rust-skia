@@ -16,23 +16,27 @@ use skia_bindings::{
     C_SkStrokeRec_hasEqualEffect
 };
 
-pub type StrokeRecInitStyle = EnumHandle<SkStrokeRec_InitStyle>;
-
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkStrokeRec_InitStyle> {
-    pub const Hairline: Self = Self(SkStrokeRec_InitStyle::kHairline_InitStyle);
-    pub const Fill: Self = Self(SkStrokeRec_InitStyle::kFill_InitStyle);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum StrokeRecInitStyle {
+    Hairline = SkStrokeRec_InitStyle::kHairline_InitStyle as _,
+    Fill = SkStrokeRec_InitStyle::kFill_InitStyle as _
 }
 
-pub type StrokeRecStyle = EnumHandle<SkStrokeRec_Style>;
+impl NativeTransmutable<SkStrokeRec_InitStyle> for StrokeRecInitStyle {}
+#[test] fn test_stroke_rec_init_style_layout() { StrokeRecInitStyle::test_layout() }
 
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkStrokeRec_Style> {
-    pub const Hairline: Self = Self(SkStrokeRec_Style::kHairline_Style);
-    pub const Fill: Self = Self(SkStrokeRec_Style::kFill_Style);
-    pub const Stroke: Self = Self(SkStrokeRec_Style::kStroke_Style);
-    pub const StrokeAndFill: Self = Self(SkStrokeRec_Style::kStrokeAndFill_Style);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum StrokeRecStyle {
+    Hairline = SkStrokeRec_Style::kHairline_Style as _,
+    Fill = SkStrokeRec_Style::kFill_Style as _,
+    Stroke = SkStrokeRec_Style::kStroke_Style as _,
+    StrokeAndFill = SkStrokeRec_Style::kStrokeAndFill_Style as _
 }
+
+impl NativeTransmutable<SkStrokeRec_Style> for StrokeRecStyle {}
+#[test] fn test_stroke_rec_style_layout() { StrokeRecStyle::test_layout() }
 
 pub type StrokeRec = Handle<SkStrokeRec>;
 

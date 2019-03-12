@@ -12,27 +12,31 @@ use crate::skia::{
     scalar
 };
 
-pub type RRectType = EnumHandle<SkRRect_Type>;
-
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkRRect_Type> {
-    pub const Empty: Self = Self(SkRRect_Type::kEmpty_Type);
-    pub const Rect: Self = Self(SkRRect_Type::kRect_Type);
-    pub const Oval: Self = Self(SkRRect_Type::kOval_Type);
-    pub const Simple: Self = Self(SkRRect_Type::kSimple_Type);
-    pub const NinePatch: Self = Self(SkRRect_Type::kNinePatch_Type);
-    pub const Complex: Self = Self(SkRRect_Type::kComplex_Type);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum RRectType {
+    Empty = SkRRect_Type::kEmpty_Type as _,
+    Rect = SkRRect_Type::kRect_Type as _,
+    Oval = SkRRect_Type::kOval_Type as _,
+    Simple = SkRRect_Type::kSimple_Type as _,
+    NinePatch = SkRRect_Type::kNinePatch_Type as _,
+    Complex = SkRRect_Type::kComplex_Type as _
 }
 
-pub type RRectCorner = EnumHandle<SkRRect_Corner>;
+impl NativeTransmutable<SkRRect_Type> for RRectType {}
+#[test] fn test_rrect_type_layout() { RRectType::test_layout() }
 
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkRRect_Corner> {
-    pub const UpperLeft: Self = Self(SkRRect_Corner::kUpperLeft_Corner);
-    pub const UpperRight: Self = Self(SkRRect_Corner::kUpperRight_Corner);
-    pub const LowerRight: Self = Self(SkRRect_Corner::kLowerRight_Corner);
-    pub const LowerLeft: Self = Self(SkRRect_Corner::kLowerLeft_Corner);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum RRectCorner {
+    UpperLeft = SkRRect_Corner::kUpperLeft_Corner as _,
+    UpperRight = SkRRect_Corner::kUpperRight_Corner as _,
+    LowerRight = SkRRect_Corner::kLowerRight_Corner as _,
+    LowerLeft = SkRRect_Corner::kLowerLeft_Corner as _
 }
+
+impl NativeTransmutable<SkRRect_Corner> for RRectCorner {}
+#[test] fn test_rrect_corner_layout() { RRectCorner::test_layout() }
 
 pub type RRect = ValueHandle<SkRRect>;
 

@@ -22,28 +22,35 @@ use skia_bindings::{
     C_SkPath_serialize
 };
 
-pub type PathDirection = EnumHandle<SkPath_Direction>;
-
-impl EnumHandle<SkPath_Direction> {
-    pub const CW: Self = Self(SkPath_Direction::kCW_Direction);
-    pub const CCW: Self = Self(SkPath_Direction::kCCW_Direction);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum PathDirection {
+    CW = SkPath_Direction::kCW_Direction as _,
+    CCW = SkPath_Direction::kCCW_Direction as _
 }
 
-impl Default for EnumHandle<SkPath_Direction> {
+impl NativeTransmutable<SkPath_Direction> for PathDirection {}
+#[test] fn test_path_direction_layout() { PathDirection::test_layout() }
+
+impl Default for PathDirection {
     fn default() -> Self {
         PathDirection::CW
     }
 }
 
-pub type PathFillType = EnumHandle<SkPath_FillType>;
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum PathFillType {
+    Winding = SkPath_FillType::kWinding_FillType as _,
+    EventOdd = SkPath_FillType::kEvenOdd_FillType as _,
+    InverseWinding = SkPath_FillType::kInverseWinding_FillType as _,
+    InverseEvenOdd = SkPath_FillType::kInverseEvenOdd_FillType as _
+}
 
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkPath_FillType> {
-    pub const Winding: Self = Self(SkPath_FillType::kWinding_FillType);
-    pub const EventOdd: Self = Self(SkPath_FillType::kEvenOdd_FillType);
-    pub const InverseWinding: Self = Self(SkPath_FillType::kInverseWinding_FillType);
-    pub const InverseEvenOdd: Self = Self(SkPath_FillType::kInverseEvenOdd_FillType);
+impl NativeTransmutable<SkPath_FillType> for PathFillType {}
+#[test] fn test_path_fill_type_layout() { PathFillType::test_layout() }
 
+impl PathFillType {
     pub fn is_inverse(self) -> bool {
         unsafe { SkPath::IsInverseFillType(self.into_native()) }
     }
@@ -58,30 +65,36 @@ impl EnumHandle<SkPath_FillType> {
     }
 }
 
-pub type PathConvexity = EnumHandle<SkPath_Convexity>;
-
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkPath_Convexity> {
-    pub const Unknown: Self = Self(SkPath_Convexity::kUnknown_Convexity);
-    pub const Convex: Self = Self(SkPath_Convexity::kConvex_Convexity);
-    pub const Concave: Self = Self(SkPath_Convexity::kConcave_Convexity);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(u8)]
+pub enum PathConvexity {
+    Unknown = SkPath_Convexity::kUnknown_Convexity as _,
+    Convex = SkPath_Convexity::kConvex_Convexity as _,
+    Concave = SkPath_Convexity::kConcave_Convexity as _
 }
 
-pub type PathArcSize = EnumHandle<SkPath_ArcSize>;
+impl NativeTransmutable<SkPath_Convexity> for PathConvexity {}
+#[test] fn test_path_convexity_layout() { PathConvexity::test_layout() }
 
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkPath_ArcSize> {
-    pub const Small: Self = Self(SkPath_ArcSize::kSmall_ArcSize);
-    pub const Large: Self = Self(SkPath_ArcSize::kLarge_ArcSize);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum PathArcSize {
+    Small = SkPath_ArcSize::kSmall_ArcSize as _,
+    Large = SkPath_ArcSize::kLarge_ArcSize as _
 }
 
-pub type AddPathMode = EnumHandle<SkPath_AddPathMode>;
+impl NativeTransmutable<SkPath_ArcSize> for PathArcSize {}
+#[test] fn test_arc_size_layout() { PathArcSize::test_layout() }
 
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkPath_AddPathMode> {
-    pub const Append: Self = Self(SkPath_AddPathMode::kAppend_AddPathMode);
-    pub const Extend: Self = Self(SkPath_AddPathMode::kExtend_AddPathMode);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum AddPathMode  {
+    Append = SkPath_AddPathMode::kAppend_AddPathMode as _,
+    Extend = SkPath_AddPathMode::kExtend_AddPathMode as _
 }
+
+impl NativeTransmutable<SkPath_AddPathMode> for AddPathMode {}
+#[test] fn test_add_path_mode_layout() { AddPathMode::test_layout() }
 
 bitflags! {
     pub struct PathSegmentMask: u32 {

@@ -36,17 +36,20 @@ impl NativePartialEq for SkRegion {
     }
 }
 
-pub type RegionOp = EnumHandle<SkRegion_Op>;
 
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkRegion_Op> {
-    pub const Difference: Self = Self(SkRegion_Op::kDifference_Op);
-    pub const Intersect: Self = Self(SkRegion_Op::kIntersect_Op);
-    pub const Union: Self = Self(SkRegion_Op::kUnion_Op);
-    pub const XOR: Self = Self(SkRegion_Op::kXOR_Op);
-    pub const ReverseDifference: Self = Self(SkRegion_Op::kReverseDifference_Op);
-    pub const Replace: Self = Self(SkRegion_Op::kReplace_Op);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum RegionOp {
+    Difference = SkRegion_Op::kDifference_Op as _,
+    Intersect = SkRegion_Op::kIntersect_Op as _,
+    Union = SkRegion_Op::kUnion_Op as _,
+    XOR = SkRegion_Op::kXOR_Op as _,
+    ReverseDifference = SkRegion_Op::kReverseDifference_Op as _,
+    Replace = SkRegion_Op::kReplace_Op as _
 }
+
+impl NativeTransmutable<SkRegion_Op> for RegionOp {}
+#[test] fn test_region_op_layout() { RegionOp::test_layout() }
 
 impl Handle<SkRegion> {
     pub fn new() -> Region {
@@ -155,19 +158,19 @@ impl Handle<SkRegion> {
     }
 
     pub fn op_rect(&mut self, rect: &IRect, op: RegionOp) -> bool {
-        unsafe { self.native_mut().op(&rect.into_native(), op.0 )}
+        unsafe { self.native_mut().op(&rect.into_native(), op.into_native()) }
     }
 
     pub fn op_region(&mut self, region: &Region, op: RegionOp) -> bool {
-        unsafe { self.native_mut().op2(region.native(), op.0 )}
+        unsafe { self.native_mut().op2(region.native(), op.into_native()) }
     }
 
     pub fn op_rect_region(&mut self, rect: &IRect, region: &Region, op: RegionOp) -> bool {
-        unsafe { self.native_mut().op3(&rect.into_native(), region.native(), op.0) }
+        unsafe { self.native_mut().op3(&rect.into_native(), region.native(), op.into_native()) }
     }
 
     pub fn op_region_rect(&mut self, region: &Region, rect: &IRect, op: RegionOp) -> bool {
-        unsafe { self.native_mut().op4(region.native(), &rect.into_native(), op.0) }
+        unsafe { self.native_mut().op4(region.native(), &rect.into_native(), op.into_native()) }
     }
 }
 

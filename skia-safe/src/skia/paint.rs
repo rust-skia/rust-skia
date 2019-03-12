@@ -46,42 +46,51 @@ bitflags! {
     }
 }
 
-pub type PaintStyle = EnumHandle<SkPaint_Style>;
-
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkPaint_Style> {
-    pub const Stroke: Self = Self(SkPaint_Style::kStroke_Style);
-    pub const Fill: Self = Self(SkPaint_Style::kFill_Style);
-    pub const StrokeAndFill: Self = Self(SkPaint_Style::kStrokeAndFill_Style);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(u8)]
+pub enum PaintStyle {
+    Stroke = SkPaint_Style::kStroke_Style as _,
+    Fill = SkPaint_Style::kFill_Style as _,
+    StrokeAndFill = SkPaint_Style::kStrokeAndFill_Style as _
 }
 
-pub type PaintCap = EnumHandle<SkPaint_Cap>;
+impl NativeTransmutable<SkPaint_Style> for PaintStyle {}
+#[test] fn test_paint_style_layout() { PaintStyle::test_layout() }
 
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkPaint_Cap> {
-    pub const Butt: Self = Self(SkPaint_Cap::kButt_Cap);
-    pub const Round: Self = Self(SkPaint_Cap::kRound_Cap);
-    pub const Square: Self = Self(SkPaint_Cap::kSquare_Cap);
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum PaintCap {
+    Butt = SkPaint_Cap::kButt_Cap as _,
+    Round = SkPaint_Cap::kRound_Cap as _,
+    Square = SkPaint_Cap::kSquare_Cap as _
 }
 
-impl Default for EnumHandle<SkPaint_Cap> {
+impl NativeTransmutable<SkPaint_Cap> for PaintCap {}
+#[test] fn test_paint_cap_layout() { PaintCap::test_layout() }
+
+impl Default for PaintCap {
     fn default() -> Self {
-        Self(SkPaint_Cap::kDefault_Cap)
+        // SkPaint_Cap::kDefault_Cap
+        PaintCap::Butt
     }
 }
 
-pub type PaintJoin = EnumHandle<SkPaint_Join>;
-
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkPaint_Join> {
-    pub const Miter: Self = Self(SkPaint_Join::kMiter_Join);
-    pub const Round: Self = Self(SkPaint_Join::kRound_Join);
-    pub const Bevel: Self = Self(SkPaint_Join::kBevel_Join);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(u8)]
+pub enum PaintJoin {
+    Miter = SkPaint_Join::kMiter_Join as _,
+    Round = SkPaint_Join::kRound_Join as _,
+    Bevel = SkPaint_Join::kBevel_Join as _,
 }
 
-impl Default for EnumHandle<SkPaint_Join> {
+impl NativeTransmutable<SkPaint_Join> for PaintJoin {}
+#[test] fn test_paint_join_layout() { PaintStyle::test_layout() }
+
+impl Default for PaintJoin {
     fn default() -> Self {
-        Self(SkPaint_Join::kDefault_Join)
+        // SkPaint_Join::kDefault_Join
+        PaintJoin::Miter
     }
 }
 

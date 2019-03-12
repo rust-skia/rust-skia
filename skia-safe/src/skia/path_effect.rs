@@ -86,6 +86,7 @@ impl PathEffectPointData {
 }
 
 /*
+// TODO: why is this here?
 pub type DashType = EnumHandle<SkPathEffect_DashType>;
 
 #[allow(non_upper_case_globals)]

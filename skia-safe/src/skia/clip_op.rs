@@ -1,16 +1,18 @@
 use crate::prelude::*;
 use skia_bindings::SkClipOp;
 
-pub type ClipOp = EnumHandle<SkClipOp>;
-
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkClipOp> {
-    pub const Difference: Self = Self(SkClipOp::kDifference);
-    pub const Intersect: Self = Self(SkClipOp::kIntersect);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum ClipOp {
+    Difference = SkClipOp::kDifference as _,
+    Intersect = SkClipOp::kIntersect as _
 }
 
+impl NativeTransmutable<SkClipOp> for ClipOp {}
+#[test] fn test_clip_op_layout() { ClipOp::test_layout() }
+
 // This is the default for the canvas's clip functions.
-impl Default for EnumHandle<SkClipOp> {
+impl Default for ClipOp {
     fn default() -> Self {
         ClipOp::Intersect
     }

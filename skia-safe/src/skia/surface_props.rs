@@ -5,34 +5,38 @@ use skia_bindings::{
     SkSurfaceProps_Flags
 };
 
-pub type PixelGeometry = EnumHandle<SkPixelGeometry>;
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum PixelGeometry {
+    Unknown = SkPixelGeometry::kUnknown_SkPixelGeometry as _,
+    RGBH = SkPixelGeometry::kRGB_H_SkPixelGeometry as _,
+    BGRH = SkPixelGeometry::kBGR_H_SkPixelGeometry as _,
+    RGBV = SkPixelGeometry::kRGB_V_SkPixelGeometry as _,
+    BGRV = SkPixelGeometry::kBGR_V_SkPixelGeometry as _
+}
 
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkPixelGeometry> {
-    pub const Unknown: Self = Self(SkPixelGeometry::kUnknown_SkPixelGeometry);
-    pub const RGBH: Self = Self(SkPixelGeometry::kRGB_H_SkPixelGeometry);
-    pub const BGRH: Self = Self(SkPixelGeometry::kBGR_H_SkPixelGeometry);
-    pub const RGBV: Self = Self(SkPixelGeometry::kRGB_V_SkPixelGeometry);
-    pub const BGRV: Self = Self(SkPixelGeometry::kBGR_V_SkPixelGeometry);
+impl NativeTransmutable<SkPixelGeometry> for PixelGeometry {}
+#[test] fn test_pixel_geometry_layout() { PixelGeometry::test_layout() }
 
+impl PixelGeometry {
     pub fn is_rgb(self) -> bool {
-        self == Self::RGBH || self == Self::RGBV
+        self == PixelGeometry::RGBH || self == PixelGeometry::RGBV
     }
 
     pub fn is_bgr(self) -> bool {
-        self == Self::BGRH || self == Self::BGRV
+        self == PixelGeometry::BGRH || self == PixelGeometry::BGRV
     }
 
     pub fn is_h(self) -> bool {
-        self == Self::RGBH || self == Self::BGRH
+        self == PixelGeometry::RGBH || self == PixelGeometry::BGRH
     }
 
     pub fn is_v(self) -> bool {
-        self == Self::RGBV || self == Self::BGRV
+        self == PixelGeometry::RGBV || self == PixelGeometry::BGRV
     }
 }
 
-impl Default for EnumHandle<SkPixelGeometry> {
+impl Default for PixelGeometry {
     fn default() -> Self {
         PixelGeometry::Unknown
     }
