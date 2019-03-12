@@ -17,7 +17,6 @@ use crate::skia::{
     BlendMode,
     PathEffect,
     MaskFilter,
-    Typeface
 };
 use skia_bindings::{
     C_SkPaint_setMaskFilter,
@@ -30,7 +29,6 @@ use skia_bindings::{
     SkPaint_Flags,
     SkPaint_Join,
     C_SkPaint_Equals,
-    C_SkPaint_setTypeface
 };
 
 bitflags! {
@@ -142,17 +140,6 @@ impl Handle<SkPaint> {
         FontHinting::from_native(unsafe { self.native().getHinting() })
     }
 
-    pub fn flags(&self) -> PaintFlags {
-        PaintFlags::from_bits_truncate(unsafe {
-            self.native().getFlags()
-        })
-    }
-
-    pub fn set_flags(&mut self, flags: PaintFlags) -> &mut Self {
-        unsafe { self.native_mut().setFlags(flags.bits()) }
-        self
-    }
-
     pub fn is_anti_alias(&self) -> bool {
         unsafe { self.native().isAntiAlias() }
     }
@@ -168,72 +155,6 @@ impl Handle<SkPaint> {
 
     pub fn set_dither(&mut self, dither: bool) -> &mut Self {
         unsafe { self.native_mut().setDither(dither) }
-        self
-    }
-
-    pub fn is_linear_text(&self) -> bool {
-        // does not link
-        // unsafe { self.native().isLinearText() }
-        self.flags().contains(PaintFlags::LINEAR_TEXT)
-    }
-
-    pub fn set_linear_text(&mut self, linear_text: bool) -> &mut Self {
-        unsafe { self.native_mut().setLinearText(linear_text) }
-        self
-    }
-
-    pub fn is_subpixel_text(&self) -> bool {
-        // does not link
-        // unsafe { self.native().isSubpixelText() }
-        self.flags().contains(PaintFlags::SUBPIXEL_TEXT)
-    }
-
-    pub fn set_subpixel_text(&mut self, subpixel_text: bool) -> &mut Self {
-        unsafe { self.native_mut().setSubpixelText(subpixel_text) }
-        self
-    }
-
-    pub fn is_lcd_render_text(&self) -> bool {
-        // does not link:
-        // unsafe { self.native().isLCDRenderText() }
-        self.flags().contains(PaintFlags::LCD_RENDER_TEXT)
-    }
-
-    pub fn set_lcd_render_text(&mut self, lcd_text: bool) -> &mut Self {
-        unsafe { self.native_mut().setLCDRenderText(lcd_text) }
-        self
-    }
-
-    pub fn is_embedded_bitmap_text(&self) -> bool {
-        // does not link:
-        // unsafe { self.native().isEmbeddedBitmapText() }
-        self.flags().contains(PaintFlags::EMBEDDED_BITMAP_TEXT)
-    }
-
-    pub fn set_embedded_bitmap_text(&mut self, use_embedded_bitmap_text: bool) -> &mut Self {
-        unsafe { self.native_mut().setEmbeddedBitmapText(use_embedded_bitmap_text) }
-        self
-    }
-
-    pub fn is_autohinted(&self) -> bool {
-        // does not link:
-        // unsafe { self.native().isAutohinted() }
-        self.flags().contains(PaintFlags::AUTO_HINTING)
-    }
-
-    pub fn set_autohinted(&mut self, use_autohinter: bool) -> &mut Self {
-        unsafe { self.native_mut().setAutohinted(use_autohinter) }
-        self
-    }
-
-    pub fn is_fake_bold_text(&self) -> bool {
-        // does not link:
-        // unsafe { self.native().isFakeBoldText() }
-        self.flags().contains(PaintFlags::FAKE_BOLD_TEXT)
-    }
-
-    pub fn set_fake_bold_text(&mut self, fake_bold_text: bool) -> &mut Self {
-        unsafe { self.native_mut().setFakeBoldText(fake_bold_text) }
         self
     }
 
@@ -405,19 +326,6 @@ impl Handle<SkPaint> {
         self
     }
 
-    pub fn typeface(&self) -> Option<Typeface> {
-        Typeface::from_unshared_ptr(unsafe {
-            self.native().getTypeface()
-        })
-    }
-
-    pub fn set_typeface(&mut self, typeface: Option<&Typeface>) -> &mut Self {
-        unsafe {
-            C_SkPaint_setTypeface(self.native_mut(), typeface.shared_ptr())
-        }
-        self
-    }
-
     /* TODO: ImageFilter postponed
 
     pub fn image_filter(&self) -> Option<ImageFilter> {
@@ -436,33 +344,6 @@ impl Handle<SkPaint> {
     */
 
     // TODO: getDrawLooper, setDrawLooper
-
-    pub fn text_size(&self) -> scalar {
-        unsafe { self.native().getTextSize() }
-    }
-
-    pub fn set_text_size(&mut self, text_size: scalar) -> &mut Self {
-        unsafe { self.native_mut().setTextSize(text_size) }
-        self
-    }
-
-    pub fn text_scale_x(&self) -> scalar {
-        unsafe { self.native().getTextScaleX() }
-    }
-
-    pub fn set_text_scale_x(&mut self, scale_x: scalar) -> &mut Self {
-        unsafe { self.native_mut().setTextScaleX(scale_x) }
-        self
-    }
-
-    pub fn text_skew_x(&self) -> scalar {
-        unsafe { self.native().getTextSkewX() }
-    }
-
-    pub fn set_text_skew_x(&mut self, skew_x: scalar) -> &mut Self {
-        unsafe { self.native_mut().setTextSkewX(skew_x) }
-        self
-    }
 
     // TODO: getTextBlobIntercepts
 

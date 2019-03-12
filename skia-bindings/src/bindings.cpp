@@ -273,8 +273,8 @@ extern "C" void C_SkPaint_setMaskFilter(SkPaint* self, const SkMaskFilter* maskF
     self->setMaskFilter(spFromConst(maskFilter));
 }
 
-extern "C" void C_SkPaint_setTypeface(SkPaint* self, const SkTypeface* typeface) {
-    self->setTypeface(spFromConst(typeface));
+extern "C" SkFontHinting C_SkPaint_getHinting(const SkPaint* self) {
+    return self->getHinting();
 }
 
 // postponed
@@ -427,26 +427,6 @@ extern "C" SkColorSpace* C_SkColorSpace_MakeSRGBLinear() {
     return SkColorSpace::MakeSRGBLinear().release();
 }
 
-extern "C" SkColorSpace* C_SkColorSpace_MakeRGB(SkColorSpace::RenderTargetGamma gamma, SkColorSpace::Gamut gamut) {
-    return SkColorSpace::MakeRGB(gamma, gamut).release();
-}
-
-extern "C" SkColorSpace* C_SkColorSpace_MakeRGB2(SkColorSpace::RenderTargetGamma gamma, const SkMatrix44* toXYZD50) {
-    return SkColorSpace::MakeRGB(gamma, *toXYZD50).release();
-}
-
-extern "C" SkColorSpace* C_SkColorSpace_MakeRGB3(const SkColorSpaceTransferFn* coeffs, SkColorSpace::Gamut gamut) {
-    return SkColorSpace::MakeRGB(*coeffs, gamut).release();
-}
-
-extern "C" SkColorSpace* C_SkColorSpace_MakeRGB4(const SkColorSpaceTransferFn* coeffs, const SkMatrix44* toXYZD50) {
-    return SkColorSpace::MakeRGB(*coeffs, *toXYZD50).release();
-}
-
-extern "C" SkColorSpace* C_SkColorSpace_MakeRGB5(SkGammaNamed gammaNamed, const SkMatrix44* toXYZD50) {
-    return SkColorSpace::MakeRGB(gammaNamed, *toXYZD50).release();
-}
-
 extern "C" SkColorSpace* C_SkColorSpace_makeLinearGamma(const SkColorSpace* self) {
     return self->makeLinearGamma().release();
 }
@@ -465,10 +445,6 @@ extern "C" SkData* C_SkColorSpace_serialize(const SkColorSpace* self) {
 
 extern "C" SkColorSpace* C_SkColorSpace_Deserialize(const void* data, size_t length) {
     return SkColorSpace::Deserialize(data, length).release();
-}
-
-extern "C" SkGammaNamed C_SkColorSpace_gammaNamed(const SkColorSpace* self) {
-    return self->gammaNamed();
 }
 
 //
@@ -695,6 +671,10 @@ extern "C" bool C_SkFont_equals(const SkFont* self, const SkFont* other) {
 
 extern "C" void C_SkFont_makeWithSize(const SkFont* self, SkScalar size, SkFont* result) {
     *result = self->makeWithSize(size);
+}
+
+extern "C" SkTypeface* C_SkFont_getTypeface(SkFont* self) {
+    return self->getTypeface();
 }
 
 extern "C" void C_SkFont_setTypeface(SkFont* self, const SkTypeface* tf) {

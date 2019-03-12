@@ -5,22 +5,8 @@ use skia_bindings::{
     SkColorSpaceTransferFn,
     SkColorSpace,
     SkColorSpacePrimaries,
-    SkGammaNamed,
     SkColorSpace_Gamut,
-    SkColorSpace_RenderTargetGamma,
 };
-
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum GammaNamed {
-    Linear = SkGammaNamed::kLinear_SkGammaNamed as _,
-    SRGB = SkGammaNamed::kSRGB_SkGammaNamed as _,
-    Curve2Dot2 = SkGammaNamed::k2Dot2Curve_SkGammaNamed as _,
-    NonStandard = SkGammaNamed::kNonStandard_SkGammaNamed as _
-}
-
-impl NativeTransmutable<SkGammaNamed> for GammaNamed {}
-#[test] fn test_gamma_named_layout() { GammaNamed::test_layout() }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct ColorSpacePrimaries {
@@ -35,20 +21,7 @@ pub struct ColorSpacePrimaries {
 }
 
 impl NativeTransmutable<SkColorSpacePrimaries> for ColorSpacePrimaries {}
-
-#[test]
-fn test_color_space_primaries_layout() {
-    ColorSpacePrimaries::test_layout()
-}
-
-impl ColorSpacePrimaries {
-
-    pub fn to_xyzd50(&self) -> Option<Matrix44> {
-        let mut matrix = Matrix44::new();
-        unsafe { self.native().toXYZD50(matrix.native_mut()) }
-            .if_true_some(matrix)
-    }
-}
+#[test] fn test_color_space_primaries_layout() { ColorSpacePrimaries::test_layout() }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct ColorSpaceTransferFn {
@@ -130,20 +103,6 @@ impl ColorSpace {
         ColorSpace::from_ptr(unsafe { skia_bindings::C_SkColorSpace_MakeSRGBLinear() }).unwrap()
     }
 
-    pub fn gamma_named(&self) -> GammaNamed {
-        GammaNamed::from_native(unsafe {
-            skia_bindings::C_SkColorSpace_gammaNamed(self.native())
-        })
-    }
-
-    pub fn gamma_close_to_srgb(&self) -> bool {
-        unsafe { self.native().gammaCloseToSRGB() }
-    }
-
-    pub fn gamma_is_linear(&self) -> bool {
-        unsafe { self.native().gammaIsLinear() }
-    }
-
     pub fn is_numerical_transfer_fn(&self) -> Option<ColorSpaceTransferFn> {
         let mut tfn : ColorSpaceTransferFn = unsafe { mem::zeroed() };
         unsafe {
@@ -199,76 +158,11 @@ impl ColorSpace {
     }
 }
 
-pub trait NewRGB<T> {
-    fn new_rgb(v: T) -> Self;
-}
-
-// TODO: should we use references for the heavier types?
-
-type RGB1 = (ColorSpaceRenderTargetGamma, ColorSpaceGamut);
-type RGB2 = (ColorSpaceRenderTargetGamma, Matrix44);
-type RGB3 = (ColorSpaceTransferFn, ColorSpaceGamut);
-type RGB4 = (ColorSpaceTransferFn, Matrix44);
-type RGB5 = (GammaNamed, Matrix44);
-
-impl NewRGB<RGB1> for RCHandle<SkColorSpace> {
-    fn new_rgb(v: RGB1) -> Self {
-        ColorSpace::from_ptr(unsafe {
-            skia_bindings::C_SkColorSpace_MakeRGB((v.0).into_native(), (v.1).into_native())
-        }).unwrap()
-    }
-}
-
-impl NewRGB<RGB2> for RCHandle<SkColorSpace> {
-    fn new_rgb(v: RGB2) -> Self {
-        ColorSpace::from_ptr(unsafe {
-            skia_bindings::C_SkColorSpace_MakeRGB2((v.0).into_native(), v.1.native())
-        }).unwrap()
-    }
-}
-
-impl NewRGB<RGB3> for RCHandle<SkColorSpace> {
-    fn new_rgb(v: RGB3) -> Self {
-        ColorSpace::from_ptr(unsafe {
-            skia_bindings::C_SkColorSpace_MakeRGB3(v.0.native(), v.1.into_native())
-        }).unwrap()
-    }
-}
-
-impl NewRGB<RGB4> for RCHandle<SkColorSpace> {
-    fn new_rgb(v: RGB4) -> Self {
-        ColorSpace::from_ptr(unsafe {
-            skia_bindings::C_SkColorSpace_MakeRGB4(v.0.native(), v.1.native())
-        }).unwrap()
-    }
-}
-
-impl NewRGB<RGB5> for RCHandle<SkColorSpace> {
-    fn new_rgb(v: RGB5) -> Self {
-        ColorSpace::from_ptr(unsafe {
-            skia_bindings::C_SkColorSpace_MakeRGB5((v.0).into_native(), v.1.native())
-        }).unwrap()
-    }
-}
-
-
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(u8)]
-pub enum ColorSpaceRenderTargetGamma {
-    Linear = SkColorSpace_RenderTargetGamma::kLinear_RenderTargetGamma as _,
-    SRGB = SkColorSpace_RenderTargetGamma::kSRGB_RenderTargetGamma as _
-}
-
-impl NativeTransmutable<SkColorSpace_RenderTargetGamma> for ColorSpaceRenderTargetGamma {}
-#[test] fn test_color_space_render_target_gamma_layout() { ColorSpaceRenderTargetGamma::test_layout() }
-
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
 pub enum ColorSpaceGamut {
     SRGB = SkColorSpace_Gamut::kSRGB_Gamut as _,
-    AdobeRGB = SkColorSpace_Gamut::kAdobeRGB_Gamut as _,
     DCIP3D65 = SkColorSpace_Gamut::kDCIP3_D65_Gamut as _,
-    Rec2020 = SkColorSpace_Gamut::kRec2020_Gamut as _
 }
 
 impl NativeTransmutable<SkColorSpace_Gamut> for ColorSpaceGamut {}
@@ -285,21 +179,22 @@ impl RefCount for ColorSpace {
 
 #[test]
 pub fn create_and_clone_colorspaces() {
-    ColorSpace::new_rgb((ColorSpaceRenderTargetGamma::Linear, ColorSpaceGamut::AdobeRGB));
-    let x = ColorSpace::new_rgb((ColorSpaceRenderTargetGamma::Linear, Matrix44::new_identity()));
+    ColorSpace::new_srgb();
+    let x = ColorSpace::new_srgb_linear();
     let _r = x.clone();
 }
 
 #[test]
 pub fn serialize_and_deserialize() {
-    let original = ColorSpace::new_rgb(
-        (ColorSpaceRenderTargetGamma::Linear, ColorSpaceGamut::AdobeRGB)
-    );
-    assert_eq!(1, original.native().ref_cnt());
+    // TODO: it seems that the deserializer deduplicates the
+    // srgb colorspace, so fix this test as soon we can create
+    // custom colorspaces again.
+    let original = ColorSpace::new_srgb();
+    assert_eq!(2, original.native().ref_cnt());
     let serialized = original.serialize();
     assert_eq!(1, serialized.native().ref_cnt());
     let deserialized = ColorSpace::deserialize(serialized);
-    assert_eq!(1, deserialized.native().ref_cnt());
+    assert_eq!(3, deserialized.native().ref_cnt());
 
     assert!(original == deserialized);
 }
