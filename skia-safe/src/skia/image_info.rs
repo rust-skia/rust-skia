@@ -14,18 +14,21 @@ use crate::skia::{
     IPoint
 };
 
-#[derive(Copy, Clone, PartialEq)]
-pub struct AlphaType(pub(crate) SkAlphaType);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum AlphaType {
+    Unknown = SkAlphaType::kUnknown_SkAlphaType as _,
+    Opaque = SkAlphaType::kOpaque_SkAlphaType as _,
+    Premul = SkAlphaType::kPremul_SkAlphaType as _,
+    Unpremul = SkAlphaType::kUnpremul_SkAlphaType as _
+}
 
-#[allow(non_upper_case_globals)]
+impl NativeTransmutable<SkAlphaType> for AlphaType {}
+#[test] fn test_alpha_type_layout() { AlphaType::test_layout() }
+
 impl AlphaType {
-    pub const Unknown: Self = Self(SkAlphaType::kUnknown_SkAlphaType);
-    pub const Opaque: Self = Self(SkAlphaType::kOpaque_SkAlphaType);
-    pub const Premul: Self = Self(SkAlphaType::kPremul_SkAlphaType);
-    pub const Unpremul: Self = Self(SkAlphaType::kUnpremul_SkAlphaType);
-
     pub fn is_opaque(self) -> bool {
-        self == Self::Opaque
+        self == AlphaType::Opaque
     }
 }
 
@@ -58,7 +61,7 @@ impl ColorType {
 
     pub fn validate_alpha_type(self, alpha_type: AlphaType) -> Option<AlphaType> {
         let mut alpha_type_r = AlphaType::Unknown;
-        unsafe { skia_bindings::SkColorTypeValidateAlphaType(self.0, alpha_type.0, &mut alpha_type_r.0) }
+        unsafe { skia_bindings::SkColorTypeValidateAlphaType(self.0, alpha_type.into_native(), alpha_type_r.native_mut()) }
             .if_true_some(alpha_type_r)
     }
 }
@@ -112,7 +115,7 @@ impl Handle<SkImageInfo> {
         let mut image_info = Self::default();
 
         unsafe {
-            skia_bindings::C_SkImageInfo_Make(image_info.native_mut(), dimensions.width, dimensions.height, ct.0, at.0, cs.shared_ptr())
+            skia_bindings::C_SkImageInfo_Make(image_info.native_mut(), dimensions.width, dimensions.height, ct.0, at.into_native(), cs.shared_ptr())
         }
         image_info
     }
@@ -125,7 +128,7 @@ impl Handle<SkImageInfo> {
         let dimensions = dimensions.into();
         let mut image_info = Self::default();
         unsafe {
-            skia_bindings::C_SkImageInfo_MakeS32(image_info.native_mut(), dimensions.width, dimensions.height, at.0);
+            skia_bindings::C_SkImageInfo_MakeS32(image_info.native_mut(), dimensions.width, dimensions.height, at.into_native());
         }
         image_info
     }
@@ -159,7 +162,7 @@ impl Handle<SkImageInfo> {
     }
 
     pub fn alpha_type(&self) -> AlphaType {
-        AlphaType(self.native().fAlphaType)
+        AlphaType::from_native(self.native().fAlphaType)
     }
 
     pub fn color_space(&self) -> Option<ColorSpace> {

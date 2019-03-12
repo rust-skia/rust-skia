@@ -110,7 +110,7 @@ impl RCHandle<SkImage> {
                 backend_texture.native(),
                 origin.into_native(),
                 color_type.0,
-                alpha_type.0,
+                alpha_type.into_native(),
                 color_space.shared_ptr())
         })
     }
@@ -147,7 +147,7 @@ impl RCHandle<SkImage> {
                 backend_texture.native(),
                 origin.into_native(),
                 color_type.0,
-                alpha_type.0,
+                alpha_type.into_native(),
                 color_space.shared_ptr())
         })
     }
@@ -301,7 +301,7 @@ impl RCHandle<SkImage> {
     }
 
     pub fn alpha_type(&self) -> AlphaType {
-        AlphaType(unsafe { self.native().alphaType() })
+        AlphaType::from_native(unsafe { self.native().alphaType() })
     }
 
     pub fn color_type(&self) -> ColorType {
