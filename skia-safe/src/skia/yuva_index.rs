@@ -4,15 +4,17 @@ use skia_bindings::{
     SkColorChannel
 };
 
-#[derive(Copy, Clone)]
-pub struct ColorChannel(pub(crate) SkColorChannel);
-
-impl ColorChannel {
-    pub const R: Self = Self(SkColorChannel::kR);
-    pub const G: Self = Self(SkColorChannel::kG);
-    pub const B: Self = Self(SkColorChannel::kB);
-    pub const A: Self = Self(SkColorChannel::kA);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum ColorChannel {
+    R = SkColorChannel::kR as _,
+    G = SkColorChannel::kG as _,
+    B = SkColorChannel::kB as _,
+    A = SkColorChannel::kA as _
 }
+
+impl NativeTransmutable<SkColorChannel> for ColorChannel {}
+#[test] fn test_color_channel_layout() { ColorChannel::test_layout() }
 
 #[derive(Copy, Clone)]
 pub struct YUVAIndex(pub(crate) SkYUVAIndex);
@@ -32,13 +34,13 @@ impl YUVAIndex {
                 assert!(index < 4);
                 YUVAIndex::from_native(SkYUVAIndex {
                     fIndex: index.try_into().unwrap(),
-                    fChannel: channel.0
+                    fChannel: channel.into_native()
                 })
             },
             None => {
                 YUVAIndex::from_native(SkYUVAIndex {
                     fIndex: -1,
-                    fChannel: ColorChannel::A.0
+                    fChannel: ColorChannel::A.into_native()
                 })
             }
         }

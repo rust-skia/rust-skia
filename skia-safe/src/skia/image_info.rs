@@ -14,63 +14,86 @@ use crate::skia::{
     IPoint
 };
 
-#[derive(Copy, Clone, PartialEq)]
-pub struct AlphaType(pub(crate) SkAlphaType);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum AlphaType {
+    Unknown = SkAlphaType::kUnknown_SkAlphaType as _,
+    Opaque = SkAlphaType::kOpaque_SkAlphaType as _,
+    Premul = SkAlphaType::kPremul_SkAlphaType as _,
+    Unpremul = SkAlphaType::kUnpremul_SkAlphaType as _
+}
 
-#[allow(non_upper_case_globals)]
+impl NativeTransmutable<SkAlphaType> for AlphaType {}
+#[test] fn test_alpha_type_layout() { AlphaType::test_layout() }
+
 impl AlphaType {
-    pub const Unknown: Self = Self(SkAlphaType::kUnknown_SkAlphaType);
-    pub const Opaque: Self = Self(SkAlphaType::kOpaque_SkAlphaType);
-    pub const Premul: Self = Self(SkAlphaType::kPremul_SkAlphaType);
-    pub const Unpremul: Self = Self(SkAlphaType::kUnpremul_SkAlphaType);
-
     pub fn is_opaque(self) -> bool {
-        self == Self::Opaque
+        self == AlphaType::Opaque
     }
 }
 
-#[derive(Copy, Clone, PartialEq)]
-pub struct ColorType(pub(crate) SkColorType);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum ColorType {
+    Unknown = SkColorType::kUnknown_SkColorType as _,
+    Alpha8 = SkColorType::kAlpha_8_SkColorType as _,
+    RGB565 = SkColorType::kRGB_565_SkColorType as _,
+    ARGB4444 = SkColorType::kARGB_4444_SkColorType as _,
+    RGBA8888 = SkColorType::kRGBA_8888_SkColorType as _,
+    RGB888x = SkColorType::kRGB_888x_SkColorType as _,
+    BRGA8888 = SkColorType::kBGRA_8888_SkColorType as _,
+    RGBA1010102 = SkColorType::kRGBA_1010102_SkColorType as _,
+    RGB101010x = SkColorType::kRGB_101010x_SkColorType as _,
+    Gray8 = SkColorType::kGray_8_SkColorType as _,
+    RGBAF16 = SkColorType::kRGBA_F16_SkColorType as _,
+    RGBAF32 = SkColorType::kRGBA_F32_SkColorType as _,
+}
 
-#[allow(non_upper_case_globals)]
+impl NativeTransmutable<SkColorType> for ColorType {}
+#[test] fn test_color_type_layout() { ColorType::test_layout() }
+
 impl ColorType {
-    pub const Unknown: Self = Self(SkColorType::kUnknown_SkColorType);
-    pub const Alpha8: Self = Self(SkColorType::kAlpha_8_SkColorType);
-    pub const RGB565: Self = Self(SkColorType::kRGB_565_SkColorType);
-    pub const ARGB4444: Self = Self(SkColorType::kARGB_4444_SkColorType);
-    pub const RGBA8888: Self = Self(SkColorType::kRGBA_8888_SkColorType);
-    pub const RGB888x: Self = Self(SkColorType::kRGB_888x_SkColorType);
-    pub const BRGA8888: Self = Self(SkColorType::kBGRA_8888_SkColorType);
-    pub const RGBA1010102: Self = Self(SkColorType::kRGBA_1010102_SkColorType);
-    pub const RGB101010x: Self = Self(SkColorType::kRGB_101010x_SkColorType);
-    pub const Gray8: Self = Self(SkColorType::kGray_8_SkColorType);
-    pub const RGBAF16: Self = Self(SkColorType::kRGBA_F16_SkColorType);
-    pub const RGBAF32: Self = Self(SkColorType::kRGBA_F32_SkColorType);
-    pub const N32: Self = Self(SkColorType::kN32_SkColorType);
+
+    // error[E0658]: dereferencing raw pointers in constants is unstable (see issue #51911)
+    /*
+    pub const N32 : Self = unsafe {
+        *((&SkColorType::kN32_SkColorType) as *const _ as *const _)
+    };
+    */
+
+    pub fn n32() -> Self {
+        Self::from_native(SkColorType::kN32_SkColorType)
+    }
 
     pub fn bytes_per_pixel(self) -> usize {
-        unsafe { skia_bindings::SkColorTypeBytesPerPixel(self.0) as _ }
+        unsafe {
+            skia_bindings::SkColorTypeBytesPerPixel(self.into_native()).try_into().unwrap()
+        }
     }
 
     pub fn is_always_opaque(self) -> bool {
-        unsafe { skia_bindings::SkColorTypeIsAlwaysOpaque(self.0) }
+        unsafe {
+            skia_bindings::SkColorTypeIsAlwaysOpaque(self.into_native())
+        }
     }
 
     pub fn validate_alpha_type(self, alpha_type: AlphaType) -> Option<AlphaType> {
         let mut alpha_type_r = AlphaType::Unknown;
-        unsafe { skia_bindings::SkColorTypeValidateAlphaType(self.0, alpha_type.0, &mut alpha_type_r.0) }
+        unsafe { skia_bindings::SkColorTypeValidateAlphaType(self.into_native(), alpha_type.into_native(), alpha_type_r.native_mut()) }
             .if_true_some(alpha_type_r)
     }
 }
 
-pub struct YUVColorSpace(pub(crate) SkYUVColorSpace);
-#[allow(non_upper_case_globals)]
-
-impl YUVColorSpace {
-    pub const JPEG: Self = Self(SkYUVColorSpace::kJPEG_SkYUVColorSpace);
-    pub const Rec601: Self = Self(SkYUVColorSpace::kRec601_SkYUVColorSpace);
-    pub const Rec709: Self = Self(SkYUVColorSpace::kRec709_SkYUVColorSpace);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum YUVColorSpace {
+    JPEG = SkYUVColorSpace::kJPEG_SkYUVColorSpace as _,
+    Rec601 = SkYUVColorSpace::kRec601_SkYUVColorSpace as _,
+    Rec709 = SkYUVColorSpace::kRec709_SkYUVColorSpace as _
 }
+
+impl NativeTransmutable<SkYUVColorSpace> for YUVColorSpace {}
+#[test] fn test_yuv_color_space_layout() { YUVColorSpace::test_layout() }
 
 pub type ImageInfo = Handle<SkImageInfo>;
 
@@ -112,26 +135,29 @@ impl Handle<SkImageInfo> {
         let mut image_info = Self::default();
 
         unsafe {
-            skia_bindings::C_SkImageInfo_Make(image_info.native_mut(), dimensions.width, dimensions.height, ct.0, at.0, cs.shared_ptr())
+            skia_bindings::C_SkImageInfo_Make(
+                image_info.native_mut(),
+                dimensions.width, dimensions.height,
+                ct.into_native(), at.into_native(), cs.shared_ptr())
         }
         image_info
     }
 
     pub fn new_n32<IS: Into<ISize>>(dimensions: IS, at: AlphaType, cs: Option<ColorSpace>) -> ImageInfo {
-        Self::new(dimensions, ColorType::N32, at, cs)
+        Self::new(dimensions, ColorType::n32(), at, cs)
     }
 
     pub fn new_s32<IS: Into<ISize>>(dimensions: IS, at: AlphaType) -> ImageInfo {
         let dimensions = dimensions.into();
         let mut image_info = Self::default();
         unsafe {
-            skia_bindings::C_SkImageInfo_MakeS32(image_info.native_mut(), dimensions.width, dimensions.height, at.0);
+            skia_bindings::C_SkImageInfo_MakeS32(image_info.native_mut(), dimensions.width, dimensions.height, at.into_native());
         }
         image_info
     }
 
     pub fn new_n32_premul<IS: Into<ISize>>(dimensions: IS, cs: Option<ColorSpace>) -> ImageInfo {
-        Self::new(dimensions, ColorType::N32, AlphaType::Premul, cs)
+        Self::new(dimensions, ColorType::n32(), AlphaType::Premul, cs)
     }
 
     pub fn new_a8<IS: Into<ISize>>(dimensions: IS) -> ImageInfo {
@@ -155,11 +181,11 @@ impl Handle<SkImageInfo> {
     }
 
     pub fn color_type(&self) -> ColorType {
-        ColorType(self.native().fColorType)
+        ColorType::from_native(self.native().fColorType)
     }
 
     pub fn alpha_type(&self) -> AlphaType {
-        AlphaType(self.native().fAlphaType)
+        AlphaType::from_native(self.native().fAlphaType)
     }
 
     pub fn color_space(&self) -> Option<ColorSpace> {

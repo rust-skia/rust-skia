@@ -74,11 +74,11 @@ impl Handle<SkBitmap> {
     }
 
     pub fn color_type(&self) -> ColorType {
-        ColorType(unsafe { self.native().colorType() })
+        ColorType::from_native(unsafe { self.native().colorType() })
     }
 
     pub fn alpha_type(&self) -> AlphaType {
-        AlphaType(unsafe { self.native().alphaType() })
+        AlphaType::from_native(unsafe { self.native().alphaType() })
     }
 
     pub fn color_space(&self) -> Option<ColorSpace> {
@@ -114,7 +114,7 @@ impl Handle<SkBitmap> {
     }
 
     pub fn set_alpha_type(&mut self, alpha_type: AlphaType) -> bool {
-        unsafe { self.native_mut().setAlphaType(alpha_type.0) }
+        unsafe { self.native_mut().setAlphaType(alpha_type.into_native()) }
     }
 
     pub unsafe fn pixels(&mut self) -> *mut ffi::c_void {
