@@ -166,7 +166,7 @@ impl Handle<SkMatrix44> {
         self
     }
 
-    #[warn(clippy::too_many_arguments)]
+    #[allow(clippy::too_many_arguments)]
     pub fn set_3x3(&mut self,
                    m_00: scalar, m_10: scalar, m_20: scalar,
                    m_01: scalar, m_11: scalar, m_21: scalar,

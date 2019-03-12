@@ -107,7 +107,8 @@ impl Default for Handle<SkImageInfo> {
 
 impl Handle<SkImageInfo> {
 
-    pub fn new(dimensions: ISize, ct: ColorType, at: AlphaType, cs: Option<ColorSpace>) -> Self {
+    pub fn new<IS: Into<ISize>>(dimensions: IS, ct: ColorType, at: AlphaType, cs: Option<ColorSpace>) -> Self {
+        let dimensions = dimensions.into();
         let mut image_info = Self::default();
 
         unsafe {
@@ -116,11 +117,12 @@ impl Handle<SkImageInfo> {
         image_info
     }
 
-    pub fn new_n32(dimensions: ISize, at: AlphaType, cs: Option<ColorSpace>) -> ImageInfo {
+    pub fn new_n32<IS: Into<ISize>>(dimensions: IS, at: AlphaType, cs: Option<ColorSpace>) -> ImageInfo {
         Self::new(dimensions, ColorType::N32, at, cs)
     }
 
-    pub fn new_s32(dimensions: ISize, at: AlphaType) -> ImageInfo {
+    pub fn new_s32<IS: Into<ISize>>(dimensions: IS, at: AlphaType) -> ImageInfo {
+        let dimensions = dimensions.into();
         let mut image_info = Self::default();
         unsafe {
             skia_bindings::C_SkImageInfo_MakeS32(image_info.native_mut(), dimensions.width, dimensions.height, at.0);
@@ -128,11 +130,11 @@ impl Handle<SkImageInfo> {
         image_info
     }
 
-    pub fn new_n32_premul(dimensions: ISize, cs: Option<ColorSpace>) -> ImageInfo {
+    pub fn new_n32_premul<IS: Into<ISize>>(dimensions: IS, cs: Option<ColorSpace>) -> ImageInfo {
         Self::new(dimensions, ColorType::N32, AlphaType::Premul, cs)
     }
 
-    pub fn new_a8(dimensions: ISize) -> ImageInfo {
+    pub fn new_a8<IS: Into<ISize>>(dimensions: IS) -> ImageInfo {
         Self::new(dimensions, ColorType::Alpha8, AlphaType::Premul, None)
     }
 
@@ -188,7 +190,7 @@ impl Handle<SkImageInfo> {
             .unwrap_or(false)
     }
 
-    pub fn with_dimensions(&self, new_dimensions: ISize) -> Self {
+    pub fn with_dimensions<IS: Into<ISize>>(&self, new_dimensions: IS) -> Self {
         Self::new(new_dimensions, self.color_type(), self.alpha_type(), self.color_space())
     }
 
@@ -222,7 +224,8 @@ impl Handle<SkImageInfo> {
         }
     }
 
-    pub fn compute_offset(&self, point: IPoint, row_bytes: usize) -> usize {
+    pub fn compute_offset<IP: Into<IPoint>>(&self, point: IP, row_bytes: usize) -> usize {
+        let point = point.into();
         unsafe {
             self.native().computeOffset(point.x, point.y, row_bytes)
         }
@@ -254,7 +257,7 @@ fn ref_cnt_in_relation_to_color_space() {
     let cs = ColorSpace::new_srgb();
     let before = cs.ref_cnt();
     {
-        let ii = ImageInfo::new_n32(ISize::new(10, 10), AlphaType::Premul, Some(cs.clone()));
+        let ii = ImageInfo::new_n32((10, 10), AlphaType::Premul, Some(cs.clone()));
         let cs = ii.color_space();
         // one for clone, one for the reference in image info.
         assert_eq!(before+2, cs.unwrap().ref_cnt())

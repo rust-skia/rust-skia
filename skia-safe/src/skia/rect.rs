@@ -36,7 +36,8 @@ impl IRect {
         IRect { left, top, right, bottom }
     }
 
-    pub fn from_size(size: ISize) -> IRect {
+    pub fn from_size<IS: Into<ISize>>(size: IS) -> IRect {
+        let size = size.into();
         Self::new(0, 0, size.width, size.height)
     }
 
@@ -81,7 +82,8 @@ impl IRect {
     }
 
     #[must_use]
-    pub fn with_offset(&self, delta: IVector) -> Self {
+    pub fn with_offset<IV: Into<IVector>>(&self, delta: IV) -> Self {
+        let delta = delta.into();
         let cloned = *self;
         Self::from_native(unsafe {
             cloned.native().makeOffset(delta.x, delta.y)
@@ -89,26 +91,28 @@ impl IRect {
     }
 
     #[must_use]
-    pub fn with_inset(&self, delta: IVector) -> Self {
+    pub fn with_inset<IV: Into<IVector>>(&self, delta: IV) -> Self {
         /* does not link:
         Self::from_native(unsafe {
             cloned.native().makeInset(delta.x, delta.y)
         }) */
-        self.with_outset(-delta)
+        self.with_outset(-delta.into())
     }
 
     #[must_use]
-    pub fn with_outset(&self, delta: IVector) -> Self {
+    pub fn with_outset<IV: Into<IVector>>(&self, delta: IV) -> Self {
+        let delta = delta.into();
         Self::from_native(unsafe {
             self.native().makeOutset(delta.x, delta.y)
         })
     }
 
     #[must_use]
-    pub fn with_offset_to(&self, new_x: i32, new_y: i32) -> Self {
+    pub fn with_offset_to<IP: Into<IPoint>>(&self, new_p: IP) -> Self {
+        let new_p = new_p.into();
         let mut copied = *self;
         unsafe {
-            copied.native_mut().offsetTo(new_x, new_y)
+            copied.native_mut().offsetTo(new_p.x, new_p.y)
         }
         copied
     }
@@ -207,18 +211,13 @@ impl Rect {
         Self { left, top, right, bottom }
     }
 
-    pub fn from_size(size: Size) -> Self {
-        (Point::default(), size).into()
+    pub fn from_size<S: Into<Size>>(size: S) -> Self {
+        (Point::default(), size.into()).into()
     }
 
     // replacement for new_xywh
-    pub fn from_point_and_size(p: Point, sz: Size) -> Self {
-        (p, sz).into()
-    }
-
-    // TODO: do we need that?
-    pub fn from_isize(size: ISize) -> Rect {
-        Self::from_size(size.into())
+    pub fn from_point_and_size<P: Into<Point>, S: Into<Size>>(p: P, sz: S) -> Self {
+        (p.into(), sz.into()).into()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -281,23 +280,31 @@ impl Rect {
             .if_true_some(r)
     }
 
-    pub fn with_offset(&self, d: Vector) -> Self {
+    #[must_use]
+    pub fn with_offset<V: Into<Vector>>(&self, d: V) -> Self {
+        let d = d.into();
         Self::new(self.left + d.x, self.top + d.y, self.right + d.x, self.bottom + d.y)
     }
 
-    pub fn with_inset(&self, d: Vector) -> Self {
+    #[must_use]
+    pub fn with_inset<V: Into<Vector>>(&self, d: V) -> Self {
+        let d = d.into();
         Self::new(self.left + d.x, self.top + d.y, self.right - d.x, self.bottom - d.y)
     }
 
-    pub fn with_outset(&self, d: Vector) -> Self {
+    #[must_use]
+    pub fn with_outset<V: Into<Vector>>(&self, d: V) -> Self {
+        let d = d.into();
         Self::new(self.left - d.x, self.top - d.y, self.right + d.x, self.bottom + d.y)
     }
 
-    pub fn with_offset_to(&self, new_x: scalar, new_y: scalar) -> Self {
+    #[must_use]
+    pub fn with_offset_to<P: Into<Point>>(&self, new_p: P) -> Self {
+        let new_p = new_p.into();
         // does not link:
         // let mut r = self.clone();
         // unsafe { r.native_mut().offsetTo(new_x, new_y) };
-        Self::new(new_x, new_y, new_x - self.left, new_y - self.top)
+        Self::new(new_p.x, new_p.y, new_p.x - self.left, new_p.y - self.top)
     }
 
     pub fn intersect(a: &Rect, b: &Rect) -> Option<Rect> {

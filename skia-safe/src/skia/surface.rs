@@ -24,7 +24,8 @@ impl NativeRefCountedBase for SkSurface {
 
 impl RCHandle<SkSurface> {
 
-    pub fn new_raster_n32_premul(size: ISize) -> Option<Self> {
+    pub fn new_raster_n32_premul<IS: Into<ISize>>(size: IS) -> Option<Self> {
+        let size = size.into();
         Self::from_ptr(unsafe {
             skia_bindings::C_SkSurface_MakeRasterN32Premul(size.width, size.height, ptr::null())
         })
@@ -76,7 +77,7 @@ impl RCHandle<SkSurface> {
 
 #[test]
 fn create() {
-    assert!(Surface::new_raster_n32_premul((0, 0).into()).is_none());
-    let surface = Surface::new_raster_n32_premul((1, 1).into()).unwrap();
+    assert!(Surface::new_raster_n32_premul((0, 0)).is_none());
+    let surface = Surface::new_raster_n32_premul((1, 1)).unwrap();
     assert_eq!(1, surface.native().ref_cnt())
 }
