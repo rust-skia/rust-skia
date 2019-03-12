@@ -207,10 +207,14 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
 
   let mut cc_build = Build::new();
 
-  builder = builder.header("src/bindings.cpp");
+  let bindings_source = "src/bindings.cpp";
+  cargo::add_dependent_path(bindings_source);
+
+  builder = builder.header(bindings_source);
 
   for include_dir in fs::read_dir("skia/include").expect("Unable to read skia/include") {
     let dir = include_dir.unwrap();
+    cargo::add_dependent_path(dir.path().to_str().unwrap());
     let include_path = format!("{}/{}", &current_dir_name, &dir.path().to_str().unwrap());
     builder = builder.clang_arg(format!("-I{}", &include_path));
     cc_build.include(&include_path);
@@ -231,7 +235,7 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
   cc_build
     .cpp(true)
     .flag("-std=c++14")
-    .file("src/bindings.cpp")
+    .file(bindings_source)
     .out_dir(skia_out_dir)
     .compile("skiabinding");
 
@@ -241,4 +245,10 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
   bindings
     .write_to_file(out_path.join("bindings.rs"))
     .expect("Couldn't write bindings!");
+}
+
+mod cargo {
+  pub fn add_dependent_path(path: &str) {
+    println!("cargo:rerun-if-changed={}", path);
+  }
 }
