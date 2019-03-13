@@ -1,10 +1,13 @@
+use std::path::PathBuf;
 use skia_safe::skia::{Canvas, Path, scalar, Paint, Color, Rect, PaintStyle, BlendMode, RRect, Font, Typeface, Image, Data};
 use crate::artifact;
 
-pub fn draw() {
-    artifact::draw_canvas_256("heptagram", draw_heptagram);
-    artifact::draw_canvas_256("rotated-rectangle", draw_rotated_rectangle);
-    artifact::draw_canvas_256("hello-skia", draw_hello_skia);
+pub fn draw(path: &PathBuf) {
+    let path = path.join("SkCanvas-Overview");
+
+    artifact::draw_canvas_256(&path, "heptagram", draw_heptagram);
+    artifact::draw_canvas_256(&path, "rotated-rectangle", draw_rotated_rectangle);
+    artifact::draw_canvas_256(&path, "hello-skia", draw_hello_skia);
 }
 
 fn draw_heptagram(canvas: &mut Canvas) {

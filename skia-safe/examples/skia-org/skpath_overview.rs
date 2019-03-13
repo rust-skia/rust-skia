@@ -1,12 +1,15 @@
+use std::path::PathBuf;
 use skia_safe::skia::{Canvas, Path, Paint, Color, PaintStyle, Font, PaintCap};
 use crate::artifact;
 
-pub fn draw() {
-    artifact::draw_canvas_256("example1", draw_example1);
-    artifact::draw_canvas_256("example2", draw_example2);
-    artifact::draw_canvas_256("example3", draw_example3);
-    artifact::draw_canvas_256("example4", draw_example4);
-    artifact::draw_canvas_256("example5", draw_example5);
+pub fn draw(path: &PathBuf) {
+    let path = path.join("SkPath-Overview");
+
+    artifact::draw_canvas_256(&path, "example1", draw_example1);
+    artifact::draw_canvas_256(&path, "example2", draw_example2);
+    artifact::draw_canvas_256(&path, "example3", draw_example3);
+    artifact::draw_canvas_256(&path, "example4", draw_example4);
+    artifact::draw_canvas_256(&path, "example5", draw_example5);
 }
 
 fn draw_example1(canvas: &mut Canvas) {
