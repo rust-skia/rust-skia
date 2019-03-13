@@ -20,6 +20,7 @@ use crate::skia::{
 use skia_bindings::{
     C_SkImage_MakeFromPicture,
     C_SkImage_MakeFromTexture,
+    C_SkImage_MakeFromCompressed,
     C_SkImage_MakeFromEncoded,
     C_SkImage_MakeFromBitmap,
     SkImage,
@@ -35,6 +36,7 @@ use skia_bindings::{
     C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend,
     SkImage_BitDepth,
     SkImage_CachingHint,
+    SkImage_CompressionType,
     C_SkImage_refEncodedData,
     C_SkImage_makeSubset,
     C_SkImage_makeTextureImage,
@@ -62,8 +64,16 @@ pub enum ImageCachingHint {
 }
 
 impl NativeTransmutable<SkImage_CachingHint> for ImageCachingHint {}
-
 #[test] fn test_caching_hint_layout() { ImageCachingHint::test_layout() }
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum ImageCompressionType {
+    ETC1 = SkImage_CompressionType::kETC1_CompressionType as _
+}
+
+impl NativeTransmutable<SkImage_CompressionType> for ImageCompressionType {}
+#[test] fn test_compression_type_layout() { ImageCompressionType::test_layout() }
 
 pub type Image = RCHandle<SkImage>;
 
@@ -93,6 +103,21 @@ impl RCHandle<SkImage> {
             C_SkImage_MakeFromEncoded(
                 data.shared_native(),
                 subset.native().as_ptr_or_null())
+        })
+    }
+
+    pub fn from_compressed<IS: Into<ISize>>(
+        context: &mut graphics::Context,
+        data: &Data,
+        size: IS,
+        c_type: ImageCompressionType) -> Option<Image> {
+        let size = size.into();
+        Image::from_ptr(unsafe {
+            C_SkImage_MakeFromCompressed(
+                context.native_mut(),
+                data.shared_native(),
+                size.width, size.height,
+                c_type.into_native())
         })
     }
 

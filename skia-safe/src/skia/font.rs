@@ -175,9 +175,15 @@ impl Handle<SkFont> {
         }
     }
 
-    pub fn typeface(&self) -> Typeface {
+    pub fn typeface(&self) -> Option<Typeface> {
         Typeface::from_unshared_ptr(unsafe {
             self.native().getTypeface()
+        })
+    }
+
+    pub fn typeface_or_default(&self) -> Typeface {
+        Typeface::from_unshared_ptr(unsafe {
+            self.native().getTypefaceOrDefault()
         }).unwrap()
     }
 
@@ -215,8 +221,6 @@ impl Handle<SkFont> {
         self
     }
 
-    // we support UTF8 for now only.
-    // TODO: can we return a slice _into_ glyphs?
     pub fn str_to_glyphs(&self, str: &str, glyphs: &mut[GlyphId]) -> usize {
         let bytes = str.as_bytes();
 
@@ -225,6 +229,7 @@ impl Handle<SkFont> {
             bytes.len(),
             TextEncoding::UTF8.into_native(),
             glyphs.as_mut_ptr(),
+            // don't fail if glyphs.len() is too large to fit into an i32.
             glyphs.len().min(i32::max_value().try_into().unwrap()).try_into().unwrap())
             .try_into().unwrap()
         }

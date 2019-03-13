@@ -210,12 +210,6 @@ impl Handle<SkImageInfo> {
         IRect::from_size(self.dimensions())
     }
 
-    pub fn gamma_close_to_srgb(&self) -> bool {
-        self.color_space()
-            .map(|cs| cs.gamma_close_to_srgb())
-            .unwrap_or(false)
-    }
-
     pub fn with_dimensions<IS: Into<ISize>>(&self, new_dimensions: IS) -> Self {
         Self::new(new_dimensions, self.color_type(), self.alpha_type(), self.color_space())
     }
