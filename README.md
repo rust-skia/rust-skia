@@ -30,14 +30,14 @@ to generate some Skia drawn PNG images in the directory `OUTPUT_DIR`.
 
 ### Crate
 
-Due to the size and it's build requirements of Skia, we'd like to experiment first with prebuilt binaries before releasing a crate.
+Due to the size and it's build requirements of Skia, we'd like to experiment with prebuilt binaries before releasing a crate.
 
-### Supported Platforms
+### Platforms
 
 - [x] Windows
 - [x] Linux Ubuntu 16 (18 should work, too).
 - [x] MacOSX
-- [ ] WebAssembly: #42.
+- [ ] WebAssembly: [#42](https://github.com/rust-skia/rust-skia/pull/42).
 - [ ] Android
 - [ ] iOS
 
@@ -45,7 +45,7 @@ Due to the size and it's build requirements of Skia, we'd like to experiment fir
 
 Skia is a large library. While we strife to bind all of the C++ APIs, it's nowhere complete yet. 
 
-We do support most of the SkCanvas, SkPaint, and SkPath and related APIs and are currently trying to make the examples from the [skia.org](https://skia.org/) website work. Upcoming are the bindings for the classes in the [`include/effects/`](https://github.com/google/skia/tree/2c36ee834ae04d036363cd3b8f3f33ec65d657f0/include/effects) directory.
+We do support most of the SkCanvas, SkPaint, and SkPath and related APIs and are trying to make the examples from the [skia.org](https://skia.org/) website work. Upcoming are the bindings for the classes in the [`include/effects/`](https://github.com/google/skia/tree/2c36ee834ae04d036363cd3b8f3f33ec65d657f0/include/effects) directory.
 
 ### Features
 
