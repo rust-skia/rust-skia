@@ -47,3 +47,9 @@ jobs:
     displayName: Build all targets
   - script: cargo test --release -p skia-safe -vv
     displayName: Test skia-safe
+  - script: cargo run --example skia-org $env:BUILD_ARTIFACTSTAGINGDIRECTORY/skia-org
+  	displayName: Run skia-org Example
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)/skia-org'
+      artifactName: 'skia-org-examples'
