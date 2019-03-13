@@ -4,13 +4,13 @@ Safe Rust bindings to the [Skia Graphics Library](https://skia.org/).
 
 ## Goals
 
-This project attempts to provide safe bindings that bridge between Skia's C++ API and idiomatic Rust on all major desktop, mobile, and [WebAssembly](https://en.wikipedia.org/wiki/WebAssembly) platforms, including GPU rendering support for [Vulkan](https://en.wikipedia.org/wiki/Vulkan_(API)), [Metal](https://en.wikipedia.org/wiki/Metal_(API)) and [OpenGL](https://en.wikipedia.org/wiki/OpenGL).
+This project attempts to provide safe bindings that bridge between Skia's C++ API and idiomatic Rust on all major desktop, mobile, and [WebAssembly](https://en.wikipedia.org/wiki/WebAssembly) platforms, including GPU rendering support for [Vulkan](https://en.wikipedia.org/wiki/Vulkan_(API)), [Metal](https://en.wikipedia.org/wiki/Metal_(API)), and [OpenGL](https://en.wikipedia.org/wiki/OpenGL).
 
 ## Building
 
 `cargo build`
 
-Just kidding, we wish it were that simple. Currently you need _at least_ to install LLVM, ninja, and OpenGL libraries.
+Just kidding, we wish it were that simple. Currently you need _at least_ to install LLVM, depot_tools, and OpenGL libraries. For some detailed information about how to install the prequisites on your platform, take a look at the [template we use to build on Azure](https://github.com/rust-skia/rust-skia/blob/master/azure-pipelines-template.yml).
 
 Please share your experience so that we can complete this section here and try to automate the build to get to the point where `cargo build` _is_ sufficient to build the bindings _including_ Skia, and if that is not possible, clearly prompts to what's missing.
 
