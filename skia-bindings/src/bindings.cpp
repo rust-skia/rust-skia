@@ -23,6 +23,9 @@
 // effects/
 #include "Sk1DPathEffect.h"
 #include "Sk2DPathEffect.h"
+#include "SkCornerPathEffect.h"
+#include "SkDashPathEffect.h"
+#include "SkDiscretePathEffect.h"
 #include "SkGradientShader.h"
 #include "SkPerlinNoiseShader.h"
 #include "SkTableColorFilter.h"
@@ -1046,6 +1049,31 @@ extern "C" SkPathEffect* C_SkLine2DPathEffect_Make(SkScalar width, const SkMatri
 extern "C" SkPathEffect* C_SkPath2DPathEffect_Make(const SkMatrix* matrix, const SkPath* path) {
     return SkPath2DPathEffect::Make(*matrix, *path).release();
 }
+
+//
+// SkCornerPathEffect
+//
+
+extern "C" SkPathEffect* C_SkCornerPathEffect_Make(SkScalar radius) {
+    return SkCornerPathEffect::Make(radius).release();
+}
+
+//
+// SkDashPathEffect
+//
+
+extern "C" SkPathEffect* C_SkDashPathEffect_Make(const SkScalar intervals[], int count, SkScalar phase) {
+    return SkDashPathEffect::Make(intervals, count, phase).release();
+}
+
+//
+// SkDiscretePathEffect
+//
+
+extern "C" SkPathEffect* C_SkDiscretePathEffect_Make(SkScalar segLength, SkScalar dev, uint32_t seedAssist) {
+    return SkDiscretePathEffect::Make(segLength, dev, seedAssist).release();
+}
+
 
 #if defined(SK_VULKAN)
 
