@@ -2,7 +2,7 @@ Safe Rust bindings to the [Skia Graphics Library](https://skia.org/).
 
 [![Build Status](https://dev.azure.com/armin0390/armin/_apis/build/status/rust-skia.rust-skia?branchName=master)](https://dev.azure.com/armin0390/armin/_build/latest?definitionId=2&branchName=master)
 
-Skia Submodule Status: chrome/m73 2c36ee834ae04d036363cd3b8f3f33ec65d657f0 ([pending changes][skiapending]).
+Skia Submodule Status: chrome/m73 ([pending changes][skiapending]).
 
 [skiapending]: https://github.com/google/skia/compare/2c36ee834ae04d036363cd3b8f3f33ec65d657f0...chrome/m73
 
