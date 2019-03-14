@@ -10,18 +10,18 @@ use cc::Build;
 
 fn main() {
 
-    assert!(Command::new("git")
-      .arg("submodule")
-      .arg("init")
-      .stdout(Stdio::inherit())
-      .stderr(Stdio::inherit())
-      .status().unwrap().success(), "git submodule init fail");
+  assert!(Command::new("git")
+    .arg("submodule")
+    .arg("init")
+    .stdout(Stdio::inherit())
+    .stderr(Stdio::inherit())
+    .status().unwrap().success(), "git submodule init fail");
 
-    assert!(Command::new("git")
-      .args(&["submodule", "update", "--depth", "1"])
-      .stdout(Stdio::inherit())
-      .stderr(Stdio::inherit())
-      .status().unwrap().success(), "git submodule update fail");
+  assert!(Command::new("git")
+    .args(&["submodule", "update", "--depth", "1"])
+    .stdout(Stdio::inherit())
+    .stderr(Stdio::inherit())
+    .status().unwrap().success(), "git submodule update fail");
 
   assert!(Command::new("python")
     .arg("skia/tools/git-sync-deps")
