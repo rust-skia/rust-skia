@@ -22,6 +22,7 @@
 #include "SkTypeface.h"
 // effects/
 #include "SkGradientShader.h"
+#include "SkPerlinNoiseShader.h"
 // gpu/
 #include "GrContext.h"
 
@@ -989,6 +990,22 @@ extern "C" SkShader* C_SkGradientShader_MakeSweep(SkScalar cx, SkScalar cy, cons
 
 extern "C" SkShader* C_SkGradientShader_MakeSweep2(SkScalar cx, SkScalar cy, const SkColor4f colors[], const SkColorSpace* colorSpace, const SkScalar pos[], int count, SkShader::TileMode mode, SkScalar startAngle, SkScalar endAngle, uint32_t flags, const SkMatrix* localMatrix) {
     return SkGradientShader::MakeSweep(cx, cy, colors, spFromConst(colorSpace), pos, count, mode, startAngle, endAngle, flags, localMatrix).release();
+}
+
+//
+// SkPerlinNoiseShader
+//
+
+extern "C" SkShader* C_SkPerlinNoiseShader_MakeFractalNoise(SkScalar baseFrequencyX, SkScalar baseFrequencyY, int numOctaves, SkScalar seed, const SkISize* tileSize) {
+    return SkPerlinNoiseShader::MakeFractalNoise(baseFrequencyX, baseFrequencyY, numOctaves, seed, tileSize).release();
+}
+
+extern "C" SkShader* C_SkPerlinNoiseShader_MakeTurbulence(SkScalar baseFrequencyX, SkScalar baseFrequencyY, int numOctaves, SkScalar seed, const SkISize* tileSize) {
+    return SkPerlinNoiseShader::MakeTurbulence(baseFrequencyX, baseFrequencyY, numOctaves, seed, tileSize).release();
+}
+
+extern "C" SkShader* C_SkPerlinNoiseShader_MakeImprovedNoise(SkScalar baseFrequencyX, SkScalar baseFrequencyY, int numOctaves, SkScalar z) {
+    return SkPerlinNoiseShader::MakeImprovedNoise(baseFrequencyX, baseFrequencyY, numOctaves, z).release();
 }
 
 #if defined(SK_VULKAN)
