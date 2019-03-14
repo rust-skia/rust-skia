@@ -15,6 +15,12 @@ pub enum ShaderTileMode {
 impl NativeTransmutable<SkShader_TileMode> for ShaderTileMode {}
 #[test] fn test_shader_tile_mode_layout() { ShaderTileMode::test_layout() }
 
+impl Default for ShaderTileMode {
+    fn default() -> Self {
+        ShaderTileMode::Clamp
+    }
+}
+
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
 pub enum ShaderGradientType {

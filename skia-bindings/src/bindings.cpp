@@ -184,6 +184,10 @@ extern "C" SkImage* C_SkImage_MakeFromPicture(
     return SkImage::MakeFromPicture(spFromConst(picture), *dimensions, matrix, paint, bitDepth, spFromConst(colorSpace)).release();
 }
 
+extern "C" SkShader* C_SkImage_makeShader(const SkImage* self, SkShader::TileMode tileMode1, SkShader::TileMode tileMode2, const SkMatrix* localMatrix) {
+    return self->makeShader(tileMode1, tileMode2, localMatrix).release();
+}
+
 extern "C" void C_SkImage_getBackendTexture(
         const SkImage* self,
         bool flushPendingGrContextIO,
