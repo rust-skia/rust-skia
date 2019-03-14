@@ -516,30 +516,28 @@ impl<T, I, O: Copy> IndexSetter<I, O> for T
     }
 }
 
-//
-// Native types that are represented with a rust type
-// _inplace_ with the same size and field layout.
-//
-
+/// Trait to use native types that as a rust type
+/// _inplace_ with the same size and field layout.
 pub trait NativeTransmutable<NT: Sized> : Sized {
+
+    /// Provides access to the native value through a
+    /// transmuted reference to the Rust value.
     fn native(&self) -> &NT {
         unsafe { transmute_ref(self) }
     }
 
+    /// Provides mutable access to the native value through a
+    /// transmuted reference to the Rust value.
     fn native_mut(&mut self) -> &mut NT {
         unsafe { transmute_ref_mut(self) }
     }
 
-    // TODO: this seems to actually copy, which is probably not what we want.
-    // TODO: this should only be possible for transmutable pairs that are
-    // both Copy
+    /// Copies the native value to an equivalent Rust value.
     fn from_native(nt: NT) -> Self {
         unsafe { mem::transmute_copy::<NT, Self>(&nt) }
     }
 
-    // TODO: this seems to actually copy, which is probably not what we want.
-    // TODO: this should only be possible for transmutable pairs that are
-    // both Copy
+    /// Copies the rust type to an equivalent instance of the native type.
     fn into_native(self) -> NT {
         unsafe { mem::transmute_copy::<Self, NT>(&self) }
     }
