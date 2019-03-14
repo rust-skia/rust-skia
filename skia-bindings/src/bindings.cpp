@@ -1,23 +1,24 @@
 #include "SkTypes.h"
 #include "SkCanvas.h"
 #include "SkColor.h"
+#include "SkColorFilter.h"
+#include "SkFont.h"
+#include "SkFontMetrics.h"
+#include "SkImageFilter.h"
 #include "SkImageInfo.h"
+#include "SkMaskFilter.h"
 #include "SkPaint.h"
 #include "SkPath.h"
+#include "SkPicture.h"
+#include "SkPictureRecorder.h"
+#include "SkPoint3.h"
 #include "SkRect.h"
 #include "SkSurface.h"
-#include "SkPicture.h"
 #include "SkYUVAIndex.h"
-#include "SkPoint3.h"
 #include "SkRegion.h"
-#include "SkFont.h"
-#include "SkTypeface.h"
-#include "SkFontMetrics.h"
-#include "SkPictureRecorder.h"
-#include "SkColorFilter.h"
 #include "SkStrokeRec.h"
-#include "SkMaskFilter.h"
-#include "SkImageFilter.h"
+#include "SkTextBlob.h"
+#include "SkTypeface.h"
 
 #include "GrContext.h"
 
@@ -627,6 +628,22 @@ extern "C" void C_SkFontStyle_Construct(SkFontStyle* uninitialized) {
 
 extern "C" bool C_SkFontStyle_equals(const SkFontStyle* lhs, const SkFontStyle* rhs) {
     return *lhs == *rhs;
+}
+
+//
+// SkTextBlob
+//
+
+extern "C" void C_SkTextBlob_ref(const SkTextBlob* self) {
+    self->ref();
+}
+
+extern "C" void C_SkTextBlob_unref(const SkTextBlob* self) {
+    self->unref();
+}
+
+extern "C" SkTextBlob* C_SkTextBlob_MakeFromText(const void* text, size_t byteLength, const SkFont* font, SkTextEncoding encoding) {
+    return SkTextBlob::MakeFromText(text, byteLength, *font, encoding).release();
 }
 
 //
