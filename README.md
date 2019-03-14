@@ -2,6 +2,10 @@ Safe Rust bindings to the [Skia Graphics Library](https://skia.org/).
 
 [![Build Status](https://dev.azure.com/armin0390/armin/_apis/build/status/rust-skia.rust-skia?branchName=master)](https://dev.azure.com/armin0390/armin/_build/latest?definitionId=2&branchName=master)
 
+Skia Submodule Status: chrome/m73 2c36ee834ae04d036363cd3b8f3f33ec65d657f0 ([pending changes][skiapending]).
+
+[skiapending]: https://github.com/google/skia/compare/2c36ee834ae04d036363cd3b8f3f33ec65d657f0...chrome/m73
+
 ## Goals
 
 This project attempts to provide safe bindings that bridge between Skia's C++ API and idiomatic Rust on all major desktop, mobile, and [WebAssembly](https://en.wikipedia.org/wiki/WebAssembly) platforms, including GPU rendering support for [Vulkan](https://en.wikipedia.org/wiki/Vulkan_(API)), [Metal](https://en.wikipedia.org/wiki/Metal_(API)), and [OpenGL](https://en.wikipedia.org/wiki/OpenGL).
