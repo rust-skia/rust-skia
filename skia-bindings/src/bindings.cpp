@@ -1,3 +1,4 @@
+// core/
 #include "SkTypes.h"
 #include "SkCanvas.h"
 #include "SkColor.h"
@@ -19,7 +20,9 @@
 #include "SkStrokeRec.h"
 #include "SkTextBlob.h"
 #include "SkTypeface.h"
-
+// effects/
+#include "SkGradientShader.h"
+// gpu/
 #include "GrContext.h"
 
 #if defined(SK_VULKAN)
@@ -946,6 +949,42 @@ extern "C" SkShader* C_SkShader_MakePictureShader(const SkPicture* src, SkShader
 
 extern "C" SkShader* C_SkShader_makeAsALocalMatrixShader(const SkShader* self, SkMatrix* localMatrix) {
     return self->makeAsALocalMatrixShader(localMatrix).release();
+}
+
+//
+// SkGradientShader
+//
+
+extern "C" SkShader* C_SkGradientShader_MakeLinear(const SkPoint pts[2], const SkColor colors[], const SkScalar pos[], int count, SkShader::TileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
+    return SkGradientShader::MakeLinear(pts, colors, pos, count, mode, flags, localMatrix).release();
+}
+
+extern "C" SkShader* C_SkGradientShader_MakeLinear2(const SkPoint pts[2], const SkColor4f colors[], const SkColorSpace* colorSpace, const SkScalar pos[], int count, SkShader::TileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
+    return SkGradientShader::MakeLinear(pts, colors, spFromConst(colorSpace), pos, count, mode, flags, localMatrix).release();
+}
+
+extern "C" SkShader* C_SkGradientShader_MakeRadial(const SkPoint* center, SkScalar radius, const SkColor colors[], const SkScalar pos[], int count, SkShader::TileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
+    return SkGradientShader::MakeRadial(*center, radius, colors, pos, count, mode, flags, localMatrix).release();
+}
+
+extern "C" SkShader* C_SkGradientShader_MakeRadial2(const SkPoint* center, SkScalar radius, const SkColor4f colors[], const SkColorSpace* colorSpace, const SkScalar pos[], int count, SkShader::TileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
+    return SkGradientShader::MakeRadial(*center, radius, colors, spFromConst(colorSpace), pos, count, mode, flags, localMatrix).release();
+}
+
+extern "C" SkShader* C_SkGradientShader_MakeTwoPointConical(const SkPoint* start, SkScalar startRadius, const SkPoint* end, SkScalar endRadius, const SkColor colors[], const SkScalar pos[], int count, SkShader::TileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
+    return SkGradientShader::MakeTwoPointConical(*start, startRadius, *end, endRadius, colors, pos, count, mode, flags, localMatrix).release();
+}
+
+extern "C" SkShader* C_SkGradientShader_MakeTwoPointConical2(const SkPoint* start, SkScalar startRadius, const SkPoint* end, SkScalar endRadius, const SkColor4f colors[], const SkColorSpace* colorSpace, const SkScalar pos[], int count, SkShader::TileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
+    return SkGradientShader::MakeTwoPointConical(*start, startRadius, *end, endRadius, colors, spFromConst(colorSpace), pos, count, mode, flags, localMatrix).release();
+}
+
+extern "C" SkShader* C_SkGradientShader_MakeSweep(SkScalar cx, SkScalar cy, const SkColor colors[], const SkScalar pos[], int count, SkShader::TileMode mode, SkScalar startAngle, SkScalar endAngle, uint32_t flags, const SkMatrix* localMatrix) {
+    return SkGradientShader::MakeSweep(cx, cy, colors, pos, count, mode, startAngle, endAngle, flags, localMatrix).release();
+}
+
+extern "C" SkShader* C_SkGradientShader_MakeSweep2(SkScalar cx, SkScalar cy, const SkColor4f colors[], const SkColorSpace* colorSpace, const SkScalar pos[], int count, SkShader::TileMode mode, SkScalar startAngle, SkScalar endAngle, uint32_t flags, const SkMatrix* localMatrix) {
+    return SkGradientShader::MakeSweep(cx, cy, colors, spFromConst(colorSpace), pos, count, mode, startAngle, endAngle, flags, localMatrix).release();
 }
 
 #if defined(SK_VULKAN)

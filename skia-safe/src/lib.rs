@@ -1,5 +1,6 @@
 pub mod graphics;
 pub mod skia;
+pub mod effects;
 mod prelude;
 
 #[macro_use]

@@ -151,6 +151,7 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .whitelist_type("SkVector4")
     .whitelist_type("SkPictureRecorder")
     .whitelist_type("SkAutoCanvasRestore")
+    .whitelist_type("SkGradientShader")
     .whitelist_var("SK_Color.*")
     .use_core()
     .clang_arg("-std=c++14");
