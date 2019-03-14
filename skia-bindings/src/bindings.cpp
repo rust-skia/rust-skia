@@ -21,6 +21,7 @@
 #include "SkTextBlob.h"
 #include "SkTypeface.h"
 // effects/
+#include "Sk1DPathEffect.h"
 #include "Sk2DPathEffect.h"
 #include "SkGradientShader.h"
 #include "SkPerlinNoiseShader.h"
@@ -1020,6 +1021,14 @@ extern "C" SkColorFilter* C_SkTableColorFilter_Make(const uint8_t table[256]) {
 
 extern "C" SkColorFilter* C_SkTableColorFilter_MakeARGB(const uint8_t tableA[256], const uint8_t tableR[256], const uint8_t tableG[256], const uint8_t tableB[256]) {
     return SkTableColorFilter::MakeARGB(tableA, tableR, tableG, tableB).release();
+}
+
+//
+// SkPath1DPathEffect
+//
+
+extern "C" SkPathEffect* C_SkPath1DPathEffect_Make(const SkPath* path, SkScalar advance, SkScalar phase, SkPath1DPathEffect::Style style) {
+    return SkPath1DPathEffect::Make(*path, advance, phase, style).release();
 }
 
 //
