@@ -55,12 +55,13 @@ We do support most of the SkCanvas, SkPaint, and SkPath and related APIs and are
 
 - [x] Vector Graphics: Matrix, Rect, Point, Size, etc.
 - [x] Basic Drawing: Surface, Canvas, Paint, Path.
-- [ ] Effects and Shaders
+- [ ] Effects and Shaders [#45](https://github.com/rust-skia/rust-skia/pull/45)
 - [ ] PDF
 - [ ] SVG
 - [ ] XPS
 - [ ] Animation
 - [x] Vulkan (rudimentary texture drawing support, enable with the cargo feature "vulkan").
+- [ ] Metal
 - [ ] OpenGL
 
 ## This project needs contributions!
