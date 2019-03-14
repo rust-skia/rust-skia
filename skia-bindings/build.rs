@@ -5,7 +5,7 @@ use std::env;
 use std::fs;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
-
+use bindgen::EnumVariation;
 use cc::Build;
 
 fn main() {
@@ -146,6 +146,8 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
   let mut builder = bindgen::Builder::default()
     .generate_inline_functions(true)
 
+    .default_enum_style(EnumVariation::Rust)
+
     .whitelist_function("C_.*")
     .whitelist_function("SkColorTypeBytesPerPixel")
     .whitelist_function("SkColorTypeIsAlwaysOpaque")
@@ -165,45 +167,6 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .whitelist_var("SK_Color.*")
     .use_core()
     .clang_arg("-std=c++14");
-
-  let enums = [
-    "GrMipMapped", "GrSurfaceOrigin",
-    "SkPaint_Flags", "SkPaint_Style", "SkPaint_Cap", "SkPaint_Join",
-    "SkGammaNamed",
-    "SkColorSpace_RenderTargetGamma", "SkColorSpace_Gamut",
-    "SkMatrix44_TypeMask", "SkMatrix_TypeMask", "SkMatrix_ScaleToFit",
-    "SkAlphaType", "SkColorType",
-    "SkYUVColorSpace",
-    "SkPixelGeometry",
-    "SkSurfaceProps_Flags",
-    "SkBitmap_AllocFlags",
-    "SkImage_BitDepth", "SkImage_CachingHint", "SkImage_CompressionType",
-    "SkColorChannel",
-    "SkYUVAIndex_Index",
-    "SkEncodedImageFormat",
-    "SkRRect_Type", "SkRRect_Corner",
-    "SkRegion_Op",
-    "SkFontMetrics_FontMetricsFlags",
-    "SkTypeface_SerializeBehavior", "SkTypeface_Encoding",
-    "SkFontStyle_Weight", "SkFontStyle_Width", "SkFontStyle_Slant",
-    "SkFont_Edging",
-    "SkTextEncoding",
-    "SkFontHinting",
-    "SkVertices_VertexMode", "SkVertices_BuilderFlags",
-    "SkPictureRecorder_RecordFlags",
-    "SkColorFilter_Flags",
-    "SkBlendMode",
-    "SkStrokeRec_InitStyle", "SkStrokeRec_Style",
-    "SkPathEffect_PointData_PointFlags", "SkPathEffect_DashType",
-    "SkBlurStyle",
-    "SkCoverageMode",
-    "SkFilterQuality",
-    "SkPath_Direction", "SkPath_FillType", "SkPath_Convexity", "SkPath_ArcSize", "SkPath_AddPathMode", "SkPath_SegmentMask", "SkPath_Verb",
-    "SkCanvas_SaveLayerFlagsSet", "SkCanvas_PointMode", "SkCanvas_SrcRectConstraint",
-    "SkClipOp"
-  ];
-
-  builder = enums.iter().fold(builder, |b, e| b.rustified_enum(e) );
 
   let mut cc_build = Build::new();
 
