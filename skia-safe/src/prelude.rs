@@ -544,6 +544,14 @@ pub trait NativeTransmutable<NT: Sized> : Sized {
         unsafe { mem::transmute_copy::<Self, NT>(&self) }
     }
 
+    /// Provides access to the Rust value through a
+    /// transmuted reference to the native value.
+    fn from_native_ref(nt: &NT) -> &Self {
+        unsafe { transmute_ref(nt) }
+    }
+
+    /// Runs a test that proves that the native and the rust
+    /// type are of the same size.
     fn test_layout() {
         assert_eq!(mem::size_of::<Self>(), mem::size_of::<NT>());
     }

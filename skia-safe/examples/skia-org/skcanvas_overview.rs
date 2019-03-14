@@ -1,4 +1,4 @@
-use skia_safe::skia::{Canvas, Path, scalar, Paint, Color, Rect, PaintStyle, BlendMode, RRect, Font, Typeface, Image, Data};
+use skia_safe::skia::{Canvas, Path, scalar, Paint, Color, Rect, PaintStyle, BlendMode, RRect, Font, Typeface, Image, Data, TextBlob};
 use crate::artifact;
 
 pub fn draw() {
@@ -76,10 +76,6 @@ fn draw_hello_skia(canvas: &mut Canvas) {
 
     let paint2 = Paint::default();
 
-    // TODO: support TextBlobs
-    // auto text = SkTextBlob::MakeFromString("Hello, Skia!", SkFont(nullptr, 18));
-    // canvas.drawTextBlob(text.get(), 50, 25, paint2);
-
-    let font = Font::from_typeface_with_size(&Typeface::default(), 18.0);
-    canvas.draw_str("Hello, Skia!", (50.0, 25.0), &font, &paint2);
+    let text = TextBlob::from_str("Hello, Skia!", &Font::from_typeface_with_size(&Typeface::default(), 18.0));
+    canvas.draw_text_blob(&text, (50, 25), &paint2);
 }

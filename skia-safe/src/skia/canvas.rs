@@ -4,36 +4,7 @@ use std::slice;
 use std::ffi::CString;
 use crate::graphics;
 use crate::prelude::*;
-use crate::skia::{
-    IRect,
-    QuickReject,
-    Region,
-    RRect,
-    ClipOp,
-    Point,
-    scalar,
-    Vector,
-    Image,
-    ImageFilter,
-    Rect,
-    IPoint,
-    Surface,
-    Bitmap,
-    ISize,
-    SurfaceProps,
-    ImageInfo,
-    Path,
-    Paint,
-    Color,
-    Matrix,
-    BlendMode,
-    Font,
-    TextEncoding,
-    Picture,
-    Vertices,
-    VerticesBone,
-    Data
-};
+use crate::skia::{IRect, QuickReject, Region, RRect, ClipOp, Point, scalar, Vector, Image, ImageFilter, Rect, IPoint, Surface, Bitmap, ISize, SurfaceProps, ImageInfo, Path, Paint, Color, Matrix, BlendMode, Font, TextEncoding, Picture, Vertices, VerticesBone, Data, TextBlob};
 use skia_bindings::{
     C_SkAutoCanvasRestore_destruct,
     SkAutoCanvasRestore,
@@ -798,7 +769,12 @@ impl Canvas {
         self
     }
 
-    // TODO: drawTextBlob
+    pub fn draw_text_blob<P: Into<Point>>(&mut self, blob: &TextBlob, origin: P, paint: &Paint) {
+        let origin = origin.into();
+        unsafe {
+            self.native_mut().drawTextBlob(blob.native(), origin.x, origin.y, paint.native())
+        }
+    }
 
     pub fn draw_picture(&mut self, picture: &Picture, matrix: Option<&Matrix>, paint: Option<&Paint>) -> &mut Self {
         unsafe {

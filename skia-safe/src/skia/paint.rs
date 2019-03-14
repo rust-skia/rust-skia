@@ -345,8 +345,6 @@ impl Handle<SkPaint> {
 
     // TODO: getDrawLooper, setDrawLooper
 
-    // TODO: getTextBlobIntercepts
-
     pub fn nothing_to_draw(&self) -> bool {
         unsafe { self.native().nothingToDraw() }
     }
