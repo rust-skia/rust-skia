@@ -105,36 +105,23 @@ fn main() {
   let current_dir_name = current_dir.to_str().unwrap();
 
   println!("cargo:rustc-link-search={}", &skia_out_dir);
-  println!("cargo:rustc-link-lib=static=skia");
-  println!("cargo:rustc-link-lib=static=skiabinding");
+  cargo::add_link_libs(&["static=skia", "static=skiabinding"]);
 
   let target = env::var("TARGET").unwrap();
   if target.contains("unknown-linux-gnu") {
-    println!("cargo:rustc-link-lib=stdc++");
-    println!("cargo:rustc-link-lib=bz2");
-    println!("cargo:rustc-link-lib=GL");
-    println!("cargo:rustc-link-lib=fontconfig");
-    println!("cargo:rustc-link-lib=freetype");
+    cargo::add_link_libs(&["stdc++", "bz2", "GL", "fontconfig", "freetype"]);
   } else if target.contains("eabi") {
-    println!("cargo:rustc-link-lib=stdc++");
-    println!("cargo:rustc-link-lib=GLESv2");
+    cargo::add_link_libs(&["stdc++", "GLESv2"]);
   } else if target.contains("apple-darwin") {
-    println!("cargo:rustc-link-lib=c++");
-    println!("cargo:rustc-link-lib=framework=OpenGL");
-    println!("cargo:rustc-link-lib=framework=ApplicationServices");
+    cargo::add_link_libs(&["c++", "framework=OpenGL", "framework=ApplicationServices"]);
   } else if target.contains("windows") {
     if target.contains("gnu") {
-      println!("cargo:rustc-link-lib=stdc++");
+      cargo::add_link_lib("stdc++");
     }
-    println!("cargo:rustc-link-lib=usp10");
-    println!("cargo:rustc-link-lib=ole32");
-    println!("cargo:rustc-link-lib=user32");
-    println!("cargo:rustc-link-lib=gdi32");
-    println!("cargo:rustc-link-lib=fontsub");
-
-    // required since GrContext::MakeVulkan is linked.
+    cargo::add_link_libs(&["usp10", "ole32", "user32", "gdi32", "fontsub"]);
+    // required as soon GrContext::MakeVulkan is linked.
     if cfg!(feature="vulkan") {
-      println!("cargo:rustc-link-lib=opengl32");
+      cargo::add_link_lib("opengl32");
     }
   }
 
@@ -213,5 +200,13 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
 mod cargo {
   pub fn add_dependent_path(path: &str) {
     println!("cargo:rerun-if-changed={}", path);
+  }
+
+  pub fn add_link_libs<'a, L: IntoIterator<Item = &'a &'a str>>(libs: L) {
+    libs.into_iter().for_each(|s| add_link_lib(*s))
+  }
+
+  pub fn add_link_lib(lib: &str) {
+    println!("cargo:rustc-link-lib={}", lib);
   }
 }
