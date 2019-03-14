@@ -21,6 +21,7 @@
 #include "SkTextBlob.h"
 #include "SkTypeface.h"
 // effects/
+#include "Sk2DPathEffect.h"
 #include "SkGradientShader.h"
 #include "SkPerlinNoiseShader.h"
 #include "SkTableColorFilter.h"
@@ -1019,6 +1020,22 @@ extern "C" SkColorFilter* C_SkTableColorFilter_Make(const uint8_t table[256]) {
 
 extern "C" SkColorFilter* C_SkTableColorFilter_MakeARGB(const uint8_t tableA[256], const uint8_t tableR[256], const uint8_t tableG[256], const uint8_t tableB[256]) {
     return SkTableColorFilter::MakeARGB(tableA, tableR, tableG, tableB).release();
+}
+
+//
+// SkLine2DPathEffect
+//
+
+extern "C" SkPathEffect* C_SkLine2DPathEffect_Make(SkScalar width, const SkMatrix* matrix) {
+    return SkLine2DPathEffect::Make(width, *matrix).release();
+}
+
+//
+// SkPath2DPathEffect
+//
+
+extern "C" SkPathEffect* C_SkPath2DPathEffect_Make(const SkMatrix* matrix, const SkPath* path) {
+    return SkPath2DPathEffect::Make(*matrix, *path).release();
 }
 
 #if defined(SK_VULKAN)

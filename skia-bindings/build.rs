@@ -151,6 +151,9 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .whitelist_type("SkVector4")
     .whitelist_type("SkPictureRecorder")
     .whitelist_type("SkAutoCanvasRestore")
+
+    .whitelist_type("SkLine2DPathEffect")
+    .whitelist_type("SkPath2DPathEffect")
     .whitelist_type("SkGradientShader")
     .whitelist_type("SkPerlinNoiseShader")
     .whitelist_type("SkTableColorFilter")
