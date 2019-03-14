@@ -23,6 +23,7 @@
 // effects/
 #include "SkGradientShader.h"
 #include "SkPerlinNoiseShader.h"
+#include "SkTableColorFilter.h"
 // gpu/
 #include "GrContext.h"
 
@@ -1006,6 +1007,18 @@ extern "C" SkShader* C_SkPerlinNoiseShader_MakeTurbulence(SkScalar baseFrequency
 
 extern "C" SkShader* C_SkPerlinNoiseShader_MakeImprovedNoise(SkScalar baseFrequencyX, SkScalar baseFrequencyY, int numOctaves, SkScalar z) {
     return SkPerlinNoiseShader::MakeImprovedNoise(baseFrequencyX, baseFrequencyY, numOctaves, z).release();
+}
+
+//
+// SkTableColorFilter
+//
+
+extern "C" SkColorFilter* C_SkTableColorFilter_Make(const uint8_t table[256]) {
+    return SkTableColorFilter::Make(table).release();
+}
+
+extern "C" SkColorFilter* C_SkTableColorFilter_MakeARGB(const uint8_t tableA[256], const uint8_t tableR[256], const uint8_t tableG[256], const uint8_t tableB[256]) {
+    return SkTableColorFilter::MakeARGB(tableA, tableR, tableG, tableB).release();
 }
 
 #if defined(SK_VULKAN)
