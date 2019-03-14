@@ -28,11 +28,16 @@ pub enum MatrixScaleToFit {
 impl NativeTransmutable<SkMatrix_ScaleToFit> for MatrixScaleToFit {}
 #[test] fn test_matrix_scale_to_fit_layout() { MatrixScaleToFit::test_layout() }
 
-pub type Matrix = ValueHandle<SkMatrix>;
+#[derive(Copy, Clone)]
+#[repr(transparent)]
+pub struct Matrix(SkMatrix);
 
-impl NativePartialEq for SkMatrix {
+impl NativeTransmutable<SkMatrix> for Matrix {}
+#[test] fn test_matrix_layout() { Matrix::test_layout() }
+
+impl PartialEq for Matrix {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { skia_bindings::C_SkMatrix_Equals(self, rhs) }
+        unsafe { skia_bindings::C_SkMatrix_Equals(self.native(), rhs.native()) }
     }
 }
 
@@ -59,7 +64,7 @@ pub enum AffineMatrixMember {
     TransY = 5
 }
 
-impl Index<MatrixMember> for ValueHandle<SkMatrix> {
+impl Index<MatrixMember> for Matrix {
     type Output = scalar;
 
     fn index(&self, index: MatrixMember) -> &Self::Output {
@@ -67,7 +72,7 @@ impl Index<MatrixMember> for ValueHandle<SkMatrix> {
     }
 }
 
-impl Index<AffineMatrixMember> for ValueHandle<SkMatrix> {
+impl Index<AffineMatrixMember> for Matrix {
     type Output = scalar;
 
     fn index(&self, index: AffineMatrixMember) -> &Self::Output {
@@ -75,7 +80,7 @@ impl Index<AffineMatrixMember> for ValueHandle<SkMatrix> {
     }
 }
 
-impl Index<usize> for ValueHandle<SkMatrix> {
+impl Index<usize> for Matrix {
     type Output = scalar;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -83,38 +88,42 @@ impl Index<usize> for ValueHandle<SkMatrix> {
     }
 }
 
-impl IndexMut<MatrixMember> for ValueHandle<SkMatrix> {
+impl IndexMut<MatrixMember> for Matrix {
     fn index_mut(&mut self, index: MatrixMember) -> &mut Self::Output {
         self.index_mut(index as usize)
     }
 }
 
-impl IndexMut<AffineMatrixMember> for ValueHandle<SkMatrix> {
+impl IndexMut<AffineMatrixMember> for Matrix {
     fn index_mut(&mut self, index: AffineMatrixMember) -> &mut Self::Output {
         self.index_mut(index as usize)
     }
 }
 
-impl IndexMut<usize> for ValueHandle<SkMatrix> {
+impl IndexMut<usize> for Matrix {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         self.native_mut().fMat.index_mut(index)
     }
 }
 
-impl Default for ValueHandle<SkMatrix> {
+impl Default for Matrix {
     fn default() -> Self {
         Matrix::new_identity()
     }
 }
 
-impl ValueHandle<SkMatrix> {
+impl Matrix {
 
     pub fn new_scale(sx: scalar, sy: scalar) -> Matrix {
-        unsafe { SkMatrix::MakeScale(sx, sy) }.into_handle()
+        Matrix::from_native(unsafe {
+            SkMatrix::MakeScale(sx, sy)
+        })
     }
 
     pub fn new_trans(d: Vector) -> Matrix {
-        unsafe { SkMatrix::MakeTrans(d.x, d.y) }.into_handle()
+        Matrix::from_native(unsafe {
+            SkMatrix::MakeTrans(d.x, d.y)
+        })
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -122,11 +131,12 @@ impl ValueHandle<SkMatrix> {
         scale_x: scalar, skew_x: scalar, trans_x: scalar,
         skew_y: scalar, scale_y: scalar, trans_y: scalar,
         pers_0: scalar, pers_1: scalar, pers_2: scalar) -> Matrix {
-        unsafe { SkMatrix::MakeAll(
-            scale_x, skew_x, trans_x,
-            skew_y, scale_y, trans_y,
-            pers_0, pers_1, pers_2)
-        }.into_handle()
+        Matrix::from_native(unsafe {
+            SkMatrix::MakeAll(
+                scale_x, skew_x, trans_x,
+                skew_y, scale_y, trans_y,
+                pers_0, pers_1, pers_2)
+        })
     }
 
     pub fn get_type(&self) -> MatrixTypeMask {
@@ -535,7 +545,7 @@ impl IndexSet for Matrix {}
 
 lazy_static! {
     static ref IDENTITY : Matrix = Matrix::new_identity();
-    static ref INVALID : Matrix = unsafe { *SkMatrix::InvalidMatrix() }.into_handle();
+    static ref INVALID : Matrix = Matrix::from_native(unsafe { *SkMatrix::InvalidMatrix() });
 }
 
 #[test]

@@ -66,15 +66,20 @@ pub enum FontStyleSlant {
 impl NativeTransmutable<SkFontStyle_Slant> for FontStyleSlant {}
 #[test] fn test_font_style_slant_layout() { FontStyleSlant::test_layout() }
 
-pub type FontStyle = ValueHandle<SkFontStyle>;
+#[derive(Copy, Clone)]
+#[repr(transparent)]
+pub struct FontStyle(SkFontStyle);
 
-impl NativePartialEq for SkFontStyle {
+impl NativeTransmutable<SkFontStyle> for FontStyle {}
+#[test] fn test_font_style_layout() { FontStyle::test_layout() }
+
+impl PartialEq for FontStyle {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { C_SkFontStyle_equals(self, rhs) }
+        unsafe { C_SkFontStyle_equals(self.native(), rhs.native()) }
     }
 }
 
-impl Default for ValueHandle<SkFontStyle> {
+impl Default for FontStyle {
     fn default() -> Self {
         // does not link under Linux:
         // unsafe { SkFontStyle::new1() }.into_handle()
@@ -87,12 +92,12 @@ impl Default for ValueHandle<SkFontStyle> {
     }
 }
 
-impl ValueHandle<SkFontStyle> {
+impl FontStyle {
 
     pub fn new(weight: FontStyleWeight, width: FontStyleWidth, slant: FontStyleSlant) -> Self {
-        unsafe {
+        Self::from_native(unsafe {
             SkFontStyle::new(*weight.native(), *width.native(), *slant.native())
-        }.into_handle()
+        })
     }
 
     pub fn weight(self) -> FontStyleWeight {

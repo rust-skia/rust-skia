@@ -854,8 +854,9 @@ impl Canvas {
     }
 
     pub fn total_matrix(&self) -> &Matrix {
-        // TODO: make this official, transmutation of a Matrix is not actually supported.
-        unsafe { transmute_ref(&*self.native().getTotalMatrix()) }
+        Matrix::from_native_ref(unsafe {
+            &*self.native().getTotalMatrix()
+        })
     }
 
     //
