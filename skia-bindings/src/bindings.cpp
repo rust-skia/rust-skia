@@ -266,6 +266,10 @@ extern "C" bool C_SkPaint_Equals(const SkPaint* lhs, const SkPaint* rhs) {
     return *lhs == *rhs;
 }
 
+extern "C" void C_SkPaint_setShader(SkPaint* self, const SkShader* shader) {
+    self->setShader(spFromConst(shader));
+}
+
 extern "C" void C_SkPaint_setColorFilter(SkPaint* self, const SkColorFilter* colorFilter) {
     self->setColorFilter(spFromConst(colorFilter));
 }

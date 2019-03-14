@@ -4,32 +4,8 @@ use std::hash::{
     Hasher
 };
 use crate::prelude::*;
-use crate::skia::{
-    Color,
-    FontHinting,
-    FilterQuality,
-    Color4f,
-    ColorSpace,
-    scalar,
-    Path,
-    Rect,
-    ColorFilter,
-    BlendMode,
-    PathEffect,
-    MaskFilter,
-};
-use skia_bindings::{
-    C_SkPaint_setMaskFilter,
-    C_SkPaint_setPathEffect,
-    C_SkPaint_setColorFilter,
-    SkPaint_Cap,
-    SkPaint,
-    C_SkPaint_destruct,
-    SkPaint_Style,
-    SkPaint_Flags,
-    SkPaint_Join,
-    C_SkPaint_Equals,
-};
+use crate::skia::{Color, FontHinting, FilterQuality, Color4f, ColorSpace, scalar, Path, Rect, ColorFilter, BlendMode, PathEffect, MaskFilter, Shader};
+use skia_bindings::{C_SkPaint_setMaskFilter, C_SkPaint_setPathEffect, C_SkPaint_setColorFilter, SkPaint_Cap, SkPaint, C_SkPaint_destruct, SkPaint_Style, SkPaint_Flags, SkPaint_Join, C_SkPaint_Equals, C_SkPaint_setShader};
 
 bitflags! {
     pub struct PaintFlags: u32 {
@@ -265,6 +241,19 @@ impl Handle<SkPaint> {
             res_scale.unwrap_or(1.0))
         }
         .if_true_some(r)
+    }
+
+    pub fn shader(&self) -> Option<Shader> {
+        Shader::from_unshared_ptr(unsafe {
+            self.native().getShader()
+        })
+    }
+
+    pub fn set_shader(&mut self, shader: Option<&Shader>) -> &mut Self {
+        unsafe {
+            C_SkPaint_setShader(self.native_mut(), shader.shared_ptr())
+        }
+        self
     }
 
     pub fn color_filter(&self) -> Option<ColorFilter> {
