@@ -123,6 +123,9 @@ pub use self::region::*;
 mod rrect;
 pub use self::rrect::*;
 
+mod shader;
+pub use self::shader::*;
+
 mod size;
 pub use self::size::*;
 

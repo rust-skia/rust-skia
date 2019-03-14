@@ -892,6 +892,58 @@ extern "C" void C_SkSurface_getBackendTexture(
     *backendTexture = self->getBackendTexture(handleAccess);
 }
 
+//
+// SkShader
+//
+
+extern "C" bool C_SkShader_isOpaque(const SkShader* self) {
+    return self->isOpaque();
+}
+
+extern "C" SkShader::GradientType C_SkShader_asAGradient(const SkShader* self, SkShader::GradientInfo* info) {
+    return self->asAGradient(info);
+}
+
+extern "C" SkShader* C_SkShader_makeWithLocalMatrix(const SkShader* self, const SkMatrix* matrix) {
+    return self->makeWithLocalMatrix(*matrix).release();
+}
+
+extern "C" SkShader* C_SkShader_makeWithColorFilter(const SkShader* self, const SkColorFilter* colorFilter) {
+    return self->makeWithColorFilter(spFromConst(colorFilter)).release();
+}
+
+extern "C" SkShader* C_SkShader_MakeEmptyShader() {
+    return SkShader::MakeEmptyShader().release();
+}
+
+extern "C" SkShader* C_SkShader_MakeColorShader(SkColor color) {
+    return SkShader::MakeColorShader(color).release();
+}
+
+extern "C" SkShader* C_SkShader_MakeColorShader2(const SkColor4f* color, const SkColorSpace* colorSpace) {
+    return SkShader::MakeColorShader(*color, spFromConst(colorSpace)).release();
+}
+
+extern "C" SkShader* C_SkShader_MakeCompose(const SkShader* dst, const SkShader* src, SkBlendMode mode, float lerp) {
+    return SkShader::MakeCompose(spFromConst(dst), spFromConst(src), mode, lerp).release();
+}
+
+extern "C" SkShader* C_SkShader_MakeMixer(const SkShader* dst, const SkShader* src, float lerp) {
+    return SkShader::MakeMixer(spFromConst(dst), spFromConst(src), lerp).release();
+}
+
+extern "C" SkShader* C_SkShader_MakeBitmapShader(const SkBitmap* src, SkShader::TileMode tmx, SkShader::TileMode tmy, const SkMatrix* localMatrix) {
+    return SkShader::MakeBitmapShader(*src, tmx, tmy, localMatrix).release();
+}
+
+extern "C" SkShader* C_SkShader_MakePictureShader(const SkPicture* src, SkShader::TileMode tmx, SkShader::TileMode tmy, const SkMatrix* localMatrix, const SkRect* tile) {
+    return SkShader::MakePictureShader(spFromConst(src), tmx, tmy, localMatrix, tile).release();
+}
+
+extern "C" SkShader* C_SkShader_makeAsALocalMatrixShader(const SkShader* self, SkMatrix* localMatrix) {
+    return self->makeAsALocalMatrixShader(localMatrix).release();
+}
+
 #if defined(SK_VULKAN)
 
 // The GrVkBackendContext struct binding's length is too short
