@@ -56,4 +56,4 @@ jobs:
   - task: PublishBuildArtifacts@1
     inputs:
       pathtoPublish: '$(Build.ArtifactStagingDirectory)/skia-org'
-      artifactName: 'skia-org-examples'
+      artifactName: 'skia-org-examples-${{ parameters.name }}-$(rustup_toolchain)'
