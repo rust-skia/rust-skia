@@ -232,6 +232,12 @@ impl<H, N> IntoHandle<H> for N
 #[repr(transparent)]
 pub struct Handle<N: NativeDrop>(N);
 
+impl<N: NativeDrop> AsRef<Handle<N>> for Handle<N> {
+    fn as_ref(&self) -> &Self {
+        &self
+    }
+}
+
 impl<N: NativeDrop> FromNative<N> for Handle<N> {
     fn from_native(n: N) -> Handle<N> {
         Handle(n)
@@ -345,6 +351,12 @@ impl<H, N> NativePointerOrNullMut2<N> for Option<&mut H>
 
 /// A representation type represented by a refcounted pointer to the native type.
 pub struct RCHandle<Native: NativeRefCounted>(*mut Native);
+
+impl<N: NativeRefCounted> AsRef<RCHandle<N>> for RCHandle<N> {
+    fn as_ref(&self) -> &Self {
+        &self
+    }
+}
 
 impl<N: NativeRefCounted> RCHandle<N> {
 
