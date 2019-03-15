@@ -896,38 +896,67 @@ impl QuickReject<Path> for Canvas {
     }
 }
 
-pub struct AutoCanvasRestore<'a>(SkAutoCanvasRestore, PhantomData<&'a ()>);
+/// A reference to a Canvas that restores the Canvas's state when
+/// it's being dropped.
+pub struct AutoRestoredCanvas<'a> {
+    canvas: &'a mut Canvas,
+    restore: SkAutoCanvasRestore,
+}
 
-impl<'a> NativeAccess<SkAutoCanvasRestore> for AutoCanvasRestore<'a> {
-    fn native(&self) -> &SkAutoCanvasRestore {
-        &self.0
-    }
-    fn native_mut(&mut self) -> &mut SkAutoCanvasRestore {
-        &mut self.0
+impl<'a> Deref for AutoRestoredCanvas<'a> {
+    type Target = Canvas;
+    fn deref(&self) -> &Self::Target {
+        self.canvas
     }
 }
 
-impl<'a> Drop for AutoCanvasRestore<'a> {
+impl<'a> DerefMut for AutoRestoredCanvas<'a> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.canvas
+    }
+}
+
+impl<'a> NativeAccess<SkAutoCanvasRestore> for AutoRestoredCanvas<'a> {
+    fn native(&self) -> &SkAutoCanvasRestore {
+        &self.restore
+    }
+
+    fn native_mut(&mut self) -> &mut SkAutoCanvasRestore {
+        &mut self.restore
+    }
+}
+
+impl<'a> Drop for AutoRestoredCanvas<'a> {
     fn drop(&mut self) {
         unsafe {
-            C_SkAutoCanvasRestore_destruct(&self.0)
+            C_SkAutoCanvasRestore_destruct(self.native_mut())
         }
     }
 }
 
-impl<'a> AutoCanvasRestore<'a> {
-    // TODO: test, scary looking lifetime requirements.
-    pub fn guard(canvas: &mut Canvas, do_save: bool) -> AutoCanvasRestore<'_> {
-        AutoCanvasRestore(unsafe {
-            SkAutoCanvasRestore::new(canvas.native_mut(), do_save)
-        }, PhantomData)
-    }
+impl<'a> AutoRestoredCanvas<'a> {
 
     pub fn restore(&mut self) {
         unsafe {
             // does not link:
             // self.native_mut().restore()
             C_SkAutoCanvasRestore_restore(self.native_mut())
+        }
+    }
+}
+
+pub enum AutoCanvasRestore {}
+
+impl AutoCanvasRestore {
+
+    pub fn guard(canvas: &mut Canvas, do_save: bool) -> AutoRestoredCanvas {
+        let restore = unsafe {
+            SkAutoCanvasRestore::new(canvas.native_mut(), do_save)
+        };
+
+        AutoRestoredCanvas {
+            canvas,
+            restore
         }
     }
 }
