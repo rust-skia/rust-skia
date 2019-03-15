@@ -206,7 +206,7 @@ fn draw_two_point_conical_shader(canvas: &mut Canvas) {
     let colors = [ Color::BLUE, Color::YELLOW ];
     let mut paint = Paint::default();
     paint.set_shader(GradientShader::two_point_conical(
-        (128.0, 128.0), 118.0,
+        (128.0, 128.0), 128.0,
         (128.0, 16.0), 16.0,
         colors.as_ref(), None, ShaderTileMode::Clamp, GradientShaderFlags::default(), None).as_ref());
     canvas.draw_paint(&paint);
@@ -245,7 +245,7 @@ fn draw_compose_shader(canvas: &mut Canvas) {
             &GradientShader::radial(
                 (128.0, 128.0), 180.0,
                 colors.as_ref(), None, ShaderTileMode::Clamp, GradientShaderFlags::default(), None).unwrap(),
-            &PerlinNoiseShader::turbulence((0.05, 0.05), 4, 0.0, None).unwrap(),
+            &PerlinNoiseShader::turbulence((0.025, 0.025), 2, 0.0, None).unwrap(),
             BlendMode::Difference, None
         ).as_ref()
     );
@@ -296,7 +296,7 @@ fn draw_color_table_color_filter(canvas: &mut Canvas) {
     canvas.scale((0.5, 0.5));
     let mut ct = [0u8; 256];
     for i in 0..ct.len() {
-        let x = (i - 96) * 255 / 64;
+        let x = (i as i32 - 96) * 255 / 64;
         ct[i] = x.max(0).min(255) as _;
     }
     let mut paint = Paint::default();
