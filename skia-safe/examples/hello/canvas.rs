@@ -39,7 +39,7 @@ impl Canvas {
 
     #[inline]
     pub fn scale(&mut self, sx: f32, sy: f32) {
-        self.canvas().scale(sx, sy);
+        self.canvas().scale((sx, sy));
     }
 
     #[inline]
