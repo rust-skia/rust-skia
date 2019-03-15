@@ -141,8 +141,8 @@ impl GradientShader {
         })
     }
 
-    pub fn sweep<'a, C: Into<GradientShaderColors<'a>>>(
-        (cx, cy) : (scalar, scalar),
+    pub fn sweep<'a, P: Into<Point>, C: Into<GradientShaderColors<'a>>>(
+        center: P,
         colors: C,
         pos: Option<&[scalar]>,
         mode: ShaderTileMode,
@@ -150,6 +150,7 @@ impl GradientShader {
         flags: GradientShaderFlags,
         local_matrix: Option<&Matrix>) -> Option<Shader> {
 
+        let center = center.into();
         let colors = colors.into();
         assert!(pos.is_none() || (pos.unwrap().len() == colors.len()));
 
@@ -160,7 +161,7 @@ impl GradientShader {
             match colors {
                 GradientShaderColors::Colors(colors) =>
                     C_SkGradientShader_MakeSweep(
-                        cx, cy,
+                        center.x, center.y,
                         colors.native().as_ptr(),
                         pos.as_ptr_or_null(),
                         colors.len().try_into().unwrap(),
@@ -171,7 +172,7 @@ impl GradientShader {
 
                 GradientShaderColors::ColorsInSpace(colors, color_space) =>
                     C_SkGradientShader_MakeSweep2(
-                        cx, cy,
+                        center.x, center.y,
                         colors.native().as_ptr(),
                         color_space.shared_native(),
                         pos.as_ptr_or_null(),

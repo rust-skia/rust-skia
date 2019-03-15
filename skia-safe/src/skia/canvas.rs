@@ -431,7 +431,7 @@ impl Canvas {
         self
     }
 
-    pub fn scale(&mut self, sx: scalar, sy: scalar) -> &mut Self {
+    pub fn scale(&mut self, (sx, sy): (scalar, scalar)) -> &mut Self {
         unsafe {
             self.native_mut().scale(sx, sy)
         }
@@ -450,7 +450,7 @@ impl Canvas {
         self
     }
 
-    pub fn skew(&mut self, sx: scalar, sy: scalar) -> &mut Self {
+    pub fn skew(&mut self, (sx, sy): (scalar, scalar)) -> &mut Self {
         unsafe {
             self.native_mut().skew(sx, sy)
         }

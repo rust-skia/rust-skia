@@ -93,7 +93,7 @@ impl RCHandle<SkColorFilter> {
         })
     }
 
-    pub fn from_matrix_row_major_255(matrix: [scalar; 20]) -> ColorFilter {
+    pub fn from_matrix_row_major_255(matrix: &[scalar; 20]) -> ColorFilter {
         ColorFilter::from_ptr(unsafe {
             C_SkColorFilter_MakeMatrixFilterRowMajor255(matrix.as_ptr())
         }).unwrap()

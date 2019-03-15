@@ -1,3 +1,4 @@
+use crate::prelude::*;
 use crate::skia::ColorFilter;
 use skia_bindings::{C_SkTableColorFilter_Make, C_SkTableColorFilter_MakeARGB};
 

@@ -7,7 +7,6 @@ pub use self::dash_path_effect::*;
 mod discrete_path_effect;
 pub use self::discrete_path_effect::*;
 
-
 mod gradient_shader;
 pub use self::gradient_shader::*;
 

@@ -24,7 +24,7 @@ pub(crate) mod artifact {
 
         let mut surface = Surface::new_raster_n32_premul((width*2, height*2)).unwrap();
         let mut canvas = surface.canvas();
-        canvas.scale(2.0, 2.0);
+        canvas.scale((2.0, 2.0));
         func(&mut canvas);
         let image = surface.make_image_snapshot();
         let data = image.encode_to_data(EncodedImageFormat::PNG).unwrap();
