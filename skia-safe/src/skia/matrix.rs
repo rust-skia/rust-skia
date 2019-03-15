@@ -569,7 +569,7 @@ fn test_get_set_trait_compilation() {
 #[test]
 fn test_tuple_to_vector() {
     let mut m = Matrix::new_identity();
-    m.set_translate((10.0, 11.0).into());
+    m.set_translate((10.0, 11.0));
     assert_eq!(10.0, m.get_translate_x());
     assert_eq!(11.0, m.get_translate_y());
 }

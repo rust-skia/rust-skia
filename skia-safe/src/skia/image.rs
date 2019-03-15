@@ -332,9 +332,14 @@ impl RCHandle<SkImage> {
         unsafe { self.native().isOpaque() }
     }
 
-    pub fn as_shader(&self, tile_modes: Option<(ShaderTileMode, ShaderTileMode)>, local_matrix: Option<&Matrix>) -> Shader {
+    pub fn as_shader<
+        'a, TM: Into<Option<(ShaderTileMode, ShaderTileMode)>>,
+        OM: Into<Option<&'a Matrix>>>(
+        &self, tile_modes: TM, local_matrix: OM) -> Shader {
+        let tile_modes = tile_modes.into();
         let tm1 = tile_modes.map(|m| m.0).unwrap_or_default();
         let tm2 = tile_modes.map(|m| m.1).unwrap_or_default();
+        let local_matrix = local_matrix.into();
 
         Shader::from_ptr(unsafe {
             C_SkImage_makeShader(self.native(), tm1.into_native(), tm2.into_native(), local_matrix.native_ptr_or_null())
