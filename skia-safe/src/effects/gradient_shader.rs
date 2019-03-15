@@ -51,30 +51,6 @@ impl GradientShader {
         })
     }
 
-    pub fn linear_with_color_space<P: Into<Point>>(
-        points: (P, P),
-        colors: &[Color4f], color_space: &ColorSpace,
-        pos: Option<&[scalar]>,
-        mode: ShaderTileMode,
-        flags: GradientShaderFlags,
-        local_matrix: Option<&Matrix>) -> Option<Shader> {
-
-        assert!(pos.is_none() || (pos.unwrap().len() == colors.len()));
-        let points = [points.0.into(), points.1.into()];
-
-        Shader::from_ptr(unsafe {
-            C_SkGradientShader_MakeLinear2(
-                points.native().as_ptr(),
-                colors.native().as_ptr(),
-                color_space.shared_native(),
-                pos.as_ptr_or_null(),
-                colors.len().try_into().unwrap(),
-                mode.into_native(),
-                flags.bits(),
-                local_matrix.native_ptr_or_null())
-        })
-    }
-
     pub fn radial<'a, P: Into<Point>, C: Into<GradientShaderColors<'a>>>(
         center: P,
         radius: scalar,
