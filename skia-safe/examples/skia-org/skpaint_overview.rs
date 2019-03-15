@@ -28,7 +28,7 @@ pub fn draw(path: &PathBuf) {
     artifact::draw_canvas_256(&path, "19-dash-path-effect", draw_dash_path_effect);
     artifact::draw_canvas_256(&path, "20-discrete-path-effect", draw_discrete_path_effect);
     artifact::draw_canvas_256(&path, "21-compose-path-effect", draw_compose_path_effect);
-    artifact::draw_canvas_256(&path, "21-sum-path-effect", draw_sum_path_effect);
+    artifact::draw_canvas_256(&path, "22-sum-path-effect", draw_sum_path_effect);
 }
 
 fn draw_three_paints(canvas: &mut Canvas) {
