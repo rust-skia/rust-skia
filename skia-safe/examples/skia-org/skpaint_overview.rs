@@ -19,8 +19,8 @@ pub fn draw(path: &PathBuf) {
     artifact::draw_canvas_256(&path, "10-turbulence-perlin-noise-shader", draw_turbulence_perlin_noise_shader);
     artifact::draw_canvas_256(&path, "11-compose-shader", draw_compose_shader);
     artifact::draw_canvas_256(&path, "12-mask-filter", draw_mask_filter);
-    artifact::draw_canvas_256(&path, "13-color-filter", draw_color_filter);
-    artifact::draw_canvas_256(&path, "14-color-filter", draw_color_table_color_filter);
+    artifact::draw_canvas((256, 128), &path, "13-color-filter", draw_color_filter);
+    artifact::draw_canvas_256(&path, "14-table-color-filter", draw_color_table_color_filter);
     artifact::draw_canvas_256(&path, "15-path-2d-effect", draw_path_2d_effect);
     artifact::draw_canvas_256(&path, "16-line-2d-effect", draw_line_2d_effect);
     artifact::draw_canvas_256(&path, "17-path-1d-effect", draw_path_1d_effect);
