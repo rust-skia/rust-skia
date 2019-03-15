@@ -10,6 +10,12 @@ bitflags! {
     }
 }
 
+impl Default for GradientShaderFlags {
+    fn default() -> Self {
+        GradientShaderFlags::empty()
+    }
+}
+
 impl GradientShader {
 
     pub fn linear<'a, P: Into<Point>, C: Into<GradientShaderColors<'a>>>(
