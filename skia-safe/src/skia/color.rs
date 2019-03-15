@@ -78,6 +78,7 @@ impl Color {
         Self::from_argb(a, self.r(), self.g(), self.b())
     }
 
+    pub const TRANSPARENT: Self = Self(skia_bindings::SK_ColorTRANSPARENT);
     pub const BLACK: Self = Self(skia_bindings::SK_ColorBLACK);
     pub const DARK_GRAY: Self = Self(skia_bindings::SK_ColorDKGRAY);
     pub const GRAY: Self = Self(skia_bindings::SK_ColorLTGRAY);
