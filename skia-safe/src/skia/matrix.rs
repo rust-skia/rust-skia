@@ -114,13 +114,14 @@ impl Default for Matrix {
 
 impl Matrix {
 
-    pub fn new_scale(sx: scalar, sy: scalar) -> Matrix {
+    pub fn new_scale((sx, sy): (scalar, scalar)) -> Matrix {
         Matrix::from_native(unsafe {
             SkMatrix::MakeScale(sx, sy)
         })
     }
 
-    pub fn new_trans(d: Vector) -> Matrix {
+    pub fn new_trans<V: Into<Vector>>(d: V) -> Matrix {
+        let d = d.into();
         Matrix::from_native(unsafe {
             SkMatrix::MakeTrans(d.x, d.y)
         })
@@ -269,27 +270,32 @@ impl Matrix {
         self
     }
 
-    pub fn set_translate(&mut self, v: Vector) -> &mut Self {
+    pub fn set_translate<V: Into<Vector>>(&mut self, v: V) -> &mut Self {
+        let v = v.into();
         unsafe { self.native_mut().setTranslate(v.x, v.y) }
         self
     }
 
-    pub fn set_scale(&mut self, sx: scalar, sy: scalar, pivot: Point) -> &mut Self {
+    pub fn set_scale<OP: Into<Option<Point>>>(&mut self, (sx, sy): (scalar, scalar), pivot: OP) -> &mut Self {
+        let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().setScale(sx, sy, pivot.x, pivot.y) }
         self
     }
 
-    pub fn set_rotate(&mut self, degrees: scalar, pivot: Point) -> &mut Self {
+    pub fn set_rotate<OP: Into<Option<Point>>>(&mut self, degrees: scalar, pivot: OP) -> &mut Self {
+        let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().setRotate(degrees, pivot.x, pivot.y) }
         self
     }
 
-    pub fn set_sin_cos(&mut self, sin_value: scalar, cos_value: scalar, pivot: Point) -> &mut Self {
+    pub fn set_sin_cos<OP: Into<Option<Point>>>(&mut self, (sin_value, cos_value): (scalar, scalar), pivot: OP) -> &mut Self {
+        let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().setSinCos(sin_value, cos_value, pivot.x, pivot.y) }
         self
     }
 
-    pub fn set_skew(&mut self, kx: scalar, ky: scalar, pivot: Point) -> &mut Self {
+    pub fn set_skew<OP: Into<Option<Point>>>(&mut self, (kx, ky): (scalar, scalar), pivot: OP) -> &mut Self {
+        let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().setSkew(kx, ky, pivot.x, pivot.y) }
         self
     }
@@ -304,17 +310,20 @@ impl Matrix {
         self
     }
 
-    pub fn pre_scale(&mut self, sx: scalar, sy: scalar, pivot: Point) -> &mut Self {
+    pub fn pre_scale<OP: Into<Option<Point>>>(&mut self, (sx, sy): (scalar, scalar), pivot: OP) -> &mut Self {
+        let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().preScale(sx, sy, pivot.x, pivot.y) }
         self
     }
 
-    pub fn pre_rotate(&mut self, degrees: scalar, pivot: Point) -> &mut Self {
+    pub fn pre_rotate<OP: Into<Option<Point>>>(&mut self, degrees: scalar, pivot: OP) -> &mut Self {
+        let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().preRotate(degrees, pivot.x, pivot.y) }
         self
     }
 
-    pub fn pre_skew(&mut self, kx: scalar, ky: scalar, pivot: Point) -> &mut Self {
+    pub fn pre_skew<OP: Into<Option<Point>>>(&mut self, (kx, ky): (scalar, scalar), pivot: OP) -> &mut Self {
+        let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().preSkew(kx, ky, pivot.x, pivot.y) }
         self
     }
@@ -329,21 +338,24 @@ impl Matrix {
         self
     }
 
-    pub fn post_scale(&mut self, sx: scalar, sy: scalar, pivot: Point) -> &mut Self {
+    pub fn post_scale<OP: Into<Option<Point>>>(&mut self, (sx, sy): (scalar, scalar), pivot: OP) -> &mut Self {
+        let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().postScale(sx, sy, pivot.x, pivot.y) }
         self
     }
 
-    pub fn post_idiv(&mut self, div_x: i32, div_y: i32) -> bool {
+    pub fn post_idiv(&mut self, (div_x, div_y): (i32, i32)) -> bool {
         unsafe { self.native_mut().postIDiv(div_x, div_y) }
     }
 
-    pub fn post_rotate(&mut self, degrees: scalar, pivot: Point) -> &mut Self {
+    pub fn post_rotate<OP: Into<Option<Point>>>(&mut self, degrees: scalar, pivot: OP) -> &mut Self {
+        let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().postRotate(degrees, pivot.x, pivot.y) }
         self
     }
 
-    pub fn post_skew(&mut self, kx: scalar, ky: scalar, pivot: Point) -> &mut Self {
+    pub fn post_skew<OP: Into<Option<Point>>>(&mut self, (kx, ky): (scalar, scalar), pivot: OP) -> &mut Self {
+        let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().postSkew(kx, ky, pivot.x, pivot.y) }
         self
     }
@@ -424,11 +436,8 @@ impl Matrix {
         }
     }
 
-    pub fn map_xy(&self, x: scalar, y: scalar) -> Point {
-        Point::from_native(unsafe { self.native().mapXY1(x, y) })
-    }
-
-    pub fn map_point(&self, point: Point) -> Point {
+    pub fn map_point<P: Into<Point>>(&self, point: P) -> Point {
+        let point = point.into();
         Point::from_native(unsafe { self.native().mapXY1(point.x, point.y) })
     }
 
@@ -450,7 +459,8 @@ impl Matrix {
         }
     }
 
-    pub fn map_vector(&self, vec: Vector) -> Vector {
+    pub fn map_vector<V: Into<Vector>>(&self, vec: V) -> Vector {
+        let vec = vec.into();
         Vector::from_native(unsafe { self.native().mapVector1(vec.x, vec.y) })
     }
 
@@ -523,8 +533,9 @@ impl Matrix {
         self.native_mut().fTypeMask = 0x80;
     }
 
-    pub fn set_scale_translate(&mut self, sx: scalar, sy: scalar, tx: scalar, ty: scalar) -> &mut Self {
-        unsafe { self.native_mut().setScaleTranslate(sx, sy, tx, ty) }
+    pub fn set_scale_translate<V: Into<Vector>>(&mut self, (sx, sy): (scalar, scalar), t: V) -> &mut Self {
+        let t = t.into();
+        unsafe { self.native_mut().setScaleTranslate(sx, sy, t.x, t.y) }
         self
     }
 
