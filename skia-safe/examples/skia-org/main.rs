@@ -5,6 +5,7 @@ extern crate skia_safe;
 
 mod skcanvas_overview;
 mod skpath_overview;
+mod skpaint_overview;
 
 pub(crate) mod artifact {
     use skia_safe::skia::{Canvas, EncodedImageFormat, Surface};
@@ -14,7 +15,14 @@ pub(crate) mod artifact {
 
     pub fn draw_canvas_256<F>(path: &PathBuf, name: &str, func: F)
         where F: Fn(&mut Canvas) -> () {
-        let mut surface = Surface::new_raster_n32_premul((512, 512)).unwrap();
+
+        draw_canvas((256, 256), path, name, func)
+    }
+
+    pub fn draw_canvas<F>((width, height): (i32, i32), path: &PathBuf, name: &str, func: F)
+        where F: Fn(&mut Canvas) -> () {
+
+        let mut surface = Surface::new_raster_n32_premul((width*2, height*2)).unwrap();
         let mut canvas = surface.canvas();
         canvas.scale(2.0, 2.0);
         func(&mut canvas);
@@ -31,6 +39,7 @@ pub(crate) mod artifact {
         let bytes = data.bytes();
         file.write_all(bytes).expect("failed to write to file");
     }
+
 }
 
 fn main() {
@@ -47,4 +56,5 @@ fn main() {
 
     skcanvas_overview::draw(&out_path);
     skpath_overview::draw(&out_path);
+    skpaint_overview::draw(&out_path);
 }
