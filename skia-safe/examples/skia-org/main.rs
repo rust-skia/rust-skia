@@ -54,7 +54,7 @@ pub (crate) mod resources {
     }
 
     pub fn mandrill() -> Image {
-        let bytes = include_bytes!("resources/mandrill_256.png");
+        let bytes = include_bytes!("resources/mandrill_512.png");
         let data = Data::new_copy(bytes);
         Image::from_encoded(&data, None).unwrap()
     }
