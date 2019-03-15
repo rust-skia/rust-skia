@@ -3,9 +3,11 @@ use std::path::PathBuf;
 
 extern crate skia_safe;
 
+// TODO: think about making the examples more Rust-idiomatic, by using method chaining for Paint / Paths, for example.
+
 mod skcanvas_overview;
-mod skpath_overview;
 mod skpaint_overview;
+mod skpath_overview;
 
 pub(crate) mod artifact {
     use skia_safe::skia::{Canvas, EncodedImageFormat, Surface};
@@ -39,7 +41,23 @@ pub(crate) mod artifact {
         let bytes = data.bytes();
         file.write_all(bytes).expect("failed to write to file");
     }
+}
 
+pub (crate) mod resources {
+
+    use skia_safe::skia::{Image, Data};
+
+    pub fn color_wheel() -> Image {
+        let bytes = include_bytes!("resources/color_wheel.png");
+        let data = Data::new_copy(bytes);
+        Image::from_encoded(&data, None).unwrap()
+    }
+
+    pub fn mandrill() -> Image {
+        let bytes = include_bytes!("resources/mandrill_256.png");
+        let data = Data::new_copy(bytes);
+        Image::from_encoded(&data, None).unwrap()
+    }
 }
 
 fn main() {

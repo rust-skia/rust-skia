@@ -1,6 +1,6 @@
 use std::path::PathBuf;
-use crate::artifact;
-use skia_safe::skia::{Canvas, Path, scalar, Paint, Color, Rect, PaintStyle, BlendMode, RRect, Font, Typeface, Image, Data, TextBlob};
+use crate::{artifact, resources};
+use skia_safe::skia::{Canvas, Path, scalar, Paint, Color, Rect, PaintStyle, BlendMode, RRect, Font, Typeface, TextBlob};
 
 pub fn draw(path: &PathBuf) {
     let path = path.join("SkCanvas-Overview");
@@ -42,9 +42,7 @@ fn draw_rotated_rectangle(canvas: &mut Canvas) {
 
 fn draw_hello_skia(canvas: &mut Canvas) {
 
-    let bytes = include_bytes!("color_wheel.png");
-    let data = Data::new_copy(bytes);
-    let image = Image::from_encoded(&data, None).unwrap();
+    let image = resources::color_wheel();
 
     canvas.draw_color(Color::WHITE, BlendMode::default());
 
