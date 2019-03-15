@@ -47,3 +47,13 @@ jobs:
     displayName: Build all targets
   - script: cargo test --release -p skia-safe -vv
     displayName: Test skia-safe
+  - ${{ if ne(parameters.name, 'Windows') }}:
+    - script: cargo run --release --example skia-org ${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-org
+      displayName: Run skia-org Example
+  - ${{ if eq(parameters.name, 'Windows') }}:
+    - script: cargo run --release --example skia-org %BUILD_ARTIFACTSTAGINGDIRECTORY%/skia-org
+      displayName: Run skia-org Example
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)/skia-org'
+      artifactName: 'skia-org-examples-${{ parameters.name }}-$(rustup_toolchain)'
