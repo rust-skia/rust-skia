@@ -26,6 +26,12 @@ fn test_layout() {
     Color::test_layout();
 }
 
+impl From<u32> for Color {
+    fn from(c: u32) -> Self {
+        Color(c)
+    }
+}
+
 impl From<RGB> for Color {
     fn from(rgb: RGB) -> Self {
         Color::from_rgb(rgb.r, rgb.g, rgb.b)

@@ -160,7 +160,8 @@ impl Handle<SkPaint> {
         Color4f::from_native(unsafe { self.native().getColor4f() })
     }
 
-    pub fn set_color(&mut self, color: Color) -> &mut Self {
+    pub fn set_color<C: Into<Color>>(&mut self, color: C) -> &mut Self {
+        let color = color.into();
         unsafe { self.native_mut().setColor(color.into_native()) }
         self
     }

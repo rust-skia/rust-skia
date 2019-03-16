@@ -67,9 +67,9 @@ impl RCHandle<SkColorFilter> {
         })
     }
 
-    pub fn filter_color(&self, color: Color) -> Color {
+    pub fn filter_color<C: Into<Color>>(&self, color: C) -> Color {
         Color::from_native(unsafe {
-            self.native().filterColor(color.into_native())
+            self.native().filterColor(color.into().into_native())
         })
     }
 
@@ -80,9 +80,9 @@ impl RCHandle<SkColorFilter> {
         })
     }
 
-    pub fn new_mode_filter(c: Color, mode: BlendMode) -> Option<Self> {
+    pub fn new_mode_filter<C: Into<Color>>(c: C, mode: BlendMode) -> Option<Self> {
         ColorFilter::from_ptr(unsafe {
-            C_SkColorFilter_MakeModeFilter(c.native(), mode.native())
+            C_SkColorFilter_MakeModeFilter(c.into().native(), mode.native())
         })
     }
 

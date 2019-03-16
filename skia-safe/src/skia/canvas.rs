@@ -507,16 +507,16 @@ impl Canvas {
         r.is_empty().if_false_some(r)
     }
 
-    pub fn draw_color(&mut self, color: Color, mode: BlendMode) -> &mut Self {
+    pub fn draw_color<C: Into<Color>>(&mut self, color: C, mode: BlendMode) -> &mut Self {
         unsafe {
-            self.native_mut().drawColor(color.into_native(), mode.into_native())
+            self.native_mut().drawColor(color.into().into_native(), mode.into_native())
         }
         self
     }
 
-    pub fn clear(&mut self, color: Color) -> &mut Self {
+    pub fn clear<C: Into<Color>>(&mut self, color: C) -> &mut Self {
         unsafe {
-            self.native_mut().clear(color.into_native())
+            self.native_mut().clear(color.into().into_native())
         }
         self
     }
