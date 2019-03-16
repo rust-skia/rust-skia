@@ -391,6 +391,10 @@ extern "C" void C_SkCanvas_discard(SkCanvas* self) {
 
 #undef SkAutoCanvasRestore
 
+extern "C" void C_SkAutoCanvasRestore_construct(SkAutoCanvasRestore* uninitialized, SkCanvas* canvas, bool doSave) {
+    new(uninitialized) SkAutoCanvasRestore(canvas, doSave);
+}
+
 extern "C" void C_SkAutoCanvasRestore_destruct(const SkAutoCanvasRestore* self) {
     self->~SkAutoCanvasRestore();
 }
