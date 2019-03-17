@@ -2,15 +2,18 @@ use crate::prelude::*;
 use crate::skia::scalar;
 use skia_bindings::{
     SkFontMetrics,
-    SkFontMetrics_FontMetricsFlags
+    SkFontMetrics_FontMetricsFlags_kUnderlineThicknessIsValid_Flag,
+    SkFontMetrics_FontMetricsFlags_kUnderlinePositionIsValid_Flag,
+    SkFontMetrics_FontMetricsFlags_kStrikeoutThicknessIsValid_Flag,
+    SkFontMetrics_FontMetricsFlags_kStrikeoutPositionIsValid_Flag
 };
 
 bitflags! {
     pub struct FontMetricsFlags: u32 {
-        const UNDERLINE_THICKNESS_IS_VALID = SkFontMetrics_FontMetricsFlags::kUnderlineThicknessIsValid_Flag as _;
-        const UNDERLINE_POSITION_IS_VALID = SkFontMetrics_FontMetricsFlags::kUnderlinePositionIsValid_Flag as _;
-        const STRIKEOUT_THICKNESS_IS_VALID = SkFontMetrics_FontMetricsFlags::kStrikeoutThicknessIsValid_Flag as _;
-        const STRIKEOUT_POSITION_IS_VALID = SkFontMetrics_FontMetricsFlags::kStrikeoutPositionIsValid_Flag as _;
+        const UNDERLINE_THICKNESS_IS_VALID = SkFontMetrics_FontMetricsFlags_kUnderlineThicknessIsValid_Flag as _;
+        const UNDERLINE_POSITION_IS_VALID = SkFontMetrics_FontMetricsFlags_kUnderlinePositionIsValid_Flag as _;
+        const STRIKEOUT_THICKNESS_IS_VALID = SkFontMetrics_FontMetricsFlags_kStrikeoutThicknessIsValid_Flag as _;
+        const STRIKEOUT_POSITION_IS_VALID = SkFontMetrics_FontMetricsFlags_kStrikeoutPositionIsValid_Flag as _;
     }
 }
 

@@ -135,7 +135,9 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
 
     .default_enum_style(EnumVariation::Rust)
 
-    .constified_enum("SkMatrix_TypeMask")
+    .constified_enum(".*Mask")
+    .constified_enum(".*Flags")
+    .constified_enum("SkCanvas_SaveLayerFlagsSet")
 
     .whitelist_function("C_.*")
     .whitelist_function("SkColorTypeBytesPerPixel")

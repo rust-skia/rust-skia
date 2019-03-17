@@ -1,5 +1,4 @@
 use skia_bindings::{
-    SkMatrix_TypeMask,
     SkMatrix_TypeMask_kIdentity_Mask,
     SkMatrix_TypeMask_kAffine_Mask,
     SkMatrix_TypeMask_kTranslate_Mask,

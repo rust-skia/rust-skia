@@ -19,16 +19,16 @@ use skia_bindings::{
     SkBitmap,
     C_SkBitmap_Construct,
     C_SkBitmap_readyToDraw,
-    SkBitmap_AllocFlags,
     C_SkBitmap_tryAllocN32Pixels,
     C_SkBitmap_tryAllocPixels,
     C_SkBitmap_eraseARGB,
-    C_SkBitmap_extractAlpha
+    C_SkBitmap_extractAlpha,
+    SkBitmap_AllocFlags_kZeroPixels_AllocFlag
 };
 
 bitflags! {
     pub struct BitmapAllocFlags: u32 {
-        const ZERO_PIXELS = SkBitmap_AllocFlags::kZeroPixels_AllocFlag as u32;
+        const ZERO_PIXELS = SkBitmap_AllocFlags_kZeroPixels_AllocFlag as u32;
     }
 }
 

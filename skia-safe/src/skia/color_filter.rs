@@ -13,7 +13,6 @@ use skia_bindings::{
     C_SkColorFilter_MakeMatrixFilterRowMajor255,
     C_SkColorFilter_makeComposed,
     C_SkColorFilter_getFlags,
-    SkColorFilter_Flags,
     C_SkColorFilter_asComponentTable,
     C_SkColorFilter_asColorMatrix,
     C_SkColorFilter_asColorMode,
@@ -22,12 +21,13 @@ use skia_bindings::{
     C_SkColorFilter_MakeModeFilter,
     SkRefCntBase,
     SkColorFilter,
-    C_SkColorFilter_MakeSRGBToLinearGamma
+    C_SkColorFilter_MakeSRGBToLinearGamma,
+    SkColorFilter_Flags_kAlphaUnchanged_Flag
 };
 
 bitflags! {
     pub struct ColorFilterFlags: u32 {
-        const ALPHA_UNCHANGED = SkColorFilter_Flags::kAlphaUnchanged_Flag as u32;
+        const ALPHA_UNCHANGED = SkColorFilter_Flags_kAlphaUnchanged_Flag as u32;
     }
 }
 
