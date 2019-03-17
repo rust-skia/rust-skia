@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::skia::u8cpu;
-use std::ops::{Index,Mul,IndexMut};
+use std::ops::{Index, Mul, IndexMut, BitOr, BitAnd};
 use skia_bindings::{
     SkColor,
     SkRGBToHSV,
@@ -26,9 +26,51 @@ fn test_layout() {
     Color::test_layout();
 }
 
+impl From<u32> for Color {
+    fn from(c: u32) -> Self {
+        Color(c)
+    }
+}
+
 impl From<RGB> for Color {
     fn from(rgb: RGB) -> Self {
         Color::from_rgb(rgb.r, rgb.g, rgb.b)
+    }
+}
+
+//
+// Bitwise operators.
+//
+
+impl BitOr for Color {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        Color::from_native(self.native() | rhs.native())
+    }
+}
+
+impl BitAnd for Color {
+    type Output = Self;
+
+    fn bitand(self, rhs: Self) -> Self::Output {
+        Color::from_native(self.native() & rhs.native())
+    }
+}
+
+impl BitOr<u32> for Color {
+    type Output = Self;
+
+    fn bitor(self, rhs: u32) -> Self::Output {
+        self | (Color::from_native(rhs))
+    }
+}
+
+impl BitAnd<u32> for Color {
+    type Output = Self;
+
+    fn bitand(self, rhs: u32) -> Self::Output {
+        self & (Color::from_native(rhs))
     }
 }
 
@@ -78,6 +120,7 @@ impl Color {
         Self::from_argb(a, self.r(), self.g(), self.b())
     }
 
+    pub const TRANSPARENT: Self = Self(skia_bindings::SK_ColorTRANSPARENT);
     pub const BLACK: Self = Self(skia_bindings::SK_ColorBLACK);
     pub const DARK_GRAY: Self = Self(skia_bindings::SK_ColorDKGRAY);
     pub const GRAY: Self = Self(skia_bindings::SK_ColorLTGRAY);

@@ -28,11 +28,16 @@ pub enum MatrixScaleToFit {
 impl NativeTransmutable<SkMatrix_ScaleToFit> for MatrixScaleToFit {}
 #[test] fn test_matrix_scale_to_fit_layout() { MatrixScaleToFit::test_layout() }
 
-pub type Matrix = ValueHandle<SkMatrix>;
+#[derive(Copy, Clone)]
+#[repr(transparent)]
+pub struct Matrix(SkMatrix);
 
-impl NativePartialEq for SkMatrix {
+impl NativeTransmutable<SkMatrix> for Matrix {}
+#[test] fn test_matrix_layout() { Matrix::test_layout() }
+
+impl PartialEq for Matrix {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { skia_bindings::C_SkMatrix_Equals(self, rhs) }
+        unsafe { skia_bindings::C_SkMatrix_Equals(self.native(), rhs.native()) }
     }
 }
 
@@ -59,7 +64,7 @@ pub enum AffineMatrixMember {
     TransY = 5
 }
 
-impl Index<MatrixMember> for ValueHandle<SkMatrix> {
+impl Index<MatrixMember> for Matrix {
     type Output = scalar;
 
     fn index(&self, index: MatrixMember) -> &Self::Output {
@@ -67,7 +72,7 @@ impl Index<MatrixMember> for ValueHandle<SkMatrix> {
     }
 }
 
-impl Index<AffineMatrixMember> for ValueHandle<SkMatrix> {
+impl Index<AffineMatrixMember> for Matrix {
     type Output = scalar;
 
     fn index(&self, index: AffineMatrixMember) -> &Self::Output {
@@ -75,7 +80,7 @@ impl Index<AffineMatrixMember> for ValueHandle<SkMatrix> {
     }
 }
 
-impl Index<usize> for ValueHandle<SkMatrix> {
+impl Index<usize> for Matrix {
     type Output = scalar;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -83,38 +88,43 @@ impl Index<usize> for ValueHandle<SkMatrix> {
     }
 }
 
-impl IndexMut<MatrixMember> for ValueHandle<SkMatrix> {
+impl IndexMut<MatrixMember> for Matrix {
     fn index_mut(&mut self, index: MatrixMember) -> &mut Self::Output {
         self.index_mut(index as usize)
     }
 }
 
-impl IndexMut<AffineMatrixMember> for ValueHandle<SkMatrix> {
+impl IndexMut<AffineMatrixMember> for Matrix {
     fn index_mut(&mut self, index: AffineMatrixMember) -> &mut Self::Output {
         self.index_mut(index as usize)
     }
 }
 
-impl IndexMut<usize> for ValueHandle<SkMatrix> {
+impl IndexMut<usize> for Matrix {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         unsafe { &mut *C_SkMatrix_SubscriptMut(self.native_mut(), index) }
     }
 }
 
-impl Default for ValueHandle<SkMatrix> {
+impl Default for Matrix {
     fn default() -> Self {
         Matrix::new_identity()
     }
 }
 
-impl ValueHandle<SkMatrix> {
+impl Matrix {
 
-    pub fn new_scale(sx: scalar, sy: scalar) -> Matrix {
-        unsafe { SkMatrix::MakeScale(sx, sy) }.into_handle()
+    pub fn new_scale((sx, sy): (scalar, scalar)) -> Matrix {
+        Matrix::from_native(unsafe {
+            SkMatrix::MakeScale(sx, sy)
+        })
     }
 
-    pub fn new_trans(d: Vector) -> Matrix {
-        unsafe { SkMatrix::MakeTrans(d.x, d.y) }.into_handle()
+    pub fn new_trans<V: Into<Vector>>(d: V) -> Matrix {
+        let d = d.into();
+        Matrix::from_native(unsafe {
+            SkMatrix::MakeTrans(d.x, d.y)
+        })
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -122,11 +132,12 @@ impl ValueHandle<SkMatrix> {
         scale_x: scalar, skew_x: scalar, trans_x: scalar,
         skew_y: scalar, scale_y: scalar, trans_y: scalar,
         pers_0: scalar, pers_1: scalar, pers_2: scalar) -> Matrix {
-        unsafe { SkMatrix::MakeAll(
-            scale_x, skew_x, trans_x,
-            skew_y, scale_y, trans_y,
-            pers_0, pers_1, pers_2)
-        }.into_handle()
+        Matrix::from_native(unsafe {
+            SkMatrix::MakeAll(
+                scale_x, skew_x, trans_x,
+                skew_y, scale_y, trans_y,
+                pers_0, pers_1, pers_2)
+        })
     }
 
     pub fn get_type(&self) -> MatrixTypeMask {
@@ -259,27 +270,32 @@ impl ValueHandle<SkMatrix> {
         self
     }
 
-    pub fn set_translate(&mut self, v: Vector) -> &mut Self {
+    pub fn set_translate<V: Into<Vector>>(&mut self, v: V) -> &mut Self {
+        let v = v.into();
         unsafe { self.native_mut().setTranslate(v.x, v.y) }
         self
     }
 
-    pub fn set_scale(&mut self, sx: scalar, sy: scalar, pivot: Point) -> &mut Self {
+    pub fn set_scale<OP: Into<Option<Point>>>(&mut self, (sx, sy): (scalar, scalar), pivot: OP) -> &mut Self {
+        let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().setScale(sx, sy, pivot.x, pivot.y) }
         self
     }
 
-    pub fn set_rotate(&mut self, degrees: scalar, pivot: Point) -> &mut Self {
+    pub fn set_rotate<OP: Into<Option<Point>>>(&mut self, degrees: scalar, pivot: OP) -> &mut Self {
+        let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().setRotate(degrees, pivot.x, pivot.y) }
         self
     }
 
-    pub fn set_sin_cos(&mut self, sin_value: scalar, cos_value: scalar, pivot: Point) -> &mut Self {
+    pub fn set_sin_cos<OP: Into<Option<Point>>>(&mut self, (sin_value, cos_value): (scalar, scalar), pivot: OP) -> &mut Self {
+        let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().setSinCos(sin_value, cos_value, pivot.x, pivot.y) }
         self
     }
 
-    pub fn set_skew(&mut self, kx: scalar, ky: scalar, pivot: Point) -> &mut Self {
+    pub fn set_skew<OP: Into<Option<Point>>>(&mut self, (kx, ky): (scalar, scalar), pivot: OP) -> &mut Self {
+        let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().setSkew(kx, ky, pivot.x, pivot.y) }
         self
     }
@@ -294,17 +310,20 @@ impl ValueHandle<SkMatrix> {
         self
     }
 
-    pub fn pre_scale(&mut self, sx: scalar, sy: scalar, pivot: Point) -> &mut Self {
+    pub fn pre_scale<OP: Into<Option<Point>>>(&mut self, (sx, sy): (scalar, scalar), pivot: OP) -> &mut Self {
+        let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().preScale(sx, sy, pivot.x, pivot.y) }
         self
     }
 
-    pub fn pre_rotate(&mut self, degrees: scalar, pivot: Point) -> &mut Self {
+    pub fn pre_rotate<OP: Into<Option<Point>>>(&mut self, degrees: scalar, pivot: OP) -> &mut Self {
+        let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().preRotate(degrees, pivot.x, pivot.y) }
         self
     }
 
-    pub fn pre_skew(&mut self, kx: scalar, ky: scalar, pivot: Point) -> &mut Self {
+    pub fn pre_skew<OP: Into<Option<Point>>>(&mut self, (kx, ky): (scalar, scalar), pivot: OP) -> &mut Self {
+        let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().preSkew(kx, ky, pivot.x, pivot.y) }
         self
     }
@@ -319,21 +338,24 @@ impl ValueHandle<SkMatrix> {
         self
     }
 
-    pub fn post_scale(&mut self, sx: scalar, sy: scalar, pivot: Point) -> &mut Self {
+    pub fn post_scale<OP: Into<Option<Point>>>(&mut self, (sx, sy): (scalar, scalar), pivot: OP) -> &mut Self {
+        let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().postScale(sx, sy, pivot.x, pivot.y) }
         self
     }
 
-    pub fn post_idiv(&mut self, div_x: i32, div_y: i32) -> bool {
+    pub fn post_idiv(&mut self, (div_x, div_y): (i32, i32)) -> bool {
         unsafe { self.native_mut().postIDiv(div_x, div_y) }
     }
 
-    pub fn post_rotate(&mut self, degrees: scalar, pivot: Point) -> &mut Self {
+    pub fn post_rotate<OP: Into<Option<Point>>>(&mut self, degrees: scalar, pivot: OP) -> &mut Self {
+        let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().postRotate(degrees, pivot.x, pivot.y) }
         self
     }
 
-    pub fn post_skew(&mut self, kx: scalar, ky: scalar, pivot: Point) -> &mut Self {
+    pub fn post_skew<OP: Into<Option<Point>>>(&mut self, (kx, ky): (scalar, scalar), pivot: OP) -> &mut Self {
+        let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().postSkew(kx, ky, pivot.x, pivot.y) }
         self
     }
@@ -414,11 +436,8 @@ impl ValueHandle<SkMatrix> {
         }
     }
 
-    pub fn map_xy(&self, x: scalar, y: scalar) -> Point {
-        Point::from_native(unsafe { self.native().mapXY1(x, y) })
-    }
-
-    pub fn map_point(&self, point: Point) -> Point {
+    pub fn map_point<P: Into<Point>>(&self, point: P) -> Point {
+        let point = point.into();
         Point::from_native(unsafe { self.native().mapXY1(point.x, point.y) })
     }
 
@@ -440,7 +459,8 @@ impl ValueHandle<SkMatrix> {
         }
     }
 
-    pub fn map_vector(&self, vec: Vector) -> Vector {
+    pub fn map_vector<V: Into<Vector>>(&self, vec: V) -> Vector {
+        let vec = vec.into();
         Vector::from_native(unsafe { self.native().mapVector1(vec.x, vec.y) })
     }
 
@@ -513,8 +533,9 @@ impl ValueHandle<SkMatrix> {
         self.native_mut().fTypeMask = 0x80;
     }
 
-    pub fn set_scale_translate(&mut self, sx: scalar, sy: scalar, tx: scalar, ty: scalar) -> &mut Self {
-        unsafe { self.native_mut().setScaleTranslate(sx, sy, tx, ty) }
+    pub fn set_scale_translate<V: Into<Vector>>(&mut self, (sx, sy): (scalar, scalar), t: V) -> &mut Self {
+        let t = t.into();
+        unsafe { self.native_mut().setScaleTranslate(sx, sy, t.x, t.y) }
         self
     }
 
@@ -535,7 +556,7 @@ impl IndexSet for Matrix {}
 
 lazy_static! {
     static ref IDENTITY : Matrix = Matrix::new_identity();
-    static ref INVALID : Matrix = unsafe { *SkMatrix::InvalidMatrix() }.into_handle();
+    static ref INVALID : Matrix = Matrix::from_native(unsafe { *SkMatrix::InvalidMatrix() });
 }
 
 #[test]
@@ -548,7 +569,7 @@ fn test_get_set_trait_compilation() {
 #[test]
 fn test_tuple_to_vector() {
     let mut m = Matrix::new_identity();
-    m.set_translate((10.0, 11.0).into());
+    m.set_translate((10.0, 11.0));
     assert_eq!(10.0, m.get_translate_x());
     assert_eq!(11.0, m.get_translate_y());
 }

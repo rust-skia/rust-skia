@@ -5,23 +5,23 @@ use std::env;
 use std::fs;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
-
+use bindgen::EnumVariation;
 use cc::Build;
 
 fn main() {
 
-    assert!(Command::new("git")
-      .arg("submodule")
-      .arg("init")
-      .stdout(Stdio::inherit())
-      .stderr(Stdio::inherit())
-      .status().unwrap().success(), "git submodule init fail");
+  assert!(Command::new("git")
+    .arg("submodule")
+    .arg("init")
+    .stdout(Stdio::inherit())
+    .stderr(Stdio::inherit())
+    .status().unwrap().success(), "git submodule init fail");
 
-    assert!(Command::new("git")
-      .args(&["submodule", "update", "--depth", "1"])
-      .stdout(Stdio::inherit())
-      .stderr(Stdio::inherit())
-      .status().unwrap().success(), "git submodule update fail");
+  assert!(Command::new("git")
+    .args(&["submodule", "update", "--depth", "1"])
+    .stdout(Stdio::inherit())
+    .stderr(Stdio::inherit())
+    .status().unwrap().success(), "git submodule update fail");
 
   assert!(Command::new("python")
     .arg("skia/tools/git-sync-deps")
@@ -105,36 +105,23 @@ fn main() {
   let current_dir_name = current_dir.to_str().unwrap();
 
   println!("cargo:rustc-link-search={}", &skia_out_dir);
-  println!("cargo:rustc-link-lib=static=skia");
-  println!("cargo:rustc-link-lib=static=skiabinding");
+  cargo::add_link_libs(&["static=skia", "static=skiabinding"]);
 
   let target = env::var("TARGET").unwrap();
   if target.contains("unknown-linux-gnu") {
-    println!("cargo:rustc-link-lib=stdc++");
-    println!("cargo:rustc-link-lib=bz2");
-    println!("cargo:rustc-link-lib=GL");
-    println!("cargo:rustc-link-lib=fontconfig");
-    println!("cargo:rustc-link-lib=freetype");
+    cargo::add_link_libs(&["stdc++", "bz2", "GL", "fontconfig", "freetype"]);
   } else if target.contains("eabi") {
-    println!("cargo:rustc-link-lib=stdc++");
-    println!("cargo:rustc-link-lib=GLESv2");
+    cargo::add_link_libs(&["stdc++", "GLESv2"]);
   } else if target.contains("apple-darwin") {
-    println!("cargo:rustc-link-lib=c++");
-    println!("cargo:rustc-link-lib=framework=OpenGL");
-    println!("cargo:rustc-link-lib=framework=ApplicationServices");
+    cargo::add_link_libs(&["c++", "framework=OpenGL", "framework=ApplicationServices"]);
   } else if target.contains("windows") {
     if target.contains("gnu") {
-      println!("cargo:rustc-link-lib=stdc++");
+      cargo::add_link_lib("stdc++");
     }
-    println!("cargo:rustc-link-lib=usp10");
-    println!("cargo:rustc-link-lib=ole32");
-    println!("cargo:rustc-link-lib=user32");
-    println!("cargo:rustc-link-lib=gdi32");
-    println!("cargo:rustc-link-lib=fontsub");
-
-    // required since GrContext::MakeVulkan is linked.
+    cargo::add_link_libs(&["usp10", "ole32", "user32", "gdi32", "fontsub"]);
+    // required as soon GrContext::MakeVulkan is linked.
     if cfg!(feature="vulkan") {
-      println!("cargo:rustc-link-lib=opengl32");
+      cargo::add_link_lib("opengl32");
     }
   }
 
@@ -145,6 +132,8 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
 
   let mut builder = bindgen::Builder::default()
     .generate_inline_functions(true)
+
+    .default_enum_style(EnumVariation::Rust)
 
     .whitelist_function("C_.*")
     .whitelist_function("SkColorTypeBytesPerPixel")
@@ -162,48 +151,20 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .whitelist_type("SkVector4")
     .whitelist_type("SkPictureRecorder")
     .whitelist_type("SkAutoCanvasRestore")
+
+    .whitelist_type("SkPath1DPathEffect")
+    .whitelist_type("SkLine2DPathEffect")
+    .whitelist_type("SkPath2DPathEffect")
+    .whitelist_type("SkCornerPathEffect")
+    .whitelist_type("SkDashPathEffect")
+    .whitelist_type("SkDiscretePathEffect")
+    .whitelist_type("SkGradientShader")
+    .whitelist_type("SkPerlinNoiseShader")
+    .whitelist_type("SkTableColorFilter")
+
     .whitelist_var("SK_Color.*")
     .use_core()
     .clang_arg("-std=c++14");
-
-  let enums = [
-    "GrMipMapped", "GrSurfaceOrigin",
-    "SkPaint_Flags", "SkPaint_Style", "SkPaint_Cap", "SkPaint_Join",
-    "SkGammaNamed",
-    "SkColorSpace_RenderTargetGamma", "SkColorSpace_Gamut",
-    "SkMatrix44_TypeMask", "SkMatrix_TypeMask", "SkMatrix_ScaleToFit",
-    "SkAlphaType", "SkColorType",
-    "SkYUVColorSpace",
-    "SkPixelGeometry",
-    "SkSurfaceProps_Flags",
-    "SkBitmap_AllocFlags",
-    "SkImage_BitDepth", "SkImage_CachingHint", "SkImage_CompressionType",
-    "SkColorChannel",
-    "SkYUVAIndex_Index",
-    "SkEncodedImageFormat",
-    "SkRRect_Type", "SkRRect_Corner",
-    "SkRegion_Op",
-    "SkFontMetrics_FontMetricsFlags",
-    "SkTypeface_SerializeBehavior", "SkTypeface_Encoding",
-    "SkFontStyle_Weight", "SkFontStyle_Width", "SkFontStyle_Slant",
-    "SkFont_Edging",
-    "SkTextEncoding",
-    "SkFontHinting",
-    "SkVertices_VertexMode", "SkVertices_BuilderFlags",
-    "SkPictureRecorder_RecordFlags",
-    "SkColorFilter_Flags",
-    "SkBlendMode",
-    "SkStrokeRec_InitStyle", "SkStrokeRec_Style",
-    "SkPathEffect_PointData_PointFlags", "SkPathEffect_DashType",
-    "SkBlurStyle",
-    "SkCoverageMode",
-    "SkFilterQuality",
-    "SkPath_Direction", "SkPath_FillType", "SkPath_Convexity", "SkPath_ArcSize", "SkPath_AddPathMode", "SkPath_SegmentMask", "SkPath_Verb",
-    "SkCanvas_SaveLayerFlagsSet", "SkCanvas_PointMode", "SkCanvas_SrcRectConstraint",
-    "SkClipOp"
-  ];
-
-  builder = enums.iter().fold(builder, |b, e| b.rustified_enum(e) );
 
   let mut cc_build = Build::new();
 
@@ -250,5 +211,13 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
 mod cargo {
   pub fn add_dependent_path(path: &str) {
     println!("cargo:rerun-if-changed={}", path);
+  }
+
+  pub fn add_link_libs<'a, L: IntoIterator<Item = &'a &'a str>>(libs: L) {
+    libs.into_iter().for_each(|s| add_link_lib(*s))
+  }
+
+  pub fn add_link_lib(lib: &str) {
+    println!("cargo:rustc-link-lib={}", lib);
   }
 }

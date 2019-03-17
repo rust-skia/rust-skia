@@ -1,24 +1,35 @@
+// core/
 #include "SkTypes.h"
 #include "SkCanvas.h"
 #include "SkColor.h"
+#include "SkColorFilter.h"
+#include "SkFont.h"
+#include "SkFontMetrics.h"
+#include "SkImageFilter.h"
 #include "SkImageInfo.h"
+#include "SkMaskFilter.h"
 #include "SkPaint.h"
 #include "SkPath.h"
+#include "SkPicture.h"
+#include "SkPictureRecorder.h"
+#include "SkPoint3.h"
 #include "SkRect.h"
 #include "SkSurface.h"
-#include "SkPicture.h"
 #include "SkYUVAIndex.h"
-#include "SkPoint3.h"
 #include "SkRegion.h"
-#include "SkFont.h"
-#include "SkTypeface.h"
-#include "SkFontMetrics.h"
-#include "SkPictureRecorder.h"
-#include "SkColorFilter.h"
 #include "SkStrokeRec.h"
-#include "SkMaskFilter.h"
-#include "SkImageFilter.h"
-
+#include "SkTextBlob.h"
+#include "SkTypeface.h"
+// effects/
+#include "Sk1DPathEffect.h"
+#include "Sk2DPathEffect.h"
+#include "SkCornerPathEffect.h"
+#include "SkDashPathEffect.h"
+#include "SkDiscretePathEffect.h"
+#include "SkGradientShader.h"
+#include "SkPerlinNoiseShader.h"
+#include "SkTableColorFilter.h"
+// gpu/
 #include "GrContext.h"
 
 #if defined(SK_VULKAN)
@@ -180,6 +191,10 @@ extern "C" SkImage* C_SkImage_MakeFromPicture(
     return SkImage::MakeFromPicture(spFromConst(picture), *dimensions, matrix, paint, bitDepth, spFromConst(colorSpace)).release();
 }
 
+extern "C" SkShader* C_SkImage_makeShader(const SkImage* self, SkShader::TileMode tileMode1, SkShader::TileMode tileMode2, const SkMatrix* localMatrix) {
+    return self->makeShader(tileMode1, tileMode2, localMatrix).release();
+}
+
 extern "C" void C_SkImage_getBackendTexture(
         const SkImage* self,
         bool flushPendingGrContextIO,
@@ -263,6 +278,10 @@ extern "C" void C_SkPaint_copy(SkPaint* self, const SkPaint* rhs) {
 
 extern "C" bool C_SkPaint_Equals(const SkPaint* lhs, const SkPaint* rhs) {
     return *lhs == *rhs;
+}
+
+extern "C" void C_SkPaint_setShader(SkPaint* self, const SkShader* shader) {
+    self->setShader(spFromConst(shader));
 }
 
 extern "C" void C_SkPaint_setColorFilter(SkPaint* self, const SkColorFilter* colorFilter) {
@@ -371,6 +390,10 @@ extern "C" void C_SkCanvas_discard(SkCanvas* self) {
 //
 
 #undef SkAutoCanvasRestore
+
+extern "C" void C_SkAutoCanvasRestore_construct(SkAutoCanvasRestore* uninitialized, SkCanvas* canvas, bool doSave) {
+    new(uninitialized) SkAutoCanvasRestore(canvas, doSave);
+}
 
 extern "C" void C_SkAutoCanvasRestore_destruct(const SkAutoCanvasRestore* self) {
     self->~SkAutoCanvasRestore();
@@ -634,6 +657,22 @@ extern "C" bool C_SkFontStyle_equals(const SkFontStyle* lhs, const SkFontStyle* 
 }
 
 //
+// SkTextBlob
+//
+
+extern "C" void C_SkTextBlob_ref(const SkTextBlob* self) {
+    self->ref();
+}
+
+extern "C" void C_SkTextBlob_unref(const SkTextBlob* self) {
+    self->unref();
+}
+
+extern "C" SkTextBlob* C_SkTextBlob_MakeFromText(const void* text, size_t byteLength, const SkFont* font, SkTextEncoding encoding) {
+    return SkTextBlob::MakeFromText(text, byteLength, *font, encoding).release();
+}
+
+//
 // SkTypeface
 //
 
@@ -878,6 +917,171 @@ extern "C" void C_SkSurface_getBackendTexture(
         GrBackendTexture* backendTexture) {
     *backendTexture = self->getBackendTexture(handleAccess);
 }
+
+//
+// SkShader
+//
+
+extern "C" bool C_SkShader_isOpaque(const SkShader* self) {
+    return self->isOpaque();
+}
+
+extern "C" SkShader::GradientType C_SkShader_asAGradient(const SkShader* self, SkShader::GradientInfo* info) {
+    return self->asAGradient(info);
+}
+
+extern "C" SkShader* C_SkShader_makeWithLocalMatrix(const SkShader* self, const SkMatrix* matrix) {
+    return self->makeWithLocalMatrix(*matrix).release();
+}
+
+extern "C" SkShader* C_SkShader_makeWithColorFilter(const SkShader* self, const SkColorFilter* colorFilter) {
+    return self->makeWithColorFilter(spFromConst(colorFilter)).release();
+}
+
+extern "C" SkShader* C_SkShader_MakeEmptyShader() {
+    return SkShader::MakeEmptyShader().release();
+}
+
+extern "C" SkShader* C_SkShader_MakeColorShader(SkColor color) {
+    return SkShader::MakeColorShader(color).release();
+}
+
+extern "C" SkShader* C_SkShader_MakeColorShader2(const SkColor4f* color, const SkColorSpace* colorSpace) {
+    return SkShader::MakeColorShader(*color, spFromConst(colorSpace)).release();
+}
+
+extern "C" SkShader* C_SkShader_MakeCompose(const SkShader* dst, const SkShader* src, SkBlendMode mode, float lerp) {
+    return SkShader::MakeCompose(spFromConst(dst), spFromConst(src), mode, lerp).release();
+}
+
+extern "C" SkShader* C_SkShader_MakeMixer(const SkShader* dst, const SkShader* src, float lerp) {
+    return SkShader::MakeMixer(spFromConst(dst), spFromConst(src), lerp).release();
+}
+
+extern "C" SkShader* C_SkShader_MakeBitmapShader(const SkBitmap* src, SkShader::TileMode tmx, SkShader::TileMode tmy, const SkMatrix* localMatrix) {
+    return SkShader::MakeBitmapShader(*src, tmx, tmy, localMatrix).release();
+}
+
+extern "C" SkShader* C_SkShader_MakePictureShader(const SkPicture* src, SkShader::TileMode tmx, SkShader::TileMode tmy, const SkMatrix* localMatrix, const SkRect* tile) {
+    return SkShader::MakePictureShader(spFromConst(src), tmx, tmy, localMatrix, tile).release();
+}
+
+extern "C" SkShader* C_SkShader_makeAsALocalMatrixShader(const SkShader* self, SkMatrix* localMatrix) {
+    return self->makeAsALocalMatrixShader(localMatrix).release();
+}
+
+//
+// SkGradientShader
+//
+
+extern "C" SkShader* C_SkGradientShader_MakeLinear(const SkPoint pts[2], const SkColor colors[], const SkScalar pos[], int count, SkShader::TileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
+    return SkGradientShader::MakeLinear(pts, colors, pos, count, mode, flags, localMatrix).release();
+}
+
+extern "C" SkShader* C_SkGradientShader_MakeLinear2(const SkPoint pts[2], const SkColor4f colors[], const SkColorSpace* colorSpace, const SkScalar pos[], int count, SkShader::TileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
+    return SkGradientShader::MakeLinear(pts, colors, spFromConst(colorSpace), pos, count, mode, flags, localMatrix).release();
+}
+
+extern "C" SkShader* C_SkGradientShader_MakeRadial(const SkPoint* center, SkScalar radius, const SkColor colors[], const SkScalar pos[], int count, SkShader::TileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
+    return SkGradientShader::MakeRadial(*center, radius, colors, pos, count, mode, flags, localMatrix).release();
+}
+
+extern "C" SkShader* C_SkGradientShader_MakeRadial2(const SkPoint* center, SkScalar radius, const SkColor4f colors[], const SkColorSpace* colorSpace, const SkScalar pos[], int count, SkShader::TileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
+    return SkGradientShader::MakeRadial(*center, radius, colors, spFromConst(colorSpace), pos, count, mode, flags, localMatrix).release();
+}
+
+extern "C" SkShader* C_SkGradientShader_MakeTwoPointConical(const SkPoint* start, SkScalar startRadius, const SkPoint* end, SkScalar endRadius, const SkColor colors[], const SkScalar pos[], int count, SkShader::TileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
+    return SkGradientShader::MakeTwoPointConical(*start, startRadius, *end, endRadius, colors, pos, count, mode, flags, localMatrix).release();
+}
+
+extern "C" SkShader* C_SkGradientShader_MakeTwoPointConical2(const SkPoint* start, SkScalar startRadius, const SkPoint* end, SkScalar endRadius, const SkColor4f colors[], const SkColorSpace* colorSpace, const SkScalar pos[], int count, SkShader::TileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
+    return SkGradientShader::MakeTwoPointConical(*start, startRadius, *end, endRadius, colors, spFromConst(colorSpace), pos, count, mode, flags, localMatrix).release();
+}
+
+extern "C" SkShader* C_SkGradientShader_MakeSweep(SkScalar cx, SkScalar cy, const SkColor colors[], const SkScalar pos[], int count, SkShader::TileMode mode, SkScalar startAngle, SkScalar endAngle, uint32_t flags, const SkMatrix* localMatrix) {
+    return SkGradientShader::MakeSweep(cx, cy, colors, pos, count, mode, startAngle, endAngle, flags, localMatrix).release();
+}
+
+extern "C" SkShader* C_SkGradientShader_MakeSweep2(SkScalar cx, SkScalar cy, const SkColor4f colors[], const SkColorSpace* colorSpace, const SkScalar pos[], int count, SkShader::TileMode mode, SkScalar startAngle, SkScalar endAngle, uint32_t flags, const SkMatrix* localMatrix) {
+    return SkGradientShader::MakeSweep(cx, cy, colors, spFromConst(colorSpace), pos, count, mode, startAngle, endAngle, flags, localMatrix).release();
+}
+
+//
+// SkPerlinNoiseShader
+//
+
+extern "C" SkShader* C_SkPerlinNoiseShader_MakeFractalNoise(SkScalar baseFrequencyX, SkScalar baseFrequencyY, int numOctaves, SkScalar seed, const SkISize* tileSize) {
+    return SkPerlinNoiseShader::MakeFractalNoise(baseFrequencyX, baseFrequencyY, numOctaves, seed, tileSize).release();
+}
+
+extern "C" SkShader* C_SkPerlinNoiseShader_MakeTurbulence(SkScalar baseFrequencyX, SkScalar baseFrequencyY, int numOctaves, SkScalar seed, const SkISize* tileSize) {
+    return SkPerlinNoiseShader::MakeTurbulence(baseFrequencyX, baseFrequencyY, numOctaves, seed, tileSize).release();
+}
+
+extern "C" SkShader* C_SkPerlinNoiseShader_MakeImprovedNoise(SkScalar baseFrequencyX, SkScalar baseFrequencyY, int numOctaves, SkScalar z) {
+    return SkPerlinNoiseShader::MakeImprovedNoise(baseFrequencyX, baseFrequencyY, numOctaves, z).release();
+}
+
+//
+// SkTableColorFilter
+//
+
+extern "C" SkColorFilter* C_SkTableColorFilter_Make(const uint8_t table[256]) {
+    return SkTableColorFilter::Make(table).release();
+}
+
+extern "C" SkColorFilter* C_SkTableColorFilter_MakeARGB(const uint8_t tableA[256], const uint8_t tableR[256], const uint8_t tableG[256], const uint8_t tableB[256]) {
+    return SkTableColorFilter::MakeARGB(tableA, tableR, tableG, tableB).release();
+}
+
+//
+// SkPath1DPathEffect
+//
+
+extern "C" SkPathEffect* C_SkPath1DPathEffect_Make(const SkPath* path, SkScalar advance, SkScalar phase, SkPath1DPathEffect::Style style) {
+    return SkPath1DPathEffect::Make(*path, advance, phase, style).release();
+}
+
+//
+// SkLine2DPathEffect
+//
+
+extern "C" SkPathEffect* C_SkLine2DPathEffect_Make(SkScalar width, const SkMatrix* matrix) {
+    return SkLine2DPathEffect::Make(width, *matrix).release();
+}
+
+//
+// SkPath2DPathEffect
+//
+
+extern "C" SkPathEffect* C_SkPath2DPathEffect_Make(const SkMatrix* matrix, const SkPath* path) {
+    return SkPath2DPathEffect::Make(*matrix, *path).release();
+}
+
+//
+// SkCornerPathEffect
+//
+
+extern "C" SkPathEffect* C_SkCornerPathEffect_Make(SkScalar radius) {
+    return SkCornerPathEffect::Make(radius).release();
+}
+
+//
+// SkDashPathEffect
+//
+
+extern "C" SkPathEffect* C_SkDashPathEffect_Make(const SkScalar intervals[], int count, SkScalar phase) {
+    return SkDashPathEffect::Make(intervals, count, phase).release();
+}
+
+//
+// SkDiscretePathEffect
+//
+
+extern "C" SkPathEffect* C_SkDiscretePathEffect_Make(SkScalar segLength, SkScalar dev, uint32_t seedAssist) {
+    return SkDiscretePathEffect::Make(segLength, dev, seedAssist).release();
+}
+
 
 #if defined(SK_VULKAN)
 
