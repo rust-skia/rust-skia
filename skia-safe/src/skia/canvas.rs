@@ -4,63 +4,9 @@ use std::slice;
 use std::ffi::CString;
 use crate::graphics;
 use crate::prelude::*;
-use crate::skia::{
-    IRect,
-    QuickReject,
-    Region,
-    RRect,
-    ClipOp,
-    Point,
-    scalar,
-    Vector,
-    Image,
-    ImageFilter,
-    Rect,
-    IPoint,
-    Surface,
-    Bitmap,
-    ISize,
-    SurfaceProps,
-    ImageInfo,
-    Path,
-    Paint,
-    Color,
-    Matrix,
-    BlendMode,
-    Font,
-    TextEncoding,
-    Picture,
-    Vertices,
-    VerticesBone,
-    Data
-};
-use skia_bindings::{
-    C_SkAutoCanvasRestore_destruct,
-    SkAutoCanvasRestore,
-    C_SkCanvas_isClipEmpty,
-    C_SkCanvas_discard,
-    SkCanvas_PointMode,
-    SkImage,
-    SkImageFilter,
-    SkPaint,
-    SkRect,
-    C_SkCanvas_getBaseLayerSize,
-    C_SkCanvas_imageInfo,
-    C_SkCanvas_newFromBitmapAndProps,
-    C_SkCanvas_newFromBitmap,
-    C_SkCanvas_newWidthHeightAndProps,
-    C_SkCanvas_newEmpty,
-    C_SkCanvas_MakeRasterDirect,
-    SkCanvas,
-    C_SkCanvas_delete,
-    C_SkCanvas_makeSurface,
-    C_SkCanvas_getGrContext,
-    SkCanvas_SaveLayerRec,
-    SkCanvas_SaveLayerFlagsSet,
-    SkMatrix,
-    SkCanvas_SrcRectConstraint,
-    C_SkAutoCanvasRestore_restore
-};
+use crate::skia::{IRect, QuickReject, Region, RRect, ClipOp, Point, scalar, Vector, Image, ImageFilter, Rect, IPoint, Surface, Bitmap, ISize, SurfaceProps, ImageInfo, Path, Paint, Color, Matrix, BlendMode, Font, TextEncoding, Picture, Vertices, VerticesBone, Data, TextBlob};
+use skia_bindings::{C_SkAutoCanvasRestore_destruct, SkAutoCanvasRestore, C_SkCanvas_isClipEmpty, C_SkCanvas_discard, SkCanvas_PointMode, SkImage, SkImageFilter, SkPaint, SkRect, C_SkCanvas_getBaseLayerSize, C_SkCanvas_imageInfo, C_SkCanvas_newFromBitmapAndProps, C_SkCanvas_newFromBitmap, C_SkCanvas_newWidthHeightAndProps, C_SkCanvas_newEmpty, C_SkCanvas_MakeRasterDirect, SkCanvas, C_SkCanvas_delete, C_SkCanvas_makeSurface, C_SkCanvas_getGrContext, SkCanvas_SaveLayerRec, SkCanvas_SaveLayerFlagsSet, SkMatrix, SkCanvas_SrcRectConstraint, C_SkAutoCanvasRestore_restore, C_SkAutoCanvasRestore_construct};
+use std::mem::uninitialized;
 
 bitflags! {
     pub struct SaveLayerFlags: u32 {
@@ -460,7 +406,7 @@ impl Canvas {
         self
     }
 
-    pub fn scale(&mut self, sx: scalar, sy: scalar) -> &mut Self {
+    pub fn scale(&mut self, (sx, sy): (scalar, scalar)) -> &mut Self {
         unsafe {
             self.native_mut().scale(sx, sy)
         }
@@ -479,7 +425,7 @@ impl Canvas {
         self
     }
 
-    pub fn skew(&mut self, sx: scalar, sy: scalar) -> &mut Self {
+    pub fn skew(&mut self, (sx, sy): (scalar, scalar)) -> &mut Self {
         unsafe {
             self.native_mut().skew(sx, sy)
         }
@@ -561,16 +507,16 @@ impl Canvas {
         r.is_empty().if_false_some(r)
     }
 
-    pub fn draw_color(&mut self, color: Color, mode: BlendMode) -> &mut Self {
+    pub fn draw_color<C: Into<Color>>(&mut self, color: C, mode: BlendMode) -> &mut Self {
         unsafe {
-            self.native_mut().drawColor(color.into_native(), mode.into_native())
+            self.native_mut().drawColor(color.into().into_native(), mode.into_native())
         }
         self
     }
 
-    pub fn clear(&mut self, color: Color) -> &mut Self {
+    pub fn clear<C: Into<Color>>(&mut self, color: C) -> &mut Self {
         unsafe {
-            self.native_mut().clear(color.into_native())
+            self.native_mut().clear(color.into().into_native())
         }
         self
     }
@@ -798,7 +744,12 @@ impl Canvas {
         self
     }
 
-    // TODO: drawTextBlob
+    pub fn draw_text_blob<P: Into<Point>>(&mut self, blob: &TextBlob, origin: P, paint: &Paint) {
+        let origin = origin.into();
+        unsafe {
+            self.native_mut().drawTextBlob(blob.native(), origin.x, origin.y, paint.native())
+        }
+    }
 
     pub fn draw_picture(&mut self, picture: &Picture, matrix: Option<&Matrix>, paint: Option<&Paint>) -> &mut Self {
         unsafe {
@@ -878,8 +829,9 @@ impl Canvas {
     }
 
     pub fn total_matrix(&self) -> &Matrix {
-        // TODO: make this official, transmutation of a Matrix is not actually supported.
-        unsafe { transmute_ref(&*self.native().getTotalMatrix()) }
+        Matrix::from_native_ref(unsafe {
+            &*self.native().getTotalMatrix()
+        })
     }
 
     //
@@ -919,38 +871,71 @@ impl QuickReject<Path> for Canvas {
     }
 }
 
-pub struct AutoCanvasRestore<'a>(SkAutoCanvasRestore, PhantomData<&'a ()>);
+/// A reference to a Canvas that restores the Canvas's state when
+/// it's being dropped.
+pub struct AutoRestoredCanvas<'a> {
+    canvas: &'a mut Canvas,
+    restore: SkAutoCanvasRestore,
+}
 
-impl<'a> NativeAccess<SkAutoCanvasRestore> for AutoCanvasRestore<'a> {
-    fn native(&self) -> &SkAutoCanvasRestore {
-        &self.0
-    }
-    fn native_mut(&mut self) -> &mut SkAutoCanvasRestore {
-        &mut self.0
+impl<'a> Deref for AutoRestoredCanvas<'a> {
+    type Target = Canvas;
+    fn deref(&self) -> &Self::Target {
+        self.canvas
     }
 }
 
-impl<'a> Drop for AutoCanvasRestore<'a> {
+impl<'a> DerefMut for AutoRestoredCanvas<'a> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.canvas
+    }
+}
+
+impl<'a> NativeAccess<SkAutoCanvasRestore> for AutoRestoredCanvas<'a> {
+    fn native(&self) -> &SkAutoCanvasRestore {
+        &self.restore
+    }
+
+    fn native_mut(&mut self) -> &mut SkAutoCanvasRestore {
+        &mut self.restore
+    }
+}
+
+impl<'a> Drop for AutoRestoredCanvas<'a> {
     fn drop(&mut self) {
         unsafe {
-            C_SkAutoCanvasRestore_destruct(&self.0)
+            C_SkAutoCanvasRestore_destruct(self.native_mut())
         }
     }
 }
 
-impl<'a> AutoCanvasRestore<'a> {
-    // TODO: test, scary looking lifetime requirements.
-    pub fn guard(canvas: &mut Canvas, do_save: bool) -> AutoCanvasRestore<'_> {
-        AutoCanvasRestore(unsafe {
-            SkAutoCanvasRestore::new(canvas.native_mut(), do_save)
-        }, PhantomData)
-    }
+impl<'a> AutoRestoredCanvas<'a> {
 
     pub fn restore(&mut self) {
         unsafe {
             // does not link:
             // self.native_mut().restore()
             C_SkAutoCanvasRestore_restore(self.native_mut())
+        }
+    }
+}
+
+pub enum AutoCanvasRestore {}
+
+impl AutoCanvasRestore {
+
+    pub fn guard(canvas: &mut Canvas, do_save: bool) -> AutoRestoredCanvas {
+        let restore = unsafe {
+            // does not link on Linux
+            // SkAutoCanvasRestore::new(canvas.native_mut(), do_save)
+            let mut acr : SkAutoCanvasRestore = uninitialized();
+            C_SkAutoCanvasRestore_construct(&mut acr, canvas.native_mut(), do_save);
+            acr
+        };
+
+        AutoRestoredCanvas {
+            canvas,
+            restore
         }
     }
 }

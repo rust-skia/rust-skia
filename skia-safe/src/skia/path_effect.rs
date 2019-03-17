@@ -101,6 +101,7 @@ impl NativeRefCountedBase for SkPathEffect {
 }
 
 impl RCHandle<SkPathEffect> {
+
     pub fn sum(first: &PathEffect, second: &PathEffect) -> PathEffect {
         PathEffect::from_ptr(unsafe {
             C_SkPathEffect_MakeSum(first.shared_native(), second.shared_native())
