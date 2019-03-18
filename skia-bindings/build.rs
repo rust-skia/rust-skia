@@ -96,12 +96,14 @@ fn main() {
     panic!("{:?}", String::from_utf8(output.stdout).unwrap());
   }
 
-  assert!(Command::new("ninja")
+  assert!(Command::new("depot_tools/ninja")
     .current_dir(PathBuf::from("./skia"))
     .args(&["-C", &skia_out_dir])
     .stdout(Stdio::inherit())
     .stderr(Stdio::inherit())
-    .status().unwrap().success(), "ninja error");
+    .status()
+    .expect("failed to run `ninja`, is the directory depot_tools/ available?")
+    .success(), "`ninja` returned an error, please check the output for details.");
 
   let current_dir = env::current_dir().unwrap();
   let current_dir_name = current_dir.to_str().unwrap();
