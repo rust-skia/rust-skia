@@ -10,6 +10,8 @@ use cc::Build;
 
 fn main() {
 
+  prerequisites::require_python();
+
   assert!(Command::new("git")
     .arg("submodule")
     .arg("init")
@@ -27,7 +29,7 @@ fn main() {
     .arg("skia/tools/git-sync-deps")
     .stdout(Stdio::inherit())
     .stderr(Stdio::inherit())
-    .status().unwrap().success(), "`skia/tools/git-sync-deps` failed (is python installed?)");
+    .status().unwrap().success(), "`skia/tools/git-sync-deps` failed");
 
   let gn_args = {
 
@@ -218,5 +220,17 @@ mod cargo {
 
   pub fn add_link_lib(lib: &str) {
     println!("cargo:rustc-link-lib={}", lib);
+  }
+}
+
+mod prerequisites {
+  use std::process::{Command, Stdio};
+
+  pub fn require_python() {
+    Command::new("python")
+    .arg("--version")
+    .stdout(Stdio::inherit())
+    .stderr(Stdio::inherit())
+    .status().expect(">>>>> Please install python to build this crate. <<<<<");
   }
 }
