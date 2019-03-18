@@ -6,7 +6,7 @@ use skia_bindings::{
     SkFontStyle_Slant,
     SkFontStyle,
     C_SkFontStyle_Construct,
-    C_SkFontStyle_equals
+    C_SkFontStyle_Equals
 };
 
 #[repr(transparent)]
@@ -75,7 +75,7 @@ impl NativeTransmutable<SkFontStyle> for FontStyle {}
 
 impl PartialEq for FontStyle {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { C_SkFontStyle_equals(self.native(), rhs.native()) }
+        unsafe { C_SkFontStyle_Equals(self.native(), rhs.native()) }
     }
 }
 

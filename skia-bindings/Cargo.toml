@@ -1,7 +1,7 @@
 [package]
 name = "skia-bindings"
-version = "0.2.0"
-authors = ["LongYinan <lynweklm@gmail.com>"]
+version = "0.3.0"
+authors = ["LongYinan <lynweklm@gmail.com>", "Armin Sander <armin@replicator.org>"]
 edition = "2018"
 build = "build.rs"
 links = "skia"

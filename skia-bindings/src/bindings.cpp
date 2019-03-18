@@ -391,7 +391,7 @@ extern "C" void C_SkCanvas_discard(SkCanvas* self) {
 
 #undef SkAutoCanvasRestore
 
-extern "C" void C_SkAutoCanvasRestore_construct(SkAutoCanvasRestore* uninitialized, SkCanvas* canvas, bool doSave) {
+extern "C" void C_SkAutoCanvasRestore_Construct(SkAutoCanvasRestore* uninitialized, SkCanvas* canvas, bool doSave) {
     new(uninitialized) SkAutoCanvasRestore(canvas, doSave);
 }
 
@@ -620,7 +620,7 @@ extern "C" void C_SkPicture_approximateBytesUsed(const SkPicture* self, size_t* 
 // SkRRect
 //
 
-extern "C" bool C_SkRRect_equals(const SkRRect* lhs, const SkRRect* rhs) {
+extern "C" bool C_SkRRect_Equals(const SkRRect* lhs, const SkRRect* rhs) {
     return *lhs == *rhs;
 }
 
@@ -640,7 +640,7 @@ extern "C" void C_SkRegion_destruct(SkRegion* region) {
     region->~SkRegion();
 }
 
-extern "C" bool C_SkRegion_equals(const SkRegion* lhs, const SkRegion* rhs) {
+extern "C" bool C_SkRegion_Equals(const SkRegion* lhs, const SkRegion* rhs) {
     return *lhs == *rhs;
 }
 
@@ -652,7 +652,7 @@ extern "C" void C_SkFontStyle_Construct(SkFontStyle* uninitialized) {
     new(uninitialized) SkFontStyle();
 }
 
-extern "C" bool C_SkFontStyle_equals(const SkFontStyle* lhs, const SkFontStyle* rhs) {
+extern "C" bool C_SkFontStyle_Equals(const SkFontStyle* lhs, const SkFontStyle* rhs) {
     return *lhs == *rhs;
 }
 
@@ -712,7 +712,7 @@ extern "C" void C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(SkFont* unini
     new(uninitialized) SkFont(spFromConst(typeface), size, scaleX, skewX);
 }
 
-extern "C" bool C_SkFont_equals(const SkFont* self, const SkFont* other) {
+extern "C" bool C_SkFont_Equals(const SkFont* self, const SkFont* other) {
     return *self == *other;
 }
 
@@ -1122,6 +1122,51 @@ extern "C" void C_GrVkBackendContext_Delete(void* vkBackendContext) {
 
 extern "C" GrContext* C_GrContext_MakeVulkan(const void* vkBackendContext) {
     return GrContext::MakeVulkan(*static_cast<const GrVkBackendContext*>(vkBackendContext)).release();
+}
+
+//
+// GrVkTypes.h
+//
+
+extern "C" void C_GrVkAlloc_Construct(GrVkAlloc* uninitialized, VkDeviceMemory memory, VkDeviceSize offset, VkDeviceSize size, uint32_t flags) {
+    new (uninitialized) GrVkAlloc(memory, offset, size, flags);
+}
+
+extern "C" bool C_GrVkAlloc_Equals(const GrVkAlloc* lhs, const GrVkAlloc* rhs) {
+    return *lhs == *rhs;
+}
+
+extern "C" void C_GrVkYcbcrConversionInfo_Construct(
+        GrVkYcbcrConversionInfo* uninitialized,
+        VkSamplerYcbcrModelConversion ycbcrModel,
+        VkSamplerYcbcrRange ycbcrRange,
+        VkChromaLocation xChromaOffset,
+        VkChromaLocation yChromaOffset,
+        VkFilter chromaFilter,
+        VkBool32 forceExplicitReconstruction,
+        uint64_t externalFormat,
+        VkFormatFeatureFlags externalFormatFeatures) {
+    new (uninitialized) GrVkYcbcrConversionInfo(ycbcrModel, ycbcrRange, xChromaOffset, yChromaOffset, chromaFilter, forceExplicitReconstruction, externalFormat, externalFormatFeatures);
+}
+
+extern "C" bool C_GrVkYcbcrConversionInfo_Equals(const GrVkYcbcrConversionInfo* lhs, const GrVkYcbcrConversionInfo* rhs) {
+    return *lhs == *rhs;
+}
+
+extern "C" void C_GrVkImageInfo_Construct(GrVkImageInfo* uninitialized,
+                VkImage image, const GrVkAlloc* alloc, VkImageTiling imageTiling, VkImageLayout layout,
+                VkFormat format, uint32_t levelCount,
+                uint32_t currentQueueFamily,
+                const GrVkYcbcrConversionInfo* ycbcrConversionInfo) {
+    new (uninitialized) GrVkImageInfo(image, *alloc, imageTiling, layout, format, levelCount, currentQueueFamily, *ycbcrConversionInfo);
+}
+
+extern "C" void C_GrVkImageInfo_updateImageLayout(GrVkImageInfo* self, VkImageLayout layout) {
+    self->updateImageLayout(layout);
+}
+
+extern "C" bool C_GrVkImageInfo_Equals(const GrVkImageInfo* lhs, const GrVkImageInfo* rhs) {
+    return *lhs == *rhs;
 }
 
 #endif

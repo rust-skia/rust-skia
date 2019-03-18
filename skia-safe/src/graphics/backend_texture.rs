@@ -1,8 +1,4 @@
 use crate::prelude::*;
-#[cfg(feature = "vulkan")]
-use std::mem;
-#[cfg(feature = "vulkan")]
-use skia_bindings::GrVkImageInfo;
 use skia_bindings::{GrBackendTexture, C_GrBackendTexture_destruct};
 
 #[cfg(feature = "vulkan")]
@@ -32,7 +28,7 @@ impl Handle<GrBackendTexture> {
             GrBackendTexture::new2(
                 width,
                 height,
-                &vk_info.native))
+                vk_info.native()))
             .unwrap()
     }
 
@@ -63,12 +59,9 @@ impl Handle<GrBackendTexture> {
     pub fn get_image_info(&self) -> Option<vulkan::ImageInfo> {
         unsafe {
             // constructor not available.
-            let mut image_info : GrVkImageInfo = mem::zeroed();
-            if self.native().getVkImageInfo(&mut image_info as _) {
-                Some(vulkan::ImageInfo::from_raw(image_info))
-            } else {
-                None
-            }
+            let mut image_info = vulkan::ImageInfo::default();
+            self.native().getVkImageInfo(image_info.native_mut())
+                .if_true_some(image_info)
         }
     }
 }

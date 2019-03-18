@@ -148,6 +148,7 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .constified_enum(".*Mask")
     .constified_enum(".*Flags")
     .constified_enum("SkCanvas_SaveLayerFlagsSet")
+    .constified_enum("GrVkAlloc_Flag")
 
     .whitelist_function("C_.*")
     .whitelist_function("SkColorTypeBytesPerPixel")
