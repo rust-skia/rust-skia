@@ -10,24 +10,26 @@ use cc::Build;
 
 fn main() {
 
+  prerequisites::require_python();
+
   assert!(Command::new("git")
     .arg("submodule")
     .arg("init")
     .stdout(Stdio::inherit())
     .stderr(Stdio::inherit())
-    .status().unwrap().success(), "git submodule init fail");
+    .status().unwrap().success(), "`git submodule init` failed");
 
   assert!(Command::new("git")
     .args(&["submodule", "update", "--depth", "1"])
     .stdout(Stdio::inherit())
     .stderr(Stdio::inherit())
-    .status().unwrap().success(), "git submodule update fail");
+    .status().unwrap().success(), "`git submodule update` failed");
 
   assert!(Command::new("python")
     .arg("skia/tools/git-sync-deps")
     .stdout(Stdio::inherit())
     .stderr(Stdio::inherit())
-    .status().unwrap().success(), "git sync deps fail");
+    .status().unwrap().success(), "`skia/tools/git-sync-deps` failed");
 
   let gn_args = {
 
@@ -94,12 +96,20 @@ fn main() {
     panic!("{:?}", String::from_utf8(output.stdout).unwrap());
   }
 
-  assert!(Command::new("ninja")
+  let ninja_command = if cfg!(windows) {
+    "depot_tools/ninja"
+  } else {
+    "../depot_tools/ninja"
+  };
+
+  assert!(Command::new(ninja_command)
     .current_dir(PathBuf::from("./skia"))
     .args(&["-C", &skia_out_dir])
     .stdout(Stdio::inherit())
     .stderr(Stdio::inherit())
-    .status().unwrap().success(), "ninja error");
+    .status()
+    .expect("failed to run `ninja`, is the directory depot_tools/ available?")
+    .success(), "`ninja` returned an error, please check the output for details.");
 
   let current_dir = env::current_dir().unwrap();
   let current_dir_name = current_dir.to_str().unwrap();
@@ -218,5 +228,17 @@ mod cargo {
 
   pub fn add_link_lib(lib: &str) {
     println!("cargo:rustc-link-lib={}", lib);
+  }
+}
+
+mod prerequisites {
+  use std::process::{Command, Stdio};
+
+  pub fn require_python() {
+    Command::new("python")
+    .arg("--version")
+    .stdout(Stdio::inherit())
+    .stderr(Stdio::inherit())
+    .status().expect(">>>>> Please install python to build this crate. <<<<<");
   }
 }
