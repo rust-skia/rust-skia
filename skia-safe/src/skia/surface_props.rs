@@ -55,29 +55,37 @@ impl Default for SurfacePropsFlags {
     }
 }
 
-pub type SurfaceProps = ValueHandle<SkSurfaceProps>;
+#[derive(Copy)]
+#[repr(transparent)]
+pub struct SurfaceProps(SkSurfaceProps);
 
-impl NativeClone for SkSurfaceProps {
+impl NativeTransmutable<SkSurfaceProps> for SurfaceProps {}
+
+impl Clone for SurfaceProps {
     fn clone(&self) -> Self {
-        unsafe { SkSurfaceProps::new3(self) }
+        Self::from_native(unsafe {
+            SkSurfaceProps::new3(self.native())
+        })
     }
 }
 
-impl NativePartialEq for SkSurfaceProps {
+impl PartialEq for SurfaceProps {
     fn eq(&self, other: &Self) -> bool {
-        unsafe { skia_bindings::C_SkSurfaceProps_Equals(self, other) }
+        unsafe {
+            skia_bindings::C_SkSurfaceProps_Equals(self.native(), other.native())
+        }
     }
 }
 
-impl Default for ValueHandle<SkSurfaceProps> {
+impl Default for SurfaceProps {
     fn default() -> Self {
         SurfaceProps::new(Default::default(), Default::default())
     }
 }
 
-impl ValueHandle<SkSurfaceProps> {
+impl SurfaceProps  {
     pub fn new(flags: SurfacePropsFlags, pixel_geometry: PixelGeometry) -> SurfaceProps {
-        SurfaceProps::from_native(unsafe {
+        Self::from_native(unsafe {
             SkSurfaceProps::new(flags.bits(), pixel_geometry.into_native())
         })
     }

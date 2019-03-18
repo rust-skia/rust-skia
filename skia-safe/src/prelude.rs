@@ -227,37 +227,16 @@ impl<H, N> IntoHandle<H> for N
     }
 }
 
-/// A representation type for a native type that has full Copy & Clone value semantics.
-#[repr(transparent)]
-#[derive(Copy, Clone)]
-pub struct ValueHandle<N: Clone>(N);
-
-impl<N: Clone> FromNative<N> for ValueHandle<N> {
-    fn from_native(n: N) -> ValueHandle<N> {
-        ValueHandle(n)
-    }
-}
-
-impl<N: Clone> NativeAccess<N> for ValueHandle<N> {
-    fn native(&self) -> &N {
-        &self.0
-    }
-
-    fn native_mut(&mut self) -> &mut N {
-        &mut self.0
-    }
-}
-
-impl<N: NativePartialEq + Clone> PartialEq for ValueHandle<N> {
-    fn eq(&self, rhs: &Self) -> bool {
-        self.native().eq(rhs.native())
-    }
-}
-
 /// Wraps a native type that can be represented as a value
 /// and needs a destructor.
 #[repr(transparent)]
 pub struct Handle<N: NativeDrop>(N);
+
+impl<N: NativeDrop> AsRef<Handle<N>> for Handle<N> {
+    fn as_ref(&self) -> &Self {
+        &self
+    }
+}
 
 impl<N: NativeDrop> FromNative<N> for Handle<N> {
     fn from_native(n: N) -> Handle<N> {
@@ -341,8 +320,43 @@ impl<H, N> NativePointerOrNullMut<N> for Option<&mut H>
     }
 }
 
+pub trait NativePointerOrNullMut2<N> {
+    fn native_ptr_or_null_mut(&mut self) -> *mut N;
+}
+
+pub trait NativePointerOrNull2<N> {
+    fn native_ptr_or_null(&self) -> *const N;
+}
+
+impl<H, N> NativePointerOrNull2<N> for Option<&H>
+    where H: NativeTransmutable<N>
+{
+    fn native_ptr_or_null(&self) -> *const N {
+        match self {
+            Some(handle) => handle.native(),
+            None => ptr::null()
+        }
+    }
+}
+
+impl<H, N> NativePointerOrNullMut2<N> for Option<&mut H>
+    where H: NativeTransmutable<N> {
+    fn native_ptr_or_null_mut(&mut self) -> *mut N {
+        match self {
+            Some(handle) => handle.native_mut(),
+            None => ptr::null_mut()
+        }
+    }
+}
+
 /// A representation type represented by a refcounted pointer to the native type.
 pub struct RCHandle<Native: NativeRefCounted>(*mut Native);
+
+impl<N: NativeRefCounted> AsRef<RCHandle<N>> for RCHandle<N> {
+    fn as_ref(&self) -> &Self {
+        &self
+    }
+}
 
 impl<N: NativeRefCounted> RCHandle<N> {
 
@@ -516,34 +530,40 @@ impl<T, I, O: Copy> IndexSetter<I, O> for T
     }
 }
 
-//
-// Native types that are represented with a rust type
-// _inplace_ with the same size and field layout.
-//
-
+/// Trait to use native types that as a rust type
+/// _inplace_ with the same size and field layout.
 pub trait NativeTransmutable<NT: Sized> : Sized {
+
+    /// Provides access to the native value through a
+    /// transmuted reference to the Rust value.
     fn native(&self) -> &NT {
         unsafe { transmute_ref(self) }
     }
 
+    /// Provides mutable access to the native value through a
+    /// transmuted reference to the Rust value.
     fn native_mut(&mut self) -> &mut NT {
         unsafe { transmute_ref_mut(self) }
     }
 
-    // TODO: this seems to actually copy, which is probably not what we want.
-    // TODO: this should only be possible for transmutable pairs that are
-    // both Copy
+    /// Copies the native value to an equivalent Rust value.
     fn from_native(nt: NT) -> Self {
         unsafe { mem::transmute_copy::<NT, Self>(&nt) }
     }
 
-    // TODO: this seems to actually copy, which is probably not what we want.
-    // TODO: this should only be possible for transmutable pairs that are
-    // both Copy
+    /// Copies the rust type to an equivalent instance of the native type.
     fn into_native(self) -> NT {
         unsafe { mem::transmute_copy::<Self, NT>(&self) }
     }
 
+    /// Provides access to the Rust value through a
+    /// transmuted reference to the native value.
+    fn from_native_ref(nt: &NT) -> &Self {
+        unsafe { transmute_ref(nt) }
+    }
+
+    /// Runs a test that proves that the native and the rust
+    /// type are of the same size.
     fn test_layout() {
         assert_eq!(mem::size_of::<Self>(), mem::size_of::<NT>());
     }
@@ -566,18 +586,18 @@ impl<NT, ElementT> NativeTransmutableSliceAccess<NT> for [ElementT]
     }
 }
 
-impl<NT, ElementT> NativeTransmutable<Option<NT>> for Option<ElementT>
-    where ElementT: NativeTransmutable<NT> {}
+impl<NT, RustT> NativeTransmutable<Option<NT>> for Option<RustT>
+    where RustT: NativeTransmutable<NT> {}
 
-impl<NT, ElementT> NativeTransmutable<Option<&[NT]>> for Option<&[ElementT]>
-    where ElementT: NativeTransmutable<NT> {}
+impl<NT, RustT> NativeTransmutable<Option<&[NT]>> for Option<&[RustT]>
+    where RustT: NativeTransmutable<NT> {}
 
 pub trait NativeTransmutableOptionSliceAccessMut<NT: Sized> {
     fn native_mut(&mut self) -> &mut Option<&mut [NT]>;
 }
 
-impl<NT, ElementT> NativeTransmutableOptionSliceAccessMut<NT> for Option<&mut [ElementT]>
-    where ElementT: NativeTransmutable<NT> {
+impl<NT, RustT> NativeTransmutableOptionSliceAccessMut<NT> for Option<&mut [RustT]>
+    where RustT: NativeTransmutable<NT> {
 
     fn native_mut(&mut self) -> &mut Option<&mut [NT]> {
         unsafe { transmute_ref_mut(self) }

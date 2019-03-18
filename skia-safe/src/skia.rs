@@ -123,6 +123,9 @@ pub use self::region::*;
 mod rrect;
 pub use self::rrect::*;
 
+mod shader;
+pub use self::shader::*;
+
 mod size;
 pub use self::size::*;
 
@@ -134,6 +137,9 @@ pub use self::surface::*;
 
 mod surface_props;
 pub use self::surface_props::*;
+
+mod text_blob;
+pub use self::text_blob::*;
 
 mod typeface;
 pub use self::typeface::*;

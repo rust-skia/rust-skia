@@ -38,23 +38,27 @@ pub enum RRectCorner {
 impl NativeTransmutable<SkRRect_Corner> for RRectCorner {}
 #[test] fn test_rrect_corner_layout() { RRectCorner::test_layout() }
 
-pub type RRect = ValueHandle<SkRRect>;
+#[derive(Copy, Clone)]
+#[repr(transparent)]
+pub struct RRect(SkRRect);
 
-impl NativePartialEq for SkRRect {
+impl NativeTransmutable<SkRRect> for RRect {}
+#[test] fn test_rrect_layout() { RRect::test_layout() }
+
+impl PartialEq for RRect {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { C_SkRRect_equals(self, rhs) }
+        unsafe { C_SkRRect_equals(self.native(), rhs.native()) }
     }
 }
 
-impl Default for ValueHandle<SkRRect> {
+impl Default for RRect {
     fn default() -> Self {
         // SkRRect::MakeEmpty does not link, so we use new().
-        unsafe { SkRRect::new() }
-            .into_handle()
+        RRect::from_native(unsafe { SkRRect::new() })
     }
 }
 
-impl ValueHandle<SkRRect> {
+impl RRect {
 
     pub fn get_type(&self) -> RRectType {
         RRectType::from_native(unsafe { self.native().getType() })
@@ -97,18 +101,21 @@ impl ValueHandle<SkRRect> {
     }
 
     pub fn new_rect<R: AsRef<Rect>>(rect: R) -> Self {
-        unsafe { SkRRect::MakeRect(rect.as_ref().native()) }
-            .into_handle()
+        Self::from_native(unsafe {
+            SkRRect::MakeRect(rect.as_ref().native())
+        })
     }
 
     pub fn new_oval<R: AsRef<Rect>>(oval: R) -> Self {
-        unsafe { SkRRect::MakeOval(oval.as_ref().native()) }
-            .into_handle()
+        Self::from_native(unsafe {
+            SkRRect::MakeOval(oval.as_ref().native())
+        })
     }
 
     pub fn new_rect_xy<R: AsRef<Rect>>(rect: R, x_rad: scalar, y_rad: scalar) -> Self {
-        unsafe { SkRRect::MakeRectXY(rect.as_ref().native(), x_rad, y_rad) }
-            .into_handle()
+        Self::from_native(unsafe {
+            SkRRect::MakeRectXY(rect.as_ref().native(), x_rad, y_rad)
+        })
     }
 
     pub fn new_nine_patch<R: AsRef<Rect>>(rect: R, left_rad: scalar, top_rad: scalar, right_rad: scalar, bottom_rad: scalar) -> Self {

@@ -85,17 +85,6 @@ impl PathEffectPointData {
     }
 }
 
-/*
-// TODO: why is this here?
-pub type DashType = EnumHandle<SkPathEffect_DashType>;
-
-#[allow(non_upper_case_globals)]
-impl EnumHandle<SkPathEffect_DashType> {
-    pub const None: Self = Self(SkPathEffect_DashType::kNone_DashType);
-    pub const Dash: Self = Self(SkPathEffect_DashType::kDash_DashType);
-}
-*/
-
 #[derive(Clone, PartialEq, Debug)]
 pub struct PathEffectDashInfo {
     pub intervals: Vec<scalar>,
@@ -112,6 +101,7 @@ impl NativeRefCountedBase for SkPathEffect {
 }
 
 impl RCHandle<SkPathEffect> {
+
     pub fn sum(first: &PathEffect, second: &PathEffect) -> PathEffect {
         PathEffect::from_ptr(unsafe {
             C_SkPathEffect_MakeSum(first.shared_native(), second.shared_native())

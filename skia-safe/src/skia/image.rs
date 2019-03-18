@@ -1,22 +1,6 @@
 use crate::prelude::*;
 use crate::graphics;
-use crate::skia::{
-    Picture,
-    Matrix,
-    ColorType,
-    ImageInfo,
-    Data,
-    Bitmap,
-    IRect,
-    YUVColorSpace,
-    AlphaType,
-    ColorSpace,
-    YUVAIndex,
-    ISize,
-    Paint,
-    EncodedImageFormat,
-    IPoint
-};
+use crate::skia::{Picture, Matrix, ColorType, ImageInfo, Data, Bitmap, IRect, YUVColorSpace, AlphaType, ColorSpace, YUVAIndex, ISize, Paint, EncodedImageFormat, IPoint, ShaderTileMode, Shader};
 use skia_bindings::{
     C_SkImage_MakeFromPicture,
     C_SkImage_MakeFromTexture,
@@ -43,7 +27,8 @@ use skia_bindings::{
     C_SkImage_makeNonTextureImage,
     C_SkImage_makeRasterImage,
     C_SkImage_makeColorSpace,
-    SkRefCntBase
+    SkRefCntBase,
+    C_SkImage_makeShader
 };
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -345,6 +330,20 @@ impl RCHandle<SkImage> {
 
     pub fn is_opaque(&self) -> bool {
         unsafe { self.native().isOpaque() }
+    }
+
+    pub fn as_shader<
+        'a, TM: Into<Option<(ShaderTileMode, ShaderTileMode)>>,
+        OM: Into<Option<&'a Matrix>>>(
+        &self, tile_modes: TM, local_matrix: OM) -> Shader {
+        let tile_modes = tile_modes.into();
+        let tm1 = tile_modes.map(|m| m.0).unwrap_or_default();
+        let tm2 = tile_modes.map(|m| m.1).unwrap_or_default();
+        let local_matrix = local_matrix.into();
+
+        Shader::from_ptr(unsafe {
+            C_SkImage_makeShader(self.native(), tm1.into_native(), tm2.into_native(), local_matrix.native_ptr_or_null())
+        }).unwrap()
     }
 
     pub fn is_texture_backed(&self) -> bool {

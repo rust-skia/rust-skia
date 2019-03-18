@@ -425,27 +425,27 @@ impl Handle<SkPath> {
             .if_true_some((rects, dirs))
     }
 
-    // TODO: add some convenience overloads (but how?)
-    // current idea is to combine dir _and_ start into one option.
-    pub fn add_rect(&mut self, rect: &Rect, dir: PathDirection, start: usize) -> &mut Self {
+    pub fn add_rect(&mut self, rect: &Rect, dir_start: Option<(PathDirection, usize)>) -> &mut Self {
+        let dir = dir_start.map(|ds| ds.0).unwrap_or_default();
+        let start = dir_start.map(|ds| ds.1).unwrap_or_default();
         unsafe {
             self.native_mut().addRect1(rect.native(), dir.into_native(), start.try_into().unwrap())
         };
         self
     }
 
-    // TODO: add some convience overloads (but how?)
-    // current idea is to combine dir _and_ start into one option.
-    pub fn add_oval(&mut self, oval: &Rect, dir: PathDirection, start: usize) -> &mut Self {
+    pub fn add_oval(&mut self, oval: &Rect, dir_start: Option<(PathDirection, usize)>) -> &mut Self {
+        let dir = dir_start.map(|ds| ds.0).unwrap_or_default();
+        let start = dir_start.map(|ds| ds.1).unwrap_or_default();
         unsafe {
             self.native_mut().addOval1(oval.native(), dir.into_native(), start.try_into().unwrap())
         };
         self
     }
 
-    // TODO: make path direction optional, or add a _direction variant.
-    pub fn add_circle<P: Into<Point>>(&mut self, p: P, radius: scalar, dir: PathDirection) -> &mut Self {
+    pub fn add_circle<P: Into<Point>>(&mut self, p: P, radius: scalar, dir: Option<PathDirection>) -> &mut Self {
         let p = p.into();
+        let dir = dir.unwrap_or_default();
         unsafe {
             self.native_mut().addCircle(p.x, p.y, radius, dir.into_native())
         };
@@ -461,16 +461,17 @@ impl Handle<SkPath> {
 
     // decided to use the simpler variant of the two, if more radii need to be specified,
     // add_rrect can be used.
-    // TODO: dir
-    pub fn add_round_rect(&mut self, rect: &Rect, rx: scalar, ry: scalar, dir: PathDirection) -> &mut Self {
+    pub fn add_round_rect(&mut self, rect: &Rect, (rx, ry): (scalar, scalar), dir: Option<PathDirection>) -> &mut Self {
+        let dir = dir.unwrap_or_default();
         unsafe {
             self.native_mut().addRoundRect(rect.native(), rx, ry, dir.into_native())
         };
         self
     }
 
-    // TODO: dir / start
-    pub fn add_rrect(&mut self, rrect: &RRect, dir: PathDirection, start: usize) -> &mut Self {
+    pub fn add_rrect(&mut self, rrect: &RRect, dir_start: Option<(PathDirection, usize)>) -> &mut Self {
+        let dir = dir_start.map(|ds| ds.0).unwrap_or_default();
+        let start = dir_start.map(|ds| ds.1).unwrap_or_default();
         unsafe {
             self.native_mut().addRRect1(rrect.native(), dir.into_native(), start.try_into().unwrap())
         };
