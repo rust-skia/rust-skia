@@ -15,19 +15,19 @@ fn main() {
     .arg("init")
     .stdout(Stdio::inherit())
     .stderr(Stdio::inherit())
-    .status().unwrap().success(), "git submodule init fail");
+    .status().unwrap().success(), "`git submodule init` failed");
 
   assert!(Command::new("git")
     .args(&["submodule", "update", "--depth", "1"])
     .stdout(Stdio::inherit())
     .stderr(Stdio::inherit())
-    .status().unwrap().success(), "git submodule update fail");
+    .status().unwrap().success(), "`git submodule update` failed");
 
   assert!(Command::new("python")
     .arg("skia/tools/git-sync-deps")
     .stdout(Stdio::inherit())
     .stderr(Stdio::inherit())
-    .status().unwrap().success(), "git sync deps fail");
+    .status().unwrap().success(), "`skia/tools/git-sync-deps` failed (is python installed?)");
 
   let gn_args = {
 
