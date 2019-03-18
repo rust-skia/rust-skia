@@ -96,7 +96,13 @@ fn main() {
     panic!("{:?}", String::from_utf8(output.stdout).unwrap());
   }
 
-  assert!(Command::new("depot_tools/ninja")
+  let ninja_command = if cfg!(windows) {
+    "depot_tools/ninja"
+  } else {
+    "../depot_tools/ninja"
+  };
+
+  assert!(Command::new(ninja_command)
     .current_dir(PathBuf::from("./skia"))
     .args(&["-C", &skia_out_dir])
     .stdout(Stdio::inherit())
