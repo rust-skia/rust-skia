@@ -39,7 +39,7 @@ jobs:
   - script: |
         rustc -Vv
         cargo -V
-        ninja --version
+        skia-bindings/depot_tools/ninja --version
     displayName: Print versions
   - script: cargo build --release --all-targets -vv
     displayName: Build all targets
