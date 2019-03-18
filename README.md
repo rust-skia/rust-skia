@@ -14,7 +14,7 @@ This project attempts to provide _up to date_ safe bindings that bridge between 
 
 `cargo build -vv`
 
-Just kidding, we wish it were that simple. Currently you need _at least_ to install LLVM, Python, depot_tools, and OpenGL libraries. For detailed information about how to install the prerequisites on your platform, take a look at the [template we use to build on Azure](https://github.com/rust-skia/rust-skia/blob/master/azure-pipelines-template.yml).
+Just kidding, we wish it were that simple. Currently you need _at least_ to install LLVM, Python, and OpenGL libraries. For detailed information about how to install the prerequisites on your platform, take a look at the [template we use to build on Azure](https://github.com/rust-skia/rust-skia/blob/master/azure-pipelines-template.yml).
 
 Please share your build experience so that we can try to automate the build to get to the point where `cargo build` _is_ sufficient to build the bindings _including_ Skia, and if that is not possible, clearly prompts to what's missing.
 
