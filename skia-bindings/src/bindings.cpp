@@ -926,6 +926,10 @@ extern "C" bool C_SkShader_isOpaque(const SkShader* self) {
     return self->isOpaque();
 }
 
+extern "C" bool C_SkShader_isAImage(const SkShader* self) {
+    return self->isAImage();
+}
+
 extern "C" SkShader::GradientType C_SkShader_asAGradient(const SkShader* self, SkShader::GradientInfo* info) {
     return self->asAGradient(info);
 }
