@@ -13,7 +13,7 @@ use crate::skia::{
 };
 use skia_bindings::{
     SkMatrix_ScaleToFit,
-    SkMatrix,
+    SkMatrix, C_SkMatrix_SubscriptMut
 };
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -102,7 +102,7 @@ impl IndexMut<AffineMatrixMember> for Matrix {
 
 impl IndexMut<usize> for Matrix {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        self.native_mut().fMat.index_mut(index)
+        unsafe { &mut *C_SkMatrix_SubscriptMut(self.native_mut(), index) }
     }
 }
 
@@ -572,4 +572,12 @@ fn test_tuple_to_vector() {
     m.set_translate((10.0, 11.0));
     assert_eq!(10.0, m.get_translate_x());
     assert_eq!(11.0, m.get_translate_y());
+}
+
+#[test]
+fn setting_a_matrix_component_recomputes_typemask() {
+    let mut m = Matrix::default();
+    assert_eq!(MatrixTypeMask::IDENTITY, m.get_type());
+    m.set_persp_x(0.1);
+    assert_eq!(MatrixTypeMask::TRANSLATE | MatrixTypeMask::SCALE | MatrixTypeMask::AFFINE | MatrixTypeMask:: PERSPECTIVE, m.get_type());
 }

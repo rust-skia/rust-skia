@@ -5,18 +5,28 @@ use std::hash::{
 };
 use crate::prelude::*;
 use crate::skia::{Color, FontHinting, FilterQuality, Color4f, ColorSpace, scalar, Path, Rect, ColorFilter, BlendMode, PathEffect, MaskFilter, Shader};
-use skia_bindings::{C_SkPaint_setMaskFilter, C_SkPaint_setPathEffect, C_SkPaint_setColorFilter, SkPaint_Cap, SkPaint, C_SkPaint_destruct, SkPaint_Style, SkPaint_Flags, SkPaint_Join, C_SkPaint_Equals, C_SkPaint_setShader};
+use skia_bindings::{C_SkPaint_setMaskFilter, C_SkPaint_setPathEffect, C_SkPaint_setColorFilter, SkPaint_Cap, SkPaint, C_SkPaint_destruct, SkPaint_Style, SkPaint_Join, C_SkPaint_Equals, C_SkPaint_setShader};
+use skia_bindings::{
+    SkPaint_Flags_kAntiAlias_Flag,
+    SkPaint_Flags_kDither_Flag,
+    SkPaint_Flags_kFakeBoldText_Flag,
+    SkPaint_Flags_kLinearText_Flag,
+    SkPaint_Flags_kSubpixelText_Flag,
+    SkPaint_Flags_kLCDRenderText_Flag,
+    SkPaint_Flags_kEmbeddedBitmapText_Flag,
+    SkPaint_Flags_kAutoHinting_Flag
+};
 
 bitflags! {
     pub struct PaintFlags: u32 {
-        const ANTI_ALIAS = SkPaint_Flags::kAntiAlias_Flag as _;
-        const DITHER = SkPaint_Flags::kDither_Flag as _;
-        const FAKE_BOLD_TEXT = SkPaint_Flags::kFakeBoldText_Flag as _;
-        const LINEAR_TEXT = SkPaint_Flags::kLinearText_Flag as _;
-        const SUBPIXEL_TEXT = SkPaint_Flags::kSubpixelText_Flag as _;
-        const LCD_RENDER_TEXT = SkPaint_Flags::kLCDRenderText_Flag as _;
-        const EMBEDDED_BITMAP_TEXT = SkPaint_Flags::kEmbeddedBitmapText_Flag as _;
-        const AUTO_HINTING = SkPaint_Flags::kAutoHinting_Flag as _;
+        const ANTI_ALIAS = SkPaint_Flags_kAntiAlias_Flag as _;
+        const DITHER = SkPaint_Flags_kDither_Flag as _;
+        const FAKE_BOLD_TEXT = SkPaint_Flags_kFakeBoldText_Flag as _;
+        const LINEAR_TEXT = SkPaint_Flags_kLinearText_Flag as _;
+        const SUBPIXEL_TEXT = SkPaint_Flags_kSubpixelText_Flag as _;
+        const LCD_RENDER_TEXT = SkPaint_Flags_kLCDRenderText_Flag as _;
+        const EMBEDDED_BITMAP_TEXT = SkPaint_Flags_kEmbeddedBitmapText_Flag as _;
+        const AUTO_HINTING = SkPaint_Flags_kAutoHinting_Flag as _;
     }
 }
 

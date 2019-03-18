@@ -135,6 +135,10 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
 
     .default_enum_style(EnumVariation::Rust)
 
+    .constified_enum(".*Mask")
+    .constified_enum(".*Flags")
+    .constified_enum("SkCanvas_SaveLayerFlagsSet")
+
     .whitelist_function("C_.*")
     .whitelist_function("SkColorTypeBytesPerPixel")
     .whitelist_function("SkColorTypeIsAlwaysOpaque")
@@ -182,11 +186,6 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
   }
 
   if cfg!(feature="vulkan") {
-	builder = builder
-      .rustified_enum("VkImageTiling")
-      .rustified_enum("VkImageLayout")
-      .rustified_enum("VkFormat");
-	
     cc_build.define("SK_VULKAN", "1");
     builder = builder.clang_arg("-DSK_VULKAN");
     cc_build.define("SKIA_IMPLEMENTATION", "1");

@@ -12,7 +12,6 @@ use crate::skia::{
 };
 use skia_bindings::{
     SkPathEffect_PointData,
-    SkPathEffect_PointData_PointFlags,
     C_SkPathEffect_MakeCompose,
     C_SkPathEffect_MakeSum,
     SkRefCntBase,
@@ -20,14 +19,17 @@ use skia_bindings::{
     C_SkPathEffect_PointData_Construct,
     C_SkPathEffect_PointData_deletePoints,
     SkPathEffect_DashInfo,
-    SkPathEffect_DashType
+    SkPathEffect_DashType,
+    SkPathEffect_PointData_PointFlags_kCircles_PointFlag,
+    SkPathEffect_PointData_PointFlags_kUsePath_PointFlag,
+    SkPathEffect_PointData_PointFlags_kUseClip_PointFlag
 };
 
 bitflags! {
     pub struct PointDataPointFlags: u32 {
-        const CIRCLES = SkPathEffect_PointData_PointFlags::kCircles_PointFlag as _;
-        const USE_PATH = SkPathEffect_PointData_PointFlags::kUsePath_PointFlag as _;
-        const USE_CLIP = SkPathEffect_PointData_PointFlags::kUseClip_PointFlag as _;
+        const CIRCLES = SkPathEffect_PointData_PointFlags_kCircles_PointFlag as _;
+        const USE_PATH = SkPathEffect_PointData_PointFlags_kUsePath_PointFlag as _;
+        const USE_CLIP = SkPathEffect_PointData_PointFlags_kUseClip_PointFlag as _;
     }
 }
 

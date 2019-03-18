@@ -2,7 +2,7 @@ use crate::prelude::*;
 use skia_bindings::{
     SkPixelGeometry,
     SkSurfaceProps,
-    SkSurfaceProps_Flags
+    SkSurfaceProps_Flags_kUseDeviceIndependentFonts_Flag
 };
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -45,7 +45,7 @@ impl Default for PixelGeometry {
 bitflags! {
     pub struct SurfacePropsFlags: u32 {
         const USE_DEVICE_INDEPENDENT_FONTS =
-            (SkSurfaceProps_Flags::kUseDeviceIndependentFonts_Flag) as u32;
+            SkSurfaceProps_Flags_kUseDeviceIndependentFonts_Flag as u32;
     }
 }
 

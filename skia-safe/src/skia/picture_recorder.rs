@@ -9,14 +9,14 @@ use crate::skia::{
 use skia_bindings::{
     C_SkPictureRecorder_finishRecordingAsPicture,
     C_SkPictureRecorder_destruct,
-    SkPictureRecorder_RecordFlags,
     SkPictureRecorder,
-    SkRect
+    SkRect,
+    SkPictureRecorder_RecordFlags_kPlaybackDrawPicture_RecordFlag
 };
 
 bitflags! {
     pub struct PictureRecorderRecordFlags: u32 {
-        const PLAYBACK_DRAW_PICTURE = SkPictureRecorder_RecordFlags::kPlaybackDrawPicture_RecordFlag as _;
+        const PLAYBACK_DRAW_PICTURE = SkPictureRecorder_RecordFlags_kPlaybackDrawPicture_RecordFlag as _;
     }
 }
 

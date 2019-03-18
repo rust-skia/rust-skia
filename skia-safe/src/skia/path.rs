@@ -18,8 +18,11 @@ use skia_bindings::{
     SkPath_FillType,
     SkPath_Convexity,
     C_SkPath_ConvertToNonInverseFillType,
-    SkPath_SegmentMask,
-    C_SkPath_serialize
+    C_SkPath_serialize,
+    SkPath_SegmentMask_kLine_SegmentMask,
+    SkPath_SegmentMask_kQuad_SegmentMask,
+    SkPath_SegmentMask_kConic_SegmentMask,
+    SkPath_SegmentMask_kCubic_SegmentMask
 };
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -98,10 +101,10 @@ impl NativeTransmutable<SkPath_AddPathMode> for AddPathMode {}
 
 bitflags! {
     pub struct PathSegmentMask: u32 {
-        const LINE = SkPath_SegmentMask::kLine_SegmentMask as _;
-        const QUAD = SkPath_SegmentMask::kQuad_SegmentMask as _;
-        const CONIC = SkPath_SegmentMask::kConic_SegmentMask as _;
-        const CUBIC = SkPath_SegmentMask::kCubic_SegmentMask as _;
+        const LINE = SkPath_SegmentMask_kLine_SegmentMask as _;
+        const QUAD = SkPath_SegmentMask_kQuad_SegmentMask as _;
+        const CONIC = SkPath_SegmentMask_kConic_SegmentMask as _;
+        const CUBIC = SkPath_SegmentMask_kCubic_SegmentMask as _;
     }
 }
 

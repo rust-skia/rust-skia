@@ -520,6 +520,10 @@ extern "C" bool C_SkMatrix_Equals(const SkMatrix* self, const SkMatrix* rhs) {
     return *self == *rhs;
 }
 
+extern "C" SkScalar* C_SkMatrix_SubscriptMut(SkMatrix* self, size_t index) {
+    return &((*self)[index]);
+}
+
 //
 // SkSurfaceProps
 //
