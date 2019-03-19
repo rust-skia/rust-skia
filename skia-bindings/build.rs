@@ -36,7 +36,7 @@ fn main() {
     let keep_inline_functions = true;
 
     let mut args =
-      r#"--args=is_official_build=true skia_use_system_expat=false skia_use_system_icu=false skia_use_system_libjpeg_turbo=false skia_use_system_libpng=false skia_use_libwebp=false skia_use_system_zlib=false cc="clang" cxx="clang++""#
+      r#"--args=is_official_build=true skia_use_expat=false skia_use_icu=false skia_use_system_libjpeg_turbo=false skia_use_system_libpng=false skia_use_libwebp=false skia_use_system_zlib=false cc="clang" cxx="clang++""#
       .to_owned();
 
     if cfg!(feature="vulkan") {
