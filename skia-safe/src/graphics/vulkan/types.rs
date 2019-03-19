@@ -1,10 +1,11 @@
 use skia_bindings::{GrVkAlloc, GrVkBackendMemory};
 use skia_bindings::{GrVkImageInfo, GrVkYcbcrConversionInfo };
-use skia_bindings::{GrVkAlloc_Flag_kNoncoherent_Flag, GrVkAlloc_Flag_kMappable_Flag, C_GrVkAlloc_Equals, C_GrVkYcbcrConversionInfo_Equals, C_GrVkImageInfo_Equals, C_GrVkImageInfo_updateImageLayout, C_GrVkImageInfo_Construct, C_GrVkYcbcrConversionInfo_Construct, C_GrVkAlloc_Construct };
+use skia_bindings::{GrVkAlloc_Flag_kNoncoherent_Flag, GrVkAlloc_Flag_kMappable_Flag, C_GrVkAlloc_Equals, C_GrVkYcbcrConversionInfo_Equals, C_GrVkImageInfo_Equals, C_GrVkImageInfo_updateImageLayout, C_GrVkImageInfo_Construct, C_GrVkYcbcrConversionInfo_Construct, C_GrVkAlloc_Construct, GrVkDrawableInfo };
 use crate::prelude::*;
 use super::{DeviceMemory, DeviceSize, ImageTiling, Image, SamplerYcbcrModelConversion, ChromaLocation, SamplerYcbcrRange};
 use super::{Filter, Bool32, FomatFeatureFlags, ImageLayout, Format};
-use std::mem;
+use std::{mem, ffi, os::raw};
+use crate::graphics::vulkan::{CommandBuffer, RenderPass, Rect2D, Instance, Device};
 
 pub type GraphicsBackendMemory = GrVkBackendMemory;
 
@@ -197,3 +198,19 @@ impl ImageInfo {
         self
     }
 }
+
+// A proper Option<fn()> return type here makes trouble on the Rust side, so we keep that a void* for now.
+pub type GetProc = Option<unsafe extern "C" fn (*const raw::c_char, Instance, Device) -> *const ffi::c_void>;
+
+#[derive(Copy, Clone, Debug)]
+#[repr(C)]
+pub struct DrawableInfo {
+    secondary_command_buffer: CommandBuffer,
+    color_attachment_index: u32,
+    compatible_render_pass: RenderPass,
+    format: Format,
+    draw_bounds: *mut Rect2D
+}
+
+impl NativeTransmutable<GrVkDrawableInfo> for DrawableInfo {}
+#[test] fn test_drawable_info_layout() { DrawableInfo::test_layout() }

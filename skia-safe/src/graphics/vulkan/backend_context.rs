@@ -1,6 +1,7 @@
 use std::ffi;
 use std::os::raw;
 use skia_bindings::{C_GrVkBackendContext_New, C_GrVkBackendContext_Delete, VkInstance, VkDevice };
+use super::GetProc;
 
 #[derive(Debug)]
 pub struct BackendContext {
@@ -12,9 +13,6 @@ impl Drop for BackendContext {
         unsafe { C_GrVkBackendContext_Delete(self.native) }
     }
 }
-
-// A proper Option<fn()> return type here makes trouble on the Rust side, so we keep that a void* for now.
-type GetProc = Option<unsafe extern "C" fn (*const raw::c_char, VkInstance, VkDevice) -> *const ffi::c_void>;
 
 impl BackendContext {
 

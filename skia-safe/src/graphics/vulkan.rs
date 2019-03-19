@@ -1,4 +1,4 @@
-use skia_bindings::{VkDeviceMemory, VkDeviceSize, VkImage, VkImageTiling, VkImageLayout, VkSamplerYcbcrModelConversion, VkSamplerYcbcrRange, VkChromaLocation, VkFilter, VkBool32, VkFormatFeatureFlags, VkFormat};
+use skia_bindings::{VkDeviceMemory, VkDeviceSize, VkImage, VkImageTiling, VkImageLayout, VkSamplerYcbcrModelConversion, VkSamplerYcbcrRange, VkChromaLocation, VkFilter, VkBool32, VkFormatFeatureFlags, VkFormat, VkDevice, VkCommandBuffer, VkRenderPass, VkRect2D, VkInstance};
 
 mod backend_context;
 pub use self::backend_context::*;
@@ -10,6 +10,8 @@ pub use self::types::*;
 // Additional Vulkan re-exports and definitions.
 //
 
+pub type Device = VkDevice;
+pub type Instance = VkInstance;
 pub type DeviceMemory = VkDeviceMemory;
 pub type DeviceSize = VkDeviceSize;
 pub type Image = VkImage;
@@ -22,3 +24,6 @@ pub type Filter = VkFilter;
 pub type Bool32 = VkBool32;
 pub type FomatFeatureFlags = VkFormatFeatureFlags;
 pub type Format = VkFormat;
+pub type CommandBuffer = VkCommandBuffer;
+pub type RenderPass = VkRenderPass;
+pub type Rect2D = VkRect2D;

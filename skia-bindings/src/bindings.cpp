@@ -34,8 +34,10 @@
 
 #if defined(SK_VULKAN)
 
-#include "GrBackendSurface.h"
+#include "vk/GrVkVulkan.h"
+#include "vk/GrVkTypes.h"
 #include "vk/GrVkBackendContext.h"
+#include "GrBackendSurface.h"
 
 #endif
 
