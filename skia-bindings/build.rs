@@ -9,108 +9,82 @@ use bindgen::EnumVariation;
 use cc::Build;
 
 fn main() {
-
-  prerequisites::require_python();
-
-  assert!(Command::new("git")
-    .arg("submodule")
-    .arg("init")
-    .stdout(Stdio::inherit())
-    .stderr(Stdio::inherit())
-    .status().unwrap().success(), "`git submodule init` failed");
-
-  assert!(Command::new("git")
-    .args(&["submodule", "update", "--depth", "1"])
-    .stdout(Stdio::inherit())
-    .stderr(Stdio::inherit())
-    .status().unwrap().success(), "`git submodule update` failed");
-
-  assert!(Command::new("python")
-    .arg("skia/tools/git-sync-deps")
-    .stdout(Stdio::inherit())
-    .stderr(Stdio::inherit())
-    .status().unwrap().success(), "`skia/tools/git-sync-deps` failed");
-
-  let gn_args = {
-
-    let keep_inline_functions = true;
-
-    let mut args =
-      r#"--args=is_official_build=true skia_use_expat=false skia_use_icu=false skia_use_system_libjpeg_turbo=false skia_use_system_libpng=false skia_use_libwebp=false skia_use_system_zlib=false cc="clang" cxx="clang++""#
-      .to_owned();
-
-    if cfg!(feature="vulkan") {
-      args.push_str(" skia_use_vulkan=true skia_enable_spirv_validation=false");
-    }
-
-    if cfg!(windows) {
-
-      let mut flags : Vec<&str> = vec![];
-      flags.push(if cfg!(build="debug") { "/MTd" } else { "/MD" });
-
-      if keep_inline_functions {
-        // sadly, this also disables inlining completely and is probably a real performance bummer.
-        flags.push("/Ob0")
-      };
-
-      let flags : String = {
-        fn quote(s: &str) -> String { String::from("\"") + s + "\"" }
-
-        let v : Vec<String> =
-            flags.into_iter().map(quote).collect();
-        v.join(",")
-      };
-
-      args.push_str(r#" clang_win="C:\Program Files\LLVM""#);
-      args.push_str(&format!(" extra_cflags=[{}]", flags));
-    } else {
-      if keep_inline_functions {
-        args.push_str(r#" extra_cflags=["-fno-inline-functions"]"#)
-      }
-    }
-
-    args
-  };
-
-  let gn_command = if cfg!(windows) {
-    "skia/bin/gn"
+  let platform = if cfg!(target_os = "windows") {
+    "win"
+  } else if cfg!(target_os = "linux") {
+    "linux"
+  } else if cfg!(target_os = "macos") {
+    "osx"
   } else {
-    "bin/gn"
+    panic!("Unsupport platform");
   };
 
-  let skia_out_dir : String =
-    PathBuf::from(env::var("OUT_DIR").unwrap())
-      .join("skia/Static")
-      .to_str().unwrap().into();
+  let commit_sha_short = "a7a87538b2";
 
-  let output = Command::new(gn_command)
-    .args(&["gen", &skia_out_dir, &gn_args])
-    .envs(env::vars())
-    .current_dir(PathBuf::from("./skia"))
-    .stdout(Stdio::inherit())
-    .stderr(Stdio::inherit())
-    .output()
-    .expect("gn error");
+  let tar_name = format!("skia-static-{}.tgz", platform);
 
-  if output.status.code() != Some(0) {
-    panic!("{:?}", String::from_utf8(output.stdout).unwrap());
+  if fs::metadata("./static/libskia.a").is_err() || fs::metadata("./include/core/SkCanvas.h").is_err() || fs::metadata("./third_party").is_err() {
+    fs::remove_file(format!("./{}", tar_name)).unwrap_or(());
+    fs::remove_file("./skia-include.tgz").unwrap_or(());
+    fs::remove_file("./skia-third-party.tgz").unwrap_or(());
+    fs::remove_dir("./third_party").unwrap_or(());
+    fs::remove_dir("./include").unwrap_or(());
+    fs::remove_dir("./static").unwrap_or(());
+    assert!(Command::new("curl")
+      .arg("-L")
+      .arg(&format!("https://github.com/rust-skia/skia/releases/download/{}/{}", commit_sha_short, tar_name))
+      .arg("--output")
+      .arg(&tar_name)
+      .stdin(Stdio::inherit())
+      .stderr(Stdio::inherit())
+      .status().unwrap().success());
+
+    assert!(Command::new("curl")
+      .arg("-L")
+      .arg(&format!("https://github.com/rust-skia/skia/releases/download/{}/skia-include.tgz", commit_sha_short))
+      .arg("--output")
+      .arg("skia-include.tgz")
+      .stdin(Stdio::inherit())
+      .stderr(Stdio::inherit())
+      .status().unwrap().success());
+
+    assert!(Command::new("curl")
+      .arg("-L")
+      .arg(&format!("https://github.com/rust-skia/skia/releases/download/{}/skia-third-party.tgz", commit_sha_short))
+      .arg("--output")
+      .arg("skia-third-party.tgz")
+      .stdin(Stdio::inherit())
+      .stderr(Stdio::inherit())
+      .status().unwrap().success());
+
+    assert!(
+      Command::new("tar")
+        .args(&["-xvf", &tar_name])
+        .stdin(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .status().unwrap().success()
+    );
+
+    assert!(
+      Command::new("tar")
+        .args(&["-xvf", "skia-include.tgz"])
+        .stdin(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .status().unwrap().success()
+    );
+
+    assert!(
+      Command::new("tar")
+        .args(&["-xvf", "skia-third-party.tgz"])
+        .stdin(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .status().unwrap().success()
+    );
   }
 
-  let ninja_command = if cfg!(windows) {
-    "depot_tools/ninja"
-  } else {
-    "../depot_tools/ninja"
-  };
-
-  assert!(Command::new(ninja_command)
-    .current_dir(PathBuf::from("./skia"))
-    .args(&["-C", &skia_out_dir])
-    .stdout(Stdio::inherit())
-    .stderr(Stdio::inherit())
-    .status()
-    .expect("failed to run `ninja`, is the directory depot_tools/ available?")
-    .success(), "`ninja` returned an error, please check the output for details.");
-
+  let mut skia_out_dir = env::current_dir().unwrap();
+  skia_out_dir.push("static");
+  let skia_out_dir = skia_out_dir.to_str().unwrap();
   let current_dir = env::current_dir().unwrap();
   let current_dir_name = current_dir.to_str().unwrap();
 
@@ -196,7 +170,7 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
 
   builder = builder.header(bindings_source);
 
-  for include_dir in fs::read_dir("skia/include").expect("Unable to read skia/include") {
+  for include_dir in fs::read_dir("include").expect("Unable to read ./include") {
     let dir = include_dir.unwrap();
     cargo::add_dependent_path(dir.path().to_str().unwrap());
     let include_path = format!("{}/{}", &current_dir_name, &dir.path().to_str().unwrap());
@@ -239,17 +213,5 @@ mod cargo {
 
   pub fn add_link_lib(lib: &str) {
     println!("cargo:rustc-link-lib={}", lib);
-  }
-}
-
-mod prerequisites {
-  use std::process::{Command, Stdio};
-
-  pub fn require_python() {
-    Command::new("python")
-    .arg("--version")
-    .stdout(Stdio::inherit())
-    .stderr(Stdio::inherit())
-    .status().expect(">>>>> Please install python to build this crate. <<<<<");
   }
 }

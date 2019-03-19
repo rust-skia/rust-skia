@@ -4,3 +4,7 @@ Cargo.lock
 target/
 cmake-build-debug/
 .idea/
+/skia-bindings/static
+/skia-bindings/*.tgz
+/skia-bindings/include
+/skia-bindings/third_party

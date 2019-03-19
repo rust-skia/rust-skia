@@ -40,7 +40,8 @@ jobs:
         rustc -Vv
         cargo -V
     displayName: Print versions
-  - script: cargo build --release --all-targets -vv
+  - bash: |
+        RUST_BACKTRACE=1 cargo build --release --all-targets -vv
     displayName: Build all targets
   - script: cargo test --release -p skia-safe -vv
     displayName: Test skia-safe
