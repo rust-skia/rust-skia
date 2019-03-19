@@ -1,11 +1,4 @@
-use skia_bindings::{
-    GrVkImageInfo,
-    VkImage,
-    VkImageTiling,
-    VkImageLayout,
-    VkFormat,
-    GrVkYcbcrConversionInfo,
-    GrVkAlloc };
+use skia_bindings::{GrVkImageInfo, VkImage, VkImageTiling, VkImageLayout, VkFormat, GrVkYcbcrConversionInfo, GrVkAlloc, VkSamplerYcbcrModelConversion, VkChromaLocation, VkSamplerYcbcrRange, VkFilter };
 use std::ffi::c_void;
 use super::alloc::Alloc;
 
@@ -37,11 +30,11 @@ impl ImageInfo {
             fLevelCount: level_count,
             fCurrentQueueFamily: VK_QUEUE_FAMILY_IGNORED,
             fYcbcrConversionInfo: GrVkYcbcrConversionInfo {
-                fYcbcrModel: 0,
-                fYcbcrRange: 0,
-                fXChromaOffset: 0,
-                fYChromaOffset: 0,
-                fChromaFilter: 0,
+                fYcbcrModel: VkSamplerYcbcrModelConversion::VK_SAMPLER_YCBCR_MODEL_CONVERSION_RGB_IDENTITY,
+                fYcbcrRange: VkSamplerYcbcrRange::VK_SAMPLER_YCBCR_RANGE_ITU_FULL,
+                fXChromaOffset: VkChromaLocation::VK_CHROMA_LOCATION_COSITED_EVEN,
+                fYChromaOffset: VkChromaLocation::VK_CHROMA_LOCATION_COSITED_EVEN,
+                fChromaFilter: VkFilter::VK_FILTER_NEAREST,
                 fForceExplicitReconstruction: 0,
                 fExternalFormat: 0,
                 fExternalFormatFeatures: 0
