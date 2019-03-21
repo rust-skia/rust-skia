@@ -1,7 +1,7 @@
 use std::ffi;
 use crate::prelude::*;
 use super::{Instance, PhysicalDevice, Device, Queue, GetProc };
-use skia_bindings::{C_GrVkBackendContext_New, C_GrVkBackendContext_Delete, VkDevice, GrVkExtensionFlags, GrVkFeatureFlags};
+use skia_bindings::{C_GrVkBackendContext_New, C_GrVkBackendContext_Delete, GrVkExtensionFlags, GrVkFeatureFlags};
 
 bitflags! {
     pub struct ExtensionFlags : u32 {

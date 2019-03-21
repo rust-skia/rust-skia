@@ -50,19 +50,112 @@ inline sk_sp<T> spFromConst(const T* pt) {
 // SkSurface
 //
 
+extern "C" SkSurface* C_SkSurface_MakeRasterDirect(const SkImageInfo* imageInfo, void* pixels, size_t rowBytes, const SkSurfaceProps* surfaceProps) {
+    return SkSurface::MakeRasterDirect(*imageInfo, pixels, rowBytes, surfaceProps).release();
+}
+
+extern "C" SkSurface* C_SkSurface_MakeRaster(const SkImageInfo* imageInfo, size_t rowBytes, const SkSurfaceProps* surfaceProps) {
+    return SkSurface::MakeRaster(*imageInfo, rowBytes, surfaceProps).release();
+}
+
 extern "C" SkSurface* C_SkSurface_MakeRasterN32Premul(int width, int height, const SkSurfaceProps* surfaceProps) {
     return SkSurface::MakeRasterN32Premul(width, height, surfaceProps).release();
+}
+
+extern "C" SkSurface* C_SkSurface_MakeFromBackendTexture(
+        GrContext* context,
+        const GrBackendTexture* backendTexture,
+        GrSurfaceOrigin origin,
+        int sampleCnt,
+        SkColorType colorType,
+        const SkColorSpace* colorSpace,
+        const SkSurfaceProps* surfaceProps) {
+    return SkSurface::MakeFromBackendTexture(
+            context,
+            *backendTexture,
+            origin,
+            sampleCnt,
+            colorType,
+            spFromConst(colorSpace), surfaceProps).release();
+}
+
+extern "C" SkSurface* C_SkSurface_MakeFromBackendRenderTarget(
+        GrContext* context,
+        const GrBackendRenderTarget* backendRenderTarget,
+        GrSurfaceOrigin origin,
+        SkColorType colorType,
+        const SkColorSpace* colorSpace,
+        const SkSurfaceProps* surfaceProps
+        ) {
+    return SkSurface::MakeFromBackendRenderTarget(
+            context,
+            *backendRenderTarget,
+            origin,
+            colorType,
+            spFromConst(colorSpace),
+            surfaceProps).release();
+}
+
+extern "C" SkSurface* C_SkSurface_MakeFromBackendTextureAsRenderTarget(
+        GrContext* context,
+        const GrBackendTexture* backendTexture,
+        GrSurfaceOrigin origin,
+        int sampleCnt,
+        SkColorType colorType,
+        const SkColorSpace* colorSpace,
+        const SkSurfaceProps* surfaceProps) {
+    return SkSurface::MakeFromBackendTextureAsRenderTarget(
+            context,
+            *backendTexture,
+            origin,
+            sampleCnt,
+            colorType,
+            spFromConst(colorSpace), surfaceProps).release();
 }
 
 extern "C" SkSurface* C_SkSurface_MakeRenderTarget(
     GrContext* context,
     SkBudgeted budgeted,
-    const SkImageInfo* imageInfo) {
-    return SkSurface::MakeRenderTarget(context, budgeted, *imageInfo).release();
+    const SkImageInfo* imageInfo,
+    int sampleCount, GrSurfaceOrigin surfaceOrigin,
+    const SkSurfaceProps* surfaceProps,
+    bool shouldCreateWithMips) {
+    return SkSurface::MakeRenderTarget(
+            context,
+            budgeted,
+            *imageInfo,
+            sampleCount,
+            surfaceOrigin,
+            surfaceProps,
+            shouldCreateWithMips).release();
 }
 
-extern "C" SkImage* C_SkSurface_makeImageSnapshot(SkSurface* self) {
-    return self->makeImageSnapshot().release();
+extern "C" SkImage* C_SkSurface_makeImageSnapshot(SkSurface* self, const SkIRect* bounds) {
+    if (bounds) {
+        return self->makeImageSnapshot(*bounds).release();
+    } else {
+        return self->makeImageSnapshot().release();
+    }
+}
+
+extern "C" void C_SkSurface_getBackendTexture(
+        SkSurface* self,
+        SkSurface::BackendHandleAccess handleAccess,
+        GrBackendTexture* backendTexture) {
+    *backendTexture = self->getBackendTexture(handleAccess);
+}
+
+extern "C" void C_SkSurface_getBackendRenderTarget(
+        SkSurface* self,
+        SkSurface::BackendHandleAccess handleAccess,
+        GrBackendRenderTarget *backendRenderTarget) {
+    *backendRenderTarget = self->getBackendRenderTarget(handleAccess);
+}
+
+extern "C" SkSurface* C_SkSurface_makeSurface(
+        SkSurface* self,
+        const SkImageInfo* imageInfo) {
+    return self->makeSurface(*imageInfo).release();
 }
 
 //
@@ -904,22 +997,6 @@ extern "C" SkISize C_SkSize_toFloor(const SkSize* size) {
     return size->toFloor();
 }
 
-extern "C" SkSurface* C_SkSurface_MakeFromBackendTexture(
-    GrContext* context,
-    const GrBackendTexture* backendTexture,
-    GrSurfaceOrigin origin,
-    int sampleCnt,
-    SkColorType colorType) {
-    return SkSurface::MakeFromBackendTexture(context, *backendTexture, origin, sampleCnt, colorType, nullptr, nullptr).release();
-}
-
-extern "C" void C_SkSurface_getBackendTexture(
-        SkSurface* self,
-        SkSurface::BackendHandleAccess handleAccess,
-        GrBackendTexture* backendTexture) {
-    *backendTexture = self->getBackendTexture(handleAccess);
-}
-
 //
 // SkShader
 //
@@ -1088,6 +1165,45 @@ extern "C" SkPathEffect* C_SkDiscretePathEffect_Make(SkScalar segLength, SkScala
     return SkDiscretePathEffect::Make(segLength, dev, seedAssist).release();
 }
 
+//
+// GrBackendFormat
+//
+
+extern "C" void C_GrBackendFormat_destruct(GrBackendFormat* self) {
+    self->~GrBackendFormat();
+}
+
+extern "C" bool C_GrBackendFormat_Equals(const GrBackendFormat* lhs, const GrBackendFormat* rhs) {
+    return *lhs == *rhs;
+}
+
+//
+// GrBackendRenderTarget
+//
+
+extern "C" void C_GrBackendRenderTarget_destruct(GrBackendRenderTarget* self) {
+    self->~GrBackendRenderTarget();
+}
+
+extern "C" GrBackendApi C_GrBackendRenderTarget_backend(const GrBackendRenderTarget* self) {
+    return self->backend();
+}
+
+//
+// GrGLTextureInfo
+//
+
+extern "C" bool C_GrGLTextureInfo_Equals(const GrGLTextureInfo* lhs, const GrGLTextureInfo* rhs) {
+    return *lhs == *rhs;
+}
+
+//
+// GrGLFramebufferInfo
+//
+
+extern "C" bool C_GrGLFramebufferInfo_Equals(const GrGLFramebufferInfo* lhs, const GrGLFramebufferInfo* rhs) {
+    return *lhs == *rhs;
+}
 
 #if defined(SK_VULKAN)
 

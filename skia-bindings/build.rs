@@ -149,6 +149,7 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .constified_enum(".*Flags")
     .constified_enum("SkCanvas_SaveLayerFlagsSet")
     .constified_enum("GrVkAlloc_Flag")
+    .constified_enum("GrGLBackendState")
 
     .whitelist_function("C_.*")
     .whitelist_function("SkColorTypeBytesPerPixel")
@@ -178,6 +179,8 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .whitelist_type("SkTableColorFilter")
 
     .whitelist_type("GrVkDrawableInfo")
+    .whitelist_type("GrVkExtensionFlags")
+    .whitelist_type("GrVkFeatureFlags")
 
     .whitelist_var("SK_Color.*")
     .use_core()

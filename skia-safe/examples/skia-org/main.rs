@@ -28,7 +28,7 @@ pub(crate) mod artifact {
         let mut canvas = surface.canvas();
         canvas.scale((2.0, 2.0));
         func(&mut canvas);
-        let image = surface.make_image_snapshot();
+        let image = surface.image_snapshot();
         let data = image.encode_to_data(EncodedImageFormat::PNG).unwrap();
 
         fs::create_dir_all(&path)
