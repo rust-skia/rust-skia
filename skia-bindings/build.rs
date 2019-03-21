@@ -163,6 +163,9 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .whitelist_function("SkPreMultiplyColor")
     .whitelist_function("SkBlendMode_Name")
 
+    // functions for which the doc generation fails.
+    .blacklist_function("SkColorFilter_asComponentTable")
+
     .whitelist_type("SkColorSpacePrimaries")
     .whitelist_type("SkVector4")
     .whitelist_type("SkPictureRecorder")
