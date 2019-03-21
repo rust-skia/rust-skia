@@ -57,6 +57,7 @@ impl Handle<GrBackendFormat> {
         }
     }
 
+    #[cfg(feature="vulkan")]
     pub fn vulkan_format(&self) -> Option<vulkan::Format> {
         unsafe {
             self.native().getVkFormat()
@@ -159,6 +160,7 @@ impl Handle<GrBackendTexture> {
         }
     }
 
+    #[cfg(feature="vulkan")]
     pub fn set_vulkan_image_layout(&mut self, layout: vulkan::ImageLayout) -> &mut Self {
         unsafe {
             self.native_mut().setVkImageLayout(layout)

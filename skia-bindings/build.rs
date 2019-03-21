@@ -128,11 +128,7 @@ fn main() {
     if target.contains("gnu") {
       cargo::add_link_lib("stdc++");
     }
-    cargo::add_link_libs(&["usp10", "ole32", "user32", "gdi32", "fontsub"]);
-    // required as soon GrContext::MakeVulkan is linked.
-    if cfg!(feature="vulkan") {
-      cargo::add_link_lib("opengl32");
-    }
+    cargo::add_link_libs(&["usp10", "ole32", "user32", "gdi32", "fontsub", "opengl32"]);
   }
 
   bindgen_gen(&current_dir_name, &skia_out_dir)
