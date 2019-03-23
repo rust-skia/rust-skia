@@ -18,7 +18,7 @@ jobs:
       architecture: 'x64'
   - ${{ if eq(parameters.name, 'macOS') }}:
     - script: |
-        brew update && brew install llvm
+        brew update && brew install llvm@7
       displayName: Install llvm
   - ${{ if ne(parameters.name, 'Windows') }}:
     # Linux and macOS.
