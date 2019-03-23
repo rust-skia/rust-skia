@@ -177,11 +177,15 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .whitelist_type("SkPerlinNoiseShader")
     .whitelist_type("SkTableColorFilter")
 
+    .whitelist_type("GrGLBackendState")
+
     .whitelist_type("GrVkDrawableInfo")
     .whitelist_type("GrVkExtensionFlags")
     .whitelist_type("GrVkFeatureFlags")
 
     .whitelist_var("SK_Color.*")
+    .whitelist_var("kAll_GrBackendState")
+
     .use_core()
     .clang_arg("-std=c++14");
 

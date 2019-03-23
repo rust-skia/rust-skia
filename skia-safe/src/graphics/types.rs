@@ -32,3 +32,5 @@ pub enum SurfaceOrigin {
 
 impl NativeTransmutable<GrSurfaceOrigin> for SurfaceOrigin {}
 #[test] fn test_surface_origin_layout() { SurfaceOrigin::test_layout() }
+
+// Note: BackendState is in gl/types.rs/

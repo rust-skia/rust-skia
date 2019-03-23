@@ -31,6 +31,8 @@
 #include "SkTableColorFilter.h"
 // gpu/
 #include "GrContext.h"
+// gpu/gl
+#include "gl/GrGLInterface.h"
 
 #if defined(SK_VULKAN)
 
@@ -1205,6 +1207,29 @@ extern "C" bool C_GrGLFramebufferInfo_Equals(const GrGLFramebufferInfo* lhs, con
     return *lhs == *rhs;
 }
 
+//
+// GrGLInterface
+//
+
+extern "C" const GrGLInterface* C_GrGLInterface_MakeNativeInterface() {
+    return GrGLMakeNativeInterface().release();
+}
+
+//
+// GrContext
+//
+
+extern "C" GrContext* C_GrContext_MakeGL(const GrGLInterface* interface) {
+    if (interface)
+        return GrContext::MakeGL(sk_sp<const GrGLInterface>(interface)).release();
+    else
+        return GrContext::MakeGL().release();
+}
+
+extern "C" bool C_GrContext_colorTypeSupportedAsSurface(const GrContext* self, SkColorType colorType) {
+    return self->colorTypeSupportedAsSurface(colorType);
+}
+
 #if defined(SK_VULKAN)
 
 // The GrVkBackendContext struct binding's length is too short
@@ -1238,8 +1263,8 @@ extern "C" void C_GrVkBackendContext_Delete(void* vkBackendContext) {
     delete static_cast<GrVkBackendContext*>(vkBackendContext);
 }
 
-extern "C" GrContext* C_GrContext_MakeVulkan(const void* vkBackendContext) {
-    return GrContext::MakeVulkan(*static_cast<const GrVkBackendContext*>(vkBackendContext)).release();
+extern "C" GrContext* C_GrContext_MakeVulkan(const GrVkBackendContext* vkBackendContext) {
+    return GrContext::MakeVulkan(*vkBackendContext).release();
 }
 
 //

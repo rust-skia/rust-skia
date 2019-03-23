@@ -65,3 +65,22 @@ impl FramebufferInfo {
         Self { fboid, format: 0 }
     }
 }
+
+bitflags! {
+    pub struct BackendState: u32 {
+        const RENDER_TARGET = skia_bindings::GrGLBackendState_kRenderTarget_GrGLBackendState as _;
+        const TEXTURE_BINDING = skia_bindings::GrGLBackendState_kTextureBinding_GrGLBackendState as _;
+        const VIEW = skia_bindings::GrGLBackendState_kView_GrGLBackendState as _;
+        const BLEND = skia_bindings::GrGLBackendState_kBlend_GrGLBackendState as _;
+        const MSAA_ENABLE = skia_bindings::GrGLBackendState_kMSAAEnable_GrGLBackendState as _;
+        const VERTEX = skia_bindings::GrGLBackendState_kVertex_GrGLBackendState as _;
+        const STENCIL = skia_bindings::GrGLBackendState_kStencil_GrGLBackendState as _;
+        const PIXEL_STORE = skia_bindings::GrGLBackendState_kPixelStore_GrGLBackendState as _;
+        const PROGRAM = skia_bindings::GrGLBackendState_kProgram_GrGLBackendState as _;
+        const FIXED_FUNCTION = skia_bindings::GrGLBackendState_kFixedFunction_GrGLBackendState as _;
+        const MISC = skia_bindings::GrGLBackendState_kMisc_GrGLBackendState as _;
+        const PATH_RENDERING = skia_bindings::GrGLBackendState_kPathRendering_GrGLBackendState as _;
+    }
+}
+
+// TODO: BackendState::ALL
