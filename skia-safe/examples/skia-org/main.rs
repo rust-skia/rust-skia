@@ -27,7 +27,7 @@ pub(crate) mod artifact {
 
         fn draw_image_256<F>(path: &PathBuf, name: &str, func: F)
             where F: Fn(&mut Canvas) -> () {
-            Self::draw_image::<F>((256, 256), path, name, func)
+            Self::draw_image((256, 256), path, name, func)
         }
     }
 
