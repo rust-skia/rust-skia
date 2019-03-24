@@ -12,7 +12,7 @@ impl NativeRefCountedBase for GrGLInterface {
 }
 
 impl RCHandle<GrGLInterface> {
-    pub fn native() -> Option<Interface> {
+    pub fn new_native() -> Option<Interface> {
         Self::from_ptr(unsafe {
             C_GrGLInterface_MakeNativeInterface() as _
         })
