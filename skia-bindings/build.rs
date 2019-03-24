@@ -211,12 +211,14 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     builder = builder.clang_arg("-DSKIA_IMPLEMENTATION=1");
   }
 
-  cc_build
+  let cc_build = cc_build
     .cpp(true)
-    .flag("-std=c++14")
     .file(bindings_source)
-    .out_dir(skia_out_dir)
-    .compile("skiabinding");
+    .out_dir(skia_out_dir);
+
+  let cc_build = if !cfg!(windows) { cc_build.flag("-std=c++14") } else { cc_build };
+
+  cc_build.compile("skiabinding");
 
   let bindings = builder.generate().expect("Unable to generate bindings");
 
