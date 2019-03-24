@@ -1,5 +1,6 @@
 use std::env;
 use std::path::PathBuf;
+use crate::artifact::DrawingDriver;
 
 extern crate skia_safe;
 
@@ -10,29 +11,83 @@ mod skpaint_overview;
 mod skpath_overview;
 
 pub(crate) mod artifact {
-    use skia_safe::skia::{Canvas, EncodedImageFormat, Surface};
+    use skia_safe::skia::{Canvas, EncodedImageFormat, Surface, Budgeted, ImageInfo};
+    use skia_safe::graphics;
     use std::fs;
     use std::io::Write;
     use std::path::PathBuf;
+    use glutin::{ContextBuilder, ContextTrait};
 
-    pub fn draw_canvas_256<F>(path: &PathBuf, name: &str, func: F)
-        where F: Fn(&mut Canvas) -> () {
+    pub trait DrawingDriver {
 
-        draw_canvas((256, 256), path, name, func)
+        const NAME: &'static str;
+
+        fn draw_image<F>(size: (i32, i32), path: &PathBuf, name: &str, func: F) -> ()
+            where F: Fn(&mut Canvas) -> ();
+
+        fn draw_image_256<F>(path: &PathBuf, name: &str, func: F)
+            where F: Fn(&mut Canvas) -> () {
+            Self::draw_image::<F>((256, 256), path, name, func)
+        }
     }
 
-    pub fn draw_canvas<F>((width, height): (i32, i32), path: &PathBuf, name: &str, func: F)
+    pub enum CPU {}
+    pub enum OpenGL {}
+
+    impl DrawingDriver for CPU {
+
+        const NAME : &'static str = "cpu";
+
+        fn draw_image<F>((width, height): (i32, i32), path: &PathBuf, name: &str, func: F)
+            where F: Fn(&mut Canvas) -> () {
+            let mut surface = Surface::new_raster_n32_premul((width*2, height*2)).unwrap();
+            draw_image_on_surface(&mut surface, path, name, func);
+        }
+    }
+
+    impl DrawingDriver for OpenGL {
+
+        const NAME: &'static str = "opengl";
+
+        fn draw_image<F>((width, height): (i32, i32), path: &PathBuf, name: &str, func: F)
+            where F: Fn(&mut Canvas) -> () {
+
+            let events_loop = glutin::EventsLoop::new();
+            let context = ContextBuilder::new()
+                .build_headless(
+                    &events_loop,
+                    glutin::dpi::PhysicalSize::new(0.0, 0.0)
+                )
+                .unwrap();
+
+            unsafe { context.make_current().unwrap(); }
+
+            let mut context = graphics::Context::new_gl(None).unwrap();
+
+            let image_info = ImageInfo::new_n32_premul((width * 2, height * 2), None);
+            let mut surface = Surface::new_render_target(
+                &mut context,
+                Budgeted::YES,
+                &image_info, None, graphics::SurfaceOrigin::TopLeft, None, false).unwrap();
+
+            draw_image_on_surface(&mut surface, path, name, func);
+        }
+    }
+
+    fn draw_image_on_surface<F>(surface: &mut Surface, path: &PathBuf, name: &str, func: F)
         where F: Fn(&mut Canvas) -> () {
 
-        let mut surface = Surface::new_raster_n32_premul((width*2, height*2)).unwrap();
         let mut canvas = surface.canvas();
+
         canvas.scale((2.0, 2.0));
         func(&mut canvas);
+        canvas.flush();
+        surface.flush();
         let image = surface.image_snapshot();
         let data = image.encode_to_data(EncodedImageFormat::PNG).unwrap();
 
         fs::create_dir_all(&path)
-            .expect("failed to create directory");
+        .expect("failed to create directory");
 
         let mut file_path = path.join(name);
         file_path.set_extension("png");
@@ -72,7 +127,15 @@ fn main() {
         }
     };
 
-    skcanvas_overview::draw(&out_path);
-    skpath_overview::draw(&out_path);
-    skpaint_overview::draw(&out_path);
+    fn draw_all<Driver: DrawingDriver>(out_path: &PathBuf) {
+
+        let out_path = out_path.join(Driver::NAME);
+
+        skcanvas_overview::draw::<Driver>(&out_path);
+        skpath_overview::draw::<Driver>(&out_path);
+        skpaint_overview::draw::<Driver>(&out_path);
+    }
+
+    draw_all::<artifact::CPU>(&out_path);
+    draw_all::<artifact::OpenGL>(&out_path);
 }

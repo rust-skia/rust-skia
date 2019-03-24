@@ -1,15 +1,15 @@
 use std::path::PathBuf;
 use skia_safe::skia::{Canvas, Path, Paint, Color, PaintStyle, Font, PaintCap};
-use crate::artifact;
+use crate::artifact::DrawingDriver;
 
-pub fn draw(path: &PathBuf) {
+pub fn draw<Driver: DrawingDriver>(path: &PathBuf) {
     let path = path.join("SkPath-Overview");
 
-    artifact::draw_canvas_256(&path, "example1", draw_example1);
-    artifact::draw_canvas_256(&path, "example2", draw_example2);
-    artifact::draw_canvas_256(&path, "example3", draw_example3);
-    artifact::draw_canvas_256(&path, "example4", draw_example4);
-    artifact::draw_canvas_256(&path, "example5", draw_example5);
+    Driver::draw_image_256(&path, "example1", draw_example1);
+    Driver::draw_image_256(&path, "example2", draw_example2);
+    Driver::draw_image_256(&path, "example3", draw_example3);
+    Driver::draw_image_256(&path, "example4", draw_example4);
+    Driver::draw_image_256(&path, "example5", draw_example5);
 }
 
 fn draw_example1(canvas: &mut Canvas) {

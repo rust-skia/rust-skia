@@ -12,3 +12,6 @@ vulkan = ["skia-bindings/vulkan"]
 bitflags = "1.0"
 skia-bindings = { path = "../skia-bindings" }
 lazy_static = "1.2"
+
+[dev-dependencies]
+glutin = "0.20"
