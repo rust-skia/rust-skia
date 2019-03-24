@@ -81,8 +81,6 @@ pub(crate) mod artifact {
 
         canvas.scale((2.0, 2.0));
         func(&mut canvas);
-        canvas.flush();
-        surface.flush();
         let image = surface.image_snapshot();
         let data = image.encode_to_data(EncodedImageFormat::PNG).unwrap();
 
