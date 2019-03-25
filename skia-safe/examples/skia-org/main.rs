@@ -1,6 +1,6 @@
-use std::env;
 use std::path::PathBuf;
 use crate::artifact::DrawingDriver;
+use clap::{App, Arg};
 
 extern crate skia_safe;
 
@@ -114,16 +114,28 @@ pub (crate) mod resources {
 }
 
 fn main() {
-    let args : Vec<String> = env::args().collect();
+    const OUT_PATH : &str = "OUT_PATH";
+    const DRIVER : &str = "driver";
+    const POSSIBLE_DRIVERS : &[&str; 1] = &["opengl"];
 
-    let out_path : PathBuf = match args.len() {
-        1 => PathBuf::from("."),
-        2 => PathBuf::from(args[1].clone()),
-        _ => {
-            println!("use skia-org [OUT_PATH]");
-            return
-        }
-    };
+    let matches =
+        App::new("skia-org examples")
+            .about("Renders examples from skia.org with rust-skia")
+            .arg(Arg::with_name(OUT_PATH)
+                .help("The output path to render into.")
+                .default_value(".")
+                .required(true))
+            .arg(Arg::with_name(DRIVER)
+                .long(DRIVER)
+                .takes_value(true)
+                .possible_values(POSSIBLE_DRIVERS)
+                .multiple(true)
+                .help("In addition to the CPU, render with the given driver.")
+            )
+            .get_matches();
+
+    let out_path : PathBuf =
+        PathBuf::from(matches.value_of(OUT_PATH).unwrap());
 
     fn draw_all<Driver: DrawingDriver>(out_path: &PathBuf) {
 
@@ -135,5 +147,9 @@ fn main() {
     }
 
     draw_all::<artifact::CPU>(&out_path);
-    draw_all::<artifact::OpenGL>(&out_path);
+
+    let drivers = matches.values_of(DRIVER).unwrap_or_default();
+    if drivers.into_iter().any(|v| v == "opengl") {
+        draw_all::<artifact::OpenGL>(&out_path);
+    }
 }
