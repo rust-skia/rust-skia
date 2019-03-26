@@ -14,5 +14,7 @@ skia-bindings = { path = "../skia-bindings" }
 lazy_static = "1.2"
 
 [dev-dependencies]
-glutin = "0.20"
+# for skia-org
 clap = "2.32"
+offscreen_gl_context = "0.22"
+gleam = "0.6"
