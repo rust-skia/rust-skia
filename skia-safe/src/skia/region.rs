@@ -8,7 +8,7 @@ use crate::skia::{
 };
 use skia_bindings::{
     C_SkRegion_destruct,
-    C_SkRegion_equals,
+    C_SkRegion_Equals,
     SkRegion,
     SkRegion_Op
 };
@@ -32,7 +32,7 @@ impl NativeClone for SkRegion {
 
 impl NativePartialEq for SkRegion {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { C_SkRegion_equals(self, rhs) }
+        unsafe { C_SkRegion_Equals(self, rhs) }
     }
 }
 

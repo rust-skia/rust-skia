@@ -128,11 +128,7 @@ fn main() {
     if target.contains("gnu") {
       cargo::add_link_lib("stdc++");
     }
-    cargo::add_link_libs(&["usp10", "ole32", "user32", "gdi32", "fontsub"]);
-    // required as soon GrContext::MakeVulkan is linked.
-    if cfg!(feature="vulkan") {
-      cargo::add_link_lib("opengl32");
-    }
+    cargo::add_link_libs(&["usp10", "ole32", "user32", "gdi32", "fontsub", "opengl32"]);
   }
 
   bindgen_gen(&current_dir_name, &skia_out_dir)
@@ -148,6 +144,8 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .constified_enum(".*Mask")
     .constified_enum(".*Flags")
     .constified_enum("SkCanvas_SaveLayerFlagsSet")
+    .constified_enum("GrVkAlloc_Flag")
+    .constified_enum("GrGLBackendState")
 
     .whitelist_function("C_.*")
     .whitelist_function("SkColorTypeBytesPerPixel")
@@ -179,7 +177,15 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .whitelist_type("SkPerlinNoiseShader")
     .whitelist_type("SkTableColorFilter")
 
+    .whitelist_type("GrGLBackendState")
+
+    .whitelist_type("GrVkDrawableInfo")
+    .whitelist_type("GrVkExtensionFlags")
+    .whitelist_type("GrVkFeatureFlags")
+
     .whitelist_var("SK_Color.*")
+    .whitelist_var("kAll_GrBackendState")
+
     .use_core()
     .clang_arg("-std=c++14");
 
@@ -205,12 +211,14 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     builder = builder.clang_arg("-DSKIA_IMPLEMENTATION=1");
   }
 
-  cc_build
+  let cc_build = cc_build
     .cpp(true)
-    .flag("-std=c++14")
     .file(bindings_source)
-    .out_dir(skia_out_dir)
-    .compile("skiabinding");
+    .out_dir(skia_out_dir);
+
+  let cc_build = if !cfg!(windows) { cc_build.flag("-std=c++14") } else { cc_build };
+
+  cc_build.compile("skiabinding");
 
   let bindings = builder.generate().expect("Unable to generate bindings");
 

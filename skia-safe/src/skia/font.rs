@@ -4,7 +4,7 @@ use skia_bindings::{
     C_SkFont_makeWithSize,
     C_SkFont_ConstructFromTypefaceWithSize,
     C_SkFont_ConstructFromTypeface,
-    C_SkFont_equals,
+    C_SkFont_Equals,
     SkFont,
     SkFont_Edging,
     C_SkFont_destruct,
@@ -46,7 +46,7 @@ impl NativeDrop for SkFont {
 
 impl NativePartialEq for SkFont {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { C_SkFont_equals(self, rhs) }
+        unsafe { C_SkFont_Equals(self, rhs) }
     }
 }
 

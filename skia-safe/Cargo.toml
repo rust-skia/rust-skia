@@ -1,6 +1,6 @@
 [package]
 name = "skia-safe"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Armin Sander <armin@replicator.org>"]
 edition = "2018"
 
@@ -12,3 +12,7 @@ vulkan = ["skia-bindings/vulkan"]
 bitflags = "1.0"
 skia-bindings = { path = "../skia-bindings" }
 lazy_static = "1.2"
+
+[dev-dependencies]
+glutin = "0.20"
+clap = "2.32"

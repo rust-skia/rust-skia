@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use skia_bindings::{
-    C_SkRRect_equals,
+    C_SkRRect_Equals,
     SkRRect,
     SkRRect_Type,
     SkRRect_Corner,
@@ -47,7 +47,7 @@ impl NativeTransmutable<SkRRect> for RRect {}
 
 impl PartialEq for RRect {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { C_SkRRect_equals(self.native(), rhs.native()) }
+        unsafe { C_SkRRect_Equals(self.native(), rhs.native()) }
     }
 }
 

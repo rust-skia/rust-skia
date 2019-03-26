@@ -1,8 +1,31 @@
-mod alloc;
-pub use self::alloc::*;
+use skia_bindings::{VkDeviceMemory, VkDeviceSize, VkImage, VkImageTiling, VkImageLayout, VkSamplerYcbcrModelConversion, VkSamplerYcbcrRange, VkChromaLocation, VkFilter, VkBool32, VkFormatFeatureFlags, VkFormat, VkDevice, VkCommandBuffer, VkRenderPass, VkRect2D, VkInstance, VkPhysicalDevice, VkQueue};
 
 mod backend_context;
 pub use self::backend_context::*;
 
-mod image_info;
-pub use self::image_info::*;
+mod types;
+pub use self::types::*;
+
+//
+// Additional Vulkan re-exports and definitions.
+//
+
+pub type Device = VkDevice;
+pub type PhysicalDevice = VkPhysicalDevice;
+pub type Instance = VkInstance;
+pub type Queue = VkQueue;
+pub type DeviceMemory = VkDeviceMemory;
+pub type DeviceSize = VkDeviceSize;
+pub type Image = VkImage;
+pub type ImageTiling = VkImageTiling;
+pub type ImageLayout = VkImageLayout;
+pub type SamplerYcbcrModelConversion = VkSamplerYcbcrModelConversion;
+pub type SamplerYcbcrRange = VkSamplerYcbcrRange;
+pub type ChromaLocation = VkChromaLocation;
+pub type Filter = VkFilter;
+pub type Bool32 = VkBool32;
+pub type FomatFeatureFlags = VkFormatFeatureFlags;
+pub type Format = VkFormat;
+pub type CommandBuffer = VkCommandBuffer;
+pub type RenderPass = VkRenderPass;
+pub type Rect2D = VkRect2D;

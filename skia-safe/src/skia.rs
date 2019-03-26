@@ -144,6 +144,9 @@ pub use self::text_blob::*;
 mod typeface;
 pub use self::typeface::*;
 
+mod types;
+pub use self::types::*;
+
 mod vector4;
 pub use self::vector4::*;
 
