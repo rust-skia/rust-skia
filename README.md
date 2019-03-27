@@ -12,7 +12,7 @@ This project attempts to provide _up to date_ safe bindings that bridge idiomati
 
 ## Building
 
-Note that the information in this section is preliminary. Please open an issue on any build problem.
+Note that the information in this section is preliminary. Please open an issue for any build problem.
 
 This project requires LLVM, python, and git to build.
 
