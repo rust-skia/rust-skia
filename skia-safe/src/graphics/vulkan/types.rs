@@ -200,7 +200,7 @@ impl ImageInfo {
 }
 
 // A proper Option<fn()> return type here makes trouble on the Rust side, so we keep that a void* for now.
-pub type GetProc = Option<unsafe extern "C" fn (*const raw::c_char, Instance, Device) -> *const ffi::c_void>;
+pub type GetProc = unsafe extern "C" fn (*const raw::c_char, Instance, Device) -> *const ffi::c_void;
 
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]

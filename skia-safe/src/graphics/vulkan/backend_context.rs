@@ -57,9 +57,8 @@ impl BackendContext {
         instance: Instance,
         physical_device: PhysicalDevice,
         device: Device,
-        queue: Queue,
-        graphics_queue_index: u32,
-        get_proc: GetProc
+        queue_and_index: (Queue, usize),
+        get_proc: Option<GetProc>
         ) -> BackendContext {
 
         BackendContext {
@@ -67,8 +66,9 @@ impl BackendContext {
                 instance as _,
                 physical_device as _,
                 device as _,
-                queue as _,
-                graphics_queue_index,
-                get_proc) }
+                queue_and_index.0 as _,
+                queue_and_index.1.try_into().unwrap(),
+                get_proc)
+        }
     }
 }
