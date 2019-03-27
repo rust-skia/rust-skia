@@ -1,9 +1,10 @@
 use std::path::PathBuf;
-use crate::artifact::{DrawingDriver, OpenGL, Vulkan, CPU};
+use crate::artifact::{DrawingDriver, OpenGL, CPU};
 use clap::{App, Arg};
 use offscreen_gl_context::{GLContext, NativeGLContext, GLVersion};
 use gleam;
-
+#[cfg(feature="vulkan")]
+use crate::artifact::{Vulkan};
 
 extern crate skia_safe;
 #[macro_use]
