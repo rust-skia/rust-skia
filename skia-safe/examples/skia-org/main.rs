@@ -184,17 +184,17 @@ fn main() {
         }
     };
 
-    if drivers.iter().any(|v| *v == CPU::NAME) {
+    if drivers.contains(&CPU::NAME) {
         draw_all::<artifact::CPU>(&out_path);
     }
 
-    if drivers.iter().any(|v| *v == OpenGL::NAME) {
+    if drivers.contains(&OpenGL::NAME) {
         draw_all::<artifact::OpenGL>(&out_path);
     }
 
     #[cfg(feature = "vulkan")]
     {
-        if drivers.iter().any(|v| *v == Vulkan::NAME) {
+        if drivers.contains(&Vulkan::NAME) {
             draw_all::<artifact::Vulkan>(&out_path)
         }
     }
