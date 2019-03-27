@@ -1,11 +1,15 @@
 use std::path::PathBuf;
-use crate::artifact::DrawingDriver;
+use crate::artifact::{DrawingDriver, OpenGL, Vulkan, CPU};
 use clap::{App, Arg};
 
 extern crate skia_safe;
+#[macro_use]
+extern crate ash;
+
 
 // TODO: think about making the examples more Rust-idiomatic, by using method chaining for Paint / Paths, for example.
 
+mod drivers;
 mod skcanvas_overview;
 mod skpaint_overview;
 mod skpath_overview;
@@ -17,6 +21,7 @@ pub(crate) mod artifact {
     use std::io::Write;
     use std::path::PathBuf;
     use glutin::{ContextBuilder, ContextTrait};
+    use crate::drivers::skia_ash::AshGraphics;
 
     pub trait DrawingDriver {
 
@@ -33,6 +38,8 @@ pub(crate) mod artifact {
 
     pub enum CPU {}
     pub enum OpenGL {}
+    #[cfg(feature = "vulkan")]
+    pub enum Vulkan {}
 
     impl DrawingDriver for CPU {
 
@@ -72,6 +79,34 @@ pub(crate) mod artifact {
 
             draw_image_on_surface(&mut surface, path, name, func);
         }
+    }
+
+    #[cfg(feature="vulkan")]
+    impl DrawingDriver for Vulkan {
+
+        const NAME: &'static str = "vulkan";
+
+        fn draw_image<F>((width, height): (i32, i32), path: &PathBuf, name: &str, func: F)
+            where F: Fn(&mut Canvas) -> () {
+
+
+            let ash_graphics = unsafe { AshGraphics::new("skia-org") };
+
+
+            /*
+            let mut context = graphics::Context::new_vulkan(vulkan_context).unwrap();
+
+            let image_info = ImageInfo::new_n32_premul((width * 2, height * 2), None);
+            let mut surface = Surface::new_render_target(
+                &mut context,
+                Budgeted::YES,
+                &image_info, None, graphics::SurfaceOrigin::TopLeft, None, false).unwrap();
+
+            draw_image_on_surface(&mut surface, path, name, func);
+            */
+        }
+
+
     }
 
     fn draw_image_on_surface<F>(surface: &mut Surface, path: &PathBuf, name: &str, func: F)
@@ -116,7 +151,6 @@ pub (crate) mod resources {
 fn main() {
     const OUT_PATH : &str = "OUT_PATH";
     const DRIVER : &str = "driver";
-    const POSSIBLE_DRIVERS : &[&str; 1] = &["opengl"];
 
     let matches =
         App::new("skia-org examples")
@@ -128,7 +162,7 @@ fn main() {
             .arg(Arg::with_name(DRIVER)
                 .long(DRIVER)
                 .takes_value(true)
-                .possible_values(POSSIBLE_DRIVERS)
+                .possible_values(get_possible_drivers())
                 .multiple(true)
                 .help("In addition to the CPU, render with the given driver.")
             )
@@ -136,6 +170,34 @@ fn main() {
 
     let out_path : PathBuf =
         PathBuf::from(matches.value_of(OUT_PATH).unwrap());
+
+
+    let drivers = {
+        let drivers = matches
+            .values_of(DRIVER)
+            .unwrap_or_default()
+            .collect::<Vec<&str>>();
+        if drivers.is_empty() {
+            vec!["cpu"]
+        } else {
+            drivers
+        }
+    };
+
+    if drivers.iter().any(|v| *v == CPU::NAME) {
+        draw_all::<artifact::CPU>(&out_path);
+    }
+
+    if drivers.iter().any(|v| *v == OpenGL::NAME) {
+        draw_all::<artifact::OpenGL>(&out_path);
+    }
+
+    #[cfg(feature = "vulkan")]
+    {
+        if drivers.iter().any(|v| *v == Vulkan::NAME) {
+            draw_all::<artifact::Vulkan>(&out_path)
+        }
+    }
 
     fn draw_all<Driver: DrawingDriver>(out_path: &PathBuf) {
 
@@ -145,11 +207,14 @@ fn main() {
         skpath_overview::draw::<Driver>(&out_path);
         skpaint_overview::draw::<Driver>(&out_path);
     }
+}
 
-    draw_all::<artifact::CPU>(&out_path);
+#[cfg(not(feature = "vulkan"))]
+fn get_possible_drivers() -> &'static [&'static str] {
+    ["opengl"].as_ref()
+}
 
-    let drivers = matches.values_of(DRIVER).unwrap_or_default();
-    if drivers.into_iter().any(|v| v == "opengl") {
-        draw_all::<artifact::OpenGL>(&out_path);
-    }
+#[cfg(feature = "vulkan")]
+fn get_possible_drivers() -> &'static [&'static str] {
+    ["opengl", "vulkan"].as_ref()
 }
