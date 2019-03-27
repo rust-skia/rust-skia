@@ -8,17 +8,45 @@ Skia Submodule Status: chrome/m73 ([pending changes][skiapending]).
 
 ## Goals
 
-This project attempts to provide _up to date_ safe bindings that bridge between Skia's C++ API and idiomatic Rust on all major desktop, mobile, and [WebAssembly](https://en.wikipedia.org/wiki/WebAssembly) platforms, including GPU rendering support for [Vulkan](https://en.wikipedia.org/wiki/Vulkan_(API)), [Metal](https://en.wikipedia.org/wiki/Metal_(API)), and [OpenGL](https://en.wikipedia.org/wiki/OpenGL).
+This project attempts to provide _up to date_ safe bindings that bridge idiomatic Rust with Skia's C++ API on all major desktop, mobile, and [WebAssembly](https://en.wikipedia.org/wiki/WebAssembly) platforms, including GPU rendering support for [Vulkan](https://en.wikipedia.org/wiki/Vulkan_(API)), [Metal](https://en.wikipedia.org/wiki/Metal_(API)), and [OpenGL](https://en.wikipedia.org/wiki/OpenGL).
 
 ## Building
 
+Note that the information in this section is preliminary. Please open an issue on any build problem.
+
+This project requires LLVM, python, and git to build.
+
+To test if LLVM is installed with the correct version, use `clang --version`. Currently, version 7.0.1 is required, or - on Mac OS X - Apple LLVM Version 10 should do, too.
+
+For python, at least version 2.7 should be available. Use `python --version` to see what you have.
+
+##### Mac OS X
+
+- Install either Apple LLVM (Version 10) via `xcode-select --install`, or LLVM 7.0.1 via `brew install llvm@7`.
+
+##### Windows
+
+- Be sure the `git` command line tool is installed.
+- Install the [official LLVM 7.0.1](http://releases.llvm.org/download.html) distribution.
+- msys:
+  - Install one of the python2 packages, for example `mingw-w64-x86_64-python2`.
+  - LLVM is _always_ picked up from `C:/Program Files/LLVM`, so be sure it's available from there.
+- without msys:
+  - Download and install Python version 2 from [python.org](https://www.python.org/downloads/release/python-2716/).
+
+##### Linux
+
+- LLVM should be installed out of the box, if not, install version 7.0.1 by using your package manager.
+
+Then use:
+
 `cargo build -vv`
 
-Just kidding, we wish it were that simple. Currently you need _at least_ to install LLVM, Python, and OpenGL libraries. For detailed information about how to install the prerequisites on your platform, take a look at the [template we use to build on Azure](https://github.com/rust-skia/rust-skia/blob/master/azure-pipelines-template.yml).
+Under Linux, OpenGL libraries _may_ be missing, if that is the case, install OpenGL drivers for you graphics card, or install a mesa OpenGL package like `libgl1-mesa-dev`.
 
-Please share your build experience so that we can try to automate the build to get to the point where `cargo build` _is_ sufficient to build the bindings _including_ Skia, and if that is not possible, clearly prompts to what's missing.
+Please share your build experience so that we can try to automate the build and get to the point where `cargo build` _is_ sufficient to build the bindings _including_ Skia, and if that is not possible, clearly prompts to what's missing.
 
-To simplify and speed up the build, we plan to provide prebuilt binaries for some of the major platforms ([#49](https://github.com/rust-skia/rust-skia/issues/49)).
+To simplify and speed up the build, we also plan to provide prebuilt binaries for some of the major platforms ([#49](https://github.com/rust-skia/rust-skia/issues/49)).
 
 ## Examples
 
@@ -26,9 +54,11 @@ The examples are taken from [Skia's website](https://skia.org/) and [ported to t
 
 If you were able to build the project, run
 
-`cargo run --example skia-org [OUTPUT_DIR]` 
+`cargo run --example skia-org -- [OUTPUT_DIR]` 
 
-to generate some Skia drawn PNG images in the directory `OUTPUT_DIR`.
+to generate some Skia drawn PNG images in the directory `OUTPUT_DIR`. To render with the GPU, use
+
+`cargo run --example skia-org -- [OUTPUT_DIR] --driver opengl`
 
 ## Status
 
@@ -60,9 +90,9 @@ We do support most of the SkCanvas, SkPaint, and SkPath and related APIs and are
 - [ ] SVG
 - [ ] XPS
 - [ ] Animation
-- [x] Vulkan (rudimentary texture drawing support, enable with the cargo feature "vulkan").
+- [x] Vulkan
+- [x] OpenGL
 - [ ] Metal
-- [ ] OpenGL
 
 ## This project needs contributions!
 
@@ -77,3 +107,4 @@ If you'd like help with the bindings, take a look at the [Wiki](https://github.c
 
 MIT
 
+  
