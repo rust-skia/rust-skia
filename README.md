@@ -77,7 +77,7 @@ An official crate is not yet available. We've created [a Milestone](https://gith
 
 ### Bindings
 
-Skia is a large library. While we strife to bind all of the C++ APIs, it's nowhere complete yet. 
+Skia is a large library. While we strive to bind all of the C++ APIs, it's nowhere complete yet. 
 
 We do support most of the SkCanvas, SkPaint, and SkPath and related APIs and are trying to make the examples from the [skia.org](https://skia.org/) website work. Recently we merged some of the bindings for the classes in the [`include/effects/`](https://github.com/google/skia/tree/2c36ee834ae04d036363cd3b8f3f33ec65d657f0/include/effects) directory.
 
