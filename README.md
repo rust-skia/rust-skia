@@ -18,7 +18,7 @@ This project requires LLVM, python, and git to build.
 
 To test if LLVM is installed with the correct version, use `clang --version`. Currently, version 7.0.1 is required, or - on Mac OS X - Apple LLVM Version 10 should do, too.
 
-For python, at least version 2.7 should be available. Use `python --version` to see what you have.
+For python, at least version 2.7 should be available. Use `python --version` to see what's there.
 
 ##### Mac OS X
 
@@ -36,7 +36,7 @@ For python, at least version 2.7 should be available. Use `python --version` to 
 
 ##### Linux
 
-- LLVM should be installed out of the box, if not, install version 7.0.1 by using your package manager.
+- LLVM should be installed out of the box, if not, install version 7.0.1.
 
 Then use:
 
