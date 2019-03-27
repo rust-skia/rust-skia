@@ -10,31 +10,33 @@ use cc::Build;
 
 fn main() {
 
+  prerequisites::require_python();
+
   assert!(Command::new("git")
     .arg("submodule")
     .arg("init")
     .stdout(Stdio::inherit())
     .stderr(Stdio::inherit())
-    .status().unwrap().success(), "git submodule init fail");
+    .status().unwrap().success(), "`git submodule init` failed");
 
   assert!(Command::new("git")
     .args(&["submodule", "update", "--depth", "1"])
     .stdout(Stdio::inherit())
     .stderr(Stdio::inherit())
-    .status().unwrap().success(), "git submodule update fail");
+    .status().unwrap().success(), "`git submodule update` failed");
 
   assert!(Command::new("python")
     .arg("skia/tools/git-sync-deps")
     .stdout(Stdio::inherit())
     .stderr(Stdio::inherit())
-    .status().unwrap().success(), "git sync deps fail");
+    .status().unwrap().success(), "`skia/tools/git-sync-deps` failed");
 
   let gn_args = {
 
     let keep_inline_functions = true;
 
     let mut args =
-      r#"--args=is_official_build=true skia_use_system_expat=false skia_use_system_icu=false skia_use_system_libjpeg_turbo=false skia_use_system_libpng=false skia_use_libwebp=false skia_use_system_zlib=false cc="clang" cxx="clang++""#
+      r#"--args=is_official_build=true skia_use_expat=false skia_use_icu=false skia_use_system_libjpeg_turbo=false skia_use_system_libpng=false skia_use_libwebp=false skia_use_system_zlib=false cc="clang" cxx="clang++""#
       .to_owned();
 
     if cfg!(feature="vulkan") {
@@ -94,12 +96,20 @@ fn main() {
     panic!("{:?}", String::from_utf8(output.stdout).unwrap());
   }
 
-  assert!(Command::new("ninja")
+  let ninja_command = if cfg!(windows) {
+    "depot_tools/ninja"
+  } else {
+    "../depot_tools/ninja"
+  };
+
+  assert!(Command::new(ninja_command)
     .current_dir(PathBuf::from("./skia"))
     .args(&["-C", &skia_out_dir])
     .stdout(Stdio::inherit())
     .stderr(Stdio::inherit())
-    .status().unwrap().success(), "ninja error");
+    .status()
+    .expect("failed to run `ninja`, is the directory depot_tools/ available?")
+    .success(), "`ninja` returned an error, please check the output for details.");
 
   let current_dir = env::current_dir().unwrap();
   let current_dir_name = current_dir.to_str().unwrap();
@@ -118,11 +128,7 @@ fn main() {
     if target.contains("gnu") {
       cargo::add_link_lib("stdc++");
     }
-    cargo::add_link_libs(&["usp10", "ole32", "user32", "gdi32", "fontsub"]);
-    // required as soon GrContext::MakeVulkan is linked.
-    if cfg!(feature="vulkan") {
-      cargo::add_link_lib("opengl32");
-    }
+    cargo::add_link_libs(&["usp10", "ole32", "user32", "gdi32", "fontsub", "opengl32"]);
   }
 
   bindgen_gen(&current_dir_name, &skia_out_dir)
@@ -135,6 +141,12 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
 
     .default_enum_style(EnumVariation::Rust)
 
+    .constified_enum(".*Mask")
+    .constified_enum(".*Flags")
+    .constified_enum("SkCanvas_SaveLayerFlagsSet")
+    .constified_enum("GrVkAlloc_Flag")
+    .constified_enum("GrGLBackendState")
+
     .whitelist_function("C_.*")
     .whitelist_function("SkColorTypeBytesPerPixel")
     .whitelist_function("SkColorTypeIsAlwaysOpaque")
@@ -146,6 +158,9 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .whitelist_function("SkPreMultiplyARGB")
     .whitelist_function("SkPreMultiplyColor")
     .whitelist_function("SkBlendMode_Name")
+
+    // functions for which the doc generation fails.
+    .blacklist_function("SkColorFilter_asComponentTable")
 
     .whitelist_type("SkColorSpacePrimaries")
     .whitelist_type("SkVector4")
@@ -162,7 +177,15 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     .whitelist_type("SkPerlinNoiseShader")
     .whitelist_type("SkTableColorFilter")
 
+    .whitelist_type("GrGLBackendState")
+
+    .whitelist_type("GrVkDrawableInfo")
+    .whitelist_type("GrVkExtensionFlags")
+    .whitelist_type("GrVkFeatureFlags")
+
     .whitelist_var("SK_Color.*")
+    .whitelist_var("kAll_GrBackendState")
+
     .use_core()
     .clang_arg("-std=c++14");
 
@@ -182,23 +205,20 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
   }
 
   if cfg!(feature="vulkan") {
-	builder = builder
-      .rustified_enum("VkImageTiling")
-      .rustified_enum("VkImageLayout")
-      .rustified_enum("VkFormat");
-	
     cc_build.define("SK_VULKAN", "1");
     builder = builder.clang_arg("-DSK_VULKAN");
     cc_build.define("SKIA_IMPLEMENTATION", "1");
     builder = builder.clang_arg("-DSKIA_IMPLEMENTATION=1");
   }
 
-  cc_build
+  let cc_build = cc_build
     .cpp(true)
-    .flag("-std=c++14")
     .file(bindings_source)
-    .out_dir(skia_out_dir)
-    .compile("skiabinding");
+    .out_dir(skia_out_dir);
+
+  let cc_build = if !cfg!(windows) { cc_build.flag("-std=c++14") } else { cc_build };
+
+  cc_build.compile("skiabinding");
 
   let bindings = builder.generate().expect("Unable to generate bindings");
 
@@ -219,5 +239,17 @@ mod cargo {
 
   pub fn add_link_lib(lib: &str) {
     println!("cargo:rustc-link-lib={}", lib);
+  }
+}
+
+mod prerequisites {
+  use std::process::{Command, Stdio};
+
+  pub fn require_python() {
+    Command::new("python")
+    .arg("--version")
+    .stdout(Stdio::inherit())
+    .stderr(Stdio::inherit())
+    .status().expect(">>>>> Please install python to build this crate. <<<<<");
   }
 }

@@ -21,8 +21,11 @@ use skia_bindings::{
     C_SkVertices_unref,
     SkVertices_Bone,
     SkVertices_VertexMode,
-    SkVertices_BuilderFlags,
-    C_SkVertices_encode
+    C_SkVertices_encode,
+    SkVertices_BuilderFlags_kHasTexCoords_BuilderFlag,
+    SkVertices_BuilderFlags_kHasColors_BuilderFlag,
+    SkVertices_BuilderFlags_kHasBones_BuilderFlag,
+    SkVertices_BuilderFlags_kIsNonVolatile_BuilderFlag
 };
 #[cfg(test)]
 use skia_bindings::{SkVertices_BoneIndices, SkVertices_BoneWeights};
@@ -261,10 +264,10 @@ impl RCHandle<SkVertices> {
 
 bitflags! {
     pub struct VerticesBuilderFlags: u32 {
-        const HAS_TEX_COORDS = SkVertices_BuilderFlags::kHasTexCoords_BuilderFlag as u32;
-        const HAS_COLORS = SkVertices_BuilderFlags::kHasColors_BuilderFlag as u32;
-        const HAS_BONES = SkVertices_BuilderFlags::kHasBones_BuilderFlag as u32;
-        const IS_NON_VOLATILE = SkVertices_BuilderFlags::kIsNonVolatile_BuilderFlag as u32;
+        const HAS_TEX_COORDS = SkVertices_BuilderFlags_kHasTexCoords_BuilderFlag as u32;
+        const HAS_COLORS = SkVertices_BuilderFlags_kHasColors_BuilderFlag as u32;
+        const HAS_BONES = SkVertices_BuilderFlags_kHasBones_BuilderFlag as u32;
+        const IS_NON_VOLATILE = SkVertices_BuilderFlags_kIsNonVolatile_BuilderFlag as u32;
     }
 }
 

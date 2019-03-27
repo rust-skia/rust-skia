@@ -31,11 +31,15 @@
 #include "SkTableColorFilter.h"
 // gpu/
 #include "GrContext.h"
+// gpu/gl
+#include "gl/GrGLInterface.h"
 
 #if defined(SK_VULKAN)
 
-#include "GrBackendSurface.h"
+#include "vk/GrVkVulkan.h"
+#include "vk/GrVkTypes.h"
 #include "vk/GrVkBackendContext.h"
+#include "GrBackendSurface.h"
 
 #endif
 
@@ -48,19 +52,112 @@ inline sk_sp<T> spFromConst(const T* pt) {
 // SkSurface
 //
 
+extern "C" SkSurface* C_SkSurface_MakeRasterDirect(const SkImageInfo* imageInfo, void* pixels, size_t rowBytes, const SkSurfaceProps* surfaceProps) {
+    return SkSurface::MakeRasterDirect(*imageInfo, pixels, rowBytes, surfaceProps).release();
+}
+
+extern "C" SkSurface* C_SkSurface_MakeRaster(const SkImageInfo* imageInfo, size_t rowBytes, const SkSurfaceProps* surfaceProps) {
+    return SkSurface::MakeRaster(*imageInfo, rowBytes, surfaceProps).release();
+}
+
 extern "C" SkSurface* C_SkSurface_MakeRasterN32Premul(int width, int height, const SkSurfaceProps* surfaceProps) {
     return SkSurface::MakeRasterN32Premul(width, height, surfaceProps).release();
+}
+
+extern "C" SkSurface* C_SkSurface_MakeFromBackendTexture(
+        GrContext* context,
+        const GrBackendTexture* backendTexture,
+        GrSurfaceOrigin origin,
+        int sampleCnt,
+        SkColorType colorType,
+        const SkColorSpace* colorSpace,
+        const SkSurfaceProps* surfaceProps) {
+    return SkSurface::MakeFromBackendTexture(
+            context,
+            *backendTexture,
+            origin,
+            sampleCnt,
+            colorType,
+            spFromConst(colorSpace), surfaceProps).release();
+}
+
+extern "C" SkSurface* C_SkSurface_MakeFromBackendRenderTarget(
+        GrContext* context,
+        const GrBackendRenderTarget* backendRenderTarget,
+        GrSurfaceOrigin origin,
+        SkColorType colorType,
+        const SkColorSpace* colorSpace,
+        const SkSurfaceProps* surfaceProps
+        ) {
+    return SkSurface::MakeFromBackendRenderTarget(
+            context,
+            *backendRenderTarget,
+            origin,
+            colorType,
+            spFromConst(colorSpace),
+            surfaceProps).release();
+}
+
+extern "C" SkSurface* C_SkSurface_MakeFromBackendTextureAsRenderTarget(
+        GrContext* context,
+        const GrBackendTexture* backendTexture,
+        GrSurfaceOrigin origin,
+        int sampleCnt,
+        SkColorType colorType,
+        const SkColorSpace* colorSpace,
+        const SkSurfaceProps* surfaceProps) {
+    return SkSurface::MakeFromBackendTextureAsRenderTarget(
+            context,
+            *backendTexture,
+            origin,
+            sampleCnt,
+            colorType,
+            spFromConst(colorSpace), surfaceProps).release();
 }
 
 extern "C" SkSurface* C_SkSurface_MakeRenderTarget(
     GrContext* context,
     SkBudgeted budgeted,
-    const SkImageInfo* imageInfo) {
-    return SkSurface::MakeRenderTarget(context, budgeted, *imageInfo).release();
+    const SkImageInfo* imageInfo,
+    int sampleCount, GrSurfaceOrigin surfaceOrigin,
+    const SkSurfaceProps* surfaceProps,
+    bool shouldCreateWithMips) {
+    return SkSurface::MakeRenderTarget(
+            context,
+            budgeted,
+            *imageInfo,
+            sampleCount,
+            surfaceOrigin,
+            surfaceProps,
+            shouldCreateWithMips).release();
 }
 
-extern "C" SkImage* C_SkSurface_makeImageSnapshot(SkSurface* self) {
-    return self->makeImageSnapshot().release();
+extern "C" SkImage* C_SkSurface_makeImageSnapshot(SkSurface* self, const SkIRect* bounds) {
+    if (bounds) {
+        return self->makeImageSnapshot(*bounds).release();
+    } else {
+        return self->makeImageSnapshot().release();
+    }
+}
+
+extern "C" void C_SkSurface_getBackendTexture(
+        SkSurface* self,
+        SkSurface::BackendHandleAccess handleAccess,
+        GrBackendTexture* backendTexture) {
+    *backendTexture = self->getBackendTexture(handleAccess);
+}
+
+extern "C" void C_SkSurface_getBackendRenderTarget(
+        SkSurface* self,
+        SkSurface::BackendHandleAccess handleAccess,
+        GrBackendRenderTarget *backendRenderTarget) {
+    *backendRenderTarget = self->getBackendRenderTarget(handleAccess);
+}
+
+extern "C" SkSurface* C_SkSurface_makeSurface(
+        SkSurface* self,
+        const SkImageInfo* imageInfo) {
+    return self->makeSurface(*imageInfo).release();
 }
 
 //
@@ -391,7 +488,7 @@ extern "C" void C_SkCanvas_discard(SkCanvas* self) {
 
 #undef SkAutoCanvasRestore
 
-extern "C" void C_SkAutoCanvasRestore_construct(SkAutoCanvasRestore* uninitialized, SkCanvas* canvas, bool doSave) {
+extern "C" void C_SkAutoCanvasRestore_Construct(SkAutoCanvasRestore* uninitialized, SkCanvas* canvas, bool doSave) {
     new(uninitialized) SkAutoCanvasRestore(canvas, doSave);
 }
 
@@ -520,6 +617,10 @@ extern "C" bool C_SkMatrix_Equals(const SkMatrix* self, const SkMatrix* rhs) {
     return *self == *rhs;
 }
 
+extern "C" SkScalar* C_SkMatrix_SubscriptMut(SkMatrix* self, size_t index) {
+    return &((*self)[index]);
+}
+
 //
 // SkSurfaceProps
 //
@@ -616,7 +717,7 @@ extern "C" void C_SkPicture_approximateBytesUsed(const SkPicture* self, size_t* 
 // SkRRect
 //
 
-extern "C" bool C_SkRRect_equals(const SkRRect* lhs, const SkRRect* rhs) {
+extern "C" bool C_SkRRect_Equals(const SkRRect* lhs, const SkRRect* rhs) {
     return *lhs == *rhs;
 }
 
@@ -636,7 +737,7 @@ extern "C" void C_SkRegion_destruct(SkRegion* region) {
     region->~SkRegion();
 }
 
-extern "C" bool C_SkRegion_equals(const SkRegion* lhs, const SkRegion* rhs) {
+extern "C" bool C_SkRegion_Equals(const SkRegion* lhs, const SkRegion* rhs) {
     return *lhs == *rhs;
 }
 
@@ -648,7 +749,7 @@ extern "C" void C_SkFontStyle_Construct(SkFontStyle* uninitialized) {
     new(uninitialized) SkFontStyle();
 }
 
-extern "C" bool C_SkFontStyle_equals(const SkFontStyle* lhs, const SkFontStyle* rhs) {
+extern "C" bool C_SkFontStyle_Equals(const SkFontStyle* lhs, const SkFontStyle* rhs) {
     return *lhs == *rhs;
 }
 
@@ -708,7 +809,7 @@ extern "C" void C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(SkFont* unini
     new(uninitialized) SkFont(spFromConst(typeface), size, scaleX, skewX);
 }
 
-extern "C" bool C_SkFont_equals(const SkFont* self, const SkFont* other) {
+extern "C" bool C_SkFont_Equals(const SkFont* self, const SkFont* other) {
     return *self == *other;
 }
 
@@ -898,28 +999,16 @@ extern "C" SkISize C_SkSize_toFloor(const SkSize* size) {
     return size->toFloor();
 }
 
-extern "C" SkSurface* C_SkSurface_MakeFromBackendTexture(
-    GrContext* context,
-    const GrBackendTexture* backendTexture,
-    GrSurfaceOrigin origin,
-    int sampleCnt,
-    SkColorType colorType) {
-    return SkSurface::MakeFromBackendTexture(context, *backendTexture, origin, sampleCnt, colorType, nullptr, nullptr).release();
-}
-
-extern "C" void C_SkSurface_getBackendTexture(
-        SkSurface* self,
-        SkSurface::BackendHandleAccess handleAccess,
-        GrBackendTexture* backendTexture) {
-    *backendTexture = self->getBackendTexture(handleAccess);
-}
-
 //
 // SkShader
 //
 
 extern "C" bool C_SkShader_isOpaque(const SkShader* self) {
     return self->isOpaque();
+}
+
+extern "C" bool C_SkShader_isAImage(const SkShader* self) {
+    return self->isAImage();
 }
 
 extern "C" SkShader::GradientType C_SkShader_asAGradient(const SkShader* self, SkShader::GradientInfo* info) {
@@ -1078,6 +1167,68 @@ extern "C" SkPathEffect* C_SkDiscretePathEffect_Make(SkScalar segLength, SkScala
     return SkDiscretePathEffect::Make(segLength, dev, seedAssist).release();
 }
 
+//
+// GrBackendFormat
+//
+
+extern "C" void C_GrBackendFormat_destruct(GrBackendFormat* self) {
+    self->~GrBackendFormat();
+}
+
+extern "C" bool C_GrBackendFormat_Equals(const GrBackendFormat* lhs, const GrBackendFormat* rhs) {
+    return *lhs == *rhs;
+}
+
+//
+// GrBackendRenderTarget
+//
+
+extern "C" void C_GrBackendRenderTarget_destruct(GrBackendRenderTarget* self) {
+    self->~GrBackendRenderTarget();
+}
+
+extern "C" GrBackendApi C_GrBackendRenderTarget_backend(const GrBackendRenderTarget* self) {
+    return self->backend();
+}
+
+//
+// GrGLTextureInfo
+//
+
+extern "C" bool C_GrGLTextureInfo_Equals(const GrGLTextureInfo* lhs, const GrGLTextureInfo* rhs) {
+    return *lhs == *rhs;
+}
+
+//
+// GrGLFramebufferInfo
+//
+
+extern "C" bool C_GrGLFramebufferInfo_Equals(const GrGLFramebufferInfo* lhs, const GrGLFramebufferInfo* rhs) {
+    return *lhs == *rhs;
+}
+
+//
+// GrGLInterface
+//
+
+extern "C" const GrGLInterface* C_GrGLInterface_MakeNativeInterface() {
+    return GrGLMakeNativeInterface().release();
+}
+
+//
+// GrContext
+//
+
+extern "C" GrContext* C_GrContext_MakeGL(const GrGLInterface* interface) {
+    if (interface)
+        return GrContext::MakeGL(sk_sp<const GrGLInterface>(interface)).release();
+    else
+        return GrContext::MakeGL().release();
+}
+
+extern "C" bool C_GrContext_colorTypeSupportedAsSurface(const GrContext* self, SkColorType colorType) {
+    return self->colorTypeSupportedAsSurface(colorType);
+}
 
 #if defined(SK_VULKAN)
 
@@ -1112,8 +1263,53 @@ extern "C" void C_GrVkBackendContext_Delete(void* vkBackendContext) {
     delete static_cast<GrVkBackendContext*>(vkBackendContext);
 }
 
-extern "C" GrContext* C_GrContext_MakeVulkan(const void* vkBackendContext) {
-    return GrContext::MakeVulkan(*static_cast<const GrVkBackendContext*>(vkBackendContext)).release();
+extern "C" GrContext* C_GrContext_MakeVulkan(const GrVkBackendContext* vkBackendContext) {
+    return GrContext::MakeVulkan(*vkBackendContext).release();
+}
+
+//
+// GrVkTypes.h
+//
+
+extern "C" void C_GrVkAlloc_Construct(GrVkAlloc* uninitialized, VkDeviceMemory memory, VkDeviceSize offset, VkDeviceSize size, uint32_t flags) {
+    new (uninitialized) GrVkAlloc(memory, offset, size, flags);
+}
+
+extern "C" bool C_GrVkAlloc_Equals(const GrVkAlloc* lhs, const GrVkAlloc* rhs) {
+    return *lhs == *rhs;
+}
+
+extern "C" void C_GrVkYcbcrConversionInfo_Construct(
+        GrVkYcbcrConversionInfo* uninitialized,
+        VkSamplerYcbcrModelConversion ycbcrModel,
+        VkSamplerYcbcrRange ycbcrRange,
+        VkChromaLocation xChromaOffset,
+        VkChromaLocation yChromaOffset,
+        VkFilter chromaFilter,
+        VkBool32 forceExplicitReconstruction,
+        uint64_t externalFormat,
+        VkFormatFeatureFlags externalFormatFeatures) {
+    new (uninitialized) GrVkYcbcrConversionInfo(ycbcrModel, ycbcrRange, xChromaOffset, yChromaOffset, chromaFilter, forceExplicitReconstruction, externalFormat, externalFormatFeatures);
+}
+
+extern "C" bool C_GrVkYcbcrConversionInfo_Equals(const GrVkYcbcrConversionInfo* lhs, const GrVkYcbcrConversionInfo* rhs) {
+    return *lhs == *rhs;
+}
+
+extern "C" void C_GrVkImageInfo_Construct(GrVkImageInfo* uninitialized,
+                VkImage image, const GrVkAlloc* alloc, VkImageTiling imageTiling, VkImageLayout layout,
+                VkFormat format, uint32_t levelCount,
+                uint32_t currentQueueFamily,
+                const GrVkYcbcrConversionInfo* ycbcrConversionInfo) {
+    new (uninitialized) GrVkImageInfo(image, *alloc, imageTiling, layout, format, levelCount, currentQueueFamily, *ycbcrConversionInfo);
+}
+
+extern "C" void C_GrVkImageInfo_updateImageLayout(GrVkImageInfo* self, VkImageLayout layout) {
+    self->updateImageLayout(layout);
+}
+
+extern "C" bool C_GrVkImageInfo_Equals(const GrVkImageInfo* lhs, const GrVkImageInfo* rhs) {
+    return *lhs == *rhs;
 }
 
 #endif
