@@ -1,6 +1,6 @@
 [package]
 name = "skia-safe"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["Armin Sander <armin@replicator.org>"]
 edition = "2018"
 
