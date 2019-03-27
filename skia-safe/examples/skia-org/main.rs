@@ -1,6 +1,9 @@
 use std::path::PathBuf;
 use crate::artifact::{DrawingDriver, OpenGL, Vulkan, CPU};
 use clap::{App, Arg};
+use offscreen_gl_context::{GLContext, NativeGLContext, GLVersion};
+use gleam;
+
 
 extern crate skia_safe;
 #[macro_use]
@@ -20,7 +23,6 @@ pub(crate) mod artifact {
     use std::fs;
     use std::io::Write;
     use std::path::PathBuf;
-    use glutin::{ContextBuilder, ContextTrait};
     use crate::drivers::skia_ash::AshGraphics;
 
     pub trait DrawingDriver {
@@ -58,16 +60,6 @@ pub(crate) mod artifact {
 
         fn draw_image<F>((width, height): (i32, i32), path: &PathBuf, name: &str, func: F)
             where F: Fn(&mut Canvas) -> () {
-
-            let events_loop = glutin::EventsLoop::new();
-            let context = ContextBuilder::new()
-                .build_headless(
-                    &events_loop,
-                    glutin::dpi::PhysicalSize::new(0.0, 0.0)
-                )
-                .unwrap();
-
-            unsafe { context.make_current().unwrap(); }
 
             let mut context = graphics::Context::new_gl(None).unwrap();
 
@@ -189,6 +181,13 @@ fn main() {
     }
 
     if drivers.contains(&OpenGL::NAME) {
+        let context =
+            GLContext::<NativeGLContext>::create(
+                gleam::gl::GlType::default(),
+                GLVersion::Major(4),
+                None).unwrap();
+
+        context.make_current().unwrap();
         draw_all::<artifact::OpenGL>(&out_path);
     }
 
@@ -218,3 +217,4 @@ fn get_possible_drivers() -> &'static [&'static str] {
 fn get_possible_drivers() -> &'static [&'static str] {
     ["cpu", "opengl", "vulkan"].as_ref()
 }
+
