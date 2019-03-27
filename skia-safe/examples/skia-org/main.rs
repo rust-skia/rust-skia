@@ -211,10 +211,10 @@ fn main() {
 
 #[cfg(not(feature = "vulkan"))]
 fn get_possible_drivers() -> &'static [&'static str] {
-    ["opengl"].as_ref()
+    ["cpu", "opengl"].as_ref()
 }
 
 #[cfg(feature = "vulkan")]
 fn get_possible_drivers() -> &'static [&'static str] {
-    ["opengl", "vulkan"].as_ref()
+    ["cpu", "opengl", "vulkan"].as_ref()
 }
