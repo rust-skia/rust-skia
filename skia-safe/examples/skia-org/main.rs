@@ -3,10 +3,15 @@ use crate::artifact::{DrawingDriver, OpenGL, CPU};
 use clap::{App, Arg};
 use offscreen_gl_context::{GLContext, NativeGLContext, GLVersion};
 use gleam;
+
+extern crate skia_safe;
+
+
+
 #[cfg(feature="vulkan")]
 use crate::artifact::{Vulkan};
 
-extern crate skia_safe;
+#[cfg(feature="vulkan")]
 #[macro_use]
 extern crate ash;
 
@@ -20,11 +25,17 @@ mod skpath_overview;
 pub(crate) mod artifact {
     use skia_safe::skia::{Canvas, EncodedImageFormat, Surface, Budgeted, ImageInfo};
     use skia_safe::graphics;
-    use std::{fs, ptr};
+    use std::fs;
     use std::io::Write;
     use std::path::PathBuf;
+
+    #[cfg(feature="vulkan")]
+    use std::ptr;
+    #[cfg(feature="vulkan")]
     use crate::drivers::skia_ash::AshGraphics;
+    #[cfg(feature="vulkan")]
     use ash::version::InstanceV1_0;
+    #[cfg(feature="vulkan")]
     use ash::vk::Handle;
 
     pub trait DrawingDriver {
