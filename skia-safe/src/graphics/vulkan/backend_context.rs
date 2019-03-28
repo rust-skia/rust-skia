@@ -128,7 +128,6 @@ unsafe extern "C" fn global_get_proc(
         match *get_proc.borrow() {
             Some(get_proc) => {
                 let get_proc_trait_object : &GetProc = mem::transmute(get_proc);
-                // let name = CStr::from_ptr(name);
                 get_proc_trait_object(name, instance, device)
             },
             None => {
