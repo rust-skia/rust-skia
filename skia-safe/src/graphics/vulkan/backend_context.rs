@@ -2,7 +2,7 @@ use std::{ffi, mem};
 use std::os::raw;
 use std::cell::RefCell;
 use crate::prelude::*;
-use super::{Instance, PhysicalDevice, Device, Queue, GetProc };
+use super::{Instance, PhysicalDevice, Device, Queue, GetProc, GetProcOf};
 use skia_bindings::{C_GrVkBackendContext_New, C_GrVkBackendContext_Delete, GrVkExtensionFlags, GrVkFeatureFlags};
 
 bitflags! {
@@ -128,7 +128,12 @@ unsafe extern "C" fn global_get_proc(
         match *get_proc.borrow() {
             Some(get_proc) => {
                 let get_proc_trait_object : &GetProc = mem::transmute(get_proc);
-                get_proc_trait_object(name, instance, device)
+                if !device.is_null() {
+                    get_proc_trait_object(GetProcOf::Device(device, name))
+                } else {
+                    // note: instance may be null here!
+                    get_proc_trait_object(GetProcOf::Instance(instance, name))
+                }
             },
             None => {
                 panic!("Vulkan GetProc called outside of a thread local resolvement context.")

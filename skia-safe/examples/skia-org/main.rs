@@ -26,7 +26,6 @@ pub(crate) mod artifact {
     use crate::drivers::skia_ash::AshGraphics;
     use ash::version::InstanceV1_0;
     use ash::vk::Handle;
-    use std::ffi::CStr;
 
     pub trait DrawingDriver {
 
@@ -87,11 +86,11 @@ pub(crate) mod artifact {
 
             let ash_graphics = unsafe { AshGraphics::new("skia-org") };
 
-            let get_proc = |name, instance, device| unsafe {
-                match ash_graphics.get_proc(CStr::from_ptr(name), instance, device) {
+            let get_proc = |of| unsafe {
+                match ash_graphics.get_proc(of) {
                     Some(f) => f as _,
                     None => {
-                        println!("resolve of {} failed", CStr::from_ptr(name).to_str().unwrap());
+                        println!("resolve of {} failed", of.name().to_str().unwrap());
                         ptr::null()
                     }
                 }

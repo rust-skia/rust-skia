@@ -1,11 +1,10 @@
+use std::ffi::{CString, c_void};
 use ash::{Instance, Entry};
-use std::ffi::{CString, CStr, c_void};
 use ash::vk;
 use ash::vk::Handle;
 // we want to use Vulkan version 1.1, but need to import these traits (confusing at least).
 use ash::version::{EntryV1_0, InstanceV1_0, DeviceV1_0};
 use skia_safe::graphics::vulkan;
-use std::mem;
 
 pub struct AshGraphics {
     pub entry: Entry,
@@ -121,17 +120,18 @@ impl AshGraphics {
         }
     }
 
-    pub unsafe fn get_proc(&self, name: &CStr, instance: vulkan::Instance, device: vulkan::Device)
+    pub unsafe fn get_proc(&self, of: vulkan::GetProcOf)
         -> Option<unsafe extern "system" fn() -> c_void> {
 
-        let name = name.as_ptr();
-
-        if !device.is_null() {
-            let ash_device = vk::Device::from_raw(device as _);
-            return self.instance.get_device_proc_addr(ash_device, name)
+        match of {
+            vulkan::GetProcOf::Instance(instance, name) => {
+                let ash_instance = vk::Instance::from_raw(instance as _);
+                self.entry.get_instance_proc_addr(ash_instance, name)
+            },
+            vulkan::GetProcOf::Device(device, name) => {
+                let ash_device = vk::Device::from_raw(device as _);
+                self.instance.get_device_proc_addr(ash_device, name)
+            }
         }
-
-        let ash_instance = vk::Instance::from_raw(instance as _);
-        return self.entry.get_instance_proc_addr(ash_instance, name)
     }
 }
