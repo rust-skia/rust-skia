@@ -48,6 +48,12 @@ Please share your build experience so that we can try to automate the build and 
 
 To simplify and speed up the build, we also plan to provide prebuilt binaries for some of the major platforms ([#49](https://github.com/rust-skia/rust-skia/issues/49)).
 
+### Feature "Vulkan"
+
+Vulkan support can be enabled with the Cargo feature "vulkan" in `Cargo.toml`. For that, a rebuild of Skia is needed, and to render the examples with Vulkan use `cargo run --example skia-org -- [OUTPUT_DIR] --driver vulkan`.
+
+Note that Vulkan drivers need to be available. On Windows, they are most likely available already, on Linux [this article on linuxconfig.org](<https://linuxconfig.org/install-and-test-vulkan-on-linux>) might get you started, and on Mac OS X, [MoltenVK](<https://moltengl.com/moltenvk/>) may be an option until Metal is properly supported.
+
 ## Examples
 
 The examples are taken from [Skia's website](https://skia.org/) and [ported to the Rust API](skia-safe/examples/skia-org).
