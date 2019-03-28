@@ -20,21 +20,21 @@ To test if LLVM is installed with the correct version, use `clang --version`. Cu
 
 For python, at least version 2.7 should be available. Use `python --version` to see what's there.
 
-##### Mac OS X
+### Mac OS X
 
 - Install either Apple LLVM (Version 10) via `xcode-select --install`, or LLVM 7.0.1 via `brew install llvm@7`.
 
-##### Windows
+### Windows
 
 - Be sure the `git` command line tool is installed.
 - Install the [official LLVM 7.0.1](http://releases.llvm.org/download.html) distribution.
 - msys:
-  - Install one of the python2 packages, for example `mingw-w64-x86_64-python2`.
+  - Install one of the Python2 packages, for example `mingw-w64-x86_64-python2`.
   - LLVM is _always_ picked up from `C:/Program Files/LLVM`, so be sure it's available from there.
 - without msys:
   - Download and install Python version 2 from [python.org](https://www.python.org/downloads/release/python-2716/).
 
-##### Linux
+### Linux
 
 - LLVM should be installed out of the box, if not, install version 7.0.1.
 
@@ -56,7 +56,7 @@ If you were able to build the project, run
 
 `cargo run --example skia-org -- [OUTPUT_DIR]` 
 
-to generate some Skia drawn PNG images in the directory `OUTPUT_DIR`. To render with the GPU, use
+to generate some Skia drawn PNG images in the directory `OUTPUT_DIR`. To render with OpenGL, use
 
 `cargo run --example skia-org -- [OUTPUT_DIR] --driver opengl`
 
