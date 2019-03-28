@@ -10,7 +10,6 @@ extern crate skia_safe;
 #[macro_use]
 extern crate ash;
 
-
 // TODO: think about making the examples more Rust-idiomatic, by using method chaining for Paint / Paths, for example.
 
 mod drivers;
@@ -21,10 +20,13 @@ mod skpath_overview;
 pub(crate) mod artifact {
     use skia_safe::skia::{Canvas, EncodedImageFormat, Surface, Budgeted, ImageInfo};
     use skia_safe::graphics;
-    use std::fs;
+    use std::{fs, ptr};
     use std::io::Write;
     use std::path::PathBuf;
     use crate::drivers::skia_ash::AshGraphics;
+    use ash::version::InstanceV1_0;
+    use ash::vk::Handle;
+    use std::ffi::CStr;
 
     pub trait DrawingDriver {
 
@@ -85,9 +87,26 @@ pub(crate) mod artifact {
 
             let ash_graphics = unsafe { AshGraphics::new("skia-org") };
 
+            let get_proc = |name, instance, device| unsafe {
+                match ash_graphics.get_proc(CStr::from_ptr(name), instance, device) {
+                    Some(f) => f as _,
+                    None => {
+                        println!("resolve of {} failed", CStr::from_ptr(name).to_str().unwrap());
+                        ptr::null()
+                    }
+                }
+            };
 
-            /*
-            let mut context = graphics::Context::new_vulkan(vulkan_context).unwrap();
+            let backend_context = unsafe {
+                graphics::vulkan::BackendContext::new(
+                    ash_graphics.instance.handle().as_raw() as _,
+                    ash_graphics.physical_device.as_raw() as _,
+                    ash_graphics.device.handle().as_raw() as _,
+                    (ash_graphics.queue_and_index.0.as_raw() as _, ash_graphics.queue_and_index.1),
+                    &get_proc)
+            };
+
+            let mut context = graphics::Context::new_vulkan(&backend_context).unwrap();
 
             let image_info = ImageInfo::new_n32_premul((width * 2, height * 2), None);
             let mut surface = Surface::new_render_target(
@@ -96,10 +115,7 @@ pub(crate) mod artifact {
                 &image_info, None, graphics::SurfaceOrigin::TopLeft, None, false).unwrap();
 
             draw_image_on_surface(&mut surface, path, name, func);
-            */
         }
-
-
     }
 
     fn draw_image_on_surface<F>(surface: &mut Surface, path: &PathBuf, name: &str, func: F)

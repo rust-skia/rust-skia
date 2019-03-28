@@ -1,15 +1,18 @@
 use ash::{Instance, Entry};
-use std::ffi::CString;
+use std::ffi::{CString, CStr, c_void};
 use ash::vk;
+use ash::vk::Handle;
 // we want to use Vulkan version 1.1, but need to import these traits (confusing at least).
 use ash::version::{EntryV1_0, InstanceV1_0, DeviceV1_0};
+use skia_safe::graphics::vulkan;
+use std::mem;
 
 pub struct AshGraphics {
-    queue_and_index: (vk::Queue, usize),
-    device: ash::Device,
-    physical_device: vk::PhysicalDevice,
-    instance: Instance,
-    entry: Entry,
+    pub entry: Entry,
+    pub instance: Instance,
+    pub physical_device: vk::PhysicalDevice,
+    pub device: ash::Device,
+    pub queue_and_index: (vk::Queue, usize),
 }
 
 impl Drop for AshGraphics {
@@ -23,7 +26,6 @@ impl Drop for AshGraphics {
 }
 
 // most code copied from here: https://github.com/MaikKlein/ash/blob/master/examples/src/lib.rs
-
 impl AshGraphics {
 
     pub unsafe fn new(app_name: &str) -> AshGraphics {
@@ -107,7 +109,7 @@ impl AshGraphics {
         };
 
         let queue_index: usize = 0;
-        let queue: ash::vk::Queue =
+        let queue: vk::Queue =
             device.get_device_queue(queue_family_index as _, queue_index as _);
 
         AshGraphics {
@@ -117,5 +119,19 @@ impl AshGraphics {
             instance,
             entry,
         }
+    }
+
+    pub unsafe fn get_proc(&self, name: &CStr, instance: vulkan::Instance, device: vulkan::Device)
+        -> Option<unsafe extern "system" fn() -> c_void> {
+
+        let name = name.as_ptr();
+
+        if !device.is_null() {
+            let ash_device = vk::Device::from_raw(device as _);
+            return self.instance.get_device_proc_addr(ash_device, name)
+        }
+
+        let ash_instance = vk::Instance::from_raw(instance as _);
+        return self.entry.get_instance_proc_addr(ash_instance, name)
     }
 }
