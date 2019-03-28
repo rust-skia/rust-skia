@@ -41,7 +41,14 @@ impl RCHandle<GrContext> {
     // TODO: support variant with GrContextOptions
     #[cfg(feature = "vulkan")]
     pub fn new_vulkan(backend_context: &vulkan::BackendContext) -> Option<Context> {
-       Context::from_ptr(unsafe { C_GrContext_MakeVulkan(backend_context.native as _) })
+        unsafe {
+            let end_resolving = backend_context.begin_resolving();
+            let context = Context::from_ptr(
+                C_GrContext_MakeVulkan(backend_context.native as _)
+            );
+            drop(end_resolving);
+            context
+        }
     }
 
     // TODO: threadSafeProxy()

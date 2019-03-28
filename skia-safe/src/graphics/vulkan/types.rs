@@ -199,8 +199,12 @@ impl ImageInfo {
     }
 }
 
-// A proper Option<fn()> return type here makes trouble on the Rust side, so we keep that a void* for now.
-pub type GetProc = unsafe extern "C" fn (*const raw::c_char, Instance, Device) -> *const ffi::c_void;
+// GetProc is a trait alias for Fn...
+// TODO: Tried to use CStr here, but &CStr needs a lifetime parameter
+//       which would make the whole trait generic.
+pub trait GetProc : Fn(*const raw::c_char, Instance, Device) -> *const ffi::c_void {}
+impl<T> GetProc for T
+    where T: Fn(*const raw::c_char, Instance, Device) -> *const ffi::c_void {}
 
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
