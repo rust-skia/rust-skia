@@ -50,9 +50,9 @@ To simplify and speed up the build, we also plan to provide prebuilt binaries fo
 
 ### Feature "Vulkan"
 
-Vulkan support can be enabled with the Cargo feature "vulkan" in `Cargo.toml`. For that, a rebuild of Skia is needed, and to render the examples with Vulkan use `cargo run --example skia-org -- [OUTPUT_DIR] --driver vulkan`.
+Vulkan support can be enabled with setting the Cargo feature `default = ["vulkan"]` in `skia-safe/Cargo.toml`, which will cause a rebuild of Skia, and to render the examples with Vulkan use `cargo run --example skia-org -- [OUTPUT_DIR] --driver vulkan`.
 
-Note that Vulkan drivers need to be available. On Windows, they are most likely available already, on Linux [this article on linuxconfig.org](<https://linuxconfig.org/install-and-test-vulkan-on-linux>) might get you started, and on Mac OS X, [MoltenVK](<https://moltengl.com/moltenvk/>) may be an option until Metal is properly supported.
+Note that Vulkan drivers need to be available. On Windows, they are most likely available already, on Linux [this article on linuxconfig.org](<https://linuxconfig.org/install-and-test-vulkan-on-linux>) might get you started, and on Mac OS X, [MoltenVK](<https://moltengl.com/moltenvk/>) may be an option until Metal is supported properly.
 
 ## Examples
 

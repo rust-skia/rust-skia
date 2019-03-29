@@ -6,8 +6,6 @@ use gleam;
 
 extern crate skia_safe;
 
-
-
 #[cfg(feature="vulkan")]
 use crate::artifact::{Vulkan};
 #[cfg(feature="vulkan")]
