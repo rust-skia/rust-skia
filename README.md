@@ -22,7 +22,9 @@ For python, at least version 2.7 should be available. Use `python --version` to 
 
 ##### Mac OS X
 
-- Install either Apple LLVM (Version 10) via `xcode-select --install`, or LLVM 7.0.1 via `brew install llvm@7`.
+- Install the XCode command line tools with `xcode-select --install`.
+- **Mac OS X 10.14 (Mojave)**: install the SDK headers: `/Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg`, otherwise the binding generation will fail with `'TargetConditionals.h' file not found`.
+- Alternatively, install LLVM 7.0.1 via `brew install llvm@7` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` like instructed.
 
 ##### Windows
 
