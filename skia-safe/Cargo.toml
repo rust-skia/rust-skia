@@ -19,4 +19,4 @@ offscreen_gl_context = "0.22"
 gleam = "0.6"
 clap = "2.32"
 # Entry.try_enumerate_instance_version will be available beginning with 0.29
-ash = { git = "https://github.com/MaikKlein/ash", ref = "775a7d035d836559a30a9ee63a0e726d7b9118f4"}
+ash = { git = "https://github.com/MaikKlein/ash", rev = "775a7d035d836559a30a9ee63a0e726d7b9118f4"}
