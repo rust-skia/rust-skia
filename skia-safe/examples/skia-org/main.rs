@@ -219,7 +219,7 @@ fn main() {
     }
 
     #[cfg(feature = "vulkan")]
-    {
+    if drivers.contains(&Vulkan::NAME) {
         match AshGraphics::vulkan_version() {
             Some((major, minor, patch)) => {
                 println!("Detected Vulkan version {}.{}.{}", major, minor, patch)
@@ -229,9 +229,7 @@ fn main() {
             }
         }
 
-        if drivers.contains(&Vulkan::NAME) {
-            draw_all::<artifact::Vulkan>(&out_path)
-        }
+        draw_all::<artifact::Vulkan>(&out_path)
     }
 
     fn draw_all<Driver: DrawingDriver>(out_path: &PathBuf) {
