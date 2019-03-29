@@ -2,7 +2,6 @@ use std::ffi::{CString, c_void};
 use ash::{Instance, Entry};
 use ash::vk;
 use ash::vk::Handle;
-// we want to use Vulkan version 1.1, but need to import these traits (confusing at least).
 use ash::version::{EntryV1_0, InstanceV1_0, DeviceV1_0};
 use skia_safe::graphics::vulkan;
 
