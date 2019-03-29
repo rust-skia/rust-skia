@@ -10,6 +10,8 @@ extern crate skia_safe;
 
 #[cfg(feature="vulkan")]
 use crate::artifact::{Vulkan};
+#[cfg(feature="vulkan")]
+use crate::drivers::skia_ash::AshGraphics;
 
 #[cfg(feature="vulkan")]
 #[macro_use]
@@ -220,6 +222,15 @@ fn main() {
 
     #[cfg(feature = "vulkan")]
     {
+        match AshGraphics::vulkan_version() {
+            Some((major, minor, patch)) => {
+                println!("Detected Vulkan version {}.{}.{}", major, minor, patch)
+            },
+            None => {
+                println!("Failed to detect Vulkan version, falling back to 1.0.0")
+            }
+        }
+
         if drivers.contains(&Vulkan::NAME) {
             draw_all::<artifact::Vulkan>(&out_path)
         }

@@ -27,10 +27,31 @@ impl Drop for AshGraphics {
 // most code copied from here: https://github.com/MaikKlein/ash/blob/master/examples/src/lib.rs
 impl AshGraphics {
 
+    pub fn vulkan_version() -> Option<(usize, usize, usize)> {
+
+        let entry = Entry::new().unwrap();
+
+        let detected_version =
+            entry
+                .try_enumerate_instance_version()
+                .unwrap_or(None);
+
+        detected_version.map(|ver| {
+            (vk_version_major!(ver) as _, vk_version_minor!(ver) as _, vk_version_patch!(ver) as _)
+        })
+    }
+
     pub unsafe fn new(app_name: &str) -> AshGraphics {
         let entry = Entry::new().unwrap();
 
+        let minimum_version = vk_make_version!(1, 0, 0);
+
         let instance: Instance = {
+
+            let api_version =
+                    Self::vulkan_version().map(|(major, minor, patch)| {
+                        vk_make_version!(major, minor, patch)
+                    }).unwrap_or(minimum_version);
 
             let app_name = CString::new(app_name).unwrap();
             let layer_names : [&CString;0] = []; // [CString::new("VK_LAYER_LUNARG_standard_validation").unwrap()];
@@ -41,7 +62,7 @@ impl AshGraphics {
                 .application_version(0)
                 .engine_name(&app_name)
                 .engine_version(0)
-                .api_version(vk_make_version!(1, 1, 0));
+                .api_version(api_version);
 
             let layers_names_raw: Vec<*const i8> = layer_names
                 .iter()
