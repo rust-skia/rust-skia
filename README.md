@@ -20,21 +20,21 @@ To test if LLVM is installed with the correct version, use `clang --version`. Cu
 
 For python, at least version 2.7 should be available. Use `python --version` to see what's there.
 
-##### Mac OS X
+### Mac OS X
 
 - Install either Apple LLVM (Version 10) via `xcode-select --install`, or LLVM 7.0.1 via `brew install llvm@7`.
 
-##### Windows
+### Windows
 
 - Be sure the `git` command line tool is installed.
 - Install the [official LLVM 7.0.1](http://releases.llvm.org/download.html) distribution.
 - msys:
-  - Install one of the python2 packages, for example `mingw-w64-x86_64-python2`.
+  - Install one of the Python2 packages, for example `mingw-w64-x86_64-python2`.
   - LLVM is _always_ picked up from `C:/Program Files/LLVM`, so be sure it's available from there.
 - without msys:
   - Download and install Python version 2 from [python.org](https://www.python.org/downloads/release/python-2716/).
 
-##### Linux
+### Linux
 
 - LLVM should be installed out of the box, if not, install version 7.0.1.
 
@@ -48,6 +48,12 @@ Please share your build experience so that we can try to automate the build and 
 
 To simplify and speed up the build, we also plan to provide prebuilt binaries for some of the major platforms ([#49](https://github.com/rust-skia/rust-skia/issues/49)).
 
+### Feature `vulkan`
+
+Vulkan support can be enabled by setting the Cargo feature `default = ["vulkan"]` in `skia-safe/Cargo.toml`, which will cause a rebuild of Skia. To render the examples with Vulkan use `cargo run --example skia-org -- [OUTPUT_DIR] --driver vulkan`.
+
+Note that Vulkan drivers need to be available. On Windows, they are most likely available already, on Linux [this article on linuxconfig.org](<https://linuxconfig.org/install-and-test-vulkan-on-linux>) might get you started, and on a Mac with Metal support, [install the Vulkan SDK](<https://vulkan.lunarg.com/sdk/home>) for Mac and configure MoltenVK by setting the `DYLD_LIBRARY_PATH`, `VK_LAYER_PATH`, and `VK_ICD_FILENAMES` environment variables as described in `Documentation/getting_started_macos.html`.
+
 ## Examples
 
 The examples are taken from [Skia's website](https://skia.org/) and [ported to the Rust API](skia-safe/examples/skia-org).
@@ -56,7 +62,7 @@ If you were able to build the project, run
 
 `cargo run --example skia-org -- [OUTPUT_DIR]` 
 
-to generate some Skia drawn PNG images in the directory `OUTPUT_DIR`. To render with the GPU, use
+to generate some Skia drawn PNG images in the directory `OUTPUT_DIR`. To render with OpenGL, use
 
 `cargo run --example skia-org -- [OUTPUT_DIR] --driver opengl`
 

@@ -1,6 +1,6 @@
 [package]
 name = "skia-safe"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["Armin Sander <armin@replicator.org>"]
 edition = "2018"
 
@@ -15,6 +15,8 @@ lazy_static = "1.2"
 
 [dev-dependencies]
 # for skia-org
-clap = "2.32"
 offscreen_gl_context = "0.22"
 gleam = "0.6"
+clap = "2.32"
+# Entry.try_enumerate_instance_version will be available beginning with 0.29
+ash = { git = "https://github.com/MaikKlein/ash", rev = "775a7d035d836559a30a9ee63a0e726d7b9118f4"}

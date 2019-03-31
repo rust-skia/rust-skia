@@ -4,8 +4,9 @@ use skia_bindings::{GrVkAlloc_Flag_kNoncoherent_Flag, GrVkAlloc_Flag_kMappable_F
 use crate::prelude::*;
 use super::{DeviceMemory, DeviceSize, ImageTiling, Image, SamplerYcbcrModelConversion, ChromaLocation, SamplerYcbcrRange};
 use super::{Filter, Bool32, FomatFeatureFlags, ImageLayout, Format};
-use std::{mem, ffi, os::raw};
+use std::{mem, os::raw};
 use crate::graphics::vulkan::{CommandBuffer, RenderPass, Rect2D, Instance, Device};
+use std::ffi::CStr;
 
 pub type GraphicsBackendMemory = GrVkBackendMemory;
 
@@ -199,8 +200,32 @@ impl ImageInfo {
     }
 }
 
-// A proper Option<fn()> return type here makes trouble on the Rust side, so we keep that a void* for now.
-pub type GetProc = Option<unsafe extern "C" fn (*const raw::c_char, Instance, Device) -> *const ffi::c_void>;
+
+// TODO: Tried to use CStr here, but &CStr needs a lifetime parameter
+//       which would make the whole GetProc trait generic.
+#[derive(Copy, Clone, Debug)]
+pub enum GetProcOf {
+    Instance(Instance, *const raw::c_char),
+    Device(Device, *const raw::c_char)
+}
+
+impl GetProcOf {
+    pub unsafe fn name(&self) -> &CStr {
+        match *self {
+            GetProcOf::Instance(_, name) => CStr::from_ptr(name),
+            GetProcOf::Device(_, name) => CStr::from_ptr(name)
+        }
+    }
+}
+
+// TODO: Really would like to see a fn() signature here, but I'm always running
+//       into a conflict between extern "C" and extern "system".
+pub type GetProcResult = *const raw::c_void;
+
+// GetProc is a trait alias for Fn...
+pub trait GetProc : Fn(GetProcOf) -> GetProcResult {}
+impl<T> GetProc for T
+    where T: Fn(GetProcOf) -> GetProcResult {}
 
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]

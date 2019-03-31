@@ -41,7 +41,14 @@ impl RCHandle<GrContext> {
     // TODO: support variant with GrContextOptions
     #[cfg(feature = "vulkan")]
     pub fn new_vulkan(backend_context: &vulkan::BackendContext) -> Option<Context> {
-       Context::from_ptr(unsafe { C_GrContext_MakeVulkan(backend_context.native) })
+        unsafe {
+            let end_resolving = backend_context.begin_resolving();
+            let context = Context::from_ptr(
+                C_GrContext_MakeVulkan(backend_context.native as _)
+            );
+            drop(end_resolving);
+            context
+        }
     }
 
     // TODO: threadSafeProxy()
@@ -182,7 +189,7 @@ impl RCHandle<GrContext> {
     #[cfg(feature = "vulkan")]
     pub fn store_vulkan_pipeline_cache_data(&mut self) -> &mut Self {
         unsafe {
-            self.native_mut().storeVkPipelineCacheDate();
+            self.native_mut().storeVkPipelineCacheData();
         }
         self
     }
