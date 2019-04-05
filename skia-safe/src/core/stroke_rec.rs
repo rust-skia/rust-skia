@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::skia::{
+use crate::core::{
     Path,
     PaintJoin,
     PaintCap,

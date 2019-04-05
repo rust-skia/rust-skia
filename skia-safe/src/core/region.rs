@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::skia::{
+use crate::core::{
     IRect,
     Path,
     IPoint,
@@ -12,7 +12,7 @@ use skia_bindings::{
     SkRegion,
     SkRegion_Op
 };
-use crate::skia::IVector;
+use crate::core::IVector;
 
 pub type Region = Handle<SkRegion>;
 

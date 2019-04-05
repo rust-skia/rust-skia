@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use skia_bindings::{SkPath1DPathEffect_Style, C_SkPath1DPathEffect_Make};
-use crate::skia::{PathEffect, Path, scalar};
+use crate::core::{PathEffect, Path, scalar};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]

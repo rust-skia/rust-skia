@@ -3,10 +3,10 @@ use std::marker::PhantomData;
 use std::ops::{Deref, DerefMut};
 use crate::prelude::*;
 use crate::graphics::{Context, BackendTexture, BackendRenderTarget, SurfaceOrigin};
-use crate::skia::{ImageInfo, SurfaceProps, Paint, ColorSpace, Budgeted, IRect, Size, IPoint, Bitmap, Image, Canvas, ISize, ColorType };
+use crate::core::{ImageInfo, SurfaceProps, Paint, ColorSpace, Budgeted, IRect, Size, IPoint, Bitmap, Image, Canvas, ISize, ColorType };
 use skia_bindings::{SkSurface, SkSurface_BackendHandleAccess, GrBackendTexture, SkRefCntBase, SkSurface_ContentChangeMode, GrBackendRenderTarget, C_SkSurface_makeSurface};
 #[cfg(test)]
-use crate::skia::AlphaType;
+use crate::core::AlphaType;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]

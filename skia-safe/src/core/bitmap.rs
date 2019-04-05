@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use std::{ffi, mem, ptr};
-use crate::skia::{
+use crate::core::{
     Paint,
     Color,
     ColorType,

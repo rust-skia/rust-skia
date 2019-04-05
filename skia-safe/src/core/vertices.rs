@@ -1,7 +1,7 @@
 use std::ops::{DerefMut,Deref};
 use std::{ptr, slice};
 use crate::prelude::*;
-use crate::skia::{
+use crate::core::{
     Point,
     Rect,
     Color,

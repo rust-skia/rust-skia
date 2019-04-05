@@ -1,6 +1,6 @@
 use std::ptr;
 use crate::prelude::*;
-use crate::skia::{
+use crate::core::{
     Rect,
     BBHFactory,
     Canvas,

@@ -1,7 +1,7 @@
 use std::{slice, mem};
 use std::os::raw;
 use crate::prelude::*;
-use crate::skia::{
+use crate::core::{
     Rect,
     StrokeRec,
     Path,

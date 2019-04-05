@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::skia::scalar;
+use crate::core::scalar;
 use skia_bindings::SkPoint3;
 use std::ops::{Add, Sub, Neg};
 

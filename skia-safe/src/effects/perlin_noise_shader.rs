@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::skia::{Shader, scalar, ISize};
+use crate::core::{Shader, scalar, ISize};
 use skia_bindings::{C_SkPerlinNoiseShader_MakeFractalNoise, C_SkPerlinNoiseShader_MakeTurbulence, C_SkPerlinNoiseShader_MakeImprovedNoise};
 
 pub enum PerlinNoiseShader {}

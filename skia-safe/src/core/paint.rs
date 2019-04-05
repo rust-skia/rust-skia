@@ -4,7 +4,7 @@ use std::hash::{
     Hasher
 };
 use crate::prelude::*;
-use crate::skia::{Color, FontHinting, FilterQuality, Color4f, ColorSpace, scalar, Path, Rect, ColorFilter, BlendMode, PathEffect, MaskFilter, Shader};
+use crate::core::{Color, FontHinting, FilterQuality, Color4f, ColorSpace, scalar, Path, Rect, ColorFilter, BlendMode, PathEffect, MaskFilter, Shader};
 use skia_bindings::{C_SkPaint_setMaskFilter, C_SkPaint_setPathEffect, C_SkPaint_setColorFilter, SkPaint_Cap, SkPaint, C_SkPaint_destruct, SkPaint_Style, SkPaint_Join, C_SkPaint_Equals, C_SkPaint_setShader};
 use skia_bindings::{
     SkPaint_Flags_kAntiAlias_Flag,

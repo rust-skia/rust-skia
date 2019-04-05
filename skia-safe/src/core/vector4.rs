@@ -1,6 +1,6 @@
 use skia_bindings::SkVector4;
 use crate::prelude::NativeTransmutable;
-use crate::skia::scalar;
+use crate::core::scalar;
 
 // TODO: complete the implementation
 

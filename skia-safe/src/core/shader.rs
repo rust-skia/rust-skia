@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use skia_bindings::{SkShader, SkRefCntBase, SkShader_TileMode, SkShader_GradientType, SkShader_GradientInfo, C_SkShader_asAGradient, C_SkShader_makeWithLocalMatrix, C_SkShader_makeWithColorFilter, C_SkShader_MakeEmptyShader, C_SkShader_MakeColorShader, C_SkShader_MakeColorShader2, C_SkShader_MakeCompose, C_SkShader_MakeMixer, C_SkShader_MakeBitmapShader, C_SkShader_MakePictureShader, C_SkShader_makeAsALocalMatrixShader, C_SkShader_isAImage};
-use crate::skia::{Matrix, Image, Color, scalar, Point, ColorFilter, ColorSpace, Color4f, BlendMode, Bitmap, Rect, Picture};
+use crate::core::{Matrix, Image, Color, scalar, Point, ColorFilter, ColorSpace, Color4f, BlendMode, Bitmap, Rect, Picture};
 use std::mem;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]

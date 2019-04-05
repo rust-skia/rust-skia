@@ -7,7 +7,7 @@ use skia_bindings::{
     SkYUVColorSpace,
     C_SkImageInfo_Construct
 };
-use crate::skia::{
+use crate::core::{
     ColorSpace,
     IRect,
     ISize,

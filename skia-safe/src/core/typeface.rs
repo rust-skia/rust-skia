@@ -1,6 +1,6 @@
 use std::ffi;
 use crate::prelude::*;
-use crate::skia::{
+use crate::core::{
     FontStyle,
     FontStyleWeight,
     FontStyleSlant,

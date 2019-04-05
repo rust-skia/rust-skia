@@ -1,6 +1,6 @@
 use std::mem;
 use crate::prelude::*;
-use crate::skia::{
+use crate::core::{
     Color,
     BlendMode,
     Bitmap,

@@ -1,4 +1,4 @@
-use crate::skia::{scalar, PathEffect};
+use crate::core::{scalar, PathEffect};
 use skia_bindings::C_SkDiscretePathEffect_Make;
 
 pub enum DiscretePathEffect {}

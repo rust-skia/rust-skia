@@ -1,19 +1,22 @@
-pub mod graphics;
-pub mod skia;
-pub mod effects;
 mod prelude;
+mod core;
+mod effects;
+pub mod graphics;
 
 #[macro_use]
 extern crate bitflags;
 #[macro_use]
 extern crate lazy_static;
 
+/// All core classes are accessible via skia_safe:: and core itself is hidden.
+pub use crate::core::*;
+pub use crate::effects::*;
 
 #[cfg(test)]
 mod transmutation_tests {
 
     use crate::prelude::NativeTransmutableSliceAccess;
-    use crate::skia::Point;
+    use crate::core::Point;
     use skia_bindings::SkPoint;
 
     #[test]

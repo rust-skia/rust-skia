@@ -1,21 +1,20 @@
-use core::mem;
-use skia_safe::skia;
-use skia_safe::skia::{Color, EncodedImageFormat};
+use std::mem;
+use skia_safe::{Surface, Path, Paint, Color, EncodedImageFormat, PaintStyle, Data};
 
 pub struct Canvas {
-    surface: skia::Surface,
-    path: skia::Path,
-    paint: skia::Paint,
+    surface: Surface,
+    path: Path,
+    paint: Paint,
 }
 
 impl Canvas {
 
     pub fn new(width: i32, height: i32) -> Canvas {
         let mut surface =
-            skia::Surface::new_raster_n32_premul((width, height))
+            Surface::new_raster_n32_premul((width, height))
                 .expect("no surface!");
-        let path = skia::Path::new();
-        let mut paint = skia::Paint::default();
+        let path = Path::new();
+        let mut paint = Paint::default();
         paint.set_color(Color::BLACK);
         paint.set_anti_alias(true);
         paint.set_stroke_width(1.0);
@@ -72,20 +71,20 @@ impl Canvas {
 
     #[inline]
     pub fn begin_path(&mut self) {
-        let new_path = skia::Path::new();
+        let new_path = Path::new();
         self.surface.canvas().draw_path(&self.path, &self.paint);
         mem::replace(&mut self.path, new_path);
     }
 
     #[inline]
     pub fn stroke(&mut self) {
-        self.paint.set_style(skia::PaintStyle::Stroke);
+        self.paint.set_style(PaintStyle::Stroke);
         self.surface.canvas().draw_path(&self.path, &self.paint);
     }
 
     #[inline]
     pub fn fill(&mut self) {
-        self.paint.set_style(skia::PaintStyle::Fill);
+        self.paint.set_style(PaintStyle::Fill);
         self.surface.canvas().draw_path(&self.path, &self.paint);
     }
 
@@ -95,13 +94,13 @@ impl Canvas {
     }
 
     #[inline]
-    pub fn data(&mut self) -> skia::Data {
+    pub fn data(&mut self) -> Data {
         let image = self.surface.image_snapshot();
         image.encode_to_data(EncodedImageFormat::PNG).unwrap()
     }
 
     #[inline]
-    fn canvas(&mut self) -> &mut skia::Canvas {
+    fn canvas(&mut self) -> &mut skia_safe::Canvas {
         self.surface.canvas()
     }
 }

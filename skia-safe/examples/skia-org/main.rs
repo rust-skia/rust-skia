@@ -23,7 +23,7 @@ mod skpaint_overview;
 mod skpath_overview;
 
 pub(crate) mod artifact {
-    use skia_safe::skia::{Canvas, EncodedImageFormat, Surface, Budgeted, ImageInfo};
+    use skia_safe::{Canvas, EncodedImageFormat, Surface, Budgeted, ImageInfo};
     use skia_safe::graphics;
     use std::fs;
     use std::io::Write;
@@ -152,7 +152,7 @@ pub(crate) mod artifact {
 
 pub (crate) mod resources {
 
-    use skia_safe::skia::{Image, Data};
+    use skia_safe::{Image, Data};
 
     pub fn color_wheel() -> Image {
         let bytes = include_bytes!("resources/color_wheel.png");

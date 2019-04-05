@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::skia::{scalar, PathEffect};
+use crate::core::{scalar, PathEffect};
 use skia_bindings::C_SkDashPathEffect_Make;
 
 pub enum DashPathEffect {}

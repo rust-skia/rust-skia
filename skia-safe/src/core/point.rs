@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::skia::scalar;
+use crate::core::scalar;
 use skia_bindings::{
     SkIPoint,
     SkPoint
@@ -10,8 +10,8 @@ use std::ops::{
     Neg,
     Mul
 };
-use crate::skia::ISize;
-use crate::skia::Size;
+use crate::core::ISize;
+use crate::core::Size;
 
 pub type IVector = IPoint;
 

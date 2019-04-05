@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use std::{mem, ops};
-use crate::skia::{Matrix, MatrixTypeMask, Vector4, scalar, Vector3 };
+use crate::core::{Matrix, MatrixTypeMask, Vector4, scalar, Vector3 };
 use skia_bindings::{
     C_SkMatrix44_Equals,
     C_SkMatrix44_destruct,
