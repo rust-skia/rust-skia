@@ -5,7 +5,7 @@ use skia_bindings::{GrContext, SkRefCntBase, C_GrContext_MakeGL, GrContext_aband
 #[cfg(feature = "vulkan")]
 use skia_bindings::C_GrContext_MakeVulkan;
 #[cfg(feature = "vulkan")]
-use super::vulkan;
+use super::vk;
 use crate::core::ColorType;
 
 pub type Context = RCHandle<GrContext>;
@@ -40,7 +40,7 @@ impl RCHandle<GrContext> {
 
     // TODO: support variant with GrContextOptions
     #[cfg(feature = "vulkan")]
-    pub fn new_vulkan(backend_context: &vulkan::BackendContext) -> Option<Context> {
+    pub fn new_vulkan(backend_context: &vk::BackendContext) -> Option<Context> {
         unsafe {
             let end_resolving = backend_context.begin_resolving();
             let context = Context::from_ptr(

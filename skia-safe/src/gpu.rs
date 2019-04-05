@@ -10,4 +10,4 @@ pub use self::types::*;
 pub mod gl;
 
 #[cfg(feature = "vulkan")]
-pub mod vulkan;
+pub mod vk;

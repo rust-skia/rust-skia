@@ -108,7 +108,7 @@ pub(crate) mod artifact {
             };
 
             let backend_context = unsafe {
-                gpu::vulkan::BackendContext::new(
+                gpu::vk::BackendContext::new(
                     ash_graphics.instance.handle().as_raw() as _,
                     ash_graphics.physical_device.as_raw() as _,
                     ash_graphics.device.handle().as_raw() as _,

@@ -3,7 +3,7 @@ use skia_bindings::{GrBackendTexture, C_GrBackendTexture_destruct, GrBackendForm
 use super::{BackendAPI, gl, MipMapped};
 
 #[cfg(feature = "vulkan")]
-use super::vulkan;
+use super::vk;
 
 pub type BackendFormat = Handle<GrBackendFormat>;
 
@@ -22,14 +22,14 @@ impl Handle<GrBackendFormat> {
     }
 
     #[cfg(feature="vulkan")]
-    pub fn new_vulkan(format: vulkan::Format) -> Self {
+    pub fn new_vulkan(format: vk::Format) -> Self {
         unsafe {
             GrBackendFormat::MakeVk(format)
         }.into_handle()
     }
 
     #[cfg(feature="vulkan")]
-    pub fn new_vulkan_ycbcr(conversion_info: &vulkan::YcbcrConversionInfo) -> Self {
+    pub fn new_vulkan_ycbcr(conversion_info: &vk::YcbcrConversionInfo) -> Self {
         unsafe {
             GrBackendFormat::MakeVk1(conversion_info.native())
         }.into_handle()
@@ -58,7 +58,7 @@ impl Handle<GrBackendFormat> {
     }
 
     #[cfg(feature="vulkan")]
-    pub fn vulkan_format(&self) -> Option<vulkan::Format> {
+    pub fn vulkan_format(&self) -> Option<vk::Format> {
         unsafe {
             self.native().getVkFormat()
                 .to_option()
@@ -110,7 +110,7 @@ impl Handle<GrBackendTexture> {
     #[cfg(feature = "vulkan")]
     pub unsafe fn new_vulkan(
         (width, height): (i32, i32),
-        vk_info: &vulkan::ImageInfo) -> BackendTexture {
+        vk_info: &vk::ImageInfo) -> BackendTexture {
         Self::from_native_if_valid(
             GrBackendTexture::new2(
                 width,
@@ -151,17 +151,17 @@ impl Handle<GrBackendTexture> {
     }
 
     #[cfg(feature = "vulkan")]
-    pub fn vulkan_image_info(&self) -> Option<vulkan::ImageInfo> {
+    pub fn vulkan_image_info(&self) -> Option<vk::ImageInfo> {
         unsafe {
             // constructor not available.
-            let mut image_info = vulkan::ImageInfo::default();
+            let mut image_info = vk::ImageInfo::default();
             self.native().getVkImageInfo(image_info.native_mut())
                 .if_true_some(image_info)
         }
     }
 
     #[cfg(feature="vulkan")]
-    pub fn set_vulkan_image_layout(&mut self, layout: vulkan::ImageLayout) -> &mut Self {
+    pub fn set_vulkan_image_layout(&mut self, layout: vk::ImageLayout) -> &mut Self {
         unsafe {
             self.native_mut().setVkImageLayout(layout)
         }
@@ -215,7 +215,7 @@ impl Handle<GrBackendRenderTarget> {
     pub fn new_vulkan(
         (width, height) : (i32, i32),
         sample_count: usize,
-        info: &vulkan::ImageInfo
+        info: &vk::ImageInfo
     ) -> BackendRenderTarget {
         unsafe {
             GrBackendRenderTarget::new3(width, height, sample_count.try_into().unwrap(), info.native())
@@ -270,15 +270,15 @@ impl Handle<GrBackendRenderTarget> {
     }
 
     #[cfg(feature="vulkan")]
-    pub fn vulkan_image_info(&self) -> Option<vulkan::ImageInfo> {
-        let mut info = vulkan::ImageInfo::default();
+    pub fn vulkan_image_info(&self) -> Option<vk::ImageInfo> {
+        let mut info = vk::ImageInfo::default();
         unsafe {
             self.native().getVkImageInfo(info.native_mut())
         }.if_true_some(info)
     }
 
     #[cfg(feature="vulkan")]
-    pub fn set_vulkan_image_layout(&mut self, layout: vulkan::ImageLayout) -> &mut Self {
+    pub fn set_vulkan_image_layout(&mut self, layout: vk::ImageLayout) -> &mut Self {
         unsafe {
             self.native_mut().setVkImageLayout(layout)
         }
