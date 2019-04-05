@@ -3,7 +3,7 @@ use ash::{Instance, Entry};
 use ash::vk;
 use ash::vk::Handle;
 use ash::version::{EntryV1_0, InstanceV1_0, DeviceV1_0};
-use skia_safe::graphics::vulkan;
+use skia_safe::gpu::vulkan;
 
 pub struct AshGraphics {
     pub entry: Entry,

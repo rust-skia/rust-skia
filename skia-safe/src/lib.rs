@@ -1,7 +1,7 @@
 mod prelude;
 mod core;
 mod effects;
-pub mod graphics;
+pub mod gpu;
 
 #[macro_use]
 extern crate bitflags;

@@ -5,7 +5,7 @@ use crate::prelude::*;
 use super::{DeviceMemory, DeviceSize, ImageTiling, Image, SamplerYcbcrModelConversion, ChromaLocation, SamplerYcbcrRange};
 use super::{Filter, Bool32, FomatFeatureFlags, ImageLayout, Format};
 use std::{mem, os::raw};
-use crate::graphics::vulkan::{CommandBuffer, RenderPass, Rect2D, Instance, Device};
+use crate::gpu::vulkan::{CommandBuffer, RenderPass, Rect2D, Instance, Device};
 use std::ffi::CStr;
 
 pub type GraphicsBackendMemory = GrVkBackendMemory;

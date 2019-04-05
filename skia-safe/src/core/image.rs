@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::graphics;
+use crate::gpu;
 use crate::core::{Picture, Matrix, ColorType, ImageInfo, Data, Bitmap, IRect, YUVColorSpace, AlphaType, ColorSpace, YUVAIndex, ISize, Paint, EncodedImageFormat, IPoint, ShaderTileMode, Shader};
 use skia_bindings::{
     C_SkImage_MakeFromPicture,
@@ -92,7 +92,7 @@ impl RCHandle<SkImage> {
     }
 
     pub fn from_compressed<IS: Into<ISize>>(
-        context: &mut graphics::Context,
+        context: &mut gpu::Context,
         data: &Data,
         size: IS,
         c_type: ImageCompressionType) -> Option<Image> {
@@ -107,9 +107,9 @@ impl RCHandle<SkImage> {
     }
 
     pub fn from_texture(
-        context: &mut graphics::Context,
-        backend_texture: &graphics::BackendTexture,
-        origin: graphics::SurfaceOrigin,
+        context: &mut gpu::Context,
+        backend_texture: &gpu::BackendTexture,
+        origin: gpu::SurfaceOrigin,
         color_type: ColorType,
         alpha_type: AlphaType,
         color_space: Option<&ColorSpace>) -> Option<Image> {
@@ -126,7 +126,7 @@ impl RCHandle<SkImage> {
     }
 
     pub fn from_encoded_cross_context(
-        context: &mut graphics::Context,
+        context: &mut gpu::Context,
         data: &Data,
         build_mips: bool,
         // not mentions in the docs, but implementation indicates that
@@ -144,9 +144,9 @@ impl RCHandle<SkImage> {
     }
 
     pub fn from_adopted_texture(
-        context: &mut graphics::Context,
-        backend_texture: &graphics::BackendTexture,
-        origin: graphics::SurfaceOrigin,
+        context: &mut gpu::Context,
+        backend_texture: &gpu::BackendTexture,
+        origin: gpu::SurfaceOrigin,
         color_type: ColorType,
         alpha_type: AlphaType,
         color_space: Option<&ColorSpace>) -> Option<Image> {
@@ -163,12 +163,12 @@ impl RCHandle<SkImage> {
     }
 
     pub fn from_yuva_textures_copy(
-        context: &mut graphics::Context,
+        context: &mut gpu::Context,
         yuv_color_space: YUVColorSpace,
-        yuva_textures: &[graphics::BackendTexture],
+        yuva_textures: &[gpu::BackendTexture],
         yuva_indices: &[YUVAIndex; 4],
         image_size: ISize,
-        image_origin: graphics::SurfaceOrigin,
+        image_origin: gpu::SurfaceOrigin,
         image_color_space: Option<ColorSpace>) -> Option<Image> {
 
         Image::from_ptr(unsafe {
@@ -186,13 +186,13 @@ impl RCHandle<SkImage> {
     // TODO: consider clippy!
     #[allow(clippy::too_many_arguments)]
     pub fn from_yuva_textures_copy_with_external_backend(
-        context: &mut graphics::Context,
+        context: &mut gpu::Context,
         yuv_color_space: YUVColorSpace,
-        yuva_textures: &[graphics::BackendTexture],
+        yuva_textures: &[gpu::BackendTexture],
         yuva_indices: &[YUVAIndex; 4],
         image_size: ISize,
-        image_origin: graphics::SurfaceOrigin,
-        backend_texture: &graphics::BackendTexture,
+        image_origin: gpu::SurfaceOrigin,
+        backend_texture: &gpu::BackendTexture,
         image_color_space: Option<ColorSpace>) -> Option<Image> {
 
         let yuva_indices : Vec<SkYUVAIndex> =
@@ -212,12 +212,12 @@ impl RCHandle<SkImage> {
     }
 
     pub fn from_yuva_textures(
-        context: &mut graphics::Context,
+        context: &mut gpu::Context,
         yuv_color_space: YUVColorSpace,
-        yuva_textures: &[graphics::BackendTexture],
+        yuva_textures: &[gpu::BackendTexture],
         yuva_indices: &[YUVAIndex; 4],
         image_size: ISize,
-        image_origin: graphics::SurfaceOrigin,
+        image_origin: gpu::SurfaceOrigin,
         image_color_space: Option<ColorSpace>) -> Option<Image> {
 
         let yuva_indices : Vec<SkYUVAIndex> =
@@ -236,10 +236,10 @@ impl RCHandle<SkImage> {
     }
 
     pub fn from_nv12_textures_copy(
-        context: &mut graphics::Context,
+        context: &mut gpu::Context,
         yuv_color_space: YUVColorSpace,
-        nv12_textures: &[graphics::BackendTexture; 2],
-        image_origin: graphics::SurfaceOrigin,
+        nv12_textures: &[gpu::BackendTexture; 2],
+        image_origin: gpu::SurfaceOrigin,
         image_color_space: Option<ColorSpace>) -> Option<Image> {
 
         Image::from_ptr(unsafe {
@@ -253,11 +253,11 @@ impl RCHandle<SkImage> {
     }
 
     pub fn from_nv12_textures_copy_with_external_backend(
-        context: &mut graphics::Context,
+        context: &mut gpu::Context,
         yuv_color_space: YUVColorSpace,
-        nv12_textures: &[graphics::BackendTexture; 2],
-        image_origin: graphics::SurfaceOrigin,
-        backend_texture: &graphics::BackendTexture,
+        nv12_textures: &[gpu::BackendTexture; 2],
+        image_origin: gpu::SurfaceOrigin,
+        backend_texture: &gpu::BackendTexture,
         image_color_space: Option<ColorSpace>) -> Option<Image> {
 
         Image::from_ptr(unsafe {
@@ -350,14 +350,14 @@ impl RCHandle<SkImage> {
         unsafe { self.native().isTextureBacked() }
     }
 
-    pub fn is_valid(&self, context: &mut graphics::Context) -> bool {
+    pub fn is_valid(&self, context: &mut gpu::Context) -> bool {
         unsafe { self.native().isValid(context.native_mut()) }
     }
 
     pub fn backend_texture(&self, flush_pending_gr_context_io: bool)
-        -> (graphics::BackendTexture, graphics::SurfaceOrigin) {
+        -> (gpu::BackendTexture, gpu::SurfaceOrigin) {
 
-        let mut origin = graphics::SurfaceOrigin::TopLeft;
+        let mut origin = gpu::SurfaceOrigin::TopLeft;
         let texture = unsafe {
             self.native()
                 .getBackendTexture(flush_pending_gr_context_io, origin.native_mut())
@@ -408,9 +408,9 @@ impl RCHandle<SkImage> {
 
     pub fn new_texture_image(
         &self,
-        context: &mut graphics::Context,
+        context: &mut gpu::Context,
         dst_color_space: &mut ColorSpace,
-        mip_mapped: graphics::MipMapped) -> Option<Image> {
+        mip_mapped: gpu::MipMapped) -> Option<Image> {
 
         Image::from_ptr(unsafe {
             C_SkImage_makeTextureImage(
