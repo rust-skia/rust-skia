@@ -24,14 +24,14 @@ jobs:
       addToPath: true
       architecture: 'x64'
 
-  - ${{ if eq(parameters.platform, 'MacOS') }}:
-    # MacOS
+  - ${{ if eq(parameters.platform, 'macOS') }}:
+    # macOS
     - script: |
         brew update && brew install llvm@7
       displayName: Install llvm
 
   - ${{ if ne(parameters.platform, 'Windows') }}:
-    # Linux and MacOS.
+    # Linux and macOS.
     - script: |
         curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $TOOLCHAIN
         echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"

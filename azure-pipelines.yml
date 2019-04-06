@@ -7,7 +7,7 @@ jobs:
 
 - template: azure-pipelines-template.yml
   parameters:
-    platform: MacOS
+    platform: macOS
     image: macOS-10.13
 
 - template: azure-pipelines-template.yml
