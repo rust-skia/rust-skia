@@ -74,3 +74,4 @@ jobs:
     inputs:
       pathtoPublish: '$(Build.ArtifactStagingDirectory)/skia-org'
       artifactName: 'skia-org-examples-$(platform)-$(toolchain)'
+    condition: eq(variables['features'], '')
