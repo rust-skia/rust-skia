@@ -178,12 +178,6 @@ impl RCHandle<GrContext> {
 
     // TODO: flushAndSignalSemaphores
 
-    pub fn unique_id(&mut self) -> u32 {
-        unsafe {
-            self.native_mut().uniqueID()
-        }
-    }
-
     pub fn supports_distance_field_text(&self) -> bool {
         unsafe {
             self.native().supportsDistanceFieldText()
