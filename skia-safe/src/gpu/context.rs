@@ -60,6 +60,13 @@ impl RCHandle<GrContext> {
         self
     }
 
+    pub fn reset_gl_texture_bindings(&mut self) -> &mut Self {
+        unsafe {
+            self.native_mut().resetGLTextureBindings()
+        }
+        self
+    }
+
     pub fn abandon(&mut self) -> &mut Self {
         unsafe {
             // self.native_mut().abandonContext()
