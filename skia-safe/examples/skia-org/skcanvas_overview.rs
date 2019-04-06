@@ -1,7 +1,7 @@
-use std::path::PathBuf;
 use crate::resources;
-use skia_safe::skia::{Canvas, Path, scalar, Paint, Color, Rect, PaintStyle, BlendMode, RRect, Font, Typeface, TextBlob};
 use crate::artifact::DrawingDriver;
+use std::path::PathBuf;
+use skia_safe::{Canvas, Path, scalar, Paint, Color, Rect, PaintStyle, BlendMode, RRect, Font, Typeface, TextBlob};
 
 pub fn draw<Driver: DrawingDriver>(path: &PathBuf) {
     let path = path.join("SkCanvas-Overview");

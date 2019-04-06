@@ -1,0 +1,363 @@
+use std::ptr;
+use std::hash::{
+    Hash,
+    Hasher
+};
+use crate::prelude::*;
+use crate::core::{Color, FontHinting, FilterQuality, Color4f, ColorSpace, scalar, Path, Rect, ColorFilter, BlendMode, PathEffect, MaskFilter, Shader};
+use skia_bindings::{C_SkPaint_setMaskFilter, C_SkPaint_setPathEffect, C_SkPaint_setColorFilter, SkPaint_Cap, SkPaint, C_SkPaint_destruct, SkPaint_Style, SkPaint_Join, C_SkPaint_Equals, C_SkPaint_setShader};
+use skia_bindings::{
+    SkPaint_Flags_kAntiAlias_Flag,
+    SkPaint_Flags_kDither_Flag,
+    SkPaint_Flags_kFakeBoldText_Flag,
+    SkPaint_Flags_kLinearText_Flag,
+    SkPaint_Flags_kSubpixelText_Flag,
+    SkPaint_Flags_kLCDRenderText_Flag,
+    SkPaint_Flags_kEmbeddedBitmapText_Flag,
+    SkPaint_Flags_kAutoHinting_Flag
+};
+
+bitflags! {
+    pub struct PaintFlags: u32 {
+        const ANTI_ALIAS = SkPaint_Flags_kAntiAlias_Flag as _;
+        const DITHER = SkPaint_Flags_kDither_Flag as _;
+        const FAKE_BOLD_TEXT = SkPaint_Flags_kFakeBoldText_Flag as _;
+        const LINEAR_TEXT = SkPaint_Flags_kLinearText_Flag as _;
+        const SUBPIXEL_TEXT = SkPaint_Flags_kSubpixelText_Flag as _;
+        const LCD_RENDER_TEXT = SkPaint_Flags_kLCDRenderText_Flag as _;
+        const EMBEDDED_BITMAP_TEXT = SkPaint_Flags_kEmbeddedBitmapText_Flag as _;
+        const AUTO_HINTING = SkPaint_Flags_kAutoHinting_Flag as _;
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(u8)]
+pub enum PaintStyle {
+    Stroke = SkPaint_Style::kStroke_Style as _,
+    Fill = SkPaint_Style::kFill_Style as _,
+    StrokeAndFill = SkPaint_Style::kStrokeAndFill_Style as _
+}
+
+impl NativeTransmutable<SkPaint_Style> for PaintStyle {}
+#[test] fn test_paint_style_layout() { PaintStyle::test_layout() }
+
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum PaintCap {
+    Butt = SkPaint_Cap::kButt_Cap as _,
+    Round = SkPaint_Cap::kRound_Cap as _,
+    Square = SkPaint_Cap::kSquare_Cap as _
+}
+
+impl NativeTransmutable<SkPaint_Cap> for PaintCap {}
+#[test] fn test_paint_cap_layout() { PaintCap::test_layout() }
+
+impl Default for PaintCap {
+    fn default() -> Self {
+        // SkPaint_Cap::kDefault_Cap
+        PaintCap::Butt
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(u8)]
+pub enum PaintJoin {
+    Miter = SkPaint_Join::kMiter_Join as _,
+    Round = SkPaint_Join::kRound_Join as _,
+    Bevel = SkPaint_Join::kBevel_Join as _,
+}
+
+impl NativeTransmutable<SkPaint_Join> for PaintJoin {}
+#[test] fn test_paint_join_layout() { PaintStyle::test_layout() }
+
+impl Default for PaintJoin {
+    fn default() -> Self {
+        // SkPaint_Join::kDefault_Join
+        PaintJoin::Miter
+    }
+}
+
+pub type Paint = Handle<SkPaint>;
+
+impl NativeDrop for SkPaint {
+    fn drop(&mut self) {
+        unsafe { C_SkPaint_destruct(self) }
+    }
+}
+
+impl NativeClone for SkPaint {
+    fn clone(&self) -> Self {
+        unsafe { SkPaint::new1(self) }
+    }
+}
+
+impl NativePartialEq for SkPaint {
+    fn eq(&self, rhs: &Self) -> bool {
+        unsafe { C_SkPaint_Equals(self, rhs) }
+    }
+}
+
+impl NativeHash for SkPaint {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        unsafe { self.getHash() }.hash(state)
+    }
+}
+
+impl Default for Handle<SkPaint> {
+    fn default() -> Self {
+        Paint::from_native(unsafe { SkPaint::new() })
+    }
+}
+
+impl Handle<SkPaint> {
+
+    pub fn reset(&mut self) -> &mut Self {
+        unsafe { self.native_mut().reset() }
+        self
+    }
+
+    pub fn set_hinting(&mut self, hinting_level: FontHinting) -> &mut Self {
+        unsafe { self.native_mut().setHinting(hinting_level.into_native()) }
+        self
+    }
+
+    pub fn hinting(&self) -> FontHinting {
+        FontHinting::from_native(unsafe { self.native().getHinting() })
+    }
+
+    pub fn is_anti_alias(&self) -> bool {
+        unsafe { self.native().isAntiAlias() }
+    }
+
+    pub fn set_anti_alias(&mut self, anti_alias: bool) -> &mut Self {
+        unsafe { self.native_mut().setAntiAlias(anti_alias) }
+        self
+    }
+
+    pub fn is_dither(&self) -> bool {
+        unsafe { self.native().isDither() }
+    }
+
+    pub fn set_dither(&mut self, dither: bool) -> &mut Self {
+        unsafe { self.native_mut().setDither(dither) }
+        self
+    }
+
+    pub fn filter_quality(&self) -> FilterQuality {
+        FilterQuality::from_native(unsafe { self.native().getFilterQuality() })
+    }
+
+    pub fn set_filter_quality(&mut self, quality: FilterQuality) -> &mut Self {
+        unsafe { self.native_mut().setFilterQuality(quality.into_native()) }
+        self
+    }
+
+    pub fn style(&self) -> PaintStyle {
+        PaintStyle::from_native(unsafe { self.native().getStyle() })
+    }
+
+    pub fn set_style(&mut self, style: PaintStyle) -> &mut Self {
+        unsafe { self.native_mut().setStyle(style.into_native()) }
+        self
+    }
+
+    pub fn color(&self) -> Color {
+        Color::from_native(unsafe { self.native().getColor() })
+    }
+
+    pub fn color4f(&self) -> Color4f {
+        Color4f::from_native(unsafe { self.native().getColor4f() })
+    }
+
+    pub fn set_color<C: Into<Color>>(&mut self, color: C) -> &mut Self {
+        let color = color.into();
+        unsafe { self.native_mut().setColor(color.into_native()) }
+        self
+    }
+
+    // TODO: why is ColorSpace mutable?
+    pub fn set_color4f(&mut self, color: Color4f, color_space: &mut ColorSpace) -> &mut Self {
+        unsafe {
+            self.native_mut().setColor4f(
+                &color.into_native(),
+                color_space.native_mut() )
+        }
+        self
+    }
+
+    pub fn alpha(&self) -> u8 {
+        unsafe { self.native().getAlpha() }
+    }
+
+    pub fn set_alpha(&mut self, alpha: u8) -> &mut Self {
+        unsafe { self.native_mut().setAlpha(alpha.into()) }
+        self
+    }
+
+    pub fn set_argb(&mut self, a: u8, r: u8, g: u8, b: u8) -> &mut Self {
+        unsafe { self.native_mut().setARGB(a.into(), r.into(), g.into(), b.into())}
+        self
+    }
+
+    pub fn stroke_width(&self) -> scalar {
+        unsafe { self.native().getStrokeWidth() }
+    }
+
+    pub fn set_stroke_width(&mut self, width: scalar) -> &mut Self {
+        unsafe { self.native_mut().setStrokeWidth(width) }
+        self
+    }
+
+    pub fn stroke_miter(&self) -> scalar {
+        unsafe { self.native().getStrokeMiter() }
+    }
+
+    pub fn set_stroke_miter(&mut self, miter: scalar) -> &mut Self {
+        unsafe { self.native_mut().setStrokeMiter(miter) }
+        self
+    }
+
+    pub fn stroke_cap(&self) -> PaintCap {
+        PaintCap::from_native(unsafe { self.native().getStrokeCap() })
+    }
+
+    pub fn set_stroke_cap(&mut self, cap: PaintCap) -> &mut Self {
+        unsafe { self.native_mut().setStrokeCap(cap.into_native()) }
+        self
+    }
+
+    pub fn stroke_join(&self) -> PaintJoin {
+        PaintJoin::from_native(unsafe { self.native().getStrokeJoin() })
+    }
+
+    pub fn set_stroke_join(&mut self, join: PaintJoin) -> &mut Self {
+        unsafe { self.native_mut().setStrokeJoin(join.into_native()) }
+        self
+    }
+
+    pub fn fill_path(&self, src: &Path, cull_rect: Option<&Rect>, res_scale: Option<scalar>) -> Option<Path> {
+        let mut r = Path::default();
+
+
+        let cull_rect_ptr =
+            cull_rect
+                .map(|r| r.native() as *const _)
+                .unwrap_or(ptr::null());
+
+        unsafe { self.native().getFillPath(
+            src.native(),
+            r.native_mut(),
+            cull_rect_ptr,
+            res_scale.unwrap_or(1.0))
+        }
+        .if_true_some(r)
+    }
+
+    pub fn shader(&self) -> Option<Shader> {
+        Shader::from_unshared_ptr(unsafe {
+            self.native().getShader()
+        })
+    }
+
+    pub fn set_shader(&mut self, shader: Option<&Shader>) -> &mut Self {
+        unsafe {
+            C_SkPaint_setShader(self.native_mut(), shader.shared_ptr())
+        }
+        self
+    }
+
+    pub fn color_filter(&self) -> Option<ColorFilter> {
+        ColorFilter::from_unshared_ptr(unsafe {
+            self.native().getColorFilter()
+        })
+    }
+
+
+    pub fn set_color_filter(&mut self, color_filter: Option<&ColorFilter>) -> &mut Self {
+        unsafe {
+            C_SkPaint_setColorFilter(self.native_mut(), color_filter.shared_ptr())
+        }
+        self
+    }
+
+    pub fn blend_mode(&self) -> BlendMode {
+        BlendMode::from_native(unsafe {
+            self.native().getBlendMode()
+        })
+    }
+
+    pub fn is_src_over(&self) -> bool {
+        unsafe {
+            self.native().isSrcOver()
+        }
+    }
+
+    pub fn set_blend_mode(&mut self, mode: BlendMode) -> &mut Self {
+        unsafe {
+            self.native_mut().setBlendMode(mode.into_native())
+        }
+        self
+    }
+
+    pub fn path_effect(&self) -> Option<PathEffect> {
+        PathEffect::from_unshared_ptr(unsafe {
+            self.native().getPathEffect()
+        })
+    }
+
+    pub fn set_path_effect(&mut self, path_effect: Option<&PathEffect>) -> &mut Self {
+        unsafe {
+            C_SkPaint_setPathEffect(self.native_mut(), path_effect.shared_ptr())
+        }
+        self
+    }
+
+    pub fn mask_filter(&self) -> Option<MaskFilter> {
+        MaskFilter::from_unshared_ptr(unsafe {
+            self.native().getMaskFilter()
+        })
+    }
+
+    pub fn set_mask_filter(&mut self, mask_filter: Option<&MaskFilter>) -> &mut Self {
+        unsafe {
+            C_SkPaint_setMaskFilter(self.native_mut(), mask_filter.shared_ptr())
+        }
+        self
+    }
+
+    /* TODO: ImageFilter postponed
+
+    pub fn image_filter(&self) -> Option<ImageFilter> {
+        ImageFilter::from_unshared_ptr(unsafe {
+            self.native().getImageFilter()
+        })
+    }
+
+    pub fn set_image_filter(&mut self, image_filter: Option<&ImageFilter>) -> &mut Self {
+        unsafe {
+            C_SkPaint_setImageFilter(self.native_mut(), image_filter.shared_ptr())
+        }
+        self
+    }
+
+    */
+
+    // TODO: getDrawLooper, setDrawLooper
+
+    pub fn nothing_to_draw(&self) -> bool {
+        unsafe { self.native().nothingToDraw() }
+    }
+}
+
+#[test]
+fn default_creation() {
+    let paint = Paint::default();
+    drop(paint)
+}
+
+#[test]
+fn method_chaining_compiles() {
+    let mut paint = Paint::default();
+    let _paint = paint.reset().reset();
+}

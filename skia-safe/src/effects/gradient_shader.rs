@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use skia_bindings::{C_SkGradientShader_MakeLinear, C_SkGradientShader_MakeLinear2, C_SkGradientShader_MakeRadial, C_SkGradientShader_MakeRadial2, C_SkGradientShader_MakeTwoPointConical, C_SkGradientShader_MakeTwoPointConical2, C_SkGradientShader_MakeSweep, C_SkGradientShader_MakeSweep2, SkGradientShader_Flags_kInterpolateColorsInPremul_Flag };
-use crate::skia::{Shader, ShaderTileMode, scalar, Color, Point, Matrix, Color4f, ColorSpace};
+use crate::core::{Shader, ShaderTileMode, scalar, Color, Point, Matrix, Color4f, ColorSpace};
 
 pub enum GradientShader {}
 

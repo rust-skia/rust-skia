@@ -1,5 +1,5 @@
 use std::path::PathBuf;
-use skia_safe::skia::{Canvas, Path, Paint, Color, PaintStyle, Font, PaintCap};
+use skia_safe::{Canvas, Path, Paint, Color, PaintStyle, Font, PaintCap};
 use crate::artifact::DrawingDriver;
 
 pub fn draw<Driver: DrawingDriver>(path: &PathBuf) {

@@ -1,6 +1,6 @@
 use std::path::PathBuf;
-use skia_safe::effects::{GradientShader, GradientShaderFlags, PerlinNoiseShader, TableColorFilter, Path2DPathEffect, Line2DPathEffect, Path1DPathEffect, Path1DPathEffectStyle, CornerPathEffect, DashPathEffect, DiscretePathEffect};
-use skia_safe::skia::{AutoCanvasRestore, BlendMode, Canvas, Color, Font, Paint, PaintStyle, Point, Rect, scalar, ShaderTileMode, TextBlob, Typeface, Matrix, Shader, BlurStyle, MaskFilter, ColorFilter, Path, PathEffect};
+use skia_safe::{GradientShader, GradientShaderFlags, PerlinNoiseShader, TableColorFilter, Path2DPathEffect, Line2DPathEffect, Path1DPathEffect, Path1DPathEffectStyle, CornerPathEffect, DashPathEffect, DiscretePathEffect};
+use skia_safe::{AutoCanvasRestore, BlendMode, Canvas, Color, Font, Paint, PaintStyle, Point, Rect, scalar, ShaderTileMode, TextBlob, Typeface, Matrix, Shader, BlurStyle, MaskFilter, ColorFilter, Path, PathEffect};
 
 use crate::resources;
 use crate::artifact::DrawingDriver;

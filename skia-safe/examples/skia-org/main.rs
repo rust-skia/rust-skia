@@ -23,8 +23,8 @@ mod skpaint_overview;
 mod skpath_overview;
 
 pub(crate) mod artifact {
-    use skia_safe::skia::{Canvas, EncodedImageFormat, Surface, Budgeted, ImageInfo};
-    use skia_safe::graphics;
+    use skia_safe::{Canvas, EncodedImageFormat, Surface, Budgeted, ImageInfo};
+    use skia_safe::gpu;
     use std::fs;
     use std::io::Write;
     use std::path::PathBuf;
@@ -74,13 +74,13 @@ pub(crate) mod artifact {
         fn draw_image<F>((width, height): (i32, i32), path: &PathBuf, name: &str, func: F)
             where F: Fn(&mut Canvas) -> () {
 
-            let mut context = graphics::Context::new_gl(None).unwrap();
+            let mut context = gpu::Context::new_gl(None).unwrap();
 
             let image_info = ImageInfo::new_n32_premul((width * 2, height * 2), None);
             let mut surface = Surface::new_render_target(
                 &mut context,
                 Budgeted::YES,
-                &image_info, None, graphics::SurfaceOrigin::TopLeft, None, false).unwrap();
+                &image_info, None, gpu::SurfaceOrigin::TopLeft, None, false).unwrap();
 
             draw_image_on_surface(&mut surface, path, name, func);
         }
@@ -108,7 +108,7 @@ pub(crate) mod artifact {
             };
 
             let backend_context = unsafe {
-                graphics::vulkan::BackendContext::new(
+                gpu::vk::BackendContext::new(
                     ash_graphics.instance.handle().as_raw() as _,
                     ash_graphics.physical_device.as_raw() as _,
                     ash_graphics.device.handle().as_raw() as _,
@@ -116,13 +116,13 @@ pub(crate) mod artifact {
                     &get_proc)
             };
 
-            let mut context = graphics::Context::new_vulkan(&backend_context).unwrap();
+            let mut context = gpu::Context::new_vulkan(&backend_context).unwrap();
 
             let image_info = ImageInfo::new_n32_premul((width * 2, height * 2), None);
             let mut surface = Surface::new_render_target(
                 &mut context,
                 Budgeted::YES,
-                &image_info, None, graphics::SurfaceOrigin::TopLeft, None, false).unwrap();
+                &image_info, None, gpu::SurfaceOrigin::TopLeft, None, false).unwrap();
 
             draw_image_on_surface(&mut surface, path, name, func);
         }
@@ -152,7 +152,7 @@ pub(crate) mod artifact {
 
 pub (crate) mod resources {
 
-    use skia_safe::skia::{Image, Data};
+    use skia_safe::{Image, Data};
 
     pub fn color_wheel() -> Image {
         let bytes = include_bytes!("resources/color_wheel.png");

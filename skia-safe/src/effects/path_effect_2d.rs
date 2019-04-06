@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::skia::{PathEffect, Matrix, scalar, Path};
+use crate::core::{PathEffect, Matrix, scalar, Path};
 use skia_bindings::{C_SkLine2DPathEffect_Make, C_SkPath2DPathEffect_Make};
 
 pub enum Line2DPathEffect {}
