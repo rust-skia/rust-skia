@@ -241,8 +241,6 @@ impl Canvas {
         Canvas::own_from_native_ptr(ptr).unwrap()
     }
 
-    // TODO: getMetaData()
-
     pub fn image_info(&self) -> ImageInfo {
         let mut ii = ImageInfo::default();
         unsafe {
