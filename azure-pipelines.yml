@@ -2,36 +2,36 @@ jobs:
 
 - template: azure-pipelines-template.yml
   parameters:
-    name: Linux Stable
+    platform: Linux
     vmImage: ubuntu-16.04
     toolchain: stable
 
 - template: azure-pipelines-template.yml
   parameters:
-    name: Linux Beta
+    platform: Linux
     vmImage: ubuntu-16.04
     toolchain: beta
 
 - template: azure-pipelines-template.yml
   parameters:
-    name: macOS Stable
+    platform: MacOS
     vmImage: macOS-10.13
     toolchain: stable
 
 - template: azure-pipelines-template.yml
   parameters:
-    name: macOS Beta
+    platform: MacOS
     vmImage: macOS-10.13
     toolchain: beta
 
 - template: azure-pipelines-template.yml
   parameters:
-    name: Windows Stable
+    platform: Windows
     vmImage: vs2017-win2016
     toolchain: stable
 
 - template: azure-pipelines-template.yml
   parameters:
-    name: Windows Beta
+    platform: Windows
     vmImage: vs2017-win2016
     toolchain: beta

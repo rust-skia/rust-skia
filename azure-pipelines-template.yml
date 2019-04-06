@@ -1,5 +1,5 @@
 jobs:
-- job: ${{ parameters.name }}
+- job: ${{ parameters.platform }}_${{ parameters.toolchain }}
   pool:
     vmImage: ${{ parameters.vmImage }}
   variables:
@@ -10,17 +10,17 @@ jobs:
       versionSpec: '2.x'
       addToPath: true
       architecture: 'x64'
-  - ${{ if eq(parameters.name, 'macOS') }}:
+  - ${{ if eq(parameters.platform, 'MacOS') }}:
     - script: |
         brew update && brew install llvm@7
       displayName: Install llvm
-  - ${{ if ne(parameters.name, 'Windows') }}:
-    # Linux and macOS.
+  - ${{ if ne(parameters.platform, 'Windows') }}:
+    # Linux and MacOS.
     - script: |
         curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUSTUP_TOOLCHAIN
         echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
       displayName: Install rust
-  - ${{ if eq(parameters.name, 'Windows') }}:
+  - ${{ if eq(parameters.platform, 'Windows') }}:
     # Windows.
     - script: |
         curl -sSf -o rustup-init.exe https://win.rustup.rs
@@ -28,7 +28,7 @@ jobs:
         set PATH=%PATH%;%USERPROFILE%\.cargo\bin
         echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
         choco install llvm --version 7.0.1
-      displayName: Install rust (windows)
+      displayName: Install Rust (Windows)
   # All platforms.
   - script: |
         rustc -Vv
@@ -38,13 +38,13 @@ jobs:
     displayName: Build all targets
   - script: cargo test --release -p skia-safe -vv
     displayName: Test skia-safe
-  - ${{ if ne(parameters.name, 'Windows') }}:
+  - ${{ if ne(parameters.platform, 'Windows') }}:
     - script: cargo run --release --example skia-org ${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-org
       displayName: Run skia-org Example
-  - ${{ if eq(parameters.name, 'Windows') }}:
+  - ${{ if eq(parameters.platform, 'Windows') }}:
     - script: cargo run --release --example skia-org %BUILD_ARTIFACTSTAGINGDIRECTORY%/skia-org
       displayName: Run skia-org Example
   - task: PublishBuildArtifacts@1
     inputs:
       pathtoPublish: '$(Build.ArtifactStagingDirectory)/skia-org'
-      artifactName: 'skia-org-examples-${{ parameters.name }}-$(rustup_toolchain)'
+      artifactName: 'skia-org-examples-${{ parameters.platform }}-$(rustup_toolchain)'
