@@ -34,7 +34,7 @@ impl RCHandle<GrContext> {
     // TODO: support variant with GrContextOptions
     pub fn new_gl(interface: Option<&gl::Interface>) -> Option<Context> {
         Context::from_ptr(unsafe {
-            C_GrContext_MakeGL(interface.native_ptr_or_null())
+            C_GrContext_MakeGL(interface.shared_ptr())
         })
     }
 
