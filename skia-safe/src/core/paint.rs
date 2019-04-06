@@ -154,8 +154,17 @@ impl Handle<SkPaint> {
         self
     }
 
+    pub fn alpha_f(&self) -> f32 {
+        unsafe { self.native().getAlphaf() }
+    }
+
     pub fn alpha(&self) -> u8 {
         unsafe { self.native().getAlpha() }
+    }
+
+    pub fn set_alpha_f(&mut self, alpha: f32) -> &mut Self {
+        unsafe { self.native_mut().setAlphaf(alpha) }
+        self
     }
 
     pub fn set_alpha(&mut self, alpha: u8) -> &mut Self {
