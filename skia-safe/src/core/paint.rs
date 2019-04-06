@@ -117,15 +117,6 @@ impl Handle<SkPaint> {
         self
     }
 
-    pub fn set_hinting(&mut self, hinting_level: FontHinting) -> &mut Self {
-        unsafe { self.native_mut().setHinting(hinting_level.into_native()) }
-        self
-    }
-
-    pub fn hinting(&self) -> FontHinting {
-        FontHinting::from_native(unsafe { self.native().getHinting() })
-    }
-
     pub fn is_anti_alias(&self) -> bool {
         unsafe { self.native().isAntiAlias() }
     }
