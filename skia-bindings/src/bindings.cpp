@@ -931,6 +931,10 @@ extern "C" SkColorFilter* C_SkColorFilter_MakeSRGBToLinearGamma() {
     return SkColorFilter::MakeSRGBToLinearGamma().release();
 }
 
+extern "C" SkColorFilter* C_SkColorFilter_MakeMixer(const SkColorFilter* cf0, const SkColorFilter* cf1, float weight) {
+    return SkColorFilter::MakeMixer(spFromConst(cf0), spFromConst(cf1), weight).release();
+}
+
 extern "C" bool C_SkColorFilter_asColorMode(const SkColorFilter* self, SkColor* color, SkBlendMode* mode) {
     return self->asColorMode(color, mode);
 }

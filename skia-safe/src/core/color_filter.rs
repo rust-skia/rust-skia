@@ -8,22 +8,7 @@ use crate::core::{
     ColorSpace,
     scalar
 };
-use skia_bindings::{
-    C_SkColorFilter_MakeLinearToSRGBGamma,
-    C_SkColorFilter_MakeMatrixFilterRowMajor255,
-    C_SkColorFilter_makeComposed,
-    C_SkColorFilter_getFlags,
-    C_SkColorFilter_asComponentTable,
-    C_SkColorFilter_asColorMatrix,
-    C_SkColorFilter_asColorMode,
-    SkColor,
-    SkBlendMode,
-    C_SkColorFilter_MakeModeFilter,
-    SkRefCntBase,
-    SkColorFilter,
-    C_SkColorFilter_MakeSRGBToLinearGamma,
-    SkColorFilter_Flags_kAlphaUnchanged_Flag
-};
+use skia_bindings::{C_SkColorFilter_MakeLinearToSRGBGamma, C_SkColorFilter_MakeMatrixFilterRowMajor255, C_SkColorFilter_makeComposed, C_SkColorFilter_getFlags, C_SkColorFilter_asComponentTable, C_SkColorFilter_asColorMatrix, C_SkColorFilter_asColorMode, SkColor, SkBlendMode, C_SkColorFilter_MakeModeFilter, SkRefCntBase, SkColorFilter, C_SkColorFilter_MakeSRGBToLinearGamma, SkColorFilter_Flags_kAlphaUnchanged_Flag, C_SkColorFilter_MakeMixer};
 
 bitflags! {
     pub struct ColorFilterFlags: u32 {
@@ -111,6 +96,12 @@ impl RCHandle<SkColorFilter> {
         ColorFilter::from_ptr(unsafe {
             C_SkColorFilter_MakeSRGBToLinearGamma()
         }).unwrap()
+    }
+
+    pub fn new_mixer(cf0: &ColorFilter, cf1: &ColorFilter, weight: f32) -> Option<ColorFilter> {
+        ColorFilter::from_ptr(unsafe {
+            C_SkColorFilter_MakeMixer(cf0.shared_native(), cf1.shared_native(), weight)
+        })
     }
 }
 
