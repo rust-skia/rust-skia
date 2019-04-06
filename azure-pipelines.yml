@@ -3,15 +3,15 @@ jobs:
 - template: azure-pipelines-template.yml
   parameters:
     platform: Linux
-	image: ubuntu-16.04
+    image: ubuntu-16.04
 
 - template: azure-pipelines-template.yml
   parameters:
     platform: MacOS
-	image: macOS-10.13
+    image: macOS-10.13
 
 - template: azure-pipelines-template.yml
   parameters:
     platform: Windows
-	image: vs2017-win2016
+    image: vs2017-win2016
 
