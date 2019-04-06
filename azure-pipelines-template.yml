@@ -2,14 +2,8 @@ jobs:
 - job: ${{ parameters.name }}
   pool:
     vmImage: ${{ parameters.vmImage }}
-  strategy:
-    matrix:
-      stable:
-        rustup_toolchain: stable
-      beta:
-        rustup_toolchain: beta
-      nightly:
-        rustup_toolchain: nightly
+  variables:
+    rustup_toolchain: ${{ parameters.toolchain }}
   steps:
   - task: UsePythonVersion@0
     inputs:
