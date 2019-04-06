@@ -872,6 +872,14 @@ extern "C" SkData* C_SkVertices_encode(const SkVertices* self) {
 }
 
 //
+// SkVertices::Bone
+//
+
+extern "C" SkRect C_SkVertices_Bone_mapRect(const SkVertices::Bone* self, const SkRect* rect) {
+    return self->mapRect(*rect);
+}
+
+//
 // SkVertices::Builder
 //
 
