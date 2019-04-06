@@ -402,10 +402,6 @@ extern "C" void C_SkPaint_setMaskFilter(SkPaint* self, const SkMaskFilter* maskF
     self->setMaskFilter(spFromConst(maskFilter));
 }
 
-extern "C" SkFontHinting C_SkPaint_getHinting(const SkPaint* self) {
-    return self->getHinting();
-}
-
 // postponed
 
 /*
