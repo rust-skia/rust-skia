@@ -142,16 +142,6 @@ impl ColorSpace {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum ColorSpaceGamut {
-    SRGB = SkColorSpace_Gamut::kSRGB_Gamut as _,
-    DCIP3D65 = SkColorSpace_Gamut::kDCIP3_D65_Gamut as _,
-}
-
-impl NativeTransmutable<SkColorSpace_Gamut> for ColorSpaceGamut {}
-#[test] fn test_color_space_gamut_layout () { ColorSpaceGamut::test_layout() }
-
 pub struct XYZD50Hash(pub u32);
 
 #[cfg(test)]
