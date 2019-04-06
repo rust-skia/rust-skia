@@ -62,12 +62,12 @@ jobs:
 
   - ${{ if ne(parameters.platform, 'Windows') }}:
     - script: cargo run --release --example skia-org ${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-org
-      displayName: Generate skia-org Examples
+      displayName: Generate skia-org Example Images
       condition: eq(variables['features'], '')
 
   - ${{ if eq(parameters.platform, 'Windows') }}:
     - script: cargo run --release --example skia-org %BUILD_ARTIFACTSTAGINGDIRECTORY%/skia-org
-      displayName: Generate skia-org Examples
+      displayName: Generate skia-org Example Images
       condition: eq(variables['features'], '')
 
   - task: PublishBuildArtifacts@1
