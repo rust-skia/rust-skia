@@ -2,13 +2,13 @@ jobs:
 - job: ${{ parameters.platform }}
   strategy:
     matrix:
-      Stable:
+      stable:
         toolchain: stable
         features: ''
-      Beta:
+      beta:
         toolchain: beta
         features: ''
-      Stable-Vulkan:
+      stable-vulkan:
         toolchain: stable
         features: 'vulkan'
   variables:
@@ -25,19 +25,20 @@ jobs:
       architecture: 'x64'
 
   - ${{ if eq(parameters.platform, 'MacOS') }}:
+    # MacOS
     - script: |
         brew update && brew install llvm@7
       displayName: Install llvm
 
-  # Linux and MacOS.
   - ${{ if ne(parameters.platform, 'Windows') }}:
+    # Linux and MacOS.
     - script: |
         curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $TOOLCHAIN
         echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
       displayName: Install Rust
 
-  # Windows.
   - ${{ if eq(parameters.platform, 'Windows') }}:
+    # Windows.
     - script: |
         curl -sSf -o rustup-init.exe https://win.rustup.rs
         rustup-init.exe -y --default-toolchain %TOOLCHAIN%
@@ -53,10 +54,10 @@ jobs:
     displayName: Print versions
 
   # Note: features are ignored when set in the workspace. This is a known bug in cargo (#5015), so cd into skia-safe instead.
-  - script: cd skia-safe && cargo build --release --features $(features) --all-targets -vv
+  - script: cd skia-safe && cargo build --release --features "$(features)" --all-targets -vv
     displayName: Build all targets in skia-safe
 
-  - script: cd skia-safe && cargo test --release --features $(features) -vv
+  - script: cd skia-safe && cargo test --release --features "$(features)" -vv
     displayName: Test skia-safe
 
   - ${{ if ne(parameters.platform, 'Windows') }}:
