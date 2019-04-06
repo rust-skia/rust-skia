@@ -1,11 +1,8 @@
-use std::mem;
 use super::{Matrix44, Data};
 use crate::prelude::*;
 use skia_bindings::{
-    SkColorSpaceTransferFn,
     SkColorSpace,
     SkColorSpacePrimaries,
-    SkColorSpace_Gamut,
 };
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -34,15 +31,9 @@ pub struct ColorSpaceTransferFn {
     pub f: f32
 }
 
-impl NativeTransmutable<SkColorSpaceTransferFn> for ColorSpaceTransferFn {}
-
-#[test]
-fn test_color_space_transfer_fn_layout() {
-    ColorSpaceTransferFn::test_layout()
-}
-
 pub struct NamedTransferFn {}
 
+// TODO: Make the binding generator provide all these constants.
 #[allow(non_upper_case_globals)]
 impl NamedTransferFn {
     pub const SRGB: ColorSpaceTransferFn = ColorSpaceTransferFn {
@@ -101,13 +92,6 @@ impl ColorSpace {
 
     pub fn new_srgb_linear() -> ColorSpace {
         ColorSpace::from_ptr(unsafe { skia_bindings::C_SkColorSpace_MakeSRGBLinear() }).unwrap()
-    }
-
-    pub fn is_numerical_transfer_fn(&self) -> Option<ColorSpaceTransferFn> {
-        let mut tfn : ColorSpaceTransferFn = unsafe { mem::zeroed() };
-        unsafe {
-            self.native().isNumericalTransferFn(tfn.native_mut())
-        }.if_true_some(tfn)
     }
 
     pub fn to_xyzd50(&self) -> Option<Matrix44> {
