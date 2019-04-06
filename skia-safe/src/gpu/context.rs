@@ -75,15 +75,11 @@ impl RCHandle<GrContext> {
         self
     }
 
-    // This function delegates to a base class. We remove this function until the base
-    // class is supported.
-    /*
     pub fn abandoned(&self) -> bool {
         unsafe {
-            self.native().abandoned()
+            self.native()._base._base.abandoned()
         }
     }
-    */
 
     pub fn release_resources_and_abandon(&mut self) -> &mut Self {
         unsafe {
