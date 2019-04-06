@@ -3,7 +3,7 @@ use ash::{Instance, Entry};
 use ash::vk;
 use ash::vk::Handle;
 use ash::version::{EntryV1_0, InstanceV1_0, DeviceV1_0};
-use skia_safe::gpu::vk;
+use skia_safe::gpu;
 
 pub struct AshGraphics {
     pub entry: Entry,
@@ -140,15 +140,15 @@ impl AshGraphics {
         }
     }
 
-    pub unsafe fn get_proc(&self, of: vk::GetProcOf)
+    pub unsafe fn get_proc(&self, of: gpu::vk::GetProcOf)
         -> Option<unsafe extern "system" fn() -> c_void> {
 
         match of {
-            vk::GetProcOf::Instance(instance, name) => {
+            gpu::vk::GetProcOf::Instance(instance, name) => {
                 let ash_instance = vk::Instance::from_raw(instance as _);
                 self.entry.get_instance_proc_addr(ash_instance, name)
             },
-            vk::GetProcOf::Device(device, name) => {
+            gpu::vk::GetProcOf::Device(device, name) => {
                 let ash_device = vk::Device::from_raw(device as _);
                 self.instance.get_device_proc_addr(ash_device, name)
             }
