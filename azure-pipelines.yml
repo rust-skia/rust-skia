@@ -1,68 +1,17 @@
 jobs:
-- job: Rust_Skia
-  strategy:
-    matrix:
-      Linux-Stable:
-        platform: Linux
-        image: ubuntu-16.04
-        toolchain: stable
-      Linux-Beta:
-        platform: Linux
-        image: ubuntu-16.04
-        toolchain: beta
-  pool:
-    vmImage: $(image)
 
-  steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '2.x'
-      addToPath: true
-      architecture: 'x64'
+- template: azure-pipelines-template.yml
+  parameters:
+    platform: Linux
+	image: ubuntu-16.04
 
-  - script: |
-      brew update && brew install llvm@7
-    displayName: Install llvm
-    condition: eq(variables['platform'], 'MacOS')
+- template: azure-pipelines-template.yml
+  parameters:
+    platform: MacOS
+	image: macOS-10.13
 
-  # Linux and MacOS.
-  - script: |
-      curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $TOOLCHAIN
-      echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
-    displayName: Install rust
-    condition: ne(variables['platform'], 'Windows')
+- template: azure-pipelines-template.yml
+  parameters:
+    platform: Windows
+	image: vs2017-win2016
 
-  # Windows.
-  - script: |
-      curl -sSf -o rustup-init.exe https://win.rustup.rs
-      rustup-init.exe -y --default-toolchain %TOOLCHAIN%
-      set PATH=%PATH%;%USERPROFILE%\.cargo\bin
-      echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
-      choco install llvm --version 7.0.1
-    displayName: Install Rust (Windows)
-    condition: eq(variables['platform'], 'Windows')
-
-  # All platforms.
-  - script: |
-        rustc -Vv
-        cargo -V
-    displayName: Print versions
-
-  - script: cargo build --release --all-targets -vv
-    displayName: Build all targets
-
-  - script: cargo test --release -p skia-safe -vv
-    displayName: Test skia-safe
-
-  - script: cargo run --release --example skia-org ${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-org
-    displayName: Run skia-org Example
-    condition: ne(variables['platform'], 'Windows')
-
-  - script: cargo run --release --example skia-org %BUILD_ARTIFACTSTAGINGDIRECTORY%/skia-org
-    displayName: Run skia-org Example
-    condition: eq(variables['platform'], 'Windows')
-
-  - task: PublishBuildArtifacts@1
-    inputs:
-      pathtoPublish: '$(Build.ArtifactStagingDirectory)/skia-org'
-      artifactName: 'skia-org-examples-$(platform)-$(toolchain)'
