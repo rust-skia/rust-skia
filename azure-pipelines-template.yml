@@ -1,56 +1,77 @@
 jobs:
-- job: ${{ parameters.name }}
-  pool:
-    vmImage: ${{ parameters.vmImage }}
+- job: ${{ parameters.platform }}
   strategy:
     matrix:
       stable:
-        rustup_toolchain: stable
+        toolchain: stable
+        features: ''
       beta:
-        rustup_toolchain: beta
-      nightly:
-        rustup_toolchain: nightly
+        toolchain: beta
+        features: ''
+      stable-vulkan:
+        toolchain: stable
+        features: 'vulkan'
+  variables:
+    platform: ${{ parameters.platform }}
+    image: ${{ parameters.image }}
+  pool:
+    vmImage: $(image)
+
   steps:
   - task: UsePythonVersion@0
     inputs:
       versionSpec: '2.x'
       addToPath: true
       architecture: 'x64'
-  - ${{ if eq(parameters.name, 'macOS') }}:
+
+  - ${{ if eq(parameters.platform, 'macOS') }}:
+    # macOS
     - script: |
         brew update && brew install llvm@7
       displayName: Install llvm
-  - ${{ if ne(parameters.name, 'Windows') }}:
+
+  - ${{ if ne(parameters.platform, 'Windows') }}:
     # Linux and macOS.
     - script: |
-        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUSTUP_TOOLCHAIN
+        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $TOOLCHAIN
         echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
-      displayName: Install rust
-  - ${{ if eq(parameters.name, 'Windows') }}:
+      displayName: Install Rust
+
+  - ${{ if eq(parameters.platform, 'Windows') }}:
     # Windows.
     - script: |
         curl -sSf -o rustup-init.exe https://win.rustup.rs
-        rustup-init.exe -y --default-toolchain %RUSTUP_TOOLCHAIN%
+        rustup-init.exe -y --default-toolchain %TOOLCHAIN%
         set PATH=%PATH%;%USERPROFILE%\.cargo\bin
         echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
         choco install llvm --version 7.0.1
-      displayName: Install rust (windows)
+      displayName: Install Rust on Windows
+
   # All platforms.
   - script: |
         rustc -Vv
         cargo -V
     displayName: Print versions
-  - script: cargo build --release --all-targets -vv
-    displayName: Build all targets
-  - script: cargo test --release -p skia-safe -vv
+
+  # Note: features are ignored when set in the workspace. This is a known bug in cargo (#5015), so cd into skia-safe instead.
+  - script: cd skia-safe && cargo build --release --features "$(features)" --all-targets -vv
+    displayName: Build all targets in skia-safe
+
+  - script: cd skia-safe && cargo test --release --features "$(features)" -vv
     displayName: Test skia-safe
-  - ${{ if ne(parameters.name, 'Windows') }}:
+
+  - ${{ if ne(parameters.platform, 'Windows') }}:
     - script: cargo run --release --example skia-org ${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-org
-      displayName: Run skia-org Example
-  - ${{ if eq(parameters.name, 'Windows') }}:
+      displayName: Generate skia-org Example Images
+      condition: eq(variables['features'], '')
+
+  - ${{ if eq(parameters.platform, 'Windows') }}:
     - script: cargo run --release --example skia-org %BUILD_ARTIFACTSTAGINGDIRECTORY%/skia-org
-      displayName: Run skia-org Example
+      displayName: Generate skia-org Example Images
+      condition: eq(variables['features'], '')
+
   - task: PublishBuildArtifacts@1
     inputs:
       pathtoPublish: '$(Build.ArtifactStagingDirectory)/skia-org'
-      artifactName: 'skia-org-examples-${{ parameters.name }}-$(rustup_toolchain)'
+      artifactName: 'skia-org-examples-$(platform)-$(toolchain)'
+    condition: eq(variables['features'], '')
