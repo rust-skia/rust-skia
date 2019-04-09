@@ -56,11 +56,8 @@ fn main() {
         (_, "apple", "darwin", _) => {
             cargo::add_link_libs(&["c++", "framework=OpenGL", "framework=ApplicationServices"]);
         },
-        (_, _, "windows", abi) => {
+        (_, _, "windows", Some("msvc")) => {
             cargo::add_link_libs(&["usp10", "ole32", "user32", "gdi32", "fontsub", "opengl32"]);
-            if abi == Some("gnu") {
-                cargo::add_link_lib("stdc++");
-            }
         },
         _ => {
             panic!("unsupported target: {:?}", cargo::target())
