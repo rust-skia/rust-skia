@@ -117,7 +117,7 @@ fn main() {
             }
         }
 
-        if flags.len() != 0 {
+        if !flags.is_empty() {
             let flags: String = {
                 let v: Vec<String> = flags.into_iter().map(quote).collect();
                 v.join(",")
