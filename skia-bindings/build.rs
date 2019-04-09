@@ -51,7 +51,7 @@ fn main() {
         (_, "unknown", "linux", Some("gnu")) => {
             cargo::add_link_libs(&["stdc++", "bz2", "GL", "fontconfig", "freetype"]);
         },
-        (_, _, "apple", Some("darwin")) => {
+        (_, "apple", "darwin", _) => {
             cargo::add_link_libs(&["c++", "framework=OpenGL", "framework=ApplicationServices"]);
         },
         (_, _, "windows", abi) => {
