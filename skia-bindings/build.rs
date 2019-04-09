@@ -211,6 +211,11 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     builder = builder.clang_arg("-DSKIA_IMPLEMENTATION=1");
   }
 
+  // We can't build Skia in DEBUG configurations at the moment,
+  // so define NDEBUG for skiabidings and the binding generator, too.
+  cc_build.define("NDEBUG", "1");
+  builder = builder.clang_arg("-DNDEBUG=1");
+
   let cc_build = cc_build
     .cpp(true)
     .file(bindings_source)
