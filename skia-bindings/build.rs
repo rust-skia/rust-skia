@@ -9,19 +9,19 @@ use bindgen::EnumVariation;
 use cc::Build;
 
 mod build {
-    /// Build with Vulkan support?
-    pub const VULKAN: bool = cfg!(feature = "vulkan");
-
-    /// Configure Skia builds to keep inline functions to
-    /// prevent mean linker errors.
-    pub const KEEP_INLINE_FUNCTIONS: bool = true;
+    /// Do we build _on_ a Windows machine?
+    pub const ON_WINDOWS: bool = cfg!(windows);
 
     /// Build Skia in a release configuration?
     /// Note that currently, we don't support debug Skia builds.
     pub const SKIA_RELEASE: bool = true;
 
-    /// Do we build _on_ a Windows machine?
-    pub const ON_WINDOWS: bool = cfg!(windows);
+    /// Configure Skia builds to keep inline functions to
+    /// prevent mean linker errors.
+    pub const KEEP_INLINE_FUNCTIONS: bool = true;
+
+    /// Build with Vulkan support?
+    pub const VULKAN: bool = cfg!(feature = "vulkan");
 }
 
 fn main() {
