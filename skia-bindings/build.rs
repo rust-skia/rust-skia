@@ -8,6 +8,22 @@ use std::process::{Command, Stdio};
 use bindgen::EnumVariation;
 use cc::Build;
 
+mod build {
+    /// Build with Vulkan support?
+    pub const VULKAN: bool = cfg!(feature = "vulkan");
+
+    /// Configure Skia builds to keep inline functions to
+    /// prevent mean linker errors.
+    pub const KEEP_INLINE_FUNCTIONS: bool = true;
+
+    /// Build Skia in a release configuration?
+    /// Note that currently, we don't support debug Skia builds.
+    pub const SKIA_RELEASE: bool = true;
+
+    /// Do we build _on_ a Windows machine?
+    pub const ON_WINDOWS: bool = cfg!(windows);
+}
+
 fn main() {
 
     prerequisites::require_python();
@@ -32,51 +48,80 @@ fn main() {
                 .status().unwrap().success(), "`skia/tools/git-sync-deps` failed");
 
     let gn_args = {
+        fn yes() -> String { "true".into() }
+        fn no() -> String { "false".into() }
 
-        let keep_inline_functions = true;
+        fn quote(s: &str) -> String { format!("\"{}\"", s) };
 
-        let mut args =
-            r#"--args=is_official_build=true skia_use_expat=false skia_use_icu=false skia_use_system_libjpeg_turbo=false skia_use_system_libpng=false skia_use_libwebp=false skia_use_system_zlib=false cc="clang" cxx="clang++""#
-                .to_owned();
+        let mut args: Vec<(&str, String)> = vec![
+            ("is_official_build", if build::SKIA_RELEASE { yes() } else { no() }),
+            ("skia_use_expat", no()),
+            ("skia_use_icu", no()),
+            ("skia_use_system_libjpeg_turbo", no()),
+            ("skia_use_system_libpng", no()),
+            ("skia_use_libwebp", no()),
+            ("skia_use_system_zlib", no()),
+            ("cc", quote("clang")),
+            ("cxx", quote("clang++")),
+        ];
 
-        if cfg!(feature="vulkan") {
-            args.push_str(" skia_use_vulkan=true skia_enable_spirv_validation=false");
+        // further flags that limit the components of Skia debug builds.
+        if !build::SKIA_RELEASE {
+            args.push(("skia_enable_atlas_text", no()));
+            args.push(("skia_enable_spirv_validation", no()));
+            args.push(("skia_enable_tools", no()));
+            args.push(("skia_enable_vulkan_debug_layers", no()));
+            args.push(("skia_use_libheif", no()));
+            args.push(("skia_use_lua", no()));
         }
 
-        if cfg!(windows) {
+        if build::VULKAN {
+            args.push(("skia_use_vulkan", yes()));
+            args.push(("skia_enable_spirv_validation", no()));
+        }
 
-            let mut flags : Vec<&str> = vec![];
-            flags.push(if cfg!(build="debug") { "/MTd" } else { "/MD" });
+        let mut flags: Vec<&str> = vec![];
 
-            if keep_inline_functions {
-                // sadly, this also disables inlining completely and is probably a real performance bummer.
+        if build::ON_WINDOWS {
+            // Rust's msvc toolchain supports uses msvcrt.dll by
+            // default for release and _debug_ builds.
+            flags.push("/MD");
+            // Tell Skia's build system where LLVM is supposed to be located.
+            // TODO: this should be checked as a prerequisite.
+            args.push(("clang_win", quote("C:/Program Files/LLVM")));
+        }
+
+        if build::KEEP_INLINE_FUNCTIONS {
+            // sadly, this also disables inlining completely and is probably a real performance bummer.
+            if build::ON_WINDOWS {
                 flags.push("/Ob0")
-            };
+            } else {
+                flags.push("-fno-inline-functions");
+            }
+        }
 
-            let flags : String = {
-                fn quote(s: &str) -> String { String::from("\"") + s + "\"" }
-
-                let v : Vec<String> =
-                    flags.into_iter().map(quote).collect();
+        if flags.len() != 0 {
+            let flags: String = {
+                let v: Vec<String> = flags.into_iter().map(quote).collect();
                 v.join(",")
             };
-
-            args.push_str(r#" clang_win="C:\Program Files\LLVM""#);
-            args.push_str(&format!(" extra_cflags=[{}]", flags));
-        } else {
-            if keep_inline_functions {
-                args.push_str(r#" extra_cflags=["-fno-inline-functions"]"#)
-            }
+            args.push(("extra_cflags", format!("[{}]", flags)));
         }
 
         args
     };
 
-    let gn_command = if cfg!(windows) {
-        "skia/bin/gn"
-    } else {
-        "bin/gn"
-    };
+    let gn_args = gn_args.into_iter()
+        .map(|(name, value)| name.to_owned() + "=" + &value)
+        .collect::<Vec<String>>()
+        .join(" ");
+
+    let gn_command =
+        if build::ON_WINDOWS {
+            "skia/bin/gn"
+        } else {
+            "bin/gn"
+        };
 
     let skia_out_dir : String =
         PathBuf::from(env::var("OUT_DIR").unwrap())
@@ -96,11 +141,12 @@ fn main() {
         panic!("{:?}", String::from_utf8(output.stdout).unwrap());
     }
 
-    let ninja_command = if cfg!(windows) {
-        "depot_tools/ninja"
-    } else {
-        "../depot_tools/ninja"
-    };
+    let ninja_command =
+        if build::ON_WINDOWS {
+            "depot_tools/ninja"
+        } else {
+            "../depot_tools/ninja"
+        };
 
     assert!(Command::new(ninja_command)
                 .current_dir(PathBuf::from("./skia"))
@@ -108,7 +154,7 @@ fn main() {
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit())
                 .status()
-                .expect("failed to run `ninja`, is the directory depot_tools/ available?")
+                .expect("failed to run `ninja`, does the directory depot_tools/ exist?")
                 .success(), "`ninja` returned an error, please check the output for details.");
 
     let current_dir = env::current_dir().unwrap();
@@ -204,24 +250,26 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
         cc_build.include(&include_path);
     }
 
-    if cfg!(feature="vulkan") {
+    if build::VULKAN {
         cc_build.define("SK_VULKAN", "1");
         builder = builder.clang_arg("-DSK_VULKAN");
         cc_build.define("SKIA_IMPLEMENTATION", "1");
         builder = builder.clang_arg("-DSKIA_IMPLEMENTATION=1");
     }
 
-    // We can't build Skia in DEBUG configurations at the moment,
-    // so define NDEBUG for skiabidings and the binding generator, too.
-    cc_build.define("NDEBUG", "1");
-    builder = builder.clang_arg("-DNDEBUG=1");
+    if build::SKIA_RELEASE {
+        cc_build.define("NDEBUG", "1");
+        builder = builder.clang_arg("-DNDEBUG=1")
+    }
 
-    let cc_build = cc_build
+    cc_build
         .cpp(true)
         .file(bindings_source)
         .out_dir(skia_out_dir);
 
-    let cc_build = if !cfg!(windows) { cc_build.flag("-std=c++14") } else { cc_build };
+    if !build::ON_WINDOWS {
+        cc_build.flag("-std=c++14");
+    }
 
     cc_build.compile("skiabinding");
 
