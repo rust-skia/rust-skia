@@ -9,7 +9,7 @@ use bindgen::EnumVariation;
 use cc::Build;
 
 mod build {
-    /// Do we build _on_ a Windows machine?
+    /// Do we build _on_ a Windows OS?
     pub const ON_WINDOWS: bool = cfg!(windows);
 
     /// Build Skia in a release configuration?
