@@ -322,6 +322,16 @@ mod cargo {
 
         Target(target[0].clone(), target[1].clone(), target[2].clone(), if target.len() > 3 { Some(target[3].clone()) } else { None })
     }
+
+    // We can not assume that the build profile of the build.rs script reflects the build
+    // profile that the target needs.
+    pub fn build_release() -> bool {
+        match env::var("PROFILE").unwrap().as_str() {
+            "release" => true,
+            "debug" => false,
+            _ => panic!("PROFILE '{}' is not supported by this build script", )
+        }
+    }
 }
 
 mod prerequisites {
