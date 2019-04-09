@@ -110,7 +110,7 @@ fn main() {
         }
 
         if build::KEEP_INLINE_FUNCTIONS {
-            // sadly, this also disables inlining completely and is probably a real performance bummer.
+            // sadly, this also disables inlining and is probably a real performance bummer.
             if build::ON_WINDOWS {
                 flags.push("/Ob0")
             } else {
