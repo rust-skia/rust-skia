@@ -129,7 +129,7 @@ fn main() {
             .to_str().unwrap().into();
 
     let output = Command::new(gn_command)
-        .args(&["gen", &skia_out_dir, &gn_args])
+        .args(&["gen", &skia_out_dir, &("--args=".to_owned() + &gn_args)])
         .envs(env::vars())
         .current_dir(PathBuf::from("./skia"))
         .stdout(Stdio::inherit())
