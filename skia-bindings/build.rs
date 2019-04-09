@@ -47,6 +47,24 @@ fn main() {
                 .stderr(Stdio::inherit())
                 .status().unwrap().success(), "`skia/tools/git-sync-deps` failed");
 
+    match cargo::target().as_str() {
+        (_, "unknown", "linux", Some("gnu")) => {
+            cargo::add_link_libs(&["stdc++", "bz2", "GL", "fontconfig", "freetype"]);
+        },
+        (_, _, "apple", Some("darwin")) => {
+            cargo::add_link_libs(&["c++", "framework=OpenGL", "framework=ApplicationServices"]);
+        },
+        (_, _, "windows", abi) => {
+            cargo::add_link_libs(&["usp10", "ole32", "user32", "gdi32", "fontsub", "opengl32"]);
+            if abi == Some("gnu") {
+                cargo::add_link_lib("stdc++");
+            }
+        },
+        _ => {
+            panic!("unsupported target: {:?}", cargo::target())
+        }
+    };
+
     let gn_args = {
         fn yes() -> String { "true".into() }
         fn no() -> String { "false".into() }
@@ -163,20 +181,6 @@ fn main() {
     println!("cargo:rustc-link-search={}", &skia_out_dir);
     cargo::add_link_libs(&["static=skia", "static=skiabinding"]);
 
-    let target = env::var("TARGET").unwrap();
-    if target.contains("unknown-linux-gnu") {
-        cargo::add_link_libs(&["stdc++", "bz2", "GL", "fontconfig", "freetype"]);
-    } else if target.contains("eabi") {
-        cargo::add_link_libs(&["stdc++", "GLESv2"]);
-    } else if target.contains("apple-darwin") {
-        cargo::add_link_libs(&["c++", "framework=OpenGL", "framework=ApplicationServices"]);
-    } else if target.contains("windows") {
-        if target.contains("gnu") {
-            cargo::add_link_lib("stdc++");
-        }
-        cargo::add_link_libs(&["usp10", "ole32", "user32", "gdi32", "fontsub", "opengl32"]);
-    }
-
     bindgen_gen(&current_dir_name, &skia_out_dir)
 }
 
@@ -282,6 +286,8 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
 }
 
 mod cargo {
+    use std::env;
+
     pub fn add_dependent_path(path: &str) {
         println!("cargo:rerun-if-changed={}", path);
     }
@@ -292,6 +298,29 @@ mod cargo {
 
     pub fn add_link_lib(lib: &str) {
         println!("cargo:rustc-link-lib={}", lib);
+    }
+
+    #[derive(Clone, Debug)]
+    pub struct Target(String, String, String, Option<String>);
+    impl Target {
+        pub fn as_str(&self) -> (&str, &str, &str, Option<&str>) {
+            (self.0.as_str(), self.1.as_str(), self.2.as_str(), self.3.as_ref().map(|s| s.as_str()))
+        }
+    }
+
+    pub fn target() -> Target {
+        let target_str = env::var("TARGET").unwrap();
+
+        let target : Vec<String> =
+            target_str
+                .split("-")
+                .map(|s| s.into())
+                .collect();
+        if target.len() < 3 {
+            panic!("Failed to parse TARGET {}", target_str);
+        }
+
+        Target(target[0].clone(), target[1].clone(), target[2].clone(), if target.len() > 3 { Some(target[3].clone()) } else { None })
     }
 }
 
