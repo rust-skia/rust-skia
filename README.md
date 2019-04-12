@@ -16,14 +16,14 @@ Note that the information in this section is preliminary. Please open an issue f
 
 This project requires LLVM, python, and git to build.
 
-To test if LLVM is installed with the correct version, use `clang --version`. Currently, version 7.0.1 is required, or - on Mac OS X - Apple LLVM Version 10 should do, too.
+To test if LLVM is installed with the correct version, use `clang --version`. Currently, version 7.0.1 is required, or - on macOS X - Apple LLVM Version 10 should do, too.
 
 For python, at least version 2.7 should be available. Use `python --version` to see what's there.
 
-### Mac OS X
+### macOS X
 
 - Install the XCode command line tools with `xcode-select --install`.
-- **Mac OS X 10.14 (Mojave)**: install the SDK headers: `/Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg`, otherwise the binding generation will fail with `'TargetConditionals.h' file not found`.
+- **macOS X 10.14 (Mojave)**: install the SDK headers: `/Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg`, otherwise the binding generation will fail with `'TargetConditionals.h' file not found`.
 - Alternatively, install LLVM 7.0.1 via `brew install llvm@7` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` like instructed.
 
 ### Windows
@@ -54,7 +54,7 @@ To simplify and speed up the build, we also plan to provide prebuilt binaries fo
 
 Vulkan support can be enabled by setting the Cargo feature `default = ["vulkan"]` in `skia-safe/Cargo.toml`, which will cause a rebuild of Skia. To render the examples with Vulkan use `cargo run --example skia-org -- [OUTPUT_DIR] --driver vulkan`.
 
-Note that Vulkan drivers need to be available. On Windows, they are most likely available already, on Linux [this article on linuxconfig.org](<https://linuxconfig.org/install-and-test-vulkan-on-linux>) might get you started, and on a Mac with Metal support, [install the Vulkan SDK](<https://vulkan.lunarg.com/sdk/home>) for Mac and configure MoltenVK by setting the `DYLD_LIBRARY_PATH`, `VK_LAYER_PATH`, and `VK_ICD_FILENAMES` environment variables as described in `Documentation/getting_started_macos.html`.
+Note that Vulkan drivers need to be available. On Windows, they are most likely available already, on Linux [this article on linuxconfig.org](<https://linuxconfig.org/install-and-test-vulkan-on-linux>) might get you started, and on macOS with Metal support, [install the Vulkan SDK](<https://vulkan.lunarg.com/sdk/home>) for Mac and configure MoltenVK by setting the `DYLD_LIBRARY_PATH`, `VK_LAYER_PATH`, and `VK_ICD_FILENAMES` environment variables as described in `Documentation/getting_started_macos.html`.
 
 ## Examples
 
@@ -78,7 +78,7 @@ An official crate is not yet available. We've created [a Milestone](https://gith
 
 - [x] Windows
 - [x] Linux Ubuntu 16 (18 should work, too).
-- [x] MacOSX
+- [x] macOS X
 - [ ] WebAssembly: [#42](https://github.com/rust-skia/rust-skia/pull/42) (help wanted).
 - [ ] Android
 - [ ] iOS
