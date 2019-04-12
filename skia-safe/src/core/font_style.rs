@@ -129,7 +129,7 @@ impl FontStyle {
     }
 }
 
-mod font_style_static {
+pub mod font_style_static {
     use super::{FontStyle, FontStyleWeight, FontStyleWidth, FontStyleSlant};
 
     lazy_static! {
@@ -139,7 +139,6 @@ mod font_style_static {
         pub static ref BOLD_ITALIC: FontStyle = FontStyle::new(FontStyleWeight::Bold , FontStyleWidth::Normal, FontStyleSlant::Italic);
     }
 }
-
 
 #[test]
 fn test_equality() {

@@ -1,8 +1,10 @@
 // core/
 #include "SkTypes.h"
+
 #include "SkCanvas.h"
 #include "SkColor.h"
 #include "SkColorFilter.h"
+#include "SkDocument.h"
 #include "SkFont.h"
 #include "SkFontMetrics.h"
 #include "SkImageFilter.h"
@@ -14,12 +16,15 @@
 #include "SkPictureRecorder.h"
 #include "SkPoint3.h"
 #include "SkRect.h"
-#include "SkSurface.h"
-#include "SkYUVAIndex.h"
 #include "SkRegion.h"
+#include "SkStream.h"
 #include "SkStrokeRec.h"
+#include "SkSurface.h"
 #include "SkTextBlob.h"
 #include "SkTypeface.h"
+#include "SkYUVAIndex.h"
+// docs/
+#include "SkPDFDocument.h"
 // effects/
 #include "Sk1DPathEffect.h"
 #include "Sk2DPathEffect.h"
@@ -618,7 +623,7 @@ extern "C" bool C_SkMatrix_Equals(const SkMatrix* self, const SkMatrix* rhs) {
 }
 
 extern "C" SkScalar* C_SkMatrix_SubscriptMut(SkMatrix* self, size_t index) {
-    return &((*self)[index]);
+    return &((*self)[static_cast<int>(index)]);
 }
 
 //
@@ -935,6 +940,14 @@ extern "C" uint32_t C_SkColorFilter_getFlags(const SkColorFilter* self) {
 }
 
 //
+// SkString
+//
+
+extern "C" void C_SkString_destruct(SkString* self) {
+    self->~SkString();
+}
+
+//
 // SkStrokeRec
 //
 
@@ -1056,6 +1069,18 @@ extern "C" SkShader* C_SkShader_makeAsALocalMatrixShader(const SkShader* self, S
 }
 
 //
+// SkDynamicMemoryWStream
+//
+
+extern "C" void C_SkDynamicMemoryWStream_destruct(SkDynamicMemoryWStream* self) {
+    self->~SkDynamicMemoryWStream();
+}
+
+extern "C" SkData* C_SkDynamicMemoryWStream_detachAsData(SkDynamicMemoryWStream* self) {
+    return self->detachAsData().release();
+}
+
+//
 // SkGradientShader
 //
 
@@ -1165,6 +1190,14 @@ extern "C" SkPathEffect* C_SkDashPathEffect_Make(const SkScalar intervals[], int
 
 extern "C" SkPathEffect* C_SkDiscretePathEffect_Make(SkScalar segLength, SkScalar dev, uint32_t seedAssist) {
     return SkDiscretePathEffect::Make(segLength, dev, seedAssist).release();
+}
+
+//
+// docs/SkPDFDocument
+//
+
+extern "C" SkDocument* C_SkPDF_MakeDocument(SkWStream* stream, const SkPDF::Metadata* metadata) {
+    return SkPDF::MakeDocument(stream, *metadata).release();
 }
 
 //

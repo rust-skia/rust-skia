@@ -1,6 +1,7 @@
 mod prelude;
 mod core;
 mod effects;
+mod interop;
 pub mod gpu;
 
 #[macro_use]
