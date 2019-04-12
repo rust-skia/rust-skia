@@ -9,6 +9,9 @@ use skia_bindings::{
     SkRefCntBase,
 };
 
+// Re-export TryFrom / TryInto to make them available in all modules that use prelude::*.
+pub use std::convert::{TryFrom, TryInto};
+
 /// Swiss army knife to convert any reference into any other.
 pub unsafe fn transmute_ref<FromT, ToT>(from: &FromT) -> &ToT {
     // TODO: can we do this statically for all instantiations of transmute_ref?
@@ -673,56 +676,6 @@ impl<E> AsPointerOrNullMut<E> for Option<Vec<E>> {
         match self {
             Some(v) => v.as_mut_ptr(),
             None => ptr::null_mut()
-        }
-    }
-}
-
-//
-// Safe Conversions from to until try_from / try_into is stabilized.
-//
-
-pub trait TryFrom<FromT> : Sized {
-    fn try_from(from: FromT) -> Option<Self>;
-}
-
-pub trait TryInto<IntoT> : Sized {
-    fn try_into(self) -> Option<IntoT>;
-}
-
-impl<IntoT, T> TryInto<IntoT> for T
-    where IntoT: TryFrom<T> {
-
-    fn try_into(self) -> Option<IntoT> {
-        IntoT::try_from(self)
-    }
-}
-
-impl TryFrom<usize> for i32 {
-    fn try_from(from: usize) -> Option<Self> {
-        if from <= i32::max_value() as usize {
-            Some(from as i32)
-        } else {
-            None
-        }
-    }
-}
-
-impl TryFrom<usize> for u32 {
-    fn try_from(from: usize) -> Option<Self> {
-        if from <= u32::max_value() as usize {
-            Some(from as u32)
-        } else {
-            None
-        }
-    }
-}
-
-impl TryFrom<i32> for usize {
-    fn try_from(from: i32) -> Option<Self> {
-        if from >= 0 {
-            Some(from as usize)
-        } else {
-            None
         }
     }
 }
