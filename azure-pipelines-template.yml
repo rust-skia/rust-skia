@@ -27,8 +27,9 @@ jobs:
   - ${{ if eq(parameters.platform, 'macOS') }}:
     # macOS
     - script: |
+        sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
         brew update && brew install llvm@7
-      displayName: Install llvm
+      displayName: Install SDK Headers & LLVM
 
   - ${{ if ne(parameters.platform, 'Windows') }}:
     # Linux and macOS.
