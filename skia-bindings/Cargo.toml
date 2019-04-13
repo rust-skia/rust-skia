@@ -15,5 +15,4 @@ vulkan = []
 
 [build-dependencies]
 cc = "1.0.35"
-bindgen = "0.48.1"
-
+bindgen = "0.49.0"
