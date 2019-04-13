@@ -2,4 +2,7 @@
 /// to marshal between Rust and Skia types only.
 
 mod stream;
+pub(crate) use self::stream::*;
+
 mod string;
+// pub(crate) use self::string::*;
