@@ -54,7 +54,9 @@ pub mod pdf {
                 .map(|encoding_quality| internal.fEncodingQuality = encoding_quality);
         }
 
-        let mut memory_stream = DynamicMemoryWStream::new();
+        // we can't move the memory stream around anymore as soon it's referred by
+        // the document.
+        let mut memory_stream = Box::pin(DynamicMemoryWStream::new());
         let document = RCHandle::from_ptr(unsafe {
             C_SkPDF_MakeDocument(&mut memory_stream.native_mut()._base, md.native())
         })

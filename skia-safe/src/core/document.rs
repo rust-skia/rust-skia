@@ -2,12 +2,13 @@ use crate::interop::DynamicMemoryWStream;
 use crate::prelude::*;
 use crate::{scalar, Canvas, Data, Rect};
 use skia_bindings::{SkDocument, SkRefCntBase};
+use std::pin::Pin;
 
 pub struct Document<State = document::Open> {
     // note: order matters here, first the document must be
     // dropped _and then_ the stream.
     document: RCHandle<SkDocument>,
-    stream: DynamicMemoryWStream,
+    stream: Pin<Box<DynamicMemoryWStream>>,
 
     state: State,
 }
@@ -43,7 +44,7 @@ impl<S> Document<S> {
 }
 
 impl Document {
-    pub(crate) fn new(stream: DynamicMemoryWStream, document: RCHandle<SkDocument>) -> Self {
+    pub(crate) fn new(stream: Pin<Box<DynamicMemoryWStream>>, document: RCHandle<SkDocument>) -> Self {
         Document {
             document,
             stream,
