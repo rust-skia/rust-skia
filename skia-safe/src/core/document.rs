@@ -3,7 +3,7 @@ use crate::prelude::*;
 use crate::{scalar, Canvas, Data, Rect};
 use skia_bindings::{SkDocument, SkRefCntBase};
 
-pub struct Document<State> {
+pub struct Document<State = document::Open> {
     // note: order matters here, first the document must be
     // dropped _and then_ the stream.
     document: RCHandle<SkDocument>,
@@ -76,7 +76,7 @@ impl Document<document::Open> {
                 canvas,
                 page: self.state.pages + 1,
             },
-        }
+        } as _
     }
 
     pub fn close(mut self) -> Data {

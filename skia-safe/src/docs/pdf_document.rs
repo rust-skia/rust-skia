@@ -7,7 +7,6 @@ pub mod pdf {
         SkPDF_Metadata, SkString,
     };
     use std::mem;
-    use crate::document;
 
     // TODO: DocumentStructureType
     // TODO: StructureElementNode
@@ -30,7 +29,7 @@ pub mod pdf {
 
     // TODO: SetNodeId
 
-    pub fn new_document(metadata: Option<&Metadata>) -> Document<document::Open> {
+    pub fn new_document(metadata: Option<&Metadata>) -> Document {
         let mut md = InternalMetadata::default();
         if let Some(metadata) = metadata {
             let internal = md.native_mut();
@@ -56,8 +55,10 @@ pub mod pdf {
         }
 
         let mut memory_stream = DynamicMemoryWStream::new();
-        let document =
-            RCHandle::from_ptr(unsafe { C_SkPDF_MakeDocument(&mut memory_stream.native_mut()._base, md.native()) }).unwrap();
+        let document = RCHandle::from_ptr(unsafe {
+            C_SkPDF_MakeDocument(&mut memory_stream.native_mut()._base, md.native())
+        })
+        .unwrap();
 
         Document::new(memory_stream, document)
     }
