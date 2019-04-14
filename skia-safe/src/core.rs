@@ -54,7 +54,7 @@ pub use self::coverage_mode::*;
 mod data;
 pub use self::data::*;
 
-mod document;
+pub(crate) mod document;
 pub use self::document::*;
 
 mod encoded_image_format;

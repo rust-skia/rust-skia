@@ -1196,6 +1196,14 @@ extern "C" SkPathEffect* C_SkDiscretePathEffect_Make(SkScalar segLength, SkScala
 // docs/SkPDFDocument
 //
 
+extern "C" void C_SkPDF_Metadata_Construct(SkPDF::Metadata* uninitialized) {
+    new(uninitialized)SkPDF::Metadata();
+}
+
+extern "C" void C_SkPDF_Metadata_destruct(SkPDF::Metadata* self) {
+    self->~Metadata();
+}
+
 extern "C" SkDocument* C_SkPDF_MakeDocument(SkWStream* stream, const SkPDF::Metadata* metadata) {
     return SkPDF::MakeDocument(stream, *metadata).release();
 }

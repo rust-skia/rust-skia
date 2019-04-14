@@ -1,5 +1,6 @@
 mod prelude;
 mod core;
+mod docs;
 mod effects;
 mod interop;
 pub mod gpu;
@@ -11,6 +12,8 @@ extern crate lazy_static;
 
 /// All core classes are accessible via skia_safe:: and core itself is hidden.
 pub use crate::core::*;
+pub use crate::core::document::document;
+pub use crate::docs::*;
 pub use crate::effects::*;
 
 #[cfg(test)]
