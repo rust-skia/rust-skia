@@ -42,7 +42,7 @@ impl<S> Document<S> {
     }
 }
 
-impl Document<document::Open> {
+impl Document {
     pub(crate) fn new(stream: DynamicMemoryWStream, document: RCHandle<SkDocument>) -> Self {
         Document {
             document,
@@ -100,7 +100,7 @@ impl Document<document::OnPage> {
 
     /// Ends the page.
     /// This function consumes the document and returns a new open document.
-    pub fn end_page(mut self) -> Document<document::Open> {
+    pub fn end_page(mut self) -> Document {
         unsafe {
             self.document.native_mut().endPage();
         }
