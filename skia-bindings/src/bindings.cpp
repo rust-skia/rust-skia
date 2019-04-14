@@ -1072,6 +1072,10 @@ extern "C" SkShader* C_SkShader_makeAsALocalMatrixShader(const SkShader* self, S
 // SkDynamicMemoryWStream
 //
 
+extern "C" void C_SkDynamicMemoryWStream_Construct(SkDynamicMemoryWStream* uninitialized) {
+    new(uninitialized) SkDynamicMemoryWStream();
+}
+
 extern "C" void C_SkDynamicMemoryWStream_destruct(SkDynamicMemoryWStream* self) {
     self->~SkDynamicMemoryWStream();
 }

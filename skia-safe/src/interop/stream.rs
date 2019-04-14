@@ -5,7 +5,8 @@
 
 use crate::prelude::*;
 use crate::core::Data;
-use skia_bindings::{SkDynamicMemoryWStream, C_SkDynamicMemoryWStream_detachAsData, C_SkDynamicMemoryWStream_destruct};
+use skia_bindings::{SkDynamicMemoryWStream, C_SkDynamicMemoryWStream_detachAsData, C_SkDynamicMemoryWStream_destruct, C_SkDynamicMemoryWStream_Construct};
+use std::mem;
 
 pub type DynamicMemoryWStream = Handle<SkDynamicMemoryWStream>;
 
@@ -20,7 +21,11 @@ impl NativeDrop for SkDynamicMemoryWStream {
 impl Handle<SkDynamicMemoryWStream> {
     pub fn new() -> Self {
         Handle::from_native(unsafe {
-            SkDynamicMemoryWStream::new()
+            // does not link under linux:
+            // SkDynamicMemoryWStream::new()
+            let mut stream = mem::uninitialized();
+            C_SkDynamicMemoryWStream_Construct(&mut stream);
+            stream
         })
     }
 
