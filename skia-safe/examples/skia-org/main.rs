@@ -68,6 +68,17 @@ pub(crate) mod artifact {
         }
     }
 
+    impl DrawingDriver for PDF {
+        const NAME: &'static str = "pdf";
+
+        fn draw_image<F>(size: (i32, i32), path: &PathBuf, name: &str, func: F) -> () where F: Fn(&mut Canvas) -> () {
+            let mut document = skia_safe::pdf::new_document(None).begin_page((size.0 as _, size.1 as _), None);
+            func(document.canvas());
+            let data = document.end_page().close();
+            write_file(data.bytes(), path, name, "pdf");
+        }
+    }
+
     impl DrawingDriver for OpenGL {
 
         const NAME: &'static str = "opengl";
@@ -126,17 +137,6 @@ pub(crate) mod artifact {
                 &image_info, None, gpu::SurfaceOrigin::TopLeft, None, false).unwrap();
 
             draw_image_on_surface(&mut surface, path, name, func);
-        }
-    }
-
-    impl DrawingDriver for PDF {
-        const NAME: &'static str = "pdf";
-
-        fn draw_image<F>(size: (i32, i32), path: &PathBuf, name: &str, func: F) -> () where F: Fn(&mut Canvas) -> () {
-            let mut document = skia_safe::pdf::new_document(None).begin_page((size.0 as _, size.1 as _), None);
-            func(document.canvas());
-            let data = document.end_page().close();
-            write_file(data.bytes(), path, name, "pdf");
         }
     }
 
