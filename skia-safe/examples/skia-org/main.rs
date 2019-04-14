@@ -1,5 +1,5 @@
 use std::path::PathBuf;
-use crate::artifact::{DrawingDriver, OpenGL, CPU};
+use crate::artifact::DrawingDriver;
 use clap::{App, Arg};
 use offscreen_gl_context::{GLContext, NativeGLContext, GLVersion};
 use gleam;
@@ -55,6 +55,7 @@ pub(crate) mod artifact {
     pub enum OpenGL {}
     #[cfg(feature = "vulkan")]
     pub enum Vulkan {}
+    pub enum PDF {}
 
     impl DrawingDriver for CPU {
 
@@ -128,6 +129,17 @@ pub(crate) mod artifact {
         }
     }
 
+    impl DrawingDriver for PDF {
+        const NAME: &'static str = "pdf";
+
+        fn draw_image<F>(size: (i32, i32), path: &PathBuf, name: &str, func: F) -> () where F: Fn(&mut Canvas) -> () {
+            let mut document = skia_safe::pdf::new_document(None).begin_page((size.0 as _, size.1 as _), None);
+            func(document.canvas());
+            let data = document.end_page().close();
+            write_file(data.bytes(), path, name, "pdf");
+        }
+    }
+
     fn draw_image_on_surface<F>(surface: &mut Surface, path: &PathBuf, name: &str, func: F)
         where F: Fn(&mut Canvas) -> () {
 
@@ -137,15 +149,17 @@ pub(crate) mod artifact {
         func(&mut canvas);
         let image = surface.image_snapshot();
         let data = image.encode_to_data(EncodedImageFormat::PNG).unwrap();
+        write_file(data.bytes(), path, name, "png");
+    }
 
+    fn write_file(bytes: &[u8], path: &PathBuf, name: &str, ext: &str) {
         fs::create_dir_all(&path)
-        .expect("failed to create directory");
+            .expect("failed to create directory");
 
         let mut file_path = path.join(name);
-        file_path.set_extension("png");
+        file_path.set_extension(ext);
 
         let mut file = fs::File::create(file_path).expect("failed to create file");
-        let bytes = data.bytes();
         file.write_all(bytes).expect("failed to write to file");
     }
 }
@@ -203,11 +217,15 @@ fn main() {
         }
     };
 
-    if drivers.contains(&CPU::NAME) {
+    if drivers.contains(&artifact::CPU::NAME) {
         draw_all::<artifact::CPU>(&out_path);
     }
 
-    if drivers.contains(&OpenGL::NAME) {
+    if drivers.contains(&artifact::PDF::NAME) {
+        draw_all::<artifact::PDF>(&out_path);
+    }
+
+    if drivers.contains(&artifact::OpenGL::NAME) {
         let context =
             GLContext::<NativeGLContext>::create(
                 gleam::gl::GlType::default(),
@@ -246,11 +264,11 @@ fn main() {
 
 #[cfg(not(feature = "vulkan"))]
 fn get_possible_drivers() -> &'static [&'static str] {
-    ["cpu", "opengl"].as_ref()
+    ["cpu", "pdf", "opengl"].as_ref()
 }
 
 #[cfg(feature = "vulkan")]
 fn get_possible_drivers() -> &'static [&'static str] {
-    ["cpu", "opengl", "vulkan"].as_ref()
+    ["cpu", "pdf", "opengl", "vulkan"].as_ref()
 }
 
