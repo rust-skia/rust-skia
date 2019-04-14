@@ -129,7 +129,7 @@ impl FontStyle {
     }
 }
 
-pub mod font_style_static {
+mod font_style_static {
     use super::{FontStyle, FontStyleWeight, FontStyleWidth, FontStyleSlant};
 
     lazy_static! {
