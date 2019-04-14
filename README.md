@@ -68,6 +68,8 @@ to generate some Skia drawn PNG images in the directory `OUTPUT_DIR`. To render 
 
 `cargo run --example skia-org -- [OUTPUT_DIR] --driver opengl`
 
+And `cargo run --example skia-org -- --help` shows the drivers that are currently supported.
+
 ## Status
 
 ### Crate
@@ -87,16 +89,16 @@ An official crate is not yet available. We've created [a Milestone](https://gith
 
 Skia is a large library. While we strive to bind all of the C++ APIs, it's nowhere complete yet. 
 
-We do support most of the SkCanvas, SkPaint, and SkPath and related APIs and are trying to make the examples from the [skia.org](https://skia.org/) website work. Recently we merged some of the bindings for the classes in the [`include/effects/`](https://github.com/google/skia/tree/2c36ee834ae04d036363cd3b8f3f33ec65d657f0/include/effects) directory.
+We do support most of the SkCanvas, SkPaint, and SkPath and related APIs and are trying to make the examples from the [skia.org](https://skia.org/) website work.
 
 ### Features
 
 - [x] Vector Graphics: Matrix, Rect, Point, Size, etc.
 - [x] Basic Drawing: Surface, Canvas, Paint, Path.
 - [x] Basic Effects and Shaders.
-- [ ] PDF
-- [ ] SVG
+- [x] PDF
 - [ ] XPS
+- [ ] SVG
 - [ ] Animation
 - [x] Vulkan
 - [x] OpenGL
