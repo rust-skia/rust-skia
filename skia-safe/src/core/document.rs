@@ -24,12 +24,12 @@ impl NativeRefCountedBase for SkDocument {
 pub mod document {
     use skia_bindings::SkCanvas;
 
-    /// Document is currently closed. May contain several pages.
+    /// Document is currently open. May contain several pages.
     pub struct Open {
         pub(crate) pages: usize,
     }
 
-    /// Document is currently drawing on a page.
+    /// Document is currently on a page and can be drawn onto.
     pub struct OnPage {
         pub(crate) canvas: *mut SkCanvas,
         pub(crate) page: usize,
@@ -44,7 +44,10 @@ impl<S> Document<S> {
 }
 
 impl Document {
-    pub(crate) fn new(stream: Pin<Box<DynamicMemoryWStream>>, document: RCHandle<SkDocument>) -> Self {
+    pub(crate) fn new(
+        stream: Pin<Box<DynamicMemoryWStream>>,
+        document: RCHandle<SkDocument>,
+    ) -> Self {
         Document {
             document,
             stream,
@@ -80,6 +83,9 @@ impl Document {
         } as _
     }
 
+    /// Close the document and return the encoded representation.
+    /// This function consumes and drops the document.
+    /// TODO: Completely hide Data?
     pub fn close(mut self) -> Data {
         unsafe {
             self.document.native_mut().close();
@@ -94,13 +100,13 @@ impl Document<document::OnPage> {
         self.state.page
     }
 
-    /// Borrows the canvas for this page on the document.
+    /// Borrows the canvas for the current page on the document.
     pub fn canvas(&mut self) -> &mut Canvas {
         Canvas::borrow_from_native(unsafe { &mut *self.state.canvas })
     }
 
     /// Ends the page.
-    /// This function consumes the document and returns a new open document.
+    /// This function consumes the document and returns a new open document containing the pages drawn so far.
     pub fn end_page(mut self) -> Document {
         unsafe {
             self.document.native_mut().endPage();
