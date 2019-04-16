@@ -67,12 +67,12 @@ jobs:
     displayName: Test skia-safe
 
   - ${{ if ne(parameters.platform, 'Windows') }}:
-    - script: cargo run --release --example skia-org ${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-org $(exampleArgs)
+    - script: cargo run --release --features "$(features)" --example skia-org ${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-org $(exampleArgs)
       displayName: Generate skia-org Example Images
       condition: ne(variables['exampleArgs'], '')
 
   - ${{ if eq(parameters.platform, 'Windows') }}:
-    - script: cargo run --release --example skia-org %BUILD_ARTIFACTSTAGINGDIRECTORY%/skia-org $(exampleArgs)
+    - script: cargo run --release --features "$(features)" --example skia-org %BUILD_ARTIFACTSTAGINGDIRECTORY%/skia-org $(exampleArgs)
       displayName: Generate skia-org Example Images
       condition: ne(variables['exampleArgs'], '')
 
@@ -80,4 +80,4 @@ jobs:
     inputs:
       pathtoPublish: '$(Build.ArtifactStagingDirectory)/skia-org'
       artifactName: 'skia-org-examples-$(platform)-$(toolchain)'
-    condition: eq(variables['features'], '')
+    condition: ne(variables['exampleArgs'], '')
