@@ -50,6 +50,7 @@ impl Canvas {
     }
 
     /// Ends the Canvas drawing and returns the resulting SVG.
+    /// TODO: rename to into_svg() or into_svg_data()?
     pub fn end(mut self) -> Data {
         self.deref_mut().flush();
         self.stream.detach_as_data()
