@@ -56,7 +56,7 @@ fn draw_hello_skia(canvas: &mut Canvas) {
 
     let oval = RRect::new_oval(rect).offset((40.0, 60.0));
     paint.set_color(Color::BLUE);
-    canvas.draw_rrect(&oval, &paint);
+    canvas.draw_rrect(oval, &paint);
 
     paint.set_color(Color::CYAN);
     canvas.draw_circle((180.0, 50.0), 25.0, &paint);
