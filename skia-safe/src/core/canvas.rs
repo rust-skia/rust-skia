@@ -462,10 +462,10 @@ impl Canvas {
         self
     }
 
-    pub fn clip_rrect(&mut self, rrect: &RRect, options: CanvasClipOptions) -> &mut Self {
+    pub fn clip_rrect<RR: AsRef<RRect>>(&mut self, rrect: RR, options: CanvasClipOptions) -> &mut Self {
         unsafe {
             self.native_mut().clipRRect(
-                rrect.native(),
+                rrect.as_ref().native(),
                 options.op.into_native(), options.do_anti_alias)
         }
         self
@@ -589,16 +589,16 @@ impl Canvas {
         self
     }
 
-    pub fn draw_rrect(&mut self, rrect: &RRect, paint: &Paint) -> &mut Self {
+    pub fn draw_rrect<RR: AsRef<RRect>>(&mut self, rrect: RR, paint: &Paint) -> &mut Self {
         unsafe {
-            self.native_mut().drawRRect(rrect.native(), paint.native())
+            self.native_mut().drawRRect(rrect.as_ref().native(), paint.native())
         }
         self
     }
 
-    pub fn draw_drrect(&mut self, outer: &RRect, inner: &RRect, paint: &Paint) -> &mut Self {
+    pub fn draw_drrect<ORR: AsRef<RRect>, IRR: AsRef<RRect>>(&mut self, outer: ORR, inner: IRR, paint: &Paint) -> &mut Self {
         unsafe {
-            self.native_mut().drawDRRect(outer.native(), inner.native(), paint.native())
+            self.native_mut().drawDRRect(outer.as_ref().native(), inner.as_ref().native(), paint.native())
         }
         self
     }

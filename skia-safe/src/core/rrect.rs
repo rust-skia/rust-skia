@@ -58,6 +58,12 @@ impl Default for RRect {
     }
 }
 
+impl AsRef<RRect> for RRect {
+    fn as_ref(&self) -> &RRect {
+        self
+    }
+}
+
 impl RRect {
 
     pub fn get_type(&self) -> RRectType {

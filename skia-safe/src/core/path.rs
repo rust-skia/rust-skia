@@ -472,11 +472,11 @@ impl Handle<SkPath> {
         self
     }
 
-    pub fn add_rrect(&mut self, rrect: &RRect, dir_start: Option<(PathDirection, usize)>) -> &mut Self {
+    pub fn add_rrect<RR: AsRef<RRect>>(&mut self, rrect: RR, dir_start: Option<(PathDirection, usize)>) -> &mut Self {
         let dir = dir_start.map(|ds| ds.0).unwrap_or_default();
         let start = dir_start.map(|ds| ds.1).unwrap_or_default();
         unsafe {
-            self.native_mut().addRRect1(rrect.native(), dir.into_native(), start.try_into().unwrap())
+            self.native_mut().addRRect1(rrect.as_ref().native(), dir.into_native(), start.try_into().unwrap())
         };
         self
     }
