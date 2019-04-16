@@ -66,15 +66,9 @@ jobs:
   - script: cd skia-safe && cargo test --release --features "$(features)" -vv
     displayName: Test skia-safe
 
-  - ${{ if ne(parameters.platform, 'Windows') }}:
-    - script: cd skia-safe && cargo run --release --features "$(features)" --example skia-org ${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-org $(exampleArgs)
-      displayName: Generate skia-org Example Images
-      condition: ne(variables['exampleArgs'], '')
-
-  - ${{ if eq(parameters.platform, 'Windows') }}:
-    - script: cd skia-safe && cargo run --release --features "$(features)" --example skia-org %BUILD_ARTIFACTSTAGINGDIRECTORY%/skia-org $(exampleArgs)
-      displayName: Generate skia-org Example Images
-      condition: ne(variables['exampleArgs'], '')
+  - script: cd skia-safe && cargo run --release --features "$(features)" --example skia-org "$(Build.ArtifactStagingDirectory)/skia-org" $(exampleArgs)
+    displayName: Generate skia-org Example Images
+    condition: ne(variables['exampleArgs'], '')
 
   - task: PublishBuildArtifacts@1
     inputs:
