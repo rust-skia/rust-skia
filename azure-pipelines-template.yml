@@ -11,6 +11,9 @@ jobs:
       stable-vulkan:
         toolchain: stable
         features: 'vulkan'
+      stable-svg:
+        toolchain: stable
+        features: 'svg'
   variables:
     platform: ${{ parameters.platform }}
     image: ${{ parameters.image }}

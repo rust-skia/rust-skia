@@ -4,6 +4,8 @@ mod docs;
 mod effects;
 mod interop;
 pub mod gpu;
+#[cfg(feature = "svg")]
+pub mod svg;
 
 #[macro_use]
 extern crate bitflags;

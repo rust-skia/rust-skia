@@ -5,7 +5,7 @@ extern crate cc;
 
 use std::env;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{PathBuf, Path};
 use std::process::{Command, Stdio};
 use bindgen::EnumVariation;
 use cc::Build;
@@ -24,6 +24,9 @@ mod build {
 
     /// Build with Vulkan support?
     pub const VULKAN: bool = cfg!(feature = "vulkan");
+
+    /// Build with SVG support?
+    pub const SVG: bool = cfg!(feature = "svg");
 }
 
 fn main() {
@@ -72,7 +75,8 @@ fn main() {
 
         let mut args: Vec<(&str, String)> = vec![
             ("is_official_build", if build::SKIA_RELEASE { yes() } else { no() }),
-            ("skia_use_expat", no()),
+            ("skia_use_expat", if build::SVG { yes() } else { no() }),
+            ("skia_use_system_expat", no()),
             ("skia_use_icu", no()),
             ("skia_use_system_libjpeg_turbo", no()),
             ("skia_use_system_libpng", no()),
@@ -175,15 +179,14 @@ fn main() {
                 .success(), "`ninja` returned an error, please check the output for details.");
 
     let current_dir = env::current_dir().unwrap();
-    let current_dir_name = current_dir.to_str().unwrap();
 
     println!("cargo:rustc-link-search={}", &skia_out_dir);
-    cargo::add_link_libs(&["static=skia", "static=skiabinding"]);
+    cargo::add_link_lib("static=skia");
 
-    bindgen_gen(&current_dir_name, &skia_out_dir)
+    bindgen_gen(&current_dir, &skia_out_dir)
 }
 
-fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
+fn bindgen_gen(current_dir: &Path, skia_out_dir: &str) {
 
     let mut builder = bindgen::Builder::default()
         .generate_inline_functions(true)
@@ -225,9 +228,11 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
         .whitelist_type("SkGradientShader")
         .whitelist_type("SkPerlinNoiseShader")
         .whitelist_type("SkTableColorFilter")
+
         .whitelist_type("SkDocument")
 
         .whitelist_type("SkDynamicMemoryWStream")
+        .whitelist_type("SkXMLStreamWriter")
 
         .whitelist_type("GrGLBackendState")
 
@@ -251,9 +256,9 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
     for include_dir in fs::read_dir("skia/include").expect("Unable to read skia/include") {
         let dir = include_dir.unwrap();
         cargo::add_dependent_path(dir.path().to_str().unwrap());
-        let include_path = format!("{}/{}", &current_dir_name, &dir.path().to_str().unwrap());
-        builder = builder.clang_arg(format!("-I{}", &include_path));
-        cc_build.include(&include_path);
+        let include_path = current_dir.join(dir.path());
+        builder = builder.clang_arg(format!("-I{}", include_path.display()));
+        cc_build.include(include_path);
     }
 
     if build::VULKAN {
@@ -261,6 +266,16 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
         builder = builder.clang_arg("-DSK_VULKAN");
         cc_build.define("SKIA_IMPLEMENTATION", "1");
         builder = builder.clang_arg("-DSKIA_IMPLEMENTATION=1");
+    }
+
+    if build::SVG {
+        cc_build.define("SK_XML", "1");
+        builder = builder.clang_arg("-DSK_XML");
+
+        // SkXMLWriter.h
+        let include_path = current_dir.join(Path::new("skia/src/xml"));
+        builder = builder.clang_arg(format!("-I{}", include_path.display()));
+        cc_build.include(include_path);
     }
 
     if build::SKIA_RELEASE {
