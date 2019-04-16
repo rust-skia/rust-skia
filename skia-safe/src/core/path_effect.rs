@@ -116,38 +116,38 @@ impl RCHandle<SkPathEffect> {
         }).unwrap()
     }
 
-    pub fn filter_path_inplace(
+    pub fn filter_path_inplace<R: AsRef<Rect>>(
         &self, dst: &mut Path, src: &Path,
-        stroke_rec: &mut StrokeRec, cull_rect: &Rect) -> bool {
+        stroke_rec: &mut StrokeRec, cull_rect: R) -> bool {
         unsafe {
             self.native().filterPath(
                 dst.native_mut(), src.native(),
                 stroke_rec.native_mut(),
-                &cull_rect.into_native())
+                cull_rect.as_ref().native())
         }
     }
 
     // for convenience
-    pub fn filter_path(&self, src: &Path, stroke_rec: &StrokeRec, cull_rect: &Rect)
+    pub fn filter_path<R: AsRef<Rect>>(&self, src: &Path, stroke_rec: &StrokeRec, cull_rect: R)
         -> Option<(Path, StrokeRec)> {
         let mut dst = Path::default();
         let mut stroke_rec_r = stroke_rec.clone();
-        self.filter_path_inplace(&mut dst, src, &mut stroke_rec_r, &cull_rect)
+        self.filter_path_inplace(&mut dst, src, &mut stroke_rec_r, cull_rect)
             .if_true_some((dst, stroke_rec_r))
     }
 
-    pub fn compute_fast_bounds(&self, src: &Rect) -> Rect {
+    pub fn compute_fast_bounds<R: AsRef<Rect>>(&self, src: R) -> Rect {
         let mut r : Rect = Rect::default();
-        unsafe { self.native().computeFastBounds(r.native_mut(), &src.into_native()) };
+        unsafe { self.native().computeFastBounds(r.native_mut(), src.as_ref().native()) };
         r
     }
 
-    pub fn as_points(
+    pub fn as_points<CR: AsRef<Rect>>(
         &self,
         src: &Path,
         stroke_rect: &StrokeRec,
         matrix: &Matrix,
-        cull_rect: &Rect)
+        cull_rect: CR)
         -> Option<PathEffectPointData> {
         let mut point_data = PathEffectPointData::default();
         unsafe {
@@ -156,7 +156,7 @@ impl RCHandle<SkPathEffect> {
                 src.native(),
                 stroke_rect.native(),
                 matrix.native(),
-                &cull_rect.into_native())
+                cull_rect.as_ref().native())
         }.if_true_some(point_data)
     }
 

@@ -30,6 +30,12 @@ fn test_irect_layout() {
     IRect::test_layout();
 }
 
+impl AsRef<IRect> for IRect {
+    fn as_ref(&self) -> &IRect {
+        self
+    }
+}
+
 impl IRect {
 
     pub fn new(left: i32, top: i32, right: i32, bottom: i32) -> IRect {
@@ -179,6 +185,7 @@ impl Contains<&IRect> for IRect {
 }
 
 impl Contains<&Rect> for IRect {
+    // TODO: can we support AsRef<Rect> here?
     fn contains(&self, other: &Rect) -> bool {
         unsafe { self.native().contains3(other.native()) }
     }
@@ -307,19 +314,19 @@ impl Rect {
         Self::new(new_p.x, new_p.y, new_p.x - self.left, new_p.y - self.top)
     }
 
-    pub fn intersect(a: &Rect, b: &Rect) -> Option<Rect> {
+    pub fn intersect<A: AsRef<Rect>, B: AsRef<Rect>>(a: A, b: B) -> Option<Rect> {
         let mut intersection = Rect::default();
-        unsafe { intersection.native_mut().intersect2(a.native(), b.native()) }
+        unsafe { intersection.native_mut().intersect2(a.as_ref().native(), b.as_ref().native()) }
             .if_true_some(intersection)
     }
 
-    pub fn intersects(a: &Rect, b: &Rect) -> bool {
-        unsafe { SkRect::Intersects(a.native(), b.native()) }
+    pub fn intersects<A: AsRef<Rect>, B: AsRef<Rect>>(a: &Rect, b: &Rect) -> bool {
+        unsafe { SkRect::Intersects(a.as_ref().native(), b.as_ref().native()) }
     }
 
-    pub fn join(a: &Rect, b: &Rect) -> Rect {
-        let mut joined = *a;
-        unsafe { joined.native_mut().join1(b.native()) }
+    pub fn join<A: AsRef<Rect>, B: AsRef<Rect>>(a: A, b: B) -> Rect {
+        let mut joined = *(a.as_ref());
+        unsafe { joined.native_mut().join1(b.as_ref().native()) }
         joined
     }
 

@@ -75,9 +75,9 @@ impl VerticesBone {
         })
     }
 
-    pub fn map_rect(&self, rect: &Rect) -> Rect {
+    pub fn map_rect<R: AsRef<Rect>>(&self, rect: R) -> Rect {
         Rect::from_native(unsafe {
-            self.native().mapRect(&rect.into_native())
+            self.native().mapRect(rect.as_ref().native())
         })
     }
 }

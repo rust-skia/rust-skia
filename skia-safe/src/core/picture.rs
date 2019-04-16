@@ -53,9 +53,9 @@ impl RCHandle<SkPicture> {
         }).unwrap()
     }
 
-    pub fn new_placeholder(cull: &Rect) -> Picture {
+    pub fn new_placeholder<C: AsRef<Rect>>(cull: C) -> Picture {
         Picture::from_ptr(unsafe {
-            C_SkPicture_MakePlaceholder(&cull.into_native())
+            C_SkPicture_MakePlaceholder(cull.as_ref().native())
         }).unwrap()
     }
 
