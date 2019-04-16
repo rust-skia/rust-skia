@@ -1373,4 +1373,8 @@ extern "C" SkCanvas* C_SkSVGCanvas_Make(const SkRect* bounds, SkXMLWriter* write
     return SkSVGCanvas::Make(*bounds, writer).release();
 }
 
+extern "C" void C_SkXMLStreamWriter_destruct(SkXMLStreamWriter* self) {
+    self->~SkXMLStreamWriter();
+}
+
 #endif
