@@ -54,6 +54,9 @@ pub use self::coverage_mode::*;
 mod data;
 pub use self::data::*;
 
+pub(crate) mod document;
+pub use self::document::*;
+
 mod encoded_image_format;
 pub use self::encoded_image_format::*;
 
@@ -140,6 +143,9 @@ pub use self::surface_props::*;
 
 mod text_blob;
 pub use self::text_blob::*;
+
+mod time;
+pub use self::time::*;
 
 mod typeface;
 pub use self::typeface::*;

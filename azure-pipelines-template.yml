@@ -14,6 +14,7 @@ jobs:
   variables:
     platform: ${{ parameters.platform }}
     image: ${{ parameters.image }}
+    exampleArgs: '--driver cpu --driver pdf'
   pool:
     vmImage: $(image)
 
@@ -62,12 +63,12 @@ jobs:
     displayName: Test skia-safe
 
   - ${{ if ne(parameters.platform, 'Windows') }}:
-    - script: cargo run --release --example skia-org ${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-org
+    - script: cargo run --release --example skia-org ${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-org $(exampleArgs)
       displayName: Generate skia-org Example Images
       condition: eq(variables['features'], '')
 
   - ${{ if eq(parameters.platform, 'Windows') }}:
-    - script: cargo run --release --example skia-org %BUILD_ARTIFACTSTAGINGDIRECTORY%/skia-org
+    - script: cargo run --release --example skia-org %BUILD_ARTIFACTSTAGINGDIRECTORY%/skia-org $(exampleArgs)
       displayName: Generate skia-org Example Images
       condition: eq(variables['features'], '')
 

@@ -140,7 +140,6 @@ mod font_style_static {
     }
 }
 
-
 #[test]
 fn test_equality() {
     let style : FontStyle = Default::default();

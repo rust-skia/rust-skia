@@ -225,6 +225,9 @@ fn bindgen_gen(current_dir_name: &str, skia_out_dir: &str) {
         .whitelist_type("SkGradientShader")
         .whitelist_type("SkPerlinNoiseShader")
         .whitelist_type("SkTableColorFilter")
+        .whitelist_type("SkDocument")
+
+        .whitelist_type("SkDynamicMemoryWStream")
 
         .whitelist_type("GrGLBackendState")
 
