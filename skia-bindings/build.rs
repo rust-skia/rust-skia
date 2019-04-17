@@ -27,6 +27,15 @@ mod build {
 
     /// Build with SVG support?
     pub const SVG: bool = cfg!(feature = "svg");
+
+    /// Build with animation support.
+    pub const ANIMATION: bool = false;
+
+    /// Support DNG file format.
+    pub const DNG: bool = false;
+
+    /// Build the particles module.
+    pub const PARTICLES: bool = false;
 }
 
 fn main() {
@@ -82,6 +91,10 @@ fn main() {
             ("skia_use_system_libpng", no()),
             ("skia_use_libwebp", no()),
             ("skia_use_system_zlib", no()),
+            ("skia_enable_skottie", if build::ANIMATION { yes() } else { no() }),
+            ("skia_use_xps", no()),
+            ("skia_use_dng_sdk", if build::DNG { yes() } else { no() }),
+            ("skia_enable_particles", if build::PARTICLES { yes() } else { no() }),
             ("cc", quote("clang")),
             ("cxx", quote("clang++")),
         ];
