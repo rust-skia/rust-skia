@@ -49,7 +49,6 @@
 
 #if defined(SK_XML)
 #include "SkSVGCanvas.h"
-#include "SkXMLWriter.h"
 #endif
 
 template<typename T>
@@ -1373,16 +1372,8 @@ extern "C" bool C_GrVkImageInfo_Equals(const GrVkImageInfo* lhs, const GrVkImage
 
 #if defined(SK_XML)
 
-// Note, we can't use the SkWStream* implementation, because its implementation creates
-// an SkXMLWriter and destroys it before returning (this bug is fixed in Skia master, and
-// so may be available in a future update).
-
-extern "C" SkCanvas* C_SkSVGCanvas_Make(const SkRect* bounds, SkXMLWriter* writer) {
+extern "C" SkCanvas* C_SkSVGCanvas_Make(const SkRect* bounds, SkWStream* writer) {
     return SkSVGCanvas::Make(*bounds, writer).release();
-}
-
-extern "C" void C_SkXMLStreamWriter_destruct(SkXMLStreamWriter* self) {
-    self->~SkXMLStreamWriter();
 }
 
 #endif

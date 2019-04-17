@@ -2,8 +2,7 @@ use crate::interop::DynamicMemoryWStream;
 use crate::prelude::*;
 use crate::{Data, Rect};
 use skia_bindings::{
-    C_SkCanvas_delete, C_SkSVGCanvas_Make, C_SkXMLStreamWriter_destruct, SkCanvas,
-    SkXMLStreamWriter,
+    C_SkCanvas_delete, C_SkSVGCanvas_Make, SkCanvas,
 };
 use std::ops::{Deref, DerefMut};
 use std::pin::Pin;
@@ -11,7 +10,6 @@ use std::ptr;
 
 pub struct Canvas {
     canvas: *mut SkCanvas,
-    xml_stream_writer: Option<Pin<Box<XMLStreamWriter>>>,
     stream: Pin<Box<DynamicMemoryWStream>>,
 }
 
@@ -42,15 +40,11 @@ impl Canvas {
     pub fn new<B: AsRef<Rect>>(bounds: B) -> Canvas {
         let bounds = bounds.as_ref();
         let mut stream = Box::pin(DynamicMemoryWStream::new());
-        let mut xml_stream_writer = Box::pin(XMLStreamWriter::from_native(unsafe {
-            SkXMLStreamWriter::new(&mut stream.native_mut()._base)
-        }));
         let canvas = unsafe {
-            C_SkSVGCanvas_Make(bounds.native(), &mut xml_stream_writer.native_mut()._base)
+            C_SkSVGCanvas_Make(bounds.native(), &mut stream.native_mut()._base)
         };
         Canvas {
             canvas,
-            xml_stream_writer: Some(xml_stream_writer),
             stream,
         }
     }
@@ -65,18 +59,7 @@ impl Canvas {
             C_SkCanvas_delete(self.canvas);
         }
         self.canvas = ptr::null_mut();
-        self.xml_stream_writer = None;
         self.stream.detach_as_data()
-    }
-}
-
-type XMLStreamWriter = Handle<SkXMLStreamWriter>;
-
-impl NativeDrop for SkXMLStreamWriter {
-    fn drop(&mut self) {
-        unsafe {
-            C_SkXMLStreamWriter_destruct(self);
-        }
     }
 }
 
