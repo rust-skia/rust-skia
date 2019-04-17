@@ -231,7 +231,7 @@ impl<H, N> IntoHandle<H> for N
 }
 
 /// Wraps a native type that can be represented as a value
-/// and needs a destructor.
+/// and needs a Drop trait.
 #[repr(transparent)]
 pub struct Handle<N: NativeDrop>(N);
 

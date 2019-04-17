@@ -52,10 +52,13 @@ pub(crate) mod artifact {
     }
 
     pub enum CPU {}
+    pub enum PDF {}
+    #[cfg(feature = "svg")]
+    pub enum SVG {}
+
     pub enum OpenGL {}
     #[cfg(feature = "vulkan")]
     pub enum Vulkan {}
-    pub enum PDF {}
 
     impl DrawingDriver for CPU {
 
@@ -76,6 +79,19 @@ pub(crate) mod artifact {
             func(document.canvas());
             let data = document.end_page().close();
             write_file(data.bytes(), path, name, "pdf");
+        }
+    }
+
+    #[cfg(feature = "svg")]
+    impl DrawingDriver for SVG {
+        const NAME: &'static str = "svg";
+
+        fn draw_image<F>(size: (i32, i32), path: &PathBuf, name: &str, func: F) -> () where F: Fn(&mut Canvas) -> () {
+            use skia_safe::Rect;
+            let mut canvas = skia_safe::svg::Canvas::new(Rect::from_size(size));
+            func(&mut canvas);
+            let data = canvas.end();
+            write_file(data.bytes(), path, name, "svg");
         }
     }
 
@@ -195,7 +211,7 @@ fn main() {
             .arg(Arg::with_name(DRIVER)
                 .long(DRIVER)
                 .takes_value(true)
-                .possible_values(get_possible_drivers())
+                .possible_values(get_possible_drivers().as_slice())
                 .multiple(true)
                 .help("In addition to the CPU, render with the given driver.")
             )
@@ -223,6 +239,13 @@ fn main() {
 
     if drivers.contains(&artifact::PDF::NAME) {
         draw_all::<artifact::PDF>(&out_path);
+    }
+
+    #[cfg(feature = "svg")]
+    {
+        if drivers.contains(&artifact::SVG::NAME) {
+            draw_all::<artifact::SVG>(&out_path);
+        }
     }
 
     if drivers.contains(&artifact::OpenGL::NAME) {
@@ -262,13 +285,13 @@ fn main() {
     }
 }
 
-#[cfg(not(feature = "vulkan"))]
-fn get_possible_drivers() -> &'static [&'static str] {
-    ["cpu", "pdf", "opengl"].as_ref()
+fn get_possible_drivers() -> Vec<&'static str> {
+    let mut drivers = vec!["cpu", "pdf", "opengl"];
+    if cfg!(feature = "vulkan") {
+        drivers.push("vulkan")
+    }
+    if cfg!(feature = "svg") {
+        drivers.push("svg");
+    }
+    drivers
 }
-
-#[cfg(feature = "vulkan")]
-fn get_possible_drivers() -> &'static [&'static str] {
-    ["cpu", "pdf", "opengl", "vulkan"].as_ref()
-}
-

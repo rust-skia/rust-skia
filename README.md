@@ -97,7 +97,7 @@ We do support most of the SkCanvas, SkPaint, and SkPath and related APIs and are
 - [x] Basic Drawing: Surface, Canvas, Paint, Path.
 - [x] Basic Effects and Shaders.
 - [x] PDF
-- [ ] SVG
+- [x] SVG
 - [ ] Animation
 - [x] Vulkan
 - [x] OpenGL

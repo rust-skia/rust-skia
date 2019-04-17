@@ -13,7 +13,7 @@ pub type DynamicMemoryWStream = Handle<SkDynamicMemoryWStream>;
 impl NativeDrop for SkDynamicMemoryWStream {
     fn drop(&mut self) {
         unsafe {
-            C_SkDynamicMemoryWStream_destruct(self)
+            C_SkDynamicMemoryWStream_destruct(self);
         }
     }
 }

@@ -5,16 +5,20 @@ jobs:
       stable:
         toolchain: stable
         features: ''
+        exampleArgs: '--driver cpu --driver pdf'
       beta:
         toolchain: beta
         features: ''
       stable-vulkan:
         toolchain: stable
         features: 'vulkan'
+      stable-svg:
+        toolchain: stable
+        features: 'svg'
+        exampleArgs: '--driver svg'
   variables:
     platform: ${{ parameters.platform }}
     image: ${{ parameters.image }}
-    exampleArgs: '--driver cpu --driver pdf'
   pool:
     vmImage: $(image)
 
@@ -62,18 +66,12 @@ jobs:
   - script: cd skia-safe && cargo test --release --features "$(features)" -vv
     displayName: Test skia-safe
 
-  - ${{ if ne(parameters.platform, 'Windows') }}:
-    - script: cargo run --release --example skia-org ${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-org $(exampleArgs)
-      displayName: Generate skia-org Example Images
-      condition: eq(variables['features'], '')
-
-  - ${{ if eq(parameters.platform, 'Windows') }}:
-    - script: cargo run --release --example skia-org %BUILD_ARTIFACTSTAGINGDIRECTORY%/skia-org $(exampleArgs)
-      displayName: Generate skia-org Example Images
-      condition: eq(variables['features'], '')
+  - script: cd skia-safe && cargo run --release --features "$(features)" --example skia-org "$(Build.ArtifactStagingDirectory)/skia-org" $(exampleArgs)
+    displayName: Generate skia-org Example Images
+    condition: ne(variables['exampleArgs'], '')
 
   - task: PublishBuildArtifacts@1
     inputs:
       pathtoPublish: '$(Build.ArtifactStagingDirectory)/skia-org'
       artifactName: 'skia-org-examples-$(platform)-$(toolchain)'
-    condition: eq(variables['features'], '')
+    condition: ne(variables['exampleArgs'], '')

@@ -145,7 +145,7 @@ impl NativeAccess<SkCanvas> for Canvas {
     }
 }
 
-/// This is the type representing a canvas that is owned and destructed
+/// This is the type representing a canvas that is owned and dropped
 /// when it goes out of scope _and_ is bound to a the lifetime of another
 /// instance. Function resolvement is done via the Deref trait.
 pub struct OwnedCanvas<'lt>(*mut Canvas, PhantomData<&'lt ()>);

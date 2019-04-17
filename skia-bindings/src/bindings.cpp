@@ -38,14 +38,18 @@
 #include "GrContext.h"
 // gpu/gl
 #include "gl/GrGLInterface.h"
+#include "SkRect.h"
 
 #if defined(SK_VULKAN)
-
 #include "vk/GrVkVulkan.h"
 #include "vk/GrVkTypes.h"
 #include "vk/GrVkBackendContext.h"
 #include "GrBackendSurface.h"
+#endif
 
+#if defined(SK_XML)
+#include "SkSVGCanvas.h"
+#include "SkXMLWriter.h"
 #endif
 
 template<typename T>
@@ -1355,6 +1359,22 @@ extern "C" void C_GrVkImageInfo_updateImageLayout(GrVkImageInfo* self, VkImageLa
 
 extern "C" bool C_GrVkImageInfo_Equals(const GrVkImageInfo* lhs, const GrVkImageInfo* rhs) {
     return *lhs == *rhs;
+}
+
+#endif
+
+#if defined(SK_XML)
+
+// Note, we can't use the SkWStream* implementation, because its implementation creates
+// an SkXMLWriter and destroys it before returning (this bug is fixed in Skia master, and
+// so may be available in a future update).
+
+extern "C" SkCanvas* C_SkSVGCanvas_Make(const SkRect* bounds, SkXMLWriter* writer) {
+    return SkSVGCanvas::Make(*bounds, writer).release();
+}
+
+extern "C" void C_SkXMLStreamWriter_destruct(SkXMLStreamWriter* self) {
+    self->~SkXMLStreamWriter();
 }
 
 #endif
