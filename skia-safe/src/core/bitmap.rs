@@ -226,8 +226,8 @@ impl Handle<SkBitmap> {
         unsafe { C_SkBitmap_eraseARGB(self.native(), a.into(), r.into(), g.into(), b.into()) }
     }
 
-    pub fn erase<C: Into<Color>>(&self, c: C, area: &IRect) {
-        unsafe { self.native().erase(c.into().into_native(), &area.into_native()) }
+    pub fn erase<C: Into<Color>, IR: AsRef<IRect>>(&self, c: C, area: IR) {
+        unsafe { self.native().erase(c.into().into_native(), area.as_ref().native()) }
     }
 
     pub fn get_color(&self, p: IPoint) -> Color {
@@ -243,8 +243,8 @@ impl Handle<SkBitmap> {
         self.native().getAddr(p.x, p.y)
     }
 
-    pub fn extract_subset(&self, dst: &mut Self, subset: &IRect) -> bool {
-        unsafe { self.native().extractSubset(dst.native_mut(), &subset.into_native() ) }
+    pub fn extract_subset<IR: AsRef<IRect>>(&self, dst: &mut Self, subset: IR) -> bool {
+        unsafe { self.native().extractSubset(dst.native_mut(), subset.as_ref().native() ) }
     }
 
     pub unsafe fn read_pixels(&self, dst_info: &ImageInfo, dst_pixels: *mut ffi::c_void, dst_row_bytes: usize, src_x: i32, src_y: i32) -> bool {

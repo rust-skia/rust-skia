@@ -341,7 +341,7 @@ fn draw_line_2d_effect(canvas: &mut Canvas) {
 fn draw_path_1d_effect(canvas: &mut Canvas) {
     let mut paint = Paint::default();
     let mut path = Path::default();
-    path.add_oval(&Rect::from_size((16.0, 6.0)), None);
+    path.add_oval(Rect::from_size((16.0, 6.0)), None);
     paint.set_path_effect(Path1DPathEffect::new(
         &path, 32.0, 0.0, Path1DPathEffectStyle::Rotate).as_ref());
     paint.set_anti_alias(true);

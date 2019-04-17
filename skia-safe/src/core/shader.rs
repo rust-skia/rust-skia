@@ -141,9 +141,8 @@ impl RCHandle<SkShader> {
     }
 
     pub fn from_color_in_space<C: AsRef<Color4f>>(color: C, space: &ColorSpace) -> Self {
-        let color = color.as_ref();
         Self::from_ptr(unsafe {
-            C_SkShader_MakeColorShader2(color.native(), space.shared_native())
+            C_SkShader_MakeColorShader2(color.as_ref().native(), space.shared_native())
         }).unwrap()
     }
 

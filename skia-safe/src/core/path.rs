@@ -298,8 +298,8 @@ impl Handle<SkPath> {
         })
     }
 
-    pub fn conservatively_contains_rect(&self, rect: &Rect) -> bool {
-        unsafe { self.native().conservativelyContainsRect(rect.native()) }
+    pub fn conservatively_contains_rect<R: AsRef<Rect>>(&self, rect: R) -> bool {
+        unsafe { self.native().conservativelyContainsRect(rect.as_ref().native()) }
     }
 
     pub fn inc_reserve(&mut self, extra_pt_count: usize) -> &mut Self {
@@ -367,8 +367,8 @@ impl Handle<SkPath> {
         self
     }
 
-    pub fn arc_to(&mut self, oval: &Rect, start_angle: scalar, sweep_angle: scalar, force_move_to: bool) -> &mut Self {
-        unsafe { self.native_mut().arcTo(oval.native(), start_angle, sweep_angle, force_move_to) };
+    pub fn arc_to<O: AsRef<Rect>>(&mut self, oval: O, start_angle: scalar, sweep_angle: scalar, force_move_to: bool) -> &mut Self {
+        unsafe { self.native_mut().arcTo(oval.as_ref().native(), start_angle, sweep_angle, force_move_to) };
         self
     }
 
@@ -428,20 +428,20 @@ impl Handle<SkPath> {
             .if_true_some((rects, dirs))
     }
 
-    pub fn add_rect(&mut self, rect: &Rect, dir_start: Option<(PathDirection, usize)>) -> &mut Self {
+    pub fn add_rect<R: AsRef<Rect>>(&mut self, rect: R, dir_start: Option<(PathDirection, usize)>) -> &mut Self {
         let dir = dir_start.map(|ds| ds.0).unwrap_or_default();
         let start = dir_start.map(|ds| ds.1).unwrap_or_default();
         unsafe {
-            self.native_mut().addRect1(rect.native(), dir.into_native(), start.try_into().unwrap())
+            self.native_mut().addRect1(rect.as_ref().native(), dir.into_native(), start.try_into().unwrap())
         };
         self
     }
 
-    pub fn add_oval(&mut self, oval: &Rect, dir_start: Option<(PathDirection, usize)>) -> &mut Self {
+    pub fn add_oval<OR: AsRef<Rect>>(&mut self, oval: OR, dir_start: Option<(PathDirection, usize)>) -> &mut Self {
         let dir = dir_start.map(|ds| ds.0).unwrap_or_default();
         let start = dir_start.map(|ds| ds.1).unwrap_or_default();
         unsafe {
-            self.native_mut().addOval1(oval.native(), dir.into_native(), start.try_into().unwrap())
+            self.native_mut().addOval1(oval.as_ref().native(), dir.into_native(), start.try_into().unwrap())
         };
         self
     }
@@ -455,28 +455,28 @@ impl Handle<SkPath> {
         self
     }
 
-    pub fn add_arc(&mut self, oval: &Rect, start_angle: scalar, sweep_angle: scalar) -> &mut Self {
+    pub fn add_arc<OR: AsRef<Rect>>(&mut self, oval: OR, start_angle: scalar, sweep_angle: scalar) -> &mut Self {
         unsafe {
-            self.native_mut().addArc(oval.native(), start_angle, sweep_angle)
+            self.native_mut().addArc(oval.as_ref().native(), start_angle, sweep_angle)
         };
         self
     }
 
     // decided to use the simpler variant of the two, if more radii need to be specified,
     // add_rrect can be used.
-    pub fn add_round_rect(&mut self, rect: &Rect, (rx, ry): (scalar, scalar), dir: Option<PathDirection>) -> &mut Self {
+    pub fn add_round_rect<R: AsRef<Rect>>(&mut self, rect: R, (rx, ry): (scalar, scalar), dir: Option<PathDirection>) -> &mut Self {
         let dir = dir.unwrap_or_default();
         unsafe {
-            self.native_mut().addRoundRect(rect.native(), rx, ry, dir.into_native())
+            self.native_mut().addRoundRect(rect.as_ref().native(), rx, ry, dir.into_native())
         };
         self
     }
 
-    pub fn add_rrect(&mut self, rrect: &RRect, dir_start: Option<(PathDirection, usize)>) -> &mut Self {
+    pub fn add_rrect<RR: AsRef<RRect>>(&mut self, rrect: RR, dir_start: Option<(PathDirection, usize)>) -> &mut Self {
         let dir = dir_start.map(|ds| ds.0).unwrap_or_default();
         let start = dir_start.map(|ds| ds.1).unwrap_or_default();
         unsafe {
-            self.native_mut().addRRect1(rrect.native(), dir.into_native(), start.try_into().unwrap())
+            self.native_mut().addRRect1(rrect.as_ref().native(), dir.into_native(), start.try_into().unwrap())
         };
         self
     }

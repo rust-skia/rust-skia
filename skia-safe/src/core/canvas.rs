@@ -462,10 +462,10 @@ impl Canvas {
         self
     }
 
-    pub fn clip_rrect(&mut self, rrect: &RRect, options: CanvasClipOptions) -> &mut Self {
+    pub fn clip_rrect<RR: AsRef<RRect>>(&mut self, rrect: RR, options: CanvasClipOptions) -> &mut Self {
         unsafe {
             self.native_mut().clipRRect(
-                rrect.native(),
+                rrect.as_ref().native(),
                 options.op.into_native(), options.do_anti_alias)
         }
         self
@@ -568,9 +568,9 @@ impl Canvas {
         self
     }
 
-    pub fn draw_irect(&mut self, rect: &IRect, paint: &Paint) -> &mut Self {
+    pub fn draw_irect<IR: AsRef<IRect>>(&mut self, rect: IR, paint: &Paint) -> &mut Self {
         unsafe {
-            self.native_mut().drawIRect(rect.native(), paint.native())
+            self.native_mut().drawIRect(rect.as_ref().native(), paint.native())
         }
         self
     }
@@ -589,16 +589,16 @@ impl Canvas {
         self
     }
 
-    pub fn draw_rrect(&mut self, rrect: &RRect, paint: &Paint) -> &mut Self {
+    pub fn draw_rrect<RR: AsRef<RRect>>(&mut self, rrect: RR, paint: &Paint) -> &mut Self {
         unsafe {
-            self.native_mut().drawRRect(rrect.native(), paint.native())
+            self.native_mut().drawRRect(rrect.as_ref().native(), paint.native())
         }
         self
     }
 
-    pub fn draw_drrect(&mut self, outer: &RRect, inner: &RRect, paint: &Paint) -> &mut Self {
+    pub fn draw_drrect<ORR: AsRef<RRect>, IRR: AsRef<RRect>>(&mut self, outer: ORR, inner: IRR, paint: &Paint) -> &mut Self {
         unsafe {
-            self.native_mut().drawDRRect(outer.native(), inner.native(), paint.native())
+            self.native_mut().drawDRRect(outer.as_ref().native(), inner.as_ref().native(), paint.native())
         }
         self
     }
@@ -670,12 +670,12 @@ impl Canvas {
         self
     }
 
-    pub fn draw_image_nine<R: AsRef<Rect>>(
-        &mut self, image: &Image, center: &IRect,
-        dst: R, paint: Option<&Paint>) -> &mut Self {
+    pub fn draw_image_nine<CIR: AsRef<IRect>, DR: AsRef<Rect>>(
+        &mut self, image: &Image, center: CIR,
+        dst: DR, paint: Option<&Paint>) -> &mut Self {
         unsafe {
             self.native_mut().drawImageNine(
-                image.native(), center.native(),
+                image.native(), center.as_ref().native(),
                 dst.as_ref().native(), paint.native_ptr_or_null())
         }
         self
@@ -716,12 +716,12 @@ impl Canvas {
         self
     }
 
-    pub fn draw_bitmap_nine<DR: AsRef<Rect>>(
-        &mut self, bitmap: &Bitmap, center: &IRect,
+    pub fn draw_bitmap_nine<CIR: AsRef<IRect>, DR: AsRef<Rect>>(
+        &mut self, bitmap: &Bitmap, center: CIR,
         dst: DR, paint: Option<&Paint>) -> &mut Self {
         unsafe {
             self.native_mut().drawBitmapNine(
-                bitmap.native(), center.native(),
+                bitmap.native(), center.as_ref().native(),
                 dst.as_ref().native(), paint.native_ptr_or_null())
         }
         self
@@ -855,7 +855,6 @@ impl Canvas {
 }
 
 impl QuickReject<Rect> for Canvas {
-    // TODO: can we support AsRef<Rect> here?
     fn quick_reject(&self, other: &Rect) -> bool {
         unsafe {
             self.native().quickReject(other.native())

@@ -365,9 +365,9 @@ impl Matrix {
         self
     }
 
-    pub fn from_rect_to_rect(src: &Rect, dst: &Rect, stf: MatrixScaleToFit) -> Option<Matrix> {
+    pub fn from_rect_to_rect<SR: AsRef<Rect>, DR: AsRef<Rect>>(src: SR, dst: DR, stf: MatrixScaleToFit) -> Option<Matrix> {
         let mut m = Matrix::new_identity();
-        unsafe { m.native_mut().setRectToRect(&src.into_native(), &dst.into_native(), stf.native().to_owned()) }
+        unsafe { m.native_mut().setRectToRect(src.as_ref().native(), dst.as_ref().native(), stf.native().to_owned()) }
             .if_true_some(m)
     }
 

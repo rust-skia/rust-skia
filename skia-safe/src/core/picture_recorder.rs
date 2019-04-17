@@ -34,15 +34,15 @@ impl Handle<SkPictureRecorder> {
         unsafe { SkPictureRecorder::new() }.into_handle()
     }
 
-    pub fn begin_recording(
+    pub fn begin_recording<BR: AsRef<Rect>>(
         &mut self,
-        bounds: &Rect,
+        bounds: BR,
         mut bbh_factory: Option<&mut BBHFactory>,
         record_flags: PictureRecorderRecordFlags) -> &mut Canvas {
 
         let canvas_ref = unsafe {
             &mut *self.native_mut().beginRecording(
-                &bounds.into_native(),
+                bounds.as_ref().native(),
                 bbh_factory.native_ptr_or_null_mut(),
                 record_flags.bits())
         };

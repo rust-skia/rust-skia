@@ -56,8 +56,8 @@ impl Handle<SkRegion> {
         unsafe { SkRegion::new() }.into_handle()
     }
 
-    pub fn from_rect(rect: &IRect) -> Region {
-        unsafe { SkRegion::new2(&rect.into_native()) }
+    pub fn from_rect<IR: AsRef<IRect>>(rect: IR) -> Region {
+        unsafe { SkRegion::new2(rect.as_ref().native()) }
             .into_handle()
     }
 
@@ -97,8 +97,8 @@ impl Handle<SkRegion> {
         unsafe { self.native_mut().setEmpty() }
     }
 
-    pub fn set_rect(&mut self, rect: &IRect) -> bool {
-        unsafe { self.native_mut().setRect(&rect.into_native()) }
+    pub fn set_rect<IR: AsRef<IRect>>(&mut self, rect: IR) -> bool {
+        unsafe { self.native_mut().setRect(rect.as_ref().native()) }
     }
 
     pub fn set_rects(&mut self, rects: &[IRect]) -> bool {
@@ -117,8 +117,8 @@ impl Handle<SkRegion> {
         unsafe { self.native_mut().setPath(path.native(), clip.native()) }
     }
 
-    pub fn intersects_rect(&self, rect: &IRect) -> bool {
-        unsafe { self.native().intersects(&rect.into_native()) }
+    pub fn intersects_rect<IR: AsRef<IRect>>(&self, rect: IR) -> bool {
+        unsafe { self.native().intersects(rect.as_ref().native()) }
     }
 
     pub fn intersects_region(&self, other: &Region) -> bool {
@@ -129,20 +129,20 @@ impl Handle<SkRegion> {
         unsafe { self.native().contains(point.x, point.y) }
     }
 
-    pub fn contains_rect(&self, rect: &IRect) -> bool {
-        unsafe { self.native().contains1(&rect.into_native()) }
+    pub fn contains_rect<IR: AsRef<IRect>>(&self, rect: IR) -> bool {
+        unsafe { self.native().contains1(rect.as_ref().native()) }
     }
 
     pub fn contains_region(&self, other: &Region) -> bool {
         unsafe { self.native().contains2(other.native()) }
     }
 
-    pub fn quick_contains(&self, rect: &IRect) -> bool {
-        unsafe { self.native().quickContains(&rect.into_native()) }
+    pub fn quick_contains<IR: AsRef<IRect>>(&self, rect: IR) -> bool {
+        unsafe { self.native().quickContains(rect.as_ref().native()) }
     }
 
-    pub fn quick_reject_rect(&self, rect: &IRect) -> bool {
-        unsafe { self.native().quickReject(&rect.into_native()) }
+    pub fn quick_reject_rect<IR: AsRef<IRect>>(&self, rect: IR) -> bool {
+        unsafe { self.native().quickReject(rect.as_ref().native()) }
     }
 
     pub fn quick_reject_region(&self, other: &Region) -> bool {
@@ -157,20 +157,20 @@ impl Handle<SkRegion> {
         unsafe { self.native_mut().translate(d.x, d.y) }
     }
 
-    pub fn op_rect(&mut self, rect: &IRect, op: RegionOp) -> bool {
-        unsafe { self.native_mut().op(&rect.into_native(), op.into_native()) }
+    pub fn op_rect<IR: AsRef<IRect>>(&mut self, rect: IR, op: RegionOp) -> bool {
+        unsafe { self.native_mut().op(rect.as_ref().native(), op.into_native()) }
     }
 
     pub fn op_region(&mut self, region: &Region, op: RegionOp) -> bool {
         unsafe { self.native_mut().op2(region.native(), op.into_native()) }
     }
 
-    pub fn op_rect_region(&mut self, rect: &IRect, region: &Region, op: RegionOp) -> bool {
-        unsafe { self.native_mut().op3(&rect.into_native(), region.native(), op.into_native()) }
+    pub fn op_rect_region<IR: AsRef<IRect>>(&mut self, rect: IR, region: &Region, op: RegionOp) -> bool {
+        unsafe { self.native_mut().op3(rect.as_ref().native(), region.native(), op.into_native()) }
     }
 
-    pub fn op_region_rect(&mut self, region: &Region, rect: &IRect, op: RegionOp) -> bool {
-        unsafe { self.native_mut().op4(region.native(), &rect.into_native(), op.into_native()) }
+    pub fn op_region_rect<IR: AsRef<IRect>>(&mut self, region: &Region, rect: IR, op: RegionOp) -> bool {
+        unsafe { self.native_mut().op4(region.native(), rect.as_ref().native(), op.into_native()) }
     }
 }
 
