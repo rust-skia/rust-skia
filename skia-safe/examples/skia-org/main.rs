@@ -108,7 +108,7 @@ pub(crate) mod artifact {
             let mut surface = Surface::new_render_target(
                 &mut context,
                 Budgeted::YES,
-                &image_info, None, gpu::SurfaceOrigin::TopLeft, None, false).unwrap();
+                &image_info, None, gpu::SurfaceOrigin::BottomLeft, None, false).unwrap();
 
             draw_image_on_surface(&mut surface, path, name, func);
         }
