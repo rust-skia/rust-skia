@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::gpu;
-use crate::core::{Picture, Matrix, ColorType, ImageInfo, Data, Bitmap, IRect, YUVColorSpace, AlphaType, ColorSpace, YUVAIndex, ISize, Paint, EncodedImageFormat, IPoint, ShaderTileMode, Shader};
+use crate::core::{Picture, Matrix, ColorType, ImageInfo, Data, Bitmap, IRect, YUVColorSpace, AlphaType, ColorSpace, YUVAIndex, ISize, Paint, EncodedImageFormat, IPoint, TileMode, Shader};
 use skia_bindings::{
     C_SkImage_MakeFromPicture,
     C_SkImage_MakeFromTexture,
@@ -333,7 +333,7 @@ impl RCHandle<SkImage> {
     }
 
     pub fn as_shader<
-        'a, TM: Into<Option<(ShaderTileMode, ShaderTileMode)>>,
+        'a, TM: Into<Option<(TileMode, TileMode)>>,
         OM: Into<Option<&'a Matrix>>>(
         &self, tile_modes: TM, local_matrix: OM) -> Shader {
         let tile_modes = tile_modes.into();

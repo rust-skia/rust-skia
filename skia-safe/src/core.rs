@@ -159,6 +159,9 @@ pub use self::surface_props::*;
 mod text_blob;
 pub use self::text_blob::*;
 
+mod tile_mode;
+pub use self::tile_mode::*;
+
 mod time;
 pub use self::time::*;
 

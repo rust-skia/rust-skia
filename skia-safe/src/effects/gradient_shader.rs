@@ -1,6 +1,5 @@
-use crate::core::{scalar, Matrix, Point, Shader, ShaderTileMode};
 use crate::prelude::*;
-use crate::{Color, Color4f, ColorSpace};
+use crate::{scalar, Color, Color4f, ColorSpace, Matrix, Point, Shader, TileMode};
 use skia_bindings::{
     C_SkGradientShader_MakeLinear, C_SkGradientShader_MakeLinear2, C_SkGradientShader_MakeRadial,
     C_SkGradientShader_MakeRadial2, C_SkGradientShader_MakeSweep, C_SkGradientShader_MakeSweep2,
@@ -35,7 +34,7 @@ impl GradientShader {
         points: (P1, P2),
         colors: C,
         pos: POS,
-        mode: ShaderTileMode,
+        mode: TileMode,
         flags: F,
         local_matrix: LM,
     ) -> Option<Shader> {
@@ -86,7 +85,7 @@ impl GradientShader {
         radius: scalar,
         colors: C,
         pos: POS,
-        mode: ShaderTileMode,
+        mode: TileMode,
         flags: F,
         local_matrix: LM,
     ) -> Option<Shader> {
@@ -143,7 +142,7 @@ impl GradientShader {
         end_radius: scalar,
         colors: C,
         pos: POS,
-        mode: ShaderTileMode,
+        mode: TileMode,
         flags: F,
         local_matrix: LM,
     ) -> Option<Shader> {
@@ -201,7 +200,7 @@ impl GradientShader {
         center: P,
         colors: C,
         pos: POS,
-        mode: ShaderTileMode,
+        mode: TileMode,
         angles: A,
         flags: F,
         local_matrix: LM,
@@ -301,7 +300,7 @@ impl RCHandle<SkShader> {
         points: (P1, P2),
         colors: C,
         pos: POS,
-        mode: ShaderTileMode,
+        mode: TileMode,
         flags: F,
         local_matrix: LM,
     ) -> Option<Self> {
@@ -320,7 +319,7 @@ impl RCHandle<SkShader> {
         radius: scalar,
         colors: C,
         pos: POS,
-        mode: ShaderTileMode,
+        mode: TileMode,
         flags: F,
         local_matrix: LM,
     ) -> Option<Self> {
@@ -343,7 +342,7 @@ impl RCHandle<SkShader> {
         end_radius: scalar,
         colors: C,
         pos: POS,
-        mode: ShaderTileMode,
+        mode: TileMode,
         flags: F,
         local_matrix: LM,
     ) -> Option<Self> {
@@ -372,7 +371,7 @@ impl RCHandle<SkShader> {
         center: P,
         colors: C,
         pos: POS,
-        mode: ShaderTileMode,
+        mode: TileMode,
         angles: A,
         flags: F,
         local_matrix: LM,
