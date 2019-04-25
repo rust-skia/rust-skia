@@ -45,11 +45,9 @@ impl Handle<SkBitmap> {
     }
 
     pub fn info(&self) -> ImageInfo {
-        // we contain ImageInfo in a struct, so we have to copy it.
-        let ptr = unsafe { self.native().info() };
-        let mut image_info = ImageInfo::default();
-        unsafe { C_SkImageInfo_Copy(ptr, image_info.native_mut()) }
-        image_info
+        ImageInfo::from_native(unsafe {
+            (*self.native().info()).clone()
+        })
     }
 
     pub fn width(&self) -> i32 {
