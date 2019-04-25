@@ -95,7 +95,7 @@ impl ColorSpace {
     }
 
     pub fn to_xyzd50(&self) -> Option<Matrix44> {
-        let mut matrix = Matrix44::new();
+        let mut matrix = Matrix44::default();
         unsafe { self.native().toXYZD50(matrix.native_mut()) }
             .if_true_some(matrix)
     }

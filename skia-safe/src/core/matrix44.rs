@@ -3,35 +3,19 @@ use std::{mem, ops};
 use crate::core::{Matrix, MatrixTypeMask, Vector4, scalar, Vector3 };
 use skia_bindings::{
     C_SkMatrix44_Equals,
-    C_SkMatrix44_destruct,
     SkMatrix44,
     C_SkMatrix44_SkMatrix,
     C_SkMatrix44_Mul,
     C_SkMatrix44_MulV4,
-    C_SkMatrix44_Construct,
     C_SkMatrix44_ConstructIdentity,
-    C_SkMatrix44_CopyConstruct
 };
 
-pub type Matrix44 = Handle<SkMatrix44>;
+#[derive(Copy, Clone)]
+#[repr(transparent)]
+pub struct Matrix44(SkMatrix44);
 
-impl NativeDrop for SkMatrix44 {
-    fn drop(&mut self) {
-        unsafe { C_SkMatrix44_destruct(self) }
-    }
-}
-
-impl NativeClone for SkMatrix44 {
-    fn clone(&self) -> Self {
-        // does not link under Linux:
-        // unsafe { SkMatrix44::new3(self) }
-        unsafe {
-            let mut matrix = mem::uninitialized();
-            C_SkMatrix44_CopyConstruct(&mut matrix, self);
-            matrix
-        }
-    }
-}
+impl NativeTransmutable<SkMatrix44> for Matrix44 {}
+#[test] fn test_matrix44_layout() { Matrix44::test_layout() }
 
 impl NativePartialEq for SkMatrix44 {
     fn eq(&self, rhs: &Self) -> bool {
@@ -45,7 +29,7 @@ impl Default for Matrix44 {
     }
 }
 
-impl Into<Matrix> for Handle<SkMatrix44> {
+impl Into<Matrix> for Matrix44 {
     fn into(self) -> Matrix {
         let mut m = Matrix::new_identity();
         unsafe { C_SkMatrix44_SkMatrix(self.native(), m.native_mut()) };
@@ -53,11 +37,11 @@ impl Into<Matrix> for Handle<SkMatrix44> {
     }
 }
 
-impl ops::Mul for Handle<SkMatrix44> {
+impl ops::Mul for Matrix44 {
     type Output = Self;
 
     fn mul(self, rhs: Self) -> Self::Output {
-        let mut out = Self::new();
+        let mut out = Self::new_identity();
         unsafe {
             C_SkMatrix44_Mul(self.native(), rhs.native(), out.native_mut())
         }
@@ -65,7 +49,7 @@ impl ops::Mul for Handle<SkMatrix44> {
     }
 }
 
-impl ops::Mul<Vector4> for Handle<SkMatrix44> {
+impl ops::Mul<Vector4> for Matrix44 {
     type Output = Vector4;
 
     fn mul(self, rhs: Vector4) -> Self::Output {
@@ -77,23 +61,23 @@ impl ops::Mul<Vector4> for Handle<SkMatrix44> {
     }
 }
 
-impl Handle<SkMatrix44> {
+impl Matrix44 {
 
     pub const ROWS : usize = 4;
     pub const COLUMNS : usize = 4;
 
-    pub fn new() -> Self {
-        Self::construct_c(C_SkMatrix44_Construct)
-    }
-
     pub fn new_identity() -> Self {
-        Self::construct_c(C_SkMatrix44_ConstructIdentity)
+        Matrix44::from_native(unsafe {
+            let mut matrix: SkMatrix44 = mem::zeroed();
+            C_SkMatrix44_ConstructIdentity(&mut matrix);
+            matrix
+        })
     }
 
     pub fn get_type(&self) -> MatrixTypeMask {
         MatrixTypeMask::from_bits_truncate(unsafe {
             self.native().getType()
-        } as _)
+        }.try_into().unwrap())
     }
 
     pub fn is_identity(&self) -> bool {
@@ -174,6 +158,22 @@ impl Handle<SkMatrix44> {
         self
     }
 
+    #[allow(clippy::too_many_arguments)]
+    pub fn set_4x4(&mut self,
+        m_00: scalar, m_10: scalar, m_20: scalar, m_30: scalar,
+        m_01: scalar, m_11: scalar, m_21: scalar, m_31: scalar,
+        m_02: scalar, m_12: scalar, m_22: scalar, m_32: scalar,
+        m_03: scalar, m_13: scalar, m_23: scalar, m_33: scalar,
+    ) -> &mut Self {
+        unsafe { self.native_mut().set4x4(
+            m_00, m_10, m_20, m_30,
+            m_01, m_11, m_21, m_31,
+            m_02, m_12, m_22, m_32,
+            m_03, m_13, m_23, m_33,
+        )};
+        self
+    }
+
     pub fn set_translate(&mut self, d: Vector3) -> &mut Self {
         unsafe { self.native_mut().setTranslate(d.x, d.y, d.z) }
         self
@@ -227,7 +227,7 @@ impl Handle<SkMatrix44> {
     }
 
     pub fn inverse(&self) -> Option<Matrix44> {
-        let mut r = Matrix44::new();
+        let mut r = Matrix44::default();
         unsafe { self.native().invert(r.native_mut()) }
             .if_true_some(r)
     }
@@ -321,7 +321,7 @@ impl Map2<(&[f64], &mut[f64])> for Matrix44 {
 
 #[test]
 fn create_identity_and_clone() {
-    Matrix44::new();
+    Matrix44::new_identity();
     let identity = Matrix44::new_identity();
     let _cloned = identity.clone();
 }
