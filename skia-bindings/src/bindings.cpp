@@ -737,6 +737,10 @@ extern "C" bool C_SkBitmap_extractAlpha(const SkBitmap* self, SkBitmap* dst, con
     return self->extractAlpha(dst, paint, offset);
 }
 
+extern "C" SkShader* C_SkBitmap_makeShader(const SkBitmap* self, SkTileMode tmx, SkTileMode tmy, const SkMatrix* localMatrix) {
+    return self->makeShader(tmx, tmy, localMatrix).release();
+}
+
 //
 // SkPicture
 //
