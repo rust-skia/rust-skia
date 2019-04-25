@@ -762,6 +762,10 @@ extern "C" void C_SkPicture_approximateBytesUsed(const SkPicture* self, size_t* 
     *out = self->approximateBytesUsed();
 }
 
+extern "C" SkShader* C_SkPicture_makeShader(const SkPicture* self, SkTileMode tmx, SkTileMode tmy, const SkMatrix* localMatrix, const SkRect* tileRect) {
+    return self->makeShader(tmx, tmy, localMatrix, tileRect).release();
+}
+
 //
 // SkRRect
 //

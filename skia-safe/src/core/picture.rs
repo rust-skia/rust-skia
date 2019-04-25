@@ -4,17 +4,8 @@ use crate::core::{
     Canvas,
     Rect
 };
-use skia_bindings::{
-    C_SkPicture_approximateOpCount,
-    C_SkPicture_playback,
-    SkPicture,
-    C_SkPicture_MakeFromData,
-    C_SkPicture_cullRect,
-    C_SkPicture_MakePlaceholder,
-    C_SkPicture_serialize,
-    C_SkPicture_approximateBytesUsed,
-    SkRefCntBase
-};
+use skia_bindings::{C_SkPicture_approximateOpCount, C_SkPicture_playback, SkPicture, C_SkPicture_MakeFromData, C_SkPicture_cullRect, C_SkPicture_MakePlaceholder, C_SkPicture_serialize, C_SkPicture_approximateBytesUsed, SkRefCntBase, C_SkPicture_makeShader};
+use crate::{TileMode, Matrix, Shader};
 
 pub type Picture = RCHandle<SkPicture>;
 
@@ -71,5 +62,18 @@ impl RCHandle<SkPicture> {
             C_SkPicture_approximateBytesUsed(self.native(), &mut value);
             value
         }
+    }
+
+    pub fn as_shader<'a, 'b, TM: Into<Option<(TileMode, TileMode)>>, LM: Into<Option<&'a Matrix>>, TR: Into<Option<&'b Rect>>>(
+        &self, tm: TM, local_matrix: LM, tile_rect: TR) -> Shader {
+        let tm = tm.into();
+        let local_matrix = local_matrix.into();
+        let tile_rect = tile_rect.into();
+        let tmx = tm.map(|tm| tm.0).unwrap_or_default();
+        let tmy = tm.map(|tm| tm.1).unwrap_or_default();
+
+        Shader::from_ptr(unsafe {
+            C_SkPicture_makeShader(self.native(), tmx.into_native(), tmy.into_native(), local_matrix.native_ptr_or_null(), tile_rect.native_ptr_or_null())
+        }).unwrap()
     }
 }
