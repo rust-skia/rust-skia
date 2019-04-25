@@ -268,15 +268,15 @@ impl Handle<SkBitmap> {
                 .map(|p| p.native() as *const SkPaint)
                 .unwrap_or(ptr::null());
 
-        let mut offset : SkIPoint = unsafe { mem::uninitialized() };
+        let mut offset : SkIPoint = unsafe { mem::zeroed() };
         unsafe { C_SkBitmap_extractAlpha(self.native(), dst.native_mut(), paint_ptr, &mut offset) }
             .if_true_some(IPoint::from_native(offset))
     }
 
     pub fn new_shader(&self, tile_modes: Option<(TileMode, TileMode)>, local_matrix: Option<&Matrix>) -> Shader {
         Shader::from_ptr(unsafe {
-            let tmx = tile_modes.map(|tm| tm.0).unwrap_or(TileMode::default());
-            let tmy = tile_modes.map(|tm| tm.1).unwrap_or(TileMode::default());
+            let tmx = tile_modes.map(|tm| tm.0).unwrap_or_default();
+            let tmy = tile_modes.map(|tm| tm.1).unwrap_or_default();
             C_SkBitmap_makeShader(self.native(), tmx.into_native(), tmy.into_native(), local_matrix.native_ptr_or_null())
         }).unwrap()
     }
