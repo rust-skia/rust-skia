@@ -271,7 +271,9 @@ impl Handle<SkBitmap> {
             .if_true_some(IPoint::from_native(offset))
     }
 
-    pub fn new_shader(&self, tile_modes: Option<(TileMode, TileMode)>, local_matrix: Option<&Matrix>) -> Shader {
+    pub fn as_shader<'a, TT: Into<Option<(TileMode, TileMode)>>, LM: Into<Option<&'a Matrix>>>(&self, tile_modes: TT, local_matrix: LM) -> Shader {
+        let tile_modes = tile_modes.into();
+        let local_matrix = local_matrix.into();
         Shader::from_ptr(unsafe {
             let tmx = tile_modes.map(|tm| tm.0).unwrap_or_default();
             let tmy = tile_modes.map(|tm| tm.1).unwrap_or_default();
@@ -290,4 +292,16 @@ fn create_clone_and_drop() {
 fn get_info() {
     let bm = Bitmap::new();
     let _info = bm.info();
+}
+
+#[test]
+fn empty_bitmap_shader() {
+    let bm = Bitmap::new();
+    let _shader = bm.as_shader(None, None);
+}
+
+#[test]
+fn shader_with_tilemode() {
+    let bm = Bitmap::new();
+    let _shader = bm.as_shader((TileMode::Decal, TileMode::Mirror), None);
 }
