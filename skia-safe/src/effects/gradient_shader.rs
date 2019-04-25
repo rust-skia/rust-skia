@@ -269,7 +269,7 @@ impl<'a> GradientShaderColors<'a> {
         }
     }
 
-    // clippy wants this
+    // to keep clippy happy.
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
