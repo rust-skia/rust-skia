@@ -181,9 +181,12 @@ impl RCHandle<SkTypeface> {
         })
     }
 
-    // chars_to_glyphs is unsupported, because the documentation does not make sense to me:
-    // The return value does not seem to actually count the required elements of the array.
-    // Use Font's text_to_glyphs 's function instead.
+    pub fn unichars_to_glyphs(&self, uni: &[Unichar], glyphs: &mut[GlyphId]) {
+        assert_eq!(uni.len(), glyphs.len());
+        unsafe {
+            self.native().unicharsToGlyphs(uni.as_ptr(), uni.len().try_into().unwrap(), glyphs.as_mut_ptr())
+        }
+    }
 
     pub fn unichar_to_glyph(&self, unichar: Unichar) -> GlyphId {
         unsafe { self.native().unicharToGlyph(unichar) }
