@@ -38,19 +38,19 @@ pub mod pdf {
             internal.fKeywords.set_s(&metadata.keywords);
             internal.fCreator.set_s(&metadata.creator);
             internal.fProducer.set_s(&metadata.producer);
-            metadata
-                .creation
-                .map(|creation| internal.fCreation = creation.into_native());
-            metadata
-                .modified
-                .map(|modified| internal.fModified = modified.into_native());
-            metadata
-                .raster_dpi
-                .map(|raster_dpi| internal.fRasterDPI = raster_dpi);
+            if let Some(creation) = metadata.creation {
+                internal.fCreation = creation.into_native();
+            }
+            if let Some(modified) = metadata.modified {
+                internal.fModified = modified.into_native();
+            }
+            if let Some(raster_dpi) = metadata.raster_dpi {
+                internal.fRasterDPI = raster_dpi;
+            }
             internal.fPDFA = metadata.pdfa;
-            metadata
-                .encoding_quality
-                .map(|encoding_quality| internal.fEncodingQuality = encoding_quality);
+            if let Some(encoding_quality) = metadata.encoding_quality {
+                internal.fEncodingQuality = encoding_quality
+            }
         }
 
         // we can't move the memory stream around anymore as soon it's referred by
@@ -82,12 +82,12 @@ pub mod pdf {
     }
 
     trait Set {
-        fn set_s(&mut self, str: &String);
+        fn set_s(&mut self, str: &str);
     }
 
     impl Set for SkString {
-        fn set_s(&mut self, str: &String) {
-            let bytes = str.as_str().as_bytes();
+        fn set_s(&mut self, str: &str) {
+            let bytes = str.as_bytes();
             unsafe { self.set2(bytes.as_ptr() as _, bytes.len()) }
         }
     }
