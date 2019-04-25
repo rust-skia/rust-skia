@@ -11,21 +11,10 @@ use crate::core::{
     ISize,
     IPoint,
 };
-use skia_bindings::{
-    SkPaint,
-    SkIPoint,
-    C_SkImageInfo_Copy,
-    C_SkBitmap_destruct,
-    SkBitmap,
-    C_SkBitmap_Construct,
-    C_SkBitmap_readyToDraw,
-    C_SkBitmap_tryAllocN32Pixels,
-    C_SkBitmap_tryAllocPixels,
-    C_SkBitmap_eraseARGB,
-    C_SkBitmap_extractAlpha,
-    SkBitmap_AllocFlags_kZeroPixels_AllocFlag
-};
+use skia_bindings::{SkPaint, SkIPoint, C_SkImageInfo_Copy, C_SkBitmap_destruct, SkBitmap, C_SkBitmap_Construct, C_SkBitmap_readyToDraw, C_SkBitmap_tryAllocN32Pixels, C_SkBitmap_tryAllocPixels, C_SkBitmap_eraseARGB, C_SkBitmap_extractAlpha, SkBitmap_AllocFlags_kZeroPixels_AllocFlag, C_SkBitmap_makeShader};
+use crate::{Matrix, Shader, TileMode};
 
+#[deprecated(since="0.6.0", note="AllocFlags is obsolete.  We always zero pixel memory when allocated.")]
 bitflags! {
     pub struct BitmapAllocFlags: u32 {
         const ZERO_PIXELS = SkBitmap_AllocFlags_kZeroPixels_AllocFlag as u32;
@@ -282,6 +271,14 @@ impl Handle<SkBitmap> {
         let mut offset : SkIPoint = unsafe { mem::uninitialized() };
         unsafe { C_SkBitmap_extractAlpha(self.native(), dst.native_mut(), paint_ptr, &mut offset) }
             .if_true_some(IPoint::from_native(offset))
+    }
+
+    pub fn new_shader(&self, tile_modes: Option<(TileMode, TileMode)>, local_matrix: Option<&Matrix>) -> Shader {
+        Shader::from_ptr(unsafe {
+            let tmx = tile_modes.map(|tm| tm.0).unwrap_or(TileMode::default());
+            let tmy = tile_modes.map(|tm| tm.1).unwrap_or(TileMode::default());
+            C_SkBitmap_makeShader(self.native(), tmx.into_native(), tmy.into_native(), local_matrix.native_ptr_or_null())
+        }).unwrap()
     }
 }
 
