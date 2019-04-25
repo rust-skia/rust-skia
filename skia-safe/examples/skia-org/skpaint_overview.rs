@@ -1,13 +1,11 @@
 use crate::artifact::DrawingDriver;
 use crate::resources;
 use skia_safe::{
-    scalar, AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color, ColorFilter, Font, MaskFilter,
-    Matrix, Paint, PaintStyle, Path, PathEffect, Point, Rect, Shader, ShaderTileMode, TextBlob,
-    Typeface,
-};
-use skia_safe::{
-    CornerPathEffect, DashPathEffect, DiscretePathEffect, GradientShader, Line2DPathEffect,
-    Path1DPathEffect, Path1DPathEffectStyle, Path2DPathEffect, PerlinNoiseShader, TableColorFilter,
+    scalar, AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color, ColorFilters, CornerPathEffect,
+    DashPathEffect, DiscretePathEffect, Font, GradientShader, GradientShaderFlags,
+    Line2DPathEffect, MaskFilter, Matrix, Paint, PaintStyle, Path, Path1DPathEffect,
+    Path1DPathEffectStyle, Path2DPathEffect, PathEffect, PerlinNoiseShader, Point, Rect, Shaders,
+    TableColorFilter, TextBlob, TileMode, Typeface,
 };
 use std::path::PathBuf;
 
@@ -122,15 +120,7 @@ fn draw_gradient(canvas: &mut Canvas) {
     let paint = &mut Paint::default();
 
     paint.set_shader(
-        GradientShader::linear(
-            points,
-            colors.as_ref(),
-            None,
-            ShaderTileMode::Clamp,
-            None,
-            None,
-        )
-        .as_ref(),
+        GradientShader::linear(points, colors.as_ref(), None, TileMode::Clamp, None, None).as_ref(),
     );
     canvas.draw_paint(paint);
 }
@@ -186,7 +176,19 @@ fn draw_transfer_modes(canvas: &mut Canvas) {
             src_points,
             src_colors.as_ref(),
             None,
-            ShaderTileMode::Clamp,
+            TileMode::Clamp,
+            None,
+            None,
+        )
+        .as_ref(),
+    );
+    let src_colors = [Color::MAGENTA & 0x00FFFFFF, Color::MAGENTA];
+    src.set_shader(
+        GradientShader::linear(
+            src_points,
+            src_colors.as_ref(),
+            None,
+            TileMode::Clamp,
             None,
             None,
         )
@@ -200,7 +202,7 @@ fn draw_transfer_modes(canvas: &mut Canvas) {
             dst_points,
             dst_colors.as_ref(),
             None,
-            ShaderTileMode::Clamp,
+            TileMode::Clamp,
             None,
             None,
         )
@@ -211,10 +213,10 @@ fn draw_transfer_modes(canvas: &mut Canvas) {
     let k = (n - 1) / 3 + 1;
     assert_eq!(k * 64, 640); // tall enough
     for (i, mode) in modes.iter().enumerate() {
-        let mut canvas = AutoCanvasRestore::guard(canvas, true);
+        let canvas = &mut AutoCanvasRestore::guard(canvas, true);
         canvas.translate((192.0 * (i / k) as scalar, 64.0 * (i % k) as scalar));
         let desc = mode.name();
-        draw_str(&mut canvas, desc, 68.0, 30.0, font, &Paint::default());
+        draw_str(canvas, desc, 68.0, 30.0, font, &Paint::default());
         canvas.clip_rect(Rect::from_size((64.0, 64.0)), Default::default());
         canvas.draw_color(Color::LIGHT_GRAY, BlendMode::default());
         canvas.save_layer(&Default::default());
@@ -231,32 +233,32 @@ fn draw_bitmap_shader(canvas: &mut Canvas) {
 
     canvas.clear(Color::WHITE);
     let mut matrix = Matrix::default();
-    matrix.set_scale((0.75, 0.75), None).pre_rotate(30.0, None);
+    matrix.set_scale((0.75, 0.75), None);
+    matrix.pre_rotate(30.0, None);
     let paint = &mut Paint::default();
-    paint.set_shader(
-        image
-            .as_shader((ShaderTileMode::Repeat, ShaderTileMode::Repeat), &matrix)
-            .as_ref(),
-    );
+    paint.set_shader(&image.as_shader((TileMode::Repeat, TileMode::Repeat), &matrix));
+    paint.set_shader(Some(
+        &image.as_shader((TileMode::Repeat, TileMode::Repeat), &matrix),
+    ));
     canvas.draw_paint(paint);
 }
 
 fn draw_radial_gradient_shader(canvas: &mut Canvas) {
     let colors = [Color::BLUE, Color::YELLOW];
-    let paint = &mut Paint::default();
+    let mut paint = Paint::default();
     paint.set_shader(
         GradientShader::radial(
             (128.0, 128.0),
             180.0,
             colors.as_ref(),
             None,
-            ShaderTileMode::Clamp,
-            None,
+            TileMode::Clamp,
+            GradientShaderFlags::default(),
             None,
         )
         .as_ref(),
     );
-    canvas.draw_paint(paint);
+    canvas.draw_paint(&paint);
 }
 
 fn draw_two_point_conical_shader(canvas: &mut Canvas) {
@@ -270,13 +272,13 @@ fn draw_two_point_conical_shader(canvas: &mut Canvas) {
             16.0,
             colors.as_ref(),
             None,
-            ShaderTileMode::Clamp,
+            TileMode::Clamp,
             None,
             None,
         )
         .as_ref(),
     );
-    canvas.draw_paint(paint);
+    canvas.draw_paint(&paint);
 }
 
 fn draw_sweep_gradient_shader(canvas: &mut Canvas) {
@@ -287,9 +289,9 @@ fn draw_sweep_gradient_shader(canvas: &mut Canvas) {
             (128.0, 128.0),
             colors.as_ref(),
             None,
-            ShaderTileMode::default(),
+            TileMode::default(),
             None,
-            None,
+            GradientShaderFlags::default(),
             None,
         )
         .as_ref(),
@@ -314,24 +316,23 @@ fn draw_turbulence_perlin_noise_shader(canvas: &mut Canvas) {
 fn draw_compose_shader(canvas: &mut Canvas) {
     let colors = [Color::BLUE, Color::YELLOW];
     let paint = &mut Paint::default();
-    paint.set_shader(
-        Shader::compose(
+    paint.set_shader(Some(
+        Shaders::blend(
+            BlendMode::Difference,
             &GradientShader::radial(
                 (128.0, 128.0),
                 180.0,
                 colors.as_ref(),
                 None,
-                ShaderTileMode::Clamp,
+                TileMode::Clamp,
                 None,
                 None,
             )
             .unwrap(),
             &PerlinNoiseShader::turbulence((0.025, 0.025), 2, 0.0, None).unwrap(),
-            BlendMode::Difference,
-            None,
         )
         .as_ref(),
-    );
+    ));
     canvas.draw_paint(paint);
 }
 
@@ -353,7 +354,7 @@ fn draw_mask_filter(canvas: &mut Canvas) {
 fn draw_color_filter(c: &mut Canvas) {
     fn f(c: &mut Canvas, (x, y): (scalar, scalar), color_matrix: &[scalar; 20]) {
         let paint = &mut Paint::default();
-        paint.set_color_filter(&ColorFilter::from_matrix_row_major_255(color_matrix));
+        paint.set_color_filter(&ColorFilters::matrix_row_major_255(color_matrix));
 
         let image = &resources::mandrill();
 
