@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::gpu::gl;
+use crate::gpu::{gl, MipMapped};
 use skia_bindings::{GrContext, SkRefCntBase, C_GrContext_MakeGL, GrContext_abandonContext, GrContext_releaseResourcesAndAbandonContext, GrContext_freeGpuResources};
 
 #[cfg(feature = "vulkan")]
@@ -188,10 +188,18 @@ impl RCHandle<GrContext> {
     }
 
     #[cfg(feature = "vulkan")]
-    pub fn store_vulkan_pipeline_cache_data(&mut self) -> &mut Self {
+    pub fn store_vk_pipeline_cache_data(&mut self) -> &mut Self {
         unsafe {
             self.native_mut().storeVkPipelineCacheData();
         }
         self
+    }
+
+    pub fn compute_texture_size<NP2: Into<Option<bool>>>(
+        color_type: ColorType, (width, height): (i32, i32), mip_mapped: MipMapped, use_next_pow2: NP2
+    ) -> usize {
+        unsafe {
+            GrContext::ComputeTextureSize(color_type.into_native(), width, height, mip_mapped.into_native(), use_next_pow2.into().unwrap_or(false))
+        }
     }
 }
