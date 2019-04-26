@@ -105,23 +105,25 @@ impl Iterator for Handle<SkContourMeasureIter> {
 
 impl Handle<SkContourMeasureIter> {
     // TODO: rename to of_path? for_path?
-    pub fn from_path(path: &Path, force_closed: bool, res_scale: Option<scalar>) -> Self {
-        let res_scale = res_scale.unwrap_or(1.0);
+    pub fn from_path<RS: Into<Option<scalar>>>(
+        path: &Path,
+        force_closed: bool,
+        res_scale: RS,
+    ) -> Self {
         Self::from_native(unsafe {
-            SkContourMeasureIter::new1(path.native(), force_closed, res_scale)
+            SkContourMeasureIter::new1(path.native(), force_closed, res_scale.into().unwrap_or(1.0))
         })
     }
 
-    pub fn reset(
+    pub fn reset<RS: Into<Option<scalar>>>(
         &mut self,
         path: &Path,
         force_closed: bool,
-        res_scale: Option<scalar>,
+        res_scale: RS,
     ) -> &mut Self {
-        let res_scale = res_scale.unwrap_or(1.0);
         unsafe {
             self.native_mut()
-                .reset(path.native(), force_closed, res_scale)
+                .reset(path.native(), force_closed, res_scale.into().unwrap_or(1.0))
         }
         self
     }
