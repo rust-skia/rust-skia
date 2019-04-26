@@ -86,7 +86,6 @@ impl Document {
 
     /// Close the document and return the encoded representation.
     /// This function consumes and drops the document.
-    /// TODO: Completely hide Data?
     pub fn close(mut self) -> Data {
         unsafe {
             self.document.native_mut().close();
