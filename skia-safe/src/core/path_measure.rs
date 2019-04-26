@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::{scalar, Matrix, Path, Point, Vector};
-use skia_bindings::{SkPathMeasure, C_SkPathMeasure_destruct};
+use skia_bindings::{C_SkPathMeasure_destruct, SkPathMeasure};
 
 pub type PathMeasure = Handle<SkPathMeasure>;
 
