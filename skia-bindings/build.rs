@@ -238,9 +238,11 @@ fn bindgen_gen(current_dir: &Path, skia_out_dir: &str) {
         .whitelist_type("SkColorSpacePrimaries")
         .whitelist_type("SkContourMeasure")
         .whitelist_type("SkContourMeasureIter")
+        .whitelist_type("SkCubicMap")
         .whitelist_type("SkDocument")
         .whitelist_type("SkDynamicMemoryWStream")
         .whitelist_type("SkPathMeasure")
+        .whitelist_type("SkVector4")
         .whitelist_type("SkPictureRecorder")
         .whitelist_type("SkVector4")
 
