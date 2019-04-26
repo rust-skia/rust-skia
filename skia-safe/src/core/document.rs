@@ -21,6 +21,7 @@ impl NativeRefCountedBase for SkDocument {
     }
 }
 
+#[allow(clippy::module_inception)]
 pub mod document {
     use skia_bindings::SkCanvas;
 
