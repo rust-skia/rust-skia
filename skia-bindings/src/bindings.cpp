@@ -5,6 +5,7 @@
 #include "SkColor.h"
 #include "SkColorFilter.h"
 #include "SkContourMeasure.h"
+#include "SkCubicMap.h"
 #include "SkDocument.h"
 #include "SkFont.h"
 #include "SkFontMetrics.h"

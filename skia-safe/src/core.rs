@@ -54,6 +54,9 @@ pub use self::contour_measure::*;
 mod coverage_mode;
 pub use self::coverage_mode::*;
 
+mod cubic_map;
+pub use self::cubic_map::*;
+
 mod data;
 pub use self::data::*;
 
