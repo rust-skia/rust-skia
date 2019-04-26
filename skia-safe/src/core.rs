@@ -48,6 +48,9 @@ pub use self::color_filter::*;
 mod color_space;
 pub use self::color_space::*;
 
+pub mod contour_measure;
+pub use self::contour_measure::*;
+
 mod coverage_mode;
 pub use self::coverage_mode::*;
 
@@ -104,6 +107,9 @@ pub use self::path::*;
 
 mod path_effect;
 pub use self::path_effect::*;
+
+pub mod path_measure;
+pub use self::path_measure::*;
 
 mod picture;
 pub use self::picture::*;

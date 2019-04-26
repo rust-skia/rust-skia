@@ -4,6 +4,7 @@
 #include "SkCanvas.h"
 #include "SkColor.h"
 #include "SkColorFilter.h"
+#include "SkContourMeasure.h"
 #include "SkDocument.h"
 #include "SkFont.h"
 #include "SkFontMetrics.h"
@@ -12,6 +13,7 @@
 #include "SkMaskFilter.h"
 #include "SkPaint.h"
 #include "SkPath.h"
+#include "SkPathMeasure.h"
 #include "SkPicture.h"
 #include "SkPictureRecorder.h"
 #include "SkPoint3.h"
@@ -427,6 +429,14 @@ extern "C" SkData* C_SkPath_serialize(const SkPath* self) {
 
 extern "C" SkPath::FillType C_SkPath_ConvertToNonInverseFillType(SkPath::FillType fill) {
     return SkPath::ConvertToNonInverseFillType(fill);
+}
+
+//
+// SkPathMeasure
+//
+
+extern "C" void C_SkPathMeasure_destruct(const SkPathMeasure* self) {
+    self->~SkPathMeasure();
 }
 
 //
@@ -948,6 +958,18 @@ extern "C" bool C_SkColorFilter_asComponentTable(const SkColorFilter* self, SkBi
 
 extern "C" uint32_t C_SkColorFilter_getFlags(const SkColorFilter* self) {
     return self->getFlags();
+}
+
+//
+// SkContourMeasureIter
+//
+
+extern "C" void C_SkContourMeasureIter_destruct(SkContourMeasureIter* self) {
+    self->~SkContourMeasureIter();
+}
+
+extern "C" SkContourMeasure* C_SkContourMeasureIter_next(SkContourMeasureIter* self) {
+    return self->next().release();
 }
 
 //
