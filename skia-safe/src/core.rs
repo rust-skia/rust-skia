@@ -108,6 +108,9 @@ pub use self::path::*;
 mod path_effect;
 pub use self::path_effect::*;
 
+pub mod path_measure;
+pub use self::path_measure::*;
+
 mod picture;
 pub use self::picture::*;
 

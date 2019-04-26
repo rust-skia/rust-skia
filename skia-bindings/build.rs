@@ -234,12 +234,15 @@ fn bindgen_gen(current_dir: &Path, skia_out_dir: &str) {
         // functions for which the doc generation fails.
         .blacklist_function("SkColorFilter_asComponentTable")
 
+        .whitelist_type("SkAutoCanvasRestore")
         .whitelist_type("SkColorSpacePrimaries")
         .whitelist_type("SkContourMeasure")
         .whitelist_type("SkContourMeasureIter")
-        .whitelist_type("SkVector4")
+        .whitelist_type("SkDocument")
+        .whitelist_type("SkDynamicMemoryWStream")
+        .whitelist_type("SkPathMeasure")
         .whitelist_type("SkPictureRecorder")
-        .whitelist_type("SkAutoCanvasRestore")
+        .whitelist_type("SkVector4")
 
         .whitelist_type("SkPath1DPathEffect")
         .whitelist_type("SkLine2DPathEffect")
@@ -250,10 +253,6 @@ fn bindgen_gen(current_dir: &Path, skia_out_dir: &str) {
         .whitelist_type("SkGradientShader")
         .whitelist_type("SkPerlinNoiseShader")
         .whitelist_type("SkTableColorFilter")
-
-        .whitelist_type("SkDocument")
-
-        .whitelist_type("SkDynamicMemoryWStream")
 
         .whitelist_type("GrGLBackendState")
 

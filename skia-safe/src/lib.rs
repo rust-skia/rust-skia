@@ -16,6 +16,7 @@ extern crate lazy_static;
 pub use crate::core::*;
 pub use crate::core::document::document;
 pub use crate::core::contour_measure::contour_measure;
+pub use crate::core::path_measure::path_measure;
 pub use crate::docs::*;
 pub use crate::effects::*;
 
