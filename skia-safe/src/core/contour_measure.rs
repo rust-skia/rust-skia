@@ -18,7 +18,7 @@ impl NativeRefCountedBase for SkContourMeasure {
 #[allow(clippy::module_inception)]
 pub mod contour_measure {
     bitflags! {
-        pub struct MatrixFlags : i32 {
+        pub struct MatrixFlags : u32 {
             const GET_POSITION = skia_bindings::SkContourMeasure_MatrixFlags_kGetPosition_MatrixFlag as _;
             const GET_TANGENT = skia_bindings::SkContourMeasure_MatrixFlags_kGetTangent_MatrixFlag as _;
             const GET_POS_AND_TAN = Self::GET_POSITION.bits | Self::GET_TANGENT.bits;
@@ -57,7 +57,8 @@ impl RCHandle<SkContourMeasure> {
             self.native().getMatrix(
                 distance,
                 m.native_mut(),
-                flags.into().unwrap_or_default().bits(),
+                // note: depending on the OS, different representation types are generated for MatrixFlags
+                flags.into().unwrap_or_default().bits().try_into().unwrap(),
             )
         }
         .if_true_some(m)
