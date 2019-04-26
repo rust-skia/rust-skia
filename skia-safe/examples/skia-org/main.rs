@@ -10,6 +10,7 @@ extern crate skia_safe;
 use crate::artifact::{Vulkan};
 #[cfg(feature="vulkan")]
 use crate::drivers::skia_ash::AshGraphics;
+use skia_safe::{Path, ContourMeasureIter, contour_measure};
 
 #[cfg(feature="vulkan")]
 #[macro_use]

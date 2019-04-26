@@ -235,6 +235,8 @@ fn bindgen_gen(current_dir: &Path, skia_out_dir: &str) {
         .blacklist_function("SkColorFilter_asComponentTable")
 
         .whitelist_type("SkColorSpacePrimaries")
+        .whitelist_type("SkContourMeasure")
+        .whitelist_type("SkContourMeasureIter")
         .whitelist_type("SkVector4")
         .whitelist_type("SkPictureRecorder")
         .whitelist_type("SkAutoCanvasRestore")

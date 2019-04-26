@@ -4,6 +4,7 @@
 #include "SkCanvas.h"
 #include "SkColor.h"
 #include "SkColorFilter.h"
+#include "SkContourMeasure.h"
 #include "SkDocument.h"
 #include "SkFont.h"
 #include "SkFontMetrics.h"
@@ -948,6 +949,18 @@ extern "C" bool C_SkColorFilter_asComponentTable(const SkColorFilter* self, SkBi
 
 extern "C" uint32_t C_SkColorFilter_getFlags(const SkColorFilter* self) {
     return self->getFlags();
+}
+
+//
+// SkContourMeasureIter
+//
+
+extern "C" void C_SkContourMeasureIter_destruct(SkContourMeasureIter* self) {
+    self->~SkContourMeasureIter();
+}
+
+extern "C" SkContourMeasure* C_SkContourMeasureIter_next(SkContourMeasureIter* self) {
+    return self->next().release();
 }
 
 //
