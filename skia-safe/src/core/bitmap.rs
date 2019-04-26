@@ -176,6 +176,12 @@ impl Handle<SkBitmap> {
         unsafe { self.native_mut().tryAllocPixelsFlags(image_info.native(), flags.bits()) }
     }
 
+    pub fn alloc_pixels_flags(&mut self, image_info: &ImageInfo, flags: BitmapAllocFlags) {
+        self.try_alloc_pixels_flags(image_info, flags)
+            .to_option()
+            .expect("Bitmap::alloc_pixels_flags failed");
+    }
+
     #[must_use]
     pub fn try_alloc_pixels_info(&mut self, image_info: &ImageInfo, row_bytes: Option<usize>) -> bool {
         match row_bytes {
@@ -186,10 +192,22 @@ impl Handle<SkBitmap> {
         }
     }
 
+    pub fn alloc_pixels_info(&mut self, image_info: &ImageInfo, row_bytes: Option<usize>) {
+        self.try_alloc_pixels_info(image_info, row_bytes)
+            .to_option()
+            .expect("Bitmap::alloc_pixels_info failed");
+    }
+
     #[must_use]
-    pub fn try_alloc_n32_pixels(&mut self, width: i32, height: i32, is_opaque: bool) -> bool {
+    pub fn try_alloc_n32_pixels(&mut self, (width, height): (i32, i32), is_opaque: bool) -> bool {
         // accessing the instance method causes a linker error.
         unsafe { C_SkBitmap_tryAllocN32Pixels(self.native_mut(), width, height, is_opaque) }
+    }
+
+    pub fn alloc_n32_pixels(&mut self, (width, height): (i32, i32), is_opaque: bool) {
+        self.try_alloc_n32_pixels((width, height), is_opaque)
+            .to_option()
+            .expect("Bitmap::alloc_n32_pixels_failed")
     }
 
     pub unsafe fn install_pixels(&mut self, image_info: &ImageInfo, pixels: *mut ffi::c_void, row_bytes: usize) -> bool {
@@ -200,6 +218,12 @@ impl Handle<SkBitmap> {
     pub fn try_alloc_pixels(&mut self) -> bool {
         // linker errr.
         unsafe { C_SkBitmap_tryAllocPixels(self.native_mut()) }
+    }
+
+    pub fn alloc_pixels(&mut self) {
+        self.try_alloc_pixels()
+            .to_option()
+            .expect("Bitmap::alloc_pixels failed")
     }
 
     pub fn pixel_ref_origin(&self) -> IPoint {

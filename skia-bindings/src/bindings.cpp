@@ -49,7 +49,6 @@
 
 #if defined(SK_XML)
 #include "SkSVGCanvas.h"
-#include "SkXMLWriter.h"
 #endif
 
 template<typename T>
@@ -400,10 +399,6 @@ extern "C" void C_SkPaint_setPathEffect(SkPaint* self, const SkPathEffect* pathE
 
 extern "C" void C_SkPaint_setMaskFilter(SkPaint* self, const SkMaskFilter* maskFilter) {
     self->setMaskFilter(spFromConst(maskFilter));
-}
-
-extern "C" SkFontHinting C_SkPaint_getHinting(const SkPaint* self) {
-    return self->getHinting();
 }
 
 // postponed
@@ -876,6 +871,14 @@ extern "C" SkData* C_SkVertices_encode(const SkVertices* self) {
 }
 
 //
+// SkVertices::Bone
+//
+
+extern "C" SkRect C_SkVertices_Bone_mapRect(const SkVertices::Bone* self, const SkRect* rect) {
+    return self->mapRect(*rect);
+}
+
+//
 // SkVertices::Builder
 //
 
@@ -925,6 +928,10 @@ extern "C" SkColorFilter* C_SkColorFilter_MakeLinearToSRGBGamma() {
 
 extern "C" SkColorFilter* C_SkColorFilter_MakeSRGBToLinearGamma() {
     return SkColorFilter::MakeSRGBToLinearGamma().release();
+}
+
+extern "C" SkColorFilter* C_SkColorFilter_MakeMixer(const SkColorFilter* cf0, const SkColorFilter* cf1, float weight) {
+    return SkColorFilter::MakeMixer(spFromConst(cf0), spFromConst(cf1), weight).release();
 }
 
 extern "C" bool C_SkColorFilter_asColorMode(const SkColorFilter* self, SkColor* color, SkBlendMode* mode) {
@@ -1365,16 +1372,8 @@ extern "C" bool C_GrVkImageInfo_Equals(const GrVkImageInfo* lhs, const GrVkImage
 
 #if defined(SK_XML)
 
-// Note, we can't use the SkWStream* implementation, because its implementation creates
-// an SkXMLWriter and destroys it before returning (this bug is fixed in Skia master, and
-// so may be available in a future update).
-
-extern "C" SkCanvas* C_SkSVGCanvas_Make(const SkRect* bounds, SkXMLWriter* writer) {
+extern "C" SkCanvas* C_SkSVGCanvas_Make(const SkRect* bounds, SkWStream* writer) {
     return SkSVGCanvas::Make(*bounds, writer).release();
-}
-
-extern "C" void C_SkXMLStreamWriter_destruct(SkXMLStreamWriter* self) {
-    self->~SkXMLStreamWriter();
 }
 
 #endif

@@ -234,7 +234,8 @@ pub struct DrawableInfo {
     color_attachment_index: u32,
     compatible_render_pass: RenderPass,
     format: Format,
-    draw_bounds: *mut Rect2D
+    draw_bounds: *mut Rect2D,
+    image: Image
 }
 
 impl NativeTransmutable<GrVkDrawableInfo> for DrawableInfo {}

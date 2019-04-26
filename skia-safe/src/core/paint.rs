@@ -4,31 +4,8 @@ use std::hash::{
     Hasher
 };
 use crate::prelude::*;
-use crate::core::{Color, FontHinting, FilterQuality, Color4f, ColorSpace, scalar, Path, Rect, ColorFilter, BlendMode, PathEffect, MaskFilter, Shader};
+use crate::core::{Color, FilterQuality, Color4f, ColorSpace, scalar, Path, Rect, ColorFilter, BlendMode, PathEffect, MaskFilter, Shader};
 use skia_bindings::{C_SkPaint_setMaskFilter, C_SkPaint_setPathEffect, C_SkPaint_setColorFilter, SkPaint_Cap, SkPaint, C_SkPaint_destruct, SkPaint_Style, SkPaint_Join, C_SkPaint_Equals, C_SkPaint_setShader};
-use skia_bindings::{
-    SkPaint_Flags_kAntiAlias_Flag,
-    SkPaint_Flags_kDither_Flag,
-    SkPaint_Flags_kFakeBoldText_Flag,
-    SkPaint_Flags_kLinearText_Flag,
-    SkPaint_Flags_kSubpixelText_Flag,
-    SkPaint_Flags_kLCDRenderText_Flag,
-    SkPaint_Flags_kEmbeddedBitmapText_Flag,
-    SkPaint_Flags_kAutoHinting_Flag
-};
-
-bitflags! {
-    pub struct PaintFlags: u32 {
-        const ANTI_ALIAS = SkPaint_Flags_kAntiAlias_Flag as _;
-        const DITHER = SkPaint_Flags_kDither_Flag as _;
-        const FAKE_BOLD_TEXT = SkPaint_Flags_kFakeBoldText_Flag as _;
-        const LINEAR_TEXT = SkPaint_Flags_kLinearText_Flag as _;
-        const SUBPIXEL_TEXT = SkPaint_Flags_kSubpixelText_Flag as _;
-        const LCD_RENDER_TEXT = SkPaint_Flags_kLCDRenderText_Flag as _;
-        const EMBEDDED_BITMAP_TEXT = SkPaint_Flags_kEmbeddedBitmapText_Flag as _;
-        const AUTO_HINTING = SkPaint_Flags_kAutoHinting_Flag as _;
-    }
-}
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(u8)]
@@ -117,15 +94,6 @@ impl Handle<SkPaint> {
         self
     }
 
-    pub fn set_hinting(&mut self, hinting_level: FontHinting) -> &mut Self {
-        unsafe { self.native_mut().setHinting(hinting_level.into_native()) }
-        self
-    }
-
-    pub fn hinting(&self) -> FontHinting {
-        FontHinting::from_native(unsafe { self.native().getHinting() })
-    }
-
     pub fn is_anti_alias(&self) -> bool {
         unsafe { self.native().isAntiAlias() }
     }
@@ -186,8 +154,17 @@ impl Handle<SkPaint> {
         self
     }
 
+    pub fn alpha_f(&self) -> f32 {
+        unsafe { self.native().getAlphaf() }
+    }
+
     pub fn alpha(&self) -> u8 {
         unsafe { self.native().getAlpha() }
+    }
+
+    pub fn set_alpha_f(&mut self, alpha: f32) -> &mut Self {
+        unsafe { self.native_mut().setAlphaf(alpha) }
+        self
     }
 
     pub fn set_alpha(&mut self, alpha: u8) -> &mut Self {

@@ -7,26 +7,7 @@ use crate::core::{
     Color,
     Data
 };
-use skia_bindings::{
-    C_SkVertices_Decode,
-    C_SkVertices_applyBones,
-    C_SkVertices_Builder_detach,
-    C_SkVertices_Builder_destruct,
-    SkVertices_Builder,
-    SkColor,
-    SkPoint,
-    C_SkVertices_MakeCopy,
-    C_SkVertices_ref,
-    SkVertices,
-    C_SkVertices_unref,
-    SkVertices_Bone,
-    SkVertices_VertexMode,
-    C_SkVertices_encode,
-    SkVertices_BuilderFlags_kHasTexCoords_BuilderFlag,
-    SkVertices_BuilderFlags_kHasColors_BuilderFlag,
-    SkVertices_BuilderFlags_kHasBones_BuilderFlag,
-    SkVertices_BuilderFlags_kIsNonVolatile_BuilderFlag
-};
+use skia_bindings::{C_SkVertices_Decode, C_SkVertices_applyBones, C_SkVertices_Builder_detach, C_SkVertices_Builder_destruct, SkVertices_Builder, SkColor, SkPoint, C_SkVertices_MakeCopy, C_SkVertices_ref, SkVertices, C_SkVertices_unref, SkVertices_Bone, SkVertices_VertexMode, C_SkVertices_encode, SkVertices_BuilderFlags_kHasTexCoords_BuilderFlag, SkVertices_BuilderFlags_kHasColors_BuilderFlag, SkVertices_BuilderFlags_kHasBones_BuilderFlag, SkVertices_BuilderFlags_kIsNonVolatile_BuilderFlag, C_SkVertices_Bone_mapRect};
 #[cfg(test)]
 use skia_bindings::{SkVertices_BoneIndices, SkVertices_BoneWeights};
 #[cfg(test)]
@@ -77,7 +58,9 @@ impl VerticesBone {
 
     pub fn map_rect<R: AsRef<Rect>>(&self, rect: R) -> Rect {
         Rect::from_native(unsafe {
-            self.native().mapRect(rect.as_ref().native())
+            // does not link.
+            // self.native().mapRect(rect.as_ref().native())
+            C_SkVertices_Bone_mapRect(self.native(), rect.as_ref().native())
         })
     }
 }

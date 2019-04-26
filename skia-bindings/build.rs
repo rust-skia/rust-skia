@@ -27,6 +27,15 @@ mod build {
 
     /// Build with SVG support?
     pub const SVG: bool = cfg!(feature = "svg");
+
+    /// Build with animation support.
+    pub const ANIMATION: bool = false;
+
+    /// Support DNG file format.
+    pub const DNG: bool = false;
+
+    /// Build the particles module.
+    pub const PARTICLES: bool = false;
 }
 
 fn main() {
@@ -52,12 +61,19 @@ fn main() {
                 .stderr(Stdio::inherit())
                 .status().unwrap().success(), "`skia/tools/git-sync-deps` failed");
 
+    let mut force_build_libs = false;
+
     match cargo::target().as_str() {
         (_, "unknown", "linux", Some("gnu")) => {
             cargo::add_link_libs(&["stdc++", "bz2", "GL", "fontconfig", "freetype"]);
         },
         (_, "apple", "darwin", _) => {
             cargo::add_link_libs(&["c++", "framework=OpenGL", "framework=ApplicationServices"]);
+            // m74: if we don't build the particles or the skottie library on macOS, the build fails with
+            // for example:
+            // [763/867] link libparticles.a
+            // FAILED: libparticles.a
+            force_build_libs = true;
         },
         (_, _, "windows", Some("msvc")) => {
             cargo::add_link_libs(&["usp10", "ole32", "user32", "gdi32", "fontsub", "opengl32"]);
@@ -82,6 +98,10 @@ fn main() {
             ("skia_use_system_libpng", no()),
             ("skia_use_libwebp", no()),
             ("skia_use_system_zlib", no()),
+            ("skia_enable_skottie", if build::ANIMATION || force_build_libs { yes() } else { no() }),
+            ("skia_use_xps", no()),
+            ("skia_use_dng_sdk", if build::DNG { yes() } else { no() }),
+            ("skia_enable_particles", if build::PARTICLES || force_build_libs { yes() } else { no() }),
             ("cc", quote("clang")),
             ("cxx", quote("clang++")),
         ];
@@ -232,7 +252,6 @@ fn bindgen_gen(current_dir: &Path, skia_out_dir: &str) {
         .whitelist_type("SkDocument")
 
         .whitelist_type("SkDynamicMemoryWStream")
-        .whitelist_type("SkXMLStreamWriter")
 
         .whitelist_type("GrGLBackendState")
 

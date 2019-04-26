@@ -258,26 +258,6 @@ impl Handle<SkFont> {
         unsafe { self.native().unicharToGlyph(uni) }
     }
 
-    pub fn contains_str(&self, str: &str) -> bool {
-        let bytes = str.as_bytes();
-        unsafe {
-            self.native().containsText(bytes.as_ptr() as _, bytes.len(), TextEncoding::UTF8.into_native())
-        }
-    }
-
-    // note that the returned usize value is the bytes of the str that fits and not the characters.
-    pub fn break_str(&self, str: &str, max_width: scalar) -> (usize, scalar) {
-        let bytes = str.as_bytes();
-
-        let mut measured_width = scalar::default();
-        let bytes_fit = unsafe { self.native()
-            .breakText(
-                bytes.as_ptr() as _, bytes.len(), TextEncoding::UTF8.into_native(),
-                max_width, &mut measured_width) };
-
-        (bytes_fit, measured_width)
-    }
-
     pub fn measure_str(&self, str: &str, paint: Option<&Paint>) -> (scalar, Rect) {
         let bytes = str.as_bytes();
         let mut bounds = Rect::default();

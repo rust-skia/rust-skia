@@ -13,7 +13,7 @@ pub type Context = RCHandle<GrContext>;
 impl NativeRefCountedBase for GrContext {
     type Base = SkRefCntBase;
     fn ref_counted_base(&self) -> &Self::Base {
-        &self._base._base
+        &self._base._base._base._base._base
     }
 }
 
@@ -60,6 +60,13 @@ impl RCHandle<GrContext> {
         self
     }
 
+    pub fn reset_gl_texture_bindings(&mut self) -> &mut Self {
+        unsafe {
+            self.native_mut().resetGLTextureBindings()
+        }
+        self
+    }
+
     pub fn abandon(&mut self) -> &mut Self {
         unsafe {
             // self.native_mut().abandonContext()
@@ -70,7 +77,7 @@ impl RCHandle<GrContext> {
 
     pub fn abandoned(&self) -> bool {
         unsafe {
-            self.native().abandoned()
+            self.native()._base._base.abandoned()
         }
     }
 
@@ -173,12 +180,6 @@ impl RCHandle<GrContext> {
     }
 
     // TODO: flushAndSignalSemaphores
-
-    pub fn unique_id(&mut self) -> u32 {
-        unsafe {
-            self.native_mut().uniqueID()
-        }
-    }
 
     pub fn supports_distance_field_text(&self) -> bool {
         unsafe {
