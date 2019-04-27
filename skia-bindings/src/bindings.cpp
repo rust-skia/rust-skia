@@ -1438,7 +1438,7 @@ C_SkMatrixConvolutionImageFilter_Make(const SkISize &kernelSize,
 //
 
 extern "C" SkImageFilter *
-C_SkMergeImageFilter_Make(const SkImageFilter *filters[], int count, const SkImageFilter::CropRect *cropRect) {
+C_SkMergeImageFilter_Make(const SkImageFilter *const filters[], int count, const SkImageFilter::CropRect *cropRect) {
     auto array = new sk_sp<SkImageFilter>[count];
     for (int i = 0; i < count; ++i) {
         array[i] = spFromConst(filters[i]);
