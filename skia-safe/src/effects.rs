@@ -61,6 +61,9 @@ pub use self::offset_image_filter::*;
 mod paint_image_filter;
 pub use self::paint_image_filter::*;
 
+mod picture_image_filter;
+pub use self::picture_image_filter::*;
+
 mod perlin_noise_shader;
 pub use self::perlin_noise_shader::*;
 
