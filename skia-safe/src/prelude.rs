@@ -367,16 +367,22 @@ impl<N: NativeRefCounted> RCHandle<N> {
     /// and returns a reference to it.
     #[inline]
     pub fn shared_native(&self) -> &N {
-        (unsafe { &*self.0 })._ref();
-        unsafe { &mut *self.0 }
+        unsafe {
+            let r = &*self.0;
+            r._ref();
+            r
+        }
     }
 
     /// Increases the reference counter of the native type
     /// and returns a reference to it.
     #[inline]
     pub fn shared_native_mut(&mut self) -> &mut N {
-        (unsafe { &*self.0 })._ref();
-        unsafe { &mut *self.0 }
+        unsafe {
+            let r = &mut *self.0;
+            r._ref();
+            r
+        }
     }
 
     /// Creates an RCHandle from a pointer.
