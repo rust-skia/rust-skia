@@ -1,5 +1,6 @@
+use crate::prelude::*;
 use crate::ImageFilter;
-use skia_bindings::C_SkComposeImageFilter_Make;
+use skia_bindings::{C_SkComposeImageFilter_Make, SkImageFilter};
 
 pub enum ComposeImageFilter {}
 
@@ -9,5 +10,11 @@ impl ComposeImageFilter {
         ImageFilter::from_ptr(unsafe {
             C_SkComposeImageFilter_Make(outer.shared_native(), inner.shared_native())
         })
+    }
+}
+
+impl RCHandle<SkImageFilter> {
+    pub fn compose(outer: &ImageFilter, inner: &ImageFilter) -> Option<Self> {
+        ComposeImageFilter::new(outer, inner)
     }
 }

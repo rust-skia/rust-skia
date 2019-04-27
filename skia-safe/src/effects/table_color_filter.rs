@@ -1,6 +1,6 @@
-use crate::core::ColorFilter;
 use crate::prelude::*;
-use skia_bindings::{C_SkTableColorFilter_Make, C_SkTableColorFilter_MakeARGB};
+use crate::ColorFilter;
+use skia_bindings::{C_SkTableColorFilter_Make, C_SkTableColorFilter_MakeARGB, SkColorFilter};
 
 pub enum TableColorFilter {}
 
@@ -25,5 +25,20 @@ impl TableColorFilter {
             )
         })
         .unwrap()
+    }
+}
+
+impl RCHandle<SkColorFilter> {
+    pub fn from_table(table: &[u8; 256]) -> Self {
+        TableColorFilter::from_table(table)
+    }
+
+    pub fn from_argb(
+        table_a: Option<&[u8; 256]>,
+        table_r: Option<&[u8; 256]>,
+        table_g: Option<&[u8; 256]>,
+        table_b: Option<&[u8; 256]>,
+    ) -> Self {
+        TableColorFilter::from_argb(table_a, table_r, table_g, table_b)
     }
 }

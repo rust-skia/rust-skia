@@ -5,7 +5,7 @@ use skia_bindings::{
     C_SkGradientShader_MakeLinear, C_SkGradientShader_MakeLinear2, C_SkGradientShader_MakeRadial,
     C_SkGradientShader_MakeRadial2, C_SkGradientShader_MakeSweep, C_SkGradientShader_MakeSweep2,
     C_SkGradientShader_MakeTwoPointConical, C_SkGradientShader_MakeTwoPointConical2,
-    SkGradientShader_Flags_kInterpolateColorsInPremul_Flag,
+    SkGradientShader_Flags_kInterpolateColorsInPremul_Flag, SkShader,
 };
 
 pub enum GradientShader {}
@@ -285,5 +285,98 @@ impl<'a> From<&'a [Color]> for GradientShaderColors<'a> {
 impl<'a> From<(&'a [Color4f], &'a ColorSpace)> for GradientShaderColors<'a> {
     fn from(c: (&'a [Color4f], &'a ColorSpace)) -> Self {
         GradientShaderColors::<'a>::ColorsInSpace(c.0, c.1)
+    }
+}
+
+impl RCHandle<SkShader> {
+    pub fn linear_gradient<
+        'a,
+        P1: Into<Point>,
+        P2: Into<Point>,
+        C: Into<GradientShaderColors<'a>>,
+        POS: Into<Option<&'a [scalar]>>,
+        F: Into<Option<GradientShaderFlags>>,
+        LM: Into<Option<&'a Matrix>>,
+    >(
+        points: (P1, P2),
+        colors: C,
+        pos: POS,
+        mode: ShaderTileMode,
+        flags: F,
+        local_matrix: LM,
+    ) -> Option<Self> {
+        GradientShader::linear(points, colors, pos, mode, flags, local_matrix)
+    }
+
+    pub fn radial_gradient<
+        'a,
+        P: Into<Point>,
+        C: Into<GradientShaderColors<'a>>,
+        POS: Into<Option<&'a [scalar]>>,
+        F: Into<Option<GradientShaderFlags>>,
+        LM: Into<Option<&'a Matrix>>,
+    >(
+        center: P,
+        radius: scalar,
+        colors: C,
+        pos: POS,
+        mode: ShaderTileMode,
+        flags: F,
+        local_matrix: LM,
+    ) -> Option<Self> {
+        GradientShader::radial(center, radius, colors, pos, mode, flags, local_matrix)
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn two_point_conical_gradient<
+        'a,
+        PS: Into<Point>,
+        PE: Into<Point>,
+        C: Into<GradientShaderColors<'a>>,
+        POS: Into<Option<&'a [scalar]>>,
+        F: Into<Option<GradientShaderFlags>>,
+        LM: Into<Option<&'a Matrix>>,
+    >(
+        start: PS,
+        start_radius: scalar,
+        end: PE,
+        end_radius: scalar,
+        colors: C,
+        pos: POS,
+        mode: ShaderTileMode,
+        flags: F,
+        local_matrix: LM,
+    ) -> Option<Self> {
+        GradientShader::two_point_conical(
+            start,
+            start_radius,
+            end,
+            end_radius,
+            colors,
+            pos,
+            mode,
+            flags,
+            local_matrix,
+        )
+    }
+
+    pub fn sweep_gradient<
+        'a,
+        P: Into<Point>,
+        C: Into<GradientShaderColors<'a>>,
+        POS: Into<Option<&'a [scalar]>>,
+        A: Into<Option<(scalar, scalar)>>,
+        F: Into<Option<GradientShaderFlags>>,
+        LM: Into<Option<&'a Matrix>>,
+    >(
+        center: P,
+        colors: C,
+        pos: POS,
+        mode: ShaderTileMode,
+        angles: A,
+        flags: F,
+        local_matrix: LM,
+    ) -> Option<Self> {
+        GradientShader::sweep(center, colors, pos, mode, angles, flags, local_matrix)
     }
 }

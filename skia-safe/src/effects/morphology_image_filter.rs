@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::{ImageFilter, ImageFilterCropRect};
-use skia_bindings::{C_SkDilateImageFilter_Make, C_SkErodeImageFilter_Make};
+use skia_bindings::{C_SkDilateImageFilter_Make, C_SkErodeImageFilter_Make, SkImageFilter};
 
 pub enum DilateImageFilter {}
 
@@ -39,5 +39,23 @@ impl ErodeImageFilter {
                 crop_rect.into().native_ptr_or_null(),
             )
         })
+    }
+}
+
+impl RCHandle<SkImageFilter> {
+    pub fn dilate<'a, CR: Into<Option<&'a ImageFilterCropRect>>>(
+        &self,
+        crop_rect: CR,
+        radii: (i32, i32),
+    ) -> Option<Self> {
+        DilateImageFilter::new(radii, self, crop_rect)
+    }
+
+    pub fn erode<'a, CR: Into<Option<&'a ImageFilterCropRect>>>(
+        &self,
+        crop_rect: CR,
+        radii: (i32, i32),
+    ) -> Option<Self> {
+        ErodeImageFilter::new(radii, self, crop_rect)
     }
 }

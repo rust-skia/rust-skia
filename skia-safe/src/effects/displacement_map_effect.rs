@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use crate::{scalar, ImageFilter, ImageFilterCropRect};
-use skia_bindings::{C_SkDisplacementMapEffect_Make, SkDisplacementMapEffect_ChannelSelectorType};
+use skia_bindings::{
+    C_SkDisplacementMapEffect_Make, SkDisplacementMapEffect_ChannelSelectorType, SkImageFilter,
+};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -45,5 +47,20 @@ impl DisplacementMapEffect {
                 crop_rect.into().native_ptr_or_null(),
             )
         })
+    }
+}
+
+impl RCHandle<SkImageFilter> {
+    pub fn displacement_map_effect<'a, CR: Into<Option<&'a ImageFilterCropRect>>>(
+        channel_selectors: (
+            DisplacementMapChannelSelector,
+            DisplacementMapChannelSelector,
+        ),
+        scale: scalar,
+        displacement: &ImageFilter,
+        color: &ImageFilter,
+        crop_rect: CR,
+    ) -> Option<Self> {
+        DisplacementMapEffect::new(channel_selectors, scale, displacement, color, crop_rect)
     }
 }

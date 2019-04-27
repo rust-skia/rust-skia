@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::{ColorFilter, ImageFilter, ImageFilterCropRect};
-use skia_bindings::C_SkColorFilterImageFilter_Make;
+use skia_bindings::{C_SkColorFilterImageFilter_Make, SkImageFilter};
 
 pub enum ColorFilterImageFilter {}
 
@@ -18,5 +18,15 @@ impl ColorFilterImageFilter {
                 crop_rect.into().native_ptr_or_null(),
             )
         })
+    }
+}
+
+impl RCHandle<SkImageFilter> {
+    pub fn color_filter<'a, CR: Into<Option<&'a ImageFilterCropRect>>>(
+        &self,
+        crop_rect: CR,
+        cf: &ColorFilter,
+    ) -> Option<Self> {
+        ColorFilterImageFilter::new(cf, self, crop_rect)
     }
 }

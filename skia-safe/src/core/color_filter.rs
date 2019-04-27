@@ -72,33 +72,33 @@ impl RCHandle<SkColorFilter> {
     }
 
     #[must_use]
-    pub fn composed(&self, inner: &ColorFilter) -> Option<ColorFilter> {
+    pub fn composed(&self, inner: &ColorFilter) -> Option<Self> {
         ColorFilter::from_ptr(unsafe {
             C_SkColorFilter_makeComposed(self.native(), inner.shared_native() )
         })
     }
 
-    pub fn from_matrix_row_major_255(matrix: &[scalar; 20]) -> ColorFilter {
+    pub fn from_matrix_row_major_255(matrix: &[scalar; 20]) -> Self {
         ColorFilter::from_ptr(unsafe {
             C_SkColorFilter_MakeMatrixFilterRowMajor255(matrix.as_ptr())
         }).unwrap()
     }
 
     // TODO: not sure if we need the new_ prefix here.
-    pub fn new_linear_to_srgb_gamma() -> ColorFilter {
+    pub fn new_linear_to_srgb_gamma() -> self {
         ColorFilter::from_ptr(unsafe {
             C_SkColorFilter_MakeLinearToSRGBGamma()
         }).unwrap()
     }
 
     // TODO: not sure if we need the new_ prefix here.
-    pub fn new_srgb_to_linear_gamma() -> ColorFilter {
+    pub fn new_srgb_to_linear_gamma() -> Self {
         ColorFilter::from_ptr(unsafe {
             C_SkColorFilter_MakeSRGBToLinearGamma()
         }).unwrap()
     }
 
-    pub fn new_mixer(cf0: &ColorFilter, cf1: &ColorFilter, weight: f32) -> Option<ColorFilter> {
+    pub fn new_mixer(cf0: &ColorFilter, cf1: &ColorFilter, weight: f32) -> Option<Self> {
         ColorFilter::from_ptr(unsafe {
             C_SkColorFilter_MakeMixer(cf0.shared_native(), cf1.shared_native(), weight)
         })
