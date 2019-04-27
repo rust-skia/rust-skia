@@ -234,11 +234,11 @@ fn draw_bitmap_shader(canvas: &mut Canvas) {
     let mut matrix = Matrix::default();
     matrix.set_scale((0.75, 0.75), None).pre_rotate(30.0, None);
     let paint = &mut Paint::default();
-    paint.set_shader(Some(
+    paint.set_shader(
         image
             .as_shader((ShaderTileMode::Repeat, ShaderTileMode::Repeat), &matrix)
             .as_ref(),
-    ));
+    );
     canvas.draw_paint(paint);
 }
 
@@ -343,7 +343,7 @@ fn draw_mask_filter(canvas: &mut Canvas) {
         BlendMode::default(),
     );
     let paint = &mut Paint::default();
-    paint.set_mask_filter(Some(&MaskFilter::blur(BlurStyle::Normal, 5.0, None)));
+    paint.set_mask_filter(&MaskFilter::blur(BlurStyle::Normal, 5.0, None));
     let blob = &TextBlob::from_str(
         "Skia",
         &Font::from_typeface_with_size(&Typeface::default(), 120.0),
@@ -354,7 +354,7 @@ fn draw_mask_filter(canvas: &mut Canvas) {
 fn draw_color_filter(c: &mut Canvas) {
     fn f(c: &mut Canvas, (x, y): (scalar, scalar), color_matrix: &[scalar; 20]) {
         let paint = &mut Paint::default();
-        paint.set_color_filter(Some(&ColorFilter::from_matrix_row_major_255(color_matrix)));
+        paint.set_color_filter(&ColorFilter::from_matrix_row_major_255(color_matrix));
 
         let image = &resources::mandrill();
 
@@ -385,12 +385,12 @@ fn draw_color_table_color_filter(canvas: &mut Canvas) {
         *v = x.max(0).min(255) as _;
     }
     let mut paint = Paint::default();
-    paint.set_color_filter(Some(&TableColorFilter::from_argb(
+    paint.set_color_filter(&TableColorFilter::from_argb(
         None,
         Some(ct),
         Some(ct),
         Some(ct),
-    )));
+    ));
     canvas.draw_image(&image, (0, 0), Some(&paint));
 }
 
@@ -411,7 +411,7 @@ fn draw_path_2d_effect(canvas: &mut Canvas) {
     let matrix = &Matrix::new_scale((4.0 * scale, 4.0 * scale));
     let paint = &mut Paint::default();
     paint
-        .set_path_effect(Some(&Path2DPathEffect::new(matrix, path)))
+        .set_path_effect(&Path2DPathEffect::new(matrix, path))
         .set_anti_alias(true);
     canvas.clear(Color::WHITE);
     let bounds = Rect::new(-4.0 * scale, -4.0 * scale, 256.0, 256.0);
@@ -494,10 +494,10 @@ fn draw_compose_path_effect(canvas: &mut Canvas) {
     const INTERVALS: [scalar; 4] = [10.0, 5.0, 2.0, 5.0];
     let paint = &mut Paint::default();
     paint
-        .set_path_effect(Some(&PathEffect::compose(
+        .set_path_effect(&PathEffect::compose(
             &DashPathEffect::new(&INTERVALS, 0.0).unwrap(),
             &DiscretePathEffect::new(10.0, 4.0, None).unwrap(),
-        )))
+        ))
         .set_style(PaintStyle::Stroke)
         .set_stroke_width(2.0)
         .set_anti_alias(true);
@@ -508,10 +508,10 @@ fn draw_compose_path_effect(canvas: &mut Canvas) {
 fn draw_sum_path_effect(canvas: &mut Canvas) {
     let paint = &mut Paint::default();
     paint
-        .set_path_effect(Some(&PathEffect::sum(
+        .set_path_effect(&PathEffect::sum(
             &DiscretePathEffect::new(10.0, 4.0, None).unwrap(),
             &DiscretePathEffect::new(10.0, 4.0, Some(1245)).unwrap(),
-        )))
+        ))
         .set_style(PaintStyle::Stroke)
         .set_stroke_width(2.0)
         .set_anti_alias(true);

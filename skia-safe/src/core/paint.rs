@@ -238,9 +238,9 @@ impl Handle<SkPaint> {
         })
     }
 
-    pub fn set_shader(&mut self, shader: Option<&Shader>) -> &mut Self {
+    pub fn set_shader<'a, S: Into<Option<&'a Shader>>>(&mut self, shader: S) -> &mut Self {
         unsafe {
-            C_SkPaint_setShader(self.native_mut(), shader.shared_ptr())
+            C_SkPaint_setShader(self.native_mut(), shader.into().shared_ptr())
         }
         self
     }
@@ -252,9 +252,9 @@ impl Handle<SkPaint> {
     }
 
 
-    pub fn set_color_filter(&mut self, color_filter: Option<&ColorFilter>) -> &mut Self {
+    pub fn set_color_filter<'a, CF: Into<Option<&'a ColorFilter>>>(&mut self, color_filter: CF) -> &mut Self {
         unsafe {
-            C_SkPaint_setColorFilter(self.native_mut(), color_filter.shared_ptr())
+            C_SkPaint_setColorFilter(self.native_mut(), color_filter.into().shared_ptr())
         }
         self
     }
@@ -284,9 +284,9 @@ impl Handle<SkPaint> {
         })
     }
 
-    pub fn set_path_effect(&mut self, path_effect: Option<&PathEffect>) -> &mut Self {
+    pub fn set_path_effect<'a, PE: Into<Option<&'a PathEffect>>>(&mut self, path_effect: PE) -> &mut Self {
         unsafe {
-            C_SkPaint_setPathEffect(self.native_mut(), path_effect.shared_ptr())
+            C_SkPaint_setPathEffect(self.native_mut(), path_effect.into().shared_ptr())
         }
         self
     }
@@ -297,9 +297,9 @@ impl Handle<SkPaint> {
         })
     }
 
-    pub fn set_mask_filter(&mut self, mask_filter: Option<&MaskFilter>) -> &mut Self {
+    pub fn set_mask_filter<'a, MF: Into<Option<&'a MaskFilter>>>(&mut self, mask_filter: MF) -> &mut Self {
         unsafe {
-            C_SkPaint_setMaskFilter(self.native_mut(), mask_filter.shared_ptr())
+            C_SkPaint_setMaskFilter(self.native_mut(), mask_filter.into().shared_ptr())
         }
         self
     }
