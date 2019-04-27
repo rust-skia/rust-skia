@@ -13,6 +13,12 @@ pub use self::arithmetic_image_filter::*;
 mod blur_image_filter;
 pub use self::blur_image_filter::*;
 
+mod color_filter_image_filter;
+pub use self::color_filter_image_filter::*;
+
+mod compose_image_filter;
+pub use self::compose_image_filter::*;
+
 mod corner_path_effect;
 pub use self::corner_path_effect::*;
 
@@ -22,8 +28,17 @@ pub use self::dash_path_effect::*;
 mod discrete_path_effect;
 pub use self::discrete_path_effect::*;
 
+mod displacement_map_effect;
+pub use self::displacement_map_effect::*;
+
+mod drop_shadow_image_filter;
+pub use self::drop_shadow_image_filter::*;
+
 mod gradient_shader;
 pub use self::gradient_shader::*;
+
+mod image_source;
+pub use self::image_source::*;
 
 mod perlin_noise_shader;
 pub use self::perlin_noise_shader::*;
