@@ -5,7 +5,8 @@ use std::hash::{
 };
 use crate::prelude::*;
 use crate::core::{Color, FilterQuality, Color4f, ColorSpace, scalar, Path, Rect, ColorFilter, BlendMode, PathEffect, MaskFilter, Shader};
-use skia_bindings::{C_SkPaint_setMaskFilter, C_SkPaint_setPathEffect, C_SkPaint_setColorFilter, SkPaint_Cap, SkPaint, C_SkPaint_destruct, SkPaint_Style, SkPaint_Join, C_SkPaint_Equals, C_SkPaint_setShader};
+use skia_bindings::{C_SkPaint_setMaskFilter, C_SkPaint_setPathEffect, C_SkPaint_setColorFilter, SkPaint_Cap, SkPaint, C_SkPaint_destruct, SkPaint_Style, SkPaint_Join, C_SkPaint_Equals, C_SkPaint_setShader, C_SkPaint_setImageFilter};
+use crate::ImageFilter;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(u8)]
@@ -303,22 +304,18 @@ impl Handle<SkPaint> {
         self
     }
 
-    /* TODO: ImageFilter postponed
-
     pub fn image_filter(&self) -> Option<ImageFilter> {
         ImageFilter::from_unshared_ptr(unsafe {
             self.native().getImageFilter()
         })
     }
 
-    pub fn set_image_filter(&mut self, image_filter: Option<&ImageFilter>) -> &mut Self {
+    pub fn set_image_filter<'a, IF: Into<Option<&'a ImageFilter>>>(&mut self, image_filter: IF) -> &mut Self {
         unsafe {
-            C_SkPaint_setImageFilter(self.native_mut(), image_filter.shared_ptr())
+            C_SkPaint_setImageFilter(self.native_mut(), image_filter.into().shared_ptr())
         }
         self
     }
-
-    */
 
     // TODO: getDrawLooper, setDrawLooper
 

@@ -414,13 +414,9 @@ extern "C" void C_SkPaint_setMaskFilter(SkPaint* self, const SkMaskFilter* maskF
     self->setMaskFilter(spFromConst(maskFilter));
 }
 
-// postponed
-
-/*
-extern "C" void C_SkPaint_setImageFilter(SkPaint* self, SkImageFilter* imageFilter) {
-    self->setImageFilter(sk_sp<SkImageFilter>(imageFilter));
+extern "C" void C_SkPaint_setImageFilter(SkPaint* self, const SkImageFilter* imageFilter) {
+    self->setImageFilter(spFromConst(imageFilter));
 }
-*/
 
 //
 // SkPath
@@ -981,6 +977,22 @@ extern "C" void C_SkContourMeasureIter_destruct(SkContourMeasureIter* self) {
 
 extern "C" SkContourMeasure* C_SkContourMeasureIter_next(SkContourMeasureIter* self) {
     return self->next().release();
+}
+
+//
+// SkImageFilter
+//
+
+extern "C" SkRect C_SkImageFilter_computeFastBounds(const SkImageFilter* self, const SkRect* bounds) {
+    return self->computeFastBounds(*bounds);
+}
+
+extern "C" SkImageFilter* C_SkImageFilter_makeWithLocalMatrix(const SkImageFilter* self, const SkMatrix* matrix) {
+    return self->makeWithLocalMatrix(*matrix).release();
+}
+
+extern "C" SkImageFilter* C_SkImageFilter_MakeMatrixFilter(const SkMatrix* matrix, SkFilterQuality quality, const SkImageFilter* input) {
+    return SkImageFilter::MakeMatrixFilter(*matrix, quality, spFromConst(input)).release();
 }
 
 //
