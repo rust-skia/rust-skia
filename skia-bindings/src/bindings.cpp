@@ -31,6 +31,8 @@
 // effects/
 #include "Sk1DPathEffect.h"
 #include "Sk2DPathEffect.h"
+#include "SkAlphaThresholdFilter.h"
+#include "SkArithmeticImageFilter.h"
 #include "SkCornerPathEffect.h"
 #include "SkDashPathEffect.h"
 #include "SkDiscretePathEffect.h"
@@ -1226,6 +1228,22 @@ extern "C" SkPathEffect* C_SkLine2DPathEffect_Make(SkScalar width, const SkMatri
 
 extern "C" SkPathEffect* C_SkPath2DPathEffect_Make(const SkMatrix* matrix, const SkPath* path) {
     return SkPath2DPathEffect::Make(*matrix, *path).release();
+}
+
+//
+// SkAlphaThresholdFilter
+//
+
+extern "C" SkImageFilter* C_SkAlphaThresholdFilter_Make(const SkRegion* region, SkScalar innerMin, SkScalar outerMax, const SkImageFilter* input, const SkImageFilter::CropRect* cropRect) {
+    return SkAlphaThresholdFilter::Make(*region, innerMin, outerMax, spFromConst(input), cropRect).release();
+}
+
+//
+// SkArithmeticImageFilter
+//
+
+extern "C" SkImageFilter* C_SkArithmeticImageFilter_Make(float k1, float k2, float k3, float k4, bool enforcePMColor, const SkImageFilter* background, const SkImageFilter* foreground, const SkImageFilter::CropRect* cropRect) {
+    return SkArithmeticImageFilter::Make(k1, k2, k3, k4, enforcePMColor, spFromConst(background), spFromConst(foreground), cropRect).release();
 }
 
 //
