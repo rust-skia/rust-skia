@@ -1,4 +1,4 @@
-use crate::prelude::{NativePointerOrNull2, NativeTransmutable};
+use crate::prelude::*;
 use crate::{scalar, ImageFilter, ImageFilterCropRect};
 use skia_bindings::{C_SkBlurImageFilter_Make, SkBlurImageFilter_TileMode};
 
