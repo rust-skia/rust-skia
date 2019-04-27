@@ -1,6 +1,12 @@
+use crate::core::{scalar, Matrix, Point, Shader, ShaderTileMode};
 use crate::prelude::*;
-use skia_bindings::{C_SkGradientShader_MakeLinear, C_SkGradientShader_MakeLinear2, C_SkGradientShader_MakeRadial, C_SkGradientShader_MakeRadial2, C_SkGradientShader_MakeTwoPointConical, C_SkGradientShader_MakeTwoPointConical2, C_SkGradientShader_MakeSweep, C_SkGradientShader_MakeSweep2, SkGradientShader_Flags_kInterpolateColorsInPremul_Flag };
-use crate::core::{Shader, ShaderTileMode, scalar, Color, Point, Matrix, Color4f, ColorSpace};
+use crate::{Color, Color4f, ColorSpace};
+use skia_bindings::{
+    C_SkGradientShader_MakeLinear, C_SkGradientShader_MakeLinear2, C_SkGradientShader_MakeRadial,
+    C_SkGradientShader_MakeRadial2, C_SkGradientShader_MakeSweep, C_SkGradientShader_MakeSweep2,
+    C_SkGradientShader_MakeTwoPointConical, C_SkGradientShader_MakeTwoPointConical2,
+    SkGradientShader_Flags_kInterpolateColorsInPremul_Flag,
+};
 
 pub enum GradientShader {}
 
@@ -12,38 +18,47 @@ bitflags! {
 
 impl Default for GradientShaderFlags {
     fn default() -> Self {
-        GradientShaderFlags::empty()
+        Self::empty()
     }
 }
 
 impl GradientShader {
-
-    pub fn linear<'a, P: Into<Point>, C: Into<GradientShaderColors<'a>>>(
-        points: (P, P),
+    pub fn linear<
+        'a,
+        P1: Into<Point>,
+        P2: Into<Point>,
+        C: Into<GradientShaderColors<'a>>,
+        POS: Into<Option<&'a [scalar]>>,
+        F: Into<Option<GradientShaderFlags>>,
+        LM: Into<Option<&'a Matrix>>,
+    >(
+        points: (P1, P2),
         colors: C,
-        pos: Option<&[scalar]>,
+        pos: POS,
         mode: ShaderTileMode,
-        flags: GradientShaderFlags,
-        local_matrix: Option<&Matrix>) -> Option<Shader> {
-
-        let colors = colors.into();
-        assert!(pos.is_none() || (pos.unwrap().len() == colors.len()));
-
+        flags: F,
+        local_matrix: LM,
+    ) -> Option<Shader> {
         let points = [points.0.into(), points.1.into()];
+        let colors = colors.into();
+        let pos = pos.into();
+        assert!(pos.is_none() || (pos.unwrap().len() == colors.len()));
+        let flags = flags.into().unwrap_or_default();
+        let local_matrix = local_matrix.into();
 
         Shader::from_ptr(unsafe {
             match colors {
-                GradientShaderColors::Colors(colors) =>
-                    C_SkGradientShader_MakeLinear(
-                        points.native().as_ptr(),
-                        colors.native().as_ptr(),
-                        pos.as_ptr_or_null(),
-                        colors.len().try_into().unwrap(),
-                        mode.into_native(),
-                        flags.bits(),
-                        local_matrix.native_ptr_or_null()),
+                GradientShaderColors::Colors(colors) => C_SkGradientShader_MakeLinear(
+                    points.native().as_ptr(),
+                    colors.native().as_ptr(),
+                    pos.as_ptr_or_null(),
+                    colors.len().try_into().unwrap(),
+                    mode.into_native(),
+                    flags.bits(),
+                    local_matrix.native_ptr_or_null(),
+                ),
 
-                GradientShaderColors::ColorsInSpace(colors, color_space) =>
+                GradientShaderColors::ColorsInSpace(colors, color_space) => {
                     C_SkGradientShader_MakeLinear2(
                         points.native().as_ptr(),
                         colors.native().as_ptr(),
@@ -52,38 +67,50 @@ impl GradientShader {
                         colors.len().try_into().unwrap(),
                         mode.into_native(),
                         flags.bits(),
-                        local_matrix.native_ptr_or_null())
+                        local_matrix.native_ptr_or_null(),
+                    )
+                }
             }
         })
     }
 
-    pub fn radial<'a, P: Into<Point>, C: Into<GradientShaderColors<'a>>>(
+    pub fn radial<
+        'a,
+        P: Into<Point>,
+        C: Into<GradientShaderColors<'a>>,
+        POS: Into<Option<&'a [scalar]>>,
+        F: Into<Option<GradientShaderFlags>>,
+        LM: Into<Option<&'a Matrix>>,
+    >(
         center: P,
         radius: scalar,
         colors: C,
-        pos: Option<&[scalar]>,
+        pos: POS,
         mode: ShaderTileMode,
-        flags: GradientShaderFlags,
-        local_matrix: Option<&Matrix>) -> Option<Shader> {
-
+        flags: F,
+        local_matrix: LM,
+    ) -> Option<Shader> {
         let colors = colors.into();
         let center = center.into();
+        let pos = pos.into();
         assert!(pos.is_none() || (pos.unwrap().len() == colors.len()));
+        let flags = flags.into().unwrap_or_default();
+        let local_matrix = local_matrix.into();
 
         Shader::from_ptr(unsafe {
             match colors {
-                GradientShaderColors::Colors(colors) =>
-                    C_SkGradientShader_MakeRadial(
-                        center.native(),
-                        radius,
-                        colors.native().as_ptr(),
-                        pos.as_ptr_or_null(),
-                        colors.len().try_into().unwrap(),
-                        mode.into_native(),
-                        flags.bits(),
-                        local_matrix.native_ptr_or_null()),
+                GradientShaderColors::Colors(colors) => C_SkGradientShader_MakeRadial(
+                    center.native(),
+                    radius,
+                    colors.native().as_ptr(),
+                    pos.as_ptr_or_null(),
+                    colors.len().try_into().unwrap(),
+                    mode.into_native(),
+                    flags.bits(),
+                    local_matrix.native_ptr_or_null(),
+                ),
 
-                GradientShaderColors::ColorsInSpace(colors, color_space) =>
+                GradientShaderColors::ColorsInSpace(colors, color_space) => {
                     C_SkGradientShader_MakeRadial2(
                         center.native(),
                         radius,
@@ -93,114 +120,159 @@ impl GradientShader {
                         colors.len().try_into().unwrap(),
                         mode.into_native(),
                         flags.bits(),
-                        local_matrix.native_ptr_or_null())
+                        local_matrix.native_ptr_or_null(),
+                    )
+                }
             }
         })
     }
 
-    pub fn two_point_conical<'a, P: Into<Point>, C: Into<GradientShaderColors<'a>>>(
-        start: P, start_radius: scalar,
-        end: P, end_radius: scalar,
+    #[allow(clippy::too_many_arguments)]
+    pub fn two_point_conical<
+        'a,
+        PS: Into<Point>,
+        PE: Into<Point>,
+        C: Into<GradientShaderColors<'a>>,
+        POS: Into<Option<&'a [scalar]>>,
+        F: Into<Option<GradientShaderFlags>>,
+        LM: Into<Option<&'a Matrix>>,
+    >(
+        start: PS,
+        start_radius: scalar,
+        end: PE,
+        end_radius: scalar,
         colors: C,
-        pos: Option<&[scalar]>,
+        pos: POS,
         mode: ShaderTileMode,
-        flags: GradientShaderFlags,
-        local_matrix: Option<&Matrix>) -> Option<Shader> {
-
+        flags: F,
+        local_matrix: LM,
+    ) -> Option<Shader> {
         let colors = colors.into();
         let start = start.into();
         let end = end.into();
-
+        let pos = pos.into();
         assert!(pos.is_none() || (pos.unwrap().len() == colors.len()));
+        let flags = flags.into().unwrap_or_default();
+        let local_matrix = local_matrix.into();
 
         Shader::from_ptr(unsafe {
             match colors {
-                GradientShaderColors::Colors(colors) =>
-                    C_SkGradientShader_MakeTwoPointConical(
-                        start.native(), start_radius,
-                        end.native(), end_radius,
-                        colors.native().as_ptr(),
-                        pos.as_ptr_or_null(),
-                        colors.len().try_into().unwrap(),
-                        mode.into_native(),
-                        flags.bits(),
-                        local_matrix.native_ptr_or_null()),
+                GradientShaderColors::Colors(colors) => C_SkGradientShader_MakeTwoPointConical(
+                    start.native(),
+                    start_radius,
+                    end.native(),
+                    end_radius,
+                    colors.native().as_ptr(),
+                    pos.as_ptr_or_null(),
+                    colors.len().try_into().unwrap(),
+                    mode.into_native(),
+                    flags.bits(),
+                    local_matrix.native_ptr_or_null(),
+                ),
 
-                GradientShaderColors::ColorsInSpace(colors, color_space) =>
+                GradientShaderColors::ColorsInSpace(colors, color_space) => {
                     C_SkGradientShader_MakeTwoPointConical2(
-                        start.native(), start_radius,
-                        end.native(), end_radius,
+                        start.native(),
+                        start_radius,
+                        end.native(),
+                        end_radius,
                         colors.native().as_ptr(),
                         color_space.shared_native(),
                         pos.as_ptr_or_null(),
                         colors.len().try_into().unwrap(),
                         mode.into_native(),
                         flags.bits(),
-                        local_matrix.native_ptr_or_null())
+                        local_matrix.native_ptr_or_null(),
+                    )
+                }
             }
         })
     }
 
-    pub fn sweep<'a, P: Into<Point>, C: Into<GradientShaderColors<'a>>>(
+    pub fn sweep<
+        'a,
+        P: Into<Point>,
+        C: Into<GradientShaderColors<'a>>,
+        POS: Into<Option<&'a [scalar]>>,
+        A: Into<Option<(scalar, scalar)>>,
+        F: Into<Option<GradientShaderFlags>>,
+        LM: Into<Option<&'a Matrix>>,
+    >(
         center: P,
         colors: C,
-        pos: Option<&[scalar]>,
+        pos: POS,
         mode: ShaderTileMode,
-        angles: Option<(scalar, scalar)>,
-        flags: GradientShaderFlags,
-        local_matrix: Option<&Matrix>) -> Option<Shader> {
-
+        angles: A,
+        flags: F,
+        local_matrix: LM,
+    ) -> Option<Shader> {
         let center = center.into();
         let colors = colors.into();
+        let pos = pos.into();
         assert!(pos.is_none() || (pos.unwrap().len() == colors.len()));
+        let angles = angles.into();
+        let flags = flags.into().unwrap_or_default();
+        let local_matrix = local_matrix.into();
 
-        let (start_angle, end_angle) =
-            (angles.map(|a| a.0).unwrap_or(0.0), angles.map(|a| a.1).unwrap_or(360.0));
+        let (start_angle, end_angle) = (
+            angles.map(|a| a.0).unwrap_or(0.0),
+            angles.map(|a| a.1).unwrap_or(360.0),
+        );
 
         Shader::from_ptr(unsafe {
             match colors {
-                GradientShaderColors::Colors(colors) =>
-                    C_SkGradientShader_MakeSweep(
-                        center.x, center.y,
-                        colors.native().as_ptr(),
-                        pos.as_ptr_or_null(),
-                        colors.len().try_into().unwrap(),
-                        mode.into_native(),
-                        start_angle, end_angle,
-                        flags.bits(),
-                        local_matrix.native_ptr_or_null()),
+                GradientShaderColors::Colors(colors) => C_SkGradientShader_MakeSweep(
+                    center.x,
+                    center.y,
+                    colors.native().as_ptr(),
+                    pos.as_ptr_or_null(),
+                    colors.len().try_into().unwrap(),
+                    mode.into_native(),
+                    start_angle,
+                    end_angle,
+                    flags.bits(),
+                    local_matrix.native_ptr_or_null(),
+                ),
 
-                GradientShaderColors::ColorsInSpace(colors, color_space) =>
+                GradientShaderColors::ColorsInSpace(colors, color_space) => {
                     C_SkGradientShader_MakeSweep2(
-                        center.x, center.y,
+                        center.x,
+                        center.y,
                         colors.native().as_ptr(),
                         color_space.shared_native(),
                         pos.as_ptr_or_null(),
                         colors.len().try_into().unwrap(),
                         mode.into_native(),
-                        start_angle, end_angle,
+                        start_angle,
+                        end_angle,
                         flags.bits(),
-                        local_matrix.native_ptr_or_null())
+                        local_matrix.native_ptr_or_null(),
+                    )
+                }
             }
         })
     }
 }
 
-/// Type that represents either a alice of Color, or a slice of Color4f and a color space.
+/// Type that represents either a slice of Color, or a slice of Color4f and a color space.
 /// Whenever this type is expected, it's either possible to directly pass a &[Color] , or
 /// a tuple of type (&[Color4f], &ColorSpace).
 pub enum GradientShaderColors<'a> {
     Colors(&'a [Color]),
-    ColorsInSpace(&'a[Color4f], &'a ColorSpace)
+    ColorsInSpace(&'a [Color4f], &'a ColorSpace),
 }
 
 impl<'a> GradientShaderColors<'a> {
-
     pub fn len(&self) -> usize {
         match self {
             GradientShaderColors::Colors(colors) => colors.len(),
-            GradientShaderColors::ColorsInSpace(colors, _) => colors.len()
+            GradientShaderColors::ColorsInSpace(colors, _) => colors.len(),
         }
+    }
+
+    // clippy wants this
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 
