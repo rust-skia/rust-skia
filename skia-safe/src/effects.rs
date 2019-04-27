@@ -10,11 +10,11 @@ pub use self::discrete_path_effect::*;
 mod gradient_shader;
 pub use self::gradient_shader::*;
 
-mod path_effect_1d;
-pub use self::path_effect_1d::*;
+mod _1d_path_effect;
+pub use self::_1d_path_effect::*;
 
-mod path_effect_2d;
-pub use self::path_effect_2d::*;
+mod _2d_path_effect;
+pub use self::_2d_path_effect::*;
 
 mod perlin_noise_shader;
 pub use self::perlin_noise_shader::*;
