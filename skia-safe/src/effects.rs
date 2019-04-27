@@ -72,3 +72,6 @@ pub use self::table_color_filter::*;
 
 mod tile_image_filter;
 pub use self::tile_image_filter::*;
+
+mod xfer_mode_image_filter;
+pub use self::xfer_mode_image_filter::*;
