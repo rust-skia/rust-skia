@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::{scalar, ImageFilter, ImageFilterCropRect};
-use skia_bindings::{C_SkBlurImageFilter_Make, SkBlurImageFilter_TileMode};
+use skia_bindings::{C_SkBlurImageFilter_Make, SkBlurImageFilter_TileMode, SkImageFilter};
 
 pub enum BlurImageFilter {}
 
@@ -42,5 +42,20 @@ impl BlurImageFilter {
                     .into_native(),
             )
         })
+    }
+}
+
+impl RCHandle<SkImageFilter> {
+    pub fn blur<
+        'a,
+        CR: Into<Option<&'a ImageFilterCropRect>>,
+        TM: Into<Option<BlurImageFilterTileMode>>,
+    >(
+        &self,
+        crop_rect: CR,
+        sigma: (scalar, scalar),
+        tile_mode: TM,
+    ) -> Option<Self> {
+        BlurImageFilter::new(sigma, self, crop_rect, tile_mode)
     }
 }

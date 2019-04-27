@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::{scalar, ImageFilter, ImageFilterCropRect};
-use skia_bindings::C_SkOffsetImageFilter_Make;
+use skia_bindings::{C_SkOffsetImageFilter_Make, SkImageFilter};
 
 pub enum OffsetImageFilter {}
 
@@ -19,5 +19,15 @@ impl OffsetImageFilter {
                 crop_rect.into().native_ptr_or_null(),
             )
         })
+    }
+}
+
+impl RCHandle<SkImageFilter> {
+    pub fn offset<'a, CR: Into<Option<&'a ImageFilterCropRect>>>(
+        &self,
+        crop_rect: CR,
+        delta: (scalar, scalar),
+    ) -> Option<Self> {
+        OffsetImageFilter::new(delta, self, crop_rect)
     }
 }

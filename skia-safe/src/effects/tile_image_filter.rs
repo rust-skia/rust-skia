@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::{ImageFilter, Rect};
-use skia_bindings::C_SkTileImageFilter_Make;
+use skia_bindings::{C_SkTileImageFilter_Make, SkImageFilter};
 
 pub enum TileImageFilter {}
 
@@ -18,5 +18,11 @@ impl TileImageFilter {
                 input.shared_native(),
             )
         })
+    }
+}
+
+impl RCHandle<SkImageFilter> {
+    pub fn tile<SR: AsRef<Rect>, DR: AsRef<Rect>>(&self, src: SR, dst: DR) -> Option<Self> {
+        TileImageFilter::new(src, dst, self)
     }
 }

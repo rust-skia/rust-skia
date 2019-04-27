@@ -24,3 +24,12 @@ impl MergeImageFilter {
         })
     }
 }
+
+impl RCHandle<SkImageFilter> {
+    pub fn merge<'a, CR: Into<Option<&'a ImageFilterCropRect>>>(
+        filters: &[&Self],
+        crop_rect: CR,
+    ) -> Option<Self> {
+        MergeImageFilter::new(filters, crop_rect)
+    }
+}

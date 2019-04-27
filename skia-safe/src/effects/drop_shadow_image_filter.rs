@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use crate::{scalar, Color, ImageFilter, ImageFilterCropRect};
-use skia_bindings::{C_SkDropShadowImageFilter_Make, SkDropShadowImageFilter_ShadowMode};
+use skia_bindings::{
+    C_SkDropShadowImageFilter_Make, SkDropShadowImageFilter_ShadowMode, SkImageFilter,
+};
 
 pub enum DropShadowImageFilter {}
 
@@ -40,5 +42,18 @@ impl DropShadowImageFilter {
                 crop_rect.into().native_ptr_or_null(),
             )
         })
+    }
+}
+
+impl RCHandle<SkImageFilter> {
+    pub fn drop_shadow<'a, CR: Into<Option<&'a ImageFilterCropRect>>>(
+        &self,
+        crop_rect: CR,
+        delta: (scalar, scalar),
+        sigma: (scalar, scalar),
+        color: Color,
+        shadow_mode: DropShadowImageFilterShadowMode,
+    ) -> Option<Self> {
+        DropShadowImageFilter::new(delta, sigma, color, shadow_mode, self, crop_rect)
     }
 }

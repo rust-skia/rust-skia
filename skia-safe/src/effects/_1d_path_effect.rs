@@ -1,6 +1,6 @@
 use crate::core::{scalar, Path, PathEffect};
 use crate::prelude::*;
-use skia_bindings::{C_SkPath1DPathEffect_Make, SkPath1DPathEffect_Style};
+use skia_bindings::{C_SkPath1DPathEffect_Make, SkPath1DPathEffect_Style, SkPathEffect};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -29,5 +29,16 @@ impl Path1DPathEffect {
         PathEffect::from_ptr(unsafe {
             C_SkPath1DPathEffect_Make(path.native(), advance, phase, style.into_native())
         })
+    }
+}
+
+impl RCHandle<SkPathEffect> {
+    pub fn path_1d(
+        path: &Path,
+        advance: scalar,
+        phase: scalar,
+        style: Path1DPathEffectStyle,
+    ) -> Option<PathEffect> {
+        Path1DPathEffect::new(path, advance, phase, style)
     }
 }
