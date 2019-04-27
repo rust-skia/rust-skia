@@ -52,6 +52,9 @@ pub use self::matrix_convolution_image_filter::*;
 mod merge_image_filter;
 pub use self::merge_image_filter::*;
 
+mod morphology_image_filter;
+pub use self::morphology_image_filter::*;
+
 mod perlin_noise_shader;
 pub use self::perlin_noise_shader::*;
 
