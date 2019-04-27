@@ -40,6 +40,18 @@ pub use self::gradient_shader::*;
 mod image_source;
 pub use self::image_source::*;
 
+mod lighting_image_filter;
+pub use self::lighting_image_filter::*;
+
+mod magnifier_image_filter;
+pub use self::magnifier_image_filter::*;
+
+mod matrix_convolution_image_filter;
+pub use self::matrix_convolution_image_filter::*;
+
+mod merge_image_filter;
+pub use self::merge_image_filter::*;
+
 mod perlin_noise_shader;
 pub use self::perlin_noise_shader::*;
 
