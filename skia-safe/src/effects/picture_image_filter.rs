@@ -5,7 +5,7 @@ use skia_bindings::C_SkPictureImageFilter_Make;
 pub enum PictureImageFilter {}
 
 impl PictureImageFilter {
-    pub fn from_picture<'a, CR: Into<Option<&Rect>>>(
+    pub fn from_picture<'a, CR: Into<Option<&'a Rect>>>(
         picture: &Picture,
         crop_rect: CR,
     ) -> Option<ImageFilter> {

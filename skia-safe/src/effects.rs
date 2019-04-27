@@ -69,3 +69,6 @@ pub use self::perlin_noise_shader::*;
 
 mod table_color_filter;
 pub use self::table_color_filter::*;
+
+mod tile_image_filter;
+pub use self::tile_image_filter::*;
