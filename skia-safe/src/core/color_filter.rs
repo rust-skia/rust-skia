@@ -85,7 +85,7 @@ impl RCHandle<SkColorFilter> {
     }
 
     // TODO: not sure if we need the new_ prefix here.
-    pub fn new_linear_to_srgb_gamma() -> self {
+    pub fn new_linear_to_srgb_gamma() -> Self {
         ColorFilter::from_ptr(unsafe {
             C_SkColorFilter_MakeLinearToSRGBGamma()
         }).unwrap()
