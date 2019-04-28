@@ -1,12 +1,15 @@
-use skia_safe::{scalar, AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color, ColorFilter, Font, MaskFilter, Matrix, Paint, PaintStyle, Path, PathEffect, Point, Rect, Shader, ShaderTileMode, TextBlob, Typeface, ImageFilter};
+use crate::artifact::DrawingDriver;
+use crate::resources;
+use skia_safe::{
+    scalar, AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color, ColorFilter, Font, MaskFilter,
+    Matrix, Paint, PaintStyle, Path, PathEffect, Point, Rect, Shader, ShaderTileMode, TextBlob,
+    Typeface,
+};
 use skia_safe::{
     CornerPathEffect, DashPathEffect, DiscretePathEffect, GradientShader, Line2DPathEffect,
     Path1DPathEffect, Path1DPathEffectStyle, Path2DPathEffect, PerlinNoiseShader, TableColorFilter,
 };
 use std::path::PathBuf;
-
-use crate::artifact::DrawingDriver;
-use crate::resources;
 
 pub fn draw<Driver: DrawingDriver>(path: &PathBuf) {
     let path = &path.join("SkPaint-Overview");
