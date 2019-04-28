@@ -85,16 +85,16 @@ impl RCHandle<SkSurface> {
         })
     }
 
-    pub fn from_backend_texture(
+    pub fn from_backend_texture<SC: Into<Option<usize>>>(
         context: &mut Context,
         backend_texture: &BackendTexture,
         origin: SurfaceOrigin,
-        sample_count: Option<usize>,
+        sample_count: SC,
         color_type: ColorType,
         color_space: Option<&ColorSpace>,
         surface_props: Option<&SurfaceProps>
     ) -> Option<Self> {
-        let sample_count = sample_count.unwrap_or(0);
+        let sample_count = sample_count.into().unwrap_or(0);
         Self::from_ptr(unsafe {
             skia_bindings::C_SkSurface_MakeFromBackendTexture(
                 context.native_mut(),
@@ -127,16 +127,16 @@ impl RCHandle<SkSurface> {
         })
     }
 
-    pub fn from_backend_texture_as_render_target(
+    pub fn from_backend_texture_as_render_target<SC: Into<Option<usize>>>(
         context: &mut Context,
         backend_texture: &BackendTexture,
         origin: SurfaceOrigin,
-        sample_count: Option<usize>,
+        sample_count: SC,
         color_type: ColorType,
         color_space: Option<&ColorSpace>,
         surface_props: Option<&SurfaceProps>
     ) -> Option<Self> {
-        let sample_count = sample_count.unwrap_or(0);
+        let sample_count = sample_count.into().unwrap_or(0);
         Self::from_ptr(unsafe {
             skia_bindings::C_SkSurface_MakeFromBackendTextureAsRenderTarget(
                 context.native_mut(),
@@ -149,16 +149,16 @@ impl RCHandle<SkSurface> {
         })
     }
 
-    pub fn new_render_target(
+    pub fn new_render_target<SC: Into<Option<usize>>>(
         context: &mut Context,
         budgeted: Budgeted,
         image_info: &ImageInfo,
-        sample_count: Option<usize>,
+        sample_count: SC,
         surface_origin: SurfaceOrigin,
         surface_props: Option<&SurfaceProps>,
         should_create_with_mips: bool
     ) -> Option<Self> {
-        let sample_count = sample_count.unwrap_or(0);
+        let sample_count = sample_count.into().unwrap_or(0);
         Self::from_ptr(unsafe {
             skia_bindings::C_SkSurface_MakeRenderTarget(
                 context.native_mut(),

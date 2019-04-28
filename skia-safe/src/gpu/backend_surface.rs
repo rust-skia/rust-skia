@@ -198,27 +198,27 @@ impl NativeClone for GrBackendRenderTarget {
 }
 
 impl Handle<GrBackendRenderTarget> {
-    pub fn new_gl(
+    pub fn new_gl<SC: Into<Option<usize>>>(
         (width, height): (i32, i32),
-        sample_count: usize, stencil_bits: usize,
+        sample_count: SC, stencil_bits: usize,
         info: &gl::FramebufferInfo
     ) -> BackendRenderTarget {
         unsafe {
             GrBackendRenderTarget::new1(
                 width, height,
-                sample_count.try_into().unwrap(), stencil_bits.try_into().unwrap(),
+                sample_count.into().unwrap_or(0).try_into().unwrap(), stencil_bits.try_into().unwrap(),
                 info.native())
         }.into_handle()
     }
 
     #[cfg(feature="vulkan")]
-    pub fn new_vulkan(
+    pub fn new_vulkan<SC: Into<Option<usize>>>(
         (width, height) : (i32, i32),
-        sample_count: usize,
+        sample_count: SC,
         info: &vk::ImageInfo
     ) -> BackendRenderTarget {
         unsafe {
-            GrBackendRenderTarget::new3(width, height, sample_count.try_into().unwrap(), info.native())
+            GrBackendRenderTarget::new3(width, height, sample_count.into().unwrap_or(0).try_into().unwrap(), info.native())
         }.into_handle()
     }
 
