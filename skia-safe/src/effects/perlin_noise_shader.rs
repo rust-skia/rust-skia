@@ -74,7 +74,7 @@ impl RCHandle<SkShader> {
         seed: scalar,
         tile_size: TS,
     ) -> Option<Self> {
-        PerlinNoiseShader::turbulence(base_frequency, num, seed, tile_size)
+        PerlinNoiseShader::turbulence(base_frequency, num_octaves, seed, tile_size)
     }
 
     pub fn improved_perlin_noise(
