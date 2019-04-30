@@ -20,9 +20,8 @@ use skia_bindings::{
 pub struct Color(SkColor);
 
 impl NativeTransmutable<SkColor> for Color {}
-
 #[test]
-fn test_layout() {
+fn test_color_layout() {
     Color::test_layout();
 }
 
