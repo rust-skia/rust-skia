@@ -295,5 +295,5 @@ pub fn color_color4f_conversion() {
     let c = Color::from_argb(1, 2, 3, 4);
     let cf = Color4f::from(c);
     let c2 = cf.to_color();
-    assert!(c == c2);
+    assert_eq!(c, c2);
 }
