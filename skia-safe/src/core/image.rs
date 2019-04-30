@@ -409,14 +409,14 @@ impl RCHandle<SkImage> {
     pub fn new_texture_image(
         &self,
         context: &mut gpu::Context,
-        dst_color_space: &mut ColorSpace,
+        dst_color_space: &ColorSpace,
         mip_mapped: gpu::MipMapped) -> Option<Image> {
 
         Image::from_ptr(unsafe {
             C_SkImage_makeTextureImage(
                 self.native(),
                 context.native_mut(),
-                dst_color_space.native_mut(),
+                dst_color_space.native_mut_force(),
                 mip_mapped.native().to_owned())
         })
     }

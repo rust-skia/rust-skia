@@ -190,6 +190,9 @@ impl<Native, Base: NativeRefCounted> NativeRefCounted for Native
 pub trait NativeAccess<N> {
     fn native(&self) -> &N;
     fn native_mut(&mut self) -> &mut N;
+    unsafe fn native_mut_force(&self) -> &mut N {
+        &mut *(self.native() as *const N as *mut N)
+    }
 }
 
 /// Implements Drop for native types we can not implement Drop for.
