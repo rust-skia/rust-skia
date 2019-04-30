@@ -7,8 +7,17 @@ pub enum BlurStyle {
     Normal = SkBlurStyle::kNormal_SkBlurStyle as _,
     Solid = SkBlurStyle::kSolid_SkBlurStyle as _,
     Outer = SkBlurStyle::kOuter_SkBlurStyle as _,
-    Inner = SkBlurStyle::kInner_SkBlurStyle as _
+    Inner = SkBlurStyle::kInner_SkBlurStyle as _,
+}
+
+impl Default for BlurStyle {
+    fn default() -> Self {
+        BlurStyle::Normal
+    }
 }
 
 impl NativeTransmutable<SkBlurStyle> for BlurStyle {}
-#[test] fn test_blur_style_layout() { BlurStyle::test_layout() }
+#[test]
+fn test_blur_style_layout() {
+    BlurStyle::test_layout()
+}
