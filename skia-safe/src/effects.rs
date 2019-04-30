@@ -43,6 +43,9 @@ pub use self::gradient_shader::*;
 mod image_source;
 pub use self::image_source::*;
 
+mod layer_draw_looper;
+pub use self::layer_draw_looper::*;
+
 mod lighting_image_filter;
 pub use self::lighting_image_filter::*;
 

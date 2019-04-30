@@ -215,6 +215,7 @@ fn bindgen_gen(current_dir: &Path, skia_out_dir: &str) {
 
         .constified_enum(".*Mask")
         .constified_enum(".*Flags")
+        .constified_enum(".*Bits")
         .constified_enum("SkCanvas_SaveLayerFlagsSet")
         .constified_enum("GrVkAlloc_Flag")
         .constified_enum("GrGLBackendState")
@@ -254,6 +255,7 @@ fn bindgen_gen(current_dir: &Path, skia_out_dir: &str) {
         .whitelist_type("SkDashPathEffect")
         .whitelist_type("SkDiscretePathEffect")
         .whitelist_type("SkGradientShader")
+        .whitelist_type("SkLayerDrawLooper_Bits")
         .whitelist_type("SkPerlinNoiseShader")
         .whitelist_type("SkTableColorFilter")
 
