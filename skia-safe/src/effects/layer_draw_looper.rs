@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use crate::{BlendMode, DrawLooper, Vector};
 use skia_bindings::{
-    C_SkLayerDrawLooper_Builder_detach, SkLayerDrawLooper_Builder, SkLayerDrawLooper_LayerInfo,
-    SkPaint,
+    C_SkLayerDrawLooper_Builder_destruct, C_SkLayerDrawLooper_Builder_detach,
+    SkLayerDrawLooper_Builder, SkLayerDrawLooper_LayerInfo, SkPaint,
 };
 
 bitflags! {
@@ -40,7 +40,7 @@ pub type LayerDrawLooperBuilder = Handle<SkLayerDrawLooper_Builder>;
 
 impl NativeDrop for SkLayerDrawLooper_Builder {
     fn drop(&mut self) {
-        unsafe { SkLayerDrawLooper_Builder::destruct(self) }
+        unsafe { C_SkLayerDrawLooper_Builder_destruct(self) }
     }
 }
 
