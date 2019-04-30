@@ -6,6 +6,7 @@
 #include "SkColorFilter.h"
 #include "SkContourMeasure.h"
 #include "SkCubicMap.h"
+#include "SkDrawLooper.h"
 #include "SkDocument.h"
 #include "SkFont.h"
 #include "SkFontMetrics.h"
@@ -995,6 +996,15 @@ extern "C" void C_SkContourMeasureIter_destruct(SkContourMeasureIter* self) {
 
 extern "C" SkContourMeasure* C_SkContourMeasureIter_next(SkContourMeasureIter* self) {
     return self->next().release();
+}
+
+//
+// SkDrawLooper
+//
+
+
+extern "C" bool C_SkDrawLooper_asABlurShadow(const SkDrawLooper* self, SkDrawLooper::BlurShadowRec& br) {
+    return self->asABlurShadow(&br);
 }
 
 //
