@@ -10,6 +10,9 @@ pub use self::alpha_threshold_filter::*;
 mod arithmetic_image_filter;
 pub use self::arithmetic_image_filter::*;
 
+mod blur_draw_looper;
+pub use self::blur_draw_looper::*;
+
 mod blur_image_filter;
 pub use self::blur_image_filter::*;
 
