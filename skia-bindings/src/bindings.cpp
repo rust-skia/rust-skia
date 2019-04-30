@@ -1380,6 +1380,10 @@ C_SkImageSource_Make2(const SkImage &image, const SkRect &srcRect, const SkRect 
 // effects/SkLayerDrawLooper
 //
 
+extern "C" void C_SkLayerDrawLooper_Builder_destruct(SkLayerDrawLooper::Builder* self) {
+    self->~Builder();
+}
+
 extern "C" SkDrawLooper* C_SkLayerDrawLooper_Builder_detach(SkLayerDrawLooper::Builder* self) {
     return self->detach().release();
 }
