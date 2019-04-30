@@ -34,6 +34,7 @@
 #include "Sk2DPathEffect.h"
 #include "SkAlphaThresholdFilter.h"
 #include "SkArithmeticImageFilter.h"
+#include "SkBlurDrawLooper.h"
 #include "SkBlurImageFilter.h"
 #include "SkColorFilterImageFilter.h"
 #include "SkComposeImageFilter.h"
@@ -44,6 +45,7 @@
 #include "SkDropShadowImageFilter.h"
 #include "SkGradientShader.h"
 #include "SkImageSource.h"
+#include "SkLayerDrawLooper.h"
 #include "SkLightingImageFilter.h"
 #include "SkMagnifierImageFilter.h"
 #include "SkMatrixConvolutionImageFilter.h"
@@ -1271,7 +1273,20 @@ extern "C" SkImageFilter *C_SkArithmeticImageFilter_Make(float k1, float k2, flo
 }
 
 //
-// SkBlurImageFilter
+// effects/SkBlurDrawLooper
+//
+
+extern "C" SkDrawLooper* C_SkBlurDrawLooper_Make(SkColor color, SkScalar sigma, SkScalar dx, SkScalar dy) {
+    return SkBlurDrawLooper::Make(color, sigma, dx, dy).release();
+}
+
+// note: SkColorSpace's ref count should not be increased before passing it here.
+extern "C" SkDrawLooper* C_SkBlurDrawLooper_Make2(SkColor4f color, SkColorSpace* cs, SkScalar sigma, SkScalar dx, SkScalar dy) {
+    return SkBlurDrawLooper::Make(color, cs, sigma, dx, dy).release();
+}
+
+//
+// effects/SkBlurImageFilter
 //
 
 extern "C" SkImageFilter *C_SkBlurImageFilter_Make(SkScalar sigmaX, SkScalar sigmaY, const SkImageFilter &input,
@@ -1359,6 +1374,14 @@ extern "C" SkImageFilter *
 C_SkImageSource_Make2(const SkImage &image, const SkRect &srcRect, const SkRect &dstRect,
                       SkFilterQuality filterQuality) {
     return SkImageSource::Make(spFromConst(&image), srcRect, dstRect, filterQuality).release();
+}
+
+//
+// effects/SkLayerDrawLooper
+//
+
+extern "C" SkDrawLooper* C_SkLayerDrawLooper_Builder_detach(SkLayerDrawLooper::Builder* self) {
+    return self->detach().release();
 }
 
 //
