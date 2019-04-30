@@ -4,7 +4,7 @@
 
 Skia Submodule Status: chrome/m75 ([pending changes][skiapending]).
 
-[skiapending]: https://github.com/google/skia/compare/847d55be4e6273fc3cd9c0b30c7bfc8a2d6575b7...chrome/m75
+[skiapending]: https://github.com/google/skia/compare/68046cd7be837bd31bc8f0e821a2f82a02dda9cf...chrome/m75
 
 ## Goals
 
