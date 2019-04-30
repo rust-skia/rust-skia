@@ -193,6 +193,16 @@ impl HSV {
 pub struct Color4f { pub r: f32, pub g: f32, pub b: f32, pub a: f32 }
 
 impl NativeTransmutable<SkColor4f> for Color4f {}
+#[test]
+fn test_color4f_layout() {
+    Color4f::test_layout();
+}
+
+impl AsRef<Color4f> for Color4f {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
 
 impl Mul<f32> for Color4f {
     type Output = Color4f;
