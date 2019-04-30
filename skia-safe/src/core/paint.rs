@@ -144,12 +144,11 @@ impl Handle<SkPaint> {
         self
     }
 
-    // TODO: why is ColorSpace mutable?
-    pub fn set_color4f(&mut self, color: Color4f, color_space: &mut ColorSpace) -> &mut Self {
+    pub fn set_color4f<C: AsRef<Color4f>>(&mut self, color: C, color_space: &ColorSpace) -> &mut Self {
         unsafe {
             self.native_mut().setColor4f(
-                &color.into_native(),
-                color_space.native_mut() )
+                color.as_ref().native(),
+                color_space.native_mut_force() )
         }
         self
     }
