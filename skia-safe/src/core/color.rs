@@ -15,7 +15,7 @@ use skia_bindings::{
 
 // note: SkColor _is_ a u32, and therefore its components are
 // endian dependent, so we can't expose it as (transmuted) fields.
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Default, Debug)]
 #[repr(transparent)]
 pub struct Color(SkColor);
 
