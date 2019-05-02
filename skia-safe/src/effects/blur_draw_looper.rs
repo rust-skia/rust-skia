@@ -19,7 +19,8 @@ impl BlurDrawLooper {
         })
     }
 
-    // note: default of ColorSpace is set to SRGB if null here, but we don't support that.
+    // note: default of ColorSpace is set to SRGB if null here,
+    // but we don't want to support that and be explicit about the colorspace when a Color4f is provided.
     // TODO: is Color4f + &ColorSpace worth using pair?
     pub fn new_with_color_space<C: AsRef<Color4f>, IV: Into<Vector>>(
         color: C,
@@ -35,7 +36,7 @@ impl BlurDrawLooper {
             //       Can we ensure that the ref count is increased when it actually is needed?
             C_SkBlurDrawLooper_Make2(
                 color.as_ref().into_native(),
-                color_space.native_mut_force(),
+                color_space.native(),
                 sigma,
                 delta.x,
                 delta.y,
