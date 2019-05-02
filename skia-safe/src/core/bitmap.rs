@@ -48,7 +48,7 @@ impl NativeClone for SkBitmap {
 
 impl Handle<SkBitmap> {
     pub fn new() -> Self {
-        Self::construct(C_SkBitmap_Construct)
+        Self::construct_c(C_SkBitmap_Construct)
     }
 
     pub fn swap(&mut self, other: &mut Self) {

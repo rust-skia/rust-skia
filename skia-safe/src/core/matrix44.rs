@@ -83,11 +83,11 @@ impl Handle<SkMatrix44> {
     pub const COLUMNS : usize = 4;
 
     pub fn new() -> Self {
-        Self::construct(C_SkMatrix44_Construct)
+        Self::construct_c(C_SkMatrix44_Construct)
     }
 
     pub fn new_identity() -> Self {
-        Self::construct(C_SkMatrix44_ConstructIdentity)
+        Self::construct_c(C_SkMatrix44_ConstructIdentity)
     }
 
     pub fn get_type(&self) -> MatrixTypeMask {
