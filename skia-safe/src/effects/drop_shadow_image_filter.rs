@@ -22,15 +22,16 @@ fn test_shadow_mode_layout() {
 
 impl DropShadowImageFilter {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new<'a, IV: Into<Vector>, CR: Into<Option<&'a ImageFilterCropRect>>>(
+    pub fn new<'a, IV: Into<Vector>, IC: Into<Color>, CR: Into<Option<&'a ImageFilterCropRect>>>(
         delta: IV,
         (sigma_x, sigma_y): (scalar, scalar),
-        color: Color,
+        color: IC,
         shadow_mode: DropShadowImageFilterShadowMode,
         input: &ImageFilter,
         crop_rect: CR,
     ) -> Option<ImageFilter> {
         let delta = delta.into();
+        let color = color.into();
         ImageFilter::from_ptr(unsafe {
             C_SkDropShadowImageFilter_Make(
                 delta.x,
@@ -47,12 +48,12 @@ impl DropShadowImageFilter {
 }
 
 impl RCHandle<SkImageFilter> {
-    pub fn drop_shadow<'a, IV: Into<Vector>, CR: Into<Option<&'a ImageFilterCropRect>>>(
+    pub fn drop_shadow<'a, IV: Into<Vector>, IC: Into<Color>, CR: Into<Option<&'a ImageFilterCropRect>>>(
         &self,
         crop_rect: CR,
         delta: IV,
         sigma: (scalar, scalar),
-        color: Color,
+        color: IC,
         shadow_mode: DropShadowImageFilterShadowMode,
     ) -> Option<Self> {
         DropShadowImageFilter::new(delta, sigma, color, shadow_mode, self, crop_rect)
