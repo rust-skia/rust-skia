@@ -1281,8 +1281,8 @@ extern "C" SkDrawLooper* C_SkBlurDrawLooper_Make(SkColor color, SkScalar sigma, 
 }
 
 // note: SkColorSpace's ref count should not be increased before passing it here.
-extern "C" SkDrawLooper* C_SkBlurDrawLooper_Make2(SkColor4f color, SkColorSpace* cs, SkScalar sigma, SkScalar dx, SkScalar dy) {
-    return SkBlurDrawLooper::Make(color, cs, sigma, dx, dy).release();
+extern "C" SkDrawLooper* C_SkBlurDrawLooper_Make2(SkColor4f color, const SkColorSpace* cs, SkScalar sigma, SkScalar dx, SkScalar dy) {
+    return SkBlurDrawLooper::Make(color, const_cast<SkColorSpace*>(cs), sigma, dx, dy).release();
 }
 
 //
