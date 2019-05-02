@@ -10,7 +10,7 @@ pub enum PerlinNoiseShader {}
 impl PerlinNoiseShader {
     pub fn fractal_noise<TS: Into<Option<ISize>>>(
         base_frequency: (scalar, scalar),
-        num_octaves: i32,
+        num_octaves: usize,
         seed: scalar,
         tile_size: TS,
     ) -> Option<Shader> {
@@ -18,7 +18,7 @@ impl PerlinNoiseShader {
             C_SkPerlinNoiseShader_MakeFractalNoise(
                 base_frequency.0,
                 base_frequency.1,
-                num_octaves,
+                num_octaves.try_into().unwrap(),
                 seed,
                 tile_size.into().native().as_ptr_or_null(),
             )
@@ -27,7 +27,7 @@ impl PerlinNoiseShader {
 
     pub fn turbulence<TS: Into<Option<ISize>>>(
         base_frequency: (scalar, scalar),
-        num_octaves: i32,
+        num_octaves: usize,
         seed: scalar,
         tile_size: TS,
     ) -> Option<Shader> {
@@ -35,7 +35,7 @@ impl PerlinNoiseShader {
             C_SkPerlinNoiseShader_MakeTurbulence(
                 base_frequency.0,
                 base_frequency.1,
-                num_octaves,
+                num_octaves.try_into().unwrap(),
                 seed,
                 tile_size.into().native().as_ptr_or_null(),
             )
@@ -44,14 +44,14 @@ impl PerlinNoiseShader {
 
     pub fn improved_noise(
         base_frequency: (scalar, scalar),
-        num_octaves: i32,
+        num_octaves: usize,
         z: scalar,
     ) -> Option<Shader> {
         Shader::from_ptr(unsafe {
             C_SkPerlinNoiseShader_MakeImprovedNoise(
                 base_frequency.0,
                 base_frequency.1,
-                num_octaves,
+                num_octaves.try_into().unwrap(),
                 z,
             )
         })
@@ -61,7 +61,7 @@ impl PerlinNoiseShader {
 impl RCHandle<SkShader> {
     pub fn fractal_perlin_noise<TS: Into<Option<ISize>>>(
         base_frequency: (scalar, scalar),
-        num_octaves: i32,
+        num_octaves: usize,
         seed: scalar,
         tile_size: TS,
     ) -> Option<Self> {
@@ -70,7 +70,7 @@ impl RCHandle<SkShader> {
 
     pub fn turbulence_perlin_noise<TS: Into<Option<ISize>>>(
         base_frequency: (scalar, scalar),
-        num_octaves: i32,
+        num_octaves: usize,
         seed: scalar,
         tile_size: TS,
     ) -> Option<Self> {
@@ -79,7 +79,7 @@ impl RCHandle<SkShader> {
 
     pub fn improved_perlin_noise(
         base_frequency: (scalar, scalar),
-        num_octaves: i32,
+        num_octaves: usize,
         z: scalar,
     ) -> Option<Self> {
         PerlinNoiseShader::improved_noise(base_frequency, num_octaves, z)
