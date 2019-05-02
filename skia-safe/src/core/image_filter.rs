@@ -201,6 +201,8 @@ impl RCHandle<SkImageFilter> {
     pub fn as_a_color_filter(&self) -> Option<ColorFilter> {
         let mut filter_ptr: *mut SkColorFilter = ptr::null_mut();
         if unsafe { self.native().asAColorFilter(&mut filter_ptr) } {
+            // If set, filter_ptr is also "ref'd" here, so we don't
+            // need to increase the reference count.
             ColorFilter::from_ptr(filter_ptr)
         } else {
             None
