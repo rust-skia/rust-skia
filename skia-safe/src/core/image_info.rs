@@ -120,12 +120,7 @@ impl NativeClone for SkImageInfo {
 
 impl Default for Handle<SkImageInfo> {
     fn default() -> Self {
-        ImageInfo::from_native(unsafe {
-            let mut image_info : SkImageInfo = mem::uninitialized();
-            // note SkImageInfo::new() does not link under Linux.
-            C_SkImageInfo_Construct(&mut image_info);
-            image_info
-        })
+        Self::construct(C_SkImageInfo_Construct)
     }
 }
 

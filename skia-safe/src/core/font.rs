@@ -59,27 +59,15 @@ impl Default for Font {
 impl Handle<SkFont> {
 
     pub fn from_typeface(typeface: &Typeface) -> Self {
-        let mut font : SkFont = unsafe { mem::uninitialized() };
-        unsafe {
-            C_SkFont_ConstructFromTypeface(&mut font, typeface.shared_native())
-        }
-        font.into_handle()
+        Self::construct_with_closure(|font| unsafe { C_SkFont_ConstructFromTypeface(font, typeface.shared_native()) })
     }
 
     pub fn from_typeface_with_size(typeface: &Typeface, size: scalar) -> Self {
-        let mut font : SkFont = unsafe { mem::uninitialized() };
-        unsafe {
-            C_SkFont_ConstructFromTypefaceWithSize(&mut font, typeface.shared_native(), size)
-        }
-        font.into_handle()
+        Self::construct_with_closure(|font| unsafe { C_SkFont_ConstructFromTypefaceWithSize(font, typeface.shared_native(), size) })
     }
 
     pub fn from_typeface_with_size_scale_and_skew(typeface: &Typeface, size: scalar, scale: scalar, skew: scalar) -> Self {
-        let mut font : SkFont = unsafe { mem::uninitialized() };
-        unsafe {
-            C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(&mut font, typeface.shared_native(), size, scale, skew)
-        }
-        font.into_handle()
+        Self::construct_with_closure(|font| unsafe { C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(font, typeface.shared_native(), size, scale, skew) })
     }
 
     pub fn is_force_auto_hinting(&self) -> bool {

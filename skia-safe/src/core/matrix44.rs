@@ -83,19 +83,11 @@ impl Handle<SkMatrix44> {
     pub const COLUMNS : usize = 4;
 
     pub fn new() -> Self {
-        Matrix44::from_native(unsafe {
-            let mut matrix: SkMatrix44 = mem::uninitialized();
-            C_SkMatrix44_Construct(&mut matrix);
-            matrix
-        })
+        Self::construct(C_SkMatrix44_Construct)
     }
 
     pub fn new_identity() -> Self {
-        Matrix44::from_native(unsafe {
-            let mut matrix: SkMatrix44 = mem::uninitialized();
-            C_SkMatrix44_ConstructIdentity(&mut matrix);
-            matrix
-        })
+        Self::construct(C_SkMatrix44_ConstructIdentity)
     }
 
     pub fn get_type(&self) -> MatrixTypeMask {
