@@ -1,4 +1,3 @@
-use std::mem;
 use crate::prelude::*;
 use skia_bindings::{
     SkAlphaType,

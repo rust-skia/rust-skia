@@ -264,13 +264,13 @@ impl NativeDrop for SkVertices_Builder {
 
 impl Handle<SkVertices_Builder> {
     pub fn new(mode: VerticesVertexMode, vertex_count: usize, index_count: usize, flags: VerticesBuilderFlags) -> VerticesBuilder {
-        unsafe {
+        Self::from_native(unsafe {
             SkVertices_Builder::new(
                 mode.into_native(),
                 vertex_count.try_into().unwrap(),
                 index_count.try_into().unwrap(),
                 flags.bits())
-        }.into_handle()
+        })
     }
 
     pub fn is_valid(&self) -> bool {

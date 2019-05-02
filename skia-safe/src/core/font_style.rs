@@ -82,13 +82,12 @@ impl PartialEq for FontStyle {
 impl Default for FontStyle {
     fn default() -> Self {
         // does not link under Linux:
-        // unsafe { SkFontStyle::new1() }.into_handle()
+        // unsafe { SkFontStyle::new1() }
         FontStyle::from_native(unsafe {
             let mut font_style = mem::uninitialized();
             C_SkFontStyle_Construct(&mut font_style);
             font_style
         })
-
     }
 }
 

@@ -358,11 +358,10 @@ impl RCHandle<SkImage> {
         -> (gpu::BackendTexture, gpu::SurfaceOrigin) {
 
         let mut origin = gpu::SurfaceOrigin::TopLeft;
-        let texture = unsafe {
+        let texture = gpu::BackendTexture::from_native(unsafe {
             self.native()
                 .getBackendTexture(flush_pending_gr_context_io, origin.native_mut())
-                .into_handle()
-        };
+        });
         (texture, origin)
     }
 
