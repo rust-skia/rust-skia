@@ -56,8 +56,7 @@ impl NativeClone for SkStrokeRec {
 
 impl Handle<SkStrokeRec> {
     pub fn new(init_style: StrokeRecInitStyle) -> Self {
-        unsafe { SkStrokeRec::new(init_style.into_native() )}
-            .into_handle()
+        Self::from_native(unsafe { SkStrokeRec::new(init_style.into_native() )})
     }
 
     // for convenience
@@ -72,16 +71,12 @@ impl Handle<SkStrokeRec> {
 
     pub fn from_paint(paint: &Paint, style: Option<PaintStyle>, res_scale: Option<scalar>) -> Self {
         let res_scale = res_scale.unwrap_or(1.0);
-        match style {
+        Self::from_native(unsafe {match style {
             Some(style) => {
-                unsafe { SkStrokeRec::new1(paint.native(), style.into_native(), res_scale)}
-                    .into_handle()
+                SkStrokeRec::new1(paint.native(), style.into_native(), res_scale)
             },
-            None => {
-                unsafe { SkStrokeRec::new2(paint.native(), res_scale)}
-                    .into_handle()
-            }
-        }
+            None => SkStrokeRec::new2(paint.native(), res_scale)
+        }})
     }
 
     pub fn style(&self) -> StrokeRecStyle {

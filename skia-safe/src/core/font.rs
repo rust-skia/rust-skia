@@ -52,7 +52,7 @@ impl NativePartialEq for SkFont {
 
 impl Default for Font {
     fn default() -> Self {
-        unsafe { SkFont::new() }.into_handle()
+        Self::from_native(unsafe { SkFont::new() })
     }
 }
 
@@ -157,7 +157,7 @@ impl Handle<SkFont> {
         if size >= 0.0 && !size.is_infinite() && !size.is_nan() {
             let mut font = unsafe { SkFont::new() };
             unsafe { C_SkFont_makeWithSize(self.native(), size, &mut font) }
-            Some(font.into_handle())
+            Some(Self::from_native(font))
         } else {
             None
         }

@@ -222,17 +222,6 @@ pub trait FromNative<N> {
     fn from_native(native: N) -> Self;
 }
 
-pub trait IntoHandle<H> {
-    fn into_handle(self) -> H;
-}
-
-impl<H, N> IntoHandle<H> for N
-    where H: FromNative<N> {
-    fn into_handle(self) -> H {
-        H::from_native(self)
-    }
-}
-
 /// Wraps a native type that can be represented as a value
 /// and needs a Drop trait.
 #[repr(transparent)]

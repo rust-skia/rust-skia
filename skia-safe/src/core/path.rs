@@ -130,7 +130,7 @@ impl NativePartialEq for SkPath {
 
 impl Default for Handle<SkPath> {
     fn default() -> Self {
-        unsafe { SkPath::new() }.into_handle()
+        Self::from_native(unsafe { SkPath::new() })
     }
 }
 
