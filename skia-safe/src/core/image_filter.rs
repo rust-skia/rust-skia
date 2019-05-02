@@ -8,13 +8,11 @@ use skia_bindings::{
     SkImageFilter_TileUsage, SkRefCntBase,
 };
 use std::ptr;
-use std::marker::PhantomData;
 
 #[repr(C)]
 pub struct ImageFilterOutputProperties<'a> {
     color_type: ColorType,
-    color_space: *mut SkColorSpace,
-    phantom_data: PhantomData<&'a SkColorSpace>,
+    color_space: &'a SkColorSpace,
 }
 
 impl<'a> NativeTransmutable<SkImageFilter_OutputProperties> for ImageFilterOutputProperties<'a> {}
@@ -30,7 +28,7 @@ impl<'a> ImageFilterOutputProperties<'a> {
     }
 
     pub fn color_space(&self) -> Option<ColorSpace> {
-        ColorSpace::from_unshared_ptr(self.color_space)
+        ColorSpace::from_unshared_ptr(self.color_space as *const _ as *mut _)
     }
 }
 
