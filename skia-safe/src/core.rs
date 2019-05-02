@@ -63,7 +63,7 @@ pub use self::data::*;
 pub(crate) mod document;
 pub use self::document::*;
 
-pub(crate) mod draw_looper;
+mod draw_looper;
 pub use self::draw_looper::*;
 
 mod encoded_image_format;
