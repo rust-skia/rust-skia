@@ -3,6 +3,7 @@ mod core;
 mod docs;
 mod effects;
 mod interop;
+mod pathops;
 pub mod gpu;
 #[cfg(feature = "svg")]
 pub mod svg;
@@ -12,13 +13,14 @@ extern crate bitflags;
 #[macro_use]
 extern crate lazy_static;
 
-/// All core classes are accessible via skia_safe:: and core itself is hidden.
+/// All Sk* types are accessible via skia_safe::
 pub use crate::core::*;
 pub use crate::core::document::document;
 pub use crate::core::contour_measure::contour_measure;
 pub use crate::core::path_measure::path_measure;
 pub use crate::docs::*;
 pub use crate::effects::*;
+pub use crate::pathops::*;
 
 #[cfg(test)]
 mod transmutation_tests {

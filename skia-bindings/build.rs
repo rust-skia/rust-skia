@@ -265,6 +265,14 @@ fn bindgen_gen(current_dir: &Path, skia_out_dir: &str) {
         .whitelist_type("GrVkExtensionFlags")
         .whitelist_type("GrVkFeatureFlags")
 
+        // pathops/
+        .whitelist_type("SkPathOp")
+        .whitelist_function("Op")
+        .whitelist_function("Simplify")
+        .whitelist_function("TightBounds")
+        .whitelist_function("AsWinding")
+        .whitelist_type("SkOpBuilder")
+
         .whitelist_var("SK_Color.*")
         .whitelist_var("kAll_GrBackendState")
 
