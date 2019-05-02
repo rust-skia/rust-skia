@@ -62,7 +62,8 @@
 #include "GrContext.h"
 // gpu/gl
 #include "gl/GrGLInterface.h"
-#include "SkRect.h"
+// pathops/
+#include "SkPathOps.h"
 
 #if defined(SK_VULKAN)
 #include "vk/GrVkVulkan.h"
@@ -1639,6 +1640,18 @@ extern "C" GrContext* C_GrContext_MakeGL(const GrGLInterface* interface) {
 
 extern "C" bool C_GrContext_colorTypeSupportedAsSurface(const GrContext* self, SkColorType colorType) {
     return self->colorTypeSupportedAsSurface(colorType);
+}
+
+//
+// pathops/
+//
+
+extern "C" void C_SkOpBuilder_Construct(SkOpBuilder* uninitialized) {
+    new(uninitialized) SkOpBuilder();
+}
+
+extern "C" void C_SkOpBuilder_destruct(SkOpBuilder* self) {
+    self->~SkOpBuilder();
 }
 
 #if defined(SK_VULKAN)
