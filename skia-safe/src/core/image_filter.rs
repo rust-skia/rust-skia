@@ -235,7 +235,7 @@ impl RCHandle<SkImageFilter> {
         unsafe { self.native().canComputeFastBounds() }
     }
 
-    pub fn with_local_matrix(&self, matrix: &Matrix) -> Option<ImageFilter> {
+    pub fn new_with_local_matrix(&self, matrix: &Matrix) -> Option<ImageFilter> {
         ImageFilter::from_ptr(unsafe {
             C_SkImageFilter_makeWithLocalMatrix(self.native(), matrix.native())
         })
@@ -245,17 +245,16 @@ impl RCHandle<SkImageFilter> {
         unsafe { self.native().canHandleComplexCTM() }
     }
 
-    // TODO: rename from_matrix?
-    pub fn new_matrix_filter(
+    pub fn with_matrix(
+        &self,
         matrix: &Matrix,
         quality: FilterQuality,
-        input: &ImageFilter,
     ) -> ImageFilter {
         ImageFilter::from_ptr(unsafe {
             C_SkImageFilter_MakeMatrixFilter(
                 matrix.native(),
                 quality.into_native(),
-                input.shared_native(),
+                self.shared_native(),
             )
         })
         .unwrap()
