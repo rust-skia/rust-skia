@@ -19,7 +19,7 @@ impl NativeDrop for SkDynamicMemoryWStream {
 
 impl Handle<SkDynamicMemoryWStream> {
     pub fn new() -> Self {
-        Self::construct(C_SkDynamicMemoryWStream_Construct)
+        Self::construct_c(C_SkDynamicMemoryWStream_Construct)
     }
 
     pub fn detach_as_data(&mut self) -> Data {

@@ -59,15 +59,15 @@ impl Default for Font {
 impl Handle<SkFont> {
 
     pub fn from_typeface(typeface: &Typeface) -> Self {
-        Self::construct_with_closure(|font| unsafe { C_SkFont_ConstructFromTypeface(font, typeface.shared_native()) })
+        Self::construct(|font| unsafe { C_SkFont_ConstructFromTypeface(font, typeface.shared_native()) })
     }
 
     pub fn from_typeface_with_size(typeface: &Typeface, size: scalar) -> Self {
-        Self::construct_with_closure(|font| unsafe { C_SkFont_ConstructFromTypefaceWithSize(font, typeface.shared_native(), size) })
+        Self::construct(|font| unsafe { C_SkFont_ConstructFromTypefaceWithSize(font, typeface.shared_native(), size) })
     }
 
     pub fn from_typeface_with_size_scale_and_skew(typeface: &Typeface, size: scalar, scale: scalar, skew: scalar) -> Self {
-        Self::construct_with_closure(|font| unsafe { C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(font, typeface.shared_native(), size, scale, skew) })
+        Self::construct(|font| unsafe { C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(font, typeface.shared_native(), size, scale, skew) })
     }
 
     pub fn is_force_auto_hinting(&self) -> bool {

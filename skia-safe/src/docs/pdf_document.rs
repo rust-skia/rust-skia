@@ -77,7 +77,7 @@ pub mod pdf {
 
     impl Default for Handle<SkPDF_Metadata> {
         fn default() -> Self {
-            Self::construct(C_SkPDF_Metadata_Construct)
+            Self::construct_c(C_SkPDF_Metadata_Construct)
         }
     }
 

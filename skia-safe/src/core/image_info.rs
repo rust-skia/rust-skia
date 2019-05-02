@@ -119,7 +119,7 @@ impl NativeClone for SkImageInfo {
 
 impl Default for Handle<SkImageInfo> {
     fn default() -> Self {
-        Self::construct(C_SkImageInfo_Construct)
+        Self::construct_c(C_SkImageInfo_Construct)
     }
 }
 

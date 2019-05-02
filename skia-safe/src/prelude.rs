@@ -243,15 +243,11 @@ impl<N: NativeDrop> Handle<N> {
     /// Constructs a C++ object in place by calling an
     /// extern "C" function that expects a pointer that points to
     /// zeroed memory of the native type.
-    pub(crate) fn construct(construct: unsafe extern "C" fn(*mut N) -> ()) -> Self {
-        unsafe {
-            let mut instance = mem::zeroed();
-            construct(&mut instance);
-            Self::from_native(instance)
-        }
+    pub(crate) fn construct_c(construct: unsafe extern "C" fn(*mut N) -> ()) -> Self {
+        Self::construct(|instance| unsafe { construct(instance) })
     }
 
-    pub(crate) fn construct_with_closure<F: Fn(&mut N) -> ()>(construct: F) -> Self {
+    pub(crate) fn construct<F: FnOnce(&mut N) -> ()>(construct: F) -> Self {
         unsafe {
             let mut instance = mem::zeroed();
             construct(&mut instance);
