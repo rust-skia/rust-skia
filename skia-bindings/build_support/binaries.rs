@@ -1,9 +1,9 @@
-//! Support for building and deploying prebuilt binaries that are dependent on various factors.
+//! Support for building and deploying prebuilt binaries.
 
 use crate::build_support::{cargo, git};
 
 /// Key generation function. The resulting string will uniquely identify the generated binaries.
-/// Parts of the key are separated by '-', every part that contains individual separators is enclosed
+/// Parts of the key are separated by '-' and every part that contains individual separators is enclosed
 /// in '[]'.
 fn key(features: &[&str]) -> String {
     let mut components = Vec::new();
