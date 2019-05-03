@@ -72,6 +72,7 @@ pub fn target() -> Target {
 
 // We can not assume that the build profile of the build.rs script reflects the build
 // profile that the target needs.
+#[allow(dead_code)]
 pub fn build_release() -> bool {
     match env::var("PROFILE").unwrap().as_str() {
         "release" => true,

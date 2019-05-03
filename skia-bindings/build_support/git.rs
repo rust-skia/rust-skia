@@ -3,7 +3,7 @@
 use std::process::{Command, Stdio};
 
 /// Returns the has of the repository located in the current directory.
-pub fn hash_short() -> String {
+pub fn hash_short() -> Option<String> {
     let output = Command::new("git")
         .arg("rev-parse")
         .arg("--short")
@@ -11,16 +11,17 @@ pub fn hash_short() -> String {
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .output()
-        .expect("git failed");
+        .ok()?;
 
     if output.status.code() != Some(0) {
-        panic!("git rev-parse failed");
+        None
     } else {
-        String::from_utf8(output.stdout).unwrap()
+        Some(String::from_utf8(output.stdout).unwrap())
     }
 }
 
 /// Returns the current branch of the repository.
+#[allow(dead_code)]
 pub fn branch() -> String {
     let output = Command::new("git")
         .arg("rev-parse")
