@@ -1,7 +1,12 @@
 //! Support function for communicating with cargo's variables and outputs.
 
 use std::fmt::{Display, Formatter};
-use std::{env, fmt};
+use std::{env, fmt, fs, io};
+use std::path::PathBuf;
+
+pub fn output_directory() -> PathBuf {
+    PathBuf::from(env::var("OUT_DIR").unwrap())
+}
 
 pub fn add_dependent_path(path: &str) {
     println!("cargo:rerun-if-changed={}", path);
@@ -79,4 +84,14 @@ pub fn build_release() -> bool {
         "debug" => false,
         _ => panic!("PROFILE '{}' is not supported by this build script",),
     }
+}
+
+// If we are builing from within a packaged crate, return the hash of the
+// original repository we were packaged from.
+pub fn package_repository_hash() -> io::Result<String> {
+    let vcs_info = fs::read_to_string(".cargo_vcs_info.json")?;
+    let value: serde_json::Value = serde_json::from_str(&vcs_info)?;
+    let git = value.get("git").expect("failed to get 'git' property");
+    let sha1 = git.get("sha1").expect("failed to get 'sha1' property");
+    Ok(sha1.as_str().unwrap().into())
 }

@@ -9,6 +9,8 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 const BINDINGS_LIB_NAME: &str = "skia-bindings";
+const REPOSITORY_CLONE_URL: &str = "https://github.com/rust-skia/rust-skia.git";
+const REPOSITORY_DIRECTORY: &str = "rust-skia";
 
 mod build {
     /// Do we build _on_ a Windows OS?
@@ -91,7 +93,7 @@ impl Configuration {
             _ => panic!("unsupported target: {:?}", cargo::target()),
         };
 
-        let output_directory = PathBuf::from(env::var("OUT_DIR").unwrap())
+        let output_directory = cargo::output_directory()
             .join("skia")
             .to_str()
             .unwrap()
@@ -122,17 +124,7 @@ impl Configuration {
 /// Returns the output directory of the libraries.
 pub fn build(config: &Configuration) {
     prerequisites::require_python();
-
-    assert!(
-        Command::new("git")
-            .args(&["submodule", "update", "--init", "--depth", "1"])
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .status()
-            .unwrap()
-            .success(),
-        "`git submodule update` failed"
-    );
+    prerequisites::get_skia();
 
     assert!(
         Command::new("python")
@@ -405,6 +397,10 @@ fn bindgen_gen(current_dir: &Path, output_directory: &str) {
 }
 
 mod prerequisites {
+    use crate::build_support::{cargo, git};
+    use crate::build_support::skia::{REPOSITORY_CLONE_URL, REPOSITORY_DIRECTORY};
+    use std::fs;
+    use std::path::PathBuf;
     use std::process::{Command, Stdio};
 
     pub fn require_python() {
@@ -414,5 +410,97 @@ mod prerequisites {
             .stderr(Stdio::inherit())
             .status()
             .expect(">>>>> Please install python to build this crate. <<<<<");
+    }
+
+    /// Get the skia git repository, either be checkout out the submodule, or
+    /// when the build.rs was called outside of the git repository,
+    /// by checking out the original repository in a temporary directory and
+    /// moving it over.
+    pub fn get_skia() {
+        match cargo::package_repository_hash() {
+            Ok(hash) => {
+                // we are in a package.
+                resolve_skia_and_depot_tools_from_repo(&hash);
+            }
+            Err(_) => {
+                // we are not in a package, assuming we are in our git repo.
+                // so just update all submodules.
+                assert!(
+                    Command::new("git")
+                        .args(&["submodule", "update", "--init", "--depth", "1"])
+                        .stdout(Stdio::inherit())
+                        .stderr(Stdio::inherit())
+                        .status()
+                        .unwrap()
+                        .success(),
+                    "`git submodule update` failed"
+                );
+            }
+        }
+    }
+
+    /// Extracts the submodules skia and depot_tools from the origin
+    /// repository we were built with and moves them to the root directory of the crate.
+    fn resolve_skia_and_depot_tools_from_repo(hash: &str) {
+        let skia_dir = PathBuf::from("skia");
+        let depot_tools_dir = PathBuf::from("depot_tools");
+
+        // if these directories already exist, we do nothing here and assume
+        // that everyhing is in place for the build.
+        if skia_dir.is_dir() && depot_tools_dir.is_dir() {
+            return;
+        }
+
+        let clone_url = REPOSITORY_CLONE_URL;
+
+        let output_directory = cargo::output_directory();
+        let repo_dir = &output_directory.join(REPOSITORY_DIRECTORY);
+
+        fs::remove_dir_all(repo_dir);
+
+        let exit_status = Command::new("git")
+            .args(&["clone", clone_url])
+            .current_dir(&output_directory)
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .status()
+            .expect("failed start git, is it missing or not in the PATH?");
+
+        if !exit_status.success() {
+            panic!("failed to clone repository: {}", clone_url);
+        }
+
+        let exit_status = Command::new("git")
+            .current_dir(repo_dir)
+            .args(&["checkout", hash])
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .status()
+            .expect("failed start git, is it missing or not in the PATH?");
+
+        if !exit_status.success() {
+            panic!(
+                "failed to checkout repository: {}, commit: {}",
+                repo_dir.to_str().unwrap(),
+                hash
+            );
+        }
+
+        git::run(&["submodule", "update", "--init", "--depth", "1"], repo_dir.as_path());
+
+        if !exit_status.success() {
+            panic!(
+                "failed to init and update submodules in {}",
+                repo_dir.to_str().unwrap()
+            );
+        }
+
+        let skia_bindings_dir = repo_dir.join("skia-bindings");
+
+        // now move the submodules over.
+        fs::rename(skia_bindings_dir.join("depot_tools"), depot_tools_dir)
+            .expect("failed to move depot_tools directory");
+        fs::rename(skia_bindings_dir.join("skia"), skia_dir)
+            .expect("failed to move skia directory");
     }
 }

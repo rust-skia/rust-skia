@@ -4,6 +4,7 @@ use crate::build_support::{binaries, git};
 use build_support::skia;
 use std::path::Path;
 use std::{fs, io};
+use crate::build_support::git::HashLength;
 
 const SRC_BINDINGS_RS: &str = "src/bindings.rs";
 
@@ -50,9 +51,12 @@ fn main() {
 
         let branch = git::branch();
         // TODO: remove prebuilt-binaries branch!
+        println!("branch: {}", branch);
         if branch == "master" || branch == "prebuilt-binaries" {
+            println!("COPYING BINARIES");
             azure::copy_binaries(&config, &staging_directory).expect("COPYING BINARIES FAILED")
         } else {
+            println!("BRANCH NOT AUTHORIZED to deploy binaries, preparing empty binaries");
             azure::prepare_binaries(None, &staging_directory)
                 .expect("PREPARING EMPTY BINARIES FAILED");
         }
@@ -64,8 +68,8 @@ fn should_try_download_binaries(config: &Configuration) -> Option<String> {
     // currently we download binaries only on azure:
     if azure::is_active() {
         // and if we can resolve the hash and the key
-        let hash_short = git::hash_short()?;
-        Some(binaries::key(&hash_short, &config.features))
+        let hash = git::hash(HashLength::Half)?;
+        Some(binaries::key(&hash, &config.features))
     } else {
         None
     }
@@ -88,6 +92,7 @@ mod azure {
     use std::io::Write;
     use std::path::{Path, PathBuf};
     use std::{env, fs, io};
+    use crate::build_support::git::HashLength;
 
     pub fn is_active() -> bool {
         artifact_staging_directory().is_some()
@@ -100,8 +105,8 @@ mod azure {
     }
 
     pub fn copy_binaries(config: &Configuration, artifacts: &Path) -> io::Result<()> {
-        let hash_short = git::hash_short().expect("failed to retrieve the git short hash");
-        let key = binaries::key(&hash_short, &config.features);
+        let hash = git::hash(HashLength::Half).expect("failed to retrieve the git hash");
+        let key = binaries::key(&hash, &config.features);
 
         let binaries = prepare_binaries(Some(&key), artifacts)?;
 
