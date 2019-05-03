@@ -107,7 +107,7 @@ mod azure {
 
         fs::copy(SRC_BINDINGS_RS, binaries.join("bindings.rs"))?;
 
-        let libraries = &config.link_libraries;
+        let output_directory = &config.output_directory;
 
         let target_is_windows = cargo::target().system == "windows";
         let (skia_lib, skia_bindings_lib) = if target_is_windows {
@@ -116,9 +116,9 @@ mod azure {
             ("libskia.a", "libskia-bindings.a")
         };
 
-        fs::copy(libraries.join(skia_lib), binaries.join(skia_lib))?;
+        fs::copy(output_directory.join(skia_lib), binaries.join(skia_lib))?;
         fs::copy(
-            libraries.join(skia_bindings_lib),
+            output_directory.join(skia_bindings_lib),
             binaries.join(skia_bindings_lib),
         )?;
 
