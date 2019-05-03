@@ -1,5 +1,12 @@
 [package]
 name = "skia-bindings"
+
+description = "Safe Skia Bindings for Rust"
+keywords = ["skia", "rust-bindings", "vulkan", "opengl", "pdf", "svg"]
+homepage = "https://github.com/rust-skia/rust-skia"
+repository = "https://github.com/rust-skia/rust-skia"
+license = "MIT"
+
 version = "0.5.0"
 authors = ["LongYinan <lynweklm@gmail.com>", "Armin Sander <armin@replicator.org>"]
 edition = "2018"
