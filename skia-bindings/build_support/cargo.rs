@@ -17,10 +17,10 @@ pub fn add_link_lib(lib: &str) {
 
 #[derive(Clone, Debug)]
 pub struct Target {
-    architecture: String,
-    vendor: String,
-    system: String,
-    abi: Option<String>,
+    pub architecture: String,
+    pub vendor: String,
+    pub system: String,
+    pub abi: Option<String>,
 }
 
 impl Target {

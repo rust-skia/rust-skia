@@ -39,9 +39,12 @@ mod build {
 }
 
 pub struct Configuration {
-    /// The output directory of the libraries we build and we need to inform carg about.
-    pub output_directory: PathBuf,
+    /// The features we build with.
+    pub features: Vec<String>,
 
+    /// The output directory of the libraries we build and we need to inform cargo about.
+    pub output_directory: PathBuf,
+    
     /// The TARGET specific link libraries we need to inform cargo about.
     pub link_libraries: Vec<String>,
 
@@ -55,8 +58,15 @@ impl Configuration {
     /// Build a configuration based on the current environment cargo supplies us with.
     pub fn from_cargo_env() -> Self {
 
-        let mut build_all_skia_libs : bool = false;
+        let mut features = Vec::new();
+        if build::VULKAN {
+            features.push("vulkan");
+        }
+        if build::SVG {
+            features.push("svg")
+        }
 
+        let mut build_all_skia_libs : bool = false;
         let mut link_libraries = Vec::new();
 
         match cargo::target().as_str() {
@@ -85,6 +95,7 @@ impl Configuration {
                 .to_str().unwrap().into();
 
         Configuration {
+            features: features.iter().map(|f| f.to_string()).collect(),
             output_directory,
             link_libraries: link_libraries.iter().map(|lib| lib.to_string()).collect(),
             build_all_skia_libs
