@@ -119,14 +119,7 @@ pub fn build(config: &Configuration) {
     prerequisites::require_python();
 
     assert!(Command::new("git")
-                .arg("submodule")
-                .arg("init")
-                .stdout(Stdio::inherit())
-                .stderr(Stdio::inherit())
-                .status().unwrap().success(), "`git submodule init` failed");
-
-    assert!(Command::new("git")
-                .args(&["submodule", "update", "--depth", "1"])
+                .args(&["submodule", "update", "--init", "--depth", "1"])
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit())
                 .status().unwrap().success(), "`git submodule update` failed");
