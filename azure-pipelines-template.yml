@@ -60,6 +60,7 @@ jobs:
     displayName: Print versions
 
   # Note: features are ignored when set in the workspace. This is a known bug in cargo (#5015), so cd into skia-safe instead.
+  # Note: SKIA_BINARIES_KEY is set to empty ('') when the build script decides not to publish.
   - bash: |
       RUST_BACKTRACE=1 cd skia-safe && cargo build --release --features "$(features)" --all-targets -vv
       export SKIA_BINARIES_KEY=$(cat $(Build.ArtifactStagingDirectory)/skia-binaries/key.txt)
@@ -79,8 +80,8 @@ jobs:
       artifactName: 'skia-org-examples-$(platform)-$(toolchain)'
     condition: ne(variables['exampleArgs'], '')
 
-  # TODO: do this only for certain branches?
   - task: ArchiveFiles@2
+    condition: ne(variables['SKIA_BINARIES_KEY'], '')
     displayName: 'Archive binaries'
     inputs:
       rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/skia-binaries'
@@ -89,6 +90,7 @@ jobs:
       archiveFile: '$(Build.ArtifactStagingDirectory)/skia-binaries-$(SKIA_BINARIES_KEY).tar.gz'
 
   - task: GithubRelease@0
+    condition: ne(variables['SKIA_BINARIES_KEY'], '')
     displayName: 'Release to GitHub rust-skia/skia-binaries'
     inputs:
       action: edit

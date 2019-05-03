@@ -10,6 +10,10 @@ const SRC_BINDINGS_RS: &str = "src/bindings.rs";
 fn main() {
     let config = skia::Configuration::from_cargo_env();
 
+    //
+    // download of prebuilt binaries possible?
+    //
+
     let mut do_full_build = true;
 
     if let Some(key) = should_try_download_binaries(&config) {
@@ -21,12 +25,20 @@ fn main() {
         }
     }
 
+    //
+    // full build?
+    //
+
     if do_full_build {
         println!("STARTING A FULL BUILD");
         skia::build(&config);
     }
 
     config.commit_to_cargo();
+
+    //
+    // publish binaries?
+    //
 
     // TODO: we may not want to deliver binaries when we did a full build
     //       but how to inform azure if we don't want to?
@@ -35,7 +47,15 @@ fn main() {
             "DETECTED AZURE, delivering binaries to {}",
             staging_directory.to_str().unwrap()
         );
-        azure::copy_binaries(&config, &staging_directory).expect("COPYING BINARIES FAILED")
+
+        let branch = git::branch();
+        // TODO: remove prebuilt-binaries branch!
+        if branch == "master" || branch == "prebuilt-binaries" {
+            azure::copy_binaries(&config, &staging_directory).expect("COPYING BINARIES FAILED")
+        } else {
+            azure::prepare_binaries(None, &staging_directory)
+                .expect("PREPARING EMPTY BINARIES FAILED");
+        }
     }
 }
 
@@ -83,15 +103,7 @@ mod azure {
         let hash_short = git::hash_short().expect("failed to retrieve the git short hash");
         let key = binaries::key(&hash_short, &config.features);
 
-        let binaries = artifacts.join("skia-binaries");
-        fs::create_dir_all(&binaries)?;
-
-        {
-            // this is primarily for azure to know the key, but it can stay inside the
-            // archive.
-            let mut key_file = File::create(binaries.join("key.txt")).unwrap();
-            key_file.write_all(key.as_bytes())?;
-        }
+        let binaries = prepare_binaries(Some(&key), artifacts)?;
 
         fs::copy(SRC_BINDINGS_RS, binaries.join("bindings.rs"))?;
 
@@ -111,5 +123,24 @@ mod azure {
         )?;
 
         Ok(())
+    }
+
+    /// Prepares the binaries directory and sets the key.txt file to the key given.
+    /// If no key is available, creates an empty key.txt file to inform azure
+    /// that binaries should not be published.
+    pub fn prepare_binaries(key: Option<&str>, artifacts: &Path) -> io::Result<PathBuf> {
+        let binaries = artifacts.join("skia-binaries");
+        fs::create_dir_all(&binaries)?;
+
+        {
+            // this is primarily for azure to know the key, but it can stay inside the
+            // archive.
+            let mut key_file = File::create(binaries.join("key.txt")).unwrap();
+            if let Some(key) = key {
+                key_file.write_all(key.as_bytes())?;
+            }
+        }
+
+        Ok(binaries)
     }
 }

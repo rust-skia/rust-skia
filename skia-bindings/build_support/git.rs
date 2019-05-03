@@ -21,7 +21,6 @@ pub fn hash_short() -> Option<String> {
 }
 
 /// Returns the current branch of the repository.
-#[allow(dead_code)]
 pub fn branch() -> String {
     let output = Command::new("git")
         .arg("rev-parse")
