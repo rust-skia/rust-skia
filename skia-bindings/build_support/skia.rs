@@ -1,14 +1,14 @@
 //! Full build support for the Skia library, SkiaBindings library and bindings.rs file.
 
-use std::env;
-use std::fs;
-use std::path::{PathBuf, Path};
-use std::process::{Command, Stdio};
+use crate::build_support::cargo;
 use bindgen::EnumVariation;
 use cc::Build;
-use crate::build_support::cargo;
+use std::env;
+use std::fs;
+use std::path::{Path, PathBuf};
+use std::process::{Command, Stdio};
 
-const BINDINGS_LIB_NAME : &str = "skia-bindings";
+const BINDINGS_LIB_NAME: &str = "skia-bindings";
 
 mod build {
     /// Do we build _on_ a Windows OS?
@@ -44,20 +44,18 @@ pub struct Configuration {
 
     /// The output directory of the libraries we build and we need to inform cargo about.
     pub output_directory: PathBuf,
-    
+
     /// The TARGET specific link libraries we need to inform cargo about.
     pub link_libraries: Vec<String>,
 
     // TODO: this can be resolved in build() and is not relevant for prebuilt binaries.
     /// Build _all_ skia libraries just to avoid build script errors.
-    pub build_all_skia_libs: bool
+    pub build_all_skia_libs: bool,
 }
 
 impl Configuration {
-
     /// Build a configuration based on the current environment cargo supplies us with.
     pub fn from_cargo_env() -> Self {
-
         let mut features = Vec::new();
         if build::VULKAN {
             features.push("vulkan");
@@ -66,39 +64,44 @@ impl Configuration {
             features.push("svg")
         }
 
-        let mut build_all_skia_libs : bool = false;
+        let mut build_all_skia_libs: bool = false;
         let mut link_libraries = Vec::new();
 
         match cargo::target().as_str() {
             (_, "unknown", "linux", Some("gnu")) => {
                 link_libraries.extend(vec!["stdc++", "bz2", "GL", "fontconfig", "freetype"]);
-            },
+            }
             (_, "apple", "darwin", _) => {
-                link_libraries.extend(vec!["c++", "framework=OpenGL", "framework=ApplicationServices"]);
+                link_libraries.extend(vec![
+                    "c++",
+                    "framework=OpenGL",
+                    "framework=ApplicationServices",
+                ]);
                 // m74: if we don't build the particles or the skottie library on macOS, the build fails with
                 // for example:
                 // [763/867] link libparticles.a
                 // FAILED: libparticles.a
                 build_all_skia_libs = true;
-            },
-            (_, _, "windows", Some("msvc")) => {
-                link_libraries.extend(vec!["usp10", "ole32", "user32", "gdi32", "fontsub", "opengl32"]);
-            },
-            _ => {
-                panic!("unsupported target: {:?}", cargo::target())
             }
+            (_, _, "windows", Some("msvc")) => {
+                link_libraries.extend(vec![
+                    "usp10", "ole32", "user32", "gdi32", "fontsub", "opengl32",
+                ]);
+            }
+            _ => panic!("unsupported target: {:?}", cargo::target()),
         };
 
-        let output_directory =
-            PathBuf::from(env::var("OUT_DIR").unwrap())
-                .join("skia")
-                .to_str().unwrap().into();
+        let output_directory = PathBuf::from(env::var("OUT_DIR").unwrap())
+            .join("skia")
+            .to_str()
+            .unwrap()
+            .into();
 
         Configuration {
             features: features.iter().map(|f| f.to_string()).collect(),
             output_directory,
             link_libraries: link_libraries.iter().map(|lib| lib.to_string()).collect(),
-            build_all_skia_libs
+            build_all_skia_libs,
         }
     }
 
@@ -106,7 +109,10 @@ impl Configuration {
     /// can be used as dependencies.
     pub fn commit_to_cargo(&self) {
         cargo::add_link_libs(&self.link_libraries);
-        println!("cargo:rustc-link-search={}", self.output_directory.to_str().unwrap());
+        println!(
+            "cargo:rustc-link-search={}",
+            self.output_directory.to_str().unwrap()
+        );
         cargo::add_link_lib("static=skia");
         cargo::add_link_lib(&format!("static={}", BINDINGS_LIB_NAME));
     }
@@ -115,31 +121,49 @@ impl Configuration {
 /// The full build of Skia, SkiaBindings, and the generation of bindings.rs.
 /// Returns the output directory of the libraries.
 pub fn build(config: &Configuration) {
-
     prerequisites::require_python();
 
-    assert!(Command::new("git")
-                .args(&["submodule", "update", "--init", "--depth", "1"])
-                .stdout(Stdio::inherit())
-                .stderr(Stdio::inherit())
-                .status().unwrap().success(), "`git submodule update` failed");
+    assert!(
+        Command::new("git")
+            .args(&["submodule", "update", "--init", "--depth", "1"])
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .status()
+            .unwrap()
+            .success(),
+        "`git submodule update` failed"
+    );
 
-    assert!(Command::new("python")
-                .arg("skia/tools/git-sync-deps")
-                .stdout(Stdio::inherit())
-                .stderr(Stdio::inherit())
-                .status().unwrap().success(), "`skia/tools/git-sync-deps` failed");
+    assert!(
+        Command::new("python")
+            .arg("skia/tools/git-sync-deps")
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .status()
+            .unwrap()
+            .success(),
+        "`skia/tools/git-sync-deps` failed"
+    );
 
     let gn_args = {
-        fn yes() -> String { "true".into() }
-        fn no() -> String { "false".into() }
+        fn yes() -> String {
+            "true".into()
+        }
+        fn no() -> String {
+            "false".into()
+        }
 
-        fn quote(s: &str) -> String { format!("\"{}\"", s) };
+        fn quote(s: &str) -> String {
+            format!("\"{}\"", s)
+        };
 
         let force_build_libs = config.build_all_skia_libs;
 
         let mut args: Vec<(&str, String)> = vec![
-            ("is_official_build", if build::SKIA_RELEASE { yes() } else { no() }),
+            (
+                "is_official_build",
+                if build::SKIA_RELEASE { yes() } else { no() },
+            ),
             ("skia_use_expat", if build::SVG { yes() } else { no() }),
             ("skia_use_system_expat", no()),
             ("skia_use_icu", no()),
@@ -147,10 +171,24 @@ pub fn build(config: &Configuration) {
             ("skia_use_system_libpng", no()),
             ("skia_use_libwebp", no()),
             ("skia_use_system_zlib", no()),
-            ("skia_enable_skottie", if build::ANIMATION || force_build_libs { yes() } else { no() }),
+            (
+                "skia_enable_skottie",
+                if build::ANIMATION || force_build_libs {
+                    yes()
+                } else {
+                    no()
+                },
+            ),
             ("skia_use_xps", no()),
             ("skia_use_dng_sdk", if build::DNG { yes() } else { no() }),
-            ("skia_enable_particles", if build::PARTICLES || force_build_libs { yes() } else { no() }),
+            (
+                "skia_enable_particles",
+                if build::PARTICLES || force_build_libs {
+                    yes()
+                } else {
+                    no()
+                },
+            ),
             ("cc", quote("clang")),
             ("cxx", quote("clang++")),
         ];
@@ -201,17 +239,17 @@ pub fn build(config: &Configuration) {
         args
     };
 
-    let gn_args = gn_args.into_iter()
+    let gn_args = gn_args
+        .into_iter()
         .map(|(name, value)| name.to_owned() + "=" + &value)
         .collect::<Vec<String>>()
         .join(" ");
 
-    let gn_command =
-        if build::ON_WINDOWS {
-            "skia/bin/gn"
-        } else {
-            "bin/gn"
-        };
+    let gn_command = if build::ON_WINDOWS {
+        "skia/bin/gn"
+    } else {
+        "bin/gn"
+    };
 
     let output_directory = config.output_directory.to_str().unwrap();
 
@@ -228,21 +266,23 @@ pub fn build(config: &Configuration) {
         panic!("{:?}", String::from_utf8(output.stdout).unwrap());
     }
 
-    let ninja_command =
-        if build::ON_WINDOWS {
-            "depot_tools/ninja"
-        } else {
-            "../depot_tools/ninja"
-        };
+    let ninja_command = if build::ON_WINDOWS {
+        "depot_tools/ninja"
+    } else {
+        "../depot_tools/ninja"
+    };
 
-    assert!(Command::new(ninja_command)
-                .current_dir(PathBuf::from("./skia"))
-                .args(&["-C", output_directory])
-                .stdout(Stdio::inherit())
-                .stderr(Stdio::inherit())
-                .status()
-                .expect("failed to run `ninja`, does the directory depot_tools/ exist?")
-                .success(), "`ninja` returned an error, please check the output for details.");
+    assert!(
+        Command::new(ninja_command)
+            .current_dir(PathBuf::from("./skia"))
+            .args(&["-C", output_directory])
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .status()
+            .expect("failed to run `ninja`, does the directory depot_tools/ exist?")
+            .success(),
+        "`ninja` returned an error, please check the output for details."
+    );
 
     let current_dir = env::current_dir().unwrap();
 
@@ -250,18 +290,14 @@ pub fn build(config: &Configuration) {
 }
 
 fn bindgen_gen(current_dir: &Path, output_directory: &str) {
-
     let mut builder = bindgen::Builder::default()
         .generate_inline_functions(true)
-
         .default_enum_style(EnumVariation::Rust)
-
         .constified_enum(".*Mask")
         .constified_enum(".*Flags")
         .constified_enum("SkCanvas_SaveLayerFlagsSet")
         .constified_enum("GrVkAlloc_Flag")
         .constified_enum("GrGLBackendState")
-
         .whitelist_function("C_.*")
         .whitelist_function("SkColorTypeBytesPerPixel")
         .whitelist_function("SkColorTypeIsAlwaysOpaque")
@@ -273,10 +309,9 @@ fn bindgen_gen(current_dir: &Path, output_directory: &str) {
         .whitelist_function("SkPreMultiplyARGB")
         .whitelist_function("SkPreMultiplyColor")
         .whitelist_function("SkBlendMode_Name")
-
         // functions for which the doc generation fails.
         .blacklist_function("SkColorFilter_asComponentTable")
-
+        // core/
         .whitelist_type("SkAutoCanvasRestore")
         .whitelist_type("SkColorSpacePrimaries")
         .whitelist_type("SkContourMeasure")
@@ -288,7 +323,7 @@ fn bindgen_gen(current_dir: &Path, output_directory: &str) {
         .whitelist_type("SkVector4")
         .whitelist_type("SkPictureRecorder")
         .whitelist_type("SkVector4")
-
+        // effects/
         .whitelist_type("SkPath1DPathEffect")
         .whitelist_type("SkLine2DPathEffect")
         .whitelist_type("SkPath2DPathEffect")
@@ -298,16 +333,16 @@ fn bindgen_gen(current_dir: &Path, output_directory: &str) {
         .whitelist_type("SkGradientShader")
         .whitelist_type("SkPerlinNoiseShader")
         .whitelist_type("SkTableColorFilter")
-
+        // gpu/
         .whitelist_type("GrGLBackendState")
-
+        // gpu/vk/
         .whitelist_type("GrVkDrawableInfo")
         .whitelist_type("GrVkExtensionFlags")
         .whitelist_type("GrVkFeatureFlags")
-
+        // misc
         .whitelist_var("SK_Color.*")
         .whitelist_var("kAll_GrBackendState")
-
+        //
         .use_core()
         .clang_arg("-std=c++14");
 
@@ -377,6 +412,7 @@ mod prerequisites {
             .arg("--version")
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
-            .status().expect(">>>>> Please install python to build this crate. <<<<<");
+            .status()
+            .expect(">>>>> Please install python to build this crate. <<<<<");
     }
 }
