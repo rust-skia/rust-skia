@@ -3,12 +3,15 @@
 extern crate bindgen;
 extern crate cc;
 
+mod build_support;
+
 use std::env;
 use std::fs;
 use std::path::{PathBuf, Path};
 use std::process::{Command, Stdio};
 use bindgen::EnumVariation;
 use cc::Build;
+use crate::build_support::cargo;
 
 mod build {
     /// Do we build _on_ a Windows OS?
@@ -322,55 +325,6 @@ fn bindgen_gen(current_dir: &Path, skia_out_dir: &str) {
     bindings
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
-}
-
-mod cargo {
-    use std::env;
-
-    pub fn add_dependent_path(path: &str) {
-        println!("cargo:rerun-if-changed={}", path);
-    }
-
-    pub fn add_link_libs<'a, L: IntoIterator<Item = &'a &'a str>>(libs: L) {
-        libs.into_iter().for_each(|s| add_link_lib(*s))
-    }
-
-    pub fn add_link_lib(lib: &str) {
-        println!("cargo:rustc-link-lib={}", lib);
-    }
-
-    #[derive(Clone, Debug)]
-    pub struct Target(String, String, String, Option<String>);
-    impl Target {
-        pub fn as_str(&self) -> (&str, &str, &str, Option<&str>) {
-            (self.0.as_str(), self.1.as_str(), self.2.as_str(), self.3.as_ref().map(|s| s.as_str()))
-        }
-    }
-
-    pub fn target() -> Target {
-        let target_str = env::var("TARGET").unwrap();
-
-        let target : Vec<String> =
-            target_str
-                .split("-")
-                .map(|s| s.into())
-                .collect();
-        if target.len() < 3 {
-            panic!("Failed to parse TARGET {}", target_str);
-        }
-
-        Target(target[0].clone(), target[1].clone(), target[2].clone(), if target.len() > 3 { Some(target[3].clone()) } else { None })
-    }
-
-    // We can not assume that the build profile of the build.rs script reflects the build
-    // profile that the target needs.
-    pub fn build_release() -> bool {
-        match env::var("PROFILE").unwrap().as_str() {
-            "release" => true,
-            "debug" => false,
-            _ => panic!("PROFILE '{}' is not supported by this build script", )
-        }
-    }
 }
 
 mod prerequisites {
