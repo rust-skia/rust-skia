@@ -7,8 +7,8 @@ pub fn add_dependent_path(path: &str) {
     println!("cargo:rerun-if-changed={}", path);
 }
 
-pub fn add_link_libs<'a, L: IntoIterator<Item = &'a &'a str>>(libs: L) {
-    libs.into_iter().for_each(|s| add_link_lib(*s))
+pub fn add_link_libs<Lib: AsRef<str>>(libs: &[Lib]) {
+    libs.into_iter().for_each(|s| add_link_lib(s.as_ref()))
 }
 
 pub fn add_link_lib(lib: &str) {

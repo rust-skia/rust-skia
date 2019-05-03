@@ -3,3 +3,4 @@
 mod binaries;
 pub mod cargo;
 mod git;
+pub mod skia;
