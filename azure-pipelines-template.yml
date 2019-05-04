@@ -94,15 +94,15 @@ jobs:
     condition: and(succeeded(), eq(variables['toolchain'], 'stable'), or(eq(variables['Build.SourceBranchName'], 'master'), eq(variables['Build.SourceBranchName'], 'prebuilt-binaries')))
     displayName: 'Release to GitHub rust-skia/skia-binaries'
     inputs:
-      action: edit
+      action: create
       githubConnection: rust-skia-github-connection
       repositoryName: rust-skia/skia-binaries
       tagSource: manual
       tag: '$(SKIA_BINARIES_KEY)'
       assets: '$(Build.ArtifactStagingDirectory)/skia-binaries-$(SKIA_BINARIES_KEY).tar.gz'
-      assetUploadMode: 'replace'
+      # assetUploadMode: 'replace'
       # TODO: change before merging this into master.
-      isDraft: true
+      # isDraft: true
       # TODO: change before merging this into master.
-      isPreRelease: true
+      # isPreRelease: true
       addChangeLog: false
