@@ -1,10 +1,10 @@
 mod build_support;
+use crate::build_support::git::HashLength;
 use crate::build_support::skia::Configuration;
-use crate::build_support::{binaries, git};
+use crate::build_support::{binaries, cargo, git};
 use build_support::skia;
 use std::path::Path;
 use std::{fs, io};
-use crate::build_support::git::HashLength;
 
 const SRC_BINDINGS_RS: &str = "src/bindings.rs";
 
@@ -56,8 +56,11 @@ fn main() {
 
 /// Returns the key if we should try to download binaries.
 fn should_try_download_binaries(config: &Configuration) -> Option<String> {
-    // currently we download binaries only on azure:
-    if azure::is_active() {
+    // are we building inside a package?
+    if let Ok(ref full_hash) = cargo::package_repository_hash() {
+        let half_hash = git::trim_hash(full_hash, HashLength::Half);
+        Some(binaries::key(&half_hash, &config.features))
+    } else if azure::is_active() {
         // and if we can resolve the hash and the key
         let hash = git::hash(HashLength::Half)?;
         Some(binaries::key(&hash, &config.features))
