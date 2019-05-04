@@ -397,8 +397,8 @@ fn bindgen_gen(current_dir: &Path, output_directory: &str) {
 }
 
 mod prerequisites {
-    use crate::build_support::{cargo, git};
     use crate::build_support::skia::{REPOSITORY_CLONE_URL, REPOSITORY_DIRECTORY};
+    use crate::build_support::{cargo, git};
     use std::fs;
     use std::path::PathBuf;
     use std::process::{Command, Stdio};
@@ -488,7 +488,10 @@ mod prerequisites {
             );
         }
 
-        git::run(&["submodule", "update", "--init", "--depth", "1"], repo_dir.as_path());
+        git::run(
+            &["submodule", "update", "--init", "--depth", "1"],
+            repo_dir.as_path(),
+        );
 
         if !exit_status.success() {
             panic!(

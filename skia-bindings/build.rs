@@ -79,6 +79,7 @@ fn download_and_install(key: &str, output_directory: &Path) -> io::Result<()> {
 }
 
 mod azure {
+    use crate::build_support::git::HashLength;
     use crate::build_support::skia::Configuration;
     use crate::build_support::{binaries, cargo, git};
     use crate::SRC_BINDINGS_RS;
@@ -86,7 +87,6 @@ mod azure {
     use std::io::Write;
     use std::path::{Path, PathBuf};
     use std::{env, fs, io};
-    use crate::build_support::git::HashLength;
 
     pub fn is_active() -> bool {
         artifact_staging_directory().is_some()
@@ -126,7 +126,6 @@ mod azure {
 
     /// Prepares the binaries directory and sets the key.txt file to the key given.
     pub fn prepare_binaries(key: &str, artifacts: &Path) -> io::Result<PathBuf> {
-
         let binaries = artifacts.join("skia-binaries");
         fs::create_dir_all(&binaries)?;
 

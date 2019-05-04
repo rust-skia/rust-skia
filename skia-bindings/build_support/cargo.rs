@@ -1,8 +1,8 @@
 //! Support function for communicating with cargo's variables and outputs.
 
 use std::fmt::{Display, Formatter};
-use std::{env, fmt, fs, io};
 use std::path::PathBuf;
+use std::{env, fmt, fs, io};
 
 pub fn output_directory() -> PathBuf {
     PathBuf::from(env::var("OUT_DIR").unwrap())
@@ -86,8 +86,8 @@ pub fn build_release() -> bool {
     }
 }
 
-// If we are builing from within a packaged crate, return the hash of the
-// original repository we were packaged from.
+// If we are builing from within a packaged crate, return the full commit hash
+// of the original repository we were packaged from.
 pub fn package_repository_hash() -> io::Result<String> {
     let vcs_info = fs::read_to_string(".cargo_vcs_info.json")?;
     let value: serde_json::Value = serde_json::from_str(&vcs_info)?;
