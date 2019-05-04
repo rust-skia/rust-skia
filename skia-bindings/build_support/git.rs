@@ -29,7 +29,8 @@ pub fn hash(kind: HashLength) -> Option<String> {
     if output.status.code() != Some(0) {
         None
     } else {
-        Some(String::from_utf8(output.stdout).unwrap())
+        // need to trim the string to remove newlines at the end.
+        Some(String::from_utf8(output.stdout).unwrap().trim().to_string())
     }
 }
 
@@ -55,7 +56,7 @@ pub fn branch() -> String {
     if output.status.code() != Some(0) {
         panic!("git rev-parse failed");
     } else {
-        String::from_utf8(output.stdout).unwrap()
+        String::from_utf8(output.stdout).unwrap().trim().to_string()
     }
 }
 
