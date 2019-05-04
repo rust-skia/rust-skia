@@ -50,25 +50,25 @@ impl Default for LayerDrawLooperBuilder {
     }
 }
 
-impl From<&LayerDrawLooperLayerInfo> for SkLayerDrawLooper_LayerInfo {
-    fn from(li: &LayerDrawLooperLayerInfo) -> Self {
-        let paint_bits: i32 = match li.paint_bits {
+impl LayerDrawLooperLayerInfo {
+    fn to_native(&self) -> SkLayerDrawLooper_LayerInfo {
+        let paint_bits: i32 = match self.paint_bits {
             LayerDrawLooperBitFlags::Bits(bits) => bits.bits().try_into().unwrap(),
             LayerDrawLooperBitFlags::EntirePaint => -1,
         };
 
-        Self {
+        SkLayerDrawLooper_LayerInfo {
             fPaintBits: paint_bits,
-            fColorMode: li.color_mode.into_native(),
-            fOffset: li.offset.into_native(),
-            fPostTranslate: li.post_translate,
+            fColorMode: self.color_mode.into_native(),
+            fOffset: self.offset.into_native(),
+            fPostTranslate: self.post_translate,
         }
     }
 }
 
 impl LayerDrawLooperBuilder {
     pub fn add_layer(&mut self, layer_info: &LayerDrawLooperLayerInfo) -> &mut Handle<SkPaint> {
-        unsafe { transmute_ref_mut(&mut *self.native_mut().addLayer(&layer_info.into())) }
+        unsafe { transmute_ref_mut(&mut *self.native_mut().addLayer(&layer_info.to_native())) }
     }
 
     pub fn add_layer_offset<IV: Into<Option<Vector>>>(&mut self, delta: IV) {
@@ -82,7 +82,7 @@ impl LayerDrawLooperBuilder {
         &mut self,
         layer_info: &LayerDrawLooperLayerInfo,
     ) -> &mut Handle<SkPaint> {
-        unsafe { transmute_ref_mut(&mut *self.native_mut().addLayerOnTop(&layer_info.into())) }
+        unsafe { transmute_ref_mut(&mut *self.native_mut().addLayerOnTop(&layer_info.to_native())) }
     }
 
     pub fn detach(&mut self) -> DrawLooper {
