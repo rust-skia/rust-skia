@@ -49,17 +49,8 @@ fn main() {
             staging_directory.to_str().unwrap()
         );
 
-        let branch = git::branch();
-        // TODO: remove prebuilt-binaries branch!
-        println!("branch: {}", branch);
-        if branch == "master" || branch == "prebuilt-binaries" {
-            println!("COPYING BINARIES");
-            azure::copy_binaries(&config, &staging_directory).expect("COPYING BINARIES FAILED")
-        } else {
-            println!("BRANCH NOT AUTHORIZED to deploy binaries, preparing empty binaries");
-            azure::prepare_binaries(None, &staging_directory)
-                .expect("PREPARING EMPTY BINARIES FAILED");
-        }
+        println!("COPYING BINARIES");
+        azure::copy_binaries(&config, &staging_directory).expect("COPYING BINARIES FAILED")
     }
 }
 
@@ -108,7 +99,7 @@ mod azure {
         let hash = git::hash(HashLength::Half).expect("failed to retrieve the git hash");
         let key = binaries::key(&hash, &config.features);
 
-        let binaries = prepare_binaries(Some(&key), artifacts)?;
+        let binaries = prepare_binaries(&key, artifacts)?;
 
         fs::copy(SRC_BINDINGS_RS, binaries.join("bindings.rs"))?;
 
@@ -131,20 +122,15 @@ mod azure {
     }
 
     /// Prepares the binaries directory and sets the key.txt file to the key given.
-    /// If no key is available, creates an empty key.txt file to inform azure
-    /// that binaries should not be published.
-    pub fn prepare_binaries(key: Option<&str>, artifacts: &Path) -> io::Result<PathBuf> {
+    pub fn prepare_binaries(key: &str, artifacts: &Path) -> io::Result<PathBuf> {
+
         let binaries = artifacts.join("skia-binaries");
         fs::create_dir_all(&binaries)?;
 
-        {
-            // this is primarily for azure to know the key, but it can stay inside the
-            // archive.
-            let mut key_file = File::create(binaries.join("key.txt")).unwrap();
-            if let Some(key) = key {
-                key_file.write_all(key.as_bytes())?;
-            }
-        }
+        // this is primarily for azure to know the key, but it can stay inside the
+        // archive.
+        let mut key_file = File::create(binaries.join("key.txt")).unwrap();
+        key_file.write_all(key.as_bytes())?;
 
         Ok(binaries)
     }
