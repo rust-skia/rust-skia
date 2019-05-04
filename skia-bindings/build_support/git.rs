@@ -24,12 +24,7 @@ pub fn hash(kind: HashLength) -> Option<String> {
         HashLength::Full => {}
     }
 
-    let output = cmd
-        .arg("HEAD")
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .output()
-        .ok()?;
+    let output = cmd.arg("HEAD").stderr(Stdio::inherit()).output().ok()?;
 
     if output.status.code() != Some(0) {
         None
@@ -53,7 +48,6 @@ pub fn branch() -> String {
         .arg("rev-parse")
         .arg("--abbrev-ref")
         .arg("HEAD")
-        .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .output()
         .expect("git failed");
@@ -65,14 +59,13 @@ pub fn branch() -> String {
     }
 }
 
-/// Run git with the given args in the given directory and return its stdout output.
+/// Run git with the given args in the given directory, print stderr to the current
+/// process's terminal, and capture its stdout output.
 pub fn run<'a, T: AsRef<str>, IOP: Into<Option<&'a Path>>>(args: &[T], dir: IOP) -> Vec<u8> {
     let args: Vec<&str> = args.iter().map(|s| s.as_ref()).collect();
 
     let mut cmd = Command::new("git");
-        cmd.args(&args)
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit());
+    cmd.args(&args).stderr(Stdio::inherit());
 
     if let Some(dir) = dir.into() {
         cmd.current_dir(dir);
