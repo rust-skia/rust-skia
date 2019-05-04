@@ -450,6 +450,10 @@ extern "C" void C_SkPaint_setImageFilter(SkPaint* self, const SkImageFilter* ima
     self->setImageFilter(spFromConst(imageFilter));
 }
 
+extern "C" SkDrawLooper* C_SkPaint_getDrawLooper(const SkPaint* self) {
+    return self->getDrawLooper();
+}
+
 extern "C" void C_SkPaint_setDrawLooper(SkPaint* self, const SkDrawLooper* drawLooper) {
     self->setDrawLooper(spFromConst(drawLooper));
 }
