@@ -456,7 +456,9 @@ mod prerequisites {
         let output_directory = cargo::output_directory();
         let repo_dir = &output_directory.join(REPOSITORY_DIRECTORY);
 
-        fs::remove_dir_all(repo_dir).expect("failed to remove rust-skia directory");
+        if repo_dir.is_dir() {
+            fs::remove_dir_all(repo_dir).expect("failed to remove rust-skia directory");
+        }
 
         let exit_status = Command::new("git")
             .args(&["clone", clone_url])
