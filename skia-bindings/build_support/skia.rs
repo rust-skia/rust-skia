@@ -456,7 +456,7 @@ mod prerequisites {
         let output_directory = cargo::output_directory();
         let repo_dir = &output_directory.join(REPOSITORY_DIRECTORY);
 
-        fs::remove_dir_all(repo_dir);
+        fs::remove_dir_all(repo_dir).expect("failed to remove rust-skia directory");
 
         let exit_status = Command::new("git")
             .args(&["clone", clone_url])
@@ -502,5 +502,8 @@ mod prerequisites {
             .expect("failed to move depot_tools directory");
         fs::rename(skia_bindings_dir.join("skia"), skia_dir)
             .expect("failed to move skia directory");
+
+        // cleanup
+        fs::remove_dir_all(repo_dir).expect("failed to cleanup rust-skia directory");
     }
 }
