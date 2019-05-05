@@ -100,3 +100,34 @@ impl Handle<SkPath> {
         as_winding(self)
     }
 }
+
+#[test]
+fn test_tight_bounds() {
+    let mut path = Path::new();
+    path.add_rect(Rect::from_point_and_size((10.0, 10.0), (10.0, 10.0)), None);
+    path.add_rect(Rect::from_point_and_size((15.0, 15.0), (10.0, 10.0)), None);
+    let tight_bounds: Rect = Rect::from_point_and_size((10.0, 10.0), (15.0, 15.0));
+    assert_eq!(path.tight_bounds().unwrap(), tight_bounds);
+}
+
+#[test]
+fn test_union() {
+    let mut path = Path::new();
+    path.add_rect(Rect::from_point_and_size((10.0, 10.0), (10.0, 10.0)), None);
+    let mut path2 = Path::new();
+    path2.add_rect(Rect::from_point_and_size((15.0, 15.0), (10.0, 10.0)), None);
+    let union = path.op(&path2, PathOp::Union).unwrap();
+    let expected: Rect = Rect::from_point_and_size((10.0, 10.0), (15.0, 15.0));
+    assert_eq!(union.tight_bounds().unwrap(), expected);
+}
+
+#[test]
+fn test_intersect() {
+    let mut path = Path::new();
+    path.add_rect(Rect::from_point_and_size((10.0, 10.0), (10.0, 10.0)), None);
+    let mut path2 = Path::new();
+    path2.add_rect(Rect::from_point_and_size((15.0, 15.0), (10.0, 10.0)), None);
+    let intersected = path.op(&path2, PathOp::Intersect).unwrap();
+    let expected: Rect = Rect::from_point_and_size((15.0, 15.0), (5.0, 5.0));
+    assert_eq!(intersected.tight_bounds().unwrap(), expected);
+}
