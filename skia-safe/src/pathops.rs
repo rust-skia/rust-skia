@@ -5,7 +5,6 @@ use crate::{Path, Rect};
 use skia_bindings::{
     C_SkOpBuilder_Construct, C_SkOpBuilder_destruct, SkOpBuilder, SkPath, SkPathOp,
 };
-use std::mem;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -63,9 +62,7 @@ impl NativeDrop for SkOpBuilder {
 
 impl Default for Handle<SkOpBuilder> {
     fn default() -> Self {
-        let mut op_builder = unsafe { mem::zeroed() };
-        unsafe { C_SkOpBuilder_Construct(&mut op_builder) }
-        op_builder.into_handle()
+        Self::construct_c(C_SkOpBuilder_Construct)
     }
 }
 
