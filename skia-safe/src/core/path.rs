@@ -130,14 +130,14 @@ impl NativePartialEq for SkPath {
 
 impl Default for Handle<SkPath> {
     fn default() -> Self {
-        Self::from_native(unsafe { SkPath::new() })
+        Self::new()
     }
 }
 
 impl Handle<SkPath> {
 
     pub fn new() -> Self {
-        Self::default()
+        Self::from_native(unsafe { SkPath::new() })
     }
 
     pub fn is_interpolatable(&self, compare: &Path) -> bool {
