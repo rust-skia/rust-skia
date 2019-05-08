@@ -1,6 +1,6 @@
 [package]
 name = "skia-bindings"
-version = "0.7.0"
+version = "0.8.0"
 authors = ["LongYinan <lynweklm@gmail.com>", "Armin Sander <armin@replicator.org>"]
 edition = "2018"
 build = "build.rs"
