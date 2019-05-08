@@ -819,8 +819,16 @@ extern "C" SkTextBlob* C_SkTextBlob_MakeFromText(const void* text, size_t byteLe
 }
 
 //
-// SkTypeface
+// core/SkTypeface.h
 //
+
+extern "C" bool C_SkTypeface_isBold(const SkTypeface* self) {
+    return self->isBold();
+}
+
+extern "C" bool C_SkTypeface_isItalic(const SkTypeface* self) {
+    return self->isItalic();
+}
 
 extern "C" SkTypeface* C_SkTypeface_MakeDefault() {
     return SkTypeface::MakeDefault().release();
@@ -830,16 +838,36 @@ extern "C" SkTypeface* C_SkTypeface_MakeFromName(const char familyName[], SkFont
     return SkTypeface::MakeFromName(familyName, fontStyle).release();
 }
 
+/*
 extern "C" SkTypeface* C_SkTypeface_MakeFromFile(const char path[], int index) {
     return SkTypeface::MakeFromFile(path, index).release();
 }
+*/
 
 extern "C" SkTypeface* C_SkTypeface_MakeFromData(const SkData* data, int index) {
     return SkTypeface::MakeFromData(sk_sp<SkData>(const_cast<SkData*>(data)), index).release();
 }
 
+extern "C" SkTypeface* C_SkTypeface_makeClone(const SkTypeface* self, const SkFontArguments* arguments) {
+    return self->makeClone(*arguments).release();
+}
+
 extern "C" SkData* C_SkTypeface_serialize(const SkTypeface* self, SkTypeface::SerializeBehavior behavior) {
     return self->serialize(behavior).release();
+}
+
+extern "C" void C_SkTypeface_LocalizedStrings_unref(SkTypeface::LocalizedStrings* self) {
+    self->unref();
+}
+
+extern "C" bool C_SkTypeface_LocalizedStrings_next(SkTypeface::LocalizedStrings* self, SkString* string, SkString* language) {
+    auto ls = SkTypeface::LocalizedString();
+    if (self->next(&ls)) {
+        *string = ls.fString;
+        *language = ls.fLanguage;
+        return true;
+    }
+    return false;
 }
 
 //

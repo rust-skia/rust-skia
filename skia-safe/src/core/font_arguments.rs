@@ -11,23 +11,23 @@ use std::{mem, slice};
 
 #[derive(Debug)]
 pub struct FontArgumentsVariationPosition<'a> {
-    pub coordinates: &'a [VariationPositionCoordinate],
+    pub coordinates: &'a [FontArgumentsVariationPositionCoordinate],
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 #[repr(C)]
-pub struct VariationPositionCoordinate {
+pub struct FontArgumentsVariationPositionCoordinate {
     pub axis: FourByteTag,
     pub value: f32,
 }
 
 impl NativeTransmutable<SkFontArguments_VariationPosition_Coordinate>
-    for VariationPositionCoordinate
+    for FontArgumentsVariationPositionCoordinate
 {
 }
 #[test]
 fn test_variation_position_coordinate_layout() {
-    VariationPositionCoordinate::test_layout()
+    FontArgumentsVariationPositionCoordinate::test_layout()
 }
 
 // Need to assign a lifetime to FontArguments, because it borrows [VariationPositionCoordinate].
@@ -128,7 +128,7 @@ fn test_font_arguments_with_no_coordinates() {
 
 #[test]
 fn access_coordinates() {
-    let coordinates = Box::new([VariationPositionCoordinate {
+    let coordinates = Box::new([FontArgumentsVariationPositionCoordinate {
         axis: 0.into(),
         value: 1.0,
     }]);
