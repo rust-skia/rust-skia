@@ -243,6 +243,7 @@ fn bindgen_gen(current_dir: &Path, skia_out_dir: &str) {
         .whitelist_type("SkDocument")
         .whitelist_type("SkDrawLooper")
         .whitelist_type("SkDynamicMemoryWStream")
+        .whitelist_type("SkFontMgr")
         .whitelist_type("SkPathMeasure")
         .whitelist_type("SkVector4")
         .whitelist_type("SkPictureRecorder")

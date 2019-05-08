@@ -11,6 +11,7 @@
 #include "SkFont.h"
 #include "SkFontArguments.h"
 #include "SkFontMetrics.h"
+#include "SkFontMgr.h"
 #include "SkImageFilter.h"
 #include "SkImageInfo.h"
 #include "SkMaskFilter.h"
@@ -898,6 +899,39 @@ extern "C" void C_SkFontArguments_setVariationDesignPosition(SkFontArguments* se
 }
 
 //
+// SkFontMgr
+//
+
+// note: this function _consumes_ / deletes the stream.
+extern "C" SkTypeface* C_SkFontMgr_makeFromStream(const SkFontMgr* self, SkStreamAsset* stream, int ttcIndex) {
+    return self->makeFromStream(std::unique_ptr<SkStreamAsset>(stream), ttcIndex).release();
+}
+
+extern "C" SkFontMgr* C_SkFontMgr_RefDefault() {
+    return SkFontMgr::RefDefault().release();
+}
+
+//
+// SkFontStyleSet
+//
+
+extern "C" int C_SkFontStyleSet_count(SkFontStyleSet* self) {
+    return self->count();
+}
+
+extern "C" void C_SkFontStyleSet_getStyle(SkFontStyleSet* self, int index, SkFontStyle* fontStyle, SkString* style) {
+    self->getStyle(index, fontStyle, style);
+}
+
+extern "C" SkTypeface* C_SkFontStyleSet_createTypeface(SkFontStyleSet* self, int index) {
+    return self->createTypeface(index);
+}
+
+extern "C" SkTypeface* C_SkFontStyleSet_matchStyle(SkFontStyleSet* self, const SkFontStyle* pattern) {
+    return self->matchStyle(*pattern);
+}
+
+//
 // SkVertices
 //
 
@@ -1181,19 +1215,39 @@ extern "C" SkShader* C_SkShader_makeAsALocalMatrixShader(const SkShader* self, S
 }
 
 //
-// SkDynamicMemoryWStream
+// SkStream
+//
+
+extern "C" void C_SkStream_delete(SkStream* stream) {
+    delete stream;
+}
+
+//
+// SkWStream
+//
+
+extern "C" void C_SkWStream_destruct(SkWStream* self) {
+    self->~SkWStream();
+}
+
+extern "C" bool C_SkWStream_write(SkWStream* self, const void* buffer, size_t size) {
+    return self->write(buffer, size);
+}
+
+//
+// SkDynamicMemoryWStream : public SkWStream
 //
 
 extern "C" void C_SkDynamicMemoryWStream_Construct(SkDynamicMemoryWStream* uninitialized) {
     new(uninitialized) SkDynamicMemoryWStream();
 }
 
-extern "C" void C_SkDynamicMemoryWStream_destruct(SkDynamicMemoryWStream* self) {
-    self->~SkDynamicMemoryWStream();
-}
-
 extern "C" SkData* C_SkDynamicMemoryWStream_detachAsData(SkDynamicMemoryWStream* self) {
     return self->detachAsData().release();
+}
+
+extern "C" SkStreamAsset* C_SkDynamicMemoryWStream_detachAsStream(SkDynamicMemoryWStream* self) {
+    return self->detachAsStream().release();
 }
 
 //
