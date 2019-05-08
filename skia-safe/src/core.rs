@@ -80,6 +80,9 @@ pub use self::font_arguments::*;
 mod font_metrics;
 pub use self::font_metrics::*;
 
+mod font_mgr;
+pub use self::font_mgr::*;
+
 mod font_style;
 pub use self::font_style::*;
 

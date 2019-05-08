@@ -433,8 +433,6 @@ impl<N: NativeRefCounted> NativeAccess<N> for RCHandle<N> {
 }
 
 impl<N: NativeRefCounted> Clone for RCHandle<N> {
-
-
     fn clone(&self) -> Self {
 
         // yes, we _do_ support shared mutability when

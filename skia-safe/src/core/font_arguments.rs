@@ -2,8 +2,7 @@ use crate::prelude::*;
 use crate::FourByteTag;
 use skia_bindings::{
     C_SkFontArguments_destruct, SkFontArguments, SkFontArguments_VariationPosition,
-    SkFontArguments_VariationPosition_Coordinate, SkFontArguments_getAxes,
-    SkFontArguments_getVariationDesignPosition,
+    SkFontArguments_VariationPosition_Coordinate,
 };
 use std::marker::PhantomData;
 use std::mem::forget;
