@@ -9,6 +9,7 @@
 #include "SkDrawLooper.h"
 #include "SkDocument.h"
 #include "SkFont.h"
+#include "SkFontArguments.h"
 #include "SkFontMetrics.h"
 #include "SkImageFilter.h"
 #include "SkImageInfo.h"
@@ -874,6 +875,26 @@ extern "C" void C_SkFont_setTypeface(SkFont* self, const SkTypeface* tf) {
 
 extern "C" void C_SkFont_destruct(SkFont* self) {
     self->~SkFont();
+}
+
+//
+// SkFontArguments
+//
+
+extern "C" void C_SkFontArguments_construct(SkFontArguments* uninitialized) {
+    new(uninitialized) SkFontArguments();
+}
+
+extern "C" void C_SkFontArguments_destruct(SkFontArguments* self) {
+    self->~SkFontArguments();
+}
+
+extern "C" void C_SkFontArguments_setCollectionIndex(SkFontArguments* self, int collectionIndex) {
+    self->setCollectionIndex(collectionIndex);
+}
+
+extern "C" void C_SkFontArguments_setVariationDesignPosition(SkFontArguments* self, SkFontArguments::VariationPosition position) {
+    self->setVariationDesignPosition(position);
 }
 
 //
