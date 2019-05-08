@@ -1,35 +1,28 @@
-use std::ffi;
+use crate::core::font_parameters::VariationAxis;
+use crate::core::{Data, FontStyle, FontTableTag, GlyphId, Rect, Unichar};
 use crate::prelude::*;
-use crate::core::{
-    FontStyle,
-    FontStyleWeight,
-    FontStyleSlant,
-    Data,
-    GlyphId,
-    Unichar,
-    FontTableTag,
-    Rect
-};
+use crate::{interop, FontArguments, FontArgumentsVariationPositionCoordinate};
 use skia_bindings::{
-    C_SkTypeface_MakeDefault,
-    SkTypeface,
-    C_SkTypeface_MakeFromName,
-    C_SkTypeface_MakeFromData,
-    SkTypeface_SerializeBehavior,
-    C_SkTypeface_serialize,
-    SkRefCntBase
+    C_SkTypeface_LocalizedStrings_next, C_SkTypeface_LocalizedStrings_unref,
+    C_SkTypeface_MakeDefault, C_SkTypeface_MakeFromData, C_SkTypeface_MakeFromName,
+    C_SkTypeface_isBold, C_SkTypeface_isItalic, C_SkTypeface_makeClone, C_SkTypeface_serialize,
+    SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings, SkTypeface_SerializeBehavior,
 };
+use std::ffi;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
 pub enum TypefaceSerializeBehavior {
     DoIncludeData = SkTypeface_SerializeBehavior::kDoIncludeData as _,
     DontIncludeData = SkTypeface_SerializeBehavior::kDontIncludeData as _,
-    IncludeDataIfLocal = SkTypeface_SerializeBehavior::kIncludeDataIfLocal as _
+    IncludeDataIfLocal = SkTypeface_SerializeBehavior::kIncludeDataIfLocal as _,
 }
 
 impl NativeTransmutable<SkTypeface_SerializeBehavior> for TypefaceSerializeBehavior {}
-#[test] fn test_typeface_serialize_behavior_layout() { TypefaceSerializeBehavior::test_layout() }
+#[test]
+fn test_typeface_serialize_behavior_layout() {
+    TypefaceSerializeBehavior::test_layout()
+}
 
 // not sure if we need to export that yet.
 /*
@@ -41,6 +34,51 @@ pub enum TypefaceEncoding  {
     UTF32 = SkTypeface_Encoding::kUTF32_Encoding as _
 }
 */
+
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub struct TypefaceLocalizedString {
+    pub string: String,
+    pub language: String,
+}
+
+#[repr(transparent)]
+pub struct TypefaceLocalizedStrings(*mut SkTypeface_LocalizedStrings);
+
+impl NativeAccess<SkTypeface_LocalizedStrings> for TypefaceLocalizedStrings {
+    fn native(&self) -> &SkTypeface_LocalizedStrings {
+        unsafe { &*self.0 }
+    }
+
+    fn native_mut(&mut self) -> &mut SkTypeface_LocalizedStrings {
+        unsafe { &mut *self.0 }
+    }
+}
+
+impl Drop for TypefaceLocalizedStrings {
+    fn drop(&mut self) {
+        unsafe { C_SkTypeface_LocalizedStrings_unref(self.0) }
+    }
+}
+
+impl Iterator for TypefaceLocalizedStrings {
+    type Item = TypefaceLocalizedString;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let mut string = interop::String::default();
+        let mut language = interop::String::default();
+        unsafe {
+            C_SkTypeface_LocalizedStrings_next(
+                self.native_mut(),
+                string.native_mut(),
+                language.native_mut(),
+            )
+        }
+        .if_true_some(TypefaceLocalizedString {
+            string: string.as_str().into(),
+            language: language.as_str().into(),
+        })
+    }
+}
 
 pub type Typeface = RCHandle<SkTypeface>;
 
@@ -58,24 +96,62 @@ impl Default for RCHandle<SkTypeface> {
     }
 }
 
+impl PartialEq for Typeface {
+    fn eq(&self, other: &Typeface) -> bool {
+        Typeface::equal(self, other)
+    }
+}
+
 impl RCHandle<SkTypeface> {
     pub fn font_style(&self) -> FontStyle {
         unsafe { FontStyle::from_native(self.native().fontStyle()) }
     }
 
     pub fn is_bold(&self) -> bool {
-        // does not link
+        // does not link:
         // unsafe { self.native().isBold() }
-        self.font_style().weight() >= FontStyleWeight::SemiBold
+        unsafe { C_SkTypeface_isBold(self.native()) }
     }
 
     pub fn is_italic(&self) -> bool {
+        // does not link:
         // unsafe { self.native().isItalic() }
-        self.font_style().slant() != FontStyleSlant::Upright
+        unsafe { C_SkTypeface_isItalic(self.native()) }
     }
 
     pub fn is_fixed_pitch(&self) -> bool {
         unsafe { self.native().isFixedPitch() }
+    }
+
+    pub fn variation_design_position(
+        &self,
+        coordinates: &mut [FontArgumentsVariationPositionCoordinate],
+    ) -> Option<usize> {
+        let r = unsafe {
+            self.native().getVariationDesignPosition(
+                coordinates.native_mut().as_mut_ptr(),
+                coordinates.len().try_into().unwrap(),
+            )
+        };
+        if r != -1 {
+            Some(r.try_into().unwrap())
+        } else {
+            None
+        }
+    }
+
+    pub fn variation_design_parameters(&self, parameters: &mut [VariationAxis]) -> Option<usize> {
+        let r = unsafe {
+            self.native().getVariationDesignParameters(
+                parameters.native_mut().as_mut_ptr(),
+                parameters.len().try_into().unwrap(),
+            )
+        };
+        if r != -1 {
+            Some(r.try_into().unwrap())
+        } else {
+            None
+        }
     }
 
     pub fn equal(face_a: &Typeface, face_b: &Typeface) -> bool {
@@ -97,16 +173,18 @@ impl RCHandle<SkTypeface> {
     // encoding of the path name is. from_data can be used instead.
 
     pub fn from_data(data: &Data, index: usize) {
-        Typeface::from_ptr(
-            unsafe {
-                C_SkTypeface_MakeFromData(data.shared_native(), index.try_into().unwrap())
-            } );
+        Typeface::from_ptr(unsafe {
+            C_SkTypeface_MakeFromData(data.shared_native(), index.try_into().unwrap())
+        });
+    }
+
+    pub fn new_clone(&self, arguments: &FontArguments) -> Option<Typeface> {
+        Typeface::from_ptr(unsafe { C_SkTypeface_makeClone(self.native(), arguments.native()) })
     }
 
     pub fn serialize(&self, behavior: TypefaceSerializeBehavior) -> Data {
-        Data::from_ptr(unsafe {
-            C_SkTypeface_serialize(self.native(), behavior.into_native())
-        }).unwrap()
+        Data::from_ptr(unsafe { C_SkTypeface_serialize(self.native(), behavior.into_native()) })
+            .unwrap()
     }
 
     // chars_to_glyphs is unsupported, because the documentation does not make sense to me:
@@ -127,8 +205,7 @@ impl RCHandle<SkTypeface> {
 
     pub fn table_tags(&self) -> Option<Vec<FontTableTag>> {
         let mut v: Vec<FontTableTag> = vec![0; self.count_tables()];
-        (unsafe { self.native().getTableTags(v.as_mut_ptr()) } != 0)
-            .if_true_some(v)
+        (unsafe { self.native().getTableTags(v.as_mut_ptr()) } != 0).if_true_some(v)
     }
 
     pub fn table_size(&self, tag: FontTableTag) -> Option<usize> {
@@ -142,7 +219,8 @@ impl RCHandle<SkTypeface> {
 
     pub fn table_data(&self, tag: FontTableTag, data: &mut [u8]) -> usize {
         unsafe {
-            self.native().getTableData(tag, 0, data.len(), data.as_mut_ptr() as _)
+            self.native()
+                .getTableData(tag, 0, data.len(), data.as_mut_ptr() as _)
         }
     }
 
@@ -155,22 +233,28 @@ impl RCHandle<SkTypeface> {
         }
     }
 
-    // TODO: implement this
-    pub fn may_support_kerning(&self) -> bool {
-        true
-    }
-
     // note: adjustments slice length must be equal to glyph's len - 1.
     pub fn kerning_pair_adjustments(&self, glyphs: &[GlyphId], adjustments: &mut [i32]) -> bool {
         (adjustments.len() == glyphs.len() + 1)
-        &&
-        unsafe {
-            self.native().
-                getKerningPairAdjustments(
+            && unsafe {
+                self.native().getKerningPairAdjustments(
                     glyphs.as_ptr(),
                     glyphs.len().try_into().unwrap(),
-                    adjustments.as_mut_ptr())
-        }
+                    adjustments.as_mut_ptr(),
+                )
+            }
+    }
+
+    pub fn new_family_name_iterator(&self) -> TypefaceLocalizedStrings {
+        TypefaceLocalizedStrings(unsafe { self.native().createFamilyNameIterator() })
+    }
+
+    pub fn family_name(&self) -> String {
+        let mut name = interop::String::default();
+        unsafe {
+            self.native().getFamilyName(name.native_mut());
+        };
+        name.as_str().into()
     }
 
     pub fn bounds(&self) -> Rect {

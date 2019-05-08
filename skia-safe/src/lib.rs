@@ -21,6 +21,7 @@ pub use crate::core::path_measure::path_measure;
 pub use crate::docs::*;
 pub use crate::effects::*;
 pub use crate::pathops::*;
+pub use crate::font_parameters;
 
 #[cfg(test)]
 mod transmutation_tests {
