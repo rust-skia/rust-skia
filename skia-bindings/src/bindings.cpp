@@ -899,20 +899,7 @@ extern "C" void C_SkFontArguments_setVariationDesignPosition(SkFontArguments* se
 }
 
 //
-// SkFontMgr
-//
-
-// note: this function _consumes_ / deletes the stream.
-extern "C" SkTypeface* C_SkFontMgr_makeFromStream(const SkFontMgr* self, SkStreamAsset* stream, int ttcIndex) {
-    return self->makeFromStream(std::unique_ptr<SkStreamAsset>(stream), ttcIndex).release();
-}
-
-extern "C" SkFontMgr* C_SkFontMgr_RefDefault() {
-    return SkFontMgr::RefDefault().release();
-}
-
-//
-// SkFontStyleSet
+// core/SkFontMgr.h
 //
 
 extern "C" int C_SkFontStyleSet_count(SkFontStyleSet* self) {
@@ -929,6 +916,23 @@ extern "C" SkTypeface* C_SkFontStyleSet_createTypeface(SkFontStyleSet* self, int
 
 extern "C" SkTypeface* C_SkFontStyleSet_matchStyle(SkFontStyleSet* self, const SkFontStyle* pattern) {
     return self->matchStyle(*pattern);
+}
+
+// note: this function _consumes_ / deletes the stream.
+extern "C" SkTypeface* C_SkFontMgr_makeFromStream(const SkFontMgr* self, SkStreamAsset* stream, int ttcIndex) {
+    return self->makeFromStream(std::unique_ptr<SkStreamAsset>(stream), ttcIndex).release();
+}
+
+extern "C" SkFontMgr* C_SkFontMgr_RefDefault() {
+    return SkFontMgr::RefDefault().release();
+}
+
+//
+// core/SkFontParameters.h
+//
+
+extern "C" bool C_SkFontParameters_Variation_Axis_isHidden(const SkFontParameters::Variation::Axis* self) {
+    return self->isHidden();
 }
 
 //
