@@ -1,8 +1,9 @@
 use crate::prelude::*;
 use crate::FourByteTag;
 use skia_bindings::{
-    C_SkFontArguments_destruct, SkFontArguments, SkFontArguments_VariationPosition,
-    SkFontArguments_VariationPosition_Coordinate,
+    C_SkFontArguments_construct, C_SkFontArguments_destruct,
+    C_SkFontArguments_setVariationDesignPosition, SkFontArguments,
+    SkFontArguments_VariationPosition, SkFontArguments_VariationPosition_Coordinate,
 };
 use std::marker::PhantomData;
 use std::mem::forget;
@@ -58,7 +59,13 @@ impl<'a> Default for FontArguments<'a> {
 
 impl<'a> FontArguments<'a> {
     pub fn new() -> Self {
-        Self::from_native(unsafe { SkFontArguments::new() })
+        Self::from_native(unsafe {
+            // does not link under Linux / macOS
+            // SkFontArguments::new()
+            let mut font_arguments = mem::zeroed();
+            C_SkFontArguments_construct(&mut font_arguments);
+            font_arguments
+        })
     }
 
     pub fn set_collection_index(&mut self, collection_index: usize) -> &mut Self {
@@ -75,12 +82,13 @@ impl<'a> FontArguments<'a> {
         mut self,
         position: FontArgumentsVariationPosition,
     ) -> FontArguments /* NEVER USE Self here, this returns a different lifetime */ {
-        let proxy = SkFontArguments_VariationPosition {
+        let position = SkFontArguments_VariationPosition {
             coordinates: position.coordinates.native().as_ptr(),
             coordinateCount: position.coordinates.len().try_into().unwrap(),
         };
         unsafe {
-            self.native_mut().setVariationDesignPosition(proxy);
+            // does not link on Linux / MacOS:
+            C_SkFontArguments_setVariationDesignPosition(self.native_mut(), position);
             // TODO: is there a more elegant way to change the lifetime of self?
             let r = mem::transmute_copy(&self);
             forget(self);
