@@ -185,7 +185,7 @@ fn create_all_typefaces() {
         println!("font_family: {}", name);
         let mut style_set = font_mgr.new_styleset(i);
         for style_index in 0..style_set.count() {
-            let (fs, style_name) = style_set.style(style_index);
+            let (_, style_name) = style_set.style(style_index);
             println!("  style: {}", style_name);
             let face = style_set.new_typeface(style_index);
             drop(face);
