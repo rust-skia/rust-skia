@@ -7,27 +7,81 @@ use crate::core::Data;
 use crate::prelude::*;
 use skia_bindings::{
     C_SkDynamicMemoryWStream_Construct, C_SkDynamicMemoryWStream_detachAsData,
-    C_SkDynamicMemoryWStream_detachAsStream, C_SkStream_delete, C_SkWStream_destruct,
-    C_SkWStream_write, SkDynamicMemoryWStream, SkStreamAsset,
+    C_SkDynamicMemoryWStream_detachAsStream, C_SkMemoryStream_MakeDirect, C_SkStream_delete,
+    C_SkWStream_destruct, C_SkWStream_write, SkDynamicMemoryWStream, SkMemoryStream, SkStream,
+    SkStreamAsset,
 };
+use std::marker::PhantomData;
+use std::ptr;
 
-#[repr(transparent)]
-pub struct StreamAsset(*mut SkStreamAsset);
+/// Trait representing an Skia allocated Stream type with a base class of SkStream.
+pub struct Stream<N: NativeStreamBase>(*mut N);
 
-impl NativeAccess<SkStreamAsset> for StreamAsset {
+pub trait NativeStreamBase {
+    fn as_stream_mut(&mut self) -> &mut SkStream;
+}
+
+impl<T: NativeStreamBase> Drop for Stream<T> {
+    fn drop(&mut self) {
+        unsafe {
+            C_SkStream_delete(self.0 as _);
+        }
+    }
+}
+
+impl<N: NativeStreamBase> Stream<N> {
+    pub fn from_ptr(ptr: *mut N) -> Stream<N> {
+        assert_ne!(ptr, ptr::null_mut());
+        Stream(ptr)
+    }
+}
+
+pub type StreamAsset = Stream<SkStreamAsset>;
+
+impl NativeStreamBase for SkStreamAsset {
+    fn as_stream_mut(&mut self) -> &mut SkStream {
+        &mut self._base._base._base
+    }
+}
+
+impl NativeAccess<SkStreamAsset> for Stream<SkStreamAsset> {
     fn native(&self) -> &SkStreamAsset {
         unsafe { &*self.0 }
     }
-
     fn native_mut(&mut self) -> &mut SkStreamAsset {
         unsafe { &mut *self.0 }
     }
 }
 
-impl Drop for StreamAsset {
-    fn drop(&mut self) {
-        unsafe {
-            C_SkStream_delete(&mut self.native_mut()._base._base._base);
+#[repr(C)]
+pub struct MemoryStream<'a> {
+    native: *mut SkMemoryStream,
+    pd: PhantomData<&'a ()>,
+}
+
+impl NativeStreamBase for SkMemoryStream {
+    fn as_stream_mut(&mut self) -> &mut SkStream {
+        &mut self._base._base._base._base._base
+    }
+}
+
+impl<'a> NativeAccess<SkMemoryStream> for MemoryStream<'a> {
+    fn native(&self) -> &SkMemoryStream {
+        unsafe { &*self.native }
+    }
+    fn native_mut(&mut self) -> &mut SkMemoryStream {
+        unsafe { &mut *self.native }
+    }
+}
+
+impl<'a> MemoryStream<'a> {
+    // Create a stream asset that refers the bytes provided.
+    pub fn from_bytes<'bytes>(bytes: &'bytes [u8]) -> MemoryStream<'bytes> {
+        let ptr = unsafe { C_SkMemoryStream_MakeDirect(bytes.as_ptr() as _, bytes.len()) };
+
+        MemoryStream {
+            native: ptr,
+            pd: PhantomData,
         }
     }
 }
@@ -68,9 +122,7 @@ impl Handle<SkDynamicMemoryWStream> {
     }
 
     pub fn detach_as_stream(&mut self) -> StreamAsset {
-        StreamAsset(unsafe {
-            C_SkDynamicMemoryWStream_detachAsStream(self.native_mut())
-        })
+        StreamAsset::from_ptr(unsafe { C_SkDynamicMemoryWStream_detachAsStream(self.native_mut()) })
     }
 }
 
@@ -79,4 +131,10 @@ fn detaching_empty_dynamic_memory_w_stream_leads_to_non_null_data() {
     let mut stream = DynamicMemoryWStream::new();
     let data = stream.detach_as_data();
     assert_eq!(0, data.size())
+}
+
+#[test]
+fn memory_stream_from_bytes() {
+    let stream = MemoryStream::from_bytes(&[1, 2, 3]);
+    drop(stream);
 }

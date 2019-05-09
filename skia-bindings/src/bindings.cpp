@@ -1267,6 +1267,14 @@ extern "C" bool C_SkWStream_write(SkWStream* self, const void* buffer, size_t si
 }
 
 //
+// SkMemoryStream: public SkStreamMemory
+//
+
+extern "C" SkMemoryStream* C_SkMemoryStream_MakeDirect(const void* data, size_t length) {
+    return SkMemoryStream::MakeDirect(data, length).release();
+}
+
+//
 // SkDynamicMemoryWStream : public SkWStream
 //
 
