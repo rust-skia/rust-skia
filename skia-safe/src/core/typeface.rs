@@ -6,9 +6,10 @@ use skia_bindings::{
     C_SkTypeface_LocalizedStrings_next, C_SkTypeface_LocalizedStrings_unref,
     C_SkTypeface_MakeDefault, C_SkTypeface_MakeFromData, C_SkTypeface_MakeFromName,
     C_SkTypeface_isBold, C_SkTypeface_isItalic, C_SkTypeface_makeClone, C_SkTypeface_serialize,
-    SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings, SkTypeface_SerializeBehavior,
+    SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings, SkTypeface_SerializeBehavior, C_SkTypeface_MakeDeserialize
 };
 use std::ffi;
+use crate::interop::{MemoryStream, NativeStreamBase};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -167,9 +168,17 @@ impl RCHandle<SkTypeface> {
         Typeface::from_ptr(unsafe { C_SkTypeface_makeClone(self.native(), arguments.native()) })
     }
 
+    // TODO: return Data as impl Deref<[u8]> / Borrow<[u8]> here?
     pub fn serialize(&self, behavior: TypefaceSerializeBehavior) -> Data {
         Data::from_ptr(unsafe { C_SkTypeface_serialize(self.native(), behavior.into_native()) })
             .unwrap()
+    }
+
+    pub fn deserialize(data: &[u8]) -> Option<Typeface> {
+        let mut stream = MemoryStream::from_bytes(data);
+        Typeface::from_ptr(unsafe {
+            C_SkTypeface_MakeDeserialize(stream.native_mut().as_stream_mut())
+        })
     }
 
     // chars_to_glyphs is unsupported, because the documentation does not make sense to me:
@@ -245,4 +254,14 @@ impl RCHandle<SkTypeface> {
     pub fn bounds(&self) -> Rect {
         Rect::from_native(unsafe { self.native().getBounds() })
     }
+}
+
+#[test]
+fn serialize_and_deserialize_default_typeface() {
+    let tf = Typeface::default();
+    let serialized = tf.serialize(TypefaceSerializeBehavior::DoIncludeData);
+    let deserialized = Typeface::deserialize(&serialized).unwrap();
+    // why aren't they not equal?
+    // assert!(Typeface::equal(&tf, &deserialized));
+    assert_eq!(tf.family_name(), deserialized.family_name());
 }

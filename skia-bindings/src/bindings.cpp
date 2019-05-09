@@ -856,6 +856,10 @@ extern "C" SkData* C_SkTypeface_serialize(const SkTypeface* self, SkTypeface::Se
     return self->serialize(behavior).release();
 }
 
+extern "C" SkTypeface* C_SkTypeface_MakeDeserialize(SkStream* stream) {
+    return SkTypeface::MakeDeserialize(stream).release();
+}
+
 extern "C" void C_SkTypeface_LocalizedStrings_unref(SkTypeface::LocalizedStrings* self) {
     self->unref();
 }
