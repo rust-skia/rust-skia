@@ -20,10 +20,22 @@ To test if LLVM is installed with the correct version, use `clang --version`. Cu
 
 For Python, at least version 2.7 _should_ be available! Use `python --version` to see what's there.
 
-### macOS X
+### macOS
 
-- Install the XCode command line tools with `xcode-select --install`.
-- **macOS X 10.14 (Mojave)**: install or _reinstall_ the SDK headers: `/Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg`, otherwise the binding generation will fail with `'TargetConditionals.h' file not found` or fail to compile libjpeg-turbo.
+- Install the XCode command line developer tools with
+
+  ```bash
+  xcode-select --install
+  ```
+
+- **macOS Mojave Version 10.14**: install the SDK headers:
+
+  ```bash
+  sudo open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg
+  ```
+
+  otherwise the Skia build _may_ fail to build `SkJpegUtility.cpp` and the binding generation _will_ fail with  `'TargetConditionals.h' file not found` . Also note that the command line developer tools _and_ SDK headers _should_ be reinstalled after an update of XCode.
+
 - As an alternative to Apple LLVM 10, install LLVM 7.0.1 via `brew install llvm@7` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` like instructed.
 
 ### Windows
