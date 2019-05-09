@@ -229,7 +229,7 @@ impl RCHandle<SkTypeface> {
 
     // note: adjustments slice length must be equal to glyph's len - 1.
     pub fn kerning_pair_adjustments(&self, glyphs: &[GlyphId], adjustments: &mut [i32]) -> bool {
-        (adjustments.len() == glyphs.len() + 1)
+        (adjustments.len() + 1 == glyphs.len())
             && unsafe {
                 self.native().getKerningPairAdjustments(
                     glyphs.as_ptr(),
