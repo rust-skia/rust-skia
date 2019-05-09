@@ -96,7 +96,7 @@ jobs:
     inputs:
       action: create
       githubConnection: rust-skia-github-connection
-      repositoryName: rust-skia/skia-binaries
+      repositoryName: rust-skia/rust-skia
       tagSource: manual
       tag: '$(SKIA_BINARIES_KEY)'
       assets: '$(Build.ArtifactStagingDirectory)/skia-binaries-$(SKIA_BINARIES_KEY).tar.gz'
