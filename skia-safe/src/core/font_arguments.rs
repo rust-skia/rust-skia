@@ -76,12 +76,13 @@ impl<'a> FontArguments<'a> {
         self
     }
 
-    // This function must consume self its lifetime needs to be changed, because it
+    // This function consumes self to be able to change its lifetime, because it
     // borrows the coordinates referenced by FontArgumentsVariationPosition.
-    pub fn set_variation_design_position(
+    // Also don't use liftime elision here for documentation.
+    pub fn set_variation_design_position<'position>(
         mut self,
-        position: FontArgumentsVariationPosition,
-    ) -> FontArguments /* NEVER USE Self here, this returns a different lifetime */ {
+        position: FontArgumentsVariationPosition<'position>,
+    ) -> FontArguments<'position> {
         let position = SkFontArguments_VariationPosition {
             coordinates: position.coordinates.native().as_ptr(),
             coordinateCount: position.coordinates.len().try_into().unwrap(),
