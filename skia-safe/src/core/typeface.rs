@@ -85,12 +85,6 @@ impl Default for RCHandle<SkTypeface> {
     }
 }
 
-impl PartialEq for Typeface {
-    fn eq(&self, other: &Typeface) -> bool {
-        Typeface::equal(self, other)
-    }
-}
-
 impl RCHandle<SkTypeface> {
     pub fn font_style(&self) -> FontStyle {
         unsafe { FontStyle::from_native(self.native().fontStyle()) }
@@ -143,6 +137,8 @@ impl RCHandle<SkTypeface> {
         }
     }
 
+    // Decided not to support PartialEq instead of this function,
+    // because Skia does not support the operator ==.
     pub fn equal(face_a: &Typeface, face_b: &Typeface) -> bool {
         unsafe { SkTypeface::Equal(face_a.native(), face_b.native()) }
     }
