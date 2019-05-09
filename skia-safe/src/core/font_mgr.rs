@@ -177,7 +177,7 @@ fn create_all_typefaces() {
     let font_mgr = FontMgr::default();
     let families = font_mgr.count_families();
     println!("FontMgr families: {}", families);
-    // we require it that the font manager returns at least one family for now.
+    // test requires that the font manager returns at least one family for now.
     assert!(families > 0);
     // get all family names
     for i in 0..families {
