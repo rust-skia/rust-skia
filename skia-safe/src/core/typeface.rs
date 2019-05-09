@@ -163,7 +163,7 @@ impl RCHandle<SkTypeface> {
         });
     }
 
-    pub fn new_clone(&self, arguments: &FontArguments) -> Option<Typeface> {
+    pub fn clone_with_arguments(&self, arguments: &FontArguments) -> Option<Typeface> {
         Typeface::from_ptr(unsafe { C_SkTypeface_makeClone(self.native(), arguments.native()) })
     }
 
