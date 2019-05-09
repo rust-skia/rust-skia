@@ -24,17 +24,6 @@ fn test_typeface_serialize_behavior_layout() {
     TypefaceSerializeBehavior::test_layout()
 }
 
-// not sure if we need to export that yet.
-/*
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum TypefaceEncoding  {
-    UTF8 = SkTypeface_Encoding::kUTF8_Encoding as _,
-    UTF16 = SkTypeface_Encoding::kUTF16_Encoding as _,
-    UTF32 = SkTypeface_Encoding::kUTF32_Encoding as _
-}
-*/
-
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct TypefaceLocalizedString {
     pub string: String,
