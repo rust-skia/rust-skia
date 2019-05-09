@@ -14,11 +14,11 @@ This project attempts to provide _up to date_ safe bindings that bridge idiomati
 
 Note that the information in this section is preliminary. Please open an issue for any build problem.
 
-This project requires LLVM, python, and git to build.
+This project requires LLVM, Python 2, and git to build.
 
 To test if LLVM is installed with the correct version, use `clang --version`. Currently, version 7.0.1 is required, or - on macOS X - Apple LLVM Version 10 should do, too.
 
-For python, at least version 2.7 should be available. Use `python --version` to see what's there.
+For Python, at least version 2.7 _should_ be available! Use `python --version` to see what's there.
 
 ### macOS X
 
