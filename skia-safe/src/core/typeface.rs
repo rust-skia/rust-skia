@@ -32,9 +32,9 @@ pub struct TypefaceLocalizedString {
 }
 
 #[repr(transparent)]
-pub struct TypefaceLocalizedStrings(*mut SkTypeface_LocalizedStrings);
+struct LocalizedStringsIter(*mut SkTypeface_LocalizedStrings);
 
-impl NativeAccess<SkTypeface_LocalizedStrings> for TypefaceLocalizedStrings {
+impl NativeAccess<SkTypeface_LocalizedStrings> for LocalizedStringsIter {
     fn native(&self) -> &SkTypeface_LocalizedStrings {
         unsafe { &*self.0 }
     }
@@ -44,13 +44,13 @@ impl NativeAccess<SkTypeface_LocalizedStrings> for TypefaceLocalizedStrings {
     }
 }
 
-impl Drop for TypefaceLocalizedStrings {
+impl Drop for LocalizedStringsIter {
     fn drop(&mut self) {
         unsafe { C_SkTypeface_LocalizedStrings_unref(self.0) }
     }
 }
 
-impl Iterator for TypefaceLocalizedStrings {
+impl Iterator for LocalizedStringsIter {
     type Item = TypefaceLocalizedString;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -239,8 +239,8 @@ impl RCHandle<SkTypeface> {
             }
     }
 
-    pub fn new_family_name_iterator(&self) -> TypefaceLocalizedStrings {
-        TypefaceLocalizedStrings(unsafe { self.native().createFamilyNameIterator() })
+    pub fn new_family_name_iterator(&self) -> impl Iterator<Item = TypefaceLocalizedString> {
+        LocalizedStringsIter(unsafe { self.native().createFamilyNameIterator() })
     }
 
     pub fn family_name(&self) -> String {
@@ -264,4 +264,18 @@ fn serialize_and_deserialize_default_typeface() {
     // why aren't they not equal?
     // assert!(Typeface::equal(&tf, &deserialized));
     assert_eq!(tf.family_name(), deserialized.family_name());
+}
+
+#[test]
+fn family_name_iterator_owns_the_strings_and_returns_at_least_one_name_for_the_default_typeface() {
+    let tf = Typeface::default();
+    let family_names = tf.new_family_name_iterator();
+    drop(tf);
+
+    let mut any = false;
+    for name in family_names {
+        println!("family: {}, language: {}", name.string, name.language);
+        any = true
+    }
+    assert!(any);
 }
