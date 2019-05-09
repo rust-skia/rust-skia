@@ -23,8 +23,8 @@ For python, at least version 2.7 should be available. Use `python --version` to 
 ### macOS X
 
 - Install the XCode command line tools with `xcode-select --install`.
-- **macOS X 10.14 (Mojave)**: install the SDK headers: `/Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg`, otherwise the binding generation will fail with `'TargetConditionals.h' file not found`.
-- Alternatively, install LLVM 7.0.1 via `brew install llvm@7` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` like instructed.
+- **macOS X 10.14 (Mojave)**: install or _reinstall_ the SDK headers: `/Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg`, otherwise the binding generation will fail with `'TargetConditionals.h' file not found` or fail to compile libjpeg-turbo.
+- As an alternative to Apple LLVM 10, install LLVM 7.0.1 via `brew install llvm@7` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` like instructed.
 
 ### Windows
 
