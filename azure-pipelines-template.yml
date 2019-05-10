@@ -96,13 +96,11 @@ jobs:
     inputs:
       action: edit
       gitHubConnection: pragmatrix
-      repositoryName: rust-skia/rust-skia
+      repositoryName: rust-skia/skia-binaries
       tagSource: manual
       tag: 'test2'
       assets: '$(Build.ArtifactStagingDirectory)/skia-binaries-$(SKIA_BINARIES_KEY).tar.gz'
       assetUploadMode: 'replace'
-      # TODO: change before merging this into master.
-      isDraft: true
       # TODO: change before merging this into master.
       isPreRelease: true
       addChangeLog: false
