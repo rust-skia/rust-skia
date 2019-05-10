@@ -406,6 +406,15 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .whitelist_function("TightBounds")
         .whitelist_function("AsWinding")
         .whitelist_type("SkOpBuilder")
+        // utils/
+        .whitelist_function("Sk3LookAt")
+        .whitelist_function("Sk3Perspective")
+        .whitelist_function("Sk3MapPts")
+        .whitelist_type("Sk3DView")
+        .whitelist_type("SkInterpolator")
+        .whitelist_type("SkParsePath")
+        .whitelist_type("SkShadowUtils")
+        .whitelist_type("SkTextUtils")
         // misc
         .whitelist_var("SK_Color.*")
         .whitelist_var("kAll_GrBackendState")
