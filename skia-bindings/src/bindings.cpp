@@ -66,6 +66,13 @@
 #include "gl/GrGLInterface.h"
 // pathops/
 #include "SkPathOps.h"
+// utils/
+#include "Sk3D.h"
+#include "SkInterpolator.h"
+#include "SkNullCanvas.h"
+#include "SkParsePath.h"
+#include "SkShadowUtils.h"
+#include "SkTextUtils.h"
 
 #if defined(SK_VULKAN)
 #include "vk/GrVkVulkan.h"
@@ -1772,6 +1779,15 @@ extern "C" void C_SkOpBuilder_Construct(SkOpBuilder* uninitialized) {
 extern "C" void C_SkOpBuilder_destruct(SkOpBuilder* self) {
     self->~SkOpBuilder();
 }
+
+//
+// utils
+//
+
+extern "C" SkCanvas* C_SkMakeNullCanvas() {
+    return SkMakeNullCanvas().release();
+}
+
 
 #if defined(SK_VULKAN)
 

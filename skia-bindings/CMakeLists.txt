@@ -9,6 +9,7 @@ include_directories("skia/include/effects")
 include_directories("skia/include/gpu")
 include_directories("skia/include/pathops")
 include_directories("skia/include/svg")
+include_directories("skia/include/utils")
 include_directories("skia/src/xml")
 
 add_library(skiabindings src/bindings.cpp)
