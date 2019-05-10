@@ -131,7 +131,6 @@ pub fn canvas_clip_options_defaults() {
 /// The canvas type that is returned when it is managed by another instance,
 /// like Surface, for example. For these cases, the Canvas' reference that is
 /// returned is bound to the lifetime of the owner.
-
 #[repr(transparent)]
 pub struct Canvas(SkCanvas);
 
