@@ -100,9 +100,9 @@ jobs:
       tagSource: manual
       tag: 'test2'
       assets: '$(Build.ArtifactStagingDirectory)/skia-binaries-$(SKIA_BINARIES_KEY).tar.gz'
-      # assetUploadMode: 'replace'
+      assetUploadMode: 'replace'
       # TODO: change before merging this into master.
-      # isDraft: true
+      isDraft: true
       # TODO: change before merging this into master.
-      # isPreRelease: true
+      isPreRelease: true
       addChangeLog: false
