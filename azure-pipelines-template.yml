@@ -94,11 +94,11 @@ jobs:
     condition: and(succeeded(), eq(variables['toolchain'], 'stable'), or(eq(variables['Build.SourceBranchName'], 'master'), eq(variables['Build.SourceBranchName'], 'prebuilt-binaries')))
     displayName: 'Release to GitHub rust-skia/skia-binaries'
     inputs:
-      action: create
+      action: edit
       gitHubConnection: pragmatrix
       repositoryName: rust-skia/rust-skia
       tagSource: manual
-      tag: 'test'
+      tag: 'test2'
       assets: '$(Build.ArtifactStagingDirectory)/skia-binaries-$(SKIA_BINARIES_KEY).tar.gz'
       # assetUploadMode: 'replace'
       # TODO: change before merging this into master.
