@@ -28,7 +28,7 @@ pub enum MatrixScaleToFit {
 impl NativeTransmutable<SkMatrix_ScaleToFit> for MatrixScaleToFit {}
 #[test] fn test_matrix_scale_to_fit_layout() { MatrixScaleToFit::test_layout() }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 #[repr(transparent)]
 pub struct Matrix(SkMatrix);
 

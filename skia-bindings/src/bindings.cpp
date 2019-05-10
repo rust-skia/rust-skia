@@ -68,6 +68,7 @@
 #include "SkPathOps.h"
 // utils/
 #include "Sk3D.h"
+#include "SkCamera.h"
 #include "SkInterpolator.h"
 #include "SkNullCanvas.h"
 #include "SkParsePath.h"
@@ -1788,6 +1789,13 @@ extern "C" SkCanvas* C_SkMakeNullCanvas() {
     return SkMakeNullCanvas().release();
 }
 
+extern "C" Sk3DView* C_Sk3DView_new() {
+    return new Sk3DView();
+}
+
+extern "C" void C_Sk3DView_delete(Sk3DView* self) {
+    delete self;
+}
 
 #if defined(SK_VULKAN)
 
