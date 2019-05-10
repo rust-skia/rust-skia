@@ -347,6 +347,11 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
 fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_directory: &str) {
     let mut builder = bindgen::Builder::default()
         .generate_inline_functions(true)
+        .generate_comments(false)
+        // TODO: probably reenable layout tests for release builds and run
+        //       a customized test run that ignores failures skia-safe
+        //       works around.
+        .layout_tests(false)
         .default_enum_style(EnumVariation::Rust)
         .constified_enum(".*Mask")
         .constified_enum(".*Flags")
