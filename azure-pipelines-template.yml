@@ -95,7 +95,7 @@ jobs:
     displayName: 'Release to GitHub rust-skia/skia-binaries'
     inputs:
       action: create
-      githubConnection: pragmatrix
+      gitHubConnection: pragmatrix
       repositoryName: rust-skia/rust-skia
       tagSource: manual
       tag: '$(SKIA_BINARIES_KEY)'
