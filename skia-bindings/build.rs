@@ -19,9 +19,12 @@ fn main() {
 
     if let Some((tag, key)) = should_try_download_binaries(&config) {
         println!("TRYING TO DOWNLOAD AND INSTALL SKIA BINARIES: {}/{}", tag, key);
-        if let Err(e) = download_and_install(tag, key, &config.output_directory) {
-            println!("DOWNLOAD AND INSTALL FAILED: {}", e)
+        let url = binaries::download_url(tag, key);
+        println!("  FROM: {}", url);
+        if let Err(e) = download_and_install(url, &config.output_directory) {
+            println!("DOWNLOAD AND INSTALL FAILED: {}", e);
         } else {
+            println!("DOWNLOAD AND INSTALL SUCCEEDED");
             do_full_build = false;
         }
     }
@@ -70,10 +73,12 @@ fn should_try_download_binaries(config: &Configuration) -> Option<(String, Strin
     }
 }
 
-fn download_and_install(tag: impl AsRef<str>, key: impl AsRef<str>, output_directory: &Path) -> io::Result<()> {
-    binaries::download((tag, key), output_directory)?;
+fn download_and_install(url: impl AsRef<str>, output_directory: &Path) -> io::Result<()> {
+    let archive = binaries::download(url)?;
+    println!("UNPACKING ARCHIVE INTO: {}", output_directory.to_str().unwrap());
+    binaries::unpack(archive, output_directory)?;
     // TODO: verify key?
-    // install bindings.rs
+    println!("INSTALLING BINDINGS");
     fs::copy(output_directory.join("bindings.rs"), SRC_BINDINGS_RS)?;
 
     Ok(())

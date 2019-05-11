@@ -5,6 +5,11 @@ use flate2::read::GzDecoder;
 use std::io;
 use std::path::Path;
 use tar::Archive;
+use std::io::Read;
+
+/// The name of the tar archive without any keys or file extensions. This is also the name
+/// of the subdirectory that is created when the archive is unpacked.
+pub const ARCHIVE_NAME: &str = "skia-binaries";
 
 /// Key generation function.
 /// The resulting string will uniquely identify the generated binaries.
@@ -41,15 +46,29 @@ pub fn key<F: AsRef<str>>(repository_short_hash: &str, features: &[F]) -> String
     components.join("-")
 }
 
+/// Create the download URL for the prebuilt binaries archive.
+pub fn download_url(tag: impl AsRef<str>, key: impl AsRef<str>) -> String {
+    format!(
+        "https://github.com/rust-skia/skia-binaries/releases/download/{}/{}-{}.tar.gz",
+        tag.as_ref(), ARCHIVE_NAME, key.as_ref()
+    )
+}
+
 /// Download the binaries and unpack the contents to the target directory.
 /// Returns true if everything went as expected.
-pub fn download((tag, key): (impl AsRef<str>, impl AsRef<str>), target: &Path) -> io::Result<()> {
+pub fn download(url: impl AsRef<str>) -> io::Result<impl Read> {
+    match reqwest::get(url.as_ref()) {
+        Err(e) => Err(io::Error::new(io::ErrorKind::Other, e)),
+        Ok(response) => Ok(response)
+    }
+}
 
-    let url = &format!(
-        "https://github.com/rust-skia/skia-binaries/releases/download/{}/skia-binaries-{}.tar.gz",
-        tag.as_ref(), key.as_ref()
-    );
-    let body = reqwest::get(url).unwrap();
-    let tar = GzDecoder::new(body);
-    Archive::new(tar).unpack(target)
+pub fn unpack(archive: impl Read, target: &Path) -> io::Result<()> {
+    let tar = GzDecoder::new(archive);
+    // note: we just pull out the files in the archive flat into the target directory, because
+    // unpacking it would create a skia-bindings/ directory we don't need.
+    for file in Archive::new(tar).entries()? {
+        file?.unpack_in(target)?;
+    }
+    Ok(())
 }
