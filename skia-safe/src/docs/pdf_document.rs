@@ -6,7 +6,6 @@ pub mod pdf {
         C_SkPDF_MakeDocument, C_SkPDF_Metadata_Construct, C_SkPDF_Metadata_destruct,
         SkPDF_Metadata, SkString,
     };
-    use std::mem;
 
     // TODO: DocumentStructureType
     // TODO: StructureElementNode
@@ -78,9 +77,7 @@ pub mod pdf {
 
     impl Default for Handle<SkPDF_Metadata> {
         fn default() -> Self {
-            let mut metadata = unsafe { mem::uninitialized() };
-            unsafe { C_SkPDF_Metadata_Construct(&mut metadata) }
-            Self::from_native(metadata)
+            Self::construct_c(C_SkPDF_Metadata_Construct)
         }
     }
 

@@ -4,8 +4,8 @@ use std::hash::{
     Hasher
 };
 use crate::prelude::*;
-use crate::{Color, FilterQuality, Color4f, ColorSpace, scalar, Path, Rect, ColorFilter, BlendMode, PathEffect, MaskFilter, Shader, ImageFilter};
-use skia_bindings::{C_SkPaint_setMaskFilter, C_SkPaint_setPathEffect, C_SkPaint_setColorFilter, SkPaint_Cap, SkPaint, C_SkPaint_destruct, SkPaint_Style, SkPaint_Join, C_SkPaint_Equals, C_SkPaint_setShader, C_SkPaint_setImageFilter};
+use crate::{Color, FilterQuality, Color4f, ColorSpace, scalar, Path, Rect, ColorFilter, BlendMode, PathEffect, MaskFilter, Shader, ImageFilter, DrawLooper};
+use skia_bindings::{C_SkPaint_setMaskFilter, C_SkPaint_setPathEffect, C_SkPaint_setColorFilter, SkPaint_Cap, SkPaint, C_SkPaint_destruct, SkPaint_Style, SkPaint_Join, C_SkPaint_Equals, C_SkPaint_setShader, C_SkPaint_setImageFilter, C_SkPaint_setDrawLooper};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(u8)]
@@ -144,12 +144,11 @@ impl Handle<SkPaint> {
         self
     }
 
-    // TODO: why is ColorSpace mutable?
-    pub fn set_color4f(&mut self, color: Color4f, color_space: &mut ColorSpace) -> &mut Self {
+    pub fn set_color4f<C: AsRef<Color4f>>(&mut self, color: C, color_space: &ColorSpace) -> &mut Self {
         unsafe {
             self.native_mut().setColor4f(
-                &color.into_native(),
-                color_space.native_mut() )
+                color.as_ref().native(),
+                color_space.native_mut_force() )
         }
         self
     }
@@ -317,7 +316,18 @@ impl Handle<SkPaint> {
         self
     }
 
-    // TODO: getDrawLooper, setDrawLooper
+    pub fn draw_looper(&self) -> Option<DrawLooper> {
+        DrawLooper::from_unshared_ptr(unsafe {
+            self.native().getDrawLooper()
+        })
+    }
+
+    pub fn set_draw_looper<'a, IDL: Into<Option<&'a DrawLooper>>>(&mut self, draw_looper: IDL) -> &mut Self {
+        unsafe {
+            C_SkPaint_setDrawLooper(self.native_mut(), draw_looper.into().shared_ptr());
+        }
+        self
+    }
 
     pub fn nothing_to_draw(&self) -> bool {
         unsafe { self.native().nothingToDraw() }

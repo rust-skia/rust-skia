@@ -58,10 +58,9 @@ impl RCHandle<SkColorFilter> {
         })
     }
 
-    // TODO: check why and if ColorSpace needs to be mutable here.
-    pub fn filter_color4f(&self, color: Color4f, color_space: &mut ColorSpace) -> Color4f {
+    pub fn filter_color4f<C: AsRef<Color4f>>(&self, color: Color4f, color_space: &ColorSpace) -> Color4f {
         Color4f::from_native(unsafe {
-            self.native().filterColor4f(color.native(), color_space.native_mut())
+            self.native().filterColor4f(color.as_ref().native(), color_space.native_mut_force())
         })
     }
 

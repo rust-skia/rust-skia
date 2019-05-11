@@ -52,34 +52,22 @@ impl NativePartialEq for SkFont {
 
 impl Default for Font {
     fn default() -> Self {
-        unsafe { SkFont::new() }.into_handle()
+        Self::from_native(unsafe { SkFont::new() })
     }
 }
 
 impl Handle<SkFont> {
 
     pub fn from_typeface(typeface: &Typeface) -> Self {
-        let mut font : SkFont = unsafe { mem::uninitialized() };
-        unsafe {
-            C_SkFont_ConstructFromTypeface(&mut font, typeface.shared_native())
-        }
-        font.into_handle()
+        Self::construct(|font| unsafe { C_SkFont_ConstructFromTypeface(font, typeface.shared_native()) })
     }
 
     pub fn from_typeface_with_size(typeface: &Typeface, size: scalar) -> Self {
-        let mut font : SkFont = unsafe { mem::uninitialized() };
-        unsafe {
-            C_SkFont_ConstructFromTypefaceWithSize(&mut font, typeface.shared_native(), size)
-        }
-        font.into_handle()
+        Self::construct(|font| unsafe { C_SkFont_ConstructFromTypefaceWithSize(font, typeface.shared_native(), size) })
     }
 
     pub fn from_typeface_with_size_scale_and_skew(typeface: &Typeface, size: scalar, scale: scalar, skew: scalar) -> Self {
-        let mut font : SkFont = unsafe { mem::uninitialized() };
-        unsafe {
-            C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(&mut font, typeface.shared_native(), size, scale, skew)
-        }
-        font.into_handle()
+        Self::construct(|font| unsafe { C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(font, typeface.shared_native(), size, scale, skew) })
     }
 
     pub fn is_force_auto_hinting(&self) -> bool {
@@ -169,7 +157,7 @@ impl Handle<SkFont> {
         if size >= 0.0 && !size.is_infinite() && !size.is_nan() {
             let mut font = unsafe { SkFont::new() };
             unsafe { C_SkFont_makeWithSize(self.native(), size, &mut font) }
-            Some(font.into_handle())
+            Some(Self::from_native(font))
         } else {
             None
         }

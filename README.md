@@ -14,17 +14,29 @@ This project attempts to provide _up to date_ safe bindings that bridge idiomati
 
 Note that the information in this section is preliminary. Please open an issue for any build problem.
 
-This project requires LLVM, python, and git to build.
+This project requires LLVM, Python 2, and git to build.
 
-To test if LLVM is installed with the correct version, use `clang --version`. Currently, version 7.0.1 is required, or - on macOS X - Apple LLVM Version 10 should do, too.
+To test if LLVM is installed with the correct version, use `clang --version`. Currently, version 7.0.1 is required, or - on macOS X - Apple LLVM version 10 should do, too.
 
-For python, at least version 2.7 should be available. Use `python --version` to see what's there.
+For Python, at least version 2.7 _should_ be available! Use `python --version` to see what's there.
 
-### macOS X
+### macOS
 
-- Install the XCode command line tools with `xcode-select --install`.
-- **macOS X 10.14 (Mojave)**: install the SDK headers: `/Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg`, otherwise the binding generation will fail with `'TargetConditionals.h' file not found`.
-- Alternatively, install LLVM 7.0.1 via `brew install llvm@7` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` like instructed.
+- Install the XCode command line developer tools with
+
+  ```bash
+  xcode-select --install
+  ```
+
+- **macOS Mojave Version 10.14**: install the SDK headers:
+
+  ```bash
+  sudo open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg
+  ```
+
+  otherwise the Skia build _may_ fail to build `SkJpegUtility.cpp` and the binding generation _will_ fail with  `'TargetConditionals.h' file not found` . Also note that the command line developer tools _and_ SDK headers _should_ be reinstalled after an update of XCode.
+
+- As an alternative to Apple LLVM 10, install LLVM 7.0.1 via `brew install llvm@7` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` like instructed.
 
 ### Windows
 

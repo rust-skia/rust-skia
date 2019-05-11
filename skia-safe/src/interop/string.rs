@@ -18,6 +18,12 @@ impl ToString for String {
     }
 }
 
+impl Default for Handle<SkString> {
+    fn default() -> Self {
+        Self::from_str("")
+    }
+}
+
 impl Handle<SkString> {
     pub fn from_str(str: &str) -> String {
         let bytes = str.as_bytes();

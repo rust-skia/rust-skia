@@ -14,7 +14,6 @@ impl Scalar for scalar {
     const HALF: Self = 0.5;
 }
 
-
 #[allow(non_camel_case_types)]
 pub(crate) type u8cpu = skia_bindings::U8CPU;
 pub type GlyphId = skia_bindings::SkGlyphID;
@@ -63,6 +62,9 @@ pub use self::data::*;
 pub(crate) mod document;
 pub use self::document::*;
 
+mod draw_looper;
+pub use self::draw_looper::*;
+
 mod encoded_image_format;
 pub use self::encoded_image_format::*;
 
@@ -72,8 +74,16 @@ pub use self::filter_quality::*;
 mod font;
 pub use self::font::*;
 
+mod font_arguments;
+pub use self::font_arguments::*;
+
 mod font_metrics;
 pub use self::font_metrics::*;
+
+mod font_mgr;
+pub use self::font_mgr::*;
+
+pub mod font_parameters;
 
 mod font_style;
 pub use self::font_style::*;

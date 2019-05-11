@@ -53,12 +53,11 @@ impl NativeTransmutable<SkRegion_Op> for RegionOp {}
 
 impl Handle<SkRegion> {
     pub fn new() -> Region {
-        unsafe { SkRegion::new() }.into_handle()
+        Self::from_native(unsafe { SkRegion::new() })
     }
 
     pub fn from_rect<IR: AsRef<IRect>>(rect: IR) -> Region {
-        unsafe { SkRegion::new2(rect.as_ref().native()) }
-            .into_handle()
+        Self::from_native(unsafe { SkRegion::new2(rect.as_ref().native()) })
     }
 
     pub fn set(&mut self, src: &Region) -> bool {

@@ -73,13 +73,13 @@ jobs:
 
   - script: cd skia-safe && cargo run --release --features "$(features)" --example skia-org "$(Build.ArtifactStagingDirectory)/skia-org" $(exampleArgs)
     displayName: Generate skia-org Example Images
-    condition: ne(variables['exampleArgs'], '')
+    condition: and(succeeded(), ne(variables['exampleArgs'], ''))
 
   - task: PublishBuildArtifacts@1
     inputs:
       pathtoPublish: '$(Build.ArtifactStagingDirectory)/skia-org'
       artifactName: 'skia-org-examples-$(platform)-$(toolchain)'
-    condition: ne(variables['exampleArgs'], '')
+    condition: and(succeeded(), ne(variables['exampleArgs'], ''))
 
   - task: ArchiveFiles@2
     condition: and(succeeded(), eq(variables['toolchain'], 'stable'), or(eq(variables['Build.SourceBranchName'], 'master'), eq(variables['Build.SourceBranchName'], 'prebuilt-binaries')))

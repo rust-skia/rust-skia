@@ -278,6 +278,9 @@ pub fn build(config: &Configuration) {
 
     let current_dir = env::current_dir().unwrap();
 
+    println!("cargo:rustc-link-search={}", &output_directory);
+    cargo::add_link_lib("static=skia");
+
     bindgen_gen(&current_dir, output_directory)
 }
 
@@ -287,6 +290,7 @@ fn bindgen_gen(current_dir: &Path, output_directory: &str) {
         .default_enum_style(EnumVariation::Rust)
         .constified_enum(".*Mask")
         .constified_enum(".*Flags")
+        .constified_enum(".*Bits")
         .constified_enum("SkCanvas_SaveLayerFlagsSet")
         .constified_enum("GrVkAlloc_Flag")
         .constified_enum("GrGLBackendState")
@@ -310,7 +314,10 @@ fn bindgen_gen(current_dir: &Path, output_directory: &str) {
         .whitelist_type("SkContourMeasureIter")
         .whitelist_type("SkCubicMap")
         .whitelist_type("SkDocument")
+        .whitelist_type("SkDrawLooper")
+        .whitelist_type("SkMemoryStream")
         .whitelist_type("SkDynamicMemoryWStream")
+        .whitelist_type("SkFontMgr")
         .whitelist_type("SkPathMeasure")
         .whitelist_type("SkVector4")
         .whitelist_type("SkPictureRecorder")
@@ -323,6 +330,7 @@ fn bindgen_gen(current_dir: &Path, output_directory: &str) {
         .whitelist_type("SkDashPathEffect")
         .whitelist_type("SkDiscretePathEffect")
         .whitelist_type("SkGradientShader")
+        .whitelist_type("SkLayerDrawLooper_Bits")
         .whitelist_type("SkPerlinNoiseShader")
         .whitelist_type("SkTableColorFilter")
         // gpu/
@@ -331,6 +339,13 @@ fn bindgen_gen(current_dir: &Path, output_directory: &str) {
         .whitelist_type("GrVkDrawableInfo")
         .whitelist_type("GrVkExtensionFlags")
         .whitelist_type("GrVkFeatureFlags")
+        // pathops/
+        .whitelist_type("SkPathOp")
+        .whitelist_function("Op")
+        .whitelist_function("Simplify")
+        .whitelist_function("TightBounds")
+        .whitelist_function("AsWinding")
+        .whitelist_type("SkOpBuilder")
         // misc
         .whitelist_var("SK_Color.*")
         .whitelist_var("kAll_GrBackendState")

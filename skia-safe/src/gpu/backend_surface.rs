@@ -16,23 +16,23 @@ impl NativeDrop for GrBackendFormat {
 impl Handle<GrBackendFormat> {
 
     pub fn new_gl(format: gl::Enum, target: gl::Enum) -> Self {
-        unsafe {
+        Self::from_native(unsafe {
             GrBackendFormat::MakeGL(format, target)
-        }.into_handle()
+        })
     }
 
     #[cfg(feature="vulkan")]
     pub fn new_vulkan(format: vk::Format) -> Self {
-        unsafe {
+        Self::from_native(unsafe {
             GrBackendFormat::MakeVk(format)
-        }.into_handle()
+        })
     }
 
     #[cfg(feature="vulkan")]
     pub fn new_vulkan_ycbcr(conversion_info: &vk::YcbcrConversionInfo) -> Self {
-        unsafe {
+        Self::from_native(unsafe {
             GrBackendFormat::MakeVk1(conversion_info.native())
-        }.into_handle()
+        })
     }
 
     pub fn backend_api(&self) -> BackendAPI {
@@ -203,12 +203,12 @@ impl Handle<GrBackendRenderTarget> {
         sample_count: SC, stencil_bits: usize,
         info: &gl::FramebufferInfo
     ) -> BackendRenderTarget {
-        unsafe {
+        Self::from_native(unsafe {
             GrBackendRenderTarget::new1(
                 width, height,
                 sample_count.into().unwrap_or(0).try_into().unwrap(), stencil_bits.try_into().unwrap(),
                 info.native())
-        }.into_handle()
+        })
     }
 
     #[cfg(feature="vulkan")]
@@ -217,9 +217,9 @@ impl Handle<GrBackendRenderTarget> {
         sample_count: SC,
         info: &vk::ImageInfo
     ) -> BackendRenderTarget {
-        unsafe {
+        BackendRenderTarget::from_native(unsafe {
             GrBackendRenderTarget::new3(width, height, sample_count.into().unwrap_or(0).try_into().unwrap(), info.native())
-        }.into_handle()
+        })
     }
 
     pub(crate) fn from_native_if_valid(native: GrBackendRenderTarget) -> Option<BackendRenderTarget> {

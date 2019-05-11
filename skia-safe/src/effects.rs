@@ -10,6 +10,9 @@ pub use self::alpha_threshold_filter::*;
 mod arithmetic_image_filter;
 pub use self::arithmetic_image_filter::*;
 
+mod blur_draw_looper;
+pub use self::blur_draw_looper::*;
+
 mod blur_image_filter;
 pub use self::blur_image_filter::*;
 
@@ -39,6 +42,9 @@ pub use self::gradient_shader::*;
 
 mod image_source;
 pub use self::image_source::*;
+
+mod layer_draw_looper;
+pub use self::layer_draw_looper::*;
 
 mod lighting_image_filter;
 pub use self::lighting_image_filter::*;

@@ -31,7 +31,7 @@ impl NativeDrop for SkPictureRecorder {
 impl Handle<SkPictureRecorder> {
 
     pub fn new() -> Self {
-        unsafe { SkPictureRecorder::new() }.into_handle()
+        Self::from_native(unsafe { SkPictureRecorder::new() })
     }
 
     pub fn begin_recording<BR: AsRef<Rect>>(

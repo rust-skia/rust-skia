@@ -1,4 +1,3 @@
-use std::mem;
 use crate::prelude::*;
 use skia_bindings::{
     SkAlphaType,
@@ -41,11 +40,11 @@ pub enum ColorType {
     ARGB4444 = SkColorType::kARGB_4444_SkColorType as _,
     RGBA8888 = SkColorType::kRGBA_8888_SkColorType as _,
     RGB888x = SkColorType::kRGB_888x_SkColorType as _,
-    BRGA8888 = SkColorType::kBGRA_8888_SkColorType as _,
+    BGRA8888 = SkColorType::kBGRA_8888_SkColorType as _,
     RGBA1010102 = SkColorType::kRGBA_1010102_SkColorType as _,
     RGB101010x = SkColorType::kRGB_101010x_SkColorType as _,
     Gray8 = SkColorType::kGray_8_SkColorType as _,
-    F16Norm = SkColorType::kRGBA_F16Norm_SkColorType as _,
+    RGBAF16Norm = SkColorType::kRGBA_F16Norm_SkColorType as _,
     RGBAF16 = SkColorType::kRGBA_F16_SkColorType as _,
     RGBAF32 = SkColorType::kRGBA_F32_SkColorType as _,
 }
@@ -120,12 +119,7 @@ impl NativeClone for SkImageInfo {
 
 impl Default for Handle<SkImageInfo> {
     fn default() -> Self {
-        ImageInfo::from_native(unsafe {
-            let mut image_info : SkImageInfo = mem::uninitialized();
-            // note SkImageInfo::new() does not link under Linux.
-            C_SkImageInfo_Construct(&mut image_info);
-            image_info
-        })
+        Self::construct_c(C_SkImageInfo_Construct)
     }
 }
 

@@ -15,14 +15,13 @@ use skia_bindings::{
 
 // note: SkColor _is_ a u32, and therefore its components are
 // endian dependent, so we can't expose it as (transmuted) fields.
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Default, Debug)]
 #[repr(transparent)]
 pub struct Color(SkColor);
 
 impl NativeTransmutable<SkColor> for Color {}
-
 #[test]
-fn test_layout() {
+fn test_color_layout() {
     Color::test_layout();
 }
 
@@ -194,6 +193,16 @@ impl HSV {
 pub struct Color4f { pub r: f32, pub g: f32, pub b: f32, pub a: f32 }
 
 impl NativeTransmutable<SkColor4f> for Color4f {}
+#[test]
+fn test_color4f_layout() {
+    Color4f::test_layout();
+}
+
+impl AsRef<Color4f> for Color4f {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
 
 impl Mul<f32> for Color4f {
     type Output = Color4f;
@@ -253,10 +262,9 @@ impl Color4f {
 
     pub fn fits_in_bytes(&self) -> bool {
         debug_assert!(self.a >= 0.0 && self.a <= 1.0);
-        return
-            self.r >= 0.0 && self.r <= 1.0 &&
-                self.g >= 0.0 && self.g <= 1.0 &&
-                self.b >= 0.0 && self.b <= 1.0;
+        self.r >= 0.0 && self.r <= 1.0 &&
+        self.g >= 0.0 && self.g <= 1.0 &&
+        self.b >= 0.0 && self.b <= 1.0
     }
 
     pub fn to_color(&self) -> Color {
@@ -287,5 +295,5 @@ pub fn color_color4f_conversion() {
     let c = Color::from_argb(1, 2, 3, 4);
     let cf = Color4f::from(c);
     let c2 = cf.to_color();
-    assert!(c == c2);
+    assert_eq!(c, c2);
 }

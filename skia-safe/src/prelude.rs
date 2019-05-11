@@ -190,6 +190,9 @@ impl<Native, Base: NativeRefCounted> NativeRefCounted for Native
 pub trait NativeAccess<N> {
     fn native(&self) -> &N;
     fn native_mut(&mut self) -> &mut N;
+    unsafe fn native_mut_force(&self) -> &mut N {
+        &mut *(self.native() as *const N as *mut N)
+    }
 }
 
 /// Implements Drop for native types we can not implement Drop for.
@@ -219,17 +222,6 @@ pub trait FromNative<N> {
     fn from_native(native: N) -> Self;
 }
 
-pub trait IntoHandle<H> {
-    fn into_handle(self) -> H;
-}
-
-impl<H, N> IntoHandle<H> for N
-    where H: FromNative<N> {
-    fn into_handle(self) -> H {
-        H::from_native(self)
-    }
-}
-
 /// Wraps a native type that can be represented as a value
 /// and needs a Drop trait.
 #[repr(transparent)]
@@ -244,6 +236,23 @@ impl<N: NativeDrop> AsRef<Handle<N>> for Handle<N> {
 impl<N: NativeDrop> FromNative<N> for Handle<N> {
     fn from_native(n: N) -> Handle<N> {
         Handle(n)
+    }
+}
+
+impl<N: NativeDrop> Handle<N> {
+    /// Constructs a C++ object in place by calling an
+    /// extern "C" function that expects a pointer that points to
+    /// zeroed memory of the native type.
+    pub fn construct_c(construct: unsafe extern "C" fn(*mut N) -> ()) -> Self {
+        Self::construct(|instance| unsafe { construct(instance) })
+    }
+
+    pub fn construct<F: FnOnce(&mut N) -> ()>(construct: F) -> Self {
+        unsafe {
+            let mut instance = mem::zeroed();
+            construct(&mut instance);
+            Self::from_native(instance)
+        }
     }
 }
 
@@ -424,8 +433,6 @@ impl<N: NativeRefCounted> NativeAccess<N> for RCHandle<N> {
 }
 
 impl<N: NativeRefCounted> Clone for RCHandle<N> {
-
-
     fn clone(&self) -> Self {
 
         // yes, we _do_ support shared mutability when

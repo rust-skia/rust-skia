@@ -6,9 +6,12 @@
 #include "SkColorFilter.h"
 #include "SkContourMeasure.h"
 #include "SkCubicMap.h"
+#include "SkDrawLooper.h"
 #include "SkDocument.h"
 #include "SkFont.h"
+#include "SkFontArguments.h"
 #include "SkFontMetrics.h"
+#include "SkFontMgr.h"
 #include "SkImageFilter.h"
 #include "SkImageInfo.h"
 #include "SkMaskFilter.h"
@@ -33,6 +36,7 @@
 #include "Sk2DPathEffect.h"
 #include "SkAlphaThresholdFilter.h"
 #include "SkArithmeticImageFilter.h"
+#include "SkBlurDrawLooper.h"
 #include "SkBlurImageFilter.h"
 #include "SkColorFilterImageFilter.h"
 #include "SkComposeImageFilter.h"
@@ -43,6 +47,7 @@
 #include "SkDropShadowImageFilter.h"
 #include "SkGradientShader.h"
 #include "SkImageSource.h"
+#include "SkLayerDrawLooper.h"
 #include "SkLightingImageFilter.h"
 #include "SkMagnifierImageFilter.h"
 #include "SkMatrixConvolutionImageFilter.h"
@@ -59,7 +64,8 @@
 #include "GrContext.h"
 // gpu/gl
 #include "gl/GrGLInterface.h"
-#include "SkRect.h"
+// pathops/
+#include "SkPathOps.h"
 
 #if defined(SK_VULKAN)
 #include "vk/GrVkVulkan.h"
@@ -436,6 +442,10 @@ extern "C" void C_SkPaint_setImageFilter(SkPaint* self, const SkImageFilter* ima
     self->setImageFilter(spFromConst(imageFilter));
 }
 
+extern "C" void C_SkPaint_setDrawLooper(SkPaint* self, const SkDrawLooper* drawLooper) {
+    self->setDrawLooper(spFromConst(drawLooper));
+}
+
 //
 // SkPath
 //
@@ -809,8 +819,16 @@ extern "C" SkTextBlob* C_SkTextBlob_MakeFromText(const void* text, size_t byteLe
 }
 
 //
-// SkTypeface
+// core/SkTypeface.h
 //
+
+extern "C" bool C_SkTypeface_isBold(const SkTypeface* self) {
+    return self->isBold();
+}
+
+extern "C" bool C_SkTypeface_isItalic(const SkTypeface* self) {
+    return self->isItalic();
+}
 
 extern "C" SkTypeface* C_SkTypeface_MakeDefault() {
     return SkTypeface::MakeDefault().release();
@@ -820,16 +838,40 @@ extern "C" SkTypeface* C_SkTypeface_MakeFromName(const char familyName[], SkFont
     return SkTypeface::MakeFromName(familyName, fontStyle).release();
 }
 
+/*
 extern "C" SkTypeface* C_SkTypeface_MakeFromFile(const char path[], int index) {
     return SkTypeface::MakeFromFile(path, index).release();
 }
+*/
 
 extern "C" SkTypeface* C_SkTypeface_MakeFromData(const SkData* data, int index) {
     return SkTypeface::MakeFromData(sk_sp<SkData>(const_cast<SkData*>(data)), index).release();
 }
 
+extern "C" SkTypeface* C_SkTypeface_makeClone(const SkTypeface* self, const SkFontArguments* arguments) {
+    return self->makeClone(*arguments).release();
+}
+
 extern "C" SkData* C_SkTypeface_serialize(const SkTypeface* self, SkTypeface::SerializeBehavior behavior) {
     return self->serialize(behavior).release();
+}
+
+extern "C" SkTypeface* C_SkTypeface_MakeDeserialize(SkStream* stream) {
+    return SkTypeface::MakeDeserialize(stream).release();
+}
+
+extern "C" void C_SkTypeface_LocalizedStrings_unref(SkTypeface::LocalizedStrings* self) {
+    self->unref();
+}
+
+extern "C" bool C_SkTypeface_LocalizedStrings_next(SkTypeface::LocalizedStrings* self, SkString* string, SkString* language) {
+    auto ls = SkTypeface::LocalizedString();
+    if (self->next(&ls)) {
+        *string = ls.fString;
+        *language = ls.fLanguage;
+        return true;
+    }
+    return false;
 }
 
 //
@@ -866,6 +908,63 @@ extern "C" void C_SkFont_setTypeface(SkFont* self, const SkTypeface* tf) {
 
 extern "C" void C_SkFont_destruct(SkFont* self) {
     self->~SkFont();
+}
+
+//
+// SkFontArguments
+//
+
+extern "C" void C_SkFontArguments_construct(SkFontArguments* uninitialized) {
+    new(uninitialized) SkFontArguments();
+}
+
+extern "C" void C_SkFontArguments_destruct(SkFontArguments* self) {
+    self->~SkFontArguments();
+}
+
+extern "C" void C_SkFontArguments_setCollectionIndex(SkFontArguments* self, int collectionIndex) {
+    self->setCollectionIndex(collectionIndex);
+}
+
+extern "C" void C_SkFontArguments_setVariationDesignPosition(SkFontArguments* self, SkFontArguments::VariationPosition position) {
+    self->setVariationDesignPosition(position);
+}
+
+//
+// core/SkFontMgr.h
+//
+
+extern "C" int C_SkFontStyleSet_count(SkFontStyleSet* self) {
+    return self->count();
+}
+
+extern "C" void C_SkFontStyleSet_getStyle(SkFontStyleSet* self, int index, SkFontStyle* fontStyle, SkString* style) {
+    self->getStyle(index, fontStyle, style);
+}
+
+extern "C" SkTypeface* C_SkFontStyleSet_createTypeface(SkFontStyleSet* self, int index) {
+    return self->createTypeface(index);
+}
+
+extern "C" SkTypeface* C_SkFontStyleSet_matchStyle(SkFontStyleSet* self, const SkFontStyle* pattern) {
+    return self->matchStyle(*pattern);
+}
+
+// note: this function _consumes_ / deletes the stream.
+extern "C" SkTypeface* C_SkFontMgr_makeFromStream(const SkFontMgr* self, SkStreamAsset* stream, int ttcIndex) {
+    return self->makeFromStream(std::unique_ptr<SkStreamAsset>(stream), ttcIndex).release();
+}
+
+extern "C" SkFontMgr* C_SkFontMgr_RefDefault() {
+    return SkFontMgr::RefDefault().release();
+}
+
+//
+// core/SkFontParameters.h
+//
+
+extern "C" bool C_SkFontParameters_Variation_Axis_isHidden(const SkFontParameters::Variation::Axis* self) {
+    return self->isHidden();
 }
 
 //
@@ -995,6 +1094,15 @@ extern "C" void C_SkContourMeasureIter_destruct(SkContourMeasureIter* self) {
 
 extern "C" SkContourMeasure* C_SkContourMeasureIter_next(SkContourMeasureIter* self) {
     return self->next().release();
+}
+
+//
+// SkDrawLooper
+//
+
+
+extern "C" bool C_SkDrawLooper_asABlurShadow(const SkDrawLooper* self, SkDrawLooper::BlurShadowRec& br) {
+    return self->asABlurShadow(&br);
 }
 
 //
@@ -1143,19 +1251,47 @@ extern "C" SkShader* C_SkShader_makeAsALocalMatrixShader(const SkShader* self, S
 }
 
 //
-// SkDynamicMemoryWStream
+// SkStream
+//
+
+extern "C" void C_SkStream_delete(SkStream* stream) {
+    delete stream;
+}
+
+//
+// SkWStream
+//
+
+extern "C" void C_SkWStream_destruct(SkWStream* self) {
+    self->~SkWStream();
+}
+
+extern "C" bool C_SkWStream_write(SkWStream* self, const void* buffer, size_t size) {
+    return self->write(buffer, size);
+}
+
+//
+// SkMemoryStream: public SkStreamMemory
+//
+
+extern "C" SkMemoryStream* C_SkMemoryStream_MakeDirect(const void* data, size_t length) {
+    return SkMemoryStream::MakeDirect(data, length).release();
+}
+
+//
+// SkDynamicMemoryWStream : public SkWStream
 //
 
 extern "C" void C_SkDynamicMemoryWStream_Construct(SkDynamicMemoryWStream* uninitialized) {
     new(uninitialized) SkDynamicMemoryWStream();
 }
 
-extern "C" void C_SkDynamicMemoryWStream_destruct(SkDynamicMemoryWStream* self) {
-    self->~SkDynamicMemoryWStream();
-}
-
 extern "C" SkData* C_SkDynamicMemoryWStream_detachAsData(SkDynamicMemoryWStream* self) {
     return self->detachAsData().release();
+}
+
+extern "C" SkStreamAsset* C_SkDynamicMemoryWStream_detachAsStream(SkDynamicMemoryWStream* self) {
+    return self->detachAsStream().release();
 }
 
 //
@@ -1257,7 +1393,20 @@ extern "C" SkImageFilter *C_SkArithmeticImageFilter_Make(float k1, float k2, flo
 }
 
 //
-// SkBlurImageFilter
+// effects/SkBlurDrawLooper
+//
+
+extern "C" SkDrawLooper* C_SkBlurDrawLooper_Make(SkColor color, SkScalar sigma, SkScalar dx, SkScalar dy) {
+    return SkBlurDrawLooper::Make(color, sigma, dx, dy).release();
+}
+
+// note: SkColorSpace's ref count should not be increased before passing it here.
+extern "C" SkDrawLooper* C_SkBlurDrawLooper_Make2(SkColor4f color, const SkColorSpace* cs, SkScalar sigma, SkScalar dx, SkScalar dy) {
+    return SkBlurDrawLooper::Make(color, const_cast<SkColorSpace*>(cs), sigma, dx, dy).release();
+}
+
+//
+// effects/SkBlurImageFilter
 //
 
 extern "C" SkImageFilter *C_SkBlurImageFilter_Make(SkScalar sigmaX, SkScalar sigmaY, const SkImageFilter &input,
@@ -1345,6 +1494,18 @@ extern "C" SkImageFilter *
 C_SkImageSource_Make2(const SkImage &image, const SkRect &srcRect, const SkRect &dstRect,
                       SkFilterQuality filterQuality) {
     return SkImageSource::Make(spFromConst(&image), srcRect, dstRect, filterQuality).release();
+}
+
+//
+// effects/SkLayerDrawLooper
+//
+
+extern "C" void C_SkLayerDrawLooper_Builder_destruct(SkLayerDrawLooper::Builder* self) {
+    self->~Builder();
+}
+
+extern "C" SkDrawLooper* C_SkLayerDrawLooper_Builder_detach(SkLayerDrawLooper::Builder* self) {
+    return self->detach().release();
 }
 
 //
@@ -1598,6 +1759,18 @@ extern "C" GrContext* C_GrContext_MakeGL(const GrGLInterface* interface) {
 
 extern "C" bool C_GrContext_colorTypeSupportedAsSurface(const GrContext* self, SkColorType colorType) {
     return self->colorTypeSupportedAsSurface(colorType);
+}
+
+//
+// pathops/
+//
+
+extern "C" void C_SkOpBuilder_Construct(SkOpBuilder* uninitialized) {
+    new(uninitialized) SkOpBuilder();
+}
+
+extern "C" void C_SkOpBuilder_destruct(SkOpBuilder* self) {
+    self->~SkOpBuilder();
 }
 
 #if defined(SK_VULKAN)

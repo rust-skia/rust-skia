@@ -358,11 +358,10 @@ impl RCHandle<SkImage> {
         -> (gpu::BackendTexture, gpu::SurfaceOrigin) {
 
         let mut origin = gpu::SurfaceOrigin::TopLeft;
-        let texture = unsafe {
+        let texture = gpu::BackendTexture::from_native(unsafe {
             self.native()
                 .getBackendTexture(flush_pending_gr_context_io, origin.native_mut())
-                .into_handle()
-        };
+        });
         (texture, origin)
     }
 
@@ -406,18 +405,18 @@ impl RCHandle<SkImage> {
         })
     }
 
-    pub fn new_texture_image(
+    pub fn new_texture_image<'a, ICS: Into<Option<&'a ColorSpace>>>(
         &self,
         context: &mut gpu::Context,
-        dst_color_space: &mut ColorSpace,
+        dst_color_space: ICS,
         mip_mapped: gpu::MipMapped) -> Option<Image> {
 
         Image::from_ptr(unsafe {
             C_SkImage_makeTextureImage(
                 self.native(),
                 context.native_mut(),
-                dst_color_space.native_mut(),
-                mip_mapped.native().to_owned())
+                dst_color_space.into().native_ptr_or_null(),
+                mip_mapped.into_native())
         })
     }
 
