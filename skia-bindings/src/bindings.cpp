@@ -1785,10 +1785,6 @@ extern "C" void C_SkOpBuilder_destruct(SkOpBuilder* self) {
 // utils
 //
 
-extern "C" SkCanvas* C_SkMakeNullCanvas() {
-    return SkMakeNullCanvas().release();
-}
-
 extern "C" Sk3DView* C_Sk3DView_new() {
     return new Sk3DView();
 }
@@ -1811,6 +1807,10 @@ extern "C" void C_SkInterpolator_setReset(SkInterpolator* self, bool reset) {
 
 extern "C" void C_SkInterpolator_setMirror(SkInterpolator* self, bool mirror) {
     self->setMirror(mirror);
+}
+
+extern "C" SkCanvas* C_SkMakeNullCanvas() {
+    return SkMakeNullCanvas().release();
 }
 
 #if defined(SK_VULKAN)

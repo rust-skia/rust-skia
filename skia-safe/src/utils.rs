@@ -6,3 +6,6 @@ pub use self::camera::*;
 
 mod interpolator;
 pub use self::interpolator::*;
+
+mod null_canvas;
+pub use self::null_canvas::*;
