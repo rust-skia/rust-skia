@@ -2,11 +2,11 @@
 
 use crate::build_support::cargo;
 use flate2::read::GzDecoder;
+use std::fs;
 use std::io;
+use std::io::Read;
 use std::path::{Path, PathBuf};
 use tar::Archive;
-use std::io::Read;
-use std::fs;
 
 /// The name of the tar archive without any keys or file extensions. This is also the name
 /// of the subdirectory that is created when the archive is unpacked.
@@ -51,7 +51,9 @@ pub fn key<F: AsRef<str>>(repository_short_hash: &str, features: &[F]) -> String
 pub fn download_url(tag: impl AsRef<str>, key: impl AsRef<str>) -> String {
     format!(
         "https://github.com/rust-skia/skia-binaries/releases/download/{}/{}-{}.tar.gz",
-        tag.as_ref(), ARCHIVE_NAME, key.as_ref()
+        tag.as_ref(),
+        ARCHIVE_NAME,
+        key.as_ref()
     )
 }
 
@@ -60,18 +62,24 @@ pub fn download_url(tag: impl AsRef<str>, key: impl AsRef<str>) -> String {
 pub fn download(url: impl AsRef<str>) -> io::Result<impl Read> {
     match reqwest::get(url.as_ref()) {
         Err(e) => Err(io::Error::new(io::ErrorKind::Other, e)),
-        Ok(response) => Ok(response)
+        Ok(response) => Ok(response),
     }
 }
 
 pub fn unpack(archive: impl Read, target: &Path) -> io::Result<()> {
     let tar = GzDecoder::new(archive);
-    // note: this creates skia-bindings/ directory.
+    // note: this creates the skia-bindings/ directory.
     Archive::new(tar).unpack(target)?;
     let binaries_dir = target.join(ARCHIVE_NAME);
-    let paths : Vec<PathBuf> = fs::read_dir(target)?.map(|e| e.unwrap().path()).collect();
+    let paths: Vec<PathBuf> = fs::read_dir(binaries_dir)?
+        .map(|e| e.unwrap().path())
+        .collect();
+
+    // pull out all nested files.
     for path in paths {
-        fs::rename(path, target)?
+        let name = path.file_name().unwrap();
+        let target_path = target.join(name);
+        fs::rename(path, target_path)?
     }
     Ok(())
 }
