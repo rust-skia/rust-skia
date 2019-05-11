@@ -51,11 +51,16 @@ impl FourByteTag {
     }
 }
 
+// TODO: wrap for type safety?
 pub type GlyphId = skia_bindings::SkGlyphID;
 
+// TODO: wrap for type safety?
 pub type Unichar = skia_bindings::SkUnichar;
 
+// TODO: wrap for type safety?
 pub type MSec = skia_bindings::SkMSec;
+
+pub const MSEC_MAX: u32 = std::i32::MAX as u32;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct Budgeted(bool);
