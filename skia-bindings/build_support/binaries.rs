@@ -6,17 +6,24 @@ use std::io;
 use std::path::Path;
 use tar::Archive;
 
-/// Key generation function. The resulting string will uniquely identify the generated binaries.
-/// Parts of the key are separated by '-' and every part that contains individual separators is enclosed
-/// in '[]'.
+/// Key generation function.
+/// The resulting string will uniquely identify the generated binaries.
+/// Every part of the key is separated by '-' and no grouping / enclosing characters are used
+/// because GitHub strips them from the filenames (tested "<>[]{}()" ).
+/// TODO: May use Unicode characters for grouping.
 pub fn key<F: AsRef<str>>(repository_short_hash: &str, features: &[F]) -> String {
     let mut components = Vec::new();
+
+    fn group(str: impl AsRef<str>) -> String {
+        // no grouping syntax ATM
+        format!("{}", str.as_ref())
+    }
 
     // SHA hash of the rust-skia repository.
     components.push(repository_short_hash.to_owned());
 
     // The target architecture, vendor, system, and abi if specified.
-    components.push(format!("[{}]", cargo::target().to_string()));
+    components.push(group(cargo::target().to_string()));
 
     // features, sorted and duplicates removed.
     if !features.is_empty() {
@@ -25,10 +32,10 @@ pub fn key<F: AsRef<str>>(repository_short_hash: &str, features: &[F]) -> String
                 features.iter().map(|f| f.as_ref().to_string()).collect();
             features.sort();
             features.dedup();
-            features.join(",")
+            features.join("-")
         };
 
-        components.push(format!("[{}]", features));
+        components.push(group(features));
     };
 
     components.join("-")
