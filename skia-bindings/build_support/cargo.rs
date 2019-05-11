@@ -97,5 +97,5 @@ pub fn package_repository_hash() -> io::Result<String> {
 }
 
 pub fn package_version() -> String {
-    env!("CARGO_PKG_VERSION").into()
+    env::var("CARGO_PKG_VERSION").unwrap().as_str().into()
 }
