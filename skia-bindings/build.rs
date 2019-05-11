@@ -124,15 +124,23 @@ mod azure {
         Ok(())
     }
 
-    /// Prepares the binaries directory and sets the key.txt file to the key given.
+    /// Prepares the binaries directory and sets the tag.txt and key.txt
+    /// file.
     pub fn prepare_binaries(key: &str, artifacts: &Path) -> io::Result<PathBuf> {
         let binaries = artifacts.join("skia-binaries");
         fs::create_dir_all(&binaries)?;
 
-        // this is primarily for azure to know the key, but it can stay inside the
-        // archive.
-        let mut key_file = File::create(binaries.join("key.txt")).unwrap();
-        key_file.write_all(key.as_bytes())?;
+        // this is primarily for azure to know the tag and the key of the binaries,
+        // but they can stay inside the archive.
+
+        {
+            let mut tag_file = File::create(binaries.join("tag.txt")).unwrap();
+            tag_file.write_all(cargo::package_version().as_bytes())?;
+        }
+        {
+            let mut key_file = File::create(binaries.join("key.txt")).unwrap();
+            key_file.write_all(key.as_bytes())?;
+        }
 
         Ok(binaries)
     }

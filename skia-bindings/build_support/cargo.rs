@@ -95,3 +95,7 @@ pub fn package_repository_hash() -> io::Result<String> {
     let sha1 = git.get("sha1").expect("failed to get 'sha1' property");
     Ok(sha1.as_str().unwrap().into())
 }
+
+pub fn package_version() -> String {
+    env::var("CARGO_PKG_VERION").unwrap().as_str().into()
+}

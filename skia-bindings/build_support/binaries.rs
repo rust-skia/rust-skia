@@ -37,9 +37,11 @@ pub fn key<F: AsRef<str>>(repository_short_hash: &str, features: &[F]) -> String
 /// Download the binaries and unpack the contents to the target directory.
 /// Returns true if everything went as expected.
 pub fn download(key: &str, target: &Path) -> io::Result<()> {
+    let tag = cargo::package_version();
+
     let url = &format!(
         "https://github.com/rust-skia/skia-binaries/releases/download/{}/skia-binaries-{}.tar.gz",
-        key, key
+        tag, key
     );
     let body = reqwest::get(url).unwrap();
     let tar = GzDecoder::new(body);
