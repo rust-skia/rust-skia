@@ -3,29 +3,13 @@
 use std::path::Path;
 use std::process::{Command, Stdio};
 
-pub enum HashLength {
-    Short,
-    Half,
-    Full,
-}
+const HALF_HASH_LENGTH: usize = 20;
 
-/// Returns the hash of the repository located in the current directory.
-pub fn hash(kind: HashLength) -> Option<String> {
+/// Returns a 20 digit hash of the repository located in the current directory.
+pub fn half_hash() -> Option<String> {
     let mut cmd = Command::new("git");
-    cmd.arg("rev-parse");
-
-    match kind {
-        HashLength::Short => {
-            cmd.arg("--short");
-        }
-        HashLength::Half => {
-            cmd.arg("--short=20");
-        }
-        HashLength::Full => {}
-    }
-
+    cmd.arg("rev-parse").arg("--short=20");
     let output = cmd.arg("HEAD").stderr(Stdio::inherit()).output().ok()?;
-
     if output.status.code() != Some(0) {
         None
     } else {
@@ -34,30 +18,8 @@ pub fn hash(kind: HashLength) -> Option<String> {
     }
 }
 
-pub fn trim_hash(hash: &str, length: HashLength) -> String {
-    match length {
-        HashLength::Short => panic!("can't know how to trim a hash into a short hash"),
-        HashLength::Half => &hash[..20],
-        HashLength::Full => hash,
-    }
-    .into()
-}
-
-/// Returns the current branch of the repository.
-pub fn branch() -> String {
-    let output = Command::new("git")
-        .arg("rev-parse")
-        .arg("--abbrev-ref")
-        .arg("HEAD")
-        .stderr(Stdio::inherit())
-        .output()
-        .expect("git failed");
-
-    if output.status.code() != Some(0) {
-        panic!("git rev-parse failed");
-    } else {
-        String::from_utf8(output.stdout).unwrap().trim().to_string()
-    }
+pub fn trim_hash(hash: &str) -> String {
+    hash[..HALF_HASH_LENGTH].into()
 }
 
 /// Run git with the given args in the given directory, print stderr to the current

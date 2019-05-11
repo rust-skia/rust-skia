@@ -526,6 +526,6 @@ mod prerequisites {
         // note this does not always work (for example when an IDE is scanning these diretories),
         // so we ignore errors for now and leave that to the next invocation.
         // TODO: add a warning here, if this fails.
-        fs::remove_dir_all(repo_dir);
+        let _ = fs::remove_dir_all(repo_dir);
     }
 }

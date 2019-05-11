@@ -15,8 +15,8 @@ pub const ARCHIVE_NAME: &str = "skia-binaries";
 /// Key generation function.
 /// The resulting string will uniquely identify the generated binaries.
 /// Every part of the key is separated by '-' and no grouping / enclosing characters are used
-/// because GitHub strips them from the filenames (tested "<>[]{}()" ).
-/// TODO: May use Unicode characters for grouping.
+/// because GitHub strips them from the filenames (tested "<>[]{}()",
+/// and also Unicode characters seem to be stripped).
 pub fn key<F: AsRef<str>>(repository_short_hash: &str, features: &[F]) -> String {
     let mut components = Vec::new();
 

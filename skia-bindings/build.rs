@@ -1,10 +1,9 @@
 mod build_support;
-use crate::build_support::git::HashLength;
 use crate::build_support::skia::Configuration;
-use crate::build_support::{binaries, cargo, git};
+use crate::build_support::{azure, binaries, cargo, git};
 use build_support::skia;
 use std::path::Path;
-use std::{fs, io, env};
+use std::{env, fs, io};
 
 const SRC_BINDINGS_RS: &str = "src/bindings.rs";
 
@@ -18,7 +17,10 @@ fn main() {
     let mut do_full_build = true;
 
     if let Some((tag, key)) = should_try_download_binaries(&config) {
-        println!("TRYING TO DOWNLOAD AND INSTALL SKIA BINARIES: {}/{}", tag, key);
+        println!(
+            "TRYING TO DOWNLOAD AND INSTALL SKIA BINARIES: {}/{}",
+            tag, key
+        );
         let url = binaries::download_url(tag, key);
         println!("  FROM: {}", url);
         if let Err(e) = download_and_install(url, &config.output_directory) {
@@ -59,26 +61,25 @@ fn main() {
 
 /// Returns the key if we should try to download binaries.
 fn should_try_download_binaries(config: &Configuration) -> Option<(String, String)> {
-
     let tag = cargo::package_version();
 
     // for testing:
     if let Ok(_) = env::var("FORCE_SKIA_BINARIES_DOWNLOAD") {
         // retrieve the hash from the repository above us.
-        let half_hash = git::hash(HashLength::Half)?;
-        return Some((tag, binaries::key(&half_hash, &config.features)))
+        let half_hash = git::half_hash()?;
+        return Some((tag, binaries::key(&half_hash, &config.features)));
     }
 
     // are we building inside a package?
     if let Ok(ref full_hash) = cargo::package_repository_hash() {
-        let half_hash = git::trim_hash(full_hash, HashLength::Half);
-        return Some((tag, binaries::key(&half_hash, &config.features)))
+        let half_hash = git::trim_hash(full_hash);
+        return Some((tag, binaries::key(&half_hash, &config.features)));
     }
 
     if azure::is_active() {
         // and if we can resolve the hash and the key
-        let hash = git::hash(HashLength::Half)?;
-        return Some((tag, binaries::key(&hash, &config.features)))
+        let half_hash = git::half_hash()?;
+        return Some((tag, binaries::key(&half_hash, &config.features)));
     }
 
     None
@@ -86,79 +87,14 @@ fn should_try_download_binaries(config: &Configuration) -> Option<(String, Strin
 
 fn download_and_install(url: impl AsRef<str>, output_directory: &Path) -> io::Result<()> {
     let archive = binaries::download(url)?;
-    println!("UNPACKING ARCHIVE INTO: {}", output_directory.to_str().unwrap());
+    println!(
+        "UNPACKING ARCHIVE INTO: {}",
+        output_directory.to_str().unwrap()
+    );
     binaries::unpack(archive, output_directory)?;
     // TODO: verify key?
     println!("INSTALLING BINDINGS");
     fs::copy(output_directory.join("bindings.rs"), SRC_BINDINGS_RS)?;
 
     Ok(())
-}
-
-mod azure {
-    use crate::build_support::git::HashLength;
-    use crate::build_support::skia::Configuration;
-    use crate::build_support::{binaries, cargo, git};
-    use crate::SRC_BINDINGS_RS;
-    use std::fs::File;
-    use std::io::Write;
-    use std::path::{Path, PathBuf};
-    use std::{env, fs, io};
-
-    pub fn is_active() -> bool {
-        artifact_staging_directory().is_some()
-    }
-
-    pub fn artifact_staging_directory() -> Option<PathBuf> {
-        env::var("BUILD_ARTIFACTSTAGINGDIRECTORY")
-            .map(|dir| PathBuf::from(dir))
-            .ok()
-    }
-
-    pub fn copy_binaries(config: &Configuration, artifacts: &Path) -> io::Result<()> {
-        let hash = git::hash(HashLength::Half).expect("failed to retrieve the git hash");
-        let key = binaries::key(&hash, &config.features);
-
-        let binaries = prepare_binaries(&key, artifacts)?;
-
-        fs::copy(SRC_BINDINGS_RS, binaries.join("bindings.rs"))?;
-
-        let output_directory = &config.output_directory;
-
-        let target_is_windows = cargo::target().system == "windows";
-        let (skia_lib, skia_bindings_lib) = if target_is_windows {
-            ("skia.lib", "skia-bindings.lib")
-        } else {
-            ("libskia.a", "libskia-bindings.a")
-        };
-
-        fs::copy(output_directory.join(skia_lib), binaries.join(skia_lib))?;
-        fs::copy(
-            output_directory.join(skia_bindings_lib),
-            binaries.join(skia_bindings_lib),
-        )?;
-
-        Ok(())
-    }
-
-    /// Prepares the binaries directory and sets the tag.txt and key.txt
-    /// file.
-    pub fn prepare_binaries(key: &str, artifacts: &Path) -> io::Result<PathBuf> {
-        let binaries = artifacts.join("skia-binaries");
-        fs::create_dir_all(&binaries)?;
-
-        // this is primarily for azure to know the tag and the key of the binaries,
-        // but they can stay inside the archive.
-
-        {
-            let mut tag_file = File::create(binaries.join("tag.txt")).unwrap();
-            tag_file.write_all(cargo::package_version().as_bytes())?;
-        }
-        {
-            let mut key_file = File::create(binaries.join("key.txt")).unwrap();
-            key_file.write_all(key.as_bytes())?;
-        }
-
-        Ok(binaries)
-    }
 }
