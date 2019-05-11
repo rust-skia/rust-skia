@@ -17,9 +17,9 @@ fn main() {
 
     let mut do_full_build = true;
 
-    if let Some(key) = should_try_download_binaries(&config) {
-        println!("TRYING TO DOWNLOAD AND INSTALL SKIA BINARIES: {}", key);
-        if let Err(e) = download_and_install(&key, &config.output_directory) {
+    if let Some((tag, key)) = should_try_download_binaries(&config) {
+        println!("TRYING TO DOWNLOAD AND INSTALL SKIA BINARIES: {}/{}", tag, key);
+        if let Err(e) = download_and_install(tag, key, &config.output_directory) {
             println!("DOWNLOAD AND INSTALL FAILED: {}", e)
         } else {
             do_full_build = false;
@@ -55,22 +55,23 @@ fn main() {
 }
 
 /// Returns the key if we should try to download binaries.
-fn should_try_download_binaries(config: &Configuration) -> Option<String> {
+fn should_try_download_binaries(config: &Configuration) -> Option<(String, String)> {
+    let tag = cargo::package_version();
     // are we building inside a package?
     if let Ok(ref full_hash) = cargo::package_repository_hash() {
         let half_hash = git::trim_hash(full_hash, HashLength::Half);
-        Some(binaries::key(&half_hash, &config.features))
+        Some((tag, binaries::key(&half_hash, &config.features)))
     } else if azure::is_active() {
         // and if we can resolve the hash and the key
         let hash = git::hash(HashLength::Half)?;
-        Some(binaries::key(&hash, &config.features))
+        Some((tag, binaries::key(&hash, &config.features)))
     } else {
         None
     }
 }
 
-fn download_and_install(key: &str, output_directory: &Path) -> io::Result<()> {
-    binaries::download(key, output_directory)?;
+fn download_and_install(tag: impl AsRef<str>, key: impl AsRef<str>, output_directory: &Path) -> io::Result<()> {
+    binaries::download((tag, key), output_directory)?;
     // TODO: verify key?
     // install bindings.rs
     fs::copy(output_directory.join("bindings.rs"), SRC_BINDINGS_RS)?;
