@@ -427,7 +427,7 @@ mod prerequisites {
             .expect(">>>>> Please install python to build this crate. <<<<<");
     }
 
-    /// Get the skia git repository, either be checkout out the submodule, or
+    /// Get the skia git repository, either by checking out the submodule, or
     /// when the build.rs was called outside of the git repository,
     /// by checking out the original repository in a temporary directory and
     /// moving it over.
