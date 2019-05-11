@@ -11,3 +11,5 @@ mod null_canvas;
 pub use self::null_canvas::*;
 
 pub mod parse_path;
+pub mod shadow_utils;
+pub mod text_utils;

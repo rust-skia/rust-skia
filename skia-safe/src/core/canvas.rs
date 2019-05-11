@@ -730,9 +730,9 @@ impl Canvas {
 
     // rust specific, based on drawSimpleText with fixed UTF8 encoding,
     // implementation is similar to Font's *_str methods.
-    pub fn draw_str<P: Into<Point>>(&mut self, str: &str, origin: P, font: &Font, paint: &Paint) -> &mut Self {
+    pub fn draw_str(&mut self, str: impl AsRef<str>, origin: impl Into<Point>, font: &Font, paint: &Paint) -> &mut Self {
         let origin = origin.into();
-        let bytes = str.as_bytes();
+        let bytes = str.as_ref().as_bytes();
         unsafe {
             self.native_mut().drawSimpleText(
                 bytes.as_ptr() as _, bytes.len(), TextEncoding::UTF8.into_native(),

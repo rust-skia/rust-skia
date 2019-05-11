@@ -420,6 +420,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .whitelist_type("SkInterpolator")
         .whitelist_type("SkParsePath")
         .whitelist_type("SkShadowUtils")
+        .whitelist_type("SkShadowFlags")
         .whitelist_type("SkTextUtils")
         // misc
         .whitelist_var("SK_Color.*")
