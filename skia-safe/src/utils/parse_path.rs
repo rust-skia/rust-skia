@@ -1,6 +1,6 @@
-use crate::prelude::{IfBoolSome, NativeAccess};
+use crate::prelude::{Handle, IfBoolSome, NativeAccess};
 use crate::{interop, Path};
-use skia_bindings::{SkParsePath_FromSVGString, SkParsePath_ToSVGString};
+use skia_bindings::{SkParsePath_FromSVGString, SkParsePath_ToSVGString, SkPath};
 use std::ffi::CString;
 
 pub fn from_svg(svg: impl AsRef<str>) -> Option<Path> {
@@ -14,4 +14,14 @@ pub fn to_svg(path: &Path) -> String {
     unsafe { SkParsePath_ToSVGString(path.native(), svg.native_mut()) };
 
     svg.as_str().into()
+}
+
+impl Handle<SkPath> {
+    pub fn from_svg(svg: impl AsRef<str>) -> Option<Path> {
+        from_svg(svg)
+    }
+
+    pub fn to_svg(&self) -> String {
+        to_svg(self)
+    }
 }
