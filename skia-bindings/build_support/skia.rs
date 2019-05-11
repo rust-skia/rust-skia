@@ -415,6 +415,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .whitelist_function("Sk3LookAt")
         .whitelist_function("Sk3Perspective")
         .whitelist_function("Sk3MapPts")
+        .whitelist_function("SkUnitCubicInterp")
         .whitelist_type("Sk3DView")
         .whitelist_type("SkInterpolator")
         .whitelist_type("SkParsePath")

@@ -1,10 +1,10 @@
 //! This wrapper combines of SkInterpolatorBase and SkInterpolator into the type Interpolator.
 
 use crate::prelude::*;
-use crate::scalar;
+use crate::{scalar, Point};
 use skia_bindings::{
     C_SkInterpolator_destruct, C_SkInterpolator_setMirror, C_SkInterpolator_setRepeatCount,
-    C_SkInterpolator_setReset, SkInterpolator, SkInterpolatorBase_Result,
+    C_SkInterpolator_setReset, SkInterpolator, SkInterpolatorBase_Result, SkUnitCubicInterp,
 };
 use std::time::Duration;
 
@@ -166,4 +166,10 @@ pub struct TimeToT {
     pub t: scalar,
     pub index: usize,
     pub exact: bool,
+}
+
+pub fn unit_cubic_interp(value: scalar, b: impl Into<Point>, c: impl Into<Point>) -> scalar {
+    let b = b.into();
+    let c = c.into();
+    unsafe { SkUnitCubicInterp(value, b.x, b.y, c.x, c.y) }
 }
