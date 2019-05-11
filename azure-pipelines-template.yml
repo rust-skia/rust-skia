@@ -63,6 +63,7 @@ jobs:
   # Note: features are ignored when set in the workspace. This is a known bug in cargo (#5015), so cd into skia-safe instead.
   # Note: SKIA_BINARIES_KEY is set to empty ('') when the build script decides not to publish.
   - bash: |
+      set -e
       cd skia-safe && cargo build --release --features "$(features)" --all-targets -vv
       export SKIA_BINARIES_TAG=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/tag.txt")
       export SKIA_BINARIES_KEY=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/key.txt")
