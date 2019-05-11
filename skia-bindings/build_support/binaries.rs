@@ -3,9 +3,10 @@
 use crate::build_support::cargo;
 use flate2::read::GzDecoder;
 use std::io;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use tar::Archive;
 use std::io::Read;
+use std::fs;
 
 /// The name of the tar archive without any keys or file extensions. This is also the name
 /// of the subdirectory that is created when the archive is unpacked.
@@ -65,10 +66,12 @@ pub fn download(url: impl AsRef<str>) -> io::Result<impl Read> {
 
 pub fn unpack(archive: impl Read, target: &Path) -> io::Result<()> {
     let tar = GzDecoder::new(archive);
-    // note: we just pull out the files in the archive flat into the target directory, because
-    // unpacking it would create a skia-bindings/ directory we don't need.
-    for file in Archive::new(tar).entries()? {
-        file?.unpack_in(target)?;
+    // note: this creates skia-bindings/ directory.
+    Archive::new(tar).unpack(target)?;
+    let binaries_dir = target.join(ARCHIVE_NAME);
+    let paths : Vec<PathBuf> = fs::read_dir(target)?.map(|e| e.unwrap().path()).collect();
+    for path in paths {
+        fs::rename(path, target)?
     }
     Ok(())
 }
