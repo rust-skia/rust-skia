@@ -1797,6 +1797,22 @@ extern "C" void C_Sk3DView_delete(Sk3DView* self) {
     delete self;
 }
 
+extern "C" void C_SkInterpolator_destruct(SkInterpolator* self) {
+    self->~SkInterpolator();
+}
+
+extern "C" void C_SkInterpolator_setRepeatCount(SkInterpolator* self, SkScalar repeatCount) {
+    self->setRepeatCount(repeatCount);
+}
+
+extern "C" void C_SkInterpolator_setReset(SkInterpolator* self, bool reset) {
+    self->setReset(reset);
+}
+
+extern "C" void C_SkInterpolator_setMirror(SkInterpolator* self, bool mirror) {
+    self->setMirror(mirror);
+}
+
 #if defined(SK_VULKAN)
 
 // The GrVkBackendContext struct binding's length is too short
