@@ -523,7 +523,9 @@ mod prerequisites {
         fs::rename(skia_bindings_dir.join("skia"), skia_dir)
             .expect("failed to move skia directory");
 
-        // cleanup (note this does not always work, so we leave that to the next invocation).
-        // fs::remove_dir_all(repo_dir).expect("failed to cleanup rust-skia directory");
+        // note this does not always work (for example when an IDE is scanning these diretories),
+        // so we ignore errors for now and leave that to the next invocation.
+        // TODO: add a warning here, if this fails.
+        fs::remove_dir_all(repo_dir);
     }
 }
