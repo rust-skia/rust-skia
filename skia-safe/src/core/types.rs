@@ -2,20 +2,8 @@ use crate::prelude::NativeTransmutable;
 use skia_bindings::{SkBudgeted, SkFourByteTag};
 use std::ops::Deref;
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-pub struct Budgeted(bool);
-
-impl NativeTransmutable<SkBudgeted> for Budgeted {}
-
-#[test]
-fn test_budgeted_layout() {
-    Budgeted::test_layout()
-}
-
-impl Budgeted {
-    pub const NO: Budgeted = Budgeted(false);
-    pub const YES: Budgeted = Budgeted(true);
-}
+#[allow(non_camel_case_types)]
+pub(crate) type u8cpu = skia_bindings::U8CPU;
 
 //
 // FourByteTag
@@ -46,19 +34,40 @@ impl From<u32> for FourByteTag {
 }
 
 impl FourByteTag {
-    pub fn a(&self) -> u8 {
+    pub fn a(self) -> u8 {
         (self.into_native() >> 24) as u8
     }
 
-    pub fn b(&self) -> u8 {
+    pub fn b(self) -> u8 {
         (self.into_native() >> 16) as u8
     }
 
-    pub fn c(&self) -> u8 {
+    pub fn c(self) -> u8 {
         (self.into_native() >> 8) as u8
     }
 
-    pub fn d(&self) -> u8 {
+    pub fn d(self) -> u8 {
         self.into_native() as u8
     }
+}
+
+pub type GlyphId = skia_bindings::SkGlyphID;
+
+pub type Unichar = skia_bindings::SkUnichar;
+
+pub type MSec = skia_bindings::SkMSec;
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+pub struct Budgeted(bool);
+
+impl NativeTransmutable<SkBudgeted> for Budgeted {}
+
+#[test]
+fn test_budgeted_layout() {
+    Budgeted::test_layout()
+}
+
+impl Budgeted {
+    pub const NO: Budgeted = Budgeted(false);
+    pub const YES: Budgeted = Budgeted(true);
 }

@@ -14,10 +14,6 @@ impl Scalar for scalar {
     const HALF: Self = 0.5;
 }
 
-#[allow(non_camel_case_types)]
-pub(crate) type u8cpu = skia_bindings::U8CPU;
-pub type GlyphId = skia_bindings::SkGlyphID;
-pub type Unichar = skia_bindings::SkUnichar;
 pub type FontTableTag = skia_bindings::SkFontTableTag;
 
 mod bbh_factory;
