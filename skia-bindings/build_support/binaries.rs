@@ -62,7 +62,9 @@ pub fn download_url(tag: impl AsRef<str>, key: impl AsRef<str>) -> String {
 pub fn download(url: impl AsRef<str>) -> io::Result<impl Read> {
     match reqwest::get(url.as_ref()) {
         Err(e) => Err(io::Error::new(io::ErrorKind::Other, e)),
-        Ok(response) => Ok(response),
+        Ok(response) => response
+            .error_for_status()
+            .map_err(|e| io::Error::new(io::ErrorKind::Other, e)),
     }
 }
 
