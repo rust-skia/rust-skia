@@ -33,8 +33,8 @@ impl RCHandle<SkPicture> {
         }).unwrap()
     }
 
-    pub fn playback(&self, canvas: &mut Canvas) {
-        unsafe { C_SkPicture_playback(self.native(), canvas.native_mut()) }
+    pub fn playback(&self, mut canvas: impl AsMut<Canvas>) {
+        unsafe { C_SkPicture_playback(self.native(), canvas.as_mut().native_mut()) }
     }
 
     pub fn cull_rect(&self) -> Rect {
