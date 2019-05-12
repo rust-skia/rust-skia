@@ -75,7 +75,7 @@ pub struct BuildConfiguration {
     all_skia_libs: bool,
 }
 
-/// This is the final, low level build configuration for Skia that are needed by the involved components.
+/// This is the final, low level build configuration.
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct FinalBuildConfiguration {
     /// The name value pairs passed as arguments to gn.
