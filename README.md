@@ -62,7 +62,7 @@ Please share your build experience so that we can try to automate the build and 
 
 ### Skia
 
-If Skia does not build or needs to be configured differently, we support some customization support in `skia-bindings/build.rs`. For some more details about how to customize Skia builds, take a look at the [README of the skia-bindings package](skia-bindings/README.md).
+For situations in which Skia does not build or needs to be configured differently, we support some customization support in `skia-bindings/build.rs`. For more details about how to customize Skia builds, take a look at the [README of the skia-bindings package](skia-bindings/README.md).
 
 ### Feature `vulkan`
 
