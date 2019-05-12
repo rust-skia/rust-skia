@@ -4,7 +4,6 @@ use skia_bindings::{
     C_Sk3DView_delete, C_Sk3DView_new, Sk3DView, SkCamera3D, SkMatrix3D, SkPatch3D, SkPoint3D,
     SkUnit3D,
 };
-use std::borrow::BorrowMut;
 
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
 #[repr(C)]
@@ -327,12 +326,10 @@ impl View3D {
         m
     }
 
-    // TODO: is BorrowMut the right trait to use here to support OwnedCanvas & Canvas?
-    //       or AsMut<> or DerefMut<>?
-    pub fn apply_to_canvas(&self, mut canvas: impl BorrowMut<Canvas>) -> &Self {
+    pub fn apply_to_canvas(&self, mut canvas: impl AsMut<Canvas>) -> &Self {
         unsafe {
             self.native()
-                .applyToCanvas(canvas.borrow_mut().native_mut())
+                .applyToCanvas(canvas.as_mut().native_mut())
         }
         self
     }
@@ -341,4 +338,23 @@ impl View3D {
         let d = d.into();
         unsafe { self.native().dotWithNormal(d.x, d.y, d.z) }
     }
+}
+
+#[test]
+fn test_canvas_passing_syntax() {
+    use crate::Surface;
+    use crate::utils::new_null_canvas;
+
+    // The null canvas is an OwnedCanvas which implements DerefMut auf Canvas, let's see
+    // if we can call a function that expects a impl BorrowMut<Canvas>.
+    let mut null_canvas = new_null_canvas();
+    let view = View3D::default();
+    // as reference
+    view.apply_to_canvas(&mut null_canvas);
+    // moved
+    view.apply_to_canvas(null_canvas);
+
+    // and one with a direct mutable reference to Canvas:
+    let mut surface = Surface::new_raster_n32_premul((100, 100)).unwrap();
+    view.apply_to_canvas(surface.canvas());
 }

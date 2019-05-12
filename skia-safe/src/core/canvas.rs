@@ -176,6 +176,21 @@ impl<'lt> Default for OwnedCanvas<'lt> {
     }
 }
 
+// We implement AsMut for Canvas & OwnedCanvas
+// to simplify a number of API calls.
+// TODO: Should we support AsRef, too?
+impl AsMut<Canvas> for Canvas {
+    fn as_mut(&mut self) -> &mut Canvas {
+        self
+    }
+}
+
+impl<'lt> AsMut<Canvas> for OwnedCanvas<'lt> {
+    fn as_mut(&mut self) -> &mut Canvas {
+        self.deref_mut()
+    }
+}
+
 impl Canvas {
 
     pub fn from_raster_direct<'pixels>(
@@ -920,6 +935,8 @@ pub enum AutoCanvasRestore {}
 
 impl AutoCanvasRestore {
 
+    // TODO: Can't use AsMut here for the canvas, because it would break
+    //       the lifetime dependency.
     pub fn guard(canvas: &mut Canvas, do_save: bool) -> AutoRestoredCanvas {
         let restore = unsafe {
             // does not link on Linux

@@ -248,11 +248,11 @@ impl RCHandle<SkSurface> {
     }
 
     // TODO: why is self mutable here?
-    pub fn draw_to_canvas<S: Into<Size>>(&mut self, canvas: &mut Canvas, size: S, paint: Option<&Paint>) {
+    pub fn draw_to_canvas<S: Into<Size>>(&mut self, mut canvas: impl AsMut<Canvas>, size: S, paint: Option<&Paint>) {
         let size = size.into();
         unsafe {
             self.native_mut().draw(
-                canvas.native_mut(),
+                canvas.as_mut().native_mut(),
                 size.width,
                 size.height,
                 paint.native_ptr_or_null())
