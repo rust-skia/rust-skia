@@ -36,5 +36,5 @@ This struct represents the top level build configuration for `skia-bindings` and
 
 ### `FinalBuildConfiguration`
 
-The `FinalBuildConfiguration` is created from the `BuildConfiguration` and contains the individual name value pairs that are sent to GN to parameterize the Skia build and the preprocessor defines that are used to create the `src/bindings.rs` file and the `skia-bindings` library.
+The `FinalBuildConfiguration` is created from the `BuildConfiguration` and contains name value pairs used by GN to parameterize the Skia build and preprocessor defines used to create the `src/bindings.rs` file and the `skia-bindings` library.
 
