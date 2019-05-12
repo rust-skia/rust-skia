@@ -8,16 +8,16 @@ pub fn output_directory() -> PathBuf {
     PathBuf::from(env::var("OUT_DIR").unwrap())
 }
 
-pub fn add_dependent_path(path: &str) {
-    println!("cargo:rerun-if-changed={}", path);
+pub fn add_dependent_path(path: impl AsRef<str>) {
+    println!("cargo:rerun-if-changed={}", path.as_ref());
 }
 
-pub fn add_link_libs<Lib: AsRef<str>>(libs: &[Lib]) {
+pub fn add_link_libs(libs: &[impl AsRef<str>]) {
     libs.into_iter().for_each(|s| add_link_lib(s.as_ref()))
 }
 
-pub fn add_link_lib(lib: &str) {
-    println!("cargo:rustc-link-lib={}", lib);
+pub fn add_link_lib(lib: impl AsRef<str>) {
+    println!("cargo:rustc-link-lib={}", lib.as_ref());
 }
 
 #[derive(Clone, Debug)]
@@ -29,7 +29,7 @@ pub struct Target {
 }
 
 impl Target {
-    pub fn as_str(&self) -> (&str, &str, &str, Option<&str>) {
+    pub fn as_strs(&self) -> (&str, &str, &str, Option<&str>) {
         (
             self.architecture.as_str(),
             self.vendor.as_str(),
@@ -63,15 +63,17 @@ pub fn target() -> Target {
         panic!("Failed to parse TARGET {}", target_str);
     }
 
+    let abi = if target.len() > 3 {
+        Some(target[3].clone())
+    } else {
+        None
+    };
+
     Target {
         architecture: target[0].clone(),
         vendor: target[1].clone(),
         system: target[2].clone(),
-        abi: if target.len() > 3 {
-            Some(target[3].clone())
-        } else {
-            None
-        },
+        abi,
     }
 }
 

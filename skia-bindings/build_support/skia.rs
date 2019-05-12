@@ -20,7 +20,7 @@ impl Default for BuildConfiguration {
         // [763/867] link libparticles.a
         // FAILED: libparticles.a
         let all_skia_libs = {
-            match cargo::target().as_str() {
+            match cargo::target().as_strs() {
                 (_, "apple", "darwin", _) => true,
                 _ => false,
             }
@@ -234,7 +234,7 @@ impl BinariesConfiguration {
 
         let mut link_libraries = Vec::new();
 
-        match cargo::target().as_str() {
+        match cargo::target().as_strs() {
             (_, "unknown", "linux", Some("gnu")) => {
                 link_libraries.extend(vec!["stdc++", "bz2", "GL", "fontconfig", "freetype"]);
             }
