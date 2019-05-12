@@ -79,7 +79,7 @@ fn main() {
     }
 }
 
-/// Returns the key if we should try to download binaries.
+/// If the binaries should be downloaded, return the tag and the key.
 fn should_try_download_binaries(config: &skia::BinariesConfiguration) -> Option<(String, String)> {
     let tag = cargo::package_version();
 
@@ -106,7 +106,7 @@ fn should_try_download_binaries(config: &skia::BinariesConfiguration) -> Option<
 }
 
 fn download_and_install(url: impl AsRef<str>, output_directory: &Path) -> io::Result<()> {
-    let archive = binaries::download(url)?;
+    let archive = binaries::begin_download(url)?;
     println!(
         "UNPACKING ARCHIVE INTO: {}",
         output_directory.to_str().unwrap()

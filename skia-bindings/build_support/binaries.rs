@@ -57,9 +57,8 @@ pub fn download_url(tag: impl AsRef<str>, key: impl AsRef<str>) -> String {
     )
 }
 
-/// Download the binaries and unpack the contents to the target directory.
-/// Returns true if everything went as expected.
-pub fn download(url: impl AsRef<str>) -> io::Result<impl Read> {
+/// Begin downloading the binaries from the given url.
+pub fn begin_download(url: impl AsRef<str>) -> io::Result<impl Read> {
     match reqwest::get(url.as_ref()) {
         Err(e) => Err(io::Error::new(io::ErrorKind::Other, e)),
         Ok(response) => response
