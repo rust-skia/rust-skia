@@ -12,36 +12,55 @@ const BINDINGS_LIB_NAME: &str = "skia-bindings";
 const REPOSITORY_CLONE_URL: &str = "https://github.com/rust-skia/rust-skia.git";
 const REPOSITORY_DIRECTORY: &str = "rust-skia";
 
-mod build {
+/// The defaults for the Skia build configuration.
+impl Default for BuildConfiguration {
+    fn default() -> Self {
+        BuildConfiguration {
+            on_windows: cfg!(windows),
+            // Note that currently, we don't support debug Skia builds,
+            // because they are hard to configure and pull in a lot of testing related modules.
+            skia_release: true,
+            keep_inline_functions: true,
+            feature_vulkan: cfg!(feature = "vulkan"),
+            feature_svg: cfg!(feature = "svg"),
+            feature_animation: false,
+            feature_dng: false,
+            feature_particles: false,
+        }
+    }
+}
+
+/// The build configuration for Skia.
+pub struct BuildConfiguration {
     /// Do we build _on_ a Windows OS?
-    pub const ON_WINDOWS: bool = cfg!(windows);
+    on_windows: bool,
 
     /// Build Skia in a release configuration?
-    /// Note that currently, we don't support debug Skia builds.
-    pub const SKIA_RELEASE: bool = true;
+    skia_release: bool,
 
     /// Configure Skia builds to keep inline functions to
     /// prevent mean linker errors.
-    pub const KEEP_INLINE_FUNCTIONS: bool = true;
+    keep_inline_functions: bool,
 
     /// Build with Vulkan support?
-    pub const VULKAN: bool = cfg!(feature = "vulkan");
+    feature_vulkan: bool,
 
     /// Build with SVG support?
-    pub const SVG: bool = cfg!(feature = "svg");
+    feature_svg: bool,
 
-    /// Build with animation support.
-    pub const ANIMATION: bool = false;
+    /// Build with animation support (yet unsupported, no wrappers).
+    feature_animation: bool,
 
-    /// Support DNG file format.
-    pub const DNG: bool = false;
+    /// Support DNG file format (currently unsupported because of build errors).
+    feature_dng: bool,
 
-    /// Build the particles module.
-    pub const PARTICLES: bool = false;
+    /// Build the particles module (unsupported, no wrappers).
+    feature_particles: bool,
 }
 
-pub struct Configuration {
-    /// The features we build with.
+/// The resulting binaries configuration.
+pub struct BinariesConfiguration {
+    /// The features we built with.
     pub features: Vec<String>,
 
     /// The output directory of the libraries we build and we need to inform cargo about.
@@ -55,14 +74,15 @@ pub struct Configuration {
     pub build_all_skia_libs: bool,
 }
 
-impl Configuration {
-    /// Build a configuration based on the current environment cargo supplies us with.
-    pub fn from_cargo_env() -> Self {
+impl BinariesConfiguration {
+    /// Build a binaries configuration based on the current environment cargo
+    /// supplies us with and a Skia build configuration.
+    pub fn from_cargo_env(build: &BuildConfiguration) -> Self {
         let mut features = Vec::new();
-        if build::VULKAN {
+        if build.feature_vulkan {
             features.push("vulkan");
         }
-        if build::SVG {
+        if build.feature_svg {
             features.push("svg")
         }
 
@@ -99,7 +119,7 @@ impl Configuration {
             .unwrap()
             .into();
 
-        Configuration {
+        BinariesConfiguration {
             features: features.iter().map(|f| f.to_string()).collect(),
             output_directory,
             link_libraries: link_libraries.iter().map(|lib| lib.to_string()).collect(),
@@ -121,8 +141,7 @@ impl Configuration {
 }
 
 /// The full build of Skia, SkiaBindings, and the generation of bindings.rs.
-/// Returns the output directory of the libraries.
-pub fn build(config: &Configuration) {
+pub fn build(build: &BuildConfiguration, config: &BinariesConfiguration) {
     prerequisites::require_python();
     prerequisites::get_skia();
 
@@ -149,14 +168,15 @@ pub fn build(config: &Configuration) {
             format!("\"{}\"", s)
         };
 
-        let force_build_libs = config.build_all_skia_libs;
-
         let mut args: Vec<(&str, String)> = vec![
             (
                 "is_official_build",
-                if build::SKIA_RELEASE { yes() } else { no() },
+                if build.skia_release { yes() } else { no() },
             ),
-            ("skia_use_expat", if build::SVG { yes() } else { no() }),
+            (
+                "skia_use_expat",
+                if build.feature_svg { yes() } else { no() },
+            ),
             ("skia_use_system_expat", no()),
             ("skia_use_icu", no()),
             ("skia_use_system_libjpeg_turbo", no()),
@@ -165,17 +185,20 @@ pub fn build(config: &Configuration) {
             ("skia_use_system_zlib", no()),
             (
                 "skia_enable_skottie",
-                if build::ANIMATION || force_build_libs {
+                if build.feature_animation || config.build_all_skia_libs {
                     yes()
                 } else {
                     no()
                 },
             ),
             ("skia_use_xps", no()),
-            ("skia_use_dng_sdk", if build::DNG { yes() } else { no() }),
+            (
+                "skia_use_dng_sdk",
+                if build.feature_dng { yes() } else { no() },
+            ),
             (
                 "skia_enable_particles",
-                if build::PARTICLES || force_build_libs {
+                if build.feature_particles || config.build_all_skia_libs {
                     yes()
                 } else {
                     no()
@@ -186,7 +209,7 @@ pub fn build(config: &Configuration) {
         ];
 
         // further flags that limit the components of Skia debug builds.
-        if !build::SKIA_RELEASE {
+        if !build.skia_release {
             args.push(("skia_enable_atlas_text", no()));
             args.push(("skia_enable_spirv_validation", no()));
             args.push(("skia_enable_tools", no()));
@@ -195,14 +218,14 @@ pub fn build(config: &Configuration) {
             args.push(("skia_use_lua", no()));
         }
 
-        if build::VULKAN {
+        if build.feature_vulkan {
             args.push(("skia_use_vulkan", yes()));
             args.push(("skia_enable_spirv_validation", no()));
         }
 
         let mut flags: Vec<&str> = vec![];
 
-        if build::ON_WINDOWS {
+        if build.on_windows {
             // Rust's msvc toolchain supports uses msvcrt.dll by
             // default for release and _debug_ builds.
             flags.push("/MD");
@@ -211,9 +234,9 @@ pub fn build(config: &Configuration) {
             args.push(("clang_win", quote("C:/Program Files/LLVM")));
         }
 
-        if build::KEEP_INLINE_FUNCTIONS {
+        if build.keep_inline_functions {
             // sadly, this also disables inlining and is probably a real performance bummer.
-            if build::ON_WINDOWS {
+            if build.on_windows {
                 flags.push("/Ob0")
             } else {
                 flags.push("-fno-inline-functions");
@@ -237,7 +260,7 @@ pub fn build(config: &Configuration) {
         .collect::<Vec<String>>()
         .join(" ");
 
-    let gn_command = if build::ON_WINDOWS {
+    let gn_command = if build.on_windows {
         "skia/bin/gn"
     } else {
         "bin/gn"
@@ -258,7 +281,7 @@ pub fn build(config: &Configuration) {
         panic!("{:?}", String::from_utf8(output.stdout).unwrap());
     }
 
-    let ninja_command = if build::ON_WINDOWS {
+    let ninja_command = if build.on_windows {
         "depot_tools/ninja"
     } else {
         "../depot_tools/ninja"
@@ -281,10 +304,10 @@ pub fn build(config: &Configuration) {
     println!("cargo:rustc-link-search={}", &output_directory);
     cargo::add_link_lib("static=skia");
 
-    bindgen_gen(&current_dir, output_directory)
+    bindgen_gen(build, &current_dir, output_directory)
 }
 
-fn bindgen_gen(current_dir: &Path, output_directory: &str) {
+fn bindgen_gen(build: &BuildConfiguration, current_dir: &Path, output_directory: &str) {
     let mut builder = bindgen::Builder::default()
         .generate_inline_functions(true)
         .default_enum_style(EnumVariation::Rust)
@@ -370,14 +393,14 @@ fn bindgen_gen(current_dir: &Path, output_directory: &str) {
         cc_build.include(include_path);
     }
 
-    if build::VULKAN {
+    if build.feature_vulkan {
         cc_build.define("SK_VULKAN", "1");
         builder = builder.clang_arg("-DSK_VULKAN");
         cc_build.define("SKIA_IMPLEMENTATION", "1");
         builder = builder.clang_arg("-DSKIA_IMPLEMENTATION=1");
     }
 
-    if build::SVG {
+    if build.feature_svg {
         cc_build.define("SK_XML", "1");
         builder = builder.clang_arg("-DSK_XML");
 
@@ -387,7 +410,7 @@ fn bindgen_gen(current_dir: &Path, output_directory: &str) {
         cc_build.include(include_path);
     }
 
-    if build::SKIA_RELEASE {
+    if build.skia_release {
         cc_build.define("NDEBUG", "1");
         builder = builder.clang_arg("-DNDEBUG=1")
     }
@@ -397,7 +420,7 @@ fn bindgen_gen(current_dir: &Path, output_directory: &str) {
         .file(bindings_source)
         .out_dir(output_directory);
 
-    if !build::ON_WINDOWS {
+    if !build.on_windows {
         cc_build.flag("-std=c++14");
     }
 

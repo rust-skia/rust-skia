@@ -1,52 +1,70 @@
 mod build_support;
-use crate::build_support::skia::Configuration;
-use crate::build_support::{azure, binaries, cargo, git};
 use build_support::skia;
+use build_support::{azure, binaries, cargo, git};
 use std::path::Path;
-use std::{env, fs, io};
+use std::{fs, io};
+
+/// Environment variables used by this build script.
+mod env {
+    use std::env;
+
+    /// Returns true if the download should be forced, independent of the situation detected.
+    pub fn force_skia_binaries_download() -> bool {
+        env::var("FORCE_SKIA_BINARIES_DOWNLOAD").is_ok()
+    }
+
+    /// Force to build skia.
+    pub fn force_skia_build() -> bool {
+        env::var("FORCE_SKIA_BUILD").is_ok()
+    }
+}
 
 const SRC_BINDINGS_RS: &str = "src/bindings.rs";
 
 fn main() {
-    let config = skia::Configuration::from_cargo_env();
+    let build_config = skia::BuildConfiguration::default();
+    let binaries_config = skia::BinariesConfiguration::from_cargo_env(&build_config);
 
     //
-    // download of prebuilt binaries possible?
+    // is the download of prebuilt binaries possible?
     //
 
-    let mut do_full_build = true;
-
-    if let Some((tag, key)) = should_try_download_binaries(&config) {
-        println!(
-            "TRYING TO DOWNLOAD AND INSTALL SKIA BINARIES: {}/{}",
-            tag, key
-        );
-        let url = binaries::download_url(tag, key);
-        println!("  FROM: {}", url);
-        if let Err(e) = download_and_install(url, &config.output_directory) {
-            println!("DOWNLOAD AND INSTALL FAILED: {}", e);
+    let build_skia = env::force_skia_build() || {
+        if let Some((tag, key)) = should_try_download_binaries(&binaries_config) {
+            println!(
+                "TRYING TO DOWNLOAD AND INSTALL SKIA BINARIES: {}/{}",
+                tag, key
+            );
+            let url = binaries::download_url(tag, key);
+            println!("  FROM: {}", url);
+            if let Err(e) = download_and_install(url, &binaries_config.output_directory) {
+                println!("DOWNLOAD AND INSTALL FAILED: {}", e);
+                true
+            } else {
+                println!("DOWNLOAD AND INSTALL SUCCEEDED");
+                false
+            }
         } else {
-            println!("DOWNLOAD AND INSTALL SUCCEEDED");
-            do_full_build = false;
+            true
         }
-    }
+    };
 
     //
     // full build?
     //
 
-    if do_full_build {
+    if build_skia {
         println!("STARTING A FULL BUILD");
-        skia::build(&config);
+        skia::build(&build_config, &binaries_config);
     }
 
-    config.commit_to_cargo();
+    binaries_config.commit_to_cargo();
 
     //
     // publish binaries?
     //
 
-    // TODO: we may not want to deliver binaries when we did a full build
+    // TODO: we may not want to deliver binaries when we downloaded the binaries
     //       but how to inform azure if we don't want to?
     if let Some(staging_directory) = azure::artifact_staging_directory() {
         println!(
@@ -55,16 +73,16 @@ fn main() {
         );
 
         println!("COPYING BINARIES");
-        azure::copy_binaries(&config, &staging_directory).expect("COPYING BINARIES FAILED")
+        azure::copy_binaries(&binaries_config, &staging_directory).expect("COPYING BINARIES FAILED")
     }
 }
 
 /// Returns the key if we should try to download binaries.
-fn should_try_download_binaries(config: &Configuration) -> Option<(String, String)> {
+fn should_try_download_binaries(config: &skia::BinariesConfiguration) -> Option<(String, String)> {
     let tag = cargo::package_version();
 
     // for testing:
-    if let Ok(_) = env::var("FORCE_SKIA_BINARIES_DOWNLOAD") {
+    if env::force_skia_binaries_download() {
         // retrieve the hash from the repository above us.
         let half_hash = git::half_hash()?;
         return Some((tag, binaries::key(&half_hash, &config.features)));

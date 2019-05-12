@@ -1,4 +1,4 @@
-use crate::build_support::skia::Configuration;
+use crate::build_support::skia;
 use crate::build_support::{binaries, cargo, git};
 use crate::SRC_BINDINGS_RS;
 use std::fs::File;
@@ -16,7 +16,7 @@ pub fn artifact_staging_directory() -> Option<PathBuf> {
         .ok()
 }
 
-pub fn copy_binaries(config: &Configuration, artifacts: &Path) -> io::Result<()> {
+pub fn copy_binaries(config: &skia::BinariesConfiguration, artifacts: &Path) -> io::Result<()> {
     let half_hash = git::half_hash().expect("failed to retrieve the git hash");
     let key = binaries::key(&half_hash, &config.features);
 
