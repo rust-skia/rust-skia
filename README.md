@@ -60,7 +60,9 @@ Under Linux, OpenGL libraries _may_ be missing, if that is the case, install Ope
 
 Please share your build experience so that we can try to automate the build and get to the point where `cargo build` _is_ sufficient to build the bindings _including_ Skia, and if that is not possible, clearly prompts to what's missing.
 
-To simplify and speed up the build, we also plan to provide prebuilt binaries for some of the major platforms ([#49](https://github.com/rust-skia/rust-skia/issues/49)).
+### Skia
+
+If Skia does not build or needs to be configured differently, we support some customization support in `skia-bindings/build.rs`. For some more details about how to customize Skia builds, take a look at the [README of the skia-bindings package](skia-bindings/README.md).
 
 ### Feature `vulkan`
 
