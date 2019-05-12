@@ -301,9 +301,6 @@ pub fn build(build: &BuildConfiguration, config: &BinariesConfiguration) {
 
     let current_dir = env::current_dir().unwrap();
 
-    println!("cargo:rustc-link-search={}", &output_directory);
-    cargo::add_link_lib("static=skia");
-
     bindgen_gen(build, &current_dir, output_directory)
 }
 
