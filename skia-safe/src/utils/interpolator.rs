@@ -1,4 +1,4 @@
-//! This wrapper combines of SkInterpolatorBase and SkInterpolator into the type Interpolator.
+//! This wrapper combines SkInterpolatorBase and SkInterpolator into the type Interpolator.
 
 use crate::prelude::*;
 use crate::{scalar, Point};
@@ -38,8 +38,7 @@ impl Default for Handle<SkInterpolator> {
     }
 }
 
-// SkInterpolatorBase functions
-
+/// Wrapper for functions that are implemented in SkInterpolatorBase
 impl Handle<SkInterpolator> {
     pub fn duration(&self) -> Option<(Duration, Duration)> {
         let mut start_time = 0;
@@ -99,8 +98,7 @@ impl Handle<SkInterpolator> {
     }
 }
 
-// SkInterpolator functions
-
+/// Wrapper for SkInterpolator functions.
 impl Handle<SkInterpolator> {
     pub fn new(elem_count: usize, frame_count: usize) -> Self {
         Handle::from_native(unsafe {
@@ -158,8 +156,7 @@ impl Handle<SkInterpolator> {
     }
 }
 
-// additional functions seem useful.
-
+/// Additional functions that seem useful.
 impl Handle<SkInterpolator> {
     pub fn elem_count(&self) -> usize {
         self.native()._base.fElemCount.try_into().unwrap()
