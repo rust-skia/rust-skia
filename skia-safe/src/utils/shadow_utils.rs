@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use crate::{scalar, Canvas, Color, Path, Point3};
 use skia_bindings::SkShadowUtils;
-use std::borrow::BorrowMut;
 
 bitflags! {
     pub struct ShadowFlags: u32 {
@@ -13,7 +12,7 @@ bitflags! {
 
 #[allow(clippy::too_many_arguments)]
 pub fn draw_shadow(
-    mut canvas: impl BorrowMut<Canvas>,
+    mut canvas: impl AsMut<Canvas>,
     path: &Path,
     z_plane_params: impl Into<Point3>,
     light_pos: impl Into<Point3>,
@@ -24,7 +23,7 @@ pub fn draw_shadow(
 ) {
     unsafe {
         SkShadowUtils::DrawShadow(
-            canvas.borrow_mut().native_mut(),
+            canvas.as_mut().native_mut(),
             path.native(),
             z_plane_params.into().native(),
             light_pos.into().native(),
@@ -49,7 +48,7 @@ impl Canvas {
         flags: impl Into<Option<ShadowFlags>>,
     ) -> &mut Self {
         draw_shadow(
-            self.borrow_mut(),
+            self.as_mut(),
             path,
             z_plane_params,
             light_pos,

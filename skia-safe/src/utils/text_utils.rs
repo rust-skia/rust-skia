@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use crate::{Canvas, Font, Paint, Path, Point, TextEncoding};
 use skia_bindings::{SkTextUtils, SkTextUtils_Align};
-use std::borrow::BorrowMut;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -18,7 +17,7 @@ fn test_align_layout() {
 }
 
 pub fn draw_str(
-    mut canvas: impl BorrowMut<Canvas>,
+    mut canvas: impl AsMut<Canvas>,
     text: impl AsRef<str>,
     p: impl Into<Point>,
     font: &Font,
@@ -29,7 +28,7 @@ pub fn draw_str(
     let p = p.into();
     unsafe {
         SkTextUtils::Draw(
-            canvas.borrow_mut().native_mut(),
+            canvas.as_mut().native_mut(),
             text.as_ptr() as _,
             text.len(),
             TextEncoding::UTF8.into_native(),
@@ -51,7 +50,7 @@ impl Canvas {
         paint: &Paint,
         align: Align,
     ) -> &mut Self {
-        draw_str(self.borrow_mut(), text, p, font, paint, align);
+        draw_str(self.as_mut(), text, p, font, paint, align);
         self
     }
 }
