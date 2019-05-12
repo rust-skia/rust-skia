@@ -15,6 +15,17 @@ const REPOSITORY_DIRECTORY: &str = "rust-skia";
 /// The defaults for the Skia build configuration.
 impl Default for BuildConfiguration {
     fn default() -> Self {
+        // m74: if we don't build the particles or the skottie library on macOS, the build fails with
+        // for example:
+        // [763/867] link libparticles.a
+        // FAILED: libparticles.a
+        let all_skia_libs = {
+            match cargo::target().as_str() {
+                (_, "apple", "darwin", _) => true,
+                _ => false,
+            }
+        };
+
         BuildConfiguration {
             on_windows: cfg!(windows),
             // Note that currently, we don't support debug Skia builds,
@@ -26,11 +37,13 @@ impl Default for BuildConfiguration {
             feature_animation: false,
             feature_dng: false,
             feature_particles: false,
+            all_skia_libs,
         }
     }
 }
 
 /// The build configuration for Skia.
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub struct BuildConfiguration {
     /// Do we build _on_ a Windows OS?
     on_windows: bool,
@@ -56,9 +69,146 @@ pub struct BuildConfiguration {
 
     /// Build the particles module (unsupported, no wrappers).
     feature_particles: bool,
+
+    /// As of M74, There is a bug in the Skia macOS build
+    /// that requires all libraries to be built, otherwise the build would fail.
+    all_skia_libs: bool,
+}
+
+/// This is the final, low level build configuration for Skia that are needed by the involved components.
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub struct FinalBuildConfiguration {
+    /// The name value pairs passed as arguments to gn.
+    pub gn_args: Vec<(String, String)>,
+
+    /// The preprocessor defines that are used for creating the bindings and
+    /// building the skia-bindings library.
+    pub defines: Vec<String>,
+}
+
+impl FinalBuildConfiguration {
+    pub fn from_build_configuration(build: &BuildConfiguration) -> FinalBuildConfiguration {
+        let gn_args = {
+            fn yes() -> String {
+                "true".into()
+            }
+            fn no() -> String {
+                "false".into()
+            }
+
+            fn quote(s: &str) -> String {
+                format!("\"{}\"", s)
+            };
+
+            let mut args: Vec<(&str, String)> = vec![
+                (
+                    "is_official_build",
+                    if build.skia_release { yes() } else { no() },
+                ),
+                (
+                    "skia_use_expat",
+                    if build.feature_svg { yes() } else { no() },
+                ),
+                ("skia_use_system_expat", no()),
+                ("skia_use_icu", no()),
+                ("skia_use_system_libjpeg_turbo", no()),
+                ("skia_use_system_libpng", no()),
+                ("skia_use_libwebp", no()),
+                ("skia_use_system_zlib", no()),
+                (
+                    "skia_enable_skottie",
+                    if build.feature_animation || build.all_skia_libs {
+                        yes()
+                    } else {
+                        no()
+                    },
+                ),
+                ("skia_use_xps", no()),
+                (
+                    "skia_use_dng_sdk",
+                    if build.feature_dng { yes() } else { no() },
+                ),
+                (
+                    "skia_enable_particles",
+                    if build.feature_particles || build.all_skia_libs {
+                        yes()
+                    } else {
+                        no()
+                    },
+                ),
+                ("cc", quote("clang")),
+                ("cxx", quote("clang++")),
+            ];
+
+            // further flags that limit the components of Skia debug builds.
+            if !build.skia_release {
+                args.push(("skia_enable_atlas_text", no()));
+                args.push(("skia_enable_spirv_validation", no()));
+                args.push(("skia_enable_tools", no()));
+                args.push(("skia_enable_vulkan_debug_layers", no()));
+                args.push(("skia_use_libheif", no()));
+                args.push(("skia_use_lua", no()));
+            }
+
+            if build.feature_vulkan {
+                args.push(("skia_use_vulkan", yes()));
+                args.push(("skia_enable_spirv_validation", no()));
+            }
+
+            let mut flags: Vec<&str> = vec![];
+
+            if build.on_windows {
+                // Rust's msvc toolchain supports uses msvcrt.dll by
+                // default for release and _debug_ builds.
+                flags.push("/MD");
+                // Tell Skia's build system where LLVM is supposed to be located.
+                // TODO: this should be checked as a prerequisite.
+                args.push(("clang_win", quote("C:/Program Files/LLVM")));
+            }
+
+            if build.keep_inline_functions {
+                // sadly, this also disables inlining and is probably a real performance bummer.
+                if build.on_windows {
+                    flags.push("/Ob0")
+                } else {
+                    flags.push("-fno-inline-functions");
+                }
+            }
+
+            if !flags.is_empty() {
+                let flags: String = {
+                    let v: Vec<String> = flags.into_iter().map(quote).collect();
+                    v.join(",")
+                };
+                args.push(("extra_cflags", format!("[{}]", flags)));
+            }
+
+            args.into_iter()
+                .map(|(key, value)| (key.to_string(), value))
+                .collect()
+        };
+
+        let defines = {
+            let mut defines = Vec::new();
+            if build.feature_vulkan {
+                defines.push("SK_VULKAN");
+                defines.push("SKIA_IMPLEMENTATION");
+            }
+            if build.feature_svg {
+                defines.push("SK_XML");
+            }
+            if build.skia_release {
+                defines.push("NDEBUG");
+            }
+            defines.iter().map(|d| d.to_string()).collect()
+        };
+
+        FinalBuildConfiguration { gn_args, defines }
+    }
 }
 
 /// The resulting binaries configuration.
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub struct BinariesConfiguration {
     /// The features we built with.
     pub features: Vec<String>,
@@ -68,10 +218,6 @@ pub struct BinariesConfiguration {
 
     /// The TARGET specific link libraries we need to inform cargo about.
     pub link_libraries: Vec<String>,
-
-    // TODO: this can be resolved in build() and is not relevant for prebuilt binaries.
-    /// Build _all_ skia libraries just to avoid build script errors.
-    pub build_all_skia_libs: bool,
 }
 
 impl BinariesConfiguration {
@@ -86,7 +232,6 @@ impl BinariesConfiguration {
             features.push("svg")
         }
 
-        let mut build_all_skia_libs: bool = false;
         let mut link_libraries = Vec::new();
 
         match cargo::target().as_str() {
@@ -99,11 +244,6 @@ impl BinariesConfiguration {
                     "framework=OpenGL",
                     "framework=ApplicationServices",
                 ]);
-                // m74: if we don't build the particles or the skottie library on macOS, the build fails with
-                // for example:
-                // [763/867] link libparticles.a
-                // FAILED: libparticles.a
-                build_all_skia_libs = true;
             }
             (_, _, "windows", Some("msvc")) => {
                 link_libraries.extend(vec![
@@ -123,7 +263,6 @@ impl BinariesConfiguration {
             features: features.iter().map(|f| f.to_string()).collect(),
             output_directory,
             link_libraries: link_libraries.iter().map(|lib| lib.to_string()).collect(),
-            build_all_skia_libs,
         }
     }
 
@@ -141,7 +280,7 @@ impl BinariesConfiguration {
 }
 
 /// The full build of Skia, SkiaBindings, and the generation of bindings.rs.
-pub fn build(build: &BuildConfiguration, config: &BinariesConfiguration) {
+pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
     prerequisites::require_python();
     prerequisites::get_skia();
 
@@ -156,115 +295,16 @@ pub fn build(build: &BuildConfiguration, config: &BinariesConfiguration) {
         "`skia/tools/git-sync-deps` failed"
     );
 
-    let gn_args = {
-        fn yes() -> String {
-            "true".into()
-        }
-        fn no() -> String {
-            "false".into()
-        }
-
-        fn quote(s: &str) -> String {
-            format!("\"{}\"", s)
-        };
-
-        let mut args: Vec<(&str, String)> = vec![
-            (
-                "is_official_build",
-                if build.skia_release { yes() } else { no() },
-            ),
-            (
-                "skia_use_expat",
-                if build.feature_svg { yes() } else { no() },
-            ),
-            ("skia_use_system_expat", no()),
-            ("skia_use_icu", no()),
-            ("skia_use_system_libjpeg_turbo", no()),
-            ("skia_use_system_libpng", no()),
-            ("skia_use_libwebp", no()),
-            ("skia_use_system_zlib", no()),
-            (
-                "skia_enable_skottie",
-                if build.feature_animation || config.build_all_skia_libs {
-                    yes()
-                } else {
-                    no()
-                },
-            ),
-            ("skia_use_xps", no()),
-            (
-                "skia_use_dng_sdk",
-                if build.feature_dng { yes() } else { no() },
-            ),
-            (
-                "skia_enable_particles",
-                if build.feature_particles || config.build_all_skia_libs {
-                    yes()
-                } else {
-                    no()
-                },
-            ),
-            ("cc", quote("clang")),
-            ("cxx", quote("clang++")),
-        ];
-
-        // further flags that limit the components of Skia debug builds.
-        if !build.skia_release {
-            args.push(("skia_enable_atlas_text", no()));
-            args.push(("skia_enable_spirv_validation", no()));
-            args.push(("skia_enable_tools", no()));
-            args.push(("skia_enable_vulkan_debug_layers", no()));
-            args.push(("skia_use_libheif", no()));
-            args.push(("skia_use_lua", no()));
-        }
-
-        if build.feature_vulkan {
-            args.push(("skia_use_vulkan", yes()));
-            args.push(("skia_enable_spirv_validation", no()));
-        }
-
-        let mut flags: Vec<&str> = vec![];
-
-        if build.on_windows {
-            // Rust's msvc toolchain supports uses msvcrt.dll by
-            // default for release and _debug_ builds.
-            flags.push("/MD");
-            // Tell Skia's build system where LLVM is supposed to be located.
-            // TODO: this should be checked as a prerequisite.
-            args.push(("clang_win", quote("C:/Program Files/LLVM")));
-        }
-
-        if build.keep_inline_functions {
-            // sadly, this also disables inlining and is probably a real performance bummer.
-            if build.on_windows {
-                flags.push("/Ob0")
-            } else {
-                flags.push("-fno-inline-functions");
-            }
-        }
-
-        if !flags.is_empty() {
-            let flags: String = {
-                let v: Vec<String> = flags.into_iter().map(quote).collect();
-                v.join(",")
-            };
-            args.push(("extra_cflags", format!("[{}]", flags)));
-        }
-
-        args
-    };
-
-    let gn_args = gn_args
-        .into_iter()
-        .map(|(name, value)| name.to_owned() + "=" + &value)
+    let gn_args = build
+        .gn_args
+        .iter()
+        .map(|(name, value)| name.clone() + "=" + value)
         .collect::<Vec<String>>()
         .join(" ");
 
-    let gn_command = if build.on_windows {
-        "skia/bin/gn"
-    } else {
-        "bin/gn"
-    };
+    let on_windows = cfg!(windows);
+
+    let gn_command = if on_windows { "skia/bin/gn" } else { "bin/gn" };
 
     let output_directory = config.output_directory.to_str().unwrap();
 
@@ -281,7 +321,7 @@ pub fn build(build: &BuildConfiguration, config: &BinariesConfiguration) {
         panic!("{:?}", String::from_utf8(output.stdout).unwrap());
     }
 
-    let ninja_command = if build.on_windows {
+    let ninja_command = if on_windows {
         "depot_tools/ninja"
     } else {
         "../depot_tools/ninja"
@@ -304,7 +344,7 @@ pub fn build(build: &BuildConfiguration, config: &BinariesConfiguration) {
     bindgen_gen(build, &current_dir, output_directory)
 }
 
-fn bindgen_gen(build: &BuildConfiguration, current_dir: &Path, output_directory: &str) {
+fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_directory: &str) {
     let mut builder = bindgen::Builder::default()
         .generate_inline_functions(true)
         .default_enum_style(EnumVariation::Rust)
@@ -382,6 +422,8 @@ fn bindgen_gen(build: &BuildConfiguration, current_dir: &Path, output_directory:
 
     builder = builder.header(bindings_source);
 
+    // TODO: may pull these into the FinalBuildConfiguration
+
     for include_dir in fs::read_dir("skia/include").expect("Unable to read skia/include") {
         let dir = include_dir.unwrap();
         cargo::add_dependent_path(dir.path().to_str().unwrap());
@@ -390,26 +432,16 @@ fn bindgen_gen(build: &BuildConfiguration, current_dir: &Path, output_directory:
         cc_build.include(include_path);
     }
 
-    if build.feature_vulkan {
-        cc_build.define("SK_VULKAN", "1");
-        builder = builder.clang_arg("-DSK_VULKAN");
-        cc_build.define("SKIA_IMPLEMENTATION", "1");
-        builder = builder.clang_arg("-DSKIA_IMPLEMENTATION=1");
-    }
-
-    if build.feature_svg {
-        cc_build.define("SK_XML", "1");
-        builder = builder.clang_arg("-DSK_XML");
-
+    {
         // SkXMLWriter.h
         let include_path = current_dir.join(Path::new("skia/src/xml"));
         builder = builder.clang_arg(format!("-I{}", include_path.display()));
         cc_build.include(include_path);
     }
 
-    if build.skia_release {
-        cc_build.define("NDEBUG", "1");
-        builder = builder.clang_arg("-DNDEBUG=1")
+    for define in &build.defines {
+        cc_build.define(&define, "1");
+        builder = builder.clang_arg(format!("-D{}=1", define));
     }
 
     cc_build
@@ -417,7 +449,7 @@ fn bindgen_gen(build: &BuildConfiguration, current_dir: &Path, output_directory:
         .file(bindings_source)
         .out_dir(output_directory);
 
-    if !build.on_windows {
+    if !cfg!(windows) {
         cc_build.flag("-std=c++14");
     }
 

@@ -1,4 +1,5 @@
 mod build_support;
+use crate::build_support::skia::FinalBuildConfiguration;
 use build_support::skia;
 use build_support::{azure, binaries, cargo, git};
 use std::path::Path;
@@ -55,7 +56,8 @@ fn main() {
 
     if build_skia {
         println!("STARTING A FULL BUILD");
-        skia::build(&build_config, &binaries_config);
+        let final_configuration = FinalBuildConfiguration::from_build_configuration(&build_config);
+        skia::build(&final_configuration, &binaries_config);
     }
 
     binaries_config.commit_to_cargo();
