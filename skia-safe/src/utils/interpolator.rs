@@ -145,10 +145,14 @@ impl Handle<SkInterpolator> {
         time: Duration,
         values: impl Into<Option<&'a mut [scalar]>>,
     ) -> InterpolatorResult {
+        let mut values = values.into();
+        if let Some(ref values) = values {
+            assert_eq!(values.len(), self.elem_count());
+        };
         InterpolatorResult::from_native(unsafe {
             self.native().timeToValues(
                 time.as_millis().try_into().unwrap(),
-                values.into().as_ptr_or_null_mut(),
+                values.as_ptr_or_null_mut(),
             )
         })
     }
