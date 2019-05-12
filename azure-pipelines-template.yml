@@ -84,7 +84,7 @@ jobs:
     condition: and(succeeded(), ne(variables['exampleArgs'], ''))
 
   - task: ArchiveFiles@2
-    condition: and(succeeded(), eq(variables['toolchain'], 'stable'), or(eq(variables['Build.SourceBranchName'], 'master'), eq(variables['Build.SourceBranchName'], 'prebuilt-binaries')))
+    condition: and(succeeded(), eq(variables['toolchain'], 'stable'), eq(variables['Build.SourceBranchName'], 'master'))
     displayName: 'Archive binaries'
     inputs:
       rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/skia-binaries'
@@ -93,7 +93,7 @@ jobs:
       archiveFile: '$(Build.ArtifactStagingDirectory)/skia-binaries-$(SKIA_BINARIES_KEY).tar.gz'
 
   - task: GithubRelease@0
-    condition: and(succeeded(), eq(variables['toolchain'], 'stable'), or(eq(variables['Build.SourceBranchName'], 'master'), eq(variables['Build.SourceBranchName'], 'prebuilt-binaries')))
+    condition: and(succeeded(), eq(variables['toolchain'], 'stable'), eq(variables['Build.SourceBranchName'], 'master'))
     displayName: 'Release to GitHub rust-skia/skia-binaries'
     inputs:
       action: 'edit'
