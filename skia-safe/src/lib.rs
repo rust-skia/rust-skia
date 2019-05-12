@@ -7,7 +7,7 @@ mod pathops;
 pub mod gpu;
 #[cfg(feature = "svg")]
 pub mod svg;
-// TODO: We don't export utils/ into the crate's root yet. Should we?
+// TODO: We don't export utils/* into the crate's root yet. Should we?
 pub mod utils;
 
 #[macro_use]
