@@ -48,9 +48,11 @@ stages:
         cd skia-bindings && cargo package -vv --no-verify --target-dir "$(Build.ArtifactStagingDirectory)"
       displayName: 'Package skia-bindings'
 
+    # TODO: find a better way to extract the skia-safe version
     - bash: |
         set -e
         cd skia-safe && cargo package -vv --target-dir "$(Build.ArtifactStagingDirectory)"
+        export SKIA_SAFE_VERSION=$(cd "$(Build.ArtifactStagingDirectory)/package" && find skia-safe-*.crate | cut -d'-' -f3 | cut -d'.' -f1-3)
       displayName: 'Package and Verify skia-safe'
 
     - task: GithubRelease@0
@@ -61,7 +63,7 @@ stages:
         repositoryName: 'rust-skia/rust-skia'
         tagSource: 'manual'
         target: 'master'
-        tag: 'test'
+        tag: '$(SKIA_SAFE_VERSION)'
         assets: '$(Build.ArtifactStagingDirectory)/package/*.crate'
         assetUploadMode: 'replace'
         isPreRelease: true
