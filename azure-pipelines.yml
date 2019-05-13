@@ -1,17 +1,50 @@
-jobs:
+stages:
 
-- template: azure-pipelines-template.yml
-  parameters:
-    platform: Linux
-    image: ubuntu-16.04
+- stage: 'Build'
+  - template: 'azure-pipelines-template.yml'
+    parameters:
+      platform: 'Linux'
+      image: 'ubuntu-16.04'
 
-- template: azure-pipelines-template.yml
-  parameters:
-    platform: macOS
-    image: macOS-10.14
+  - template: 'azure-pipelines-template.yml'
+    parameters:
+      platform: 'macOS'
+      image: 'macOS-10.14'
 
-- template: azure-pipelines-template.yml
-  parameters:
-    platform: Windows
-    image: vs2017-win2016
+  - template: 'azure-pipelines-template.yml'
+    parameters:
+      platform: 'Windows'
+      image: 'vs2017-win2016'
 
+- stage: 'Package'
+  condition: and(succeeded(), eq(variables['build.SourceBranchName'], 'package'))
+  job:
+    pool:
+      vmImage: ubuntu-16.04
+
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '2.x'
+        addToPath: true
+        architecture: 'x64'
+
+    - script: |
+        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
+        echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
+      displayName: 'Install Rust'
+
+    - script: |
+        rustc -Vv
+        cargo -V
+      displayName: 'Print versions'
+
+    - bash: |
+        set -e
+        cd skia-bindings && cargo package -vv
+      displayName: 'Package skia-bindings'
+
+    - bash: |
+        set -e
+        cd skia-safe && cargo package -vv
+      displayName: 'Package skia-safe'
