@@ -6,10 +6,23 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::{env, fs, io};
 
+/// Deliver binaries if we are inside a git repository _and_
+/// the artifact staging directory is set.
+/// The git repository test is important to support package verifications.
+pub fn should_deliver_binaries() -> Option<PathBuf> {
+    if git::half_hash().is_none() {
+        return None
+    }
+
+    artifact_staging_directory()
+}
+
+/// Are we running on azure-pipelines?
 pub fn is_active() -> bool {
     artifact_staging_directory().is_some()
 }
 
+/// Returns the artifact staging directory.
 pub fn artifact_staging_directory() -> Option<PathBuf> {
     env::var("BUILD_ARTIFACTSTAGINGDIRECTORY")
         .map(|dir| PathBuf::from(dir))
