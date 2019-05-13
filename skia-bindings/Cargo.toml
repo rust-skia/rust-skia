@@ -2,7 +2,7 @@
 
 name = "skia-bindings"
 
-description = "Safe Skia Bindings for Rust"
+description = "Skia Bindings for Rust"
 keywords = ["skia", "rust-bindings", "vulkan", "opengl", "pdf", "svg"]
 homepage = "https://github.com/rust-skia/rust-skia"
 repository = "https://github.com/rust-skia/rust-skia"
