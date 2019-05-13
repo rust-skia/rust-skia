@@ -45,8 +45,8 @@ stages:
 
     - bash: |
         set -e
-        cd skia-bindings && cargo package -vv --target-dir "$(Build.ArtifactStagingDirectory)"
-      displayName: 'Package and Verify skia-bindings'
+        cd skia-bindings && cargo package -vv --no-verify --target-dir "$(Build.ArtifactStagingDirectory)"
+      displayName: 'Package skia-bindings'
 
     - bash: |
         set -e
