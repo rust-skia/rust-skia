@@ -1,6 +1,7 @@
 stages:
 
 - stage: 'Build'
+  jobs:
   - template: 'azure-pipelines-template.yml'
     parameters:
       platform: 'Linux'
@@ -18,7 +19,8 @@ stages:
 
 - stage: 'Package'
   condition: and(succeeded(), eq(variables['build.SourceBranchName'], 'package'))
-  job:
+  jobs:
+  - job:
     pool:
       vmImage: ubuntu-16.04
 
