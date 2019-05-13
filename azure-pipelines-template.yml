@@ -6,21 +6,21 @@ jobs:
         toolchain: stable
         features: ''
         exampleArgs: '--driver cpu --driver pdf'
-#      beta:
-#        toolchain: beta
-#        features: ''
-#      stable-vulkan:
-#        toolchain: stable
-#        features: 'vulkan'
-#      stable-svg:
-#        toolchain: stable
-#        features: 'svg'
-#        exampleArgs: '--driver svg'
+      beta:
+        toolchain: beta
+        features: ''
+      stable-vulkan:
+        toolchain: stable
+        features: 'vulkan'
+      stable-svg:
+        toolchain: stable
+        features: 'svg'
+        exampleArgs: '--driver svg'
   variables:
     platform: ${{ parameters.platform }}
     image: ${{ parameters.image }}
     rust_backtrace: 1
-    release_branch: 'package'
+    release_branch: 'master'
   pool:
     vmImage: $(image)
 
