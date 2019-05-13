@@ -23,6 +23,8 @@ stages:
   - job:
     pool:
       vmImage: ubuntu-16.04
+    variables:
+      rust_backtrace: 1
 
     steps:
     - task: UsePythonVersion@0
@@ -43,10 +45,24 @@ stages:
 
     - bash: |
         set -e
-        cd skia-bindings && cargo package -vv
-      displayName: 'Package skia-bindings'
+        cd skia-bindings && cargo package -vv --target-dir "$(Build.ArtifactStagingDirectory)"
+      displayName: 'Package and Verify skia-bindings'
 
-    - bash: |
-        set -e
-        cd skia-safe && cargo package -vv
-      displayName: 'Package skia-safe'
+#    - bash: |
+#        set -e
+#        cd skia-safe && cargo package -vv --target-dir "$(Build.ArtifactStagingDirectory)"
+#      displayName: 'Package and Verify skia-safe'
+
+    - task: GithubRelease@0
+      displayName: 'Release to GitHub rust-skia/rust-skia'
+      inputs:
+        action: 'edit'
+        gitHubConnection: 'rust-skia-github-connection'
+        repositoryName: 'rust-skia/rust-skia'
+        tagSource: 'manual'
+        target: 'master'
+        tag: 'test'
+        assets: '$(Build.ArtifactStagingDirectory)/package/*.crate'
+        assetUploadMode: 'replace'
+        isPreRelease: true
+        addChangeLog: false
