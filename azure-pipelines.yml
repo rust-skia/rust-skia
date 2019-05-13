@@ -43,17 +43,21 @@ stages:
         cargo -V
       displayName: 'Print versions'
 
+    # TODO: find a better way to extract the GITHUB_RELEASE_TAG
     - bash: |
         set -e
         cd skia-bindings && cargo package -vv --target-dir "$(Build.ArtifactStagingDirectory)"
+        export GITHUB_RELEASE_TAG=$(cd "$(Build.ArtifactStagingDirectory)/package" && find skia-bindings-*.crate | cut -d'-' -f3 | cut -d'.' -f1-3)
       displayName: 'Package and Verify skia-bindings'
 
-    # TODO: find a better way to extract the skia-safe version
-    - bash: |
-        set -e
-        cd skia-safe && cargo package -vv --no-verify --target-dir "$(Build.ArtifactStagingDirectory)"
-        export SKIA_SAFE_VERSION=$(cd "$(Build.ArtifactStagingDirectory)/package" && find skia-safe-*.crate | cut -d'-' -f3 | cut -d'.' -f1-3)
-      displayName: 'Package skia-safe'
+    # TODO: why does this fail with
+    # error: 1 files in the working directory contain changes that were not yet committed into git:
+    #   src/prelude.rs
+    # to proceed despite this, pass the `--allow-dirty` flag
+    #- bash: |
+    #    set -e
+    #    cd skia-safe && cargo package -vv --no-verify --target-dir "$(Build.ArtifactStagingDirectory)"
+    #  displayName: 'Package skia-safe'
 
     - task: GithubRelease@0
       displayName: 'Release to GitHub rust-skia/rust-skia'
@@ -63,7 +67,7 @@ stages:
         repositoryName: 'rust-skia/rust-skia'
         tagSource: 'manual'
         target: 'master'
-        tag: '$(SKIA_SAFE_VERSION)'
+        tag: '$(GITHUB_RELEASE_TAG)'
         assets: '$(Build.ArtifactStagingDirectory)/package/*.crate'
         assetUploadMode: 'replace'
         isPreRelease: true
