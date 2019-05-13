@@ -48,10 +48,10 @@ stages:
         cd skia-bindings && cargo package -vv --target-dir "$(Build.ArtifactStagingDirectory)"
       displayName: 'Package and Verify skia-bindings'
 
-#    - bash: |
-#        set -e
-#        cd skia-safe && cargo package -vv --target-dir "$(Build.ArtifactStagingDirectory)"
-#      displayName: 'Package and Verify skia-safe'
+    - bash: |
+        set -e
+        cd skia-safe && cargo package -vv --target-dir "$(Build.ArtifactStagingDirectory)"
+      displayName: 'Package and Verify skia-safe'
 
     - task: GithubRelease@0
       displayName: 'Release to GitHub rust-skia/rust-skia'
