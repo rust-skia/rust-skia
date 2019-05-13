@@ -68,7 +68,7 @@ fn main() {
 
     // TODO: we may not want to deliver binaries when we downloaded the binaries
     //       but how to inform azure if we don't want to?
-    if let Some(staging_directory) = azure::artifact_staging_directory() {
+    if let Some(staging_directory) = azure::should_deliver_binaries() {
         println!(
             "DETECTED AZURE, delivering binaries to {}",
             staging_directory.to_str().unwrap()
