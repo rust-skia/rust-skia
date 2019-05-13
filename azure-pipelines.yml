@@ -48,6 +48,7 @@ stages:
         set -e
         cd skia-bindings && cargo package -vv --target-dir "$(Build.ArtifactStagingDirectory)"
         export GITHUB_RELEASE_TAG=$(cd "$(Build.ArtifactStagingDirectory)/package" && find skia-bindings-*.crate | cut -d'-' -f3 | cut -d'.' -f1-3)
+        echo "##vso[task.setvariable variable=GITHUB_RELEASE_TAG;]${GITHUB_RELEASE_TAG}"
       displayName: 'Package and Verify skia-bindings'
 
     # TODO: why does this fail with
