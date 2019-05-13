@@ -46,6 +46,8 @@ impl NativeClone for SkBitmap {
     }
 }
 
+// TODO: implement Default?
+
 impl Handle<SkBitmap> {
     pub fn new() -> Self {
         Self::construct_c(C_SkBitmap_Construct)
@@ -54,6 +56,8 @@ impl Handle<SkBitmap> {
     pub fn swap(&mut self, other: &mut Self) {
         unsafe { self.native_mut().swap(other.native_mut()) }
     }
+
+    // TODO: implement pixmap()
 
     pub fn info(&self) -> ImageInfo {
         // we contain ImageInfo in a struct, so we have to copy it.
@@ -165,8 +169,8 @@ impl Handle<SkBitmap> {
     }
 
     #[must_use]
-    pub fn set_info(&mut self, image_info: &ImageInfo, row_bytes: Option<usize>) -> bool {
-        unsafe { self.native_mut().setInfo(image_info.native(), row_bytes.unwrap_or(0)) }
+    pub fn set_info(&mut self, image_info: &ImageInfo, row_bytes: impl Into<Option<usize>>) -> bool {
+        unsafe { self.native_mut().setInfo(image_info.native(), row_bytes.into().unwrap_or(0)) }
     }
 
     #[must_use]
@@ -181,8 +185,8 @@ impl Handle<SkBitmap> {
     }
 
     #[must_use]
-    pub fn try_alloc_pixels_info(&mut self, image_info: &ImageInfo, row_bytes: Option<usize>) -> bool {
-        match row_bytes {
+    pub fn try_alloc_pixels_info(&mut self, image_info: &ImageInfo, row_bytes: impl Into<Option<usize>>) -> bool {
+        match row_bytes.into() {
             Some(row_bytes) =>
                 unsafe { self.native_mut().tryAllocPixels(image_info.native(), row_bytes) },
             None =>
@@ -190,20 +194,20 @@ impl Handle<SkBitmap> {
         }
     }
 
-    pub fn alloc_pixels_info(&mut self, image_info: &ImageInfo, row_bytes: Option<usize>) {
-        self.try_alloc_pixels_info(image_info, row_bytes)
+    pub fn alloc_pixels_info(&mut self, image_info: &ImageInfo, row_bytes: impl Into<Option<usize>>) {
+        self.try_alloc_pixels_info(image_info, row_bytes.into())
             .to_option()
             .expect("Bitmap::alloc_pixels_info failed");
     }
 
     #[must_use]
-    pub fn try_alloc_n32_pixels(&mut self, (width, height): (i32, i32), is_opaque: bool) -> bool {
+    pub fn try_alloc_n32_pixels(&mut self, (width, height): (i32, i32), is_opaque: impl Into<Option<bool>>) -> bool {
         // accessing the instance method causes a linker error.
-        unsafe { C_SkBitmap_tryAllocN32Pixels(self.native_mut(), width, height, is_opaque) }
+        unsafe { C_SkBitmap_tryAllocN32Pixels(self.native_mut(), width, height, is_opaque.into().unwrap_or(false)) }
     }
 
-    pub fn alloc_n32_pixels(&mut self, (width, height): (i32, i32), is_opaque: bool) {
-        self.try_alloc_n32_pixels((width, height), is_opaque)
+    pub fn alloc_n32_pixels(&mut self, (width, height): (i32, i32), is_opaque: impl Into<Option<bool>>) {
+        self.try_alloc_n32_pixels((width, height), is_opaque.into().unwrap_or(false))
             .to_option()
             .expect("Bitmap::alloc_n32_pixels_failed")
     }
@@ -212,9 +216,11 @@ impl Handle<SkBitmap> {
         self.native_mut().installPixels1(image_info.native(), pixels, row_bytes)
     }
 
+    // TODO: setPixels()?
+
     #[must_use]
     pub fn try_alloc_pixels(&mut self) -> bool {
-        // linker errr.
+        // linker error.
         unsafe { C_SkBitmap_tryAllocPixels(self.native_mut()) }
     }
 
@@ -224,9 +230,14 @@ impl Handle<SkBitmap> {
             .expect("Bitmap::alloc_pixels failed")
     }
 
+    // TODO: allocPixels(Allocator*)
+    // TODO: pixel_ref()
+
     pub fn pixel_ref_origin(&self) -> IPoint {
         IPoint::from_native(unsafe { self.native().pixelRefOrigin() })
     }
+
+    // TODO: setPixelRef()
 
     pub fn ready_to_draw(&self) -> bool {
         unsafe { C_SkBitmap_readyToDraw(self.native()) }
@@ -240,7 +251,7 @@ impl Handle<SkBitmap> {
         unsafe { self.native().notifyPixelsChanged() }
     }
 
-    pub fn erase_color<C: Into<Color>>(&self, c: C) {
+    pub fn erase_color(&self, c: impl Into<Color>) {
         unsafe { self.native().eraseColor(c.into().into_native()) }
     }
 
@@ -248,24 +259,29 @@ impl Handle<SkBitmap> {
         unsafe { C_SkBitmap_eraseARGB(self.native(), a.into(), r.into(), g.into(), b.into()) }
     }
 
-    pub fn erase<C: Into<Color>, IR: AsRef<IRect>>(&self, c: C, area: IR) {
+    pub fn erase(&self, c: impl Into<Color>, area: impl AsRef<IRect>) {
         unsafe { self.native().erase(c.into().into_native(), area.as_ref().native()) }
     }
 
-    pub fn get_color(&self, p: IPoint) -> Color {
+    pub fn get_color(&self, p: impl Into<IPoint>) -> Color {
+        let p = p.into();
         Color::from_native(unsafe { self.native().getColor(p.x, p.y) })
     }
 
-    pub fn get_alpha_f(&self, p: IPoint) -> f32 {
+    pub fn get_alpha_f(&self, p: impl Into<IPoint>) -> f32 {
+        let p = p.into();
         unsafe { self.native().getAlphaf(p.x, p.y) }
     }
 
-    #[inline]
-    pub unsafe fn get_addr(&self, p: IPoint) -> *const ffi::c_void {
+    pub unsafe fn get_addr(&self, p: impl Into<IPoint>) -> *const ffi::c_void {
+        let p = p.into();
         self.native().getAddr(p.x, p.y)
     }
 
-    pub fn extract_subset<IR: AsRef<IRect>>(&self, dst: &mut Self, subset: IR) -> bool {
+    // TODO: get_addr_32()?
+    // TODO: get_addr_16()?
+
+    pub fn extract_subset(&self, dst: &mut Self, subset: impl AsRef<IRect>) -> bool {
         unsafe { self.native().extractSubset(dst.native_mut(), subset.as_ref().native() ) }
     }
 
@@ -273,16 +289,16 @@ impl Handle<SkBitmap> {
         self.native().readPixels(dst_info.native(), dst_pixels, dst_row_bytes, src_x, src_y)
     }
 
-    pub fn extract_alpha(&self, dst: &mut Self, paint: Option<&Paint>) -> Option<IPoint> {
-        let paint_ptr =
-            paint
-                .map(|p| p.native() as *const SkPaint)
-                .unwrap_or(ptr::null());
+    // TOOD: read_pixels(Pixmap)
+    // TOOD: write_pixels(Pixmap)
 
-        let mut offset : SkIPoint = unsafe { mem::uninitialized() };
-        unsafe { C_SkBitmap_extractAlpha(self.native(), dst.native_mut(), paint_ptr, &mut offset) }
-            .if_true_some(IPoint::from_native(offset))
+    pub fn extract_alpha<'a>(&self, dst: &mut Self, paint: impl Into<Option<&'a Paint>>) -> Option<IPoint> {
+        let mut offset = IPoint::default();
+        unsafe { C_SkBitmap_extractAlpha(self.native(), dst.native_mut(), paint.into().native_ptr_or_null(), offset.native_mut()) }
+            .if_true_some(offset)
     }
+
+    // TODO: peek_pixels(Pixmap)
 }
 
 #[test]
