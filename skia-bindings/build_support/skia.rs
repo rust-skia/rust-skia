@@ -427,7 +427,9 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .whitelist_var("kAll_GrBackendState")
         //
         .use_core()
-        .clang_arg("-std=c++14");
+        .clang_arg("-std=c++14")
+        // required for macOS LLVM 8 to pick up C++ headers:
+        .clang_args(&["-x", "c++"]);
 
     let mut cc_build = Build::new();
 
