@@ -64,6 +64,8 @@ Please share your build experience so that we can try to automate the build and 
 
 For situations in which Skia does not build or needs to be configured differently, we support some customization support in `skia-bindings/build.rs`. For more details about how to customize Skia builds, take a look at the [README of the skia-bindings package](skia-bindings/README.md).
 
+Note that official crate packages _will_ try to download prebuilt binaries from [skia-binaries](<https://github.com/rust-skia/skia-binaries/releases>) if the platform matches with one of our images we test our builds with. If the download fails, a full build of Skia is triggered.
+
 ### Feature `vulkan`
 
 Vulkan support can be enabled by setting the Cargo feature `default = ["vulkan"]` in `skia-safe/Cargo.toml`, which will cause a rebuild of Skia. To render the examples with Vulkan use `cargo run --example skia-org -- [OUTPUT_DIR] --driver vulkan`.
@@ -88,7 +90,7 @@ And `cargo run --example skia-org -- --help` shows the drivers that are currentl
 
 ### Crate
 
-An official crate is not yet available. We've created [a Milestone](https://github.com/rust-skia/rust-skia/milestone/1) on Github's issue tracker to track the progress.
+An official crate is not yet available on [crates.io](<https://crates.io/>) but every update to the master branch releases new crates to the [releases tab](<https://github.com/rust-skia/rust-skia/releases>) and there is also a [a Milestone](https://github.com/rust-skia/rust-skia/milestone/1) to track the progress.
 
 ### Platforms
 
