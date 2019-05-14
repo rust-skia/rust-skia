@@ -35,7 +35,7 @@ jobs:
     # macOS
     - script: |
         sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
-      displayName: Install SDK Headers & LLVM
+      displayName: Install SDK Headers
 
   - ${{ if ne(parameters.platform, 'Windows') }}:
     # Linux and macOS.
@@ -52,13 +52,25 @@ jobs:
         set PATH=%PATH%;%USERPROFILE%\.cargo\bin
         echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
         choco install llvm --version 8.0.0
-      displayName: Install Rust on Windows
+      displayName: Install Rust and LLVM on Windows
 
   # All platforms.
   - script: |
         rustc -Vv
         cargo -V
-    displayName: Print versions
+    displayName: Rust & Cargo Versions
+
+  - ${{ if ne(parameters.platform, 'Windows') }}:
+      # Linux and macOS.
+      - script: |
+          clang --version
+        displayName: LLVM/Clang Version
+
+  - ${{ if eq(parameters.platform, 'Windows') }}:
+    # Windows.
+    - script: |
+        "C:/Program Files/LLVM/bin/clang.exe" --version
+      displayName: LLVM/Clang Version
 
   # Note: features are ignored when set in the workspace. This is a known bug in cargo (#5015), so cd into skia-safe instead.
   - bash: |
