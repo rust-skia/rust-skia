@@ -107,21 +107,22 @@ An official crate is not yet available on [crates.io](<https://crates.io/>) but 
 
 ### Bindings
 
-Skia is a large library. While we strive to bind all of the C++ APIs, it's nowhere complete yet. 
-
-We do support most of the SkCanvas, SkPaint, and SkPath and related APIs and are trying to make the examples from the [skia.org](https://skia.org/) website work.
+We wrapped a large part of the public Skia C++ APIs. To see what's missing, take a look at the [API Complete Milestone](<https://github.com/rust-skia/rust-skia/milestone/2>).
 
 ### Features
 
 - [x] Vector Graphics: Matrix, Rect, Point, Size, etc.
-- [x] Basic Drawing: Surface, Canvas, Paint, Path.
-- [x] Basic Effects and Shaders.
+- [x] Most drawing related classes and functions: Surface, Canvas, Paint, Path.
+- [x] [Almost all](<https://github.com/rust-skia/rust-skia/issues/99>) Effects and Shaders.
+- [x] Utility classes we think are useful.
 - [x] PDF
 - [x] SVG
 - [ ] Animation
 - [x] Vulkan
 - [x] OpenGL
 - [ ] Metal
+
+Wrappers for functions that take callbacks and virtual classes that need to be implemented on the Rust side are not supported right now. While we think they should be wrapped, the use cases related seem to be rather special, so we postponed that for now.
 
 ## This project needs contributions!
 
