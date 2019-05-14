@@ -16,7 +16,7 @@ Note that the information in this section is preliminary. Please open an issue f
 
 This project requires LLVM, Python 2, and git to build.
 
-To test if LLVM is installed with the correct version, use `clang --version`. Currently, version 7.0.1 is required, or - on macOS X - Apple LLVM version 10 should do, too.
+To test if LLVM is installed with the correct version, use `clang --version`. Currently, version 8 is recommended, and at least 7 needs to be available, or - on macOS X - Apple LLVM version 10 should do, too.
 
 For Python, at least version 2.7 _should_ be available! Use `python --version` to see what's there.
 
@@ -36,12 +36,12 @@ For Python, at least version 2.7 _should_ be available! Use `python --version` t
 
   otherwise the Skia build _may_ fail to build `SkJpegUtility.cpp` and the binding generation _will_ fail with  `'TargetConditionals.h' file not found` . Also note that the command line developer tools _and_ SDK headers _should_ be reinstalled after an update of XCode.
 
-- As an alternative to Apple LLVM 10, install LLVM 7.0.1 via `brew install llvm@7` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` like instructed.
+- As an alternative to Apple LLVM 10, install LLVM 8 or 7 via `brew install llvm` or `brew install llvm@7` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` like instructed.
 
 ### Windows
 
 - Be sure the `git` command line tool is installed.
-- Install the [official LLVM 7.0.1](http://releases.llvm.org/download.html) distribution.
+- Install the [official LLVM 8](http://releases.llvm.org/download.html) distribution.
 - msys:
   - Install one of the Python2 packages, for example `mingw-w64-x86_64-python2`.
   - LLVM is _always_ picked up from `C:/Program Files/LLVM`, so be sure it's available from there.
@@ -50,7 +50,7 @@ For Python, at least version 2.7 _should_ be available! Use `python --version` t
 
 ### Linux
 
-- LLVM should be installed out of the box, if not, install version 7.0.1.
+- LLVM should be installed out of the box, if not, install version 8.
 
 Then use:
 
