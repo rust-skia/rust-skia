@@ -67,7 +67,7 @@ stages:
         gitHubConnection: 'rust-skia-github-connection'
         repositoryName: 'rust-skia/rust-skia'
         tagSource: 'manual'
-        target: 'master'
+        target: '$(Build.SourceVersion)'
         tag: '$(GITHUB_RELEASE_TAG)'
         assets: '$(Build.ArtifactStagingDirectory)/package/*.crate'
         assetUploadMode: 'replace'
