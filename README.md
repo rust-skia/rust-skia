@@ -14,9 +14,13 @@ This project attempts to provide _up to date_ safe bindings that bridge idiomati
 
 Note that the information in this section is preliminary. Please open an issue for any build problem.
 
+### Prerequisites
+
 This project requires LLVM, Python 2, and git to build.
 
-To test if LLVM is installed with the correct version, use `clang --version`. Currently, version 8 is recommended, and at least 7 needs to be available, or - on macOS X - Apple LLVM version 10 should do, too.
+To see which version of LLVM/Clang is available, use `clang --version`. 
+
+We recommend version 8, but also had successes to build Skia with 6.0.1 and 7.0.1, and - on macOS - Apple LLVM version 10. So it's probably best to use the preinstalled version or install version 8 if LLVM is not available on your platform by default.
 
 For Python, at least version 2.7 _should_ be available! Use `python --version` to see what's there.
 
@@ -36,7 +40,7 @@ For Python, at least version 2.7 _should_ be available! Use `python --version` t
 
   otherwise the Skia build _may_ fail to build `SkJpegUtility.cpp` and the binding generation _will_ fail with  `'TargetConditionals.h' file not found` . Also note that the command line developer tools _and_ SDK headers _should_ be reinstalled after an update of XCode.
 
-- As an alternative to Apple LLVM 10, install LLVM 8 or 7 via `brew install llvm` or `brew install llvm@7` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` like instructed.
+- As an alternative to Apple LLVM 10, install LLVM via `brew install llvm` or `brew install llvm@7` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` like instructed.
 
 ### Windows
 
