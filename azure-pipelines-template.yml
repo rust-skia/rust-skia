@@ -61,10 +61,10 @@ jobs:
     displayName: Rust & Cargo Versions
 
   - ${{ if ne(parameters.platform, 'Windows') }}:
-      # Linux and macOS.
-      - script: |
-          clang --version
-        displayName: LLVM/Clang Version
+    # Linux and macOS.
+    - script: |
+        clang --version
+      displayName: LLVM/Clang Version
 
   - ${{ if eq(parameters.platform, 'Windows') }}:
     # Windows.
