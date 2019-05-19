@@ -46,7 +46,7 @@ pub enum PaintJoin {
 }
 
 impl NativeTransmutable<SkPaint_Join> for PaintJoin {}
-#[test] fn test_paint_join_layout() { PaintStyle::test_layout() }
+#[test] fn test_paint_join_layout() { PaintJoin::test_layout() }
 
 impl Default for PaintJoin {
     fn default() -> Self {
