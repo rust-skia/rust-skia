@@ -28,14 +28,12 @@ impl BlurDrawLooper {
         sigma: scalar,
         delta: IV,
     ) -> Option<DrawLooper> {
-        let color = color.as_ref();
         let delta = delta.into();
-
         DrawLooper::from_ptr(unsafe {
             // TODO: the rule that the passing side should increase the ref counter falls apart here.
             //       Can we ensure that the ref count is increased when it actually is needed?
             C_SkBlurDrawLooper_Make2(
-                color.as_ref().into_native(),
+                *color.as_ref().native(),
                 color_space.native(),
                 sigma,
                 delta.x,

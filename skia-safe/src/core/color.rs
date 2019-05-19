@@ -13,8 +13,9 @@ use skia_bindings::{
 // like to define Alpha::TRANSPARENT and Alpha::OPAQUE.
 // pub type Alpha = u8;
 
-// note: SkColor _is_ a u32, and therefore its components are
-// endian dependent, so we can't expose it as (transmuted) fields.
+// Note: SkColor _is_ a u32, and therefore its components are
+// endian dependent, so we can't expose it as (transmuted) individual
+// argb fields.
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
 #[repr(transparent)]
 pub struct Color(SkColor);
@@ -61,7 +62,7 @@ impl BitOr<u32> for Color {
     type Output = Self;
 
     fn bitor(self, rhs: u32) -> Self::Output {
-        self | (Color::from_native(rhs))
+        self | Color::from_native(rhs)
     }
 }
 
@@ -75,10 +76,8 @@ impl BitAnd<u32> for Color {
 
 impl Color {
 
-    // note: we don't use the u8cpu type here, because we trust the rust
+    // note: we don't use the u8cpu type here, because we trust the Rust
     // compiler to optimize the storage type.
-
-    #[inline]
     pub fn from_argb(a: u8, r: u8, g: u8, b:u8) -> Color {
         Self(
             (u8cpu::from(a) << 24) |
@@ -88,32 +87,26 @@ impl Color {
         )
     }
 
-    #[inline]
     pub fn from_rgb(r: u8, g: u8, b: u8) -> Color {
         Self::from_argb(0xff, r, g, b)
     }
 
-    #[inline]
     pub fn a(self) -> u8 {
         (self.into_native() >> 24) as _
     }
 
-    #[inline]
     pub fn r(self) -> u8 {
         (self.into_native() >> 16) as _
     }
 
-    #[inline]
     pub fn g(self) -> u8 {
         (self.into_native() >> 8) as _
     }
 
-    #[inline]
     pub fn b(self) -> u8 {
         self.into_native() as _
     }
 
-    #[inline]
     #[must_use]
     pub fn with_a(self, a: u8) -> Self {
         Self::from_argb(a, self.r(), self.g(), self.b())
@@ -142,7 +135,7 @@ impl Color {
 
 }
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct RGB { pub r: u8, pub g: u8, pub b: u8 }
 
 impl From<(u8, u8, u8)> for RGB {
@@ -165,7 +158,7 @@ impl RGB {
     }
 }
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct HSV { pub h: f32, pub s: f32, pub v: f32 }
 
 impl From<(f32, f32, f32)> for HSV {
@@ -187,8 +180,7 @@ impl HSV {
 
 // decided not to directly support SkRGBA4f for now because of the
 // lack of const generics.
-
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 #[repr(C)]
 pub struct Color4f { pub r: f32, pub g: f32, pub b: f32, pub a: f32 }
 
@@ -198,35 +190,51 @@ fn test_color4f_layout() {
     Color4f::test_layout();
 }
 
-impl AsRef<Color4f> for Color4f {
+impl AsRef<Self> for Color4f {
     fn as_ref(&self) -> &Self {
         self
     }
 }
 
 impl Mul<f32> for Color4f {
-    type Output = Color4f;
-
-    fn mul(self, scale: f32) -> Self::Output {
+    type Output = Self;
+    fn mul(self, scale: f32) -> Self {
         let r = self.r * scale;
         let g = self.g * scale;
         let b = self.b * scale;
         let a = self.a * scale;
-        Color4f { r, g, b, a }
+        Self { r, g, b, a }
+    }
+}
+
+impl Mul for Color4f {
+    type Output = Self;
+    fn mul(self, scale: Self) -> Self {
+        self.mul(&scale)
+    }
+}
+
+impl Mul<&Self> for Color4f {
+    type Output = Self;
+    fn mul(self, scale: &Self) -> Self {
+        Self {
+            r: self.r * scale.r,
+            g: self.g * scale.g,
+            b: self.b * scale.b,
+            a: self.a * scale.a }
     }
 }
 
 impl Index<usize> for Color4f {
     type Output = f32;
-
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.vec()[index]
+    fn index(&self, index: usize) -> &f32 {
+        &self.as_array()[index]
     }
 }
 
 impl IndexMut<usize> for Color4f {
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        &mut self.vec_mut()[index]
+    fn index_mut(&mut self, index: usize) -> &mut f32 {
+        &mut self.as_array_mut()[index]
     }
 }
 
@@ -239,17 +247,18 @@ impl From<Color> for Color4f {
         let g = c(color.g());
         let b = c(color.b());
         let a = c(color.a());
-        Color4f { r, g, b, a }
+        Self { r, g, b, a }
     }
 }
 
 impl Color4f {
-
-    pub fn vec(&self) -> &[f32; 4] {
+    // corresponding Skia function: vec()
+    pub fn as_array(&self) -> &[f32; 4] {
         unsafe { transmute_ref(self) }
     }
 
-    pub fn vec_mut(&mut self) -> &mut[f32; 4] {
+    // corresponding Skia function: vec()
+    pub fn as_array_mut(&mut self) -> &mut[f32; 4] {
         unsafe { transmute_ref_mut(self) }
     }
 
@@ -258,8 +267,8 @@ impl Color4f {
         self.a == 1.0
     }
 
-    // TODO: this is the copied implementation, it would probably be better to call the Skia function.
-
+    // TODO: This is the copied implementation, it would probably be better
+    //       to call the Skia function.
     pub fn fits_in_bytes(&self) -> bool {
         debug_assert!(self.a >= 0.0 && self.a <= 1.0);
         self.r >= 0.0 && self.r <= 1.0 &&
@@ -278,8 +287,14 @@ impl Color4f {
         Color::from_argb(a, r, g, b)
     }
 
-    pub fn make_opaque(&self) -> Self {
-        Self { a: 1.0, .. *self }
+    // TODO: FromPMColor
+    // TODO: premul()
+    // TODO: unpremul()
+    // TODO: toBytes_RGBA()
+    // TODO: FromBytes_RGBA
+
+    pub fn to_opaque(&self) -> Self {
+        Self { a: 1.0, .. self.clone() }
     }
 }
 
