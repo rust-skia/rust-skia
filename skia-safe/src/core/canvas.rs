@@ -1,12 +1,11 @@
 use std::ops::{Deref, DerefMut};
 use std::marker::PhantomData;
-use std::slice;
+use std::{slice, mem};
 use std::ffi::CString;
 use crate::gpu;
 use crate::prelude::*;
 use crate::core::{IRect, QuickReject, Region, RRect, ClipOp, Point, scalar, Vector, Image, ImageFilter, Rect, IPoint, Surface, Bitmap, ISize, SurfaceProps, ImageInfo, Path, Paint, Color, Matrix, BlendMode, Font, TextEncoding, Picture, Vertices, VerticesBone, Data, TextBlob};
 use skia_bindings::{C_SkAutoCanvasRestore_destruct, SkAutoCanvasRestore, C_SkCanvas_isClipEmpty, C_SkCanvas_discard, SkCanvas_PointMode, SkImage, SkImageFilter, SkPaint, SkRect, C_SkCanvas_getBaseLayerSize, C_SkCanvas_imageInfo, C_SkCanvas_newFromBitmapAndProps, C_SkCanvas_newFromBitmap, C_SkCanvas_newWidthHeightAndProps, C_SkCanvas_newEmpty, C_SkCanvas_MakeRasterDirect, SkCanvas, C_SkCanvas_delete, C_SkCanvas_makeSurface, C_SkCanvas_getGrContext, SkCanvas_SaveLayerRec, SkMatrix, SkCanvas_SrcRectConstraint, C_SkAutoCanvasRestore_restore, C_SkAutoCanvasRestore_Construct, SkCanvas_SaveLayerFlagsSet_kInitWithPrevious_SaveLayerFlag};
-use std::mem::uninitialized;
 
 bitflags! {
     pub struct SaveLayerFlags: u32 {
@@ -78,7 +77,6 @@ impl<'a> SaveLayerRec<'a> {
     }
 }
 
-
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
 pub enum CanvasPointMode {
@@ -107,22 +105,6 @@ pub struct CanvasTopLayerPixels<'a> {
     pub info: ImageInfo,
     pub row_bytes: usize,
     pub origin: IPoint
-}
-
-/// Additional options to Canvas's clip functions.
-/// use default() for Intersect / no anti alias.
-
-#[derive(Copy, Clone, PartialEq, Default, Debug)]
-pub struct CanvasClipOptions {
-    pub op: ClipOp,
-    pub do_anti_alias: bool
-}
-
-#[test]
-pub fn canvas_clip_options_defaults() {
-    let cco = CanvasClipOptions::default();
-    assert_eq!(ClipOp::Intersect, cco.op);
-    assert_eq!(false, cco.do_anti_alias);
 }
 
 // Warning: do never access SkCanvas fields from Rust, bindgen generates a wrong layout
@@ -193,12 +175,13 @@ impl<'lt> AsMut<Canvas> for OwnedCanvas<'lt> {
 
 impl Canvas {
 
+    // TODO: Support impl Into<Option<&'a SurfaceProps>>?
     pub fn from_raster_direct<'pixels>(
         info: &ImageInfo,
         pixels: &'pixels mut [u8],
-        row_bytes: Option<usize>,
+        row_bytes: impl Into<Option<usize>>,
         props: Option<&SurfaceProps>) -> Option<OwnedCanvas<'pixels>> {
-        let row_bytes = row_bytes.unwrap_or_else(|| info.min_row_bytes());
+        let row_bytes = row_bytes.into().unwrap_or_else(|| info.min_row_bytes());
         if row_bytes >= info.min_row_bytes() && pixels.len() >= info.compute_byte_size(row_bytes) {
             let ptr = unsafe {
                 C_SkCanvas_MakeRasterDirect(
@@ -213,10 +196,10 @@ impl Canvas {
         }
     }
 
-    pub fn from_raster_direct_n32<'pixels, IS: Into<ISize>>(
-        size: IS,
+    pub fn from_raster_direct_n32<'pixels>(
+        size: impl Into<ISize>,
         pixels: &'pixels mut [u32 /* PMColor */],
-        row_bytes: Option<usize>) -> Option<OwnedCanvas<'pixels>> {
+        row_bytes: impl Into<Option<usize>>) -> Option<OwnedCanvas<'pixels>> {
         let info = ImageInfo::new_n32_premul(size, None);
         let pixels_ptr : *mut u8 = pixels.as_mut_ptr() as _;
         let pixels_u8 : &'pixels mut [u8] = unsafe {
@@ -227,7 +210,8 @@ impl Canvas {
 
     #[allow(clippy::new_ret_no_self)]
     // Decided to call this variant new, because it seems to be the simplest reasonable one.
-    pub fn new<'lt, IS: Into<ISize>>(size: IS, props: Option<&SurfaceProps>) -> Option<OwnedCanvas<'lt>> {
+    // TODO: Support impl Into<Option<&'a SurfaceProps>>?
+    pub fn new<'lt>(size: impl Into<ISize>, props: Option<&SurfaceProps>) -> Option<OwnedCanvas<'lt>> {
         let size = size.into();
         if size.width >= 0 && size.height >= 0 {
             let ptr = unsafe {
@@ -240,6 +224,7 @@ impl Canvas {
         }
     }
 
+    // TODO: Support impl Into<Option<&'a SurfaceProps>>?
     pub fn from_bitmap<'lt>(bitmap: &Bitmap, props: Option<&SurfaceProps>) -> OwnedCanvas<'lt> {
         let props_ptr = props.native_ptr_or_null();
         let ptr =
@@ -285,10 +270,9 @@ impl Canvas {
         size
     }
 
-    // TODO: check if the lifetime requirements are met (in relation to Surface::canvas()).
-    // (we might need to consume self here and prevent the drop(), and also support
-    // this function on OwnedCanvas only).
-    pub fn make_surface(&mut self, info: &ImageInfo, props: Option<&SurfaceProps>) -> Option<Surface> {
+    // Note: implementation creates new canvas, it only takes SkSurfaceProps from &self if no props are given.
+    // TODO: Support impl Into<Option<&'a SurfaceProps>>?
+    pub fn new_surface(&mut self, info: &ImageInfo, props: Option<&SurfaceProps>) -> Option<Surface> {
         Surface::from_ptr(unsafe {
             C_SkCanvas_makeSurface(
                 self.native_mut(),
@@ -298,7 +282,7 @@ impl Canvas {
     }
 
     // TODO: test ref count consistency assuming it is not increased in the native part.
-    pub fn graphics_context(&mut self) -> Option<gpu::Context> {
+    pub fn gpu_context(&mut self) -> Option<gpu::Context> {
         gpu::Context::from_unshared_ptr(unsafe {
             C_SkCanvas_getGrContext(self.native_mut())
         })
@@ -329,11 +313,11 @@ impl Canvas {
     // TODO: peekPixels()
 
     #[must_use]
-    pub fn read_pixels<IP: Into<IPoint>>(
+    pub fn read_pixels(
         &mut self,
         info: &ImageInfo,
         dst_pixels: &mut [u8], dst_row_bytes: usize,
-        src_point: IP) -> bool {
+        src_point: impl Into<IPoint>) -> bool {
         let src_point = src_point.into();
         let required_size = info.compute_byte_size(dst_row_bytes);
         (dst_pixels.len() >= required_size) &&
@@ -348,7 +332,7 @@ impl Canvas {
     // TODO: read_pixels(Pixmap).
 
     #[must_use]
-    pub fn read_pixels_to_bitmap<IP: Into<IPoint>>(&mut self, bitmap: &mut Bitmap, src: IP) -> bool {
+    pub fn read_pixels_to_bitmap(&mut self, bitmap: &mut Bitmap, src: impl Into<IPoint>) -> bool {
         let src = src.into();
         unsafe {
             self.native_mut().readPixels2(bitmap.native(), src.x, src.y)
@@ -357,7 +341,7 @@ impl Canvas {
 
     // TODO: that (pixels, row_bytes) pair is probably worth abstracting over.
     #[must_use]
-    pub fn write_pixels<IP: Into<IPoint>>(&mut self, info: &ImageInfo, pixels: &[u8], row_bytes: usize, offset: IP) -> bool {
+    pub fn write_pixels(&mut self, info: &ImageInfo, pixels: &[u8], row_bytes: usize, offset: impl Into<IPoint>) -> bool {
         let offset = offset.into();
         let required_size = info.compute_byte_size(row_bytes);
         (pixels.len() >= required_size) && unsafe {
@@ -369,7 +353,7 @@ impl Canvas {
     }
 
     #[must_use]
-    pub fn write_pixels_from_bitmap<IP: Into<IPoint>>(&mut self, bitmap: &Bitmap, offset: IP) -> bool {
+    pub fn write_pixels_from_bitmap(&mut self, bitmap: &Bitmap, offset: impl Into<IPoint>) -> bool {
         let offset = offset.into();
         unsafe {
             self.native_mut().writePixels1(bitmap.native(), offset.x, offset.y)
@@ -384,6 +368,8 @@ impl Canvas {
         }
     }
 
+    // Note: The save_layer(bounds, paint) variants
+    // have been replaced with SaveLayerRec.
     pub fn save_layer(&mut self, layer_rec: &SaveLayerRec) -> usize {
         unsafe {
             self.native_mut().saveLayer2(layer_rec.native())
@@ -410,7 +396,7 @@ impl Canvas {
         self
     }
 
-    pub fn translate<V: Into<Vector>>(&mut self, d: V) -> &mut Self {
+    pub fn translate(&mut self, d: impl Into<Vector>) -> &mut Self {
         let d = d.into();
         unsafe {
             self.native_mut().translate(d.x, d.y)
@@ -425,6 +411,7 @@ impl Canvas {
         self
     }
 
+    // impl Into<Option<Point>>?
     pub fn rotate(&mut self, degrees: scalar, point: Option<Point>) -> &mut Self {
         match point {
             Some(point) => {
@@ -465,43 +452,41 @@ impl Canvas {
         self
     }
 
-    pub fn clip_rect<R: AsRef<Rect>>(&mut self, rect: R, options: CanvasClipOptions) -> &mut Self {
+    pub fn clip_rect(&mut self, rect: impl AsRef<Rect>, op: impl Into<Option<ClipOp>>, do_anti_alias: impl Into<Option<bool>>) -> &mut Self {
         unsafe {
             self.native_mut().clipRect(
                 rect.as_ref().native(),
-                options.op.into_native(), options.do_anti_alias)
+                op.into().unwrap_or_default().into_native(), do_anti_alias.into().unwrap_or_default())
         }
         self
     }
 
-    pub fn clip_rrect<RR: AsRef<RRect>>(&mut self, rrect: RR, options: CanvasClipOptions) -> &mut Self {
+    pub fn clip_rrect(&mut self, rrect: impl AsRef<RRect>, op: impl Into<Option<ClipOp>>, do_anti_alias: impl Into<Option<bool>>) -> &mut Self {
         unsafe {
             self.native_mut().clipRRect(
                 rrect.as_ref().native(),
-                options.op.into_native(), options.do_anti_alias)
+                op.into().unwrap_or_default().into_native(), do_anti_alias.into().unwrap_or_default())
         }
         self
     }
 
-    pub fn clip_path(&mut self, path: &Path, options: CanvasClipOptions) -> &mut Self {
+    pub fn clip_path(&mut self, path: &Path, op: impl Into<Option<ClipOp>>, do_anti_alias: impl Into<Option<bool>>) -> &mut Self {
         unsafe {
             self.native_mut().clipPath(
                 path.native(),
-                options.op.into_native(), options.do_anti_alias)
+                op.into().unwrap_or_default().into_native(), do_anti_alias.into().unwrap_or_default())
         }
         self
     }
 
-    pub fn clip_region(&mut self, device_rgn: &Region, op: ClipOp) -> &mut Self {
+    pub fn clip_region(&mut self, device_rgn: &Region, op: impl Into<Option<ClipOp>>) -> &mut Self {
         unsafe {
-            self.native_mut().clipRegion(device_rgn.native(), op.into_native())
+            self.native_mut().clipRegion(device_rgn.native(), op.into().unwrap_or_default().into_native())
         }
         self
     }
 
-    // quickReject is implemented as a trait.
-    // TODO: think about removing that trait and implement
-    // quick_reject_rect and quick_reject_path here and for impl Region.
+    // Note: quickReject() functions are implemented as a trait.
 
     pub fn local_clip_bounds(&self) -> Option<Rect> {
         let r = Rect::from_native(unsafe {
@@ -519,14 +504,14 @@ impl Canvas {
         r.is_empty().if_false_some(r)
     }
 
-    pub fn draw_color<C: Into<Color>>(&mut self, color: C, mode: BlendMode) -> &mut Self {
+    pub fn draw_color(&mut self, color: impl Into<Color>, mode: impl Into<Option<BlendMode>>) -> &mut Self {
         unsafe {
-            self.native_mut().drawColor(color.into().into_native(), mode.into_native())
+            self.native_mut().drawColor(color.into().into_native(), mode.into().unwrap_or_default().into_native())
         }
         self
     }
 
-    pub fn clear<C: Into<Color>>(&mut self, color: C) -> &mut Self {
+    pub fn clear(&mut self, color: impl Into<Color>) -> &mut Self {
         unsafe {
             self.native_mut().clear(color.into().into_native())
         }
@@ -557,7 +542,7 @@ impl Canvas {
         self
     }
 
-    pub fn draw_point<P: Into<Point>>(&mut self, p: P, paint: &Paint) -> &mut Self {
+    pub fn draw_point(&mut self, p: impl Into<Point>, paint: &Paint) -> &mut Self {
         let p = p.into();
         unsafe {
             self.native_mut().drawPoint(p.x, p.y, paint.native())
@@ -565,7 +550,7 @@ impl Canvas {
         self
     }
 
-    pub fn draw_line<P: Into<Point>>(&mut self, p1: P, p2: P, paint: &Paint) -> &mut Self {
+    pub fn draw_line(&mut self, p1: impl Into<Point>, p2: impl Into<Point>, paint: &Paint) -> &mut Self {
         let (p1, p2) = (p1.into(), p2.into());
         unsafe {
             self.native_mut().drawLine(p1.x, p1.y, p2.x, p2.y, paint.native())
@@ -573,14 +558,14 @@ impl Canvas {
         self
     }
 
-    pub fn draw_rect<R: AsRef<Rect>>(&mut self, rect: R, paint: &Paint) -> &mut Self {
+    pub fn draw_rect(&mut self, rect: impl AsRef<Rect>, paint: &Paint) -> &mut Self {
         unsafe {
             self.native_mut().drawRect(rect.as_ref().native(), paint.native())
         }
         self
     }
 
-    pub fn draw_irect<IR: AsRef<IRect>>(&mut self, rect: IR, paint: &Paint) -> &mut Self {
+    pub fn draw_irect(&mut self, rect: impl AsRef<IRect>, paint: &Paint) -> &mut Self {
         unsafe {
             self.native_mut().drawIRect(rect.as_ref().native(), paint.native())
         }
@@ -594,28 +579,28 @@ impl Canvas {
         self
     }
 
-    pub fn draw_oval<R: AsRef<Rect>>(&mut self, oval: R, paint: &Paint) -> &mut Self {
+    pub fn draw_oval(&mut self, oval: impl AsRef<Rect>, paint: &Paint) -> &mut Self {
         unsafe {
             self.native_mut().drawOval(oval.as_ref().native(), paint.native())
         }
         self
     }
 
-    pub fn draw_rrect<RR: AsRef<RRect>>(&mut self, rrect: RR, paint: &Paint) -> &mut Self {
+    pub fn draw_rrect(&mut self, rrect: impl AsRef<RRect>, paint: &Paint) -> &mut Self {
         unsafe {
             self.native_mut().drawRRect(rrect.as_ref().native(), paint.native())
         }
         self
     }
 
-    pub fn draw_drrect<ORR: AsRef<RRect>, IRR: AsRef<RRect>>(&mut self, outer: ORR, inner: IRR, paint: &Paint) -> &mut Self {
+    pub fn draw_drrect(&mut self, outer: impl AsRef<RRect>, inner: impl AsRef<RRect>, paint: &Paint) -> &mut Self {
         unsafe {
             self.native_mut().drawDRRect(outer.as_ref().native(), inner.as_ref().native(), paint.native())
         }
         self
     }
 
-    pub fn draw_circle<P: Into<Point>>(&mut self, center: P, radius: scalar, paint: &Paint) -> &mut Self {
+    pub fn draw_circle(&mut self, center: impl Into<Point>, radius: scalar, paint: &Paint) -> &mut Self {
         let center = center.into();
         unsafe {
             // does not link:
@@ -625,7 +610,7 @@ impl Canvas {
         self
     }
 
-    pub fn draw_arc<R: AsRef<Rect>>(&mut self, oval: R, start_angle: scalar, sweep_angle: scalar, use_center: bool, paint: &Paint) -> &mut Self {
+    pub fn draw_arc(&mut self, oval: impl AsRef<Rect>, start_angle: scalar, sweep_angle: scalar, use_center: bool, paint: &Paint) -> &mut Self {
         unsafe {
             self.native_mut().drawArc(
                 oval.as_ref().native(),
@@ -635,7 +620,7 @@ impl Canvas {
         self
     }
 
-    pub fn draw_round_rect<R: AsRef<Rect>>(&mut self, rect: R, rx: scalar, ry: scalar, paint: &Paint) -> &mut Self {
+    pub fn draw_round_rect(&mut self, rect: impl AsRef<Rect>, rx: scalar, ry: scalar, paint: &Paint) -> &mut Self {
         unsafe {
             self.native_mut().drawRoundRect(rect.as_ref().native(), rx, ry, paint.native())
         }
@@ -649,7 +634,7 @@ impl Canvas {
         self
     }
 
-    pub fn draw_image<P: Into<Point>>(&mut self, image: &Image, left_top: P, paint: Option<&Paint>) -> &mut Self {
+    pub fn draw_image(&mut self, image: &Image, left_top: impl Into<Point>, paint: Option<&Paint>) -> &mut Self {
         let left_top = left_top.into();
         unsafe {
             self.native_mut().drawImage(
@@ -659,11 +644,11 @@ impl Canvas {
         self
     }
 
-    pub fn draw_image_rect<DR: AsRef<Rect>>(
+    pub fn draw_image_rect(
         &mut self,
         image: &Image,
         src: Option<(&Rect, SrcRectConstraint)>,
-        dst: DR,
+        dst: impl AsRef<Rect>,
         paint: &Paint) -> &mut Self {
         match src {
             Some((src, constraint)) => unsafe {
@@ -682,9 +667,9 @@ impl Canvas {
         self
     }
 
-    pub fn draw_image_nine<CIR: AsRef<IRect>, DR: AsRef<Rect>>(
-        &mut self, image: &Image, center: CIR,
-        dst: DR, paint: Option<&Paint>) -> &mut Self {
+    pub fn draw_image_nine(
+        &mut self, image: &Image, center: impl AsRef<IRect>,
+        dst: impl AsRef<Rect>, paint: Option<&Paint>) -> &mut Self {
         unsafe {
             self.native_mut().drawImageNine(
                 image.native(), center.as_ref().native(),
@@ -941,7 +926,7 @@ impl AutoCanvasRestore {
         let restore = unsafe {
             // does not link on Linux
             // SkAutoCanvasRestore::new(canvas.native_mut(), do_save)
-            let mut acr : SkAutoCanvasRestore = uninitialized();
+            let mut acr : SkAutoCanvasRestore = mem::zeroed();
             C_SkAutoCanvasRestore_Construct(&mut acr, canvas.native_mut(), do_save);
             acr
         };
@@ -1010,9 +995,52 @@ mod tests {
     fn test_total_matrix_transmutation() {
         let mut c = Canvas::new((2, 2), None).unwrap();
         let matrix_ref = c.total_matrix();
-        assert!(Matrix::default() == *matrix_ref);
+        assert_eq!(Matrix::default(), *matrix_ref);
         c.rotate(0.1, None);
         let matrix_ref = c.total_matrix();
-        assert!(Matrix::default() != *matrix_ref);
+        assert_ne!(Matrix::default(), *matrix_ref);
+    }
+
+    #[test]
+    fn test_make_surface() {
+        let mut pixels: [u32; 4] = Default::default();
+        let mut canvas = Canvas::from_raster_direct_n32(
+            (2, 2),
+            pixels.as_mut(),
+            None).unwrap();
+        let ii = canvas.image_info();
+        let mut surface = canvas.new_surface(&ii, None).unwrap();
+        dbg!(&mut canvas as *mut _);
+        drop(canvas);
+
+        let canvas = surface.canvas();
+        dbg!(canvas as *mut _);
+        canvas.clear(Color::RED);
+    }
+
+    #[test]
+    fn rotate_options() {
+        let mut c = OwnedCanvas::default();
+        let p = Point::default();
+        // None
+        c.rotate(10.0, None);
+        // Some
+        c.rotate(10.0, Some((20.0, 2.0).into()));
+        c.rotate(10.0, Some(p));
+        // Direct
+        // note: this fails, because into() what?
+        // c.rotate(10.0, (20.0, 2.0).into());
+        c.rotate(10.0, p);
+    }
+
+    #[test]
+    fn clip_options_overloads() {
+        let mut c = OwnedCanvas::default();
+        // do_anti_alias
+        c.clip_rect(Rect::default(), None, true);
+        // clip_op
+        c.clip_rect(Rect::default(), ClipOp::Difference, None);
+        // both
+        c.clip_rect(Rect::default(), ClipOp::Difference, true);
     }
 }

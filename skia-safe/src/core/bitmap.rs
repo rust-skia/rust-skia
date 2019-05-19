@@ -290,9 +290,9 @@ impl Handle<SkBitmap> {
     // TOOD: read_pixels(Pixmap)
     // TOOD: write_pixels(Pixmap)
 
-    pub fn extract_alpha<'a>(&self, dst: &mut Self, paint: impl Into<Option<&'a Paint>>) -> Option<IPoint> {
+    pub fn extract_alpha<'a>(&self, dst: &mut Self, paint: Option<&Paint>) -> Option<IPoint> {
         let mut offset = IPoint::default();
-        unsafe { C_SkBitmap_extractAlpha(self.native(), dst.native_mut(), paint.into().native_ptr_or_null(), offset.native_mut()) }
+        unsafe { C_SkBitmap_extractAlpha(self.native(), dst.native_mut(), paint.native_ptr_or_null(), offset.native_mut()) }
             .if_true_some(offset)
     }
 
