@@ -5,7 +5,8 @@ use std::ffi::CString;
 use crate::gpu;
 use crate::prelude::*;
 use crate::core::{IRect, QuickReject, Region, RRect, ClipOp, Point, scalar, Vector, Image, ImageFilter, Rect, IPoint, Surface, Bitmap, ISize, SurfaceProps, ImageInfo, Path, Paint, Color, Matrix, BlendMode, Font, TextEncoding, Picture, Vertices, VerticesBone, Data, TextBlob};
-use skia_bindings::{C_SkAutoCanvasRestore_destruct, SkAutoCanvasRestore, C_SkCanvas_isClipEmpty, C_SkCanvas_discard, SkCanvas_PointMode, SkImage, SkImageFilter, SkPaint, SkRect, C_SkCanvas_getBaseLayerSize, C_SkCanvas_imageInfo, C_SkCanvas_newFromBitmapAndProps, C_SkCanvas_newFromBitmap, C_SkCanvas_newWidthHeightAndProps, C_SkCanvas_newEmpty, C_SkCanvas_MakeRasterDirect, SkCanvas, C_SkCanvas_delete, C_SkCanvas_makeSurface, C_SkCanvas_getGrContext, SkCanvas_SaveLayerRec, SkMatrix, SkCanvas_SrcRectConstraint, C_SkAutoCanvasRestore_restore, C_SkAutoCanvasRestore_Construct, SkCanvas_SaveLayerFlagsSet_kInitWithPrevious_SaveLayerFlag};
+use skia_bindings::{C_SkAutoCanvasRestore_destruct, SkAutoCanvasRestore, C_SkCanvas_isClipEmpty, C_SkCanvas_discard, SkCanvas_PointMode, SkImage, SkImageFilter, SkPaint, SkRect, C_SkCanvas_getBaseLayerSize, C_SkCanvas_imageInfo, C_SkCanvas_newFromBitmapAndProps, C_SkCanvas_newFromBitmap, C_SkCanvas_newWidthHeightAndProps, C_SkCanvas_newEmpty, C_SkCanvas_MakeRasterDirect, SkCanvas, C_SkCanvas_delete, C_SkCanvas_makeSurface, C_SkCanvas_getGrContext, SkCanvas_SaveLayerRec, SkMatrix, SkCanvas_SrcRectConstraint, C_SkAutoCanvasRestore_restore, C_SkAutoCanvasRestore_Construct, SkCanvas_SaveLayerFlagsSet_kInitWithPrevious_SaveLayerFlag, SkCanvas_Lattice_RectType, SkCanvas_Lattice};
+use std::convert::TryInto;
 
 bitflags! {
     pub struct SaveLayerFlags: u32 {
@@ -678,7 +679,7 @@ impl Canvas {
         self
     }
 
-    pub fn draw_bitmap<P: Into<Point>>(&mut self, bitmap: &Bitmap, left_top: P, paint: Option<&Paint>) -> &mut Self {
+    pub fn draw_bitmap(&mut self, bitmap: &Bitmap, left_top: impl Into<Point>, paint: Option<&Paint>) -> &mut Self {
         let left_top = left_top.into();
         unsafe {
             self.native_mut().drawBitmap(
@@ -688,13 +689,14 @@ impl Canvas {
         self
     }
 
-    pub fn draw_bitmap_rect<R: AsRef<Rect>>(
+    pub fn draw_bitmap_rect(
         &mut self,
         bitmap: &Bitmap,
         src: Option<&Rect>,
-        dst: R,
+        dst: impl AsRef<Rect>,
         paint: &Paint,
-        constraint: SrcRectConstraint) -> &mut Self {
+        constraint: impl Into<Option<SrcRectConstraint>>) -> &mut Self {
+        let constraint = constraint.into().unwrap_or(SrcRectConstraint::Strict);
         match src {
             Some(src) => unsafe {
                 self.native_mut().drawBitmapRect(
@@ -713,9 +715,9 @@ impl Canvas {
         self
     }
 
-    pub fn draw_bitmap_nine<CIR: AsRef<IRect>, DR: AsRef<Rect>>(
-        &mut self, bitmap: &Bitmap, center: CIR,
-        dst: DR, paint: Option<&Paint>) -> &mut Self {
+    pub fn draw_bitmap_nine(
+        &mut self, bitmap: &Bitmap, center: impl AsRef<IRect>,
+        dst: impl AsRef<Rect>, paint: Option<&Paint>) -> &mut Self {
         unsafe {
             self.native_mut().drawBitmapNine(
                 bitmap.native(), center.as_ref().native(),
