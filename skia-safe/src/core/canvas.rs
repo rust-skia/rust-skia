@@ -726,7 +726,35 @@ impl Canvas {
         self
     }
 
-    // TODO: Lattice, drawBitmapLattice, drawImageLattice
+    pub fn draw_bitmap_lattice(&mut self,
+                               bitmap: &Bitmap,
+                               lattice: &CanvasLattice,
+                               dst: impl AsRef<Rect>,
+                               paint: Option<&Paint>)
+        -> &mut Self {
+        unsafe {
+            self.native_mut().drawBitmapLattice(bitmap.native(),
+                                                &lattice.native().native,
+                                                dst.as_ref().native(),
+                                                paint.native_ptr_or_null())
+        }
+        self
+    }
+
+    pub fn draw_image_lattice(&mut self,
+                              image: &Image,
+                              lattice: &CanvasLattice,
+                              dst: impl AsRef<Rect>,
+                              paint: Option<&Paint>)
+        -> &mut Self {
+        unsafe {
+            self.native_mut().drawImageLattice(image.native(),
+                                               &lattice.native().native,
+                                               dst.as_ref().native(),
+                                               paint.native_ptr_or_null())
+        }
+        self
+    }
 
     // TODO: drawSimpleText
 
@@ -868,6 +896,76 @@ impl QuickReject<Path> for Canvas {
         }
     }
 }
+
+//
+// Lattice
+//
+
+#[derive(Debug)]
+pub struct CanvasLattice<'a> {
+    pub x_divs: &'a [i32],
+    pub y_divs: &'a [i32],
+    pub rect_types: Option<&'a [CanvasLatticeRectType]>,
+    pub bounds: Option<IRect>,
+    pub colors: Option<&'a [Color]>
+}
+
+struct CanvasLatticeRef<'a> {
+    native: SkCanvas_Lattice,
+    pd: PhantomData<&'a CanvasLattice<'a>>
+}
+
+impl<'a> CanvasLattice<'a> {
+    fn native(&self) -> CanvasLatticeRef {
+        if let Some(rect_types) = self.rect_types {
+            let rect_count = (self.x_divs.len() + 1) * (self.y_divs.len() + 1);
+            assert_eq!(rect_count, rect_types.len());
+            // even though rect types may not include any FixedColor refs,
+            // we expect the colors slice with a proper size here, this
+            // saves us for going over the types array and looking for FixedColor
+            // entries.
+            assert_eq!(rect_count, self.colors.unwrap().len());
+        }
+
+        let native = SkCanvas_Lattice {
+            fXDivs: self.x_divs.as_ptr(),
+            fYDivs: self.y_divs.as_ptr(),
+            fRectTypes: self.rect_types.native().as_ptr_or_null(),
+            fXCount: self.x_divs.len().try_into().unwrap(),
+            fYCount: self.y_divs.len().try_into().unwrap(),
+            fBounds: self.bounds.native().as_ptr_or_null(),
+            fColors: self.colors.native().as_ptr_or_null()
+        };
+        CanvasLatticeRef {
+            native,
+            pd: PhantomData
+        }
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(u8)]
+pub enum CanvasLatticeRectType {
+    Default = SkCanvas_Lattice_RectType::kDefault as _,
+    Transparent = SkCanvas_Lattice_RectType::kTransparent as _,
+    FixedColor = SkCanvas_Lattice_RectType::kFixedColor as _
+}
+
+impl NativeTransmutable<SkCanvas_Lattice_RectType> for CanvasLatticeRectType {}
+#[test]
+fn test_lattice_rect_type_layout() {
+    CanvasLatticeRectType::test_layout();
+}
+
+impl Default for CanvasLatticeRectType {
+    fn default() -> Self {
+        CanvasLatticeRectType::Default
+    }
+}
+
+//
+// AutoRestoredCanvas
+//
 
 /// A reference to a Canvas that restores the Canvas's state when
 /// it's being dropped.
