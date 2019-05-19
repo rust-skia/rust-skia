@@ -215,7 +215,7 @@ fn draw_transfer_modes(canvas: &mut Canvas) {
         canvas.translate((192.0 * (i / k) as scalar, 64.0 * (i % k) as scalar));
         let desc = mode.name();
         draw_str(&mut canvas, desc, 68.0, 30.0, font, &Paint::default());
-        canvas.clip_rect(Rect::from_size((64.0, 64.0)), Default::default());
+        canvas.clip_rect(Rect::from_size((64.0, 64.0)), None, None);
         canvas.draw_color(Color::LIGHT_GRAY, BlendMode::default());
         canvas.save_layer(&Default::default());
         canvas.clear(Color::TRANSPARENT);

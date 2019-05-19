@@ -1019,21 +1019,6 @@ mod tests {
     }
 
     #[test]
-    fn rotate_options() {
-        let mut c = OwnedCanvas::default();
-        let p = Point::default();
-        // None
-        c.rotate(10.0, None);
-        // Some
-        c.rotate(10.0, Some((20.0, 2.0).into()));
-        c.rotate(10.0, Some(p));
-        // Direct
-        // note: this fails, because into() what?
-        // c.rotate(10.0, (20.0, 2.0).into());
-        c.rotate(10.0, p);
-    }
-
-    #[test]
     fn clip_options_overloads() {
         let mut c = OwnedCanvas::default();
         // do_anti_alias
