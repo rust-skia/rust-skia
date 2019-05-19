@@ -756,7 +756,7 @@ impl Canvas {
         self
     }
 
-    // TODO: drawSimpleText
+    // TODO: drawSimpleText?
 
     // rust specific, based on drawSimpleText with fixed UTF8 encoding,
     // implementation is similar to Font's *_str methods.
@@ -771,7 +771,7 @@ impl Canvas {
         self
     }
 
-    pub fn draw_text_blob<P: Into<Point>>(&mut self, blob: &TextBlob, origin: P, paint: &Paint) {
+    pub fn draw_text_blob(&mut self, blob: &TextBlob, origin: impl Into<Point>, paint: &Paint) {
         let origin = origin.into();
         unsafe {
             self.native_mut().drawTextBlob(blob.native(), origin.x, origin.y, paint.native())
@@ -815,14 +815,15 @@ impl Canvas {
         cubics: &[Point;12],
         colors: &[Color;4],
         tex_coords: &[Point;4],
-        mode: BlendMode,
-        paint: &Paint) -> &mut Self {
+        mode: impl Into<Option<BlendMode>>,
+        paint: &Paint,
+        ) -> &mut Self {
         unsafe {
             self.native_mut().drawPatch(
                 cubics.native().as_ptr(),
                 colors.native().as_ptr(),
                 tex_coords.native().as_ptr(),
-                mode.into_native(),
+                mode.into().unwrap_or(BlendMode::Modulate).into_native(),
                 paint.native())
         }
         self
@@ -831,14 +832,13 @@ impl Canvas {
     // TODO: drawAtlas
     // TODO: drawDrawable
 
-    // TODO: why is Data mutable here?
-    pub fn draw_annotation<R: AsRef<Rect>>(&mut self, rect: R, key: &str, value: &mut Data) -> &mut Self {
+    pub fn draw_annotation(&mut self, rect: impl AsRef<Rect>, key: &str, value: &Data) -> &mut Self {
         let key = CString::new(key).unwrap();
         unsafe {
             self.native_mut().drawAnnotation(
                 rect.as_ref().native(),
                 key.as_ptr(),
-                value.native_mut() )
+                value.native_mut_force() )
         }
         self
     }
@@ -1020,7 +1020,7 @@ pub enum AutoCanvasRestore {}
 
 impl AutoCanvasRestore {
 
-    // TODO: Can't use AsMut here for the canvas, because it would break
+    // Note: Can't use AsMut here for the canvas, because it would break
     //       the lifetime dependency.
     pub fn guard(canvas: &mut Canvas, do_save: bool) -> AutoRestoredCanvas {
         let restore = unsafe {
