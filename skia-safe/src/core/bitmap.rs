@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use std::{ffi, mem, ptr};
+use std::ffi;
 use crate::core::{
     Paint,
     Color,
@@ -12,8 +12,6 @@ use crate::core::{
     IPoint,
 };
 use skia_bindings::{
-    SkPaint,
-    SkIPoint,
     C_SkImageInfo_Copy,
     C_SkBitmap_destruct,
     SkBitmap,
