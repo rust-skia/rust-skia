@@ -27,20 +27,20 @@ impl NativeRefCountedBase for SkColorFilter {
 
 impl RCHandle<SkColorFilter> {
 
-    pub fn as_color_mode(&self) -> Option<(Color, BlendMode)> {
-        let mut color : SkColor = unsafe { mem::uninitialized() };
-        let mut mode: SkBlendMode = unsafe { mem::uninitialized() };
-        unsafe { C_SkColorFilter_asColorMode(self.native(), &mut color, &mut mode) }
-            .if_true_some((Color::from_native(color), BlendMode::from_native(mode)))
+    pub fn to_color_mode(&self) -> Option<(Color, BlendMode)> {
+        let mut color: Color = 0.into();
+        let mut mode: BlendMode = BlendMode::default();
+        unsafe { C_SkColorFilter_asColorMode(self.native(), color.native_mut(), mode.native_mut()) }
+            .if_true_some((color, mode))
     }
 
-    pub fn as_color_matrix(&self) -> Option<[scalar; 20]> {
-        let mut matrix : [scalar; 20] = unsafe { mem::uninitialized() };
+    pub fn to_color_matrix(&self) -> Option<[scalar; 20]> {
+        let mut matrix : [scalar; 20] = Default::default();
         unsafe { C_SkColorFilter_asColorMatrix(self.native(), matrix.as_mut_ptr())}
             .if_true_some(matrix)
     }
 
-    pub fn as_component_table(&self) -> Option<Bitmap> {
+    pub fn to_component_table(&self) -> Option<Bitmap> {
         let mut bitmap = Bitmap::new();
         unsafe { C_SkColorFilter_asComponentTable(self.native(), bitmap.native_mut())}
             .if_true_some(bitmap)
@@ -52,24 +52,25 @@ impl RCHandle<SkColorFilter> {
         })
     }
 
-    pub fn filter_color<C: Into<Color>>(&self, color: C) -> Color {
+    pub fn filter_color(&self, color: impl Into<Color>) -> Color {
         Color::from_native(unsafe {
             self.native().filterColor(color.into().into_native())
         })
     }
 
-    pub fn filter_color4f<C: AsRef<Color4f>>(&self, color: Color4f, color_space: &ColorSpace) -> Color4f {
+    pub fn filter_color4f(&self, color: impl AsRef<Color4f>, color_space: &ColorSpace) -> Color4f {
         Color4f::from_native(unsafe {
             self.native().filterColor4f(color.as_ref().native(), color_space.native_mut_force())
         })
     }
 
-    pub fn new_mode_filter<C: Into<Color>>(c: C, mode: BlendMode) -> Option<Self> {
+    pub fn new_mode_filter(c: impl Into<Color>, mode: BlendMode) -> Option<Self> {
         ColorFilter::from_ptr(unsafe {
             C_SkColorFilter_MakeModeFilter(c.into().native(), mode.native())
         })
     }
 
+    // TODO: name this function to_composed()?
     #[must_use]
     pub fn composed(&self, inner: &ColorFilter) -> Option<Self> {
         ColorFilter::from_ptr(unsafe {
@@ -83,14 +84,12 @@ impl RCHandle<SkColorFilter> {
         }).unwrap()
     }
 
-    // TODO: not sure if we need the new_ prefix here.
     pub fn new_linear_to_srgb_gamma() -> Self {
         ColorFilter::from_ptr(unsafe {
             C_SkColorFilter_MakeLinearToSRGBGamma()
         }).unwrap()
     }
 
-    // TODO: not sure if we need the new_ prefix here.
     pub fn new_srgb_to_linear_gamma() -> Self {
         ColorFilter::from_ptr(unsafe {
             C_SkColorFilter_MakeSRGBToLinearGamma()
@@ -102,6 +101,10 @@ impl RCHandle<SkColorFilter> {
             C_SkColorFilter_MakeMixer(cf0.shared_native(), cf1.shared_native(), weight)
         })
     }
+
+    // TODO: asFragmentProcessor()
+    // TODO: affectsTransparentBlack()
+    // TODO: Deserialize (via Flattenable).
 }
 
 #[test]

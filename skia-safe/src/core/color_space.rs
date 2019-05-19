@@ -5,7 +5,8 @@ use skia_bindings::{
     SkColorSpacePrimaries,
 };
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
+#[repr(C)]
 pub struct ColorSpacePrimaries {
     rx: f32,
     ry: f32,
@@ -20,7 +21,7 @@ pub struct ColorSpacePrimaries {
 impl NativeTransmutable<SkColorSpacePrimaries> for ColorSpacePrimaries {}
 #[test] fn test_color_space_primaries_layout() { ColorSpacePrimaries::test_layout() }
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct ColorSpaceTransferFn {
     pub g: f32,
     pub a: f32,
@@ -31,7 +32,7 @@ pub struct ColorSpaceTransferFn {
     pub f: f32
 }
 
-pub struct NamedTransferFn {}
+pub enum NamedTransferFn {}
 
 // TODO: Make the binding generator provide all these constants.
 #[allow(non_upper_case_globals)]
@@ -134,14 +135,23 @@ impl ColorSpace {
         }).unwrap()
     }
 
+    // TODO: writeToMemory()?
+
     pub fn deserialize(data: Data) -> ColorSpace {
         let bytes = data.bytes();
         ColorSpace::from_ptr(unsafe {
             skia_bindings::C_SkColorSpace_Deserialize(bytes.as_ptr() as _, bytes.len())
         }).unwrap()
     }
+
+    // TODO: transferFn()
+    // TODO: invTransferFn()
+    // TODO: gamutTransformTo()
+    // TODO: transferFnHash()?
+    // TODO: hash()?
 }
 
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct XYZD50Hash(pub u32);
 
 #[cfg(test)]
