@@ -61,6 +61,9 @@ pub use self::cubic_map::*;
 mod data;
 pub use self::data::*;
 
+mod data_table;
+pub use self::data_table::*;
+
 pub(crate) mod document;
 pub use self::document::*;
 
