@@ -1,6 +1,6 @@
 use crate::interop::DynamicMemoryWStream;
 use crate::prelude::*;
-use crate::{scalar, Canvas, Data, Rect};
+use crate::{Canvas, Data, Rect, Size};
 use skia_bindings::{SkDocument, SkRefCntBase};
 use std::pin::Pin;
 
@@ -61,17 +61,18 @@ impl Document {
         self.state.pages
     }
 
-    // This function consumes the document and returns a document containing a canvas that represents the
-    // page it's currently drawing on.
+    // This function consumes the document and returns a document containing a
+    // canvas that represents the page it's currently drawing on.
     pub fn begin_page(
         mut self,
-        (width, height): (scalar, scalar),
+        size: impl Into<Size>,
         content: Option<&Rect>,
     ) -> Document<document::OnPage> {
+        let size = size.into();
         let canvas = unsafe {
             self.document
                 .native_mut()
-                .beginPage(width, height, content.native_ptr_or_null())
+                .beginPage(size.width, size.height, content.native_ptr_or_null())
         };
 
         Document {
@@ -106,7 +107,8 @@ impl Document<document::OnPage> {
     }
 
     /// Ends the page.
-    /// This function consumes the document and returns a new open document containing the pages drawn so far.
+    /// This function consumes the document and returns a new open document that
+    /// contains the pages drawn so far.
     pub fn end_page(mut self) -> Document {
         unsafe {
             self.document.native_mut().endPage();
@@ -120,7 +122,9 @@ impl Document<document::OnPage> {
             },
         }
 
-        // TODO: think about providing a close that implicitly ends the page and calls close on the Open document.
-        // TODO: think about providing a begin_page that implicitly ends the current page.
+        // TODO: think about providing a close that implicitly ends the page
+        //       and calls close on the Open document.
+        // TODO: think about providing a begin_page that implicitly ends the
+        //       current page.
     }
 }
