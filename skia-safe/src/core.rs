@@ -64,7 +64,6 @@ pub use self::data::*;
 mod data_table;
 pub use self::data_table::*;
 
-
 mod deferred_display_list_recorder;
 pub use self::deferred_display_list_recorder::*;
 
@@ -73,6 +72,9 @@ pub use self::document::*;
 
 mod draw_looper;
 pub use self::draw_looper::*;
+
+mod drawable;
+pub use self::drawable::*;
 
 mod encoded_image_format;
 pub use self::encoded_image_format::*;
