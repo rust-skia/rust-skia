@@ -27,6 +27,11 @@ impl NativeRefCountedBase for SkColorFilter {
 
 impl RCHandle<SkColorFilter> {
 
+    #[deprecated(since = "0.11.0", note = "use to_color_mode()")]
+    pub fn as_color_mode(&self) -> Option<(Color, BlendMode)> {
+        self.to_color_mode()
+    }
+
     pub fn to_color_mode(&self) -> Option<(Color, BlendMode)> {
         let mut color: Color = 0.into();
         let mut mode: BlendMode = BlendMode::default();
@@ -112,7 +117,7 @@ fn color_mode_roundtrip() {
     let color = Color::CYAN;
     let mode = BlendMode::ColorBurn;
     let cf = ColorFilter::new_mode_filter(color, mode).unwrap();
-    let (c, m) = cf.as_color_mode().unwrap();
+    let (c, m) = cf.to_color_mode().unwrap();
     assert!(color == c);
     assert_eq!(mode, m);
 }

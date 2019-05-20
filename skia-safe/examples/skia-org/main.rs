@@ -78,7 +78,7 @@ pub(crate) mod artifact {
             let mut document = skia_safe::pdf::new_document(None).begin_page((size.0 as _, size.1 as _), None);
             func(document.canvas());
             let data = document.end_page().close();
-            write_file(data.bytes(), path, name, "pdf");
+            write_file(data.as_bytes(), path, name, "pdf");
         }
     }
 
@@ -91,7 +91,7 @@ pub(crate) mod artifact {
             let mut canvas = skia_safe::svg::Canvas::new(Rect::from_size(size));
             func(&mut canvas);
             let data = canvas.end();
-            write_file(data.bytes(), path, name, "svg");
+            write_file(data.as_bytes(), path, name, "svg");
         }
     }
 

@@ -41,6 +41,11 @@ impl RCHandle<SkData> {
         self.size() == 0
     }
 
+    #[deprecated(since = "0.11.0", note = "use as_bytes()")]
+    pub fn bytes(&self) -> &[u8] {
+        self.as_bytes()
+    }
+
     pub fn as_bytes(&self) -> &[u8] {
         unsafe {
             let bytes = self.native().bytes();
