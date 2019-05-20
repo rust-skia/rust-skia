@@ -64,6 +64,10 @@ pub use self::data::*;
 mod data_table;
 pub use self::data_table::*;
 
+
+mod deferred_display_list_recorder;
+pub use self::deferred_display_list_recorder::*;
+
 pub(crate) mod document;
 pub use self::document::*;
 
@@ -161,6 +165,9 @@ pub use self::stroke_rec::*;
 
 mod surface;
 pub use self::surface::*;
+
+mod surface_characterization;
+pub use self::surface_characterization::*;
 
 mod surface_props;
 pub use self::surface_props::*;
