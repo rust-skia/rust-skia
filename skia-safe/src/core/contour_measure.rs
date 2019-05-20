@@ -9,12 +9,12 @@ pub type CountourMeasure = RCHandle<SkContourMeasure>;
 
 impl NativeRefCountedBase for SkContourMeasure {
     type Base = SkRefCntBase;
-
     fn ref_counted_base(&self) -> &Self::Base {
         &self._base._base
     }
 }
 
+// TODO: review naming consistency of nested types throughout the crate.
 #[allow(clippy::module_inception)]
 pub mod contour_measure {
     bitflags! {
@@ -47,10 +47,10 @@ impl RCHandle<SkContourMeasure> {
         .if_true_some((p, v))
     }
 
-    pub fn matrix<F: Into<Option<contour_measure::MatrixFlags>>>(
+    pub fn matrix(
         &self,
         distance: scalar,
-        flags: F,
+        flags: impl Into<Option<contour_measure::MatrixFlags>>,
     ) -> Option<Matrix> {
         let mut m = Matrix::default();
         unsafe {
@@ -105,21 +105,21 @@ impl Iterator for Handle<SkContourMeasureIter> {
 
 impl Handle<SkContourMeasureIter> {
     // TODO: rename to of_path? for_path?
-    pub fn from_path<RS: Into<Option<scalar>>>(
+    pub fn from_path(
         path: &Path,
         force_closed: bool,
-        res_scale: RS,
+        res_scale: impl Into<Option<scalar>>,
     ) -> Self {
         Self::from_native(unsafe {
             SkContourMeasureIter::new1(path.native(), force_closed, res_scale.into().unwrap_or(1.0))
         })
     }
 
-    pub fn reset<RS: Into<Option<scalar>>>(
+    pub fn reset(
         &mut self,
         path: &Path,
         force_closed: bool,
-        res_scale: RS,
+        res_scale: impl Into<Option<scalar>>,
     ) -> &mut Self {
         unsafe {
             self.native_mut()

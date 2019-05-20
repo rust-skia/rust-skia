@@ -16,6 +16,9 @@ impl Scalar for scalar {
 
 pub type FontTableTag = skia_bindings::SkFontTableTag;
 
+mod annotation;
+pub use self::annotation::*;
+
 mod bbh_factory;
 pub use self::bbh_factory::*;
 
@@ -42,6 +45,9 @@ pub use self::color_filter::*;
 
 mod color_space;
 pub use self::color_space::*;
+
+mod color_space_xform_canvas;
+pub use self::color_space_xform_canvas::*;
 
 pub mod contour_measure;
 pub use self::contour_measure::*;

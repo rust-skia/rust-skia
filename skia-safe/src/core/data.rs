@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use std::slice;
+use std::{slice, ops};
 use skia_bindings::{SkData, C_SkData_unref, C_SkData_ref, C_SkData_MakeWithCopy, C_SkData_MakeEmpty, C_SkData_MakeSubset, C_SkData_MakeUninitialized, C_SkData_MakeWithCString};
 use std::ops::Deref;
 use std::ffi::CStr;
@@ -19,7 +19,7 @@ impl NativeRefCounted for SkData {
 impl Deref for RCHandle<SkData> {
     type Target = [u8];
     fn deref(&self) -> &Self::Target {
-        self.bytes()
+        self.as_bytes()
     }
 }
 
@@ -31,7 +31,6 @@ impl PartialEq for RCHandle<SkData> {
     }
 }
 
-// TODO: complete the implementation.
 impl RCHandle<SkData> {
 
     pub fn size(&self) -> usize {
@@ -42,12 +41,19 @@ impl RCHandle<SkData> {
         self.size() == 0
     }
 
-    // TODO: as_bytes?
-    pub fn bytes(&self) -> &[u8] {
+    pub fn as_bytes(&self) -> &[u8] {
         unsafe {
             let bytes = self.native().bytes();
             slice::from_raw_parts(bytes, self.size())
         }
+    }
+
+    // TODO: (needs function unique())
+    // pub fn writable_data(&mut self) -> &mut [u8]
+
+    pub fn copy_range(&self, offset: usize, buffer: &mut [u8]) -> &Self {
+        buffer.copy_from_slice(&self.as_bytes()[offset..offset + buffer.len()]);
+        self
     }
 
     // TODO: rename to copy_from ?
@@ -57,18 +63,20 @@ impl RCHandle<SkData> {
         }).unwrap()
     }
 
-    pub fn new_uninitialized(length: usize) -> Data {
+    pub unsafe fn new_uninitialized(length: usize) -> Data {
         Data::from_ptr(unsafe {
             C_SkData_MakeUninitialized(length)
         }).unwrap()
     }
 
+    // TODO: use Range as stand in for offset / length?
     pub fn new_subset(data: &Data, offset: usize, length: usize) -> Data {
         Data::from_ptr(unsafe {
             C_SkData_MakeSubset(data.native(), offset, length)
         }).unwrap()
     }
 
+    // TODO: rename to from_cstr()?
     pub fn new_cstr(cstr: &CStr) -> Data {
         Data::from_ptr(unsafe {
             C_SkData_MakeWithCString(cstr.as_ptr())
@@ -77,6 +85,7 @@ impl RCHandle<SkData> {
 
     // TODO: MakeFromFileName (not sure if we need that)
     // TODO: MakeFromFile (not sure if we need that)
+    // TODO: MakeFromStream
 
     pub fn new_empty() -> Self {
         Data::from_ptr(unsafe {

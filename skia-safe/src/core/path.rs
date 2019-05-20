@@ -585,7 +585,7 @@ impl Handle<SkPath> {
 
     pub fn deserialize(data: &Data) -> Option<Path> {
         let mut path = Path::default();
-        let bytes = data.bytes();
+        let bytes = data.as_bytes();
         unsafe {
             path.native_mut().readFromMemory(
                 bytes.as_ptr() as _,

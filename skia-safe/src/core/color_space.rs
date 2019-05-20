@@ -138,7 +138,7 @@ impl ColorSpace {
     // TODO: writeToMemory()?
 
     pub fn deserialize(data: Data) -> ColorSpace {
-        let bytes = data.bytes();
+        let bytes = data.as_bytes();
         ColorSpace::from_ptr(unsafe {
             skia_bindings::C_SkColorSpace_Deserialize(bytes.as_ptr() as _, bytes.len())
         }).unwrap()
