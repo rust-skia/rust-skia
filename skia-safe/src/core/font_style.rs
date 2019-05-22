@@ -5,9 +5,6 @@ use skia_bindings::{
 };
 use std::mem;
 
-use crate::prelude::*;
-use skia_bindings::{SkFontStyle_Slant, SkFontStyle_Weight, SkFontStyle_Width};
-
 #[repr(transparent)]
 #[derive(Copy, Clone, PartialEq, PartialOrd)]
 pub struct Weight(i32);
@@ -104,25 +101,25 @@ impl Default for FontStyle {
 
 impl FontStyle {
     pub fn new(
-        weight: font_style::Weight,
-        width: font_style::Width,
-        slant: font_style::Slant,
+        weight: Weight,
+        width: Width,
+        slant: Slant,
     ) -> Self {
         Self::from_native(unsafe {
             SkFontStyle::new(*weight.native(), *width.native(), *slant.native())
         })
     }
 
-    pub fn weight(self) -> font_style::Weight {
-        font_style::Weight::from_native(unsafe { self.native().weight() })
+    pub fn weight(self) -> Weight {
+        Weight::from_native(unsafe { self.native().weight() })
     }
 
-    pub fn width(self) -> font_style::Width {
-        font_style::Width::from_native(unsafe { self.native().width() })
+    pub fn width(self) -> Width {
+        Width::from_native(unsafe { self.native().width() })
     }
 
-    pub fn slant(self) -> font_style::Slant {
-        font_style::Slant::from_native(unsafe { self.native().slant() })
+    pub fn slant(self) -> Slant {
+        Slant::from_native(unsafe { self.native().slant() })
     }
 
     pub fn normal() -> FontStyle {
@@ -143,29 +140,17 @@ impl FontStyle {
 }
 
 mod font_style_static {
-    use super::{font_style::Slant, font_style::Weight, font_style::Width, FontStyle};
+    use super::{Slant, Weight, Width, FontStyle};
 
     lazy_static! {
-        pub static ref NORMAL: FontStyle = FontStyle::new(
-            Weight::Normal,
-            Width::Normal,
-            Slant::Upright
-        );
-        pub static ref BOLD: FontStyle = FontStyle::new(
-            Weight::Bold,
-            Width::Normal,
-            Slant::Upright
-        );
-        pub static ref ITALIC: FontStyle = FontStyle::new(
-            Weight::Normal,
-            Width::Normal,
-            Slant::Italic
-        );
-        pub static ref BOLD_ITALIC: FontStyle = FontStyle::new(
-            Weight::Bold,
-            Width::Normal,
-            Slant::Italic
-        );
+        pub static ref NORMAL: FontStyle =
+            FontStyle::new(Weight::Normal, Width::Normal, Slant::Upright);
+        pub static ref BOLD: FontStyle =
+            FontStyle::new(Weight::Bold, Width::Normal, Slant::Upright);
+        pub static ref ITALIC: FontStyle =
+            FontStyle::new(Weight::Normal, Width::Normal, Slant::Italic);
+        pub static ref BOLD_ITALIC: FontStyle =
+            FontStyle::new(Weight::Bold, Width::Normal, Slant::Italic);
     }
 }
 

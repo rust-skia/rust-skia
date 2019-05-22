@@ -105,8 +105,14 @@ pub use self::font_mgr::*;
 
 pub mod font_parameters;
 
-mod font_style_;
-pub use self::font_style_::*;
+pub mod font_style;
+pub use self::font_style::FontStyle;
+#[deprecated(since = "0.11.0", note = "use font_style::Weight")]
+pub type FontStyleWeight = font_style::Weight;
+#[deprecated(since = "0.11.0", note = "use font_style::Width")]
+pub type FontStyleWidth = font_style::Width;
+#[deprecated(since = "0.11.0", note = "use font_style::Slant")]
+pub type FontStyleSlant = font_style::Slant;
 
 mod font_types;
 pub use self::font_types::*;
