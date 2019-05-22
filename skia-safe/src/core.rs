@@ -124,8 +124,16 @@ pub use font_types::*;
 
 pub mod graphics;
 
-mod image_;
-pub use image_::*;
+pub mod image;
+pub use image::Image;
+#[deprecated(since = "0.11.0", note = "use image::BitDepth instead")]
+pub type ImageBitDepth = image::BitDepth;
+#[deprecated(since = "0.11.0", note = "use image::CachingHint instead")]
+pub type ImageCachingHint = image::CachingHint;
+#[deprecated(since = "0.11.0", note = "use image::CompressionType instead")]
+pub type ImageCompressionType = image::CompressionType;
+
+
 
 mod image_filter;
 pub use image_filter::*;

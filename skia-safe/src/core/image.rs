@@ -27,55 +27,42 @@ use skia_bindings::{
     SkRefCntBase,
     C_SkImage_makeShader
 };
+use skia_bindings::{SkImage_BitDepth, SkImage_CachingHint, SkImage_CompressionType};
 
-#[deprecated(since = "0.11.0", note = "use image::BitDepth instead")]
-pub type ImageBitDepth = image::BitDepth;
-
-#[deprecated(since = "0.11.0", note = "use image::CachingHint instead")]
-pub type ImageCachingHint = image::CachingHint;
-
-#[deprecated(since = "0.11.0", note = "use image::CompressionType instead")]
-pub type ImageCompressionType = image::CompressionType;
-
-pub mod image {
-    use crate::prelude::*;
-    use skia_bindings::{SkImage_BitDepth, SkImage_CachingHint, SkImage_CompressionType};
-
-    #[derive(Copy, Clone, PartialEq, Eq, Debug)]
-    #[repr(i32)]
-    pub enum BitDepth {
-        U8 = SkImage_BitDepth::kU8 as _,
-        F16 = SkImage_BitDepth::kF16 as _
-    }
-
-    impl NativeTransmutable<SkImage_BitDepth> for BitDepth {}
-
-    #[test]
-    fn test_bit_depth_layout() { BitDepth::test_layout() }
-
-    #[derive(Copy, Clone, PartialEq, Eq, Debug)]
-    #[repr(i32)]
-    pub enum CachingHint {
-        Allow = SkImage_CachingHint::kAllow_CachingHint as _,
-        Disallow = SkImage_CachingHint::kDisallow_CachingHint as _
-    }
-
-    impl NativeTransmutable<SkImage_CachingHint> for CachingHint {}
-
-    #[test]
-    fn test_caching_hint_layout() { CachingHint::test_layout() }
-
-    #[derive(Copy, Clone, PartialEq, Eq, Debug)]
-    #[repr(i32)]
-    pub enum CompressionType {
-        ETC1 = SkImage_CompressionType::kETC1_CompressionType as _
-    }
-
-    impl NativeTransmutable<SkImage_CompressionType> for CompressionType {}
-
-    #[test]
-    fn test_compression_type_layout() { CompressionType::test_layout() }
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum BitDepth {
+    U8 = SkImage_BitDepth::kU8 as _,
+    F16 = SkImage_BitDepth::kF16 as _
 }
+
+impl NativeTransmutable<SkImage_BitDepth> for BitDepth {}
+
+#[test]
+fn test_bit_depth_layout() { BitDepth::test_layout() }
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum CachingHint {
+    Allow = SkImage_CachingHint::kAllow_CachingHint as _,
+    Disallow = SkImage_CachingHint::kDisallow_CachingHint as _
+}
+
+impl NativeTransmutable<SkImage_CachingHint> for CachingHint {}
+
+#[test]
+fn test_caching_hint_layout() { CachingHint::test_layout() }
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum CompressionType {
+    ETC1 = SkImage_CompressionType::kETC1_CompressionType as _
+}
+
+impl NativeTransmutable<SkImage_CompressionType> for CompressionType {}
+
+#[test]
+fn test_compression_type_layout() { CompressionType::test_layout() }
 
 pub type Image = RCHandle<SkImage>;
 
@@ -119,7 +106,7 @@ impl RCHandle<SkImage> {
         context: &mut gpu::Context,
         data: &Data,
         size: impl Into<ISize>,
-        c_type: image::CompressionType) -> Option<Image> {
+        c_type: CompressionType) -> Option<Image> {
         let size = size.into();
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromCompressed(
@@ -304,7 +291,7 @@ impl RCHandle<SkImage> {
         dimensions: impl Into<ISize>,
         matrix: Option<&Matrix>,
         paint: Option<&Paint>,
-        bit_depth: image::BitDepth,
+        bit_depth: BitDepth,
         color_space: Option<&ColorSpace>) -> Option<Image> {
 
         Image::from_ptr(unsafe {
@@ -400,7 +387,7 @@ impl RCHandle<SkImage> {
         pixels: &mut[P],
         dst_row_bytes: usize,
         src: impl Into<IPoint>,
-        caching_hint: image::CachingHint) -> bool {
+        caching_hint: CachingHint) -> bool {
 
         if pixels.elements_size_of() !=
             (usize::try_from(dst_info.height()).unwrap() * dst_row_bytes) {
