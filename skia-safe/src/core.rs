@@ -82,6 +82,9 @@ pub use self::encoded_image_format::*;
 mod filter_quality;
 pub use self::filter_quality::*;
 
+mod flattenable;
+pub use self::flattenable:: *;
+
 mod font;
 pub use self::font::*;
 
