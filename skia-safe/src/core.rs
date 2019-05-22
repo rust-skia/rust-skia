@@ -1,5 +1,4 @@
 #[allow(non_camel_case_types)]
-
 pub type scalar = skia_bindings::SkScalar;
 
 pub trait Scalar : Copy {
@@ -17,82 +16,82 @@ impl Scalar for scalar {
 pub type FontTableTag = skia_bindings::SkFontTableTag;
 
 mod annotation;
-pub use self::annotation::*;
+pub use annotation::*;
 
 mod bbh_factory;
-pub use self::bbh_factory::*;
+pub use bbh_factory::*;
 
 mod bitmap;
-pub use self::bitmap::*;
+pub use bitmap::*;
 
 mod blend_mode;
-pub use self::blend_mode::*;
+pub use blend_mode::*;
 
 mod blur_types;
-pub use self::blur_types::*;
+pub use blur_types::*;
 
 mod canvas;
-pub use self::canvas::*;
+pub use canvas::*;
 
 mod clip_op;
-pub use self::clip_op::*;
+pub use clip_op::*;
 
 mod color;
-pub use self::color::*;
+pub use color::*;
 
 mod color_filter;
-pub use self::color_filter::*;
+pub use color_filter::*;
 
 mod color_space;
-pub use self::color_space::*;
+pub use color_space::*;
 
 mod color_space_xform_canvas;
-pub use self::color_space_xform_canvas::*;
+pub use color_space_xform_canvas::*;
 
 pub mod contour_measure;
-pub use self::contour_measure::*;
+pub use contour_measure::*;
 
 mod coverage_mode;
-pub use self::coverage_mode::*;
+pub use coverage_mode::*;
 
 mod cubic_map;
-pub use self::cubic_map::*;
+pub use cubic_map::*;
 
 mod data;
-pub use self::data::*;
+pub use data::*;
 
 mod data_table;
-pub use self::data_table::*;
+pub use data_table::*;
 
 mod deferred_display_list_recorder;
-pub use self::deferred_display_list_recorder::*;
+pub use deferred_display_list_recorder::*;
 
 pub(crate) mod document;
-pub use self::document::*;
+pub use document::*;
 
 mod draw_looper;
-pub use self::draw_looper::*;
+pub use draw_looper::*;
 
 mod drawable;
-pub use self::drawable::*;
+pub use drawable::*;
 
 mod encoded_image_format;
-pub use self::encoded_image_format::*;
+pub use encoded_image_format::*;
 
 // unsupported, because it's used in experimental APIs only.
 // mod executor;
 
 mod filter_quality;
-pub use self::filter_quality::*;
+pub use filter_quality::*;
 
 mod flattenable;
-pub use self::flattenable:: *;
+pub use flattenable:: *;
 
 mod font;
-pub use self::font::*;
+pub use font::*;
 
 pub mod font_arguments;
-pub use self::font_arguments::FontArguments;
+pub use font_arguments::FontArguments;
 #[deprecated(since = "0.11.0", note = "use font_arguments::VariationPosition instead")]
 pub type FontArgumentsVariationPosition<'a> = font_arguments::VariationPosition<'a>;
 #[deprecated(since = "0.11.0", note = "use font_arguments::variation_position::Coordinate instead")]
@@ -101,16 +100,18 @@ pub type FontArgumentsVariationPositionCoordinate = font_arguments::variation_po
 // unsupported, because it's not used in publicly exposed APIs:
 // mod font_lcd_config;
 
-mod font_metrics_;
-pub use self::font_metrics_::*;
+pub mod font_metrics;
+pub use font_metrics::FontMetrics;
+#[deprecated(since = "0.11.0", note = "use font_metrics::Flags instead")]
+pub type FontMetricsFlags = font_metrics::Flags;
 
 mod font_mgr;
-pub use self::font_mgr::*;
+pub use font_mgr::*;
 
 pub mod font_parameters;
 
 pub mod font_style;
-pub use self::font_style::FontStyle;
+pub use font_style::FontStyle;
 #[deprecated(since = "0.11.0", note = "use font_style::Weight")]
 pub type FontStyleWeight = font_style::Weight;
 #[deprecated(since = "0.11.0", note = "use font_style::Width")]
@@ -119,102 +120,102 @@ pub type FontStyleWidth = font_style::Width;
 pub type FontStyleSlant = font_style::Slant;
 
 mod font_types;
-pub use self::font_types::*;
+pub use font_types::*;
 
 pub mod graphics;
 
 mod image_;
-pub use self::image_::*;
+pub use image_::*;
 
 mod image_filter;
-pub use self::image_filter::*;
+pub use image_filter::*;
 
 mod image_info;
-pub use self::image_info::*;
+pub use image_info::*;
 
 mod mask_filter;
-pub use self::mask_filter::*;
+pub use mask_filter::*;
 
 mod matrix;
-pub use self::matrix::*;
+pub use matrix::*;
 
 mod matrix44;
-pub use self::matrix44::*;
+pub use matrix44::*;
 
 mod matrix_typemask;
-pub use self::matrix_typemask::*;
+pub use matrix_typemask::*;
 
 mod paint;
-pub use self::paint::*;
+pub use paint::*;
 
 mod path;
-pub use self::path::*;
+pub use path::*;
 
 mod path_effect;
-pub use self::path_effect::*;
+pub use path_effect::*;
 
 pub mod path_measure;
-pub use self::path_measure::*;
+pub use path_measure::*;
 
 mod picture;
-pub use self::picture::*;
+pub use picture::*;
 
 mod picture_recorder;
-pub use self::picture_recorder::*;
+pub use picture_recorder::*;
 
 mod point;
-pub use self::point::*;
+pub use point::*;
 
 mod point3;
-pub use self::point3::*;
+pub use point3::*;
 
 mod rect;
-pub use self::rect::*;
+pub use rect::*;
 
 mod region;
-pub use self::region::*;
+pub use region::*;
 
 mod rrect;
-pub use self::rrect::*;
+pub use rrect::*;
 
 mod shader;
-pub use self::shader::*;
+pub use shader::*;
 
 mod size;
-pub use self::size::*;
+pub use size::*;
 
 mod stroke_rec;
-pub use self::stroke_rec::*;
+pub use stroke_rec::*;
 
 mod surface;
-pub use self::surface::*;
+pub use surface::*;
 
 mod surface_characterization;
-pub use self::surface_characterization::*;
+pub use surface_characterization::*;
 
 mod surface_props;
-pub use self::surface_props::*;
+pub use surface_props::*;
 
 mod text_blob;
-pub use self::text_blob::*;
+pub use text_blob::*;
 
 mod time;
-pub use self::time::*;
+pub use time::*;
 
 mod typeface;
-pub use self::typeface::*;
+pub use typeface::*;
 
 mod types;
-pub use self::types::*;
+pub use types::*;
 
 mod vector4;
-pub use self::vector4::*;
+pub use vector4::*;
 
 mod vertices;
-pub use self::vertices::*;
+pub use vertices::*;
 
 mod yuva_index;
-pub use self::yuva_index::*;
+pub use yuva_index::*;
 
 //
 // Skia specific traits used for overloading.
