@@ -1,7 +1,7 @@
 use crate::core::font_parameters::VariationAxis;
 use crate::core::{Data, FontStyle, FontTableTag, GlyphId, Rect, Unichar};
 use crate::prelude::*;
-use crate::{interop, FontArguments, FontArgumentsVariationPositionCoordinate};
+use crate::{interop, FontArguments, font_arguments};
 use skia_bindings::{
     C_SkTypeface_LocalizedStrings_next, C_SkTypeface_LocalizedStrings_unref,
     C_SkTypeface_MakeDefault, C_SkTypeface_MakeFromData, C_SkTypeface_MakeFromName,
@@ -109,7 +109,7 @@ impl RCHandle<SkTypeface> {
 
     pub fn variation_design_position(
         &self,
-        coordinates: &mut [FontArgumentsVariationPositionCoordinate],
+        coordinates: &mut [font_arguments::variation_position::Coordinate],
     ) -> Option<usize> {
         let r = unsafe {
             self.native().getVariationDesignPosition(

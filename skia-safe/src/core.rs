@@ -88,8 +88,8 @@ pub use self::flattenable:: *;
 mod font;
 pub use self::font::*;
 
-mod font_arguments;
-pub use self::font_arguments::*;
+mod font_arguments_;
+pub use self::font_arguments_::*;
 
 mod font_metrics;
 pub use self::font_metrics::*;
