@@ -105,11 +105,13 @@ pub use self::font_mgr::*;
 
 pub mod font_parameters;
 
-mod font_style;
-pub use self::font_style::*;
+mod font_style_;
+pub use self::font_style_::*;
 
 mod font_types;
 pub use self::font_types::*;
+
+pub mod graphics;
 
 mod image;
 pub use self::image::*;
