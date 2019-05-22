@@ -1069,7 +1069,7 @@ mod tests {
             canvas.clear(Color::RED);
         }
 
-        // TODO: equals to 0xff0000ff on MacOS, but why? Endianess should be the same.
+        // TODO: equals to 0xff0000ff on macOS, but why? Endianess should be the same.
         // assert_eq!(0xffff0000, pixels[0]);
     }
 

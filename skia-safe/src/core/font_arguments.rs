@@ -88,7 +88,7 @@ impl<'a> FontArguments<'a> {
             coordinateCount: position.coordinates.len().try_into().unwrap(),
         };
         unsafe {
-            // does not link on Linux / MacOS:
+            // does not link on Linux / macOS:
             C_SkFontArguments_setVariationDesignPosition(self.native_mut(), position);
             // TODO: is there a more elegant way to change the lifetime of self?
             let r = mem::transmute_copy(&self);
