@@ -113,8 +113,8 @@ pub use self::font_types::*;
 
 pub mod graphics;
 
-mod image;
-pub use self::image::*;
+mod image_;
+pub use self::image_::*;
 
 mod image_filter;
 pub use self::image_filter::*;

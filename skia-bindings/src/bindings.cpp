@@ -207,8 +207,8 @@ extern "C" SkSurface* C_SkSurface_makeSurface(
 // SkImage
 //
 
-extern "C" SkImage* C_SkImage_MakeRasterData(const SkImageInfo* info, SkData* pixels, size_t rowBytes) {
-    return SkImage::MakeRasterData(*info, sk_sp<SkData>(pixels), rowBytes).release();
+extern "C" SkImage* C_SkImage_MakeRasterData(const SkImageInfo* info, const SkData* pixels, size_t rowBytes) {
+    return SkImage::MakeRasterData(*info, spFromConst(pixels), rowBytes).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromBitmap(const SkBitmap* bitmap) {
@@ -370,6 +370,13 @@ extern "C" SkImage* C_SkImage_makeNonTextureImage(const SkImage* self) {
 
 extern "C" SkImage* C_SkImage_makeRasterImage(const SkImage* self) {
     return self->makeRasterImage().release();
+}
+
+extern "C" SkImage *C_SkImage_makeWithFilter(const SkImage *self, GrContext *context,
+                                             const SkImageFilter *filter, const SkIRect *subset,
+                                             const SkIRect *clipBounds, SkIRect *outSubset,
+                                             SkIPoint *offset) {
+    return self->makeWithFilter(context, filter, *subset, *clipBounds, outSubset, offset).release();
 }
 
 extern "C" SkImage* C_SkImage_makeColorSpace(const SkImage* self, const SkColorSpace* target) {
