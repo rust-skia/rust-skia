@@ -91,8 +91,12 @@ pub use self::flattenable:: *;
 mod font;
 pub use self::font::*;
 
-mod font_arguments_;
-pub use self::font_arguments_::*;
+pub mod font_arguments;
+pub use self::font_arguments::FontArguments;
+#[deprecated(since = "0.11.0", note = "use font_arguments::VariationPosition instead")]
+pub type FontArgumentsVariationPosition<'a> = font_arguments::VariationPosition<'a>;
+#[deprecated(since = "0.11.0", note = "use font_arguments::variation_position::Coordinate instead")]
+pub type FontArgumentsVariationPositionCoordinate = font_arguments::variation_position::Coordinate;
 
 // unsupported, because it's not used in publicly exposed APIs:
 // mod font_lcd_config;
