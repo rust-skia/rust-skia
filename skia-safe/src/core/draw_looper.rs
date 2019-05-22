@@ -14,7 +14,6 @@ impl NativeRefCountedBase for SkDrawLooper {
     }
 }
 
-// TODO: What does Rec mean, is it Record, and should it be abbreviated then?
 #[derive(Clone, PartialEq, Default, Debug)]
 #[repr(C)]
 pub struct DrawLooperBlurShadowRec {
@@ -30,16 +29,13 @@ fn test_blur_shadow_rec_layout() {
     DrawLooperBlurShadowRec::test_layout()
 }
 
-// TODO: Context
-
 impl RCHandle<SkDrawLooper> {
-    // TODO: makeContext
 
     pub fn can_compute_fast_bounds(&self, paint: &Paint) -> bool {
         unsafe { self.native().canComputeFastBounds(paint.native()) }
     }
 
-    pub fn compute_fast_bounds<SR: AsRef<Rect>>(&self, paint: &Paint, src: SR) -> Rect {
+    pub fn compute_fast_bounds(&self, paint: &Paint, src: impl AsRef<Rect>) -> Rect {
         let mut r = Rect::default();
         unsafe {
             self.native()
@@ -52,4 +48,6 @@ impl RCHandle<SkDrawLooper> {
         let mut br = DrawLooperBlurShadowRec::default();
         unsafe { C_SkDrawLooper_asABlurShadow(self.native(), br.native_mut()) }.if_true_some(br)
     }
+
+    // TODO: Deserialize
 }
