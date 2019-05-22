@@ -78,11 +78,11 @@ fn draw_three_paints(canvas: &mut Canvas) {
 
     let blob1 = TextBlob::from_str(
         "Skia!",
-        &Font::from_typeface_with_size_scale_and_skew(&Typeface::default(), 64.0, 1.0, 0.0),
+        &Font::from_typeface_with_params(&Typeface::default(), 64.0, 1.0, 0.0),
     );
     let blob2 = TextBlob::from_str(
         "Skia!",
-        &Font::from_typeface_with_size_scale_and_skew(&Typeface::default(), 64.0, 1.5, 0.0),
+        &Font::from_typeface_with_params(&Typeface::default(), 64.0, 1.5, 0.0),
     );
 
     canvas.clear(Color::WHITE);
@@ -106,7 +106,7 @@ fn draw_fill_and_stroke(canvas: &mut Canvas) {
 
     let blob = TextBlob::from_str(
         "SKIA",
-        &Font::from_typeface_with_size(&Typeface::default(), 80.0),
+        &Font::from_typeface(&Typeface::default(), 80.0),
     );
 
     fill_paint.set_color(Color::from_argb(0xFF, 0xFF, 0x00, 0x00));
@@ -178,7 +178,7 @@ fn draw_transfer_modes(canvas: &mut Canvas) {
         &mut Paint::default(),
     );
     stroke.set_style(PaintStyle::Stroke);
-    let font = &Font::from_typeface_with_size(&Typeface::default(), 24.0);
+    let font = &Font::from_typeface(&Typeface::default(), 24.0);
     let src_points: (Point, Point) = ((0.0, 0.0).into(), (64.0, 0.0).into());
     let src_colors = [Color::MAGENTA & 0x00_FF_FF_FF, Color::MAGENTA];
     src.set_shader(
@@ -235,7 +235,7 @@ fn draw_bitmap_shader(canvas: &mut Canvas) {
     let paint = &mut Paint::default();
     paint.set_shader(
         image
-            .as_shader((ShaderTileMode::Repeat, ShaderTileMode::Repeat), &matrix)
+            .to_shader((ShaderTileMode::Repeat, ShaderTileMode::Repeat), &matrix)
             .as_ref(),
     );
     canvas.draw_paint(paint);
@@ -345,7 +345,7 @@ fn draw_mask_filter(canvas: &mut Canvas) {
     paint.set_mask_filter(&MaskFilter::blur(BlurStyle::Normal, 5.0, None));
     let blob = &TextBlob::from_str(
         "Skia",
-        &Font::from_typeface_with_size(&Typeface::default(), 120.0),
+        &Font::from_typeface(&Typeface::default(), 120.0),
     );
     canvas.draw_text_blob(blob, (0, 160), paint);
 }

@@ -165,7 +165,7 @@ pub(crate) mod artifact {
         func(&mut canvas);
         let image = surface.image_snapshot();
         let data = image.encode_to_data(EncodedImageFormat::PNG).unwrap();
-        write_file(data.bytes(), path, name, "png");
+        write_file(data.as_bytes(), path, name, "png");
     }
 
     fn write_file(bytes: &[u8], path: &PathBuf, name: &str, ext: &str) {
