@@ -17,7 +17,7 @@ impl NativeTransmutable<SkColorChannel> for ColorChannel {}
 #[test] fn test_color_channel_layout() { ColorChannel::test_layout() }
 
 #[derive(Copy, Clone)]
-pub struct YUVAIndex(pub(crate) SkYUVAIndex);
+pub struct YUVAIndex(SkYUVAIndex);
 
 impl NativeTransmutable<SkYUVAIndex> for YUVAIndex {}
 

@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use std::{slice, ops};
+use std::slice;
 use skia_bindings::{SkData, C_SkData_unref, C_SkData_ref, C_SkData_MakeWithCopy, C_SkData_MakeEmpty, C_SkData_MakeSubset, C_SkData_MakeUninitialized, C_SkData_MakeWithCString};
 use std::ops::Deref;
 use std::ffi::CStr;
@@ -69,9 +69,9 @@ impl RCHandle<SkData> {
     }
 
     pub unsafe fn new_uninitialized(length: usize) -> Data {
-        Data::from_ptr(unsafe {
+        Data::from_ptr(
             C_SkData_MakeUninitialized(length)
-        }).unwrap()
+        ).unwrap()
     }
 
     // TODO: use Range as stand in for offset / length?

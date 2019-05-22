@@ -1,4 +1,3 @@
-use std::mem;
 use crate::prelude::*;
 use crate::core::{
     Color,
@@ -8,7 +7,7 @@ use crate::core::{
     ColorSpace,
     scalar
 };
-use skia_bindings::{C_SkColorFilter_MakeLinearToSRGBGamma, C_SkColorFilter_MakeMatrixFilterRowMajor255, C_SkColorFilter_makeComposed, C_SkColorFilter_getFlags, C_SkColorFilter_asComponentTable, C_SkColorFilter_asColorMatrix, C_SkColorFilter_asColorMode, SkColor, SkBlendMode, C_SkColorFilter_MakeModeFilter, SkRefCntBase, SkColorFilter, C_SkColorFilter_MakeSRGBToLinearGamma, SkColorFilter_Flags_kAlphaUnchanged_Flag, C_SkColorFilter_MakeMixer};
+use skia_bindings::{C_SkColorFilter_MakeLinearToSRGBGamma, C_SkColorFilter_MakeMatrixFilterRowMajor255, C_SkColorFilter_makeComposed, C_SkColorFilter_getFlags, C_SkColorFilter_asComponentTable, C_SkColorFilter_asColorMatrix, C_SkColorFilter_asColorMode, C_SkColorFilter_MakeModeFilter, SkRefCntBase, SkColorFilter, C_SkColorFilter_MakeSRGBToLinearGamma, SkColorFilter_Flags_kAlphaUnchanged_Flag, C_SkColorFilter_MakeMixer};
 
 bitflags! {
     pub struct ColorFilterFlags: u32 {
