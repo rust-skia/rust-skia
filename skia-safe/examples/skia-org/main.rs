@@ -75,7 +75,7 @@ pub(crate) mod artifact {
         const NAME: &'static str = "pdf";
 
         fn draw_image<F>(size: (i32, i32), path: &PathBuf, name: &str, func: F) -> () where F: Fn(&mut Canvas) -> () {
-            let mut document = skia_safe::pdf::new_document(None).begin_page((size.0 as _, size.1 as _), None);
+            let mut document = skia_safe::pdf::new_document(None).begin_page(size, None);
             func(document.canvas());
             let data = document.end_page().close();
             write_file(data.as_bytes(), path, name, "pdf");
