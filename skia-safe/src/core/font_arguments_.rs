@@ -87,7 +87,7 @@ impl<'a> FontArguments<'a> {
 
     // This function consumes self for it to be able to change its lifetime,
     // because it borrows the coordinates referenced by FontArgumentsVariationPosition.
-    // We don't use liftime elision here for documentation purposes.
+    #[allow(clippy::needless_lifetimes)]
     pub fn set_variation_design_position<'position>(
         mut self,
         position: font_arguments::VariationPosition<'position>,

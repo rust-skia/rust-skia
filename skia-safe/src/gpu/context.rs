@@ -75,6 +75,7 @@ impl RCHandle<GrContext> {
         self
     }
 
+    // TODO: is_...?
     pub fn abandoned(&self) -> bool {
         unsafe {
             self.native()._base._base.abandoned()
@@ -152,12 +153,14 @@ impl RCHandle<GrContext> {
         }
     }
 
+    // TODO: is_...?
     pub fn color_type_supported_as_image(&self, color_type: ColorType) -> bool {
         unsafe {
             self.native().colorTypeSupportedAsImage(color_type.into_native())
         }
     }
 
+    // TODO: is_...?
     pub fn color_type_supported_as_surface(&self, color_type: ColorType) -> bool {
         unsafe {
             // does not link

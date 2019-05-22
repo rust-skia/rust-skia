@@ -52,7 +52,6 @@ impl RCHandle<SkFontStyleSet> {
         (font_style, style.as_str().into())
     }
 
-    // TODO: use the original name create_typeface() ?
     pub fn new_typeface(&mut self, index: usize) -> Option<Typeface> {
         assert!(index < self.count());
 
@@ -61,14 +60,13 @@ impl RCHandle<SkFontStyleSet> {
         })
     }
 
-    pub fn match_style(&mut self, index: usize, pattern: &FontStyle) -> Option<Typeface> {
+    pub fn match_style(&mut self, index: usize, pattern: FontStyle) -> Option<Typeface> {
         assert!(index < self.count());
         Typeface::from_ptr(unsafe {
             C_SkFontStyleSet_matchStyle(self.native_mut(), pattern.native())
         })
     }
 
-    // TODO: use the original name create_empty() ?
     pub fn new_empty() -> Self {
         FontStyleSet::from_ptr(unsafe { SkFontStyleSet::CreateEmpty() }).unwrap()
     }
@@ -111,13 +109,17 @@ impl RCHandle<SkFontMgr> {
             .unwrap()
     }
 
-    pub fn match_family(&self, family_name: &str) -> FontStyleSet {
-        let family_name = CString::new(family_name).unwrap();
+    pub fn match_family(&self, family_name: impl AsRef<str>) -> FontStyleSet {
+        let family_name = CString::new(family_name.as_ref()).unwrap();
         FontStyleSet::from_ptr(unsafe { self.native().matchFamily(family_name.as_ptr()) }).unwrap()
     }
 
-    pub fn match_family_style(&self, family_name: &str, style: FontStyle) -> Option<Typeface> {
-        let family_name = CString::new(family_name).unwrap();
+    pub fn match_family_style(
+        &self,
+        family_name: impl AsRef<str>,
+        style: FontStyle,
+    ) -> Option<Typeface> {
+        let family_name = CString::new(family_name.as_ref()).unwrap();
         Typeface::from_ptr(unsafe {
             self.native()
                 .matchFamilyStyle(family_name.as_ptr(), style.native())
@@ -127,12 +129,12 @@ impl RCHandle<SkFontMgr> {
     // TODO: support IntoIterator / AsRef<str> for bcp_47?
     pub fn match_family_style_character(
         &self,
-        family_name: &str,
+        family_name: impl AsRef<str>,
         style: FontStyle,
         bcp_47: &[&str],
         character: Unichar,
     ) -> Option<Typeface> {
-        let family_name = CString::new(family_name).unwrap();
+        let family_name = CString::new(family_name.as_ref()).unwrap();
         // create backing store for the pointer array.
         let bcp_47: Vec<CString> = bcp_47.iter().map(|s| CString::new(*s).unwrap()).collect();
         // note: mutability needed to comply to the C type "const char* bcp47[]".
@@ -156,7 +158,12 @@ impl RCHandle<SkFontMgr> {
         })
     }
 
+    #[deprecated(since = "0.11.0", note = "use new_from_data() instead")]
     pub fn new_from_bytes(&self, bytes: &[u8], ttc_index: Option<usize>) -> Option<Typeface> {
+        self.new_from_data(bytes, ttc_index)
+    }
+
+    pub fn new_from_data(&self, bytes: &[u8], ttc_index: impl Into<Option<usize>>) -> Option<Typeface> {
         let mut stream = DynamicMemoryWStream::from_bytes(bytes);
         let mut stream = stream.detach_as_stream();
         Typeface::from_ptr(unsafe {
@@ -166,10 +173,12 @@ impl RCHandle<SkFontMgr> {
             C_SkFontMgr_makeFromStream(
                 self.native(),
                 stream_ptr,
-                ttc_index.unwrap_or_default().try_into().unwrap(),
+                ttc_index.into().unwrap_or_default().try_into().unwrap(),
             )
         })
     }
+
+    // TODO: makeFromStream(.., ttcIndex).
 }
 
 #[test]

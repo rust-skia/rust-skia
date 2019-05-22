@@ -252,6 +252,7 @@ impl Handle<SkImageInfo> {
         }
     }
 
+    // TODO: has_valid_row_bytes()?
     pub fn valid_row_bytes(&self, row_bytes: usize) -> bool {
         unsafe {
             self.native().validRowBytes(row_bytes)

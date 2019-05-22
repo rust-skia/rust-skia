@@ -79,6 +79,9 @@ pub use self::drawable::*;
 mod encoded_image_format;
 pub use self::encoded_image_format::*;
 
+// unsupported, because it's used in experimental APIs only.
+// mod executor;
+
 mod filter_quality;
 pub use self::filter_quality::*;
 
@@ -91,8 +94,11 @@ pub use self::font::*;
 mod font_arguments_;
 pub use self::font_arguments_::*;
 
-mod font_metrics;
-pub use self::font_metrics::*;
+// unsupported, because it's not used in publicly exposed APIs:
+// mod font_lcd_config;
+
+mod font_metrics_;
+pub use self::font_metrics_::*;
 
 mod font_mgr;
 pub use self::font_mgr::*;

@@ -107,6 +107,7 @@ impl Handle<SkPathMeasure> {
         unsafe { self.native_mut().isClosed() }
     }
 
+    // TODO: has_next_contour()?
     pub fn next_contour(&mut self) -> bool {
         unsafe { self.native_mut().nextContour() }
     }

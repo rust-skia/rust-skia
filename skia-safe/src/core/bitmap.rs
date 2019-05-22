@@ -97,7 +97,13 @@ impl Handle<SkBitmap> {
         unsafe { self.native().shiftPerPixel().try_into().unwrap() }
     }
 
+    #[deprecated(since = "0.11.0", note = "use is_empty() instead")]
     pub fn empty(&self) -> bool {
+        self.is_empty()
+
+    }
+
+    pub fn is_empty(&self) -> bool {
         unsafe { self.native().empty() }
     }
 
@@ -237,7 +243,12 @@ impl Handle<SkBitmap> {
 
     // TODO: setPixelRef()
 
+    #[deprecated(since = "0.11.0", note = "use is_ready_to_draw() insteadd")]
     pub fn ready_to_draw(&self) -> bool {
+        self.is_ready_to_draw()
+    }
+
+    pub fn is_ready_to_draw(&self) -> bool {
         unsafe { C_SkBitmap_readyToDraw(self.native()) }
     }
 
