@@ -4,25 +4,25 @@ use skia_bindings::{
     C_SkImageFilter_MakeMatrixFilter, C_SkImageFilter_computeFastBounds,
     C_SkImageFilter_makeWithLocalMatrix, SkColorFilter, SkColorSpace, SkImageFilter,
     SkImageFilterCache, SkImageFilter_Context, SkImageFilter_CropRect,
-    SkImageFilter_CropRect_CropEdge, SkImageFilter_MapDirection, SkImageFilter_OutputProperties,
+    SkImageFilter_MapDirection, SkImageFilter_OutputProperties,
     SkImageFilter_TileUsage, SkRefCntBase,
 };
 use std::ptr;
 
 #[repr(C)]
-pub struct ImageFilterOutputProperties<'a> {
+pub struct OutputProperties<'a> {
     color_type: ColorType,
     color_space: &'a SkColorSpace,
 }
 
-impl<'a> NativeTransmutable<SkImageFilter_OutputProperties> for ImageFilterOutputProperties<'a> {}
+impl<'a> NativeTransmutable<SkImageFilter_OutputProperties> for OutputProperties<'a> {}
 
 #[test]
 fn test_output_properties_layout() {
-    ImageFilterOutputProperties::test_layout();
+    OutputProperties::test_layout();
 }
 
-impl<'a> ImageFilterOutputProperties<'a> {
+impl<'a> OutputProperties<'a> {
     pub fn color_type(&self) -> ColorType {
         self.color_type
     }
@@ -33,21 +33,21 @@ impl<'a> ImageFilterOutputProperties<'a> {
 }
 
 #[repr(C)]
-pub struct ImageFilterContext<'a> {
+pub struct Context<'a> {
     ctm: Matrix,
     clip_bounds: IRect,
     cache: &'a mut SkImageFilterCache,
-    output_properties: ImageFilterOutputProperties<'a>,
+    output_properties: OutputProperties<'a>,
 }
 
-impl<'a> NativeTransmutable<SkImageFilter_Context> for ImageFilterContext<'a> {}
+impl<'a> NativeTransmutable<SkImageFilter_Context> for Context<'a> {}
 
 #[test]
 fn test_context_layout() {
-    ImageFilterContext::test_layout();
+    Context::test_layout();
 }
 
-impl<'a> ImageFilterContext<'a> {
+impl<'a> Context<'a> {
     pub fn ctm(&self) -> &Matrix {
         &self.ctm
     }
@@ -58,7 +58,7 @@ impl<'a> ImageFilterContext<'a> {
 
     // TODO support access to SkImageFilterCache, even though it's declared in src/core?
 
-    pub fn output_properties(&self) -> &ImageFilterOutputProperties {
+    pub fn output_properties(&self) -> &OutputProperties {
         &self.output_properties
     }
 
@@ -67,51 +67,43 @@ impl<'a> ImageFilterContext<'a> {
     }
 }
 
-bitflags! {
-    pub struct ImageFilterCropRectCropEdge : u32 {
-        const HAS_LEFT = SkImageFilter_CropRect_CropEdge::kHasLeft_CropEdge as _;
-        const HAS_TOP = SkImageFilter_CropRect_CropEdge::kHasTop_CropEdge as _;
-        const HAS_WIDTH = SkImageFilter_CropRect_CropEdge::kHasWidth_CropEdge as _;
-        const HAS_HEIGHT = SkImageFilter_CropRect_CropEdge::kHasHeight_CropEdge as _;
-        const HAS_ALL = Self::HAS_LEFT.bits | Self::HAS_TOP.bits | Self::HAS_WIDTH.bits | Self::HAS_HEIGHT.bits;
-    }
-}
-
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 #[repr(transparent)]
-pub struct ImageFilterCropRect(SkImageFilter_CropRect);
+pub struct CropRect(SkImageFilter_CropRect);
 
-impl NativeTransmutable<SkImageFilter_CropRect> for ImageFilterCropRect {}
+impl NativeTransmutable<SkImageFilter_CropRect> for CropRect {}
 
 #[test]
 fn test_crop_rect_layout() {
-    ImageFilterCropRect::test_layout();
+    CropRect::test_layout();
 }
 
-impl Default for ImageFilterCropRect {
+impl Default for CropRect {
     fn default() -> Self {
-        ImageFilterCropRect::from_native(unsafe { SkImageFilter_CropRect::new() })
+        CropRect::from_native(unsafe { SkImageFilter_CropRect::new() })
     }
 }
 
-impl ImageFilterCropRect {
-    pub fn new<R: AsRef<Rect>>(rect: R, flags: ImageFilterCropRectCropEdge) -> Self {
-        ImageFilterCropRect::from_native(unsafe {
-            SkImageFilter_CropRect::new1(rect.as_ref().native(), flags.bits())
+impl CropRect {
+    pub fn new(rect: impl AsRef<Rect>, flags: impl Into<Option<crop_rect::CropEdge>>) -> Self {
+        CropRect::from_native(unsafe {
+            SkImageFilter_CropRect::new1(
+                rect.as_ref().native(),
+                flags.into().unwrap_or(crop_rect::CropEdge::HAS_ALL).bits())
         })
     }
 
-    pub fn flags(&self) -> ImageFilterCropRectCropEdge {
-        ImageFilterCropRectCropEdge::from_bits_truncate(unsafe { self.native().flags() })
+    pub fn flags(&self) -> crop_rect::CropEdge {
+        crop_rect::CropEdge::from_bits_truncate(unsafe { self.native().flags() })
     }
 
     pub fn rect(&self) -> &Rect {
         Rect::from_native_ref(unsafe { &*self.native().rect() })
     }
 
-    pub fn apply_to<IR: AsRef<IRect>>(
+    pub fn apply_to(
         &self,
-        image_bounds: IR,
+        image_bounds: impl AsRef<IRect>,
         matrix: &Matrix,
         embiggen: bool,
     ) -> IRect {
@@ -128,30 +120,44 @@ impl ImageFilterCropRect {
     }
 }
 
+pub mod crop_rect {
+    use skia_bindings::SkImageFilter_CropRect_CropEdge;
+
+    bitflags! {
+        pub struct CropEdge : u32 {
+            const HAS_LEFT = SkImageFilter_CropRect_CropEdge::kHasLeft_CropEdge as _;
+            const HAS_TOP = SkImageFilter_CropRect_CropEdge::kHasTop_CropEdge as _;
+            const HAS_WIDTH = SkImageFilter_CropRect_CropEdge::kHasWidth_CropEdge as _;
+            const HAS_HEIGHT = SkImageFilter_CropRect_CropEdge::kHasHeight_CropEdge as _;
+            const HAS_ALL = Self::HAS_LEFT.bits | Self::HAS_TOP.bits | Self::HAS_WIDTH.bits | Self::HAS_HEIGHT.bits;
+        }
+    }
+}
+
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-pub enum ImageFilterTileUsage {
+pub enum TileUsage {
     Possible = SkImageFilter_TileUsage::kPossible_TileUsage as _,
     Never = SkImageFilter_TileUsage::kNever_TileUsage as _,
 }
 
-impl NativeTransmutable<SkImageFilter_TileUsage> for ImageFilterTileUsage {}
+impl NativeTransmutable<SkImageFilter_TileUsage> for TileUsage {}
 #[test]
 fn test_tile_usage_layout() {
-    ImageFilterTileUsage::test_layout();
+    TileUsage::test_layout();
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-pub enum ImageFilterMapDirection {
+pub enum MapDirection {
     Forward = SkImageFilter_MapDirection::kForward_MapDirection as _,
     Reverse = SkImageFilter_MapDirection::kReverse_MapDirection as _,
 }
 
-impl NativeTransmutable<SkImageFilter_MapDirection> for ImageFilterMapDirection {}
+impl NativeTransmutable<SkImageFilter_MapDirection> for MapDirection {}
 #[test]
 fn test_map_direction_layout() {
-    ImageFilterMapDirection::test_layout();
+    MapDirection::test_layout();
 }
 
 pub type ImageFilter = RCHandle<SkImageFilter>;
@@ -164,14 +170,14 @@ impl NativeRefCountedBase for SkImageFilter {
 }
 
 impl RCHandle<SkImageFilter> {
-    // TODO: filterImage() SkSpecialImage is declared in src/core/
+    // TODO: wrapfilterImage()? SkSpecialImage is declared in src/core/
 
-    pub fn filter_bounds<'a, IRS: AsRef<IRect>, IR: Into<Option<&'a IRect>>>(
+    pub fn filter_bounds<'a>(
         &self,
-        src: IRS,
+        src: impl AsRef<IRect>,
         ctm: &Matrix,
-        map_direction: ImageFilterMapDirection,
-        input_rect: IR,
+        map_direction: MapDirection,
+        input_rect: impl Into<Option<&'a IRect>>,
     ) -> IRect {
         IRect::from_native(unsafe {
             self.native().filterBounds(
@@ -198,7 +204,12 @@ impl RCHandle<SkImageFilter> {
 
     // TODO: removeKey() SkImageFilterCacheKey is declared in src/core/
 
+    #[deprecated(since = "0.11.0", note = "use to_a_color_filter() instead")]
     pub fn as_a_color_filter(&self) -> Option<ColorFilter> {
+        self.to_a_color_filter()
+    }
+
+    pub fn to_a_color_filter(&self) -> Option<ColorFilter> {
         let mut filter_ptr: *mut SkColorFilter = ptr::null_mut();
         if unsafe { self.native().asAColorFilter(&mut filter_ptr) } {
             // If set, filter_ptr is also "ref'd" here, so we don't
@@ -214,18 +225,20 @@ impl RCHandle<SkImageFilter> {
     }
 
     pub fn input(&self, i: usize) -> Option<ImageFilter> {
+        assert!(i < self.count_inputs());
         ImageFilter::from_unshared_ptr(unsafe { self.native().getInput(i.try_into().unwrap()) })
     }
 
+    // TODO: rename to is_crop_rect_set() ?
     pub fn crop_rect_is_set(&self) -> bool {
         unsafe { self.native().cropRectIsSet() }
     }
 
-    pub fn crop_rect(&self) -> ImageFilterCropRect {
-        ImageFilterCropRect::from_native(unsafe { self.native().getCropRect() })
+    pub fn crop_rect(&self) -> CropRect {
+        CropRect::from_native(unsafe { self.native().getCropRect() })
     }
 
-    pub fn compute_fast_bounds<R: AsRef<Rect>>(&self, bounds: R) -> Rect {
+    pub fn compute_fast_bounds(&self, bounds: impl AsRef<Rect>) -> Rect {
         Rect::from_native(unsafe {
             C_SkImageFilter_computeFastBounds(self.native(), bounds.as_ref().native())
         })
@@ -235,7 +248,12 @@ impl RCHandle<SkImageFilter> {
         unsafe { self.native().canComputeFastBounds() }
     }
 
+    #[deprecated(since = "0.11.0", note = "use with_local_matrix() instead")]
     pub fn new_with_local_matrix(&self, matrix: &Matrix) -> Option<ImageFilter> {
+        self.with_local_matrix(matrix)
+    }
+
+    pub fn with_local_matrix(&self, matrix: &Matrix) -> Option<ImageFilter> {
         ImageFilter::from_ptr(unsafe {
             C_SkImageFilter_makeWithLocalMatrix(self.native(), matrix.native())
         })
@@ -260,7 +278,5 @@ impl RCHandle<SkImageFilter> {
         .unwrap()
     }
 
-    // TODO: GetFlattenabletype()?
-    // TODO: getFlattenableType()?
     // TODO: Deserialize?
 }

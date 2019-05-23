@@ -136,8 +136,20 @@ pub type ImageCompressionType = image::CompressionType;
 mod image_encoder;
 pub use image_encoder::*;
 
-mod image_filter;
-pub use image_filter::*;
+pub mod image_filter;
+pub use image_filter::ImageFilter;
+#[deprecated(since = "0.11.0", note = "use image_filter::OutputProperties instead")]
+pub type ImageFilterOutputProperties<'a> = image_filter::OutputProperties<'a>;
+#[deprecated(since = "0.11.0", note = "use image_filter::Context instead")]
+pub type ImageFilterContext<'a> = image_filter::Context<'a>;
+#[deprecated(since = "0.11.0", note = "use image_filter::CropRect instead")]
+pub type ImageFilterCropRect = image_filter::CropRect;
+#[deprecated(since = "0.11.0", note = "use image_filter::crop_rect::CropEdge instead")]
+pub type ImageFilterCropRectCropEdge = image_filter::crop_rect::CropEdge;
+#[deprecated(since = "0.11.0", note = "use image_filter::TileUsage instead")]
+pub type ImageFilterTileUsage = image_filter::TileUsage;
+#[deprecated(since = "0.11.0", note = "use image_filter::MapDirection instead")]
+pub type ImageFilterMapDirection = image_filter::MapDirection;
 
 mod image_info;
 pub use image_info::*;
