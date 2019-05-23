@@ -151,6 +151,9 @@ pub type ImageFilterTileUsage = image_filter::TileUsage;
 #[deprecated(since = "0.11.0", note = "use image_filter::MapDirection instead")]
 pub type ImageFilterMapDirection = image_filter::MapDirection;
 
+mod image_generator;
+pub use image_generator::*;
+
 mod image_info;
 pub use image_info::*;
 
