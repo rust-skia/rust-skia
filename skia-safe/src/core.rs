@@ -133,7 +133,8 @@ pub type ImageCachingHint = image::CachingHint;
 #[deprecated(since = "0.11.0", note = "use image::CompressionType instead")]
 pub type ImageCompressionType = image::CompressionType;
 
-
+mod image_encoder;
+pub use image_encoder::*;
 
 mod image_filter;
 pub use image_filter::*;
