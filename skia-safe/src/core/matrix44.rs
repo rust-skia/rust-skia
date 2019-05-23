@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use std::{mem, ops};
-use crate::core::{Matrix, MatrixTypeMask, Vector4, scalar, Vector3 };
+use crate::core::{Matrix, Vector4, scalar, Vector3 };
 use skia_bindings::{
     C_SkMatrix44_Equals,
     C_SkMatrix44_destruct,
@@ -12,6 +12,16 @@ use skia_bindings::{
     C_SkMatrix44_ConstructIdentity,
     C_SkMatrix44_CopyConstruct
 };
+
+bitflags! {
+    pub struct TypeMask: u32 {
+        const IDENTITY = skia_bindings::SkMatrix44_TypeMask_kIdentity_Mask as u32;
+        const TRANSLATE = skia_bindings::SkMatrix44_TypeMask_kTranslate_Mask as u32;
+        const SCALE = skia_bindings::SkMatrix44_TypeMask_kScale_Mask as u32;
+        const AFFINE = skia_bindings::SkMatrix44_TypeMask_kAffine_Mask as u32;
+        const PERSPECTIVE = skia_bindings::SkMatrix44_TypeMask_kPerspective_Mask as u32;
+    }
+}
 
 pub type Matrix44 = Handle<SkMatrix44>;
 
@@ -26,7 +36,7 @@ impl NativeClone for SkMatrix44 {
         // does not link under Linux:
         // unsafe { SkMatrix44::new3(self) }
         unsafe {
-            let mut matrix = mem::uninitialized();
+            let mut matrix = mem::zeroed();
             C_SkMatrix44_CopyConstruct(&mut matrix, self);
             matrix
         }
@@ -90,8 +100,8 @@ impl Handle<SkMatrix44> {
         Self::construct_c(C_SkMatrix44_ConstructIdentity)
     }
 
-    pub fn get_type(&self) -> MatrixTypeMask {
-        MatrixTypeMask::from_bits_truncate(unsafe {
+    pub fn get_type(&self) -> TypeMask {
+        TypeMask::from_bits_truncate(unsafe {
             self.native().getType()
         } as _)
     }
@@ -111,12 +121,12 @@ impl Handle<SkMatrix44> {
     pub fn is_scale(&self) -> bool {
         // linker error:
         // unsafe { self.0.isScale() }
-        (self.get_type() & !MatrixTypeMask::SCALE).is_empty()
+        (self.get_type() & !TypeMask::SCALE).is_empty()
     }
 
     pub fn has_perspective(&self) -> bool {
         // would cause a linker error
-        self.get_type().contains(MatrixTypeMask::PERSPECTIVE)
+        self.get_type().contains(TypeMask::PERSPECTIVE)
     }
 
     pub fn set_identity(&mut self) -> &mut Self {

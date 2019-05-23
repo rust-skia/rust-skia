@@ -160,14 +160,19 @@ pub use image_info::*;
 mod mask_filter;
 pub use mask_filter::*;
 
-mod matrix;
-pub use matrix::*;
+pub mod matrix;
+pub use matrix::Matrix;
+#[deprecated(since = "0.11.0", note = "use matrix::TypeMask instead")]
+pub type MatrixTypeMask = matrix::TypeMask;
+#[deprecated(since = "0.11.0", note = "use matrix::ScaleToFit instead")]
+pub type MatrixScaletoFit = matrix::ScaleToFit;
+#[deprecated(since = "0.11.0", note = "use matrix::Member instead")]
+pub type MatrixMember = matrix::Member;
+#[deprecated(since = "0.11.0", note = "use matrix::AffineMember instead")]
+pub type AffineMatrixMember = matrix::AffineMember;
 
-mod matrix44;
-pub use matrix44::*;
-
-mod matrix_typemask;
-pub use matrix_typemask::*;
+pub mod matrix44;
+pub use matrix44::Matrix44;
 
 mod paint;
 pub use paint::*;
