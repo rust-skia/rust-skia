@@ -26,9 +26,9 @@ impl NativeRefCountedBase for SkMaskFilter {
 
 impl RCHandle<SkMaskFilter> {
 
-    pub fn blur(style: BlurStyle, sigma: scalar, respect_ctm: Option<bool>) -> Self {
+    pub fn blur(style: BlurStyle, sigma: scalar, respect_ctm: impl Into<Option<bool>>) -> Self {
         Self::from_ptr(unsafe {
-            C_SkMaskFilter_MakeBlur(style.into_native(), sigma, respect_ctm.unwrap_or(true))
+            C_SkMaskFilter_MakeBlur(style.into_native(), sigma, respect_ctm.into().unwrap_or(true))
         }).unwrap()
     }
 
@@ -49,4 +49,6 @@ impl RCHandle<SkMaskFilter> {
             C_SkMaskFilter_makeWithMatrix(self.native(), matrix.native())
         }).unwrap()
     }
+
+    // TODO: Deserialize
 }
