@@ -580,6 +580,10 @@ extern "C" void C_SkImageInfo_Copy(const SkImageInfo* from, SkImageInfo* to) {
     *to = *from;
 }
 
+extern "C" bool C_SkImageInfo_Equals(const SkImageInfo* lhs, const SkImageInfo* rhs) {
+    return *lhs == *rhs;
+}
+
 extern "C" void C_SkImageInfo_Make(SkImageInfo* self, int width, int height, SkColorType ct, SkAlphaType at, const SkColorSpace* cs) {
     *self = SkImageInfo::Make(width, height, ct, at, spFromConst(cs));
 }
@@ -593,6 +597,14 @@ extern "C" SkColorSpace* C_SkImageInfo_colorSpace(const SkImageInfo* self) {
     SkColorSpace* cs = self->colorSpace();
     if (cs) cs->ref();
     return cs;
+}
+
+extern "C" bool C_SkImageInfo_gammaCloseToSRGB(const SkImageInfo* self) {
+    return self->gammaCloseToSRGB();
+}
+
+extern "C" void C_SkImageInfo_reset(SkImageInfo* self) {
+    self->reset();
 }
 
 //
