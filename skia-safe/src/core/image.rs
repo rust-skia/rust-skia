@@ -453,6 +453,7 @@ impl RCHandle<SkImage> {
         })
     }
 
+    // TODO: rename to with_filter()?
     pub fn new_with_filter(
         &self,
         mut context: Option<&mut gpu::Context>,
@@ -460,6 +461,7 @@ impl RCHandle<SkImage> {
         clip_bounds: impl Into<IRect>,
         subset: impl Into<IRect>)
         -> Option<(Image, IRect, IPoint)> {
+
         let mut out_subset = IRect::default();
         let mut offset = IPoint::default();
 
