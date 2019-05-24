@@ -177,6 +177,9 @@ pub use matrix44::{Vector4, Matrix44};
 mod milestone;
 pub use milestone::*;
 
+mod multi_picture_draw;
+pub use multi_picture_draw::*;
+
 mod paint;
 pub use paint::*;
 
