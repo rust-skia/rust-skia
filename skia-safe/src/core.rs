@@ -172,7 +172,7 @@ pub type MatrixMember = matrix::Member;
 pub type AffineMatrixMember = matrix::AffineMember;
 
 pub mod matrix44;
-pub use matrix44::Matrix44;
+pub use matrix44::{Vector4, Matrix44};
 
 mod paint;
 pub use paint::*;
@@ -236,9 +236,6 @@ pub use typeface::*;
 
 mod types;
 pub use types::*;
-
-mod vector4;
-pub use vector4::*;
 
 mod vertices;
 pub use vertices::*;
