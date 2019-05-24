@@ -684,5 +684,5 @@ fn setting_a_matrix_component_recomputes_typemask() {
     let mut m = Matrix::default();
     assert_eq!(TypeMask::IDENTITY, m.get_type());
     m.set_persp_x(0.1);
-    assert_eq!(TypeMask::TRANSLATE | TypeMask::SCALE | TypeMask::AFFINE | TypeMask:: PERSPECTIVE, m.get_type());
+    assert_eq!(TypeMask::TRANSLATE | TypeMask::SCALE | TypeMask::AFFINE | TypeMask::PERSPECTIVE, m.get_type());
 }
