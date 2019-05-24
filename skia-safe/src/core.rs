@@ -174,6 +174,9 @@ pub type AffineMatrixMember = matrix::AffineMember;
 pub mod matrix44;
 pub use matrix44::{Vector4, Matrix44};
 
+mod milestone;
+pub use milestone::*;
+
 mod paint;
 pub use paint::*;
 
