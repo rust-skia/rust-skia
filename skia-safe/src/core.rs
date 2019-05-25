@@ -197,6 +197,8 @@ pub use path::FillType as PathFillType;
 pub use path::Convexity as PathConvexity;
 #[deprecated(since = "0.11.0", note = "use path::AddPathMode instead")]
 pub use path::AddPathMode as AddPathMode;
+#[deprecated(since = "0.11.0", note = "use path::SegmentMask instead")]
+pub use path::SegmentMask as PathSegmentMask;
 #[deprecated(since = "0.11.0", note = "use path::ArcSize instead")]
 pub use path::ArcSize as PathArcSize;
 
