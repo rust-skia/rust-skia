@@ -187,8 +187,18 @@ pub use paint::Style as PaintStyle;
 pub use paint::Cap as PaintCap;
 pub use paint::Join as PaintJoin;
 
-mod path;
-pub use path::*;
+pub mod path;
+pub use path::Path;
+#[deprecated(since = "0.11.0", note = "use matrix::AffineMember instead")]
+pub use path::Direction as PathDirection;
+#[deprecated(since = "0.11.0", note = "use path::FillType instead")]
+pub use path::FillType as PathFillType;
+#[deprecated(since = "0.11.0", note = "use path::Convexity instead")]
+pub use path::Convexity as PathConvexity;
+#[deprecated(since = "0.11.0", note = "use path::AddPathMode instead")]
+pub use path::AddPathMode as AddPathMode;
+#[deprecated(since = "0.11.0", note = "use path::ArcSize instead")]
+pub use path::ArcSize as PathArcSize;
 
 mod path_effect;
 pub use path_effect::*;
