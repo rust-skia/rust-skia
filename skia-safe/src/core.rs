@@ -93,9 +93,9 @@ pub use font::*;
 pub mod font_arguments;
 pub use font_arguments::FontArguments;
 #[deprecated(since = "0.11.0", note = "use font_arguments::VariationPosition instead")]
-pub type FontArgumentsVariationPosition<'a> = font_arguments::VariationPosition<'a>;
+pub use font_arguments::VariationPosition as FontArgumentsVariationPosition;
 #[deprecated(since = "0.11.0", note = "use font_arguments::variation_position::Coordinate instead")]
-pub type FontArgumentsVariationPositionCoordinate = font_arguments::variation_position::Coordinate;
+pub use font_arguments::variation_position::Coordinate as FontArgumentsVariationPositionCoordinate;
 
 // unsupported, because it's not used in publicly exposed APIs:
 // mod font_lcd_config;
@@ -103,7 +103,7 @@ pub type FontArgumentsVariationPositionCoordinate = font_arguments::variation_po
 pub mod font_metrics;
 pub use font_metrics::FontMetrics;
 #[deprecated(since = "0.11.0", note = "use font_metrics::Flags instead")]
-pub type FontMetricsFlags = font_metrics::Flags;
+pub use font_metrics::Flags as FontMetricsFlags;
 
 mod font_mgr;
 pub use font_mgr::*;
@@ -113,11 +113,11 @@ pub mod font_parameters;
 pub mod font_style;
 pub use font_style::FontStyle;
 #[deprecated(since = "0.11.0", note = "use font_style::Weight")]
-pub type FontStyleWeight = font_style::Weight;
+pub use font_style::Weight as FontStyleWeight;
 #[deprecated(since = "0.11.0", note = "use font_style::Width")]
-pub type FontStyleWidth = font_style::Width;
+pub use font_style::Width as FontStyleWidth;
 #[deprecated(since = "0.11.0", note = "use font_style::Slant")]
-pub type FontStyleSlant = font_style::Slant;
+pub use font_style::Slant as FontStyleSlant;
 
 mod font_types;
 pub use font_types::*;
@@ -127,11 +127,11 @@ pub mod graphics;
 pub mod image;
 pub use image::Image;
 #[deprecated(since = "0.11.0", note = "use image::BitDepth instead")]
-pub type ImageBitDepth = image::BitDepth;
+pub use image::BitDepth as ImageBitDepth;
 #[deprecated(since = "0.11.0", note = "use image::CachingHint instead")]
-pub type ImageCachingHint = image::CachingHint;
+pub use image::CachingHint as ImageCachingHint;
 #[deprecated(since = "0.11.0", note = "use image::CompressionType instead")]
-pub type ImageCompressionType = image::CompressionType;
+pub use image::CompressionType as ImageCompressionType;
 
 mod image_encoder;
 pub use image_encoder::*;
@@ -139,17 +139,17 @@ pub use image_encoder::*;
 pub mod image_filter;
 pub use image_filter::ImageFilter;
 #[deprecated(since = "0.11.0", note = "use image_filter::OutputProperties instead")]
-pub type ImageFilterOutputProperties<'a> = image_filter::OutputProperties<'a>;
+pub use image_filter::OutputProperties as ImageFilterOutputProperties;
 #[deprecated(since = "0.11.0", note = "use image_filter::Context instead")]
-pub type ImageFilterContext<'a> = image_filter::Context<'a>;
+pub use image_filter::Context as ImageFilterContext;
 #[deprecated(since = "0.11.0", note = "use image_filter::CropRect instead")]
-pub type ImageFilterCropRect = image_filter::CropRect;
+pub use image_filter::CropRect as ImageFilterCropRect;
 #[deprecated(since = "0.11.0", note = "use image_filter::crop_rect::CropEdge instead")]
-pub type ImageFilterCropRectCropEdge = image_filter::crop_rect::CropEdge;
+pub use image_filter::crop_rect::CropEdge as ImageFilterCropRectCropEdge;
 #[deprecated(since = "0.11.0", note = "use image_filter::TileUsage instead")]
-pub type ImageFilterTileUsage = image_filter::TileUsage;
+pub use image_filter::TileUsage as ImageFilterTileUsage;
 #[deprecated(since = "0.11.0", note = "use image_filter::MapDirection instead")]
-pub type ImageFilterMapDirection = image_filter::MapDirection;
+pub use image_filter::MapDirection as ImageFilterMapDirection;
 
 mod image_generator;
 pub use image_generator::*;
@@ -163,13 +163,13 @@ pub use mask_filter::*;
 pub mod matrix;
 pub use matrix::Matrix;
 #[deprecated(since = "0.11.0", note = "use matrix::TypeMask instead")]
-pub type MatrixTypeMask = matrix::TypeMask;
+pub use matrix::TypeMask as MatrixTypeMask;
 #[deprecated(since = "0.11.0", note = "use matrix::ScaleToFit instead")]
-pub type MatrixScaletoFit = matrix::ScaleToFit;
+pub use matrix::ScaleToFit as MatrixScaletoFit;
 #[deprecated(since = "0.11.0", note = "use matrix::Member instead")]
-pub type MatrixMember = matrix::Member;
+pub use matrix::Member as MatrixMember;
 #[deprecated(since = "0.11.0", note = "use matrix::AffineMember instead")]
-pub type AffineMatrixMember = matrix::AffineMember;
+pub use matrix::AffineMember as AffineMatrixMember;
 
 pub mod matrix44;
 pub use matrix44::{Vector4, Matrix44};
@@ -180,8 +180,12 @@ pub use milestone::*;
 mod multi_picture_draw;
 pub use multi_picture_draw::*;
 
-mod paint;
-pub use paint::*;
+pub mod paint;
+pub use paint::Paint;
+// We keep these around for the time being.
+pub use paint::Style as PaintStyle;
+pub use paint::Cap as PaintCap;
+pub use paint::Join as PaintJoin;
 
 mod path;
 pub use path::*;
