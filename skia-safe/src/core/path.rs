@@ -8,7 +8,8 @@ use crate::core::{
     Data,
     Matrix
 };
-use skia_bindings::{SkPath_AddPathMode, SkPath_ArcSize, C_SkPath_Equals, SkPath_Direction, SkPath, C_SkPath_destruct, SkPath_FillType, SkPath_Convexity, C_SkPath_ConvertToNonInverseFillType, C_SkPath_serialize, SkPath_SegmentMask_kLine_SegmentMask, SkPath_SegmentMask_kQuad_SegmentMask, SkPath_SegmentMask_kConic_SegmentMask, SkPath_SegmentMask_kCubic_SegmentMask, SkPath_Verb, SkPath_Iter, C_SkPath_Iter_destruct, C_SkPath_Iter_isCloseLine, SkPath_RawIter, C_SkPath_RawIter_destruct};
+use crate::interop::DynamicMemoryWStream;
+use skia_bindings::{SkPath_AddPathMode, SkPath_ArcSize, C_SkPath_Equals, SkPath_Direction, SkPath, C_SkPath_destruct, SkPath_FillType, SkPath_Convexity, C_SkPath_ConvertToNonInverseFillType, C_SkPath_serialize, SkPath_SegmentMask_kLine_SegmentMask, SkPath_SegmentMask_kQuad_SegmentMask, SkPath_SegmentMask_kConic_SegmentMask, SkPath_SegmentMask_kCubic_SegmentMask, SkPath_Verb, SkPath_Iter, C_SkPath_Iter_destruct, C_SkPath_Iter_isCloseLine, SkPath_RawIter, C_SkPath_RawIter_destruct, C_SkPath_isValid};
 use std::marker::PhantomData;
 use std::mem::forget;
 
@@ -737,19 +738,40 @@ impl Handle<SkPath> {
         })
     }
 
-    // TODO: Iter
-    // TODO: RawIter
-
-    pub fn contains<P: Into<Point>>(&self, p: P) -> bool {
+    pub fn contains(&self, p: impl Into<Point>) -> bool {
         let p = p.into();
         unsafe { self.native().contains(p.x, p.y) }
     }
+
+    pub fn dump_as_data(&self, force_close: bool, dump_as_hex: bool) -> Data {
+        let mut stream = DynamicMemoryWStream::new();
+        unsafe {
+            self.native().dump(&mut stream.native_mut()._base, force_close, dump_as_hex);
+        }
+        stream.detach_as_data()
+    }
+
+    pub fn dump(&self) {
+        unsafe {
+            self.native().dump1()
+        }
+    }
+
+    pub fn dump_hex(&self) {
+        unsafe {
+            self.native().dumpHex()
+        }
+    }
+
+    // TODO: writeToMemory()?
 
     pub fn serialize(&self) -> Data {
         Data::from_ptr(unsafe {
             C_SkPath_serialize(self.native())
         }).unwrap()
     }
+
+    // TODO: readFromMemory()?
 
     pub fn deserialize(data: &Data) -> Option<Path> {
         let mut path = Path::default();
@@ -759,5 +781,19 @@ impl Handle<SkPath> {
                 bytes.as_ptr() as _,
                 bytes.len()) > 0
         }.if_true_some(path)
+    }
+
+    pub fn generation_id(&self) -> u32 {
+        unsafe {
+            self.native().getGenerationID()
+        }
+    }
+
+    pub fn is_valid(&self) -> bool {
+        // does not link:
+        // unsafe { self.native().isValid() }
+        unsafe {
+            C_SkPath_isValid(self.native())
+        }
     }
 }

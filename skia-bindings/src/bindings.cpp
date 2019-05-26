@@ -481,6 +481,10 @@ extern "C" SkPath::FillType C_SkPath_ConvertToNonInverseFillType(SkPath::FillTyp
     return SkPath::ConvertToNonInverseFillType(fill);
 }
 
+extern "C" bool C_SkPath_isValid(const SkPath* self) {
+    return self->isValid();
+}
+
 extern "C" void C_SkPath_Iter_destruct(SkPath::Iter* self) {
     self->~Iter();
 }
