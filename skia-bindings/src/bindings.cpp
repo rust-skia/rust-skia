@@ -481,6 +481,18 @@ extern "C" SkPath::FillType C_SkPath_ConvertToNonInverseFillType(SkPath::FillTyp
     return SkPath::ConvertToNonInverseFillType(fill);
 }
 
+extern "C" void C_SkPath_Iter_destruct(SkPath::Iter* self) {
+    self->~Iter();
+}
+
+extern "C" bool C_SkPath_Iter_isCloseLine(const SkPath::Iter* self) {
+    return self->isCloseLine();
+}
+
+extern "C" void C_SkPath_RawIter_destruct(SkPath::RawIter* self) {
+    self->~RawIter();
+}
+
 //
 // SkPathMeasure
 //
