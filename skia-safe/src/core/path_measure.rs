@@ -12,20 +12,17 @@ impl NativeDrop for SkPathMeasure {
     }
 }
 
-#[allow(clippy::module_inception)]
-pub mod path_measure {
-    bitflags! {
-        pub struct MatrixFlags : u32 {
-            const GET_POSITION = skia_bindings::SkPathMeasure_MatrixFlags_kGetPosition_MatrixFlag as _;
-            const GET_TANGENT = skia_bindings::SkPathMeasure_MatrixFlags_kGetTangent_MatrixFlag as _;
-            const GET_POS_AND_TAN = Self::GET_POSITION.bits | Self::GET_TANGENT.bits;
-        }
+bitflags! {
+    pub struct MatrixFlags : u32 {
+        const GET_POSITION = skia_bindings::SkPathMeasure_MatrixFlags_kGetPosition_MatrixFlag as _;
+        const GET_TANGENT = skia_bindings::SkPathMeasure_MatrixFlags_kGetTangent_MatrixFlag as _;
+        const GET_POS_AND_TAN = Self::GET_POSITION.bits | Self::GET_TANGENT.bits;
     }
+}
 
-    impl Default for MatrixFlags {
-        fn default() -> Self {
-            Self::GET_POS_AND_TAN
-        }
+impl Default for MatrixFlags {
+    fn default() -> Self {
+        Self::GET_POS_AND_TAN
     }
 }
 
@@ -69,7 +66,7 @@ impl Handle<SkPathMeasure> {
     }
 
     // TODO: why is getMatrix() non-const?
-    pub fn matrix<F: Into<Option<path_measure::MatrixFlags>>>(
+    pub fn matrix<F: Into<Option<MatrixFlags>>>(
         &mut self,
         distance: scalar,
         flags: F,

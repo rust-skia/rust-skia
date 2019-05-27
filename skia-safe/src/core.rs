@@ -212,7 +212,7 @@ pub use path_effect::PointData as PathEffectPointData;
 pub use path_effect::point_data::PointFlags as PointDataPointFlags;
 
 pub mod path_measure;
-pub use path_measure::*;
+pub use path_measure::PathMeasure;
 
 mod picture;
 pub use picture::*;
