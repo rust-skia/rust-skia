@@ -114,9 +114,17 @@ impl RCHandle<SkPathEffect> {
         }).unwrap()
     }
 
-    pub fn filter_path_inplace<R: AsRef<Rect>>(
+    pub fn filter_path(&self, src: &Path, stroke_rec: &StrokeRec, cull_rect: impl AsRef<Rect>)
+        -> Option<(Path, StrokeRec)> {
+        let mut dst = Path::default();
+        let mut stroke_rec_r = stroke_rec.clone();
+        self.filter_path_inplace(&mut dst, src, &mut stroke_rec_r, cull_rect)
+            .if_true_some((dst, stroke_rec_r))
+    }
+
+    pub fn filter_path_inplace(
         &self, dst: &mut Path, src: &Path,
-        stroke_rec: &mut StrokeRec, cull_rect: R) -> bool {
+        stroke_rec: &mut StrokeRec, cull_rect: impl AsRef<Rect>) -> bool {
         unsafe {
             self.native().filterPath(
                 dst.native_mut(), src.native(),
@@ -125,27 +133,19 @@ impl RCHandle<SkPathEffect> {
         }
     }
 
-    // for convenience
-    pub fn filter_path<R: AsRef<Rect>>(&self, src: &Path, stroke_rec: &StrokeRec, cull_rect: R)
-        -> Option<(Path, StrokeRec)> {
-        let mut dst = Path::default();
-        let mut stroke_rec_r = stroke_rec.clone();
-        self.filter_path_inplace(&mut dst, src, &mut stroke_rec_r, cull_rect)
-            .if_true_some((dst, stroke_rec_r))
-    }
-
-    pub fn compute_fast_bounds<R: AsRef<Rect>>(&self, src: R) -> Rect {
+    pub fn compute_fast_bounds(&self, src: impl AsRef<Rect>) -> Rect {
         let mut r : Rect = Rect::default();
         unsafe { self.native().computeFastBounds(r.native_mut(), src.as_ref().native()) };
         r
     }
 
-    pub fn as_points<CR: AsRef<Rect>>(
+    // TODO: rename to to_points()?
+    pub fn as_points(
         &self,
         src: &Path,
         stroke_rect: &StrokeRec,
         matrix: &Matrix,
-        cull_rect: CR)
+        cull_rect: impl AsRef<Rect>)
         -> Option<PointData> {
         let mut point_data = PointData::default();
         unsafe {
@@ -158,7 +158,13 @@ impl RCHandle<SkPathEffect> {
         }.if_true_some(point_data)
     }
 
+    #[deprecated(since = "0.11.0", note = "use as_a_dash() instead")]
     pub fn as_dash(&self) -> Option<DashInfo> {
+        self.as_a_dash()
+    }
+
+    // TODO: rename to to_a_dash()?
+    pub fn as_a_dash(&self) -> Option<DashInfo> {
         let mut dash_info = unsafe { SkPathEffect_DashInfo::new() };
 
         let dash_type = unsafe {
@@ -179,6 +185,8 @@ impl RCHandle<SkPathEffect> {
             }
         }
     }
+
+    // TODO: Deserialize / trait Flattenable
 }
 
 #[test]
