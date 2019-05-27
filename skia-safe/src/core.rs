@@ -202,8 +202,14 @@ pub use path::SegmentMask as PathSegmentMask;
 #[deprecated(since = "0.11.0", note = "use path::ArcSize instead")]
 pub use path::ArcSize as PathArcSize;
 
-mod path_effect;
-pub use path_effect::*;
+pub mod path_effect;
+pub use path_effect::PathEffect;
+#[deprecated(since = "0.11.0", note = "use path_effect::DashInfo instead")]
+pub use path_effect::DashInfo as PathEffectDashInfo;
+#[deprecated(since = "0.11.0", note = "use path_effect::PointData instead")]
+pub use path_effect::PointData as PathEffectPointData;
+#[deprecated(since = "0.11.0", note = "use path_effect::point_data::PointFlags instead")]
+pub use path_effect::point_data::PointFlags as PointDataPointFlags;
 
 pub mod path_measure;
 pub use path_measure::*;

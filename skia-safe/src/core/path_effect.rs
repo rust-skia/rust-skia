@@ -20,22 +20,11 @@ use skia_bindings::{
     C_SkPathEffect_PointData_deletePoints,
     SkPathEffect_DashInfo,
     SkPathEffect_DashType,
-    SkPathEffect_PointData_PointFlags_kCircles_PointFlag,
-    SkPathEffect_PointData_PointFlags_kUsePath_PointFlag,
-    SkPathEffect_PointData_PointFlags_kUseClip_PointFlag
 };
 
-bitflags! {
-    pub struct PointDataPointFlags: u32 {
-        const CIRCLES = SkPathEffect_PointData_PointFlags_kCircles_PointFlag as _;
-        const USE_PATH = SkPathEffect_PointData_PointFlags_kUsePath_PointFlag as _;
-        const USE_CLIP = SkPathEffect_PointData_PointFlags_kUseClip_PointFlag as _;
-    }
-}
-
 #[repr(C)]
-pub struct PathEffectPointData {
-    pub flags: PointDataPointFlags,
+pub struct PointData {
+    pub flags: point_data::PointFlags,
     points: *const Point,
     num_points: raw::c_int,
     pub size: Vector,
@@ -45,17 +34,17 @@ pub struct PathEffectPointData {
     pub last: Path,
 }
 
-impl NativeTransmutable<SkPathEffect_PointData> for PathEffectPointData {}
+impl NativeTransmutable<SkPathEffect_PointData> for PointData {}
 
 #[test]
 fn test_point_data_layout() {
     Point::test_layout();
     Vector::test_layout();
     Rect::test_layout();
-    PathEffectPointData::test_layout();
+    PointData::test_layout();
 }
 
-impl Drop for PathEffectPointData {
+impl Drop for PointData {
     fn drop(&mut self) {
         unsafe {
             // we can't call destruct, because it would destruct
@@ -66,9 +55,9 @@ impl Drop for PathEffectPointData {
     }
 }
 
-impl Default for PathEffectPointData {
+impl Default for PointData {
     fn default() -> Self {
-        PathEffectPointData::from_native(unsafe {
+        PointData::from_native(unsafe {
             // does not link under Linux:
             // SkPathEffect_PointData::new()
             let mut point_data = mem::uninitialized();
@@ -78,8 +67,7 @@ impl Default for PathEffectPointData {
     }
 }
 
-impl PathEffectPointData {
-
+impl PointData {
     pub fn points(&self) -> &[Point] {
         unsafe {
             slice::from_raw_parts(self.points, self.num_points.try_into().unwrap())
@@ -87,8 +75,18 @@ impl PathEffectPointData {
     }
 }
 
+pub mod point_data {
+    bitflags! {
+        pub struct PointFlags: u32 {
+            const CIRCLES = skia_bindings::SkPathEffect_PointData_PointFlags_kCircles_PointFlag as _;
+            const USE_PATH = skia_bindings::SkPathEffect_PointData_PointFlags_kUsePath_PointFlag as _;
+            const USE_CLIP = skia_bindings::SkPathEffect_PointData_PointFlags_kUseClip_PointFlag as _;
+        }
+    }
+}
+
 #[derive(Clone, PartialEq, Debug)]
-pub struct PathEffectDashInfo {
+pub struct DashInfo {
     pub intervals: Vec<scalar>,
     pub phase: scalar
 }
@@ -148,8 +146,8 @@ impl RCHandle<SkPathEffect> {
         stroke_rect: &StrokeRec,
         matrix: &Matrix,
         cull_rect: CR)
-        -> Option<PathEffectPointData> {
-        let mut point_data = PathEffectPointData::default();
+        -> Option<PointData> {
+        let mut point_data = PointData::default();
         unsafe {
             self.native().asPoints(
                 point_data.native_mut(),
@@ -160,7 +158,7 @@ impl RCHandle<SkPathEffect> {
         }.if_true_some(point_data)
     }
 
-    pub fn as_dash(&self) -> Option<PathEffectDashInfo> {
+    pub fn as_dash(&self) -> Option<DashInfo> {
         let mut dash_info = unsafe { SkPathEffect_DashInfo::new() };
 
         let dash_type = unsafe {
@@ -174,7 +172,7 @@ impl RCHandle<SkPathEffect> {
                 unsafe {
                     assert_eq!(dash_type, self.native().asADash(&mut dash_info));
                 }
-                Some(PathEffectDashInfo { intervals: v, phase: dash_info.fPhase })
+                Some(DashInfo { intervals: v, phase: dash_info.fPhase })
             },
             SkPathEffect_DashType::kNone_DashType => {
                 None
@@ -185,6 +183,6 @@ impl RCHandle<SkPathEffect> {
 
 #[test]
 fn create_and_drop_point_data() {
-    let data = PathEffectPointData::default();
+    let data = PointData::default();
     drop(data)
 }
