@@ -758,6 +758,10 @@ extern "C" bool C_SkBitmap_tryAllocPixels(SkBitmap* self) {
     return self->tryAllocPixels();
 }
 
+extern "C" void C_SkBitmap_setPixelRef(SkBitmap* self, const SkPixelRef* pixelRef, int dx, int dy) {
+    self->setPixelRef(spFromConst(pixelRef), dx, dy);
+}
+
 extern "C" bool C_SkBitmap_readyToDraw(const SkBitmap* self) {
     return self->readyToDraw();
 }

@@ -10,19 +10,9 @@ use crate::core::{
     ImageInfo,
     ISize,
     IPoint,
+    PixelRef
 };
-use skia_bindings::{
-    C_SkImageInfo_Copy,
-    C_SkBitmap_destruct,
-    SkBitmap,
-    C_SkBitmap_Construct,
-    C_SkBitmap_readyToDraw,
-    C_SkBitmap_tryAllocN32Pixels,
-    C_SkBitmap_tryAllocPixels,
-    C_SkBitmap_eraseARGB,
-    C_SkBitmap_extractAlpha,
-    SkBitmap_AllocFlags_kZeroPixels_AllocFlag
-};
+use skia_bindings::{C_SkImageInfo_Copy, C_SkBitmap_destruct, SkBitmap, C_SkBitmap_Construct, C_SkBitmap_readyToDraw, C_SkBitmap_tryAllocN32Pixels, C_SkBitmap_tryAllocPixels, C_SkBitmap_eraseARGB, C_SkBitmap_extractAlpha, SkBitmap_AllocFlags_kZeroPixels_AllocFlag, C_SkBitmap_setPixelRef};
 
 bitflags! {
     pub struct BitmapAllocFlags: u32 {
@@ -235,13 +225,22 @@ impl Handle<SkBitmap> {
     }
 
     // TODO: allocPixels(Allocator*)
-    // TODO: pixel_ref()
+
+    // TODO: find a way to return pixel ref without increasing the ref count here?
+    pub fn pixel_ref(&self) -> Option<PixelRef> {
+        PixelRef::from_unshared_ptr(unsafe {
+            self.native().pixelRef()
+        })
+    }
 
     pub fn pixel_ref_origin(&self) -> IPoint {
         IPoint::from_native(unsafe { self.native().pixelRefOrigin() })
     }
 
-    // TODO: setPixelRef()
+    pub fn set_pixel_ref(&mut self, pixel_ref: Option<&PixelRef>, offset: impl Into<IPoint>) {
+        let offset = offset.into();
+        unsafe { C_SkBitmap_setPixelRef(self.native_mut(), pixel_ref.shared_ptr(), offset.x, offset.y) }
+    }
 
     #[deprecated(since = "0.11.0", note = "use is_ready_to_draw() insteadd")]
     pub fn ready_to_draw(&self) -> bool {
