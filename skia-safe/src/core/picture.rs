@@ -9,6 +9,7 @@ use skia_bindings::{
     C_SkPicture_playback,
     SkPicture,
     C_SkPicture_MakeFromData,
+    C_SkPicture_MakeFromData2,
     C_SkPicture_cullRect,
     C_SkPicture_MakePlaceholder,
     C_SkPicture_serialize,
@@ -27,11 +28,23 @@ impl NativeRefCountedBase for SkPicture {
 }
 
 impl RCHandle<SkPicture> {
-    pub fn from_data(data: &Data) -> Picture {
+    // TODO: wrap MakeFromStream
+
+    // TODO: may support SkSerialProces in MakeFromData?
+
+    pub fn from_data(data: &Data) -> Option<Picture> {
         Picture::from_ptr(unsafe {
             C_SkPicture_MakeFromData(data.native())
-        }).unwrap()
+        })
     }
+
+    pub fn from_bytes(bytes: &[u8]) -> Option<Picture> {
+        Picture::from_ptr(unsafe {
+            C_SkPicture_MakeFromData2(bytes.as_ptr() as _, bytes.len())
+        })
+    }
+
+    // TODO: AbortCallback and the function that use it.
 
     pub fn playback(&self, mut canvas: impl AsMut<Canvas>) {
         unsafe { C_SkPicture_playback(self.native(), canvas.as_mut().native_mut()) }
@@ -47,13 +60,15 @@ impl RCHandle<SkPicture> {
         unsafe { self.native().uniqueID() }
     }
 
+    // TODO: support SkSerialProcs in serialize()?
+
     pub fn serialize(&self) -> Data {
         Data::from_ptr(unsafe {
             C_SkPicture_serialize(self.native())
         }).unwrap()
     }
 
-    pub fn new_placeholder<C: AsRef<Rect>>(cull: C) -> Picture {
+    pub fn new_placeholder(cull: impl AsRef<Rect>) -> Picture {
         Picture::from_ptr(unsafe {
             C_SkPicture_MakePlaceholder(cull.as_ref().native())
         }).unwrap()

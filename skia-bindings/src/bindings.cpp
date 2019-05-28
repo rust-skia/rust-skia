@@ -780,6 +780,10 @@ extern "C" SkPicture* C_SkPicture_MakeFromData(const SkData* data) {
     return SkPicture::MakeFromData(data).release();
 }
 
+extern "C" SkPicture* C_SkPicture_MakeFromData2(const void* data, size_t size) {
+    return SkPicture::MakeFromData(data, size).release();
+}
+
 extern "C" SkData* C_SkPicture_serialize(const SkPicture* self) {
     return self->serialize().release();
 }
