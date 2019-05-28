@@ -21,6 +21,7 @@
 #include "SkPathMeasure.h"
 #include "SkPicture.h"
 #include "SkPictureRecorder.h"
+#include "SkPixelRef.h"
 #include "SkPoint3.h"
 #include "SkRect.h"
 #include "SkRegion.h"

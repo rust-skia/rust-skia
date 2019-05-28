@@ -222,6 +222,9 @@ pub use picture_recorder::PictureRecorder;
 #[deprecated(since = "0.11.0", note = "use picture_recorder::RecordFlags instead")]
 pub use picture_recorder::RecordFlags as PictureRecorderRecordFlags;
 
+mod pixel_ref;
+pub use pixel_ref::*;
+
 mod point;
 pub use point::*;
 
