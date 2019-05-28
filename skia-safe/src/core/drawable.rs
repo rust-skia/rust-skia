@@ -1,9 +1,19 @@
+use crate::prelude::*;
 use crate::{Canvas, Matrix, Point, gpu, IRect, ImageInfo, Picture, Rect};
+use skia_bindings::{SkDrawable, SkRefCntBase};
 
-pub enum Drawable {}
+pub type Drawable = RCHandle<SkDrawable>;
+
+impl NativeRefCountedBase for SkDrawable {
+    type Base = SkRefCntBase;
+
+    fn ref_counted_base(&self) -> &Self::Base {
+        &self._base._base._base
+    }
+}
 
 // TODO: complete implementation
-impl Drawable {
+impl RCHandle<SkDrawable> {
 
     pub fn draw(&mut self, canvas: &Canvas, matrix: Option<&Matrix>) -> &mut Self {
         unimplemented!()

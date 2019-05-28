@@ -7,6 +7,7 @@
 #include "SkContourMeasure.h"
 #include "SkCubicMap.h"
 #include "SkDrawLooper.h"
+#include "SkDrawable.h"
 #include "SkDocument.h"
 #include "SkFont.h"
 #include "SkFontArguments.h"
@@ -1085,6 +1086,10 @@ extern "C" SkPicture* C_SkPictureRecorder_finishRecordingAsPicture(SkPictureReco
     } else {
         return self->finishRecordingAsPicture().release();
     }
+}
+
+extern "C" SkDrawable* C_SkPictureRecorder_finishRecordingAsDrawable(SkPictureRecorder* self) {
+    return self->finishRecordingAsDrawable().release();
 }
 
 //

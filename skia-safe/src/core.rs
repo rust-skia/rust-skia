@@ -217,8 +217,10 @@ pub use path_measure::PathMeasure;
 mod picture;
 pub use picture::*;
 
-mod picture_recorder;
-pub use picture_recorder::*;
+pub mod picture_recorder;
+pub use picture_recorder::PictureRecorder;
+#[deprecated(since = "0.11.0", note = "use picture_recorder::RecordFlags instead")]
+pub use picture_recorder::RecordFlags as PictureRecorderRecordFlags;
 
 mod point;
 pub use point::*;
