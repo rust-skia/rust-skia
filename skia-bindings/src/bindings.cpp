@@ -1224,6 +1224,18 @@ extern "C" void C_SkPathEffect_PointData_deletePoints(SkPathEffect::PointData* s
 }
 
 //
+// SkPixmap
+//
+
+extern "C" void C_SkPixmap_destruct(SkPixmap* self) {
+    self->~SkPixmap();
+}
+
+extern "C" void C_SkPixmap_setColorSpace(SkPixmap* self, const SkColorSpace* colorSpace) {
+    self->setColorSpace(spFromConst(colorSpace));
+}
+
+//
 // SkMaskFilter
 //
 

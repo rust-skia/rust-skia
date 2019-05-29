@@ -225,6 +225,9 @@ pub use picture_recorder::RecordFlags as PictureRecorderRecordFlags;
 mod pixel_ref;
 pub use pixel_ref::*;
 
+mod pixmap;
+pub use pixmap::*;
+
 mod point;
 pub use point::*;
 
