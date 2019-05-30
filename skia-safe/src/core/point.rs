@@ -100,7 +100,7 @@ impl IPoint {
         self.y = y;
     }
 
-    pub fn equals(&self, x: i32, y: i32) -> bool {
+    pub fn equals(self, x: i32, y: i32) -> bool {
         self.x == x && self.y == y
     }
 }
