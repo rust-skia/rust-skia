@@ -4,7 +4,7 @@ use skia_bindings::{
     SkIPoint,
     SkPoint
 };
-use std::ops::{Sub, Add, Neg, Mul, AddAssign, SubAssign};
+use std::ops::{Sub, Add, Neg, Mul, AddAssign, SubAssign, MulAssign};
 
 pub type IVector = IPoint;
 
@@ -29,14 +29,14 @@ impl Neg for IPoint {
 }
 
 impl Add<IVector> for IPoint {
-    type Output = IVector;
-    fn add(self, rhs: Self) -> Self::Output {
-        IVector::new(self.x + rhs.x, self.y + rhs.y)
+    type Output = IPoint;
+    fn add(self, rhs: IVector) -> Self {
+        IPoint::new(self.x + rhs.x, self.y + rhs.y)
     }
 }
 
-impl AddAssign for IPoint {
-    fn add_assign(&mut self, rhs: IPoint) {
+impl AddAssign<IVector> for IPoint {
+    fn add_assign(&mut self, rhs: IVector) {
         self.x += rhs.x;
         self.y += self.y;
     }
@@ -57,13 +57,13 @@ impl AddAssign<ISize> for IPoint {
 }
 
 impl Sub for IPoint {
-    type Output = IVector;
-    fn sub(self, rhs: Self) -> Self::Output {
-        IVector::new(self.x - rhs.x, self.y - rhs.y)
+    type Output = Self;
+    fn sub(self, rhs: Self) -> Self {
+        IPoint::new(self.x - rhs.x, self.y - rhs.y)
     }
 }
 
-impl SubAssign for IPoint {
+impl SubAssign<IVector> for IPoint {
     fn sub_assign(&mut self, rhs: Self) {
         self.x -= rhs.x;
         self.y -= rhs.y;
@@ -96,12 +96,11 @@ impl IPoint {
     }
 
     pub fn set(&mut self, x: i32, y: i32) {
-        self.x = x;
-        self.y = y;
+        *self = IPoint::new(x, y);
     }
 
     pub fn equals(self, x: i32, y: i32) -> bool {
-        self.x == x && self.y == y
+        self == IPoint::new(x, y)
     }
 }
 
@@ -117,7 +116,7 @@ pub struct Point {
 impl NativeTransmutable<SkPoint> for Point {}
 
 #[test]
-fn point_layout() {
+fn test_point_layout() {
     Point::test_layout()
 }
 
@@ -128,10 +127,17 @@ impl Neg for Point {
     }
 }
 
-impl Add for Point {
+impl Add<Vector> for Point {
     type Output = Self;
-    fn add(self, rhs: Self) -> Self {
+    fn add(self, rhs: Vector) -> Self {
         Point::new(self.x + rhs.x, self.y + rhs.y)
+    }
+}
+
+impl AddAssign<Vector> for Point {
+    fn add_assign(&mut self, rhs: Vector) {
+        self.x += rhs.x;
+        self.y += rhs.y;
     }
 }
 
@@ -143,9 +149,16 @@ impl Add<Size> for Point {
 }
 
 impl Sub for Point {
-    type Output = Self;
+    type Output = Point;
     fn sub(self, rhs: Self) -> Self {
         Point::new(self.x - rhs.x, self.y - rhs.y)
+    }
+}
+
+impl SubAssign<Vector> for Point {
+    fn sub_assign(&mut self, rhs: Vector) {
+        self.x -= rhs.x;
+        self.y -= rhs.y;
     }
 }
 
@@ -163,14 +176,46 @@ impl Mul<scalar> for Point {
     }
 }
 
+impl MulAssign<scalar> for Point {
+    fn mul_assign(&mut self, rhs: scalar) {
+        self.x *= rhs;
+        self.y *= rhs;
+    }
+}
+
 impl Point {
 
     pub fn new(x: scalar, y: scalar) -> Self {
-        Point { x, y }
+        Self { x, y }
     }
 
     pub fn is_zero(self) -> bool {
         self.x == 0.0 && self.y == 0.0
+    }
+
+    pub fn set(&mut self, x: scalar, y: scalar) {
+        *self = Self::new(x, y);
+    }
+
+    pub fn iset(&mut self, p: impl Into<IPoint>) {
+        let p = p.into();
+        self.x = p.x as scalar;
+        self.y = p.y as scalar;
+    }
+
+    pub fn set_abs(&mut self, p: impl Into<Point>) {
+        let p = p.into();
+        self.x = p.x.abs();
+        self.y = p.y.abs();
+    }
+
+    pub fn offset_points(points: &mut [Point], offset: impl Into<Vector>) {
+        let offset = offset.into();
+        points.iter_mut().for_each(|p| p.offset(offset));
+    }
+
+    pub fn offset(&mut self, d: impl Into<Vector>) {
+        *self += d.into();
     }
 
     pub fn length(self) -> scalar {
@@ -181,26 +226,57 @@ impl Point {
         self.length()
     }
 
-    #[must_use]
-    pub fn normalized(mut self) -> Option<Self> {
+    pub fn normalize(&mut self) -> bool {
         unsafe { self.native_mut().normalize() }
-            .if_true_some(self)
     }
 
-    #[must_use]
+    pub fn set_normalize(&mut self, x: scalar, y: scalar) -> bool {
+        unsafe { self.native_mut().setNormalize(x, y) }
+    }
+
+    pub fn set_length(&mut self, length: scalar) -> bool {
+        unsafe { self.native_mut().setLength(length) }
+    }
+
+    pub fn set_length_xy(&mut self, x: scalar, y: scalar, length: scalar) -> bool {
+        unsafe { self.native_mut().setLength1(x, y, length) }
+    }
+
+    #[deprecated(since = "0.11.0", note = "use set_length()")]
     pub fn with_length(mut self, length: scalar) -> Option<Self> {
         unsafe { self.native_mut().setLength(length) }
             .if_true_some(self)
     }
 
     #[must_use]
-    pub fn scaled(mut self, scale: scalar) -> Self {
-        unsafe { self.native_mut().scale1(scale) }
-        self
+    pub fn scaled(self, scale: scalar) -> Self {
+        let mut p = Point::default();
+        unsafe { self.native().scale(scale, p.native_mut()) }
+        p
+    }
+
+    pub fn scale(&mut self, scale: scalar) {
+        *self = self.scaled(scale);
+    }
+
+    pub fn negate(&mut self) {
+        *self = -*self;
     }
 
     pub fn is_finite(self) -> bool {
         unsafe { self.native().isFinite() }
+    }
+
+    pub fn equals(self, x: scalar, y: scalar) -> bool {
+        self == Point::new(x, y)
+    }
+
+    pub fn length_xy(x: scalar, y: scalar) -> scalar {
+        unsafe { SkPoint::Length(x, y) }
+    }
+
+    pub fn normalize_vector(v: &mut Vector) -> scalar {
+        unsafe { SkPoint::Normalize(v.native_mut()) }
     }
 
     pub fn distance(a: Self, b: Self) -> scalar {
@@ -213,6 +289,14 @@ impl Point {
 
     pub fn cross_product(a: Self, b: Self) -> scalar {
         unsafe { SkPoint::CrossProduct(a.native(), b.native() )}
+    }
+
+    pub fn cross(self, vec: Vector) -> scalar {
+        unsafe { self.native().cross(vec.native()) }
+    }
+
+    pub fn dot(self, vec: Vector) -> scalar {
+        unsafe { self.native().dot(vec.native()) }
     }
 }
 
@@ -238,7 +322,6 @@ impl From<IPoint> for Point {
     }
 }
 
-// TODO: this is experimental.
 impl From<(i32, i32)> for Point {
     fn from(source: (i32, i32)) -> Self {
         (source.0 as scalar, source.1 as scalar).into()
