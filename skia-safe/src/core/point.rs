@@ -1,31 +1,23 @@
 use crate::prelude::*;
-use crate::core::scalar;
+use crate::core::{scalar, ISize, Size};
 use skia_bindings::{
     SkIPoint,
     SkPoint
 };
-use std::ops::{
-    Sub,
-    Add,
-    Neg,
-    Mul
-};
-use crate::core::ISize;
-use crate::core::Size;
+use std::ops::{Sub, Add, Neg, Mul, AddAssign, SubAssign};
 
 pub type IVector = IPoint;
 
 #[repr(C)]
-#[derive(Copy, Clone, PartialEq, Default, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
 pub struct IPoint {
     pub x: i32,
     pub y: i32
 }
 
 impl NativeTransmutable<SkIPoint> for IPoint {}
-
 #[test]
-fn test_layout() {
+fn test_ipoint_layout() {
     IPoint::test_layout()
 }
 
@@ -36,10 +28,17 @@ impl Neg for IPoint {
     }
 }
 
-impl Add for IPoint {
-    type Output = IPoint;
+impl Add<IVector> for IPoint {
+    type Output = IVector;
     fn add(self, rhs: Self) -> Self::Output {
-        IPoint::new(self.x + rhs.x, self.y + rhs.y)
+        IVector::new(self.x + rhs.x, self.y + rhs.y)
+    }
+}
+
+impl AddAssign for IPoint {
+    fn add_assign(&mut self, rhs: IPoint) {
+        self.x += rhs.x;
+        self.y += self.y;
     }
 }
 
@@ -50,10 +49,24 @@ impl Add<ISize> for IPoint {
     }
 }
 
+impl AddAssign<ISize> for IPoint {
+    fn add_assign(&mut self, rhs: ISize) {
+        self.x += rhs.width;
+        self.y += rhs.height;
+    }
+}
+
 impl Sub for IPoint {
-    type Output = IPoint;
+    type Output = IVector;
     fn sub(self, rhs: Self) -> Self::Output {
-        IPoint::new(self.x - rhs.x, self.y - rhs.y)
+        IVector::new(self.x - rhs.x, self.y - rhs.y)
+    }
+}
+
+impl SubAssign for IPoint {
+    fn sub_assign(&mut self, rhs: Self) {
+        self.x -= rhs.x;
+        self.y -= rhs.y;
     }
 }
 
@@ -61,6 +74,13 @@ impl Sub<ISize> for IPoint {
     type Output = IPoint;
     fn sub(self, rhs: ISize) -> Self::Output {
         IPoint::new(self.x - rhs.width, self.y - rhs.height)
+    }
+}
+
+impl SubAssign<ISize> for IPoint {
+    fn sub_assign(&mut self, rhs: ISize) {
+        self.x -= rhs.width;
+        self.y -= rhs.height;
     }
 }
 
@@ -73,6 +93,15 @@ impl IPoint {
         // does not link:
         // unsafe { self.native().isZero() }
         (self.x | self.y) == 0
+    }
+
+    pub fn set(&mut self, x: i32, y: i32) {
+        self.x = x;
+        self.y = y;
+    }
+
+    pub fn equals(&self, x: i32, y: i32) -> bool {
+        self.x == x && self.y == y
     }
 }
 
