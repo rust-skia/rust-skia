@@ -148,6 +148,13 @@ impl Add<Size> for Point {
     }
 }
 
+impl AddAssign<Size> for Point {
+    fn add_assign(&mut self, rhs: Size) {
+        self.x += rhs.width;
+        self.y += rhs.height;
+    }
+}
+
 impl Sub for Point {
     type Output = Point;
     fn sub(self, rhs: Self) -> Self {
@@ -166,6 +173,13 @@ impl Sub<Size> for Point {
     type Output = Self;
     fn sub(self, rhs: Size) -> Self {
         Point::new(self.x - rhs.width, self.y - rhs.height)
+    }
+}
+
+impl SubAssign<Size> for Point {
+    fn sub_assign(&mut self, rhs: Size) {
+        self.x -= rhs.width;
+        self.y -= rhs.height;
     }
 }
 
