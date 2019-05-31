@@ -234,6 +234,12 @@ pub use point::*;
 mod point3;
 pub use point3::*;
 
+mod promise_image_texture;
+pub use promise_image_texture::*;
+
+mod raster_handle_allocator;
+pub use raster_handle_allocator::*;
+
 mod rect;
 pub use rect::*;
 
