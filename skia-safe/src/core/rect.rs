@@ -9,13 +9,10 @@ use crate::core::{
     Contains,
     Vector
 };
-use skia_bindings::{
-    SkIRect,
-    SkRect,
-};
+use skia_bindings::{SkIRect, SkRect, SkIRect_MakeXYWH};
 
 #[repr(C)]
-#[derive(Copy, Clone, PartialEq, Default, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
 pub struct IRect {
     pub left: i32,
     pub top: i32,
@@ -37,18 +34,45 @@ impl AsRef<IRect> for IRect {
 }
 
 impl IRect {
-
-    pub fn new(left: i32, top: i32, right: i32, bottom: i32) -> IRect {
-        IRect { left, top, right, bottom }
+    pub fn new(left: i32, top: i32, right: i32, bottom: i32) -> Self {
+        Self { left, top, right, bottom }
     }
 
-    pub fn from_size<IS: Into<ISize>>(size: IS) -> IRect {
+    pub fn new_empty() -> Self {
+        Self::default()
+    }
+
+    pub fn from_wh(w: i32, h: i32) -> Self {
+        Self::from_size((w, h))
+    }
+
+    pub fn from_size(size: impl Into<ISize>) -> Self {
         let size = size.into();
         Self::new(0, 0, size.width, size.height)
     }
 
-    pub fn left_top(&self) -> IPoint {
-        (self.left, self.top).into()
+    pub fn from_ltrb(l: i32, t: i32, r: i32, b: i32) -> Self {
+        Self::new(l, t, r, b)
+    }
+
+    pub fn from_xywh(x: i32, y: i32, w: i32, h: i32) -> Self {
+        Self::from_native(unsafe { SkIRect_MakeXYWH(x, y, w, h) })
+    }
+
+    pub fn left(&self) -> i32 {
+        self.left
+    }
+
+    pub fn top(&self) -> i32 {
+        self.top
+    }
+
+    pub fn right(&self) -> i32 {
+        self.right
+    }
+
+    pub fn bottom(&self) -> i32 {
+        self.bottom
     }
 
     pub fn x(&self) -> i32 {
@@ -57,6 +81,11 @@ impl IRect {
 
     pub fn y(&self) -> i32 {
         self.top
+    }
+
+    #[deprecated(since = "0.11.0", note = "will be removed without replacement")]
+    pub fn left_top(&self) -> IPoint {
+        (self.left, self.top).into()
     }
 
     pub fn width(&self) -> i32 {
@@ -87,17 +116,33 @@ impl IRect {
         unsafe { self.native().isEmpty() }
     }
 
+    pub fn set_empty(&mut self) {
+        *self = Self::new_empty()
+    }
+
+    pub fn set(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
+        *self = Self::new(left, top, right, bottom)
+    }
+
+    pub fn set_ltrb(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
+        self.set(left, top, right, bottom)
+    }
+
+    pub fn set_xywh(&mut self, x: i32, y: i32, w: i32, h: i32) {
+        *self = Self::from_xywh(x, y, w, h);
+    }
+
     #[must_use]
-    pub fn with_offset<IV: Into<IVector>>(&self, delta: IV) -> Self {
+    pub fn with_offset(&self, delta: impl Into<IVector>) -> Self {
         let delta = delta.into();
-        let cloned = *self;
+        let copied = *self;
         Self::from_native(unsafe {
-            cloned.native().makeOffset(delta.x, delta.y)
+            copied.native().makeOffset(delta.x, delta.y)
         })
     }
 
     #[must_use]
-    pub fn with_inset<IV: Into<IVector>>(&self, delta: IV) -> Self {
+    pub fn with_inset(&self, delta: impl Into<IVector>) -> Self {
         /* does not link:
         Self::from_native(unsafe {
             cloned.native().makeInset(delta.x, delta.y)
@@ -106,21 +151,38 @@ impl IRect {
     }
 
     #[must_use]
-    pub fn with_outset<IV: Into<IVector>>(&self, delta: IV) -> Self {
+    pub fn with_outset(&self, delta: impl Into<IVector>) -> Self {
         let delta = delta.into();
         Self::from_native(unsafe {
             self.native().makeOutset(delta.x, delta.y)
         })
     }
 
+    pub fn offset(&mut self, delta: impl Into<IPoint>) {
+        let delta = delta.into();
+        unsafe { self.native_mut().offset1(delta.native()) }
+    }
+
+    pub fn offset_to(&mut self, new_p: impl Into<IPoint>) {
+        *self = self.with_offset_to(new_p)
+    }
+
     #[must_use]
-    pub fn with_offset_to<IP: Into<IPoint>>(&self, new_p: IP) -> Self {
+    pub fn with_offset_to(&self, new_p: impl Into<IPoint>) -> Self {
         let new_p = new_p.into();
         let mut copied = *self;
         unsafe {
             copied.native_mut().offsetTo(new_p.x, new_p.y)
         }
         copied
+    }
+
+    pub fn inset(&mut self, delta: impl Into<IVector>) {
+        *self = self.with_inset(delta)
+    }
+
+    pub fn outset(&mut self, delta: impl Into<IVector>) {
+        *self = self.with_outset(delta)
     }
 
     #[must_use]
@@ -131,6 +193,12 @@ impl IRect {
         }
         copied
     }
+
+    pub fn adjust(&mut self, d_l: i32, d_t: i32, d_r: i32, d_b: i32) {
+        *self = self.with_adjustment(d_l, d_t, d_r, d_b)
+    }
+
+    // contains() is implemented through a trait below.
 
     pub fn contains_no_empty_check(&self, r: &Self) -> bool {
         unsafe { self.native().containsNoEmptyCheck1(r.native()) }
@@ -162,6 +230,10 @@ impl IRect {
         copied
     }
 
+    pub fn sort(&mut self) {
+        *self = self.sorted()
+    }
+
     #[must_use]
     pub fn sorted(&self) -> Self {
         let mut copied = *self;
@@ -170,6 +242,15 @@ impl IRect {
         unsafe { copied.native_mut().sort() }
         copied
     }
+
+    #[must_use]
+    pub fn empty() -> &'static Self {
+        &EMPTY
+    }
+}
+
+lazy_static! {
+    static ref EMPTY: IRect = IRect::default();
 }
 
 impl Contains<IPoint> for IRect {
@@ -185,7 +266,7 @@ impl Contains<&IRect> for IRect {
 }
 
 impl Contains<&Rect> for IRect {
-    // TODO: can we support AsRef<Rect> here?
+    // TODO: can AsRef<Rect> supported here?
     fn contains(&self, other: &Rect) -> bool {
         unsafe { self.native().contains3(other.native()) }
     }
