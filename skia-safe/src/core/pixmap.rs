@@ -120,7 +120,7 @@ impl Handle<SkPixmap> {
 
     pub unsafe fn addr_at(&self, p: impl Into<IPoint>) -> *const c_void {
         let p = p.into();
-        unsafe { self.native().addr1(p.x, p.y) }
+        self.native().addr1(p.x, p.y)
     }
 
     // TODO: addr8(), addr16(), addr32(), addr64(), addrF16(),
