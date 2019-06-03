@@ -245,12 +245,12 @@ impl IRect {
 
     #[must_use]
     pub fn empty() -> &'static Self {
-        &EMPTY
+        &EMPTY_IRECT
     }
 }
 
 lazy_static! {
-    static ref EMPTY: IRect = IRect::default();
+    static ref EMPTY_IRECT: IRect = IRect::default();
 }
 
 impl Contains<IPoint> for IRect {
@@ -299,13 +299,38 @@ impl Rect {
         Self { left, top, right, bottom }
     }
 
-    pub fn from_size<S: Into<Size>>(size: S) -> Self {
+    pub fn new_empty() -> Self {
+        Self::new(0.0, 0.0, 0.0, 0.0)
+    }
+
+    pub fn from_wh(w: scalar, h: scalar) -> Self {
+        Self::new(0.0, 0.0, w, h)
+    }
+
+    pub fn from_iwh(w: i32, h: i32) -> Self {
+        Self::from_wh(w as scalar, h as scalar)
+    }
+
+    pub fn from_size(size: impl Into<Size>) -> Self {
         (Point::default(), size.into()).into()
     }
 
-    // replacement for new_xywh
-    pub fn from_point_and_size<P: Into<Point>, S: Into<Size>>(p: P, sz: S) -> Self {
+    pub fn from_xywh(x: scalar, y: scalar, w: scalar, h: scalar) -> Self {
+        Self::new(x, y, x + w, y + h)
+    }
+
+    pub fn from_point_and_size(p: impl Into<Point>, sz: impl Into<Size>) -> Self {
         (p.into(), sz.into()).into()
+    }
+
+    pub fn from_isize(isize: impl Into<ISize>) -> Self {
+        let isize = isize.into();
+        Self::from_iwh(isize.width, isize.height)
+    }
+
+    pub fn from_irect(irect: impl AsRef<IRect>) -> Self {
+        let irect = irect.as_ref();
+        Self::new(irect.left as scalar, irect.top as scalar, irect.right as scalar, irect.bottom as scalar)
     }
 
     pub fn is_empty(&self) -> bool {
@@ -320,6 +345,7 @@ impl Rect {
         unsafe { self.native().isFinite() }
     }
 
+    #[deprecated(since = "0.11.0", note = "removed without replacement")]
     pub fn left_top(&self) -> Point {
         (self.left, self.top).into()
     }
@@ -330,6 +356,22 @@ impl Rect {
 
     pub fn y(&self) -> scalar {
         self.top
+    }
+
+    pub fn left(&self) -> scalar {
+        self.left
+    }
+
+    pub fn top(&self) -> scalar {
+        self.top
+    }
+
+    pub fn right(&self) -> scalar {
+        self.right
+    }
+
+    pub fn bottom(&self) -> scalar {
+        self.bottom
     }
 
     pub fn size(&self) -> Size {
@@ -345,7 +387,7 @@ impl Rect {
     }
 
     pub fn center(&self) -> Point {
-        (self.center_x(), self.center_y()).into()
+        Point::from((self.center_x(), self.center_y()))
     }
 
     pub fn center_x(&self) -> scalar {
@@ -362,32 +404,84 @@ impl Rect {
         quad
     }
 
+    pub fn set_empty(&mut self) {
+        *self = Self::new_empty()
+    }
+
+    pub fn set_irect(&mut self, irect: impl AsRef<IRect>) {
+        *self = Self::from_irect(irect)
+    }
+
+    pub fn set(&mut self, left: scalar, top: scalar, right: scalar, bottom: scalar) {
+        *self = Self::new(left, top, right, bottom)
+    }
+
+    pub fn set_ltrb(&mut self, left: scalar, top: scalar, right: scalar, bottom: scalar) {
+        self.set(left, top, right, bottom)
+    }
+
+    pub fn iset(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
+        *self = Self::from_irect(IRect::new(left, top, right, bottom))
+    }
+
+    pub fn iset_wh(&mut self, width: i32, height: i32) {
+        *self = Self::from_isize(ISize::new(width, height))
+    }
+
+    pub fn set_bounds(&mut self, points: &[Point]) {
+        unsafe { self.native_mut().setBoundsCheck(points.native().as_ptr(), points.len().try_into().unwrap()); }
+    }
+
+    pub fn set_bounds_check(&mut self, points: &[Point]) -> bool {
+        unsafe { self.native_mut().setBoundsCheck(points.native().as_ptr(), points.len().try_into().unwrap()) }
+    }
+
+    pub fn set_bounds_no_check(&mut self, points: &[Point]) {
+        unsafe { self.native_mut().setBoundsNoCheck(points.native().as_ptr(), points.len().try_into().unwrap()) }
+    }
+
+    pub fn set_bounds2(&mut self, p0: impl Into<Point>, p1: impl Into<Point>) {
+        unsafe { self.native_mut().set3(p0.into().native(), p1.into().native()) }
+    }
+
     pub fn from_bounds(points: &[Point]) -> Option<Self> {
         let mut r = Self::default();
         unsafe { r.native_mut().setBoundsCheck(points.native().as_ptr(), points.len().try_into().unwrap()) }
             .if_true_some(r)
     }
 
-    #[must_use]
-    pub fn with_offset<V: Into<Vector>>(&self, d: V) -> Self {
+    pub fn set_xywh(&mut self, x: scalar, y: scalar, width: scalar, height: scalar) {
+        *self = Self::from_xywh(x, y, width, height)
+    }
+
+    pub fn set_wh(&mut self, w: scalar, h: scalar) {
+        *self = Self::from_wh(w, h)
+    }
+
+    pub fn with_offset(&self, d: impl Into<Vector>) -> Self {
         let d = d.into();
         Self::new(self.left + d.x, self.top + d.y, self.right + d.x, self.bottom + d.y)
     }
 
-    #[must_use]
-    pub fn with_inset<V: Into<Vector>>(&self, d: V) -> Self {
+    pub fn with_inset(&self, d: impl Into<Vector>) -> Self {
         let d = d.into();
         Self::new(self.left + d.x, self.top + d.y, self.right - d.x, self.bottom - d.y)
     }
 
-    #[must_use]
-    pub fn with_outset<V: Into<Vector>>(&self, d: V) -> Self {
+    pub fn with_outset(&self, d: impl Into<Vector>) -> Self {
         let d = d.into();
         Self::new(self.left - d.x, self.top - d.y, self.right + d.x, self.bottom + d.y)
     }
 
-    #[must_use]
-    pub fn with_offset_to<P: Into<Point>>(&self, new_p: P) -> Self {
+    pub fn offset(&mut self, d: impl Into<Vector>) {
+        *self = self.with_offset(d)
+    }
+
+    pub fn offset_to(&mut self, new_p: impl Into<Point>) {
+        *self = self.with_offset_to(new_p)
+    }
+
+    pub fn with_offset_to(&self, new_p: impl Into<Point>) -> Self {
         let new_p = new_p.into();
         // does not link:
         // let mut r = self.clone();
@@ -395,21 +489,69 @@ impl Rect {
         Self::new(new_p.x, new_p.y, new_p.x - self.left, new_p.y - self.top)
     }
 
-    pub fn intersect<A: AsRef<Rect>, B: AsRef<Rect>>(a: A, b: B) -> Option<Rect> {
-        let mut intersection = Rect::default();
-        unsafe { intersection.native_mut().intersect2(a.as_ref().native(), b.as_ref().native()) }
-            .if_true_some(intersection)
+    pub fn inset(&mut self, d: impl Into<Vector>) {
+        *self = self.with_inset(d)
     }
 
-    pub fn intersects<A: AsRef<Rect>, B: AsRef<Rect>>(a: &Rect, b: &Rect) -> bool {
+    pub fn outset(&mut self, d: impl Into<Vector>) {
+        *self = self.with_outset(d)
+    }
+
+    pub fn intersect(&mut self, r: impl AsRef<Rect>) -> bool {
+        unsafe {
+            self.native_mut().intersect(r.as_ref().native())
+        }
+    }
+
+    pub fn intersect_ltrb(&mut self, left: scalar, top: scalar, right: scalar, bottom: scalar) -> bool {
+        unsafe {
+            self.native_mut().intersect1(left, top, right, bottom)
+        }
+    }
+
+    #[must_use]
+    pub fn intersect2(&mut self, a: impl AsRef<Rect>, b: impl AsRef<Rect>) -> bool
+    {
+        unsafe { self.native_mut().intersect2(a.as_ref().native(), b.as_ref().native()) }
+    }
+
+    pub fn intersects_ltrb(&self, left: scalar, top: scalar, right: scalar, bottom: scalar) -> bool {
+        // does not link:
+        // unsafe { self.native().intersects(left, top, right, bottom) }
+        self.intersects(Rect::new(left, top, right, bottom))
+    }
+
+    pub fn intersects(&self, r: impl AsRef<Rect>) -> bool {
+        unsafe { self.native().intersects1(r.as_ref().native()) }
+    }
+
+    pub fn intersects2(a: impl AsRef<Rect>, b: impl AsRef<Rect>) -> bool {
         unsafe { SkRect::Intersects(a.as_ref().native(), b.as_ref().native()) }
     }
 
-    pub fn join<A: AsRef<Rect>, B: AsRef<Rect>>(a: A, b: B) -> Rect {
-        let mut joined = *(a.as_ref());
-        unsafe { joined.native_mut().join1(b.as_ref().native()) }
-        joined
+    pub fn join_ltrb(&mut self, left: scalar, top: scalar, right: scalar, bottom: scalar) {
+        unsafe { self.native_mut().join(left, top, right, bottom) }
     }
+
+    pub fn join(&mut self, r: impl AsRef<Rect>) {
+        unsafe { self.native_mut().join1(r.as_ref().native()) }
+    }
+
+    pub fn join2(a: impl AsRef<Rect>, b: impl AsRef<Rect>) -> Rect {
+        let mut result = a.as_ref().clone();
+        result.join(b);
+        result
+    }
+
+    pub fn join_non_empty_arg(&mut self, r: impl AsRef<Rect>) {
+        unsafe { self.native_mut().joinNonEmptyArg(r.as_ref().native()) }
+    }
+
+    pub fn join_possibly_empty_rect(&mut self, r: impl AsRef<Rect>) {
+        unsafe { self.native_mut().joinPossiblyEmptyRect(r.as_ref().native()) }
+    }
+
+    // The set of contains() functions are defined as a trait below.
 
     #[must_use]
     pub fn round(&self) -> IRect {
@@ -418,11 +560,17 @@ impl Rect {
         r
     }
 
+    // The functions round_out() are defined as a trait below.
+
     #[must_use]
     pub fn round_in(&self) -> IRect {
         let mut r = IRect::default();
         unsafe { self.native().roundIn(r.native_mut()) };
         r
+    }
+
+    pub fn sort(&mut self) {
+        unsafe { self.native_mut().sort() }
     }
 
     #[must_use]
@@ -431,7 +579,15 @@ impl Rect {
     }
 
     pub fn as_scalars(&self) -> &[scalar; 4] {
-        unsafe { transmute_ref(self) }
+        unsafe { transmute_ref(&self.left) }
+    }
+
+    pub fn dump(&self, as_hex: impl Into<Option<bool>>) {
+        unsafe { self.native().dump(as_hex.into().unwrap_or_default()) }
+    }
+
+    pub fn dump_hex(&self) {
+        self.dump(true)
     }
 }
 
@@ -502,8 +658,13 @@ impl From<(Point, Size)> for Rect {
     }
 }
 
+impl From<ISize> for Rect {
+    fn from(isize: ISize) -> Self {
+        Self::from_isize(isize)
+    }
+}
 impl From<IRect> for Rect {
-    fn from(source: IRect) -> Self {
-        Self::new(source.left as _, source.top as _, source.right as _, source.bottom as _)
+    fn from(irect: IRect) -> Self {
+        Self::from_irect(irect)
     }
 }
