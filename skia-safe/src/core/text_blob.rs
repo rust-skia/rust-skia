@@ -13,6 +13,10 @@ impl NativeRefCounted for SkTextBlob {
     fn _unref(&self) {
         unsafe { skia_bindings::C_SkTextBlob_unref(self) }
     }
+
+    fn unique(&self) -> bool {
+        unsafe { skia_bindings::C_SkTextBlob_unique(self) }
+    }
 }
 
 impl RCHandle<SkTextBlob> {

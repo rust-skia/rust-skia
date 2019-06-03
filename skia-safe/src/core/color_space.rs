@@ -78,6 +78,10 @@ impl NativeRefCounted for SkColorSpace {
     fn _unref(&self) {
         unsafe { skia_bindings::C_SkColorSpace_unref(self) }
     }
+
+    fn unique(&self) -> bool {
+        unsafe { skia_bindings::C_SkColorSpace_unique(self) }
+    }
 }
 
 impl NativePartialEq for SkColorSpace {

@@ -397,6 +397,10 @@ extern "C" void C_SkData_unref(const SkData* self) {
     self->unref();
 }
 
+extern "C" bool C_SkData_unique(const SkData* self) {
+    return self->unique();
+}
+
 extern "C" SkData* C_SkData_MakeWithCopy(const void* data, size_t length) {
     return SkData::MakeWithCopy(data, length).release();
 }
@@ -637,6 +641,10 @@ extern "C" void C_SkColorSpace_unref(const SkColorSpace* self) {
     self->unref();
 }
 
+extern "C" bool C_SkColorSpace_unique(const SkColorSpace* self) {
+    return self->unique();
+}
+
 extern "C" SkColorSpace* C_SkColorSpace_MakeSRGB() {
     return SkColorSpace::MakeSRGB().release();
 }
@@ -867,6 +875,10 @@ extern "C" void C_SkTextBlob_unref(const SkTextBlob* self) {
     self->unref();
 }
 
+extern "C" bool C_SkTextBlob_unique(const SkTextBlob* self) {
+    return self->unique();
+}
+
 extern "C" SkTextBlob* C_SkTextBlob_MakeFromText(const void* text, size_t byteLength, const SkFont* font, SkTextEncoding encoding) {
     return SkTextBlob::MakeFromText(text, byteLength, *font, encoding).release();
 }
@@ -1030,6 +1042,10 @@ extern "C" void C_SkVertices_ref(const SkVertices* self) {
 
 extern "C" void C_SkVertices_unref(const SkVertices* self) {
     self->unref();
+}
+
+extern "C" bool C_SkVertices_unique(const SkVertices* self) {
+    return self->unique();
 }
 
 extern "C" SkVertices* C_SkVertices_MakeCopy(

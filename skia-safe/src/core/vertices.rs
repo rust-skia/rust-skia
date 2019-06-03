@@ -7,7 +7,7 @@ use crate::core::{
     Color,
     Data
 };
-use skia_bindings::{C_SkVertices_Decode, C_SkVertices_applyBones, C_SkVertices_Builder_detach, C_SkVertices_Builder_destruct, SkVertices_Builder, SkColor, SkPoint, C_SkVertices_MakeCopy, C_SkVertices_ref, SkVertices, C_SkVertices_unref, SkVertices_Bone, SkVertices_VertexMode, C_SkVertices_encode, SkVertices_BuilderFlags_kHasTexCoords_BuilderFlag, SkVertices_BuilderFlags_kHasColors_BuilderFlag, SkVertices_BuilderFlags_kHasBones_BuilderFlag, SkVertices_BuilderFlags_kIsNonVolatile_BuilderFlag, C_SkVertices_Bone_mapRect};
+use skia_bindings::{C_SkVertices_Decode, C_SkVertices_applyBones, C_SkVertices_Builder_detach, C_SkVertices_Builder_destruct, SkVertices_Builder, SkColor, SkPoint, C_SkVertices_MakeCopy, C_SkVertices_ref, SkVertices, C_SkVertices_unref, SkVertices_Bone, SkVertices_VertexMode, C_SkVertices_encode, SkVertices_BuilderFlags_kHasTexCoords_BuilderFlag, SkVertices_BuilderFlags_kHasColors_BuilderFlag, SkVertices_BuilderFlags_kHasBones_BuilderFlag, SkVertices_BuilderFlags_kIsNonVolatile_BuilderFlag, C_SkVertices_Bone_mapRect, C_SkVertices_unique };
 #[cfg(test)]
 use skia_bindings::{SkVertices_BoneIndices, SkVertices_BoneWeights};
 #[cfg(test)]
@@ -90,6 +90,10 @@ impl NativeRefCounted for SkVertices {
 
     fn _unref(&self) {
         unsafe { C_SkVertices_unref(self) }
+    }
+
+    fn unique(&self) -> bool {
+        unsafe { C_SkVertices_unique(self) }
     }
 }
 

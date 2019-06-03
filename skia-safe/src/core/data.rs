@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use std::slice;
-use skia_bindings::{SkData, C_SkData_unref, C_SkData_ref, C_SkData_MakeWithCopy, C_SkData_MakeEmpty, C_SkData_MakeSubset, C_SkData_MakeUninitialized, C_SkData_MakeWithCString};
+use skia_bindings::{SkData, C_SkData_unref, C_SkData_ref, C_SkData_MakeWithCopy, C_SkData_MakeEmpty, C_SkData_MakeSubset, C_SkData_MakeUninitialized, C_SkData_MakeWithCString, C_SkData_unique};
 use std::ops::Deref;
 use std::ffi::CStr;
 
@@ -13,6 +13,10 @@ impl NativeRefCounted for SkData {
 
     fn _unref(&self) {
         unsafe { C_SkData_unref(self) }
+    }
+
+    fn unique(&self) -> bool {
+        unsafe { C_SkData_unique(self) }
     }
 }
 

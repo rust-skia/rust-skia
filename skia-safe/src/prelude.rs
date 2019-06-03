@@ -138,6 +138,7 @@ impl RefCount for SkColorSpace {
 pub trait NativeRefCounted: Sized {
     fn _ref(&self);
     fn _unref(&self);
+    fn unique(&self) -> bool;
     fn _ref_cnt(&self) -> usize {
         unimplemented!();
     }
@@ -150,6 +151,10 @@ impl NativeRefCounted for SkRefCntBase {
 
     fn _unref(&self) {
         unsafe { self.unref() }
+    }
+
+    fn unique(&self) -> bool {
+        unsafe { self.unique() }
     }
 
     #[allow(clippy::cast_ptr_alignment)]
@@ -179,6 +184,10 @@ impl<Native, Base: NativeRefCounted> NativeRefCounted for Native
 
     fn _unref(&self) {
         self.ref_counted_base()._unref();
+    }
+
+    fn unique(&self) -> bool {
+        self.ref_counted_base().unique()
     }
 
     fn _ref_cnt(&self) -> usize {
