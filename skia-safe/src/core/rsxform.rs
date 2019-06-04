@@ -4,20 +4,20 @@ use skia_bindings::SkRSXform;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 #[repr(C)]
-pub struct RSXForm {
+pub struct RSXform {
     pub scos: scalar,
     pub ssin: scalar,
     pub tx: scalar,
     pub ty: scalar,
 }
 
-impl NativeTransmutable<SkRSXform> for RSXForm {}
+impl NativeTransmutable<SkRSXform> for RSXform {}
 #[test]
 fn test_rsx_form_layout() {
-    RSXForm::test_layout()
+    RSXform::test_layout()
 }
 
-impl RSXForm {
+impl RSXform {
     pub fn new(scos: scalar, ssin: scalar, t: impl Into<Vector>) -> Self {
         let t = t.into();
         Self {
@@ -36,7 +36,7 @@ impl RSXForm {
     ) -> Self {
         let t = t.into();
         let a = a.into();
-        RSXForm::from_native(unsafe {
+        RSXform::from_native(unsafe {
             SkRSXform::MakeFromRadians(scale, radians, t.x, t.y, a.x, a.y)
         })
     }

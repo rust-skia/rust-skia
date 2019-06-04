@@ -8,7 +8,8 @@ use crate::core::{
     Rect,
     Point3,
     Size,
-    scalar
+    scalar,
+    RSXform
 };
 use skia_bindings::{
     SkMatrix_ScaleToFit,
@@ -352,7 +353,10 @@ impl Matrix {
         self
     }
 
-    // TODO: setRSXform()
+    pub fn set_rsxform(&mut self, rsx_form: &RSXform) -> &mut Self {
+        unsafe { self.native_mut().setRSXform(rsx_form.native()) };
+        self
+    }
 
     pub fn set_skew(&mut self, (kx, ky): (scalar, scalar), pivot: impl Into<Option<Point>>) -> &mut Self {
         let pivot = pivot.into().unwrap_or_default();
