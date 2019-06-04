@@ -244,8 +244,15 @@ pub use rsxform::*;
 mod scalar_;
 pub use scalar_::*;
 
-mod shader;
-pub use shader::*;
+pub mod shader;
+pub use shader::Shader;
+
+#[deprecated(since = "0.11.0", note = "use shader::TileMode")]
+pub use shader::TileMode as ShaderTileMode;
+#[deprecated(since = "0.11.0", note = "use shader::GradientType")]
+pub use shader::GradientType as ShaderGradientType;
+#[deprecated(since = "0.11.0", note = "use shader::GradientInfo")]
+pub use shader::GradientInfo as ShaderGradientInfo;
 
 mod size;
 pub use size::*;

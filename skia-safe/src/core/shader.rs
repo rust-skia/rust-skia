@@ -5,25 +5,25 @@ use std::mem;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-pub enum ShaderTileMode {
+pub enum TileMode {
     Clamp = SkShader_TileMode::kClamp_TileMode as _,
     Repeat = SkShader_TileMode::kRepeat_TileMode as _,
     Mirror = SkShader_TileMode::kMirror_TileMode as _,
     Decal = SkShader_TileMode::kDecal_TileMode as _
 }
 
-impl NativeTransmutable<SkShader_TileMode> for ShaderTileMode {}
-#[test] fn test_shader_tile_mode_layout() { ShaderTileMode::test_layout() }
+impl NativeTransmutable<SkShader_TileMode> for TileMode {}
+#[test] fn test_shader_tile_mode_layout() { TileMode::test_layout() }
 
-impl Default for ShaderTileMode {
+impl Default for TileMode {
     fn default() -> Self {
-        ShaderTileMode::Clamp
+        TileMode::Clamp
     }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-pub enum ShaderGradientType {
+pub enum GradientType {
     None = SkShader_GradientType::kNone_GradientType as _,
     Color = SkShader_GradientType::kColor_GradientType as _,
     Linear = SkShader_GradientType::kLinear_GradientType as _,
@@ -32,15 +32,15 @@ pub enum ShaderGradientType {
     Conical = SkShader_GradientType::kConical_GradientType as _,
 }
 
-impl NativeTransmutable<SkShader_GradientType> for ShaderGradientType {}
-#[test] fn test_shader_grandient_type_layout() { ShaderGradientType::test_layout() }
+impl NativeTransmutable<SkShader_GradientType> for GradientType {}
+#[test] fn test_shader_grandient_type_layout() { GradientType::test_layout() }
 
-pub struct ShaderGradientInfo<'a> {
+pub struct GradientInfo<'a> {
     pub colors: &'a [Color],
     pub color_offsets: &'a [scalar],
     pub point: (Point, Point),
     pub radius: (scalar, scalar),
-    pub tile_mode: ShaderTileMode
+    pub tile_mode: TileMode
 }
 
 pub type Shader = RCHandle<SkShader>;
@@ -74,10 +74,10 @@ impl RCHandle<SkShader> {
         }
     }
 
-    pub fn image(&self) -> Option<(Image, Matrix, (ShaderTileMode, ShaderTileMode))> {
+    pub fn image(&self) -> Option<(Image, Matrix, (TileMode, TileMode))> {
         unsafe {
             let mut matrix = Matrix::default();
-            let mut tile_mode : [ShaderTileMode; 2] = mem::zeroed();
+            let mut tile_mode : [TileMode; 2] = mem::zeroed();
             let image =
                 Image::from_unshared_ptr(self.native().isAImage(matrix.native_mut(), tile_mode.native_mut().as_mut_ptr()));
             image.map(|i| (i, matrix, (tile_mode[0], tile_mode[1])))
@@ -93,7 +93,7 @@ impl RCHandle<SkShader> {
     }
 
     pub fn as_a_gradient<'a>(&self, colors: &'a mut [Color], color_offsets: &'a mut [scalar])
-        -> (ShaderGradientType, ShaderGradientInfo<'a>) {
+        -> (GradientType, GradientInfo<'a>) {
         assert_eq!(colors.len(), color_offsets.len());
         let max_color_count = colors.len();
         unsafe {
@@ -110,14 +110,14 @@ impl RCHandle<SkShader> {
             let gradient_type = C_SkShader_asAGradient(self.native(), &mut info);
             let returned_color_count : usize = info.fColorCount.try_into().unwrap();
             assert!(returned_color_count <= max_color_count);
-            let info = ShaderGradientInfo {
+            let info = GradientInfo {
                 colors: &colors[0..returned_color_count],
                 color_offsets: &color_offsets[0..returned_color_count],
                 point: (Point::from_native(info.fPoint[0]), Point::from_native(info.fPoint[1])),
                 radius: (info.fRadius[0], info.fRadius[1]),
-                tile_mode: ShaderTileMode::Clamp
+                tile_mode: TileMode::Clamp
             };
-            (ShaderGradientType::from_native(gradient_type), info)
+            (GradientType::from_native(gradient_type), info)
         }
     }
 
@@ -159,13 +159,13 @@ impl RCHandle<SkShader> {
         })
     }
 
-    pub fn from_bitmap(src: &Bitmap, (tmx, tmy): (ShaderTileMode, ShaderTileMode), local_matrix: Option<&Matrix>) -> Self {
+    pub fn from_bitmap(src: &Bitmap, (tmx, tmy): (TileMode, TileMode), local_matrix: Option<&Matrix>) -> Self {
         Self::from_ptr(unsafe {
             C_SkShader_MakeBitmapShader(src.native(), tmx.into_native(), tmy.into_native(), local_matrix.native_ptr_or_null())
         }).unwrap()
     }
 
-    pub fn from_picture(src: &Picture, (tmx, tmy): (ShaderTileMode, ShaderTileMode), local_matrix: Option<&Matrix>, tile: Option<&Rect>) -> Self {
+    pub fn from_picture(src: &Picture, (tmx, tmy): (TileMode, TileMode), local_matrix: Option<&Matrix>, tile: Option<&Rect>) -> Self {
         Self::from_ptr(unsafe {
             C_SkShader_MakePictureShader(src.shared_native(), tmx.into_native(), tmy.into_native(), local_matrix.native_ptr_or_null(), tile.native_ptr_or_null())
         }).unwrap()

@@ -2,7 +2,7 @@ use crate::artifact::DrawingDriver;
 use crate::resources;
 use skia_safe::{
     scalar, AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color, ColorFilter, Font, MaskFilter,
-    Matrix, Paint, PaintStyle, Path, PathEffect, Point, Rect, Shader, ShaderTileMode, TextBlob,
+    Matrix, Paint, PaintStyle, Path, PathEffect, Point, Rect, Shader, shader::TileMode, TextBlob,
     Typeface,
 };
 use skia_safe::{
@@ -126,7 +126,7 @@ fn draw_gradient(canvas: &mut Canvas) {
             points,
             colors.as_ref(),
             None,
-            ShaderTileMode::Clamp,
+            TileMode::Clamp,
             None,
             None,
         )
@@ -186,7 +186,7 @@ fn draw_transfer_modes(canvas: &mut Canvas) {
             src_points,
             src_colors.as_ref(),
             None,
-            ShaderTileMode::Clamp,
+            TileMode::Clamp,
             None,
             None,
         )
@@ -200,7 +200,7 @@ fn draw_transfer_modes(canvas: &mut Canvas) {
             dst_points,
             dst_colors.as_ref(),
             None,
-            ShaderTileMode::Clamp,
+            TileMode::Clamp,
             None,
             None,
         )
@@ -235,7 +235,7 @@ fn draw_bitmap_shader(canvas: &mut Canvas) {
     let paint = &mut Paint::default();
     paint.set_shader(
         image
-            .to_shader((ShaderTileMode::Repeat, ShaderTileMode::Repeat), &matrix)
+            .to_shader((TileMode::Repeat, TileMode::Repeat), &matrix)
             .as_ref(),
     );
     canvas.draw_paint(paint);
@@ -250,7 +250,7 @@ fn draw_radial_gradient_shader(canvas: &mut Canvas) {
             180.0,
             colors.as_ref(),
             None,
-            ShaderTileMode::Clamp,
+            TileMode::Clamp,
             None,
             None,
         )
@@ -270,7 +270,7 @@ fn draw_two_point_conical_shader(canvas: &mut Canvas) {
             16.0,
             colors.as_ref(),
             None,
-            ShaderTileMode::Clamp,
+            TileMode::Clamp,
             None,
             None,
         )
@@ -287,7 +287,7 @@ fn draw_sweep_gradient_shader(canvas: &mut Canvas) {
             (128.0, 128.0),
             colors.as_ref(),
             None,
-            ShaderTileMode::default(),
+            TileMode::default(),
             None,
             None,
             None,
@@ -321,7 +321,7 @@ fn draw_compose_shader(canvas: &mut Canvas) {
                 180.0,
                 colors.as_ref(),
                 None,
-                ShaderTileMode::Clamp,
+                TileMode::Clamp,
                 None,
                 None,
             )
