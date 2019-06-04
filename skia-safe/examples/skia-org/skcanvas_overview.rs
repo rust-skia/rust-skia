@@ -54,7 +54,7 @@ fn draw_hello_skia(canvas: &mut Canvas) {
     let mut rect = Rect::from_point_and_size((50.0, 50.0), (40.0, 60.0));
     canvas.draw_rect(rect, &paint);
 
-    let oval = RRect::new_oval(rect).offset((40.0, 60.0));
+    let oval = RRect::new_oval(rect).with_offset((40.0, 60.0));
     paint.set_color(Color::BLUE);
     canvas.draw_rrect(oval, &paint);
 
