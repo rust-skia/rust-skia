@@ -14,7 +14,7 @@ use crate::core::{
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-pub enum RRectType {
+pub enum Type {
     Empty = SkRRect_Type::kEmpty_Type as _,
     Rect = SkRRect_Type::kRect_Type as _,
     Oval = SkRRect_Type::kOval_Type as _,
@@ -23,20 +23,20 @@ pub enum RRectType {
     Complex = SkRRect_Type::kComplex_Type as _
 }
 
-impl NativeTransmutable<SkRRect_Type> for RRectType {}
-#[test] fn test_rrect_type_layout() { RRectType::test_layout() }
+impl NativeTransmutable<SkRRect_Type> for Type {}
+#[test] fn test_rrect_type_layout() { Type::test_layout() }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-pub enum RRectCorner {
+pub enum Corner {
     UpperLeft = SkRRect_Corner::kUpperLeft_Corner as _,
     UpperRight = SkRRect_Corner::kUpperRight_Corner as _,
     LowerRight = SkRRect_Corner::kLowerRight_Corner as _,
     LowerLeft = SkRRect_Corner::kLowerLeft_Corner as _
 }
 
-impl NativeTransmutable<SkRRect_Corner> for RRectCorner {}
-#[test] fn test_rrect_corner_layout() { RRectCorner::test_layout() }
+impl NativeTransmutable<SkRRect_Corner> for Corner {}
+#[test] fn test_rrect_corner_layout() { Corner::test_layout() }
 
 #[derive(Copy, Clone)]
 #[repr(transparent)]
@@ -65,9 +65,8 @@ impl AsRef<RRect> for RRect {
 }
 
 impl RRect {
-
-    pub fn get_type(&self) -> RRectType {
-        RRectType::from_native(unsafe { self.native().getType() })
+    pub fn get_type(&self) -> Type {
+        Type::from_native(unsafe { self.native().getType() })
     }
 
     pub fn is_empty(&self) -> bool {
@@ -148,7 +147,7 @@ impl RRect {
         Rect::from_native(unsafe { *self.native().rect() })
     }
 
-    pub fn radii(&self, corner: RRectCorner) -> Vector {
+    pub fn radii(&self, corner: Corner) -> Vector {
         Vector::from_native(unsafe {
             self.native().radii(corner.native().to_owned())
         })

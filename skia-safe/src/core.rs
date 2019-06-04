@@ -246,8 +246,12 @@ pub use rect::*;
 pub mod region;
 pub use region::Region;
 
-mod rrect;
-pub use rrect::*;
+pub mod rrect;
+pub use rrect::RRect;
+#[deprecated(since = "0.11.0", note = "use rrect::Type instead")]
+pub use rrect::Type as RRectType;
+#[deprecated(since = "0.11.0", note = "use rrect::Corner instead")]
+pub use rrect::Corner as RRectCorner;
 
 mod shader;
 pub use shader::*;
