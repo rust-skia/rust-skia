@@ -253,6 +253,9 @@ pub use rrect::Type as RRectType;
 #[deprecated(since = "0.11.0", note = "use rrect::Corner instead")]
 pub use rrect::Corner as RRectCorner;
 
+mod rsx_form;
+pub use rsx_form::*;
+
 mod shader;
 pub use shader::*;
 

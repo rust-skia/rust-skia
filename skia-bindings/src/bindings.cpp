@@ -25,6 +25,8 @@
 #include "SkPoint3.h"
 #include "SkRect.h"
 #include "SkRegion.h"
+#include "SkRRect.h"
+#include "SkRSXform.h"
 #include "SkStream.h"
 #include "SkStrokeRec.h"
 #include "SkSurface.h"
