@@ -1,18 +1,3 @@
-#[allow(non_camel_case_types)]
-pub type scalar = skia_bindings::SkScalar;
-
-pub trait Scalar : Copy {
-    const NEARLY_ZERO: Self;
-    const ONE: Self;
-    const HALF: Self;
-}
-
-impl Scalar for scalar {
-    const NEARLY_ZERO: Self = 1.0 / ((1 << 12) as Self);
-    const ONE: Self = 1.0;
-    const HALF: Self = 0.5;
-}
-
 pub type FontTableTag = skia_bindings::SkFontTableTag;
 
 mod annotation;
@@ -255,6 +240,9 @@ pub use rrect::Corner as RRectCorner;
 
 mod rsxform;
 pub use rsxform::*;
+
+mod scalar_;
+pub use scalar_::*;
 
 mod shader;
 pub use shader::*;
