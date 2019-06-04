@@ -243,8 +243,8 @@ pub use raster_handle_allocator::*;
 mod rect;
 pub use rect::*;
 
-mod region;
-pub use region::*;
+pub mod region;
+pub use region::Region;
 
 mod rrect;
 pub use rrect::*;

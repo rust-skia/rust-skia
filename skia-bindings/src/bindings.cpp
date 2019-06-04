@@ -851,6 +851,26 @@ extern "C" bool C_SkRegion_Equals(const SkRegion* lhs, const SkRegion* rhs) {
     return *lhs == *rhs;
 }
 
+extern "C" void C_SkRegion_Iterator_Construct(SkRegion::Iterator* uninitialized) {
+    new(uninitialized) SkRegion::Iterator();
+}
+
+extern "C" void C_SkRegion_Iterator_destruct(SkRegion::Iterator* self) {
+    self->~Iterator();
+}
+
+extern "C" const SkRegion* C_SkRegion_Iterator_rgn(const SkRegion::Iterator* self) {
+    return self->rgn();
+}
+
+extern "C" void C_SkRegion_Cliperator_destruct(SkRegion::Cliperator* self) {
+    self->~Cliperator();
+}
+
+extern "C" void C_SkRegion_Spanerator_destruct(SkRegion::Spanerator* self) {
+    self->~Spanerator();
+}
+
 //
 // SkFontStyle
 //
