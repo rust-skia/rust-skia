@@ -14,7 +14,7 @@ use crate::core::{
 use skia_bindings::{SkPaint, SkIPoint, C_SkBitmap_destruct, SkBitmap, C_SkBitmap_Construct, C_SkBitmap_readyToDraw, C_SkBitmap_tryAllocN32Pixels, C_SkBitmap_tryAllocPixels, C_SkBitmap_eraseARGB, C_SkBitmap_extractAlpha, SkBitmap_AllocFlags_kZeroPixels_AllocFlag, C_SkBitmap_makeShader};
 use crate::{Matrix, Shader, TileMode};
 
-#[deprecated(since="0.6.0", note="AllocFlags is obsolete.  We always zero pixel memory when allocated.")]
+#[deprecated(since="0.11.0", note="AllocFlags is obsolete.  We always zero pixel memory when allocated.")]
 bitflags! {
     pub struct BitmapAllocFlags: u32 {
         const ZERO_PIXELS = SkBitmap_AllocFlags_kZeroPixels_AllocFlag as u32;
