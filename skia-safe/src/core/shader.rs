@@ -66,7 +66,7 @@ impl RCHandle<SkShader> {
         }
     }
 
-    #[deprecated(since="0.6.0", note="skbug.com/8941")]
+    #[deprecated(since="0.11.0", note="skbug.com/8941")]
     pub fn as_a_gradient<'a>(&self, colors: &'a mut [Color], color_offsets: &'a mut [scalar])
         -> (ShaderGradientType, ShaderGradientInfo<'a>) {
         assert_eq!(colors.len(), color_offsets.len());
