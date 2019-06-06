@@ -511,7 +511,7 @@ impl<N: NativeRefCounted> ToSharedPointerMut<N> for Option<&mut RCHandle<N>> {
     }
 }
 
-/// Trait to compute how much bytes the elements of this type occupy in memory.
+/// Trait to compute how many bytes the elements of this type occupy in memory.
 pub trait ElementsSizeOf {
     fn elements_size_of(&self) -> usize;
 }
