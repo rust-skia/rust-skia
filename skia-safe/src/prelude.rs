@@ -25,7 +25,7 @@ pub unsafe fn transmute_ref_mut<FromT, ToT>(from: &mut FromT) -> &mut ToT {
     &mut *(from as *mut FromT as *mut ToT)
 }
 
-pub trait ToOption {
+pub(crate) trait ToOption {
     type Target;
     fn to_option(self) -> Option<Self::Target>;
 }
@@ -62,7 +62,7 @@ impl ToOption for bool {
     }
 }
 
-pub trait IfBoolSome {
+pub(crate) trait IfBoolSome {
     fn if_true_some<V>(self, v: V) -> Option<V>;
     fn if_false_some<V>(self, v: V) -> Option<V>;
 }
@@ -77,7 +77,7 @@ impl IfBoolSome for bool {
     }
 }
 
-pub trait RefCount {
+pub(crate) trait RefCount {
     fn ref_cnt(&self) -> usize;
 }
 
@@ -95,15 +95,14 @@ impl RefCount for SkRefCntBase {
         }
     }
 }
-impl RefCount for SkRefCnt {
 
+impl RefCount for SkRefCnt {
     fn ref_cnt(&self) -> usize {
         self._base.ref_cnt()
     }
 }
 
 impl RefCount for SkNVRefCnt {
-
     #[allow(clippy::cast_ptr_alignment)]
     fn ref_cnt(&self) -> usize {
         unsafe {
@@ -187,7 +186,7 @@ impl<Native, Base: NativeRefCounted> NativeRefCounted for Native
 }
 
 /// Trait that enables access to a native representation by reference.
-pub trait NativeAccess<N> {
+pub(crate) trait NativeAccess<N> {
     fn native(&self) -> &N;
     fn native_mut(&mut self) -> &mut N;
     unsafe fn native_mut_force(&self) -> &mut N {
@@ -218,7 +217,7 @@ pub trait NativeHash {
 }
 
 /// A trait allowing a conversion from a native type to a handle type.
-pub trait FromNative<N> {
+pub(crate) trait FromNative<N> {
     fn from_native(native: N) -> Self;
 }
 
@@ -290,7 +289,7 @@ impl<N: NativeDrop + NativeHash> Hash for Handle<N> {
     }
 }
 
-pub trait NativeSliceAccess<N: NativeDrop + NativeClone> {
+pub(crate) trait NativeSliceAccess<N: NativeDrop + NativeClone> {
     fn native(&self) -> Vec<N>;
 }
 
@@ -303,11 +302,11 @@ impl<N> NativeSliceAccess<N> for [Handle<N>]
 
 /// A trait that supports retrieving a pointer from an Option<Handle<Native>>.
 /// Returns a null pointer if the Option is None.
-pub trait NativePointerOrNull<N> {
+pub(crate) trait NativePointerOrNull<N> {
     fn native_ptr_or_null(&self) -> *const N;
 }
 
-pub trait NativePointerOrNullMut<N> {
+pub(crate) trait NativePointerOrNullMut<N> {
     fn native_ptr_or_null_mut(&mut self) -> *mut N;
 }
 
@@ -332,11 +331,11 @@ impl<H, N> NativePointerOrNullMut<N> for Option<&mut H>
     }
 }
 
-pub trait NativePointerOrNullMut2<N> {
+pub(crate) trait NativePointerOrNullMut2<N> {
     fn native_ptr_or_null_mut(&mut self) -> *mut N;
 }
 
-pub trait NativePointerOrNull2<N> {
+pub(crate) trait NativePointerOrNull2<N> {
     fn native_ptr_or_null(&self) -> *const N;
 }
 
@@ -456,11 +455,11 @@ impl<N: NativeRefCounted + NativePartialEq> PartialEq for RCHandle<N> {
 }
 
 /// A trait for types that can be converted to a shared pointer that may be null.
-pub trait ToSharedPointer<N> {
+pub(crate) trait ToSharedPointer<N> {
     fn shared_ptr(&self) -> *const N;
 }
 
-pub trait ToSharedPointerMut<N> {
+pub(crate) trait ToSharedPointerMut<N> {
     fn shared_ptr_mut(&mut self) -> *mut N;
 }
 
@@ -503,7 +502,7 @@ impl<N: NativeRefCounted> ToSharedPointerMut<N> for Option<&mut RCHandle<N>> {
 }
 
     /// Trait to compute the elements of this type occupy memory in bytes.
-pub trait ElementsSizeOf {
+pub(crate) trait ElementsSizeOf {
     fn elements_size_of(&self) -> usize;
 }
 
@@ -548,7 +547,7 @@ impl<T, I, O: Copy> IndexSetter<I, O> for T
 
 /// Trait to use native types that as a rust type
 /// _inplace_ with the same size and field layout.
-pub trait NativeTransmutable<NT: Sized> : Sized {
+pub(crate) trait NativeTransmutable<NT: Sized> : Sized {
 
     /// Provides access to the native value through a
     /// transmuted reference to the Rust value.
@@ -585,7 +584,7 @@ pub trait NativeTransmutable<NT: Sized> : Sized {
     }
 }
 
-pub trait NativeTransmutableSliceAccess<NT: Sized> {
+pub(crate) trait NativeTransmutableSliceAccess<NT: Sized> {
     fn native(&self) -> &[NT];
     fn native_mut(&mut self) -> &mut [NT];
 }
@@ -608,7 +607,7 @@ impl<NT, RustT> NativeTransmutable<Option<NT>> for Option<RustT>
 impl<NT, RustT> NativeTransmutable<Option<&[NT]>> for Option<&[RustT]>
     where RustT: NativeTransmutable<NT> {}
 
-pub trait NativeTransmutableOptionSliceAccessMut<NT: Sized> {
+pub(crate) trait NativeTransmutableOptionSliceAccessMut<NT: Sized> {
     fn native_mut(&mut self) -> &mut Option<&mut [NT]>;
 }
 
@@ -625,11 +624,11 @@ impl<NT, RustT> NativeTransmutableOptionSliceAccessMut<NT> for Option<&mut [Rust
 // that may be null.
 //
 
-pub trait AsPointerOrNull<PointerT> {
+pub(crate) trait AsPointerOrNull<PointerT> {
     fn as_ptr_or_null(&self) -> *const PointerT;
 }
 
-pub trait AsPointerOrNullMut<PointerT> {
+pub(crate) trait AsPointerOrNullMut<PointerT> {
     fn as_ptr_or_null(&self) -> *const PointerT;
     fn as_ptr_or_null_mut(&mut self) -> *mut PointerT;
 }
