@@ -7,7 +7,7 @@ use skia_bindings::{
 };
 
 #[repr(C)]
-#[derive(Copy, Clone, PartialEq, Default, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
 pub struct ISize {
     pub width: i32,
     pub height: i32
@@ -16,7 +16,7 @@ pub struct ISize {
 impl NativeTransmutable<SkISize> for ISize {}
 
 #[test]
-fn isize_layout() {
+fn test_isize_layout() {
     ISize::test_layout()
 }
 
@@ -25,12 +25,30 @@ impl ISize {
         ISize { width: w, height: h }
     }
 
+    pub fn new_empty() -> ISize {
+        Self::new(0, 0)
+    }
+
+    pub fn set(&mut self, w: i32, h: i32) {
+        *self = Self::new(w, h);
+    }
+
     pub fn is_zero(self) -> bool {
         self.width == 0 && self.height == 0
     }
 
     pub fn is_empty(self) -> bool {
         self.width <= 0 || self.height <= 0
+    }
+
+    pub fn set_empty(&mut self) {
+        *self = Self::new_empty();
+    }
+
+    // TODO: should the functions with() and height() be supported?
+
+    pub fn equals(self, w: i32, h: i32) -> bool {
+        self == Self::new(w, h)
     }
 }
 
@@ -57,12 +75,30 @@ impl Size {
         Self::new(src.width as _, src.height as _)
     }
 
+    pub fn new_empty() -> Self {
+        Self::new(0.0, 0.0)
+    }
+
+    pub fn set(&mut self, w: scalar, h: scalar) {
+        *self = Self::new(w, h);
+    }
+
     pub fn is_zero(self) -> bool {
         self.width == 0.0 && self.height == 0.0
     }
 
     pub fn is_empty(self) -> bool {
         self.width <= 0.0 || self.height <= 0.0
+    }
+
+    pub fn set_empty(&mut self) {
+        *self = Self::new_empty()
+    }
+
+    // TODO: should width() and height() be supported?
+
+    pub fn equals(self, w: scalar, h: scalar) -> bool {
+        self == Self::new(w, h)
     }
 
     pub fn to_round(self) -> ISize {
