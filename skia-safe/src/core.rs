@@ -257,8 +257,12 @@ pub use shader::GradientInfo as ShaderGradientInfo;
 mod size;
 pub use size::*;
 
-mod stroke_rec;
-pub use stroke_rec::*;
+pub mod stroke_rec;
+pub use stroke_rec::StrokeRec;
+#[deprecated(note = "use stroke_rec::InitStyle")]
+pub use stroke_rec::InitStyle as StrokeRecInitStyle;
+#[deprecated(note = "use stroke_rec::Style")]
+pub use stroke_rec::Style as StrokeRecStyle;
 
 mod surface;
 pub use surface::*;

@@ -18,25 +18,25 @@ use skia_bindings::{
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-pub enum StrokeRecInitStyle {
+pub enum InitStyle {
     Hairline = SkStrokeRec_InitStyle::kHairline_InitStyle as _,
     Fill = SkStrokeRec_InitStyle::kFill_InitStyle as _
 }
 
-impl NativeTransmutable<SkStrokeRec_InitStyle> for StrokeRecInitStyle {}
-#[test] fn test_stroke_rec_init_style_layout() { StrokeRecInitStyle::test_layout() }
+impl NativeTransmutable<SkStrokeRec_InitStyle> for InitStyle {}
+#[test] fn test_stroke_rec_init_style_layout() { InitStyle::test_layout() }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-pub enum StrokeRecStyle {
+pub enum Style {
     Hairline = SkStrokeRec_Style::kHairline_Style as _,
     Fill = SkStrokeRec_Style::kFill_Style as _,
     Stroke = SkStrokeRec_Style::kStroke_Style as _,
     StrokeAndFill = SkStrokeRec_Style::kStrokeAndFill_Style as _
 }
 
-impl NativeTransmutable<SkStrokeRec_Style> for StrokeRecStyle {}
-#[test] fn test_stroke_rec_style_layout() { StrokeRecStyle::test_layout() }
+impl NativeTransmutable<SkStrokeRec_Style> for Style {}
+#[test] fn test_stroke_rec_style_layout() { Style::test_layout() }
 
 pub type StrokeRec = Handle<SkStrokeRec>;
 
@@ -55,18 +55,18 @@ impl NativeClone for SkStrokeRec {
 }
 
 impl Handle<SkStrokeRec> {
-    pub fn new(init_style: StrokeRecInitStyle) -> Self {
+    pub fn new(init_style: InitStyle) -> Self {
         Self::from_native(unsafe { SkStrokeRec::new(init_style.into_native() )})
     }
 
     // for convenience
     pub fn new_hairline() -> Self {
-        Self::new(StrokeRecInitStyle::Hairline)
+        Self::new(InitStyle::Hairline)
     }
 
     // for convenience
     pub fn new_fill() -> Self {
-        Self::new(StrokeRecInitStyle::Fill)
+        Self::new(InitStyle::Fill)
     }
 
     pub fn from_paint(paint: &Paint, style: Option<PaintStyle>, res_scale: Option<scalar>) -> Self {
@@ -79,8 +79,8 @@ impl Handle<SkStrokeRec> {
         }})
     }
 
-    pub fn style(&self) -> StrokeRecStyle {
-        StrokeRecStyle::from_native(unsafe { self.native().getStyle() })
+    pub fn style(&self) -> Style {
+        Style::from_native(unsafe { self.native().getStyle() })
     }
 
     pub fn width(&self) -> scalar {
