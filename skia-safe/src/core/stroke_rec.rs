@@ -1,11 +1,9 @@
 use crate::prelude::*;
 use crate::core::{
     Path,
-    PaintJoin,
-    PaintCap,
-    PaintStyle,
     Paint,
-    scalar
+    scalar,
+    paint
 };
 use skia_bindings::{
     SkStrokeRec_InitStyle,
@@ -69,9 +67,9 @@ impl Handle<SkStrokeRec> {
         Self::new(InitStyle::Fill)
     }
 
-    pub fn from_paint(paint: &Paint, style: Option<PaintStyle>, res_scale: Option<scalar>) -> Self {
-        let res_scale = res_scale.unwrap_or(1.0);
-        Self::from_native(unsafe {match style {
+    pub fn from_paint(paint: &Paint, style: impl Into<Option<paint::Style>>, res_scale: impl Into<Option<scalar>>) -> Self {
+        let res_scale = res_scale.into().unwrap_or(1.0);
+        Self::from_native(unsafe {match style.into() {
             Some(style) => {
                 SkStrokeRec::new1(paint.native(), style.into_native(), res_scale)
             },
@@ -91,12 +89,12 @@ impl Handle<SkStrokeRec> {
         unsafe { self.native().getMiter() }
     }
 
-    pub fn cap(&self) -> PaintCap {
-        PaintCap::from_native(unsafe { self.native().getCap() })
+    pub fn cap(&self) -> paint::Cap {
+        paint::Cap::from_native(unsafe { self.native().getCap() })
     }
 
-    pub fn join(&self) -> PaintJoin {
-        PaintJoin::from_native(unsafe { self.native().getJoin() })
+    pub fn join(&self) -> paint::Join {
+        paint::Join::from_native(unsafe { self.native().getJoin() })
     }
 
     pub fn is_hairline_style(&self) -> bool {
@@ -117,15 +115,15 @@ impl Handle<SkStrokeRec> {
         self
     }
 
-    pub fn set_stroke_style(&mut self, width: scalar, stroke_and_fill: Option<bool>) -> &mut Self {
-        let stroke_and_fill = stroke_and_fill.unwrap_or(false);
+    pub fn set_stroke_style(&mut self, width: scalar, stroke_and_fill: impl Into<Option<bool>>) -> &mut Self {
+        let stroke_and_fill = stroke_and_fill.into().unwrap_or(false);
         unsafe {
             self.native_mut().setStrokeStyle(width, stroke_and_fill )
         }
         self
     }
 
-    pub fn set_stroke_params(&mut self, cap: PaintCap, join: PaintJoin, miter_limit: scalar) -> &mut Self {
+    pub fn set_stroke_params(&mut self, cap: paint::Cap, join: paint::Join, miter_limit: scalar) -> &mut Self {
         unsafe {
             self.native_mut().setStrokeParams(cap.into_native(), join.into_native(), miter_limit)
         }
@@ -144,7 +142,11 @@ impl Handle<SkStrokeRec> {
         unsafe { self.native().needToApply() }
     }
 
-    pub fn apply_to_path(&self, path: &mut Path) -> bool {
+    pub fn apply_to_path(&self, dst: &mut Path, src: &Path) -> bool {
+        unsafe { self.native().applyToPath(dst.native_mut(), src.native()) }
+    }
+
+    pub fn apply_to_path_inplace(&self, path: &mut Path) -> bool {
         unsafe { self.native().applyToPath(path.native_mut(), path.native()) }
     }
 
@@ -156,11 +158,11 @@ impl Handle<SkStrokeRec> {
         unsafe { self.native().getInflationRadius() }
     }
 
-    pub fn inflation_radius_from_paint_and_style(paint: &Paint, style: PaintStyle) -> scalar {
+    pub fn inflation_radius_from_paint_and_style(paint: &Paint, style: paint::Style) -> scalar {
         unsafe { SkStrokeRec::GetInflationRadius(paint.native(), style.into_native() ) }
     }
 
-    pub fn inflation_radius_from_params(join: PaintJoin, miter_limit: scalar, cap: PaintCap, stroke_width: scalar) -> scalar {
+    pub fn inflation_radius_from_params(join: paint::Join, miter_limit: scalar, cap: paint::Cap, stroke_width: scalar) -> scalar {
         unsafe {
             SkStrokeRec::GetInflationRadius1(
                 join.into_native(),
