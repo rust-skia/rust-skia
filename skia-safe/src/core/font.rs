@@ -240,10 +240,6 @@ impl Handle<SkFont> {
         }
     }
 
-    pub fn unichar_to_glyph(&self, uni: Unichar) -> GlyphId {
-        unsafe { self.native().unicharToGlyph(uni) }
-    }
-
     pub fn count_str(&self, str: impl AsRef<str>) -> usize {
         self.count_text(str.as_ref().as_bytes(), TextEncoding::UTF8)
     }
@@ -273,7 +269,6 @@ impl Handle<SkFont> {
         glyphs
     }
 
-
     pub fn measure_str(&self, str: impl AsRef<str>, paint: Option<&Paint>) -> (scalar, Rect) {
         let bytes = str.as_ref().as_bytes();
         self.measure_text(bytes, TextEncoding::UTF8, paint)
@@ -289,13 +284,27 @@ impl Handle<SkFont> {
         (width, bounds)
     }
 
-    pub fn widths(&self, glyphs: &[u16], widths: &mut [scalar]) {
+    pub fn unichar_to_glyph(&self, uni: Unichar) -> GlyphId {
+        unsafe { self.native().unicharToGlyph(uni) }
+    }
+
+    pub fn unichar_to_glyphs(&self, uni: &[Unichar], glyphs: &mut [GlyphId]) {
+        assert_eq!(uni.len(), glyphs.len());
+        unsafe {
+            self.native().unicharsToGlyphs(
+                uni.as_ptr(),
+                uni.len().try_into().unwrap(),
+                glyphs.as_mut_ptr())
+        }
+    }
+
+    pub fn widths(&self, glyphs: &[GlyphId], widths: &mut [scalar]) {
         self.widths_bounds(glyphs, Some(widths), None, None)
     }
 
     pub fn widths_bounds(
         &self,
-        glyphs: &[u16],
+        glyphs: &[GlyphId],
         mut widths: Option<&mut [scalar]>,
         mut bounds: Option<&mut [Rect]>,
         paint: Option<&Paint>) {
@@ -318,11 +327,11 @@ impl Handle<SkFont> {
         }
     }
 
-    pub fn bounds(&self, glyphs: &[u16], bounds: &mut [Rect], paint: Option<&Paint>) {
+    pub fn bounds(&self, glyphs: &[GlyphId], bounds: &mut [Rect], paint: Option<&Paint>) {
         self.widths_bounds(glyphs, None, Some(bounds), paint)
     }
 
-    pub fn pos(&self, glyphs: &[u16], pos: &mut [Point], origin: Option<Point>) {
+    pub fn pos(&self, glyphs: &[GlyphId], pos: &mut [Point], origin: Option<Point>) {
         let count = glyphs.len();
         assert_eq!(count, pos.len());
 
@@ -337,7 +346,7 @@ impl Handle<SkFont> {
         }
     }
 
-    pub fn x_pos(&self, glyphs: &[u16], xpos: &mut [scalar], origin: Option<scalar>) {
+    pub fn x_pos(&self, glyphs: &[GlyphId], xpos: &mut [scalar], origin: Option<scalar>) {
         let count = glyphs.len();
         assert_eq!(count, xpos.len());
         let origin = origin.unwrap_or_default();
@@ -351,7 +360,7 @@ impl Handle<SkFont> {
         }
     }
 
-    pub fn path(&self, glyph_id: u16) -> Option<Path> {
+    pub fn path(&self, glyph_id: GlyphId) -> Option<Path> {
         let mut path = Path::default();
         unsafe {
             self.native().getPath(glyph_id, path.native_mut())

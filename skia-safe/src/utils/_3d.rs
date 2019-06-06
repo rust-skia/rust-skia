@@ -3,14 +3,14 @@
 //!       Should we place them into a module?
 use crate::prelude::*;
 use crate::{Matrix44, Point, Point3};
-use skia_bindings::{Sk3LookAt, Sk3MapPts, Sk3Perspective, SkMatrix44};
+use skia_bindings::{Sk3LookAt, Sk3MapPts, Sk3Perspective};
 
 pub fn look_at(
     eye: impl Into<Point3>,
     center: impl Into<Point3>,
     up: impl Into<Point3>,
 ) -> Matrix44 {
-    let mut m4 = Matrix44::new();
+    let mut m4 = Matrix44::default();
     unsafe {
         Sk3LookAt(
             m4.native_mut(),
@@ -23,7 +23,7 @@ pub fn look_at(
 }
 
 pub fn perspective(near: f32, far: f32, angle: f32) -> Matrix44 {
-    let mut m4 = Matrix44::new();
+    let mut m4 = Matrix44::default();
     unsafe {
         Sk3Perspective(m4.native_mut(), near, far, angle);
     }
@@ -42,7 +42,7 @@ pub fn map_points(dst: &mut [Point], m4: &Matrix44, src: &[Point3]) {
     }
 }
 
-impl Handle<SkMatrix44> {
+impl Matrix44 {
     pub fn look_at(
         eye: impl Into<Point3>,
         center: impl Into<Point3>,

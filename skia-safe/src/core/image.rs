@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::{gpu, ImageFilter};
-use crate::core::{Picture, Matrix, ColorType, ImageInfo, Data, Bitmap, IRect, YUVColorSpace, AlphaType, ColorSpace, YUVAIndex, ISize, Paint, EncodedImageFormat, IPoint, shader::TileMode, Shader};
+use crate::core::{Picture, Matrix, ColorType, ImageInfo, Data, Bitmap, IRect, YUVColorSpace, AlphaType, ColorSpace, YUVAIndex, ISize, Paint, EncodedImageFormat, IPoint, TileMode, Shader};
 use skia_bindings::{
     C_SkImage_MakeFromPicture,
     C_SkImage_MakeFromTexture,
@@ -199,7 +199,6 @@ impl RCHandle<SkImage> {
         })
     }
 
-    // TODO: consider clippy!
     #[allow(clippy::too_many_arguments)]
     pub fn from_yuva_textures_copy_with_external_backend(
         context: &mut gpu::Context,
@@ -223,9 +222,6 @@ impl RCHandle<SkImage> {
                 image_color_space.shared_ptr())
         })
     }
-
-    // TODO: MakeFromYUVATextureCopy()
-    // TODO: MakeFromYUVATexturesCopyWithExternalBackend()
 
     pub fn from_yuva_textures(
         context: &mut gpu::Context,
@@ -302,6 +298,12 @@ impl RCHandle<SkImage> {
                 paint.native_ptr_or_null(),
                 bit_depth.into_native(),
                 color_space.shared_ptr())
+        })
+    }
+
+    pub fn image_info(&self) -> ImageInfo {
+        ImageInfo::from_native(unsafe {
+            (*self.native().imageInfo()).clone()
         })
     }
 
@@ -420,9 +422,9 @@ impl RCHandle<SkImage> {
         })
     }
 
-    pub fn new_subset(&self, rect: IRect) -> Option<Image> {
+    pub fn new_subset(&self, rect: impl AsRef<IRect>) -> Option<Image> {
         Image::from_ptr(unsafe {
-            C_SkImage_makeSubset(self.native(), rect.native())
+            C_SkImage_makeSubset(self.native(), rect.as_ref().native())
         })
     }
 

@@ -1,13 +1,12 @@
+use crate::core::{scalar, BlendMode, Color, Color4f, ColorSpace};
 use crate::prelude::*;
-use crate::core::{
-    Color,
-    BlendMode,
-    Bitmap,
-    Color4f,
-    ColorSpace,
-    scalar
+use skia_bindings::{
+    C_SkColorFilter_asColorMatrix, C_SkColorFilter_asColorMode, C_SkColorFilter_getFlags,
+    C_SkColorFilter_makeComposed, C_SkColorFilters_Blend, C_SkColorFilters_Compose,
+    C_SkColorFilters_Lerp, C_SkColorFilters_LinearToSRGBGamma, C_SkColorFilters_MatrixRowMajor255,
+    C_SkColorFilters_SRGBToLinearGamma, SkColorFilter,
+    SkColorFilter_Flags_kAlphaUnchanged_Flag, SkRefCntBase,
 };
-use skia_bindings::{C_SkColorFilter_MakeLinearToSRGBGamma, C_SkColorFilter_MakeMatrixFilterRowMajor255, C_SkColorFilter_makeComposed, C_SkColorFilter_getFlags, C_SkColorFilter_asComponentTable, C_SkColorFilter_asColorMatrix, C_SkColorFilter_asColorMode, C_SkColorFilter_MakeModeFilter, SkRefCntBase, SkColorFilter, C_SkColorFilter_MakeSRGBToLinearGamma, SkColorFilter_Flags_kAlphaUnchanged_Flag, C_SkColorFilter_MakeMixer};
 
 bitflags! {
     pub struct ColorFilterFlags: u32 {
@@ -44,16 +43,8 @@ impl RCHandle<SkColorFilter> {
             .if_true_some(matrix)
     }
 
-    pub fn to_component_table(&self) -> Option<Bitmap> {
-        let mut bitmap = Bitmap::new();
-        unsafe { C_SkColorFilter_asComponentTable(self.native(), bitmap.native_mut())}
-            .if_true_some(bitmap)
-    }
-
     pub fn flags(&self) -> ColorFilterFlags {
-        ColorFilterFlags::from_bits_truncate(unsafe {
-            C_SkColorFilter_getFlags(self.native())
-        })
+        ColorFilterFlags::from_bits_truncate(unsafe { C_SkColorFilter_getFlags(self.native()) })
     }
 
     pub fn filter_color(&self, color: impl Into<Color>) -> Color {
@@ -64,45 +55,15 @@ impl RCHandle<SkColorFilter> {
 
     pub fn filter_color4f(&self, color: impl AsRef<Color4f>, color_space: &ColorSpace) -> Color4f {
         Color4f::from_native(unsafe {
-            self.native().filterColor4f(color.as_ref().native(), color_space.native_mut_force())
+            self.native()
+                .filterColor4f(color.as_ref().native(), color_space.native_mut_force())
         })
     }
 
-    pub fn new_mode_filter(c: impl Into<Color>, mode: BlendMode) -> Option<Self> {
-        ColorFilter::from_ptr(unsafe {
-            C_SkColorFilter_MakeModeFilter(c.into().native(), mode.native())
-        })
-    }
-
-    // TODO: name this function to_composed()?
     #[must_use]
     pub fn composed(&self, inner: &ColorFilter) -> Option<Self> {
         ColorFilter::from_ptr(unsafe {
-            C_SkColorFilter_makeComposed(self.native(), inner.shared_native() )
-        })
-    }
-
-    pub fn from_matrix_row_major_255(matrix: &[scalar; 20]) -> Self {
-        ColorFilter::from_ptr(unsafe {
-            C_SkColorFilter_MakeMatrixFilterRowMajor255(matrix.as_ptr())
-        }).unwrap()
-    }
-
-    pub fn new_linear_to_srgb_gamma() -> Self {
-        ColorFilter::from_ptr(unsafe {
-            C_SkColorFilter_MakeLinearToSRGBGamma()
-        }).unwrap()
-    }
-
-    pub fn new_srgb_to_linear_gamma() -> Self {
-        ColorFilter::from_ptr(unsafe {
-            C_SkColorFilter_MakeSRGBToLinearGamma()
-        }).unwrap()
-    }
-
-    pub fn new_mixer(cf0: &ColorFilter, cf1: &ColorFilter, weight: f32) -> Option<Self> {
-        ColorFilter::from_ptr(unsafe {
-            C_SkColorFilter_MakeMixer(cf0.shared_native(), cf1.shared_native(), weight)
+            C_SkColorFilter_makeComposed(self.native(), inner.shared_native())
         })
     }
 
@@ -111,13 +72,49 @@ impl RCHandle<SkColorFilter> {
     // TODO: Deserialize (via Flattenable).
 }
 
+pub enum ColorFilters {}
+
+impl ColorFilters {
+    pub fn compose(outer: &ColorFilter, inner: &ColorFilter) -> Option<ColorFilter> {
+        ColorFilter::from_ptr(unsafe {
+            C_SkColorFilters_Compose(outer.shared_native(), inner.shared_native())
+        })
+    }
+
+    pub fn matrix_row_major_255(array: &[scalar; 20]) -> ColorFilter {
+        ColorFilter::from_ptr(unsafe { C_SkColorFilters_MatrixRowMajor255(array.as_ptr()) })
+            .unwrap()
+    }
+
+    pub fn blend<C: Into<Color>>(c: C, mode: BlendMode) -> Option<ColorFilter> {
+        ColorFilter::from_ptr(unsafe {
+            C_SkColorFilters_Blend(c.into().into_native(), mode.into_native())
+        })
+    }
+
+    pub fn linear_to_srgb_gamma() -> ColorFilter {
+        ColorFilter::from_ptr(unsafe { C_SkColorFilters_LinearToSRGBGamma() }).unwrap()
+    }
+
+    pub fn srgb_to_linear_gamma() -> ColorFilter {
+        ColorFilter::from_ptr(unsafe { C_SkColorFilters_SRGBToLinearGamma() }).unwrap()
+    }
+
+    pub fn lerp(t: f32, dst: &ColorFilter, src: &ColorFilter) -> Option<ColorFilter> {
+        ColorFilter::from_ptr(unsafe {
+            C_SkColorFilters_Lerp(t, dst.shared_native(), src.shared_native())
+        })
+    }
+
+}
+
 #[test]
 fn color_mode_roundtrip() {
     let color = Color::CYAN;
     let mode = BlendMode::ColorBurn;
-    let cf = ColorFilter::new_mode_filter(color, mode).unwrap();
+    let cf = ColorFilters::blend(color, mode).unwrap();
     let (c, m) = cf.to_color_mode().unwrap();
-    assert!(color == c);
+    assert_eq!(color, c);
     assert_eq!(mode, m);
 }
 
@@ -125,7 +122,7 @@ fn color_mode_roundtrip() {
 fn ref_count() {
     let color = Color::CYAN;
     let mode = BlendMode::ColorBurn;
-    let cf = ColorFilter::new_mode_filter(color, mode).unwrap();
+    let cf = ColorFilters::blend(color, mode).unwrap();
     let rc = cf.native()._ref_cnt();
     assert_eq!(1, rc);
 }

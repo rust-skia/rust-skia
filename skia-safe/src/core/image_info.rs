@@ -5,6 +5,7 @@ use skia_bindings::{
     SkColorType,
     SkYUVColorSpace,
     C_SkImageInfo_Construct,
+    C_SkImageInfo_Copy,
     C_SkImageInfo_Equals,
     C_SkImageInfo_gammaCloseToSRGB,
     C_SkImageInfo_reset
@@ -15,6 +16,7 @@ use crate::core::{
     ISize,
     IPoint
 };
+use std::mem;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -92,7 +94,8 @@ impl ColorType {
 pub enum YUVColorSpace {
     JPEG = SkYUVColorSpace::kJPEG_SkYUVColorSpace as _,
     Rec601 = SkYUVColorSpace::kRec601_SkYUVColorSpace as _,
-    Rec709 = SkYUVColorSpace::kRec709_SkYUVColorSpace as _
+    Rec709 = SkYUVColorSpace::kRec709_SkYUVColorSpace as _,
+    Identity = SkYUVColorSpace::kIdentity_SkYUVColorSpace as _,
 }
 
 impl NativeTransmutable<SkYUVColorSpace> for YUVColorSpace {}
@@ -110,11 +113,13 @@ impl NativeDrop for SkImageInfo {
 
 impl NativeClone for SkImageInfo {
     fn clone(&self) -> Self {
-        let mut image_info = unsafe { SkImageInfo::new() };
         unsafe {
-            skia_bindings::C_SkImageInfo_Copy(self, &mut image_info);
+            let mut image_info = mem::zeroed();
+            // note SkImageInfo::new() does not link under Linux.
+            C_SkImageInfo_Construct(&mut image_info);
+            C_SkImageInfo_Copy(self, &mut image_info);
+            image_info
         }
-        image_info
     }
 }
 
@@ -126,6 +131,7 @@ impl NativePartialEq for SkImageInfo {
 
 impl Default for Handle<SkImageInfo> {
     fn default() -> Self {
+        // note SkImageInfo::new() does not link under Linux.
         Self::construct_c(C_SkImageInfo_Construct)
     }
 }

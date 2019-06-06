@@ -12,8 +12,10 @@ use crate::core::{
     IPoint,
     PixelRef
 };
-use skia_bindings::{C_SkImageInfo_Copy, C_SkBitmap_destruct, SkBitmap, C_SkBitmap_Construct, C_SkBitmap_readyToDraw, C_SkBitmap_tryAllocN32Pixels, C_SkBitmap_tryAllocPixels, C_SkBitmap_eraseARGB, C_SkBitmap_extractAlpha, SkBitmap_AllocFlags_kZeroPixels_AllocFlag, C_SkBitmap_setPixelRef};
+use skia_bindings::{C_SkBitmap_destruct, SkBitmap, C_SkBitmap_Construct, C_SkBitmap_readyToDraw, C_SkBitmap_tryAllocN32Pixels, C_SkBitmap_tryAllocPixels, C_SkBitmap_eraseARGB, C_SkBitmap_extractAlpha, SkBitmap_AllocFlags_kZeroPixels_AllocFlag, C_SkBitmap_setPixelRef, C_SkBitmap_makeShader};
+use crate::{Matrix, Shader, TileMode};
 
+#[deprecated(since="0.11.0", note="AllocFlags is obsolete.  We always zero pixel memory when allocated.")]
 bitflags! {
     pub struct BitmapAllocFlags: u32 {
         const ZERO_PIXELS = SkBitmap_AllocFlags_kZeroPixels_AllocFlag as u32;
@@ -48,11 +50,9 @@ impl Handle<SkBitmap> {
     // TODO: implement pixmap()
 
     pub fn info(&self) -> ImageInfo {
-        // we contain ImageInfo in a struct, so we have to copy it.
-        let ptr = unsafe { self.native().info() };
-        let mut image_info = ImageInfo::default();
-        unsafe { C_SkImageInfo_Copy(ptr, image_info.native_mut()) }
-        image_info
+        ImageInfo::from_native(unsafe {
+            (*self.native().info()).clone()
+        })
     }
 
     pub fn width(&self) -> i32 {
@@ -307,6 +307,21 @@ impl Handle<SkBitmap> {
     }
 
     // TODO: peek_pixels(Pixmap)
+
+    #[deprecated(since = "0.11.0", note = "use to_shader()")]
+    pub fn as_shader<'a>(&self, tile_modes: impl Into<Option<(TileMode, TileMode)>>, local_matrix: impl Into<Option<&'a Matrix>>) -> Shader {
+        self.to_shader(tile_modes, local_matrix)
+    }
+
+    pub fn to_shader<'a>(&self, tile_modes: impl Into<Option<(TileMode, TileMode)>>, local_matrix: impl Into<Option<&'a Matrix>>) -> Shader {
+        let tile_modes = tile_modes.into();
+        let local_matrix = local_matrix.into();
+        Shader::from_ptr(unsafe {
+            let tmx = tile_modes.map(|tm| tm.0).unwrap_or_default();
+            let tmy = tile_modes.map(|tm| tm.1).unwrap_or_default();
+            C_SkBitmap_makeShader(self.native(), tmx.into_native(), tmy.into_native(), local_matrix.native_ptr_or_null())
+        }).unwrap()
+    }
 }
 
 #[test]
@@ -319,4 +334,16 @@ fn create_clone_and_drop() {
 fn get_info() {
     let bm = Bitmap::new();
     let _info = bm.info();
+}
+
+#[test]
+fn empty_bitmap_shader() {
+    let bm = Bitmap::new();
+    let _shader = bm.to_shader(None, None);
+}
+
+#[test]
+fn shader_with_tilemode() {
+    let bm = Bitmap::new();
+    let _shader = bm.to_shader((TileMode::Decal, TileMode::Mirror), None);
 }

@@ -2,9 +2,9 @@
 
 [![Build Status](https://dev.azure.com/pragmatrix-github/rust-skia/_apis/build/status/rust-skia.rust-skia?branchName=master)](https://dev.azure.com/pragmatrix-github/rust-skia/_build/latest?definitionId=2&branchName=master)
 
-Skia Submodule Status: chrome/m74 ([pending changes][skiapending]).
+Skia Submodule Status: chrome/m75 ([pending changes][skiapending]).
 
-[skiapending]: https://github.com/google/skia/compare/ae4b97edd5b9eeee9e4fe9814f67e3abc4ba1a75...chrome/m74
+[skiapending]: https://github.com/google/skia/compare/3a2e3e75232d225e6f5e7c3530458be63bbb355a...chrome/m75
 
 ## Goals
 

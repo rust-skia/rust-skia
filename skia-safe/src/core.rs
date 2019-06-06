@@ -245,10 +245,10 @@ mod scalar_;
 pub use scalar_::*;
 
 pub mod shader;
-pub use shader::Shader;
+pub use shader::{Shader, Shaders};
 
-#[deprecated(since = "0.11.0", note = "use shader::TileMode")]
-pub use shader::TileMode as ShaderTileMode;
+#[deprecated(since = "0.11.0", note = "use TileMode")]
+pub use TileMode as ShaderTileMode;
 #[deprecated(since = "0.11.0", note = "use shader::GradientType")]
 pub use shader::GradientType as ShaderGradientType;
 #[deprecated(since = "0.11.0", note = "use shader::GradientInfo")]
@@ -271,6 +271,9 @@ pub use surface_props::*;
 
 mod text_blob;
 pub use text_blob::*;
+
+mod tile_mode;
+pub use self::tile_mode::*;
 
 mod time;
 pub use time::*;

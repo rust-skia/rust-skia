@@ -1,30 +1,12 @@
 use crate::prelude::*;
-use crate::{Matrix, Image, Color, scalar, Point, ColorFilter, ColorSpace, Color4f, BlendMode, Bitmap, Rect, Picture, GradientShaderFlags};
-use skia_bindings::{SkShader, SkRefCntBase, SkShader_TileMode, SkShader_GradientType, SkShader_GradientInfo, C_SkShader_asAGradient, C_SkShader_makeWithLocalMatrix, C_SkShader_makeWithColorFilter, C_SkShader_MakeEmptyShader, C_SkShader_MakeColorShader, C_SkShader_MakeColorShader2, C_SkShader_MakeCompose, C_SkShader_MakeMixer, C_SkShader_MakeBitmapShader, C_SkShader_MakePictureShader, C_SkShader_makeAsALocalMatrixShader, C_SkShader_isAImage};
+use crate::{Matrix, Image, Color, scalar, Point, ColorFilter, ColorSpace, Color4f, BlendMode, GradientShaderFlags, TileMode};
+use skia_bindings::{SkShader, SkRefCntBase, SkShader_GradientType, SkShader_GradientInfo, C_SkShader_asAGradient, C_SkShader_makeWithLocalMatrix, C_SkShader_makeWithColorFilter, C_SkShader_isAImage, SkTileMode, C_SkShaders_Empty, C_SkShaders_Color, C_SkShaders_Color2, C_SkShaders_Blend, C_SkShaders_Lerp, C_SkShaders_Lerp2};
 use std::mem;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-pub enum TileMode {
-    Clamp = SkShader_TileMode::kClamp_TileMode as _,
-    Repeat = SkShader_TileMode::kRepeat_TileMode as _,
-    Mirror = SkShader_TileMode::kMirror_TileMode as _,
-    Decal = SkShader_TileMode::kDecal_TileMode as _
-}
-
-impl NativeTransmutable<SkShader_TileMode> for TileMode {}
-#[test] fn test_shader_tile_mode_layout() { TileMode::test_layout() }
-
-impl Default for TileMode {
-    fn default() -> Self {
-        TileMode::Clamp
-    }
-}
-
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
 #[allow(dead_code)]
-enum GradientTypeInternal {
+pub enum GradientTypeInternal {
     None = SkShader_GradientType::kNone_GradientType as _,
     Color = SkShader_GradientType::kColor_GradientType as _,
     Linear = SkShader_GradientType::kLinear_GradientType as _,
@@ -70,17 +52,11 @@ impl NativeRefCountedBase for SkShader {
 
 impl Default for RCHandle<SkShader> {
     fn default() -> Self {
-        Self::new_empty()
+        Shaders::empty()
     }
 }
 
 impl RCHandle<SkShader> {
-
-    pub fn local_matrix(&self) -> &Matrix {
-        Matrix::from_native_ref(unsafe {
-            &*self.native().getLocalMatrix()
-        })
-    }
 
     pub fn is_opaque(&self) -> bool {
         unsafe {
@@ -106,6 +82,7 @@ impl RCHandle<SkShader> {
         }
     }
 
+    #[deprecated(since="0.11.0", note="skbug.com/8941")]
     pub fn as_a_gradient<'a>(&self, colors: &'a mut [Color], color_offsets: &'a mut [scalar])
         -> Option<(GradientType, GradientInfo<'a>)> {
         assert_eq!(colors.len(), color_offsets.len());
@@ -117,7 +94,7 @@ impl RCHandle<SkShader> {
                 fColorOffsets: color_offsets.as_mut_ptr(),
                 fPoint: mem::zeroed(),
                 fRadius: Default::default(),
-                fTileMode: SkShader_TileMode::kClamp_TileMode,
+                fTileMode: SkTileMode::kClamp,
                 fGradientFlags: 0
             };
 
@@ -159,53 +136,46 @@ impl RCHandle<SkShader> {
             C_SkShader_makeWithColorFilter(self.native(), color_filter.shared_native())
         }).unwrap()
     }
+}
 
-    pub fn new_empty() -> Self {
-        Self::from_ptr(unsafe { C_SkShader_MakeEmptyShader() }).unwrap()
+pub enum Shaders {}
+
+impl Shaders {
+    pub fn empty() -> Shader {
+        Shader::from_ptr(unsafe {
+            C_SkShaders_Empty()
+        }).unwrap()
     }
 
-    pub fn from_color(color: impl Into<Color>) -> Self {
+    pub fn color<C: Into<Color>>(color: C) -> Shader {
         let color = color.into();
-        Self::from_ptr(unsafe {
-            C_SkShader_MakeColorShader(color.into_native())
+        Shader::from_ptr(unsafe {
+            C_SkShaders_Color(color.into_native())
         }).unwrap()
     }
 
-    pub fn from_color_in_space(color: impl AsRef<Color4f>, space: &ColorSpace) -> Self {
-        Self::from_ptr(unsafe {
-            C_SkShader_MakeColorShader2(color.as_ref().native(), space.shared_native())
+    pub fn color_in_space<C: AsRef<Color4f>>(color: C, space: &ColorSpace) -> Shader {
+        Shader::from_ptr(unsafe {
+            C_SkShaders_Color2(color.as_ref().native(), space.shared_native())
         }).unwrap()
     }
 
-    pub fn compose(dst: &Shader, src: &Shader, mode: BlendMode, lerp: Option<scalar>) -> Option<Self> {
-        let lerp = lerp.unwrap_or(1.0);
-        Self::from_ptr(unsafe {
-            C_SkShader_MakeCompose(dst.shared_native(), src.shared_native(), mode.into_native(), lerp)
+    pub fn blend(mode: BlendMode, dst: &Shader, src: &Shader) -> Shader {
+        Shader::from_ptr(unsafe {
+            C_SkShaders_Blend(mode.into_native(), dst.shared_native(), src.shared_native())
+        }).unwrap()
+    }
+
+    pub fn lerp(t: f32, dst: &Shader, src: &Shader) -> Option<Shader> {
+        Shader::from_ptr(unsafe {
+            C_SkShaders_Lerp(t, dst.shared_native(), src.shared_native())
         })
     }
 
-    pub fn mixer(dst: &Shader, src: &Shader, lerp: scalar) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            C_SkShader_MakeMixer(dst.shared_native(), src.shared_native(), lerp)
-        })
-    }
-
-    pub fn from_bitmap(src: &Bitmap, (tmx, tmy): (TileMode, TileMode), local_matrix: Option<&Matrix>) -> Self {
-        Self::from_ptr(unsafe {
-            C_SkShader_MakeBitmapShader(src.native(), tmx.into_native(), tmy.into_native(), local_matrix.native_ptr_or_null())
+    // TODO: rename as soon it's clear from the documentation what it does.
+    pub fn lerp2(red: &Shader, dst: &Shader, src: &Shader) -> Shader {
+        Shader::from_ptr(unsafe {
+            C_SkShaders_Lerp2(red.shared_native(), dst.shared_native(), src.shared_native())
         }).unwrap()
-    }
-
-    pub fn from_picture(src: &Picture, (tmx, tmy): (TileMode, TileMode), local_matrix: Option<&Matrix>, tile: Option<&Rect>) -> Self {
-        Self::from_ptr(unsafe {
-            C_SkShader_MakePictureShader(src.shared_native(), tmx.into_native(), tmy.into_native(), local_matrix.native_ptr_or_null(), tile.native_ptr_or_null())
-        }).unwrap()
-    }
-
-    pub fn as_a_local_matrix_shader(&self) -> Option<(Self, Matrix)> {
-        let mut matrix = Matrix::default();
-        Self::from_ptr(unsafe {
-            C_SkShader_makeAsALocalMatrixShader(self.native(), matrix.native_mut())
-        }).map(|s| (s, matrix))
     }
 }

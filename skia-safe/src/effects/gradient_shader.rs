@@ -1,6 +1,5 @@
-use crate::core::{scalar, Matrix, Point, Shader, shader::TileMode};
 use crate::prelude::*;
-use crate::{Color, Color4f, ColorSpace};
+use crate::{scalar, Color, Color4f, ColorSpace, Matrix, Point, Shader, TileMode};
 use skia_bindings::{
     C_SkGradientShader_MakeLinear, C_SkGradientShader_MakeLinear2, C_SkGradientShader_MakeRadial,
     C_SkGradientShader_MakeRadial2, C_SkGradientShader_MakeSweep, C_SkGradientShader_MakeSweep2,
@@ -270,7 +269,7 @@ impl<'a> GradientShaderColors<'a> {
         }
     }
 
-    // clippy wants this
+    // to keep clippy happy.
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }

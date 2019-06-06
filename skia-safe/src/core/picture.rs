@@ -14,8 +14,10 @@ use skia_bindings::{
     C_SkPicture_MakePlaceholder,
     C_SkPicture_serialize,
     C_SkPicture_approximateBytesUsed,
-    SkRefCntBase
+    SkRefCntBase,
+    C_SkPicture_makeShader
 };
+use crate::{TileMode, Matrix, Shader};
 
 pub type Picture = RCHandle<SkPicture>;
 
@@ -86,5 +88,20 @@ impl RCHandle<SkPicture> {
             C_SkPicture_approximateBytesUsed(self.native(), &mut value);
             value
         }
+    }
+
+    pub fn to_shader<'a, 'b>(
+        &self, tm: impl Into<Option<(TileMode, TileMode)>>,
+        local_matrix: impl Into<Option<&'a Matrix>>,
+        tile_rect: impl Into<Option<&'b Rect>>) -> Shader {
+        let tm = tm.into();
+        let local_matrix = local_matrix.into();
+        let tile_rect = tile_rect.into();
+        let tmx = tm.map(|tm| tm.0).unwrap_or_default();
+        let tmy = tm.map(|tm| tm.1).unwrap_or_default();
+
+        Shader::from_ptr(unsafe {
+            C_SkPicture_makeShader(self.native(), tmx.into_native(), tmy.into_native(), local_matrix.native_ptr_or_null(), tile_rect.native_ptr_or_null())
+        }).unwrap()
     }
 }

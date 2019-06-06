@@ -5,7 +5,7 @@ use std::hash::{
 };
 use crate::prelude::*;
 use crate::{Color, FilterQuality, Color4f, ColorSpace, scalar, Path, Rect, ColorFilter, BlendMode, PathEffect, MaskFilter, Shader, ImageFilter, DrawLooper};
-use skia_bindings::{C_SkPaint_setMaskFilter, C_SkPaint_setPathEffect, C_SkPaint_setColorFilter, SkPaint_Cap, SkPaint, C_SkPaint_destruct, SkPaint_Style, SkPaint_Join, C_SkPaint_Equals, C_SkPaint_setShader, C_SkPaint_setImageFilter, C_SkPaint_setDrawLooper};
+use skia_bindings::{C_SkPaint_setMaskFilter, C_SkPaint_setPathEffect, C_SkPaint_setColorFilter, SkPaint_Cap, SkPaint, C_SkPaint_destruct, SkPaint_Style, SkPaint_Join, C_SkPaint_Equals, C_SkPaint_setShader, C_SkPaint_setImageFilter, C_SkPaint_setDrawLooper, C_SkPaint_getDrawLooper };
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(u8)]
@@ -318,7 +318,9 @@ impl Handle<SkPaint> {
 
     pub fn draw_looper(&self) -> Option<DrawLooper> {
         DrawLooper::from_unshared_ptr(unsafe {
-            self.native().getDrawLooper()
+            // does not link on Windows:
+            // self.native().getDrawLooper()
+            C_SkPaint_getDrawLooper(self.native())
         })
     }
 
