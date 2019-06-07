@@ -264,8 +264,14 @@ pub use stroke_rec::InitStyle as StrokeRecInitStyle;
 #[deprecated(note = "use stroke_rec::Style")]
 pub use stroke_rec::Style as StrokeRecStyle;
 
-mod surface;
-pub use surface::*;
+pub mod surface;
+pub use surface::Surface;
+#[deprecated(note = "use surface::OwnedSurface")]
+pub use surface::OwnedSurface as OwnedSurface;
+#[deprecated(note = "use surface::BackendHandleAccess")]
+pub use surface::BackendHandleAccess as SurfaceBackendHandleAccess;
+#[deprecated(note = "use surface::ContentChangeMode")]
+pub use surface::ContentChangeMode as SurfaceContentChangeMode;
 
 mod surface_characterization;
 pub use surface_characterization::*;

@@ -10,24 +10,24 @@ use crate::core::AlphaType;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-pub enum SurfaceContentChangeMode {
+pub enum ContentChangeMode {
     Discard = SkSurface_ContentChangeMode::kDiscard_ContentChangeMode as _,
     Retain = SkSurface_ContentChangeMode::kRetain_ContentChangeMode as _
 }
 
-impl NativeTransmutable<SkSurface_ContentChangeMode> for SurfaceContentChangeMode {}
-#[test] fn test_surface_content_change_mode() { SurfaceContentChangeMode::test_layout() }
+impl NativeTransmutable<SkSurface_ContentChangeMode> for ContentChangeMode {}
+#[test] fn test_surface_content_change_mode() { ContentChangeMode::test_layout() }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-pub enum SurfaceBackendHandleAccess {
+pub enum BackendHandleAccess {
     FlushRead = SkSurface_BackendHandleAccess::kFlushRead_BackendHandleAccess as _,
     FlushWrite = SkSurface_BackendHandleAccess::kFlushWrite_BackendHandleAccess as _,
     DiscardWrite = SkSurface_BackendHandleAccess::kDiscardWrite_BackendHandleAccess as _
 }
 
-impl NativeTransmutable<SkSurface_BackendHandleAccess> for SurfaceBackendHandleAccess {}
-#[test] fn test_surface_backend_handle_access() { SurfaceBackendHandleAccess::test_layout() }
+impl NativeTransmutable<SkSurface_BackendHandleAccess> for BackendHandleAccess {}
+#[test] fn test_surface_backend_handle_access() { BackendHandleAccess::test_layout() }
 
 // TODO: complete the implementation.
 pub type Surface = RCHandle<SkSurface>;
@@ -190,14 +190,14 @@ impl RCHandle<SkSurface> {
         }
     }
 
-    pub fn notify_content_will_change(&mut self, mode: SurfaceContentChangeMode) -> &mut Self {
+    pub fn notify_content_will_change(&mut self, mode: ContentChangeMode) -> &mut Self {
         unsafe {
             self.native_mut().notifyContentWillChange(mode.into_native())
         }
         self
     }
 
-    pub fn backend_texture(&mut self, handle_access: SurfaceBackendHandleAccess) -> Option<BackendTexture> {
+    pub fn backend_texture(&mut self, handle_access: BackendHandleAccess) -> Option<BackendTexture> {
         unsafe {
             let mut backend_texture = GrBackendTexture::new();
             skia_bindings::C_SkSurface_getBackendTexture(
@@ -209,7 +209,7 @@ impl RCHandle<SkSurface> {
         }
     }
 
-    pub fn backend_render_target(&mut self, handle_access: SurfaceBackendHandleAccess) -> Option<BackendRenderTarget> {
+    pub fn backend_render_target(&mut self, handle_access: BackendHandleAccess) -> Option<BackendRenderTarget> {
         unsafe {
             let mut backend_render_target = GrBackendRenderTarget::new();
             skia_bindings::C_SkSurface_getBackendRenderTarget(
