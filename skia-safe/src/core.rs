@@ -305,8 +305,18 @@ pub use types::*;
 mod un_pre_multiply;
 pub use un_pre_multiply::*;
 
-mod vertices;
-pub use vertices::*;
+pub mod vertices;
+pub use vertices::Vertices;
+#[deprecated(note = "use vertices::BoneIndices")]
+pub use vertices::BoneIndices as BoneIndices;
+#[deprecated(note = "use vertices::BoneWeights")]
+pub use vertices::BoneWeights as BoneWeights;
+#[deprecated(note = "use vertices::Bone")]
+pub use vertices::Bone as VerticesBone;
+#[deprecated(note = "use vertices::VertexMode")]
+pub use vertices::VertexMode as VerticesVertexMode;
+#[deprecated(note = "use vertices::Builder")]
+pub use vertices::Builder as VerticesBuilder;
 
 mod yuva_index;
 pub use yuva_index::*;

@@ -13,7 +13,6 @@ use skia_bindings::{SkVertices_BoneIndices, SkVertices_BoneWeights};
 #[cfg(test)]
 use std::mem;
 
-// TODO: review naming
 pub type BoneIndices = [u32; 4];
 
 #[test]
@@ -21,7 +20,6 @@ fn bone_indices_layout() {
     assert_eq!(mem::size_of::<BoneIndices>(), mem::size_of::<SkVertices_BoneIndices>());
 }
 
-// TODO: review naming
 pub type BoneWeights = [u32; 4];
 
 #[test]
@@ -31,9 +29,9 @@ fn bone_weights_layout() {
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 #[repr(transparent)]
-pub struct VerticesBone([u32; 6]);
+pub struct Bone([u32; 6]);
 
-impl Deref for VerticesBone {
+impl Deref for Bone {
     type Target = [u32; 6];
 
     fn deref(&self) -> &Self::Target {
@@ -41,15 +39,15 @@ impl Deref for VerticesBone {
     }
 }
 
-impl DerefMut for VerticesBone {
+impl DerefMut for Bone {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
 }
 
-impl NativeTransmutable<SkVertices_Bone> for VerticesBone {}
+impl NativeTransmutable<SkVertices_Bone> for Bone {}
 
-impl VerticesBone {
+impl Bone {
     pub fn map_point(&self, point: Point) -> Point {
         Point::from_native(unsafe {
             self.native().mapPoint(&point.into_native())
@@ -67,19 +65,19 @@ impl VerticesBone {
 
 #[test]
 fn test_bone_layout() {
-    VerticesBone::test_layout();
+    Bone::test_layout();
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-pub enum VerticesVertexMode {
+pub enum VertexMode {
     Triangles =  SkVertices_VertexMode::kTriangles_VertexMode as _,
     TriangleStrip = SkVertices_VertexMode::kTriangleStrip_VertexMode as _,
     TriangleFan = SkVertices_VertexMode::kTriangleFan_VertexMode as _
 }
 
-impl NativeTransmutable<SkVertices_VertexMode> for VerticesVertexMode {}
-#[test] fn test_vertices_vertex_mode_layout() { VerticesVertexMode::test_layout() }
+impl NativeTransmutable<SkVertices_VertexMode> for VertexMode {}
+#[test] fn test_vertices_vertex_mode_layout() { VertexMode::test_layout() }
 
 pub type Vertices = RCHandle<SkVertices>;
 
@@ -100,7 +98,7 @@ impl NativeRefCounted for SkVertices {
 impl RCHandle<SkVertices> {
 
     pub fn new_copy(
-        mode: VerticesVertexMode,
+        mode: VertexMode,
         positions: &[Point],
         texs: &[Point],
         colors: &[Color],
@@ -140,8 +138,8 @@ impl RCHandle<SkVertices> {
         unsafe { self.native().uniqueID() }
     }
 
-    pub fn mode(&self) -> VerticesVertexMode {
-        VerticesVertexMode::from_native(unsafe { self.native().mode() })
+    pub fn mode(&self) -> VertexMode {
+        VertexMode::from_native(unsafe { self.native().mode() })
     }
 
     pub fn bounds(&self) -> Rect {
@@ -221,7 +219,7 @@ impl RCHandle<SkVertices> {
         }
     }
 
-    pub fn apply_bones(&self, bones: &[VerticesBone]) -> Vertices {
+    pub fn apply_bones(&self, bones: &[Bone]) -> Vertices {
         Vertices::from_ptr(unsafe {
             C_SkVertices_applyBones(
                 self.native(),
@@ -258,7 +256,7 @@ bitflags! {
     }
 }
 
-pub type VerticesBuilder = Handle<SkVertices_Builder>;
+pub type Builder = Handle<SkVertices_Builder>;
 
 impl NativeDrop for SkVertices_Builder {
     fn drop(&mut self) {
@@ -267,7 +265,7 @@ impl NativeDrop for SkVertices_Builder {
 }
 
 impl Handle<SkVertices_Builder> {
-    pub fn new(mode: VerticesVertexMode, vertex_count: usize, index_count: usize, flags: VerticesBuilderFlags) -> VerticesBuilder {
+    pub fn new(mode: VertexMode, vertex_count: usize, index_count: usize, flags: VerticesBuilderFlags) -> Builder {
         Self::from_native(unsafe {
             SkVertices_Builder::new(
                 mode.into_native(),
