@@ -16,8 +16,12 @@ pub enum ColorChannel {
 impl NativeTransmutable<SkColorChannel> for ColorChannel {}
 #[test] fn test_color_channel_layout() { ColorChannel::test_layout() }
 
-#[derive(Copy, Clone)]
-pub struct YUVAIndex(SkYUVAIndex);
+#[repr(C)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+pub struct YUVAIndex {
+    index: i32,
+    channel: ColorChannel
+}
 
 impl NativeTransmutable<SkYUVAIndex> for YUVAIndex {}
 
@@ -27,21 +31,18 @@ fn test_yuva_index_layout() {
 }
 
 impl YUVAIndex {
-
     pub fn new(index: Option<(usize, ColorChannel)>) -> YUVAIndex {
         match index {
             Some((index, channel)) => {
                 assert!(index < 4);
-                YUVAIndex::from_native(SkYUVAIndex {
-                    fIndex: index.try_into().unwrap(),
-                    fChannel: channel.into_native()
-                })
+                Self {
+                    index: index.try_into().unwrap(),
+                    channel
+                }
             },
-            None => {
-                YUVAIndex::from_native(SkYUVAIndex {
-                    fIndex: -1,
-                    fChannel: ColorChannel::A.into_native()
-                })
+            None => Self {
+                index: -1,
+                channel: ColorChannel::A
             }
         }
     }
@@ -53,5 +54,3 @@ impl YUVAIndex {
         }.if_true_some(num_planes.try_into().unwrap())
     }
 }
-
-
