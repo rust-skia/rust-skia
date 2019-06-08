@@ -6,7 +6,7 @@ use skia_bindings::{GrContext, SkRefCntBase, C_GrContext_MakeGL, GrContext_aband
 use skia_bindings::C_GrContext_MakeVulkan;
 #[cfg(feature = "vulkan")]
 use super::vk;
-use crate::core::ColorType;
+use crate::ColorType;
 
 pub type Context = RCHandle<GrContext>;
 

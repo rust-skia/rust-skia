@@ -1,7 +1,7 @@
 use std::mem;
 use std::ops::{Index, IndexMut};
 use crate::prelude::*;
-use crate::core::{
+use crate::{
     Vector,
     Scalar,
     Point,

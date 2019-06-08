@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::core::scalar;
+use crate::scalar;
 use skia_bindings::{
     SkSize,
     SkISize,

@@ -5,7 +5,7 @@ use skia_bindings::{
     SkRRect_Type,
     SkRRect_Corner,
 };
-use crate::core::{
+use crate::{
     Rect,
     Vector,
     Matrix,

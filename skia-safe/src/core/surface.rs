@@ -1,12 +1,8 @@
 use std::ptr;
-use std::marker::PhantomData;
-use std::ops::{Deref, DerefMut};
 use crate::prelude::*;
 use crate::gpu::{Context, BackendTexture, BackendRenderTarget, SurfaceOrigin};
 use crate::{ImageInfo, SurfaceProps, Paint, ColorSpace, Budgeted, IRect, Size, IPoint, Bitmap, Image, Canvas, ISize, ColorType, SurfaceCharacterization, Pixmap, Point, DeferredDisplayList};
 use skia_bindings::{SkSurface, SkSurface_BackendHandleAccess, GrBackendTexture, SkRefCntBase, SkSurface_ContentChangeMode, GrBackendRenderTarget, C_SkSurface_makeSurface, SkSurfaceCharacterization};
-#[cfg(test)]
-use crate::core::AlphaType;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -383,7 +379,7 @@ fn create() {
 
 #[test]
 fn test_raster_direct() {
-    let image_info = ImageInfo::new((20, 20), ColorType::RGBA8888, AlphaType::Unpremul, None);
+    let image_info = ImageInfo::new((20, 20), ColorType::RGBA8888, crate::AlphaType::Unpremul, None);
     let min_row_bytes = image_info.min_row_bytes();
     let mut pixels = vec![0u8; image_info.compute_byte_size(min_row_bytes)];
     let mut surface = Surface::new_raster_direct(&image_info, pixels.as_mut_slice(), Some(min_row_bytes), None).unwrap();

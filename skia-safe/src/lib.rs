@@ -32,7 +32,7 @@ pub use crate::font_parameters;
 mod transmutation_tests {
 
     use crate::prelude::NativeTransmutableSliceAccess;
-    use crate::core::Point;
+    use crate::Point;
     use skia_bindings::SkPoint;
 
     #[test]

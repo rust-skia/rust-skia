@@ -1,7 +1,7 @@
 use crate::prelude::*;
-use skia_bindings::*;
-use crate::core::{Rect, scalar, Paint, Font};
+use crate::{Rect, scalar, Paint, Font};
 use std::ptr;
+use skia_bindings::{SkTextBlob, C_SkTextBlob_MakeFromText, SkTextEncoding};
 
 pub type TextBlob = RCHandle<SkTextBlob>;
 

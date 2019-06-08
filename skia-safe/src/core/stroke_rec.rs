@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::core::{
+use crate::{
     Path,
     Paint,
     scalar,

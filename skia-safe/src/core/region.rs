@@ -1,13 +1,13 @@
 use crate::prelude::*;
-use crate::core::{
+use crate::{
     IRect,
     Path,
     IPoint,
+    IVector,
     Contains,
     QuickReject
 };
 use skia_bindings::{C_SkRegion_destruct, C_SkRegion_Equals, SkRegion, SkRegion_Op, SkRegion_Iterator, SkRegion_Cliperator, SkRegion_Spanerator, C_SkRegion_Spanerator_destruct, C_SkRegion_Iterator_Construct, C_SkRegion_Iterator_rgn, C_SkRegion_Cliperator_destruct};
-use crate::core::IVector;
 use std::marker::PhantomData;
 use std::{mem, ptr, iter};
 

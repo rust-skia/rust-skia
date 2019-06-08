@@ -1,4 +1,4 @@
-use crate::core::{scalar, PathEffect};
+use crate::{scalar, PathEffect};
 use crate::prelude::*;
 use skia_bindings::{C_SkCornerPathEffect_Make, SkPathEffect};
 

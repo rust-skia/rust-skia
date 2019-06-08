@@ -1,4 +1,4 @@
-use crate::core::{scalar, ISize, Shader};
+use crate::{scalar, ISize, Shader};
 use crate::prelude::*;
 use skia_bindings::{
     C_SkPerlinNoiseShader_MakeFractalNoise, C_SkPerlinNoiseShader_MakeImprovedNoise,

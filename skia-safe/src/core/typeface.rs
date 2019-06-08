@@ -1,5 +1,4 @@
-use crate::core::font_parameters::VariationAxis;
-use crate::core::{Data, FontStyle, FontTableTag, GlyphId, Rect, Unichar};
+use crate::{Data, FontStyle, FontTableTag, GlyphId, Rect, Unichar, font_parameters::VariationAxis};
 use crate::prelude::*;
 use crate::{interop, FontArguments, font_arguments};
 use skia_bindings::{

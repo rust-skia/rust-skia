@@ -1,7 +1,7 @@
 use std::{slice, mem};
 use std::os::raw;
 use crate::prelude::*;
-use crate::core::{
+use crate::{
     Rect,
     StrokeRec,
     Path,

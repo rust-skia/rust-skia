@@ -10,7 +10,7 @@ use skia_bindings::{
     C_SkImageInfo_gammaCloseToSRGB,
     C_SkImageInfo_reset
 };
-use crate::core::{
+use crate::{
     ColorSpace,
     IRect,
     ISize,

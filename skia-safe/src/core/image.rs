@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::{gpu, ImageFilter};
-use crate::core::{Picture, Matrix, ColorType, ImageInfo, Data, Bitmap, IRect, YUVColorSpace, AlphaType, ColorSpace, YUVAIndex, ISize, Paint, EncodedImageFormat, IPoint, TileMode, Shader};
+use crate::{Picture, Matrix, ColorType, ImageInfo, Data, Bitmap, IRect, YUVColorSpace, AlphaType, ColorSpace, YUVAIndex, ISize, Paint, EncodedImageFormat, IPoint, TileMode, Shader};
 use skia_bindings::{
     C_SkImage_MakeFromPicture,
     C_SkImage_MakeFromTexture,

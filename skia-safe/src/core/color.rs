@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::core::u8cpu;
+use crate::u8cpu;
 use std::ops::{Index, Mul, IndexMut, BitOr, BitAnd};
 use skia_bindings::{
     SkColor,

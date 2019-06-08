@@ -11,7 +11,7 @@ use skia_bindings::{
     C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew,
     C_SkFont_setTypeface,
 };
-use crate::core::{
+use crate::{
     Path,
     Point,
     Rect,
