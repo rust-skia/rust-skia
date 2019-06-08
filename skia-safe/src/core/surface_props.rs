@@ -60,6 +60,9 @@ impl Default for SurfacePropsFlags {
 pub struct SurfaceProps(SkSurfaceProps);
 
 impl NativeTransmutable<SkSurfaceProps> for SurfaceProps {}
+pub fn test_surface_props_layout() {
+    SurfaceProps::test_layout()
+}
 
 impl Clone for SurfaceProps {
     fn clone(&self) -> Self {
@@ -77,6 +80,8 @@ impl PartialEq for SurfaceProps {
     }
 }
 
+impl Eq for SurfaceProps {}
+
 impl Default for SurfaceProps {
     fn default() -> Self {
         SurfaceProps::new(Default::default(), Default::default())
@@ -84,6 +89,8 @@ impl Default for SurfaceProps {
 }
 
 impl SurfaceProps  {
+    // TODO: do we need to wrap the construcor(s) with InitType?
+
     pub fn new(flags: SurfacePropsFlags, pixel_geometry: PixelGeometry) -> SurfaceProps {
         Self::from_native(unsafe {
             SkSurfaceProps::new(flags.bits(), pixel_geometry.into_native())
@@ -114,4 +121,3 @@ fn create() {
     assert_eq!(PixelGeometry::RGBH, props.pixel_geometry());
     assert_eq!(true, props.is_use_device_independent_fonts());
 }
-
