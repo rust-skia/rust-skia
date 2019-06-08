@@ -381,11 +381,10 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .whitelist_type("SkCubicMap")
         .whitelist_type("SkDocument")
         .whitelist_type("SkDrawLooper")
-        .whitelist_type("SkMemoryStream")
         .whitelist_type("SkDynamicMemoryWStream")
         .whitelist_type("SkFontMgr")
+        .whitelist_type("SkMemoryStream")
         .whitelist_type("SkPathMeasure")
-        .whitelist_type("SkVector4")
         .whitelist_type("SkPictureRecorder")
         .whitelist_type("SkVector4")
         // effects/
