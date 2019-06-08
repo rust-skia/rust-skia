@@ -179,6 +179,20 @@ extern "C" SkSurface* C_SkSurface_MakeRenderTarget(
             shouldCreateWithMips).release();
 }
 
+extern "C" SkSurface* C_SkSurface_MakeRenderTarget2(
+        GrContext* context,
+        const SkSurfaceCharacterization& characterization,
+        SkBudgeted budgeted) {
+    return SkSurface::MakeRenderTarget(
+            context,
+            characterization,
+            budgeted).release();
+}
+
+extern "C" SkSurface* C_SkSurface_MakeNull(int width, int height) {
+    return SkSurface::MakeNull(width, height).release();
+}
+
 extern "C" SkImage* C_SkSurface_makeImageSnapshot(SkSurface* self, const SkIRect* bounds) {
     if (bounds) {
         return self->makeImageSnapshot(*bounds).release();

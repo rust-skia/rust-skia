@@ -1,4 +1,4 @@
-use crate::core::{scalar, BlendMode, Color, Color4f, ColorSpace};
+use crate::{BlendMode, Color, Color4f, ColorSpace, scalar};
 use crate::prelude::*;
 use skia_bindings::{
     C_SkColorFilter_asColorMatrix, C_SkColorFilter_asColorMode, C_SkColorFilter_getFlags,

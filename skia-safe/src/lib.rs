@@ -15,10 +15,14 @@ extern crate bitflags;
 #[macro_use]
 extern crate lazy_static;
 
+// Prelude re-exports
+pub use crate::prelude::Borrowed;
+
 /// All Sk* types are accessible via skia_safe::
 pub use crate::core::*;
 pub use crate::core::document::document;
 pub use crate::core::contour_measure::contour_measure;
+
 pub use crate::docs::*;
 pub use crate::effects::*;
 pub use crate::pathops::*;

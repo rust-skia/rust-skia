@@ -1,9 +1,18 @@
+use crate::prelude::*;
 use crate::{ISize, ImageInfo, ColorType, ColorSpace, SurfaceProps};
 use crate::gpu::SurfaceOrigin;
+use skia_bindings::SkSurfaceCharacterization;
 
-pub enum SurfaceCharacterization {}
+pub type SurfaceCharacterization = Handle<SkSurfaceCharacterization>;
 
-// TODO: implement clone!
+// TODO: implement clone.
+
+impl NativeDrop for SkSurfaceCharacterization {
+    fn drop(&mut self) {
+        unimplemented!()
+    }
+}
+
 // TODO: implement PartialEq
 
 impl Default for SurfaceCharacterization {

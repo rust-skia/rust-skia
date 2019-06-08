@@ -1,5 +1,5 @@
 use std::{ptr, mem};
-use std::ops::{Index, IndexMut};
+use std::ops::{Index, IndexMut, Deref, DerefMut};
 use std::hash::{Hasher, Hash};
 #[cfg(test)]
 use skia_bindings::{SkSurface, SkData, SkColorSpace};
@@ -11,6 +11,7 @@ use skia_bindings::{
 
 // Re-export TryFrom / TryInto to make them available in all modules that use prelude::*.
 pub use std::convert::{TryFrom, TryInto};
+use std::marker::PhantomData;
 
 /// Swiss army knife to convert any reference into any other.
 pub unsafe fn transmute_ref<FromT, ToT>(from: &FromT) -> &ToT {
@@ -697,5 +698,33 @@ impl<E> AsPointerOrNullMut<E> for Option<Vec<E>> {
             Some(v) => v.as_mut_ptr(),
             None => ptr::null_mut()
         }
+    }
+}
+
+// Wraps a handle so that the Rust's borrow checker thinks the handle represents
+// something that is borrowed from something else.
+#[repr(C)]
+pub struct Borrowed<'a, H>(H, PhantomData<&'a ()>);
+
+impl<'a, H> Deref for Borrowed<'a, H> {
+    type Target = H;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl<'a, H> DerefMut for Borrowed<'a, H> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+pub trait BorrowedFrom : Sized {
+    fn borrowed_from<D: ?Sized>(self, _dep: &D) -> Borrowed<Self>;
+}
+
+impl<T: Sized> BorrowedFrom for T {
+    fn borrowed_from<D: ?Sized>(self, _dep: &D) -> Borrowed<Self> {
+        Borrowed(self, PhantomData)
     }
 }

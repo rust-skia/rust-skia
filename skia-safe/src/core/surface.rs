@@ -3,8 +3,8 @@ use std::marker::PhantomData;
 use std::ops::{Deref, DerefMut};
 use crate::prelude::*;
 use crate::gpu::{Context, BackendTexture, BackendRenderTarget, SurfaceOrigin};
-use crate::core::{ImageInfo, SurfaceProps, Paint, ColorSpace, Budgeted, IRect, Size, IPoint, Bitmap, Image, Canvas, ISize, ColorType };
-use skia_bindings::{SkSurface, SkSurface_BackendHandleAccess, GrBackendTexture, SkRefCntBase, SkSurface_ContentChangeMode, GrBackendRenderTarget, C_SkSurface_makeSurface};
+use crate::{ImageInfo, SurfaceProps, Paint, ColorSpace, Budgeted, IRect, Size, IPoint, Bitmap, Image, Canvas, ISize, ColorType, SurfaceCharacterization, Pixmap, Point, DeferredDisplayList};
+use skia_bindings::{SkSurface, SkSurface_BackendHandleAccess, GrBackendTexture, SkRefCntBase, SkSurface_ContentChangeMode, GrBackendRenderTarget, C_SkSurface_makeSurface, SkSurfaceCharacterization};
 #[cfg(test)]
 use crate::core::AlphaType;
 
@@ -27,29 +27,26 @@ pub enum BackendHandleAccess {
 }
 
 impl NativeTransmutable<SkSurface_BackendHandleAccess> for BackendHandleAccess {}
-#[test] fn test_surface_backend_handle_access() { BackendHandleAccess::test_layout() }
+#[test] fn test_surface_backend_handle_access_layout() { BackendHandleAccess::test_layout() }
 
-// TODO: complete the implementation.
 pub type Surface = RCHandle<SkSurface>;
 
 impl NativeRefCountedBase for SkSurface {
     type Base = SkRefCntBase;
-
     fn ref_counted_base(&self) -> &Self::Base {
         &self._base._base
     }
 }
 
 impl RCHandle<SkSurface> {
-
     pub fn new_raster_direct<'pixels>(
         image_info: &ImageInfo,
         pixels: &'pixels mut [u8],
-        row_bytes: Option<usize>,
+        row_bytes: impl Into<Option<usize>>,
         surface_props: Option<&SurfaceProps>
-    ) -> Option<OwnedSurface<'pixels>> {
+    ) -> Option<Borrowed<'pixels, Surface>> {
 
-        let row_bytes = row_bytes.unwrap_or(image_info.min_row_bytes());
+        let row_bytes = row_bytes.into().unwrap_or(image_info.min_row_bytes());
 
         if pixels.len() < image_info.compute_byte_size(row_bytes) {
             return None
@@ -61,46 +58,46 @@ impl RCHandle<SkSurface> {
                 pixels.as_mut_ptr() as _,
                 row_bytes,
                 surface_props.native_ptr_or_null())
-        }).map(|surface| surface.into())
+        }).map(move |surface| surface.borrowed_from(pixels))
     }
+
+    // TODO: MakeRasterDirectReleaseProc()?
 
     pub fn new_raster(
         image_info: &ImageInfo,
-        row_bytes: Option<usize>,
+        row_bytes: impl Into<Option<usize>>,
         surface_props: Option<&SurfaceProps>
     ) -> Option<Self> {
-        let row_bytes = row_bytes.unwrap_or_default();
         Self::from_ptr(unsafe {
             skia_bindings::C_SkSurface_MakeRaster(
                 image_info.native(),
-                row_bytes,
+                row_bytes.into().unwrap_or_default(),
                 surface_props.native_ptr_or_null())
         })
     }
 
-    pub fn new_raster_n32_premul<IS: Into<ISize>>(size: IS) -> Option<Self> {
+    pub fn new_raster_n32_premul(size: impl Into<ISize>) -> Option<Self> {
         let size = size.into();
         Self::from_ptr(unsafe {
             skia_bindings::C_SkSurface_MakeRasterN32Premul(size.width, size.height, ptr::null())
         })
     }
 
-    pub fn from_backend_texture<SC: Into<Option<usize>>>(
+    pub fn from_backend_texture(
         context: &mut Context,
         backend_texture: &BackendTexture,
         origin: SurfaceOrigin,
-        sample_count: SC,
+        sample_count: impl Into<Option<usize>>,
         color_type: ColorType,
         color_space: Option<&ColorSpace>,
         surface_props: Option<&SurfaceProps>
     ) -> Option<Self> {
-        let sample_count = sample_count.into().unwrap_or(0);
         Self::from_ptr(unsafe {
             skia_bindings::C_SkSurface_MakeFromBackendTexture(
                 context.native_mut(),
                 backend_texture.native(),
                 origin.into_native(),
-                sample_count.try_into().unwrap(),
+                sample_count.into().unwrap_or(0).try_into().unwrap(),
                 color_type.into_native(),
                 color_space.shared_ptr(),
                 surface_props.native_ptr_or_null())
@@ -127,48 +124,67 @@ impl RCHandle<SkSurface> {
         })
     }
 
-    pub fn from_backend_texture_as_render_target<SC: Into<Option<usize>>>(
+    pub fn from_backend_texture_as_render_target(
         context: &mut Context,
         backend_texture: &BackendTexture,
         origin: SurfaceOrigin,
-        sample_count: SC,
+        sample_count: impl Into<Option<usize>>,
         color_type: ColorType,
         color_space: Option<&ColorSpace>,
         surface_props: Option<&SurfaceProps>
     ) -> Option<Self> {
-        let sample_count = sample_count.into().unwrap_or(0);
         Self::from_ptr(unsafe {
             skia_bindings::C_SkSurface_MakeFromBackendTextureAsRenderTarget(
                 context.native_mut(),
                 backend_texture.native(),
                 origin.into_native(),
-                sample_count.try_into().unwrap(),
+                sample_count.into().unwrap_or(0).try_into().unwrap(),
                 color_type.into_native(),
                 color_space.shared_ptr(),
                 surface_props.native_ptr_or_null())
         })
     }
 
-    pub fn new_render_target<SC: Into<Option<usize>>>(
+    pub fn new_render_target(
         context: &mut Context,
         budgeted: Budgeted,
         image_info: &ImageInfo,
-        sample_count: SC,
+        sample_count: impl Into<Option<usize>>,
+        // not optional, because with vulkan, there is no clear default anymore.
         surface_origin: SurfaceOrigin,
         surface_props: Option<&SurfaceProps>,
-        should_create_with_mips: bool
+        should_create_with_mips: impl Into<Option<bool>>
     ) -> Option<Self> {
-        let sample_count = sample_count.into().unwrap_or(0);
         Self::from_ptr(unsafe {
             skia_bindings::C_SkSurface_MakeRenderTarget(
                 context.native_mut(),
                 budgeted.into_native(),
                 image_info.native(),
-                sample_count.try_into().unwrap(),
+                sample_count.into().unwrap_or(0).try_into().unwrap(),
                 surface_origin.into_native(),
                 surface_props.native_ptr_or_null(),
-                should_create_with_mips
+                should_create_with_mips.into().unwrap_or_default()
             )
+        })
+    }
+
+    pub fn new_render_target_with_characterization(
+        context: &mut Context,
+        characterization: &SurfaceCharacterization,
+        budgeted: Budgeted
+    ) -> Option<Self> {
+        Self::from_ptr(unsafe {
+            skia_bindings::C_SkSurface_MakeRenderTarget2(
+                context.native_mut(),
+                characterization.native(),
+                budgeted.into_native())
+        })
+    }
+
+    pub fn new_null(size: impl Into<ISize>) -> Option<Self> {
+        let size = size.into();
+        Self::from_ptr(unsafe {
+            skia_bindings::C_SkSurface_MakeNull(size.width, size.height)
         })
     }
 
@@ -226,8 +242,13 @@ impl RCHandle<SkSurface> {
         Canvas::borrow_from_native(canvas_ref)
     }
 
-    // TODO: why is self mutable here?
+    #[deprecated(note = "use Surface::new_surface")]
     pub fn new_compatible(&mut self, info: &ImageInfo) -> Option<Surface> {
+        self.new_surface(info)
+    }
+
+    // TODO: why is self mutable here?
+    pub fn new_surface(&mut self, info: &ImageInfo) -> Option<Surface> {
         Surface::from_ptr(unsafe {
             C_SkSurface_makeSurface(self.native_mut(), info.native())
         })
@@ -240,15 +261,21 @@ impl RCHandle<SkSurface> {
         }).unwrap()
     }
 
-    pub fn image_snapshot_with_bounds(&mut self, bounds: IRect) -> Option<Image> {
+    // TODO: combine this function with image_snapshot and make bounds optional()?
+    pub fn image_snapshot_with_bounds(&mut self, bounds: impl AsRef<IRect>) -> Option<Image> {
         Image::from_ptr(unsafe {
             skia_bindings::C_SkSurface_makeImageSnapshot(
-                self.native_mut(), bounds.native())
+                self.native_mut(), bounds.as_ref().native())
         })
     }
 
     // TODO: why is self mutable here?
-    pub fn draw_to_canvas<S: Into<Size>>(&mut self, mut canvas: impl AsMut<Canvas>, size: S, paint: Option<&Paint>) {
+    #[deprecated(note = "use Surface::draw()")]
+    pub fn draw_to_canvas(&mut self, canvas: impl AsMut<Canvas>, size: impl Into<Size>, paint: Option<&Paint>) {
+        self.draw(canvas, size, paint)
+    }
+
+    pub fn draw(&mut self, mut canvas: impl AsMut<Canvas>, size: impl Into<Size>, paint: Option<&Paint>) {
         let size = size.into();
         unsafe {
             self.native_mut().draw(
@@ -259,13 +286,22 @@ impl RCHandle<SkSurface> {
         }
     }
 
-    // TODO: support Pixmap peekPixels
-    // TODO: support Pixmap readPixels
+    pub fn peek_pixels(&mut self) -> Option<Borrowed<Pixmap>> {
+        let mut pm = Pixmap::default();
+        unsafe { self.native_mut().peekPixels(pm.native_mut())}
+            .if_true_some(pm.borrowed_from(self))
+    }
 
-    pub fn read_pixels<IP: Into<IPoint>>(
+    // TODO: why is self mut?
+    pub fn read_pixels_to_pixmap(&mut self, dst: &Pixmap, src: impl Into<IPoint>) -> bool {
+        let src = src.into();
+        unsafe { self.native_mut().readPixels(dst.native(), src.x, src.y) }
+    }
+
+    pub fn read_pixels(
         &mut self,
         dst_info: &ImageInfo,
-        dst_pixels: &mut [u8], dst_row_bytes: usize, src: IP) -> bool {
+        dst_pixels: &mut [u8], dst_row_bytes: usize, src: impl Into<IPoint>) -> bool {
         if dst_row_bytes < dst_info.min_row_bytes() {
             return false;
         };
@@ -283,12 +319,12 @@ impl RCHandle<SkSurface> {
         }
     }
 
-    // TODO: why is self mutable here?
-    // TODO: why is Bitmap non-mutable here.
-    pub fn read_pixels_to_bitmap<IP: Into<IPoint>>(
+    // TODO: why is self mut?
+    // TODO: why is Bitmap non-mutable.
+    pub fn read_pixels_to_bitmap(
         &mut self,
         bitmap: &Bitmap,
-        src: IP
+        src: impl Into<IPoint>
     ) -> bool {
         let src = src.into();
         unsafe {
@@ -296,7 +332,14 @@ impl RCHandle<SkSurface> {
         }
     }
 
-    pub fn write_pixels_from_bitmap<IP: Into<IPoint>>(&mut self, bitmap: &Bitmap, dst: IP) {
+    pub fn write_pixels_from_pixmap(&mut self, src: &Pixmap, dst: impl Into<IPoint>) {
+        let dst = dst.into();
+        unsafe {
+            self.native_mut().writePixels(src.native(), dst.x, dst.y)
+        }
+    }
+
+    pub fn write_pixels_from_bitmap(&mut self, bitmap: &Bitmap, dst: impl Into<IPoint>) {
         let dst = dst.into();
         unsafe {
             self.native_mut().writePixels1(bitmap.native(), dst.x, dst.y)
@@ -313,37 +356,20 @@ impl RCHandle<SkSurface> {
         unsafe { self.native_mut().flush(); }
     }
 
-    // TODO: flushAndSignalSemaphores()
+    // TODO: flush(access, FlushInfo)
+    // TODO: flush(access, FlshFlags, semaphores)
     // TODO: wait()
-    // TODO: characterize()
-    // TODO: draw()
 
-}
-
-// A lifetime bound surface.
-pub struct OwnedSurface<'a> {
-    surface: Surface,
-    phantom: PhantomData<& 'a()>
-}
-
-impl<'a> Deref for OwnedSurface<'a> {
-    type Target = Surface;
-    fn deref(&self) -> &Self::Target {
-        &self.surface
+    pub fn characterize(&self) -> Option<SurfaceCharacterization> {
+        let mut sc = SurfaceCharacterization::default();
+        unsafe {
+            self.native().characterize(sc.native_mut())
+        }.if_true_some(sc)
     }
-}
 
-impl<'a> DerefMut for OwnedSurface<'a> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.surface
-    }
-}
-
-impl<'a> From<Surface> for OwnedSurface<'a> {
-    fn from(surface: RCHandle<SkSurface>) -> Self {
-        OwnedSurface {
-            surface,
-            phantom: PhantomData
+    pub fn draw_display_list(&mut self, deferred_display_list: &mut DeferredDisplayList) -> bool {
+        unsafe {
+            self.native_mut().draw1(deferred_display_list.native_mut())
         }
     }
 }
