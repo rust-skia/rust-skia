@@ -77,6 +77,6 @@ fn draw_hello_skia(canvas: &mut Canvas) {
 
     let paint2 = Paint::default();
 
-    let text = TextBlob::from_str("Hello, Skia!", &Font::from_typeface(&Typeface::default(), 18.0));
+    let text = TextBlob::from_str("Hello, Skia!", &Font::from_typeface(&Typeface::default(), 18.0)).unwrap();
     canvas.draw_text_blob(&text, (50, 25), &paint2);
 }

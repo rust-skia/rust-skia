@@ -79,11 +79,11 @@ fn draw_three_paints(canvas: &mut Canvas) {
     let blob1 = TextBlob::from_str(
         "Skia!",
         &Font::from_typeface_with_params(&Typeface::default(), 64.0, 1.0, 0.0),
-    );
+    ).unwrap();
     let blob2 = TextBlob::from_str(
         "Skia!",
         &Font::from_typeface_with_params(&Typeface::default(), 64.0, 1.5, 0.0),
-    );
+    ).unwrap();
 
     canvas.clear(Color::WHITE);
     canvas.draw_text_blob(&blob1, (20.0, 64.0), paint1);
@@ -107,7 +107,7 @@ fn draw_fill_and_stroke(canvas: &mut Canvas) {
     let blob = TextBlob::from_str(
         "SKIA",
         &Font::from_typeface(&Typeface::default(), 80.0),
-    );
+    ).unwrap();
 
     fill_paint.set_color(Color::from_argb(0xFF, 0xFF, 0x00, 0x00));
     canvas.draw_text_blob(&blob, (20, 120), fill_paint);
@@ -137,7 +137,7 @@ fn draw_gradient(canvas: &mut Canvas) {
 
 fn draw_transfer_modes(canvas: &mut Canvas) {
     fn draw_str(c: &mut Canvas, text: &str, x: scalar, y: scalar, font: &Font, paint: &Paint) {
-        c.draw_text_blob(&TextBlob::from_str(text, font), (x, y), paint);
+        c.draw_text_blob(&TextBlob::from_str(text, font).unwrap(), (x, y), paint);
     }
 
     let modes = [
@@ -346,7 +346,7 @@ fn draw_mask_filter(canvas: &mut Canvas) {
     let blob = &TextBlob::from_str(
         "Skia",
         &Font::from_typeface(&Typeface::default(), 120.0),
-    );
+    ).unwrap();
     canvas.draw_text_blob(blob, (0, 160), paint);
 }
 
