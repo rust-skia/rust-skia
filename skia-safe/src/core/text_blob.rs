@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::{Rect, scalar, Paint, Font};
+use crate::{Rect, scalar, Paint, Font, TextEncoding};
 use std::ptr;
 use skia_bindings::{SkTextBlob, C_SkTextBlob_MakeFromText, SkTextEncoding};
 
@@ -20,7 +20,6 @@ impl NativeRefCounted for SkTextBlob {
 }
 
 impl RCHandle<SkTextBlob> {
-
     pub fn bounds(&self) -> &Rect {
         unsafe {
             Rect::from_native_ref(&*self.native().bounds())
@@ -33,8 +32,13 @@ impl RCHandle<SkTextBlob> {
         }
     }
 
-    // TODO: consider providing a inplace variant.
+    #[deprecated(note = "use get_intercepts()")]
     pub fn interceps(&self, bounds: &[scalar; 2], paint: Option<&Paint>) -> Vec<scalar> {
+        self.get_interceps(bounds, paint)
+    }
+
+    // TODO: consider to provide an inplace variant.
+    pub fn get_interceps(&self, bounds: &[scalar; 2], paint: Option<&Paint>) -> Vec<scalar> {
         unsafe {
             let count = self.native().getIntercepts(bounds.as_ptr(), ptr::null_mut(), paint.native_ptr_or_null());
             let mut intervals = vec![Default::default(); count.try_into().unwrap()];
@@ -44,13 +48,15 @@ impl RCHandle<SkTextBlob> {
         }
     }
 
-    pub fn from_str(str: &str, font: &Font) -> TextBlob {
-        let bytes = str.as_bytes();
-        TextBlob::from_ptr(unsafe {
-            C_SkTextBlob_MakeFromText(bytes.as_ptr() as _, bytes.len(), font.native(), SkTextEncoding::kUTF8)
-        }).unwrap()
+    pub fn from_str(str: &str, font: &Font) -> Option<TextBlob> {
+        Self::from_text(str.as_bytes(), TextEncoding::UTF8, font)
     }
 
-    // TODO: from_text (MakeFromText with support for TextEncoding).
+    pub fn from_text(text: &[u8], encoding: TextEncoding, font: &Font) -> Option<TextBlob> {
+        TextBlob::from_ptr(unsafe {
+            C_SkTextBlob_MakeFromText(text.as_ptr() as _, text.len(), font.native(), encoding.into_native())
+        })
+    }
+
     // TODO: serialize, Deserialize
 }
