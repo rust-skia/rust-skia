@@ -302,6 +302,9 @@ pub use typeface::SerializeBehavior as TypefaceSerializeBehavior;
 mod types;
 pub use types::*;
 
+mod un_pre_multiply;
+pub use un_pre_multiply::*;
+
 mod vertices;
 pub use vertices::*;
 
