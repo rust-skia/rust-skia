@@ -291,6 +291,9 @@ pub use self::tile_mode::*;
 mod time;
 pub use time::*;
 
+mod trace_memory_dump;
+pub use trace_memory_dump::*;
+
 mod typeface;
 pub use typeface::*;
 
