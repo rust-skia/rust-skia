@@ -18,7 +18,7 @@ pub mod variation_position {
     use crate::FourByteTag;
     use skia_bindings::SkFontArguments_VariationPosition_Coordinate;
 
-    #[derive(Copy, Clone, PartialEq, Debug)]
+    #[derive(Copy, Clone, PartialEq, Default, Debug)]
     #[repr(C)]
     pub struct Coordinate {
         pub axis: FourByteTag,

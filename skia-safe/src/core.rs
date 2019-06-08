@@ -1,5 +1,3 @@
-pub type FontTableTag = skia_bindings::SkFontTableTag;
-
 mod annotation;
 pub use annotation::*;
 
@@ -294,8 +292,12 @@ pub use time::*;
 mod trace_memory_dump;
 pub use trace_memory_dump::*;
 
-mod typeface;
-pub use typeface::*;
+pub mod typeface;
+pub use typeface::Typeface;
+#[deprecated(note = "use typeface::LocalizedString")]
+pub use typeface::LocalizedString as TypefaceLocalizedString;
+#[deprecated(note = "use typeface::SerializeBehavior")]
+pub use typeface::SerializeBehavior as TypefaceSerializeBehavior;
 
 mod types;
 pub use types::*;

@@ -1,4 +1,4 @@
-use crate::{Data, FontStyle, FontTableTag, GlyphId, Rect, Unichar, font_parameters::VariationAxis};
+use crate::{Data, FontStyle, GlyphId, Rect, Unichar, font_parameters::VariationAxis};
 use crate::prelude::*;
 use crate::{interop, FontArguments, font_arguments};
 use skia_bindings::{
@@ -7,66 +7,30 @@ use skia_bindings::{
     C_SkTypeface_isBold, C_SkTypeface_isItalic, C_SkTypeface_makeClone, C_SkTypeface_serialize,
     SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings, SkTypeface_SerializeBehavior, C_SkTypeface_MakeDeserialize
 };
-use std::ffi;
+use std::{ffi, ptr};
 use crate::interop::{MemoryStream, NativeStreamBase};
+
+pub type FontId = skia_bindings::SkFontID;
+pub type FontTableTag = skia_bindings::SkFontTableTag;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-pub enum TypefaceSerializeBehavior {
+pub enum SerializeBehavior {
     DoIncludeData = SkTypeface_SerializeBehavior::kDoIncludeData as _,
     DontIncludeData = SkTypeface_SerializeBehavior::kDontIncludeData as _,
     IncludeDataIfLocal = SkTypeface_SerializeBehavior::kIncludeDataIfLocal as _,
 }
 
-impl NativeTransmutable<SkTypeface_SerializeBehavior> for TypefaceSerializeBehavior {}
+impl NativeTransmutable<SkTypeface_SerializeBehavior> for SerializeBehavior {}
 #[test]
 fn test_typeface_serialize_behavior_layout() {
-    TypefaceSerializeBehavior::test_layout()
+    SerializeBehavior::test_layout()
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
-pub struct TypefaceLocalizedString {
+pub struct LocalizedString {
     pub string: String,
     pub language: String,
-}
-
-#[repr(transparent)]
-struct LocalizedStringsIter(*mut SkTypeface_LocalizedStrings);
-
-impl NativeAccess<SkTypeface_LocalizedStrings> for LocalizedStringsIter {
-    fn native(&self) -> &SkTypeface_LocalizedStrings {
-        unsafe { &*self.0 }
-    }
-
-    fn native_mut(&mut self) -> &mut SkTypeface_LocalizedStrings {
-        unsafe { &mut *self.0 }
-    }
-}
-
-impl Drop for LocalizedStringsIter {
-    fn drop(&mut self) {
-        unsafe { C_SkTypeface_LocalizedStrings_unref(self.0) }
-    }
-}
-
-impl Iterator for LocalizedStringsIter {
-    type Item = TypefaceLocalizedString;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let mut string = interop::String::default();
-        let mut language = interop::String::default();
-        unsafe {
-            C_SkTypeface_LocalizedStrings_next(
-                self.native_mut(),
-                string.native_mut(),
-                language.native_mut(),
-            )
-        }
-        .if_true_some(TypefaceLocalizedString {
-            string: string.as_str().into(),
-            language: language.as_str().into(),
-        })
-    }
 }
 
 pub type Typeface = RCHandle<SkTypeface>;
@@ -106,36 +70,44 @@ impl RCHandle<SkTypeface> {
         unsafe { self.native().isFixedPitch() }
     }
 
-    pub fn variation_design_position(
-        &self,
-        coordinates: &mut [font_arguments::variation_position::Coordinate],
-    ) -> Option<usize> {
-        let r = unsafe {
-            self.native().getVariationDesignPosition(
-                coordinates.native_mut().as_mut_ptr(),
-                coordinates.len().try_into().unwrap(),
-            )
-        };
-        if r != -1 {
-            Some(r.try_into().unwrap())
-        } else {
-            None
+    pub fn variation_design_position(&self) -> Option<Vec<font_arguments::variation_position::Coordinate>> {
+        unsafe {
+            let r =
+                self.native().getVariationDesignPosition(
+                    ptr::null_mut(), 0,
+                );
+            if r != -1 {
+                let mut v = vec![font_arguments::variation_position::Coordinate::default(); r as _];
+                let elements = self.native().getVariationDesignPosition(v.native_mut().as_mut_ptr(), r);
+                assert_eq!(elements, r);
+                Some(v)
+            } else {
+                None
+            }
         }
     }
 
-    pub fn variation_design_parameters(&self, parameters: &mut [VariationAxis]) -> Option<usize> {
-        let r = unsafe {
-            self.native().getVariationDesignParameters(
-                parameters.native_mut().as_mut_ptr(),
-                parameters.len().try_into().unwrap(),
-            )
-        };
-        if r != -1 {
-            Some(r.try_into().unwrap())
-        } else {
-            None
+    pub fn variation_design_parameters(&self) -> Option<Vec<VariationAxis>> {
+        unsafe {
+            let r = self.native().getVariationDesignParameters(ptr::null_mut(), 0);
+            if r != -1 {
+                let mut v = vec![VariationAxis::default(); r as _];
+                let elements = self.native().getVariationDesignParameters(
+                    v.native_mut().as_mut_ptr(), r
+                );
+                assert_eq!(elements, r);
+                Some(v)
+            } else {
+                None
+            }
         }
     }
+
+    pub fn unique_id(self) -> FontId {
+        unsafe { self.native().uniqueID() }
+    }
+
+    // TODO: wrap SkTypeface::UniqueID()?
 
     // Decided not to support PartialEq instead of this function,
     // because Skia does not support the operator ==.
@@ -144,22 +116,20 @@ impl RCHandle<SkTypeface> {
     }
 
     pub fn from_name(familiy_name: &str, font_style: FontStyle) -> Option<Typeface> {
-        let familiy_name = ffi::CString::new(familiy_name);
-        if let Result::Ok(familiy_name) = familiy_name {
-            Typeface::from_ptr(unsafe {
-                C_SkTypeface_MakeFromName(familiy_name.as_ptr(), *font_style.native())
-            })
-        } else {
-            None
-        }
+        let familiy_name = ffi::CString::new(familiy_name).ok()?;
+        Typeface::from_ptr(unsafe {
+            C_SkTypeface_MakeFromName(familiy_name.as_ptr(), *font_style.native())
+        })
     }
 
     // from_file is unsupported, because it is unclear what the
     // encoding of the path name is. from_data can be used instead.
 
-    pub fn from_data(data: &Data, index: usize) {
+    // TODO: MakeFromStream()?
+
+    pub fn from_data(data: &Data, index: impl Into<Option<usize>>) {
         Typeface::from_ptr(unsafe {
-            C_SkTypeface_MakeFromData(data.shared_native(), index.try_into().unwrap())
+            C_SkTypeface_MakeFromData(data.shared_native(), index.into().unwrap_or_default().try_into().unwrap())
         });
     }
 
@@ -167,11 +137,15 @@ impl RCHandle<SkTypeface> {
         Typeface::from_ptr(unsafe { C_SkTypeface_makeClone(self.native(), arguments.native()) })
     }
 
+    // TODO: serialize(Write)?
+
     // TODO: return Data as impl Deref<[u8]> / Borrow<[u8]> here?
-    pub fn serialize(&self, behavior: TypefaceSerializeBehavior) -> Data {
+    pub fn serialize(&self, behavior: SerializeBehavior) -> Data {
         Data::from_ptr(unsafe { C_SkTypeface_serialize(self.native(), behavior.into_native()) })
             .unwrap()
     }
+
+    // TODO: Deserialize(Read?)
 
     pub fn deserialize(data: &[u8]) -> Option<Typeface> {
         let mut stream = MemoryStream::from_bytes(data);
@@ -204,7 +178,12 @@ impl RCHandle<SkTypeface> {
         (unsafe { self.native().getTableTags(v.as_mut_ptr()) } != 0).if_true_some(v)
     }
 
+    #[deprecated(note = "use get_table_size()")]
     pub fn table_size(&self, tag: FontTableTag) -> Option<usize> {
+        self.get_table_size(tag)
+    }
+
+    pub fn get_table_size(&self, tag: FontTableTag) -> Option<usize> {
         let size = unsafe { self.native().getTableSize(tag) };
         if size != 0 {
             Some(size)
@@ -213,7 +192,12 @@ impl RCHandle<SkTypeface> {
         }
     }
 
+    #[deprecated(note = "use get_table_data()")]
     pub fn table_data(&self, tag: FontTableTag, data: &mut [u8]) -> usize {
+        self.get_table_data(tag, data)
+    }
+
+    pub fn get_table_data(&self, tag: FontTableTag, data: &mut [u8]) -> usize {
         unsafe {
             self.native()
                 .getTableData(tag, 0, data.len(), data.as_mut_ptr() as _)
@@ -229,8 +213,13 @@ impl RCHandle<SkTypeface> {
         }
     }
 
-    // note: adjustments slice length must be equal to glyph's len - 1.
+    #[deprecated(note = "use get_kerning_pair_adjustments()")]
     pub fn kerning_pair_adjustments(&self, glyphs: &[GlyphId], adjustments: &mut [i32]) -> bool {
+        self.get_kerning_pair_adjustments(glyphs, adjustments)
+    }
+
+    // note: adjustments slice length must be equal to glyph's len - 1.
+    pub fn get_kerning_pair_adjustments(&self, glyphs: &[GlyphId], adjustments: &mut [i32]) -> bool {
         (adjustments.len() + 1 == glyphs.len())
             && unsafe {
                 self.native().getKerningPairAdjustments(
@@ -241,7 +230,7 @@ impl RCHandle<SkTypeface> {
             }
     }
 
-    pub fn new_family_name_iterator(&self) -> impl Iterator<Item = TypefaceLocalizedString> {
+    pub fn new_family_name_iterator(&self) -> impl Iterator<Item = LocalizedString> {
         LocalizedStringsIter(unsafe { self.native().createFamilyNameIterator() })
     }
 
@@ -253,15 +242,58 @@ impl RCHandle<SkTypeface> {
         name.as_str().into()
     }
 
+    // TODO: openStream()
+    // TODO: makeFontData()
+    // TODO: createScalerContext()
+
     pub fn bounds(&self) -> Rect {
         Rect::from_native(unsafe { self.native().getBounds() })
+    }
+}
+
+#[repr(transparent)]
+struct LocalizedStringsIter(*mut SkTypeface_LocalizedStrings);
+
+impl NativeAccess<SkTypeface_LocalizedStrings> for LocalizedStringsIter {
+    fn native(&self) -> &SkTypeface_LocalizedStrings {
+        unsafe { &*self.0 }
+    }
+
+    fn native_mut(&mut self) -> &mut SkTypeface_LocalizedStrings {
+        unsafe { &mut *self.0 }
+    }
+}
+
+impl Drop for LocalizedStringsIter {
+    fn drop(&mut self) {
+        unsafe { C_SkTypeface_LocalizedStrings_unref(self.0) }
+    }
+}
+
+impl Iterator for LocalizedStringsIter {
+    type Item = LocalizedString;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let mut string = interop::String::default();
+        let mut language = interop::String::default();
+        unsafe {
+            C_SkTypeface_LocalizedStrings_next(
+                self.native_mut(),
+                string.native_mut(),
+                language.native_mut(),
+            )
+        }
+            .if_true_some(LocalizedString {
+                string: string.as_str().into(),
+                language: language.as_str().into(),
+            })
     }
 }
 
 #[test]
 fn serialize_and_deserialize_default_typeface() {
     let tf = Typeface::default();
-    let serialized = tf.serialize(TypefaceSerializeBehavior::DoIncludeData);
+    let serialized = tf.serialize(SerializeBehavior::DoIncludeData);
     let deserialized = Typeface::deserialize(&serialized).unwrap();
     // why aren't they not equal?
     // assert!(Typeface::equal(&tf, &deserialized));
