@@ -387,6 +387,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .whitelist_type("SkPathMeasure")
         .whitelist_type("SkPictureRecorder")
         .whitelist_type("SkVector4")
+        .whitelist_type("SkYUVASizeInfo")
         // effects/
         .whitelist_type("SkPath1DPathEffect")
         .whitelist_type("SkLine2DPathEffect")

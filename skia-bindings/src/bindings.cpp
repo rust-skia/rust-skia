@@ -1,6 +1,6 @@
+// codec/
+#include "SkEncodedOrigin.h"
 // core/
-#include "SkTypes.h"
-
 #include "SkCanvas.h"
 #include "SkColor.h"
 #include "SkColorFilter.h"
@@ -33,7 +33,9 @@
 #include "SkSwizzle.h"
 #include "SkTextBlob.h"
 #include "SkTypeface.h"
+#include "SkTypes.h"
 #include "SkYUVAIndex.h"
+#include "SkYUVASizeInfo.h"
 // docs/
 #include "SkPDFDocument.h"
 // effects/
@@ -94,6 +96,14 @@
 template<typename T>
 inline sk_sp<T> spFromConst(const T* pt) {
     return sk_sp<T>(const_cast<T*>(pt));
+}
+
+//
+// codec/SkEncodedOrigin.h
+//
+
+extern "C" void C_SkEncodedOriginToMatrix(SkEncodedOrigin origin, int w, int h, SkMatrix* matrix) {
+    *matrix = SkEncodedOriginToMatrix(origin, w, h);
 }
 
 //
@@ -982,6 +992,18 @@ extern "C" bool C_SkTypeface_LocalizedStrings_next(SkTypeface::LocalizedStrings*
         return true;
     }
     return false;
+}
+
+//
+// core/SkYUVASizeInfo.h
+//
+
+extern "C" bool C_SkYUVASizeInfo_equals(const SkYUVASizeInfo* l, const SkYUVASizeInfo* r) {
+    return *l == *r;
+}
+
+extern "C" size_t C_SkYUVASizeInfo_computeTotalBytes(const SkYUVASizeInfo* self) {
+    return self->computeTotalBytes();
 }
 
 //

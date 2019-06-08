@@ -323,6 +323,9 @@ pub use vertices::Builder as VerticesBuilder;
 mod yuva_index;
 pub use yuva_index::*;
 
+mod yuva_size_info;
+pub use yuva_size_info::*;
+
 //
 // Skia specific traits used for overloading.
 //

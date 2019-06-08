@@ -1,4 +1,5 @@
 mod prelude;
+mod codec;
 mod core;
 mod docs;
 mod effects;
@@ -19,6 +20,7 @@ extern crate lazy_static;
 pub use crate::prelude::Borrowed;
 
 /// All Sk* types are accessible via skia_safe::
+pub use crate::codec::*;
 pub use crate::core::*;
 pub use crate::core::document::document;
 pub use crate::core::contour_measure::contour_measure;
