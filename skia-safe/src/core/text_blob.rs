@@ -1,7 +1,8 @@
 use crate::prelude::*;
-use crate::{Rect, scalar, Paint, Font, TextEncoding};
-use std::ptr;
-use skia_bindings::{SkTextBlob, C_SkTextBlob_MakeFromText, SkTextEncoding};
+use crate::{Rect, scalar, Paint, Font, TextEncoding, Point, GlyphId};
+use std::{ptr, slice};
+use skia_bindings::{SkTextBlob, C_SkTextBlob_MakeFromText, SkTextBlobBuilder, C_SkTextBlobBuilder_make, C_SkTextBlobBuilder_destruct};
+use std::convert::TryInto;
 
 pub type TextBlob = RCHandle<SkTextBlob>;
 
@@ -59,4 +60,73 @@ impl RCHandle<SkTextBlob> {
     }
 
     // TODO: serialize, Deserialize
+}
+
+pub type TextBlobBuilder = Handle<SkTextBlobBuilder>;
+
+impl NativeDrop for SkTextBlobBuilder {
+    fn drop(&mut self) {
+        unsafe {
+            C_SkTextBlobBuilder_destruct(self)
+        }
+    }
+}
+
+impl Handle<SkTextBlobBuilder> {
+    pub fn new() -> Self {
+        Self::from_native(unsafe {
+            SkTextBlobBuilder::new()
+        })
+    }
+
+    pub fn make(&mut self) -> Option<TextBlob> {
+        TextBlob::from_ptr(unsafe {
+            C_SkTextBlobBuilder_make(self.native_mut())
+        })
+    }
+
+    pub fn alloc_run(&mut self, font: &Font, count: usize, offset: impl Into<Point>, bounds: Option<&Rect>) -> &mut [GlyphId] {
+        let offset = offset.into();
+        unsafe {
+            let buffer = self.native_mut().allocRun(
+                font.native(),
+                count.try_into().unwrap(),
+                offset.x, offset.y,
+                bounds.native_ptr_or_null());
+            slice::from_raw_parts_mut((*buffer).glyphs, count)
+        }
+    }
+
+    pub fn alloc_run_pos_h(&mut self, font: Font, count: usize, y: scalar, bounds: Option<&Rect>) -> (&mut [GlyphId], &mut [scalar]) {
+        unsafe {
+            let buffer = self.native_mut().allocRunPosH(
+                font.native(),
+                count.try_into().unwrap(),
+                y,
+                bounds.native_ptr_or_null());
+            (
+                slice::from_raw_parts_mut((*buffer).glyphs, count),
+                slice::from_raw_parts_mut((*buffer).pos, count)
+            )
+        }
+    }
+
+    pub fn alloc_run_pos(&mut self, font: Font, count: usize, bounds: Option<&Rect>) -> (&mut [GlyphId], &mut [Point]) {
+        unsafe {
+            let buffer = self.native_mut().allocRunPos(
+                font.native(),
+                count.try_into().unwrap(),
+                bounds.native_ptr_or_null());
+            (
+                slice::from_raw_parts_mut((*buffer).glyphs, count),
+                slice::from_raw_parts_mut((*buffer).pos as *mut Point, count)
+            )
+        }
+    }
+}
+
+#[test]
+fn test_point_size_equals_size_of_two_scalars_used_in_alloc_run_pos() {
+    use std::mem;
+    assert_eq!(mem::size_of::<Point>(), mem::size_of::<[scalar; 2]>())
 }

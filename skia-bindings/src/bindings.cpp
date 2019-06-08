@@ -920,6 +920,14 @@ extern "C" SkTextBlob* C_SkTextBlob_MakeFromText(const void* text, size_t byteLe
     return SkTextBlob::MakeFromText(text, byteLength, *font, encoding).release();
 }
 
+extern "C" void C_SkTextBlobBuilder_destruct(SkTextBlobBuilder* self) {
+    self->~SkTextBlobBuilder();
+}
+
+extern "C" SkTextBlob* C_SkTextBlobBuilder_make(SkTextBlobBuilder* self) {
+    return self->make().release();
+}
+
 //
 // core/SkTypeface.h
 //

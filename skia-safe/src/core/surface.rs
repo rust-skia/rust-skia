@@ -1,8 +1,8 @@
 use std::ptr;
 use crate::prelude::*;
 use crate::gpu::{Context, BackendTexture, BackendRenderTarget, SurfaceOrigin};
-use crate::{ImageInfo, SurfaceProps, Paint, ColorSpace, Budgeted, IRect, Size, IPoint, Bitmap, Image, Canvas, ISize, ColorType, SurfaceCharacterization, Pixmap, Point, DeferredDisplayList};
-use skia_bindings::{SkSurface, SkSurface_BackendHandleAccess, GrBackendTexture, SkRefCntBase, SkSurface_ContentChangeMode, GrBackendRenderTarget, C_SkSurface_makeSurface, SkSurfaceCharacterization};
+use crate::{ImageInfo, SurfaceProps, Paint, ColorSpace, Budgeted, IRect, Size, IPoint, Bitmap, Image, Canvas, ISize, ColorType, SurfaceCharacterization, Pixmap, DeferredDisplayList};
+use skia_bindings::{SkSurface, SkSurface_BackendHandleAccess, GrBackendTexture, SkRefCntBase, SkSurface_ContentChangeMode, GrBackendRenderTarget, C_SkSurface_makeSurface};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
