@@ -48,13 +48,13 @@ impl DerefMut for Bone {
 impl NativeTransmutable<SkVertices_Bone> for Bone {}
 
 impl Bone {
-    pub fn map_point(&self, point: Point) -> Point {
+    pub fn map_point(&self, point: impl Into<Point>) -> Point {
         Point::from_native(unsafe {
-            self.native().mapPoint(&point.into_native())
+            self.native().mapPoint(&point.into().into_native())
         })
     }
 
-    pub fn map_rect<R: AsRef<Rect>>(&self, rect: R) -> Rect {
+    pub fn map_rect(&self, rect: impl AsRef<Rect>) -> Rect {
         Rect::from_native(unsafe {
             // does not link.
             // self.native().mapRect(rect.as_ref().native())
@@ -104,7 +104,7 @@ impl RCHandle<SkVertices> {
         colors: &[Color],
         bone_indices_and_weights: Option<(&BoneIndices, &BoneWeights)>,
         indices: Option<&[u16]>,
-        is_volatile: bool) -> Vertices {
+        is_volatile: impl Into<Option<bool>>) -> Vertices {
 
         let vertex_count = positions.len();
         assert_eq!(vertex_count, texs.len());
@@ -130,7 +130,7 @@ impl RCHandle<SkVertices> {
                 bone_weights_ptr as _,
                 indices_count.try_into().unwrap(),
                 indices_ptr,
-                is_volatile
+                is_volatile.into().unwrap_or(true)
             )}).unwrap()
     }
 
@@ -180,7 +180,6 @@ impl RCHandle<SkVertices> {
         }
     }
 
-    // TODO: use wrapper type as soon we can transmute colors
     pub fn colors(&self) -> Option<&[Color]> {
         unsafe {
             let ptr : *const SkColor = self.native().colors().to_option()?;
@@ -245,10 +244,8 @@ impl RCHandle<SkVertices> {
     }
 }
 
-
-
 bitflags! {
-    pub struct VerticesBuilderFlags: u32 {
+    pub struct BuilderFlags: u32 {
         const HAS_TEX_COORDS = SkVertices_BuilderFlags_kHasTexCoords_BuilderFlag as u32;
         const HAS_COLORS = SkVertices_BuilderFlags_kHasColors_BuilderFlag as u32;
         const HAS_BONES = SkVertices_BuilderFlags_kHasBones_BuilderFlag as u32;
@@ -265,7 +262,7 @@ impl NativeDrop for SkVertices_Builder {
 }
 
 impl Handle<SkVertices_Builder> {
-    pub fn new(mode: VertexMode, vertex_count: usize, index_count: usize, flags: VerticesBuilderFlags) -> Builder {
+    pub fn new(mode: VertexMode, vertex_count: usize, index_count: usize, flags: BuilderFlags) -> Builder {
         Self::from_native(unsafe {
             SkVertices_Builder::new(
                 mode.into_native(),

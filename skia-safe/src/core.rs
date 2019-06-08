@@ -315,6 +315,8 @@ pub use vertices::BoneWeights as BoneWeights;
 pub use vertices::Bone as VerticesBone;
 #[deprecated(note = "use vertices::VertexMode")]
 pub use vertices::VertexMode as VerticesVertexMode;
+#[deprecated(note = "use vertices::BuilderFlags")]
+pub use vertices::BuilderFlags as VerticesBuilderFlags;
 #[deprecated(note = "use vertices::Builder")]
 pub use vertices::Builder as VerticesBuilder;
 
