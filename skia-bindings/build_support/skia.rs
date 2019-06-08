@@ -370,6 +370,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .whitelist_function("SkPreMultiplyARGB")
         .whitelist_function("SkPreMultiplyColor")
         .whitelist_function("SkBlendMode_Name")
+        .whitelist_function("SkSwapRB")
         // functions for which the doc generation fails.
         .blacklist_function("SkColorFilter_asComponentTable")
         // core/

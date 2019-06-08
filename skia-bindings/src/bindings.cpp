@@ -30,6 +30,7 @@
 #include "SkStream.h"
 #include "SkStrokeRec.h"
 #include "SkSurface.h"
+#include "SkSwizzle.h"
 #include "SkTextBlob.h"
 #include "SkTypeface.h"
 #include "SkYUVAIndex.h"

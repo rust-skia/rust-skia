@@ -279,6 +279,9 @@ pub use surface_characterization::*;
 mod surface_props;
 pub use surface_props::*;
 
+mod swizzle;
+pub use swizzle::*;
+
 mod text_blob;
 pub use text_blob::*;
 
