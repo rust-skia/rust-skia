@@ -198,9 +198,9 @@ impl NativeClone for GrBackendRenderTarget {
 }
 
 impl Handle<GrBackendRenderTarget> {
-    pub fn new_gl<SC: Into<Option<usize>>>(
+    pub fn new_gl(
         (width, height): (i32, i32),
-        sample_count: SC, stencil_bits: usize,
+        sample_count: impl Into<Option<usize>>, stencil_bits: usize,
         info: &gl::FramebufferInfo
     ) -> BackendRenderTarget {
         Self::from_native(unsafe {
@@ -212,9 +212,9 @@ impl Handle<GrBackendRenderTarget> {
     }
 
     #[cfg(feature="vulkan")]
-    pub fn new_vulkan<SC: Into<Option<usize>>>(
+    pub fn new_vulkan(
         (width, height) : (i32, i32),
-        sample_count: SC,
+        sample_count: impl Into<Option<usize>>,
         info: &vk::ImageInfo
     ) -> BackendRenderTarget {
         BackendRenderTarget::from_native(unsafe {

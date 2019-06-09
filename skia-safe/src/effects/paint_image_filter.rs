@@ -12,7 +12,7 @@ impl RCHandle<SkImageFilter> {
 }
 
 impl Handle<SkPaint> {
-    pub fn as_image_filter<'a, CR: >(
+    pub fn as_image_filter<'a>(
         &self,
         crop_rect: impl Into<Option<&'a CropRect>>,
     ) -> Option<ImageFilter> {

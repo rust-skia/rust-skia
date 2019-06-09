@@ -13,11 +13,11 @@ impl RCHandle<SkDrawLooper> {
         new(color, sigma, delta)
     }
 
-    pub fn blur_with_color_space<C: AsRef<Color4f>, IV: Into<Vector>>(
-        color: C,
+    pub fn blur_with_color_space(
+        color: impl AsRef<Color4f>,
         color_space: &ColorSpace,
         sigma: scalar,
-        delta: IV,
+        delta: impl Into<Vector>,
     ) -> Option<Self> {
         new_with_color_space(color, color_space, sigma, delta)
     }

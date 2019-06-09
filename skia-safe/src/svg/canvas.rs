@@ -37,7 +37,7 @@ impl DerefMut for Canvas {
 
 impl Canvas {
     /// Creates a new SVG canvas.
-    pub fn new<B: AsRef<Rect>>(bounds: B) -> Canvas {
+    pub fn new(bounds: impl AsRef<Rect>) -> Canvas {
         let bounds = bounds.as_ref();
         let mut stream = Box::pin(DynamicMemoryWStream::new());
         let canvas = unsafe {

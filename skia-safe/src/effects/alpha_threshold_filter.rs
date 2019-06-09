@@ -3,9 +3,9 @@ use crate::{scalar, ImageFilter, image_filter::CropRect, Region};
 use skia_bindings::{C_SkAlphaThresholdFilter_Make, SkImageFilter};
 
 impl RCHandle<SkImageFilter> {
-    pub fn alpha_threshold<'a, CR: Into<Option<&'a CropRect>>>(
+    pub fn alpha_threshold<'a>(
         &self,
-        crop_rect: CR,
+        crop_rect: impl Into<Option<&'a CropRect>>,
         region: &Region,
         inner_min: scalar,
         outer_max: scalar,
@@ -14,12 +14,12 @@ impl RCHandle<SkImageFilter> {
     }
 }
 
-pub fn new<'a, CR: Into<Option<&'a CropRect>>>(
+pub fn new<'a>(
     region: &Region,
     inner_min: scalar,
     outer_max: scalar,
     input: &ImageFilter,
-    crop_rect: CR,
+    crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
         C_SkAlphaThresholdFilter_Make(

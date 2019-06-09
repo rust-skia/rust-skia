@@ -55,16 +55,11 @@ impl RCHandle<SkImageFilter> {
         )
     }
 
-    pub fn distant_lit_specular_lighting<
-        'a,
-        IP3: Into<Point3>,
-        IC: Into<Color>,
-        CR: Into<Option<&'a CropRect>>,
-    >(
+    pub fn distant_lit_specular_lighting<'a>(
         &self,
-        crop_rect: CR,
-        direction: IP3,
-        light_color: IC,
+        crop_rect: impl Into<Option<&'a CropRect>>,
+        direction: impl Into<Point3>,
+        light_color: impl Into<Color>,
         surface_scale: scalar,
         ks: scalar,
         shininess: scalar,

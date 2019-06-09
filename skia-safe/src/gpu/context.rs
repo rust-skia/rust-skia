@@ -198,8 +198,8 @@ impl RCHandle<GrContext> {
         self
     }
 
-    pub fn compute_texture_size<NP2: Into<Option<bool>>>(
-        color_type: ColorType, (width, height): (i32, i32), mip_mapped: MipMapped, use_next_pow2: NP2
+    pub fn compute_texture_size(
+        color_type: ColorType, (width, height): (i32, i32), mip_mapped: MipMapped, use_next_pow2: impl Into<Option<bool>>
     ) -> usize {
         unsafe {
             GrContext::ComputeTextureSize(color_type.into_native(), width, height, mip_mapped.into_native(), use_next_pow2.into().unwrap_or(false))
