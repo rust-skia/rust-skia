@@ -1,13 +1,11 @@
 use crate::artifact::DrawingDriver;
 use crate::resources;
 use skia_safe::{
-    CornerPathEffect, DashPathEffect, DiscretePathEffect, GradientShader, Line2DPathEffect,
-    Path1DPathEffect, Path1DPathEffectStyle, Path2DPathEffect, PerlinNoiseShader, TableColorFilter,
-    scalar, AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color, ColorFilters,
-    Font, Shaders,
-    MaskFilter, Matrix, Paint, PaintStyle, Path,
-    PathEffect, Point, Rect,
-    TextBlob, TileMode, Typeface,
+    corner_path_effect, dash_path_effect, discrete_path_effect, line_2d_path_effect,
+    path_1d_path_effect, path_2d_path_effect, scalar, AutoCanvasRestore, BlendMode, BlurStyle,
+    Canvas, Color, ColorFilters, Font, GradientShader, MaskFilter, Matrix, Paint, PaintStyle, Path,
+    PathEffect, PerlinNoiseShader, Point, Rect, Shaders, TableColorFilter, TextBlob, TileMode,
+    Typeface,
 };
 use std::path::PathBuf;
 
@@ -79,11 +77,13 @@ fn draw_three_paints(canvas: &mut Canvas) {
     let blob1 = TextBlob::from_str(
         "Skia!",
         &Font::from_typeface_with_params(&Typeface::default(), 64.0, 1.0, 0.0),
-    ).unwrap();
+    )
+    .unwrap();
     let blob2 = TextBlob::from_str(
         "Skia!",
         &Font::from_typeface_with_params(&Typeface::default(), 64.0, 1.5, 0.0),
-    ).unwrap();
+    )
+    .unwrap();
 
     canvas.clear(Color::WHITE);
     canvas.draw_text_blob(&blob1, (20.0, 64.0), paint1);
@@ -104,10 +104,8 @@ fn draw_fill_and_stroke(canvas: &mut Canvas) {
     stroke_paint.set_stroke_width(5.0);
     canvas.draw_oval(Rect::from_point_and_size((150, 10), (60, 20)), stroke_paint);
 
-    let blob = TextBlob::from_str(
-        "SKIA",
-        &Font::from_typeface(&Typeface::default(), 80.0),
-    ).unwrap();
+    let blob =
+        TextBlob::from_str("SKIA", &Font::from_typeface(&Typeface::default(), 80.0)).unwrap();
 
     fill_paint.set_color(Color::from_argb(0xFF, 0xFF, 0x00, 0x00));
     canvas.draw_text_blob(&blob, (20, 120), fill_paint);
@@ -122,15 +120,7 @@ fn draw_gradient(canvas: &mut Canvas) {
     let paint = &mut Paint::default();
 
     paint.set_shader(
-        GradientShader::linear(
-            points,
-            colors.as_ref(),
-            None,
-            TileMode::Clamp,
-            None,
-            None,
-        )
-        .as_ref(),
+        GradientShader::linear(points, colors.as_ref(), None, TileMode::Clamp, None, None).as_ref(),
     );
     canvas.draw_paint(paint);
 }
@@ -343,10 +333,8 @@ fn draw_mask_filter(canvas: &mut Canvas) {
     );
     let paint = &mut Paint::default();
     paint.set_mask_filter(&MaskFilter::blur(BlurStyle::Normal, 5.0, None));
-    let blob = &TextBlob::from_str(
-        "Skia",
-        &Font::from_typeface(&Typeface::default(), 120.0),
-    ).unwrap();
+    let blob =
+        &TextBlob::from_str("Skia", &Font::from_typeface(&Typeface::default(), 120.0)).unwrap();
     canvas.draw_text_blob(blob, (0, 160), paint);
 }
 
@@ -410,7 +398,7 @@ fn draw_path_2d_effect(canvas: &mut Canvas) {
     let matrix = &Matrix::new_scale((4.0 * scale, 4.0 * scale));
     let paint = &mut Paint::default();
     paint
-        .set_path_effect(&Path2DPathEffect::new(matrix, path))
+        .set_path_effect(&path_2d_path_effect::new(matrix, path))
         .set_anti_alias(true);
     canvas.clear(Color::WHITE);
     let bounds = Rect::new(-4.0 * scale, -4.0 * scale, 256.0, 256.0);
@@ -422,7 +410,7 @@ fn draw_line_2d_effect(canvas: &mut Canvas) {
     let lattice = &mut Matrix::default();
     lattice.set_scale((8.0, 8.0), None).pre_rotate(30.0, None);
     paint
-        .set_path_effect(Line2DPathEffect::new(0.0, lattice).as_ref())
+        .set_path_effect(line_2d_path_effect::new(0.0, lattice).as_ref())
         .set_anti_alias(true);
     let bounds = Rect::from_size((256, 256)).with_outset((8.0, 8.0));
     canvas.clear(Color::WHITE);
@@ -435,7 +423,7 @@ fn draw_path_1d_effect(canvas: &mut Canvas) {
     path.add_oval(Rect::from_size((16.0, 6.0)), None);
     paint
         .set_path_effect(
-            Path1DPathEffect::new(path, 32.0, 0.0, Path1DPathEffectStyle::Rotate).as_ref(),
+            path_1d_path_effect::new(path, 32.0, 0.0, path_1d_path_effect::Style::Rotate).as_ref(),
         )
         .set_anti_alias(true);
     canvas.clear(Color::WHITE);
@@ -459,7 +447,7 @@ fn star() -> Path {
 fn draw_corner_path_effect(canvas: &mut Canvas) {
     let paint = &mut Paint::default();
     paint
-        .set_path_effect(CornerPathEffect::new(32.0).as_ref())
+        .set_path_effect(corner_path_effect::new(32.0).as_ref())
         .set_style(PaintStyle::Stroke)
         .set_anti_alias(true);
     canvas.clear(Color::WHITE);
@@ -470,7 +458,7 @@ fn draw_dash_path_effect(canvas: &mut Canvas) {
     const INTERVALS: [scalar; 4] = [10.0, 5.0, 2.0, 5.0];
     let paint = &mut Paint::default();
     paint
-        .set_path_effect(DashPathEffect::new(&INTERVALS, 0.0).as_ref())
+        .set_path_effect(dash_path_effect::new(&INTERVALS, 0.0).as_ref())
         .set_style(PaintStyle::Stroke)
         .set_stroke_width(2.0)
         .set_anti_alias(true);
@@ -481,7 +469,7 @@ fn draw_dash_path_effect(canvas: &mut Canvas) {
 fn draw_discrete_path_effect(canvas: &mut Canvas) {
     let paint = &mut Paint::default();
     paint
-        .set_path_effect(DiscretePathEffect::new(10.0, 4.0, None).as_ref())
+        .set_path_effect(discrete_path_effect::new(10.0, 4.0, None).as_ref())
         .set_style(PaintStyle::Stroke)
         .set_stroke_width(2.0)
         .set_anti_alias(true);
@@ -494,8 +482,8 @@ fn draw_compose_path_effect(canvas: &mut Canvas) {
     let paint = &mut Paint::default();
     paint
         .set_path_effect(&PathEffect::compose(
-            &DashPathEffect::new(&INTERVALS, 0.0).unwrap(),
-            &DiscretePathEffect::new(10.0, 4.0, None).unwrap(),
+            &dash_path_effect::new(&INTERVALS, 0.0).unwrap(),
+            &discrete_path_effect::new(10.0, 4.0, None).unwrap(),
         ))
         .set_style(PaintStyle::Stroke)
         .set_stroke_width(2.0)
@@ -508,8 +496,8 @@ fn draw_sum_path_effect(canvas: &mut Canvas) {
     let paint = &mut Paint::default();
     paint
         .set_path_effect(&PathEffect::sum(
-            &DiscretePathEffect::new(10.0, 4.0, None).unwrap(),
-            &DiscretePathEffect::new(10.0, 4.0, Some(1245)).unwrap(),
+            &discrete_path_effect::new(10.0, 4.0, None).unwrap(),
+            &discrete_path_effect::new(10.0, 4.0, Some(1245)).unwrap(),
         ))
         .set_style(PaintStyle::Stroke)
         .set_stroke_width(2.0)
