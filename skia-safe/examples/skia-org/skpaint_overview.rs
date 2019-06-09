@@ -1,11 +1,11 @@
 use crate::artifact::DrawingDriver;
 use crate::resources;
 use skia_safe::{
-    corner_path_effect, dash_path_effect, discrete_path_effect, line_2d_path_effect,
-    path_1d_path_effect, path_2d_path_effect, scalar, AutoCanvasRestore, BlendMode, BlurStyle,
-    Canvas, Color, ColorFilters, Font, gradient_shader, MaskFilter, Matrix, Paint, PaintStyle, Path,
-    PathEffect, PerlinNoiseShader, Point, Rect, Shaders, TableColorFilter, TextBlob, TileMode,
-    Typeface,
+    corner_path_effect, dash_path_effect, discrete_path_effect, gradient_shader,
+    line_2d_path_effect, path_1d_path_effect, path_2d_path_effect, perlin_noise_shader, scalar,
+    table_color_filter, AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color, ColorFilters, Font,
+    MaskFilter, Matrix, Paint, PaintStyle, Path, PathEffect, Point, Rect, Shaders, TextBlob,
+    TileMode, Typeface,
 };
 use std::path::PathBuf;
 
@@ -120,7 +120,8 @@ fn draw_gradient(canvas: &mut Canvas) {
     let paint = &mut Paint::default();
 
     paint.set_shader(
-        gradient_shader::linear(points, colors.as_ref(), None, TileMode::Clamp, None, None).as_ref(),
+        gradient_shader::linear(points, colors.as_ref(), None, TileMode::Clamp, None, None)
+            .as_ref(),
     );
     canvas.draw_paint(paint);
 }
@@ -291,14 +292,14 @@ fn draw_sweep_gradient_shader(canvas: &mut Canvas) {
 fn draw_fractal_perlin_noise_shader(canvas: &mut Canvas) {
     canvas.clear(Color::WHITE);
     let paint = &mut Paint::default();
-    paint.set_shader(PerlinNoiseShader::fractal_noise((0.05, 0.05), 4, 0.0, None).as_ref());
+    paint.set_shader(perlin_noise_shader::fractal_noise((0.05, 0.05), 4, 0.0, None).as_ref());
     canvas.draw_paint(paint);
 }
 
 fn draw_turbulence_perlin_noise_shader(canvas: &mut Canvas) {
     canvas.clear(Color::WHITE);
     let paint = &mut Paint::default();
-    paint.set_shader(PerlinNoiseShader::turbulence((0.05, 0.05), 4, 0.0, None).as_ref());
+    paint.set_shader(perlin_noise_shader::turbulence((0.05, 0.05), 4, 0.0, None).as_ref());
     canvas.draw_paint(paint);
 }
 
@@ -318,7 +319,7 @@ fn draw_compose_shader(canvas: &mut Canvas) {
                 None,
             )
             .unwrap(),
-            &PerlinNoiseShader::turbulence((0.025, 0.025), 2, 0.0, None).unwrap(),
+            &perlin_noise_shader::turbulence((0.025, 0.025), 2, 0.0, None).unwrap(),
         )
         .as_ref(),
     ));
@@ -372,7 +373,7 @@ fn draw_color_table_color_filter(canvas: &mut Canvas) {
         *v = x.max(0).min(255) as _;
     }
     let mut paint = Paint::default();
-    paint.set_color_filter(&TableColorFilter::from_argb(
+    paint.set_color_filter(&table_color_filter::from_argb(
         None,
         Some(ct),
         Some(ct),
