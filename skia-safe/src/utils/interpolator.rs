@@ -10,16 +10,16 @@ use std::time::Duration;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-pub enum InterpolatorResult {
+pub enum Result {
     Normal = SkInterpolatorBase_Result::kNormal_Result as _,
     FreezeStart = SkInterpolatorBase_Result::kFreezeStart_Result as _,
     FreezeEnd = SkInterpolatorBase_Result::kFreezeEnd_Result as _,
 }
 
-impl NativeTransmutable<SkInterpolatorBase_Result> for InterpolatorResult {}
+impl NativeTransmutable<SkInterpolatorBase_Result> for Result {}
 #[test]
 fn test_interpolator_result_layout() {
-    InterpolatorResult::test_layout();
+    Result::test_layout();
 }
 
 pub type Interpolator = Handle<SkInterpolator>;
@@ -75,11 +75,11 @@ impl Handle<SkInterpolator> {
         self
     }
 
-    pub fn time_to_t(&self, time: Duration) -> (InterpolatorResult, TimeToT) {
+    pub fn time_to_t(&self, time: Duration) -> (Result, TimeToT) {
         let mut t = 0.0;
         let mut index = 0;
         let mut exact = false;
-        let r = InterpolatorResult::from_native(unsafe {
+        let r = Result::from_native(unsafe {
             self.native()._base.timeToT(
                 time.as_millis().try_into().unwrap(),
                 &mut t,
@@ -142,12 +142,12 @@ impl Handle<SkInterpolator> {
         &self,
         time: Duration,
         values: impl Into<Option<&'a mut [scalar]>>,
-    ) -> InterpolatorResult {
+    ) -> Result {
         let mut values = values.into();
         if let Some(ref values) = values {
             assert_eq!(values.len(), self.elem_count());
         };
-        InterpolatorResult::from_native(unsafe {
+        Result::from_native(unsafe {
             self.native().timeToValues(
                 time.as_millis().try_into().unwrap(),
                 values.as_ptr_or_null_mut(),

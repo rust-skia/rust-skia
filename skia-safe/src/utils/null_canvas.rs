@@ -1,14 +1,14 @@
 use crate::{Canvas, OwnedCanvas};
 use skia_bindings::C_SkMakeNullCanvas;
 
-pub fn new_null_canvas() -> OwnedCanvas<'static> {
-    Canvas::own_from_native_ptr(unsafe { C_SkMakeNullCanvas() }).unwrap()
-}
-
 impl Canvas {
     pub fn new_null() -> OwnedCanvas<'static> {
         new_null_canvas()
     }
+}
+
+pub fn new_null_canvas() -> OwnedCanvas<'static> {
+    Canvas::own_from_native_ptr(unsafe { C_SkMakeNullCanvas() }).unwrap()
 }
 
 #[test]
