@@ -1,9 +1,7 @@
 mod _1d_path_effect;
 pub use _1d_path_effect::*;
-
 mod _2d_path_effect;
 pub use _2d_path_effect::*;
-
 pub mod alpha_threshold_filter;
 pub mod arithmetic_image_filter;
 pub mod blur_draw_looper;
@@ -17,12 +15,8 @@ pub mod displacement_map_effect;
 pub mod drop_shadow_image_filter;
 pub mod gradient_shader;
 pub mod image_source;
-
-mod layer_draw_looper;
-pub use layer_draw_looper::*;
-
-mod lighting_image_filter;
-pub use lighting_image_filter::*;
+pub mod layer_draw_looper;
+pub mod lighting_image_filter;
 
 mod magnifier_image_filter;
 pub use magnifier_image_filter::*;
