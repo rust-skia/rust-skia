@@ -13,8 +13,24 @@ pub use blend_mode::*;
 mod blur_types;
 pub use blur_types::*;
 
-mod canvas;
-pub use canvas::*;
+pub mod canvas;
+pub use canvas::Canvas;
+pub use canvas::OwnedCanvas;
+pub use canvas::AutoCanvasRestore;
+#[deprecated(note = "use canvas::Lattice")]
+pub use canvas::Lattice as CanvasLattice;
+#[deprecated(note = "use canvas::SaveLayerFlags")]
+pub use canvas::SaveLayerFlags;
+#[deprecated(note = "use canvas::SaveLayerRec")]
+pub use canvas::SaveLayerRec;
+#[deprecated(note = "use canvas::PointMode")]
+pub use canvas::PointMode as CanvasPointMode;
+#[deprecated(note = "use canvas::SrcRectConstraint")]
+pub use canvas::SrcRectConstraint;
+#[deprecated(note = "use canvas::TopLayerPixels")]
+pub use canvas::TopLayerPixels as CanvasTopLayerPixels;
+#[deprecated(note = "use canvas::lattice::RectType")]
+pub use canvas::lattice::RectType as CanvasLatticeRectType;
 
 mod clip_op;
 pub use clip_op::*;

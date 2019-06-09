@@ -8,6 +8,8 @@ use crate::{IRect, QuickReject, Region, RRect, ClipOp, Point, scalar, Vector, Im
 use skia_bindings::{C_SkAutoCanvasRestore_destruct, SkAutoCanvasRestore, C_SkCanvas_isClipEmpty, C_SkCanvas_discard, SkCanvas_PointMode, SkImage, SkImageFilter, SkPaint, SkRect, C_SkCanvas_getBaseLayerSize, C_SkCanvas_imageInfo, C_SkCanvas_newFromBitmapAndProps, C_SkCanvas_newFromBitmap, C_SkCanvas_newWidthHeightAndProps, C_SkCanvas_newEmpty, C_SkCanvas_MakeRasterDirect, SkCanvas, C_SkCanvas_delete, C_SkCanvas_makeSurface, C_SkCanvas_getGrContext, SkCanvas_SaveLayerRec, SkMatrix, SkCanvas_SrcRectConstraint, C_SkAutoCanvasRestore_restore, C_SkAutoCanvasRestore_Construct, SkCanvas_SaveLayerFlagsSet_kInitWithPrevious_SaveLayerFlag, SkCanvas_Lattice_RectType, SkCanvas_Lattice};
 use std::convert::TryInto;
 
+pub use lattice::Lattice;
+
 bitflags! {
     pub struct SaveLayerFlags: u32 {
         const INIT_WITH_PREVIOUS = SkCanvas_SaveLayerFlagsSet_kInitWithPrevious_SaveLayerFlag as _;
@@ -80,14 +82,14 @@ impl<'a> SaveLayerRec<'a> {
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-pub enum CanvasPointMode {
+pub enum PointMode {
     Points = SkCanvas_PointMode::kPoints_PointMode as _,
     Lines = SkCanvas_PointMode::kLines_PointMode as _,
     Polygon = SkCanvas_PointMode::kPolygon_PointMode as _
 }
 
-impl NativeTransmutable<SkCanvas_PointMode> for CanvasPointMode {}
-#[test] fn test_canvas_point_mode_layout() { CanvasPointMode::test_layout() }
+impl NativeTransmutable<SkCanvas_PointMode> for PointMode {}
+#[test] fn test_canvas_point_mode_layout() { PointMode::test_layout() }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -101,7 +103,7 @@ impl NativeTransmutable<SkCanvas_SrcRectConstraint> for SrcRectConstraint {}
 
 /// Provides access to Canvas's pixels.
 /// Returned by Canvas::access_top_layer_pixels()
-pub struct CanvasTopLayerPixels<'a> {
+pub struct TopLayerPixels<'a> {
     pub pixels: &'a mut [u8],
     pub info: ImageInfo,
     pub row_bytes: usize,
@@ -289,7 +291,7 @@ impl Canvas {
         })
     }
 
-    pub fn access_top_layer_pixels(&mut self) -> Option<CanvasTopLayerPixels> {
+    pub fn access_top_layer_pixels(&mut self) -> Option<TopLayerPixels> {
         let mut info = ImageInfo::default();
         let mut row_bytes = 0;
         let mut origin = IPoint::default();
@@ -304,7 +306,7 @@ impl Canvas {
             let pixels = unsafe {
                 slice::from_raw_parts_mut(ptr as _, size)
             };
-            Some(CanvasTopLayerPixels{pixels, info, row_bytes, origin})
+            Some(TopLayerPixels {pixels, info, row_bytes, origin})
         } else {
             None
         }
@@ -535,7 +537,7 @@ impl Canvas {
         self
     }
 
-    pub fn draw_points(&mut self, mode: CanvasPointMode, pts: &[Point], paint: &Paint) -> &mut Self {
+    pub fn draw_points(&mut self, mode: PointMode, pts: &[Point], paint: &Paint) -> &mut Self {
         unsafe {
             self.native_mut().drawPoints(
                 mode.into_native(), pts.len(), pts.native().as_ptr(), paint.native())
@@ -728,7 +730,7 @@ impl Canvas {
 
     pub fn draw_bitmap_lattice(&mut self,
                                bitmap: &Bitmap,
-                               lattice: &CanvasLattice,
+                               lattice: &Lattice,
                                dst: impl AsRef<Rect>,
                                paint: Option<&Paint>)
         -> &mut Self {
@@ -743,7 +745,7 @@ impl Canvas {
 
     pub fn draw_image_lattice(&mut self,
                               image: &Image,
-                              lattice: &CanvasLattice,
+                              lattice: &Lattice,
                               dst: impl AsRef<Rect>,
                               paint: Option<&Paint>)
         -> &mut Self {
@@ -901,65 +903,72 @@ impl QuickReject<Path> for Canvas {
 // Lattice
 //
 
-#[derive(Debug)]
-pub struct CanvasLattice<'a> {
-    pub x_divs: &'a [i32],
-    pub y_divs: &'a [i32],
-    pub rect_types: Option<&'a [CanvasLatticeRectType]>,
-    pub bounds: Option<IRect>,
-    pub colors: Option<&'a [Color]>
-}
+pub mod lattice {
+    use crate::prelude::*;
+    use crate::{IRect, Color};
+    use skia_bindings::{SkCanvas_Lattice, SkCanvas_Lattice_RectType};
+    use std::marker::PhantomData;
 
-struct CanvasLatticeRef<'a> {
-    native: SkCanvas_Lattice,
-    pd: PhantomData<&'a CanvasLattice<'a>>
-}
+    #[derive(Debug)]
+    pub struct Lattice<'a> {
+        pub x_divs: &'a [i32],
+        pub y_divs: &'a [i32],
+        pub rect_types: Option<&'a [RectType]>,
+        pub bounds: Option<IRect>,
+        pub colors: Option<&'a [Color]>
+    }
 
-impl<'a> CanvasLattice<'a> {
-    fn native(&self) -> CanvasLatticeRef {
-        if let Some(rect_types) = self.rect_types {
-            let rect_count = (self.x_divs.len() + 1) * (self.y_divs.len() + 1);
-            assert_eq!(rect_count, rect_types.len());
-            // even though rect types may not include any FixedColor refs,
-            // we expect the colors slice with a proper size here, this
-            // saves us for going over the types array and looking for FixedColor
-            // entries.
-            assert_eq!(rect_count, self.colors.unwrap().len());
-        }
+    pub(crate) struct Ref<'a> {
+        pub native: SkCanvas_Lattice,
+        pd: PhantomData<&'a Lattice<'a>>
+    }
 
-        let native = SkCanvas_Lattice {
-            fXDivs: self.x_divs.as_ptr(),
-            fYDivs: self.y_divs.as_ptr(),
-            fRectTypes: self.rect_types.native().as_ptr_or_null(),
-            fXCount: self.x_divs.len().try_into().unwrap(),
-            fYCount: self.y_divs.len().try_into().unwrap(),
-            fBounds: self.bounds.native().as_ptr_or_null(),
-            fColors: self.colors.native().as_ptr_or_null()
-        };
-        CanvasLatticeRef {
-            native,
-            pd: PhantomData
+    impl<'a> Lattice<'a> {
+        pub(crate) fn native(&self) -> Ref {
+            if let Some(rect_types) = self.rect_types {
+                let rect_count = (self.x_divs.len() + 1) * (self.y_divs.len() + 1);
+                assert_eq!(rect_count, rect_types.len());
+                // even though rect types may not include any FixedColor refs,
+                // we expect the colors slice with a proper size here, this
+                // saves us for going over the types array and looking for FixedColor
+                // entries.
+                assert_eq!(rect_count, self.colors.unwrap().len());
+            }
+
+            let native = SkCanvas_Lattice {
+                fXDivs: self.x_divs.as_ptr(),
+                fYDivs: self.y_divs.as_ptr(),
+                fRectTypes: self.rect_types.native().as_ptr_or_null(),
+                fXCount: self.x_divs.len().try_into().unwrap(),
+                fYCount: self.y_divs.len().try_into().unwrap(),
+                fBounds: self.bounds.native().as_ptr_or_null(),
+                fColors: self.colors.native().as_ptr_or_null()
+            };
+            Ref {
+                native,
+                pd: PhantomData
+            }
         }
     }
-}
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(u8)]
-pub enum CanvasLatticeRectType {
-    Default = SkCanvas_Lattice_RectType::kDefault as _,
-    Transparent = SkCanvas_Lattice_RectType::kTransparent as _,
-    FixedColor = SkCanvas_Lattice_RectType::kFixedColor as _
-}
+    #[derive(Copy, Clone, PartialEq, Eq, Debug)]
+    #[repr(u8)]
+    pub enum RectType {
+        Default = SkCanvas_Lattice_RectType::kDefault as _,
+        Transparent = SkCanvas_Lattice_RectType::kTransparent as _,
+        FixedColor = SkCanvas_Lattice_RectType::kFixedColor as _
+    }
 
-impl NativeTransmutable<SkCanvas_Lattice_RectType> for CanvasLatticeRectType {}
-#[test]
-fn test_lattice_rect_type_layout() {
-    CanvasLatticeRectType::test_layout();
-}
+    impl NativeTransmutable<SkCanvas_Lattice_RectType> for RectType {}
+    #[test]
+    fn test_lattice_rect_type_layout() {
+        RectType::test_layout();
+    }
 
-impl Default for CanvasLatticeRectType {
-    fn default() -> Self {
-        CanvasLatticeRectType::Default
+    impl Default for RectType {
+        fn default() -> Self {
+            RectType::Default
+        }
     }
 }
 

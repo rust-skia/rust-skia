@@ -15,13 +15,6 @@ use crate::{
 use skia_bindings::{C_SkBitmap_destruct, SkBitmap, C_SkBitmap_Construct, C_SkBitmap_readyToDraw, C_SkBitmap_tryAllocN32Pixels, C_SkBitmap_tryAllocPixels, C_SkBitmap_eraseARGB, C_SkBitmap_extractAlpha, SkBitmap_AllocFlags_kZeroPixels_AllocFlag, C_SkBitmap_setPixelRef, C_SkBitmap_makeShader};
 use crate::{Matrix, Shader, TileMode};
 
-#[deprecated(since="0.11.0", note="AllocFlags is obsolete.  We always zero pixel memory when allocated.")]
-bitflags! {
-    pub struct BitmapAllocFlags: u32 {
-        const ZERO_PIXELS = SkBitmap_AllocFlags_kZeroPixels_AllocFlag as u32;
-    }
-}
-
 pub type Bitmap = Handle<SkBitmap>;
 
 impl NativeDrop for SkBitmap {
@@ -168,12 +161,12 @@ impl Handle<SkBitmap> {
     }
 
     #[must_use]
-    pub fn try_alloc_pixels_flags(&mut self, image_info: &ImageInfo, flags: BitmapAllocFlags) -> bool {
-        unsafe { self.native_mut().tryAllocPixelsFlags(image_info.native(), flags.bits()) }
+    pub fn try_alloc_pixels_flags(&mut self, image_info: &ImageInfo) -> bool {
+        unsafe { self.native_mut().tryAllocPixelsFlags(image_info.native(), SkBitmap_AllocFlags_kZeroPixels_AllocFlag as _) }
     }
 
-    pub fn alloc_pixels_flags(&mut self, image_info: &ImageInfo, flags: BitmapAllocFlags) {
-        self.try_alloc_pixels_flags(image_info, flags)
+    pub fn alloc_pixels_flags(&mut self, image_info: &ImageInfo) {
+        self.try_alloc_pixels_flags(image_info)
             .to_option()
             .expect("Bitmap::alloc_pixels_flags failed");
     }
