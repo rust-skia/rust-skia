@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::{Matrix, Image, Color, scalar, Point, ColorFilter, ColorSpace, Color4f, BlendMode, GradientShaderFlags, TileMode};
+use crate::{Matrix, Image, Color, scalar, Point, ColorFilter, ColorSpace, Color4f, BlendMode, TileMode, gradient_shader};
 use skia_bindings::{SkShader, SkRefCntBase, SkShader_GradientType, SkShader_GradientInfo, C_SkShader_asAGradient, C_SkShader_makeWithLocalMatrix, C_SkShader_makeWithColorFilter, C_SkShader_isAImage, SkTileMode, C_SkShaders_Empty, C_SkShaders_Color, C_SkShaders_Color2, C_SkShaders_Blend, C_SkShaders_Lerp, C_SkShaders_Lerp2};
 use std::mem;
 
@@ -32,7 +32,7 @@ pub struct GradientInfo<'a> {
     pub colors: &'a [Color],
     pub color_offsets: &'a [scalar],
     pub tile_mode: TileMode,
-    pub gradient_flags: GradientShaderFlags
+    pub gradient_flags: gradient_shader::Flags
 }
 
 impl<'a> GradientInfo<'a> {
@@ -119,7 +119,7 @@ impl RCHandle<SkShader> {
                     colors: &colors[0..returned_color_count],
                     color_offsets: &color_offsets[0..returned_color_count],
                     tile_mode: TileMode::Clamp,
-                    gradient_flags: GradientShaderFlags::from_bits_truncate(info.fGradientFlags)
+                    gradient_flags: gradient_shader::Flags::from_bits_truncate(info.fGradientFlags)
                 })
             })
         }
@@ -137,6 +137,8 @@ impl RCHandle<SkShader> {
         }).unwrap()
     }
 }
+
+// TODO: use a module as a wrapper for the static class?
 
 pub enum Shaders {}
 

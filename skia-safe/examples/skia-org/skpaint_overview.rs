@@ -3,7 +3,7 @@ use crate::resources;
 use skia_safe::{
     corner_path_effect, dash_path_effect, discrete_path_effect, line_2d_path_effect,
     path_1d_path_effect, path_2d_path_effect, scalar, AutoCanvasRestore, BlendMode, BlurStyle,
-    Canvas, Color, ColorFilters, Font, GradientShader, MaskFilter, Matrix, Paint, PaintStyle, Path,
+    Canvas, Color, ColorFilters, Font, gradient_shader, MaskFilter, Matrix, Paint, PaintStyle, Path,
     PathEffect, PerlinNoiseShader, Point, Rect, Shaders, TableColorFilter, TextBlob, TileMode,
     Typeface,
 };
@@ -120,7 +120,7 @@ fn draw_gradient(canvas: &mut Canvas) {
     let paint = &mut Paint::default();
 
     paint.set_shader(
-        GradientShader::linear(points, colors.as_ref(), None, TileMode::Clamp, None, None).as_ref(),
+        gradient_shader::linear(points, colors.as_ref(), None, TileMode::Clamp, None, None).as_ref(),
     );
     canvas.draw_paint(paint);
 }
@@ -172,7 +172,7 @@ fn draw_transfer_modes(canvas: &mut Canvas) {
     let src_points: (Point, Point) = ((0.0, 0.0).into(), (64.0, 0.0).into());
     let src_colors = [Color::MAGENTA & 0x00_FF_FF_FF, Color::MAGENTA];
     src.set_shader(
-        GradientShader::linear(
+        gradient_shader::linear(
             src_points,
             src_colors.as_ref(),
             None,
@@ -186,7 +186,7 @@ fn draw_transfer_modes(canvas: &mut Canvas) {
     let dst_points: (Point, Point) = ((0.0, 0.0).into(), (0.0, 64.0).into());
     let dst_colors = [Color::CYAN & 0x00_FF_FF_FF, Color::CYAN];
     dst.set_shader(
-        GradientShader::linear(
+        gradient_shader::linear(
             dst_points,
             dst_colors.as_ref(),
             None,
@@ -236,7 +236,7 @@ fn draw_radial_gradient_shader(canvas: &mut Canvas) {
     let colors = [Color::BLUE, Color::YELLOW];
     let mut paint = Paint::default();
     paint.set_shader(
-        GradientShader::radial(
+        gradient_shader::radial(
             (128.0, 128.0),
             180.0,
             colors.as_ref(),
@@ -254,7 +254,7 @@ fn draw_two_point_conical_shader(canvas: &mut Canvas) {
     let colors = [Color::BLUE, Color::YELLOW];
     let paint = &mut Paint::default();
     paint.set_shader(
-        GradientShader::two_point_conical(
+        gradient_shader::two_point_conical(
             (128.0, 128.0),
             128.0,
             (128.0, 16.0),
@@ -274,7 +274,7 @@ fn draw_sweep_gradient_shader(canvas: &mut Canvas) {
     let colors = [Color::CYAN, Color::MAGENTA, Color::YELLOW, Color::CYAN];
     let paint = &mut Paint::default();
     paint.set_shader(
-        GradientShader::sweep(
+        gradient_shader::sweep(
             (128.0, 128.0),
             colors.as_ref(),
             None,
@@ -308,7 +308,7 @@ fn draw_compose_shader(canvas: &mut Canvas) {
     paint.set_shader(Some(
         Shaders::blend(
             BlendMode::Difference,
-            &GradientShader::radial(
+            &gradient_shader::radial(
                 (128.0, 128.0),
                 180.0,
                 colors.as_ref(),

@@ -13,18 +13,10 @@ pub mod compose_image_filter;
 pub mod corner_path_effect;
 pub mod dash_path_effect;
 pub mod discrete_path_effect;
-
-mod displacement_map_effect;
-pub use displacement_map_effect::*;
-
-mod drop_shadow_image_filter;
-pub use drop_shadow_image_filter::*;
-
-mod gradient_shader;
-pub use gradient_shader::*;
-
-mod image_source;
-pub use image_source::*;
+pub mod displacement_map_effect;
+pub mod drop_shadow_image_filter;
+pub mod gradient_shader;
+pub mod image_source;
 
 mod layer_draw_looper;
 pub use layer_draw_looper::*;
