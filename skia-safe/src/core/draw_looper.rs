@@ -16,17 +16,17 @@ impl NativeRefCountedBase for SkDrawLooper {
 
 #[derive(Clone, PartialEq, Default, Debug)]
 #[repr(C)]
-pub struct DrawLooperBlurShadowRec {
+pub struct BlurShadowRec {
     pub sigma: scalar,
     pub offset: Vector,
     pub color: Color,
     pub blur: BlurStyle,
 }
 
-impl NativeTransmutable<SkDrawLooper_BlurShadowRec> for DrawLooperBlurShadowRec {}
+impl NativeTransmutable<SkDrawLooper_BlurShadowRec> for BlurShadowRec {}
 #[test]
 fn test_blur_shadow_rec_layout() {
-    DrawLooperBlurShadowRec::test_layout()
+    BlurShadowRec::test_layout()
 }
 
 impl RCHandle<SkDrawLooper> {
@@ -44,8 +44,8 @@ impl RCHandle<SkDrawLooper> {
         r
     }
 
-    pub fn as_a_blur_shadow(&self) -> Option<DrawLooperBlurShadowRec> {
-        let mut br = DrawLooperBlurShadowRec::default();
+    pub fn as_a_blur_shadow(&self) -> Option<BlurShadowRec> {
+        let mut br = BlurShadowRec::default();
         unsafe { C_SkDrawLooper_asABlurShadow(self.native(), br.native_mut()) }.if_true_some(br)
     }
 

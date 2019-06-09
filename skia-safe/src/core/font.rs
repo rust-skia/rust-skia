@@ -27,14 +27,14 @@ use crate::{
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-pub enum FontEdging {
+pub enum Edging {
     Alias = SkFont_Edging::kAlias as _,
     AntiAlias = SkFont_Edging::kAntiAlias as _,
     SubpixelAntiAlias = SkFont_Edging::kSubpixelAntiAlias as _
 }
 
-impl NativeTransmutable<SkFont_Edging> for FontEdging {}
-#[test] fn test_font_edging_layout() { FontEdging::test_layout() }
+impl NativeTransmutable<SkFont_Edging> for Edging {}
+#[test] fn test_font_edging_layout() { Edging::test_layout() }
 
 pub type Font = Handle<SkFont>;
 
@@ -140,13 +140,13 @@ impl Handle<SkFont> {
         self
     }
 
-    pub fn edging(&self) -> FontEdging {
-        FontEdging::from_native(unsafe {
+    pub fn edging(&self) -> Edging {
+        Edging::from_native(unsafe {
             self.native().getEdging()
         })
     }
 
-    pub fn set_edging(&mut self, edging: FontEdging) -> &mut Self {
+    pub fn set_edging(&mut self, edging: Edging) -> &mut Self {
         unsafe {
             self.native_mut().setEdging(edging.into_native())
         }

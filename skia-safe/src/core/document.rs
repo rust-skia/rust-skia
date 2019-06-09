@@ -4,7 +4,7 @@ use crate::{Canvas, Data, Rect, Size};
 use skia_bindings::{SkDocument, SkRefCntBase};
 use std::pin::Pin;
 
-pub struct Document<State = document::Open> {
+pub struct Document<State = state::Open> {
     // note: order matters here, first the document must be
     // dropped _and then_ the stream.
     document: RCHandle<SkDocument>,
@@ -21,8 +21,7 @@ impl NativeRefCountedBase for SkDocument {
     }
 }
 
-#[allow(clippy::module_inception)]
-pub mod document {
+pub mod state {
     use skia_bindings::SkCanvas;
 
     /// Document is currently open. May contain several pages.
@@ -52,7 +51,7 @@ impl Document {
         Document {
             document,
             stream,
-            state: document::Open { pages: 0 },
+            state: state::Open { pages: 0 },
         }
     }
 
@@ -67,7 +66,7 @@ impl Document {
         mut self,
         size: impl Into<Size>,
         content: Option<&Rect>,
-    ) -> Document<document::OnPage> {
+    ) -> Document<state::OnPage> {
         let size = size.into();
         let canvas = unsafe {
             self.document
@@ -78,7 +77,7 @@ impl Document {
         Document {
             stream: self.stream,
             document: self.document,
-            state: document::OnPage {
+            state: state::OnPage {
                 canvas,
                 page: self.state.pages + 1,
             },
@@ -95,7 +94,7 @@ impl Document {
     }
 }
 
-impl Document<document::OnPage> {
+impl Document<state::OnPage> {
     /// The current page we are currently drawing on.
     pub fn page(&self) -> usize {
         self.state.page
@@ -117,7 +116,7 @@ impl Document<document::OnPage> {
         Document {
             stream: self.stream,
             document: self.document,
-            state: document::Open {
+            state: state::Open {
                 pages: self.state.page,
             },
         }

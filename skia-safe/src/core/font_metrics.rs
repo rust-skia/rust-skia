@@ -14,7 +14,7 @@ bitflags! {
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct FontMetrics {
-    flags: Flags,
+    flags: self::Flags,
     pub top: scalar,
     pub ascent: scalar,
     pub descent: scalar,

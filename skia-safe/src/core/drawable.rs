@@ -27,7 +27,7 @@ impl RCHandle<SkDrawable> {
                                  api: gpu::BackendAPI,
                                  matrix: &Matrix,
                                  clip_bounds: impl Into<IRect>,
-                                 buffer_info: &ImageInfo) -> DrawableGPUDrawHandler {
+                                 buffer_info: &ImageInfo) -> GPUDrawHandler {
         unimplemented!()
     }
 
@@ -51,10 +51,10 @@ impl RCHandle<SkDrawable> {
     // TODO: Deserialize()
 }
 
-pub enum DrawableGPUDrawHandler {}
+pub enum GPUDrawHandler {}
 
 // TODO: complete implementation
-impl DrawableGPUDrawHandler {
+impl GPUDrawHandler {
     /* TODO:
     pub fn draw(info: &crate::gpu::BackendDrawableInfo) {
         unimplemented!()

@@ -5,7 +5,7 @@ use std::ffi::CString;
 use crate::gpu;
 use crate::prelude::*;
 use crate::{IRect, QuickReject, Region, RRect, ClipOp, Point, scalar, Vector, Image, ImageFilter, Rect, IPoint, Surface, Bitmap, ISize, SurfaceProps, ImageInfo, Path, Paint, Color, Matrix, BlendMode, Font, TextEncoding, Picture, Vertices, vertices, Data, TextBlob};
-use skia_bindings::{C_SkAutoCanvasRestore_destruct, SkAutoCanvasRestore, C_SkCanvas_isClipEmpty, C_SkCanvas_discard, SkCanvas_PointMode, SkImage, SkImageFilter, SkPaint, SkRect, C_SkCanvas_getBaseLayerSize, C_SkCanvas_imageInfo, C_SkCanvas_newFromBitmapAndProps, C_SkCanvas_newFromBitmap, C_SkCanvas_newWidthHeightAndProps, C_SkCanvas_newEmpty, C_SkCanvas_MakeRasterDirect, SkCanvas, C_SkCanvas_delete, C_SkCanvas_makeSurface, C_SkCanvas_getGrContext, SkCanvas_SaveLayerRec, SkMatrix, SkCanvas_SrcRectConstraint, C_SkAutoCanvasRestore_restore, C_SkAutoCanvasRestore_Construct, SkCanvas_SaveLayerFlagsSet_kInitWithPrevious_SaveLayerFlag, SkCanvas_Lattice_RectType, SkCanvas_Lattice};
+use skia_bindings::{C_SkAutoCanvasRestore_destruct, SkAutoCanvasRestore, C_SkCanvas_isClipEmpty, C_SkCanvas_discard, SkCanvas_PointMode, SkImage, SkImageFilter, SkPaint, SkRect, C_SkCanvas_getBaseLayerSize, C_SkCanvas_imageInfo, C_SkCanvas_newFromBitmapAndProps, C_SkCanvas_newFromBitmap, C_SkCanvas_newWidthHeightAndProps, C_SkCanvas_newEmpty, C_SkCanvas_MakeRasterDirect, SkCanvas, C_SkCanvas_delete, C_SkCanvas_makeSurface, C_SkCanvas_getGrContext, SkCanvas_SaveLayerRec, SkMatrix, SkCanvas_SrcRectConstraint, C_SkAutoCanvasRestore_restore, C_SkAutoCanvasRestore_Construct, SkCanvas_SaveLayerFlagsSet_kInitWithPrevious_SaveLayerFlag};
 use std::convert::TryInto;
 
 pub use lattice::Lattice;

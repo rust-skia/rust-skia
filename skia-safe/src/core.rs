@@ -14,9 +14,7 @@ mod blur_types;
 pub use blur_types::*;
 
 pub mod canvas;
-pub use canvas::Canvas;
-pub use canvas::OwnedCanvas;
-pub use canvas::AutoCanvasRestore;
+pub use canvas::{Canvas, OwnedCanvas, AutoCanvasRestore};
 #[deprecated(note = "use canvas::Lattice")]
 pub use canvas::Lattice as CanvasLattice;
 #[deprecated(note = "use canvas::SaveLayerFlags")]
@@ -38,8 +36,10 @@ pub use clip_op::*;
 mod color;
 pub use color::*;
 
-mod color_filter;
-pub use color_filter::*;
+pub mod color_filter;
+pub use color_filter::{ColorFilter, ColorFilters};
+#[deprecated(note = "use ColorFilter::Flags")]
+pub use color_filter::Flags as ColorFilterFlags;
 
 mod color_space;
 pub use color_space::*;
@@ -48,7 +48,7 @@ mod color_space_xform_canvas;
 pub use color_space_xform_canvas::*;
 
 pub mod contour_measure;
-pub use contour_measure::*;
+pub use contour_measure::{ContourMeasure, ContourMeasureIter};
 
 mod coverage_mode;
 pub use coverage_mode::*;
@@ -65,14 +65,16 @@ pub use data_table::*;
 mod deferred_display_list_recorder;
 pub use deferred_display_list_recorder::*;
 
-pub(crate) mod document;
-pub use document::*;
+pub mod document;
+pub use document::Document;
 
-mod draw_looper;
-pub use draw_looper::*;
+pub mod draw_looper;
+pub use draw_looper::DrawLooper;
+#[deprecated(note = "use draw_looper::BlurShadowRec")]
+pub use draw_looper::BlurShadowRec as DrawLooperBlurShadowRec;
 
-mod drawable;
-pub use drawable::*;
+pub mod drawable;
+pub use drawable::Drawable;
 
 mod encoded_image_format;
 pub use encoded_image_format::*;
@@ -86,8 +88,10 @@ pub use filter_quality::*;
 mod flattenable;
 pub use flattenable:: *;
 
-mod font;
-pub use font::*;
+pub mod font;
+pub use font::Font;
+#[deprecated(note = "use font::Edging")]
+pub use font::Edging as FontEdging;
 
 pub mod font_arguments;
 pub use font_arguments::FontArguments;
@@ -260,7 +264,6 @@ pub use scalar_::*;
 
 pub mod shader;
 pub use shader::{Shader, Shaders};
-
 #[deprecated(since = "0.11.0", note = "use TileMode")]
 pub use TileMode as ShaderTileMode;
 #[deprecated(since = "0.11.0", note = "use shader::GradientType")]

@@ -9,7 +9,7 @@ use skia_bindings::{
 };
 
 bitflags! {
-    pub struct ColorFilterFlags: u32 {
+    pub struct Flags: u32 {
         const ALPHA_UNCHANGED = SkColorFilter_Flags_kAlphaUnchanged_Flag as u32;
     }
 }
@@ -43,8 +43,8 @@ impl RCHandle<SkColorFilter> {
             .if_true_some(matrix)
     }
 
-    pub fn flags(&self) -> ColorFilterFlags {
-        ColorFilterFlags::from_bits_truncate(unsafe { C_SkColorFilter_getFlags(self.native()) })
+    pub fn flags(&self) -> self::Flags {
+        Flags::from_bits_truncate(unsafe { C_SkColorFilter_getFlags(self.native()) })
     }
 
     pub fn filter_color(&self, color: impl Into<Color>) -> Color {

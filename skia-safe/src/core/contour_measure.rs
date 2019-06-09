@@ -5,7 +5,7 @@ use skia_bindings::{
     SkContourMeasureIter, SkRefCntBase,
 };
 
-pub type CountourMeasure = RCHandle<SkContourMeasure>;
+pub type ContourMeasure = RCHandle<SkContourMeasure>;
 
 impl NativeRefCountedBase for SkContourMeasure {
     type Base = SkRefCntBase;
@@ -14,21 +14,17 @@ impl NativeRefCountedBase for SkContourMeasure {
     }
 }
 
-// TODO: review naming consistency of nested types throughout the crate.
-#[allow(clippy::module_inception)]
-pub mod contour_measure {
-    bitflags! {
-        pub struct MatrixFlags : u32 {
-            const GET_POSITION = skia_bindings::SkContourMeasure_MatrixFlags_kGetPosition_MatrixFlag as _;
-            const GET_TANGENT = skia_bindings::SkContourMeasure_MatrixFlags_kGetTangent_MatrixFlag as _;
-            const GET_POS_AND_TAN = Self::GET_POSITION.bits | Self::GET_TANGENT.bits;
-        }
+bitflags! {
+    pub struct MatrixFlags : u32 {
+        const GET_POSITION = skia_bindings::SkContourMeasure_MatrixFlags_kGetPosition_MatrixFlag as _;
+        const GET_TANGENT = skia_bindings::SkContourMeasure_MatrixFlags_kGetTangent_MatrixFlag as _;
+        const GET_POS_AND_TAN = Self::GET_POSITION.bits | Self::GET_TANGENT.bits;
     }
+}
 
-    impl Default for MatrixFlags {
-        fn default() -> Self {
-            Self::GET_POS_AND_TAN
-        }
+impl Default for MatrixFlags {
+    fn default() -> Self {
+        Self::GET_POS_AND_TAN
     }
 }
 
@@ -50,7 +46,7 @@ impl RCHandle<SkContourMeasure> {
     pub fn matrix(
         &self,
         distance: scalar,
-        flags: impl Into<Option<contour_measure::MatrixFlags>>,
+        flags: impl Into<Option<MatrixFlags>>,
     ) -> Option<Matrix> {
         let mut m = Matrix::default();
         unsafe {
@@ -96,10 +92,10 @@ impl NativeDrop for SkContourMeasureIter {
 }
 
 impl Iterator for Handle<SkContourMeasureIter> {
-    type Item = CountourMeasure;
+    type Item = ContourMeasure;
 
     fn next(&mut self) -> Option<Self::Item> {
-        CountourMeasure::from_ptr(unsafe { C_SkContourMeasureIter_next(self.native_mut()) })
+        ContourMeasure::from_ptr(unsafe { C_SkContourMeasureIter_next(self.native_mut()) })
     }
 }
 
