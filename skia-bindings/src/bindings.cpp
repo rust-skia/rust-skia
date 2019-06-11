@@ -14,6 +14,7 @@
 #include "SkFontMetrics.h"
 #include "SkFontMgr.h"
 #include "SkImageFilter.h"
+#include "SkImageGenerator.h"
 #include "SkImageInfo.h"
 #include "SkMaskFilter.h"
 #include "SkMultiPictureDraw.h"
@@ -243,6 +244,10 @@ extern "C" SkImage* C_SkImage_MakeRasterData(const SkImageInfo* info, const SkDa
 
 extern "C" SkImage* C_SkImage_MakeFromBitmap(const SkBitmap* bitmap) {
     return SkImage::MakeFromBitmap(*bitmap).release();
+}
+
+extern "C" SkImage* C_SkImage_MakeFromGenerator(SkImageGenerator* imageGenerator, const SkIRect* subset) {
+    return SkImage::MakeFromGenerator(std::unique_ptr<SkImageGenerator>(imageGenerator), subset).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromEncoded(const SkData* encoded, const SkIRect* subset) {
@@ -1272,6 +1277,38 @@ extern "C" SkImageFilter* C_SkImageFilter_makeWithLocalMatrix(const SkImageFilte
 
 extern "C" SkImageFilter* C_SkImageFilter_MakeMatrixFilter(const SkMatrix* matrix, SkFilterQuality quality, const SkImageFilter* input) {
     return SkImageFilter::MakeMatrixFilter(*matrix, quality, spFromConst(input)).release();
+}
+
+//
+// SkImageGenerator
+//
+
+extern "C" void C_SkImageGenerator_delete(SkImageGenerator *self) {
+    delete self;
+}
+
+extern "C" SkData *C_SkImageGenerator_refEncodedData(SkImageGenerator *self) {
+    return self->refEncodedData().release();
+}
+
+extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromEncoded(const SkData *data) {
+    return SkImageGenerator::MakeFromEncoded(spFromConst(data)).release();
+}
+
+extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromPicture(
+        const SkISize *size,
+        const SkPicture *picture,
+        const SkMatrix *matrix,
+        const SkPaint *paint,
+        SkImage::BitDepth bd,
+        const SkColorSpace *cs) {
+    return SkImageGenerator::MakeFromPicture(
+            *size,
+            spFromConst(picture),
+            matrix,
+            paint,
+            bd,
+            spFromConst(cs)).release();
 }
 
 //

@@ -101,6 +101,13 @@ pub enum YUVColorSpace {
 impl NativeTransmutable<SkYUVColorSpace> for YUVColorSpace {}
 #[test] fn test_yuv_color_space_layout() { YUVColorSpace::test_layout() }
 
+
+impl Default for YUVColorSpace {
+    fn default() -> Self {
+        YUVColorSpace::Identity
+    }
+}
+
 pub type ImageInfo = Handle<SkImageInfo>;
 
 impl NativeDrop for SkImageInfo {

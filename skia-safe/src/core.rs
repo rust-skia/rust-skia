@@ -336,8 +336,8 @@ pub use vertices::BuilderFlags as VerticesBuilderFlags;
 #[deprecated(note = "use vertices::Builder")]
 pub use vertices::Builder as VerticesBuilder;
 
-mod yuva_index;
-pub use yuva_index::*;
+pub mod yuva_index;
+pub use yuva_index::{ColorChannel, YUVAIndex};
 
 mod yuva_size_info;
 pub use yuva_size_info::*;

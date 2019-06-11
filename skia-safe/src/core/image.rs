@@ -1,33 +1,9 @@
 use crate::prelude::*;
-use crate::{gpu, ImageFilter};
+use crate::{gpu, ImageFilter, ImageGenerator};
 use crate::{Picture, Matrix, ColorType, ImageInfo, Data, Bitmap, IRect, YUVColorSpace, AlphaType, ColorSpace, YUVAIndex, ISize, Paint, EncodedImageFormat, IPoint, TileMode, Shader};
-use skia_bindings::{
-    C_SkImage_MakeFromPicture,
-    C_SkImage_MakeFromTexture,
-    C_SkImage_MakeFromCompressed,
-    C_SkImage_MakeFromEncoded,
-    C_SkImage_MakeFromBitmap,
-    SkImage,
-    C_SkImage_encodeToData,
-    C_SkImage_MakeRasterData,
-    C_SkImage_MakeCrossContextFromEncoded,
-    C_SkImage_MakeFromAdoptedTexture,
-    C_SkImage_MakeFromYUVATexturesCopy,
-    C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend,
-    C_SkImage_MakeFromYUVATextures,
-    C_SkImage_MakeFromNV12TexturesCopy,
-    C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend,
-    C_SkImage_refEncodedData,
-    C_SkImage_makeSubset,
-    C_SkImage_makeTextureImage,
-    C_SkImage_makeNonTextureImage,
-    C_SkImage_makeRasterImage,
-    C_SkImage_makeWithFilter,
-    C_SkImage_makeColorSpace,
-    SkRefCntBase,
-    C_SkImage_makeShader
-};
+use skia_bindings::{C_SkImage_MakeFromPicture, C_SkImage_MakeFromTexture, C_SkImage_MakeFromCompressed, C_SkImage_MakeFromEncoded, C_SkImage_MakeFromBitmap, SkImage, C_SkImage_encodeToData, C_SkImage_MakeRasterData, C_SkImage_MakeCrossContextFromEncoded, C_SkImage_MakeFromAdoptedTexture, C_SkImage_MakeFromYUVATexturesCopy, C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend, C_SkImage_MakeFromYUVATextures, C_SkImage_MakeFromNV12TexturesCopy, C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend, C_SkImage_refEncodedData, C_SkImage_makeSubset, C_SkImage_makeTextureImage, C_SkImage_makeNonTextureImage, C_SkImage_makeRasterImage, C_SkImage_makeWithFilter, C_SkImage_makeColorSpace, SkRefCntBase, C_SkImage_makeShader, C_SkImage_MakeFromGenerator};
 use skia_bindings::{SkImage_BitDepth, SkImage_CachingHint, SkImage_CompressionType};
+use std::mem;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -91,7 +67,13 @@ impl RCHandle<SkImage> {
         })
     }
 
-    // TODO: MakeFromGenerator()
+    pub fn from_generator(mut image_generator: ImageGenerator, subset: Option<&IRect>) -> Option<Image> {
+        let image = Image::from_ptr(unsafe {
+            C_SkImage_MakeFromGenerator(image_generator.native_mut(), subset.native_ptr_or_null())
+        });
+        mem::forget(image_generator);
+        image
+    }
 
     pub fn from_encoded(data: &Data, subset: Option<IRect>) -> Option<Image> {
         Image::from_ptr(unsafe {

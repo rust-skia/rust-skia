@@ -2,7 +2,7 @@ use crate::prelude::*;
 use crate::{
     AlphaType, Color, Color4f, ColorSpace, ColorType, FilterQuality, IPoint, IRect, ImageInfo,
 };
-use skia_bindings::{C_SkImageInfo_Copy, C_SkPixmap_destruct, C_SkPixmap_setColorSpace, SkPixmap};
+use skia_bindings::{C_SkPixmap_destruct, C_SkPixmap_setColorSpace, SkPixmap};
 use std::convert::TryInto;
 use std::ffi::c_void;
 
@@ -48,12 +48,7 @@ impl Handle<SkPixmap> {
     }
 
     pub fn info(&self) -> ImageInfo {
-        // we contain ImageInfo in a struct, so we have to copy it.
-        // TODO: deduplicate this code.
-        let ptr = unsafe { self.native().info() };
-        let mut image_info = ImageInfo::default();
-        unsafe { C_SkImageInfo_Copy(ptr, image_info.native_mut()) }
-        image_info
+        ImageInfo::from_native(unsafe { (*self.native().info()).clone() })
     }
 
     pub fn row_bytes(&self) -> usize {
