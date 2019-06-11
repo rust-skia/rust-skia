@@ -44,9 +44,6 @@ pub use color_filter::Flags as ColorFilterFlags;
 mod color_space;
 pub use color_space::*;
 
-mod color_space_xform_canvas;
-pub use color_space_xform_canvas::*;
-
 pub mod contour_measure;
 pub use contour_measure::{ContourMeasure, ContourMeasureIter};
 
