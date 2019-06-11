@@ -17,7 +17,7 @@ extern crate bitflags;
 extern crate lazy_static;
 
 // Prelude re-exports
-pub use crate::prelude::Borrowed;
+pub use crate::prelude::Borrows;
 
 /// All Sk* types are accessible via skia_safe::
 pub use crate::codec::*;

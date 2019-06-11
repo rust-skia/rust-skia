@@ -384,6 +384,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .whitelist_type("SkDynamicMemoryWStream")
         .whitelist_type("SkFontMgr")
         .whitelist_type("SkMemoryStream")
+        .whitelist_type("SkMultiPictureDraw")
         .whitelist_type("SkPathMeasure")
         .whitelist_type("SkPictureRecorder")
         .whitelist_type("SkVector4")

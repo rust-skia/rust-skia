@@ -16,6 +16,7 @@
 #include "SkImageFilter.h"
 #include "SkImageInfo.h"
 #include "SkMaskFilter.h"
+#include "SkMultiPictureDraw.h"
 #include "SkPaint.h"
 #include "SkPath.h"
 #include "SkPathMeasure.h"

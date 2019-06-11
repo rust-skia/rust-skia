@@ -40,7 +40,7 @@ impl RCHandle<SkSurface> {
         pixels: &'pixels mut [u8],
         row_bytes: impl Into<Option<usize>>,
         surface_props: Option<&SurfaceProps>
-    ) -> Option<Borrowed<'pixels, Surface>> {
+    ) -> Option<Borrows<'pixels, Surface>> {
 
         let row_bytes = row_bytes.into().unwrap_or(image_info.min_row_bytes());
 
@@ -54,7 +54,7 @@ impl RCHandle<SkSurface> {
                 pixels.as_mut_ptr() as _,
                 row_bytes,
                 surface_props.native_ptr_or_null())
-        }).map(move |surface| surface.borrowed_from(pixels))
+        }).map(move |surface| surface.borrows(pixels))
     }
 
     // TODO: MakeRasterDirectReleaseProc()?
@@ -282,10 +282,10 @@ impl RCHandle<SkSurface> {
         }
     }
 
-    pub fn peek_pixels(&mut self) -> Option<Borrowed<Pixmap>> {
+    pub fn peek_pixels(&mut self) -> Option<Borrows<Pixmap>> {
         let mut pm = Pixmap::default();
         unsafe { self.native_mut().peekPixels(pm.native_mut())}
-            .if_true_some(pm.borrowed_from(self))
+            .if_true_some(pm.borrows(self))
     }
 
     // TODO: why is self mut?

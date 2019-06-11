@@ -702,29 +702,36 @@ impl<E> AsPointerOrNullMut<E> for Option<Vec<E>> {
 }
 
 // Wraps a handle so that the Rust's borrow checker thinks the handle represents
-// something that is borrowed from something else.
+// something that borrows something else.
 #[repr(C)]
-pub struct Borrowed<'a, H>(H, PhantomData<&'a ()>);
+pub struct Borrows<'a, H>(H, PhantomData<&'a ()>);
 
-impl<'a, H> Deref for Borrowed<'a, H> {
+impl<'a, H> Deref for Borrows<'a, H> {
     type Target = H;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl<'a, H> DerefMut for Borrowed<'a, H> {
+impl<'a, H> DerefMut for Borrows<'a, H> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
 }
 
-pub trait BorrowedFrom : Sized {
-    fn borrowed_from<D: ?Sized>(self, _dep: &D) -> Borrowed<Self>;
+impl<'a, H> Borrows<'a, H> {
+    /// Release the borrowed dependency and return the handle.
+    pub fn release(self) -> H {
+        self.0
+    }
 }
 
-impl<T: Sized> BorrowedFrom for T {
-    fn borrowed_from<D: ?Sized>(self, _dep: &D) -> Borrowed<Self> {
-        Borrowed(self, PhantomData)
+pub trait BorrowsFrom : Sized {
+    fn borrows<D: ?Sized>(self, _dep: &D) -> Borrows<Self>;
+}
+
+impl<T: Sized> BorrowsFrom for T {
+    fn borrows<D: ?Sized>(self, _dep: &D) -> Borrows<Self> {
+        Borrows(self, PhantomData)
     }
 }
