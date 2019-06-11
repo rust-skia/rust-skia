@@ -456,7 +456,15 @@ extern "C" SkData* C_SkData_MakeEmpty() {
 }
 
 //
-// SkPaint
+// core/SkMultiPictureDraw.h
+//
+
+extern "C" void C_SkMultiPictureDraw_destruct(SkMultiPictureDraw* self) {
+    self->~SkMultiPictureDraw();
+}
+
+//
+// core/SkPaint.h
 //
 
 extern "C" void C_SkPaint_destruct(SkPaint* self) {
