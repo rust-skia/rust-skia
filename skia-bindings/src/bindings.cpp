@@ -32,6 +32,7 @@
 #include "SkStream.h"
 #include "SkStrokeRec.h"
 #include "SkSurface.h"
+#include "SkSurfaceCharacterization.h"
 #include "SkSwizzle.h"
 #include "SkTextBlob.h"
 #include "SkTypeface.h"
@@ -232,6 +233,27 @@ extern "C" SkSurface* C_SkSurface_makeSurface(
         SkSurface* self,
         const SkImageInfo* imageInfo) {
     return self->makeSurface(*imageInfo).release();
+}
+
+//
+// core/SkSurfaceCharacterization.h
+//
+
+extern "C" void C_SkSurfaceCharacterization_destruct(SkSurfaceCharacterization* self) {
+    self->~SkSurfaceCharacterization();
+}
+
+/*
+extern "C" void C_SkSurfaceCharacterization_copy(const SkSurfaceCharacterization* self, SkSurfaceCharacterization* rhs) {
+    *rhs = *self;
+}
+*/
+extern "C" bool C_SkSurfaceCharacterization_equals(const SkSurfaceCharacterization* self, const SkSurfaceCharacterization* rhs) {
+    return *self == *rhs;
+}
+
+extern "C" void C_SkSurfaceCharacterization_imageInfo(const SkSurfaceCharacterization* self, SkImageInfo* imageInfo) {
+    *imageInfo = self->imageInfo();
 }
 
 //
@@ -453,8 +475,6 @@ extern "C" SkData* C_SkData_MakeWithCString(const char* cstr) {
 extern "C" SkData* C_SkData_MakeWithoutCopy(const void* data, size_t length) {
     return SkData::MakeWithoutCopy(data, length).release();
 }
-
-
 
 extern "C" SkData* C_SkData_MakeEmpty() {
     return SkData::MakeEmpty().release();
