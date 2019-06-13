@@ -244,12 +244,6 @@ extern "C" void C_SkSurfaceCharacterization_destruct(SkSurfaceCharacterization* 
     self->~SkSurfaceCharacterization();
 }
 
-/*
-extern "C" void C_SkSurfaceCharacterization_copy(const SkSurfaceCharacterization* self, SkSurfaceCharacterization* rhs) {
-    *rhs = *self;
-}
-*/
-
 extern "C" bool C_SkSurfaceCharacterization_equals(const SkSurfaceCharacterization* self, const SkSurfaceCharacterization* rhs) {
     return *self == *rhs;
 }
