@@ -6,6 +6,7 @@
 #include "SkColorFilter.h"
 #include "SkContourMeasure.h"
 #include "SkCubicMap.h"
+#include "SkDeferredDisplayListRecorder.h"
 #include "SkDrawLooper.h"
 #include "SkDrawable.h"
 #include "SkDocument.h"
@@ -248,6 +249,7 @@ extern "C" void C_SkSurfaceCharacterization_copy(const SkSurfaceCharacterization
     *rhs = *self;
 }
 */
+
 extern "C" bool C_SkSurfaceCharacterization_equals(const SkSurfaceCharacterization* self, const SkSurfaceCharacterization* rhs) {
     return *self == *rhs;
 }
@@ -1275,9 +1277,24 @@ extern "C" SkContourMeasure* C_SkContourMeasureIter_next(SkContourMeasureIter* s
 }
 
 //
-// SkDrawLooper
+// core/SkDeferredDisplayListRecorder.h
 //
 
+extern "C" void C_SkDeferredDisplayListRecorder_destruct(SkDeferredDisplayListRecorder* self) {
+    self->~SkDeferredDisplayListRecorder();
+}
+
+extern "C" SkDeferredDisplayList* C_SkDeferredDisplayListRecorder_detach(SkDeferredDisplayListRecorder* self) {
+    return self->detach().release();
+}
+
+extern "C" void C_SkDeferredDisplayList_delete(SkDeferredDisplayList* self) {
+    delete self;
+}
+
+//
+// core/SkDrawLooper.h
+//
 
 extern "C" bool C_SkDrawLooper_asABlurShadow(const SkDrawLooper* self, SkDrawLooper::BlurShadowRec& br) {
     return self->asABlurShadow(&br);
