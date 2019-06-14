@@ -73,6 +73,7 @@
 #include "SkXfermodeImageFilter.h"
 // gpu/
 #include "GrContext.h"
+#include "GrBackendDrawableInfo.h"
 // gpu/gl
 #include "gl/GrGLInterface.h"
 // pathops/
@@ -1972,7 +1973,7 @@ extern "C" const GrGLInterface* C_GrGLInterface_MakeNativeInterface() {
 }
 
 //
-// GrContext
+// gpu/GrContext.h
 //
 
 extern "C" GrContext* C_GrContext_MakeGL(const GrGLInterface* interface) {
@@ -1984,6 +1985,14 @@ extern "C" GrContext* C_GrContext_MakeGL(const GrGLInterface* interface) {
 
 extern "C" bool C_GrContext_colorTypeSupportedAsSurface(const GrContext* self, SkColorType colorType) {
     return self->colorTypeSupportedAsSurface(colorType);
+}
+
+//
+// gpu/GrBackendDrawableInfo.h
+//
+
+extern "C" void C_GrBackendDrawableInfo_destruct(GrBackendDrawableInfo* self) {
+    self->~GrBackendDrawableInfo();
 }
 
 //
