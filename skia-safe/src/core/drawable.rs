@@ -1,6 +1,9 @@
 use crate::prelude::*;
-use crate::{Canvas, Matrix, Point, gpu, IRect, ImageInfo, Picture, Rect};
-use skia_bindings::{SkDrawable, SkRefCntBase};
+use crate::{gpu, Canvas, IRect, ImageInfo, Matrix, Point, Rect};
+use skia_bindings::{
+    C_SkDrawable_GpuDrawHandler_destruct, C_SkDrawable_GpuDrawHandler_draw,
+    C_SkDrawable_snapGpuDrawHandler, SkDrawable, SkDrawable_GpuDrawHandler, SkRefCntBase,
+};
 
 pub type Drawable = RCHandle<SkDrawable>;
 
@@ -12,52 +15,87 @@ impl NativeRefCountedBase for SkDrawable {
     }
 }
 
-// TODO: complete implementation
 impl RCHandle<SkDrawable> {
-
-    pub fn draw(&mut self, canvas: &Canvas, matrix: Option<&Matrix>) -> &mut Self {
-        unimplemented!()
+    pub fn draw(&mut self, canvas: &mut Canvas, matrix: Option<&Matrix>) {
+        unsafe {
+            self.native_mut()
+                .draw(canvas.native_mut(), matrix.native_ptr_or_null())
+        }
     }
 
-    pub fn draw_at(&mut self, canvas: &Canvas, point: impl Into<Point>) -> &mut Self {
-        unimplemented!()
+    pub fn draw_at(&mut self, canvas: &mut Canvas, point: impl Into<Point>) {
+        let point = point.into();
+        unsafe {
+            self.native_mut()
+                .draw1(canvas.native_mut(), point.x, point.y)
+        }
     }
 
-    pub fn snap_gpu_draw_handler(&mut self,
-                                 api: gpu::BackendAPI,
-                                 matrix: &Matrix,
-                                 clip_bounds: impl Into<IRect>,
-                                 buffer_info: &ImageInfo) -> GPUDrawHandler {
-        unimplemented!()
+    pub fn snap_gpu_draw_handler(
+        &mut self,
+        api: gpu::BackendAPI,
+        matrix: &Matrix,
+        clip_bounds: impl Into<IRect>,
+        buffer_info: &ImageInfo,
+    ) -> Option<GPUDrawHandler> {
+        unsafe {
+            C_SkDrawable_snapGpuDrawHandler(
+                self.native_mut(),
+                api.into_native(),
+                matrix.native(),
+                clip_bounds.into().native(),
+                buffer_info.native(),
+            )
+        }
+        .to_option()
+        .map(GPUDrawHandler)
     }
 
     // TODO: clarify ref-counter situation here, return value is SkPicture*
+    /*
     pub fn new_picture_snapshot(&mut self) -> Option<Picture> {
         unimplemented!()
     }
+    */
 
     pub fn generation_id(&mut self) -> u32 {
-        unimplemented!()
+        unsafe { self.native_mut().getGenerationID() }
     }
 
     pub fn bounds(&mut self) -> Rect {
-        unimplemented!()
+        Rect::from_native(unsafe { self.native_mut().getBounds() })
     }
 
-    pub fn notify_drawing_changed(&mut self) -> &mut Self {
-        unimplemented!()
+    pub fn notify_drawing_changed(&mut self) {
+        unsafe { self.native_mut().notifyDrawingChanged() }
     }
 
+    // TODO: implement Flattenable
     // TODO: Deserialize()
 }
 
-pub enum GPUDrawHandler {}
+pub struct GPUDrawHandler(*mut SkDrawable_GpuDrawHandler);
 
-// TODO: complete implementation
-impl GPUDrawHandler {
-    /* TODO:
-    pub fn draw(info: &crate::gpu::BackendDrawableInfo) {
-        unimplemented!()
+impl NativeAccess<SkDrawable_GpuDrawHandler> for GPUDrawHandler {
+    fn native(&self) -> &SkDrawable_GpuDrawHandler {
+        unsafe { &*self.0 }
     }
-    */
+
+    fn native_mut(&mut self) -> &mut SkDrawable_GpuDrawHandler {
+        unsafe { &mut *self.0 }
+    }
+}
+
+impl Drop for GPUDrawHandler {
+    fn drop(&mut self) {
+        unsafe { C_SkDrawable_GpuDrawHandler_destruct(self.native_mut()) }
+    }
+}
+
+impl GPUDrawHandler {
+    pub fn draw(&mut self, info: &gpu::BackendDrawableInfo) {
+        unsafe {
+            C_SkDrawable_GpuDrawHandler_draw(self.native_mut(), info.native());
+        }
+    }
 }

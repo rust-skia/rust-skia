@@ -2,7 +2,11 @@
 use crate::gpu::vk;
 use crate::gpu::BackendAPI;
 use crate::prelude::*;
-use skia_bindings::{C_GrBackendDrawableInfo_destruct, GrBackendDrawableInfo};
+use skia_bindings::{
+    C_GrBackendDrawableInfo_backend, C_GrBackendDrawableInfo_construct,
+    C_GrBackendDrawableInfo_destruct, C_GrBackendDrawableInfo_isValid, GrBackendDrawableInfo,
+};
+use std::mem;
 
 pub type BackendDrawableInfo = Handle<GrBackendDrawableInfo>;
 
@@ -14,7 +18,13 @@ impl NativeDrop for GrBackendDrawableInfo {
 
 impl Handle<GrBackendDrawableInfo> {
     pub fn new() -> BackendDrawableInfo {
-        Self::from_native(unsafe { GrBackendDrawableInfo::new() })
+        // does not link:
+        // Self::from_native(unsafe { GrBackendDrawableInfo::new() })
+        Self::from_native(unsafe {
+            let mut di = mem::zeroed();
+            C_GrBackendDrawableInfo_construct(&mut di);
+            di
+        })
     }
 
     #[cfg(feature = "vulkan")]
@@ -23,11 +33,15 @@ impl Handle<GrBackendDrawableInfo> {
     }
 
     pub fn is_valid(&self) -> bool {
-        unsafe { self.native().isValid() }
+        // does not link:
+        // unsafe { self.native().isValid() }
+        unsafe { C_GrBackendDrawableInfo_isValid(self.native()) }
     }
 
     pub fn backend(&self) -> BackendAPI {
-        BackendAPI::from_native(unsafe { self.native().backend() })
+        // does not link:
+        // BackendAPI::from_native(unsafe { self.native().backend() })
+        BackendAPI::from_native(unsafe { C_GrBackendDrawableInfo_backend(self.native()) })
     }
 
     #[cfg(feature = "vulkan")]

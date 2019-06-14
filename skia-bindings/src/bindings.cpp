@@ -1296,6 +1296,25 @@ extern "C" bool C_SkDrawLooper_asABlurShadow(const SkDrawLooper* self, SkDrawLoo
 }
 
 //
+// core/SkDrawable.h
+//
+
+extern "C" SkDrawable::GpuDrawHandler *C_SkDrawable_snapGpuDrawHandler(SkDrawable *self, GrBackendApi backendApi,
+                                                                       const SkMatrix *matrix,
+                                                                       const SkIRect *clipBounds,
+                                                                       const SkImageInfo *bufferInfo) {
+    return self->snapGpuDrawHandler(backendApi, *matrix, *clipBounds, *bufferInfo).release();
+}
+
+extern "C" void C_SkDrawable_GpuDrawHandler_destruct(SkDrawable::GpuDrawHandler *self) {
+    self->~GpuDrawHandler();
+}
+
+extern "C" void C_SkDrawable_GpuDrawHandler_draw(SkDrawable::GpuDrawHandler *self, const GrBackendDrawableInfo *info) {
+    self->draw(*info);
+}
+
+//
 // SkImageFilter
 //
 
@@ -1991,8 +2010,20 @@ extern "C" bool C_GrContext_colorTypeSupportedAsSurface(const GrContext* self, S
 // gpu/GrBackendDrawableInfo.h
 //
 
+extern "C" void C_GrBackendDrawableInfo_construct(GrBackendDrawableInfo* uninitialized) {
+    new(uninitialized) GrBackendDrawableInfo();
+}
+
 extern "C" void C_GrBackendDrawableInfo_destruct(GrBackendDrawableInfo* self) {
     self->~GrBackendDrawableInfo();
+}
+
+extern "C" bool C_GrBackendDrawableInfo_isValid(const GrBackendDrawableInfo* self) {
+    return self->isValid();
+}
+
+extern "C" GrBackendApi C_GrBackendDrawableInfo_backend(const GrBackendDrawableInfo* self) {
+    return self->backend();
 }
 
 //
