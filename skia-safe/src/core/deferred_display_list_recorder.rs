@@ -2,7 +2,7 @@ use crate::prelude::*;
 use crate::{Canvas, SurfaceCharacterization};
 use skia_bindings::{
     C_SkDeferredDisplayListRecorder_destruct, C_SkDeferredDisplayListRecorder_detach,
-    SkDeferredDisplayList, SkDeferredDisplayListRecorder,
+    SkDeferredDisplayListRecorder,
 };
 
 pub use private::DeferredDisplayList;
