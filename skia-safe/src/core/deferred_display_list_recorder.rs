@@ -27,9 +27,7 @@ impl Handle<SkDeferredDisplayListRecorder> {
     }
 
     pub fn detach(mut self) -> Option<DeferredDisplayList> {
-        let ptr = unsafe {
-            C_SkDeferredDisplayListRecorder_detach(self.native_mut())
-        };
+        let ptr = unsafe { C_SkDeferredDisplayListRecorder_detach(self.native_mut()) };
         if ptr.is_null() {
             return None;
         }
