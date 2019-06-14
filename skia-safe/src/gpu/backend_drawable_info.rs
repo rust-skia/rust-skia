@@ -45,12 +45,13 @@ impl Handle<GrBackendDrawableInfo> {
     }
 
     #[cfg(feature = "vulkan")]
-    pub fn get_vk_drawable_info(&self) -> vk::DrawableInfo {
+    pub fn get_vk_drawable_info(&self) -> Option<vk::DrawableInfo> {
         use std::mem;
         unsafe {
-            let mut di = mem::zeroed();
-            self.native().getVkDrawableInfo(&mut di)
+            let mut di: vk::DrawableInfo = mem::zeroed();
+            self.native()
+                .getVkDrawableInfo(di.native_mut())
+                .if_true_some(di)
         }
-        .if_true_some(di)
     }
 }
