@@ -373,12 +373,9 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .whitelist_function("SkSwapRB")
         // functions for which the doc generation fails.
         .blacklist_function("SkColorFilter_asComponentTable")
-        // types for which the binding generator generates bogus.
-        // TODO: why does std:: or std__ not match?
-        // TODO: why are these types generated anyway, they are not used.
-        .blacklist_type("*Tree__Pairib")
-        .blacklist_type("*Tree_val__Unchecked_const_iterator")
-        .blacklist_type("*Tree__Unchecked_const_iterator")
+        // Types for which the binding generator pulls in stuff that can not be compiled.
+        .opaque_type("SkDeferredDisplayList")
+        .opaque_type("SkDeferredDisplayList_PendingPathsMap")
         // core/
         .whitelist_type("SkAutoCanvasRestore")
         .whitelist_type("SkColorSpacePrimaries")
