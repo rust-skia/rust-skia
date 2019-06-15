@@ -224,7 +224,12 @@ impl RCHandle<SkImageFilter> {
         unsafe { self.native().countInputs() }.try_into().unwrap()
     }
 
+    #[deprecated(note = "use get_input()")]
     pub fn input(&self, i: usize) -> Option<ImageFilter> {
+        self.get_input(i)
+    }
+
+    pub fn get_input(&self, i: usize) -> Option<ImageFilter> {
         assert!(i < self.count_inputs());
         ImageFilter::from_unshared_ptr(unsafe { self.native().getInput(i.try_into().unwrap()) })
     }

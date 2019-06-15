@@ -212,8 +212,6 @@ impl Handle<SkPaint> {
         self
     }
 
-    // getFillPath is not the typical getter we can strip the prefix "get" from, so we
-    // stick to the original name of the Skia method.
     pub fn get_fill_path(&self, src: &Path, cull_rect: Option<&Rect>, res_scale: impl Into<Option<scalar>>) -> Option<Path> {
         let mut r = Path::default();
 

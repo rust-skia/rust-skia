@@ -43,7 +43,16 @@ impl RCHandle<SkContourMeasure> {
         .if_true_some((p, v))
     }
 
+    #[deprecated(note = "use get_matrix()")]
     pub fn matrix(
+        &self,
+        distance: scalar,
+        flags: impl Into<Option<MatrixFlags>>,
+    ) -> Option<Matrix> {
+        self.get_matrix(distance, flags)
+    }
+
+    pub fn get_matrix(
         &self,
         distance: scalar,
         flags: impl Into<Option<MatrixFlags>>,

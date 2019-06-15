@@ -297,11 +297,26 @@ impl Handle<SkFont> {
         }
     }
 
+    #[deprecated(note = "use get_widths")]
     pub fn widths(&self, glyphs: &[GlyphId], widths: &mut [scalar]) {
-        self.widths_bounds(glyphs, Some(widths), None, None)
+        self.get_widths(glyphs, widths)
     }
 
+    pub fn get_widths(&self, glyphs: &[GlyphId], widths: &mut [scalar]) {
+        self.get_widths_bounds(glyphs, Some(widths), None, None)
+    }
+
+    #[deprecated(note = "use get_widths_bounds()")]
     pub fn widths_bounds(
+        &self,
+        glyphs: &[GlyphId],
+        widths: Option<&mut [scalar]>,
+        bounds: Option<&mut [Rect]>,
+        paint: Option<&Paint>) {
+        self.get_widths_bounds(glyphs, widths, bounds, paint)
+    }
+
+    pub fn get_widths_bounds(
         &self,
         glyphs: &[GlyphId],
         mut widths: Option<&mut [scalar]>,
@@ -326,11 +341,21 @@ impl Handle<SkFont> {
         }
     }
 
+    #[deprecated(note = "use get_bounds()")]
     pub fn bounds(&self, glyphs: &[GlyphId], bounds: &mut [Rect], paint: Option<&Paint>) {
-        self.widths_bounds(glyphs, None, Some(bounds), paint)
+        self.get_bounds(glyphs, bounds, paint)
     }
 
+    pub fn get_bounds(&self, glyphs: &[GlyphId], bounds: &mut [Rect], paint: Option<&Paint>) {
+        self.get_widths_bounds(glyphs, None, Some(bounds), paint)
+    }
+
+    #[deprecated(note = "use get_pos()")]
     pub fn pos(&self, glyphs: &[GlyphId], pos: &mut [Point], origin: Option<Point>) {
+        self.get_pos(glyphs, pos, origin)
+    }
+
+    pub fn get_pos(&self, glyphs: &[GlyphId], pos: &mut [Point], origin: Option<Point>) {
         let count = glyphs.len();
         assert_eq!(count, pos.len());
 
@@ -345,7 +370,12 @@ impl Handle<SkFont> {
         }
     }
 
+    #[deprecated(note = "use get_x_pos()")]
     pub fn x_pos(&self, glyphs: &[GlyphId], xpos: &mut [scalar], origin: Option<scalar>) {
+        self.get_x_pos(glyphs, xpos, origin)
+    }
+
+    pub fn get_x_pos(&self, glyphs: &[GlyphId], xpos: &mut [scalar], origin: Option<scalar>) {
         let count = glyphs.len();
         assert_eq!(count, xpos.len());
         let origin = origin.unwrap_or_default();
@@ -359,7 +389,12 @@ impl Handle<SkFont> {
         }
     }
 
+    #[deprecated(note = "use get_path()")]
     pub fn path(&self, glyph_id: GlyphId) -> Option<Path> {
+        self.get_path(glyph_id)
+    }
+
+    pub fn get_path(&self, glyph_id: GlyphId) -> Option<Path> {
         let mut path = Path::default();
         unsafe {
             self.native().getPath(glyph_id, path.native_mut())
