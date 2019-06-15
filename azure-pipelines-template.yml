@@ -41,6 +41,7 @@ jobs:
     # Linux and macOS.
     - script: |
         curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $TOOLCHAIN
+        $HOME/.cargo/bin/rustup component add rustfmt --toolchain $TOOLCHAIN
         echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
       displayName: Install Rust
 
@@ -72,9 +73,12 @@ jobs:
         "C:/Program Files/LLVM/bin/clang.exe" --version
       displayName: LLVM/Clang Version
 
+  # Note: support to ignore specific rust files and directories is unstable yet: https://github.com/rust-lang/rustfmt/pull/2522
   - bash: |
       set -e
+      echo "// WAITING FOR RUSTFMT.TOML TO SUPPORT IGNORING FILES" >skia-bindings/src/bindings.rs
       cargo fmt -- --check
+      rm skia-bindings/src/bindings.rs
     displayName: Check Rust formatting
 
   # Note: features are ignored when set in the workspace. This is a known bug in cargo (#5015), so cd into skia-safe instead.
