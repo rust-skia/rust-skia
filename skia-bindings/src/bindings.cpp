@@ -16,6 +16,8 @@
 #include "SkFontArguments.h"
 #include "SkFontMetrics.h"
 #include "SkFontMgr.h"
+#include "SkImage.h"
+#include "SkImageEncoder.h"
 #include "SkImageFilter.h"
 #include "SkImageGenerator.h"
 #include "SkImageInfo.h"
@@ -440,7 +442,19 @@ extern "C" SkImage* C_SkImage_makeColorSpace(const SkImage* self, const SkColorS
 }
 
 //
-// SkData
+// core/SkImageEncoder.h
+//
+
+extern "C" SkData *C_SkEncodePixmap(const SkPixmap *src, SkEncodedImageFormat format, int quality) {
+    return SkEncodePixmap(*src, format, quality).release();
+}
+
+extern "C" SkData *C_SkEncodeBitmap(const SkBitmap *src, SkEncodedImageFormat format, int quality) {
+    return SkEncodeBitmap(*src, format, quality).release();
+}
+
+//
+// core/SkData.h
 //
 
 extern "C" void C_SkData_ref(const SkData* self) {
