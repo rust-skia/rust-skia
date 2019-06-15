@@ -7,7 +7,7 @@ use skia_bindings::{
 use std::{mem, ops};
 
 #[repr(C)]
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Vector4 {
     x: scalar,
     y: scalar,
