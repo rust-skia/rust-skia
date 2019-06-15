@@ -1,13 +1,9 @@
-use std::{ptr, mem};
-use std::ops::{Index, IndexMut, Deref, DerefMut};
-use std::hash::{Hasher, Hash};
 #[cfg(test)]
-use skia_bindings::{SkSurface, SkData, SkColorSpace};
-use skia_bindings::{
-    SkNVRefCnt,
-    SkRefCnt,
-    SkRefCntBase,
-};
+use skia_bindings::{SkColorSpace, SkData, SkSurface};
+use skia_bindings::{SkNVRefCnt, SkRefCnt, SkRefCntBase};
+use std::hash::{Hash, Hasher};
+use std::ops::{Deref, DerefMut, Index, IndexMut};
+use std::{mem, ptr};
 
 // Re-export TryFrom / TryInto to make them available in all modules that use prelude::*.
 pub use std::convert::{TryFrom, TryInto};
@@ -59,7 +55,11 @@ impl ToOption for bool {
     type Target = ();
 
     fn to_option(self) -> Option<Self::Target> {
-        if self { Some(()) } else { None }
+        if self {
+            Some(())
+        } else {
+            None
+        }
     }
 }
 
@@ -93,15 +93,13 @@ pub(crate) trait RefCount {
 }
 
 impl RefCount for SkRefCntBase {
-
     // the problem here is that the binding generator represents std::atomic as an u8 (we
     // are lucky that the C alignment rules make space for an i32), so to get the ref
     // counter, we need to get the u8 pointer to fRefCnt and interpret it as an i32 pointer.
     #[allow(clippy::cast_ptr_alignment)]
     fn ref_cnt(&self) -> usize {
         unsafe {
-            let ptr: *const i32 =
-                &self.fRefCnt as *const _ as *const i32;
+            let ptr: *const i32 = &self.fRefCnt as *const _ as *const i32;
             (*ptr).try_into().unwrap()
         }
     }
@@ -117,8 +115,7 @@ impl RefCount for SkNVRefCnt {
     #[allow(clippy::cast_ptr_alignment)]
     fn ref_cnt(&self) -> usize {
         unsafe {
-            let ptr: *const i32 =
-                &self.fRefCnt as *const _ as *const i32;
+            let ptr: *const i32 = &self.fRefCnt as *const _ as *const i32;
             (*ptr).try_into().unwrap()
         }
     }
@@ -170,14 +167,12 @@ impl NativeRefCounted for SkRefCntBase {
     #[allow(clippy::cast_ptr_alignment)]
     fn _ref_cnt(&self) -> usize {
         unsafe {
-            let ptr: *const i32 =
-                &self.fRefCnt as *const _ as *const i32;
+            let ptr: *const i32 = &self.fRefCnt as *const _ as *const i32;
 
             (*ptr).try_into().unwrap()
         }
     }
 }
-
 
 /// Implements NativeRefCounted by just providing a reference to the base class
 /// that implements a RefCount.
@@ -187,7 +182,9 @@ pub trait NativeRefCountedBase {
 }
 
 impl<Native, Base: NativeRefCounted> NativeRefCounted for Native
-    where Native: NativeRefCountedBase<Base=Base> {
+where
+    Native: NativeRefCountedBase<Base = Base>,
+{
     fn _ref(&self) {
         self.ref_counted_base()._ref();
     }
@@ -314,7 +311,9 @@ pub(crate) trait NativeSliceAccess<N: NativeDrop + NativeClone> {
 }
 
 impl<N> NativeSliceAccess<N> for [Handle<N>]
-    where N: NativeDrop + NativeClone {
+where
+    N: NativeDrop + NativeClone,
+{
     fn native(&self) -> Vec<N> {
         self.iter().map(|v| (v.native().clone())).collect()
     }
@@ -331,22 +330,25 @@ pub(crate) trait NativePointerOrNullMut<N> {
 }
 
 impl<H, N> NativePointerOrNull<N> for Option<&H>
-    where H: NativeAccess<N>
+where
+    H: NativeAccess<N>,
 {
     fn native_ptr_or_null(&self) -> *const N {
         match self {
             Some(handle) => handle.native(),
-            None => ptr::null()
+            None => ptr::null(),
         }
     }
 }
 
 impl<H, N> NativePointerOrNullMut<N> for Option<&mut H>
-    where H: NativeAccess<N> {
+where
+    H: NativeAccess<N>,
+{
     fn native_ptr_or_null_mut(&mut self) -> *mut N {
         match self {
             Some(handle) => handle.native_mut(),
-            None => ptr::null_mut()
+            None => ptr::null_mut(),
         }
     }
 }
@@ -360,22 +362,25 @@ pub(crate) trait NativePointerOrNull2<N> {
 }
 
 impl<H, N> NativePointerOrNull2<N> for Option<&H>
-    where H: NativeTransmutable<N>
+where
+    H: NativeTransmutable<N>,
 {
     fn native_ptr_or_null(&self) -> *const N {
         match self {
             Some(handle) => handle.native(),
-            None => ptr::null()
+            None => ptr::null(),
         }
     }
 }
 
 impl<H, N> NativePointerOrNullMut2<N> for Option<&mut H>
-    where H: NativeTransmutable<N> {
+where
+    H: NativeTransmutable<N>,
+{
     fn native_ptr_or_null_mut(&mut self) -> *mut N {
         match self {
             Some(handle) => handle.native_mut(),
-            None => ptr::null_mut()
+            None => ptr::null_mut(),
         }
     }
 }
@@ -391,7 +396,6 @@ impl<N: NativeRefCounted> AsRef<RCHandle<N>> for RCHandle<N> {
 }
 
 impl<N: NativeRefCounted> RCHandle<N> {
-
     /// Increases the reference counter of the native type
     /// and returns a reference to it.
     #[inline]
@@ -440,7 +444,6 @@ impl<N: NativeRefCounted> RCHandle<N> {
 }
 
 impl<N: NativeRefCounted> NativeAccess<N> for RCHandle<N> {
-
     /// Returns a reference to the native representation.
     fn native(&self) -> &N {
         unsafe { &*self.0 }
@@ -454,7 +457,6 @@ impl<N: NativeRefCounted> NativeAccess<N> for RCHandle<N> {
 
 impl<N: NativeRefCounted> Clone for RCHandle<N> {
     fn clone(&self) -> Self {
-
         // yes, we _do_ support shared mutability when
         // a ref-counted handle is cloned, so beware of spooky action at
         // a distance.
@@ -462,7 +464,7 @@ impl<N: NativeRefCounted> Clone for RCHandle<N> {
     }
 }
 
-impl <N: NativeRefCounted> Drop for RCHandle<N> {
+impl<N: NativeRefCounted> Drop for RCHandle<N> {
     #[inline]
     fn drop(&mut self) {
         unsafe { &*self.0 }._unref();
@@ -485,11 +487,10 @@ pub(crate) trait ToSharedPointerMut<N> {
 }
 
 impl<N: NativeRefCounted> ToSharedPointer<N> for Option<RCHandle<N>> {
-
     fn shared_ptr(&self) -> *const N {
         match self {
             Some(handle) => handle.shared_native(),
-            None => ptr::null()
+            None => ptr::null(),
         }
     }
 }
@@ -498,17 +499,16 @@ impl<N: NativeRefCounted> ToSharedPointerMut<N> for Option<RCHandle<N>> {
     fn shared_ptr_mut(&mut self) -> *mut N {
         match self {
             Some(handle) => handle.shared_native_mut(),
-            None => ptr::null_mut()
+            None => ptr::null_mut(),
         }
     }
 }
 
 impl<N: NativeRefCounted> ToSharedPointer<N> for Option<&RCHandle<N>> {
-
     fn shared_ptr(&self) -> *const N {
         match self {
             Some(handle) => handle.shared_native(),
-            None => ptr::null()
+            None => ptr::null(),
         }
     }
 }
@@ -517,7 +517,7 @@ impl<N: NativeRefCounted> ToSharedPointerMut<N> for Option<&mut RCHandle<N>> {
     fn shared_ptr_mut(&mut self) -> *mut N {
         match self {
             Some(handle) => handle.shared_native_mut(),
-            None => ptr::null_mut()
+            None => ptr::null_mut(),
         }
     }
 }
@@ -541,12 +541,13 @@ pub trait IndexGet {}
 /// for all Index & IndexMut implementation for that type.
 pub trait IndexSet {}
 
-pub trait IndexGetter<I, O : Copy> {
+pub trait IndexGetter<I, O: Copy> {
     fn get(&self, index: I) -> O;
 }
 
 impl<T, I, O: Copy> IndexGetter<I, O> for T
-    where T: Index<I, Output=O> + IndexGet
+where
+    T: Index<I, Output = O> + IndexGet,
 {
     fn get(&self, index: I) -> O {
         self[index]
@@ -558,7 +559,8 @@ pub trait IndexSetter<I, O: Copy> {
 }
 
 impl<T, I, O: Copy> IndexSetter<I, O> for T
-    where T: IndexMut<I, Output=O> + IndexSet
+where
+    T: IndexMut<I, Output = O> + IndexSet,
 {
     fn set(&mut self, index: I, value: O) {
         self[index] = value
@@ -567,8 +569,7 @@ impl<T, I, O: Copy> IndexSetter<I, O> for T
 
 /// Trait to use native types that as a rust type
 /// _inplace_ with the same size and field layout.
-pub(crate) trait NativeTransmutable<NT: Sized> : Sized {
-
+pub(crate) trait NativeTransmutable<NT: Sized>: Sized {
     /// Provides access to the native value through a
     /// transmuted reference to the Rust value.
     fn native(&self) -> &NT {
@@ -610,8 +611,9 @@ pub(crate) trait NativeTransmutableSliceAccess<NT: Sized> {
 }
 
 impl<NT, ElementT> NativeTransmutableSliceAccess<NT> for [ElementT]
-    where ElementT: NativeTransmutable<NT> {
-
+where
+    ElementT: NativeTransmutable<NT>,
+{
     fn native(&self) -> &[NT] {
         unsafe { &*(self as *const [ElementT] as *const [NT]) }
     }
@@ -621,19 +623,21 @@ impl<NT, ElementT> NativeTransmutableSliceAccess<NT> for [ElementT]
     }
 }
 
-impl<NT, RustT> NativeTransmutable<Option<NT>> for Option<RustT>
-    where RustT: NativeTransmutable<NT> {}
+impl<NT, RustT> NativeTransmutable<Option<NT>> for Option<RustT> where RustT: NativeTransmutable<NT> {}
 
-impl<NT, RustT> NativeTransmutable<Option<&[NT]>> for Option<&[RustT]>
-    where RustT: NativeTransmutable<NT> {}
+impl<NT, RustT> NativeTransmutable<Option<&[NT]>> for Option<&[RustT]> where
+    RustT: NativeTransmutable<NT>
+{
+}
 
 pub(crate) trait NativeTransmutableOptionSliceAccessMut<NT: Sized> {
     fn native_mut(&mut self) -> &mut Option<&mut [NT]>;
 }
 
 impl<NT, RustT> NativeTransmutableOptionSliceAccessMut<NT> for Option<&mut [RustT]>
-    where RustT: NativeTransmutable<NT> {
-
+where
+    RustT: NativeTransmutable<NT>,
+{
     fn native_mut(&mut self) -> &mut Option<&mut [NT]> {
         unsafe { transmute_ref_mut(self) }
     }
@@ -657,7 +661,7 @@ impl<E> AsPointerOrNull<E> for Option<E> {
     fn as_ptr_or_null(&self) -> *const E {
         match self {
             Some(e) => e,
-            None => ptr::null()
+            None => ptr::null(),
         }
     }
 }
@@ -666,7 +670,7 @@ impl<E> AsPointerOrNull<E> for Option<&[E]> {
     fn as_ptr_or_null(&self) -> *const E {
         match self {
             Some(slice) => slice.as_ptr(),
-            None => ptr::null()
+            None => ptr::null(),
         }
     }
 }
@@ -675,14 +679,14 @@ impl<E> AsPointerOrNullMut<E> for Option<&mut [E]> {
     fn as_ptr_or_null(&self) -> *const E {
         match self {
             Some(slice) => slice.as_ptr(),
-            None => ptr::null()
+            None => ptr::null(),
         }
     }
 
     fn as_ptr_or_null_mut(&mut self) -> *mut E {
         match self {
             Some(slice) => slice.as_mut_ptr(),
-            None => ptr::null_mut()
+            None => ptr::null_mut(),
         }
     }
 }
@@ -691,7 +695,7 @@ impl<E> AsPointerOrNull<E> for Option<&Vec<E>> {
     fn as_ptr_or_null(&self) -> *const E {
         match self {
             Some(v) => v.as_ptr(),
-            None => ptr::null()
+            None => ptr::null(),
         }
     }
 }
@@ -700,14 +704,14 @@ impl<E> AsPointerOrNullMut<E> for Option<Vec<E>> {
     fn as_ptr_or_null(&self) -> *const E {
         match self {
             Some(v) => v.as_ptr(),
-            None => ptr::null()
+            None => ptr::null(),
         }
     }
 
     fn as_ptr_or_null_mut(&mut self) -> *mut E {
         match self {
             Some(v) => v.as_mut_ptr(),
-            None => ptr::null_mut()
+            None => ptr::null_mut(),
         }
     }
 }
@@ -737,7 +741,7 @@ impl<'a, H> Borrows<'a, H> {
     }
 }
 
-pub(crate) trait BorrowsFrom : Sized {
+pub(crate) trait BorrowsFrom: Sized {
     fn borrows<D: ?Sized>(self, _dep: &D) -> Borrows<Self>;
 }
 

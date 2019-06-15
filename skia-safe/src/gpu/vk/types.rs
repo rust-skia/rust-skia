@@ -1,12 +1,20 @@
-use skia_bindings::{GrVkAlloc, GrVkBackendMemory};
-use skia_bindings::{GrVkImageInfo, GrVkYcbcrConversionInfo };
-use skia_bindings::{GrVkAlloc_Flag_kNoncoherent_Flag, GrVkAlloc_Flag_kMappable_Flag, C_GrVkAlloc_Equals, C_GrVkYcbcrConversionInfo_Equals, C_GrVkImageInfo_Equals, C_GrVkImageInfo_updateImageLayout, C_GrVkImageInfo_Construct, C_GrVkYcbcrConversionInfo_Construct, C_GrVkAlloc_Construct, GrVkDrawableInfo };
+use super::{Bool32, Filter, FomatFeatureFlags, Format, ImageLayout};
+use super::{
+    ChromaLocation, DeviceMemory, DeviceSize, Image, ImageTiling, SamplerYcbcrModelConversion,
+    SamplerYcbcrRange,
+};
+use crate::gpu::vk::{CommandBuffer, Device, Instance, Rect2D, RenderPass};
 use crate::prelude::*;
-use super::{DeviceMemory, DeviceSize, ImageTiling, Image, SamplerYcbcrModelConversion, ChromaLocation, SamplerYcbcrRange};
-use super::{Filter, Bool32, FomatFeatureFlags, ImageLayout, Format};
-use std::{mem, os::raw};
-use crate::gpu::vk::{CommandBuffer, RenderPass, Rect2D, Instance, Device};
+use skia_bindings::{
+    C_GrVkAlloc_Construct, C_GrVkAlloc_Equals, C_GrVkImageInfo_Construct, C_GrVkImageInfo_Equals,
+    C_GrVkImageInfo_updateImageLayout, C_GrVkYcbcrConversionInfo_Construct,
+    C_GrVkYcbcrConversionInfo_Equals, GrVkAlloc_Flag_kMappable_Flag,
+    GrVkAlloc_Flag_kNoncoherent_Flag, GrVkDrawableInfo,
+};
+use skia_bindings::{GrVkAlloc, GrVkBackendMemory};
+use skia_bindings::{GrVkImageInfo, GrVkYcbcrConversionInfo};
 use std::ffi::CStr;
+use std::{mem, os::raw};
 
 pub type GraphicsBackendMemory = GrVkBackendMemory;
 
@@ -18,11 +26,14 @@ pub struct Alloc {
     pub size: DeviceSize,
     pub flags: AllocFlag,
     pub backend_memory: GraphicsBackendMemory,
-    uses_system_heap: bool
+    uses_system_heap: bool,
 }
 
 impl NativeTransmutable<GrVkAlloc> for Alloc {}
-#[test] fn test_vk_alloc_layout() { Alloc::test_layout() }
+#[test]
+fn test_vk_alloc_layout() {
+    Alloc::test_layout()
+}
 
 impl Default for Alloc {
     fn default() -> Self {
@@ -32,7 +43,7 @@ impl Default for Alloc {
 
 impl PartialEq for Alloc {
     fn eq(&self, other: &Self) -> bool {
-        unsafe { C_GrVkAlloc_Equals(self.native(), other.native() )}
+        unsafe { C_GrVkAlloc_Equals(self.native(), other.native()) }
     }
 }
 
@@ -44,9 +55,12 @@ bitflags! {
 }
 
 impl Alloc {
-
-    pub unsafe fn from_device_memory(memory: DeviceMemory, offset: DeviceSize, size: DeviceSize, flags: AllocFlag) -> Alloc
-    {
+    pub unsafe fn from_device_memory(
+        memory: DeviceMemory,
+        offset: DeviceSize,
+        size: DeviceSize,
+        flags: AllocFlag,
+    ) -> Alloc {
         // does not link:
         // Self::from_native(GrVkAlloc::new1(memory, offset, size, flags.bits()))
 
@@ -66,11 +80,14 @@ pub struct YcbcrConversionInfo {
     pub chroma_filter: Filter,
     pub force_explicit_reconsturction: Bool32,
     pub external_format: u64,
-    pub external_format_features: FomatFeatureFlags
+    pub external_format_features: FomatFeatureFlags,
 }
 
 impl NativeTransmutable<GrVkYcbcrConversionInfo> for YcbcrConversionInfo {}
-#[test] fn test_ycbcr_conversion_info_layout() { YcbcrConversionInfo::test_layout() }
+#[test]
+fn test_ycbcr_conversion_info_layout() {
+    YcbcrConversionInfo::test_layout()
+}
 
 impl Default for YcbcrConversionInfo {
     fn default() -> Self {
@@ -85,7 +102,6 @@ impl PartialEq for YcbcrConversionInfo {
 }
 
 impl YcbcrConversionInfo {
-
     pub fn new(
         ycrbcr_model: SamplerYcbcrModelConversion,
         ycbcr_range: SamplerYcbcrRange,
@@ -94,7 +110,8 @@ impl YcbcrConversionInfo {
         chroma_filter: Filter,
         force_explicit_reconsturction: Bool32,
         external_format: u64,
-        external_format_features: FomatFeatureFlags) -> YcbcrConversionInfo {
+        external_format_features: FomatFeatureFlags,
+    ) -> YcbcrConversionInfo {
         // does not link:
         /*
         YcbcrConversionInfo::from_native(unsafe {
@@ -119,7 +136,8 @@ impl YcbcrConversionInfo {
                 chroma_filter,
                 force_explicit_reconsturction,
                 external_format,
-                external_format_features);
+                external_format_features,
+            );
 
             YcbcrConversionInfo::from_native(ci)
         }
@@ -140,11 +158,14 @@ pub struct ImageInfo {
     pub format: Format,
     pub level_count: u32,
     pub current_queue_familiy: u32,
-    pub ycbcr_conversion_info: YcbcrConversionInfo
+    pub ycbcr_conversion_info: YcbcrConversionInfo,
 }
 
 impl NativeTransmutable<GrVkImageInfo> for ImageInfo {}
-#[test] fn test_image_info_layout() { ImageInfo::test_layout() }
+#[test]
+fn test_image_info_layout() {
+    ImageInfo::test_layout()
+}
 
 impl Default for ImageInfo {
     fn default() -> Self {
@@ -159,7 +180,6 @@ impl PartialEq for ImageInfo {
 }
 
 impl ImageInfo {
-
     pub unsafe fn from_image(
         image: Image,
         alloc: Alloc,
@@ -168,16 +188,17 @@ impl ImageInfo {
         format: Format,
         level_count: u32,
         current_queue_family: Option<u32>,
-        ycbcr_conversion_info: Option<YcbcrConversionInfo>) -> ImageInfo
-    {
+        ycbcr_conversion_info: Option<YcbcrConversionInfo>,
+    ) -> ImageInfo {
         // originally defined as a C macro in vulkan_core.h
         // and therefore not present in the bindings.
-        const VK_QUEUE_FAMILY_IGNORED : u32 = 0;
+        const VK_QUEUE_FAMILY_IGNORED: u32 = 0;
 
         let current_queue_family = current_queue_family.unwrap_or(VK_QUEUE_FAMILY_IGNORED);
         let ycbcr_conversion_info = ycbcr_conversion_info.unwrap_or_default();
         let mut image_info = mem::uninitialized();
-        C_GrVkImageInfo_Construct(&mut image_info,
+        C_GrVkImageInfo_Construct(
+            &mut image_info,
             image,
             alloc.native(),
             tiling,
@@ -185,7 +206,8 @@ impl ImageInfo {
             format,
             level_count,
             current_queue_family,
-            ycbcr_conversion_info.native());
+            ycbcr_conversion_info.native(),
+        );
         ImageInfo::from_native(image_info)
     }
 
@@ -200,20 +222,19 @@ impl ImageInfo {
     }
 }
 
-
 // TODO: Tried to use CStr here, but &CStr needs a lifetime parameter
 //       which would make the whole GetProc trait generic.
 #[derive(Copy, Clone, Debug)]
 pub enum GetProcOf {
     Instance(Instance, *const raw::c_char),
-    Device(Device, *const raw::c_char)
+    Device(Device, *const raw::c_char),
 }
 
 impl GetProcOf {
     pub unsafe fn name(&self) -> &CStr {
         match *self {
             GetProcOf::Instance(_, name) => CStr::from_ptr(name),
-            GetProcOf::Device(_, name) => CStr::from_ptr(name)
+            GetProcOf::Device(_, name) => CStr::from_ptr(name),
         }
     }
 }
@@ -223,9 +244,8 @@ impl GetProcOf {
 pub type GetProcResult = *const raw::c_void;
 
 // GetProc is a trait alias for Fn...
-pub trait GetProc : Fn(GetProcOf) -> GetProcResult {}
-impl<T> GetProc for T
-    where T: Fn(GetProcOf) -> GetProcResult {}
+pub trait GetProc: Fn(GetProcOf) -> GetProcResult {}
+impl<T> GetProc for T where T: Fn(GetProcOf) -> GetProcResult {}
 
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
@@ -235,8 +255,11 @@ pub struct DrawableInfo {
     compatible_render_pass: RenderPass,
     format: Format,
     draw_bounds: *mut Rect2D,
-    image: Image
+    image: Image,
 }
 
 impl NativeTransmutable<GrVkDrawableInfo> for DrawableInfo {}
-#[test] fn test_drawable_info_layout() { DrawableInfo::test_layout() }
+#[test]
+fn test_drawable_info_layout() {
+    DrawableInfo::test_layout()
+}

@@ -15,8 +15,11 @@ pub enum EncodedImageFormat {
     KTX = SkEncodedImageFormat::kKTX as _,
     ASTC = SkEncodedImageFormat::kASTC as _,
     DNG = SkEncodedImageFormat::kDNG as _,
-    HEIF = SkEncodedImageFormat::kHEIF as _
+    HEIF = SkEncodedImageFormat::kHEIF as _,
 }
 
 impl NativeTransmutable<SkEncodedImageFormat> for EncodedImageFormat {}
-#[test] fn test_encoded_image_format_layout() { EncodedImageFormat::test_layout() }
+#[test]
+fn test_encoded_image_format_layout() {
+    EncodedImageFormat::test_layout()
+}

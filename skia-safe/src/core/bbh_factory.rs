@@ -11,5 +11,4 @@ impl NativeDrop for SkBBHFactory {
 }
 
 // TODO: complete the implementation
-impl Handle<SkBBHFactory> {
-}
+impl Handle<SkBBHFactory> {}

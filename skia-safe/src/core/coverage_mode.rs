@@ -8,8 +8,11 @@ pub enum CoverageMode {
     Intersect = SkCoverageMode::kIntersect as _,
     Difference = SkCoverageMode::kDifference as _,
     ReverseDifference = SkCoverageMode::kReverseDifference as _,
-    Xor = SkCoverageMode::kXor as _
+    Xor = SkCoverageMode::kXor as _,
 }
 
 impl NativeTransmutable<SkCoverageMode> for CoverageMode {}
-#[test] fn test_coverage_mode_layout() { CoverageMode::test_layout() }
+#[test]
+fn test_coverage_mode_layout() {
+    CoverageMode::test_layout()
+}

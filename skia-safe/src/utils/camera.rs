@@ -327,10 +327,7 @@ impl View3D {
     }
 
     pub fn apply_to_canvas(&self, mut canvas: impl AsMut<Canvas>) -> &Self {
-        unsafe {
-            self.native()
-                .applyToCanvas(canvas.as_mut().native_mut())
-        }
+        unsafe { self.native().applyToCanvas(canvas.as_mut().native_mut()) }
         self
     }
 
@@ -342,8 +339,8 @@ impl View3D {
 
 #[test]
 fn test_canvas_passing_syntax() {
-    use crate::Surface;
     use crate::utils::new_null_canvas;
+    use crate::Surface;
 
     let mut null_canvas = new_null_canvas();
     let view = View3D::default();

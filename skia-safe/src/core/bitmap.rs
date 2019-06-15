@@ -1,8 +1,16 @@
 use crate::prelude::*;
-use std::ffi;
-use crate::{Paint, Color, ColorType, AlphaType, ColorSpace, IRect, ImageInfo, ISize, IPoint, PixelRef, Pixmap};
-use skia_bindings::{C_SkBitmap_destruct, SkBitmap, C_SkBitmap_Construct, C_SkBitmap_readyToDraw, C_SkBitmap_tryAllocN32Pixels, C_SkBitmap_tryAllocPixels, C_SkBitmap_eraseARGB, C_SkBitmap_extractAlpha, SkBitmap_AllocFlags_kZeroPixels_AllocFlag, C_SkBitmap_setPixelRef, C_SkBitmap_makeShader};
+use crate::{
+    AlphaType, Color, ColorSpace, ColorType, IPoint, IRect, ISize, ImageInfo, Paint, PixelRef,
+    Pixmap,
+};
 use crate::{Matrix, Shader, TileMode};
+use skia_bindings::{
+    C_SkBitmap_Construct, C_SkBitmap_destruct, C_SkBitmap_eraseARGB, C_SkBitmap_extractAlpha,
+    C_SkBitmap_makeShader, C_SkBitmap_readyToDraw, C_SkBitmap_setPixelRef,
+    C_SkBitmap_tryAllocN32Pixels, C_SkBitmap_tryAllocPixels, SkBitmap,
+    SkBitmap_AllocFlags_kZeroPixels_AllocFlag,
+};
+use std::ffi;
 
 pub type Bitmap = Handle<SkBitmap>;
 
@@ -30,15 +38,11 @@ impl Handle<SkBitmap> {
     }
 
     pub fn pixmap(&self) -> &Pixmap {
-        Pixmap::from_native_ref(unsafe {
-            &*self.native().pixmap()
-        })
+        Pixmap::from_native_ref(unsafe { &*self.native().pixmap() })
     }
 
     pub fn info(&self) -> &ImageInfo {
-        ImageInfo::from_native_ref(unsafe {
-            &*self.native().info()
-        })
+        ImageInfo::from_native_ref(unsafe { &*self.native().info() })
     }
 
     pub fn width(&self) -> i32 {
@@ -76,7 +80,6 @@ impl Handle<SkBitmap> {
     #[deprecated(since = "0.12.0", note = "use is_empty()")]
     pub fn empty(&self) -> bool {
         self.is_empty()
-
     }
 
     pub fn is_empty(&self) -> bool {
@@ -149,13 +152,25 @@ impl Handle<SkBitmap> {
     }
 
     #[must_use]
-    pub fn set_info(&mut self, image_info: &ImageInfo, row_bytes: impl Into<Option<usize>>) -> bool {
-        unsafe { self.native_mut().setInfo(image_info.native(), row_bytes.into().unwrap_or(0)) }
+    pub fn set_info(
+        &mut self,
+        image_info: &ImageInfo,
+        row_bytes: impl Into<Option<usize>>,
+    ) -> bool {
+        unsafe {
+            self.native_mut()
+                .setInfo(image_info.native(), row_bytes.into().unwrap_or(0))
+        }
     }
 
     #[must_use]
     pub fn try_alloc_pixels_flags(&mut self, image_info: &ImageInfo) -> bool {
-        unsafe { self.native_mut().tryAllocPixelsFlags(image_info.native(), SkBitmap_AllocFlags_kZeroPixels_AllocFlag as _) }
+        unsafe {
+            self.native_mut().tryAllocPixelsFlags(
+                image_info.native(),
+                SkBitmap_AllocFlags_kZeroPixels_AllocFlag as _,
+            )
+        }
     }
 
     pub fn alloc_pixels_flags(&mut self, image_info: &ImageInfo) {
@@ -165,35 +180,65 @@ impl Handle<SkBitmap> {
     }
 
     #[must_use]
-    pub fn try_alloc_pixels_info(&mut self, image_info: &ImageInfo, row_bytes: impl Into<Option<usize>>) -> bool {
+    pub fn try_alloc_pixels_info(
+        &mut self,
+        image_info: &ImageInfo,
+        row_bytes: impl Into<Option<usize>>,
+    ) -> bool {
         match row_bytes.into() {
-            Some(row_bytes) =>
-                unsafe { self.native_mut().tryAllocPixels(image_info.native(), row_bytes) },
-            None =>
-                unsafe { self.native_mut().tryAllocPixels1(image_info.native()) },
+            Some(row_bytes) => unsafe {
+                self.native_mut()
+                    .tryAllocPixels(image_info.native(), row_bytes)
+            },
+            None => unsafe { self.native_mut().tryAllocPixels1(image_info.native()) },
         }
     }
 
-    pub fn alloc_pixels_info(&mut self, image_info: &ImageInfo, row_bytes: impl Into<Option<usize>>) {
+    pub fn alloc_pixels_info(
+        &mut self,
+        image_info: &ImageInfo,
+        row_bytes: impl Into<Option<usize>>,
+    ) {
         self.try_alloc_pixels_info(image_info, row_bytes.into())
             .to_option()
             .expect("Bitmap::alloc_pixels_info failed");
     }
 
     #[must_use]
-    pub fn try_alloc_n32_pixels(&mut self, (width, height): (i32, i32), is_opaque: impl Into<Option<bool>>) -> bool {
+    pub fn try_alloc_n32_pixels(
+        &mut self,
+        (width, height): (i32, i32),
+        is_opaque: impl Into<Option<bool>>,
+    ) -> bool {
         // accessing the instance method causes a linker error.
-        unsafe { C_SkBitmap_tryAllocN32Pixels(self.native_mut(), width, height, is_opaque.into().unwrap_or(false)) }
+        unsafe {
+            C_SkBitmap_tryAllocN32Pixels(
+                self.native_mut(),
+                width,
+                height,
+                is_opaque.into().unwrap_or(false),
+            )
+        }
     }
 
-    pub fn alloc_n32_pixels(&mut self, (width, height): (i32, i32), is_opaque: impl Into<Option<bool>>) {
+    pub fn alloc_n32_pixels(
+        &mut self,
+        (width, height): (i32, i32),
+        is_opaque: impl Into<Option<bool>>,
+    ) {
         self.try_alloc_n32_pixels((width, height), is_opaque.into().unwrap_or(false))
             .to_option()
             .expect("Bitmap::alloc_n32_pixels_failed")
     }
 
-    pub unsafe fn install_pixels(&mut self, image_info: &ImageInfo, pixels: *mut ffi::c_void, row_bytes: usize) -> bool {
-        self.native_mut().installPixels1(image_info.native(), pixels, row_bytes)
+    pub unsafe fn install_pixels(
+        &mut self,
+        image_info: &ImageInfo,
+        pixels: *mut ffi::c_void,
+        row_bytes: usize,
+    ) -> bool {
+        self.native_mut()
+            .installPixels1(image_info.native(), pixels, row_bytes)
     }
 
     // TODO: setPixels()?
@@ -214,9 +259,7 @@ impl Handle<SkBitmap> {
 
     // TODO: find a way to return pixel ref without increasing the ref count here?
     pub fn pixel_ref(&self) -> Option<PixelRef> {
-        PixelRef::from_unshared_ptr(unsafe {
-            self.native().pixelRef()
-        })
+        PixelRef::from_unshared_ptr(unsafe { self.native().pixelRef() })
     }
 
     pub fn pixel_ref_origin(&self) -> IPoint {
@@ -225,7 +268,14 @@ impl Handle<SkBitmap> {
 
     pub fn set_pixel_ref(&mut self, pixel_ref: Option<&PixelRef>, offset: impl Into<IPoint>) {
         let offset = offset.into();
-        unsafe { C_SkBitmap_setPixelRef(self.native_mut(), pixel_ref.shared_ptr(), offset.x, offset.y) }
+        unsafe {
+            C_SkBitmap_setPixelRef(
+                self.native_mut(),
+                pixel_ref.shared_ptr(),
+                offset.x,
+                offset.y,
+            )
+        }
     }
 
     #[deprecated(since = "0.12.0", note = "use is_ready_to_draw()")]
@@ -254,7 +304,10 @@ impl Handle<SkBitmap> {
     }
 
     pub fn erase(&self, c: impl Into<Color>, area: impl AsRef<IRect>) {
-        unsafe { self.native().erase(c.into().into_native(), area.as_ref().native()) }
+        unsafe {
+            self.native()
+                .erase(c.into().into_native(), area.as_ref().native())
+        }
     }
 
     pub fn get_color(&self, p: impl Into<IPoint>) -> Color {
@@ -276,11 +329,22 @@ impl Handle<SkBitmap> {
     // TODO: get_addr_16()?
 
     pub fn extract_subset(&self, dst: &mut Self, subset: impl AsRef<IRect>) -> bool {
-        unsafe { self.native().extractSubset(dst.native_mut(), subset.as_ref().native() ) }
+        unsafe {
+            self.native()
+                .extractSubset(dst.native_mut(), subset.as_ref().native())
+        }
     }
 
-    pub unsafe fn read_pixels(&self, dst_info: &ImageInfo, dst_pixels: *mut ffi::c_void, dst_row_bytes: usize, src_x: i32, src_y: i32) -> bool {
-        self.native().readPixels(dst_info.native(), dst_pixels, dst_row_bytes, src_x, src_y)
+    pub unsafe fn read_pixels(
+        &self,
+        dst_info: &ImageInfo,
+        dst_pixels: *mut ffi::c_void,
+        dst_row_bytes: usize,
+        src_x: i32,
+        src_y: i32,
+    ) -> bool {
+        self.native()
+            .readPixels(dst_info.native(), dst_pixels, dst_row_bytes, src_x, src_y)
     }
 
     // TOOD: read_pixels(Pixmap)
@@ -288,30 +352,50 @@ impl Handle<SkBitmap> {
 
     pub fn extract_alpha(&self, dst: &mut Self, paint: Option<&Paint>) -> Option<IPoint> {
         let mut offset = IPoint::default();
-        unsafe { C_SkBitmap_extractAlpha(self.native(), dst.native_mut(), paint.native_ptr_or_null(), offset.native_mut()) }
-            .if_true_some(offset)
+        unsafe {
+            C_SkBitmap_extractAlpha(
+                self.native(),
+                dst.native_mut(),
+                paint.native_ptr_or_null(),
+                offset.native_mut(),
+            )
+        }
+        .if_true_some(offset)
     }
 
     pub fn peek_pixels(&self) -> Option<Borrows<Pixmap>> {
         let mut pixmap = Pixmap::default();
-        unsafe {
-            self.native().peekPixels(pixmap.native_mut())
-        }.if_true_then_some(|| pixmap.borrows(self))
+        unsafe { self.native().peekPixels(pixmap.native_mut()) }
+            .if_true_then_some(|| pixmap.borrows(self))
     }
 
     #[deprecated(since = "0.12.0", note = "use to_shader()")]
-    pub fn as_shader<'a>(&self, tile_modes: impl Into<Option<(TileMode, TileMode)>>, local_matrix: impl Into<Option<&'a Matrix>>) -> Shader {
+    pub fn as_shader<'a>(
+        &self,
+        tile_modes: impl Into<Option<(TileMode, TileMode)>>,
+        local_matrix: impl Into<Option<&'a Matrix>>,
+    ) -> Shader {
         self.to_shader(tile_modes, local_matrix)
     }
 
-    pub fn to_shader<'a>(&self, tile_modes: impl Into<Option<(TileMode, TileMode)>>, local_matrix: impl Into<Option<&'a Matrix>>) -> Shader {
+    pub fn to_shader<'a>(
+        &self,
+        tile_modes: impl Into<Option<(TileMode, TileMode)>>,
+        local_matrix: impl Into<Option<&'a Matrix>>,
+    ) -> Shader {
         let tile_modes = tile_modes.into();
         let local_matrix = local_matrix.into();
         Shader::from_ptr(unsafe {
             let tmx = tile_modes.map(|tm| tm.0).unwrap_or_default();
             let tmy = tile_modes.map(|tm| tm.1).unwrap_or_default();
-            C_SkBitmap_makeShader(self.native(), tmx.into_native(), tmy.into_native(), local_matrix.native_ptr_or_null())
-        }).unwrap()
+            C_SkBitmap_makeShader(
+                self.native(),
+                tmx.into_native(),
+                tmy.into_native(),
+                local_matrix.native_ptr_or_null(),
+            )
+        })
+        .unwrap()
     }
 }
 

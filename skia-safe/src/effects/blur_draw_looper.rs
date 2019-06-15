@@ -3,11 +3,7 @@ use crate::{scalar, Color, Color4f, ColorSpace, DrawLooper, Vector};
 use skia_bindings::{C_SkBlurDrawLooper_Make, C_SkBlurDrawLooper_Make2, SkDrawLooper};
 
 impl RCHandle<SkDrawLooper> {
-    pub fn blur(
-        color: impl Into<Color>,
-        sigma: scalar,
-        delta: impl Into<Vector>,
-    ) -> Option<Self> {
+    pub fn blur(color: impl Into<Color>, sigma: scalar, delta: impl Into<Vector>) -> Option<Self> {
         new(color, sigma, delta)
     }
 
@@ -23,11 +19,7 @@ impl RCHandle<SkDrawLooper> {
 
 // TODO: we already support a similar passing of either a Color or a pair of Color4f/ColorSpace in GradientShaderColors, can we use that here?
 
-pub fn new(
-    color: impl Into<Color>,
-    sigma: scalar,
-    delta: impl Into<Vector>,
-) -> Option<DrawLooper> {
+pub fn new(color: impl Into<Color>, sigma: scalar, delta: impl Into<Vector>) -> Option<DrawLooper> {
     let delta = delta.into();
     DrawLooper::from_ptr(unsafe {
         C_SkBlurDrawLooper_Make(color.into().into_native(), sigma, delta.x, delta.y)

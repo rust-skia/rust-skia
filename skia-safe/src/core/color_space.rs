@@ -1,9 +1,6 @@
-use super::{Matrix44, Data};
+use super::{Data, Matrix44};
 use crate::prelude::*;
-use skia_bindings::{
-    SkColorSpace,
-    SkColorSpacePrimaries,
-};
+use skia_bindings::{SkColorSpace, SkColorSpacePrimaries};
 
 #[derive(Clone, PartialEq, Debug)]
 #[repr(C)]
@@ -15,11 +12,14 @@ pub struct ColorSpacePrimaries {
     bx: f32,
     by: f32,
     wx: f32,
-    wy: f32
+    wy: f32,
 }
 
 impl NativeTransmutable<SkColorSpacePrimaries> for ColorSpacePrimaries {}
-#[test] fn test_color_space_primaries_layout() { ColorSpacePrimaries::test_layout() }
+#[test]
+fn test_color_space_primaries_layout() {
+    ColorSpacePrimaries::test_layout()
+}
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct ColorSpaceTransferFn {
@@ -29,7 +29,7 @@ pub struct ColorSpaceTransferFn {
     pub c: f32,
     pub d: f32,
     pub e: f32,
-    pub f: f32
+    pub f: f32,
 }
 
 // TODO: Make the binding generator provide all these constants.
@@ -43,7 +43,7 @@ pub mod named_transfer_fn {
         c: 1.0 / 12.92,
         d: 0.04045,
         e: 0.0,
-        f: 0.0
+        f: 0.0,
     };
 
     pub const DOT22: ColorSpaceTransferFn = ColorSpaceTransferFn {
@@ -53,7 +53,7 @@ pub mod named_transfer_fn {
         c: 0.0,
         d: 0.0,
         e: 0.0,
-        f: 0.0
+        f: 0.0,
     };
 
     pub const LINEAR: ColorSpaceTransferFn = ColorSpaceTransferFn {
@@ -63,7 +63,7 @@ pub mod named_transfer_fn {
         c: 0.0,
         d: 0.0,
         e: 0.0,
-        f: 0.0
+        f: 0.0,
     };
 }
 
@@ -100,8 +100,7 @@ impl ColorSpace {
 
     pub fn to_xyzd50(&self) -> Option<Matrix44> {
         let mut matrix = Matrix44::default();
-        unsafe { self.native().toXYZD50(matrix.native_mut()) }
-            .if_true_some(matrix)
+        unsafe { self.native().toXYZD50(matrix.native_mut()) }.if_true_some(matrix)
     }
 
     pub fn to_xyzd50_hash(&self) -> XYZD50Hash {
@@ -112,20 +111,19 @@ impl ColorSpace {
     pub fn with_linear_gamma(&self) -> ColorSpace {
         ColorSpace::from_ptr(unsafe {
             skia_bindings::C_SkColorSpace_makeLinearGamma(self.native())
-        }).unwrap()
+        })
+        .unwrap()
     }
 
     #[must_use]
     pub fn with_srgb_gamma(&self) -> ColorSpace {
-        ColorSpace::from_ptr(unsafe {
-            skia_bindings::C_SkColorSpace_makeSRGBGamma(self.native())
-        }).unwrap()
+        ColorSpace::from_ptr(unsafe { skia_bindings::C_SkColorSpace_makeSRGBGamma(self.native()) })
+            .unwrap()
     }
 
     pub fn with_color_spin(&self) -> ColorSpace {
-        ColorSpace::from_ptr(unsafe {
-            skia_bindings::C_SkColorSpace_makeColorSpin(self.native())
-        }).unwrap()
+        ColorSpace::from_ptr(unsafe { skia_bindings::C_SkColorSpace_makeColorSpin(self.native()) })
+            .unwrap()
     }
 
     pub fn is_srgb(&self) -> bool {
@@ -133,9 +131,7 @@ impl ColorSpace {
     }
 
     pub fn serialize(&self) -> Data {
-        Data::from_ptr(unsafe {
-            skia_bindings::C_SkColorSpace_serialize(self.native())
-        }).unwrap()
+        Data::from_ptr(unsafe { skia_bindings::C_SkColorSpace_serialize(self.native()) }).unwrap()
     }
 
     // TODO: writeToMemory()?
@@ -144,7 +140,8 @@ impl ColorSpace {
         let bytes = data.as_bytes();
         ColorSpace::from_ptr(unsafe {
             skia_bindings::C_SkColorSpace_Deserialize(bytes.as_ptr() as _, bytes.len())
-        }).unwrap()
+        })
+        .unwrap()
     }
 
     // TODO: transferFn()

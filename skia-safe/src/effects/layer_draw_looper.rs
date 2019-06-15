@@ -78,10 +78,7 @@ impl Builder {
         }
     }
 
-    pub fn add_layer_on_top(
-        &mut self,
-        layer_info: &LayerInfo,
-    ) -> &mut Handle<SkPaint> {
+    pub fn add_layer_on_top(&mut self, layer_info: &LayerInfo) -> &mut Handle<SkPaint> {
         unsafe { transmute_ref_mut(&mut *self.native_mut().addLayerOnTop(&layer_info.to_native())) }
     }
 

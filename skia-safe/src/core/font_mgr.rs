@@ -163,7 +163,11 @@ impl RCHandle<SkFontMgr> {
         self.new_from_data(bytes, ttc_index)
     }
 
-    pub fn new_from_data(&self, bytes: &[u8], ttc_index: impl Into<Option<usize>>) -> Option<Typeface> {
+    pub fn new_from_data(
+        &self,
+        bytes: &[u8],
+        ttc_index: impl Into<Option<usize>>,
+    ) -> Option<Typeface> {
         let mut stream = DynamicMemoryWStream::from_bytes(bytes);
         let mut stream = stream.detach_as_stream();
         Typeface::from_ptr(unsafe {

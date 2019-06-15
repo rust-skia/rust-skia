@@ -1,5 +1,5 @@
+use skia_safe::{Color, Data, EncodedImageFormat, Paint, PaintStyle, Path, Surface};
 use std::mem;
-use skia_safe::{Surface, Path, Paint, Color, EncodedImageFormat, PaintStyle, Data};
 
 pub struct Canvas {
     surface: Surface,
@@ -8,11 +8,8 @@ pub struct Canvas {
 }
 
 impl Canvas {
-
     pub fn new(width: i32, height: i32) -> Canvas {
-        let mut surface =
-            Surface::new_raster_n32_premul((width, height))
-                .expect("no surface!");
+        let mut surface = Surface::new_raster_n32_premul((width, height)).expect("no surface!");
         let path = Path::new();
         let mut paint = Paint::default();
         paint.set_color(Color::BLACK);

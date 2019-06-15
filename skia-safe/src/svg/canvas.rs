@@ -1,9 +1,7 @@
 use crate::interop::DynamicMemoryWStream;
 use crate::prelude::*;
 use crate::{Data, Rect};
-use skia_bindings::{
-    C_SkCanvas_delete, C_SkSVGCanvas_Make, SkCanvas,
-};
+use skia_bindings::{C_SkCanvas_delete, C_SkSVGCanvas_Make, SkCanvas};
 use std::ops::{Deref, DerefMut};
 use std::pin::Pin;
 use std::ptr;
@@ -40,13 +38,8 @@ impl Canvas {
     pub fn new(bounds: impl AsRef<Rect>) -> Canvas {
         let bounds = bounds.as_ref();
         let mut stream = Box::pin(DynamicMemoryWStream::new());
-        let canvas = unsafe {
-            C_SkSVGCanvas_Make(bounds.native(), &mut stream.native_mut()._base)
-        };
-        Canvas {
-            canvas,
-            stream,
-        }
+        let canvas = unsafe { C_SkSVGCanvas_Make(bounds.native(), &mut stream.native_mut()._base) };
+        Canvas { canvas, stream }
     }
 
     /// Ends the Canvas drawing and returns the resulting SVG.

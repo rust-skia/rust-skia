@@ -3,8 +3,8 @@
 //! The policy is to avoid exporting Skia streams and try to cover every use case by
 //! using Rust native Streams.
 
-use crate::Data;
 use crate::prelude::*;
+use crate::Data;
 use skia_bindings::{
     C_SkDynamicMemoryWStream_Construct, C_SkDynamicMemoryWStream_detachAsData,
     C_SkDynamicMemoryWStream_detachAsStream, C_SkMemoryStream_MakeDirect, C_SkStream_delete,

@@ -1,40 +1,28 @@
 use crate::prelude::*;
-use std::{mem, ptr};
-use skia_bindings::{
-    C_SkFont_makeWithSize,
-    C_SkFont_ConstructFromTypefaceWithSize,
-    C_SkFont_ConstructFromTypeface,
-    C_SkFont_Equals,
-    SkFont,
-    SkFont_Edging,
-    C_SkFont_destruct,
-    C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew,
-    C_SkFont_setTypeface,
-};
 use crate::{
-    Path,
-    Point,
-    Rect,
+    scalar, FontHinting, FontMetrics, GlyphId, Paint, Path, Point, Rect, TextEncoding, Typeface,
     Unichar,
-    TextEncoding,
-    GlyphId,
-    Typeface,
-    FontHinting,
-    Paint,
-    FontMetrics,
-    scalar
 };
+use skia_bindings::{
+    C_SkFont_ConstructFromTypeface, C_SkFont_ConstructFromTypefaceWithSize,
+    C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew, C_SkFont_Equals, C_SkFont_destruct,
+    C_SkFont_makeWithSize, C_SkFont_setTypeface, SkFont, SkFont_Edging,
+};
+use std::{mem, ptr};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
 pub enum Edging {
     Alias = SkFont_Edging::kAlias as _,
     AntiAlias = SkFont_Edging::kAntiAlias as _,
-    SubpixelAntiAlias = SkFont_Edging::kSubpixelAntiAlias as _
+    SubpixelAntiAlias = SkFont_Edging::kSubpixelAntiAlias as _,
 }
 
 impl NativeTransmutable<SkFont_Edging> for Edging {}
-#[test] fn test_font_edging_layout() { Edging::test_layout() }
+#[test]
+fn test_font_edging_layout() {
+    Edging::test_layout()
+}
 
 pub type Font = Handle<SkFont>;
 
@@ -57,32 +45,57 @@ impl Default for Font {
 }
 
 impl Handle<SkFont> {
-
     pub fn from_typeface(typeface: &Typeface, size: impl Into<Option<scalar>>) -> Self {
         match size.into() {
-            None =>
-                Self::construct(|font| unsafe {
-                    C_SkFont_ConstructFromTypeface(font, typeface.shared_native())
-                }),
-            Some(size) =>
-                Self::construct(|font| unsafe {
-                    C_SkFont_ConstructFromTypefaceWithSize(font, typeface.shared_native(), size)
-                })
+            None => Self::construct(|font| unsafe {
+                C_SkFont_ConstructFromTypeface(font, typeface.shared_native())
+            }),
+            Some(size) => Self::construct(|font| unsafe {
+                C_SkFont_ConstructFromTypefaceWithSize(font, typeface.shared_native(), size)
+            }),
         }
     }
 
     #[deprecated(since = "0.12.0", note = "use from_typeface()")]
     pub fn from_typeface_with_size(typeface: &Typeface, size: scalar) -> Self {
-        Self::construct(|font| unsafe { C_SkFont_ConstructFromTypefaceWithSize(font, typeface.shared_native(), size) })
+        Self::construct(|font| unsafe {
+            C_SkFont_ConstructFromTypefaceWithSize(font, typeface.shared_native(), size)
+        })
     }
 
     #[deprecated(since = "0.12.0", note = "use from_typeface_with_params()")]
-    pub fn from_typeface_with_size_scale_and_skew(typeface: &Typeface, size: scalar, scale: scalar, skew: scalar) -> Self {
-        Self::construct(|font| unsafe { C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(font, typeface.shared_native(), size, scale, skew) })
+    pub fn from_typeface_with_size_scale_and_skew(
+        typeface: &Typeface,
+        size: scalar,
+        scale: scalar,
+        skew: scalar,
+    ) -> Self {
+        Self::construct(|font| unsafe {
+            C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(
+                font,
+                typeface.shared_native(),
+                size,
+                scale,
+                skew,
+            )
+        })
     }
 
-    pub fn from_typeface_with_params(typeface: &Typeface, size: scalar, scale: scalar, skew: scalar) -> Self {
-        Self::construct(|font| unsafe { C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(font, typeface.shared_native(), size, scale, skew) })
+    pub fn from_typeface_with_params(
+        typeface: &Typeface,
+        size: scalar,
+        scale: scalar,
+        skew: scalar,
+    ) -> Self {
+        Self::construct(|font| unsafe {
+            C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(
+                font,
+                typeface.shared_native(),
+                size,
+                scale,
+                skew,
+            )
+        })
     }
 
     pub fn is_force_auto_hinting(&self) -> bool {
@@ -106,64 +119,46 @@ impl Handle<SkFont> {
     }
 
     pub fn set_force_autohinting(&mut self, force_auto_hinting: bool) -> &mut Self {
-        unsafe {
-            self.native_mut().setForceAutoHinting(force_auto_hinting)
-        }
+        unsafe { self.native_mut().setForceAutoHinting(force_auto_hinting) }
         self
     }
 
     pub fn set_embedded_bitmaps(&mut self, embedded_bitmaps: bool) -> &mut Self {
-        unsafe {
-            self.native_mut().setEmbeddedBitmaps(embedded_bitmaps)
-        }
+        unsafe { self.native_mut().setEmbeddedBitmaps(embedded_bitmaps) }
         self
     }
 
     pub fn set_subpixel(&mut self, subpixel: bool) -> &mut Self {
-        unsafe {
-            self.native_mut().setSubpixel(subpixel)
-        }
+        unsafe { self.native_mut().setSubpixel(subpixel) }
         self
     }
 
     pub fn set_linear_metrics(&mut self, linear_metrics: bool) -> &mut Self {
-        unsafe {
-            self.native_mut().setLinearMetrics(linear_metrics)
-        }
+        unsafe { self.native_mut().setLinearMetrics(linear_metrics) }
         self
     }
 
     pub fn set_embolden(&mut self, embolden: bool) -> &mut Self {
-        unsafe {
-            self.native_mut().setEmbolden(embolden)
-        }
+        unsafe { self.native_mut().setEmbolden(embolden) }
         self
     }
 
     pub fn edging(&self) -> Edging {
-        Edging::from_native(unsafe {
-            self.native().getEdging()
-        })
+        Edging::from_native(unsafe { self.native().getEdging() })
     }
 
     pub fn set_edging(&mut self, edging: Edging) -> &mut Self {
-        unsafe {
-            self.native_mut().setEdging(edging.into_native())
-        }
+        unsafe { self.native_mut().setEdging(edging.into_native()) }
         self
     }
 
     pub fn set_hinting(&mut self, hinting: FontHinting) -> &mut Self {
-        unsafe {
-            self.native_mut().setHinting(hinting.into_native())
-        }
+        unsafe { self.native_mut().setHinting(hinting.into_native()) }
         self
     }
 
     pub fn hinting(&self) -> FontHinting {
-        FontHinting::from_native(unsafe {
-            self.native().getHinting()
-        })
+        FontHinting::from_native(unsafe { self.native().getHinting() })
     }
 
     #[must_use]
@@ -178,15 +173,11 @@ impl Handle<SkFont> {
     }
 
     pub fn typeface(&self) -> Option<Typeface> {
-        Typeface::from_unshared_ptr(unsafe {
-            self.native().getTypeface()
-        })
+        Typeface::from_unshared_ptr(unsafe { self.native().getTypeface() })
     }
 
     pub fn typeface_or_default(&self) -> Typeface {
-        Typeface::from_unshared_ptr(unsafe {
-            self.native().getTypefaceOrDefault()
-        }).unwrap()
+        Typeface::from_unshared_ptr(unsafe { self.native().getTypefaceOrDefault() }).unwrap()
     }
 
     pub fn size(&self) -> scalar {
@@ -202,9 +193,7 @@ impl Handle<SkFont> {
     }
 
     pub fn set_typeface(&mut self, tf: &Typeface) -> &mut Self {
-        unsafe {
-            C_SkFont_setTypeface(self.native_mut(), tf.shared_native())
-        }
+        unsafe { C_SkFont_setTypeface(self.native_mut(), tf.shared_native()) }
         self
     }
 
@@ -223,19 +212,32 @@ impl Handle<SkFont> {
         self
     }
 
-    pub fn str_to_glyphs(&self, str: impl AsRef<str>, glyphs: &mut[GlyphId]) -> usize {
+    pub fn str_to_glyphs(&self, str: impl AsRef<str>, glyphs: &mut [GlyphId]) -> usize {
         self.text_to_glyphs(str.as_ref().as_bytes(), TextEncoding::UTF8, glyphs)
     }
 
-    pub fn text_to_glyphs(&self, text: &[u8], encoding: TextEncoding, glyphs: &mut[GlyphId]) -> usize {
-        unsafe { self.native().textToGlyphs(
-            text.as_ptr() as _,
-            text.len(),
-            encoding.into_native(),
-            glyphs.as_mut_ptr(),
-            // don't fail if glyphs.len() is too large to fit into an i32.
-            glyphs.len().min(i32::max_value().try_into().unwrap()).try_into().unwrap())
-            .try_into().unwrap()
+    pub fn text_to_glyphs(
+        &self,
+        text: &[u8],
+        encoding: TextEncoding,
+        glyphs: &mut [GlyphId],
+    ) -> usize {
+        unsafe {
+            self.native()
+                .textToGlyphs(
+                    text.as_ptr() as _,
+                    text.len(),
+                    encoding.into_native(),
+                    glyphs.as_mut_ptr(),
+                    // don't fail if glyphs.len() is too large to fit into an i32.
+                    glyphs
+                        .len()
+                        .min(i32::max_value().try_into().unwrap())
+                        .try_into()
+                        .unwrap(),
+                )
+                .try_into()
+                .unwrap()
         }
     }
 
@@ -244,13 +246,18 @@ impl Handle<SkFont> {
     }
 
     pub fn count_text(&self, text: &[u8], encoding: TextEncoding) -> usize {
-        unsafe { self.native().textToGlyphs(
-            text.as_ptr() as _,
-            text.len(),
-            encoding.into_native(),
-            ptr::null_mut(), i32::max_value()).try_into().unwrap()
+        unsafe {
+            self.native()
+                .textToGlyphs(
+                    text.as_ptr() as _,
+                    text.len(),
+                    encoding.into_native(),
+                    ptr::null_mut(),
+                    i32::max_value(),
+                )
+                .try_into()
+                .unwrap()
         }
-
     }
 
     // convenience function
@@ -262,7 +269,7 @@ impl Handle<SkFont> {
     // convenience function
     pub fn text_to_glyphs_vec(&self, text: &[u8], encoding: TextEncoding) -> Vec<GlyphId> {
         let count = self.count_text(text, encoding);
-        let mut glyphs : Vec<GlyphId> = vec![Default::default(); count];
+        let mut glyphs: Vec<GlyphId> = vec![Default::default(); count];
         let resulting_count = self.text_to_glyphs(text, encoding, glyphs.as_mut_slice());
         assert_eq!(count, resulting_count);
         glyphs
@@ -273,12 +280,22 @@ impl Handle<SkFont> {
         self.measure_text(bytes, TextEncoding::UTF8, paint)
     }
 
-    pub fn measure_text(&self, text: &[u8], encoding: TextEncoding, paint: Option<&Paint>) -> (scalar, Rect) {
+    pub fn measure_text(
+        &self,
+        text: &[u8],
+        encoding: TextEncoding,
+        paint: Option<&Paint>,
+    ) -> (scalar, Rect) {
         let mut bounds = Rect::default();
-        let width = unsafe { self.native()
-            .measureText1(
-                text.as_ptr() as _, text.len(), encoding.into_native(),
-                bounds.native_mut(), paint.native_ptr_or_null()) };
+        let width = unsafe {
+            self.native().measureText1(
+                text.as_ptr() as _,
+                text.len(),
+                encoding.into_native(),
+                bounds.native_mut(),
+                paint.native_ptr_or_null(),
+            )
+        };
 
         (width, bounds)
     }
@@ -293,7 +310,8 @@ impl Handle<SkFont> {
             self.native().unicharsToGlyphs(
                 uni.as_ptr(),
                 uni.len().try_into().unwrap(),
-                glyphs.as_mut_ptr())
+                glyphs.as_mut_ptr(),
+            )
         }
     }
 
@@ -312,7 +330,8 @@ impl Handle<SkFont> {
         glyphs: &[GlyphId],
         widths: Option<&mut [scalar]>,
         bounds: Option<&mut [Rect]>,
-        paint: Option<&Paint>) {
+        paint: Option<&Paint>,
+    ) {
         self.get_widths_bounds(glyphs, widths, bounds, paint)
     }
 
@@ -321,12 +340,17 @@ impl Handle<SkFont> {
         glyphs: &[GlyphId],
         mut widths: Option<&mut [scalar]>,
         mut bounds: Option<&mut [Rect]>,
-        paint: Option<&Paint>) {
+        paint: Option<&Paint>,
+    ) {
         let count = glyphs.len();
 
         {
-            if let Some(slice) = &widths { assert_eq!(count, slice.len()) };
-            if let Some(slice) = &bounds { assert_eq!(count, slice.len()) };
+            if let Some(slice) = &widths {
+                assert_eq!(count, slice.len())
+            };
+            if let Some(slice) = &bounds {
+                assert_eq!(count, slice.len())
+            };
         }
 
         let bounds_ptr = bounds.native_mut().as_ptr_or_null_mut();
@@ -337,7 +361,10 @@ impl Handle<SkFont> {
             self.native().getWidthsBounds(
                 glyphs.as_ptr(),
                 count.try_into().unwrap(),
-                widths_ptr, bounds_ptr, paint_ptr)
+                widths_ptr,
+                bounds_ptr,
+                paint_ptr,
+            )
         }
     }
 
@@ -366,7 +393,8 @@ impl Handle<SkFont> {
                 glyphs.as_ptr(),
                 count.try_into().unwrap(),
                 pos.native_mut().as_mut_ptr(),
-                origin.native().clone())
+                origin.native().clone(),
+            )
         }
     }
 
@@ -385,7 +413,8 @@ impl Handle<SkFont> {
                 glyphs.as_ptr(),
                 count.try_into().unwrap(),
                 xpos.as_mut_ptr(),
-                origin)
+                origin,
+            )
         }
     }
 
@@ -396,9 +425,7 @@ impl Handle<SkFont> {
 
     pub fn get_path(&self, glyph_id: GlyphId) -> Option<Path> {
         let mut path = Path::default();
-        unsafe {
-            self.native().getPath(glyph_id, path.native_mut())
-        }.if_true_some(path)
+        unsafe { self.native().getPath(glyph_id, path.native_mut()) }.if_true_some(path)
     }
 
     // TODO: getPaths() (needs a function to be passed, but supports a context).
@@ -410,8 +437,6 @@ impl Handle<SkFont> {
     }
 
     pub fn spacing(&self) -> scalar {
-        unsafe {
-            self.native().getMetrics(ptr::null_mut())
-        }
+        unsafe { self.native().getMetrics(ptr::null_mut()) }
     }
 }

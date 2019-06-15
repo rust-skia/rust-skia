@@ -1,5 +1,7 @@
 use crate::prelude::NativeTransmutable;
-use skia_bindings::{GrGLenum, C_GrGLTextureInfo_Equals, GrGLTextureInfo, GrGLFramebufferInfo, GrGLuint};
+use skia_bindings::{
+    C_GrGLTextureInfo_Equals, GrGLFramebufferInfo, GrGLTextureInfo, GrGLenum, GrGLuint,
+};
 
 pub type Enum = GrGLenum;
 pub type UInt = GrGLuint;
@@ -9,17 +11,18 @@ pub type UInt = GrGLuint;
 pub struct TextureInfo {
     pub target: Enum,
     pub id: Enum,
-    pub format: Enum
+    pub format: Enum,
 }
 
 impl NativeTransmutable<GrGLTextureInfo> for TextureInfo {}
-#[test] fn test_texture_info_layout() { TextureInfo::test_layout() }
+#[test]
+fn test_texture_info_layout() {
+    TextureInfo::test_layout()
+}
 
 impl PartialEq for TextureInfo {
     fn eq(&self, other: &Self) -> bool {
-        unsafe {
-            C_GrGLTextureInfo_Equals(self.native(), other.native())
-        }
+        unsafe { C_GrGLTextureInfo_Equals(self.native(), other.native()) }
     }
 }
 
@@ -29,7 +32,7 @@ impl Default for TextureInfo {
         TextureInfo {
             target: 0,
             id: 0,
-            format: 0
+            format: 0,
         }
     }
 }
@@ -39,7 +42,7 @@ impl TextureInfo {
         Self {
             target,
             id,
-            format: 0
+            format: 0,
         }
     }
 }
@@ -48,15 +51,21 @@ impl TextureInfo {
 #[repr(C)]
 pub struct FramebufferInfo {
     pub fboid: UInt,
-    pub format: Enum
+    pub format: Enum,
 }
 
 impl NativeTransmutable<GrGLFramebufferInfo> for FramebufferInfo {}
-#[test] fn test_framebuffer_info_layout() { FramebufferInfo::test_layout() }
+#[test]
+fn test_framebuffer_info_layout() {
+    FramebufferInfo::test_layout()
+}
 
 impl Default for FramebufferInfo {
     fn default() -> Self {
-        FramebufferInfo { fboid: 0, format: 0 }
+        FramebufferInfo {
+            fboid: 0,
+            format: 0,
+        }
     }
 }
 

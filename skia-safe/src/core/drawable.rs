@@ -1,6 +1,10 @@
 use crate::prelude::*;
-use crate::{gpu, Canvas, IRect, ImageInfo, Matrix, Point, Rect, NativeFlattenable};
-use skia_bindings::{C_SkDrawable_GpuDrawHandler_destruct, C_SkDrawable_GpuDrawHandler_draw, C_SkDrawable_snapGpuDrawHandler, SkDrawable, SkDrawable_GpuDrawHandler, SkRefCntBase, SkFlattenable, C_SkDrawable_Deserialize};
+use crate::{gpu, Canvas, IRect, ImageInfo, Matrix, NativeFlattenable, Point, Rect};
+use skia_bindings::{
+    C_SkDrawable_Deserialize, C_SkDrawable_GpuDrawHandler_destruct,
+    C_SkDrawable_GpuDrawHandler_draw, C_SkDrawable_snapGpuDrawHandler, SkDrawable,
+    SkDrawable_GpuDrawHandler, SkFlattenable, SkRefCntBase,
+};
 
 pub type Drawable = RCHandle<SkDrawable>;
 

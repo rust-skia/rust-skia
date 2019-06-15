@@ -1,34 +1,44 @@
-use std::ptr;
-use std::hash::{
-    Hash,
-    Hasher
-};
 use crate::prelude::*;
-use crate::{Color, FilterQuality, Color4f, ColorSpace, scalar, Path, Rect, ColorFilter, BlendMode, PathEffect, MaskFilter, Shader, ImageFilter, DrawLooper};
-use skia_bindings::{C_SkPaint_setMaskFilter, C_SkPaint_setPathEffect, C_SkPaint_setColorFilter, SkPaint_Cap, SkPaint, C_SkPaint_destruct, SkPaint_Style, SkPaint_Join, C_SkPaint_Equals, C_SkPaint_setShader, C_SkPaint_setImageFilter, C_SkPaint_setDrawLooper, C_SkPaint_getDrawLooper };
+use crate::{
+    scalar, BlendMode, Color, Color4f, ColorFilter, ColorSpace, DrawLooper, FilterQuality,
+    ImageFilter, MaskFilter, Path, PathEffect, Rect, Shader,
+};
+use skia_bindings::{
+    C_SkPaint_Equals, C_SkPaint_destruct, C_SkPaint_getDrawLooper, C_SkPaint_setColorFilter,
+    C_SkPaint_setDrawLooper, C_SkPaint_setImageFilter, C_SkPaint_setMaskFilter,
+    C_SkPaint_setPathEffect, C_SkPaint_setShader, SkPaint, SkPaint_Cap, SkPaint_Join,
+    SkPaint_Style,
+};
+use std::hash::{Hash, Hasher};
+use std::ptr;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(u8)]
 pub enum Style {
     Stroke = SkPaint_Style::kStroke_Style as _,
     Fill = SkPaint_Style::kFill_Style as _,
-    StrokeAndFill = SkPaint_Style::kStrokeAndFill_Style as _
+    StrokeAndFill = SkPaint_Style::kStrokeAndFill_Style as _,
 }
 
 impl NativeTransmutable<SkPaint_Style> for Style {}
-#[test] fn test_paint_style_layout() { Style::test_layout() }
-
+#[test]
+fn test_paint_style_layout() {
+    Style::test_layout()
+}
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
 pub enum Cap {
     Butt = SkPaint_Cap::kButt_Cap as _,
     Round = SkPaint_Cap::kRound_Cap as _,
-    Square = SkPaint_Cap::kSquare_Cap as _
+    Square = SkPaint_Cap::kSquare_Cap as _,
 }
 
 impl NativeTransmutable<SkPaint_Cap> for Cap {}
-#[test] fn test_paint_cap_layout() { Cap::test_layout() }
+#[test]
+fn test_paint_cap_layout() {
+    Cap::test_layout()
+}
 
 impl Default for Cap {
     fn default() -> Self {
@@ -46,7 +56,10 @@ pub enum Join {
 }
 
 impl NativeTransmutable<SkPaint_Join> for Join {}
-#[test] fn test_paint_join_layout() { Join::test_layout() }
+#[test]
+fn test_paint_join_layout() {
+    Join::test_layout()
+}
 
 impl Default for Join {
     fn default() -> Self {
@@ -88,7 +101,6 @@ impl Default for Handle<SkPaint> {
 }
 
 impl Handle<SkPaint> {
-
     pub fn reset(&mut self) -> &mut Self {
         unsafe { self.native_mut().reset() }
         self
@@ -144,11 +156,14 @@ impl Handle<SkPaint> {
         self
     }
 
-    pub fn set_color4f(&mut self, color: impl AsRef<Color4f>, color_space: &ColorSpace) -> &mut Self {
+    pub fn set_color4f(
+        &mut self,
+        color: impl AsRef<Color4f>,
+        color_space: &ColorSpace,
+    ) -> &mut Self {
         unsafe {
-            self.native_mut().setColor4f(
-                color.as_ref().native(),
-                color_space.native_mut_force() )
+            self.native_mut()
+                .setColor4f(color.as_ref().native(), color_space.native_mut_force())
         }
         self
     }
@@ -172,7 +187,10 @@ impl Handle<SkPaint> {
     }
 
     pub fn set_argb(&mut self, a: u8, r: u8, g: u8, b: u8) -> &mut Self {
-        unsafe { self.native_mut().setARGB(a.into(), r.into(), g.into(), b.into())}
+        unsafe {
+            self.native_mut()
+                .setARGB(a.into(), r.into(), g.into(), b.into())
+        }
         self
     }
 
@@ -212,105 +230,96 @@ impl Handle<SkPaint> {
         self
     }
 
-    pub fn get_fill_path(&self, src: &Path, cull_rect: Option<&Rect>, res_scale: impl Into<Option<scalar>>) -> Option<Path> {
+    pub fn get_fill_path(
+        &self,
+        src: &Path,
+        cull_rect: Option<&Rect>,
+        res_scale: impl Into<Option<scalar>>,
+    ) -> Option<Path> {
         let mut r = Path::default();
 
-        let cull_rect_ptr =
-            cull_rect
-                .map(|r| r.native() as *const _)
-                .unwrap_or(ptr::null());
+        let cull_rect_ptr = cull_rect
+            .map(|r| r.native() as *const _)
+            .unwrap_or(ptr::null());
 
-        unsafe { self.native().getFillPath(
-            src.native(),
-            r.native_mut(),
-            cull_rect_ptr,
-            res_scale.into().unwrap_or(1.0))
+        unsafe {
+            self.native().getFillPath(
+                src.native(),
+                r.native_mut(),
+                cull_rect_ptr,
+                res_scale.into().unwrap_or(1.0),
+            )
         }
         .if_true_some(r)
     }
 
     pub fn shader(&self) -> Option<Shader> {
-        Shader::from_unshared_ptr(unsafe {
-            self.native().getShader()
-        })
+        Shader::from_unshared_ptr(unsafe { self.native().getShader() })
     }
 
     pub fn set_shader<'a>(&mut self, shader: impl Into<Option<&'a Shader>>) -> &mut Self {
-        unsafe {
-            C_SkPaint_setShader(self.native_mut(), shader.into().shared_ptr())
-        }
+        unsafe { C_SkPaint_setShader(self.native_mut(), shader.into().shared_ptr()) }
         self
     }
 
     pub fn color_filter(&self) -> Option<ColorFilter> {
-        ColorFilter::from_unshared_ptr(unsafe {
-            self.native().getColorFilter()
-        })
+        ColorFilter::from_unshared_ptr(unsafe { self.native().getColorFilter() })
     }
 
-
-    pub fn set_color_filter<'a>(&mut self, color_filter: impl Into<Option<&'a ColorFilter>>) -> &mut Self {
-        unsafe {
-            C_SkPaint_setColorFilter(self.native_mut(), color_filter.into().shared_ptr())
-        }
+    pub fn set_color_filter<'a>(
+        &mut self,
+        color_filter: impl Into<Option<&'a ColorFilter>>,
+    ) -> &mut Self {
+        unsafe { C_SkPaint_setColorFilter(self.native_mut(), color_filter.into().shared_ptr()) }
         self
     }
 
     pub fn blend_mode(&self) -> BlendMode {
-        BlendMode::from_native(unsafe {
-            self.native().getBlendMode()
-        })
+        BlendMode::from_native(unsafe { self.native().getBlendMode() })
     }
 
     pub fn is_src_over(&self) -> bool {
-        unsafe {
-            self.native().isSrcOver()
-        }
+        unsafe { self.native().isSrcOver() }
     }
 
     pub fn set_blend_mode(&mut self, mode: BlendMode) -> &mut Self {
-        unsafe {
-            self.native_mut().setBlendMode(mode.into_native())
-        }
+        unsafe { self.native_mut().setBlendMode(mode.into_native()) }
         self
     }
 
     pub fn path_effect(&self) -> Option<PathEffect> {
-        PathEffect::from_unshared_ptr(unsafe {
-            self.native().getPathEffect()
-        })
+        PathEffect::from_unshared_ptr(unsafe { self.native().getPathEffect() })
     }
 
-    pub fn set_path_effect<'a>(&mut self, path_effect: impl Into<Option<&'a PathEffect>>) -> &mut Self {
-        unsafe {
-            C_SkPaint_setPathEffect(self.native_mut(), path_effect.into().shared_ptr())
-        }
+    pub fn set_path_effect<'a>(
+        &mut self,
+        path_effect: impl Into<Option<&'a PathEffect>>,
+    ) -> &mut Self {
+        unsafe { C_SkPaint_setPathEffect(self.native_mut(), path_effect.into().shared_ptr()) }
         self
     }
 
     pub fn mask_filter(&self) -> Option<MaskFilter> {
-        MaskFilter::from_unshared_ptr(unsafe {
-            self.native().getMaskFilter()
-        })
+        MaskFilter::from_unshared_ptr(unsafe { self.native().getMaskFilter() })
     }
 
-    pub fn set_mask_filter<'a>(&mut self, mask_filter: impl Into<Option<&'a MaskFilter>>) -> &mut Self {
-        unsafe {
-            C_SkPaint_setMaskFilter(self.native_mut(), mask_filter.into().shared_ptr())
-        }
+    pub fn set_mask_filter<'a>(
+        &mut self,
+        mask_filter: impl Into<Option<&'a MaskFilter>>,
+    ) -> &mut Self {
+        unsafe { C_SkPaint_setMaskFilter(self.native_mut(), mask_filter.into().shared_ptr()) }
         self
     }
 
     pub fn image_filter(&self) -> Option<ImageFilter> {
-        ImageFilter::from_unshared_ptr(unsafe {
-            self.native().getImageFilter()
-        })
+        ImageFilter::from_unshared_ptr(unsafe { self.native().getImageFilter() })
     }
 
-    pub fn set_image_filter<'a>(&mut self, image_filter: impl Into<Option<&'a ImageFilter>>) -> &mut Self {
-        unsafe {
-            C_SkPaint_setImageFilter(self.native_mut(), image_filter.into().shared_ptr())
-        }
+    pub fn set_image_filter<'a>(
+        &mut self,
+        image_filter: impl Into<Option<&'a ImageFilter>>,
+    ) -> &mut Self {
+        unsafe { C_SkPaint_setImageFilter(self.native_mut(), image_filter.into().shared_ptr()) }
         self
     }
 
@@ -322,7 +331,10 @@ impl Handle<SkPaint> {
         })
     }
 
-    pub fn set_draw_looper<'a>(&mut self, draw_looper: impl Into<Option<&'a DrawLooper>>) -> &mut Self {
+    pub fn set_draw_looper<'a>(
+        &mut self,
+        draw_looper: impl Into<Option<&'a DrawLooper>>,
+    ) -> &mut Self {
         unsafe {
             C_SkPaint_setDrawLooper(self.native_mut(), draw_looper.into().shared_ptr());
         }

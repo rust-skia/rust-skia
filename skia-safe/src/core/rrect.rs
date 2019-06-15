@@ -1,17 +1,7 @@
 use crate::prelude::*;
-use skia_bindings::{
-    C_SkRRect_Equals,
-    SkRRect,
-    SkRRect_Type,
-    SkRRect_Corner,
-};
-use crate::{
-    Rect,
-    Vector,
-    Matrix,
-    scalar
-};
-use std::{ptr, mem};
+use crate::{scalar, Matrix, Rect, Vector};
+use skia_bindings::{C_SkRRect_Equals, SkRRect, SkRRect_Corner, SkRRect_Type};
+use std::{mem, ptr};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -21,11 +11,14 @@ pub enum Type {
     Oval = SkRRect_Type::kOval_Type as _,
     Simple = SkRRect_Type::kSimple_Type as _,
     NinePatch = SkRRect_Type::kNinePatch_Type as _,
-    Complex = SkRRect_Type::kComplex_Type as _
+    Complex = SkRRect_Type::kComplex_Type as _,
 }
 
 impl NativeTransmutable<SkRRect_Type> for Type {}
-#[test] fn test_rrect_type_layout() { Type::test_layout() }
+#[test]
+fn test_rrect_type_layout() {
+    Type::test_layout()
+}
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -33,18 +26,24 @@ pub enum Corner {
     UpperLeft = SkRRect_Corner::kUpperLeft_Corner as _,
     UpperRight = SkRRect_Corner::kUpperRight_Corner as _,
     LowerRight = SkRRect_Corner::kLowerRight_Corner as _,
-    LowerLeft = SkRRect_Corner::kLowerLeft_Corner as _
+    LowerLeft = SkRRect_Corner::kLowerLeft_Corner as _,
 }
 
 impl NativeTransmutable<SkRRect_Corner> for Corner {}
-#[test] fn test_rrect_corner_layout() { Corner::test_layout() }
+#[test]
+fn test_rrect_corner_layout() {
+    Corner::test_layout()
+}
 
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct RRect(SkRRect);
 
 impl NativeTransmutable<SkRRect> for RRect {}
-#[test] fn test_rrect_layout() { RRect::test_layout() }
+#[test]
+fn test_rrect_layout() {
+    RRect::test_layout()
+}
 
 impl PartialEq for RRect {
     fn eq(&self, rhs: &Self) -> bool {
@@ -126,30 +125,33 @@ impl RRect {
     //       is it possible to find a proper convention here (new_ vs from_?)?
 
     pub fn new_rect(rect: impl AsRef<Rect>) -> Self {
-        Self::from_native(unsafe {
-            SkRRect::MakeRect(rect.as_ref().native())
-        })
+        Self::from_native(unsafe { SkRRect::MakeRect(rect.as_ref().native()) })
     }
 
     pub fn new_oval(oval: impl AsRef<Rect>) -> Self {
-        Self::from_native(unsafe {
-            SkRRect::MakeOval(oval.as_ref().native())
-        })
+        Self::from_native(unsafe { SkRRect::MakeOval(oval.as_ref().native()) })
     }
 
     pub fn new_rect_xy(rect: impl AsRef<Rect>, x_rad: scalar, y_rad: scalar) -> Self {
-        Self::from_native(unsafe {
-            SkRRect::MakeRectXY(rect.as_ref().native(), x_rad, y_rad)
-        })
+        Self::from_native(unsafe { SkRRect::MakeRectXY(rect.as_ref().native(), x_rad, y_rad) })
     }
 
-    pub fn new_nine_patch(rect: impl AsRef<Rect>, left_rad: scalar, top_rad: scalar, right_rad: scalar, bottom_rad: scalar) -> Self {
+    pub fn new_nine_patch(
+        rect: impl AsRef<Rect>,
+        left_rad: scalar,
+        top_rad: scalar,
+        right_rad: scalar,
+        bottom_rad: scalar,
+    ) -> Self {
         let mut r = Self::default();
         unsafe {
-            r.native_mut()
-                .setNinePatch(
-                    rect.as_ref().native(),
-                    left_rad, top_rad, right_rad, bottom_rad)
+            r.native_mut().setNinePatch(
+                rect.as_ref().native(),
+                left_rad,
+                top_rad,
+                right_rad,
+                bottom_rad,
+            )
         }
         r
     }
@@ -168,11 +170,29 @@ impl RRect {
     }
 
     pub fn set_rect_xy(&mut self, rect: impl AsRef<Rect>, x_rad: scalar, y_rad: scalar) {
-        unsafe { self.native_mut().setRectXY(rect.as_ref().native(), x_rad, y_rad) }
+        unsafe {
+            self.native_mut()
+                .setRectXY(rect.as_ref().native(), x_rad, y_rad)
+        }
     }
 
-    pub fn set_nine_patch(&mut self, rect: impl AsRef<Rect>, left_rad: scalar, top_rad: scalar, right_rad: scalar, bottom_rad: scalar) {
-        unsafe { self.native_mut().setNinePatch(rect.as_ref().native(), left_rad, top_rad, right_rad, bottom_rad) }
+    pub fn set_nine_patch(
+        &mut self,
+        rect: impl AsRef<Rect>,
+        left_rad: scalar,
+        top_rad: scalar,
+        right_rad: scalar,
+        bottom_rad: scalar,
+    ) {
+        unsafe {
+            self.native_mut().setNinePatch(
+                rect.as_ref().native(),
+                left_rad,
+                top_rad,
+                right_rad,
+                bottom_rad,
+            )
+        }
     }
 
     pub fn set_rect_radii(&mut self, rect: impl AsRef<Rect>, radii: &[Vector; 4]) {
@@ -187,15 +207,11 @@ impl RRect {
     }
 
     pub fn radii(&self, corner: Corner) -> Vector {
-        Vector::from_native(unsafe {
-            self.native().radii(corner.into_native())
-        })
+        Vector::from_native(unsafe { self.native().radii(corner.into_native()) })
     }
 
     pub fn bounds(&self) -> &Rect {
-        Rect::from_native_ref(unsafe {
-            &*self.native().getBounds()
-        })
+        Rect::from_native_ref(unsafe { &*self.native().getBounds() })
     }
 
     pub fn inset(&mut self, delta: impl Into<Vector>) {
@@ -239,7 +255,7 @@ impl RRect {
         unsafe { self.native().isValid() }
     }
 
-    pub const SIZE_IN_MEMORY : usize = mem::size_of::<Self>();
+    pub const SIZE_IN_MEMORY: usize = mem::size_of::<Self>();
 
     pub fn write_to_memory(&self, buffer: &mut Vec<u8>) {
         unsafe {
@@ -252,21 +268,19 @@ impl RRect {
 
     pub fn read_from_memory(&mut self, buffer: &[u8]) -> usize {
         unsafe {
-            self.native_mut().readFromMemory(buffer.as_ptr() as _, buffer.len())
+            self.native_mut()
+                .readFromMemory(buffer.as_ptr() as _, buffer.len())
         }
     }
 
     #[must_use]
     pub fn transform(&self, matrix: &Matrix) -> Option<Self> {
         let mut r = Self::default();
-        unsafe { self.native().transform(matrix.native(), r.native_mut()) }
-            .if_true_some(r)
+        unsafe { self.native().transform(matrix.native(), r.native_mut()) }.if_true_some(r)
     }
 
     pub fn dump(&self, as_hex: impl Into<Option<bool>>) {
-        unsafe {
-            self.native().dump(as_hex.into().unwrap_or_default())
-        }
+        unsafe { self.native().dump(as_hex.into().unwrap_or_default()) }
     }
 
     pub fn dump_hex(&self) {

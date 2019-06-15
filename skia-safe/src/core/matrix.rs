@@ -1,20 +1,8 @@
+use crate::prelude::*;
+use crate::{scalar, Point, Point3, RSXform, Rect, Scalar, Size, Vector};
+use skia_bindings::{C_SkMatrix_SubscriptMut, SkMatrix, SkMatrix_ScaleToFit};
 use std::mem;
 use std::ops::{Index, IndexMut};
-use crate::prelude::*;
-use crate::{
-    Vector,
-    Scalar,
-    Point,
-    Rect,
-    Point3,
-    Size,
-    scalar,
-    RSXform
-};
-use skia_bindings::{
-    SkMatrix_ScaleToFit,
-    SkMatrix, C_SkMatrix_SubscriptMut
-};
 
 bitflags! {
     pub struct TypeMask: u32 {
@@ -32,18 +20,24 @@ pub enum ScaleToFit {
     Fill = SkMatrix_ScaleToFit::kFill_ScaleToFit as _,
     Start = SkMatrix_ScaleToFit::kStart_ScaleToFit as _,
     Center = SkMatrix_ScaleToFit::kCenter_ScaleToFit as _,
-    End = SkMatrix_ScaleToFit::kEnd_ScaleToFit as _
+    End = SkMatrix_ScaleToFit::kEnd_ScaleToFit as _,
 }
 
 impl NativeTransmutable<SkMatrix_ScaleToFit> for ScaleToFit {}
-#[test] fn test_matrix_scale_to_fit_layout() { ScaleToFit::test_layout() }
+#[test]
+fn test_matrix_scale_to_fit_layout() {
+    ScaleToFit::test_layout()
+}
 
 #[derive(Copy, Clone, Debug)]
 #[repr(transparent)]
 pub struct Matrix(SkMatrix);
 
 impl NativeTransmutable<SkMatrix> for Matrix {}
-#[test] fn test_matrix_layout() { Matrix::test_layout() }
+#[test]
+fn test_matrix_layout() {
+    Matrix::test_layout()
+}
 
 impl PartialEq for Matrix {
     fn eq(&self, rhs: &Self) -> bool {
@@ -61,7 +55,7 @@ pub enum Member {
     TransY = 5,
     Persp0 = 6,
     Persp1 = 7,
-    Persp2 = 8
+    Persp2 = 8,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -71,7 +65,7 @@ pub enum AffineMember {
     SkewX = 2,
     ScaleY = 3,
     TransX = 4,
-    TransY = 5
+    TransY = 5,
 }
 
 impl Index<Member> for Matrix {
@@ -123,37 +117,36 @@ impl Default for Matrix {
 }
 
 impl Matrix {
-
     pub fn new_scale((sx, sy): (scalar, scalar)) -> Matrix {
-        Matrix::from_native(unsafe {
-            SkMatrix::MakeScale(sx, sy)
-        })
+        Matrix::from_native(unsafe { SkMatrix::MakeScale(sx, sy) })
     }
 
     pub fn new_trans(d: impl Into<Vector>) -> Matrix {
         let d = d.into();
-        Matrix::from_native(unsafe {
-            SkMatrix::MakeTrans(d.x, d.y)
-        })
+        Matrix::from_native(unsafe { SkMatrix::MakeTrans(d.x, d.y) })
     }
 
     #[allow(clippy::too_many_arguments)]
     pub fn new_all(
-        scale_x: scalar, skew_x: scalar, trans_x: scalar,
-        skew_y: scalar, scale_y: scalar, trans_y: scalar,
-        pers_0: scalar, pers_1: scalar, pers_2: scalar) -> Matrix {
+        scale_x: scalar,
+        skew_x: scalar,
+        trans_x: scalar,
+        skew_y: scalar,
+        scale_y: scalar,
+        trans_y: scalar,
+        pers_0: scalar,
+        pers_1: scalar,
+        pers_2: scalar,
+    ) -> Matrix {
         Matrix::from_native(unsafe {
             SkMatrix::MakeAll(
-                scale_x, skew_x, trans_x,
-                skew_y, scale_y, trans_y,
-                pers_0, pers_1, pers_2)
+                scale_x, skew_x, trans_x, skew_y, scale_y, trans_y, pers_0, pers_1, pers_2,
+            )
         })
     }
 
     pub fn get_type(&self) -> TypeMask {
-        TypeMask::from_bits_truncate(unsafe {
-            self.native().getType()
-        } as _)
+        TypeMask::from_bits_truncate(unsafe { self.native().getType() } as _)
     }
 
     pub fn is_identity(&self) -> bool {
@@ -302,15 +295,27 @@ impl Matrix {
     }
 
     #[allow(clippy::too_many_arguments)]
-    pub fn set_all(&mut self,
-                   scale_x: scalar, skew_x: scalar, trans_x: scalar,
-                   skew_y: scalar, scale_y: scalar, trans_y: scalar,
-                   persp_0: scalar, persp_1: scalar, persp_2: scalar) -> &mut Self {
-        unsafe { self.native_mut().setAll(scale_x, skew_x, trans_x, skew_y, scale_y, trans_y, persp_0, persp_1, persp_2) };
+    pub fn set_all(
+        &mut self,
+        scale_x: scalar,
+        skew_x: scalar,
+        trans_x: scalar,
+        skew_y: scalar,
+        scale_y: scalar,
+        trans_y: scalar,
+        persp_0: scalar,
+        persp_1: scalar,
+        persp_2: scalar,
+    ) -> &mut Self {
+        unsafe {
+            self.native_mut().setAll(
+                scale_x, skew_x, trans_x, skew_y, scale_y, trans_y, persp_0, persp_1, persp_2,
+            )
+        };
         self
     }
 
-    pub fn get_9(&self, buffer: &mut[scalar; 9]) {
+    pub fn get_9(&self, buffer: &mut [scalar; 9]) {
         unsafe { self.native().get9(buffer.as_mut_ptr()) }
     }
 
@@ -335,7 +340,11 @@ impl Matrix {
         self
     }
 
-    pub fn set_scale(&mut self, (sx, sy): (scalar, scalar), pivot: impl Into<Option<Point>>) -> &mut Self {
+    pub fn set_scale(
+        &mut self,
+        (sx, sy): (scalar, scalar),
+        pivot: impl Into<Option<Point>>,
+    ) -> &mut Self {
         let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().setScale(sx, sy, pivot.x, pivot.y) }
         self
@@ -347,9 +356,16 @@ impl Matrix {
         self
     }
 
-    pub fn set_sin_cos(&mut self, (sin_value, cos_value): (scalar, scalar), pivot: impl Into<Option<Point>>) -> &mut Self {
+    pub fn set_sin_cos(
+        &mut self,
+        (sin_value, cos_value): (scalar, scalar),
+        pivot: impl Into<Option<Point>>,
+    ) -> &mut Self {
         let pivot = pivot.into().unwrap_or_default();
-        unsafe { self.native_mut().setSinCos(sin_value, cos_value, pivot.x, pivot.y) }
+        unsafe {
+            self.native_mut()
+                .setSinCos(sin_value, cos_value, pivot.x, pivot.y)
+        }
         self
     }
 
@@ -358,7 +374,11 @@ impl Matrix {
         self
     }
 
-    pub fn set_skew(&mut self, (kx, ky): (scalar, scalar), pivot: impl Into<Option<Point>>) -> &mut Self {
+    pub fn set_skew(
+        &mut self,
+        (kx, ky): (scalar, scalar),
+        pivot: impl Into<Option<Point>>,
+    ) -> &mut Self {
         let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().setSkew(kx, ky, pivot.x, pivot.y) }
         self
@@ -375,7 +395,11 @@ impl Matrix {
         self
     }
 
-    pub fn pre_scale(&mut self, (sx, sy): (scalar, scalar), pivot: impl Into<Option<Point>>) -> &mut Self {
+    pub fn pre_scale(
+        &mut self,
+        (sx, sy): (scalar, scalar),
+        pivot: impl Into<Option<Point>>,
+    ) -> &mut Self {
         let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().preScale(sx, sy, pivot.x, pivot.y) }
         self
@@ -387,7 +411,11 @@ impl Matrix {
         self
     }
 
-    pub fn pre_skew(&mut self, (kx, ky): (scalar, scalar), pivot: impl Into<Option<Point>>) -> &mut Self {
+    pub fn pre_skew(
+        &mut self,
+        (kx, ky): (scalar, scalar),
+        pivot: impl Into<Option<Point>>,
+    ) -> &mut Self {
         let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().preSkew(kx, ky, pivot.x, pivot.y) }
         self
@@ -404,7 +432,11 @@ impl Matrix {
         self
     }
 
-    pub fn post_scale(&mut self, (sx, sy): (scalar, scalar), pivot: impl Into<Option<Point>>) -> &mut Self {
+    pub fn post_scale(
+        &mut self,
+        (sx, sy): (scalar, scalar),
+        pivot: impl Into<Option<Point>>,
+    ) -> &mut Self {
         let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().postScale(sx, sy, pivot.x, pivot.y) }
         self
@@ -420,7 +452,11 @@ impl Matrix {
         self
     }
 
-    pub fn post_skew(&mut self, (kx, ky): (scalar, scalar), pivot: impl Into<Option<Point>>) -> &mut Self {
+    pub fn post_skew(
+        &mut self,
+        (kx, ky): (scalar, scalar),
+        pivot: impl Into<Option<Point>>,
+    ) -> &mut Self {
         let pivot = pivot.into().unwrap_or_default();
         unsafe { self.native_mut().postSkew(kx, ky, pivot.x, pivot.y) }
         self
@@ -431,34 +467,52 @@ impl Matrix {
         self
     }
 
-    pub fn set_rect_to_rect(&mut self, src: impl AsRef<Rect>, dst: impl AsRef<Rect>, stf: ScaleToFit) -> bool {
-        unsafe { self.native_mut().setRectToRect(src.as_ref().native(), dst.as_ref().native(), stf.into_native()) }
+    pub fn set_rect_to_rect(
+        &mut self,
+        src: impl AsRef<Rect>,
+        dst: impl AsRef<Rect>,
+        stf: ScaleToFit,
+    ) -> bool {
+        unsafe {
+            self.native_mut().setRectToRect(
+                src.as_ref().native(),
+                dst.as_ref().native(),
+                stf.into_native(),
+            )
+        }
     }
 
-    pub fn from_rect_to_rect(src: impl AsRef<Rect>, dst: impl AsRef<Rect>, stf: ScaleToFit) -> Option<Matrix> {
+    pub fn from_rect_to_rect(
+        src: impl AsRef<Rect>,
+        dst: impl AsRef<Rect>,
+        stf: ScaleToFit,
+    ) -> Option<Matrix> {
         let mut m = Matrix::new_identity();
-        m.set_rect_to_rect(src, dst, stf)
-            .if_true_some(m)
+        m.set_rect_to_rect(src, dst, stf).if_true_some(m)
     }
 
     pub fn set_poly_to_poly(&mut self, src: &[Point], dst: &[Point]) -> bool {
         if src.len() != dst.len() {
-            return false
+            return false;
         }
-        unsafe { self.native_mut().setPolyToPoly(src.native().as_ptr(), dst.native().as_ptr(), src.len().try_into().unwrap()) }
+        unsafe {
+            self.native_mut().setPolyToPoly(
+                src.native().as_ptr(),
+                dst.native().as_ptr(),
+                src.len().try_into().unwrap(),
+            )
+        }
     }
 
     pub fn from_poly_to_poly(src: &[Point], dst: &[Point]) -> Option<Matrix> {
         let mut m = Matrix::new_identity();
-        m.set_poly_to_poly(src, dst)
-            .if_true_some(m)
+        m.set_poly_to_poly(src, dst).if_true_some(m)
     }
 
     #[must_use]
     pub fn invert(&self) -> Option<Matrix> {
         let mut m = Matrix::new_identity();
-        unsafe { self.native().invert(m.native_mut()) }
-            .if_true_some(m)
+        unsafe { self.native().invert(m.native_mut()) }.if_true_some(m)
     }
 
     pub fn set_affine_identity(affine: &mut [scalar; 6]) {
@@ -474,8 +528,7 @@ impl Matrix {
     #[must_use]
     pub fn to_affine(&self) -> Option<[scalar; 6]> {
         let mut affine = [scalar::default(); 6];
-        unsafe { self.native().asAffine(affine.as_mut_ptr()) }
-            .if_true_some(affine)
+        unsafe { self.native().asAffine(affine.as_mut_ptr()) }.if_true_some(affine)
     }
 
     pub fn set_affine(&mut self, affine: &[scalar; 6]) -> &mut Self {
@@ -496,26 +549,27 @@ impl Matrix {
             self.native().mapPoints(
                 dst.native_mut().as_mut_ptr(),
                 src.native().as_ptr(),
-                src.len().try_into().unwrap())
+                src.len().try_into().unwrap(),
+            )
         };
     }
 
-    pub fn map_points_inplace(&self, pts: &mut[Point]) {
+    pub fn map_points_inplace(&self, pts: &mut [Point]) {
         unsafe {
-            self.native().mapPoints1(
-                pts.native_mut().as_mut_ptr(),
-                pts.len().try_into().unwrap())
+            self.native()
+                .mapPoints1(pts.native_mut().as_mut_ptr(), pts.len().try_into().unwrap())
         };
     }
 
-    pub fn map_homogeneous_points(&self, dst: &mut[Point3], src: &[Point3]) {
+    pub fn map_homogeneous_points(&self, dst: &mut [Point3], src: &[Point3]) {
         assert!(dst.len() >= src.len());
 
         unsafe {
             self.native().mapHomogeneousPoints(
                 dst.native_mut().as_mut_ptr(),
                 src.native().as_ptr(),
-                src.len().try_into().unwrap())
+                src.len().try_into().unwrap(),
+            )
         };
     }
 
@@ -528,21 +582,23 @@ impl Matrix {
         Point::from_native(unsafe { self.native().mapXY1(point.x, point.y) })
     }
 
-    pub fn map_vectors(&self, dst: &mut[Vector], src: &[Vector]) {
+    pub fn map_vectors(&self, dst: &mut [Vector], src: &[Vector]) {
         assert!(dst.len() >= src.len());
         unsafe {
             self.native().mapVectors(
                 dst.native_mut().as_mut_ptr(),
                 src.native().as_ptr(),
-                src.len().try_into().unwrap())
+                src.len().try_into().unwrap(),
+            )
         }
     }
 
-    pub fn map_vectors_inplace(&self, vecs: &mut[Vector]) {
+    pub fn map_vectors_inplace(&self, vecs: &mut [Vector]) {
         unsafe {
             self.native().mapVectors1(
                 vecs.native_mut().as_mut_ptr(),
-                vecs.len().try_into().unwrap())
+                vecs.len().try_into().unwrap(),
+            )
         }
     }
 
@@ -559,14 +615,20 @@ impl Matrix {
 
     pub fn map_rect_to_quad(&self, rect: impl AsRef<Rect>) -> [Point; 4] {
         let mut points = [Point::default(); 4];
-        unsafe { self.native().mapRectToQuad(points.native_mut().as_mut_ptr(), rect.as_ref().native()) };
+        unsafe {
+            self.native()
+                .mapRectToQuad(points.native_mut().as_mut_ptr(), rect.as_ref().native())
+        };
         points
     }
 
     pub fn map_rect_scale_translate(&self, src: impl AsRef<Rect>) -> Option<Rect> {
         if self.is_scale_translate() {
             let mut rect = Rect::default();
-            unsafe { self.native().mapRectScaleTranslate(rect.native_mut(), src.as_ref().native()) };
+            unsafe {
+                self.native()
+                    .mapRectScaleTranslate(rect.native_mut(), src.as_ref().native())
+            };
             Some(rect)
         } else {
             None
@@ -587,7 +649,9 @@ impl Matrix {
 
     pub fn fixed_step_in_x(&self, y: scalar) -> Option<Vector> {
         if self.is_fixed_step_in_x() {
-            Some(Vector::from_native(unsafe { self.native().fixedStepInX(y) }))
+            Some(Vector::from_native(unsafe {
+                self.native().fixedStepInX(y)
+            }))
         } else {
             None
         }
@@ -618,8 +682,10 @@ impl Matrix {
     pub fn decompose_scale(&self, mut remaining: Option<&mut Matrix>) -> Option<Size> {
         let mut size = Size::default();
         unsafe {
-            self.native().decomposeScale(size.native_mut(), remaining.native_ptr_or_null_mut())
-        }.if_true_some(size)
+            self.native()
+                .decomposeScale(size.native_mut(), remaining.native_ptr_or_null_mut())
+        }
+        .if_true_some(size)
     }
 
     pub fn i() -> &'static Matrix {
@@ -642,7 +708,11 @@ impl Matrix {
         self.native_mut().fTypeMask = 0x80;
     }
 
-    pub fn set_scale_translate(&mut self, (sx, sy): (scalar, scalar), t: impl Into<Vector>) -> &mut Self {
+    pub fn set_scale_translate(
+        &mut self,
+        (sx, sy): (scalar, scalar),
+        t: impl Into<Vector>,
+    ) -> &mut Self {
         let t = t.into();
         unsafe { self.native_mut().setScaleTranslate(sx, sy, t.x, t.y) }
         self
@@ -654,7 +724,7 @@ impl Matrix {
 
     pub fn new_identity() -> Matrix {
         // SkMatrix contains no C++ types, so this is safe:
-        let mut m : SkMatrix = unsafe { mem::zeroed() };
+        let mut m: SkMatrix = unsafe { mem::zeroed() };
         unsafe { m.reset() };
         Matrix::from_native(m)
     }
@@ -664,8 +734,8 @@ impl IndexGet for Matrix {}
 impl IndexSet for Matrix {}
 
 lazy_static! {
-    static ref IDENTITY : Matrix = Matrix::new_identity();
-    static ref INVALID : Matrix = Matrix::from_native(unsafe { *SkMatrix::InvalidMatrix() });
+    static ref IDENTITY: Matrix = Matrix::new_identity();
+    static ref INVALID: Matrix = Matrix::from_native(unsafe { *SkMatrix::InvalidMatrix() });
 }
 
 #[test]
@@ -688,5 +758,8 @@ fn setting_a_matrix_component_recomputes_typemask() {
     let mut m = Matrix::default();
     assert_eq!(TypeMask::IDENTITY, m.get_type());
     m.set_persp_x(0.1);
-    assert_eq!(TypeMask::TRANSLATE | TypeMask::SCALE | TypeMask::AFFINE | TypeMask::PERSPECTIVE, m.get_type());
+    assert_eq!(
+        TypeMask::TRANSLATE | TypeMask::SCALE | TypeMask::AFFINE | TypeMask::PERSPECTIVE,
+        m.get_type()
+    );
 }

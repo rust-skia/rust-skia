@@ -1,28 +1,22 @@
 use crate::prelude::*;
-use crate::{
-    Path,
-    Paint,
-    scalar,
-    paint
-};
+use crate::{paint, scalar, Paint, Path};
 use skia_bindings::{
-    SkStrokeRec_InitStyle,
-    SkStrokeRec,
-    SkStrokeRec_Style,
-    C_SkStrokeRec_destruct,
-    C_SkStrokeRec_copy,
-    C_SkStrokeRec_hasEqualEffect
+    C_SkStrokeRec_copy, C_SkStrokeRec_destruct, C_SkStrokeRec_hasEqualEffect, SkStrokeRec,
+    SkStrokeRec_InitStyle, SkStrokeRec_Style,
 };
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
 pub enum InitStyle {
     Hairline = SkStrokeRec_InitStyle::kHairline_InitStyle as _,
-    Fill = SkStrokeRec_InitStyle::kFill_InitStyle as _
+    Fill = SkStrokeRec_InitStyle::kFill_InitStyle as _,
 }
 
 impl NativeTransmutable<SkStrokeRec_InitStyle> for InitStyle {}
-#[test] fn test_stroke_rec_init_style_layout() { InitStyle::test_layout() }
+#[test]
+fn test_stroke_rec_init_style_layout() {
+    InitStyle::test_layout()
+}
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -30,11 +24,14 @@ pub enum Style {
     Hairline = SkStrokeRec_Style::kHairline_Style as _,
     Fill = SkStrokeRec_Style::kFill_Style as _,
     Stroke = SkStrokeRec_Style::kStroke_Style as _,
-    StrokeAndFill = SkStrokeRec_Style::kStrokeAndFill_Style as _
+    StrokeAndFill = SkStrokeRec_Style::kStrokeAndFill_Style as _,
 }
 
 impl NativeTransmutable<SkStrokeRec_Style> for Style {}
-#[test] fn test_stroke_rec_style_layout() { Style::test_layout() }
+#[test]
+fn test_stroke_rec_style_layout() {
+    Style::test_layout()
+}
 
 pub type StrokeRec = Handle<SkStrokeRec>;
 
@@ -54,7 +51,7 @@ impl NativeClone for SkStrokeRec {
 
 impl Handle<SkStrokeRec> {
     pub fn new(init_style: InitStyle) -> Self {
-        Self::from_native(unsafe { SkStrokeRec::new(init_style.into_native() )})
+        Self::from_native(unsafe { SkStrokeRec::new(init_style.into_native()) })
     }
 
     // for convenience
@@ -67,14 +64,18 @@ impl Handle<SkStrokeRec> {
         Self::new(InitStyle::Fill)
     }
 
-    pub fn from_paint(paint: &Paint, style: impl Into<Option<paint::Style>>, res_scale: impl Into<Option<scalar>>) -> Self {
+    pub fn from_paint(
+        paint: &Paint,
+        style: impl Into<Option<paint::Style>>,
+        res_scale: impl Into<Option<scalar>>,
+    ) -> Self {
         let res_scale = res_scale.into().unwrap_or(1.0);
-        Self::from_native(unsafe {match style.into() {
-            Some(style) => {
-                SkStrokeRec::new1(paint.native(), style.into_native(), res_scale)
-            },
-            None => SkStrokeRec::new2(paint.native(), res_scale)
-        }})
+        Self::from_native(unsafe {
+            match style.into() {
+                Some(style) => SkStrokeRec::new1(paint.native(), style.into_native(), res_scale),
+                None => SkStrokeRec::new2(paint.native(), res_scale),
+            }
+        })
     }
 
     pub fn style(&self) -> Style {
@@ -115,17 +116,25 @@ impl Handle<SkStrokeRec> {
         self
     }
 
-    pub fn set_stroke_style(&mut self, width: scalar, stroke_and_fill: impl Into<Option<bool>>) -> &mut Self {
+    pub fn set_stroke_style(
+        &mut self,
+        width: scalar,
+        stroke_and_fill: impl Into<Option<bool>>,
+    ) -> &mut Self {
         let stroke_and_fill = stroke_and_fill.into().unwrap_or(false);
-        unsafe {
-            self.native_mut().setStrokeStyle(width, stroke_and_fill )
-        }
+        unsafe { self.native_mut().setStrokeStyle(width, stroke_and_fill) }
         self
     }
 
-    pub fn set_stroke_params(&mut self, cap: paint::Cap, join: paint::Join, miter_limit: scalar) -> &mut Self {
+    pub fn set_stroke_params(
+        &mut self,
+        cap: paint::Cap,
+        join: paint::Join,
+        miter_limit: scalar,
+    ) -> &mut Self {
         unsafe {
-            self.native_mut().setStrokeParams(cap.into_native(), join.into_native(), miter_limit)
+            self.native_mut()
+                .setStrokeParams(cap.into_native(), join.into_native(), miter_limit)
         }
         self
     }
@@ -159,16 +168,22 @@ impl Handle<SkStrokeRec> {
     }
 
     pub fn inflation_radius_from_paint_and_style(paint: &Paint, style: paint::Style) -> scalar {
-        unsafe { SkStrokeRec::GetInflationRadius(paint.native(), style.into_native() ) }
+        unsafe { SkStrokeRec::GetInflationRadius(paint.native(), style.into_native()) }
     }
 
-    pub fn inflation_radius_from_params(join: paint::Join, miter_limit: scalar, cap: paint::Cap, stroke_width: scalar) -> scalar {
+    pub fn inflation_radius_from_params(
+        join: paint::Join,
+        miter_limit: scalar,
+        cap: paint::Cap,
+        stroke_width: scalar,
+    ) -> scalar {
         unsafe {
             SkStrokeRec::GetInflationRadius1(
                 join.into_native(),
                 miter_limit,
                 cap.into_native(),
-                stroke_width)
+                stroke_width,
+            )
         }
     }
 
@@ -177,8 +192,6 @@ impl Handle<SkStrokeRec> {
         // unsafe {
         //     self.native().hasEqualEffect(other.native())
         // }
-        unsafe {
-            C_SkStrokeRec_hasEqualEffect(self.native(), other.native())
-        }
+        unsafe { C_SkStrokeRec_hasEqualEffect(self.native(), other.native()) }
     }
 }

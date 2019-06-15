@@ -69,9 +69,11 @@ impl Document {
     ) -> Document<state::OnPage> {
         let size = size.into();
         let canvas = unsafe {
-            self.document
-                .native_mut()
-                .beginPage(size.width, size.height, content.native_ptr_or_null())
+            self.document.native_mut().beginPage(
+                size.width,
+                size.height,
+                content.native_ptr_or_null(),
+            )
         };
 
         Document {

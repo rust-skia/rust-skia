@@ -1,15 +1,12 @@
 use crate::prelude::*;
-use crate::{
-    IRect,
-    Path,
-    IPoint,
-    IVector,
-    Contains,
-    QuickReject
+use crate::{Contains, IPoint, IRect, IVector, Path, QuickReject};
+use skia_bindings::{
+    C_SkRegion_Cliperator_destruct, C_SkRegion_Equals, C_SkRegion_Iterator_Construct,
+    C_SkRegion_Iterator_rgn, C_SkRegion_Spanerator_destruct, C_SkRegion_destruct, SkRegion,
+    SkRegion_Cliperator, SkRegion_Iterator, SkRegion_Op, SkRegion_Spanerator,
 };
-use skia_bindings::{C_SkRegion_destruct, C_SkRegion_Equals, SkRegion, SkRegion_Op, SkRegion_Iterator, SkRegion_Cliperator, SkRegion_Spanerator, C_SkRegion_Spanerator_destruct, C_SkRegion_Iterator_Construct, C_SkRegion_Iterator_rgn, C_SkRegion_Cliperator_destruct};
 use std::marker::PhantomData;
-use std::{mem, ptr, iter};
+use std::{iter, mem, ptr};
 
 pub type Region = Handle<SkRegion>;
 
@@ -33,7 +30,6 @@ impl NativePartialEq for SkRegion {
     }
 }
 
-
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
 pub enum RegionOp {
@@ -42,11 +38,14 @@ pub enum RegionOp {
     Union = SkRegion_Op::kUnion_Op as _,
     XOR = SkRegion_Op::kXOR_Op as _,
     ReverseDifference = SkRegion_Op::kReverseDifference_Op as _,
-    Replace = SkRegion_Op::kReplace_Op as _
+    Replace = SkRegion_Op::kReplace_Op as _,
 }
 
 impl NativeTransmutable<SkRegion_Op> for RegionOp {}
-#[test] fn test_region_op_layout() { RegionOp::test_layout() }
+#[test]
+fn test_region_op_layout() {
+    RegionOp::test_layout()
+}
 
 impl Handle<SkRegion> {
     pub fn new() -> Region {
@@ -110,9 +109,8 @@ impl Handle<SkRegion> {
 
     pub fn set_rects(&mut self, rects: &[IRect]) -> bool {
         unsafe {
-            self.native_mut().setRects(
-                rects.native().as_ptr(),
-                rects.len().try_into().unwrap())
+            self.native_mut()
+                .setRects(rects.native().as_ptr(), rects.len().try_into().unwrap())
         }
     }
 
@@ -165,9 +163,7 @@ impl Handle<SkRegion> {
     pub fn quick_reject_region(&self, other: &Region) -> bool {
         // does not link:
         // unsafe { self.native().quickReject1(other.native()) }
-        self.is_empty()
-            || other.is_empty()
-            || !IRect::intersects(&self.bounds(), &other.bounds())
+        self.is_empty() || other.is_empty() || !IRect::intersects(&self.bounds(), &other.bounds())
     }
 
     pub fn translate(&mut self, d: impl Into<IVector>) {
@@ -182,19 +178,38 @@ impl Handle<SkRegion> {
     }
 
     pub fn op_rect(&mut self, rect: impl AsRef<IRect>, op: RegionOp) -> bool {
-        unsafe { self.native_mut().op(rect.as_ref().native(), op.into_native()) }
+        unsafe {
+            self.native_mut()
+                .op(rect.as_ref().native(), op.into_native())
+        }
     }
 
     pub fn op_region(&mut self, region: &Region, op: RegionOp) -> bool {
         unsafe { self.native_mut().op2(region.native(), op.into_native()) }
     }
 
-    pub fn op_rect_region(&mut self, rect: impl AsRef<IRect>, region: &Region, op: RegionOp) -> bool {
-        unsafe { self.native_mut().op3(rect.as_ref().native(), region.native(), op.into_native()) }
+    pub fn op_rect_region(
+        &mut self,
+        rect: impl AsRef<IRect>,
+        region: &Region,
+        op: RegionOp,
+    ) -> bool {
+        unsafe {
+            self.native_mut()
+                .op3(rect.as_ref().native(), region.native(), op.into_native())
+        }
     }
 
-    pub fn op_region_rect(&mut self, region: &Region, rect: impl AsRef<IRect>, op: RegionOp) -> bool {
-        unsafe { self.native_mut().op4(region.native(), rect.as_ref().native(), op.into_native()) }
+    pub fn op_region_rect(
+        &mut self,
+        region: &Region,
+        rect: impl AsRef<IRect>,
+        op: RegionOp,
+    ) -> bool {
+        unsafe {
+            self.native_mut()
+                .op4(region.native(), rect.as_ref().native(), op.into_native())
+        }
     }
 
     pub fn write_to_memory(&self, buf: &mut Vec<u8>) {
@@ -208,7 +223,8 @@ impl Handle<SkRegion> {
 
     pub fn read_from_memory(&mut self, buf: &[u8]) -> usize {
         unsafe {
-            self.native_mut().readFromMemory(buf.as_ptr() as _, buf.len())
+            self.native_mut()
+                .readFromMemory(buf.as_ptr() as _, buf.len())
         }
     }
 }
@@ -217,7 +233,7 @@ impl Handle<SkRegion> {
 // combine overloads (static)
 //
 
-pub trait Combine<A, B> : Sized {
+pub trait Combine<A, B>: Sized {
     fn combine(a: &A, op: RegionOp, b: &B) -> Self;
 
     fn difference(a: &A, b: &B) -> Self {
@@ -349,9 +365,7 @@ impl<'a> Iterator<'a> {
     }
 
     pub fn new(region: &'a Region) -> Iterator<'a> {
-        Iterator::from_native(unsafe {
-            SkRegion_Iterator::new1(region.native())
-        })
+        Iterator::from_native(unsafe { SkRegion_Iterator::new1(region.native()) })
     }
 
     pub fn rewind(&mut self) -> bool {
@@ -368,9 +382,7 @@ impl<'a> Iterator<'a> {
     }
 
     pub fn is_done(&self) -> bool {
-        unsafe {
-            self.native().done()
-        }
+        unsafe { self.native().done() }
     }
 
     pub fn next(&mut self) {
@@ -389,7 +401,7 @@ impl<'a> Iterator<'a> {
             // let r = self.native().rgn();
             let r = C_SkRegion_Iterator_rgn(self.native());
             if r.is_null() {
-                return None
+                return None;
             }
             Some(transmute_ref(&*r))
         }
@@ -401,7 +413,7 @@ impl<'a> iter::Iterator for Iterator<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.is_done() {
-            return None
+            return None;
         }
         let r = *self.rect();
         Iterator::next(self);
@@ -415,7 +427,7 @@ fn test_iterator() {
     let r2 = IRect::new(100, 100, 120, 140);
     let mut r = Region::new();
     r.set_rects(&[r1, r2]);
-    let rects : Vec<IRect> = Iterator::new(&r).collect();
+    let rects: Vec<IRect> = Iterator::new(&r).collect();
     assert_eq!(rects.len(), 2);
     assert_eq!(rects[0], r1);
     assert_eq!(rects[1], r2);
@@ -463,7 +475,7 @@ impl<'a> iter::Iterator for Cliperator<'a> {
     type Item = IRect;
     fn next(&mut self) -> Option<Self::Item> {
         if self.is_done() {
-            return None
+            return None;
         }
         let rect = *self.rect();
         self.next();
@@ -487,7 +499,7 @@ impl<'a> Drop for Spanerator<'a> {
     }
 }
 
-impl <'a> Spanerator<'a> {
+impl<'a> Spanerator<'a> {
     pub fn new(region: &'a Region, y: i32, left: i32, right: i32) -> Spanerator<'a> {
         Spanerator::from_native(unsafe {
             SkRegion_Spanerator::new(region.native(), y, left, right)
@@ -502,7 +514,8 @@ impl<'a> iter::Iterator for Spanerator<'a> {
         unsafe {
             let mut left = 0;
             let mut right = 0;
-            self.native_mut().next(&mut left, &mut right)
+            self.native_mut()
+                .next(&mut left, &mut right)
                 .if_true_some((left, right))
         }
     }

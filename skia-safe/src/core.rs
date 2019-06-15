@@ -14,21 +14,21 @@ mod blur_types;
 pub use blur_types::*;
 
 pub mod canvas;
-pub use canvas::{Canvas, OwnedCanvas, AutoCanvasRestore};
+#[deprecated(since = "0.12.0", note = "use canvas::lattice::RectType")]
+pub use canvas::lattice::RectType as CanvasLatticeRectType;
 #[deprecated(since = "0.12.0", note = "use canvas::Lattice")]
 pub use canvas::Lattice as CanvasLattice;
+#[deprecated(since = "0.12.0", note = "use canvas::PointMode")]
+pub use canvas::PointMode as CanvasPointMode;
 #[deprecated(since = "0.12.0", note = "use canvas::SaveLayerFlags")]
 pub use canvas::SaveLayerFlags;
 #[deprecated(since = "0.12.0", note = "use canvas::SaveLayerRec")]
 pub use canvas::SaveLayerRec;
-#[deprecated(since = "0.12.0", note = "use canvas::PointMode")]
-pub use canvas::PointMode as CanvasPointMode;
 #[deprecated(since = "0.12.0", note = "use canvas::SrcRectConstraint")]
 pub use canvas::SrcRectConstraint;
 #[deprecated(since = "0.12.0", note = "use canvas::TopLayerPixels")]
 pub use canvas::TopLayerPixels as CanvasTopLayerPixels;
-#[deprecated(since = "0.12.0", note = "use canvas::lattice::RectType")]
-pub use canvas::lattice::RectType as CanvasLatticeRectType;
+pub use canvas::{AutoCanvasRestore, Canvas, OwnedCanvas};
 
 mod clip_op;
 pub use clip_op::*;
@@ -37,11 +37,11 @@ mod color;
 pub use color::*;
 
 pub mod color_filter;
-pub use color_filter::{ColorFilter, color_filters};
-#[deprecated(since = "0.12.0", note = "use color_filters")]
-pub use color_filters as ColorFilters;
 #[deprecated(since = "0.12.0", note = "use ColorFilter::Flags")]
 pub use color_filter::Flags as ColorFilterFlags;
+pub use color_filter::{color_filters, ColorFilter};
+#[deprecated(since = "0.12.0", note = "use color_filters")]
+pub use color_filters as ColorFilters;
 
 mod color_space;
 pub use color_space::*;
@@ -70,9 +70,9 @@ pub mod document;
 pub use document::Document;
 
 pub mod draw_looper;
-pub use draw_looper::DrawLooper;
 #[deprecated(since = "0.12.0", note = "use draw_looper::BlurShadowRec")]
 pub use draw_looper::BlurShadowRec as DrawLooperBlurShadowRec;
+pub use draw_looper::DrawLooper;
 
 pub mod drawable;
 pub use drawable::Drawable;
@@ -87,27 +87,30 @@ mod filter_quality;
 pub use filter_quality::*;
 
 mod flattenable;
-pub use flattenable:: *;
+pub use flattenable::*;
 
 pub mod font;
-pub use font::Font;
 #[deprecated(since = "0.12.0", note = "use font::Edging")]
 pub use font::Edging as FontEdging;
+pub use font::Font;
 
 pub mod font_arguments;
+#[deprecated(
+    since = "0.12.0",
+    note = "use font_arguments::variation_position::Coordinate"
+)]
+pub use font_arguments::variation_position::Coordinate as FontArgumentsVariationPositionCoordinate;
 pub use font_arguments::FontArguments;
 #[deprecated(since = "0.12.0", note = "use font_arguments::VariationPosition")]
 pub use font_arguments::VariationPosition as FontArgumentsVariationPosition;
-#[deprecated(since = "0.12.0", note = "use font_arguments::variation_position::Coordinate")]
-pub use font_arguments::variation_position::Coordinate as FontArgumentsVariationPositionCoordinate;
 
 // unsupported, because it's not used in publicly exposed APIs:
 // mod font_lcd_config;
 
 pub mod font_metrics;
-pub use font_metrics::FontMetrics;
 #[deprecated(since = "0.12.0", note = "use font_metrics::Flags")]
 pub use font_metrics::Flags as FontMetricsFlags;
+pub use font_metrics::FontMetrics;
 
 mod font_mgr;
 pub use font_mgr::*;
@@ -116,12 +119,12 @@ pub mod font_parameters;
 
 pub mod font_style;
 pub use font_style::FontStyle;
+#[deprecated(since = "0.12.0", note = "use font_style::Slant")]
+pub use font_style::Slant as FontStyleSlant;
 #[deprecated(since = "0.12.0", note = "use font_style::Weight")]
 pub use font_style::Weight as FontStyleWeight;
 #[deprecated(since = "0.12.0", note = "use font_style::Width")]
 pub use font_style::Width as FontStyleWidth;
-#[deprecated(since = "0.12.0", note = "use font_style::Slant")]
-pub use font_style::Slant as FontStyleSlant;
 
 mod font_types;
 pub use font_types::*;
@@ -129,31 +132,31 @@ pub use font_types::*;
 pub mod graphics;
 
 pub mod image;
-pub use image::Image;
 #[deprecated(since = "0.12.0", note = "use image::BitDepth")]
 pub use image::BitDepth as ImageBitDepth;
 #[deprecated(since = "0.12.0", note = "use image::CachingHint")]
 pub use image::CachingHint as ImageCachingHint;
 #[deprecated(since = "0.12.0", note = "use image::CompressionType")]
 pub use image::CompressionType as ImageCompressionType;
+pub use image::Image;
 
 mod image_encoder;
 pub use image_encoder::*;
 
 pub mod image_filter;
-pub use image_filter::ImageFilter;
-#[deprecated(since = "0.12.0", note = "use image_filter::OutputProperties")]
-pub use image_filter::OutputProperties as ImageFilterOutputProperties;
+#[deprecated(since = "0.12.0", note = "use image_filter::crop_rect::CropEdge")]
+pub use image_filter::crop_rect::CropEdge as ImageFilterCropRectCropEdge;
 #[deprecated(since = "0.12.0", note = "use image_filter::Context")]
 pub use image_filter::Context as ImageFilterContext;
 #[deprecated(since = "0.12.0", note = "use image_filter::CropRect")]
 pub use image_filter::CropRect as ImageFilterCropRect;
-#[deprecated(since = "0.12.0", note = "use image_filter::crop_rect::CropEdge")]
-pub use image_filter::crop_rect::CropEdge as ImageFilterCropRectCropEdge;
-#[deprecated(since = "0.12.0", note = "use image_filter::TileUsage")]
-pub use image_filter::TileUsage as ImageFilterTileUsage;
+pub use image_filter::ImageFilter;
 #[deprecated(since = "0.12.0", note = "use image_filter::MapDirection")]
 pub use image_filter::MapDirection as ImageFilterMapDirection;
+#[deprecated(since = "0.12.0", note = "use image_filter::OutputProperties")]
+pub use image_filter::OutputProperties as ImageFilterOutputProperties;
+#[deprecated(since = "0.12.0", note = "use image_filter::TileUsage")]
+pub use image_filter::TileUsage as ImageFilterTileUsage;
 
 mod image_generator;
 pub use image_generator::*;
@@ -165,18 +168,18 @@ mod mask_filter;
 pub use mask_filter::*;
 
 pub mod matrix;
-pub use matrix::Matrix;
-#[deprecated(since = "0.12.0", note = "use matrix::TypeMask")]
-pub use matrix::TypeMask as MatrixTypeMask;
-#[deprecated(since = "0.12.0", note = "use matrix::ScaleToFit")]
-pub use matrix::ScaleToFit as MatrixScaletoFit;
-#[deprecated(since = "0.12.0", note = "use matrix::Member")]
-pub use matrix::Member as MatrixMember;
 #[deprecated(since = "0.12.0", note = "use matrix::AffineMember")]
 pub use matrix::AffineMember as AffineMatrixMember;
+pub use matrix::Matrix;
+#[deprecated(since = "0.12.0", note = "use matrix::Member")]
+pub use matrix::Member as MatrixMember;
+#[deprecated(since = "0.12.0", note = "use matrix::ScaleToFit")]
+pub use matrix::ScaleToFit as MatrixScaletoFit;
+#[deprecated(since = "0.12.0", note = "use matrix::TypeMask")]
+pub use matrix::TypeMask as MatrixTypeMask;
 
 pub mod matrix44;
-pub use matrix44::{Vector4, Matrix44};
+pub use matrix44::{Matrix44, Vector4};
 
 mod milestone;
 pub use milestone::*;
@@ -187,33 +190,33 @@ pub use multi_picture_draw::*;
 pub mod paint;
 pub use paint::Paint;
 // We keep these around for the time being.
-pub use paint::Style as PaintStyle;
 pub use paint::Cap as PaintCap;
 pub use paint::Join as PaintJoin;
+pub use paint::Style as PaintStyle;
 
 pub mod path;
-pub use path::Path;
+#[deprecated(since = "0.12.0", note = "use path::AddPathMode")]
+pub use path::AddPathMode;
+#[deprecated(since = "0.12.0", note = "use path::ArcSize")]
+pub use path::ArcSize as PathArcSize;
+#[deprecated(since = "0.12.0", note = "use path::Convexity")]
+pub use path::Convexity as PathConvexity;
 #[deprecated(since = "0.12.0", note = "use matrix::AffineMember")]
 pub use path::Direction as PathDirection;
 #[deprecated(since = "0.12.0", note = "use path::FillType")]
 pub use path::FillType as PathFillType;
-#[deprecated(since = "0.12.0", note = "use path::Convexity")]
-pub use path::Convexity as PathConvexity;
-#[deprecated(since = "0.12.0", note = "use path::AddPathMode")]
-pub use path::AddPathMode as AddPathMode;
+pub use path::Path;
 #[deprecated(since = "0.12.0", note = "use path::SegmentMask")]
 pub use path::SegmentMask as PathSegmentMask;
-#[deprecated(since = "0.12.0", note = "use path::ArcSize")]
-pub use path::ArcSize as PathArcSize;
 
 pub mod path_effect;
-pub use path_effect::PathEffect;
-#[deprecated(since = "0.12.0", note = "use path_effect::DashInfo")]
-pub use path_effect::DashInfo as PathEffectDashInfo;
-#[deprecated(since = "0.12.0", note = "use path_effect::PointData")]
-pub use path_effect::PointData as PathEffectPointData;
 #[deprecated(since = "0.12.0", note = "use path_effect::point_data::PointFlags")]
 pub use path_effect::point_data::PointFlags as PointDataPointFlags;
+#[deprecated(since = "0.12.0", note = "use path_effect::DashInfo")]
+pub use path_effect::DashInfo as PathEffectDashInfo;
+pub use path_effect::PathEffect;
+#[deprecated(since = "0.12.0", note = "use path_effect::PointData")]
+pub use path_effect::PointData as PathEffectPointData;
 
 pub mod path_measure;
 pub use path_measure::PathMeasure;
@@ -251,11 +254,11 @@ pub mod region;
 pub use region::Region;
 
 pub mod rrect;
+#[deprecated(since = "0.12.0", note = "use rrect::Corner")]
+pub use rrect::Corner as RRectCorner;
 pub use rrect::RRect;
 #[deprecated(since = "0.12.0", note = "use rrect::Type")]
 pub use rrect::Type as RRectType;
-#[deprecated(since = "0.12.0", note = "use rrect::Corner")]
-pub use rrect::Corner as RRectCorner;
 
 mod rsxform;
 pub use rsxform::*;
@@ -264,23 +267,23 @@ mod scalar_;
 pub use scalar_::*;
 
 pub mod shader;
-pub use shader::{Shader, shaders};
+#[deprecated(since = "0.12.0", note = "use shader::GradientInfo")]
+pub use shader::GradientInfo as ShaderGradientInfo;
+#[deprecated(since = "0.12.0", note = "use shader::GradientType")]
+pub use shader::GradientType as ShaderGradientType;
+pub use shader::{shaders, Shader};
 #[deprecated(since = "0.12.0", note = "use shaders")]
 pub use shaders as Shaders;
 #[deprecated(since = "0.12.0", note = "use TileMode")]
 pub use TileMode as ShaderTileMode;
-#[deprecated(since = "0.12.0", note = "use shader::GradientType")]
-pub use shader::GradientType as ShaderGradientType;
-#[deprecated(since = "0.12.0", note = "use shader::GradientInfo")]
-pub use shader::GradientInfo as ShaderGradientInfo;
 
 mod size;
 pub use size::*;
 
 pub mod stroke_rec;
-pub use stroke_rec::StrokeRec;
 #[deprecated(since = "0.12.0", note = "use stroke_rec::InitStyle")]
 pub use stroke_rec::InitStyle as StrokeRecInitStyle;
+pub use stroke_rec::StrokeRec;
 #[deprecated(since = "0.12.0", note = "use stroke_rec::Style")]
 pub use stroke_rec::Style as StrokeRecStyle;
 
@@ -315,11 +318,11 @@ mod trace_memory_dump;
 pub use trace_memory_dump::*;
 
 pub mod typeface;
-pub use typeface::Typeface;
 #[deprecated(since = "0.12.0", note = "use typeface::LocalizedString")]
 pub use typeface::LocalizedString as TypefaceLocalizedString;
 #[deprecated(since = "0.12.0", note = "use typeface::SerializeBehavior")]
 pub use typeface::SerializeBehavior as TypefaceSerializeBehavior;
+pub use typeface::Typeface;
 
 mod types;
 pub use types::*;
@@ -328,19 +331,19 @@ mod un_pre_multiply;
 pub use un_pre_multiply::*;
 
 pub mod vertices;
-pub use vertices::Vertices;
-#[deprecated(since = "0.12.0", note = "use vertices::BoneIndices")]
-pub use vertices::BoneIndices as BoneIndices;
-#[deprecated(since = "0.12.0", note = "use vertices::BoneWeights")]
-pub use vertices::BoneWeights as BoneWeights;
 #[deprecated(since = "0.12.0", note = "use vertices::Bone")]
 pub use vertices::Bone as VerticesBone;
-#[deprecated(since = "0.12.0", note = "use vertices::VertexMode")]
-pub use vertices::VertexMode as VerticesVertexMode;
-#[deprecated(since = "0.12.0", note = "use vertices::BuilderFlags")]
-pub use vertices::BuilderFlags as VerticesBuilderFlags;
+#[deprecated(since = "0.12.0", note = "use vertices::BoneIndices")]
+pub use vertices::BoneIndices;
+#[deprecated(since = "0.12.0", note = "use vertices::BoneWeights")]
+pub use vertices::BoneWeights;
 #[deprecated(since = "0.12.0", note = "use vertices::Builder")]
 pub use vertices::Builder as VerticesBuilder;
+#[deprecated(since = "0.12.0", note = "use vertices::BuilderFlags")]
+pub use vertices::BuilderFlags as VerticesBuilderFlags;
+#[deprecated(since = "0.12.0", note = "use vertices::VertexMode")]
+pub use vertices::VertexMode as VerticesVertexMode;
+pub use vertices::Vertices;
 
 pub mod yuva_index;
 pub use yuva_index::{ColorChannel, YUVAIndex};

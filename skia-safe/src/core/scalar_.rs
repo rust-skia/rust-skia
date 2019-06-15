@@ -3,7 +3,7 @@ pub type scalar = skia_bindings::SkScalar;
 
 // TODO: wrap more core/SkScalar.h functions / macros.
 
-pub trait Scalar : Copy {
+pub trait Scalar: Copy {
     const NEARLY_ZERO: Self;
     const ONE: Self;
     const HALF: Self;

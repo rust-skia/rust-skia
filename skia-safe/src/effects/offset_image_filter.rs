@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::{ImageFilter, image_filter::CropRect, Vector};
+use crate::{image_filter::CropRect, ImageFilter, Vector};
 use skia_bindings::{C_SkOffsetImageFilter_Make, SkImageFilter};
 
 impl RCHandle<SkImageFilter> {

@@ -1,6 +1,10 @@
-use crate::{BlendMode, Color, Color4f, ColorSpace, scalar, NativeFlattenable};
 use crate::prelude::*;
-use skia_bindings::{C_SkColorFilter_asColorMatrix, C_SkColorFilter_asColorMode, C_SkColorFilter_getFlags, C_SkColorFilter_makeComposed, SkColorFilter, SkColorFilter_Flags_kAlphaUnchanged_Flag, SkRefCntBase, SkFlattenable, C_SkColorFilter_Deserialize};
+use crate::{scalar, BlendMode, Color, Color4f, ColorSpace, NativeFlattenable};
+use skia_bindings::{
+    C_SkColorFilter_Deserialize, C_SkColorFilter_asColorMatrix, C_SkColorFilter_asColorMode,
+    C_SkColorFilter_getFlags, C_SkColorFilter_makeComposed, SkColorFilter,
+    SkColorFilter_Flags_kAlphaUnchanged_Flag, SkFlattenable, SkRefCntBase,
+};
 
 bitflags! {
     pub struct Flags: u32 {
@@ -28,7 +32,6 @@ impl NativeFlattenable for SkColorFilter {
 }
 
 impl RCHandle<SkColorFilter> {
-
     #[deprecated(since = "0.12.0", note = "use to_color_mode()")]
     pub fn as_color_mode(&self) -> Option<(Color, BlendMode)> {
         self.to_color_mode()
@@ -42,8 +45,8 @@ impl RCHandle<SkColorFilter> {
     }
 
     pub fn to_color_matrix(&self) -> Option<[scalar; 20]> {
-        let mut matrix : [scalar; 20] = Default::default();
-        unsafe { C_SkColorFilter_asColorMatrix(self.native(), matrix.as_mut_ptr())}
+        let mut matrix: [scalar; 20] = Default::default();
+        unsafe { C_SkColorFilter_asColorMatrix(self.native(), matrix.as_mut_ptr()) }
             .if_true_some(matrix)
     }
 
@@ -52,9 +55,7 @@ impl RCHandle<SkColorFilter> {
     }
 
     pub fn filter_color(&self, color: impl Into<Color>) -> Color {
-        Color::from_native(unsafe {
-            self.native().filterColor(color.into().into_native())
-        })
+        Color::from_native(unsafe { self.native().filterColor(color.into().into_native()) })
     }
 
     pub fn filter_color4f(&self, color: impl AsRef<Color4f>, color_space: &ColorSpace) -> Color4f {
@@ -77,8 +78,12 @@ impl RCHandle<SkColorFilter> {
 
 pub mod color_filters {
     use crate::prelude::*;
-    use crate::{ColorFilter, Color, scalar, BlendMode};
-    use skia_bindings::{C_SkColorFilters_Blend, C_SkColorFilters_Compose, C_SkColorFilters_Lerp, C_SkColorFilters_LinearToSRGBGamma, C_SkColorFilters_MatrixRowMajor255, C_SkColorFilters_SRGBToLinearGamma};
+    use crate::{scalar, BlendMode, Color, ColorFilter};
+    use skia_bindings::{
+        C_SkColorFilters_Blend, C_SkColorFilters_Compose, C_SkColorFilters_Lerp,
+        C_SkColorFilters_LinearToSRGBGamma, C_SkColorFilters_MatrixRowMajor255,
+        C_SkColorFilters_SRGBToLinearGamma,
+    };
 
     pub fn compose(outer: &ColorFilter, inner: &ColorFilter) -> Option<ColorFilter> {
         ColorFilter::from_ptr(unsafe {

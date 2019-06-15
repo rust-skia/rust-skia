@@ -1,11 +1,11 @@
-mod prelude;
 mod codec;
 mod core;
 mod docs;
 mod effects;
+pub mod gpu;
 mod interop;
 mod pathops;
-pub mod gpu;
+mod prelude;
 #[cfg(feature = "svg")]
 pub mod svg;
 // TODO: We don't export utils/* into the crate's root yet. Should we?

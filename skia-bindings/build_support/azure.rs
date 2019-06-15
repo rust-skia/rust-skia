@@ -11,7 +11,7 @@ use std::{env, fs, io};
 /// The git repository test is important to support package verifications.
 pub fn should_deliver_binaries() -> Option<PathBuf> {
     if git::half_hash().is_none() {
-        return None
+        return None;
     }
 
     artifact_staging_directory()

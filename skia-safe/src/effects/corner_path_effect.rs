@@ -1,5 +1,5 @@
-use crate::{scalar, PathEffect};
 use crate::prelude::*;
+use crate::{scalar, PathEffect};
 use skia_bindings::{C_SkCornerPathEffect_Make, SkPathEffect};
 
 impl RCHandle<SkPathEffect> {

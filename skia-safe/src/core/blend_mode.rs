@@ -1,9 +1,6 @@
 use crate::prelude::*;
+use skia_bindings::{SkBlendMode, SkBlendMode_Name};
 use std::ffi::CStr;
-use skia_bindings::{
-    SkBlendMode,
-    SkBlendMode_Name
-};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -42,7 +39,10 @@ pub enum BlendMode {
 }
 
 impl NativeTransmutable<SkBlendMode> for BlendMode {}
-#[test] fn test_blend_mode_layout() { BlendMode::test_layout() }
+#[test]
+fn test_blend_mode_layout() {
+    BlendMode::test_layout()
+}
 
 impl Default for BlendMode {
     fn default() -> Self {
@@ -51,7 +51,6 @@ impl Default for BlendMode {
 }
 
 impl BlendMode {
-
     pub fn name(self) -> &'static str {
         unsafe {
             let name_ptr = SkBlendMode_Name(self.into_native());

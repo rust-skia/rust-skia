@@ -1,8 +1,11 @@
 use crate::prelude::*;
-use std::slice;
-use skia_bindings::{SkData, C_SkData_unref, C_SkData_ref, C_SkData_MakeWithCopy, C_SkData_MakeEmpty, C_SkData_MakeSubset, C_SkData_MakeUninitialized, C_SkData_MakeWithCString, C_SkData_unique};
-use std::ops::Deref;
+use skia_bindings::{
+    C_SkData_MakeEmpty, C_SkData_MakeSubset, C_SkData_MakeUninitialized, C_SkData_MakeWithCString,
+    C_SkData_MakeWithCopy, C_SkData_ref, C_SkData_unique, C_SkData_unref, SkData,
+};
 use std::ffi::CStr;
+use std::ops::Deref;
+use std::slice;
 
 pub type Data = RCHandle<SkData>;
 unsafe impl Send for Data {}
@@ -37,7 +40,6 @@ impl PartialEq for RCHandle<SkData> {
 }
 
 impl RCHandle<SkData> {
-
     pub fn size(&self) -> usize {
         unsafe { self.native().size() }
     }
@@ -68,29 +70,21 @@ impl RCHandle<SkData> {
 
     // TODO: rename to copy_from() ? or from_bytes()?
     pub fn new_copy(data: &[u8]) -> Self {
-        Data::from_ptr(unsafe {
-            C_SkData_MakeWithCopy(data.as_ptr() as _, data.len())
-        }).unwrap()
+        Data::from_ptr(unsafe { C_SkData_MakeWithCopy(data.as_ptr() as _, data.len()) }).unwrap()
     }
 
     pub unsafe fn new_uninitialized(length: usize) -> Data {
-        Data::from_ptr(
-            C_SkData_MakeUninitialized(length)
-        ).unwrap()
+        Data::from_ptr(C_SkData_MakeUninitialized(length)).unwrap()
     }
 
     // TODO: use Range as stand in for offset / length?
     pub fn new_subset(data: &Data, offset: usize, length: usize) -> Data {
-        Data::from_ptr(unsafe {
-            C_SkData_MakeSubset(data.native(), offset, length)
-        }).unwrap()
+        Data::from_ptr(unsafe { C_SkData_MakeSubset(data.native(), offset, length) }).unwrap()
     }
 
     // TODO: rename to from_cstr()?
     pub fn new_cstr(cstr: &CStr) -> Data {
-        Data::from_ptr(unsafe {
-            C_SkData_MakeWithCString(cstr.as_ptr())
-        }).unwrap()
+        Data::from_ptr(unsafe { C_SkData_MakeWithCString(cstr.as_ptr()) }).unwrap()
     }
 
     // TODO: MakeFromFileName (not sure if we need that)
@@ -98,15 +92,13 @@ impl RCHandle<SkData> {
     // TODO: MakeFromStream
 
     pub fn new_empty() -> Self {
-        Data::from_ptr(unsafe {
-            C_SkData_MakeEmpty()
-        }).unwrap()
+        Data::from_ptr(unsafe { C_SkData_MakeEmpty() }).unwrap()
     }
 }
 
 #[test]
 fn data_supports_equals() {
-    let x : &[u8] = &[1u8, 2u8, 3u8];
+    let x: &[u8] = &[1u8, 2u8, 3u8];
     let d1 = Data::new_copy(x);
     let d2 = Data::new_copy(x);
     assert!(d1 == d2)

@@ -3,7 +3,7 @@ use crate::prelude::*;
 use crate::{ColorSpace, ColorType, ISize, ImageInfo, SurfaceProps};
 use skia_bindings::{
     C_SkSurfaceCharacterization_destruct, C_SkSurfaceCharacterization_equals,
-    SkSurfaceCharacterization,C_SkSurfaceCharacterization_imageInfo
+    C_SkSurfaceCharacterization_imageInfo, SkSurfaceCharacterization,
 };
 
 pub type SurfaceCharacterization = Handle<SkSurfaceCharacterization>;
@@ -53,7 +53,9 @@ impl Handle<SkSurfaceCharacterization> {
     pub fn image_info(&self) -> &ImageInfo {
         // no dice to link that under windows:
         // ImageInfo::from_native(unsafe { (*self.native().imageInfo()).clone() })
-        ImageInfo::from_native_ref(unsafe { &*C_SkSurfaceCharacterization_imageInfo(self.native()) })
+        ImageInfo::from_native_ref(unsafe {
+            &*C_SkSurfaceCharacterization_imageInfo(self.native())
+        })
     }
 
     pub fn origin(&self) -> SurfaceOrigin {

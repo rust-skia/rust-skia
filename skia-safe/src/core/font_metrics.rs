@@ -29,7 +29,7 @@ pub struct FontMetrics {
     underline_thickness: scalar,
     underline_position: scalar,
     strikeout_thickness: scalar,
-    strikeout_position: scalar
+    strikeout_position: scalar,
 }
 
 impl NativeTransmutable<SkFontMetrics> for FontMetrics {}
@@ -40,31 +40,28 @@ fn test_font_metrics_layout() {
 }
 
 impl FontMetrics {
-
     // the following 4 functions do not link.
 
     pub fn underline_thickness(&self) -> Option<scalar> {
         self.if_valid(
             Flags::UNDERLINE_THICKNESS_IS_VALID,
-            self.underline_thickness)
+            self.underline_thickness,
+        )
     }
 
     pub fn underline_position(&self) -> Option<scalar> {
-        self.if_valid(
-            Flags::UNDERLINE_POSITION_IS_VALID,
-            self.underline_position)
+        self.if_valid(Flags::UNDERLINE_POSITION_IS_VALID, self.underline_position)
     }
 
     pub fn strikeout_thickness(&self) -> Option<scalar> {
         self.if_valid(
             Flags::STRIKEOUT_THICKNESS_IS_VALID,
-            self.strikeout_thickness)
+            self.strikeout_thickness,
+        )
     }
 
     pub fn strikeout_position(&self) -> Option<scalar> {
-        self.if_valid(
-            Flags::STRIKEOUT_POSITION_IS_VALID,
-            self.strikeout_position)
+        self.if_valid(Flags::STRIKEOUT_POSITION_IS_VALID, self.strikeout_position)
     }
 
     fn if_valid(&self, flag: Flags, value: scalar) -> Option<scalar> {

@@ -1,6 +1,14 @@
 use crate::prelude::*;
-use crate::{ColorFilter, ColorSpace, ColorType, FilterQuality, IRect, Matrix, Rect, NativeFlattenable};
-use skia_bindings::{C_SkImageFilter_MakeMatrixFilter, C_SkImageFilter_computeFastBounds, C_SkImageFilter_makeWithLocalMatrix, SkColorFilter, SkColorSpace, SkImageFilter, SkImageFilterCache, SkImageFilter_Context, SkImageFilter_CropRect, SkImageFilter_MapDirection, SkImageFilter_OutputProperties, SkImageFilter_TileUsage, SkRefCntBase, SkFlattenable, C_SkImageFilter_Deserialize};
+use crate::{
+    ColorFilter, ColorSpace, ColorType, FilterQuality, IRect, Matrix, NativeFlattenable, Rect,
+};
+use skia_bindings::{
+    C_SkImageFilter_Deserialize, C_SkImageFilter_MakeMatrixFilter,
+    C_SkImageFilter_computeFastBounds, C_SkImageFilter_makeWithLocalMatrix, SkColorFilter,
+    SkColorSpace, SkFlattenable, SkImageFilter, SkImageFilterCache, SkImageFilter_Context,
+    SkImageFilter_CropRect, SkImageFilter_MapDirection, SkImageFilter_OutputProperties,
+    SkImageFilter_TileUsage, SkRefCntBase,
+};
 use std::ptr;
 
 #[repr(C)]
@@ -83,7 +91,8 @@ impl CropRect {
         CropRect::from_native(unsafe {
             SkImageFilter_CropRect::new1(
                 rect.as_ref().native(),
-                flags.into().unwrap_or(crop_rect::CropEdge::HAS_ALL).bits())
+                flags.into().unwrap_or(crop_rect::CropEdge::HAS_ALL).bits(),
+            )
         })
     }
 
@@ -169,9 +178,7 @@ impl NativeFlattenable for SkImageFilter {
     }
 
     fn native_deserialize(data: &[u8]) -> *mut Self {
-        unsafe {
-            C_SkImageFilter_Deserialize(data.as_ptr() as _, data.len())
-        }
+        unsafe { C_SkImageFilter_Deserialize(data.as_ptr() as _, data.len()) }
     }
 }
 
@@ -274,11 +281,7 @@ impl RCHandle<SkImageFilter> {
         unsafe { self.native().canHandleComplexCTM() }
     }
 
-    pub fn with_matrix(
-        &self,
-        matrix: &Matrix,
-        quality: FilterQuality,
-    ) -> ImageFilter {
+    pub fn with_matrix(&self, matrix: &Matrix, quality: FilterQuality) -> ImageFilter {
         ImageFilter::from_ptr(unsafe {
             C_SkImageFilter_MakeMatrixFilter(
                 matrix.native(),

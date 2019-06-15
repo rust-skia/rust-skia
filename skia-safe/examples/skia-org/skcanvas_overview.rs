@@ -1,7 +1,10 @@
-use crate::resources;
 use crate::artifact::DrawingDriver;
+use crate::resources;
+use skia_safe::{
+    scalar, BlendMode, Canvas, Color, Font, Paint, PaintStyle, Path, RRect, Rect, TextBlob,
+    Typeface,
+};
 use std::path::PathBuf;
-use skia_safe::{Canvas, Path, scalar, Paint, Color, Rect, PaintStyle, BlendMode, RRect, Font, Typeface, TextBlob};
 
 pub fn draw<Driver: DrawingDriver>(path: &PathBuf) {
     let path = path.join("SkCanvas-Overview");
@@ -12,8 +15,8 @@ pub fn draw<Driver: DrawingDriver>(path: &PathBuf) {
 
 fn draw_heptagram(canvas: &mut Canvas) {
     const SCALE: scalar = 256.0;
-    const R : scalar = 0.45 * SCALE;
-    const TAU : scalar = 6.2831853;
+    const R: scalar = 0.45 * SCALE;
+    const TAU: scalar = 6.2831853;
     let mut path = Path::default();
     path.move_to((R, 0.0));
     for i in 1..7 {
@@ -41,7 +44,6 @@ fn draw_rotated_rectangle(canvas: &mut Canvas) {
 }
 
 fn draw_hello_skia(canvas: &mut Canvas) {
-
     let image = resources::color_wheel();
 
     canvas.draw_color(Color::WHITE, BlendMode::default());
@@ -77,6 +79,10 @@ fn draw_hello_skia(canvas: &mut Canvas) {
 
     let paint2 = Paint::default();
 
-    let text = TextBlob::from_str("Hello, Skia!", &Font::from_typeface(&Typeface::default(), 18.0)).unwrap();
+    let text = TextBlob::from_str(
+        "Hello, Skia!",
+        &Font::from_typeface(&Typeface::default(), 18.0),
+    )
+    .unwrap();
     canvas.draw_text_blob(&text, (50, 25), &paint2);
 }
