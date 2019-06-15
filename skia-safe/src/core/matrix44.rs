@@ -279,7 +279,11 @@ impl Matrix44 {
     // Note: set_scale(), pre_scale() and post_scale() is implemented as a Trait below.
 
     pub fn set_rotate_degrees_about(&mut self, v: impl Into<Vector3>, degrees: scalar) -> &mut Self {
-        unimplemented!()
+        let v = v.into();
+        unsafe {
+            self.native_mut().setRotateDegreesAbout(v.x, v.y, v.z, degrees);
+        }
+        self
     }
 
     pub fn set_rotate_about(&mut self, v: impl Into<Vector3>, radians: scalar) -> &mut Self {
