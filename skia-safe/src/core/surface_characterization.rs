@@ -50,12 +50,10 @@ impl Handle<SkSurfaceCharacterization> {
         unsafe { self.native().isValid() }
     }
 
-    pub fn image_info(&self) -> ImageInfo {
+    pub fn image_info(&self) -> &ImageInfo {
         // no dice to link that under windows:
         // ImageInfo::from_native(unsafe { (*self.native().imageInfo()).clone() })
-        let mut ii = ImageInfo::default();
-        unsafe { C_SkSurfaceCharacterization_imageInfo(self.native(), ii.native_mut()); }
-        ii
+        ImageInfo::from_native_ref(unsafe { &*C_SkSurfaceCharacterization_imageInfo(self.native()) })
     }
 
     pub fn origin(&self) -> SurfaceOrigin {

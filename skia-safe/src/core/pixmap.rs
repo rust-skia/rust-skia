@@ -57,8 +57,8 @@ impl Handle<SkPixmap> {
         .if_true_some(pixmap)
     }
 
-    pub fn info(&self) -> ImageInfo {
-        ImageInfo::from_native(unsafe { (*self.native().info()).clone() })
+    pub fn info(&self) -> &ImageInfo {
+        ImageInfo::from_native_ref(unsafe { &*self.native().info() })
     }
 
     pub fn row_bytes(&self) -> usize {

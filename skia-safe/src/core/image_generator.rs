@@ -36,8 +36,8 @@ impl ImageGenerator {
         Data::from_ptr(unsafe { C_SkImageGenerator_refEncodedData(self.native_mut()) })
     }
 
-    pub fn info(&self) -> ImageInfo {
-        ImageInfo::from_native(unsafe { (*self.native().getInfo()).clone() })
+    pub fn info(&self) -> &ImageInfo {
+        ImageInfo::from_native_ref(unsafe { &*self.native().getInfo() })
     }
 
     pub fn is_valid(&self, mut context: Option<&mut gpu::Context>) -> bool {

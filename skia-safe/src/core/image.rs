@@ -283,9 +283,9 @@ impl RCHandle<SkImage> {
         })
     }
 
-    pub fn image_info(&self) -> ImageInfo {
-        ImageInfo::from_native(unsafe {
-            (*self.native().imageInfo()).clone()
+    pub fn image_info(&self) -> &ImageInfo {
+        ImageInfo::from_native_ref(unsafe {
+            &*self.native().imageInfo()
         })
     }
 
