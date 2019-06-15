@@ -1,6 +1,6 @@
 use crate::{BlendMode, Color, Color4f, ColorSpace, scalar, NativeFlattenable};
 use crate::prelude::*;
-use skia_bindings::{C_SkColorFilter_asColorMatrix, C_SkColorFilter_asColorMode, C_SkColorFilter_getFlags, C_SkColorFilter_makeComposed, C_SkColorFilters_Blend, C_SkColorFilters_Compose, C_SkColorFilters_Lerp, C_SkColorFilters_LinearToSRGBGamma, C_SkColorFilters_MatrixRowMajor255, C_SkColorFilters_SRGBToLinearGamma, SkColorFilter, SkColorFilter_Flags_kAlphaUnchanged_Flag, SkRefCntBase, SkFlattenable, C_SkColorFilter_Deserialize};
+use skia_bindings::{C_SkColorFilter_asColorMatrix, C_SkColorFilter_asColorMode, C_SkColorFilter_getFlags, C_SkColorFilter_makeComposed, SkColorFilter, SkColorFilter_Flags_kAlphaUnchanged_Flag, SkRefCntBase, SkFlattenable, C_SkColorFilter_Deserialize};
 
 bitflags! {
     pub struct Flags: u32 {
@@ -75,9 +75,11 @@ impl RCHandle<SkColorFilter> {
     // TODO: affectsTransparentBlack()
 }
 
-pub enum ColorFilters {}
+pub mod color_filters {
+    use crate::prelude::*;
+    use crate::{ColorFilter, Color, scalar, BlendMode};
+    use skia_bindings::{C_SkColorFilters_Blend, C_SkColorFilters_Compose, C_SkColorFilters_Lerp, C_SkColorFilters_LinearToSRGBGamma, C_SkColorFilters_MatrixRowMajor255, C_SkColorFilters_SRGBToLinearGamma};
 
-impl ColorFilters {
     pub fn compose(outer: &ColorFilter, inner: &ColorFilter) -> Option<ColorFilter> {
         ColorFilter::from_ptr(unsafe {
             C_SkColorFilters_Compose(outer.shared_native(), inner.shared_native())
@@ -89,7 +91,7 @@ impl ColorFilters {
             .unwrap()
     }
 
-    pub fn blend<C: Into<Color>>(c: C, mode: BlendMode) -> Option<ColorFilter> {
+    pub fn blend(c: impl Into<Color>, mode: BlendMode) -> Option<ColorFilter> {
         ColorFilter::from_ptr(unsafe {
             C_SkColorFilters_Blend(c.into().into_native(), mode.into_native())
         })
@@ -115,7 +117,7 @@ impl ColorFilters {
 fn color_mode_roundtrip() {
     let color = Color::CYAN;
     let mode = BlendMode::ColorBurn;
-    let cf = ColorFilters::blend(color, mode).unwrap();
+    let cf = color_filters::blend(color, mode).unwrap();
     let (c, m) = cf.to_color_mode().unwrap();
     assert_eq!(color, c);
     assert_eq!(mode, m);
@@ -125,7 +127,7 @@ fn color_mode_roundtrip() {
 fn ref_count() {
     let color = Color::CYAN;
     let mode = BlendMode::ColorBurn;
-    let cf = ColorFilters::blend(color, mode).unwrap();
+    let cf = color_filters::blend(color, mode).unwrap();
     let rc = cf.native()._ref_cnt();
     assert_eq!(1, rc);
 }

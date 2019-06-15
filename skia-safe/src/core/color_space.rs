@@ -32,11 +32,10 @@ pub struct ColorSpaceTransferFn {
     pub f: f32
 }
 
-pub enum NamedTransferFn {}
-
 // TODO: Make the binding generator provide all these constants.
-#[allow(non_upper_case_globals)]
-impl NamedTransferFn {
+pub mod named_transfer_fn {
+    use crate::ColorSpaceTransferFn;
+
     pub const SRGB: ColorSpaceTransferFn = ColorSpaceTransferFn {
         g: 2.4,
         a: 1.0 / 1.055,

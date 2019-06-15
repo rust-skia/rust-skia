@@ -2,8 +2,6 @@ use crate::prelude::*;
 use crate::{scalar, Color, Color4f, ColorSpace, DrawLooper, Vector};
 use skia_bindings::{C_SkBlurDrawLooper_Make, C_SkBlurDrawLooper_Make2, SkDrawLooper};
 
-pub enum BlurDrawLooper {}
-
 impl RCHandle<SkDrawLooper> {
     pub fn blur(
         color: impl Into<Color>,

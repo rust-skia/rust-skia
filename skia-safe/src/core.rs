@@ -37,12 +37,16 @@ mod color;
 pub use color::*;
 
 pub mod color_filter;
-pub use color_filter::{ColorFilter, ColorFilters};
+pub use color_filter::{ColorFilter, color_filters};
+#[deprecated(note = "use color_filters")]
+pub use color_filters as ColorFilters;
 #[deprecated(note = "use ColorFilter::Flags")]
 pub use color_filter::Flags as ColorFilterFlags;
 
 mod color_space;
 pub use color_space::*;
+#[deprecated(note = "use named_transfer_fn")]
+pub use named_transfer_fn as NamedTransferFn;
 
 pub mod contour_measure;
 pub use contour_measure::{ContourMeasure, ContourMeasureIter};
