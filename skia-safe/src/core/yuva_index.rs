@@ -1,8 +1,5 @@
 use crate::prelude::*;
-use skia_bindings::{
-    SkYUVAIndex,
-    SkColorChannel
-};
+use skia_bindings::{SkYUVAIndex, SkColorChannel, SkYUVAIndex_Index};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -16,8 +13,27 @@ pub enum ColorChannel {
 impl NativeTransmutable<SkColorChannel> for ColorChannel {}
 #[test] fn test_color_channel_layout() { ColorChannel::test_layout() }
 
-#[derive(Copy, Clone)]
-pub struct YUVAIndex(pub(crate) SkYUVAIndex);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum Index {
+    Y = SkYUVAIndex_Index::kY_Index as _,
+    U = SkYUVAIndex_Index::kU_Index as _,
+    V = SkYUVAIndex_Index::kV_Index as _,
+    A = SkYUVAIndex_Index::kA_Index as _,
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+pub struct YUVAIndex {
+    pub(crate) index: i32,
+    pub(crate) channel: ColorChannel
+}
+
+impl Default for YUVAIndex {
+    fn default() -> Self {
+        YUVAIndex::new(None)
+    }
+}
 
 impl NativeTransmutable<SkYUVAIndex> for YUVAIndex {}
 
@@ -27,31 +43,32 @@ fn test_yuva_index_layout() {
 }
 
 impl YUVAIndex {
+    pub const INDEX_COUNT: usize = 4;
 
     pub fn new(index: Option<(usize, ColorChannel)>) -> YUVAIndex {
         match index {
             Some((index, channel)) => {
-                assert!(index < 4);
-                YUVAIndex::from_native(SkYUVAIndex {
-                    fIndex: index.try_into().unwrap(),
-                    fChannel: channel.into_native()
-                })
+                assert!(index < Self::INDEX_COUNT);
+                Self {
+                    index: index.try_into().unwrap(),
+                    channel
+                }
             },
-            None => {
-                YUVAIndex::from_native(SkYUVAIndex {
-                    fIndex: -1,
-                    fChannel: ColorChannel::A.into_native()
-                })
+            None => Self {
+                index: -1,
+                channel: ColorChannel::A
             }
         }
     }
 
-    pub fn are_valid_indices(indices: &[YUVAIndex; 4]) -> Option<usize> {
+    pub fn are_valid_indices(indices: &[YUVAIndex; Self::INDEX_COUNT]) -> Option<usize> {
         let mut num_planes = 0;
         unsafe {
             SkYUVAIndex::AreValidIndices(indices.native().as_ptr(), &mut num_planes)
-        }.if_true_some(num_planes.try_into().unwrap())
+        }.if_true_then_some(|| num_planes.try_into().unwrap())
+    }
+
+    pub(crate) fn is_valid(self) -> bool {
+        self.index >= 0 && self.index < Self::INDEX_COUNT as i32
     }
 }
-
-

@@ -1,5 +1,5 @@
 use std::{ptr, mem};
-use std::ops::{Index, IndexMut};
+use std::ops::{Index, IndexMut, Deref, DerefMut};
 use std::hash::{Hasher, Hash};
 #[cfg(test)]
 use skia_bindings::{SkSurface, SkData, SkColorSpace};
@@ -11,6 +11,7 @@ use skia_bindings::{
 
 // Re-export TryFrom / TryInto to make them available in all modules that use prelude::*.
 pub use std::convert::{TryFrom, TryInto};
+use std::marker::PhantomData;
 
 /// Swiss army knife to convert any reference into any other.
 pub unsafe fn transmute_ref<FromT, ToT>(from: &FromT) -> &ToT {
@@ -65,6 +66,8 @@ impl ToOption for bool {
 pub(crate) trait IfBoolSome {
     fn if_true_some<V>(self, v: V) -> Option<V>;
     fn if_false_some<V>(self, v: V) -> Option<V>;
+    fn if_true_then_some<V>(self, f: impl FnOnce() -> V) -> Option<V>;
+    fn if_false_then_some<V>(self, f: impl FnOnce() -> V) -> Option<V>;
 }
 
 impl IfBoolSome for bool {
@@ -74,6 +77,14 @@ impl IfBoolSome for bool {
 
     fn if_false_some<V>(self, v: V) -> Option<V> {
         (!self).if_true_some(v)
+    }
+
+    fn if_true_then_some<V>(self, f: impl FnOnce() -> V) -> Option<V> {
+        self.to_option().map(|()| f())
+    }
+
+    fn if_false_then_some<V>(self, f: impl FnOnce() -> V) -> Option<V> {
+        (!self).to_option().map(|()| f())
     }
 }
 
@@ -137,6 +148,7 @@ impl RefCount for SkColorSpace {
 pub trait NativeRefCounted: Sized {
     fn _ref(&self);
     fn _unref(&self);
+    fn unique(&self) -> bool;
     fn _ref_cnt(&self) -> usize {
         unimplemented!();
     }
@@ -149,6 +161,10 @@ impl NativeRefCounted for SkRefCntBase {
 
     fn _unref(&self) {
         unsafe { self.unref() }
+    }
+
+    fn unique(&self) -> bool {
+        unsafe { self.unique() }
     }
 
     #[allow(clippy::cast_ptr_alignment)]
@@ -180,6 +196,10 @@ impl<Native, Base: NativeRefCounted> NativeRefCounted for Native
         self.ref_counted_base()._unref();
     }
 
+    fn unique(&self) -> bool {
+        self.ref_counted_base().unique()
+    }
+
     fn _ref_cnt(&self) -> usize {
         self.ref_counted_base()._ref_cnt()
     }
@@ -189,8 +209,9 @@ impl<Native, Base: NativeRefCounted> NativeRefCounted for Native
 pub(crate) trait NativeAccess<N> {
     fn native(&self) -> &N;
     fn native_mut(&mut self) -> &mut N;
-    unsafe fn native_mut_force(&self) -> &mut N {
-        &mut *(self.native() as *const N as *mut N)
+    // Returns a ptr to the native mutable value.
+    unsafe fn native_mut_force(&self) -> *mut N {
+        self.native() as *const N as *mut N
     }
 }
 
@@ -216,11 +237,6 @@ pub trait NativeHash {
     fn hash<H: Hasher>(&self, state: &mut H);
 }
 
-/// A trait allowing a conversion from a native type to a handle type.
-pub(crate) trait FromNative<N> {
-    fn from_native(native: N) -> Self;
-}
-
 /// Wraps a native type that can be represented as a value
 /// and needs a Drop trait.
 #[repr(transparent)]
@@ -232,13 +248,17 @@ impl<N: NativeDrop> AsRef<Handle<N>> for Handle<N> {
     }
 }
 
-impl<N: NativeDrop> FromNative<N> for Handle<N> {
-    fn from_native(n: N) -> Handle<N> {
+impl<N: NativeDrop> Handle<N> {
+    /// Create a handle from a native type.
+    pub fn from_native(n: N) -> Self {
         Handle(n)
     }
-}
 
-impl<N: NativeDrop> Handle<N> {
+    /// Create a reference to the Rust wrapper from a reference to the native type.
+    pub fn from_native_ref(n: &N) -> &Self {
+        unsafe { transmute_ref(n) }
+    }
+
     /// Constructs a C++ object in place by calling an
     /// extern "C" function that expects a pointer that points to
     /// zeroed memory of the native type.
@@ -361,6 +381,7 @@ impl<H, N> NativePointerOrNullMut2<N> for Option<&mut H>
 }
 
 /// A representation type represented by a refcounted pointer to the native type.
+#[repr(transparent)]
 pub struct RCHandle<Native: NativeRefCounted>(*mut Native);
 
 impl<N: NativeRefCounted> AsRef<RCHandle<N>> for RCHandle<N> {
@@ -501,11 +522,10 @@ impl<N: NativeRefCounted> ToSharedPointerMut<N> for Option<&mut RCHandle<N>> {
     }
 }
 
-    /// Trait to compute the elements of this type occupy memory in bytes.
+/// Trait to compute how many bytes the elements of this type occupy in memory.
 pub(crate) trait ElementsSizeOf {
     fn elements_size_of(&self) -> usize;
 }
-
 
 impl<N: Sized> ElementsSizeOf for [N] {
     fn elements_size_of(&self) -> usize {
@@ -689,5 +709,40 @@ impl<E> AsPointerOrNullMut<E> for Option<Vec<E>> {
             Some(v) => v.as_mut_ptr(),
             None => ptr::null_mut()
         }
+    }
+}
+
+// Wraps a handle so that the Rust's borrow checker assumes it represents
+// something that borrows something else.
+#[repr(C)]
+pub struct Borrows<'a, H>(H, PhantomData<&'a ()>);
+
+impl<'a, H> Deref for Borrows<'a, H> {
+    type Target = H;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl<'a, H> DerefMut for Borrows<'a, H> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+impl<'a, H> Borrows<'a, H> {
+    /// Release the borrowed dependency and return the handle.
+    pub unsafe fn release(self) -> H {
+        self.0
+    }
+}
+
+pub(crate) trait BorrowsFrom : Sized {
+    fn borrows<D: ?Sized>(self, _dep: &D) -> Borrows<Self>;
+}
+
+impl<T: Sized> BorrowsFrom for T {
+    fn borrows<D: ?Sized>(self, _dep: &D) -> Borrows<Self> {
+        Borrows(self, PhantomData)
     }
 }

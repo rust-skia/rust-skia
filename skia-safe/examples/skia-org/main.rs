@@ -75,10 +75,10 @@ pub(crate) mod artifact {
         const NAME: &'static str = "pdf";
 
         fn draw_image<F>(size: (i32, i32), path: &PathBuf, name: &str, func: F) -> () where F: Fn(&mut Canvas) -> () {
-            let mut document = skia_safe::pdf::new_document(None).begin_page((size.0 as _, size.1 as _), None);
+            let mut document = skia_safe::pdf::new_document(None).begin_page(size, None);
             func(document.canvas());
             let data = document.end_page().close();
-            write_file(data.bytes(), path, name, "pdf");
+            write_file(data.as_bytes(), path, name, "pdf");
         }
     }
 
@@ -91,7 +91,7 @@ pub(crate) mod artifact {
             let mut canvas = skia_safe::svg::Canvas::new(Rect::from_size(size));
             func(&mut canvas);
             let data = canvas.end();
-            write_file(data.bytes(), path, name, "svg");
+            write_file(data.as_bytes(), path, name, "svg");
         }
     }
 
@@ -165,7 +165,7 @@ pub(crate) mod artifact {
         func(&mut canvas);
         let image = surface.image_snapshot();
         let data = image.encode_to_data(EncodedImageFormat::PNG).unwrap();
-        write_file(data.bytes(), path, name, "png");
+        write_file(data.as_bytes(), path, name, "png");
     }
 
     fn write_file(bytes: &[u8], path: &PathBuf, name: &str, ext: &str) {

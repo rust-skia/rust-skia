@@ -54,7 +54,7 @@ fn draw_hello_skia(canvas: &mut Canvas) {
     let mut rect = Rect::from_point_and_size((50.0, 50.0), (40.0, 60.0));
     canvas.draw_rect(rect, &paint);
 
-    let oval = RRect::new_oval(rect).offset((40.0, 60.0));
+    let oval = RRect::new_oval(rect).with_offset((40.0, 60.0));
     paint.set_color(Color::BLUE);
     canvas.draw_rrect(oval, &paint);
 
@@ -77,6 +77,6 @@ fn draw_hello_skia(canvas: &mut Canvas) {
 
     let paint2 = Paint::default();
 
-    let text = TextBlob::from_str("Hello, Skia!", &Font::from_typeface_with_size(&Typeface::default(), 18.0));
+    let text = TextBlob::from_str("Hello, Skia!", &Font::from_typeface(&Typeface::default(), 18.0)).unwrap();
     canvas.draw_text_blob(&text, (50, 25), &paint2);
 }

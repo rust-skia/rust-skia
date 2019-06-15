@@ -1,7 +1,7 @@
 use crate::prelude::*;
-use crate::core::scalar;
+use crate::scalar;
 use skia_bindings::SkPoint3;
-use std::ops::{Add, Sub, Neg};
+use std::ops::{Add, Sub, Neg, AddAssign, SubAssign};
 
 pub type Vector3 = Point3;
 pub type Color3f = Point3;
@@ -17,7 +17,7 @@ pub struct Point3 {
 impl NativeTransmutable<SkPoint3> for Point3 {}
 
 #[test]
-fn test_layout() {
+fn test_point3_layout() {
     Point3::test_layout()
 }
 
@@ -41,10 +41,22 @@ impl Add for Point3 {
     }
 }
 
+impl AddAssign for Point3 {
+    fn add_assign(&mut self, rhs: Point3) {
+        *self = *self + rhs;
+    }
+}
+
 impl Sub for Point3 {
     type Output = Self;
     fn sub(self, rhs: Self) -> Self::Output {
         Self::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
+    }
+}
+
+impl SubAssign for Point3 {
+    fn sub_assign(&mut self, rhs: Point3) {
+        *self = *self - rhs;
     }
 }
 
@@ -53,10 +65,24 @@ impl Point3 {
         Self { x, y, z }
     }
 
+    pub fn set(&mut self, x: scalar, y: scalar, z: scalar) {
+        *self = Self::new(x, y, z);
+    }
+
+    pub fn length_xyz(x: scalar, y: scalar, z: scalar) -> scalar {
+        unsafe { SkPoint3::Length(x, y, z) }
+    }
+
     pub fn length(&self) -> scalar {
         // does not link:
         // unsafe { self.native().length() }
         unsafe { SkPoint3::Length(self.x, self.y, self.z) }
+    }
+
+    pub fn normalize(&mut self) -> bool {
+        unsafe {
+            self.native_mut().normalize()
+        }
     }
 
     #[must_use]
@@ -66,10 +92,15 @@ impl Point3 {
             .if_true_some(normalized)
     }
 
+    // TODO: with_scale()?
     #[must_use]
     pub fn scaled(&self, scale: scalar) -> Self {
         // scale() does not link.
         Self::from_native(unsafe { self.native().makeScale(scale) })
+    }
+
+    pub fn scale(&mut self, value: scalar) {
+        *self = self.scaled(value);
     }
 
     pub fn is_finite(&self) -> bool {
@@ -80,9 +111,19 @@ impl Point3 {
         unsafe { SkPoint3::DotProduct(a.native(), b.native()) }
     }
 
+    pub fn dot(&self, vec: Self) -> scalar {
+        unsafe { self.native().dot(vec.native()) }
+    }
+
     pub fn cross_product(a: Self, b: Self) -> Point3 {
         Self::from_native(unsafe {
             SkPoint3::CrossProduct(a.native(), b.native())
+        })
+    }
+
+    pub fn cross(&self, vec: Self) -> Point3 {
+        Self::from_native(unsafe {
+            self.native().cross(vec.native())
         })
     }
 }

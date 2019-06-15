@@ -1,11 +1,12 @@
 use crate::prelude::*;
-use crate::{Matrix, Image, Color, scalar, Point, ColorFilter, ColorSpace, Color4f, BlendMode, TileMode};
-use skia_bindings::{SkShader, SkRefCntBase, SkShader_GradientType, SkShader_GradientInfo, C_SkShader_asAGradient, C_SkShader_makeWithLocalMatrix, C_SkShader_makeWithColorFilter, C_SkShader_isAImage, SkTileMode, C_SkShaders_Empty, C_SkShaders_Color, C_SkShaders_Color2, C_SkShaders_Blend, C_SkShaders_Lerp, C_SkShaders_Lerp2};
+use crate::{Matrix, Image, Color, scalar, Point, ColorFilter, TileMode, gradient_shader, NativeFlattenable};
+use skia_bindings::{SkShader, SkRefCntBase, SkShader_GradientType, SkShader_GradientInfo, C_SkShader_asAGradient, C_SkShader_makeWithLocalMatrix, C_SkShader_makeWithColorFilter, C_SkShader_isAImage, SkTileMode, C_SkShader_Deserialize, SkFlattenable};
 use std::mem;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-pub enum ShaderGradientType {
+#[allow(dead_code)]
+pub enum GradientTypeInternal {
     None = SkShader_GradientType::kNone_GradientType as _,
     Color = SkShader_GradientType::kColor_GradientType as _,
     Linear = SkShader_GradientType::kLinear_GradientType as _,
@@ -14,15 +15,30 @@ pub enum ShaderGradientType {
     Conical = SkShader_GradientType::kConical_GradientType as _,
 }
 
-impl NativeTransmutable<SkShader_GradientType> for ShaderGradientType {}
-#[test] fn test_shader_grandient_type_layout() { ShaderGradientType::test_layout() }
+impl NativeTransmutable<SkShader_GradientType> for GradientTypeInternal {}
+#[test] fn test_shader_grandient_type_layout() { GradientTypeInternal::test_layout() }
 
-pub struct ShaderGradientInfo<'a> {
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub enum GradientType {
+    Color,
+    Linear(Point, Point),
+    Radial(Point, scalar),
+    Conical([(Point, scalar); 2]),
+    Sweep(Point)
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub struct GradientInfo<'a> {
     pub colors: &'a [Color],
     pub color_offsets: &'a [scalar],
-    pub point: (Point, Point),
-    pub radius: (scalar, scalar),
-    pub tile_mode: TileMode
+    pub tile_mode: TileMode,
+    pub gradient_flags: gradient_shader::Flags
+}
+
+impl<'a> GradientInfo<'a> {
+    pub fn color_count(&self) -> usize {
+        self.colors.len()
+    }
 }
 
 pub type Shader = RCHandle<SkShader>;
@@ -34,9 +50,21 @@ impl NativeRefCountedBase for SkShader {
     }
 }
 
+impl NativeFlattenable for SkShader {
+    fn native_flattenable(&self) -> &SkFlattenable {
+        &self._base
+    }
+
+    fn native_deserialize(data: &[u8]) -> *mut Self {
+        unsafe {
+            C_SkShader_Deserialize(data.as_ptr() as _, data.len())
+        }
+    }
+}
+
 impl Default for RCHandle<SkShader> {
     fn default() -> Self {
-        Shaders::empty()
+        shaders::empty()
     }
 }
 
@@ -68,7 +96,7 @@ impl RCHandle<SkShader> {
 
     #[deprecated(since="0.11.0", note="skbug.com/8941")]
     pub fn as_a_gradient<'a>(&self, colors: &'a mut [Color], color_offsets: &'a mut [scalar])
-        -> (ShaderGradientType, ShaderGradientInfo<'a>) {
+        -> Option<(GradientType, GradientInfo<'a>)> {
         assert_eq!(colors.len(), color_offsets.len());
         let max_color_count = colors.len();
         unsafe {
@@ -82,18 +110,30 @@ impl RCHandle<SkShader> {
                 fGradientFlags: 0
             };
 
-            let gradient_type = C_SkShader_asAGradient(self.native(), &mut info);
-            let returned_color_count : usize = info.fColorCount.try_into().unwrap();
-            assert!(returned_color_count <= max_color_count);
-            let info = ShaderGradientInfo {
-                colors: &colors[0..returned_color_count],
-                color_offsets: &color_offsets[0..returned_color_count],
-                point: (Point::from_native(info.fPoint[0]), Point::from_native(info.fPoint[1])),
-                radius: (info.fRadius[0], info.fRadius[1]),
-                // TODO: tile mode should be converted from the returned info record.
-                tile_mode: TileMode::Clamp
-            };
-            (ShaderGradientType::from_native(gradient_type), info)
+            let gradient_type = GradientTypeInternal::from_native(C_SkShader_asAGradient(self.native(), &mut info));
+            match gradient_type {
+                GradientTypeInternal::None =>
+                    None,
+                GradientTypeInternal::Color =>
+                    Some(GradientType::Color),
+                GradientTypeInternal::Linear =>
+                    Some(GradientType::Linear(Point::from_native(info.fPoint[0]), Point::from_native(info.fPoint[1]))),
+                GradientTypeInternal::Radial =>
+                    Some(GradientType::Radial(Point::from_native(info.fPoint[0]), info.fRadius[0])),
+                GradientTypeInternal::Sweep =>
+                    Some(GradientType::Sweep(Point::from_native(info.fPoint[0]))),
+                GradientTypeInternal::Conical =>
+                    Some(GradientType::Conical([(Point::from_native(info.fPoint[0]), info.fRadius[0]), (Point::from_native(info.fPoint[1]), info.fRadius[1])])),
+            }.map(move |t| {
+                let returned_color_count: usize = info.fColorCount.try_into().unwrap();
+                assert!(returned_color_count <= max_color_count);
+                (t, GradientInfo {
+                    colors: &colors[0..returned_color_count],
+                    color_offsets: &color_offsets[0..returned_color_count],
+                    tile_mode: TileMode::Clamp,
+                    gradient_flags: gradient_shader::Flags::from_bits_truncate(info.fGradientFlags)
+                })
+            })
         }
     }
 
@@ -110,23 +150,25 @@ impl RCHandle<SkShader> {
     }
 }
 
-pub enum Shaders {}
+pub mod shaders {
+    use crate::prelude::*;
+    use crate::{Shader, Color, ColorSpace, BlendMode, Color4f};
+    use skia_bindings::{C_SkShaders_Empty, C_SkShaders_Color, C_SkShaders_Color2, C_SkShaders_Blend, C_SkShaders_Lerp, C_SkShaders_Lerp2};
 
-impl Shaders {
     pub fn empty() -> Shader {
         Shader::from_ptr(unsafe {
             C_SkShaders_Empty()
         }).unwrap()
     }
 
-    pub fn color<C: Into<Color>>(color: C) -> Shader {
+    pub fn color(color: impl Into<Color>) -> Shader {
         let color = color.into();
         Shader::from_ptr(unsafe {
             C_SkShaders_Color(color.into_native())
         }).unwrap()
     }
 
-    pub fn color_in_space<C: AsRef<Color4f>>(color: C, space: &ColorSpace) -> Shader {
+    pub fn color_in_space(color: impl AsRef<Color4f>, space: &ColorSpace) -> Shader {
         Shader::from_ptr(unsafe {
             C_SkShaders_Color2(color.as_ref().native(), space.shared_native())
         }).unwrap()

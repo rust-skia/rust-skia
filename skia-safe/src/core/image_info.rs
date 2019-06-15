@@ -1,6 +1,16 @@
 use crate::prelude::*;
-use skia_bindings::{SkAlphaType, SkImageInfo, SkColorType, SkYUVColorSpace, C_SkImageInfo_Construct, C_SkImageInfo_Copy};
-use crate::core::{
+use skia_bindings::{
+    SkAlphaType,
+    SkImageInfo,
+    SkColorType,
+    SkYUVColorSpace,
+    C_SkImageInfo_Construct,
+    C_SkImageInfo_Copy,
+    C_SkImageInfo_Equals,
+    C_SkImageInfo_gammaCloseToSRGB,
+    C_SkImageInfo_reset
+};
+use crate::{
     ColorSpace,
     IRect,
     ISize,
@@ -91,6 +101,13 @@ pub enum YUVColorSpace {
 impl NativeTransmutable<SkYUVColorSpace> for YUVColorSpace {}
 #[test] fn test_yuv_color_space_layout() { YUVColorSpace::test_layout() }
 
+
+impl Default for YUVColorSpace {
+    fn default() -> Self {
+        YUVColorSpace::Identity
+    }
+}
+
 pub type ImageInfo = Handle<SkImageInfo>;
 
 impl NativeDrop for SkImageInfo {
@@ -113,7 +130,11 @@ impl NativeClone for SkImageInfo {
     }
 }
 
-// TODO: NativePartialEq
+impl NativePartialEq for SkImageInfo {
+    fn eq(&self, rhs: &Self) -> bool {
+        unsafe { C_SkImageInfo_Equals(self, rhs) }
+    }
+}
 
 impl Default for Handle<SkImageInfo> {
     fn default() -> Self {
@@ -124,7 +145,7 @@ impl Default for Handle<SkImageInfo> {
 
 impl Handle<SkImageInfo> {
 
-    pub fn new<IS: Into<ISize>>(dimensions: IS, ct: ColorType, at: AlphaType, cs: Option<ColorSpace>) -> Self {
+    pub fn new(dimensions: impl Into<ISize>, ct: ColorType, at: AlphaType, cs: Option<&ColorSpace>) -> Self {
         let dimensions = dimensions.into();
         let mut image_info = Self::default();
 
@@ -137,11 +158,11 @@ impl Handle<SkImageInfo> {
         image_info
     }
 
-    pub fn new_n32<IS: Into<ISize>>(dimensions: IS, at: AlphaType, cs: Option<ColorSpace>) -> ImageInfo {
+    pub fn new_n32(dimensions: impl Into<ISize>, at: AlphaType, cs: Option<&ColorSpace>) -> ImageInfo {
         Self::new(dimensions, ColorType::n32(), at, cs)
     }
 
-    pub fn new_s32<IS: Into<ISize>>(dimensions: IS, at: AlphaType) -> ImageInfo {
+    pub fn new_s32(dimensions: impl Into<ISize>, at: AlphaType) -> ImageInfo {
         let dimensions = dimensions.into();
         let mut image_info = Self::default();
         unsafe {
@@ -150,11 +171,11 @@ impl Handle<SkImageInfo> {
         image_info
     }
 
-    pub fn new_n32_premul<IS: Into<ISize>>(dimensions: IS, cs: Option<ColorSpace>) -> ImageInfo {
+    pub fn new_n32_premul(dimensions: impl Into<ISize>, cs: Option<&ColorSpace>) -> ImageInfo {
         Self::new(dimensions, ColorType::n32(), AlphaType::Premul, cs)
     }
 
-    pub fn new_a8<IS: Into<ISize>>(dimensions: IS) -> ImageInfo {
+    pub fn new_a8(dimensions: impl Into<ISize>) -> ImageInfo {
         Self::new(dimensions, ColorType::Alpha8, AlphaType::Premul, None)
     }
 
@@ -204,19 +225,25 @@ impl Handle<SkImageInfo> {
         IRect::from_size(self.dimensions())
     }
 
-    pub fn with_dimensions<IS: Into<ISize>>(&self, new_dimensions: IS) -> Self {
-        Self::new(new_dimensions, self.color_type(), self.alpha_type(), self.color_space())
+    pub fn is_gamma_close_to_srgb(&self) -> bool {
+        // does not link:
+        // unsafe { self.native().gammaCloseToSRGB() }
+        unsafe { C_SkImageInfo_gammaCloseToSRGB(self.native()) }
+    }
+
+    pub fn with_dimensions(&self, new_dimensions: impl Into<ISize>) -> Self {
+        Self::new(new_dimensions, self.color_type(), self.alpha_type(), self.color_space().as_ref())
     }
 
     pub fn with_alpha_type(&self, new_alpha_type: AlphaType) -> Self {
-        Self::new(self.dimensions(), self.color_type(), new_alpha_type, self.color_space())
+        Self::new(self.dimensions(), self.color_type(), new_alpha_type, self.color_space().as_ref())
     }
 
     pub fn with_color_type(&self, new_color_type: ColorType) -> Self {
-        Self::new(self.dimensions(), new_color_type, self.alpha_type(), self.color_space())
+        Self::new(self.dimensions(), new_color_type, self.alpha_type(), self.color_space().as_ref())
     }
 
-    pub fn with_color_space(&self, new_color_space: Option<ColorSpace>) -> Self {
+    pub fn with_color_space(&self, new_color_space: Option<&ColorSpace>) -> Self {
         Self::new(self.dimensions(), self.color_type(), self.alpha_type(), new_color_space)
     }
 
@@ -238,7 +265,7 @@ impl Handle<SkImageInfo> {
         }
     }
 
-    pub fn compute_offset<IP: Into<IPoint>>(&self, point: IP, row_bytes: usize) -> usize {
+    pub fn compute_offset(&self, point: impl Into<IPoint>, row_bytes: usize) -> usize {
         let point = point.into();
         unsafe {
             self.native().computeOffset(point.x, point.y, row_bytes)
@@ -251,19 +278,25 @@ impl Handle<SkImageInfo> {
         }
     }
 
+    pub fn compute_min_byte_size(&self) -> usize {
+        unsafe {
+            self.native().computeMinByteSize()
+        }
+    }
+
+    // TODO: rename to has_valid_row_bytes()?
     pub fn valid_row_bytes(&self, row_bytes: usize) -> bool {
         unsafe {
             self.native().validRowBytes(row_bytes)
         }
     }
 
-    /* TODO: does not link, create a C wrapper function for that.
     pub fn reset(&mut self) -> &mut Self {
-        unsafe {
-            self.native_mut().reset()
-        }
+        // does not link:
+        // unsafe { self.native_mut().reset() }
+        unsafe { C_SkImageInfo_reset(self.native_mut()) };
         self
-    } */
+    }
 }
 
 #[test]
@@ -271,10 +304,13 @@ fn ref_cnt_in_relation_to_color_space() {
     let cs = ColorSpace::new_srgb();
     let before = cs.ref_cnt();
     {
-        let ii = ImageInfo::new_n32((10, 10), AlphaType::Premul, Some(cs.clone()));
-        let cs = ii.color_space();
-        // one for clone, one for the reference in image info.
-        assert_eq!(before+2, cs.unwrap().ref_cnt())
+        let ii = ImageInfo::new_n32((10, 10), AlphaType::Premul, Some(&cs));
+        // one for the capture in image info
+        assert_eq!(before+1, cs.ref_cnt());
+        let cs2 = ii.color_space();
+        // and one for the returned one.
+        assert_eq!(before+2, cs.ref_cnt());
+        drop(cs2);
     }
     assert_eq!(before, cs.ref_cnt())
 }

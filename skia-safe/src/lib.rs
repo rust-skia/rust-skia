@@ -1,4 +1,5 @@
 mod prelude;
+mod codec;
 mod core;
 mod docs;
 mod effects;
@@ -15,21 +16,21 @@ extern crate bitflags;
 #[macro_use]
 extern crate lazy_static;
 
+// Prelude re-exports
+pub use crate::prelude::Borrows;
+
 /// All Sk* types are accessible via skia_safe::
+pub use crate::codec::*;
 pub use crate::core::*;
-pub use crate::core::document::document;
-pub use crate::core::contour_measure::contour_measure;
-pub use crate::core::path_measure::path_measure;
 pub use crate::docs::*;
 pub use crate::effects::*;
 pub use crate::pathops::*;
-pub use crate::font_parameters;
 
 #[cfg(test)]
 mod transmutation_tests {
 
     use crate::prelude::NativeTransmutableSliceAccess;
-    use crate::core::Point;
+    use crate::Point;
     use skia_bindings::SkPoint;
 
     #[test]

@@ -1,18 +1,6 @@
 use crate::prelude::*;
-use crate::core::{
-    BlurStyle,
-    scalar,
-    Matrix,
-    CoverageMode
-};
-use skia_bindings::{
-    C_SkMaskFilter_Combine,
-    C_SkMaskFilter_Compose,
-    C_SkMaskFilter_MakeBlur,
-    SkRefCntBase,
-    SkMaskFilter,
-    C_SkMaskFilter_makeWithMatrix
-};
+use crate::{BlurStyle, scalar, Matrix, CoverageMode, NativeFlattenable};
+use skia_bindings::{C_SkMaskFilter_Combine, C_SkMaskFilter_Compose, C_SkMaskFilter_MakeBlur, SkRefCntBase, SkMaskFilter, C_SkMaskFilter_makeWithMatrix, C_SkMaskFilter_Deserialize, SkFlattenable};
 
 pub type MaskFilter = RCHandle<SkMaskFilter>;
 
@@ -24,11 +12,23 @@ impl NativeRefCountedBase for SkMaskFilter {
     }
 }
 
+impl NativeFlattenable for SkMaskFilter {
+    fn native_flattenable(&self) -> &SkFlattenable {
+        &self._base
+    }
+
+    fn native_deserialize(data: &[u8]) -> *mut Self {
+        unsafe {
+            C_SkMaskFilter_Deserialize(data.as_ptr() as _, data.len())
+        }
+    }
+}
+
 impl RCHandle<SkMaskFilter> {
 
-    pub fn blur(style: BlurStyle, sigma: scalar, respect_ctm: Option<bool>) -> Self {
+    pub fn blur(style: BlurStyle, sigma: scalar, respect_ctm: impl Into<Option<bool>>) -> Self {
         Self::from_ptr(unsafe {
-            C_SkMaskFilter_MakeBlur(style.into_native(), sigma, respect_ctm.unwrap_or(true))
+            C_SkMaskFilter_MakeBlur(style.into_native(), sigma, respect_ctm.into().unwrap_or(true))
         }).unwrap()
     }
 

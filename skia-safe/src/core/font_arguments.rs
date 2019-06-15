@@ -1,41 +1,41 @@
 use crate::prelude::*;
-use crate::FourByteTag;
 use skia_bindings::{
     C_SkFontArguments_construct, C_SkFontArguments_destruct,
-    C_SkFontArguments_setVariationDesignPosition, SkFontArguments,
-    SkFontArguments_VariationPosition, SkFontArguments_VariationPosition_Coordinate,
+    C_SkFontArguments_getVariationDesignPosition, C_SkFontArguments_setVariationDesignPosition,
+    SkFontArguments, SkFontArguments_VariationPosition,
 };
 use std::marker::PhantomData;
-use std::mem::forget;
 use std::{mem, slice};
 
 #[derive(Debug)]
-pub struct FontArgumentsVariationPosition<'a> {
-    pub coordinates: &'a [FontArgumentsVariationPositionCoordinate],
+pub struct VariationPosition<'a> {
+    pub coordinates: &'a [variation_position::Coordinate],
 }
 
-#[derive(Copy, Clone, PartialEq, Debug)]
-#[repr(C)]
-pub struct FontArgumentsVariationPositionCoordinate {
-    pub axis: FourByteTag,
-    pub value: f32,
+pub mod variation_position {
+    use crate::prelude::*;
+    use crate::FourByteTag;
+    use skia_bindings::SkFontArguments_VariationPosition_Coordinate;
+
+    #[derive(Copy, Clone, PartialEq, Default, Debug)]
+    #[repr(C)]
+    pub struct Coordinate {
+        pub axis: FourByteTag,
+        pub value: f32,
+    }
+
+    impl NativeTransmutable<SkFontArguments_VariationPosition_Coordinate> for Coordinate {}
+    #[test]
+    fn test_coordinate_layout() {
+        Coordinate::test_layout()
+    }
 }
 
-impl NativeTransmutable<SkFontArguments_VariationPosition_Coordinate>
-    for FontArgumentsVariationPositionCoordinate
-{
-}
-#[test]
-fn test_variation_position_coordinate_layout() {
-    FontArgumentsVariationPositionCoordinate::test_layout()
-}
-
-// Need to assign a lifetime to FontArguments, because it borrows [VariationPositionCoordinate].
 #[repr(C)]
 #[derive(Debug)]
 pub struct FontArguments<'a> {
     args: SkFontArguments,
-    pd: PhantomData<&'a ()>,
+    pd: PhantomData<&'a [variation_position::Coordinate]>,
 }
 
 impl<'a> NativeTransmutable<SkFontArguments> for FontArguments<'a> {}
@@ -46,7 +46,6 @@ fn test_font_arguments_layout() {
 
 impl<'a> Drop for FontArguments<'a> {
     fn drop(&mut self) {
-        println!("drop fa");
         unsafe { C_SkFontArguments_destruct(self.native_mut()) }
     }
 }
@@ -76,24 +75,20 @@ impl<'a> FontArguments<'a> {
         self
     }
 
-    // This function consumes self to be able to change its lifetime, because it
-    // borrows the coordinates referenced by FontArgumentsVariationPosition.
-    // Also don't use liftime elision here for documentation.
-    pub fn set_variation_design_position<'position>(
-        mut self,
-        position: FontArgumentsVariationPosition<'position>,
-    ) -> FontArguments<'position> {
+    // This function consumes self for it to be able to change its lifetime,
+    // because it borrows the coordinates referenced by FontArgumentsVariationPosition.
+    pub fn set_variation_design_position(mut self, position: VariationPosition) -> FontArguments /* not Self!! */
+    {
         let position = SkFontArguments_VariationPosition {
             coordinates: position.coordinates.native().as_ptr(),
             coordinateCount: position.coordinates.len().try_into().unwrap(),
         };
         unsafe {
-            // does not link on Linux / MacOS:
+            // does not link on Linux / macOS:
             C_SkFontArguments_setVariationDesignPosition(self.native_mut(), position);
-            // TODO: is there a more elegant way to change the lifetime of self?
-            let r = mem::transmute_copy(&self);
-            forget(self);
-            r
+            // note: we are _not_ returning Self here, but VariationPosition with a
+            // changed lifetime.
+            mem::transmute(self)
         }
     }
 
@@ -103,18 +98,15 @@ impl<'a> FontArguments<'a> {
             .unwrap()
     }
 
-    pub fn variation_design_position(&self) -> FontArgumentsVariationPosition {
-        // TODO: find out why calling getVariationDesignPosition() returns garbage
-        // (tested on Windows).
-        // TODO: build a extern "C" wrapper for the function getVariationDesignPosition().
-        let position = self.native().fVariationDesignPosition;
-        FontArgumentsVariationPosition {
-            coordinates: unsafe {
-                slice::from_raw_parts(
+    pub fn variation_design_position(&self) -> VariationPosition {
+        unsafe {
+            let position = C_SkFontArguments_getVariationDesignPosition(self.native());
+            VariationPosition {
+                coordinates: slice::from_raw_parts(
                     position.coordinates as *const _,
                     position.coordinateCount.try_into().unwrap(),
-                )
-            },
+                ),
+            }
         }
     }
 }
@@ -129,12 +121,12 @@ fn test_font_arguments_with_no_coordinates() {
 
 #[test]
 fn access_coordinates() {
-    let coordinates = Box::new([FontArgumentsVariationPositionCoordinate {
+    let coordinates = Box::new([variation_position::Coordinate {
         axis: 0.into(),
         value: 1.0,
     }]);
     let args = FontArguments::new();
-    let args = args.set_variation_design_position(FontArgumentsVariationPosition {
+    let args = args.set_variation_design_position(VariationPosition {
         coordinates: coordinates.as_ref(),
     });
     assert_eq!(args.variation_design_position().coordinates[0].value, 1.0);

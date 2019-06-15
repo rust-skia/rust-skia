@@ -1,8 +1,6 @@
 use crate::prelude::*;
-use crate::{scalar, BlurStyle, Color, Paint, Rect, Vector};
-use skia_bindings::{
-    C_SkDrawLooper_asABlurShadow, SkDrawLooper, SkDrawLooper_BlurShadowRec, SkRefCntBase,
-};
+use crate::{scalar, BlurStyle, Color, Paint, Rect, Vector, NativeFlattenable};
+use skia_bindings::{C_SkDrawLooper_asABlurShadow, SkDrawLooper, SkDrawLooper_BlurShadowRec, SkRefCntBase, SkFlattenable, C_SkDrawLooper_Deserialize};
 
 pub type DrawLooper = RCHandle<SkDrawLooper>;
 
@@ -14,32 +12,40 @@ impl NativeRefCountedBase for SkDrawLooper {
     }
 }
 
-// TODO: What does Rec mean, is it Record, and should it be abbreviated then?
+impl NativeFlattenable for SkDrawLooper {
+    fn native_flattenable(&self) -> &SkFlattenable {
+        &self._base
+    }
+
+    fn native_deserialize(data: &[u8]) -> *mut Self {
+        unsafe {
+            C_SkDrawLooper_Deserialize(data.as_ptr() as _, data.len())
+        }
+    }
+}
+
 #[derive(Clone, PartialEq, Default, Debug)]
 #[repr(C)]
-pub struct DrawLooperBlurShadowRec {
+pub struct BlurShadowRec {
     pub sigma: scalar,
     pub offset: Vector,
     pub color: Color,
     pub blur: BlurStyle,
 }
 
-impl NativeTransmutable<SkDrawLooper_BlurShadowRec> for DrawLooperBlurShadowRec {}
+impl NativeTransmutable<SkDrawLooper_BlurShadowRec> for BlurShadowRec {}
 #[test]
 fn test_blur_shadow_rec_layout() {
-    DrawLooperBlurShadowRec::test_layout()
+    BlurShadowRec::test_layout()
 }
 
-// TODO: Context
-
 impl RCHandle<SkDrawLooper> {
-    // TODO: makeContext
 
     pub fn can_compute_fast_bounds(&self, paint: &Paint) -> bool {
         unsafe { self.native().canComputeFastBounds(paint.native()) }
     }
 
-    pub fn compute_fast_bounds<SR: AsRef<Rect>>(&self, paint: &Paint, src: SR) -> Rect {
+    pub fn compute_fast_bounds(&self, paint: &Paint, src: impl AsRef<Rect>) -> Rect {
         let mut r = Rect::default();
         unsafe {
             self.native()
@@ -48,8 +54,8 @@ impl RCHandle<SkDrawLooper> {
         r
     }
 
-    pub fn as_a_blur_shadow(&self) -> Option<DrawLooperBlurShadowRec> {
-        let mut br = DrawLooperBlurShadowRec::default();
+    pub fn as_a_blur_shadow(&self) -> Option<BlurShadowRec> {
+        let mut br = BlurShadowRec::default();
         unsafe { C_SkDrawLooper_asABlurShadow(self.native(), br.native_mut()) }.if_true_some(br)
     }
 }

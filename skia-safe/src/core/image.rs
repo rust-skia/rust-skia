@@ -1,64 +1,44 @@
 use crate::prelude::*;
-use crate::gpu;
-use crate::core::{Picture, Matrix, ColorType, ImageInfo, Data, Bitmap, IRect, YUVColorSpace, AlphaType, ColorSpace, YUVAIndex, ISize, Paint, EncodedImageFormat, IPoint, TileMode, Shader};
-use skia_bindings::{
-    C_SkImage_MakeFromPicture,
-    C_SkImage_MakeFromTexture,
-    C_SkImage_MakeFromCompressed,
-    C_SkImage_MakeFromEncoded,
-    C_SkImage_MakeFromBitmap,
-    SkImage,
-    C_SkImage_encodeToData,
-    C_SkImage_MakeRasterData,
-    C_SkImage_MakeCrossContextFromEncoded,
-    C_SkImage_MakeFromAdoptedTexture,
-    C_SkImage_MakeFromYUVATexturesCopy,
-    SkYUVAIndex,
-    C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend,
-    C_SkImage_MakeFromYUVATextures,
-    C_SkImage_MakeFromNV12TexturesCopy,
-    C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend,
-    SkImage_BitDepth,
-    SkImage_CachingHint,
-    SkImage_CompressionType,
-    C_SkImage_refEncodedData,
-    C_SkImage_makeSubset,
-    C_SkImage_makeTextureImage,
-    C_SkImage_makeNonTextureImage,
-    C_SkImage_makeRasterImage,
-    C_SkImage_makeColorSpace,
-    SkRefCntBase,
-    C_SkImage_makeShader
-};
+use crate::{gpu, ImageFilter, ImageGenerator, Pixmap, FilterQuality};
+use crate::{Picture, Matrix, ColorType, ImageInfo, Data, Bitmap, IRect, YUVColorSpace, AlphaType, ColorSpace, YUVAIndex, ISize, Paint, EncodedImageFormat, IPoint, TileMode, Shader};
+use skia_bindings::{C_SkImage_MakeFromPicture, C_SkImage_MakeFromTexture, C_SkImage_MakeFromCompressed, C_SkImage_MakeFromEncoded, C_SkImage_MakeFromBitmap, SkImage, C_SkImage_encodeToData, C_SkImage_MakeRasterData, C_SkImage_MakeCrossContextFromEncoded, C_SkImage_MakeFromAdoptedTexture, C_SkImage_MakeFromYUVATexturesCopy, C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend, C_SkImage_MakeFromYUVATextures, C_SkImage_MakeFromNV12TexturesCopy, C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend, C_SkImage_refEncodedData, C_SkImage_makeSubset, C_SkImage_makeTextureImage, C_SkImage_makeNonTextureImage, C_SkImage_makeRasterImage, C_SkImage_makeWithFilter, C_SkImage_makeColorSpace, SkRefCntBase, C_SkImage_makeShader, C_SkImage_MakeFromGenerator};
+use skia_bindings::{SkImage_BitDepth, SkImage_CachingHint, SkImage_CompressionType};
+use std::mem;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-pub enum ImageBitDepth {
+pub enum BitDepth {
     U8 = SkImage_BitDepth::kU8 as _,
     F16 = SkImage_BitDepth::kF16 as _
 }
 
-impl NativeTransmutable<SkImage_BitDepth> for ImageBitDepth {}
-#[test] fn test_image_bit_depth_layout() { ImageBitDepth::test_layout() }
+impl NativeTransmutable<SkImage_BitDepth> for BitDepth {}
+
+#[test]
+fn test_bit_depth_layout() { BitDepth::test_layout() }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-pub enum ImageCachingHint {
+pub enum CachingHint {
     Allow = SkImage_CachingHint::kAllow_CachingHint as _,
     Disallow = SkImage_CachingHint::kDisallow_CachingHint as _
 }
 
-impl NativeTransmutable<SkImage_CachingHint> for ImageCachingHint {}
-#[test] fn test_caching_hint_layout() { ImageCachingHint::test_layout() }
+impl NativeTransmutable<SkImage_CachingHint> for CachingHint {}
+
+#[test]
+fn test_caching_hint_layout() { CachingHint::test_layout() }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-pub enum ImageCompressionType {
+pub enum CompressionType {
     ETC1 = SkImage_CompressionType::kETC1_CompressionType as _
 }
 
-impl NativeTransmutable<SkImage_CompressionType> for ImageCompressionType {}
-#[test] fn test_compression_type_layout() { ImageCompressionType::test_layout() }
+impl NativeTransmutable<SkImage_CompressionType> for CompressionType {}
+
+#[test]
+fn test_compression_type_layout() { CompressionType::test_layout() }
 
 pub type Image = RCHandle<SkImage>;
 
@@ -71,16 +51,28 @@ impl NativeRefCountedBase for SkImage {
 
 impl RCHandle<SkImage> {
 
-    pub fn from_raster_data(info: &ImageInfo, pixels: &mut Data, row_bytes: usize) -> Option<Image> {
+    // TODO: MakeRasterCopy()
+
+    pub fn from_raster_data(info: &ImageInfo, pixels: &Data, row_bytes: usize) -> Option<Image> {
         Image::from_ptr(unsafe {
-            C_SkImage_MakeRasterData(info.native(), pixels.shared_native_mut(), row_bytes)
+            C_SkImage_MakeRasterData(info.native(), pixels.shared_native(), row_bytes)
         })
     }
+
+    // TODO: MakeFromRaster()
 
     pub fn from_bitmap(bitmap: &Bitmap) -> Option<Image> {
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromBitmap(bitmap.native())
         })
+    }
+
+    pub fn from_generator(mut image_generator: ImageGenerator, subset: Option<&IRect>) -> Option<Image> {
+        let image = Image::from_ptr(unsafe {
+            C_SkImage_MakeFromGenerator(image_generator.native_mut(), subset.native_ptr_or_null())
+        });
+        mem::forget(image_generator);
+        image
     }
 
     pub fn from_encoded(data: &Data, subset: Option<IRect>) -> Option<Image> {
@@ -91,11 +83,12 @@ impl RCHandle<SkImage> {
         })
     }
 
-    pub fn from_compressed<IS: Into<ISize>>(
+    // TODO: this is experimental, should probably be removed.
+    pub fn from_compressed(
         context: &mut gpu::Context,
         data: &Data,
-        size: IS,
-        c_type: ImageCompressionType) -> Option<Image> {
+        size: impl Into<ISize>,
+        c_type: CompressionType) -> Option<Image> {
         let size = size.into();
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromCompressed(
@@ -105,6 +98,8 @@ impl RCHandle<SkImage> {
                 c_type.into_native())
         })
     }
+
+    // TODO: add variant with TextureReleaseProc
 
     pub fn from_texture(
         context: &mut gpu::Context,
@@ -132,16 +127,18 @@ impl RCHandle<SkImage> {
         // not mentions in the docs, but implementation indicates that
         // this can be null.
         color_space: Option<&ColorSpace>,
-        limit_to_max_texture_size: bool) -> Option<Image> {
+        limit_to_max_texture_size: impl Into<Option<bool>>) -> Option<Image> {
 
         Image::from_ptr(unsafe {
             C_SkImage_MakeCrossContextFromEncoded(
                 context.native_mut(),
                 data.shared_native(),
                 build_mips,
-                color_space.native_ptr_or_null(), limit_to_max_texture_size)
+                color_space.native_ptr_or_null(), limit_to_max_texture_size.into().unwrap_or_default())
         })
     }
+
+    // TODO: MakeCrossContextFromPixmap()
 
     pub fn from_adopted_texture(
         context: &mut gpu::Context,
@@ -162,14 +159,15 @@ impl RCHandle<SkImage> {
         })
     }
 
+    // TODO: rename to clone_from_yuva_textures() ?
     pub fn from_yuva_textures_copy(
         context: &mut gpu::Context,
         yuv_color_space: YUVColorSpace,
         yuva_textures: &[gpu::BackendTexture],
         yuva_indices: &[YUVAIndex; 4],
-        image_size: ISize,
+        image_size: impl Into<ISize>,
         image_origin: gpu::SurfaceOrigin,
-        image_color_space: Option<ColorSpace>) -> Option<Image> {
+        image_color_space: Option<&ColorSpace>) -> Option<Image> {
 
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromYUVATexturesCopy(
@@ -177,34 +175,30 @@ impl RCHandle<SkImage> {
                 yuv_color_space.into_native(),
                 yuva_textures.native().as_ptr(),
                 yuva_indices.native().as_ptr(),
-                image_size.into_native(),
+                image_size.into().into_native(),
                 image_origin.into_native(),
                 image_color_space.shared_ptr())
         })
     }
 
-    // TODO: consider clippy!
     #[allow(clippy::too_many_arguments)]
     pub fn from_yuva_textures_copy_with_external_backend(
         context: &mut gpu::Context,
         yuv_color_space: YUVColorSpace,
         yuva_textures: &[gpu::BackendTexture],
         yuva_indices: &[YUVAIndex; 4],
-        image_size: ISize,
+        image_size: impl Into<ISize>,
         image_origin: gpu::SurfaceOrigin,
         backend_texture: &gpu::BackendTexture,
-        image_color_space: Option<ColorSpace>) -> Option<Image> {
-
-        let yuva_indices : Vec<SkYUVAIndex> =
-            yuva_indices.iter().map(|i| i.0).collect();
+        image_color_space: Option<&ColorSpace>) -> Option<Image> {
 
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend(
                 context.native_mut(),
                 yuv_color_space.into_native(),
                 yuva_textures.native().as_ptr(),
-                yuva_indices.as_ptr(),
-                image_size.into_native(),
+                yuva_indices.native().as_ptr(),
+                image_size.into().into_native(),
                 image_origin.into_native(),
                 backend_texture.native(),
                 image_color_space.shared_ptr())
@@ -216,31 +210,30 @@ impl RCHandle<SkImage> {
         yuv_color_space: YUVColorSpace,
         yuva_textures: &[gpu::BackendTexture],
         yuva_indices: &[YUVAIndex; 4],
-        image_size: ISize,
+        image_size: impl Into<ISize>,
         image_origin: gpu::SurfaceOrigin,
-        image_color_space: Option<ColorSpace>) -> Option<Image> {
-
-        let yuva_indices : Vec<SkYUVAIndex> =
-            yuva_indices.iter().map(|i| i.0).collect();
+        image_color_space: Option<&ColorSpace>) -> Option<Image> {
 
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromYUVATextures(
                 context.native_mut(),
                 yuv_color_space.into_native(),
                 yuva_textures.native().as_ptr(),
-                yuva_indices.as_ptr(),
-                image_size.into_native(),
+                yuva_indices.native().as_ptr(),
+                image_size.into().into_native(),
                 image_origin.into_native(),
                 image_color_space.shared_ptr())
         })
     }
+
+    // TODO: MakeFromYUVAPixmaps()
 
     pub fn from_nv12_textures_copy(
         context: &mut gpu::Context,
         yuv_color_space: YUVColorSpace,
         nv12_textures: &[gpu::BackendTexture; 2],
         image_origin: gpu::SurfaceOrigin,
-        image_color_space: Option<ColorSpace>) -> Option<Image> {
+        image_color_space: Option<&ColorSpace>) -> Option<Image> {
 
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromNV12TexturesCopy(
@@ -258,7 +251,7 @@ impl RCHandle<SkImage> {
         nv12_textures: &[gpu::BackendTexture; 2],
         image_origin: gpu::SurfaceOrigin,
         backend_texture: &gpu::BackendTexture,
-        image_color_space: Option<ColorSpace>) -> Option<Image> {
+        image_color_space: Option<&ColorSpace>) -> Option<Image> {
 
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
@@ -272,17 +265,17 @@ impl RCHandle<SkImage> {
     }
 
     pub fn from_picture(
-        picture: Picture,
-        dimensions: ISize,
+        picture: &Picture,
+        dimensions: impl Into<ISize>,
         matrix: Option<&Matrix>,
         paint: Option<&Paint>,
-        bit_depth: ImageBitDepth,
-        color_space: Option<ColorSpace>) -> Option<Image> {
+        bit_depth: BitDepth,
+        color_space: Option<&ColorSpace>) -> Option<Image> {
 
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromPicture(
                 picture.shared_native(),
-                &dimensions.into_native(),
+                dimensions.into().native(),
                 matrix.native_ptr_or_null(),
                 paint.native_ptr_or_null(),
                 bit_depth.into_native(),
@@ -290,9 +283,9 @@ impl RCHandle<SkImage> {
         })
     }
 
-    pub fn image_info(&self) -> ImageInfo {
-        ImageInfo::from_native(unsafe {
-            (*self.native().imageInfo()).clone()
+    pub fn image_info(&self) -> &ImageInfo {
+        ImageInfo::from_native_ref(unsafe {
+            &*self.native().imageInfo()
         })
     }
 
@@ -338,18 +331,24 @@ impl RCHandle<SkImage> {
         unsafe { self.native().isOpaque() }
     }
 
-    pub fn as_shader<
-        'a, TM: Into<Option<(TileMode, TileMode)>>,
-        OM: Into<Option<&'a Matrix>>>(
-        &self, tile_modes: TM, local_matrix: OM) -> Shader {
+    pub fn to_shader<'a>(
+        &self,
+        tile_modes: impl Into<Option<(TileMode, TileMode)>>,
+        local_matrix: impl Into<Option<&'a Matrix>>) -> Shader {
         let tile_modes = tile_modes.into();
         let tm1 = tile_modes.map(|m| m.0).unwrap_or_default();
         let tm2 = tile_modes.map(|m| m.1).unwrap_or_default();
-        let local_matrix = local_matrix.into();
 
         Shader::from_ptr(unsafe {
-            C_SkImage_makeShader(self.native(), tm1.into_native(), tm2.into_native(), local_matrix.native_ptr_or_null())
+            C_SkImage_makeShader(self.native(), tm1.into_native(), tm2.into_native(), local_matrix.into().native_ptr_or_null())
         }).unwrap()
+    }
+
+    pub fn peek_pixels(&self) -> Option<Borrows<Pixmap>> {
+        let mut pixmap = Pixmap::default();
+        unsafe {
+            self.native().peekPixels(pixmap.native_mut())
+        }.if_false_then_some(|| pixmap.borrows(self))
     }
 
     pub fn is_texture_backed(&self) -> bool {
@@ -376,13 +375,15 @@ impl RCHandle<SkImage> {
         dst_info: &ImageInfo,
         pixels: &mut[P],
         dst_row_bytes: usize,
-        src: IPoint,
-        caching_hint: ImageCachingHint) -> bool {
+        src: impl Into<IPoint>,
+        caching_hint: CachingHint) -> bool {
 
         if pixels.elements_size_of() !=
             (usize::try_from(dst_info.height()).unwrap() * dst_row_bytes) {
             return false
         }
+
+        let src = src.into();
 
         unsafe {
             self.native().readPixels(
@@ -393,28 +394,36 @@ impl RCHandle<SkImage> {
         }
     }
 
+    #[must_use]
+    pub fn scale_pixels(&self, dst: &Pixmap, filter_quality: FilterQuality, caching_hint: impl Into<Option<CachingHint>>) -> bool {
+        unsafe {
+            self.native().scalePixels(dst.native(), filter_quality.into_native(), caching_hint.into().unwrap_or(CachingHint::Allow).into_native())
+        }
+    }
+
+    // TODO: support quality!
     pub fn encode_to_data(&self, image_format: EncodedImageFormat) -> Option<Data> {
         Data::from_ptr(unsafe {
             C_SkImage_encodeToData(self.native(), image_format.into_native())
         })
     }
 
-    pub fn ref_encoded_data(&self) -> Option<Data> {
+    pub fn encoded_data(&self) -> Option<Data> {
         Data::from_ptr(unsafe {
             C_SkImage_refEncodedData(self.native())
         })
     }
 
-    pub fn new_subset(&self, rect: IRect) -> Option<Image> {
+    pub fn new_subset(&self, rect: impl AsRef<IRect>) -> Option<Image> {
         Image::from_ptr(unsafe {
-            C_SkImage_makeSubset(self.native(), rect.native())
+            C_SkImage_makeSubset(self.native(), rect.as_ref().native())
         })
     }
 
-    pub fn new_texture_image<'a, ICS: Into<Option<&'a ColorSpace>>>(
+    pub fn new_texture_image<'a>(
         &self,
         context: &mut gpu::Context,
-        dst_color_space: ICS,
+        dst_color_space: impl Into<Option<&'a ColorSpace>>,
         mip_mapped: gpu::MipMapped) -> Option<Image> {
 
         Image::from_ptr(unsafe {
@@ -437,6 +446,32 @@ impl RCHandle<SkImage> {
             C_SkImage_makeRasterImage(self.native())
         })
     }
+
+    // TODO: rename to with_filter()?
+    pub fn new_with_filter(
+        &self,
+        mut context: Option<&mut gpu::Context>,
+        filter: &ImageFilter,
+        clip_bounds: impl Into<IRect>,
+        subset: impl Into<IRect>)
+        -> Option<(Image, IRect, IPoint)> {
+
+        let mut out_subset = IRect::default();
+        let mut offset = IPoint::default();
+
+        Image::from_ptr(unsafe {
+            C_SkImage_makeWithFilter(
+                self.native(),
+                context.native_ptr_or_null_mut(),
+                filter.native(),
+                subset.into().native(),
+                clip_bounds.into().native(),
+                out_subset.native_mut(),
+                offset.native_mut())
+        }).map(|image| (image, out_subset, offset))
+    }
+
+    // TODO: MakeBackendTextureFromSkImage()
 
     pub fn is_lazy_generated(&self) -> bool {
         unsafe { self.native().isLazyGenerated() }

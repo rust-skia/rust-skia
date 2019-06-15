@@ -1,5 +1,5 @@
 use std::path::PathBuf;
-use skia_safe::{Canvas, Path, Paint, Color, PaintStyle, Font, PaintCap};
+use skia_safe::{Canvas, Path, Paint, paint, Color, Font};
 use crate::artifact::DrawingDriver;
 
 pub fn draw<Driver: DrawingDriver>(path: &PathBuf) {
@@ -18,13 +18,11 @@ fn draw_example1(canvas: &mut Canvas) {
     let mut path = Path::default();
     path.move_to((124, 108));
     path.line_to((172, 24));
-    // TODO: even though convenient, I don't like to specify the default() here as the Path's direction.
-    // may be we should really make the Optional.
-    path.add_circle((50, 50), 30.0, Default::default());
+    path.add_circle((50, 50), 30.0, None);
     path.move_to((36, 148));
     path.quad_to((66, 188), (120, 136));
     canvas.draw_path(&path, &paint);
-    paint.set_style(PaintStyle::Stroke);
+    paint.set_style(paint::Style::Stroke);
     paint.set_color(Color::BLUE);
     paint.set_stroke_width(3.0);
     canvas.draw_path(&path, &paint);
@@ -37,12 +35,12 @@ fn draw_example2(canvas: &mut Canvas) {
     path.move_to((36, 48));
     path.quad_to((66, 88), (120, 36));
     canvas.draw_path(&path, &paint);
-    paint.set_style(PaintStyle::Stroke);
+    paint.set_style(paint::Style::Stroke);
     paint.set_color(Color::BLUE);
     paint.set_stroke_width(8.0);
     canvas.translate((0, 50));
     canvas.draw_path(&path, &paint);
-    paint.set_style(PaintStyle::StrokeAndFill);
+    paint.set_style(paint::Style::StrokeAndFill);
     paint.set_color(Color::RED);
     canvas.translate((0, 50));
     canvas.draw_path(&path, &paint);
@@ -54,7 +52,7 @@ fn draw_example3(canvas: &mut Canvas) {
     canvas.draw_str("1st contour", (150, 100), &Font::default(), &paint);
     canvas.draw_str("2nd contour", (130, 160), &Font::default(), &paint);
     canvas.draw_str("3rd contour", (40, 30), &Font::default(), &paint);
-    paint.set_style(PaintStyle::Stroke);
+    paint.set_style(paint::Style::Stroke);
     let mut path = Path::default();
     path.move_to((124, 108));
     path.line_to((172, 24));
@@ -68,7 +66,7 @@ fn draw_example3(canvas: &mut Canvas) {
 fn draw_example4(canvas: &mut Canvas) {
     let mut paint = Paint::default();
     paint.set_anti_alias(true);
-    paint.set_style(PaintStyle::Stroke);
+    paint.set_style(paint::Style::Stroke);
     paint.set_stroke_width(8.0);
     let mut path = Path::default();
     path.move_to((36, 48));
@@ -82,15 +80,15 @@ fn draw_example4(canvas: &mut Canvas) {
 fn draw_example5(canvas: &mut Canvas) {
     let mut paint = Paint::default();
     paint.set_anti_alias(true);
-    paint.set_style(PaintStyle::Stroke);
+    paint.set_style(paint::Style::Stroke);
     paint.set_stroke_width(8.0);
-    paint.set_stroke_cap(PaintCap::Round);
+    paint.set_stroke_cap(paint::Cap::Round);
     let mut path = Path::default();
     path.move_to((36, 48));
     path.line_to((36, 48));
     canvas.draw_path(&path, &paint);
     path.reset();
-    paint.set_stroke_cap(PaintCap::Square);
+    paint.set_stroke_cap(paint::Cap::Square);
     path.move_to((56, 48));
     path.close();
     canvas.draw_path(&path, &paint);

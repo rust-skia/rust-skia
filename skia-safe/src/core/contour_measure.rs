@@ -5,30 +5,26 @@ use skia_bindings::{
     SkContourMeasureIter, SkRefCntBase,
 };
 
-pub type CountourMeasure = RCHandle<SkContourMeasure>;
+pub type ContourMeasure = RCHandle<SkContourMeasure>;
 
 impl NativeRefCountedBase for SkContourMeasure {
     type Base = SkRefCntBase;
-
     fn ref_counted_base(&self) -> &Self::Base {
         &self._base._base
     }
 }
 
-#[allow(clippy::module_inception)]
-pub mod contour_measure {
-    bitflags! {
-        pub struct MatrixFlags : u32 {
-            const GET_POSITION = skia_bindings::SkContourMeasure_MatrixFlags_kGetPosition_MatrixFlag as _;
-            const GET_TANGENT = skia_bindings::SkContourMeasure_MatrixFlags_kGetTangent_MatrixFlag as _;
-            const GET_POS_AND_TAN = Self::GET_POSITION.bits | Self::GET_TANGENT.bits;
-        }
+bitflags! {
+    pub struct MatrixFlags : u32 {
+        const GET_POSITION = skia_bindings::SkContourMeasure_MatrixFlags_kGetPosition_MatrixFlag as _;
+        const GET_TANGENT = skia_bindings::SkContourMeasure_MatrixFlags_kGetTangent_MatrixFlag as _;
+        const GET_POS_AND_TAN = Self::GET_POSITION.bits | Self::GET_TANGENT.bits;
     }
+}
 
-    impl Default for MatrixFlags {
-        fn default() -> Self {
-            Self::GET_POS_AND_TAN
-        }
+impl Default for MatrixFlags {
+    fn default() -> Self {
+        Self::GET_POS_AND_TAN
     }
 }
 
@@ -47,10 +43,19 @@ impl RCHandle<SkContourMeasure> {
         .if_true_some((p, v))
     }
 
-    pub fn matrix<F: Into<Option<contour_measure::MatrixFlags>>>(
+    #[deprecated(since = "0.12.0", note = "use get_matrix()")]
+    pub fn matrix(
         &self,
         distance: scalar,
-        flags: F,
+        flags: impl Into<Option<MatrixFlags>>,
+    ) -> Option<Matrix> {
+        self.get_matrix(distance, flags)
+    }
+
+    pub fn get_matrix(
+        &self,
+        distance: scalar,
+        flags: impl Into<Option<MatrixFlags>>,
     ) -> Option<Matrix> {
         let mut m = Matrix::default();
         unsafe {
@@ -96,30 +101,30 @@ impl NativeDrop for SkContourMeasureIter {
 }
 
 impl Iterator for Handle<SkContourMeasureIter> {
-    type Item = CountourMeasure;
+    type Item = ContourMeasure;
 
     fn next(&mut self) -> Option<Self::Item> {
-        CountourMeasure::from_ptr(unsafe { C_SkContourMeasureIter_next(self.native_mut()) })
+        ContourMeasure::from_ptr(unsafe { C_SkContourMeasureIter_next(self.native_mut()) })
     }
 }
 
 impl Handle<SkContourMeasureIter> {
     // TODO: rename to of_path? for_path?
-    pub fn from_path<RS: Into<Option<scalar>>>(
+    pub fn from_path(
         path: &Path,
         force_closed: bool,
-        res_scale: RS,
+        res_scale: impl Into<Option<scalar>>,
     ) -> Self {
         Self::from_native(unsafe {
             SkContourMeasureIter::new1(path.native(), force_closed, res_scale.into().unwrap_or(1.0))
         })
     }
 
-    pub fn reset<RS: Into<Option<scalar>>>(
+    pub fn reset(
         &mut self,
         path: &Path,
         force_closed: bool,
-        res_scale: RS,
+        res_scale: impl Into<Option<scalar>>,
     ) -> &mut Self {
         unsafe {
             self.native_mut()

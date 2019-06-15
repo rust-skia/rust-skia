@@ -1,7 +1,8 @@
 use crate::prelude::*;
 use std::{mem, ops};
-use crate::core::{Matrix, MatrixTypeMask, Vector4, scalar, Vector3 };
+use crate::{Matrix, scalar, Scalar, Vector3 };
 use skia_bindings::{
+    SkVector4,
     C_SkMatrix44_Equals,
     SkMatrix44,
     C_SkMatrix44_SkMatrix,
@@ -10,6 +11,78 @@ use skia_bindings::{
     C_SkMatrix44_ConstructIdentity,
 };
 
+#[repr(C)]
+#[derive(Clone, PartialEq, Debug)]
+pub struct Vector4 {
+    x: scalar,
+    y: scalar,
+    z: scalar,
+    w: scalar
+}
+
+impl NativeTransmutable<SkVector4> for Vector4 {}
+
+#[test]
+fn test_vector4_layout() {
+    Vector4::test_layout()
+}
+
+impl Default for Vector4 {
+    fn default() -> Self {
+        (0.0, 0.0, 0.0).into()
+    }
+}
+
+impl From<(scalar, scalar, scalar, scalar)> for Vector4 {
+    fn from((x, y, z, w): (scalar, scalar, scalar, scalar)) -> Self {
+        Vector4::new(x, y, z, w)
+    }
+}
+
+impl From<(scalar, scalar, scalar)> for Vector4 {
+    fn from((x, y, z): (scalar, scalar, scalar)) -> Self {
+        Vector4::new(x, y, z, None)
+    }
+}
+
+impl From<[scalar; 4]> for Vector4 {
+    fn from(v4: [scalar; 4]) -> Self {
+        Vector4::new(v4[0], v4[1], v4[2], v4[3])
+    }
+}
+
+impl From<[scalar; 3]> for Vector4 {
+    fn from(v3: [scalar; 3]) -> Self {
+        Vector4::new(v3[0], v3[1], v3[2], None)
+    }
+}
+
+impl Vector4 {
+    pub fn new(x: scalar, y: scalar, z: scalar, w: impl Into<Option<scalar>>) -> Self {
+        Vector4 {
+            x, y, z, w: w.into().unwrap_or(scalar::ONE)
+        }
+    }
+
+    pub fn equals(&self, x: scalar, y: scalar, z: scalar, w: impl Into<Option<scalar>>) -> bool {
+        *self == Self::new(x, y, z, w)
+    }
+
+    pub fn set(&mut self, x: scalar, y: scalar, z: scalar, w: impl Into<Option<scalar>>) {
+        *self = Self::new(x, y, z, w)
+    }
+}
+
+bitflags! {
+    pub struct TypeMask: u8 {
+        const IDENTITY = skia_bindings::SkMatrix44_kIdentity_Mask as _;
+        const TRANSLATE = skia_bindings::SkMatrix44_kTranslate_Mask as _;
+        const SCALE = skia_bindings::SkMatrix44_kScale_Mask as _;
+        const AFFINE = skia_bindings::SkMatrix44_kAffine_Mask as _;
+        const PERSPECTIVE = skia_bindings::SkMatrix44_kPerspective_Mask as _;
+    }
+}
+
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct Matrix44(SkMatrix44);
@@ -17,9 +90,9 @@ pub struct Matrix44(SkMatrix44);
 impl NativeTransmutable<SkMatrix44> for Matrix44 {}
 #[test] fn test_matrix44_layout() { Matrix44::test_layout() }
 
-impl NativePartialEq for SkMatrix44 {
+impl PartialEq for Matrix44 {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { C_SkMatrix44_Equals(self, rhs)}
+        unsafe { C_SkMatrix44_Equals(self.native(), rhs.native())}
     }
 }
 
@@ -74,8 +147,8 @@ impl Matrix44 {
         })
     }
 
-    pub fn get_type(&self) -> MatrixTypeMask {
-        MatrixTypeMask::from_bits_truncate(unsafe {
+    pub fn get_type(&self) -> TypeMask {
+        TypeMask::from_bits_truncate(unsafe {
             self.native().getType()
         }.try_into().unwrap())
     }
@@ -95,12 +168,13 @@ impl Matrix44 {
     pub fn is_scale(&self) -> bool {
         // linker error:
         // unsafe { self.0.isScale() }
-        (self.get_type() & !MatrixTypeMask::SCALE).is_empty()
+        // TODO: create and use a wrapper function for isScale()
+        (self.get_type() & !TypeMask::SCALE).is_empty()
     }
 
     pub fn has_perspective(&self) -> bool {
         // would cause a linker error
-        self.get_type().contains(MatrixTypeMask::PERSPECTIVE)
+        self.get_type().contains(TypeMask::PERSPECTIVE)
     }
 
     pub fn set_identity(&mut self) -> &mut Self {
@@ -114,33 +188,43 @@ impl Matrix44 {
     }
 
     pub fn get(&self, (row, column): (usize, usize)) -> scalar {
-        assert!(row <= Self::ROWS && column <= Self::COLUMNS);
+        assert!(row < Self::ROWS && column < Self::COLUMNS);
         unsafe { self.native().get(row as _ , column as _) }
     }
 
     pub fn set(&mut self, (row, column): (usize, usize), value: scalar) -> &mut Self {
-        assert!(row <= Self::ROWS && column <= Self::COLUMNS);
+        assert!(row < Self::ROWS && column < Self::COLUMNS);
         unsafe { self.native_mut().set(row as _, column as _, value) }
         self
     }
+
+    // TODO: getDouble(), setDouble(), getFloat(), setFloat()?
 
     pub fn as_col_major(&self, floats: &mut [scalar; 16]) {
         unsafe { self.native().asColMajorf(floats.as_mut_ptr())}
     }
 
+    // TODO: asColMajord()?
+
     pub fn as_row_major(&self, floats: &mut [scalar; 16]) {
         unsafe { self.native().asRowMajorf(floats.as_mut_ptr())}
     }
+
+    // TODO: asRowMajord()?
 
     pub fn set_col_major(&mut self, floats: &[scalar; 16]) -> &mut Self {
         unsafe { self.native_mut().setColMajorf(floats.as_ptr()) }
         self
     }
 
+    // TODO: setColMajord()?
+
     pub fn set_row_major(&mut self, floats: &[scalar; 16]) -> &mut Self {
         unsafe { self.native_mut().setRowMajorf(floats.as_ptr()) }
         self
     }
+
+    // TODO: setRowMajord()?
 
     #[allow(clippy::too_many_arguments)]
     pub fn set_3x3(&mut self,
@@ -174,37 +258,44 @@ impl Matrix44 {
         self
     }
 
-    pub fn set_translate(&mut self, d: Vector3) -> &mut Self {
+    pub fn set_translate(&mut self, d: impl Into<Vector3>) -> &mut Self {
+        let d = d.into();
         unsafe { self.native_mut().setTranslate(d.x, d.y, d.z) }
         self
     }
 
-    pub fn pre_translate(&mut self, d: Vector3) -> &mut Self {
+    pub fn pre_translate(&mut self, d: impl Into<Vector3>) -> &mut Self {
+        let d = d.into();
         unsafe { self.native_mut().preTranslate(d.x, d.y, d.z) }
         self
     }
 
-    pub fn post_translate(&mut self, d: Vector3) -> &mut Self {
+    pub fn post_translate(&mut self, d: impl Into<Vector3>) -> &mut Self {
+        let d = d.into();
         unsafe { self.native_mut().postTranslate(d.x, d.y, d.z) }
         self
     }
 
-    // TODO: implement
+    // Note: set_scale(), pre_scale() and post_scale() is implemented as a Trait below.
 
-    /*
-    pub fn set_rotate_degrees_about(&mut self, v: Vector3, degrees: scalar) -> &mut Self {
-        unimplemented!("linker error");
+    pub fn set_rotate_degrees_about(&mut self, v: impl Into<Vector3>, degrees: scalar) -> &mut Self {
+        let v = v.into();
+        unsafe {
+            self.native_mut().setRotateDegreesAbout(v.x, v.y, v.z, degrees);
+        }
+        self
     }
-    */
 
-    pub fn set_rotate_about(&mut self, v: Vector3, radians: scalar) -> &mut Self {
+    pub fn set_rotate_about(&mut self, v: impl Into<Vector3>, radians: scalar) -> &mut Self {
+        let v = v.into();
         unsafe {
             self.native_mut().setRotateAbout(v.x, v.y, v.z, radians)
         }
         self
     }
 
-    pub fn set_rotate_about_unit(&mut self, v: Vector3, radians: scalar) -> &mut Self {
+    pub fn set_rotate_about_unit(&mut self, v: impl Into<Vector3>, radians: scalar) -> &mut Self {
+        let v = v.into();
         unsafe {
             self.native_mut().setRotateAboutUnit(v.x, v.y, v.z, radians)
         }
@@ -226,7 +317,14 @@ impl Matrix44 {
         self.set_concat(&m, &self.clone())
     }
 
+    #[deprecated(since = "0.12.0", note = "use invert()")]
+    #[must_use]
     pub fn inverse(&self) -> Option<Matrix44> {
+        self.invert()
+    }
+
+    #[must_use]
+    pub fn invert(&self) -> Option<Matrix44> {
         let mut r = Matrix44::default();
         unsafe { self.native().invert(r.native_mut()) }
             .if_true_some(r)
@@ -240,6 +338,26 @@ impl Matrix44 {
     pub fn map_scalars(&self, src: &[scalar; 4], dst: &mut [scalar; 4]) {
         unsafe {
             self.native().mapScalars(src.as_ptr(), dst.as_mut_ptr())
+        }
+    }
+
+    // map2 is implemented as Trait below.
+
+    pub fn preserves_2d_axis_alignment(&self, epsilon: impl Into<Option<scalar>>) -> bool {
+        unsafe {
+            self.native().preserves2dAxisAlignment(epsilon.into().unwrap_or(Scalar::NEARLY_ZERO))
+        }
+    }
+
+    pub fn dump(&self) {
+        unsafe {
+            self.native().dump()
+        }
+    }
+
+    pub fn determinant(&self) -> f64 {
+        unsafe {
+            self.native().determinant()
         }
     }
 }
@@ -305,7 +423,7 @@ pub trait Map2<T> {
 
 impl Map2<(&[scalar], &mut[scalar])> for Matrix44 {
     fn map2(&self, (src2, dst4): (&[scalar], &mut[scalar])) {
-        assert_eq!(0, (src2.len() % 2) & 1);
+        assert_eq!(0, src2.len() % 2);
         assert_eq!(src2.len() * 2, dst4.len());
         unsafe { self.native().map2(src2.as_ptr(), (src2.len() / 2).try_into().unwrap(), dst4.as_mut_ptr()) }
     }
@@ -313,7 +431,7 @@ impl Map2<(&[scalar], &mut[scalar])> for Matrix44 {
 
 impl Map2<(&[f64], &mut[f64])> for Matrix44 {
     fn map2(&self, (src2, dst4): (&[f64], &mut[f64])) {
-        assert_eq!(0, (src2.len() % 2) & 1);
+        assert_eq!(0, src2.len() % 2);
         assert_eq!(src2.len() * 2, dst4.len());
         unsafe { self.native().map21(src2.as_ptr(), (src2.len() / 2).try_into().unwrap(), dst4.as_mut_ptr()) }
     }

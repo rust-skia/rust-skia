@@ -12,20 +12,17 @@ impl NativeDrop for SkPathMeasure {
     }
 }
 
-#[allow(clippy::module_inception)]
-pub mod path_measure {
-    bitflags! {
-        pub struct MatrixFlags : u32 {
-            const GET_POSITION = skia_bindings::SkPathMeasure_MatrixFlags_kGetPosition_MatrixFlag as _;
-            const GET_TANGENT = skia_bindings::SkPathMeasure_MatrixFlags_kGetTangent_MatrixFlag as _;
-            const GET_POS_AND_TAN = Self::GET_POSITION.bits | Self::GET_TANGENT.bits;
-        }
+bitflags! {
+    pub struct MatrixFlags : u32 {
+        const GET_POSITION = skia_bindings::SkPathMeasure_MatrixFlags_kGetPosition_MatrixFlag as _;
+        const GET_TANGENT = skia_bindings::SkPathMeasure_MatrixFlags_kGetTangent_MatrixFlag as _;
+        const GET_POS_AND_TAN = Self::GET_POSITION.bits | Self::GET_TANGENT.bits;
     }
+}
 
-    impl Default for MatrixFlags {
-        fn default() -> Self {
-            Self::GET_POS_AND_TAN
-        }
+impl Default for MatrixFlags {
+    fn default() -> Self {
+        Self::GET_POS_AND_TAN
     }
 }
 
@@ -37,10 +34,10 @@ impl Default for Handle<SkPathMeasure> {
 
 impl Handle<SkPathMeasure> {
     // TODO: rename for_path / of_path?
-    pub fn from_path<RS: Into<Option<scalar>>>(
+    pub fn from_path(
         path: &Path,
         force_closed: bool,
-        res_scale: RS,
+        res_scale: impl Into<Option<scalar>>,
     ) -> Self {
         Self::from_native(unsafe {
             SkPathMeasure::new1(path.native(), force_closed, res_scale.into().unwrap_or(1.0))
@@ -58,21 +55,23 @@ impl Handle<SkPathMeasure> {
     }
 
     // TODO: why is getPosTan() non-const?
+    // TODO: rename to get_pos_tan(), because the function has arguments?
     pub fn pos_tan(&mut self, distance: scalar) -> Option<(Point, Vector)> {
-        let mut p = Point::default();
-        let mut v = Vector::default();
+        let mut position = Point::default();
+        let mut tangent = Vector::default();
         unsafe {
             self.native_mut()
-                .getPosTan(distance, p.native_mut(), v.native_mut())
+                .getPosTan(distance, position.native_mut(), tangent.native_mut())
         }
-        .if_true_some((p, v))
+        .if_true_some((position, tangent))
     }
 
     // TODO: why is getMatrix() non-const?
-    pub fn matrix<F: Into<Option<path_measure::MatrixFlags>>>(
+    // TODO: rename to get_matrix(), because the function has arguments?
+    pub fn matrix(
         &mut self,
         distance: scalar,
-        flags: F,
+        flags: impl Into<Option<MatrixFlags>>,
     ) -> Option<Matrix> {
         let mut m = Matrix::default();
         unsafe {
@@ -87,6 +86,7 @@ impl Handle<SkPathMeasure> {
     }
 
     // TODO: why is getSegment() non-const?
+    // TODO: rename to get_segment(), because the function has arguments?
     pub fn segment(
         &mut self,
         start_d: scalar,
@@ -107,6 +107,7 @@ impl Handle<SkPathMeasure> {
         unsafe { self.native_mut().isClosed() }
     }
 
+    // TODO: rename to has_next_contour()?
     pub fn next_contour(&mut self) -> bool {
         unsafe { self.native_mut().nextContour() }
     }

@@ -3,7 +3,7 @@
 //! The policy is to avoid exporting Skia streams and try to cover every use case by
 //! using Rust native Streams.
 
-use crate::core::Data;
+use crate::Data;
 use crate::prelude::*;
 use skia_bindings::{
     C_SkDynamicMemoryWStream_Construct, C_SkDynamicMemoryWStream_detachAsData,
@@ -76,6 +76,7 @@ impl<'a> NativeAccess<SkMemoryStream> for MemoryStream<'a> {
 
 impl<'a> MemoryStream<'a> {
     // Create a stream asset that refers the bytes provided.
+    #[allow(clippy::needless_lifetimes)]
     pub fn from_bytes<'bytes>(bytes: &'bytes [u8]) -> MemoryStream<'bytes> {
         let ptr = unsafe { C_SkMemoryStream_MakeDirect(bytes.as_ptr() as _, bytes.len()) };
 

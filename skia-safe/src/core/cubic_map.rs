@@ -14,7 +14,7 @@ fn test_cubic_map_layout() {
 }
 
 impl CubicMap {
-    pub fn new<P1: Into<Point>, P2: Into<Point>>(p1: P1, p2: P2) -> Self {
+    pub fn new(p1: impl Into<Point>, p2: impl Into<Point>) -> Self {
         Self::from_native(unsafe {
             SkCubicMap::new(p1.into().into_native(), p2.into().into_native())
         })

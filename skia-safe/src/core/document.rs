@@ -1,10 +1,10 @@
 use crate::interop::DynamicMemoryWStream;
 use crate::prelude::*;
-use crate::{scalar, Canvas, Data, Rect};
+use crate::{Canvas, Data, Rect, Size};
 use skia_bindings::{SkDocument, SkRefCntBase};
 use std::pin::Pin;
 
-pub struct Document<State = document::Open> {
+pub struct Document<State = state::Open> {
     // note: order matters here, first the document must be
     // dropped _and then_ the stream.
     document: RCHandle<SkDocument>,
@@ -21,8 +21,7 @@ impl NativeRefCountedBase for SkDocument {
     }
 }
 
-#[allow(clippy::module_inception)]
-pub mod document {
+pub mod state {
     use skia_bindings::SkCanvas;
 
     /// Document is currently open. May contain several pages.
@@ -52,7 +51,7 @@ impl Document {
         Document {
             document,
             stream,
-            state: document::Open { pages: 0 },
+            state: state::Open { pages: 0 },
         }
     }
 
@@ -61,23 +60,24 @@ impl Document {
         self.state.pages
     }
 
-    // This function consumes the document and returns a document containing a canvas that represents the
-    // page it's currently drawing on.
+    // This function consumes the document and returns a document containing a
+    // canvas that represents the page it's currently drawing on.
     pub fn begin_page(
         mut self,
-        (width, height): (scalar, scalar),
+        size: impl Into<Size>,
         content: Option<&Rect>,
-    ) -> Document<document::OnPage> {
+    ) -> Document<state::OnPage> {
+        let size = size.into();
         let canvas = unsafe {
             self.document
                 .native_mut()
-                .beginPage(width, height, content.native_ptr_or_null())
+                .beginPage(size.width, size.height, content.native_ptr_or_null())
         };
 
         Document {
             stream: self.stream,
             document: self.document,
-            state: document::OnPage {
+            state: state::OnPage {
                 canvas,
                 page: self.state.pages + 1,
             },
@@ -94,7 +94,7 @@ impl Document {
     }
 }
 
-impl Document<document::OnPage> {
+impl Document<state::OnPage> {
     /// The current page we are currently drawing on.
     pub fn page(&self) -> usize {
         self.state.page
@@ -106,7 +106,8 @@ impl Document<document::OnPage> {
     }
 
     /// Ends the page.
-    /// This function consumes the document and returns a new open document containing the pages drawn so far.
+    /// This function consumes the document and returns a new open document that
+    /// contains the pages drawn so far.
     pub fn end_page(mut self) -> Document {
         unsafe {
             self.document.native_mut().endPage();
@@ -115,12 +116,14 @@ impl Document<document::OnPage> {
         Document {
             stream: self.stream,
             document: self.document,
-            state: document::Open {
+            state: state::Open {
                 pages: self.state.page,
             },
         }
 
-        // TODO: think about providing a close that implicitly ends the page and calls close on the Open document.
-        // TODO: think about providing a begin_page that implicitly ends the current page.
+        // TODO: think about providing a close that implicitly ends the page
+        //       and calls close on the Open document.
+        // TODO: think about providing a begin_page that implicitly ends the
+        //       current page.
     }
 }

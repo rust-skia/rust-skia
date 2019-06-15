@@ -6,7 +6,7 @@ use skia_bindings::{GrContext, SkRefCntBase, C_GrContext_MakeGL, GrContext_aband
 use skia_bindings::C_GrContext_MakeVulkan;
 #[cfg(feature = "vulkan")]
 use super::vk;
-use crate::core::ColorType;
+use crate::ColorType;
 
 pub type Context = RCHandle<GrContext>;
 
@@ -75,6 +75,7 @@ impl RCHandle<GrContext> {
         self
     }
 
+    // TODO: is_...?
     pub fn abandoned(&self) -> bool {
         unsafe {
             self.native()._base._base.abandoned()
@@ -152,12 +153,14 @@ impl RCHandle<GrContext> {
         }
     }
 
+    // TODO: is_...?
     pub fn color_type_supported_as_image(&self, color_type: ColorType) -> bool {
         unsafe {
             self.native().colorTypeSupportedAsImage(color_type.into_native())
         }
     }
 
+    // TODO: is_...?
     pub fn color_type_supported_as_surface(&self, color_type: ColorType) -> bool {
         unsafe {
             // does not link
@@ -195,8 +198,8 @@ impl RCHandle<GrContext> {
         self
     }
 
-    pub fn compute_texture_size<NP2: Into<Option<bool>>>(
-        color_type: ColorType, (width, height): (i32, i32), mip_mapped: MipMapped, use_next_pow2: NP2
+    pub fn compute_texture_size(
+        color_type: ColorType, (width, height): (i32, i32), mip_mapped: MipMapped, use_next_pow2: impl Into<Option<bool>>
     ) -> usize {
         unsafe {
             GrContext::ComputeTextureSize(color_type.into_native(), width, height, mip_mapped.into_native(), use_next_pow2.into().unwrap_or(false))

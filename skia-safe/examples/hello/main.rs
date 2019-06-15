@@ -24,6 +24,6 @@ fn main() {
     canvas.fill();
     let d = canvas.data();
     let mut file = File::create("test.png").unwrap();
-    let bytes = d.bytes();
+    let bytes = d.as_bytes();
     file.write_all(bytes).unwrap();
 }

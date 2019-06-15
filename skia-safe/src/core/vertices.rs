@@ -1,19 +1,18 @@
 use std::ops::{DerefMut,Deref};
 use std::{ptr, slice};
 use crate::prelude::*;
-use crate::core::{
+use crate::{
     Point,
     Rect,
     Color,
     Data
 };
-use skia_bindings::{C_SkVertices_Decode, C_SkVertices_applyBones, C_SkVertices_Builder_detach, C_SkVertices_Builder_destruct, SkVertices_Builder, SkColor, SkPoint, C_SkVertices_MakeCopy, C_SkVertices_ref, SkVertices, C_SkVertices_unref, SkVertices_Bone, SkVertices_VertexMode, C_SkVertices_encode, SkVertices_BuilderFlags_kHasTexCoords_BuilderFlag, SkVertices_BuilderFlags_kHasColors_BuilderFlag, SkVertices_BuilderFlags_kHasBones_BuilderFlag, SkVertices_BuilderFlags_kIsNonVolatile_BuilderFlag, C_SkVertices_Bone_mapRect};
+use skia_bindings::{C_SkVertices_Decode, C_SkVertices_applyBones, C_SkVertices_Builder_detach, C_SkVertices_Builder_destruct, SkVertices_Builder, SkColor, SkPoint, C_SkVertices_MakeCopy, C_SkVertices_ref, SkVertices, C_SkVertices_unref, SkVertices_Bone, SkVertices_VertexMode, C_SkVertices_encode, SkVertices_BuilderFlags_kHasTexCoords_BuilderFlag, SkVertices_BuilderFlags_kHasColors_BuilderFlag, SkVertices_BuilderFlags_kHasBones_BuilderFlag, SkVertices_BuilderFlags_kIsNonVolatile_BuilderFlag, C_SkVertices_Bone_mapRect, C_SkVertices_unique };
 #[cfg(test)]
 use skia_bindings::{SkVertices_BoneIndices, SkVertices_BoneWeights};
 #[cfg(test)]
 use std::mem;
 
-// TODO: review naming
 pub type BoneIndices = [u32; 4];
 
 #[test]
@@ -21,7 +20,6 @@ fn bone_indices_layout() {
     assert_eq!(mem::size_of::<BoneIndices>(), mem::size_of::<SkVertices_BoneIndices>());
 }
 
-// TODO: review naming
 pub type BoneWeights = [u32; 4];
 
 #[test]
@@ -31,9 +29,9 @@ fn bone_weights_layout() {
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 #[repr(transparent)]
-pub struct VerticesBone([u32; 6]);
+pub struct Bone([u32; 6]);
 
-impl Deref for VerticesBone {
+impl Deref for Bone {
     type Target = [u32; 6];
 
     fn deref(&self) -> &Self::Target {
@@ -41,22 +39,22 @@ impl Deref for VerticesBone {
     }
 }
 
-impl DerefMut for VerticesBone {
+impl DerefMut for Bone {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
 }
 
-impl NativeTransmutable<SkVertices_Bone> for VerticesBone {}
+impl NativeTransmutable<SkVertices_Bone> for Bone {}
 
-impl VerticesBone {
-    pub fn map_point(&self, point: Point) -> Point {
+impl Bone {
+    pub fn map_point(&self, point: impl Into<Point>) -> Point {
         Point::from_native(unsafe {
-            self.native().mapPoint(&point.into_native())
+            self.native().mapPoint(&point.into().into_native())
         })
     }
 
-    pub fn map_rect<R: AsRef<Rect>>(&self, rect: R) -> Rect {
+    pub fn map_rect(&self, rect: impl AsRef<Rect>) -> Rect {
         Rect::from_native(unsafe {
             // does not link.
             // self.native().mapRect(rect.as_ref().native())
@@ -67,19 +65,19 @@ impl VerticesBone {
 
 #[test]
 fn test_bone_layout() {
-    VerticesBone::test_layout();
+    Bone::test_layout();
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-pub enum VerticesVertexMode {
+pub enum VertexMode {
     Triangles =  SkVertices_VertexMode::kTriangles_VertexMode as _,
     TriangleStrip = SkVertices_VertexMode::kTriangleStrip_VertexMode as _,
     TriangleFan = SkVertices_VertexMode::kTriangleFan_VertexMode as _
 }
 
-impl NativeTransmutable<SkVertices_VertexMode> for VerticesVertexMode {}
-#[test] fn test_vertices_vertex_mode_layout() { VerticesVertexMode::test_layout() }
+impl NativeTransmutable<SkVertices_VertexMode> for VertexMode {}
+#[test] fn test_vertices_vertex_mode_layout() { VertexMode::test_layout() }
 
 pub type Vertices = RCHandle<SkVertices>;
 
@@ -91,18 +89,22 @@ impl NativeRefCounted for SkVertices {
     fn _unref(&self) {
         unsafe { C_SkVertices_unref(self) }
     }
+
+    fn unique(&self) -> bool {
+        unsafe { C_SkVertices_unique(self) }
+    }
 }
 
 impl RCHandle<SkVertices> {
 
     pub fn new_copy(
-        mode: VerticesVertexMode,
+        mode: VertexMode,
         positions: &[Point],
         texs: &[Point],
         colors: &[Color],
         bone_indices_and_weights: Option<(&BoneIndices, &BoneWeights)>,
         indices: Option<&[u16]>,
-        is_volatile: bool) -> Vertices {
+        is_volatile: impl Into<Option<bool>>) -> Vertices {
 
         let vertex_count = positions.len();
         assert_eq!(vertex_count, texs.len());
@@ -128,7 +130,7 @@ impl RCHandle<SkVertices> {
                 bone_weights_ptr as _,
                 indices_count.try_into().unwrap(),
                 indices_ptr,
-                is_volatile
+                is_volatile.into().unwrap_or(true)
             )}).unwrap()
     }
 
@@ -136,8 +138,8 @@ impl RCHandle<SkVertices> {
         unsafe { self.native().uniqueID() }
     }
 
-    pub fn mode(&self) -> VerticesVertexMode {
-        VerticesVertexMode::from_native(unsafe { self.native().mode() })
+    pub fn mode(&self) -> VertexMode {
+        VertexMode::from_native(unsafe { self.native().mode() })
     }
 
     pub fn bounds(&self) -> Rect {
@@ -178,7 +180,6 @@ impl RCHandle<SkVertices> {
         }
     }
 
-    // TODO: use wrapper type as soon we can transmute colors
     pub fn colors(&self) -> Option<&[Color]> {
         unsafe {
             let ptr : *const SkColor = self.native().colors().to_option()?;
@@ -217,7 +218,7 @@ impl RCHandle<SkVertices> {
         }
     }
 
-    pub fn apply_bones(&self, bones: &[VerticesBone]) -> Vertices {
+    pub fn apply_bones(&self, bones: &[Bone]) -> Vertices {
         Vertices::from_ptr(unsafe {
             C_SkVertices_applyBones(
                 self.native(),
@@ -243,10 +244,8 @@ impl RCHandle<SkVertices> {
     }
 }
 
-
-
 bitflags! {
-    pub struct VerticesBuilderFlags: u32 {
+    pub struct BuilderFlags: u32 {
         const HAS_TEX_COORDS = SkVertices_BuilderFlags_kHasTexCoords_BuilderFlag as u32;
         const HAS_COLORS = SkVertices_BuilderFlags_kHasColors_BuilderFlag as u32;
         const HAS_BONES = SkVertices_BuilderFlags_kHasBones_BuilderFlag as u32;
@@ -254,7 +253,7 @@ bitflags! {
     }
 }
 
-pub type VerticesBuilder = Handle<SkVertices_Builder>;
+pub type Builder = Handle<SkVertices_Builder>;
 
 impl NativeDrop for SkVertices_Builder {
     fn drop(&mut self) {
@@ -263,7 +262,7 @@ impl NativeDrop for SkVertices_Builder {
 }
 
 impl Handle<SkVertices_Builder> {
-    pub fn new(mode: VerticesVertexMode, vertex_count: usize, index_count: usize, flags: VerticesBuilderFlags) -> VerticesBuilder {
+    pub fn new(mode: VertexMode, vertex_count: usize, index_count: usize, flags: BuilderFlags) -> Builder {
         Self::from_native(unsafe {
             SkVertices_Builder::new(
                 mode.into_native(),

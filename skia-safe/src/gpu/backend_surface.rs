@@ -43,6 +43,7 @@ impl Handle<GrBackendFormat> {
 
     pub fn gl_format(&self) -> Option<gl::Enum> {
         unsafe {
+            #[allow(clippy::map_clone)]
             self.native().getGLFormat()
                 .to_option()
                 .map(|format| *format)
@@ -51,6 +52,7 @@ impl Handle<GrBackendFormat> {
 
     pub fn gl_target(&self) -> Option<gl::Enum> {
         unsafe {
+            #[allow(clippy::map_clone)]
             self.native().getGLTarget()
                 .to_option()
                 .map(|target| *target)
@@ -121,7 +123,7 @@ impl Handle<GrBackendTexture> {
 
     pub (crate) unsafe fn from_native_if_valid(backend_texture: GrBackendTexture) -> Option<BackendTexture> {
         backend_texture.fIsValid
-            .if_true_some(BackendTexture::from_native(backend_texture))
+            .if_true_then_some(|| BackendTexture::from_native(backend_texture))
     }
 
     pub fn width(&self) -> i32 {
@@ -198,10 +200,10 @@ impl NativeClone for GrBackendRenderTarget {
 }
 
 impl Handle<GrBackendRenderTarget> {
-    pub fn new_gl<SC: Into<Option<usize>>>(
+    pub fn new_gl(
         (width, height): (i32, i32),
-        sample_count: SC, stencil_bits: usize,
-        info: &gl::FramebufferInfo
+        sample_count: impl Into<Option<usize>>, stencil_bits: usize,
+        info: gl::FramebufferInfo
     ) -> BackendRenderTarget {
         Self::from_native(unsafe {
             GrBackendRenderTarget::new1(
@@ -212,9 +214,9 @@ impl Handle<GrBackendRenderTarget> {
     }
 
     #[cfg(feature="vulkan")]
-    pub fn new_vulkan<SC: Into<Option<usize>>>(
+    pub fn new_vulkan(
         (width, height) : (i32, i32),
-        sample_count: SC,
+        sample_count: impl Into<Option<usize>>,
         info: &vk::ImageInfo
     ) -> BackendRenderTarget {
         BackendRenderTarget::from_native(unsafe {

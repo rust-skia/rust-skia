@@ -1,184 +1,352 @@
-#[allow(non_camel_case_types)]
-
-pub type scalar = skia_bindings::SkScalar;
-
-pub trait Scalar : Copy {
-    const NEARLY_ZERO: Self;
-    const ONE: Self;
-    const HALF: Self;
-}
-
-impl Scalar for scalar {
-    const NEARLY_ZERO: Self = 1.0 / ((1 << 12) as Self);
-    const ONE: Self = 1.0;
-    const HALF: Self = 0.5;
-}
-
-pub type FontTableTag = skia_bindings::SkFontTableTag;
+mod annotation;
+pub use annotation::annotate;
 
 mod bbh_factory;
-pub use self::bbh_factory::*;
+pub use bbh_factory::*;
 
 mod bitmap;
-pub use self::bitmap::*;
+pub use bitmap::*;
 
 mod blend_mode;
-pub use self::blend_mode::*;
+pub use blend_mode::*;
 
 mod blur_types;
-pub use self::blur_types::*;
+pub use blur_types::*;
 
-mod canvas;
-pub use self::canvas::*;
+pub mod canvas;
+pub use canvas::{Canvas, OwnedCanvas, AutoCanvasRestore};
+#[deprecated(since = "0.12.0", note = "use canvas::Lattice")]
+pub use canvas::Lattice as CanvasLattice;
+#[deprecated(since = "0.12.0", note = "use canvas::SaveLayerFlags")]
+pub use canvas::SaveLayerFlags;
+#[deprecated(since = "0.12.0", note = "use canvas::SaveLayerRec")]
+pub use canvas::SaveLayerRec;
+#[deprecated(since = "0.12.0", note = "use canvas::PointMode")]
+pub use canvas::PointMode as CanvasPointMode;
+#[deprecated(since = "0.12.0", note = "use canvas::SrcRectConstraint")]
+pub use canvas::SrcRectConstraint;
+#[deprecated(since = "0.12.0", note = "use canvas::TopLayerPixels")]
+pub use canvas::TopLayerPixels as CanvasTopLayerPixels;
+#[deprecated(since = "0.12.0", note = "use canvas::lattice::RectType")]
+pub use canvas::lattice::RectType as CanvasLatticeRectType;
 
 mod clip_op;
-pub use self::clip_op::*;
+pub use clip_op::*;
 
 mod color;
-pub use self::color::*;
+pub use color::*;
 
-mod color_filter;
-pub use self::color_filter::*;
+pub mod color_filter;
+pub use color_filter::{ColorFilter, color_filters};
+#[deprecated(since = "0.12.0", note = "use color_filters")]
+pub use color_filters as ColorFilters;
+#[deprecated(since = "0.12.0", note = "use ColorFilter::Flags")]
+pub use color_filter::Flags as ColorFilterFlags;
 
 mod color_space;
-pub use self::color_space::*;
+pub use color_space::*;
+#[deprecated(since = "0.12.0", note = "use named_transfer_fn")]
+pub use named_transfer_fn as NamedTransferFn;
 
 pub mod contour_measure;
-pub use self::contour_measure::*;
+pub use contour_measure::{ContourMeasure, ContourMeasureIter};
 
 mod coverage_mode;
-pub use self::coverage_mode::*;
+pub use coverage_mode::*;
 
 mod cubic_map;
-pub use self::cubic_map::*;
+pub use cubic_map::*;
 
 mod data;
-pub use self::data::*;
+pub use data::*;
 
-pub(crate) mod document;
-pub use self::document::*;
+mod data_table;
+pub use data_table::*;
 
-mod draw_looper;
-pub use self::draw_looper::*;
+mod deferred_display_list_recorder;
+pub use deferred_display_list_recorder::*;
+
+pub mod document;
+pub use document::Document;
+
+pub mod draw_looper;
+pub use draw_looper::DrawLooper;
+#[deprecated(since = "0.12.0", note = "use draw_looper::BlurShadowRec")]
+pub use draw_looper::BlurShadowRec as DrawLooperBlurShadowRec;
+
+pub mod drawable;
+pub use drawable::Drawable;
 
 mod encoded_image_format;
-pub use self::encoded_image_format::*;
+pub use encoded_image_format::*;
+
+// unsupported, because it's used in experimental APIs only.
+// mod executor;
 
 mod filter_quality;
-pub use self::filter_quality::*;
+pub use filter_quality::*;
 
-mod font;
-pub use self::font::*;
+mod flattenable;
+pub use flattenable:: *;
 
-mod font_arguments;
-pub use self::font_arguments::*;
+pub mod font;
+pub use font::Font;
+#[deprecated(since = "0.12.0", note = "use font::Edging")]
+pub use font::Edging as FontEdging;
 
-mod font_metrics;
-pub use self::font_metrics::*;
+pub mod font_arguments;
+pub use font_arguments::FontArguments;
+#[deprecated(since = "0.12.0", note = "use font_arguments::VariationPosition")]
+pub use font_arguments::VariationPosition as FontArgumentsVariationPosition;
+#[deprecated(since = "0.12.0", note = "use font_arguments::variation_position::Coordinate")]
+pub use font_arguments::variation_position::Coordinate as FontArgumentsVariationPositionCoordinate;
+
+// unsupported, because it's not used in publicly exposed APIs:
+// mod font_lcd_config;
+
+pub mod font_metrics;
+pub use font_metrics::FontMetrics;
+#[deprecated(since = "0.12.0", note = "use font_metrics::Flags")]
+pub use font_metrics::Flags as FontMetricsFlags;
 
 mod font_mgr;
-pub use self::font_mgr::*;
+pub use font_mgr::*;
 
 pub mod font_parameters;
 
-mod font_style;
-pub use self::font_style::*;
+pub mod font_style;
+pub use font_style::FontStyle;
+#[deprecated(since = "0.12.0", note = "use font_style::Weight")]
+pub use font_style::Weight as FontStyleWeight;
+#[deprecated(since = "0.12.0", note = "use font_style::Width")]
+pub use font_style::Width as FontStyleWidth;
+#[deprecated(since = "0.12.0", note = "use font_style::Slant")]
+pub use font_style::Slant as FontStyleSlant;
 
 mod font_types;
-pub use self::font_types::*;
+pub use font_types::*;
 
-mod image;
-pub use self::image::*;
+pub mod graphics;
 
-mod image_filter;
-pub use self::image_filter::*;
+pub mod image;
+pub use image::Image;
+#[deprecated(since = "0.12.0", note = "use image::BitDepth")]
+pub use image::BitDepth as ImageBitDepth;
+#[deprecated(since = "0.12.0", note = "use image::CachingHint")]
+pub use image::CachingHint as ImageCachingHint;
+#[deprecated(since = "0.12.0", note = "use image::CompressionType")]
+pub use image::CompressionType as ImageCompressionType;
+
+mod image_encoder;
+pub use image_encoder::*;
+
+pub mod image_filter;
+pub use image_filter::ImageFilter;
+#[deprecated(since = "0.12.0", note = "use image_filter::OutputProperties")]
+pub use image_filter::OutputProperties as ImageFilterOutputProperties;
+#[deprecated(since = "0.12.0", note = "use image_filter::Context")]
+pub use image_filter::Context as ImageFilterContext;
+#[deprecated(since = "0.12.0", note = "use image_filter::CropRect")]
+pub use image_filter::CropRect as ImageFilterCropRect;
+#[deprecated(since = "0.12.0", note = "use image_filter::crop_rect::CropEdge")]
+pub use image_filter::crop_rect::CropEdge as ImageFilterCropRectCropEdge;
+#[deprecated(since = "0.12.0", note = "use image_filter::TileUsage")]
+pub use image_filter::TileUsage as ImageFilterTileUsage;
+#[deprecated(since = "0.12.0", note = "use image_filter::MapDirection")]
+pub use image_filter::MapDirection as ImageFilterMapDirection;
+
+mod image_generator;
+pub use image_generator::*;
 
 mod image_info;
-pub use self::image_info::*;
+pub use image_info::*;
 
 mod mask_filter;
-pub use self::mask_filter::*;
+pub use mask_filter::*;
 
-mod matrix;
-pub use self::matrix::*;
+pub mod matrix;
+pub use matrix::Matrix;
+#[deprecated(since = "0.12.0", note = "use matrix::TypeMask")]
+pub use matrix::TypeMask as MatrixTypeMask;
+#[deprecated(since = "0.12.0", note = "use matrix::ScaleToFit")]
+pub use matrix::ScaleToFit as MatrixScaletoFit;
+#[deprecated(since = "0.12.0", note = "use matrix::Member")]
+pub use matrix::Member as MatrixMember;
+#[deprecated(since = "0.12.0", note = "use matrix::AffineMember")]
+pub use matrix::AffineMember as AffineMatrixMember;
 
-mod matrix44;
-pub use self::matrix44::*;
+pub mod matrix44;
+pub use matrix44::{Vector4, Matrix44};
 
-mod matrix_typemask;
-pub use self::matrix_typemask::*;
+mod milestone;
+pub use milestone::*;
 
-mod paint;
-pub use self::paint::*;
+mod multi_picture_draw;
+pub use multi_picture_draw::*;
 
-mod path;
-pub use self::path::*;
+pub mod paint;
+pub use paint::Paint;
+// We keep these around for the time being.
+pub use paint::Style as PaintStyle;
+pub use paint::Cap as PaintCap;
+pub use paint::Join as PaintJoin;
 
-mod path_effect;
-pub use self::path_effect::*;
+pub mod path;
+pub use path::Path;
+#[deprecated(since = "0.12.0", note = "use matrix::AffineMember")]
+pub use path::Direction as PathDirection;
+#[deprecated(since = "0.12.0", note = "use path::FillType")]
+pub use path::FillType as PathFillType;
+#[deprecated(since = "0.12.0", note = "use path::Convexity")]
+pub use path::Convexity as PathConvexity;
+#[deprecated(since = "0.12.0", note = "use path::AddPathMode")]
+pub use path::AddPathMode as AddPathMode;
+#[deprecated(since = "0.12.0", note = "use path::SegmentMask")]
+pub use path::SegmentMask as PathSegmentMask;
+#[deprecated(since = "0.12.0", note = "use path::ArcSize")]
+pub use path::ArcSize as PathArcSize;
+
+pub mod path_effect;
+pub use path_effect::PathEffect;
+#[deprecated(since = "0.12.0", note = "use path_effect::DashInfo")]
+pub use path_effect::DashInfo as PathEffectDashInfo;
+#[deprecated(since = "0.12.0", note = "use path_effect::PointData")]
+pub use path_effect::PointData as PathEffectPointData;
+#[deprecated(since = "0.12.0", note = "use path_effect::point_data::PointFlags")]
+pub use path_effect::point_data::PointFlags as PointDataPointFlags;
 
 pub mod path_measure;
-pub use self::path_measure::*;
+pub use path_measure::PathMeasure;
 
 mod picture;
-pub use self::picture::*;
+pub use picture::*;
 
-mod picture_recorder;
-pub use self::picture_recorder::*;
+pub mod picture_recorder;
+pub use picture_recorder::PictureRecorder;
+#[deprecated(since = "0.12.0", note = "use picture_recorder::RecordFlags")]
+pub use picture_recorder::RecordFlags as PictureRecorderRecordFlags;
+
+mod pixel_ref;
+pub use pixel_ref::*;
+
+mod pixmap;
+pub use pixmap::*;
 
 mod point;
-pub use self::point::*;
+pub use point::*;
 
 mod point3;
-pub use self::point3::*;
+pub use point3::*;
+
+mod promise_image_texture;
+pub use promise_image_texture::*;
+
+mod raster_handle_allocator;
+pub use raster_handle_allocator::*;
 
 mod rect;
-pub use self::rect::*;
+pub use rect::*;
 
-mod region;
-pub use self::region::*;
+pub mod region;
+pub use region::Region;
 
-mod rrect;
-pub use self::rrect::*;
+pub mod rrect;
+pub use rrect::RRect;
+#[deprecated(since = "0.12.0", note = "use rrect::Type")]
+pub use rrect::Type as RRectType;
+#[deprecated(since = "0.12.0", note = "use rrect::Corner")]
+pub use rrect::Corner as RRectCorner;
 
-mod shader;
-pub use self::shader::*;
+mod rsxform;
+pub use rsxform::*;
+
+mod scalar_;
+pub use scalar_::*;
+
+pub mod shader;
+pub use shader::{Shader, shaders};
+#[deprecated(since = "0.12.0", note = "use shaders")]
+pub use shaders as Shaders;
+#[deprecated(since = "0.12.0", note = "use TileMode")]
+pub use TileMode as ShaderTileMode;
+#[deprecated(since = "0.12.0", note = "use shader::GradientType")]
+pub use shader::GradientType as ShaderGradientType;
+#[deprecated(since = "0.12.0", note = "use shader::GradientInfo")]
+pub use shader::GradientInfo as ShaderGradientInfo;
 
 mod size;
-pub use self::size::*;
+pub use size::*;
 
-mod stroke_rec;
-pub use self::stroke_rec::*;
+pub mod stroke_rec;
+pub use stroke_rec::StrokeRec;
+#[deprecated(since = "0.12.0", note = "use stroke_rec::InitStyle")]
+pub use stroke_rec::InitStyle as StrokeRecInitStyle;
+#[deprecated(since = "0.12.0", note = "use stroke_rec::Style")]
+pub use stroke_rec::Style as StrokeRecStyle;
 
-mod surface;
-pub use self::surface::*;
+pub mod surface;
+pub use surface::Surface;
+#[deprecated(since = "0.12.0", note = "use Borrowed<'a, Surface>")]
+pub type OwnedSurface<'a> = crate::Borrows<'a, Surface>;
+#[deprecated(since = "0.12.0", note = "use surface::BackendHandleAccess")]
+pub use surface::BackendHandleAccess as SurfaceBackendHandleAccess;
+#[deprecated(since = "0.12.0", note = "use surface::ContentChangeMode")]
+pub use surface::ContentChangeMode as SurfaceContentChangeMode;
+
+mod surface_characterization;
+pub use surface_characterization::*;
 
 mod surface_props;
-pub use self::surface_props::*;
+pub use surface_props::*;
+
+mod swizzle;
+pub use swizzle::*;
 
 mod text_blob;
-pub use self::text_blob::*;
+pub use text_blob::*;
 
 mod tile_mode;
 pub use self::tile_mode::*;
 
 mod time;
-pub use self::time::*;
+pub use time::*;
 
-mod typeface;
-pub use self::typeface::*;
+mod trace_memory_dump;
+pub use trace_memory_dump::*;
+
+pub mod typeface;
+pub use typeface::Typeface;
+#[deprecated(since = "0.12.0", note = "use typeface::LocalizedString")]
+pub use typeface::LocalizedString as TypefaceLocalizedString;
+#[deprecated(since = "0.12.0", note = "use typeface::SerializeBehavior")]
+pub use typeface::SerializeBehavior as TypefaceSerializeBehavior;
 
 mod types;
-pub use self::types::*;
+pub use types::*;
 
-mod vector4;
-pub use self::vector4::*;
+mod un_pre_multiply;
+pub use un_pre_multiply::*;
 
-mod vertices;
-pub use self::vertices::*;
+pub mod vertices;
+pub use vertices::Vertices;
+#[deprecated(since = "0.12.0", note = "use vertices::BoneIndices")]
+pub use vertices::BoneIndices as BoneIndices;
+#[deprecated(since = "0.12.0", note = "use vertices::BoneWeights")]
+pub use vertices::BoneWeights as BoneWeights;
+#[deprecated(since = "0.12.0", note = "use vertices::Bone")]
+pub use vertices::Bone as VerticesBone;
+#[deprecated(since = "0.12.0", note = "use vertices::VertexMode")]
+pub use vertices::VertexMode as VerticesVertexMode;
+#[deprecated(since = "0.12.0", note = "use vertices::BuilderFlags")]
+pub use vertices::BuilderFlags as VerticesBuilderFlags;
+#[deprecated(since = "0.12.0", note = "use vertices::Builder")]
+pub use vertices::Builder as VerticesBuilder;
 
-mod yuva_index;
-pub use self::yuva_index::*;
+pub mod yuva_index;
+pub use yuva_index::{ColorChannel, YUVAIndex};
+
+mod yuva_size_info;
+pub use yuva_size_info::*;
 
 //
 // Skia specific traits used for overloading.

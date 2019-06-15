@@ -6,7 +6,7 @@ use skia_bindings::{
 };
 
 bitflags! {
-    pub struct LayerDrawLooperBits : u32 {
+    pub struct Bits : u32 {
         const STYLE = skia_bindings::SkLayerDrawLooper_Bits_kStyle_Bit as _;
         const PATH_EFFECT = skia_bindings::SkLayerDrawLooper_Bits_kPathEffect_Bit as _;
         const MASK_FILTER = skia_bindings::SkLayerDrawLooper_Bits_kMaskFilter_Bit as _;
@@ -17,26 +17,26 @@ bitflags! {
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
-pub enum LayerDrawLooperBitFlags {
-    Bits(LayerDrawLooperBits),
+pub enum BitFlags {
+    Bits(Bits),
     EntirePaint,
 }
 
-impl From<LayerDrawLooperBits> for LayerDrawLooperBitFlags {
-    fn from(bits: LayerDrawLooperBits) -> Self {
-        LayerDrawLooperBitFlags::Bits(bits)
+impl From<Bits> for BitFlags {
+    fn from(bits: Bits) -> Self {
+        BitFlags::Bits(bits)
     }
 }
 
 #[derive(Clone, PartialEq, Debug)]
-pub struct LayerDrawLooperLayerInfo {
-    pub paint_bits: LayerDrawLooperBitFlags,
+pub struct LayerInfo {
+    pub paint_bits: BitFlags,
     pub color_mode: BlendMode,
     pub offset: Vector,
     pub post_translate: bool,
 }
 
-pub type LayerDrawLooperBuilder = Handle<SkLayerDrawLooper_Builder>;
+pub type Builder = Handle<SkLayerDrawLooper_Builder>;
 
 impl NativeDrop for SkLayerDrawLooper_Builder {
     fn drop(&mut self) {
@@ -44,17 +44,17 @@ impl NativeDrop for SkLayerDrawLooper_Builder {
     }
 }
 
-impl Default for LayerDrawLooperBuilder {
-    fn default() -> LayerDrawLooperBuilder {
+impl Default for Builder {
+    fn default() -> Builder {
         Self::from_native(unsafe { SkLayerDrawLooper_Builder::new() })
     }
 }
 
-impl LayerDrawLooperLayerInfo {
+impl LayerInfo {
     fn to_native(&self) -> SkLayerDrawLooper_LayerInfo {
         let paint_bits: i32 = match self.paint_bits {
-            LayerDrawLooperBitFlags::Bits(bits) => bits.bits().try_into().unwrap(),
-            LayerDrawLooperBitFlags::EntirePaint => -1,
+            BitFlags::Bits(bits) => bits.bits().try_into().unwrap(),
+            BitFlags::EntirePaint => -1,
         };
 
         SkLayerDrawLooper_LayerInfo {
@@ -66,12 +66,12 @@ impl LayerDrawLooperLayerInfo {
     }
 }
 
-impl LayerDrawLooperBuilder {
-    pub fn add_layer(&mut self, layer_info: &LayerDrawLooperLayerInfo) -> &mut Handle<SkPaint> {
+impl Builder {
+    pub fn add_layer(&mut self, layer_info: &LayerInfo) -> &mut Handle<SkPaint> {
         unsafe { transmute_ref_mut(&mut *self.native_mut().addLayer(&layer_info.to_native())) }
     }
 
-    pub fn add_layer_offset<IV: Into<Option<Vector>>>(&mut self, delta: IV) {
+    pub fn add_layer_offset(&mut self, delta: impl Into<Option<Vector>>) {
         let delta = delta.into().unwrap_or_default();
         unsafe {
             self.native_mut().addLayer1(delta.x, delta.y);
@@ -80,7 +80,7 @@ impl LayerDrawLooperBuilder {
 
     pub fn add_layer_on_top(
         &mut self,
-        layer_info: &LayerDrawLooperLayerInfo,
+        layer_info: &LayerInfo,
     ) -> &mut Handle<SkPaint> {
         unsafe { transmute_ref_mut(&mut *self.native_mut().addLayerOnTop(&layer_info.to_native())) }
     }
