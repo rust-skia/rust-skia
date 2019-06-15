@@ -72,6 +72,11 @@ jobs:
         "C:/Program Files/LLVM/bin/clang.exe" --version
       displayName: LLVM/Clang Version
 
+  - bash: |
+      set -e
+      cargo fmt -- --check
+    displayName: Check Rust formatting
+
   # Note: features are ignored when set in the workspace. This is a known bug in cargo (#5015), so cd into skia-safe instead.
   - bash: |
       set -e
