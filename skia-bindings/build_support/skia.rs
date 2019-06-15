@@ -382,6 +382,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .whitelist_type("SkContourMeasure")
         .whitelist_type("SkContourMeasureIter")
         .whitelist_type("SkCubicMap")
+        .whitelist_type("SkDataTable")
         .whitelist_type("SkDocument")
         .whitelist_type("SkDrawLooper")
         .whitelist_type("SkDynamicMemoryWStream")

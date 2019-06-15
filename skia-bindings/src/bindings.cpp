@@ -6,6 +6,7 @@
 #include "SkColorFilter.h"
 #include "SkContourMeasure.h"
 #include "SkCubicMap.h"
+#include "SkDataTable.h"
 #include "SkDeferredDisplayListRecorder.h"
 #include "SkDrawLooper.h"
 #include "SkDrawable.h"
@@ -1269,6 +1270,23 @@ extern "C" void C_SkContourMeasureIter_destruct(SkContourMeasureIter* self) {
 
 extern "C" SkContourMeasure* C_SkContourMeasureIter_next(SkContourMeasureIter* self) {
     return self->next().release();
+}
+
+//
+// core/SkDataTable.h
+//
+
+extern "C" SkDataTable *C_SkDataTable_MakeEmpty() {
+    return SkDataTable::MakeEmpty().release();
+}
+
+extern "C" SkDataTable *C_SkDataTable_MakeCopyArrays(const void *const *ptrs,
+                                                     const size_t *sizes, int count) {
+    return SkDataTable::MakeCopyArrays(ptrs, sizes, count).release();
+}
+
+extern "C" SkDataTable *C_SkDataTable_MakeCopyArray(const void *array, size_t elemSize, int count) {
+    return SkDataTable::MakeCopyArray(array, elemSize, count).release();
 }
 
 //
