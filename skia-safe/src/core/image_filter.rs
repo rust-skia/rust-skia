@@ -1,12 +1,6 @@
 use crate::prelude::*;
-use crate::{ColorFilter, ColorSpace, ColorType, FilterQuality, IRect, Matrix, Rect};
-use skia_bindings::{
-    C_SkImageFilter_MakeMatrixFilter, C_SkImageFilter_computeFastBounds,
-    C_SkImageFilter_makeWithLocalMatrix, SkColorFilter, SkColorSpace, SkImageFilter,
-    SkImageFilterCache, SkImageFilter_Context, SkImageFilter_CropRect,
-    SkImageFilter_MapDirection, SkImageFilter_OutputProperties,
-    SkImageFilter_TileUsage, SkRefCntBase,
-};
+use crate::{ColorFilter, ColorSpace, ColorType, FilterQuality, IRect, Matrix, Rect, NativeFlattenable};
+use skia_bindings::{C_SkImageFilter_MakeMatrixFilter, C_SkImageFilter_computeFastBounds, C_SkImageFilter_makeWithLocalMatrix, SkColorFilter, SkColorSpace, SkImageFilter, SkImageFilterCache, SkImageFilter_Context, SkImageFilter_CropRect, SkImageFilter_MapDirection, SkImageFilter_OutputProperties, SkImageFilter_TileUsage, SkRefCntBase, SkFlattenable, C_SkImageFilter_Deserialize};
 use std::ptr;
 
 #[repr(C)]
@@ -169,6 +163,18 @@ impl NativeRefCountedBase for SkImageFilter {
     }
 }
 
+impl NativeFlattenable for SkImageFilter {
+    fn native_flattenable(&self) -> &SkFlattenable {
+        &self._base
+    }
+
+    fn native_deserialize(data: &[u8]) -> *mut Self {
+        unsafe {
+            C_SkImageFilter_Deserialize(data.as_ptr() as _, data.len())
+        }
+    }
+}
+
 impl RCHandle<SkImageFilter> {
     // TODO: wrapfilterImage()? SkSpecialImage is declared in src/core/
 
@@ -282,6 +288,4 @@ impl RCHandle<SkImageFilter> {
         })
         .unwrap()
     }
-
-    // TODO: implement Flattenable?
 }

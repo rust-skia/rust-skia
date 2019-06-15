@@ -1,26 +1,8 @@
 use std::{slice, mem};
 use std::os::raw;
 use crate::prelude::*;
-use crate::{
-    Rect,
-    StrokeRec,
-    Path,
-    Matrix,
-    scalar,
-    Vector,
-    Point
-};
-use skia_bindings::{
-    SkPathEffect_PointData,
-    C_SkPathEffect_MakeCompose,
-    C_SkPathEffect_MakeSum,
-    SkRefCntBase,
-    SkPathEffect,
-    C_SkPathEffect_PointData_Construct,
-    C_SkPathEffect_PointData_deletePoints,
-    SkPathEffect_DashInfo,
-    SkPathEffect_DashType,
-};
+use crate::{Rect, StrokeRec, Path, Matrix, scalar, Vector, Point, NativeFlattenable};
+use skia_bindings::{SkPathEffect_PointData, C_SkPathEffect_MakeCompose, C_SkPathEffect_MakeSum, SkRefCntBase, SkPathEffect, C_SkPathEffect_PointData_Construct, C_SkPathEffect_PointData_deletePoints, SkPathEffect_DashInfo, SkPathEffect_DashType, SkFlattenable, C_SkPathEffect_Deserialize};
 
 #[repr(C)]
 pub struct PointData {
@@ -97,6 +79,18 @@ impl NativeRefCountedBase for SkPathEffect {
     type Base = SkRefCntBase;
     fn ref_counted_base(&self) -> &Self::Base {
         &self._base._base._base
+    }
+}
+
+impl NativeFlattenable for SkPathEffect {
+    fn native_flattenable(&self) -> &SkFlattenable {
+        &self._base
+    }
+
+    fn native_deserialize(data: &[u8]) -> *mut Self {
+        unsafe {
+            C_SkPathEffect_Deserialize(data.as_ptr() as _, data.len())
+        }
     }
 }
 
@@ -185,8 +179,6 @@ impl RCHandle<SkPathEffect> {
             }
         }
     }
-
-    // TODO: implement Flattenable
 }
 
 #[test]

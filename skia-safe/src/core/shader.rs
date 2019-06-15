@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use crate::{Matrix, Image, Color, scalar, Point, ColorFilter, TileMode, gradient_shader};
-use skia_bindings::{SkShader, SkRefCntBase, SkShader_GradientType, SkShader_GradientInfo, C_SkShader_asAGradient, C_SkShader_makeWithLocalMatrix, C_SkShader_makeWithColorFilter, C_SkShader_isAImage, SkTileMode};
+use crate::{Matrix, Image, Color, scalar, Point, ColorFilter, TileMode, gradient_shader, NativeFlattenable};
+use skia_bindings::{SkShader, SkRefCntBase, SkShader_GradientType, SkShader_GradientInfo, C_SkShader_asAGradient, C_SkShader_makeWithLocalMatrix, C_SkShader_makeWithColorFilter, C_SkShader_isAImage, SkTileMode, C_SkShader_Deserialize, SkFlattenable};
 use std::mem;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -47,6 +47,18 @@ impl NativeRefCountedBase for SkShader {
     type Base = SkRefCntBase;
     fn ref_counted_base(&self) -> &Self::Base {
         &self._base._base._base
+    }
+}
+
+impl NativeFlattenable for SkShader {
+    fn native_flattenable(&self) -> &SkFlattenable {
+        &self._base
+    }
+
+    fn native_deserialize(data: &[u8]) -> *mut Self {
+        unsafe {
+            C_SkShader_Deserialize(data.as_ptr() as _, data.len())
+        }
     }
 }
 

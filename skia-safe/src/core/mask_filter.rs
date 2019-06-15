@@ -1,18 +1,6 @@
 use crate::prelude::*;
-use crate::{
-    BlurStyle,
-    scalar,
-    Matrix,
-    CoverageMode
-};
-use skia_bindings::{
-    C_SkMaskFilter_Combine,
-    C_SkMaskFilter_Compose,
-    C_SkMaskFilter_MakeBlur,
-    SkRefCntBase,
-    SkMaskFilter,
-    C_SkMaskFilter_makeWithMatrix
-};
+use crate::{BlurStyle, scalar, Matrix, CoverageMode, NativeFlattenable};
+use skia_bindings::{C_SkMaskFilter_Combine, C_SkMaskFilter_Compose, C_SkMaskFilter_MakeBlur, SkRefCntBase, SkMaskFilter, C_SkMaskFilter_makeWithMatrix, C_SkMaskFilter_Deserialize, SkFlattenable};
 
 pub type MaskFilter = RCHandle<SkMaskFilter>;
 
@@ -21,6 +9,18 @@ impl NativeRefCountedBase for SkMaskFilter {
 
     fn ref_counted_base(&self) -> &Self::Base {
         &self._base._base._base
+    }
+}
+
+impl NativeFlattenable for SkMaskFilter {
+    fn native_flattenable(&self) -> &SkFlattenable {
+        &self._base
+    }
+
+    fn native_deserialize(data: &[u8]) -> *mut Self {
+        unsafe {
+            C_SkMaskFilter_Deserialize(data.as_ptr() as _, data.len())
+        }
     }
 }
 
@@ -49,6 +49,4 @@ impl RCHandle<SkMaskFilter> {
             C_SkMaskFilter_makeWithMatrix(self.native(), matrix.native())
         }).unwrap()
     }
-
-    // TODO: implement Flattenable
 }

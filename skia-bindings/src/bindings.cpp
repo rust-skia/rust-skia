@@ -12,6 +12,7 @@
 #include "SkDrawLooper.h"
 #include "SkDrawable.h"
 #include "SkDocument.h"
+#include "SkFlattenable.h"
 #include "SkFont.h"
 #include "SkFontArguments.h"
 #include "SkFontMetrics.h"
@@ -1055,7 +1056,19 @@ extern "C" size_t C_SkYUVASizeInfo_computeTotalBytes(const SkYUVASizeInfo* self)
 }
 
 //
-// SkFont
+// core/SkFlattenable.h
+//
+
+extern "C" const char* C_SkFlattenable_getTypeName(const SkFlattenable* self) {
+    return self->getTypeName();
+}
+
+extern "C" SkData* C_SkFlattenable_serialize(const SkFlattenable* self) {
+    return self->serialize().release();
+}
+
+//
+// core/SkFont.h
 //
 
 extern "C" void C_SkFont_ConstructFromTypeface(SkFont* uninitialized, const SkTypeface* typeface) {
@@ -1253,6 +1266,10 @@ extern "C" uint32_t C_SkColorFilter_getFlags(const SkColorFilter* self) {
     return self->getFlags();
 }
 
+extern "C" SkColorFilter* C_SkColorFilter_Deserialize(const void* data, size_t size) {
+    return SkColorFilter::Deserialize(data, size).release();
+}
+
 //
 // SkColorFilters
 //
@@ -1334,6 +1351,10 @@ extern "C" bool C_SkDrawLooper_asABlurShadow(const SkDrawLooper* self, SkDrawLoo
     return self->asABlurShadow(&br);
 }
 
+extern "C" SkDrawLooper* C_SkDrawLooper_Deserialize(const void* data, size_t length) {
+    return SkDrawLooper::Deserialize(data, length).release();
+}
+
 //
 // core/SkDrawable.h
 //
@@ -1343,6 +1364,10 @@ extern "C" SkDrawable::GpuDrawHandler *C_SkDrawable_snapGpuDrawHandler(SkDrawabl
                                                                        const SkIRect *clipBounds,
                                                                        const SkImageInfo *bufferInfo) {
     return self->snapGpuDrawHandler(backendApi, *matrix, *clipBounds, *bufferInfo).release();
+}
+
+extern "C" SkDrawable* C_SkDrawable_Deserialize(const void* data, size_t length) {
+    return SkDrawable::Deserialize(data, length).release();
 }
 
 extern "C" void C_SkDrawable_GpuDrawHandler_destruct(SkDrawable::GpuDrawHandler *self) {
@@ -1367,6 +1392,10 @@ extern "C" SkImageFilter* C_SkImageFilter_makeWithLocalMatrix(const SkImageFilte
 
 extern "C" SkImageFilter* C_SkImageFilter_MakeMatrixFilter(const SkMatrix* matrix, SkFilterQuality quality, const SkImageFilter* input) {
     return SkImageFilter::MakeMatrixFilter(*matrix, quality, spFromConst(input)).release();
+}
+
+extern "C" SkImageFilter* C_SkImageFilter_Deserialize(const void* data, size_t length) {
+    return SkImageFilter::Deserialize(data, length).release();
 }
 
 //
@@ -1446,6 +1475,10 @@ extern "C" void C_SkPathEffect_PointData_deletePoints(SkPathEffect::PointData* s
     self->fPoints = nullptr;
 }
 
+extern "C" SkPathEffect* C_SkPathEffect_Deserialize(const void* data, size_t length) {
+    return SkPathEffect::Deserialize(data, length).release();
+}
+
 //
 // SkPixmap
 //
@@ -1476,6 +1509,10 @@ extern "C" SkMaskFilter* C_SkMaskFilter_Combine(const SkMaskFilter* filterA, con
 
 extern "C" SkMaskFilter* C_SkMaskFilter_makeWithMatrix(const SkMaskFilter* self, const SkMatrix* matrix) {
     return self->makeWithMatrix(*matrix).release();
+}
+
+extern "C" SkMaskFilter* C_SkMaskFilter_Deserialize(const void* data, size_t length) {
+    return SkMaskFilter::Deserialize(data, length).release();
 }
 
 //
@@ -1532,6 +1569,10 @@ extern "C" SkShader* C_SkShaders_Lerp(float t, const SkShader* dst, const SkShad
 
 extern "C" SkShader* C_SkShaders_Lerp2(const SkShader* red, const SkShader* dst, const SkShader* src) {
     return SkShaders::Lerp(spFromConst(red), spFromConst(dst), spFromConst(src)).release();
+}
+
+extern "C" SkShader* C_SkShader_Deserialize(const void* data, size_t length) {
+    return dynamic_cast<SkShader*>(SkShader::Deserialize(SkFlattenable::Type::kSkShaderBase_Type, data, length).release());
 }
 
 //

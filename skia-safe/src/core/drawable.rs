@@ -1,9 +1,6 @@
 use crate::prelude::*;
-use crate::{gpu, Canvas, IRect, ImageInfo, Matrix, Point, Rect};
-use skia_bindings::{
-    C_SkDrawable_GpuDrawHandler_destruct, C_SkDrawable_GpuDrawHandler_draw,
-    C_SkDrawable_snapGpuDrawHandler, SkDrawable, SkDrawable_GpuDrawHandler, SkRefCntBase,
-};
+use crate::{gpu, Canvas, IRect, ImageInfo, Matrix, Point, Rect, NativeFlattenable};
+use skia_bindings::{C_SkDrawable_GpuDrawHandler_destruct, C_SkDrawable_GpuDrawHandler_draw, C_SkDrawable_snapGpuDrawHandler, SkDrawable, SkDrawable_GpuDrawHandler, SkRefCntBase, SkFlattenable, C_SkDrawable_Deserialize};
 
 pub type Drawable = RCHandle<SkDrawable>;
 
@@ -12,6 +9,16 @@ impl NativeRefCountedBase for SkDrawable {
 
     fn ref_counted_base(&self) -> &Self::Base {
         &self._base._base._base
+    }
+}
+
+impl NativeFlattenable for SkDrawable {
+    fn native_flattenable(&self) -> &SkFlattenable {
+        &self._base
+    }
+
+    fn native_deserialize(data: &[u8]) -> *mut Self {
+        unsafe { C_SkDrawable_Deserialize(data.as_ptr() as _, data.len()) }
     }
 }
 
@@ -69,9 +76,6 @@ impl RCHandle<SkDrawable> {
     pub fn notify_drawing_changed(&mut self) {
         unsafe { self.native_mut().notifyDrawingChanged() }
     }
-
-    // TODO: implement Flattenable
-    // TODO: Deserialize()
 }
 
 pub struct GPUDrawHandler(*mut SkDrawable_GpuDrawHandler);

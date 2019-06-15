@@ -58,8 +58,6 @@ impl RCHandle<SkTextBlob> {
             C_SkTextBlob_MakeFromText(text.as_ptr() as _, text.len(), font.native(), encoding.into_native())
         })
     }
-
-    // TODO: implement Flattenable
 }
 
 pub type TextBlobBuilder = Handle<SkTextBlobBuilder>;

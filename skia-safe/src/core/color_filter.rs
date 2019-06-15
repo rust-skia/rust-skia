@@ -1,12 +1,6 @@
-use crate::{BlendMode, Color, Color4f, ColorSpace, scalar};
+use crate::{BlendMode, Color, Color4f, ColorSpace, scalar, NativeFlattenable};
 use crate::prelude::*;
-use skia_bindings::{
-    C_SkColorFilter_asColorMatrix, C_SkColorFilter_asColorMode, C_SkColorFilter_getFlags,
-    C_SkColorFilter_makeComposed, C_SkColorFilters_Blend, C_SkColorFilters_Compose,
-    C_SkColorFilters_Lerp, C_SkColorFilters_LinearToSRGBGamma, C_SkColorFilters_MatrixRowMajor255,
-    C_SkColorFilters_SRGBToLinearGamma, SkColorFilter,
-    SkColorFilter_Flags_kAlphaUnchanged_Flag, SkRefCntBase,
-};
+use skia_bindings::{C_SkColorFilter_asColorMatrix, C_SkColorFilter_asColorMode, C_SkColorFilter_getFlags, C_SkColorFilter_makeComposed, C_SkColorFilters_Blend, C_SkColorFilters_Compose, C_SkColorFilters_Lerp, C_SkColorFilters_LinearToSRGBGamma, C_SkColorFilters_MatrixRowMajor255, C_SkColorFilters_SRGBToLinearGamma, SkColorFilter, SkColorFilter_Flags_kAlphaUnchanged_Flag, SkRefCntBase, SkFlattenable, C_SkColorFilter_Deserialize};
 
 bitflags! {
     pub struct Flags: u32 {
@@ -20,6 +14,16 @@ impl NativeRefCountedBase for SkColorFilter {
     type Base = SkRefCntBase;
     fn ref_counted_base(&self) -> &Self::Base {
         &self._base._base._base
+    }
+}
+
+impl NativeFlattenable for SkColorFilter {
+    fn native_flattenable(&self) -> &SkFlattenable {
+        &self._base
+    }
+
+    fn native_deserialize(data: &[u8]) -> *mut Self {
+        unsafe { C_SkColorFilter_Deserialize(data.as_ptr() as _, data.len()) }
     }
 }
 
@@ -69,8 +73,6 @@ impl RCHandle<SkColorFilter> {
 
     // TODO: asFragmentProcessor()
     // TODO: affectsTransparentBlack()
-    // TODO: Deserialize (via Flattenable).
-    // TODO: implement Flattenable.
 }
 
 pub enum ColorFilters {}
