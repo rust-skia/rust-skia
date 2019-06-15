@@ -1,5 +1,5 @@
 mod annotation;
-pub use annotation::*;
+pub use annotation::annotate;
 
 mod bbh_factory;
 pub use bbh_factory::*;

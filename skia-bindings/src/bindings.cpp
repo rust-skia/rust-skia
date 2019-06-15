@@ -1,6 +1,7 @@
 // codec/
 #include "SkEncodedOrigin.h"
 // core/
+#include "SkAnnotation.h"
 #include "SkCanvas.h"
 #include "SkColor.h"
 #include "SkColorFilter.h"

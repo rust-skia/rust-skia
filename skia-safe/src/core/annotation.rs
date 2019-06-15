@@ -1,37 +1,67 @@
-use crate::{Canvas, Rect, Point, Data};
+use crate::{Canvas, Data, Point, Rect};
 
-pub enum Annotate {}
+pub mod annotate {
+    use crate::prelude::*;
+    use crate::{Canvas, Data, Point, Rect};
+    use skia_bindings::{
+        SkAnnotateLinkToDestination, SkAnnotateNamedDestination, SkAnnotateRectWithURL,
+    };
 
-impl Annotate {
     pub fn rect_with_url(canvas: &mut Canvas, rect: impl AsRef<Rect>, data: &Data) {
-        unimplemented!()
+        unsafe {
+            SkAnnotateRectWithURL(
+                canvas.native_mut(),
+                rect.as_ref().native(),
+                data.native_mut_force(),
+            )
+        }
     }
 
-    pub fn named_destination(canvas: &mut Canvas, point: impl Into<Point>, data: &Data)  {
-        unimplemented!()
+    pub fn named_destination(canvas: &mut Canvas, point: impl Into<Point>, data: &Data) {
+        unsafe {
+            SkAnnotateNamedDestination(
+                canvas.native_mut(),
+                point.into().native(),
+                data.native_mut_force(),
+            )
+        }
     }
 
     pub fn link_to_destination(canvas: &mut Canvas, rect: impl AsRef<Rect>, data: &Data) {
-        unimplemented!()
+        unsafe {
+            SkAnnotateLinkToDestination(
+                canvas.native_mut(),
+                rect.as_ref().native(),
+                data.native_mut_force(),
+            )
+        }
     }
 }
 
 impl Canvas {
-    // TODO: explicit URL as str (or is there an URL type in std?)
+    // TODO: accept str or the Url type from the url crate?
     pub fn annotate_rect_with_url(&mut self, rect: impl AsRef<Rect>, data: &Data) -> &mut Self {
-        Annotate::rect_with_url(self, rect, data);
+        annotate::rect_with_url(self, rect, data);
         self
     }
 
-    // TODO: is data a string here, and if so which encoding?
-    pub fn annotate_named_destination(&mut self, point: impl Into<Point>, data: &Data) -> &mut Self {
-        Annotate::named_destination(self, point, data);
+    // TODO: is data a string here, and if so, of what encoding?
+    pub fn annotate_named_destination(
+        &mut self,
+        point: impl Into<Point>,
+        data: &Data,
+    ) -> &mut Self {
+        annotate::named_destination(self, point, data);
         self
     }
 
-    // TODO: explicit str?
-    pub fn annotate_link_to_destination(&mut self, rect: impl AsRef<Rect>, data: &Data) -> &mut Self {
-        Annotate::link_to_destination(self, rect, data);
+    // TODO: use str?
+    pub fn annotate_link_to_destination(
+        &mut self,
+        rect: impl AsRef<Rect>,
+        data: &Data,
+    ) -> &mut Self {
+        annotate::link_to_destination(self, rect, data);
         self
     }
 }
