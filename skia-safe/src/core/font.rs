@@ -224,7 +224,6 @@ impl Handle<SkFont> {
     }
 
     pub fn str_to_glyphs(&self, str: impl AsRef<str>, glyphs: &mut[GlyphId]) -> usize {
-        let bytes = str.as_ref().as_bytes();
         self.text_to_glyphs(str.as_ref().as_bytes(), TextEncoding::UTF8, glyphs)
     }
 
