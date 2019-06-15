@@ -5,6 +5,7 @@ use std::ops::Deref;
 use std::ffi::CStr;
 
 pub type Data = RCHandle<SkData>;
+unsafe impl Send for Data {}
 
 impl NativeRefCounted for SkData {
     fn _ref(&self) {
