@@ -24,7 +24,7 @@ pub fn trim_hash(hash: &str) -> String {
 
 /// Run git with the given args in the given directory, print stderr to the current
 /// process's terminal, and capture its stdout output.
-pub fn run<'a, T: AsRef<str>, IOP: Into<Option<&'a Path>>>(args: &[T], dir: IOP) -> Vec<u8> {
+pub fn run<'a>(args: &[impl AsRef<str>], dir: impl Into<Option<&'a Path>>) -> Vec<u8> {
     let args: Vec<&str> = args.iter().map(|s| s.as_ref()).collect();
 
     let mut cmd = Command::new("git");

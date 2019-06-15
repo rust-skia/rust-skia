@@ -51,7 +51,7 @@ impl RCHandle<SkDataTable> {
         let mut size = usize::default();
         let ptr = self.native().at(index.try_into().unwrap(), &mut size);
         let element_size = mem::size_of::<T>();
-        assert!(size % element_size == 0);
+        assert_eq!(size % element_size, 0);
         let elements = size / element_size;
         slice::from_raw_parts(ptr as _, elements)
     }

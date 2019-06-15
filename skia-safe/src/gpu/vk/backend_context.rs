@@ -56,12 +56,12 @@ impl<'a> Drop for BackendContext<'a> {
 //       it refers to.
 impl<'a> BackendContext<'a> {
 
-    pub unsafe fn new<GP: GetProc>(
+    pub unsafe fn new(
         instance: Instance,
         physical_device: PhysicalDevice,
         device: Device,
         (queue, queue_index): (Queue, usize),
-        get_proc: &GP
+        get_proc: &impl GetProc
     ) -> BackendContext {
 
         BackendContext {

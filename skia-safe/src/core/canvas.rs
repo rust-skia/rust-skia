@@ -1051,6 +1051,7 @@ pub enum AutoCanvasRestore {}
 
 impl AutoCanvasRestore {
 
+    // TODO: rename to save(), add a method to Canvas, perhaps named auto_restored()?
     // Note: Can't use AsMut here for the canvas, because it would break
     //       the lifetime dependency.
     pub fn guard(canvas: &mut Canvas, do_save: bool) -> AutoRestoredCanvas {
