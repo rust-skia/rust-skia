@@ -66,7 +66,7 @@ impl RCHandle<SkData> {
         self
     }
 
-    // TODO: rename to copy_from ?
+    // TODO: rename to copy_from() ? or from_bytes()?
     pub fn new_copy(data: &[u8]) -> Self {
         Data::from_ptr(unsafe {
             C_SkData_MakeWithCopy(data.as_ptr() as _, data.len())
