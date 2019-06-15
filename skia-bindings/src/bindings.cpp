@@ -16,6 +16,7 @@
 #include "SkFontArguments.h"
 #include "SkFontMetrics.h"
 #include "SkFontMgr.h"
+#include "SkGraphics.h"
 #include "SkImage.h"
 #include "SkImageEncoder.h"
 #include "SkImageFilter.h"
