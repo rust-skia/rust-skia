@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::{scalar, ImageFilter, image_filter::CropRect, Rect};
+use crate::{image_filter::CropRect, scalar, ImageFilter, Rect};
 use skia_bindings::{C_SkMagnifierImageFilter_Make, SkImageFilter};
 
 impl RCHandle<SkImageFilter> {

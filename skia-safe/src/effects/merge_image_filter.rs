@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::{ImageFilter, image_filter::CropRect};
+use crate::{image_filter::CropRect, ImageFilter};
 use skia_bindings::{C_SkMergeImageFilter_Make, SkImageFilter};
 use std::convert::TryInto;
 

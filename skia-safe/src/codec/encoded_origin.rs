@@ -1,6 +1,6 @@
-use skia_bindings::{SkEncodedOrigin, C_SkEncodedOriginToMatrix};
 use crate::prelude::NativeTransmutable;
 use crate::{ISize, Matrix};
+use skia_bindings::{C_SkEncodedOriginToMatrix, SkEncodedOrigin};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -22,7 +22,8 @@ impl Default for EncodedOrigin {
 }
 
 impl NativeTransmutable<SkEncodedOrigin> for EncodedOrigin {}
-#[test] fn test_encoded_origin_layout() {
+#[test]
+fn test_encoded_origin_layout() {
     EncodedOrigin::test_layout()
 }
 

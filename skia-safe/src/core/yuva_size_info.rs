@@ -1,20 +1,18 @@
-use crate::{ISize, EncodedOrigin};
 use crate::prelude::*;
-use skia_bindings::{SkYUVASizeInfo, C_SkYUVASizeInfo_equals, C_SkYUVASizeInfo_computeTotalBytes};
+use crate::{EncodedOrigin, ISize};
+use skia_bindings::{C_SkYUVASizeInfo_computeTotalBytes, C_SkYUVASizeInfo_equals, SkYUVASizeInfo};
 use std::ffi::c_void;
 
 #[derive(Clone, Default, Debug)]
 pub struct YUVASizeInfo {
     pub sizes: [ISize; Self::MAX_COUNT],
     pub width_bytes: [usize; Self::MAX_COUNT],
-    pub origin: EncodedOrigin
+    pub origin: EncodedOrigin,
 }
 
 impl PartialEq for YUVASizeInfo {
     fn eq(&self, other: &Self) -> bool {
-        unsafe {
-            C_SkYUVASizeInfo_equals(self.native(), other.native())
-        }
+        unsafe { C_SkYUVASizeInfo_equals(self.native(), other.native()) }
     }
 }
 
@@ -29,7 +27,11 @@ impl YUVASizeInfo {
         unsafe { C_SkYUVASizeInfo_computeTotalBytes(self.native()) }
     }
 
-    pub unsafe fn compute_planes(&self, base: *mut c_void, planes: &mut [*mut c_void; Self::MAX_COUNT]) {
+    pub unsafe fn compute_planes(
+        &self,
+        base: *mut c_void,
+        planes: &mut [*mut c_void; Self::MAX_COUNT],
+    ) {
         self.native().computePlanes(base, planes.as_mut_ptr());
     }
 }

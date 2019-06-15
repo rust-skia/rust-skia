@@ -1,4 +1,9 @@
-use skia_bindings::{VkDeviceMemory, VkDeviceSize, VkImage, VkImageTiling, VkImageLayout, VkSamplerYcbcrModelConversion, VkSamplerYcbcrRange, VkChromaLocation, VkFilter, VkBool32, VkFormatFeatureFlags, VkFormat, VkDevice, VkCommandBuffer, VkRenderPass, VkRect2D, VkInstance, VkPhysicalDevice, VkQueue};
+use skia_bindings::{
+    VkBool32, VkChromaLocation, VkCommandBuffer, VkDevice, VkDeviceMemory, VkDeviceSize, VkFilter,
+    VkFormat, VkFormatFeatureFlags, VkImage, VkImageLayout, VkImageTiling, VkInstance,
+    VkPhysicalDevice, VkQueue, VkRect2D, VkRenderPass, VkSamplerYcbcrModelConversion,
+    VkSamplerYcbcrRange,
+};
 
 mod backend_context;
 pub use self::backend_context::*;

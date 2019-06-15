@@ -1,12 +1,7 @@
 use crate::prelude::*;
 use crate::u8cpu;
-use std::ops::{Index, Mul, IndexMut, BitOr, BitAnd};
-use skia_bindings::{
-    SkColor,
-    SkRGBToHSV,
-    SkHSVToColor,
-    SkColor4f
-};
+use skia_bindings::{SkColor, SkColor4f, SkHSVToColor, SkRGBToHSV};
+use std::ops::{BitAnd, BitOr, Index, IndexMut, Mul};
 
 // TODO: What should we do with SkAlpha?
 // It does not seem to be used, but if we want to export it, we'd
@@ -75,15 +70,14 @@ impl BitAnd<u32> for Color {
 }
 
 impl Color {
-
     // note: we don't use the u8cpu type here, because we trust the Rust
     // compiler to optimize the storage type.
-    pub fn from_argb(a: u8, r: u8, g: u8, b:u8) -> Color {
+    pub fn from_argb(a: u8, r: u8, g: u8, b: u8) -> Color {
         Self(
-            (u8cpu::from(a) << 24) |
-            (u8cpu::from(r) << 16) |
-            (u8cpu::from(g) << 8) |
-            (u8cpu::from(b))
+            (u8cpu::from(a) << 24)
+                | (u8cpu::from(r) << 16)
+                | (u8cpu::from(g) << 8)
+                | (u8cpu::from(b)),
         )
     }
 
@@ -132,15 +126,18 @@ impl Color {
     pub fn to_hsv(self) -> HSV {
         self.to_rgb().to_hsv()
     }
-
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
-pub struct RGB { pub r: u8, pub g: u8, pub b: u8 }
+pub struct RGB {
+    pub r: u8,
+    pub g: u8,
+    pub b: u8,
+}
 
 impl From<(u8, u8, u8)> for RGB {
     fn from((r, g, b): (u8, u8, u8)) -> Self {
-        Self{ r, g, b }
+        Self { r, g, b }
     }
 }
 
@@ -152,26 +149,33 @@ impl RGB {
                 self.r.into(),
                 self.g.into(),
                 self.b.into(),
-                hsv.as_mut_ptr());
+                hsv.as_mut_ptr(),
+            );
         }
-        HSV { h: hsv[0], s: hsv[1], v: hsv[2] }
+        HSV {
+            h: hsv[0],
+            s: hsv[1],
+            v: hsv[2],
+        }
     }
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
-pub struct HSV { pub h: f32, pub s: f32, pub v: f32 }
+pub struct HSV {
+    pub h: f32,
+    pub s: f32,
+    pub v: f32,
+}
 
 impl From<(f32, f32, f32)> for HSV {
     fn from((h, s, v): (f32, f32, f32)) -> Self {
-        Self{ h, s, v }
+        Self { h, s, v }
     }
 }
 
 impl HSV {
     pub fn to_color(&self, alpha: u8) -> Color {
-        Color::from_native(unsafe {
-            SkHSVToColor(alpha.into(), [self.h, self.s, self.v].as_ptr())
-        })
+        Color::from_native(unsafe { SkHSVToColor(alpha.into(), [self.h, self.s, self.v].as_ptr()) })
     }
 }
 
@@ -182,7 +186,12 @@ impl HSV {
 // lack of const generics.
 #[derive(Clone, PartialEq, Debug)]
 #[repr(C)]
-pub struct Color4f { pub r: f32, pub g: f32, pub b: f32, pub a: f32 }
+pub struct Color4f {
+    pub r: f32,
+    pub g: f32,
+    pub b: f32,
+    pub a: f32,
+}
 
 impl NativeTransmutable<SkColor4f> for Color4f {}
 #[test]
@@ -221,7 +230,8 @@ impl Mul<&Self> for Color4f {
             r: self.r * scale.r,
             g: self.g * scale.g,
             b: self.b * scale.b,
-            a: self.a * scale.a }
+            a: self.a * scale.a,
+        }
     }
 }
 
@@ -258,7 +268,7 @@ impl Color4f {
     }
 
     // corresponding Skia function: vec()
-    pub fn as_array_mut(&mut self) -> &mut[f32; 4] {
+    pub fn as_array_mut(&mut self) -> &mut [f32; 4] {
         unsafe { transmute_ref_mut(self) }
     }
 
@@ -271,9 +281,12 @@ impl Color4f {
     //       to call the Skia function.
     pub fn fits_in_bytes(&self) -> bool {
         debug_assert!(self.a >= 0.0 && self.a <= 1.0);
-        self.r >= 0.0 && self.r <= 1.0 &&
-        self.g >= 0.0 && self.g <= 1.0 &&
-        self.b >= 0.0 && self.b <= 1.0
+        self.r >= 0.0
+            && self.r <= 1.0
+            && self.g >= 0.0
+            && self.g <= 1.0
+            && self.b >= 0.0
+            && self.b <= 1.0
     }
 
     pub fn to_color(&self) -> Color {
@@ -294,13 +307,21 @@ impl Color4f {
     // TODO: FromBytes_RGBA
 
     pub fn to_opaque(&self) -> Self {
-        Self { a: 1.0, .. self.clone() }
+        Self {
+            a: 1.0,
+            ..self.clone()
+        }
     }
 }
 
 #[test]
 pub fn color4f_array_access() {
-    let mut color = Color4f { r: 0.1, g: 0.2, b: 0.3, a: 0.4 };
+    let mut color = Color4f {
+        r: 0.1,
+        g: 0.2,
+        b: 0.3,
+        a: 0.4,
+    };
     color[1] = 0.5;
     assert_eq!(0.5, color.g);
 }

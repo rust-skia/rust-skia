@@ -1,6 +1,6 @@
 use crate::prelude::*;
+use crate::{scalar, Path, PathEffect};
 use skia_bindings::SkPathEffect;
-use crate::{Path, scalar, PathEffect};
 
 impl RCHandle<SkPathEffect> {
     pub fn path_1d(
@@ -32,12 +32,7 @@ pub mod path_1d_path_effect {
         Style::test_layout()
     }
 
-    pub fn new(
-        path: &Path,
-        advance: scalar,
-        phase: scalar,
-        style: Style,
-    ) -> Option<PathEffect> {
+    pub fn new(path: &Path, advance: scalar, phase: scalar, style: Style) -> Option<PathEffect> {
         PathEffect::from_ptr(unsafe {
             C_SkPath1DPathEffect_Make(path.native(), advance, phase, style.into_native())
         })

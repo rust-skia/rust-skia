@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::{ImageFilter, image_filter};
+use crate::{image_filter, ImageFilter};
 use skia_bindings::{C_SkArithmeticImageFilter_Make, SkImageFilter};
 
 impl RCHandle<SkImageFilter> {

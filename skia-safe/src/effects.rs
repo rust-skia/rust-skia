@@ -28,8 +28,8 @@ pub use morphology_image_filter::*;
 
 pub mod offset_image_filter;
 pub mod paint_image_filter;
-pub mod picture_image_filter;
 pub mod perlin_noise_shader;
+pub mod picture_image_filter;
 pub mod table_color_filter;
 pub mod tile_image_filter;
 pub mod xfer_mode_image_filter;

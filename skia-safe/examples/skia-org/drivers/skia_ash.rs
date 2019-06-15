@@ -1,9 +1,9 @@
-use std::ffi::{CString, c_void};
-use ash::{Instance, Entry};
+use ash::version::{DeviceV1_0, EntryV1_0, InstanceV1_0};
 use ash::vk;
 use ash::vk::Handle;
-use ash::version::{EntryV1_0, InstanceV1_0, DeviceV1_0};
+use ash::{Entry, Instance};
 use skia_safe::gpu;
+use std::ffi::{c_void, CString};
 
 pub struct AshGraphics {
     pub entry: Entry,
@@ -25,18 +25,17 @@ impl Drop for AshGraphics {
 
 // most code copied from here: https://github.com/MaikKlein/ash/blob/master/examples/src/lib.rs
 impl AshGraphics {
-
     pub fn vulkan_version() -> Option<(usize, usize, usize)> {
-
         let entry = Entry::new().unwrap();
 
-        let detected_version =
-            entry
-                .try_enumerate_instance_version()
-                .unwrap_or(None);
+        let detected_version = entry.try_enumerate_instance_version().unwrap_or(None);
 
         detected_version.map(|ver| {
-            (vk_version_major!(ver) as _, vk_version_minor!(ver) as _, vk_version_patch!(ver) as _)
+            (
+                vk_version_major!(ver) as _,
+                vk_version_minor!(ver) as _,
+                vk_version_patch!(ver) as _,
+            )
         })
     }
 
@@ -46,14 +45,12 @@ impl AshGraphics {
         let minimum_version = vk_make_version!(1, 0, 0);
 
         let instance: Instance = {
-
-            let api_version =
-                    Self::vulkan_version().map(|(major, minor, patch)| {
-                        vk_make_version!(major, minor, patch)
-                    }).unwrap_or(minimum_version);
+            let api_version = Self::vulkan_version()
+                .map(|(major, minor, patch)| vk_make_version!(major, minor, patch))
+                .unwrap_or(minimum_version);
 
             let app_name = CString::new(app_name).unwrap();
-            let layer_names : [&CString;0] = []; // [CString::new("VK_LAYER_LUNARG_standard_validation").unwrap()];
+            let layer_names: [&CString; 0] = []; // [CString::new("VK_LAYER_LUNARG_standard_validation").unwrap()];
             let extension_names_raw = []; // extension_names();
 
             let app_info = vk::ApplicationInfo::builder()
@@ -79,7 +76,6 @@ impl AshGraphics {
         };
 
         let (physical_device, queue_family_index) = {
-
             let physical_devices = instance
                 .enumerate_physical_devices()
                 .expect("Failed to enumerate Vulkan physical devices.");
@@ -92,7 +88,8 @@ impl AshGraphics {
                         .iter()
                         .enumerate()
                         .filter_map(|(index, ref info)| {
-                            let supports_graphic = info.queue_flags.contains(vk::QueueFlags::GRAPHICS);
+                            let supports_graphic =
+                                info.queue_flags.contains(vk::QueueFlags::GRAPHICS);
                             match supports_graphic {
                                 true => Some((*physical_device, index)),
                                 _ => None,
@@ -128,8 +125,7 @@ impl AshGraphics {
         };
 
         let queue_index: usize = 0;
-        let queue: vk::Queue =
-            device.get_device_queue(queue_family_index as _, queue_index as _);
+        let queue: vk::Queue = device.get_device_queue(queue_family_index as _, queue_index as _);
 
         AshGraphics {
             queue_and_index: (queue, queue_index),
@@ -140,14 +136,15 @@ impl AshGraphics {
         }
     }
 
-    pub unsafe fn get_proc(&self, of: gpu::vk::GetProcOf)
-        -> Option<unsafe extern "system" fn() -> c_void> {
-
+    pub unsafe fn get_proc(
+        &self,
+        of: gpu::vk::GetProcOf,
+    ) -> Option<unsafe extern "system" fn() -> c_void> {
         match of {
             gpu::vk::GetProcOf::Instance(instance, name) => {
                 let ash_instance = vk::Instance::from_raw(instance as _);
                 self.entry.get_instance_proc_addr(ash_instance, name)
-            },
+            }
             gpu::vk::GetProcOf::Device(device, name) => {
                 let ash_device = vk::Device::from_raw(device as _);
                 self.instance.get_device_proc_addr(ash_device, name)

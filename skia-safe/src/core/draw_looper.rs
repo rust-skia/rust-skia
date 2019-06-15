@@ -1,6 +1,9 @@
 use crate::prelude::*;
-use crate::{scalar, BlurStyle, Color, Paint, Rect, Vector, NativeFlattenable};
-use skia_bindings::{C_SkDrawLooper_asABlurShadow, SkDrawLooper, SkDrawLooper_BlurShadowRec, SkRefCntBase, SkFlattenable, C_SkDrawLooper_Deserialize};
+use crate::{scalar, BlurStyle, Color, NativeFlattenable, Paint, Rect, Vector};
+use skia_bindings::{
+    C_SkDrawLooper_Deserialize, C_SkDrawLooper_asABlurShadow, SkDrawLooper,
+    SkDrawLooper_BlurShadowRec, SkFlattenable, SkRefCntBase,
+};
 
 pub type DrawLooper = RCHandle<SkDrawLooper>;
 
@@ -18,9 +21,7 @@ impl NativeFlattenable for SkDrawLooper {
     }
 
     fn native_deserialize(data: &[u8]) -> *mut Self {
-        unsafe {
-            C_SkDrawLooper_Deserialize(data.as_ptr() as _, data.len())
-        }
+        unsafe { C_SkDrawLooper_Deserialize(data.as_ptr() as _, data.len()) }
     }
 }
 
@@ -40,7 +41,6 @@ fn test_blur_shadow_rec_layout() {
 }
 
 impl RCHandle<SkDrawLooper> {
-
     pub fn can_compute_fast_bounds(&self, paint: &Paint) -> bool {
         unsafe { self.native().canComputeFastBounds(paint.native()) }
     }

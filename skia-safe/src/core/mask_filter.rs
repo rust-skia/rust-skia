@@ -1,6 +1,10 @@
 use crate::prelude::*;
-use crate::{BlurStyle, scalar, Matrix, CoverageMode, NativeFlattenable};
-use skia_bindings::{C_SkMaskFilter_Combine, C_SkMaskFilter_Compose, C_SkMaskFilter_MakeBlur, SkRefCntBase, SkMaskFilter, C_SkMaskFilter_makeWithMatrix, C_SkMaskFilter_Deserialize, SkFlattenable};
+use crate::{scalar, BlurStyle, CoverageMode, Matrix, NativeFlattenable};
+use skia_bindings::{
+    C_SkMaskFilter_Combine, C_SkMaskFilter_Compose, C_SkMaskFilter_Deserialize,
+    C_SkMaskFilter_MakeBlur, C_SkMaskFilter_makeWithMatrix, SkFlattenable, SkMaskFilter,
+    SkRefCntBase,
+};
 
 pub type MaskFilter = RCHandle<SkMaskFilter>;
 
@@ -18,18 +22,20 @@ impl NativeFlattenable for SkMaskFilter {
     }
 
     fn native_deserialize(data: &[u8]) -> *mut Self {
-        unsafe {
-            C_SkMaskFilter_Deserialize(data.as_ptr() as _, data.len())
-        }
+        unsafe { C_SkMaskFilter_Deserialize(data.as_ptr() as _, data.len()) }
     }
 }
 
 impl RCHandle<SkMaskFilter> {
-
     pub fn blur(style: BlurStyle, sigma: scalar, respect_ctm: impl Into<Option<bool>>) -> Self {
         Self::from_ptr(unsafe {
-            C_SkMaskFilter_MakeBlur(style.into_native(), sigma, respect_ctm.into().unwrap_or(true))
-        }).unwrap()
+            C_SkMaskFilter_MakeBlur(
+                style.into_native(),
+                sigma,
+                respect_ctm.into().unwrap_or(true),
+            )
+        })
+        .unwrap()
     }
 
     pub fn compose(outer: &Self, inner: &Self) -> Option<Self> {
@@ -40,13 +46,16 @@ impl RCHandle<SkMaskFilter> {
 
     pub fn combine(filter_a: &Self, filter_b: &Self, mode: CoverageMode) -> Option<Self> {
         Self::from_ptr(unsafe {
-            C_SkMaskFilter_Combine(filter_a.shared_native(), filter_b.shared_native(), mode.into_native())
+            C_SkMaskFilter_Combine(
+                filter_a.shared_native(),
+                filter_b.shared_native(),
+                mode.into_native(),
+            )
         })
     }
 
     pub fn with_matrix(&self, matrix: &Matrix) -> Self {
-        Self::from_ptr(unsafe {
-            C_SkMaskFilter_makeWithMatrix(self.native(), matrix.native())
-        }).unwrap()
+        Self::from_ptr(unsafe { C_SkMaskFilter_makeWithMatrix(self.native(), matrix.native()) })
+            .unwrap()
     }
 }

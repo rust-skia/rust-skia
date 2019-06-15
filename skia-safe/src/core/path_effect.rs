@@ -1,8 +1,13 @@
-use std::{slice, mem};
-use std::os::raw;
 use crate::prelude::*;
-use crate::{Rect, StrokeRec, Path, Matrix, scalar, Vector, Point, NativeFlattenable};
-use skia_bindings::{SkPathEffect_PointData, C_SkPathEffect_MakeCompose, C_SkPathEffect_MakeSum, SkRefCntBase, SkPathEffect, C_SkPathEffect_PointData_Construct, C_SkPathEffect_PointData_deletePoints, SkPathEffect_DashInfo, SkPathEffect_DashType, SkFlattenable, C_SkPathEffect_Deserialize};
+use crate::{scalar, Matrix, NativeFlattenable, Path, Point, Rect, StrokeRec, Vector};
+use skia_bindings::{
+    C_SkPathEffect_Deserialize, C_SkPathEffect_MakeCompose, C_SkPathEffect_MakeSum,
+    C_SkPathEffect_PointData_Construct, C_SkPathEffect_PointData_deletePoints, SkFlattenable,
+    SkPathEffect, SkPathEffect_DashInfo, SkPathEffect_DashType, SkPathEffect_PointData,
+    SkRefCntBase,
+};
+use std::os::raw;
+use std::{mem, slice};
 
 #[repr(C)]
 pub struct PointData {
@@ -51,9 +56,7 @@ impl Default for PointData {
 
 impl PointData {
     pub fn points(&self) -> &[Point] {
-        unsafe {
-            slice::from_raw_parts(self.points, self.num_points.try_into().unwrap())
-        }
+        unsafe { slice::from_raw_parts(self.points, self.num_points.try_into().unwrap()) }
     }
 }
 
@@ -70,7 +73,7 @@ pub mod point_data {
 #[derive(Clone, PartialEq, Debug)]
 pub struct DashInfo {
     pub intervals: Vec<scalar>,
-    pub phase: scalar
+    pub phase: scalar,
 }
 
 pub type PathEffect = RCHandle<SkPathEffect>;
@@ -88,28 +91,31 @@ impl NativeFlattenable for SkPathEffect {
     }
 
     fn native_deserialize(data: &[u8]) -> *mut Self {
-        unsafe {
-            C_SkPathEffect_Deserialize(data.as_ptr() as _, data.len())
-        }
+        unsafe { C_SkPathEffect_Deserialize(data.as_ptr() as _, data.len()) }
     }
 }
 
 impl RCHandle<SkPathEffect> {
-
     pub fn sum(first: &PathEffect, second: &PathEffect) -> PathEffect {
         PathEffect::from_ptr(unsafe {
             C_SkPathEffect_MakeSum(first.shared_native(), second.shared_native())
-        }).unwrap()
+        })
+        .unwrap()
     }
 
     pub fn compose(first: &PathEffect, second: &PathEffect) -> PathEffect {
         PathEffect::from_ptr(unsafe {
             C_SkPathEffect_MakeCompose(first.shared_native(), second.shared_native())
-        }).unwrap()
+        })
+        .unwrap()
     }
 
-    pub fn filter_path(&self, src: &Path, stroke_rec: &StrokeRec, cull_rect: impl AsRef<Rect>)
-        -> Option<(Path, StrokeRec)> {
+    pub fn filter_path(
+        &self,
+        src: &Path,
+        stroke_rec: &StrokeRec,
+        cull_rect: impl AsRef<Rect>,
+    ) -> Option<(Path, StrokeRec)> {
         let mut dst = Path::default();
         let mut stroke_rec_r = stroke_rec.clone();
         self.filter_path_inplace(&mut dst, src, &mut stroke_rec_r, cull_rect)
@@ -117,19 +123,28 @@ impl RCHandle<SkPathEffect> {
     }
 
     pub fn filter_path_inplace(
-        &self, dst: &mut Path, src: &Path,
-        stroke_rec: &mut StrokeRec, cull_rect: impl AsRef<Rect>) -> bool {
+        &self,
+        dst: &mut Path,
+        src: &Path,
+        stroke_rec: &mut StrokeRec,
+        cull_rect: impl AsRef<Rect>,
+    ) -> bool {
         unsafe {
             self.native().filterPath(
-                dst.native_mut(), src.native(),
+                dst.native_mut(),
+                src.native(),
                 stroke_rec.native_mut(),
-                cull_rect.as_ref().native())
+                cull_rect.as_ref().native(),
+            )
         }
     }
 
     pub fn compute_fast_bounds(&self, src: impl AsRef<Rect>) -> Rect {
-        let mut r : Rect = Rect::default();
-        unsafe { self.native().computeFastBounds(r.native_mut(), src.as_ref().native()) };
+        let mut r: Rect = Rect::default();
+        unsafe {
+            self.native()
+                .computeFastBounds(r.native_mut(), src.as_ref().native())
+        };
         r
     }
 
@@ -139,8 +154,8 @@ impl RCHandle<SkPathEffect> {
         src: &Path,
         stroke_rect: &StrokeRec,
         matrix: &Matrix,
-        cull_rect: impl AsRef<Rect>)
-        -> Option<PointData> {
+        cull_rect: impl AsRef<Rect>,
+    ) -> Option<PointData> {
         let mut point_data = PointData::default();
         unsafe {
             self.native().asPoints(
@@ -148,8 +163,10 @@ impl RCHandle<SkPathEffect> {
                 src.native(),
                 stroke_rect.native(),
                 matrix.native(),
-                cull_rect.as_ref().native())
-        }.if_true_some(point_data)
+                cull_rect.as_ref().native(),
+            )
+        }
+        .if_true_some(point_data)
     }
 
     #[deprecated(since = "0.12.0", note = "use as_a_dash()")]
@@ -161,9 +178,7 @@ impl RCHandle<SkPathEffect> {
     pub fn as_a_dash(&self) -> Option<DashInfo> {
         let mut dash_info = unsafe { SkPathEffect_DashInfo::new() };
 
-        let dash_type = unsafe {
-            self.native().asADash(&mut dash_info)
-        };
+        let dash_type = unsafe { self.native().asADash(&mut dash_info) };
 
         match dash_type {
             SkPathEffect_DashType::kDash_DashType => {
@@ -172,11 +187,12 @@ impl RCHandle<SkPathEffect> {
                 unsafe {
                     assert_eq!(dash_type, self.native().asADash(&mut dash_info));
                 }
-                Some(DashInfo { intervals: v, phase: dash_info.fPhase })
-            },
-            SkPathEffect_DashType::kNone_DashType => {
-                None
+                Some(DashInfo {
+                    intervals: v,
+                    phase: dash_info.fPhase,
+                })
             }
+            SkPathEffect_DashType::kNone_DashType => None,
         }
     }
 }

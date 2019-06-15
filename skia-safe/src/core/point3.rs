@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::scalar;
 use skia_bindings::SkPoint3;
-use std::ops::{Add, Sub, Neg, AddAssign, SubAssign};
+use std::ops::{Add, AddAssign, Neg, Sub, SubAssign};
 
 pub type Vector3 = Point3;
 pub type Color3f = Point3;
@@ -11,7 +11,7 @@ pub type Color3f = Point3;
 pub struct Point3 {
     pub x: scalar,
     pub y: scalar,
-    pub z: scalar
+    pub z: scalar,
 }
 
 impl NativeTransmutable<SkPoint3> for Point3 {}
@@ -80,16 +80,13 @@ impl Point3 {
     }
 
     pub fn normalize(&mut self) -> bool {
-        unsafe {
-            self.native_mut().normalize()
-        }
+        unsafe { self.native_mut().normalize() }
     }
 
     #[must_use]
     pub fn normalized(&self) -> Option<Self> {
         let mut normalized = *self;
-        unsafe { normalized.native_mut().normalize() }
-            .if_true_some(normalized)
+        unsafe { normalized.native_mut().normalize() }.if_true_some(normalized)
     }
 
     // TODO: with_scale()?
@@ -116,14 +113,10 @@ impl Point3 {
     }
 
     pub fn cross_product(a: Self, b: Self) -> Point3 {
-        Self::from_native(unsafe {
-            SkPoint3::CrossProduct(a.native(), b.native())
-        })
+        Self::from_native(unsafe { SkPoint3::CrossProduct(a.native(), b.native()) })
     }
 
     pub fn cross(&self, vec: Self) -> Point3 {
-        Self::from_native(unsafe {
-            self.native().cross(vec.native())
-        })
+        Self::from_native(unsafe { self.native().cross(vec.native()) })
     }
 }

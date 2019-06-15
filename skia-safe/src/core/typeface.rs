@@ -1,14 +1,15 @@
-use crate::{Data, FontStyle, GlyphId, Rect, Unichar, font_parameters::VariationAxis};
+use crate::interop::{MemoryStream, NativeStreamBase};
 use crate::prelude::*;
-use crate::{interop, FontArguments, font_arguments};
+use crate::{font_arguments, interop, FontArguments};
+use crate::{font_parameters::VariationAxis, Data, FontStyle, GlyphId, Rect, Unichar};
 use skia_bindings::{
     C_SkTypeface_LocalizedStrings_next, C_SkTypeface_LocalizedStrings_unref,
-    C_SkTypeface_MakeDefault, C_SkTypeface_MakeFromData, C_SkTypeface_MakeFromName,
-    C_SkTypeface_isBold, C_SkTypeface_isItalic, C_SkTypeface_makeClone, C_SkTypeface_serialize,
-    SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings, SkTypeface_SerializeBehavior, C_SkTypeface_MakeDeserialize
+    C_SkTypeface_MakeDefault, C_SkTypeface_MakeDeserialize, C_SkTypeface_MakeFromData,
+    C_SkTypeface_MakeFromName, C_SkTypeface_isBold, C_SkTypeface_isItalic, C_SkTypeface_makeClone,
+    C_SkTypeface_serialize, SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings,
+    SkTypeface_SerializeBehavior,
 };
 use std::{ffi, ptr};
-use crate::interop::{MemoryStream, NativeStreamBase};
 
 pub type FontId = skia_bindings::SkFontID;
 pub type FontTableTag = skia_bindings::SkFontTableTag;
@@ -70,15 +71,16 @@ impl RCHandle<SkTypeface> {
         unsafe { self.native().isFixedPitch() }
     }
 
-    pub fn variation_design_position(&self) -> Option<Vec<font_arguments::variation_position::Coordinate>> {
+    pub fn variation_design_position(
+        &self,
+    ) -> Option<Vec<font_arguments::variation_position::Coordinate>> {
         unsafe {
-            let r =
-                self.native().getVariationDesignPosition(
-                    ptr::null_mut(), 0,
-                );
+            let r = self.native().getVariationDesignPosition(ptr::null_mut(), 0);
             if r != -1 {
                 let mut v = vec![font_arguments::variation_position::Coordinate::default(); r as _];
-                let elements = self.native().getVariationDesignPosition(v.native_mut().as_mut_ptr(), r);
+                let elements = self
+                    .native()
+                    .getVariationDesignPosition(v.native_mut().as_mut_ptr(), r);
                 assert_eq!(elements, r);
                 Some(v)
             } else {
@@ -89,12 +91,14 @@ impl RCHandle<SkTypeface> {
 
     pub fn variation_design_parameters(&self) -> Option<Vec<VariationAxis>> {
         unsafe {
-            let r = self.native().getVariationDesignParameters(ptr::null_mut(), 0);
+            let r = self
+                .native()
+                .getVariationDesignParameters(ptr::null_mut(), 0);
             if r != -1 {
                 let mut v = vec![VariationAxis::default(); r as _];
-                let elements = self.native().getVariationDesignParameters(
-                    v.native_mut().as_mut_ptr(), r
-                );
+                let elements = self
+                    .native()
+                    .getVariationDesignParameters(v.native_mut().as_mut_ptr(), r);
                 assert_eq!(elements, r);
                 Some(v)
             } else {
@@ -129,7 +133,10 @@ impl RCHandle<SkTypeface> {
 
     pub fn from_data(data: &Data, index: impl Into<Option<usize>>) {
         Typeface::from_ptr(unsafe {
-            C_SkTypeface_MakeFromData(data.shared_native(), index.into().unwrap_or_default().try_into().unwrap())
+            C_SkTypeface_MakeFromData(
+                data.shared_native(),
+                index.into().unwrap_or_default().try_into().unwrap(),
+            )
         });
     }
 
@@ -154,10 +161,14 @@ impl RCHandle<SkTypeface> {
         })
     }
 
-    pub fn unichars_to_glyphs(&self, uni: &[Unichar], glyphs: &mut[GlyphId]) {
+    pub fn unichars_to_glyphs(&self, uni: &[Unichar], glyphs: &mut [GlyphId]) {
         assert_eq!(uni.len(), glyphs.len());
         unsafe {
-            self.native().unicharsToGlyphs(uni.as_ptr(), uni.len().try_into().unwrap(), glyphs.as_mut_ptr())
+            self.native().unicharsToGlyphs(
+                uni.as_ptr(),
+                uni.len().try_into().unwrap(),
+                glyphs.as_mut_ptr(),
+            )
         }
     }
 
@@ -219,7 +230,11 @@ impl RCHandle<SkTypeface> {
     }
 
     // note: adjustments slice length must be equal to glyph's len - 1.
-    pub fn get_kerning_pair_adjustments(&self, glyphs: &[GlyphId], adjustments: &mut [i32]) -> bool {
+    pub fn get_kerning_pair_adjustments(
+        &self,
+        glyphs: &[GlyphId],
+        adjustments: &mut [i32],
+    ) -> bool {
         (adjustments.len() + 1 == glyphs.len())
             && unsafe {
                 self.native().getKerningPairAdjustments(
@@ -283,10 +298,10 @@ impl Iterator for LocalizedStringsIter {
                 language.native_mut(),
             )
         }
-            .if_true_then_some(|| LocalizedString {
-                string: string.as_str().into(),
-                language: language.as_str().into(),
-            })
+        .if_true_then_some(|| LocalizedString {
+            string: string.as_str().into(),
+            language: language.as_str().into(),
+        })
     }
 }
 

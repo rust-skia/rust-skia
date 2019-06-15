@@ -100,11 +100,7 @@ impl Default for FontStyle {
 }
 
 impl FontStyle {
-    pub fn new(
-        weight: Weight,
-        width: Width,
-        slant: Slant,
-    ) -> Self {
+    pub fn new(weight: Weight, width: Width, slant: Slant) -> Self {
         Self::from_native(unsafe {
             SkFontStyle::new(*weight.native(), *width.native(), *slant.native())
         })
@@ -140,7 +136,7 @@ impl FontStyle {
 }
 
 mod font_style_static {
-    use super::{Slant, Weight, Width, FontStyle};
+    use super::{FontStyle, Slant, Weight, Width};
 
     lazy_static! {
         pub static ref NORMAL: FontStyle =

@@ -21,9 +21,13 @@ impl Default for Handle<SkPixmap> {
 }
 
 impl Handle<SkPixmap> {
-    pub fn new<'pixels>(info: &ImageInfo, pixels: &'pixels [u8], row_bytes: usize) -> Borrows<'pixels, Self> {
-        let width : usize = info.width().try_into().unwrap();
-        let height : usize = info.height().try_into().unwrap();
+    pub fn new<'pixels>(
+        info: &ImageInfo,
+        pixels: &'pixels [u8],
+        row_bytes: usize,
+    ) -> Borrows<'pixels, Self> {
+        let width: usize = info.width().try_into().unwrap();
+        let height: usize = info.height().try_into().unwrap();
 
         assert!(row_bytes >= width * info.bytes_per_pixel());
         assert!(pixels.len() >= height * row_bytes);

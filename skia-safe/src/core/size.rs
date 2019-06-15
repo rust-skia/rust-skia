@@ -1,16 +1,12 @@
 use crate::prelude::*;
 use crate::scalar;
-use skia_bindings::{
-    SkSize,
-    SkISize,
-    C_SkSize_toFloor
-};
+use skia_bindings::{C_SkSize_toFloor, SkISize, SkSize};
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
 pub struct ISize {
     pub width: i32,
-    pub height: i32
+    pub height: i32,
 }
 
 impl NativeTransmutable<SkISize> for ISize {}
@@ -22,7 +18,10 @@ fn test_isize_layout() {
 
 impl ISize {
     pub fn new(w: i32, h: i32) -> ISize {
-        ISize { width: w, height: h }
+        ISize {
+            width: w,
+            height: h,
+        }
     }
 
     pub fn new_empty() -> ISize {
@@ -56,19 +55,22 @@ impl ISize {
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct Size {
     pub width: scalar,
-    pub height: scalar
+    pub height: scalar,
 }
 
 impl NativeTransmutable<SkSize> for Size {}
 
 #[test]
 fn test_size_layout() {
-   Size::test_layout()
+    Size::test_layout()
 }
 
 impl Size {
     pub fn new(w: scalar, h: scalar) -> Size {
-        Size { width: w, height: h }
+        Size {
+            width: w,
+            height: h,
+        }
     }
 
     pub fn from_isize(src: ISize) -> Size {
@@ -112,9 +114,7 @@ impl Size {
     pub fn to_floor(self) -> ISize {
         // does not link:
         // ISize::from_native(unsafe { self.native().toFloor() })
-        ISize::from_native(unsafe {
-            C_SkSize_toFloor(self.native())
-        })
+        ISize::from_native(unsafe { C_SkSize_toFloor(self.native()) })
     }
 }
 

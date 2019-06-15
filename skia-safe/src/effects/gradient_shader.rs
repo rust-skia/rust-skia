@@ -313,4 +313,3 @@ impl<'a> From<(&'a [Color4f], &'a ColorSpace)> for GradientShaderColors<'a> {
         GradientShaderColors::<'a>::ColorsInSpace(c.0, c.1)
     }
 }
-

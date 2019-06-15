@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::{Canvas, Font, Paint, Path, Point, TextEncoding};
-use skia_bindings::{SkTextUtils, SkTextUtils_Align};
 use core::borrow::BorrowMut;
+use skia_bindings::{SkTextUtils, SkTextUtils_Align};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]

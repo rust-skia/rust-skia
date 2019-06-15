@@ -1,10 +1,7 @@
 use crate::prelude::*;
 use crate::{scalar, ISize, Size};
-use skia_bindings::{
-    SkIPoint,
-    SkPoint
-};
-use std::ops::{Sub, Add, Neg, Mul, AddAssign, SubAssign, MulAssign};
+use skia_bindings::{SkIPoint, SkPoint};
+use std::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 pub type IVector = IPoint;
 
@@ -12,7 +9,7 @@ pub type IVector = IPoint;
 #[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
 pub struct IPoint {
     pub x: i32,
-    pub y: i32
+    pub y: i32,
 }
 
 impl NativeTransmutable<SkIPoint> for IPoint {}
@@ -110,7 +107,7 @@ pub type Vector = Point;
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct Point {
     pub x: scalar,
-    pub y: scalar
+    pub y: scalar,
 }
 
 impl NativeTransmutable<SkPoint> for Point {}
@@ -198,7 +195,6 @@ impl MulAssign<scalar> for Point {
 }
 
 impl Point {
-
     pub fn new(x: scalar, y: scalar) -> Self {
         Self { x, y }
     }
@@ -258,8 +254,7 @@ impl Point {
 
     #[deprecated(since = "0.12.0", note = "use set_length()")]
     pub fn with_length(mut self, length: scalar) -> Option<Self> {
-        unsafe { self.native_mut().setLength(length) }
-            .if_true_some(self)
+        unsafe { self.native_mut().setLength(length) }.if_true_some(self)
     }
 
     #[must_use]
@@ -302,7 +297,7 @@ impl Point {
     }
 
     pub fn cross_product(a: Self, b: Self) -> scalar {
-        unsafe { SkPoint::CrossProduct(a.native(), b.native() )}
+        unsafe { SkPoint::CrossProduct(a.native(), b.native()) }
     }
 
     pub fn cross(self, vec: Vector) -> scalar {
