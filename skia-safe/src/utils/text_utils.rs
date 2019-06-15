@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::{Canvas, Font, Paint, Path, Point, TextEncoding};
 use skia_bindings::{SkTextUtils, SkTextUtils_Align};
+use core::borrow::BorrowMut;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -50,7 +51,7 @@ impl Canvas {
         paint: &Paint,
         align: Align,
     ) -> &mut Self {
-        draw_str(self.as_mut(), text, p, font, paint, align);
+        draw_str(self.borrow_mut(), text, p, font, paint, align);
         self
     }
 }

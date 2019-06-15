@@ -46,7 +46,7 @@ pub mod named_transfer_fn {
         f: 0.0
     };
 
-    pub const Dot22: ColorSpaceTransferFn = ColorSpaceTransferFn {
+    pub const DOT22: ColorSpaceTransferFn = ColorSpaceTransferFn {
         g: 2.2,
         a: 1.0,
         b: 0.0,
@@ -56,7 +56,7 @@ pub mod named_transfer_fn {
         f: 0.0
     };
 
-    pub const Linear: ColorSpaceTransferFn = ColorSpaceTransferFn {
+    pub const LINEAR: ColorSpaceTransferFn = ColorSpaceTransferFn {
         g: 1.0,
         a: 1.0,
         b: 0.0,

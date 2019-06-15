@@ -34,12 +34,12 @@ impl RCHandle<SkTextBlob> {
     }
 
     #[deprecated(note = "use get_intercepts()")]
-    pub fn interceps(&self, bounds: &[scalar; 2], paint: Option<&Paint>) -> Vec<scalar> {
+    pub fn interceps(&self, bounds: [scalar; 2], paint: Option<&Paint>) -> Vec<scalar> {
         self.get_interceps(bounds, paint)
     }
 
     // TODO: consider to provide an inplace variant.
-    pub fn get_interceps(&self, bounds: &[scalar; 2], paint: Option<&Paint>) -> Vec<scalar> {
+    pub fn get_interceps(&self, bounds: [scalar; 2], paint: Option<&Paint>) -> Vec<scalar> {
         unsafe {
             let count = self.native().getIntercepts(bounds.as_ptr(), ptr::null_mut(), paint.native_ptr_or_null());
             let mut intervals = vec![Default::default(); count.try_into().unwrap()];

@@ -43,6 +43,7 @@ impl Handle<GrBackendFormat> {
 
     pub fn gl_format(&self) -> Option<gl::Enum> {
         unsafe {
+            #[allow(clippy::map_clone)]
             self.native().getGLFormat()
                 .to_option()
                 .map(|format| *format)
@@ -51,6 +52,7 @@ impl Handle<GrBackendFormat> {
 
     pub fn gl_target(&self) -> Option<gl::Enum> {
         unsafe {
+            #[allow(clippy::map_clone)]
             self.native().getGLTarget()
                 .to_option()
                 .map(|target| *target)
@@ -201,7 +203,7 @@ impl Handle<GrBackendRenderTarget> {
     pub fn new_gl(
         (width, height): (i32, i32),
         sample_count: impl Into<Option<usize>>, stencil_bits: usize,
-        info: &gl::FramebufferInfo
+        info: gl::FramebufferInfo
     ) -> BackendRenderTarget {
         Self::from_native(unsafe {
             GrBackendRenderTarget::new1(

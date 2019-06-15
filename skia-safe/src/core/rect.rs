@@ -538,7 +538,7 @@ impl Rect {
     }
 
     pub fn join2(a: impl AsRef<Rect>, b: impl AsRef<Rect>) -> Rect {
-        let mut result = a.as_ref().clone();
+        let mut result = *a.as_ref();
         result.join(b);
         result
     }

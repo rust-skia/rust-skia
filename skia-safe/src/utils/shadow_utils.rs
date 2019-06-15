@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use crate::{scalar, Canvas, Color, Path, Point3};
+use core::borrow::BorrowMut;
 use skia_bindings::SkShadowUtils;
 
 bitflags! {
@@ -30,7 +31,7 @@ pub fn draw_shadow(
             light_radius,
             ambient_color.into().into_native(),
             spot_color.into().into_native(),
-            flags.into().unwrap_or(ShadowFlags::empty()).bits(),
+            flags.into().unwrap_or_else(ShadowFlags::empty).bits(),
         )
     }
 }
@@ -48,7 +49,7 @@ impl Canvas {
         flags: impl Into<Option<ShadowFlags>>,
     ) -> &mut Self {
         draw_shadow(
-            self.as_mut(),
+            self.borrow_mut(),
             path,
             z_plane_params,
             light_pos,

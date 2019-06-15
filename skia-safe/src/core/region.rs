@@ -441,6 +441,7 @@ impl<'a> Cliperator<'a> {
     }
 
     // TODO: why does this function need &mut self?
+    #[allow(clippy::wrong_self_convention)]
     pub fn is_done(&mut self) -> bool {
         unsafe { self.native_mut().done() }
     }

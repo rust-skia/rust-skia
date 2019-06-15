@@ -42,7 +42,7 @@ impl RCHandle<SkSurface> {
         surface_props: Option<&SurfaceProps>
     ) -> Option<Borrows<'pixels, Surface>> {
 
-        let row_bytes = row_bytes.into().unwrap_or(image_info.min_row_bytes());
+        let row_bytes = row_bytes.into().unwrap_or_else(|| image_info.min_row_bytes());
 
         if pixels.len() < image_info.compute_byte_size(row_bytes) {
             return None

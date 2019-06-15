@@ -209,8 +209,9 @@ impl<Native, Base: NativeRefCounted> NativeRefCounted for Native
 pub(crate) trait NativeAccess<N> {
     fn native(&self) -> &N;
     fn native_mut(&mut self) -> &mut N;
-    unsafe fn native_mut_force(&self) -> &mut N {
-        &mut *(self.native() as *const N as *mut N)
+    // Returns a ptr to the native mutable value.
+    unsafe fn native_mut_force(&self) -> *mut N {
+        self.native() as *const N as *mut N
     }
 }
 
