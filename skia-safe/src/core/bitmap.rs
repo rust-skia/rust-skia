@@ -292,7 +292,12 @@ impl Handle<SkBitmap> {
             .if_true_some(offset)
     }
 
-    // TODO: peek_pixels(Pixmap)
+    pub fn peek_pixels(&self) -> Option<Borrows<Pixmap>> {
+        let mut pixmap = Pixmap::default();
+        unsafe {
+            self.native().peekPixels(pixmap.native_mut())
+        }.if_true_then_some(|| pixmap.borrows(self))
+    }
 
     #[deprecated(since = "0.11.0", note = "use to_shader()")]
     pub fn as_shader<'a>(&self, tile_modes: impl Into<Option<(TileMode, TileMode)>>, local_matrix: impl Into<Option<&'a Matrix>>) -> Shader {
