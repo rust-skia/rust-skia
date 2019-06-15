@@ -34,6 +34,7 @@ mod transmutation_tests {
     use skia_bindings::SkPoint;
 
     #[test]
+    #[allow(clippy::float_cmp)]
     fn test_transmutation_of_fixed_size_arrays_to_slice() {
         let mut points = [Point::default(); 4];
 

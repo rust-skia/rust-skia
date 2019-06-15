@@ -315,6 +315,7 @@ impl Color4f {
 }
 
 #[test]
+#[allow(clippy::float_cmp)]
 pub fn color4f_array_access() {
     let mut color = Color4f {
         r: 0.1,
