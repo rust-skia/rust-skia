@@ -77,7 +77,7 @@ pub(crate) mod artifact {
     impl DrawingDriver for PDF {
         const NAME: &'static str = "pdf";
 
-        fn draw_image<F>(size: (i32, i32), path: &PathBuf, name: &str, func: F) -> ()
+        fn draw_image<F>(size: (i32, i32), path: &PathBuf, name: &str, func: F)
         where
             F: Fn(&mut Canvas) -> (),
         {

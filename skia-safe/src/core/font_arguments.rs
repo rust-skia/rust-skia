@@ -120,6 +120,7 @@ fn test_font_arguments_with_no_coordinates() {
 }
 
 #[test]
+#[allow(clippy::float_cmp)]
 fn access_coordinates() {
     let coordinates = Box::new([variation_position::Coordinate {
         axis: 0.into(),

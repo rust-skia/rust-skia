@@ -746,6 +746,7 @@ fn test_get_set_trait_compilation() {
 }
 
 #[test]
+#[allow(clippy::float_cmp)]
 fn test_tuple_to_vector() {
     let mut m = Matrix::new_identity();
     m.set_translate((10.0, 11.0));
