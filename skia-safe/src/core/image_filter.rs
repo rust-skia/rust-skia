@@ -278,5 +278,5 @@ impl RCHandle<SkImageFilter> {
         .unwrap()
     }
 
-    // TODO: Deserialize?
+    // TODO: implement Flattenable?
 }

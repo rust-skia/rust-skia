@@ -1,17 +1,6 @@
 use crate::prelude::*;
 use std::ffi;
-use crate::{
-    Paint,
-    Color,
-    ColorType,
-    AlphaType,
-    ColorSpace,
-    IRect,
-    ImageInfo,
-    ISize,
-    IPoint,
-    PixelRef
-};
+use crate::{Paint, Color, ColorType, AlphaType, ColorSpace, IRect, ImageInfo, ISize, IPoint, PixelRef, Pixmap};
 use skia_bindings::{C_SkBitmap_destruct, SkBitmap, C_SkBitmap_Construct, C_SkBitmap_readyToDraw, C_SkBitmap_tryAllocN32Pixels, C_SkBitmap_tryAllocPixels, C_SkBitmap_eraseARGB, C_SkBitmap_extractAlpha, SkBitmap_AllocFlags_kZeroPixels_AllocFlag, C_SkBitmap_setPixelRef, C_SkBitmap_makeShader};
 use crate::{Matrix, Shader, TileMode};
 
@@ -40,7 +29,11 @@ impl Handle<SkBitmap> {
         unsafe { self.native_mut().swap(other.native_mut()) }
     }
 
-    // TODO: implement pixmap()
+    pub fn pixmap(&self) -> &Pixmap {
+        Pixmap::from_native_ref(unsafe {
+            &*self.native().pixmap()
+        })
+    }
 
     pub fn info(&self) -> ImageInfo {
         ImageInfo::from_native(unsafe {

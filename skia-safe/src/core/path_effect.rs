@@ -186,7 +186,7 @@ impl RCHandle<SkPathEffect> {
         }
     }
 
-    // TODO: Deserialize / trait Flattenable
+    // TODO: implement Flattenable
 }
 
 #[test]

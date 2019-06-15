@@ -2,7 +2,7 @@ use std::ops::{Deref, DerefMut};
 use std::marker::PhantomData;
 use std::{slice, mem};
 use std::ffi::CString;
-use crate::gpu;
+use crate::{gpu, Pixmap, Drawable};
 use crate::prelude::*;
 use crate::{IRect, QuickReject, Region, RRect, ClipOp, Point, scalar, Vector, Image, ImageFilter, Rect, IPoint, Surface, Bitmap, ISize, SurfaceProps, ImageInfo, Path, Paint, Color, Matrix, BlendMode, Font, TextEncoding, Picture, Vertices, vertices, Data, TextBlob};
 use skia_bindings::{C_SkAutoCanvasRestore_destruct, SkAutoCanvasRestore, C_SkCanvas_isClipEmpty, C_SkCanvas_discard, SkCanvas_PointMode, SkImage, SkImageFilter, SkPaint, SkRect, C_SkCanvas_getBaseLayerSize, C_SkCanvas_imageInfo, C_SkCanvas_newFromBitmapAndProps, C_SkCanvas_newFromBitmap, C_SkCanvas_newWidthHeightAndProps, C_SkCanvas_newEmpty, C_SkCanvas_MakeRasterDirect, SkCanvas, C_SkCanvas_delete, C_SkCanvas_makeSurface, C_SkCanvas_getGrContext, SkCanvas_SaveLayerRec, SkMatrix, SkCanvas_SrcRectConstraint, C_SkAutoCanvasRestore_restore, C_SkAutoCanvasRestore_Construct, SkCanvas_SaveLayerFlagsSet_kInitWithPrevious_SaveLayerFlag};
@@ -313,7 +313,12 @@ impl Canvas {
     }
 
     // TODO: accessTopRasterHandle()
-    // TODO: peekPixels()
+
+    pub fn peek_pixels(&mut self) -> Option<Borrows<Pixmap>> {
+        let mut pixmap = Pixmap::default();
+        unsafe { self.native_mut().peekPixels(pixmap.native_mut()) }
+            .if_true_then_some(move || pixmap.borrows(self))
+    }
 
     #[must_use]
     pub fn read_pixels(
@@ -332,7 +337,13 @@ impl Canvas {
         }
     }
 
-    // TODO: read_pixels(Pixmap).
+    #[must_use]
+    pub fn read_pixels_to_pixmap(&mut self, pixmap: &mut Pixmap, src: impl Into<IPoint>) -> bool {
+        let src = src.into();
+        unsafe {
+            self.native_mut().readPixels1(pixmap.native(), src.x, src.y)
+        }
+    }
 
     #[must_use]
     pub fn read_pixels_to_bitmap(&mut self, bitmap: &mut Bitmap, src: impl Into<IPoint>) -> bool {
@@ -363,7 +374,6 @@ impl Canvas {
         }
     }
 
-    // TODO: (usability) think about _not_ returning usize here and instead &mut Self.
     // The count can be read via save_count() at any time.
     pub fn save(&mut self) -> usize {
         unsafe {
@@ -832,7 +842,19 @@ impl Canvas {
     }
 
     // TODO: drawAtlas
-    // TODO: drawDrawable
+
+    pub fn draw_drawable(&mut self, drawable: &mut Drawable, matrix: Option<&Matrix>) {
+        unsafe {
+            self.native_mut().drawDrawable(drawable.native_mut(), matrix.native_ptr_or_null())
+        }
+    }
+
+    pub fn draw_drawable_at(&mut self, drawable: &mut Drawable, offset: impl Into<Point>) {
+        let offset = offset.into();
+        unsafe {
+            self.native_mut().drawDrawable1(drawable.native_mut(), offset.x, offset.y)
+        }
+    }
 
     pub fn draw_annotation(&mut self, rect: impl AsRef<Rect>, key: &str, value: &Data) -> &mut Self {
         let key = CString::new(key).unwrap();

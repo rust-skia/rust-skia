@@ -1091,7 +1091,7 @@ extern "C" void C_SkFont_destruct(SkFont* self) {
 }
 
 //
-// SkFontArguments
+// core/SkFontArguments.h
 //
 
 extern "C" void C_SkFontArguments_construct(SkFontArguments* uninitialized) {
@@ -1108,6 +1108,11 @@ extern "C" void C_SkFontArguments_setCollectionIndex(SkFontArguments* self, int 
 
 extern "C" void C_SkFontArguments_setVariationDesignPosition(SkFontArguments* self, SkFontArguments::VariationPosition position) {
     self->setVariationDesignPosition(position);
+}
+
+extern "C" SkFontArguments::VariationPosition
+C_SkFontArguments_getVariationDesignPosition(const SkFontArguments *self) {
+    return self->getVariationDesignPosition();
 }
 
 //

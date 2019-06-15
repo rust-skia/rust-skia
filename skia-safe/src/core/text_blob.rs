@@ -59,7 +59,7 @@ impl RCHandle<SkTextBlob> {
         })
     }
 
-    // TODO: serialize, Deserialize
+    // TODO: implement Flattenable
 }
 
 pub type TextBlobBuilder = Handle<SkTextBlobBuilder>;

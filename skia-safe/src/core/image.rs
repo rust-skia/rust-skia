@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::{gpu, ImageFilter, ImageGenerator};
+use crate::{gpu, ImageFilter, ImageGenerator, Pixmap, FilterQuality};
 use crate::{Picture, Matrix, ColorType, ImageInfo, Data, Bitmap, IRect, YUVColorSpace, AlphaType, ColorSpace, YUVAIndex, ISize, Paint, EncodedImageFormat, IPoint, TileMode, Shader};
 use skia_bindings::{C_SkImage_MakeFromPicture, C_SkImage_MakeFromTexture, C_SkImage_MakeFromCompressed, C_SkImage_MakeFromEncoded, C_SkImage_MakeFromBitmap, SkImage, C_SkImage_encodeToData, C_SkImage_MakeRasterData, C_SkImage_MakeCrossContextFromEncoded, C_SkImage_MakeFromAdoptedTexture, C_SkImage_MakeFromYUVATexturesCopy, C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend, C_SkImage_MakeFromYUVATextures, C_SkImage_MakeFromNV12TexturesCopy, C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend, C_SkImage_refEncodedData, C_SkImage_makeSubset, C_SkImage_makeTextureImage, C_SkImage_makeNonTextureImage, C_SkImage_makeRasterImage, C_SkImage_makeWithFilter, C_SkImage_makeColorSpace, SkRefCntBase, C_SkImage_makeShader, C_SkImage_MakeFromGenerator};
 use skia_bindings::{SkImage_BitDepth, SkImage_CachingHint, SkImage_CompressionType};
@@ -344,7 +344,12 @@ impl RCHandle<SkImage> {
         }).unwrap()
     }
 
-    // TODO: peekPixels()
+    pub fn peek_pixels(&self) -> Option<Borrows<Pixmap>> {
+        let mut pixmap = Pixmap::default();
+        unsafe {
+            self.native().peekPixels(pixmap.native_mut())
+        }.if_false_then_some(|| pixmap.borrows(self))
+    }
 
     pub fn is_texture_backed(&self) -> bool {
         unsafe { self.native().isTextureBacked() }
@@ -389,7 +394,12 @@ impl RCHandle<SkImage> {
         }
     }
 
-    // TODO: scalePixels()
+    #[must_use]
+    pub fn scale_pixels(&self, dst: &Pixmap, filter_quality: FilterQuality, caching_hint: impl Into<Option<CachingHint>>) -> bool {
+        unsafe {
+            self.native().scalePixels(dst.native(), filter_quality.into_native(), caching_hint.into().unwrap_or(CachingHint::Allow).into_native())
+        }
+    }
 
     // TODO: support quality!
     pub fn encode_to_data(&self, image_format: EncodedImageFormat) -> Option<Data> {

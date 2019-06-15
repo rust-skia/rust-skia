@@ -50,5 +50,5 @@ impl RCHandle<SkMaskFilter> {
         }).unwrap()
     }
 
-    // TODO: Deserialize
+    // TODO: implement Flattenable
 }

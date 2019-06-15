@@ -260,7 +260,9 @@ mod scalar_;
 pub use scalar_::*;
 
 pub mod shader;
-pub use shader::{Shader, Shaders};
+pub use shader::{Shader, shaders};
+#[deprecated(since = "0.11.0", note = "use shaders")]
+pub use shaders as Shaders;
 #[deprecated(since = "0.11.0", note = "use TileMode")]
 pub use TileMode as ShaderTileMode;
 #[deprecated(since = "0.11.0", note = "use shader::GradientType")]

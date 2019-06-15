@@ -283,7 +283,7 @@ impl Iterator for LocalizedStringsIter {
                 language.native_mut(),
             )
         }
-            .if_true_some(LocalizedString {
+            .if_true_then_some(|| LocalizedString {
                 string: string.as_str().into(),
                 language: language.as_str().into(),
             })

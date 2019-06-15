@@ -48,7 +48,7 @@ impl Handle<SkInterpolator> {
                 ._base
                 .getDuration(&mut start_time, &mut end_time)
         }
-        .if_true_some((
+        .if_true_then_some(|| (
             Duration::from_millis(start_time.try_into().unwrap()),
             Duration::from_millis(end_time.try_into().unwrap()),
         ))

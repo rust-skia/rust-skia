@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use crate::{Matrix, Image, Color, scalar, Point, ColorFilter, ColorSpace, Color4f, BlendMode, TileMode, gradient_shader};
-use skia_bindings::{SkShader, SkRefCntBase, SkShader_GradientType, SkShader_GradientInfo, C_SkShader_asAGradient, C_SkShader_makeWithLocalMatrix, C_SkShader_makeWithColorFilter, C_SkShader_isAImage, SkTileMode, C_SkShaders_Empty, C_SkShaders_Color, C_SkShaders_Color2, C_SkShaders_Blend, C_SkShaders_Lerp, C_SkShaders_Lerp2};
+use crate::{Matrix, Image, Color, scalar, Point, ColorFilter, TileMode, gradient_shader};
+use skia_bindings::{SkShader, SkRefCntBase, SkShader_GradientType, SkShader_GradientInfo, C_SkShader_asAGradient, C_SkShader_makeWithLocalMatrix, C_SkShader_makeWithColorFilter, C_SkShader_isAImage, SkTileMode};
 use std::mem;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -52,7 +52,7 @@ impl NativeRefCountedBase for SkShader {
 
 impl Default for RCHandle<SkShader> {
     fn default() -> Self {
-        Shaders::empty()
+        shaders::empty()
     }
 }
 
@@ -138,25 +138,25 @@ impl RCHandle<SkShader> {
     }
 }
 
-// TODO: use a module as a wrapper for the static class?
+pub mod shaders {
+    use crate::prelude::*;
+    use crate::{Shader, Color, ColorSpace, BlendMode, Color4f};
+    use skia_bindings::{C_SkShaders_Empty, C_SkShaders_Color, C_SkShaders_Color2, C_SkShaders_Blend, C_SkShaders_Lerp, C_SkShaders_Lerp2};
 
-pub enum Shaders {}
-
-impl Shaders {
     pub fn empty() -> Shader {
         Shader::from_ptr(unsafe {
             C_SkShaders_Empty()
         }).unwrap()
     }
 
-    pub fn color<C: Into<Color>>(color: C) -> Shader {
+    pub fn color(color: impl Into<Color>) -> Shader {
         let color = color.into();
         Shader::from_ptr(unsafe {
             C_SkShaders_Color(color.into_native())
         }).unwrap()
     }
 
-    pub fn color_in_space<C: AsRef<Color4f>>(color: C, space: &ColorSpace) -> Shader {
+    pub fn color_in_space(color: impl AsRef<Color4f>, space: &ColorSpace) -> Shader {
         Shader::from_ptr(unsafe {
             C_SkShaders_Color2(color.as_ref().native(), space.shared_native())
         }).unwrap()

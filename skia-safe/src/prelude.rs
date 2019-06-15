@@ -66,6 +66,8 @@ impl ToOption for bool {
 pub(crate) trait IfBoolSome {
     fn if_true_some<V>(self, v: V) -> Option<V>;
     fn if_false_some<V>(self, v: V) -> Option<V>;
+    fn if_true_then_some<V>(self, f: impl FnOnce() -> V) -> Option<V>;
+    fn if_false_then_some<V>(self, f: impl FnOnce() -> V) -> Option<V>;
 }
 
 impl IfBoolSome for bool {
@@ -75,6 +77,14 @@ impl IfBoolSome for bool {
 
     fn if_false_some<V>(self, v: V) -> Option<V> {
         (!self).if_true_some(v)
+    }
+
+    fn if_true_then_some<V>(self, f: impl FnOnce() -> V) -> Option<V> {
+        self.to_option().map(|()| f())
+    }
+
+    fn if_false_then_some<V>(self, f: impl FnOnce() -> V) -> Option<V> {
+        (!self).to_option().map(|()| f())
     }
 }
 
@@ -226,11 +236,6 @@ pub trait NativeHash {
     fn hash<H: Hasher>(&self, state: &mut H);
 }
 
-/// A trait allowing a conversion from a native type to a handle type.
-pub(crate) trait FromNative<N> {
-    fn from_native(native: N) -> Self;
-}
-
 /// Wraps a native type that can be represented as a value
 /// and needs a Drop trait.
 #[repr(transparent)]
@@ -242,13 +247,17 @@ impl<N: NativeDrop> AsRef<Handle<N>> for Handle<N> {
     }
 }
 
-impl<N: NativeDrop> FromNative<N> for Handle<N> {
-    fn from_native(n: N) -> Handle<N> {
+impl<N: NativeDrop> Handle<N> {
+    /// Create a handle from a native type.
+    pub fn from_native(n: N) -> Self {
         Handle(n)
     }
-}
 
-impl<N: NativeDrop> Handle<N> {
+    /// Create a reference to the Rust wrapper from a reference to the native type.
+    pub fn from_native_ref(n: &N) -> &Self {
+        unsafe { transmute_ref(n) }
+    }
+
     /// Constructs a C++ object in place by calling an
     /// extern "C" function that expects a pointer that points to
     /// zeroed memory of the native type.
@@ -371,6 +380,7 @@ impl<H, N> NativePointerOrNullMut2<N> for Option<&mut H>
 }
 
 /// A representation type represented by a refcounted pointer to the native type.
+#[repr(transparent)]
 pub struct RCHandle<Native: NativeRefCounted>(*mut Native);
 
 impl<N: NativeRefCounted> AsRef<RCHandle<N>> for RCHandle<N> {
@@ -701,7 +711,7 @@ impl<E> AsPointerOrNullMut<E> for Option<Vec<E>> {
     }
 }
 
-// Wraps a handle so that the Rust's borrow checker thinks the handle represents
+// Wraps a handle so that the Rust's borrow checker assumes it represents
 // something that borrows something else.
 #[repr(C)]
 pub struct Borrows<'a, H>(H, PhantomData<&'a ()>);
@@ -721,12 +731,12 @@ impl<'a, H> DerefMut for Borrows<'a, H> {
 
 impl<'a, H> Borrows<'a, H> {
     /// Release the borrowed dependency and return the handle.
-    pub fn release(self) -> H {
+    pub unsafe fn release(self) -> H {
         self.0
     }
 }
 
-pub trait BorrowsFrom : Sized {
+pub(crate) trait BorrowsFrom : Sized {
     fn borrows<D: ?Sized>(self, _dep: &D) -> Borrows<Self>;
 }
 

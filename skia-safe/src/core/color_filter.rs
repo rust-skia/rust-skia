@@ -70,6 +70,7 @@ impl RCHandle<SkColorFilter> {
     // TODO: asFragmentProcessor()
     // TODO: affectsTransparentBlack()
     // TODO: Deserialize (via Flattenable).
+    // TODO: implement Flattenable.
 }
 
 pub enum ColorFilters {}

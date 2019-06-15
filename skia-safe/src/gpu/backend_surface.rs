@@ -121,7 +121,7 @@ impl Handle<GrBackendTexture> {
 
     pub (crate) unsafe fn from_native_if_valid(backend_texture: GrBackendTexture) -> Option<BackendTexture> {
         backend_texture.fIsValid
-            .if_true_some(BackendTexture::from_native(backend_texture))
+            .if_true_then_some(|| BackendTexture::from_native(backend_texture))
     }
 
     pub fn width(&self) -> i32 {

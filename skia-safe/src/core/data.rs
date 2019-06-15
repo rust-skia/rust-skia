@@ -58,7 +58,7 @@ impl RCHandle<SkData> {
         }
     }
 
-    // TODO: (needs function unique())
+    // TODO:
     // pub fn writable_data(&mut self) -> &mut [u8]
 
     pub fn copy_range(&self, offset: usize, buffer: &mut [u8]) -> &Self {

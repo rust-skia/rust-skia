@@ -1,8 +1,6 @@
 use crate::prelude::*;
 use skia_bindings::SkTime_DateTime;
 
-// TODO: should we support chrono interop here?
-
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 #[repr(C)]
 pub struct DateTime {

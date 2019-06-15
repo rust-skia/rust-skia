@@ -285,7 +285,7 @@ impl RCHandle<SkSurface> {
     pub fn peek_pixels(&mut self) -> Option<Borrows<Pixmap>> {
         let mut pm = Pixmap::default();
         unsafe { self.native_mut().peekPixels(pm.native_mut())}
-            .if_true_some(pm.borrows(self))
+            .if_true_then_some(move || pm.borrows(self))
     }
 
     // TODO: why is self mut?

@@ -1,11 +1,10 @@
 use crate::prelude::*;
 use skia_bindings::{
     C_SkFontArguments_construct, C_SkFontArguments_destruct,
-    C_SkFontArguments_setVariationDesignPosition, SkFontArguments,
-    SkFontArguments_VariationPosition,
+    C_SkFontArguments_getVariationDesignPosition, C_SkFontArguments_setVariationDesignPosition,
+    SkFontArguments, SkFontArguments_VariationPosition,
 };
 use std::marker::PhantomData;
-use std::mem::forget;
 use std::{mem, slice};
 
 #[derive(Debug)]
@@ -78,11 +77,8 @@ impl<'a> FontArguments<'a> {
 
     // This function consumes self for it to be able to change its lifetime,
     // because it borrows the coordinates referenced by FontArgumentsVariationPosition.
-    #[allow(clippy::needless_lifetimes)]
-    pub fn set_variation_design_position<'position>(
-        mut self,
-        position: VariationPosition<'position>,
-    ) -> FontArguments<'position> {
+    pub fn set_variation_design_position(mut self, position: VariationPosition) -> FontArguments /* not Self!! */
+    {
         let position = SkFontArguments_VariationPosition {
             coordinates: position.coordinates.native().as_ptr(),
             coordinateCount: position.coordinates.len().try_into().unwrap(),
@@ -90,10 +86,9 @@ impl<'a> FontArguments<'a> {
         unsafe {
             // does not link on Linux / macOS:
             C_SkFontArguments_setVariationDesignPosition(self.native_mut(), position);
-            // TODO: is there a more elegant way to change the lifetime of self?
-            let r = mem::transmute_copy(&self);
-            forget(self);
-            r
+            // note: we are _not_ returning Self here, but VariationPosition with a
+            // changed lifetime.
+            mem::transmute(self)
         }
     }
 
@@ -104,15 +99,14 @@ impl<'a> FontArguments<'a> {
     }
 
     pub fn variation_design_position(&self) -> VariationPosition {
-        // TODO: build a extern "C" wrapper for the function getVariationDesignPosition().
-        let position = self.native().fVariationDesignPosition;
-        VariationPosition {
-            coordinates: unsafe {
-                slice::from_raw_parts(
+        unsafe {
+            let position = C_SkFontArguments_getVariationDesignPosition(self.native());
+            VariationPosition {
+                coordinates: slice::from_raw_parts(
                     position.coordinates as *const _,
                     position.coordinateCount.try_into().unwrap(),
-                )
-            },
+                ),
+            }
         }
     }
 }

@@ -61,14 +61,16 @@ impl<'a> Borrows<'a, MultiPictureDraw> {
     }
 
     pub fn draw(mut self, flush: impl Into<Option<bool>>) -> MultiPictureDraw {
-        unsafe { self.native_mut().draw(flush.into().unwrap_or(false)) }
-        self.release()
+        unsafe {
+            self.native_mut().draw(flush.into().unwrap_or(false));
+            self.release()
+        }
     }
 
     pub fn reset(mut self) -> MultiPictureDraw {
         unsafe {
             self.native_mut().reset();
+            self.release()
         }
-        self.release()
     }
 }

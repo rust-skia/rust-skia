@@ -65,7 +65,7 @@ impl YUVAIndex {
         let mut num_planes = 0;
         unsafe {
             SkYUVAIndex::AreValidIndices(indices.native().as_ptr(), &mut num_planes)
-        }.if_true_some(num_planes.try_into().unwrap())
+        }.if_true_then_some(|| num_planes.try_into().unwrap())
     }
 
     pub(crate) fn is_valid(&self) -> bool {
