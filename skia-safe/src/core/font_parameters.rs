@@ -23,7 +23,7 @@ pub mod variation {
     }
 
     impl Axis {
-        #[deprecated(since = "0.11.0", note = "use is_hidden() instead")]
+        #[deprecated(since = "0.12.0", note = "use is_hidden()")]
         pub fn hidden(&self) -> bool {
             self.is_hidden()
         }

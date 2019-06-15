@@ -73,7 +73,7 @@ impl Handle<SkBitmap> {
         unsafe { self.native().shiftPerPixel().try_into().unwrap() }
     }
 
-    #[deprecated(since = "0.11.0", note = "use is_empty() instead")]
+    #[deprecated(since = "0.12.0", note = "use is_empty()")]
     pub fn empty(&self) -> bool {
         self.is_empty()
 
@@ -228,7 +228,7 @@ impl Handle<SkBitmap> {
         unsafe { C_SkBitmap_setPixelRef(self.native_mut(), pixel_ref.shared_ptr(), offset.x, offset.y) }
     }
 
-    #[deprecated(since = "0.11.0", note = "use is_ready_to_draw() insteadd")]
+    #[deprecated(since = "0.12.0", note = "use is_ready_to_draw()")]
     pub fn ready_to_draw(&self) -> bool {
         self.is_ready_to_draw()
     }
@@ -299,7 +299,7 @@ impl Handle<SkBitmap> {
         }.if_true_then_some(|| pixmap.borrows(self))
     }
 
-    #[deprecated(since = "0.11.0", note = "use to_shader()")]
+    #[deprecated(since = "0.12.0", note = "use to_shader()")]
     pub fn as_shader<'a>(&self, tile_modes: impl Into<Option<(TileMode, TileMode)>>, local_matrix: impl Into<Option<&'a Matrix>>) -> Shader {
         self.to_shader(tile_modes, local_matrix)
     }

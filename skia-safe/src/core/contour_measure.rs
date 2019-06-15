@@ -43,7 +43,7 @@ impl RCHandle<SkContourMeasure> {
         .if_true_some((p, v))
     }
 
-    #[deprecated(note = "use get_matrix()")]
+    #[deprecated(since = "0.12.0", note = "use get_matrix()")]
     pub fn matrix(
         &self,
         distance: scalar,

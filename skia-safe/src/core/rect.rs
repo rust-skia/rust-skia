@@ -83,7 +83,7 @@ impl IRect {
         self.top
     }
 
-    #[deprecated(since = "0.11.0", note = "will be removed without replacement")]
+    #[deprecated(since = "0.12.0", note = "will be removed without replacement")]
     pub fn left_top(&self) -> IPoint {
         (self.left, self.top).into()
     }
@@ -345,7 +345,7 @@ impl Rect {
         unsafe { self.native().isFinite() }
     }
 
-    #[deprecated(since = "0.11.0", note = "removed without replacement")]
+    #[deprecated(since = "0.12.0", note = "removed without replacement")]
     pub fn left_top(&self) -> Point {
         (self.left, self.top).into()
     }

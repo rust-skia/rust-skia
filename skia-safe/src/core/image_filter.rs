@@ -210,7 +210,7 @@ impl RCHandle<SkImageFilter> {
 
     // TODO: removeKey() SkImageFilterCacheKey is declared in src/core/
 
-    #[deprecated(since = "0.11.0", note = "use to_a_color_filter() instead")]
+    #[deprecated(since = "0.12.0", note = "use to_a_color_filter()")]
     pub fn as_a_color_filter(&self) -> Option<ColorFilter> {
         self.to_a_color_filter()
     }
@@ -259,7 +259,7 @@ impl RCHandle<SkImageFilter> {
         unsafe { self.native().canComputeFastBounds() }
     }
 
-    #[deprecated(since = "0.11.0", note = "use with_local_matrix() instead")]
+    #[deprecated(since = "0.12.0", note = "use with_local_matrix()")]
     pub fn new_with_local_matrix(&self, matrix: &Matrix) -> Option<ImageFilter> {
         self.with_local_matrix(matrix)
     }

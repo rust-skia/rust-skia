@@ -85,7 +85,7 @@ impl Handle<SkRegion> {
         unsafe { self.native().computeRegionComplexity().try_into().unwrap() }
     }
 
-    #[deprecated(note = "use get_boundary_path()")]
+    #[deprecated(since = "0.12.0", note = "use get_boundary_path()")]
     pub fn boundary_path(&self, path: &mut Path) -> bool {
         self.get_boundary_path(path)
     }

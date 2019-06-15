@@ -152,7 +152,7 @@ impl RCHandle<SkPathEffect> {
         }.if_true_some(point_data)
     }
 
-    #[deprecated(since = "0.11.0", note = "use as_a_dash() instead")]
+    #[deprecated(since = "0.12.0", note = "use as_a_dash()")]
     pub fn as_dash(&self) -> Option<DashInfo> {
         self.as_a_dash()
     }

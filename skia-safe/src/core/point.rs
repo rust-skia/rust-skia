@@ -256,7 +256,7 @@ impl Point {
         unsafe { self.native_mut().setLength1(x, y, length) }
     }
 
-    #[deprecated(since = "0.11.0", note = "use set_length()")]
+    #[deprecated(since = "0.12.0", note = "use set_length()")]
     pub fn with_length(mut self, length: scalar) -> Option<Self> {
         unsafe { self.native_mut().setLength(length) }
             .if_true_some(self)

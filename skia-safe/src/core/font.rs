@@ -71,12 +71,12 @@ impl Handle<SkFont> {
         }
     }
 
-    #[deprecated(since = "0.11.0", note = "use from_typeface()")]
+    #[deprecated(since = "0.12.0", note = "use from_typeface()")]
     pub fn from_typeface_with_size(typeface: &Typeface, size: scalar) -> Self {
         Self::construct(|font| unsafe { C_SkFont_ConstructFromTypefaceWithSize(font, typeface.shared_native(), size) })
     }
 
-    #[deprecated(since = "0.11.0", note = "use from_typeface_with_params()")]
+    #[deprecated(since = "0.12.0", note = "use from_typeface_with_params()")]
     pub fn from_typeface_with_size_scale_and_skew(typeface: &Typeface, size: scalar, scale: scalar, skew: scalar) -> Self {
         Self::construct(|font| unsafe { C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(font, typeface.shared_native(), size, scale, skew) })
     }
@@ -297,7 +297,7 @@ impl Handle<SkFont> {
         }
     }
 
-    #[deprecated(note = "use get_widths")]
+    #[deprecated(since = "0.12.0", note = "use get_widths")]
     pub fn widths(&self, glyphs: &[GlyphId], widths: &mut [scalar]) {
         self.get_widths(glyphs, widths)
     }
@@ -306,7 +306,7 @@ impl Handle<SkFont> {
         self.get_widths_bounds(glyphs, Some(widths), None, None)
     }
 
-    #[deprecated(note = "use get_widths_bounds()")]
+    #[deprecated(since = "0.12.0", note = "use get_widths_bounds()")]
     pub fn widths_bounds(
         &self,
         glyphs: &[GlyphId],
@@ -341,7 +341,7 @@ impl Handle<SkFont> {
         }
     }
 
-    #[deprecated(note = "use get_bounds()")]
+    #[deprecated(since = "0.12.0", note = "use get_bounds()")]
     pub fn bounds(&self, glyphs: &[GlyphId], bounds: &mut [Rect], paint: Option<&Paint>) {
         self.get_bounds(glyphs, bounds, paint)
     }
@@ -350,7 +350,7 @@ impl Handle<SkFont> {
         self.get_widths_bounds(glyphs, None, Some(bounds), paint)
     }
 
-    #[deprecated(note = "use get_pos()")]
+    #[deprecated(since = "0.12.0", note = "use get_pos()")]
     pub fn pos(&self, glyphs: &[GlyphId], pos: &mut [Point], origin: Option<Point>) {
         self.get_pos(glyphs, pos, origin)
     }
@@ -370,7 +370,7 @@ impl Handle<SkFont> {
         }
     }
 
-    #[deprecated(note = "use get_x_pos()")]
+    #[deprecated(since = "0.12.0", note = "use get_x_pos()")]
     pub fn x_pos(&self, glyphs: &[GlyphId], xpos: &mut [scalar], origin: Option<scalar>) {
         self.get_x_pos(glyphs, xpos, origin)
     }
@@ -389,7 +389,7 @@ impl Handle<SkFont> {
         }
     }
 
-    #[deprecated(note = "use get_path()")]
+    #[deprecated(since = "0.12.0", note = "use get_path()")]
     pub fn path(&self, glyph_id: GlyphId) -> Option<Path> {
         self.get_path(glyph_id)
     }

@@ -317,7 +317,7 @@ impl Matrix44 {
         self.set_concat(&m, &self.clone())
     }
 
-    #[deprecated(since = "0.11.0", note = "use invert()")]
+    #[deprecated(since = "0.12.0", note = "use invert()")]
     #[must_use]
     pub fn inverse(&self) -> Option<Matrix44> {
         self.invert()

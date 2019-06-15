@@ -189,7 +189,7 @@ impl Matrix {
         unsafe { self.native().preservesRightAngles(scalar::NEARLY_ZERO) }
     }
 
-    #[deprecated(since = "0.11.0", note = "use scale_x() instead")]
+    #[deprecated(since = "0.12.0", note = "use scale_x() ")]
     pub fn get_scale_x(&self) -> scalar {
         self.scale_x()
     }
@@ -198,7 +198,7 @@ impl Matrix {
         unsafe { self.native().getScaleX() }
     }
 
-    #[deprecated(since = "0.11.0", note = "use scale_y() instead")]
+    #[deprecated(since = "0.12.0", note = "use scale_y()")]
     pub fn get_scale_y(&self) -> scalar {
         self.scale_y()
     }
@@ -207,7 +207,7 @@ impl Matrix {
         unsafe { self.native().getScaleY() }
     }
 
-    #[deprecated(since = "0.11.0", note = "use skew_y() instead")]
+    #[deprecated(since = "0.12.0", note = "use skew_y()")]
     pub fn get_skew_y(&self) -> scalar {
         self.skew_y()
     }
@@ -216,7 +216,7 @@ impl Matrix {
         unsafe { self.native().getSkewY() }
     }
 
-    #[deprecated(since = "0.11.0", note = "use skew_x() instead")]
+    #[deprecated(since = "0.12.0", note = "use skew_x()")]
     pub fn get_skew_x(&self) -> scalar {
         self.skew_x()
     }
@@ -225,7 +225,7 @@ impl Matrix {
         unsafe { self.native().getSkewX() }
     }
 
-    #[deprecated(since = "0.11.0", note = "use translate_x() instead")]
+    #[deprecated(since = "0.12.0", note = "use translate_x()")]
     pub fn get_translate_x(&self) -> scalar {
         self.translate_x()
     }
@@ -234,7 +234,7 @@ impl Matrix {
         unsafe { self.native().getTranslateX() }
     }
 
-    #[deprecated(since = "0.11.0", note = "use translate_y() instead")]
+    #[deprecated(since = "0.12.0", note = "use translate_y()")]
     pub fn get_translate_y(&self) -> scalar {
         self.translate_y()
     }
@@ -243,7 +243,7 @@ impl Matrix {
         unsafe { self.native().getTranslateY() }
     }
 
-    #[deprecated(since = "0.11.0", note = "use persp_x() instead")]
+    #[deprecated(since = "0.12.0", note = "use persp_x()")]
     pub fn get_persp_x(&self) -> scalar {
         self.persp_x()
     }
@@ -252,7 +252,7 @@ impl Matrix {
         unsafe { self.native().getPerspX() }
     }
 
-    #[deprecated(since = "0.11.0", note = "use persp_y() instead")]
+    #[deprecated(since = "0.12.0", note = "use persp_y()")]
     pub fn get_persp_y(&self) -> scalar {
         self.persp_y()
     }
@@ -465,7 +465,7 @@ impl Matrix {
         unsafe { SkMatrix::SetAffineIdentity(affine.as_mut_ptr()) }
     }
 
-    #[deprecated(since = "0.11.0", note = "use to_affine() instead")]
+    #[deprecated(since = "0.12.0", note = "use to_affine()")]
     #[must_use]
     pub fn as_affine(&self) -> Option<[scalar; 6]> {
         self.to_affine()
