@@ -2060,6 +2060,14 @@ extern "C" GrBackendApi C_GrBackendDrawableInfo_backend(const GrBackendDrawableI
     return self->backend();
 }
 
+#if defined(SK_VULKAN)
+
+extern "C" bool C_GrBackendDrawableInfo_getVkDrawableInfo(const GrBackendDrawableInfo* self, GrVkDrawableInfo* info) {
+    return self->getVkDrawableInfo(info);
+}
+
+#endif
+
 //
 // pathops/
 //
