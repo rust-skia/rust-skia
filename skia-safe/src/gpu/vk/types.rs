@@ -102,6 +102,7 @@ impl PartialEq for YcbcrConversionInfo {
 }
 
 impl YcbcrConversionInfo {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         ycrbcr_model: SamplerYcbcrModelConversion,
         ycbcr_range: SamplerYcbcrRange,
@@ -180,6 +181,7 @@ impl PartialEq for ImageInfo {
 }
 
 impl ImageInfo {
+    #[allow(clippy::too_many_arguments)]
     pub unsafe fn from_image(
         image: Image,
         alloc: Alloc,

@@ -58,6 +58,7 @@ impl Handle<GrBackendFormat> {
     #[cfg(feature = "vulkan")]
     pub fn vulkan_format(&self) -> Option<vk::Format> {
         unsafe {
+            #[allow(clippy::map_clone)]
             self.native()
                 .getVkFormat()
                 .to_option()

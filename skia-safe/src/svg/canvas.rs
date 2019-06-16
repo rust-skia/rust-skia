@@ -64,7 +64,7 @@ fn test_svg() {
     let paint = Paint::default();
     canvas.draw_circle((10, 10), 10.0, &paint);
     let data = canvas.end();
-    let contents = String::from_utf8_lossy(data.bytes());
+    let contents = String::from_utf8_lossy(data.as_bytes());
     dbg!(&contents);
     assert!(contents
         .contains(r#"<ellipse fill="rgb(0,0,0)" stroke="none" cx="10" cy="10" rx="10" ry="10"/>"#));
