@@ -474,6 +474,14 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         // Types for which the binding generator pulls in stuff that can not be compiled.
         .opaque_type("SkDeferredDisplayList")
         .opaque_type("SkDeferredDisplayList_PendingPathsMap")
+        // Types for which a bindgen layout is wrong causing types that contain
+        // fields of them to fail their layout test. Making them opaque fixes their
+        // sizes and all the types that depend on them.
+        .opaque_type("std::atomic")
+        .opaque_type("std::function")
+        .opaque_type("std::unique_ptr")
+        .opaque_type("SkAutoTMalloc")
+        .opaque_type("SkTHashMap")
         // core/
         .whitelist_type("SkAutoCanvasRestore")
         .whitelist_type("SkColorSpacePrimaries")

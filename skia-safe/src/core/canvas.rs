@@ -143,9 +143,6 @@ pub struct TopLayerPixels<'a> {
     pub origin: IPoint,
 }
 
-// Warning: do never access SkCanvas fields from Rust, bindgen generates a wrong layout
-// as of version 0.47.3.
-
 /// The canvas type that is returned when it is managed by another instance,
 /// like Surface, for example. For these cases, the Canvas' reference that is
 /// returned is bound to the lifetime of the owner.
