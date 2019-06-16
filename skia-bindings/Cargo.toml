@@ -31,7 +31,7 @@ shaper = []
 [dependencies]
 
 [build-dependencies]
-cc = "1.0.35"
+cc = "1.0.37"
 # we'd like to reference specific bindgen versions here, because the generated
 # bindings are platform dependent and critical to this project.
 bindgen = "=0.51.0"
