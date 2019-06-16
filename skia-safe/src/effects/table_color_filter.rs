@@ -21,6 +21,7 @@ pub fn from_table(table: &[u8; 256]) -> ColorFilter {
     ColorFilter::from_ptr(unsafe { C_SkTableColorFilter_Make(table.as_ptr()) }).unwrap()
 }
 
+#[allow(clippy::redundant_closure)]
 pub fn from_argb(
     table_a: Option<&[u8; 256]>,
     table_r: Option<&[u8; 256]>,
