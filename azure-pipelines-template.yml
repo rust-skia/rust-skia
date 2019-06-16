@@ -95,8 +95,8 @@ jobs:
   # So we check the skia-bindings with the regular set of checks and skia-safe with warnings as errors after that.
   - bash: |
       set -e
-      cd skia-bindings && cargo clippy --release --features "$(features)"
-      cd skia-safe && cargo clippy --release --features "$(features)" --all-targets -- -D warnings
+      (cd skia-bindings && cargo clippy --release --features "$(features)")
+      (cd skia-safe && cargo clippy --release --features "$(features)" --all-targets -- -D warnings)
     displayName: Clippy skia-bindings and skia-safe
 
   - script: cd skia-safe && cargo test --release --features "$(features)" -vv
