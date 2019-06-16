@@ -41,7 +41,7 @@ pub(crate) mod artifact {
     pub trait DrawingDriver {
         const NAME: &'static str;
 
-        fn draw_image<F>(size: (i32, i32), path: &PathBuf, name: &str, func: F) -> ()
+        fn draw_image<F>(size: (i32, i32), path: &PathBuf, name: &str, func: F)
         where
             F: Fn(&mut Canvas) -> ();
 
@@ -92,7 +92,7 @@ pub(crate) mod artifact {
     impl DrawingDriver for SVG {
         const NAME: &'static str = "svg";
 
-        fn draw_image<F>(size: (i32, i32), path: &PathBuf, name: &str, func: F) -> ()
+        fn draw_image<F>(size: (i32, i32), path: &PathBuf, name: &str, func: F)
         where
             F: Fn(&mut Canvas) -> (),
         {
