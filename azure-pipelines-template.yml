@@ -42,8 +42,9 @@ jobs:
     - script: |
         curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $TOOLCHAIN
         $HOME/.cargo/bin/rustup component add rustfmt --toolchain $TOOLCHAIN
+        $HOME/.cargo/bin/rustup component add clippy --toolchain $TOOLCHAIN
         echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
-      displayName: Install Rust
+      displayName: Install Rust, Rustfmt, and Clippy
 
   - ${{ if eq(parameters.platform, 'Windows') }}:
     # Windows.
