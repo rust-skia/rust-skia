@@ -90,9 +90,10 @@ impl AshGraphics {
                         .filter_map(|(index, ref info)| {
                             let supports_graphic =
                                 info.queue_flags.contains(vk::QueueFlags::GRAPHICS);
-                            match supports_graphic {
-                                true => Some((*physical_device, index)),
-                                _ => None,
+                            if supports_graphic {
+                                Some((*physical_device, index))
+                            } else {
+                                None
                             }
                         })
                         .nth(0)
