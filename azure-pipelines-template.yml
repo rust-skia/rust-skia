@@ -94,11 +94,14 @@ jobs:
 
   # Note: Clippy freshness check is independent from the freshness check of the build.
   # So we check the skia-bindings with the regular set of checks and skia-safe with warnings as errors after that.
-  - bash: |
-      set -e
-      (cd skia-bindings && cargo clippy --release --features "$(features)")
-      (cd skia-safe && cargo clippy --release --features "$(features)" --all-targets -- -D warnings)
-    displayName: Clippy skia-bindings and skia-safe
+  # Also: Windows is disabled for now, because the clippy freshness
+  # check does seems to _always_ pick up skia-bindings when we want to check skia-safe with -D warnings.
+  - ${{ if ne(parameters.platform, 'Windows') }}:
+    - bash: |
+        set -e
+        (cd skia-bindings && cargo clippy --release --features "$(features)")
+        (cd skia-safe && cargo clippy --release --features "$(features)" --all-targets -- -D warnings)
+      displayName: Clippy skia-bindings and skia-safe
 
   - script: cd skia-safe && cargo test --release --features "$(features)" -vv
     displayName: Test skia-safe
