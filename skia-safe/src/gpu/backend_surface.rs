@@ -173,6 +173,10 @@ impl Handle<GrBackendTexture> {
     pub fn is_valid(&self) -> bool {
         unsafe { self.native().isValid() }
     }
+
+    pub fn is_same_texture(&mut self, texture: &BackendTexture) -> bool {
+        unsafe { self.native_mut().isSameTexture(texture.native()) }
+    }
 }
 
 pub type BackendRenderTarget = Handle<GrBackendRenderTarget>;
