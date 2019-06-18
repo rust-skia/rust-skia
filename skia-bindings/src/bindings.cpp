@@ -1259,12 +1259,12 @@ extern "C" SkColorFilter* C_SkColorFilter_makeComposed(const SkColorFilter* self
     return self->makeComposed(spFromConst(inner)).release();
 }
 
-extern "C" bool C_SkColorFilter_asColorMode(const SkColorFilter* self, SkColor* color, SkBlendMode* mode) {
-    return self->asColorMode(color, mode);
+extern "C" bool C_SkColorFilter_asAColorMode(const SkColorFilter* self, SkColor* color, SkBlendMode* mode) {
+    return self->asAColorMode(color, mode);
 }
 
-extern "C" bool C_SkColorFilter_asColorMatrix(const SkColorFilter* self, SkScalar matrix[20]) {
-    return self->asColorMatrix(matrix);
+extern "C" bool C_SkColorFilter_asAColorMatrix(const SkColorFilter* self, SkScalar matrix[20]) {
+    return self->asAColorMatrix(matrix);
 }
 
 extern "C" uint32_t C_SkColorFilter_getFlags(const SkColorFilter* self) {
@@ -1287,8 +1287,13 @@ extern "C" SkColorFilter* C_SkColorFilters_Blend(const SkColor c, SkBlendMode bl
     return SkColorFilters::Blend(c, blendMode).release();
 }
 
-extern "C" SkColorFilter* C_SkColorFilters_MatrixRowMajor255(const SkScalar array[20]) {
-    return SkColorFilters::MatrixRowMajor255(array).release();
+
+extern "C" SkColorFilter* C_SkColorFilters_Matrix(const SkColorMatrix* colorMatrix) {
+    return SkColorFilters::Matrix(*colorMatrix).release();
+}
+
+extern "C" SkColorFilter* C_SkColorFilters_MatrixRowMajor(const SkScalar array[20]) {
+    return SkColorFilters::Matrix(array).release();
 }
 
 extern "C" SkColorFilter* C_SkColorFilters_LinearToSRGBGamma() {
