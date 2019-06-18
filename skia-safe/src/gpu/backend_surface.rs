@@ -174,6 +174,7 @@ impl Handle<GrBackendTexture> {
         unsafe { self.native().isValid() }
     }
 
+    #[allow(clippy::wrong_self_convention)]
     pub fn is_same_texture(&mut self, texture: &BackendTexture) -> bool {
         unsafe { self.native_mut().isSameTexture(texture.native()) }
     }
