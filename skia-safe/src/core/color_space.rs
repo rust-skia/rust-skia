@@ -65,6 +65,16 @@ pub mod named_transfer_fn {
         e: 0.0,
         f: 0.0,
     };
+
+    pub const REC2020: ColorSpaceTransferFn = ColorSpaceTransferFn {
+        g: 2.22222,
+        a: 0.909672,
+        b: 0.0903276,
+        c: 0.222222,
+        d: 0.0812429,
+        e: 0.0,
+        f: 0.0,
+    };
 }
 
 pub type ColorSpace = RCHandle<SkColorSpace>;
