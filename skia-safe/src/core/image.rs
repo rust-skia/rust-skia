@@ -392,6 +392,12 @@ impl RCHandle<SkImage> {
         unsafe { self.native().isValid(context.native_mut()) }
     }
 
+    // TODO: flush(GrContext*, GrFlushInfo&).
+
+    pub fn flush(&mut self, context: &mut gpu::Context) {
+        unsafe { self.native_mut().flush1(context.native_mut()) }
+    }
+
     pub fn backend_texture(
         &self,
         flush_pending_gr_context_io: bool,
