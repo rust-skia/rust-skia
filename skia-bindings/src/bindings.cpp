@@ -1792,6 +1792,14 @@ extern "C" bool C_SkColorMatrix_equals(const SkColorMatrix* lhs, const SkColorMa
     return *lhs == *rhs;
 }
 
+extern "C" float* C_SkColorMatrix_get20(const SkColorMatrix* self, float m[20]) {
+    return self->get20(m);
+}
+
+extern "C" void C_SkColorMatrix_set20(SkColorMatrix* self, const float m[20]) {
+    self->set20(m);
+}
+
 //
 // effects/SkComposeImageFilter
 //

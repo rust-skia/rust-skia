@@ -1,5 +1,8 @@
 use crate::prelude::*;
-use skia_bindings::{C_SkColorMatrix_equals, SkColorMatrix, SkColorMatrix_Axis};
+use skia_bindings::{
+    C_SkColorMatrix_equals, C_SkColorMatrix_get20, C_SkColorMatrix_set20, SkColorMatrix,
+    SkColorMatrix_Axis,
+};
 use std::mem;
 
 pub type ColorMatrix = Handle<SkColorMatrix>;
@@ -43,11 +46,15 @@ impl Handle<SkColorMatrix> {
     }
 
     pub fn set_row_major(&mut self, src: &[f32; 20]) {
-        unsafe { self.native_mut().setRowMajor(src.as_ptr()) }
+        // does not link:
+        // unsafe { self.native_mut().setRowMajor(src.as_ptr()) }
+        self.set_20(src)
     }
 
     pub fn get_row_major(&mut self, dst: &mut [f32; 20]) {
-        unsafe { self.native_mut().getRowMajor(dst.as_mut_ptr()) }
+        // does not link:
+        // unsafe { self.native_mut().getRowMajor(dst.as_mut_ptr()) }
+        self.get_20(dst);
     }
 
     pub fn set_rotate(&mut self, axis: Axis, degrees: f32) {
@@ -98,12 +105,16 @@ impl Handle<SkColorMatrix> {
     }
 
     pub fn get_20<'a>(&self, m: &'a mut [f32; 20]) -> &'a mut [f32; 20] {
-        unsafe { self.native().get20(m.as_mut_ptr()) };
+        // does not link:
+        // unsafe { self.native().get20(m.as_mut_ptr()) };
+        unsafe { C_SkColorMatrix_get20(self.native(), m.as_mut_ptr()) };
         m
     }
 
     pub fn set_20(&mut self, m: &[f32; 20]) {
-        unsafe { self.native_mut().set20(m.as_ptr()) }
+        // fails to link:
+        // unsafe { self.native_mut().set20(m.as_ptr()) }
+        unsafe { C_SkColorMatrix_set20(self.native_mut(), m.as_ptr()) };
     }
 }
 
