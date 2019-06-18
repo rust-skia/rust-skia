@@ -143,7 +143,7 @@ fn color_mode_roundtrip() {
     let color = Color::CYAN;
     let mode = BlendMode::ColorBurn;
     let cf = color_filters::blend(color, mode).unwrap();
-    let (c, m) = cf.to_color_mode().unwrap();
+    let (c, m) = cf.to_a_color_mode().unwrap();
     assert_eq!(color, c);
     assert_eq!(mode, m);
 }

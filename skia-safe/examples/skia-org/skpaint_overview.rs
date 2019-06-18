@@ -342,7 +342,7 @@ fn draw_mask_filter(canvas: &mut Canvas) {
 fn draw_color_filter(c: &mut Canvas) {
     fn f(c: &mut Canvas, (x, y): (scalar, scalar), color_matrix: &[scalar; 20]) {
         let paint = &mut Paint::default();
-        paint.set_color_filter(&ColorFilters::matrix_row_major_255(color_matrix));
+        paint.set_color_filter(&ColorFilters::matrix_row_major(color_matrix));
 
         let image = &resources::mandrill();
 
