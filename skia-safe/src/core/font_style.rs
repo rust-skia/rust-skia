@@ -36,17 +36,40 @@ impl Deref for Weight {
 
 #[allow(non_upper_case_globals)]
 impl Weight {
+    #[deprecated(note = "use INVISIBLE")]
     pub const Invisible: Self = Self(SkFontStyle_Weight::kInvisible_Weight as _);
+    #[deprecated(note = "use THIN")]
     pub const Thin: Self = Self(SkFontStyle_Weight::kThin_Weight as _);
+    #[deprecated(note = "use EXTRA_LIGHT")]
     pub const ExtraLight: Self = Self(SkFontStyle_Weight::kExtraLight_Weight as _);
+    #[deprecated(note = "use LIGHT")]
     pub const Light: Self = Self(SkFontStyle_Weight::kLight_Weight as _);
+    #[deprecated(note = "use NORMAL")]
     pub const Normal: Self = Self(SkFontStyle_Weight::kNormal_Weight as _);
+    #[deprecated(note = "use MEDIUM")]
     pub const Medium: Self = Self(SkFontStyle_Weight::kMedium_Weight as _);
+    #[deprecated(note = "use SEMI_BOLD")]
     pub const SemiBold: Self = Self(SkFontStyle_Weight::kSemiBold_Weight as _);
+    #[deprecated(note = "use BOLD")]
     pub const Bold: Self = Self(SkFontStyle_Weight::kBold_Weight as _);
+    #[deprecated(note = "use EXTRA_BOLD")]
     pub const ExtraBold: Self = Self(SkFontStyle_Weight::kExtraBold_Weight as _);
+    #[deprecated(note = "use BLACK")]
     pub const Black: Self = Self(SkFontStyle_Weight::kBlack_Weight as _);
+    #[deprecated(note = "use EXTRA_BLACK")]
     pub const ExtraBlack: Self = Self(SkFontStyle_Weight::kExtraBlack_Weight as _);
+
+    pub const INVISIBLE: Self = Self(SkFontStyle_Weight::kInvisible_Weight as _);
+    pub const THIN: Self = Self(SkFontStyle_Weight::kThin_Weight as _);
+    pub const EXTRA_LIGHT: Self = Self(SkFontStyle_Weight::kExtraLight_Weight as _);
+    pub const LIGHT: Self = Self(SkFontStyle_Weight::kLight_Weight as _);
+    pub const NORMAL: Self = Self(SkFontStyle_Weight::kNormal_Weight as _);
+    pub const MEDIUM: Self = Self(SkFontStyle_Weight::kMedium_Weight as _);
+    pub const SEMI_BOLD: Self = Self(SkFontStyle_Weight::kSemiBold_Weight as _);
+    pub const BOLD: Self = Self(SkFontStyle_Weight::kBold_Weight as _);
+    pub const EXTRA_BOLD: Self = Self(SkFontStyle_Weight::kExtraBold_Weight as _);
+    pub const BLACK: Self = Self(SkFontStyle_Weight::kBlack_Weight as _);
+    pub const EXTRA_BLACK: Self = Self(SkFontStyle_Weight::kExtraBlack_Weight as _);
 }
 
 /// Wrapper type for the width of a font.
@@ -79,15 +102,34 @@ impl Deref for Width {
 
 #[allow(non_upper_case_globals)]
 impl Width {
+    #[deprecated(note = "use ULTRA_CONDENSED")]
     pub const UltraCondensed: Self = Self(SkFontStyle_Width::kUltraCondensed_Width as _);
+    #[deprecated(note = "use EXTRA_CONDENSED")]
     pub const ExtraCondensed: Self = Self(SkFontStyle_Width::kExtraCondensed_Width as _);
+    #[deprecated(note = "use CONDENSED")]
     pub const Condensed: Self = Self(SkFontStyle_Width::kCondensed_Width as _);
+    #[deprecated(note = "use SEMI_CONDENSED")]
     pub const SemiCondensed: Self = Self(SkFontStyle_Width::kSemiCondensed_Width as _);
+    #[deprecated(note = "use NORMAL")]
     pub const Normal: Self = Self(SkFontStyle_Width::kNormal_Width as _);
+    #[deprecated(note = "use SEMI_EXPANDED")]
     pub const SemiExpanded: Self = Self(SkFontStyle_Width::kSemiExpanded_Width as _);
+    #[deprecated(note = "use EXPANDED")]
     pub const Expanded: Self = Self(SkFontStyle_Width::kExpanded_Width as _);
+    #[deprecated(note = "use EXTRA_EXPANDED")]
     pub const ExtraExpanded: Self = Self(SkFontStyle_Width::kExtraExpanded_Width as _);
+    #[deprecated(note = "use ULTRA_EXPANDED")]
     pub const UltraExpanded: Self = Self(SkFontStyle_Width::kUltraExpanded_Width as _);
+
+    pub const ULTRA_CONDENSED: Self = Self(SkFontStyle_Width::kUltraCondensed_Width as _);
+    pub const EXTRA_CONDENSED: Self = Self(SkFontStyle_Width::kExtraCondensed_Width as _);
+    pub const CONDENSED: Self = Self(SkFontStyle_Width::kCondensed_Width as _);
+    pub const SEMI_CONDENSED: Self = Self(SkFontStyle_Width::kSemiCondensed_Width as _);
+    pub const NORMAL: Self = Self(SkFontStyle_Width::kNormal_Width as _);
+    pub const SEMI_EXPANDED: Self = Self(SkFontStyle_Width::kSemiExpanded_Width as _);
+    pub const EXPANDED: Self = Self(SkFontStyle_Width::kExpanded_Width as _);
+    pub const EXTRA_EXPANDED: Self = Self(SkFontStyle_Width::kExtraExpanded_Width as _);
+    pub const ULTRA_EXPANDED: Self = Self(SkFontStyle_Width::kUltraExpanded_Width as _);
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -175,13 +217,13 @@ mod font_style_static {
 
     lazy_static! {
         pub static ref NORMAL: FontStyle =
-            FontStyle::new(Weight::Normal, Width::Normal, Slant::Upright);
+            FontStyle::new(Weight::NORMAL, Width::NORMAL, Slant::Upright);
         pub static ref BOLD: FontStyle =
-            FontStyle::new(Weight::Bold, Width::Normal, Slant::Upright);
+            FontStyle::new(Weight::BOLD, Width::NORMAL, Slant::Upright);
         pub static ref ITALIC: FontStyle =
-            FontStyle::new(Weight::Normal, Width::Normal, Slant::Italic);
+            FontStyle::new(Weight::NORMAL, Width::NORMAL, Slant::Italic);
         pub static ref BOLD_ITALIC: FontStyle =
-            FontStyle::new(Weight::Bold, Width::Normal, Slant::Italic);
+            FontStyle::new(Weight::BOLD, Width::NORMAL, Slant::Italic);
     }
 }
 
