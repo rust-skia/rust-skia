@@ -269,6 +269,22 @@ impl RCHandle<SkSurface> {
         }
     }
 
+    // TODO: support variant with TextureReleaseProc and ReleaseContext
+    pub fn replace_backend_texture(
+        &mut self,
+        backend_texture: &BackendTexture,
+        origin: SurfaceOrigin,
+    ) -> bool {
+        unsafe {
+            self.native_mut().replaceBackendTexture(
+                backend_texture.native(),
+                origin.into_native(),
+                None,
+                ptr::null_mut(),
+            )
+        }
+    }
+
     pub fn canvas(&mut self) -> &mut Canvas {
         let canvas_ref = unsafe { &mut *self.native_mut().getCanvas() };
         Canvas::borrow_from_native(canvas_ref)
@@ -373,6 +389,8 @@ impl RCHandle<SkSurface> {
         let src = src.into();
         unsafe { self.native_mut().readPixels2(bitmap.native(), src.x, src.y) }
     }
+
+    // TODO: wrap asyncRescaleAndReadPixels (m76)
 
     pub fn write_pixels_from_pixmap(&mut self, src: &Pixmap, dst: impl Into<IPoint>) {
         let dst = dst.into();
