@@ -1,15 +1,15 @@
 //! Support function for communicating with cargo's variables and outputs.
 
 use std::fmt::{Display, Formatter};
-use std::path::PathBuf;
+use std::path::{PathBuf, Path};
 use std::{env, fmt, fs, io};
 
 pub fn output_directory() -> PathBuf {
     PathBuf::from(env::var("OUT_DIR").unwrap())
 }
 
-pub fn add_dependent_path(path: impl AsRef<str>) {
-    println!("cargo:rerun-if-changed={}", path.as_ref());
+pub fn add_dependent_path(path: impl AsRef<Path>) {
+    println!("cargo:rerun-if-changed={}", path.as_ref().to_str().unwrap());
 }
 
 pub fn add_link_libs(libs: &[impl AsRef<str>]) {
