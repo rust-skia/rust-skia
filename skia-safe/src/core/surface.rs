@@ -221,7 +221,15 @@ impl RCHandle<SkSurface> {
         self
     }
 
+    #[deprecated(note = "use get_backend_texture()")]
     pub fn backend_texture(
+        &mut self,
+        handle_access: BackendHandleAccess,
+    ) -> Option<BackendTexture> {
+        self.get_backend_texture(handle_access)
+    }
+
+    pub fn get_backend_texture(
         &mut self,
         handle_access: BackendHandleAccess,
     ) -> Option<BackendTexture> {
@@ -237,7 +245,15 @@ impl RCHandle<SkSurface> {
         }
     }
 
+    #[deprecated(note = "use get_backend_render_target()")]
     pub fn backend_render_target(
+        &mut self,
+        handle_access: BackendHandleAccess,
+    ) -> Option<BackendRenderTarget> {
+        self.get_backend_render_target(handle_access)
+    }
+
+    pub fn get_backend_render_target(
         &mut self,
         handle_access: BackendHandleAccess,
     ) -> Option<BackendRenderTarget> {
