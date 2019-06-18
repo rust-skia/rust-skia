@@ -1,8 +1,9 @@
 use crate::prelude::*;
-use crate::{scalar, Font, GlyphId, Paint, Point, Rect, TextEncoding};
+use crate::{scalar, Font, GlyphId, Paint, Point, RSXform, Rect, TextEncoding};
 use skia_bindings::{
-    C_SkTextBlobBuilder_destruct, C_SkTextBlobBuilder_make, C_SkTextBlob_MakeFromText, SkTextBlob,
-    SkTextBlobBuilder,
+    C_SkTextBlobBuilder_destruct, C_SkTextBlobBuilder_make, C_SkTextBlob_MakeFromPosText,
+    C_SkTextBlob_MakeFromPosTextH, C_SkTextBlob_MakeFromRSXform, C_SkTextBlob_MakeFromText,
+    SkTextBlob, SkTextBlobBuilder,
 };
 use std::convert::TryInto;
 use std::{ptr, slice};
@@ -56,8 +57,8 @@ impl RCHandle<SkTextBlob> {
         }
     }
 
-    pub fn from_str(str: &str, font: &Font) -> Option<TextBlob> {
-        Self::from_text(str.as_bytes(), TextEncoding::UTF8, font)
+    pub fn from_str(str: impl AsRef<str>, font: &Font) -> Option<TextBlob> {
+        Self::from_text(str.as_ref().as_bytes(), TextEncoding::UTF8, font)
     }
 
     pub fn from_text(text: &[u8], encoding: TextEncoding, font: &Font) -> Option<TextBlob> {
@@ -65,6 +66,68 @@ impl RCHandle<SkTextBlob> {
             C_SkTextBlob_MakeFromText(
                 text.as_ptr() as _,
                 text.len(),
+                font.native(),
+                encoding.into_native(),
+            )
+        })
+    }
+
+    pub fn from_pos_text_h(
+        text: &[u8],
+        xpos: &[scalar],
+        const_y: scalar,
+        font: &Font,
+        encoding: impl Into<Option<TextEncoding>>,
+    ) -> Option<TextBlob> {
+        let encoding = encoding.into().unwrap_or_default();
+        // TODO: avoid that verification somehow.
+        assert_eq!(xpos.len(), font.count_text(text, encoding));
+        TextBlob::from_ptr(unsafe {
+            C_SkTextBlob_MakeFromPosTextH(
+                text.as_ptr() as _,
+                text.len(),
+                xpos.as_ptr(),
+                const_y,
+                font.native(),
+                encoding.into_native(),
+            )
+        })
+    }
+
+    pub fn from_pos_text(
+        text: &[u8],
+        pos: &[Point],
+        font: &Font,
+        encoding: impl Into<Option<TextEncoding>>,
+    ) -> Option<TextBlob> {
+        let encoding = encoding.into().unwrap_or_default();
+        // TODO: avoid that verification somehow.
+        assert_eq!(pos.len(), font.count_text(text, encoding));
+        TextBlob::from_ptr(unsafe {
+            C_SkTextBlob_MakeFromPosText(
+                text.as_ptr() as _,
+                text.len(),
+                pos.native().as_ptr(),
+                font.native(),
+                encoding.into_native(),
+            )
+        })
+    }
+
+    pub fn from_rsxform(
+        text: &[u8],
+        xform: &[RSXform],
+        font: &Font,
+        encoding: impl Into<Option<TextEncoding>>,
+    ) -> Option<TextBlob> {
+        let encoding = encoding.into().unwrap_or_default();
+        // TODO: avoid that verification somehow.
+        assert_eq!(xform.len(), font.count_text(text, encoding));
+        TextBlob::from_ptr(unsafe {
+            C_SkTextBlob_MakeFromRSXform(
+                text.as_ptr() as _,
+                text.len(),
+                xform.native().as_ptr(),
                 font.native(),
                 encoding.into_native(),
             )
@@ -145,6 +208,22 @@ impl Handle<SkTextBlobBuilder> {
             (
                 slice::from_raw_parts_mut((*buffer).glyphs, count),
                 slice::from_raw_parts_mut((*buffer).pos as *mut Point, count),
+            )
+        }
+    }
+
+    pub fn alloc_run_rsxform(
+        &mut self,
+        font: &Font,
+        count: usize,
+    ) -> (&mut [GlyphId], &mut [RSXform]) {
+        unsafe {
+            let buffer = self
+                .native_mut()
+                .allocRunRSXform(font.native(), count.try_into().unwrap());
+            (
+                slice::from_raw_parts_mut((*buffer).glyphs, count),
+                slice::from_raw_parts_mut((*buffer).pos as *mut RSXform, count),
             )
         }
     }

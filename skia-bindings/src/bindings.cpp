@@ -980,6 +980,27 @@ extern "C" SkTextBlob* C_SkTextBlob_MakeFromText(const void* text, size_t byteLe
     return SkTextBlob::MakeFromText(text, byteLength, *font, encoding).release();
 }
 
+extern "C" SkTextBlob *C_SkTextBlob_MakeFromPosTextH(const void *text, size_t byteLength,
+                                                     const SkScalar xpos[], SkScalar constY, const SkFont *font,
+                                                     SkTextEncoding encoding) {
+    return SkTextBlob::MakeFromPosTextH(text, byteLength, xpos, constY, *font, encoding).release();
+}
+
+extern "C" SkTextBlob *C_SkTextBlob_MakeFromPosText(const void *text, size_t byteLength,
+                                                    const SkPoint pos[],
+                                                    const SkFont *font,
+                                                    SkTextEncoding encoding) {
+    return SkTextBlob::MakeFromPosText(text, byteLength, pos, *font, encoding).release();
+}
+
+extern "C" SkTextBlob *C_SkTextBlob_MakeFromRSXform(const void *text, size_t byteLength,
+                                                    const SkRSXform xform[],
+                                                    const SkFont *font,
+                                                    SkTextEncoding encoding) {
+    return SkTextBlob::MakeFromRSXform(text, byteLength, xform, *font, encoding).release();
+}
+
+
 extern "C" void C_SkTextBlobBuilder_destruct(SkTextBlobBuilder* self) {
     self->~SkTextBlobBuilder();
 }
