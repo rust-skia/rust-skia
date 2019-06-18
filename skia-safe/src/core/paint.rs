@@ -78,7 +78,7 @@ impl NativeDrop for SkPaint {
 
 impl NativeClone for SkPaint {
     fn clone(&self) -> Self {
-        unsafe { SkPaint::new1(self) }
+        unsafe { SkPaint::new2(self) }
     }
 }
 
@@ -101,6 +101,15 @@ impl Default for Handle<SkPaint> {
 }
 
 impl Handle<SkPaint> {
+    pub fn new(color: impl AsRef<Color4f>, color_space: Option<&ColorSpace>) -> Paint {
+        Paint::from_native(unsafe {
+            SkPaint::new1(
+                color.as_ref().native(),
+                color_space.native_ptr_or_null_mut_force(),
+            )
+        })
+    }
+
     pub fn reset(&mut self) -> &mut Self {
         unsafe { self.native_mut().reset() }
         self
