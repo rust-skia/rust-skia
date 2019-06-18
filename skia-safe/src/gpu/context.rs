@@ -174,6 +174,8 @@ impl RCHandle<GrContext> {
         }
     }
 
+    // TODO: wait()
+
     pub fn flush(&mut self) -> &mut Self {
         unsafe {
             self.native_mut().flush();
@@ -181,7 +183,12 @@ impl RCHandle<GrContext> {
         self
     }
 
+    // TODO: flush(GrFlushInfo, ..) two variants.
     // TODO: flushAndSignalSemaphores
+
+    pub fn check_async_work_completion(&mut self) {
+        unsafe { self.native_mut().checkAsyncWorkCompletion() }
+    }
 
     pub fn supports_distance_field_text(&self) -> bool {
         unsafe { self.native().supportsDistanceFieldText() }
@@ -211,4 +218,7 @@ impl RCHandle<GrContext> {
             )
         }
     }
+
+    // TODO: support createBackendTexture (2 variants) and deleteBackendTexture(),
+    //       introduced in m76
 }
