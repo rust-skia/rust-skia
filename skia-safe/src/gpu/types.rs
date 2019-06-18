@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use skia_bindings::{GrBackendApi, GrMipMapped, GrSurfaceOrigin};
+use skia_bindings::{GrBackendApi, GrMipMapped, GrRenderable, GrSurfaceOrigin};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(u32)]
@@ -16,6 +16,8 @@ fn test_backend_api_layout() {
     BackendAPI::test_layout()
 }
 
+// TODO: this should be a newtype(bool) I guess with implementations
+//       of From<bool> and Deref?
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(u8)]
 pub enum MipMapped {
@@ -27,6 +29,21 @@ impl NativeTransmutable<GrMipMapped> for MipMapped {}
 #[test]
 fn test_mip_mapped_layout() {
     MipMapped::test_layout()
+}
+
+// TODO: this should be a newtype(bool) I guess with implementations
+//       of From<bool> and Deref?
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(u8)]
+pub enum Renderable {
+    No = GrRenderable::kNo as _,
+    Yes = GrRenderable::kYes as _,
+}
+
+impl NativeTransmutable<GrRenderable> for Renderable {}
+#[test]
+fn test_renderable_layout() {
+    Renderable::test_layout()
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
