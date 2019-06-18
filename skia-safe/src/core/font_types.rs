@@ -16,6 +16,12 @@ fn test_text_encoding_layout() {
     TextEncoding::test_layout()
 }
 
+impl Default for TextEncoding {
+    fn default() -> Self {
+        TextEncoding::UTF8
+    }
+}
+
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
 pub enum FontHinting {
