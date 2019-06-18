@@ -262,6 +262,10 @@ impl From<Color> for Color4f {
 }
 
 impl Color4f {
+    pub const fn new(r: f32, g: f32, b: f32, a: f32) -> Color4f {
+        Self { r, g, b, a }
+    }
+
     // corresponding Skia function: vec()
     pub fn as_array(&self) -> &[f32; 4] {
         unsafe { transmute_ref(self) }
@@ -312,6 +316,23 @@ impl Color4f {
             ..self.clone()
         }
     }
+}
+
+pub mod colors {
+    use crate::Color4f;
+
+    pub const TRANSPARENT: Color4f = Color4f::new(0.0, 0.0, 0.0, 0.0);
+    pub const BLACK: Color4f = Color4f::new(0.0, 0.0, 0.0, 1.0);
+    pub const DARK_GREY: Color4f = Color4f::new(0.25, 0.25, 0.25, 1.0);
+    pub const GREY: Color4f = Color4f::new(0.5, 0.5, 0.5, 1.0);
+    pub const LIGHT_GREY: Color4f = Color4f::new(0.75, 0.75, 0.75, 1.0);
+    pub const WHITE: Color4f = Color4f::new(1.0, 1.0, 1.0, 1.0);
+    pub const RED: Color4f = Color4f::new(1.0, 0.0, 0.0, 1.0);
+    pub const GREEN: Color4f = Color4f::new(0.0, 1.0, 0.0, 1.0);
+    pub const BLUE: Color4f = Color4f::new(0.0, 0.0, 1.0, 1.0);
+    pub const YELLOW: Color4f = Color4f::new(1.0, 1.0, 0.0, 1.0);
+    pub const CYAN: Color4f = Color4f::new(0.0, 1.0, 1.0, 1.0);
+    pub const MAGENTA: Color4f = Color4f::new(1.0, 0.0, 1.0, 1.0);
 }
 
 #[test]
