@@ -4,7 +4,6 @@ use crate::build_support::{android, cargo, clang, ios, vs};
 use bindgen::EnumVariation;
 use cc::Build;
 use std::env;
-use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
@@ -492,22 +491,13 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
 
     builder = builder.header(bindings_source);
 
-    // TODO: may pull these into the FinalBuildConfiguration
+    // TODO: may put the include paths into the FinalBuildConfiguration?
 
-    for include_dir in fs::read_dir("skia/include").expect("Unable to read skia/include") {
-        let dir = include_dir.unwrap();
-        cargo::add_dependent_path(dir.path().to_str().unwrap());
-        let include_path = current_dir.join(dir.path());
-        builder = builder.clang_arg(format!("-I{}", include_path.display()));
-        cc_build.include(include_path);
-    }
+    let include_path = current_dir.join("skia");
+    cargo::add_dependent_path(include_path.join(PathBuf::from("include")));
 
-    {
-        // SkXMLWriter.h
-        let include_path = current_dir.join(Path::new("skia/src/xml"));
-        builder = builder.clang_arg(format!("-I{}", include_path.display()));
-        cc_build.include(include_path);
-    }
+    builder = builder.clang_arg(format!("-I{}", include_path.display()));
+    cc_build.include(include_path);
 
     let definitions = {
         let skia_definitions = {
