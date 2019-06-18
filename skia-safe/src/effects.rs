@@ -9,6 +9,8 @@ pub mod arithmetic_image_filter;
 pub mod blur_draw_looper;
 pub mod blur_image_filter;
 pub mod color_filter_image_filter;
+pub mod color_matrix;
+pub use color_matrix::ColorMatrix;
 pub mod compose_image_filter;
 pub mod corner_path_effect;
 pub mod dash_path_effect;

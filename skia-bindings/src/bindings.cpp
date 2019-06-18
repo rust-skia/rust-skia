@@ -1764,6 +1764,14 @@ extern "C" SkImageFilter *C_SkColorFilterImageFilter_Make(const SkColorFilter &c
 }
 
 //
+// effects/SkColorMatrix.h
+//
+
+extern "C" bool C_SkColorMatrix_equals(const SkColorMatrix* lhs, const SkColorMatrix* rhs) {
+    return *lhs == *rhs;
+}
+
+//
 // effects/SkComposeImageFilter
 //
 
