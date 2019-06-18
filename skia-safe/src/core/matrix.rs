@@ -378,8 +378,8 @@ impl Matrix {
         self
     }
 
-    pub fn set_rsxform(&mut self, rsx_form: &RSXform) -> &mut Self {
-        unsafe { self.native_mut().setRSXform(rsx_form.native()) };
+    pub fn set_rsxform(&mut self, rsxform: &RSXform) -> &mut Self {
+        unsafe { self.native_mut().setRSXform(rsxform.native()) };
         self
     }
 

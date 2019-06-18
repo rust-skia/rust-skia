@@ -13,7 +13,7 @@ pub struct RSXform {
 
 impl NativeTransmutable<SkRSXform> for RSXform {}
 #[test]
-fn test_rsx_form_layout() {
+fn test_rsxform_layout() {
     RSXform::test_layout()
 }
 
