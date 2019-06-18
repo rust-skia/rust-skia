@@ -323,6 +323,7 @@ where
 /// Returns a null pointer if the Option is None.
 pub(crate) trait NativePointerOrNull<N> {
     fn native_ptr_or_null(&self) -> *const N;
+    unsafe fn native_ptr_or_null_mut_force(&self) -> *mut N;
 }
 
 pub(crate) trait NativePointerOrNullMut<N> {
@@ -337,6 +338,13 @@ where
         match self {
             Some(handle) => handle.native(),
             None => ptr::null(),
+        }
+    }
+
+    unsafe fn native_ptr_or_null_mut_force(&self) -> *mut N {
+        match self {
+            Some(handle) => handle.native_mut_force(),
+            None => ptr::null_mut(),
         }
     }
 }
