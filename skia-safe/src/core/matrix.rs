@@ -30,8 +30,11 @@ fn test_matrix_scale_to_fit_layout() {
 }
 
 #[derive(Copy, Clone, Debug)]
-#[repr(transparent)]
-pub struct Matrix(SkMatrix);
+#[repr(C)]
+pub struct Matrix {
+    mat: [scalar; 9usize],
+    type_mask: u32,
+}
 
 impl NativeTransmutable<SkMatrix> for Matrix {}
 #[test]
@@ -112,11 +115,18 @@ impl IndexMut<usize> for Matrix {
 
 impl Default for Matrix {
     fn default() -> Self {
-        Matrix::new_identity()
+        Matrix::new()
     }
 }
 
 impl Matrix {
+    const fn new() -> Self {
+        Self {
+            mat: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0],
+            type_mask: TypeMask::IDENTITY.bits() | 0x10,
+        }
+    }
+
     pub fn new_scale((sx, sy): (scalar, scalar)) -> Matrix {
         Matrix::from_native(unsafe { SkMatrix::MakeScale(sx, sy) })
     }
@@ -722,11 +732,8 @@ impl Matrix {
         unsafe { self.native().isFinite() }
     }
 
-    pub fn new_identity() -> Matrix {
-        // SkMatrix contains no C++ types, so this is safe:
-        let mut m: SkMatrix = unsafe { mem::zeroed() };
-        unsafe { m.reset() };
-        Matrix::from_native(m)
+    pub fn new_identity() -> Self {
+        Self::new()
     }
 }
 
