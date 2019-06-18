@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use crate::{scalar, Point, Point3, RSXform, Rect, Scalar, Size, Vector};
 use skia_bindings::{C_SkMatrix_SubscriptMut, SkMatrix, SkMatrix_ScaleToFit};
-use std::mem;
 use std::ops::{Index, IndexMut};
 
 bitflags! {
