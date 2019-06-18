@@ -1,7 +1,7 @@
 //! Support function for communicating with cargo's variables and outputs.
 
 use std::fmt::{Display, Formatter};
-use std::path::{PathBuf, Path};
+use std::path::{Path, PathBuf};
 use std::{env, fmt, fs, io};
 
 pub fn output_directory() -> PathBuf {
