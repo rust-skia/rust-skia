@@ -4,9 +4,14 @@ use skia_bindings::{
     SkFontStyle_Weight, SkFontStyle_Width,
 };
 use std::mem;
+use std::ops::Deref;
 
-#[repr(transparent)]
+/// Wrapper type of a font weight.
+///
+/// Use Weight::from() to create a weight from an i32.
+/// Use *weight to pull out the wrapped value of the Weight.
 #[derive(Copy, Clone, PartialEq, PartialOrd)]
+#[repr(transparent)]
 pub struct Weight(i32);
 
 impl NativeTransmutable<i32> for Weight {}
@@ -14,6 +19,19 @@ impl NativeTransmutable<i32> for Weight {}
 #[test]
 fn test_weight_layout() {
     Weight::test_layout()
+}
+
+impl From<i32> for Weight {
+    fn from(weight: i32) -> Self {
+        Weight(weight)
+    }
+}
+
+impl Deref for Weight {
+    type Target = i32;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 #[allow(non_upper_case_globals)]
@@ -31,8 +49,12 @@ impl Weight {
     pub const ExtraBlack: Self = Self(SkFontStyle_Weight::kExtraBlack_Weight as _);
 }
 
-#[repr(transparent)]
+/// Wrapper type for the width of a font.
+///
+/// To create a width of a font from an i32, use Width::from().
+/// To access the underlying value of the font weight, dereference *weight.
 #[derive(Copy, Clone, PartialEq, PartialOrd)]
+#[repr(transparent)]
 pub struct Width(i32);
 
 impl NativeTransmutable<i32> for Width {}
@@ -40,6 +62,19 @@ impl NativeTransmutable<i32> for Width {}
 #[test]
 fn test_width_layout() {
     Width::test_layout()
+}
+
+impl From<i32> for Width {
+    fn from(width: i32) -> Self {
+        Width(width)
+    }
+}
+
+impl Deref for Width {
+    type Target = i32;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 #[allow(non_upper_case_globals)]
