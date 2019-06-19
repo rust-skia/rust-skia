@@ -78,7 +78,7 @@ impl<'a> BackendContext<'a> {
     }
 
     // The idea here is to set up a thread local variable with the GetProc function trait
-    // and reroute queries to global_get_proc to it as long the caller does not invoke the Drop
+    // and reroute queries to global_get_proc as long the caller does not invoke the Drop
     // impl trait that is returned.
     // This is an attempt to support Rust Closures / Functions that resolve function pointers instead
     // of relying on a global extern "C" function.

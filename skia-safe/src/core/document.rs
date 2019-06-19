@@ -123,9 +123,9 @@ impl Document<state::OnPage> {
             },
         }
 
-        // TODO: think about providing a close that implicitly ends the page
-        //       and calls close on the Open document.
-        // TODO: think about providing a begin_page that implicitly ends the
+        // TODO: think about providing a close() function that implicitly ends the page
+        //       and calls close() on the Open document.
+        // TODO: think about providing a begin_page() function that implicitly ends the
         //       current page.
     }
 }

@@ -139,7 +139,7 @@ impl Handle<SkInterpolator> {
         }
     }
 
-    // TODO: may provide a version that returns a Vec.
+    // TODO: may provide a variant that returns a Vec.
     pub fn time_to_values<'a>(
         &self,
         time: Duration,
