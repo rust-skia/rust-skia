@@ -632,7 +632,7 @@ pub(crate) mod definitions {
 
     /// A preprocessor definition.
     pub type Definition = (String, Option<String>);
-    /// A contianer for a number fo preprocessor definitions.
+    /// A container for a number of preprocessor definitions.
     pub type Definitions = Vec<Definition>;
 
     /// Parse a defines = line from a ninja build file.
