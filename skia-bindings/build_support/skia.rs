@@ -38,6 +38,7 @@ impl Default for BuildConfiguration {
             feature_dng: false,
             feature_particles: false,
             all_skia_libs,
+            definitions: Vec::new(),
         }
     }
 }
@@ -73,6 +74,9 @@ pub struct BuildConfiguration {
     /// As of M74, There is a bug in the Skia macOS build
     /// that requires all libraries to be built, otherwise the build would fail.
     all_skia_libs: bool,
+
+    /// Additional preprocessor definitions that will override predefined ones.
+    definitions: Definitions,
 }
 
 /// This is the final, low level build configuration.
@@ -81,9 +85,9 @@ pub struct FinalBuildConfiguration {
     /// The name value pairs passed as arguments to gn.
     pub gn_args: Vec<(String, String)>,
 
-    /// The preprocessor defines that are used for creating the bindings and
-    /// building the skia-bindings library.
-    pub defines: Vec<String>,
+    /// The additional definitions (cloned from the definitions of
+    /// the BuildConfiguration).
+    pub definitions: Definitions,
 }
 
 impl FinalBuildConfiguration {
@@ -188,22 +192,10 @@ impl FinalBuildConfiguration {
                 .collect()
         };
 
-        let defines = {
-            let mut defines = Vec::new();
-            if build.feature_vulkan {
-                defines.push("SK_VULKAN");
-                defines.push("SKIA_IMPLEMENTATION");
-            }
-            if build.feature_svg {
-                defines.push("SK_XML");
-            }
-            if build.skia_release {
-                defines.push("NDEBUG");
-            }
-            defines.iter().map(|d| d.to_string()).collect()
-        };
-
-        FinalBuildConfiguration { gn_args, defines }
+        FinalBuildConfiguration {
+            gn_args,
+            definitions: build.definitions.clone(),
+        }
     }
 }
 
@@ -306,10 +298,14 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
 
     let gn_command = if on_windows { "skia/bin/gn" } else { "bin/gn" };
 
-    let output_directory = config.output_directory.to_str().unwrap();
+    let output_directory_str = config.output_directory.to_str().unwrap();
 
     let output = Command::new(gn_command)
-        .args(&["gen", output_directory, &("--args=".to_owned() + &gn_args)])
+        .args(&[
+            "gen",
+            output_directory_str,
+            &("--args=".to_owned() + &gn_args),
+        ])
         .envs(env::vars())
         .current_dir(PathBuf::from("./skia"))
         .stdout(Stdio::inherit())
@@ -330,7 +326,7 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
     assert!(
         Command::new(ninja_command)
             .current_dir(PathBuf::from("./skia"))
-            .args(&["-C", output_directory])
+            .args(&["-C", output_directory_str])
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
             .status()
@@ -341,10 +337,10 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
 
     let current_dir = env::current_dir().unwrap();
 
-    bindgen_gen(build, &current_dir, output_directory)
+    bindgen_gen(build, &current_dir, &config.output_directory)
 }
 
-fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_directory: &str) {
+fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_directory: &Path) {
     let mut builder = bindgen::Builder::default()
         .generate_inline_functions(true)
         .generate_comments(false)
@@ -467,9 +463,27 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         cc_build.include(include_path);
     }
 
-    for define in &build.defines {
-        cc_build.define(&define, "1");
-        builder = builder.clang_arg(format!("-D{}=1", define));
+    let definitions = {
+        let skia_definitions = {
+            let ninja_file = output_directory.join("obj").join("skia.ninja");
+            let contents = fs::read_to_string(ninja_file).unwrap();
+            definitions::from_ninja(contents)
+        };
+
+        definitions::combine(skia_definitions, build.definitions.clone())
+    };
+
+    for (name, value) in &definitions {
+        match value {
+            Some(value) => {
+                cc_build.define(name, value.as_str());
+                builder = builder.clang_arg(format!("-D{}={}", name, value));
+            }
+            None => {
+                cc_build.define(name, "");
+                builder = builder.clang_arg(format!("-D{}", name));
+            }
+        }
     }
 
     cc_build
@@ -607,5 +621,65 @@ mod prerequisites {
         // so we ignore errors for now and leave that to the next invocation.
         // TODO: add a warning here, if this fails.
         let _ = fs::remove_dir_all(repo_dir);
+    }
+}
+
+pub use definitions::Definition;
+pub use definitions::Definitions;
+
+pub(crate) mod definitions {
+    use std::collections::HashSet;
+
+    /// A preprocessor definition.
+    pub type Definition = (String, Option<String>);
+    /// A contianer for a number fo preprocessor definitions.
+    pub type Definitions = Vec<Definition>;
+
+    /// Parse a defines = line from a ninja build file.
+    pub fn from_ninja(ninja_file: impl AsRef<str>) -> Definitions {
+        let lines: Vec<&str> = ninja_file.as_ref().lines().collect();
+        let defines = {
+            let prefix = "defines = ";
+            let defines = lines
+                .into_iter()
+                .find(|s| s.starts_with(prefix))
+                .expect("missing a line with the prefix 'defines =' in a .ninja file");
+            &defines[prefix.len()..]
+        };
+        let defines: Vec<&str> = {
+            let prefix = "-D";
+            defines
+                .split_whitespace()
+                .into_iter()
+                .map(|d| {
+                    if d.starts_with(prefix) {
+                        &d[prefix.len()..]
+                    } else {
+                        panic!("missing '-D' prefix from a definition")
+                    }
+                })
+                .collect()
+        };
+        defines
+            .into_iter()
+            .map(|d| {
+                let items: Vec<&str> = d.splitn(2, "=").collect();
+                match items.len() {
+                    1 => (items[0].to_string(), None),
+                    2 => (items[0].to_string(), Some(items[1].to_string())),
+                    _ => panic!("internal error"),
+                }
+            })
+            .collect()
+    }
+
+    pub fn combine(a: Definitions, b: Definitions) -> Definitions {
+        compress(a.into_iter().chain(b.into_iter()).collect())
+    }
+
+    pub fn compress(mut definitions: Definitions) -> Definitions {
+        let mut uniques = HashSet::new();
+        definitions.retain(|e| uniques.insert(e.0.clone()));
+        definitions
     }
 }
