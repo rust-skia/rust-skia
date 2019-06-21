@@ -15,7 +15,7 @@ stages:
   - template: 'azure-pipelines-template.yml'
     parameters:
       platform: 'Windows'
-      image: 'vs2017-win2016'
+      image: 'windows-2019'
 
 - stage: 'Package'
   condition: and(succeeded(), eq(variables['build.SourceBranchName'], 'master'))
