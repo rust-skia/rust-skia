@@ -5,3 +5,4 @@ pub mod binaries;
 pub mod cargo;
 pub mod git;
 pub mod skia;
+pub mod vs;

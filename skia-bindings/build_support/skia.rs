@@ -1,6 +1,6 @@
 //! Full build support for the Skia library, SkiaBindings library and bindings.rs file.
 
-use crate::build_support::cargo;
+use crate::build_support::{cargo, vs};
 use bindgen::EnumVariation;
 use cc::Build;
 use std::env;
@@ -168,6 +168,17 @@ impl FinalBuildConfiguration {
                 // Tell Skia's build system where LLVM is supposed to be located.
                 // TODO: this should be checked as a prerequisite.
                 args.push(("clang_win", quote("C:/Program Files/LLVM")));
+            }
+
+            // target specific gn args.
+
+            match cargo::target().as_strs() {
+                (_, _, "windows", Some("msvc")) => {
+                    if let Some(win_vc) = vs::resolve_win_vc() {
+                        args.push(("win_vc", quote(win_vc.to_str().unwrap())))
+                    }
+                }
+                _ => {}
             }
 
             if build.keep_inline_functions {
