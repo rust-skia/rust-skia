@@ -1,6 +1,6 @@
 //! Full build support for the Skia library, SkiaBindings library and bindings.rs file.
 
-use crate::build_support::{cargo, vs};
+use crate::build_support::{android, cargo, vs};
 use bindgen::EnumVariation;
 use cc::Build;
 use std::env;
@@ -144,6 +144,15 @@ impl FinalBuildConfiguration {
                 ("cxx", quote("clang++")),
             ];
 
+            let target = cargo::target();
+            if target.system == "android" {
+                // TODO Not remove, but tweak skia parameters above
+                // for android
+                args.clear();
+                args.push(("cc", quote("clang")));
+                args.push(("cxx", quote("clang++")));
+            }
+
             // further flags that limit the components of Skia debug builds.
             if !build.skia_release {
                 args.push(("skia_enable_atlas_text", no()));
@@ -177,6 +186,13 @@ impl FinalBuildConfiguration {
                     if let Some(win_vc) = vs::resolve_win_vc() {
                         args.push(("win_vc", quote(win_vc.to_str().unwrap())))
                     }
+                }
+                (mut arch, _, "android", _) => {
+                    args.push(("ndk", quote(&android::ndk())));
+                    if arch == "aarch64" {
+                        arch = "arm64";
+                    }
+                    args.push(("target_cpu", quote(arch)));
                 }
                 _ => {}
             }
@@ -252,6 +268,9 @@ impl BinariesConfiguration {
                 link_libraries.extend(vec![
                     "usp10", "ole32", "user32", "gdi32", "fontsub", "opengl32",
                 ]);
+            }
+            (_, _, "android", _) => {
+                link_libraries.extend(vec!["log", "android", "EGL", "GLESv2"]);
             }
             _ => panic!("unsupported target: {:?}", cargo::target()),
         };
@@ -504,6 +523,20 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
 
     if !cfg!(windows) {
         cc_build.flag("-std=c++14");
+    }
+
+    let target = cargo::target();
+    if target.system == "android" {
+        let ndk = android::ndk();
+        let arch = target.to_string();
+        cc_build.target(&arch);
+        builder = builder
+            .clang_arg(format!("--sysroot={}/sysroot", ndk))
+            .clang_arg(format!(
+                "-isystem{}/sources/cxx-stl/llvm-libc++/include",
+                ndk
+            ))
+            .clang_arg(format!("--target={}", arch));
     }
 
     cc_build.compile(BINDINGS_LIB_NAME);
