@@ -43,9 +43,16 @@ stages:
         cargo -V
       displayName: 'Print versions'
 
+    # skia-bindings gets packaged without verification, because the build process modifies the src directory.
+    # TODO: reenable package verification as soon CLion and rust-analyzer supports !include macros.
     - bash: |
         set -e
-        cd skia-bindings && cargo package -vv --target-dir "$(Build.ArtifactStagingDirectory)"
+        (cd skia-bindings && cargo package -vv --no-verify --target-dir /tmp/)
+        mkdir -p "$(Build.ArtifactStagingDirectory)/package/"
+        cp /tmp/package/skia-bindings-*.crate "$(Build.ArtifactStagingDirectory)/package/"
+        # pseudo-verification:
+        (cd /tmp/package && tar xzf skia-bindings-*.crate && rm skia-bindings-*.crate)
+        (cd /tmp/package/skia-bindings-* && cargo build -vv --release)
       displayName: 'Package and Verify skia-bindings'
 
     # TODO: why does this fail with
