@@ -1006,3 +1006,14 @@ impl Handle<SkPath> {
         unsafe { C_SkPath_isValid(self.native()) }
     }
 }
+
+#[test]
+fn test_get_points() {
+    let mut p = Path::new();
+    p.add_rect(Rect::new(0.0, 0.0, 10.0, 10.0), None);
+    let points_count = p.count_points();
+    let mut points = vec![Point::default(); points_count];
+    let count_returned = p.get_points(&mut points);
+    assert_eq!(count_returned, points.len());
+    assert_eq!(count_returned, 4);
+}
