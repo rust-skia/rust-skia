@@ -4,6 +4,7 @@ use ash::vk::Handle;
 use ash::{Entry, Instance};
 use skia_safe::gpu;
 use std::ffi::{c_void, CString};
+use std::os::raw;
 
 pub struct AshGraphics {
     pub entry: Entry,
@@ -60,7 +61,7 @@ impl AshGraphics {
                 .engine_version(0)
                 .api_version(api_version);
 
-            let layers_names_raw: Vec<*const i8> = layer_names
+            let layers_names_raw: Vec<*const raw::c_char> = layer_names
                 .iter()
                 .map(|raw_name| raw_name.as_ptr())
                 .collect();
