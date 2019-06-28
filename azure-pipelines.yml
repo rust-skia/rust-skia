@@ -18,7 +18,7 @@ stages:
       image: 'windows-2019'
 
 - stage: 'Package'
-  condition: and(succeeded(), eq(variables['build.SourceBranchName'], 'master'))
+  condition: and(succeeded(), eq(variables['build.SourceBranchName'], 'release'))
   jobs:
   - job:
     pool:
@@ -74,7 +74,7 @@ stages:
         gitHubConnection: 'rust-skia-github-connection'
         repositoryName: 'rust-skia/rust-skia'
         tagSource: 'manual'
-        target: 'master'
+        target: 'release'
         tag: '$(GITHUB_RELEASE_TAG)'
         assets: '$(Build.ArtifactStagingDirectory)/package/*.crate'
         assetUploadMode: 'replace'

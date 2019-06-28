@@ -20,7 +20,7 @@ jobs:
     platform: ${{ parameters.platform }}
     image: ${{ parameters.image }}
     rust_backtrace: 1
-    release_branch: 'master'
+    release_branch: 'release'
   pool:
     vmImage: $(image)
 
