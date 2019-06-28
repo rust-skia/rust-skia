@@ -146,11 +146,8 @@ impl FinalBuildConfiguration {
 
             let target = cargo::target();
             if target.system == "android" {
-                // TODO Not remove, but tweak skia parameters above
-                // for android
-                args.clear();
-                args.push(("cc", quote("clang")));
-                args.push(("cxx", quote("clang++")));
+                args.push(("skia_use_system_freetype2", no()));
+                args.push(("skia_enable_fontmgr_android", yes()));
             }
 
             // further flags that limit the components of Skia debug builds.
