@@ -1,5 +1,5 @@
 jobs:
-- job: ${{ parameters.platform }}
+- job: "${{ parameters.name }}"
   strategy:
     matrix:
       stable:
@@ -19,6 +19,8 @@ jobs:
   variables:
     platform: ${{ parameters.platform }}
     image: ${{ parameters.image }}
+    target: ${{ parameters.target }}
+    runBinaries: ${{ parameters.runBinaries }}
     rust_backtrace: 1
     release_branch: 'release'
   pool:
@@ -43,6 +45,7 @@ jobs:
         curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $TOOLCHAIN
         $HOME/.cargo/bin/rustup component add rustfmt --toolchain $TOOLCHAIN
         $HOME/.cargo/bin/rustup component add clippy --toolchain $TOOLCHAIN
+        $HOME/.cargo/bin/rustup target add $TARGET
         echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
       displayName: Install Rust, Rustfmt, and Clippy
 
@@ -74,6 +77,17 @@ jobs:
         "C:/Program Files/LLVM/bin/clang.exe" --version
       displayName: LLVM/Clang Version
 
+  - ${{ if eq(parameters.target, 'aarch64-linux-android') }}:
+    # Android NDK (macOS only for now)
+    - bash: |
+        set -e
+        (cd /tmp && curl -sSf -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-r18b-darwin-x86_64.zip)
+        (cd /tmp && unzip android-ndk.zip)
+        (cd /tmp/android-ndk-r18b && build/tools/make_standalone_toolchain.py --arch arm64 --install-dir /tmp/ndk)
+        echo "##vso[task.setvariable variable=PATH;]${PATH}:/tmp/ndk/bin"
+        echo "##vso[task.setvariable variable=ANDROID_NDK;]/tmp/android-ndk-r18b"
+      displayName: 'Install Android NDK'
+
   # Note: support to ignore specific rust files and directories is unstable yet: https://github.com/rust-lang/rustfmt/pull/2522
   - bash: |
       set -e
@@ -85,7 +99,7 @@ jobs:
   # Note: features are ignored when set in the workspace. This is a known bug in cargo (#5015), so cd into skia-safe instead.
   - bash: |
       set -e
-      cd skia-safe && cargo build --release --features "$(features)" --all-targets -vv
+      cd skia-safe && cargo build --release --features "$(features)" --all-targets --target $(target) -vv
       export SKIA_BINARIES_TAG=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/tag.txt")
       export SKIA_BINARIES_KEY=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/key.txt")
       echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
@@ -99,22 +113,23 @@ jobs:
   - ${{ if ne(parameters.platform, 'Windows') }}:
     - bash: |
         set -e
-        (cd skia-bindings && cargo clippy --release --features "$(features)")
-        (cd skia-safe && cargo clippy --release --features "$(features)" --all-targets -- -D warnings)
+        (cd skia-bindings && cargo clippy --release --features "$(features)" --target $(target))
+        (cd skia-safe && cargo clippy --release --features "$(features)" --all-targets --target $(target) -- -D warnings)
       displayName: Clippy skia-bindings and skia-safe
 
-  - script: cd skia-safe && cargo test --release --features "$(features)" -vv
+  - script: cd skia-safe && cargo test --release --features "$(features)" --target $(target) -vv
     displayName: Test skia-safe
+    condition: and(succeeded(), variables['runBinaries'])
 
-  - script: cd skia-safe && cargo run --release --features "$(features)" --example skia-org "$(Build.ArtifactStagingDirectory)/skia-org" $(exampleArgs)
+  - script: cd skia-safe && cargo run --release --features "$(features)" --target $(target) --example skia-org "$(Build.ArtifactStagingDirectory)/skia-org" $(exampleArgs)
     displayName: Generate skia-org Example Images
-    condition: and(succeeded(), ne(variables['exampleArgs'], ''))
+    condition: and(succeeded(), ne(variables['exampleArgs'], ''), variables['runBinaries'])
 
   - task: PublishBuildArtifacts@1
     inputs:
       pathtoPublish: '$(Build.ArtifactStagingDirectory)/skia-org'
       artifactName: 'skia-org-examples-$(platform)-$(toolchain)'
-    condition: and(succeeded(), ne(variables['exampleArgs'], ''))
+    condition: and(succeeded(), ne(variables['exampleArgs'], ''), variables['runBinaries'])
 
   - task: ArchiveFiles@2
     condition: and(succeeded(), eq(variables['toolchain'], 'stable'), eq(variables['Build.SourceBranchName'], variables['release_branch']))
