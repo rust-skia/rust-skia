@@ -22,7 +22,7 @@ If both went well, the Rust binding code is available at `src/bindings.rs`, and 
 
 Because the Skia build _and_ the binding generation is quite complicated and depends on a number of factors that lie outside the Rust ecosystem, we decided to experiment with prebuilt binaries.
 
-Whenever a new version of `rust-skia` is built from the `master` branch on our CI server, the resulting Skia library, `skia-bindings` library, _and_ `bindings.rs` are uploaded to the releases tab of the [skia-binaries repository](<https://github.com/rust-skia/skia-binaries/releases>).
+Whenever a new version of `rust-skia` is built from the `release` branch on our CI server, the resulting Skia library, `skia-bindings` library, _and_ `bindings.rs` are uploaded to the releases tab of the [skia-binaries repository](<https://github.com/rust-skia/skia-binaries/releases>).
 
 And whenever the build script detects that `skia-bindings` is built from inside a crate _and_ a prebuilt archive is available that matches the repository's hash, platform, and features, it downloads the package, unpacks it, and skips the full build step of Skia and the bindings.
 
