@@ -119,17 +119,17 @@ jobs:
 
   - script: cd skia-safe && cargo test --release --features "$(features)" --target $(target) -vv
     displayName: Test skia-safe
-    condition: and(succeeded(), variables['runBinaries'])
+    condition: and(succeeded(), eq(variables['runBinaries'], True))
 
   - script: cd skia-safe && cargo run --release --features "$(features)" --target $(target) --example skia-org "$(Build.ArtifactStagingDirectory)/skia-org" $(exampleArgs)
     displayName: Generate skia-org Example Images
-    condition: and(succeeded(), ne(variables['exampleArgs'], ''), variables['runBinaries'])
+    condition: and(succeeded(), ne(variables['exampleArgs'], ''), eq(variables['runBinaries'], True))
 
   - task: PublishBuildArtifacts@1
     inputs:
       pathtoPublish: '$(Build.ArtifactStagingDirectory)/skia-org'
       artifactName: 'skia-org-examples-$(platform)-$(toolchain)'
-    condition: and(succeeded(), ne(variables['exampleArgs'], ''), variables['runBinaries'])
+    condition: and(succeeded(), ne(variables['exampleArgs'], ''), eq(variables['runBinaries'], True))
 
   - task: ArchiveFiles@2
     condition: and(succeeded(), eq(variables['toolchain'], 'stable'), eq(variables['Build.SourceBranchName'], variables['release_branch']))
