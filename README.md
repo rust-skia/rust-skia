@@ -120,7 +120,23 @@ to generate some Skia drawn PNG images in the directory `OUTPUT_DIR`. To render 
 
 `cargo run --example skia-org -- [OUTPUT_DIR] --driver opengl`
 
-And `cargo run --example skia-org -- --help` shows the drivers that are currently supported.
+And `cargo run --example skia-org -- --help` shows the drivers that are supported.
+
+Some examples:
+
+Fill, Stroke, Text:
+
+![Fill, Stroke, Text](https://rust-skia.github.io/skia-org/cpu/SkPaint-Overview/02-fill-and-stroke.png)
+
+Sweep Gradient:
+
+![Sweep Gradient](https://rust-skia.github.io/skia-org/cpu/SkPaint-Overview/08-sweep-gradient-shader.png)
+
+Dash Path Effect:
+
+![Dash Path Effect](https://rust-skia.github.io/skia-org/cpu/SkPaint-Overview/19-dash-path-effect.png)
+
+For more, you may take a look at the [rust-skia.github.io](https://github.com/rust-skia/rust-skia.github.io/tree/master/skia-org/cpu) repository.
 
 ## This project needs contributions!
 
