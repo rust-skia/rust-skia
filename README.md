@@ -10,6 +10,38 @@ Skia Submodule Status: chrome/m75 ([pending changes][skiapending]).
 
 This project attempts to provide _up to date_ safe bindings that bridge idiomatic Rust with Skia's C++ API on all major desktop, mobile, and [WebAssembly](https://en.wikipedia.org/wiki/WebAssembly) platforms, including GPU rendering support for [Vulkan](https://en.wikipedia.org/wiki/Vulkan_(API)), [Metal](https://en.wikipedia.org/wiki/Metal_(API)), and [OpenGL](https://en.wikipedia.org/wiki/OpenGL).
 
+## Status
+
+### Crate
+
+An official crate is not yet available on [crates.io](<https://crates.io/>) but every update to the `release` branch uploads new crates to the [releases tab](<https://github.com/rust-skia/rust-skia/releases>) and there is also [a Milestone](https://github.com/rust-skia/rust-skia/milestone/1) that tracks the progress.
+
+### Platforms & Build Targets
+
+- [x] Windows
+- [x] Linux Ubuntu 16 (18 should work, too).
+- [x] macOS
+- [x] Android
+- [ ] WebAssembly: [#42](https://github.com/rust-skia/rust-skia/pull/42) (help wanted).
+- [ ] iOS
+
+### Bindings & Wrappers
+
+We wrapped most part of the public Skia C++ APIs. To see what's missing, take a look at the [API Complete Milestone](<https://github.com/rust-skia/rust-skia/milestone/2>).
+
+- [x] Vector Graphics: Matrix, Rect, Point, Size, etc.
+- [x] Most drawing related classes and functions: Surface, Canvas, Paint, Path.
+- [x] [Almost all](<https://github.com/rust-skia/rust-skia/issues/99>) Effects and Shaders.
+- [x] Utility classes we think are useful.
+- [x] PDF
+- [x] SVG
+- [ ] Animation
+- [x] Vulkan
+- [x] OpenGL
+- [ ] Metal
+
+Wrappers for functions that take callbacks and virtual classes are not supported right now. While we think they should be wrapped, the use cases related seem to be rather special, so we postponed that for now.
+
 ## Building
 
 Note that the information in this section is preliminary. Please open an issue for any build problem.
@@ -60,7 +92,7 @@ Then use:
 
 `cargo build -vv`
 
-Under Linux, OpenGL libraries _may_ be missing, if that is the case, install OpenGL drivers for you graphics card, or install a mesa OpenGL package like `libgl1-mesa-dev`.
+On Linux, OpenGL libraries _may_ be missing, if that is the case, install OpenGL drivers for you graphics card, or install a mesa OpenGL package like `libgl1-mesa-dev`.
 
 Please share your build experience so that we can try to automate the build and get to the point where `cargo build` _is_ sufficient to build the bindings _including_ Skia, and if that is not possible, clearly prompts to what's missing.
 
@@ -68,7 +100,7 @@ Please share your build experience so that we can try to automate the build and 
 
 For situations in which Skia does not build or needs to be configured differently, we support some customization support in `skia-bindings/build.rs`. For more details about how to customize Skia builds, take a look at the [README of the skia-bindings package](skia-bindings/README.md).
 
-Note that official crate packages _will_ try to download prebuilt binaries from [skia-binaries](<https://github.com/rust-skia/skia-binaries/releases>) if the platform matches with one of our images we test our builds with. If the download fails, a full build of Skia is triggered.
+Note that crate packages _will_ try to download prebuilt binaries from [skia-binaries](<https://github.com/rust-skia/skia-binaries/releases>) if the platform matches with one of the binaries build on the CI. If the download fails, a full build of Skia is triggered.
 
 ### Feature `vulkan`
 
@@ -89,40 +121,6 @@ to generate some Skia drawn PNG images in the directory `OUTPUT_DIR`. To render 
 `cargo run --example skia-org -- [OUTPUT_DIR] --driver opengl`
 
 And `cargo run --example skia-org -- --help` shows the drivers that are currently supported.
-
-## Status
-
-### Crate
-
-An official crate is not yet available on [crates.io](<https://crates.io/>) but every update to the master branch releases new crates to the [releases tab](<https://github.com/rust-skia/rust-skia/releases>) and there is also a [a Milestone](https://github.com/rust-skia/rust-skia/milestone/1) to track the progress.
-
-### Platforms
-
-- [x] Windows
-- [x] Linux Ubuntu 16 (18 should work, too).
-- [x] macOS X
-- [ ] WebAssembly: [#42](https://github.com/rust-skia/rust-skia/pull/42) (help wanted).
-- [ ] Android
-- [ ] iOS
-
-### Bindings
-
-We wrapped a large part of the public Skia C++ APIs. To see what's missing, take a look at the [API Complete Milestone](<https://github.com/rust-skia/rust-skia/milestone/2>).
-
-### Features
-
-- [x] Vector Graphics: Matrix, Rect, Point, Size, etc.
-- [x] Most drawing related classes and functions: Surface, Canvas, Paint, Path.
-- [x] [Almost all](<https://github.com/rust-skia/rust-skia/issues/99>) Effects and Shaders.
-- [x] Utility classes we think are useful.
-- [x] PDF
-- [x] SVG
-- [ ] Animation
-- [x] Vulkan
-- [x] OpenGL
-- [ ] Metal
-
-Wrappers for functions that take callbacks and virtual classes that need to be implemented on the Rust side are not supported right now. While we think they should be wrapped, the use cases related seem to be rather special, so we postponed that for now.
 
 ## This project needs contributions!
 
