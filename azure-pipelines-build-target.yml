@@ -1,0 +1,67 @@
+parameters:
+  # defaults:
+  runBinaries: false
+  runClippy: false
+  exampleArgs: ''
+
+steps:
+  - bash: |
+      rustup target add ${{ parameters.target }}
+    displayName: 'Install target ${{ parameters.target }}'
+
+  # Note: features are ignored when set in the workspace. This is a known bug in cargo (#5015), so cd into skia-safe instead.
+  - bash: |
+      set -e
+      cd skia-safe && cargo build --release --features "$(features)" --all-targets --target ${{ parameters.target }} -vv
+      export SKIA_BINARIES_TAG=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/tag.txt")
+      export SKIA_BINARIES_KEY=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/key.txt")
+      echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
+      echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+    displayName: 'Build all targets in skia-safe for ${{ parameters.target }}'
+
+  # Note: Clippy freshness check is independent from the freshness check of the build.
+  # So we check the skia-bindings with the regular set of checks and skia-safe with warnings as errors after that.
+  # Also: Windows is disabled for now, because the clippy freshness
+  # check does seems to _always_ pick up skia-bindings when we want to check skia-safe with -D warnings.
+  - ${{ if eq(parameters.runClippy, True) }}:
+    - bash: |
+        set -e
+        (cd skia-bindings && cargo clippy --release --features "$(features)" --target ${{ parameters.target }})
+        (cd skia-safe && cargo clippy --release --features "$(features)" --all-targets --target ${{ parameters.target }} -- -D warnings)
+      displayName: 'Clippy skia-bindings and skia-safe'
+
+  - ${{ if eq(parameters.runBinaries, True) }}:
+    - script: cd skia-safe && cargo test --release --features "$(features)" --target ${{ parameters.target }} -vv
+      displayName: Test skia-safe
+
+    - script: cd skia-safe && cargo run --release --features "$(features)" --target ${{ parameters.target }} --example skia-org "$(Build.ArtifactStagingDirectory)/skia-org" ${{ parameters.exampleArgs }}
+      displayName: 'Generate skia-org example images'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathtoPublish: '$(Build.ArtifactStagingDirectory)/skia-org'
+        artifactName: 'skia-org-examples-$(platform)-$(toolchain)'
+
+  - task: ArchiveFiles@2
+    condition: and(succeeded(), eq(variables['toolchain'], 'stable'), eq(variables['Build.SourceBranchName'], variables['release_branch']))
+    displayName: 'Archive binaries (${{ parameters.target }})'
+    inputs:
+      rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/skia-binaries'
+      archiveType: 'tar'
+      tarCompression: 'gz'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/skia-binaries-$(SKIA_BINARIES_KEY).tar.gz'
+
+  - task: GithubRelease@0
+    condition: and(succeeded(), eq(variables['toolchain'], 'stable'), eq(variables['Build.SourceBranchName'], variables['release_branch']))
+    displayName: 'Release to GitHub rust-skia/skia-binaries (${{ parameters.target }})'
+    inputs:
+      action: 'edit'
+      gitHubConnection: 'rust-skia-github-connection'
+      repositoryName: 'rust-skia/skia-binaries'
+      tagSource: 'manual'
+      target: 'master'
+      tag: '$(SKIA_BINARIES_TAG)'
+      assets: '$(Build.ArtifactStagingDirectory)/skia-binaries-$(SKIA_BINARIES_KEY).tar.gz'
+      assetUploadMode: 'replace'
+      isPreRelease: true
+      addChangeLog: false
