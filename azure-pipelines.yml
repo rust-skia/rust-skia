@@ -8,31 +8,18 @@ stages:
 #      platform: 'Linux'
 #      image: 'ubuntu-16.04'
 #      target: 'x86_64-unknown-linux-gnu'
-#      runBinaries: true
-
-#  - template: 'azure-pipelines-template.yml'
-#    parameters:
-#      name: 'macOS'
-#      platform: 'macOS'
-#      image: 'macOS-10.14'
-#      target: 'x86_64-apple-darwin'
-#      runBinaries: true
-
-#  - template: 'azure-pipelines-template.yml'
-#    parameters:
-#      name: 'Windows'
-#      platform: 'Windows'
-#      image: 'windows-2019'
-#      target: 'x86_64-pc-windows-msvc'
-#      runBinaries: true
 
   - template: 'azure-pipelines-template.yml'
     parameters:
-      name: 'macOS_Android'
       platform: 'macOS'
+      platformTarget: 'x86_64-apple-darwin'
       image: 'macOS-10.14'
-      target: 'aarch64-linux-android'
-      runBinaries: false
+
+#  - template: 'azure-pipelines-template.yml'
+#    parameters:
+#      platform: 'Windows'
+#      image: 'windows-2019'
+#      target: 'x86_64-pc-windows-msvc'
 
 - stage: 'Package'
   condition: and(succeeded(), eq(variables['build.SourceBranchName'], 'release'))
