@@ -375,7 +375,9 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         //       a customized test run that ignores failures skia-safe
         //       works around.
         .layout_tests(false)
-        .default_enum_style(EnumVariation::Rust)
+        .default_enum_style(EnumVariation::Rust {
+            non_exhaustive: false,
+        })
         .constified_enum(".*Mask")
         .constified_enum(".*Flags")
         .constified_enum(".*Bits")
