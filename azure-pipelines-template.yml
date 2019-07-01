@@ -10,9 +10,11 @@ jobs:
       beta:
         toolchain: beta
         features: ''
+        exampleArgs: ''
       stable-vulkan:
         toolchain: stable
         features: 'vulkan'
+        exampleArgs: ''
       stable-svg:
         toolchain: stable
         features: 'svg'
@@ -99,8 +101,8 @@ jobs:
 
   - template: 'azure-pipelines-build-target.yml'
     parameters:
-      target: $(platformTarget)
-      exampleArgs: $(exampleArgs)
+      target: '$(platformTarget)'
+      exampleArgs: '$(exampleArgs)'
       ${{ if ne(parameters.platform, 'Windows') }}:
         runClippy: true
       runBinaries: true

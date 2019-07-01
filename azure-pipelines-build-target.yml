@@ -34,13 +34,14 @@ steps:
     - script: cd skia-safe && cargo test --release --features "$(features)" --target ${{ parameters.target }} -vv
       displayName: Test skia-safe
 
-    - script: cd skia-safe && cargo run --release --features "$(features)" --target ${{ parameters.target }} --example skia-org "$(Build.ArtifactStagingDirectory)/skia-org" ${{ parameters.exampleArgs }}
-      displayName: 'Generate skia-org example images'
+    - ${{ if ne(parameters.exampleArgs, '') }}:
+      - script: cd skia-safe && cargo run --release --features "$(features)" --target ${{ parameters.target }} --example skia-org "$(Build.ArtifactStagingDirectory)/skia-org" ${{ parameters.exampleArgs }}
+        displayName: 'Generate skia-org example images'
 
-    - task: PublishBuildArtifacts@1
-      inputs:
-        pathtoPublish: '$(Build.ArtifactStagingDirectory)/skia-org'
-        artifactName: 'skia-org-examples-$(platform)-$(toolchain)'
+      - task: PublishBuildArtifacts@1
+        inputs:
+          pathtoPublish: '$(Build.ArtifactStagingDirectory)/skia-org'
+          artifactName: 'skia-org-examples-$(platform)-$(toolchain)'
 
   - task: ArchiveFiles@2
     condition: and(succeeded(), eq(variables['toolchain'], 'stable'), eq(variables['Build.SourceBranchName'], variables['release_branch']))
