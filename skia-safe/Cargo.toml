@@ -19,7 +19,8 @@ svg = ["skia-bindings/svg"]
 [dependencies]
 bitflags = "1.0.4"
 skia-bindings = { version = "0.12.8", path = "../skia-bindings" }
-lazy_static = "1.3.0"
+# TODO: 1.3 breaks offscreen_gl_context
+lazy_static = "=1.2"
 
 [dev-dependencies]
 # for skia-org
