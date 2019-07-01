@@ -21,7 +21,7 @@ An official crate is not yet available on [crates.io](<https://crates.io/>) but 
 - [x] Windows
 - [x] Linux Ubuntu 16 (18 should work, too).
 - [x] macOS
-- [x] Android
+- [x] Android (macOS -> aarm64, contributed by [@DenisKolodin](https://github.com/DenisKolodin))
 - [ ] WebAssembly: [#42](https://github.com/rust-skia/rust-skia/pull/42) (help wanted).
 - [ ] iOS
 
@@ -96,6 +96,22 @@ On Linux, OpenGL libraries _may_ be missing, if that is the case, install OpenGL
 
 Please share your build experience so that we can try to automate the build and get to the point where `cargo build` _is_ sufficient to build the bindings _including_ Skia, and if that is not possible, clearly prompts to what's missing.
 
+### Android
+
+Cross compilation to Android is supported on macOS hosts for targeting 64 bit ARM architectures (`aarch64`):
+
+1. Download the r18b NDK from: https://developer.android.com/ndk/downloads/older_releases.html
+2. Create a toolchain for the compilation:
+   `build/tools/make_standalone_toolchain.py --arch arm64 --install-dir /tmp/ndk`
+3. Compile your code for the `aarch64-linux-android` target with:
+
+```bash
+ANDROID_NDK=~/path/to/android-ndk-r18b PATH=$PATH:/tmp/ndk/bin cargo build --target aarch64-linux-android
+```
+_Notes:_
+
+- It doesn't work for the latest 19 NDK, because Skia doesn't support it yet.
+
 ### Skia
 
 For situations in which Skia does not build or needs to be configured differently, we support some customization support in `skia-bindings/build.rs`. For more details about how to customize Skia builds, take a look at the [README of the skia-bindings package](skia-bindings/README.md).
@@ -144,8 +160,8 @@ If you'd like to help with the bindings, take a look at the [Wiki](https://githu
 
 ## Maintainers
 
-- LongYinan (@Brooooooklyn)
-- Armin (@pragmatrix)
+- LongYinan ([@Brooooooklyn](https://github.com/Brooooooklyn))
+- Armin ([@pragmatrix](https://github.com/pragmatrix))
 
 ## License
 
