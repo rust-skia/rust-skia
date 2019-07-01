@@ -2,12 +2,12 @@ stages:
 
 - stage: 'Build'
   jobs:
-#  - template: 'azure-pipelines-template.yml'
-#    parameters:
-#      name: 'Linux'
-#      platform: 'Linux'
-#      image: 'ubuntu-16.04'
-#      target: 'x86_64-unknown-linux-gnu'
+  - template: 'azure-pipelines-template.yml'
+    parameters:
+      name: 'Linux'
+      platform: 'Linux'
+      image: 'ubuntu-16.04'
+      target: 'x86_64-unknown-linux-gnu'
 
   - template: 'azure-pipelines-template.yml'
     parameters:
@@ -15,11 +15,11 @@ stages:
       platformTarget: 'x86_64-apple-darwin'
       image: 'macOS-10.14'
 
-#  - template: 'azure-pipelines-template.yml'
-#    parameters:
-#      platform: 'Windows'
-#      image: 'windows-2019'
-#      target: 'x86_64-pc-windows-msvc'
+  - template: 'azure-pipelines-template.yml'
+    parameters:
+      platform: 'Windows'
+      image: 'windows-2019'
+      target: 'x86_64-pc-windows-msvc'
 
 - stage: 'Package'
   condition: and(succeeded(), eq(variables['build.SourceBranchName'], 'release'))
