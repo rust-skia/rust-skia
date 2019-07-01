@@ -101,7 +101,8 @@ jobs:
     parameters:
       target: $(platformTarget)
       exampleArgs: $(exampleArgs)
-      runClippy: true
+      ${{ if ne(parameters.platform, 'Windows') }}:
+        runClippy: true
       runBinaries: true
 
   - ${{ if eq(parameters.platform, 'macOS') }}:
