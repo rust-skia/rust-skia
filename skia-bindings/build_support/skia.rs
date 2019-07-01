@@ -167,22 +167,19 @@ impl FinalBuildConfiguration {
 
             let mut flags: Vec<&str> = vec![];
 
-            if build.on_windows {
-                // Rust's msvc toolchain supports uses msvcrt.dll by
-                // default for release and _debug_ builds.
-                flags.push("/MD");
-                // Tell Skia's build system where LLVM is supposed to be located.
-                // TODO: this should be checked as a prerequisite.
-                args.push(("clang_win", quote("C:/Program Files/LLVM")));
-            }
-
             // target specific gn args.
 
             match cargo::target().as_strs() {
-                (_, _, "windows", Some("msvc")) => {
+                (_, _, "windows", Some("msvc")) if build.on_windows => {
                     if let Some(win_vc) = vs::resolve_win_vc() {
                         args.push(("win_vc", quote(win_vc.to_str().unwrap())))
                     }
+                    // Rust's msvc toolchain links to msvcrt.dll by
+                    // default for release and _debug_ builds.
+                    flags.push("/MD");
+                    // Tell Skia's build system where LLVM is supposed to be located.
+                    // TODO: this should be checked as a prerequisite.
+                    args.push(("clang_win", quote("C:/Program Files/LLVM")));
                 }
                 (mut arch, _, "android", _) => {
                     args.push(("ndk", quote(&android::ndk())));
@@ -196,7 +193,10 @@ impl FinalBuildConfiguration {
 
             if build.keep_inline_functions {
                 // sadly, this also disables inlining and is probably a real performance bummer.
-                if build.on_windows {
+                if build.on_windows
+                    && target.system == "windows"
+                    && target.abi == Some("msvc".into())
+                {
                     flags.push("/Ob0")
                 } else {
                     flags.push("-fno-inline-functions");
