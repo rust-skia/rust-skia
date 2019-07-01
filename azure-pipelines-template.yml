@@ -1,5 +1,5 @@
 jobs:
-- job: "${{ parameters.name }}"
+- job: "${{ parameters.platform }}"
 
   strategy:
     matrix:
