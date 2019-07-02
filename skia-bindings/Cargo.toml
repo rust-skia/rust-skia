@@ -24,7 +24,7 @@ svg = []
 
 [build-dependencies]
 cc = "1.0.35"
-bindgen = "=0.49.2"
+bindgen = "0.49.0"
 
 # for downloading and extracting prebuilt binaries:
 reqwest = "0.9.16"
