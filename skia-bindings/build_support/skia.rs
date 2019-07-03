@@ -529,6 +529,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         cc_build.target(&arch);
         builder = builder
             .clang_arg(format!("--sysroot={}/sysroot", ndk))
+            .clang_arg(format!("-I{}/sysroot/usr/include/{}", ndk, arch))
             .clang_arg(format!(
                 "-isystem{}/sources/cxx-stl/llvm-libc++/include",
                 ndk
