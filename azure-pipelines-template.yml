@@ -28,6 +28,7 @@ jobs:
     platform: ${{ parameters.platform }}
     platformTarget: ${{ parameters.platformTarget }}
     image: ${{ parameters.image }}
+    androidNDK: ${{ parameters.androidNDK }}
     rust_backtrace: 1
     release_branch: 'release'
 
