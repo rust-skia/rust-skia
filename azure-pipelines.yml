@@ -6,12 +6,14 @@ stages:
     parameters:
       platform: 'Linux'
       platformTarget: 'x86_64-unknown-linux-gnu'
+      androidNDK: 'r18b-linux-x86_64'
       image: 'ubuntu-16.04'
 
   - template: 'azure-pipelines-template.yml'
     parameters:
       platform: 'macOS'
       platformTarget: 'x86_64-apple-darwin'
+      androidNDK: 'r18b-darwin-x86_64'
       image: 'macOS-10.14'
 
   - template: 'azure-pipelines-template.yml'
