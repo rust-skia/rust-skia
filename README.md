@@ -98,7 +98,7 @@ Please share your build experience so that we can try to automate the build and 
 
 ### Android
 
-Cross compilation to Android is supported on macOS hosts for targeting 64 bit ARM architectures (`aarch64`):
+Cross compilation to Android is supported on macOS and Linux hosts for targeting 64 bit ARM architectures (`aarch64`):
 
 1. Download the r18b NDK from: https://developer.android.com/ndk/downloads/older_releases.html
 2. Create a toolchain for the compilation:
