@@ -21,7 +21,7 @@ An official crate is not yet available on [crates.io](<https://crates.io/>) but 
 - [x] Windows
 - [x] Linux Ubuntu 16 (18 should work, too).
 - [x] macOS
-- [x] Android (macOS | Linux -> aarm64, contributed by [@DenisKolodin](https://github.com/DenisKolodin))
+- [x] Android (macOS | Linux -> aarch64, contributed by [@DenisKolodin](https://github.com/DenisKolodin))
 - [ ] WebAssembly: [#42](https://github.com/rust-skia/rust-skia/pull/42) (help wanted).
 - [ ] iOS
 
