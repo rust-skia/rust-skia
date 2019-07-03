@@ -1,3 +1,7 @@
+parameters:
+  # defaults:
+  androidNDK: ''
+
 jobs:
 - job: "${{ parameters.platform }}"
 
@@ -80,11 +84,11 @@ jobs:
         "C:/Program Files/LLVM/bin/clang.exe" --version
       displayName: LLVM/Clang Version
 
-  - ${{ if eq(parameters.platform, 'macOS') }}:
-    # Android NDK (macOS only for now)
+  - ${{ if ne(parameters.androidNDK, '') }}:
+    # Android NDK
     - bash: |
         set -e
-        (cd /tmp && curl -sSf -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-r18b-darwin-x86_64.zip)
+        (cd /tmp && curl -sSf -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-$(androidNDK).zip)
         (cd /tmp && unzip android-ndk.zip)
         (cd /tmp/android-ndk-r18b && build/tools/make_standalone_toolchain.py --arch arm64 --install-dir /tmp/ndk)
         echo "##vso[task.setvariable variable=PATH;]${PATH}:/tmp/ndk/bin"
