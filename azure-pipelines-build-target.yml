@@ -10,9 +10,11 @@ steps:
     displayName: 'Install target ${{ parameters.target }}'
 
   # Note: features are ignored when set in the workspace. This is a known bug in cargo (#5015), so cd into skia-safe instead.
+  # Also be sure that the bindings.rs file is rebuilt (https://github.com/rust-skia/rust-skia/issues/10)
   - bash: |
       set -e
-      cd skia-safe && cargo build --release --features "$(features)" --all-targets --target ${{ parameters.target }} -vv
+      touch skia-bindings/build.rs
+      (cd skia-safe && cargo build --release --features "$(features)" --all-targets --target ${{ parameters.target }} -vv)
       export SKIA_BINARIES_TAG=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/tag.txt")
       export SKIA_BINARIES_KEY=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/key.txt")
       echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
