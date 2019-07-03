@@ -106,8 +106,15 @@ jobs:
       ${{ if ne(parameters.platform, 'Windows') }}:
         runClippy: true
       runBinaries: true
+      releaseBinaries: true
 
   - ${{ if eq(parameters.platform, 'macOS') }}:
+    - template: 'azure-pipelines-build-target.yml'
+      parameters:
+        target: 'aarch64-linux-android'
+        releaseBinaries: true
+
+  - ${{ if eq(parameters.platform, 'Linux') }}:
     - template: 'azure-pipelines-build-target.yml'
       parameters:
         target: 'aarch64-linux-android'
