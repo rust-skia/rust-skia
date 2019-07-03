@@ -111,7 +111,7 @@ ANDROID_NDK=~/path/to/android-ndk-r18b PATH=$PATH:/tmp/ndk/bin cargo build --tar
 _Notes:_
 
 - It doesn't work for the latest 19 NDK, because Skia doesn't support it yet.
-- Rebuilding skia-bindings with a different target may cause linker errors, in that case `touch skia-bindings/build.rs` will force a rebuild (https://github.com/rust-skia/rust-skia/issues/10).
+- Rebuilding skia-bindings with a different target may cause linker errors, in that case `touch skia-bindings/build.rs` will force a rebuild ([#10](https://github.com/rust-skia/rust-skia/issues/10)).
 
 ### Skia
 
