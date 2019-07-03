@@ -24,7 +24,9 @@ svg = []
 
 [build-dependencies]
 cc = "1.0.35"
-bindgen = "0.50"
+# we'd like to reference specific bindgen versions here, because the generated
+# bindings are platform dependent and critical to this project.
+bindgen = "=0.50.0"
 
 # for downloading and extracting prebuilt binaries:
 reqwest = "0.9.16"
