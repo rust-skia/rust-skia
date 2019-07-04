@@ -1,6 +1,6 @@
 //! Full build support for the Skia library, SkiaBindings library and bindings.rs file.
 
-use crate::build_support::{android, cargo, vs};
+use crate::build_support::{android, cargo, ios, vs};
 use bindgen::EnumVariation;
 use cc::Build;
 use std::env;
@@ -553,11 +553,12 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
                 .clang_arg(format!("--target={}", target));
         }
         (arch, "apple", "ios", _) => {
+            let sdk_path = ios::sdk_path();
             builder = builder
                 .clang_arg("-miphoneos-version-min=7.0")
                 .clang_arg("-fembed-bitcode")
                 .clang_args(&["-arch", clang::target_arch(arch)])
-                .clang_args(&["-isysroot", "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.2.sdk"]);
+                .clang_args(&["-isysroot", sdk_path.to_str().unwrap()]);
         }
         _ => {}
     }
