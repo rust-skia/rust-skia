@@ -124,6 +124,11 @@ jobs:
         target: 'aarch64-apple-ios'
         releaseBinaries: true
 
+    - template: 'azure-pipelines-build-target.yml'
+      parameters:
+        target: 'x86_64-apple-ios'
+        releaseBinaries: true
+
   - ${{ if eq(parameters.platform, 'Linux') }}:
     - template: 'azure-pipelines-build-target.yml'
       parameters:

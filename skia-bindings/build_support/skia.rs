@@ -1,6 +1,6 @@
 //! Full build support for the Skia library, SkiaBindings library and bindings.rs file.
 
-use crate::build_support::{android, cargo, ios, vs};
+use crate::build_support::{android, cargo, clang, ios, vs};
 use bindgen::EnumVariation;
 use cc::Build;
 use std::env;
@@ -218,10 +218,10 @@ impl FinalBuildConfiguration {
                 .collect()
         };
 
-        return FinalBuildConfiguration {
+        FinalBuildConfiguration {
             gn_args,
             definitions: build.definitions.clone(),
-        };
+        }
     }
 }
 
@@ -553,12 +553,9 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
                 .clang_arg(format!("--target={}", target));
         }
         (arch, "apple", "ios", _) => {
-            let sdk_path = ios::sdk_path();
-            builder = builder
-                .clang_arg("-miphoneos-version-min=7.0")
-                .clang_arg("-fembed-bitcode")
-                .clang_args(&["-arch", clang::target_arch(arch)])
-                .clang_args(&["-isysroot", sdk_path.to_str().unwrap()]);
+            for arg in ios::additional_clang_args(arch) {
+                builder = builder.clang_arg(arg);
+            }
         }
         _ => {}
     }
@@ -749,16 +746,5 @@ pub(crate) mod definitions {
         let mut uniques = HashSet::new();
         definitions.retain(|e| uniques.insert(e.0.clone()));
         definitions
-    }
-}
-
-mod clang {
-    /// Convert a Rust target architecture identifier to a clang target architecture identifier.
-    pub fn target_arch(arch: &str) -> &str {
-        if arch == "aarch64" {
-            "arm64"
-        } else {
-            arch
-        }
     }
 }

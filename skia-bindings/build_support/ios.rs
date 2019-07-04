@@ -1,11 +1,38 @@
+use crate::build_support::clang;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
 
-pub fn sdk_path() -> PathBuf {
+// TODO: add support for 32 bit devices and simulators.
+
+pub fn additional_clang_args(arch: &str) -> Vec<String> {
+    let mut args: Vec<String> = Vec::new();
+
+    if is_simulator(arch) {
+        args.push("-mios-simulator-version-min=7.0".into());
+        args.push("-m64".into());
+    } else {
+        args.push("-miphoneos-version-min=7.0".into());
+        args.push("-arch".into());
+        args.push(clang::target_arch(arch).into());
+    }
+
+    args.push("-isysroot".into());
+    args.push(sdk_path(arch).to_str().unwrap().into());
+    args.push("-fembed-bitcode".into());
+
+    args
+}
+
+/// Resolve the iOS SDK path by starting xcrun.
+fn sdk_path(arch: &str) -> PathBuf {
     let sdk_path = Command::new("xcrun")
         .arg("--show-sdk-path")
         .arg("--sdk")
-        .arg("iphoneos")
+        .arg(if is_simulator(arch) {
+            "iphonesimulator"
+        } else {
+            "iphoneos"
+        })
         .stderr(Stdio::inherit())
         .output()
         .expect("failed to invoke xcrun")
@@ -13,4 +40,12 @@ pub fn sdk_path() -> PathBuf {
 
     let string = String::from_utf8(sdk_path).expect("failed to resolve iOS SDK path");
     PathBuf::from(string.trim())
+}
+
+/// Returns true if the target architecture indicates that a simulator build is needed.
+fn is_simulator(arch: &str) -> bool {
+    match arch {
+        "x86_64" => true,
+        _ => false,
+    }
 }
