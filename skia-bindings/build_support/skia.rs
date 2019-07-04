@@ -22,6 +22,7 @@ impl Default for BuildConfiguration {
         let all_skia_libs = {
             match cargo::target().as_strs() {
                 (_, "apple", "darwin", _) => true,
+                (_, "apple", "ios", _) => true,
                 _ => false,
             }
         };
@@ -181,12 +182,13 @@ impl FinalBuildConfiguration {
                     // TODO: this should be checked as a prerequisite.
                     args.push(("clang_win", quote("C:/Program Files/LLVM")));
                 }
-                (mut arch, _, "android", _) => {
+                (arch, "linux", "android", _) => {
                     args.push(("ndk", quote(&android::ndk())));
-                    if arch == "aarch64" {
-                        arch = "arm64";
-                    }
-                    args.push(("target_cpu", quote(arch)));
+                    args.push(("target_cpu", quote(target_cpu(arch))));
+                }
+                (arch, "apple", "ios", _) => {
+                    args.push(("target_os", quote("ios")));
+                    args.push(("target_cpu", quote(target_cpu(arch))));
                 }
                 _ => {}
             }
@@ -216,9 +218,17 @@ impl FinalBuildConfiguration {
                 .collect()
         };
 
-        FinalBuildConfiguration {
+        return FinalBuildConfiguration {
             gn_args,
             definitions: build.definitions.clone(),
+        };
+
+        fn target_cpu(arch: &str) -> &str {
+            if arch == "aarch64" {
+                "arm64"
+            } else {
+                arch
+            }
         }
     }
 }
@@ -266,8 +276,19 @@ impl BinariesConfiguration {
                     "usp10", "ole32", "user32", "gdi32", "fontsub", "opengl32",
                 ]);
             }
-            (_, _, "android", _) => {
+            (_, "linux", "android", _) => {
                 link_libraries.extend(vec!["log", "android", "EGL", "GLESv2"]);
+            }
+            (_, "apple", "ios", _) => {
+                link_libraries.extend(vec![
+                    "c++",
+                    "framework=MobileCoreServices",
+                    "framework=CoreFoundation",
+                    "framework=CoreGraphics",
+                    "framework=CoreText",
+                    "framework=ImageIO",
+                    "framework=UIKit",
+                ]);
             }
             _ => panic!("unsupported target: {:?}", cargo::target()),
         };
@@ -525,18 +546,29 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
     }
 
     let target = cargo::target();
-    if target.system == "android" {
-        let ndk = android::ndk();
-        let arch = target.to_string();
-        cc_build.target(&arch);
-        builder = builder
-            .clang_arg(format!("--sysroot={}/sysroot", ndk))
-            .clang_arg(format!("-I{}/sysroot/usr/include/{}", ndk, arch))
-            .clang_arg(format!(
-                "-isystem{}/sources/cxx-stl/llvm-libc++/include",
-                ndk
-            ))
-            .clang_arg(format!("--target={}", arch));
+    match target.as_strs() {
+        (_, "linux", "android", _) => {
+            let ndk = android::ndk();
+            let arch = target.to_string();
+            cc_build.target(&arch);
+            builder = builder
+                .clang_arg(format!("--sysroot={}/sysroot", ndk))
+                .clang_arg(format!("-I{}/sysroot/usr/include/{}", ndk, arch))
+                .clang_arg(format!(
+                    "-isystem{}/sources/cxx-stl/llvm-libc++/include",
+                    ndk
+                ))
+                .clang_arg(format!("--target={}", arch));
+        }
+        (_, "apple", "ios", _) => {
+            let arch = target.to_string();
+            builder = builder
+                .clang_arg("-miphoneos-version-min=7.0")
+                .clang_arg("-fembed-bitcode")
+                .clang_args(&["-arch", "arm64"])
+                .clang_args(&["-isysroot", "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.2.sdk"]);
+        }
+        _ => {}
     }
 
     cc_build.compile(BINDINGS_LIB_NAME);
