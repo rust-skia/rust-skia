@@ -184,11 +184,11 @@ impl FinalBuildConfiguration {
                 }
                 (arch, "linux", "android", _) => {
                     args.push(("ndk", quote(&android::ndk())));
-                    args.push(("target_cpu", quote(target_cpu(arch))));
+                    args.push(("target_cpu", quote(clang::target_arch(arch))));
                 }
                 (arch, "apple", "ios", _) => {
                     args.push(("target_os", quote("ios")));
-                    args.push(("target_cpu", quote(target_cpu(arch))));
+                    args.push(("target_cpu", quote(clang::target_arch(arch))));
                 }
                 _ => {}
             }
@@ -222,14 +222,6 @@ impl FinalBuildConfiguration {
             gn_args,
             definitions: build.definitions.clone(),
         };
-
-        fn target_cpu(arch: &str) -> &str {
-            if arch == "aarch64" {
-                "arm64"
-            } else {
-                arch
-            }
-        }
     }
 }
 
@@ -558,14 +550,13 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
                     "-isystem{}/sources/cxx-stl/llvm-libc++/include",
                     ndk
                 ))
-                .clang_arg(format!("--target={}", arch));
+                .clang_arg(format!("--target={}", target));
         }
-        (_, "apple", "ios", _) => {
-            let arch = target.to_string();
+        (arch, "apple", "ios", _) => {
             builder = builder
                 .clang_arg("-miphoneos-version-min=7.0")
                 .clang_arg("-fembed-bitcode")
-                .clang_args(&["-arch", "arm64"])
+                .clang_args(&["-arch", clang::target_arch(arch)]
                 .clang_args(&["-isysroot", "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.2.sdk"]);
         }
         _ => {}
@@ -757,5 +748,16 @@ pub(crate) mod definitions {
         let mut uniques = HashSet::new();
         definitions.retain(|e| uniques.insert(e.0.clone()));
         definitions
+    }
+}
+
+mod clang {
+    /// Convert a Rust target architecture identifier to a clang target architecture identifier.
+    pub fn target_arch(arch: &str) -> &str {
+        if arch == "aarch64" {
+            "arm64"
+        } else {
+            arch
+        }
     }
 }
