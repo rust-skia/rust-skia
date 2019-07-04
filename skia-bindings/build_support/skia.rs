@@ -541,11 +541,11 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
     match target.as_strs() {
         (_, "linux", "android", _) => {
             let ndk = android::ndk();
-            let arch = target.to_string();
-            cc_build.target(&arch);
+            let target = target.to_string();
+            cc_build.target(&target);
             builder = builder
                 .clang_arg(format!("--sysroot={}/sysroot", ndk))
-                .clang_arg(format!("-I{}/sysroot/usr/include/{}", ndk, arch))
+                .clang_arg(format!("-I{}/sysroot/usr/include/{}", ndk, target))
                 .clang_arg(format!(
                     "-isystem{}/sources/cxx-stl/llvm-libc++/include",
                     ndk
@@ -556,7 +556,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
             builder = builder
                 .clang_arg("-miphoneos-version-min=7.0")
                 .clang_arg("-fembed-bitcode")
-                .clang_args(&["-arch", clang::target_arch(arch)]
+                .clang_args(&["-arch", clang::target_arch(arch)])
                 .clang_args(&["-isysroot", "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.2.sdk"]);
         }
         _ => {}
