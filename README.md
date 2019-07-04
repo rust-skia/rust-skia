@@ -22,8 +22,8 @@ An official crate is not yet available on [crates.io](<https://crates.io/>) but 
 - [x] Linux Ubuntu 16 (18 should work, too).
 - [x] macOS
 - [x] Android (macOS | Linux -> aarch64, contributed by [@DenisKolodin](https://github.com/DenisKolodin))
+- [x] iOS
 - [ ] WebAssembly: [#42](https://github.com/rust-skia/rust-skia/pull/42) (help wanted).
-- [ ] iOS
 
 ### Bindings & Wrappers
 
@@ -112,6 +112,10 @@ _Notes:_
 
 - It doesn't work for the latest 19 NDK, because Skia doesn't support it yet.
 - Rebuilding skia-bindings with a different target may cause linker errors, in that case `touch skia-bindings/build.rs` will force a rebuild ([#10](https://github.com/rust-skia/rust-skia/issues/10)).
+
+### iOS
+
+Compilation to iOS is supported on macOS targeting the iOS simulator (`--target x86_64-apple-ios`) and 64 bit ARM devices (`--target aarch64-apple-ios`).
 
 ### Skia
 
