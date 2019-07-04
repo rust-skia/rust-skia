@@ -3,9 +3,9 @@
 use crate::build_support::{android, cargo, clang, ios, vs};
 use bindgen::EnumVariation;
 use cc::Build;
-use std::env;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+use std::{env, fs};
 
 const BINDINGS_LIB_NAME: &str = "skia-bindings";
 const REPOSITORY_CLONE_URL: &str = "https://github.com/rust-skia/rust-skia.git";
