@@ -140,19 +140,6 @@ impl FinalBuildConfiguration {
                 ("cxx", quote("clang++")),
             ];
 
-            if build.feature_svg {
-                args.push(("skia_use_expat", yes()));
-                args.push(("skia_use_system_expat", no()));
-            } else {
-                args.push(("skia_use_expat", no()));
-            }
-
-            let target = cargo::target();
-            if target.system == "android" {
-                args.push(("skia_use_system_freetype2", no()));
-                args.push(("skia_enable_fontmgr_android", yes()));
-            }
-
             // further flags that limit the components of Skia debug builds.
             if !build.skia_release {
                 args.push(("skia_enable_atlas_text", no()));
@@ -169,10 +156,11 @@ impl FinalBuildConfiguration {
             }
 
             let mut flags: Vec<&str> = vec![];
+            let mut use_expat = build.feature_svg;
 
             // target specific gn args.
-
-            match cargo::target().as_strs() {
+            let target = cargo::target();
+            match target.as_strs() {
                 (_, _, "windows", Some("msvc")) if build.on_windows => {
                     if let Some(win_vc) = vs::resolve_win_vc() {
                         args.push(("win_vc", quote(win_vc.to_str().unwrap())))
@@ -187,12 +175,25 @@ impl FinalBuildConfiguration {
                 (arch, "linux", "android", _) => {
                     args.push(("ndk", quote(&android::ndk())));
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
+                    args.push(("skia_use_system_freetype2", no()));
+                    args.push(("skia_enable_fontmgr_android", yes()));
+                    // Enabling fontmgr_android implicitly enables expat.
+                    // We make this explicit to avoid relying on an expat installed
+                    // in the system.
+                    use_expat = true;
                 }
                 (arch, "apple", "ios", _) => {
                     args.push(("target_os", quote("ios")));
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
                 }
                 _ => {}
+            }
+
+            if use_expat {
+                args.push(("skia_use_expat", yes()));
+                args.push(("skia_use_system_expat", no()));
+            } else {
+                args.push(("skia_use_expat", no()));
             }
 
             if build.keep_inline_functions {
