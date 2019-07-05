@@ -110,11 +110,6 @@ impl FinalBuildConfiguration {
                     "is_official_build",
                     if build.skia_release { yes() } else { no() },
                 ),
-                (
-                    "skia_use_expat",
-                    if build.feature_svg { yes() } else { no() },
-                ),
-                ("skia_use_system_expat", no()),
                 ("skia_use_icu", no()),
                 ("skia_use_system_libjpeg_turbo", no()),
                 ("skia_use_system_libpng", no()),
@@ -144,6 +139,13 @@ impl FinalBuildConfiguration {
                 ("cc", quote("clang")),
                 ("cxx", quote("clang++")),
             ];
+
+            if build.feature_svg {
+                args.push(("skia_use_expat", yes()));
+                args.push(("skia_use_system_expat", no()));
+            } else {
+                args.push(("skia_use_expat", no()));
+            }
 
             let target = cargo::target();
             if target.system == "android" {
