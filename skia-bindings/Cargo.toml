@@ -19,6 +19,7 @@ include = [ "Cargo.toml", "build.rs", "build_support.rs", "build_support/**/*.rs
 default = []
 vulkan = []
 svg = []
+shaper = []
 
 [dependencies]
 
