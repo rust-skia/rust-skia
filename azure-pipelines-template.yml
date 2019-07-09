@@ -23,6 +23,10 @@ jobs:
         toolchain: stable
         features: 'svg'
         exampleArgs: '--driver svg'
+      stable-shaper:
+        toolchain: stable
+        features: 'shaper'
+        exampleArgs: ''
 
   variables:
     platform: ${{ parameters.platform }}
