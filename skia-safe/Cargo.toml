@@ -15,6 +15,7 @@ edition = "2018"
 default = []
 vulkan = ["skia-bindings/vulkan"]
 svg = ["skia-bindings/svg"]
+shaper = ["skia-bindings/shaper"]
 
 [dependencies]
 bitflags = "1.0.4"

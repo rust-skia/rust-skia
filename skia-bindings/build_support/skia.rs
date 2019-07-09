@@ -34,6 +34,7 @@ impl Default for BuildConfiguration {
             keep_inline_functions: true,
             feature_vulkan: cfg!(feature = "vulkan"),
             feature_svg: cfg!(feature = "svg"),
+            feature_shaper: cfg!(feature = "shaper"),
             feature_animation: false,
             feature_dng: false,
             feature_particles: false,
@@ -62,6 +63,9 @@ pub struct BuildConfiguration {
     /// Build with SVG support?
     feature_svg: bool,
 
+    /// Builds the skshaper module, compiles harfbuzz & icu support.
+    feature_shaper: bool,
+
     /// Build with animation support (yet unsupported, no wrappers).
     feature_animation: bool,
 
@@ -72,7 +76,7 @@ pub struct BuildConfiguration {
     feature_particles: bool,
 
     /// As of M74, There is a bug in the Skia macOS build
-    /// that requires all libraries to be built, otherwise the build would fail.
+    /// that requires all libraries to be built, otherwise the build will fail.
     all_skia_libs: bool,
 
     /// Additional preprocessor definitions that will override predefined ones.
@@ -109,7 +113,6 @@ impl FinalBuildConfiguration {
                     "is_official_build",
                     if build.skia_release { yes() } else { no() },
                 ),
-                ("skia_use_icu", no()),
                 ("skia_use_system_libjpeg_turbo", no()),
                 ("skia_use_system_libpng", no()),
                 ("skia_use_libwebp", no()),
@@ -147,6 +150,17 @@ impl FinalBuildConfiguration {
                 args.push(("skia_enable_vulkan_debug_layers", no()));
                 args.push(("skia_use_libheif", no()));
                 args.push(("skia_use_lua", no()));
+            }
+
+            if build.feature_shaper {
+                args.push(("skia_enable_skshaper", yes()));
+                args.push(("skia_use_icu", yes()));
+                args.push(("skia_use_system_icu", no()));
+                args.push(("skia_use_harfbuzz", yes()));
+                args.push(("skia_use_system_harfbuzz", no()));
+                args.push(("skia_use_sfntly", no()));
+            } else {
+                args.push(("skia_use_icu", no()));
             }
 
             if build.feature_vulkan {
