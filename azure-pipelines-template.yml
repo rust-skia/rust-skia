@@ -91,8 +91,9 @@ jobs:
         set -e
         (cd /tmp && curl -sSf -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-$(androidNDK).zip)
         (cd /tmp && unzip android-ndk.zip)
-        (cd /tmp/android-ndk-r18b && build/tools/make_standalone_toolchain.py --arch arm64 --install-dir /tmp/ndk)
-        echo "##vso[task.setvariable variable=PATH;]${PATH}:/tmp/ndk/bin"
+        (cd /tmp/android-ndk-r18b && build/tools/make_standalone_toolchain.py --arch arm64 --install-dir /tmp/ndk-arm64)
+        (cd /tmp/android-ndk-r18b && build/tools/make_standalone_toolchain.py --arch x86_64 --install-dir /tmp/ndk-x86_64)
+        echo "##vso[task.setvariable variable=PATH;]${PATH}:/tmp/ndk-arm64/bin:/tmp/ndk-x86_64/bin"
         echo "##vso[task.setvariable variable=ANDROID_NDK;]/tmp/android-ndk-r18b"
       displayName: 'Install Android NDK'
 
