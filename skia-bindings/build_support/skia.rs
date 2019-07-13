@@ -480,7 +480,8 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .use_core()
         .clang_arg("-std=c++14")
         // required for macOS LLVM 8 to pick up C++ headers:
-        .clang_args(&["-x", "c++"]);
+        .clang_args(&["-x", "c++"])
+        .clang_arg("-v");
 
     let mut cc_build = Build::new();
 
@@ -542,18 +543,12 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
 
     let target = cargo::target();
     match target.as_strs() {
-        (_, "linux", "android", _) => {
-            let ndk = android::ndk();
-            let target = target.to_string();
-            cc_build.target(&target);
-            builder = builder
-                .clang_arg(format!("--sysroot={}/sysroot", ndk))
-                .clang_arg(format!("-I{}/sysroot/usr/include/{}", ndk, target))
-                .clang_arg(format!(
-                    "-isystem{}/sources/cxx-stl/llvm-libc++/include",
-                    ndk
-                ))
-                .clang_arg(format!("--target={}", target));
+        (arch, "linux", "android", _) => {
+            let target = &target.to_string();
+            cc_build.target(target);
+            for arg in android::additional_clang_args(target, arch) {
+                builder = builder.clang_arg(arg);
+            }
         }
         (arch, "apple", "ios", _) => {
             for arg in ios::additional_clang_args(arch) {
@@ -563,8 +558,10 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         _ => {}
     }
 
+    println!("COMPILING BINDINGS: {}", bindings_source);
     cc_build.compile(BINDINGS_LIB_NAME);
 
+    println!("GENERATING BINDINGS");
     let bindings = builder.generate().expect("Unable to generate bindings");
 
     let out_path = PathBuf::from("src");
