@@ -92,6 +92,9 @@ pub struct FinalBuildConfiguration {
     /// The additional definitions (cloned from the definitions of
     /// the BuildConfiguration).
     pub definitions: Definitions,
+
+    /// The binding source files to compile.
+    pub binding_sources: Vec<PathBuf>,
 }
 
 impl FinalBuildConfiguration {
@@ -234,9 +237,19 @@ impl FinalBuildConfiguration {
                 .collect()
         };
 
+        let binding_sources = {
+            let mut sources: Vec<PathBuf> = Vec::new();
+            sources.push("src/bindings.cpp".into());
+            if build.feature_shaper {
+                sources.push("src/shaper.cpp".into())
+            };
+            sources
+        };
+
         FinalBuildConfiguration {
             gn_args,
             definitions: build.definitions.clone(),
+            binding_sources,
         }
     }
 }
@@ -486,6 +499,8 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .whitelist_type("SkShadowUtils")
         .whitelist_type("SkShadowFlags")
         .whitelist_type("SkTextUtils")
+        // modules/skshaper/
+        .whitelist_type("SkShaper")
         // misc
         .whitelist_var("SK_Color.*")
         .whitelist_var("kAll_GrBackendState")
@@ -498,12 +513,12 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
 
     let mut cc_build = Build::new();
 
-    // note: we add dependent paths only if we do a full build,
-    // otherwise these paths are not even existing.
-    let bindings_source = "src/bindings.cpp";
-    cargo::add_dependent_path(bindings_source);
-
-    builder = builder.header(bindings_source);
+    for source in &build.binding_sources {
+        cc_build.file(source);
+        let source = source.to_str().unwrap();
+        cargo::add_dependent_path(source);
+        builder = builder.header(source);
+    }
 
     // TODO: may put the include paths into the FinalBuildConfiguration?
 
@@ -512,6 +527,13 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
 
     builder = builder.clang_arg(format!("-I{}", include_path.display()));
     cc_build.include(include_path);
+
+    {
+        // SkShaper.h
+        let include_path = current_dir.join(Path::new("skia/modules/skshaper/include"));
+        builder = builder.clang_arg(format!("-I{}", include_path.display()));
+        cc_build.include(include_path);
+    }
 
     let definitions = {
         let skia_definitions = {
@@ -536,10 +558,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         }
     }
 
-    cc_build
-        .cpp(true)
-        .file(bindings_source)
-        .out_dir(output_directory);
+    cc_build.cpp(true).out_dir(output_directory);
 
     if !cfg!(windows) {
         cc_build.flag("-std=c++14");

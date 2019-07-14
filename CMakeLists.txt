@@ -5,4 +5,4 @@ project (skia-bindings)
 
 include_directories(skia-bindings/skia)
 
-add_library(skiabindings skia-bindings/src/bindings.cpp)
+add_library(skiabindings skia-bindings/src/bindings.cpp skia-bindings/src/shaper.cpp)
