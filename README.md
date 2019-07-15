@@ -98,19 +98,30 @@ Please share your build experience so that we can try to automate the build and 
 
 ### Android
 
-Cross compilation to Android is supported on macOS and Linux hosts for targeting 64 bit ARM architectures (`aarch64`):
+Cross compilation to Android is supported for targeting 64 bit ARM and Intel x86 architectures (`aarch64` and `x86_64`):
 
-1. Download the r18b NDK from: https://developer.android.com/ndk/downloads/older_releases.html
-2. Create a toolchain for the compilation:
+For example, to compile for `aarch64`:
+
+1. Install the rust target: `rustup target install aarch64-linux-android`.
+2. Download the r18b NDK from: https://developer.android.com/ndk/downloads/older_releases.html
+3. Create a toolchain for the compilation:
    `build/tools/make_standalone_toolchain.py --arch arm64 --install-dir /tmp/ndk`
-3. Compile your code for the `aarch64-linux-android` target with:
+4. Compile your package for the `aarch64-linux-android` target:
+
+On **macOS** & **Linux**:
 
 ```bash
-ANDROID_NDK=~/path/to/android-ndk-r18b PATH=$PATH:/tmp/ndk/bin cargo build --target aarch64-linux-android
+ANDROID_NDK=~/path/to/android-ndk-r18b PATH=$PATH:/tmp/ndk/bin cargo build --target aarch64-linux-android -vv
+```
+
+On **Windows** it's a bit more complicated, because the Android NDK clang executable must be invoked through .cmd scripts:
+
+```bash
+ANDROID_NDK=~/path/to/android-ndk-r18b PATH=$PATH:/tmp/ndk/bin CC_aarch64_linux_android=aarch64-linux-android-clang.cmd CXX_aarch64_linux_android=aarch64-linux-android-clang++.cmd CARGO_TARGET_aarch64_linux_android_LINKER=aarch64-linux-android-clang.cmd cargo build --target aarch64-linux-android -vv
 ```
 _Notes:_
 
-- It doesn't work for the latest 19 NDK, because Skia doesn't support it yet.
+- It doesn't work for the latest NDK, because Skia doesn't support it yet.
 - Rebuilding skia-bindings with a different target may cause linker errors, in that case `touch skia-bindings/build.rs` will force a rebuild ([#10](https://github.com/rust-skia/rust-skia/issues/10)).
 
 ### iOS
