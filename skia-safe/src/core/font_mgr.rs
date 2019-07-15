@@ -36,7 +36,7 @@ impl RCHandle<SkFontStyleSet> {
         }
     }
 
-    pub fn style(&mut self, index: usize) -> (FontStyle, String) {
+    pub fn style(&mut self, index: usize) -> (FontStyle, Option<String>) {
         assert!(index < self.count());
 
         let mut font_style = FontStyle::default();
@@ -49,7 +49,14 @@ impl RCHandle<SkFontStyleSet> {
                 style.native_mut(),
             )
         }
-        (font_style, style.as_str().into())
+
+        // Note: Android's FontMgr returns empty style names.
+        let name = style
+            .as_str()
+            .is_empty()
+            .if_false_then_some(|| style.as_str().into());
+
+        (font_style, name)
     }
 
     pub fn new_typeface(&mut self, index: usize) -> Option<Typeface> {
@@ -192,14 +199,16 @@ fn create_all_typefaces() {
     println!("FontMgr families: {}", families);
     // test requires that the font manager returns at least one family for now.
     assert!(families > 0);
-    // get all family names
+    // print all family names and styles
     for i in 0..families {
         let name = font_mgr.family_name(i);
         println!("font_family: {}", name);
         let mut style_set = font_mgr.new_styleset(i);
         for style_index in 0..style_set.count() {
             let (_, style_name) = style_set.style(style_index);
-            println!("  style: {}", style_name);
+            if let Some(style_name) = style_name {
+                println!("  style: {}", style_name);
+            }
             let face = style_set.new_typeface(style_index);
             drop(face);
         }
