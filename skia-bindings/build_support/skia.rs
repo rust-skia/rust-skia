@@ -28,7 +28,7 @@ impl Default for BuildConfiguration {
         };
 
         BuildConfiguration {
-            on_windows: cfg!(windows),
+            on_windows: cargo::host().system == "windows",
             // Note that currently, we don't support debug Skia builds,
             // because they are hard to configure and pull in a lot of testing related modules.
             skia_release: true,

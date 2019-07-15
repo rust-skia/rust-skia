@@ -57,7 +57,17 @@ impl Display for Target {
 
 pub fn target() -> Target {
     let target_str = env::var("TARGET").unwrap();
+    parse_target(target_str)
+}
 
+pub fn host() -> Target {
+    let host_str = env::var("HOST").unwrap();
+    println!("HOST: {}", host_str);
+    parse_target(host_str)
+}
+
+fn parse_target(target_str: impl AsRef<str>) -> Target {
+    let target_str = target_str.as_ref();
     let target: Vec<String> = target_str.split("-").map(|s| s.into()).collect();
     if target.len() < 3 {
         panic!("Failed to parse TARGET {}", target_str);
