@@ -4,7 +4,8 @@ pub mod variation {
     use crate::prelude::*;
     use crate::FourByteTag;
     use skia_bindings::{
-        C_SkFontParameters_Variation_Axis_isHidden, SkFontParameters_Variation_Axis,
+        C_SkFontParameters_Variation_Axis_isHidden, C_SkFontParameters_Variation_Axis_setHidden,
+        SkFontParameters_Variation_Axis,
     };
 
     #[derive(Clone, PartialEq, Default, Debug)]
@@ -37,9 +38,16 @@ pub mod variation {
         }
 
         pub fn set_hidden(&mut self, hidden: bool) -> &mut Self {
+            // does not link on iOS / x86_64:
+            // https://github.com/rust-skia/rust-skia/issues/146
+            /*
             unsafe {
                 self.native_mut().setHidden(hidden);
             };
+            */
+            unsafe {
+                C_SkFontParameters_Variation_Axis_setHidden(self.native_mut(), hidden);
+            }
             self
         }
     }

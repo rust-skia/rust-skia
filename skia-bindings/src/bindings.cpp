@@ -1165,6 +1165,10 @@ extern "C" bool C_SkFontParameters_Variation_Axis_isHidden(const SkFontParameter
     return self->isHidden();
 }
 
+extern "C" void C_SkFontParameters_Variation_Axis_setHidden(SkFontParameters::Variation::Axis* self, bool hidden) {
+    self->setHidden(hidden);
+}
+
 //
 // SkVertices
 //
@@ -1572,7 +1576,11 @@ extern "C" SkShader* C_SkShaders_Lerp2(const SkShader* red, const SkShader* dst,
 }
 
 extern "C" SkShader* C_SkShader_Deserialize(const void* data, size_t length) {
-    return dynamic_cast<SkShader*>(SkShader::Deserialize(SkFlattenable::Type::kSkShaderBase_Type, data, length).release());
+    // note: dynamic_cast may lead to a linker error here on iOS x86_64
+    // https://github.com/rust-skia/rust-skia/issues/146
+    // "typeinfo for SkShader", referenced from:
+    //      _C_SkShader_Deserialize in libcanvasnative.a(bindings.o)
+    return (SkShader*)(SkShader::Deserialize(SkFlattenable::Type::kSkShaderBase_Type, data, length).release());
 }
 
 //
