@@ -131,13 +131,13 @@ impl RCHandle<SkTypeface> {
 
     // TODO: MakeFromStream()?
 
-    pub fn from_data(data: &Data, index: impl Into<Option<usize>>) {
+    pub fn from_data(data: &Data, index: impl Into<Option<usize>>) -> Typeface {
         Typeface::from_ptr(unsafe {
             C_SkTypeface_MakeFromData(
                 data.shared_native(),
                 index.into().unwrap_or_default().try_into().unwrap(),
             )
-        });
+        })
     }
 
     pub fn clone_with_arguments(&self, arguments: &FontArguments) -> Option<Typeface> {
