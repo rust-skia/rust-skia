@@ -131,7 +131,7 @@ impl RCHandle<SkTypeface> {
 
     // TODO: MakeFromStream()?
 
-    pub fn from_data(data: &Data, index: impl Into<Option<usize>>) -> Typeface {
+    pub fn from_data(data: &Data, index: impl Into<Option<usize>>) -> Option<Typeface> {
         Typeface::from_ptr(unsafe {
             C_SkTypeface_MakeFromData(
                 data.shared_native(),
