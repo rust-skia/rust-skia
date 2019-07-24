@@ -3,7 +3,7 @@ use skia_bindings::{
     C_SkData_MakeEmpty, C_SkData_MakeSubset, C_SkData_MakeUninitialized, C_SkData_MakeWithCString,
     C_SkData_MakeWithCopy, C_SkData_ref, C_SkData_unique, C_SkData_unref, SkData,
 };
-use std::ffi::CStr;
+use std::ffi::{CStr, CString};
 use std::ops::Deref;
 use std::slice;
 
@@ -82,7 +82,16 @@ impl RCHandle<SkData> {
         Data::from_ptr(unsafe { C_SkData_MakeSubset(data.native(), offset, length) }).unwrap()
     }
 
-    // TODO: rename to from_cstr()?
+    /// Constructs Data from a copy of a &str.
+    ///
+    /// Functions that use Data as a string container usually expect it to contain
+    /// a c-string including the terminating 0 byte, so this function converts
+    /// the string to a CString and forwards it to new_cstr().
+    pub fn new_str(str: &str) -> Data {
+        Self::new_cstr(&CString::new(str).unwrap())
+    }
+
+    /// Constructs Data from a &CStr by copying its contents.
     pub fn new_cstr(cstr: &CStr) -> Data {
         Data::from_ptr(unsafe { C_SkData_MakeWithCString(cstr.as_ptr()) }).unwrap()
     }
