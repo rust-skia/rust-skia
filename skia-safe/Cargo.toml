@@ -7,7 +7,7 @@ homepage = "https://github.com/rust-skia/rust-skia"
 repository = "https://github.com/rust-skia/rust-skia"
 license = "MIT"
 
-version = "0.13.2"
+version = "0.13.3"
 authors = ["Armin Sander <armin@replicator.org>"]
 edition = "2018"
 
