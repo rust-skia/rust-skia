@@ -24,7 +24,7 @@ lazy_static = "=1.2"
 
 [dev-dependencies]
 # for skia-org
-offscreen_gl_context = "0.22.0"
+offscreen_gl_context = "0.23.0"
 gleam = "0.6.16"
 clap = "2.33.0"
 ash = "0.29"
