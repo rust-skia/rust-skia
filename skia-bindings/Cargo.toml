@@ -8,7 +8,7 @@ homepage = "https://github.com/rust-skia/rust-skia"
 repository = "https://github.com/rust-skia/rust-skia"
 license = "MIT"
 
-version = "0.13.2"
+version = "0.13.4"
 authors = ["LongYinan <lynweklm@gmail.com>", "Armin Sander <armin@replicator.org>"]
 edition = "2018"
 build = "build.rs"
