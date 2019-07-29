@@ -28,6 +28,10 @@ extern "C" void C_SkShaper_RunIterator_delete(SkShaper::RunIterator* self) {
     delete self;
 }
 
+extern "C" void C_SkShaper_RunIterator_consume(SkShaper::RunIterator* self)  {
+    self->consume();
+}
+
 extern "C" size_t C_SkShaper_RunIterator_endOfCurrentRun(const SkShaper::RunIterator* self) {
     return self->endOfCurrentRun();
 }
@@ -44,7 +48,7 @@ extern "C" SkShaper::FontRunIterator* C_SkShaper_MakeFontMgrRunIterator(const ch
     return SkShaper::MakeFontMgrRunIterator(utf8, utf8Bytes, *font, sk_sp<SkFontMgr>(fallback)).release();
 }
 
-extern "C" size_t C_SkShaper_BiDiRunIterator_currentLevel(const SkShaper::BiDiRunIterator* self) {
+extern "C" uint8_t C_SkShaper_BiDiRunIterator_currentLevel(const SkShaper::BiDiRunIterator* self) {
     return self->currentLevel();
 }
 
