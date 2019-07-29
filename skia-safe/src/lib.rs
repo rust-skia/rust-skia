@@ -4,6 +4,7 @@ mod docs;
 mod effects;
 pub mod gpu;
 mod interop;
+mod modules;
 mod pathops;
 mod prelude;
 #[cfg(feature = "svg")]
@@ -24,6 +25,7 @@ pub use crate::codec::*;
 pub use crate::core::*;
 pub use crate::docs::*;
 pub use crate::effects::*;
+pub use crate::modules::*;
 pub use crate::pathops::*;
 
 #[cfg(test)]
