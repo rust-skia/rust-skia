@@ -581,7 +581,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         _ => {}
     }
 
-    println!("COMPILING BINDINGS: {}", bindings_source);
+    println!("COMPILING BINDINGS: {:?}", build.binding_sources);
     cc_build.compile(BINDINGS_LIB_NAME);
 
     println!("GENERATING BINDINGS");
