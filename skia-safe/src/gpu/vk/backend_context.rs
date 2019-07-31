@@ -43,7 +43,7 @@ fn test_feature_flags_layout() {
 // so we do need to use a pointer here for now.
 pub struct BackendContext<'a> {
     pub(crate) native: *mut ffi::c_void,
-    get_proc: &'a GetProc,
+    get_proc: &'a dyn GetProc,
 }
 
 impl<'a> Drop for BackendContext<'a> {
@@ -87,7 +87,7 @@ impl<'a> BackendContext<'a> {
 
     pub(crate) unsafe fn begin_resolving(&self) -> impl Drop {
         THREAD_LOCAL_GET_PROC.with(|get_proc| {
-            let get_proc_trait_object: &GetProc = self.get_proc;
+            let get_proc_trait_object: &dyn GetProc = self.get_proc;
             *get_proc.borrow_mut() = Some(mem::transmute(get_proc_trait_object))
         });
 
@@ -109,7 +109,8 @@ thread_local! {
 
 // https://doc.rust-lang.org/1.19.0/std/raw/struct.TraitObject.html
 #[repr(C)]
-// Copy & Clone are required for the *get_proc.borrow() below.
+// Copy & Clone are required for the *get_proc.borrow() below. And std::raw::TraitObject
+// can not be used, because it's unstable (last checked 1.36).
 #[derive(Copy, Clone)]
 struct TraitObject {
     pub data: *mut (),
@@ -125,7 +126,7 @@ unsafe extern "C" fn global_get_proc(
     THREAD_LOCAL_GET_PROC.with(|get_proc| {
         match *get_proc.borrow() {
             Some(get_proc) => {
-                let get_proc_trait_object: &GetProc = mem::transmute(get_proc);
+                let get_proc_trait_object: &dyn GetProc = mem::transmute(get_proc);
                 if !device.is_null() {
                     get_proc_trait_object(GetProcOf::Device(device, name))
                 } else {
