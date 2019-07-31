@@ -32,7 +32,6 @@ impl NativeFlattenable for SkColorFilter {
 }
 
 impl RCHandle<SkColorFilter> {
-
     #[deprecated(since = "0.14.0", note = "use to_a_color_mode()")]
     pub fn to_color_mode(&self) -> Option<(Color, BlendMode)> {
         self.to_a_color_mode()
