@@ -5,7 +5,8 @@ use crate::{
     Image, ImageInfo, Paint, Pixmap, Size, SurfaceCharacterization, SurfaceProps,
 };
 use skia_bindings::{
-    C_SkSurface_makeSurface, GrBackendRenderTarget, GrBackendTexture, SkRefCntBase, SkSurface,
+    C_SkSurface_imageInfo, C_SkSurface_makeSurface, C_SkSurface_makeSurface2,
+    GrBackendRenderTarget, GrBackendTexture, SkRefCntBase, SkSurface,
     SkSurface_BackendHandleAccess, SkSurface_ContentChangeMode,
 };
 use std::ptr;
@@ -196,6 +197,26 @@ impl RCHandle<SkSurface> {
         })
     }
 
+    // TODO: support TextureReleaseProc / ReleaseContext
+
+    pub fn from_backend_texture_with_caracterization(
+        context: &mut Context,
+        characterization: &SurfaceCharacterization,
+        backend_texture: &BackendTexture,
+    ) -> Option<Self> {
+        Self::from_ptr(unsafe {
+            skia_bindings::C_SkSurface_MakeFromBackendTexture2(
+                context.native_mut(),
+                characterization.native(),
+                backend_texture.native(),
+            )
+        })
+    }
+
+    pub fn is_compatible(&self, characterization: &SurfaceCharacterization) -> bool {
+        unsafe { self.native().isCompatible(characterization.native()) }
+    }
+
     pub fn new_null(size: impl Into<ISize>) -> Option<Self> {
         let size = size.into();
         Self::from_ptr(unsafe { skia_bindings::C_SkSurface_MakeNull(size.width, size.height) })
@@ -207,6 +228,12 @@ impl RCHandle<SkSurface> {
 
     pub fn height(&self) -> i32 {
         unsafe { self.native().height() }
+    }
+
+    pub fn image_info(&mut self) -> ImageInfo {
+        let mut info = ImageInfo::default();
+        unsafe { C_SkSurface_imageInfo(self.native_mut(), info.native_mut()) };
+        info
     }
 
     pub fn generation_id(&mut self) -> u32 {
@@ -300,6 +327,13 @@ impl RCHandle<SkSurface> {
         Surface::from_ptr(unsafe { C_SkSurface_makeSurface(self.native_mut(), info.native()) })
     }
 
+    pub fn new_surface_with_dimensions(&mut self, dim: impl Into<ISize>) -> Option<Surface> {
+        let dim = dim.into();
+        Surface::from_ptr(unsafe {
+            C_SkSurface_makeSurface2(self.native_mut(), dim.width, dim.height)
+        })
+    }
+
     pub fn image_snapshot(&mut self) -> Image {
         Image::from_ptr(unsafe {
             skia_bindings::C_SkSurface_makeImageSnapshot(self.native_mut(), ptr::null())
@@ -391,6 +425,7 @@ impl RCHandle<SkSurface> {
     }
 
     // TODO: wrap asyncRescaleAndReadPixels (m76)
+    // TODO: wrap asyncRescaleAndReadPixelsYUV420 (m77)
 
     pub fn write_pixels_from_pixmap(&mut self, src: &Pixmap, dst: impl Into<IPoint>) {
         let dst = dst.into();

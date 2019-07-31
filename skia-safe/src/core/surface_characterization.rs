@@ -1,6 +1,6 @@
 use crate::gpu::SurfaceOrigin;
 use crate::prelude::*;
-use crate::{ColorSpace, ColorType, ISize, ImageInfo, SurfaceProps};
+use crate::{gpu, ColorSpace, ColorType, ISize, ImageInfo, SurfaceProps};
 use skia_bindings::{
     C_SkSurfaceCharacterization_destruct, C_SkSurfaceCharacterization_equals,
     C_SkSurfaceCharacterization_imageInfo, SkSurfaceCharacterization,
@@ -58,6 +58,10 @@ impl Handle<SkSurfaceCharacterization> {
         })
     }
 
+    pub fn backend_format(&self) -> &gpu::BackendFormat {
+        gpu::BackendFormat::from_native_ref(unsafe { &*self.native().backendFormat() })
+    }
+
     pub fn origin(&self) -> SurfaceOrigin {
         SurfaceOrigin::from_native(unsafe { self.native().origin() })
     }
@@ -74,10 +78,13 @@ impl Handle<SkSurfaceCharacterization> {
         ColorType::from_native(unsafe { self.native().colorType() })
     }
 
-    // TODO: fsaaType() (GrFSAAType is defined in GrTypesPriv.h)
-
+    #[deprecated(note = "use sample_count()")]
     pub fn stencil_count(&self) -> usize {
-        unsafe { self.native().stencilCount() }.try_into().unwrap()
+        self.sample_count()
+    }
+
+    pub fn sample_count(&self) -> usize {
+        unsafe { self.native().sampleCount() }.try_into().unwrap()
     }
 
     pub fn is_textureable(&self) -> bool {
@@ -96,11 +103,19 @@ impl Handle<SkSurfaceCharacterization> {
         unsafe { self.native().vulkanSecondaryCBCompatible() }
     }
 
+    pub fn is_protected(&self) -> gpu::Protected {
+        gpu::Protected::from_native(unsafe { self.native().isProtected() })
+    }
+
     pub fn color_space(&self) -> Option<ColorSpace> {
         ColorSpace::from_unshared_ptr(unsafe { self.native().colorSpace() })
     }
 
     pub fn surface_props(&self) -> &SurfaceProps {
         SurfaceProps::from_native_ref(unsafe { &*self.native().surfaceProps() })
+    }
+
+    pub fn is_compatible(&self, backend_texture: &gpu::BackendTexture) -> bool {
+        unsafe { self.native().isCompatible(backend_texture.native()) }
     }
 }

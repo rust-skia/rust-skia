@@ -320,6 +320,7 @@ fn draw_compose_shader(canvas: &mut Canvas) {
             )
             .unwrap(),
             &perlin_noise_shader::turbulence((0.025, 0.025), 2, 0.0, None).unwrap(),
+            None,
         )
         .as_ref(),
     ));

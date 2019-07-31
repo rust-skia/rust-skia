@@ -11,9 +11,9 @@ use skia_bindings::{
     C_SkCanvas_getBaseLayerSize, C_SkCanvas_getGrContext, C_SkCanvas_imageInfo,
     C_SkCanvas_isClipEmpty, C_SkCanvas_makeSurface, C_SkCanvas_newEmpty, C_SkCanvas_newFromBitmap,
     C_SkCanvas_newFromBitmapAndProps, C_SkCanvas_newWidthHeightAndProps, SkAutoCanvasRestore,
-    SkCanvas, SkCanvas_PointMode, SkCanvas_SaveLayerFlagsSet_kInitWithPrevious_SaveLayerFlag,
-    SkCanvas_SaveLayerRec, SkCanvas_SrcRectConstraint, SkImage, SkImageFilter, SkMatrix, SkPaint,
-    SkRect,
+    SkCanvas, SkCanvas_PointMode, SkCanvas_SaveLayerFlagsSet_kF16ColorType,
+    SkCanvas_SaveLayerFlagsSet_kInitWithPrevious_SaveLayerFlag, SkCanvas_SaveLayerRec,
+    SkCanvas_SrcRectConstraint, SkImage, SkImageFilter, SkMatrix, SkPaint, SkRect,
 };
 use std::convert::TryInto;
 use std::ffi::CString;
@@ -26,6 +26,7 @@ pub use lattice::Lattice;
 bitflags! {
     pub struct SaveLayerFlags: u32 {
         const INIT_WITH_PREVIOUS = SkCanvas_SaveLayerFlagsSet_kInitWithPrevious_SaveLayerFlag as _;
+        const F16_COLOR_TYPE = SkCanvas_SaveLayerFlagsSet_kF16ColorType as _;
     }
 }
 
