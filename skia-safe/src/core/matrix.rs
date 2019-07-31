@@ -271,43 +271,35 @@ impl Matrix {
     }
 
     pub fn set_scale_x(&mut self, v: scalar) -> &mut Self {
-        self[Member::ScaleX] = v;
-        self
+        self.set(Member::ScaleX, v)
     }
 
     pub fn set_scale_y(&mut self, v: scalar) -> &mut Self {
-        self[Member::ScaleY] = v;
-        self
+        self.set(Member::ScaleY, v)
     }
 
     pub fn set_skew_y(&mut self, v: scalar) -> &mut Self {
-        self[Member::SkewY] = v;
-        self
+        self.set(Member::SkewY, v)
     }
 
     pub fn set_skew_x(&mut self, v: scalar) -> &mut Self {
-        self[Member::SkewX] = v;
-        self
+        self.set(Member::SkewX, v)
     }
 
     pub fn set_translate_x(&mut self, v: scalar) -> &mut Self {
-        self[Member::TransX] = v;
-        self
+        self.set(Member::TransX, v)
     }
 
     pub fn set_translate_y(&mut self, v: scalar) -> &mut Self {
-        self[Member::TransY] = v;
-        self
+        self.set(Member::TransY, v)
     }
 
     pub fn set_persp_x(&mut self, v: scalar) -> &mut Self {
-        self[Member::Persp0] = v;
-        self
+        self.set(Member::Persp0, v)
     }
 
     pub fn set_persp_y(&mut self, v: scalar) -> &mut Self {
-        self[Member::Persp1] = v;
-        self
+        self.set(Member::Persp1, v)
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -340,12 +332,16 @@ impl Matrix {
     }
 
     pub fn set_9(&mut self, buffer: &[scalar; 9]) -> &mut Self {
-        unsafe { self.native_mut().set9(buffer.as_ptr()) }
+        unsafe {
+            self.native_mut().set9(buffer.as_ptr());
+        }
         self
     }
 
     pub fn reset(&mut self) -> &mut Self {
-        unsafe { self.native_mut().reset() }
+        unsafe {
+            self.native_mut().reset();
+        }
         self
     }
 
@@ -356,7 +352,9 @@ impl Matrix {
 
     pub fn set_translate(&mut self, v: impl Into<Vector>) -> &mut Self {
         let v = v.into();
-        unsafe { self.native_mut().setTranslate(v.x, v.y) }
+        unsafe {
+            self.native_mut().setTranslate(v.x, v.y);
+        }
         self
     }
 
@@ -366,13 +364,17 @@ impl Matrix {
         pivot: impl Into<Option<Point>>,
     ) -> &mut Self {
         let pivot = pivot.into().unwrap_or_default();
-        unsafe { self.native_mut().setScale(sx, sy, pivot.x, pivot.y) }
+        unsafe {
+            self.native_mut().setScale(sx, sy, pivot.x, pivot.y);
+        }
         self
     }
 
     pub fn set_rotate(&mut self, degrees: scalar, pivot: impl Into<Option<Point>>) -> &mut Self {
         let pivot = pivot.into().unwrap_or_default();
-        unsafe { self.native_mut().setRotate(degrees, pivot.x, pivot.y) }
+        unsafe {
+            self.native_mut().setRotate(degrees, pivot.x, pivot.y);
+        }
         self
     }
 
@@ -384,13 +386,15 @@ impl Matrix {
         let pivot = pivot.into().unwrap_or_default();
         unsafe {
             self.native_mut()
-                .setSinCos(sin_value, cos_value, pivot.x, pivot.y)
+                .setSinCos(sin_value, cos_value, pivot.x, pivot.y);
         }
         self
     }
 
     pub fn set_rsxform(&mut self, rsxform: &RSXform) -> &mut Self {
-        unsafe { self.native_mut().setRSXform(rsxform.native()) };
+        unsafe {
+            self.native_mut().setRSXform(rsxform.native());
+        }
         self
     }
 
@@ -400,18 +404,24 @@ impl Matrix {
         pivot: impl Into<Option<Point>>,
     ) -> &mut Self {
         let pivot = pivot.into().unwrap_or_default();
-        unsafe { self.native_mut().setSkew(kx, ky, pivot.x, pivot.y) }
+        unsafe {
+            self.native_mut().setSkew(kx, ky, pivot.x, pivot.y);
+        }
         self
     }
 
     pub fn set_concat(&mut self, a: &Matrix, b: &Matrix) -> &mut Self {
-        unsafe { self.native_mut().setConcat(a.native(), b.native()) }
+        unsafe {
+            self.native_mut().setConcat(a.native(), b.native());
+        }
         self
     }
 
     pub fn pre_translate(&mut self, delta: impl Into<Vector>) -> &mut Self {
         let delta = delta.into();
-        unsafe { self.native_mut().preTranslate(delta.x, delta.y) }
+        unsafe {
+            self.native_mut().preTranslate(delta.x, delta.y);
+        }
         self
     }
 
@@ -421,13 +431,17 @@ impl Matrix {
         pivot: impl Into<Option<Point>>,
     ) -> &mut Self {
         let pivot = pivot.into().unwrap_or_default();
-        unsafe { self.native_mut().preScale(sx, sy, pivot.x, pivot.y) }
+        unsafe {
+            self.native_mut().preScale(sx, sy, pivot.x, pivot.y);
+        }
         self
     }
 
     pub fn pre_rotate(&mut self, degrees: scalar, pivot: impl Into<Option<Point>>) -> &mut Self {
         let pivot = pivot.into().unwrap_or_default();
-        unsafe { self.native_mut().preRotate(degrees, pivot.x, pivot.y) }
+        unsafe {
+            self.native_mut().preRotate(degrees, pivot.x, pivot.y);
+        }
         self
     }
 
@@ -437,18 +451,24 @@ impl Matrix {
         pivot: impl Into<Option<Point>>,
     ) -> &mut Self {
         let pivot = pivot.into().unwrap_or_default();
-        unsafe { self.native_mut().preSkew(kx, ky, pivot.x, pivot.y) }
+        unsafe {
+            self.native_mut().preSkew(kx, ky, pivot.x, pivot.y);
+        }
         self
     }
 
     pub fn pre_concat(&mut self, other: &Matrix) -> &mut Self {
-        unsafe { self.native_mut().preConcat(other.native()) }
+        unsafe {
+            self.native_mut().preConcat(other.native());
+        }
         self
     }
 
     pub fn post_translate(&mut self, delta: impl Into<Vector>) -> &mut Self {
         let delta = delta.into();
-        unsafe { self.native_mut().postTranslate(delta.x, delta.y) }
+        unsafe {
+            self.native_mut().postTranslate(delta.x, delta.y);
+        }
         self
     }
 
@@ -458,7 +478,9 @@ impl Matrix {
         pivot: impl Into<Option<Point>>,
     ) -> &mut Self {
         let pivot = pivot.into().unwrap_or_default();
-        unsafe { self.native_mut().postScale(sx, sy, pivot.x, pivot.y) }
+        unsafe {
+            self.native_mut().postScale(sx, sy, pivot.x, pivot.y);
+        }
         self
     }
 
@@ -468,7 +490,9 @@ impl Matrix {
 
     pub fn post_rotate(&mut self, degrees: scalar, pivot: impl Into<Option<Point>>) -> &mut Self {
         let pivot = pivot.into().unwrap_or_default();
-        unsafe { self.native_mut().postRotate(degrees, pivot.x, pivot.y) }
+        unsafe {
+            self.native_mut().postRotate(degrees, pivot.x, pivot.y);
+        }
         self
     }
 
@@ -478,12 +502,16 @@ impl Matrix {
         pivot: impl Into<Option<Point>>,
     ) -> &mut Self {
         let pivot = pivot.into().unwrap_or_default();
-        unsafe { self.native_mut().postSkew(kx, ky, pivot.x, pivot.y) }
+        unsafe {
+            self.native_mut().postSkew(kx, ky, pivot.x, pivot.y);
+        }
         self
     }
 
     pub fn post_concat(&mut self, other: &Matrix) -> &mut Self {
-        unsafe { self.native_mut().postConcat(other.native()) }
+        unsafe {
+            self.native_mut().postConcat(other.native());
+        }
         self
     }
 
@@ -558,7 +586,9 @@ impl Matrix {
 
     pub fn from_affine(affine: &[scalar; 6]) -> Matrix {
         let mut m = Matrix::new_identity();
-        unsafe { m.native_mut().setAffine(affine.as_ptr()) }
+        unsafe {
+            m.native_mut().setAffine(affine.as_ptr());
+        }
         m
     }
 

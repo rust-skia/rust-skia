@@ -169,7 +169,7 @@ impl RCHandle<SkShader> {
 
 pub mod shaders {
     use crate::prelude::*;
-    use crate::{BlendMode, Color, Color4f, ColorSpace, Shader};
+    use crate::{BlendMode, Color, Color4f, ColorSpace, Matrix, Shader};
     use skia_bindings::{
         C_SkShaders_Blend, C_SkShaders_Color, C_SkShaders_Color2, C_SkShaders_Empty,
         C_SkShaders_Lerp, C_SkShaders_Lerp2,
@@ -189,21 +189,43 @@ pub mod shaders {
             .unwrap()
     }
 
-    pub fn blend(mode: BlendMode, dst: Shader, src: Shader) -> Shader {
+    pub fn blend(
+        mode: BlendMode,
+        dst: Shader,
+        src: Shader,
+        local_matrix: Option<&Matrix>,
+    ) -> Shader {
         Shader::from_ptr(unsafe {
-            C_SkShaders_Blend(mode.into_native(), dst.into_ptr(), src.into_ptr())
+            C_SkShaders_Blend(
+                mode.into_native(),
+                dst.into_ptr(),
+                src.into_ptr(),
+                local_matrix.native_ptr_or_null(),
+            )
         })
         .unwrap()
     }
 
-    pub fn lerp(t: f32, dst: Shader, src: Shader) -> Option<Shader> {
-        Shader::from_ptr(unsafe { C_SkShaders_Lerp(t, dst.into_ptr(), src.into_ptr()) })
+    pub fn lerp(t: f32, dst: Shader, src: Shader, local_matrix: Option<&Matrix>) -> Option<Shader> {
+        Shader::from_ptr(unsafe {
+            C_SkShaders_Lerp(
+                t,
+                dst.into_ptr(),
+                src.into_ptr(),
+                local_matrix.native_ptr_or_null(),
+            )
+        })
     }
 
     // TODO: rename as soon it's clear from the documentation what it does.
-    pub fn lerp2(red: Shader, dst: Shader, src: Shader) -> Shader {
+    pub fn lerp2(red: Shader, dst: Shader, src: Shader, local_matrix: Option<&Matrix>) -> Shader {
         Shader::from_ptr(unsafe {
-            C_SkShaders_Lerp2(red.into_ptr(), dst.into_ptr(), src.into_ptr())
+            C_SkShaders_Lerp2(
+                red.into_ptr(),
+                dst.into_ptr(),
+                src.into_ptr(),
+                local_matrix.native_ptr_or_null(),
+            )
         })
         .unwrap()
     }

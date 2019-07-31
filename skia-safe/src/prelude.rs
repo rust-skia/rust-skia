@@ -573,15 +573,16 @@ where
 }
 
 pub trait IndexSetter<I, O: Copy> {
-    fn set(&mut self, index: I, value: O);
+    fn set(&mut self, index: I, value: O) -> &mut Self;
 }
 
 impl<T, I, O: Copy> IndexSetter<I, O> for T
 where
     T: IndexMut<I, Output = O> + IndexSet,
 {
-    fn set(&mut self, index: I, value: O) {
-        self[index] = value
+    fn set(&mut self, index: I, value: O) -> &mut Self {
+        self[index] = value;
+        self
     }
 }
 
