@@ -5,6 +5,7 @@ use skia_bindings::{GrBackendApi, GrMipMapped, GrProtected, GrRenderable, GrSurf
 #[repr(u32)]
 pub enum BackendAPI {
     Metal = GrBackendApi::kMetal as _,
+    Dawn = GrBackendApi::kDawn as _,
     OpenGL = GrBackendApi::kOpenGL as _,
     Vulkan = GrBackendApi::kVulkan as _,
     Mock = GrBackendApi::kMock as _,

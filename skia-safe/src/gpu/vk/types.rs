@@ -4,6 +4,7 @@ use super::{
     SamplerYcbcrRange,
 };
 use crate::gpu::vk;
+use crate::gpu::Protected;
 use crate::prelude::*;
 use skia_bindings::{
     C_GrVkAlloc_Construct, C_GrVkAlloc_Equals, C_GrVkImageInfo_Equals,
@@ -156,6 +157,7 @@ pub struct ImageInfo {
     pub format: Format,
     pub level_count: u32,
     pub current_queue_family: u32,
+    pub protected: Protected,
     pub ycbcr_conversion_info: YcbcrConversionInfo,
 }
 
@@ -175,6 +177,7 @@ impl Default for ImageInfo {
             format: VkFormat::VK_FORMAT_UNDEFINED,
             level_count: 0,
             current_queue_family: vk::QUEUE_FAMILY_IGNORED,
+            protected: Protected::No,
             ycbcr_conversion_info: Default::default(),
         }
     }
@@ -197,11 +200,13 @@ impl ImageInfo {
         level_count: u32,
         current_queue_family: impl Into<Option<u32>>,
         ycbcr_conversion_info: impl Into<Option<YcbcrConversionInfo>>,
+        protected: impl Into<Option<Protected>>, // added in m77
     ) -> ImageInfo {
         let current_queue_family = current_queue_family
             .into()
             .unwrap_or(vk::QUEUE_FAMILY_IGNORED);
         let ycbcr_conversion_info = ycbcr_conversion_info.into().unwrap_or_default();
+        let protected = protected.into().unwrap_or(Protected::No);
         Self {
             image,
             alloc,
@@ -210,6 +215,7 @@ impl ImageInfo {
             format,
             level_count,
             current_queue_family,
+            protected,
             ycbcr_conversion_info,
         }
     }
@@ -225,6 +231,7 @@ impl ImageInfo {
         level_count: u32,
         current_queue_family: impl Into<Option<u32>>,
         ycbcr_conversion_info: impl Into<Option<YcbcrConversionInfo>>,
+        protected: impl Into<Option<Protected>>, // added in m77
     ) -> ImageInfo {
         Self::new(
             image,
@@ -235,6 +242,7 @@ impl ImageInfo {
             level_count,
             current_queue_family,
             ycbcr_conversion_info,
+            protected,
         )
     }
 
@@ -248,6 +256,7 @@ impl ImageInfo {
             info.level_count,
             info.current_queue_family,
             info.ycbcr_conversion_info,
+            info.protected,
         )
     }
 

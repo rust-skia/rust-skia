@@ -1,9 +1,9 @@
 use super::{gl, BackendAPI, MipMapped};
 use crate::prelude::*;
 use skia_bindings::{
-    C_GrBackendFormat_ConstructGL, C_GrBackendFormat_destruct, C_GrBackendRenderTarget_destruct,
-    C_GrBackendTexture_destruct, GrBackendFormat, GrBackendRenderTarget, GrBackendTexture,
-    GrMipMapped,
+    C_GrBackendFormat_Construct, C_GrBackendFormat_ConstructGL, C_GrBackendFormat_destruct,
+    C_GrBackendRenderTarget_destruct, C_GrBackendTexture_destruct, GrBackendFormat,
+    GrBackendRenderTarget, GrBackendTexture, GrMipMapped,
 };
 
 #[cfg(feature = "vulkan")]
@@ -20,7 +20,23 @@ impl NativeDrop for GrBackendFormat {
     }
 }
 
+impl NativeClone for GrBackendFormat {
+    fn clone(&self) -> Self {
+        unsafe { GrBackendFormat::new(self) }
+    }
+}
+
+impl Default for BackendFormat {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Handle<GrBackendFormat> {
+    pub fn new() -> Self {
+        Self::construct(|bf| unsafe { C_GrBackendFormat_Construct(bf) })
+    }
+
     pub fn new_gl(format: gl::Enum, target: gl::Enum) -> Self {
         Self::construct(|bf| unsafe { C_GrBackendFormat_ConstructGL(bf, format, target) })
     }
@@ -153,6 +169,10 @@ impl Handle<GrBackendTexture> {
         }
     }
 
+    pub fn gl_texture_paramters_modified(&mut self) {
+        unsafe { self.native_mut().glTextureParametersModified() }
+    }
+
     #[cfg(feature = "vulkan")]
     pub fn vulkan_image_info(&self) -> Option<vk::ImageInfo> {
         unsafe {
@@ -174,6 +194,10 @@ impl Handle<GrBackendTexture> {
         let format = BackendFormat::from_native(unsafe { self.native().getBackendFormat() });
 
         format.is_valid().if_true_some(format)
+    }
+
+    pub fn is_protected(&self) -> bool {
+        unsafe { self.native().isProtected() }
     }
 
     pub fn is_valid(&self) -> bool {
@@ -278,6 +302,14 @@ impl Handle<GrBackendRenderTarget> {
     pub fn set_vulkan_image_layout(&mut self, layout: vk::ImageLayout) -> &mut Self {
         unsafe { self.native_mut().setVkImageLayout(layout) }
         self
+    }
+
+    pub fn backend_format(&self) -> BackendFormat {
+        BackendFormat::from_native(unsafe { self.native().getBackendFormat() })
+    }
+
+    pub fn is_protected(&self) -> bool {
+        unsafe { self.native().isProtected() }
     }
 
     pub fn is_valid(&self) -> bool {

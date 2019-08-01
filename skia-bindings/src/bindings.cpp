@@ -2410,6 +2410,11 @@ extern "C" SkDocument* C_SkPDF_MakeDocument(SkWStream* stream, const SkPDF::Meta
 // GrBackendFormat
 //
 
+
+extern "C" void C_GrBackendFormat_Construct(GrBackendFormat* uninitialized) {
+    new(uninitialized)GrBackendFormat();
+}
+
 extern "C" void C_GrBackendFormat_ConstructGL(GrBackendFormat* uninitialized, GrGLenum format, GrGLenum target) {
     new(uninitialized)GrBackendFormat(GrBackendFormat::MakeGL(format, target));
 }
@@ -2635,8 +2640,8 @@ extern "C" bool C_GrVkImageInfo_Equals(const GrVkImageInfo* lhs, const GrVkImage
 
 #if defined(SK_XML)
 
-extern "C" SkCanvas* C_SkSVGCanvas_Make(const SkRect* bounds, SkWStream* writer) {
-    return SkSVGCanvas::Make(*bounds, writer).release();
+extern "C" SkCanvas* C_SkSVGCanvas_Make(const SkRect* bounds, SkWStream* writer, uint32_t flags) {
+    return SkSVGCanvas::Make(*bounds, writer, flags).release();
 }
 
 #endif

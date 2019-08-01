@@ -213,6 +213,6 @@ impl RCHandle<GrContext> {
         }
     }
 
-    // TODO: support createBackendTexture (2 variants) and deleteBackendTexture(),
-    //       introduced in m76
+    // TODO: support createBackendTexture (several variants) and deleteBackendTexture(),
+    //       introduced in m76 and m77
 }
