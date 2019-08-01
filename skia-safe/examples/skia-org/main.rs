@@ -99,7 +99,7 @@ pub(crate) mod artifact {
             F: Fn(&mut Canvas) -> (),
         {
             use skia_safe::Rect;
-            let mut canvas = skia_safe::svg::Canvas::new(Rect::from_size(size));
+            let mut canvas = skia_safe::svg::Canvas::new(Rect::from_size(size), None);
             func(&mut canvas);
             let data = canvas.end();
             write_file(data.as_bytes(), path, name, "svg");

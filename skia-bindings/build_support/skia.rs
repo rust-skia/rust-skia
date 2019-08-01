@@ -519,6 +519,8 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .whitelist_function("TightBounds")
         .whitelist_function("AsWinding")
         .whitelist_type("SkOpBuilder")
+        // svg/
+        .whitelist_type("SkSVGCanvas")
         // utils/
         .whitelist_function("Sk3LookAt")
         .whitelist_function("Sk3Perspective")
