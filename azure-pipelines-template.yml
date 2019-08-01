@@ -32,7 +32,9 @@ jobs:
     platform: ${{ parameters.platform }}
     platformTarget: ${{ parameters.platformTarget }}
     image: ${{ parameters.image }}
+    androidHost: ${{ parameters.androidHost }}
     androidNDK: ${{ parameters.androidNDK }}
+    androidBinExt: ${{ parameters.androidBinExt }}
     rust_backtrace: 1
     release_branch: 'release'
 
@@ -88,16 +90,14 @@ jobs:
         "C:/Program Files/LLVM/bin/clang.exe" --version
       displayName: LLVM/Clang Version
 
-  - ${{ if ne(parameters.androidNDK, '') }}:
+  - ${{ if ne(parameters.androidHost, '') }}:
     # Android NDK
     - bash: |
         set -e
-        (cd /tmp && curl -sSf -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-$(androidNDK).zip)
+        (cd /tmp && curl -sSf -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-$(androidNDK)-$(androidHost).zip)
         (cd /tmp && unzip android-ndk.zip)
-        (cd /tmp/android-ndk-r18b && build/tools/make_standalone_toolchain.py --arch arm64 --install-dir /tmp/ndk-arm64)
-        (cd /tmp/android-ndk-r18b && build/tools/make_standalone_toolchain.py --arch x86_64 --install-dir /tmp/ndk-x86_64)
-        echo "##vso[task.setvariable variable=PATH;]${PATH}:/tmp/ndk-arm64/bin:/tmp/ndk-x86_64/bin"
-        echo "##vso[task.setvariable variable=ANDROID_NDK;]/tmp/android-ndk-r18b"
+        echo "##vso[task.setvariable variable=ANDROID_NDK;]/tmp/android-ndk-$(androidNDK)"
+        echo "##vso[task.setvariable variable=PATH;]${PATH}:/tmp/android-ndk-$(androidNDK)/toolchains/llvm/prebuilt/$(androidHost)/bin"
       displayName: 'Install Android NDK'
 
   # Note: support to ignore specific rust files and directories is unstable yet: https://github.com/rust-lang/rustfmt/pull/2522
@@ -121,10 +121,14 @@ jobs:
     - template: 'azure-pipelines-build-target.yml'
       parameters:
         target: 'aarch64-linux-android'
+        androidEnv: true
+        releaseBinaries: true
 
     - template: 'azure-pipelines-build-target.yml'
       parameters:
         target: 'x86_64-linux-android'
+        androidEnv: true
+        releaseBinaries: true
 
     - template: 'azure-pipelines-build-target.yml'
       parameters:
@@ -139,8 +143,21 @@ jobs:
   - ${{ if eq(parameters.platform, 'Linux') }}:
     - template: 'azure-pipelines-build-target.yml'
       parameters:
+        androidEnv: true
         target: 'aarch64-linux-android'
 
     - template: 'azure-pipelines-build-target.yml'
       parameters:
+        androidEnv: true
+        target: 'x86_64-linux-android'
+
+  - ${{ if eq(parameters.platform, 'Windows') }}:
+    - template: 'azure-pipelines-build-target.yml'
+      parameters:
+        androidEnv: true
+        target: 'aarch64-linux-android'
+
+    - template: 'azure-pipelines-build-target.yml'
+      parameters:
+        androidEnv: true
         target: 'x86_64-linux-android'
