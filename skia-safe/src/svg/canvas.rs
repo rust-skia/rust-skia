@@ -33,12 +33,26 @@ impl DerefMut for Canvas {
     }
 }
 
+bitflags! {
+    #[derive(Default)]
+    pub struct Flags : u32 {
+        const CONVERT_TEXT_TO_PATHS = skia_bindings::SkSVGCanvas_kConvertTextToPaths_Flag as _;
+    }
+}
+
 impl Canvas {
     /// Creates a new SVG canvas.
-    pub fn new(bounds: impl AsRef<Rect>) -> Canvas {
+    pub fn new(bounds: impl AsRef<Rect>, flags: impl Into<Option<Flags>>) -> Canvas {
         let bounds = bounds.as_ref();
+        let flags = flags.into().unwrap_or_default();
         let mut stream = Box::pin(DynamicMemoryWStream::new());
-        let canvas = unsafe { C_SkSVGCanvas_Make(bounds.native(), &mut stream.native_mut()._base) };
+        let canvas = unsafe {
+            C_SkSVGCanvas_Make(
+                bounds.native(),
+                &mut stream.native_mut()._base,
+                flags.bits(),
+            )
+        };
         Canvas { canvas, stream }
     }
 
@@ -60,7 +74,7 @@ impl Canvas {
 fn test_svg() {
     use crate::Paint;
 
-    let mut canvas = Canvas::new(&Rect::from_size((20, 20)));
+    let mut canvas = Canvas::new(&Rect::from_size((20, 20)), None);
     let paint = Paint::default();
     canvas.draw_circle((10, 10), 10.0, &paint);
     let data = canvas.end();
@@ -74,7 +88,7 @@ fn test_svg() {
 #[test]
 fn test_svg_without_ending() {
     use crate::Paint;
-    let mut canvas = Canvas::new(&Rect::from_size((20, 20)));
+    let mut canvas = Canvas::new(&Rect::from_size((20, 20)), None);
     let paint = Paint::default();
     canvas.draw_circle((10, 10), 10.0, &paint);
 }
