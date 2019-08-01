@@ -118,12 +118,10 @@ jobs:
     - template: 'azure-pipelines-build-target.yml'
       parameters:
         target: 'aarch64-linux-android'
-        releaseBinaries: true
 
     - template: 'azure-pipelines-build-target.yml'
       parameters:
         target: 'x86_64-linux-android'
-        releaseBinaries: true
 
     - template: 'azure-pipelines-build-target.yml'
       parameters:
@@ -143,4 +141,3 @@ jobs:
     - template: 'azure-pipelines-build-target.yml'
       parameters:
         target: 'x86_64-linux-android'
-        releaseBinaries: true
