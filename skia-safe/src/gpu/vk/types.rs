@@ -4,6 +4,7 @@ use super::{
     SamplerYcbcrRange,
 };
 use crate::gpu::vk::{CommandBuffer, Device, Instance, Rect2D, RenderPass};
+use crate::gpu::Protected;
 use crate::prelude::*;
 use skia_bindings::{
     C_GrVkAlloc_Construct, C_GrVkAlloc_Equals, C_GrVkImageInfo_Construct, C_GrVkImageInfo_Equals,
@@ -185,6 +186,7 @@ impl ImageInfo {
         format: Format,
         level_count: u32,
         current_queue_family: Option<u32>,
+        protected: Protected, // added in m77
         ycbcr_conversion_info: Option<YcbcrConversionInfo>,
     ) -> ImageInfo {
         // originally defined as a C macro in vulkan_core.h
@@ -209,7 +211,7 @@ impl ImageInfo {
     }
 
     pub fn from_info(info: &ImageInfo, layout: ImageLayout) -> ImageInfo {
-        ImageInfo::from_native(unsafe { GrVkImageInfo::new2(info.native(), layout) })
+        ImageInfo::from_native(unsafe { GrVkImageInfo::new3(info.native(), layout) })
     }
 
     pub fn update_image_layout(&mut self, layout: ImageLayout) -> &mut Self {

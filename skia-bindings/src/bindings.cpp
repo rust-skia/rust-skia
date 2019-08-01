@@ -2102,6 +2102,10 @@ extern "C" SkDocument* C_SkPDF_MakeDocument(SkWStream* stream, const SkPDF::Meta
 // GrBackendFormat
 //
 
+extern "C" void C_GrBackendFormat_CopyConstruct(GrBackendFormat* uninitialized, const GrBackendFormat* format) {
+    new(uninitialized)GrBackendFormat(*format);
+}
+
 extern "C" void C_GrBackendFormat_destruct(GrBackendFormat* self) {
     self->~GrBackendFormat();
 }
@@ -2303,8 +2307,9 @@ extern "C" void C_GrVkImageInfo_Construct(GrVkImageInfo* uninitialized,
                 VkImage image, const GrVkAlloc* alloc, VkImageTiling imageTiling, VkImageLayout layout,
                 VkFormat format, uint32_t levelCount,
                 uint32_t currentQueueFamily,
+                GrProtected isProtected,
                 const GrVkYcbcrConversionInfo* ycbcrConversionInfo) {
-    new (uninitialized) GrVkImageInfo(image, *alloc, imageTiling, layout, format, levelCount, currentQueueFamily, *ycbcrConversionInfo);
+    new (uninitialized) GrVkImageInfo(image, *alloc, imageTiling, layout, format, levelCount, currentQueueFamily, isProtected, *ycbcrConversionInfo);
 }
 
 extern "C" void C_GrVkImageInfo_updateImageLayout(GrVkImageInfo* self, VkImageLayout layout) {
@@ -2319,8 +2324,8 @@ extern "C" bool C_GrVkImageInfo_Equals(const GrVkImageInfo* lhs, const GrVkImage
 
 #if defined(SK_XML)
 
-extern "C" SkCanvas* C_SkSVGCanvas_Make(const SkRect* bounds, SkWStream* writer) {
-    return SkSVGCanvas::Make(*bounds, writer).release();
+extern "C" SkCanvas* C_SkSVGCanvas_Make(const SkRect* bounds, SkWStream* writer, uint32_t flags) {
+    return SkSVGCanvas::Make(*bounds, writer, flags).release();
 }
 
 #endif
