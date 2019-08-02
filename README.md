@@ -29,16 +29,18 @@ An official crate is not yet available on [crates.io](<https://crates.io/>) but 
 
 We wrapped most part of the public Skia C++ APIs. To see what's missing, take a look at the [API Complete Milestone](<https://github.com/rust-skia/rust-skia/milestone/2>).
 
-- [x] Vector Graphics: Matrix, Rect, Point, Size, etc.
+- [x] Vector Geometry: Matrix, Rect, Point, Size, etc.
 - [x] Most drawing related classes and functions: Surface, Canvas, Paint, Path.
 - [x] [Almost all](<https://github.com/rust-skia/rust-skia/issues/99>) Effects and Shaders.
 - [x] Utility classes we think are useful.
-- [x] PDF
-- [x] SVG
-- [ ] Animation
-- [x] Vulkan
-- [x] OpenGL
-- [ ] Metal
+- [x] PDF & SVG rendering
+- [ ] Skia Modules
+  - [x] Text shaping with [Harfbuzz](https://www.freedesktop.org/wiki/Software/HarfBuzz/) and [ICU](http://site.icu-project.org/home).
+  - [ ] Animation via [Skottie](https://skia.org/user/modules/skottie)
+- [ ] GPU Backends
+  - [x] Vulkan
+  - [x] OpenGL
+  - [ ] Metal
 
 Wrappers for functions that take callbacks and virtual classes are not supported right now. While we think they should be wrapped, the use cases related seem to be rather special, so we postponed that for now.
 
@@ -139,6 +141,12 @@ Note that crate packages _will_ try to download prebuilt binaries from [skia-bin
 Vulkan support can be enabled by setting the Cargo feature `default = ["vulkan"]` in `skia-safe/Cargo.toml`, which will cause a rebuild of Skia. To render the examples with Vulkan use `cargo run --example skia-org -- [OUTPUT_DIR] --driver vulkan`.
 
 Note that Vulkan drivers need to be available. On Windows, they are most likely available already, on Linux [this article on linuxconfig.org](<https://linuxconfig.org/install-and-test-vulkan-on-linux>) might get you started, and on macOS with Metal support, [install the Vulkan SDK](<https://vulkan.lunarg.com/sdk/home>) for Mac and configure MoltenVK by setting the `DYLD_LIBRARY_PATH`, `VK_LAYER_PATH`, and `VK_ICD_FILENAMES` environment variables as described in `Documentation/getting_started_macos.html`.
+
+### Feature `shaper`
+
+The Cargo feature `shaper` enables text shaping with Harfbuzz and ICU. 
+
+On **Windows**, the file `icudtl.dat` must be available in your executable's directory. To provide the data file, either copy it from the build's output directory (shown when skia-bindings is compiled with `cargo build -vv | grep "ninja: Entering directory"`), or - if your executable directory is writable - invoke the function `skia_bindings::icu::init()` before creating the `Shaper` object.
 
 ## Examples
 
