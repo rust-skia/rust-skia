@@ -535,7 +535,7 @@ mod tests {
     fn test_rtl_text_shaping() {
         skia_bindings::icu::init();
 
-        let shaper = Shaper::new_shape_then_wrap().unwrap();
+        let shaper = Shaper::new().unwrap();
         shaper.shape(
             "العربية",
             &Font::default(),
