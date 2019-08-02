@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::shaper::run_handler::RunInfo;
-use crate::{scalar, Font, FontMgr, FourByteTag, Point, TextBlob, Vector};
+use crate::{scalar, Font, FontMgr, FourByteTag};
 pub use run_handler::RunHandler;
 use skia_bindings::{
     C_RustRunHandler_construct, C_SkShaper_BiDiRunIterator_currentLevel,
@@ -10,10 +10,10 @@ use skia_bindings::{
     C_SkShaper_MakeShaperDrivenWrapper, C_SkShaper_MakeStdLanguageRunIterator,
     C_SkShaper_RunIterator_atEnd, C_SkShaper_RunIterator_consume, C_SkShaper_RunIterator_delete,
     C_SkShaper_RunIterator_endOfCurrentRun, C_SkShaper_ScriptRunIterator_currentScript,
-    C_SkShaper_delete, C_SkShaper_shape, C_SkTextBlobBuilderRunHandler_makeBlob, RustRunHandler,
-    RustRunHandler_Param, SkShaper, SkShaper_BiDiRunIterator, SkShaper_FontRunIterator,
-    SkShaper_LanguageRunIterator, SkShaper_RunHandler_Buffer, SkShaper_RunHandler_RunInfo,
-    SkShaper_RunIterator, SkShaper_ScriptRunIterator, SkTextBlobBuilderRunHandler, TraitObject,
+    C_SkShaper_delete, C_SkShaper_shape, RustRunHandler_Param, SkShaper, SkShaper_BiDiRunIterator,
+    SkShaper_FontRunIterator, SkShaper_LanguageRunIterator, SkShaper_RunHandler_Buffer,
+    SkShaper_RunHandler_RunInfo, SkShaper_RunIterator, SkShaper_ScriptRunIterator,
+    SkTextBlobBuilderRunHandler, TraitObject,
 };
 use std::ffi::{CStr, CString};
 use std::mem;

@@ -1,8 +1,8 @@
 // We always compile SkShaper.h with HARFBUZZ & ICU for now.
 #define SK_SHAPER_HARFBUZZ_AVAILABLE
 
-#include "SkShaper.h"
-#include "SkFontMgr.h"
+#include "modules/skshaper/include/SkShaper.h"
+#include "include/core/SkFontMgr.h"
 
 extern "C" SkShaper* C_SkShaper_MakePrimitive() {
     return SkShaper::MakePrimitive().release();
