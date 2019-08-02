@@ -517,6 +517,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .whitelist_type("SkTextUtils")
         // modules/skshaper/
         .whitelist_type("SkShaper")
+        .whitelist_type("RustRunHandler")
         // misc
         .whitelist_var("SK_Color.*")
         .whitelist_var("kAll_GrBackendState")

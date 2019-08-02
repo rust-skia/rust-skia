@@ -1,18 +1,23 @@
-//! TODO: Implement iterator traits if possible.
 use crate::prelude::*;
-use crate::{Font, FontMgr, FourByteTag};
+use crate::shaper::run_handler::RunInfo;
+use crate::{scalar, Font, FontMgr, FourByteTag, Point, TextBlob, Vector};
+pub use run_handler::RunHandler;
 use skia_bindings::{
-    C_SkShaper_BiDiRunIterator_currentLevel, C_SkShaper_FontRunIterator_currentFont,
-    C_SkShaper_LanguageRunIterator_currentLanguage, C_SkShaper_Make,
-    C_SkShaper_MakeFontMgrRunIterator, C_SkShaper_MakeHbIcuScriptRunIterator,
+    C_RustRunHandler_construct, C_SkShaper_BiDiRunIterator_currentLevel,
+    C_SkShaper_FontRunIterator_currentFont, C_SkShaper_LanguageRunIterator_currentLanguage,
+    C_SkShaper_Make, C_SkShaper_MakeFontMgrRunIterator, C_SkShaper_MakeHbIcuScriptRunIterator,
     C_SkShaper_MakeIcuBidiRunIterator, C_SkShaper_MakePrimitive, C_SkShaper_MakeShapeThenWrap,
     C_SkShaper_MakeShaperDrivenWrapper, C_SkShaper_MakeStdLanguageRunIterator,
     C_SkShaper_RunIterator_atEnd, C_SkShaper_RunIterator_consume, C_SkShaper_RunIterator_delete,
     C_SkShaper_RunIterator_endOfCurrentRun, C_SkShaper_ScriptRunIterator_currentScript,
-    C_SkShaper_delete, SkShaper, SkShaper_BiDiRunIterator, SkShaper_FontRunIterator,
-    SkShaper_LanguageRunIterator, SkShaper_RunIterator, SkShaper_ScriptRunIterator,
+    C_SkShaper_delete, C_SkShaper_shape, C_SkTextBlobBuilderRunHandler_makeBlob, RustRunHandler,
+    RustRunHandler_Param, SkShaper, SkShaper_BiDiRunIterator, SkShaper_FontRunIterator,
+    SkShaper_LanguageRunIterator, SkShaper_RunHandler_Buffer, SkShaper_RunHandler_RunInfo,
+    SkShaper_RunIterator, SkShaper_ScriptRunIterator, SkTextBlobBuilderRunHandler, TraitObject,
 };
-use std::ffi::CStr;
+use std::ffi::{CStr, CString};
+use std::mem;
+use std::pin::Pin;
 
 pub struct Shaper(*mut SkShaper);
 
@@ -268,4 +273,267 @@ impl Shaper {
     }
 }
 
-// TODO: RunHandler
+mod run_handler {
+    use crate::prelude::*;
+    use crate::{Font, GlyphId, Point, Vector};
+    use skia_bindings::{SkShaper_RunHandler_Buffer, SkShaper_RunHandler_RunInfo};
+    use std::ops::Range;
+
+    pub trait RunHandler {
+        fn begin_line(&mut self);
+        fn run_info(&mut self, info: &RunInfo);
+        fn commit_run_info(&mut self);
+        fn run_buffer<'a>(&'a mut self, info: &RunInfo) -> Buffer<'a>;
+        fn commit_run_buffer(&mut self, info: &RunInfo);
+        fn commit_line(&mut self);
+    }
+
+    /*
+        #[repr(C)]
+        #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Default, Debug)]
+        pub struct Range {
+            begin: usize,
+            size: usize,
+        }
+
+    impl NativeTransmutable<SkShaper_RunHandler_Range> for Range {}
+
+    #[test]
+    fn test_range_layout() {
+        Range::test_layout();
+    }
+    */
+
+    pub struct RunInfo<'a> {
+        pub font: &'a Font,
+        pub bidi_level: u8,
+        pub advance: Vector,
+        pub glyph_count: usize,
+        pub utf8_range: Range<usize>,
+    }
+
+    impl<'a> RunInfo<'a> {
+        pub(crate) fn from_native(ri: &SkShaper_RunHandler_RunInfo) -> Self {
+            // TODO: should we avoid that copy and wrap RunInfo with functions?
+            let utf8_range = ri.utf8Range;
+            RunInfo {
+                font: Font::from_native_ref(unsafe { &*ri.fFont }),
+                bidi_level: ri.fBidiLevel,
+                advance: Vector::from_native(ri.fAdvance),
+                glyph_count: ri.glyphCount,
+                utf8_range: utf8_range.fBegin..utf8_range.fBegin + utf8_range.fSize,
+            }
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct Buffer<'a> {
+        pub glyphs: &'a mut [GlyphId],
+        pub positions: &'a mut [Point],
+        pub offsets: Option<&'a mut [Point]>,
+        pub clusters: Option<&'a mut [u32]>,
+        pub point: Point,
+    }
+
+    impl<'a> Buffer<'a> {
+        pub fn new(
+            glyphs: &'a mut [GlyphId],
+            positions: &'a mut [Point],
+            point: impl Into<Option<Point>>,
+        ) -> Self {
+            Buffer {
+                glyphs,
+                positions,
+                offsets: None,
+                clusters: None,
+                point: point.into().unwrap_or_default(),
+            }
+        }
+
+        pub(crate) fn native_buffer_mut(
+            &mut self,
+            glyph_count: usize,
+        ) -> SkShaper_RunHandler_Buffer {
+            assert_eq!(self.glyphs.len(), glyph_count);
+            assert_eq!(self.positions.len(), glyph_count);
+            if let Some(offsets) = &self.offsets {
+                assert_eq!(offsets.len(), glyph_count)
+            }
+            if let Some(clusters) = &self.clusters {
+                assert_eq!(clusters.len(), glyph_count)
+            }
+            SkShaper_RunHandler_Buffer {
+                glyphs: self.glyphs.as_mut_ptr(),
+                positions: self.positions.native_mut().as_mut_ptr(),
+                offsets: self.offsets.native_mut().as_ptr_or_null_mut(),
+                clusters: self.clusters.as_ptr_or_null_mut(),
+                point: self.point.into_native(),
+            }
+        }
+    }
+}
+
+impl Shaper {
+    // TODO: SkShaper::shape() with non-standard run handlers.
+
+    pub fn shape(
+        &self,
+        utf8: &str,
+        font: &Font,
+        left_to_right: bool,
+        width: scalar,
+        run_handler: &mut dyn RunHandler,
+    ) {
+        let param = RustRunHandler_Param {
+            trait_: unsafe { mem::transmute(run_handler) },
+            beginLine: Some(begin_line),
+            runInfo: Some(run_info),
+            commitRunInfo: Some(commit_run_info),
+            runBuffer: Some(run_buffer),
+            commitRunBuffer: Some(commit_run_buffer),
+            commitLine: Some(commit_line),
+        };
+
+        extern "C" fn begin_line(to: TraitObject) {
+            to_run_handler(to).begin_line()
+        }
+
+        extern "C" fn run_info(to: TraitObject, ri: *const SkShaper_RunHandler_RunInfo) {
+            to_run_handler(to).run_info(&RunInfo::from_native(unsafe { &*ri }));
+        }
+
+        extern "C" fn commit_run_info(to: TraitObject) {
+            to_run_handler(to).commit_run_info()
+        }
+
+        extern "C" fn run_buffer(
+            to: TraitObject,
+            ri: *const SkShaper_RunHandler_RunInfo,
+        ) -> SkShaper_RunHandler_Buffer {
+            let ri = unsafe { &*ri };
+            to_run_handler(to)
+                .run_buffer(&RunInfo::from_native(ri))
+                .native_buffer_mut(ri.glyphCount)
+        }
+
+        extern "C" fn commit_run_buffer(to: TraitObject, ri: *const SkShaper_RunHandler_RunInfo) {
+            to_run_handler(to).commit_run_buffer(&RunInfo::from_native(unsafe { &*ri }))
+        }
+
+        extern "C" fn commit_line(to: TraitObject) {
+            to_run_handler(to).commit_line()
+        }
+
+        fn to_run_handler<'a>(to: TraitObject) -> &'a mut dyn RunHandler {
+            unsafe { mem::transmute(to) }
+        }
+
+        let bytes = utf8.as_bytes();
+
+        unsafe {
+            let mut run_handler = mem::zeroed();
+            C_RustRunHandler_construct(&mut run_handler, &param);
+
+            C_SkShaper_shape(
+                self.native(),
+                bytes.as_ptr() as _,
+                bytes.len(),
+                font.native(),
+                left_to_right,
+                width,
+                &mut run_handler._base,
+            )
+        }
+    }
+}
+
+// TODO: Is there a way around converting and storing the CString here?
+#[repr(C)]
+pub struct TextBlobBuilderRunHandler(Pin<CString>, SkTextBlobBuilderRunHandler);
+
+impl NativeAccess<SkTextBlobBuilderRunHandler> for TextBlobBuilderRunHandler {
+    fn native(&self) -> &SkTextBlobBuilderRunHandler {
+        &self.1
+    }
+    fn native_mut(&mut self) -> &mut SkTextBlobBuilderRunHandler {
+        &mut self.1
+    }
+}
+
+/*
+impl TextBlobBuilderRunHandler {
+    pub fn new(text: &str, offset: Point) -> TextBlobBuilderRunHandler {
+        let c_string = Pin::new(CString::new(text).unwrap());
+        let ptr = c_string.as_ptr();
+        TextBlobBuilderRunHandler(c_string, unsafe {
+            SkTextBlobBuilderRunHandler::new(ptr, offset.into_native())
+        })
+    }
+}
+*/
+
+/*
+impl Shaper {
+    pub fn shape_text_blob(text: &str, offset: Point) -> Option<(TextBlob, Point)> {
+        let builder = TextBlobBuilderRunHandler::new(text, offset);
+        builder.
+    }
+}
+
+*/
+
+#[cfg(test)]
+mod tests {
+    use crate::shaper::run_handler::{Buffer, RunInfo};
+    use crate::shaper::RunHandler;
+    use crate::{Font, GlyphId, Point, Shaper};
+
+    #[derive(Default, Debug)]
+    pub struct DebugRunHandler {
+        glyphs: Vec<GlyphId>,
+        points: Vec<Point>,
+    }
+
+    impl RunHandler for DebugRunHandler {
+        fn begin_line(&mut self) {
+            println!("begin_line");
+        }
+
+        fn run_info(&mut self, info: &RunInfo) {
+            println!("run_info: {:?} {:?}", info.advance, info.utf8_range);
+        }
+
+        fn commit_run_info(&mut self) {
+            println!("commit_run_info");
+        }
+
+        fn run_buffer<'a>(&'a mut self, info: &RunInfo) -> Buffer {
+            println!("run_buffer {}", info.glyph_count);
+            let count = info.glyph_count;
+            self.glyphs.resize(count, 0);
+            self.points.resize(count, Point::default());
+            Buffer::new(&mut self.glyphs, &mut self.points, None)
+        }
+
+        fn commit_run_buffer(&mut self, _info: &RunInfo) {
+            println!("commit_run_buffer");
+            println!("state: {:?}", self);
+        }
+
+        fn commit_line(&mut self) {
+            println!("commit_line");
+        }
+    }
+
+    #[test]
+    fn test_rtl_text_shaping() {
+        let shaper = Shaper::new_shape_then_wrap().unwrap();
+        shaper.shape(
+            "العربية",
+            &Font::default(),
+            false,
+            10000.0,
+            &mut DebugRunHandler::default(),
+        );
+    }
+}

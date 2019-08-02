@@ -76,7 +76,86 @@ extern "C" void C_SkShaper_RunHandler_delete(SkShaper::RunHandler* self) {
     delete self;
 }
 
-// TODO: support RunHandler
+extern "C" struct TraitObject {
+    void* data;
+    void* vtable;
+};
+
+namespace RunHandler {
+    extern "C" typedef void (*BeginLine)(TraitObject);
+    extern "C" typedef void (*RunInfo)(TraitObject, const SkShaper::RunHandler::RunInfo*);
+    extern "C" typedef void (*CommitRunInfo)(TraitObject);
+    extern "C" typedef SkShaper::RunHandler::Buffer (*RunBuffer)(TraitObject, const SkShaper::RunHandler::RunInfo*);
+    extern "C" typedef void (*CommitRunBuffer)(TraitObject, const SkShaper::RunHandler::RunInfo*);
+    extern "C" typedef void (*CommitLine)(TraitObject);
+}
+
+class RustRunHandler: SkShaper::RunHandler {
+
+public:
+    struct Param {
+        TraitObject trait;
+        ::RunHandler::BeginLine beginLine;
+        ::RunHandler::RunInfo runInfo;
+        ::RunHandler::CommitRunInfo commitRunInfo;
+        ::RunHandler::RunBuffer runBuffer;
+        ::RunHandler::CommitRunBuffer commitRunBuffer;
+        ::RunHandler::CommitLine commitLine;
+    };
+
+    explicit RustRunHandler(const Param& param)
+    :_param(param){
+    }
+
+
+private:
+    void beginLine() override {
+        _param.beginLine(_param.trait);
+    }
+
+    void runInfo(const RunInfo &info) override {
+        _param.runInfo(_param.trait, &info);
+    }
+
+    void commitRunInfo() override {
+        _param.commitRunInfo(_param.trait);
+    }
+
+    Buffer runBuffer(const RunInfo &info) override {
+        return _param.runBuffer(_param.trait, &info);
+    }
+
+    void commitRunBuffer(const RunInfo &info) override {
+        _param.commitRunBuffer(_param.trait, &info);
+    }
+
+    void commitLine() override {
+        _param.commitLine(_param.trait);
+    }
+
+private:
+    Param _param;
+};
+
+extern "C" void C_RustRunHandler_construct(RustRunHandler* uninitialized, const RustRunHandler::Param* param) {
+    new(uninitialized)RustRunHandler(*param);
+}
+
+extern "C" void
+C_SkShaper_shape(const SkShaper *self, const char *utf8, size_t utf8Bytes, const SkFont *srcFont, bool leftToRight,
+                 SkScalar width, SkShaper::RunHandler *runHandler) {
+    self->shape(utf8, utf8Bytes, *srcFont, leftToRight, width, runHandler);
+}
+
+extern "C" void
+C_SkShaper_shape2(const SkShaper *self, const char *utf8, size_t utf8Bytes, SkShaper::FontRunIterator *fontRunIterator,
+                  SkShaper::BiDiRunIterator *bidiRunIterator,
+                  SkShaper::ScriptRunIterator *scriptRunIterator,
+                  SkShaper::LanguageRunIterator *languageRunIterator, SkScalar width,
+                  SkShaper::RunHandler *runHandler) {
+    self->shape(utf8, utf8Bytes, *fontRunIterator, *bidiRunIterator, *scriptRunIterator, *languageRunIterator, width,
+                runHandler);
+}
 
 extern "C" SkTextBlob* C_SkTextBlobBuilderRunHandler_makeBlob(SkTextBlobBuilderRunHandler* self) {
     return self->makeBlob().release();
