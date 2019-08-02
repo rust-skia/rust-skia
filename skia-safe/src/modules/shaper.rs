@@ -37,6 +37,12 @@ impl Drop for Shaper {
     }
 }
 
+impl Default for Shaper {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Shaper {
     pub fn new_primitive() -> Self {
         unsafe { C_SkShaper_MakePrimitive() }
@@ -126,7 +132,7 @@ impl FontRunIterator {
 }
 
 impl Shaper {
-    pub fn new_font_mgr_run_iterator<'a>(
+    pub fn new_font_mgr_run_iterator(
         utf8: &str,
         font: &Font,
         mut fallback: Option<&mut FontMgr>,
