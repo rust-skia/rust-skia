@@ -527,6 +527,8 @@ mod tests {
 
     #[test]
     fn test_rtl_text_shaping() {
+        skia_bindings::icu::init();
+
         let shaper = Shaper::new_shape_then_wrap().unwrap();
         shaper.shape(
             "العربية",
@@ -536,4 +538,5 @@ mod tests {
             &mut DebugRunHandler::default(),
         );
     }
+
 }

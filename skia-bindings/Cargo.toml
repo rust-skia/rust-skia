@@ -13,7 +13,7 @@ authors = ["LongYinan <lynweklm@gmail.com>", "Armin Sander <armin@replicator.org
 edition = "2018"
 build = "build.rs"
 links = "skia"
-include = [ "Cargo.toml", "build.rs", "build_support.rs", "build_support/**/*.rs", "src/**/*.cpp", "src/lib.rs" ]
+include = [ "Cargo.toml", "build.rs", "build_support.rs", "build_support/**/*.rs", "src/**/*.cpp", "src/lib.rs", "src/icu.rs" ]
 
 [features]
 default = []
