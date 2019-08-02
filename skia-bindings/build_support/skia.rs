@@ -7,9 +7,19 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::{env, fs};
 
-const BINDINGS_LIB_NAME: &str = "skia-bindings";
 const REPOSITORY_CLONE_URL: &str = "https://github.com/rust-skia/rust-skia.git";
 const REPOSITORY_DIRECTORY: &str = "rust-skia";
+
+mod lib {
+    pub const BINDINGS: &str = "skia-bindings";
+    pub const SKSHAPER: &str = "skshaper";
+}
+
+mod feature {
+    pub const VULKAN: &str = "vulkan";
+    pub const SVG: &str = "svg";
+    pub const SHAPER: &str = "shaper";
+}
 
 /// The defaults for the Skia build configuration.
 impl Default for BuildConfiguration {
@@ -273,10 +283,13 @@ impl BinariesConfiguration {
     pub fn from_cargo_env(build: &BuildConfiguration) -> Self {
         let mut features = Vec::new();
         if build.feature_vulkan {
-            features.push("vulkan");
+            features.push(feature::VULKAN);
         }
         if build.feature_svg {
-            features.push("svg")
+            features.push(feature::SVG)
+        }
+        if build.feature_shaper {
+            features.push(feature::SHAPER)
         }
 
         let mut link_libraries = Vec::new();
@@ -336,7 +349,10 @@ impl BinariesConfiguration {
             self.output_directory.to_str().unwrap()
         );
         cargo::add_link_lib("static=skia");
-        cargo::add_link_lib(&format!("static={}", BINDINGS_LIB_NAME));
+        cargo::add_link_lib(&format!("static={}", lib::BINDINGS));
+        if self.features.contains(&String::from(feature::SHAPER)) {
+            cargo::add_link_lib(&format!("static={}", lib::SKSHAPER))
+        }
     }
 }
 
@@ -582,7 +598,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
     }
 
     println!("COMPILING BINDINGS: {:?}", build.binding_sources);
-    cc_build.compile(BINDINGS_LIB_NAME);
+    cc_build.compile(lib::BINDINGS);
 
     println!("GENERATING BINDINGS");
     let bindings = builder.generate().expect("Unable to generate bindings");
