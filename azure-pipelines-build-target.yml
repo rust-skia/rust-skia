@@ -34,7 +34,7 @@ steps:
       displayName: 'Clippy skia-bindings and skia-safe'
 
   - ${{ if eq(parameters.runBinaries, True) }}:
-    - script: cd skia-safe && cargo test --release --features "$(features)" --target ${{ parameters.target }} -vv
+    - script: cd skia-safe && cargo test --release --features "$(features)" --target ${{ parameters.target }} -vv -- --test-threads=1 --nocapture
       displayName: Test skia-safe
 
     - ${{ if ne(parameters.exampleArgs, '') }}:
