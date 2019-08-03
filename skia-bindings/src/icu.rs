@@ -1,10 +1,3 @@
-/// This function writes the file `icudtl.dat` into the current's executable directory
-/// making sure that it's available when text shaping is used in Skia.
-///
-/// If your executable directory can not be written to, make sure that `icudtl.dat` is
-/// available.
-///
-/// It's currently not possible to load `icudtl.dat` from another location.
 #[cfg(windows)]
 pub fn init() {
     use std::{env, fs};

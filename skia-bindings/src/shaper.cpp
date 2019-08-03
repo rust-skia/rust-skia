@@ -157,6 +157,14 @@ C_SkShaper_shape2(const SkShaper *self, const char *utf8, size_t utf8Bytes, SkSh
                 runHandler);
 }
 
+extern "C" void C_SkTextBlobBuilderRunHandler_construct(SkTextBlobBuilderRunHandler* uninitialized, const char* utf8Text, const SkPoint* offset) {
+    new(uninitialized)SkTextBlobBuilderRunHandler(utf8Text, *offset);
+}
+
 extern "C" SkTextBlob* C_SkTextBlobBuilderRunHandler_makeBlob(SkTextBlobBuilderRunHandler* self) {
     return self->makeBlob().release();
+}
+
+extern "C" SkPoint C_SkTextBlobBuilderRunHandler_endPoint(SkTextBlobBuilderRunHandler* self) {
+    return self->endPoint();
 }
