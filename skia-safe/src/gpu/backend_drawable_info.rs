@@ -6,7 +6,6 @@ use skia_bindings::{
     C_GrBackendDrawableInfo_backend, C_GrBackendDrawableInfo_construct,
     C_GrBackendDrawableInfo_destruct, C_GrBackendDrawableInfo_isValid, GrBackendDrawableInfo,
 };
-use std::mem;
 
 pub type BackendDrawableInfo = Handle<GrBackendDrawableInfo>;
 
@@ -42,6 +41,7 @@ impl Handle<GrBackendDrawableInfo> {
 
     #[cfg(feature = "vulkan")]
     pub fn get_vk_drawable_info(&self) -> Option<vk::DrawableInfo> {
+        use std::mem;
         unsafe {
             let mut di: vk::DrawableInfo = mem::zeroed();
             skia_bindings::C_GrBackendDrawableInfo_getVkDrawableInfo(self.native(), di.native_mut())
