@@ -21,6 +21,8 @@ mod drivers;
 mod skcanvas_overview;
 mod skpaint_overview;
 mod skpath_overview;
+#[cfg(feature = "shaper")]
+mod skshaper_example;
 
 pub(crate) mod artifact {
     use skia_safe::gpu;
@@ -304,6 +306,9 @@ fn main() {
         skcanvas_overview::draw::<Driver>(&out_path);
         skpath_overview::draw::<Driver>(&out_path);
         skpaint_overview::draw::<Driver>(&out_path);
+
+        #[cfg(feature = "shaper")]
+        skshaper_example::draw::<Driver>(&out_path);
     }
 }
 

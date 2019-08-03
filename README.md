@@ -146,7 +146,9 @@ Note that Vulkan drivers need to be available. On Windows, they are most likely 
 
 The Cargo feature `shaper` enables text shaping with Harfbuzz and ICU. 
 
-On **Windows**, the file `icudtl.dat` must be available in your executable's directory. To provide the data file, either copy it from the build's output directory (shown when skia-bindings is compiled with `cargo build -vv | grep "ninja: Entering directory"`), or - if your executable directory is writable - invoke the function `skia_bindings::icu::init()` before creating the `Shaper` object.
+On **Windows**, the file `icudtl.dat` must be available in your executable's directory. To provide the data file, either copy it from the build's output directory (shown when skia-bindings is compiled with `cargo build -vv | grep "ninja: Entering directory"`), or - if your executable directory is writable - invoke the function `skia_safe::icu::init()` before creating the `skia_safe::Shaper` object. 
+
+A simple example can be found [in the skia-org command line application](skia-safe/examples/skia-org/skshaper_example.rs).
 
 ## Examples
 
