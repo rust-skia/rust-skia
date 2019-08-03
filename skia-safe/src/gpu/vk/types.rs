@@ -107,7 +107,7 @@ impl YcbcrConversionInfo {
         x_chroma_offset: ChromaLocation,
         y_chroma_offset: ChromaLocation,
         chroma_filter: Filter,
-        force_explicit_reconsturction: Bool32,
+        force_explicit_reconstruction: Bool32,
         external_format: u64,
         external_format_features: FomatFeatureFlags,
     ) -> YcbcrConversionInfo {
@@ -132,7 +132,7 @@ impl YcbcrConversionInfo {
                 x_chroma_offset,
                 y_chroma_offset,
                 chroma_filter,
-                force_explicit_reconsturction,
+                force_explicit_reconstruction,
                 external_format,
                 external_format_features,
             )
