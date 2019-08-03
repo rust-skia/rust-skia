@@ -294,22 +294,6 @@ mod run_handler {
         fn commit_line(&mut self);
     }
 
-    /*
-        #[repr(C)]
-        #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Default, Debug)]
-        pub struct Range {
-            begin: usize,
-            size: usize,
-        }
-
-    impl NativeTransmutable<SkShaper_RunHandler_Range> for Range {}
-
-    #[test]
-    fn test_range_layout() {
-        Range::test_layout();
-    }
-    */
-
     pub struct RunInfo<'a> {
         pub font: &'a Font,
         pub bidi_level: u8,
