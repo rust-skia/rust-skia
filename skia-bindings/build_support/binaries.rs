@@ -63,6 +63,7 @@ pub fn download(url: impl AsRef<str>) -> io::Result<impl Read> {
     let mut data = Vec::new();
     let mut handle = Easy::new();
     handle.url(url.as_ref()).unwrap();
+    handle.fail_on_error(true).unwrap();
     let curl_result = {
         let mut transfer = handle.transfer();
         transfer
