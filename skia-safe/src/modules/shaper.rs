@@ -422,8 +422,7 @@ impl Shaper {
         let bytes = utf8.as_ref().as_bytes();
 
         unsafe {
-            let mut run_handler = mem::zeroed();
-            C_RustRunHandler_construct(&mut run_handler, &param);
+            let mut run_handler = construct(|rh| C_RustRunHandler_construct(rh, &param));
 
             C_SkShaper_shape(
                 self.native(),
@@ -459,10 +458,9 @@ impl TextBlobBuilderRunHandler {
         TextBlobBuilderRunHandler(c_string, unsafe {
             SkTextBlobBuilderRunHandler::new(ptr, offset.into().into_native())
         }) */
-        let mut run_handler = unsafe { mem::zeroed() };
-        unsafe {
-            C_SkTextBlobBuilderRunHandler_construct(&mut run_handler, ptr, offset.into().native())
-        };
+        let run_handler = construct(|rh| unsafe {
+            C_SkTextBlobBuilderRunHandler_construct(rh, ptr, offset.into().native())
+        });
         TextBlobBuilderRunHandler(c_string, run_handler)
     }
 
