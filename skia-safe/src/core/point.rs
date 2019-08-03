@@ -82,7 +82,7 @@ impl SubAssign<ISize> for IPoint {
 }
 
 impl IPoint {
-    pub fn new(x: i32, y: i32) -> IPoint {
+    pub const fn new(x: i32, y: i32) -> Self {
         IPoint { x, y }
     }
 
@@ -195,7 +195,7 @@ impl MulAssign<scalar> for Point {
 }
 
 impl Point {
-    pub fn new(x: scalar, y: scalar) -> Self {
+    pub const fn new(x: scalar, y: scalar) -> Self {
         Self { x, y }
     }
 

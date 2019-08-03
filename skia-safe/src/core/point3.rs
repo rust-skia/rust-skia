@@ -61,7 +61,7 @@ impl SubAssign for Point3 {
 }
 
 impl Point3 {
-    pub fn new(x: scalar, y: scalar, z: scalar) -> Self {
+    pub const fn new(x: scalar, y: scalar, z: scalar) -> Self {
         Self { x, y, z }
     }
 
