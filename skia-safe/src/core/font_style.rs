@@ -3,7 +3,6 @@ use skia_bindings::{
     C_SkFontStyle_Construct, C_SkFontStyle_Equals, SkFontStyle, SkFontStyle_Slant,
     SkFontStyle_Weight, SkFontStyle_Width,
 };
-use std::mem;
 use std::ops::Deref;
 
 /// Wrapper type of a font weight.
@@ -168,11 +167,7 @@ impl Default for FontStyle {
     fn default() -> Self {
         // does not link under Linux:
         // unsafe { SkFontStyle::new1() }
-        FontStyle::from_native(unsafe {
-            let mut font_style = mem::uninitialized();
-            C_SkFontStyle_Construct(&mut font_style);
-            font_style
-        })
+        FontStyle::construct(|fs| unsafe { C_SkFontStyle_Construct(fs) })
     }
 }
 

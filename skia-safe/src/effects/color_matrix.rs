@@ -3,7 +3,6 @@ use skia_bindings::{
     C_SkColorMatrix_equals, C_SkColorMatrix_get20, C_SkColorMatrix_set20, SkColorMatrix,
     SkColorMatrix_Axis,
 };
-use std::mem;
 
 pub type ColorMatrix = Handle<SkColorMatrix>;
 
@@ -19,11 +18,7 @@ impl NativePartialEq for SkColorMatrix {
 
 impl Default for Handle<SkColorMatrix> {
     fn default() -> Self {
-        unsafe {
-            let mut matrix = ColorMatrix::from_native(mem::zeroed());
-            matrix.set_identity();
-            matrix
-        }
+        ColorMatrix::construct(|cm| unsafe { (*cm).setIdentity() })
     }
 }
 

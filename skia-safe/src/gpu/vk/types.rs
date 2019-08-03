@@ -14,7 +14,7 @@ use skia_bindings::{
 use skia_bindings::{GrVkAlloc, GrVkBackendMemory};
 use skia_bindings::{GrVkImageInfo, GrVkYcbcrConversionInfo};
 use std::ffi::CStr;
-use std::{mem, os::raw};
+use std::os::raw;
 
 pub type GraphicsBackendMemory = GrVkBackendMemory;
 
@@ -64,9 +64,7 @@ impl Alloc {
         // does not link:
         // Self::from_native(GrVkAlloc::new1(memory, offset, size, flags.bits()))
 
-        let mut alloc = mem::uninitialized();
-        C_GrVkAlloc_Construct(&mut alloc, memory, offset, size, flags.bits());
-        Alloc::from_native(alloc)
+        Alloc::construct(|alloc| C_GrVkAlloc_Construct(alloc, memory, offset, size, flags.bits()))
     }
 }
 
@@ -126,10 +124,9 @@ impl YcbcrConversionInfo {
                 external_format,
                 external_format_features)
         }) */
-        unsafe {
-            let mut ci = mem::uninitialized();
+        YcbcrConversionInfo::construct(|ci| unsafe {
             C_GrVkYcbcrConversionInfo_Construct(
-                &mut ci,
+                ci,
                 ycrbcr_model,
                 ycbcr_range,
                 x_chroma_offset,
@@ -138,10 +135,8 @@ impl YcbcrConversionInfo {
                 force_explicit_reconsturction,
                 external_format,
                 external_format_features,
-            );
-
-            YcbcrConversionInfo::from_native(ci)
-        }
+            )
+        })
     }
 
     pub fn is_valid(&self) -> bool {
@@ -198,19 +193,19 @@ impl ImageInfo {
 
         let current_queue_family = current_queue_family.unwrap_or(VK_QUEUE_FAMILY_IGNORED);
         let ycbcr_conversion_info = ycbcr_conversion_info.unwrap_or_default();
-        let mut image_info = mem::uninitialized();
-        C_GrVkImageInfo_Construct(
-            &mut image_info,
-            image,
-            alloc.native(),
-            tiling,
-            layout,
-            format,
-            level_count,
-            current_queue_family,
-            ycbcr_conversion_info.native(),
-        );
-        ImageInfo::from_native(image_info)
+        ImageInfo::construct(|image_info| {
+            C_GrVkImageInfo_Construct(
+                image_info,
+                image,
+                alloc.native(),
+                tiling,
+                layout,
+                format,
+                level_count,
+                current_queue_family,
+                ycbcr_conversion_info.native(),
+            );
+        })
     }
 
     pub fn from_info(info: &ImageInfo, layout: ImageLayout) -> ImageInfo {

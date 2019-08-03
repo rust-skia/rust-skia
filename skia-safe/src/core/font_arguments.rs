@@ -58,12 +58,10 @@ impl<'a> Default for FontArguments<'a> {
 
 impl<'a> FontArguments<'a> {
     pub fn new() -> Self {
-        Self::from_native(unsafe {
-            // does not link under Linux / macOS
-            // SkFontArguments::new()
-            let mut font_arguments = mem::zeroed();
-            C_SkFontArguments_construct(&mut font_arguments);
-            font_arguments
+        // does not link under Linux / macOS
+        // SkFontArguments::new()
+        Self::construct(|fa| unsafe {
+            C_SkFontArguments_construct(fa);
         })
     }
 

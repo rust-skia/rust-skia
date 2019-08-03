@@ -4,7 +4,7 @@ use skia_bindings::{
     C_SkMatrix44_ConstructIdentity, C_SkMatrix44_Equals, C_SkMatrix44_Mul, C_SkMatrix44_MulV4,
     C_SkMatrix44_SkMatrix, SkMatrix44, SkVector4,
 };
-use std::{mem, ops};
+use std::ops;
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -136,10 +136,8 @@ impl Matrix44 {
     pub const COLUMNS: usize = 4;
 
     pub fn new_identity() -> Self {
-        Matrix44::from_native(unsafe {
-            let mut matrix: SkMatrix44 = mem::zeroed();
-            C_SkMatrix44_ConstructIdentity(&mut matrix);
-            matrix
+        Matrix44::construct(|matrix| unsafe {
+            C_SkMatrix44_ConstructIdentity(matrix);
         })
     }
 

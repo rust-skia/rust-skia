@@ -5,7 +5,6 @@ use skia_bindings::{
     C_SkImageInfo_gammaCloseToSRGB, C_SkImageInfo_reset, SkAlphaType, SkColorType, SkImageInfo,
     SkYUVColorSpace,
 };
-use std::mem;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -120,12 +119,12 @@ impl NativeDrop for SkImageInfo {
 
 impl NativeClone for SkImageInfo {
     fn clone(&self) -> Self {
+        // SkImageInfo::new() does not link under Linux.
         unsafe {
-            let mut image_info = mem::zeroed();
-            // note SkImageInfo::new() does not link under Linux.
-            C_SkImageInfo_Construct(&mut image_info);
-            C_SkImageInfo_Copy(self, &mut image_info);
-            image_info
+            construct(|image_info| {
+                C_SkImageInfo_Construct(image_info);
+                C_SkImageInfo_Copy(self, image_info);
+            })
         }
     }
 }

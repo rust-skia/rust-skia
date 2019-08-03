@@ -355,12 +355,10 @@ fn test_iterator_layout() {
 
 impl<'a> Iterator<'a> {
     pub fn new_empty() -> Iterator<'a> {
-        Iterator::from_native(unsafe {
-            // does not link:
-            // SkRegion_Iterator::new()
-            let mut iterator = mem::zeroed();
-            C_SkRegion_Iterator_Construct(&mut iterator);
-            iterator
+        // does not link:
+        // SkRegion_Iterator::new()
+        Iterator::construct(|iterator| unsafe {
+            C_SkRegion_Iterator_Construct(iterator);
         })
     }
 
