@@ -256,13 +256,9 @@ impl<N: NativeDrop> Handle<N> {
         unsafe { transmute_ref(n) }
     }
 
-    /// Constructs a C++ object in place by calling an
-    /// extern "C" function that expects a pointer that points to
-    /// zeroed memory of the native type.
-    pub fn construct_c(construct: unsafe extern "C" fn(*mut N) -> ()) -> Self {
-        Self::construct(|instance| unsafe { construct(instance) })
-    }
-
+    /// Constructs a C++ object in place by calling a
+    /// function that expects a pointer that points to
+    /// uninitialized memory of the native type.
     pub fn construct(construct: impl FnOnce(*mut N)) -> Self {
         Self::from_native(self::construct(construct))
     }

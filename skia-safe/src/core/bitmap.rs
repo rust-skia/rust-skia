@@ -30,7 +30,7 @@ impl NativeClone for SkBitmap {
 
 impl Handle<SkBitmap> {
     pub fn new() -> Self {
-        Self::construct_c(C_SkBitmap_Construct)
+        Self::construct(|bitmap| unsafe { C_SkBitmap_Construct(bitmap) })
     }
 
     pub fn swap(&mut self, other: &mut Self) {
