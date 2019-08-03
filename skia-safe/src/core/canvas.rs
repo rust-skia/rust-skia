@@ -19,7 +19,7 @@ use std::convert::TryInto;
 use std::ffi::CString;
 use std::marker::PhantomData;
 use std::ops::{Deref, DerefMut};
-use std::{mem, slice};
+use std::slice;
 
 pub use lattice::Lattice;
 
@@ -1211,13 +1211,11 @@ impl AutoCanvasRestore {
     // Note: Can't use AsMut here for the canvas, because it would break
     //       the lifetime dependency.
     pub fn guard(canvas: &mut Canvas, do_save: bool) -> AutoRestoredCanvas {
-        let restore = unsafe {
-            // does not link on Linux
-            // SkAutoCanvasRestore::new(canvas.native_mut(), do_save)
-            let mut acr: SkAutoCanvasRestore = mem::zeroed();
-            C_SkAutoCanvasRestore_Construct(&mut acr, canvas.native_mut(), do_save);
-            acr
-        };
+        // does not link on Linux
+        // SkAutoCanvasRestore::new(canvas.native_mut(), do_save)
+        let restore = construct(|acr| unsafe {
+            C_SkAutoCanvasRestore_Construct(acr, canvas.native_mut(), do_save)
+        });
 
         AutoRestoredCanvas { canvas, restore }
     }

@@ -83,7 +83,7 @@ impl RCHandle<SkShader> {
     pub fn image(&self) -> Option<(Image, Matrix, (TileMode, TileMode))> {
         unsafe {
             let mut matrix = Matrix::default();
-            let mut tile_mode: [TileMode; 2] = mem::zeroed();
+            let mut tile_mode = [TileMode::default(); 2];
             let image = Image::from_unshared_ptr(
                 self.native()
                     .isAImage(matrix.native_mut(), tile_mode.native_mut().as_mut_ptr()),

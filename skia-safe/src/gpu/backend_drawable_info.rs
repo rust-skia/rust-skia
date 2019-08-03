@@ -20,11 +20,7 @@ impl Handle<GrBackendDrawableInfo> {
     pub fn new() -> BackendDrawableInfo {
         // does not link:
         // Self::from_native(unsafe { GrBackendDrawableInfo::new() })
-        Self::from_native(unsafe {
-            let mut di = mem::zeroed();
-            C_GrBackendDrawableInfo_construct(&mut di);
-            di
-        })
+        Self::construct(|di| unsafe { C_GrBackendDrawableInfo_construct(di) })
     }
 
     #[cfg(feature = "vulkan")]

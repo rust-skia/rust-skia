@@ -8,7 +8,7 @@ use skia_bindings::{
     C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew, C_SkFont_Equals, C_SkFont_destruct,
     C_SkFont_makeWithSize, C_SkFont_setTypeface, SkFont, SkFont_Edging,
 };
-use std::{mem, ptr};
+use std::ptr;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -431,9 +431,10 @@ impl Handle<SkFont> {
     // TODO: getPaths() (needs a function to be passed, but supports a context).
 
     pub fn metrics(&self) -> (scalar, FontMetrics) {
-        let mut fm = unsafe { mem::zeroed() };
-        let line_spacing = unsafe { self.native().getMetrics(&mut fm) };
-        (line_spacing, FontMetrics::from_native(fm))
+        let mut line_spacing = 0.0;
+        let fm =
+            FontMetrics::construct(|fm| line_spacing = unsafe { self.native().getMetrics(fm) });
+        (line_spacing, fm)
     }
 
     pub fn spacing(&self) -> scalar {

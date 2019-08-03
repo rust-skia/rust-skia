@@ -7,7 +7,7 @@ use skia_bindings::{
     SkRefCntBase,
 };
 use std::os::raw;
-use std::{mem, slice};
+use std::slice;
 
 #[repr(C)]
 pub struct PointData {
@@ -44,13 +44,9 @@ impl Drop for PointData {
 
 impl Default for PointData {
     fn default() -> Self {
-        PointData::from_native(unsafe {
-            // does not link under Linux:
-            // SkPathEffect_PointData::new()
-            let mut point_data = mem::uninitialized();
-            C_SkPathEffect_PointData_Construct(&mut point_data);
-            point_data
-        })
+        // does not link under Linux:
+        // SkPathEffect_PointData::new()
+        PointData::construct(|point_data| unsafe { C_SkPathEffect_PointData_Construct(point_data) })
     }
 }
 

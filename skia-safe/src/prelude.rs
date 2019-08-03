@@ -2,9 +2,9 @@
 use skia_bindings::{SkColorSpace, SkData, SkSurface};
 use skia_bindings::{SkNVRefCnt, SkRefCnt, SkRefCntBase};
 use std::hash::{Hash, Hasher};
+use std::mem::MaybeUninit;
 use std::ops::{Deref, DerefMut, Index, IndexMut};
 use std::{mem, ptr};
-
 // Re-export TryFrom / TryInto to make them available in all modules that use prelude::*.
 pub use std::convert::{TryFrom, TryInto};
 use std::marker::PhantomData;
@@ -263,13 +263,17 @@ impl<N: NativeDrop> Handle<N> {
         Self::construct(|instance| unsafe { construct(instance) })
     }
 
-    pub fn construct<F: FnOnce(&mut N) -> ()>(construct: F) -> Self {
-        unsafe {
-            let mut instance = mem::zeroed();
-            construct(&mut instance);
-            Self::from_native(instance)
-        }
+    pub fn construct(construct: impl FnOnce(*mut N)) -> Self {
+        Self::from_native(self::construct(construct))
     }
+}
+
+/// Constructs a C++ object in place by calling a lambda that is meant to initialize
+/// the pointer to the Rust memory provided as an object pointer.
+pub(crate) fn construct<N>(construct: impl FnOnce(*mut N)) -> N {
+    let mut instance = MaybeUninit::uninit();
+    construct(instance.as_mut_ptr());
+    unsafe { instance.assume_init() }
 }
 
 impl<N: NativeDrop> Drop for Handle<N> {
@@ -610,6 +614,10 @@ pub(crate) trait NativeTransmutable<NT: Sized>: Sized {
     /// type are of the same size.
     fn test_layout() {
         assert_eq!(mem::size_of::<Self>(), mem::size_of::<NT>());
+    }
+
+    fn construct(construct: impl FnOnce(*mut NT)) -> Self {
+        Self::from_native(self::construct(construct))
     }
 }
 
