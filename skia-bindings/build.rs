@@ -106,7 +106,7 @@ fn should_try_download_binaries(config: &skia::BinariesConfiguration) -> Option<
 }
 
 fn download_and_install(url: impl AsRef<str>, output_directory: &Path) -> io::Result<()> {
-    let archive = binaries::begin_download(url)?;
+    let archive = binaries::download(url)?;
     println!(
         "UNPACKING ARCHIVE INTO: {}",
         output_directory.to_str().unwrap()
