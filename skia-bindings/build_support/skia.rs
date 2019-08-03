@@ -548,13 +548,6 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
     builder = builder.clang_arg(format!("-I{}", include_path.display()));
     cc_build.include(include_path);
 
-    {
-        // SkShaper.h
-        let include_path = current_dir.join(Path::new("skia/modules/skshaper/include"));
-        builder = builder.clang_arg(format!("-I{}", include_path.display()));
-        cc_build.include(include_path);
-    }
-
     let definitions = {
         let skia_definitions = {
             let ninja_file = output_directory.join("obj").join("skia.ninja");
