@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::shaper::run_handler::RunInfo;
-use crate::{scalar, Font, FontMgr, FourByteTag};
+use crate::{scalar, Font, FontMgr, FourByteTag, Point, TextBlob};
 pub use run_handler::RunHandler;
 use skia_bindings::{
     C_RustRunHandler_construct, C_SkShaper_BiDiRunIterator_currentLevel,
@@ -10,10 +10,10 @@ use skia_bindings::{
     C_SkShaper_MakeShaperDrivenWrapper, C_SkShaper_MakeStdLanguageRunIterator,
     C_SkShaper_RunIterator_atEnd, C_SkShaper_RunIterator_consume, C_SkShaper_RunIterator_delete,
     C_SkShaper_RunIterator_endOfCurrentRun, C_SkShaper_ScriptRunIterator_currentScript,
-    C_SkShaper_delete, C_SkShaper_shape, RustRunHandler_Param, SkShaper, SkShaper_BiDiRunIterator,
-    SkShaper_FontRunIterator, SkShaper_LanguageRunIterator, SkShaper_RunHandler_Buffer,
-    SkShaper_RunHandler_RunInfo, SkShaper_RunIterator, SkShaper_ScriptRunIterator,
-    SkTextBlobBuilderRunHandler, TraitObject,
+    C_SkShaper_delete, C_SkShaper_shape, C_SkTextBlobBuilderRunHandler_makeBlob,
+    RustRunHandler_Param, SkShaper, SkShaper_BiDiRunIterator, SkShaper_FontRunIterator,
+    SkShaper_LanguageRunIterator, SkShaper_RunHandler_Buffer, SkShaper_RunHandler_RunInfo,
+    SkShaper_RunIterator, SkShaper_ScriptRunIterator, SkTextBlobBuilderRunHandler, TraitObject,
 };
 use std::ffi::{CStr, CString};
 use std::mem;
@@ -380,11 +380,11 @@ mod run_handler {
 }
 
 impl Shaper {
-    // TODO: SkShaper::shape() with non-standard run handlers.
+    // TODO: SkShaper::shape() with non-standard run iterators.
 
     pub fn shape(
         &self,
-        utf8: &str,
+        utf8: impl AsRef<str>,
         font: &Font,
         left_to_right: bool,
         width: scalar,
@@ -434,7 +434,7 @@ impl Shaper {
             unsafe { mem::transmute(to) }
         }
 
-        let bytes = utf8.as_bytes();
+        let bytes = utf8.as_ref().as_bytes();
 
         unsafe {
             let mut run_handler = mem::zeroed();
@@ -466,27 +466,50 @@ impl NativeAccess<SkTextBlobBuilderRunHandler> for TextBlobBuilderRunHandler {
     }
 }
 
-/*
 impl TextBlobBuilderRunHandler {
-    pub fn new(text: &str, offset: Point) -> TextBlobBuilderRunHandler {
-        let c_string = Pin::new(CString::new(text).unwrap());
+    pub fn new(text: impl AsRef<str>, offset: impl Into<Point>) -> TextBlobBuilderRunHandler {
+        let c_string = Pin::new(CString::new(text.as_ref()).unwrap());
         let ptr = c_string.as_ptr();
         TextBlobBuilderRunHandler(c_string, unsafe {
-            SkTextBlobBuilderRunHandler::new(ptr, offset.into_native())
+            SkTextBlobBuilderRunHandler::new(ptr, offset.into().into_native())
         })
     }
-}
-*/
 
-/*
-impl Shaper {
-    pub fn shape_text_blob(text: &str, offset: Point) -> Option<(TextBlob, Point)> {
-        let builder = TextBlobBuilderRunHandler::new(text, offset);
-        builder.
+    pub fn make_blob(&mut self) -> Option<TextBlob> {
+        TextBlob::from_ptr(unsafe { C_SkTextBlobBuilderRunHandler_makeBlob(self.native_mut()) })
+    }
+
+    pub fn end_point(&mut self) -> Point {
+        Point::from_native(unsafe { self.native_mut().endPoint() })
     }
 }
 
-*/
+impl Shaper {
+    pub fn shape_text_blob(
+        &self,
+        text: impl AsRef<str>,
+        font: &Font,
+        left_to_right: bool,
+        width: scalar,
+        offset: impl Into<Point>,
+    ) -> Option<(TextBlob, Point)> {
+        let text = text.as_ref();
+        let bytes = text.as_bytes();
+        let mut builder = TextBlobBuilderRunHandler::new(text, offset);
+        unsafe {
+            C_SkShaper_shape(
+                self.native(),
+                bytes.as_ptr() as _,
+                bytes.len(),
+                font.native(),
+                left_to_right,
+                width,
+                &mut builder.native_mut()._base,
+            )
+        };
+        builder.make_blob().map(|tb| (tb, builder.end_point()))
+    }
+}
 
 #[cfg(test)]
 mod tests {
