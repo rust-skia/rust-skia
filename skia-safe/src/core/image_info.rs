@@ -138,7 +138,7 @@ impl NativePartialEq for SkImageInfo {
 impl Default for Handle<SkImageInfo> {
     fn default() -> Self {
         // note SkImageInfo::new() does not link under Linux.
-        Self::construct_c(C_SkImageInfo_Construct)
+        Self::construct(|image_info| unsafe { C_SkImageInfo_Construct(image_info) })
     }
 }
 

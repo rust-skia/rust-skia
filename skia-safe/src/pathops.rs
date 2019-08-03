@@ -62,7 +62,7 @@ impl NativeDrop for SkOpBuilder {
 
 impl Default for Handle<SkOpBuilder> {
     fn default() -> Self {
-        Self::construct_c(C_SkOpBuilder_Construct)
+        Self::construct(|opb| unsafe { C_SkOpBuilder_Construct(opb) })
     }
 }
 
