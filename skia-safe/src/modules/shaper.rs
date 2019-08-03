@@ -10,7 +10,8 @@ use skia_bindings::{
     C_SkShaper_MakeShaperDrivenWrapper, C_SkShaper_MakeStdLanguageRunIterator,
     C_SkShaper_RunIterator_atEnd, C_SkShaper_RunIterator_consume, C_SkShaper_RunIterator_delete,
     C_SkShaper_RunIterator_endOfCurrentRun, C_SkShaper_ScriptRunIterator_currentScript,
-    C_SkShaper_delete, C_SkShaper_shape, C_SkTextBlobBuilderRunHandler_makeBlob,
+    C_SkShaper_delete, C_SkShaper_shape, C_SkTextBlobBuilderRunHandler_construct,
+    C_SkTextBlobBuilderRunHandler_endPoint, C_SkTextBlobBuilderRunHandler_makeBlob,
     RustRunHandler_Param, SkShaper, SkShaper_BiDiRunIterator, SkShaper_FontRunIterator,
     SkShaper_LanguageRunIterator, SkShaper_RunHandler_Buffer, SkShaper_RunHandler_RunInfo,
     SkShaper_RunIterator, SkShaper_ScriptRunIterator, SkTextBlobBuilderRunHandler, TraitObject,
@@ -454,9 +455,15 @@ impl TextBlobBuilderRunHandler {
     pub fn new(text: impl AsRef<str>, offset: impl Into<Point>) -> TextBlobBuilderRunHandler {
         let c_string = Pin::new(CString::new(text.as_ref()).unwrap());
         let ptr = c_string.as_ptr();
+        /* does not link:
         TextBlobBuilderRunHandler(c_string, unsafe {
             SkTextBlobBuilderRunHandler::new(ptr, offset.into().into_native())
-        })
+        }) */
+        let mut run_handler = unsafe { mem::zeroed() };
+        unsafe {
+            C_SkTextBlobBuilderRunHandler_construct(&mut run_handler, ptr, offset.into().native())
+        };
+        TextBlobBuilderRunHandler(c_string, run_handler)
     }
 
     pub fn make_blob(&mut self) -> Option<TextBlob> {
@@ -464,7 +471,8 @@ impl TextBlobBuilderRunHandler {
     }
 
     pub fn end_point(&mut self) -> Point {
-        Point::from_native(unsafe { self.native_mut().endPoint() })
+        // .endPoint() does not link.
+        Point::from_native(unsafe { C_SkTextBlobBuilderRunHandler_endPoint(self.native_mut()) })
     }
 }
 
@@ -492,6 +500,19 @@ impl Shaper {
             )
         };
         builder.make_blob().map(|tb| (tb, builder.end_point()))
+    }
+}
+
+pub mod icu {
+    /// On Windows, this function writes the file `icudtl.dat` into the current's
+    /// executable directory making sure that it's available when text shaping is used in Skia.
+    ///
+    /// If your executable directory can not be written to, make sure that `icudtl.dat` is
+    /// available.
+    ///
+    /// It's currently not possible to load `icudtl.dat` from another location.
+    pub fn init() {
+        skia_bindings::icu::init()
     }
 }
 
