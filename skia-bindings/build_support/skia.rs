@@ -102,7 +102,7 @@ impl FinalBuildConfiguration {
 
             fn quote(s: &str) -> String {
                 format!("\"{}\"", s)
-            };
+            }
 
             let mut args: Vec<(&str, String)> = vec![
                 (
@@ -315,11 +315,13 @@ impl BinariesConfiguration {
 
 /// The full build of Skia, SkiaBindings, and the generation of bindings.rs.
 pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
-    prerequisites::require_python();
     prerequisites::get_skia();
 
+    let python2 = &prerequisites::locate_python2_path();
+    println!("Python2 found at: {:?}", python2);
+
     assert!(
-        Command::new("python")
+        Command::new(python2)
             .arg("skia/tools/git-sync-deps")
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
@@ -346,6 +348,7 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
         .args(&[
             "gen",
             output_directory_str,
+            &("--script-executable=".to_owned() + python2.to_str().unwrap()),
             &("--args=".to_owned() + &gn_args),
         ])
         .envs(env::vars())
@@ -567,13 +570,42 @@ mod prerequisites {
     use std::path::PathBuf;
     use std::process::{Command, Stdio};
 
-    pub fn require_python() {
-        Command::new("python")
+    pub fn locate_python2_path() -> PathBuf {
+        which::which(locate_python2_cmd()).unwrap()
+    }
+
+    pub fn locate_python2_cmd() -> &'static str {
+        println!("Probing 'python'");
+
+        if let Some(true) = is_python_version_2("python") {
+            return "python";
+        }
+
+        println!("Probing 'python2'");
+        if let Some(true) = is_python_version_2("python2") {
+            return "python2";
+        }
+
+        panic!(">>>>> Probing for python version 2 failed, please make sure that python2 or python is available in PATH <<<<<");
+    }
+
+    /// Returns true if the given python executable is python version 2.
+    /// or None if the executable was not found.
+    pub fn is_python_version_2(exe: impl AsRef<str>) -> Option<bool> {
+        Command::new(exe.as_ref())
             .arg("--version")
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .status()
-            .expect(">>>>> Please install python to build this crate. <<<<<");
+            .output()
+            .map(|output| {
+                let mut str = String::from_utf8(output.stdout).unwrap();
+                if str.is_empty() {
+                    // Python2 seems to push the version to stderr.
+                    str = String::from_utf8(output.stderr).unwrap()
+                }
+                // Don't parse version output, for example output
+                // might be "Python 2.7.15+"
+                str.starts_with("Python 2")
+            })
+            .ok()
     }
 
     /// Get the skia git repository, either by checking out the submodule, or
