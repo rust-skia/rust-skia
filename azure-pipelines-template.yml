@@ -143,21 +143,21 @@ jobs:
   - ${{ if eq(parameters.platform, 'Linux') }}:
     - template: 'azure-pipelines-build-target.yml'
       parameters:
-        androidEnv: true
         target: 'aarch64-linux-android'
+        androidEnv: true
 
     - template: 'azure-pipelines-build-target.yml'
       parameters:
-        androidEnv: true
         target: 'x86_64-linux-android'
+        androidEnv: true
 
   - ${{ if eq(parameters.platform, 'Windows') }}:
     - template: 'azure-pipelines-build-target.yml'
       parameters:
-        androidEnv: true
         target: 'aarch64-linux-android'
+        androidEnv: true
 
     - template: 'azure-pipelines-build-target.yml'
       parameters:
-        androidEnv: true
         target: 'x86_64-linux-android'
+        androidEnv: true
