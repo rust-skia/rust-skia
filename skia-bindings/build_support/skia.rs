@@ -575,7 +575,7 @@ mod prerequisites {
     }
 
     pub fn locate_python2_cmd() -> &'static str {
-        const PYTHON_CMDS: [&str; 3] = ["python2.7", "python2", "python"];
+        const PYTHON_CMDS: [&str; 2] = ["python", "python2"];
         for python in PYTHON_CMDS.as_ref() {
             println!("Probing '{}'", python);
             if let Some(true) = is_python_version_2(python) {
