@@ -318,7 +318,7 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
     prerequisites::get_skia();
 
     let python2 = &prerequisites::locate_python2_path();
-    println!("Python2 found at: {:?}", python2);
+    println!("Python 2 found at: {:?}", python2);
 
     assert!(
         Command::new(python2)
@@ -575,18 +575,15 @@ mod prerequisites {
     }
 
     pub fn locate_python2_cmd() -> &'static str {
-        println!("Probing 'python'");
-
-        if let Some(true) = is_python_version_2("python") {
-            return "python";
+        const PYTHON_CMDS: [&str; 3] = ["python2.7", "python2", "python"];
+        for python in PYTHON_CMDS.as_ref() {
+            println!("Probing '{}'", python);
+            if let Some(true) = is_python_version_2(python) {
+                return python;
+            }
         }
 
-        println!("Probing 'python2'");
-        if let Some(true) = is_python_version_2("python2") {
-            return "python2";
-        }
-
-        panic!(">>>>> Probing for python version 2 failed, please make sure that python2 or python is available in PATH <<<<<");
+        panic!(">>>>> Probing for Python 2 failed, please make sure that it's available in PATH, probed executables are: {:?} <<<<<", PYTHON_CMDS);
     }
 
     /// Returns true if the given python executable is python version 2.
@@ -603,7 +600,7 @@ mod prerequisites {
                 }
                 // Don't parse version output, for example output
                 // might be "Python 2.7.15+"
-                str.starts_with("Python 2")
+                str.starts_with("Python 2.")
             })
             .ok()
     }
