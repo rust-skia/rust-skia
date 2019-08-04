@@ -108,56 +108,56 @@ jobs:
       rm skia-bindings/src/bindings.rs
     displayName: Check Rust formatting
 
-  - template: 'azure-pipelines-build-target.yml'
-    parameters:
-      target: '$(platformTarget)'
-      exampleArgs: '$(exampleArgs)'
-      ${{ if ne(parameters.platform, 'Windows') }}:
-        runClippy: true
-      runBinaries: true
-      releaseBinaries: true
+#  - template: 'azure-pipelines-build-target.yml'
+#    parameters:
+#      target: '$(platformTarget)'
+#      exampleArgs: '$(exampleArgs)'
+#      ${{ if ne(parameters.platform, 'Windows') }}:
+#        runClippy: true
+#      runBinaries: true
+#      releaseBinaries: true
 
-  - ${{ if eq(parameters.platform, 'macOS') }}:
-    - template: 'azure-pipelines-build-target.yml'
-      parameters:
-        target: 'aarch64-linux-android'
-        androidEnv: true
-        releaseBinaries: true
+#  - ${{ if eq(parameters.platform, 'macOS') }}:
+#    - template: 'azure-pipelines-build-target.yml'
+#      parameters:
+#        target: 'aarch64-linux-android'
+#        androidEnv: true
+#        releaseBinaries: true
 
-    - template: 'azure-pipelines-build-target.yml'
-      parameters:
-        target: 'x86_64-linux-android'
-        androidEnv: true
-        releaseBinaries: true
-
-    - template: 'azure-pipelines-build-target.yml'
-      parameters:
-        target: 'aarch64-apple-ios'
-        releaseBinaries: true
-
-    - template: 'azure-pipelines-build-target.yml'
-      parameters:
-        target: 'x86_64-apple-ios'
-        releaseBinaries: true
-
+#    - template: 'azure-pipelines-build-target.yml'
+#      parameters:
+#        target: 'x86_64-linux-android'
+#        androidEnv: true
+#        releaseBinaries: true
+#
+#    - template: 'azure-pipelines-build-target.yml'
+#      parameters:
+#        target: 'aarch64-apple-ios'
+#        releaseBinaries: true
+#
+#    - template: 'azure-pipelines-build-target.yml'
+#      parameters:
+#        target: 'x86_64-apple-ios'
+#        releaseBinaries: true
+#
   - ${{ if eq(parameters.platform, 'Linux') }}:
     - template: 'azure-pipelines-build-target.yml'
       parameters:
         target: 'aarch64-linux-android'
         androidEnv: true
-
-    - template: 'azure-pipelines-build-target.yml'
-      parameters:
-        target: 'x86_64-linux-android'
-        androidEnv: true
-
-  - ${{ if eq(parameters.platform, 'Windows') }}:
-    - template: 'azure-pipelines-build-target.yml'
-      parameters:
-        target: 'aarch64-linux-android'
-        androidEnv: true
-
-    - template: 'azure-pipelines-build-target.yml'
-      parameters:
-        target: 'x86_64-linux-android'
-        androidEnv: true
+#
+#    - template: 'azure-pipelines-build-target.yml'
+#      parameters:
+#        target: 'x86_64-linux-android'
+#        androidEnv: true
+#
+#  - ${{ if eq(parameters.platform, 'Windows') }}:
+#    - template: 'azure-pipelines-build-target.yml'
+#      parameters:
+#        target: 'aarch64-linux-android'
+#        androidEnv: true
+#
+#    - template: 'azure-pipelines-build-target.yml'
+#      parameters:
+#        target: 'x86_64-linux-android'
+#        androidEnv: true
