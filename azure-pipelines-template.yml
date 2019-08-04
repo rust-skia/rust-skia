@@ -36,12 +36,6 @@ jobs:
     vmImage: $(image)
 
   steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '2.x'
-      addToPath: true
-      architecture: 'x64'
-
   - ${{ if eq(parameters.platform, 'macOS') }}:
     # macOS
     - script: |
@@ -59,6 +53,11 @@ jobs:
 
   - ${{ if eq(parameters.platform, 'Windows') }}:
     # Windows.
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '2.x'
+        addToPath: true
+        architecture: 'x64'
     - script: |
         curl -sSf -o rustup-init.exe https://win.rustup.rs
         rustup-init.exe -y --default-toolchain %TOOLCHAIN%
