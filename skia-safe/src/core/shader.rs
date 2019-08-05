@@ -4,10 +4,9 @@ use crate::{
 };
 use skia_bindings::{
     C_SkShader_Deserialize, C_SkShader_asAGradient, C_SkShader_isAImage,
-    C_SkShader_makeWithColorFilter, C_SkShader_makeWithLocalMatrix, SkFlattenable, SkRefCntBase,
-    SkShader, SkShader_GradientInfo, SkShader_GradientType, SkTileMode,
+    C_SkShader_makeWithColorFilter, C_SkShader_makeWithLocalMatrix, SkFlattenable, SkPoint,
+    SkRefCntBase, SkShader, SkShader_GradientInfo, SkShader_GradientType, SkTileMode,
 };
-use std::mem;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -109,7 +108,7 @@ impl RCHandle<SkShader> {
                 fColorCount: max_color_count.try_into().unwrap(),
                 fColors: colors.native_mut().as_mut_ptr(),
                 fColorOffsets: color_offsets.as_mut_ptr(),
-                fPoint: mem::zeroed(),
+                fPoint: [SkPoint { fX: 0.0, fY: 0.0 }; 2],
                 fRadius: Default::default(),
                 fTileMode: SkTileMode::kClamp,
                 fGradientFlags: 0,

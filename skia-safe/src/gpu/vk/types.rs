@@ -291,7 +291,7 @@ pub type GetProcResult = *const raw::c_void;
 pub trait GetProc: Fn(GetProcOf) -> GetProcResult {}
 impl<T> GetProc for T where T: Fn(GetProcOf) -> GetProcResult {}
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Default, Debug)]
 #[repr(C)]
 pub struct DrawableInfo {
     secondary_command_buffer: vk::CommandBuffer,
