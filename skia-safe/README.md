@@ -2,7 +2,7 @@
 
 This packages contains safe Rust wrappers for Skia and uses [skia-bindings](https://crates.io/crates/skia-bindings) to build and interface with the Skia C++ library.
 
-For information about the supported build targets and how to run the examples, please visit the [homepage of the rust-skia project](https://github.com/rust-skia/rust-skia).
+For information about the supported build targets and how to run the examples, please visit the [github page of the rust-skia project](https://github.com/rust-skia/rust-skia).
 
 ## Documentation
 
