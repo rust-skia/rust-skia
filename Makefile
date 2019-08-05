@@ -5,8 +5,8 @@
 
 .PHONY: publish
 publish: package
-	cd skia-bindings && cargo publish
-	cd skia-safe && cargo publish
+	cd skia-bindings && cargo publish -vv --no-verify
+	cd skia-safe && cargo publish -vv --no-verify
 
 .PHONY: package
 package: clean-packages package-bindings package-safe
