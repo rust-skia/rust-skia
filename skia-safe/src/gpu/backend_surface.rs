@@ -5,7 +5,6 @@ use skia_bindings::{
     C_GrBackendRenderTarget_destruct, C_GrBackendTexture_destruct, GrBackendFormat,
     GrBackendRenderTarget, GrBackendTexture,
 };
-use std::mem;
 
 #[cfg(feature = "vulkan")]
 use super::vk;
@@ -20,11 +19,7 @@ impl NativeDrop for GrBackendFormat {
 
 impl NativeClone for GrBackendFormat {
     fn clone(&self) -> Self {
-        unsafe {
-            let mut format = mem::zeroed();
-            C_GrBackendFormat_CopyConstruct(&mut format, self);
-            format
-        }
+        construct(|format| unsafe { C_GrBackendFormat_CopyConstruct(format, self) })
     }
 }
 

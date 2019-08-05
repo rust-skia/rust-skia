@@ -142,11 +142,7 @@ impl Matrix44 {
     }
 
     pub fn new_nan() -> Self {
-        Matrix44::from_native(unsafe {
-            let mut matrix: SkMatrix44 = mem::zeroed();
-            C_SkMatrix44_ConstructNaN(&mut matrix);
-            matrix
-        })
+        Matrix44::construct(|m| unsafe { C_SkMatrix44_ConstructNaN(m) })
     }
 
     pub fn get_type(&self) -> TypeMask {
