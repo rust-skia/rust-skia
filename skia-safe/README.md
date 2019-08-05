@@ -10,7 +10,7 @@ Functional level documentation is [not yet](https://github.com/rust-skia/rust-sk
 
 ## Bindings & Wrappers
 
-skia-safe wrapps most part of the public Skia C++ APIs:
+Skia-safe wraps most parts of the public Skia C++ APIs:
 
 - [x] Vector Geometry: Matrix, Rect, Point, Size, etc.
 - [x] Most drawing related classes and functions: Surface, Canvas, Paint, Path.
@@ -29,7 +29,7 @@ Wrappers for functions that take callbacks and virtual classes are not supported
 
 ## Features
 
-skia-safe supports the following features that can be configured [via cargo](https://doc.rust-lang.org/cargo/reference/manifest.html#the-features-section):
+Skia-safe supports the following features that can be configured [via cargo](https://doc.rust-lang.org/cargo/reference/manifest.html#the-features-section):
 
 ### Feature `vulkan`
 
