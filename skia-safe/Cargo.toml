@@ -5,9 +5,10 @@ description = "Safe Skia Bindings for Rust"
 homepage = "https://github.com/rust-skia/rust-skia"
 repository = "https://github.com/rust-skia/rust-skia"
 readme = "README.md"
-# creates.io: 5 max
+# 5 max
 keywords = ["skia", "rust-bindings", "vulkan", "opengl", "pdf"]
-categories = ["api-bindings", "graphics", "multimedia::images", "rendering", "rendering::graphics-api", "visualization"] 
+# 6 max
+categories = ["api-bindings", "graphics", "multimedia::images", "rendering::graphics-api", "visualization"] 
 license = "MIT"
 
 version = "0.14.1"
