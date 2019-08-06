@@ -82,12 +82,12 @@ pub mod pdf {
     }
 
     trait Set {
-        fn set_s(&mut self, str: &str);
+        fn set_s(&mut self, str: impl AsRef<str>);
     }
 
     impl Set for SkString {
-        fn set_s(&mut self, str: &str) {
-            let bytes = str.as_bytes();
+        fn set_s(&mut self, str: impl AsRef<str>) {
+            let bytes = str.as_ref().as_bytes();
             unsafe { self.set2(bytes.as_ptr() as _, bytes.len()) }
         }
     }

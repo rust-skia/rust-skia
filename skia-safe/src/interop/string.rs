@@ -25,8 +25,8 @@ impl Default for Handle<SkString> {
 }
 
 impl Handle<SkString> {
-    pub fn from_str(str: &str) -> String {
-        let bytes = str.as_bytes();
+    pub fn from_str(str: impl AsRef<str>) -> String {
+        let bytes = str.as_ref().as_bytes();
         Handle::from_native(unsafe { SkString::new3(bytes.as_ptr() as _, bytes.len()) })
     }
 
