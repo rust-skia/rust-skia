@@ -247,19 +247,19 @@ impl<N: NativeDrop> AsRef<Handle<N>> for Handle<N> {
 
 impl<N: NativeDrop> Handle<N> {
     /// Create a handle from a native type.
-    pub fn from_native(n: N) -> Self {
+    pub(crate) fn from_native(n: N) -> Self {
         Handle(n)
     }
 
     /// Create a reference to the Rust wrapper from a reference to the native type.
-    pub fn from_native_ref(n: &N) -> &Self {
+    pub(crate) fn from_native_ref(n: &N) -> &Self {
         unsafe { transmute_ref(n) }
     }
 
     /// Constructs a C++ object in place by calling a
     /// function that expects a pointer that points to
     /// uninitialized memory of the native type.
-    pub fn construct(construct: impl FnOnce(*mut N)) -> Self {
+    pub(crate) fn construct(construct: impl FnOnce(*mut N)) -> Self {
         Self::from_native(self::construct(construct))
     }
 }
@@ -407,7 +407,7 @@ impl<N: NativeRefCounted> RCHandle<N> {
     /// Increases the reference counter of the native type
     /// and returns a reference to it.
     #[inline]
-    pub fn shared_native(&self) -> &N {
+    pub(crate) fn shared_native(&self) -> &N {
         unsafe {
             let r = &*self.0;
             r._ref();
@@ -418,7 +418,7 @@ impl<N: NativeRefCounted> RCHandle<N> {
     /// Increases the reference counter of the native type
     /// and returns a reference to it.
     #[inline]
-    pub fn shared_native_mut(&mut self) -> &mut N {
+    pub(crate) fn shared_native_mut(&mut self) -> &mut N {
         unsafe {
             let r = &mut *self.0;
             r._ref();
@@ -430,7 +430,7 @@ impl<N: NativeRefCounted> RCHandle<N> {
     /// Returns None if the pointer is null.
     /// Does not increase the reference count.
     #[inline]
-    pub fn from_ptr(ptr: *mut N) -> Option<Self> {
+    pub(crate) fn from_ptr(ptr: *mut N) -> Option<Self> {
         if !ptr.is_null() {
             Some(RCHandle(ptr))
         } else {
@@ -441,7 +441,7 @@ impl<N: NativeRefCounted> RCHandle<N> {
     /// Creates an RCHandle from a pointer.
     /// Returns None if the pointer is null.
     /// Increases the reference count.
-    pub fn from_unshared_ptr(ptr: *mut N) -> Option<Self> {
+    pub(crate) fn from_unshared_ptr(ptr: *mut N) -> Option<Self> {
         if !ptr.is_null() {
             (unsafe { (*ptr)._ref() });
             Some(RCHandle(ptr))
