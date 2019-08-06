@@ -1,6 +1,3 @@
 /Cargo.lock
 /target/
-/cmake-build-debug/
 /.cargo/credentials
-/skia-bindings/src/bindings.rs
-/skia-bindings/src/bindings.rs.bk
