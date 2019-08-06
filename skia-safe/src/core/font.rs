@@ -45,6 +45,11 @@ impl Default for Font {
 }
 
 impl Handle<SkFont> {
+    // Canonical new.
+    pub fn new(typeface: &Typeface, size: impl Into<Option<scalar>>) -> Self {
+        Self::from_typeface(typeface, size)
+    }
+
     pub fn from_typeface(typeface: &Typeface, size: impl Into<Option<scalar>>) -> Self {
         match size.into() {
             None => Self::construct(|font| unsafe {
@@ -56,7 +61,7 @@ impl Handle<SkFont> {
         }
     }
 
-    #[deprecated(since = "0.12.0", note = "use from_typeface()")]
+    #[deprecated(since = "0.12.0", note = "use from_typeface() or new()")]
     pub fn from_typeface_with_size(typeface: &Typeface, size: scalar) -> Self {
         Self::construct(|font| unsafe {
             C_SkFont_ConstructFromTypefaceWithSize(font, typeface.shared_native(), size)

@@ -31,11 +31,16 @@ impl Deref for FourByteTag {
 
 impl From<u32> for FourByteTag {
     fn from(v: u32) -> Self {
-        FourByteTag(v)
+        Self::new(v)
     }
 }
 
 impl FourByteTag {
+    // Canonical new.
+    pub fn new(v: u32) -> Self {
+        Self(v)
+    }
+
     pub fn a(self) -> u8 {
         (self.into_native() >> 24) as u8
     }

@@ -33,7 +33,13 @@ impl Default for Handle<SkPathMeasure> {
 }
 
 impl Handle<SkPathMeasure> {
+    // Canonical new:
+    pub fn new(path: &Path, force_closed: bool, res_scale: impl Into<Option<scalar>>) -> Self {
+        Self::from_path(path, force_closed, res_scale)
+    }
+
     // TODO: rename for_path / of_path?
+    // TODO: deprecate in favor of new()?
     pub fn from_path(
         path: &Path,
         force_closed: bool,

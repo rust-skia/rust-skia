@@ -22,8 +22,8 @@ fn test_color_layout() {
 }
 
 impl From<u32> for Color {
-    fn from(c: u32) -> Self {
-        Color(c)
+    fn from(argb: u32) -> Self {
+        Color::new(argb)
     }
 }
 
@@ -70,6 +70,11 @@ impl BitAnd<u32> for Color {
 }
 
 impl Color {
+    // This is the canonical Rust idiomatic new implementation:
+    pub const fn new(argb: u32) -> Self {
+        Self(argb)
+    }
+
     // note: we don't use the u8cpu type here, because we trust the Rust
     // compiler to optimize the storage type.
     pub fn from_argb(a: u8, r: u8, g: u8, b: u8) -> Color {
