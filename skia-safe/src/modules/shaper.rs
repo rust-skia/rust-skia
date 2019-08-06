@@ -183,8 +183,8 @@ impl BiDiRunIterator {
 }
 
 impl Shaper {
-    pub fn new_icu_bidi_run_iterator(utf8: &str, level: u8) -> Option<BiDiRunIterator> {
-        let bytes = utf8.as_bytes();
+    pub fn new_icu_bidi_run_iterator(utf8: impl AsRef<str>, level: u8) -> Option<BiDiRunIterator> {
+        let bytes = utf8.as_ref().as_bytes();
         unsafe { C_SkShaper_MakeIcuBidiRunIterator(bytes.as_ptr() as _, bytes.len(), level) }
             .to_option()
             .map(BiDiRunIterator)
@@ -226,8 +226,8 @@ impl ScriptRunIterator {
 }
 
 impl Shaper {
-    pub fn new_hb_icu_script_run_iterator(utf8: &str) -> ScriptRunIterator {
-        let bytes = utf8.as_bytes();
+    pub fn new_hb_icu_script_run_iterator(utf8: impl AsRef<str>) -> ScriptRunIterator {
+        let bytes = utf8.as_ref().as_bytes();
         unsafe { C_SkShaper_MakeHbIcuScriptRunIterator(bytes.as_ptr() as _, bytes.len()) }
             .to_option()
             .map(ScriptRunIterator)
@@ -272,8 +272,8 @@ impl LanguageRunIterator {
 }
 
 impl Shaper {
-    pub fn new_std_language_run_iterator(utf8: &str) -> Option<LanguageRunIterator> {
-        let bytes = utf8.as_bytes();
+    pub fn new_std_language_run_iterator(utf8: impl AsRef<str>) -> Option<LanguageRunIterator> {
+        let bytes = utf8.as_ref().as_bytes();
         unsafe { C_SkShaper_MakeStdLanguageRunIterator(bytes.as_ptr() as _, bytes.len()) }
             .to_option()
             .map(LanguageRunIterator)
