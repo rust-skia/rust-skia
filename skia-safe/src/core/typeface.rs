@@ -51,6 +51,11 @@ impl Default for RCHandle<SkTypeface> {
 }
 
 impl RCHandle<SkTypeface> {
+    // Canonical new:
+    pub fn new(family_name: impl AsRef<str>, font_style: FontStyle) -> Option<Self> {
+        Self::from_name(family_name, font_style)
+    }
+
     pub fn font_style(&self) -> FontStyle {
         unsafe { FontStyle::from_native(self.native().fontStyle()) }
     }
@@ -119,8 +124,8 @@ impl RCHandle<SkTypeface> {
         unsafe { SkTypeface::Equal(face_a.native(), face_b.native()) }
     }
 
-    pub fn from_name(familiy_name: &str, font_style: FontStyle) -> Option<Typeface> {
-        let familiy_name = ffi::CString::new(familiy_name).ok()?;
+    pub fn from_name(family_name: impl AsRef<str>, font_style: FontStyle) -> Option<Typeface> {
+        let familiy_name = ffi::CString::new(family_name.as_ref()).ok()?;
         Typeface::from_ptr(unsafe {
             C_SkTypeface_MakeFromName(familiy_name.as_ptr(), *font_style.native())
         })

@@ -130,7 +130,6 @@ pub mod color_filters {
             C_SkColorFilters_Lerp(t, dst.shared_native(), src.shared_native())
         })
     }
-
 }
 
 #[test]

@@ -109,7 +109,13 @@ impl Iterator for Handle<SkContourMeasureIter> {
 }
 
 impl Handle<SkContourMeasureIter> {
+    // Canonical new:
+    pub fn new(path: &Path, force_closed: bool, res_scale: impl Into<Option<scalar>>) -> Self {
+        Self::from_path(path, force_closed, res_scale)
+    }
+
     // TODO: rename to of_path? for_path?
+    // TODO: may deprecate in favor of Self::new().
     pub fn from_path(
         path: &Path,
         force_closed: bool,

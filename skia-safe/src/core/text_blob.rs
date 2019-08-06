@@ -25,6 +25,10 @@ impl NativeRefCounted for SkTextBlob {
 }
 
 impl RCHandle<SkTextBlob> {
+    pub fn new(str: impl AsRef<str>, font: &Font) -> Option<Self> {
+        Self::from_str(str, font)
+    }
+
     pub fn bounds(&self) -> &Rect {
         unsafe { Rect::from_native_ref(&*self.native().bounds()) }
     }

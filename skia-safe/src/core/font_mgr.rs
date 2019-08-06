@@ -96,6 +96,11 @@ impl Default for RCHandle<SkFontMgr> {
 }
 
 impl RCHandle<SkFontMgr> {
+    // Canonical new:
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     pub fn count_families(&self) -> usize {
         unsafe { self.native().countFamilies().try_into().unwrap() }
     }
