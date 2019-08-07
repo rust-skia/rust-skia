@@ -406,9 +406,9 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
     }
 
     let ninja_command = if on_windows {
-        "depot_tools/ninja"
+        "ninja/ninja"
     } else {
-        "../depot_tools/ninja"
+        "../ninja/ninja"
     };
 
     assert!(
@@ -418,7 +418,7 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
             .status()
-            .expect("failed to run `ninja`, does the directory depot_tools/ exist?")
+            .expect("failed to run `ninja`")
             .success(),
         "`ninja` returned an error, please check the output for details."
     );
@@ -656,7 +656,7 @@ mod prerequisites {
         match cargo::package_repository_hash() {
             Ok(hash) => {
                 // we are in a package.
-                resolve_skia_and_depot_tools_from_repo(&hash);
+                resolve_skia_from_repo(&hash);
             }
             Err(_) => {
                 // we are not in a package, assuming we are in our git repo.
@@ -675,15 +675,14 @@ mod prerequisites {
         }
     }
 
-    /// Extracts the submodules skia and depot_tools from the origin
+    /// Extracts the submodules skia from the origin
     /// repository we were built with and moves them to the root directory of the crate.
-    fn resolve_skia_and_depot_tools_from_repo(hash: &str) {
+    fn resolve_skia_from_repo(hash: &str) {
         let skia_dir = PathBuf::from("skia");
-        let depot_tools_dir = PathBuf::from("depot_tools");
 
         // if these directories already exist, we do nothing here and assume
         // that everyhing is in place for the build.
-        if skia_dir.is_dir() && depot_tools_dir.is_dir() {
+        if skia_dir.is_dir() {
             return;
         }
 
@@ -738,9 +737,7 @@ mod prerequisites {
 
         let skia_bindings_dir = repo_dir.join("skia-bindings");
 
-        // now move the submodules over.
-        fs::rename(skia_bindings_dir.join("depot_tools"), depot_tools_dir)
-            .expect("failed to move depot_tools directory");
+        // now move the skia submodule over.
         fs::rename(skia_bindings_dir.join("skia"), skia_dir)
             .expect("failed to move skia directory");
 
