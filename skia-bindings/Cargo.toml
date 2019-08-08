@@ -20,7 +20,7 @@ include = [ "Cargo.toml", "build.rs", "build_support.rs", "build_support/**/*.rs
 # Note: use short hashes here because of filesystem path size restrictions.
 [package.metadata]
 skia = "75c3974"
-depot_tools = "2313020"
+depot_tools = "a110bf6"
 
 [features]
 default = []
