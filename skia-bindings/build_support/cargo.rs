@@ -127,8 +127,8 @@ pub fn get_metadata() -> Vec<(String, String)> {
     )
     .join("Cargo.toml");
     let str = fs::read_to_string(cargo_toml).expect("Failed to read Cargo.toml");
-    let root: value::Table =
-        de::from_str::<value::Table>(&str).expect("Failed to parse Cargo.toml");
+    let root: value::Value =
+        de::from_str::<value::Value>(&str).expect("Failed to parse Cargo.toml");
     let manifest_table: &value::Table = root
         .get("package.metadata")
         .expect("[package.metadata] missing")

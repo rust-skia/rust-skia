@@ -695,7 +695,7 @@ mod prerequisites {
             // prepare unpacking directory
             let unpack_dir = &PathBuf::from(format!("{}.tmp", repo_name));
             if unpack_dir.is_dir() {
-                fs::remove_dir_all(unpack_dir);
+                fs::remove_dir_all(unpack_dir).unwrap();
             }
 
             // download
