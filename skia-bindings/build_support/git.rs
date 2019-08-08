@@ -24,7 +24,20 @@ pub fn trim_hash(hash: &str) -> String {
 
 /// Run git with the given args in the given directory, print stderr to the current
 /// process's terminal, and capture its stdout output.
+/// Panics if the git command fails.
 pub fn run<'a>(args: &[impl AsRef<str>], dir: impl Into<Option<&'a Path>>) -> Vec<u8> {
+    let args: Vec<&str> = args.iter().map(|s| s.as_ref()).collect();
+    let (status, output) = run2(&args, dir);
+    if status == 0 {
+        return output;
+    }
+    panic!("GIT command failed: git {}", args.join(" "));
+}
+
+/// Like run, but returns the status code _and_ the output or None if
+/// there is no status code (for example the command was interrupted).
+/// Panics if the git command could not be run at all.
+pub fn run2<'a>(args: &[impl AsRef<str>], dir: impl Into<Option<&'a Path>>) -> (i32, Vec<u8>) {
     let args: Vec<&str> = args.iter().map(|s| s.as_ref()).collect();
 
     let mut cmd = Command::new("git");
@@ -35,9 +48,6 @@ pub fn run<'a>(args: &[impl AsRef<str>], dir: impl Into<Option<&'a Path>>) -> Ve
     }
 
     let output = cmd.output().expect("running git failed, is it in PATH?");
-    if output.status.code() != Some(0) {
-        panic!("GIT command failed: git {}", args.join(" "));
-    } else {
-        output.stdout
-    }
+    let status = output.status.code().expect("git command terminated");
+    (status, output.stdout)
 }
