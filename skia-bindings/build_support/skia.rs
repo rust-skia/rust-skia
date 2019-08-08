@@ -604,6 +604,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
 
 mod prerequisites {
     use crate::build_support::{cargo, utils};
+    use flate2::read::GzDecoder;
     use std::fs;
     use std::io::Cursor;
     use std::path::PathBuf;
@@ -705,7 +706,8 @@ mod prerequisites {
                 utils::download(archive_url).expect(&format!("Failed to download {}", archive_url));
 
             // unpack
-            tar::Archive::new(Cursor::new(archive))
+            let tar = GzDecoder::new(Cursor::new(archive));
+            tar::Archive::new(tar)
                 .unpack(unpack_dir)
                 .expect("Failed to extract archive");
 
