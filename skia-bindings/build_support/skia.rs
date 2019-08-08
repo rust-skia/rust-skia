@@ -693,8 +693,8 @@ mod prerequisites {
                 .find(|(n, _)| n == repo_name)
                 .expect("metadata entry not found");
 
-            // prepare unpacking directory
-            let unpack_dir = &PathBuf::from(format!("{}.tmp", repo_name));
+            // remove unpacking directory, github will format it to repo_name-hash
+            let unpack_dir = &PathBuf::from(format!("{}-{}", repo_name, hash));
             if unpack_dir.is_dir() {
                 fs::remove_dir_all(unpack_dir).unwrap();
             }
@@ -708,7 +708,7 @@ mod prerequisites {
             // unpack
             let tar = GzDecoder::new(Cursor::new(archive));
             tar::Archive::new(tar)
-                .unpack(unpack_dir)
+                .unpack(".")
                 .expect("Failed to extract archive");
 
             // move unpack directory to the target repository directory
