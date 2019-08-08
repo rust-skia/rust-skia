@@ -645,16 +645,15 @@ mod prerequisites {
             .ok()
     }
 
-    /// Get the skia and depot_tools, either by checking out the submodules, or
-    /// when the build.rs was called outside of the git repository,
-    /// by checking out the original repository in a temporary directory and
-    /// moving it over.
+    /// Resolve the skia and depot_tools subdirectory contents, either by checking out the
+    /// submodules, or when the build.rs was called outside of the git repository,
+    /// by downloading and unpacking them from GitHub.
     pub fn resolve_dependencies() {
         if cargo::is_crate() {
-            // we are in a package.
+            // we are in a crate.
             download_dependencies();
         } else {
-            // we are not in a package, assuming we are in our git repo.
+            // we are not in a crate, assuming we are in our git repo.
             // so just update all submodules.
             assert!(
                 Command::new("git")
@@ -669,9 +668,11 @@ mod prerequisites {
         }
     }
 
-    // We use codeload.github.com, otherwise the short hash will be expanded as the root
+    // Specifies where to download Skia and Depot Tools archives from.
+    //
+    // We use codeload.github.com, otherwise the short hash will be expanded to a full hash as the root
     // directory inside the tar.gz, and we run into filesystem path length restrictions
-    // with skia.
+    // with Skia.
     const DEPENDENCIES: &[(&str, &str); 2] = &[
         ("https://codeload.github.com/google/skia/tar.gz", "skia"),
         (
@@ -680,8 +681,9 @@ mod prerequisites {
         ),
     ];
 
-    /// Downloads the submodules skia and depot_tools from the origin
-    /// repository under rust skia.
+    /// Downloads the skia and depot_tools from their repositories.
+    ///
+    /// The hashes are taken from the Cargo.toml section [package.metadata].
     fn download_dependencies() {
         let metadata = cargo::get_metadata();
 
@@ -718,7 +720,6 @@ mod prerequisites {
                 .expect("Failed to extract archive");
 
             // move unpack directory to the target repository directory
-
             fs::rename(unpack_dir, repo_name).expect("failed to move directory");
         }
     }
