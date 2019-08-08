@@ -669,9 +669,15 @@ mod prerequisites {
         }
     }
 
+    // We use codeload.github.com, otherwise the short hash will be expanded as the root
+    // directory inside the tar.gz, and we run into filesystem path length restrictions
+    // with skia.
     const DEPENDENCIES: &[(&str, &str); 2] = &[
-        ("https://github.com/google/skia", "skia"),
-        ("https://github.com/rust-skia/depot_tools", "depot_tools"),
+        ("https://codeload.github.com/google/skia/tar.gz", "skia"),
+        (
+            "https://codeload.github.com/rust-skia/depot_tools/tar.gz",
+            "depot_tools",
+        ),
     ];
 
     /// Downloads the submodules skia and depot_tools from the origin
@@ -688,19 +694,19 @@ mod prerequisites {
             }
 
             // hash available?
-            let (_, hash) = metadata
+            let (_, short_hash) = metadata
                 .iter()
                 .find(|(n, _)| n == repo_name)
                 .expect("metadata entry not found");
 
             // remove unpacking directory, github will format it to repo_name-hash
-            let unpack_dir = &PathBuf::from(format!("{}-{}", repo_name, hash));
+            let unpack_dir = &PathBuf::from(format!("{}-{}", repo_name, short_hash));
             if unpack_dir.is_dir() {
                 fs::remove_dir_all(unpack_dir).unwrap();
             }
 
             // download
-            let archive_url = &format!("{}/archive/{}.tar.gz", repo_url, hash);
+            let archive_url = &format!("{}/{}", repo_url, short_hash);
             println!("DOWNLOADING: {}", archive_url);
             let archive =
                 utils::download(archive_url).expect(&format!("Failed to download {}", archive_url));
