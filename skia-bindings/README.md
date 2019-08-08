@@ -1,16 +1,14 @@
 # Skia Bindings
 
-**NOTE:** This is a supporting package for [skia-safe](https:://crates.io/crate/skia-safe), which provides safe Rust bindings to the [Skia Graphics Library](https://skia.org/).
-
-This package contains build support for Skia and number of additional C functions that support the package skia-safe.
+This is a supporting package for [skia-safe](https:://crates.io/crate/skia-safe), which provides safe Rust bindings to the [Skia Graphics Library](https://skia.org/).
 
 ## Organization
 
 This package contains three components. 
 
 - First, full configuration and build support for Skia in [`build.rs`](build.rs) and  [`build_support/`](build_support/).
-- Additional C binding sources to help out bindgen with stuff it has problems with or to work around linker errors. These are [`src/bindings.cpp`](src/bindings.cpp), and [`src/shaper.cpp`](src/shaper.cpp).
-- And a number of functions that are used to manage and download prebuilt binaries.
+- Additional C bindings to help out bindgen with stuff it has problems with or to work around linker errors. These are [`src/bindings.cpp`](src/bindings.cpp), and [`src/shaper.cpp`](src/shaper.cpp).
+- And a number of functions that are used to download prebuilt binaries.
 
 ### Skia Build Support
 
