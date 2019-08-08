@@ -1,11 +1,10 @@
 //! Support for building and deploying prebuilt binaries.
 
 use crate::build_support::cargo;
-use curl::easy::Easy;
 use flate2::read::GzDecoder;
 use std::fs;
 use std::io;
-use std::io::{Cursor, Read};
+use std::io::Read;
 use std::path::{Path, PathBuf};
 use tar::Archive;
 
@@ -56,29 +55,6 @@ pub fn download_url(tag: impl AsRef<str>, key: impl AsRef<str>) -> String {
         ARCHIVE_NAME,
         key.as_ref()
     )
-}
-
-/// Download the binaries from the given URL and return a stream to read from.
-pub fn download(url: impl AsRef<str>) -> io::Result<impl Read> {
-    let mut data = Vec::new();
-    let mut handle = Easy::new();
-    handle.url(url.as_ref())?;
-    handle.fail_on_error(true)?;
-    handle.follow_location(true)?;
-    let curl_result = {
-        let mut transfer = handle.transfer();
-        transfer
-            .write_function(|new_data| {
-                data.extend_from_slice(new_data);
-                Ok(new_data.len())
-            })
-            .unwrap();
-        transfer.perform()
-    };
-    match curl_result {
-        Err(e) => Err(io::Error::new(io::ErrorKind::Other, e)),
-        Ok(()) => Ok(Cursor::new(data)),
-    }
 }
 
 pub fn unpack(archive: impl Read, target: &Path) -> io::Result<()> {

@@ -1,7 +1,7 @@
 mod build_support;
 use crate::build_support::skia::FinalBuildConfiguration;
-use build_support::skia;
-use build_support::{azure, binaries, cargo, git};
+use build_support::{azure, binaries, cargo, git, skia, utils};
+use std::io::Cursor;
 use std::path::Path;
 use std::{fs, io};
 
@@ -106,12 +106,12 @@ fn should_try_download_binaries(config: &skia::BinariesConfiguration) -> Option<
 }
 
 fn download_and_install(url: impl AsRef<str>, output_directory: &Path) -> io::Result<()> {
-    let archive = binaries::download(url)?;
+    let archive = utils::download(url)?;
     println!(
         "UNPACKING ARCHIVE INTO: {}",
         output_directory.to_str().unwrap()
     );
-    binaries::unpack(archive, output_directory)?;
+    binaries::unpack(Cursor::new(archive), output_directory)?;
     // TODO: verify key?
     println!("INSTALLING BINDINGS");
     fs::copy(output_directory.join("bindings.rs"), SRC_BINDINGS_RS)?;

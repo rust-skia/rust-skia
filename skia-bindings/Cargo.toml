@@ -16,6 +16,11 @@ build = "build.rs"
 links = "skia"
 include = [ "Cargo.toml", "build.rs", "build_support.rs", "build_support/**/*.rs", "src/**/*.cpp", "src/lib.rs", "src/icu.rs" ]
 
+# Metadata used from inside the packaged crate that defines where to download skia and depot_tools archives from.
+[package.metadata]
+skia = "75c3974d315f3accddb3583ff5f44f0d449cb424"
+depot_tools = "2313020206fce572179a52ac2cce0d342491e1ab"
+
 [features]
 default = []
 vulkan = []
@@ -30,13 +35,14 @@ cc = "1.0.35"
 # bindings are platform dependent and critical to this project.
 bindgen = "=0.51.0"
 
-# for downloading and extracting prebuilt binaries:
+# for downloading and extracting prebuilt binaries and skia / depot_tools archives:
 curl = "0.4.22"
 flate2 = "1.0.7"
 tar = "0.4.24"
 
 # for reading .cargo.vcs_info.json to get the repository sha1 in case we need the full build.
 serde_json = "1.0.39"
-
+# for reading Cargo.toml from within a package.
+toml = "0.5.1"
 # for finding python's executable and passing it to gn.
 which = "2.0.1"

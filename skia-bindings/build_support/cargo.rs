@@ -98,6 +98,11 @@ pub fn build_release() -> bool {
     }
 }
 
+/// Are we inside the crate?
+pub fn is_crate() -> bool {
+    package_repository_hash().is_ok()
+}
+
 // If we are builing from within a packaged crate, return the full commit hash
 // of the original repository we were packaged from.
 pub fn package_repository_hash() -> io::Result<String> {
@@ -110,4 +115,28 @@ pub fn package_repository_hash() -> io::Result<String> {
 
 pub fn package_version() -> String {
     env::var("CARGO_PKG_VERSION").unwrap().as_str().into()
+}
+
+/// Parses Cargo.toml and returns the metadadata specifed in the
+/// [package.metadata] section.
+pub fn get_metadata() -> Vec<(String, String)> {
+    use toml::{de, value};
+
+    let cargo_toml = PathBuf::from(
+        env::var("CARGO_MANIFEST_DIR").expect("missing environment variable CARGO_MANIFEST_DIR"),
+    )
+    .join("Cargo.toml");
+    let str = fs::read_to_string(cargo_toml).expect("Failed to read Cargo.toml");
+    let root: value::Table =
+        de::from_str::<value::Table>(&str).expect("Failed to parse Cargo.toml");
+    let manifest_table: &value::Table = root
+        .get("package.metadata")
+        .expect("[package.metadata] missing")
+        .as_table()
+        .unwrap();
+
+    manifest_table
+        .iter()
+        .map(|(a, b)| (a.clone(), b.to_string()))
+        .collect()
 }
