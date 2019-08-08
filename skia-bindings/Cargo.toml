@@ -41,7 +41,8 @@ curl = "0.4.22"
 flate2 = "1.0.7"
 tar = "0.4.26"
 
-# for reading .cargo.vcs_info.json to get the repository sha1 in case we need the full build.
+# for reading .cargo.vcs_info.json to get the repository sha1 that is used to download
+# the matching prebuilt binaries.
 serde_json = "1.0.39"
 # for reading Cargo.toml from within a package.
 toml = "0.5.1"
