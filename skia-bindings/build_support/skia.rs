@@ -708,7 +708,7 @@ mod prerequisites {
             // unpack
             let tar = GzDecoder::new(Cursor::new(archive));
             tar::Archive::new(tar)
-                .unpack(".")
+                .unpack(std::env::current_dir().unwrap())
                 .expect("Failed to extract archive");
 
             // move unpack directory to the target repository directory
