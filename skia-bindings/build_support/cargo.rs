@@ -139,6 +139,6 @@ pub fn get_metadata() -> Vec<(String, String)> {
 
     manifest_table
         .iter()
-        .map(|(a, b)| (a.clone(), b.to_string()))
+        .map(|(a, b)| (a.clone(), b.as_str().unwrap().to_owned()))
         .collect()
 }
