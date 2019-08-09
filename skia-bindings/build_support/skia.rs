@@ -268,21 +268,30 @@ pub struct BinariesConfiguration {
 
     /// The TARGET specific link libraries we need to inform cargo about.
     pub link_libraries: Vec<String>,
+
+    /// Additional files relative to the output_directory
+    /// that are needed to build dependent projects.
+    pub additional_files: Vec<PathBuf>,
 }
+
+const SKIA_OUTPUT_DIR: &str = "skia";
+const ICUDTL_DAT: &str = "icudtl.dat";
 
 impl BinariesConfiguration {
     /// Build a binaries configuration based on the current environment cargo
     /// supplies us with and a Skia build configuration.
     pub fn from_cargo_env(build: &BuildConfiguration) -> Self {
+        let mut additional_files = Vec::new();
         let mut features = Vec::new();
         if build.feature_vulkan {
             features.push(feature::VULKAN);
         }
         if build.feature_svg {
-            features.push(feature::SVG)
+            features.push(feature::SVG);
         }
         if build.feature_shaper {
-            features.push(feature::SHAPER)
+            features.push(feature::SHAPER);
+            additional_files.push(ICUDTL_DAT.into())
         }
 
         let mut link_libraries = Vec::new();
@@ -321,7 +330,7 @@ impl BinariesConfiguration {
         };
 
         let output_directory = cargo::output_directory()
-            .join("skia")
+            .join(SKIA_OUTPUT_DIR)
             .to_str()
             .unwrap()
             .into();
@@ -330,6 +339,7 @@ impl BinariesConfiguration {
             features: features.iter().map(|f| f.to_string()).collect(),
             output_directory,
             link_libraries: link_libraries.iter().map(|lib| lib.to_string()).collect(),
+            additional_files,
         }
     }
 

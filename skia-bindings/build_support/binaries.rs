@@ -42,6 +42,10 @@ pub fn export(config: &skia::BinariesConfiguration, target_dir: &Path) -> io::Re
         export_dir.join(skia_bindings_lib),
     )?;
 
+    for file in &config.additional_files {
+        fs::copy(output_directory.join(file), export_dir.join(file))?;
+    }
+
     Ok(())
 }
 
