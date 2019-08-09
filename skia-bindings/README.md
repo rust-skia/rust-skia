@@ -1,6 +1,6 @@
 # Skia Bindings
 
-This is a supporting package for [skia-safe](https:://crates.io/crate/skia-safe), which provides safe Rust bindings to the [Skia Graphics Library](https://skia.org/).
+This is a supporting package for [skia-safe](https://crates.io/crates/skia-safe), which provides safe Rust bindings to the [Skia Graphics Library](https://skia.org/).
 
 ## Organization
 
