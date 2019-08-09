@@ -735,21 +735,21 @@ mod prerequisites {
     // directory inside the tar.gz, and we run into filesystem path length restrictions
     // with Skia.
     struct Dependency {
-        pub url: &'static str,
         pub repo: &'static str,
+        pub url: &'static str,
         pub path_filter: fn(&Path) -> bool,
     }
 
-    fn dependencies() -> Vec<Dependency> {
-        return vec![
+    fn dependencies() -> &'static [Dependency] {
+        return &[
             Dependency {
-                url: "https://codeload.github.com/google/skia/tar.gz",
                 repo: "skia",
+                url: "https://codeload.github.com/google/skia/tar.gz",
                 path_filter: filter_skia,
             },
             Dependency {
-                url: "https://codeload.github.com/rust-skia/depot_tools/tar.gz",
                 repo: "depot_tools",
+                url: "https://codeload.github.com/rust-skia/depot_tools/tar.gz",
                 path_filter: filter_depot_tools,
             },
         ];
