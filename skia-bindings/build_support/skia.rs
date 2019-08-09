@@ -546,7 +546,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
     // TODO: may put the include paths into the FinalBuildConfiguration?
 
     let include_path = current_dir.join("skia");
-    cargo::add_dependent_path(include_path.join(PathBuf::from("include")));
+    cargo::add_dependent_path(include_path.join("include"));
 
     builder = builder.clang_arg(format!("-I{}", include_path.display()));
     cc_build.include(include_path);
