@@ -766,7 +766,7 @@ mod prerequisites {
         // we need only ninja from depot_tools.
         // https://github.com/rust-skia/rust-skia/pull/165
         fn filter_depot_tools(p: &Path) -> bool {
-            p.starts_with("ninja")
+            p.to_str().unwrap().starts_with("ninja")
         }
     }
 }
