@@ -715,14 +715,10 @@ mod prerequisites {
                     let path = entry.path().unwrap();
                     let mut components = path.components();
                     let root = components.next().unwrap();
-                    if root.as_os_str() != unpack_dir.as_os_str() {
-                        panic!(
-                            "unexpected archive root directory: {:?}, expected: {:?}",
-                            root.as_os_str(),
-                            unpack_dir.as_os_str()
-                        )
-                    }
-                    if (dep.path_filter)(components.as_path()) {
+                    // skip pax headers.
+                    if root.as_os_str() == unpack_dir.as_os_str()
+                        && (dep.path_filter)(components.as_path())
+                    {
                         entry.unpack_in(&dir).unwrap();
                     }
                 }
