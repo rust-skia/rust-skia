@@ -7,7 +7,8 @@ use std::process::{Command, Stdio};
 use std::{env, fs};
 
 mod lib {
-    pub const BINDINGS: &str = "skia-bindings";
+    pub const SKIA: &str = "skia";
+    pub const SKIA_BINDINGS: &str = "skia-bindings";
     pub const SKSHAPER: &str = "skshaper";
 }
 
@@ -269,6 +270,9 @@ pub struct BinariesConfiguration {
     /// The TARGET specific link libraries we need to inform cargo about.
     pub link_libraries: Vec<String>,
 
+    /// The static Skia libraries skia-bindings provides and dependent projects need to link with.
+    pub built_libraries: Vec<String>,
+
     /// Additional files relative to the output_directory
     /// that are needed to build dependent projects.
     pub additional_files: Vec<PathBuf>,
@@ -281,6 +285,7 @@ impl BinariesConfiguration {
     /// Build a binaries configuration based on the current environment cargo
     /// supplies us with and a Skia build configuration.
     pub fn from_cargo_env(build: &BuildConfiguration) -> Self {
+        let mut built_libraries = Vec::new();
         let mut additional_files = Vec::new();
         let mut features = Vec::new();
         if build.feature_vulkan {
@@ -291,7 +296,8 @@ impl BinariesConfiguration {
         }
         if build.feature_shaper {
             features.push(feature::SHAPER);
-            additional_files.push(ICUDTL_DAT.into())
+            additional_files.push(ICUDTL_DAT.into());
+            built_libraries.push(lib::SKSHAPER.into());
         }
 
         let mut link_libraries = Vec::new();
@@ -335,10 +341,14 @@ impl BinariesConfiguration {
             .unwrap()
             .into();
 
+        built_libraries.push(lib::SKIA.into());
+        built_libraries.push(lib::SKIA_BINDINGS.into());
+
         BinariesConfiguration {
             features: features.iter().map(|f| f.to_string()).collect(),
             output_directory,
             link_libraries: link_libraries.iter().map(|lib| lib.to_string()).collect(),
+            built_libraries,
             additional_files,
         }
     }
@@ -351,10 +361,9 @@ impl BinariesConfiguration {
             "cargo:rustc-link-search={}",
             self.output_directory.to_str().unwrap()
         );
-        cargo::add_link_lib("static=skia");
-        cargo::add_link_lib(&format!("static={}", lib::BINDINGS));
-        if self.features.contains(&String::from(feature::SHAPER)) {
-            cargo::add_link_lib(&format!("static={}", lib::SKSHAPER))
+
+        for lib in &self.built_libraries {
+            cargo::add_link_lib(format!("static={}", lib));
         }
     }
 }
@@ -598,7 +607,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
     }
 
     println!("COMPILING BINDINGS: {:?}", build.binding_sources);
-    cc_build.compile(lib::BINDINGS);
+    cc_build.compile(lib::SKIA_BINDINGS);
 
     println!("GENERATING BINDINGS");
     let bindings = builder.generate().expect("Unable to generate bindings");

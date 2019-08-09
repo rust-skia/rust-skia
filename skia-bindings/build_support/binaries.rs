@@ -30,17 +30,12 @@ pub fn export(config: &skia::BinariesConfiguration, target_dir: &Path) -> io::Re
 
     let output_directory = &config.output_directory;
 
-    let (skia_lib, skia_bindings_lib) = if cargo::target().is_windows() {
-        ("skia.lib", "skia-bindings.lib")
-    } else {
-        ("libskia.a", "libskia-bindings.a")
-    };
+    let target = cargo::target();
 
-    fs::copy(output_directory.join(skia_lib), export_dir.join(skia_lib))?;
-    fs::copy(
-        output_directory.join(skia_bindings_lib),
-        export_dir.join(skia_bindings_lib),
-    )?;
+    for lib in &config.built_libraries {
+        let filename = &target.library_to_filename(lib);
+        fs::copy(output_directory.join(filename), export_dir.join(filename))?;
+    }
 
     for file in &config.additional_files {
         fs::copy(output_directory.join(file), export_dir.join(file))?;
