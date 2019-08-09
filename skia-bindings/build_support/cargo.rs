@@ -33,6 +33,16 @@ impl Target {
         self.system == "windows"
     }
 
+    /// Convert a library name to a filename.
+    pub fn library_to_filename(&self, name: impl AsRef<str>) -> PathBuf {
+        let name = name.as_ref();
+        if self.is_windows() {
+            format!("{}.lib", name).into()
+        } else {
+            format!("lib{}.a", name).into()
+        }
+    }
+
     pub fn as_strs(&self) -> (&str, &str, &str, Option<&str>) {
         (
             self.architecture.as_str(),
