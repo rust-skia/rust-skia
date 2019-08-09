@@ -605,9 +605,11 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
 mod prerequisites {
     use crate::build_support::{cargo, utils};
     use flate2::read::GzDecoder;
+    use std::ffi::OsStr;
     use std::fs;
     use std::io::Cursor;
-    use std::path::PathBuf;
+    use std::path::Component;
+    use std::path::{Path, PathBuf};
     use std::process::{Command, Stdio};
 
     pub fn locate_python2_path() -> PathBuf {
@@ -668,26 +670,16 @@ mod prerequisites {
         }
     }
 
-    // Specifies where to download Skia and Depot Tools archives from.
-    //
-    // We use codeload.github.com, otherwise the short hash will be expanded to a full hash as the root
-    // directory inside the tar.gz, and we run into filesystem path length restrictions
-    // with Skia.
-    const DEPENDENCIES: &[(&str, &str); 2] = &[
-        ("https://codeload.github.com/google/skia/tar.gz", "skia"),
-        (
-            "https://codeload.github.com/rust-skia/depot_tools/tar.gz",
-            "depot_tools",
-        ),
-    ];
-
     /// Downloads the skia and depot_tools from their repositories.
     ///
     /// The hashes are taken from the Cargo.toml section [package.metadata].
     fn download_dependencies() {
         let metadata = cargo::get_metadata();
 
-        for (repo_url, repo_name) in DEPENDENCIES {
+        for dep in dependencies() {
+            let repo_url = dep.url;
+            let repo_name = dep.repo;
+
             let dir = PathBuf::from(repo_name);
 
             // directory exists => assume that the download of the archive was successful.
@@ -714,13 +706,71 @@ mod prerequisites {
                 utils::download(archive_url).expect(&format!("Failed to download {}", archive_url));
 
             // unpack
-            let tar = GzDecoder::new(Cursor::new(archive));
-            tar::Archive::new(tar)
-                .unpack(std::env::current_dir().unwrap())
-                .expect("Failed to extract archive");
+            {
+                let tar = GzDecoder::new(Cursor::new(archive));
+                let mut archive = tar::Archive::new(tar);
+                let dir = std::env::current_dir().unwrap();
+                for entry in archive.entries().expect("failed to iterate over archive") {
+                    let mut entry = entry.unwrap();
+                    let path = entry.path().unwrap();
+                    let mut components = path.components();
+                    let root = components.next().unwrap();
+                    if root.as_os_str() != unpack_dir.as_os_str() {
+                        panic!(
+                            "unexpected archive root directory: {:?}, expected: {:?}",
+                            root.as_os_str(),
+                            unpack_dir.as_os_str()
+                        )
+                    }
+                    if (dep.path_filter)(components.as_path()) {
+                        entry.unpack_in(&dir).unwrap();
+                    }
+                }
+            }
 
             // move unpack directory to the target repository directory
             fs::rename(unpack_dir, repo_name).expect("failed to move directory");
+        }
+    }
+
+    // Specifies where to download Skia and Depot Tools archives from.
+    //
+    // We use codeload.github.com, otherwise the short hash will be expanded to a full hash as the root
+    // directory inside the tar.gz, and we run into filesystem path length restrictions
+    // with Skia.
+    struct Dependency {
+        pub url: &'static str,
+        pub repo: &'static str,
+        pub path_filter: fn(&Path) -> bool,
+    }
+
+    fn dependencies() -> Vec<Dependency> {
+        return vec![
+            Dependency {
+                url: "https://codeload.github.com/google/skia/tar.gz",
+                repo: "skia",
+                path_filter: filter_skia,
+            },
+            Dependency {
+                url: "https://codeload.github.com/rust-skia/depot_tools/tar.gz",
+                repo: "depot_tools",
+                path_filter: filter_depot_tools,
+            },
+        ];
+
+        // infra/ contains very long filenames which may hit the max path restriction on Windows.
+        // https://github.com/rust-skia/rust-skia/issues/169
+        fn filter_skia(p: &Path) -> bool {
+            match p.components().next() {
+                Some(Component::Normal(name)) if name == OsStr::new("infra") => false,
+                _ => true,
+            }
+        }
+
+        // we need only ninja from depot_tools.
+        // https://github.com/rust-skia/rust-skia/pull/165
+        fn filter_depot_tools(p: &Path) -> bool {
+            p.starts_with("ninja")
         }
     }
 }
