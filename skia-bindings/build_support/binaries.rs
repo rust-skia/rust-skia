@@ -1,12 +1,71 @@
-//! Support for building and deploying prebuilt binaries.
+//! Support for exporting and building prebuilt binaries.
 
-use crate::build_support::cargo;
+use crate::build_support::{azure, binaries, cargo, git, skia};
 use flate2::read::GzDecoder;
 use std::fs;
 use std::io;
-use std::io::Read;
+use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use tar::Archive;
+
+/// Export binaries if we are inside a git repository _and_
+/// the artifact staging directory is set.
+/// The git repository test is important to support package verifications.
+pub fn should_export() -> Option<PathBuf> {
+    if git::half_hash().is_none() {
+        return None;
+    }
+
+    azure::artifact_staging_directory()
+}
+
+/// Export the binaries to a target directory.
+pub fn export(config: &skia::BinariesConfiguration, target_dir: &Path) -> io::Result<()> {
+    let half_hash = git::half_hash().expect("failed to retrieve the git hash");
+    let key = binaries::key(&half_hash, &config.features);
+
+    let binaries = prepare(&key, target_dir)?;
+
+    fs::copy(crate::SRC_BINDINGS_RS, binaries.join("bindings.rs"))?;
+
+    let output_directory = &config.output_directory;
+
+    let target_is_windows = cargo::target().system == "windows";
+    let (skia_lib, skia_bindings_lib) = if target_is_windows {
+        ("skia.lib", "skia-bindings.lib")
+    } else {
+        ("libskia.a", "libskia-bindings.a")
+    };
+
+    fs::copy(output_directory.join(skia_lib), binaries.join(skia_lib))?;
+    fs::copy(
+        output_directory.join(skia_bindings_lib),
+        binaries.join(skia_bindings_lib),
+    )?;
+
+    Ok(())
+}
+
+/// Prepares the binaries directory and sets the tag.txt and key.txt
+/// file.
+fn prepare(key: &str, artifacts: &Path) -> io::Result<PathBuf> {
+    let binaries = artifacts.join("skia-binaries");
+    fs::create_dir_all(&binaries)?;
+
+    // this is primarily for azure to know the tag and the key of the binaries,
+    // but they can stay inside the archive.
+
+    {
+        let mut tag_file = fs::File::create(binaries.join("tag.txt")).unwrap();
+        tag_file.write_all(cargo::package_version().as_bytes())?;
+    }
+    {
+        let mut key_file = fs::File::create(binaries.join("key.txt")).unwrap();
+        key_file.write_all(key.as_bytes())?;
+    }
+
+    Ok(binaries)
+}
 
 /// The name of the tar archive without any keys or file extensions. This is also the name
 /// of the subdirectory that is created when the archive is unpacked.

@@ -68,14 +68,14 @@ fn main() {
 
     // TODO: we may not want to deliver binaries when we downloaded the binaries
     //       but how to inform azure if we don't want to?
-    if let Some(staging_directory) = azure::should_deliver_binaries() {
+    if let Some(staging_directory) = binaries::should_export() {
         println!(
-            "DETECTED AZURE, delivering binaries to {}",
+            "DETECTED AZURE, exporting binaries to {}",
             staging_directory.to_str().unwrap()
         );
 
-        println!("COPYING BINARIES");
-        azure::copy_binaries(&binaries_config, &staging_directory).expect("COPYING BINARIES FAILED")
+        println!("EXPORTING BINARIES");
+        binaries::export(&binaries_config, &staging_directory).expect("EXPORTING BINARIES FAILED")
     }
 }
 
