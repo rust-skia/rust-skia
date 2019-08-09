@@ -33,7 +33,7 @@ impl Default for BuildConfiguration {
         };
 
         BuildConfiguration {
-            on_windows: cargo::host().system == "windows",
+            on_windows: cargo::host().is_windows(),
             // Note that currently, we don't support debug Skia builds,
             // because they are hard to configure and pull in a lot of testing related modules.
             skia_release: true,
@@ -220,10 +220,7 @@ impl FinalBuildConfiguration {
 
             if build.keep_inline_functions {
                 // sadly, this also disables inlining and is probably a real performance bummer.
-                if build.on_windows
-                    && target.system == "windows"
-                    && target.abi == Some("msvc".into())
-                {
+                if build.on_windows && target.is_windows() && target.abi == Some("msvc".into()) {
                     flags.push("/Ob0")
                 } else {
                     flags.push("-fno-inline-functions");

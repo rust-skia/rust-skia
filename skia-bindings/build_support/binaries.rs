@@ -30,8 +30,7 @@ pub fn export(config: &skia::BinariesConfiguration, target_dir: &Path) -> io::Re
 
     let output_directory = &config.output_directory;
 
-    let target_is_windows = cargo::target().system == "windows";
-    let (skia_lib, skia_bindings_lib) = if target_is_windows {
+    let (skia_lib, skia_bindings_lib) = if cargo::target().is_windows() {
         ("skia.lib", "skia-bindings.lib")
     } else {
         ("libskia.a", "libskia-bindings.a")

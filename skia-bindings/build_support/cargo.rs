@@ -29,6 +29,10 @@ pub struct Target {
 }
 
 impl Target {
+    pub fn is_windows(&self) -> bool {
+        self.system == "windows"
+    }
+
     pub fn as_strs(&self) -> (&str, &str, &str, Option<&str>) {
         (
             self.architecture.as_str(),
