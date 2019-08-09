@@ -24,9 +24,9 @@ pub fn export(config: &skia::BinariesConfiguration, target_dir: &Path) -> io::Re
     let half_hash = git::half_hash().expect("failed to retrieve the git hash");
     let key = binaries::key(&half_hash, &config.features);
 
-    let binaries = prepare(&key, target_dir)?;
+    let export_dir = prepare_export_directory(&key, target_dir)?;
 
-    fs::copy(crate::SRC_BINDINGS_RS, binaries.join("bindings.rs"))?;
+    fs::copy(crate::SRC_BINDINGS_RS, export_dir.join("bindings.rs"))?;
 
     let output_directory = &config.output_directory;
 
@@ -36,10 +36,10 @@ pub fn export(config: &skia::BinariesConfiguration, target_dir: &Path) -> io::Re
         ("libskia.a", "libskia-bindings.a")
     };
 
-    fs::copy(output_directory.join(skia_lib), binaries.join(skia_lib))?;
+    fs::copy(output_directory.join(skia_lib), export_dir.join(skia_lib))?;
     fs::copy(
         output_directory.join(skia_bindings_lib),
-        binaries.join(skia_bindings_lib),
+        export_dir.join(skia_bindings_lib),
     )?;
 
     Ok(())
@@ -47,7 +47,7 @@ pub fn export(config: &skia::BinariesConfiguration, target_dir: &Path) -> io::Re
 
 /// Prepares the binaries directory and sets the tag.txt and key.txt
 /// file.
-fn prepare(key: &str, artifacts: &Path) -> io::Result<PathBuf> {
+fn prepare_export_directory(key: &str, artifacts: &Path) -> io::Result<PathBuf> {
     let binaries = artifacts.join("skia-binaries");
     fs::create_dir_all(&binaries)?;
 
@@ -115,11 +115,11 @@ pub fn download_url(tag: impl AsRef<str>, key: impl AsRef<str>) -> String {
     )
 }
 
-pub fn unpack(archive: impl Read, target: &Path) -> io::Result<()> {
+pub fn unpack(archive: impl Read, output_directory: &Path) -> io::Result<()> {
     let tar = GzDecoder::new(archive);
     // note: this creates the skia-bindings/ directory.
-    Archive::new(tar).unpack(target)?;
-    let binaries_dir = target.join(ARCHIVE_NAME);
+    Archive::new(tar).unpack(output_directory)?;
+    let binaries_dir = output_directory.join(ARCHIVE_NAME);
     let paths: Vec<PathBuf> = fs::read_dir(binaries_dir)?
         .map(|e| e.unwrap().path())
         .collect();
@@ -127,7 +127,7 @@ pub fn unpack(archive: impl Read, target: &Path) -> io::Result<()> {
     // pull out all nested files.
     for path in paths {
         let name = path.file_name().unwrap();
-        let target_path = target.join(name);
+        let target_path = output_directory.join(name);
         fs::rename(path, target_path)?
     }
     Ok(())
