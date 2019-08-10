@@ -17,6 +17,7 @@ use skia_bindings::{
     SkShaper_RunIterator, SkShaper_ScriptRunIterator, SkTextBlobBuilderRunHandler, TraitObject,
 };
 use std::ffi::{CStr, CString};
+use std::marker::PhantomData;
 use std::mem;
 use std::pin::Pin;
 
@@ -437,31 +438,33 @@ impl Shaper {
     }
 }
 
-// TODO: Is there a way around converting and storing the CString here?
 #[repr(C)]
-pub struct TextBlobBuilderRunHandler(Pin<CString>, SkTextBlobBuilderRunHandler);
+pub struct TextBlobBuilderRunHandler<'text>(SkTextBlobBuilderRunHandler, PhantomData<&'text str>);
 
-impl NativeAccess<SkTextBlobBuilderRunHandler> for TextBlobBuilderRunHandler {
+impl NativeAccess<SkTextBlobBuilderRunHandler> for TextBlobBuilderRunHandler<'_> {
     fn native(&self) -> &SkTextBlobBuilderRunHandler {
-        &self.1
+        &self.0
     }
     fn native_mut(&mut self) -> &mut SkTextBlobBuilderRunHandler {
-        &mut self.1
+        &mut self.0
     }
 }
 
-impl TextBlobBuilderRunHandler {
-    pub fn new(text: impl AsRef<str>, offset: impl Into<Point>) -> TextBlobBuilderRunHandler {
-        let c_string = Pin::new(CString::new(text.as_ref()).unwrap());
-        let ptr = c_string.as_ptr();
+impl TextBlobBuilderRunHandler<'_> {
+    pub fn new(text: &str, offset: impl Into<Point>) -> TextBlobBuilderRunHandler {
         /* does not link:
         TextBlobBuilderRunHandler(c_string, unsafe {
             SkTextBlobBuilderRunHandler::new(ptr, offset.into().into_native())
         }) */
+        let ptr = text.as_ptr();
+        // we can safely pass a ptr to the utf8 text string to the RunHandler, because it does not
+        // expect it to be 0 terminated, but this introduces another problem because
+        // we can never be sure that the RunHandler callbacks refer to that range. For
+        // now we ensure that by not exposing the RunHandler of a TextBlobBuilder.
         let run_handler = construct(|rh| unsafe {
-            C_SkTextBlobBuilderRunHandler_construct(rh, ptr, offset.into().native())
+            C_SkTextBlobBuilderRunHandler_construct(rh, ptr as *const i8, offset.into().native())
         });
-        TextBlobBuilderRunHandler(c_string, run_handler)
+        TextBlobBuilderRunHandler(run_handler, PhantomData)
     }
 
     pub fn make_blob(&mut self) -> Option<TextBlob> {
