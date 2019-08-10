@@ -16,10 +16,9 @@ use skia_bindings::{
     SkShaper_LanguageRunIterator, SkShaper_RunHandler_Buffer, SkShaper_RunHandler_RunInfo,
     SkShaper_RunIterator, SkShaper_ScriptRunIterator, SkTextBlobBuilderRunHandler, TraitObject,
 };
-use std::ffi::{CStr, CString};
+use std::ffi::CStr;
 use std::marker::PhantomData;
 use std::mem;
-use std::pin::Pin;
 
 pub struct Shaper(*mut SkShaper);
 
