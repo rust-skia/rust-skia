@@ -289,7 +289,7 @@ pub use stroke_rec::Style as StrokeRecStyle;
 
 pub mod surface;
 pub use surface::Surface;
-#[deprecated(since = "0.12.0", note = "use Borrowed<'a, Surface>")]
+#[deprecated(since = "0.12.0", note = "use Borrows<'a, Surface>")]
 pub type OwnedSurface<'a> = crate::Borrows<'a, Surface>;
 #[deprecated(since = "0.12.0", note = "use surface::BackendHandleAccess")]
 pub use surface::BackendHandleAccess as SurfaceBackendHandleAccess;
