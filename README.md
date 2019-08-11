@@ -1,6 +1,6 @@
 # Safe Rust bindings to the [Skia Graphics Library](https://skia.org/).
 
-[![Build Status](https://dev.azure.com/pragmatrix-github/rust-skia/_apis/build/status/rust-skia.rust-skia?branchName=master)](https://dev.azure.com/pragmatrix-github/rust-skia/_build/latest?definitionId=2&branchName=master)
+![crates.io](https://img.shields.io/crates/v/skia-safe)![license](https://img.shields.io/crates/l/skia-safe)![Build Status](https://dev.azure.com/pragmatrix-github/rust-skia/_apis/build/status/rust-skia.rust-skia?branchName=master)
 
 Skia Submodule Status: chrome/m76 ([pending changes][skiapending]).
 
