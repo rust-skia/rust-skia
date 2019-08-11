@@ -11,22 +11,22 @@ jobs:
         toolchain: stable
         features: ''
         exampleArgs: '--driver cpu --driver pdf'
-      beta:
-        toolchain: beta
-        features: ''
-        exampleArgs: ''
-      stable-vulkan:
-        toolchain: stable
-        features: 'vulkan'
-        exampleArgs: ''
-      stable-svg:
-        toolchain: stable
-        features: 'svg'
-        exampleArgs: '--driver svg'
-      stable-shaper:
-        toolchain: stable
-        features: 'shaper'
-        exampleArgs: ''
+#      beta:
+#        toolchain: beta
+#        features: ''
+#        exampleArgs: ''
+#      stable-vulkan:
+#        toolchain: stable
+#        features: 'vulkan'
+#        exampleArgs: ''
+#      stable-svg:
+#        toolchain: stable
+#        features: 'svg'
+#        exampleArgs: '--driver svg'
+#      stable-shaper:
+#        toolchain: stable
+#        features: 'shaper'
+#        exampleArgs: ''
 
   variables:
     platform: ${{ parameters.platform }}
