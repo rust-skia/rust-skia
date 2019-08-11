@@ -34,6 +34,7 @@ jobs:
     image: ${{ parameters.image }}
     androidHost: ${{ parameters.androidHost }}
     androidNDK: ${{ parameters.androidNDK }}
+    androidAPILevel: ${{ parameters.androidAPILevel }}
     androidBinExt: ${{ parameters.androidBinExt }}
     rust_backtrace: 1
     release_branch: 'release'
@@ -98,7 +99,7 @@ jobs:
         (cd /tmp && unzip android-ndk.zip)
         echo "##vso[task.setvariable variable=ANDROID_NDK;]/tmp/android-ndk-$(androidNDK)"
         echo "##vso[task.setvariable variable=PATH;]${PATH}:/tmp/android-ndk-$(androidNDK)/toolchains/llvm/prebuilt/$(androidHost)/bin"
-      displayName: 'Install Android NDK'
+      displayName: 'Install Android NDK $(androidNDK)'
 
   # Note: support to ignore specific rust files and directories is unstable yet: https://github.com/rust-lang/rustfmt/pull/2522
   - bash: |

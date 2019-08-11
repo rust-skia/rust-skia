@@ -18,9 +18,9 @@ steps:
       if [ "${{ parameters.androidEnv }}" == "true" ]; then
         TARGET=${{ parameters.target }}
         TARGET=${TARGET//-/_}
-        export CC_${TARGET}=${{ parameters.target }}$(androidNDK)-clang$(androidBinExt)
-        export CXX_${TARGET}=${{ parameters.target }}$(androidNDK)-clang++$(androidBinExt)
-        export CARGO_TARGET_${TARGET}_LINKER=${{ parameters.target }}$(androidNDK)-clang$(androidBinExt)
+        export CC_${TARGET}=${{ parameters.target }}$(androidAPILevel)-clang$(androidBinExt)
+        export CXX_${TARGET}=${{ parameters.target }}$(androidAPILevel)-clang++$(androidBinExt)
+        export CARGO_TARGET_${TARGET}_LINKER=${{ parameters.target }}$(androidAPILevel)-clang$(androidBinExt)
         echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
       fi
       set
