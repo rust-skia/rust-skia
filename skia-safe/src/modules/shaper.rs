@@ -19,6 +19,7 @@ use skia_bindings::{
 use std::ffi::CStr;
 use std::marker::PhantomData;
 use std::mem;
+use std::os::raw;
 
 pub struct Shaper(*mut SkShaper);
 
@@ -461,7 +462,11 @@ impl TextBlobBuilderRunHandler<'_> {
         // we can never be sure that the RunHandler callbacks refer to that range. For
         // now we ensure that by not exposing the RunHandler of a TextBlobBuilder.
         let run_handler = construct(|rh| unsafe {
-            C_SkTextBlobBuilderRunHandler_construct(rh, ptr as *const i8, offset.into().native())
+            C_SkTextBlobBuilderRunHandler_construct(
+                rh,
+                ptr as *const raw::c_char,
+                offset.into().native(),
+            )
         });
         TextBlobBuilderRunHandler(run_handler, PhantomData)
     }
