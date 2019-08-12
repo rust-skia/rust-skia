@@ -118,12 +118,12 @@ jobs:
 #      runBinaries: true
 #      releaseBinaries: true
 
-#  - ${{ if eq(parameters.platform, 'macOS') }}:
-#    - template: 'azure-pipelines-build-target.yml'
-#      parameters:
-#        target: 'aarch64-linux-android'
-#        androidEnv: true
-#        releaseBinaries: true
+  - ${{ if eq(parameters.platform, 'macOS') }}:
+    - template: 'azure-pipelines-build-target.yml'
+      parameters:
+        target: 'aarch64-linux-android'
+        androidEnv: true
+        releaseBinaries: true
 
 #    - template: 'azure-pipelines-build-target.yml'
 #      parameters:
@@ -152,11 +152,11 @@ jobs:
 #        target: 'x86_64-linux-android'
 #        androidEnv: true
 #
-#  - ${{ if eq(parameters.platform, 'Windows') }}:
-#    - template: 'azure-pipelines-build-target.yml'
-#      parameters:
-#        target: 'aarch64-linux-android'
-#        androidEnv: true
+  - ${{ if eq(parameters.platform, 'Windows') }}:
+    - template: 'azure-pipelines-build-target.yml'
+      parameters:
+        target: 'aarch64-linux-android'
+        androidEnv: true
 #
 #    - template: 'azure-pipelines-build-target.yml'
 #      parameters:
