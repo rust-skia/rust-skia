@@ -100,7 +100,7 @@ Please share your build experience so that we can try to automate the build and 
 
 ### Android
 
-Cross compilation to Android is supported for targeting 64 bit ARM and Intel x86 architectures (`aarch64` and `x86_64`):
+Cross compilation to Android is supported for targeting 64 bit ARM and Intel x86 architectures (`aarch64` and `x86_64`) for API Level 26 (Oreo, Android 8):
 
 For example, to compile for `aarch64`:
 
@@ -111,19 +111,19 @@ For example, to compile for `aarch64`:
 On **macOS**:
 
 ```bash
-ANDROID_NDK=/path/to/android-ndk-r20 PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin CC_aarch64_linux_android=aarch64-linux-android21-clang CXX_aarch64_linux_android=aarch64-linux-android21-clang++ cargo build --target aarch64-linux-android -vv
+ANDROID_NDK=:path-to-android-ndk-r20 PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin CC_aarch64_linux_android=aarch64-linux-android26-clang CXX_aarch64_linux_android=aarch64-linux-android26-clang++ cargo build --target aarch64-linux-android -vv
 ```
 
 On **Linux**:
 
 ```bash
-ANDROID_NDK=/path/to/android-ndk-r20 PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin CC_aarch64_linux_android=aarch64-linux-android21-clang CXX_aarch64_linux_android=aarch64-linux-android21-clang++ cargo build --target aarch64-linux-android -vv
+ANDROID_NDK=:path-to-android-ndk-r20 PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin CC_aarch64_linux_android=aarch64-linux-android26-clang CXX_aarch64_linux_android=aarch64-linux-android26-clang++ cargo build --target aarch64-linux-android -vv
 ```
 
 On **Windows** the Android NDK clang executable must be invoked through .cmd scripts:
 
 ```bash
-ANDROID_NDK=/path/to/android-ndk-r20 PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin CC_aarch64_linux_android=aarch64-linux-android-clang.cmd CXX_aarch64_linux_android=aarch64-linux-android-clang++.cmd CARGO_TARGET_aarch64_linux_android_LINKER=aarch64-linux-android-clang.cmd cargo build --target aarch64-linux-android -vv
+ANDROID_NDK=:path-to-android-ndk-r20 PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/windows-x86_64/bin CC_aarch64_linux_android=aarch64-linux-android26-clang.cmd CXX_aarch64_linux_android=aarch64-linux-android26-clang++.cmd CARGO_TARGET_aarch64_linux_android_LINKER=aarch64-linux-android26-clang.cmd cargo build --target aarch64-linux-android -vv
 ```
 _Notes:_
 

@@ -192,6 +192,8 @@ impl FinalBuildConfiguration {
                 }
                 (arch, "linux", "android", _) => {
                     args.push(("ndk", quote(&android::ndk())));
+                    // TODO: make API-level configurable?
+                    args.push(("ndk_api", android::API_LEVEL.into()));
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
                     args.push(("skia_use_system_freetype2", no()));
                     args.push(("skia_enable_fontmgr_android", yes()));
@@ -305,7 +307,14 @@ impl BinariesConfiguration {
                 ]);
             }
             (_, "linux", "android", _) => {
-                link_libraries.extend(vec!["log", "android", "EGL", "GLESv2"]);
+                link_libraries.extend(vec![
+                    "log",
+                    "android",
+                    "EGL",
+                    "GLESv2",
+                    "c++_static",
+                    "c++abi",
+                ]);
             }
             (_, "apple", "ios", _) => {
                 link_libraries.extend(vec![
