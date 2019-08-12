@@ -10,12 +10,13 @@ use skia_bindings::{
     C_GrVkAlloc_Construct, C_GrVkAlloc_Equals, C_GrVkImageInfo_Construct, C_GrVkImageInfo_Equals,
     C_GrVkImageInfo_updateImageLayout, C_GrVkYcbcrConversionInfo_Construct,
     C_GrVkYcbcrConversionInfo_Equals, GrVkAlloc_Flag_kMappable_Flag,
-    GrVkAlloc_Flag_kNoncoherent_Flag, GrVkDrawableInfo,
+    GrVkAlloc_Flag_kNoncoherent_Flag, GrVkDrawableInfo, VkFormat,
 };
 use skia_bindings::{GrVkAlloc, GrVkBackendMemory};
 use skia_bindings::{GrVkImageInfo, GrVkYcbcrConversionInfo};
 use std::ffi::CStr;
 use std::os::raw;
+use std::ptr;
 
 pub type GraphicsBackendMemory = GrVkBackendMemory;
 
@@ -205,6 +206,7 @@ impl ImageInfo {
                 format,
                 level_count,
                 current_queue_family,
+                protected.into_native(),
                 ycbcr_conversion_info.native(),
             );
         })
@@ -246,15 +248,28 @@ pub type GetProcResult = *const raw::c_void;
 pub trait GetProc: Fn(GetProcOf) -> GetProcResult {}
 impl<T> GetProc for T where T: Fn(GetProcOf) -> GetProcResult {}
 
-#[derive(Copy, Clone, Default, Debug)]
+#[derive(Copy, Clone, Debug)]
 #[repr(C)]
 pub struct DrawableInfo {
-    secondary_command_buffer: CommandBuffer,
-    color_attachment_index: u32,
-    compatible_render_pass: RenderPass,
-    format: Format,
-    draw_bounds: *mut Rect2D,
-    image: Image,
+    pub secondary_command_buffer: CommandBuffer,
+    pub color_attachment_index: u32,
+    pub compatible_render_pass: RenderPass,
+    pub format: Format,
+    pub draw_bounds: *mut Rect2D,
+    pub image: Image,
+}
+
+impl Default for DrawableInfo {
+    fn default() -> Self {
+        DrawableInfo {
+            secondary_command_buffer: ptr::null_mut(),
+            color_attachment_index: 0,
+            compatible_render_pass: ptr::null_mut(),
+            format: VkFormat::VK_FORMAT_UNDEFINED,
+            draw_bounds: ptr::null_mut(),
+            image: ptr::null_mut(),
+        }
+    }
 }
 
 impl NativeTransmutable<GrVkDrawableInfo> for DrawableInfo {}
