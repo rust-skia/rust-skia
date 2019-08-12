@@ -20,7 +20,8 @@ steps:
         TARGET=${TARGET//-/_}
         export CC_${TARGET}=${{ parameters.target }}$(androidAPILevel)-clang$(androidBinExt)
         export CXX_${TARGET}=${{ parameters.target }}$(androidAPILevel)-clang++$(androidBinExt)
-        export CARGO_TARGET_${TARGET}_LINKER=${{ parameters.target }}$(androidAPILevel)-clang$(androidBinExt)
+        TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
+        export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=${{ parameters.target }}$(androidAPILevel)-clang$(androidBinExt)
         echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
       fi
       set
