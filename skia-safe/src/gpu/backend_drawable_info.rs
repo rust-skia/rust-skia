@@ -37,7 +37,6 @@ impl Handle<GrBackendDrawableInfo> {
 
     #[cfg(feature = "vulkan")]
     pub fn get_vk_drawable_info(&self) -> Option<vk::DrawableInfo> {
-        use std::mem;
         unsafe {
             let mut di = vk::DrawableInfo::default();
             skia_bindings::C_GrBackendDrawableInfo_getVkDrawableInfo(self.native(), di.native_mut())
