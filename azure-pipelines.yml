@@ -26,7 +26,8 @@ stages:
     parameters:
       platform: 'Windows'
       platformTarget: 'x86_64-pc-windows-msvc'
-      androidHost: 'windows-x86_64'
+      # No Android builds for Windows, ATM.
+      # androidHost: 'windows-x86_64'
       androidNDK: 'r20'
       androidAPILevel: '26'
       androidBinExt: '.cmd'
