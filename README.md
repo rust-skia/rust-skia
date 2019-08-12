@@ -96,22 +96,24 @@ For example, to compile for `aarch64`:
 On **macOS**:
 
 ```bash
-ANDROID_NDK=:path-to-android-ndk-r20 PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin CC_aarch64_linux_android=aarch64-linux-android26-clang CXX_aarch64_linux_android=aarch64-linux-android26-clang++ cargo build --target aarch64-linux-android -vv
+ANDROID_NDK=:path-to-android-ndk-r20 PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin CC_aarch64_linux_android=aarch64-linux-android26-clang CXX_aarch64_linux_android=aarch64-linux-android26-clang++ CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android26-clang cargo build --target aarch64-linux-android -vv
 ```
 
 On **Linux**:
 
 ```bash
-ANDROID_NDK=:path-to-android-ndk-r20 PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin CC_aarch64_linux_android=aarch64-linux-android26-clang CXX_aarch64_linux_android=aarch64-linux-android26-clang++ cargo build --target aarch64-linux-android -vv
+ANDROID_NDK=:path-to-android-ndk-r20 PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin CC_aarch64_linux_android=aarch64-linux-android26-clang CXX_aarch64_linux_android=aarch64-linux-android26-clang++ CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android26-clang cargo build --target aarch64-linux-android -vv
 ```
 
-On **Windows** the Android NDK clang executable must be invoked through .cmd scripts:
+On **Windows** the Android NDK clang executable must be invoked through `.cmd` scripts:
 
 ```bash
-ANDROID_NDK=:path-to-android-ndk-r20 PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/windows-x86_64/bin CC_aarch64_linux_android=aarch64-linux-android26-clang.cmd CXX_aarch64_linux_android=aarch64-linux-android26-clang++.cmd CARGO_TARGET_aarch64_linux_android_LINKER=aarch64-linux-android26-clang.cmd cargo build --target aarch64-linux-android -vv
+ANDROID_NDK=:path-to-android-ndk-r20 PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/windows-x86_64/bin CC_aarch64_linux_android=aarch64-linux-android26-clang.cmd CXX_aarch64_linux_android=aarch64-linux-android26-clang++.cmd CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android26-clang.cmd cargo build --target aarch64-linux-android -vv
 ```
 _Notes:_
 
+- The `CARGO_TARGET_${TARGET}_LINKER` environment variable [needs to be all uppercase](https://github.com/rust-lang/cargo/issues/1109#issuecomment-386850387).
+- In some older shells (for example macOS High Sierra), environment variable replacement can not be used when the variable was defined on the same line. Therefore the `ANDROID_NDK` variable must be defined before it's used in the `PATH` variable.
 - Rebuilding skia-bindings with a different target may cause linker errors, in that case `touch skia-bindings/build.rs` will force a rebuild ([#10](https://github.com/rust-skia/rust-skia/issues/10)).
 
 ### iOS
