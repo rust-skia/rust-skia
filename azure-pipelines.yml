@@ -29,7 +29,7 @@ stages:
       androidHost: 'windows-x86_64'
       androidNDK: 'r20'
       androidAPILevel: '26'
-      androidBinExt: ''
+      androidBinExt: '.cmd'
       image: 'windows-2019'
 
 - stage: 'Package'
