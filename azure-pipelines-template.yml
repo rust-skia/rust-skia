@@ -125,40 +125,50 @@ jobs:
         androidEnv: true
         releaseBinaries: true
 
-#    - template: 'azure-pipelines-build-target.yml'
-#      parameters:
-#        target: 'x86_64-linux-android'
-#        androidEnv: true
-#        releaseBinaries: true
-#
-#    - template: 'azure-pipelines-build-target.yml'
-#      parameters:
-#        target: 'aarch64-apple-ios'
-#        releaseBinaries: true
-#
-#    - template: 'azure-pipelines-build-target.yml'
-#      parameters:
-#        target: 'x86_64-apple-ios'
-#        releaseBinaries: true
-#
+    - template: 'azure-pipelines-build-target.yml'
+      parameters:
+        target: 'x86_64-linux-android'
+        androidEnv: true
+        releaseBinaries: true
+
+    - template: 'azure-pipelines-build-target.yml'
+      parameters:
+        target: 'aarch64-apple-ios'
+        releaseBinaries: true
+
+    - template: 'azure-pipelines-build-target.yml'
+      parameters:
+        target: 'x86_64-apple-ios'
+        releaseBinaries: true
+
   - ${{ if eq(parameters.platform, 'Linux') }}:
-    - template: 'azure-pipelines-build-target.yml'
-      parameters:
-        target: 'aarch64-linux-android'
-        androidEnv: true
+# TODO: Temporarily disabled, because of:
+#       /home/vsts/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/8.0.7/include/arm_neon.h:37394:23:
+#         error: use of undeclared identifier '__builtin_neon_vrndns_f32'
+#       >> Builds fine on Ubuntu 18, though.
 #
 #    - template: 'azure-pipelines-build-target.yml'
 #      parameters:
-#        target: 'x86_64-linux-android'
+#        target: 'aarch64-linux-android'
 #        androidEnv: true
-#
+
+    - template: 'azure-pipelines-build-target.yml'
+      parameters:
+        target: 'x86_64-linux-android'
+        androidEnv: true
+
   - ${{ if eq(parameters.platform, 'Windows') }}:
-    - template: 'azure-pipelines-build-target.yml'
-      parameters:
-        target: 'aarch64-linux-android'
-        androidEnv: true
+# TODO: Temporaly disabled, because of:
+#       error occurred:
+#         Failed to find tool. Is `aarch64-linux-android26-clang.cmd` installed?
+#       >> works locally on msys2, probably a PATH problem with AZURE?, although PATH variable looks fine.
 #
 #    - template: 'azure-pipelines-build-target.yml'
 #      parameters:
-#        target: 'x86_64-linux-android'
+#        target: 'aarch64-linux-android'
 #        androidEnv: true
+
+    - template: 'azure-pipelines-build-target.yml'
+      parameters:
+        target: 'x86_64-linux-android'
+        androidEnv: true
