@@ -265,6 +265,7 @@ impl Camera3D {
 // Also note that the implementation uses interior pointers,
 // so we let Skia do the allocation.
 
+#[repr(transparent)]
 pub struct View3D(*mut Sk3DView);
 unsafe impl Send for View3D {}
 

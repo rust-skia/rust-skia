@@ -42,6 +42,7 @@ pub(crate) mod private {
     use crate::prelude::*;
     use skia_bindings::{C_SkDeferredDisplayList_delete, SkDeferredDisplayList};
 
+    #[repr(transparent)]
     pub struct DeferredDisplayList(pub(crate) *mut SkDeferredDisplayList);
 
     impl NativeAccess<SkDeferredDisplayList> for DeferredDisplayList {
