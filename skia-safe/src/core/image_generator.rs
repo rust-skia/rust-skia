@@ -9,6 +9,7 @@ use skia_bindings::{
 };
 use std::ffi::c_void;
 
+#[repr(transparent)]
 pub struct ImageGenerator(*mut SkImageGenerator);
 
 impl NativeAccess<SkImageGenerator> for ImageGenerator {

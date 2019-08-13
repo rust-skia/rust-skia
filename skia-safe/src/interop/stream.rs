@@ -15,6 +15,7 @@ use std::marker::PhantomData;
 use std::ptr;
 
 /// Trait representing an Skia allocated Stream type with a base class of SkStream.
+#[repr(transparent)]
 pub struct Stream<N: NativeStreamBase>(*mut N);
 
 pub trait NativeStreamBase {

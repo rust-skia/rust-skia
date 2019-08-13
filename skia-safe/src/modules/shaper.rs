@@ -21,6 +21,7 @@ use std::marker::PhantomData;
 use std::mem;
 use std::os::raw;
 
+#[repr(transparent)]
 pub struct Shaper(*mut SkShaper);
 
 impl NativeAccess<SkShaper> for Shaper {
@@ -101,6 +102,7 @@ where
     }
 }
 
+#[repr(transparent)]
 pub struct FontRunIterator(*mut SkShaper_FontRunIterator);
 
 impl Drop for FontRunIterator {
@@ -151,6 +153,7 @@ impl Shaper {
     }
 }
 
+#[repr(transparent)]
 pub struct BiDiRunIterator(*mut SkShaper_BiDiRunIterator);
 
 impl Drop for BiDiRunIterator {
@@ -192,6 +195,7 @@ impl Shaper {
     }
 }
 
+#[repr(transparent)]
 pub struct ScriptRunIterator(*mut SkShaper_ScriptRunIterator);
 
 impl Drop for ScriptRunIterator {
@@ -236,6 +240,7 @@ impl Shaper {
     }
 }
 
+#[repr(transparent)]
 pub struct LanguageRunIterator(*mut SkShaper_LanguageRunIterator);
 
 impl Drop for LanguageRunIterator {

@@ -82,6 +82,7 @@ impl RCHandle<SkDrawable> {
     }
 }
 
+#[repr(transparent)]
 pub struct GPUDrawHandler(*mut SkDrawable_GpuDrawHandler);
 
 impl NativeAccess<SkDrawable_GpuDrawHandler> for GPUDrawHandler {
