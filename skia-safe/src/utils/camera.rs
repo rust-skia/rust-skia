@@ -266,6 +266,7 @@ impl Camera3D {
 // so we let Skia do the allocation.
 
 pub struct View3D(*mut Sk3DView);
+unsafe impl Send for View3D {}
 
 impl NativeAccess<Sk3DView> for View3D {
     fn native(&self) -> &Sk3DView {

@@ -22,6 +22,7 @@ use std::mem;
 use std::os::raw;
 
 pub struct Shaper(*mut SkShaper);
+unsafe impl Send for Shaper {}
 
 impl NativeAccess<SkShaper> for Shaper {
     fn native(&self) -> &SkShaper {

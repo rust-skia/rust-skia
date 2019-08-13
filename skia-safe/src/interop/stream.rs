@@ -16,6 +16,7 @@ use std::ptr;
 
 /// Trait representing an Skia allocated Stream type with a base class of SkStream.
 pub struct Stream<N: NativeStreamBase>(*mut N);
+unsafe impl<N: NativeStreamBase> Send for Stream<N> {}
 
 pub trait NativeStreamBase {
     fn as_stream_mut(&mut self) -> &mut SkStream;
@@ -58,6 +59,7 @@ pub struct MemoryStream<'a> {
     native: *mut SkMemoryStream,
     pd: PhantomData<&'a ()>,
 }
+unsafe impl Send for MemoryStream<'_> {}
 
 impl NativeStreamBase for SkMemoryStream {
     fn as_stream_mut(&mut self) -> &mut SkStream {
