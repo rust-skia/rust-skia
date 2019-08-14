@@ -6,8 +6,6 @@ pub type MultiPictureDraw = Handle<SkMultiPictureDraw>;
 
 impl NativeDrop for SkMultiPictureDraw {
     fn drop(&mut self) {
-        // does not link under Windows:
-        // unsafe { SkMultiPictureDraw::destruct(self) }
         unsafe { C_SkMultiPictureDraw_destruct(self) }
     }
 }

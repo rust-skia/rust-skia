@@ -30,21 +30,10 @@ pub mod variation {
         }
 
         pub fn is_hidden(&self) -> bool {
-            unsafe {
-                // does not link:
-                // self.native().isHidden()
-                C_SkFontParameters_Variation_Axis_isHidden(self.native())
-            }
+            unsafe { C_SkFontParameters_Variation_Axis_isHidden(self.native()) }
         }
 
         pub fn set_hidden(&mut self, hidden: bool) -> &mut Self {
-            // does not link on iOS / x86_64:
-            // https://github.com/rust-skia/rust-skia/issues/146
-            /*
-            unsafe {
-                self.native_mut().setHidden(hidden);
-            };
-            */
             unsafe {
                 C_SkFontParameters_Variation_Axis_setHidden(self.native_mut(), hidden);
             }

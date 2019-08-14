@@ -40,8 +40,6 @@ fn test_font_metrics_layout() {
 }
 
 impl FontMetrics {
-    // the following 4 functions do not link.
-
     pub fn underline_thickness(&self) -> Option<scalar> {
         self.if_valid(
             Flags::UNDERLINE_THICKNESS_IS_VALID,

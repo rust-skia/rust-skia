@@ -30,7 +30,7 @@ impl Default for MatrixFlags {
 
 impl RCHandle<SkContourMeasure> {
     pub fn length(&self) -> scalar {
-        unsafe { self.native().length() }
+        self.native().fLength
     }
 
     pub fn pos_tan(&self, distance: scalar) -> Option<(Point, Vector)> {
@@ -84,7 +84,7 @@ impl RCHandle<SkContourMeasure> {
     }
 
     pub fn is_closed(&self) -> bool {
-        unsafe { self.native().isClosed() }
+        self.native().fIsClosed
     }
 }
 
@@ -92,8 +92,6 @@ pub type ContourMeasureIter = Handle<SkContourMeasureIter>;
 
 impl NativeDrop for SkContourMeasureIter {
     fn drop(&mut self) {
-        // does not link:
-        // unsafe { SkContourMeasureIter::destruct(self); }
         unsafe {
             C_SkContourMeasureIter_destruct(self);
         }

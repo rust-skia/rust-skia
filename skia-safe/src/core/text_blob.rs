@@ -30,11 +30,11 @@ impl RCHandle<SkTextBlob> {
     }
 
     pub fn bounds(&self) -> &Rect {
-        unsafe { Rect::from_native_ref(&*self.native().bounds()) }
+        Rect::from_native_ref(&self.native().fBounds)
     }
 
     pub fn unique_id(&self) -> u32 {
-        unsafe { self.native().uniqueID() }
+        self.native().fUniqueID
     }
 
     #[deprecated(note = "use get_intercepts()")]

@@ -1,10 +1,10 @@
 use crate::prelude::*;
 use crate::{scalar, Matrix, NativeFlattenable, Path, Point, Rect, StrokeRec, Vector};
 use skia_bindings::{
-    C_SkPathEffect_Deserialize, C_SkPathEffect_MakeCompose, C_SkPathEffect_MakeSum,
-    C_SkPathEffect_PointData_Construct, C_SkPathEffect_PointData_deletePoints, SkFlattenable,
-    SkPathEffect, SkPathEffect_DashInfo, SkPathEffect_DashType, SkPathEffect_PointData,
-    SkRefCntBase,
+    C_SkPathEffect_DashInfo_Construct, C_SkPathEffect_Deserialize, C_SkPathEffect_MakeCompose,
+    C_SkPathEffect_MakeSum, C_SkPathEffect_PointData_Construct,
+    C_SkPathEffect_PointData_deletePoints, SkFlattenable, SkPathEffect, SkPathEffect_DashType,
+    SkPathEffect_PointData, SkRefCntBase,
 };
 use std::os::raw;
 use std::slice;
@@ -44,8 +44,6 @@ impl Drop for PointData {
 
 impl Default for PointData {
     fn default() -> Self {
-        // does not link under Linux:
-        // SkPathEffect_PointData::new()
         PointData::construct(|point_data| unsafe { C_SkPathEffect_PointData_Construct(point_data) })
     }
 }
@@ -172,7 +170,7 @@ impl RCHandle<SkPathEffect> {
 
     // TODO: rename to to_a_dash()?
     pub fn as_a_dash(&self) -> Option<DashInfo> {
-        let mut dash_info = unsafe { SkPathEffect_DashInfo::new() };
+        let mut dash_info = construct(|di| unsafe { C_SkPathEffect_DashInfo_Construct(di) });
 
         let dash_type = unsafe { self.native().asADash(&mut dash_info) };
 

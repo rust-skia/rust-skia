@@ -41,14 +41,10 @@ impl Handle<SkColorMatrix> {
     }
 
     pub fn set_row_major(&mut self, src: &[f32; 20]) {
-        // does not link:
-        // unsafe { self.native_mut().setRowMajor(src.as_ptr()) }
         self.set_20(src)
     }
 
     pub fn get_row_major(&mut self, dst: &mut [f32; 20]) {
-        // does not link:
-        // unsafe { self.native_mut().getRowMajor(dst.as_mut_ptr()) }
         self.get_20(dst);
     }
 
@@ -80,11 +76,13 @@ impl Handle<SkColorMatrix> {
     }
 
     pub fn pre_concat(&mut self, mat: &ColorMatrix) {
-        unsafe { self.native_mut().preConcat(mat.native()) }
+        let self_ptr = self.native() as *const _;
+        unsafe { self.native_mut().setConcat(self_ptr, mat.native()) }
     }
 
     pub fn post_concat(&mut self, mat: &ColorMatrix) {
-        unsafe { self.native_mut().postConcat(mat.native()) }
+        let self_ptr = self.native() as *const _;
+        unsafe { self.native_mut().setConcat(mat.native(), self_ptr) }
     }
 
     pub fn set_saturation(&mut self, sat: f32) {
@@ -100,15 +98,11 @@ impl Handle<SkColorMatrix> {
     }
 
     pub fn get_20<'a>(&self, m: &'a mut [f32; 20]) -> &'a mut [f32; 20] {
-        // does not link:
-        // unsafe { self.native().get20(m.as_mut_ptr()) };
         unsafe { C_SkColorMatrix_get20(self.native(), m.as_mut_ptr()) };
         m
     }
 
     pub fn set_20(&mut self, m: &[f32; 20]) {
-        // fails to link:
-        // unsafe { self.native_mut().set20(m.as_ptr()) }
         unsafe { C_SkColorMatrix_set20(self.native_mut(), m.as_ptr()) };
     }
 }

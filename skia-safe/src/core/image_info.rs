@@ -119,7 +119,6 @@ impl NativeDrop for SkImageInfo {
 
 impl NativeClone for SkImageInfo {
     fn clone(&self) -> Self {
-        // SkImageInfo::new() does not link under Linux.
         unsafe {
             construct(|image_info| {
                 C_SkImageInfo_Construct(image_info);
@@ -137,7 +136,6 @@ impl NativePartialEq for SkImageInfo {
 
 impl Default for Handle<SkImageInfo> {
     fn default() -> Self {
-        // note SkImageInfo::new() does not link under Linux.
         Self::construct(|image_info| unsafe { C_SkImageInfo_Construct(image_info) })
     }
 }
@@ -241,8 +239,6 @@ impl Handle<SkImageInfo> {
     }
 
     pub fn is_gamma_close_to_srgb(&self) -> bool {
-        // does not link:
-        // unsafe { self.native().gammaCloseToSRGB() }
         unsafe { C_SkImageInfo_gammaCloseToSRGB(self.native()) }
     }
 
@@ -291,7 +287,7 @@ impl Handle<SkImageInfo> {
     }
 
     pub fn min_row_bytes(&self) -> usize {
-        unsafe { self.native().minRowBytes() }
+        usize::try_from(self.width()).unwrap() * self.bytes_per_pixel()
     }
 
     pub fn compute_offset(&self, point: impl Into<IPoint>, row_bytes: usize) -> usize {
@@ -304,17 +300,15 @@ impl Handle<SkImageInfo> {
     }
 
     pub fn compute_min_byte_size(&self) -> usize {
-        unsafe { self.native().computeMinByteSize() }
+        self.compute_byte_size(self.min_row_bytes())
     }
 
     // TODO: rename to has_valid_row_bytes()?
     pub fn valid_row_bytes(&self, row_bytes: usize) -> bool {
-        unsafe { self.native().validRowBytes(row_bytes) }
+        row_bytes >= self.min_row_bytes()
     }
 
     pub fn reset(&mut self) -> &mut Self {
-        // does not link:
-        // unsafe { self.native_mut().reset() }
         unsafe { C_SkImageInfo_reset(self.native_mut()) };
         self
     }

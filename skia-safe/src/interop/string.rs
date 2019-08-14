@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use skia_bindings::{C_SkString_destruct, SkString};
+use skia_bindings::{C_SkString_c_str, C_SkString_destruct, C_SkString_size, SkString};
 use std::{slice, str};
 
 pub type String = Handle<SkString>;
@@ -31,17 +31,19 @@ impl Handle<SkString> {
     }
 
     pub fn set(&mut self, string: &Self) {
+        let bytes = string.as_str().as_bytes();
         unsafe {
-            // does not link:
-            // self.native_mut().set(string.native());
-            let bytes = string.as_str().as_bytes();
-            self.native_mut().set2(bytes.as_ptr() as _, bytes.len());
+            self.native_mut().set1(bytes.as_ptr() as _, bytes.len());
         }
     }
 
     pub fn as_str(&self) -> &str {
-        let slice =
-            unsafe { slice::from_raw_parts(self.native().c_str() as _, self.native().size()) };
+        let slice = unsafe {
+            slice::from_raw_parts(
+                C_SkString_c_str(self.native()) as _,
+                C_SkString_size(self.native()),
+            )
+        };
         str::from_utf8(slice).unwrap()
     }
 }

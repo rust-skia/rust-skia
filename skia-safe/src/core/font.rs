@@ -6,7 +6,10 @@ use crate::{
 use skia_bindings::{
     C_SkFont_ConstructFromTypeface, C_SkFont_ConstructFromTypefaceWithSize,
     C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew, C_SkFont_Equals, C_SkFont_destruct,
-    C_SkFont_makeWithSize, C_SkFont_setTypeface, SkFont, SkFont_Edging,
+    C_SkFont_getEdging, C_SkFont_getHinting, C_SkFont_makeWithSize, C_SkFont_setTypeface, SkFont,
+    SkFont_Edging, SkFont_PrivFlags, SkFont_PrivFlags_kEmbeddedBitmaps_PrivFlag,
+    SkFont_PrivFlags_kEmbolden_PrivFlag, SkFont_PrivFlags_kForceAutoHinting_PrivFlag,
+    SkFont_PrivFlags_kLinearMetrics_PrivFlag, SkFont_PrivFlags_kSubpixel_PrivFlag,
 };
 use std::ptr;
 
@@ -104,23 +107,27 @@ impl Handle<SkFont> {
     }
 
     pub fn is_force_auto_hinting(&self) -> bool {
-        unsafe { self.native().isForceAutoHinting() }
+        self.has_flag(SkFont_PrivFlags_kForceAutoHinting_PrivFlag)
     }
 
     pub fn is_embedded_bitmaps(&self) -> bool {
-        unsafe { self.native().isEmbeddedBitmaps() }
+        self.has_flag(SkFont_PrivFlags_kEmbeddedBitmaps_PrivFlag)
     }
 
     pub fn is_subpixel(&self) -> bool {
-        unsafe { self.native().isSubpixel() }
+        self.has_flag(SkFont_PrivFlags_kSubpixel_PrivFlag)
     }
 
     pub fn is_linear_metrics(&self) -> bool {
-        unsafe { self.native().isLinearMetrics() }
+        self.has_flag(SkFont_PrivFlags_kLinearMetrics_PrivFlag)
     }
 
     pub fn is_embolden(&self) -> bool {
-        unsafe { self.native().isEmbolden() }
+        self.has_flag(SkFont_PrivFlags_kEmbolden_PrivFlag)
+    }
+
+    fn has_flag(&self, flag: SkFont_PrivFlags) -> bool {
+        (self.native().fFlags as SkFont_PrivFlags & flag) != 0
     }
 
     pub fn set_force_autohinting(&mut self, force_auto_hinting: bool) -> &mut Self {
@@ -149,7 +156,7 @@ impl Handle<SkFont> {
     }
 
     pub fn edging(&self) -> Edging {
-        Edging::from_native(unsafe { self.native().getEdging() })
+        Edging::from_native(unsafe { C_SkFont_getEdging(self.native()) })
     }
 
     pub fn set_edging(&mut self, edging: Edging) -> &mut Self {
@@ -163,7 +170,7 @@ impl Handle<SkFont> {
     }
 
     pub fn hinting(&self) -> FontHinting {
-        FontHinting::from_native(unsafe { self.native().getHinting() })
+        FontHinting::from_native(unsafe { C_SkFont_getHinting(self.native()) })
     }
 
     #[must_use]
@@ -178,7 +185,7 @@ impl Handle<SkFont> {
     }
 
     pub fn typeface(&self) -> Option<Typeface> {
-        Typeface::from_unshared_ptr(unsafe { self.native().getTypeface() })
+        Typeface::from_unshared_ptr(self.native().fTypeface.fPtr)
     }
 
     pub fn typeface_or_default(&self) -> Typeface {
@@ -186,15 +193,15 @@ impl Handle<SkFont> {
     }
 
     pub fn size(&self) -> scalar {
-        unsafe { self.native().getSize() }
+        self.native().fSize
     }
 
     pub fn scale_x(&self) -> scalar {
-        unsafe { self.native().getScaleX() }
+        self.native().fScaleX
     }
 
     pub fn skew_x(&self) -> scalar {
-        unsafe { self.native().getSkewX() }
+        self.native().fSkewX
     }
 
     pub fn set_typeface(&mut self, tf: &Typeface) -> &mut Self {
@@ -293,7 +300,7 @@ impl Handle<SkFont> {
     ) -> (scalar, Rect) {
         let mut bounds = Rect::default();
         let width = unsafe {
-            self.native().measureText1(
+            self.native().measureText(
                 text.as_ptr() as _,
                 text.len(),
                 encoding.into_native(),

@@ -1,4 +1,7 @@
-use skia_bindings::{SkNVRefCnt, SkRefCnt, SkRefCntBase};
+use skia_bindings::{
+    C_SkRefCntBase_ref, C_SkRefCntBase_unique, C_SkRefCntBase_unref, SkNVRefCnt, SkRefCnt,
+    SkRefCntBase,
+};
 use std::hash::{Hash, Hasher};
 use std::mem::MaybeUninit;
 use std::ops::{Deref, DerefMut, Index, IndexMut};
@@ -130,15 +133,15 @@ pub trait NativeRefCounted: Sized {
 
 impl NativeRefCounted for SkRefCntBase {
     fn _ref(&self) {
-        unsafe { self.ref_() }
+        unsafe { C_SkRefCntBase_ref(self) }
     }
 
     fn _unref(&self) {
-        unsafe { self.unref() }
+        unsafe { C_SkRefCntBase_unref(self) }
     }
 
     fn unique(&self) -> bool {
-        unsafe { self.unique() }
+        unsafe { C_SkRefCntBase_unique(self) }
     }
 
     #[allow(clippy::cast_ptr_alignment)]
@@ -587,6 +590,12 @@ pub(crate) trait NativeTransmutable<NT: Sized>: Sized {
     /// transmuted reference to the native value.
     fn from_native_ref(nt: &NT) -> &Self {
         unsafe { transmute_ref(nt) }
+    }
+
+    /// Provides access to the Rust value through a
+    /// transmuted reference to the native mutable value.
+    fn from_native_ref_mut(nt: &mut NT) -> &mut Self {
+        unsafe { transmute_ref_mut(nt) }
     }
 
     /// Runs a test that proves that the native and the rust

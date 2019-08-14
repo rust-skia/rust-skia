@@ -315,27 +315,27 @@ impl RCHandle<SkImage> {
     }
 
     pub fn image_info(&self) -> &ImageInfo {
-        ImageInfo::from_native_ref(unsafe { &*self.native().imageInfo() })
+        ImageInfo::from_native_ref(&self.native().fInfo)
     }
 
     pub fn width(&self) -> i32 {
-        unsafe { self.native().width() }
+        self.image_info().width()
     }
 
     pub fn height(&self) -> i32 {
-        unsafe { self.native().height() }
+        self.image_info().height()
     }
 
     pub fn dimensions(&self) -> ISize {
-        ISize::from_native(unsafe { self.native().dimensions() })
+        self.image_info().dimensions()
     }
 
     pub fn bounds(&self) -> IRect {
-        IRect::from_native(unsafe { self.native().bounds() })
+        self.image_info().bounds()
     }
 
     pub fn unique_id(&self) -> u32 {
-        unsafe { self.native().uniqueID() }
+        self.native().fUniqueID
     }
 
     pub fn alpha_type(&self) -> AlphaType {
@@ -355,7 +355,7 @@ impl RCHandle<SkImage> {
     }
 
     pub fn is_opaque(&self) -> bool {
-        unsafe { self.native().isOpaque() }
+        self.alpha_type().is_opaque()
     }
 
     pub fn to_shader<'a>(

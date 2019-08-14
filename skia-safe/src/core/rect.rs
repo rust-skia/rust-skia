@@ -1,6 +1,11 @@
 use crate::prelude::*;
+use crate::private::safe32::{sk32, sk64};
 use crate::{scalar, Contains, IPoint, ISize, IVector, Point, Size, Vector};
-use skia_bindings::{SkIRect, SkIRect_MakeXYWH, SkRect};
+use skia_bindings::{
+    C_SkIRect_isEmpty, C_SkRect_round, C_SkRect_roundIn, C_SkRect_roundOut, SkIRect,
+    SkIRect_contains, SkRect,
+};
+use std::mem;
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
@@ -25,7 +30,7 @@ impl AsRef<IRect> for IRect {
 }
 
 impl IRect {
-    pub fn new(left: i32, top: i32, right: i32, bottom: i32) -> Self {
+    pub const fn new(left: i32, top: i32, right: i32, bottom: i32) -> Self {
         Self {
             left,
             top,
@@ -34,8 +39,8 @@ impl IRect {
         }
     }
 
-    pub fn new_empty() -> Self {
-        Self::default()
+    pub const fn new_empty() -> Self {
+        Self::new(0, 0, 0, 0)
     }
 
     pub fn from_wh(w: i32, h: i32) -> Self {
@@ -47,12 +52,17 @@ impl IRect {
         Self::new(0, 0, size.width, size.height)
     }
 
-    pub fn from_ltrb(l: i32, t: i32, r: i32, b: i32) -> Self {
+    pub const fn from_ltrb(l: i32, t: i32, r: i32, b: i32) -> Self {
         Self::new(l, t, r, b)
     }
 
     pub fn from_xywh(x: i32, y: i32, w: i32, h: i32) -> Self {
-        Self::from_native(unsafe { SkIRect_MakeXYWH(x, y, w, h) })
+        IRect {
+            left: x,
+            top: y,
+            right: sk32::sat_add(x, w),
+            bottom: sk32::sat_add(y, h),
+        }
     }
 
     pub fn left(&self) -> i32 {
@@ -85,11 +95,11 @@ impl IRect {
     }
 
     pub fn width(&self) -> i32 {
-        unsafe { self.native().width() }
+        sk32::can_overflow_sub(self.right, self.left)
     }
 
     pub fn height(&self) -> i32 {
-        unsafe { self.native().height() }
+        sk32::can_overflow_sub(self.bottom, self.top)
     }
 
     pub fn size(&self) -> ISize {
@@ -97,19 +107,19 @@ impl IRect {
     }
 
     pub fn width_64(&self) -> i64 {
-        unsafe { self.native().width64() }
+        self.right as i64 - self.left as i64
     }
 
     pub fn height_64(&self) -> i64 {
-        unsafe { self.native().height64() }
+        self.bottom as i64 - self.top as i64
     }
 
     pub fn is_empty_64(&self) -> bool {
-        unsafe { self.native().isEmpty64() }
+        self.right <= self.left || self.bottom <= self.top
     }
 
     pub fn is_empty(&self) -> bool {
-        unsafe { self.native().isEmpty() }
+        unsafe { C_SkIRect_isEmpty(self.native()) }
     }
 
     pub fn set_empty(&mut self) {
@@ -131,28 +141,40 @@ impl IRect {
     #[must_use]
     pub fn with_offset(&self, delta: impl Into<IVector>) -> Self {
         let delta = delta.into();
-        let copied = *self;
-        Self::from_native(unsafe { copied.native().makeOffset(delta.x, delta.y) })
+        let (dx, dy) = (delta.x, delta.y);
+        IRect::new(
+            sk32::sat_add(self.left, dx),
+            sk32::sat_add(self.top, dy),
+            sk32::sat_add(self.right, dx),
+            sk32::sat_add(self.bottom, dy),
+        )
     }
 
     #[must_use]
     pub fn with_inset(&self, delta: impl Into<IVector>) -> Self {
-        /* does not link:
-        Self::from_native(unsafe {
-            cloned.native().makeInset(delta.x, delta.y)
-        }) */
         self.with_outset(-delta.into())
     }
 
     #[must_use]
     pub fn with_outset(&self, delta: impl Into<IVector>) -> Self {
         let delta = delta.into();
-        Self::from_native(unsafe { self.native().makeOutset(delta.x, delta.y) })
+        let (dx, dy) = (delta.x, delta.y);
+        IRect::new(
+            sk32::sat_sub(self.left, dx),
+            sk32::sat_sub(self.top, dy),
+            sk32::sat_add(self.right, dx),
+            sk32::sat_add(self.bottom, dy),
+        )
     }
 
     pub fn offset(&mut self, delta: impl Into<IPoint>) {
         let delta = delta.into();
-        unsafe { self.native_mut().offset1(delta.native()) }
+        let (dx, dy) = (delta.x, delta.y);
+
+        self.left = sk32::sat_add(self.left, dx);
+        self.top = sk32::sat_add(self.top, dy);
+        self.right = sk32::sat_add(self.right, dx);
+        self.bottom = sk32::sat_add(self.bottom, dy);
     }
 
     pub fn offset_to(&mut self, new_p: impl Into<IPoint>) {
@@ -162,9 +184,14 @@ impl IRect {
     #[must_use]
     pub fn with_offset_to(&self, new_p: impl Into<IPoint>) -> Self {
         let new_p = new_p.into();
-        let mut copied = *self;
-        unsafe { copied.native_mut().offsetTo(new_p.x, new_p.y) }
-        copied
+        let (new_x, new_y) = (new_p.x, new_p.y);
+
+        IRect::new(
+            sk64::pin_to_s32(self.right as i64 + new_x as i64 - self.left as i64),
+            sk64::pin_to_s32(self.bottom as i64 + new_y as i64 - self.top as i64),
+            new_x,
+            new_y,
+        )
     }
 
     pub fn inset(&mut self, delta: impl Into<IVector>) {
@@ -177,9 +204,12 @@ impl IRect {
 
     #[must_use]
     pub fn with_adjustment(&self, d_l: i32, d_t: i32, d_r: i32, d_b: i32) -> Self {
-        let mut copied = *self;
-        unsafe { copied.native_mut().adjust(d_l, d_t, d_r, d_b) }
-        copied
+        IRect::new(
+            sk32::sat_add(self.left, d_l),
+            sk32::sat_add(self.top, d_t),
+            sk32::sat_add(self.right, d_r),
+            sk32::sat_add(self.bottom, d_b),
+        )
     }
 
     pub fn adjust(&mut self, d_l: i32, d_t: i32, d_r: i32, d_b: i32) {
@@ -189,36 +219,41 @@ impl IRect {
     // contains() is implemented through a trait below.
 
     pub fn contains_no_empty_check(&self, r: &Self) -> bool {
-        unsafe { self.native().containsNoEmptyCheck1(r.native()) }
+        debug_assert!(self.left < self.right && self.top < self.bottom);
+        debug_assert!(r.left < r.right && r.top < r.bottom);
+
+        self.left <= r.left && self.top <= r.top && self.right >= r.right && self.bottom >= r.bottom
     }
 
     pub fn intersect(a: &Self, b: &Self) -> Option<Self> {
-        let mut intersection = Self::default();
-        unsafe { intersection.native_mut().intersect1(a.native(), b.native()) }
-            .if_true_some(intersection)
+        if a.is_empty_64() || b.is_empty_64() {
+            return None;
+        }
+        Self::intersect_no_empty_check(a, b)
     }
 
     pub fn intersect_no_empty_check(a: &Self, b: &Self) -> Option<Self> {
-        let mut intersection = Self::default();
-        unsafe {
-            intersection
-                .native_mut()
-                .intersectNoEmptyCheck(a.native(), b.native())
-        }
-        .if_true_some(intersection)
+        debug_assert!(!a.is_empty_64() && !b.is_empty_64());
+        let r = IRect::new(
+            a.left.max(b.left),
+            a.top.max(b.top),
+            a.right.min(b.right),
+            a.bottom.min(b.bottom),
+        );
+        r.is_empty().if_false_some(r)
     }
 
     pub fn intersects(a: &Self, b: &Self) -> bool {
-        unsafe { SkIRect::Intersects(a.native(), b.native()) }
+        Self::intersect(a, b).is_some()
     }
 
     pub fn intersects_no_empty_check(a: &Self, b: &Self) -> bool {
-        unsafe { SkIRect::IntersectsNoEmptyCheck(a.native(), b.native()) }
+        Self::intersect_no_empty_check(a, b).is_some()
     }
 
     pub fn join(a: &Self, b: &Self) -> Self {
         let mut copied = *a;
-        unsafe { copied.native_mut().join1(b.native()) }
+        unsafe { copied.native_mut().join(b.left, b.top, b.right, b.bottom) }
         copied
     }
 
@@ -228,11 +263,12 @@ impl IRect {
 
     #[must_use]
     pub fn sorted(&self) -> Self {
-        let mut copied = *self;
-        // makeSorted does not link:
-        // IRect::from_native(unsafe { self.native().makeSorted() })
-        unsafe { copied.native_mut().sort() }
-        copied
+        Self::new(
+            self.left.min(self.right),
+            self.top.min(self.bottom),
+            self.left.max(self.right),
+            self.top.max(self.bottom),
+        )
     }
 
     #[must_use]
@@ -247,20 +283,37 @@ lazy_static! {
 
 impl Contains<IPoint> for IRect {
     fn contains(&self, other: IPoint) -> bool {
-        unsafe { self.native().contains(other.x, other.y) }
+        let (x, y) = (other.x, other.y);
+        x >= self.left && x < self.right && y >= self.top && y < self.bottom
     }
 }
 
 impl Contains<&IRect> for IRect {
-    fn contains(&self, other: &IRect) -> bool {
-        unsafe { self.native().contains2(other.native()) }
+    fn contains(&self, r: &IRect) -> bool {
+        !r.is_empty()
+            && !self.is_empty()
+            && self.left <= r.left
+            && self.top <= r.top
+            && self.right >= r.right
+            && self.bottom >= r.bottom
     }
 }
 
 impl Contains<&Rect> for IRect {
-    // TODO: can AsRef<Rect> supported here?
     fn contains(&self, other: &Rect) -> bool {
-        unsafe { self.native().contains3(other.native()) }
+        unsafe { SkIRect_contains(self.native(), other.native()) }
+    }
+}
+
+impl Contains<IRect> for IRect {
+    fn contains(&self, other: IRect) -> bool {
+        self.contains(&other)
+    }
+}
+
+impl Contains<Rect> for IRect {
+    fn contains(&self, other: Rect) -> bool {
+        self.contains(&other)
     }
 }
 
@@ -336,15 +389,28 @@ impl Rect {
     }
 
     pub fn is_empty(&self) -> bool {
-        unsafe { self.native().isEmpty() }
+        // We write it as the NOT of a non-empty rect, so we will return true if any values
+        // are NaN.
+        !(self.left < self.right && self.top < self.bottom)
     }
 
     pub fn is_sorted(&self) -> bool {
-        unsafe { self.native().isSorted() }
+        self.left <= self.right && self.top <= self.bottom
     }
 
     pub fn is_finite(&self) -> bool {
-        unsafe { self.native().isFinite() }
+        let mut accum: f32 = 0.0;
+        accum *= self.left;
+        accum *= self.top;
+        accum *= self.right;
+        accum *= self.bottom;
+
+        // accum is either NaN or it is finite (zero).
+        debug_assert!(0.0 == accum || accum.is_nan());
+
+        // value==value will be true iff value is not NaN
+        // TODO: is it faster to say !accum or accum==accum?
+        !accum.is_nan()
     }
 
     #[deprecated(since = "0.12.0", note = "removed without replacement")]
@@ -381,11 +447,13 @@ impl Rect {
     }
 
     pub fn width(&self) -> scalar {
-        unsafe { self.native().width() }
+        // unsafe { self.native().width() }
+        self.native().fRight - self.native().fLeft
     }
 
     pub fn height(&self) -> scalar {
-        unsafe { self.native().height() }
+        // unsafe { self.native().height() }
+        self.native().fBottom - self.native().fTop
     }
 
     pub fn center(&self) -> Point {
@@ -393,11 +461,13 @@ impl Rect {
     }
 
     pub fn center_x(&self) -> scalar {
-        unsafe { self.native().centerX() }
+        // don't use (fLeft + fBottom) * 0.5 as that might overflow before the 0.5
+        self.left * 0.5 + self.right * 0.5
     }
 
     pub fn center_y(&self) -> scalar {
-        unsafe { self.native().centerY() }
+        // don't use (fTop + fBottom) * 0.5 as that might overflow before the 0.5
+        self.top * 0.5 + self.bottom * 0.5
     }
 
     pub fn to_quad(&self) -> [Point; 4] {
@@ -452,10 +522,11 @@ impl Rect {
     }
 
     pub fn set_bounds2(&mut self, p0: impl Into<Point>, p1: impl Into<Point>) {
-        unsafe {
-            self.native_mut()
-                .set3(p0.into().native(), p1.into().native())
-        }
+        let (p0, p1) = (p0.into(), p1.into());
+        self.left = p0.x.min(p1.x);
+        self.right = p0.x.max(p1.x);
+        self.top = p0.y.min(p1.y);
+        self.bottom = p0.y.max(p1.y);
     }
 
     pub fn from_bounds(points: &[Point]) -> Option<Self> {
@@ -515,9 +586,6 @@ impl Rect {
 
     pub fn with_offset_to(&self, new_p: impl Into<Point>) -> Self {
         let new_p = new_p.into();
-        // does not link:
-        // let mut r = self.clone();
-        // unsafe { r.native_mut().offsetTo(new_x, new_y) };
         Self::new(new_p.x, new_p.y, new_p.x - self.left, new_p.y - self.top)
     }
 
@@ -558,17 +626,43 @@ impl Rect {
         right: scalar,
         bottom: scalar,
     ) -> bool {
-        // does not link:
-        // unsafe { self.native().intersects(left, top, right, bottom) }
-        self.intersects(Rect::new(left, top, right, bottom))
+        Self::intersects_(
+            self.left,
+            self.top,
+            self.right,
+            self.bottom,
+            left,
+            top,
+            right,
+            bottom,
+        )
     }
 
     pub fn intersects(&self, r: impl AsRef<Rect>) -> bool {
-        unsafe { self.native().intersects1(r.as_ref().native()) }
+        let r = r.as_ref();
+        self.intersects_ltrb(r.left, r.top, r.right, r.bottom)
     }
 
     pub fn intersects2(a: impl AsRef<Rect>, b: impl AsRef<Rect>) -> bool {
-        unsafe { SkRect::Intersects(a.as_ref().native(), b.as_ref().native()) }
+        a.as_ref().intersects(b)
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn intersects_(
+        al: scalar,
+        at: scalar,
+        ar: scalar,
+        ab: scalar,
+        bl: scalar,
+        bt: scalar,
+        br: scalar,
+        bb: scalar,
+    ) -> bool {
+        let l = al.max(bl);
+        let r = ar.min(br);
+        let t = at.max(bt);
+        let b = ab.min(bb);
+        l < r && t < b
     }
 
     pub fn join_ltrb(&mut self, left: scalar, top: scalar, right: scalar, bottom: scalar) {
@@ -576,21 +670,32 @@ impl Rect {
     }
 
     pub fn join(&mut self, r: impl AsRef<Rect>) {
-        unsafe { self.native_mut().join1(r.as_ref().native()) }
+        let r = r.as_ref();
+        self.join_ltrb(r.left, r.top, r.right, r.bottom)
     }
 
     pub fn join2(a: impl AsRef<Rect>, b: impl AsRef<Rect>) -> Rect {
-        let mut result = *a.as_ref();
+        let mut result = a.as_ref().clone();
         result.join(b);
         result
     }
 
     pub fn join_non_empty_arg(&mut self, r: impl AsRef<Rect>) {
-        unsafe { self.native_mut().joinNonEmptyArg(r.as_ref().native()) }
+        let r = r.as_ref();
+        debug_assert!(!r.is_empty());
+        if self.left >= self.right || self.top >= self.bottom {
+            *self = *r;
+        } else {
+            self.join_possibly_empty_rect(r);
+        }
     }
 
     pub fn join_possibly_empty_rect(&mut self, r: impl AsRef<Rect>) {
-        unsafe { self.native_mut().joinPossiblyEmptyRect(r.as_ref().native()) }
+        let r = r.as_ref();
+        self.left = self.left.min(r.left);
+        self.top = self.top.min(r.top);
+        self.right = self.right.max(r.right);
+        self.bottom = self.bottom.max(r.bottom);
     }
 
     // The set of contains() functions are defined as a trait below.
@@ -598,7 +703,7 @@ impl Rect {
     #[must_use]
     pub fn round(&self) -> IRect {
         let mut r = IRect::default();
-        unsafe { self.native().round(r.native_mut()) };
+        unsafe { C_SkRect_round(self.native(), r.native_mut()) };
         r
     }
 
@@ -607,17 +712,28 @@ impl Rect {
     #[must_use]
     pub fn round_in(&self) -> IRect {
         let mut r = IRect::default();
-        unsafe { self.native().roundIn(r.native_mut()) };
+        unsafe { C_SkRect_roundIn(self.native(), r.native_mut()) };
         r
     }
 
     pub fn sort(&mut self) {
-        unsafe { self.native_mut().sort() }
+        if self.left > self.right {
+            mem::swap(&mut self.left, &mut self.right);
+        }
+
+        if self.top > self.bottom {
+            mem::swap(&mut self.top, &mut self.bottom);
+        }
     }
 
     #[must_use]
     pub fn sorted(&self) -> Rect {
-        Rect::from_native(unsafe { self.native().makeSorted() })
+        Rect::new(
+            self.left.min(self.right),
+            self.top.min(self.bottom),
+            self.left.max(self.right),
+            self.top.max(self.bottom),
+        )
     }
 
     pub fn as_scalars(&self) -> &[scalar; 4] {
@@ -634,22 +750,32 @@ impl Rect {
 }
 
 impl Contains<Point> for Rect {
-    fn contains(&self, other: Point) -> bool {
-        // does not link:
-        // unsafe { self.native().contains(other.x, other.y) }
-        other.x >= self.left && other.x < self.right && other.y >= self.top && other.y < self.bottom
+    fn contains(&self, p: Point) -> bool {
+        p.x >= self.left && p.x < self.right && p.y >= self.top && p.y < self.bottom
     }
 }
 
 impl Contains<Rect> for Rect {
-    fn contains(&self, other: Rect) -> bool {
-        unsafe { self.native().contains1(other.native()) }
+    fn contains(&self, r: Rect) -> bool {
+        // todo: can we eliminate the this->isempty check?
+        !r.is_empty()
+            && !self.is_empty()
+            && self.left <= r.left
+            && self.top <= r.top
+            && self.right >= r.right
+            && self.bottom >= r.bottom
     }
 }
 
 impl Contains<IRect> for Rect {
-    fn contains(&self, other: IRect) -> bool {
-        unsafe { self.native().contains2(other.native()) }
+    fn contains(&self, r: IRect) -> bool {
+        // todo: can we eliminate the this->isEmpty check?
+        !r.is_empty()
+            && !self.is_empty()
+            && self.left <= r.left as scalar
+            && self.top <= r.top as scalar
+            && self.right >= r.right as scalar
+            && self.bottom >= r.bottom as scalar
     }
 }
 
@@ -668,16 +794,19 @@ pub trait RoundOut<R> {
 impl RoundOut<IRect> for Rect {
     fn round_out(&self) -> IRect {
         let mut r = IRect::default();
-        unsafe { self.native().roundOut(r.native_mut()) };
+        unsafe { C_SkRect_roundOut(self.native(), r.native_mut()) };
         r
     }
 }
 
 impl RoundOut<Rect> for Rect {
     fn round_out(&self) -> Rect {
-        let mut r = Rect::default();
-        unsafe { self.native().roundOut1(r.native_mut()) };
-        r
+        Rect::new(
+            self.left.floor(),
+            self.top.floor(),
+            self.right.ceil(),
+            self.bottom.ceil(),
+        )
     }
 }
 

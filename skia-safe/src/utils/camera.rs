@@ -103,16 +103,12 @@ impl Matrix3D {
         c: scalar,
         d: impl Into<Option<scalar>>,
     ) -> &mut Self {
-        assert!(row < self.mat.len());
-        unsafe {
-            self.native_mut().setRow(
-                row.try_into().unwrap(),
-                a,
-                b,
-                c,
-                d.into().unwrap_or_default(),
-            )
-        }
+        debug_assert!(row < self.mat.len());
+        let mat = &mut self.mat;
+        mat[row][0] = a;
+        mat[row][1] = b;
+        mat[row][2] = c;
+        mat[row][3] = d.into().unwrap_or_default();
         self
     }
 
@@ -213,7 +209,8 @@ impl Patch3D {
     }
 
     pub fn dot_with(&self, v: impl Into<Vector3D>) -> scalar {
-        unsafe { self.native().dotWith1(v.into().native()) }
+        let v = v.into();
+        unsafe { self.native().dotWith(v.x, v.y, v.z) }
     }
 }
 

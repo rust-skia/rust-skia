@@ -6,8 +6,6 @@ pub type PathMeasure = Handle<SkPathMeasure>;
 
 impl NativeDrop for SkPathMeasure {
     fn drop(&mut self) {
-        // does not link:
-        // unsafe { SkPathMeasure::destruct()(self) }
         unsafe { C_SkPathMeasure_destruct(self) }
     }
 }

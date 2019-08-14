@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::scalar;
-use skia_bindings::{C_SkSize_toFloor, SkISize, SkSize};
+use skia_bindings::{C_SkSize_toCeil, C_SkSize_toFloor, C_SkSize_toRound, SkISize, SkSize};
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
@@ -104,16 +104,14 @@ impl Size {
     }
 
     pub fn to_round(self) -> ISize {
-        ISize::from_native(unsafe { self.native().toRound() })
+        ISize::from_native(unsafe { C_SkSize_toRound(self.native()) })
     }
 
     pub fn to_ceil(self) -> ISize {
-        ISize::from_native(unsafe { self.native().toCeil() })
+        ISize::from_native(unsafe { C_SkSize_toCeil(self.native()) })
     }
 
     pub fn to_floor(self) -> ISize {
-        // does not link:
-        // ISize::from_native(unsafe { self.native().toFloor() })
         ISize::from_native(unsafe { C_SkSize_toFloor(self.native()) })
     }
 }

@@ -1,7 +1,7 @@
 //! SkStream and relatives.
-//! This implementation covers the minimal subset to interface with Rust or Rust streams.
-//! The policy is to avoid exporting Skia streams and try to cover every use case by
-//! using Rust native Streams.
+//! This implementation covers the minimal subset to interface with Rust streams.
+//!
+//! Bindings that wrap functions that use Skia stream types, _must_ use Rust streams instead.
 
 use crate::prelude::*;
 use crate::Data;
@@ -68,7 +68,7 @@ impl NativeStreamBase for SkMemoryStream {
     }
 }
 
-impl<'a> NativeAccess<SkMemoryStream> for MemoryStream<'a> {
+impl NativeAccess<SkMemoryStream> for MemoryStream<'_> {
     fn native(&self) -> &SkMemoryStream {
         unsafe { &*self.native }
     }
@@ -77,10 +77,9 @@ impl<'a> NativeAccess<SkMemoryStream> for MemoryStream<'a> {
     }
 }
 
-impl<'a> MemoryStream<'a> {
+impl MemoryStream<'_> {
     // Create a stream asset that refers the bytes provided.
-    #[allow(clippy::needless_lifetimes)]
-    pub fn from_bytes<'bytes>(bytes: &'bytes [u8]) -> MemoryStream<'bytes> {
+    pub fn from_bytes(bytes: &[u8]) -> MemoryStream {
         let ptr = unsafe { C_SkMemoryStream_MakeDirect(bytes.as_ptr() as _, bytes.len()) };
 
         MemoryStream {

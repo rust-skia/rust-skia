@@ -7,8 +7,7 @@ use skia_bindings::SkRSXform;
 pub struct RSXform {
     pub scos: scalar,
     pub ssin: scalar,
-    pub tx: scalar,
-    pub ty: scalar,
+    pub t: Vector,
 }
 
 impl NativeTransmutable<SkRSXform> for RSXform {}
@@ -20,12 +19,7 @@ fn test_rsxform_layout() {
 impl RSXform {
     pub fn new(scos: scalar, ssin: scalar, t: impl Into<Vector>) -> Self {
         let t = t.into();
-        Self {
-            scos,
-            ssin,
-            tx: t.x,
-            ty: t.y,
-        }
+        Self { scos, ssin, t }
     }
 
     pub fn from_radians(
@@ -36,28 +30,25 @@ impl RSXform {
     ) -> Self {
         let t = t.into();
         let a = a.into();
-        RSXform::from_native(unsafe {
-            SkRSXform::MakeFromRadians(scale, radians, t.x, t.y, a.x, a.y)
-        })
+
+        let s = radians.sin() * scale;
+        let c = radians.cos() * scale;
+        Self::new(c, s, (t.x + -c * a.x + s * a.y, t.y + -s * a.x - c * a.y))
     }
 
     pub fn rect_stays_rect(&self) -> bool {
-        // unsafe { self.native().rectStaysRect() }
         self.scos == 0.0 || self.ssin == 0.0
     }
 
     pub fn set_identity(&mut self) {
-        // does not link:
-        // unsafe { self.native_mut().setIdentity() }
-        self.scos = 1.0;
-        self.ssin = 0.0;
-        self.tx = 0.0;
-        self.ty = 0.0;
+        self.set(1.0, 0.0, Vector::default())
     }
 
     pub fn set(&mut self, scos: scalar, ssin: scalar, t: impl Into<Vector>) {
         let t = t.into();
-        unsafe { self.native_mut().set(scos, ssin, t.x, t.y) }
+        self.scos = scos;
+        self.ssin = ssin;
+        self.t = t;
     }
 
     pub fn to_quad(&self, size: impl Into<Size>) -> [Point; 4] {

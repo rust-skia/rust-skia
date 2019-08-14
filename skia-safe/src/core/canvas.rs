@@ -424,7 +424,7 @@ impl Canvas {
     // Note: The save_layer(bounds, paint) variants
     // have been replaced with SaveLayerRec.
     pub fn save_layer(&mut self, layer_rec: &SaveLayerRec) -> usize {
-        unsafe { self.native_mut().saveLayer2(layer_rec.native()) }
+        unsafe { self.native_mut().saveLayer1(layer_rec.native()) }
             .try_into()
             .unwrap()
     }
@@ -544,18 +544,12 @@ impl Canvas {
     // Note: quickReject() functions are implemented as a trait.
 
     pub fn local_clip_bounds(&self) -> Option<Rect> {
-        let r = Rect::from_native(unsafe {
-            // pointer versions do not link.
-            self.native().getLocalClipBounds()
-        });
+        let r = Rect::from_native(unsafe { self.native().getLocalClipBounds() });
         r.is_empty().if_false_some(r)
     }
 
     pub fn device_clip_bounds(&self) -> Option<IRect> {
-        let r = IRect::from_native(unsafe {
-            // pointer versions do not link.
-            self.native().getDeviceClipBounds()
-        });
+        let r = IRect::from_native(unsafe { self.native().getDeviceClipBounds() });
         r.is_empty().if_false_some(r)
     }
 
@@ -574,16 +568,12 @@ impl Canvas {
     }
 
     pub fn clear(&mut self, color: impl Into<Color>) -> &mut Self {
-        unsafe { self.native_mut().clear(color.into().into_native()) }
-        self
+        // unsafe { self.native_mut().clear(color.into().into_native()) }
+        self.draw_color(color, BlendMode::Src)
     }
 
     pub fn discard(&mut self) -> &mut Self {
-        unsafe {
-            // does not link:
-            // self.native_mut().discard()
-            C_SkCanvas_discard(self.native_mut())
-        }
+        unsafe { C_SkCanvas_discard(self.native_mut()) }
         self
     }
 
@@ -633,11 +623,7 @@ impl Canvas {
     }
 
     pub fn draw_irect(&mut self, rect: impl AsRef<IRect>, paint: &Paint) -> &mut Self {
-        unsafe {
-            self.native_mut()
-                .drawIRect(rect.as_ref().native(), paint.native())
-        }
-        self
+        self.draw_rect(Rect::from(*rect.as_ref()), paint)
     }
 
     pub fn draw_region(&mut self, region: &Region, paint: &Paint) -> &mut Self {
@@ -688,8 +674,6 @@ impl Canvas {
     ) -> &mut Self {
         let center = center.into();
         unsafe {
-            // does not link:
-            // self.native_mut().drawCircle1(center.into_native(), radius, paint.native())
             self.native_mut()
                 .drawCircle(center.x, center.y, radius, paint.native())
         }
@@ -944,7 +928,7 @@ impl Canvas {
         paint: Option<&Paint>,
     ) -> &mut Self {
         unsafe {
-            self.native_mut().drawPicture2(
+            self.native_mut().drawPicture(
                 picture.native(),
                 matrix.native_ptr_or_null(),
                 paint.native_ptr_or_null(),
@@ -1194,11 +1178,7 @@ impl<'a> Drop for AutoRestoredCanvas<'a> {
 
 impl<'a> AutoRestoredCanvas<'a> {
     pub fn restore(&mut self) {
-        unsafe {
-            // does not link:
-            // self.native_mut().restore()
-            C_SkAutoCanvasRestore_restore(self.native_mut())
-        }
+        unsafe { C_SkAutoCanvasRestore_restore(self.native_mut()) }
     }
 }
 
@@ -1209,8 +1189,6 @@ impl AutoCanvasRestore {
     // Note: Can't use AsMut here for the canvas, because it would break
     //       the lifetime dependency.
     pub fn guard(canvas: &mut Canvas, do_save: bool) -> AutoRestoredCanvas {
-        // does not link on Linux
-        // SkAutoCanvasRestore::new(canvas.native_mut(), do_save)
         let restore = construct(|acr| unsafe {
             C_SkAutoCanvasRestore_Construct(acr, canvas.native_mut(), do_save)
         });

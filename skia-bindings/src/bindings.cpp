@@ -31,8 +31,10 @@
 #include "include/core/SkPicture.h"
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkPixelRef.h"
+#include "include/core/SkPoint.h"
 #include "include/core/SkPoint3.h"
 #include "include/core/SkRect.h"
+#include "include/core/SkRefCnt.h"
 #include "include/core/SkRegion.h"
 #include "include/core/SkRRect.h"
 #include "include/core/SkRSXform.h"
@@ -247,6 +249,14 @@ extern "C" SkSurface* C_SkSurface_makeSurface(
 //
 // core/SkSurfaceCharacterization.h
 //
+
+extern "C" void C_SkSurfaceCharacterization_Construct(SkSurfaceCharacterization* uninitialized) {
+    new(uninitialized)SkSurfaceCharacterization();
+}
+
+extern "C" void C_SkSurfaceCharacterization_CopyConstruct(SkSurfaceCharacterization* uninitialized, const SkSurfaceCharacterization* from) {
+    new(uninitialized)SkSurfaceCharacterization(*from);
+}
 
 extern "C" void C_SkSurfaceCharacterization_destruct(SkSurfaceCharacterization* self) {
     self->~SkSurfaceCharacterization();
@@ -520,12 +530,36 @@ extern "C" bool C_SkPaint_Equals(const SkPaint* lhs, const SkPaint* rhs) {
     return *lhs == *rhs;
 }
 
+extern "C" SkFilterQuality C_SkPaint_getFilterQuality(const SkPaint* self) {
+    return self->getFilterQuality();
+}
+
+extern "C" SkPaint::Style C_SkPaint_getStyle(const SkPaint* self) {
+    return self->getStyle();
+}
+
+extern "C" uint8_t C_SkPaint_getAlpha(const SkPaint* self) {
+    return self->getAlpha();
+}
+
+extern "C" SkPaint::Cap C_SkPaint_getStrokeCap(const SkPaint* self) {
+    return self->getStrokeCap();
+}
+
+extern "C" SkPaint::Join C_SkPaint_getStrokeJoin(const SkPaint* self) {
+    return self->getStrokeJoin();
+}
+
 extern "C" void C_SkPaint_setShader(SkPaint* self, const SkShader* shader) {
     self->setShader(spFromConst(shader));
 }
 
 extern "C" void C_SkPaint_setColorFilter(SkPaint* self, const SkColorFilter* colorFilter) {
     self->setColorFilter(spFromConst(colorFilter));
+}
+
+extern "C" SkBlendMode C_SkPaint_getBlendMode(const SkPaint* self) {
+    return self->getBlendMode();
 }
 
 extern "C" void C_SkPaint_setPathEffect(SkPaint* self, const SkPathEffect* pathEffect) {
@@ -576,12 +610,56 @@ extern "C" void C_SkPath_Iter_destruct(SkPath::Iter* self) {
     self->~Iter();
 }
 
+extern "C" SkPath::Verb C_SkPath_Iter_next(SkPath::Iter* self, SkPoint pts[4], bool doConsumeDegenerates, bool exact) {
+    return self->next(pts, doConsumeDegenerates, exact);
+}
+
 extern "C" bool C_SkPath_Iter_isCloseLine(const SkPath::Iter* self) {
     return self->isCloseLine();
 }
 
+extern "C" void C_SkPath_RawIter_Construct(SkPath::RawIter* uninitialized) {
+    new(uninitialized)SkPath::RawIter();
+}
+
 extern "C" void C_SkPath_RawIter_destruct(SkPath::RawIter* self) {
     self->~RawIter();
+}
+
+extern "C" SkPath::Verb C_SkPath_RawIter_next(SkPath::RawIter* self, SkPoint pts[4]) {
+    return self->next(pts);
+}
+
+extern "C" SkPath::Verb C_SkPath_RawIter_peek(const SkPath::RawIter* self) {
+    return self->peek();
+}
+
+extern "C" SkPath::FillType C_SkPath_getFillType(const SkPath* self) {
+    return self->getFillType();
+}
+
+extern "C" SkPath::Convexity C_SkPath_getConvexity(const SkPath* self) {
+    return self->getConvexity();
+}
+
+extern "C" SkPath::Convexity C_SkPath_getConvexityOrUnknown(const SkPath* self) {
+    return self->getConvexityOrUnknown();
+}
+
+extern "C" bool C_SkPath_isEmpty(const SkPath* self) {
+    return self->isEmpty();
+}
+
+extern "C" bool C_SkPath_isFinite(const SkPath* self) {
+    return self->isFinite();
+}
+
+extern "C" const SkRect* C_SkPath_getBounds(const SkPath* self) {
+    return &self->getBounds();
+}
+
+extern "C" uint32_t C_SkPath_getSegmentMasks(const SkPath* self) {
+    return self->getSegmentMasks();
 }
 
 //
@@ -792,6 +870,34 @@ extern "C" SkScalar* C_SkMatrix_SubscriptMut(SkMatrix* self, size_t index) {
     return &((*self)[static_cast<int>(index)]);
 }
 
+extern "C" SkMatrix::TypeMask C_SkMatrix_getType(const SkMatrix* self) {
+    return self->getType();
+}
+
+extern "C" bool C_SkMatrix_rectStaysRect(const SkMatrix* self) {
+    return self->rectStaysRect();
+}
+
+extern "C" bool C_SkMatrix_hasPerspective(const SkMatrix* self) {
+    return self->hasPerspective();
+}
+
+extern "C" bool C_SkMatrix_invert(const SkMatrix* self, SkMatrix* inverse) {
+    return self->invert(inverse);
+}
+
+extern "C" bool C_SkMatrix_cheapEqualTo(const SkMatrix* self, const SkMatrix* other) {
+    return self->cheapEqualTo(*other);
+}
+
+extern "C" void C_SkMatrix_setScaleTranslate(SkMatrix* self, SkScalar sx, SkScalar sy, SkScalar tx, SkScalar ty) {
+    self->setScaleTranslate(sx, sy, tx, ty);
+}
+
+extern "C" bool C_SkMatrix_isFinite(const SkMatrix* self) {
+    return self->isFinite();
+}
+
 //
 // SkSurfaceProps
 //
@@ -814,13 +920,6 @@ extern "C" void C_SkBitmap_destruct(SkBitmap* self) {
 
 extern "C" void C_SkBitmap_Copy(const SkBitmap* from, SkBitmap* to) {
     *to = *from;
-}
-
-extern "C" SkColorSpace* C_SkBitmap_colorSpace(const SkBitmap* self) {
-    // note: colorSpace returns a pointer without increasing the reference counter.
-    SkColorSpace* cs = self->colorSpace();
-    if (cs) cs->ref();
-    return cs;
 }
 
 extern "C" bool C_SkBitmap_ComputeIsOpaque(const SkBitmap* self) {
@@ -901,16 +1000,39 @@ extern "C" SkShader* C_SkPicture_makeShader(const SkPicture* self, SkTileMode tm
 }
 
 //
-// SkRRect
+// core/SkRRect.h
 //
+
+extern "C" SkRRect::Type C_SkRRect_getType(const SkRRect* self) {
+    return self->getType();
+}
+
+extern "C" void C_SkRRect_setRect(SkRRect* self, const SkRect* rect) {
+    self->setRect(*rect);
+}
+
+extern "C" void C_SkRRect_setOval(SkRRect* self, const SkRect* oval) {
+    self->setOval(*oval);
+}
 
 extern "C" bool C_SkRRect_Equals(const SkRRect* lhs, const SkRRect* rhs) {
     return *lhs == *rhs;
 }
 
 //
-// GrBackendTexture
+// gpu/GrBackendSurface.h
 //
+extern "C" void C_GrBackendRenderTarget_Construct(GrBackendRenderTarget* uninitialized) {
+    new(uninitialized) GrBackendRenderTarget();
+}
+
+extern "C" void C_GrBackendRenderTarget_destruct(GrBackendRenderTarget* self) {
+    self->~GrBackendRenderTarget();
+}
+
+extern "C" void C_GrBackendTexture_Construct(GrBackendTexture* uninitialized) {
+    new(uninitialized) GrBackendTexture();
+}
 
 extern "C" void C_GrBackendTexture_destruct(const GrBackendTexture* self) {
     self->~GrBackendTexture();
@@ -926,6 +1048,14 @@ extern "C" void C_SkRegion_destruct(SkRegion* region) {
 
 extern "C" bool C_SkRegion_Equals(const SkRegion* lhs, const SkRegion* rhs) {
     return *lhs == *rhs;
+}
+
+extern "C" bool C_SkRegion_set(SkRegion* self, const SkRegion* region) {
+    return self->set(*region);
+}
+
+extern "C" bool C_SkRegion_quickContains(const SkRegion* self, int32_t left, int32_t top, int32_t right, int32_t bottom) {
+    return self->quickContains(left, top, right, bottom);
 }
 
 extern "C" void C_SkRegion_Iterator_Construct(SkRegion::Iterator* uninitialized) {
@@ -956,9 +1086,26 @@ extern "C" void C_SkFontStyle_Construct(SkFontStyle* uninitialized) {
     new(uninitialized) SkFontStyle();
 }
 
+extern "C" void C_SkFontStyle_Construct2(SkFontStyle* uninitialized, int weight, int width, SkFontStyle::Slant slant) {
+    new(uninitialized) SkFontStyle(weight, width, slant);
+}
+
 extern "C" bool C_SkFontStyle_Equals(const SkFontStyle* lhs, const SkFontStyle* rhs) {
     return *lhs == *rhs;
 }
+
+extern "C" int C_SkFontStyle_weight(const SkFontStyle* self) {
+    return self->weight();
+}
+
+extern "C" int C_SkFontStyle_width(const SkFontStyle* self) {
+    return self->width();
+}
+
+extern "C" SkFontStyle::Slant C_SkFontStyle_slant(const SkFontStyle* self) {
+    return self->slant();
+}
+
 
 //
 // SkTextBlob
@@ -1066,6 +1213,14 @@ extern "C" bool C_SkTypeface_LocalizedStrings_next(SkTypeface::LocalizedStrings*
 }
 
 //
+// core/SkYUVAIndex.h
+//
+
+extern "C" bool C_SkYUVAIndex_AreValidIndices(const SkYUVAIndex yuvaIndices[4], int* numPlanes) {
+    return SkYUVAIndex::AreValidIndices(yuvaIndices, numPlanes);
+}
+
+//
 // core/SkYUVASizeInfo.h
 //
 
@@ -1107,6 +1262,14 @@ extern "C" void C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(SkFont* unini
 
 extern "C" bool C_SkFont_Equals(const SkFont* self, const SkFont* other) {
     return *self == *other;
+}
+
+extern "C" SkFont::Edging C_SkFont_getEdging(const SkFont* self) {
+    return self->getEdging();
+}
+
+extern "C" SkFontHinting C_SkFont_getHinting(const SkFont* self) {
+    return self->getHinting();
 }
 
 extern "C" void C_SkFont_makeWithSize(const SkFont* self, SkScalar size, SkFont* result) {
@@ -1273,6 +1436,62 @@ extern "C" SkDrawable* C_SkPictureRecorder_finishRecordingAsDrawable(SkPictureRe
 }
 
 //
+// SkPixelRef
+//
+
+extern "C" void C_SkPixelRef_notifyAddedToCache(SkPixelRef* self) {
+    self->notifyAddedToCache();
+}
+
+//
+// core/SkPoint.h
+//
+
+extern "C" bool C_SkPoint_isFinite(const SkPoint* self) {
+    return self->isFinite();
+}
+
+//
+// core/SkRect.h
+//
+
+extern "C" bool C_SkIRect_isEmpty(const SkIRect* self) {
+    return self->isEmpty();
+}
+
+extern "C" bool C_SkIRect_contains(const SkIRect* self, const SkRect* rect) {
+    return self->contains(*rect);
+}
+
+extern "C" void C_SkRect_round(const SkRect* self, SkIRect* dst) {
+    self->round(dst);
+}
+
+extern "C" void C_SkRect_roundIn(const SkRect* self, SkIRect* dst) {
+    self->roundIn(dst);
+}
+
+extern "C" void C_SkRect_roundOut(const SkRect* self, SkIRect* dst) {
+    self->roundOut(dst);
+}
+
+//
+// core/SkRefCntBase.h
+//
+
+extern "C" void C_SkRefCntBase_ref(const SkRefCntBase* self) {
+    self->ref();
+}
+
+extern "C" void C_SkRefCntBase_unref(const SkRefCntBase* self) {
+    self->unref();
+}
+
+extern "C" bool C_SkRefCntBase_unique(const SkRefCntBase* self) {
+    return self->unique();
+}
+
+//
 // SkColorFilter
 //
 
@@ -1429,6 +1648,18 @@ extern "C" SkImageFilter* C_SkImageFilter_Deserialize(const void* data, size_t l
     return SkImageFilter::Deserialize(data, length).release();
 }
 
+extern "C" bool C_SkImageFilter_isColorFilterNode(const SkImageFilter* self, SkColorFilter** filterPtr) {
+    return self->isColorFilterNode(filterPtr);
+}
+
+extern "C" int C_SkImageFilter_countInputs(const SkImageFilter* self) {
+    return self->countInputs();
+}
+
+extern "C" SkImageFilter* C_SkImageFilter_getInput(const SkImageFilter* self, int i) {
+    return self->getInput(i);
+}
+
 //
 // SkImageGenerator
 //
@@ -1439,6 +1670,10 @@ extern "C" void C_SkImageGenerator_delete(SkImageGenerator *self) {
 
 extern "C" SkData *C_SkImageGenerator_refEncodedData(SkImageGenerator *self) {
     return self->refEncodedData().release();
+}
+
+extern "C" bool C_SkImageGenerator_isValid(const SkImageGenerator* self, GrContext* context) {
+    return self->isValid(context);
 }
 
 extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromEncoded(const SkData *data) {
@@ -1462,15 +1697,23 @@ extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromPicture(
 }
 
 //
-// SkString
+// core/SkString.h
 //
 
 extern "C" void C_SkString_destruct(SkString* self) {
     self->~SkString();
 }
 
+extern "C" size_t C_SkString_size(const SkString* self) {
+    return self->size();
+}
+
+extern "C" const char* C_SkString_c_str(const SkString* self) {
+    return self->c_str();
+}
+
 //
-// SkStrokeRec
+// core/SkStrokeRec.h
 //
 
 extern "C" void C_SkStrokeRec_destruct(SkStrokeRec* self) {
@@ -1479,6 +1722,14 @@ extern "C" void C_SkStrokeRec_destruct(SkStrokeRec* self) {
 
 extern "C" void C_SkStrokeRec_copy(const SkStrokeRec* self, SkStrokeRec* other) {
     *other = *self;
+}
+
+extern "C" SkPaint::Cap C_SkStrokeRec_getCap(const SkStrokeRec* self) {
+    return self->getCap();
+}
+
+extern "C" SkPaint::Join C_SkStrokeRec_getJoin(const SkStrokeRec* self) {
+    return self->getJoin();
 }
 
 extern "C" bool C_SkStrokeRec_hasEqualEffect(const SkStrokeRec* self, const SkStrokeRec* other) {
@@ -1504,6 +1755,10 @@ extern "C" void C_SkPathEffect_PointData_Construct(SkPathEffect::PointData* unit
 extern "C" void C_SkPathEffect_PointData_deletePoints(SkPathEffect::PointData* self) {
     delete [] self->fPoints;
     self->fPoints = nullptr;
+}
+
+extern "C" void C_SkPathEffect_DashInfo_Construct(SkPathEffect::DashInfo* uninitialized) {
+    new(uninitialized) SkPathEffect::DashInfo();
 }
 
 extern "C" SkPathEffect* C_SkPathEffect_Deserialize(const void* data, size_t length) {
@@ -1547,8 +1802,16 @@ extern "C" SkMaskFilter* C_SkMaskFilter_Deserialize(const void* data, size_t len
 }
 
 //
-// SkSize
+// core/SkSize.h
 //
+
+extern "C" SkISize C_SkSize_toRound(const SkSize* size) {
+    return size->toRound();
+}
+
+extern "C" SkISize C_SkSize_toCeil(const SkSize* size) {
+    return size->toCeil();
+}
 
 extern "C" SkISize C_SkSize_toFloor(const SkSize* size) {
     return size->toFloor();
@@ -2078,24 +2341,28 @@ extern "C" SkDocument* C_SkPDF_MakeDocument(SkWStream* stream, const SkPDF::Meta
 // GrBackendFormat
 //
 
+extern "C" void C_GrBackendFormat_ConstructGL(GrBackendFormat* uninitialized, GrGLenum format, GrGLenum target) {
+    new(uninitialized)GrBackendFormat(GrBackendFormat::MakeGL(format, target));
+}
+
+#if defined(SK_VULKAN)
+
+extern "C" void C_GrBackendFormat_ConstructVk(GrBackendFormat* uninitialized, VkFormat format) {
+    new(uninitialized)GrBackendFormat(GrBackendFormat::MakeVk(format));
+}
+
+extern "C" void C_GrBackendFormat_ConstructVk2(GrBackendFormat* uninitialized, const GrVkYcbcrConversionInfo* ycbcrInfo) {
+    new(uninitialized)GrBackendFormat(GrBackendFormat::MakeVk(*ycbcrInfo));
+}
+
+#endif
+
 extern "C" void C_GrBackendFormat_destruct(GrBackendFormat* self) {
     self->~GrBackendFormat();
 }
 
 extern "C" bool C_GrBackendFormat_Equals(const GrBackendFormat* lhs, const GrBackendFormat* rhs) {
     return *lhs == *rhs;
-}
-
-//
-// GrBackendRenderTarget
-//
-
-extern "C" void C_GrBackendRenderTarget_destruct(GrBackendRenderTarget* self) {
-    self->~GrBackendRenderTarget();
-}
-
-extern "C" GrBackendApi C_GrBackendRenderTarget_backend(const GrBackendRenderTarget* self) {
-    return self->backend();
 }
 
 //
@@ -2139,6 +2406,10 @@ extern "C" bool C_GrContext_colorTypeSupportedAsSurface(const GrContext* self, S
 
 extern "C" bool C_GrContext_abandoned(const GrContext* self) {
     return self->abandoned();
+}
+
+extern "C" void C_GrContext_flush(GrContext* self) {
+    self->flush();
 }
 
 //

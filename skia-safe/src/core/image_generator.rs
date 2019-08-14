@@ -5,7 +5,8 @@ use crate::{
 };
 use skia_bindings::{
     C_SkImageGenerator_MakeFromEncoded, C_SkImageGenerator_MakeFromPicture,
-    C_SkImageGenerator_delete, C_SkImageGenerator_refEncodedData, SkImageGenerator,
+    C_SkImageGenerator_delete, C_SkImageGenerator_isValid, C_SkImageGenerator_refEncodedData,
+    SkImageGenerator,
 };
 use std::ffi::c_void;
 
@@ -30,7 +31,7 @@ impl Drop for ImageGenerator {
 
 impl ImageGenerator {
     pub fn unique_id(&self) -> u32 {
-        unsafe { self.native().uniqueID() }
+        self.native().fUniqueID
     }
 
     pub fn encoded_data(&mut self) -> Option<Data> {
@@ -38,11 +39,11 @@ impl ImageGenerator {
     }
 
     pub fn info(&self) -> &ImageInfo {
-        ImageInfo::from_native_ref(unsafe { &*self.native().getInfo() })
+        ImageInfo::from_native_ref(&self.native().fInfo)
     }
 
     pub fn is_valid(&self, mut context: Option<&mut gpu::Context>) -> bool {
-        unsafe { self.native().isValid(context.native_ptr_or_null_mut()) }
+        unsafe { C_SkImageGenerator_isValid(self.native(), context.native_ptr_or_null_mut()) }
     }
 
     #[must_use]

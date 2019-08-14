@@ -53,23 +53,19 @@ impl RCHandle<SkTypeface> {
     }
 
     pub fn font_style(&self) -> FontStyle {
-        unsafe { FontStyle::from_native(self.native().fontStyle()) }
+        FontStyle::from_native(self.native().fStyle)
     }
 
     pub fn is_bold(&self) -> bool {
-        // does not link:
-        // unsafe { self.native().isBold() }
         unsafe { C_SkTypeface_isBold(self.native()) }
     }
 
     pub fn is_italic(&self) -> bool {
-        // does not link:
-        // unsafe { self.native().isItalic() }
         unsafe { C_SkTypeface_isItalic(self.native()) }
     }
 
     pub fn is_fixed_pitch(&self) -> bool {
-        unsafe { self.native().isFixedPitch() }
+        self.native().fIsFixedPitch
     }
 
     pub fn variation_design_position(
@@ -109,7 +105,7 @@ impl RCHandle<SkTypeface> {
     }
 
     pub fn unique_id(self) -> FontId {
-        unsafe { self.native().uniqueID() }
+        self.native().fUniqueID
     }
 
     // TODO: wrap SkTypeface::UniqueID()?

@@ -1,12 +1,16 @@
 use super::{gl, BackendAPI, MipMapped};
 use crate::prelude::*;
 use skia_bindings::{
-    C_GrBackendFormat_destruct, C_GrBackendRenderTarget_backend, C_GrBackendRenderTarget_destruct,
+    C_GrBackendFormat_ConstructGL, C_GrBackendFormat_destruct, C_GrBackendRenderTarget_destruct,
     C_GrBackendTexture_destruct, GrBackendFormat, GrBackendRenderTarget, GrBackendTexture,
+    GrMipMapped,
 };
 
 #[cfg(feature = "vulkan")]
 use super::vk;
+
+#[cfg(feature = "vulkan")]
+use skia_bindings::{C_GrBackendFormat_ConstructVk, C_GrBackendFormat_ConstructVk2};
 
 pub type BackendFormat = Handle<GrBackendFormat>;
 
@@ -18,21 +22,23 @@ impl NativeDrop for GrBackendFormat {
 
 impl Handle<GrBackendFormat> {
     pub fn new_gl(format: gl::Enum, target: gl::Enum) -> Self {
-        Self::from_native(unsafe { GrBackendFormat::MakeGL(format, target) })
+        Self::construct(|bf| unsafe { C_GrBackendFormat_ConstructGL(bf, format, target) })
     }
 
     #[cfg(feature = "vulkan")]
     pub fn new_vulkan(format: vk::Format) -> Self {
-        Self::from_native(unsafe { GrBackendFormat::MakeVk(format) })
+        Self::construct(|bf| unsafe { C_GrBackendFormat_ConstructVk(bf, format) })
     }
 
     #[cfg(feature = "vulkan")]
     pub fn new_vulkan_ycbcr(conversion_info: &vk::YcbcrConversionInfo) -> Self {
-        Self::from_native(unsafe { GrBackendFormat::MakeVk1(conversion_info.native()) })
+        Self::construct(|bf| unsafe {
+            C_GrBackendFormat_ConstructVk2(bf, conversion_info.native())
+        })
     }
 
     pub fn backend_api(&self) -> BackendAPI {
-        BackendAPI::from_native(unsafe { self.native().backend() })
+        BackendAPI::from_native(self.native().fBackend)
     }
 
     pub fn gl_format(&self) -> Option<gl::Enum> {
@@ -73,7 +79,7 @@ impl Handle<GrBackendFormat> {
     }
 
     pub fn is_valid(&self) -> bool {
-        unsafe { self.native().isValid() }
+        self.native().fValid
     }
 }
 
@@ -87,7 +93,7 @@ impl NativeDrop for GrBackendTexture {
 
 impl NativeClone for GrBackendTexture {
     fn clone(&self) -> Self {
-        unsafe { GrBackendTexture::new4(self) }
+        unsafe { GrBackendTexture::new3(self) }
     }
 }
 
@@ -97,7 +103,7 @@ impl Handle<GrBackendTexture> {
         mip_mapped: MipMapped,
         gl_info: gl::TextureInfo,
     ) -> BackendTexture {
-        Self::from_native_if_valid(GrBackendTexture::new1(
+        Self::from_native_if_valid(GrBackendTexture::new(
             width,
             height,
             mip_mapped.into_native(),
@@ -111,7 +117,7 @@ impl Handle<GrBackendTexture> {
         (width, height): (i32, i32),
         vk_info: &vk::ImageInfo,
     ) -> BackendTexture {
-        Self::from_native_if_valid(GrBackendTexture::new2(width, height, vk_info.native())).unwrap()
+        Self::from_native_if_valid(GrBackendTexture::new1(width, height, vk_info.native())).unwrap()
     }
 
     pub(crate) unsafe fn from_native_if_valid(
@@ -123,19 +129,19 @@ impl Handle<GrBackendTexture> {
     }
 
     pub fn width(&self) -> i32 {
-        unsafe { self.native().width() }
+        self.native().fWidth
     }
 
     pub fn height(&self) -> i32 {
-        unsafe { self.native().height() }
+        self.native().fHeight
     }
 
     pub fn has_mip_maps(&self) -> bool {
-        unsafe { self.native().hasMipMaps() }
+        self.native().fMipMapped == GrMipMapped::kYes
     }
 
     pub fn backend(&self) -> BackendAPI {
-        BackendAPI::from_native(unsafe { self.native().backend() })
+        BackendAPI::from_native(self.native().fBackend)
     }
 
     pub fn gl_texture_info(&self) -> Option<gl::TextureInfo> {
@@ -171,7 +177,7 @@ impl Handle<GrBackendTexture> {
     }
 
     pub fn is_valid(&self) -> bool {
-        unsafe { self.native().isValid() }
+        self.native().fIsValid
     }
 
     #[allow(clippy::wrong_self_convention)]
@@ -184,15 +190,13 @@ pub type BackendRenderTarget = Handle<GrBackendRenderTarget>;
 
 impl NativeDrop for GrBackendRenderTarget {
     fn drop(&mut self) {
-        // does not link:
-        // unsafe { GrBackendRenderTarget::destruct(self) }
         unsafe { C_GrBackendRenderTarget_destruct(self) }
     }
 }
 
 impl NativeClone for GrBackendRenderTarget {
     fn clone(&self) -> Self {
-        unsafe { GrBackendRenderTarget::new5(self) }
+        unsafe { GrBackendRenderTarget::new4(self) }
     }
 }
 
@@ -204,7 +208,7 @@ impl Handle<GrBackendRenderTarget> {
         info: gl::FramebufferInfo,
     ) -> BackendRenderTarget {
         Self::from_native(unsafe {
-            GrBackendRenderTarget::new1(
+            GrBackendRenderTarget::new(
                 width,
                 height,
                 sample_count.into().unwrap_or(0).try_into().unwrap(),
@@ -221,7 +225,7 @@ impl Handle<GrBackendRenderTarget> {
         info: &vk::ImageInfo,
     ) -> BackendRenderTarget {
         BackendRenderTarget::from_native(unsafe {
-            GrBackendRenderTarget::new3(
+            GrBackendRenderTarget::new2(
                 width,
                 height,
                 sample_count.into().unwrap_or(0).try_into().unwrap(),
@@ -240,28 +244,23 @@ impl Handle<GrBackendRenderTarget> {
     }
 
     pub fn width(&self) -> i32 {
-        unsafe { self.native().width() }
+        self.native().fWidth
     }
 
     pub fn height(&self) -> i32 {
-        unsafe { self.native().height() }
+        self.native().fHeight
     }
 
     pub fn sample_count(&self) -> usize {
-        unsafe { self.native().sampleCnt().try_into().unwrap() }
+        self.native().fSampleCnt.try_into().unwrap()
     }
 
     pub fn stencil_bits(&self) -> usize {
-        unsafe { self.native().stencilBits().try_into().unwrap() }
+        self.native().fStencilBits.try_into().unwrap()
     }
 
     pub fn backend(&self) -> BackendAPI {
-        /* does not link
-        BackendAPI::from_native(unsafe {
-            self.native().backend()
-        }) */
-
-        BackendAPI::from_native(unsafe { C_GrBackendRenderTarget_backend(self.native()) })
+        BackendAPI::from_native(self.native().fBackend)
     }
 
     pub fn gl_framebuffer_info(&self) -> Option<gl::FramebufferInfo> {
@@ -282,6 +281,6 @@ impl Handle<GrBackendRenderTarget> {
     }
 
     pub fn is_valid(&self) -> bool {
-        unsafe { self.native().isValid() }
+        self.native().fIsValid
     }
 }

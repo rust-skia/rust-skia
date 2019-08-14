@@ -114,7 +114,7 @@ impl ColorSpace {
     }
 
     pub fn to_xyzd50_hash(&self) -> XYZD50Hash {
-        XYZD50Hash(unsafe { self.native().toXYZD50Hash() })
+        XYZD50Hash(self.native().fToXYZD50Hash)
     }
 
     #[must_use]
