@@ -38,7 +38,6 @@ impl Default for BuildConfiguration {
             // Note that currently, we don't support debug Skia builds,
             // because they are hard to configure and pull in a lot of testing related modules.
             skia_release: true,
-            keep_inline_functions: true,
             feature_vulkan: cfg!(feature = "vulkan"),
             feature_svg: cfg!(feature = "svg"),
             feature_shaper: cfg!(feature = "shaper"),
@@ -59,10 +58,6 @@ pub struct BuildConfiguration {
 
     /// Build Skia in a release configuration?
     skia_release: bool,
-
-    /// Configure Skia builds to keep inline functions to
-    /// prevent mean linker errors.
-    keep_inline_functions: bool,
 
     /// Build with Vulkan support?
     feature_vulkan: bool,
@@ -217,15 +212,6 @@ impl FinalBuildConfiguration {
                 args.push(("skia_use_system_expat", no()));
             } else {
                 args.push(("skia_use_expat", no()));
-            }
-
-            if build.keep_inline_functions {
-                // sadly, this also disables inlining and is probably a real performance bummer.
-                if build.on_windows && target.is_windows() && target.abi == Some("msvc".into()) {
-                    flags.push("/Ob0")
-                } else {
-                    flags.push("-fno-inline-functions");
-                }
             }
 
             if !flags.is_empty() {
@@ -442,7 +428,6 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
 
 fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_directory: &Path) {
     let mut builder = bindgen::Builder::default()
-        .generate_inline_functions(true)
         .generate_comments(false)
         .layout_tests(true)
         // on macOS some arrays that are used in opaque types get too large to support Debug.
