@@ -142,30 +142,26 @@ impl Matrix44 {
     }
 
     pub fn get_type(&self) -> TypeMask {
-        TypeMask::from_bits_truncate(unsafe { self.native().getType() }.try_into().unwrap())
+        TypeMask::from_bits_truncate(self.native().fTypeMask)
     }
 
     pub fn is_identity(&self) -> bool {
-        unsafe { self.native().isIdentity() }
+        self.get_type() == TypeMask::IDENTITY
     }
 
     pub fn is_translate(&self) -> bool {
-        unsafe { self.native().isTranslate() }
+        (self.get_type() & !TypeMask::TRANSLATE).is_empty()
     }
 
     pub fn is_scale_translate(&self) -> bool {
-        unsafe { self.native().isScaleTranslate() }
+        (self.get_type() & !(TypeMask::SCALE | TypeMask::TRANSLATE)).is_empty()
     }
 
     pub fn is_scale(&self) -> bool {
-        // linker error:
-        // unsafe { self.0.isScale() }
-        // TODO: create and use a wrapper function for isScale()
         (self.get_type() & !TypeMask::SCALE).is_empty()
     }
 
     pub fn has_perspective(&self) -> bool {
-        // would cause a linker error
         self.get_type().contains(TypeMask::PERSPECTIVE)
     }
 
@@ -175,18 +171,15 @@ impl Matrix44 {
     }
 
     pub fn reset(&mut self) -> &mut Self {
-        // reset() would cause a linker error.
         self.set_identity()
     }
 
-    pub fn get(&self, (row, column): (usize, usize)) -> scalar {
-        assert!(row < Self::ROWS && column < Self::COLUMNS);
-        unsafe { self.native().get(row as _, column as _) }
+    pub fn get(&self, (row, col): (usize, usize)) -> scalar {
+        self.native().fMat[col][row]
     }
 
-    pub fn set(&mut self, (row, column): (usize, usize), value: scalar) -> &mut Self {
-        assert!(row < Self::ROWS && column < Self::COLUMNS);
-        unsafe { self.native_mut().set(row as _, column as _, value) }
+    pub fn set(&mut self, (row, col): (usize, usize), value: scalar) -> &mut Self {
+        self.native_mut().fMat[col][row] = value;
         self
     }
 
@@ -298,11 +291,7 @@ impl Matrix44 {
         degrees: scalar,
     ) -> &mut Self {
         let v = v.into();
-        unsafe {
-            self.native_mut()
-                .setRotateDegreesAbout(v.x, v.y, v.z, degrees);
-        }
-        self
+        self.set_rotate_about(v, degrees * std::f32::consts::PI / 180.0)
     }
 
     pub fn set_rotate_about(&mut self, v: impl Into<Vector3>, radians: scalar) -> &mut Self {
@@ -323,12 +312,10 @@ impl Matrix44 {
     }
 
     pub fn pre_concat(&mut self, m: &Self) -> &mut Self {
-        // would cause a linker error
         self.set_concat(&self.clone(), &m)
     }
 
     pub fn post_concat(&mut self, m: &Self) -> &mut Self {
-        // would cause a linker error
         self.set_concat(&m, &self.clone())
     }
 

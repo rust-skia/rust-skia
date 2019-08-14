@@ -74,8 +74,6 @@ impl Point3 {
     }
 
     pub fn length(&self) -> scalar {
-        // does not link:
-        // unsafe { self.native().length() }
         unsafe { SkPoint3::Length(self.x, self.y, self.z) }
     }
 
@@ -92,8 +90,7 @@ impl Point3 {
     // TODO: with_scale()?
     #[must_use]
     pub fn scaled(&self, scale: scalar) -> Self {
-        // scale() does not link.
-        Self::from_native(unsafe { self.native().makeScale(scale) })
+        Self::new(scale * self.x, scale * self.y, scale * self.z)
     }
 
     pub fn scale(&mut self, value: scalar) {
@@ -101,22 +98,36 @@ impl Point3 {
     }
 
     pub fn is_finite(&self) -> bool {
-        unsafe { self.native().isFinite() }
+        let mut accum = 0.0;
+        accum *= self.x;
+        accum *= self.y;
+        accum *= self.z;
+
+        // accum is either NaN or it is finite (zero).
+        debug_assert!(accum == 0.0 || accum.is_nan());
+
+        // value==value will be true iff value is not NaN
+        // TODO: is it faster to say !accum or accum==accum?
+        !accum.is_nan()
     }
 
     pub fn dot_product(a: Self, b: Self) -> scalar {
-        unsafe { SkPoint3::DotProduct(a.native(), b.native()) }
+        a.x * b.x + a.y * b.y + a.z * b.z
     }
 
     pub fn dot(&self, vec: Self) -> scalar {
-        unsafe { self.native().dot(vec.native()) }
+        Self::dot_product(*self, vec)
     }
 
-    pub fn cross_product(a: Self, b: Self) -> Point3 {
-        Self::from_native(unsafe { SkPoint3::CrossProduct(a.native(), b.native()) })
+    pub fn cross_product(a: Self, b: Self) -> Self {
+        let mut result = Self::default();
+        result.x = a.y * b.z - a.z * b.y;
+        result.y = a.z * b.x - a.x * b.z;
+        result.z = a.x * b.y - a.y * b.x;
+        result
     }
 
-    pub fn cross(&self, vec: Self) -> Point3 {
-        Self::from_native(unsafe { self.native().cross(vec.native()) })
+    pub fn cross(&self, vec: Self) -> Self {
+        Self::cross_product(*self, vec)
     }
 }

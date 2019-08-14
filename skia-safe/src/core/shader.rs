@@ -93,11 +93,7 @@ impl RCHandle<SkShader> {
     }
 
     pub fn is_a_image(&self) -> bool {
-        unsafe {
-            // does not link under Windows.
-            // self.native().isAImage1()
-            C_SkShader_isAImage(self.native())
-        }
+        unsafe { C_SkShader_isAImage(self.native()) }
     }
 
     #[deprecated(since = "0.11.0", note = "skbug.com/8941")]

@@ -5,8 +5,8 @@ use crate::{
     Image, ImageInfo, Paint, Pixmap, Size, SurfaceCharacterization, SurfaceProps,
 };
 use skia_bindings::{
-    C_SkSurface_makeSurface, GrBackendRenderTarget, GrBackendTexture, SkRefCntBase, SkSurface,
-    SkSurface_BackendHandleAccess, SkSurface_ContentChangeMode,
+    C_GrBackendRenderTarget_Construct, C_GrBackendTexture_Construct, C_SkSurface_makeSurface,
+    SkRefCntBase, SkSurface, SkSurface_BackendHandleAccess, SkSurface_ContentChangeMode,
 };
 use std::ptr;
 
@@ -199,11 +199,11 @@ impl RCHandle<SkSurface> {
     }
 
     pub fn width(&self) -> i32 {
-        unsafe { self.native().width() }
+        self.native().fWidth
     }
 
     pub fn height(&self) -> i32 {
-        unsafe { self.native().height() }
+        self.native().fHeight
     }
 
     pub fn generation_id(&mut self) -> u32 {
@@ -231,7 +231,7 @@ impl RCHandle<SkSurface> {
         handle_access: BackendHandleAccess,
     ) -> Option<BackendTexture> {
         unsafe {
-            let mut backend_texture = GrBackendTexture::new();
+            let mut backend_texture = construct(|bt| C_GrBackendTexture_Construct(bt));
             skia_bindings::C_SkSurface_getBackendTexture(
                 self.native_mut(),
                 handle_access.into_native(),
@@ -255,7 +255,7 @@ impl RCHandle<SkSurface> {
         handle_access: BackendHandleAccess,
     ) -> Option<BackendRenderTarget> {
         unsafe {
-            let mut backend_render_target = GrBackendRenderTarget::new();
+            let mut backend_render_target = construct(|rt| C_GrBackendRenderTarget_Construct(rt));
             skia_bindings::C_SkSurface_getBackendRenderTarget(
                 self.native_mut(),
                 handle_access.into_native(),
@@ -403,7 +403,7 @@ impl RCHandle<SkSurface> {
     }
 
     pub fn props(&self) -> &SurfaceProps {
-        SurfaceProps::from_native_ref(unsafe { &*self.native().props() })
+        SurfaceProps::from_native_ref(&self.native().fProps)
     }
 
     pub fn flush(&mut self) {

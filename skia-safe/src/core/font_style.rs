@@ -1,7 +1,8 @@
 use crate::prelude::*;
 use skia_bindings::{
-    C_SkFontStyle_Construct, C_SkFontStyle_Equals, SkFontStyle, SkFontStyle_Slant,
-    SkFontStyle_Weight, SkFontStyle_Width,
+    C_SkFontStyle_Construct, C_SkFontStyle_Construct2, C_SkFontStyle_Equals, C_SkFontStyle_slant,
+    C_SkFontStyle_weight, C_SkFontStyle_width, SkFontStyle, SkFontStyle_Slant, SkFontStyle_Weight,
+    SkFontStyle_Width,
 };
 use std::ops::Deref;
 
@@ -165,29 +166,27 @@ impl PartialEq for FontStyle {
 
 impl Default for FontStyle {
     fn default() -> Self {
-        // does not link under Linux:
-        // unsafe { SkFontStyle::new1() }
         FontStyle::construct(|fs| unsafe { C_SkFontStyle_Construct(fs) })
     }
 }
 
 impl FontStyle {
     pub fn new(weight: Weight, width: Width, slant: Slant) -> Self {
-        Self::from_native(unsafe {
-            SkFontStyle::new(*weight.native(), *width.native(), *slant.native())
+        Self::construct(|fs| unsafe {
+            C_SkFontStyle_Construct2(fs, *weight.native(), *width.native(), *slant.native())
         })
     }
 
     pub fn weight(self) -> Weight {
-        Weight::from_native(unsafe { self.native().weight() })
+        Weight::from_native(unsafe { C_SkFontStyle_weight(self.native()) })
     }
 
     pub fn width(self) -> Width {
-        Width::from_native(unsafe { self.native().width() })
+        Width::from_native(unsafe { C_SkFontStyle_width(self.native()) })
     }
 
     pub fn slant(self) -> Slant {
-        Slant::from_native(unsafe { self.native().slant() })
+        Slant::from_native(unsafe { C_SkFontStyle_slant(self.native()) })
     }
 
     pub fn normal() -> FontStyle {

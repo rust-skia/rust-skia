@@ -4,7 +4,8 @@ use crate::{
 };
 use skia_bindings::{
     C_SkImageFilter_Deserialize, C_SkImageFilter_MakeMatrixFilter,
-    C_SkImageFilter_computeFastBounds, C_SkImageFilter_makeWithLocalMatrix, SkColorFilter,
+    C_SkImageFilter_computeFastBounds, C_SkImageFilter_countInputs, C_SkImageFilter_getInput,
+    C_SkImageFilter_isColorFilterNode, C_SkImageFilter_makeWithLocalMatrix, SkColorFilter,
     SkColorSpace, SkFlattenable, SkImageFilter, SkImageFilterCache, SkImageFilter_Context,
     SkImageFilter_CropRect, SkImageFilter_MapDirection, SkImageFilter_OutputProperties,
     SkImageFilter_TileUsage, SkRefCntBase,
@@ -65,7 +66,7 @@ impl<'a> Context<'a> {
     }
 
     pub fn is_valid(&self) -> bool {
-        unsafe { self.native().isValid() }
+        self.ctm.is_finite()
     }
 }
 
@@ -82,26 +83,27 @@ fn test_crop_rect_layout() {
 
 impl Default for CropRect {
     fn default() -> Self {
-        CropRect::from_native(unsafe { SkImageFilter_CropRect::new() })
+        CropRect::from_native(SkImageFilter_CropRect {
+            fRect: Rect::default().into_native(),
+            fFlags: 0,
+        })
     }
 }
 
 impl CropRect {
     pub fn new(rect: impl AsRef<Rect>, flags: impl Into<Option<crop_rect::CropEdge>>) -> Self {
-        CropRect::from_native(unsafe {
-            SkImageFilter_CropRect::new1(
-                rect.as_ref().native(),
-                flags.into().unwrap_or(crop_rect::CropEdge::HAS_ALL).bits(),
-            )
+        CropRect::from_native(SkImageFilter_CropRect {
+            fRect: rect.as_ref().into_native(),
+            fFlags: flags.into().unwrap_or(crop_rect::CropEdge::HAS_ALL).bits(),
         })
     }
 
     pub fn flags(&self) -> crop_rect::CropEdge {
-        crop_rect::CropEdge::from_bits_truncate(unsafe { self.native().flags() })
+        crop_rect::CropEdge::from_bits_truncate(self.native().fFlags)
     }
 
     pub fn rect(&self) -> &Rect {
-        Rect::from_native_ref(unsafe { &*self.native().rect() })
+        Rect::from_native_ref(&self.native().fRect)
     }
 
     pub fn apply_to(
@@ -206,7 +208,7 @@ impl RCHandle<SkImageFilter> {
 
     pub fn color_filter_node(&self) -> Option<ColorFilter> {
         let mut filter_ptr: *mut SkColorFilter = ptr::null_mut();
-        if unsafe { self.native().isColorFilterNode(&mut filter_ptr) } {
+        if unsafe { C_SkImageFilter_isColorFilterNode(self.native(), &mut filter_ptr) } {
             // according to the documentation, this must be set to a ref'd colorfilter
             // (which is one with an increased ref count I assume).
             ColorFilter::from_ptr(filter_ptr)
@@ -234,7 +236,9 @@ impl RCHandle<SkImageFilter> {
     }
 
     pub fn count_inputs(&self) -> usize {
-        unsafe { self.native().countInputs() }.try_into().unwrap()
+        unsafe { C_SkImageFilter_countInputs(self.native()) }
+            .try_into()
+            .unwrap()
     }
 
     #[deprecated(note = "use get_input()")]
@@ -244,16 +248,18 @@ impl RCHandle<SkImageFilter> {
 
     pub fn get_input(&self, i: usize) -> Option<ImageFilter> {
         assert!(i < self.count_inputs());
-        ImageFilter::from_unshared_ptr(unsafe { self.native().getInput(i.try_into().unwrap()) })
+        ImageFilter::from_unshared_ptr(unsafe {
+            C_SkImageFilter_getInput(self.native(), i.try_into().unwrap())
+        })
     }
 
     // TODO: rename to is_crop_rect_set() ?
     pub fn crop_rect_is_set(&self) -> bool {
-        unsafe { self.native().cropRectIsSet() }
+        !self.crop_rect().flags().is_empty()
     }
 
     pub fn crop_rect(&self) -> CropRect {
-        CropRect::from_native(unsafe { self.native().getCropRect() })
+        CropRect::from_native(self.native().fCropRect)
     }
 
     pub fn compute_fast_bounds(&self, bounds: impl AsRef<Rect>) -> Rect {

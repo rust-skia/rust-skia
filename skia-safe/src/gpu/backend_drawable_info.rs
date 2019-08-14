@@ -17,8 +17,6 @@ impl NativeDrop for GrBackendDrawableInfo {
 
 impl Handle<GrBackendDrawableInfo> {
     pub fn new() -> BackendDrawableInfo {
-        // does not link:
-        // Self::from_native(unsafe { GrBackendDrawableInfo::new() })
         Self::construct(|di| unsafe { C_GrBackendDrawableInfo_construct(di) })
     }
 
@@ -28,14 +26,10 @@ impl Handle<GrBackendDrawableInfo> {
     }
 
     pub fn is_valid(&self) -> bool {
-        // does not link:
-        // unsafe { self.native().isValid() }
         unsafe { C_GrBackendDrawableInfo_isValid(self.native()) }
     }
 
     pub fn backend(&self) -> BackendAPI {
-        // does not link:
-        // BackendAPI::from_native(unsafe { self.native().backend() })
         BackendAPI::from_native(unsafe { C_GrBackendDrawableInfo_backend(self.native()) })
     }
 

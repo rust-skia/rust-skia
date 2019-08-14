@@ -458,10 +458,6 @@ impl NativeAccess<SkTextBlobBuilderRunHandler> for TextBlobBuilderRunHandler<'_>
 
 impl TextBlobBuilderRunHandler<'_> {
     pub fn new(text: &str, offset: impl Into<Point>) -> TextBlobBuilderRunHandler {
-        /* does not link:
-        TextBlobBuilderRunHandler(c_string, unsafe {
-            SkTextBlobBuilderRunHandler::new(ptr, offset.into().into_native())
-        }) */
         let ptr = text.as_ptr();
         // we can safely pass a ptr to the utf8 text string to the RunHandler, because it does not
         // expect it to be 0 terminated, but this introduces another problem because
@@ -482,7 +478,6 @@ impl TextBlobBuilderRunHandler<'_> {
     }
 
     pub fn end_point(&mut self) -> Point {
-        // .endPoint() does not link.
         Point::from_native(unsafe { C_SkTextBlobBuilderRunHandler_endPoint(self.native_mut()) })
     }
 }

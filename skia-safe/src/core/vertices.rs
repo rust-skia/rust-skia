@@ -13,7 +13,7 @@ use skia_bindings::{
 use skia_bindings::{SkVertices_BoneIndices, SkVertices_BoneWeights};
 #[cfg(test)]
 use std::mem;
-use std::ops::{Deref, DerefMut};
+use std::ops::{Index, IndexMut};
 use std::{ptr, slice};
 
 pub type BoneIndices = [u32; 4];
@@ -37,34 +37,37 @@ fn bone_weights_layout() {
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
-#[repr(transparent)]
-pub struct Bone([u32; 6]);
-
-impl Deref for Bone {
-    type Target = [u32; 6];
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for Bone {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
+#[repr(C)]
+pub struct Bone {
+    values: [f32; 6],
 }
 
 impl NativeTransmutable<SkVertices_Bone> for Bone {}
 
+impl Index<usize> for Bone {
+    type Output = f32;
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.values[index]
+    }
+}
+
+impl IndexMut<usize> for Bone {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.values[index]
+    }
+}
+
 impl Bone {
     pub fn map_point(&self, point: impl Into<Point>) -> Point {
-        Point::from_native(unsafe { self.native().mapPoint(&point.into().into_native()) })
+        let point = point.into();
+        let values = &self.values;
+        let x = values[0] * point.x + values[2] * point.y + values[4];
+        let y = values[1] * point.x + values[3] * point.y + values[5];
+        Point::new(x, y)
     }
 
     pub fn map_rect(&self, rect: impl AsRef<Rect>) -> Rect {
         Rect::from_native(unsafe {
-            // does not link.
-            // self.native().mapRect(rect.as_ref().native())
             C_SkVertices_Bone_mapRect(self.native(), rect.as_ref().native())
         })
     }
@@ -111,13 +114,17 @@ impl RCHandle<SkVertices> {
         positions: &[Point],
         texs: &[Point],
         colors: &[Color],
-        bone_indices_and_weights: Option<(&BoneIndices, &BoneWeights)>,
+        bone_indices_and_weights: Option<(&[BoneIndices], &[BoneWeights])>,
         indices: Option<&[u16]>,
         is_volatile: impl Into<Option<bool>>,
     ) -> Vertices {
         let vertex_count = positions.len();
-        assert_eq!(vertex_count, texs.len());
-        assert_eq!(vertex_count, colors.len());
+        assert_eq!(texs.len(), vertex_count);
+        assert_eq!(colors.len(), vertex_count);
+        if let Some((bi, bw)) = bone_indices_and_weights {
+            assert_eq!(bi.len(), vertex_count);
+            assert_eq!(bw.len(), vertex_count);
+        }
 
         let bone_indices = bone_indices_and_weights.map(|t| t.0);
         let bone_weights = bone_indices_and_weights.map(|t| t.1);
@@ -146,85 +153,73 @@ impl RCHandle<SkVertices> {
     }
 
     pub fn unique_id(&self) -> u32 {
-        unsafe { self.native().uniqueID() }
+        self.native().fUniqueID
     }
 
     pub fn mode(&self) -> VertexMode {
-        VertexMode::from_native(unsafe { self.native().mode() })
+        VertexMode::from_native(self.native().fMode)
     }
 
-    pub fn bounds(&self) -> Rect {
-        Rect::from_native(unsafe { *self.native().bounds() })
+    pub fn bounds(&self) -> &Rect {
+        Rect::from_native_ref(&self.native().fBounds)
     }
 
     pub fn has_colors(&self) -> bool {
-        unsafe { self.native().hasColors() }
+        self.colors().is_some()
     }
 
     pub fn has_tex_coords(&self) -> bool {
-        unsafe { self.native().hasTexCoords() }
+        self.tex_coords().is_some()
     }
 
     pub fn has_bones(&self) -> bool {
-        unsafe { self.native().hasBones() }
+        self.bone_indices().is_some()
     }
 
     pub fn has_indices(&self) -> bool {
-        unsafe { self.native().hasIndices() }
+        self.indices().is_some()
     }
 
     pub fn vertex_count(&self) -> usize {
-        unsafe { self.native().vertexCount().try_into().unwrap() }
+        self.native().fVertexCnt.try_into().unwrap()
     }
 
     pub fn positions(&self) -> &[Point] {
-        unsafe {
-            let ptr: *const SkPoint = self.native().positions();
-            slice::from_raw_parts(ptr as _, self.vertex_count())
-        }
+        let positions: *const SkPoint = self.native().fPositions;
+        unsafe { slice::from_raw_parts(positions as _, self.vertex_count()) }
     }
 
     pub fn tex_coords(&self) -> Option<&[Point]> {
-        unsafe {
-            let ptr: *const SkPoint = self.native().positions().to_option()?;
-            Some(slice::from_raw_parts(ptr as _, self.vertex_count()))
-        }
+        let texs: *const SkPoint = self.native().fTexs.to_option()?;
+        Some(unsafe { slice::from_raw_parts(texs as _, self.vertex_count()) })
     }
 
     pub fn colors(&self) -> Option<&[Color]> {
-        unsafe {
-            let ptr: *const SkColor = self.native().colors().to_option()?;
-            Some(slice::from_raw_parts(ptr as _, self.vertex_count()))
-        }
+        let colors: *const SkColor = self.native().fColors.to_option()?;
+        Some(unsafe { slice::from_raw_parts(colors as _, self.vertex_count()) })
     }
 
     pub fn bone_indices(&self) -> Option<&[BoneIndices]> {
-        unsafe {
-            let indices = self.native().boneIndices().to_option()?;
-            Some(slice::from_raw_parts_mut(indices as _, self.vertex_count()))
-        }
+        let indices = self.native().fBoneIndices.to_option()?;
+        Some(unsafe { slice::from_raw_parts(indices as _, self.vertex_count()) })
     }
 
     pub fn bone_weights(&self) -> Option<&[BoneWeights]> {
-        unsafe {
-            let weights = self.native().boneWeights().to_option()?;
-            Some(slice::from_raw_parts_mut(weights as _, self.vertex_count()))
-        }
+        let weights = self.native().fBoneWeights.to_option()?;
+        Some(unsafe { slice::from_raw_parts(weights as _, self.vertex_count()) })
     }
 
     pub fn index_count(&self) -> usize {
-        unsafe { self.native().indexCount().try_into().unwrap() }
+        self.native().fIndexCnt.try_into().unwrap()
     }
 
     pub fn indices(&self) -> Option<&[u16]> {
-        unsafe {
-            let indices = self.native().indices().to_option()?;
-            Some(slice::from_raw_parts_mut(indices as _, self.index_count()))
-        }
+        let indices = self.native().fIndices.to_option()?;
+        Some(unsafe { slice::from_raw_parts_mut(indices as _, self.index_count()) })
     }
 
     pub fn is_volatile(&self) -> bool {
-        unsafe { self.native().isVolatile() }
+        self.native().fIsVolatile
     }
 
     pub fn apply_bones(&self, bones: &[Bone]) -> Vertices {
@@ -286,9 +281,6 @@ impl Handle<SkVertices_Builder> {
     }
 
     pub fn is_valid(&self) -> bool {
-        // does not link
-        // unsafe { self.native().isValid() }
-        // TODO: write a C wrapper function in case the implementation changes
         !self.native().fVertices.fPtr.is_null()
     }
 

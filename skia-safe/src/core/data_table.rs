@@ -25,13 +25,11 @@ impl Index<usize> for DataTable {
 
 impl RCHandle<SkDataTable> {
     pub fn is_empty(&self) -> bool {
-        // does not link:
-        // unsafe { self.native().isEmpty() }
         self.count() == 0
     }
 
     pub fn count(&self) -> usize {
-        unsafe { self.native().count().try_into().unwrap() }
+        self.native().fCount.try_into().unwrap()
     }
 
     pub fn at_size(&self, index: usize) -> usize {

@@ -1,6 +1,9 @@
 use crate::prelude::*;
 use crate::{scalar, Matrix, Rect, Vector};
-use skia_bindings::{C_SkRRect_Equals, SkRRect, SkRRect_Corner, SkRRect_Type};
+use skia_bindings::{
+    C_SkRRect_Equals, C_SkRRect_getType, C_SkRRect_setOval, C_SkRRect_setRect, SkRRect,
+    SkRRect_Corner, SkRRect_Type,
+};
 use std::{mem, ptr};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -53,8 +56,7 @@ impl PartialEq for RRect {
 
 impl Default for RRect {
     fn default() -> Self {
-        // SkRRect::MakeEmpty does not link, so we use new().
-        RRect::from_native(unsafe { SkRRect::new() })
+        Self::new()
     }
 }
 
@@ -66,74 +68,80 @@ impl AsRef<RRect> for RRect {
 
 impl RRect {
     pub fn new() -> Self {
-        Self::default()
+        RRect::from_native(unsafe { mem::zeroed() })
     }
 
     pub fn get_type(&self) -> Type {
-        Type::from_native(unsafe { self.native().getType() })
+        Type::from_native(unsafe { C_SkRRect_getType(self.native()) })
     }
 
     pub fn is_empty(&self) -> bool {
-        unsafe { self.native().isEmpty() }
+        self.get_type() == Type::Empty
     }
 
     pub fn is_rect(&self) -> bool {
-        unsafe { self.native().isRect() }
+        self.get_type() == Type::Rect
     }
 
     pub fn is_oval(&self) -> bool {
-        unsafe { self.native().isOval() }
+        self.get_type() == Type::Oval
     }
 
     pub fn is_simple(&self) -> bool {
-        unsafe { self.native().isSimple() }
+        self.get_type() == Type::Simple
     }
 
     pub fn is_nine_patch(&self) -> bool {
-        unsafe { self.native().isNinePatch() }
+        self.get_type() == Type::NinePatch
     }
 
     pub fn is_complex(&self) -> bool {
-        unsafe { self.native().isComplex() }
+        self.get_type() == Type::Complex
     }
 
     pub fn width(&self) -> scalar {
-        unsafe { self.native().width() }
+        self.rect().width()
     }
 
     pub fn height(&self) -> scalar {
-        unsafe { self.native().height() }
+        self.rect().height()
     }
 
     pub fn simple_radii(&self) -> Vector {
-        Vector::from_native(unsafe { self.native().getSimpleRadii() })
+        self.radii(Corner::UpperLeft)
     }
 
     pub fn set_empty(&mut self) {
-        unsafe { self.native_mut().setEmpty() }
+        *self = Self::new()
     }
 
     pub fn set_rect(&mut self, rect: impl AsRef<Rect>) {
-        unsafe { self.native_mut().setRect(rect.as_ref().native()) }
+        unsafe { C_SkRRect_setRect(self.native_mut(), rect.as_ref().native()) }
     }
 
     pub fn new_empty() -> Self {
-        Self::default()
+        Self::new()
     }
 
     // TODO: consider to rename all the following new_* function to from_* functions?
     //       is it possible to find a proper convention here (new_ vs from_?)?
 
     pub fn new_rect(rect: impl AsRef<Rect>) -> Self {
-        Self::from_native(unsafe { SkRRect::MakeRect(rect.as_ref().native()) })
+        let mut rr = Self::default();
+        rr.set_rect(rect);
+        rr
     }
 
     pub fn new_oval(oval: impl AsRef<Rect>) -> Self {
-        Self::from_native(unsafe { SkRRect::MakeOval(oval.as_ref().native()) })
+        let mut rr = Self::default();
+        rr.set_oval(oval);
+        rr
     }
 
     pub fn new_rect_xy(rect: impl AsRef<Rect>, x_rad: scalar, y_rad: scalar) -> Self {
-        Self::from_native(unsafe { SkRRect::MakeRectXY(rect.as_ref().native(), x_rad, y_rad) })
+        let mut rr = Self::default();
+        rr.set_rect_xy(rect.as_ref(), x_rad, y_rad);
+        rr
     }
 
     pub fn new_nine_patch(
@@ -166,7 +174,7 @@ impl RRect {
     }
 
     pub fn set_oval(&mut self, oval: impl AsRef<Rect>) {
-        unsafe { self.native_mut().setOval(oval.as_ref().native()) }
+        unsafe { C_SkRRect_setOval(self.native_mut(), oval.as_ref().native()) }
     }
 
     pub fn set_rect_xy(&mut self, rect: impl AsRef<Rect>, x_rad: scalar, y_rad: scalar) {
@@ -203,15 +211,15 @@ impl RRect {
     }
 
     pub fn rect(&self) -> &Rect {
-        Rect::from_native_ref(unsafe { &*self.native().rect() })
+        Rect::from_native_ref(&self.native().fRect)
     }
 
     pub fn radii(&self, corner: Corner) -> Vector {
-        Vector::from_native(unsafe { self.native().radii(corner.into_native()) })
+        Vector::from_native(self.native().fRadii[corner as usize])
     }
 
     pub fn bounds(&self) -> &Rect {
-        Rect::from_native_ref(unsafe { &*self.native().getBounds() })
+        self.rect()
     }
 
     pub fn inset(&mut self, delta: impl Into<Vector>) {
@@ -220,7 +228,6 @@ impl RRect {
 
     pub fn with_inset(&self, delta: impl Into<Vector>) -> Self {
         let delta = delta.into();
-        // inset1 does not link.
         let mut r = Self::default();
         unsafe { self.native().inset(delta.x, delta.y, r.native_mut()) };
         r
@@ -231,19 +238,16 @@ impl RRect {
     }
 
     pub fn with_outset(&self, delta: impl Into<Vector>) -> Self {
-        // outset and outset1 does not link.
         self.with_inset(-delta.into())
     }
 
     pub fn offset(&mut self, delta: impl Into<Vector>) {
-        *self = self.with_offset(delta);
+        Rect::from_native_ref_mut(&mut self.native_mut().fRect).offset(delta)
     }
 
     pub fn with_offset(&self, delta: impl Into<Vector>) -> Self {
-        let delta = delta.into();
-        // makeOffset and offset does not link.
         let mut copied = *self;
-        unsafe { copied.native_mut().fRect.offset(delta.x, delta.y) }
+        copied.offset(delta);
         copied
     }
 
@@ -284,8 +288,6 @@ impl RRect {
     }
 
     pub fn dump_hex(&self) {
-        // does not link:
-        // unsafe { self.native().dumpHex() }
         self.dump(true)
     }
 }

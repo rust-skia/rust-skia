@@ -1,8 +1,9 @@
 use crate::gpu::{gl, MipMapped};
 use crate::prelude::*;
 use skia_bindings::{
-    C_GrContext_MakeGL, C_GrContext_abandoned, GrContext, GrContext_abandonContext,
-    GrContext_freeGpuResources, GrContext_releaseResourcesAndAbandonContext, SkRefCntBase,
+    C_GrContext_MakeGL, C_GrContext_abandoned, C_GrContext_flush, GrContext,
+    GrContext_abandonContext, GrContext_freeGpuResources,
+    GrContext_releaseResourcesAndAbandonContext, SkRefCntBase,
 };
 
 #[cfg(feature = "vulkan")]
@@ -153,8 +154,6 @@ impl RCHandle<GrContext> {
     // TODO: is_...?
     pub fn color_type_supported_as_surface(&self, color_type: ColorType) -> bool {
         unsafe {
-            // does not link
-            // self.native().colorTypeSupportedAsSurface(color_type.into_native())
             skia_bindings::C_GrContext_colorTypeSupportedAsSurface(
                 self.native(),
                 color_type.into_native(),
@@ -174,9 +173,7 @@ impl RCHandle<GrContext> {
     // TODO: wait()
 
     pub fn flush(&mut self) -> &mut Self {
-        unsafe {
-            self.native_mut().flush();
-        }
+        unsafe { C_GrContext_flush(self.native_mut()) }
         self
     }
 

@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use crate::{paint, scalar, Paint, Path};
 use skia_bindings::{
-    C_SkStrokeRec_copy, C_SkStrokeRec_destruct, C_SkStrokeRec_hasEqualEffect, SkStrokeRec,
-    SkStrokeRec_InitStyle, SkStrokeRec_Style,
+    C_SkStrokeRec_copy, C_SkStrokeRec_destruct, C_SkStrokeRec_getCap, C_SkStrokeRec_getJoin,
+    C_SkStrokeRec_hasEqualEffect, SkStrokeRec, SkStrokeRec_InitStyle, SkStrokeRec_Style,
 };
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -83,27 +83,27 @@ impl Handle<SkStrokeRec> {
     }
 
     pub fn width(&self) -> scalar {
-        unsafe { self.native().getWidth() }
+        self.native().fWidth
     }
 
     pub fn miter(&self) -> scalar {
-        unsafe { self.native().getMiter() }
+        self.native().fMiterLimit
     }
 
     pub fn cap(&self) -> paint::Cap {
-        paint::Cap::from_native(unsafe { self.native().getCap() })
+        paint::Cap::from_native(unsafe { C_SkStrokeRec_getCap(self.native()) })
     }
 
     pub fn join(&self) -> paint::Join {
-        paint::Join::from_native(unsafe { self.native().getJoin() })
+        paint::Join::from_native(unsafe { C_SkStrokeRec_getJoin(self.native()) })
     }
 
     pub fn is_hairline_style(&self) -> bool {
-        unsafe { self.native().isHairlineStyle() }
+        self.style() == Style::Hairline
     }
 
     pub fn is_fill_style(&self) -> bool {
-        unsafe { self.native().isFillStyle() }
+        self.style() == Style::Fill
     }
 
     pub fn set_fill_style(&mut self) -> &mut Self {
@@ -132,23 +132,25 @@ impl Handle<SkStrokeRec> {
         join: paint::Join,
         miter_limit: scalar,
     ) -> &mut Self {
-        unsafe {
-            self.native_mut()
-                .setStrokeParams(cap.into_native(), join.into_native(), miter_limit)
-        }
+        let native = self.native_mut();
+        native.set_fCap(cap.into_native() as _);
+        native.set_fJoin(join.into_native() as _);
+        native.fMiterLimit = miter_limit;
         self
     }
 
     pub fn res_scale(&self) -> scalar {
-        unsafe { self.native().getResScale() }
+        self.native().fResScale
     }
 
     pub fn set_res_scale(&mut self, rs: scalar) {
-        unsafe { self.native_mut().setResScale(rs) }
+        debug_assert!(rs > 0.0 && rs.is_finite());
+        self.native_mut().fResScale = rs;
     }
 
     pub fn need_to_apply(&self) -> bool {
-        unsafe { self.native().needToApply() }
+        let style = self.style();
+        style == Style::Stroke || style == Style::StrokeAndFill
     }
 
     pub fn apply_to_path(&self, dst: &mut Path, src: &Path) -> bool {
@@ -188,10 +190,6 @@ impl Handle<SkStrokeRec> {
     }
 
     pub fn has_equal_effect(&self, other: &StrokeRec) -> bool {
-        // does not link:
-        // unsafe {
-        //     self.native().hasEqualEffect(other.native())
-        // }
         unsafe { C_SkStrokeRec_hasEqualEffect(self.native(), other.native()) }
     }
 }

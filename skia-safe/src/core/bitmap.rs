@@ -10,7 +10,7 @@ use skia_bindings::{
     C_SkBitmap_tryAllocN32Pixels, C_SkBitmap_tryAllocPixels, SkBitmap,
     SkBitmap_AllocFlags_kZeroPixels_AllocFlag,
 };
-use std::ffi;
+use std::{ffi, ptr};
 
 pub type Bitmap = Handle<SkBitmap>;
 
@@ -38,43 +38,43 @@ impl Handle<SkBitmap> {
     }
 
     pub fn pixmap(&self) -> &Pixmap {
-        Pixmap::from_native_ref(unsafe { &*self.native().pixmap() })
+        Pixmap::from_native_ref(&self.native().fPixmap)
     }
 
     pub fn info(&self) -> &ImageInfo {
-        ImageInfo::from_native_ref(unsafe { &*self.native().info() })
+        self.pixmap().info()
     }
 
     pub fn width(&self) -> i32 {
-        unsafe { self.native().width() }
+        self.pixmap().width()
     }
 
     pub fn height(&self) -> i32 {
-        unsafe { self.native().height() }
+        self.pixmap().height()
     }
 
     pub fn color_type(&self) -> ColorType {
-        ColorType::from_native(unsafe { self.native().colorType() })
+        self.pixmap().color_type()
     }
 
     pub fn alpha_type(&self) -> AlphaType {
-        AlphaType::from_native(unsafe { self.native().alphaType() })
+        self.pixmap().alpha_type()
     }
 
     pub fn color_space(&self) -> Option<ColorSpace> {
-        ColorSpace::from_ptr(unsafe { skia_bindings::C_SkBitmap_colorSpace(self.native()) })
+        self.pixmap().color_space()
     }
 
     pub fn bytes_per_pixel(&self) -> usize {
-        unsafe { self.native().bytesPerPixel().try_into().unwrap() }
+        ImageInfo::from_native_ref(&self.native().fPixmap.fInfo).bytes_per_pixel()
     }
 
     pub fn row_bytes_as_pixels(&self) -> usize {
-        unsafe { self.native().rowBytesAsPixels().try_into().unwrap() }
+        Pixmap::from_native_ref(&self.native().fPixmap).row_bytes_as_pixels()
     }
 
     pub fn shift_per_pixel(&self) -> usize {
-        unsafe { self.native().shiftPerPixel().try_into().unwrap() }
+        self.pixmap().shift_per_pixel()
     }
 
     #[deprecated(since = "0.12.0", note = "use is_empty()")]
@@ -83,19 +83,19 @@ impl Handle<SkBitmap> {
     }
 
     pub fn is_empty(&self) -> bool {
-        unsafe { self.native().empty() }
+        self.info().is_empty()
     }
 
     pub fn is_null(&self) -> bool {
-        unsafe { self.native().isNull() }
+        self.native().fPixelRef.fPtr == ptr::null_mut()
     }
 
     pub fn draws_nothing(&self) -> bool {
-        unsafe { self.native().drawsNothing() }
+        self.is_empty() || self.is_null()
     }
 
     pub fn row_bytes(&self) -> usize {
-        unsafe { self.native().rowBytes() }
+        self.pixmap().row_bytes()
     }
 
     pub fn set_alpha_type(&mut self, alpha_type: AlphaType) -> bool {
@@ -103,11 +103,11 @@ impl Handle<SkBitmap> {
     }
 
     pub unsafe fn pixels(&mut self) -> *mut ffi::c_void {
-        self.native_mut().getPixels()
+        self.pixmap().writable_addr()
     }
 
     pub fn compute_byte_size(&self) -> usize {
-        unsafe { self.native().computeByteSize() }
+        self.pixmap().compute_byte_size()
     }
 
     pub fn is_immutable(&self) -> bool {
@@ -119,7 +119,7 @@ impl Handle<SkBitmap> {
     }
 
     pub fn is_opaque(&self) -> bool {
-        unsafe { self.native().isOpaque() }
+        self.pixmap().is_opaque()
     }
 
     pub fn is_volatile(&self) -> bool {
@@ -135,20 +135,20 @@ impl Handle<SkBitmap> {
     }
 
     pub fn compute_is_opaque(bm: &Self) -> bool {
-        // well, the binding's version causes a linker error.
         unsafe { skia_bindings::C_SkBitmap_ComputeIsOpaque(bm.native()) }
     }
 
     pub fn bounds(&self) -> IRect {
-        IRect::from_native(unsafe { self.native().bounds() })
+        self.info().bounds()
     }
 
     pub fn dimensions(&self) -> ISize {
-        ISize::from_native(unsafe { self.native().dimensions() })
+        self.info().dimensions()
     }
 
     pub fn get_subset(&self) -> IRect {
-        IRect::from_native(unsafe { self.native().getSubset() })
+        let origin = IPoint::from_native(unsafe { self.native().pixelRefOrigin() });
+        IRect::from_xywh(origin.x, origin.y, self.width(), self.height())
     }
 
     #[must_use]
@@ -185,12 +185,12 @@ impl Handle<SkBitmap> {
         image_info: &ImageInfo,
         row_bytes: impl Into<Option<usize>>,
     ) -> bool {
-        match row_bytes.into() {
-            Some(row_bytes) => unsafe {
-                self.native_mut()
-                    .tryAllocPixels(image_info.native(), row_bytes)
-            },
-            None => unsafe { self.native_mut().tryAllocPixels1(image_info.native()) },
+        let row_bytes = row_bytes
+            .into()
+            .unwrap_or_else(|| image_info.min_row_bytes());
+        unsafe {
+            self.native_mut()
+                .tryAllocPixels(image_info.native(), row_bytes)
         }
     }
 
@@ -210,7 +210,6 @@ impl Handle<SkBitmap> {
         (width, height): (i32, i32),
         is_opaque: impl Into<Option<bool>>,
     ) -> bool {
-        // accessing the instance method causes a linker error.
         unsafe {
             C_SkBitmap_tryAllocN32Pixels(
                 self.native_mut(),
@@ -237,15 +236,19 @@ impl Handle<SkBitmap> {
         pixels: *mut ffi::c_void,
         row_bytes: usize,
     ) -> bool {
-        self.native_mut()
-            .installPixels1(image_info.native(), pixels, row_bytes)
+        self.native_mut().installPixels(
+            image_info.native(),
+            pixels,
+            row_bytes,
+            None,
+            ptr::null_mut(),
+        )
     }
 
     // TODO: setPixels()?
 
     #[must_use]
     pub fn try_alloc_pixels(&mut self) -> bool {
-        // linker error.
         unsafe { C_SkBitmap_tryAllocPixels(self.native_mut()) }
     }
 
@@ -259,7 +262,7 @@ impl Handle<SkBitmap> {
 
     // TODO: find a way to return pixel ref without increasing the ref count here?
     pub fn pixel_ref(&self) -> Option<PixelRef> {
-        PixelRef::from_unshared_ptr(unsafe { self.native().pixelRef() })
+        PixelRef::from_unshared_ptr(self.native().fPixelRef.fPtr)
     }
 
     pub fn pixel_ref_origin(&self) -> IPoint {
@@ -311,13 +314,11 @@ impl Handle<SkBitmap> {
     }
 
     pub fn get_color(&self, p: impl Into<IPoint>) -> Color {
-        let p = p.into();
-        Color::from_native(unsafe { self.native().getColor(p.x, p.y) })
+        self.pixmap().get_color(p)
     }
 
     pub fn get_alpha_f(&self, p: impl Into<IPoint>) -> f32 {
-        let p = p.into();
-        unsafe { self.native().getAlphaf(p.x, p.y) }
+        self.pixmap().get_alpha_f(p)
     }
 
     pub unsafe fn get_addr(&self, p: impl Into<IPoint>) -> *const ffi::c_void {

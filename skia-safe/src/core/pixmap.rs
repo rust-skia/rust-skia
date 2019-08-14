@@ -2,9 +2,13 @@ use crate::prelude::*;
 use crate::{
     AlphaType, Color, Color4f, ColorSpace, ColorType, FilterQuality, IPoint, IRect, ImageInfo,
 };
-use skia_bindings::{C_SkPixmap_destruct, C_SkPixmap_setColorSpace, SkPixmap};
+use skia_bindings::{
+    C_SkImageInfo_Construct, C_SkPixmap_destruct, C_SkPixmap_setColorSpace, SkPixmap,
+};
 use std::convert::TryInto;
 use std::ffi::c_void;
+use std::os::raw;
+use std::{ptr, slice};
 
 pub type Pixmap = Handle<SkPixmap>;
 
@@ -16,7 +20,11 @@ impl NativeDrop for SkPixmap {
 
 impl Default for Handle<SkPixmap> {
     fn default() -> Self {
-        Pixmap::from_native(unsafe { SkPixmap::new() })
+        Pixmap::from_native(SkPixmap {
+            fPixels: ptr::null(),
+            fRowBytes: 0,
+            fInfo: construct(|ii| unsafe { C_SkImageInfo_Construct(ii) }),
+        })
     }
 }
 
@@ -31,8 +39,11 @@ impl Handle<SkPixmap> {
 
         assert!(row_bytes >= width * info.bytes_per_pixel());
         assert!(pixels.len() >= height * row_bytes);
-        let pm = Pixmap::from_native(unsafe {
-            SkPixmap::new1(info.native(), pixels.as_ptr() as _, row_bytes)
+
+        let pm = Pixmap::from_native(SkPixmap {
+            fPixels: ptr::null(),
+            fRowBytes: 0,
+            fInfo: ImageInfo::new_unknown(None).native().clone(),
         });
         pm.borrows(pixels)
     }
@@ -62,55 +73,55 @@ impl Handle<SkPixmap> {
     }
 
     pub fn info(&self) -> &ImageInfo {
-        ImageInfo::from_native_ref(unsafe { &*self.native().info() })
+        ImageInfo::from_native_ref(&self.native().fInfo)
     }
 
     pub fn row_bytes(&self) -> usize {
-        unsafe { self.native().rowBytes() }
+        self.native().fRowBytes
     }
 
-    pub unsafe fn addr(&self) -> *const c_void {
-        self.native().addr()
+    pub fn addr(&self) -> *const c_void {
+        self.native().fPixels
     }
 
     pub fn width(&self) -> i32 {
-        unsafe { self.native().width() }
+        self.info().width()
     }
 
     pub fn height(&self) -> i32 {
-        unsafe { self.native().height() }
+        self.info().height()
     }
 
     pub fn color_type(&self) -> ColorType {
-        ColorType::from_native(unsafe { self.native().colorType() })
+        self.info().color_type()
     }
 
     pub fn alpha_type(&self) -> AlphaType {
-        AlphaType::from_native(unsafe { self.native().alphaType() })
+        self.info().alpha_type()
     }
 
     pub fn color_space(&self) -> Option<ColorSpace> {
-        ColorSpace::from_unshared_ptr(unsafe { self.native().colorSpace() })
+        self.info().color_space()
     }
 
     pub fn is_opaque(&self) -> bool {
-        unsafe { self.native().isOpaque() }
+        self.alpha_type().is_opaque()
     }
 
     pub fn bounds(&self) -> IRect {
-        IRect::from_native(unsafe { self.native().bounds() })
+        IRect::from_wh(self.width(), self.height())
     }
 
     pub fn row_bytes_as_pixels(&self) -> usize {
-        unsafe { self.native().rowBytesAsPixels().try_into().unwrap() }
+        self.native().fRowBytes >> self.shift_per_pixel()
     }
 
     pub fn shift_per_pixel(&self) -> usize {
-        unsafe { self.native().shiftPerPixel().try_into().unwrap() }
+        self.info().shift_per_pixel()
     }
 
     pub fn compute_byte_size(&self) -> usize {
-        unsafe { self.native().computeByteSize().try_into().unwrap() }
+        self.info().compute_byte_size(self.row_bytes())
     }
 
     pub fn compute_is_opaque(&self) -> bool {
@@ -129,19 +140,19 @@ impl Handle<SkPixmap> {
 
     pub unsafe fn addr_at(&self, p: impl Into<IPoint>) -> *const c_void {
         let p = p.into();
-        self.native().addr1(p.x, p.y)
+        (self.addr() as *const raw::c_char).add(self.info().compute_offset(p, self.row_bytes()))
+            as _
     }
 
     // TODO: addr8(), addr16(), addr32(), addr64(), addrF16(),
     //       addr8_at(), addr16_at(), addr32_at(), addr64_at(), addrF16_at()
 
     pub unsafe fn writable_addr(&self) -> *mut c_void {
-        self.native().writable_addr()
+        self.addr() as _
     }
 
     pub unsafe fn writable_addr_at(&self, p: impl Into<IPoint>) -> *mut c_void {
-        let p = p.into();
-        self.native().writable_addr1(p.x, p.y)
+        self.addr_at(p) as _
     }
 
     // TODO: writable_addr8
@@ -166,7 +177,7 @@ impl Handle<SkPixmap> {
         let src = src.into();
 
         unsafe {
-            self.native().readPixels1(
+            self.native().readPixels(
                 dst_info.native(),
                 pixels.as_mut_ptr() as _,
                 dst_row_bytes,
@@ -177,8 +188,17 @@ impl Handle<SkPixmap> {
     }
 
     pub fn read_pixels_to_pixmap(&self, dst: &Pixmap, src: impl Into<IPoint>) -> bool {
-        let src = src.into();
-        unsafe { self.native().readPixels2(dst.native(), src.x, src.y) }
+        let row_bytes = dst.row_bytes();
+        let len = usize::try_from(dst.height()).unwrap() * row_bytes;
+        unsafe {
+            let addr = dst.writable_addr() as *mut raw::c_char;
+            self.read_pixels(
+                dst.info(),
+                slice::from_raw_parts_mut(addr, len),
+                row_bytes,
+                src,
+            )
+        }
     }
 
     pub fn scale_pixels(&self, dst: &Pixmap, filter_quality: FilterQuality) -> bool {
@@ -193,7 +213,7 @@ impl Handle<SkPixmap> {
         unsafe {
             match subset {
                 Some(subset) => self.native().erase(color, subset.native()),
-                None => self.native().erase1(color),
+                None => self.native().erase(color, self.bounds().native()),
             }
         }
     }
@@ -202,7 +222,7 @@ impl Handle<SkPixmap> {
         let color = color.as_ref();
         unsafe {
             self.native()
-                .erase2(color.native(), subset.native_ptr_or_null())
+                .erase1(color.native(), subset.native_ptr_or_null())
         }
     }
 }

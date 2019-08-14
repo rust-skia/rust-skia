@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::{scalar, ISize, Size};
-use skia_bindings::{SkIPoint, SkPoint};
+use skia_bindings::{C_SkPoint_isFinite, SkIPoint, SkPoint};
 use std::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 pub type IVector = IPoint;
@@ -87,8 +87,6 @@ impl IPoint {
     }
 
     pub fn is_zero(self) -> bool {
-        // does not link:
-        // unsafe { self.native().isZero() }
         (self.x | self.y) == 0
     }
 
@@ -229,7 +227,7 @@ impl Point {
     }
 
     pub fn length(self) -> scalar {
-        unsafe { self.native().length() }
+        unsafe { SkPoint::Length(self.x, self.y) }
     }
 
     pub fn distance_to_origin(self) -> scalar {
@@ -273,7 +271,7 @@ impl Point {
     }
 
     pub fn is_finite(self) -> bool {
-        unsafe { self.native().isFinite() }
+        unsafe { C_SkPoint_isFinite(self.native()) }
     }
 
     pub fn equals(self, x: scalar, y: scalar) -> bool {
@@ -289,23 +287,23 @@ impl Point {
     }
 
     pub fn distance(a: Self, b: Self) -> scalar {
-        unsafe { SkPoint::Distance(a.native(), b.native()) }
+        unsafe { SkPoint::Length(a.x - b.x, a.y - b.y) }
     }
 
     pub fn dot_product(a: Self, b: Self) -> scalar {
-        unsafe { SkPoint::DotProduct(a.native(), b.native()) }
+        a.x * b.x + a.y * b.y
     }
 
     pub fn cross_product(a: Self, b: Self) -> scalar {
-        unsafe { SkPoint::CrossProduct(a.native(), b.native()) }
+        a.x * b.y - a.y * b.x
     }
 
     pub fn cross(self, vec: Vector) -> scalar {
-        unsafe { self.native().cross(vec.native()) }
+        Self::cross_product(self, vec)
     }
 
     pub fn dot(self, vec: Vector) -> scalar {
-        unsafe { self.native().dot(vec.native()) }
+        Self::dot_product(self, vec)
     }
 }
 

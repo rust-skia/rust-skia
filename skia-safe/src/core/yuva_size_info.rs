@@ -22,8 +22,6 @@ impl YUVASizeInfo {
     pub const MAX_COUNT: usize = 4;
 
     pub fn compute_total_bytes(&self) -> usize {
-        // does not link:
-        // unsafe { self.native().computeTotalBytes() }
         unsafe { C_SkYUVASizeInfo_computeTotalBytes(self.native()) }
     }
 

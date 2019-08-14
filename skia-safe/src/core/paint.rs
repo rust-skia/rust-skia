@@ -4,10 +4,11 @@ use crate::{
     ImageFilter, MaskFilter, Path, PathEffect, Rect, Shader,
 };
 use skia_bindings::{
-    C_SkPaint_Equals, C_SkPaint_destruct, C_SkPaint_getDrawLooper, C_SkPaint_setColorFilter,
-    C_SkPaint_setDrawLooper, C_SkPaint_setImageFilter, C_SkPaint_setMaskFilter,
-    C_SkPaint_setPathEffect, C_SkPaint_setShader, SkPaint, SkPaint_Cap, SkPaint_Join,
-    SkPaint_Style,
+    C_SkPaint_Equals, C_SkPaint_destruct, C_SkPaint_getAlpha, C_SkPaint_getBlendMode,
+    C_SkPaint_getDrawLooper, C_SkPaint_getFilterQuality, C_SkPaint_getStrokeCap,
+    C_SkPaint_getStrokeJoin, C_SkPaint_getStyle, C_SkPaint_setColorFilter, C_SkPaint_setDrawLooper,
+    C_SkPaint_setImageFilter, C_SkPaint_setMaskFilter, C_SkPaint_setPathEffect,
+    C_SkPaint_setShader, SkPaint, SkPaint_Cap, SkPaint_Join, SkPaint_Style,
 };
 use std::hash::{Hash, Hasher};
 use std::ptr;
@@ -116,25 +117,35 @@ impl Handle<SkPaint> {
     }
 
     pub fn is_anti_alias(&self) -> bool {
-        unsafe { self.native().isAntiAlias() }
+        unsafe { self.native().__bindgen_anon_1.fBitfields.fAntiAlias() != 0 }
     }
 
     pub fn set_anti_alias(&mut self, anti_alias: bool) -> &mut Self {
-        unsafe { self.native_mut().setAntiAlias(anti_alias) }
+        unsafe {
+            self.native_mut()
+                .__bindgen_anon_1
+                .fBitfields
+                .set_fAntiAlias(anti_alias as _);
+        }
         self
     }
 
     pub fn is_dither(&self) -> bool {
-        unsafe { self.native().isDither() }
+        unsafe { self.native().__bindgen_anon_1.fBitfields.fDither() != 0 }
     }
 
     pub fn set_dither(&mut self, dither: bool) -> &mut Self {
-        unsafe { self.native_mut().setDither(dither) }
+        unsafe {
+            self.native_mut()
+                .__bindgen_anon_1
+                .fBitfields
+                .set_fDither(dither as _);
+        }
         self
     }
 
     pub fn filter_quality(&self) -> FilterQuality {
-        FilterQuality::from_native(unsafe { self.native().getFilterQuality() })
+        FilterQuality::from_native(unsafe { C_SkPaint_getFilterQuality(self.native()) })
     }
 
     pub fn set_filter_quality(&mut self, quality: FilterQuality) -> &mut Self {
@@ -143,7 +154,7 @@ impl Handle<SkPaint> {
     }
 
     pub fn style(&self) -> Style {
-        Style::from_native(unsafe { self.native().getStyle() })
+        Style::from_native(unsafe { C_SkPaint_getStyle(self.native()) })
     }
 
     pub fn set_style(&mut self, style: Style) -> &mut Self {
@@ -152,11 +163,11 @@ impl Handle<SkPaint> {
     }
 
     pub fn color(&self) -> Color {
-        Color::from_native(unsafe { self.native().getColor() })
+        self.color4f().to_color()
     }
 
     pub fn color4f(&self) -> Color4f {
-        Color4f::from_native(unsafe { self.native().getColor4f() })
+        Color4f::from_native(self.native().fColor4f)
     }
 
     pub fn set_color(&mut self, color: impl Into<Color>) -> &mut Self {
@@ -172,17 +183,17 @@ impl Handle<SkPaint> {
     ) -> &mut Self {
         unsafe {
             self.native_mut()
-                .setColor4f(color.as_ref().native(), color_space.native_mut_force())
+                .setColor1(color.as_ref().native(), color_space.native_mut_force())
         }
         self
     }
 
     pub fn alpha_f(&self) -> f32 {
-        unsafe { self.native().getAlphaf() }
+        self.color4f().a
     }
 
     pub fn alpha(&self) -> u8 {
-        unsafe { self.native().getAlpha() }
+        unsafe { C_SkPaint_getAlpha(self.native()) }
     }
 
     pub fn set_alpha_f(&mut self, alpha: f32) -> &mut Self {
@@ -191,8 +202,7 @@ impl Handle<SkPaint> {
     }
 
     pub fn set_alpha(&mut self, alpha: u8) -> &mut Self {
-        unsafe { self.native_mut().setAlpha(alpha.into()) }
-        self
+        self.set_alpha_f(alpha as f32 * (1.0 / 255.0))
     }
 
     pub fn set_argb(&mut self, a: u8, r: u8, g: u8, b: u8) -> &mut Self {
@@ -204,7 +214,7 @@ impl Handle<SkPaint> {
     }
 
     pub fn stroke_width(&self) -> scalar {
-        unsafe { self.native().getStrokeWidth() }
+        self.native().fWidth
     }
 
     pub fn set_stroke_width(&mut self, width: scalar) -> &mut Self {
@@ -213,7 +223,7 @@ impl Handle<SkPaint> {
     }
 
     pub fn stroke_miter(&self) -> scalar {
-        unsafe { self.native().getStrokeMiter() }
+        self.native().fMiterLimit
     }
 
     pub fn set_stroke_miter(&mut self, miter: scalar) -> &mut Self {
@@ -222,7 +232,7 @@ impl Handle<SkPaint> {
     }
 
     pub fn stroke_cap(&self) -> Cap {
-        Cap::from_native(unsafe { self.native().getStrokeCap() })
+        Cap::from_native(unsafe { C_SkPaint_getStrokeCap(self.native()) })
     }
 
     pub fn set_stroke_cap(&mut self, cap: Cap) -> &mut Self {
@@ -231,7 +241,7 @@ impl Handle<SkPaint> {
     }
 
     pub fn stroke_join(&self) -> Join {
-        Join::from_native(unsafe { self.native().getStrokeJoin() })
+        Join::from_native(unsafe { C_SkPaint_getStrokeJoin(self.native()) })
     }
 
     pub fn set_stroke_join(&mut self, join: Join) -> &mut Self {
@@ -263,7 +273,7 @@ impl Handle<SkPaint> {
     }
 
     pub fn shader(&self) -> Option<Shader> {
-        Shader::from_unshared_ptr(unsafe { self.native().getShader() })
+        Shader::from_unshared_ptr(self.native().fShader.fPtr)
     }
 
     pub fn set_shader<'a>(&mut self, shader: impl Into<Option<&'a Shader>>) -> &mut Self {
@@ -272,7 +282,7 @@ impl Handle<SkPaint> {
     }
 
     pub fn color_filter(&self) -> Option<ColorFilter> {
-        ColorFilter::from_unshared_ptr(unsafe { self.native().getColorFilter() })
+        ColorFilter::from_unshared_ptr(self.native().fColorFilter.fPtr)
     }
 
     pub fn set_color_filter<'a>(
@@ -284,20 +294,26 @@ impl Handle<SkPaint> {
     }
 
     pub fn blend_mode(&self) -> BlendMode {
-        BlendMode::from_native(unsafe { self.native().getBlendMode() })
+        BlendMode::from_native(unsafe { C_SkPaint_getBlendMode(self.native()) })
     }
 
     pub fn is_src_over(&self) -> bool {
-        unsafe { self.native().isSrcOver() }
+        self.blend_mode() == BlendMode::SrcOver
     }
 
     pub fn set_blend_mode(&mut self, mode: BlendMode) -> &mut Self {
-        unsafe { self.native_mut().setBlendMode(mode.into_native()) }
+        // unsafe { self.native_mut().setBlendMode(mode.into_native()) }
+        unsafe {
+            self.native_mut()
+                .__bindgen_anon_1
+                .fBitfields
+                .set_fBlendMode(mode as _);
+        };
         self
     }
 
     pub fn path_effect(&self) -> Option<PathEffect> {
-        PathEffect::from_unshared_ptr(unsafe { self.native().getPathEffect() })
+        PathEffect::from_unshared_ptr(self.native().fPathEffect.fPtr)
     }
 
     pub fn set_path_effect<'a>(
@@ -309,7 +325,7 @@ impl Handle<SkPaint> {
     }
 
     pub fn mask_filter(&self) -> Option<MaskFilter> {
-        MaskFilter::from_unshared_ptr(unsafe { self.native().getMaskFilter() })
+        MaskFilter::from_unshared_ptr(self.native().fMaskFilter.fPtr)
     }
 
     pub fn set_mask_filter<'a>(
@@ -321,7 +337,7 @@ impl Handle<SkPaint> {
     }
 
     pub fn image_filter(&self) -> Option<ImageFilter> {
-        ImageFilter::from_unshared_ptr(unsafe { self.native().getImageFilter() })
+        ImageFilter::from_unshared_ptr(self.native().fImageFilter.fPtr)
     }
 
     pub fn set_image_filter<'a>(
@@ -333,11 +349,7 @@ impl Handle<SkPaint> {
     }
 
     pub fn draw_looper(&self) -> Option<DrawLooper> {
-        DrawLooper::from_unshared_ptr(unsafe {
-            // does not link on Windows:
-            // self.native().getDrawLooper()
-            C_SkPaint_getDrawLooper(self.native())
-        })
+        DrawLooper::from_unshared_ptr(unsafe { C_SkPaint_getDrawLooper(self.native()) })
     }
 
     pub fn set_draw_looper<'a>(

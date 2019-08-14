@@ -95,15 +95,16 @@ impl SurfaceProps {
     }
 
     pub fn flags(self) -> SurfacePropsFlags {
-        SurfacePropsFlags::from_bits_truncate(unsafe { self.native().flags() })
+        SurfacePropsFlags::from_bits_truncate(self.native().fFlags)
     }
 
     pub fn pixel_geometry(self) -> PixelGeometry {
-        PixelGeometry::from_native(unsafe { self.native().pixelGeometry() })
+        PixelGeometry::from_native(self.native().fPixelGeometry)
     }
 
     pub fn is_use_device_independent_fonts(self) -> bool {
-        unsafe { self.native().isUseDeviceIndependentFonts() }
+        self.flags()
+            .contains(SurfacePropsFlags::USE_DEVICE_INDEPENDENT_FONTS)
     }
 }
 

@@ -7,6 +7,9 @@ pub(crate) type u8cpu = skia_bindings::U8CPU;
 
 // TODO: U16CPU?
 
+pub(crate) const SK_MAX_S32: i32 = std::i32::MAX;
+pub(crate) const SK_MIN_S32: i32 = -SK_MAX_S32;
+
 //
 // FourByteTag
 //

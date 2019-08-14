@@ -5,6 +5,7 @@ use super::{
 };
 use crate::gpu::vk::{CommandBuffer, Device, Instance, Rect2D, RenderPass};
 use crate::prelude::*;
+use core::mem;
 use skia_bindings::{
     C_GrVkAlloc_Construct, C_GrVkAlloc_Equals, C_GrVkImageInfo_Construct, C_GrVkImageInfo_Equals,
     C_GrVkImageInfo_updateImageLayout, C_GrVkYcbcrConversionInfo_Construct,
@@ -37,7 +38,7 @@ fn test_vk_alloc_layout() {
 
 impl Default for Alloc {
     fn default() -> Self {
-        Alloc::from_native(unsafe { GrVkAlloc::new() })
+        Alloc::from_native(unsafe { mem::zeroed() })
     }
 }
 
@@ -61,9 +62,6 @@ impl Alloc {
         size: DeviceSize,
         flags: AllocFlag,
     ) -> Alloc {
-        // does not link:
-        // Self::from_native(GrVkAlloc::new1(memory, offset, size, flags.bits()))
-
         Alloc::construct(|alloc| C_GrVkAlloc_Construct(alloc, memory, offset, size, flags.bits()))
     }
 }
@@ -89,7 +87,8 @@ fn test_ycbcr_conversion_info_layout() {
 
 impl Default for YcbcrConversionInfo {
     fn default() -> Self {
-        YcbcrConversionInfo::from_native(unsafe { GrVkYcbcrConversionInfo::new() })
+        // YcbcrConversionInfo::from_native(unsafe { GrVkYcbcrConversionInfo::new() })
+        YcbcrConversionInfo::from_native(unsafe { mem::zeroed() })
     }
 }
 
@@ -111,19 +110,6 @@ impl YcbcrConversionInfo {
         external_format: u64,
         external_format_features: FomatFeatureFlags,
     ) -> YcbcrConversionInfo {
-        // does not link:
-        /*
-        YcbcrConversionInfo::from_native(unsafe {
-            GrVkYcbcrConversionInfo::new1(
-                ycrbcr_model,
-                ycbcr_range,
-                x_chroma_offset,
-                y_chroma_offset,
-                chroma_filter,
-                force_explicit_reconsturction,
-                external_format,
-                external_format_features)
-        }) */
         YcbcrConversionInfo::construct(|ci| unsafe {
             C_GrVkYcbcrConversionInfo_Construct(
                 ci,
@@ -213,7 +199,6 @@ impl ImageInfo {
     }
 
     pub fn update_image_layout(&mut self, layout: ImageLayout) -> &mut Self {
-        // .updateImageLayout() does not link.
         unsafe { C_GrVkImageInfo_updateImageLayout(self.native_mut(), layout) }
         self
     }

@@ -57,18 +57,13 @@ impl<'a> Default for FontArguments<'a> {
 
 impl<'a> FontArguments<'a> {
     pub fn new() -> Self {
-        // does not link under Linux / macOS
-        // SkFontArguments::new()
         Self::construct(|fa| unsafe {
             C_SkFontArguments_construct(fa);
         })
     }
 
     pub fn set_collection_index(&mut self, collection_index: usize) -> &mut Self {
-        unsafe {
-            self.native_mut()
-                .setCollectionIndex(collection_index.try_into().unwrap());
-        }
+        self.native_mut().fCollectionIndex = collection_index.try_into().unwrap();
         self
     }
 
@@ -81,7 +76,6 @@ impl<'a> FontArguments<'a> {
             coordinateCount: position.coordinates.len().try_into().unwrap(),
         };
         unsafe {
-            // does not link on Linux / macOS:
             C_SkFontArguments_setVariationDesignPosition(self.native_mut(), position);
             // note: we are _not_ returning Self here, but VariationPosition with a
             // changed lifetime.
@@ -90,9 +84,7 @@ impl<'a> FontArguments<'a> {
     }
 
     pub fn collection_index(&self) -> usize {
-        unsafe { self.native().getCollectionIndex() }
-            .try_into()
-            .unwrap()
+        self.native().fCollectionIndex.try_into().unwrap()
     }
 
     pub fn variation_design_position(&self) -> VariationPosition {

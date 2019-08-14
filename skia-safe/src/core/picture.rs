@@ -37,7 +37,7 @@ impl RCHandle<SkPicture> {
     }
 
     pub fn unique_id(&self) -> u32 {
-        unsafe { self.native().uniqueID() }
+        self.native().fUniqueID
     }
 
     // TODO: support SkSerialProcs in serialize()?

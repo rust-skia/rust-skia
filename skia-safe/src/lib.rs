@@ -7,6 +7,7 @@ mod interop;
 mod modules;
 mod pathops;
 mod prelude;
+mod private;
 #[cfg(feature = "svg")]
 pub mod svg;
 // TODO: We don't export utils/* into the crate's root yet. Should we?

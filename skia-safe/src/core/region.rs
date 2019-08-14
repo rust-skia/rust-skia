@@ -2,8 +2,9 @@ use crate::prelude::*;
 use crate::{Contains, IPoint, IRect, IVector, Path, QuickReject};
 use skia_bindings::{
     C_SkRegion_Cliperator_destruct, C_SkRegion_Equals, C_SkRegion_Iterator_Construct,
-    C_SkRegion_Iterator_rgn, C_SkRegion_Spanerator_destruct, C_SkRegion_destruct, SkRegion,
-    SkRegion_Cliperator, SkRegion_Iterator, SkRegion_Op, SkRegion_Spanerator,
+    C_SkRegion_Iterator_rgn, C_SkRegion_Spanerator_destruct, C_SkRegion_destruct,
+    C_SkRegion_quickContains, C_SkRegion_set, SkRegion, SkRegion_Cliperator, SkRegion_Iterator,
+    SkRegion_Op, SkRegion_RunHead, SkRegion_Spanerator,
 };
 use std::marker::PhantomData;
 use std::{iter, mem, ptr};
@@ -12,8 +13,6 @@ pub type Region = Handle<SkRegion>;
 
 impl NativeDrop for SkRegion {
     fn drop(&mut self) {
-        // does not link:
-        // unsafe { SkRegion::destruct(self) }
         unsafe { C_SkRegion_destruct(self) }
     }
 }
@@ -57,27 +56,30 @@ impl Handle<SkRegion> {
     }
 
     pub fn set(&mut self, src: &Region) -> bool {
-        unsafe { self.native_mut().set(src.native()) }
+        unsafe { C_SkRegion_set(self.native_mut(), src.native()) }
     }
 
     pub fn swap(&mut self, other: &mut Region) {
         unsafe { self.native_mut().swap(other.native_mut()) }
     }
 
+    const EMPTY_RUN_HEAD_PTR: *mut SkRegion_RunHead = -1 as _;
+    const RECT_RUN_HEAD_PTR: *mut SkRegion_RunHead = ptr::null_mut();
+
     pub fn is_empty(&self) -> bool {
-        unsafe { self.native().isEmpty() }
+        self.native().fRunHead == Self::EMPTY_RUN_HEAD_PTR
     }
 
     pub fn is_rect(&self) -> bool {
-        unsafe { self.native().isRect() }
+        self.native().fRunHead == Self::RECT_RUN_HEAD_PTR
     }
 
     pub fn is_complex(&self) -> bool {
-        unsafe { self.native().isComplex() }
+        !self.is_empty() && !self.is_rect()
     }
 
-    pub fn bounds(&self) -> IRect {
-        IRect::from_native(unsafe { *self.native().getBounds() })
+    pub fn bounds(&self) -> &IRect {
+        IRect::from_native_ref(&self.native().fBounds)
     }
 
     pub fn compute_region_complexity(&self) -> usize {
@@ -102,8 +104,6 @@ impl Handle<SkRegion> {
     }
 
     pub fn set_rect_ltbr(&mut self, left: i32, top: i32, right: i32, bottom: i32) -> bool {
-        // does not link:
-        // unsafe { self.native_mut().setRect1(left, top, right, bottom) }
         self.set_rect(IRect::new(left, top, right, bottom))
     }
 
@@ -146,29 +146,30 @@ impl Handle<SkRegion> {
         unsafe { self.native().contains2(other.native()) }
     }
 
-    pub fn quick_contains(&self, rect: impl AsRef<IRect>) -> bool {
-        unsafe { self.native().quickContains(rect.as_ref().native()) }
+    pub fn quick_contains(&self, r: impl AsRef<IRect>) -> bool {
+        let r = r.as_ref();
+        self.quick_contains_ltrb(r.left, r.top, r.right, r.bottom)
     }
 
     pub fn quick_contains_ltrb(&self, left: i32, top: i32, right: i32, bottom: i32) -> bool {
-        unsafe { self.native().quickContains1(left, top, right, bottom) }
+        unsafe { C_SkRegion_quickContains(self.native(), left, top, right, bottom) }
     }
 
-    // quick_reject() trait below.
+    // see also the quick_reject() trait below.
 
     pub fn quick_reject_rect(&self, rect: impl AsRef<IRect>) -> bool {
-        unsafe { self.native().quickReject(rect.as_ref().native()) }
+        let rect = rect.as_ref();
+        self.is_empty() || rect.is_empty() || !IRect::intersects(&self.bounds(), rect)
     }
 
-    pub fn quick_reject_region(&self, other: &Region) -> bool {
-        // does not link:
-        // unsafe { self.native().quickReject1(other.native()) }
-        self.is_empty() || other.is_empty() || !IRect::intersects(&self.bounds(), &other.bounds())
+    pub fn quick_reject_region(&self, rgn: &Region) -> bool {
+        self.is_empty() || rgn.is_empty() || !IRect::intersects(&self.bounds(), &rgn.bounds())
     }
 
     pub fn translate(&mut self, d: impl Into<IVector>) {
         let d = d.into();
-        unsafe { self.native_mut().translate(d.x, d.y) }
+        let self_ptr = self.native_mut() as *mut _;
+        unsafe { self.native().translate(d.x, d.y, self_ptr) }
     }
 
     pub fn translated(&self, d: impl Into<IVector>) -> Region {
@@ -178,14 +179,19 @@ impl Handle<SkRegion> {
     }
 
     pub fn op_rect(&mut self, rect: impl AsRef<IRect>, op: RegionOp) -> bool {
+        let self_ptr = self.native_mut() as *const _;
         unsafe {
             self.native_mut()
-                .op(rect.as_ref().native(), op.into_native())
+                .op1(self_ptr, rect.as_ref().native(), op.into_native())
         }
     }
 
     pub fn op_region(&mut self, region: &Region, op: RegionOp) -> bool {
-        unsafe { self.native_mut().op2(region.native(), op.into_native()) }
+        let self_ptr = self.native_mut() as *const _;
+        unsafe {
+            self.native_mut()
+                .op2(self_ptr, region.native(), op.into_native())
+        }
     }
 
     pub fn op_rect_region(
@@ -196,7 +202,7 @@ impl Handle<SkRegion> {
     ) -> bool {
         unsafe {
             self.native_mut()
-                .op3(rect.as_ref().native(), region.native(), op.into_native())
+                .op(rect.as_ref().native(), region.native(), op.into_native())
         }
     }
 
@@ -208,7 +214,7 @@ impl Handle<SkRegion> {
     ) -> bool {
         unsafe {
             self.native_mut()
-                .op4(region.native(), rect.as_ref().native(), op.into_native())
+                .op1(region.native(), rect.as_ref().native(), op.into_native())
         }
     }
 
@@ -355,15 +361,13 @@ fn test_iterator_layout() {
 
 impl<'a> Iterator<'a> {
     pub fn new_empty() -> Iterator<'a> {
-        // does not link:
-        // SkRegion_Iterator::new()
         Iterator::construct(|iterator| unsafe {
             C_SkRegion_Iterator_Construct(iterator);
         })
     }
 
     pub fn new(region: &'a Region) -> Iterator<'a> {
-        Iterator::from_native(unsafe { SkRegion_Iterator::new1(region.native()) })
+        Iterator::from_native(unsafe { SkRegion_Iterator::new(region.native()) })
     }
 
     pub fn rewind(&mut self) -> bool {
@@ -380,7 +384,7 @@ impl<'a> Iterator<'a> {
     }
 
     pub fn is_done(&self) -> bool {
-        unsafe { self.native().done() }
+        self.native().fDone
     }
 
     pub fn next(&mut self) {
@@ -390,13 +394,11 @@ impl<'a> Iterator<'a> {
     }
 
     pub fn rect(&self) -> &IRect {
-        IRect::from_native_ref(unsafe { &*self.native().rect() })
+        IRect::from_native_ref(&self.native().fRect)
     }
 
     pub fn rgn(&self) -> Option<&Region> {
         unsafe {
-            // does not link:
-            // let r = self.native().rgn();
             let r = C_SkRegion_Iterator_rgn(self.native());
             if r.is_null() {
                 return None;
@@ -454,10 +456,8 @@ impl<'a> Cliperator<'a> {
         })
     }
 
-    // TODO: why does this function need &mut self?
-    #[allow(clippy::wrong_self_convention)]
-    pub fn is_done(&mut self) -> bool {
-        unsafe { self.native_mut().done() }
+    pub fn is_done(&self) -> bool {
+        self.native().fDone
     }
 
     pub fn next(&mut self) {
@@ -465,7 +465,7 @@ impl<'a> Cliperator<'a> {
     }
 
     pub fn rect(&self) -> &IRect {
-        IRect::from_native_ref(unsafe { &*self.native().rect() })
+        IRect::from_native_ref(&self.native().fRect)
     }
 }
 

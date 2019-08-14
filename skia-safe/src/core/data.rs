@@ -41,7 +41,7 @@ impl PartialEq for RCHandle<SkData> {
 
 impl RCHandle<SkData> {
     pub fn size(&self) -> usize {
-        unsafe { self.native().size() }
+        self.native().fSize
     }
 
     pub fn is_empty(&self) -> bool {
@@ -55,7 +55,7 @@ impl RCHandle<SkData> {
 
     pub fn as_bytes(&self) -> &[u8] {
         unsafe {
-            let bytes = self.native().bytes();
+            let bytes = self.native().fPtr as *const u8;
             slice::from_raw_parts(bytes, self.size())
         }
     }
