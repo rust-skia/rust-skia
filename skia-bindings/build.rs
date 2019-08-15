@@ -87,19 +87,19 @@ fn should_try_download_binaries(config: &skia::BinariesConfiguration) -> Option<
     if env::force_skia_binaries_download() {
         // retrieve the hash from the repository above us.
         let half_hash = git::half_hash()?;
-        return Some((tag, binaries::key(&half_hash, &config.features)));
+        return Some((tag, binaries::key(&half_hash, &config.feature_ids)));
     }
 
     // are we building inside a package?
     if let Ok(ref full_hash) = cargo::package_repository_hash() {
         let half_hash = git::trim_hash(full_hash);
-        return Some((tag, binaries::key(&half_hash, &config.features)));
+        return Some((tag, binaries::key(&half_hash, &config.feature_ids)));
     }
 
     if azure::is_active() {
         // and if we can resolve the hash and the key
         let half_hash = git::half_hash()?;
-        return Some((tag, binaries::key(&half_hash, &config.features)));
+        return Some((tag, binaries::key(&half_hash, &config.feature_ids)));
     }
 
     None
