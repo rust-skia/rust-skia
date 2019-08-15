@@ -79,16 +79,16 @@ For other platforms, more information is available at the [OpenSSL crate documen
 ### Windows
 
 - Be sure the `git` command line tool is installed.
-- Install the [official LLVM 8](http://releases.llvm.org/download.html) distribution.
-- msys:
-  - Install one of the Python2 packages, for example `mingw-w64-x86_64-python2`.
-  - LLVM is _always_ picked up from `C:/Program Files/LLVM`, so be sure it's available from there.
-- without msys:
+- Install the [latest LLVM 8](http://releases.llvm.org/download.html) distribution.
+- [MSYS2](https://www.msys2.org/):
+  - Install Python2 with `pacman -S python2`.
+  - `clang` is _always_ picked up from `C:/Program Files/LLVM/bin`, so be sure it's available from there.
+- Windows Shell (Cmd.exe):
   - Download and install Python version 2 from [python.org](https://www.python.org/downloads/release/python-2716/).
 
 ### Linux
 
-- LLVM should be installed out of the box, if not, install version 8.
+- LLVM/Clang should be installed out of the box, if not, install version 8.
 
 Then use:
 
