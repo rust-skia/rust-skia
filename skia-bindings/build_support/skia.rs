@@ -170,7 +170,7 @@ impl TextLayout {
         match self {
             TextLayout::ShaperAndParagraph => vec![Patch {
                 name: "skparagraph".into(),
-                marker_file: "BUILD.gn".into(),
+                marked_file: "BUILD.gn".into(),
             }],
             _ => Vec::new(),
         }
@@ -521,6 +521,11 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
 
     if output.status.code() != Some(0) {
         panic!("{:?}", String::from_utf8(output.stdout).unwrap());
+    }
+
+    for patch in &build.skia_patches {
+        println!("reversing patch: {}", patch.name);
+        patch.reverse(&PathBuf::from("skia"));
     }
 
     let ninja_command = if on_windows {
@@ -958,22 +963,34 @@ pub(crate) mod definitions {
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Patch {
     name: String,
-    marker_file: PathBuf,
+    marked_file: PathBuf,
 }
 
 impl Patch {
     fn apply(&self, root_dir: &Path) {
-        let patch_name = &self.name;
-        let marker_file = &self.marker_file;
-
-        let build_gn = root_dir.join(marker_file);
-        let contents = fs::read_to_string(build_gn).unwrap();
-        let patch_marker = format!("**SKIA-BINDINGS-PATCH-MARKER-{}**", patch_name);
-        if contents.contains(&patch_marker) {
-            return;
+        if !self.is_applied(root_dir) {
+            let patch_file = PathBuf::from("..").join(self.name.clone() + ".patch");
+            git::run(&["apply", patch_file.to_str().unwrap()], Some(root_dir));
         }
+    }
 
-        let patch_file = PathBuf::from("..").join(String::from(patch_name) + ".patch");
-        git::run(&["apply", patch_file.to_str().unwrap()], Some(root_dir));
+    fn reverse(&self, root_dir: &Path) {
+        if self.is_applied(root_dir) {
+            let patch_file = PathBuf::from("..").join(self.name.clone() + ".patch");
+            git::run(
+                &["apply", "--reverse", patch_file.to_str().unwrap()],
+                Some(root_dir),
+            );
+        }
+    }
+
+    fn is_applied(&self, root_dir: &Path) -> bool {
+        let build_gn = root_dir.join(&self.marked_file);
+        let contents = fs::read_to_string(build_gn).unwrap();
+        let patch_marker = format!(
+            "**SKIA-BINDINGS-PATCH-MARKER-{}**",
+            self.name.to_uppercase()
+        );
+        contents.contains(&patch_marker)
     }
 }
