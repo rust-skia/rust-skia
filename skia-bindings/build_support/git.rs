@@ -25,7 +25,7 @@ pub fn trim_hash(hash: &str) -> String {
 /// Run git with the given args in the given directory, print stderr to the current
 /// process's terminal, and capture its stdout output.
 /// Panics if the git command fails.
-pub fn _run<'a>(args: &[impl AsRef<str>], dir: impl Into<Option<&'a Path>>) -> Vec<u8> {
+pub fn run<'a>(args: &[impl AsRef<str>], dir: impl Into<Option<&'a Path>>) -> Vec<u8> {
     let args: Vec<&str> = args.iter().map(|s| s.as_ref()).collect();
     let (status, output) = _run2(&args, dir);
     if status == 0 {

@@ -1,21 +1,25 @@
 //! Full build support for the Skia library, SkiaBindings library and bindings.rs file.
 
-use crate::build_support::{android, cargo, clang, ios, vs};
+use crate::build_support::{android, cargo, clang, git, ios, vs};
 use cc::Build;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::{env, fs};
 
+/// The libraries to link with.
 mod lib {
     pub const SKIA: &str = "skia";
     pub const SKIA_BINDINGS: &str = "skia-bindings";
     pub const SKSHAPER: &str = "skshaper";
+    pub const SKPARAGRAPH: &str = "skparagraph";
 }
 
-mod feature {
+/// Feature identifiers define the additional configuration parts of the binaries to download.
+mod feature_id {
     pub const VULKAN: &str = "vulkan";
     pub const SVG: &str = "svg";
     pub const SHAPER: &str = "shaper";
+    pub const PARAGRAPH: &str = "paragraph";
 }
 
 /// The defaults for the Skia build configuration.
@@ -33,17 +37,29 @@ impl Default for BuildConfiguration {
             }
         };
 
+        let text_layout = {
+            match (cfg!(feature = "paragraph"), cfg!(feature = "shaper")) {
+                (false, false) => TextLayout::None,
+                (false, true) => TextLayout::ShaperOnly,
+                (true, false) => panic!("invalid feature configuration, feature 'shaper' must be enabled for feature 'paragraph'"),
+                (true, true) => TextLayout::ShaperAndParagraph,
+            }
+        };
+
         BuildConfiguration {
             on_windows: cargo::host().is_windows(),
             // Note that currently, we don't support debug Skia builds,
             // because they are hard to configure and pull in a lot of testing related modules.
             skia_release: true,
-            feature_vulkan: cfg!(feature = "vulkan"),
-            feature_svg: cfg!(feature = "svg"),
-            feature_shaper: cfg!(feature = "shaper"),
-            feature_animation: false,
-            feature_dng: false,
-            feature_particles: false,
+            keep_inline_functions: true,
+            features: Features {
+                vulkan: cfg!(feature = "vulkan"),
+                svg: cfg!(feature = "svg"),
+                text_layout,
+                animation: false,
+                dng: false,
+                particles: false,
+            },
             all_skia_libs,
             definitions: Vec::new(),
         }
@@ -59,23 +75,12 @@ pub struct BuildConfiguration {
     /// Build Skia in a release configuration?
     skia_release: bool,
 
-    /// Build with Vulkan support?
-    feature_vulkan: bool,
+    /// Configure Skia builds to keep inline functions to
+    /// prevent mean linker errors.
+    keep_inline_functions: bool,
 
-    /// Build with SVG support?
-    feature_svg: bool,
-
-    /// Builds the skshaper module, compiles harfbuzz & icu support.
-    feature_shaper: bool,
-
-    /// Build with animation support (yet unsupported, no wrappers).
-    feature_animation: bool,
-
-    /// Support DNG file format (currently unsupported because of build errors).
-    feature_dng: bool,
-
-    /// Build the particles module (unsupported, no wrappers).
-    feature_particles: bool,
+    /// The Skia feature set to compile.
+    features: Features,
 
     /// As of M74, There is a bug in the Skia macOS build
     /// that requires all libraries to be built, otherwise the build will fail.
@@ -85,9 +90,99 @@ pub struct BuildConfiguration {
     definitions: Definitions,
 }
 
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub struct Features {
+    /// Build with Vulkan support?
+    vulkan: bool,
+
+    /// Build with SVG support?
+    svg: bool,
+
+    /// Features related to text layout.
+    text_layout: TextLayout,
+
+    /// Build with animation support (yet unsupported, no wrappers).
+    animation: bool,
+
+    /// Support DNG file format (currently unsupported because of build errors).
+    dng: bool,
+
+    /// Build the particles module (unsupported, no wrappers).
+    particles: bool,
+}
+
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub enum TextLayout {
+    /// No text shaping or layout features.
+    None,
+    /// Builds the skshaper module, compiles harfbuzz & icu support.
+    ShaperOnly,
+    /// Builds the skshaper and the skparagraph module.
+    ShaperAndParagraph,
+}
+
+impl TextLayout {
+    fn skia_args(&self) -> Vec<(&'static str, String)> {
+        let mut args = Vec::new();
+        let (shaper, paragraph) = match self {
+            TextLayout::None => {
+                args.push(("skia_use_icu", no()));
+                (false, false)
+            }
+            TextLayout::ShaperOnly => (true, false),
+            TextLayout::ShaperAndParagraph => (true, true),
+        };
+
+        if shaper {
+            args.extend(vec![
+                ("skia_enable_skshaper", yes()),
+                ("skia_use_icu", yes()),
+                ("skia_use_system_icu", no()),
+                ("skia_use_harfbuzz", yes()),
+                ("skia_use_system_harfbuzz", no()),
+                ("skia_use_sfntly", no()),
+            ]);
+        }
+
+        if paragraph {
+            args.extend(vec![
+                ("skia_enable_skparagraph", yes()),
+                // note: currently, tests need to be enabled, because modules/skparagraph
+                // is not included in the default dependency configuration.
+                // ("paragraph_tests_enabled", no()),
+            ]);
+        }
+
+        args
+    }
+
+    fn sources(&self) -> Vec<PathBuf> {
+        match self {
+            TextLayout::None => Vec::new(),
+            TextLayout::ShaperOnly => vec!["src/shaper.cpp".into()],
+            TextLayout::ShaperAndParagraph => {
+                vec!["src/shaper.cpp".into(), "src/paragraph.cpp".into()]
+            }
+        }
+    }
+
+    fn patches(&self) -> Vec<Patch> {
+        match self {
+            TextLayout::ShaperAndParagraph => vec![Patch {
+                name: "skparagraph".into(),
+                marker_file: "BUILD.gn".into(),
+            }],
+            _ => Vec::new(),
+        }
+    }
+}
+
 /// This is the final, low level build configuration.
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct FinalBuildConfiguration {
+    /// Patches to be applied to the Skia repository.
+    pub skia_patches: Vec<Patch>,
+
     /// The name value pairs passed as arguments to gn.
     pub gn_args: Vec<(String, String)>,
 
@@ -101,14 +196,9 @@ pub struct FinalBuildConfiguration {
 
 impl FinalBuildConfiguration {
     pub fn from_build_configuration(build: &BuildConfiguration) -> FinalBuildConfiguration {
-        let gn_args = {
-            fn yes() -> String {
-                "true".into()
-            }
-            fn no() -> String {
-                "false".into()
-            }
+        let features = &build.features;
 
+        let gn_args = {
             fn quote(s: &str) -> String {
                 format!("\"{}\"", s)
             }
@@ -124,20 +214,17 @@ impl FinalBuildConfiguration {
                 ("skia_use_system_zlib", no()),
                 (
                     "skia_enable_skottie",
-                    if build.feature_animation || build.all_skia_libs {
+                    if features.animation || build.all_skia_libs {
                         yes()
                     } else {
                         no()
                     },
                 ),
                 ("skia_use_xps", no()),
-                (
-                    "skia_use_dng_sdk",
-                    if build.feature_dng { yes() } else { no() },
-                ),
+                ("skia_use_dng_sdk", if features.dng { yes() } else { no() }),
                 (
                     "skia_enable_particles",
-                    if build.feature_particles || build.all_skia_libs {
+                    if features.particles || build.all_skia_libs {
                         yes()
                     } else {
                         no()
@@ -157,24 +244,15 @@ impl FinalBuildConfiguration {
                 args.push(("skia_use_lua", no()));
             }
 
-            if build.feature_shaper {
-                args.push(("skia_enable_skshaper", yes()));
-                args.push(("skia_use_icu", yes()));
-                args.push(("skia_use_system_icu", no()));
-                args.push(("skia_use_harfbuzz", yes()));
-                args.push(("skia_use_system_harfbuzz", no()));
-                args.push(("skia_use_sfntly", no()));
-            } else {
-                args.push(("skia_use_icu", no()));
-            }
+            args.extend(features.text_layout.skia_args());
 
-            if build.feature_vulkan {
+            if features.vulkan {
                 args.push(("skia_use_vulkan", yes()));
                 args.push(("skia_enable_spirv_validation", no()));
             }
 
             let mut flags: Vec<&str> = vec![];
-            let mut use_expat = build.feature_svg;
+            let mut use_expat = features.svg;
 
             // target specific gn args.
             let target = cargo::target();
@@ -232,13 +310,12 @@ impl FinalBuildConfiguration {
         let binding_sources = {
             let mut sources: Vec<PathBuf> = Vec::new();
             sources.push("src/bindings.cpp".into());
-            if build.feature_shaper {
-                sources.push("src/shaper.cpp".into())
-            };
+            sources.extend(features.text_layout.sources());
             sources
         };
 
         FinalBuildConfiguration {
+            skia_patches: features.text_layout.patches(),
             gn_args,
             definitions: build.definitions.clone(),
             binding_sources,
@@ -246,11 +323,18 @@ impl FinalBuildConfiguration {
     }
 }
 
+fn yes() -> String {
+    "true".into()
+}
+fn no() -> String {
+    "false".into()
+}
+
 /// The resulting binaries configuration.
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct BinariesConfiguration {
-    /// The features we built with.
-    pub features: Vec<String>,
+    /// The feature identifiers we built with.
+    pub feature_ids: Vec<String>,
 
     /// The output directory of the libraries we build and we need to inform cargo about.
     pub output_directory: PathBuf,
@@ -273,19 +357,30 @@ impl BinariesConfiguration {
     /// Build a binaries configuration based on the current environment cargo
     /// supplies us with and a Skia build configuration.
     pub fn from_cargo_env(build: &BuildConfiguration) -> Self {
+        let features = &build.features;
+
         let mut built_libraries = Vec::new();
         let mut additional_files = Vec::new();
-        let mut features = Vec::new();
-        if build.feature_vulkan {
-            features.push(feature::VULKAN);
+        let mut feature_ids = Vec::new();
+
+        if features.vulkan {
+            feature_ids.push(feature_id::VULKAN);
         }
-        if build.feature_svg {
-            features.push(feature::SVG);
+        if features.svg {
+            feature_ids.push(feature_id::SVG);
         }
-        if build.feature_shaper {
-            features.push(feature::SHAPER);
-            additional_files.push(ICUDTL_DAT.into());
-            built_libraries.push(lib::SKSHAPER.into());
+        match features.text_layout {
+            TextLayout::None => {}
+            TextLayout::ShaperOnly => {
+                feature_ids.push(feature_id::SHAPER);
+                additional_files.push(ICUDTL_DAT.into());
+                built_libraries.push(lib::SKSHAPER.into());
+            }
+            TextLayout::ShaperAndParagraph => {
+                feature_ids.push(feature_id::PARAGRAPH);
+                additional_files.push(ICUDTL_DAT.into());
+                built_libraries.push(lib::SKPARAGRAPH.into());
+            }
         }
 
         let mut link_libraries = Vec::new();
@@ -340,7 +435,7 @@ impl BinariesConfiguration {
         built_libraries.push(lib::SKIA_BINDINGS.into());
 
         BinariesConfiguration {
-            features: features.iter().map(|f| f.to_string()).collect(),
+            feature_ids: feature_ids.iter().map(|f| f.to_string()).collect(),
             output_directory,
             link_libraries: link_libraries.iter().map(|lib| lib.to_string()).collect(),
             built_libraries,
@@ -381,6 +476,11 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
         "`skia/tools/git-sync-deps` failed"
     );
 
+    for patch in &build.skia_patches {
+        println!("applying patch: {}", patch.name);
+        patch.apply(&PathBuf::from("skia"));
+    }
+
     let gn_args = build
         .gn_args
         .iter()
@@ -393,6 +493,8 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
     let gn_command = if on_windows { "skia/bin/gn" } else { "bin/gn" };
 
     let output_directory_str = config.output_directory.to_str().unwrap();
+
+    println!("Skia args: {}", &gn_args);
 
     let output = Command::new(gn_command)
         .args(&[
@@ -877,5 +979,28 @@ pub(crate) mod definitions {
         let mut uniques = HashSet::new();
         definitions.retain(|e| uniques.insert(e.0.clone()));
         definitions
+    }
+}
+
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub struct Patch {
+    name: String,
+    marker_file: PathBuf,
+}
+
+impl Patch {
+    fn apply(&self, root_dir: &Path) {
+        let patch_name = &self.name;
+        let marker_file = &self.marker_file;
+
+        let build_gn = root_dir.join(marker_file);
+        let contents = fs::read_to_string(build_gn).unwrap();
+        let patch_marker = format!("**SKIA-BINDINGS-PATCH-MARKER-{}**", patch_name);
+        if contents.contains(&patch_marker) {
+            return;
+        }
+
+        let patch_file = PathBuf::from("..").join(String::from(patch_name) + ".patch");
+        git::run(&["apply", patch_file.to_str().unwrap()], Some(root_dir));
     }
 }

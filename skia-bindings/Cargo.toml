@@ -27,6 +27,7 @@ default = []
 vulkan = []
 svg = []
 shaper = []
+paragraph = ["shaper"]
 
 [dependencies]
 
