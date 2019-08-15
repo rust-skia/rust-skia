@@ -14,7 +14,14 @@ This project attempts to provide _up to date_ safe bindings that bridge idiomati
 
 ### Crate
 
-Currently we recommend to use the git repository because the [prerelease on crates.io](https://crates.io/crates/skia-safe) is a bit flaky at the moment.
+Although we recommend to use the git repository because the [prerelease on crates.io](https://crates.io/crates/skia-safe) is a bit flaky at the moment, adding
+
+```toml
+[dependencies]
+skia-safe = "0"
+```
+
+to your `Cargo.toml` should get you started.
 
 ### Platforms & Build Targets
 
