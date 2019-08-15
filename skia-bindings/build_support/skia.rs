@@ -388,6 +388,7 @@ impl BinariesConfiguration {
             TextLayout::ShaperAndParagraph => {
                 feature_ids.push(feature_id::PARAGRAPH);
                 additional_files.push(ICUDTL_DAT.into());
+                built_libraries.push(lib::SKSHAPER.into());
                 built_libraries.push(lib::SKPARAGRAPH.into());
             }
         }
