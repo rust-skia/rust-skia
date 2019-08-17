@@ -121,7 +121,7 @@ extern "C" void C_SkEncodedOriginToMatrix(SkEncodedOrigin origin, int w, int h, 
 }
 
 //
-// SkSurface
+// core/SkSurface.h
 //
 
 extern "C" SkSurface* C_SkSurface_MakeRasterDirect(const SkImageInfo* imageInfo, void* pixels, size_t rowBytes, const SkSurfaceProps* surfaceProps) {
@@ -218,6 +218,14 @@ extern "C" SkSurface* C_SkSurface_MakeNull(int width, int height) {
     return SkSurface::MakeNull(width, height).release();
 }
 
+extern "C" int C_SkSurface_width(const SkSurface* self) {
+    return self->width();
+}
+
+extern "C" int C_SkSurface_height(const SkSurface* self) {
+    return self->height();
+}
+
 extern "C" SkImage* C_SkSurface_makeImageSnapshot(SkSurface* self, const SkIRect* bounds) {
     if (bounds) {
         return self->makeImageSnapshot(*bounds).release();
@@ -244,6 +252,10 @@ extern "C" SkSurface* C_SkSurface_makeSurface(
         SkSurface* self,
         const SkImageInfo* imageInfo) {
     return self->makeSurface(*imageInfo).release();
+}
+
+extern "C" const SkSurfaceProps* C_SkSurface_props(const SkSurface* self) {
+    return &self->props();
 }
 
 //
@@ -959,7 +971,7 @@ extern "C" SkShader* C_SkBitmap_makeShader(const SkBitmap* self, SkTileMode tmx,
 }
 
 //
-// SkPicture
+// core/SkPicture.h
 //
 
 extern "C" SkPicture* C_SkPicture_MakeFromData(const SkData* data) {
@@ -984,6 +996,10 @@ extern "C" void C_SkPicture_playback(const SkPicture* self, SkCanvas* canvas) {
 
 extern "C" SkRect C_SkPicture_cullRect(const SkPicture* self) {
     return self->cullRect();
+}
+
+extern "C" uint32_t C_SkPicture_uniqueID(const SkPicture* self) {
+    return self->uniqueID();
 }
 
 extern "C" int C_SkPicture_approximateOpCount(const SkPicture* self) {
@@ -1440,8 +1456,28 @@ extern "C" SkDrawable* C_SkPictureRecorder_finishRecordingAsDrawable(SkPictureRe
 }
 
 //
-// SkPixelRef
+// core/SkPixelRef.h
 //
+
+extern "C" int C_SkPixelRef_width(const SkPixelRef* self) {
+    return self->width();
+}
+
+extern "C" int C_SkPixelRef_height(const SkPixelRef* self) {
+    return self->height();
+}
+
+extern "C" void* C_SkPixelRef_pixels(const SkPixelRef* self) {
+    return self->pixels();
+}
+
+extern "C" size_t C_SkPixelRef_rowBytes(const SkPixelRef* self) {
+    return self->rowBytes();
+}
+
+extern "C" bool C_SkPixelRef_isImmutable(const SkPixelRef* self) {
+    return self->isImmutable();
+}
 
 extern "C" void C_SkPixelRef_notifyAddedToCache(SkPixelRef* self) {
     self->notifyAddedToCache();
@@ -1567,6 +1603,10 @@ extern "C" SkContourMeasure* C_SkContourMeasureIter_next(SkContourMeasureIter* s
 //
 // core/SkDataTable.h
 //
+
+extern "C" int C_SkDataTable_count(const SkDataTable* self) {
+    return self->count();
+}
 
 extern "C" SkDataTable *C_SkDataTable_MakeEmpty() {
     return SkDataTable::MakeEmpty().release();

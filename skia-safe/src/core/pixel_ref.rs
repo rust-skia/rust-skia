@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use skia_bindings::{
-    C_SkPixelRef_notifyAddedToCache, SkPixelRef, SkPixelRef_Mutability, SkRefCntBase,
+    C_SkPixelRef_height, C_SkPixelRef_isImmutable, C_SkPixelRef_notifyAddedToCache,
+    C_SkPixelRef_pixels, C_SkPixelRef_rowBytes, C_SkPixelRef_width, SkPixelRef, SkRefCntBase,
 };
 use std::os::raw::c_void;
 
@@ -15,19 +16,19 @@ impl RCHandle<SkPixelRef> {
     // TODO: wrap constructor with pixels borrowed.
 
     pub fn width(&self) -> i32 {
-        self.native().fWidth
+        unsafe { C_SkPixelRef_width(self.native()) }
     }
 
     pub fn height(&self) -> i32 {
-        self.native().fHeight
+        unsafe { C_SkPixelRef_height(self.native()) }
     }
 
     pub unsafe fn pixels(&self) -> *mut c_void {
-        self.native().fPixels
+        C_SkPixelRef_pixels(self.native())
     }
 
     pub fn row_bytes(&self) -> usize {
-        self.native().fRowBytes
+        unsafe { C_SkPixelRef_rowBytes(self.native()) }
     }
 
     pub fn generation_id(&self) -> u32 {
@@ -39,7 +40,7 @@ impl RCHandle<SkPixelRef> {
     }
 
     pub fn is_immutable(&self) -> bool {
-        self.native().fMutability() != SkPixelRef_Mutability::kMutable
+        unsafe { C_SkPixelRef_isImmutable(self.native()) }
     }
 
     pub fn set_immutable(&mut self) {

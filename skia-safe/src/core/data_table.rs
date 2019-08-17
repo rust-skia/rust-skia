@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use skia_bindings::{
     C_SkDataTable_MakeCopyArray, C_SkDataTable_MakeCopyArrays, C_SkDataTable_MakeEmpty,
-    SkDataTable, SkRefCntBase,
+    C_SkDataTable_count, SkDataTable, SkRefCntBase,
 };
 use std::convert::TryInto;
 use std::ffi::{c_void, CStr};
@@ -29,7 +29,9 @@ impl RCHandle<SkDataTable> {
     }
 
     pub fn count(&self) -> usize {
-        self.native().fCount.try_into().unwrap()
+        unsafe { C_SkDataTable_count(self.native()) }
+            .try_into()
+            .unwrap()
     }
 
     pub fn at_size(&self, index: usize) -> usize {
