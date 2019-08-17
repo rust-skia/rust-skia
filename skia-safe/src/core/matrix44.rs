@@ -290,7 +290,6 @@ impl Matrix44 {
         v: impl Into<Vector3>,
         degrees: scalar,
     ) -> &mut Self {
-        let v = v.into();
         self.set_rotate_about(v, degrees * std::f32::consts::PI / 180.0)
     }
 

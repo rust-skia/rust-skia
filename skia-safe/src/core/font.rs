@@ -130,7 +130,12 @@ impl Handle<SkFont> {
         (self.native().fFlags as SkFont_PrivFlags & flag) != 0
     }
 
+    #[deprecated(since = "15.0", note = "use set_force_auto_hinting()")]
     pub fn set_force_autohinting(&mut self, force_auto_hinting: bool) -> &mut Self {
+        self.set_force_auto_hinting(force_auto_hinting)
+    }
+
+    pub fn set_force_auto_hinting(&mut self, force_auto_hinting: bool) -> &mut Self {
         unsafe { self.native_mut().setForceAutoHinting(force_auto_hinting) }
         self
     }
@@ -452,4 +457,20 @@ impl Handle<SkFont> {
     pub fn spacing(&self) -> scalar {
         unsafe { self.native().getMetrics(ptr::null_mut()) }
     }
+}
+
+#[test]
+fn test_flags() {
+    let tf = Typeface::default();
+    let mut font = Font::new(&tf, 10.0);
+
+    font.set_force_auto_hinting(true);
+    assert!(font.is_force_auto_hinting());
+    font.set_force_auto_hinting(false);
+    assert!(!font.is_force_auto_hinting());
+
+    font.set_embolden(true);
+    assert!(font.is_embolden());
+    font.set_embolden(false);
+    assert!(!font.is_embolden());
 }

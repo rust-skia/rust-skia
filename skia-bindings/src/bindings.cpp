@@ -1003,6 +1003,10 @@ extern "C" SkShader* C_SkPicture_makeShader(const SkPicture* self, SkTileMode tm
 // core/SkRRect.h
 //
 
+extern "C" void C_SkRRect_Construct(SkRRect* uninitialized) {
+    new(uninitialized) SkRRect();
+}
+
 extern "C" SkRRect::Type C_SkRRect_getType(const SkRRect* self) {
     return self->getType();
 }

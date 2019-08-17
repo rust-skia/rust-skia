@@ -80,7 +80,7 @@ impl Handle<SkPixmap> {
         self.native().fRowBytes
     }
 
-    pub fn addr(&self) -> *const c_void {
+    pub unsafe fn addr(&self) -> *const c_void {
         self.native().fPixels
     }
 
@@ -113,7 +113,7 @@ impl Handle<SkPixmap> {
     }
 
     pub fn row_bytes_as_pixels(&self) -> usize {
-        self.native().fRowBytes >> self.shift_per_pixel()
+        self.row_bytes() >> self.shift_per_pixel()
     }
 
     pub fn shift_per_pixel(&self) -> usize {
@@ -130,12 +130,22 @@ impl Handle<SkPixmap> {
 
     pub fn get_color(&self, p: impl Into<IPoint>) -> Color {
         let p = p.into();
+        self.assert_pixel_exists(p);
         Color::from_native(unsafe { self.native().getColor(p.x, p.y) })
     }
 
     pub fn get_alpha_f(&self, p: impl Into<IPoint>) -> f32 {
         let p = p.into();
+        self.assert_pixel_exists(p);
         unsafe { self.native().getAlphaf(p.x, p.y) }
+    }
+
+    // Helper to test if the pixel does exist physically in memory.
+    fn assert_pixel_exists(&self, p: impl Into<IPoint>) {
+        let p = p.into();
+        assert!(!unsafe { self.addr() }.is_null());
+        assert!(p.x >= 0 && p.x < self.width());
+        assert!(p.y >= 0 && p.y < self.height());
     }
 
     pub unsafe fn addr_at(&self, p: impl Into<IPoint>) -> *const c_void {

@@ -303,7 +303,6 @@ impl Handle<SkImageInfo> {
         self.compute_byte_size(self.min_row_bytes())
     }
 
-    // TODO: rename to has_valid_row_bytes()?
     pub fn valid_row_bytes(&self, row_bytes: usize) -> bool {
         row_bytes >= self.min_row_bytes()
     }
