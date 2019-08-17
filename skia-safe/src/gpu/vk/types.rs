@@ -1,4 +1,4 @@
-use super::{Bool32, Filter, FomatFeatureFlags, Format, ImageLayout};
+use super::{Bool32, Filter, Format, FormatFeatureFlags, ImageLayout};
 use super::{
     ChromaLocation, DeviceMemory, DeviceSize, Image, ImageTiling, SamplerYcbcrModelConversion,
     SamplerYcbcrRange,
@@ -20,7 +20,7 @@ use std::os::raw;
 pub type GraphicsBackendMemory = GrVkBackendMemory;
 
 #[repr(C)]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Default, Debug)]
 pub struct Alloc {
     pub memory: DeviceMemory,
     pub offset: DeviceSize,
@@ -34,12 +34,6 @@ impl NativeTransmutable<GrVkAlloc> for Alloc {}
 #[test]
 fn test_vk_alloc_layout() {
     Alloc::test_layout()
-}
-
-impl Default for Alloc {
-    fn default() -> Self {
-        Alloc::from_native(unsafe { mem::zeroed() })
-    }
 }
 
 impl PartialEq for Alloc {
@@ -66,7 +60,7 @@ impl Alloc {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Default, Debug)]
 #[repr(C)]
 pub struct YcbcrConversionInfo {
     pub ycrbcr_model: SamplerYcbcrModelConversion,
@@ -76,20 +70,13 @@ pub struct YcbcrConversionInfo {
     pub chroma_filter: Filter,
     pub force_explicit_reconsturction: Bool32,
     pub external_format: u64,
-    pub external_format_features: FomatFeatureFlags,
+    pub external_format_features: FormatFeatureFlags,
 }
 
 impl NativeTransmutable<GrVkYcbcrConversionInfo> for YcbcrConversionInfo {}
 #[test]
 fn test_ycbcr_conversion_info_layout() {
     YcbcrConversionInfo::test_layout()
-}
-
-impl Default for YcbcrConversionInfo {
-    fn default() -> Self {
-        // YcbcrConversionInfo::from_native(unsafe { GrVkYcbcrConversionInfo::new() })
-        YcbcrConversionInfo::from_native(unsafe { mem::zeroed() })
-    }
 }
 
 impl PartialEq for YcbcrConversionInfo {
@@ -108,7 +95,7 @@ impl YcbcrConversionInfo {
         chroma_filter: Filter,
         force_explicit_reconstruction: Bool32,
         external_format: u64,
-        external_format_features: FomatFeatureFlags,
+        external_format_features: FormatFeatureFlags,
     ) -> YcbcrConversionInfo {
         YcbcrConversionInfo::construct(|ci| unsafe {
             C_GrVkYcbcrConversionInfo_Construct(

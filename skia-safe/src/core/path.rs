@@ -38,7 +38,7 @@ impl Default for Direction {
 #[repr(i32)]
 pub enum FillType {
     Winding = SkPath_FillType::kWinding_FillType as _,
-    EventOdd = SkPath_FillType::kEvenOdd_FillType as _,
+    EvenOdd = SkPath_FillType::kEvenOdd_FillType as _,
     InverseWinding = SkPath_FillType::kInverseWinding_FillType as _,
     InverseEvenOdd = SkPath_FillType::kInverseEvenOdd_FillType as _,
 }
@@ -273,8 +273,12 @@ impl<'a> RawIter<'a> {
         Verb::from_native(unsafe { C_SkPath_RawIter_peek(self.native()) })
     }
 
-    pub unsafe fn conic_weight(&self) -> scalar {
-        *self.native().fRawIter.fConicWeights
+    pub fn conic_weight(&self) -> Option<scalar> {
+        self.native()
+            .fRawIter
+            .fConicWeights
+            .to_option()
+            .map(|cw| unsafe { *cw })
     }
 }
 
@@ -283,10 +287,6 @@ impl<'a> Iterator for RawIter<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let mut points = [Point::default(); Verb::MAX_POINTS];
-        /* inlined
-        let verb =
-            Verb::from_native(unsafe { self.native_mut().next(points.native_mut().as_mut_ptr()) });
-            */
 
         let verb = Verb::from_native(unsafe {
             C_SkPath_RawIter_next(self.native_mut(), points.native_mut().as_mut_ptr())
@@ -1025,4 +1025,24 @@ fn test_get_points() {
     let count_returned = p.get_points(&mut points);
     assert_eq!(count_returned, points.len());
     assert_eq!(count_returned, 4);
+}
+
+#[test]
+fn fill_type() {
+    let mut p = Path::default();
+    assert_eq!(p.fill_type(), FillType::Winding);
+    p.set_fill_type(FillType::EvenOdd);
+    assert_eq!(p.fill_type(), FillType::EvenOdd);
+    assert!(!p.is_inverse_fill_type());
+    p.toggle_inverse_fill_type();
+    assert_eq!(p.fill_type(), FillType::InverseEvenOdd);
+    assert!(p.is_inverse_fill_type());
+}
+
+#[test]
+fn is_volatile() {
+    let mut p = Path::default();
+    assert!(!p.is_volatile());
+    p.set_is_volatile(true);
+    assert!(p.is_volatile());
 }

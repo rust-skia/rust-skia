@@ -568,7 +568,6 @@ impl Canvas {
     }
 
     pub fn clear(&mut self, color: impl Into<Color>) -> &mut Self {
-        // unsafe { self.native_mut().clear(color.into().into_native()) }
         self.draw_color(color, BlendMode::Src)
     }
 
@@ -1187,7 +1186,7 @@ pub enum AutoCanvasRestore {}
 impl AutoCanvasRestore {
     // TODO: rename to save(), add a method to Canvas, perhaps named auto_restored()?
     // Note: Can't use AsMut here for the canvas, because it would break
-    //       the lifetime dependency.
+    //       the lifetime bound.
     pub fn guard(canvas: &mut Canvas, do_save: bool) -> AutoRestoredCanvas {
         let restore = construct(|acr| unsafe {
             C_SkAutoCanvasRestore_Construct(acr, canvas.native_mut(), do_save)

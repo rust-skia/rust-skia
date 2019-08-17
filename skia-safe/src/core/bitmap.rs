@@ -66,11 +66,11 @@ impl Handle<SkBitmap> {
     }
 
     pub fn bytes_per_pixel(&self) -> usize {
-        ImageInfo::from_native_ref(&self.native().fPixmap.fInfo).bytes_per_pixel()
+        self.info().bytes_per_pixel()
     }
 
     pub fn row_bytes_as_pixels(&self) -> usize {
-        Pixmap::from_native_ref(&self.native().fPixmap).row_bytes_as_pixels()
+        self.pixmap().row_bytes_as_pixels()
     }
 
     pub fn shift_per_pixel(&self) -> usize {
@@ -87,7 +87,7 @@ impl Handle<SkBitmap> {
     }
 
     pub fn is_null(&self) -> bool {
-        self.native().fPixelRef.fPtr == ptr::null_mut()
+        self.native().fPixelRef.fPtr.is_null()
     }
 
     pub fn draws_nothing(&self) -> bool {

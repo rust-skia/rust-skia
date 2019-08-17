@@ -138,7 +138,6 @@ impl Matrix {
     }
 
     pub fn new_trans(d: impl Into<Vector>) -> Matrix {
-        let d = d.into();
         let mut m = Matrix::new();
         m.set_translate(d);
         m
@@ -632,10 +631,10 @@ impl Matrix {
     }
 
     pub fn map_rect(&self, rect: impl AsRef<Rect>) -> (Rect, bool) {
-        let mut rect = rect.as_ref().into_native();
-        let ptr = &mut rect;
+        let mut rect = *rect.as_ref();
+        let ptr = rect.native_mut();
         let rect_stays_rect = unsafe { self.native().mapRect(ptr, ptr) };
-        (Rect::from_native(rect), rect_stays_rect)
+        (rect, rect_stays_rect)
     }
 
     pub fn map_rect_to_quad(&self, rect: impl AsRef<Rect>) -> [Point; 4] {

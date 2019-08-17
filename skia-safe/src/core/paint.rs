@@ -302,7 +302,6 @@ impl Handle<SkPaint> {
     }
 
     pub fn set_blend_mode(&mut self, mode: BlendMode) -> &mut Self {
-        // unsafe { self.native_mut().setBlendMode(mode.into_native()) }
         unsafe {
             self.native_mut()
                 .__bindgen_anon_1
@@ -377,4 +376,46 @@ fn default_creation() {
 fn method_chaining_compiles() {
     let mut paint = Paint::default();
     let _paint = paint.reset().reset();
+}
+
+#[test]
+fn union_flags() {
+    let mut paint = Paint::default();
+    assert!(!paint.is_anti_alias());
+    assert!(!paint.is_dither());
+    assert_eq!(paint.filter_quality(), FilterQuality::None);
+    assert_eq!(paint.style(), Style::Fill);
+
+    {
+        paint.set_anti_alias(true);
+
+        assert!(paint.is_anti_alias());
+        assert!(!paint.is_dither());
+        assert_eq!(paint.filter_quality(), FilterQuality::None);
+        assert_eq!(paint.style(), Style::Fill);
+
+        paint.set_anti_alias(false);
+    }
+
+    {
+        paint.set_filter_quality(FilterQuality::High);
+
+        assert!(!paint.is_anti_alias());
+        assert!(!paint.is_dither());
+        assert_eq!(paint.filter_quality(), FilterQuality::High);
+        assert_eq!(paint.style(), Style::Fill);
+
+        paint.set_filter_quality(FilterQuality::None);
+    }
+
+    {
+        paint.set_style(Style::StrokeAndFill);
+
+        assert!(!paint.is_anti_alias());
+        assert!(!paint.is_dither());
+        assert_eq!(paint.filter_quality(), FilterQuality::None);
+        assert_eq!(paint.style(), Style::StrokeAndFill);
+
+        paint.set_style(Style::Fill);
+    }
 }

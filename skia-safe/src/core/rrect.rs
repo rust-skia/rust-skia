@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use crate::{scalar, Matrix, Rect, Vector};
 use skia_bindings::{
-    C_SkRRect_Equals, C_SkRRect_getType, C_SkRRect_setOval, C_SkRRect_setRect, SkRRect,
-    SkRRect_Corner, SkRRect_Type,
+    C_SkRRect_Construct, C_SkRRect_Equals, C_SkRRect_getType, C_SkRRect_setOval, C_SkRRect_setRect,
+    SkRRect, SkRRect_Corner, SkRRect_Type,
 };
 use std::{mem, ptr};
 
@@ -68,7 +68,7 @@ impl AsRef<RRect> for RRect {
 
 impl RRect {
     pub fn new() -> Self {
-        RRect::from_native(unsafe { mem::zeroed() })
+        RRect::construct(|rr| unsafe { C_SkRRect_Construct(rr) })
     }
 
     pub fn get_type(&self) -> Type {

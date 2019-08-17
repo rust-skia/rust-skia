@@ -7,7 +7,9 @@ use skia_bindings::SkRSXform;
 pub struct RSXform {
     pub scos: scalar,
     pub ssin: scalar,
-    pub t: Vector,
+    // don't use Vector here to keep this struct Skia-like.
+    pub tx: scalar,
+    pub ty: scalar,
 }
 
 impl NativeTransmutable<SkRSXform> for RSXform {}
@@ -19,7 +21,12 @@ fn test_rsxform_layout() {
 impl RSXform {
     pub fn new(scos: scalar, ssin: scalar, t: impl Into<Vector>) -> Self {
         let t = t.into();
-        Self { scos, ssin, t }
+        Self {
+            scos,
+            ssin,
+            tx: t.x,
+            ty: t.y,
+        }
     }
 
     pub fn from_radians(
@@ -48,7 +55,8 @@ impl RSXform {
         let t = t.into();
         self.scos = scos;
         self.ssin = ssin;
-        self.t = t;
+        self.tx = t.x;
+        self.ty = t.y;
     }
 
     pub fn to_quad(&self, size: impl Into<Size>) -> [Point; 4] {

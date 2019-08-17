@@ -140,14 +140,9 @@ impl IRect {
 
     #[must_use]
     pub fn with_offset(&self, delta: impl Into<IVector>) -> Self {
-        let delta = delta.into();
-        let (dx, dy) = (delta.x, delta.y);
-        IRect::new(
-            sk32::sat_add(self.left, dx),
-            sk32::sat_add(self.top, dy),
-            sk32::sat_add(self.right, dx),
-            sk32::sat_add(self.bottom, dy),
-        )
+        let mut cloned = self.clone();
+        cloned.offset(delta);
+        cloned
     }
 
     #[must_use]
@@ -447,12 +442,10 @@ impl Rect {
     }
 
     pub fn width(&self) -> scalar {
-        // unsafe { self.native().width() }
         self.native().fRight - self.native().fLeft
     }
 
     pub fn height(&self) -> scalar {
-        // unsafe { self.native().height() }
         self.native().fBottom - self.native().fTop
     }
 

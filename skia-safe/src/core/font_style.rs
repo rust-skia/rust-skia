@@ -173,7 +173,12 @@ impl Default for FontStyle {
 impl FontStyle {
     pub fn new(weight: Weight, width: Width, slant: Slant) -> Self {
         Self::construct(|fs| unsafe {
-            C_SkFontStyle_Construct2(fs, *weight.native(), *width.native(), *slant.native())
+            C_SkFontStyle_Construct2(
+                fs,
+                weight.into_native(),
+                width.into_native(),
+                slant.into_native(),
+            )
         })
     }
 
