@@ -32,7 +32,6 @@ pub mod variation_position {
 }
 
 #[repr(C)]
-#[derive(Debug)]
 pub struct FontArguments<'a> {
     args: SkFontArguments,
     pd: PhantomData<&'a [variation_position::Coordinate]>,
@@ -112,7 +111,6 @@ impl<'a> FontArguments<'a> {
 #[test]
 fn test_font_arguments_with_no_coordinates() {
     let fa = FontArguments::new();
-    dbg!(&fa);
     let coordinates = fa.variation_design_position();
     assert_eq!(coordinates.coordinates, []);
 }

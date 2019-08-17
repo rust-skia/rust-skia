@@ -445,6 +445,10 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .generate_inline_functions(true)
         .generate_comments(false)
         .layout_tests(true)
+        // on macOS some arrays that are used in opaque types get too large to support Debug.
+        // (for example High Sierra: [u16; 105])
+        // TODO: may reenable when const generics land in stable.
+        .derive_debug(false)
         .default_enum_style(EnumVariation::Rust {
             non_exhaustive: false,
         })
