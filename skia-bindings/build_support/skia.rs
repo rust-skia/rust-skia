@@ -477,11 +477,32 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         // Types for which a bindgen layout is wrong causing types that contain
         // fields of them to fail their layout test. Making them opaque fixes their
         // sizes and all the types that depend on them.
+        // Windows:
         .opaque_type("std::atomic")
         .opaque_type("std::function")
         .opaque_type("std::unique_ptr")
         .opaque_type("SkAutoTMalloc")
         .opaque_type("SkTHashMap")
+        // Linux (Ubuntu 18 LLVM 6)
+        .opaque_type("SkWeakRefCnt")
+        .opaque_type("GrContext")
+        .opaque_type("GrContextThreadSafeProxy")
+        .opaque_type("GrContext_Base")
+        .opaque_type("GrGLInterface")
+        .opaque_type("GrImageContext")
+        .opaque_type("GrRecordingContext")
+        .opaque_type("GrSurfaceProxy")
+        .opaque_type("Sk2DPathEffect")
+        .opaque_type("SkCornerPathEffect")
+        .opaque_type("SkDataTable")
+        .opaque_type("SkDiscretePathEffect")
+        .opaque_type("SkDrawable")
+        .opaque_type("SkLine2DPathEffect")
+        .opaque_type("SkPath2DPathEffect")
+        .opaque_type("SkPathRef_GenIDChangeListener")
+        .opaque_type("SkPicture")
+        .opaque_type("SkPixelRef")
+        .opaque_type("SkSurface")
         // core/
         .whitelist_type("SkAutoCanvasRestore")
         .whitelist_type("SkColorSpacePrimaries")
