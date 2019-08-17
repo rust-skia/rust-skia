@@ -38,10 +38,6 @@ pub type Typeface = RCHandle<SkTypeface>;
 
 impl NativeRefCountedBase for SkTypeface {
     type Base = SkRefCntBase;
-
-    fn ref_counted_base(&self) -> &Self::Base {
-        &self._base._base._base
-    }
 }
 
 impl Default for RCHandle<SkTypeface> {

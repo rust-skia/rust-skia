@@ -471,38 +471,6 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .whitelist_function("SkSwapRB")
         // functions for which the doc generation fails.
         .blacklist_function("SkColorFilter_asComponentTable")
-        // Types for which the binding generator pulls in stuff that can not be compiled.
-        .opaque_type("SkDeferredDisplayList")
-        .opaque_type("SkDeferredDisplayList_PendingPathsMap")
-        // Types for which a bindgen layout is wrong causing types that contain
-        // fields of them to fail their layout test. Making them opaque fixes their
-        // sizes and all the types that depend on them.
-        // Windows:
-        .opaque_type("std::atomic")
-        .opaque_type("std::function")
-        .opaque_type("std::unique_ptr")
-        .opaque_type("SkAutoTMalloc")
-        .opaque_type("SkTHashMap")
-        // Linux (Ubuntu 18 LLVM 6)
-        .opaque_type("SkWeakRefCnt")
-        .opaque_type("GrContext")
-        .opaque_type("GrContextThreadSafeProxy")
-        .opaque_type("GrContext_Base")
-        .opaque_type("GrGLInterface")
-        .opaque_type("GrImageContext")
-        .opaque_type("GrRecordingContext")
-        .opaque_type("GrSurfaceProxy")
-        .opaque_type("Sk2DPathEffect")
-        .opaque_type("SkCornerPathEffect")
-        .opaque_type("SkDataTable")
-        .opaque_type("SkDiscretePathEffect")
-        .opaque_type("SkDrawable")
-        .opaque_type("SkLine2DPathEffect")
-        .opaque_type("SkPath2DPathEffect")
-        .opaque_type("SkPathRef_GenIDChangeListener")
-        .opaque_type("SkPicture")
-        .opaque_type("SkPixelRef")
-        .opaque_type("SkSurface")
         // core/
         .whitelist_type("SkAutoCanvasRestore")
         .whitelist_type("SkColorSpacePrimaries")
@@ -568,6 +536,10 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         // required for macOS LLVM 8 to pick up C++ headers:
         .clang_args(&["-x", "c++"])
         .clang_arg("-v");
+
+    for opaque_type in OPAQUE_TYPES {
+        builder = builder.opaque_type(opaque_type)
+    }
 
     let mut cc_build = Build::new();
 
@@ -643,6 +615,41 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
 }
+
+const OPAQUE_TYPES: &[&str] = &[
+    // Types for which the binding generator pulls in stuff that can not be compiled.
+    "SkDeferredDisplayList",
+    "SkDeferredDisplayList_PendingPathsMap",
+    // Types for which a bindgen layout is wrong causing types that contain
+    // fields of them to fail their layout test.
+
+    // Windows:
+    "std::atomic",
+    "std::function",
+    "std::unique_ptr",
+    "SkAutoTMalloc",
+    "SkTHashMap",
+    // Ubuntu 18 LLVM 6: all types derived from SkWeakRefCnt
+    "SkWeakRefCnt",
+    "GrContext",
+    "GrContextThreadSafeProxy",
+    "GrContext_Base",
+    "GrGLInterface",
+    "GrImageContext",
+    "GrRecordingContext",
+    "GrSurfaceProxy",
+    "Sk2DPathEffect",
+    "SkCornerPathEffect",
+    "SkDataTable",
+    "SkDiscretePathEffect",
+    "SkDrawable",
+    "SkLine2DPathEffect",
+    "SkPath2DPathEffect",
+    "SkPathRef_GenIDChangeListener",
+    "SkPicture",
+    "SkPixelRef",
+    "SkSurface",
+];
 
 mod prerequisites {
     use crate::build_support::{cargo, utils};

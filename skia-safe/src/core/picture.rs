@@ -11,10 +11,6 @@ pub type Picture = RCHandle<SkPicture>;
 
 impl NativeRefCountedBase for SkPicture {
     type Base = SkRefCntBase;
-
-    fn ref_counted_base(&self) -> &Self::Base {
-        &self._base._base
-    }
 }
 
 impl RCHandle<SkPicture> {

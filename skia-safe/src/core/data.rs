@@ -105,6 +105,13 @@ impl RCHandle<SkData> {
     }
 }
 
+#[cfg(test)]
+impl RefCount for SkData {
+    fn ref_cnt(&self) -> usize {
+        self._base.ref_cnt()
+    }
+}
+
 #[test]
 fn data_supports_equals() {
     let x: &[u8] = &[1u8, 2u8, 3u8];

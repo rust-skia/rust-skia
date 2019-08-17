@@ -323,15 +323,15 @@ impl Handle<SkImageInfo> {
 #[test]
 fn ref_cnt_in_relation_to_color_space() {
     let cs = ColorSpace::new_srgb();
-    let before = cs.ref_cnt();
+    let before = cs.native().ref_cnt();
     {
         let ii = ImageInfo::new_n32((10, 10), AlphaType::Premul, Some(&cs));
         // one for the capture in image info
-        assert_eq!(before + 1, cs.ref_cnt());
+        assert_eq!(before + 1, cs.native().ref_cnt());
         let cs2 = ii.color_space();
         // and one for the returned one.
-        assert_eq!(before + 2, cs.ref_cnt());
+        assert_eq!(before + 2, cs.native().ref_cnt());
         drop(cs2);
     }
-    assert_eq!(before, cs.ref_cnt())
+    assert_eq!(before, cs.native().ref_cnt())
 }

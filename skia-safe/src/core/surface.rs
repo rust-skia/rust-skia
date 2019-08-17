@@ -41,9 +41,6 @@ pub type Surface = RCHandle<SkSurface>;
 
 impl NativeRefCountedBase for SkSurface {
     type Base = SkRefCntBase;
-    fn ref_counted_base(&self) -> &Self::Base {
-        &self._base._base
-    }
 }
 
 impl RCHandle<SkSurface> {
@@ -433,7 +430,7 @@ impl RCHandle<SkSurface> {
 fn create() {
     assert!(Surface::new_raster_n32_premul((0, 0)).is_none());
     let surface = Surface::new_raster_n32_premul((1, 1)).unwrap();
-    assert_eq!(1, surface.native().ref_cnt())
+    assert_eq!(1, surface.native().ref_counted_base()._ref_cnt())
 }
 
 #[test]

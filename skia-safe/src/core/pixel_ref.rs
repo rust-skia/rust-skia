@@ -7,10 +7,6 @@ unsafe impl Sync for RCHandle<SkPixelRef> {}
 
 impl NativeRefCountedBase for SkPixelRef {
     type Base = SkRefCntBase;
-
-    fn ref_counted_base(&self) -> &Self::Base {
-        &self._base._base
-    }
 }
 
 impl RCHandle<SkPixelRef> {

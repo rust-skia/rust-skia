@@ -1,5 +1,3 @@
-#[cfg(test)]
-use skia_bindings::{SkColorSpace, SkData, SkSurface};
 use skia_bindings::{SkNVRefCnt, SkRefCnt, SkRefCntBase};
 use std::hash::{Hash, Hasher};
 use std::mem::MaybeUninit;
@@ -121,27 +119,6 @@ impl RefCount for SkNVRefCnt {
     }
 }
 
-#[cfg(test)]
-impl RefCount for SkData {
-    fn ref_cnt(&self) -> usize {
-        self._base.ref_cnt()
-    }
-}
-
-#[cfg(test)]
-impl RefCount for SkSurface {
-    fn ref_cnt(&self) -> usize {
-        self._base.ref_cnt()
-    }
-}
-
-#[cfg(test)]
-impl RefCount for SkColorSpace {
-    fn ref_cnt(&self) -> usize {
-        self._base.ref_cnt()
-    }
-}
-
 pub trait NativeRefCounted: Sized {
     fn _ref(&self);
     fn _unref(&self);
@@ -168,7 +145,6 @@ impl NativeRefCounted for SkRefCntBase {
     fn _ref_cnt(&self) -> usize {
         unsafe {
             let ptr: *const i32 = &self.fRefCnt as *const _ as *const i32;
-
             (*ptr).try_into().unwrap()
         }
     }
@@ -178,7 +154,14 @@ impl NativeRefCounted for SkRefCntBase {
 /// that implements a RefCount.
 pub trait NativeRefCountedBase {
     type Base: NativeRefCounted;
-    fn ref_counted_base(&self) -> &Self::Base;
+
+    /// Returns the ref counter base class of the ref counted type.
+    ///
+    /// Default implementation assumes that the base class ptr is the same as the
+    /// ptr to self.
+    fn ref_counted_base(&self) -> &Self::Base {
+        unsafe { &*(self as *const _ as *const Self::Base) }
+    }
 }
 
 impl<Native, Base: NativeRefCounted> NativeRefCounted for Native
