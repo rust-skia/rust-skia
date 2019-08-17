@@ -5,8 +5,9 @@ use crate::{
     Image, ImageInfo, Paint, Pixmap, Size, SurfaceCharacterization, SurfaceProps,
 };
 use skia_bindings::{
-    C_GrBackendRenderTarget_Construct, C_GrBackendTexture_Construct, C_SkSurface_makeSurface,
-    SkRefCntBase, SkSurface, SkSurface_BackendHandleAccess, SkSurface_ContentChangeMode,
+    C_GrBackendRenderTarget_Construct, C_GrBackendTexture_Construct, C_SkSurface_height,
+    C_SkSurface_makeSurface, C_SkSurface_props, C_SkSurface_width, SkRefCntBase, SkSurface,
+    SkSurface_BackendHandleAccess, SkSurface_ContentChangeMode,
 };
 use std::ptr;
 
@@ -199,11 +200,11 @@ impl RCHandle<SkSurface> {
     }
 
     pub fn width(&self) -> i32 {
-        self.native().fWidth
+        unsafe { C_SkSurface_width(self.native()) }
     }
 
     pub fn height(&self) -> i32 {
-        self.native().fHeight
+        unsafe { C_SkSurface_height(self.native()) }
     }
 
     pub fn generation_id(&mut self) -> u32 {
@@ -403,7 +404,7 @@ impl RCHandle<SkSurface> {
     }
 
     pub fn props(&self) -> &SurfaceProps {
-        SurfaceProps::from_native_ref(&self.native().fProps)
+        SurfaceProps::from_native_ref(unsafe { &*C_SkSurface_props(self.native()) })
     }
 
     pub fn flush(&mut self) {

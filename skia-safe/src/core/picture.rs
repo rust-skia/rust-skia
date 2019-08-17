@@ -4,7 +4,8 @@ use crate::{Matrix, Shader, TileMode};
 use skia_bindings::{
     C_SkPicture_MakeFromData, C_SkPicture_MakeFromData2, C_SkPicture_MakePlaceholder,
     C_SkPicture_approximateBytesUsed, C_SkPicture_approximateOpCount, C_SkPicture_cullRect,
-    C_SkPicture_makeShader, C_SkPicture_playback, C_SkPicture_serialize, SkPicture, SkRefCntBase,
+    C_SkPicture_makeShader, C_SkPicture_playback, C_SkPicture_serialize, C_SkPicture_uniqueID,
+    SkPicture, SkRefCntBase,
 };
 
 pub type Picture = RCHandle<SkPicture>;
@@ -37,7 +38,7 @@ impl RCHandle<SkPicture> {
     }
 
     pub fn unique_id(&self) -> u32 {
-        self.native().fUniqueID
+        unsafe { C_SkPicture_uniqueID(self.native()) }
     }
 
     // TODO: support SkSerialProcs in serialize()?
