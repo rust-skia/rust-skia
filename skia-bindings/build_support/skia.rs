@@ -372,8 +372,8 @@ impl BinariesConfiguration {
 pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
     prerequisites::resolve_dependencies();
 
-    let python2 = &prerequisites::locate_python2_path();
-    println!("Python 2 found at: {:?}", python2);
+    let python2 = &prerequisites::locate_python2_cmd();
+    println!("Python 2 found: {:?}", python2);
 
     assert!(
         Command::new(python2)
@@ -403,8 +403,8 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
         .args(&[
             "gen",
             output_directory_str,
-            &("--script-executable=".to_owned() + python2.to_str().unwrap()),
-            &("--args=".to_owned() + &gn_args),
+            &format!("--script-executable={}", python2),
+            &format!("--args={}", gn_args),
         ])
         .envs(env::vars())
         .current_dir(PathBuf::from("./skia"))
@@ -627,10 +627,6 @@ mod prerequisites {
     use std::path::Component;
     use std::path::{Path, PathBuf};
     use std::process::{Command, Stdio};
-
-    pub fn locate_python2_path() -> PathBuf {
-        which::which(locate_python2_cmd()).unwrap()
-    }
 
     pub fn locate_python2_cmd() -> &'static str {
         const PYTHON_CMDS: [&str; 2] = ["python", "python2"];

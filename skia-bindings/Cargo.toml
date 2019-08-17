@@ -46,5 +46,3 @@ tar = "0.4.26"
 serde_json = "1.0.39"
 # for reading Cargo.toml from within a package.
 toml = "0.5.1"
-# for finding python's executable and passing it to gn.
-which = "2.0.1"
