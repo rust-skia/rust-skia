@@ -202,7 +202,7 @@ impl Handle<SkPaint> {
     }
 
     pub fn set_alpha(&mut self, alpha: u8) -> &mut Self {
-        self.set_alpha_f(alpha as f32 * (1.0 / 255.0))
+        self.set_alpha_f(f32::from(alpha) * (1.0 / 255.0))
     }
 
     pub fn set_argb(&mut self, a: u8, r: u8, g: u8, b: u8) -> &mut Self {

@@ -107,11 +107,11 @@ impl IRect {
     }
 
     pub fn width_64(&self) -> i64 {
-        self.right as i64 - self.left as i64
+        i64::from(self.right) - i64::from(self.left)
     }
 
     pub fn height_64(&self) -> i64 {
-        self.bottom as i64 - self.top as i64
+        i64::from(self.bottom) - i64::from(self.top)
     }
 
     pub fn is_empty_64(&self) -> bool {
@@ -140,9 +140,9 @@ impl IRect {
 
     #[must_use]
     pub fn with_offset(&self, delta: impl Into<IVector>) -> Self {
-        let mut cloned = self.clone();
-        cloned.offset(delta);
-        cloned
+        let mut copied = *self;
+        copied.offset(delta);
+        copied
     }
 
     #[must_use]
@@ -182,8 +182,8 @@ impl IRect {
         let (new_x, new_y) = (new_p.x, new_p.y);
 
         IRect::new(
-            sk64::pin_to_s32(self.right as i64 + new_x as i64 - self.left as i64),
-            sk64::pin_to_s32(self.bottom as i64 + new_y as i64 - self.top as i64),
+            sk64::pin_to_s32(i64::from(self.right) + i64::from(new_x) - i64::from(self.left)),
+            sk64::pin_to_s32(i64::from(self.bottom) + i64::from(new_y) - i64::from(self.top)),
             new_x,
             new_y,
         )
@@ -668,7 +668,7 @@ impl Rect {
     }
 
     pub fn join2(a: impl AsRef<Rect>, b: impl AsRef<Rect>) -> Rect {
-        let mut result = a.as_ref().clone();
+        let mut result = *a.as_ref();
         result.join(b);
         result
     }
