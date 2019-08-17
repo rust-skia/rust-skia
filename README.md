@@ -78,13 +78,19 @@ For other platforms, more information is available at the [OpenSSL crate documen
 
 ### Windows
 
-- Be sure the `git` command line tool is installed.
+- Have the latest versions of `git` and Rust ready.
+- [Install Visual Studio 2019 Build Tools](https://visualstudio.microsoft.com/downloads/) or one of the other IDE releases. If you installed the IDE version, make sure that the [Desktop Development with C++ workload](https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=vs-2019) is installed.
 - Install the [latest LLVM 8](http://releases.llvm.org/download.html) distribution.
 - [MSYS2](https://www.msys2.org/):
   - Install Python2 with `pacman -S python2`.
   - `clang` is _always_ picked up from `C:/Program Files/LLVM/bin`, so be sure it's available from there.
 - Windows Shell (Cmd.exe):
+  
   - Download and install Python version 2 from [python.org](https://www.python.org/downloads/release/python-2716/).
+- Install and switch to the MSVC toolchain:
+  ```bash
+  rustup default stable-msvc
+  ```
 
 ### Linux
 
@@ -92,7 +98,9 @@ For other platforms, more information is available at the [OpenSSL crate documen
 
 Then use:
 
-`cargo build -vv`
+```bash
+cargo build -vv
+```
 
 On Linux, OpenGL libraries _may_ be missing, if that is the case, install OpenGL drivers for you graphics card, or install a mesa OpenGL package like `libgl1-mesa-dev`.
 
@@ -104,9 +112,12 @@ Cross compilation to Android is supported for targeting 64 bit ARM and Intel x86
 
 For example, to compile for `aarch64`:
 
-1. Install the rust target: `rustup target install aarch64-linux-android`.
+1. Install the rust target:
+   ```bash
+   rustup target install aarch64-linux-android
+   ```
 2. Download the [r20 NDK](https://developer.android.com/ndk/downloads) for your host architecture and unzip it.
-4. Compile your package for the `aarch64-linux-android` target:
+3. Compile your package for the `aarch64-linux-android` target:
 
 On **macOS**:
 
@@ -127,7 +138,7 @@ ANDROID_NDK=:path-to-android-ndk-r20 PATH=$PATH:$ANDROID_NDK/toolchains/llvm/pre
 ```
 _Notes:_
 
-- The `CARGO_TARGET_${TARGET}_LINKER` environment variable [needs to be all uppercase](https://github.com/rust-lang/cargo/issues/1109#issuecomment-386850387).
+- The `CARGO_TARGET_${TARGET}_LINKER` environment variable name [needs to be all uppercase](https://github.com/rust-lang/cargo/issues/1109#issuecomment-386850387).
 - In some older shells (for example macOS High Sierra), environment variable replacement can not be used when the variable was defined on the same line. Therefore the `ANDROID_NDK` variable must be defined before it's used in the `PATH` variable.
 - Rebuilding skia-bindings with a different target may cause linker errors, in that case `touch skia-bindings/build.rs` will force a rebuild ([#10](https://github.com/rust-skia/rust-skia/issues/10)).
 
@@ -147,13 +158,20 @@ The examples are taken from [Skia's website](https://skia.org/) and [ported to t
 
 If you were able to build the project, run
 
-`cargo run --example skia-org -- [OUTPUT_DIR]` 
+```bash
+cargo run --example skia-org -- [OUTPUT_DIR]
+```
 
 to generate some Skia drawn PNG images in the directory `OUTPUT_DIR`. To render with OpenGL, use
 
-`cargo run --example skia-org -- [OUTPUT_DIR] --driver opengl`
+```bash
+cargo run --example skia-org -- [OUTPUT_DIR] --driver opengl
+```
 
-And `cargo run --example skia-org -- --help` shows the drivers that are supported.
+And to show the drivers that are supported
+```bash 
+cargo run --example skia-org -- --help
+```
 
 Some examples:
 
