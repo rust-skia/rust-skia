@@ -127,10 +127,10 @@ impl Handle<SkFont> {
     }
 
     fn has_flag(&self, flag: SkFont_PrivFlags) -> bool {
-        (self.native().fFlags as SkFont_PrivFlags & flag) != 0
+        (SkFont_PrivFlags::from(self.native().fFlags) & flag) != 0
     }
 
-    #[deprecated(since = "15.0", note = "use set_force_auto_hinting()")]
+    #[deprecated(since = "0.15.0", note = "use set_force_auto_hinting()")]
     pub fn set_force_autohinting(&mut self, force_auto_hinting: bool) -> &mut Self {
         self.set_force_auto_hinting(force_auto_hinting)
     }

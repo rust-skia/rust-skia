@@ -202,6 +202,7 @@ impl<'a> Iter<'a> {
     }
 
     pub fn conic_weight(&self) -> Option<scalar> {
+        #[allow(clippy::map_clone)]
         self.native()
             .fConicWeights
             .to_option()
@@ -274,6 +275,7 @@ impl<'a> RawIter<'a> {
     }
 
     pub fn conic_weight(&self) -> Option<scalar> {
+        #[allow(clippy::map_clone)]
         self.native()
             .fRawIter
             .fConicWeights
