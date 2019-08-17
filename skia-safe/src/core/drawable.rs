@@ -10,15 +10,11 @@ pub type Drawable = RCHandle<SkDrawable>;
 
 impl NativeRefCountedBase for SkDrawable {
     type Base = SkRefCntBase;
-
-    fn ref_counted_base(&self) -> &Self::Base {
-        &self._base._base._base
-    }
 }
 
 impl NativeFlattenable for SkDrawable {
     fn native_flattenable(&self) -> &SkFlattenable {
-        &self._base
+        unsafe { &*(self as *const SkDrawable as *const SkFlattenable) }
     }
 
     fn native_deserialize(data: &[u8]) -> *mut Self {

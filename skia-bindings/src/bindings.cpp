@@ -2137,6 +2137,10 @@ extern "C" bool C_GrContext_colorTypeSupportedAsSurface(const GrContext* self, S
     return self->colorTypeSupportedAsSurface(colorType);
 }
 
+extern "C" bool C_GrContext_abandoned(const GrContext* self) {
+    return self->abandoned();
+}
+
 //
 // gpu/GrBackendDrawableInfo.h
 //

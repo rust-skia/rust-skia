@@ -1,8 +1,8 @@
 use crate::gpu::{gl, MipMapped};
 use crate::prelude::*;
 use skia_bindings::{
-    C_GrContext_MakeGL, GrContext, GrContext_abandonContext, GrContext_freeGpuResources,
-    GrContext_releaseResourcesAndAbandonContext, SkRefCntBase,
+    C_GrContext_MakeGL, C_GrContext_abandoned, GrContext, GrContext_abandonContext,
+    GrContext_freeGpuResources, GrContext_releaseResourcesAndAbandonContext, SkRefCntBase,
 };
 
 #[cfg(feature = "vulkan")]
@@ -15,9 +15,6 @@ pub type Context = RCHandle<GrContext>;
 
 impl NativeRefCountedBase for GrContext {
     type Base = SkRefCntBase;
-    fn ref_counted_base(&self) -> &Self::Base {
-        &self._base._base._base._base._base
-    }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -74,7 +71,7 @@ impl RCHandle<GrContext> {
 
     // TODO: is_...?
     pub fn abandoned(&self) -> bool {
-        unsafe { self.native()._base._base.abandoned() }
+        unsafe { C_GrContext_abandoned(self.native()) }
     }
 
     pub fn release_resources_and_abandon(&mut self) -> &mut Self {

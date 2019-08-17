@@ -13,9 +13,6 @@ unsafe impl Send for DataTable {}
 
 impl NativeRefCountedBase for SkDataTable {
     type Base = SkRefCntBase;
-    fn ref_counted_base(&self) -> &Self::Base {
-        &self._base._base
-    }
 }
 
 impl Index<usize> for DataTable {

@@ -165,9 +165,9 @@ impl ColorSpace {
 pub struct XYZD50Hash(pub u32);
 
 #[cfg(test)]
-impl RefCount for ColorSpace {
+impl RefCount for SkColorSpace {
     fn ref_cnt(&self) -> usize {
-        self.native().ref_cnt()
+        self._base.ref_cnt()
     }
 }
 
