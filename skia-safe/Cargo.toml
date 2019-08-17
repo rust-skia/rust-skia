@@ -11,7 +11,7 @@ keywords = ["skia", "rust-bindings", "vulkan", "opengl", "pdf"]
 categories = ["api-bindings", "graphics", "multimedia::images", "rendering::graphics-api", "visualization"] 
 license = "MIT"
 
-version = "0.14.4"
+version = "0.15.0"
 authors = ["Armin Sander <armin@replicator.org>"]
 edition = "2018"
 
@@ -23,7 +23,7 @@ shaper = ["skia-bindings/shaper"]
 
 [dependencies]
 bitflags = "1.0.4"
-skia-bindings = { version = "0.14.4", path = "../skia-bindings" }
+skia-bindings = { version = "0.15.0", path = "../skia-bindings" }
 # TODO: 1.3 breaks offscreen_gl_context
 lazy_static = "=1.2"
 
