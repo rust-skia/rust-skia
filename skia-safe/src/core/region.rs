@@ -343,7 +343,7 @@ impl QuickReject<Region> for Region {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 #[repr(transparent)]
 pub struct Iterator<'a>(SkRegion_Iterator, PhantomData<&'a Region>);
 
@@ -431,7 +431,7 @@ fn test_iterator() {
     assert_eq!(rects[1], r2);
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 #[repr(transparent)]
 pub struct Cliperator<'a>(SkRegion_Cliperator, PhantomData<&'a Region>);
 
@@ -481,7 +481,7 @@ impl<'a> iter::Iterator for Cliperator<'a> {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 #[repr(transparent)]
 pub struct Spanerator<'a>(SkRegion_Spanerator, PhantomData<&'a Region>);
 
