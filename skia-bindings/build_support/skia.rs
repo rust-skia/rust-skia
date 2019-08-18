@@ -638,6 +638,10 @@ const OPAQUE_TYPES: &[&str] = &[
     "SkPicture",
     "SkPixelRef",
     "SkSurface",
+    // Types not needed (for now):
+    "SkDeque",
+    "SkDeque_Iter",
+    "GrGLInterface_Functions",
 ];
 
 mod prerequisites {
