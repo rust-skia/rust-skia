@@ -3,9 +3,23 @@
 # prerequisites:
 #   .cargo/credentials
 
+.PHONY: all
+all:
+	@echo "make publish: publish the rust-skia packages to crates.io"
+	@echo "make publish-only: do not verify or build packages, only publish the the packages"
+
 .PHONY: publish
-publish: package
+publish: package-bindings package-safe publish-bindings wait publish-safe
+
+.PHONY: publish-only
+publish-only: publish-bindings publish-safe
+
+.PHONY: publish-bindings
+publish-bindings:
 	cd skia-bindings && cargo publish -vv --no-verify
+
+.PHONY: publish-safe
+publish-safe:
 	cd skia-safe && cargo publish -vv --no-verify --allow-dirty
 
 .PHONY: package
@@ -26,3 +40,8 @@ package-safe:
 clean-packages:
 	rm -rf target/package
 
+
+.PHONY: wait
+wait: 
+	@echo "published a package, Waiting for crates.io to catch up before publishing the next"
+	sleep 10
