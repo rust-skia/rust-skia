@@ -780,6 +780,11 @@ const OPAQUE_TYPES: &[&str] = &[
     "SkDeque",
     "SkDeque_Iter",
     "GrGLInterface_Functions",
+    // SkShaper (m77) Trivial*Iterator classes create two vtable pointers.
+    "SkShaper_TrivialBiDiRunIterator",
+    "SkShaper_TrivialFontRunIterator",
+    "SkShaper_TrivialLanguageRunIterator",
+    "SkShaper_TrivialScriptRunIterator",
 ];
 
 mod prerequisites {
