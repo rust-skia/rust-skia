@@ -56,3 +56,15 @@ impl From<NullHandle> for VkImage {
         ptr::null_mut()
     }
 }
+
+impl From<NullHandle> for VkCommandBuffer {
+    fn from(_: NullHandle) -> Self {
+        ptr::null_mut()
+    }
+}
+
+impl From<NullHandle> for VkRenderPass {
+    fn from(_: NullHandle) -> Self {
+        ptr::null_mut()
+    }
+}
