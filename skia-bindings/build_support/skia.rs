@@ -463,6 +463,8 @@ impl BinariesConfiguration {
 pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
     prerequisites::resolve_dependencies();
 
+    // call Skia's git-sync-deps
+
     let python2 = &prerequisites::locate_python2_cmd();
     println!("Python 2 found: {:?}", python2);
 
@@ -477,10 +479,14 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
         "`skia/tools/git-sync-deps` failed"
     );
 
+    // apply patches
+
     for patch in &build.skia_patches {
         println!("applying patch: {}", patch.name);
         patch.apply(&PathBuf::from("skia"));
     }
+
+    // configure Skia
 
     let gn_args = build
         .gn_args
@@ -515,10 +521,7 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
         panic!("{:?}", String::from_utf8(output.stdout).unwrap());
     }
 
-    for patch in &build.skia_patches {
-        println!("reversing patch: {}", patch.name);
-        patch.reverse(&PathBuf::from("skia"));
-    }
+    // build Skia
 
     let ninja_command = if on_windows {
         "depot_tools/ninja"
@@ -526,20 +529,31 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
         "../depot_tools/ninja"
     };
 
+    let ninja_status = Command::new(ninja_command)
+        .current_dir(PathBuf::from("./skia"))
+        .args(&["-C", output_directory_str])
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .status();
+
+    // reverse patches
+    //
+    // Even though we patch only the gn configuration, we wait until the ninja build went through,
+    // because ninja may regenerate its files by calling into gn again (happened once on the CI).
+
+    for patch in &build.skia_patches {
+        println!("reversing patch: {}", patch.name);
+        patch.reverse(&PathBuf::from("skia"));
+    }
+
     assert!(
-        Command::new(ninja_command)
-            .current_dir(PathBuf::from("./skia"))
-            .args(&["-C", output_directory_str])
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .status()
+        ninja_status
             .expect("failed to run `ninja`, does the directory depot_tools/ exist?")
             .success(),
         "`ninja` returned an error, please check the output for details."
     );
 
     let current_dir = env::current_dir().unwrap();
-
     bindgen_gen(build, &current_dir, &config.output_directory)
 }
 
