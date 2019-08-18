@@ -105,9 +105,10 @@ fn parse_target(target_str: impl AsRef<str>) -> Target {
     }
 }
 
-// We can not assume that the build profile of the build.rs script reflects the build
-// profile that the target needs.
-#[allow(dead_code)]
+/// Returns `true` if the target should be built in release mode, `false`, if in debug mode.
+///
+/// We can not assume that the build profile of the build.rs script reflects the build
+/// profile that the target needs.
 pub fn build_release() -> bool {
     match env::var("PROFILE").unwrap().as_str() {
         "release" => true,
