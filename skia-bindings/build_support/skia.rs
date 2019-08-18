@@ -358,6 +358,7 @@ impl BinariesConfiguration {
     /// supplies us with and a Skia build configuration.
     pub fn from_cargo_env(build: &BuildConfiguration) -> Self {
         let features = &build.features;
+        let target = cargo::target();
 
         let mut built_libraries = Vec::new();
         let mut additional_files = Vec::new();
@@ -379,14 +380,18 @@ impl BinariesConfiguration {
             TextLayout::ShaperAndParagraph => {
                 feature_ids.push(feature_id::PARAGRAPH);
                 additional_files.push(ICUDTL_DAT.into());
-                built_libraries.push(lib::SKSHAPER.into());
+                // Windows does not seem to embed Shaper implementation files
+                // into the skparagraph library.
+                if target.is_windows() {
+                    built_libraries.push(lib::SKSHAPER.into());
+                }
                 built_libraries.push(lib::SKPARAGRAPH.into());
             }
         }
 
         let mut link_libraries = Vec::new();
 
-        match cargo::target().as_strs() {
+        match target.as_strs() {
             (_, "unknown", "linux", Some("gnu")) => {
                 link_libraries.extend(vec!["stdc++", "bz2", "GL", "fontconfig", "freetype"]);
             }
