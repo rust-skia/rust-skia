@@ -23,7 +23,7 @@ shaper = ["skia-bindings/shaper"]
 
 [dependencies]
 bitflags = "1.0.4"
-skia-bindings = { version = "0.15.0", path = "../skia-bindings" }
+skia-bindings = { version = "=0.15.0", path = "../skia-bindings" }
 # TODO: 1.3 breaks offscreen_gl_context
 lazy_static = "=1.2"
 
