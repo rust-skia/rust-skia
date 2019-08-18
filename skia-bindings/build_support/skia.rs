@@ -48,9 +48,7 @@ impl Default for BuildConfiguration {
 
         BuildConfiguration {
             on_windows: cargo::host().is_windows(),
-            // Note that currently, we don't support debug Skia builds,
-            // because they are hard to configure and pull in a lot of testing related modules.
-            skia_release: true,
+            skia_release: cargo::build_release(),
             keep_inline_functions: true,
             features: Features {
                 vulkan: cfg!(feature = "vulkan"),
@@ -222,6 +220,7 @@ impl FinalBuildConfiguration {
                     "is_official_build",
                     if build.skia_release { yes() } else { no() },
                 ),
+                ("is_debug", if build.skia_release { no() } else { yes() }),
                 ("skia_use_system_libjpeg_turbo", no()),
                 ("skia_use_system_libpng", no()),
                 ("skia_use_libwebp", no()),
