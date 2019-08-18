@@ -2460,8 +2460,12 @@ extern "C" void C_GrContext_flush(GrContext* self) {
 // gpu/GrBackendDrawableInfo.h
 //
 
-extern "C" void C_GrBackendDrawableInfo_construct(GrBackendDrawableInfo* uninitialized) {
+extern "C" void C_GrBackendDrawableInfo_Construct(GrBackendDrawableInfo* uninitialized) {
     new(uninitialized) GrBackendDrawableInfo();
+}
+
+extern "C" void C_GrBackendDrawableInfo_Construct2(GrBackendDrawableInfo* uninitialized, const GrVkDrawableInfo* info) {
+    new(uninitialized) GrBackendDrawableInfo(*info);
 }
 
 extern "C" void C_GrBackendDrawableInfo_destruct(GrBackendDrawableInfo* self) {
@@ -2592,14 +2596,6 @@ extern "C" void C_GrVkYcbcrConversionInfo_Construct(
 
 extern "C" bool C_GrVkYcbcrConversionInfo_Equals(const GrVkYcbcrConversionInfo* lhs, const GrVkYcbcrConversionInfo* rhs) {
     return *lhs == *rhs;
-}
-
-extern "C" void C_GrVkImageInfo_Construct(GrVkImageInfo* uninitialized,
-                VkImage image, const GrVkAlloc* alloc, VkImageTiling imageTiling, VkImageLayout layout,
-                VkFormat format, uint32_t levelCount,
-                uint32_t currentQueueFamily,
-                const GrVkYcbcrConversionInfo* ycbcrConversionInfo) {
-    new (uninitialized) GrVkImageInfo(image, *alloc, imageTiling, layout, format, levelCount, currentQueueFamily, *ycbcrConversionInfo);
 }
 
 extern "C" void C_GrVkImageInfo_updateImageLayout(GrVkImageInfo* self, VkImageLayout layout) {

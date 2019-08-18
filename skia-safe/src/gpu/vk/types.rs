@@ -3,14 +3,14 @@ use super::{
     ChromaLocation, DeviceMemory, DeviceSize, Image, ImageTiling, SamplerYcbcrModelConversion,
     SamplerYcbcrRange,
 };
-use crate::gpu::vk::{CommandBuffer, Device, Instance, Rect2D, RenderPass};
+use crate::gpu::vk;
 use crate::prelude::*;
-use core::mem;
 use skia_bindings::{
-    C_GrVkAlloc_Construct, C_GrVkAlloc_Equals, C_GrVkImageInfo_Construct, C_GrVkImageInfo_Equals,
+    C_GrVkAlloc_Construct, C_GrVkAlloc_Equals, C_GrVkImageInfo_Equals,
     C_GrVkImageInfo_updateImageLayout, C_GrVkYcbcrConversionInfo_Construct,
     C_GrVkYcbcrConversionInfo_Equals, GrVkAlloc_Flag_kMappable_Flag,
-    GrVkAlloc_Flag_kNoncoherent_Flag, GrVkDrawableInfo,
+    GrVkAlloc_Flag_kNoncoherent_Flag, GrVkDrawableInfo, VkChromaLocation, VkFilter, VkFormat,
+    VkImageLayout, VkImageTiling, VkSamplerYcbcrModelConversion, VkSamplerYcbcrRange,
 };
 use skia_bindings::{GrVkAlloc, GrVkBackendMemory};
 use skia_bindings::{GrVkImageInfo, GrVkYcbcrConversionInfo};
@@ -20,7 +20,7 @@ use std::os::raw;
 pub type GraphicsBackendMemory = GrVkBackendMemory;
 
 #[repr(C)]
-#[derive(Copy, Clone, Default, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct Alloc {
     pub memory: DeviceMemory,
     pub offset: DeviceSize,
@@ -34,6 +34,19 @@ impl NativeTransmutable<GrVkAlloc> for Alloc {}
 #[test]
 fn test_vk_alloc_layout() {
     Alloc::test_layout()
+}
+
+impl Default for Alloc {
+    fn default() -> Self {
+        Self {
+            memory: vk::NULL_HANDLE.into(),
+            offset: 0,
+            size: 0,
+            flags: AllocFlag::empty(),
+            backend_memory: 0,
+            uses_system_heap: false,
+        }
+    }
 }
 
 impl PartialEq for Alloc {
@@ -60,7 +73,7 @@ impl Alloc {
     }
 }
 
-#[derive(Copy, Clone, Default, Debug)]
+#[derive(Copy, Clone, Debug)]
 #[repr(C)]
 pub struct YcbcrConversionInfo {
     pub ycrbcr_model: SamplerYcbcrModelConversion,
@@ -82,6 +95,22 @@ fn test_ycbcr_conversion_info_layout() {
 impl PartialEq for YcbcrConversionInfo {
     fn eq(&self, other: &Self) -> bool {
         unsafe { C_GrVkYcbcrConversionInfo_Equals(self.native(), other.native()) }
+    }
+}
+
+impl Default for YcbcrConversionInfo {
+    fn default() -> Self {
+        YcbcrConversionInfo {
+            ycrbcr_model:
+                VkSamplerYcbcrModelConversion::VK_SAMPLER_YCBCR_MODEL_CONVERSION_RGB_IDENTITY,
+            ycbcr_range: VkSamplerYcbcrRange::VK_SAMPLER_YCBCR_RANGE_ITU_FULL,
+            x_chroma_offset: VkChromaLocation::VK_CHROMA_LOCATION_COSITED_EVEN,
+            y_chroma_offset: VkChromaLocation::VK_CHROMA_LOCATION_COSITED_EVEN,
+            chroma_filter: VkFilter::VK_FILTER_NEAREST,
+            force_explicit_reconsturction: 0,
+            external_format: 0,
+            external_format_features: 0,
+        }
     }
 }
 
@@ -113,7 +142,7 @@ impl YcbcrConversionInfo {
     }
 
     pub fn is_valid(&self) -> bool {
-        unsafe { self.native().isValid() }
+        self.native().fExternalFormat != 0
     }
 }
 
@@ -126,7 +155,7 @@ pub struct ImageInfo {
     pub layout: ImageLayout,
     pub format: Format,
     pub level_count: u32,
-    pub current_queue_familiy: u32,
+    pub current_queue_family: u32,
     pub ycbcr_conversion_info: YcbcrConversionInfo,
 }
 
@@ -138,7 +167,16 @@ fn test_image_info_layout() {
 
 impl Default for ImageInfo {
     fn default() -> Self {
-        ImageInfo::from_native(unsafe { GrVkImageInfo::new() })
+        ImageInfo {
+            image: vk::NULL_HANDLE.into(),
+            alloc: Alloc::default(),
+            tiling: VkImageTiling::VK_IMAGE_TILING_OPTIMAL,
+            layout: VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+            format: VkFormat::VK_FORMAT_UNDEFINED,
+            level_count: 0,
+            current_queue_family: vk::QUEUE_FAMILY_IGNORED,
+            ycbcr_conversion_info: Default::default(),
+        }
     }
 }
 
@@ -150,6 +188,34 @@ impl PartialEq for ImageInfo {
 
 impl ImageInfo {
     #[allow(clippy::too_many_arguments)]
+    pub unsafe fn new(
+        image: Image,
+        alloc: Alloc,
+        tiling: ImageTiling,
+        layout: ImageLayout,
+        format: Format,
+        level_count: u32,
+        current_queue_family: impl Into<Option<u32>>,
+        ycbcr_conversion_info: impl Into<Option<YcbcrConversionInfo>>,
+    ) -> ImageInfo {
+        let current_queue_family = current_queue_family
+            .into()
+            .unwrap_or(vk::QUEUE_FAMILY_IGNORED);
+        let ycbcr_conversion_info = ycbcr_conversion_info.into().unwrap_or_default();
+        Self {
+            image,
+            alloc,
+            tiling,
+            layout,
+            format,
+            level_count,
+            current_queue_family,
+            ycbcr_conversion_info,
+        }
+    }
+
+    // TODO: may deprecate in favor of ::new().
+    #[allow(clippy::too_many_arguments)]
     pub unsafe fn from_image(
         image: Image,
         alloc: Alloc,
@@ -157,32 +223,32 @@ impl ImageInfo {
         layout: ImageLayout,
         format: Format,
         level_count: u32,
-        current_queue_family: Option<u32>,
-        ycbcr_conversion_info: Option<YcbcrConversionInfo>,
+        current_queue_family: impl Into<Option<u32>>,
+        ycbcr_conversion_info: impl Into<Option<YcbcrConversionInfo>>,
     ) -> ImageInfo {
-        // originally defined as a C macro in vulkan_core.h
-        // and therefore not present in the bindings.
-        const VK_QUEUE_FAMILY_IGNORED: u32 = 0;
-
-        let current_queue_family = current_queue_family.unwrap_or(VK_QUEUE_FAMILY_IGNORED);
-        let ycbcr_conversion_info = ycbcr_conversion_info.unwrap_or_default();
-        ImageInfo::construct(|image_info| {
-            C_GrVkImageInfo_Construct(
-                image_info,
-                image,
-                alloc.native(),
-                tiling,
-                layout,
-                format,
-                level_count,
-                current_queue_family,
-                ycbcr_conversion_info.native(),
-            );
-        })
+        Self::new(
+            image,
+            alloc,
+            tiling,
+            layout,
+            format,
+            level_count,
+            current_queue_family,
+            ycbcr_conversion_info,
+        )
     }
 
-    pub fn from_info(info: &ImageInfo, layout: ImageLayout) -> ImageInfo {
-        ImageInfo::from_native(unsafe { GrVkImageInfo::new2(info.native(), layout) })
+    pub unsafe fn from_info(info: &ImageInfo, layout: ImageLayout) -> ImageInfo {
+        Self::new(
+            info.image,
+            info.alloc,
+            info.tiling,
+            layout,
+            info.format,
+            info.level_count,
+            info.current_queue_family,
+            info.ycbcr_conversion_info,
+        )
     }
 
     pub fn update_image_layout(&mut self, layout: ImageLayout) -> &mut Self {
@@ -195,8 +261,8 @@ impl ImageInfo {
 //       which would make the whole GetProc trait generic.
 #[derive(Copy, Clone, Debug)]
 pub enum GetProcOf {
-    Instance(Instance, *const raw::c_char),
-    Device(Device, *const raw::c_char),
+    Instance(vk::Instance, *const raw::c_char),
+    Device(vk::Device, *const raw::c_char),
 }
 
 impl GetProcOf {
@@ -219,11 +285,11 @@ impl<T> GetProc for T where T: Fn(GetProcOf) -> GetProcResult {}
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
 pub struct DrawableInfo {
-    secondary_command_buffer: CommandBuffer,
+    secondary_command_buffer: vk::CommandBuffer,
     color_attachment_index: u32,
-    compatible_render_pass: RenderPass,
+    compatible_render_pass: vk::RenderPass,
     format: Format,
-    draw_bounds: *mut Rect2D,
+    draw_bounds: *mut vk::Rect2D,
     image: Image,
 }
 

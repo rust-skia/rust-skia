@@ -3,7 +3,7 @@ use crate::gpu::vk;
 use crate::gpu::BackendAPI;
 use crate::prelude::*;
 use skia_bindings::{
-    C_GrBackendDrawableInfo_backend, C_GrBackendDrawableInfo_construct,
+    C_GrBackendDrawableInfo_Construct, C_GrBackendDrawableInfo_backend,
     C_GrBackendDrawableInfo_destruct, C_GrBackendDrawableInfo_isValid, GrBackendDrawableInfo,
 };
 
@@ -17,12 +17,14 @@ impl NativeDrop for GrBackendDrawableInfo {
 
 impl Handle<GrBackendDrawableInfo> {
     pub fn new() -> BackendDrawableInfo {
-        Self::construct(|di| unsafe { C_GrBackendDrawableInfo_construct(di) })
+        Self::construct(|di| unsafe { C_GrBackendDrawableInfo_Construct(di) })
     }
 
     #[cfg(feature = "vulkan")]
     pub fn from_vk(info: &vk::DrawableInfo) -> BackendDrawableInfo {
-        Self::from_native(unsafe { GrBackendDrawableInfo::new1(info.native()) })
+        Self::construct(|di| unsafe {
+            skia_bindings::C_GrBackendDrawableInfo_Construct2(di, info.native())
+        })
     }
 
     pub fn is_valid(&self) -> bool {

@@ -4,6 +4,7 @@ use skia_bindings::{
     VkPhysicalDevice, VkQueue, VkRect2D, VkRenderPass, VkSamplerYcbcrModelConversion,
     VkSamplerYcbcrRange,
 };
+use std::ptr;
 
 mod backend_context;
 pub use self::backend_context::*;
@@ -34,3 +35,24 @@ pub type Format = VkFormat;
 pub type CommandBuffer = VkCommandBuffer;
 pub type RenderPass = VkRenderPass;
 pub type Rect2D = VkRect2D;
+
+pub const QUEUE_FAMILY_IGNORED: u32 = !0;
+
+//
+// VK_NULL_HANDLE and conversions.
+//
+
+pub struct NullHandle;
+pub const NULL_HANDLE: NullHandle = NullHandle;
+
+impl From<NullHandle> for VkDeviceMemory {
+    fn from(_: NullHandle) -> Self {
+        ptr::null_mut()
+    }
+}
+
+impl From<NullHandle> for VkImage {
+    fn from(_: NullHandle) -> Self {
+        ptr::null_mut()
+    }
+}
