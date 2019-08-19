@@ -380,12 +380,8 @@ impl BinariesConfiguration {
             TextLayout::ShaperAndParagraph => {
                 feature_ids.push(feature_id::PARAGRAPH);
                 additional_files.push(ICUDTL_DAT.into());
-                // Windows does not seem to embed Shaper implementation files
-                // into the skparagraph library.
-                if target.is_windows() {
-                    built_libraries.push(lib::SKSHAPER.into());
-                }
                 built_libraries.push(lib::SKPARAGRAPH.into());
+                built_libraries.push(lib::SKSHAPER.into());
             }
         }
 
