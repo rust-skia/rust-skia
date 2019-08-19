@@ -175,6 +175,17 @@ impl TextLayout {
             _ => Vec::new(),
         }
     }
+
+    fn ninja_files(&self) -> Vec<PathBuf> {
+        match self {
+            TextLayout::None => Vec::new(),
+            TextLayout::ShaperOnly => vec!["obj/modules/skshaper/skshaper.ninja".into()],
+            TextLayout::ShaperAndParagraph => vec![
+                "obj/modules/skshaper/skshaper.ninja".into(),
+                "obj/modules/skparagraph/skparagraph.ninja".into(),
+            ],
+        }
+    }
 }
 
 /// This is the final, low level build configuration.
@@ -185,6 +196,9 @@ pub struct FinalBuildConfiguration {
 
     /// The name value pairs passed as arguments to gn.
     pub gn_args: Vec<(String, String)>,
+
+    /// ninja files that need to be parsed for further definitions.
+    pub ninja_files: Vec<PathBuf>,
 
     /// The additional definitions (cloned from the definitions of
     /// the BuildConfiguration).
@@ -307,6 +321,13 @@ impl FinalBuildConfiguration {
                 .collect()
         };
 
+        let ninja_files = {
+            let mut files = Vec::new();
+            files.push("obj/skia.ninja".into());
+            files.extend(features.text_layout.ninja_files());
+            files
+        };
+
         let binding_sources = {
             let mut sources: Vec<PathBuf> = Vec::new();
             sources.push("src/bindings.cpp".into());
@@ -317,6 +338,7 @@ impl FinalBuildConfiguration {
         FinalBuildConfiguration {
             skia_patches: features.text_layout.patches(),
             gn_args,
+            ninja_files,
             definitions: build.definitions.clone(),
             binding_sources,
         }
@@ -682,13 +704,15 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
     cc_build.include(include_path);
 
     let definitions = {
-        let skia_definitions = {
-            let ninja_file = output_directory.join("obj").join("skia.ninja");
-            let contents = fs::read_to_string(ninja_file).unwrap();
-            definitions::from_ninja(contents)
-        };
+        let mut definitions = Vec::new();
 
-        definitions::combine(skia_definitions, build.definitions.clone())
+        for ninja_file in &build.ninja_files {
+            let ninja_file = output_directory.join(ninja_file);
+            let contents = fs::read_to_string(ninja_file).unwrap();
+            definitions = definitions::combine(definitions, definitions::from_ninja(contents))
+        }
+
+        definitions::combine(definitions, build.definitions.clone())
     };
 
     for (name, value) in &definitions {
@@ -998,10 +1022,10 @@ pub(crate) mod definitions {
     }
 
     pub fn combine(a: Definitions, b: Definitions) -> Definitions {
-        compress(a.into_iter().chain(b.into_iter()).collect())
+        remove_duplicates(a.into_iter().chain(b.into_iter()).collect())
     }
 
-    pub fn compress(mut definitions: Definitions) -> Definitions {
+    pub fn remove_duplicates(mut definitions: Definitions) -> Definitions {
         let mut uniques = HashSet::new();
         definitions.retain(|e| uniques.insert(e.0.clone()));
         definitions

@@ -1,6 +1,3 @@
-// We always compile SkShaper.h with HARFBUZZ & ICU for now.
-#define SK_SHAPER_HARFBUZZ_AVAILABLE
-
 #include "modules/skshaper/include/SkShaper.h"
 #include "include/core/SkFontMgr.h"
 
