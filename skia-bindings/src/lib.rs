@@ -5,5 +5,8 @@
 mod bindings;
 pub use bindings::*;
 
+mod defaults;
+pub use defaults::*;
+
 #[cfg(feature = "shaper")]
 pub mod icu;

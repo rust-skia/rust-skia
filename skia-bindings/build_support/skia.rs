@@ -603,6 +603,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         // mem::uninitialized()
         .raw_line("#![allow(invalid_value)]")
         .raw_line("#![allow(deprecated)]")
+        .parse_callbacks(Box::new(ParseCallbacks))
         .constified_enum(".*Mask")
         .constified_enum(".*Flags")
         .constified_enum(".*Bits")
@@ -1113,6 +1114,7 @@ mod prerequisites {
 
 use bindgen::EnumVariation;
 pub use definitions::{Definition, Definitions};
+use regex::Regex;
 
 pub(crate) mod definitions {
     use std::collections::HashSet;
