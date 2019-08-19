@@ -1,3 +1,4 @@
+#include "bindings.h"
 // codec/
 #include "include/codec/SkEncodedOrigin.h"
 // core/
@@ -121,7 +122,6 @@ template<typename T>
 inline sk_sp<T> sp(T* pt) {
     return sk_sp<T>(pt);
 }
-
 
 //
 // codec/SkEncodedOrigin.h
