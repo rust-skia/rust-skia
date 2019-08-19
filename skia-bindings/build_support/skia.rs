@@ -594,6 +594,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .raw_line("#![allow(clippy::all)]")
         // GrVkBackendContext contains u128 fields on macOS
         .raw_line("#![allow(improper_ctypes)]")
+        .parse_callbacks(Box::new(ParseCallbacks))
         .constified_enum(".*Mask")
         .constified_enum(".*Flags")
         .constified_enum(".*Bits")
@@ -1064,6 +1065,7 @@ mod prerequisites {
 
 use bindgen::EnumVariation;
 pub use definitions::{Definition, Definitions};
+use regex::Regex;
 
 pub(crate) mod definitions {
     use std::collections::HashSet;

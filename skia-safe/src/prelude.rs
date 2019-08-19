@@ -494,9 +494,7 @@ impl<N: NativeRefCounted> NativeAccess<N> for RCHandle<N> {
 
 impl<N: NativeRefCounted> Clone for RCHandle<N> {
     fn clone(&self) -> Self {
-        // yes, we _do_ support shared mutability when
-        // a ref-counted handle is cloned, so beware of spooky action at
-        // a distance.
+        // Support shared mutability when a ref-counted handle is cloned.
         let ptr = self.0;
         unsafe { (&*ptr)._ref() };
         Self(ptr)
