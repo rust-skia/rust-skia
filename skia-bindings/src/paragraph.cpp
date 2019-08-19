@@ -18,6 +18,9 @@ using namespace skia::textlayout;
 //
 
 extern "C" {
+    FontCollection* C_FontCollection_new() {
+        return new FontCollection();
+    }
 
     void C_FontCollection_setAssetFontManager(FontCollection* self, const SkFontMgr* fontManager) {
         self->setAssetFontManager(spFromConst(fontManager));

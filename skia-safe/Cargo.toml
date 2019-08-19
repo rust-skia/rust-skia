@@ -15,6 +15,10 @@ version = "0.20.0"
 authors = ["Armin Sander <armin@replicator.org>"]
 edition = "2018"
 
+[lib]
+doctest = false
+
+
 [features]
 default = []
 vulkan = ["skia-bindings/vulkan"]
@@ -37,3 +41,5 @@ offscreen_gl_context = { git = "https://github.com/servo/rust-offscreen-renderin
 sparkle = "0.1.10"
 clap = "2.33.0"
 ash = "0.29"
+serial_test = "0.2"
+serial_test_derive = "0.2"
