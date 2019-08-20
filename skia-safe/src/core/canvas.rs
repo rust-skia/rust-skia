@@ -720,14 +720,14 @@ impl Canvas {
 
     pub fn draw_image(
         &mut self,
-        image: &Image,
+        image: impl AsRef<Image>,
         left_top: impl Into<Point>,
         paint: Option<&Paint>,
     ) -> &mut Self {
         let left_top = left_top.into();
         unsafe {
             self.native_mut().drawImage(
-                image.native(),
+                image.as_ref().native(),
                 left_top.x,
                 left_top.y,
                 paint.native_ptr_or_null(),
@@ -738,7 +738,7 @@ impl Canvas {
 
     pub fn draw_image_rect(
         &mut self,
-        image: &Image,
+        image: impl AsRef<Image>,
         src: Option<(&Rect, SrcRectConstraint)>,
         dst: impl AsRef<Rect>,
         paint: &Paint,
@@ -746,7 +746,7 @@ impl Canvas {
         match src {
             Some((src, constraint)) => unsafe {
                 self.native_mut().drawImageRect(
-                    image.native(),
+                    image.as_ref().native(),
                     src.native(),
                     dst.as_ref().native(),
                     paint.native(),
@@ -755,7 +755,7 @@ impl Canvas {
             },
             None => unsafe {
                 self.native_mut().drawImageRect2(
-                    image.native(),
+                    image.as_ref().native(),
                     dst.as_ref().native(),
                     paint.native(),
                 )
@@ -766,14 +766,14 @@ impl Canvas {
 
     pub fn draw_image_nine(
         &mut self,
-        image: &Image,
+        image: impl AsRef<Image>,
         center: impl AsRef<IRect>,
         dst: impl AsRef<Rect>,
         paint: Option<&Paint>,
     ) -> &mut Self {
         unsafe {
             self.native_mut().drawImageNine(
-                image.native(),
+                image.as_ref().native(),
                 center.as_ref().native(),
                 dst.as_ref().native(),
                 paint.native_ptr_or_null(),
@@ -869,14 +869,14 @@ impl Canvas {
 
     pub fn draw_image_lattice(
         &mut self,
-        image: &Image,
+        image: impl AsRef<Image>,
         lattice: &Lattice,
         dst: impl AsRef<Rect>,
         paint: Option<&Paint>,
     ) -> &mut Self {
         unsafe {
             self.native_mut().drawImageLattice(
-                image.native(),
+                image.as_ref().native(),
                 &lattice.native().native,
                 dst.as_ref().native(),
                 paint.native_ptr_or_null(),
