@@ -262,32 +262,26 @@ impl Camera3D {
 // Also note that the implementation uses interior pointers,
 // so we let Skia do the allocation.
 
-#[repr(transparent)]
-pub struct View3D(*mut Sk3DView);
+pub type View3D = RefHandle<Sk3DView>;
 unsafe impl Send for View3D {}
-
-impl NativeAccess<Sk3DView> for View3D {
-    fn native(&self) -> &Sk3DView {
-        unsafe { &*self.0 }
-    }
-    fn native_mut(&mut self) -> &mut Sk3DView {
-        unsafe { &mut *self.0 }
-    }
-}
 
 impl Default for View3D {
     fn default() -> Self {
-        View3D(unsafe { C_Sk3DView_new() })
+        Self::new()
     }
 }
 
-impl Drop for View3D {
+impl NativeDrop for Sk3DView {
     fn drop(&mut self) {
-        unsafe { C_Sk3DView_delete(self.native_mut()) }
+        unsafe { C_Sk3DView_delete(self) }
     }
 }
 
-impl View3D {
+impl RefHandle<Sk3DView> {
+    pub fn new() -> Self {
+        View3D::from_ptr(unsafe { C_Sk3DView_new() }).unwrap()
+    }
+
     pub fn save(&mut self) -> &mut Self {
         unsafe { self.native_mut().save() }
         self

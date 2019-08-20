@@ -1664,8 +1664,8 @@ extern "C" SkDrawable* C_SkDrawable_Deserialize(const void* data, size_t length)
     return SkDrawable::Deserialize(data, length).release();
 }
 
-extern "C" void C_SkDrawable_GpuDrawHandler_destruct(SkDrawable::GpuDrawHandler *self) {
-    self->~GpuDrawHandler();
+extern "C" void C_SkDrawable_GpuDrawHandler_delete(SkDrawable::GpuDrawHandler *self) {
+    delete self;
 }
 
 extern "C" void C_SkDrawable_GpuDrawHandler_draw(SkDrawable::GpuDrawHandler *self, const GrBackendDrawableInfo *info) {

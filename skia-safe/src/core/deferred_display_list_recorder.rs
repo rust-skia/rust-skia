@@ -27,8 +27,9 @@ impl Handle<SkDeferredDisplayListRecorder> {
     }
 
     pub fn detach(mut self) -> Option<DeferredDisplayList> {
-        let ptr = unsafe { C_SkDeferredDisplayListRecorder_detach(self.native_mut()) };
-        Some(DeferredDisplayList(ptr.to_option()?))
+        DeferredDisplayList::from_ptr(unsafe {
+            C_SkDeferredDisplayListRecorder_detach(self.native_mut())
+        })
     }
 
     // TODO: makePromiseTexture()?
@@ -39,22 +40,11 @@ pub(crate) mod private {
     use crate::prelude::*;
     use skia_bindings::{C_SkDeferredDisplayList_delete, SkDeferredDisplayList};
 
-    #[repr(transparent)]
-    pub struct DeferredDisplayList(pub(crate) *mut SkDeferredDisplayList);
+    pub type DeferredDisplayList = RefHandle<SkDeferredDisplayList>;
 
-    impl NativeAccess<SkDeferredDisplayList> for DeferredDisplayList {
-        fn native(&self) -> &SkDeferredDisplayList {
-            unsafe { &*self.0 }
-        }
-
-        fn native_mut(&mut self) -> &mut SkDeferredDisplayList {
-            unsafe { &mut *self.0 }
-        }
-    }
-
-    impl Drop for DeferredDisplayList {
+    impl NativeDrop for SkDeferredDisplayList {
         fn drop(&mut self) {
-            unsafe { C_SkDeferredDisplayList_delete(self.0) }
+            unsafe { C_SkDeferredDisplayList_delete(self) }
         }
     }
 }

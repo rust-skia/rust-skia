@@ -10,26 +10,15 @@ use skia_bindings::{
 };
 use std::ffi::c_void;
 
-#[repr(transparent)]
-pub struct ImageGenerator(*mut SkImageGenerator);
+pub type ImageGenerator = RefHandle<SkImageGenerator>;
 
-impl NativeAccess<SkImageGenerator> for ImageGenerator {
-    fn native(&self) -> &SkImageGenerator {
-        unsafe { &*self.0 }
-    }
-
-    fn native_mut(&mut self) -> &mut SkImageGenerator {
-        unsafe { &mut *self.0 }
-    }
-}
-
-impl Drop for ImageGenerator {
+impl NativeDrop for SkImageGenerator {
     fn drop(&mut self) {
-        unsafe { C_SkImageGenerator_delete(self.native_mut()) }
+        unsafe { C_SkImageGenerator_delete(self) }
     }
 }
 
-impl ImageGenerator {
+impl RefHandle<SkImageGenerator> {
     pub fn unique_id(&self) -> u32 {
         self.native().fUniqueID
     }
@@ -116,10 +105,8 @@ impl ImageGenerator {
 
     // TODO: generateTexture()
 
-    pub fn from_encoded(encoded: &Data) -> Option<ImageGenerator> {
-        unsafe { C_SkImageGenerator_MakeFromEncoded(encoded.shared_native()) }
-            .to_option()
-            .map(ImageGenerator)
+    pub fn from_encoded(encoded: &Data) -> Option<Self> {
+        Self::from_ptr(unsafe { C_SkImageGenerator_MakeFromEncoded(encoded.shared_native()) })
     }
 
     pub fn from_picture(
@@ -129,8 +116,8 @@ impl ImageGenerator {
         paint: Option<&Paint>,
         bit_depth: image::BitDepth,
         color_space: Option<&ColorSpace>,
-    ) -> Option<ImageGenerator> {
-        unsafe {
+    ) -> Option<Self> {
+        Self::from_ptr(unsafe {
             C_SkImageGenerator_MakeFromPicture(
                 size.native(),
                 picture.native(),
@@ -139,8 +126,6 @@ impl ImageGenerator {
                 bit_depth.into_native(),
                 color_space.native_ptr_or_null(),
             )
-        }
-        .to_option()
-        .map(ImageGenerator)
+        })
     }
 }

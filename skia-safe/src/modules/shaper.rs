@@ -21,57 +21,36 @@ use std::marker::PhantomData;
 use std::mem;
 use std::os::raw;
 
-#[repr(transparent)]
-pub struct Shaper(*mut SkShaper);
+pub type Shaper = RefHandle<SkShaper>;
 unsafe impl Send for Shaper {}
 
-impl NativeAccess<SkShaper> for Shaper {
-    fn native(&self) -> &SkShaper {
-        unsafe { &*self.0 }
-    }
-
-    fn native_mut(&mut self) -> &mut SkShaper {
-        unsafe { &mut *self.0 }
-    }
-}
-
-impl Drop for Shaper {
+impl NativeDrop for SkShaper {
     fn drop(&mut self) {
-        unsafe { C_SkShaper_delete(self.0) }
+        unsafe { C_SkShaper_delete(self) }
     }
 }
 
-impl Default for Shaper {
+impl Default for RefHandle<SkShaper> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl Shaper {
+impl RefHandle<SkShaper> {
     pub fn new_primitive() -> Self {
-        unsafe { C_SkShaper_MakePrimitive() }
-            .to_option()
-            .map(Shaper)
-            .unwrap()
+        Self::from_ptr(unsafe { C_SkShaper_MakePrimitive() }).unwrap()
     }
 
     pub fn new_shaper_driven_wrapper() -> Option<Self> {
-        unsafe { C_SkShaper_MakeShaperDrivenWrapper() }
-            .to_option()
-            .map(Shaper)
+        Self::from_ptr(unsafe { C_SkShaper_MakeShaperDrivenWrapper() })
     }
 
     pub fn new_shape_then_wrap() -> Option<Self> {
-        unsafe { C_SkShaper_MakeShapeThenWrap() }
-            .to_option()
-            .map(Shaper)
+        Self::from_ptr(unsafe { C_SkShaper_MakeShapeThenWrap() })
     }
 
     pub fn new() -> Self {
-        unsafe { C_SkShaper_Make() }
-            .to_option()
-            .map(Shaper)
-            .unwrap()
+        Self::from_ptr(unsafe { C_SkShaper_Make() }).unwrap()
     }
 }
 
@@ -103,25 +82,15 @@ where
     }
 }
 
-#[repr(transparent)]
-pub struct FontRunIterator(*mut SkShaper_FontRunIterator);
+pub type FontRunIterator = RefHandle<SkShaper_FontRunIterator>;
 
-impl Drop for FontRunIterator {
+impl NativeDrop for SkShaper_FontRunIterator {
     fn drop(&mut self) {
-        unsafe { C_SkShaper_RunIterator_delete(self.access_run_iterator_mut()) }
+        unsafe { C_SkShaper_RunIterator_delete(&mut self._base) }
     }
 }
 
-impl NativeAccess<SkShaper_FontRunIterator> for FontRunIterator {
-    fn native(&self) -> &SkShaper_FontRunIterator {
-        unsafe { &*self.0 }
-    }
-    fn native_mut(&mut self) -> &mut SkShaper_FontRunIterator {
-        unsafe { &mut *self.0 }
-    }
-}
-
-impl RunIteratorNativeAccess for FontRunIterator {
+impl RunIteratorNativeAccess for RefHandle<SkShaper_FontRunIterator> {
     fn access_run_iterator(&self) -> &SkShaper_RunIterator {
         &self.native()._base
     }
@@ -130,20 +99,20 @@ impl RunIteratorNativeAccess for FontRunIterator {
     }
 }
 
-impl FontRunIterator {
+impl RefHandle<SkShaper_FontRunIterator> {
     pub fn current_font(&self) -> &Font {
         Font::from_native_ref(unsafe { &*C_SkShaper_FontRunIterator_currentFont(self.native()) })
     }
 }
 
-impl Shaper {
+impl RefHandle<SkShaper> {
     pub fn new_font_mgr_run_iterator(
         utf8: &str,
         font: &Font,
         mut fallback: Option<&mut FontMgr>,
     ) -> FontRunIterator {
         let bytes = utf8.as_bytes();
-        FontRunIterator(unsafe {
+        FontRunIterator::from_ptr(unsafe {
             C_SkShaper_MakeFontMgrRunIterator(
                 bytes.as_ptr() as _,
                 bytes.len(),
@@ -151,28 +120,19 @@ impl Shaper {
                 fallback.shared_ptr_mut(),
             )
         })
+        .unwrap()
     }
 }
 
-#[repr(transparent)]
-pub struct BiDiRunIterator(*mut SkShaper_BiDiRunIterator);
+pub type BiDiRunIterator = RefHandle<SkShaper_BiDiRunIterator>;
 
-impl Drop for BiDiRunIterator {
+impl NativeDrop for SkShaper_BiDiRunIterator {
     fn drop(&mut self) {
-        unsafe { C_SkShaper_RunIterator_delete(self.access_run_iterator_mut()) }
+        unsafe { C_SkShaper_RunIterator_delete(&mut self._base) }
     }
 }
 
-impl NativeAccess<SkShaper_BiDiRunIterator> for BiDiRunIterator {
-    fn native(&self) -> &SkShaper_BiDiRunIterator {
-        unsafe { &*self.0 }
-    }
-    fn native_mut(&mut self) -> &mut SkShaper_BiDiRunIterator {
-        unsafe { &mut *self.0 }
-    }
-}
-
-impl RunIteratorNativeAccess for BiDiRunIterator {
+impl RunIteratorNativeAccess for RefHandle<SkShaper_BiDiRunIterator> {
     fn access_run_iterator(&self) -> &SkShaper_RunIterator {
         &self.native()._base
     }
@@ -181,40 +141,30 @@ impl RunIteratorNativeAccess for BiDiRunIterator {
     }
 }
 
-impl BiDiRunIterator {
+impl RefHandle<SkShaper_BiDiRunIterator> {
     pub fn current_level(&self) -> u8 {
         unsafe { C_SkShaper_BiDiRunIterator_currentLevel(self.native()) }
     }
 }
 
-impl Shaper {
+impl RefHandle<SkShaper> {
     pub fn new_icu_bidi_run_iterator(utf8: impl AsRef<str>, level: u8) -> Option<BiDiRunIterator> {
         let bytes = utf8.as_ref().as_bytes();
-        unsafe { C_SkShaper_MakeIcuBidiRunIterator(bytes.as_ptr() as _, bytes.len(), level) }
-            .to_option()
-            .map(BiDiRunIterator)
+        BiDiRunIterator::from_ptr(unsafe {
+            C_SkShaper_MakeIcuBidiRunIterator(bytes.as_ptr() as _, bytes.len(), level)
+        })
     }
 }
 
-#[repr(transparent)]
-pub struct ScriptRunIterator(*mut SkShaper_ScriptRunIterator);
+pub type ScriptRunIterator = RefHandle<SkShaper_ScriptRunIterator>;
 
-impl Drop for ScriptRunIterator {
+impl NativeDrop for SkShaper_ScriptRunIterator {
     fn drop(&mut self) {
-        unsafe { C_SkShaper_RunIterator_delete(self.access_run_iterator_mut()) }
+        unsafe { C_SkShaper_RunIterator_delete(&mut self._base) }
     }
 }
 
-impl NativeAccess<SkShaper_ScriptRunIterator> for ScriptRunIterator {
-    fn native(&self) -> &SkShaper_ScriptRunIterator {
-        unsafe { &*self.0 }
-    }
-    fn native_mut(&mut self) -> &mut SkShaper_ScriptRunIterator {
-        unsafe { &mut *self.0 }
-    }
-}
-
-impl RunIteratorNativeAccess for ScriptRunIterator {
+impl RunIteratorNativeAccess for RefHandle<SkShaper_ScriptRunIterator> {
     fn access_run_iterator(&self) -> &SkShaper_RunIterator {
         &self.native()._base
     }
@@ -223,7 +173,7 @@ impl RunIteratorNativeAccess for ScriptRunIterator {
     }
 }
 
-impl ScriptRunIterator {
+impl RefHandle<SkShaper_ScriptRunIterator> {
     pub fn current_script(&self) -> FourByteTag {
         FourByteTag::from_native(unsafe {
             C_SkShaper_ScriptRunIterator_currentScript(self.native())
@@ -231,35 +181,25 @@ impl ScriptRunIterator {
     }
 }
 
-impl Shaper {
+impl RefHandle<SkShaper> {
     pub fn new_hb_icu_script_run_iterator(utf8: impl AsRef<str>) -> ScriptRunIterator {
         let bytes = utf8.as_ref().as_bytes();
-        unsafe { C_SkShaper_MakeHbIcuScriptRunIterator(bytes.as_ptr() as _, bytes.len()) }
-            .to_option()
-            .map(ScriptRunIterator)
-            .unwrap()
+        ScriptRunIterator::from_ptr(unsafe {
+            C_SkShaper_MakeHbIcuScriptRunIterator(bytes.as_ptr() as _, bytes.len())
+        })
+        .unwrap()
     }
 }
 
-#[repr(transparent)]
-pub struct LanguageRunIterator(*mut SkShaper_LanguageRunIterator);
+pub type LanguageRunIterator = RefHandle<SkShaper_LanguageRunIterator>;
 
-impl Drop for LanguageRunIterator {
+impl NativeDrop for SkShaper_LanguageRunIterator {
     fn drop(&mut self) {
-        unsafe { C_SkShaper_RunIterator_delete(self.access_run_iterator_mut()) }
+        unsafe { C_SkShaper_RunIterator_delete(&mut self._base) }
     }
 }
 
-impl NativeAccess<SkShaper_LanguageRunIterator> for LanguageRunIterator {
-    fn native(&self) -> &SkShaper_LanguageRunIterator {
-        unsafe { &*self.0 }
-    }
-    fn native_mut(&mut self) -> &mut SkShaper_LanguageRunIterator {
-        unsafe { &mut *self.0 }
-    }
-}
-
-impl RunIteratorNativeAccess for LanguageRunIterator {
+impl RunIteratorNativeAccess for RefHandle<SkShaper_LanguageRunIterator> {
     fn access_run_iterator(&self) -> &SkShaper_RunIterator {
         &self.native()._base
     }
@@ -268,7 +208,7 @@ impl RunIteratorNativeAccess for LanguageRunIterator {
     }
 }
 
-impl LanguageRunIterator {
+impl RefHandle<SkShaper_LanguageRunIterator> {
     pub fn current_language(&self) -> &CStr {
         unsafe {
             CStr::from_ptr(C_SkShaper_LanguageRunIterator_currentLanguage(
@@ -278,12 +218,12 @@ impl LanguageRunIterator {
     }
 }
 
-impl Shaper {
+impl RefHandle<SkShaper> {
     pub fn new_std_language_run_iterator(utf8: impl AsRef<str>) -> Option<LanguageRunIterator> {
         let bytes = utf8.as_ref().as_bytes();
-        unsafe { C_SkShaper_MakeStdLanguageRunIterator(bytes.as_ptr() as _, bytes.len()) }
-            .to_option()
-            .map(LanguageRunIterator)
+        LanguageRunIterator::from_ptr(unsafe {
+            C_SkShaper_MakeStdLanguageRunIterator(bytes.as_ptr() as _, bytes.len())
+        })
     }
 }
 
@@ -371,7 +311,7 @@ mod run_handler {
     }
 }
 
-impl Shaper {
+impl RefHandle<SkShaper> {
     // TODO: SkShaper::shape() with non-standard run iterators.
 
     pub fn shape(
@@ -444,7 +384,7 @@ impl Shaper {
     }
 }
 
-#[repr(C)]
+#[repr(transparent)]
 pub struct TextBlobBuilderRunHandler<'text>(SkTextBlobBuilderRunHandler, PhantomData<&'text str>);
 
 impl NativeAccess<SkTextBlobBuilderRunHandler> for TextBlobBuilderRunHandler<'_> {
@@ -482,7 +422,7 @@ impl TextBlobBuilderRunHandler<'_> {
     }
 }
 
-impl Shaper {
+impl RefHandle<SkShaper> {
     pub fn shape_text_blob(
         &self,
         text: impl AsRef<str>,
