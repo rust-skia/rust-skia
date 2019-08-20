@@ -432,11 +432,7 @@ impl<N: NativeDrop> RefHandle<N> {
     /// From this time on the RefHandle ownes the object that the pointer points
     /// to and will call it's NativeDrop implementation it it goes out of scope.
     pub(crate) fn from_ptr(ptr: *mut N) -> Option<Self> {
-        if !ptr.is_null() {
-            Some(RefHandle(ptr))
-        } else {
-            None
-        }
+        ptr.to_option().map(Self)
     }
 }
 
@@ -460,17 +456,6 @@ impl<N: NativeRefCounted> AsRef<RCHandle<N>> for RCHandle<N> {
 }
 
 impl<N: NativeRefCounted> RCHandle<N> {
-    /// Increases the reference counter of the native type
-    /// and returns a reference to it.
-    #[inline]
-    pub(crate) fn shared_native(&self) -> &N {
-        unsafe {
-            let r = &*self.0;
-            r._ref();
-            r
-        }
-    }
-
     /// Creates an RCHandle from a pointer.
     /// Returns None if the pointer is null.
     /// Does not increase the reference count.
@@ -486,13 +471,12 @@ impl<N: NativeRefCounted> RCHandle<N> {
     /// Creates an RCHandle from a pointer.
     /// Returns None if the pointer is null.
     /// Increases the reference count.
+    #[inline]
     pub(crate) fn from_unshared_ptr(ptr: *mut N) -> Option<Self> {
-        if !ptr.is_null() {
-            (unsafe { (*ptr)._ref() });
-            Some(RCHandle(ptr))
-        } else {
-            None
-        }
+        ptr.to_option().map(|ptr| {
+            unsafe { (*ptr)._ref() };
+            Self(ptr)
+        })
     }
 }
 
@@ -513,7 +497,9 @@ impl<N: NativeRefCounted> Clone for RCHandle<N> {
         // yes, we _do_ support shared mutability when
         // a ref-counted handle is cloned, so beware of spooky action at
         // a distance.
-        RCHandle(self.shared_native() as *const N as _)
+        let ptr = self.0;
+        unsafe { (&*ptr)._ref() };
+        Self(ptr)
     }
 }
 
