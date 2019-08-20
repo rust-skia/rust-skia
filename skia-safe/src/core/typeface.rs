@@ -243,7 +243,7 @@ impl RCHandle<SkTypeface> {
     }
 
     pub fn new_family_name_iterator(&self) -> impl Iterator<Item = LocalizedString> {
-        LocalizedStringsIter(unsafe { self.native().createFamilyNameIterator() })
+        LocalizedStringsIter::from_ptr(unsafe { self.native().createFamilyNameIterator() }).unwrap()
     }
 
     pub fn family_name(&self) -> String {
@@ -263,26 +263,15 @@ impl RCHandle<SkTypeface> {
     }
 }
 
-#[repr(transparent)]
-struct LocalizedStringsIter(*mut SkTypeface_LocalizedStrings);
+pub type LocalizedStringsIter = RefHandle<SkTypeface_LocalizedStrings>;
 
-impl NativeAccess<SkTypeface_LocalizedStrings> for LocalizedStringsIter {
-    fn native(&self) -> &SkTypeface_LocalizedStrings {
-        unsafe { &*self.0 }
-    }
-
-    fn native_mut(&mut self) -> &mut SkTypeface_LocalizedStrings {
-        unsafe { &mut *self.0 }
-    }
-}
-
-impl Drop for LocalizedStringsIter {
+impl NativeDrop for SkTypeface_LocalizedStrings {
     fn drop(&mut self) {
-        unsafe { C_SkTypeface_LocalizedStrings_unref(self.0) }
+        unsafe { C_SkTypeface_LocalizedStrings_unref(self) }
     }
 }
 
-impl Iterator for LocalizedStringsIter {
+impl Iterator for RefHandle<SkTypeface_LocalizedStrings> {
     type Item = LocalizedString;
 
     fn next(&mut self) -> Option<Self::Item> {
