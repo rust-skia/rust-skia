@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use crate::{interop, FontMgr, FontStyle, Typeface, Unichar};
 use skia_bindings as sb;
-use skia_bindings::C_FontCollection_matchTypeface;
 use std::ffi;
 
 pub type FontCollection = RCHandle<sb::skia_textlayout_FontCollection>;
@@ -81,7 +80,7 @@ impl RCHandle<sb::skia_textlayout_FontCollection> {
     ) -> Option<Typeface> {
         let family_name = ffi::CString::new(family_name.as_ref()).unwrap();
         Typeface::from_ptr(unsafe {
-            C_FontCollection_matchTypeface(
+            sb::C_FontCollection_matchTypeface(
                 self.native_mut(),
                 family_name.as_ptr(),
                 font_style.into_native(),
