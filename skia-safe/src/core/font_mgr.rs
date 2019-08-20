@@ -91,14 +91,13 @@ impl NativeRefCountedBase for SkFontMgr {
 
 impl Default for RCHandle<SkFontMgr> {
     fn default() -> Self {
-        FontMgr::from_ptr(unsafe { C_SkFontMgr_RefDefault() }).unwrap()
+        Self::new()
     }
 }
 
 impl RCHandle<SkFontMgr> {
-    // Canonical new:
     pub fn new() -> Self {
-        Self::default()
+        FontMgr::from_ptr(unsafe { C_SkFontMgr_RefDefault() }).unwrap()
     }
 
     pub fn count_families(&self) -> usize {
