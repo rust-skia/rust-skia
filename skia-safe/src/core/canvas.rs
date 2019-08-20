@@ -912,23 +912,32 @@ impl Canvas {
         self
     }
 
-    pub fn draw_text_blob(&mut self, blob: &TextBlob, origin: impl Into<Point>, paint: &Paint) {
+    pub fn draw_text_blob(
+        &mut self,
+        blob: impl AsRef<TextBlob>,
+        origin: impl Into<Point>,
+        paint: &Paint,
+    ) {
         let origin = origin.into();
         unsafe {
-            self.native_mut()
-                .drawTextBlob(blob.native(), origin.x, origin.y, paint.native())
+            self.native_mut().drawTextBlob(
+                blob.as_ref().native(),
+                origin.x,
+                origin.y,
+                paint.native(),
+            )
         }
     }
 
     pub fn draw_picture(
         &mut self,
-        picture: &Picture,
+        picture: impl AsRef<Picture>,
         matrix: Option<&Matrix>,
         paint: Option<&Paint>,
     ) -> &mut Self {
         unsafe {
             self.native_mut().drawPicture(
-                picture.native(),
+                picture.as_ref().native(),
                 matrix.native_ptr_or_null(),
                 paint.native_ptr_or_null(),
             )
