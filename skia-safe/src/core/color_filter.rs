@@ -73,9 +73,9 @@ impl RCHandle<SkColorFilter> {
     }
 
     #[must_use]
-    pub fn composed(&self, inner: &ColorFilter) -> Option<Self> {
+    pub fn composed(&self, inner: impl Into<ColorFilter>) -> Option<Self> {
         ColorFilter::from_ptr(unsafe {
-            C_SkColorFilter_makeComposed(self.native(), inner.shared_native())
+            C_SkColorFilter_makeComposed(self.native(), inner.into().into_ptr())
         })
     }
 
@@ -92,9 +92,9 @@ pub mod color_filters {
         C_SkColorFilters_MatrixRowMajor, C_SkColorFilters_SRGBToLinearGamma,
     };
 
-    pub fn compose(outer: &ColorFilter, inner: &ColorFilter) -> Option<ColorFilter> {
+    pub fn compose(outer: ColorFilter, inner: ColorFilter) -> Option<ColorFilter> {
         ColorFilter::from_ptr(unsafe {
-            C_SkColorFilters_Compose(outer.shared_native(), inner.shared_native())
+            C_SkColorFilters_Compose(outer.into_ptr(), inner.into_ptr())
         })
     }
 
@@ -125,10 +125,8 @@ pub mod color_filters {
         ColorFilter::from_ptr(unsafe { C_SkColorFilters_SRGBToLinearGamma() }).unwrap()
     }
 
-    pub fn lerp(t: f32, dst: &ColorFilter, src: &ColorFilter) -> Option<ColorFilter> {
-        ColorFilter::from_ptr(unsafe {
-            C_SkColorFilters_Lerp(t, dst.shared_native(), src.shared_native())
-        })
+    pub fn lerp(t: f32, dst: ColorFilter, src: ColorFilter) -> Option<ColorFilter> {
+        ColorFilter::from_ptr(unsafe { C_SkColorFilters_Lerp(t, dst.into_ptr(), src.into_ptr()) })
     }
 }
 

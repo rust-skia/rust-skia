@@ -119,10 +119,14 @@ fn draw_gradient(canvas: &mut Canvas) {
     let colors = [Color::BLUE, Color::YELLOW];
     let paint = &mut Paint::default();
 
-    paint.set_shader(
-        gradient_shader::linear(points, colors.as_ref(), None, TileMode::Clamp, None, None)
-            .as_ref(),
-    );
+    paint.set_shader(gradient_shader::linear(
+        points,
+        colors.as_ref(),
+        None,
+        TileMode::Clamp,
+        None,
+        None,
+    ));
     canvas.draw_paint(paint);
 }
 
@@ -172,31 +176,25 @@ fn draw_transfer_modes(canvas: &mut Canvas) {
     let font = &Font::from_typeface(&Typeface::default(), 24.0);
     let src_points: (Point, Point) = ((0.0, 0.0).into(), (64.0, 0.0).into());
     let src_colors = [Color::MAGENTA & 0x00_FF_FF_FF, Color::MAGENTA];
-    src.set_shader(
-        gradient_shader::linear(
-            src_points,
-            src_colors.as_ref(),
-            None,
-            TileMode::Clamp,
-            None,
-            None,
-        )
-        .as_ref(),
-    );
+    src.set_shader(gradient_shader::linear(
+        src_points,
+        src_colors.as_ref(),
+        None,
+        TileMode::Clamp,
+        None,
+        None,
+    ));
 
     let dst_points: (Point, Point) = ((0.0, 0.0).into(), (0.0, 64.0).into());
     let dst_colors = [Color::CYAN & 0x00_FF_FF_FF, Color::CYAN];
-    dst.set_shader(
-        gradient_shader::linear(
-            dst_points,
-            dst_colors.as_ref(),
-            None,
-            TileMode::Clamp,
-            None,
-            None,
-        )
-        .as_ref(),
-    );
+    dst.set_shader(gradient_shader::linear(
+        dst_points,
+        dst_colors.as_ref(),
+        None,
+        TileMode::Clamp,
+        None,
+        None,
+    ));
     canvas.clear(Color::WHITE);
     let n = modes.len();
     let k = (n - 1) / 3 + 1;
@@ -225,18 +223,81 @@ fn draw_bitmap_shader(canvas: &mut Canvas) {
     matrix.set_scale((0.75, 0.75), None);
     matrix.pre_rotate(30.0, None);
     let paint = &mut Paint::default();
-    paint.set_shader(
-        image
-            .to_shader((TileMode::Repeat, TileMode::Repeat), &matrix)
-            .as_ref(),
-    );
+    paint.set_shader(image.to_shader((TileMode::Repeat, TileMode::Repeat), &matrix));
     canvas.draw_paint(paint);
 }
 
 fn draw_radial_gradient_shader(canvas: &mut Canvas) {
     let colors = [Color::BLUE, Color::YELLOW];
     let mut paint = Paint::default();
-    paint.set_shader(
+    paint.set_shader(gradient_shader::radial(
+        (128.0, 128.0),
+        180.0,
+        colors.as_ref(),
+        None,
+        TileMode::Clamp,
+        None,
+        None,
+    ));
+    canvas.draw_paint(&paint);
+}
+
+fn draw_two_point_conical_shader(canvas: &mut Canvas) {
+    let colors = [Color::BLUE, Color::YELLOW];
+    let paint = &mut Paint::default();
+    paint.set_shader(gradient_shader::two_point_conical(
+        (128.0, 128.0),
+        128.0,
+        (128.0, 16.0),
+        16.0,
+        colors.as_ref(),
+        None,
+        TileMode::Clamp,
+        None,
+        None,
+    ));
+    canvas.draw_paint(&paint);
+}
+
+fn draw_sweep_gradient_shader(canvas: &mut Canvas) {
+    let colors = [Color::CYAN, Color::MAGENTA, Color::YELLOW, Color::CYAN];
+    let paint = &mut Paint::default();
+    paint.set_shader(gradient_shader::sweep(
+        (128.0, 128.0),
+        colors.as_ref(),
+        None,
+        TileMode::default(),
+        None,
+        None,
+        None,
+    ));
+    canvas.draw_paint(paint);
+}
+
+fn draw_fractal_perlin_noise_shader(canvas: &mut Canvas) {
+    canvas.clear(Color::WHITE);
+    let paint = &mut Paint::default();
+    paint.set_shader(perlin_noise_shader::fractal_noise(
+        (0.05, 0.05),
+        4,
+        0.0,
+        None,
+    ));
+    canvas.draw_paint(paint);
+}
+
+fn draw_turbulence_perlin_noise_shader(canvas: &mut Canvas) {
+    canvas.clear(Color::WHITE);
+    let paint = &mut Paint::default();
+    paint.set_shader(perlin_noise_shader::turbulence((0.05, 0.05), 4, 0.0, None));
+    canvas.draw_paint(paint);
+}
+
+fn draw_compose_shader(canvas: &mut Canvas) {
+    let colors = [Color::BLUE, Color::YELLOW];
+    let paint = &mut Paint::default();
+    paint.set_shader(Shaders::blend(
+        BlendMode::Difference,
         gradient_shader::radial(
             (128.0, 128.0),
             180.0,
@@ -246,82 +307,8 @@ fn draw_radial_gradient_shader(canvas: &mut Canvas) {
             None,
             None,
         )
-        .as_ref(),
-    );
-    canvas.draw_paint(&paint);
-}
-
-fn draw_two_point_conical_shader(canvas: &mut Canvas) {
-    let colors = [Color::BLUE, Color::YELLOW];
-    let paint = &mut Paint::default();
-    paint.set_shader(
-        gradient_shader::two_point_conical(
-            (128.0, 128.0),
-            128.0,
-            (128.0, 16.0),
-            16.0,
-            colors.as_ref(),
-            None,
-            TileMode::Clamp,
-            None,
-            None,
-        )
-        .as_ref(),
-    );
-    canvas.draw_paint(&paint);
-}
-
-fn draw_sweep_gradient_shader(canvas: &mut Canvas) {
-    let colors = [Color::CYAN, Color::MAGENTA, Color::YELLOW, Color::CYAN];
-    let paint = &mut Paint::default();
-    paint.set_shader(
-        gradient_shader::sweep(
-            (128.0, 128.0),
-            colors.as_ref(),
-            None,
-            TileMode::default(),
-            None,
-            None,
-            None,
-        )
-        .as_ref(),
-    );
-    canvas.draw_paint(paint);
-}
-
-fn draw_fractal_perlin_noise_shader(canvas: &mut Canvas) {
-    canvas.clear(Color::WHITE);
-    let paint = &mut Paint::default();
-    paint.set_shader(perlin_noise_shader::fractal_noise((0.05, 0.05), 4, 0.0, None).as_ref());
-    canvas.draw_paint(paint);
-}
-
-fn draw_turbulence_perlin_noise_shader(canvas: &mut Canvas) {
-    canvas.clear(Color::WHITE);
-    let paint = &mut Paint::default();
-    paint.set_shader(perlin_noise_shader::turbulence((0.05, 0.05), 4, 0.0, None).as_ref());
-    canvas.draw_paint(paint);
-}
-
-fn draw_compose_shader(canvas: &mut Canvas) {
-    let colors = [Color::BLUE, Color::YELLOW];
-    let paint = &mut Paint::default();
-    paint.set_shader(Some(
-        Shaders::blend(
-            BlendMode::Difference,
-            &gradient_shader::radial(
-                (128.0, 128.0),
-                180.0,
-                colors.as_ref(),
-                None,
-                TileMode::Clamp,
-                None,
-                None,
-            )
-            .unwrap(),
-            &perlin_noise_shader::turbulence((0.025, 0.025), 2, 0.0, None).unwrap(),
-        )
-        .as_ref(),
+        .unwrap(),
+        perlin_noise_shader::turbulence((0.025, 0.025), 2, 0.0, None).unwrap(),
     ));
     canvas.draw_paint(paint);
 }
@@ -333,7 +320,7 @@ fn draw_mask_filter(canvas: &mut Canvas) {
         BlendMode::default(),
     );
     let paint = &mut Paint::default();
-    paint.set_mask_filter(&MaskFilter::blur(BlurStyle::Normal, 5.0, None));
+    paint.set_mask_filter(MaskFilter::blur(BlurStyle::Normal, 5.0, None));
     let blob =
         &TextBlob::from_str("Skia", &Font::from_typeface(&Typeface::default(), 120.0)).unwrap();
     canvas.draw_text_blob(blob, (0, 160), paint);
@@ -342,7 +329,7 @@ fn draw_mask_filter(canvas: &mut Canvas) {
 fn draw_color_filter(c: &mut Canvas) {
     fn f(c: &mut Canvas, (x, y): (scalar, scalar), color_matrix: &[scalar; 20]) {
         let paint = &mut Paint::default();
-        paint.set_color_filter(&ColorFilters::matrix_row_major(color_matrix));
+        paint.set_color_filter(ColorFilters::matrix_row_major(color_matrix));
 
         let image = &resources::mandrill();
 
@@ -373,7 +360,7 @@ fn draw_color_table_color_filter(canvas: &mut Canvas) {
         *v = x.max(0).min(255) as _;
     }
     let mut paint = Paint::default();
-    paint.set_color_filter(&table_color_filter::from_argb(
+    paint.set_color_filter(table_color_filter::from_argb(
         None,
         Some(ct),
         Some(ct),
@@ -399,7 +386,7 @@ fn draw_path_2d_effect(canvas: &mut Canvas) {
     let matrix = &Matrix::new_scale((4.0 * scale, 4.0 * scale));
     let paint = &mut Paint::default();
     paint
-        .set_path_effect(&path_2d_path_effect::new(matrix, path))
+        .set_path_effect(path_2d_path_effect::new(matrix, path))
         .set_anti_alias(true);
     canvas.clear(Color::WHITE);
     let bounds = Rect::new(-4.0 * scale, -4.0 * scale, 256.0, 256.0);
@@ -411,7 +398,7 @@ fn draw_line_2d_effect(canvas: &mut Canvas) {
     let lattice = &mut Matrix::default();
     lattice.set_scale((8.0, 8.0), None).pre_rotate(30.0, None);
     paint
-        .set_path_effect(line_2d_path_effect::new(0.0, lattice).as_ref())
+        .set_path_effect(line_2d_path_effect::new(0.0, lattice))
         .set_anti_alias(true);
     let bounds = Rect::from_size((256, 256)).with_outset((8.0, 8.0));
     canvas.clear(Color::WHITE);
@@ -423,9 +410,12 @@ fn draw_path_1d_effect(canvas: &mut Canvas) {
     let path = &mut Path::default();
     path.add_oval(Rect::from_size((16.0, 6.0)), None);
     paint
-        .set_path_effect(
-            path_1d_path_effect::new(path, 32.0, 0.0, path_1d_path_effect::Style::Rotate).as_ref(),
-        )
+        .set_path_effect(path_1d_path_effect::new(
+            path,
+            32.0,
+            0.0,
+            path_1d_path_effect::Style::Rotate,
+        ))
         .set_anti_alias(true);
     canvas.clear(Color::WHITE);
     canvas.draw_circle((128.0, 128.0), 122.0, paint);
@@ -448,7 +438,7 @@ fn star() -> Path {
 fn draw_corner_path_effect(canvas: &mut Canvas) {
     let paint = &mut Paint::default();
     paint
-        .set_path_effect(corner_path_effect::new(32.0).as_ref())
+        .set_path_effect(corner_path_effect::new(32.0))
         .set_style(PaintStyle::Stroke)
         .set_anti_alias(true);
     canvas.clear(Color::WHITE);
@@ -459,7 +449,7 @@ fn draw_dash_path_effect(canvas: &mut Canvas) {
     const INTERVALS: [scalar; 4] = [10.0, 5.0, 2.0, 5.0];
     let paint = &mut Paint::default();
     paint
-        .set_path_effect(dash_path_effect::new(&INTERVALS, 0.0).as_ref())
+        .set_path_effect(dash_path_effect::new(&INTERVALS, 0.0))
         .set_style(PaintStyle::Stroke)
         .set_stroke_width(2.0)
         .set_anti_alias(true);
@@ -470,7 +460,7 @@ fn draw_dash_path_effect(canvas: &mut Canvas) {
 fn draw_discrete_path_effect(canvas: &mut Canvas) {
     let paint = &mut Paint::default();
     paint
-        .set_path_effect(discrete_path_effect::new(10.0, 4.0, None).as_ref())
+        .set_path_effect(discrete_path_effect::new(10.0, 4.0, None))
         .set_style(PaintStyle::Stroke)
         .set_stroke_width(2.0)
         .set_anti_alias(true);
@@ -482,9 +472,9 @@ fn draw_compose_path_effect(canvas: &mut Canvas) {
     const INTERVALS: [scalar; 4] = [10.0, 5.0, 2.0, 5.0];
     let paint = &mut Paint::default();
     paint
-        .set_path_effect(&PathEffect::compose(
-            &dash_path_effect::new(&INTERVALS, 0.0).unwrap(),
-            &discrete_path_effect::new(10.0, 4.0, None).unwrap(),
+        .set_path_effect(PathEffect::compose(
+            dash_path_effect::new(&INTERVALS, 0.0).unwrap(),
+            discrete_path_effect::new(10.0, 4.0, None).unwrap(),
         ))
         .set_style(PaintStyle::Stroke)
         .set_stroke_width(2.0)
@@ -496,9 +486,9 @@ fn draw_compose_path_effect(canvas: &mut Canvas) {
 fn draw_sum_path_effect(canvas: &mut Canvas) {
     let paint = &mut Paint::default();
     paint
-        .set_path_effect(&PathEffect::sum(
-            &discrete_path_effect::new(10.0, 4.0, None).unwrap(),
-            &discrete_path_effect::new(10.0, 4.0, Some(1245)).unwrap(),
+        .set_path_effect(PathEffect::sum(
+            discrete_path_effect::new(10.0, 4.0, None).unwrap(),
+            discrete_path_effect::new(10.0, 4.0, Some(1245)).unwrap(),
         ))
         .set_style(PaintStyle::Stroke)
         .set_stroke_width(2.0)

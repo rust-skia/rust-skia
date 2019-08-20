@@ -4,7 +4,7 @@ use skia_bindings::{C_SkOffsetImageFilter_Make, SkImageFilter};
 
 impl RCHandle<SkImageFilter> {
     pub fn offset<'a>(
-        &self,
+        self,
         crop_rect: impl Into<Option<&'a CropRect>>,
         delta: impl Into<Vector>,
     ) -> Option<Self> {
@@ -14,7 +14,7 @@ impl RCHandle<SkImageFilter> {
 
 pub fn new<'a>(
     delta: impl Into<Vector>,
-    input: &ImageFilter,
+    input: ImageFilter,
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     let delta = delta.into();
@@ -22,7 +22,7 @@ pub fn new<'a>(
         C_SkOffsetImageFilter_Make(
             delta.x,
             delta.y,
-            input.shared_native(),
+            input.into_ptr(),
             crop_rect.into().native_ptr_or_null(),
         )
     })

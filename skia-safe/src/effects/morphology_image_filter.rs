@@ -4,7 +4,7 @@ use skia_bindings::SkImageFilter;
 
 impl RCHandle<SkImageFilter> {
     pub fn dilate<'a>(
-        &self,
+        self,
         crop_rect: impl Into<Option<&'a CropRect>>,
         radii: (i32, i32),
     ) -> Option<Self> {
@@ -12,7 +12,7 @@ impl RCHandle<SkImageFilter> {
     }
 
     pub fn erode<'a>(
-        &self,
+        self,
         crop_rect: impl Into<Option<&'a CropRect>>,
         radii: (i32, i32),
     ) -> Option<Self> {
@@ -28,14 +28,14 @@ pub mod dilate_image_filter {
 
     pub fn new<'a>(
         (radius_x, radius_y): (i32, i32),
-        input: &ImageFilter,
+        input: ImageFilter,
         crop_rect: impl Into<Option<&'a CropRect>>,
     ) -> Option<ImageFilter> {
         ImageFilter::from_ptr(unsafe {
             C_SkDilateImageFilter_Make(
                 radius_x,
                 radius_y,
-                input.shared_native(),
+                input.into_ptr(),
                 crop_rect.into().native_ptr_or_null(),
             )
         })
@@ -44,20 +44,20 @@ pub mod dilate_image_filter {
 
 pub mod erode_image_filter {
     use crate::image_filter::CropRect;
-    use crate::prelude::NativePointerOrNull2;
+    use crate::prelude::{IntoPtr, NativePointerOrNull2};
     use crate::ImageFilter;
     use skia_bindings::C_SkErodeImageFilter_Make;
 
     pub fn new<'a>(
         (radius_x, radius_y): (i32, i32),
-        input: &ImageFilter,
+        input: ImageFilter,
         crop_rect: impl Into<Option<&'a CropRect>>,
     ) -> Option<ImageFilter> {
         ImageFilter::from_ptr(unsafe {
             C_SkErodeImageFilter_Make(
                 radius_x,
                 radius_y,
-                input.shared_native(),
+                input.into_ptr(),
                 crop_rect.into().native_ptr_or_null(),
             )
         })

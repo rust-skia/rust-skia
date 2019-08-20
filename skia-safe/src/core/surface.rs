@@ -99,7 +99,7 @@ impl RCHandle<SkSurface> {
         origin: SurfaceOrigin,
         sample_count: impl Into<Option<usize>>,
         color_type: ColorType,
-        color_space: Option<&ColorSpace>,
+        color_space: impl Into<Option<ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
@@ -109,7 +109,7 @@ impl RCHandle<SkSurface> {
                 origin.into_native(),
                 sample_count.into().unwrap_or(0).try_into().unwrap(),
                 color_type.into_native(),
-                color_space.shared_ptr(),
+                color_space.into().into_ptr_or_null(),
                 surface_props.native_ptr_or_null(),
             )
         })
@@ -120,7 +120,7 @@ impl RCHandle<SkSurface> {
         backend_render_target: &BackendRenderTarget,
         origin: SurfaceOrigin,
         color_type: ColorType,
-        color_space: Option<&ColorSpace>,
+        color_space: impl Into<Option<ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
@@ -129,7 +129,7 @@ impl RCHandle<SkSurface> {
                 backend_render_target.native(),
                 origin.into_native(),
                 color_type.into_native(),
-                color_space.shared_ptr(),
+                color_space.into().into_ptr_or_null(),
                 surface_props.native_ptr_or_null(),
             )
         })
@@ -141,7 +141,7 @@ impl RCHandle<SkSurface> {
         origin: SurfaceOrigin,
         sample_count: impl Into<Option<usize>>,
         color_type: ColorType,
-        color_space: Option<&ColorSpace>,
+        color_space: impl Into<Option<ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
@@ -151,7 +151,7 @@ impl RCHandle<SkSurface> {
                 origin.into_native(),
                 sample_count.into().unwrap_or(0).try_into().unwrap(),
                 color_type.into_native(),
-                color_space.shared_ptr(),
+                color_space.into().into_ptr_or_null(),
                 surface_props.native_ptr_or_null(),
             )
         })

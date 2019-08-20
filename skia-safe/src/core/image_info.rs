@@ -145,7 +145,7 @@ impl Handle<SkImageInfo> {
         dimensions: impl Into<ISize>,
         ct: ColorType,
         at: AlphaType,
-        cs: Option<&ColorSpace>,
+        cs: impl Into<Option<ColorSpace>>,
     ) -> Self {
         let dimensions = dimensions.into();
         let mut image_info = Self::default();
@@ -157,7 +157,7 @@ impl Handle<SkImageInfo> {
                 dimensions.height,
                 ct.into_native(),
                 at.into_native(),
-                cs.shared_ptr(),
+                cs.into().into_ptr_or_null(),
             )
         }
         image_info
@@ -166,7 +166,7 @@ impl Handle<SkImageInfo> {
     pub fn new_n32(
         dimensions: impl Into<ISize>,
         at: AlphaType,
-        cs: Option<&ColorSpace>,
+        cs: impl Into<Option<ColorSpace>>,
     ) -> ImageInfo {
         Self::new(dimensions, ColorType::n32(), at, cs)
     }
@@ -185,7 +185,10 @@ impl Handle<SkImageInfo> {
         image_info
     }
 
-    pub fn new_n32_premul(dimensions: impl Into<ISize>, cs: Option<&ColorSpace>) -> ImageInfo {
+    pub fn new_n32_premul(
+        dimensions: impl Into<ISize>,
+        cs: impl Into<Option<ColorSpace>>,
+    ) -> ImageInfo {
         Self::new(dimensions, ColorType::n32(), AlphaType::Premul, cs)
     }
 
@@ -247,7 +250,7 @@ impl Handle<SkImageInfo> {
             new_dimensions,
             self.color_type(),
             self.alpha_type(),
-            self.color_space().as_ref(),
+            self.color_space(),
         )
     }
 
@@ -256,7 +259,7 @@ impl Handle<SkImageInfo> {
             self.dimensions(),
             self.color_type(),
             new_alpha_type,
-            self.color_space().as_ref(),
+            self.color_space(),
         )
     }
 
@@ -265,11 +268,11 @@ impl Handle<SkImageInfo> {
             self.dimensions(),
             new_color_type,
             self.alpha_type(),
-            self.color_space().as_ref(),
+            self.color_space(),
         )
     }
 
-    pub fn with_color_space(&self, new_color_space: Option<&ColorSpace>) -> Self {
+    pub fn with_color_space(&self, new_color_space: impl Into<Option<ColorSpace>>) -> Self {
         Self::new(
             self.dimensions(),
             self.color_type(),
@@ -318,7 +321,7 @@ fn ref_cnt_in_relation_to_color_space() {
     let cs = ColorSpace::new_srgb();
     let before = cs.native().ref_cnt();
     {
-        let ii = ImageInfo::new_n32((10, 10), AlphaType::Premul, Some(&cs));
+        let ii = ImageInfo::new_n32((10, 10), AlphaType::Premul, Some(cs.clone()));
         // one for the capture in image info
         assert_eq!(before + 1, cs.native().ref_cnt());
         let cs2 = ii.color_space();

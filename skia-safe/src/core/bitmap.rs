@@ -269,12 +269,16 @@ impl Handle<SkBitmap> {
         IPoint::from_native(unsafe { self.native().pixelRefOrigin() })
     }
 
-    pub fn set_pixel_ref(&mut self, pixel_ref: Option<&PixelRef>, offset: impl Into<IPoint>) {
+    pub fn set_pixel_ref(
+        &mut self,
+        pixel_ref: impl Into<Option<PixelRef>>,
+        offset: impl Into<IPoint>,
+    ) {
         let offset = offset.into();
         unsafe {
             C_SkBitmap_setPixelRef(
                 self.native_mut(),
-                pixel_ref.shared_ptr(),
+                pixel_ref.into().into_ptr_or_null(),
                 offset.x,
                 offset.y,
             )

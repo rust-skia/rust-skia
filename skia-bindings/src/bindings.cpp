@@ -108,9 +108,10 @@
 #endif
 
 template<typename T>
-inline sk_sp<T> spFromConst(const T* pt) {
-    return sk_sp<T>(const_cast<T*>(pt));
+inline sk_sp<T> sp(T* pt) {
+    return sk_sp<T>(pt);
 }
+
 
 //
 // codec/SkEncodedOrigin.h
@@ -142,7 +143,7 @@ extern "C" SkSurface* C_SkSurface_MakeFromBackendTexture(
         GrSurfaceOrigin origin,
         int sampleCnt,
         SkColorType colorType,
-        const SkColorSpace* colorSpace,
+        SkColorSpace* colorSpace,
         const SkSurfaceProps* surfaceProps) {
     return SkSurface::MakeFromBackendTexture(
             context,
@@ -150,7 +151,7 @@ extern "C" SkSurface* C_SkSurface_MakeFromBackendTexture(
             origin,
             sampleCnt,
             colorType,
-            spFromConst(colorSpace), surfaceProps).release();
+            sp(colorSpace), surfaceProps).release();
 }
 
 extern "C" SkSurface* C_SkSurface_MakeFromBackendRenderTarget(
@@ -158,7 +159,7 @@ extern "C" SkSurface* C_SkSurface_MakeFromBackendRenderTarget(
         const GrBackendRenderTarget* backendRenderTarget,
         GrSurfaceOrigin origin,
         SkColorType colorType,
-        const SkColorSpace* colorSpace,
+        SkColorSpace* colorSpace,
         const SkSurfaceProps* surfaceProps
         ) {
     return SkSurface::MakeFromBackendRenderTarget(
@@ -166,7 +167,7 @@ extern "C" SkSurface* C_SkSurface_MakeFromBackendRenderTarget(
             *backendRenderTarget,
             origin,
             colorType,
-            spFromConst(colorSpace),
+            sp(colorSpace),
             surfaceProps).release();
 }
 
@@ -176,7 +177,7 @@ extern "C" SkSurface* C_SkSurface_MakeFromBackendTextureAsRenderTarget(
         GrSurfaceOrigin origin,
         int sampleCnt,
         SkColorType colorType,
-        const SkColorSpace* colorSpace,
+        SkColorSpace* colorSpace,
         const SkSurfaceProps* surfaceProps) {
     return SkSurface::MakeFromBackendTextureAsRenderTarget(
             context,
@@ -184,7 +185,7 @@ extern "C" SkSurface* C_SkSurface_MakeFromBackendTextureAsRenderTarget(
             origin,
             sampleCnt,
             colorType,
-            spFromConst(colorSpace), surfaceProps).release();
+            sp(colorSpace), surfaceProps).release();
 }
 
 extern "C" SkSurface* C_SkSurface_MakeRenderTarget(
@@ -286,8 +287,8 @@ extern "C" const SkImageInfo* C_SkSurfaceCharacterization_imageInfo(const SkSurf
 // SkImage
 //
 
-extern "C" SkImage* C_SkImage_MakeRasterData(const SkImageInfo* info, const SkData* pixels, size_t rowBytes) {
-    return SkImage::MakeRasterData(*info, spFromConst(pixels), rowBytes).release();
+extern "C" SkImage* C_SkImage_MakeRasterData(const SkImageInfo* info, SkData* pixels, size_t rowBytes) {
+    return SkImage::MakeRasterData(*info, sp(pixels), rowBytes).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromBitmap(const SkBitmap* bitmap) {
@@ -298,12 +299,12 @@ extern "C" SkImage* C_SkImage_MakeFromGenerator(SkImageGenerator* imageGenerator
     return SkImage::MakeFromGenerator(std::unique_ptr<SkImageGenerator>(imageGenerator), subset).release();
 }
 
-extern "C" SkImage* C_SkImage_MakeFromEncoded(const SkData* encoded, const SkIRect* subset) {
-    return SkImage::MakeFromEncoded(spFromConst(encoded), subset).release();
+extern "C" SkImage* C_SkImage_MakeFromEncoded(SkData* encoded, const SkIRect* subset) {
+    return SkImage::MakeFromEncoded(sp(encoded), subset).release();
 }
 
-extern "C" SkImage* C_SkImage_MakeFromCompressed(GrContext* context, const SkData* encoded, int width, int height, SkImage::CompressionType type) {
-    return SkImage::MakeFromCompressed(context, spFromConst(encoded), width, height, type).release();
+extern "C" SkImage* C_SkImage_MakeFromCompressed(GrContext* context, SkData* encoded, int width, int height, SkImage::CompressionType type) {
+    return SkImage::MakeFromCompressed(context, sp(encoded), width, height, type).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromTexture(
@@ -312,18 +313,18 @@ extern "C" SkImage* C_SkImage_MakeFromTexture(
         GrSurfaceOrigin origin,
         SkColorType colorType,
         SkAlphaType alphaType,
-        const SkColorSpace* colorSpace) {
-    return SkImage::MakeFromTexture(context, *backendTexture, origin, colorType, alphaType, spFromConst(colorSpace)).release();
+        SkColorSpace* colorSpace) {
+    return SkImage::MakeFromTexture(context, *backendTexture, origin, colorType, alphaType, sp(colorSpace)).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeCrossContextFromEncoded(
         GrContext* context,
-        const SkData* data,
+        SkData* data,
         bool buildMips,
         const SkColorSpace* dstColorSpace,
         bool limitToMaxTextureSize
         ) {
-    return SkImage::MakeCrossContextFromEncoded(context, spFromConst(data), buildMips, const_cast<SkColorSpace*>(dstColorSpace), limitToMaxTextureSize).release();
+    return SkImage::MakeCrossContextFromEncoded(context, sp(data), buildMips, const_cast<SkColorSpace*>(dstColorSpace), limitToMaxTextureSize).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromAdoptedTexture(
@@ -332,8 +333,8 @@ extern "C" SkImage* C_SkImage_MakeFromAdoptedTexture(
         GrSurfaceOrigin origin,
         SkColorType colorType,
         SkAlphaType alphaType,
-        const SkColorSpace* colorSpace) {
-    return SkImage::MakeFromAdoptedTexture(context, *backendTexture, origin, colorType, alphaType, spFromConst(colorSpace)).release();
+        SkColorSpace* colorSpace) {
+    return SkImage::MakeFromAdoptedTexture(context, *backendTexture, origin, colorType, alphaType, sp(colorSpace)).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromYUVATexturesCopy(
@@ -343,11 +344,11 @@ extern "C" SkImage* C_SkImage_MakeFromYUVATexturesCopy(
         const SkYUVAIndex yuvaIndices[4],
         SkISize imageSize,
         GrSurfaceOrigin imageOrigin,
-        const SkColorSpace* colorSpace) {
+        SkColorSpace* colorSpace) {
     return SkImage::MakeFromYUVATexturesCopy(
             context,
             yuvColorSpace, yuvaTextures, yuvaIndices,
-            imageSize, imageOrigin, spFromConst(colorSpace)).release();
+            imageSize, imageOrigin, sp(colorSpace)).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend(
@@ -358,12 +359,12 @@ extern "C" SkImage* C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend(
         SkISize imageSize,
         GrSurfaceOrigin imageOrigin,
         const GrBackendTexture& backendTexture,
-        const SkColorSpace* colorSpace) {
+        SkColorSpace* colorSpace) {
     return SkImage::MakeFromYUVATexturesCopyWithExternalBackend(
             context,
             yuvColorSpace, yuvaTextures, yuvaIndices,
             imageSize, imageOrigin, backendTexture,
-            spFromConst(colorSpace)).release();
+            sp(colorSpace)).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromYUVATextures(
@@ -373,11 +374,11 @@ extern "C" SkImage* C_SkImage_MakeFromYUVATextures(
         const SkYUVAIndex yuvaIndices[4],
         SkISize imageSize,
         GrSurfaceOrigin imageOrigin,
-        const SkColorSpace* colorSpace) {
+        SkColorSpace* colorSpace) {
     return SkImage::MakeFromYUVATextures(
             context,
             yuvColorSpace, yuvaTextures, yuvaIndices,
-            imageSize, imageOrigin, spFromConst(colorSpace)).release();
+            imageSize, imageOrigin, sp(colorSpace)).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromNV12TexturesCopy(
@@ -385,10 +386,10 @@ extern "C" SkImage* C_SkImage_MakeFromNV12TexturesCopy(
         SkYUVColorSpace yuvColorSpace,
         const GrBackendTexture nv12Textures[2],
         GrSurfaceOrigin imageOrigin,
-        const SkColorSpace* imageColorSpace) {
+        SkColorSpace* imageColorSpace) {
     return SkImage::MakeFromNV12TexturesCopy(
             context, yuvColorSpace, nv12Textures, imageOrigin,
-            spFromConst(imageColorSpace)).release();
+            sp(imageColorSpace)).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
@@ -397,21 +398,21 @@ extern "C" SkImage* C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
         const GrBackendTexture nv12Textures[2],
         GrSurfaceOrigin imageOrigin,
         const GrBackendTexture* backendTexture,
-        const SkColorSpace* imageColorSpace) {
+        SkColorSpace* imageColorSpace) {
     return SkImage::MakeFromNV12TexturesCopyWithExternalBackend(
             context,
             yuvColorSpace, nv12Textures, imageOrigin, *backendTexture,
-            spFromConst(imageColorSpace)).release();
+            sp(imageColorSpace)).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromPicture(
-        const SkPicture* picture,
+        SkPicture* picture,
         const SkISize* dimensions,
         const SkMatrix* matrix,
         const SkPaint* paint,
         SkImage::BitDepth bitDepth,
-        const SkColorSpace* colorSpace) {
-    return SkImage::MakeFromPicture(spFromConst(picture), *dimensions, matrix, paint, bitDepth, spFromConst(colorSpace)).release();
+        SkColorSpace* colorSpace) {
+    return SkImage::MakeFromPicture(sp(picture), *dimensions, matrix, paint, bitDepth, sp(colorSpace)).release();
 }
 
 extern "C" SkShader* C_SkImage_makeShader(const SkImage* self, SkTileMode tileMode1, SkTileMode tileMode2, const SkMatrix* localMatrix) {
@@ -462,8 +463,8 @@ extern "C" SkImage *C_SkImage_makeWithFilter(const SkImage *self, GrContext *con
     return self->makeWithFilter(context, filter, *subset, *clipBounds, outSubset, offset).release();
 }
 
-extern "C" SkImage* C_SkImage_makeColorSpace(const SkImage* self, const SkColorSpace* target) {
-    return self->makeColorSpace(spFromConst(target)).release();
+extern "C" SkImage* C_SkImage_makeColorSpace(const SkImage* self, SkColorSpace* target) {
+    return self->makeColorSpace(sp(target)).release();
 }
 
 //
@@ -562,36 +563,36 @@ extern "C" SkPaint::Join C_SkPaint_getStrokeJoin(const SkPaint* self) {
     return self->getStrokeJoin();
 }
 
-extern "C" void C_SkPaint_setShader(SkPaint* self, const SkShader* shader) {
-    self->setShader(spFromConst(shader));
+extern "C" void C_SkPaint_setShader(SkPaint* self, SkShader* shader) {
+    self->setShader(sp(shader));
 }
 
-extern "C" void C_SkPaint_setColorFilter(SkPaint* self, const SkColorFilter* colorFilter) {
-    self->setColorFilter(spFromConst(colorFilter));
+extern "C" void C_SkPaint_setColorFilter(SkPaint* self, SkColorFilter* colorFilter) {
+    self->setColorFilter(sp(colorFilter));
 }
 
 extern "C" SkBlendMode C_SkPaint_getBlendMode(const SkPaint* self) {
     return self->getBlendMode();
 }
 
-extern "C" void C_SkPaint_setPathEffect(SkPaint* self, const SkPathEffect* pathEffect) {
-    self->setPathEffect(spFromConst(pathEffect));
+extern "C" void C_SkPaint_setPathEffect(SkPaint* self, SkPathEffect* pathEffect) {
+    self->setPathEffect(sp(pathEffect));
 }
 
-extern "C" void C_SkPaint_setMaskFilter(SkPaint* self, const SkMaskFilter* maskFilter) {
-    self->setMaskFilter(spFromConst(maskFilter));
+extern "C" void C_SkPaint_setMaskFilter(SkPaint* self, SkMaskFilter* maskFilter) {
+    self->setMaskFilter(sp(maskFilter));
 }
 
-extern "C" void C_SkPaint_setImageFilter(SkPaint* self, const SkImageFilter* imageFilter) {
-    self->setImageFilter(spFromConst(imageFilter));
+extern "C" void C_SkPaint_setImageFilter(SkPaint* self, SkImageFilter* imageFilter) {
+    self->setImageFilter(sp(imageFilter));
 }
 
 extern "C" SkDrawLooper* C_SkPaint_getDrawLooper(const SkPaint* self) {
     return self->getDrawLooper();
 }
 
-extern "C" void C_SkPaint_setDrawLooper(SkPaint* self, const SkDrawLooper* drawLooper) {
-    self->setDrawLooper(spFromConst(drawLooper));
+extern "C" void C_SkPaint_setDrawLooper(SkPaint* self, SkDrawLooper* drawLooper) {
+    self->setDrawLooper(sp(drawLooper));
 }
 
 //
@@ -777,8 +778,8 @@ extern "C" bool C_SkImageInfo_Equals(const SkImageInfo* lhs, const SkImageInfo* 
     return *lhs == *rhs;
 }
 
-extern "C" void C_SkImageInfo_Make(SkImageInfo* self, int width, int height, SkColorType ct, SkAlphaType at, const SkColorSpace* cs) {
-    *self = SkImageInfo::Make(width, height, ct, at, spFromConst(cs));
+extern "C" void C_SkImageInfo_Make(SkImageInfo* self, int width, int height, SkColorType ct, SkAlphaType at, SkColorSpace* cs) {
+    *self = SkImageInfo::Make(width, height, ct, at, sp(cs));
 }
 
 extern "C" void C_SkImageInfo_MakeS32(SkImageInfo* self, int width, int height, SkAlphaType at) {
@@ -946,8 +947,8 @@ extern "C" bool C_SkBitmap_tryAllocPixels(SkBitmap* self) {
     return self->tryAllocPixels();
 }
 
-extern "C" void C_SkBitmap_setPixelRef(SkBitmap* self, const SkPixelRef* pixelRef, int dx, int dy) {
-    self->setPixelRef(spFromConst(pixelRef), dx, dy);
+extern "C" void C_SkBitmap_setPixelRef(SkBitmap* self, SkPixelRef* pixelRef, int dx, int dy) {
+    self->setPixelRef(sp(pixelRef), dx, dy);
 }
 
 extern "C" bool C_SkBitmap_readyToDraw(const SkBitmap* self) {
@@ -1268,16 +1269,16 @@ extern "C" SkData* C_SkFlattenable_serialize(const SkFlattenable* self) {
 // core/SkFont.h
 //
 
-extern "C" void C_SkFont_ConstructFromTypeface(SkFont* uninitialized, const SkTypeface* typeface) {
-    new(uninitialized) SkFont(spFromConst(typeface));
+extern "C" void C_SkFont_ConstructFromTypeface(SkFont* uninitialized, SkTypeface* typeface) {
+    new(uninitialized) SkFont(sp(typeface));
 }
 
-extern "C" void C_SkFont_ConstructFromTypefaceWithSize(SkFont* uninitialized, const SkTypeface* typeface, SkScalar size) {
-    new(uninitialized) SkFont(spFromConst(typeface), size);
+extern "C" void C_SkFont_ConstructFromTypefaceWithSize(SkFont* uninitialized, SkTypeface* typeface, SkScalar size) {
+    new(uninitialized) SkFont(sp(typeface), size);
 }
 
-extern "C" void C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(SkFont* uninitialized, const SkTypeface* typeface, SkScalar size, SkScalar scaleX, SkScalar skewX) {
-    new(uninitialized) SkFont(spFromConst(typeface), size, scaleX, skewX);
+extern "C" void C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(SkFont* uninitialized, SkTypeface* typeface, SkScalar size, SkScalar scaleX, SkScalar skewX) {
+    new(uninitialized) SkFont(sp(typeface), size, scaleX, skewX);
 }
 
 extern "C" bool C_SkFont_Equals(const SkFont* self, const SkFont* other) {
@@ -1300,8 +1301,8 @@ extern "C" SkTypeface* C_SkFont_getTypeface(SkFont* self) {
     return self->getTypeface();
 }
 
-extern "C" void C_SkFont_setTypeface(SkFont* self, const SkTypeface* tf) {
-    self->setTypeface(spFromConst(tf));
+extern "C" void C_SkFont_setTypeface(SkFont* self, SkTypeface* tf) {
+    self->setTypeface(sp(tf));
 }
 
 extern "C" void C_SkFont_destruct(SkFont* self) {
@@ -1535,8 +1536,8 @@ extern "C" bool C_SkRefCntBase_unique(const SkRefCntBase* self) {
 // SkColorFilter
 //
 
-extern "C" SkColorFilter* C_SkColorFilter_makeComposed(const SkColorFilter* self, const SkColorFilter* inner) {
-    return self->makeComposed(spFromConst(inner)).release();
+extern "C" SkColorFilter* C_SkColorFilter_makeComposed(const SkColorFilter* self, SkColorFilter* inner) {
+    return self->makeComposed(sp(inner)).release();
 }
 
 extern "C" bool C_SkColorFilter_asAColorMode(const SkColorFilter* self, SkColor* color, SkBlendMode* mode) {
@@ -1559,8 +1560,8 @@ extern "C" SkColorFilter* C_SkColorFilter_Deserialize(const void* data, size_t s
 // SkColorFilters
 //
 
-extern "C" SkColorFilter* C_SkColorFilters_Compose(const SkColorFilter* outer, const SkColorFilter* inner) {
-    return SkColorFilters::Compose(spFromConst(outer), spFromConst(inner)).release();
+extern "C" SkColorFilter* C_SkColorFilters_Compose(SkColorFilter* outer, SkColorFilter* inner) {
+    return SkColorFilters::Compose(sp(outer), sp(inner)).release();
 }
 
 extern "C" SkColorFilter* C_SkColorFilters_Blend(const SkColor c, SkBlendMode blendMode) {
@@ -1584,8 +1585,8 @@ extern "C" SkColorFilter* C_SkColorFilters_SRGBToLinearGamma() {
     return SkColorFilters::SRGBToLinearGamma().release();
 }
 
-extern "C" SkColorFilter* C_SkColorFilters_Lerp(float t, const SkColorFilter* dst, const SkColorFilter* src) {
-    return SkColorFilters::Lerp(t, spFromConst(dst), spFromConst(src)).release();
+extern "C" SkColorFilter* C_SkColorFilters_Lerp(float t, SkColorFilter* dst, SkColorFilter* src) {
+    return SkColorFilters::Lerp(t, sp(dst), sp(src)).release();
 }
 
 //
@@ -1684,8 +1685,8 @@ extern "C" SkImageFilter* C_SkImageFilter_makeWithLocalMatrix(const SkImageFilte
     return self->makeWithLocalMatrix(*matrix).release();
 }
 
-extern "C" SkImageFilter* C_SkImageFilter_MakeMatrixFilter(const SkMatrix* matrix, SkFilterQuality quality, const SkImageFilter* input) {
-    return SkImageFilter::MakeMatrixFilter(*matrix, quality, spFromConst(input)).release();
+extern "C" SkImageFilter* C_SkImageFilter_MakeMatrixFilter(const SkMatrix* matrix, SkFilterQuality quality, SkImageFilter* input) {
+    return SkImageFilter::MakeMatrixFilter(*matrix, quality, sp(input)).release();
 }
 
 extern "C" SkImageFilter* C_SkImageFilter_Deserialize(const void* data, size_t length) {
@@ -1720,24 +1721,24 @@ extern "C" bool C_SkImageGenerator_isValid(const SkImageGenerator* self, GrConte
     return self->isValid(context);
 }
 
-extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromEncoded(const SkData *data) {
-    return SkImageGenerator::MakeFromEncoded(spFromConst(data)).release();
+extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromEncoded(SkData *data) {
+    return SkImageGenerator::MakeFromEncoded(sp(data)).release();
 }
 
 extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromPicture(
         const SkISize *size,
-        const SkPicture *picture,
+        SkPicture *picture,
         const SkMatrix *matrix,
         const SkPaint *paint,
         SkImage::BitDepth bd,
-        const SkColorSpace *cs) {
+        SkColorSpace *cs) {
     return SkImageGenerator::MakeFromPicture(
             *size,
-            spFromConst(picture),
+            sp(picture),
             matrix,
             paint,
             bd,
-            spFromConst(cs)).release();
+            sp(cs)).release();
 }
 
 //
@@ -1784,12 +1785,12 @@ extern "C" bool C_SkStrokeRec_hasEqualEffect(const SkStrokeRec* self, const SkSt
 // SkPathEffect
 //
 
-extern "C" SkPathEffect* C_SkPathEffect_MakeSum(const SkPathEffect* first, const SkPathEffect* second) {
-    return SkPathEffect::MakeSum(spFromConst(first), spFromConst(second)).release();
+extern "C" SkPathEffect* C_SkPathEffect_MakeSum(SkPathEffect* first, SkPathEffect* second) {
+    return SkPathEffect::MakeSum(sp(first), sp(second)).release();
 }
 
-extern "C" SkPathEffect* C_SkPathEffect_MakeCompose(const SkPathEffect* outer, const SkPathEffect* inner) {
-    return SkPathEffect::MakeCompose(spFromConst(outer), spFromConst(inner)).release();
+extern "C" SkPathEffect* C_SkPathEffect_MakeCompose(SkPathEffect* outer, SkPathEffect* inner) {
+    return SkPathEffect::MakeCompose(sp(outer), sp(inner)).release();
 }
 
 extern "C" void C_SkPathEffect_PointData_Construct(SkPathEffect::PointData* unitialized) {
@@ -1817,8 +1818,8 @@ extern "C" void C_SkPixmap_destruct(SkPixmap* self) {
     self->~SkPixmap();
 }
 
-extern "C" void C_SkPixmap_setColorSpace(SkPixmap* self, const SkColorSpace* colorSpace) {
-    self->setColorSpace(spFromConst(colorSpace));
+extern "C" void C_SkPixmap_setColorSpace(SkPixmap* self, SkColorSpace* colorSpace) {
+    self->setColorSpace(sp(colorSpace));
 }
 
 //
@@ -1829,12 +1830,12 @@ extern "C" SkMaskFilter* C_SkMaskFilter_MakeBlur(SkBlurStyle style, SkScalar sig
     return SkMaskFilter::MakeBlur(style, sigma, respectCTM).release();
 }
 
-extern "C" SkMaskFilter* C_SkMaskFilter_Compose(const SkMaskFilter* outer, const SkMaskFilter* inner) {
-    return SkMaskFilter::MakeCompose(spFromConst(outer), spFromConst(inner)).release();
+extern "C" SkMaskFilter* C_SkMaskFilter_Compose(SkMaskFilter* outer, SkMaskFilter* inner) {
+    return SkMaskFilter::MakeCompose(sp(outer), sp(inner)).release();
 }
 
-extern "C" SkMaskFilter* C_SkMaskFilter_Combine(const SkMaskFilter* filterA, const SkMaskFilter* filterB, SkCoverageMode coverageMode) {
-    return SkMaskFilter::MakeCombine(spFromConst(filterA), spFromConst(filterB), coverageMode).release();
+extern "C" SkMaskFilter* C_SkMaskFilter_Combine(SkMaskFilter* filterA, SkMaskFilter* filterB, SkCoverageMode coverageMode) {
+    return SkMaskFilter::MakeCombine(sp(filterA), sp(filterB), coverageMode).release();
 }
 
 extern "C" SkMaskFilter* C_SkMaskFilter_makeWithMatrix(const SkMaskFilter* self, const SkMatrix* matrix) {
@@ -1881,8 +1882,8 @@ extern "C" SkShader* C_SkShader_makeWithLocalMatrix(const SkShader* self, const 
     return self->makeWithLocalMatrix(*matrix).release();
 }
 
-extern "C" SkShader* C_SkShader_makeWithColorFilter(const SkShader* self, const SkColorFilter* colorFilter) {
-    return self->makeWithColorFilter(spFromConst(colorFilter)).release();
+extern "C" SkShader* C_SkShader_makeWithColorFilter(const SkShader* self, SkColorFilter* colorFilter) {
+    return self->makeWithColorFilter(sp(colorFilter)).release();
 }
 
 extern "C" SkShader* C_SkShaders_Empty() {
@@ -1893,20 +1894,20 @@ extern "C" SkShader* C_SkShaders_Color(SkColor color) {
     return SkShaders::Color(color).release();
 }
 
-extern "C" SkShader* C_SkShaders_Color2(const SkColor4f* color, const SkColorSpace* colorSpace) {
-    return SkShaders::Color(*color, spFromConst(colorSpace)).release();
+extern "C" SkShader* C_SkShaders_Color2(const SkColor4f* color, SkColorSpace* colorSpace) {
+    return SkShaders::Color(*color, sp(colorSpace)).release();
 }
 
-extern "C" SkShader* C_SkShaders_Blend(SkBlendMode mode, const SkShader* dst, const SkShader* src) {
-    return SkShaders::Blend(mode, spFromConst(dst), spFromConst(src)).release();
+extern "C" SkShader* C_SkShaders_Blend(SkBlendMode mode, SkShader* dst, SkShader* src) {
+    return SkShaders::Blend(mode, sp(dst), sp(src)).release();
 }
 
-extern "C" SkShader* C_SkShaders_Lerp(float t, const SkShader* dst, const SkShader* src) {
-    return SkShaders::Lerp(t, spFromConst(dst), spFromConst(src)).release();
+extern "C" SkShader* C_SkShaders_Lerp(float t, SkShader* dst, SkShader* src) {
+    return SkShaders::Lerp(t, sp(dst), sp(src)).release();
 }
 
-extern "C" SkShader* C_SkShaders_Lerp2(const SkShader* red, const SkShader* dst, const SkShader* src) {
-    return SkShaders::Lerp(spFromConst(red), spFromConst(dst), spFromConst(src)).release();
+extern "C" SkShader* C_SkShaders_Lerp2(SkShader* red, SkShader* dst, SkShader* src) {
+    return SkShaders::Lerp(sp(red), sp(dst), sp(src)).release();
 }
 
 extern "C" SkShader* C_SkShader_Deserialize(const void* data, size_t length) {
@@ -1969,32 +1970,32 @@ extern "C" SkShader* C_SkGradientShader_MakeLinear(const SkPoint pts[2], const S
     return SkGradientShader::MakeLinear(pts, colors, pos, count, mode, flags, localMatrix).release();
 }
 
-extern "C" SkShader* C_SkGradientShader_MakeLinear2(const SkPoint pts[2], const SkColor4f colors[], const SkColorSpace* colorSpace, const SkScalar pos[], int count, SkTileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
-    return SkGradientShader::MakeLinear(pts, colors, spFromConst(colorSpace), pos, count, mode, flags, localMatrix).release();
+extern "C" SkShader* C_SkGradientShader_MakeLinear2(const SkPoint pts[2], const SkColor4f colors[], SkColorSpace* colorSpace, const SkScalar pos[], int count, SkTileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
+    return SkGradientShader::MakeLinear(pts, colors, sp(colorSpace), pos, count, mode, flags, localMatrix).release();
 }
 
 extern "C" SkShader* C_SkGradientShader_MakeRadial(const SkPoint* center, SkScalar radius, const SkColor colors[], const SkScalar pos[], int count, SkTileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
     return SkGradientShader::MakeRadial(*center, radius, colors, pos, count, mode, flags, localMatrix).release();
 }
 
-extern "C" SkShader* C_SkGradientShader_MakeRadial2(const SkPoint* center, SkScalar radius, const SkColor4f colors[], const SkColorSpace* colorSpace, const SkScalar pos[], int count, SkTileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
-    return SkGradientShader::MakeRadial(*center, radius, colors, spFromConst(colorSpace), pos, count, mode, flags, localMatrix).release();
+extern "C" SkShader* C_SkGradientShader_MakeRadial2(const SkPoint* center, SkScalar radius, const SkColor4f colors[], SkColorSpace* colorSpace, const SkScalar pos[], int count, SkTileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
+    return SkGradientShader::MakeRadial(*center, radius, colors, sp(colorSpace), pos, count, mode, flags, localMatrix).release();
 }
 
 extern "C" SkShader* C_SkGradientShader_MakeTwoPointConical(const SkPoint* start, SkScalar startRadius, const SkPoint* end, SkScalar endRadius, const SkColor colors[], const SkScalar pos[], int count, SkTileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
     return SkGradientShader::MakeTwoPointConical(*start, startRadius, *end, endRadius, colors, pos, count, mode, flags, localMatrix).release();
 }
 
-extern "C" SkShader* C_SkGradientShader_MakeTwoPointConical2(const SkPoint* start, SkScalar startRadius, const SkPoint* end, SkScalar endRadius, const SkColor4f colors[], const SkColorSpace* colorSpace, const SkScalar pos[], int count, SkTileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
-    return SkGradientShader::MakeTwoPointConical(*start, startRadius, *end, endRadius, colors, spFromConst(colorSpace), pos, count, mode, flags, localMatrix).release();
+extern "C" SkShader* C_SkGradientShader_MakeTwoPointConical2(const SkPoint* start, SkScalar startRadius, const SkPoint* end, SkScalar endRadius, const SkColor4f colors[], SkColorSpace* colorSpace, const SkScalar pos[], int count, SkTileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
+    return SkGradientShader::MakeTwoPointConical(*start, startRadius, *end, endRadius, colors, sp(colorSpace), pos, count, mode, flags, localMatrix).release();
 }
 
 extern "C" SkShader* C_SkGradientShader_MakeSweep(SkScalar cx, SkScalar cy, const SkColor colors[], const SkScalar pos[], int count, SkTileMode mode, SkScalar startAngle, SkScalar endAngle, uint32_t flags, const SkMatrix* localMatrix) {
     return SkGradientShader::MakeSweep(cx, cy, colors, pos, count, mode, startAngle, endAngle, flags, localMatrix).release();
 }
 
-extern "C" SkShader* C_SkGradientShader_MakeSweep2(SkScalar cx, SkScalar cy, const SkColor4f colors[], const SkColorSpace* colorSpace, const SkScalar pos[], int count, SkTileMode mode, SkScalar startAngle, SkScalar endAngle, uint32_t flags, const SkMatrix* localMatrix) {
-    return SkGradientShader::MakeSweep(cx, cy, colors, spFromConst(colorSpace), pos, count, mode, startAngle, endAngle, flags, localMatrix).release();
+extern "C" SkShader* C_SkGradientShader_MakeSweep2(SkScalar cx, SkScalar cy, const SkColor4f colors[], SkColorSpace* colorSpace, const SkScalar pos[], int count, SkTileMode mode, SkScalar startAngle, SkScalar endAngle, uint32_t flags, const SkMatrix* localMatrix) {
+    return SkGradientShader::MakeSweep(cx, cy, colors, sp(colorSpace), pos, count, mode, startAngle, endAngle, flags, localMatrix).release();
 }
 
 //
@@ -2042,9 +2043,9 @@ extern "C" SkPathEffect* C_SkPath2DPathEffect_Make(const SkMatrix* matrix, const
 //
 
 extern "C" SkImageFilter *
-C_SkAlphaThresholdFilter_Make(const SkRegion &region, SkScalar innerMin, SkScalar outerMax, const SkImageFilter &input,
+C_SkAlphaThresholdFilter_Make(const SkRegion &region, SkScalar innerMin, SkScalar outerMax, SkImageFilter *input,
                               const SkImageFilter::CropRect *cropRect) {
-    return SkAlphaThresholdFilter::Make(region, innerMin, outerMax, spFromConst(&input), cropRect).release();
+    return SkAlphaThresholdFilter::Make(region, innerMin, outerMax, sp(input), cropRect).release();
 }
 
 //
@@ -2052,11 +2053,11 @@ C_SkAlphaThresholdFilter_Make(const SkRegion &region, SkScalar innerMin, SkScala
 //
 
 extern "C" SkImageFilter *C_SkArithmeticImageFilter_Make(float k1, float k2, float k3, float k4, bool enforcePMColor,
-                                                         const SkImageFilter &background,
-                                                         const SkImageFilter &foreground,
+                                                         SkImageFilter *background,
+                                                         SkImageFilter *foreground,
                                                          const SkImageFilter::CropRect *cropRect) {
-    return SkArithmeticImageFilter::Make(k1, k2, k3, k4, enforcePMColor, spFromConst(&background),
-                                         spFromConst(&foreground), cropRect).release();
+    return SkArithmeticImageFilter::Make(k1, k2, k3, k4, enforcePMColor, sp(background),
+                                         sp(foreground), cropRect).release();
 }
 
 //
@@ -2076,19 +2077,19 @@ extern "C" SkDrawLooper* C_SkBlurDrawLooper_Make2(SkColor4f color, const SkColor
 // effects/SkBlurImageFilter
 //
 
-extern "C" SkImageFilter *C_SkBlurImageFilter_Make(SkScalar sigmaX, SkScalar sigmaY, const SkImageFilter &input,
+extern "C" SkImageFilter *C_SkBlurImageFilter_Make(SkScalar sigmaX, SkScalar sigmaY, SkImageFilter *input,
                                                    const SkImageFilter::CropRect *cropRect,
                                                    SkBlurImageFilter::TileMode tileMode) {
-    return SkBlurImageFilter::Make(sigmaX, sigmaY, spFromConst(&input), cropRect, tileMode).release();
+    return SkBlurImageFilter::Make(sigmaX, sigmaY, sp(input), cropRect, tileMode).release();
 }
 
 //
 // effects/SkColorFilterImageFilter
 //
 
-extern "C" SkImageFilter *C_SkColorFilterImageFilter_Make(const SkColorFilter &cf, const SkImageFilter &input,
+extern "C" SkImageFilter *C_SkColorFilterImageFilter_Make(SkColorFilter *cf, SkImageFilter *input,
                                                           const SkImageFilter::CropRect *cropRect) {
-    return SkColorFilterImageFilter::Make(spFromConst(&cf), spFromConst(&input), cropRect).release();
+    return SkColorFilterImageFilter::Make(sp(cf), sp(input), cropRect).release();
 }
 
 //
@@ -2111,8 +2112,8 @@ extern "C" void C_SkColorMatrix_set20(SkColorMatrix* self, const float m[20]) {
 // effects/SkComposeImageFilter
 //
 
-extern "C" SkImageFilter *C_SkComposeImageFilter_Make(const SkImageFilter &outer, const SkImageFilter &inner) {
-    return SkComposeImageFilter::Make(spFromConst(&outer), spFromConst(&inner)).release();
+extern "C" SkImageFilter *C_SkComposeImageFilter_Make(SkImageFilter *outer, SkImageFilter *inner) {
+    return SkComposeImageFilter::Make(sp(outer), sp(inner)).release();
 }
 
 //
@@ -2145,12 +2146,12 @@ extern "C" SkPathEffect* C_SkDiscretePathEffect_Make(SkScalar segLength, SkScala
 
 extern "C" SkImageFilter *C_SkDisplacementMapEffect_Make(SkDisplacementMapEffect::ChannelSelectorType xChannelSelector,
                                                          SkDisplacementMapEffect::ChannelSelectorType yChannelSelector,
-                                                         SkScalar scale, const SkImageFilter &displacement,
-                                                         const SkImageFilter &color,
+                                                         SkScalar scale, SkImageFilter *displacement,
+                                                         SkImageFilter *color,
                                                          const SkImageFilter::CropRect *cropRect) {
 
-    return SkDisplacementMapEffect::Make(xChannelSelector, yChannelSelector, scale, spFromConst(&displacement),
-                                         spFromConst(&color), cropRect).release();
+    return SkDisplacementMapEffect::Make(xChannelSelector, yChannelSelector, scale, sp(displacement),
+                                         sp(color), cropRect).release();
 }
 
 //
@@ -2159,9 +2160,9 @@ extern "C" SkImageFilter *C_SkDisplacementMapEffect_Make(SkDisplacementMapEffect
 
 extern "C" SkImageFilter *C_SkDropShadowImageFilter_Make(SkScalar dx, SkScalar dy, SkScalar sigmaX, SkScalar sigmaY,
                                                          SkColor color, SkDropShadowImageFilter::ShadowMode shadowMode,
-                                                         const SkImageFilter &input,
+                                                         SkImageFilter *input,
                                                          const SkImageFilter::CropRect *cropRect) {
-    return SkDropShadowImageFilter::Make(dx, dy, sigmaX, sigmaY, color, shadowMode, spFromConst(&input),
+    return SkDropShadowImageFilter::Make(dx, dy, sigmaX, sigmaY, color, shadowMode, sp(input),
                                          cropRect).release();
 }
 
@@ -2169,14 +2170,14 @@ extern "C" SkImageFilter *C_SkDropShadowImageFilter_Make(SkScalar dx, SkScalar d
 // effects/SkImageSource
 //
 
-extern "C" SkImageFilter *C_SkImageSource_Make(const SkImage &image) {
-    return SkImageSource::Make(spFromConst(&image)).release();
+extern "C" SkImageFilter *C_SkImageSource_Make(SkImage *image) {
+    return SkImageSource::Make(sp(image)).release();
 }
 
 extern "C" SkImageFilter *
-C_SkImageSource_Make2(const SkImage &image, const SkRect &srcRect, const SkRect &dstRect,
+C_SkImageSource_Make2(SkImage* image, const SkRect &srcRect, const SkRect &dstRect,
                       SkFilterQuality filterQuality) {
-    return SkImageSource::Make(spFromConst(&image), srcRect, dstRect, filterQuality).release();
+    return SkImageSource::Make(sp(image), srcRect, dstRect, filterQuality).release();
 }
 
 //
@@ -2197,17 +2198,17 @@ extern "C" SkDrawLooper* C_SkLayerDrawLooper_Builder_detach(SkLayerDrawLooper::B
 
 extern "C" SkImageFilter *
 C_SkLightingImageFilter_MakeDistantLitDiffuse(const SkPoint3 &direction, SkColor lightColor, SkScalar surfaceScale,
-                                              SkScalar kd, const SkImageFilter &input,
+                                              SkScalar kd, SkImageFilter *input,
                                               const SkImageFilter::CropRect *cropRect) {
-    return SkLightingImageFilter::MakeDistantLitDiffuse(direction, lightColor, surfaceScale, kd, spFromConst(&input),
+    return SkLightingImageFilter::MakeDistantLitDiffuse(direction, lightColor, surfaceScale, kd, sp(input),
                                                         cropRect).release();
 }
 
 extern "C" SkImageFilter *
 C_SkLightingImageFilter_MakePointLitDiffuse(const SkPoint3 &location, SkColor lightColor, SkScalar surfaceScale,
-                                            SkScalar kd, const SkImageFilter &input,
+                                            SkScalar kd, SkImageFilter *input,
                                             const SkImageFilter::CropRect *cropRect) {
-    return SkLightingImageFilter::MakePointLitDiffuse(location, lightColor, surfaceScale, kd, spFromConst(&input),
+    return SkLightingImageFilter::MakePointLitDiffuse(location, lightColor, surfaceScale, kd, sp(input),
                                                       cropRect).release();
 }
 
@@ -2215,37 +2216,37 @@ extern "C" SkImageFilter *
 C_SkLightingImageFilter_MakeSpotLitDiffuse(const SkPoint3 &location,
                                            const SkPoint3 &target, SkScalar specularExponent, SkScalar cutoffAngle,
                                            SkColor lightColor, SkScalar surfaceScale, SkScalar kd,
-                                           const SkImageFilter *input, const SkImageFilter::CropRect *cropRect) {
+                                           SkImageFilter *input, const SkImageFilter::CropRect *cropRect) {
     return SkLightingImageFilter::MakeSpotLitDiffuse(location, target, specularExponent, cutoffAngle, lightColor,
-                                                     surfaceScale, kd, spFromConst(input), cropRect).release();
+                                                     surfaceScale, kd, sp(input), cropRect).release();
 }
 
 extern "C" SkImageFilter *
 C_SkLightingImageFilter_MakeDistantLitSpecular(const SkPoint3 &direction,
                                                SkColor lightColor, SkScalar surfaceScale, SkScalar ks,
-                                               SkScalar shininess, const SkImageFilter &input,
+                                               SkScalar shininess, SkImageFilter *input,
                                                const SkImageFilter::CropRect *cropRect) {
     return SkLightingImageFilter::MakeDistantLitSpecular(direction, lightColor, surfaceScale, ks, shininess,
-                                                         spFromConst(&input), cropRect).release();
+                                                         sp(input), cropRect).release();
 }
 
 extern "C" SkImageFilter *
 C_SkLightingImageFilter_MakePointLitSpecular(const SkPoint3 &location,
                                              SkColor lightColor, SkScalar surfaceScale, SkScalar ks,
-                                             SkScalar shininess, const SkImageFilter &input,
+                                             SkScalar shininess, SkImageFilter *input,
                                              const SkImageFilter::CropRect *cropRect) {
     return SkLightingImageFilter::MakePointLitSpecular(location, lightColor, surfaceScale, ks, shininess,
-                                                       spFromConst(&input), cropRect).release();
+                                                       sp(input), cropRect).release();
 }
 
 extern "C" SkImageFilter *
 C_SkLightingImageFilter_MakeSpotLitSpecular(const SkPoint3 &location,
                                             const SkPoint3 &target, SkScalar specularExponent, SkScalar cutoffAngle,
                                             SkColor lightColor, SkScalar surfaceScale, SkScalar ks,
-                                            SkScalar shininess, const SkImageFilter &input,
+                                            SkScalar shininess, SkImageFilter *input,
                                             const SkImageFilter::CropRect *cropRect) {
     return SkLightingImageFilter::MakeSpotLitSpecular(location, target, specularExponent, cutoffAngle, lightColor,
-                                                      surfaceScale, ks, shininess, spFromConst(&input),
+                                                      surfaceScale, ks, shininess, sp(input),
                                                       cropRect).release();
 }
 
@@ -2254,9 +2255,9 @@ C_SkLightingImageFilter_MakeSpotLitSpecular(const SkPoint3 &location,
 //
 
 extern "C" SkImageFilter *
-C_SkMagnifierImageFilter_Make(const SkRect &srcRect, SkScalar inset, const SkImageFilter &input,
+C_SkMagnifierImageFilter_Make(const SkRect &srcRect, SkScalar inset, SkImageFilter *input,
                               const SkImageFilter::CropRect *cropRect) {
-    return SkMagnifierImageFilter::Make(srcRect, inset, spFromConst(&input), cropRect).release();
+    return SkMagnifierImageFilter::Make(srcRect, inset, sp(input), cropRect).release();
 }
 
 //
@@ -2271,10 +2272,10 @@ C_SkMatrixConvolutionImageFilter_Make(const SkISize &kernelSize,
                                       const SkIPoint &kernelOffset,
                                       SkMatrixConvolutionImageFilter::TileMode tileMode,
                                       bool convolveAlpha,
-                                      const SkImageFilter &input,
+                                      SkImageFilter *input,
                                       const SkImageFilter::CropRect *cropRect) {
     return SkMatrixConvolutionImageFilter::Make(kernelSize, kernel, gain, bias, kernelOffset, tileMode, convolveAlpha,
-                                                spFromConst(&input), cropRect).release();
+                                                sp(input), cropRect).release();
 }
 
 //
@@ -2282,10 +2283,10 @@ C_SkMatrixConvolutionImageFilter_Make(const SkISize &kernelSize,
 //
 
 extern "C" SkImageFilter *
-C_SkMergeImageFilter_Make(const SkImageFilter *const filters[], int count, const SkImageFilter::CropRect *cropRect) {
+C_SkMergeImageFilter_Make(SkImageFilter *const filters[], int count, const SkImageFilter::CropRect *cropRect) {
     auto array = new sk_sp<SkImageFilter>[count];
     for (int i = 0; i < count; ++i) {
-        array[i] = spFromConst(filters[i]);
+        array[i] = sp(filters[i]);
     }
     auto imageFilter = SkMergeImageFilter::Make(array, count, cropRect).release();
     delete[] array;
@@ -2296,23 +2297,23 @@ C_SkMergeImageFilter_Make(const SkImageFilter *const filters[], int count, const
 // effects/SkMorphologyImageFiter
 //
 
-extern "C" SkImageFilter *C_SkDilateImageFilter_Make(int radiusX, int radiusY, const SkImageFilter &input,
+extern "C" SkImageFilter *C_SkDilateImageFilter_Make(int radiusX, int radiusY, SkImageFilter *input,
                                                      const SkImageFilter::CropRect *cropRect) {
-    return SkDilateImageFilter::Make(radiusX, radiusY, spFromConst(&input), cropRect).release();
+    return SkDilateImageFilter::Make(radiusX, radiusY, sp(input), cropRect).release();
 }
 
-extern "C" SkImageFilter *C_SkErodeImageFilter_Make(int radiusX, int radiusY, const SkImageFilter &input,
+extern "C" SkImageFilter *C_SkErodeImageFilter_Make(int radiusX, int radiusY, SkImageFilter *input,
                                                     const SkImageFilter::CropRect *cropRect) {
-    return SkErodeImageFilter::Make(radiusX, radiusY, spFromConst(&input), cropRect).release();
+    return SkErodeImageFilter::Make(radiusX, radiusY, sp(input), cropRect).release();
 }
 
 //
 // effects/SkOffsetImageFilter
 //
 
-extern "C" SkImageFilter *C_SkOffsetImageFilter_Make(SkScalar dx, SkScalar dy, const SkImageFilter &input,
+extern "C" SkImageFilter *C_SkOffsetImageFilter_Make(SkScalar dx, SkScalar dy, SkImageFilter *input,
                                                      const SkImageFilter::CropRect *cropRect) {
-    return SkOffsetImageFilter::Make(dx, dy, spFromConst(&input), cropRect).release();
+    return SkOffsetImageFilter::Make(dx, dy, sp(input), cropRect).release();
 }
 
 //
@@ -2327,11 +2328,11 @@ extern "C" SkImageFilter *C_SkPaintImageFilter_Make(const SkPaint &paint, const 
 // effects/SkPictureImageFilter
 //
 
-extern "C" SkImageFilter *C_SkPictureImageFilter_Make(const SkPicture &picture, const SkRect *cropRect) {
+extern "C" SkImageFilter *C_SkPictureImageFilter_Make(SkPicture *picture, const SkRect *cropRect) {
     if (cropRect) {
-        return SkPictureImageFilter::Make(spFromConst(&picture), *cropRect).release();
+        return SkPictureImageFilter::Make(sp(picture), *cropRect).release();
     } else {
-        return SkPictureImageFilter::Make(spFromConst(&picture)).release();
+        return SkPictureImageFilter::Make(sp(picture)).release();
     }
 }
 
@@ -2351,8 +2352,8 @@ extern "C" SkColorFilter* C_SkTableColorFilter_MakeARGB(const uint8_t tableA[256
 // effects/SkTileImageFilter
 //
 
-extern "C" SkImageFilter *C_SkTileImageFilter_Make(const SkRect &src, const SkRect &dst, const SkImageFilter &input) {
-    return SkTileImageFilter::Make(src, dst, spFromConst(&input)).release();
+extern "C" SkImageFilter *C_SkTileImageFilter_Make(const SkRect &src, const SkRect &dst, SkImageFilter *input) {
+    return SkTileImageFilter::Make(src, dst, sp(input)).release();
 }
 
 //
@@ -2360,9 +2361,9 @@ extern "C" SkImageFilter *C_SkTileImageFilter_Make(const SkRect &src, const SkRe
 //
 
 extern "C" SkImageFilter *
-C_SkXfermodeImageFilter_Make(SkBlendMode mode, const SkImageFilter &background, const SkImageFilter *foreground,
+C_SkXfermodeImageFilter_Make(SkBlendMode mode, SkImageFilter *background, SkImageFilter *foreground,
                              const SkImageFilter::CropRect *cropRect) {
-    return SkXfermodeImageFilter::Make(mode, spFromConst(&background), spFromConst(foreground), cropRect).release();
+    return SkXfermodeImageFilter::Make(mode, sp(background), sp(foreground), cropRect).release();
 }
 
 //

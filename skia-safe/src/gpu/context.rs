@@ -32,8 +32,8 @@ pub struct ResourceCacheUsage {
 
 impl RCHandle<GrContext> {
     // TODO: support variant with GrContextOptions
-    pub fn new_gl(interface: Option<&gl::Interface>) -> Option<Context> {
-        Context::from_ptr(unsafe { C_GrContext_MakeGL(interface.shared_ptr()) })
+    pub fn new_gl(interface: impl Into<Option<gl::Interface>>) -> Option<Context> {
+        Context::from_ptr(unsafe { C_GrContext_MakeGL(interface.into().into_ptr_or_null()) })
     }
 
     // TODO: support variant with GrContextOptions

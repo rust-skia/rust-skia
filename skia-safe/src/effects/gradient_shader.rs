@@ -112,7 +112,7 @@ pub fn linear<'a>(
                 C_SkGradientShader_MakeLinear2(
                     points.native().as_ptr(),
                     colors.native().as_ptr(),
-                    color_space.shared_native(),
+                    color_space.into_ptr(),
                     pos.as_ptr_or_null(),
                     colors.len().try_into().unwrap(),
                     mode.into_native(),
@@ -158,7 +158,7 @@ pub fn radial<'a>(
                     center.native(),
                     radius,
                     colors.native().as_ptr(),
-                    color_space.shared_native(),
+                    color_space.into_ptr(),
                     pos.as_ptr_or_null(),
                     colors.len().try_into().unwrap(),
                     mode.into_native(),
@@ -212,7 +212,7 @@ pub fn two_point_conical<'a>(
                     end.native(),
                     end_radius,
                     colors.native().as_ptr(),
-                    color_space.shared_native(),
+                    color_space.into_ptr(),
                     pos.as_ptr_or_null(),
                     colors.len().try_into().unwrap(),
                     mode.into_native(),
@@ -266,7 +266,7 @@ pub fn sweep<'a>(
                     center.x,
                     center.y,
                     colors.native().as_ptr(),
-                    color_space.shared_native(),
+                    color_space.into_ptr(),
                     pos.as_ptr_or_null(),
                     colors.len().try_into().unwrap(),
                     mode.into_native(),
@@ -285,7 +285,7 @@ pub fn sweep<'a>(
 /// a tuple of type (&[Color4f], &ColorSpace).
 pub enum GradientShaderColors<'a> {
     Colors(&'a [Color]),
-    ColorsInSpace(&'a [Color4f], &'a ColorSpace),
+    ColorsInSpace(&'a [Color4f], ColorSpace),
 }
 
 impl<'a> GradientShaderColors<'a> {
@@ -308,8 +308,8 @@ impl<'a> From<&'a [Color]> for GradientShaderColors<'a> {
     }
 }
 
-impl<'a> From<(&'a [Color4f], &'a ColorSpace)> for GradientShaderColors<'a> {
-    fn from(c: (&'a [Color4f], &'a ColorSpace)) -> Self {
+impl<'a> From<(&'a [Color4f], ColorSpace)> for GradientShaderColors<'a> {
+    fn from(c: (&'a [Color4f], ColorSpace)) -> Self {
         GradientShaderColors::<'a>::ColorsInSpace(c.0, c.1)
     }
 }

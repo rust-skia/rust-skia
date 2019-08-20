@@ -6,7 +6,7 @@ use skia_bindings::{
 
 impl RCHandle<SkImageFilter> {
     pub fn drop_shadow<'a>(
-        &self,
+        self,
         crop_rect: impl Into<Option<&'a CropRect>>,
         delta: impl Into<Vector>,
         sigma: (scalar, scalar),
@@ -36,7 +36,7 @@ pub fn new<'a>(
     (sigma_x, sigma_y): (scalar, scalar),
     color: impl Into<Color>,
     shadow_mode: ShadowMode,
-    input: &ImageFilter,
+    input: ImageFilter,
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     let delta = delta.into();
@@ -49,7 +49,7 @@ pub fn new<'a>(
             sigma_y,
             color.into_native(),
             shadow_mode.into_native(),
-            input.shared_native(),
+            input.into_ptr(),
             crop_rect.into().native_ptr_or_null(),
         )
     })

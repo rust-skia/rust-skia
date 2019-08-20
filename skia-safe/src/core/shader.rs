@@ -159,9 +159,9 @@ impl RCHandle<SkShader> {
             .unwrap()
     }
 
-    pub fn with_color_filter(&self, color_filter: &ColorFilter) -> Self {
+    pub fn with_color_filter(&self, color_filter: ColorFilter) -> Self {
         Self::from_ptr(unsafe {
-            C_SkShader_makeWithColorFilter(self.native(), color_filter.shared_native())
+            C_SkShader_makeWithColorFilter(self.native(), color_filter.into_ptr())
         })
         .unwrap()
     }
@@ -184,32 +184,26 @@ pub mod shaders {
         Shader::from_ptr(unsafe { C_SkShaders_Color(color.into_native()) }).unwrap()
     }
 
-    pub fn color_in_space(color: impl AsRef<Color4f>, space: &ColorSpace) -> Shader {
+    pub fn color_in_space(color: impl AsRef<Color4f>, space: ColorSpace) -> Shader {
+        Shader::from_ptr(unsafe { C_SkShaders_Color2(color.as_ref().native(), space.into_ptr()) })
+            .unwrap()
+    }
+
+    pub fn blend(mode: BlendMode, dst: Shader, src: Shader) -> Shader {
         Shader::from_ptr(unsafe {
-            C_SkShaders_Color2(color.as_ref().native(), space.shared_native())
+            C_SkShaders_Blend(mode.into_native(), dst.into_ptr(), src.into_ptr())
         })
         .unwrap()
     }
 
-    pub fn blend(mode: BlendMode, dst: &Shader, src: &Shader) -> Shader {
-        Shader::from_ptr(unsafe {
-            C_SkShaders_Blend(mode.into_native(), dst.shared_native(), src.shared_native())
-        })
-        .unwrap()
-    }
-
-    pub fn lerp(t: f32, dst: &Shader, src: &Shader) -> Option<Shader> {
-        Shader::from_ptr(unsafe { C_SkShaders_Lerp(t, dst.shared_native(), src.shared_native()) })
+    pub fn lerp(t: f32, dst: Shader, src: Shader) -> Option<Shader> {
+        Shader::from_ptr(unsafe { C_SkShaders_Lerp(t, dst.into_ptr(), src.into_ptr()) })
     }
 
     // TODO: rename as soon it's clear from the documentation what it does.
-    pub fn lerp2(red: &Shader, dst: &Shader, src: &Shader) -> Shader {
+    pub fn lerp2(red: Shader, dst: Shader, src: Shader) -> Shader {
         Shader::from_ptr(unsafe {
-            C_SkShaders_Lerp2(
-                red.shared_native(),
-                dst.shared_native(),
-                src.shared_native(),
-            )
+            C_SkShaders_Lerp2(red.into_ptr(), dst.into_ptr(), src.into_ptr())
         })
         .unwrap()
     }

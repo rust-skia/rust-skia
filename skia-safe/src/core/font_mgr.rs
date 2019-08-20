@@ -163,10 +163,14 @@ impl RCHandle<SkFontMgr> {
         })
     }
 
-    pub fn match_face_style(&self, typeface: &Typeface, style: FontStyle) -> Option<Typeface> {
+    pub fn match_face_style(
+        &self,
+        typeface: impl AsRef<Typeface>,
+        style: FontStyle,
+    ) -> Option<Typeface> {
         Typeface::from_ptr(unsafe {
             self.native()
-                .matchFaceStyle(typeface.native(), style.native())
+                .matchFaceStyle(typeface.as_ref().native(), style.native())
         })
     }
 

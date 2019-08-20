@@ -62,7 +62,7 @@ impl FontMetrics {
         self.if_valid(Flags::STRIKEOUT_POSITION_IS_VALID, self.strikeout_position)
     }
 
-    fn if_valid(&self, flag: Flags, value: scalar) -> Option<scalar> {
+    fn if_valid(&self, flag: self::Flags, value: scalar) -> Option<scalar> {
         self.flags.contains(flag).if_true_some(value)
     }
 }

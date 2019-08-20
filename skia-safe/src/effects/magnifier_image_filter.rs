@@ -4,7 +4,7 @@ use skia_bindings::{C_SkMagnifierImageFilter_Make, SkImageFilter};
 
 impl RCHandle<SkImageFilter> {
     pub fn magnifier<'a>(
-        &self,
+        self,
         crop_rect: impl Into<Option<&'a CropRect>>,
         src_rect: impl AsRef<Rect>,
         inset: scalar,
@@ -16,14 +16,14 @@ impl RCHandle<SkImageFilter> {
 pub fn new<'a>(
     src_rect: impl AsRef<Rect>,
     inset: scalar,
-    input: &ImageFilter,
+    input: ImageFilter,
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
         C_SkMagnifierImageFilter_Make(
             src_rect.as_ref().native(),
             inset,
-            input.shared_native(),
+            input.into_ptr(),
             crop_rect.into().native_ptr_or_null(),
         )
     })

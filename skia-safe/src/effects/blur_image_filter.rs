@@ -4,7 +4,7 @@ use skia_bindings::{C_SkBlurImageFilter_Make, SkBlurImageFilter_TileMode, SkImag
 
 impl RCHandle<SkImageFilter> {
     pub fn blur<'a>(
-        &self,
+        self,
         crop_rect: impl Into<Option<&'a CropRect>>,
         sigma: (scalar, scalar),
         tile_mode: impl Into<Option<TileMode>>,
@@ -29,7 +29,7 @@ fn test_tile_mode_layout() {
 
 pub fn new<'a>(
     (sigma_x, sigma_y): (scalar, scalar),
-    input: &ImageFilter,
+    input: ImageFilter,
     crop_rect: impl Into<Option<&'a CropRect>>,
     tile_mode: impl Into<Option<TileMode>>,
 ) -> Option<ImageFilter> {
@@ -37,7 +37,7 @@ pub fn new<'a>(
         C_SkBlurImageFilter_Make(
             sigma_x,
             sigma_y,
-            input.shared_native(),
+            input.into_ptr(),
             crop_rect.into().native_ptr_or_null(),
             tile_mode
                 .into()
