@@ -190,22 +190,22 @@ impl RCHandle<SkVertices> {
     }
 
     pub fn tex_coords(&self) -> Option<&[Point]> {
-        let texs: *const SkPoint = self.native().fTexs.to_option()?;
+        let texs: *const SkPoint = self.native().fTexs.into_option()?;
         Some(unsafe { slice::from_raw_parts(texs as _, self.vertex_count()) })
     }
 
     pub fn colors(&self) -> Option<&[Color]> {
-        let colors: *const SkColor = self.native().fColors.to_option()?;
+        let colors: *const SkColor = self.native().fColors.into_option()?;
         Some(unsafe { slice::from_raw_parts(colors as _, self.vertex_count()) })
     }
 
     pub fn bone_indices(&self) -> Option<&[BoneIndices]> {
-        let indices = self.native().fBoneIndices.to_option()?;
+        let indices = self.native().fBoneIndices.into_option()?;
         Some(unsafe { slice::from_raw_parts(indices as _, self.vertex_count()) })
     }
 
     pub fn bone_weights(&self) -> Option<&[BoneWeights]> {
-        let weights = self.native().fBoneWeights.to_option()?;
+        let weights = self.native().fBoneWeights.into_option()?;
         Some(unsafe { slice::from_raw_parts(weights as _, self.vertex_count()) })
     }
 
@@ -214,7 +214,7 @@ impl RCHandle<SkVertices> {
     }
 
     pub fn indices(&self) -> Option<&[u16]> {
-        let indices = self.native().fIndices.to_option()?;
+        let indices = self.native().fIndices.into_option()?;
         Some(unsafe { slice::from_raw_parts_mut(indices as _, self.index_count()) })
     }
 
@@ -305,35 +305,35 @@ impl Handle<SkVertices_Builder> {
 
     pub fn tex_coords(&mut self) -> Option<&mut [Point]> {
         unsafe {
-            let coords: *mut SkPoint = self.native_mut().texCoords().to_option()?;
+            let coords: *mut SkPoint = self.native_mut().texCoords().into_option()?;
             Some(slice::from_raw_parts_mut(coords as _, self.vertex_count()))
         }
     }
 
     pub fn colors(&mut self) -> Option<&mut [Color]> {
         unsafe {
-            let colors: *mut SkColor = self.native_mut().colors().to_option()?;
+            let colors: *mut SkColor = self.native_mut().colors().into_option()?;
             Some(slice::from_raw_parts_mut(colors as _, self.vertex_count()))
         }
     }
 
     pub fn bone_indices(&mut self) -> Option<&mut [BoneIndices]> {
         unsafe {
-            let indices = self.native_mut().boneIndices().to_option()?;
+            let indices = self.native_mut().boneIndices().into_option()?;
             Some(slice::from_raw_parts_mut(indices as _, self.vertex_count()))
         }
     }
 
     pub fn bone_weights(&mut self) -> Option<&mut [BoneWeights]> {
         unsafe {
-            let weights = self.native_mut().boneWeights().to_option()?;
+            let weights = self.native_mut().boneWeights().into_option()?;
             Some(slice::from_raw_parts_mut(weights as _, self.vertex_count()))
         }
     }
 
     pub fn indices(&mut self) -> Option<&mut [u16]> {
         unsafe {
-            let indices = self.native_mut().indices().to_option()?;
+            let indices = self.native_mut().indices().into_option()?;
             Some(slice::from_raw_parts_mut(indices as _, self.index_count()))
         }
     }

@@ -23,15 +23,15 @@ pub unsafe fn transmute_ref_mut<FromT, ToT>(from: &mut FromT) -> &mut ToT {
     &mut *(from as *mut FromT as *mut ToT)
 }
 
-pub(crate) trait ToOption {
+pub(crate) trait IntoOption {
     type Target;
-    fn to_option(self) -> Option<Self::Target>;
+    fn into_option(self) -> Option<Self::Target>;
 }
 
-impl<T> ToOption for *const T {
+impl<T> IntoOption for *const T {
     type Target = *const T;
 
-    fn to_option(self) -> Option<Self::Target> {
+    fn into_option(self) -> Option<Self::Target> {
         if !self.is_null() {
             Some(self)
         } else {
@@ -40,10 +40,10 @@ impl<T> ToOption for *const T {
     }
 }
 
-impl<T> ToOption for *mut T {
+impl<T> IntoOption for *mut T {
     type Target = *mut T;
 
-    fn to_option(self) -> Option<Self::Target> {
+    fn into_option(self) -> Option<Self::Target> {
         if !self.is_null() {
             Some(self)
         } else {
@@ -52,10 +52,10 @@ impl<T> ToOption for *mut T {
     }
 }
 
-impl ToOption for bool {
+impl IntoOption for bool {
     type Target = ();
 
-    fn to_option(self) -> Option<Self::Target> {
+    fn into_option(self) -> Option<Self::Target> {
         if self {
             Some(())
         } else {
@@ -73,7 +73,7 @@ pub(crate) trait IfBoolSome {
 
 impl IfBoolSome for bool {
     fn if_true_some<V>(self, v: V) -> Option<V> {
-        self.to_option().and(Some(v))
+        self.into_option().and(Some(v))
     }
 
     fn if_false_some<V>(self, v: V) -> Option<V> {
@@ -81,11 +81,11 @@ impl IfBoolSome for bool {
     }
 
     fn if_true_then_some<V>(self, f: impl FnOnce() -> V) -> Option<V> {
-        self.to_option().map(|()| f())
+        self.into_option().map(|()| f())
     }
 
     fn if_false_then_some<V>(self, f: impl FnOnce() -> V) -> Option<V> {
-        (!self).to_option().map(|()| f())
+        (!self).into_option().map(|()| f())
     }
 }
 
@@ -432,7 +432,7 @@ impl<N: NativeDrop> RefHandle<N> {
     /// From this time on the RefHandle ownes the object that the pointer points
     /// to and will call it's NativeDrop implementation it it goes out of scope.
     pub(crate) fn from_ptr(ptr: *mut N) -> Option<Self> {
-        ptr.to_option().map(Self)
+        ptr.into_option().map(Self)
     }
 }
 
@@ -473,7 +473,7 @@ impl<N: NativeRefCounted> RCHandle<N> {
     /// Increases the reference count.
     #[inline]
     pub(crate) fn from_unshared_ptr(ptr: *mut N) -> Option<Self> {
-        ptr.to_option().map(|ptr| {
+        ptr.into_option().map(|ptr| {
             unsafe { (*ptr)._ref() };
             Self(ptr)
         })

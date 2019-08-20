@@ -399,7 +399,7 @@ impl<'a> Iterator<'a> {
 
     pub fn rgn(&self) -> Option<&Region> {
         unsafe {
-            let r = C_SkRegion_Iterator_rgn(self.native()).to_option()?;
+            let r = C_SkRegion_Iterator_rgn(self.native()).into_option()?;
             Some(transmute_ref(&*r))
         }
     }

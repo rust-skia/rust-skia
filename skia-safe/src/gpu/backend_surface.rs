@@ -46,7 +46,7 @@ impl Handle<GrBackendFormat> {
             #[allow(clippy::map_clone)]
             self.native()
                 .getGLFormat()
-                .to_option()
+                .into_option()
                 .map(|format| *format)
         }
     }
@@ -56,7 +56,7 @@ impl Handle<GrBackendFormat> {
             #[allow(clippy::map_clone)]
             self.native()
                 .getGLTarget()
-                .to_option()
+                .into_option()
                 .map(|target| *target)
         }
     }
@@ -67,7 +67,7 @@ impl Handle<GrBackendFormat> {
             #[allow(clippy::map_clone)]
             self.native()
                 .getVkFormat()
-                .to_option()
+                .into_option()
                 .map(|format| *format)
         }
     }
