@@ -406,7 +406,7 @@ where
     }
 }
 
-/// A wrapper type that represents a native type through a pointer to
+/// A wrapper type that represents a native type with a pointer to
 /// the native object.
 #[repr(transparent)]
 pub struct RefHandle<N: NativeDrop>(*mut N);
