@@ -2,13 +2,13 @@ use crate::prelude::*;
 use crate::Rect;
 use skia_bindings as sb;
 
-pub type Affinity = sb::skia_textlayout_Affinity;
-pub type RectHeightStyle = sb::skia_textlayout_RectHeightStyle;
-pub type RectWidthStyle = sb::skia_textlayout_RectWidthStyle;
-pub type TextAlign = sb::skia_textlayout_TextAlign;
-pub type TextDirection = sb::skia_textlayout_TextDirection;
+pub use sb::skia_textlayout_Affinity as Affinity;
+pub use sb::skia_textlayout_RectHeightStyle as RectHeightStyle;
+pub use sb::skia_textlayout_RectWidthStyle as RectWidthStyle;
+pub use sb::skia_textlayout_TextAlign as TextAlign;
+pub use sb::skia_textlayout_TextDirection as TextDirection;
 
-pub type PositionWithAffinity = sb::skia_textlayout_PositionWithAffinity;
+pub use sb::skia_textlayout_PositionWithAffinity as PositionWithAffinity;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 #[repr(C)]
@@ -24,4 +24,4 @@ fn text_box_layout() {
     TextBox::test_layout()
 }
 
-pub type TextBaseline = sb::skia_textlayout_TextBaseline;
+pub use sb::skia_textlayout_TextBaseline as TextBaseline;
