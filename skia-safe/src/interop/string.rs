@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use skia_bindings::{C_SkString_c_str, C_SkString_destruct, C_SkString_size, SkString};
+use skia_bindings::{C_SkString_c_str_size, C_SkString_destruct, SkString};
 use std::{slice, str};
 
 pub type String = Handle<SkString>;
@@ -9,6 +9,12 @@ impl NativeDrop for SkString {
         unsafe {
             C_SkString_destruct(self);
         }
+    }
+}
+
+impl AsRef<str> for String {
+    fn as_ref(&self) -> &str {
+        self.as_str()
     }
 }
 
@@ -30,21 +36,60 @@ impl Handle<SkString> {
         Handle::from_native(unsafe { SkString::new3(bytes.as_ptr() as _, bytes.len()) })
     }
 
-    pub fn set(&mut self, string: &Self) {
-        let bytes = string.as_str().as_bytes();
-        unsafe {
-            self.native_mut().set1(bytes.as_ptr() as _, bytes.len());
-        }
-    }
-
     pub fn as_str(&self) -> &str {
+        self.native().as_str()
+    }
+}
+
+pub trait AsStr {
+    fn as_str(&self) -> &str;
+}
+
+impl AsStr for Handle<SkString> {
+    fn as_str(&self) -> &str {
+        self.native().as_str()
+    }
+}
+
+impl AsStr for SkString {
+    fn as_str(&self) -> &str {
+        let mut size = 0;
         let slice = unsafe {
-            slice::from_raw_parts(
-                C_SkString_c_str(self.native()) as _,
-                C_SkString_size(self.native()),
-            )
+            slice::from_raw_parts(C_SkString_c_str_size(self, &mut size) as *const u8, size)
         };
         str::from_utf8(slice).unwrap()
+    }
+}
+
+pub trait SetStr {
+    fn set_str(&mut self, str: impl AsRef<str>);
+}
+
+impl SetStr for Handle<SkString> {
+    fn set_str(&mut self, str: impl AsRef<str>) {
+        self.native_mut().set_str(str)
+    }
+}
+
+impl SetStr for SkString {
+    fn set_str(&mut self, str: impl AsRef<str>) {
+        let bytes = str.as_ref().as_bytes();
+        unsafe { self.set1(bytes.as_ptr() as _, bytes.len()) }
+    }
+}
+
+pub type Strings = Vec<String>;
+
+pub trait FromStrs {
+    fn from_strs(strings: &[impl AsRef<str>]) -> Self;
+}
+
+impl FromStrs for Vec<String> {
+    fn from_strs(strings: &[impl AsRef<str>]) -> Self {
+        strings
+            .iter()
+            .map(|s| String::from_str(s.as_ref()))
+            .collect()
     }
 }
 
@@ -58,6 +103,6 @@ fn string_from_rust_and_back() {
 #[test]
 fn set_string() {
     let mut hello = String::from_str("Hello");
-    hello.set(&String::from_str("World"));
+    hello.set_str(String::from_str("World"));
     assert_eq!("World", hello.as_str());
 }

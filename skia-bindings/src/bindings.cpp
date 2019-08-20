@@ -1769,11 +1769,8 @@ extern "C" void C_SkString_destruct(SkString* self) {
     self->~SkString();
 }
 
-extern "C" size_t C_SkString_size(const SkString* self) {
-    return self->size();
-}
-
-extern "C" const char* C_SkString_c_str(const SkString* self) {
+extern "C" const char* C_SkString_c_str_size(const SkString* self, size_t* size) {
+    *size = self->size();
     return self->c_str();
 }
 
