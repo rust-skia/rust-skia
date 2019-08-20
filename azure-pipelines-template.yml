@@ -27,15 +27,19 @@ jobs:
           toolchain: stable
           features: 'shaper'
           exampleArgs: ''
+        stable-textlayout:
+          toolchain: stable
+          features: 'textlayout'
+          exampleArgs: ''
 
       ${{ if eq(parameters.deployRelease, 'False') }}:
         stable-all-features:
           toolchain: stable
-          features: 'vulkan,svg,shaper'
+          features: 'vulkan,svg,shaper,textlayout'
           exampleArgs: '--driver cpu --driver pdf --driver svg'
         beta-all-features:
           toolchain: beta
-          features: 'vulkan,svg,shaper'
+          features: 'vulkan,svg,shaper,textlayout'
           exampleArgs: ''
 
   variables:
