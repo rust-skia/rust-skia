@@ -64,8 +64,8 @@ extern "C" {
 //
 
 extern "C" {
-    void C_StrutStyle_assign(StrutStyle* self, const StrutStyle* other) {
-        *self = *other;
+    void C_StrutStyle_CopyConstruct(StrutStyle* uninitialized, const StrutStyle* other) {
+        new(uninitialized) StrutStyle(*other);
     }
 
     void C_StrutStyle_destruct(StrutStyle* self) {
@@ -84,16 +84,16 @@ extern "C" {
 }
 
 extern "C" {
+    void C_ParagraphStyle_CopyConstruct(ParagraphStyle* uninitialized, const ParagraphStyle* other) {
+        new(uninitialized) ParagraphStyle(*other);
+    }
+
+    void C_ParagraphStyle_destruct(ParagraphStyle* self) {
+        self->~ParagraphStyle();
+    }
+
     bool C_ParagraphStyle_Equals(const ParagraphStyle* left, const ParagraphStyle* right) {
         return *left == *right;
-    }
-
-    void C_ParagraphStyle_setStrutStyle(ParagraphStyle* self, const StrutStyle* strutStyle) {
-        self->setStrutStyle(*strutStyle);
-    }
-
-    void C_ParagraphStyle_setEllipsis(ParagraphStyle* self, const StrutStyle* strutStyle) {
-        self->setStrutStyle(*strutStyle);
     }
 }
 
@@ -102,8 +102,8 @@ extern "C" {
 //
 
 extern "C" {
-    void C_TextShadow_destruct(TextShadow* self) {
-        self->~TextShadow();
+    bool C_TextShadow_Equals(const TextShadow* self, const TextShadow* other) {
+        return *self == *other;
     }
 }
 
@@ -120,12 +120,9 @@ extern "C" {
         self->~TextBoxes();
     }
 
-    const TextBox* C_TextBoxes_ptr(TextBoxes* boxes) {
+    const TextBox* C_TextBoxes_ptr_count(const TextBoxes* boxes, size_t* count) {
+        *count = boxes->textBoxes.size();
         return &boxes->textBoxes.front();
-    }
-
-    size_t C_TextBoxes_count(const TextBoxes* boxes) {
-        return boxes->textBoxes.size();
     }
 }
 
@@ -214,23 +211,12 @@ extern "C" {
 //
 
 extern "C" {
-    void C_TextStyle_assign(TextStyle* self, const TextStyle* other) {
-        *self = *other;
+    void C_TextStyle_CopyConstruct(TextStyle* uninitialized, const TextStyle* other) {
+        new(uninitialized) TextStyle(*other);
     }
 
     void C_TextStyle_destruct(TextStyle* self) {
         self->~TextStyle();
-    }
-
-    size_t C_TextStyle_getShadowNumber(const TextStyle* self) {
-        return self->getShadowNumber();
-    }
-
-    void C_TextStyle_getShadows(const TextStyle* self, TextShadow shadowsOut[]) {
-        auto shadows = self->getShadows();
-        for(std::vector<TextShadow>::size_type i = 0; i != shadows.size(); ++i) {
-            shadowsOut[i] = shadows[i];
-        }
     }
 
     void C_TextStyle_addShadow(TextStyle* self, const TextShadow* shadow) {
@@ -251,8 +237,8 @@ extern "C" {
         self->setFontFamilies(std::vector<SkString>(data, data + count));
     }
 
-    void C_TextStyle_setTypeface(TextStyle* self, const SkTypeface* typeface) {
-        self->setTypeface(spFromConst(typeface));
+    void C_TextStyle_setTypeface(TextStyle* self, SkTypeface* typeface) {
+        self->setTypeface(sk_sp<SkTypeface>(typeface));
     }
 
     void C_TextStyle_getFontMetrics(const TextStyle* self, SkFontMetrics* metrics) {
@@ -260,3 +246,41 @@ extern "C" {
     }
 }
 
+
+struct TextShadows {
+    std::vector<TextShadow> textShadows;
+};
+
+extern "C" {
+    const TextShadow* C_TextShadows_ptr_count(const TextShadows* shadows, size_t* count) {
+        *count = shadows->textShadows.size();
+        return &shadows->textShadows.front();
+    }
+}
+
+//
+// TypefaceFontProvider
+//
+
+extern "C" {
+    TypefaceFontStyleSet* C_TypefaceFontStyleSet_new(const SkString* family_name) {
+        return new TypefaceFontStyleSet(*family_name);
+    }
+
+    void C_TypefaceFontStyleSet_appendTypeface(TypefaceFontStyleSet* self, SkTypeface* typeface) {
+        self->appendTypeface(sk_sp<SkTypeface>(typeface));
+    }
+}
+
+extern "C" {
+    TypefaceFontProvider* C_TypefaceFontProvider_new() {
+        return new TypefaceFontProvider();
+    }
+
+    size_t C_TypefaceFontProvider_registerTypeface(TypefaceFontProvider* self, SkTypeface* typeface, const SkString* alias) {
+        if (alias) {
+            return self->registerTypeface(sk_sp<SkTypeface>(typeface), *alias);
+        }
+        self->registerTypeface(sk_sp<SkTypeface>(typeface));
+    }
+}
