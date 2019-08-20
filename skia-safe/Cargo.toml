@@ -20,7 +20,7 @@ default = []
 vulkan = ["skia-bindings/vulkan"]
 svg = ["skia-bindings/svg"]
 shaper = ["skia-bindings/shaper"]
-paragraph = ["skia-bindings/paragraph", "shaper"]
+textlayout = ["skia-bindings/textlayout", "shaper"]
 
 [dependencies]
 bitflags = "1.0.4"

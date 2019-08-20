@@ -19,7 +19,7 @@ mod feature_id {
     pub const VULKAN: &str = "vulkan";
     pub const SVG: &str = "svg";
     pub const SHAPER: &str = "shaper";
-    pub const PARAGRAPH: &str = "paragraph";
+    pub const TEXTLAYOUT: &str = "textlayout";
 }
 
 /// The defaults for the Skia build configuration.
@@ -38,7 +38,7 @@ impl Default for BuildConfiguration {
         };
 
         let text_layout = {
-            match (cfg!(feature = "paragraph"), cfg!(feature = "shaper")) {
+            match (cfg!(feature = "textlayout"), cfg!(feature = "shaper")) {
                 (false, false) => TextLayout::None,
                 (false, true) => TextLayout::ShaperOnly,
                 (true, false) => panic!("invalid feature configuration, feature 'shaper' must be enabled for feature 'paragraph'"),
@@ -400,7 +400,7 @@ impl BinariesConfiguration {
                 built_libraries.push(lib::SKSHAPER.into());
             }
             TextLayout::ShaperAndParagraph => {
-                feature_ids.push(feature_id::PARAGRAPH);
+                feature_ids.push(feature_id::TEXTLAYOUT);
                 additional_files.push(ICUDTL_DAT.into());
                 built_libraries.push(lib::SKPARAGRAPH.into());
                 built_libraries.push(lib::SKSHAPER.into());

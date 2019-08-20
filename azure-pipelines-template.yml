@@ -24,9 +24,9 @@ jobs:
         toolchain: stable
         features: 'svg'
         exampleArgs: '--driver svg'
-      stable-paragraph:
+      stable-textlayout:
         toolchain: stable
-        features: 'paragraph'
+        features: 'textlayout'
         exampleArgs: ''
 
   variables:
