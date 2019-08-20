@@ -5,7 +5,7 @@ use skia_bindings::{
 use std::hash::{Hash, Hasher};
 use std::mem::MaybeUninit;
 use std::ops::{Deref, DerefMut, Index, IndexMut};
-use std::{mem, ptr};
+use std::{mem, ptr, slice};
 // Re-export TryFrom / TryInto to make them available in all modules that use prelude::*.
 pub use std::convert::{TryFrom, TryInto};
 use std::marker::PhantomData;
@@ -220,8 +220,9 @@ pub trait NativeHash {
     fn hash<H: Hasher>(&self, state: &mut H);
 }
 
-/// Wraps a native type that can be represented as a value
-/// and needs a Drop trait.
+/// Wraps a native type that can be represented and used in Rust memory.
+///
+/// This type requires the trait `NativeDrop` to be implemented.
 #[repr(transparent)]
 pub struct Handle<N: NativeDrop>(N);
 
@@ -232,7 +233,8 @@ impl<N: NativeDrop> AsRef<Handle<N>> for Handle<N> {
 }
 
 impl<N: NativeDrop> Handle<N> {
-    /// Create a handle from a native type.
+    /// Wrap a native instance into a handle.
+    /// TODO: rename to wrap_native() and mark as unsafe.
     pub(crate) fn from_native(n: N) -> Self {
         Handle(n)
     }
@@ -242,11 +244,35 @@ impl<N: NativeDrop> Handle<N> {
         unsafe { transmute_ref(n) }
     }
 
+    /// Create a mutable reference to the Rust wrapper from a reference to the native type.
+    #[allow(dead_code)]
+    pub(crate) fn from_native_ref_mut(n: &mut N) -> &mut Self {
+        unsafe { transmute_ref_mut(n) }
+    }
+
     /// Constructs a C++ object in place by calling a
     /// function that expects a pointer that points to
     /// uninitialized memory of the native type.
     pub(crate) fn construct(construct: impl FnOnce(*mut N)) -> Self {
         Self::from_native(self::construct(construct))
+    }
+
+    /// Replaces the native instance with the one from this Handle, and
+    /// returns the replaced one wrapped in  a Rust Handle without
+    /// deinitializing either one.
+    pub(crate) fn replace_native(mut self, native: &mut N) -> Self {
+        mem::swap(&mut self.0, native);
+        self
+    }
+}
+
+pub(crate) trait ReplaceWith<Other> {
+    fn replace_with(&mut self, other: Other) -> Other;
+}
+
+impl<N: NativeDrop> ReplaceWith<Handle<N>> for N {
+    fn replace_with(&mut self, other: Handle<N>) -> Handle<N> {
+        other.replace_native(self)
     }
 }
 
@@ -292,16 +318,17 @@ impl<N: NativeDrop + NativeHash> Hash for Handle<N> {
     }
 }
 
-pub(crate) trait NativeSliceAccess<N: NativeDrop + NativeClone> {
-    fn native(&self) -> Vec<N>;
+pub(crate) trait NativeSliceAccess<N: NativeDrop> {
+    fn native(&self) -> &[N];
 }
 
-impl<N> NativeSliceAccess<N> for [Handle<N>]
-where
-    N: NativeDrop + NativeClone,
-{
-    fn native(&self) -> Vec<N> {
-        self.iter().map(|v| (v.native().clone())).collect()
+impl<N: NativeDrop> NativeSliceAccess<N> for [Handle<N>] {
+    fn native(&self) -> &[N] {
+        let ptr = self
+            .first()
+            .map(|f| f.native() as *const _)
+            .unwrap_or(ptr::null());
+        unsafe { slice::from_raw_parts(ptr, self.len()) }
     }
 }
 
@@ -379,7 +406,42 @@ where
     }
 }
 
-/// A representation type represented by a refcounted pointer to the native type.
+/// A wrapper type that represents a native type through a pointer to
+/// the native object.
+#[repr(transparent)]
+pub struct RefHandle<N: NativeDrop>(*mut N);
+
+impl<N: NativeDrop> Drop for RefHandle<N> {
+    fn drop(&mut self) {
+        self.native_mut().drop()
+    }
+}
+
+impl<N: NativeDrop> NativeAccess<N> for RefHandle<N> {
+    fn native(&self) -> &N {
+        unsafe { &*self.0 }
+    }
+    fn native_mut(&mut self) -> &mut N {
+        unsafe { &mut *self.0 }
+    }
+}
+
+impl<N: NativeDrop> RefHandle<N> {
+    /// Creates a RefHandle from a native pointer.
+    ///
+    /// From this time on the RefHandle ownes the object that the pointer points
+    /// to and will call it's NativeDrop implementation it it goes out of scope.
+    pub(crate) fn from_ptr(ptr: *mut N) -> Option<Self> {
+        if !ptr.is_null() {
+            Some(RefHandle(ptr))
+        } else {
+            None
+        }
+    }
+}
+
+/// A wrapper type represented by a reference counted pointer
+/// to the native type.
 #[repr(transparent)]
 pub struct RCHandle<Native: NativeRefCounted>(*mut Native);
 
@@ -513,6 +575,30 @@ impl<N: NativeRefCounted> ToSharedPointerMut<N> for Option<&mut RCHandle<N>> {
             Some(handle) => handle.shared_native_mut(),
             None => ptr::null_mut(),
         }
+    }
+}
+
+/// A trait that consumes self and converts it to a ptr to the native type.
+pub(crate) trait IntoPtr<N> {
+    fn into_ptr(self) -> *mut N;
+}
+
+impl<N: NativeRefCounted> IntoPtr<N> for RCHandle<N> {
+    fn into_ptr(self) -> *mut N {
+        let ptr = self.0;
+        mem::forget(self);
+        ptr
+    }
+}
+
+/// A trait that consumes self and converts it to a ptr to the native type or null.
+pub(crate) trait IntoPtrOrNull<N> {
+    fn into_ptr_or_null(self) -> *mut N;
+}
+
+impl<N: NativeRefCounted> IntoPtrOrNull<N> for Option<RCHandle<N>> {
+    fn into_ptr_or_null(self) -> *mut N {
+        self.map(|rc| rc.into_ptr()).unwrap_or(ptr::null_mut())
     }
 }
 
