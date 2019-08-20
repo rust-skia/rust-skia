@@ -1203,8 +1203,8 @@ extern "C" SkTypeface* C_SkTypeface_MakeFromFile(const char path[], int index) {
 }
 */
 
-extern "C" SkTypeface* C_SkTypeface_MakeFromData(const SkData* data, int index) {
-    return SkTypeface::MakeFromData(sk_sp<SkData>(const_cast<SkData*>(data)), index).release();
+extern "C" SkTypeface* C_SkTypeface_MakeFromData(SkData* data, int index) {
+    return SkTypeface::MakeFromData(sp(data), index).release();
 }
 
 extern "C" SkTypeface* C_SkTypeface_makeClone(const SkTypeface* self, const SkFontArguments* arguments) {
@@ -2438,9 +2438,9 @@ extern "C" const GrGLInterface* C_GrGLInterface_MakeNativeInterface() {
 // gpu/GrContext.h
 //
 
-extern "C" GrContext* C_GrContext_MakeGL(const GrGLInterface* interface) {
+extern "C" GrContext* C_GrContext_MakeGL(GrGLInterface* interface) {
     if (interface)
-        return GrContext::MakeGL(sk_sp<const GrGLInterface>(interface)).release();
+        return GrContext::MakeGL(sp(interface)).release();
     else
         return GrContext::MakeGL().release();
 }
