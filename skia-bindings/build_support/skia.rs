@@ -1065,7 +1065,6 @@ mod prerequisites {
 
 use bindgen::EnumVariation;
 pub use definitions::{Definition, Definitions};
-use regex::Regex;
 
 pub(crate) mod definitions {
     use std::collections::HashSet;
