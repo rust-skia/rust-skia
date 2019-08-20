@@ -917,7 +917,7 @@ impl Canvas {
         blob: impl AsRef<TextBlob>,
         origin: impl Into<Point>,
         paint: &Paint,
-    ) {
+    ) -> &mut Self {
         let origin = origin.into();
         unsafe {
             self.native_mut().drawTextBlob(
@@ -927,6 +927,7 @@ impl Canvas {
                 paint.native(),
             )
         }
+        self
     }
 
     pub fn draw_picture(
