@@ -18,7 +18,7 @@ fn draw_rtl_shaped(canvas: &mut Canvas) {
     let mut paint = Paint::default();
     paint.set_anti_alias(true);
 
-    let font = &Font::from_typeface(&Typeface::default(), 64.0);
+    let font = &Font::from_typeface(Typeface::default(), 64.0);
 
     let shaper = Shaper::new();
     if let Some((blob, _)) =
@@ -32,7 +32,7 @@ fn draw_rtl_unshaped(canvas: &mut Canvas) {
     let mut paint = Paint::default();
     paint.set_anti_alias(true);
 
-    let font = &Font::from_typeface(&Typeface::default(), 64.0);
+    let font = &Font::from_typeface(Typeface::default(), 64.0);
 
     let shaper = Shaper::new_primitive();
     if let Some((blob, _)) =
