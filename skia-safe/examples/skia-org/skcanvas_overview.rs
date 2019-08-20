@@ -1,12 +1,11 @@
 use crate::artifact::DrawingDriver;
 use crate::resources;
 use skia_safe::{
-    scalar, BlendMode, Canvas, Color, Font, Paint, PaintStyle, Path, RRect, Rect, TextBlob,
-    Typeface,
+    paint, scalar, BlendMode, Canvas, Color, Font, Paint, Path, RRect, Rect, TextBlob, Typeface,
 };
-use std::path::PathBuf;
+use std::path;
 
-pub fn draw<Driver: DrawingDriver>(path: &PathBuf) {
+pub fn draw<Driver: DrawingDriver>(path: &path::Path) {
     let path = path.join("SkCanvas-Overview");
     Driver::draw_image_256(&path, "heptagram", draw_heptagram);
     Driver::draw_image_256(&path, "rotated-rectangle", draw_rotated_rectangle);
@@ -28,15 +27,15 @@ fn draw_heptagram(canvas: &mut Canvas) {
     path.close();
     let mut p = Paint::default();
     p.set_anti_alias(true);
-    canvas.clear(Color::WHITE);
-    canvas.translate((0.5 * SCALE, 0.5 * SCALE));
-    canvas.draw_path(&path, &p);
+    canvas
+        .clear(Color::WHITE)
+        .translate((0.5 * SCALE, 0.5 * SCALE))
+        .draw_path(&path, &p);
 }
 
 fn draw_rotated_rectangle(canvas: &mut Canvas) {
     canvas.save();
-    canvas.translate((128.0, 128.0));
-    canvas.rotate(45.0, None);
+    canvas.translate((128.0, 128.0)).rotate(45.0, None);
     let rect = Rect::from_point_and_size((-90.5, -90.5), (181.0, 181.0));
     let mut paint = Paint::default();
     paint.set_color(Color::BLUE);
@@ -50,9 +49,10 @@ fn draw_hello_skia(canvas: &mut Canvas) {
     canvas.draw_color(Color::WHITE, BlendMode::default());
 
     let mut paint = Paint::default();
-    paint.set_style(PaintStyle::Stroke);
-    paint.set_stroke_width(4.0);
-    paint.set_color(Color::RED);
+    paint
+        .set_style(paint::Style::Stroke)
+        .set_stroke_width(4.0)
+        .set_color(Color::RED);
 
     let mut rect = Rect::from_point_and_size((50.0, 50.0), (40.0, 60.0));
     canvas.draw_rect(rect, &paint);

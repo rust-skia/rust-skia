@@ -29,7 +29,7 @@ pub(crate) mod artifact {
     use skia_safe::{Budgeted, Canvas, EncodedImageFormat, ImageInfo, Surface};
     use std::fs;
     use std::io::Write;
-    use std::path::PathBuf;
+    use std::path::Path;
 
     #[cfg(feature = "vulkan")]
     use crate::drivers::skia_ash::AshGraphics;
@@ -43,11 +43,11 @@ pub(crate) mod artifact {
     pub trait DrawingDriver {
         const NAME: &'static str;
 
-        fn draw_image<F>(size: (i32, i32), path: &PathBuf, name: &str, func: F)
+        fn draw_image<F>(size: (i32, i32), path: &Path, name: &str, func: F)
         where
             F: Fn(&mut Canvas) -> ();
 
-        fn draw_image_256<F>(path: &PathBuf, name: &str, func: F)
+        fn draw_image_256<F>(path: &Path, name: &str, func: F)
         where
             F: Fn(&mut Canvas) -> (),
         {
@@ -67,7 +67,7 @@ pub(crate) mod artifact {
     impl DrawingDriver for CPU {
         const NAME: &'static str = "cpu";
 
-        fn draw_image<F>((width, height): (i32, i32), path: &PathBuf, name: &str, func: F)
+        fn draw_image<F>((width, height): (i32, i32), path: &Path, name: &str, func: F)
         where
             F: Fn(&mut Canvas) -> (),
         {
@@ -79,7 +79,7 @@ pub(crate) mod artifact {
     impl DrawingDriver for PDF {
         const NAME: &'static str = "pdf";
 
-        fn draw_image<F>(size: (i32, i32), path: &PathBuf, name: &str, func: F)
+        fn draw_image<F>(size: (i32, i32), path: &Path, name: &str, func: F)
         where
             F: Fn(&mut Canvas) -> (),
         {
@@ -94,7 +94,7 @@ pub(crate) mod artifact {
     impl DrawingDriver for SVG {
         const NAME: &'static str = "svg";
 
-        fn draw_image<F>(size: (i32, i32), path: &PathBuf, name: &str, func: F)
+        fn draw_image<F>(size: (i32, i32), path: &Path, name: &str, func: F)
         where
             F: Fn(&mut Canvas) -> (),
         {
@@ -109,7 +109,7 @@ pub(crate) mod artifact {
     impl DrawingDriver for OpenGL {
         const NAME: &'static str = "opengl";
 
-        fn draw_image<F>((width, height): (i32, i32), path: &PathBuf, name: &str, func: F)
+        fn draw_image<F>((width, height): (i32, i32), path: &Path, name: &str, func: F)
         where
             F: Fn(&mut Canvas) -> (),
         {
@@ -135,7 +135,7 @@ pub(crate) mod artifact {
     impl DrawingDriver for Vulkan {
         const NAME: &'static str = "vulkan";
 
-        fn draw_image<F>((width, height): (i32, i32), path: &PathBuf, name: &str, func: F)
+        fn draw_image<F>((width, height): (i32, i32), path: &Path, name: &str, func: F)
         where
             F: Fn(&mut Canvas) -> (),
         {
@@ -182,7 +182,7 @@ pub(crate) mod artifact {
         }
     }
 
-    fn draw_image_on_surface<F>(surface: &mut Surface, path: &PathBuf, name: &str, func: F)
+    fn draw_image_on_surface<F>(surface: &mut Surface, path: &Path, name: &str, func: F)
     where
         F: Fn(&mut Canvas) -> (),
     {
@@ -195,7 +195,7 @@ pub(crate) mod artifact {
         write_file(data.as_bytes(), path, name, "png");
     }
 
-    fn write_file(bytes: &[u8], path: &PathBuf, name: &str, ext: &str) {
+    fn write_file(bytes: &[u8], path: &Path, name: &str, ext: &str) {
         fs::create_dir_all(&path).expect("failed to create directory");
 
         let mut file_path = path.join(name);
@@ -245,7 +245,7 @@ fn main() {
         )
         .get_matches();
 
-    let out_path: PathBuf = PathBuf::from(matches.value_of(OUT_PATH).unwrap());
+    let out_path = PathBuf::from(matches.value_of(OUT_PATH).unwrap());
 
     let drivers = {
         let drivers = matches
