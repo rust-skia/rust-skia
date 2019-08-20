@@ -30,7 +30,7 @@ pub use sb::skia_textlayout_TextDecorationStyle as TextDecorationStyle;
 
 pub use sb::skia_textlayout_StyleType as StyleType;
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct Decoration {
     pub ty: TextDecoration,
     pub color: Color,
