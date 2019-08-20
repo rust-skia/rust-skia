@@ -48,32 +48,31 @@ impl Default for Font {
 }
 
 impl Handle<SkFont> {
-    // Canonical new.
-    pub fn new(typeface: &Typeface, size: impl Into<Option<scalar>>) -> Self {
+    pub fn new(typeface: impl Into<Typeface>, size: impl Into<Option<scalar>>) -> Self {
         Self::from_typeface(typeface, size)
     }
 
-    pub fn from_typeface(typeface: &Typeface, size: impl Into<Option<scalar>>) -> Self {
+    pub fn from_typeface(typeface: impl Into<Typeface>, size: impl Into<Option<scalar>>) -> Self {
         match size.into() {
             None => Self::construct(|font| unsafe {
-                C_SkFont_ConstructFromTypeface(font, typeface.shared_native())
+                C_SkFont_ConstructFromTypeface(font, typeface.into().into_ptr())
             }),
             Some(size) => Self::construct(|font| unsafe {
-                C_SkFont_ConstructFromTypefaceWithSize(font, typeface.shared_native(), size)
+                C_SkFont_ConstructFromTypefaceWithSize(font, typeface.into().into_ptr(), size)
             }),
         }
     }
 
     #[deprecated(since = "0.12.0", note = "use from_typeface() or new()")]
-    pub fn from_typeface_with_size(typeface: &Typeface, size: scalar) -> Self {
+    pub fn from_typeface_with_size(typeface: impl Into<Typeface>, size: scalar) -> Self {
         Self::construct(|font| unsafe {
-            C_SkFont_ConstructFromTypefaceWithSize(font, typeface.shared_native(), size)
+            C_SkFont_ConstructFromTypefaceWithSize(font, typeface.into().into_ptr(), size)
         })
     }
 
     #[deprecated(since = "0.12.0", note = "use from_typeface_with_params()")]
     pub fn from_typeface_with_size_scale_and_skew(
-        typeface: &Typeface,
+        typeface: impl Into<Typeface>,
         size: scalar,
         scale: scalar,
         skew: scalar,
@@ -81,7 +80,7 @@ impl Handle<SkFont> {
         Self::construct(|font| unsafe {
             C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(
                 font,
-                typeface.shared_native(),
+                typeface.into().into_ptr(),
                 size,
                 scale,
                 skew,
@@ -90,7 +89,7 @@ impl Handle<SkFont> {
     }
 
     pub fn from_typeface_with_params(
-        typeface: &Typeface,
+        typeface: impl Into<Typeface>,
         size: scalar,
         scale: scalar,
         skew: scalar,
@@ -98,7 +97,7 @@ impl Handle<SkFont> {
         Self::construct(|font| unsafe {
             C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(
                 font,
-                typeface.shared_native(),
+                typeface.into().into_ptr(),
                 size,
                 scale,
                 skew,
@@ -209,8 +208,8 @@ impl Handle<SkFont> {
         self.native().fSkewX
     }
 
-    pub fn set_typeface(&mut self, tf: &Typeface) -> &mut Self {
-        unsafe { C_SkFont_setTypeface(self.native_mut(), tf.shared_native()) }
+    pub fn set_typeface(&mut self, tf: impl Into<Typeface>) -> &mut Self {
+        unsafe { C_SkFont_setTypeface(self.native_mut(), tf.into().into_ptr()) }
         self
     }
 
@@ -461,8 +460,7 @@ impl Handle<SkFont> {
 
 #[test]
 fn test_flags() {
-    let tf = Typeface::default();
-    let mut font = Font::new(&tf, 10.0);
+    let mut font = Font::new(Typeface::default(), 10.0);
 
     font.set_force_auto_hinting(true);
     assert!(font.is_force_auto_hinting());

@@ -445,6 +445,14 @@ impl<N: NativeDrop> RefHandle<N> {
 #[repr(transparent)]
 pub struct RCHandle<Native: NativeRefCounted>(*mut Native);
 
+/// A reference counted handle is cheap to clone, so we do support a conversion
+/// from a reference to a ref counter to an owned handle.
+impl<N: NativeRefCounted> From<&RCHandle<N>> for RCHandle<N> {
+    fn from(rch: &RCHandle<N>) -> Self {
+        rch.clone()
+    }
+}
+
 impl<N: NativeRefCounted> AsRef<RCHandle<N>> for RCHandle<N> {
     fn as_ref(&self) -> &Self {
         &self
@@ -458,17 +466,6 @@ impl<N: NativeRefCounted> RCHandle<N> {
     pub(crate) fn shared_native(&self) -> &N {
         unsafe {
             let r = &*self.0;
-            r._ref();
-            r
-        }
-    }
-
-    /// Increases the reference counter of the native type
-    /// and returns a reference to it.
-    #[inline]
-    pub(crate) fn shared_native_mut(&mut self) -> &mut N {
-        unsafe {
-            let r = &mut *self.0;
             r._ref();
             r
         }
@@ -530,51 +527,6 @@ impl<N: NativeRefCounted> Drop for RCHandle<N> {
 impl<N: NativeRefCounted + NativePartialEq> PartialEq for RCHandle<N> {
     fn eq(&self, rhs: &Self) -> bool {
         self.native().eq(rhs.native())
-    }
-}
-
-/// A trait for types that can be converted to a shared pointer that may be null.
-pub(crate) trait ToSharedPointer<N> {
-    fn shared_ptr(&self) -> *const N;
-}
-
-pub(crate) trait ToSharedPointerMut<N> {
-    fn shared_ptr_mut(&mut self) -> *mut N;
-}
-
-impl<N: NativeRefCounted> ToSharedPointer<N> for Option<RCHandle<N>> {
-    fn shared_ptr(&self) -> *const N {
-        match self {
-            Some(handle) => handle.shared_native(),
-            None => ptr::null(),
-        }
-    }
-}
-
-impl<N: NativeRefCounted> ToSharedPointerMut<N> for Option<RCHandle<N>> {
-    fn shared_ptr_mut(&mut self) -> *mut N {
-        match self {
-            Some(handle) => handle.shared_native_mut(),
-            None => ptr::null_mut(),
-        }
-    }
-}
-
-impl<N: NativeRefCounted> ToSharedPointer<N> for Option<&RCHandle<N>> {
-    fn shared_ptr(&self) -> *const N {
-        match self {
-            Some(handle) => handle.shared_native(),
-            None => ptr::null(),
-        }
-    }
-}
-
-impl<N: NativeRefCounted> ToSharedPointerMut<N> for Option<&mut RCHandle<N>> {
-    fn shared_ptr_mut(&mut self) -> *mut N {
-        match self {
-            Some(handle) => handle.shared_native_mut(),
-            None => ptr::null_mut(),
-        }
     }
 }
 

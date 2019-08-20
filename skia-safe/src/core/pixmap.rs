@@ -55,11 +55,10 @@ impl Handle<SkPixmap> {
 
     // TODO: Add reset function that borrows pixels?
 
-    pub fn set_color_space<'a>(
-        &mut self,
-        color_space: impl Into<Option<&'a ColorSpace>>,
-    ) -> &mut Self {
-        unsafe { C_SkPixmap_setColorSpace(self.native_mut(), color_space.into().shared_ptr()) }
+    pub fn set_color_space(&mut self, color_space: impl Into<Option<ColorSpace>>) -> &mut Self {
+        unsafe {
+            C_SkPixmap_setColorSpace(self.native_mut(), color_space.into().into_ptr_or_null())
+        }
         self
     }
 

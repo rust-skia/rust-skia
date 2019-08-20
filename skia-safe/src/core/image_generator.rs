@@ -105,26 +105,26 @@ impl RefHandle<SkImageGenerator> {
 
     // TODO: generateTexture()
 
-    pub fn from_encoded(encoded: &Data) -> Option<Self> {
-        Self::from_ptr(unsafe { C_SkImageGenerator_MakeFromEncoded(encoded.shared_native()) })
+    pub fn from_encoded(encoded: Data) -> Option<Self> {
+        Self::from_ptr(unsafe { C_SkImageGenerator_MakeFromEncoded(encoded.into_ptr()) })
     }
 
     pub fn from_picture(
         size: ISize,
-        picture: &Picture,
+        picture: Picture,
         matrix: Option<&Matrix>,
         paint: Option<&Paint>,
         bit_depth: image::BitDepth,
-        color_space: Option<&ColorSpace>,
+        color_space: impl Into<Option<ColorSpace>>,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
             C_SkImageGenerator_MakeFromPicture(
                 size.native(),
-                picture.native(),
+                picture.into_ptr(),
                 matrix.native_ptr_or_null(),
                 paint.native_ptr_or_null(),
                 bit_depth.into_native(),
-                color_space.native_ptr_or_null(),
+                color_space.into().into_ptr_or_null(),
             )
         })
     }

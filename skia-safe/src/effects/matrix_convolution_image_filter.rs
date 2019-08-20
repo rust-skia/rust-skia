@@ -7,7 +7,7 @@ use skia_bindings::{
 impl RCHandle<SkImageFilter> {
     #[allow(clippy::too_many_arguments)]
     pub fn matrix_convolution<'a>(
-        &self,
+        self,
         crop_rect: impl Into<Option<&'a CropRect>>,
         kernel_size: impl Into<ISize>,
         kernel: &[scalar],
@@ -54,7 +54,7 @@ pub fn new<'a>(
     kernel_offset: impl Into<IPoint>,
     tile_mode: TileMode,
     convolve_alpha: bool,
-    input: &ImageFilter,
+    input: ImageFilter,
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     let kernel_size = kernel_size.into();
@@ -71,7 +71,7 @@ pub fn new<'a>(
             kernel_offset.into().native(),
             tile_mode.into_native(),
             convolve_alpha,
-            input.shared_native(),
+            input.into_ptr(),
             crop_rect.into().native_ptr_or_null(),
         )
     })

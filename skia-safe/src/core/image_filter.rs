@@ -287,12 +287,12 @@ impl RCHandle<SkImageFilter> {
         unsafe { self.native().canHandleComplexCTM() }
     }
 
-    pub fn with_matrix(&self, matrix: &Matrix, quality: FilterQuality) -> ImageFilter {
+    pub fn with_matrix(self, matrix: &Matrix, quality: FilterQuality) -> ImageFilter {
         ImageFilter::from_ptr(unsafe {
             C_SkImageFilter_MakeMatrixFilter(
                 matrix.native(),
                 quality.into_native(),
-                self.shared_native(),
+                self.into_ptr(),
             )
         })
         .unwrap()

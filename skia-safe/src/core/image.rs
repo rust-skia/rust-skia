@@ -72,9 +72,9 @@ impl NativeRefCountedBase for SkImage {
 impl RCHandle<SkImage> {
     // TODO: MakeRasterCopy()
 
-    pub fn from_raster_data(info: &ImageInfo, pixels: &Data, row_bytes: usize) -> Option<Image> {
+    pub fn from_raster_data(info: &ImageInfo, pixels: Data, row_bytes: usize) -> Option<Image> {
         Image::from_ptr(unsafe {
-            C_SkImage_MakeRasterData(info.native(), pixels.shared_native(), row_bytes)
+            C_SkImage_MakeRasterData(info.native(), pixels.into_ptr(), row_bytes)
         })
     }
 
@@ -95,16 +95,16 @@ impl RCHandle<SkImage> {
         image
     }
 
-    pub fn from_encoded(data: &Data, subset: Option<IRect>) -> Option<Image> {
+    pub fn from_encoded(data: Data, subset: Option<IRect>) -> Option<Image> {
         Image::from_ptr(unsafe {
-            C_SkImage_MakeFromEncoded(data.shared_native(), subset.native().as_ptr_or_null())
+            C_SkImage_MakeFromEncoded(data.into_ptr(), subset.native().as_ptr_or_null())
         })
     }
 
     // TODO: this is experimental, should probably be removed.
     pub fn from_compressed(
         context: &mut gpu::Context,
-        data: &Data,
+        data: Data,
         size: impl Into<ISize>,
         c_type: CompressionType,
     ) -> Option<Image> {
@@ -112,7 +112,7 @@ impl RCHandle<SkImage> {
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromCompressed(
                 context.native_mut(),
-                data.shared_native(),
+                data.into_ptr(),
                 size.width,
                 size.height,
                 c_type.into_native(),
@@ -128,7 +128,7 @@ impl RCHandle<SkImage> {
         origin: gpu::SurfaceOrigin,
         color_type: ColorType,
         alpha_type: AlphaType,
-        color_space: Option<&ColorSpace>,
+        color_space: impl Into<Option<ColorSpace>>,
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromTexture(
@@ -137,14 +137,14 @@ impl RCHandle<SkImage> {
                 origin.into_native(),
                 color_type.into_native(),
                 alpha_type.into_native(),
-                color_space.shared_ptr(),
+                color_space.into().into_ptr_or_null(),
             )
         })
     }
 
     pub fn from_encoded_cross_context(
         context: &mut gpu::Context,
-        data: &Data,
+        data: Data,
         build_mips: bool,
         // not mentions in the docs, but implementation indicates that
         // this can be null.
@@ -154,7 +154,7 @@ impl RCHandle<SkImage> {
         Image::from_ptr(unsafe {
             C_SkImage_MakeCrossContextFromEncoded(
                 context.native_mut(),
-                data.shared_native(),
+                data.into_ptr(),
                 build_mips,
                 color_space.native_ptr_or_null(),
                 limit_to_max_texture_size.into().unwrap_or_default(),
@@ -170,7 +170,7 @@ impl RCHandle<SkImage> {
         origin: gpu::SurfaceOrigin,
         color_type: ColorType,
         alpha_type: AlphaType,
-        color_space: Option<&ColorSpace>,
+        color_space: impl Into<Option<ColorSpace>>,
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromAdoptedTexture(
@@ -179,7 +179,7 @@ impl RCHandle<SkImage> {
                 origin.into_native(),
                 color_type.into_native(),
                 alpha_type.into_native(),
-                color_space.shared_ptr(),
+                color_space.into().into_ptr_or_null(),
             )
         })
     }
@@ -192,7 +192,7 @@ impl RCHandle<SkImage> {
         yuva_indices: &[YUVAIndex; 4],
         image_size: impl Into<ISize>,
         image_origin: gpu::SurfaceOrigin,
-        image_color_space: Option<&ColorSpace>,
+        image_color_space: impl Into<Option<ColorSpace>>,
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromYUVATexturesCopy(
@@ -202,7 +202,7 @@ impl RCHandle<SkImage> {
                 yuva_indices.native().as_ptr(),
                 image_size.into().into_native(),
                 image_origin.into_native(),
-                image_color_space.shared_ptr(),
+                image_color_space.into().into_ptr_or_null(),
             )
         })
     }
@@ -216,7 +216,7 @@ impl RCHandle<SkImage> {
         image_size: impl Into<ISize>,
         image_origin: gpu::SurfaceOrigin,
         backend_texture: &gpu::BackendTexture,
-        image_color_space: Option<&ColorSpace>,
+        image_color_space: impl Into<Option<ColorSpace>>,
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend(
@@ -227,7 +227,7 @@ impl RCHandle<SkImage> {
                 image_size.into().into_native(),
                 image_origin.into_native(),
                 backend_texture.native(),
-                image_color_space.shared_ptr(),
+                image_color_space.into().into_ptr_or_null(),
             )
         })
     }
@@ -239,7 +239,7 @@ impl RCHandle<SkImage> {
         yuva_indices: &[YUVAIndex; 4],
         image_size: impl Into<ISize>,
         image_origin: gpu::SurfaceOrigin,
-        image_color_space: Option<&ColorSpace>,
+        image_color_space: impl Into<Option<ColorSpace>>,
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromYUVATextures(
@@ -249,7 +249,7 @@ impl RCHandle<SkImage> {
                 yuva_indices.native().as_ptr(),
                 image_size.into().into_native(),
                 image_origin.into_native(),
-                image_color_space.shared_ptr(),
+                image_color_space.into().into_ptr_or_null(),
             )
         })
     }
@@ -261,7 +261,7 @@ impl RCHandle<SkImage> {
         yuv_color_space: YUVColorSpace,
         nv12_textures: &[gpu::BackendTexture; 2],
         image_origin: gpu::SurfaceOrigin,
-        image_color_space: Option<&ColorSpace>,
+        image_color_space: impl Into<Option<ColorSpace>>,
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromNV12TexturesCopy(
@@ -269,7 +269,7 @@ impl RCHandle<SkImage> {
                 yuv_color_space.into_native(),
                 nv12_textures.native().as_ptr(),
                 image_origin.into_native(),
-                image_color_space.shared_ptr(),
+                image_color_space.into().into_ptr_or_null(),
             )
         })
     }
@@ -280,7 +280,7 @@ impl RCHandle<SkImage> {
         nv12_textures: &[gpu::BackendTexture; 2],
         image_origin: gpu::SurfaceOrigin,
         backend_texture: &gpu::BackendTexture,
-        image_color_space: Option<&ColorSpace>,
+        image_color_space: impl Into<Option<ColorSpace>>,
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
@@ -289,27 +289,27 @@ impl RCHandle<SkImage> {
                 nv12_textures.native().as_ptr(),
                 image_origin.into_native(),
                 backend_texture.native(),
-                image_color_space.shared_ptr(),
+                image_color_space.into().into_ptr_or_null(),
             )
         })
     }
 
     pub fn from_picture(
-        picture: &Picture,
+        picture: Picture,
         dimensions: impl Into<ISize>,
         matrix: Option<&Matrix>,
         paint: Option<&Paint>,
         bit_depth: BitDepth,
-        color_space: Option<&ColorSpace>,
+        color_space: impl Into<Option<ColorSpace>>,
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             C_SkImage_MakeFromPicture(
-                picture.shared_native(),
+                picture.into_ptr(),
                 dimensions.into().native(),
                 matrix.native_ptr_or_null(),
                 paint.native_ptr_or_null(),
                 bit_depth.into_native(),
-                color_space.shared_ptr(),
+                color_space.into().into_ptr_or_null(),
             )
         })
     }
@@ -525,9 +525,9 @@ impl RCHandle<SkImage> {
         unsafe { self.native().isLazyGenerated() }
     }
 
-    pub fn new_color_space(&self, color_space: Option<&ColorSpace>) -> Option<Image> {
+    pub fn new_color_space(&self, color_space: impl Into<Option<ColorSpace>>) -> Option<Image> {
         Image::from_ptr(unsafe {
-            C_SkImage_makeColorSpace(self.native(), color_space.shared_ptr())
+            C_SkImage_makeColorSpace(self.native(), color_space.into().into_ptr_or_null())
         })
     }
 }

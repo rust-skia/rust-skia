@@ -9,7 +9,7 @@ use skia_bindings::{
 
 impl RCHandle<SkImageFilter> {
     pub fn distant_lit_diffuse_lighting<'a>(
-        &self,
+        self,
         crop_rect: impl Into<Option<&'a CropRect>>,
         direction: impl Into<Point3>,
         light_color: impl Into<Color>,
@@ -20,7 +20,7 @@ impl RCHandle<SkImageFilter> {
     }
 
     pub fn point_lit_diffuse_lighting<'a>(
-        &self,
+        self,
         crop_rect: impl Into<Option<&'a CropRect>>,
         location: impl Into<Point3>,
         light_color: impl Into<Color>,
@@ -32,7 +32,7 @@ impl RCHandle<SkImageFilter> {
 
     #[allow(clippy::too_many_arguments)]
     pub fn spot_lit_diffuse_lighting<'a>(
-        &self,
+        self,
         crop_rect: impl Into<Option<&'a CropRect>>,
         location: impl Into<Point3>,
         target: impl Into<Point3>,
@@ -56,7 +56,7 @@ impl RCHandle<SkImageFilter> {
     }
 
     pub fn distant_lit_specular_lighting<'a>(
-        &self,
+        self,
         crop_rect: impl Into<Option<&'a CropRect>>,
         direction: impl Into<Point3>,
         light_color: impl Into<Color>,
@@ -76,7 +76,7 @@ impl RCHandle<SkImageFilter> {
     }
 
     pub fn point_lit_specular_lighting<'a>(
-        &self,
+        self,
         crop_rect: impl Into<Option<&'a CropRect>>,
         location: impl Into<Point3>,
         light_color: impl Into<Color>,
@@ -97,7 +97,7 @@ impl RCHandle<SkImageFilter> {
 
     #[allow(clippy::too_many_arguments)]
     pub fn spot_lit_specular_lighting<'a>(
-        &self,
+        self,
         crop_rect: impl Into<Option<&'a CropRect>>,
         location: impl Into<Point3>,
         target: impl Into<Point3>,
@@ -128,7 +128,7 @@ pub fn distant_lit_diffuse<'a>(
     light_color: impl Into<Color>,
     surface_scale: scalar,
     kd: scalar,
-    input: &ImageFilter,
+    input: ImageFilter,
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
@@ -137,7 +137,7 @@ pub fn distant_lit_diffuse<'a>(
             light_color.into().into_native(),
             surface_scale,
             kd,
-            input.shared_native(),
+            input.into_ptr(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
@@ -148,7 +148,7 @@ pub fn point_lit_diffuse<'a>(
     light_color: impl Into<Color>,
     surface_scale: scalar,
     kd: scalar,
-    input: &ImageFilter,
+    input: ImageFilter,
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
@@ -157,7 +157,7 @@ pub fn point_lit_diffuse<'a>(
             light_color.into().into_native(),
             surface_scale,
             kd,
-            input.shared_native(),
+            input.into_ptr(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
@@ -172,7 +172,7 @@ pub fn spot_lit_diffuse<'a>(
     light_color: impl Into<Color>,
     surface_scale: scalar,
     kd: scalar,
-    input: &ImageFilter,
+    input: ImageFilter,
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
@@ -184,7 +184,7 @@ pub fn spot_lit_diffuse<'a>(
             light_color.into().into_native(),
             surface_scale,
             kd,
-            input.shared_native(),
+            input.into_ptr(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
@@ -196,7 +196,7 @@ pub fn distant_lit_specular<'a>(
     surface_scale: scalar,
     ks: scalar,
     shininess: scalar,
-    input: &ImageFilter,
+    input: ImageFilter,
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
@@ -206,7 +206,7 @@ pub fn distant_lit_specular<'a>(
             surface_scale,
             ks,
             shininess,
-            input.shared_native(),
+            input.into_ptr(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
@@ -218,7 +218,7 @@ pub fn point_lit_specular<'a>(
     surface_scale: scalar,
     ks: scalar,
     shininess: scalar,
-    input: &ImageFilter,
+    input: ImageFilter,
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
@@ -228,7 +228,7 @@ pub fn point_lit_specular<'a>(
             surface_scale,
             ks,
             shininess,
-            input.shared_native(),
+            input.into_ptr(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
@@ -244,7 +244,7 @@ pub fn spot_lit_specular<'a>(
     surface_scale: scalar,
     ks: scalar,
     shininess: scalar,
-    input: &ImageFilter,
+    input: ImageFilter,
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
@@ -257,7 +257,7 @@ pub fn spot_lit_specular<'a>(
             surface_scale,
             ks,
             shininess,
-            input.shared_native(),
+            input.into_ptr(),
             crop_rect.into().native_ptr_or_null(),
         )
     })

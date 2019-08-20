@@ -109,7 +109,7 @@ impl RefHandle<SkShaper> {
     pub fn new_font_mgr_run_iterator(
         utf8: &str,
         font: &Font,
-        mut fallback: Option<&mut FontMgr>,
+        fallback: impl Into<Option<FontMgr>>,
     ) -> FontRunIterator {
         let bytes = utf8.as_bytes();
         FontRunIterator::from_ptr(unsafe {
@@ -117,7 +117,7 @@ impl RefHandle<SkShaper> {
                 bytes.as_ptr() as _,
                 bytes.len(),
                 font.native(),
-                fallback.shared_ptr_mut(),
+                fallback.into().into_ptr_or_null(),
             )
         })
         .unwrap()

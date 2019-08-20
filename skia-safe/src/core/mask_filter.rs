@@ -38,19 +38,13 @@ impl RCHandle<SkMaskFilter> {
         .unwrap()
     }
 
-    pub fn compose(outer: &Self, inner: &Self) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            C_SkMaskFilter_Compose(outer.shared_native(), inner.shared_native())
-        })
+    pub fn compose(outer: Self, inner: Self) -> Option<Self> {
+        Self::from_ptr(unsafe { C_SkMaskFilter_Compose(outer.into_ptr(), inner.into_ptr()) })
     }
 
-    pub fn combine(filter_a: &Self, filter_b: &Self, mode: CoverageMode) -> Option<Self> {
+    pub fn combine(filter_a: Self, filter_b: Self, mode: CoverageMode) -> Option<Self> {
         Self::from_ptr(unsafe {
-            C_SkMaskFilter_Combine(
-                filter_a.shared_native(),
-                filter_b.shared_native(),
-                mode.into_native(),
-            )
+            C_SkMaskFilter_Combine(filter_a.into_ptr(), filter_b.into_ptr(), mode.into_native())
         })
     }
 

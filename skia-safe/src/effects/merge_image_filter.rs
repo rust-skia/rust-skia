@@ -5,7 +5,7 @@ use std::convert::TryInto;
 
 impl RCHandle<SkImageFilter> {
     pub fn merge<'a>(
-        filters: &[&Self],
+        filters: impl IntoIterator<Item = Self>,
         crop_rect: impl Into<Option<&'a CropRect>>,
     ) -> Option<Self> {
         new(filters, crop_rect)
@@ -14,17 +14,14 @@ impl RCHandle<SkImageFilter> {
 
 #[allow(clippy::new_ret_no_self)]
 pub fn new<'a>(
-    filters: &[&ImageFilter],
+    filters: impl IntoIterator<Item = ImageFilter>,
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
-    let shared_filters: Vec<*const SkImageFilter> = filters
-        .iter()
-        .map(|f| f.shared_native() as *const _)
-        .collect();
+    let filter_ptrs: Vec<*mut SkImageFilter> = filters.into_iter().map(|f| f.into_ptr()).collect();
     ImageFilter::from_ptr(unsafe {
         C_SkMergeImageFilter_Make(
-            shared_filters.as_ptr(),
-            shared_filters.len().try_into().unwrap(),
+            filter_ptrs.as_ptr(),
+            filter_ptrs.len().try_into().unwrap(),
             crop_rect.into().native_ptr_or_null(),
         )
     })

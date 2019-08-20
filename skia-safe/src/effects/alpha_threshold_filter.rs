@@ -4,7 +4,7 @@ use skia_bindings::{C_SkAlphaThresholdFilter_Make, SkImageFilter};
 
 impl RCHandle<SkImageFilter> {
     pub fn alpha_threshold<'a>(
-        &self,
+        self,
         crop_rect: impl Into<Option<&'a CropRect>>,
         region: &Region,
         inner_min: scalar,
@@ -18,7 +18,7 @@ pub fn new<'a>(
     region: &Region,
     inner_min: scalar,
     outer_max: scalar,
-    input: &ImageFilter,
+    input: ImageFilter,
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
@@ -26,7 +26,7 @@ pub fn new<'a>(
             region.native(),
             inner_min,
             outer_max,
-            input.shared_native(),
+            input.into_ptr(),
             crop_rect.into().native_ptr_or_null(),
         )
     })

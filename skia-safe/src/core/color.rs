@@ -70,7 +70,6 @@ impl BitAnd<u32> for Color {
 }
 
 impl Color {
-    // This is the canonical Rust idiomatic new implementation:
     pub const fn new(argb: u32) -> Self {
         Self(argb)
     }
