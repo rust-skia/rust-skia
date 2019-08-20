@@ -38,40 +38,45 @@ impl Handle<sb::skia_textlayout_StrutStyle> {
         }
     }
 
-    pub fn set_font_families(&mut self, families: &[impl AsRef<str>]) {
-        let families = interop::Strings::from_strs(families);
+    pub fn set_font_families(&mut self, families: &[impl AsRef<str>]) -> &mut Self {
+        let families: Vec<interop::String> = FromStrs::from_strs(families);
         let families = families.native();
         unsafe {
             sb::C_StrutStyle_setFontFamilies(self.native_mut(), families.as_ptr(), families.len());
         }
+        self
     }
 
     pub fn font_style(&self) -> FontStyle {
         FontStyle::from_native(self.native().fFontStyle)
     }
 
-    pub fn set_font_style(&mut self, font_style: FontStyle) {
-        self.native_mut().fFontStyle = font_style.into_native()
+    pub fn set_font_style(&mut self, font_style: FontStyle) -> &mut Self {
+        self.native_mut().fFontStyle = font_style.into_native();
+        self
     }
 
     pub fn font_size(&self) -> scalar {
         self.native().fFontSize
     }
 
-    pub fn set_font_size(&mut self, font_size: scalar) {
+    pub fn set_font_size(&mut self, font_size: scalar) -> &mut Self {
         self.native_mut().fFontSize = font_size;
+        self
     }
 
-    pub fn set_height(&mut self, height: scalar) {
+    pub fn set_height(&mut self, height: scalar) -> &mut Self {
         self.native_mut().fHeight = height;
+        self
     }
 
     pub fn height(&self) -> scalar {
         self.native().fHeight
     }
 
-    pub fn set_leading(&mut self, leading: scalar) {
+    pub fn set_leading(&mut self, leading: scalar) -> &mut Self {
         self.native_mut().fLeading = leading;
+        self
     }
 
     pub fn leading(&self) -> scalar {
@@ -82,16 +87,18 @@ impl Handle<sb::skia_textlayout_StrutStyle> {
         self.native().fStrutEnabled
     }
 
-    pub fn set_strut_enabled(&mut self, strut_enabled: bool) {
+    pub fn set_strut_enabled(&mut self, strut_enabled: bool) -> &mut Self {
         self.native_mut().fStrutEnabled = strut_enabled;
+        self
     }
 
     pub fn force_strut_height(&self) -> bool {
         self.native().fForceStrutHeight
     }
 
-    pub fn set_force_strut_height(&mut self, force_strut_height: bool) {
+    pub fn set_force_strut_height(&mut self, force_strut_height: bool) -> &mut Self {
         self.native_mut().fForceStrutHeight = force_strut_height;
+        self
     }
 }
 
@@ -130,35 +137,39 @@ impl Handle<sb::skia_textlayout_ParagraphStyle> {
         StrutStyle::from_native_ref(&self.native().fStrutStyle)
     }
 
-    pub fn set_strut_style(&mut self, strut_style: StrutStyle) {
+    pub fn set_strut_style(&mut self, strut_style: StrutStyle) -> &mut Self {
         self.native_mut().fStrutStyle.replace_with(strut_style);
+        self
     }
 
     pub fn text_style(&self) -> &TextStyle {
         TextStyle::from_native_ref(&self.native().fDefaultTextStyle)
     }
 
-    pub fn set_text_style(&mut self, text_style: &TextStyle) {
+    pub fn set_text_style(&mut self, text_style: &TextStyle) -> &mut Self {
         // TODO: implement the assignment operator in C.
         self.native_mut()
             .fDefaultTextStyle
             .replace_with(text_style.clone());
+        self
     }
 
     pub fn text_direction(&self) -> TextDirection {
         self.native().fTextDirection
     }
 
-    pub fn set_text_direction(&mut self, direction: TextDirection) {
+    pub fn set_text_direction(&mut self, direction: TextDirection) -> &mut Self {
         self.native_mut().fTextDirection = direction;
+        self
     }
 
     pub fn text_align(&self) -> TextAlign {
         self.native().fTextAlign
     }
 
-    pub fn set_text_align(&mut self, align: TextAlign) {
-        self.native_mut().fTextAlign = align
+    pub fn set_text_align(&mut self, align: TextAlign) -> &mut Self {
+        self.native_mut().fTextAlign = align;
+        self
     }
 
     pub fn max_lines(&self) -> Option<usize> {
@@ -168,24 +179,27 @@ impl Handle<sb::skia_textlayout_ParagraphStyle> {
         }
     }
 
-    pub fn set_max_lines(&mut self, lines: impl Into<Option<usize>>) {
-        self.native_mut().fLinesLimit = lines.into().unwrap_or(usize::max_value())
+    pub fn set_max_lines(&mut self, lines: impl Into<Option<usize>>) -> &mut Self {
+        self.native_mut().fLinesLimit = lines.into().unwrap_or(usize::max_value());
+        self
     }
 
     pub fn ellipsis(&self) -> &str {
         self.native().fEllipsis.as_str()
     }
 
-    pub fn set_ellipsis(&mut self, ellipsis: impl AsRef<str>) {
-        self.native_mut().fEllipsis.set_str(ellipsis)
+    pub fn set_ellipsis(&mut self, ellipsis: impl AsRef<str>) -> &mut Self {
+        self.native_mut().fEllipsis.set_str(ellipsis);
+        self
     }
 
     pub fn height(&self) -> scalar {
         self.native().fHeight
     }
 
-    pub fn set_height(&mut self, height: scalar) {
+    pub fn set_height(&mut self, height: scalar) -> &mut Self {
         self.native_mut().fHeight = height;
+        self
     }
 
     pub fn unlimited_lines(&self) -> bool {
@@ -204,7 +218,8 @@ impl Handle<sb::skia_textlayout_ParagraphStyle> {
         self.native().fHintingIsOn
     }
 
-    pub fn turn_hinting_off(&mut self) {
-        self.native_mut().fHintingIsOn = false
+    pub fn turn_hinting_off(&mut self) -> &mut Self {
+        self.native_mut().fHintingIsOn = false;
+        self
     }
 }
