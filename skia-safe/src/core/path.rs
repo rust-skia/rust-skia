@@ -205,7 +205,7 @@ impl<'a> Iter<'a> {
         #[allow(clippy::map_clone)]
         self.native()
             .fConicWeights
-            .to_option()
+            .into_option()
             .map(|p| unsafe { *p })
     }
 
@@ -279,7 +279,7 @@ impl<'a> RawIter<'a> {
         self.native()
             .fRawIter
             .fConicWeights
-            .to_option()
+            .into_option()
             .map(|cw| unsafe { *cw })
     }
 }

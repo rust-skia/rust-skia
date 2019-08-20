@@ -175,7 +175,7 @@ impl Handle<SkBitmap> {
 
     pub fn alloc_pixels_flags(&mut self, image_info: &ImageInfo) {
         self.try_alloc_pixels_flags(image_info)
-            .to_option()
+            .into_option()
             .expect("Bitmap::alloc_pixels_flags failed");
     }
 
@@ -200,7 +200,7 @@ impl Handle<SkBitmap> {
         row_bytes: impl Into<Option<usize>>,
     ) {
         self.try_alloc_pixels_info(image_info, row_bytes.into())
-            .to_option()
+            .into_option()
             .expect("Bitmap::alloc_pixels_info failed");
     }
 
@@ -226,7 +226,7 @@ impl Handle<SkBitmap> {
         is_opaque: impl Into<Option<bool>>,
     ) {
         self.try_alloc_n32_pixels((width, height), is_opaque.into().unwrap_or(false))
-            .to_option()
+            .into_option()
             .expect("Bitmap::alloc_n32_pixels_failed")
     }
 
@@ -254,7 +254,7 @@ impl Handle<SkBitmap> {
 
     pub fn alloc_pixels(&mut self) {
         self.try_alloc_pixels()
-            .to_option()
+            .into_option()
             .expect("Bitmap::alloc_pixels failed")
     }
 
