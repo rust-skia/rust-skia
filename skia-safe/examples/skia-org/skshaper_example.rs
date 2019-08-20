@@ -1,8 +1,8 @@
 use crate::artifact::DrawingDriver;
 use skia_safe::{icu, Canvas, Font, Paint, Point, Shaper, Typeface};
-use std::path::PathBuf;
+use std::path;
 
-pub fn draw<Driver: DrawingDriver>(path: &PathBuf) {
+pub fn draw<Driver: DrawingDriver>(path: &path::Path) {
     let path = path.join("SkShaper-Example");
 
     icu::init();
@@ -24,7 +24,7 @@ fn draw_rtl_shaped(canvas: &mut Canvas) {
     if let Some((blob, _)) =
         shaper.shape_text_blob(RTL_TEXT, font, false, 10000.0, Point::default())
     {
-        canvas.draw_text_blob(&blob, TEXT_POS, &paint)
+        canvas.draw_text_blob(&blob, TEXT_POS, &paint);
     }
 }
 
@@ -38,6 +38,6 @@ fn draw_rtl_unshaped(canvas: &mut Canvas) {
     if let Some((blob, _)) =
         shaper.shape_text_blob(RTL_TEXT, font, false, 10000.0, Point::default())
     {
-        canvas.draw_text_blob(&blob, TEXT_POS, &paint)
+        canvas.draw_text_blob(&blob, TEXT_POS, &paint);
     }
 }
