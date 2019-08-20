@@ -88,8 +88,9 @@ impl Handle<sb::skia_textlayout_TextStyle> {
         Color::from_native(self.native().fColor)
     }
 
-    pub fn set_color(&mut self, color: impl Into<Color>) {
-        self.native_mut().fColor = color.into().into_native()
+    pub fn set_color(&mut self, color: impl Into<Color>) -> &mut Self {
+        self.native_mut().fColor = color.into().into_native();
+        self
     }
 
     pub fn foreground(&self) -> Option<&Paint> {
@@ -98,12 +99,13 @@ impl Handle<sb::skia_textlayout_TextStyle> {
             .if_true_some(Paint::from_native_ref(&self.native().fForeground))
     }
 
-    pub fn set_foreground_color(&mut self, paint: impl Into<Option<Paint>>) {
+    pub fn set_foreground_color(&mut self, paint: impl Into<Option<Paint>>) -> &mut Self {
         let n = self.native_mut();
         n.fHasForeground = paint
             .into()
             .map(|paint| n.fForeground.replace_with(paint))
             .is_some();
+        self
     }
 
     pub fn background(&self) -> Option<&Paint> {
@@ -112,12 +114,13 @@ impl Handle<sb::skia_textlayout_TextStyle> {
             .if_true_some(Paint::from_native_ref(&self.native().fBackground))
     }
 
-    pub fn set_background_color(&mut self, paint: impl Into<Option<Paint>>) {
+    pub fn set_background_color(&mut self, paint: impl Into<Option<Paint>>) -> &mut Self {
         let n = self.native_mut();
         n.fHasBackground = paint
             .into()
             .map(|paint| n.fBackground.replace_with(paint))
             .is_some();
+        self
     }
 
     pub fn decoration(&self) -> &Decoration {
@@ -132,8 +135,9 @@ impl Handle<sb::skia_textlayout_TextStyle> {
         FontStyle::from_native(self.native().fFontStyle)
     }
 
-    pub fn set_font_style(&mut self, font_style: FontStyle) {
-        self.native_mut().fFontStyle = font_style.into_native()
+    pub fn set_font_style(&mut self, font_style: FontStyle) -> &mut Self {
+        self.native_mut().fFontStyle = font_style.into_native();
+        self
     }
 
     pub fn shadows(&self) -> &[TextShadow] {
@@ -145,12 +149,14 @@ impl Handle<sb::skia_textlayout_TextStyle> {
         }
     }
 
-    pub fn add_shadow(&mut self, shadow: TextShadow) {
+    pub fn add_shadow(&mut self, shadow: TextShadow) -> &mut Self {
         unsafe { sb::C_TextStyle_addShadow(self.native_mut(), shadow.native()) }
+        self
     }
 
-    pub fn reset_shadows(&mut self) {
+    pub fn reset_shadows(&mut self) -> &mut Self {
         unsafe { sb::C_TextStyle_resetShadows(self.native_mut()) }
+        self
     }
 
     pub fn font_families(&self) -> FontFamilies {
@@ -161,32 +167,36 @@ impl Handle<sb::skia_textlayout_TextStyle> {
         }
     }
 
-    pub fn set_font_families(&mut self, families: &[impl AsRef<str>]) {
-        let families = interop::Strings::from_strs(families);
+    pub fn set_font_families(&mut self, families: &[impl AsRef<str>]) -> &mut Self {
+        let families: Vec<interop::String> = FromStrs::from_strs(families);
         let families = families.native();
         unsafe {
             sb::C_TextStyle_setFontFamilies(self.native_mut(), families.as_ptr(), families.len())
         }
+        self
     }
 
-    pub fn set_height(&mut self, height: scalar) {
+    pub fn set_height(&mut self, height: scalar) -> &mut Self {
         self.native_mut().fHeight = height;
+        self
     }
 
     pub fn height(&self) -> scalar {
         self.native().fHeight
     }
 
-    pub fn set_letter_spacing(&mut self, letter_spacing: scalar) {
+    pub fn set_letter_spacing(&mut self, letter_spacing: scalar) -> &mut Self {
         self.native_mut().fLetterSpacing = letter_spacing;
+        self
     }
 
     pub fn letter_spacing(&self) -> scalar {
         self.native().fLetterSpacing
     }
 
-    pub fn set_word_spacing(&mut self, word_spacing: scalar) {
+    pub fn set_word_spacing(&mut self, word_spacing: scalar) -> &mut Self {
         self.native_mut().fWordSpacing = word_spacing;
+        self
     }
 
     pub fn word_spacing(&self) -> scalar {
@@ -197,26 +207,29 @@ impl Handle<sb::skia_textlayout_TextStyle> {
         Typeface::from_unshared_ptr(self.native().fTypeface.fPtr)
     }
 
-    pub fn set_typeface(&mut self, typeface: impl Into<Option<Typeface>>) {
+    pub fn set_typeface(&mut self, typeface: impl Into<Option<Typeface>>) -> &mut Self {
         unsafe {
             sb::C_TextStyle_setTypeface(self.native_mut(), typeface.into().into_ptr_or_null())
         }
+        self
     }
 
     pub fn locale(&self) -> &str {
         self.native().fLocale.as_str()
     }
 
-    pub fn set_locale(&mut self, locale: impl AsRef<str>) {
-        self.native_mut().fLocale.set_str(locale)
+    pub fn set_locale(&mut self, locale: impl AsRef<str>) -> &mut Self {
+        self.native_mut().fLocale.set_str(locale);
+        self
     }
 
     pub fn text_baseline(&self) -> TextBaseline {
         self.native().fTextBaseline
     }
 
-    pub fn set_text_baseline(&mut self, baseline: TextBaseline) {
-        self.native_mut().fTextBaseline = baseline
+    pub fn set_text_baseline(&mut self, baseline: TextBaseline) -> &mut Self {
+        self.native_mut().fTextBaseline = baseline;
+        self
     }
 
     pub fn font_metrics(&self) -> FontMetrics {

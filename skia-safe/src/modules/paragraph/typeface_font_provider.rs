@@ -38,8 +38,9 @@ impl RCHandle<sb::skia_textlayout_TypefaceFontStyleSet> {
         self.native().fAlias.as_str()
     }
 
-    pub fn append_typeface(&mut self, typeface: Typeface) {
+    pub fn append_typeface(&mut self, typeface: Typeface) -> &mut Self {
         unsafe { sb::C_TypefaceFontStyleSet_appendTypeface(self.native_mut(), typeface.into_ptr()) }
+        self
     }
 }
 
