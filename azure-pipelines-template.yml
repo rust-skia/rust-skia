@@ -24,9 +24,9 @@ jobs:
         toolchain: stable
         features: 'svg'
         exampleArgs: '--driver svg'
-      stable-textlayout:
+      stable-shaper:
         toolchain: stable
-        features: 'textlayout'
+        features: 'shaper'
         exampleArgs: ''
 
   variables:
