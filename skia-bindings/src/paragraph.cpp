@@ -281,6 +281,6 @@ extern "C" {
         if (alias) {
             return self->registerTypeface(sk_sp<SkTypeface>(typeface), *alias);
         }
-        self->registerTypeface(sk_sp<SkTypeface>(typeface));
+        return self->registerTypeface(sk_sp<SkTypeface>(typeface));
     }
 }
