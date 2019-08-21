@@ -1,4 +1,5 @@
 use crate::interop;
+use crate::interop::AsStr;
 use std::ops::Index;
 
 mod dart_types;
@@ -33,14 +34,12 @@ pub struct FontFamilies<'a>(&'a [skia_bindings::SkString]);
 impl Index<usize> for FontFamilies<'_> {
     type Output = str;
     fn index(&self, index: usize) -> &Self::Output {
-        interop::String::from_native_ref(&self.0[index]).as_str()
+        self.0[index].as_str()
     }
 }
 
 impl FontFamilies<'_> {
     pub fn iter(&self) -> impl Iterator<Item = &str> {
-        self.0
-            .iter()
-            .map(|str| interop::String::from_native_ref(str).as_str())
+        self.0.iter().map(|str| str.as_str())
     }
 }
