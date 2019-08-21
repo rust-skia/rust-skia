@@ -42,18 +42,11 @@ jobs:
   steps:
   - ${{ if eq(parameters.platform, 'macOS') }}:
     # macOS
-    - script: |
+    - bash: |
         sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
-      displayName: Install SDK Headers
-
-  - ${{ if ne(parameters.platform, 'Windows') }}:
-    # Linux and macOS.
-    - script: |
-        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $TOOLCHAIN
-        $HOME/.cargo/bin/rustup component add rustfmt --toolchain $TOOLCHAIN
-        $HOME/.cargo/bin/rustup component add clippy --toolchain $TOOLCHAIN
+        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain ${TOOLCHAIN}
         echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
-      displayName: Install Rust, Rustfmt, and Clippy
+      displayName: Install SDK Headers & Rust
 
   - ${{ if eq(parameters.platform, 'Windows') }}:
     # Windows.
@@ -65,16 +58,20 @@ jobs:
     - script: |
         curl -sSf -o rustup-init.exe https://win.rustup.rs
         rustup-init.exe -y --default-toolchain %TOOLCHAIN%
-        set PATH=%PATH%;%USERPROFILE%\.cargo\bin
         echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
         choco install llvm --version 8.0.0
       displayName: Install Rust and LLVM on Windows
 
-  # All platforms.
-  - script: |
-        rustc -Vv
-        cargo -V
-    displayName: Rust & Cargo Versions
+  # All platforms (Linux images have Rust preinstalled and in the PATH).
+  - bash: |
+      set -e
+      rustup default ${TOOLCHAIN}
+      rustup update ${TOOLCHAIN}
+      rustup component add clippy --toolchain ${TOOLCHAIN}
+      rustup component add rustfmt --toolchain ${TOOLCHAIN}
+      rustc -Vv
+      cargo -V
+    displayName: Update Rust, Install Clippy and Rustfmt and print Rust & Cargo Versions
 
   - ${{ if ne(parameters.platform, 'Windows') }}:
     # Linux and macOS.
