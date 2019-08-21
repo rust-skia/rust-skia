@@ -78,8 +78,6 @@ impl SetStr for SkString {
     }
 }
 
-pub type Strings = Vec<String>;
-
 pub trait FromStrs {
     fn from_strs(strings: &[impl AsRef<str>]) -> Self;
 }
