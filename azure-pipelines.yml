@@ -47,15 +47,13 @@ stages:
       rust_backtrace: 1
 
     steps:
-    - script: |
-        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
-        echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
-      displayName: 'Install Rust'
-
-    - script: |
+    - bash: |
+        set -e
+        rustup default stable
+        rustup update stable
         rustc -Vv
         cargo -V
-      displayName: 'Print versions'
+      displayName: 'Update Rust and Print Versions'
 
     # skia-bindings gets packaged without verification, because the build process modifies the src directory.
     # TODO: reenable package verification as soon CLion and rust-analyzer supports !include macros.
