@@ -116,8 +116,6 @@ jobs:
     parameters:
       target: '$(platformTarget)'
       exampleArgs: '$(exampleArgs)'
-      ${{ if ne(parameters.platform, 'Windows') }}:
-        runClippy: true
       runBinaries: true
       releaseBinaries: ${{ parameters.deployRelease }}
 
