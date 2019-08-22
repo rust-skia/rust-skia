@@ -3,9 +3,8 @@ parameters:
   runBinaries: false
   runClippy: false
   # produce and release binaries to GitHub
-  releaseBinaries: false
+  releaseBinaries: 'False'
   exampleArgs: ''
-  toolchain: stable
 
 steps:
   - bash: |
@@ -52,7 +51,7 @@ steps:
           pathtoPublish: '$(Build.ArtifactStagingDirectory)/skia-org'
           artifactName: 'skia-org-examples-$(platform)-$(toolchain)'
 
-  - ${{ if eq(parameters.releaseBinaries, True) }}:
+  - ${{ if eq(parameters.releaseBinaries, 'True') }}:
     - task: ArchiveFiles@2
       displayName: 'Archive binaries (${{ parameters.target }})'
       inputs:

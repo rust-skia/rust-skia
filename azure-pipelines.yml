@@ -8,7 +8,7 @@
 #   And no binaries or packages are released.
 
 variables:
-  deployRelease: $[ eq(variables['build.SourceBranchName'], 'release') ]
+  deployRelease: ${{ eq(variables['build.SourceBranchName'], 'release') }}
 
 stages:
 
@@ -20,7 +20,7 @@ stages:
       platformTarget: 'x86_64-unknown-linux-gnu'
       androidNDK: 'r18b-linux-x86_64'
       image: 'ubuntu-16.04'
-      deployRelease: $(deployRelease)
+      deployRelease: ${{ eq(variables['build.SourceBranchName'], 'release') }}
 
   - template: 'azure-pipelines-template.yml'
     parameters:
@@ -28,17 +28,17 @@ stages:
       platformTarget: 'x86_64-apple-darwin'
       androidNDK: 'r18b-darwin-x86_64'
       image: 'macOS-10.14'
-      deployRelease: $(deployRelease)
+      deployRelease: ${{ eq(variables['build.SourceBranchName'], 'release') }}
 
   - template: 'azure-pipelines-template.yml'
     parameters:
       platform: 'Windows'
       platformTarget: 'x86_64-pc-windows-msvc'
       image: 'windows-2019'
-      deployRelease: $(deployRelease)
+      deployRelease: ${{ eq(variables['build.SourceBranchName'], 'release') }}
 
 - stage: 'Package'
-  condition: and(succeeded(), variables.deployRelease)
+  condition: and(succeeded(), eq(variables.deployRelease, 'True'))
   jobs:
   - job:
     pool:

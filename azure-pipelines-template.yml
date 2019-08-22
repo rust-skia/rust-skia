@@ -8,24 +8,33 @@ jobs:
   strategy:
     matrix:
       stable:
+        toolchain: stable
         features: ''
         exampleArgs: '--driver cpu --driver pdf'
 
-      ${{ if parameters.deployRelease }}:
+      ${{ if eq(parameters.deployRelease, 'True') }}:
         stable-vulkan:
+          toolchain: stable
           features: 'vulkan'
+          exampleArgs: ''
         stable-svg:
+          toolchain: stable
           features: 'svg'
+          exampleArgs: ''
         stable-shaper:
+          toolchain: stable
           features: 'shaper'
+          exampleArgs: ''
 
-      ${{ if not(parameters.deployRelease) }}:
+      ${{ if eq(parameters.deployRelease, 'False') }}:
         stable-all-features:
+          toolchain: stable
           features: 'vulkan,svg,shaper'
           exampleArgs: '--driver cpu --driver pdf --driver svg'
         beta-all-features:
           toolchain: beta
           features: 'vulkan,svg,shaper'
+          exampleArgs: ''
 
   variables:
     platform: ${{ parameters.platform }}
@@ -33,7 +42,6 @@ jobs:
     image: ${{ parameters.image }}
     androidNDK: ${{ parameters.androidNDK }}
     rust_backtrace: 1
-    release_branch: 'release'
 
   pool:
     vmImage: $(image)
