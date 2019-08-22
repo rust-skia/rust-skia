@@ -8,25 +8,24 @@ jobs:
   strategy:
     matrix:
       stable:
-        toolchain: stable
         features: ''
         exampleArgs: '--driver cpu --driver pdf'
-      beta:
-        toolchain: beta
-        features: ''
-        exampleArgs: ''
-      stable-vulkan:
-        toolchain: stable
-        features: 'vulkan'
-        exampleArgs: ''
-      stable-svg:
-        toolchain: stable
-        features: 'svg'
-        exampleArgs: '--driver svg'
-      stable-shaper:
-        toolchain: stable
-        features: 'shaper'
-        exampleArgs: ''
+
+      ${{ if parameters.deployRelease }}:
+        stable-vulkan:
+          features: 'vulkan'
+        stable-svg:
+          features: 'svg'
+        stable-shaper:
+          features: 'shaper'
+
+      ${{ if not(parameters.deployRelease) }}:
+        stable-all-features:
+          features: 'vulkan,svg,shaper'
+          exampleArgs: '--driver cpu --driver pdf --driver svg'
+        beta-all-features:
+          toolchain: beta
+          features: 'vulkan,svg,shaper'
 
   variables:
     platform: ${{ parameters.platform }}
@@ -112,7 +111,7 @@ jobs:
       ${{ if ne(parameters.platform, 'Windows') }}:
         runClippy: true
       runBinaries: true
-      releaseBinaries: true
+      releaseBinaries: ${{ parameters.deployRelease }}
 
   - ${{ if eq(parameters.platform, 'macOS') }}:
     - template: 'azure-pipelines-build-target.yml'
@@ -126,12 +125,12 @@ jobs:
     - template: 'azure-pipelines-build-target.yml'
       parameters:
         target: 'aarch64-apple-ios'
-        releaseBinaries: true
+        releaseBinaries: ${{ parameters.deployRelease }}
 
     - template: 'azure-pipelines-build-target.yml'
       parameters:
         target: 'x86_64-apple-ios'
-        releaseBinaries: true
+        releaseBinaries: ${{ parameters.deployRelease }}
 
   - ${{ if eq(parameters.platform, 'Linux') }}:
     - template: 'azure-pipelines-build-target.yml'

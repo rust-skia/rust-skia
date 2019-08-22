@@ -1,3 +1,15 @@
+# This script can run in two configurations:
+#
+# deployRelease = true
+#   A reasonable number of feature combinations are built and binaries are deployed.
+#
+# deployRelease = false
+#   Only two feature sets are built: One with no features and one with all features.
+#   And no binaries or packages are released.
+
+variables:
+  deployRelease: $[ eq(variables['build.SourceBranchName'], 'release') ]
+
 stages:
 
 - stage: 'Build'
@@ -8,6 +20,7 @@ stages:
       platformTarget: 'x86_64-unknown-linux-gnu'
       androidNDK: 'r18b-linux-x86_64'
       image: 'ubuntu-16.04'
+      deployRelease: $(deployRelease)
 
   - template: 'azure-pipelines-template.yml'
     parameters:
@@ -15,15 +28,17 @@ stages:
       platformTarget: 'x86_64-apple-darwin'
       androidNDK: 'r18b-darwin-x86_64'
       image: 'macOS-10.14'
+      deployRelease: $(deployRelease)
 
   - template: 'azure-pipelines-template.yml'
     parameters:
       platform: 'Windows'
       platformTarget: 'x86_64-pc-windows-msvc'
       image: 'windows-2019'
+      deployRelease: $(deployRelease)
 
 - stage: 'Package'
-  condition: and(succeeded(), eq(variables['build.SourceBranchName'], 'release'))
+  condition: and(succeeded(), variables.deployRelease)
   jobs:
   - job:
     pool:
