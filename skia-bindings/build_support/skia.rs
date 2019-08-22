@@ -817,7 +817,7 @@ const OPAQUE_TYPES: &[&str] = &[
     "SkShaper_TrivialScriptRunIterator",
     // skparagraph
     "std::vector",
-    "std::basic_string",
+    "std::u16string",
     // Vulkan reexports with the wrong field naming conventions.
     "VkPhysicalDeviceFeatures",
     "VkPhysicalDeviceFeatures2",
