@@ -3,7 +3,8 @@ use crate::gpu::Protected;
 use crate::prelude::*;
 use skia_bindings as sb;
 use skia_bindings::{
-    GrVkAlloc, GrVkBackendMemory, GrVkDrawableInfo, GrVkImageInfo, GrVkYcbcrConversionInfo,
+    GrVkAlloc, GrVkBackendMemory, GrVkDrawableInfo, GrVkDrawableInfo, GrVkImageInfo,
+    GrVkYcbcrConversionInfo,
 };
 use std::ffi::CStr;
 use std::os::raw;
