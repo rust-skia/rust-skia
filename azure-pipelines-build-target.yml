@@ -1,7 +1,6 @@
 parameters:
   # defaults:
   runBinaries: false
-  runClippy: false
   # produce and release binaries to GitHub
   releaseBinaries: 'False'
   exampleArgs: ''
@@ -23,16 +22,11 @@ steps:
       echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
     displayName: 'Build all targets in skia-safe for ${{ parameters.target }}'
 
-  # Note: Clippy freshness check is independent from the freshness check of the build.
-  # So we check the skia-bindings with the regular set of checks and skia-safe with warnings as errors after that.
-  # Also: Windows is disabled for now, because the clippy freshness
-  # check does seems to _always_ pick up skia-bindings when we want to check skia-safe with -D warnings.
-  - ${{ if eq(parameters.runClippy, True) }}:
-    - bash: |
-        set -e
-        (cd skia-bindings && cargo clippy --release --features "$(features)" --target ${{ parameters.target }})
-        (cd skia-safe && cargo clippy --release --features "$(features)" --all-targets --target ${{ parameters.target }} -- -D warnings)
-      displayName: 'Clippy skia-bindings and skia-safe'
+  - bash: |
+      set -e
+      (cd skia-bindings && cargo clippy --release --features "$(features)" --all-targets --target ${{ parameters.target }} -- -D warnings)
+      (cd skia-safe && cargo clippy --release --features "$(features)" --all-targets --target ${{ parameters.target }} -- -D warnings)
+    displayName: 'Clippy skia-bindings and skia-safe'
 
   - ${{ if eq(parameters.runBinaries, True) }}:
 
