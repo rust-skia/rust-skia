@@ -36,7 +36,6 @@ pub use sb::VkRect2D as Rect2D;
 pub use sb::VkRenderPass as RenderPass;
 pub use sb::VkSamplerYcbcrModelConversion as SamplerYcbcrModelConversion;
 pub use sb::VkSamplerYcbcrRange as SamplerYcbcrRange;
-pub use sb::VkStructureType as StructureType;
 
 pub const QUEUE_FAMILY_IGNORED: u32 = !0;
 
