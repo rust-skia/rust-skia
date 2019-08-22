@@ -674,6 +674,9 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         // modules/skshaper/
         .whitelist_type("SkShaper")
         .whitelist_type("RustRunHandler")
+        // Vulkan reexports that got swallowed by making them opaque.
+        .whitelist_type("VkPhysicalDeviceFeatures")
+        .whitelist_type("VkPhysicalDeviceFeatures2")
         // misc
         .whitelist_var("SK_Color.*")
         .whitelist_var("kAll_GrBackendState")
@@ -807,7 +810,96 @@ const OPAQUE_TYPES: &[&str] = &[
     "SkShaper_TrivialFontRunIterator",
     "SkShaper_TrivialLanguageRunIterator",
     "SkShaper_TrivialScriptRunIterator",
+    // skparagraph
+    "std::vector",
+    "std::basic_string",
+    // Vulkan reexports with the wrong field naming conventions.
+    "VkPhysicalDeviceFeatures",
+    "VkPhysicalDeviceFeatures2",
 ];
+
+#[derive(Debug)]
+struct ParseCallbacks;
+
+impl bindgen::callbacks::ParseCallbacks for ParseCallbacks {
+    /// Allows to rename an enum variant, replacing `_original_variant_name`.
+    fn enum_variant_name(
+        &self,
+        enum_name: Option<&str>,
+        original_variant_name: &str,
+        _variant_value: bindgen::callbacks::EnumVariantValue,
+    ) -> Option<String> {
+        enum_name.and_then(|enum_name| {
+            ENUM_TABLE
+                .iter()
+                .find(|n| n.0 == enum_name)
+                .map(|(_, replacer)| replacer(enum_name, original_variant_name))
+        })
+    }
+
+    fn item_name(&self, _original_item_name: &str) -> Option<String> {
+        println!("item: {}", _original_item_name);
+        None
+    }
+}
+
+type EnumEntry = (&'static str, fn(&str, &str) -> String);
+
+const ENUM_TABLE: &[EnumEntry] = &[
+    // DartTypes.h
+    ("Affinity", replace::k_xxx),
+    ("RectHeightStyle", replace::k_xxx),
+    ("RectWidthStyle", replace::k_xxx),
+    ("TextAlign", replace::k_xxx),
+    ("TextDirection", replace::k_xxx_uppercase),
+    ("TextBaseline", replace::k_xxx),
+    // TextStyle.h
+    ("TextDecorationStyle", replace::k_xxx),
+    ("StyleType", replace::k_xxx),
+    // Vk*
+    ("VkChromaLocation", replace::vk),
+    ("VkFilter", replace::vk),
+    ("VkFormat", replace::vk),
+    ("VkImageLayout", replace::vk),
+    ("VkImageTiling", replace::vk),
+    ("VkSamplerYcbcrModelConversion", replace::vk),
+    ("VkSamplerYcbcrRange", replace::vk),
+    ("VkStructureType", replace::vk),
+];
+
+pub(crate) mod replace {
+    use heck::ShoutySnakeCase;
+    use regex::Regex;
+
+    pub fn k_xxx_uppercase(name: &str, variant: &str) -> String {
+        k_xxx(name, variant).to_uppercase()
+    }
+
+    pub fn k_xxx(name: &str, variant: &str) -> String {
+        if variant.starts_with("k") {
+            variant[1..].into()
+        } else {
+            panic!(
+                "Variant name '{}' of enum type '{}' is expected to start with a 'k'",
+                variant, name
+            );
+        }
+    }
+
+    pub fn _k_xxx_enum(name: &str, variant: &str) -> String {
+        capture(variant, &format!("k(.*)_{}", name))
+    }
+
+    pub fn vk(name: &str, variant: &str) -> String {
+        let prefix = name.to_shouty_snake_case();
+        capture(variant, &format!("{}_(.*)", prefix))
+    }
+
+    fn capture(variant: &str, pattern: &str) -> String {
+        let re = Regex::new(pattern).unwrap();
+        re.captures(variant).unwrap()[1].into()
+    }
+}
 
 mod prerequisites {
     use crate::build_support::{cargo, utils};

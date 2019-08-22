@@ -5,8 +5,7 @@ use skia_bindings::{
     C_GrVkAlloc_Construct, C_GrVkAlloc_Equals, C_GrVkImageInfo_Equals,
     C_GrVkImageInfo_updateImageLayout, C_GrVkYcbcrConversionInfo_Construct,
     C_GrVkYcbcrConversionInfo_Equals, GrVkAlloc_Flag_kMappable_Flag,
-    GrVkAlloc_Flag_kNoncoherent_Flag, GrVkDrawableInfo, VkChromaLocation, VkFilter, VkFormat,
-    VkImageLayout, VkImageTiling, VkSamplerYcbcrModelConversion, VkSamplerYcbcrRange,
+    GrVkAlloc_Flag_kNoncoherent_Flag, GrVkDrawableInfo,
 };
 use skia_bindings::{GrVkAlloc, GrVkBackendMemory};
 use skia_bindings::{GrVkImageInfo, GrVkYcbcrConversionInfo};
@@ -98,12 +97,11 @@ impl PartialEq for YcbcrConversionInfo {
 impl Default for YcbcrConversionInfo {
     fn default() -> Self {
         YcbcrConversionInfo {
-            ycrbcr_model:
-                VkSamplerYcbcrModelConversion::VK_SAMPLER_YCBCR_MODEL_CONVERSION_RGB_IDENTITY,
-            ycbcr_range: VkSamplerYcbcrRange::VK_SAMPLER_YCBCR_RANGE_ITU_FULL,
-            x_chroma_offset: VkChromaLocation::VK_CHROMA_LOCATION_COSITED_EVEN,
-            y_chroma_offset: VkChromaLocation::VK_CHROMA_LOCATION_COSITED_EVEN,
-            chroma_filter: VkFilter::VK_FILTER_NEAREST,
+            ycrbcr_model: vk::SamplerYcbcrModelConversion::RGB_IDENTITY,
+            ycbcr_range: vk::SamplerYcbcrRange::ITU_FULL,
+            x_chroma_offset: vk::ChromaLocation::COSITED_EVEN,
+            y_chroma_offset: vk::ChromaLocation::COSITED_EVEN,
+            chroma_filter: vk::Filter::NEAREST,
             force_explicit_reconsturction: 0,
             external_format: 0,
             external_format_features: 0,
@@ -168,9 +166,9 @@ impl Default for ImageInfo {
         ImageInfo {
             image: vk::NULL_HANDLE.into(),
             alloc: Alloc::default(),
-            tiling: VkImageTiling::VK_IMAGE_TILING_OPTIMAL,
-            layout: VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-            format: VkFormat::VK_FORMAT_UNDEFINED,
+            tiling: vk::ImageTiling::OPTIMAL,
+            layout: vk::ImageLayout::UNDEFINED,
+            format: vk::Format::UNDEFINED,
             level_count: 0,
             current_queue_family: vk::QUEUE_FAMILY_IGNORED,
             protected: Protected::No,
@@ -304,7 +302,7 @@ impl Default for DrawableInfo {
             secondary_command_buffer: vk::NULL_HANDLE.into(),
             color_attachment_index: 0,
             compatible_render_pass: vk::NULL_HANDLE.into(),
-            format: VkFormat::VK_FORMAT_UNDEFINED,
+            format: vk::Format::UNDEFINED,
             draw_bounds: ptr::null_mut(),
             image: vk::NULL_HANDLE.into(),
         }
