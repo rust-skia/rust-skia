@@ -838,6 +838,11 @@ impl bindgen::callbacks::ParseCallbacks for ParseCallbacks {
                 .map(|(_, replacer)| replacer(enum_name, original_variant_name))
         })
     }
+
+    fn item_name(&self, _original_item_name: &str) -> Option<String> {
+        println!("item: {}", _original_item_name);
+        None
+    }
 }
 
 type EnumEntry = (&'static str, fn(&str, &str) -> String);
