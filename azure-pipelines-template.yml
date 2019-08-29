@@ -12,22 +12,30 @@ jobs:
         toolchain: stable
         features: ''
         exampleArgs: '--driver cpu --driver pdf'
-      beta:
-        toolchain: beta
-        features: ''
-        exampleArgs: ''
-      stable-vulkan:
-        toolchain: stable
-        features: 'vulkan'
-        exampleArgs: ''
-      stable-svg:
-        toolchain: stable
-        features: 'svg'
-        exampleArgs: '--driver svg'
-      stable-shaper:
-        toolchain: stable
-        features: 'shaper'
-        exampleArgs: ''
+
+      ${{ if eq(parameters.deployRelease, 'True') }}:
+        stable-vulkan:
+          toolchain: stable
+          features: 'vulkan'
+          exampleArgs: ''
+        stable-svg:
+          toolchain: stable
+          features: 'svg'
+          exampleArgs: ''
+        stable-shaper:
+          toolchain: stable
+          features: 'shaper'
+          exampleArgs: ''
+
+      ${{ if eq(parameters.deployRelease, 'False') }}:
+        stable-all-features:
+          toolchain: stable
+          features: 'vulkan,svg,shaper'
+          exampleArgs: '--driver cpu --driver pdf --driver svg'
+        beta-all-features:
+          toolchain: beta
+          features: 'vulkan,svg,shaper'
+          exampleArgs: ''
 
   variables:
     platform: ${{ parameters.platform }}
@@ -38,7 +46,6 @@ jobs:
     androidAPILevel: ${{ parameters.androidAPILevel }}
     androidBinExt: ${{ parameters.androidBinExt }}
     rust_backtrace: 1
-    release_branch: 'release'
 
   pool:
     vmImage: $(image)
@@ -46,18 +53,11 @@ jobs:
   steps:
   - ${{ if eq(parameters.platform, 'macOS') }}:
     # macOS
-    - script: |
+    - bash: |
         sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
-      displayName: Install SDK Headers
-
-  - ${{ if ne(parameters.platform, 'Windows') }}:
-    # Linux and macOS.
-    - script: |
-        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $TOOLCHAIN
-        $HOME/.cargo/bin/rustup component add rustfmt --toolchain $TOOLCHAIN
-        $HOME/.cargo/bin/rustup component add clippy --toolchain $TOOLCHAIN
+        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain ${TOOLCHAIN}
         echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
-      displayName: Install Rust, Rustfmt, and Clippy
+      displayName: Install SDK Headers & Rust
 
   - ${{ if eq(parameters.platform, 'Windows') }}:
     # Windows.
@@ -69,16 +69,20 @@ jobs:
     - script: |
         curl -sSf -o rustup-init.exe https://win.rustup.rs
         rustup-init.exe -y --default-toolchain %TOOLCHAIN%
-        set PATH=%PATH%;%USERPROFILE%\.cargo\bin
         echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
         choco install llvm --version 8.0.0
       displayName: Install Rust and LLVM on Windows
 
-  # All platforms.
-  - script: |
-        rustc -Vv
-        cargo -V
-    displayName: Rust & Cargo Versions
+  # All platforms (Linux images have Rust preinstalled and in the PATH).
+  - bash: |
+      set -e
+      rustup default ${TOOLCHAIN}
+      rustup update ${TOOLCHAIN}
+      rustup component add clippy --toolchain ${TOOLCHAIN}
+      rustup component add rustfmt --toolchain ${TOOLCHAIN}
+      rustc -Vv
+      cargo -V
+    displayName: Update Rust, Install Clippy and Rustfmt and print Rust & Cargo Versions
 
   - ${{ if ne(parameters.platform, 'Windows') }}:
     # Linux and macOS.
@@ -114,10 +118,8 @@ jobs:
     parameters:
       target: '$(platformTarget)'
       exampleArgs: '$(exampleArgs)'
-      ${{ if ne(parameters.platform, 'Windows') }}:
-        runClippy: true
       runBinaries: true
-      releaseBinaries: true
+      releaseBinaries: ${{ parameters.deployRelease }}
 
   - ${{ if eq(parameters.platform, 'macOS') }}:
     - template: 'azure-pipelines-build-target.yml'
@@ -135,12 +137,12 @@ jobs:
     - template: 'azure-pipelines-build-target.yml'
       parameters:
         target: 'aarch64-apple-ios'
-        releaseBinaries: true
+        releaseBinaries: ${{ parameters.deployRelease }}
 
     - template: 'azure-pipelines-build-target.yml'
       parameters:
         target: 'x86_64-apple-ios'
-        releaseBinaries: true
+        releaseBinaries: ${{ parameters.deployRelease }}
 
   - ${{ if eq(parameters.platform, 'Linux') }}:
 # TODO: Temporarily disabled, because of:

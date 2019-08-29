@@ -591,6 +591,9 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .default_enum_style(EnumVariation::Rust {
             non_exhaustive: false,
         })
+        .raw_line("#![allow(clippy::all)]")
+        // GrVkBackendContext contains u128 fields on macOS
+        .raw_line("#![allow(improper_ctypes)]")
         .constified_enum(".*Mask")
         .constified_enum(".*Flags")
         .constified_enum(".*Bits")

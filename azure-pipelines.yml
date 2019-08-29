@@ -1,3 +1,15 @@
+# This script can run in two configurations:
+#
+# deployRelease = true
+#   A reasonable number of feature combinations are built and binaries are deployed.
+#
+# deployRelease = false
+#   Only two feature sets are built: One with no features and one with all features.
+#   And no binaries or packages are released.
+
+variables:
+  deployRelease: ${{ eq(variables['build.SourceBranchName'], 'release') }}
+
 stages:
 
 - stage: 'Build'
@@ -11,6 +23,7 @@ stages:
       androidAPILevel: '26'
       androidBinExt: ''
       image: 'ubuntu-16.04'
+      deployRelease: ${{ eq(variables['build.SourceBranchName'], 'release') }}
 
   - template: 'azure-pipelines-template.yml'
     parameters:
@@ -21,6 +34,7 @@ stages:
       androidAPILevel: '26'
       androidBinExt: ''
       image: 'macOS-10.14'
+      deployRelease: ${{ eq(variables['build.SourceBranchName'], 'release') }}
 
   - template: 'azure-pipelines-template.yml'
     parameters:
@@ -32,9 +46,10 @@ stages:
       androidAPILevel: '26'
       androidBinExt: '.cmd'
       image: 'windows-2019'
+      deployRelease: ${{ eq(variables['build.SourceBranchName'], 'release') }}
 
 - stage: 'Package'
-  condition: and(succeeded(), eq(variables['build.SourceBranchName'], 'release'))
+  condition: and(succeeded(), eq(variables.deployRelease, 'True'))
   jobs:
   - job:
     pool:
@@ -43,15 +58,13 @@ stages:
       rust_backtrace: 1
 
     steps:
-    - script: |
-        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
-        echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
-      displayName: 'Install Rust'
-
-    - script: |
+    - bash: |
+        set -e
+        rustup default stable
+        rustup update stable
         rustc -Vv
         cargo -V
-      displayName: 'Print versions'
+      displayName: 'Update Rust and Print Versions'
 
     # skia-bindings gets packaged without verification, because the build process modifies the src directory.
     # TODO: reenable package verification as soon CLion and rust-analyzer supports !include macros.
