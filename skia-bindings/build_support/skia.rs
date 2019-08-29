@@ -379,9 +379,8 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
         .collect::<Vec<String>>()
         .join(" ");
 
-    let on_windows = cfg!(windows);
-
-    let gn_command = if on_windows { "skia/bin/gn" } else { "bin/gn" };
+    let current_dir = env::current_dir().unwrap();
+    let gn_command = current_dir.join("skia").join("bin").join("gn");
 
     let output_directory_str = config.output_directory.to_str().unwrap();
 
@@ -403,11 +402,12 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
         panic!("{:?}", String::from_utf8(output.stdout).unwrap());
     }
 
-    let ninja_command = if on_windows {
-        "depot_tools/ninja"
-    } else {
-        "../depot_tools/ninja"
-    };
+    let on_windows = cfg!(windows);
+
+    let ninja_command =
+        current_dir
+            .join("depot_tools")
+            .join(if on_windows { "ninja.exe" } else { "ninja" });
 
     assert!(
         Command::new(ninja_command)
@@ -416,12 +416,10 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
             .status()
-            .expect("failed to run `ninja`, does the directory depot_tools/ exist?")
+            .expect("failed to run `ninja`")
             .success(),
         "`ninja` returned an error, please check the output for details."
     );
-
-    let current_dir = env::current_dir().unwrap();
 
     bindgen_gen(build, &current_dir, &config.output_directory)
 }
