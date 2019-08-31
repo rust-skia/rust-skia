@@ -74,7 +74,7 @@ stages:
     # TODO: find a better way to extract the GITHUB_RELEASE_TAG
     - bash: |
         set -e
-        cd skia-safe && cargo package -vv --no-verify --allow-dirty --target-dir "$(Build.ArtifactStagingDirectory)"
+        cd skia-safe && cargo package -vv --offline --no-verify --allow-dirty --target-dir "$(Build.ArtifactStagingDirectory)"
         export GITHUB_RELEASE_TAG=$(cd "$(Build.ArtifactStagingDirectory)/package" && find skia-safe-*.crate | cut -d'-' -f3 | cut -d'.' -f1-3)
         echo "##vso[task.setvariable variable=GITHUB_RELEASE_TAG;]${GITHUB_RELEASE_TAG}"
       displayName: 'Package skia-safe'
