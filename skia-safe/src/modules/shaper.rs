@@ -450,7 +450,6 @@ mod rust_run_handler {
     fn to_run_handler<'a>(to: TraitObject) -> &'a mut dyn RunHandler {
         unsafe { mem::transmute(to) }
     }
-
 }
 
 #[repr(transparent)]
