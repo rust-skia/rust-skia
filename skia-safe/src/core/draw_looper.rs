@@ -41,6 +41,9 @@ fn test_blur_shadow_rec_layout() {
 }
 
 impl RCHandle<SkDrawLooper> {
+    // TODO: Context
+    // TODO: makeContext
+
     pub fn can_compute_fast_bounds(&self, paint: &Paint) -> bool {
         unsafe { self.native().canComputeFastBounds(paint.native()) }
     }
@@ -58,4 +61,6 @@ impl RCHandle<SkDrawLooper> {
         let mut br = BlurShadowRec::default();
         unsafe { C_SkDrawLooper_asABlurShadow(self.native(), br.native_mut()) }.if_true_some(br)
     }
+
+    // TODO: apply
 }
