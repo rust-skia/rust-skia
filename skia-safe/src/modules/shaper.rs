@@ -1,24 +1,25 @@
 use crate::prelude::*;
-use crate::shaper::run_handler::RunInfo;
 use crate::{scalar, Font, FontMgr, FourByteTag, Point, TextBlob};
 pub use run_handler::RunHandler;
 use skia_bindings::{
-    C_RustRunHandler_construct, C_SkShaper_BiDiRunIterator_currentLevel,
-    C_SkShaper_FontRunIterator_currentFont, C_SkShaper_LanguageRunIterator_currentLanguage,
-    C_SkShaper_Make, C_SkShaper_MakeFontMgrRunIterator, C_SkShaper_MakeHbIcuScriptRunIterator,
+    C_SkShaper_BiDiRunIterator_currentLevel, C_SkShaper_FontRunIterator_currentFont,
+    C_SkShaper_LanguageRunIterator_currentLanguage, C_SkShaper_Make,
+    C_SkShaper_MakeFontMgrRunIterator, C_SkShaper_MakeHbIcuScriptRunIterator,
     C_SkShaper_MakeIcuBidiRunIterator, C_SkShaper_MakePrimitive, C_SkShaper_MakeShapeThenWrap,
     C_SkShaper_MakeShaperDrivenWrapper, C_SkShaper_MakeStdLanguageRunIterator,
     C_SkShaper_RunIterator_atEnd, C_SkShaper_RunIterator_consume, C_SkShaper_RunIterator_delete,
     C_SkShaper_RunIterator_endOfCurrentRun, C_SkShaper_ScriptRunIterator_currentScript,
-    C_SkShaper_delete, C_SkShaper_shape, C_SkTextBlobBuilderRunHandler_construct,
-    C_SkTextBlobBuilderRunHandler_endPoint, C_SkTextBlobBuilderRunHandler_makeBlob,
-    RustRunHandler_Param, SkShaper, SkShaper_BiDiRunIterator, SkShaper_FontRunIterator,
-    SkShaper_LanguageRunIterator, SkShaper_RunHandler_Buffer, SkShaper_RunHandler_RunInfo,
-    SkShaper_RunIterator, SkShaper_ScriptRunIterator, SkTextBlobBuilderRunHandler, TraitObject,
+    C_SkShaper_TrivialBidiRunIterator_new, C_SkShaper_TrivialFontRunIterator_new,
+    C_SkShaper_TrivialLanguageRunIterator_new, C_SkShaper_TrivialScriptRunIterator_new,
+    C_SkShaper_delete, C_SkShaper_shape, C_SkShaper_shape2,
+    C_SkTextBlobBuilderRunHandler_construct, C_SkTextBlobBuilderRunHandler_endPoint,
+    C_SkTextBlobBuilderRunHandler_makeBlob, RustRunHandler_Param, SkShaper,
+    SkShaper_BiDiRunIterator, SkShaper_FontRunIterator, SkShaper_LanguageRunIterator,
+    SkShaper_RunHandler_Buffer, SkShaper_RunHandler_RunInfo, SkShaper_RunIterator,
+    SkShaper_ScriptRunIterator, SkTextBlobBuilderRunHandler, TraitObject,
 };
 use std::ffi::CStr;
 use std::marker::PhantomData;
-use std::mem;
 use std::os::raw;
 
 pub type Shaper = RefHandle<SkShaper>;
@@ -122,6 +123,13 @@ impl RefHandle<SkShaper> {
         })
         .unwrap()
     }
+
+    pub fn new_trivial_font_run_iterator(font: &Font, utf8_bytes: usize) -> FontRunIterator {
+        FontRunIterator::from_ptr(unsafe {
+            C_SkShaper_TrivialFontRunIterator_new(font.native(), utf8_bytes)
+        })
+        .unwrap()
+    }
 }
 
 pub type BiDiRunIterator = RefHandle<SkShaper_BiDiRunIterator>;
@@ -153,6 +161,13 @@ impl RefHandle<SkShaper> {
         BiDiRunIterator::from_ptr(unsafe {
             C_SkShaper_MakeIcuBidiRunIterator(bytes.as_ptr() as _, bytes.len(), level)
         })
+    }
+
+    pub fn new_trivial_bidi_run_iterator(bidi_level: u8, utf8_bytes: usize) -> BiDiRunIterator {
+        BiDiRunIterator::from_ptr(unsafe {
+            C_SkShaper_TrivialBidiRunIterator_new(bidi_level, utf8_bytes)
+        })
+        .unwrap()
     }
 }
 
@@ -186,6 +201,13 @@ impl RefHandle<SkShaper> {
         let bytes = utf8.as_ref().as_bytes();
         ScriptRunIterator::from_ptr(unsafe {
             C_SkShaper_MakeHbIcuScriptRunIterator(bytes.as_ptr() as _, bytes.len())
+        })
+        .unwrap()
+    }
+
+    pub fn new_trivial_script_run_iterator(bidi_level: u8, utf8_bytes: usize) -> ScriptRunIterator {
+        ScriptRunIterator::from_ptr(unsafe {
+            C_SkShaper_TrivialScriptRunIterator_new(bidi_level, utf8_bytes)
         })
         .unwrap()
     }
@@ -224,6 +246,17 @@ impl RefHandle<SkShaper> {
         LanguageRunIterator::from_ptr(unsafe {
             C_SkShaper_MakeStdLanguageRunIterator(bytes.as_ptr() as _, bytes.len())
         })
+    }
+
+    pub fn new_trivial_language_run_iterator(language: impl AsRef<str>) -> LanguageRunIterator {
+        let bytes = language.as_ref().as_bytes();
+        LanguageRunIterator::from_ptr(unsafe {
+            C_SkShaper_TrivialLanguageRunIterator_new(
+                bytes.as_ptr() as *const raw::c_char,
+                bytes.len(),
+            )
+        })
+        .unwrap()
     }
 }
 
@@ -312,8 +345,6 @@ mod run_handler {
 }
 
 impl RefHandle<SkShaper> {
-    // TODO: SkShaper::shape() with non-standard run iterators.
-
     pub fn shape(
         &self,
         utf8: impl AsRef<str>,
@@ -322,55 +353,12 @@ impl RefHandle<SkShaper> {
         width: scalar,
         run_handler: &mut dyn RunHandler,
     ) {
-        let param = RustRunHandler_Param {
-            trait_: unsafe { mem::transmute(run_handler) },
-            beginLine: Some(begin_line),
-            runInfo: Some(run_info),
-            commitRunInfo: Some(commit_run_info),
-            runBuffer: Some(run_buffer),
-            commitRunBuffer: Some(commit_run_buffer),
-            commitLine: Some(commit_line),
-        };
-
-        extern "C" fn begin_line(to: TraitObject) {
-            to_run_handler(to).begin_line()
-        }
-
-        extern "C" fn run_info(to: TraitObject, ri: *const SkShaper_RunHandler_RunInfo) {
-            to_run_handler(to).run_info(&RunInfo::from_native(unsafe { &*ri }));
-        }
-
-        extern "C" fn commit_run_info(to: TraitObject) {
-            to_run_handler(to).commit_run_info()
-        }
-
-        extern "C" fn run_buffer(
-            to: TraitObject,
-            ri: *const SkShaper_RunHandler_RunInfo,
-        ) -> SkShaper_RunHandler_Buffer {
-            let ri = unsafe { &*ri };
-            to_run_handler(to)
-                .run_buffer(&RunInfo::from_native(ri))
-                .native_buffer_mut(ri.glyphCount)
-        }
-
-        extern "C" fn commit_run_buffer(to: TraitObject, ri: *const SkShaper_RunHandler_RunInfo) {
-            to_run_handler(to).commit_run_buffer(&RunInfo::from_native(unsafe { &*ri }))
-        }
-
-        extern "C" fn commit_line(to: TraitObject) {
-            to_run_handler(to).commit_line()
-        }
-
-        fn to_run_handler<'a>(to: TraitObject) -> &'a mut dyn RunHandler {
-            unsafe { mem::transmute(to) }
-        }
-
         let bytes = utf8.as_ref().as_bytes();
 
-        unsafe {
-            let mut run_handler = construct(|rh| C_RustRunHandler_construct(rh, &param));
+        let param = rust_run_handler::new_param(run_handler);
+        let mut run_handler = rust_run_handler::from_param(&param);
 
+        unsafe {
             C_SkShaper_shape(
                 self.native(),
                 bytes.as_ptr() as _,
@@ -382,6 +370,97 @@ impl RefHandle<SkShaper> {
             )
         }
     }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn shape_with_iterators(
+        &self,
+        utf8: impl AsRef<str>,
+        font_run_iterator: &mut FontRunIterator,
+        bidi_run_iterator: &mut BiDiRunIterator,
+        script_run_iterator: &mut ScriptRunIterator,
+        language_run_iterator: &mut LanguageRunIterator,
+        width: scalar,
+        run_handler: &mut dyn RunHandler,
+    ) {
+        let bytes = utf8.as_ref().as_bytes();
+        let param = rust_run_handler::new_param(run_handler);
+        let mut run_handler = rust_run_handler::from_param(&param);
+        unsafe {
+            C_SkShaper_shape2(
+                self.native(),
+                bytes.as_ptr() as _,
+                bytes.len(),
+                font_run_iterator.native_mut(),
+                bidi_run_iterator.native_mut(),
+                script_run_iterator.native_mut(),
+                language_run_iterator.native_mut(),
+                width,
+                &mut run_handler._base,
+            )
+        }
+    }
+}
+
+mod rust_run_handler {
+    use crate::prelude::*;
+    use crate::shaper::run_handler::RunInfo;
+    use crate::shaper::RunHandler;
+    use skia_bindings::{
+        C_RustRunHandler_construct, RustRunHandler, RustRunHandler_Param,
+        SkShaper_RunHandler_Buffer, SkShaper_RunHandler_RunInfo, TraitObject,
+    };
+    use std::mem;
+
+    pub fn new_param(run_handler: &mut dyn RunHandler) -> RustRunHandler_Param {
+        RustRunHandler_Param {
+            trait_: unsafe { mem::transmute(run_handler) },
+            beginLine: Some(begin_line),
+            runInfo: Some(run_info),
+            commitRunInfo: Some(commit_run_info),
+            runBuffer: Some(run_buffer),
+            commitRunBuffer: Some(commit_run_buffer),
+            commitLine: Some(commit_line),
+        }
+    }
+
+    pub fn from_param(param: &RustRunHandler_Param) -> RustRunHandler {
+        construct(|rh| unsafe { C_RustRunHandler_construct(rh, param) })
+    }
+
+    extern "C" fn begin_line(to: TraitObject) {
+        to_run_handler(to).begin_line()
+    }
+
+    extern "C" fn run_info(to: TraitObject, ri: *const SkShaper_RunHandler_RunInfo) {
+        to_run_handler(to).run_info(&RunInfo::from_native(unsafe { &*ri }));
+    }
+
+    extern "C" fn commit_run_info(to: TraitObject) {
+        to_run_handler(to).commit_run_info()
+    }
+
+    extern "C" fn run_buffer(
+        to: TraitObject,
+        ri: *const SkShaper_RunHandler_RunInfo,
+    ) -> SkShaper_RunHandler_Buffer {
+        let ri = unsafe { &*ri };
+        to_run_handler(to)
+            .run_buffer(&RunInfo::from_native(ri))
+            .native_buffer_mut(ri.glyphCount)
+    }
+
+    extern "C" fn commit_run_buffer(to: TraitObject, ri: *const SkShaper_RunHandler_RunInfo) {
+        to_run_handler(to).commit_run_buffer(&RunInfo::from_native(unsafe { &*ri }))
+    }
+
+    extern "C" fn commit_line(to: TraitObject) {
+        to_run_handler(to).commit_line()
+    }
+
+    fn to_run_handler<'a>(to: TraitObject) -> &'a mut dyn RunHandler {
+        unsafe { mem::transmute(to) }
+    }
+
 }
 
 #[repr(transparent)]
