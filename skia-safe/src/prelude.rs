@@ -277,7 +277,7 @@ impl<N: NativeDrop> ReplaceWith<Handle<N>> for N {
 }
 
 /// Constructs a C++ object in place by calling a lambda that is meant to initialize
-/// the pointer to the Rust memory provided as an object pointer.
+/// the pointer to the Rust memory provided as a pointer.
 pub(crate) fn construct<N>(construct: impl FnOnce(*mut N)) -> N {
     let mut instance = MaybeUninit::uninit();
     construct(instance.as_mut_ptr());
