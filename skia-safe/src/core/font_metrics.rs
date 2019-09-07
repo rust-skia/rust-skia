@@ -1,14 +1,15 @@
 use crate::prelude::*;
 use crate::scalar;
+use skia_bindings as sb;
 use skia_bindings::SkFontMetrics;
 
 bitflags! {
     #[derive(Default)]
     pub struct Flags: u32 {
-        const UNDERLINE_THICKNESS_IS_VALID = skia_bindings::SkFontMetrics_FontMetricsFlags_kUnderlineThicknessIsValid_Flag as _;
-        const UNDERLINE_POSITION_IS_VALID = skia_bindings::SkFontMetrics_FontMetricsFlags_kUnderlinePositionIsValid_Flag as _;
-        const STRIKEOUT_THICKNESS_IS_VALID = skia_bindings::SkFontMetrics_FontMetricsFlags_kStrikeoutThicknessIsValid_Flag as _;
-        const STRIKEOUT_POSITION_IS_VALID = skia_bindings::SkFontMetrics_FontMetricsFlags_kStrikeoutPositionIsValid_Flag as _;
+        const UNDERLINE_THICKNESS_IS_VALID = sb::SkFontMetrics_FontMetricsFlags_kUnderlineThicknessIsValid_Flag as _;
+        const UNDERLINE_POSITION_IS_VALID = sb::SkFontMetrics_FontMetricsFlags_kUnderlinePositionIsValid_Flag as _;
+        const STRIKEOUT_THICKNESS_IS_VALID = sb::SkFontMetrics_FontMetricsFlags_kStrikeoutThicknessIsValid_Flag as _;
+        const STRIKEOUT_POSITION_IS_VALID = sb::SkFontMetrics_FontMetricsFlags_kStrikeoutPositionIsValid_Flag as _;
     }
 }
 

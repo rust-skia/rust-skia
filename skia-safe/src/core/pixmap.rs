@@ -3,9 +3,8 @@ use crate::{
     AlphaType, Color, Color4f, ColorSpace, ColorType, FilterQuality, IPoint, IRect, ISize,
     ImageInfo,
 };
-use skia_bindings::{
-    C_SkImageInfo_Construct, C_SkPixmap_destruct, C_SkPixmap_setColorSpace, SkPixmap,
-};
+use skia_bindings as sb;
+use skia_bindings::SkPixmap;
 use std::convert::TryInto;
 use std::ffi::c_void;
 use std::os::raw;
@@ -15,7 +14,7 @@ pub type Pixmap = Handle<SkPixmap>;
 
 impl NativeDrop for SkPixmap {
     fn drop(&mut self) {
-        unsafe { C_SkPixmap_destruct(self) }
+        unsafe { sb::C_SkPixmap_destruct(self) }
     }
 }
 
@@ -24,7 +23,7 @@ impl Default for Handle<SkPixmap> {
         Pixmap::from_native(SkPixmap {
             fPixels: ptr::null(),
             fRowBytes: 0,
-            fInfo: construct(|ii| unsafe { C_SkImageInfo_Construct(ii) }),
+            fInfo: construct(|ii| unsafe { sb::C_SkImageInfo_Construct(ii) }),
         })
     }
 }
@@ -58,7 +57,7 @@ impl Handle<SkPixmap> {
 
     pub fn set_color_space(&mut self, color_space: impl Into<Option<ColorSpace>>) -> &mut Self {
         unsafe {
-            C_SkPixmap_setColorSpace(self.native_mut(), color_space.into().into_ptr_or_null())
+            sb::C_SkPixmap_setColorSpace(self.native_mut(), color_space.into().into_ptr_or_null())
         }
         self
     }

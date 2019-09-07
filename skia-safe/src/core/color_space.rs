@@ -1,5 +1,6 @@
 use super::{Data, Matrix44};
 use crate::prelude::*;
+use skia_bindings as sb;
 use skia_bindings::{SkColorSpace, SkColorSpacePrimaries};
 
 #[derive(Clone, PartialEq, Debug)]
@@ -81,15 +82,15 @@ pub type ColorSpace = RCHandle<SkColorSpace>;
 
 impl NativeRefCounted for SkColorSpace {
     fn _ref(&self) {
-        unsafe { skia_bindings::C_SkColorSpace_ref(self) };
+        unsafe { sb::C_SkColorSpace_ref(self) };
     }
 
     fn _unref(&self) {
-        unsafe { skia_bindings::C_SkColorSpace_unref(self) }
+        unsafe { sb::C_SkColorSpace_unref(self) }
     }
 
     fn unique(&self) -> bool {
-        unsafe { skia_bindings::C_SkColorSpace_unique(self) }
+        unsafe { sb::C_SkColorSpace_unique(self) }
     }
 }
 
@@ -101,11 +102,11 @@ impl NativePartialEq for SkColorSpace {
 
 impl ColorSpace {
     pub fn new_srgb() -> ColorSpace {
-        ColorSpace::from_ptr(unsafe { skia_bindings::C_SkColorSpace_MakeSRGB() }).unwrap()
+        ColorSpace::from_ptr(unsafe { sb::C_SkColorSpace_MakeSRGB() }).unwrap()
     }
 
     pub fn new_srgb_linear() -> ColorSpace {
-        ColorSpace::from_ptr(unsafe { skia_bindings::C_SkColorSpace_MakeSRGBLinear() }).unwrap()
+        ColorSpace::from_ptr(unsafe { sb::C_SkColorSpace_MakeSRGBLinear() }).unwrap()
     }
 
     pub fn to_xyzd50(&self) -> Option<Matrix44> {
@@ -119,21 +120,16 @@ impl ColorSpace {
 
     #[must_use]
     pub fn with_linear_gamma(&self) -> ColorSpace {
-        ColorSpace::from_ptr(unsafe {
-            skia_bindings::C_SkColorSpace_makeLinearGamma(self.native())
-        })
-        .unwrap()
+        ColorSpace::from_ptr(unsafe { sb::C_SkColorSpace_makeLinearGamma(self.native()) }).unwrap()
     }
 
     #[must_use]
     pub fn with_srgb_gamma(&self) -> ColorSpace {
-        ColorSpace::from_ptr(unsafe { skia_bindings::C_SkColorSpace_makeSRGBGamma(self.native()) })
-            .unwrap()
+        ColorSpace::from_ptr(unsafe { sb::C_SkColorSpace_makeSRGBGamma(self.native()) }).unwrap()
     }
 
     pub fn with_color_spin(&self) -> ColorSpace {
-        ColorSpace::from_ptr(unsafe { skia_bindings::C_SkColorSpace_makeColorSpin(self.native()) })
-            .unwrap()
+        ColorSpace::from_ptr(unsafe { sb::C_SkColorSpace_makeColorSpin(self.native()) }).unwrap()
     }
 
     pub fn is_srgb(&self) -> bool {
@@ -141,7 +137,7 @@ impl ColorSpace {
     }
 
     pub fn serialize(&self) -> Data {
-        Data::from_ptr(unsafe { skia_bindings::C_SkColorSpace_serialize(self.native()) }).unwrap()
+        Data::from_ptr(unsafe { sb::C_SkColorSpace_serialize(self.native()) }).unwrap()
     }
 
     // TODO: writeToMemory()?
@@ -149,7 +145,7 @@ impl ColorSpace {
     pub fn deserialize(data: Data) -> ColorSpace {
         let bytes = data.as_bytes();
         ColorSpace::from_ptr(unsafe {
-            skia_bindings::C_SkColorSpace_Deserialize(bytes.as_ptr() as _, bytes.len())
+            sb::C_SkColorSpace_Deserialize(bytes.as_ptr() as _, bytes.len())
         })
         .unwrap()
     }

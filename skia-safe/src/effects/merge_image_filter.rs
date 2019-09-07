@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::{image_filter::CropRect, ImageFilter};
-use skia_bindings::{C_SkMergeImageFilter_Make, SkImageFilter};
+use skia_bindings as sb;
+use skia_bindings::SkImageFilter;
 use std::convert::TryInto;
 
 impl RCHandle<SkImageFilter> {
@@ -19,7 +20,7 @@ pub fn new<'a>(
 ) -> Option<ImageFilter> {
     let filter_ptrs: Vec<*mut SkImageFilter> = filters.into_iter().map(|f| f.into_ptr()).collect();
     ImageFilter::from_ptr(unsafe {
-        C_SkMergeImageFilter_Make(
+        sb::C_SkMergeImageFilter_Make(
             filter_ptrs.as_ptr(),
             filter_ptrs.len().try_into().unwrap(),
             crop_rect.into().native_ptr_or_null(),

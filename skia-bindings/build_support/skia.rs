@@ -590,6 +590,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .default_enum_style(EnumVariation::Rust {
             non_exhaustive: false,
         })
+        .parse_callbacks(Box::new(ParseCallbacks))
         .raw_line("#![allow(clippy::all)]")
         // GrVkBackendContext contains u128 fields on macOS
         .raw_line("#![allow(improper_ctypes)]")
@@ -835,11 +836,6 @@ impl bindgen::callbacks::ParseCallbacks for ParseCallbacks {
                 .find(|n| n.0 == enum_name)
                 .map(|(_, replacer)| replacer(enum_name, original_variant_name))
         })
-    }
-
-    fn item_name(&self, _original_item_name: &str) -> Option<String> {
-        println!("item: {}", _original_item_name);
-        None
     }
 }
 

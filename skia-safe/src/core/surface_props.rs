@@ -1,7 +1,6 @@
 use crate::prelude::*;
-use skia_bindings::{
-    SkPixelGeometry, SkSurfaceProps, SkSurfaceProps_Flags_kUseDeviceIndependentFonts_Flag,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkPixelGeometry, SkSurfaceProps};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -46,7 +45,7 @@ impl Default for PixelGeometry {
 bitflags! {
     pub struct SurfacePropsFlags: u32 {
         const USE_DEVICE_INDEPENDENT_FONTS =
-            SkSurfaceProps_Flags_kUseDeviceIndependentFonts_Flag as u32;
+            sb::SkSurfaceProps_Flags_kUseDeviceIndependentFonts_Flag as u32;
     }
 }
 
@@ -73,7 +72,7 @@ impl Clone for SurfaceProps {
 
 impl PartialEq for SurfaceProps {
     fn eq(&self, other: &Self) -> bool {
-        unsafe { skia_bindings::C_SkSurfaceProps_Equals(self.native(), other.native()) }
+        unsafe { sb::C_SkSurfaceProps_Equals(self.native(), other.native()) }
     }
 }
 

@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::{EncodedOrigin, ISize};
-use skia_bindings::{C_SkYUVASizeInfo_computeTotalBytes, C_SkYUVASizeInfo_equals, SkYUVASizeInfo};
+use skia_bindings as sb;
+use skia_bindings::SkYUVASizeInfo;
 use std::ffi::c_void;
 
 #[derive(Clone, Default, Debug)]
@@ -12,7 +13,7 @@ pub struct YUVASizeInfo {
 
 impl PartialEq for YUVASizeInfo {
     fn eq(&self, other: &Self) -> bool {
-        unsafe { C_SkYUVASizeInfo_equals(self.native(), other.native()) }
+        unsafe { sb::C_SkYUVASizeInfo_equals(self.native(), other.native()) }
     }
 }
 
@@ -22,7 +23,7 @@ impl YUVASizeInfo {
     pub const MAX_COUNT: usize = 4;
 
     pub fn compute_total_bytes(&self) -> usize {
-        unsafe { C_SkYUVASizeInfo_computeTotalBytes(self.native()) }
+        unsafe { sb::C_SkYUVASizeInfo_computeTotalBytes(self.native()) }
     }
 
     pub unsafe fn compute_planes(

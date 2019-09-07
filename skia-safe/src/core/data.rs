@@ -1,8 +1,6 @@
 use crate::prelude::*;
-use skia_bindings::{
-    C_SkData_MakeEmpty, C_SkData_MakeSubset, C_SkData_MakeUninitialized, C_SkData_MakeWithCString,
-    C_SkData_MakeWithCopy, C_SkData_ref, C_SkData_unique, C_SkData_unref, SkData,
-};
+use skia_bindings as sb;
+use skia_bindings::SkData;
 use std::ffi::{CStr, CString};
 use std::ops::Deref;
 use std::slice;
@@ -12,15 +10,15 @@ unsafe impl Send for Data {}
 
 impl NativeRefCounted for SkData {
     fn _ref(&self) {
-        unsafe { C_SkData_ref(self) }
+        unsafe { sb::C_SkData_ref(self) }
     }
 
     fn _unref(&self) {
-        unsafe { C_SkData_unref(self) }
+        unsafe { sb::C_SkData_unref(self) }
     }
 
     fn unique(&self) -> bool {
-        unsafe { C_SkData_unique(self) }
+        unsafe { sb::C_SkData_unique(self) }
     }
 }
 
@@ -70,16 +68,17 @@ impl RCHandle<SkData> {
 
     // TODO: rename to copy_from() ? or from_bytes()?
     pub fn new_copy(data: &[u8]) -> Self {
-        Data::from_ptr(unsafe { C_SkData_MakeWithCopy(data.as_ptr() as _, data.len()) }).unwrap()
+        Data::from_ptr(unsafe { sb::C_SkData_MakeWithCopy(data.as_ptr() as _, data.len()) })
+            .unwrap()
     }
 
     pub unsafe fn new_uninitialized(length: usize) -> Data {
-        Data::from_ptr(C_SkData_MakeUninitialized(length)).unwrap()
+        Data::from_ptr(sb::C_SkData_MakeUninitialized(length)).unwrap()
     }
 
     // TODO: use Range as stand in for offset / length?
     pub fn new_subset(data: &Data, offset: usize, length: usize) -> Data {
-        Data::from_ptr(unsafe { C_SkData_MakeSubset(data.native(), offset, length) }).unwrap()
+        Data::from_ptr(unsafe { sb::C_SkData_MakeSubset(data.native(), offset, length) }).unwrap()
     }
 
     /// Constructs Data from a copy of a &str.
@@ -93,7 +92,7 @@ impl RCHandle<SkData> {
 
     /// Constructs Data from a &CStr by copying its contents.
     pub fn new_cstr(cstr: &CStr) -> Data {
-        Data::from_ptr(unsafe { C_SkData_MakeWithCString(cstr.as_ptr()) }).unwrap()
+        Data::from_ptr(unsafe { sb::C_SkData_MakeWithCString(cstr.as_ptr()) }).unwrap()
     }
 
     // TODO: MakeFromFileName (not sure if we need that)
@@ -101,7 +100,7 @@ impl RCHandle<SkData> {
     // TODO: MakeFromStream
 
     pub fn new_empty() -> Self {
-        Data::from_ptr(unsafe { C_SkData_MakeEmpty() }).unwrap()
+        Data::from_ptr(unsafe { sb::C_SkData_MakeEmpty() }).unwrap()
     }
 }
 

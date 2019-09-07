@@ -1,8 +1,7 @@
 use crate::prelude::*;
 use crate::{image_filter::CropRect, scalar, Color, ImageFilter, Vector};
-use skia_bindings::{
-    C_SkDropShadowImageFilter_Make, SkDropShadowImageFilter_ShadowMode, SkImageFilter,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkDropShadowImageFilter_ShadowMode, SkImageFilter};
 
 impl RCHandle<SkImageFilter> {
     pub fn drop_shadow<'a>(
@@ -42,7 +41,7 @@ pub fn new<'a>(
     let delta = delta.into();
     let color = color.into();
     ImageFilter::from_ptr(unsafe {
-        C_SkDropShadowImageFilter_Make(
+        sb::C_SkDropShadowImageFilter_Make(
             delta.x,
             delta.y,
             sigma_x,

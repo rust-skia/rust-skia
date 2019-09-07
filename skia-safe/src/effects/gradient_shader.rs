@@ -1,11 +1,7 @@
 use crate::prelude::*;
 use crate::{scalar, Color, Color4f, ColorSpace, Matrix, Point, Shader, TileMode};
-use skia_bindings::{
-    C_SkGradientShader_MakeLinear, C_SkGradientShader_MakeLinear2, C_SkGradientShader_MakeRadial,
-    C_SkGradientShader_MakeRadial2, C_SkGradientShader_MakeSweep, C_SkGradientShader_MakeSweep2,
-    C_SkGradientShader_MakeTwoPointConical, C_SkGradientShader_MakeTwoPointConical2,
-    SkGradientShader_Flags_kInterpolateColorsInPremul_Flag, SkShader,
-};
+use skia_bindings as sb;
+use skia_bindings::SkShader;
 
 impl RCHandle<SkShader> {
     pub fn linear_gradient<'a>(
@@ -71,7 +67,7 @@ impl RCHandle<SkShader> {
 
 bitflags! {
     pub struct Flags: u32 {
-        const INTERPOLATE_COLORS_IN_PREMUL = SkGradientShader_Flags_kInterpolateColorsInPremul_Flag as _;
+        const INTERPOLATE_COLORS_IN_PREMUL = sb::SkGradientShader_Flags_kInterpolateColorsInPremul_Flag as _;
     }
 }
 
@@ -98,7 +94,7 @@ pub fn linear<'a>(
 
     Shader::from_ptr(unsafe {
         match colors {
-            GradientShaderColors::Colors(colors) => C_SkGradientShader_MakeLinear(
+            GradientShaderColors::Colors(colors) => sb::C_SkGradientShader_MakeLinear(
                 points.native().as_ptr(),
                 colors.native().as_ptr(),
                 pos.as_ptr_or_null(),
@@ -109,7 +105,7 @@ pub fn linear<'a>(
             ),
 
             GradientShaderColors::ColorsInSpace(colors, color_space) => {
-                C_SkGradientShader_MakeLinear2(
+                sb::C_SkGradientShader_MakeLinear2(
                     points.native().as_ptr(),
                     colors.native().as_ptr(),
                     color_space.into_ptr(),
@@ -142,7 +138,7 @@ pub fn radial<'a>(
 
     Shader::from_ptr(unsafe {
         match colors {
-            GradientShaderColors::Colors(colors) => C_SkGradientShader_MakeRadial(
+            GradientShaderColors::Colors(colors) => sb::C_SkGradientShader_MakeRadial(
                 center.native(),
                 radius,
                 colors.native().as_ptr(),
@@ -154,7 +150,7 @@ pub fn radial<'a>(
             ),
 
             GradientShaderColors::ColorsInSpace(colors, color_space) => {
-                C_SkGradientShader_MakeRadial2(
+                sb::C_SkGradientShader_MakeRadial2(
                     center.native(),
                     radius,
                     colors.native().as_ptr(),
@@ -192,7 +188,7 @@ pub fn two_point_conical<'a>(
 
     Shader::from_ptr(unsafe {
         match colors {
-            GradientShaderColors::Colors(colors) => C_SkGradientShader_MakeTwoPointConical(
+            GradientShaderColors::Colors(colors) => sb::C_SkGradientShader_MakeTwoPointConical(
                 start.native(),
                 start_radius,
                 end.native(),
@@ -206,7 +202,7 @@ pub fn two_point_conical<'a>(
             ),
 
             GradientShaderColors::ColorsInSpace(colors, color_space) => {
-                C_SkGradientShader_MakeTwoPointConical2(
+                sb::C_SkGradientShader_MakeTwoPointConical2(
                     start.native(),
                     start_radius,
                     end.native(),
@@ -248,7 +244,7 @@ pub fn sweep<'a>(
 
     Shader::from_ptr(unsafe {
         match colors {
-            GradientShaderColors::Colors(colors) => C_SkGradientShader_MakeSweep(
+            GradientShaderColors::Colors(colors) => sb::C_SkGradientShader_MakeSweep(
                 center.x,
                 center.y,
                 colors.native().as_ptr(),
@@ -262,7 +258,7 @@ pub fn sweep<'a>(
             ),
 
             GradientShaderColors::ColorsInSpace(colors, color_space) => {
-                C_SkGradientShader_MakeSweep2(
+                sb::C_SkGradientShader_MakeSweep2(
                     center.x,
                     center.y,
                     colors.native().as_ptr(),

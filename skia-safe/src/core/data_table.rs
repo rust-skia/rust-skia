@@ -1,8 +1,6 @@
 use crate::prelude::*;
-use skia_bindings::{
-    C_SkDataTable_MakeCopyArray, C_SkDataTable_MakeCopyArrays, C_SkDataTable_MakeEmpty,
-    C_SkDataTable_count, SkDataTable, SkRefCntBase,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkDataTable, SkRefCntBase};
 use std::convert::TryInto;
 use std::ffi::{c_void, CStr};
 use std::ops::Index;
@@ -29,7 +27,7 @@ impl RCHandle<SkDataTable> {
     }
 
     pub fn count(&self) -> usize {
-        unsafe { C_SkDataTable_count(self.native()) }
+        unsafe { sb::C_SkDataTable_count(self.native()) }
             .try_into()
             .unwrap()
     }
@@ -59,14 +57,14 @@ impl RCHandle<SkDataTable> {
     }
 
     pub fn new_empty() -> Self {
-        DataTable::from_ptr(unsafe { C_SkDataTable_MakeEmpty() }).unwrap()
+        DataTable::from_ptr(unsafe { sb::C_SkDataTable_MakeEmpty() }).unwrap()
     }
 
     pub fn from_slices(slices: &[&[u8]]) -> Self {
         let ptrs: Vec<*const c_void> = slices.iter().map(|s| s.as_ptr() as _).collect();
         let sizes: Vec<usize> = slices.iter().map(|s| s.len()).collect();
         unsafe {
-            DataTable::from_ptr(C_SkDataTable_MakeCopyArrays(
+            DataTable::from_ptr(sb::C_SkDataTable_MakeCopyArrays(
                 ptrs.as_ptr(),
                 sizes.as_ptr(),
                 slices.len().try_into().unwrap(),
@@ -77,7 +75,7 @@ impl RCHandle<SkDataTable> {
 
     pub fn from_slice<T: Copy>(slice: &[T]) -> Self {
         unsafe {
-            DataTable::from_ptr(C_SkDataTable_MakeCopyArray(
+            DataTable::from_ptr(sb::C_SkDataTable_MakeCopyArray(
                 slice.as_ptr() as _,
                 mem::size_of::<T>(),
                 slice.len().try_into().unwrap(),

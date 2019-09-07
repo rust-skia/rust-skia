@@ -1,10 +1,7 @@
 use crate::prelude::*;
 use crate::{gpu, Canvas, IRect, ImageInfo, Matrix, NativeFlattenable, Point, Rect};
-use skia_bindings::{
-    C_SkDrawable_Deserialize, C_SkDrawable_GpuDrawHandler_delete, C_SkDrawable_GpuDrawHandler_draw,
-    C_SkDrawable_snapGpuDrawHandler, SkDrawable, SkDrawable_GpuDrawHandler, SkFlattenable,
-    SkRefCntBase,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkDrawable, SkDrawable_GpuDrawHandler, SkFlattenable, SkRefCntBase};
 
 pub type Drawable = RCHandle<SkDrawable>;
 
@@ -18,7 +15,7 @@ impl NativeFlattenable for SkDrawable {
     }
 
     fn native_deserialize(data: &[u8]) -> *mut Self {
-        unsafe { C_SkDrawable_Deserialize(data.as_ptr() as _, data.len()) }
+        unsafe { sb::C_SkDrawable_Deserialize(data.as_ptr() as _, data.len()) }
     }
 }
 
@@ -46,7 +43,7 @@ impl RCHandle<SkDrawable> {
         buffer_info: &ImageInfo,
     ) -> Option<GPUDrawHandler> {
         GPUDrawHandler::from_ptr(unsafe {
-            C_SkDrawable_snapGpuDrawHandler(
+            sb::C_SkDrawable_snapGpuDrawHandler(
                 self.native_mut(),
                 api.into_native(),
                 matrix.native(),
@@ -80,14 +77,14 @@ pub type GPUDrawHandler = RefHandle<SkDrawable_GpuDrawHandler>;
 
 impl NativeDrop for SkDrawable_GpuDrawHandler {
     fn drop(&mut self) {
-        unsafe { C_SkDrawable_GpuDrawHandler_delete(self) }
+        unsafe { sb::C_SkDrawable_GpuDrawHandler_delete(self) }
     }
 }
 
 impl RefHandle<SkDrawable_GpuDrawHandler> {
     pub fn draw(&mut self, info: &gpu::BackendDrawableInfo) {
         unsafe {
-            C_SkDrawable_GpuDrawHandler_draw(self.native_mut(), info.native());
+            sb::C_SkDrawable_GpuDrawHandler_draw(self.native_mut(), info.native());
         }
     }
 }

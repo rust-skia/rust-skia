@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::{scalar, PathEffect};
-use skia_bindings::{C_SkCornerPathEffect_Make, SkPathEffect};
+use skia_bindings as sb;
+use skia_bindings::SkPathEffect;
 
 impl RCHandle<SkPathEffect> {
     pub fn corner_path(radius: scalar) -> Option<Self> {
@@ -9,5 +10,5 @@ impl RCHandle<SkPathEffect> {
 }
 
 pub fn new(radius: scalar) -> Option<PathEffect> {
-    PathEffect::from_ptr(unsafe { C_SkCornerPathEffect_Make(radius) })
+    PathEffect::from_ptr(unsafe { sb::C_SkCornerPathEffect_Make(radius) })
 }

@@ -1,10 +1,7 @@
 use crate::prelude::*;
 use crate::{ColorSpace, IPoint, IRect, ISize};
-use skia_bindings::{
-    C_SkImageInfo_Construct, C_SkImageInfo_Copy, C_SkImageInfo_Equals,
-    C_SkImageInfo_gammaCloseToSRGB, C_SkImageInfo_reset, SkAlphaType, SkColorType, SkImageInfo,
-    SkYUVColorSpace,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkAlphaType, SkColorType, SkImageInfo, SkYUVColorSpace};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -65,20 +62,20 @@ impl ColorType {
 
     pub fn bytes_per_pixel(self) -> usize {
         unsafe {
-            skia_bindings::SkColorTypeBytesPerPixel(self.into_native())
+            sb::SkColorTypeBytesPerPixel(self.into_native())
                 .try_into()
                 .unwrap()
         }
     }
 
     pub fn is_always_opaque(self) -> bool {
-        unsafe { skia_bindings::SkColorTypeIsAlwaysOpaque(self.into_native()) }
+        unsafe { sb::SkColorTypeIsAlwaysOpaque(self.into_native()) }
     }
 
     pub fn validate_alpha_type(self, alpha_type: AlphaType) -> Option<AlphaType> {
         let mut alpha_type_r = AlphaType::Unknown;
         unsafe {
-            skia_bindings::SkColorTypeValidateAlphaType(
+            sb::SkColorTypeValidateAlphaType(
                 self.into_native(),
                 alpha_type.into_native(),
                 alpha_type_r.native_mut(),
@@ -113,7 +110,7 @@ pub type ImageInfo = Handle<SkImageInfo>;
 
 impl NativeDrop for SkImageInfo {
     fn drop(&mut self) {
-        unsafe { skia_bindings::C_SkImageInfo_destruct(self) }
+        unsafe { sb::C_SkImageInfo_destruct(self) }
     }
 }
 
@@ -121,8 +118,8 @@ impl NativeClone for SkImageInfo {
     fn clone(&self) -> Self {
         unsafe {
             construct(|image_info| {
-                C_SkImageInfo_Construct(image_info);
-                C_SkImageInfo_Copy(self, image_info);
+                sb::C_SkImageInfo_Construct(image_info);
+                sb::C_SkImageInfo_Copy(self, image_info);
             })
         }
     }
@@ -130,13 +127,13 @@ impl NativeClone for SkImageInfo {
 
 impl NativePartialEq for SkImageInfo {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { C_SkImageInfo_Equals(self, rhs) }
+        unsafe { sb::C_SkImageInfo_Equals(self, rhs) }
     }
 }
 
 impl Default for Handle<SkImageInfo> {
     fn default() -> Self {
-        Self::construct(|image_info| unsafe { C_SkImageInfo_Construct(image_info) })
+        Self::construct(|image_info| unsafe { sb::C_SkImageInfo_Construct(image_info) })
     }
 }
 
@@ -151,7 +148,7 @@ impl Handle<SkImageInfo> {
         let mut image_info = Self::default();
 
         unsafe {
-            skia_bindings::C_SkImageInfo_Make(
+            sb::C_SkImageInfo_Make(
                 image_info.native_mut(),
                 dimensions.width,
                 dimensions.height,
@@ -175,7 +172,7 @@ impl Handle<SkImageInfo> {
         let dimensions = dimensions.into();
         let mut image_info = Self::default();
         unsafe {
-            skia_bindings::C_SkImageInfo_MakeS32(
+            sb::C_SkImageInfo_MakeS32(
                 image_info.native_mut(),
                 dimensions.width,
                 dimensions.height,
@@ -222,7 +219,7 @@ impl Handle<SkImageInfo> {
     }
 
     pub fn color_space(&self) -> Option<ColorSpace> {
-        ColorSpace::from_ptr(unsafe { skia_bindings::C_SkImageInfo_colorSpace(self.native()) })
+        ColorSpace::from_ptr(unsafe { sb::C_SkImageInfo_colorSpace(self.native()) })
     }
 
     pub fn is_empty(&self) -> bool {
@@ -242,7 +239,7 @@ impl Handle<SkImageInfo> {
     }
 
     pub fn is_gamma_close_to_srgb(&self) -> bool {
-        unsafe { C_SkImageInfo_gammaCloseToSRGB(self.native()) }
+        unsafe { sb::C_SkImageInfo_gammaCloseToSRGB(self.native()) }
     }
 
     pub fn with_dimensions(&self, new_dimensions: impl Into<ISize>) -> Self {
@@ -311,7 +308,7 @@ impl Handle<SkImageInfo> {
     }
 
     pub fn reset(&mut self) -> &mut Self {
-        unsafe { C_SkImageInfo_reset(self.native_mut()) };
+        unsafe { sb::C_SkImageInfo_reset(self.native_mut()) };
         self
     }
 }

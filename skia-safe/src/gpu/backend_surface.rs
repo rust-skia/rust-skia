@@ -1,22 +1,16 @@
 use super::{gl, BackendAPI, MipMapped};
 use crate::prelude::*;
-use skia_bindings::{
-    C_GrBackendFormat_Construct, C_GrBackendFormat_ConstructGL, C_GrBackendFormat_destruct,
-    C_GrBackendRenderTarget_destruct, C_GrBackendTexture_destruct, GrBackendFormat,
-    GrBackendRenderTarget, GrBackendTexture, GrMipMapped,
-};
+use skia_bindings as sb;
+use skia_bindings::{GrBackendFormat, GrBackendRenderTarget, GrBackendTexture, GrMipMapped};
 
 #[cfg(feature = "vulkan")]
 use super::vk;
-
-#[cfg(feature = "vulkan")]
-use skia_bindings::{C_GrBackendFormat_ConstructVk, C_GrBackendFormat_ConstructVk2};
 
 pub type BackendFormat = Handle<GrBackendFormat>;
 
 impl NativeDrop for GrBackendFormat {
     fn drop(&mut self) {
-        unsafe { C_GrBackendFormat_destruct(self) }
+        unsafe { sb::C_GrBackendFormat_destruct(self) }
     }
 }
 
@@ -34,22 +28,22 @@ impl Default for BackendFormat {
 
 impl Handle<GrBackendFormat> {
     pub fn new() -> Self {
-        Self::construct(|bf| unsafe { C_GrBackendFormat_Construct(bf) })
+        Self::construct(|bf| unsafe { sb::C_GrBackendFormat_Construct(bf) })
     }
 
     pub fn new_gl(format: gl::Enum, target: gl::Enum) -> Self {
-        Self::construct(|bf| unsafe { C_GrBackendFormat_ConstructGL(bf, format, target) })
+        Self::construct(|bf| unsafe { sb::C_GrBackendFormat_ConstructGL(bf, format, target) })
     }
 
     #[cfg(feature = "vulkan")]
     pub fn new_vulkan(format: vk::Format) -> Self {
-        Self::construct(|bf| unsafe { C_GrBackendFormat_ConstructVk(bf, format) })
+        Self::construct(|bf| unsafe { sb::C_GrBackendFormat_ConstructVk(bf, format) })
     }
 
     #[cfg(feature = "vulkan")]
     pub fn new_vulkan_ycbcr(conversion_info: &vk::YcbcrConversionInfo) -> Self {
         Self::construct(|bf| unsafe {
-            C_GrBackendFormat_ConstructVk2(bf, conversion_info.native())
+            sb::C_GrBackendFormat_ConstructVk2(bf, conversion_info.native())
         })
     }
 
@@ -103,7 +97,7 @@ pub type BackendTexture = Handle<GrBackendTexture>;
 
 impl NativeDrop for GrBackendTexture {
     fn drop(&mut self) {
-        unsafe { C_GrBackendTexture_destruct(self) }
+        unsafe { sb::C_GrBackendTexture_destruct(self) }
     }
 }
 
@@ -214,7 +208,7 @@ pub type BackendRenderTarget = Handle<GrBackendRenderTarget>;
 
 impl NativeDrop for GrBackendRenderTarget {
     fn drop(&mut self) {
-        unsafe { C_GrBackendRenderTarget_destruct(self) }
+        unsafe { sb::C_GrBackendRenderTarget_destruct(self) }
     }
 }
 

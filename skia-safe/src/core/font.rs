@@ -3,14 +3,8 @@ use crate::{
     scalar, FontHinting, FontMetrics, GlyphId, Paint, Path, Point, Rect, TextEncoding, Typeface,
     Unichar,
 };
-use skia_bindings::{
-    C_SkFont_ConstructFromTypeface, C_SkFont_ConstructFromTypefaceWithSize,
-    C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew, C_SkFont_Equals, C_SkFont_destruct,
-    C_SkFont_getEdging, C_SkFont_getHinting, C_SkFont_makeWithSize, C_SkFont_setTypeface, SkFont,
-    SkFont_Edging, SkFont_PrivFlags, SkFont_PrivFlags_kEmbeddedBitmaps_PrivFlag,
-    SkFont_PrivFlags_kEmbolden_PrivFlag, SkFont_PrivFlags_kForceAutoHinting_PrivFlag,
-    SkFont_PrivFlags_kLinearMetrics_PrivFlag, SkFont_PrivFlags_kSubpixel_PrivFlag,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkFont, SkFont_Edging, SkFont_PrivFlags};
 use std::ptr;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -31,13 +25,13 @@ pub type Font = Handle<SkFont>;
 
 impl NativeDrop for SkFont {
     fn drop(&mut self) {
-        unsafe { C_SkFont_destruct(self) }
+        unsafe { sb::C_SkFont_destruct(self) }
     }
 }
 
 impl NativePartialEq for SkFont {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { C_SkFont_Equals(self, rhs) }
+        unsafe { sb::C_SkFont_Equals(self, rhs) }
     }
 }
 
@@ -55,10 +49,10 @@ impl Handle<SkFont> {
     pub fn from_typeface(typeface: impl Into<Typeface>, size: impl Into<Option<scalar>>) -> Self {
         match size.into() {
             None => Self::construct(|font| unsafe {
-                C_SkFont_ConstructFromTypeface(font, typeface.into().into_ptr())
+                sb::C_SkFont_ConstructFromTypeface(font, typeface.into().into_ptr())
             }),
             Some(size) => Self::construct(|font| unsafe {
-                C_SkFont_ConstructFromTypefaceWithSize(font, typeface.into().into_ptr(), size)
+                sb::C_SkFont_ConstructFromTypefaceWithSize(font, typeface.into().into_ptr(), size)
             }),
         }
     }
@@ -66,7 +60,7 @@ impl Handle<SkFont> {
     #[deprecated(since = "0.12.0", note = "use from_typeface() or new()")]
     pub fn from_typeface_with_size(typeface: impl Into<Typeface>, size: scalar) -> Self {
         Self::construct(|font| unsafe {
-            C_SkFont_ConstructFromTypefaceWithSize(font, typeface.into().into_ptr(), size)
+            sb::C_SkFont_ConstructFromTypefaceWithSize(font, typeface.into().into_ptr(), size)
         })
     }
 
@@ -78,7 +72,7 @@ impl Handle<SkFont> {
         skew: scalar,
     ) -> Self {
         Self::construct(|font| unsafe {
-            C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(
+            sb::C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(
                 font,
                 typeface.into().into_ptr(),
                 size,
@@ -95,7 +89,7 @@ impl Handle<SkFont> {
         skew: scalar,
     ) -> Self {
         Self::construct(|font| unsafe {
-            C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(
+            sb::C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(
                 font,
                 typeface.into().into_ptr(),
                 size,
@@ -106,23 +100,23 @@ impl Handle<SkFont> {
     }
 
     pub fn is_force_auto_hinting(&self) -> bool {
-        self.has_flag(SkFont_PrivFlags_kForceAutoHinting_PrivFlag)
+        self.has_flag(sb::SkFont_PrivFlags_kForceAutoHinting_PrivFlag)
     }
 
     pub fn is_embedded_bitmaps(&self) -> bool {
-        self.has_flag(SkFont_PrivFlags_kEmbeddedBitmaps_PrivFlag)
+        self.has_flag(sb::SkFont_PrivFlags_kEmbeddedBitmaps_PrivFlag)
     }
 
     pub fn is_subpixel(&self) -> bool {
-        self.has_flag(SkFont_PrivFlags_kSubpixel_PrivFlag)
+        self.has_flag(sb::SkFont_PrivFlags_kSubpixel_PrivFlag)
     }
 
     pub fn is_linear_metrics(&self) -> bool {
-        self.has_flag(SkFont_PrivFlags_kLinearMetrics_PrivFlag)
+        self.has_flag(sb::SkFont_PrivFlags_kLinearMetrics_PrivFlag)
     }
 
     pub fn is_embolden(&self) -> bool {
-        self.has_flag(SkFont_PrivFlags_kEmbolden_PrivFlag)
+        self.has_flag(sb::SkFont_PrivFlags_kEmbolden_PrivFlag)
     }
 
     fn has_flag(&self, flag: SkFont_PrivFlags) -> bool {
@@ -160,7 +154,7 @@ impl Handle<SkFont> {
     }
 
     pub fn edging(&self) -> Edging {
-        Edging::from_native(unsafe { C_SkFont_getEdging(self.native()) })
+        Edging::from_native(unsafe { sb::C_SkFont_getEdging(self.native()) })
     }
 
     pub fn set_edging(&mut self, edging: Edging) -> &mut Self {
@@ -174,14 +168,14 @@ impl Handle<SkFont> {
     }
 
     pub fn hinting(&self) -> FontHinting {
-        FontHinting::from_native(unsafe { C_SkFont_getHinting(self.native()) })
+        FontHinting::from_native(unsafe { sb::C_SkFont_getHinting(self.native()) })
     }
 
     #[must_use]
     pub fn with_size(&self, size: scalar) -> Option<Self> {
         if size >= 0.0 && !size.is_infinite() && !size.is_nan() {
             let mut font = unsafe { SkFont::new() };
-            unsafe { C_SkFont_makeWithSize(self.native(), size, &mut font) }
+            unsafe { sb::C_SkFont_makeWithSize(self.native(), size, &mut font) }
             Some(Self::from_native(font))
         } else {
             None
@@ -209,7 +203,7 @@ impl Handle<SkFont> {
     }
 
     pub fn set_typeface(&mut self, tf: impl Into<Typeface>) -> &mut Self {
-        unsafe { C_SkFont_setTypeface(self.native_mut(), tf.into().into_ptr()) }
+        unsafe { sb::C_SkFont_setTypeface(self.native_mut(), tf.into().into_ptr()) }
         self
     }
 

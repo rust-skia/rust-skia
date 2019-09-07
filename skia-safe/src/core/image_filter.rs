@@ -2,13 +2,11 @@ use crate::prelude::*;
 use crate::{
     ColorFilter, ColorSpace, ColorType, FilterQuality, IRect, Matrix, NativeFlattenable, Rect,
 };
+use skia_bindings as sb;
 use skia_bindings::{
-    C_SkImageFilter_Deserialize, C_SkImageFilter_MakeMatrixFilter,
-    C_SkImageFilter_computeFastBounds, C_SkImageFilter_countInputs, C_SkImageFilter_getInput,
-    C_SkImageFilter_isColorFilterNode, C_SkImageFilter_makeWithLocalMatrix, SkColorFilter,
-    SkColorSpace, SkFlattenable, SkImageFilter, SkImageFilterCache, SkImageFilter_Context,
-    SkImageFilter_CropRect, SkImageFilter_MapDirection, SkImageFilter_OutputProperties,
-    SkImageFilter_TileUsage, SkRefCntBase,
+    SkColorFilter, SkColorSpace, SkFlattenable, SkImageFilter, SkImageFilterCache,
+    SkImageFilter_Context, SkImageFilter_CropRect, SkImageFilter_MapDirection,
+    SkImageFilter_OutputProperties, SkImageFilter_TileUsage, SkRefCntBase,
 };
 use std::ptr;
 
@@ -180,7 +178,7 @@ impl NativeFlattenable for SkImageFilter {
     }
 
     fn native_deserialize(data: &[u8]) -> *mut Self {
-        unsafe { C_SkImageFilter_Deserialize(data.as_ptr() as _, data.len()) }
+        unsafe { sb::C_SkImageFilter_Deserialize(data.as_ptr() as _, data.len()) }
     }
 }
 
@@ -208,7 +206,7 @@ impl RCHandle<SkImageFilter> {
 
     pub fn color_filter_node(&self) -> Option<ColorFilter> {
         let mut filter_ptr: *mut SkColorFilter = ptr::null_mut();
-        if unsafe { C_SkImageFilter_isColorFilterNode(self.native(), &mut filter_ptr) } {
+        if unsafe { sb::C_SkImageFilter_isColorFilterNode(self.native(), &mut filter_ptr) } {
             // according to the documentation, this must be set to a ref'd colorfilter
             // (which is one with an increased ref count I assume).
             ColorFilter::from_ptr(filter_ptr)
@@ -236,7 +234,7 @@ impl RCHandle<SkImageFilter> {
     }
 
     pub fn count_inputs(&self) -> usize {
-        unsafe { C_SkImageFilter_countInputs(self.native()) }
+        unsafe { sb::C_SkImageFilter_countInputs(self.native()) }
             .try_into()
             .unwrap()
     }
@@ -249,7 +247,7 @@ impl RCHandle<SkImageFilter> {
     pub fn get_input(&self, i: usize) -> Option<ImageFilter> {
         assert!(i < self.count_inputs());
         ImageFilter::from_unshared_ptr(unsafe {
-            C_SkImageFilter_getInput(self.native(), i.try_into().unwrap())
+            sb::C_SkImageFilter_getInput(self.native(), i.try_into().unwrap())
         })
     }
 
@@ -264,7 +262,7 @@ impl RCHandle<SkImageFilter> {
 
     pub fn compute_fast_bounds(&self, bounds: impl AsRef<Rect>) -> Rect {
         Rect::from_native(unsafe {
-            C_SkImageFilter_computeFastBounds(self.native(), bounds.as_ref().native())
+            sb::C_SkImageFilter_computeFastBounds(self.native(), bounds.as_ref().native())
         })
     }
 
@@ -279,7 +277,7 @@ impl RCHandle<SkImageFilter> {
 
     pub fn with_local_matrix(&self, matrix: &Matrix) -> Option<ImageFilter> {
         ImageFilter::from_ptr(unsafe {
-            C_SkImageFilter_makeWithLocalMatrix(self.native(), matrix.native())
+            sb::C_SkImageFilter_makeWithLocalMatrix(self.native(), matrix.native())
         })
     }
 
@@ -289,7 +287,7 @@ impl RCHandle<SkImageFilter> {
 
     pub fn with_matrix(self, matrix: &Matrix, quality: FilterQuality) -> ImageFilter {
         ImageFilter::from_ptr(unsafe {
-            C_SkImageFilter_MakeMatrixFilter(
+            sb::C_SkImageFilter_MakeMatrixFilter(
                 matrix.native(),
                 quality.into_native(),
                 self.into_ptr(),

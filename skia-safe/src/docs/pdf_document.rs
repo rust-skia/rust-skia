@@ -2,10 +2,8 @@ pub mod pdf {
     use crate::interop::DynamicMemoryWStream;
     use crate::prelude::*;
     use crate::{scalar, DateTime, Document};
-    use skia_bindings::{
-        C_SkPDF_MakeDocument, C_SkPDF_Metadata_Construct, C_SkPDF_Metadata_destruct,
-        SkPDF_Metadata, SkString,
-    };
+    use skia_bindings as sb;
+    use skia_bindings::{SkPDF_Metadata, SkString};
 
     // TODO: DocumentStructureType
     // TODO: StructureElementNode
@@ -57,7 +55,7 @@ pub mod pdf {
         // the document.
         let mut memory_stream = Box::pin(DynamicMemoryWStream::new());
         let document = RCHandle::from_ptr(unsafe {
-            C_SkPDF_MakeDocument(&mut memory_stream.native_mut()._base, md.native())
+            sb::C_SkPDF_MakeDocument(&mut memory_stream.native_mut()._base, md.native())
         })
         .unwrap();
 
@@ -71,13 +69,13 @@ pub mod pdf {
     type InternalMetadata = Handle<SkPDF_Metadata>;
     impl NativeDrop for SkPDF_Metadata {
         fn drop(&mut self) {
-            unsafe { C_SkPDF_Metadata_destruct(self) }
+            unsafe { sb::C_SkPDF_Metadata_destruct(self) }
         }
     }
 
     impl Default for Handle<SkPDF_Metadata> {
         fn default() -> Self {
-            Self::construct(|pdf_md| unsafe { C_SkPDF_Metadata_Construct(pdf_md) })
+            Self::construct(|pdf_md| unsafe { sb::C_SkPDF_Metadata_Construct(pdf_md) })
         }
     }
 

@@ -1,10 +1,7 @@
 use crate::prelude::*;
 use crate::{scalar, Font, GlyphId, Paint, Point, RSXform, Rect, TextEncoding};
-use skia_bindings::{
-    C_SkTextBlobBuilder_destruct, C_SkTextBlobBuilder_make, C_SkTextBlob_MakeFromPosText,
-    C_SkTextBlob_MakeFromPosTextH, C_SkTextBlob_MakeFromRSXform, C_SkTextBlob_MakeFromText,
-    SkTextBlob, SkTextBlobBuilder,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkTextBlob, SkTextBlobBuilder};
 use std::convert::TryInto;
 use std::{ptr, slice};
 
@@ -12,15 +9,15 @@ pub type TextBlob = RCHandle<SkTextBlob>;
 
 impl NativeRefCounted for SkTextBlob {
     fn _ref(&self) {
-        unsafe { skia_bindings::C_SkTextBlob_ref(self) };
+        unsafe { sb::C_SkTextBlob_ref(self) };
     }
 
     fn _unref(&self) {
-        unsafe { skia_bindings::C_SkTextBlob_unref(self) }
+        unsafe { sb::C_SkTextBlob_unref(self) }
     }
 
     fn unique(&self) -> bool {
-        unsafe { skia_bindings::C_SkTextBlob_unique(self) }
+        unsafe { sb::C_SkTextBlob_unique(self) }
     }
 }
 
@@ -67,7 +64,7 @@ impl RCHandle<SkTextBlob> {
 
     pub fn from_text(text: &[u8], encoding: TextEncoding, font: &Font) -> Option<TextBlob> {
         TextBlob::from_ptr(unsafe {
-            C_SkTextBlob_MakeFromText(
+            sb::C_SkTextBlob_MakeFromText(
                 text.as_ptr() as _,
                 text.len(),
                 font.native(),
@@ -87,7 +84,7 @@ impl RCHandle<SkTextBlob> {
         // TODO: avoid that verification somehow.
         assert_eq!(xpos.len(), font.count_text(text, encoding));
         TextBlob::from_ptr(unsafe {
-            C_SkTextBlob_MakeFromPosTextH(
+            sb::C_SkTextBlob_MakeFromPosTextH(
                 text.as_ptr() as _,
                 text.len(),
                 xpos.as_ptr(),
@@ -108,7 +105,7 @@ impl RCHandle<SkTextBlob> {
         // TODO: avoid that verification somehow.
         assert_eq!(pos.len(), font.count_text(text, encoding));
         TextBlob::from_ptr(unsafe {
-            C_SkTextBlob_MakeFromPosText(
+            sb::C_SkTextBlob_MakeFromPosText(
                 text.as_ptr() as _,
                 text.len(),
                 pos.native().as_ptr(),
@@ -128,7 +125,7 @@ impl RCHandle<SkTextBlob> {
         // TODO: avoid that verification somehow.
         assert_eq!(xform.len(), font.count_text(text, encoding));
         TextBlob::from_ptr(unsafe {
-            C_SkTextBlob_MakeFromRSXform(
+            sb::C_SkTextBlob_MakeFromRSXform(
                 text.as_ptr() as _,
                 text.len(),
                 xform.native().as_ptr(),
@@ -143,7 +140,7 @@ pub type TextBlobBuilder = Handle<SkTextBlobBuilder>;
 
 impl NativeDrop for SkTextBlobBuilder {
     fn drop(&mut self) {
-        unsafe { C_SkTextBlobBuilder_destruct(self) }
+        unsafe { sb::C_SkTextBlobBuilder_destruct(self) }
     }
 }
 
@@ -153,7 +150,7 @@ impl Handle<SkTextBlobBuilder> {
     }
 
     pub fn make(&mut self) -> Option<TextBlob> {
-        TextBlob::from_ptr(unsafe { C_SkTextBlobBuilder_make(self.native_mut()) })
+        TextBlob::from_ptr(unsafe { sb::C_SkTextBlobBuilder_make(self.native_mut()) })
     }
 
     pub fn alloc_run(

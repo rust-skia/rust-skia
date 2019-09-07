@@ -2,12 +2,9 @@ use crate::interop::{MemoryStream, NativeStreamBase};
 use crate::prelude::*;
 use crate::{font_arguments, interop, FontArguments};
 use crate::{font_parameters::VariationAxis, Data, FontStyle, GlyphId, Rect, Unichar};
+use skia_bindings as sb;
 use skia_bindings::{
-    C_SkTypeface_LocalizedStrings_next, C_SkTypeface_LocalizedStrings_unref,
-    C_SkTypeface_MakeDefault, C_SkTypeface_MakeDeserialize, C_SkTypeface_MakeFromData,
-    C_SkTypeface_MakeFromName, C_SkTypeface_copyTableData, C_SkTypeface_isBold,
-    C_SkTypeface_isItalic, C_SkTypeface_makeClone, C_SkTypeface_serialize, SkRefCntBase,
-    SkTypeface, SkTypeface_LocalizedStrings, SkTypeface_SerializeBehavior,
+    SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings, SkTypeface_SerializeBehavior,
 };
 use std::{ffi, ptr};
 
@@ -42,7 +39,7 @@ impl NativeRefCountedBase for SkTypeface {
 
 impl Default for RCHandle<SkTypeface> {
     fn default() -> Self {
-        Typeface::from_ptr(unsafe { C_SkTypeface_MakeDefault() }).unwrap()
+        Typeface::from_ptr(unsafe { sb::C_SkTypeface_MakeDefault() }).unwrap()
     }
 }
 
@@ -57,11 +54,11 @@ impl RCHandle<SkTypeface> {
     }
 
     pub fn is_bold(&self) -> bool {
-        unsafe { C_SkTypeface_isBold(self.native()) }
+        unsafe { sb::C_SkTypeface_isBold(self.native()) }
     }
 
     pub fn is_italic(&self) -> bool {
-        unsafe { C_SkTypeface_isItalic(self.native()) }
+        unsafe { sb::C_SkTypeface_isItalic(self.native()) }
     }
 
     pub fn is_fixed_pitch(&self) -> bool {
@@ -119,7 +116,7 @@ impl RCHandle<SkTypeface> {
     pub fn from_name(family_name: impl AsRef<str>, font_style: FontStyle) -> Option<Typeface> {
         let familiy_name = ffi::CString::new(family_name.as_ref()).ok()?;
         Typeface::from_ptr(unsafe {
-            C_SkTypeface_MakeFromName(familiy_name.as_ptr(), *font_style.native())
+            sb::C_SkTypeface_MakeFromName(familiy_name.as_ptr(), *font_style.native())
         })
     }
 
@@ -130,7 +127,7 @@ impl RCHandle<SkTypeface> {
 
     pub fn from_data(data: Data, index: impl Into<Option<usize>>) -> Option<Typeface> {
         Typeface::from_ptr(unsafe {
-            C_SkTypeface_MakeFromData(
+            sb::C_SkTypeface_MakeFromData(
                 data.into_ptr(),
                 index.into().unwrap_or_default().try_into().unwrap(),
             )
@@ -138,14 +135,14 @@ impl RCHandle<SkTypeface> {
     }
 
     pub fn clone_with_arguments(&self, arguments: &FontArguments) -> Option<Typeface> {
-        Typeface::from_ptr(unsafe { C_SkTypeface_makeClone(self.native(), arguments.native()) })
+        Typeface::from_ptr(unsafe { sb::C_SkTypeface_makeClone(self.native(), arguments.native()) })
     }
 
     // TODO: serialize(Write)?
 
     // TODO: return Data as impl Deref<[u8]> / Borrow<[u8]> here?
     pub fn serialize(&self, behavior: SerializeBehavior) -> Data {
-        Data::from_ptr(unsafe { C_SkTypeface_serialize(self.native(), behavior.into_native()) })
+        Data::from_ptr(unsafe { sb::C_SkTypeface_serialize(self.native(), behavior.into_native()) })
             .unwrap()
     }
 
@@ -154,7 +151,7 @@ impl RCHandle<SkTypeface> {
     pub fn deserialize(data: &[u8]) -> Option<Typeface> {
         let mut stream = MemoryStream::from_bytes(data);
         Typeface::from_ptr(unsafe {
-            C_SkTypeface_MakeDeserialize(stream.native_mut().as_stream_mut())
+            sb::C_SkTypeface_MakeDeserialize(stream.native_mut().as_stream_mut())
         })
     }
 
@@ -213,7 +210,7 @@ impl RCHandle<SkTypeface> {
     }
 
     pub fn copy_table_data(&self, tag: FontTableTag) -> Option<Data> {
-        Data::from_ptr(unsafe { C_SkTypeface_copyTableData(self.native(), tag) })
+        Data::from_ptr(unsafe { sb::C_SkTypeface_copyTableData(self.native(), tag) })
     }
 
     pub fn units_per_em(&self) -> Option<i32> {
@@ -271,7 +268,7 @@ pub type LocalizedStringsIter = RefHandle<SkTypeface_LocalizedStrings>;
 
 impl NativeDrop for SkTypeface_LocalizedStrings {
     fn drop(&mut self) {
-        unsafe { C_SkTypeface_LocalizedStrings_unref(self) }
+        unsafe { sb::C_SkTypeface_LocalizedStrings_unref(self) }
     }
 }
 
@@ -282,7 +279,7 @@ impl Iterator for RefHandle<SkTypeface_LocalizedStrings> {
         let mut string = interop::String::default();
         let mut language = interop::String::default();
         unsafe {
-            C_SkTypeface_LocalizedStrings_next(
+            sb::C_SkTypeface_LocalizedStrings_next(
                 self.native_mut(),
                 string.native_mut(),
                 language.native_mut(),

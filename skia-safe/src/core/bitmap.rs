@@ -4,19 +4,15 @@ use crate::{
     Pixmap,
 };
 use crate::{Matrix, Shader, TileMode};
-use skia_bindings::{
-    C_SkBitmap_Construct, C_SkBitmap_destruct, C_SkBitmap_eraseARGB, C_SkBitmap_extractAlpha,
-    C_SkBitmap_makeShader, C_SkBitmap_readyToDraw, C_SkBitmap_setPixelRef,
-    C_SkBitmap_tryAllocN32Pixels, C_SkBitmap_tryAllocPixels, SkBitmap,
-    SkBitmap_AllocFlags_kZeroPixels_AllocFlag,
-};
+use skia_bindings as sb;
+use skia_bindings::SkBitmap;
 use std::{ffi, ptr};
 
 pub type Bitmap = Handle<SkBitmap>;
 
 impl NativeDrop for SkBitmap {
     fn drop(&mut self) {
-        unsafe { C_SkBitmap_destruct(self) }
+        unsafe { sb::C_SkBitmap_destruct(self) }
     }
 }
 
@@ -30,7 +26,7 @@ impl NativeClone for SkBitmap {
 
 impl Handle<SkBitmap> {
     pub fn new() -> Self {
-        Self::construct(|bitmap| unsafe { C_SkBitmap_Construct(bitmap) })
+        Self::construct(|bitmap| unsafe { sb::C_SkBitmap_Construct(bitmap) })
     }
 
     pub fn swap(&mut self, other: &mut Self) {
@@ -135,7 +131,7 @@ impl Handle<SkBitmap> {
     }
 
     pub fn compute_is_opaque(bm: &Self) -> bool {
-        unsafe { skia_bindings::C_SkBitmap_ComputeIsOpaque(bm.native()) }
+        unsafe { sb::C_SkBitmap_ComputeIsOpaque(bm.native()) }
     }
 
     pub fn bounds(&self) -> IRect {
@@ -168,7 +164,7 @@ impl Handle<SkBitmap> {
         unsafe {
             self.native_mut().tryAllocPixelsFlags(
                 image_info.native(),
-                SkBitmap_AllocFlags_kZeroPixels_AllocFlag as _,
+                sb::SkBitmap_AllocFlags_kZeroPixels_AllocFlag as _,
             )
         }
     }
@@ -211,7 +207,7 @@ impl Handle<SkBitmap> {
         is_opaque: impl Into<Option<bool>>,
     ) -> bool {
         unsafe {
-            C_SkBitmap_tryAllocN32Pixels(
+            sb::C_SkBitmap_tryAllocN32Pixels(
                 self.native_mut(),
                 width,
                 height,
@@ -249,7 +245,7 @@ impl Handle<SkBitmap> {
 
     #[must_use]
     pub fn try_alloc_pixels(&mut self) -> bool {
-        unsafe { C_SkBitmap_tryAllocPixels(self.native_mut()) }
+        unsafe { sb::C_SkBitmap_tryAllocPixels(self.native_mut()) }
     }
 
     pub fn alloc_pixels(&mut self) {
@@ -276,7 +272,7 @@ impl Handle<SkBitmap> {
     ) {
         let offset = offset.into();
         unsafe {
-            C_SkBitmap_setPixelRef(
+            sb::C_SkBitmap_setPixelRef(
                 self.native_mut(),
                 pixel_ref.into().into_ptr_or_null(),
                 offset.x,
@@ -291,7 +287,7 @@ impl Handle<SkBitmap> {
     }
 
     pub fn is_ready_to_draw(&self) -> bool {
-        unsafe { C_SkBitmap_readyToDraw(self.native()) }
+        unsafe { sb::C_SkBitmap_readyToDraw(self.native()) }
     }
 
     pub fn generation_id(&self) -> u32 {
@@ -307,7 +303,7 @@ impl Handle<SkBitmap> {
     }
 
     pub fn erase_argb(&self, a: u8, r: u8, g: u8, b: u8) {
-        unsafe { C_SkBitmap_eraseARGB(self.native(), a.into(), r.into(), g.into(), b.into()) }
+        unsafe { sb::C_SkBitmap_eraseARGB(self.native(), a.into(), r.into(), g.into(), b.into()) }
     }
 
     pub fn erase(&self, c: impl Into<Color>, area: impl AsRef<IRect>) {
@@ -358,7 +354,7 @@ impl Handle<SkBitmap> {
     pub fn extract_alpha(&self, dst: &mut Self, paint: Option<&Paint>) -> Option<IPoint> {
         let mut offset = IPoint::default();
         unsafe {
-            C_SkBitmap_extractAlpha(
+            sb::C_SkBitmap_extractAlpha(
                 self.native(),
                 dst.native_mut(),
                 paint.native_ptr_or_null(),
@@ -393,7 +389,7 @@ impl Handle<SkBitmap> {
         Shader::from_ptr(unsafe {
             let tmx = tile_modes.map(|tm| tm.0).unwrap_or_default();
             let tmy = tile_modes.map(|tm| tm.1).unwrap_or_default();
-            C_SkBitmap_makeShader(
+            sb::C_SkBitmap_makeShader(
                 self.native(),
                 tmx.into_native(),
                 tmy.into_native(),

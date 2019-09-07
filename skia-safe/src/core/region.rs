@@ -1,10 +1,9 @@
 use crate::prelude::*;
 use crate::{Contains, IPoint, IRect, IVector, Path, QuickReject};
+use skia_bindings as sb;
 use skia_bindings::{
-    C_SkRegion_Cliperator_destruct, C_SkRegion_Equals, C_SkRegion_Iterator_Construct,
-    C_SkRegion_Iterator_rgn, C_SkRegion_Spanerator_destruct, C_SkRegion_destruct,
-    C_SkRegion_quickContains, C_SkRegion_set, SkRegion, SkRegion_Cliperator, SkRegion_Iterator,
-    SkRegion_Op, SkRegion_RunHead, SkRegion_Spanerator,
+    SkRegion, SkRegion_Cliperator, SkRegion_Iterator, SkRegion_Op, SkRegion_RunHead,
+    SkRegion_Spanerator,
 };
 use std::marker::PhantomData;
 use std::{iter, mem, ptr};
@@ -13,7 +12,7 @@ pub type Region = Handle<SkRegion>;
 
 impl NativeDrop for SkRegion {
     fn drop(&mut self) {
-        unsafe { C_SkRegion_destruct(self) }
+        unsafe { sb::C_SkRegion_destruct(self) }
     }
 }
 
@@ -25,7 +24,7 @@ impl NativeClone for SkRegion {
 
 impl NativePartialEq for SkRegion {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { C_SkRegion_Equals(self, rhs) }
+        unsafe { sb::C_SkRegion_Equals(self, rhs) }
     }
 }
 
@@ -56,7 +55,7 @@ impl Handle<SkRegion> {
     }
 
     pub fn set(&mut self, src: &Region) -> bool {
-        unsafe { C_SkRegion_set(self.native_mut(), src.native()) }
+        unsafe { sb::C_SkRegion_set(self.native_mut(), src.native()) }
     }
 
     pub fn swap(&mut self, other: &mut Region) {
@@ -152,7 +151,7 @@ impl Handle<SkRegion> {
     }
 
     pub fn quick_contains_ltrb(&self, left: i32, top: i32, right: i32, bottom: i32) -> bool {
-        unsafe { C_SkRegion_quickContains(self.native(), left, top, right, bottom) }
+        unsafe { sb::C_SkRegion_quickContains(self.native(), left, top, right, bottom) }
     }
 
     // see also the quick_reject() trait below.
@@ -362,7 +361,7 @@ fn test_iterator_layout() {
 impl<'a> Iterator<'a> {
     pub fn new_empty() -> Iterator<'a> {
         Iterator::construct(|iterator| unsafe {
-            C_SkRegion_Iterator_Construct(iterator);
+            sb::C_SkRegion_Iterator_Construct(iterator);
         })
     }
 
@@ -399,7 +398,7 @@ impl<'a> Iterator<'a> {
 
     pub fn rgn(&self) -> Option<&Region> {
         unsafe {
-            let r = C_SkRegion_Iterator_rgn(self.native()).into_option()?;
+            let r = sb::C_SkRegion_Iterator_rgn(self.native()).into_option()?;
             Some(transmute_ref(&*r))
         }
     }
@@ -442,7 +441,7 @@ fn test_cliperator_layout() {
 
 impl<'a> Drop for Cliperator<'a> {
     fn drop(&mut self) {
-        unsafe { C_SkRegion_Cliperator_destruct(self.native_mut()) }
+        unsafe { sb::C_SkRegion_Cliperator_destruct(self.native_mut()) }
     }
 }
 
@@ -490,7 +489,7 @@ fn test_spanerator_layout() {
 
 impl<'a> Drop for Spanerator<'a> {
     fn drop(&mut self) {
-        unsafe { C_SkRegion_Spanerator_destruct(self.native_mut()) }
+        unsafe { sb::C_SkRegion_Spanerator_destruct(self.native_mut()) }
     }
 }
 

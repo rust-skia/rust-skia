@@ -1,9 +1,7 @@
 use crate::prelude::*;
 use crate::{scalar, Matrix, Path, Point, Vector};
-use skia_bindings::{
-    C_SkContourMeasureIter_destruct, C_SkContourMeasureIter_next, SkContourMeasure,
-    SkContourMeasureIter, SkRefCntBase,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkContourMeasure, SkContourMeasureIter, SkRefCntBase};
 
 pub type ContourMeasure = RCHandle<SkContourMeasure>;
 
@@ -16,8 +14,8 @@ impl NativeRefCountedBase for SkContourMeasure {
 
 bitflags! {
     pub struct MatrixFlags : u32 {
-        const GET_POSITION = skia_bindings::SkContourMeasure_MatrixFlags_kGetPosition_MatrixFlag as _;
-        const GET_TANGENT = skia_bindings::SkContourMeasure_MatrixFlags_kGetTangent_MatrixFlag as _;
+        const GET_POSITION = sb::SkContourMeasure_MatrixFlags_kGetPosition_MatrixFlag as _;
+        const GET_TANGENT = sb::SkContourMeasure_MatrixFlags_kGetTangent_MatrixFlag as _;
         const GET_POS_AND_TAN = Self::GET_POSITION.bits | Self::GET_TANGENT.bits;
     }
 }
@@ -93,7 +91,7 @@ pub type ContourMeasureIter = Handle<SkContourMeasureIter>;
 impl NativeDrop for SkContourMeasureIter {
     fn drop(&mut self) {
         unsafe {
-            C_SkContourMeasureIter_destruct(self);
+            sb::C_SkContourMeasureIter_destruct(self);
         }
     }
 }
@@ -102,7 +100,7 @@ impl Iterator for Handle<SkContourMeasureIter> {
     type Item = ContourMeasure;
 
     fn next(&mut self) -> Option<Self::Item> {
-        ContourMeasure::from_ptr(unsafe { C_SkContourMeasureIter_next(self.native_mut()) })
+        ContourMeasure::from_ptr(unsafe { sb::C_SkContourMeasureIter_next(self.native_mut()) })
     }
 }
 

@@ -1,5 +1,6 @@
 use crate::prelude::*;
-use skia_bindings::{C_SkString_c_str_size, C_SkString_destruct, SkString};
+use skia_bindings as sb;
+use skia_bindings::SkString;
 use std::{slice, str};
 
 pub type String = Handle<SkString>;
@@ -7,7 +8,7 @@ pub type String = Handle<SkString>;
 impl NativeDrop for SkString {
     fn drop(&mut self) {
         unsafe {
-            C_SkString_destruct(self);
+            sb::C_SkString_destruct(self);
         }
     }
 }
@@ -55,7 +56,10 @@ impl AsStr for SkString {
     fn as_str(&self) -> &str {
         let mut size = 0;
         let slice = unsafe {
-            slice::from_raw_parts(C_SkString_c_str_size(self, &mut size) as *const u8, size)
+            slice::from_raw_parts(
+                sb::C_SkString_c_str_size(self, &mut size) as *const u8,
+                size,
+            )
         };
         str::from_utf8(slice).unwrap()
     }

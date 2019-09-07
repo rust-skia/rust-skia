@@ -1,19 +1,20 @@
 use crate::prelude::*;
 use crate::{scalar, Matrix, Path, Point, Vector};
-use skia_bindings::{C_SkPathMeasure_destruct, SkPathMeasure};
+use skia_bindings as sb;
+use skia_bindings::SkPathMeasure;
 
 pub type PathMeasure = Handle<SkPathMeasure>;
 
 impl NativeDrop for SkPathMeasure {
     fn drop(&mut self) {
-        unsafe { C_SkPathMeasure_destruct(self) }
+        unsafe { sb::C_SkPathMeasure_destruct(self) }
     }
 }
 
 bitflags! {
     pub struct MatrixFlags : u32 {
-        const GET_POSITION = skia_bindings::SkPathMeasure_MatrixFlags_kGetPosition_MatrixFlag as _;
-        const GET_TANGENT = skia_bindings::SkPathMeasure_MatrixFlags_kGetTangent_MatrixFlag as _;
+        const GET_POSITION = sb::SkPathMeasure_MatrixFlags_kGetPosition_MatrixFlag as _;
+        const GET_TANGENT = sb::SkPathMeasure_MatrixFlags_kGetTangent_MatrixFlag as _;
         const GET_POS_AND_TAN = Self::GET_POSITION.bits | Self::GET_TANGENT.bits;
     }
 }

@@ -1,6 +1,7 @@
 use crate::prelude::NativeTransmutable;
 use crate::{ISize, Matrix};
-use skia_bindings::{C_SkEncodedOriginToMatrix, SkEncodedOrigin};
+use skia_bindings as sb;
+use skia_bindings::SkEncodedOrigin;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -32,7 +33,12 @@ impl EncodedOrigin {
         let size = size.into();
         let mut m = Matrix::default();
         unsafe {
-            C_SkEncodedOriginToMatrix(self.into_native(), size.width, size.height, m.native_mut())
+            sb::C_SkEncodedOriginToMatrix(
+                self.into_native(),
+                size.width,
+                size.height,
+                m.native_mut(),
+            )
         };
         m
     }

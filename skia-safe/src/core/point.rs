@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::{scalar, ISize, Size};
-use skia_bindings::{C_SkPoint_isFinite, SkIPoint, SkPoint};
+use skia_bindings as sb;
+use skia_bindings::{SkIPoint, SkPoint};
 use std::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 pub type IVector = IPoint;
@@ -271,7 +272,7 @@ impl Point {
     }
 
     pub fn is_finite(self) -> bool {
-        unsafe { C_SkPoint_isFinite(self.native()) }
+        unsafe { sb::C_SkPoint_isFinite(self.native()) }
     }
 
     pub fn equals(self, x: scalar, y: scalar) -> bool {

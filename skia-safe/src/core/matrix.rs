@@ -1,20 +1,17 @@
 use crate::prelude::*;
 use crate::{scalar, Point, Point3, RSXform, Rect, Scalar, Size, Vector};
-use skia_bindings::{
-    C_SkMatrix_SubscriptMut, C_SkMatrix_cheapEqualTo, C_SkMatrix_getType,
-    C_SkMatrix_hasPerspective, C_SkMatrix_invert, C_SkMatrix_isFinite, C_SkMatrix_rectStaysRect,
-    C_SkMatrix_setScaleTranslate, SkMatrix, SkMatrix_ScaleToFit,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkMatrix, SkMatrix_ScaleToFit};
 use std::ops::{Index, IndexMut};
 use std::slice;
 
 bitflags! {
     pub struct TypeMask: u32 {
-        const IDENTITY = skia_bindings::SkMatrix_TypeMask_kIdentity_Mask as u32;
-        const TRANSLATE = skia_bindings::SkMatrix_TypeMask_kTranslate_Mask as u32;
-        const SCALE = skia_bindings::SkMatrix_TypeMask_kScale_Mask as u32;
-        const AFFINE = skia_bindings::SkMatrix_TypeMask_kAffine_Mask as u32;
-        const PERSPECTIVE = skia_bindings::SkMatrix_TypeMask_kPerspective_Mask as u32;
+        const IDENTITY = sb::SkMatrix_TypeMask_kIdentity_Mask as u32;
+        const TRANSLATE = sb::SkMatrix_TypeMask_kTranslate_Mask as u32;
+        const SCALE = sb::SkMatrix_TypeMask_kScale_Mask as u32;
+        const AFFINE = sb::SkMatrix_TypeMask_kAffine_Mask as u32;
+        const PERSPECTIVE = sb::SkMatrix_TypeMask_kPerspective_Mask as u32;
     }
 }
 
@@ -48,7 +45,7 @@ fn test_matrix_layout() {
 
 impl PartialEq for Matrix {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { skia_bindings::C_SkMatrix_Equals(self.native(), rhs.native()) }
+        unsafe { sb::C_SkMatrix_Equals(self.native(), rhs.native()) }
     }
 }
 
@@ -113,7 +110,7 @@ impl IndexMut<AffineMember> for Matrix {
 
 impl IndexMut<usize> for Matrix {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        unsafe { &mut *C_SkMatrix_SubscriptMut(self.native_mut(), index) }
+        unsafe { &mut *sb::C_SkMatrix_SubscriptMut(self.native_mut(), index) }
     }
 }
 
@@ -163,7 +160,7 @@ impl Matrix {
     }
 
     pub fn get_type(&self) -> TypeMask {
-        TypeMask::from_bits_truncate(unsafe { C_SkMatrix_getType(self.native()) } as _)
+        TypeMask::from_bits_truncate(unsafe { sb::C_SkMatrix_getType(self.native()) } as _)
     }
 
     pub fn is_identity(&self) -> bool {
@@ -179,7 +176,7 @@ impl Matrix {
     }
 
     pub fn rect_stays_rect(&self) -> bool {
-        unsafe { C_SkMatrix_rectStaysRect(self.native()) }
+        unsafe { sb::C_SkMatrix_rectStaysRect(self.native()) }
     }
 
     pub fn preserves_axis_alignment(&self) -> bool {
@@ -187,7 +184,7 @@ impl Matrix {
     }
 
     pub fn has_perspective(&self) -> bool {
-        unsafe { C_SkMatrix_hasPerspective(self.native()) }
+        unsafe { sb::C_SkMatrix_hasPerspective(self.native()) }
     }
 
     pub fn is_similarity(&self) -> bool {
@@ -560,7 +557,7 @@ impl Matrix {
     #[must_use]
     pub fn invert(&self) -> Option<Matrix> {
         let mut m = Matrix::new_identity();
-        unsafe { C_SkMatrix_invert(self.native(), m.native_mut()) }.if_true_some(m)
+        unsafe { sb::C_SkMatrix_invert(self.native(), m.native_mut()) }.if_true_some(m)
     }
 
     pub fn set_affine_identity(affine: &mut [scalar; 6]) {
@@ -709,7 +706,7 @@ impl Matrix {
     }
 
     pub fn cheap_equal_to(&self, other: &Matrix) -> bool {
-        unsafe { C_SkMatrix_cheapEqualTo(self.native(), other.native()) }
+        unsafe { sb::C_SkMatrix_cheapEqualTo(self.native(), other.native()) }
     }
 
     pub fn dump(&self) {
@@ -763,12 +760,12 @@ impl Matrix {
         t: impl Into<Vector>,
     ) -> &mut Self {
         let t = t.into();
-        unsafe { C_SkMatrix_setScaleTranslate(self.native_mut(), sx, sy, t.x, t.y) }
+        unsafe { sb::C_SkMatrix_setScaleTranslate(self.native_mut(), sx, sy, t.x, t.y) }
         self
     }
 
     pub fn is_finite(&self) -> bool {
-        unsafe { C_SkMatrix_isFinite(self.native()) }
+        unsafe { sb::C_SkMatrix_isFinite(self.native()) }
     }
 
     pub fn new_identity() -> Self {

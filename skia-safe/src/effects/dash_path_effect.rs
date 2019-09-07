@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::{scalar, PathEffect};
-use skia_bindings::{C_SkDashPathEffect_Make, SkPathEffect};
+use skia_bindings as sb;
+use skia_bindings::SkPathEffect;
 
 impl RCHandle<SkPathEffect> {
     pub fn dash(intervals: &[scalar], phase: scalar) -> Option<Self> {
@@ -10,7 +11,7 @@ impl RCHandle<SkPathEffect> {
 
 pub fn new(intervals: &[scalar], phase: scalar) -> Option<PathEffect> {
     PathEffect::from_ptr(unsafe {
-        C_SkDashPathEffect_Make(
+        sb::C_SkDashPathEffect_Make(
             intervals.as_ptr(),
             intervals.len().try_into().unwrap(),
             phase,

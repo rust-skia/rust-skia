@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::{image_filter::CropRect, scalar, ImageFilter, Rect};
-use skia_bindings::{C_SkMagnifierImageFilter_Make, SkImageFilter};
+use skia_bindings as sb;
+use skia_bindings::SkImageFilter;
 
 impl RCHandle<SkImageFilter> {
     pub fn magnifier<'a>(
@@ -20,7 +21,7 @@ pub fn new<'a>(
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
-        C_SkMagnifierImageFilter_Make(
+        sb::C_SkMagnifierImageFilter_Make(
             src_rect.as_ref().native(),
             inset,
             input.into_ptr(),

@@ -1,8 +1,6 @@
 use crate::prelude::*;
-use skia_bindings::{
-    C_SkColorMatrix_equals, C_SkColorMatrix_get20, C_SkColorMatrix_set20, SkColorMatrix,
-    SkColorMatrix_Axis,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkColorMatrix, SkColorMatrix_Axis};
 
 pub type ColorMatrix = Handle<SkColorMatrix>;
 
@@ -12,7 +10,7 @@ impl NativeDrop for SkColorMatrix {
 
 impl NativePartialEq for SkColorMatrix {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { C_SkColorMatrix_equals(self, rhs) }
+        unsafe { sb::C_SkColorMatrix_equals(self, rhs) }
     }
 }
 
@@ -98,12 +96,12 @@ impl Handle<SkColorMatrix> {
     }
 
     pub fn get_20<'a>(&self, m: &'a mut [f32; 20]) -> &'a mut [f32; 20] {
-        unsafe { C_SkColorMatrix_get20(self.native(), m.as_mut_ptr()) };
+        unsafe { sb::C_SkColorMatrix_get20(self.native(), m.as_mut_ptr()) };
         m
     }
 
     pub fn set_20(&mut self, m: &[f32; 20]) {
-        unsafe { C_SkColorMatrix_set20(self.native_mut(), m.as_ptr()) };
+        unsafe { sb::C_SkColorMatrix_set20(self.native_mut(), m.as_ptr()) };
     }
 }
 

@@ -2,9 +2,8 @@
 
 use crate::prelude::*;
 use crate::{Path, Rect};
-use skia_bindings::{
-    C_SkOpBuilder_Construct, C_SkOpBuilder_destruct, SkOpBuilder, SkPath, SkPathOp,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkOpBuilder, SkPath, SkPathOp};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -27,7 +26,7 @@ fn test_path_op_layout() {
 pub fn op(one: &Path, two: &Path, op: PathOp) -> Option<Path> {
     let mut result = Path::default();
     unsafe {
-        skia_bindings::Op(
+        sb::Op(
             one.native(),
             two.native(),
             op.into_native(),
@@ -39,30 +38,30 @@ pub fn op(one: &Path, two: &Path, op: PathOp) -> Option<Path> {
 
 pub fn simplify(path: &Path) -> Option<Path> {
     let mut result = Path::default();
-    unsafe { skia_bindings::Simplify(path.native(), result.native_mut()) }.if_true_some(result)
+    unsafe { sb::Simplify(path.native(), result.native_mut()) }.if_true_some(result)
 }
 
 pub fn tight_bounds(path: &Path) -> Option<Rect> {
     let mut result = Rect::default();
-    unsafe { skia_bindings::TightBounds(path.native(), result.native_mut()) }.if_true_some(result)
+    unsafe { sb::TightBounds(path.native(), result.native_mut()) }.if_true_some(result)
 }
 
 pub fn as_winding(path: &Path) -> Option<Path> {
     let mut result = Path::default();
-    unsafe { skia_bindings::AsWinding(path.native(), result.native_mut()) }.if_true_some(result)
+    unsafe { sb::AsWinding(path.native(), result.native_mut()) }.if_true_some(result)
 }
 
 pub type OpBuilder = Handle<SkOpBuilder>;
 
 impl NativeDrop for SkOpBuilder {
     fn drop(&mut self) {
-        unsafe { C_SkOpBuilder_destruct(self) }
+        unsafe { sb::C_SkOpBuilder_destruct(self) }
     }
 }
 
 impl Default for Handle<SkOpBuilder> {
     fn default() -> Self {
-        Self::construct(|opb| unsafe { C_SkOpBuilder_Construct(opb) })
+        Self::construct(|opb| unsafe { sb::C_SkOpBuilder_Construct(opb) })
     }
 }
 

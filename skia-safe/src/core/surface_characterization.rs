@@ -1,38 +1,37 @@
 use crate::gpu::SurfaceOrigin;
 use crate::prelude::*;
 use crate::{gpu, ColorSpace, ColorType, ISize, ImageInfo, SurfaceProps};
+use skia_bindings as sb;
 use skia_bindings::{
-    C_SkSurfaceCharacterization_Construct, C_SkSurfaceCharacterization_CopyConstruct,
-    C_SkSurfaceCharacterization_destruct, C_SkSurfaceCharacterization_equals,
-    C_SkSurfaceCharacterization_imageInfo, SkSurfaceCharacterization,
-    SkSurfaceCharacterization_MipMapped, SkSurfaceCharacterization_Textureable,
-    SkSurfaceCharacterization_UsesGLFBO0, SkSurfaceCharacterization_VulkanSecondaryCBCompatible,
+    SkSurfaceCharacterization, SkSurfaceCharacterization_MipMapped,
+    SkSurfaceCharacterization_Textureable, SkSurfaceCharacterization_UsesGLFBO0,
+    SkSurfaceCharacterization_VulkanSecondaryCBCompatible,
 };
 
 pub type SurfaceCharacterization = Handle<SkSurfaceCharacterization>;
 
 impl NativeDrop for SkSurfaceCharacterization {
     fn drop(&mut self) {
-        unsafe { C_SkSurfaceCharacterization_destruct(self) }
+        unsafe { sb::C_SkSurfaceCharacterization_destruct(self) }
     }
 }
 
 impl NativeClone for SkSurfaceCharacterization {
     fn clone(&self) -> Self {
-        construct(|sc| unsafe { C_SkSurfaceCharacterization_CopyConstruct(sc, self) })
+        construct(|sc| unsafe { sb::C_SkSurfaceCharacterization_CopyConstruct(sc, self) })
     }
 }
 
 impl NativePartialEq for SkSurfaceCharacterization {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { C_SkSurfaceCharacterization_equals(self, rhs) }
+        unsafe { sb::C_SkSurfaceCharacterization_equals(self, rhs) }
     }
 }
 
 impl Default for Handle<SkSurfaceCharacterization> {
     fn default() -> Self {
         SurfaceCharacterization::from_native(construct(|sc| unsafe {
-            C_SkSurfaceCharacterization_Construct(sc)
+            sb::C_SkSurfaceCharacterization_Construct(sc)
         }))
     }
 }
@@ -57,7 +56,7 @@ impl Handle<SkSurfaceCharacterization> {
 
     pub fn image_info(&self) -> &ImageInfo {
         ImageInfo::from_native_ref(unsafe {
-            &*C_SkSurfaceCharacterization_imageInfo(self.native())
+            &*sb::C_SkSurfaceCharacterization_imageInfo(self.native())
         })
     }
 

@@ -395,9 +395,10 @@ mod rust_run_handler {
     use crate::prelude::*;
     use crate::shaper::run_handler::RunInfo;
     use crate::shaper::RunHandler;
+    use skia_bindings as sb;
     use skia_bindings::{
-        C_RustRunHandler_construct, RustRunHandler, RustRunHandler_Param,
-        SkShaper_RunHandler_Buffer, SkShaper_RunHandler_RunInfo, TraitObject,
+        RustRunHandler, RustRunHandler_Param, SkShaper_RunHandler_Buffer,
+        SkShaper_RunHandler_RunInfo, TraitObject,
     };
     use std::mem;
 
@@ -414,7 +415,7 @@ mod rust_run_handler {
     }
 
     pub fn from_param(param: &RustRunHandler_Param) -> RustRunHandler {
-        construct(|rh| unsafe { C_RustRunHandler_construct(rh, param) })
+        construct(|rh| unsafe { sb::C_RustRunHandler_construct(rh, param) })
     }
 
     extern "C" fn begin_line(to: TraitObject) {

@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::ColorFilter;
-use skia_bindings::{C_SkTableColorFilter_Make, C_SkTableColorFilter_MakeARGB, SkColorFilter};
+use skia_bindings as sb;
+use skia_bindings::SkColorFilter;
 
 impl RCHandle<SkColorFilter> {
     pub fn from_table(table: &[u8; 256]) -> Self {
@@ -18,7 +19,7 @@ impl RCHandle<SkColorFilter> {
 }
 
 pub fn from_table(table: &[u8; 256]) -> ColorFilter {
-    ColorFilter::from_ptr(unsafe { C_SkTableColorFilter_Make(table.as_ptr()) }).unwrap()
+    ColorFilter::from_ptr(unsafe { sb::C_SkTableColorFilter_Make(table.as_ptr()) }).unwrap()
 }
 
 #[allow(clippy::redundant_closure)]
@@ -29,7 +30,7 @@ pub fn from_argb(
     table_b: Option<&[u8; 256]>,
 ) -> ColorFilter {
     ColorFilter::from_ptr(unsafe {
-        C_SkTableColorFilter_MakeARGB(
+        sb::C_SkTableColorFilter_MakeARGB(
             table_a.map(|t| t.as_ref()).as_ptr_or_null(),
             table_r.map(|t| t.as_ref()).as_ptr_or_null(),
             table_g.map(|t| t.as_ref()).as_ptr_or_null(),

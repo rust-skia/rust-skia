@@ -1,15 +1,12 @@
 use crate::prelude::*;
 use crate::{BBHFactory, Canvas, Drawable, Picture, Rect};
-use skia_bindings::{
-    C_SkPictureRecorder_destruct, C_SkPictureRecorder_finishRecordingAsDrawable,
-    C_SkPictureRecorder_finishRecordingAsPicture, SkPictureRecorder,
-    SkPictureRecorder_RecordFlags_kPlaybackDrawPicture_RecordFlag, SkRect,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkPictureRecorder, SkRect};
 use std::ptr;
 
 bitflags! {
     pub struct RecordFlags: u32 {
-        const PLAYBACK_DRAW_PICTURE = SkPictureRecorder_RecordFlags_kPlaybackDrawPicture_RecordFlag as _;
+        const PLAYBACK_DRAW_PICTURE = sb::SkPictureRecorder_RecordFlags_kPlaybackDrawPicture_RecordFlag as _;
     }
 }
 
@@ -18,7 +15,7 @@ pub type PictureRecorder = Handle<SkPictureRecorder>;
 impl NativeDrop for SkPictureRecorder {
     fn drop(&mut self) {
         unsafe {
-            C_SkPictureRecorder_destruct(self);
+            sb::C_SkPictureRecorder_destruct(self);
         }
     }
 }
@@ -62,7 +59,7 @@ impl Handle<SkPictureRecorder> {
             cull_rect.map(|r| r.native() as _).unwrap_or(ptr::null());
 
         let picture_ptr = unsafe {
-            C_SkPictureRecorder_finishRecordingAsPicture(self.native_mut(), cull_rect_ptr)
+            sb::C_SkPictureRecorder_finishRecordingAsPicture(self.native_mut(), cull_rect_ptr)
         };
 
         Picture::from_ptr(picture_ptr)
@@ -70,7 +67,7 @@ impl Handle<SkPictureRecorder> {
 
     pub fn finish_recording_as_drawable(&mut self) -> Option<Drawable> {
         Drawable::from_ptr(unsafe {
-            C_SkPictureRecorder_finishRecordingAsDrawable(self.native_mut())
+            sb::C_SkPictureRecorder_finishRecordingAsDrawable(self.native_mut())
         })
     }
 }

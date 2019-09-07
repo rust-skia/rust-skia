@@ -1,16 +1,11 @@
 use crate::gpu::{gl, MipMapped};
 use crate::prelude::*;
-use skia_bindings::{
-    C_GrContext_MakeGL, C_GrContext_abandoned, C_GrContext_flush, GrContext,
-    GrContext_abandonContext, GrContext_freeGpuResources,
-    GrContext_releaseResourcesAndAbandonContext, SkRefCntBase,
-};
+use skia_bindings as sb;
+use skia_bindings::{GrContext, SkRefCntBase};
 
 #[cfg(feature = "vulkan")]
 use super::vk;
 use crate::ColorType;
-#[cfg(feature = "vulkan")]
-use skia_bindings::C_GrContext_MakeVulkan;
 
 pub type Context = RCHandle<GrContext>;
 
@@ -33,7 +28,7 @@ pub struct ResourceCacheUsage {
 impl RCHandle<GrContext> {
     // TODO: support variant with GrContextOptions
     pub fn new_gl(interface: impl Into<Option<gl::Interface>>) -> Option<Context> {
-        Context::from_ptr(unsafe { C_GrContext_MakeGL(interface.into().into_ptr_or_null()) })
+        Context::from_ptr(unsafe { sb::C_GrContext_MakeGL(interface.into().into_ptr_or_null()) })
     }
 
     // TODO: support variant with GrContextOptions
@@ -41,7 +36,8 @@ impl RCHandle<GrContext> {
     pub fn new_vulkan(backend_context: &vk::BackendContext) -> Option<Context> {
         unsafe {
             let end_resolving = backend_context.begin_resolving();
-            let context = Context::from_ptr(C_GrContext_MakeVulkan(backend_context.native as _));
+            let context =
+                Context::from_ptr(sb::C_GrContext_MakeVulkan(backend_context.native as _));
             drop(end_resolving);
             context
         }
@@ -52,7 +48,7 @@ impl RCHandle<GrContext> {
     pub fn reset(&mut self, backend_state: Option<u32>) -> &mut Self {
         unsafe {
             self.native_mut()
-                .resetContext(backend_state.unwrap_or(skia_bindings::kAll_GrBackendState))
+                .resetContext(backend_state.unwrap_or(sb::kAll_GrBackendState))
         }
         self
     }
@@ -65,18 +61,18 @@ impl RCHandle<GrContext> {
     pub fn abandon(&mut self) -> &mut Self {
         unsafe {
             // self.native_mut().abandonContext()
-            GrContext_abandonContext(self.native_mut() as *mut _ as _)
+            sb::GrContext_abandonContext(self.native_mut() as *mut _ as _)
         }
         self
     }
 
     // TODO: is_...?
     pub fn abandoned(&self) -> bool {
-        unsafe { C_GrContext_abandoned(self.native()) }
+        unsafe { sb::C_GrContext_abandoned(self.native()) }
     }
 
     pub fn release_resources_and_abandon(&mut self) -> &mut Self {
-        unsafe { GrContext_releaseResourcesAndAbandonContext(self.native_mut() as *mut _ as _) }
+        unsafe { sb::GrContext_releaseResourcesAndAbandonContext(self.native_mut() as *mut _ as _) }
         self
     }
 
@@ -111,7 +107,7 @@ impl RCHandle<GrContext> {
     }
 
     pub fn free_gpu_resources(&mut self) -> &mut Self {
-        unsafe { GrContext_freeGpuResources(self.native_mut() as *mut _ as _) }
+        unsafe { sb::GrContext_freeGpuResources(self.native_mut() as *mut _ as _) }
         self
     }
 
@@ -154,10 +150,7 @@ impl RCHandle<GrContext> {
     // TODO: is_...?
     pub fn color_type_supported_as_surface(&self, color_type: ColorType) -> bool {
         unsafe {
-            skia_bindings::C_GrContext_colorTypeSupportedAsSurface(
-                self.native(),
-                color_type.into_native(),
-            )
+            sb::C_GrContext_colorTypeSupportedAsSurface(self.native(), color_type.into_native())
         }
     }
 
@@ -173,7 +166,7 @@ impl RCHandle<GrContext> {
     // TODO: wait()
 
     pub fn flush(&mut self) -> &mut Self {
-        unsafe { C_GrContext_flush(self.native_mut()) }
+        unsafe { sb::C_GrContext_flush(self.native_mut()) }
         self
     }
 

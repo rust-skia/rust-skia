@@ -2,11 +2,8 @@ use crate::interop;
 use crate::interop::DynamicMemoryWStream;
 use crate::prelude::*;
 use crate::{FontStyle, Typeface, Unichar};
-use skia_bindings::{
-    C_SkFontMgr_RefDefault, C_SkFontMgr_makeFromStream, C_SkFontStyleSet_count,
-    C_SkFontStyleSet_createTypeface, C_SkFontStyleSet_getStyle, C_SkFontStyleSet_matchStyle,
-    SkFontMgr, SkFontStyleSet, SkRefCntBase,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkFontMgr, SkFontStyleSet, SkRefCntBase};
 use std::ffi::CString;
 use std::mem;
 use std::os::raw::c_char;
@@ -30,7 +27,7 @@ impl Default for RCHandle<SkFontStyleSet> {
 impl RCHandle<SkFontStyleSet> {
     pub fn count(&mut self) -> usize {
         unsafe {
-            C_SkFontStyleSet_count(self.native_mut())
+            sb::C_SkFontStyleSet_count(self.native_mut())
                 .try_into()
                 .unwrap()
         }
@@ -42,7 +39,7 @@ impl RCHandle<SkFontStyleSet> {
         let mut font_style = FontStyle::default();
         let mut style = interop::String::default();
         unsafe {
-            C_SkFontStyleSet_getStyle(
+            sb::C_SkFontStyleSet_getStyle(
                 self.native_mut(),
                 index.try_into().unwrap(),
                 font_style.native_mut(),
@@ -63,14 +60,14 @@ impl RCHandle<SkFontStyleSet> {
         assert!(index < self.count());
 
         Typeface::from_ptr(unsafe {
-            C_SkFontStyleSet_createTypeface(self.native_mut(), index.try_into().unwrap())
+            sb::C_SkFontStyleSet_createTypeface(self.native_mut(), index.try_into().unwrap())
         })
     }
 
     pub fn match_style(&mut self, index: usize, pattern: FontStyle) -> Option<Typeface> {
         assert!(index < self.count());
         Typeface::from_ptr(unsafe {
-            C_SkFontStyleSet_matchStyle(self.native_mut(), pattern.native())
+            sb::C_SkFontStyleSet_matchStyle(self.native_mut(), pattern.native())
         })
     }
 
@@ -97,7 +94,7 @@ impl Default for RCHandle<SkFontMgr> {
 
 impl RCHandle<SkFontMgr> {
     pub fn new() -> Self {
-        FontMgr::from_ptr(unsafe { C_SkFontMgr_RefDefault() }).unwrap()
+        FontMgr::from_ptr(unsafe { sb::C_SkFontMgr_RefDefault() }).unwrap()
     }
 
     pub fn count_families(&self) -> usize {
@@ -189,7 +186,7 @@ impl RCHandle<SkFontMgr> {
             let stream_ptr = stream.native_mut() as *mut _;
             // makeFromStream takes ownership of the stream, so don't call drop on it.
             mem::forget(stream);
-            C_SkFontMgr_makeFromStream(
+            sb::C_SkFontMgr_makeFromStream(
                 self.native(),
                 stream_ptr,
                 ttc_index.into().unwrap_or_default().try_into().unwrap(),

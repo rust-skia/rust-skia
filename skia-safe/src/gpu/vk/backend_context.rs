@@ -1,21 +1,20 @@
 use super::{Device, GetProc, GetProcOf, Instance, PhysicalDevice, Queue};
 use crate::prelude::*;
-use skia_bindings::{
-    C_GrVkBackendContext_Delete, C_GrVkBackendContext_New, GrVkExtensionFlags, GrVkFeatureFlags,
-};
+use skia_bindings as sb;
+use skia_bindings::{GrVkExtensionFlags, GrVkFeatureFlags};
 use std::cell::RefCell;
 use std::os::raw;
 use std::{ffi, mem};
 
 bitflags! {
     pub struct ExtensionFlags : u32 {
-        const EXT_DEBUG_REPORT = skia_bindings::GrVkExtensionFlags_kEXT_debug_report_GrVkExtensionFlag as _;
-        const NV_GLSL_SHADER = skia_bindings::GrVkExtensionFlags_kNV_glsl_shader_GrVkExtensionFlag as _;
-        const KHR_SURFACE = skia_bindings::GrVkExtensionFlags_kKHR_surface_GrVkExtensionFlag as _;
-        const KHR_SWAPCHAIN = skia_bindings::GrVkExtensionFlags_kKHR_swapchain_GrVkExtensionFlag as _;
-        const KHR_WIN32_SURFACE = skia_bindings::GrVkExtensionFlags_kKHR_win32_surface_GrVkExtensionFlag as _;
-        const KHR_ANDROID_SURFACE = skia_bindings::GrVkExtensionFlags_kKHR_android_surface_GrVkExtensionFlag as _;
-        const KHR_XCB_SURFACE = skia_bindings::GrVkExtensionFlags_kKHR_xcb_surface_GrVkExtensionFlag as _;
+        const EXT_DEBUG_REPORT = sb::GrVkExtensionFlags_kEXT_debug_report_GrVkExtensionFlag as _;
+        const NV_GLSL_SHADER = sb::GrVkExtensionFlags_kNV_glsl_shader_GrVkExtensionFlag as _;
+        const KHR_SURFACE = sb::GrVkExtensionFlags_kKHR_surface_GrVkExtensionFlag as _;
+        const KHR_SWAPCHAIN = sb::GrVkExtensionFlags_kKHR_swapchain_GrVkExtensionFlag as _;
+        const KHR_WIN32_SURFACE = sb::GrVkExtensionFlags_kKHR_win32_surface_GrVkExtensionFlag as _;
+        const KHR_ANDROID_SURFACE = sb::GrVkExtensionFlags_kKHR_android_surface_GrVkExtensionFlag as _;
+        const KHR_XCB_SURFACE = sb::GrVkExtensionFlags_kKHR_xcb_surface_GrVkExtensionFlag as _;
     }
 }
 
@@ -27,9 +26,9 @@ fn test_extension_flags_layout() {
 
 bitflags! {
     pub struct FeatureFlags: u32 {
-        const GEOMETRY_SHADER = skia_bindings::GrVkFeatureFlags_kGeometryShader_GrVkFeatureFlag as _;
-        const DUAL_SRC_BLEND = skia_bindings::GrVkFeatureFlags_kDualSrcBlend_GrVkFeatureFlag as _;
-        const SAMPLE_RATE_SHADING = skia_bindings::GrVkFeatureFlags_kSampleRateShading_GrVkFeatureFlag as _;
+        const GEOMETRY_SHADER = sb::GrVkFeatureFlags_kGeometryShader_GrVkFeatureFlag as _;
+        const DUAL_SRC_BLEND = sb::GrVkFeatureFlags_kDualSrcBlend_GrVkFeatureFlag as _;
+        const SAMPLE_RATE_SHADING = sb::GrVkFeatureFlags_kSampleRateShading_GrVkFeatureFlag as _;
     }
 }
 
@@ -48,7 +47,7 @@ pub struct BackendContext<'a> {
 
 impl<'a> Drop for BackendContext<'a> {
     fn drop(&mut self) {
-        unsafe { C_GrVkBackendContext_Delete(self.native) }
+        unsafe { sb::C_GrVkBackendContext_Delete(self.native) }
     }
 }
 
@@ -65,7 +64,7 @@ impl<'a> BackendContext<'a> {
         get_proc: &impl GetProc,
     ) -> BackendContext {
         BackendContext {
-            native: C_GrVkBackendContext_New(
+            native: sb::C_GrVkBackendContext_New(
                 instance as _,
                 physical_device as _,
                 device as _,

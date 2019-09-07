@@ -1,10 +1,8 @@
 use crate::prelude::*;
 use crate::private::safe32::{sk32, sk64};
 use crate::{scalar, Contains, IPoint, ISize, IVector, Point, Size, Vector};
-use skia_bindings::{
-    C_SkIRect_isEmpty, C_SkRect_round, C_SkRect_roundIn, C_SkRect_roundOut, SkIRect,
-    SkIRect_contains, SkRect,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkIRect, SkRect};
 use std::mem;
 
 #[repr(C)]
@@ -119,7 +117,7 @@ impl IRect {
     }
 
     pub fn is_empty(&self) -> bool {
-        unsafe { C_SkIRect_isEmpty(self.native()) }
+        unsafe { sb::C_SkIRect_isEmpty(self.native()) }
     }
 
     pub fn set_empty(&mut self) {
@@ -296,7 +294,7 @@ impl Contains<&IRect> for IRect {
 
 impl Contains<&Rect> for IRect {
     fn contains(&self, other: &Rect) -> bool {
-        unsafe { SkIRect_contains(self.native(), other.native()) }
+        unsafe { sb::SkIRect_contains(self.native(), other.native()) }
     }
 }
 
@@ -696,7 +694,7 @@ impl Rect {
     #[must_use]
     pub fn round(&self) -> IRect {
         let mut r = IRect::default();
-        unsafe { C_SkRect_round(self.native(), r.native_mut()) };
+        unsafe { sb::C_SkRect_round(self.native(), r.native_mut()) };
         r
     }
 
@@ -705,7 +703,7 @@ impl Rect {
     #[must_use]
     pub fn round_in(&self) -> IRect {
         let mut r = IRect::default();
-        unsafe { C_SkRect_roundIn(self.native(), r.native_mut()) };
+        unsafe { sb::C_SkRect_roundIn(self.native(), r.native_mut()) };
         r
     }
 
@@ -787,7 +785,7 @@ pub trait RoundOut<R> {
 impl RoundOut<IRect> for Rect {
     fn round_out(&self) -> IRect {
         let mut r = IRect::default();
-        unsafe { C_SkRect_roundOut(self.native(), r.native_mut()) };
+        unsafe { sb::C_SkRect_roundOut(self.native(), r.native_mut()) };
         r
     }
 }

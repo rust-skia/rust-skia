@@ -1,9 +1,7 @@
 use crate::prelude::*;
 use crate::{scalar, BlurStyle, Color, NativeFlattenable, Paint, Rect, Vector};
-use skia_bindings::{
-    C_SkDrawLooper_Deserialize, C_SkDrawLooper_asABlurShadow, SkDrawLooper,
-    SkDrawLooper_BlurShadowRec, SkFlattenable, SkRefCntBase,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkDrawLooper, SkDrawLooper_BlurShadowRec, SkFlattenable, SkRefCntBase};
 
 pub type DrawLooper = RCHandle<SkDrawLooper>;
 
@@ -21,7 +19,7 @@ impl NativeFlattenable for SkDrawLooper {
     }
 
     fn native_deserialize(data: &[u8]) -> *mut Self {
-        unsafe { C_SkDrawLooper_Deserialize(data.as_ptr() as _, data.len()) }
+        unsafe { sb::C_SkDrawLooper_Deserialize(data.as_ptr() as _, data.len()) }
     }
 }
 
@@ -59,7 +57,7 @@ impl RCHandle<SkDrawLooper> {
 
     pub fn as_a_blur_shadow(&self) -> Option<BlurShadowRec> {
         let mut br = BlurShadowRec::default();
-        unsafe { C_SkDrawLooper_asABlurShadow(self.native(), br.native_mut()) }.if_true_some(br)
+        unsafe { sb::C_SkDrawLooper_asABlurShadow(self.native(), br.native_mut()) }.if_true_some(br)
     }
 
     // TODO: apply

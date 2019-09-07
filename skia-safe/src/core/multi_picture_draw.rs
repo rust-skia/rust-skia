@@ -1,12 +1,13 @@
 use crate::prelude::*;
 use crate::{Canvas, Matrix, Paint, Picture};
-use skia_bindings::{C_SkMultiPictureDraw_destruct, SkMultiPictureDraw};
+use skia_bindings as sb;
+use skia_bindings::SkMultiPictureDraw;
 
 pub type MultiPictureDraw = Handle<SkMultiPictureDraw>;
 
 impl NativeDrop for SkMultiPictureDraw {
     fn drop(&mut self) {
-        unsafe { C_SkMultiPictureDraw_destruct(self) }
+        unsafe { sb::C_SkMultiPictureDraw_destruct(self) }
     }
 }
 
