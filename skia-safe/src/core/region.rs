@@ -102,7 +102,7 @@ impl Handle<SkRegion> {
         unsafe { self.native_mut().setRect(rect.as_ref().native()) }
     }
 
-    #[deprecated(since = "m78", note = "use set_rect()")]
+    #[deprecated(since = "0.0.0", note = "use set_rect()")]
     pub fn set_rect_ltbr(&mut self, left: i32, top: i32, right: i32, bottom: i32) -> bool {
         self.set_rect(IRect::new(left, top, right, bottom))
     }
@@ -151,7 +151,7 @@ impl Handle<SkRegion> {
         unsafe { sb::C_SkRegion_quickContains(self.native(), r.native()) }
     }
 
-    #[deprecated(since = "m78", note = "use quick_contains()")]
+    #[deprecated(since = "0.0.0", note = "use quick_contains()")]
     pub fn quick_contains_ltrb(&self, left: i32, top: i32, right: i32, bottom: i32) -> bool {
         let rect = IRect::new(left, top, right, bottom);
         self.quick_contains(rect)

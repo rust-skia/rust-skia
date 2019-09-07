@@ -26,7 +26,7 @@ pub mod dilate_image_filter {
     use crate::ImageFilter;
     use skia_bindings as sb;
 
-    #[deprecated(since = "m78", note = "use color_filters::dilate")]
+    #[deprecated(since = "0.0.0", note = "use color_filters::dilate")]
     pub fn new<'a>(
         (radius_x, radius_y): (i32, i32),
         input: ImageFilter,
@@ -49,7 +49,7 @@ pub mod erode_image_filter {
     use crate::ImageFilter;
     use skia_bindings as sb;
 
-    #[deprecated(since = "m78", note = "use color_filters::erode")]
+    #[deprecated(since = "0.0.0", note = "use color_filters::erode")]
     pub fn new<'a>(
         (radius_x, radius_y): (i32, i32),
         input: ImageFilter,

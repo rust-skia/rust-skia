@@ -9,7 +9,7 @@ impl RCHandle<SkImageFilter> {
     }
 }
 
-#[deprecated(since = "m78", note = "use image_filters::compose")]
+#[deprecated(since = "0.0.0", note = "use image_filters::compose")]
 pub fn new(outer: ImageFilter, inner: ImageFilter) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
         sb::C_SkComposeImageFilter_Make(outer.into_ptr(), inner.into_ptr())

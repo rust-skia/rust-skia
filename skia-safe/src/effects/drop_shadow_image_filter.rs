@@ -38,7 +38,7 @@ fn test_shadow_mode_layout() {
 }
 
 #[deprecated(
-    since = "m78",
+    since = "0.0.0",
     note = "use color_filters::drop_shadow & color_filters::drop_shadow_only"
 )]
 pub fn new<'a>(

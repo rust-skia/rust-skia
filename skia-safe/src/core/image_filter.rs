@@ -196,7 +196,7 @@ impl RCHandle<SkImageFilter> {
         })
     }
 
-    #[deprecated(since = "m78", note = "use image_filters::matrix_transform()")]
+    #[deprecated(since = "0.0.0", note = "use image_filters::matrix_transform()")]
     pub fn with_matrix(self, matrix: &Matrix, quality: FilterQuality) -> ImageFilter {
         ImageFilter::from_ptr(unsafe {
             sb::C_SkImageFilter_MakeMatrixFilter(

@@ -47,6 +47,7 @@ impl Handle<GrBackendFormat> {
         })
     }
 
+    #[deprecated(since = "0.0.0", note = "use backend()")]
     pub fn backend_api(&self) -> BackendAPI {
         BackendAPI::from_native(self.native().fBackend)
     }

@@ -124,7 +124,7 @@ impl IRect {
         *self = Self::new_empty()
     }
 
-    #[deprecated(since = "m78", note = "use set_ltrb()")]
+    #[deprecated(since = "0.0.0", note = "use set_ltrb()")]
     pub fn set(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
         self.set_ltrb(left, top, right, bottom)
     }
@@ -231,7 +231,7 @@ impl IRect {
         unsafe { r.native_mut().intersect(a.native(), b.native()) }.if_true_some(r)
     }
 
-    #[deprecated(since = "m78", note = "removed without alternative")]
+    #[deprecated(since = "0.0.0", note = "removed without alternative")]
     pub fn intersect_no_empty_check(a: &Self, b: &Self) -> Option<Self> {
         Self::intersect_no_empty_check_(a, b)
     }
@@ -240,7 +240,7 @@ impl IRect {
         Self::intersect(a, b).is_some()
     }
 
-    #[deprecated(since = "m78", note = "removed without alternative")]
+    #[deprecated(since = "0.0.0", note = "removed without alternative")]
     pub fn intersects_no_empty_check(a: &Self, b: &Self) -> bool {
         Self::intersect_no_empty_check_(a, b).is_some()
     }
@@ -488,7 +488,7 @@ impl Rect {
         *self = Self::from_irect(irect)
     }
 
-    #[deprecated(since = "m78", note = "use set_ltrb()")]
+    #[deprecated(since = "0.0.0", note = "use set_ltrb()")]
     pub fn set(&mut self, left: scalar, top: scalar, right: scalar, bottom: scalar) {
         self.set_ltrb(left, top, right, bottom)
     }
@@ -497,12 +497,12 @@ impl Rect {
         *self = Self::new(left, top, right, bottom)
     }
 
-    #[deprecated(since = "m78", note = "use from_irect()")]
+    #[deprecated(since = "0.0.0", note = "use from_irect()")]
     pub fn iset(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
         *self = Self::from_irect(IRect::new(left, top, right, bottom))
     }
 
-    #[deprecated(since = "m78", note = "use from_isize()")]
+    #[deprecated(since = "0.0.0", note = "use from_isize()")]
     pub fn iset_wh(&mut self, width: i32, height: i32) {
         *self = Self::from_isize(ISize::new(width, height))
     }
@@ -612,7 +612,7 @@ impl Rect {
         unsafe { self.native_mut().intersect(r.as_ref().native()) }
     }
 
-    #[deprecated(since = "m78", note = "use intersect()")]
+    #[deprecated(since = "0.0.0", note = "use intersect()")]
     pub fn intersect_ltrb(
         &mut self,
         left: scalar,
@@ -631,7 +631,7 @@ impl Rect {
         }
     }
 
-    #[deprecated(since = "m78", note = "use intersects()")]
+    #[deprecated(since = "0.0.0", note = "use intersects()")]
     pub fn intersects_ltrb(
         &self,
         left: scalar,
@@ -687,7 +687,7 @@ impl Rect {
         l < r && t < b
     }
 
-    #[deprecated(since = "m78", note = "use join()")]
+    #[deprecated(since = "0.0.0", note = "use join()")]
     pub fn join_ltrb(&mut self, left: scalar, top: scalar, right: scalar, bottom: scalar) {
         self.join(Rect::new(left, top, right, bottom))
     }

@@ -14,7 +14,7 @@ impl RCHandle<SkImageFilter> {
     }
 }
 
-#[deprecated(since = "m78", note = "use color_filters::magnifier")]
+#[deprecated(since = "0.0.0", note = "use color_filters::magnifier")]
 pub fn new<'a>(
     src_rect: impl AsRef<Rect>,
     inset: scalar,

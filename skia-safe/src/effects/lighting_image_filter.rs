@@ -126,7 +126,7 @@ impl RCHandle<SkImageFilter> {
     }
 }
 
-#[deprecated(since = "m78", note = "use color_filters::distant_lit_diffuse")]
+#[deprecated(since = "0.0.0", note = "use color_filters::distant_lit_diffuse")]
 pub fn distant_lit_diffuse<'a>(
     direction: impl Into<Point3>,
     light_color: impl Into<Color>,
@@ -147,7 +147,7 @@ pub fn distant_lit_diffuse<'a>(
     })
 }
 
-#[deprecated(since = "m78", note = "use color_filters::point_lit_diffuse")]
+#[deprecated(since = "0.0.0", note = "use color_filters::point_lit_diffuse")]
 pub fn point_lit_diffuse<'a>(
     location: impl Into<Point3>,
     light_color: impl Into<Color>,
@@ -168,7 +168,7 @@ pub fn point_lit_diffuse<'a>(
     })
 }
 
-#[deprecated(since = "m78", note = "use color_filters::spot_lit_diffuse")]
+#[deprecated(since = "0.0.0", note = "use color_filters::spot_lit_diffuse")]
 #[allow(clippy::too_many_arguments)]
 pub fn spot_lit_diffuse<'a>(
     location: impl Into<Point3>,
@@ -196,7 +196,7 @@ pub fn spot_lit_diffuse<'a>(
     })
 }
 
-#[deprecated(since = "m78", note = "use color_filters::distant_lit_specular")]
+#[deprecated(since = "0.0.0", note = "use color_filters::distant_lit_specular")]
 pub fn distant_lit_specular<'a>(
     direction: impl Into<Point3>,
     light_color: impl Into<Color>,
@@ -219,7 +219,7 @@ pub fn distant_lit_specular<'a>(
     })
 }
 
-#[deprecated(since = "m78", note = "use color_filters::point_lit_specular")]
+#[deprecated(since = "0.0.0", note = "use color_filters::point_lit_specular")]
 pub fn point_lit_specular<'a>(
     location: impl Into<Point3>,
     light_color: impl Into<Color>,
@@ -242,7 +242,7 @@ pub fn point_lit_specular<'a>(
     })
 }
 
-#[deprecated(since = "m78", note = "use color_filters::spot_lit_specular")]
+#[deprecated(since = "0.0.0", note = "use color_filters::spot_lit_specular")]
 #[allow(clippy::too_many_arguments)]
 pub fn spot_lit_specular<'a>(
     location: impl Into<Point3>,

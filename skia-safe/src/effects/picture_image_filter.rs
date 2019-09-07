@@ -28,7 +28,7 @@ impl RCHandle<SkPicture> {
     }
 }
 
-#[deprecated(since = "m78", note = "use color_filters::picture")]
+#[deprecated(since = "0.0.0", note = "use color_filters::picture")]
 pub fn from_picture<'a>(
     picture: Picture,
     target_rect: impl Into<Option<&'a Rect>>,
