@@ -5,6 +5,7 @@ parameters:
 
 jobs:
 - job: "${{ parameters.platform }}"
+  timeoutInMinutes: 0
 
   strategy:
     matrix:
