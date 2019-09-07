@@ -38,6 +38,7 @@ bitflags! {
     #[derive(Default)]
     pub struct Flags : u32 {
         const CONVERT_TEXT_TO_PATHS = sb::SkSVGCanvas_kConvertTextToPaths_Flag as _;
+        const NO_PRETTY_XML = sb::SkSVGCanvas_kNoPrettyXML_Flag as _;
     }
 }
 
@@ -81,8 +82,7 @@ fn test_svg() {
     let data = canvas.end();
     let contents = String::from_utf8_lossy(data.as_bytes());
     dbg!(&contents);
-    assert!(contents
-        .contains(r#"<ellipse fill="rgb(0,0,0)" stroke="none" cx="10" cy="10" rx="10" ry="10"/>"#));
+    assert!(contents.contains(r#"<ellipse cx="10" cy="10" rx="10" ry="10"/>"#));
     assert!(contents.contains(r#"</svg>"#));
 }
 
