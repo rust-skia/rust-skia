@@ -20,7 +20,7 @@ fn draw_rtl_shaped(canvas: &mut Canvas) {
 
     let font = &Font::from_typeface(Typeface::default(), 64.0);
 
-    let shaper = Shaper::new();
+    let shaper = Shaper::new(None);
     if let Some((blob, _)) =
         shaper.shape_text_blob(RTL_TEXT, font, false, 10000.0, Point::default())
     {

@@ -5,16 +5,20 @@ extern "C" SkShaper* C_SkShaper_MakePrimitive() {
     return SkShaper::MakePrimitive().release();
 }
 
-extern "C" SkShaper* C_SkShaper_MakeShaperDrivenWrapper() {
-    return SkShaper::MakeShaperDrivenWrapper().release();
+extern "C" SkShaper* C_SkShaper_MakeShaperDrivenWrapper(SkFontMgr* fontMgr) {
+    return SkShaper::MakeShaperDrivenWrapper(sk_sp<SkFontMgr>(fontMgr)).release();
 }
 
-extern "C" SkShaper* C_SkShaper_MakeShapeThenWrap() {
-    return SkShaper::MakeShapeThenWrap().release();
+extern "C" SkShaper* C_SkShaper_MakeShapeThenWrap(SkFontMgr* fontMgr) {
+    return SkShaper::MakeShapeThenWrap(sk_sp<SkFontMgr>(fontMgr)).release();
 }
 
-extern "C" SkShaper* C_SkShaper_Make() {
-    return SkShaper::Make().release();
+extern "C" SkShaper* C_SkShaper_MakeShapeDontWrapOrReorder(SkFontMgr* fontMgr) {
+    return SkShaper::MakeShapeDontWrapOrReorder(sk_sp<SkFontMgr>(fontMgr)).release();
+}
+
+extern "C" SkShaper* C_SkShaper_Make(SkFontMgr* fontMgr) {
+    return SkShaper::Make(sk_sp<SkFontMgr>(fontMgr)).release();
 }
 
 extern "C" void C_SkShaper_delete(SkShaper* self) {
