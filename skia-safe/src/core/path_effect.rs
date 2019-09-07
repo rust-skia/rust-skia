@@ -1,10 +1,8 @@
 use crate::prelude::*;
 use crate::{scalar, Matrix, NativeFlattenable, Path, Point, Rect, StrokeRec, Vector};
+use skia_bindings as sb;
 use skia_bindings::{
-    C_SkPathEffect_DashInfo_Construct, C_SkPathEffect_Deserialize, C_SkPathEffect_MakeCompose,
-    C_SkPathEffect_MakeSum, C_SkPathEffect_PointData_Construct,
-    C_SkPathEffect_PointData_deletePoints, SkFlattenable, SkPathEffect, SkPathEffect_DashType,
-    SkPathEffect_PointData, SkRefCntBase,
+    SkFlattenable, SkPathEffect, SkPathEffect_DashType, SkPathEffect_PointData, SkRefCntBase,
 };
 use std::os::raw;
 use std::slice;
@@ -37,14 +35,16 @@ impl Drop for PointData {
             // we can't call destruct, because it would destruct
             // other fields like Path, which would also be dropped individually,
             // so we just delete the points array here.
-            C_SkPathEffect_PointData_deletePoints(self.native_mut())
+            sb::C_SkPathEffect_PointData_deletePoints(self.native_mut())
         }
     }
 }
 
 impl Default for PointData {
     fn default() -> Self {
-        PointData::construct(|point_data| unsafe { C_SkPathEffect_PointData_Construct(point_data) })
+        PointData::construct(|point_data| unsafe {
+            sb::C_SkPathEffect_PointData_Construct(point_data)
+        })
     }
 }
 
@@ -55,11 +55,13 @@ impl PointData {
 }
 
 pub mod point_data {
+    use skia_bindings as sb;
+
     bitflags! {
         pub struct PointFlags: u32 {
-            const CIRCLES = skia_bindings::SkPathEffect_PointData_PointFlags_kCircles_PointFlag as _;
-            const USE_PATH = skia_bindings::SkPathEffect_PointData_PointFlags_kUsePath_PointFlag as _;
-            const USE_CLIP = skia_bindings::SkPathEffect_PointData_PointFlags_kUseClip_PointFlag as _;
+            const CIRCLES = sb::SkPathEffect_PointData_PointFlags_kCircles_PointFlag as _;
+            const USE_PATH = sb::SkPathEffect_PointData_PointFlags_kUsePath_PointFlag as _;
+            const USE_CLIP = sb::SkPathEffect_PointData_PointFlags_kUseClip_PointFlag as _;
         }
     }
 }
@@ -85,19 +87,21 @@ impl NativeFlattenable for SkPathEffect {
     }
 
     fn native_deserialize(data: &[u8]) -> *mut Self {
-        unsafe { C_SkPathEffect_Deserialize(data.as_ptr() as _, data.len()) }
+        unsafe { sb::C_SkPathEffect_Deserialize(data.as_ptr() as _, data.len()) }
     }
 }
 
 impl RCHandle<SkPathEffect> {
     pub fn sum(first: PathEffect, second: PathEffect) -> PathEffect {
-        PathEffect::from_ptr(unsafe { C_SkPathEffect_MakeSum(first.into_ptr(), second.into_ptr()) })
-            .unwrap()
+        PathEffect::from_ptr(unsafe {
+            sb::C_SkPathEffect_MakeSum(first.into_ptr(), second.into_ptr())
+        })
+        .unwrap()
     }
 
     pub fn compose(first: PathEffect, second: PathEffect) -> PathEffect {
         PathEffect::from_ptr(unsafe {
-            C_SkPathEffect_MakeCompose(first.into_ptr(), second.into_ptr())
+            sb::C_SkPathEffect_MakeCompose(first.into_ptr(), second.into_ptr())
         })
         .unwrap()
     }
@@ -168,7 +172,7 @@ impl RCHandle<SkPathEffect> {
 
     // TODO: rename to to_a_dash()?
     pub fn as_a_dash(&self) -> Option<DashInfo> {
-        let mut dash_info = construct(|di| unsafe { C_SkPathEffect_DashInfo_Construct(di) });
+        let mut dash_info = construct(|di| unsafe { sb::C_SkPathEffect_DashInfo_Construct(di) });
 
         let dash_type = unsafe { self.native().asADash(&mut dash_info) };
 

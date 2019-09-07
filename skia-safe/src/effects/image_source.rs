@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::{FilterQuality, Image, ImageFilter, Rect};
-use skia_bindings::{C_SkImageSource_Make, C_SkImageSource_Make2, SkImage, SkImageFilter};
+use skia_bindings as sb;
+use skia_bindings::{SkImage, SkImageFilter};
 
 impl RCHandle<SkImageFilter> {
     pub fn from_image(image: Image) -> Option<Self> {
@@ -47,7 +48,7 @@ impl RCHandle<SkImage> {
 }
 
 pub fn from_image(image: Image) -> Option<ImageFilter> {
-    ImageFilter::from_ptr(unsafe { C_SkImageSource_Make(image.into_ptr()) })
+    ImageFilter::from_ptr(unsafe { sb::C_SkImageSource_Make(image.into_ptr()) })
 }
 
 pub fn from_image_rect(
@@ -57,7 +58,7 @@ pub fn from_image_rect(
     filter_quality: FilterQuality,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
-        C_SkImageSource_Make2(
+        sb::C_SkImageSource_Make2(
             image.into_ptr(),
             src_rect.as_ref().native(),
             dst_rect.as_ref().native(),

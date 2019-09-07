@@ -1,9 +1,6 @@
 use crate::prelude::*;
-use skia_bindings::{
-    C_SkFontArguments_construct, C_SkFontArguments_destruct,
-    C_SkFontArguments_getVariationDesignPosition, C_SkFontArguments_setVariationDesignPosition,
-    SkFontArguments, SkFontArguments_VariationPosition,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkFontArguments, SkFontArguments_VariationPosition};
 use std::marker::PhantomData;
 use std::{mem, slice};
 
@@ -45,7 +42,7 @@ fn test_font_arguments_layout() {
 
 impl<'a> Drop for FontArguments<'a> {
     fn drop(&mut self) {
-        unsafe { C_SkFontArguments_destruct(self.native_mut()) }
+        unsafe { sb::C_SkFontArguments_destruct(self.native_mut()) }
     }
 }
 
@@ -58,7 +55,7 @@ impl<'a> Default for FontArguments<'a> {
 impl<'a> FontArguments<'a> {
     pub fn new() -> Self {
         Self::construct(|fa| unsafe {
-            C_SkFontArguments_construct(fa);
+            sb::C_SkFontArguments_construct(fa);
         })
     }
 
@@ -76,7 +73,7 @@ impl<'a> FontArguments<'a> {
             coordinateCount: position.coordinates.len().try_into().unwrap(),
         };
         unsafe {
-            C_SkFontArguments_setVariationDesignPosition(self.native_mut(), position);
+            sb::C_SkFontArguments_setVariationDesignPosition(self.native_mut(), position);
             // note: we are _not_ returning Self here, but VariationPosition with a
             // changed lifetime.
             mem::transmute(self)
@@ -89,7 +86,7 @@ impl<'a> FontArguments<'a> {
 
     pub fn variation_design_position(&self) -> VariationPosition {
         unsafe {
-            let position = C_SkFontArguments_getVariationDesignPosition(self.native());
+            let position = sb::C_SkFontArguments_getVariationDesignPosition(self.native());
             VariationPosition {
                 coordinates: slice::from_raw_parts(
                     position.coordinates as *const _,

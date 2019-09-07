@@ -1,9 +1,7 @@
 use crate::prelude::*;
 use crate::{scalar, ISize, Shader};
-use skia_bindings::{
-    C_SkPerlinNoiseShader_MakeFractalNoise, C_SkPerlinNoiseShader_MakeImprovedNoise,
-    C_SkPerlinNoiseShader_MakeTurbulence, SkShader,
-};
+use skia_bindings as sb;
+use skia_bindings::SkShader;
 
 impl RCHandle<SkShader> {
     pub fn fractal_perlin_noise(
@@ -40,7 +38,7 @@ pub fn fractal_noise(
     tile_size: impl Into<Option<ISize>>,
 ) -> Option<Shader> {
     Shader::from_ptr(unsafe {
-        C_SkPerlinNoiseShader_MakeFractalNoise(
+        sb::C_SkPerlinNoiseShader_MakeFractalNoise(
             base_frequency.0,
             base_frequency.1,
             num_octaves.try_into().unwrap(),
@@ -57,7 +55,7 @@ pub fn turbulence(
     tile_size: impl Into<Option<ISize>>,
 ) -> Option<Shader> {
     Shader::from_ptr(unsafe {
-        C_SkPerlinNoiseShader_MakeTurbulence(
+        sb::C_SkPerlinNoiseShader_MakeTurbulence(
             base_frequency.0,
             base_frequency.1,
             num_octaves.try_into().unwrap(),
@@ -73,7 +71,7 @@ pub fn improved_noise(
     z: scalar,
 ) -> Option<Shader> {
     Shader::from_ptr(unsafe {
-        C_SkPerlinNoiseShader_MakeImprovedNoise(
+        sb::C_SkPerlinNoiseShader_MakeImprovedNoise(
             base_frequency.0,
             base_frequency.1,
             num_octaves.try_into().unwrap(),

@@ -3,18 +3,15 @@ use crate::{
     gpu, image, ColorSpace, Data, ISize, ImageInfo, Matrix, Paint, Picture, YUVAIndex,
     YUVASizeInfo, YUVColorSpace,
 };
-use skia_bindings::{
-    C_SkImageGenerator_MakeFromEncoded, C_SkImageGenerator_MakeFromPicture,
-    C_SkImageGenerator_delete, C_SkImageGenerator_isValid, C_SkImageGenerator_refEncodedData,
-    SkImageGenerator,
-};
+use skia_bindings as sb;
+use skia_bindings::SkImageGenerator;
 use std::ffi::c_void;
 
 pub type ImageGenerator = RefHandle<SkImageGenerator>;
 
 impl NativeDrop for SkImageGenerator {
     fn drop(&mut self) {
-        unsafe { C_SkImageGenerator_delete(self) }
+        unsafe { sb::C_SkImageGenerator_delete(self) }
     }
 }
 
@@ -24,7 +21,7 @@ impl RefHandle<SkImageGenerator> {
     }
 
     pub fn encoded_data(&mut self) -> Option<Data> {
-        Data::from_ptr(unsafe { C_SkImageGenerator_refEncodedData(self.native_mut()) })
+        Data::from_ptr(unsafe { sb::C_SkImageGenerator_refEncodedData(self.native_mut()) })
     }
 
     pub fn info(&self) -> &ImageInfo {
@@ -32,7 +29,7 @@ impl RefHandle<SkImageGenerator> {
     }
 
     pub fn is_valid(&self, mut context: Option<&mut gpu::Context>) -> bool {
-        unsafe { C_SkImageGenerator_isValid(self.native(), context.native_ptr_or_null_mut()) }
+        unsafe { sb::C_SkImageGenerator_isValid(self.native(), context.native_ptr_or_null_mut()) }
     }
 
     #[must_use]
@@ -106,7 +103,7 @@ impl RefHandle<SkImageGenerator> {
     // TODO: generateTexture()
 
     pub fn from_encoded(encoded: Data) -> Option<Self> {
-        Self::from_ptr(unsafe { C_SkImageGenerator_MakeFromEncoded(encoded.into_ptr()) })
+        Self::from_ptr(unsafe { sb::C_SkImageGenerator_MakeFromEncoded(encoded.into_ptr()) })
     }
 
     pub fn from_picture(
@@ -118,7 +115,7 @@ impl RefHandle<SkImageGenerator> {
         color_space: impl Into<Option<ColorSpace>>,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
-            C_SkImageGenerator_MakeFromPicture(
+            sb::C_SkImageGenerator_MakeFromPicture(
                 size.native(),
                 picture.into_ptr(),
                 matrix.native_ptr_or_null(),

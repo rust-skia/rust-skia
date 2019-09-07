@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::{scalar, PathEffect};
-use skia_bindings::{C_SkDiscretePathEffect_Make, SkPathEffect};
+use skia_bindings as sb;
+use skia_bindings::SkPathEffect;
 
 impl RCHandle<SkPathEffect> {
     pub fn discrete(
@@ -18,6 +19,6 @@ pub fn new(
     seed_assist: impl Into<Option<u32>>,
 ) -> Option<PathEffect> {
     PathEffect::from_ptr(unsafe {
-        C_SkDiscretePathEffect_Make(seg_length, dev, seed_assist.into().unwrap_or(0))
+        sb::C_SkDiscretePathEffect_Make(seg_length, dev, seed_assist.into().unwrap_or(0))
     })
 }

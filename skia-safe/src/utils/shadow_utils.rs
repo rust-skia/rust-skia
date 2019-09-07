@@ -1,12 +1,13 @@
 use crate::prelude::*;
 use crate::{scalar, Canvas, Color, Path, Point3};
 use core::borrow::BorrowMut;
+use skia_bindings as sb;
 use skia_bindings::SkShadowUtils;
 
 bitflags! {
     pub struct ShadowFlags: u32 {
-        const TRANSPARENT_OCCLUDER = skia_bindings::SkShadowFlags_kTransparentOccluder_ShadowFlag as u32;
-        const GEOMETRIC_ONLY = skia_bindings::SkShadowFlags_kGeometricOnly_ShadowFlag as u32;
+        const TRANSPARENT_OCCLUDER = sb::SkShadowFlags_kTransparentOccluder_ShadowFlag as u32;
+        const GEOMETRIC_ONLY = sb::SkShadowFlags_kGeometricOnly_ShadowFlag as u32;
         const ALL = Self::TRANSPARENT_OCCLUDER.bits | Self::GEOMETRIC_ONLY.bits;
     }
 }

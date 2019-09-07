@@ -1,5 +1,6 @@
 use crate::prelude::*;
-use skia_bindings::{SkBlendMode, SkBlendMode_Name};
+use skia_bindings as sb;
+use skia_bindings::SkBlendMode;
 use std::ffi::CStr;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -53,7 +54,7 @@ impl Default for BlendMode {
 impl BlendMode {
     pub fn name(self) -> &'static str {
         unsafe {
-            let name_ptr = SkBlendMode_Name(self.into_native());
+            let name_ptr = sb::SkBlendMode_Name(self.into_native());
             CStr::from_ptr(name_ptr).to_str().unwrap()
         }
     }

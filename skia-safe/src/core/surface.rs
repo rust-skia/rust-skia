@@ -4,11 +4,9 @@ use crate::{
     Bitmap, Budgeted, Canvas, ColorSpace, ColorType, DeferredDisplayList, IPoint, IRect, ISize,
     Image, ImageInfo, Paint, Pixmap, Size, SurfaceCharacterization, SurfaceProps,
 };
+use skia_bindings as sb;
 use skia_bindings::{
-    C_GrBackendRenderTarget_Construct, C_GrBackendTexture_Construct, C_SkSurface_height,
-    C_SkSurface_imageInfo, C_SkSurface_makeSurface, C_SkSurface_makeSurface2, C_SkSurface_props,
-    C_SkSurface_width, SkRefCntBase, SkSurface, SkSurface_BackendHandleAccess,
-    SkSurface_ContentChangeMode,
+    SkRefCntBase, SkSurface, SkSurface_BackendHandleAccess, SkSurface_ContentChangeMode,
 };
 use std::ptr;
 
@@ -61,7 +59,7 @@ impl RCHandle<SkSurface> {
         };
 
         Self::from_ptr(unsafe {
-            skia_bindings::C_SkSurface_MakeRasterDirect(
+            sb::C_SkSurface_MakeRasterDirect(
                 image_info.native(),
                 pixels.as_mut_ptr() as _,
                 row_bytes,
@@ -79,7 +77,7 @@ impl RCHandle<SkSurface> {
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
-            skia_bindings::C_SkSurface_MakeRaster(
+            sb::C_SkSurface_MakeRaster(
                 image_info.native(),
                 row_bytes.into().unwrap_or_default(),
                 surface_props.native_ptr_or_null(),
@@ -90,7 +88,7 @@ impl RCHandle<SkSurface> {
     pub fn new_raster_n32_premul(size: impl Into<ISize>) -> Option<Self> {
         let size = size.into();
         Self::from_ptr(unsafe {
-            skia_bindings::C_SkSurface_MakeRasterN32Premul(size.width, size.height, ptr::null())
+            sb::C_SkSurface_MakeRasterN32Premul(size.width, size.height, ptr::null())
         })
     }
 
@@ -104,7 +102,7 @@ impl RCHandle<SkSurface> {
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
-            skia_bindings::C_SkSurface_MakeFromBackendTexture(
+            sb::C_SkSurface_MakeFromBackendTexture(
                 context.native_mut(),
                 backend_texture.native(),
                 origin.into_native(),
@@ -125,7 +123,7 @@ impl RCHandle<SkSurface> {
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
-            skia_bindings::C_SkSurface_MakeFromBackendRenderTarget(
+            sb::C_SkSurface_MakeFromBackendRenderTarget(
                 context.native_mut(),
                 backend_render_target.native(),
                 origin.into_native(),
@@ -146,7 +144,7 @@ impl RCHandle<SkSurface> {
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
-            skia_bindings::C_SkSurface_MakeFromBackendTextureAsRenderTarget(
+            sb::C_SkSurface_MakeFromBackendTextureAsRenderTarget(
                 context.native_mut(),
                 backend_texture.native(),
                 origin.into_native(),
@@ -169,7 +167,7 @@ impl RCHandle<SkSurface> {
         should_create_with_mips: impl Into<Option<bool>>,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
-            skia_bindings::C_SkSurface_MakeRenderTarget(
+            sb::C_SkSurface_MakeRenderTarget(
                 context.native_mut(),
                 budgeted.into_native(),
                 image_info.native(),
@@ -187,7 +185,7 @@ impl RCHandle<SkSurface> {
         budgeted: Budgeted,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
-            skia_bindings::C_SkSurface_MakeRenderTarget2(
+            sb::C_SkSurface_MakeRenderTarget2(
                 context.native_mut(),
                 characterization.native(),
                 budgeted.into_native(),
@@ -203,7 +201,7 @@ impl RCHandle<SkSurface> {
         backend_texture: &BackendTexture,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
-            skia_bindings::C_SkSurface_MakeFromBackendTexture2(
+            sb::C_SkSurface_MakeFromBackendTexture2(
                 context.native_mut(),
                 characterization.native(),
                 backend_texture.native(),
@@ -217,20 +215,20 @@ impl RCHandle<SkSurface> {
 
     pub fn new_null(size: impl Into<ISize>) -> Option<Self> {
         let size = size.into();
-        Self::from_ptr(unsafe { skia_bindings::C_SkSurface_MakeNull(size.width, size.height) })
+        Self::from_ptr(unsafe { sb::C_SkSurface_MakeNull(size.width, size.height) })
     }
 
     pub fn width(&self) -> i32 {
-        unsafe { C_SkSurface_width(self.native()) }
+        unsafe { sb::C_SkSurface_width(self.native()) }
     }
 
     pub fn height(&self) -> i32 {
-        unsafe { C_SkSurface_height(self.native()) }
+        unsafe { sb::C_SkSurface_height(self.native()) }
     }
 
     pub fn image_info(&mut self) -> ImageInfo {
         let mut info = ImageInfo::default();
-        unsafe { C_SkSurface_imageInfo(self.native_mut(), info.native_mut()) };
+        unsafe { sb::C_SkSurface_imageInfo(self.native_mut(), info.native_mut()) };
         info
     }
 
@@ -259,8 +257,8 @@ impl RCHandle<SkSurface> {
         handle_access: BackendHandleAccess,
     ) -> Option<BackendTexture> {
         unsafe {
-            let mut backend_texture = construct(|bt| C_GrBackendTexture_Construct(bt));
-            skia_bindings::C_SkSurface_getBackendTexture(
+            let mut backend_texture = construct(|bt| sb::C_GrBackendTexture_Construct(bt));
+            sb::C_SkSurface_getBackendTexture(
                 self.native_mut(),
                 handle_access.into_native(),
                 &mut backend_texture as _,
@@ -283,8 +281,9 @@ impl RCHandle<SkSurface> {
         handle_access: BackendHandleAccess,
     ) -> Option<BackendRenderTarget> {
         unsafe {
-            let mut backend_render_target = construct(|rt| C_GrBackendRenderTarget_Construct(rt));
-            skia_bindings::C_SkSurface_getBackendRenderTarget(
+            let mut backend_render_target =
+                construct(|rt| sb::C_GrBackendRenderTarget_Construct(rt));
+            sb::C_SkSurface_getBackendRenderTarget(
                 self.native_mut(),
                 handle_access.into_native(),
                 &mut backend_render_target as _,
@@ -322,19 +321,19 @@ impl RCHandle<SkSurface> {
 
     // TODO: why is self mutable here?
     pub fn new_surface(&mut self, info: &ImageInfo) -> Option<Surface> {
-        Surface::from_ptr(unsafe { C_SkSurface_makeSurface(self.native_mut(), info.native()) })
+        Surface::from_ptr(unsafe { sb::C_SkSurface_makeSurface(self.native_mut(), info.native()) })
     }
 
     pub fn new_surface_with_dimensions(&mut self, dim: impl Into<ISize>) -> Option<Surface> {
         let dim = dim.into();
         Surface::from_ptr(unsafe {
-            C_SkSurface_makeSurface2(self.native_mut(), dim.width, dim.height)
+            sb::C_SkSurface_makeSurface2(self.native_mut(), dim.width, dim.height)
         })
     }
 
     pub fn image_snapshot(&mut self) -> Image {
         Image::from_ptr(unsafe {
-            skia_bindings::C_SkSurface_makeImageSnapshot(self.native_mut(), ptr::null())
+            sb::C_SkSurface_makeImageSnapshot(self.native_mut(), ptr::null())
         })
         .unwrap()
     }
@@ -342,10 +341,7 @@ impl RCHandle<SkSurface> {
     // TODO: combine this function with image_snapshot and make bounds optional()?
     pub fn image_snapshot_with_bounds(&mut self, bounds: impl AsRef<IRect>) -> Option<Image> {
         Image::from_ptr(unsafe {
-            skia_bindings::C_SkSurface_makeImageSnapshot(
-                self.native_mut(),
-                bounds.as_ref().native(),
-            )
+            sb::C_SkSurface_makeImageSnapshot(self.native_mut(), bounds.as_ref().native())
         })
     }
 
@@ -439,7 +435,7 @@ impl RCHandle<SkSurface> {
     }
 
     pub fn props(&self) -> &SurfaceProps {
-        SurfaceProps::from_native_ref(unsafe { &*C_SkSurface_props(self.native()) })
+        SurfaceProps::from_native_ref(unsafe { &*sb::C_SkSurface_props(self.native()) })
     }
 
     pub fn flush(&mut self) {

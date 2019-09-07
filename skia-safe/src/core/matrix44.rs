@@ -1,9 +1,7 @@
 use crate::prelude::*;
 use crate::{scalar, Matrix, Scalar, Vector3};
-use skia_bindings::{
-    C_SkMatrix44_ConstructIdentity, C_SkMatrix44_ConstructNaN, C_SkMatrix44_Equals,
-    C_SkMatrix44_Mul, C_SkMatrix44_MulV4, C_SkMatrix44_SkMatrix, SkMatrix44, SkVector4,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkMatrix44, SkVector4};
 use std::ops;
 
 #[repr(C)]
@@ -73,11 +71,11 @@ impl Vector4 {
 
 bitflags! {
     pub struct TypeMask: u8 {
-        const IDENTITY = skia_bindings::SkMatrix44_kIdentity_Mask as _;
-        const TRANSLATE = skia_bindings::SkMatrix44_kTranslate_Mask as _;
-        const SCALE = skia_bindings::SkMatrix44_kScale_Mask as _;
-        const AFFINE = skia_bindings::SkMatrix44_kAffine_Mask as _;
-        const PERSPECTIVE = skia_bindings::SkMatrix44_kPerspective_Mask as _;
+        const IDENTITY = sb::SkMatrix44_kIdentity_Mask as _;
+        const TRANSLATE = sb::SkMatrix44_kTranslate_Mask as _;
+        const SCALE = sb::SkMatrix44_kScale_Mask as _;
+        const AFFINE = sb::SkMatrix44_kAffine_Mask as _;
+        const PERSPECTIVE = sb::SkMatrix44_kPerspective_Mask as _;
     }
 }
 
@@ -93,7 +91,7 @@ fn test_matrix44_layout() {
 
 impl PartialEq for Matrix44 {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { C_SkMatrix44_Equals(self.native(), rhs.native()) }
+        unsafe { sb::C_SkMatrix44_Equals(self.native(), rhs.native()) }
     }
 }
 
@@ -106,7 +104,7 @@ impl Default for Matrix44 {
 impl Into<Matrix> for Matrix44 {
     fn into(self) -> Matrix {
         let mut m = Matrix::new_identity();
-        unsafe { C_SkMatrix44_SkMatrix(self.native(), m.native_mut()) };
+        unsafe { sb::C_SkMatrix44_SkMatrix(self.native(), m.native_mut()) };
         m
     }
 }
@@ -116,7 +114,7 @@ impl ops::Mul for Matrix44 {
 
     fn mul(self, rhs: Self) -> Self::Output {
         let mut out = Self::new_identity();
-        unsafe { C_SkMatrix44_Mul(self.native(), rhs.native(), out.native_mut()) }
+        unsafe { sb::C_SkMatrix44_Mul(self.native(), rhs.native(), out.native_mut()) }
         out
     }
 }
@@ -126,7 +124,7 @@ impl ops::Mul<Vector4> for Matrix44 {
 
     fn mul(self, rhs: Vector4) -> Self::Output {
         let mut out = Vector4::default();
-        unsafe { C_SkMatrix44_MulV4(self.native(), rhs.native(), out.native_mut()) }
+        unsafe { sb::C_SkMatrix44_MulV4(self.native(), rhs.native(), out.native_mut()) }
         out
     }
 }
@@ -137,13 +135,13 @@ impl Matrix44 {
 
     pub fn new_identity() -> Self {
         Matrix44::construct(|matrix| unsafe {
-            C_SkMatrix44_ConstructIdentity(matrix);
+            sb::C_SkMatrix44_ConstructIdentity(matrix);
         })
     }
 
     pub fn new_nan() -> Self {
         Matrix44::construct(|matrix| unsafe {
-            C_SkMatrix44_ConstructNaN(matrix);
+            sb::C_SkMatrix44_ConstructNaN(matrix);
         })
     }
 

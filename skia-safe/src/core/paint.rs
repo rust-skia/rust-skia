@@ -3,13 +3,8 @@ use crate::{
     scalar, BlendMode, Color, Color4f, ColorFilter, ColorSpace, FilterQuality, ImageFilter,
     MaskFilter, Path, PathEffect, Rect, Shader,
 };
-use skia_bindings::{
-    C_SkPaint_Equals, C_SkPaint_destruct, C_SkPaint_getAlpha, C_SkPaint_getBlendMode,
-    C_SkPaint_getFilterQuality, C_SkPaint_getStrokeCap, C_SkPaint_getStrokeJoin,
-    C_SkPaint_getStyle, C_SkPaint_setColorFilter, C_SkPaint_setImageFilter,
-    C_SkPaint_setMaskFilter, C_SkPaint_setPathEffect, C_SkPaint_setShader, SkPaint, SkPaint_Cap,
-    SkPaint_Join, SkPaint_Style,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkPaint, SkPaint_Cap, SkPaint_Join, SkPaint_Style};
 use std::hash::{Hash, Hasher};
 use std::ptr;
 
@@ -73,7 +68,7 @@ pub type Paint = Handle<SkPaint>;
 
 impl NativeDrop for SkPaint {
     fn drop(&mut self) {
-        unsafe { C_SkPaint_destruct(self) }
+        unsafe { sb::C_SkPaint_destruct(self) }
     }
 }
 
@@ -85,7 +80,7 @@ impl NativeClone for SkPaint {
 
 impl NativePartialEq for SkPaint {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { C_SkPaint_Equals(self, rhs) }
+        unsafe { sb::C_SkPaint_Equals(self, rhs) }
     }
 }
 
@@ -145,7 +140,7 @@ impl Handle<SkPaint> {
     }
 
     pub fn filter_quality(&self) -> FilterQuality {
-        FilterQuality::from_native(unsafe { C_SkPaint_getFilterQuality(self.native()) })
+        FilterQuality::from_native(unsafe { sb::C_SkPaint_getFilterQuality(self.native()) })
     }
 
     pub fn set_filter_quality(&mut self, quality: FilterQuality) -> &mut Self {
@@ -154,7 +149,7 @@ impl Handle<SkPaint> {
     }
 
     pub fn style(&self) -> Style {
-        Style::from_native(unsafe { C_SkPaint_getStyle(self.native()) })
+        Style::from_native(unsafe { sb::C_SkPaint_getStyle(self.native()) })
     }
 
     pub fn set_style(&mut self, style: Style) -> &mut Self {
@@ -193,7 +188,7 @@ impl Handle<SkPaint> {
     }
 
     pub fn alpha(&self) -> u8 {
-        unsafe { C_SkPaint_getAlpha(self.native()) }
+        unsafe { sb::C_SkPaint_getAlpha(self.native()) }
     }
 
     pub fn set_alpha_f(&mut self, alpha: f32) -> &mut Self {
@@ -232,7 +227,7 @@ impl Handle<SkPaint> {
     }
 
     pub fn stroke_cap(&self) -> Cap {
-        Cap::from_native(unsafe { C_SkPaint_getStrokeCap(self.native()) })
+        Cap::from_native(unsafe { sb::C_SkPaint_getStrokeCap(self.native()) })
     }
 
     pub fn set_stroke_cap(&mut self, cap: Cap) -> &mut Self {
@@ -241,7 +236,7 @@ impl Handle<SkPaint> {
     }
 
     pub fn stroke_join(&self) -> Join {
-        Join::from_native(unsafe { C_SkPaint_getStrokeJoin(self.native()) })
+        Join::from_native(unsafe { sb::C_SkPaint_getStrokeJoin(self.native()) })
     }
 
     pub fn set_stroke_join(&mut self, join: Join) -> &mut Self {
@@ -277,7 +272,7 @@ impl Handle<SkPaint> {
     }
 
     pub fn set_shader(&mut self, shader: impl Into<Option<Shader>>) -> &mut Self {
-        unsafe { C_SkPaint_setShader(self.native_mut(), shader.into().into_ptr_or_null()) }
+        unsafe { sb::C_SkPaint_setShader(self.native_mut(), shader.into().into_ptr_or_null()) }
         self
     }
 
@@ -287,13 +282,13 @@ impl Handle<SkPaint> {
 
     pub fn set_color_filter(&mut self, color_filter: impl Into<Option<ColorFilter>>) -> &mut Self {
         unsafe {
-            C_SkPaint_setColorFilter(self.native_mut(), color_filter.into().into_ptr_or_null())
+            sb::C_SkPaint_setColorFilter(self.native_mut(), color_filter.into().into_ptr_or_null())
         }
         self
     }
 
     pub fn blend_mode(&self) -> BlendMode {
-        BlendMode::from_native(unsafe { C_SkPaint_getBlendMode(self.native()) })
+        BlendMode::from_native(unsafe { sb::C_SkPaint_getBlendMode(self.native()) })
     }
 
     pub fn is_src_over(&self) -> bool {
@@ -315,7 +310,9 @@ impl Handle<SkPaint> {
     }
 
     pub fn set_path_effect(&mut self, path_effect: impl Into<Option<PathEffect>>) -> &mut Self {
-        unsafe { C_SkPaint_setPathEffect(self.native_mut(), path_effect.into().into_ptr_or_null()) }
+        unsafe {
+            sb::C_SkPaint_setPathEffect(self.native_mut(), path_effect.into().into_ptr_or_null())
+        }
         self
     }
 
@@ -324,7 +321,9 @@ impl Handle<SkPaint> {
     }
 
     pub fn set_mask_filter(&mut self, mask_filter: impl Into<Option<MaskFilter>>) -> &mut Self {
-        unsafe { C_SkPaint_setMaskFilter(self.native_mut(), mask_filter.into().into_ptr_or_null()) }
+        unsafe {
+            sb::C_SkPaint_setMaskFilter(self.native_mut(), mask_filter.into().into_ptr_or_null())
+        }
         self
     }
 
@@ -334,7 +333,7 @@ impl Handle<SkPaint> {
 
     pub fn set_image_filter(&mut self, image_filter: impl Into<Option<ImageFilter>>) -> &mut Self {
         unsafe {
-            C_SkPaint_setImageFilter(self.native_mut(), image_filter.into().into_ptr_or_null())
+            sb::C_SkPaint_setImageFilter(self.native_mut(), image_filter.into().into_ptr_or_null())
         }
         self
     }

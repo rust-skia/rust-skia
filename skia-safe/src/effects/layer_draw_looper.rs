@@ -1,18 +1,16 @@
 use crate::prelude::*;
 use crate::{BlendMode, DrawLooper, Vector};
-use skia_bindings::{
-    C_SkLayerDrawLooper_Builder_destruct, C_SkLayerDrawLooper_Builder_detach,
-    SkLayerDrawLooper_Builder, SkLayerDrawLooper_LayerInfo, SkPaint,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkLayerDrawLooper_Builder, SkLayerDrawLooper_LayerInfo, SkPaint};
 
 bitflags! {
     pub struct Bits : u32 {
-        const STYLE = skia_bindings::SkLayerDrawLooper_Bits_kStyle_Bit as _;
-        const PATH_EFFECT = skia_bindings::SkLayerDrawLooper_Bits_kPathEffect_Bit as _;
-        const MASK_FILTER = skia_bindings::SkLayerDrawLooper_Bits_kMaskFilter_Bit as _;
-        const SHADER = skia_bindings::SkLayerDrawLooper_Bits_kShader_Bit as _;
-        const COLOR_FILTER = skia_bindings::SkLayerDrawLooper_Bits_kColorFilter_Bit as _;
-        const XFER_MODE = skia_bindings::SkLayerDrawLooper_Bits_kXfermode_Bit as _;
+        const STYLE = sb::SkLayerDrawLooper_Bits_kStyle_Bit as _;
+        const PATH_EFFECT = sb::SkLayerDrawLooper_Bits_kPathEffect_Bit as _;
+        const MASK_FILTER = sb::SkLayerDrawLooper_Bits_kMaskFilter_Bit as _;
+        const SHADER = sb::SkLayerDrawLooper_Bits_kShader_Bit as _;
+        const COLOR_FILTER = sb::SkLayerDrawLooper_Bits_kColorFilter_Bit as _;
+        const XFER_MODE = sb::SkLayerDrawLooper_Bits_kXfermode_Bit as _;
     }
 }
 
@@ -40,7 +38,7 @@ pub type Builder = Handle<SkLayerDrawLooper_Builder>;
 
 impl NativeDrop for SkLayerDrawLooper_Builder {
     fn drop(&mut self) {
-        unsafe { C_SkLayerDrawLooper_Builder_destruct(self) }
+        unsafe { sb::C_SkLayerDrawLooper_Builder_destruct(self) }
     }
 }
 
@@ -83,7 +81,7 @@ impl Builder {
     }
 
     pub fn detach(&mut self) -> DrawLooper {
-        DrawLooper::from_ptr(unsafe { C_SkLayerDrawLooper_Builder_detach(self.native_mut()) })
+        DrawLooper::from_ptr(unsafe { sb::C_SkLayerDrawLooper_Builder_detach(self.native_mut()) })
             .unwrap()
     }
 }

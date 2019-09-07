@@ -1,9 +1,7 @@
 use crate::prelude::*;
 use crate::{Canvas, SurfaceCharacterization};
-use skia_bindings::{
-    C_SkDeferredDisplayListRecorder_destruct, C_SkDeferredDisplayListRecorder_detach,
-    SkDeferredDisplayListRecorder,
-};
+use skia_bindings as sb;
+use skia_bindings::SkDeferredDisplayListRecorder;
 
 pub use private::DeferredDisplayList;
 
@@ -11,7 +9,7 @@ pub type DeferredDisplayListRecorder = Handle<SkDeferredDisplayListRecorder>;
 
 impl NativeDrop for SkDeferredDisplayListRecorder {
     fn drop(&mut self) {
-        unsafe { C_SkDeferredDisplayListRecorder_destruct(self) }
+        unsafe { sb::C_SkDeferredDisplayListRecorder_destruct(self) }
     }
 }
 
@@ -28,7 +26,7 @@ impl Handle<SkDeferredDisplayListRecorder> {
 
     pub fn detach(mut self) -> Option<DeferredDisplayList> {
         DeferredDisplayList::from_ptr(unsafe {
-            C_SkDeferredDisplayListRecorder_detach(self.native_mut())
+            sb::C_SkDeferredDisplayListRecorder_detach(self.native_mut())
         })
     }
 
@@ -38,13 +36,14 @@ impl Handle<SkDeferredDisplayListRecorder> {
 
 pub(crate) mod private {
     use crate::prelude::*;
-    use skia_bindings::{C_SkDeferredDisplayList_delete, SkDeferredDisplayList};
+    use skia_bindings as sb;
+    use skia_bindings::SkDeferredDisplayList;
 
     pub type DeferredDisplayList = RefHandle<SkDeferredDisplayList>;
 
     impl NativeDrop for SkDeferredDisplayList {
         fn drop(&mut self) {
-            unsafe { C_SkDeferredDisplayList_delete(self) }
+            unsafe { sb::C_SkDeferredDisplayList_delete(self) }
         }
     }
 }

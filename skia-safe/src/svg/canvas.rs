@@ -1,7 +1,8 @@
 use crate::interop::DynamicMemoryWStream;
 use crate::prelude::*;
 use crate::{Data, Rect};
-use skia_bindings::{C_SkCanvas_delete, C_SkSVGCanvas_Make, SkCanvas};
+use skia_bindings as sb;
+use skia_bindings::SkCanvas;
 use std::ops::{Deref, DerefMut};
 use std::pin::Pin;
 use std::ptr;
@@ -14,7 +15,7 @@ pub struct Canvas {
 impl Drop for Canvas {
     fn drop(&mut self) {
         unsafe {
-            C_SkCanvas_delete(self.canvas);
+            sb::C_SkCanvas_delete(self.canvas);
         }
     }
 }
@@ -36,7 +37,7 @@ impl DerefMut for Canvas {
 bitflags! {
     #[derive(Default)]
     pub struct Flags : u32 {
-        const CONVERT_TEXT_TO_PATHS = skia_bindings::SkSVGCanvas_kConvertTextToPaths_Flag as _;
+        const CONVERT_TEXT_TO_PATHS = sb::SkSVGCanvas_kConvertTextToPaths_Flag as _;
     }
 }
 
@@ -47,7 +48,7 @@ impl Canvas {
         let flags = flags.into().unwrap_or_default();
         let mut stream = Box::pin(DynamicMemoryWStream::new());
         let canvas = unsafe {
-            C_SkSVGCanvas_Make(
+            sb::C_SkSVGCanvas_Make(
                 bounds.native(),
                 &mut stream.native_mut()._base,
                 flags.bits(),
@@ -63,7 +64,7 @@ impl Canvas {
         // we have to delete the canvas and destruct the stream writer
         // to get all data out _and_ keep the referential integrity.
         unsafe {
-            C_SkCanvas_delete(self.canvas);
+            sb::C_SkCanvas_delete(self.canvas);
         }
         self.canvas = ptr::null_mut();
         self.stream.detach_as_data()

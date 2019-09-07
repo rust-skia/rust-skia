@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::{image_filter, ImageFilter};
-use skia_bindings::{C_SkArithmeticImageFilter_Make, SkImageFilter};
+use skia_bindings as sb;
+use skia_bindings::SkImageFilter;
 
 impl RCHandle<SkImageFilter> {
     #[allow(clippy::too_many_arguments)]
@@ -38,7 +39,7 @@ pub fn new<'a>(
 ) -> Option<ImageFilter> {
     let inputs = inputs.into();
     ImageFilter::from_ptr(unsafe {
-        C_SkArithmeticImageFilter_Make(
+        sb::C_SkArithmeticImageFilter_Make(
             inputs.k[0],
             inputs.k[1],
             inputs.k[2],

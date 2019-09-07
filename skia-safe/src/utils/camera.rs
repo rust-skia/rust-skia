@@ -1,9 +1,7 @@
 use crate::prelude::*;
 use crate::{scalar, Canvas, Matrix};
-use skia_bindings::{
-    C_Sk3DView_delete, C_Sk3DView_new, Sk3DView, SkCamera3D, SkMatrix3D, SkPatch3D, SkPoint3D,
-    SkUnit3D,
-};
+use skia_bindings as sb;
+use skia_bindings::{Sk3DView, SkCamera3D, SkMatrix3D, SkPatch3D, SkPoint3D, SkUnit3D};
 
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
 #[repr(C)]
@@ -273,13 +271,13 @@ impl Default for View3D {
 
 impl NativeDrop for Sk3DView {
     fn drop(&mut self) {
-        unsafe { C_Sk3DView_delete(self) }
+        unsafe { sb::C_Sk3DView_delete(self) }
     }
 }
 
 impl RefHandle<Sk3DView> {
     pub fn new() -> Self {
-        View3D::from_ptr(unsafe { C_Sk3DView_new() }).unwrap()
+        View3D::from_ptr(unsafe { sb::C_Sk3DView_new() }).unwrap()
     }
 
     pub fn save(&mut self) -> &mut Self {

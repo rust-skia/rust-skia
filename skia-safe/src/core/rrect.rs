@@ -1,9 +1,7 @@
 use crate::prelude::*;
 use crate::{scalar, Matrix, Rect, Vector};
-use skia_bindings::{
-    C_SkRRect_Construct, C_SkRRect_Equals, C_SkRRect_getType, C_SkRRect_setOval, C_SkRRect_setRect,
-    SkRRect, SkRRect_Corner, SkRRect_Type,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkRRect, SkRRect_Corner, SkRRect_Type};
 use std::{mem, ptr};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -50,7 +48,7 @@ fn test_rrect_layout() {
 
 impl PartialEq for RRect {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { C_SkRRect_Equals(self.native(), rhs.native()) }
+        unsafe { sb::C_SkRRect_Equals(self.native(), rhs.native()) }
     }
 }
 
@@ -68,11 +66,11 @@ impl AsRef<RRect> for RRect {
 
 impl RRect {
     pub fn new() -> Self {
-        RRect::construct(|rr| unsafe { C_SkRRect_Construct(rr) })
+        RRect::construct(|rr| unsafe { sb::C_SkRRect_Construct(rr) })
     }
 
     pub fn get_type(&self) -> Type {
-        Type::from_native(unsafe { C_SkRRect_getType(self.native()) })
+        Type::from_native(unsafe { sb::C_SkRRect_getType(self.native()) })
     }
 
     pub fn is_empty(&self) -> bool {
@@ -116,7 +114,7 @@ impl RRect {
     }
 
     pub fn set_rect(&mut self, rect: impl AsRef<Rect>) {
-        unsafe { C_SkRRect_setRect(self.native_mut(), rect.as_ref().native()) }
+        unsafe { sb::C_SkRRect_setRect(self.native_mut(), rect.as_ref().native()) }
     }
 
     pub fn new_empty() -> Self {
@@ -174,7 +172,7 @@ impl RRect {
     }
 
     pub fn set_oval(&mut self, oval: impl AsRef<Rect>) {
-        unsafe { C_SkRRect_setOval(self.native_mut(), oval.as_ref().native()) }
+        unsafe { sb::C_SkRRect_setOval(self.native_mut(), oval.as_ref().native()) }
     }
 
     pub fn set_rect_xy(&mut self, rect: impl AsRef<Rect>, x_rad: scalar, y_rad: scalar) {

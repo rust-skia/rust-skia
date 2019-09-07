@@ -19,11 +19,11 @@ pub mod encode {
 
     use crate::prelude::*;
     use crate::{Bitmap, Data, EncodedImageFormat, Pixmap};
-    use skia_bindings::{C_SkEncodeBitmap, C_SkEncodePixmap};
+    use skia_bindings as sb;
 
     pub fn pixmap(src: &Pixmap, format: EncodedImageFormat, quality: usize) -> Option<Data> {
         Data::from_ptr(unsafe {
-            C_SkEncodePixmap(
+            sb::C_SkEncodePixmap(
                 src.native(),
                 format.into_native(),
                 quality.try_into().unwrap(),
@@ -33,7 +33,7 @@ pub mod encode {
 
     pub fn bitmap(src: &Bitmap, format: EncodedImageFormat, quality: usize) -> Option<Data> {
         Data::from_ptr(unsafe {
-            C_SkEncodeBitmap(
+            sb::C_SkEncodeBitmap(
                 src.native(),
                 format.into_native(),
                 quality.try_into().unwrap(),

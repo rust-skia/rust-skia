@@ -1,11 +1,7 @@
 use crate::prelude::*;
 use crate::{image_filter::CropRect, scalar, Color, ImageFilter, Point3};
-use skia_bindings::{
-    C_SkLightingImageFilter_MakeDistantLitDiffuse, C_SkLightingImageFilter_MakeDistantLitSpecular,
-    C_SkLightingImageFilter_MakePointLitDiffuse, C_SkLightingImageFilter_MakePointLitSpecular,
-    C_SkLightingImageFilter_MakeSpotLitDiffuse, C_SkLightingImageFilter_MakeSpotLitSpecular,
-    SkImageFilter,
-};
+use skia_bindings as sb;
+use skia_bindings::SkImageFilter;
 
 impl RCHandle<SkImageFilter> {
     pub fn distant_lit_diffuse_lighting<'a>(
@@ -132,7 +128,7 @@ pub fn distant_lit_diffuse<'a>(
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
-        C_SkLightingImageFilter_MakeDistantLitDiffuse(
+        sb::C_SkLightingImageFilter_MakeDistantLitDiffuse(
             direction.into().native(),
             light_color.into().into_native(),
             surface_scale,
@@ -152,7 +148,7 @@ pub fn point_lit_diffuse<'a>(
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
-        C_SkLightingImageFilter_MakePointLitDiffuse(
+        sb::C_SkLightingImageFilter_MakePointLitDiffuse(
             location.into().native(),
             light_color.into().into_native(),
             surface_scale,
@@ -176,7 +172,7 @@ pub fn spot_lit_diffuse<'a>(
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
-        C_SkLightingImageFilter_MakeSpotLitDiffuse(
+        sb::C_SkLightingImageFilter_MakeSpotLitDiffuse(
             location.into().native(),
             target.into().native(),
             specular_exponent,
@@ -200,7 +196,7 @@ pub fn distant_lit_specular<'a>(
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
-        C_SkLightingImageFilter_MakeDistantLitSpecular(
+        sb::C_SkLightingImageFilter_MakeDistantLitSpecular(
             direction.into().native(),
             light_color.into().into_native(),
             surface_scale,
@@ -222,7 +218,7 @@ pub fn point_lit_specular<'a>(
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
-        C_SkLightingImageFilter_MakePointLitSpecular(
+        sb::C_SkLightingImageFilter_MakePointLitSpecular(
             location.into().native(),
             light_color.into().into_native(),
             surface_scale,
@@ -248,7 +244,7 @@ pub fn spot_lit_specular<'a>(
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
-        C_SkLightingImageFilter_MakeSpotLitSpecular(
+        sb::C_SkLightingImageFilter_MakeSpotLitSpecular(
             location.into().native(),
             target.into().native(),
             specular_exponent,

@@ -1,7 +1,6 @@
 use crate::prelude::*;
-use skia_bindings::{
-    C_SkYUVAIndex_AreValidIndices, SkColorChannel, SkYUVAIndex, SkYUVAIndex_Index,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkColorChannel, SkYUVAIndex, SkYUVAIndex_Index};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -68,7 +67,7 @@ impl YUVAIndex {
 
     pub fn are_valid_indices(indices: &[YUVAIndex; Self::INDEX_COUNT]) -> Option<usize> {
         let mut num_planes = 0;
-        unsafe { C_SkYUVAIndex_AreValidIndices(indices.native().as_ptr(), &mut num_planes) }
+        unsafe { sb::C_SkYUVAIndex_AreValidIndices(indices.native().as_ptr(), &mut num_planes) }
             .if_true_then_some(|| num_planes.try_into().unwrap())
     }
 

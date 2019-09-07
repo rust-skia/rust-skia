@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use crate::u8cpu;
+use skia_bindings as sb;
 use skia_bindings::{SkColor, SkColor4f, SkHSVToColor, SkRGBToHSV};
 use std::ops::{BitAnd, BitOr, Index, IndexMut, Mul};
 
@@ -110,18 +111,18 @@ impl Color {
         Self::from_argb(a, self.r(), self.g(), self.b())
     }
 
-    pub const TRANSPARENT: Self = Self(skia_bindings::SK_ColorTRANSPARENT);
-    pub const BLACK: Self = Self(skia_bindings::SK_ColorBLACK);
-    pub const DARK_GRAY: Self = Self(skia_bindings::SK_ColorDKGRAY);
-    pub const GRAY: Self = Self(skia_bindings::SK_ColorLTGRAY);
-    pub const LIGHT_GRAY: Self = Self(skia_bindings::SK_ColorLTGRAY);
-    pub const WHITE: Self = Self(skia_bindings::SK_ColorWHITE);
-    pub const RED: Self = Self(skia_bindings::SK_ColorRED);
-    pub const GREEN: Self = Self(skia_bindings::SK_ColorGREEN);
-    pub const BLUE: Self = Self(skia_bindings::SK_ColorBLUE);
-    pub const YELLOW: Self = Self(skia_bindings::SK_ColorYELLOW);
-    pub const CYAN: Self = Self(skia_bindings::SK_ColorCYAN);
-    pub const MAGENTA: Self = Self(skia_bindings::SK_ColorMAGENTA);
+    pub const TRANSPARENT: Self = Self(sb::SK_ColorTRANSPARENT);
+    pub const BLACK: Self = Self(sb::SK_ColorBLACK);
+    pub const DARK_GRAY: Self = Self(sb::SK_ColorDKGRAY);
+    pub const GRAY: Self = Self(sb::SK_ColorLTGRAY);
+    pub const LIGHT_GRAY: Self = Self(sb::SK_ColorLTGRAY);
+    pub const WHITE: Self = Self(sb::SK_ColorWHITE);
+    pub const RED: Self = Self(sb::SK_ColorRED);
+    pub const GREEN: Self = Self(sb::SK_ColorGREEN);
+    pub const BLUE: Self = Self(sb::SK_ColorBLUE);
+    pub const YELLOW: Self = Self(sb::SK_ColorYELLOW);
+    pub const CYAN: Self = Self(sb::SK_ColorCYAN);
+    pub const MAGENTA: Self = Self(sb::SK_ColorMAGENTA);
 
     pub fn to_rgb(self) -> RGB {
         (self.r(), self.g(), self.b()).into()

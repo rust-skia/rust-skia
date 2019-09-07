@@ -5,13 +5,9 @@ use crate::{
     ImageFilter, ImageInfo, Matrix, Paint, Path, Picture, Point, QuickReject, RRect, Rect, Region,
     Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices,
 };
+use skia_bindings as sb;
 use skia_bindings::{
-    C_SkAutoCanvasRestore_Construct, C_SkAutoCanvasRestore_destruct, C_SkAutoCanvasRestore_restore,
-    C_SkCanvas_MakeRasterDirect, C_SkCanvas_delete, C_SkCanvas_discard,
-    C_SkCanvas_getBaseLayerSize, C_SkCanvas_getGrContext, C_SkCanvas_imageInfo,
-    C_SkCanvas_isClipEmpty, C_SkCanvas_makeSurface, C_SkCanvas_newEmpty, C_SkCanvas_newFromBitmap,
-    C_SkCanvas_newFromBitmapAndProps, C_SkCanvas_newWidthHeightAndProps, SkAutoCanvasRestore,
-    SkCanvas, SkCanvas_PointMode, SkCanvas_SaveLayerFlagsSet_kF16ColorType,
+    SkAutoCanvasRestore, SkCanvas, SkCanvas_PointMode, SkCanvas_SaveLayerFlagsSet_kF16ColorType,
     SkCanvas_SaveLayerFlagsSet_kInitWithPrevious_SaveLayerFlag, SkCanvas_SaveLayerRec,
     SkCanvas_SrcRectConstraint, SkImage, SkImageFilter, SkMatrix, SkPaint, SkRect,
 };
@@ -182,13 +178,13 @@ impl<'lt> DerefMut for OwnedCanvas<'lt> {
 
 impl<'lt> Drop for OwnedCanvas<'lt> {
     fn drop(&mut self) {
-        unsafe { C_SkCanvas_delete(self.native()) }
+        unsafe { sb::C_SkCanvas_delete(self.native()) }
     }
 }
 
 impl<'lt> Default for OwnedCanvas<'lt> {
     fn default() -> Self {
-        let ptr = unsafe { C_SkCanvas_newEmpty() };
+        let ptr = unsafe { sb::C_SkCanvas_newEmpty() };
         Canvas::own_from_native_ptr(ptr).unwrap()
     }
 }
@@ -219,7 +215,7 @@ impl Canvas {
         let row_bytes = row_bytes.into().unwrap_or_else(|| info.min_row_bytes());
         if row_bytes >= info.min_row_bytes() && pixels.len() >= info.compute_byte_size(row_bytes) {
             let ptr = unsafe {
-                C_SkCanvas_MakeRasterDirect(
+                sb::C_SkCanvas_MakeRasterDirect(
                     info.native(),
                     pixels.as_mut_ptr() as _,
                     row_bytes,
@@ -254,7 +250,7 @@ impl Canvas {
         let size = size.into();
         if size.width >= 0 && size.height >= 0 {
             let ptr = unsafe {
-                C_SkCanvas_newWidthHeightAndProps(
+                sb::C_SkCanvas_newWidthHeightAndProps(
                     size.width,
                     size.height,
                     props.native_ptr_or_null(),
@@ -270,16 +266,16 @@ impl Canvas {
     pub fn from_bitmap<'lt>(bitmap: &Bitmap, props: Option<&SurfaceProps>) -> OwnedCanvas<'lt> {
         let props_ptr = props.native_ptr_or_null();
         let ptr = if props_ptr.is_null() {
-            unsafe { C_SkCanvas_newFromBitmap(bitmap.native()) }
+            unsafe { sb::C_SkCanvas_newFromBitmap(bitmap.native()) }
         } else {
-            unsafe { C_SkCanvas_newFromBitmapAndProps(bitmap.native(), props_ptr) }
+            unsafe { sb::C_SkCanvas_newFromBitmapAndProps(bitmap.native(), props_ptr) }
         };
         Canvas::own_from_native_ptr(ptr).unwrap()
     }
 
     pub fn image_info(&self) -> ImageInfo {
         let mut ii = ImageInfo::default();
-        unsafe { C_SkCanvas_imageInfo(self.native(), ii.native_mut()) };
+        unsafe { sb::C_SkCanvas_imageInfo(self.native(), ii.native_mut()) };
         ii
     }
 
@@ -297,7 +293,7 @@ impl Canvas {
 
     pub fn base_layer_size(&self) -> ISize {
         let mut size = ISize::default();
-        unsafe { C_SkCanvas_getBaseLayerSize(self.native(), size.native_mut()) }
+        unsafe { sb::C_SkCanvas_getBaseLayerSize(self.native(), size.native_mut()) }
         size
     }
 
@@ -309,13 +305,13 @@ impl Canvas {
         props: Option<&SurfaceProps>,
     ) -> Option<Surface> {
         Surface::from_ptr(unsafe {
-            C_SkCanvas_makeSurface(self.native_mut(), info.native(), props.native_ptr_or_null())
+            sb::C_SkCanvas_makeSurface(self.native_mut(), info.native(), props.native_ptr_or_null())
         })
     }
 
     // TODO: test ref count consistency assuming it is not increased in the native part.
     pub fn gpu_context(&mut self) -> Option<gpu::Context> {
-        gpu::Context::from_unshared_ptr(unsafe { C_SkCanvas_getGrContext(self.native_mut()) })
+        gpu::Context::from_unshared_ptr(unsafe { sb::C_SkCanvas_getGrContext(self.native_mut()) })
     }
 
     pub fn access_top_layer_pixels(&mut self) -> Option<TopLayerPixels> {
@@ -573,7 +569,7 @@ impl Canvas {
     }
 
     pub fn discard(&mut self) -> &mut Self {
-        unsafe { C_SkCanvas_discard(self.native_mut()) }
+        unsafe { sb::C_SkCanvas_discard(self.native_mut()) }
         self
     }
 
@@ -1030,11 +1026,11 @@ impl Canvas {
     }
 
     pub fn is_clip_empty(&self) -> bool {
-        unsafe { C_SkCanvas_isClipEmpty(self.native()) }
+        unsafe { sb::C_SkCanvas_isClipEmpty(self.native()) }
     }
 
     pub fn is_clip_rect(&self) -> bool {
-        unsafe { C_SkCanvas_isClipEmpty(self.native()) }
+        unsafe { sb::C_SkCanvas_isClipEmpty(self.native()) }
     }
 
     pub fn total_matrix(&self) -> &Matrix {
@@ -1182,13 +1178,13 @@ impl<'a> NativeAccess<SkAutoCanvasRestore> for AutoRestoredCanvas<'a> {
 
 impl<'a> Drop for AutoRestoredCanvas<'a> {
     fn drop(&mut self) {
-        unsafe { C_SkAutoCanvasRestore_destruct(self.native_mut()) }
+        unsafe { sb::C_SkAutoCanvasRestore_destruct(self.native_mut()) }
     }
 }
 
 impl<'a> AutoRestoredCanvas<'a> {
     pub fn restore(&mut self) {
-        unsafe { C_SkAutoCanvasRestore_restore(self.native_mut()) }
+        unsafe { sb::C_SkAutoCanvasRestore_restore(self.native_mut()) }
     }
 }
 
@@ -1200,7 +1196,7 @@ impl AutoCanvasRestore {
     //       the lifetime bound.
     pub fn guard(canvas: &mut Canvas, do_save: bool) -> AutoRestoredCanvas {
         let restore = construct(|acr| unsafe {
-            C_SkAutoCanvasRestore_Construct(acr, canvas.native_mut(), do_save)
+            sb::C_SkAutoCanvasRestore_Construct(acr, canvas.native_mut(), do_save)
         });
 
         AutoRestoredCanvas { canvas, restore }

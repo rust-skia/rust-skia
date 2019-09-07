@@ -2,10 +2,8 @@
 
 use crate::prelude::*;
 use crate::{scalar, Point};
-use skia_bindings::{
-    C_SkInterpolator_destruct, C_SkInterpolator_setMirror, C_SkInterpolator_setRepeatCount,
-    C_SkInterpolator_setReset, SkInterpolator, SkInterpolatorBase_Result, SkUnitCubicInterp,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkInterpolator, SkInterpolatorBase_Result, SkUnitCubicInterp};
 use std::time::Duration;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -27,7 +25,7 @@ pub type Interpolator = Handle<SkInterpolator>;
 impl NativeDrop for SkInterpolator {
     fn drop(&mut self) {
         unsafe {
-            C_SkInterpolator_destruct(self);
+            sb::C_SkInterpolator_destruct(self);
         }
     }
 }
@@ -57,17 +55,17 @@ impl Handle<SkInterpolator> {
     }
 
     pub fn set_mirror(&mut self, mirror: bool) -> &mut Self {
-        unsafe { C_SkInterpolator_setMirror(self.native_mut(), mirror) }
+        unsafe { sb::C_SkInterpolator_setMirror(self.native_mut(), mirror) }
         self
     }
 
     pub fn set_repeat_count(&mut self, repeat_count: scalar) -> &mut Self {
-        unsafe { C_SkInterpolator_setRepeatCount(self.native_mut(), repeat_count) }
+        unsafe { sb::C_SkInterpolator_setRepeatCount(self.native_mut(), repeat_count) }
         self
     }
 
     pub fn set_reset(&mut self, reset: bool) -> &mut Self {
-        unsafe { C_SkInterpolator_setReset(self.native_mut(), reset) }
+        unsafe { sb::C_SkInterpolator_setReset(self.native_mut(), reset) }
         self
     }
 

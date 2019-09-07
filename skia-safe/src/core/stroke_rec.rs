@@ -1,9 +1,7 @@
 use crate::prelude::*;
 use crate::{paint, scalar, Paint, Path};
-use skia_bindings::{
-    C_SkStrokeRec_copy, C_SkStrokeRec_destruct, C_SkStrokeRec_getCap, C_SkStrokeRec_getJoin,
-    C_SkStrokeRec_hasEqualEffect, SkStrokeRec, SkStrokeRec_InitStyle, SkStrokeRec_Style,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkStrokeRec, SkStrokeRec_InitStyle, SkStrokeRec_Style};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -37,14 +35,14 @@ pub type StrokeRec = Handle<SkStrokeRec>;
 
 impl NativeDrop for SkStrokeRec {
     fn drop(&mut self) {
-        unsafe { C_SkStrokeRec_destruct(self) };
+        unsafe { sb::C_SkStrokeRec_destruct(self) };
     }
 }
 
 impl NativeClone for SkStrokeRec {
     fn clone(&self) -> Self {
         let mut copy = StrokeRec::new_hairline();
-        unsafe { C_SkStrokeRec_copy(self, copy.native_mut()) }
+        unsafe { sb::C_SkStrokeRec_copy(self, copy.native_mut()) }
         *copy.native()
     }
 }
@@ -91,11 +89,11 @@ impl Handle<SkStrokeRec> {
     }
 
     pub fn cap(&self) -> paint::Cap {
-        paint::Cap::from_native(unsafe { C_SkStrokeRec_getCap(self.native()) })
+        paint::Cap::from_native(unsafe { sb::C_SkStrokeRec_getCap(self.native()) })
     }
 
     pub fn join(&self) -> paint::Join {
-        paint::Join::from_native(unsafe { C_SkStrokeRec_getJoin(self.native()) })
+        paint::Join::from_native(unsafe { sb::C_SkStrokeRec_getJoin(self.native()) })
     }
 
     pub fn is_hairline_style(&self) -> bool {
@@ -190,6 +188,6 @@ impl Handle<SkStrokeRec> {
     }
 
     pub fn has_equal_effect(&self, other: &StrokeRec) -> bool {
-        unsafe { C_SkStrokeRec_hasEqualEffect(self.native(), other.native()) }
+        unsafe { sb::C_SkStrokeRec_hasEqualEffect(self.native(), other.native()) }
     }
 }

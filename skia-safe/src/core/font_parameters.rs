@@ -3,10 +3,8 @@ pub type VariationAxis = variation::Axis;
 pub mod variation {
     use crate::prelude::*;
     use crate::FourByteTag;
-    use skia_bindings::{
-        C_SkFontParameters_Variation_Axis_isHidden, C_SkFontParameters_Variation_Axis_setHidden,
-        SkFontParameters_Variation_Axis,
-    };
+    use skia_bindings as sb;
+    use skia_bindings::SkFontParameters_Variation_Axis;
 
     #[derive(Clone, PartialEq, Default, Debug)]
     pub struct Axis {
@@ -30,12 +28,12 @@ pub mod variation {
         }
 
         pub fn is_hidden(&self) -> bool {
-            unsafe { C_SkFontParameters_Variation_Axis_isHidden(self.native()) }
+            unsafe { sb::C_SkFontParameters_Variation_Axis_isHidden(self.native()) }
         }
 
         pub fn set_hidden(&mut self, hidden: bool) -> &mut Self {
             unsafe {
-                C_SkFontParameters_Variation_Axis_setHidden(self.native_mut(), hidden);
+                sb::C_SkFontParameters_Variation_Axis_setHidden(self.native_mut(), hidden);
             }
             self
         }

@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::{scalar, Color, Color4f, ColorSpace, DrawLooper, Vector};
-use skia_bindings::{C_SkBlurDrawLooper_Make, C_SkBlurDrawLooper_Make2, SkDrawLooper};
+use skia_bindings as sb;
+use skia_bindings::SkDrawLooper;
 
 impl RCHandle<SkDrawLooper> {
     pub fn blur(color: impl Into<Color>, sigma: scalar, delta: impl Into<Vector>) -> Option<Self> {
@@ -22,7 +23,7 @@ impl RCHandle<SkDrawLooper> {
 pub fn new(color: impl Into<Color>, sigma: scalar, delta: impl Into<Vector>) -> Option<DrawLooper> {
     let delta = delta.into();
     DrawLooper::from_ptr(unsafe {
-        C_SkBlurDrawLooper_Make(color.into().into_native(), sigma, delta.x, delta.y)
+        sb::C_SkBlurDrawLooper_Make(color.into().into_native(), sigma, delta.x, delta.y)
     })
 }
 
@@ -39,7 +40,7 @@ pub fn new_with_color_space(
     DrawLooper::from_ptr(unsafe {
         // TODO: the rule that the passing side should increase the ref counter falls apart here.
         //       Can we ensure that the ref count is increased when it actually is needed?
-        C_SkBlurDrawLooper_Make2(
+        sb::C_SkBlurDrawLooper_Make2(
             *color.as_ref().native(),
             color_space.native(),
             sigma,

@@ -2,10 +2,10 @@ use crate::prelude::*;
 use crate::{
     gradient_shader, scalar, Color, ColorFilter, Image, Matrix, NativeFlattenable, Point, TileMode,
 };
+use skia_bindings as sb;
 use skia_bindings::{
-    C_SkShader_Deserialize, C_SkShader_asAGradient, C_SkShader_isAImage,
-    C_SkShader_makeWithColorFilter, C_SkShader_makeWithLocalMatrix, SkFlattenable, SkPoint,
-    SkRefCntBase, SkShader, SkShader_GradientInfo, SkShader_GradientType, SkTileMode,
+    SkFlattenable, SkPoint, SkRefCntBase, SkShader, SkShader_GradientInfo, SkShader_GradientType,
+    SkTileMode,
 };
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -64,7 +64,7 @@ impl NativeFlattenable for SkShader {
     }
 
     fn native_deserialize(data: &[u8]) -> *mut Self {
-        unsafe { C_SkShader_Deserialize(data.as_ptr() as _, data.len()) }
+        unsafe { sb::C_SkShader_Deserialize(data.as_ptr() as _, data.len()) }
     }
 }
 
@@ -76,7 +76,7 @@ impl Default for RCHandle<SkShader> {
 
 impl RCHandle<SkShader> {
     pub fn is_opaque(&self) -> bool {
-        unsafe { skia_bindings::C_SkShader_isOpaque(self.native()) }
+        unsafe { sb::C_SkShader_isOpaque(self.native()) }
     }
 
     pub fn image(&self) -> Option<(Image, Matrix, (TileMode, TileMode))> {
@@ -92,7 +92,7 @@ impl RCHandle<SkShader> {
     }
 
     pub fn is_a_image(&self) -> bool {
-        unsafe { C_SkShader_isAImage(self.native()) }
+        unsafe { sb::C_SkShader_isAImage(self.native()) }
     }
 
     #[deprecated(since = "0.11.0", note = "skbug.com/8941")]
@@ -114,8 +114,10 @@ impl RCHandle<SkShader> {
                 fGradientFlags: 0,
             };
 
-            let gradient_type =
-                GradientTypeInternal::from_native(C_SkShader_asAGradient(self.native(), &mut info));
+            let gradient_type = GradientTypeInternal::from_native(sb::C_SkShader_asAGradient(
+                self.native(),
+                &mut info,
+            ));
             match gradient_type {
                 GradientTypeInternal::None => None,
                 GradientTypeInternal::Color => Some(GradientType::Color),
@@ -154,13 +156,15 @@ impl RCHandle<SkShader> {
     }
 
     pub fn with_local_matrix(&self, matrix: &Matrix) -> Self {
-        Self::from_ptr(unsafe { C_SkShader_makeWithLocalMatrix(self.native(), matrix.native()) })
-            .unwrap()
+        Self::from_ptr(unsafe {
+            sb::C_SkShader_makeWithLocalMatrix(self.native(), matrix.native())
+        })
+        .unwrap()
     }
 
     pub fn with_color_filter(&self, color_filter: ColorFilter) -> Self {
         Self::from_ptr(unsafe {
-            C_SkShader_makeWithColorFilter(self.native(), color_filter.into_ptr())
+            sb::C_SkShader_makeWithColorFilter(self.native(), color_filter.into_ptr())
         })
         .unwrap()
     }
@@ -169,23 +173,22 @@ impl RCHandle<SkShader> {
 pub mod shaders {
     use crate::prelude::*;
     use crate::{BlendMode, Color, Color4f, ColorSpace, Matrix, Shader};
-    use skia_bindings::{
-        C_SkShaders_Blend, C_SkShaders_Color, C_SkShaders_Color2, C_SkShaders_Empty,
-        C_SkShaders_Lerp, C_SkShaders_Lerp2,
-    };
+    use skia_bindings as sb;
 
     pub fn empty() -> Shader {
-        Shader::from_ptr(unsafe { C_SkShaders_Empty() }).unwrap()
+        Shader::from_ptr(unsafe { sb::C_SkShaders_Empty() }).unwrap()
     }
 
     pub fn color(color: impl Into<Color>) -> Shader {
         let color = color.into();
-        Shader::from_ptr(unsafe { C_SkShaders_Color(color.into_native()) }).unwrap()
+        Shader::from_ptr(unsafe { sb::C_SkShaders_Color(color.into_native()) }).unwrap()
     }
 
     pub fn color_in_space(color: impl AsRef<Color4f>, space: ColorSpace) -> Shader {
-        Shader::from_ptr(unsafe { C_SkShaders_Color2(color.as_ref().native(), space.into_ptr()) })
-            .unwrap()
+        Shader::from_ptr(unsafe {
+            sb::C_SkShaders_Color2(color.as_ref().native(), space.into_ptr())
+        })
+        .unwrap()
     }
 
     pub fn blend(
@@ -195,7 +198,7 @@ pub mod shaders {
         local_matrix: Option<&Matrix>,
     ) -> Shader {
         Shader::from_ptr(unsafe {
-            C_SkShaders_Blend(
+            sb::C_SkShaders_Blend(
                 mode.into_native(),
                 dst.into_ptr(),
                 src.into_ptr(),
@@ -207,7 +210,7 @@ pub mod shaders {
 
     pub fn lerp(t: f32, dst: Shader, src: Shader, local_matrix: Option<&Matrix>) -> Option<Shader> {
         Shader::from_ptr(unsafe {
-            C_SkShaders_Lerp(
+            sb::C_SkShaders_Lerp(
                 t,
                 dst.into_ptr(),
                 src.into_ptr(),
@@ -219,7 +222,7 @@ pub mod shaders {
     // TODO: rename as soon it's clear from the documentation what it does.
     pub fn lerp2(red: Shader, dst: Shader, src: Shader, local_matrix: Option<&Matrix>) -> Shader {
         Shader::from_ptr(unsafe {
-            C_SkShaders_Lerp2(
+            sb::C_SkShaders_Lerp2(
                 red.into_ptr(),
                 dst.into_ptr(),
                 src.into_ptr(),

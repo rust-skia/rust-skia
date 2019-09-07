@@ -15,20 +15,22 @@ impl RCHandle<SkPathEffect> {
 pub mod line_2d_path_effect {
     use crate::prelude::*;
     use crate::{scalar, Matrix, PathEffect};
-    use skia_bindings::C_SkLine2DPathEffect_Make;
+    use skia_bindings as sb;
 
     pub fn new(width: scalar, matrix: &Matrix) -> Option<PathEffect> {
-        PathEffect::from_ptr(unsafe { C_SkLine2DPathEffect_Make(width, matrix.native()) })
+        PathEffect::from_ptr(unsafe { sb::C_SkLine2DPathEffect_Make(width, matrix.native()) })
     }
 }
 
 pub mod path_2d_path_effect {
     use crate::prelude::*;
     use crate::{Matrix, Path, PathEffect};
-    use skia_bindings::C_SkPath2DPathEffect_Make;
+    use skia_bindings as sb;
 
     pub fn new(matrix: &Matrix, path: &Path) -> PathEffect {
-        PathEffect::from_ptr(unsafe { C_SkPath2DPathEffect_Make(matrix.native(), path.native()) })
-            .unwrap()
+        PathEffect::from_ptr(unsafe {
+            sb::C_SkPath2DPathEffect_Make(matrix.native(), path.native())
+        })
+        .unwrap()
     }
 }

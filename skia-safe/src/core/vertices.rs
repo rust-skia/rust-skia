@@ -1,13 +1,8 @@
 use crate::prelude::*;
 use crate::{Color, Data, Point, Rect};
+use skia_bindings as sb;
 use skia_bindings::{
-    C_SkVertices_Bone_mapRect, C_SkVertices_Builder_destruct, C_SkVertices_Builder_detach,
-    C_SkVertices_Decode, C_SkVertices_MakeCopy, C_SkVertices_applyBones, C_SkVertices_encode,
-    C_SkVertices_ref, C_SkVertices_unique, C_SkVertices_unref, SkColor, SkPoint, SkVertices,
-    SkVertices_Bone, SkVertices_Builder, SkVertices_BuilderFlags_kHasBones_BuilderFlag,
-    SkVertices_BuilderFlags_kHasColors_BuilderFlag,
-    SkVertices_BuilderFlags_kHasTexCoords_BuilderFlag,
-    SkVertices_BuilderFlags_kIsNonVolatile_BuilderFlag, SkVertices_VertexMode,
+    SkColor, SkPoint, SkVertices, SkVertices_Bone, SkVertices_Builder, SkVertices_VertexMode,
 };
 #[cfg(test)]
 use skia_bindings::{SkVertices_BoneIndices, SkVertices_BoneWeights};
@@ -68,7 +63,7 @@ impl Bone {
 
     pub fn map_rect(&self, rect: impl AsRef<Rect>) -> Rect {
         Rect::from_native(unsafe {
-            C_SkVertices_Bone_mapRect(self.native(), rect.as_ref().native())
+            sb::C_SkVertices_Bone_mapRect(self.native(), rect.as_ref().native())
         })
     }
 }
@@ -96,15 +91,15 @@ pub type Vertices = RCHandle<SkVertices>;
 
 impl NativeRefCounted for SkVertices {
     fn _ref(&self) {
-        unsafe { C_SkVertices_ref(self) }
+        unsafe { sb::C_SkVertices_ref(self) }
     }
 
     fn _unref(&self) {
-        unsafe { C_SkVertices_unref(self) }
+        unsafe { sb::C_SkVertices_unref(self) }
     }
 
     fn unique(&self) -> bool {
-        unsafe { C_SkVertices_unique(self) }
+        unsafe { sb::C_SkVertices_unique(self) }
     }
 }
 
@@ -136,7 +131,7 @@ impl RCHandle<SkVertices> {
         let indices_count = indices.map(|i| i.len()).unwrap_or(0);
 
         Vertices::from_ptr(unsafe {
-            C_SkVertices_MakeCopy(
+            sb::C_SkVertices_MakeCopy(
                 mode.into_native(),
                 vertex_count as _,
                 positions.native().as_ptr(),
@@ -224,7 +219,7 @@ impl RCHandle<SkVertices> {
 
     pub fn apply_bones(&self, bones: &[Bone]) -> Vertices {
         Vertices::from_ptr(unsafe {
-            C_SkVertices_applyBones(
+            sb::C_SkVertices_applyBones(
                 self.native(),
                 bones.native().as_ptr(),
                 bones.len().try_into().unwrap(),
@@ -238,20 +233,20 @@ impl RCHandle<SkVertices> {
     }
 
     pub fn decode(buffer: &[u8]) -> Option<Vertices> {
-        Vertices::from_ptr(unsafe { C_SkVertices_Decode(buffer.as_ptr() as _, buffer.len()) })
+        Vertices::from_ptr(unsafe { sb::C_SkVertices_Decode(buffer.as_ptr() as _, buffer.len()) })
     }
 
     pub fn encode(&self) -> Data {
-        Data::from_ptr(unsafe { C_SkVertices_encode(self.native()) }).unwrap()
+        Data::from_ptr(unsafe { sb::C_SkVertices_encode(self.native()) }).unwrap()
     }
 }
 
 bitflags! {
     pub struct BuilderFlags: u32 {
-        const HAS_TEX_COORDS = SkVertices_BuilderFlags_kHasTexCoords_BuilderFlag as u32;
-        const HAS_COLORS = SkVertices_BuilderFlags_kHasColors_BuilderFlag as u32;
-        const HAS_BONES = SkVertices_BuilderFlags_kHasBones_BuilderFlag as u32;
-        const IS_NON_VOLATILE = SkVertices_BuilderFlags_kIsNonVolatile_BuilderFlag as u32;
+        const HAS_TEX_COORDS = sb::SkVertices_BuilderFlags_kHasTexCoords_BuilderFlag as u32;
+        const HAS_COLORS = sb::SkVertices_BuilderFlags_kHasColors_BuilderFlag as u32;
+        const HAS_BONES = sb::SkVertices_BuilderFlags_kHasBones_BuilderFlag as u32;
+        const IS_NON_VOLATILE = sb::SkVertices_BuilderFlags_kIsNonVolatile_BuilderFlag as u32;
     }
 }
 
@@ -259,7 +254,7 @@ pub type Builder = Handle<SkVertices_Builder>;
 
 impl NativeDrop for SkVertices_Builder {
     fn drop(&mut self) {
-        unsafe { C_SkVertices_Builder_destruct(self) }
+        unsafe { sb::C_SkVertices_Builder_destruct(self) }
     }
 }
 
@@ -339,6 +334,6 @@ impl Handle<SkVertices_Builder> {
     }
 
     pub fn detach(mut self) -> Vertices {
-        Vertices::from_ptr(unsafe { C_SkVertices_Builder_detach(self.native_mut()) }).unwrap()
+        Vertices::from_ptr(unsafe { sb::C_SkVertices_Builder_detach(self.native_mut()) }).unwrap()
     }
 }

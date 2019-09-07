@@ -1,8 +1,7 @@
 use crate::prelude::*;
 use crate::{image_filter::CropRect, scalar, IPoint, ISize, ImageFilter};
-use skia_bindings::{
-    C_SkMatrixConvolutionImageFilter_Make, SkImageFilter, SkMatrixConvolutionImageFilter_TileMode,
-};
+use skia_bindings as sb;
+use skia_bindings::{SkImageFilter, SkMatrixConvolutionImageFilter_TileMode};
 
 impl RCHandle<SkImageFilter> {
     #[allow(clippy::too_many_arguments)]
@@ -63,7 +62,7 @@ pub fn new<'a>(
         kernel.len()
     );
     ImageFilter::from_ptr(unsafe {
-        C_SkMatrixConvolutionImageFilter_Make(
+        sb::C_SkMatrixConvolutionImageFilter_Make(
             kernel_size.native(),
             kernel.as_ptr(),
             gain,

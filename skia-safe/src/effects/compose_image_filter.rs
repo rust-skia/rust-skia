@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::ImageFilter;
-use skia_bindings::{C_SkComposeImageFilter_Make, SkImageFilter};
+use skia_bindings as sb;
+use skia_bindings::SkImageFilter;
 
 impl RCHandle<SkImageFilter> {
     pub fn compose(outer: ImageFilter, inner: ImageFilter) -> Option<Self> {
@@ -10,6 +11,6 @@ impl RCHandle<SkImageFilter> {
 
 pub fn new(outer: ImageFilter, inner: ImageFilter) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
-        C_SkComposeImageFilter_Make(outer.into_ptr(), inner.into_ptr())
+        sb::C_SkComposeImageFilter_Make(outer.into_ptr(), inner.into_ptr())
     })
 }

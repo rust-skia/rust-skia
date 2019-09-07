@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::{ImageFilter, Rect};
-use skia_bindings::{C_SkTileImageFilter_Make, SkImageFilter};
+use skia_bindings as sb;
+use skia_bindings::SkImageFilter;
 
 impl RCHandle<SkImageFilter> {
     pub fn tile(self, src: impl AsRef<Rect>, dst: impl AsRef<Rect>) -> Option<Self> {
@@ -14,7 +15,7 @@ pub fn new(
     input: ImageFilter,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
-        C_SkTileImageFilter_Make(
+        sb::C_SkTileImageFilter_Make(
             src.as_ref().native(),
             dst.as_ref().native(),
             input.into_ptr(),

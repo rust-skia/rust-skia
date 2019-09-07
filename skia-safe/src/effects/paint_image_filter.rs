@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::{image_filter::CropRect, ImageFilter, Paint};
-use skia_bindings::{C_SkPaintImageFilter_Make, SkImageFilter, SkPaint};
+use skia_bindings as sb;
+use skia_bindings::{SkImageFilter, SkPaint};
 
 impl RCHandle<SkImageFilter> {
     pub fn from_paint<'a>(
@@ -25,6 +26,6 @@ pub fn from_paint<'a>(
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
-        C_SkPaintImageFilter_Make(paint.native(), crop_rect.into().native_ptr_or_null())
+        sb::C_SkPaintImageFilter_Make(paint.native(), crop_rect.into().native_ptr_or_null())
     })
 }

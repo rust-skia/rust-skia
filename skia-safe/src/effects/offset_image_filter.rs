@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::{image_filter::CropRect, ImageFilter, Vector};
-use skia_bindings::{C_SkOffsetImageFilter_Make, SkImageFilter};
+use skia_bindings as sb;
+use skia_bindings::SkImageFilter;
 
 impl RCHandle<SkImageFilter> {
     pub fn offset<'a>(
@@ -19,7 +20,7 @@ pub fn new<'a>(
 ) -> Option<ImageFilter> {
     let delta = delta.into();
     ImageFilter::from_ptr(unsafe {
-        C_SkOffsetImageFilter_Make(
+        sb::C_SkOffsetImageFilter_Make(
             delta.x,
             delta.y,
             input.into_ptr(),

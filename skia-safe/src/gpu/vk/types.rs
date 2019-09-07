@@ -1,14 +1,10 @@
 use crate::gpu::vk;
 use crate::gpu::Protected;
 use crate::prelude::*;
+use skia_bindings as sb;
 use skia_bindings::{
-    C_GrVkAlloc_Construct, C_GrVkAlloc_Equals, C_GrVkImageInfo_Equals,
-    C_GrVkImageInfo_updateImageLayout, C_GrVkYcbcrConversionInfo_Construct,
-    C_GrVkYcbcrConversionInfo_Equals, GrVkAlloc_Flag_kMappable_Flag,
-    GrVkAlloc_Flag_kNoncoherent_Flag, GrVkDrawableInfo,
+    GrVkAlloc, GrVkBackendMemory, GrVkDrawableInfo, GrVkImageInfo, GrVkYcbcrConversionInfo,
 };
-use skia_bindings::{GrVkAlloc, GrVkBackendMemory};
-use skia_bindings::{GrVkImageInfo, GrVkYcbcrConversionInfo};
 use std::ffi::CStr;
 use std::os::raw;
 use std::ptr;
@@ -47,14 +43,14 @@ impl Default for Alloc {
 
 impl PartialEq for Alloc {
     fn eq(&self, other: &Self) -> bool {
-        unsafe { C_GrVkAlloc_Equals(self.native(), other.native()) }
+        unsafe { sb::C_GrVkAlloc_Equals(self.native(), other.native()) }
     }
 }
 
 bitflags! {
     pub struct AllocFlag : u32 {
-        const NONCOHERENT = GrVkAlloc_Flag_kNoncoherent_Flag as _;
-        const MAPPABLE = GrVkAlloc_Flag_kMappable_Flag as _;
+        const NONCOHERENT = sb::GrVkAlloc_Flag_kNoncoherent_Flag as _;
+        const MAPPABLE = sb::GrVkAlloc_Flag_kMappable_Flag as _;
     }
 }
 
@@ -65,7 +61,9 @@ impl Alloc {
         size: vk::DeviceSize,
         flags: AllocFlag,
     ) -> Alloc {
-        Alloc::construct(|alloc| C_GrVkAlloc_Construct(alloc, memory, offset, size, flags.bits()))
+        Alloc::construct(|alloc| {
+            sb::C_GrVkAlloc_Construct(alloc, memory, offset, size, flags.bits())
+        })
     }
 }
 
@@ -90,7 +88,7 @@ fn test_ycbcr_conversion_info_layout() {
 
 impl PartialEq for YcbcrConversionInfo {
     fn eq(&self, other: &Self) -> bool {
-        unsafe { C_GrVkYcbcrConversionInfo_Equals(self.native(), other.native()) }
+        unsafe { sb::C_GrVkYcbcrConversionInfo_Equals(self.native(), other.native()) }
     }
 }
 
@@ -122,7 +120,7 @@ impl YcbcrConversionInfo {
         external_format_features: vk::FormatFeatureFlags,
     ) -> YcbcrConversionInfo {
         YcbcrConversionInfo::construct(|ci| unsafe {
-            C_GrVkYcbcrConversionInfo_Construct(
+            sb::C_GrVkYcbcrConversionInfo_Construct(
                 ci,
                 ycrbcr_model,
                 ycbcr_range,
@@ -179,7 +177,7 @@ impl Default for ImageInfo {
 
 impl PartialEq for ImageInfo {
     fn eq(&self, other: &Self) -> bool {
-        unsafe { C_GrVkImageInfo_Equals(self.native(), other.native()) }
+        unsafe { sb::C_GrVkImageInfo_Equals(self.native(), other.native()) }
     }
 }
 
@@ -255,7 +253,7 @@ impl ImageInfo {
     }
 
     pub fn update_image_layout(&mut self, layout: vk::ImageLayout) -> &mut Self {
-        unsafe { C_GrVkImageInfo_updateImageLayout(self.native_mut(), layout) }
+        unsafe { sb::C_GrVkImageInfo_updateImageLayout(self.native_mut(), layout) }
         self
     }
 }

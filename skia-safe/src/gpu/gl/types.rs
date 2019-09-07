@@ -1,7 +1,6 @@
 use crate::prelude::NativeTransmutable;
-use skia_bindings::{
-    C_GrGLTextureInfo_Equals, GrGLFramebufferInfo, GrGLTextureInfo, GrGLenum, GrGLuint,
-};
+use skia_bindings as sb;
+use skia_bindings::{GrGLFramebufferInfo, GrGLTextureInfo, GrGLenum, GrGLuint};
 
 pub type Enum = GrGLenum;
 pub type UInt = GrGLuint;
@@ -22,7 +21,7 @@ fn test_texture_info_layout() {
 
 impl PartialEq for TextureInfo {
     fn eq(&self, other: &Self) -> bool {
-        unsafe { C_GrGLTextureInfo_Equals(self.native(), other.native()) }
+        unsafe { sb::C_GrGLTextureInfo_Equals(self.native(), other.native()) }
     }
 }
 
@@ -77,18 +76,18 @@ impl FramebufferInfo {
 
 bitflags! {
     pub struct BackendState: u32 {
-        const RENDER_TARGET = skia_bindings::GrGLBackendState_kRenderTarget_GrGLBackendState as _;
-        const TEXTURE_BINDING = skia_bindings::GrGLBackendState_kTextureBinding_GrGLBackendState as _;
-        const VIEW = skia_bindings::GrGLBackendState_kView_GrGLBackendState as _;
-        const BLEND = skia_bindings::GrGLBackendState_kBlend_GrGLBackendState as _;
-        const MSAA_ENABLE = skia_bindings::GrGLBackendState_kMSAAEnable_GrGLBackendState as _;
-        const VERTEX = skia_bindings::GrGLBackendState_kVertex_GrGLBackendState as _;
-        const STENCIL = skia_bindings::GrGLBackendState_kStencil_GrGLBackendState as _;
-        const PIXEL_STORE = skia_bindings::GrGLBackendState_kPixelStore_GrGLBackendState as _;
-        const PROGRAM = skia_bindings::GrGLBackendState_kProgram_GrGLBackendState as _;
-        const FIXED_FUNCTION = skia_bindings::GrGLBackendState_kFixedFunction_GrGLBackendState as _;
-        const MISC = skia_bindings::GrGLBackendState_kMisc_GrGLBackendState as _;
-        const PATH_RENDERING = skia_bindings::GrGLBackendState_kPathRendering_GrGLBackendState as _;
+        const RENDER_TARGET = sb::GrGLBackendState_kRenderTarget_GrGLBackendState as _;
+        const TEXTURE_BINDING = sb::GrGLBackendState_kTextureBinding_GrGLBackendState as _;
+        const VIEW = sb::GrGLBackendState_kView_GrGLBackendState as _;
+        const BLEND = sb::GrGLBackendState_kBlend_GrGLBackendState as _;
+        const MSAA_ENABLE = sb::GrGLBackendState_kMSAAEnable_GrGLBackendState as _;
+        const VERTEX = sb::GrGLBackendState_kVertex_GrGLBackendState as _;
+        const STENCIL = sb::GrGLBackendState_kStencil_GrGLBackendState as _;
+        const PIXEL_STORE = sb::GrGLBackendState_kPixelStore_GrGLBackendState as _;
+        const PROGRAM = sb::GrGLBackendState_kProgram_GrGLBackendState as _;
+        const FIXED_FUNCTION = sb::GrGLBackendState_kFixedFunction_GrGLBackendState as _;
+        const MISC = sb::GrGLBackendState_kMisc_GrGLBackendState as _;
+        const PATH_RENDERING = sb::GrGLBackendState_kPathRendering_GrGLBackendState as _;
     }
 }
 
