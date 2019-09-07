@@ -49,38 +49,37 @@ impl Handle<GrBackendFormat> {
 
     #[deprecated(since = "0.0.0", note = "use backend()")]
     pub fn backend_api(&self) -> BackendAPI {
+        self.backend()
+    }
+
+    pub fn backend(&self) -> BackendAPI {
         BackendAPI::from_native(self.native().fBackend)
     }
 
+    // texture_type() would return a private type.
+
+    #[deprecated(since = "0.0.0", note = "use as_gl_format()")]
     pub fn gl_format(&self) -> Option<gl::Enum> {
-        unsafe {
-            #[allow(clippy::map_clone)]
-            self.native()
-                .getGLFormat()
-                .into_option()
-                .map(|format| *format)
-        }
+        Some(self.as_gl_format() as _)
     }
 
-    pub fn gl_target(&self) -> Option<gl::Enum> {
-        unsafe {
+    pub fn as_gl_format(&self) -> gl::Format {
+        gl::Format::from_native(unsafe {
             #[allow(clippy::map_clone)]
-            self.native()
-                .getGLTarget()
-                .into_option()
-                .map(|target| *target)
-        }
+            self.native().asGLFormat()
+        })
+    }
+
+    #[deprecated(since = "0.0.0", note = "use as_vk_format()")]
+    #[cfg(feature = "vulkan")]
+    pub fn vulkan_format(&self) -> Option<vk::Format> {
+        self.as_vk_format()
     }
 
     #[cfg(feature = "vulkan")]
-    pub fn vulkan_format(&self) -> Option<vk::Format> {
-        unsafe {
-            #[allow(clippy::map_clone)]
-            self.native()
-                .getVkFormat()
-                .into_option()
-                .map(|format| *format)
-        }
+    pub fn as_vk_format(&self) -> Option<vk::Format> {
+        let mut r = vk::Format::UNDEFINED;
+        unsafe { self.native().asVkFormat(&mut r) }.if_true_some(r)
     }
 
     pub fn to_texture_2d(&self) -> Option<Self> {

@@ -2781,6 +2781,10 @@ extern "C" void C_GrContext_flush(GrContext* self) {
     self->flush();
 }
 
+extern "C" GrBackendFormat C_GrContext_defaultBackendFormat(const GrContext* self, SkColorType ct, GrRenderable renderable) {
+    return self->defaultBackendFormat(ct, renderable);
+}
+
 //
 // gpu/GrBackendDrawableInfo.h
 //
@@ -2904,19 +2908,6 @@ extern "C" void C_GrVkAlloc_Construct(GrVkAlloc* uninitialized, VkDeviceMemory m
 
 extern "C" bool C_GrVkAlloc_Equals(const GrVkAlloc* lhs, const GrVkAlloc* rhs) {
     return *lhs == *rhs;
-}
-
-extern "C" void C_GrVkYcbcrConversionInfo_Construct(
-        GrVkYcbcrConversionInfo* uninitialized,
-        VkSamplerYcbcrModelConversion ycbcrModel,
-        VkSamplerYcbcrRange ycbcrRange,
-        VkChromaLocation xChromaOffset,
-        VkChromaLocation yChromaOffset,
-        VkFilter chromaFilter,
-        VkBool32 forceExplicitReconstruction,
-        uint64_t externalFormat,
-        VkFormatFeatureFlags externalFormatFeatures) {
-    new (uninitialized) GrVkYcbcrConversionInfo(ycbcrModel, ycbcrRange, xChromaOffset, yChromaOffset, chromaFilter, forceExplicitReconstruction, externalFormat, externalFormatFeatures);
 }
 
 extern "C" bool C_GrVkYcbcrConversionInfo_Equals(const GrVkYcbcrConversionInfo* lhs, const GrVkYcbcrConversionInfo* rhs) {
