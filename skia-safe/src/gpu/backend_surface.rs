@@ -169,7 +169,7 @@ impl Handle<GrBackendTexture> {
         }
     }
 
-    pub fn gl_texture_paramters_modified(&mut self) {
+    pub fn gl_texture_parameters_modified(&mut self) {
         unsafe { self.native_mut().glTextureParametersModified() }
     }
 

@@ -41,7 +41,7 @@ impl Default for BuildConfiguration {
             match (cfg!(feature = "textlayout"), cfg!(feature = "shaper")) {
                 (false, false) => TextLayout::None,
                 (false, true) => TextLayout::ShaperOnly,
-                (true, false) => panic!("invalid feature configuration, feature 'shaper' must be enabled for feature 'paragraph'"),
+                (true, false) => panic!("invalid feature configuration, feature 'shaper' must be enabled for feature 'textlayout'"),
                 (true, true) => TextLayout::ShaperAndParagraph,
             }
         };
@@ -76,7 +76,7 @@ pub struct BuildConfiguration {
     skia_release: bool,
 
     /// Configure Skia builds to keep inline functions to
-    /// prevent mean linker errors.
+    /// prevent linker errors.
     keep_inline_functions: bool,
 
     /// The Skia feature set to compile.
