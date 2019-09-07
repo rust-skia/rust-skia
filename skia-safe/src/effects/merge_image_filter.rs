@@ -13,6 +13,7 @@ impl RCHandle<SkImageFilter> {
     }
 }
 
+#[deprecated(since = "m78", note = "use color_filters::merge")]
 #[allow(clippy::new_ret_no_self)]
 pub fn new<'a>(
     filters: impl IntoIterator<Item = ImageFilter>,

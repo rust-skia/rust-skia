@@ -1,21 +1,7 @@
 use crate::prelude::*;
+use crate::ColorChannel;
 use skia_bindings as sb;
-use skia_bindings::{SkColorChannel, SkYUVAIndex, SkYUVAIndex_Index};
-
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum ColorChannel {
-    R = SkColorChannel::kR as _,
-    G = SkColorChannel::kG as _,
-    B = SkColorChannel::kB as _,
-    A = SkColorChannel::kA as _,
-}
-
-impl NativeTransmutable<SkColorChannel> for ColorChannel {}
-#[test]
-fn test_color_channel_layout() {
-    ColorChannel::test_layout()
-}
+use skia_bindings::{SkYUVAIndex, SkYUVAIndex_Index};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]

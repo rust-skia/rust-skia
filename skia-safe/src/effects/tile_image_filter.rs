@@ -9,6 +9,7 @@ impl RCHandle<SkImageFilter> {
     }
 }
 
+#[deprecated(since = "m78", note = "use color_filters::tile")]
 pub fn new(
     src: impl AsRef<Rect>,
     dst: impl AsRef<Rect>,

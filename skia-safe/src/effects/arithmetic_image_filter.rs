@@ -31,6 +31,7 @@ impl From<([f32; 4], bool)> for ArithmeticFPInputs {
 }
 
 #[allow(clippy::too_many_arguments)]
+#[deprecated(since = "m78", note = "use image_filters::arithmetic()")]
 pub fn new<'a>(
     inputs: impl Into<ArithmeticFPInputs>,
     background: ImageFilter,

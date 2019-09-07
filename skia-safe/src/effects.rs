@@ -21,6 +21,7 @@ pub mod drop_shadow_image_filter;
 pub mod gradient_shader;
 pub mod high_contrast_filter;
 pub use high_contrast_filter::{high_contrast_config, HighContrastConfig};
+pub mod image_filters;
 pub mod image_source;
 pub mod layer_draw_looper;
 pub mod lighting_image_filter;

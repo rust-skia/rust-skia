@@ -21,6 +21,7 @@ impl Handle<SkPaint> {
     }
 }
 
+#[deprecated(since = "m78", note = "use color_filters::paint")]
 pub fn from_paint<'a>(
     paint: &Paint,
     crop_rect: impl Into<Option<&'a CropRect>>,

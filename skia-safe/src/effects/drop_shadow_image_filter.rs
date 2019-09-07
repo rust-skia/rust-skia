@@ -30,6 +30,10 @@ fn test_shadow_mode_layout() {
     ShadowMode::test_layout();
 }
 
+#[deprecated(
+    since = "m78",
+    note = "use color_filters::drop_shadow & color_filters::drop_shadow_only"
+)]
 pub fn new<'a>(
     delta: impl Into<Vector>,
     (sigma_x, sigma_y): (scalar, scalar),
