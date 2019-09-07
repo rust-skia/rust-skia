@@ -1,72 +1,11 @@
 use crate::prelude::*;
-use crate::{
-    ColorFilter, ColorSpace, ColorType, FilterQuality, IRect, Matrix, NativeFlattenable, Rect,
-};
+use crate::{ColorFilter, FilterQuality, IRect, Matrix, NativeFlattenable, Rect};
 use skia_bindings as sb;
 use skia_bindings::{
-    SkColorFilter, SkColorSpace, SkFlattenable, SkImageFilter, SkImageFilterCache,
-    SkImageFilter_Context, SkImageFilter_CropRect, SkImageFilter_MapDirection,
-    SkImageFilter_OutputProperties, SkImageFilter_TileUsage, SkRefCntBase,
+    SkColorFilter, SkFlattenable, SkImageFilter, SkImageFilter_CropRect,
+    SkImageFilter_MapDirection, SkRefCntBase,
 };
 use std::ptr;
-
-#[repr(C)]
-pub struct OutputProperties<'a> {
-    color_type: ColorType,
-    color_space: &'a SkColorSpace,
-}
-
-impl<'a> NativeTransmutable<SkImageFilter_OutputProperties> for OutputProperties<'a> {}
-
-#[test]
-fn test_output_properties_layout() {
-    OutputProperties::test_layout();
-}
-
-impl<'a> OutputProperties<'a> {
-    pub fn color_type(&self) -> ColorType {
-        self.color_type
-    }
-
-    pub fn color_space(&self) -> Option<ColorSpace> {
-        ColorSpace::from_unshared_ptr(self.color_space as *const _ as *mut _)
-    }
-}
-
-#[repr(C)]
-pub struct Context<'a> {
-    ctm: Matrix,
-    clip_bounds: IRect,
-    cache: &'a mut SkImageFilterCache,
-    output_properties: OutputProperties<'a>,
-}
-
-impl<'a> NativeTransmutable<SkImageFilter_Context> for Context<'a> {}
-
-#[test]
-fn test_context_layout() {
-    Context::test_layout();
-}
-
-impl<'a> Context<'a> {
-    pub fn ctm(&self) -> &Matrix {
-        &self.ctm
-    }
-
-    pub fn clip_bounds(&self) -> &IRect {
-        &self.clip_bounds
-    }
-
-    // TODO support access to SkImageFilterCache, even though it's declared in src/core?
-
-    pub fn output_properties(&self) -> &OutputProperties {
-        &self.output_properties
-    }
-
-    pub fn is_valid(&self) -> bool {
-        self.ctm.is_finite()
-    }
-}
 
 #[derive(Clone)]
 #[repr(transparent)]
@@ -139,19 +78,6 @@ pub mod crop_rect {
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
-pub enum TileUsage {
-    Possible = SkImageFilter_TileUsage::kPossible_TileUsage as _,
-    Never = SkImageFilter_TileUsage::kNever_TileUsage as _,
-}
-
-impl NativeTransmutable<SkImageFilter_TileUsage> for TileUsage {}
-#[test]
-fn test_tile_usage_layout() {
-    TileUsage::test_layout();
-}
-
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
 pub enum MapDirection {
     Forward = SkImageFilter_MapDirection::kForward_MapDirection as _,
     Reverse = SkImageFilter_MapDirection::kReverse_MapDirection as _,
@@ -202,8 +128,6 @@ impl RCHandle<SkImageFilter> {
         })
     }
 
-    // TODO: DrawWithFP()
-
     pub fn color_filter_node(&self) -> Option<ColorFilter> {
         let mut filter_ptr: *mut SkColorFilter = ptr::null_mut();
         if unsafe { sb::C_SkImageFilter_isColorFilterNode(self.native(), &mut filter_ptr) } {
@@ -247,17 +171,8 @@ impl RCHandle<SkImageFilter> {
     pub fn get_input(&self, i: usize) -> Option<ImageFilter> {
         assert!(i < self.count_inputs());
         ImageFilter::from_unshared_ptr(unsafe {
-            sb::C_SkImageFilter_getInput(self.native(), i.try_into().unwrap())
+            sb::C_SkImageFilter_getInput(self.native(), i.try_into().unwrap()) as *mut _
         })
-    }
-
-    // TODO: rename to is_crop_rect_set() ?
-    pub fn crop_rect_is_set(&self) -> bool {
-        !self.crop_rect().flags().is_empty()
-    }
-
-    pub fn crop_rect(&self) -> CropRect {
-        CropRect::from_native(self.native().fCropRect)
     }
 
     pub fn compute_fast_bounds(&self, bounds: impl AsRef<Rect>) -> Rect {
@@ -281,10 +196,7 @@ impl RCHandle<SkImageFilter> {
         })
     }
 
-    pub fn can_handle_complex_ctm(&self) -> bool {
-        unsafe { self.native().canHandleComplexCTM() }
-    }
-
+    #[deprecated(since = "m78", note = "use image_filters::matrix_transform()")]
     pub fn with_matrix(self, matrix: &Matrix, quality: FilterQuality) -> ImageFilter {
         ImageFilter::from_ptr(unsafe {
             sb::C_SkImageFilter_MakeMatrixFilter(

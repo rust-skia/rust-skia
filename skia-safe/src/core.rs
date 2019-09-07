@@ -146,17 +146,11 @@ pub use image_encoder::*;
 pub mod image_filter;
 #[deprecated(since = "0.12.0", note = "use image_filter::crop_rect::CropEdge")]
 pub use image_filter::crop_rect::CropEdge as ImageFilterCropRectCropEdge;
-#[deprecated(since = "0.12.0", note = "use image_filter::Context")]
-pub use image_filter::Context as ImageFilterContext;
 #[deprecated(since = "0.12.0", note = "use image_filter::CropRect")]
 pub use image_filter::CropRect as ImageFilterCropRect;
 pub use image_filter::ImageFilter;
 #[deprecated(since = "0.12.0", note = "use image_filter::MapDirection")]
 pub use image_filter::MapDirection as ImageFilterMapDirection;
-#[deprecated(since = "0.12.0", note = "use image_filter::OutputProperties")]
-pub use image_filter::OutputProperties as ImageFilterOutputProperties;
-#[deprecated(since = "0.12.0", note = "use image_filter::TileUsage")]
-pub use image_filter::TileUsage as ImageFilterTileUsage;
 
 mod image_generator;
 pub use image_generator::*;
@@ -346,7 +340,7 @@ pub use vertices::VertexMode as VerticesVertexMode;
 pub use vertices::Vertices;
 
 pub mod yuva_index;
-pub use yuva_index::{ColorChannel, YUVAIndex};
+pub use yuva_index::YUVAIndex;
 
 mod yuva_size_info;
 pub use yuva_size_info::*;

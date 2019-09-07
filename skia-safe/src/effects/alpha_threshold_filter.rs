@@ -15,6 +15,7 @@ impl RCHandle<SkImageFilter> {
     }
 }
 
+#[deprecated(since = "m78", note = "use image_filters::alpha_threshold()")]
 pub fn new<'a>(
     region: &Region,
     inner_min: scalar,

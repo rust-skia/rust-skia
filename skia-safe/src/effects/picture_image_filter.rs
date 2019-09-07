@@ -28,11 +28,12 @@ impl RCHandle<SkPicture> {
     }
 }
 
+#[deprecated(since = "m78", note = "use color_filters::picture")]
 pub fn from_picture<'a>(
     picture: Picture,
-    crop_rect: impl Into<Option<&'a Rect>>,
+    target_rect: impl Into<Option<&'a Rect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
-        sb::C_SkPictureImageFilter_Make(picture.into_ptr(), crop_rect.into().native_ptr_or_null())
+        sb::C_SkPictureImageFilter_Make(picture.into_ptr(), target_rect.into().native_ptr_or_null())
     })
 }
