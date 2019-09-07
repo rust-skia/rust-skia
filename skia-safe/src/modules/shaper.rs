@@ -21,7 +21,7 @@ impl NativeDrop for SkShaper {
 
 impl Default for RefHandle<SkShaper> {
     fn default() -> Self {
-        Self::new()
+        Self::new(None)
     }
 }
 
@@ -30,16 +30,26 @@ impl RefHandle<SkShaper> {
         Self::from_ptr(unsafe { sb::C_SkShaper_MakePrimitive() }).unwrap()
     }
 
-    pub fn new_shaper_driven_wrapper() -> Option<Self> {
-        Self::from_ptr(unsafe { sb::C_SkShaper_MakeShaperDrivenWrapper() })
+    pub fn new_shaper_driven_wrapper(font_mgr: impl Into<Option<FontMgr>>) -> Option<Self> {
+        Self::from_ptr(unsafe {
+            sb::C_SkShaper_MakeShaperDrivenWrapper(font_mgr.into().into_ptr_or_null())
+        })
     }
 
-    pub fn new_shape_then_wrap() -> Option<Self> {
-        Self::from_ptr(unsafe { sb::C_SkShaper_MakeShapeThenWrap() })
+    pub fn new_shape_then_wrap(font_mgr: impl Into<Option<FontMgr>>) -> Option<Self> {
+        Self::from_ptr(unsafe {
+            sb::C_SkShaper_MakeShapeThenWrap(font_mgr.into().into_ptr_or_null())
+        })
     }
 
-    pub fn new() -> Self {
-        Self::from_ptr(unsafe { sb::C_SkShaper_Make() }).unwrap()
+    pub fn new_shape_dont_wrap_or_reorder(font_mgr: impl Into<Option<FontMgr>>) -> Option<Self> {
+        Self::from_ptr(unsafe {
+            sb::C_SkShaper_MakeShapeDontWrapOrReorder(font_mgr.into().into_ptr_or_null())
+        })
+    }
+
+    pub fn new(font_mgr: impl Into<Option<FontMgr>>) -> Self {
+        Self::from_ptr(unsafe { sb::C_SkShaper_Make(font_mgr.into().into_ptr_or_null()) }).unwrap()
     }
 }
 
@@ -547,7 +557,7 @@ mod tests {
     fn test_rtl_text_shaping() {
         skia_bindings::icu::init();
 
-        let shaper = Shaper::new();
+        let shaper = Shaper::new(None);
         shaper.shape(
             "العربية",
             &Font::default(),
