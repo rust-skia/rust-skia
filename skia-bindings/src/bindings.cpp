@@ -345,17 +345,7 @@ extern "C" SkImage* C_SkImage_MakeFromTexture(
         SkColorSpace* colorSpace) {
     return SkImage::MakeFromTexture(context, *backendTexture, origin, colorType, alphaType, sp(colorSpace)).release();
 }
-
-extern "C" SkImage* C_SkImage_MakeCrossContextFromEncoded(
-        GrContext* context,
-        SkData* data,
-        bool buildMips,
-        const SkColorSpace* dstColorSpace,
-        bool limitToMaxTextureSize
-        ) {
-    return SkImage::MakeCrossContextFromEncoded(context, sp(data), buildMips, const_cast<SkColorSpace*>(dstColorSpace), limitToMaxTextureSize).release();
-}
-
+ 
 extern "C" SkImage* C_SkImage_MakeFromAdoptedTexture(
         GrContext* context,
         const GrBackendTexture* backendTexture,
@@ -472,9 +462,8 @@ extern "C" SkImage* C_SkImage_makeSubset(const SkImage* self, const SkIRect* sub
 extern "C" SkImage* C_SkImage_makeTextureImage(
         const SkImage* self,
         GrContext* context,
-        const SkColorSpace* dstColorSpace,
         GrMipMapped mipMapped) {
-    return self->makeTextureImage(context, const_cast<SkColorSpace*>(dstColorSpace), mipMapped).release();
+    return self->makeTextureImage(context, mipMapped).release();
 }
 
 extern "C" SkImage* C_SkImage_makeNonTextureImage(const SkImage* self) {
@@ -1100,8 +1089,8 @@ extern "C" bool C_SkRegion_set(SkRegion* self, const SkRegion* region) {
     return self->set(*region);
 }
 
-extern "C" bool C_SkRegion_quickContains(const SkRegion* self, int32_t left, int32_t top, int32_t right, int32_t bottom) {
-    return self->quickContains(left, top, right, bottom);
+extern "C" bool C_SkRegion_quickContains(const SkRegion* self, const SkIRect* r) {
+    return self->quickContains(*r);
 }
 
 extern "C" void C_SkRegion_Iterator_Construct(SkRegion::Iterator* uninitialized) {
@@ -1738,7 +1727,7 @@ extern "C" int C_SkImageFilter_countInputs(const SkImageFilter* self) {
     return self->countInputs();
 }
 
-extern "C" SkImageFilter* C_SkImageFilter_getInput(const SkImageFilter* self, int i) {
+extern "C" const SkImageFilter* C_SkImageFilter_getInput(const SkImageFilter* self, int i) {
     return self->getInput(i);
 }
 
