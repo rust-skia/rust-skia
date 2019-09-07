@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::{image_filter::CropRect, scalar, IPoint, ISize, ImageFilter};
+use crate::{image_filter::CropRect, image_filters, scalar, IPoint, IRect, ISize, ImageFilter};
 use skia_bindings as sb;
 use skia_bindings::{SkImageFilter, SkMatrixConvolutionImageFilter_TileMode};
 
@@ -7,16 +7,16 @@ impl RCHandle<SkImageFilter> {
     #[allow(clippy::too_many_arguments)]
     pub fn matrix_convolution<'a>(
         self,
-        crop_rect: impl Into<Option<&'a CropRect>>,
+        crop_rect: impl Into<Option<&'a IRect>>,
         kernel_size: impl Into<ISize>,
         kernel: &[scalar],
         gain: scalar,
         bias: scalar,
         kernel_offset: impl Into<IPoint>,
-        tile_mode: TileMode,
+        tile_mode: crate::TileMode,
         convolve_alpha: bool,
     ) -> Option<Self> {
-        new(
+        image_filters::matrix_convolution(
             kernel_size,
             kernel,
             gain,
@@ -39,6 +39,7 @@ pub enum TileMode {
     ClampToBlack = SkMatrixConvolutionImageFilter_TileMode::kClampToBlack_TileMode as _,
 }
 
+#[allow(deprecated)]
 impl NativeTransmutable<SkMatrixConvolutionImageFilter_TileMode> for TileMode {}
 #[test]
 fn test_tile_mode_layout() {
@@ -46,6 +47,7 @@ fn test_tile_mode_layout() {
 }
 
 #[deprecated(since = "m78", note = "use color_filters::matrix_convolution")]
+#[allow(deprecated)]
 #[allow(clippy::too_many_arguments)]
 pub fn new<'a>(
     kernel_size: impl Into<ISize>,

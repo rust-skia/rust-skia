@@ -1,11 +1,11 @@
 use crate::prelude::*;
-use crate::ImageFilter;
+use crate::{image_filters, ImageFilter};
 use skia_bindings as sb;
 use skia_bindings::SkImageFilter;
 
 impl RCHandle<SkImageFilter> {
     pub fn compose(outer: ImageFilter, inner: ImageFilter) -> Option<Self> {
-        new(outer, inner)
+        image_filters::compose(outer, inner)
     }
 }
 

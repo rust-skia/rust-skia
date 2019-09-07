@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::{image_filter::CropRect, ImageFilter};
+use crate::{image_filter::CropRect, image_filters, IRect, ImageFilter};
 use skia_bindings as sb;
 use skia_bindings::SkImageFilter;
 use std::convert::TryInto;
@@ -7,9 +7,9 @@ use std::convert::TryInto;
 impl RCHandle<SkImageFilter> {
     pub fn merge<'a>(
         filters: impl IntoIterator<Item = Self>,
-        crop_rect: impl Into<Option<&'a CropRect>>,
+        crop_rect: impl Into<Option<&'a IRect>>,
     ) -> Option<Self> {
-        new(filters, crop_rect)
+        image_filters::merge(filters, crop_rect)
     }
 }
 

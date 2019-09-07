@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::{image_filter, ImageFilter};
+use crate::{image_filter, image_filters, IRect, ImageFilter};
 use skia_bindings as sb;
 use skia_bindings::SkImageFilter;
 
@@ -9,9 +9,19 @@ impl RCHandle<SkImageFilter> {
         inputs: impl Into<ArithmeticFPInputs>,
         background: Self,
         foreground: Self,
-        crop_rect: impl Into<Option<&'a image_filter::CropRect>>,
+        crop_rect: impl Into<Option<&'a IRect>>,
     ) -> Option<Self> {
-        new(inputs, background, foreground, crop_rect)
+        let inputs = inputs.into();
+        image_filters::arithmetic(
+            inputs.k[0],
+            inputs.k[1],
+            inputs.k[2],
+            inputs.k[3],
+            inputs.enforce_pm_color,
+            background,
+            foreground,
+            crop_rect,
+        )
     }
 }
 

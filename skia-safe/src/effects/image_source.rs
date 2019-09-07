@@ -1,11 +1,11 @@
 use crate::prelude::*;
-use crate::{FilterQuality, Image, ImageFilter, Rect};
+use crate::{image_filters, FilterQuality, Image, ImageFilter, Rect};
 use skia_bindings as sb;
 use skia_bindings::{SkImage, SkImageFilter};
 
 impl RCHandle<SkImageFilter> {
     pub fn from_image(image: Image) -> Option<Self> {
-        from_image(image)
+        image_filters::image(image, None, None, None)
     }
 
     pub fn from_image_rect(
@@ -14,7 +14,7 @@ impl RCHandle<SkImageFilter> {
         dst_rect: impl AsRef<Rect>,
         filter_quality: FilterQuality,
     ) -> Option<Self> {
-        from_image_rect(image, src_rect, dst_rect, filter_quality)
+        image_filters::image(image, src_rect.as_ref(), dst_rect.as_ref(), filter_quality)
     }
 }
 
@@ -24,7 +24,7 @@ impl RCHandle<SkImage> {
     }
 
     pub fn into_filter(self) -> Option<ImageFilter> {
-        from_image(self)
+        image_filters::image(self, None, None, None)
     }
 
     pub fn as_filter_rect(
@@ -43,7 +43,7 @@ impl RCHandle<SkImage> {
         dst_rect: impl AsRef<Rect>,
         filter_quality: FilterQuality,
     ) -> Option<ImageFilter> {
-        from_image_rect(self, src_rect, dst_rect, filter_quality)
+        image_filters::image(self, src_rect.as_ref(), dst_rect.as_ref(), filter_quality)
     }
 }
 

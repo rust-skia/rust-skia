@@ -1,17 +1,17 @@
 use crate::prelude::*;
-use crate::{image_filter::CropRect, scalar, ImageFilter};
+use crate::{image_filter::CropRect, image_filters, scalar, ColorChannel, IRect, ImageFilter};
 use skia_bindings as sb;
 use skia_bindings::{SkDisplacementMapEffect_ChannelSelectorType, SkImageFilter};
 
 impl RCHandle<SkImageFilter> {
     pub fn displacement_map_effect<'a>(
-        channel_selectors: (ChannelSelector, ChannelSelector),
+        channel_selectors: (ColorChannel, ColorChannel),
         scale: scalar,
         displacement: ImageFilter,
         color: ImageFilter,
-        crop_rect: impl Into<Option<&'a CropRect>>,
+        crop_rect: impl Into<Option<&'a IRect>>,
     ) -> Option<Self> {
-        new(channel_selectors, scale, displacement, color, crop_rect)
+        image_filters::displacement_map(channel_selectors, scale, displacement, color, crop_rect)
     }
 }
 
@@ -26,13 +26,16 @@ pub enum ChannelSelector {
     A = SkDisplacementMapEffect_ChannelSelectorType::kA_ChannelSelectorType as _,
 }
 
+#[allow(deprecated)]
 impl NativeTransmutable<SkDisplacementMapEffect_ChannelSelectorType> for ChannelSelector {}
 #[test]
+#[allow(deprecated)]
 fn test_channel_selector_type_layout() {
     ChannelSelector::test_layout();
 }
 
 #[deprecated(since = "m78", note = "use color_filters::displacement_map")]
+#[allow(deprecated)]
 pub fn new<'a>(
     (x_channel_selector, y_channel_selector): (ChannelSelector, ChannelSelector),
     scale: scalar,
