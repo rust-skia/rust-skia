@@ -81,7 +81,7 @@ impl Handle<SkSurfaceCharacterization> {
         self.image_info().color_type()
     }
 
-    #[deprecated(note = "use sample_count()")]
+    #[deprecated(since = "0.17.0", note = "use sample_count()")]
     pub fn stencil_count(&self) -> usize {
         self.sample_count()
     }
