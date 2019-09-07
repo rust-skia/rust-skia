@@ -42,6 +42,7 @@ pub enum TileMode {
 #[allow(deprecated)]
 impl NativeTransmutable<SkMatrixConvolutionImageFilter_TileMode> for TileMode {}
 #[test]
+#[allow(deprecated)]
 fn test_tile_mode_layout() {
     TileMode::test_layout();
 }
