@@ -119,6 +119,10 @@ impl Handle<SkFont> {
         self.has_flag(sb::SkFont_PrivFlags_kEmbolden_PrivFlag)
     }
 
+    pub fn is_baseline_snap(&self) -> bool {
+        self.has_flag(sb::SkFont_PrivFlags_kBaselineSnap_PrivFlag)
+    }
+
     fn has_flag(&self, flag: SkFont_PrivFlags) -> bool {
         (SkFont_PrivFlags::from(self.native().fFlags) & flag) != 0
     }
@@ -150,6 +154,11 @@ impl Handle<SkFont> {
 
     pub fn set_embolden(&mut self, embolden: bool) -> &mut Self {
         unsafe { self.native_mut().setEmbolden(embolden) }
+        self
+    }
+
+    pub fn set_baseline_snap(&mut self, baseline_snap: bool) -> &mut Self {
+        unsafe { self.native_mut().setBaselineSnap(baseline_snap) }
         self
     }
 

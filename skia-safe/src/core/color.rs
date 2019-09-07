@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::u8cpu;
 use skia_bindings as sb;
-use skia_bindings::{SkColor, SkColor4f, SkHSVToColor, SkPMColor, SkRGBToHSV};
+use skia_bindings::{SkColor, SkColor4f, SkColorChannel, SkHSVToColor, SkPMColor, SkRGBToHSV};
 use std::ops::{BitAnd, BitOr, Index, IndexMut, Mul};
 
 // TODO: What should we do with SkAlpha?
@@ -192,6 +192,21 @@ pub fn pre_multiply_argb(a: u8cpu, r: u8cpu, g: u8cpu, b: u8cpu) -> PMColor {
 
 pub fn pre_multiply_color(c: impl Into<Color>) -> PMColor {
     unsafe { sb::SkPreMultiplyColor(c.into().into_native()) }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(i32)]
+pub enum ColorChannel {
+    R = SkColorChannel::kR as _,
+    G = SkColorChannel::kG as _,
+    B = SkColorChannel::kB as _,
+    A = SkColorChannel::kA as _,
+}
+
+impl NativeTransmutable<SkColorChannel> for ColorChannel {}
+#[test]
+fn color_channel_layout() {
+    ColorChannel::test_layout()
 }
 
 // decided not to directly support SkRGBA4f for now because of the

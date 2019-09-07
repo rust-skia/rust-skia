@@ -107,6 +107,11 @@ pub mod color_filters {
             .unwrap()
     }
 
+    pub fn hsla_matrix(row_major: &[f32; 20]) -> ColorFilter {
+        ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_HSLAMatrix(row_major.as_ptr()) })
+            .unwrap()
+    }
+
     pub fn blend(c: impl Into<Color>, mode: BlendMode) -> Option<ColorFilter> {
         ColorFilter::from_ptr(unsafe {
             sb::C_SkColorFilters_Blend(c.into().into_native(), mode.into_native())

@@ -94,6 +94,31 @@ impl RCHandle<SkImage> {
         })
     }
 
+    pub fn decode_to_raster(encoded: &[u8], subset: impl Into<Option<IRect>>) -> Option<Image> {
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_DecodeToRaster(
+                encoded.as_ptr() as _,
+                encoded.len(),
+                subset.into().into_native().as_ptr_or_null(),
+            )
+        })
+    }
+
+    pub fn decode_to_texture(
+        context: &mut gpu::Context,
+        encoded: &[u8],
+        subset: impl Into<Option<IRect>>,
+    ) -> Option<Image> {
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_DecodeToTexture(
+                context.native_mut(),
+                encoded.as_ptr() as _,
+                encoded.len(),
+                subset.into().into_native().as_ptr_or_null(),
+            )
+        })
+    }
+
     // TODO: this is experimental, should probably be removed.
     pub fn from_compressed(
         context: &mut gpu::Context,
@@ -135,27 +160,21 @@ impl RCHandle<SkImage> {
         })
     }
 
-    pub fn from_encoded_cross_context(
+    pub fn from_pixmap_cross_context(
         context: &mut gpu::Context,
-        data: Data,
+        pixmap: &Pixmap,
         build_mips: bool,
-        // not mentions in the docs, but implementation indicates that
-        // this can be null.
-        color_space: Option<&ColorSpace>,
         limit_to_max_texture_size: impl Into<Option<bool>>,
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeCrossContextFromEncoded(
+            sb::C_SkImage_MakeCrossContextFromPixmap(
                 context.native_mut(),
-                data.into_ptr(),
+                pixmap.native(),
                 build_mips,
-                color_space.native_ptr_or_null(),
-                limit_to_max_texture_size.into().unwrap_or_default(),
+                limit_to_max_texture_size.into().unwrap_or(false),
             )
         })
     }
-
-    // TODO: MakeCrossContextFromPixmap()
 
     pub fn from_adopted_texture(
         context: &mut gpu::Context,
@@ -210,6 +229,7 @@ impl RCHandle<SkImage> {
         image_origin: gpu::SurfaceOrigin,
         backend_texture: &gpu::BackendTexture,
         image_color_space: impl Into<Option<ColorSpace>>,
+        // TODO: m78 introduced textureReleaseProc and releaseContext here.
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend(
@@ -274,6 +294,7 @@ impl RCHandle<SkImage> {
         image_origin: gpu::SurfaceOrigin,
         backend_texture: &gpu::BackendTexture,
         image_color_space: impl Into<Option<ColorSpace>>,
+        // TODO: m78 introduced textureReleaseProc and releaseContext here.
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
@@ -468,14 +489,12 @@ impl RCHandle<SkImage> {
     pub fn new_texture_image<'a>(
         &self,
         context: &mut gpu::Context,
-        dst_color_space: impl Into<Option<&'a ColorSpace>>,
         mip_mapped: gpu::MipMapped,
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_makeTextureImage(
                 self.native(),
                 context.native_mut(),
-                dst_color_space.into().native_ptr_or_null(),
                 mip_mapped.into_native(),
             )
         })
@@ -523,6 +542,12 @@ impl RCHandle<SkImage> {
     pub fn new_color_space(&self, color_space: impl Into<Option<ColorSpace>>) -> Option<Image> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_makeColorSpace(self.native(), color_space.into().into_ptr_or_null())
+        })
+    }
+
+    pub fn reinterpret_color_space(&self, new_color_space: ColorSpace) -> Option<Image> {
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_reinterpretColorSpace(self.native(), new_color_space.into_ptr())
         })
     }
 }

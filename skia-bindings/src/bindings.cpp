@@ -332,6 +332,14 @@ extern "C" SkImage* C_SkImage_MakeFromEncoded(SkData* encoded, const SkIRect* su
     return SkImage::MakeFromEncoded(sp(encoded), subset).release();
 }
 
+extern "C" SkImage* C_SkImage_DecodeToRaster(const void* encoded, size_t length, const SkIRect* subset) {
+    return SkImage::DecodeToRaster(encoded, length, subset).release();
+}
+
+extern "C" SkImage* C_SkImage_DecodeToTexture(GrContext* ctx, const void* encoded, size_t length, const SkIRect* subset) {
+    return SkImage::DecodeToTexture(ctx, encoded, length, subset).release();
+}
+
 extern "C" SkImage* C_SkImage_MakeFromCompressed(GrContext* context, SkData* encoded, int width, int height, SkImage::CompressionType type) {
     return SkImage::MakeFromCompressed(context, sp(encoded), width, height, type).release();
 }
@@ -345,7 +353,15 @@ extern "C" SkImage* C_SkImage_MakeFromTexture(
         SkColorSpace* colorSpace) {
     return SkImage::MakeFromTexture(context, *backendTexture, origin, colorType, alphaType, sp(colorSpace)).release();
 }
- 
+
+extern "C" SkImage* C_SkImage_MakeCrossContextFromPixmap(
+        GrContext* context,
+        const SkPixmap* pixmap,
+        bool buildMips,
+        bool limitToMaxTextureSize) {
+    return SkImage::MakeCrossContextFromPixmap(context, *pixmap, buildMips, limitToMaxTextureSize).release();
+}
+
 extern "C" SkImage* C_SkImage_MakeFromAdoptedTexture(
         GrContext* context,
         const GrBackendTexture* backendTexture,
@@ -483,6 +499,10 @@ extern "C" SkImage *C_SkImage_makeWithFilter(const SkImage *self, GrContext *con
 
 extern "C" SkImage* C_SkImage_makeColorSpace(const SkImage* self, SkColorSpace* target) {
     return self->makeColorSpace(sp(target)).release();
+}
+
+extern "C" SkImage* C_SkImage_reinterpretColorSpace(const SkImage* self, SkColorSpace* newColorSpace) {
+    return self->reinterpretColorSpace(sp(newColorSpace)).release();
 }
 
 //
@@ -1593,6 +1613,10 @@ extern "C" SkColorFilter* C_SkColorFilters_Matrix(const SkColorMatrix* colorMatr
 
 extern "C" SkColorFilter* C_SkColorFilters_MatrixRowMajor(const SkScalar array[20]) {
     return SkColorFilters::Matrix(array).release();
+}
+
+extern "C" SkColorFilter* C_SkColorFilters_HSLAMatrix(const float rowMajor[20]) {
+    return SkColorFilters::HSLAMatrix(rowMajor).release();
 }
 
 extern "C" SkColorFilter* C_SkColorFilters_LinearToSRGBGamma() {
