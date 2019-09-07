@@ -25,7 +25,7 @@ impl ISize {
         }
     }
 
-    pub fn new_empty() -> ISize {
+    pub const fn new_empty() -> ISize {
         Self::new(0, 0)
     }
 

@@ -124,16 +124,24 @@ impl IRect {
         *self = Self::new_empty()
     }
 
+    #[deprecated(since = "m78", note = "use set_ltrb()")]
     pub fn set(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
-        *self = Self::new(left, top, right, bottom)
+        self.set_ltrb(left, top, right, bottom)
     }
 
     pub fn set_ltrb(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
-        self.set(left, top, right, bottom)
+        *self = Self::new(left, top, right, bottom);
     }
 
     pub fn set_xywh(&mut self, x: i32, y: i32, w: i32, h: i32) {
         *self = Self::from_xywh(x, y, w, h);
+    }
+
+    pub fn set_wh(&mut self, width: i32, height: i32) {
+        self.left = 0;
+        self.top = 0;
+        self.right = width;
+        self.bottom = width;
     }
 
     #[must_use]
@@ -219,13 +227,25 @@ impl IRect {
     }
 
     pub fn intersect(a: &Self, b: &Self) -> Option<Self> {
-        if a.is_empty_64() || b.is_empty_64() {
-            return None;
-        }
-        Self::intersect_no_empty_check(a, b)
+        let mut r = Self::default();
+        unsafe { r.native_mut().intersect(a.native(), b.native()) }.if_true_some(r)
     }
 
+    #[deprecated(since = "m78", note = "removed without alternative")]
     pub fn intersect_no_empty_check(a: &Self, b: &Self) -> Option<Self> {
+        Self::intersect_no_empty_check_(a, b)
+    }
+
+    pub fn intersects(a: &Self, b: &Self) -> bool {
+        Self::intersect(a, b).is_some()
+    }
+
+    #[deprecated(since = "m78", note = "removed without alternative")]
+    pub fn intersects_no_empty_check(a: &Self, b: &Self) -> bool {
+        Self::intersect_no_empty_check_(a, b).is_some()
+    }
+
+    fn intersect_no_empty_check_(a: &Self, b: &Self) -> Option<Self> {
         debug_assert!(!a.is_empty_64() && !b.is_empty_64());
         let r = IRect::new(
             a.left.max(b.left),
@@ -236,17 +256,9 @@ impl IRect {
         r.is_empty().if_false_some(r)
     }
 
-    pub fn intersects(a: &Self, b: &Self) -> bool {
-        Self::intersect(a, b).is_some()
-    }
-
-    pub fn intersects_no_empty_check(a: &Self, b: &Self) -> bool {
-        Self::intersect_no_empty_check(a, b).is_some()
-    }
-
     pub fn join(a: &Self, b: &Self) -> Self {
         let mut copied = *a;
-        unsafe { copied.native_mut().join(b.left, b.top, b.right, b.bottom) }
+        unsafe { copied.native_mut().join(b.native()) }
         copied
     }
 
@@ -294,7 +306,7 @@ impl Contains<&IRect> for IRect {
 
 impl Contains<&Rect> for IRect {
     fn contains(&self, other: &Rect) -> bool {
-        unsafe { sb::SkIRect_contains(self.native(), other.native()) }
+        unsafe { sb::C_SkIRect_contains(self.native(), other.native()) }
     }
 }
 
@@ -471,22 +483,26 @@ impl Rect {
         *self = Self::new_empty()
     }
 
+    // TODO: deprecate and rename to set() as soon the other set() variant is removed.
     pub fn set_irect(&mut self, irect: impl AsRef<IRect>) {
         *self = Self::from_irect(irect)
     }
 
+    #[deprecated(since = "m78", note = "use set_ltrb()")]
     pub fn set(&mut self, left: scalar, top: scalar, right: scalar, bottom: scalar) {
-        *self = Self::new(left, top, right, bottom)
+        self.set_ltrb(left, top, right, bottom)
     }
 
     pub fn set_ltrb(&mut self, left: scalar, top: scalar, right: scalar, bottom: scalar) {
-        self.set(left, top, right, bottom)
+        *self = Self::new(left, top, right, bottom)
     }
 
+    #[deprecated(since = "m78", note = "use from_irect()")]
     pub fn iset(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
         *self = Self::from_irect(IRect::new(left, top, right, bottom))
     }
 
+    #[deprecated(since = "m78", note = "use from_isize()")]
     pub fn iset_wh(&mut self, width: i32, height: i32) {
         *self = Self::from_isize(ISize::new(width, height))
     }
@@ -535,6 +551,10 @@ impl Rect {
 
     pub fn set_wh(&mut self, w: scalar, h: scalar) {
         *self = Self::from_wh(w, h)
+    }
+
+    pub fn set_iwh(&mut self, width: i32, height: i32) {
+        *self = Self::from_iwh(width, height)
     }
 
     pub fn with_offset(&self, d: impl Into<Vector>) -> Self {
@@ -592,6 +612,7 @@ impl Rect {
         unsafe { self.native_mut().intersect(r.as_ref().native()) }
     }
 
+    #[deprecated(since = "m78", note = "use intersect()")]
     pub fn intersect_ltrb(
         &mut self,
         left: scalar,
@@ -599,17 +620,18 @@ impl Rect {
         right: scalar,
         bottom: scalar,
     ) -> bool {
-        unsafe { self.native_mut().intersect1(left, top, right, bottom) }
+        self.intersect(Rect::new(left, top, right, bottom))
     }
 
     #[must_use]
     pub fn intersect2(&mut self, a: impl AsRef<Rect>, b: impl AsRef<Rect>) -> bool {
         unsafe {
             self.native_mut()
-                .intersect2(a.as_ref().native(), b.as_ref().native())
+                .intersect1(a.as_ref().native(), b.as_ref().native())
         }
     }
 
+    #[deprecated(since = "m78", note = "use intersects()")]
     pub fn intersects_ltrb(
         &self,
         left: scalar,
@@ -631,7 +653,16 @@ impl Rect {
 
     pub fn intersects(&self, r: impl AsRef<Rect>) -> bool {
         let r = r.as_ref();
-        self.intersects_ltrb(r.left, r.top, r.right, r.bottom)
+        Self::intersects_(
+            self.left,
+            self.top,
+            self.right,
+            self.bottom,
+            r.left,
+            r.top,
+            r.right,
+            r.bottom,
+        )
     }
 
     pub fn intersects2(a: impl AsRef<Rect>, b: impl AsRef<Rect>) -> bool {
@@ -656,13 +687,14 @@ impl Rect {
         l < r && t < b
     }
 
+    #[deprecated(since = "m78", note = "use join()")]
     pub fn join_ltrb(&mut self, left: scalar, top: scalar, right: scalar, bottom: scalar) {
-        unsafe { self.native_mut().join(left, top, right, bottom) }
+        self.join(Rect::new(left, top, right, bottom))
     }
 
     pub fn join(&mut self, r: impl AsRef<Rect>) {
         let r = r.as_ref();
-        self.join_ltrb(r.left, r.top, r.right, r.bottom)
+        unsafe { self.native_mut().join(r.native()) }
     }
 
     pub fn join2(a: impl AsRef<Rect>, b: impl AsRef<Rect>) -> Rect {
