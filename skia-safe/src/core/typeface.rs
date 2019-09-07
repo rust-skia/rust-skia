@@ -5,9 +5,9 @@ use crate::{font_parameters::VariationAxis, Data, FontStyle, GlyphId, Rect, Unic
 use skia_bindings::{
     C_SkTypeface_LocalizedStrings_next, C_SkTypeface_LocalizedStrings_unref,
     C_SkTypeface_MakeDefault, C_SkTypeface_MakeDeserialize, C_SkTypeface_MakeFromData,
-    C_SkTypeface_MakeFromName, C_SkTypeface_isBold, C_SkTypeface_isItalic, C_SkTypeface_makeClone,
-    C_SkTypeface_serialize, SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings,
-    SkTypeface_SerializeBehavior,
+    C_SkTypeface_MakeFromName, C_SkTypeface_copyTableData, C_SkTypeface_isBold,
+    C_SkTypeface_isItalic, C_SkTypeface_makeClone, C_SkTypeface_serialize, SkRefCntBase,
+    SkTypeface, SkTypeface_LocalizedStrings, SkTypeface_SerializeBehavior,
 };
 use std::{ffi, ptr};
 
@@ -210,6 +210,10 @@ impl RCHandle<SkTypeface> {
             self.native()
                 .getTableData(tag, 0, data.len(), data.as_mut_ptr() as _)
         }
+    }
+
+    pub fn copy_table_data(&self, tag: FontTableTag) -> Option<Data> {
+        Data::from_ptr(unsafe { C_SkTypeface_copyTableData(self.native(), tag) })
     }
 
     pub fn units_per_em(&self) -> Option<i32> {

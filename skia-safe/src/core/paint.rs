@@ -1,14 +1,14 @@
 use crate::prelude::*;
 use crate::{
-    scalar, BlendMode, Color, Color4f, ColorFilter, ColorSpace, DrawLooper, FilterQuality,
-    ImageFilter, MaskFilter, Path, PathEffect, Rect, Shader,
+    scalar, BlendMode, Color, Color4f, ColorFilter, ColorSpace, FilterQuality, ImageFilter,
+    MaskFilter, Path, PathEffect, Rect, Shader,
 };
 use skia_bindings::{
     C_SkPaint_Equals, C_SkPaint_destruct, C_SkPaint_getAlpha, C_SkPaint_getBlendMode,
-    C_SkPaint_getDrawLooper, C_SkPaint_getFilterQuality, C_SkPaint_getStrokeCap,
-    C_SkPaint_getStrokeJoin, C_SkPaint_getStyle, C_SkPaint_setColorFilter, C_SkPaint_setDrawLooper,
-    C_SkPaint_setImageFilter, C_SkPaint_setMaskFilter, C_SkPaint_setPathEffect,
-    C_SkPaint_setShader, SkPaint, SkPaint_Cap, SkPaint_Join, SkPaint_Style,
+    C_SkPaint_getFilterQuality, C_SkPaint_getStrokeCap, C_SkPaint_getStrokeJoin,
+    C_SkPaint_getStyle, C_SkPaint_setColorFilter, C_SkPaint_setImageFilter,
+    C_SkPaint_setMaskFilter, C_SkPaint_setPathEffect, C_SkPaint_setShader, SkPaint, SkPaint_Cap,
+    SkPaint_Join, SkPaint_Style,
 };
 use std::hash::{Hash, Hasher};
 use std::ptr;
@@ -335,17 +335,6 @@ impl Handle<SkPaint> {
     pub fn set_image_filter(&mut self, image_filter: impl Into<Option<ImageFilter>>) -> &mut Self {
         unsafe {
             C_SkPaint_setImageFilter(self.native_mut(), image_filter.into().into_ptr_or_null())
-        }
-        self
-    }
-
-    pub fn draw_looper(&self) -> Option<DrawLooper> {
-        DrawLooper::from_unshared_ptr(unsafe { C_SkPaint_getDrawLooper(self.native()) })
-    }
-
-    pub fn set_draw_looper(&mut self, draw_looper: impl Into<Option<DrawLooper>>) -> &mut Self {
-        unsafe {
-            C_SkPaint_setDrawLooper(self.native_mut(), draw_looper.into().into_ptr_or_null());
         }
         self
     }

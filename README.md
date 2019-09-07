@@ -2,9 +2,9 @@
 
 [![crates.io](https://img.shields.io/crates/v/skia-safe)](https://crates.io/crates/skia-safe) [![license](https://img.shields.io/crates/l/skia-safe)](LICENSE) [![Build Status](https://dev.azure.com/pragmatrix-github/rust-skia/_apis/build/status/rust-skia.rust-skia?branchName=master)](https://dev.azure.com/pragmatrix-github/rust-skia/_build/latest?branchName=master)
 
-Skia Submodule Status: chrome/m76 ([pending changes][skiapending]).
+Skia Submodule Status: chrome/m77 ([pending changes][skiapending]).
 
-[skiapending]: https://github.com/google/skia/compare/f13f8690bede09ca97071e9786d68bc0758a24cc...chrome/m76
+[skiapending]: https://github.com/google/skia/compare/2417cee95d...chrome/m77
 
 ## Goals
 
@@ -78,13 +78,19 @@ For other platforms, more information is available at the [OpenSSL crate documen
 
 ### Windows
 
-- Be sure the `git` command line tool is installed.
+- Have the latest versions of `git` and Rust ready.
+- [Install Visual Studio 2019 Build Tools](https://visualstudio.microsoft.com/downloads/) or one of the other IDE releases. If you installed the IDE version, make sure that the [Desktop Development with C++ workload](https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=vs-2019) is installed.
 - Install the [latest LLVM 8](http://releases.llvm.org/download.html) distribution.
 - [MSYS2](https://www.msys2.org/):
   - Install Python2 with `pacman -S python2`.
   - `clang` is _always_ picked up from `C:/Program Files/LLVM/bin`, so be sure it's available from there.
 - Windows Shell (Cmd.exe):
+  
   - Download and install Python version 2 from [python.org](https://www.python.org/downloads/release/python-2716/).
+- Install and switch to the MSVC toolchain:
+  ```bash
+  rustup default stable-msvc
+  ```
 
 ### Linux
 
@@ -92,7 +98,9 @@ For other platforms, more information is available at the [OpenSSL crate documen
 
 Then use:
 
-`cargo build -vv`
+```bash
+cargo build -vv
+```
 
 On Linux, OpenGL libraries _may_ be missing, if that is the case, install OpenGL drivers for you graphics card, or install a mesa OpenGL package like `libgl1-mesa-dev`.
 
@@ -100,30 +108,38 @@ Please share your build experience so that we can try to automate the build and 
 
 ### Android
 
-Cross compilation to Android is supported for targeting 64 bit ARM and Intel x86 architectures (`aarch64` and `x86_64`):
+Cross compilation to Android is supported for targeting 64 bit ARM and Intel x86 architectures (`aarch64` and `x86_64`) for API Level 26 (Oreo, Android 8):
 
 For example, to compile for `aarch64`:
 
-1. Install the rust target: `rustup target install aarch64-linux-android`.
-2. Download the r18b NDK from: https://developer.android.com/ndk/downloads/older_releases.html
-3. Create a toolchain for the compilation:
-   `build/tools/make_standalone_toolchain.py --arch arm64 --install-dir /tmp/ndk`
-4. Compile your package for the `aarch64-linux-android` target:
+1. Install the rust target:
+   ```bash
+   rustup target install aarch64-linux-android
+   ```
+2. Download the [r20 NDK](https://developer.android.com/ndk/downloads) for your host architecture and unzip it.
+3. Compile your package for the `aarch64-linux-android` target:
 
-On **macOS** & **Linux**:
+On **macOS**:
 
 ```bash
-ANDROID_NDK=~/path/to/android-ndk-r18b PATH=$PATH:/tmp/ndk/bin cargo build --target aarch64-linux-android -vv
+ANDROID_NDK=:path-to-android-ndk-r20 PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin CC_aarch64_linux_android=aarch64-linux-android26-clang CXX_aarch64_linux_android=aarch64-linux-android26-clang++ CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android26-clang cargo build --target aarch64-linux-android -vv
 ```
 
-On **Windows** it's a bit more complicated, because the Android NDK clang executable must be invoked through .cmd scripts:
+On **Linux**:
 
 ```bash
-ANDROID_NDK=~/path/to/android-ndk-r18b PATH=$PATH:/tmp/ndk/bin CC_aarch64_linux_android=aarch64-linux-android-clang.cmd CXX_aarch64_linux_android=aarch64-linux-android-clang++.cmd CARGO_TARGET_aarch64_linux_android_LINKER=aarch64-linux-android-clang.cmd cargo build --target aarch64-linux-android -vv
+ANDROID_NDK=:path-to-android-ndk-r20 PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin CC_aarch64_linux_android=aarch64-linux-android26-clang CXX_aarch64_linux_android=aarch64-linux-android26-clang++ CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android26-clang cargo build --target aarch64-linux-android -vv
+```
+
+On **Windows** the Android NDK clang executable must be invoked through `.cmd` scripts:
+
+```bash
+ANDROID_NDK=:path-to-android-ndk-r20 PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/windows-x86_64/bin CC_aarch64_linux_android=aarch64-linux-android26-clang.cmd CXX_aarch64_linux_android=aarch64-linux-android26-clang++.cmd CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android26-clang.cmd cargo build --target aarch64-linux-android -vv
 ```
 _Notes:_
 
-- It doesn't work for the latest NDK, because Skia doesn't support it yet.
+- The `CARGO_TARGET_${TARGET}_LINKER` environment variable name [needs to be all uppercase](https://github.com/rust-lang/cargo/issues/1109#issuecomment-386850387).
+- In some older shells (for example macOS High Sierra), environment variable replacement can not be used when the variable was defined on the same line. Therefore the `ANDROID_NDK` variable must be defined before it's used in the `PATH` variable.
 - Rebuilding skia-bindings with a different target may cause linker errors, in that case `touch skia-bindings/build.rs` will force a rebuild ([#10](https://github.com/rust-skia/rust-skia/issues/10)).
 
 ### iOS
@@ -142,13 +158,20 @@ The examples are taken from [Skia's website](https://skia.org/) and [ported to t
 
 If you were able to build the project, run
 
-`cargo run --example skia-org -- [OUTPUT_DIR]` 
+```bash
+cargo run --example skia-org -- [OUTPUT_DIR]
+```
 
 to generate some Skia drawn PNG images in the directory `OUTPUT_DIR`. To render with OpenGL, use
 
-`cargo run --example skia-org -- [OUTPUT_DIR] --driver opengl`
+```bash
+cargo run --example skia-org -- [OUTPUT_DIR] --driver opengl
+```
 
-And `cargo run --example skia-org -- --help` shows the drivers that are supported.
+And to show the drivers that are supported
+```bash 
+cargo run --example skia-org -- --help
+```
 
 Some examples:
 

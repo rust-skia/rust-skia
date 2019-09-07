@@ -1,10 +1,11 @@
 use crate::prelude::*;
-use skia_bindings::{GrBackendApi, GrMipMapped, GrRenderable, GrSurfaceOrigin};
+use skia_bindings::{GrBackendApi, GrMipMapped, GrProtected, GrRenderable, GrSurfaceOrigin};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum BackendAPI {
     Metal = GrBackendApi::kMetal as _,
+    Dawn = GrBackendApi::kDawn as _,
     OpenGL = GrBackendApi::kOpenGL as _,
     Vulkan = GrBackendApi::kVulkan as _,
     Mock = GrBackendApi::kMock as _,
@@ -44,6 +45,21 @@ impl NativeTransmutable<GrRenderable> for Renderable {}
 #[test]
 fn test_renderable_layout() {
     Renderable::test_layout()
+}
+
+// TODO: this should be a newtype(bool) I guess with implementations
+//       of From<bool> and Deref?
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(u8)]
+pub enum Protected {
+    No = GrProtected::kNo as _,
+    Yes = GrProtected::kYes as _,
+}
+
+impl NativeTransmutable<GrProtected> for Protected {}
+#[test]
+fn test_protected_layout() {
+    Protected::test_layout()
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]

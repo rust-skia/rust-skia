@@ -4,16 +4,27 @@ parameters:
   # produce and release binaries to GitHub
   releaseBinaries: 'False'
   exampleArgs: ''
+  androidEnv: false
 
 steps:
   - bash: |
       rustup target add ${{ parameters.target }}
-    displayName: 'Install target ${{ parameters.target }}'
+    displayName: 'Install Rust target ${{ parameters.target }}'
 
   # Note: features are ignored when set in the workspace. This is a known bug in cargo (#5015), so cd into skia-safe instead.
   # Also be sure that the bindings.rs file is rebuilt (https://github.com/rust-skia/rust-skia/issues/10)
   - bash: |
       set -e
+      if [ "${{ parameters.androidEnv }}" == "true" ]; then
+        TARGET=${{ parameters.target }}
+        TARGET=${TARGET//-/_}
+        export CC_${TARGET}=${{ parameters.target }}$(androidAPILevel)-clang$(androidBinExt)
+        export CXX_${TARGET}=${{ parameters.target }}$(androidAPILevel)-clang++$(androidBinExt)
+        TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
+        export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=${{ parameters.target }}$(androidAPILevel)-clang$(androidBinExt)
+        echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
+      fi
+      set
       touch skia-bindings/build.rs
       (cd skia-safe && cargo build --release --features "$(features)" --all-targets --target ${{ parameters.target }} -vv)
       export SKIA_BINARIES_TAG=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/tag.txt")

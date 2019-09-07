@@ -22,7 +22,7 @@ pub fn should_export() -> Option<PathBuf> {
 /// Export the binaries to a target directory.
 pub fn export(config: &skia::BinariesConfiguration, target_dir: &Path) -> io::Result<()> {
     let half_hash = git::half_hash().expect("failed to retrieve the git hash");
-    let key = binaries::key(&half_hash, &config.features);
+    let key = binaries::key(&half_hash, &config.feature_ids);
 
     let export_dir = prepare_export_directory(&key, target_dir)?;
 

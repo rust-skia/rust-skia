@@ -18,7 +18,10 @@ stages:
     parameters:
       platform: 'Linux'
       platformTarget: 'x86_64-unknown-linux-gnu'
-      androidNDK: 'r18b-linux-x86_64'
+      androidHost: 'linux-x86_64'
+      androidNDK: 'r20'
+      androidAPILevel: '26'
+      androidBinExt: ''
       image: 'ubuntu-16.04'
       deployRelease: ${{ eq(variables['build.SourceBranchName'], 'release') }}
 
@@ -26,7 +29,10 @@ stages:
     parameters:
       platform: 'macOS'
       platformTarget: 'x86_64-apple-darwin'
-      androidNDK: 'r18b-darwin-x86_64'
+      androidHost: 'darwin-x86_64'
+      androidNDK: 'r20'
+      androidAPILevel: '26'
+      androidBinExt: ''
       image: 'macOS-10.14'
       deployRelease: ${{ eq(variables['build.SourceBranchName'], 'release') }}
 
@@ -34,6 +40,11 @@ stages:
     parameters:
       platform: 'Windows'
       platformTarget: 'x86_64-pc-windows-msvc'
+      # No Android builds for Windows, ATM.
+      # androidHost: 'windows-x86_64'
+      androidNDK: 'r20'
+      androidAPILevel: '26'
+      androidBinExt: '.cmd'
       image: 'windows-2019'
       deployRelease: ${{ eq(variables['build.SourceBranchName'], 'release') }}
 

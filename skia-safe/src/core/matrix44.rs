@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use crate::{scalar, Matrix, Scalar, Vector3};
 use skia_bindings::{
-    C_SkMatrix44_ConstructIdentity, C_SkMatrix44_Equals, C_SkMatrix44_Mul, C_SkMatrix44_MulV4,
-    C_SkMatrix44_SkMatrix, SkMatrix44, SkVector4,
+    C_SkMatrix44_ConstructIdentity, C_SkMatrix44_ConstructNaN, C_SkMatrix44_Equals,
+    C_SkMatrix44_Mul, C_SkMatrix44_MulV4, C_SkMatrix44_SkMatrix, SkMatrix44, SkVector4,
 };
 use std::ops;
 
@@ -138,6 +138,12 @@ impl Matrix44 {
     pub fn new_identity() -> Self {
         Matrix44::construct(|matrix| unsafe {
             C_SkMatrix44_ConstructIdentity(matrix);
+        })
+    }
+
+    pub fn new_nan() -> Self {
+        Matrix44::construct(|matrix| unsafe {
+            C_SkMatrix44_ConstructNaN(matrix);
         })
     }
 

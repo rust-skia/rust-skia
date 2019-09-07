@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::{
-    AlphaType, Color, Color4f, ColorSpace, ColorType, FilterQuality, IPoint, IRect, ImageInfo,
+    AlphaType, Color, Color4f, ColorSpace, ColorType, FilterQuality, IPoint, IRect, ISize,
+    ImageInfo,
 };
 use skia_bindings::{
     C_SkImageInfo_Construct, C_SkPixmap_destruct, C_SkPixmap_setColorSpace, SkPixmap,
@@ -89,6 +90,10 @@ impl Handle<SkPixmap> {
 
     pub fn height(&self) -> i32 {
         self.info().height()
+    }
+
+    pub fn dimensions(&self) -> ISize {
+        self.info().dimensions()
     }
 
     pub fn color_type(&self) -> ColorType {

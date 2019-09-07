@@ -1,6 +1,3 @@
-// We always compile SkShaper.h with HARFBUZZ & ICU for now.
-#define SK_SHAPER_HARFBUZZ_AVAILABLE
-
 #include "modules/skshaper/include/SkShaper.h"
 #include "include/core/SkFontMgr.h"
 
@@ -48,12 +45,20 @@ extern "C" SkShaper::FontRunIterator* C_SkShaper_MakeFontMgrRunIterator(const ch
     return SkShaper::MakeFontMgrRunIterator(utf8, utf8Bytes, *font, sk_sp<SkFontMgr>(fallback)).release();
 }
 
+extern "C" SkShaper::FontRunIterator* C_SkShaper_TrivialFontRunIterator_new(const SkFont& font, size_t utf8Bytes) {
+    return new SkShaper::TrivialFontRunIterator(font, utf8Bytes);
+}
+
 extern "C" uint8_t C_SkShaper_BiDiRunIterator_currentLevel(const SkShaper::BiDiRunIterator* self) {
     return self->currentLevel();
 }
 
 extern "C" SkShaper::BiDiRunIterator* C_SkShaper_MakeIcuBidiRunIterator(const char* utf8, size_t utf8Bytes, uint8_t bidiLevel) {
     return SkShaper::MakeIcuBiDiRunIterator(utf8, utf8Bytes, bidiLevel).release();
+}
+
+extern "C" SkShaper::BiDiRunIterator* C_SkShaper_TrivialBidiRunIterator_new(uint8_t bidiLevel, size_t utf8Bytes) {
+    return new SkShaper::TrivialBiDiRunIterator(bidiLevel, utf8Bytes);
 }
 
 extern "C" SkFourByteTag C_SkShaper_ScriptRunIterator_currentScript(const SkShaper::ScriptRunIterator* self) {
@@ -64,12 +69,20 @@ extern "C" SkShaper::ScriptRunIterator* C_SkShaper_MakeHbIcuScriptRunIterator(co
     return SkShaper::MakeHbIcuScriptRunIterator(utf8, utf8Bytes).release();
 }
 
+extern "C" SkShaper::ScriptRunIterator* C_SkShaper_TrivialScriptRunIterator_new(uint8_t bidiLevel, size_t utf8Bytes) {
+    return new SkShaper::TrivialScriptRunIterator(bidiLevel, utf8Bytes);
+}
+
 extern "C" const char* C_SkShaper_LanguageRunIterator_currentLanguage(const SkShaper::LanguageRunIterator* self) {
     return self->currentLanguage();
 }
 
 extern "C" SkShaper::LanguageRunIterator* C_SkShaper_MakeStdLanguageRunIterator(const char* utf8, size_t utf8Bytes) {
     return SkShaper::MakeStdLanguageRunIterator(utf8, utf8Bytes).release();
+}
+
+extern "C" SkShaper::LanguageRunIterator* C_SkShaper_TrivialLanguageRunIterator_new(const char* utf8, size_t utf8Bytes) {
+    return new SkShaper::TrivialLanguageRunIterator(utf8, utf8Bytes);
 }
 
 extern "C" void C_SkShaper_RunHandler_delete(SkShaper::RunHandler* self) {

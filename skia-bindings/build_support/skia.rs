@@ -1,21 +1,25 @@
 //! Full build support for the Skia library, SkiaBindings library and bindings.rs file.
 
-use crate::build_support::{android, cargo, clang, ios, vs};
+use crate::build_support::{android, cargo, clang, git, ios, vs};
 use cc::Build;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::{env, fs};
 
+/// The libraries to link with.
 mod lib {
     pub const SKIA: &str = "skia";
     pub const SKIA_BINDINGS: &str = "skia-bindings";
     pub const SKSHAPER: &str = "skshaper";
+    pub const SKPARAGRAPH: &str = "skparagraph";
 }
 
-mod feature {
+/// Feature identifiers define the additional configuration parts of the binaries to download.
+mod feature_id {
     pub const VULKAN: &str = "vulkan";
     pub const SVG: &str = "svg";
     pub const SHAPER: &str = "shaper";
+    pub const TEXTLAYOUT: &str = "textlayout";
 }
 
 /// The defaults for the Skia build configuration.
@@ -33,17 +37,29 @@ impl Default for BuildConfiguration {
             }
         };
 
+        let text_layout = {
+            match (cfg!(feature = "textlayout"), cfg!(feature = "shaper")) {
+                (false, false) => TextLayout::None,
+                (false, true) => TextLayout::ShaperOnly,
+                (true, false) => panic!("invalid feature configuration, feature 'shaper' must be enabled for feature 'textlayout'"),
+                (true, true) => TextLayout::ShaperAndParagraph,
+            }
+        };
+
         BuildConfiguration {
             on_windows: cargo::host().is_windows(),
             // Note that currently, we don't support debug Skia builds,
             // because they are hard to configure and pull in a lot of testing related modules.
             skia_release: true,
-            feature_vulkan: cfg!(feature = "vulkan"),
-            feature_svg: cfg!(feature = "svg"),
-            feature_shaper: cfg!(feature = "shaper"),
-            feature_animation: false,
-            feature_dng: false,
-            feature_particles: false,
+            keep_inline_functions: true,
+            features: Features {
+                vulkan: cfg!(feature = "vulkan"),
+                svg: cfg!(feature = "svg"),
+                text_layout,
+                animation: false,
+                dng: false,
+                particles: false,
+            },
             all_skia_libs,
             definitions: Vec::new(),
         }
@@ -59,23 +75,12 @@ pub struct BuildConfiguration {
     /// Build Skia in a release configuration?
     skia_release: bool,
 
-    /// Build with Vulkan support?
-    feature_vulkan: bool,
+    /// Configure Skia builds to keep inline functions to
+    /// prevent linker errors.
+    keep_inline_functions: bool,
 
-    /// Build with SVG support?
-    feature_svg: bool,
-
-    /// Builds the skshaper module, compiles harfbuzz & icu support.
-    feature_shaper: bool,
-
-    /// Build with animation support (yet unsupported, no wrappers).
-    feature_animation: bool,
-
-    /// Support DNG file format (currently unsupported because of build errors).
-    feature_dng: bool,
-
-    /// Build the particles module (unsupported, no wrappers).
-    feature_particles: bool,
+    /// The Skia feature set to compile.
+    features: Features,
 
     /// As of M74, There is a bug in the Skia macOS build
     /// that requires all libraries to be built, otherwise the build will fail.
@@ -85,11 +90,115 @@ pub struct BuildConfiguration {
     definitions: Definitions,
 }
 
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub struct Features {
+    /// Build with Vulkan support?
+    vulkan: bool,
+
+    /// Build with SVG support?
+    svg: bool,
+
+    /// Features related to text layout.
+    text_layout: TextLayout,
+
+    /// Build with animation support (yet unsupported, no wrappers).
+    animation: bool,
+
+    /// Support DNG file format (currently unsupported because of build errors).
+    dng: bool,
+
+    /// Build the particles module (unsupported, no wrappers).
+    particles: bool,
+}
+
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub enum TextLayout {
+    /// No text shaping or layout features.
+    None,
+    /// Builds the skshaper module, compiles harfbuzz & icu support.
+    ShaperOnly,
+    /// Builds the skshaper and the skparagraph module.
+    ShaperAndParagraph,
+}
+
+impl TextLayout {
+    fn skia_args(&self) -> Vec<(&'static str, String)> {
+        let mut args = Vec::new();
+        let (shaper, paragraph) = match self {
+            TextLayout::None => {
+                args.push(("skia_use_icu", no()));
+                (false, false)
+            }
+            TextLayout::ShaperOnly => (true, false),
+            TextLayout::ShaperAndParagraph => (true, true),
+        };
+
+        if shaper {
+            args.extend(vec![
+                ("skia_enable_skshaper", yes()),
+                ("skia_use_icu", yes()),
+                ("skia_use_system_icu", no()),
+                ("skia_use_harfbuzz", yes()),
+                ("skia_use_system_harfbuzz", no()),
+                ("skia_use_sfntly", no()),
+            ]);
+        }
+
+        if paragraph {
+            args.extend(vec![
+                ("skia_enable_skparagraph", yes()),
+                // note: currently, tests need to be enabled, because modules/skparagraph
+                // is not included in the default dependency configuration.
+                // ("paragraph_tests_enabled", no()),
+            ]);
+        }
+
+        args
+    }
+
+    fn sources(&self) -> Vec<PathBuf> {
+        match self {
+            TextLayout::None => Vec::new(),
+            TextLayout::ShaperOnly => vec!["src/shaper.cpp".into()],
+            TextLayout::ShaperAndParagraph => {
+                vec!["src/shaper.cpp".into(), "src/paragraph.cpp".into()]
+            }
+        }
+    }
+
+    fn patches(&self) -> Vec<Patch> {
+        match self {
+            TextLayout::ShaperAndParagraph => vec![Patch {
+                name: "skparagraph".into(),
+                marked_file: "BUILD.gn".into(),
+            }],
+            _ => Vec::new(),
+        }
+    }
+
+    fn ninja_files(&self) -> Vec<PathBuf> {
+        match self {
+            TextLayout::None => Vec::new(),
+            TextLayout::ShaperOnly => vec!["obj/modules/skshaper/skshaper.ninja".into()],
+            TextLayout::ShaperAndParagraph => vec![
+                "obj/modules/skshaper/skshaper.ninja".into(),
+                "obj/modules/skparagraph/skparagraph.ninja".into(),
+            ],
+        }
+    }
+}
+
 /// This is the final, low level build configuration.
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct FinalBuildConfiguration {
+    /// Patches to be applied to the Skia repository.
+    pub skia_patches: Vec<Patch>,
+
     /// The name value pairs passed as arguments to gn.
     pub gn_args: Vec<(String, String)>,
+
+    /// ninja files that need to be parsed for further definitions.
+    pub ninja_files: Vec<PathBuf>,
 
     /// The additional definitions (cloned from the definitions of
     /// the BuildConfiguration).
@@ -101,14 +210,9 @@ pub struct FinalBuildConfiguration {
 
 impl FinalBuildConfiguration {
     pub fn from_build_configuration(build: &BuildConfiguration) -> FinalBuildConfiguration {
-        let gn_args = {
-            fn yes() -> String {
-                "true".into()
-            }
-            fn no() -> String {
-                "false".into()
-            }
+        let features = &build.features;
 
+        let gn_args = {
             fn quote(s: &str) -> String {
                 format!("\"{}\"", s)
             }
@@ -124,20 +228,17 @@ impl FinalBuildConfiguration {
                 ("skia_use_system_zlib", no()),
                 (
                     "skia_enable_skottie",
-                    if build.feature_animation || build.all_skia_libs {
+                    if features.animation || build.all_skia_libs {
                         yes()
                     } else {
                         no()
                     },
                 ),
                 ("skia_use_xps", no()),
-                (
-                    "skia_use_dng_sdk",
-                    if build.feature_dng { yes() } else { no() },
-                ),
+                ("skia_use_dng_sdk", if features.dng { yes() } else { no() }),
                 (
                     "skia_enable_particles",
-                    if build.feature_particles || build.all_skia_libs {
+                    if features.particles || build.all_skia_libs {
                         yes()
                     } else {
                         no()
@@ -157,24 +258,15 @@ impl FinalBuildConfiguration {
                 args.push(("skia_use_lua", no()));
             }
 
-            if build.feature_shaper {
-                args.push(("skia_enable_skshaper", yes()));
-                args.push(("skia_use_icu", yes()));
-                args.push(("skia_use_system_icu", no()));
-                args.push(("skia_use_harfbuzz", yes()));
-                args.push(("skia_use_system_harfbuzz", no()));
-                args.push(("skia_use_sfntly", no()));
-            } else {
-                args.push(("skia_use_icu", no()));
-            }
+            args.extend(features.text_layout.skia_args());
 
-            if build.feature_vulkan {
+            if features.vulkan {
                 args.push(("skia_use_vulkan", yes()));
                 args.push(("skia_enable_spirv_validation", no()));
             }
 
             let mut flags: Vec<&str> = vec![];
-            let mut use_expat = build.feature_svg;
+            let mut use_expat = features.svg;
 
             // target specific gn args.
             let target = cargo::target();
@@ -192,6 +284,8 @@ impl FinalBuildConfiguration {
                 }
                 (arch, "linux", "android", _) => {
                     args.push(("ndk", quote(&android::ndk())));
+                    // TODO: make API-level configurable?
+                    args.push(("ndk_api", android::API_LEVEL.into()));
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
                     args.push(("skia_use_system_freetype2", no()));
                     args.push(("skia_enable_fontmgr_android", yes()));
@@ -227,28 +321,42 @@ impl FinalBuildConfiguration {
                 .collect()
         };
 
+        let ninja_files = {
+            let mut files = Vec::new();
+            files.push("obj/skia.ninja".into());
+            files.extend(features.text_layout.ninja_files());
+            files
+        };
+
         let binding_sources = {
             let mut sources: Vec<PathBuf> = Vec::new();
             sources.push("src/bindings.cpp".into());
-            if build.feature_shaper {
-                sources.push("src/shaper.cpp".into())
-            };
+            sources.extend(features.text_layout.sources());
             sources
         };
 
         FinalBuildConfiguration {
+            skia_patches: features.text_layout.patches(),
             gn_args,
+            ninja_files,
             definitions: build.definitions.clone(),
             binding_sources,
         }
     }
 }
 
+fn yes() -> String {
+    "true".into()
+}
+fn no() -> String {
+    "false".into()
+}
+
 /// The resulting binaries configuration.
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct BinariesConfiguration {
-    /// The features we built with.
-    pub features: Vec<String>,
+    /// The feature identifiers we built with.
+    pub feature_ids: Vec<String>,
 
     /// The output directory of the libraries we build and we need to inform cargo about.
     pub output_directory: PathBuf,
@@ -271,24 +379,37 @@ impl BinariesConfiguration {
     /// Build a binaries configuration based on the current environment cargo
     /// supplies us with and a Skia build configuration.
     pub fn from_cargo_env(build: &BuildConfiguration) -> Self {
+        let features = &build.features;
+        let target = cargo::target();
+
         let mut built_libraries = Vec::new();
         let mut additional_files = Vec::new();
-        let mut features = Vec::new();
-        if build.feature_vulkan {
-            features.push(feature::VULKAN);
+        let mut feature_ids = Vec::new();
+
+        if features.vulkan {
+            feature_ids.push(feature_id::VULKAN);
         }
-        if build.feature_svg {
-            features.push(feature::SVG);
+        if features.svg {
+            feature_ids.push(feature_id::SVG);
         }
-        if build.feature_shaper {
-            features.push(feature::SHAPER);
-            additional_files.push(ICUDTL_DAT.into());
-            built_libraries.push(lib::SKSHAPER.into());
+        match features.text_layout {
+            TextLayout::None => {}
+            TextLayout::ShaperOnly => {
+                feature_ids.push(feature_id::SHAPER);
+                additional_files.push(ICUDTL_DAT.into());
+                built_libraries.push(lib::SKSHAPER.into());
+            }
+            TextLayout::ShaperAndParagraph => {
+                feature_ids.push(feature_id::TEXTLAYOUT);
+                additional_files.push(ICUDTL_DAT.into());
+                built_libraries.push(lib::SKPARAGRAPH.into());
+                built_libraries.push(lib::SKSHAPER.into());
+            }
         }
 
         let mut link_libraries = Vec::new();
 
-        match cargo::target().as_strs() {
+        match target.as_strs() {
             (_, "unknown", "linux", Some("gnu")) => {
                 link_libraries.extend(vec!["stdc++", "bz2", "GL", "fontconfig", "freetype"]);
             }
@@ -305,7 +426,14 @@ impl BinariesConfiguration {
                 ]);
             }
             (_, "linux", "android", _) => {
-                link_libraries.extend(vec!["log", "android", "EGL", "GLESv2"]);
+                link_libraries.extend(vec![
+                    "log",
+                    "android",
+                    "EGL",
+                    "GLESv2",
+                    "c++_static",
+                    "c++abi",
+                ]);
             }
             (_, "apple", "ios", _) => {
                 link_libraries.extend(vec![
@@ -331,7 +459,7 @@ impl BinariesConfiguration {
         built_libraries.push(lib::SKIA_BINDINGS.into());
 
         BinariesConfiguration {
-            features: features.iter().map(|f| f.to_string()).collect(),
+            feature_ids: feature_ids.iter().map(|f| f.to_string()).collect(),
             output_directory,
             link_libraries: link_libraries.iter().map(|lib| lib.to_string()).collect(),
             built_libraries,
@@ -358,6 +486,8 @@ impl BinariesConfiguration {
 pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
     prerequisites::resolve_dependencies();
 
+    // call Skia's git-sync-deps
+
     let python2 = &prerequisites::locate_python2_cmd();
     println!("Python 2 found: {:?}", python2);
 
@@ -372,6 +502,15 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
         "`skia/tools/git-sync-deps` failed"
     );
 
+    // apply patches
+
+    for patch in &build.skia_patches {
+        println!("applying patch: {}", patch.name);
+        patch.apply(&PathBuf::from("skia"));
+    }
+
+    // configure Skia
+
     let gn_args = build
         .gn_args
         .iter()
@@ -383,6 +522,8 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
     let gn_command = current_dir.join("skia").join("bin").join("gn");
 
     let output_directory_str = config.output_directory.to_str().unwrap();
+
+    println!("Skia args: {}", &gn_args);
 
     let output = Command::new(gn_command)
         .args(&[
@@ -402,6 +543,8 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
         panic!("{:?}", String::from_utf8(output.stdout).unwrap());
     }
 
+    // build Skia
+
     let on_windows = cfg!(windows);
 
     let ninja_command =
@@ -409,14 +552,26 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
             .join("depot_tools")
             .join(if on_windows { "ninja.exe" } else { "ninja" });
 
+    let ninja_status = Command::new(ninja_command)
+        .current_dir(PathBuf::from("./skia"))
+        .args(&["-C", output_directory_str])
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .status();
+
+    // reverse patches
+    //
+    // Even though we patch only the gn configuration, we wait until the ninja build went through,
+    // because ninja may regenerate its files by calling into gn again (happened once on the CI).
+
+    for patch in &build.skia_patches {
+        println!("reversing patch: {}", patch.name);
+        patch.reverse(&PathBuf::from("skia"));
+    }
+
     assert!(
-        Command::new(ninja_command)
-            .current_dir(PathBuf::from("./skia"))
-            .args(&["-C", output_directory_str])
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .status()
-            .expect("failed to run `ninja`")
+        ninja_status
+            .expect("failed to run `ninja`, does the directory depot_tools/ exist?")
             .success(),
         "`ninja` returned an error, please check the output for details."
     );
@@ -503,6 +658,8 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .whitelist_function("TightBounds")
         .whitelist_function("AsWinding")
         .whitelist_type("SkOpBuilder")
+        // svg/
+        .whitelist_type("SkSVGCanvas")
         // utils/
         .whitelist_function("Sk3LookAt")
         .whitelist_function("Sk3Perspective")
@@ -549,13 +706,15 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
     cc_build.include(include_path);
 
     let definitions = {
-        let skia_definitions = {
-            let ninja_file = output_directory.join("obj").join("skia.ninja");
-            let contents = fs::read_to_string(ninja_file).unwrap();
-            definitions::from_ninja(contents)
-        };
+        let mut definitions = Vec::new();
 
-        definitions::combine(skia_definitions, build.definitions.clone())
+        for ninja_file in &build.ninja_files {
+            let ninja_file = output_directory.join(ninja_file);
+            let contents = fs::read_to_string(ninja_file).unwrap();
+            definitions = definitions::combine(definitions, definitions::from_ninja(contents))
+        }
+
+        definitions::combine(definitions, build.definitions.clone())
     };
 
     for (name, value) in &definitions {
@@ -643,6 +802,11 @@ const OPAQUE_TYPES: &[&str] = &[
     "SkDeque",
     "SkDeque_Iter",
     "GrGLInterface_Functions",
+    // SkShaper (m77) Trivial*Iterator classes create two vtable pointers.
+    "SkShaper_TrivialBiDiRunIterator",
+    "SkShaper_TrivialFontRunIterator",
+    "SkShaper_TrivialLanguageRunIterator",
+    "SkShaper_TrivialScriptRunIterator",
 ];
 
 mod prerequisites {
@@ -860,12 +1024,47 @@ pub(crate) mod definitions {
     }
 
     pub fn combine(a: Definitions, b: Definitions) -> Definitions {
-        compress(a.into_iter().chain(b.into_iter()).collect())
+        remove_duplicates(a.into_iter().chain(b.into_iter()).collect())
     }
 
-    pub fn compress(mut definitions: Definitions) -> Definitions {
+    pub fn remove_duplicates(mut definitions: Definitions) -> Definitions {
         let mut uniques = HashSet::new();
         definitions.retain(|e| uniques.insert(e.0.clone()));
         definitions
+    }
+}
+
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub struct Patch {
+    name: String,
+    marked_file: PathBuf,
+}
+
+impl Patch {
+    fn apply(&self, root_dir: &Path) {
+        if !self.is_applied(root_dir) {
+            let patch_file = PathBuf::from("..").join(self.name.clone() + ".patch");
+            git::run(&["apply", patch_file.to_str().unwrap()], Some(root_dir));
+        }
+    }
+
+    fn reverse(&self, root_dir: &Path) {
+        if self.is_applied(root_dir) {
+            let patch_file = PathBuf::from("..").join(self.name.clone() + ".patch");
+            git::run(
+                &["apply", "--reverse", patch_file.to_str().unwrap()],
+                Some(root_dir),
+            );
+        }
+    }
+
+    fn is_applied(&self, root_dir: &Path) -> bool {
+        let build_gn = root_dir.join(&self.marked_file);
+        let contents = fs::read_to_string(build_gn).unwrap();
+        let patch_marker = format!(
+            "**SKIA-BINDINGS-PATCH-MARKER-{}**",
+            self.name.to_uppercase()
+        );
+        contents.contains(&patch_marker)
     }
 }

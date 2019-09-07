@@ -3,6 +3,7 @@ use crate::scalar;
 use skia_bindings::SkFontMetrics;
 
 bitflags! {
+    #[derive(Default)]
     pub struct Flags: u32 {
         const UNDERLINE_THICKNESS_IS_VALID = skia_bindings::SkFontMetrics_FontMetricsFlags_kUnderlineThicknessIsValid_Flag as _;
         const UNDERLINE_POSITION_IS_VALID = skia_bindings::SkFontMetrics_FontMetricsFlags_kUnderlinePositionIsValid_Flag as _;
@@ -12,7 +13,7 @@ bitflags! {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct FontMetrics {
     flags: self::Flags,
     pub top: scalar,

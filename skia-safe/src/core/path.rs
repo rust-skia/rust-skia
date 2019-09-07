@@ -521,6 +521,10 @@ impl Handle<SkPath> {
         .unwrap()
     }
 
+    pub fn approximate_bytes_used(&self) -> usize {
+        unsafe { self.native().approximateBytesUsed() }
+    }
+
     pub fn swap(&mut self, other: &mut Path) -> &mut Self {
         unsafe { self.native_mut().swap(other.native_mut()) }
         self

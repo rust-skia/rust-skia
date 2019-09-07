@@ -1,5 +1,6 @@
 parameters:
   # defaults:
+  androidHost: ''
   androidNDK: ''
 
 jobs:
@@ -41,7 +42,10 @@ jobs:
     platform: ${{ parameters.platform }}
     platformTarget: ${{ parameters.platformTarget }}
     image: ${{ parameters.image }}
+    androidHost: ${{ parameters.androidHost }}
     androidNDK: ${{ parameters.androidNDK }}
+    androidAPILevel: ${{ parameters.androidAPILevel }}
+    androidBinExt: ${{ parameters.androidBinExt }}
     rust_backtrace: 1
 
   pool:
@@ -93,17 +97,15 @@ jobs:
         "C:/Program Files/LLVM/bin/clang.exe" --version
       displayName: LLVM/Clang Version
 
-  - ${{ if ne(parameters.androidNDK, '') }}:
+  - ${{ if ne(parameters.androidHost, '') }}:
     # Android NDK
     - bash: |
         set -e
-        (cd /tmp && curl -sSf -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-$(androidNDK).zip)
-        (cd /tmp && unzip android-ndk.zip)
-        (cd /tmp/android-ndk-r18b && build/tools/make_standalone_toolchain.py --arch arm64 --install-dir /tmp/ndk-arm64)
-        (cd /tmp/android-ndk-r18b && build/tools/make_standalone_toolchain.py --arch x86_64 --install-dir /tmp/ndk-x86_64)
-        echo "##vso[task.setvariable variable=PATH;]${PATH}:/tmp/ndk-arm64/bin:/tmp/ndk-x86_64/bin"
-        echo "##vso[task.setvariable variable=ANDROID_NDK;]/tmp/android-ndk-r18b"
-      displayName: 'Install Android NDK'
+        (cd ${HOME} && curl -sSf -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-$(androidNDK)-$(androidHost).zip)
+        (cd ${HOME} && unzip android-ndk.zip)
+        echo "##vso[task.setvariable variable=ANDROID_NDK;]${HOME}/android-ndk-$(androidNDK)"
+        echo "##vso[task.setvariable variable=PATH;]${PATH}:${HOME}/android-ndk-$(androidNDK)/toolchains/llvm/prebuilt/$(androidHost)/bin"
+      displayName: 'Install Android NDK $(androidNDK)'
 
   # Note: support to ignore specific rust files and directories is unstable yet: https://github.com/rust-lang/rustfmt/pull/2522
   - bash: |
@@ -124,10 +126,14 @@ jobs:
     - template: 'azure-pipelines-build-target.yml'
       parameters:
         target: 'aarch64-linux-android'
+        androidEnv: true
+        releaseBinaries: true
 
     - template: 'azure-pipelines-build-target.yml'
       parameters:
         target: 'x86_64-linux-android'
+        androidEnv: true
+        releaseBinaries: true
 
     - template: 'azure-pipelines-build-target.yml'
       parameters:
@@ -140,10 +146,31 @@ jobs:
         releaseBinaries: ${{ parameters.deployRelease }}
 
   - ${{ if eq(parameters.platform, 'Linux') }}:
-    - template: 'azure-pipelines-build-target.yml'
-      parameters:
-        target: 'aarch64-linux-android'
+# TODO: Temporarily disabled, because of:
+#       /home/vsts/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/8.0.7/include/arm_neon.h:37394:23:
+#         error: use of undeclared identifier '__builtin_neon_vrndns_f32'
+#       >> Builds fine on Ubuntu 18, though.
+#
+#    - template: 'azure-pipelines-build-target.yml'
+#      parameters:
+#        target: 'aarch64-linux-android'
+#        androidEnv: true
 
     - template: 'azure-pipelines-build-target.yml'
       parameters:
         target: 'x86_64-linux-android'
+        androidEnv: true
+
+# TODO: Windows Android builds are temporaly disabled, because of:
+#       error occurred:
+#         Failed to find tool. Is `aarch64-linux-android26-clang.cmd` installed?
+#       >> works locally on msys2, probably a PATH problem with AZURE?, although PATH variable looks fine.
+#  - ${{ if eq(parameters.platform, 'Windows') }}:
+#    - template: 'azure-pipelines-build-target.yml'
+#      parameters:
+#        target: 'aarch64-linux-android'
+#        androidEnv: true
+#    - template: 'azure-pipelines-build-target.yml'
+#      parameters:
+#        target: 'x86_64-linux-android'
+#        androidEnv: true
