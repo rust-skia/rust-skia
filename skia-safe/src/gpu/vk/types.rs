@@ -70,14 +70,15 @@ impl Alloc {
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
 pub struct YcbcrConversionInfo {
+    pub format: vk::Format,
+    pub external_format: u64,
     pub ycrbcr_model: vk::SamplerYcbcrModelConversion,
     pub ycbcr_range: vk::SamplerYcbcrRange,
     pub x_chroma_offset: vk::ChromaLocation,
     pub y_chroma_offset: vk::ChromaLocation,
     pub chroma_filter: vk::Filter,
-    pub force_explicit_reconsturction: vk::Bool32,
-    pub external_format: u64,
-    pub external_format_features: vk::FormatFeatureFlags,
+    pub force_explicit_reconstruction: vk::Bool32,
+    pub format_features: vk::FormatFeatureFlags,
 }
 
 impl NativeTransmutable<GrVkYcbcrConversionInfo> for YcbcrConversionInfo {}
@@ -95,19 +96,46 @@ impl PartialEq for YcbcrConversionInfo {
 impl Default for YcbcrConversionInfo {
     fn default() -> Self {
         YcbcrConversionInfo {
+            format: vk::Format::UNDEFINED,
+            external_format: 0,
             ycrbcr_model: vk::SamplerYcbcrModelConversion::RGB_IDENTITY,
             ycbcr_range: vk::SamplerYcbcrRange::ITU_FULL,
             x_chroma_offset: vk::ChromaLocation::COSITED_EVEN,
             y_chroma_offset: vk::ChromaLocation::COSITED_EVEN,
             chroma_filter: vk::Filter::NEAREST,
-            force_explicit_reconsturction: 0,
-            external_format: 0,
-            external_format_features: 0,
+            force_explicit_reconstruction: 0,
+            format_features: 0,
         }
     }
 }
 
 impl YcbcrConversionInfo {
+    pub fn new_with_format(
+        format: vk::Format,
+        external_format: u64,
+        ycrbcr_model: vk::SamplerYcbcrModelConversion,
+        ycbcr_range: vk::SamplerYcbcrRange,
+        x_chroma_offset: vk::ChromaLocation,
+        y_chroma_offset: vk::ChromaLocation,
+        chroma_filter: vk::Filter,
+        force_explicit_reconstruction: vk::Bool32,
+        format_features: vk::FormatFeatureFlags,
+    ) -> YcbcrConversionInfo {
+        debug_assert!(ycrbcr_model != vk::SamplerYcbcrModelConversion::RGB_IDENTITY);
+        debug_assert!((format != vk::Format::UNDEFINED) ^ (external_format != 0));
+        YcbcrConversionInfo {
+            format,
+            external_format,
+            ycrbcr_model,
+            ycbcr_range,
+            x_chroma_offset,
+            y_chroma_offset,
+            chroma_filter,
+            force_explicit_reconstruction,
+            format_features,
+        }
+    }
+
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         ycrbcr_model: vk::SamplerYcbcrModelConversion,
@@ -119,23 +147,21 @@ impl YcbcrConversionInfo {
         external_format: u64,
         external_format_features: vk::FormatFeatureFlags,
     ) -> YcbcrConversionInfo {
-        YcbcrConversionInfo::construct(|ci| unsafe {
-            sb::C_GrVkYcbcrConversionInfo_Construct(
-                ci,
-                ycrbcr_model,
-                ycbcr_range,
-                x_chroma_offset,
-                y_chroma_offset,
-                chroma_filter,
-                force_explicit_reconstruction,
-                external_format,
-                external_format_features,
-            )
-        })
+        Self::new_with_format(
+            vk::Format::UNDEFINED,
+            external_format,
+            ycrbcr_model,
+            ycbcr_range,
+            x_chroma_offset,
+            y_chroma_offset,
+            chroma_filter,
+            force_explicit_reconstruction,
+            external_format_features,
+        )
     }
 
     pub fn is_valid(&self) -> bool {
-        self.native().fExternalFormat != 0
+        self.ycrbcr_model != vk::SamplerYcbcrModelConversion::RGB_IDENTITY
     }
 }
 
@@ -212,7 +238,7 @@ impl ImageInfo {
         }
     }
 
-    // TODO: may deprecate in favor of ::new().
+    #[deprecated(since = "0.0.0", note = "use new()")]
     #[allow(clippy::too_many_arguments)]
     pub unsafe fn from_image(
         image: vk::Image,

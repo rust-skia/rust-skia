@@ -1,4 +1,4 @@
-use crate::gpu::{gl, MipMapped};
+use crate::gpu::{gl, BackendFormat, MipMapped, Renderable};
 use crate::prelude::*;
 use skia_bindings as sb;
 use skia_bindings::{GrContext, SkRefCntBase};
@@ -89,6 +89,10 @@ impl RCHandle<GrContext> {
         }
     }
 
+    pub fn resource_cache_limit(&self) -> usize {
+        unsafe { self.native().getResourceCacheLimit() }
+    }
+
     pub fn resource_cache_usage(&self) -> ResourceCacheUsage {
         let mut resource_count = 0;
         let mut resource_bytes = 0;
@@ -104,6 +108,19 @@ impl RCHandle<GrContext> {
 
     pub fn resource_cache_purgeable_bytes(&self) -> usize {
         unsafe { self.native().getResourceCachePurgeableBytes() }
+    }
+
+    pub fn set_resource_cache_limits(&mut self, limits: ResourceCacheLimits) {
+        unsafe {
+            self.native_mut().setResourceCacheLimits(
+                limits.max_resources.try_into().unwrap(),
+                limits.max_resource_bytes,
+            )
+        }
+    }
+
+    pub fn set_resource_cache_limit(&mut self, max_resource_bytes: usize) {
+        unsafe { self.native_mut().setResourceCacheLimit(max_resource_bytes) }
     }
 
     pub fn free_gpu_resources(&mut self) -> &mut Self {
@@ -204,6 +221,16 @@ impl RCHandle<GrContext> {
                 use_next_pow2.into().unwrap_or(false),
             )
         }
+    }
+
+    pub fn default_backend_format(&self, ct: ColorType, renderable: Renderable) -> BackendFormat {
+        BackendFormat::from_native(unsafe {
+            sb::C_GrContext_defaultBackendFormat(
+                self.native(),
+                ct.into_native(),
+                renderable.into_native(),
+            )
+        })
     }
 
     // TODO: support createBackendTexture (several variants) and deleteBackendTexture(),
