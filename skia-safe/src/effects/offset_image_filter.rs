@@ -1,15 +1,15 @@
 use crate::prelude::*;
-use crate::{image_filter::CropRect, ImageFilter, Vector};
+use crate::{image_filter::CropRect, image_filters, IRect, ImageFilter, Vector};
 use skia_bindings as sb;
 use skia_bindings::SkImageFilter;
 
 impl RCHandle<SkImageFilter> {
     pub fn offset<'a>(
         self,
-        crop_rect: impl Into<Option<&'a CropRect>>,
+        crop_rect: impl Into<Option<&'a IRect>>,
         delta: impl Into<Vector>,
     ) -> Option<Self> {
-        new(delta, self, crop_rect)
+        image_filters::offset(delta, self, crop_rect)
     }
 }
 

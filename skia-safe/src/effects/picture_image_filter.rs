@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::{ImageFilter, Picture, Rect};
+use crate::{image_filters, ImageFilter, Picture, Rect};
 use skia_bindings as sb;
 use skia_bindings::{SkImageFilter, SkPicture};
 
@@ -8,7 +8,7 @@ impl RCHandle<SkImageFilter> {
         picture: Picture,
         crop_rect: impl Into<Option<&'a Rect>>,
     ) -> Option<Self> {
-        from_picture(picture, crop_rect)
+        image_filters::picture(picture, crop_rect)
     }
 }
 
@@ -24,7 +24,7 @@ impl RCHandle<SkPicture> {
         self,
         crop_rect: impl Into<Option<&'a Rect>>,
     ) -> Option<ImageFilter> {
-        from_picture(self, crop_rect)
+        image_filters::picture(self, crop_rect)
     }
 }
 

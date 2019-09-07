@@ -1,22 +1,22 @@
-use crate::image_filter::CropRect;
 use crate::prelude::*;
+use crate::{image_filters, IRect};
 use skia_bindings::SkImageFilter;
 
 impl RCHandle<SkImageFilter> {
     pub fn dilate<'a>(
         self,
-        crop_rect: impl Into<Option<&'a CropRect>>,
+        crop_rect: impl Into<Option<&'a IRect>>,
         radii: (i32, i32),
     ) -> Option<Self> {
-        dilate_image_filter::new(radii, self, crop_rect)
+        image_filters::dilate(radii, self, crop_rect)
     }
 
     pub fn erode<'a>(
         self,
-        crop_rect: impl Into<Option<&'a CropRect>>,
+        crop_rect: impl Into<Option<&'a IRect>>,
         radii: (i32, i32),
     ) -> Option<Self> {
-        erode_image_filter::new(radii, self, crop_rect)
+        image_filters::erode(radii, self, crop_rect)
     }
 }
 

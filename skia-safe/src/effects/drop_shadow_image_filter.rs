@@ -1,18 +1,25 @@
 use crate::prelude::*;
-use crate::{image_filter::CropRect, scalar, Color, ImageFilter, Vector};
+use crate::{image_filter::CropRect, image_filters, scalar, Color, IRect, ImageFilter, Vector};
 use skia_bindings as sb;
 use skia_bindings::{SkDropShadowImageFilter_ShadowMode, SkImageFilter};
 
 impl RCHandle<SkImageFilter> {
     pub fn drop_shadow<'a>(
         self,
-        crop_rect: impl Into<Option<&'a CropRect>>,
+        crop_rect: impl Into<Option<&'a IRect>>,
         delta: impl Into<Vector>,
         sigma: (scalar, scalar),
         color: impl Into<Color>,
         shadow_mode: ShadowMode,
     ) -> Option<Self> {
-        new(delta, sigma, color, shadow_mode, self, crop_rect)
+        match shadow_mode {
+            ShadowMode::DrawShadowAndForeground => {
+                image_filters::drop_shadow(delta, sigma, color, self, crop_rect)
+            }
+            ShadowMode::DrawShadowOnly => {
+                image_filters::drop_shadow_only(delta, sigma, color, self, crop_rect)
+            }
+        }
     }
 }
 

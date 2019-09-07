@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::{image_filter::CropRect, BlendMode, ImageFilter};
+use crate::{image_filter::CropRect, image_filters, BlendMode, IRect, ImageFilter};
 use skia_bindings as sb;
 use skia_bindings::SkImageFilter;
 
@@ -8,13 +8,13 @@ impl RCHandle<SkImageFilter> {
         blend_mode: BlendMode,
         background: ImageFilter,
         foreground: impl Into<Option<ImageFilter>>,
-        crop_rect: impl Into<Option<&'a CropRect>>,
+        crop_rect: impl Into<Option<&'a IRect>>,
     ) -> Option<Self> {
-        new(blend_mode, background, foreground, crop_rect)
+        image_filters::xfermode(blend_mode, background, foreground, crop_rect)
     }
 }
 
-#[deprecated(since = "m78", note = "use color_filters::xfermode")]
+#[deprecated(since = "m78", note = "use color_filters::xfermode()")]
 pub fn new<'a>(
     blend_mode: BlendMode,
     background: ImageFilter,
