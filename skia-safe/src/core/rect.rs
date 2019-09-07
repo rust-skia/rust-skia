@@ -141,7 +141,7 @@ impl IRect {
         self.left = 0;
         self.top = 0;
         self.right = width;
-        self.bottom = width;
+        self.bottom = height;
     }
 
     #[must_use]
