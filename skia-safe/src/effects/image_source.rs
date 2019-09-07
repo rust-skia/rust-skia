@@ -47,12 +47,12 @@ impl RCHandle<SkImage> {
     }
 }
 
-#[deprecated(since = "m78", note = "use color_filters::image")]
+#[deprecated(since = "0.0.0", note = "use color_filters::image")]
 pub fn from_image(image: Image) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe { sb::C_SkImageSource_Make(image.into_ptr()) })
 }
 
-#[deprecated(since = "m78", note = "use color_filters::image")]
+#[deprecated(since = "0.0.0", note = "use color_filters::image")]
 pub fn from_image_rect(
     image: Image,
     src_rect: impl AsRef<Rect>,

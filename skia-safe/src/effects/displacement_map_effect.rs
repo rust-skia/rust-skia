@@ -15,7 +15,7 @@ impl RCHandle<SkImageFilter> {
     }
 }
 
-#[deprecated(since = "m78", note = "use skia_safe::ColorChannel")]
+#[deprecated(since = "0.0.0", note = "use skia_safe::ColorChannel")]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
 pub enum ChannelSelector {
@@ -34,7 +34,7 @@ fn test_channel_selector_type_layout() {
     ChannelSelector::test_layout();
 }
 
-#[deprecated(since = "m78", note = "use color_filters::displacement_map")]
+#[deprecated(since = "0.0.0", note = "use color_filters::displacement_map")]
 #[allow(deprecated)]
 pub fn new<'a>(
     (x_channel_selector, y_channel_selector): (ChannelSelector, ChannelSelector),

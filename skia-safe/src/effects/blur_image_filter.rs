@@ -14,7 +14,7 @@ impl RCHandle<SkImageFilter> {
     }
 }
 
-#[deprecated(since = "m78", note = "use skia_safe::TileMode")]
+#[deprecated(since = "0.0.0", note = "use skia_safe::TileMode")]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
 pub enum TileMode {
@@ -32,7 +32,7 @@ fn test_tile_mode_layout() {
 }
 
 #[allow(deprecated)]
-#[deprecated(since = "m78", note = "use image_filters::blur")]
+#[deprecated(since = "0.0.0", note = "use image_filters::blur")]
 pub fn new<'a>(
     (sigma_x, sigma_y): (scalar, scalar),
     input: ImageFilter,
