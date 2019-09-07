@@ -654,10 +654,6 @@ extern "C" void C_SkPath_Iter_destruct(SkPath::Iter* self) {
     self->~Iter();
 }
 
-extern "C" SkPath::Verb C_SkPath_Iter_next(SkPath::Iter* self, SkPoint pts[4], bool doConsumeDegenerates, bool exact) {
-    return self->next(pts, doConsumeDegenerates, exact);
-}
-
 extern "C" bool C_SkPath_Iter_isCloseLine(const SkPath::Iter* self) {
     return self->isCloseLine();
 }

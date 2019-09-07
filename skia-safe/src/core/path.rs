@@ -178,20 +178,10 @@ impl<'a> Iter<'a> {
         r
     }
 
-    pub fn next(
-        &mut self,
-        do_consume_generates: impl Into<Option<bool>>,
-        exact: impl Into<Option<bool>>,
-    ) -> (Verb, Vec<Point>) {
+    pub fn next(&mut self) -> (Verb, Vec<Point>) {
         let mut points = [Point::default(); Verb::MAX_POINTS];
-        let verb = Verb::from_native(unsafe {
-            sb::C_SkPath_Iter_next(
-                self.native_mut(),
-                points.native_mut().as_mut_ptr(),
-                do_consume_generates.into().unwrap_or(true),
-                exact.into().unwrap_or(false),
-            )
-        });
+        let verb =
+            Verb::from_native(unsafe { self.native_mut().next(points.native_mut().as_mut_ptr()) });
         (verb, points[0..verb.points()].into())
     }
 
@@ -216,7 +206,7 @@ impl<'a> Iterator for Iter<'a> {
     type Item = (Verb, Vec<Point>);
 
     fn next(&mut self) -> Option<Self::Item> {
-        let (verb, points) = self.next(None, None);
+        let (verb, points) = self.next();
         if verb != Verb::Done {
             Some((verb, points))
         } else {
