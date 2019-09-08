@@ -178,13 +178,6 @@ impl<'a> Iter<'a> {
         r
     }
 
-    pub fn next(&mut self) -> (Verb, Vec<Point>) {
-        let mut points = [Point::default(); Verb::MAX_POINTS];
-        let verb =
-            Verb::from_native(unsafe { self.native_mut().next(points.native_mut().as_mut_ptr()) });
-        (verb, points[0..verb.points()].into())
-    }
-
     pub fn conic_weight(&self) -> Option<scalar> {
         #[allow(clippy::map_clone)]
         self.native()
@@ -206,9 +199,11 @@ impl<'a> Iterator for Iter<'a> {
     type Item = (Verb, Vec<Point>);
 
     fn next(&mut self) -> Option<Self::Item> {
-        let (verb, points) = self.next();
+        let mut points = [Point::default(); Verb::MAX_POINTS];
+        let verb =
+            Verb::from_native(unsafe { self.native_mut().next(points.native_mut().as_mut_ptr()) });
         if verb != Verb::Done {
-            Some((verb, points))
+            Some((verb, points[0..verb.points()].into()))
         } else {
             None
         }

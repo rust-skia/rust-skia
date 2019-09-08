@@ -486,7 +486,7 @@ impl RCHandle<SkImage> {
         Image::from_ptr(unsafe { sb::C_SkImage_makeSubset(self.native(), rect.as_ref().native()) })
     }
 
-    pub fn new_texture_image<'a>(
+    pub fn new_texture_image(
         &self,
         context: &mut gpu::Context,
         mip_mapped: gpu::MipMapped,
