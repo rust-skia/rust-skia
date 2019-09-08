@@ -110,6 +110,7 @@ impl Default for YcbcrConversionInfo {
 }
 
 impl YcbcrConversionInfo {
+    #[allow(clippy::too_many_arguments)]
     pub fn new_with_format(
         format: vk::Format,
         external_format: u64,
