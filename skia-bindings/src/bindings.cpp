@@ -84,6 +84,7 @@
 #include "include/gpu/GrContext.h"
 #include "include/gpu/GrBackendDrawableInfo.h"
 // gpu/gl
+#include "include/gpu/gl/GrGLExtensions.h"
 #include "include/gpu/gl/GrGLInterface.h"
 // pathops/
 #include "include/pathops/SkPathOps.h"
@@ -2453,13 +2454,28 @@ extern "C" bool C_GrGLFramebufferInfo_Equals(const GrGLFramebufferInfo* lhs, con
 }
 
 //
-// GrGLInterface
+// gpu/gl/GrGLInterface.h
+//
+
+extern "C" void C_GrGLExtensions_destruct(GrGLExtensions* self) {
+    self->~GrGLExtensions();
+}
+
+extern "C" void C_GrGLExtensions_reset(GrGLExtensions* self) {
+    self->reset();
+}
+
+//
+// gpu/gl/GrGLInterface.h
 //
 
 extern "C" const GrGLInterface* C_GrGLInterface_MakeNativeInterface() {
     return GrGLMakeNativeInterface().release();
 }
 
+extern "C" GrGLExtensions* C_GrGLInterface_extensions(GrGLInterface* self) {
+    return &self->fExtensions;
+}
 //
 // gpu/GrContext.h
 //
