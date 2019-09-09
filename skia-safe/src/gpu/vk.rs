@@ -2,10 +2,10 @@ use skia_bindings as sb;
 use std::ptr;
 
 mod backend_context;
-pub use self::backend_context::*;
+pub use backend_context::*;
 
 mod types;
-pub use self::types::*;
+pub use types::*;
 
 //
 // Additional Vulkan re-exports and definitions.
