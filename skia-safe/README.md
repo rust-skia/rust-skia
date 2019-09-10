@@ -6,7 +6,7 @@ For information about the supported build targets and how to run the examples, p
 
 ## Documentation
 
-Functional level documentation is [not yet](https://github.com/rust-skia/rust-skia/issues/23) available. To get started, take a look at the [Rust examples](https://github.com/rust-skia/rust-skia/tree/master/skia-safe/examples/skia-org) or the [Skia documentation](https://skia.org). 
+Function level documentation is [not yet](https://github.com/rust-skia/rust-skia/issues/23) available. To get started, take a look at the [Rust examples](https://github.com/rust-skia/rust-skia/tree/master/skia-safe/examples/skia-org) or the [Skia documentation](https://skia.org). 
 
 ## Bindings & Wrappers
 
