@@ -2,7 +2,7 @@ use crate::artifact::DrawingDriver;
 use clap::{App, Arg};
 use gleam;
 use offscreen_gl_context::{GLContext, GLVersion, NativeGLContext};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 extern crate skia_safe;
 
@@ -20,6 +20,8 @@ extern crate ash;
 mod drivers;
 mod skcanvas_overview;
 mod skpaint_overview;
+#[cfg(feature = "textlayout")]
+mod skparagraph_example;
 mod skpath_overview;
 #[cfg(feature = "shaper")]
 mod skshaper_example;
@@ -300,7 +302,7 @@ fn main() {
         }
     }
 
-    fn draw_all<Driver: DrawingDriver>(out_path: &PathBuf) {
+    fn draw_all<Driver: DrawingDriver>(out_path: &Path) {
         let out_path = out_path.join(Driver::NAME);
 
         skcanvas_overview::draw::<Driver>(&out_path);
@@ -309,6 +311,9 @@ fn main() {
 
         #[cfg(feature = "shaper")]
         skshaper_example::draw::<Driver>(&out_path);
+
+        #[cfg(feature = "textlayout")]
+        skparagraph_example::draw::<Driver>(&out_path);
     }
 }
 
