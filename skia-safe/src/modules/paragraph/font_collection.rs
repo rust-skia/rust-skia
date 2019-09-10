@@ -77,20 +77,32 @@ impl RCHandle<sb::skia_textlayout_FontCollection> {
         &mut self,
         family_name: impl AsRef<str>,
         font_style: FontStyle,
+        locale: impl AsRef<str>,
     ) -> Option<Typeface> {
         let family_name = ffi::CString::new(family_name.as_ref()).unwrap();
+        let locale = interop::String::from_str(locale);
         Typeface::from_ptr(unsafe {
             sb::C_FontCollection_matchTypeface(
                 self.native_mut(),
                 family_name.as_ptr(),
                 font_style.into_native(),
+                locale.native(),
             )
         })
     }
 
-    pub fn match_default_typeface(&mut self, font_style: FontStyle) -> Option<Typeface> {
+    pub fn match_default_typeface(
+        &mut self,
+        font_style: FontStyle,
+        locale: impl AsRef<str>,
+    ) -> Option<Typeface> {
+        let locale = interop::String::from_str(locale);
         Typeface::from_ptr(unsafe {
-            sb::C_FontCollection_matchDefaultTypeface(self.native_mut(), font_style.into_native())
+            sb::C_FontCollection_matchDefaultTypeface(
+                self.native_mut(),
+                font_style.into_native(),
+                locale.native(),
+            )
         })
     }
 
