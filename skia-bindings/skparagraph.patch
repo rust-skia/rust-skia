@@ -1,8 +1,8 @@
 diff --git a/BUILD.gn b/BUILD.gn
-index 07bdbc2370..90c346acc9 100644
+index 6a85dd96b..809d4724d 100644
 --- a/BUILD.gn
 +++ b/BUILD.gn
-@@ -1179,6 +1179,9 @@ group("modules") {
+@@ -1076,6 +1076,9 @@ group("modules") {
      "modules/particles",
      "modules/skottie",
      "modules/skshaper",
@@ -12,3 +12,15 @@ index 07bdbc2370..90c346acc9 100644
    ]
  }
  
+diff --git a/modules/skparagraph/BUILD.gn b/modules/skparagraph/BUILD.gn
+index 5a85d37c4..a3ab9b884 100644
+--- a/modules/skparagraph/BUILD.gn
++++ b/modules/skparagraph/BUILD.gn
+@@ -18,6 +18,7 @@ if (skia_enable_skparagraph) {
+ 
+   component("skparagraph") {
+     import("skparagraph.gni")
++    complete_static_lib = false
+     public_configs = [ ":public_config" ]
+     public = skparagraph_public
+     if (skia_use_icu && skia_use_harfbuzz) {
