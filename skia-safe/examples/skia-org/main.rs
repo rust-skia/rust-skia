@@ -14,6 +14,8 @@ mod artifact;
 mod drivers;
 mod skcanvas_overview;
 mod skpaint_overview;
+#[cfg(feature = "textlayout")]
+mod skparagraph_example;
 mod skpath_overview;
 #[cfg(feature = "shaper")]
 mod skshaper_example;
@@ -119,6 +121,9 @@ fn main() {
 
         #[cfg(feature = "shaper")]
         skshaper_example::draw::<Driver>(&out_path);
+
+        #[cfg(feature = "textlayout")]
+        skparagraph_example::draw::<Driver>(&out_path);
     }
 }
 
