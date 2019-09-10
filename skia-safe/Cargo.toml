@@ -18,7 +18,6 @@ edition = "2018"
 [lib]
 doctest = false
 
-
 [features]
 default = []
 vulkan = ["skia-bindings/vulkan"]
