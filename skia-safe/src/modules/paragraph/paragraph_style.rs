@@ -84,20 +84,20 @@ impl Handle<sb::skia_textlayout_StrutStyle> {
     }
 
     pub fn strut_enabled(&self) -> bool {
-        self.native().fStrutEnabled
+        self.native().fEnabled
     }
 
-    pub fn set_strut_enabled(&mut self, strut_enabled: bool) -> &mut Self {
-        self.native_mut().fStrutEnabled = strut_enabled;
+    pub fn set_strut_enabled(&mut self, enabled: bool) -> &mut Self {
+        self.native_mut().fEnabled = enabled;
         self
     }
 
     pub fn force_strut_height(&self) -> bool {
-        self.native().fForceStrutHeight
+        self.native().fForceHeight
     }
 
-    pub fn set_force_strut_height(&mut self, force_strut_height: bool) -> &mut Self {
-        self.native_mut().fForceStrutHeight = force_strut_height;
+    pub fn set_force_strut_height(&mut self, force_height: bool) -> &mut Self {
+        self.native_mut().fForceHeight = force_height;
         self
     }
 }

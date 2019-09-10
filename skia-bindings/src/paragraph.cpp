@@ -46,12 +46,12 @@ extern "C" {
         return self->geFallbackManager().release();
     }
 
-    SkTypeface* C_FontCollection_matchTypeface(FontCollection* self, const char* familyName, SkFontStyle fontStyle) {
-        return self->matchTypeface(familyName, fontStyle).release();
+    SkTypeface* C_FontCollection_matchTypeface(FontCollection* self, const char* familyName, SkFontStyle fontStyle, const SkString* locale) {
+        return self->matchTypeface(familyName, fontStyle, *locale).release();
     }
 
-    SkTypeface* C_FontCollection_matchDefaultTypeface(FontCollection* self, SkFontStyle fontStyle) {
-        return self->matchDefaultTypeface(fontStyle).release();
+    SkTypeface* C_FontCollection_matchDefaultTypeface(FontCollection* self, SkFontStyle fontStyle, const SkString* locale) {
+        return self->matchDefaultTypeface(fontStyle, *locale).release();
     }
 
     SkTypeface* C_FontCollection_defaultFallback(FontCollection* self, SkUnichar unicode, SkFontStyle fontStyle, const SkString* locale) {
