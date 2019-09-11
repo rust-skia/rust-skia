@@ -224,13 +224,16 @@ impl RCHandle<GrContext> {
     }
 
     pub fn default_backend_format(&self, ct: ColorType, renderable: Renderable) -> BackendFormat {
-        BackendFormat::from_native(unsafe {
+        let mut format = BackendFormat::default();
+        unsafe {
             sb::C_GrContext_defaultBackendFormat(
                 self.native(),
                 ct.into_native(),
                 renderable.into_native(),
+                format.native_mut(),
             )
-        })
+        };
+        format
     }
 
     // TODO: support createBackendTexture (several variants) and deleteBackendTexture(),

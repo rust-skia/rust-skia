@@ -2781,8 +2781,8 @@ extern "C" void C_GrContext_flush(GrContext* self) {
     self->flush();
 }
 
-extern "C" GrBackendFormat C_GrContext_defaultBackendFormat(const GrContext* self, SkColorType ct, GrRenderable renderable) {
-    return self->defaultBackendFormat(ct, renderable);
+extern "C" void C_GrContext_defaultBackendFormat(const GrContext* self, SkColorType ct, GrRenderable renderable, GrBackendFormat* result) {
+    *result = self->defaultBackendFormat(ct, renderable);
 }
 
 //
