@@ -1,9 +1,13 @@
+# defaults:
 parameters:
-  # defaults:
+  # Run test cases and examples?
   runBinaries: false
-  # produce and release binaries to GitHub
+  # Run Clippy on on the target?
+  runClippy: false
+  # Produce and release binaries to GitHub?
   releaseBinaries: 'False'
   exampleArgs: ''
+  # Set up Android environment? Not compatible with runBinaries or runClippy!
   androidEnv: false
 
 steps:
@@ -33,11 +37,12 @@ steps:
       echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
     displayName: 'Build all targets in skia-safe for ${{ parameters.target }}'
 
-  - bash: |
-      set -e
-      (cd skia-bindings && cargo clippy --release --features "$(features)" --all-targets --target ${{ parameters.target }} -- -D warnings)
-      (cd skia-safe && cargo clippy --release --features "$(features)" --all-targets --target ${{ parameters.target }} -- -D warnings)
-    displayName: 'Clippy skia-bindings and skia-safe'
+  - ${{ if eq(parameters.runClippy, True) }}:
+    - bash: |
+        set -e
+        (cd skia-bindings && cargo clippy --release --features "$(features)" --all-targets --target ${{ parameters.target }} -- -D warnings)
+        (cd skia-safe && cargo clippy --release --features "$(features)" --all-targets --target ${{ parameters.target }} -- -D warnings)
+      displayName: 'Clippy skia-bindings and skia-safe'
 
   - ${{ if eq(parameters.runBinaries, True) }}:
 

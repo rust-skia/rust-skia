@@ -119,6 +119,7 @@ jobs:
     parameters:
       target: '$(platformTarget)'
       exampleArgs: '$(exampleArgs)'
+      runClippy: true
       runBinaries: true
       releaseBinaries: ${{ parameters.deployRelease }}
 
