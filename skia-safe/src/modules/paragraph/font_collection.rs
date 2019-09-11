@@ -70,7 +70,7 @@ impl RCHandle<sb::skia_textlayout_FontCollection> {
     }
 
     pub fn fallback_manager(&self) -> Option<FontMgr> {
-        FontMgr::from_unshared_ptr(self.native().fDefaultFontManager.fPtr)
+        FontMgr::from_ptr(unsafe { sb::C_FontCollection_getFallbackManager(self.native()) })
     }
 
     pub fn match_typeface(
@@ -128,7 +128,7 @@ impl RCHandle<sb::skia_textlayout_FontCollection> {
     }
 
     pub fn font_fallback_enabled(&self) -> bool {
-        self.native().fEnableFontFallback
+        unsafe { sb::C_FontCollection_fontFallbackEnabled(self.native()) }
     }
 }
 

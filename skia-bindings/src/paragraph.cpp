@@ -57,6 +57,10 @@ extern "C" {
     SkTypeface* C_FontCollection_defaultFallback(FontCollection* self, SkUnichar unicode, SkFontStyle fontStyle, const SkString* locale) {
         return self->defaultFallback(unicode, fontStyle, *locale).release();
     }
+
+    bool C_FontCollection_fontFallbackEnabled(const FontCollection* self) {
+        return const_cast<FontCollection*>(self)->fontFallbackEnabled();
+    }
 }
 
 //

@@ -825,6 +825,8 @@ const OPAQUE_TYPES: &[&str] = &[
     // skparagraph
     "std::vector",
     "std::u16string",
+    // skparagraph (m78), (layout fails on macOS and Linux, not sure why, looks like an obscure alignment problem)
+    "skia::textlayout::FontCollection",
     // Vulkan reexports with the wrong field naming conventions.
     "VkPhysicalDeviceFeatures",
     "VkPhysicalDeviceFeatures2",
