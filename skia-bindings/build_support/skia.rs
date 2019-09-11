@@ -308,6 +308,12 @@ impl FinalBuildConfiguration {
                 args.push(("skia_use_expat", no()));
             }
 
+            if build.all_skia_libs {
+                // m78: modules/particles forgets to set SKIA_IMPLEMENTATION=1 and so
+                // expects system vulkan headers.
+                flags.push("-DSKIA_IMPLEMENTATION=1");
+            }
+
             if !flags.is_empty() {
                 let flags: String = {
                     let v: Vec<String> = flags.into_iter().map(quote).collect();
