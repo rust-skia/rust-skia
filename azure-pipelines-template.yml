@@ -127,13 +127,13 @@ jobs:
       parameters:
         target: 'aarch64-linux-android'
         androidEnv: true
-        releaseBinaries: true
+        releaseBinaries: ${{ parameters.deployRelease }}
 
     - template: 'azure-pipelines-build-target.yml'
       parameters:
         target: 'x86_64-linux-android'
         androidEnv: true
-        releaseBinaries: true
+        releaseBinaries: ${{ parameters.deployRelease }}
 
     - template: 'azure-pipelines-build-target.yml'
       parameters:
