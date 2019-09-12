@@ -1,4 +1,4 @@
-use super::{FontCollection, Paragraph, ParagraphStyle, TextStyle};
+use super::{FontCollection, Paragraph, ParagraphStyle, PlaceholderStyle, TextStyle};
 use crate::prelude::*;
 use skia_bindings as sb;
 use std::ffi;
@@ -31,6 +31,13 @@ impl RefHandle<sb::skia_textlayout_ParagraphBuilder> {
     pub fn add_text(&mut self, str: impl AsRef<str>) -> &mut Self {
         let cstr = ffi::CString::new(str.as_ref()).unwrap();
         unsafe { sb::C_ParagraphBuilder_addText(self.native_mut(), cstr.as_ptr()) }
+        self
+    }
+
+    pub fn add_placeholder(&mut self, placeholder_style: &PlaceholderStyle) -> &mut Self {
+        unsafe {
+            sb::C_ParagraphBuilder_addPlaceholder(self.native_mut(), placeholder_style.native())
+        }
         self
     }
 

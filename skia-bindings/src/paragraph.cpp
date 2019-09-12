@@ -4,6 +4,7 @@
 
 #include "modules/skparagraph/include/DartTypes.h"
 #include "modules/skparagraph/include/FontCollection.h"
+#include "modules/skparagraph/include/ParagraphCache.h"
 #include "modules/skparagraph/include/Paragraph.h"
 #include "modules/skparagraph/include/ParagraphBuilder.h"
 #include "modules/skparagraph/include/ParagraphStyle.h"
@@ -58,8 +59,30 @@ extern "C" {
         return self->defaultFallback(unicode, fontStyle, *locale).release();
     }
 
+    SkTypeface* C_FontCollection_defaultFallback2(FontCollection* self) {
+        return self->defaultFallback().release();
+    }
+
     bool C_FontCollection_fontFallbackEnabled(const FontCollection* self) {
         return const_cast<FontCollection*>(self)->fontFallbackEnabled();
+    }
+
+    ParagraphCache* C_FontCollection_paragraphCache(FontCollection* self) {
+        return self->getParagraphCache();
+    }
+}
+
+//
+// ParagraphCache.h
+//
+
+extern "C" {
+    void C_ParagraphCache_destruct(ParagraphCache* self) {
+        self->~ParagraphCache();
+    }
+
+    int C_ParagraphCache_count(ParagraphCache* self) {
+        return self->count();
     }
 }
 
@@ -153,6 +176,11 @@ extern "C" {
         new(uninitialized) TextBoxes{std::move(v)};
     }
 
+    void C_Paragraph_GetRectsForPlaceholders(Paragraph* self, TextBoxes* uninitialized) {
+        auto v = self->GetRectsForPlaceholders();
+        new(uninitialized) TextBoxes{std::move(v)};
+    }
+
     void C_Paragraph_getGlyphPositionAtCoordinate(Paragraph* self, SkScalar x, SkScalar y, PositionWithAffinity* position) {
         *position = self->getGlyphPositionAtCoordinate(x, y);
     }
@@ -195,6 +223,10 @@ extern "C" {
 
     void C_ParagraphBuilder_addText(ParagraphBuilder* self, const char* text) {
         self->addText(text);
+    }
+
+    void C_ParagraphBuilder_addPlaceholder(ParagraphBuilder* self, const PlaceholderStyle* placeholderStyle) {
+        self->addPlaceholder(*placeholderStyle);
     }
 
     void C_ParagraphBuilder_setParagraphStyle(ParagraphBuilder* self, const ParagraphStyle* style) {
@@ -243,10 +275,6 @@ extern "C" {
 
     void C_TextStyle_setTypeface(TextStyle* self, SkTypeface* typeface) {
         self->setTypeface(sk_sp<SkTypeface>(typeface));
-    }
-
-    void C_TextStyle_getFontMetrics(const TextStyle* self, SkFontMetrics* metrics) {
-        self->getFontMetrics(metrics);
     }
 }
 

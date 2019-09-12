@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::textlayout::ParagraphCache;
 use crate::{interop, FontMgr, FontStyle, Typeface, Unichar};
 use skia_bindings as sb;
 use std::ffi;
@@ -106,7 +107,7 @@ impl RCHandle<sb::skia_textlayout_FontCollection> {
         })
     }
 
-    pub fn default_fallback(
+    pub fn default_fallback_char(
         &mut self,
         unicode: Unichar,
         font_style: FontStyle,
@@ -123,12 +124,28 @@ impl RCHandle<sb::skia_textlayout_FontCollection> {
         })
     }
 
+    pub fn default_fallback(&mut self) -> Option<Typeface> {
+        Typeface::from_ptr(unsafe { sb::C_FontCollection_defaultFallback2(self.native_mut()) })
+    }
+
     pub fn disable_font_fallback(&mut self) {
         unsafe { self.native_mut().disableFontFallback() }
     }
 
     pub fn font_fallback_enabled(&self) -> bool {
         unsafe { sb::C_FontCollection_fontFallbackEnabled(self.native()) }
+    }
+
+    pub fn paragraph_cache(&self) -> &ParagraphCache {
+        ParagraphCache::from_native_ref(unsafe {
+            &*sb::C_FontCollection_paragraphCache(self.native_mut_force())
+        })
+    }
+
+    pub fn paragraph_cache_mut(&mut self) -> &mut ParagraphCache {
+        ParagraphCache::from_native_ref_mut(unsafe {
+            &mut *sb::C_FontCollection_paragraphCache(self.native_mut())
+        })
     }
 }
 

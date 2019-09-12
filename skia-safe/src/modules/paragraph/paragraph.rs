@@ -68,6 +68,12 @@ impl RefHandle<sb::skia_textlayout_Paragraph> {
         })
     }
 
+    pub fn get_rects_for_placeholders(&mut self) -> TextBoxes {
+        TextBoxes::construct(|tb| unsafe {
+            sb::C_Paragraph_GetRectsForPlaceholders(self.native_mut(), tb)
+        })
+    }
+
     pub fn get_glyph_position_at_coordinate(
         &mut self,
         p: impl Into<Point>,

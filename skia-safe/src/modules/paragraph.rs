@@ -14,6 +14,9 @@ pub use paragraph::*;
 mod paragraph_builder;
 pub use paragraph_builder::*;
 
+mod paragraph_cache;
+pub use paragraph_cache::*;
+
 mod paragraph_style;
 pub use paragraph_style::*;
 

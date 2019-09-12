@@ -686,6 +686,9 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         // modules/skshaper/
         .whitelist_type("SkShaper")
         .whitelist_type("RustRunHandler")
+        // modules/skparagraph/
+        .whitelist_type("skia::textlayout::Block")
+        .whitelist_type("skia::textlayout::Placeholder")
         // Vulkan reexports that got swallowed by making them opaque.
         .whitelist_type("VkPhysicalDeviceFeatures")
         .whitelist_type("VkPhysicalDeviceFeatures2")
@@ -904,6 +907,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     // TextStyle.h
     ("TextDecorationStyle", replace::k_xxx),
     ("StyleType", replace::k_xxx),
+    ("PlaceholderAlignment", replace::k_xxx),
     // Vk*
     ("VkChromaLocation", replace::vk),
     ("VkFilter", replace::vk),
