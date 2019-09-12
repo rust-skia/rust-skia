@@ -53,4 +53,10 @@ pub mod textlayout {
             Self::AllAttributes
         }
     }
+
+    impl Default for crate::skia_textlayout_PlaceholderAlignment {
+        fn default() -> Self {
+            Self::Baseline
+        }
+    }
 }

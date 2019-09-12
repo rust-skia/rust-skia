@@ -24,4 +24,43 @@ fn text_box_layout() {
     TextBox::test_layout()
 }
 
+pub const EMPTY_INDEX: usize = std::usize::MAX;
+
+pub trait RangeExtensions {
+    fn width(&self) -> usize;
+    fn shift(&mut self, d: usize);
+    fn contains(&self, other: &Self) -> bool;
+    fn intersects(&self, other: &Self) -> bool;
+    fn empty(&self) -> bool;
+}
+
+impl RangeExtensions for Range<usize> {
+    fn width(&self) -> usize {
+        self.end - self.start
+    }
+
+    fn shift(&mut self, d: usize) {
+        self.start += d;
+        self.end += d;
+    }
+
+    fn contains(&self, other: &Self) -> bool {
+        self.start <= other.start && self.end >= other.end
+    }
+
+    fn intersects(&self, other: &Self) -> bool {
+        self.start.max(other.start) <= self.end.min(other.end)
+    }
+
+    fn empty(&self) -> bool {
+        self.start == EMPTY_INDEX && self.end == EMPTY_INDEX
+    }
+}
+
+pub const EMPTY_RANGE: Range<usize> = Range {
+    start: EMPTY_INDEX,
+    end: EMPTY_INDEX,
+};
+
 pub use sb::skia_textlayout_TextBaseline as TextBaseline;
+use std::ops::Range;

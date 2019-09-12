@@ -28,7 +28,18 @@ impl TextDecoration {
 
 pub use sb::skia_textlayout_TextDecorationStyle as TextDecorationStyle;
 
+#[test]
+fn text_decoration_style_member_naming() {
+    let _ = TextDecorationStyle::Solid;
+}
+
 pub use sb::skia_textlayout_StyleType as StyleType;
+
+#[test]
+fn style_type_member_naming() {
+    let _ = StyleType::Foreground;
+    let _ = StyleType::LetterSpacing;
+}
 
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct Decoration {
@@ -43,6 +54,49 @@ impl NativeTransmutable<sb::skia_textlayout_Decoration> for Decoration {}
 #[test]
 fn decoration_layout() {
     Decoration::test_layout();
+}
+
+use crate::textlayout::{RangeExtensions, EMPTY_INDEX, EMPTY_RANGE};
+pub use sb::skia_textlayout_PlaceholderAlignment as PlaceholderAlignment;
+use std::ops::Range;
+
+#[test]
+fn placeholder_alignment_member_naming() {
+    let _ = PlaceholderAlignment::Baseline;
+    let _ = PlaceholderAlignment::AboveBaseline;
+}
+
+#[derive(Clone, PartialEq, Default, Debug)]
+pub struct PlaceholderStyle {
+    pub width: scalar,
+    pub height: scalar,
+    pub alignment: PlaceholderAlignment,
+    pub baseline: TextBaseline,
+    pub baseline_offset: scalar,
+}
+
+impl NativeTransmutable<sb::skia_textlayout_PlaceholderStyle> for PlaceholderStyle {}
+#[test]
+fn placeholder_style_layout() {
+    PlaceholderStyle::test_layout()
+}
+
+impl PlaceholderStyle {
+    pub fn new(
+        width: scalar,
+        height: scalar,
+        alignment: PlaceholderAlignment,
+        baseline: TextBaseline,
+        offset: scalar,
+    ) -> Self {
+        Self {
+            width,
+            height,
+            alignment,
+            baseline,
+            baseline_offset: offset,
+        }
+    }
 }
 
 pub type TextStyle = Handle<sb::skia_textlayout_TextStyle>;
@@ -74,6 +128,10 @@ impl Default for Handle<sb::skia_textlayout_TextStyle> {
 impl Handle<sb::skia_textlayout_TextStyle> {
     pub fn new() -> Self {
         TextStyle::from_native(unsafe { sb::skia_textlayout_TextStyle::new() })
+    }
+
+    pub fn to_placeholder(&self) -> Self {
+        TextStyle::from_native(unsafe { sb::skia_textlayout_TextStyle::new1(self.native(), true) })
     }
 
     pub fn equals(&self, other: &TextStyle) -> bool {
@@ -182,7 +240,21 @@ impl Handle<sb::skia_textlayout_TextStyle> {
     }
 
     pub fn height(&self) -> scalar {
-        self.native().fHeight
+        let n = self.native();
+        if n.fHeightOverride {
+            n.fHeight
+        } else {
+            0.0
+        }
+    }
+
+    pub fn set_height_override(&mut self, height_override: bool) -> &mut Self {
+        self.native_mut().fHeightOverride = height_override;
+        self
+    }
+
+    pub fn height_override(&self) -> bool {
+        self.native().fHeightOverride
     }
 
     pub fn set_letter_spacing(&mut self, letter_spacing: scalar) -> &mut Self {
@@ -233,8 +305,98 @@ impl Handle<sb::skia_textlayout_TextStyle> {
     }
 
     pub fn font_metrics(&self) -> FontMetrics {
-        let mut m = FontMetrics::default();
-        unsafe { sb::C_TextStyle_getFontMetrics(self.native(), m.native_mut()) }
-        m
+        FontMetrics::construct(|fm| unsafe { self.native().getFontMetrics(fm) })
+    }
+
+    pub fn is_placeholder(&self) -> bool {
+        self.native().fIsPlaceholder
+    }
+
+    pub fn set_placeholder(&mut self) -> &mut Self {
+        self.native_mut().fIsPlaceholder = true;
+        self
+    }
+}
+
+pub type TextIndex = usize;
+pub type TextRange = Range<usize>;
+pub const EMPTY_TEXT: TextRange = EMPTY_RANGE;
+
+#[derive(Clone, PartialEq)]
+pub struct Block {
+    pub range: TextRange,
+    pub style: TextStyle,
+}
+
+impl NativeTransmutable<sb::skia_textlayout_Block> for Block {}
+#[test]
+fn block_layout() {
+    Block::test_layout()
+}
+
+impl Default for Block {
+    fn default() -> Self {
+        Self {
+            range: EMPTY_RANGE,
+            style: Default::default(),
+        }
+    }
+}
+
+impl Block {
+    pub fn new(text_range: TextRange, style: TextStyle) -> Self {
+        Self {
+            range: text_range,
+            style,
+        }
+    }
+
+    pub fn add(&mut self, tail: TextRange) -> &mut Self {
+        debug_assert!(self.range.end == tail.start);
+        self.range = self.range.start..self.range.start + self.range.width() + tail.width();
+        self
+    }
+}
+
+pub type BlockIndex = usize;
+pub type BlockRange = Range<usize>;
+
+pub const EMPTY_BLOCK: usize = EMPTY_INDEX;
+pub const EMPTY_BLOCKS: Range<usize> = EMPTY_RANGE;
+
+#[derive(Clone, PartialEq, Debug)]
+pub struct Placeholder {
+    pub range: TextRange,
+    pub style: PlaceholderStyle,
+    pub blocks_before: BlockRange,
+    pub text_before: TextRange,
+}
+
+impl NativeTransmutable<sb::skia_textlayout_Placeholder> for Placeholder {}
+
+#[test]
+fn placeholder_layout() {
+    Placeholder::test_layout()
+}
+
+impl Default for Placeholder {
+    fn default() -> Self {
+        Self {
+            range: EMPTY_RANGE,
+            style: Default::default(),
+            blocks_before: 0..0,
+            text_before: 0..0,
+        }
+    }
+}
+
+impl Placeholder {
+    pub fn new(range: Range<usize>, style: PlaceholderStyle, blocks_before: BlockRange) -> Self {
+        Self {
+            range,
+            style,
+            blocks_before,
+            text_before: 0..0,
+        }
     }
 }
