@@ -1,4 +1,4 @@
-# Safe Rust bindings to the [Skia Graphics Library](https://skia.org/).
+# <img alt="" width="48" align="top" src="artwork/rust-skia-icon_512x512.png"/> Safe Rust bindings to the [Skia Graphics Library](https://skia.org/).
 
 [![crates.io](https://img.shields.io/crates/v/skia-safe)](https://crates.io/crates/skia-safe) [![license](https://img.shields.io/crates/l/skia-safe)](LICENSE) [![Build Status](https://dev.azure.com/pragmatrix-github/rust-skia/_apis/build/status/rust-skia.rust-skia?branchName=master)](https://dev.azure.com/pragmatrix-github/rust-skia/_build/latest?branchName=master)
 
@@ -154,9 +154,19 @@ Note that crate packages _will_ try to download prebuilt binaries from [skia-bin
 
 ## Examples
 
-The examples are taken from [Skia's website](https://skia.org/) and [ported to the Rust API](skia-safe/examples/skia-org).
+The `icon` example generates the rust-skia icon in the current directory.
+It computes the position of all the gear teeth etc. based on parameters such as the number of teeth and wheel radius.
 
 If you were able to build the project, run
+
+```bash
+cargo run --example icon 512
+```
+
+It has a single optional parameter which is the size in pixels for the PNG file.
+Without parameters, it’ll produce PNG frames for the [animated version](https://matracas.org/tmp/rust-skia-icon.html).
+
+The other examples are taken from [Skia's website](https://skia.org/) and [ported to the Rust API](skia-safe/examples/skia-org).
 
 ```bash
 cargo run --example skia-org -- [OUTPUT_DIR]
@@ -174,6 +184,9 @@ cargo run --example skia-org -- --help
 ```
 
 Some examples:
+
+Fill, Radial Gradients, Stroke, Stroke with Grandient, Transparency:
+[![Rust-skia icon](artwork/rust-skia-icon_512x512.png)](https://matracas.org/tmp/rust-skia-icon.html)
 
 Fill, Stroke, Text:
 
