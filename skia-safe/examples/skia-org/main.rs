@@ -1,6 +1,5 @@
 use crate::artifact::DrawingDriver;
 use clap::{App, Arg};
-use gleam;
 use offscreen_gl_context::{GLContext, GLVersion, NativeGLContext};
 use std::path::PathBuf;
 
@@ -276,7 +275,7 @@ fn main() {
 
     if drivers.contains(&artifact::OpenGL::NAME) {
         let context = GLContext::<NativeGLContext>::create(
-            gleam::gl::GlType::default(),
+            sparkle::gl::GlType::Gl,
             GLVersion::Major(4),
             None,
         )
