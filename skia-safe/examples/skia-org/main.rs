@@ -276,7 +276,7 @@ fn main() {
     if drivers.contains(&artifact::OpenGL::NAME) {
         let context = GLContext::<NativeGLContext>::create(
             sparkle::gl::GlType::Gl,
-            GLVersion::Major(4),
+            GLVersion::MajorMinor(3, 3),
             None,
         )
         .unwrap();
