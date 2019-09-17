@@ -1,4 +1,4 @@
-use crate::artifact::DrawingDriver;
+use crate::DrawingDriver;
 use skia_safe::{paint, Canvas, Color, Font, Paint, Path};
 use std::path;
 
