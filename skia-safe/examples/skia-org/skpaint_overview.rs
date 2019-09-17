@@ -1,5 +1,4 @@
-use crate::artifact::DrawingDriver;
-use crate::resources;
+use crate::{resources, DrawingDriver};
 use skia_safe::{
     corner_path_effect, dash_path_effect, discrete_path_effect, gradient_shader,
     line_2d_path_effect, paint, path_1d_path_effect, path_2d_path_effect, perlin_noise_shader,

@@ -1,5 +1,4 @@
-use crate::artifact::DrawingDriver;
-use crate::resources;
+use crate::{resources, DrawingDriver};
 use skia_safe::{
     paint, scalar, BlendMode, Canvas, Color, Font, Paint, Path, RRect, Rect, TextBlob, Typeface,
 };
