@@ -81,6 +81,18 @@ fn main() {
         draw_all::<drivers::OpenGL>(&out_path);
     }
 
+    if drivers.contains(&"opengl-es") {
+        let context = GLContext::<NativeGLContext>::create(
+            sparkle::gl::GlType::Gles,
+            GLVersion::MajorMinor(3, 3),
+            None,
+        )
+        .unwrap();
+
+        context.make_current().unwrap();
+        draw_all::<drivers::OpenGL>(&out_path);
+    }
+
     #[cfg(feature = "vulkan")]
     {
         use drivers::vulkan::AshGraphics;
@@ -111,7 +123,7 @@ fn main() {
 }
 
 fn get_available_drivers() -> Vec<&'static str> {
-    let mut drivers = vec!["cpu", "pdf", "opengl"];
+    let mut drivers = vec!["cpu", "pdf", "opengl", "opengl-es"];
     if cfg!(feature = "vulkan") {
         drivers.push("vulkan")
     }
