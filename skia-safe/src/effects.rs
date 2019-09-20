@@ -11,6 +11,7 @@ pub mod blur_image_filter;
 pub mod color_filter_image_filter;
 pub mod color_matrix;
 pub use color_matrix::ColorMatrix;
+pub mod color_matrix_filter;
 pub mod compose_image_filter;
 pub mod corner_path_effect;
 pub mod dash_path_effect;
