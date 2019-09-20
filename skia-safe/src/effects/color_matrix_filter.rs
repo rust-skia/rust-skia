@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::{Color, ColorFilter, ImageFilter};
+use crate::{Color, ColorFilter};
 use skia_bindings as sb;
 use skia_bindings::SkColorFilter;
 
