@@ -6,15 +6,14 @@ use skia_bindings::{SkColorFilter, SkHighContrastConfig};
 
 pub mod high_contrast_config {
     use crate::prelude::NativeTransmutable;
-    use skia_bindings as sb;
     use skia_bindings::SkHighContrastConfig_InvertStyle;
 
     #[repr(i32)]
     #[derive(Copy, Clone, PartialEq, Eq, Debug)]
     pub enum InvertStyle {
-        NoInvert = sb::SkHighContrastConfig_InvertStyle::kNoInvert as _,
-        InvertBrightness = sb::SkHighContrastConfig_InvertStyle::kInvertBrightness as _,
-        InvertLightness = sb::SkHighContrastConfig_InvertStyle::kInvertLightness as _,
+        NoInvert = SkHighContrastConfig_InvertStyle::kNoInvert as _,
+        InvertBrightness = SkHighContrastConfig_InvertStyle::kInvertBrightness as _,
+        InvertLightness = SkHighContrastConfig_InvertStyle::kInvertLightness as _,
     }
 
     impl NativeTransmutable<SkHighContrastConfig_InvertStyle> for InvertStyle {}
