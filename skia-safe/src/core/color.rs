@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::u8cpu;
 use skia_bindings as sb;
-use skia_bindings::{SkColor, SkColor4f, SkHSVToColor, SkRGBToHSV};
+use skia_bindings::{SkColor, SkColor4f, SkHSVToColor, SkPMColor, SkRGBToHSV};
 use std::ops::{BitAnd, BitOr, Index, IndexMut, Mul};
 
 // TODO: What should we do with SkAlpha?
@@ -184,8 +184,15 @@ impl HSV {
     }
 }
 
-// TODO: What should we do about PMColor, is it needed?
-// pub struct PMColor(SkPMColor);
+pub type PMColor = SkPMColor;
+
+pub fn pre_multiply_argb(a: u8cpu, r: u8cpu, g: u8cpu, b: u8cpu) -> PMColor {
+    unsafe { sb::SkPreMultiplyARGB(a, r, g, b) }
+}
+
+pub fn pre_multiply_color(c: impl Into<Color>) -> PMColor {
+    unsafe { sb::SkPreMultiplyColor(c.into().into_native()) }
+}
 
 // decided not to directly support SkRGBA4f for now because of the
 // lack of const generics.
