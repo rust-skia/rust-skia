@@ -33,7 +33,10 @@ mod morphology_image_filter;
 pub use morphology_image_filter::*;
 
 pub mod offset_image_filter;
-pub mod op_path_effect;
+
+mod op_path_effect;
+pub use op_path_effect::*;
+
 pub mod overdraw_color_filter;
 pub mod paint_image_filter;
 pub mod perlin_noise_shader;
