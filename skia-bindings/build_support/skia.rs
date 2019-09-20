@@ -646,6 +646,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .whitelist_type("SkLayerDrawLooper_Bits")
         .whitelist_type("SkPerlinNoiseShader")
         .whitelist_type("SkTableColorFilter")
+        .whitelist_type("SkTableMaskFilter")
         // gpu/
         .whitelist_type("GrGLBackendState")
         // gpu/vk/
