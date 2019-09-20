@@ -59,6 +59,7 @@
 #include "include/effects/SkBlurImageFilter.h"
 #include "include/effects/SkColorFilterImageFilter.h"
 #include "include/effects/SkColorMatrix.h"
+#include "include/effects/SkColorMatrixFilter.h"
 #include "include/effects/SkComposeImageFilter.h"
 #include "include/effects/SkCornerPathEffect.h"
 #include "include/effects/SkDashPathEffect.h"
@@ -66,19 +67,26 @@
 #include "include/effects/SkDisplacementMapEffect.h"
 #include "include/effects/SkDropShadowImageFilter.h"
 #include "include/effects/SkGradientShader.h"
+#include "include/effects/SkHighContrastFilter.h"
 #include "include/effects/SkImageSource.h"
 #include "include/effects/SkLayerDrawLooper.h"
 #include "include/effects/SkLightingImageFilter.h"
+#include "include/effects/SkLumaColorFilter.h"
 #include "include/effects/SkMagnifierImageFilter.h"
 #include "include/effects/SkMatrixConvolutionImageFilter.h"
 #include "include/effects/SkMergeImageFilter.h"
 #include "include/effects/SkMorphologyImageFilter.h"
 #include "include/effects/SkOffsetImageFilter.h"
+#include "include/effects/SkOpPathEffect.h"
+#include "include/effects/SkOverdrawColorFilter.h"
 #include "include/effects/SkPaintImageFilter.h"
 #include "include/effects/SkPictureImageFilter.h"
 #include "include/effects/SkPerlinNoiseShader.h"
+#include "include/effects/SkShaderMaskFilter.h"
 #include "include/effects/SkTableColorFilter.h"
+#include "include/effects/SkTableMaskFilter.h"
 #include "include/effects/SkTileImageFilter.h"
+#include "include/effects/SkTrimPathEffect.h"
 #include "include/effects/SkXfermodeImageFilter.h"
 // gpu/
 #include "include/gpu/GrContext.h"
@@ -2131,6 +2139,14 @@ extern "C" void C_SkColorMatrix_set20(SkColorMatrix* self, const float m[20]) {
 }
 
 //
+// effects/SkColorMatrixFilter.h
+//
+
+extern "C" SkColorFilter *C_SkColorMatrixFilter_MakeLightingFilter(SkColor mul, SkColor add) {
+    return SkColorMatrixFilter::MakeLightingFilter(mul, add).release();
+}
+
+//
 // effects/SkComposeImageFilter
 //
 
@@ -2186,6 +2202,14 @@ extern "C" SkImageFilter *C_SkDropShadowImageFilter_Make(SkScalar dx, SkScalar d
                                                          const SkImageFilter::CropRect *cropRect) {
     return SkDropShadowImageFilter::Make(dx, dy, sigmaX, sigmaY, color, shadowMode, sp(input),
                                          cropRect).release();
+}
+
+//
+// effects/SkHighContrastFilter.h
+//
+
+extern "C" SkColorFilter* C_SkHighContrastFilter_Make(const SkHighContrastConfig* config) {
+    return SkHighContrastFilter::Make(*config).release();
 }
 
 //
@@ -2273,6 +2297,14 @@ C_SkLightingImageFilter_MakeSpotLitSpecular(const SkPoint3 &location,
 }
 
 //
+// effects/SkLumaColorFilter.h
+//
+
+extern "C" SkColorFilter* C_SkLumaColorFilter_Make() {
+    return SkLumaColorFilter::Make().release();
+}
+
+//
 // effects/SkMagnifierImageFilter
 //
 
@@ -2339,6 +2371,38 @@ extern "C" SkImageFilter *C_SkOffsetImageFilter_Make(SkScalar dx, SkScalar dy, S
 }
 
 //
+// effects/SkOpPathEffect.h
+//
+
+extern "C" {
+
+SkPathEffect* C_SkMergePathEffect_Make(SkPathEffect* one, SkPathEffect* two, SkPathOp op) {
+    return SkMergePathEffect::Make(sp(one), sp(two), op).release();
+}
+
+SkPathEffect* C_SkMatrixPathEffect_MakeTranslate(SkScalar dx, SkScalar dy) {
+    return SkMatrixPathEffect::MakeTranslate(dx, dy).release();
+}
+
+SkPathEffect* C_SkMatrixPathEffect_Make(const SkMatrix* m) {
+    return SkMatrixPathEffect::Make(*m).release();
+}
+
+SkPathEffect* C_SkStrokePathEffect_Make(SkScalar width, SkPaint::Join join, SkPaint::Cap cap, SkScalar miter) {
+    return SkStrokePathEffect::Make(width, join, cap, miter).release();
+}
+
+}
+
+//
+// effects/SkOverdrawColorFilter.h
+//
+
+extern "C" SkColorFilter* C_SkOverdrawColorFilter_Make(const SkPMColor colors[SkOverdrawColorFilter::kNumColors]) {
+    return SkOverdrawColorFilter::Make(colors).release();
+}
+
+//
 // effects/SkPaintImageFilter
 //
 
@@ -2356,6 +2420,15 @@ extern "C" SkImageFilter *C_SkPictureImageFilter_Make(SkPicture *picture, const 
     } else {
         return SkPictureImageFilter::Make(sp(picture)).release();
     }
+}
+
+
+//
+// effects/SkShaderMaskFilter.h
+//
+
+extern "C" SkMaskFilter* C_SkShaderMaskFilter_Make(SkShader* shader) {
+    return SkShaderMaskFilter::Make(sp(shader)).release();
 }
 
 //
@@ -2376,6 +2449,14 @@ extern "C" SkColorFilter* C_SkTableColorFilter_MakeARGB(const uint8_t tableA[256
 
 extern "C" SkImageFilter *C_SkTileImageFilter_Make(const SkRect &src, const SkRect &dst, SkImageFilter *input) {
     return SkTileImageFilter::Make(src, dst, sp(input)).release();
+}
+
+//
+// effects/SkTrimPathEffect.h
+//
+
+extern "C" SkPathEffect *C_SkTrimPathEffect_Make(SkScalar startT, SkScalar stopT, SkTrimPathEffect::Mode mode) {
+    return SkTrimPathEffect::Make(startT, stopT, mode).release();
 }
 
 //
