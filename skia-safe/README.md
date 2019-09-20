@@ -14,7 +14,7 @@ Skia-safe wraps most parts of the public Skia C++ APIs:
 
 - [x] Vector Geometry: Matrix, Rect, Point, Size, etc.
 - [x] Most drawing related classes and functions: Surface, Canvas, Paint, Path.
-- [x] [Almost all](<https://github.com/rust-skia/rust-skia/issues/99>) Effects and Shaders.
+- [x] Effects and Shaders.
 - [x] Utility classes we think are useful.
 - [x] PDF & SVG rendering
 - [ ] Skia Modules
