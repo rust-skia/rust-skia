@@ -1,4 +1,4 @@
-use crate::artifact::DrawingDriver;
+use crate::DrawingDriver;
 use skia_safe::textlayout::{FontCollection, ParagraphBuilder, ParagraphStyle, TextStyle};
 use skia_safe::{icu, Canvas, FontMgr, Paint, Point};
 use std::path;
