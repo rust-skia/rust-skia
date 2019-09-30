@@ -55,7 +55,7 @@ pub mod pdf {
         // the document.
         let mut memory_stream = Box::pin(DynamicMemoryWStream::new());
         let document = RCHandle::from_ptr(unsafe {
-            sb::C_SkPDF_MakeDocument(&mut memory_stream.native_mut()._base, md.native())
+            sb::C_SkPDF_MakeDocument(memory_stream.native_mut().base_mut(), md.native())
         })
         .unwrap();
 

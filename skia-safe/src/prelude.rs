@@ -106,9 +106,11 @@ impl RefCount for SkRefCntBase {
     }
 }
 
+impl NativeBase<SkRefCntBase> for SkRefCnt {}
+
 impl RefCount for SkRefCnt {
     fn ref_cnt(&self) -> usize {
-        self._base.ref_cnt()
+        self.base().ref_cnt()
     }
 }
 
@@ -155,6 +157,7 @@ impl NativeRefCounted for SkRefCntBase {
 
 /// Implements NativeRefCounted by just providing a reference to the base class
 /// that implements a RefCount.
+/// TODO: use NativeBase
 pub trait NativeRefCountedBase {
     type Base: NativeRefCounted;
 
@@ -777,5 +780,16 @@ pub(crate) trait BorrowsFrom: Sized {
 impl<T: Sized> BorrowsFrom for T {
     fn borrows<D: ?Sized>(self, _dep: &D) -> Borrows<Self> {
         Borrows(self, PhantomData)
+    }
+}
+
+/// Declares a baseclass for a native type.
+pub trait NativeBase<Base> {
+    fn base(&self) -> &Base {
+        unsafe { &*(self as *const Self as *const Base) }
+    }
+
+    fn base_mut(&mut self) -> &mut Base {
+        unsafe { &mut *(self as *mut Self as *mut Base) }
     }
 }

@@ -7,9 +7,6 @@ pub type ContourMeasure = RCHandle<SkContourMeasure>;
 
 impl NativeRefCountedBase for SkContourMeasure {
     type Base = SkRefCntBase;
-    fn ref_counted_base(&self) -> &Self::Base {
-        &self._base._base
-    }
 }
 
 bitflags! {

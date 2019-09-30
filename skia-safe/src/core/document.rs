@@ -15,10 +15,6 @@ pub struct Document<State = state::Open> {
 
 impl NativeRefCountedBase for SkDocument {
     type Base = SkRefCntBase;
-
-    fn ref_counted_base(&self) -> &Self::Base {
-        &self._base._base
-    }
 }
 
 pub mod state {

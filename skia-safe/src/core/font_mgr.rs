@@ -10,12 +10,10 @@ use std::os::raw::c_char;
 
 pub type FontStyleSet = RCHandle<SkFontStyleSet>;
 
+impl NativeBase<SkRefCntBase> for SkFontStyleSet {}
+
 impl NativeRefCountedBase for SkFontStyleSet {
     type Base = SkRefCntBase;
-
-    fn ref_counted_base(&self) -> &Self::Base {
-        &self._base._base
-    }
 }
 
 impl Default for RCHandle<SkFontStyleSet> {
@@ -78,12 +76,10 @@ impl RCHandle<SkFontStyleSet> {
 
 pub type FontMgr = RCHandle<SkFontMgr>;
 
+impl NativeBase<SkRefCntBase> for SkFontMgr {}
+
 impl NativeRefCountedBase for SkFontMgr {
     type Base = SkRefCntBase;
-
-    fn ref_counted_base(&self) -> &Self::Base {
-        &self._base._base
-    }
 }
 
 impl Default for RCHandle<SkFontMgr> {
