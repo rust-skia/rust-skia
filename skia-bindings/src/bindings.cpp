@@ -1630,6 +1630,14 @@ extern "C" SkContourMeasure* C_SkContourMeasureIter_next(SkContourMeasureIter* s
     return self->next().release();
 }
 
+extern "C" SkScalar C_SkContourMeasure_length(const SkContourMeasure* self) {
+    return self->length();
+}
+
+extern "C" bool C_SkContourMeasure_isClosed(const SkContourMeasure* self) {
+    return self->isClosed();
+}
+
 //
 // core/SkDataTable.h
 //
