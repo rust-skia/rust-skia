@@ -855,6 +855,8 @@ const OPAQUE_TYPES: &[&str] = &[
     "SkShaper_RunHandler",
     "SkShaper_RunIterator",
     "SkShaper_ScriptRunIterator",
+    "SkContourMeasure",
+    "SkDocument",
 ];
 
 #[derive(Debug)]

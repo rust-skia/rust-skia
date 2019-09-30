@@ -25,7 +25,7 @@ impl Default for MatrixFlags {
 
 impl RCHandle<SkContourMeasure> {
     pub fn length(&self) -> scalar {
-        self.native().fLength
+        unsafe { sb::C_SkContourMeasure_length(self.native()) }
     }
 
     pub fn pos_tan(&self, distance: scalar) -> Option<(Point, Vector)> {
@@ -79,7 +79,7 @@ impl RCHandle<SkContourMeasure> {
     }
 
     pub fn is_closed(&self) -> bool {
-        self.native().fIsClosed
+        unsafe { sb::C_SkContourMeasure_isClosed(self.native()) }
     }
 }
 
