@@ -5,17 +5,17 @@ use skia_bindings::{SkDrawLooper, SkDrawLooper_BlurShadowRec, SkFlattenable, SkR
 
 pub type DrawLooper = RCHandle<SkDrawLooper>;
 
+impl NativeBase<SkRefCntBase> for SkDrawLooper {}
+
 impl NativeRefCountedBase for SkDrawLooper {
     type Base = SkRefCntBase;
-
-    fn ref_counted_base(&self) -> &Self::Base {
-        &self._base._base._base
-    }
 }
+
+impl NativeBase<SkFlattenable> for SkDrawLooper {}
 
 impl NativeFlattenable for SkDrawLooper {
     fn native_flattenable(&self) -> &SkFlattenable {
-        &self._base
+        &self.base()
     }
 
     fn native_deserialize(data: &[u8]) -> *mut Self {

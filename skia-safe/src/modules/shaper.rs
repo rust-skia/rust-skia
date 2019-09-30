@@ -43,11 +43,6 @@ impl RefHandle<SkShaper> {
     }
 }
 
-pub trait RunIteratorNativeAccess {
-    fn access_run_iterator(&self) -> &SkShaper_RunIterator;
-    fn access_run_iterator_mut(&mut self) -> &mut SkShaper_RunIterator;
-}
-
 pub trait RunIterator {
     fn consume(&mut self);
     fn end_of_current_run(&self) -> usize;
@@ -56,35 +51,28 @@ pub trait RunIterator {
 
 impl<T> RunIterator for T
 where
-    T: RunIteratorNativeAccess,
+    T: NativeBase<SkShaper_RunIterator>,
 {
     fn consume(&mut self) {
-        unsafe { sb::C_SkShaper_RunIterator_consume(self.access_run_iterator_mut()) }
+        unsafe { sb::C_SkShaper_RunIterator_consume(self.base_mut()) }
     }
 
     fn end_of_current_run(&self) -> usize {
-        unsafe { sb::C_SkShaper_RunIterator_endOfCurrentRun(self.access_run_iterator()) }
+        unsafe { sb::C_SkShaper_RunIterator_endOfCurrentRun(self.base()) }
     }
 
     fn at_end(&self) -> bool {
-        unsafe { sb::C_SkShaper_RunIterator_atEnd(self.access_run_iterator()) }
+        unsafe { sb::C_SkShaper_RunIterator_atEnd(self.base()) }
     }
 }
 
 pub type FontRunIterator = RefHandle<SkShaper_FontRunIterator>;
 
+impl NativeBase<SkShaper_RunIterator> for SkShaper_FontRunIterator {}
+
 impl NativeDrop for SkShaper_FontRunIterator {
     fn drop(&mut self) {
-        unsafe { sb::C_SkShaper_RunIterator_delete(&mut self._base) }
-    }
-}
-
-impl RunIteratorNativeAccess for RefHandle<SkShaper_FontRunIterator> {
-    fn access_run_iterator(&self) -> &SkShaper_RunIterator {
-        &self.native()._base
-    }
-    fn access_run_iterator_mut(&mut self) -> &mut SkShaper_RunIterator {
-        &mut self.native_mut()._base
+        unsafe { sb::C_SkShaper_RunIterator_delete(self.base_mut()) }
     }
 }
 
@@ -124,18 +112,11 @@ impl RefHandle<SkShaper> {
 
 pub type BiDiRunIterator = RefHandle<SkShaper_BiDiRunIterator>;
 
+impl NativeBase<SkShaper_RunIterator> for SkShaper_BiDiRunIterator {}
+
 impl NativeDrop for SkShaper_BiDiRunIterator {
     fn drop(&mut self) {
-        unsafe { sb::C_SkShaper_RunIterator_delete(&mut self._base) }
-    }
-}
-
-impl RunIteratorNativeAccess for RefHandle<SkShaper_BiDiRunIterator> {
-    fn access_run_iterator(&self) -> &SkShaper_RunIterator {
-        &self.native()._base
-    }
-    fn access_run_iterator_mut(&mut self) -> &mut SkShaper_RunIterator {
-        &mut self.native_mut()._base
+        unsafe { sb::C_SkShaper_RunIterator_delete(self.base_mut()) }
     }
 }
 
@@ -163,18 +144,11 @@ impl RefHandle<SkShaper> {
 
 pub type ScriptRunIterator = RefHandle<SkShaper_ScriptRunIterator>;
 
+impl NativeBase<SkShaper_RunIterator> for SkShaper_ScriptRunIterator {}
+
 impl NativeDrop for SkShaper_ScriptRunIterator {
     fn drop(&mut self) {
-        unsafe { sb::C_SkShaper_RunIterator_delete(&mut self._base) }
-    }
-}
-
-impl RunIteratorNativeAccess for RefHandle<SkShaper_ScriptRunIterator> {
-    fn access_run_iterator(&self) -> &SkShaper_RunIterator {
-        &self.native()._base
-    }
-    fn access_run_iterator_mut(&mut self) -> &mut SkShaper_RunIterator {
-        &mut self.native_mut()._base
+        unsafe { sb::C_SkShaper_RunIterator_delete(self.base_mut()) }
     }
 }
 
@@ -205,18 +179,11 @@ impl RefHandle<SkShaper> {
 
 pub type LanguageRunIterator = RefHandle<SkShaper_LanguageRunIterator>;
 
+impl NativeBase<SkShaper_RunIterator> for SkShaper_LanguageRunIterator {}
+
 impl NativeDrop for SkShaper_LanguageRunIterator {
     fn drop(&mut self) {
-        unsafe { sb::C_SkShaper_RunIterator_delete(&mut self._base) }
-    }
-}
-
-impl RunIteratorNativeAccess for RefHandle<SkShaper_LanguageRunIterator> {
-    fn access_run_iterator(&self) -> &SkShaper_RunIterator {
-        &self.native()._base
-    }
-    fn access_run_iterator_mut(&mut self) -> &mut SkShaper_RunIterator {
-        &mut self.native_mut()._base
+        unsafe { sb::C_SkShaper_RunIterator_delete(self.base_mut()) }
     }
 }
 
@@ -356,7 +323,7 @@ impl RefHandle<SkShaper> {
                 font.native(),
                 left_to_right,
                 width,
-                &mut run_handler._base,
+                run_handler.base_mut(),
             )
         }
     }
@@ -397,10 +364,12 @@ mod rust_run_handler {
     use crate::shaper::RunHandler;
     use skia_bindings as sb;
     use skia_bindings::{
-        RustRunHandler, RustRunHandler_Param, SkShaper_RunHandler_Buffer,
+        RustRunHandler, RustRunHandler_Param, SkShaper_RunHandler, SkShaper_RunHandler_Buffer,
         SkShaper_RunHandler_RunInfo, TraitObject,
     };
     use std::mem;
+
+    impl NativeBase<SkShaper_RunHandler> for RustRunHandler {}
 
     pub fn new_param(run_handler: &mut dyn RunHandler) -> RustRunHandler_Param {
         RustRunHandler_Param {

@@ -74,16 +74,16 @@ pub struct DashInfo {
 
 pub type PathEffect = RCHandle<SkPathEffect>;
 
+impl NativeBase<SkRefCntBase> for SkPathEffect {}
+impl NativeBase<SkFlattenable> for SkPathEffect {}
+
 impl NativeRefCountedBase for SkPathEffect {
     type Base = SkRefCntBase;
-    fn ref_counted_base(&self) -> &Self::Base {
-        &self._base._base._base
-    }
 }
 
 impl NativeFlattenable for SkPathEffect {
     fn native_flattenable(&self) -> &SkFlattenable {
-        &self._base
+        self.base()
     }
 
     fn native_deserialize(data: &[u8]) -> *mut Self {

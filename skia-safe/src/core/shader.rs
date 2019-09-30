@@ -51,16 +51,19 @@ impl<'a> GradientInfo<'a> {
 
 pub type Shader = RCHandle<SkShader>;
 
+impl NativeBase<SkRefCntBase> for SkShader {}
+impl NativeBase<SkFlattenable> for SkShader {}
+
 impl NativeRefCountedBase for SkShader {
     type Base = SkRefCntBase;
     fn ref_counted_base(&self) -> &Self::Base {
-        &self._base._base._base
+        self.base()
     }
 }
 
 impl NativeFlattenable for SkShader {
     fn native_flattenable(&self) -> &SkFlattenable {
-        &self._base
+        &self.base()
     }
 
     fn native_deserialize(data: &[u8]) -> *mut Self {

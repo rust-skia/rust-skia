@@ -165,16 +165,16 @@ fn test_map_direction_layout() {
 
 pub type ImageFilter = RCHandle<SkImageFilter>;
 
+impl NativeBase<SkRefCntBase> for SkImageFilter {}
+impl NativeBase<SkFlattenable> for SkImageFilter {}
+
 impl NativeRefCountedBase for SkImageFilter {
     type Base = SkRefCntBase;
-    fn ref_counted_base(&self) -> &Self::Base {
-        &self._base._base._base
-    }
 }
 
 impl NativeFlattenable for SkImageFilter {
     fn native_flattenable(&self) -> &SkFlattenable {
-        &self._base
+        self.base()
     }
 
     fn native_deserialize(data: &[u8]) -> *mut Self {

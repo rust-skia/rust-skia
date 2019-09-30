@@ -5,17 +5,16 @@ use skia_bindings::{SkFlattenable, SkMaskFilter, SkRefCntBase};
 
 pub type MaskFilter = RCHandle<SkMaskFilter>;
 
+impl NativeBase<SkRefCntBase> for SkMaskFilter {}
+impl NativeBase<SkFlattenable> for SkMaskFilter {}
+
 impl NativeRefCountedBase for SkMaskFilter {
     type Base = SkRefCntBase;
-
-    fn ref_counted_base(&self) -> &Self::Base {
-        &self._base._base._base
-    }
 }
 
 impl NativeFlattenable for SkMaskFilter {
     fn native_flattenable(&self) -> &SkFlattenable {
-        &self._base
+        self.base()
     }
 
     fn native_deserialize(data: &[u8]) -> *mut Self {

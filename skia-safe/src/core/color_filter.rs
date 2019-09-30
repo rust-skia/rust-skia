@@ -11,16 +11,17 @@ bitflags! {
 
 pub type ColorFilter = RCHandle<SkColorFilter>;
 
+impl NativeBase<SkRefCntBase> for SkColorFilter {}
+
 impl NativeRefCountedBase for SkColorFilter {
     type Base = SkRefCntBase;
-    fn ref_counted_base(&self) -> &Self::Base {
-        &self._base._base._base
-    }
 }
+
+impl NativeBase<SkFlattenable> for SkColorFilter {}
 
 impl NativeFlattenable for SkColorFilter {
     fn native_flattenable(&self) -> &SkFlattenable {
-        &self._base
+        &self.base()
     }
 
     fn native_deserialize(data: &[u8]) -> *mut Self {

@@ -6,7 +6,7 @@
 use crate::prelude::*;
 use crate::Data;
 use skia_bindings as sb;
-use skia_bindings::{SkDynamicMemoryWStream, SkMemoryStream, SkStream, SkStreamAsset};
+use skia_bindings::{SkDynamicMemoryWStream, SkMemoryStream, SkStream, SkStreamAsset, SkWStream};
 use std::marker::PhantomData;
 use std::ptr;
 
@@ -35,10 +35,11 @@ impl<N: NativeStreamBase> Stream<N> {
 }
 
 pub type StreamAsset = Stream<SkStreamAsset>;
+impl NativeBase<SkStream> for SkStreamAsset {}
 
 impl NativeStreamBase for SkStreamAsset {
     fn as_stream_mut(&mut self) -> &mut SkStream {
-        &mut self._base._base._base
+        self.base_mut()
     }
 }
 
@@ -57,10 +58,11 @@ pub struct MemoryStream<'a> {
     pd: PhantomData<&'a ()>,
 }
 unsafe impl Send for MemoryStream<'_> {}
+impl NativeBase<SkStream> for SkMemoryStream {}
 
 impl NativeStreamBase for SkMemoryStream {
     fn as_stream_mut(&mut self) -> &mut SkStream {
-        &mut self._base._base._base._base._base
+        self.base_mut()
     }
 }
 
@@ -87,10 +89,12 @@ impl MemoryStream<'_> {
 
 pub type DynamicMemoryWStream = Handle<SkDynamicMemoryWStream>;
 
+impl NativeBase<SkWStream> for SkDynamicMemoryWStream {}
+
 impl NativeDrop for SkDynamicMemoryWStream {
     fn drop(&mut self) {
         unsafe {
-            sb::C_SkWStream_destruct(&mut self._base);
+            sb::C_SkWStream_destruct(self.base_mut());
         }
     }
 }
@@ -109,7 +113,7 @@ impl Handle<SkDynamicMemoryWStream> {
     pub fn write(&mut self, bytes: &[u8]) -> bool {
         unsafe {
             sb::C_SkWStream_write(
-                &mut self.native_mut()._base,
+                self.native_mut().base_mut(),
                 bytes.as_ptr() as _,
                 bytes.len(),
             )

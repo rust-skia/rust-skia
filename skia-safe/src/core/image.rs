@@ -53,11 +53,10 @@ fn test_compression_type_layout() {
 
 pub type Image = RCHandle<SkImage>;
 
+impl NativeBase<SkRefCntBase> for SkImage {}
+
 impl NativeRefCountedBase for SkImage {
     type Base = SkRefCntBase;
-    fn ref_counted_base(&self) -> &Self::Base {
-        &self._base._base
-    }
 }
 
 impl RCHandle<SkImage> {

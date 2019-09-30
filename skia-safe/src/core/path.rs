@@ -975,7 +975,7 @@ impl Handle<SkPath> {
         let mut stream = DynamicMemoryWStream::new();
         unsafe {
             self.native()
-                .dump(&mut stream.native_mut()._base, force_close, dump_as_hex);
+                .dump(stream.native_mut().base_mut(), force_close, dump_as_hex);
         }
         stream.detach_as_data()
     }
