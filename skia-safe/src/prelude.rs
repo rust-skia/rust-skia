@@ -11,13 +11,13 @@ pub use std::convert::{TryFrom, TryInto};
 use std::marker::PhantomData;
 
 /// Swiss army knife to convert any reference into any other.
-pub unsafe fn transmute_ref<FromT, ToT>(from: &FromT) -> &ToT {
+pub(crate) unsafe fn transmute_ref<FromT, ToT>(from: &FromT) -> &ToT {
     // TODO: can we do this statically for all instantiations of transmute_ref?
     debug_assert_eq!(mem::size_of::<FromT>(), mem::size_of::<ToT>());
     &*(from as *const FromT as *const ToT)
 }
 
-pub unsafe fn transmute_ref_mut<FromT, ToT>(from: &mut FromT) -> &mut ToT {
+pub(crate) unsafe fn transmute_ref_mut<FromT, ToT>(from: &mut FromT) -> &mut ToT {
     // TODO: can we do this statically for all instantiations of transmute_ref_mut?
     debug_assert_eq!(mem::size_of::<FromT>(), mem::size_of::<ToT>());
     &mut *(from as *mut FromT as *mut ToT)
