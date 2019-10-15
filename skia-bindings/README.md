@@ -1,4 +1,4 @@
-# Skia Bindings
+# <img alt="" width="48" align="top"  src="https://raw.githubusercontent.com/rust-skia/rust-skia/master/artwork/rust-skia-icon_512x512.png"/> Skia Bindings
 
 This is a supporting package for [skia-safe](https://crates.io/crates/skia-safe), which provides safe Rust bindings to the [Skia Graphics Library](https://skia.org/).
 
