@@ -206,6 +206,10 @@ For more, you may take a look at the [rust-skia.github.io](https://github.com/ru
 
 If you'd like to help with the bindings, take a look at the [Wiki](https://github.com/rust-skia/rust-skia/wiki) to get started and create an issue to avoid duplicate work. For smaller tasks, grep for "TODO" in the source code. And for heroic work, check out the label [help wanted](https://github.com/rust-skia/rust-skia/labels/help%20wanted). And if you like to help making the Rust API nicer to use, look out for open issues with the label [api ergonomics](https://github.com/rust-skia/rust-skia/issues?q=is%3Aissue+is%3Aopen+label%3A%22api+ergonomics%22).
 
+## Notable Contributions
+
+- The Rust-Skia Logo and the example program that renders it, by Alberto González Palomo ([@AlbertoGP](https://github.com/AlbertoGP))
+
 ## Maintainers
 
 - LongYinan ([@Brooooooklyn](https://github.com/Brooooooklyn))
