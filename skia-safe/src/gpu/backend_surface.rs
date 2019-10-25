@@ -47,7 +47,7 @@ impl Handle<GrBackendFormat> {
         })
     }
 
-    #[deprecated(since = "0.0.0", note = "use backend()")]
+    #[deprecated(since = "0.19.0", note = "use backend()")]
     pub fn backend_api(&self) -> BackendAPI {
         self.backend()
     }
@@ -58,7 +58,7 @@ impl Handle<GrBackendFormat> {
 
     // texture_type() would return a private type.
 
-    #[deprecated(since = "0.0.0", note = "use as_gl_format()")]
+    #[deprecated(since = "0.19.0", note = "use as_gl_format()")]
     pub fn gl_format(&self) -> Option<gl::Enum> {
         Some(self.as_gl_format() as _)
     }
@@ -70,7 +70,7 @@ impl Handle<GrBackendFormat> {
         })
     }
 
-    #[deprecated(since = "0.0.0", note = "use as_vk_format()")]
+    #[deprecated(since = "0.19.0", note = "use as_vk_format()")]
     #[cfg(feature = "vulkan")]
     pub fn vulkan_format(&self) -> Option<vk::Format> {
         self.as_vk_format()

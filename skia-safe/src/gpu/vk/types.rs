@@ -239,7 +239,7 @@ impl ImageInfo {
         }
     }
 
-    #[deprecated(since = "0.0.0", note = "use new()")]
+    #[deprecated(since = "0.19.0", note = "use new()")]
     #[allow(clippy::too_many_arguments)]
     pub unsafe fn from_image(
         image: vk::Image,

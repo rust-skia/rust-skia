@@ -13,7 +13,7 @@ impl RCHandle<SkImageFilter> {
     }
 }
 
-#[deprecated(since = "0.0.0", note = "use color_filters::offset")]
+#[deprecated(since = "0.19.0", note = "use color_filters::offset")]
 pub fn new<'a>(
     delta: impl Into<Vector>,
     input: ImageFilter,
