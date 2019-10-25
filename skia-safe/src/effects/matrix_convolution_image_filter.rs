@@ -30,7 +30,7 @@ impl RCHandle<SkImageFilter> {
     }
 }
 
-#[deprecated(since = "0.0.0", note = "use skia_safe::TileMode")]
+#[deprecated(since = "0.19.0", note = "use skia_safe::TileMode")]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
 pub enum TileMode {
@@ -47,7 +47,7 @@ fn test_tile_mode_layout() {
     TileMode::test_layout();
 }
 
-#[deprecated(since = "0.0.0", note = "use color_filters::matrix_convolution")]
+#[deprecated(since = "0.19.0", note = "use color_filters::matrix_convolution")]
 #[allow(deprecated)]
 #[allow(clippy::too_many_arguments)]
 pub fn new<'a>(

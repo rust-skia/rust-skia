@@ -13,7 +13,7 @@ impl RCHandle<SkImageFilter> {
     }
 }
 
-#[deprecated(since = "0.0.0", note = "use image_filters::color_filter")]
+#[deprecated(since = "0.19.0", note = "use image_filters::color_filter")]
 pub fn new<'a>(
     cf: ColorFilter,
     input: ImageFilter,
