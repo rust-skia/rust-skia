@@ -28,12 +28,14 @@ package: clean-packages package-bindings package-safe
 # bindings are not verifiable, so we do build them by hand.
 .PHONY: package-bindings
 package-bindings: 
+	rm -f target/package/skia-bindings-*.crate
 	cd skia-bindings && cargo package -vv --no-verify 
 	cd target/package && tar xzf skia-bindings-*.crate
 	cd target/package && cargo build -vv --release
 
 .PHONY: package-safe
 package-safe:
+	rm -f target/package/skia-safe-*.crate
 	cd skia-safe && cargo package -vv --no-verify --allow-dirty
 
 .PHONY: clean-packages
