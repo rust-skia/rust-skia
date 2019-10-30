@@ -76,6 +76,27 @@ pub mod named_transfer_fn {
         e: 0.0,
         f: 0.0,
     };
+
+    pub const PQ: ColorSpaceTransferFn = ColorSpaceTransferFn {
+        g: -2.0,
+        a: -107.0 / 128.0,
+        b: 1.0,
+        c: 32.0 / 2523.0,
+        d: 2413.0 / 128.0,
+        e: -2392.0 / 128.0,
+        f: 8192.0 / 1305.0,
+    };
+
+    #[allow(clippy::excessive_precision)]
+    pub const HLG: ColorSpaceTransferFn = ColorSpaceTransferFn {
+        g: -3.0,
+        a: 2.0,
+        b: 2.0,
+        c: 1.0 / 0.178_832_77,
+        d: 0.284_668_92,
+        e: 0.559_910_73,
+        f: 0.0,
+    };
 }
 
 pub type ColorSpace = RCHandle<SkColorSpace>;
