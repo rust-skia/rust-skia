@@ -63,10 +63,18 @@ impl RCHandle<SkColorFilter> {
         Color::from_native(unsafe { self.native().filterColor(color.into().into_native()) })
     }
 
-    pub fn filter_color4f(&self, color: impl AsRef<Color4f>, color_space: &ColorSpace) -> Color4f {
+    pub fn filter_color4f(
+        &self,
+        color: impl AsRef<Color4f>,
+        src_color_space: &ColorSpace,
+        dst_color_space: Option<&ColorSpace>,
+    ) -> Color4f {
         Color4f::from_native(unsafe {
-            self.native()
-                .filterColor4f(color.as_ref().native(), color_space.native_mut_force())
+            self.native().filterColor4f(
+                color.as_ref().native(),
+                src_color_space.native_mut_force(),
+                dst_color_space.native_ptr_or_null_mut_force(),
+            )
         })
     }
 
