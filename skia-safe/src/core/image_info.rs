@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::{ColorSpace, IPoint, IRect, ISize};
 use skia_bindings as sb;
-use skia_bindings::{SkAlphaType, SkColorType, SkImageInfo, SkYUVColorSpace};
+use skia_bindings::{SkAlphaType, SkColorInfo, SkColorType, SkImageInfo, SkYUVColorSpace};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -40,6 +40,12 @@ pub enum ColorType {
     RGBAF16Norm = SkColorType::kRGBA_F16Norm_SkColorType as _,
     RGBAF16 = SkColorType::kRGBA_F16_SkColorType as _,
     RGBAF32 = SkColorType::kRGBA_F32_SkColorType as _,
+    R8G8UNorm = SkColorType::kR8G8_unorm_SkColorType as _,
+    A16Float = SkColorType::kA16_float_SkColorType as _,
+    R16G16Float = SkColorType::kR16G16_float_SkColorType as _,
+    A16UNorm = SkColorType::kA16_unorm_SkColorType as _,
+    R16G16UNorm = SkColorType::kR16G16_unorm_SkColorType as _,
+    R16G16B16A16UNorm = SkColorType::kR16G16B16A16_unorm_SkColorType as _,
 }
 
 impl NativeTransmutable<SkColorType> for ColorType {}
@@ -106,6 +112,90 @@ impl Default for YUVColorSpace {
     }
 }
 
+pub type ColorInfo = Handle<SkColorInfo>;
+
+impl NativeDrop for SkColorInfo {
+    fn drop(&mut self) {
+        unsafe { sb::C_SkColorInfo_destruct(self) }
+    }
+}
+
+impl NativeClone for SkColorInfo {
+    fn clone(&self) -> Self {
+        unsafe {
+            construct(|color_info| {
+                sb::C_SkColorInfo_Construct(color_info);
+                sb::C_SkColorInfo_Copy(self, color_info);
+            })
+        }
+    }
+}
+
+impl NativePartialEq for SkColorInfo {
+    fn eq(&self, rhs: &Self) -> bool {
+        unsafe { sb::C_SkColorInfo_Equals(self, rhs) }
+    }
+}
+
+impl Default for Handle<SkColorInfo> {
+    fn default() -> Self {
+        Self::construct(|color_info| unsafe { sb::C_SkColorInfo_Construct(color_info) })
+    }
+}
+
+impl Handle<SkColorInfo> {
+    pub fn new(ct: ColorType, at: AlphaType, cs: impl Into<Option<ColorSpace>>) -> Self {
+        Self::construct(|color_info| unsafe {
+            sb::C_SkColorInfo_Construct2(
+                color_info,
+                ct.into_native(),
+                at.into_native(),
+                cs.into().into_ptr_or_null(),
+            )
+        })
+    }
+
+    pub fn color_space(&self) -> Option<ColorSpace> {
+        ColorSpace::from_unshared_ptr(self.native().fColorSpace.fPtr)
+    }
+
+    pub fn color_type(&self) -> ColorType {
+        ColorType::from_native(self.native().fColorType)
+    }
+
+    pub fn alpha_type(&self) -> AlphaType {
+        AlphaType::from_native(self.native().fAlphaType)
+    }
+
+    pub fn is_opaque(&self) -> bool {
+        self.alpha_type().is_opaque()
+    }
+
+    pub fn is_gamma_close_to_srgb(&self) -> bool {
+        unsafe { sb::C_SkColorInfo_gammaCloseToSRGB(self.native()) }
+    }
+
+    pub fn with_alpha_type(&self, new_alpha_type: AlphaType) -> Self {
+        Self::new(self.color_type(), new_alpha_type, self.color_space())
+    }
+
+    pub fn with_color_type(&self, new_color_type: ColorType) -> Self {
+        Self::new(new_color_type, self.alpha_type(), self.color_space())
+    }
+
+    pub fn with_color_space(&self, cs: ColorSpace) -> Self {
+        Self::new(self.color_type(), self.alpha_type(), cs)
+    }
+
+    pub fn bytes_per_pixel(&self) -> usize {
+        unsafe { self.native().bytesPerPixel().try_into().unwrap() }
+    }
+
+    pub fn shift_per_pixel(&self) -> usize {
+        unsafe { self.native().shiftPerPixel().try_into().unwrap() }
+    }
+}
+
 pub type ImageInfo = Handle<SkImageInfo>;
 
 impl NativeDrop for SkImageInfo {
@@ -160,6 +250,16 @@ impl Handle<SkImageInfo> {
         image_info
     }
 
+    pub fn from_color_info(dimensions: impl Into<ISize>, color_info: ColorInfo) -> Self {
+        // TODO: (perf) actually move of color_info.
+        Self::new(
+            dimensions,
+            color_info.color_type(),
+            color_info.alpha_type(),
+            color_info.color_space(),
+        )
+    }
+
     pub fn new_n32(
         dimensions: impl Into<ISize>,
         at: AlphaType,
@@ -211,23 +311,27 @@ impl Handle<SkImageInfo> {
     }
 
     pub fn color_type(&self) -> ColorType {
-        ColorType::from_native(self.native().fColorType)
+        self.color_info().color_type()
     }
 
     pub fn alpha_type(&self) -> AlphaType {
-        AlphaType::from_native(self.native().fAlphaType)
+        self.color_info().alpha_type()
     }
 
     pub fn color_space(&self) -> Option<ColorSpace> {
-        ColorSpace::from_ptr(unsafe { sb::C_SkImageInfo_colorSpace(self.native()) })
+        self.color_info().color_space()
     }
 
     pub fn is_empty(&self) -> bool {
         self.dimensions().is_empty()
     }
 
+    pub fn color_info(&self) -> &ColorInfo {
+        Handle::from_native_ref(&self.native().fColorInfo)
+    }
+
     pub fn is_opaque(&self) -> bool {
-        self.alpha_type().is_opaque()
+        self.color_info().is_opaque()
     }
 
     pub fn dimensions(&self) -> ISize {
@@ -239,51 +343,40 @@ impl Handle<SkImageInfo> {
     }
 
     pub fn is_gamma_close_to_srgb(&self) -> bool {
-        unsafe { sb::C_SkImageInfo_gammaCloseToSRGB(self.native()) }
+        self.color_info().is_gamma_close_to_srgb()
     }
 
     pub fn with_dimensions(&self, new_dimensions: impl Into<ISize>) -> Self {
-        Self::new(
-            new_dimensions,
-            self.color_type(),
-            self.alpha_type(),
-            self.color_space(),
-        )
+        Self::from_color_info(new_dimensions, self.color_info().clone())
     }
 
     pub fn with_alpha_type(&self, new_alpha_type: AlphaType) -> Self {
-        Self::new(
+        Self::from_color_info(
             self.dimensions(),
-            self.color_type(),
-            new_alpha_type,
-            self.color_space(),
+            self.color_info().with_alpha_type(new_alpha_type),
         )
     }
 
     pub fn with_color_type(&self, new_color_type: ColorType) -> Self {
-        Self::new(
+        Self::from_color_info(
             self.dimensions(),
-            new_color_type,
-            self.alpha_type(),
-            self.color_space(),
+            self.color_info().with_color_type(new_color_type),
         )
     }
 
     pub fn with_color_space(&self, new_color_space: impl Into<Option<ColorSpace>>) -> Self {
-        Self::new(
+        Self::from_color_info(
             self.dimensions(),
-            self.color_type(),
-            self.alpha_type(),
-            new_color_space,
+            self.color_info().with_color_space(new_color_space),
         )
     }
 
     pub fn bytes_per_pixel(&self) -> usize {
-        unsafe { self.native().bytesPerPixel().try_into().unwrap() }
+        self.color_info().bytes_per_pixel()
     }
 
     pub fn shift_per_pixel(&self) -> usize {
-        unsafe { self.native().shiftPerPixel().try_into().unwrap() }
+        self.color_info().shift_per_pixel()
     }
 
     pub fn min_row_bytes(&self) -> usize {
