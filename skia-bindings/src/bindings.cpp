@@ -786,8 +786,32 @@ extern "C" void C_SkAutoCanvasRestore_restore(SkAutoCanvasRestore* self) {
 }
 
 //
-// SkImageInfo
+// core/SkImageInfo.h
 //
+
+extern "C" void C_SkColorInfo_Construct(SkColorInfo* uninitialized) {
+    new (uninitialized) SkColorInfo();
+}
+
+extern "C" void C_SkColorInfo_Construct2(SkColorInfo* uninitialized, SkColorType ct, SkAlphaType at, SkColorSpace* cs) {
+    new (uninitialized) SkColorInfo(ct, at, sp(cs));
+}
+
+extern "C" void C_SkColorInfo_destruct(SkColorInfo* self) {
+    self->~SkColorInfo();
+}
+
+extern "C" void C_SkColorInfo_Copy(const SkColorInfo* from, SkColorInfo* to) {
+    *to = *from;
+}
+
+extern "C" bool C_SkColorInfo_Equals(const SkColorInfo* lhs, const SkColorInfo* rhs) {
+    return *lhs == *rhs;
+}
+
+extern "C" bool C_SkColorInfo_gammaCloseToSRGB(const SkColorInfo* self) {
+    return self->gammaCloseToSRGB();
+}
 
 extern "C" void C_SkImageInfo_Construct(SkImageInfo* uninitialized) {
     new (uninitialized) SkImageInfo();
@@ -811,17 +835,6 @@ extern "C" void C_SkImageInfo_Make(SkImageInfo* self, int width, int height, SkC
 
 extern "C" void C_SkImageInfo_MakeS32(SkImageInfo* self, int width, int height, SkAlphaType at) {
     *self = SkImageInfo::MakeS32(width, height, at);
-}
-
-extern "C" SkColorSpace* C_SkImageInfo_colorSpace(const SkImageInfo* self) {
-    // note: colorSpace returns just a pointer without increasing the reference counter.
-    SkColorSpace* cs = self->colorSpace();
-    if (cs) cs->ref();
-    return cs;
-}
-
-extern "C" bool C_SkImageInfo_gammaCloseToSRGB(const SkImageInfo* self) {
-    return self->gammaCloseToSRGB();
 }
 
 extern "C" void C_SkImageInfo_reset(SkImageInfo* self) {
