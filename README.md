@@ -26,7 +26,7 @@ to your `Cargo.toml` should get you started.
 ### Platforms & Build Targets
 
 - [x] Windows
-- [x] Linux Ubuntu 16 (18 should work, too).
+- [x] Linux Ubuntu 18 (16 should work, too).
 - [x] macOS
 - [x] Android (macOS | Linux -> aarch64, contributed by [@DenisKolodin](https://github.com/DenisKolodin))
 - [x] iOS
