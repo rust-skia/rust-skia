@@ -418,8 +418,9 @@ impl RCHandle<SkSurface> {
         unsafe { self.native_mut().readPixels2(bitmap.native(), src.x, src.y) }
     }
 
-    // TODO: wrap asyncRescaleAndReadPixels (m76)
-    // TODO: wrap asyncRescaleAndReadPixelsYUV420 (m77)
+    // TODO: wrap AsyncReadResult (m79)
+    // TODO: wrap asyncRescaleAndReadPixels (m76/m79)
+    // TODO: wrap asyncRescaleAndReadPixelsYUV420 (m77/m79)
 
     pub fn write_pixels_from_pixmap(&mut self, src: &Pixmap, dst: impl Into<IPoint>) {
         let dst = dst.into();
