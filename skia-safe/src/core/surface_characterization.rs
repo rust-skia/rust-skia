@@ -39,9 +39,21 @@ impl Default for Handle<SkSurfaceCharacterization> {
 // TODO: there is an alterative for when SK_SUPPORT_GPU is not set, of which the
 //       layout differs, should we support that?
 impl Handle<SkSurfaceCharacterization> {
-    pub fn resized(&self, size: impl Into<ISize>) -> SurfaceCharacterization {
+    pub fn resized(&self, size: impl Into<ISize>) -> Self {
         let size = size.into();
         Self::from_native(unsafe { self.native().createResized(size.width, size.height) })
+    }
+
+    pub fn with_color_space(&self, color_space: impl Into<Option<ColorSpace>>) -> Self {
+        let mut characterization = Self::default();
+        unsafe {
+            sb::C_SkSurfaceCharacterization_createColorSpace(
+                self.native(),
+                color_space.into().into_ptr_or_null(),
+                characterization.native_mut(),
+            )
+        };
+        characterization
     }
 
     // TODO: contextInfo() / refContextInfo()

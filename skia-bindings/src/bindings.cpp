@@ -310,6 +310,10 @@ extern "C" bool C_SkSurfaceCharacterization_equals(const SkSurfaceCharacterizati
     return *self == *rhs;
 }
 
+extern "C" void C_SkSurfaceCharacterization_createColorSpace(const SkSurfaceCharacterization* self, SkColorSpace* cs, SkSurfaceCharacterization* out) {
+    *out = self->createColorSpace(sp(cs));
+}
+
 extern "C" const SkImageInfo* C_SkSurfaceCharacterization_imageInfo(const SkSurfaceCharacterization* self) {
     return &self->imageInfo();
 }
