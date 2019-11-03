@@ -22,7 +22,7 @@ stages:
       androidNDK: 'r20'
       androidAPILevel: '26'
       androidBinExt: ''
-      image: 'ubuntu-16.04'
+      image: 'ubuntu-18.04'
       deployRelease: ${{ eq(variables['build.SourceBranchName'], 'release') }}
 
   - template: 'azure-pipelines-template.yml'
