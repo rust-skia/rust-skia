@@ -36,13 +36,8 @@ impl RCHandle<SkTextBlob> {
         self.native().fUniqueID
     }
 
-    #[deprecated(note = "use get_intercepts()")]
-    pub fn interceps(&self, bounds: [scalar; 2], paint: Option<&Paint>) -> Vec<scalar> {
-        self.get_interceps(bounds, paint)
-    }
-
     // TODO: consider to provide an inplace variant.
-    pub fn get_interceps(&self, bounds: [scalar; 2], paint: Option<&Paint>) -> Vec<scalar> {
+    pub fn get_intercepts(&self, bounds: [scalar; 2], paint: Option<&Paint>) -> Vec<scalar> {
         unsafe {
             let count = self.native().getIntercepts(
                 bounds.as_ptr(),
