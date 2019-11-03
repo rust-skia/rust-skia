@@ -36,7 +36,6 @@ pub enum Format {
     RG8 = GrGLFormat::kRG8 as _,
     RGB10_A2 = GrGLFormat::kRGB10_A2 as _,
     RGBA4 = GrGLFormat::kRGBA4 as _,
-    RGBA32F = GrGLFormat::kRGBA32F as _,
     SRGB8_ALPHA8 = GrGLFormat::kSRGB8_ALPHA8 as _,
     COMPRESSED_RGB8_ETC2 = GrGLFormat::kCOMPRESSED_RGB8_ETC2 as _,
     COMPRESSED_ETC1_RGB8 = GrGLFormat::kCOMPRESSED_ETC1_RGB8 as _,
