@@ -2804,6 +2804,10 @@ extern "C" void C_GrContext_flush(GrContext* self) {
     self->flush();
 }
 
+extern "C" size_t C_GrContext_ComputeImageSize(SkImage* image, GrMipMapped mm, bool useNextPow2) {
+    return GrContext::ComputeImageSize(sp(image), mm, useNextPow2);
+}
+
 extern "C" void C_GrContext_defaultBackendFormat(const GrContext* self, SkColorType ct, GrRenderable renderable, GrBackendFormat* result) {
     *result = self->defaultBackendFormat(ct, renderable);
 }
