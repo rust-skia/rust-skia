@@ -5,7 +5,7 @@ use skia_bindings::{GrContext, SkRefCntBase};
 
 #[cfg(feature = "vulkan")]
 use super::vk;
-use crate::ColorType;
+use crate::{ColorType, Data, Image};
 
 pub type Context = RCHandle<GrContext>;
 
@@ -206,19 +206,16 @@ impl RCHandle<GrContext> {
         self
     }
 
-    pub fn compute_texture_size(
-        color_type: ColorType,
-        (width, height): (i32, i32),
+    pub fn compute_image_size(
+        image: impl AsRef<Image>,
         mip_mapped: MipMapped,
         use_next_pow2: impl Into<Option<bool>>,
     ) -> usize {
         unsafe {
-            GrContext::ComputeTextureSize(
-                color_type.into_native(),
-                width,
-                height,
+            sb::C_GrContext_ComputeImageSize(
+                image.as_ref().clone().into_ptr(),
                 mip_mapped.into_native(),
-                use_next_pow2.into().unwrap_or(false),
+                use_next_pow2.into().unwrap_or_default(),
             )
         }
     }
@@ -237,5 +234,12 @@ impl RCHandle<GrContext> {
     }
 
     // TODO: support createBackendTexture (several variants) and deleteBackendTexture(),
-    //       introduced in m76 and m77
+    //       introduced in m76, m77, and m79
+
+    pub fn precompile_shader(&mut self, key: &Data, data: &Data) -> bool {
+        unsafe {
+            self.native_mut()
+                .precompileShader(key.native(), data.native())
+        }
+    }
 }
