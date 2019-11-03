@@ -193,15 +193,7 @@ pub mod path;
 pub use path::AddPathMode;
 #[deprecated(since = "0.12.0", note = "use path::ArcSize")]
 pub use path::ArcSize as PathArcSize;
-#[deprecated(since = "0.12.0", note = "use path::Convexity")]
-pub use path::Convexity as PathConvexity;
-#[deprecated(since = "0.12.0", note = "use matrix::AffineMember")]
-pub use path::Direction as PathDirection;
-#[deprecated(since = "0.12.0", note = "use path::FillType")]
-pub use path::FillType as PathFillType;
 pub use path::Path;
-#[deprecated(since = "0.12.0", note = "use path::SegmentMask")]
-pub use path::SegmentMask as PathSegmentMask;
 
 pub mod path_effect;
 #[deprecated(since = "0.12.0", note = "use path_effect::point_data::PointFlags")]
@@ -214,6 +206,9 @@ pub use path_effect::PointData as PathEffectPointData;
 
 pub mod path_measure;
 pub use path_measure::PathMeasure;
+
+pub mod path_types;
+pub use path_types::*;
 
 mod picture;
 pub use picture::*;
