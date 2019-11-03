@@ -1223,6 +1223,9 @@ extern "C" SkTextBlob *C_SkTextBlob_MakeFromRSXform(const void *text, size_t byt
     return SkTextBlob::MakeFromRSXform(text, byteLength, xform, *font, encoding).release();
 }
 
+extern "C" void C_SkTextBlob_Iter_destruct(SkTextBlob::Iter* self) {
+    self->~Iter();
+}
 
 extern "C" void C_SkTextBlobBuilder_destruct(SkTextBlobBuilder* self) {
     self->~SkTextBlobBuilder();
