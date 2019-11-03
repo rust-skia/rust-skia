@@ -1,7 +1,9 @@
 use crate::prelude::*;
-use crate::{scalar, Font, GlyphId, Paint, Point, RSXform, Rect, TextEncoding};
+use crate::{scalar, Font, GlyphId, Paint, Point, RSXform, Rect, TextEncoding, Typeface};
 use skia_bindings as sb;
-use skia_bindings::{SkTextBlob, SkTextBlobBuilder};
+use skia_bindings::{
+    SkTextBlob, SkTextBlobBuilder, SkTextBlob_Iter, SkTextBlob_Iter_Run, SkTypeface,
+};
 use std::convert::TryInto;
 use std::{ptr, slice};
 
@@ -226,6 +228,58 @@ impl Handle<SkTextBlobBuilder> {
                 slice::from_raw_parts_mut((*buffer).glyphs, count),
                 slice::from_raw_parts_mut((*buffer).pos as *mut RSXform, count),
             )
+        }
+    }
+}
+
+pub type TextBlobIter<'a> = Borrows<'a, Handle<SkTextBlob_Iter>>;
+
+pub struct TextBlobRun<'a> {
+    typeface: *mut SkTypeface,
+    pub glyph_indices: &'a [u16],
+}
+
+impl TextBlobRun<'_> {
+    pub fn typeface(&self) -> &Option<Typeface> {
+        Typeface::from_unshared_ptr_ref(&self.typeface)
+    }
+}
+
+impl<'a> Borrows<'a, Handle<SkTextBlob_Iter>> {
+    pub fn new(text_blob: &'a TextBlob) -> Self {
+        Handle::from_native(unsafe { SkTextBlob_Iter::new(text_blob.native()) }).borrows(text_blob)
+    }
+}
+
+impl NativeDrop for SkTextBlob_Iter {
+    fn drop(&mut self) {
+        unsafe { sb::C_SkTextBlob_Iter_destruct(self) }
+    }
+}
+
+impl<'a> Iterator for Borrows<'a, Handle<SkTextBlob_Iter>> {
+    type Item = TextBlobRun<'a>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let mut run = SkTextBlob_Iter_Run {
+            fTypeface: ptr::null_mut(),
+            fGlyphCount: 0,
+            fGlyphIndices: ptr::null_mut(),
+        };
+        unsafe {
+            if self.native_mut().next(&mut run) {
+                let indices = if !run.fGlyphIndices.is_null() && run.fGlyphCount != 0 {
+                    slice::from_raw_parts(run.fGlyphIndices, run.fGlyphCount.try_into().unwrap())
+                } else {
+                    &[]
+                };
+
+                Some(TextBlobRun {
+                    typeface: run.fTypeface,
+                    glyph_indices: indices,
+                })
+            } else {
+                None
+            }
         }
     }
 }

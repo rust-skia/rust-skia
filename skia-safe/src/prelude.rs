@@ -481,6 +481,35 @@ impl<N: NativeRefCounted> RCHandle<N> {
             Self(ptr)
         })
     }
+
+    /// Create a reference to the Rust wrapper from a reference to a pointer that points
+    /// to the native type.
+    pub(crate) fn from_unshared_ptr_ref(n: &*mut N) -> &Option<Self> {
+        unsafe { transmute_ref(n) }
+    }
+}
+
+#[cfg(tests)]
+mod rc_handle_tests {
+    use crate::prelude::RCHandle;
+    use crate::Typeface;
+    use skia_bindings::SkTypeface;
+    use std::ptr;
+
+    #[test]
+    fn rc_native_ref_null() {
+        let f: *mut SkTypeface = ptr::null_mut();
+        let r = Typeface::from_native_ref(&f);
+        assert!(r.is_none())
+    }
+
+    #[test]
+    fn rc_native_ref_non_null() {
+        let tf = Typeface::default();
+        let f: *mut SkTypeface = tf.0;
+        let r = Typeface::from_native_ref(&f);
+        assert!(r.is_some())
+    }
 }
 
 impl<N: NativeRefCounted> NativeAccess<N> for RCHandle<N> {
