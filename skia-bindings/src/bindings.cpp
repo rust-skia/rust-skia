@@ -29,6 +29,7 @@
 #include "include/core/SkPaint.h"
 #include "include/core/SkPath.h"
 #include "include/core/SkPathMeasure.h"
+#include "include/core/SkPathTypes.h"
 #include "include/core/SkPicture.h"
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkPixelRef.h"
@@ -709,6 +710,12 @@ extern "C" uint32_t C_SkPath_getSegmentMasks(const SkPath* self) {
 extern "C" void C_SkPathMeasure_destruct(const SkPathMeasure* self) {
     self->~SkPathMeasure();
 }
+
+//
+// core/SkPathTypes.h
+//
+
+extern "C" void C_SkPathTypes(SkPathFillType, SkPathConvexityType, SkPathDirection, SkPathSegmentMask, SkPathVerb) {}
 
 //
 // SkCanvas
