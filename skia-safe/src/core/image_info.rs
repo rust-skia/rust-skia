@@ -183,7 +183,7 @@ impl Handle<SkColorInfo> {
         Self::new(new_color_type, self.alpha_type(), self.color_space())
     }
 
-    pub fn with_color_space(&self, cs: ColorSpace) -> Self {
+    pub fn with_color_space(&self, cs: impl Into<Option<ColorSpace>>) -> Self {
         Self::new(self.color_type(), self.alpha_type(), cs)
     }
 
