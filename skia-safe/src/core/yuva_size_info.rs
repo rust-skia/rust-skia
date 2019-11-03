@@ -23,7 +23,7 @@ impl YUVASizeInfo {
     pub const MAX_COUNT: usize = 4;
 
     pub fn compute_total_bytes(&self) -> usize {
-        unsafe { sb::C_SkYUVASizeInfo_computeTotalBytes(self.native()) }
+        unsafe { self.native().computeTotalBytes() }
     }
 
     // TODO: try to expose a safe(r) Rust function.

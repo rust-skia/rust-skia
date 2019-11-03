@@ -1311,10 +1311,6 @@ extern "C" bool C_SkYUVASizeInfo_equals(const SkYUVASizeInfo* l, const SkYUVASiz
     return *l == *r;
 }
 
-extern "C" size_t C_SkYUVASizeInfo_computeTotalBytes(const SkYUVASizeInfo* self) {
-    return self->computeTotalBytes();
-}
-
 //
 // core/SkFlattenable.h
 //
