@@ -155,15 +155,10 @@ jobs:
         releaseBinaries: ${{ parameters.deployRelease }}
 
   - ${{ if eq(parameters.platform, 'Linux') }}:
-# TODO: Temporarily disabled, because of:
-#       /home/vsts/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/8.0.7/include/arm_neon.h:37394:23:
-#         error: use of undeclared identifier '__builtin_neon_vrndns_f32'
-#       >> Builds fine on Ubuntu 18, though.
-#
-#    - template: 'azure-pipelines-build-target.yml'
-#      parameters:
-#        target: 'aarch64-linux-android'
-#        androidEnv: true
+    - template: 'azure-pipelines-build-target.yml'
+      parameters:
+        target: 'aarch64-linux-android'
+        androidEnv: true
 
     - template: 'azure-pipelines-build-target.yml'
       parameters:
