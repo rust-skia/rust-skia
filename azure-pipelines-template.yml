@@ -86,9 +86,10 @@ jobs:
     displayName: Update Rust, Install Clippy and Rustfmt and print Rust & Cargo Versions
 
   - ${{ if eq(parameters.platform, 'Linux') }}:
-    # Linux Ubuntu 16.04 (Gl/glx.h and libgl)
+    # Linux Ubuntu 18.04 (Gl/glx.h and libgl)
     - bash: |
         set -e
+        sudo apt-get update
         sudo apt-get install mesa-common-dev libgl1-mesa-dev libgl1
       displayName: Install mesa-common-dev libgl1-mesa-dev and libgl1
 
