@@ -170,7 +170,7 @@ jobs:
         target: 'x86_64-linux-android'
         androidEnv: true
 
-# TODO: Windows Android builds are temporaly disabled, because of:
+# TODO: Windows Android builds are temporarily disabled, because of:
 #       error occurred:
 #         Failed to find tool. Is `aarch64-linux-android26-clang.cmd` installed?
 #       >> works locally on msys2, probably a PATH problem with AZURE?, although PATH variable looks fine.
