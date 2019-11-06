@@ -171,6 +171,7 @@ impl RefCount for SkColorSpace {
 pub fn create_and_clone_colorspaces() {
     ColorSpace::new_srgb();
     let x = ColorSpace::new_srgb_linear();
+    #[allow(clippy::redundant_clone)]
     let _r = x.clone();
 }
 

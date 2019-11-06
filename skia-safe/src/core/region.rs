@@ -521,6 +521,7 @@ impl<'a> iter::Iterator for Spanerator<'a> {
 #[test]
 fn new_clone_drop() {
     let region = Region::new();
+    #[allow(clippy::redundant_clone)]
     let _cloned = region.clone();
 }
 

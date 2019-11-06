@@ -767,7 +767,9 @@ impl<'a, H> DerefMut for Borrows<'a, H> {
 }
 
 impl<'a, H> Borrows<'a, H> {
-    /// Release the borrowed dependency and return the handle.
+    /// Notify that the borrowed dependency is not referred to anymore and return the handle.
+    /// # Safety
+    /// The borrowed dependency must be removed before calling `release()`.
     pub unsafe fn release(self) -> H {
         self.0
     }

@@ -403,6 +403,7 @@ impl Handle<SkBitmap> {
 #[test]
 fn create_clone_and_drop() {
     let bm = Bitmap::new();
+    #[allow(clippy::redundant_clone)]
     let _bm2 = bm.clone();
 }
 
