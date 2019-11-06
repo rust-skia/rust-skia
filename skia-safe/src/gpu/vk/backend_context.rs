@@ -56,6 +56,9 @@ impl<'a> Drop for BackendContext<'a> {
 // TODO: think about making this safe in respect to the lifetime of the handles
 //       it refers to.
 impl<'a> BackendContext<'a> {
+    /// # Safety
+    /// `instance`, `physical_device`, `device`, and `queue` must outlive the `BackendContext`
+    /// returned.
     pub unsafe fn new(
         instance: Instance,
         physical_device: PhysicalDevice,

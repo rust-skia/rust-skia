@@ -26,6 +26,9 @@ impl YUVASizeInfo {
         unsafe { sb::C_SkYUVASizeInfo_computeTotalBytes(self.native()) }
     }
 
+    // TODO: try to expose a safe(r) Rust function.
+    /// # Safety
+    /// This function is a forwarder to the native C++ function and is therefore inherently unsafe.
     pub unsafe fn compute_planes(
         &self,
         base: *mut c_void,

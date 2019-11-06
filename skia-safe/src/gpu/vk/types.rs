@@ -55,6 +55,8 @@ bitflags! {
 }
 
 impl Alloc {
+    /// # Safety
+    /// The memory's lifetime is expected to outlive the lifetime of the returned object.
     pub unsafe fn from_device_memory(
         memory: vk::DeviceMemory,
         offset: vk::DeviceSize,
@@ -209,6 +211,8 @@ impl PartialEq for ImageInfo {
 }
 
 impl ImageInfo {
+    /// # Safety
+    /// The Vulkan `image` and `alloc` must outlive the lifetime of the ImageInfo returned.
     #[allow(clippy::too_many_arguments)]
     pub unsafe fn new(
         image: vk::Image,
@@ -239,6 +243,8 @@ impl ImageInfo {
         }
     }
 
+    /// # Safety
+    /// The Vulkan `image` and `alloc` must outlive the lifetime of the ImageInfo returned.
     #[deprecated(since = "0.19.0", note = "use new()")]
     #[allow(clippy::too_many_arguments)]
     pub unsafe fn from_image(
@@ -265,6 +271,8 @@ impl ImageInfo {
         )
     }
 
+    /// # Safety
+    /// The Vulkan `info.image` and `info.alloc` must outlive the lifetime of the ImageInfo returned.
     pub unsafe fn from_info(info: &ImageInfo, layout: vk::ImageLayout) -> ImageInfo {
         Self::new(
             info.image,
@@ -294,6 +302,8 @@ pub enum GetProcOf {
 }
 
 impl GetProcOf {
+    /// # Safety
+    /// The referred raw `name` strings must outlive the returned CStr reference.
     pub unsafe fn name(&self) -> &CStr {
         match *self {
             GetProcOf::Instance(_, name) => CStr::from_ptr(name),
