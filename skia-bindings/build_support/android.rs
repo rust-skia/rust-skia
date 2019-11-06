@@ -27,10 +27,6 @@ pub fn additional_clang_args(target: &str, arch: &str) -> Vec<String> {
 
             args.push(format!("--sysroot={}/sysroot", ndk));
             args.push(format!("-I{}/sysroot/usr/include/{}", ndk, target));
-            args.push(format!(
-                "-isystem{}/sources/cxx-stl/llvm-libc++/include",
-                ndk
-            ));
             args.push(format!("--target={}", target));
         }
     }
