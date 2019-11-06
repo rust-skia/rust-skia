@@ -34,7 +34,7 @@ to your `Cargo.toml` should get you started.
 
 ### Bindings & Supported Features
 
-The supported bindings and Skia features are desribed in the [skia-safe package's readme](skia-safe/README.md).
+The supported bindings and Skia features are described in the [skia-safe package's readme](skia-safe/README.md).
 
 ## Building
 
@@ -185,7 +185,7 @@ cargo run --example skia-org -- --help
 
 Some examples:
 
-Fill, Radial Gradients, Stroke, Stroke with Grandient, Transparency:
+Fill, Radial Gradients, Stroke, Stroke with Gradient, Transparency:
 [![Rust-skia icon](artwork/rust-skia-icon_512x512.png)](https://matracas.org/tmp/rust-skia-icon.html)
 
 Fill, Stroke, Text:
