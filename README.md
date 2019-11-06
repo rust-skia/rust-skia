@@ -46,7 +46,7 @@ This project requires **LLVM**, **Python 2**, and **OpenSSL libraries** to build
 
 To see which version of LLVM/Clang is available, use `clang --version`. 
 
-We recommend version 8, but also had successes to build Skia with 6.0.1 and 7.0.1, and - on macOS - Apple LLVM version 10. So it's probably best to use the preinstalled version or install version 8 if LLVM is not available on your platform by default.
+We recommend version 8, but also had successes to build Skia with 6.0.1 and 7.0.1, and - on macOS - Apple LLVM version 11. So it's probably best to use the preinstalled version or install version 8 if LLVM is not available on your platform by default.
 
 Python version 2.7 _must_ be available. The build script probes for `python --version` and `python2 --version` and uses the first one that looks like a version 2 executable.
 
