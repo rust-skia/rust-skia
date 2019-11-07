@@ -6,7 +6,7 @@ use skia_bindings::SkImageFilter;
 impl RCHandle<SkImageFilter> {
     pub fn xfer_mode<'a>(
         blend_mode: BlendMode,
-        background: ImageFilter,
+        background: impl Into<Option<ImageFilter>>,
         foreground: impl Into<Option<ImageFilter>>,
         crop_rect: impl Into<Option<&'a IRect>>,
     ) -> Option<Self> {

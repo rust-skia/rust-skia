@@ -6,7 +6,7 @@ use std::convert::TryInto;
 
 impl RCHandle<SkImageFilter> {
     pub fn merge<'a>(
-        filters: impl IntoIterator<Item = Self>,
+        filters: impl IntoIterator<Item = Option<Self>>,
         crop_rect: impl Into<Option<&'a IRect>>,
     ) -> Option<Self> {
         image_filters::merge(filters, crop_rect)

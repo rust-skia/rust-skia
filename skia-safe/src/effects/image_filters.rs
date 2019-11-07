@@ -10,7 +10,7 @@ pub fn alpha_threshold<'a>(
     region: &Region,
     inner_min: scalar,
     outer_max: scalar,
-    input: ImageFilter,
+    input: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
@@ -18,7 +18,7 @@ pub fn alpha_threshold<'a>(
             region.native(),
             inner_min,
             outer_max,
-            input.into_ptr(),
+            input.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
@@ -31,8 +31,8 @@ pub fn arithmetic<'a>(
     k3: scalar,
     k4: scalar,
     enforce_pm_color: bool,
-    background: ImageFilter,
-    foreground: ImageFilter,
+    background: impl Into<Option<ImageFilter>>,
+    foreground: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
@@ -42,8 +42,8 @@ pub fn arithmetic<'a>(
             k3,
             k4,
             enforce_pm_color,
-            background.into_ptr(),
-            foreground.into_ptr(),
+            background.into().into_ptr_or_null(),
+            foreground.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
@@ -52,7 +52,7 @@ pub fn arithmetic<'a>(
 pub fn blur<'a>(
     (sigma_x, sigma_y): (scalar, scalar),
     tile_mode: impl Into<Option<TileMode>>,
-    input: ImageFilter,
+    input: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
@@ -60,7 +60,7 @@ pub fn blur<'a>(
             sigma_x,
             sigma_y,
             tile_mode.into().unwrap_or(TileMode::Decal).into_native(),
-            input.into_ptr(),
+            input.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
@@ -68,13 +68,13 @@ pub fn blur<'a>(
 
 pub fn color_filter<'a>(
     cf: ColorFilter,
-    input: ImageFilter,
+    input: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
         sb::C_SkImageFilters_ColorFilter(
             cf.into_ptr(),
-            input.into_ptr(),
+            input.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
@@ -89,7 +89,7 @@ pub fn compose(outer: ImageFilter, inner: ImageFilter) -> Option<ImageFilter> {
 pub fn displacement_map<'a>(
     (x_channel_selector, y_channel_selector): (ColorChannel, ColorChannel),
     scale: scalar,
-    displacement: ImageFilter,
+    displacement: impl Into<Option<ImageFilter>>,
     color: ImageFilter,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
@@ -98,7 +98,7 @@ pub fn displacement_map<'a>(
             x_channel_selector.into_native(),
             y_channel_selector.into_native(),
             scale,
-            displacement.into_ptr(),
+            displacement.into().into_ptr_or_null(),
             color.into_ptr(),
             crop_rect.into().native_ptr_or_null(),
         )
@@ -109,7 +109,7 @@ pub fn drop_shadow<'a>(
     delta: impl Into<Vector>,
     (sigma_x, sigma_y): (scalar, scalar),
     color: impl Into<Color>,
-    input: ImageFilter,
+    input: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
     let delta = delta.into();
@@ -121,7 +121,7 @@ pub fn drop_shadow<'a>(
             sigma_x,
             sigma_y,
             color.into_native(),
-            input.into_ptr(),
+            input.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
@@ -131,7 +131,7 @@ pub fn drop_shadow_only<'a>(
     delta: impl Into<Vector>,
     (sigma_x, sigma_y): (scalar, scalar),
     color: impl Into<Color>,
-    input: ImageFilter,
+    input: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
     let delta = delta.into();
@@ -143,7 +143,7 @@ pub fn drop_shadow_only<'a>(
             sigma_x,
             sigma_y,
             color.into_native(),
-            input.into_ptr(),
+            input.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
@@ -173,14 +173,14 @@ pub fn image<'a>(
 pub fn magnifier<'a>(
     src_rect: impl AsRef<Rect>,
     inset: scalar,
-    input: ImageFilter,
+    input: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
         sb::C_SkImageFilters_Magnifier(
             src_rect.as_ref().native(),
             inset,
-            input.into_ptr(),
+            input.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
@@ -195,7 +195,7 @@ pub fn matrix_convolution<'a>(
     kernel_offset: impl Into<IPoint>,
     tile_mode: TileMode,
     convolve_alpha: bool,
-    input: ImageFilter,
+    input: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
     let kernel_size = kernel_size.into();
@@ -212,7 +212,7 @@ pub fn matrix_convolution<'a>(
             kernel_offset.into().native(),
             tile_mode.into_native(),
             convolve_alpha,
-            input.into_ptr(),
+            input.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
@@ -221,23 +221,24 @@ pub fn matrix_convolution<'a>(
 pub fn matrix_transform(
     matrix: &Matrix,
     filter_quality: FilterQuality,
-    input: ImageFilter,
+    input: impl Into<Option<ImageFilter>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
         sb::C_SkImageFilters_MatrixTransform(
             matrix.native(),
             filter_quality.into_native(),
-            input.into_ptr(),
+            input.into().into_ptr_or_null(),
         )
     })
 }
 
 #[allow(clippy::new_ret_no_self)]
 pub fn merge<'a>(
-    filters: impl IntoIterator<Item = ImageFilter>,
+    filters: impl IntoIterator<Item = Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
-    let filter_ptrs: Vec<*mut SkImageFilter> = filters.into_iter().map(|f| f.into_ptr()).collect();
+    let filter_ptrs: Vec<*mut SkImageFilter> =
+        filters.into_iter().map(|f| f.into_ptr_or_null()).collect();
     ImageFilter::from_ptr(unsafe {
         sb::C_SkImageFilters_Merge(
             filter_ptrs.as_ptr(),
@@ -249,7 +250,7 @@ pub fn merge<'a>(
 
 pub fn offset<'a>(
     delta: impl Into<Vector>,
-    input: ImageFilter,
+    input: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
     let delta = delta.into();
@@ -257,7 +258,7 @@ pub fn offset<'a>(
         sb::C_SkImageFilters_Offset(
             delta.x,
             delta.y,
-            input.into_ptr(),
+            input.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
@@ -284,27 +285,27 @@ pub fn picture<'a>(
 pub fn tile(
     src: impl AsRef<Rect>,
     dst: impl AsRef<Rect>,
-    input: ImageFilter,
+    input: impl Into<Option<ImageFilter>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
         sb::C_SkImageFilters_Tile(
             src.as_ref().native(),
             dst.as_ref().native(),
-            input.into_ptr(),
+            input.into().into_ptr_or_null(),
         )
     })
 }
 
 pub fn xfermode<'a>(
     blend_mode: BlendMode,
-    background: ImageFilter,
+    background: impl Into<Option<ImageFilter>>,
     foreground: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
         sb::C_SkImageFilters_Xfermode(
             blend_mode.into_native(),
-            background.into_ptr(),
+            background.into().into_ptr_or_null(),
             foreground.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
         )
@@ -313,14 +314,14 @@ pub fn xfermode<'a>(
 
 pub fn dilate<'a>(
     (radius_x, radius_y): (i32, i32),
-    input: ImageFilter,
+    input: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
         sb::C_SkImageFilters_Dilate(
             radius_x,
             radius_y,
-            input.into_ptr(),
+            input.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
@@ -328,14 +329,14 @@ pub fn dilate<'a>(
 
 pub fn erode<'a>(
     (radius_x, radius_y): (i32, i32),
-    input: ImageFilter,
+    input: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
         sb::C_SkImageFilters_Erode(
             radius_x,
             radius_y,
-            input.into_ptr(),
+            input.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
@@ -346,7 +347,7 @@ pub fn distant_lit_diffuse<'a>(
     light_color: impl Into<Color>,
     surface_scale: scalar,
     kd: scalar,
-    input: ImageFilter,
+    input: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
@@ -355,7 +356,7 @@ pub fn distant_lit_diffuse<'a>(
             light_color.into().into_native(),
             surface_scale,
             kd,
-            input.into_ptr(),
+            input.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
@@ -366,7 +367,7 @@ pub fn point_lit_diffuse<'a>(
     light_color: impl Into<Color>,
     surface_scale: scalar,
     kd: scalar,
-    input: ImageFilter,
+    input: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
@@ -375,7 +376,7 @@ pub fn point_lit_diffuse<'a>(
             light_color.into().into_native(),
             surface_scale,
             kd,
-            input.into_ptr(),
+            input.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
@@ -390,7 +391,7 @@ pub fn spot_lit_diffuse<'a>(
     light_color: impl Into<Color>,
     surface_scale: scalar,
     kd: scalar,
-    input: ImageFilter,
+    input: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
@@ -402,7 +403,7 @@ pub fn spot_lit_diffuse<'a>(
             light_color.into().into_native(),
             surface_scale,
             kd,
-            input.into_ptr(),
+            input.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
@@ -414,7 +415,7 @@ pub fn distant_lit_specular<'a>(
     surface_scale: scalar,
     ks: scalar,
     shininess: scalar,
-    input: ImageFilter,
+    input: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
@@ -424,7 +425,7 @@ pub fn distant_lit_specular<'a>(
             surface_scale,
             ks,
             shininess,
-            input.into_ptr(),
+            input.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
@@ -436,7 +437,7 @@ pub fn point_lit_specular<'a>(
     surface_scale: scalar,
     ks: scalar,
     shininess: scalar,
-    input: ImageFilter,
+    input: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
@@ -446,7 +447,7 @@ pub fn point_lit_specular<'a>(
             surface_scale,
             ks,
             shininess,
-            input.into_ptr(),
+            input.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
@@ -462,7 +463,7 @@ pub fn spot_lit_specular<'a>(
     surface_scale: scalar,
     ks: scalar,
     shininess: scalar,
-    input: ImageFilter,
+    input: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
@@ -475,7 +476,7 @@ pub fn spot_lit_specular<'a>(
             surface_scale,
             ks,
             shininess,
-            input.into_ptr(),
+            input.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
