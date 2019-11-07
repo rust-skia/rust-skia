@@ -34,7 +34,7 @@ fn test_channel_selector_type_layout() {
     ChannelSelector::test_layout();
 }
 
-#[deprecated(since = "0.19.0", note = "use color_filters::displacement_map")]
+#[deprecated(since = "0.19.0", note = "use image_filters::displacement_map")]
 #[allow(deprecated)]
 pub fn new<'a>(
     (x_channel_selector, y_channel_selector): (ChannelSelector, ChannelSelector),
