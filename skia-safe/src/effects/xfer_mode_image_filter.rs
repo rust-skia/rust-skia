@@ -14,7 +14,7 @@ impl RCHandle<SkImageFilter> {
     }
 }
 
-#[deprecated(since = "0.19.0", note = "use color_filters::xfermode()")]
+#[deprecated(since = "0.19.0", note = "use image_filters::xfermode()")]
 pub fn new<'a>(
     blend_mode: BlendMode,
     background: ImageFilter,
