@@ -7,8 +7,8 @@ impl RCHandle<SkImageFilter> {
     #[allow(clippy::too_many_arguments)]
     pub fn arithmetic<'a>(
         inputs: impl Into<ArithmeticFPInputs>,
-        background: Self,
-        foreground: Self,
+        background: impl Into<Option<Self>>,
+        foreground: impl Into<Option<Self>>,
         crop_rect: impl Into<Option<&'a IRect>>,
     ) -> Option<Self> {
         let inputs = inputs.into();
