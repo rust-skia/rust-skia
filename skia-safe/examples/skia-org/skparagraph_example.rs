@@ -20,6 +20,7 @@ fn draw_lorem_ipsum(canvas: &mut Canvas) {
         // 1000 runs of this function can be used to reliably reproduce a crash on macOS with a segmentation
         // fault if font fallback is not disabled in the font collection.
         // For more information: https://github.com/pragmatrix/rust-skia/pull/2#issuecomment-531819718
+        #[cfg(target_os = "macos")]
         font_collection.disable_font_fallback();
 
         let paragraph_style = ParagraphStyle::new();
