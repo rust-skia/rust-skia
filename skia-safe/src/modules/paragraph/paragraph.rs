@@ -70,7 +70,7 @@ impl RefHandle<sb::skia_textlayout_Paragraph> {
 
     pub fn get_rects_for_placeholders(&mut self) -> TextBoxes {
         TextBoxes::construct(|tb| unsafe {
-            sb::C_Paragraph_GetRectsForPlaceholders(self.native_mut(), tb)
+            sb::C_Paragraph_getRectsForPlaceholders(self.native_mut(), tb)
         })
     }
 

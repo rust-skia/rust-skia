@@ -4,6 +4,7 @@
 
 #include "modules/skparagraph/include/DartTypes.h"
 #include "modules/skparagraph/include/FontCollection.h"
+#include "modules/skparagraph/include/Metrics.h"
 #include "modules/skparagraph/include/ParagraphCache.h"
 #include "modules/skparagraph/include/Paragraph.h"
 #include "modules/skparagraph/include/ParagraphBuilder.h"
@@ -44,7 +45,7 @@ extern "C" {
     }
 
     SkFontMgr* C_FontCollection_getFallbackManager(const FontCollection* self) {
-        return self->geFallbackManager().release();
+        return self->getFallbackManager().release();
     }
 
     SkTypeface* C_FontCollection_matchTypeface(FontCollection* self, const char* familyName, SkFontStyle fontStyle, const SkString* locale) {
@@ -135,6 +136,14 @@ extern "C" {
 }
 
 //
+// Metrics.h
+//
+
+extern "C" {
+    void C_Metrics_Types(const StyleMetrics*, const LineMetrics*) {}
+}
+
+//
 // Paragraph.h
 //
 
@@ -176,8 +185,8 @@ extern "C" {
         new(uninitialized) TextBoxes{std::move(v)};
     }
 
-    void C_Paragraph_GetRectsForPlaceholders(Paragraph* self, TextBoxes* uninitialized) {
-        auto v = self->GetRectsForPlaceholders();
+    void C_Paragraph_getRectsForPlaceholders(Paragraph* self, TextBoxes* uninitialized) {
+        auto v = self->getRectsForPlaceholders();
         new(uninitialized) TextBoxes{std::move(v)};
     }
 
@@ -247,6 +256,8 @@ extern "C" {
 //
 
 extern "C" {
+    void C_TextStyle_Types(const Block*, const Placeholder*) {}
+    
     void C_TextStyle_CopyConstruct(TextStyle* uninitialized, const TextStyle* other) {
         new(uninitialized) TextStyle(*other);
     }
