@@ -686,9 +686,6 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         // modules/skshaper/
         .whitelist_type("SkShaper")
         .whitelist_type("RustRunHandler")
-        // modules/skparagraph/
-        .whitelist_type("skia::textlayout::Block")
-        .whitelist_type("skia::textlayout::Placeholder")
         // Vulkan reexports that got swallowed by making them opaque.
         .whitelist_type("VkPhysicalDeviceFeatures")
         .whitelist_type("VkPhysicalDeviceFeatures2")
@@ -830,6 +827,8 @@ const OPAQUE_TYPES: &[&str] = &[
     "std::u16string",
     // skparagraph (m78), (layout fails on macOS and Linux, not sure why, looks like an obscure alignment problem)
     "skia::textlayout::FontCollection",
+    // skparagraph (m79), std::map is used in LineMetrics
+    "skia::textlayout::LineMetrics",
     // Vulkan reexports with the wrong field naming conventions.
     "VkPhysicalDeviceFeatures",
     "VkPhysicalDeviceFeatures2",
