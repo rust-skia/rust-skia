@@ -227,7 +227,7 @@ impl FinalBuildConfiguration {
                     args.push(("target_os", quote("ios")));
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
                 }
-                ("wasm32", "unknown", _, _) => {
+                ("wasm32", "unknown", "emscripten", _) => {
                     args.push(("target_cpu", quote("wasm")));
                     compiler_executables = ("emcc", "em++");
                 }
@@ -649,7 +649,12 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
             }
         }
         ("wasm32", "unknown", "emscripten", _) => {
-            builder = builder.clang_arg("--target=wasm32");
+            builder = builder.clang_arg("--target=wasm32-unknown-emscripten");
+            // Add C++ includes (otherwise build will fail with <cmath> not found)
+            builder = builder.clang_arg("-I/usr/share/emscripten/system/include/libcxx");
+            // visibility=default, otherwise some types may be missing:
+            // https://github.com/rust-lang/rust-bindgen/issues/751#issuecomment-555735577
+            builder = builder.clang_arg("-fvisibility=default");
         }
         _ => {}
     }
