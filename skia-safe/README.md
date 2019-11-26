@@ -40,7 +40,7 @@ Note that Vulkan drivers need to be available. On Windows, they are most likely 
 
 ### `svg`
 
-This feature enables the SVG rendering backend. To create a new Skia canvas that renders to SVG, use the function `skia-safe::svg::Canvas::new()`.
+This feature enables the SVG rendering backend. To create a new Skia canvas that renders to SVG, use the function `skia_safe::svg::Canvas::new()`.
 
 ### `shaper`
 
