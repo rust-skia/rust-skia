@@ -1,5 +1,6 @@
 use super::{PositionWithAffinity, RectHeightStyle, RectWidthStyle, TextBox};
 use crate::prelude::*;
+use crate::textlayout::LineMetrics;
 use crate::{scalar, Canvas, Point};
 use skia_bindings as sb;
 use std::ops::{Index, Range};
@@ -37,8 +38,12 @@ impl RefHandle<sb::skia_textlayout_Paragraph> {
         self.native().fIdeographicBaseline
     }
 
+    pub fn longest_line(&self) -> scalar {
+        self.native().fLongestLine
+    }
+
     pub fn did_exceed_max_lines(&mut self) -> bool {
-        unsafe { sb::C_Paragraph_didExceedMaxLines(self.native_mut()) }
+        self.native().fExceededMaxLines
     }
 
     pub fn layout(&mut self, width: scalar) {
@@ -90,6 +95,13 @@ impl RefHandle<sb::skia_textlayout_Paragraph> {
         range[0]..range[1]
     }
 
+    pub fn get_line_metrics(&mut self) -> LineMetricsVector {
+        Handle::<sb::LineMetricsVector>::construct(|lmv| unsafe {
+            sb::C_Paragraph_getLineMetrics(self.native_mut(), lmv)
+        })
+        .borrows(self)
+    }
+
     pub fn line_number(&mut self) -> usize {
         unsafe { sb::C_Paragraph_lineNumber(self.native_mut()) }
     }
@@ -130,6 +142,41 @@ impl Handle<sb::TextBoxes> {
             let mut count = 0;
             let ptr = sb::C_TextBoxes_ptr_count(self.native(), &mut count);
             std::slice::from_raw_parts(ptr as *const TextBox, count)
+        }
+    }
+}
+
+pub type LineMetricsVector<'a> = Borrows<'a, Handle<sb::LineMetricsVector>>;
+
+impl NativeDrop for sb::LineMetricsVector {
+    fn drop(&mut self) {
+        unsafe { sb::C_LineMetricsVector_destruct(self) }
+    }
+}
+
+impl<'a> Index<usize> for Borrows<'a, Handle<sb::LineMetricsVector>> {
+    type Output = LineMetrics<'a>;
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.as_slice()[index]
+    }
+}
+
+impl<'a> AsRef<[LineMetrics<'a>]> for Borrows<'a, Handle<sb::LineMetricsVector>> {
+    fn as_ref(&self) -> &[LineMetrics<'a>] {
+        self.as_slice()
+    }
+}
+
+impl<'a> Borrows<'a, Handle<sb::LineMetricsVector>> {
+    pub fn iter(&self) -> impl Iterator<Item = &'a LineMetrics<'a>> {
+        self.as_slice().iter()
+    }
+
+    pub fn as_slice(&self) -> &'a [LineMetrics<'a>] {
+        unsafe {
+            let mut count = 0;
+            let ptr = sb::C_LineMetricsVector_ptr_count(self.native(), &mut count);
+            std::slice::from_raw_parts(ptr as *const LineMetrics, count)
         }
     }
 }

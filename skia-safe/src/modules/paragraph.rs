@@ -7,6 +7,9 @@ pub use dart_types::*;
 mod font_collection;
 pub use font_collection::*;
 
+mod metrics;
+pub use metrics::*;
+
 #[allow(clippy::module_inception)]
 mod paragraph;
 pub use paragraph::*;
