@@ -269,8 +269,8 @@ extern "C" {
         *style = self->peekStyle();
     }
 
-    void C_ParagraphBuilder_addText(ParagraphBuilder* self, const char* text) {
-        self->addText(text);
+    void C_ParagraphBuilder_addText(ParagraphBuilder* self, const char* text, size_t len) {
+        self->addText(text, len);
     }
 
     void C_ParagraphBuilder_addPlaceholder(ParagraphBuilder* self, const PlaceholderStyle* placeholderStyle) {
