@@ -140,7 +140,29 @@ extern "C" {
 //
 
 extern "C" {
-    void C_Metrics_Types(const StyleMetrics*, const LineMetrics*) {}
+    void C_LineMetrics_destruct(LineMetrics* self) {
+        self->~LineMetrics();
+    }
+    
+    size_t C_LineMetrics_fLineMetrics_count(const LineMetrics* self, size_t begin, size_t end) {
+        auto lower = self->fLineMetrics.lower_bound(begin);
+        auto upper = self->fLineMetrics.upper_bound(end);
+        return std::distance(lower, upper);
+    }
+    
+    struct StyleMetricsRecord {
+        size_t index;
+        const StyleMetrics* metrics;
+    };
+    
+    void C_LineMetrics_fLineMetrics_getRange(const LineMetrics* self, size_t begin, size_t end, StyleMetricsRecord* array) {
+        auto lower = self->fLineMetrics.lower_bound(begin);
+        auto upper = self->fLineMetrics.upper_bound(end);
+        for (auto it = lower; it != upper; it++)
+        {
+            *array++ = StyleMetricsRecord { it->first, &it->second };
+        }
+    }
 }
 
 //
@@ -162,15 +184,27 @@ extern "C" {
     }
 }
 
+struct LineMetricsVector {
+    std::vector<LineMetrics> lineMetrics;
+};
+
+extern "C" {
+    void C_LineMetricsVector_destruct(LineMetricsVector* self) {
+        self->~LineMetricsVector();
+    }
+
+    const LineMetrics* C_LineMetricsVector_ptr_count(const LineMetricsVector* metrics, size_t* count) {
+        *count = metrics->lineMetrics.size();
+        return &metrics->lineMetrics.front();
+    }
+}
+
+
 extern "C" {
     void C_Paragraph_delete(Paragraph* self) {
         delete self;
     }
-
-    bool C_Paragraph_didExceedMaxLines(Paragraph* self) {
-        return self->didExceedMaxLines();
-    }
-
+    
     void C_Paragraph_layout(Paragraph* self, SkScalar width) {
         self->layout(width);
     }
@@ -200,6 +234,11 @@ extern "C" {
         range[1] = sk_range.end;
     }
 
+    void C_Paragraph_getLineMetrics(Paragraph* self, LineMetricsVector* uninitialized) {
+        auto v = new(uninitialized) LineMetricsVector();
+        self->getLineMetrics(v->lineMetrics);
+    }
+    
     size_t C_Paragraph_lineNumber(Paragraph* self) {
         return self->lineNumber();
     }
