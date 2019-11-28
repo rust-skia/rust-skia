@@ -777,7 +777,7 @@ impl<E> AsPointerOrNullMut<E> for Option<Vec<E>> {
 
 // Wraps a handle so that the Rust's borrow checker assumes it represents
 // something that borrows something else.
-#[repr(C)]
+#[repr(transparent)]
 pub struct Borrows<'a, H>(H, PhantomData<&'a ()>);
 
 impl<'a, H> Deref for Borrows<'a, H> {
