@@ -1,8 +1,10 @@
 use super::{FontFamilies, TextBaseline, TextShadow};
 use crate::interop::{AsStr, FromStrs, SetStr};
 use crate::prelude::*;
+use crate::textlayout::{RangeExtensions, EMPTY_INDEX, EMPTY_RANGE};
 use crate::{interop, scalar, Color, FontMetrics, FontStyle, Paint, Typeface};
 use skia_bindings as sb;
+use std::ops::Range;
 use std::slice;
 
 bitflags! {
@@ -56,9 +58,7 @@ fn decoration_layout() {
     Decoration::test_layout();
 }
 
-use crate::textlayout::{RangeExtensions, EMPTY_INDEX, EMPTY_RANGE};
 pub use sb::skia_textlayout_PlaceholderAlignment as PlaceholderAlignment;
-use std::ops::Range;
 
 #[test]
 fn placeholder_alignment_member_naming() {
@@ -364,10 +364,11 @@ pub type BlockRange = Range<usize>;
 pub const EMPTY_BLOCK: usize = EMPTY_INDEX;
 pub const EMPTY_BLOCKS: Range<usize> = EMPTY_RANGE;
 
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq)]
 pub struct Placeholder {
     pub range: TextRange,
     pub style: PlaceholderStyle,
+    pub text_style: TextStyle,
     pub blocks_before: BlockRange,
     pub text_before: TextRange,
 }
@@ -384,6 +385,7 @@ impl Default for Placeholder {
         Self {
             range: EMPTY_RANGE,
             style: Default::default(),
+            text_style: Default::default(),
             blocks_before: 0..0,
             text_before: 0..0,
         }
@@ -391,12 +393,19 @@ impl Default for Placeholder {
 }
 
 impl Placeholder {
-    pub fn new(range: Range<usize>, style: PlaceholderStyle, blocks_before: BlockRange) -> Self {
+    pub fn new(
+        range: Range<usize>,
+        style: PlaceholderStyle,
+        text_style: TextStyle,
+        blocks_before: BlockRange,
+        text_before: TextRange,
+    ) -> Self {
         Self {
             range,
             style,
+            text_style,
             blocks_before,
-            text_before: 0..0,
+            text_before,
         }
     }
 }
