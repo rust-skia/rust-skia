@@ -1,7 +1,7 @@
 use super::{FontCollection, Paragraph, ParagraphStyle, PlaceholderStyle, TextStyle};
 use crate::prelude::*;
 use skia_bindings as sb;
-use std::ffi;
+use std::os::raw;
 
 pub type ParagraphBuilder = RefHandle<sb::skia_textlayout_ParagraphBuilder>;
 
@@ -29,8 +29,14 @@ impl RefHandle<sb::skia_textlayout_ParagraphBuilder> {
     }
 
     pub fn add_text(&mut self, str: impl AsRef<str>) -> &mut Self {
-        let cstr = ffi::CString::new(str.as_ref()).unwrap();
-        unsafe { sb::C_ParagraphBuilder_addText(self.native_mut(), cstr.as_ptr()) }
+        let str = str.as_ref();
+        unsafe {
+            sb::C_ParagraphBuilder_addText(
+                self.native_mut(),
+                str.as_ptr() as *const raw::c_char,
+                str.len(),
+            )
+        }
         self
     }
 
