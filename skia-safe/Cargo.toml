@@ -40,5 +40,5 @@ offscreen_gl_context = { git = "https://github.com/servo/rust-offscreen-renderin
 sparkle = "0.1.10"
 clap = "2.33.0"
 ash = "0.29"
-serial_test = "0.2"
+serial_test = "0.3"
 serial_test_derive = "0.3"
