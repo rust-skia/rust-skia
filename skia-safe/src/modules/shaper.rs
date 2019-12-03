@@ -95,11 +95,11 @@ impl RefHandle<SkShaper_FontRunIterator> {
 }
 
 impl RefHandle<SkShaper> {
-    pub fn new_font_mgr_run_iterator(
-        utf8: &str,
+    pub fn new_font_mgr_run_iterator<'a>(
+        utf8: &'a str,
         font: &Font,
         fallback: impl Into<Option<FontMgr>>,
-    ) -> FontRunIterator {
+    ) -> Borrows<'a, FontRunIterator> {
         let bytes = utf8.as_bytes();
         FontRunIterator::from_ptr(unsafe {
             sb::C_SkShaper_MakeFontMgrRunIterator(
@@ -110,7 +110,11 @@ impl RefHandle<SkShaper> {
             )
         })
         .unwrap()
+        .borrows(utf8)
     }
+
+    // TODO: m79: wrap MakeFontMgrRunIterator with requestName (borrowed), requestStyle and
+    //       a LanguageRunIterator.
 
     pub fn new_trivial_font_run_iterator(font: &Font, utf8_bytes: usize) -> FontRunIterator {
         FontRunIterator::from_ptr(unsafe {
@@ -137,11 +141,20 @@ impl RefHandle<SkShaper_BiDiRunIterator> {
 }
 
 impl RefHandle<SkShaper> {
-    pub fn new_icu_bidi_run_iterator(utf8: impl AsRef<str>, level: u8) -> Option<BiDiRunIterator> {
-        let bytes = utf8.as_ref().as_bytes();
+    pub fn new_bidi_run_iterator(utf8: &str, bidi_level: u8) -> Option<Borrows<BiDiRunIterator>> {
+        let bytes = utf8.as_bytes();
+        BiDiRunIterator::from_ptr(unsafe {
+            sb::C_SkShaper_MakeBidiRunIterator(bytes.as_ptr() as _, bytes.len(), bidi_level)
+        })
+        .map(|i| i.borrows(utf8))
+    }
+
+    pub fn new_icu_bidi_run_iterator(utf8: &str, level: u8) -> Option<Borrows<BiDiRunIterator>> {
+        let bytes = utf8.as_bytes();
         BiDiRunIterator::from_ptr(unsafe {
             sb::C_SkShaper_MakeIcuBidiRunIterator(bytes.as_ptr() as _, bytes.len(), level)
         })
+        .map(|i| i.borrows(utf8))
     }
 
     pub fn new_trivial_bidi_run_iterator(bidi_level: u8, utf8_bytes: usize) -> BiDiRunIterator {
@@ -171,12 +184,26 @@ impl RefHandle<SkShaper_ScriptRunIterator> {
 }
 
 impl RefHandle<SkShaper> {
-    pub fn new_hb_icu_script_run_iterator(utf8: impl AsRef<str>) -> ScriptRunIterator {
-        let bytes = utf8.as_ref().as_bytes();
+    pub fn new_script_run_iterator(utf8: &str, script: FourByteTag) -> Borrows<ScriptRunIterator> {
+        let bytes = utf8.as_bytes();
+        ScriptRunIterator::from_ptr(unsafe {
+            sb::C_SkShaper_MakeScriptRunIterator(
+                bytes.as_ptr() as _,
+                bytes.len(),
+                script.into_native(),
+            )
+        })
+        .unwrap()
+        .borrows(utf8)
+    }
+
+    pub fn new_hb_icu_script_run_iterator(utf8: &str) -> Borrows<ScriptRunIterator> {
+        let bytes = utf8.as_bytes();
         ScriptRunIterator::from_ptr(unsafe {
             sb::C_SkShaper_MakeHbIcuScriptRunIterator(bytes.as_ptr() as _, bytes.len())
         })
         .unwrap()
+        .borrows(utf8)
     }
 
     pub fn new_trivial_script_run_iterator(bidi_level: u8, utf8_bytes: usize) -> ScriptRunIterator {
@@ -208,8 +235,10 @@ impl RefHandle<SkShaper_LanguageRunIterator> {
 }
 
 impl RefHandle<SkShaper> {
-    pub fn new_std_language_run_iterator(utf8: impl AsRef<str>) -> Option<LanguageRunIterator> {
-        let bytes = utf8.as_ref().as_bytes();
+    pub fn new_std_language_run_iterator(utf8: &str) -> Option<LanguageRunIterator> {
+        // a LanguageRunIterator never accesses the UTF8 string, so it's safe to
+        // not borrow the string.
+        let bytes = utf8.as_bytes();
         LanguageRunIterator::from_ptr(unsafe {
             sb::C_SkShaper_MakeStdLanguageRunIterator(bytes.as_ptr() as _, bytes.len())
         })
@@ -314,13 +343,13 @@ mod run_handler {
 impl RefHandle<SkShaper> {
     pub fn shape(
         &self,
-        utf8: impl AsRef<str>,
+        utf8: &str,
         font: &Font,
         left_to_right: bool,
         width: scalar,
         run_handler: &mut dyn RunHandler,
     ) {
-        let bytes = utf8.as_ref().as_bytes();
+        let bytes = utf8.as_bytes();
 
         let param = rust_run_handler::new_param(run_handler);
         let mut run_handler = rust_run_handler::from_param(&param);
@@ -341,7 +370,7 @@ impl RefHandle<SkShaper> {
     #[allow(clippy::too_many_arguments)]
     pub fn shape_with_iterators(
         &self,
-        utf8: impl AsRef<str>,
+        utf8: &str,
         font_run_iterator: &mut FontRunIterator,
         bidi_run_iterator: &mut BiDiRunIterator,
         script_run_iterator: &mut ScriptRunIterator,
@@ -349,7 +378,7 @@ impl RefHandle<SkShaper> {
         width: scalar,
         run_handler: &mut dyn RunHandler,
     ) {
-        let bytes = utf8.as_ref().as_bytes();
+        let bytes = utf8.as_bytes();
         let param = rust_run_handler::new_param(run_handler);
         let mut run_handler = rust_run_handler::from_param(&param);
         unsafe {
@@ -473,13 +502,12 @@ impl TextBlobBuilderRunHandler<'_> {
 impl RefHandle<SkShaper> {
     pub fn shape_text_blob(
         &self,
-        text: impl AsRef<str>,
+        text: &str,
         font: &Font,
         left_to_right: bool,
         width: scalar,
         offset: impl Into<Point>,
     ) -> Option<(TextBlob, Point)> {
-        let text = text.as_ref();
         let bytes = text.as_bytes();
         let mut builder = TextBlobBuilderRunHandler::new(text, offset);
         unsafe {
@@ -498,13 +526,13 @@ impl RefHandle<SkShaper> {
 }
 
 pub mod icu {
-    /// On Windows, this function writes the file `icudtl.dat` into the current's
-    /// executable directory making sure that it's available when text shaping is used in Skia.
+    /// On Windows, this function writes the file `icudtl.dat` into the current
+    /// executable's directory making sure that it's available when text shaping is used in Skia.
     ///
     /// If your executable directory can not be written to, make sure that `icudtl.dat` is
     /// available.
     ///
-    /// It's currently not possible to load `icudtl.dat` from another location.
+    /// Note that it is currently not possible to load `icudtl.dat` from another location.
     pub fn init() {
         skia_bindings::icu::init()
     }
