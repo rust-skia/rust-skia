@@ -57,6 +57,10 @@ extern "C" uint8_t C_SkShaper_BiDiRunIterator_currentLevel(const SkShaper::BiDiR
     return self->currentLevel();
 }
 
+extern "C" SkShaper::BiDiRunIterator* C_SkShaper_MakeBidiRunIterator(const char* utf8, size_t utf8Bytes, uint8_t bidiLevel) {
+    return SkShaper::MakeBiDiRunIterator(utf8, utf8Bytes, bidiLevel).release();
+}
+
 extern "C" SkShaper::BiDiRunIterator* C_SkShaper_MakeIcuBidiRunIterator(const char* utf8, size_t utf8Bytes, uint8_t bidiLevel) {
     return SkShaper::MakeIcuBiDiRunIterator(utf8, utf8Bytes, bidiLevel).release();
 }
@@ -67,6 +71,10 @@ extern "C" SkShaper::BiDiRunIterator* C_SkShaper_TrivialBidiRunIterator_new(uint
 
 extern "C" SkFourByteTag C_SkShaper_ScriptRunIterator_currentScript(const SkShaper::ScriptRunIterator* self) {
     return self->currentScript();
+}
+
+extern "C" SkShaper::ScriptRunIterator* C_SkShaper_MakeScriptRunIterator(const char* utf8, size_t utf8Bytes, SkFourByteTag script) {
+    return SkShaper::MakeScriptRunIterator(utf8, utf8Bytes, script).release();
 }
 
 extern "C" SkShaper::ScriptRunIterator* C_SkShaper_MakeHbIcuScriptRunIterator(const char* utf8, size_t utf8Bytes) {
