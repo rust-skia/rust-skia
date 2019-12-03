@@ -180,3 +180,39 @@ impl<'a> Borrows<'a, Handle<sb::LineMetricsVector>> {
         }
     }
 }
+
+#[test]
+#[serial_test_derive::serial]
+fn test_line_metrics() {
+    use crate::icu;
+    icu::init();
+
+    // note: some of the following code is copied from the skparagraph skia-org example.
+    use crate::textlayout::{FontCollection, ParagraphBuilder, ParagraphStyle, TextStyle};
+    use crate::FontMgr;
+
+    let mut font_collection = FontCollection::new();
+    font_collection.set_default_font_manager(FontMgr::new(), None);
+
+    // As of Skia: 6d1c0d4196f19537cc64f74bacc7d123de3be454
+    // 1000 runs of this function can be used to reliably reproduce a crash on macOS with a segmentation
+    // fault if font fallback is not disabled in the font collection.
+    // For more information: https://github.com/pragmatrix/rust-skia/pull/2#issuecomment-531819718
+    #[cfg(target_os = "macos")]
+    font_collection.disable_font_fallback();
+
+    let paragraph_style = ParagraphStyle::new();
+    let mut paragraph_builder = ParagraphBuilder::new(&paragraph_style, font_collection);
+    let ts = TextStyle::new();
+    paragraph_builder.push_style(&ts);
+    paragraph_builder.add_text(LOREM_IPSUM);
+    let mut paragraph = paragraph_builder.build();
+    paragraph.layout(256.0);
+
+    let line_metrics = paragraph.get_line_metrics();
+    for (line, lm) in line_metrics.iter().enumerate() {
+        println!("line {}: width: {}", line + 1, lm.width)
+    }
+
+    static LOREM_IPSUM: &str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at leo at nulla tincidunt placerat. Proin eget purus augue. Quisque et est ullamcorper, pellentesque felis nec, pulvinar massa. Aliquam imperdiet, nulla ut dictum euismod, purus dui pulvinar risus, eu suscipit elit neque ac est. Nullam eleifend justo quis placerat ultricies. Vestibulum ut elementum velit. Praesent et dolor sit amet purus bibendum mattis. Aliquam erat volutpat.";
+}
