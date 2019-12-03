@@ -59,20 +59,21 @@ pub trait RunIterator {
     fn at_end(&self) -> bool;
 }
 
-impl<T> RunIterator for T
+impl<T> RunIterator for RefHandle<T>
 where
+    T: NativeDrop,
     T: NativeBase<SkShaper_RunIterator>,
 {
     fn consume(&mut self) {
-        unsafe { sb::C_SkShaper_RunIterator_consume(self.base_mut()) }
+        unsafe { sb::C_SkShaper_RunIterator_consume(self.native_mut().base_mut()) }
     }
 
     fn end_of_current_run(&self) -> usize {
-        unsafe { sb::C_SkShaper_RunIterator_endOfCurrentRun(self.base()) }
+        unsafe { sb::C_SkShaper_RunIterator_endOfCurrentRun(self.native().base()) }
     }
 
     fn at_end(&self) -> bool {
-        unsafe { sb::C_SkShaper_RunIterator_atEnd(self.base()) }
+        unsafe { sb::C_SkShaper_RunIterator_atEnd(self.native().base()) }
     }
 }
 
