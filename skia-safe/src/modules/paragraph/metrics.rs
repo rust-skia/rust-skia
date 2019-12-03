@@ -84,7 +84,11 @@ impl<'a> LineMetrics<'a> {
                 range.end,
                 v.as_mut_ptr() as *mut sb::StyleMetricsRecord,
             );
-            mem::transmute(v)
+            // TODO: can the second allocation of that vec be avoided? Transmuting the vec is
+            //       UB beginning with Rust 1.40.
+            v.into_iter()
+                .map(|v| mem::transmute::<(usize, *mut StyleMetrics<'a>), StyleMetricsRecord>(v))
+                .collect()
         }
     }
 }
