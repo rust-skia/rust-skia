@@ -202,8 +202,6 @@ fn download_and_install(url: impl AsRef<str>, output_directory: &Path) -> io::Re
     );
     binaries::unpack(Cursor::new(archive), output_directory)?;
     // TODO: verify key?
-    println!("INSTALLING BINDINGS");
-    fs::copy(output_directory.join("bindings.rs"), SRC_BINDINGS_RS)?;
 
     Ok(())
 }

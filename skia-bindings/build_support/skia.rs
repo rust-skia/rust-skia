@@ -481,7 +481,7 @@ impl BinariesConfiguration {
         let target = cargo::target();
 
         let mut built_libraries = Vec::new();
-        let mut additional_files = Vec::new();
+        let mut additional_files: Vec<PathBuf> = vec!["bindings.rs".into()];
         let feature_ids = features.ids();
 
         if features.text_layout {
