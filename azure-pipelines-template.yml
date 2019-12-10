@@ -31,7 +31,10 @@ jobs:
           toolchain: stable
           features: 'textlayout'
           exampleArgs: ''
-
+        stable-all-features:
+          toolchain: stable
+          features: 'vulkan,svg,shaper,textlayout'
+          exampleArgs: ''
       ${{ if eq(parameters.deployRelease, 'False') }}:
         stable-all-features:
           toolchain: stable
