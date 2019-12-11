@@ -178,9 +178,6 @@ pub use matrix44::{Matrix44, Vector4};
 mod milestone;
 pub use milestone::*;
 
-mod multi_picture_draw;
-pub use multi_picture_draw::*;
-
 pub mod paint;
 pub use paint::Paint;
 // We keep these around for the time being.

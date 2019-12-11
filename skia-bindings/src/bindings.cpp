@@ -25,7 +25,6 @@
 #include "include/core/SkImageGenerator.h"
 #include "include/core/SkImageInfo.h"
 #include "include/core/SkMaskFilter.h"
-#include "include/core/SkMultiPictureDraw.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPath.h"
 #include "include/core/SkPathMeasure.h"
@@ -565,14 +564,6 @@ extern "C" SkData* C_SkData_MakeEmpty() {
 }
 
 //
-// core/SkMultiPictureDraw.h
-//
-
-extern "C" void C_SkMultiPictureDraw_destruct(SkMultiPictureDraw* self) {
-    self->~SkMultiPictureDraw();
-}
-
-//
 // core/SkPaint.h
 //
 
@@ -633,7 +624,7 @@ extern "C" void C_SkPaint_setImageFilter(SkPaint* self, SkImageFilter* imageFilt
 }
 
 //
-// SkPath
+// core/SkPath.h
 //
 
 extern "C" void C_SkPath_destruct(const SkPath* self) {
@@ -646,10 +637,6 @@ extern "C" bool C_SkPath_Equals(const SkPath* lhs, const SkPath* rhs) {
 
 extern "C" SkData* C_SkPath_serialize(const SkPath* self) {
     return self->serialize().release();
-}
-
-extern "C" SkPath::FillType C_SkPath_ConvertToNonInverseFillType(SkPath::FillType fill) {
-    return SkPath::ConvertToNonInverseFillType(fill);
 }
 
 extern "C" bool C_SkPath_isValid(const SkPath* self) {
@@ -680,16 +667,16 @@ extern "C" SkPath::Verb C_SkPath_RawIter_peek(const SkPath::RawIter* self) {
     return self->peek();
 }
 
-extern "C" SkPath::FillType C_SkPath_getFillType(const SkPath* self) {
+extern "C" SkPathFillType C_SkPath_getFillType(const SkPath* self) {
     return self->getFillType();
 }
 
-extern "C" SkPath::Convexity C_SkPath_getConvexity(const SkPath* self) {
-    return self->getConvexity();
+extern "C" SkPathConvexityType C_SkPath_getConvexity(const SkPath* self) {
+    return self->getConvexityType();
 }
 
-extern "C" SkPath::Convexity C_SkPath_getConvexityOrUnknown(const SkPath* self) {
-    return self->getConvexityOrUnknown();
+extern "C" SkPathConvexityType C_SkPath_getConvexityOrUnknown(const SkPath* self) {
+    return self->getConvexityTypeOrUnknown();
 }
 
 extern "C" bool C_SkPath_isEmpty(const SkPath* self) {
@@ -720,7 +707,7 @@ extern "C" void C_SkPathMeasure_destruct(const SkPathMeasure* self) {
 // core/SkPathTypes.h
 //
 
-extern "C" void C_SkPathTypes(SkPathFillType, SkPathConvexityType, SkPathDirection, SkPathSegmentMask, SkPathVerb) {}
+extern "C" void C_SkPathTypes_Types(SkPathFillType, SkPathConvexityType, SkPathDirection, SkPathSegmentMask, SkPathVerb) {}
 
 //
 // SkCanvas
@@ -2168,17 +2155,7 @@ extern "C" SkImageFilter *C_SkColorFilterImageFilter_Make(SkColorFilter *cf, SkI
 // effects/SkColorMatrix.h
 //
 
-extern "C" bool C_SkColorMatrix_equals(const SkColorMatrix* lhs, const SkColorMatrix* rhs) {
-    return *lhs == *rhs;
-}
-
-extern "C" float* C_SkColorMatrix_get20(const SkColorMatrix* self, float m[20]) {
-    return self->get20(m);
-}
-
-extern "C" void C_SkColorMatrix_set20(SkColorMatrix* self, const float m[20]) {
-    self->set20(m);
-}
+extern "C" void C_SkColorMatrix_Types(const SkColorMatrix*) {};
 
 //
 // effects/SkColorMatrixFilter.h
