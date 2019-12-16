@@ -288,7 +288,7 @@ impl Handle<SkPaint> {
     }
 
     pub fn blend_mode(&self) -> BlendMode {
-        BlendMode::from_native(unsafe { sb::C_SkPaint_getBlendMode(self.native()) })
+        unsafe { sb::C_SkPaint_getBlendMode(self.native()) }
     }
 
     pub fn is_src_over(&self) -> bool {

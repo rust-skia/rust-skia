@@ -668,6 +668,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .whitelist_function("SkHSVToColor")
         .whitelist_function("SkPreMultiplyARGB")
         .whitelist_function("SkPreMultiplyColor")
+        .whitelist_function("SkBlendMode_AsCoeff")
         .whitelist_function("SkBlendMode_Name")
         .whitelist_function("SkSwapRB")
         // functions for which the doc generation fails.
@@ -951,6 +952,8 @@ impl bindgen::callbacks::ParseCallbacks for ParseCallbacks {
 type EnumEntry = (&'static str, fn(&str, &str) -> String);
 
 const ENUM_TABLE: &[EnumEntry] = &[
+    ("SkBlendMode", replace::k_xxx),
+    ("SkBlendModeCoeff", replace::k_xxx),
     // DartTypes.h
     ("Affinity", replace::k_xxx),
     ("RectHeightStyle", replace::k_xxx),

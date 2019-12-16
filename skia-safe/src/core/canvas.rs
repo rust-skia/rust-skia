@@ -565,10 +565,8 @@ impl Canvas {
         mode: impl Into<Option<BlendMode>>,
     ) -> &mut Self {
         unsafe {
-            self.native_mut().drawColor(
-                color.into().into_native(),
-                mode.into().unwrap_or_default().into_native(),
-            )
+            self.native_mut()
+                .drawColor(color.into().into_native(), mode.into().unwrap_or_default())
         }
         self
     }
@@ -965,16 +963,13 @@ impl Canvas {
                     vertices.native(),
                     bones.native().as_ptr(),
                     bones.len().try_into().unwrap(),
-                    mode.into_native(),
+                    mode,
                     paint.native(),
                 )
             },
             None => unsafe {
-                self.native_mut().drawVertices(
-                    vertices.native(),
-                    mode.into_native(),
-                    paint.native(),
-                )
+                self.native_mut()
+                    .drawVertices(vertices.native(), mode, paint.native())
             },
         }
         self
@@ -993,7 +988,7 @@ impl Canvas {
                 cubics.native().as_ptr(),
                 colors.native().as_ptr(),
                 tex_coords.native().as_ptr(),
-                mode.into().unwrap_or(BlendMode::Modulate).into_native(),
+                mode.into().unwrap_or(BlendMode::Modulate),
                 paint.native(),
             )
         }

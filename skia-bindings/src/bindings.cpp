@@ -3,6 +3,7 @@
 #include "include/codec/SkEncodedOrigin.h"
 // core/
 #include "include/core/SkAnnotation.h"
+#include "include/core/SkBlendMode.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkColorFilter.h"
