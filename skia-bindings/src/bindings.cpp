@@ -672,11 +672,11 @@ extern "C" SkPathFillType C_SkPath_getFillType(const SkPath* self) {
     return self->getFillType();
 }
 
-extern "C" SkPathConvexityType C_SkPath_getConvexity(const SkPath* self) {
+extern "C" SkPathConvexityType C_SkPath_getConvexityType(const SkPath* self) {
     return self->getConvexityType();
 }
 
-extern "C" SkPathConvexityType C_SkPath_getConvexityOrUnknown(const SkPath* self) {
+extern "C" SkPathConvexityType C_SkPath_getConvexityTypeOrUnknown(const SkPath* self) {
     return self->getConvexityTypeOrUnknown();
 }
 
