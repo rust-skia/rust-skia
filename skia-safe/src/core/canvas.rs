@@ -156,9 +156,10 @@ impl NativeAccess<SkCanvas> for Canvas {
     }
 }
 
-/// This is the type representing a canvas that is owned and dropped
+/// A type representing a canvas that is owned and dropped
 /// when it goes out of scope _and_ is bound to a the lifetime of another
-/// instance. Function resolvement is done via the Deref trait.
+/// instance.
+/// Function resolvement is done via the Deref trait.
 #[repr(transparent)]
 pub struct OwnedCanvas<'lt>(*mut Canvas, PhantomData<&'lt ()>);
 
@@ -312,6 +313,18 @@ impl Canvas {
     // TODO: test ref count consistency assuming it is not increased in the native part.
     pub fn gpu_context(&mut self) -> Option<gpu::Context> {
         gpu::Context::from_unshared_ptr(unsafe { sb::C_SkCanvas_getGrContext(self.native_mut()) })
+    }
+
+    /// # Safety
+    /// This function is unsafe because it is not clear how exactly the lifetime of the canvas
+    /// relates to surface returned.
+    /// TODO: It might be possible to make this safe by returning a _kind of_ reference to the
+    ///       Surface that can not be cloned and stays bound to the lifetime of canvas.
+    ///       But even then, the Surface might exist twice then, which is confusing, but
+    ///       probably safe, because the first instance is borrowed by the canvas.
+    /// See also `OwnedCanvas`, `Surface::canvas()`.
+    pub unsafe fn surface(&mut self) -> Option<Surface> {
+        Surface::from_unshared_ptr(unsafe { self.native_mut().getSurface() })
     }
 
     pub fn access_top_layer_pixels(&mut self) -> Option<TopLayerPixels> {
