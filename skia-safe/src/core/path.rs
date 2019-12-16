@@ -12,13 +12,13 @@ use std::marker::PhantomData;
 use std::mem::forget;
 
 #[deprecated(since = "0.0.0", note = "use path_types::PathDirection")]
-type Direction = path_types::PathDirection;
+pub type Direction = path_types::PathDirection;
 
 #[deprecated(since = "0.0.0", note = "use path_types::PathFillType")]
-type FillType = path_types::PathFillType;
+pub type FillType = path_types::PathFillType;
 
 #[deprecated(since = "0.0.0", note = "use path_types::PathConvexityType")]
-type Convexity = path_types::PathConvexityType;
+pub type Convexity = path_types::PathConvexityType;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]

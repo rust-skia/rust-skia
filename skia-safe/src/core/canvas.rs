@@ -324,7 +324,7 @@ impl Canvas {
     ///       probably safe, because the first instance is borrowed by the canvas.
     /// See also `OwnedCanvas`, `Surface::canvas()`.
     pub unsafe fn surface(&mut self) -> Option<Surface> {
-        Surface::from_unshared_ptr(unsafe { self.native_mut().getSurface() })
+        Surface::from_unshared_ptr(self.native_mut().getSurface())
     }
 
     pub fn access_top_layer_pixels(&mut self) -> Option<TopLayerPixels> {

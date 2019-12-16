@@ -45,7 +45,7 @@ impl ISize {
         *self = Self::new_empty();
     }
 
-    pub fn area(&self) -> i64 {
+    pub fn area(self) -> i64 {
         self.width as i64 * self.height as i64
     }
 
