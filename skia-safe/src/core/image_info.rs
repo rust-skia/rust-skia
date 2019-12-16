@@ -97,6 +97,7 @@ pub enum YUVColorSpace {
     JPEG = SkYUVColorSpace::kJPEG_SkYUVColorSpace as _,
     Rec601 = SkYUVColorSpace::kRec601_SkYUVColorSpace as _,
     Rec709 = SkYUVColorSpace::kRec709_SkYUVColorSpace as _,
+    BT2020 = SkYUVColorSpace::kBT2020_SkYUVColorSpace as _,
     Identity = SkYUVColorSpace::kIdentity_SkYUVColorSpace as _,
 }
 
