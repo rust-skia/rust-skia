@@ -2156,7 +2156,28 @@ extern "C" SkImageFilter *C_SkColorFilterImageFilter_Make(SkColorFilter *cf, SkI
 // effects/SkColorMatrix.h
 //
 
-extern "C" void C_SkColorMatrix_Types(const SkColorMatrix*) {};
+extern "C" void C_SkColorMatrix_Construct(SkColorMatrix* uninitialized) {
+    new(uninitialized)SkColorMatrix();
+}
+
+extern "C" void C_SkColorMatrix_Construct2(SkColorMatrix* uninitialized, 
+                                           float m00, float m01, float m02, float m03, float m04,
+                                           float m10, float m11, float m12, float m13, float m14,
+                                           float m20, float m21, float m22, float m23, float m24,
+                                           float m30, float m31, float m32, float m33, float m34) {
+    new(uninitialized)SkColorMatrix(m00, m01, m02, m03, m04,
+                                    m10, m11, m12, m13, m14,
+                                    m20, m21, m22, m23, m24,
+                                    m30, m31, m32, m33, m34);
+}
+
+extern "C" void C_SkColorMatrix_setRowMajor(SkColorMatrix* self, const float src[20]) {
+    self->setRowMajor(src);
+}
+
+extern "C" void C_SkColorMatrix_getRowMajor(const SkColorMatrix* self, float dst[20]) {
+    self->getRowMajor(dst);
+}
 
 //
 // effects/SkColorMatrixFilter.h
