@@ -45,6 +45,10 @@ impl ISize {
         *self = Self::new_empty();
     }
 
+    pub fn area(&self) -> i64 {
+        self.width as i64 * self.height as i64
+    }
+
     // TODO: should the functions with() and height() be supported?
 
     pub fn equals(self, w: i32, h: i32) -> bool {
