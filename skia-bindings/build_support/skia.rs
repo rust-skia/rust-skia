@@ -275,9 +275,19 @@ impl FinalBuildConfiguration {
                     if let Some(win_vc) = vs::resolve_win_vc() {
                         args.push(("win_vc", quote(win_vc.to_str().unwrap())))
                     }
-                    // Rust's msvc toolchain links to msvcrt.dll by
-                    // default for release and _debug_ builds.
-                    flags.push("/MD");
+                    // Code on MSVC needs to be compiled differently (e.g. with /MT or /MD) depending on the runtime being linked.
+                    // (See https://doc.rust-lang.org/reference/linkage.html#static-and-dynamic-c-runtimes)
+                    // When static feature is enabled (target-feature=+crt-static) the C runtime should be statically linked
+                    // and the compiler has to place the library name LIBCMT.lib into the .obj
+                    // See https://docs.microsoft.com/en-us/cpp/build/reference/md-mt-ld-use-run-time-library?view=vs-2019
+                    if cfg!(target_feature = "crt-static")
+                    {
+                        flags.push("/MT");
+                    }
+                    // otherwith the C runtime should be linked dynamically
+                    else {
+                        flags.push("/MD");
+                    }
                     // Tell Skia's build system where LLVM is supposed to be located.
                     // TODO: this should be checked as a prerequisite.
                     args.push(("clang_win", quote("C:/Program Files/LLVM")));
