@@ -280,8 +280,7 @@ impl FinalBuildConfiguration {
                     // When static feature is enabled (target-feature=+crt-static) the C runtime should be statically linked
                     // and the compiler has to place the library name LIBCMT.lib into the .obj
                     // See https://docs.microsoft.com/en-us/cpp/build/reference/md-mt-ld-use-run-time-library?view=vs-2019
-                    if cfg!(target_feature = "crt-static")
-                    {
+                    if cfg!(target_feature = "crt-static") {
                         flags.push("/MT");
                     }
                     // otherwith the C runtime should be linked dynamically
