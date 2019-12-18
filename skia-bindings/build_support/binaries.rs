@@ -98,6 +98,10 @@ pub fn key(repository_short_hash: &str, features: &[impl AsRef<str>]) -> String 
         components.push(group(features));
     };
 
+    if cargo::target_crt_static() {
+        components.push("static".into());
+    }
+
     components.join("-")
 }
 

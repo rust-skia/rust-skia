@@ -74,6 +74,10 @@ pub fn target() -> Target {
     parse_target(target_str)
 }
 
+pub fn target_crt_static() -> bool {
+    cfg!(target_feature = "crt-static")
+}
+
 pub fn host() -> Target {
     let host_str = env::var("HOST").unwrap();
     println!("HOST: {}", host_str);
