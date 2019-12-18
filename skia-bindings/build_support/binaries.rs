@@ -12,10 +12,7 @@ use tar::Archive;
 /// the artifact staging directory is set.
 /// The git repository test is important to support package verifications.
 pub fn should_export() -> Option<PathBuf> {
-    if git::half_hash().is_none() {
-        return None;
-    }
-
+    git::half_hash()?;
     azure::artifact_staging_directory()
 }
 
@@ -79,7 +76,7 @@ pub fn key(repository_short_hash: &str, features: &[impl AsRef<str>]) -> String 
 
     fn group(str: impl AsRef<str>) -> String {
         // no grouping syntax ATM
-        format!("{}", str.as_ref())
+        str.as_ref().to_string()
     }
 
     // SHA hash of the rust-skia repository.

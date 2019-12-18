@@ -474,9 +474,12 @@ impl BinariesConfiguration {
         built_libraries.push(lib::SKIA_BINDINGS.into());
 
         BinariesConfiguration {
-            feature_ids: feature_ids.iter().map(|f| f.to_string()).collect(),
+            feature_ids: feature_ids.into_iter().map(|f| f.to_string()).collect(),
             output_directory,
-            link_libraries: link_libraries.iter().map(|lib| lib.to_string()).collect(),
+            link_libraries: link_libraries
+                .into_iter()
+                .map(|lib| lib.to_string())
+                .collect(),
             built_libraries,
             additional_files,
         }
@@ -943,7 +946,7 @@ pub(crate) mod replace {
     }
 
     pub fn k_xxx(name: &str, variant: &str) -> String {
-        if variant.starts_with("k") {
+        if variant.starts_with('k') {
             variant[1..].into()
         } else {
             panic!(
@@ -1064,8 +1067,8 @@ mod prerequisites {
             // download
             let archive_url = &format!("{}/{}", repo_url, short_hash);
             println!("DOWNLOADING: {}", archive_url);
-            let archive =
-                utils::download(archive_url).expect(&format!("Failed to download {}", archive_url));
+            let archive = utils::download(archive_url)
+                .unwrap_or_else(|_| panic!("Failed to download {}", archive_url));
 
             // unpack
             {
@@ -1159,7 +1162,6 @@ pub(crate) mod definitions {
             let prefix = "-D";
             defines
                 .split_whitespace()
-                .into_iter()
                 .map(|d| {
                     if d.starts_with(prefix) {
                         &d[prefix.len()..]
@@ -1172,7 +1174,7 @@ pub(crate) mod definitions {
         defines
             .into_iter()
             .map(|d| {
-                let items: Vec<&str> = d.splitn(2, "=").collect();
+                let items: Vec<&str> = d.splitn(2, '=').collect();
                 match items.len() {
                     1 => (items[0].to_string(), None),
                     2 => (items[0].to_string(), Some(items[1].to_string())),

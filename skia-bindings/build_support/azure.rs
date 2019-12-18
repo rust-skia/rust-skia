@@ -9,6 +9,6 @@ pub fn is_active() -> bool {
 /// Returns the artifact staging directory.
 pub fn artifact_staging_directory() -> Option<PathBuf> {
     env::var("BUILD_ARTIFACTSTAGINGDIRECTORY")
-        .map(|dir| PathBuf::from(dir))
+        .map(PathBuf::from)
         .ok()
 }
