@@ -13,7 +13,7 @@ pub fn add_dependent_path(path: impl AsRef<Path>) {
 }
 
 pub fn add_link_libs(libs: &[impl AsRef<str>]) {
-    libs.into_iter().for_each(|s| add_link_lib(s.as_ref()))
+    libs.iter().for_each(|s| add_link_lib(s.as_ref()))
 }
 
 pub fn add_link_lib(lib: impl AsRef<str>) {
@@ -82,7 +82,7 @@ pub fn host() -> Target {
 
 fn parse_target(target_str: impl AsRef<str>) -> Target {
     let target_str = target_str.as_ref();
-    let target: Vec<String> = target_str.split("-").map(|s| s.into()).collect();
+    let target: Vec<String> = target_str.split('-').map(|s| s.into()).collect();
     if target.len() < 3 {
         panic!("Failed to parse TARGET {}", target_str);
     }

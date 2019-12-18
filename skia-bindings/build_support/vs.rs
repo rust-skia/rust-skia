@@ -10,7 +10,7 @@ pub fn resolve_win_vc() -> Option<PathBuf> {
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC",
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC",
     ]
-    .into_iter()
-    .map(|s| PathBuf::from(s))
+    .iter()
+    .map(PathBuf::from)
     .find(|pb| pb.exists())
 }
