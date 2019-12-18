@@ -207,6 +207,7 @@ fn test_line_metrics() {
     paragraph_builder.push_style(&ts);
     paragraph_builder.add_text(LOREM_IPSUM);
     let mut paragraph = paragraph_builder.build();
+    // m80: fatal error: could not create line break iterator.
     paragraph.layout(256.0);
 
     let line_metrics = paragraph.get_line_metrics();

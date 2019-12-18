@@ -1,16 +1,18 @@
+use crate::interop::FromStrs;
 use crate::prelude::*;
 use crate::textlayout::ParagraphCache;
 use crate::{interop, FontMgr, FontStyle, Typeface, Unichar};
 use skia_bindings as sb;
+use skia_bindings::skia_textlayout_FontCollection;
 use std::ffi;
 
-pub type FontCollection = RCHandle<sb::skia_textlayout_FontCollection>;
+pub type FontCollection = RCHandle<skia_textlayout_FontCollection>;
 
-impl NativeRefCountedBase for sb::skia_textlayout_FontCollection {
+impl NativeRefCountedBase for skia_textlayout_FontCollection {
     type Base = sb::SkRefCntBase;
 }
 
-impl RCHandle<sb::skia_textlayout_FontCollection> {
+impl RCHandle<skia_textlayout_FontCollection> {
     pub fn new() -> Self {
         Self::from_ptr(unsafe { sb::C_FontCollection_new() }).unwrap()
     }
@@ -74,37 +76,22 @@ impl RCHandle<sb::skia_textlayout_FontCollection> {
         FontMgr::from_ptr(unsafe { sb::C_FontCollection_getFallbackManager(self.native()) })
     }
 
-    pub fn match_typeface(
+    pub fn find_typefaces(
         &mut self,
-        family_name: impl AsRef<str>,
+        family_names: &[impl AsRef<str>],
         font_style: FontStyle,
-        locale: impl AsRef<str>,
-    ) -> Option<Typeface> {
-        let family_name = ffi::CString::new(family_name.as_ref()).unwrap();
-        let locale = interop::String::from_str(locale);
-        Typeface::from_ptr(unsafe {
-            sb::C_FontCollection_matchTypeface(
+    ) -> Vec<Typeface> {
+        let family_names = interop::Strings::from_strs(family_names);
+        let mut typefaces = Typefaces::new();
+        unsafe {
+            sb::C_FontCollection_findTypefaces(
                 self.native_mut(),
-                family_name.as_ptr(),
+                family_names.native(),
                 font_style.into_native(),
-                locale.native(),
+                typefaces.native_mut(),
             )
-        })
-    }
-
-    pub fn match_default_typeface(
-        &mut self,
-        font_style: FontStyle,
-        locale: impl AsRef<str>,
-    ) -> Option<Typeface> {
-        let locale = interop::String::from_str(locale);
-        Typeface::from_ptr(unsafe {
-            sb::C_FontCollection_matchDefaultTypeface(
-                self.native_mut(),
-                font_style.into_native(),
-                locale.native(),
-            )
-        })
+        };
+        typefaces.into_vec()
     }
 
     pub fn default_fallback_char(
@@ -132,6 +119,10 @@ impl RCHandle<sb::skia_textlayout_FontCollection> {
         unsafe { self.native_mut().disableFontFallback() }
     }
 
+    pub fn enable_font_fallback(&mut self) {
+        unsafe { self.native_mut().enableFontFallback() }
+    }
+
     pub fn font_fallback_enabled(&self) -> bool {
         unsafe { sb::C_FontCollection_fontFallbackEnabled(self.native()) }
     }
@@ -146,6 +137,31 @@ impl RCHandle<sb::skia_textlayout_FontCollection> {
         ParagraphCache::from_native_ref_mut(unsafe {
             &mut *sb::C_FontCollection_paragraphCache(self.native_mut())
         })
+    }
+}
+
+type Typefaces = Handle<sb::Typefaces>;
+
+impl NativeDrop for sb::Typefaces {
+    fn drop(&mut self) {
+        unsafe { sb::C_Typefaces_destruct(self) }
+    }
+}
+
+impl Handle<sb::Typefaces> {
+    pub fn new() -> Self {
+        Typefaces::construct(|tf| unsafe { sb::C_Typefaces_construct(tf) })
+    }
+
+    pub fn into_vec(mut self) -> Vec<Typeface> {
+        let count = unsafe { sb::C_Typefaces_count(self.native()) };
+        (0..count)
+            .into_iter()
+            .map(|i| {
+                Typeface::from_ptr(unsafe { sb::C_Typefaces_release(self.native_mut(), i) })
+                    .unwrap()
+            })
+            .collect()
     }
 }
 

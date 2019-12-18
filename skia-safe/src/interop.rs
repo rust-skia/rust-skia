@@ -5,3 +5,6 @@ pub(crate) use self::stream::*;
 
 mod string;
 pub(crate) use self::string::*;
+
+mod strings;
+pub(crate) use self::strings::*;

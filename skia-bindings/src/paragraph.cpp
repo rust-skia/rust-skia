@@ -19,6 +19,32 @@ using namespace skia::textlayout;
 // FontCollection.h
 //
 
+struct Typefaces {
+    std::vector<sk_sp<SkTypeface>> typefaces;
+};
+
+extern "C" {
+    void C_Typefaces_construct(Typefaces* uninitialized) {
+        new(uninitialized)Typefaces();
+    }
+    
+    void C_Typefaces_destruct(Typefaces* self) {
+        self->~Typefaces();
+    }
+    
+    size_t C_Typefaces_count(const Typefaces* faces) {
+        return faces->typefaces.size();
+    }
+    
+    SkTypeface* C_Typefaces_get(const Typefaces* faces, size_t i) {
+        return faces->typefaces[i].get();
+    }
+    
+    SkTypeface* C_Typefaces_release(Typefaces* faces, size_t i) {
+        return faces->typefaces[i].release();
+    }
+}
+
 extern "C" {
     FontCollection* C_FontCollection_new() {
         return new FontCollection();
@@ -48,12 +74,9 @@ extern "C" {
         return self->getFallbackManager().release();
     }
 
-    SkTypeface* C_FontCollection_matchTypeface(FontCollection* self, const char* familyName, SkFontStyle fontStyle, const SkString* locale) {
-        return self->matchTypeface(familyName, fontStyle, *locale).release();
-    }
-
-    SkTypeface* C_FontCollection_matchDefaultTypeface(FontCollection* self, SkFontStyle fontStyle, const SkString* locale) {
-        return self->matchDefaultTypeface(fontStyle, *locale).release();
+    void C_FontCollection_findTypefaces(FontCollection* self, const SkStrings* familyNames, SkFontStyle fontStyle, Typefaces* typefaces) {
+        auto tfs = self->findTypefaces(familyNames->strings, fontStyle);
+        typefaces->typefaces = std::move(tfs);
     }
 
     SkTypeface* C_FontCollection_defaultFallback(FontCollection* self, SkUnichar unicode, SkFontStyle fontStyle, const SkString* locale) {

@@ -1813,6 +1813,23 @@ extern "C" const char* C_SkString_c_str_size(const SkString* self, size_t* size)
     return self->c_str();
 }
 
+extern "C" {
+    void C_SkStrings_construct(SkStrings *uninitialized, SkString *string, size_t count) {
+        new(uninitialized) SkStrings{
+                std::vector<SkString>(std::make_move_iterator(string), std::make_move_iterator(string + count))
+        };
+    }
+
+    void C_SkStrings_destruct(SkStrings* self) {
+        self->~SkStrings();
+    }
+    
+    const SkString* C_SkStrings_ptr_count(const SkStrings* self, size_t* count) {
+        *count = self->strings.size();
+        return &self->strings.front();
+    }
+}
+
 //
 // core/SkStrokeRec.h
 //
