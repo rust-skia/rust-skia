@@ -2,6 +2,8 @@ use crate::gpu::gl::Extensions;
 use crate::prelude::*;
 use skia_bindings as sb;
 use skia_bindings::{GrGLInterface, SkRefCntBase};
+use std::ffi::c_void;
+use std::os::raw;
 
 pub type Interface = RCHandle<GrGLInterface>;
 
@@ -13,6 +15,23 @@ impl RCHandle<GrGLInterface> {
     pub fn new_native() -> Option<Interface> {
         Self::from_ptr(unsafe { sb::C_GrGLInterface_MakeNativeInterface() as _ })
     }
+
+    pub fn new_load_with<F>(loadfn: F) -> Option<Interface>
+    where F: FnMut(&str) -> *const c_void
+    {
+        Self::from_ptr(unsafe {
+            sb::C_GrGLInterface_MakeAssembledInterface(
+                &loadfn as *const _ as *mut c_void, Some(wrapper::<F>)
+            ) as _
+        })
+    }
+}
+
+unsafe extern "C" fn wrapper<F>(ctx: *mut c_void, name: *const raw::c_char)
+                                -> *const c_void
+where F: FnMut(&str) -> *const c_void
+{
+    (*(ctx as *mut F))(std::ffi::CStr::from_ptr(name).to_str().unwrap())
 }
 
 impl RCHandle<GrGLInterface> {
