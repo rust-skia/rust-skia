@@ -23,13 +23,16 @@ impl RCHandle<GrGLInterface> {
         Self::from_ptr(unsafe {
             sb::C_GrGLInterface_MakeAssembledInterface(
                 &loadfn as *const _ as *mut c_void,
-                Some(wrapper::<F>),
+                Some(gl_get_proc_fn_wrapper::<F>),
             ) as _
         })
     }
 }
 
-unsafe extern "C" fn wrapper<F>(ctx: *mut c_void, name: *const raw::c_char) -> *const c_void
+unsafe extern "C" fn gl_get_proc_fn_wrapper<F>(
+    ctx: *mut c_void,
+    name: *const raw::c_char,
+) -> *const c_void
 where
     F: FnMut(&str) -> *const c_void,
 {
