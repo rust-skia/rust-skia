@@ -97,6 +97,7 @@
 // gpu/gl
 #include "include/gpu/gl/GrGLExtensions.h"
 #include "include/gpu/gl/GrGLInterface.h"
+#include "include/gpu/gl/GrGLAssembleInterface.h"
 // pathops/
 #include "include/pathops/SkPathOps.h"
 // utils/
@@ -2781,6 +2782,17 @@ extern "C" const GrGLInterface* C_GrGLInterface_MakeNativeInterface() {
 extern "C" GrGLExtensions* C_GrGLInterface_extensions(GrGLInterface* self) {
     return &self->fExtensions;
 }
+
+//
+// gpu/gl/GrGLAssembleInterface.h
+//
+
+typedef const void* (*GLGetProcFnVoidPtr)(void* ctx, const char name[]);
+
+extern "C" const GrGLInterface* C_GrGLInterface_MakeAssembledInterface(void *ctx, GLGetProcFnVoidPtr get) {
+  return GrGLMakeAssembledInterface(ctx, reinterpret_cast<GrGLGetProc>(get)).release();
+}
+
 //
 // gpu/GrContext.h
 //
