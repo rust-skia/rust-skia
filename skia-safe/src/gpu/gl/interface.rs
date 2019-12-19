@@ -17,19 +17,21 @@ impl RCHandle<GrGLInterface> {
     }
 
     pub fn new_load_with<F>(loadfn: F) -> Option<Interface>
-    where F: FnMut(&str) -> *const c_void
+    where
+        F: FnMut(&str) -> *const c_void,
     {
         Self::from_ptr(unsafe {
             sb::C_GrGLInterface_MakeAssembledInterface(
-                &loadfn as *const _ as *mut c_void, Some(wrapper::<F>)
+                &loadfn as *const _ as *mut c_void,
+                Some(wrapper::<F>),
             ) as _
         })
     }
 }
 
-unsafe extern "C" fn wrapper<F>(ctx: *mut c_void, name: *const raw::c_char)
-                                -> *const c_void
-where F: FnMut(&str) -> *const c_void
+unsafe extern "C" fn wrapper<F>(ctx: *mut c_void, name: *const raw::c_char) -> *const c_void
+where
+    F: FnMut(&str) -> *const c_void,
 {
     (*(ctx as *mut F))(std::ffi::CStr::from_ptr(name).to_str().unwrap())
 }
