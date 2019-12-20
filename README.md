@@ -53,23 +53,19 @@ The supported bindings and Skia features are described in the [skia-safe package
 
 If the target platform or feature configuration is not available as a prebuilt binary, skia-bindings' `build.rs` will try to build Skia and the generate the Rust bindings. 
 
-To prepare for that, a number of prerequisites are needed:
+To prepare for that, **LLVM** and **Python 2** are needed:
 
-### Prerequisites
-
-Building skia-bindings and Skia needs **LLVM** and **Python 2**.
-
-#### LLVM
+**LLVM**
 
 We recommend the version that comes preinstalled with your platform or, if not available, the [latest official LLVM release](http://releases.llvm.org/download.html). To see which version of LLVM/Clang is installed on your system, use `clang --version`. 
 
-#### Python 2
+**Python 2**
 
 Python version 2.7 _must_ be available.
 
 The build script probes for `python --version` and `python2 --version` and uses the first one that looks like a version 2 executable for building Skia.
 
-### macOS
+### On macOS
 
 - Install the XCode command line developer tools with
 
@@ -89,7 +85,7 @@ The build script probes for `python --version` and `python2 --version` and uses 
 
   Note that if these environment variables are not set, [bindgen](https://github.com/rust-lang/rust-bindgen) most likely uses to the wrong `libclang.dylib`, causing spurious compilation errors (see #228).
 
-### Windows
+### On Windows
 
 - Have the latest versions of `git` and Rust ready.
 - [Install Visual Studio 2019 Build Tools](https://visualstudio.microsoft.com/downloads/) or one of the other IDE releases. If you installed the IDE version, make sure that the [Desktop Development with C++ workload](https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=vs-2019) is installed.
@@ -106,7 +102,7 @@ The build script probes for `python --version` and `python2 --version` and uses 
   rustup default stable-msvc
   ```
 
-### Linux
+### On Linux
 
 - LLVM/Clang should be available already, if not, [install the latest version](http://releases.llvm.org/download.html).
 
@@ -118,7 +114,7 @@ cargo build -vv
 
 OpenGL libraries _may_ be missing, if that is the case, install OpenGL drivers for you graphics card, or install a mesa OpenGL package like `libgl1-mesa-dev`.
 
-### Android
+### For Android
 
 Cross compilation to Android is supported for targeting 64 bit ARM and Intel x86 architectures (`aarch64` and `x86_64`) for API Level 26 (Oreo, Android 8):
 
@@ -154,7 +150,7 @@ _Notes:_
 - In some older shells (for example macOS High Sierra), environment variable replacement can not be used when the variable was defined on the same line. Therefore the `ANDROID_NDK` variable must be defined before it's used in the `PATH` variable.
 - Rebuilding skia-bindings with a different target may cause linker errors, in that case `touch skia-bindings/build.rs` will force a rebuild ([#10](https://github.com/rust-skia/rust-skia/issues/10)).
 
-### iOS
+### For iOS
 
 Compilation to iOS is supported on macOS targeting the iOS simulator (`--target x86_64-apple-ios`) and 64 bit ARM devices (`--target aarch64-apple-ios`).
 
