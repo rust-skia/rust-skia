@@ -46,6 +46,7 @@ pub const QUEUE_FAMILY_IGNORED: u32 = !0;
 pub struct NullHandle;
 pub const NULL_HANDLE: NullHandle = NullHandle;
 
+#[cfg(target_pointer_width = "64")]
 impl From<NullHandle> for Buffer {
     fn from(_: NullHandle) -> Self {
         ptr::null_mut()
@@ -64,6 +65,7 @@ impl From<NullHandle> for Device {
     }
 }
 
+#[cfg(target_pointer_width = "64")]
 impl From<NullHandle> for DeviceMemory {
     fn from(_: NullHandle) -> Self {
         ptr::null_mut()
@@ -82,6 +84,7 @@ impl From<NullHandle> for PhysicalDevice {
     }
 }
 
+#[cfg(target_pointer_width = "64")]
 impl From<NullHandle> for Image {
     fn from(_: NullHandle) -> Self {
         ptr::null_mut()
@@ -94,8 +97,16 @@ impl From<NullHandle> for Queue {
     }
 }
 
+#[cfg(target_pointer_width = "64")]
 impl From<NullHandle> for RenderPass {
     fn from(_: NullHandle) -> Self {
         ptr::null_mut()
+    }
+}
+
+#[cfg(not(target_pointer_width = "64"))]
+impl From<NullHandle> for u64 {
+    fn from(_: NullHandle) -> Self {
+        0
     }
 }
