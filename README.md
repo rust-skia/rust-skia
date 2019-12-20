@@ -73,7 +73,7 @@ The build script probes for `python --version` and `python2 --version` and uses 
   xcode-select --install
   ```
 
-- **macOS Mojave Version 10.14**: install the SDK headers:
+- **macOS Mojave and newer**: install the SDK headers, for example:
 
   ```bash
   sudo open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg
@@ -83,17 +83,18 @@ The build script probes for `python --version` and `python2 --version` and uses 
 
 - As an alternative to Apple's XCode LLVM, install LLVM via `brew install llvm` or `brew install llvm` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` like instructed. 
 
-  Note that if these environment variables are not set, [bindgen](https://github.com/rust-lang/rust-bindgen) most likely uses to the wrong `libclang.dylib`, causing spurious compilation errors (see #228).
+  If the environment variables are not set, [bindgen](https://github.com/rust-lang/rust-bindgen) will most likely use the wrong `libclang.dylib` and cause confusing compilation errors (see #228).
 
 ### On Windows
 
 - Have the latest versions of `git` and Rust ready.
-- [Install Visual Studio 2019 Build Tools](https://visualstudio.microsoft.com/downloads/) or one of the other IDE releases. If you installed the IDE version, make sure that the [Desktop Development with C++ workload](https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=vs-2019) is installed.
+- [Install Visual Studio 2019 Build Tools](https://visualstudio.microsoft.com/downloads/) or one of the IDE releases. If you installed the IDE, make sure that the [Desktop Development with C++ workload](https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=vs-2019) is installed.
 - Install the [latest LLVM](http://releases.llvm.org/download.html) distribution.
+
+  `clang.exe` is expected to be located at `C:/Program Files/LLVM/bin`, so be sure it's available from there.
 - [MSYS2](https://www.msys2.org/):
   
   - Install Python2 with `pacman -S python2`.
-  - `clang.exe` is expected to be located at `C:/Program Files/LLVM/bin`, so be sure it's available from there.
 - Windows Shell (`Cmd.exe`):
   
   - Download and install Python version 2 from [python.org](https://www.python.org/downloads/release/python-2716/).
@@ -112,7 +113,7 @@ Then use:
 cargo build -vv
 ```
 
-OpenGL libraries _may_ be missing, if that is the case, install OpenGL drivers for you graphics card, or install a mesa OpenGL package like `libgl1-mesa-dev`.
+If OpenGL libraries are missing, install the drivers for you graphics card, or a mesa package like `libgl1-mesa-dev`.
 
 ### For Android
 
