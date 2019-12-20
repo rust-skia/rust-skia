@@ -33,7 +33,7 @@ For other platforms, more information is available at the [OpenSSL crate documen
 
 ### Platform Support, Build Targets, and prebuilt Binaries
 
-Because building Skia takes a lot of time and needs tools that may not be installed, the skia-bindings crate's `build.rs` tries to download prebuilt binaries [skia-binaries](<https://github.com/rust-skia/skia-binaries/releases>).
+Because building Skia takes a lot of time and needs tools that may not be installed, the skia-bindings crate's `build.rs` tries to download prebuilt binaries from [the skia-binaries repository](<https://github.com/rust-skia/skia-binaries/releases>).
 
 | Platform | Binaries |
 | ---- | ---- |
