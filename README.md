@@ -85,7 +85,9 @@ The build script probes for `python --version` and `python2 --version` and uses 
 
   otherwise the Skia build _may_ fail to build `SkJpegUtility.cpp` and the binding generation _will_ fail with  `'TargetConditionals.h' file not found` . Also note that the command line developer tools _and_ SDK headers _should_ be reinstalled after an update of XCode.
 
-- As an alternative to Apple's XCode LLVM, install LLVM via `brew install llvm` or `brew install llvm` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` like instructed.
+- As an alternative to Apple's XCode LLVM, install LLVM via `brew install llvm` or `brew install llvm` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` like instructed. 
+
+  Note that if these environment variables are not set, [bindgen](https://github.com/rust-lang/rust-bindgen) most likely uses to the wrong `libclang.dylib`, causing spurious compilation errors (see #228).
 
 ### Windows
 
