@@ -14,7 +14,7 @@ This project attempts to provide _up to date_ safe bindings that bridge idiomati
 
 ### Crate
 
-Although we recommend to use the git repository because the [prerelease on crates.io](https://crates.io/crates/skia-safe) is a bit flaky at the moment, adding
+A prerelease crate is available from [crates.io](https://crates.io/crates/skia-safe) and adding
 
 ```toml
 [dependencies]
@@ -23,40 +23,51 @@ skia-safe = "0"
 
 to your `Cargo.toml` should get you started.
 
-### Platforms & Build Targets
-
-- [x] Windows
-- [x] Linux Ubuntu 18 (16 should work, too).
-- [x] macOS
-- [x] Android (macOS | Linux -> aarch64, contributed by [@DenisKolodin](https://github.com/DenisKolodin))
-- [x] iOS
-- [ ] WebAssembly: [#42](https://github.com/rust-skia/rust-skia/pull/42) (help wanted).
-
-### Bindings & Supported Features
-
-The supported bindings and Skia features are described in the [skia-safe package's readme](skia-safe/README.md).
-
-## Building
-
-Note that the information in this section is preliminary. Please open an issue for any build problem.
-
-### Prerequisites
-
-This project requires **LLVM**, **Python 2**, and **OpenSSL libraries** to build.
-
-To see which version of LLVM/Clang is available, use `clang --version`. 
-
-We recommend version 8, but also had successes to build Skia with 6.0.1 and 7.0.1, and - on macOS - Apple LLVM version 11. So it's probably best to use the preinstalled version or install version 8 if LLVM is not available on your platform by default.
-
-Python version 2.7 _must_ be available. The build script probes for `python --version` and `python2 --version` and uses the first one that looks like a version 2 executable.
-
-OpenSSL libraries can be installed on **Debian** and **Ubuntu** with:
+**On Linux** you may run into trouble when **OpenSSL libraries** are missing. On **Debian** and **Ubuntu** they can be installed with:
 
 ```bash
 sudo apt-get install pkg-config libssl-dev
 ```
 
 For other platforms, more information is available at the [OpenSSL crate documentation](https://docs.rs/openssl/0.10.24/openssl/#automatic).
+
+### Platform Support, Build Targets, and prebuilt Binaries
+
+Because building Skia takes a lot of time and needs tools that may not be installed, the skia-bindings crate's `build.rs` tries to download prebuilt binaries [skia-binaries](<https://github.com/rust-skia/skia-binaries/releases>).
+
+| Platform | Binaries |
+| ---- | ---- |
+|  Windows   | `x86_64-pc-windows-msvc` |
+| Linux Ubuntu 18 (16 should work, too).    | `x86_64-unknown-linux-gnu` |
+| macOS    | `x86_64-apple-darwin` |
+| Android (via macOS or Linux) | `aarch64-linux-android`<br/>`x86_64-linux-android` |
+| iOS     | `aarch64-apple-ios`<br/>`x86_64-apple-ios` |
+
+There is no WebAssembly support. If you'd like to help out, take a look at issue [#42](https://github.com/rust-skia/rust-skia/pull/42).
+
+### Bindings & Supported Features
+
+The supported bindings and Skia features are described in the [skia-safe package's readme](skia-safe/README.md) and prebuilt binaries are available for any single feature, or for all features combined.
+
+## Building
+
+If the target platform or feature configuration is not available as a prebuilt binary, skia-bindings' `build.rs` will try to build Skia and the generate the Rust bindings. 
+
+To prepare for that, a number of prerequisites are needed:
+
+### Prerequisites
+
+Building skia-bindings and Skia needs **LLVM** and **Python 2**.
+
+#### LLVM
+
+We recommend the version that comes preinstalled with your platform or, if not available, the [latest official LLVM release](http://releases.llvm.org/download.html). To see which version of LLVM/Clang is installed on your system, use `clang --version`. 
+
+#### Python 2
+
+Python version 2.7 _must_ be available.
+
+The build script probes for `python --version` and `python2 --version` and uses the first one that looks like a version 2 executable for building Skia.
 
 ### macOS
 
@@ -74,27 +85,28 @@ For other platforms, more information is available at the [OpenSSL crate documen
 
   otherwise the Skia build _may_ fail to build `SkJpegUtility.cpp` and the binding generation _will_ fail with  `'TargetConditionals.h' file not found` . Also note that the command line developer tools _and_ SDK headers _should_ be reinstalled after an update of XCode.
 
-- As an alternative to Apple LLVM 10, install LLVM via `brew install llvm` or `brew install llvm@7` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` like instructed.
+- As an alternative to Apple's XCode LLVM, install LLVM via `brew install llvm` or `brew install llvm` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` like instructed.
 
 ### Windows
 
 - Have the latest versions of `git` and Rust ready.
 - [Install Visual Studio 2019 Build Tools](https://visualstudio.microsoft.com/downloads/) or one of the other IDE releases. If you installed the IDE version, make sure that the [Desktop Development with C++ workload](https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=vs-2019) is installed.
-- Install the [latest LLVM 8](http://releases.llvm.org/download.html) distribution.
+- Install the [latest LLVM](http://releases.llvm.org/download.html) distribution.
 - [MSYS2](https://www.msys2.org/):
+  
   - Install Python2 with `pacman -S python2`.
-  - `clang` is _always_ picked up from `C:/Program Files/LLVM/bin`, so be sure it's available from there.
-- Windows Shell (Cmd.exe):
+  - `clang.exe` is expected to be located at `C:/Program Files/LLVM/bin`, so be sure it's available from there.
+- Windows Shell (`Cmd.exe`):
   
   - Download and install Python version 2 from [python.org](https://www.python.org/downloads/release/python-2716/).
-- Install and switch to the MSVC toolchain:
+- Install and select the MSVC toolchain:
   ```bash
   rustup default stable-msvc
   ```
 
 ### Linux
 
-- LLVM/Clang should be installed out of the box, if not, install version 8.
+- LLVM/Clang should be available already, if not, [install the latest version](http://releases.llvm.org/download.html).
 
 Then use:
 
@@ -102,9 +114,7 @@ Then use:
 cargo build -vv
 ```
 
-On Linux, OpenGL libraries _may_ be missing, if that is the case, install OpenGL drivers for you graphics card, or install a mesa OpenGL package like `libgl1-mesa-dev`.
-
-Please share your build experience so that we can try to automate the build and get to the point where `cargo build` _is_ sufficient to build the bindings _including_ Skia, and if that is not possible, clearly prompts to what's missing.
+OpenGL libraries _may_ be missing, if that is the case, install OpenGL drivers for you graphics card, or install a mesa OpenGL package like `libgl1-mesa-dev`.
 
 ### Android
 
@@ -148,9 +158,9 @@ Compilation to iOS is supported on macOS targeting the iOS simulator (`--target 
 
 ### Skia
 
-For situations in which Skia does not build or needs to be configured differently, we support some customization support in `skia-bindings/build.rs`. For more details about how to customize Skia builds, take a look at the [README of the skia-bindings package](skia-bindings/README.md).
+For situations in which Skia does not build or needs to be configured differently, we support some customization support in `skia-bindings/build.rs`. For more details take a look at the [README of the skia-bindings package](skia-bindings/README.md).
 
-Note that crate packages _will_ try to download prebuilt binaries from [skia-binaries](<https://github.com/rust-skia/skia-binaries/releases>) if the platform matches with one of the binaries build on the CI. If the download fails, a full build of Skia is triggered.
+Please share your build experience so that we can try to automate the build and get to the point where `cargo build` _is_ sufficient to build the bindings _including_ Skia, and if that is not possible, clearly prompts to what's missing.
 
 ## Examples
 
@@ -210,7 +220,8 @@ More details can be found at [CONTRIBUTING.md](https://github.com/rust-skia/rust
 
 ## Notable Contributions
 
-- The Rust-Skia Logo and the example program that renders it, by Alberto González Palomo ([@AlbertoGP](https://github.com/AlbertoGP))
+- Denis Kolodin ([@DenisKolodin](https://github.com/DenisKolodin)) added build support for Android.
+- Alberto González Palomo ([@AlbertoGP](https://github.com/AlbertoGP)) designed the Rust-Skia Logo and the example program that renders it.
 
 ## Maintainers
 
@@ -221,4 +232,4 @@ More details can be found at [CONTRIBUTING.md](https://github.com/rust-skia/rust
 
 MIT
 
-  
+  
