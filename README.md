@@ -40,14 +40,14 @@ Because building Skia takes a lot of time and needs tools that may not be instal
 |  Windows   | `x86_64-pc-windows-msvc` |
 | Linux Ubuntu 18 (16 should work, too).    | `x86_64-unknown-linux-gnu` |
 | macOS    | `x86_64-apple-darwin` |
-| Android (via macOS or Linux) | `aarch64-linux-android`<br/>`x86_64-linux-android` |
+| Android | `aarch64-linux-android`<br/>`x86_64-linux-android` |
 | iOS     | `aarch64-apple-ios`<br/>`x86_64-apple-ios` |
 
 There is no WebAssembly support. If you'd like to help out, take a look at issue [#42](https://github.com/rust-skia/rust-skia/pull/42).
 
 ### Bindings & Supported Features
 
-The supported bindings and Skia features are described in the [skia-safe package's readme](skia-safe/README.md) and prebuilt binaries are available for any single feature, or for all features combined.
+The supported bindings and Skia features are described in the [skia-safe package's readme](skia-safe/README.md) and prebuilt binaries are available for any single feature, or for all features combined.
 
 ## Building
 
@@ -57,7 +57,7 @@ To prepare for that, a number of prerequisites are needed:
 
 ### Prerequisites
 
-Building skia-bindings and Skia needs **LLVM** and **Python 2**.
+Building skia-bindings and Skia needs **LLVM** and **Python 2**.
 
 #### LLVM
 
