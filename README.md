@@ -51,7 +51,7 @@ The supported bindings and Skia features are described in the [skia-safe package
 
 ## Building
 
-If the target platform or feature configuration is not available as a prebuilt binary, skia-bindings' `build.rs` will try to build Skia and the generate the Rust bindings. 
+If the target platform or feature configuration is not available as a prebuilt binary, skia-bindings' `build.rs` will try to build Skia and generate the Rust bindings. 
 
 To prepare for that, **LLVM** and **Python 2** are needed:
 
