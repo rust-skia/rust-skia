@@ -31,19 +31,19 @@ sudo apt-get install pkg-config libssl-dev
 
 For other platforms, more information is available at the [OpenSSL crate documentation](https://docs.rs/openssl/0.10.24/openssl/#automatic).
 
-### Platform Support, Build Targets, and prebuilt Binaries
+### Platform Support, Build Targets, and Prebuilt Binaries
 
 Because building Skia takes a lot of time and needs tools that may not be installed, the skia-bindings crate's `build.rs` tries to download prebuilt binaries from [the skia-binaries repository](<https://github.com/rust-skia/skia-binaries/releases>).
 
 | Platform | Binaries |
-| ---- | ---- |
-|  Windows   | `x86_64-pc-windows-msvc` |
-| Linux Ubuntu 18 (16 should work, too).    | `x86_64-unknown-linux-gnu` |
+| -------- | -------- |
+|  Windows | `x86_64-pc-windows-msvc` |
+| Linux Ubuntu 18 (16 should work, too). | `x86_64-unknown-linux-gnu` |
 | macOS    | `x86_64-apple-darwin` |
-| Android | `aarch64-linux-android`<br/>`x86_64-linux-android` |
-| iOS     | `aarch64-apple-ios`<br/>`x86_64-apple-ios` |
+| Android  | `aarch64-linux-android`<br/>`x86_64-linux-android` |
+| iOS      | `aarch64-apple-ios`<br/>`x86_64-apple-ios` |
 
-There is no WebAssembly support. If you'd like to help out, take a look at issue [#42](https://github.com/rust-skia/rust-skia/pull/42).
+There no support for WebAssembly yet. If you'd like to help out, take a look at issue [#39](https://github.com/rust-skia/rust-skia/issues/39).
 
 ### Bindings & Supported Features
 
