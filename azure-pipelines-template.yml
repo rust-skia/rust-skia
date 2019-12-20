@@ -153,6 +153,11 @@ jobs:
 
     - template: 'azure-pipelines-build-target.yml'
       parameters:
+        target: 'i686-linux-android'
+        androidEnv: true
+
+    - template: 'azure-pipelines-build-target.yml'
+      parameters:
         target: 'aarch64-apple-ios'
         releaseBinaries: ${{ parameters.deployRelease }}
 
@@ -170,6 +175,11 @@ jobs:
     - template: 'azure-pipelines-build-target.yml'
       parameters:
         target: 'x86_64-linux-android'
+        androidEnv: true
+
+    - template: 'azure-pipelines-build-target.yml'
+      parameters:
+        target: 'i686-linux-android'
         androidEnv: true
 
 # TODO: Windows Android builds are temporarily disabled, because of:
