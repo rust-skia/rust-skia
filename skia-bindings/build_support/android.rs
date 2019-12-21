@@ -20,8 +20,8 @@ pub fn additional_clang_args(target: &str, target_arch: &str) -> Vec<String> {
     match (cargo::host().system.as_str(), target_arch) {
         // under Linux hosts and x68 targets, we do have better chances without
         // any further configuration adjustments.
-        ("linux", "i686") => {}
-        ("linux", "x86_64") => {}
+        // ("linux", "i686") => {}
+        // ("linux", "x86_64") => {}
         _ => {
             let ndk = ndk();
 
