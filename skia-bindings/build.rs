@@ -1,8 +1,8 @@
 mod build_support;
 use build_support::{binaries, cargo, git, skia, utils};
+use std::io;
 use std::io::Cursor;
 use std::path::Path;
-use std::{fs, io};
 
 /// Environment variables used by this build script.
 mod env {
