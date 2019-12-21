@@ -485,18 +485,22 @@ impl BinariesConfiguration {
         }
     }
 
-    /// Inform cargo that the output files of the given configuration are available and
+    /// Inform cargo that the library files of the given configuration are available and
     /// can be used as dependencies.
     pub fn commit_to_cargo(&self) {
-        cargo::add_link_libs(&self.link_libraries);
         println!(
             "cargo:rustc-link-search={}",
             self.output_directory.to_str().unwrap()
         );
 
+        // On Linux, the order is significant, first the static libraries we built, and then
+        // the system libraries.
+
         for lib in &self.built_libraries {
             cargo::add_link_lib(format!("static={}", lib));
         }
+
+        cargo::add_link_libs(&self.link_libraries);
     }
 }
 
