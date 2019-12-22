@@ -706,6 +706,9 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         //   std::_Tree* types
         .blacklist_type("std::_Tree.*")
         .blacklist_type("std::map.*")
+        //   debug builds:
+        .blacklist_type("SkLRUCache")
+        .blacklist_type("SkLRUCache_Entry")
         //   not used at all:
         .blacklist_type("std::vector.*")
         // Vulkan reexports that got swallowed by making them opaque.
