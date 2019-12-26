@@ -426,6 +426,21 @@ impl Canvas {
             .unwrap()
     }
 
+    pub fn save_layer_alpha(
+        &mut self,
+        bounds: impl Into<Option<Rect>>,
+        alpha: u8,
+    ) -> usize {
+        let bounds = match bounds.into() {
+            Some(bounds) => bounds.native(),
+            None => std::ptr::null(),
+        };
+
+        unsafe { self.native_mut().saveLayerAlpha(bounds, alpha.into()) }
+            .try_into()
+            .unwrap()
+    }
+
     pub fn restore(&mut self) -> &mut Self {
         unsafe { self.native_mut().restore() };
         self
