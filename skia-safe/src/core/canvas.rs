@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::{gpu, Drawable, Pixmap};
+use crate::{gpu, u8cpu, Drawable, Pixmap};
 use crate::{
     scalar, vertices, Bitmap, BlendMode, ClipOp, Color, Data, Font, IPoint, IRect, ISize, Image,
     ImageFilter, ImageInfo, Matrix, Paint, Path, Picture, Point, QuickReject, RRect, Rect, Region,
@@ -426,19 +426,13 @@ impl Canvas {
             .unwrap()
     }
 
-    pub fn save_layer_alpha(
-        &mut self,
-        bounds: impl Into<Option<Rect>>,
-        alpha: u8,
-    ) -> usize {
-        let bounds = match bounds.into() {
-            Some(bounds) => bounds.native(),
-            None => std::ptr::null(),
-        };
-
-        unsafe { self.native_mut().saveLayerAlpha(bounds, alpha.into()) }
-            .try_into()
-            .unwrap()
+    pub fn save_layer_alpha(&mut self, bounds: impl Into<Option<Rect>>, alpha: u8cpu) -> usize {
+        unsafe {
+            self.native_mut()
+                .saveLayerAlpha(bounds.into().native().as_ptr_or_null(), alpha)
+        }
+        .try_into()
+        .unwrap()
     }
 
     pub fn restore(&mut self) -> &mut Self {
