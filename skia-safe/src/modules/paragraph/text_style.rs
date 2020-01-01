@@ -198,6 +198,15 @@ impl Handle<sb::skia_textlayout_TextStyle> {
         self
     }
 
+    pub fn font_size(&self) -> scalar {
+        self.native().fFontSize
+    }
+
+    pub fn set_font_size(&mut self, font_size: scalar) -> &mut Self {
+        self.native_mut().fFontSize = font_size;
+        self
+    }
+
     pub fn shadows(&self) -> &[TextShadow] {
         unsafe {
             let ts: &sb::TextShadows = transmute_ref(&self.native().fTextShadows);
