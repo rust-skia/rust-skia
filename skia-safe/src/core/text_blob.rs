@@ -172,7 +172,7 @@ impl Handle<SkTextBlobBuilder> {
 
     pub fn alloc_run_pos_h(
         &mut self,
-        font: Font,
+        font: &Font,
         count: usize,
         y: scalar,
         bounds: Option<&Rect>,
@@ -193,7 +193,7 @@ impl Handle<SkTextBlobBuilder> {
 
     pub fn alloc_run_pos(
         &mut self,
-        font: Font,
+        font: &Font,
         count: usize,
         bounds: Option<&Rect>,
     ) -> (&mut [GlyphId], &mut [Point]) {
