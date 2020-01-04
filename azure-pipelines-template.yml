@@ -9,12 +9,12 @@ jobs:
 
   strategy:
     matrix:
-      stable:
-        toolchain: stable
-        features: ''
-        exampleArgs: '--driver cpu --driver pdf'
 
       ${{ if eq(parameters.deployRelease, 'True') }}:
+        stable:
+          toolchain: stable
+          features: ''
+          exampleArgs: ''
         stable-vulkan:
           toolchain: stable
           features: 'vulkan'
@@ -40,6 +40,11 @@ jobs:
           toolchain: stable
           features: 'vulkan,svg,shaper,textlayout'
           exampleArgs: '--driver cpu --driver pdf --driver svg'
+        stable-all-features-debug:
+          toolchain: stable
+          features: 'vulkan,svg,shaper,textlayout'
+          exampleArgs: ''
+          skiaDebug: '1'
         beta-all-features:
           toolchain: beta
           features: 'vulkan,svg,shaper,textlayout'
