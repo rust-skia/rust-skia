@@ -9,8 +9,6 @@ parameters:
   exampleArgs: ''
   # Set up Android environment? Not compatible with runBinaries or runClippy!
   androidEnv: false
-  # Build Skia with Debugging enabled?
-  skiaDebug: '0'
 
 steps:
   - bash: |
@@ -30,9 +28,8 @@ steps:
         export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=${{ parameters.target }}$(androidAPILevel)-clang$(androidBinExt)
         echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
       fi
-      set
       touch skia-bindings/build.rs
-      export SKIA_DEBUG=${{ parameters.skiaDebug }}
+      set
       (cd skia-safe && cargo build --release --features "$(features)" --all-targets --target ${{ parameters.target }} -vv)
       export SKIA_BINARIES_TAG=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/tag.txt")
       export SKIA_BINARIES_KEY=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/key.txt")
@@ -43,6 +40,7 @@ steps:
   - ${{ if eq(parameters.runClippy, True) }}:
     - bash: |
         set -e
+        set
         (cd skia-bindings && cargo clippy --release --features "$(features)" --all-targets --target ${{ parameters.target }} -- -D warnings)
         (cd skia-safe && cargo clippy --release --features "$(features)" --all-targets --target ${{ parameters.target }} -- -D warnings)
       displayName: 'Clippy skia-bindings and skia-safe'

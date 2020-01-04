@@ -44,7 +44,7 @@ jobs:
           toolchain: stable
           features: 'vulkan,svg,shaper,textlayout'
           exampleArgs: ''
-          skiaDebug: '1'
+          skia_debug: '1'
         beta-all-features:
           toolchain: beta
           features: 'vulkan,svg,shaper,textlayout'
