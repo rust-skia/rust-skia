@@ -46,9 +46,17 @@ impl Default for BuildConfiguration {
             }
         };
 
+        let skia_debug = {
+            match env::var("SKIA_DEBUG") {
+                Ok(v) if v != "0" => true,
+                Err(_) => true,
+                _ => false,
+            }
+        };
+
         BuildConfiguration {
             on_windows: cargo::host().is_windows(),
-            skia_release: cargo::build_release(),
+            skia_debug,
             keep_inline_functions: true,
             features: Features {
                 vulkan: cfg!(feature = "vulkan"),
@@ -70,8 +78,8 @@ pub struct BuildConfiguration {
     /// Do we build _on_ a Windows OS?
     on_windows: bool,
 
-    /// Build Skia in a release configuration?
-    skia_release: bool,
+    /// Build Skia in a debug configuration?
+    skia_debug: bool,
 
     /// Configure Skia builds to keep inline functions to
     /// prevent linker errors.
@@ -218,9 +226,9 @@ impl FinalBuildConfiguration {
             let mut args: Vec<(&str, String)> = vec![
                 (
                     "is_official_build",
-                    if build.skia_release { yes() } else { no() },
+                    if build.skia_debug { no() } else { yes() },
                 ),
-                ("is_debug", if build.skia_release { no() } else { yes() }),
+                ("is_debug", if build.skia_debug { yes() } else { no() }),
                 ("skia_use_system_libjpeg_turbo", no()),
                 ("skia_use_system_libpng", no()),
                 ("skia_use_libwebp", no()),
@@ -248,7 +256,7 @@ impl FinalBuildConfiguration {
             ];
 
             // further flags that limit the components of Skia debug builds.
-            if !build.skia_release {
+            if build.skia_debug {
                 args.push(("skia_enable_atlas_text", no()));
                 args.push(("skia_enable_spirv_validation", no()));
                 args.push(("skia_enable_tools", no()));

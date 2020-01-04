@@ -9,6 +9,8 @@ parameters:
   exampleArgs: ''
   # Set up Android environment? Not compatible with runBinaries or runClippy!
   androidEnv: false
+  # Build Skia with Debugging enabled?
+  skiaDebug: '0'
 
 steps:
   - bash: |
@@ -30,6 +32,7 @@ steps:
       fi
       set
       touch skia-bindings/build.rs
+      export SKIA_DEBUG=${{ parameters.skiaDebug }}
       (cd skia-safe && cargo build --release --features "$(features)" --all-targets --target ${{ parameters.target }} -vv)
       export SKIA_BINARIES_TAG=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/tag.txt")
       export SKIA_BINARIES_KEY=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/key.txt")
