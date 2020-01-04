@@ -22,6 +22,10 @@ To configure and build Skia, [`build_support/skia.rs`](build_support/skia.rs) do
 
 If both steps went well, the resulting Rust binding code is written to `src/bindings.rs`, and the `skia-bindings` library is found in the output directory alongside where Skia was built previously.
 
+### Debug Builds
+
+By default, and for performance reasons, Skia is built in release mode even when cargo creates debug output. Skia debug builds can be enabled only by explicitly setting the environment variable `SKIA_DEBUG=1`.
+
 ### Prebuilt Binaries
 
 Because building Skia _and_ creating the bindings is slow and depend on a number of components that lie outside the Rust ecosystem, we decided to experiment with prebuilt binaries.
