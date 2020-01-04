@@ -36,7 +36,7 @@ And whenever the build script detects that `skia-bindings` is built from inside 
 
 ## Build Customization
 
-Besides of the features `vulkan`, `svg`, and `shaper` that can be directly specified when the package is added as a cargo dependency, the Skia build can be customized further in `build.rs` by adjusting one of two structs that are defined in `build_support/skia.rs`:
+Besides of the features `vulkan`, `svg`, `shaper`, and `textlayout` that can be directly specified when the package is added as a cargo dependency, the Skia build can be customized further in `build.rs` by adjusting one of two structs that are defined in `build_support/skia.rs`:
 
 ### `BuildConfiguration`
 
