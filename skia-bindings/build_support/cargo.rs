@@ -1,5 +1,7 @@
 //! Support function for communicating with cargo's variables and outputs.
 
+#![allow(dead_code)]
+
 use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
 use std::{env, fmt, fs, io};
@@ -8,8 +10,22 @@ pub fn output_directory() -> PathBuf {
     PathBuf::from(env::var("OUT_DIR").unwrap())
 }
 
-pub fn add_dependent_path(path: impl AsRef<Path>) {
+pub fn rerun_if_changed(path: impl AsRef<Path>) {
     println!("cargo:rerun-if-changed={}", path.as_ref().to_str().unwrap());
+}
+
+/// Returns the value of an environment variable and notify cargo that the build
+/// should rereun if it changes.
+pub fn env_var(name: impl AsRef<str>) -> Option<String> {
+    let name = name.as_ref();
+    rerun_if_env_changed(name);
+    env::var(name).ok()
+}
+
+/// Notify cargo that it should rerun the build if the environment
+/// variable changes.
+pub fn rerun_if_env_changed(name: impl AsRef<str>) {
+    println!("cargo:rerun-if-env-changed={}", name.as_ref())
 }
 
 pub fn add_link_libs(libs: &[impl AsRef<str>]) {
