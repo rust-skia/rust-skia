@@ -69,6 +69,12 @@ impl Default for RCHandle<sb::skia_textlayout_TypefaceFontProvider> {
     }
 }
 
+impl Into<Option<FontMgr>> for TypefaceFontProvider {
+    fn into(self) -> Option<FontMgr> {
+        Some(self.deref().clone())
+    }
+}
+
 impl RCHandle<sb::skia_textlayout_TypefaceFontProvider> {
     pub fn new() -> Self {
         Self::from_ptr(unsafe { sb::C_TypefaceFontProvider_new() }).unwrap()
