@@ -69,6 +69,12 @@ impl Default for RCHandle<sb::skia_textlayout_TypefaceFontProvider> {
     }
 }
 
+impl Into<FontMgr> for TypefaceFontProvider {
+    fn into(self) -> FontMgr {
+        self.deref().clone()
+    }
+}
+
 impl RCHandle<sb::skia_textlayout_TypefaceFontProvider> {
     pub fn new() -> Self {
         Self::from_ptr(unsafe { sb::C_TypefaceFontProvider_new() }).unwrap()
@@ -101,6 +107,7 @@ impl RCHandle<sb::skia_textlayout_TypefaceFontProvider> {
 
 #[cfg(test)]
 mod tests {
+    use super::super::{FontCollection, TypefaceFontProvider};
     use super::TypefaceFontStyleSet;
     use crate::prelude::{NativeAccess, NativeRefCounted, NativeRefCountedBase};
     use crate::Typeface;
@@ -123,5 +130,17 @@ mod tests {
         drop(style_set);
         assert_eq!(tf.native().ref_counted_base()._ref_cnt(), base_cnt);
         drop(tf);
+    }
+
+    #[test]
+    #[serial_test_derive::serial]
+    fn treat_font_provider_as_font_mgr() {
+        let mut font_collection = FontCollection::new();
+        let typeface = Typeface::default();
+        let mut manager = TypefaceFontProvider::new();
+        manager.register_typeface(typeface, Some("AlArabiya"));
+        assert_eq!(font_collection.font_managers_count(), 0);
+        font_collection.set_asset_font_manager(Some(manager.into()));
+        assert_eq!(font_collection.font_managers_count(), 1);
     }
 }
