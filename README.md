@@ -33,7 +33,7 @@ For other platforms, more information is available at the [OpenSSL crate documen
 
 ### Platform Support, Build Targets, and Prebuilt Binaries
 
-Because building Skia takes a lot of time and needs tools that may not be installed, the skia-bindings crate's `build.rs` tries to download prebuilt binaries from [the skia-binaries repository](<https://github.com/rust-skia/skia-binaries/releases>).
+Because building Skia takes a lot of time and needs tools that may be missing, the skia-bindings crate's `build.rs` tries to download prebuilt binaries from [the skia-binaries repository](<https://github.com/rust-skia/skia-binaries/releases>).
 
 | Platform | Binaries |
 | -------- | -------- |
@@ -47,7 +47,7 @@ There no support for WebAssembly yet. If you'd like to help out, take a look at 
 
 ### Bindings & Supported Features
 
-The supported bindings and Skia features are described in the [skia-safe package's readme](skia-safe/README.md) and prebuilt binaries are available for any single feature, or for all features combined.
+The supported bindings and Skia features are described in the [skia-safe package's readme](skia-safe/README.md) and prebuilt binaries are available for any single feature or for all features combined.
 
 ## Building
 
@@ -57,7 +57,7 @@ To prepare for that, **LLVM** and **Python 2** are needed:
 
 **LLVM**
 
-We recommend the version that comes preinstalled with your platform or, if not available, the [latest official LLVM release](http://releases.llvm.org/download.html). To see which version of LLVM/Clang is installed on your system, use `clang --version`. 
+We recommend the version that comes preinstalled with your platform, or, if not available, the [latest official LLVM release](http://releases.llvm.org/download.html). To see which version of LLVM/Clang is installed on your system, use `clang --version`. 
 
 **Python 2**
 
