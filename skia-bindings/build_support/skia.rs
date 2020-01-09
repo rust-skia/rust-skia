@@ -373,7 +373,7 @@ fn no() -> String {
     "false".into()
 }
 
-/// The resulting binaries configuration.
+/// The configuration of the resulting binaries.
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct BinariesConfiguration {
     /// The feature identifiers we built with.
