@@ -144,6 +144,7 @@ impl TextLayout {
                 ("skia_use_icu", yes()),
                 ("skia_use_system_icu", no()),
                 ("skia_use_harfbuzz", yes()),
+                ("skia_pdf_subset_harfbuzz", yes()),
                 ("skia_use_system_harfbuzz", no()),
                 ("skia_use_sfntly", no()),
             ]);
