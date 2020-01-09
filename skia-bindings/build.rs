@@ -7,16 +7,18 @@ use std::{fs, io};
 
 /// Environment variables used by this build script.
 mod env {
-    use std::env;
+    use crate::build_support::cargo;
 
-    /// Returns true if the download should be forced, independent of the situation detected.
+    /// Returns true if the download should be forced. This can be used to test downloads
+    /// from within a repository build. If this environment variable is not set, binaries
+    /// are downloaded only in crate builds.
     pub fn force_skia_binaries_download() -> bool {
-        env::var("FORCE_SKIA_BINARIES_DOWNLOAD").is_ok()
+        cargo::env_var("FORCE_SKIA_BINARIES_DOWNLOAD").is_some()
     }
 
-    /// Force to build skia.
+    /// Force to build skia, even if there is a binary available.
     pub fn force_skia_build() -> bool {
-        env::var("FORCE_SKIA_BUILD").is_ok()
+        cargo::env_var("FORCE_SKIA_BUILD").is_some()
     }
 }
 

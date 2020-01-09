@@ -1,11 +1,10 @@
 use crate::build_support::cargo;
-use std::env;
 
 /// API level Android 8, Oreo (the first one with full Vulkan support)
 pub const API_LEVEL: &str = "26";
 
 pub fn ndk() -> String {
-    env::var("ANDROID_NDK").expect("ANDROID_NDK variable not set")
+    cargo::env_var("ANDROID_NDK").expect("ANDROID_NDK variable not set")
 }
 
 pub fn additional_clang_args(target: &str, target_arch: &str) -> Vec<String> {
