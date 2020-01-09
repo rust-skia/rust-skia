@@ -1,6 +1,6 @@
 //! Full build support for the Skia library, SkiaBindings library and bindings.rs file.
 
-use crate::build_support::{android, cargo, clang, git, ios, vs};
+use crate::build_support::{android, binaries, cargo, clang, git, ios, vs};
 use cc::Build;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -391,6 +391,9 @@ pub struct BinariesConfiguration {
     /// Additional files relative to the output_directory
     /// that are needed to build dependent projects.
     pub additional_files: Vec<PathBuf>,
+
+    /// `true` if the skia libraries are built with debugging information.
+    pub skia_debug: bool,
 }
 
 const SKIA_OUTPUT_DIR: &str = "skia";
@@ -488,6 +491,7 @@ impl BinariesConfiguration {
                 .collect(),
             built_libraries,
             additional_files,
+            skia_debug: build.skia_debug,
         }
     }
 
@@ -507,6 +511,10 @@ impl BinariesConfiguration {
         }
 
         cargo::add_link_libs(&self.link_libraries);
+    }
+
+    pub fn key(&self, repository_short_hash: &str) -> String {
+        binaries::key(repository_short_hash, &self.feature_ids, self.skia_debug)
     }
 }
 
