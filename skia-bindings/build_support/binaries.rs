@@ -1,6 +1,6 @@
 //! Support for exporting and building prebuilt binaries.
 
-use crate::build_support::{azure, binaries, cargo, git, skia};
+use crate::build_support::{azure, cargo, git, skia};
 use flate2::read::GzDecoder;
 use std::fs;
 use std::io;
@@ -19,7 +19,7 @@ pub fn should_export() -> Option<PathBuf> {
 /// Export the binaries to a target directory.
 pub fn export(config: &skia::BinariesConfiguration, target_dir: &Path) -> io::Result<()> {
     let half_hash = git::half_hash().expect("failed to retrieve the git hash");
-    let key = binaries::key(&half_hash, &config.feature_ids);
+    let key = config.key(&half_hash);
 
     let export_dir = prepare_export_directory(&key, target_dir)?;
 
@@ -71,7 +71,7 @@ pub const ARCHIVE_NAME: &str = "skia-binaries";
 /// Every part of the key is separated by '-' and no grouping / enclosing characters are used
 /// because GitHub strips them from the filenames (tested "<>[]{}()",
 /// and also Unicode characters seem to be stripped).
-pub fn key(repository_short_hash: &str, features: &[impl AsRef<str>]) -> String {
+pub fn key(repository_short_hash: &str, features: &[impl AsRef<str>], skia_debug: bool) -> String {
     let mut components = Vec::new();
 
     fn group(str: impl AsRef<str>) -> String {
@@ -100,6 +100,10 @@ pub fn key(repository_short_hash: &str, features: &[impl AsRef<str>]) -> String 
 
     if cargo::target_crt_static() {
         components.push("static".into());
+    }
+
+    if skia_debug {
+        components.push("debug".into())
     }
 
     components.join("-")
