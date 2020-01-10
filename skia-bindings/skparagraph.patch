@@ -26,3 +26,28 @@ index 5a85d37c4e..a3ab9b8846 100644
      public_configs = [ ":public_config" ]
      public = skparagraph_public
      if (skia_use_icu && skia_use_harfbuzz) {
+
+diff --git a/modules/skshaper/BUILD.gn b/modules/skshaper/BUILD.gn
+index a672d984f..a8b8bb39d 100644
+--- a/modules/skshaper/BUILD.gn
++++ b/modules/skshaper/BUILD.gn
+@@ -19,6 +19,7 @@ if (skia_enable_skshaper) {
+   }
+
+   component("skshaper") {
++    complete_static_lib = false
+     check_includes = false
+     import("skshaper.gni")
+     public_configs = [ ":public_config" ]
+diff --git a/third_party/icu/BUILD.gn b/third_party/icu/BUILD.gn
+index 50157f0bf..db72569f6 100644
+--- a/third_party/icu/BUILD.gn
++++ b/third_party/icu/BUILD.gn
+@@ -68,6 +68,7 @@ if (skia_use_system_icu) {
+   }
+
+   third_party("icu") {
++    complete_static_lib = false
+     public_include_dirs = [
+       "../externals/icu/source/common",
+       "../externals/icu/source/i18n",
