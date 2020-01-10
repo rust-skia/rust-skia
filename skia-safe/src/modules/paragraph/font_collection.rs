@@ -156,7 +156,6 @@ impl Handle<sb::Typefaces> {
     pub fn into_vec(mut self) -> Vec<Typeface> {
         let count = unsafe { sb::C_Typefaces_count(self.native()) };
         (0..count)
-            .into_iter()
             .map(|i| {
                 Typeface::from_ptr(unsafe { sb::C_Typefaces_release(self.native_mut(), i) })
                     .unwrap()
