@@ -9,7 +9,7 @@ use std::{fs, io};
 mod env {
     use crate::build_support::cargo;
 
-    /// Returns true if the download should be forced. This can be used to test downloads
+    /// Returns true if the download should be forced. This can be used to test prebuilt binaries
     /// from within a repository build. If this environment variable is not set, binaries
     /// are downloaded only in crate builds.
     pub fn force_skia_binaries_download() -> bool {
