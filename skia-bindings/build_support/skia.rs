@@ -526,9 +526,18 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
 
     // apply patches
 
+    let ref patch_root = PathBuf::from("skia");
+
+    // if there is any patch to be applied, be sure there is a git repository in the skia
+    // subdirectory, because otherwise git apply will silently fail.
+
+    if !build.skia_patches.is_empty() {
+        git::run(&["init"], Some(patch_root.as_path()));
+    }
+
     for patch in &build.skia_patches {
         println!("applying patch: {}", patch.name);
-        patch.apply(&PathBuf::from("skia"));
+        patch.apply(patch_root);
     }
 
     // configure Skia
@@ -588,7 +597,7 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
 
     for patch in &build.skia_patches {
         println!("reversing patch: {}", patch.name);
-        patch.reverse(&PathBuf::from("skia"));
+        patch.reverse(patch_root);
     }
 
     assert!(
