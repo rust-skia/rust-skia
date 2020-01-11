@@ -172,16 +172,6 @@ impl TextLayout {
         }
     }
 
-    fn patches(&self) -> Vec<Patch> {
-        match self {
-            TextLayout::ShaperAndParagraph => vec![Patch {
-                name: "skparagraph".into(),
-                marked_file: "BUILD.gn".into(),
-            }],
-            _ => Vec::new(),
-        }
-    }
-
     fn ninja_files(&self) -> Vec<PathBuf> {
         match self {
             TextLayout::None => Vec::new(),
@@ -197,9 +187,6 @@ impl TextLayout {
 /// This is the final, low level build configuration.
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct FinalBuildConfiguration {
-    /// Patches to be applied to the Skia repository.
-    pub skia_patches: Vec<Patch>,
-
     /// The name value pairs passed as arguments to gn.
     pub gn_args: Vec<(String, String)>,
 
@@ -358,7 +345,6 @@ impl FinalBuildConfiguration {
         };
 
         FinalBuildConfiguration {
-            skia_patches: features.text_layout.patches(),
             gn_args,
             ninja_files,
             definitions: build.definitions.clone(),
@@ -539,13 +525,6 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
         "`skia/tools/git-sync-deps` failed"
     );
 
-    // apply patches
-
-    for patch in &build.skia_patches {
-        println!("applying patch: {}", patch.name);
-        patch.apply(&PathBuf::from("skia"));
-    }
-
     // configure Skia
 
     let gn_args = build
@@ -595,16 +574,6 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .status();
-
-    // reverse patches
-    //
-    // Even though we patch only the gn configuration, we wait until the ninja build went through,
-    // because ninja may regenerate its files by calling into gn again (happened once on the CI).
-
-    for patch in &build.skia_patches {
-        println!("reversing patch: {}", patch.name);
-        patch.reverse(&PathBuf::from("skia"));
-    }
 
     assert!(
         ninja_status
@@ -1214,40 +1183,5 @@ pub(crate) mod definitions {
         let mut uniques = HashSet::new();
         definitions.retain(|e| uniques.insert(e.0.clone()));
         definitions
-    }
-}
-
-#[derive(Clone, PartialEq, Eq, Debug)]
-pub struct Patch {
-    name: String,
-    marked_file: PathBuf,
-}
-
-impl Patch {
-    fn apply(&self, root_dir: &Path) {
-        if !self.is_applied(root_dir) {
-            let patch_file = PathBuf::from("..").join(self.name.clone() + ".patch");
-            git::run(&["apply", patch_file.to_str().unwrap()], Some(root_dir));
-        }
-    }
-
-    fn reverse(&self, root_dir: &Path) {
-        if self.is_applied(root_dir) {
-            let patch_file = PathBuf::from("..").join(self.name.clone() + ".patch");
-            git::run(
-                &["apply", "--reverse", patch_file.to_str().unwrap()],
-                Some(root_dir),
-            );
-        }
-    }
-
-    fn is_applied(&self, root_dir: &Path) -> bool {
-        let build_gn = root_dir.join(&self.marked_file);
-        let contents = fs::read_to_string(build_gn).unwrap();
-        let patch_marker = format!(
-            "**SKIA-BINDINGS-PATCH-MARKER-{}**",
-            self.name.to_uppercase()
-        );
-        contents.contains(&patch_marker)
     }
 }
