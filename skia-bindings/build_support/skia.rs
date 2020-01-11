@@ -525,11 +525,11 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
 
     // call Skia's git-sync-deps
 
-    let python2 = &prerequisites::locate_python2_cmd();
-    println!("Python 2 found: {:?}", python2);
+    let python3 = &prerequisites::locate_python3_cmd();
+    println!("Python 3 found: {:?}", python3);
 
     assert!(
-        Command::new(python2)
+        Command::new(python3)
             .arg("skia/tools/git-sync-deps")
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
@@ -566,7 +566,7 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
         .args(&[
             "gen",
             output_directory_str,
-            &format!("--script-executable={}", python2),
+            &format!("--script-executable={}", python3),
             &format!("--args={}", gn_args),
         ])
         .envs(env::vars())
@@ -1003,21 +1003,21 @@ mod prerequisites {
     use std::path::{Path, PathBuf};
     use std::process::{Command, Stdio};
 
-    pub fn locate_python2_cmd() -> &'static str {
-        const PYTHON_CMDS: [&str; 2] = ["python", "python2"];
+    pub fn locate_python3_cmd() -> &'static str {
+        const PYTHON_CMDS: [&str; 2] = ["python", "python3"];
         for python in PYTHON_CMDS.as_ref() {
             println!("Probing '{}'", python);
-            if let Some(true) = is_python_version_2(python) {
+            if let Some(true) = is_python_version_3(python) {
                 return python;
             }
         }
 
-        panic!(">>>>> Probing for Python 2 failed, please make sure that it's available in PATH, probed executables are: {:?} <<<<<", PYTHON_CMDS);
+        panic!(">>>>> Probing for Python 3 failed, please make sure that it's available in PATH, probed executables are: {:?} <<<<<", PYTHON_CMDS);
     }
 
-    /// Returns true if the given python executable is python version 2.
+    /// Returns true if the given python executable is python version 3.
     /// or None if the executable was not found.
-    pub fn is_python_version_2(exe: impl AsRef<str>) -> Option<bool> {
+    pub fn is_python_version_3(exe: impl AsRef<str>) -> Option<bool> {
         Command::new(exe.as_ref())
             .arg("--version")
             .output()
@@ -1029,7 +1029,7 @@ mod prerequisites {
                 }
                 // Don't parse version output, for example output
                 // might be "Python 2.7.15+"
-                str.starts_with("Python 2.")
+                str.starts_with("Python 3.")
             })
             .ok()
     }
