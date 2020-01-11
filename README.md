@@ -54,17 +54,17 @@ The supported bindings and Skia features are described in the [skia-safe package
 
 If the target platform or feature configuration is not available as a prebuilt binary, skia-bindings' `build.rs` will try to build Skia and generate the Rust bindings. 
 
-To prepare for that, **LLVM** and **Python 2** are needed:
+To prepare for that, **LLVM** and **Python 3** are needed:
 
 **LLVM**
 
 We recommend the version that comes preinstalled with your platform, or, if not available, the [latest official LLVM release](http://releases.llvm.org/download.html). To see which version of LLVM/Clang is installed on your system, use `clang --version`. 
 
-**Python 2**
+**Python 3**
 
-Python version 2.7 _must_ be available.
+Python 3 _must_ be available.
 
-The build script probes for `python --version` and `python2 --version` and uses the first one that looks like a version 2 executable for building Skia.
+The build script probes for `python --version` and `python3 --version` and uses the first one that looks like a version 3 executable for building Skia.
 
 ### On macOS
 
@@ -95,10 +95,12 @@ The build script probes for `python --version` and `python2 --version` and uses 
   `clang.exe` is expected to be located at `C:/Program Files/LLVM/bin`, so be sure it's available from there.
 - [MSYS2](https://www.msys2.org/):
   
-  - Install Python2 with `pacman -S python2`.
+  - Install Python3 with `pacman -S python`.
+  
+    **Important:** If there is a side-by-side installation of a MinGW python3 _and_ a MSYS2 python3, the MSYS2 shell must be used, otherwise the MinGW python3 based build will fail.
 - Windows Shell (`Cmd.exe`):
   
-  - Download and install Python version 2 from [python.org](https://www.python.org/downloads/release/python-2716/).
+  - Download and install Python version 3 from [python.org](https://www.python.org/downloads).
 - Install and select the MSVC toolchain:
   ```bash
   rustup default stable-msvc
