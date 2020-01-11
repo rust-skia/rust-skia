@@ -1,4 +1,5 @@
 //! git build helper.
+#![allow(dead_code)]
 
 use std::path::Path;
 use std::process::{Command, Stdio};
@@ -27,7 +28,7 @@ pub fn trim_hash(hash: &str) -> String {
 /// Panics if the git command fails.
 pub fn run<'a>(args: &[impl AsRef<str>], dir: impl Into<Option<&'a Path>>) -> Vec<u8> {
     let args: Vec<&str> = args.iter().map(|s| s.as_ref()).collect();
-    let (status, output) = _run2(&args, dir);
+    let (status, output) = run2(&args, dir);
     if status == 0 {
         return output;
     }
@@ -37,7 +38,7 @@ pub fn run<'a>(args: &[impl AsRef<str>], dir: impl Into<Option<&'a Path>>) -> Ve
 /// Like run, but returns the status code _and_ the output or None if
 /// there is no status code (for example the command was interrupted).
 /// Panics if the git command could not be run at all.
-pub fn _run2<'a>(args: &[impl AsRef<str>], dir: impl Into<Option<&'a Path>>) -> (i32, Vec<u8>) {
+pub fn run2<'a>(args: &[impl AsRef<str>], dir: impl Into<Option<&'a Path>>) -> (i32, Vec<u8>) {
     let args: Vec<&str> = args.iter().map(|s| s.as_ref()).collect();
 
     let mut cmd = Command::new("git");
