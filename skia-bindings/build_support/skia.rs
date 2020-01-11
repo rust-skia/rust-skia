@@ -526,7 +526,7 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
 
     // apply patches
 
-    let ref patch_root = PathBuf::from("skia");
+    let patch_root = &PathBuf::from("skia");
 
     // if there is any patch to be applied, be sure there is a git repository in the skia
     // subdirectory, because otherwise git apply will silently fail.
