@@ -1,6 +1,6 @@
 //! Full build support for the Skia library, SkiaBindings library and bindings.rs file.
 
-use crate::build_support::{android, binaries, cargo, clang, git, ios, vs};
+use crate::build_support::{android, binaries, cargo, clang, git, ios, llvm, vs};
 use cc::Build;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -295,8 +295,13 @@ impl FinalBuildConfiguration {
                         flags.push("/MD");
                     }
                     // Tell Skia's build system where LLVM is supposed to be located.
-                    // TODO: this should be checked as a prerequisite.
-                    args.push(("clang_win", quote("C:/Program Files/LLVM")));
+                    if let Some(llvm_home) = llvm::win::find_llvm_home() {
+                        args.push(("clang_win", quote(&llvm_home)));
+                    } else {
+                        panic!(
+                            "Unable to locate LLVM installation. skia-bindings can not be built."
+                        );
+                    }
                 }
                 (arch, "linux", "android", _) => {
                     args.push(("ndk", quote(&android::ndk())));
