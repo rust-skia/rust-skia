@@ -2,9 +2,10 @@
 
 [![crates.io](https://img.shields.io/crates/v/skia-safe)](https://crates.io/crates/skia-safe) [![license](https://img.shields.io/crates/l/skia-safe)](LICENSE) [![Build Status](https://dev.azure.com/pragmatrix-github/rust-skia/_apis/build/status/rust-skia.rust-skia?branchName=master)](https://dev.azure.com/pragmatrix-github/rust-skia/_build/latest?branchName=master)
 
-Skia Submodule Status: chrome/m79 ([pending changes][skiapending]).
+Skia Submodule Status: chrome/m79 ([pending changes][skiapending], [our changes][skiaours]).
 
 [skiapending]: https://github.com/rust-skia/skia/compare/15a19f57bb...google:chrome/m79
+[skiaours]: https://github.com/google/skia/compare/chrome/m79...rust-skia:15a19f57bb
 
 ## Goals
 
