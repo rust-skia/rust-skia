@@ -88,16 +88,21 @@ The build script probes for `python --version` and `python2 --version` and uses 
 ### On Windows
 
 - Have the latest versions of `git` and Rust ready.
+
 - [Install Visual Studio 2019 Build Tools](https://visualstudio.microsoft.com/downloads/) or one of the IDE releases. If you installed the IDE, make sure that the [Desktop Development with C++ workload](https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=vs-2019) is installed.
+
 - Install the [latest LLVM](http://releases.llvm.org/download.html) distribution.
 
-  `clang.exe` is expected to be located at `C:/Program Files/LLVM/bin`, so be sure it's available from there.
+  If the environment variable `LLVM_HOME` is not defined, the build script will look for LLVM installations located at `C:\Program Files\LLVM\`, `C:\LLVM\`, and `%USERPROFILE%\scoop\apps\llvm\current\`.
+  
 - [MSYS2](https://www.msys2.org/):
   
   - Install Python2 with `pacman -S python2`.
+  
 - Windows Shell (`Cmd.exe`):
   
   - Download and install Python version 2 from [python.org](https://www.python.org/downloads/release/python-2716/).
+  
 - Install and select the MSVC toolchain:
   ```bash
   rustup default stable-msvc
