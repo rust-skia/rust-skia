@@ -17,13 +17,22 @@ pub fn should_export() -> Option<PathBuf> {
 }
 
 /// Export the binaries to a target directory.
-pub fn export(config: &skia::BinariesConfiguration, target_dir: &Path) -> io::Result<()> {
+///
+/// `source_files` are additional files from below skia-bindings/ that are copied to the target directory.
+pub fn export(
+    config: &skia::BinariesConfiguration,
+    source_files: &[(&str, &str)],
+    target_dir: &Path,
+) -> io::Result<()> {
     let half_hash = git::half_hash().expect("failed to retrieve the git hash");
     let key = config.key(&half_hash);
 
     let export_dir = prepare_export_directory(&key, target_dir)?;
 
-    fs::copy(crate::SRC_BINDINGS_RS, export_dir.join("bindings.rs"))?;
+    for source_file in source_files {
+        let (src, dst) = source_file;
+        fs::copy(PathBuf::from(src), export_dir.join(PathBuf::from(dst)))?;
+    }
 
     let output_directory = &config.output_directory;
 
