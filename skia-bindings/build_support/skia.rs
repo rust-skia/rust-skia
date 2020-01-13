@@ -441,7 +441,7 @@ impl BinariesConfiguration {
 
         match target.as_strs() {
             (_, "unknown", "linux", Some("gnu")) => {
-                link_libraries.extend(vec!["stdc++", "bz2", "GL", "fontconfig", "freetype"]);
+                link_libraries.extend(vec!["stdc++", "GL", "fontconfig", "freetype"]);
             }
             (_, "apple", "darwin", _) => {
                 link_libraries.extend(vec![
