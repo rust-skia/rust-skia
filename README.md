@@ -110,15 +110,37 @@ The build script probes for `python --version` and `python2 --version` and uses 
 
 ### On Linux
 
+#### Ubuntu 16+
+
 - LLVM/Clang should be available already, if not, [install the latest version](http://releases.llvm.org/download.html).
 
-Then use:
+- If OpenGL libraries are missing, install the drivers for you graphics card, or a mesa package like `libgl1-mesa-dev`.
 
-```bash
-cargo build -vv
-```
+#### CentOS 7
 
-If OpenGL libraries are missing, install the drivers for you graphics card, or a mesa package like `libgl1-mesa-dev`.
+- Install the following packages:
+
+  ```bash
+  sudo yum install gcc openssl-devel libX11-devel python2 fontconfig-devel mesa-libGL-devel
+  ```
+
+- [Install and enable the LLVM toolset 7](https://www.softwarecollections.org/en/scls/rhscl/llvm-toolset-7.0/)
+
+- [Install and enable the Developer Toolset 8](https://www.softwarecollections.org/en/scls/rhscl/devtoolset-8/)
+
+#### CentOS 8
+
+- Install the following packages:
+
+  ```bash
+  sudo yum install gcc openssl-devel libX11-devel python2 clang fontconfig-devel mesa-libGL-devel
+  ```
+
+- Set `/usr/bin/python2` as the default `python` command:
+
+  ```bash
+  sudo alternatives --set python /usr/bin/python2
+  ```
 
 ### For Android
 
