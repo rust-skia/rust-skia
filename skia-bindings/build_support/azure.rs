@@ -1,4 +1,4 @@
-use std::env;
+use crate::build_support::cargo;
 use std::path::PathBuf;
 
 /// Are we running on azure-pipelines?
@@ -8,7 +8,5 @@ pub fn is_active() -> bool {
 
 /// Returns the artifact staging directory.
 pub fn artifact_staging_directory() -> Option<PathBuf> {
-    env::var("BUILD_ARTIFACTSTAGINGDIRECTORY")
-        .map(PathBuf::from)
-        .ok()
+    cargo::env_var("BUILD_ARTIFACTSTAGINGDIRECTORY").map(PathBuf::from)
 }
