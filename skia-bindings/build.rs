@@ -59,7 +59,6 @@ mod env {
     }
 }
 
-const SRC_BINDINGS_RS: &str = "src/bindings.rs";
 const SKIA_LICENSE: &str = "skia/LICENSE";
 
 fn main() {
@@ -162,10 +161,7 @@ fn main() {
         );
 
         println!("EXPORTING BINARIES");
-        let source_files = &[
-            (SRC_BINDINGS_RS, "bindings.rs"),
-            (SKIA_LICENSE, "LICENSE_SKIA"),
-        ];
+        let source_files = &[(SKIA_LICENSE, "LICENSE_SKIA")];
         binaries::export(&binaries_config, source_files, &staging_directory)
             .expect("EXPORTING BINARIES FAILED")
     }
