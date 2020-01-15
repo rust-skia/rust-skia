@@ -1,6 +1,6 @@
 mod build_support;
 use crate::build_support::skia::FinalBuildConfiguration;
-use build_support::{azure, binaries, cargo, git, skia, utils};
+use build_support::{binaries, cargo, git, skia, utils};
 use std::io::Cursor;
 use std::path::Path;
 use std::{fs, io};
