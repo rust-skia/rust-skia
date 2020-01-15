@@ -527,6 +527,7 @@ impl RefHandle<SkShaper> {
 }
 
 pub mod icu {
+
     /// On Windows, this function writes the file `icudtl.dat` into the current
     /// executable's directory making sure that it's available when text shaping is used in Skia.
     ///
@@ -535,7 +536,13 @@ pub mod icu {
     ///
     /// Note that it is currently not possible to load `icudtl.dat` from another location.
     pub fn init() {
-        skia_bindings::icu::init()
+        skia_bindings::icu::init();
+
+        // Since m80, there is an initialization problem of icu in the module skparagraph,
+        // which we do not understand yet, but powering up an harfbuzz Shaper compensates
+        // for that.
+        #[cfg(all(windows, feature = "textlayout"))]
+        crate::Shaper::new(None);
     }
 }
 
