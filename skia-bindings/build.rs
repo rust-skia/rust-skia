@@ -69,8 +69,6 @@ fn main() {
     // publish binaries?
     //
 
-    // TODO: we may not want to deliver binaries when we downloaded the binaries
-    //       but how to inform azure if we don't want to?
     if let Some(staging_directory) = binaries::should_export() {
         println!(
             "DETECTED AZURE, exporting binaries to {}",
@@ -101,12 +99,6 @@ fn should_try_download_binaries(config: &skia::BinariesConfiguration) -> Option<
     // are we building inside a package?
     if let Ok(ref full_hash) = cargo::package_repository_hash() {
         let half_hash = git::trim_hash(full_hash);
-        return Some((tag, config.key(&half_hash)));
-    }
-
-    if azure::is_active() {
-        // and if we can resolve the hash and the key
-        let half_hash = git::half_hash()?;
         return Some((tag, config.key(&half_hash)));
     }
 
