@@ -109,13 +109,6 @@
 #include "include/utils/SkShadowUtils.h"
 #include "include/utils/SkTextUtils.h"
 
-#if defined(SK_VULKAN)
-#include "include/gpu/vk/GrVkVulkan.h"
-#include "include/gpu/vk/GrVkTypes.h"
-#include "include/gpu/vk/GrVkBackendContext.h"
-#include "include/gpu/GrBackendSurface.h"
-#endif
-
 #if defined(SK_XML)
 #include "include/svg/SkSVGCanvas.h"
 #endif
@@ -2757,18 +2750,6 @@ extern "C" void C_GrBackendFormat_ConstructGL(GrBackendFormat* uninitialized, Gr
     new(uninitialized)GrBackendFormat(GrBackendFormat::MakeGL(format, target));
 }
 
-#if defined(SK_VULKAN)
-
-extern "C" void C_GrBackendFormat_ConstructVk(GrBackendFormat* uninitialized, VkFormat format) {
-    new(uninitialized)GrBackendFormat(GrBackendFormat::MakeVk(format));
-}
-
-extern "C" void C_GrBackendFormat_ConstructVk2(GrBackendFormat* uninitialized, const GrVkYcbcrConversionInfo* ycbcrInfo) {
-    new(uninitialized)GrBackendFormat(GrBackendFormat::MakeVk(*ycbcrInfo));
-}
-
-#endif
-
 extern "C" void C_GrBackendFormat_destruct(GrBackendFormat* self) {
     self->~GrBackendFormat();
 }
@@ -2888,14 +2869,6 @@ extern "C" GrBackendApi C_GrBackendDrawableInfo_backend(const GrBackendDrawableI
     return self->backend();
 }
 
-#if defined(SK_VULKAN)
-
-extern "C" bool C_GrBackendDrawableInfo_getVkDrawableInfo(const GrBackendDrawableInfo* self, GrVkDrawableInfo* info) {
-    return self->getVkDrawableInfo(info);
-}
-
-#endif
-
 //
 // pathops/
 //
@@ -2941,71 +2914,6 @@ extern "C" void C_SkInterpolator_setMirror(SkInterpolator* self, bool mirror) {
 extern "C" SkCanvas* C_SkMakeNullCanvas() {
     return SkMakeNullCanvas().release();
 }
-
-#if defined(SK_VULKAN)
-
-extern "C" void C_GPU_VK_Types(GrVkExtensionFlags *, GrVkFeatureFlags *) {}
-
-// The GrVkBackendContext struct binding's length is too short
-// because of the std::function that is used in it.
-
-typedef PFN_vkVoidFunction (*GetProcFn)(const char* name, VkInstance instance, VkDevice device);
-typedef const void* (*GetProcFnVoidPtr)(const char* name, VkInstance instance, VkDevice device);
-
-extern "C" void* C_GrVkBackendContext_New(
-        void* instance,
-        void* physicalDevice,
-        void* device,
-        void* queue,
-        uint32_t graphicsQueueIndex,
-
-        /* PFN_vkVoidFunction makes us trouble on the Rust side */
-        GetProcFnVoidPtr getProc) {
-
-    auto& context = *new GrVkBackendContext();
-    context.fInstance = static_cast<VkInstance>(instance);
-    context.fPhysicalDevice = static_cast<VkPhysicalDevice>(physicalDevice);
-    context.fDevice = static_cast<VkDevice>(device);
-    context.fQueue = static_cast<VkQueue>(queue);
-    context.fGraphicsQueueIndex = graphicsQueueIndex;
-
-    context.fGetProc = *(reinterpret_cast<GetProcFn*>(&getProc));
-    return &context;
-}
-
-extern "C" void C_GrVkBackendContext_Delete(void* vkBackendContext) {
-    delete static_cast<GrVkBackendContext*>(vkBackendContext);
-}
-
-extern "C" GrContext* C_GrContext_MakeVulkan(const GrVkBackendContext* vkBackendContext) {
-    return GrContext::MakeVulkan(*vkBackendContext).release();
-}
-
-//
-// GrVkTypes.h
-//
-
-extern "C" void C_GrVkAlloc_Construct(GrVkAlloc* uninitialized, VkDeviceMemory memory, VkDeviceSize offset, VkDeviceSize size, uint32_t flags) {
-    new (uninitialized) GrVkAlloc(memory, offset, size, flags);
-}
-
-extern "C" bool C_GrVkAlloc_Equals(const GrVkAlloc* lhs, const GrVkAlloc* rhs) {
-    return *lhs == *rhs;
-}
-
-extern "C" bool C_GrVkYcbcrConversionInfo_Equals(const GrVkYcbcrConversionInfo* lhs, const GrVkYcbcrConversionInfo* rhs) {
-    return *lhs == *rhs;
-}
-
-extern "C" void C_GrVkImageInfo_updateImageLayout(GrVkImageInfo* self, VkImageLayout layout) {
-    self->updateImageLayout(layout);
-}
-
-extern "C" bool C_GrVkImageInfo_Equals(const GrVkImageInfo* lhs, const GrVkImageInfo* rhs) {
-    return *lhs == *rhs;
-}
-
-#endif
 
 #if defined(SK_XML)
 

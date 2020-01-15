@@ -359,6 +359,9 @@ impl FinalBuildConfiguration {
             let mut sources: Vec<PathBuf> = Vec::new();
             sources.push("src/bindings.cpp".into());
             sources.extend(features.text_layout.sources());
+            if features.vulkan {
+                sources.push("src/vulkan.cpp".into());
+            }
             sources
         };
 
