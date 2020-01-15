@@ -96,8 +96,8 @@ fn should_try_download_binaries(config: &skia::BinariesConfiguration) -> Option<
         return Some((tag, config.key(&half_hash)));
     }
 
-    // are we building inside a package?
-    if let Ok(ref full_hash) = cargo::package_repository_hash() {
+    // are we building inside a crate?
+    if let Ok(ref full_hash) = cargo::crate_repository_hash() {
         let half_hash = git::trim_hash(full_hash);
         return Some((tag, config.key(&half_hash)));
     }
