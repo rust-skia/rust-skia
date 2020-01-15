@@ -133,14 +133,14 @@ pub fn build_release() -> bool {
     }
 }
 
-/// Are we inside the crate?
+/// Are we inside a crate?
 pub fn is_crate() -> bool {
-    package_repository_hash().is_ok()
+    crate_repository_hash().is_ok()
 }
 
-// If we are builing from within a packaged crate, return the full commit hash
-// of the original repository we were packaged from.
-pub fn package_repository_hash() -> io::Result<String> {
+// If we are building from within a crate, return the full commit hash
+// of the repository the crate was packaged from.
+pub fn crate_repository_hash() -> io::Result<String> {
     let vcs_info = fs::read_to_string(".cargo_vcs_info.json")?;
     let value: serde_json::Value = serde_json::from_str(&vcs_info)?;
     let git = value.get("git").expect("failed to get 'git' property");
