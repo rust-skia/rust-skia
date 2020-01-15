@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use crate::build_support::cargo;
 use std::path::PathBuf;
 
