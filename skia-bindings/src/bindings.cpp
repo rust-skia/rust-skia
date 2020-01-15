@@ -134,6 +134,12 @@ extern "C" void C_SkEncodedOriginToMatrix(SkEncodedOrigin origin, int w, int h, 
 }
 
 //
+// core/
+//
+
+extern "C" void C_Core_Types(SkCubicMap *, SkGraphics *) {};
+
+//
 // core/SkSurface.h
 //
 
@@ -708,7 +714,8 @@ extern "C" void C_SkPathMeasure_destruct(const SkPathMeasure* self) {
 // core/SkPathTypes.h
 //
 
-extern "C" void C_SkPathTypes_Types(SkPathFillType, SkPathConvexityType, SkPathDirection, SkPathSegmentMask, SkPathVerb) {}
+extern "C" void
+C_SkPathTypes_Types(SkPathFillType *, SkPathConvexityType *, SkPathDirection *, SkPathSegmentMask *, SkPathVerb *) {}
 
 //
 // SkCanvas
@@ -768,7 +775,7 @@ extern "C" void C_SkCanvas_discard(SkCanvas* self) {
 }
 
 //
-// SkAutoCanvasRestore
+// core/SkAutoCanvasRestore.h
 //
 
 #undef SkAutoCanvasRestore
@@ -842,8 +849,10 @@ extern "C" void C_SkImageInfo_reset(SkImageInfo* self) {
 }
 
 //
-// SkColorSpace
+// core/SkColorSpace.h
 //
+
+extern "C" void C_SkColorSpace_Types(SkColorSpacePrimaries *) {}
 
 extern "C" void C_SkColorSpace_ref(const SkColorSpace* self) {
     self->ref();
@@ -2040,9 +2049,16 @@ extern "C" SkStreamAsset* C_SkDynamicMemoryWStream_detachAsStream(SkDynamicMemor
 }
 
 //
+// effects/
+//
+
+extern "C" void C_Effects_Types(SkTableMaskFilter *) {}
+
+//
 // effects/SkGradientShader.h
 //
 
+extern "C" void C_SkGradientShader_Types(SkGradientShader *) {}
 extern "C" SkShader* C_SkGradientShader_MakeLinear(const SkPoint pts[2], const SkColor colors[], const SkScalar pos[], int count, SkTileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
     return SkGradientShader::MakeLinear(pts, colors, pos, count, mode, flags, localMatrix).release();
 }
@@ -2287,6 +2303,8 @@ C_SkImageSource_Make2(SkImage* image, const SkRect &srcRect, const SkRect &dstRe
 //
 // effects/SkLayerDrawLooper.h
 //
+
+extern "C" void C_SkLayerDrawLooper_Types(SkLayerDrawLooper *) {}
 
 extern "C" void C_SkLayerDrawLooper_Builder_destruct(SkLayerDrawLooper::Builder* self) {
     self->~Builder();
@@ -2776,6 +2794,12 @@ extern "C" bool C_GrGLFramebufferInfo_Equals(const GrGLFramebufferInfo* lhs, con
 }
 
 //
+// gpu/gl/
+//
+
+extern "C" void C_GPU_GL_Types(GrGLBackendState *) {}
+
+//
 // gpu/gl/GrGLInterface.h
 //
 
@@ -2888,6 +2912,8 @@ extern "C" void C_SkOpBuilder_destruct(SkOpBuilder* self) {
 // utils
 //
 
+extern "C" void C_Utils_Types(SkShadowFlags *, SkShadowUtils *, SkTextUtils *, SkParsePath *) {}
+
 extern "C" Sk3DView* C_Sk3DView_new() {
     return new Sk3DView();
 }
@@ -2917,6 +2943,8 @@ extern "C" SkCanvas* C_SkMakeNullCanvas() {
 }
 
 #if defined(SK_VULKAN)
+
+extern "C" void C_GPU_VK_Types(GrVkExtensionFlags *, GrVkFeatureFlags *) {}
 
 // The GrVkBackendContext struct binding's length is too short
 // because of the std::function that is used in it.
@@ -2980,6 +3008,8 @@ extern "C" bool C_GrVkImageInfo_Equals(const GrVkImageInfo* lhs, const GrVkImage
 #endif
 
 #if defined(SK_XML)
+
+extern "C" void C_SVG_Types(SkSVGCanvas *) {}
 
 extern "C" SkCanvas* C_SkSVGCanvas_Make(const SkRect* bounds, SkWStream* writer, uint32_t flags) {
     return SkSVGCanvas::Make(*bounds, writer, flags).release();

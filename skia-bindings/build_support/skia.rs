@@ -649,89 +649,13 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .raw_line("#![allow(invalid_value)]")
         .raw_line("#![allow(deprecated)]")
         .parse_callbacks(Box::new(ParseCallbacks))
+        .whitelist_function("C_.*")
         .constified_enum(".*Mask")
         .constified_enum(".*Flags")
         .constified_enum(".*Bits")
         .constified_enum("SkCanvas_SaveLayerFlagsSet")
         .constified_enum("GrVkAlloc_Flag")
         .constified_enum("GrGLBackendState")
-        .whitelist_function("C_.*")
-        .whitelist_function("SkAnnotateRectWithURL")
-        .whitelist_function("SkAnnotateNamedDestination")
-        .whitelist_function("SkAnnotateLinkToDestination")
-        .whitelist_function("SkColorTypeBytesPerPixel")
-        .whitelist_function("SkColorTypeIsAlwaysOpaque")
-        .whitelist_function("SkColorTypeValidateAlphaType")
-        .whitelist_function("SkRGBToHSV")
-        // this function does not whitelist (probably because of inlining):
-        .whitelist_function("SkColorToHSV")
-        .whitelist_function("SkHSVToColor")
-        .whitelist_function("SkPreMultiplyARGB")
-        .whitelist_function("SkPreMultiplyColor")
-        .whitelist_function("SkBlendMode_AsCoeff")
-        .whitelist_function("SkBlendMode_Name")
-        .whitelist_function("SkSwapRB")
-        // functions for which the doc generation fails.
-        .blacklist_function("SkColorFilter_asComponentTable")
-        // core/
-        .whitelist_type("SkAutoCanvasRestore")
-        .whitelist_type("SkColorSpacePrimaries")
-        .whitelist_type("SkContourMeasure")
-        .whitelist_type("SkContourMeasureIter")
-        .whitelist_type("SkCubicMap")
-        .whitelist_type("SkDataTable")
-        .whitelist_type("SkDocument")
-        .whitelist_type("SkDrawLooper")
-        .whitelist_type("SkDynamicMemoryWStream")
-        .whitelist_type("SkFontMgr")
-        .whitelist_type("SkGraphics")
-        .whitelist_type("SkMemoryStream")
-        .whitelist_type("SkMultiPictureDraw")
-        .whitelist_type("SkPathMeasure")
-        .whitelist_type("SkPictureRecorder")
-        .whitelist_type("SkVector4")
-        .whitelist_type("SkYUVASizeInfo")
-        // effects/
-        .whitelist_type("SkPath1DPathEffect")
-        .whitelist_type("SkLine2DPathEffect")
-        .whitelist_type("SkPath2DPathEffect")
-        .whitelist_type("SkCornerPathEffect")
-        .whitelist_type("SkDashPathEffect")
-        .whitelist_type("SkDiscretePathEffect")
-        .whitelist_type("SkGradientShader")
-        .whitelist_type("SkLayerDrawLooper_Bits")
-        .whitelist_type("SkPerlinNoiseShader")
-        .whitelist_type("SkTableColorFilter")
-        .whitelist_type("SkTableMaskFilter")
-        // gpu/
-        .whitelist_type("GrGLBackendState")
-        // gpu/vk/
-        .whitelist_type("GrVkDrawableInfo")
-        .whitelist_type("GrVkExtensionFlags")
-        .whitelist_type("GrVkFeatureFlags")
-        // pathops/
-        .whitelist_type("SkPathOp")
-        .whitelist_function("Op")
-        .whitelist_function("Simplify")
-        .whitelist_function("TightBounds")
-        .whitelist_function("AsWinding")
-        .whitelist_type("SkOpBuilder")
-        // svg/
-        .whitelist_type("SkSVGCanvas")
-        // utils/
-        .whitelist_function("Sk3LookAt")
-        .whitelist_function("Sk3Perspective")
-        .whitelist_function("Sk3MapPts")
-        .whitelist_function("SkUnitCubicInterp")
-        .whitelist_type("Sk3DView")
-        .whitelist_type("SkInterpolator")
-        .whitelist_type("SkParsePath")
-        .whitelist_type("SkShadowUtils")
-        .whitelist_type("SkShadowFlags")
-        .whitelist_type("SkTextUtils")
-        // modules/skshaper/
-        .whitelist_type("SkShaper")
-        .whitelist_type("RustRunHandler")
         // modules/skparagraph
         //   pulls in a std::map<>, which we treat as opaque, but bindgen creates wrong bindings for
         //   std::_Tree* types
@@ -743,6 +667,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         //   not used at all:
         .blacklist_type("std::vector.*")
         // Vulkan reexports that got swallowed by making them opaque.
+        // (these can not be whitelisted by a extern "C" function)
         .whitelist_type("VkPhysicalDeviceFeatures")
         .whitelist_type("VkPhysicalDeviceFeatures2")
         // misc
@@ -754,6 +679,10 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         // required for macOS LLVM 8 to pick up C++ headers:
         .clang_args(&["-x", "c++"])
         .clang_arg("-v");
+
+    for function in WHITELISTED_FUNCTIONS {
+        builder = builder.whitelist_function(function)
+    }
 
     for opaque_type in OPAQUE_TYPES {
         builder = builder.opaque_type(opaque_type)
@@ -835,6 +764,36 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
 }
+
+const WHITELISTED_FUNCTIONS: &[&str] = &[
+    "SkAnnotateRectWithURL",
+    "SkAnnotateNamedDestination",
+    "SkAnnotateLinkToDestination",
+    "SkColorTypeBytesPerPixel",
+    "SkColorTypeIsAlwaysOpaque",
+    "SkColorTypeValidateAlphaType",
+    "SkRGBToHSV",
+    // this function does not whitelist (probably because of inlining):
+    "SkColorToHSV",
+    "SkHSVToColor",
+    "SkPreMultiplyARGB",
+    "SkPreMultiplyColor",
+    "SkBlendMode_AsCoeff",
+    "SkBlendMode_Name",
+    "SkSwapRB",
+    // functions for which the doc generation fails
+    "SkColorFilter_asComponentTable",
+    // pathops/
+    "Op",
+    "Simplify",
+    "TightBounds",
+    "AsWinding",
+    // utils/
+    "Sk3LookAt",
+    "Sk3Perspective",
+    "Sk3MapPts",
+    "SkUnitCubicInterp",
+];
 
 const OPAQUE_TYPES: &[&str] = &[
     // Types for which the binding generator pulls in stuff that can not be compiled.
