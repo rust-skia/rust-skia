@@ -651,9 +651,6 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .raw_line("#![allow(clippy::all)]")
         // GrVkBackendContext contains u128 fields on macOS
         .raw_line("#![allow(improper_ctypes)]")
-        // mem::uninitialized()
-        .raw_line("#![allow(invalid_value)]")
-        .raw_line("#![allow(deprecated)]")
         .parse_callbacks(Box::new(ParseCallbacks))
         .whitelist_function("C_.*")
         .constified_enum(".*Mask")
