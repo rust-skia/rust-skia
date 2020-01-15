@@ -6,5 +6,7 @@ pub(crate) use self::stream::*;
 mod string;
 pub(crate) use self::string::*;
 
+#[cfg(feature = "textlayout")]
 mod strings;
+#[cfg(feature = "textlayout")]
 pub(crate) use self::strings::*;
