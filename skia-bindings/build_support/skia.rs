@@ -362,6 +362,9 @@ impl FinalBuildConfiguration {
             if features.vulkan {
                 sources.push("src/vulkan.cpp".into());
             }
+            if features.svg {
+                sources.push("src/svg.cpp".into())
+            }
             sources
         };
 

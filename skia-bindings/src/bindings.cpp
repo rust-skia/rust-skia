@@ -109,10 +109,6 @@
 #include "include/utils/SkShadowUtils.h"
 #include "include/utils/SkTextUtils.h"
 
-#if defined(SK_XML)
-#include "include/svg/SkSVGCanvas.h"
-#endif
-
 template<typename T>
 inline sk_sp<T> sp(T* pt) {
     return sk_sp<T>(pt);
@@ -2914,13 +2910,3 @@ extern "C" void C_SkInterpolator_setMirror(SkInterpolator* self, bool mirror) {
 extern "C" SkCanvas* C_SkMakeNullCanvas() {
     return SkMakeNullCanvas().release();
 }
-
-#if defined(SK_XML)
-
-extern "C" void C_SVG_Types(SkSVGCanvas *) {}
-
-extern "C" SkCanvas* C_SkSVGCanvas_Make(const SkRect* bounds, SkWStream* writer, uint32_t flags) {
-    return SkSVGCanvas::Make(*bounds, writer, flags).release();
-}
-
-#endif
