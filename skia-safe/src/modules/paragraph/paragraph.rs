@@ -184,23 +184,15 @@ impl<'a> Borrows<'a, Handle<sb::LineMetricsVector>> {
 #[test]
 #[serial_test_derive::serial]
 fn test_line_metrics() {
-    use crate::icu;
-    icu::init();
-
     // note: some of the following code is copied from the skparagraph skia-org example.
+    use crate::icu;
     use crate::textlayout::{FontCollection, ParagraphBuilder, ParagraphStyle, TextStyle};
     use crate::FontMgr;
 
+    icu::init();
+
     let mut font_collection = FontCollection::new();
     font_collection.set_default_font_manager(FontMgr::new(), None);
-
-    // As of Skia: 6d1c0d4196f19537cc64f74bacc7d123de3be454
-    // 1000 runs of this function can be used to reliably reproduce a crash on macOS with a segmentation
-    // fault if font fallback is not disabled in the font collection.
-    // For more information: https://github.com/pragmatrix/rust-skia/pull/2#issuecomment-531819718
-    #[cfg(target_os = "macos")]
-    font_collection.disable_font_fallback();
-
     let paragraph_style = ParagraphStyle::new();
     let mut paragraph_builder = ParagraphBuilder::new(&paragraph_style, font_collection);
     let ts = TextStyle::new();
