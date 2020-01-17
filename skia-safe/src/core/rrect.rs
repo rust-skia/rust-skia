@@ -1,39 +1,19 @@
 use crate::prelude::*;
 use crate::{scalar, Matrix, Rect, Vector};
 use skia_bindings as sb;
-use skia_bindings::{SkRRect, SkRRect_Corner, SkRRect_Type};
+use skia_bindings::SkRRect;
 use std::{mem, ptr};
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum Type {
-    Empty = SkRRect_Type::kEmpty_Type as _,
-    Rect = SkRRect_Type::kRect_Type as _,
-    Oval = SkRRect_Type::kOval_Type as _,
-    Simple = SkRRect_Type::kSimple_Type as _,
-    NinePatch = SkRRect_Type::kNinePatch_Type as _,
-    Complex = SkRRect_Type::kComplex_Type as _,
-}
-
-impl NativeTransmutable<SkRRect_Type> for Type {}
+pub use skia_bindings::SkRRect_Type as Type;
 #[test]
-fn test_rrect_type_layout() {
-    Type::test_layout()
+fn test_rrect_type_naming() {
+    let _ = Type::Complex;
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum Corner {
-    UpperLeft = SkRRect_Corner::kUpperLeft_Corner as _,
-    UpperRight = SkRRect_Corner::kUpperRight_Corner as _,
-    LowerRight = SkRRect_Corner::kLowerRight_Corner as _,
-    LowerLeft = SkRRect_Corner::kLowerLeft_Corner as _,
-}
-
-impl NativeTransmutable<SkRRect_Corner> for Corner {}
+pub use skia_bindings::SkRRect_Corner as Corner;
 #[test]
-fn test_rrect_corner_layout() {
-    Corner::test_layout()
+fn test_rrect_corner_naming() {
+    let _ = Corner::LowerLeft;
 }
 
 #[derive(Copy, Clone)]
@@ -70,7 +50,7 @@ impl RRect {
     }
 
     pub fn get_type(&self) -> Type {
-        Type::from_native(unsafe { sb::C_SkRRect_getType(self.native()) })
+        unsafe { sb::C_SkRRect_getType(self.native()) }
     }
 
     pub fn is_empty(&self) -> bool {

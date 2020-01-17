@@ -4,64 +4,26 @@ use crate::{
     MaskFilter, Path, PathEffect, Rect, Shader,
 };
 use skia_bindings as sb;
-use skia_bindings::{SkPaint, SkPaint_Cap, SkPaint_Join, SkPaint_Style};
+use skia_bindings::SkPaint;
 use std::hash::{Hash, Hasher};
 use std::ptr;
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(u8)]
-pub enum Style {
-    Stroke = SkPaint_Style::kStroke_Style as _,
-    Fill = SkPaint_Style::kFill_Style as _,
-    StrokeAndFill = SkPaint_Style::kStrokeAndFill_Style as _,
-}
-
-impl NativeTransmutable<SkPaint_Style> for Style {}
+pub use sb::SkPaint_Style as Style;
 #[test]
-fn test_paint_style_layout() {
-    Style::test_layout()
+pub fn test_style_naming() {
+    let _ = Style::Fill;
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum Cap {
-    Butt = SkPaint_Cap::kButt_Cap as _,
-    Round = SkPaint_Cap::kRound_Cap as _,
-    Square = SkPaint_Cap::kSquare_Cap as _,
-}
-
-impl NativeTransmutable<SkPaint_Cap> for Cap {}
+pub use sb::SkPaint_Cap as Cap;
 #[test]
-fn test_paint_cap_layout() {
-    Cap::test_layout()
+pub fn test_cap_naming() {
+    let _ = Cap::Butt;
 }
 
-impl Default for Cap {
-    fn default() -> Self {
-        // SkPaint_Cap::kDefault_Cap
-        Cap::Butt
-    }
-}
-
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(u8)]
-pub enum Join {
-    Miter = SkPaint_Join::kMiter_Join as _,
-    Round = SkPaint_Join::kRound_Join as _,
-    Bevel = SkPaint_Join::kBevel_Join as _,
-}
-
-impl NativeTransmutable<SkPaint_Join> for Join {}
+pub use sb::SkPaint_Join as Join;
 #[test]
-fn test_paint_join_layout() {
-    Join::test_layout()
-}
-
-impl Default for Join {
-    fn default() -> Self {
-        // SkPaint_Join::kDefault_Join
-        Join::Miter
-    }
+pub fn test_join_naming() {
+    let _ = Join::Miter;
 }
 
 pub type Paint = Handle<SkPaint>;
@@ -140,20 +102,20 @@ impl Handle<SkPaint> {
     }
 
     pub fn filter_quality(&self) -> FilterQuality {
-        FilterQuality::from_native(unsafe { sb::C_SkPaint_getFilterQuality(self.native()) })
+        unsafe { sb::C_SkPaint_getFilterQuality(self.native()) }
     }
 
     pub fn set_filter_quality(&mut self, quality: FilterQuality) -> &mut Self {
-        unsafe { self.native_mut().setFilterQuality(quality.into_native()) }
+        unsafe { self.native_mut().setFilterQuality(quality) }
         self
     }
 
     pub fn style(&self) -> Style {
-        Style::from_native(unsafe { sb::C_SkPaint_getStyle(self.native()) })
+        unsafe { sb::C_SkPaint_getStyle(self.native()) }
     }
 
     pub fn set_style(&mut self, style: Style) -> &mut Self {
-        unsafe { self.native_mut().setStyle(style.into_native()) }
+        unsafe { self.native_mut().setStyle(style) }
         self
     }
 
@@ -227,20 +189,20 @@ impl Handle<SkPaint> {
     }
 
     pub fn stroke_cap(&self) -> Cap {
-        Cap::from_native(unsafe { sb::C_SkPaint_getStrokeCap(self.native()) })
+        unsafe { sb::C_SkPaint_getStrokeCap(self.native()) }
     }
 
     pub fn set_stroke_cap(&mut self, cap: Cap) -> &mut Self {
-        unsafe { self.native_mut().setStrokeCap(cap.into_native()) }
+        unsafe { self.native_mut().setStrokeCap(cap) }
         self
     }
 
     pub fn stroke_join(&self) -> Join {
-        Join::from_native(unsafe { sb::C_SkPaint_getStrokeJoin(self.native()) })
+        unsafe { sb::C_SkPaint_getStrokeJoin(self.native()) }
     }
 
     pub fn set_stroke_join(&mut self, join: Join) -> &mut Self {
-        unsafe { self.native_mut().setStrokeJoin(join.into_native()) }
+        unsafe { self.native_mut().setStrokeJoin(join) }
         self
     }
 

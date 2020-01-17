@@ -214,7 +214,7 @@ impl RCHandle<GrContext> {
         unsafe {
             sb::C_GrContext_ComputeImageSize(
                 image.as_ref().clone().into_ptr(),
-                mip_mapped.into_native(),
+                mip_mapped,
                 use_next_pow2.into().unwrap_or_default(),
             )
         }
@@ -226,7 +226,7 @@ impl RCHandle<GrContext> {
             sb::C_GrContext_defaultBackendFormat(
                 self.native(),
                 ct.into_native(),
-                renderable.into_native(),
+                renderable,
                 format.native_mut(),
             )
         };

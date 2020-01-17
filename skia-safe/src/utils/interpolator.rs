@@ -3,21 +3,13 @@
 use crate::prelude::*;
 use crate::{scalar, Point};
 use skia_bindings as sb;
-use skia_bindings::{SkInterpolator, SkInterpolatorBase_Result, SkUnitCubicInterp};
+use skia_bindings::{SkInterpolator, SkUnitCubicInterp};
 use std::time::Duration;
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum Result {
-    Normal = SkInterpolatorBase_Result::kNormal_Result as _,
-    FreezeStart = SkInterpolatorBase_Result::kFreezeStart_Result as _,
-    FreezeEnd = SkInterpolatorBase_Result::kFreezeEnd_Result as _,
-}
-
-impl NativeTransmutable<SkInterpolatorBase_Result> for Result {}
+pub use skia_bindings::SkInterpolatorBase_Result as Result;
 #[test]
-fn test_interpolator_result_layout() {
-    Result::test_layout();
+fn test_interpolator_result_naming() {
+    let _ = Result::FreezeEnd_Result;
 }
 
 pub type Interpolator = Handle<SkInterpolator>;
@@ -73,14 +65,14 @@ impl Handle<SkInterpolator> {
         let mut t = 0.0;
         let mut index = 0;
         let mut exact = false;
-        let r = Result::from_native(unsafe {
+        let r = unsafe {
             self.native()._base.timeToT(
                 time.as_millis().try_into().unwrap(),
                 &mut t,
                 &mut index,
                 &mut exact,
             )
-        });
+        };
         (
             r,
             TimeToT {
@@ -141,12 +133,12 @@ impl Handle<SkInterpolator> {
         if let Some(ref values) = values {
             assert_eq!(values.len(), self.elem_count());
         };
-        Result::from_native(unsafe {
+        unsafe {
             self.native().timeToValues(
                 time.as_millis().try_into().unwrap(),
                 values.as_ptr_or_null_mut(),
             )
-        })
+        }
     }
 }
 

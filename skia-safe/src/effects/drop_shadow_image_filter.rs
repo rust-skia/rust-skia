@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::{image_filter::CropRect, image_filters, scalar, Color, IRect, ImageFilter, Vector};
 use skia_bindings as sb;
-use skia_bindings::{SkDropShadowImageFilter_ShadowMode, SkImageFilter};
+use skia_bindings::SkImageFilter;
 
 impl RCHandle<SkImageFilter> {
     pub fn drop_shadow<'a>(
@@ -23,18 +23,10 @@ impl RCHandle<SkImageFilter> {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum ShadowMode {
-    DrawShadowAndForeground =
-        SkDropShadowImageFilter_ShadowMode::kDrawShadowAndForeground_ShadowMode as _,
-    DrawShadowOnly = SkDropShadowImageFilter_ShadowMode::kDrawShadowOnly_ShadowMode as _,
-}
-
-impl NativeTransmutable<SkDropShadowImageFilter_ShadowMode> for ShadowMode {}
+pub use skia_bindings::SkDropShadowImageFilter_ShadowMode as ShadowMode;
 #[test]
-fn test_shadow_mode_layout() {
-    ShadowMode::test_layout();
+fn test_shadow_mode_naming() {
+    let _ = ShadowMode::DrawShadowOnly;
 }
 
 #[deprecated(
@@ -58,7 +50,7 @@ pub fn new<'a>(
             sigma_x,
             sigma_y,
             color.into_native(),
-            shadow_mode.into_native(),
+            shadow_mode,
             input.into_ptr(),
             crop_rect.into().native_ptr_or_null(),
         )

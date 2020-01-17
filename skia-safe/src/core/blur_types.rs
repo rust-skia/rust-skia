@@ -1,23 +1,6 @@
-use crate::prelude::*;
-use skia_bindings::SkBlurStyle;
+pub use skia_bindings::SkBlurStyle as BlurStyle;
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum BlurStyle {
-    Normal = SkBlurStyle::kNormal_SkBlurStyle as _,
-    Solid = SkBlurStyle::kSolid_SkBlurStyle as _,
-    Outer = SkBlurStyle::kOuter_SkBlurStyle as _,
-    Inner = SkBlurStyle::kInner_SkBlurStyle as _,
-}
-
-impl Default for BlurStyle {
-    fn default() -> Self {
-        BlurStyle::Normal
-    }
-}
-
-impl NativeTransmutable<SkBlurStyle> for BlurStyle {}
 #[test]
-fn test_blur_style_layout() {
-    BlurStyle::test_layout()
+fn test_blur_style_naming() {
+    let _ = BlurStyle::Outer;
 }

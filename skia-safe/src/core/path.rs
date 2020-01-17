@@ -5,67 +5,34 @@ use crate::{
     Rect, Vector,
 };
 use skia_bindings as sb;
-use skia_bindings::{
-    SkPath, SkPathVerb, SkPath_AddPathMode, SkPath_ArcSize, SkPath_Iter, SkPath_RawIter,
-};
+use skia_bindings::{SkPath, SkPathVerb, SkPath_Iter, SkPath_RawIter};
 use std::marker::PhantomData;
 use std::mem::forget;
 
 #[deprecated(since = "0.25.0", note = "use path_types::PathDirection")]
-pub type Direction = path_types::PathDirection;
+pub use path_types::PathDirection as Direction;
 
 #[deprecated(since = "0.25.0", note = "use path_types::PathFillType")]
-pub type FillType = path_types::PathFillType;
+pub use path_types::PathFillType as FillType;
 
 #[deprecated(since = "0.25.0", note = "use path_types::PathConvexityType")]
-pub type Convexity = path_types::PathConvexityType;
+pub use path_types::PathConvexityType as Convexity;
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum ArcSize {
-    Small = SkPath_ArcSize::kSmall_ArcSize as _,
-    Large = SkPath_ArcSize::kLarge_ArcSize as _,
-}
-
-impl NativeTransmutable<SkPath_ArcSize> for ArcSize {}
+pub use skia_bindings::SkPath_ArcSize as ArcSize;
 #[test]
-fn test_arc_size_layout() {
-    ArcSize::test_layout()
+fn test_arc_size_naming() {
+    let _ = ArcSize::Small;
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum AddPathMode {
-    Append = SkPath_AddPathMode::kAppend_AddPathMode as _,
-    Extend = SkPath_AddPathMode::kExtend_AddPathMode as _,
-}
-
-impl NativeTransmutable<SkPath_AddPathMode> for AddPathMode {}
+pub use skia_bindings::SkPath_AddPathMode as AddPathMode;
 #[test]
-fn test_add_path_mode_layout() {
-    AddPathMode::test_layout()
+fn test_add_path_mode_naming() {
+    let _ = AddPathMode::Append;
 }
 
-type SegmentMask = path_types::PathSegmentMask;
+pub use path_types::PathSegmentMask as SegmentMask;
 
-type Verb = path_types::PathVerb;
-
-impl Verb {
-    /// The maximum number of points an iterator will return for the verb.
-    pub const MAX_POINTS: usize = 4;
-    /// The number of points an iterator will return for the verb.
-    pub fn points(self) -> usize {
-        match self {
-            Verb::Move => 1,
-            Verb::Line => 2,
-            Verb::Quad => 3,
-            Verb::Conic => 4,
-            Verb::Qubic => 4,
-            Verb::Close => 0,
-            Verb::Done => 0,
-        }
-    }
-}
+pub use path_types::PathVerb as Verb;
 
 #[repr(C)]
 pub struct Iter<'a>(SkPath_Iter, PhantomData<&'a Handle<SkPath>>);
@@ -130,9 +97,9 @@ impl<'a> Iterator for Iter<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let mut points = [Point::default(); Verb::MAX_POINTS];
-        let verb = Verb::from_native(SkPathVerb::from_native(unsafe {
+        let verb = SkPathVerb::from_native(unsafe {
             self.native_mut().next(points.native_mut().as_mut_ptr())
-        }));
+        });
         if verb != Verb::Done {
             Some((verb, points[0..verb.points()].into()))
         } else {
@@ -181,9 +148,7 @@ impl<'a> RawIter<'a> {
     }
 
     pub fn peek(&self) -> Verb {
-        Verb::from_native(SkPathVerb::from_native(unsafe {
-            sb::C_SkPath_RawIter_peek(self.native())
-        }))
+        SkPathVerb::from_native(unsafe { sb::C_SkPath_RawIter_peek(self.native()) })
     }
 
     pub fn conic_weight(&self) -> Option<scalar> {
@@ -202,9 +167,9 @@ impl<'a> Iterator for RawIter<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         let mut points = [Point::default(); Verb::MAX_POINTS];
 
-        let verb = Verb::from_native(SkPathVerb::from_native(unsafe {
+        let verb = SkPathVerb::from_native(unsafe {
             sb::C_SkPath_RawIter_next(self.native_mut(), points.native_mut().as_mut_ptr())
-        }));
+        });
 
         if verb != Verb::Done {
             Some((verb, points[0..verb.points()].into()))
@@ -259,7 +224,7 @@ impl Handle<SkPath> {
     }
 
     pub fn fill_type(&self) -> PathFillType {
-        PathFillType::from_native(unsafe { sb::C_SkPath_getFillType(self.native()) })
+        unsafe { sb::C_SkPath_getFillType(self.native()) }
     }
 
     pub fn set_fill_type(&mut self, ft: PathFillType) -> &mut Self {
@@ -278,17 +243,15 @@ impl Handle<SkPath> {
     }
 
     pub fn convexity_type(&self) -> PathConvexityType {
-        PathConvexityType::from_native(unsafe { sb::C_SkPath_getConvexityType(self.native()) })
+        unsafe { sb::C_SkPath_getConvexityType(self.native()) }
     }
 
     pub fn convexity_type_or_unknown(&self) -> PathConvexityType {
-        PathConvexityType::from_native(unsafe {
-            sb::C_SkPath_getConvexityTypeOrUnknown(self.native())
-        })
+        unsafe { sb::C_SkPath_getConvexityTypeOrUnknown(self.native()) }
     }
 
     pub fn set_convexity_type(&mut self, convexity: PathConvexityType) -> &mut Self {
-        unsafe { self.native_mut().setConvexityType(convexity.into_native()) }
+        unsafe { self.native_mut().setConvexityType(convexity) }
         self
     }
 
@@ -622,15 +585,8 @@ impl Handle<SkPath> {
     ) -> &mut Self {
         let (r, xy) = (r.into(), xy.into());
         unsafe {
-            self.native_mut().arcTo2(
-                r.x,
-                r.y,
-                x_axis_rotate,
-                large_arc.into_native(),
-                sweep.into_native(),
-                xy.x,
-                xy.y,
-            )
+            self.native_mut()
+                .arcTo2(r.x, r.y, x_axis_rotate, large_arc, sweep, xy.x, xy.y)
         };
         self
     }
@@ -645,15 +601,8 @@ impl Handle<SkPath> {
     ) -> &mut Self {
         let (r, xy) = (r.into(), xy.into());
         unsafe {
-            self.native_mut().rArcTo(
-                r.x,
-                r.y,
-                x_axis_rotate,
-                large_arc.into_native(),
-                sweep.into_native(),
-                xy.x,
-                xy.y,
-            )
+            self.native_mut()
+                .rArcTo(r.x, r.y, x_axis_rotate, large_arc, sweep, xy.x, xy.y)
         };
         self
     }
@@ -700,7 +649,7 @@ impl Handle<SkPath> {
         let mut direction = PathDirection::default();
         unsafe {
             self.native()
-                .isRect(rect.native_mut(), &mut is_closed, direction.native_mut())
+                .isRect(rect.native_mut(), &mut is_closed, &mut direction)
         }
         .if_true_some((rect, is_closed, direction))
     }
@@ -713,11 +662,8 @@ impl Handle<SkPath> {
         let dir = dir_start.map(|ds| ds.0).unwrap_or_default();
         let start = dir_start.map(|ds| ds.1).unwrap_or_default();
         unsafe {
-            self.native_mut().addRect1(
-                rect.as_ref().native(),
-                dir.into_native(),
-                start.try_into().unwrap(),
-            )
+            self.native_mut()
+                .addRect1(rect.as_ref().native(), dir, start.try_into().unwrap())
         };
         self
     }
@@ -730,11 +676,8 @@ impl Handle<SkPath> {
         let dir = dir_start.map(|ds| ds.0).unwrap_or_default();
         let start = dir_start.map(|ds| ds.1).unwrap_or_default();
         unsafe {
-            self.native_mut().addOval1(
-                oval.as_ref().native(),
-                dir.into_native(),
-                start.try_into().unwrap(),
-            )
+            self.native_mut()
+                .addOval1(oval.as_ref().native(), dir, start.try_into().unwrap())
         };
         self
     }
@@ -747,10 +690,7 @@ impl Handle<SkPath> {
     ) -> &mut Self {
         let p = p.into();
         let dir = dir.into().unwrap_or_default();
-        unsafe {
-            self.native_mut()
-                .addCircle(p.x, p.y, radius, dir.into_native())
-        };
+        unsafe { self.native_mut().addCircle(p.x, p.y, radius, dir) };
         self
     }
 
@@ -778,7 +718,7 @@ impl Handle<SkPath> {
         let dir = dir.into().unwrap_or_default();
         unsafe {
             self.native_mut()
-                .addRoundRect(rect.as_ref().native(), rx, ry, dir.into_native())
+                .addRoundRect(rect.as_ref().native(), rx, ry, dir)
         };
         self
     }
@@ -791,11 +731,8 @@ impl Handle<SkPath> {
         let dir = dir_start.map(|ds| ds.0).unwrap_or_default();
         let start = dir_start.map(|ds| ds.1).unwrap_or_default();
         unsafe {
-            self.native_mut().addRRect1(
-                rrect.as_ref().native(),
-                dir.into_native(),
-                start.try_into().unwrap(),
-            )
+            self.native_mut()
+                .addRRect1(rrect.as_ref().native(), dir, start.try_into().unwrap())
         };
         self
     }
@@ -818,10 +755,7 @@ impl Handle<SkPath> {
     ) -> &mut Self {
         let d = d.into();
         let mode = mode.into().unwrap_or(AddPathMode::Append);
-        unsafe {
-            self.native_mut()
-                .addPath(src.native(), d.x, d.y, mode.into_native())
-        };
+        unsafe { self.native_mut().addPath(src.native(), d.x, d.y, mode) };
         self
     }
 
@@ -835,7 +769,7 @@ impl Handle<SkPath> {
         let mode = mode.into().unwrap_or(AddPathMode::Append);
         unsafe {
             self.native_mut()
-                .addPath1(src.native(), matrix.native(), mode.into_native())
+                .addPath1(src.native(), matrix.native(), mode)
         };
         self
     }

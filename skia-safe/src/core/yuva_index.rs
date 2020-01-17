@@ -1,15 +1,12 @@
 use crate::prelude::*;
 use crate::ColorChannel;
 use skia_bindings as sb;
-use skia_bindings::{SkYUVAIndex, SkYUVAIndex_Index};
+use skia_bindings::SkYUVAIndex;
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum Index {
-    Y = SkYUVAIndex_Index::kY_Index as _,
-    U = SkYUVAIndex_Index::kU_Index as _,
-    V = SkYUVAIndex_Index::kV_Index as _,
-    A = SkYUVAIndex_Index::kA_Index as _,
+pub use skia_bindings::SkYUVAIndex_Index as Index;
+#[test]
+pub fn test_yuva_index_naming() {
+    let _ = Index::Y;
 }
 
 #[repr(C)]

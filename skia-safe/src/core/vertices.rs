@@ -1,9 +1,7 @@
 use crate::prelude::*;
 use crate::{Color, Data, Point, Rect};
 use skia_bindings as sb;
-use skia_bindings::{
-    SkColor, SkPoint, SkVertices, SkVertices_Bone, SkVertices_Builder, SkVertices_VertexMode,
-};
+use skia_bindings::{SkColor, SkPoint, SkVertices, SkVertices_Bone, SkVertices_Builder};
 #[cfg(test)]
 use skia_bindings::{SkVertices_BoneIndices, SkVertices_BoneWeights};
 #[cfg(test)]
@@ -73,18 +71,10 @@ fn test_bone_layout() {
     Bone::test_layout();
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum VertexMode {
-    Triangles = SkVertices_VertexMode::kTriangles_VertexMode as _,
-    TriangleStrip = SkVertices_VertexMode::kTriangleStrip_VertexMode as _,
-    TriangleFan = SkVertices_VertexMode::kTriangleFan_VertexMode as _,
-}
-
-impl NativeTransmutable<SkVertices_VertexMode> for VertexMode {}
+pub use skia_bindings::SkVertices_VertexMode as VertexMode;
 #[test]
-fn test_vertices_vertex_mode_layout() {
-    VertexMode::test_layout()
+fn test_vertices_vertex_mode_naming() {
+    let _ = VertexMode::Triangles;
 }
 
 pub type Vertices = RCHandle<SkVertices>;
@@ -132,7 +122,7 @@ impl RCHandle<SkVertices> {
 
         Vertices::from_ptr(unsafe {
             sb::C_SkVertices_MakeCopy(
-                mode.into_native(),
+                mode,
                 vertex_count as _,
                 positions.native().as_ptr(),
                 texs.native().as_ptr(),
@@ -152,7 +142,7 @@ impl RCHandle<SkVertices> {
     }
 
     pub fn mode(&self) -> VertexMode {
-        VertexMode::from_native(self.native().fMode)
+        self.native().fMode
     }
 
     pub fn bounds(&self) -> &Rect {
@@ -267,7 +257,7 @@ impl Handle<SkVertices_Builder> {
     ) -> Builder {
         Self::from_native(unsafe {
             SkVertices_Builder::new(
-                mode.into_native(),
+                mode,
                 vertex_count.try_into().unwrap(),
                 index_count.try_into().unwrap(),
                 flags.bits(),

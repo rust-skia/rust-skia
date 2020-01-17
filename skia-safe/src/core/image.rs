@@ -5,50 +5,25 @@ use crate::{
     ImageInfo, Matrix, Paint, Picture, Shader, TileMode, YUVAIndex, YUVColorSpace,
 };
 use skia_bindings as sb;
-use skia_bindings::{
-    SkImage, SkImage_BitDepth, SkImage_CachingHint, SkImage_CompressionType, SkRefCntBase,
-};
+use skia_bindings::{SkImage, SkRefCntBase};
 use std::mem;
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum BitDepth {
-    U8 = SkImage_BitDepth::kU8 as _,
-    F16 = SkImage_BitDepth::kF16 as _,
-}
-
-impl NativeTransmutable<SkImage_BitDepth> for BitDepth {}
-
+pub use skia_bindings::SkImage_BitDepth as BitDepth;
 #[test]
-fn test_bit_depth_layout() {
-    BitDepth::test_layout()
+fn test_bit_depth_naming() {
+    let _ = BitDepth::F16;
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum CachingHint {
-    Allow = SkImage_CachingHint::kAllow_CachingHint as _,
-    Disallow = SkImage_CachingHint::kDisallow_CachingHint as _,
-}
-
-impl NativeTransmutable<SkImage_CachingHint> for CachingHint {}
-
+pub use skia_bindings::SkImage_CachingHint as CachingHint;
 #[test]
-fn test_caching_hint_layout() {
-    CachingHint::test_layout()
+fn test_caching_hint_naming() {
+    let _ = CachingHint::Allow;
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum CompressionType {
-    ETC1 = SkImage_CompressionType::kETC1_CompressionType as _,
-}
-
-impl NativeTransmutable<SkImage_CompressionType> for CompressionType {}
-
+pub use skia_bindings::SkImage_CompressionType as CompressionType;
 #[test]
-fn test_compression_type_layout() {
-    CompressionType::test_layout()
+fn test_compression_type_naming() {
+    let _ = CompressionType::ETC1;
 }
 
 pub type Image = RCHandle<SkImage>;
@@ -133,7 +108,7 @@ impl RCHandle<SkImage> {
                 data.into_ptr(),
                 size.width,
                 size.height,
-                c_type.into_native(),
+                c_type,
             )
         })
     }
@@ -152,9 +127,9 @@ impl RCHandle<SkImage> {
             sb::C_SkImage_MakeFromTexture(
                 context.native_mut(),
                 backend_texture.native(),
-                origin.into_native(),
+                origin,
                 color_type.into_native(),
-                alpha_type.into_native(),
+                alpha_type,
                 color_space.into().into_ptr_or_null(),
             )
         })
@@ -188,9 +163,9 @@ impl RCHandle<SkImage> {
             sb::C_SkImage_MakeFromAdoptedTexture(
                 context.native_mut(),
                 backend_texture.native(),
-                origin.into_native(),
+                origin,
                 color_type.into_native(),
-                alpha_type.into_native(),
+                alpha_type,
                 color_space.into().into_ptr_or_null(),
             )
         })
@@ -209,11 +184,11 @@ impl RCHandle<SkImage> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_MakeFromYUVATexturesCopy(
                 context.native_mut(),
-                yuv_color_space.into_native(),
+                yuv_color_space,
                 yuva_textures.native().as_ptr(),
                 yuva_indices.native().as_ptr(),
                 image_size.into().into_native(),
-                image_origin.into_native(),
+                image_origin,
                 image_color_space.into().into_ptr_or_null(),
             )
         })
@@ -234,11 +209,11 @@ impl RCHandle<SkImage> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend(
                 context.native_mut(),
-                yuv_color_space.into_native(),
+                yuv_color_space,
                 yuva_textures.native().as_ptr(),
                 yuva_indices.native().as_ptr(),
                 image_size.into().into_native(),
-                image_origin.into_native(),
+                image_origin,
                 backend_texture.native(),
                 image_color_space.into().into_ptr_or_null(),
             )
@@ -257,11 +232,11 @@ impl RCHandle<SkImage> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_MakeFromYUVATextures(
                 context.native_mut(),
-                yuv_color_space.into_native(),
+                yuv_color_space,
                 yuva_textures.native().as_ptr(),
                 yuva_indices.native().as_ptr(),
                 image_size.into().into_native(),
-                image_origin.into_native(),
+                image_origin,
                 image_color_space.into().into_ptr_or_null(),
             )
         })
@@ -279,9 +254,9 @@ impl RCHandle<SkImage> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_MakeFromNV12TexturesCopy(
                 context.native_mut(),
-                yuv_color_space.into_native(),
+                yuv_color_space,
                 nv12_textures.native().as_ptr(),
-                image_origin.into_native(),
+                image_origin,
                 image_color_space.into().into_ptr_or_null(),
             )
         })
@@ -299,9 +274,9 @@ impl RCHandle<SkImage> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
                 context.native_mut(),
-                yuv_color_space.into_native(),
+                yuv_color_space,
                 nv12_textures.native().as_ptr(),
-                image_origin.into_native(),
+                image_origin,
                 backend_texture.native(),
                 image_color_space.into().into_ptr_or_null(),
             )
@@ -322,7 +297,7 @@ impl RCHandle<SkImage> {
                 dimensions.into().native(),
                 matrix.native_ptr_or_null(),
                 paint.native_ptr_or_null(),
-                bit_depth.into_native(),
+                bit_depth,
                 color_space.into().into_ptr_or_null(),
             )
         })
@@ -353,7 +328,7 @@ impl RCHandle<SkImage> {
     }
 
     pub fn alpha_type(&self) -> AlphaType {
-        AlphaType::from_native(unsafe { self.native().alphaType() })
+        unsafe { self.native().alphaType() }
     }
 
     pub fn color_type(&self) -> ColorType {
@@ -384,8 +359,8 @@ impl RCHandle<SkImage> {
         Shader::from_ptr(unsafe {
             sb::C_SkImage_makeShader(
                 self.native(),
-                tm1.into_native(),
-                tm2.into_native(),
+                tm1,
+                tm2,
                 local_matrix.into().native_ptr_or_null(),
             )
         })
@@ -419,7 +394,7 @@ impl RCHandle<SkImage> {
         let mut origin = gpu::SurfaceOrigin::TopLeft;
         let texture = gpu::BackendTexture::from_native(unsafe {
             self.native()
-                .getBackendTexture(flush_pending_gr_context_io, origin.native_mut())
+                .getBackendTexture(flush_pending_gr_context_io, &mut origin)
         });
         (texture, origin)
     }
@@ -447,7 +422,7 @@ impl RCHandle<SkImage> {
                 dst_row_bytes,
                 src.x,
                 src.y,
-                caching_hint.native().to_owned(),
+                caching_hint,
             )
         }
     }
@@ -462,11 +437,8 @@ impl RCHandle<SkImage> {
         unsafe {
             self.native().scalePixels(
                 dst.native(),
-                filter_quality.into_native(),
-                caching_hint
-                    .into()
-                    .unwrap_or(CachingHint::Allow)
-                    .into_native(),
+                filter_quality,
+                caching_hint.into().unwrap_or(CachingHint::Allow),
             )
         }
     }
@@ -480,9 +452,7 @@ impl RCHandle<SkImage> {
         image_format: EncodedImageFormat,
         quality: i32,
     ) -> Option<Data> {
-        Data::from_ptr(unsafe {
-            sb::C_SkImage_encodeToData(self.native(), image_format.into_native(), quality)
-        })
+        Data::from_ptr(unsafe { sb::C_SkImage_encodeToData(self.native(), image_format, quality) })
     }
 
     pub fn encoded_data(&self) -> Option<Data> {
@@ -499,11 +469,7 @@ impl RCHandle<SkImage> {
         mip_mapped: gpu::MipMapped,
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
-            sb::C_SkImage_makeTextureImage(
-                self.native(),
-                context.native_mut(),
-                mip_mapped.into_native(),
-            )
+            sb::C_SkImage_makeTextureImage(self.native(), context.native_mut(), mip_mapped)
         })
     }
 

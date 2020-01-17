@@ -914,31 +914,129 @@ impl bindgen::callbacks::ParseCallbacks for ParseCallbacks {
 type EnumEntry = (&'static str, fn(&str, &str) -> String);
 
 const ENUM_TABLE: &[EnumEntry] = &[
-    ("SkBlendMode", replace::k_xxx),
-    ("SkBlendModeCoeff", replace::k_xxx),
+    //
+    // core/ effects/
+    //
+    ("SkBlendMode", rewrite::k_xxx),
+    ("SkBlendModeCoeff", rewrite::k_xxx),
+    ("SkBlurStyle", rewrite::k_xxx_name),
+    ("SkClipOp", rewrite::k_xxx),
+    ("SkColorChannel", rewrite::k_xxx),
+    ("SkCoverageMode", rewrite::k_xxx),
+    ("SkEncodedImageFormat", rewrite::k_xxx),
+    ("SkEncodedOrigin", rewrite::k_xxx_name),
+    ("SkFilterQuality", rewrite::k_xxx_name),
+    ("SkFontHinting", rewrite::k_xxx),
+    ("SkAlphaType", rewrite::k_xxx_name),
+    ("SkYUVColorSpace", rewrite::k_xxx_name),
+    ("SkPathFillType", rewrite::k_xxx),
+    ("SkPathConvexityType", rewrite::k_xxx),
+    ("SkPathDirection", rewrite::k_xxx),
+    ("SkPathVerb", rewrite::k_xxx),
+    ("SkPathOp", rewrite::k_xxx_name),
+    ("SkTileMode", rewrite::k_xxx),
+    // SkPaint_Style
+    // SkStrokeRec_Style
+    // SkPath1DPathEffect_Style
+    ("Style", rewrite::k_xxx_name_opt),
+    // SkPaint_Cap
+    ("Cap", rewrite::k_xxx_name),
+    // SkPaint_Join
+    ("Join", rewrite::k_xxx_name),
+    // SkStrokeRec_InitStyle
+    ("InitStyle", rewrite::k_xxx_name),
+    // SkBlurImageFilter_TileMode
+    // SkMatrixConvulutionImageFilter_TileMode
+    ("TileMode", rewrite::k_xxx_name),
+    // SkCanvas_*
+    ("PointMode", rewrite::k_xxx_name),
+    ("SrcRectConstraint", rewrite::k_xxx_name),
+    // SkCanvas_Lattice_RectType
+    ("RectType", rewrite::k_xxx),
+    // SkDisplacementMapEffect_ChannelSelectorType
+    ("ChannelSelectorType", rewrite::k_xxx_name),
+    // SkDropShadowImageFilter_ShadowMode
+    ("ShadowMode", rewrite::k_xxx_name),
+    // SkFont_Edging
+    ("Edging", rewrite::k_xxx),
+    // SkFont_Slant
+    ("Slant", rewrite::k_xxx_name),
+    // SkHighContrastConfig_InvertStyle
+    ("InvertStyle", rewrite::k_xxx),
+    // SkImage_*
+    ("BitDepth", rewrite::k_xxx),
+    ("CachingHint", rewrite::k_xxx_name),
+    ("CompressionType", rewrite::k_xxx_name),
+    // SkImageFilter_MapDirection
+    ("MapDirection", rewrite::k_xxx_name),
+    // SkInterpolatorBase_Result
+    ("Result", rewrite::k_xxx),
+    // SkMatrix_ScaleToFit
+    ("ScaleToFit", rewrite::k_xxx_name),
+    // SkPath_*
+    ("ArcSize", rewrite::k_xxx_name),
+    ("AddPathMode", rewrite::k_xxx_name),
+    // SkRegion_Op
+    // TODO: remove kLastOp?
+    ("Op", rewrite::k_xxx_name_opt),
+    // SkRRect_*
+    // TODO: remove kLastType?
+    ("Type", rewrite::k_xxx_name_opt),
+    ("Corner", rewrite::k_xxx_name),
+    // SkShader_GradientType
+    ("GradientType", rewrite::k_xxx_name),
+    // SkSurface_*
+    ("ContentChangeMode", rewrite::k_xxx_name),
+    ("BackendHandleAccess", rewrite::k_xxx_name),
+    // SkTextUtils_Align
+    ("Align", rewrite::k_xxx_name),
+    // SkTrimPathEffect_Mode
+    ("Mode", rewrite::k_xxx),
+    // SkTypeface_SerializeBehavior
+    ("SerializeBehavior", rewrite::k_xxx),
+    // SkVertices_VertexMode
+    ("VertexMode", rewrite::k_xxx_name),
+    // SkYUVAIndex_Index
+    ("Index", rewrite::k_xxx_name),
+    //
+    // gpu/
+    //
+    ("GrGLStandard", rewrite::k_xxx_name),
+    ("GrGLFormat", rewrite::k_xxx),
+    ("GrSurfaceOrigin", rewrite::k_xxx_name),
+    ("GrBackendApi", rewrite::k_xxx),
+    ("GrMipMapped", rewrite::k_xxx),
+    ("GrRenderable", rewrite::k_xxx),
+    ("GrProtected", rewrite::k_xxx),
+    //
     // DartTypes.h
-    ("Affinity", replace::k_xxx),
-    ("RectHeightStyle", replace::k_xxx),
-    ("RectWidthStyle", replace::k_xxx),
-    ("TextAlign", replace::k_xxx),
-    ("TextDirection", replace::k_xxx_uppercase),
-    ("TextBaseline", replace::k_xxx),
+    //
+    ("Affinity", rewrite::k_xxx),
+    ("RectHeightStyle", rewrite::k_xxx),
+    ("RectWidthStyle", rewrite::k_xxx),
+    ("TextAlign", rewrite::k_xxx),
+    ("TextDirection", rewrite::k_xxx_uppercase),
+    ("TextBaseline", rewrite::k_xxx),
+    //
     // TextStyle.h
-    ("TextDecorationStyle", replace::k_xxx),
-    ("StyleType", replace::k_xxx),
-    ("PlaceholderAlignment", replace::k_xxx),
+    //
+    ("TextDecorationStyle", rewrite::k_xxx),
+    ("StyleType", rewrite::k_xxx),
+    ("PlaceholderAlignment", rewrite::k_xxx),
+    //
     // Vk*
-    ("VkChromaLocation", replace::vk),
-    ("VkFilter", replace::vk),
-    ("VkFormat", replace::vk),
-    ("VkImageLayout", replace::vk),
-    ("VkImageTiling", replace::vk),
-    ("VkSamplerYcbcrModelConversion", replace::vk),
-    ("VkSamplerYcbcrRange", replace::vk),
-    ("VkStructureType", replace::vk),
+    //
+    ("VkChromaLocation", rewrite::vk),
+    ("VkFilter", rewrite::vk),
+    ("VkFormat", rewrite::vk),
+    ("VkImageLayout", rewrite::vk),
+    ("VkImageTiling", rewrite::vk),
+    ("VkSamplerYcbcrModelConversion", rewrite::vk),
+    ("VkSamplerYcbcrRange", rewrite::vk),
+    ("VkStructureType", rewrite::vk),
 ];
 
-pub(crate) mod replace {
+pub(crate) mod rewrite {
     use heck::ShoutySnakeCase;
     use regex::Regex;
 
@@ -958,17 +1056,36 @@ pub(crate) mod replace {
     }
 
     pub fn _k_xxx_enum(name: &str, variant: &str) -> String {
-        capture(variant, &format!("k(.*)_{}", name))
+        capture(name, variant, &format!("k(.*)_{}", name))
+    }
+
+    pub fn k_xxx_name_opt(name: &str, variant: &str) -> String {
+        let suffix = &format!("_{}", name);
+        if variant.ends_with(suffix) {
+            capture(name, variant, &format!("k(.*){}", suffix))
+        } else {
+            capture(name, variant, "k(.*)")
+        }
+    }
+
+    pub fn k_xxx_name(name: &str, variant: &str) -> String {
+        capture(name, variant, &format!("k(.*)_{}", name))
     }
 
     pub fn vk(name: &str, variant: &str) -> String {
         let prefix = name.to_shouty_snake_case();
-        capture(variant, &format!("{}_(.*)", prefix))
+        capture(name, variant, &format!("{}_(.*)", prefix))
     }
 
-    fn capture(variant: &str, pattern: &str) -> String {
+    fn capture(name: &str, variant: &str, pattern: &str) -> String {
         let re = Regex::new(pattern).unwrap();
-        re.captures(variant).unwrap()[1].into()
+        re.captures(variant).unwrap_or_else(|| {
+            panic!(
+                "failed to match '{}' on enum variant '{}' of enum '{}'",
+                pattern, variant, name
+            )
+        })[1]
+            .into()
     }
 }
 

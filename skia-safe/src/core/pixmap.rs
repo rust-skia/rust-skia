@@ -215,10 +215,7 @@ impl Handle<SkPixmap> {
     }
 
     pub fn scale_pixels(&self, dst: &Pixmap, filter_quality: FilterQuality) -> bool {
-        unsafe {
-            self.native()
-                .scalePixels(dst.native(), filter_quality.into_native())
-        }
+        unsafe { self.native().scalePixels(dst.native(), filter_quality) }
     }
 
     pub fn erase(&self, color: impl Into<Color>, subset: Option<&IRect>) -> bool {

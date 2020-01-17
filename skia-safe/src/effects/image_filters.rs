@@ -59,7 +59,7 @@ pub fn blur<'a>(
         sb::C_SkImageFilters_Blur(
             sigma_x,
             sigma_y,
-            tile_mode.into().unwrap_or(TileMode::Decal).into_native(),
+            tile_mode.into().unwrap_or(TileMode::Decal),
             input.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
         )
@@ -95,8 +95,8 @@ pub fn displacement_map<'a>(
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
         sb::C_SkImageFilters_DisplacementMap(
-            x_channel_selector.into_native(),
-            y_channel_selector.into_native(),
+            x_channel_selector,
+            y_channel_selector,
             scale,
             displacement.into().into_ptr_or_null(),
             color.into_ptr(),
@@ -165,7 +165,7 @@ pub fn image<'a>(
             image.into_ptr(),
             src_rect.as_ref().native(),
             dst_rect.as_ref().native(),
-            filter_quality.into_native(),
+            filter_quality,
         )
     })
 }
@@ -210,7 +210,7 @@ pub fn matrix_convolution<'a>(
             gain,
             bias,
             kernel_offset.into().native(),
-            tile_mode.into_native(),
+            tile_mode,
             convolve_alpha,
             input.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
@@ -226,7 +226,7 @@ pub fn matrix_transform(
     ImageFilter::from_ptr(unsafe {
         sb::C_SkImageFilters_MatrixTransform(
             matrix.native(),
-            filter_quality.into_native(),
+            filter_quality,
             input.into().into_ptr_or_null(),
         )
     })

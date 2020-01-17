@@ -4,21 +4,13 @@ use crate::{
     Unichar,
 };
 use skia_bindings as sb;
-use skia_bindings::{SkFont, SkFont_Edging, SkFont_PrivFlags};
+use skia_bindings::{SkFont, SkFont_PrivFlags};
 use std::ptr;
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum Edging {
-    Alias = SkFont_Edging::kAlias as _,
-    AntiAlias = SkFont_Edging::kAntiAlias as _,
-    SubpixelAntiAlias = SkFont_Edging::kSubpixelAntiAlias as _,
-}
-
-impl NativeTransmutable<SkFont_Edging> for Edging {}
+pub use skia_bindings::SkFont_Edging as Edging;
 #[test]
-fn test_font_edging_layout() {
-    Edging::test_layout()
+fn test_font_edging_naming() {
+    let _ = Edging::Alias;
 }
 
 pub type Font = Handle<SkFont>;
@@ -163,21 +155,21 @@ impl Handle<SkFont> {
     }
 
     pub fn edging(&self) -> Edging {
-        Edging::from_native(unsafe { sb::C_SkFont_getEdging(self.native()) })
+        unsafe { sb::C_SkFont_getEdging(self.native()) }
     }
 
     pub fn set_edging(&mut self, edging: Edging) -> &mut Self {
-        unsafe { self.native_mut().setEdging(edging.into_native()) }
+        unsafe { self.native_mut().setEdging(edging) }
         self
     }
 
     pub fn set_hinting(&mut self, hinting: FontHinting) -> &mut Self {
-        unsafe { self.native_mut().setHinting(hinting.into_native()) }
+        unsafe { self.native_mut().setHinting(hinting) }
         self
     }
 
     pub fn hinting(&self) -> FontHinting {
-        FontHinting::from_native(unsafe { sb::C_SkFont_getHinting(self.native()) })
+        unsafe { sb::C_SkFont_getHinting(self.native()) }
     }
 
     #[must_use]

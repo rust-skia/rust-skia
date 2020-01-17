@@ -16,25 +16,18 @@ impl RCHandle<SkPathEffect> {
 pub mod path_1d_path_effect {
     use crate::prelude::*;
     use crate::{scalar, Path, PathEffect};
-    use skia_bindings::{C_SkPath1DPathEffect_Make, SkPath1DPathEffect_Style};
+    use skia_bindings::C_SkPath1DPathEffect_Make;
 
-    #[derive(Copy, Clone, PartialEq, Eq, Debug)]
-    #[repr(i32)]
-    pub enum Style {
-        Translate = SkPath1DPathEffect_Style::kTranslate_Style as _,
-        Rotate = SkPath1DPathEffect_Style::kRotate_Style as _,
-        Morph = SkPath1DPathEffect_Style::kMorph_Style as _,
-    }
+    pub use skia_bindings::SkPath1DPathEffect_Style as Style;
 
-    impl NativeTransmutable<SkPath1DPathEffect_Style> for Style {}
     #[test]
-    fn test_path_1d_path_effect_style_layout() {
-        Style::test_layout()
+    fn style_enum_naming() {
+        let _n = Style::Translate;
     }
 
     pub fn new(path: &Path, advance: scalar, phase: scalar, style: Style) -> Option<PathEffect> {
         PathEffect::from_ptr(unsafe {
-            C_SkPath1DPathEffect_Make(path.native(), advance, phase, style.into_native())
+            C_SkPath1DPathEffect_Make(path.native(), advance, phase, style)
         })
     }
 }

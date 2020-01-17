@@ -3,27 +3,12 @@ use crate::{
     gradient_shader, scalar, Color, ColorFilter, Image, Matrix, NativeFlattenable, Point, TileMode,
 };
 use skia_bindings as sb;
-use skia_bindings::{
-    SkFlattenable, SkPoint, SkRefCntBase, SkShader, SkShader_GradientInfo, SkShader_GradientType,
-    SkTileMode,
-};
+use skia_bindings::{SkFlattenable, SkPoint, SkRefCntBase, SkShader, SkShader_GradientInfo};
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-#[allow(dead_code)]
-pub enum GradientTypeInternal {
-    None = SkShader_GradientType::kNone_GradientType as _,
-    Color = SkShader_GradientType::kColor_GradientType as _,
-    Linear = SkShader_GradientType::kLinear_GradientType as _,
-    Radial = SkShader_GradientType::kRadial_GradientType as _,
-    Sweep = SkShader_GradientType::kSweep_GradientType as _,
-    Conical = SkShader_GradientType::kConical_GradientType as _,
-}
-
-impl NativeTransmutable<SkShader_GradientType> for GradientTypeInternal {}
+pub use skia_bindings::SkShader_GradientType as GradientTypeInternal;
 #[test]
-fn test_shader_grandient_type_layout() {
-    GradientTypeInternal::test_layout()
+fn test_shader_grandient_type_naming() {
+    let _ = GradientTypeInternal::Linear;
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -88,7 +73,7 @@ impl RCHandle<SkShader> {
             let mut tile_mode = [TileMode::default(); 2];
             let image = Image::from_unshared_ptr(
                 self.native()
-                    .isAImage(matrix.native_mut(), tile_mode.native_mut().as_mut_ptr()),
+                    .isAImage(matrix.native_mut(), tile_mode.as_mut_ptr()),
             );
             image.map(|i| (i, matrix, (tile_mode[0], tile_mode[1])))
         }
@@ -113,14 +98,11 @@ impl RCHandle<SkShader> {
                 fColorOffsets: color_offsets.as_mut_ptr(),
                 fPoint: [SkPoint { fX: 0.0, fY: 0.0 }; 2],
                 fRadius: Default::default(),
-                fTileMode: SkTileMode::kClamp,
+                fTileMode: TileMode::Clamp,
                 fGradientFlags: 0,
             };
 
-            let gradient_type = GradientTypeInternal::from_native(sb::C_SkShader_asAGradient(
-                self.native(),
-                &mut info,
-            ));
+            let gradient_type = sb::C_SkShader_asAGradient(self.native(), &mut info);
             match gradient_type {
                 GradientTypeInternal::None => None,
                 GradientTypeInternal::Color => Some(GradientType::Color),

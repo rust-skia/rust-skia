@@ -3,26 +3,16 @@ use crate::prelude::*;
 use crate::{font_arguments, interop, FontArguments};
 use crate::{font_parameters::VariationAxis, Data, FontStyle, GlyphId, Rect, Unichar};
 use skia_bindings as sb;
-use skia_bindings::{
-    SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings, SkTypeface_SerializeBehavior,
-};
+use skia_bindings::{SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings};
 use std::{ffi, ptr};
 
 pub type FontId = skia_bindings::SkFontID;
 pub type FontTableTag = skia_bindings::SkFontTableTag;
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum SerializeBehavior {
-    DoIncludeData = SkTypeface_SerializeBehavior::kDoIncludeData as _,
-    DontIncludeData = SkTypeface_SerializeBehavior::kDontIncludeData as _,
-    IncludeDataIfLocal = SkTypeface_SerializeBehavior::kIncludeDataIfLocal as _,
-}
-
-impl NativeTransmutable<SkTypeface_SerializeBehavior> for SerializeBehavior {}
+pub use skia_bindings::SkTypeface_SerializeBehavior as SerializeBehavior;
 #[test]
-fn test_typeface_serialize_behavior_layout() {
-    SerializeBehavior::test_layout()
+fn test_typeface_serialize_behavior_naming() {
+    let _ = SerializeBehavior::DontIncludeData;
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -142,8 +132,7 @@ impl RCHandle<SkTypeface> {
 
     // TODO: return Data as impl Deref<[u8]> / Borrow<[u8]> here?
     pub fn serialize(&self, behavior: SerializeBehavior) -> Data {
-        Data::from_ptr(unsafe { sb::C_SkTypeface_serialize(self.native(), behavior.into_native()) })
-            .unwrap()
+        Data::from_ptr(unsafe { sb::C_SkTypeface_serialize(self.native(), behavior) }).unwrap()
     }
 
     // TODO: Deserialize(Read?)

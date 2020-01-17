@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use skia_bindings::{SkFontHinting, SkTextEncoding};
+use skia_bindings::SkTextEncoding;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -7,6 +7,7 @@ pub enum TextEncoding {
     UTF8 = SkTextEncoding::kUTF8 as _,
     UTF16 = SkTextEncoding::kUTF16 as _,
     UTF32 = SkTextEncoding::kUTF32 as _,
+    // TODO: enum rewriter: ID -> Id
     GlyphId = SkTextEncoding::kGlyphID as _,
 }
 
@@ -22,17 +23,8 @@ impl Default for TextEncoding {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum FontHinting {
-    None = SkFontHinting::kNone as _,
-    Slight = SkFontHinting::kSlight as _,
-    Normal = SkFontHinting::kNormal as _,
-    Full = SkFontHinting::kFull as _,
-}
-
-impl NativeTransmutable<SkFontHinting> for FontHinting {}
+pub use skia_bindings::SkFontHinting as FontHinting;
 #[test]
-fn test_font_hinting_layout() {
-    FontHinting::test_layout();
+fn test_font_hinting_naming() {
+    let _ = FontHinting::Full;
 }

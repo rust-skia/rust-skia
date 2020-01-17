@@ -15,12 +15,11 @@ impl RCHandle<SkImageFilter> {
 }
 
 #[deprecated(since = "0.19.0", note = "use skia_safe::TileMode")]
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum TileMode {
-    Clamp = SkBlurImageFilter_TileMode::kClamp_TileMode as _,
-    Repeat = SkBlurImageFilter_TileMode::kRepeat_TileMode as _,
-    ClampToBlack = SkBlurImageFilter_TileMode::kClampToBlack_TileMode as _,
+pub use sb::SkBlurImageFilter_TileMode as TileMode;
+
+#[test]
+fn test_tile_mode_naming() {
+    let _ = TileMode::Clamp;
 }
 
 #[allow(deprecated)]

@@ -23,21 +23,13 @@ pub mod encode {
 
     pub fn pixmap(src: &Pixmap, format: EncodedImageFormat, quality: usize) -> Option<Data> {
         Data::from_ptr(unsafe {
-            sb::C_SkEncodePixmap(
-                src.native(),
-                format.into_native(),
-                quality.try_into().unwrap(),
-            )
+            sb::C_SkEncodePixmap(src.native(), format, quality.try_into().unwrap())
         })
     }
 
     pub fn bitmap(src: &Bitmap, format: EncodedImageFormat, quality: usize) -> Option<Data> {
         Data::from_ptr(unsafe {
-            sb::C_SkEncodeBitmap(
-                src.native(),
-                format.into_native(),
-                quality.try_into().unwrap(),
-            )
+            sb::C_SkEncodeBitmap(src.native(), format, quality.try_into().unwrap())
         })
     }
 }
