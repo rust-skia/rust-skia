@@ -123,7 +123,7 @@ pub struct Features {
 
 impl Features {
     pub fn gpu(&self) -> bool {
-        return self.gl || self.vulkan;
+        self.gl || self.vulkan
     }
 }
 
