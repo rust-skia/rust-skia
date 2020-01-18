@@ -70,3 +70,7 @@ extern "C" GrContext* C_GrContext_MakeGL(GrGLInterface* interface) {
     else
         return GrContext::MakeGL().release();
 }
+
+extern "C" void C_GrBackendFormat_ConstructGL(GrBackendFormat* uninitialized, GrGLenum format, GrGLenum target) {
+    new(uninitialized)GrBackendFormat(GrBackendFormat::MakeGL(format, target));
+}

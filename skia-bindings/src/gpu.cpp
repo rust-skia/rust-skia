@@ -169,10 +169,6 @@ extern "C" void C_GrBackendFormat_Construct(GrBackendFormat* uninitialized) {
     new(uninitialized)GrBackendFormat();
 }
 
-extern "C" void C_GrBackendFormat_ConstructGL(GrBackendFormat* uninitialized, GrGLenum format, GrGLenum target) {
-    new(uninitialized)GrBackendFormat(GrBackendFormat::MakeGL(format, target));
-}
-
 extern "C" void C_GrBackendFormat_destruct(GrBackendFormat* self) {
     self->~GrBackendFormat();
 }
