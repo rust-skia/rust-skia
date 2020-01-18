@@ -1,12 +1,9 @@
-use crate::gpu::SurfaceOrigin;
+#[cfg(feature = "gpu")]
+use crate::gpu;
 use crate::prelude::*;
-use crate::{gpu, ColorSpace, ColorType, ISize, ImageInfo, SurfaceProps};
+use crate::{ColorSpace, SurfaceProps};
 use skia_bindings as sb;
-use skia_bindings::{
-    SkSurfaceCharacterization, SkSurfaceCharacterization_MipMapped,
-    SkSurfaceCharacterization_Textureable, SkSurfaceCharacterization_UsesGLFBO0,
-    SkSurfaceCharacterization_VulkanSecondaryCBCompatible,
-};
+use skia_bindings::SkSurfaceCharacterization;
 
 pub type SurfaceCharacterization = Handle<SkSurfaceCharacterization>;
 
@@ -36,10 +33,11 @@ impl Default for Handle<SkSurfaceCharacterization> {
     }
 }
 
-// TODO: there is an alterative for when SK_SUPPORT_GPU is not set, of which the
+// TODO: there is an alternative for when SK_SUPPORT_GPU is not set, of which the
 //       layout differs, should we support that?
 impl Handle<SkSurfaceCharacterization> {
-    pub fn resized(&self, size: impl Into<ISize>) -> Self {
+    #[cfg(feature = "gpu")]
+    pub fn resized(&self, size: impl Into<crate::ISize>) -> Self {
         let size = size.into();
         Self::from_native(unsafe { self.native().createResized(size.width, size.height) })
     }
@@ -55,7 +53,10 @@ impl Handle<SkSurfaceCharacterization> {
         };
         characterization
     }
+}
 
+#[cfg(feature = "gpu")]
+impl Handle<SkSurfaceCharacterization> {
     // TODO: contextInfo() / refContextInfo()
 
     pub fn cache_max_resource_bytes(&self) -> usize {
@@ -63,11 +64,11 @@ impl Handle<SkSurfaceCharacterization> {
     }
 
     pub fn is_valid(&self) -> bool {
-        self.image_info().color_type() != ColorType::Unknown
+        self.image_info().color_type() != crate::ColorType::Unknown
     }
 
-    pub fn image_info(&self) -> &ImageInfo {
-        ImageInfo::from_native_ref(unsafe {
+    pub fn image_info(&self) -> &crate::ImageInfo {
+        crate::ImageInfo::from_native_ref(unsafe {
             &*sb::C_SkSurfaceCharacterization_imageInfo(self.native())
         })
     }
@@ -76,7 +77,7 @@ impl Handle<SkSurfaceCharacterization> {
         gpu::BackendFormat::from_native_ref(&self.native().fBackendFormat)
     }
 
-    pub fn origin(&self) -> SurfaceOrigin {
+    pub fn origin(&self) -> gpu::SurfaceOrigin {
         self.native().fOrigin
     }
 
@@ -88,7 +89,7 @@ impl Handle<SkSurfaceCharacterization> {
         self.image_info().height()
     }
 
-    pub fn color_type(&self) -> ColorType {
+    pub fn color_type(&self) -> crate::ColorType {
         self.image_info().color_type()
     }
 
@@ -102,20 +103,20 @@ impl Handle<SkSurfaceCharacterization> {
     }
 
     pub fn is_textureable(&self) -> bool {
-        self.native().fIsTextureable == SkSurfaceCharacterization_Textureable::kYes
+        self.native().fIsTextureable == sb::SkSurfaceCharacterization_Textureable::kYes
     }
 
     pub fn is_mip_mapped(&self) -> bool {
-        self.native().fIsMipMapped == SkSurfaceCharacterization_MipMapped::kYes
+        self.native().fIsMipMapped == sb::SkSurfaceCharacterization_MipMapped::kYes
     }
 
     pub fn uses_glfbo0(&self) -> bool {
-        self.native().fUsesGLFBO0 == SkSurfaceCharacterization_UsesGLFBO0::kYes
+        self.native().fUsesGLFBO0 == sb::SkSurfaceCharacterization_UsesGLFBO0::kYes
     }
 
     pub fn vulkan_secondary_cb_compatible(&self) -> bool {
         self.native().fVulkanSecondaryCBCompatible
-            == SkSurfaceCharacterization_VulkanSecondaryCBCompatible::kYes
+            == sb::SkSurfaceCharacterization_VulkanSecondaryCBCompatible::kYes
     }
 
     pub fn is_protected(&self) -> gpu::Protected {
@@ -125,11 +126,14 @@ impl Handle<SkSurfaceCharacterization> {
     pub fn color_space(&self) -> Option<ColorSpace> {
         self.image_info().color_space()
     }
+}
 
+impl Handle<SkSurfaceCharacterization> {
     pub fn surface_props(&self) -> &SurfaceProps {
         SurfaceProps::from_native_ref(&self.native().fSurfaceProps)
     }
 
+    #[cfg(feature = "gpu")]
     pub fn is_compatible(&self, backend_texture: &gpu::BackendTexture) -> bool {
         unsafe { self.native().isCompatible(backend_texture.native()) }
     }

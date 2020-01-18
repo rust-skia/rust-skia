@@ -100,25 +100,25 @@ pub struct BuildConfiguration {
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Features {
     /// Build with OpenGL / EGL support?
-    gl: bool,
+    pub gl: bool,
 
     /// Build with Vulkan support?
-    vulkan: bool,
+    pub vulkan: bool,
 
     /// Build with SVG support?
-    svg: bool,
+    pub svg: bool,
 
     /// Features related to text layout.
-    text_layout: TextLayout,
+    pub text_layout: TextLayout,
 
     /// Build with animation support (yet unsupported, no wrappers).
-    animation: bool,
+    pub animation: bool,
 
     /// Support DNG file format (currently unsupported because of build errors).
-    dng: bool,
+    pub dng: bool,
 
     /// Build the particles module (unsupported, no wrappers).
-    particles: bool,
+    pub particles: bool,
 }
 
 impl Features {
@@ -468,40 +468,28 @@ impl BinariesConfiguration {
 
         match target.as_strs() {
             (_, "unknown", "linux", Some("gnu")) => {
-                link_libraries.extend(vec!["stdc++", "GL", "fontconfig", "freetype"]);
+                link_libraries.extend(vec!["stdc++", "fontconfig", "freetype"]);
+                if features.gl {
+                    link_libraries.push("GL");
+                }
             }
             (_, "apple", "darwin", _) => {
-                link_libraries.extend(vec![
-                    "c++",
-                    "framework=OpenGL",
-                    "framework=ApplicationServices",
-                ]);
+                link_libraries.extend(vec!["c++", "framework=ApplicationServices"]);
+                if features.gl {
+                    link_libraries.push("framework=OpenGL");
+                }
             }
             (_, _, "windows", Some("msvc")) => {
-                link_libraries.extend(vec![
-                    "usp10", "ole32", "user32", "gdi32", "fontsub", "opengl32",
-                ]);
+                link_libraries.extend(vec!["usp10", "ole32", "user32", "gdi32", "fontsub"]);
+                if features.gl {
+                    link_libraries.push("opengl32");
+                }
             }
             (_, "linux", "android", _) => {
-                link_libraries.extend(vec![
-                    "log",
-                    "android",
-                    "EGL",
-                    "GLESv2",
-                    "c++_static",
-                    "c++abi",
-                ]);
+                link_libraries.extend(android::link_libraries(features));
             }
             (_, "apple", "ios", _) => {
-                link_libraries.extend(vec![
-                    "c++",
-                    "framework=MobileCoreServices",
-                    "framework=CoreFoundation",
-                    "framework=CoreGraphics",
-                    "framework=CoreText",
-                    "framework=ImageIO",
-                    "framework=UIKit",
-                ]);
+                link_libraries.extend(ios::link_libraries(features));
             }
             _ => panic!("unsupported target: {:?}", cargo::target()),
         };

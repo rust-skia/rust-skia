@@ -1575,23 +1575,8 @@ extern "C" SkDrawLooper* C_SkDrawLooper_Deserialize(const void* data, size_t len
 // core/SkDrawable.h
 //
 
-extern "C" SkDrawable::GpuDrawHandler *C_SkDrawable_snapGpuDrawHandler(SkDrawable *self, GrBackendApi backendApi,
-                                                                       const SkMatrix *matrix,
-                                                                       const SkIRect *clipBounds,
-                                                                       const SkImageInfo *bufferInfo) {
-    return self->snapGpuDrawHandler(backendApi, *matrix, *clipBounds, *bufferInfo).release();
-}
-
 extern "C" SkDrawable* C_SkDrawable_Deserialize(const void* data, size_t length) {
     return SkDrawable::Deserialize(data, length).release();
-}
-
-extern "C" void C_SkDrawable_GpuDrawHandler_delete(SkDrawable::GpuDrawHandler *self) {
-    delete self;
-}
-
-extern "C" void C_SkDrawable_GpuDrawHandler_draw(SkDrawable::GpuDrawHandler *self, const GrBackendDrawableInfo *info) {
-    self->draw(*info);
 }
 
 //

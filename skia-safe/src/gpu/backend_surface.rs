@@ -1,10 +1,11 @@
-use super::{gl, BackendAPI, MipMapped};
+#[cfg(feature = "gl")]
+use super::gl;
+#[cfg(feature = "vulkan")]
+use super::vk;
+use super::BackendAPI;
 use crate::prelude::*;
 use skia_bindings as sb;
 use skia_bindings::{GrBackendFormat, GrBackendRenderTarget, GrBackendTexture, GrMipMapped};
-
-#[cfg(feature = "vulkan")]
-use super::vk;
 
 pub type BackendFormat = Handle<GrBackendFormat>;
 
@@ -31,6 +32,7 @@ impl Handle<GrBackendFormat> {
         Self::construct(|bf| unsafe { sb::C_GrBackendFormat_Construct(bf) })
     }
 
+    #[cfg(feature = "gl")]
     pub fn new_gl(format: gl::Enum, target: gl::Enum) -> Self {
         Self::construct(|bf| unsafe { sb::C_GrBackendFormat_ConstructGL(bf, format, target) })
     }
@@ -59,10 +61,12 @@ impl Handle<GrBackendFormat> {
     // texture_type() would return a private type.
 
     #[deprecated(since = "0.19.0", note = "use as_gl_format()")]
+    #[cfg(feature = "gl")]
     pub fn gl_format(&self) -> Option<gl::Enum> {
         Some(self.as_gl_format() as _)
     }
 
+    #[cfg(feature = "gl")]
     pub fn as_gl_format(&self) -> gl::Format {
         unsafe {
             #[allow(clippy::map_clone)]
@@ -108,9 +112,10 @@ impl NativeClone for GrBackendTexture {
 }
 
 impl Handle<GrBackendTexture> {
+    #[cfg(feature = "gl")]
     pub unsafe fn new_gl(
         (width, height): (i32, i32),
-        mip_mapped: MipMapped,
+        mip_mapped: super::MipMapped,
         gl_info: gl::TextureInfo,
     ) -> BackendTexture {
         Self::from_native_if_valid(GrBackendTexture::new(
@@ -154,6 +159,7 @@ impl Handle<GrBackendTexture> {
         self.native().fBackend
     }
 
+    #[cfg(feature = "gl")]
     pub fn gl_texture_info(&self) -> Option<gl::TextureInfo> {
         unsafe {
             let mut texture_info = gl::TextureInfo::default();
@@ -163,6 +169,7 @@ impl Handle<GrBackendTexture> {
         }
     }
 
+    #[cfg(feature = "gl")]
     pub fn gl_texture_parameters_modified(&mut self) {
         unsafe { self.native_mut().glTextureParametersModified() }
     }
@@ -219,6 +226,7 @@ impl NativeClone for GrBackendRenderTarget {
 }
 
 impl Handle<GrBackendRenderTarget> {
+    #[cfg(feature = "gl")]
     pub fn new_gl(
         (width, height): (i32, i32),
         sample_count: impl Into<Option<usize>>,
@@ -281,6 +289,7 @@ impl Handle<GrBackendRenderTarget> {
         self.native().fBackend
     }
 
+    #[cfg(feature = "gl")]
     pub fn gl_framebuffer_info(&self) -> Option<gl::FramebufferInfo> {
         let mut info = gl::FramebufferInfo::default();
         unsafe { self.native().getGLFramebufferInfo(info.native_mut()) }.if_true_some(info)

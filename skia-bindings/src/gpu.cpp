@@ -1,6 +1,7 @@
 #include "bindings.h"
 #include "include/gpu/GrContext.h"
 #include "include/gpu/GrBackendDrawableInfo.h"
+#include "include/core/SkDrawable.h"
 #include "include/core/SkSurface.h"
 #include "include/core/SkSurfaceCharacterization.h"
 
@@ -217,4 +218,23 @@ extern "C" bool C_GrBackendDrawableInfo_isValid(const GrBackendDrawableInfo* sel
 
 extern "C" GrBackendApi C_GrBackendDrawableInfo_backend(const GrBackendDrawableInfo* self) {
     return self->backend();
+}
+
+//
+// core/SkDrawable.h
+//
+
+extern "C" SkDrawable::GpuDrawHandler *C_SkDrawable_snapGpuDrawHandler(SkDrawable *self, GrBackendApi backendApi,
+                                                                       const SkMatrix *matrix,
+                                                                       const SkIRect *clipBounds,
+                                                                       const SkImageInfo *bufferInfo) {
+    return self->snapGpuDrawHandler(backendApi, *matrix, *clipBounds, *bufferInfo).release();
+}
+
+extern "C" void C_SkDrawable_GpuDrawHandler_delete(SkDrawable::GpuDrawHandler *self) {
+    delete self;
+}
+
+extern "C" void C_SkDrawable_GpuDrawHandler_draw(SkDrawable::GpuDrawHandler *self, const GrBackendDrawableInfo *info) {
+    self->draw(*info);
 }
