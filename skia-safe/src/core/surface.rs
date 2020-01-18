@@ -77,7 +77,7 @@ impl RCHandle<SkSurface> {
     }
 }
 
-#[cfg(gpu)]
+#[cfg(feature = "gpu")]
 impl RCHandle<SkSurface> {
     pub fn from_backend_texture(
         context: &mut gpu::Context,
@@ -194,71 +194,6 @@ impl RCHandle<SkSurface> {
                 backend_texture.native(),
             )
         })
-    }
-
-    #[deprecated(since = "0.14.0", note = "use get_backend_texture()")]
-    pub fn backend_texture(
-        &mut self,
-        handle_access: BackendHandleAccess,
-    ) -> Option<gpu::BackendTexture> {
-        self.get_backend_texture(handle_access)
-    }
-
-    pub fn get_backend_texture(
-        &mut self,
-        handle_access: BackendHandleAccess,
-    ) -> Option<gpu::BackendTexture> {
-        unsafe {
-            let mut backend_texture = construct(|bt| sb::C_GrBackendTexture_Construct(bt));
-            sb::C_SkSurface_getBackendTexture(
-                self.native_mut(),
-                handle_access.into_native(),
-                &mut backend_texture as _,
-            );
-
-            gpu::BackendTexture::from_native_if_valid(backend_texture)
-        }
-    }
-
-    #[deprecated(since = "0.14.0", note = "use get_backend_render_target()")]
-    pub fn backend_render_target(
-        &mut self,
-        handle_access: BackendHandleAccess,
-    ) -> Option<gpu::BackendRenderTarget> {
-        self.get_backend_render_target(handle_access)
-    }
-
-    pub fn get_backend_render_target(
-        &mut self,
-        handle_access: BackendHandleAccess,
-    ) -> Option<gpu::BackendRenderTarget> {
-        unsafe {
-            let mut backend_render_target =
-                construct(|rt| sb::C_GrBackendRenderTarget_Construct(rt));
-            sb::C_SkSurface_getBackendRenderTarget(
-                self.native_mut(),
-                handle_access.into_native(),
-                &mut backend_render_target as _,
-            );
-
-            pug::BackendRenderTarget::from_native_if_valid(backend_render_target)
-        }
-    }
-
-    // TODO: support variant with TextureReleaseProc and ReleaseContext
-    pub fn replace_backend_texture(
-        &mut self,
-        backend_texture: &gpu::BackendTexture,
-        origin: gpu::SurfaceOrigin,
-    ) -> bool {
-        unsafe {
-            self.native_mut().replaceBackendTexture(
-                backend_texture.native(),
-                origin.into_native(),
-                None,
-                ptr::null_mut(),
-            )
-        }
     }
 }
 

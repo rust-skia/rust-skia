@@ -125,6 +125,12 @@ impl Features {
     pub fn gpu(&self) -> bool {
         return self.gl || self.vulkan;
     }
+
+    // TODO: clarify why the Skia build script needs the functions *glGetCurrentContext and *glGetProcAddress even
+    //       though OpenGL is not configured.
+    pub fn need_gl_libs(&self) -> bool {
+        self.gpu()
+    }
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -469,19 +475,19 @@ impl BinariesConfiguration {
         match target.as_strs() {
             (_, "unknown", "linux", Some("gnu")) => {
                 link_libraries.extend(vec!["stdc++", "fontconfig", "freetype"]);
-                if features.gl {
+                if features.need_gl_libs() {
                     link_libraries.push("GL");
                 }
             }
             (_, "apple", "darwin", _) => {
                 link_libraries.extend(vec!["c++", "framework=ApplicationServices"]);
-                if features.gl {
+                if features.need_gl_libs() {
                     link_libraries.push("framework=OpenGL");
                 }
             }
             (_, _, "windows", Some("msvc")) => {
                 link_libraries.extend(vec!["usp10", "ole32", "user32", "gdi32", "fontsub"]);
-                if features.gl {
+                if features.need_gl_libs() {
                     link_libraries.push("opengl32");
                 }
             }

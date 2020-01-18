@@ -43,7 +43,7 @@ pub fn additional_clang_args(target: &str, target_arch: &str) -> Vec<String> {
 
 pub fn link_libraries(features: &Features) -> Vec<&str> {
     let mut libs = vec!["log", "android", "c++_static", "c++abi"];
-    if features.gl {
+    if features.need_gl_libs() {
         libs.extend(vec!["EGL", "GLESv2"])
     };
     libs
