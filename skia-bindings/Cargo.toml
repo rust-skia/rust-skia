@@ -24,6 +24,7 @@ depot_tools = "a110bf6"
 
 [features]
 default = []
+gl = []
 vulkan = []
 svg = []
 shaper = []

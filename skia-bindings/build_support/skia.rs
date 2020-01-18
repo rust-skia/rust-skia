@@ -16,6 +16,7 @@ mod lib {
 
 /// Feature identifiers define the additional configuration parts of the binaries to download.
 mod feature_id {
+    pub const GL: &str = "gl";
     pub const VULKAN: &str = "vulkan";
     pub const SVG: &str = "svg";
     pub const SHAPER: &str = "shaper";
@@ -58,6 +59,7 @@ impl Default for BuildConfiguration {
             skia_debug,
             keep_inline_functions: true,
             features: Features {
+                gl: cfg!(feature = "gl"),
                 vulkan: cfg!(feature = "vulkan"),
                 svg: cfg!(feature = "svg"),
                 text_layout,
@@ -97,6 +99,9 @@ pub struct BuildConfiguration {
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Features {
+    /// Build with OpenGL / EGL support?
+    gl: bool,
+
     /// Build with Vulkan support?
     vulkan: bool,
 
@@ -114,6 +119,12 @@ pub struct Features {
 
     /// Build the particles module (unsupported, no wrappers).
     particles: bool,
+}
+
+impl Features {
+    pub fn gpu(&self) -> bool {
+        return self.gl || self.vulkan;
+    }
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -229,6 +240,7 @@ impl FinalBuildConfiguration {
                     if build.skia_debug { no() } else { yes() },
                 ),
                 ("is_debug", if build.skia_debug { yes() } else { no() }),
+                ("skia_enable_gpu", if features.gpu() { yes() } else { no() }),
                 ("skia_use_system_libjpeg_turbo", no()),
                 ("skia_use_system_libpng", no()),
                 ("skia_use_libwebp", no()),
@@ -359,8 +371,14 @@ impl FinalBuildConfiguration {
             let mut sources: Vec<PathBuf> = Vec::new();
             sources.push("src/bindings.cpp".into());
             sources.extend(features.text_layout.sources());
+            if features.gl {
+                sources.push("src/gl.cpp".into());
+            }
             if features.vulkan {
                 sources.push("src/vulkan.cpp".into());
+            }
+            if features.gpu() {
+                sources.push("src/gpu.cpp".into());
             }
             if features.svg {
                 sources.push("src/svg.cpp".into())
@@ -422,6 +440,9 @@ impl BinariesConfiguration {
         let mut additional_files = Vec::new();
         let mut feature_ids = Vec::new();
 
+        if features.gl {
+            feature_ids.push(feature_id::GL);
+        }
         if features.vulkan {
             feature_ids.push(feature_id::VULKAN);
         }

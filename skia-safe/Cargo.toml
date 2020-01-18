@@ -20,10 +20,13 @@ doctest = false
 
 [features]
 default = []
-vulkan = ["skia-bindings/vulkan"]
+gl = ["gpu", "skia-bindings/gl"]
+vulkan = ["gpu", "skia-bindings/vulkan"]
 svg = ["skia-bindings/svg"]
 shaper = ["skia-bindings/shaper"]
-textlayout = ["skia-bindings/textlayout", "shaper"]
+textlayout = ["shaper", "skia-bindings/textlayout"]
+# implied only, do not use
+gpu = []
 
 [dependencies]
 bitflags = "1.0.4"
