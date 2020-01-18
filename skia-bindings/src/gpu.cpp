@@ -4,6 +4,7 @@
 #include "include/core/SkDrawable.h"
 #include "include/core/SkSurface.h"
 #include "include/core/SkSurfaceCharacterization.h"
+#include "include/core/SkImageGenerator.h"
 
 //
 // core/SkSurface.h
