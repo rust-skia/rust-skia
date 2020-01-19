@@ -11,13 +11,13 @@ use skia_bindings::{
 use std::marker::PhantomData;
 use std::mem::forget;
 
-#[deprecated(since = "0.0.0", note = "use path_types::PathDirection")]
+#[deprecated(since = "0.25.0", note = "use path_types::PathDirection")]
 pub type Direction = path_types::PathDirection;
 
-#[deprecated(since = "0.0.0", note = "use path_types::PathFillType")]
+#[deprecated(since = "0.25.0", note = "use path_types::PathFillType")]
 pub type FillType = path_types::PathFillType;
 
-#[deprecated(since = "0.0.0", note = "use path_types::PathConvexityType")]
+#[deprecated(since = "0.25.0", note = "use path_types::PathConvexityType")]
 pub type Convexity = path_types::PathConvexityType;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -296,17 +296,17 @@ impl Handle<SkPath> {
         self.convexity_type() == PathConvexityType::Convex
     }
 
-    #[deprecated(since = "0.0.0", note = "use convexity_type()")]
+    #[deprecated(since = "0.25.0", note = "use convexity_type()")]
     pub fn convexity(&self) -> PathConvexityType {
         self.convexity_type()
     }
 
-    #[deprecated(since = "0.0.0", note = "use convexity_type_or_unknown()")]
+    #[deprecated(since = "0.25.0", note = "use convexity_type_or_unknown()")]
     pub fn convexity_or_unknown(&self) -> PathConvexityType {
         self.convexity_type_or_unknown()
     }
 
-    #[deprecated(since = "0.0.0", note = "use set_convexity_type()")]
+    #[deprecated(since = "0.25.0", note = "use set_convexity_type()")]
     pub fn set_convexity(&mut self, convexity: PathConvexityType) -> &mut Self {
         self.set_convexity_type(convexity)
     }
