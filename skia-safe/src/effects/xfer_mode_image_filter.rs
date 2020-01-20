@@ -23,7 +23,7 @@ pub fn new<'a>(
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
         sb::C_SkXfermodeImageFilter_Make(
-            blend_mode.into_native(),
+            blend_mode,
             background.into_ptr(),
             foreground.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),

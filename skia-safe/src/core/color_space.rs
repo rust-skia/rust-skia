@@ -1,4 +1,4 @@
-use super::{Data, Matrix44};
+use super::Data;
 use crate::prelude::*;
 use skia_bindings as sb;
 use skia_bindings::{SkColorSpace, SkColorSpacePrimaries};
@@ -128,11 +128,6 @@ impl ColorSpace {
 
     pub fn new_srgb_linear() -> ColorSpace {
         ColorSpace::from_ptr(unsafe { sb::C_SkColorSpace_MakeSRGBLinear() }).unwrap()
-    }
-
-    pub fn to_xyzd50(&self) -> Option<Matrix44> {
-        let mut matrix = Matrix44::default();
-        unsafe { self.native().toXYZD50(matrix.native_mut()) }.if_true_some(matrix)
     }
 
     pub fn to_xyzd50_hash(&self) -> XYZD50Hash {

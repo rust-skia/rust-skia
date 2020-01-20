@@ -304,7 +304,7 @@ pub fn xfermode<'a>(
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
         sb::C_SkImageFilters_Xfermode(
-            blend_mode.into_native(),
+            blend_mode,
             background.into().into_ptr_or_null(),
             foreground.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),

@@ -156,9 +156,10 @@ impl NativeAccess<SkCanvas> for Canvas {
     }
 }
 
-/// This is the type representing a canvas that is owned and dropped
+/// A type representing a canvas that is owned and dropped
 /// when it goes out of scope _and_ is bound to a the lifetime of another
-/// instance. Function resolvement is done via the Deref trait.
+/// instance.
+/// Function resolvement is done via the Deref trait.
 #[repr(transparent)]
 pub struct OwnedCanvas<'lt>(*mut Canvas, PhantomData<&'lt ()>);
 
@@ -312,6 +313,18 @@ impl Canvas {
     // TODO: test ref count consistency assuming it is not increased in the native part.
     pub fn gpu_context(&mut self) -> Option<gpu::Context> {
         gpu::Context::from_unshared_ptr(unsafe { sb::C_SkCanvas_getGrContext(self.native_mut()) })
+    }
+
+    /// # Safety
+    /// This function is unsafe because it is not clear how exactly the lifetime of the canvas
+    /// relates to surface returned.
+    /// TODO: It might be possible to make this safe by returning a _kind of_ reference to the
+    ///       Surface that can not be cloned and stays bound to the lifetime of canvas.
+    ///       But even then, the Surface might exist twice then, which is confusing, but
+    ///       probably safe, because the first instance is borrowed by the canvas.
+    /// See also `OwnedCanvas`, `Surface::canvas()`.
+    pub unsafe fn surface(&mut self) -> Option<Surface> {
+        Surface::from_unshared_ptr(self.native_mut().getSurface())
     }
 
     pub fn access_top_layer_pixels(&mut self) -> Option<TopLayerPixels> {
@@ -565,10 +578,8 @@ impl Canvas {
         mode: impl Into<Option<BlendMode>>,
     ) -> &mut Self {
         unsafe {
-            self.native_mut().drawColor(
-                color.into().into_native(),
-                mode.into().unwrap_or_default().into_native(),
-            )
+            self.native_mut()
+                .drawColor(color.into().into_native(), mode.into().unwrap_or_default())
         }
         self
     }
@@ -965,16 +976,13 @@ impl Canvas {
                     vertices.native(),
                     bones.native().as_ptr(),
                     bones.len().try_into().unwrap(),
-                    mode.into_native(),
+                    mode,
                     paint.native(),
                 )
             },
             None => unsafe {
-                self.native_mut().drawVertices(
-                    vertices.native(),
-                    mode.into_native(),
-                    paint.native(),
-                )
+                self.native_mut()
+                    .drawVertices(vertices.native(), mode, paint.native())
             },
         }
         self
@@ -993,7 +1001,7 @@ impl Canvas {
                 cubics.native().as_ptr(),
                 colors.native().as_ptr(),
                 tex_coords.native().as_ptr(),
-                mode.into().unwrap_or(BlendMode::Modulate).into_native(),
+                mode.into().unwrap_or(BlendMode::Modulate),
                 paint.native(),
             )
         }

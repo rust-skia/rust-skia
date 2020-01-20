@@ -198,7 +198,7 @@ mod tests {
     use crate::FontMgr;
 
     #[test]
-    #[serial_test_derive::serial]
+    #[serial_test::serial]
     fn create_all_typefaces() {
         let font_mgr = FontMgr::default();
         let families = font_mgr.count_families();

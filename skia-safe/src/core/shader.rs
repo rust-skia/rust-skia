@@ -202,7 +202,7 @@ pub mod shaders {
     ) -> Shader {
         Shader::from_ptr(unsafe {
             sb::C_SkShaders_Blend(
-                mode.into_native(),
+                mode,
                 dst.into_ptr(),
                 src.into_ptr(),
                 local_matrix.native_ptr_or_null(),

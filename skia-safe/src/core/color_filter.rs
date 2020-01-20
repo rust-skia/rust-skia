@@ -37,11 +37,9 @@ impl RCHandle<SkColorFilter> {
 
     pub fn to_a_color_mode(&self) -> Option<(Color, BlendMode)> {
         let mut color: Color = 0.into();
-        let mut mode: BlendMode = BlendMode::default();
-        unsafe {
-            sb::C_SkColorFilter_asAColorMode(self.native(), color.native_mut(), mode.native_mut())
-        }
-        .if_true_some((color, mode))
+        let mut mode: BlendMode = Default::default();
+        unsafe { sb::C_SkColorFilter_asAColorMode(self.native(), color.native_mut(), &mut mode) }
+            .if_true_some((color, mode))
     }
 
     #[deprecated(since = "0.14.0", note = "use to_a_color_matrix()")]
@@ -121,9 +119,7 @@ pub mod color_filters {
     }
 
     pub fn blend(c: impl Into<Color>, mode: BlendMode) -> Option<ColorFilter> {
-        ColorFilter::from_ptr(unsafe {
-            sb::C_SkColorFilters_Blend(c.into().into_native(), mode.into_native())
-        })
+        ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_Blend(c.into().into_native(), mode) })
     }
 
     pub fn linear_to_srgb_gamma() -> ColorFilter {

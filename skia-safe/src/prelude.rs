@@ -323,6 +323,7 @@ impl<N: NativeDrop + NativeHash> Hash for Handle<N> {
 
 pub(crate) trait NativeSliceAccess<N: NativeDrop> {
     fn native(&self) -> &[N];
+    fn native_mut(&mut self) -> &mut [N];
 }
 
 impl<N: NativeDrop> NativeSliceAccess<N> for [Handle<N>] {
@@ -332,6 +333,14 @@ impl<N: NativeDrop> NativeSliceAccess<N> for [Handle<N>] {
             .map(|f| f.native() as *const _)
             .unwrap_or(ptr::null());
         unsafe { slice::from_raw_parts(ptr, self.len()) }
+    }
+
+    fn native_mut(&mut self) -> &mut [N] {
+        let ptr = self
+            .first_mut()
+            .map(|f| f.native_mut() as *mut _)
+            .unwrap_or(ptr::null_mut());
+        unsafe { slice::from_raw_parts_mut(ptr, self.len()) }
     }
 }
 

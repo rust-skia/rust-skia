@@ -3,6 +3,7 @@
 #include "include/codec/SkEncodedOrigin.h"
 // core/
 #include "include/core/SkAnnotation.h"
+#include "include/core/SkBlendMode.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkColorFilter.h"
@@ -25,7 +26,6 @@
 #include "include/core/SkImageGenerator.h"
 #include "include/core/SkImageInfo.h"
 #include "include/core/SkMaskFilter.h"
-#include "include/core/SkMultiPictureDraw.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPath.h"
 #include "include/core/SkPathMeasure.h"
@@ -109,17 +109,6 @@
 #include "include/utils/SkShadowUtils.h"
 #include "include/utils/SkTextUtils.h"
 
-#if defined(SK_VULKAN)
-#include "include/gpu/vk/GrVkVulkan.h"
-#include "include/gpu/vk/GrVkTypes.h"
-#include "include/gpu/vk/GrVkBackendContext.h"
-#include "include/gpu/GrBackendSurface.h"
-#endif
-
-#if defined(SK_XML)
-#include "include/svg/SkSVGCanvas.h"
-#endif
-
 template<typename T>
 inline sk_sp<T> sp(T* pt) {
     return sk_sp<T>(pt);
@@ -132,6 +121,12 @@ inline sk_sp<T> sp(T* pt) {
 extern "C" void C_SkEncodedOriginToMatrix(SkEncodedOrigin origin, int w, int h, SkMatrix* matrix) {
     *matrix = SkEncodedOriginToMatrix(origin, w, h);
 }
+
+//
+// core/
+//
+
+extern "C" void C_Core_Types(SkCubicMap *, SkGraphics *) {};
 
 //
 // core/SkSurface.h
@@ -565,14 +560,6 @@ extern "C" SkData* C_SkData_MakeEmpty() {
 }
 
 //
-// core/SkMultiPictureDraw.h
-//
-
-extern "C" void C_SkMultiPictureDraw_destruct(SkMultiPictureDraw* self) {
-    self->~SkMultiPictureDraw();
-}
-
-//
 // core/SkPaint.h
 //
 
@@ -633,7 +620,7 @@ extern "C" void C_SkPaint_setImageFilter(SkPaint* self, SkImageFilter* imageFilt
 }
 
 //
-// SkPath
+// core/SkPath.h
 //
 
 extern "C" void C_SkPath_destruct(const SkPath* self) {
@@ -646,10 +633,6 @@ extern "C" bool C_SkPath_Equals(const SkPath* lhs, const SkPath* rhs) {
 
 extern "C" SkData* C_SkPath_serialize(const SkPath* self) {
     return self->serialize().release();
-}
-
-extern "C" SkPath::FillType C_SkPath_ConvertToNonInverseFillType(SkPath::FillType fill) {
-    return SkPath::ConvertToNonInverseFillType(fill);
 }
 
 extern "C" bool C_SkPath_isValid(const SkPath* self) {
@@ -680,16 +663,16 @@ extern "C" SkPath::Verb C_SkPath_RawIter_peek(const SkPath::RawIter* self) {
     return self->peek();
 }
 
-extern "C" SkPath::FillType C_SkPath_getFillType(const SkPath* self) {
+extern "C" SkPathFillType C_SkPath_getFillType(const SkPath* self) {
     return self->getFillType();
 }
 
-extern "C" SkPath::Convexity C_SkPath_getConvexity(const SkPath* self) {
-    return self->getConvexity();
+extern "C" SkPathConvexityType C_SkPath_getConvexityType(const SkPath* self) {
+    return self->getConvexityType();
 }
 
-extern "C" SkPath::Convexity C_SkPath_getConvexityOrUnknown(const SkPath* self) {
-    return self->getConvexityOrUnknown();
+extern "C" SkPathConvexityType C_SkPath_getConvexityTypeOrUnknown(const SkPath* self) {
+    return self->getConvexityTypeOrUnknown();
 }
 
 extern "C" bool C_SkPath_isEmpty(const SkPath* self) {
@@ -720,7 +703,8 @@ extern "C" void C_SkPathMeasure_destruct(const SkPathMeasure* self) {
 // core/SkPathTypes.h
 //
 
-extern "C" void C_SkPathTypes(SkPathFillType, SkPathConvexityType, SkPathDirection, SkPathSegmentMask, SkPathVerb) {}
+extern "C" void
+C_SkPathTypes_Types(SkPathFillType *, SkPathConvexityType *, SkPathDirection *, SkPathSegmentMask *, SkPathVerb *) {}
 
 //
 // SkCanvas
@@ -780,7 +764,7 @@ extern "C" void C_SkCanvas_discard(SkCanvas* self) {
 }
 
 //
-// SkAutoCanvasRestore
+// core/SkAutoCanvasRestore.h
 //
 
 #undef SkAutoCanvasRestore
@@ -854,8 +838,10 @@ extern "C" void C_SkImageInfo_reset(SkImageInfo* self) {
 }
 
 //
-// SkColorSpace
+// core/SkColorSpace.h
 //
+
+extern "C" void C_SkColorSpace_Types(SkColorSpacePrimaries *) {}
 
 extern "C" void C_SkColorSpace_ref(const SkColorSpace* self) {
     self->ref();
@@ -1825,6 +1811,23 @@ extern "C" const char* C_SkString_c_str_size(const SkString* self, size_t* size)
     return self->c_str();
 }
 
+extern "C" {
+    void C_SkStrings_construct(SkStrings *uninitialized, SkString *string, size_t count) {
+        new(uninitialized) SkStrings{
+                std::vector<SkString>(std::make_move_iterator(string), std::make_move_iterator(string + count))
+        };
+    }
+
+    void C_SkStrings_destruct(SkStrings* self) {
+        self->~SkStrings();
+    }
+    
+    const SkString* C_SkStrings_ptr_count(const SkStrings* self, size_t* count) {
+        *count = self->strings.size();
+        return &self->strings.front();
+    }
+}
+
 //
 // core/SkStrokeRec.h
 //
@@ -2035,9 +2038,16 @@ extern "C" SkStreamAsset* C_SkDynamicMemoryWStream_detachAsStream(SkDynamicMemor
 }
 
 //
+// effects/
+//
+
+extern "C" void C_Effects_Types(SkTableMaskFilter *) {}
+
+//
 // effects/SkGradientShader.h
 //
 
+extern "C" void C_SkGradientShader_Types(SkGradientShader *) {}
 extern "C" SkShader* C_SkGradientShader_MakeLinear(const SkPoint pts[2], const SkColor colors[], const SkScalar pos[], int count, SkTileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
     return SkGradientShader::MakeLinear(pts, colors, pos, count, mode, flags, localMatrix).release();
 }
@@ -2168,16 +2178,27 @@ extern "C" SkImageFilter *C_SkColorFilterImageFilter_Make(SkColorFilter *cf, SkI
 // effects/SkColorMatrix.h
 //
 
-extern "C" bool C_SkColorMatrix_equals(const SkColorMatrix* lhs, const SkColorMatrix* rhs) {
-    return *lhs == *rhs;
+extern "C" void C_SkColorMatrix_Construct(SkColorMatrix* uninitialized) {
+    new(uninitialized)SkColorMatrix();
 }
 
-extern "C" float* C_SkColorMatrix_get20(const SkColorMatrix* self, float m[20]) {
-    return self->get20(m);
+extern "C" void C_SkColorMatrix_Construct2(SkColorMatrix* uninitialized, 
+                                           float m00, float m01, float m02, float m03, float m04,
+                                           float m10, float m11, float m12, float m13, float m14,
+                                           float m20, float m21, float m22, float m23, float m24,
+                                           float m30, float m31, float m32, float m33, float m34) {
+    new(uninitialized)SkColorMatrix(m00, m01, m02, m03, m04,
+                                    m10, m11, m12, m13, m14,
+                                    m20, m21, m22, m23, m24,
+                                    m30, m31, m32, m33, m34);
 }
 
-extern "C" void C_SkColorMatrix_set20(SkColorMatrix* self, const float m[20]) {
-    self->set20(m);
+extern "C" void C_SkColorMatrix_setRowMajor(SkColorMatrix* self, const float src[20]) {
+    self->setRowMajor(src);
+}
+
+extern "C" void C_SkColorMatrix_getRowMajor(const SkColorMatrix* self, float dst[20]) {
+    self->getRowMajor(dst);
 }
 
 //
@@ -2271,6 +2292,8 @@ C_SkImageSource_Make2(SkImage* image, const SkRect &srcRect, const SkRect &dstRe
 //
 // effects/SkLayerDrawLooper.h
 //
+
+extern "C" void C_SkLayerDrawLooper_Types(SkLayerDrawLooper *) {}
 
 extern "C" void C_SkLayerDrawLooper_Builder_destruct(SkLayerDrawLooper::Builder* self) {
     self->~Builder();
@@ -2723,18 +2746,6 @@ extern "C" void C_GrBackendFormat_ConstructGL(GrBackendFormat* uninitialized, Gr
     new(uninitialized)GrBackendFormat(GrBackendFormat::MakeGL(format, target));
 }
 
-#if defined(SK_VULKAN)
-
-extern "C" void C_GrBackendFormat_ConstructVk(GrBackendFormat* uninitialized, VkFormat format) {
-    new(uninitialized)GrBackendFormat(GrBackendFormat::MakeVk(format));
-}
-
-extern "C" void C_GrBackendFormat_ConstructVk2(GrBackendFormat* uninitialized, const GrVkYcbcrConversionInfo* ycbcrInfo) {
-    new(uninitialized)GrBackendFormat(GrBackendFormat::MakeVk(*ycbcrInfo));
-}
-
-#endif
-
 extern "C" void C_GrBackendFormat_destruct(GrBackendFormat* self) {
     self->~GrBackendFormat();
 }
@@ -2758,6 +2769,12 @@ extern "C" bool C_GrGLTextureInfo_Equals(const GrGLTextureInfo* lhs, const GrGLT
 extern "C" bool C_GrGLFramebufferInfo_Equals(const GrGLFramebufferInfo* lhs, const GrGLFramebufferInfo* rhs) {
     return *lhs == *rhs;
 }
+
+//
+// gpu/gl/
+//
+
+extern "C" void C_GPU_GL_Types(GrGLBackendState *) {}
 
 //
 // gpu/gl/GrGLInterface.h
@@ -2848,14 +2865,6 @@ extern "C" GrBackendApi C_GrBackendDrawableInfo_backend(const GrBackendDrawableI
     return self->backend();
 }
 
-#if defined(SK_VULKAN)
-
-extern "C" bool C_GrBackendDrawableInfo_getVkDrawableInfo(const GrBackendDrawableInfo* self, GrVkDrawableInfo* info) {
-    return self->getVkDrawableInfo(info);
-}
-
-#endif
-
 //
 // pathops/
 //
@@ -2871,6 +2880,8 @@ extern "C" void C_SkOpBuilder_destruct(SkOpBuilder* self) {
 //
 // utils
 //
+
+extern "C" void C_Utils_Types(SkShadowFlags *, SkShadowUtils *, SkTextUtils *, SkParsePath *) {}
 
 extern "C" Sk3DView* C_Sk3DView_new() {
     return new Sk3DView();
@@ -2899,74 +2910,3 @@ extern "C" void C_SkInterpolator_setMirror(SkInterpolator* self, bool mirror) {
 extern "C" SkCanvas* C_SkMakeNullCanvas() {
     return SkMakeNullCanvas().release();
 }
-
-#if defined(SK_VULKAN)
-
-// The GrVkBackendContext struct binding's length is too short
-// because of the std::function that is used in it.
-
-typedef PFN_vkVoidFunction (*GetProcFn)(const char* name, VkInstance instance, VkDevice device);
-typedef const void* (*GetProcFnVoidPtr)(const char* name, VkInstance instance, VkDevice device);
-
-extern "C" void* C_GrVkBackendContext_New(
-        void* instance,
-        void* physicalDevice,
-        void* device,
-        void* queue,
-        uint32_t graphicsQueueIndex,
-
-        /* PFN_vkVoidFunction makes us trouble on the Rust side */
-        GetProcFnVoidPtr getProc) {
-
-    auto& context = *new GrVkBackendContext();
-    context.fInstance = static_cast<VkInstance>(instance);
-    context.fPhysicalDevice = static_cast<VkPhysicalDevice>(physicalDevice);
-    context.fDevice = static_cast<VkDevice>(device);
-    context.fQueue = static_cast<VkQueue>(queue);
-    context.fGraphicsQueueIndex = graphicsQueueIndex;
-
-    context.fGetProc = *(reinterpret_cast<GetProcFn*>(&getProc));
-    return &context;
-}
-
-extern "C" void C_GrVkBackendContext_Delete(void* vkBackendContext) {
-    delete static_cast<GrVkBackendContext*>(vkBackendContext);
-}
-
-extern "C" GrContext* C_GrContext_MakeVulkan(const GrVkBackendContext* vkBackendContext) {
-    return GrContext::MakeVulkan(*vkBackendContext).release();
-}
-
-//
-// GrVkTypes.h
-//
-
-extern "C" void C_GrVkAlloc_Construct(GrVkAlloc* uninitialized, VkDeviceMemory memory, VkDeviceSize offset, VkDeviceSize size, uint32_t flags) {
-    new (uninitialized) GrVkAlloc(memory, offset, size, flags);
-}
-
-extern "C" bool C_GrVkAlloc_Equals(const GrVkAlloc* lhs, const GrVkAlloc* rhs) {
-    return *lhs == *rhs;
-}
-
-extern "C" bool C_GrVkYcbcrConversionInfo_Equals(const GrVkYcbcrConversionInfo* lhs, const GrVkYcbcrConversionInfo* rhs) {
-    return *lhs == *rhs;
-}
-
-extern "C" void C_GrVkImageInfo_updateImageLayout(GrVkImageInfo* self, VkImageLayout layout) {
-    self->updateImageLayout(layout);
-}
-
-extern "C" bool C_GrVkImageInfo_Equals(const GrVkImageInfo* lhs, const GrVkImageInfo* rhs) {
-    return *lhs == *rhs;
-}
-
-#endif
-
-#if defined(SK_XML)
-
-extern "C" SkCanvas* C_SkSVGCanvas_Make(const SkRect* bounds, SkWStream* writer, uint32_t flags) {
-    return SkSVGCanvas::Make(*bounds, writer, flags).release();
-}
-
-#endif

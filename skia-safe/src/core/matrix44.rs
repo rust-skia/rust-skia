@@ -271,23 +271,29 @@ impl Matrix44 {
 
     pub fn set_translate(&mut self, d: impl Into<Vector3>) -> &mut Self {
         let d = d.into();
-        unsafe { self.native_mut().setTranslate(d.x, d.y, d.z) }
+        unsafe {
+            self.native_mut().setTranslate(d.x, d.y, d.z);
+        }
         self
     }
 
     pub fn pre_translate(&mut self, d: impl Into<Vector3>) -> &mut Self {
         let d = d.into();
-        unsafe { self.native_mut().preTranslate(d.x, d.y, d.z) }
+        unsafe {
+            self.native_mut().preTranslate(d.x, d.y, d.z);
+        }
         self
     }
 
     pub fn post_translate(&mut self, d: impl Into<Vector3>) -> &mut Self {
         let d = d.into();
-        unsafe { self.native_mut().postTranslate(d.x, d.y, d.z) }
+        unsafe {
+            self.native_mut().postTranslate(d.x, d.y, d.z);
+        }
         self
     }
 
-    // Note: set_scale(), pre_scale() and post_scale() is implemented as a Trait below.
+    // Note: set_scale(), pre_scale() and post_scale() are implemented as a Trait below.
 
     pub fn set_rotate_degrees_about(
         &mut self,
@@ -383,17 +389,23 @@ impl SetPrePostScale<scalar> for Matrix44 {
 
 impl SetPrePostScale<(scalar, scalar, scalar)> for Matrix44 {
     fn set_scale(&mut self, (sx, sy, sz): (scalar, scalar, scalar)) -> &mut Self {
-        unsafe { self.native_mut().setScale(sx, sy, sz) }
+        unsafe {
+            self.native_mut().setScale(sx, sy, sz);
+        }
         self
     }
 
     fn pre_scale(&mut self, (sx, sy, sz): (scalar, scalar, scalar)) -> &mut Self {
-        unsafe { self.native_mut().preScale(sx, sy, sz) }
+        unsafe {
+            self.native_mut().preScale(sx, sy, sz);
+        }
         self
     }
 
     fn post_scale(&mut self, (sx, sy, sz): (scalar, scalar, scalar)) -> &mut Self {
-        unsafe { self.native_mut().postScale(sx, sy, sz) }
+        unsafe {
+            self.native_mut().postScale(sx, sy, sz);
+        }
         self
     }
 }

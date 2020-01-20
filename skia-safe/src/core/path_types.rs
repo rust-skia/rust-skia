@@ -1,10 +1,8 @@
 use crate::prelude::*;
 use skia_bindings as sb;
 use skia_bindings::{
-    SkPathConvexityType, SkPathDirection, SkPathFillType, SkPathVerb, SkPath_Convexity,
-    SkPath_Direction, SkPath_FillType, SkPath_Verb,
+    SkPathConvexityType, SkPathDirection, SkPathFillType, SkPathVerb, SkPath_Verb,
 };
-use std::mem;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
@@ -16,11 +14,28 @@ pub enum PathFillType {
 }
 
 impl NativeTransmutable<SkPathFillType> for PathFillType {}
-impl NativeTransmutable<SkPath_FillType> for SkPathFillType {}
 #[test]
 pub fn test_fill_type_layout() {
     PathFillType::test_layout();
-    SkPathFillType::test_layout();
+}
+
+impl PathFillType {
+    pub fn is_even_odd(self) -> bool {
+        (self as i32 & 1) != 0
+    }
+
+    pub fn is_inverse(self) -> bool {
+        (self as i32 & 2) != 0
+    }
+
+    pub fn to_non_inverse(self) -> Self {
+        match self {
+            PathFillType::Winding => self,
+            PathFillType::EvenOdd => self,
+            PathFillType::InverseWinding => PathFillType::Winding,
+            PathFillType::InverseEvenOdd => PathFillType::EvenOdd,
+        }
+    }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -37,24 +52,6 @@ fn test_convexity_layout() {
     PathConvexityType::test_layout();
 }
 
-// The sizes of SkPath_Convexity and SkPathConvexityType differ in C++, so
-// we provide custom conversions.
-impl PathConvexityType {
-    pub(crate) fn native_from_path(convexity: SkPath_Convexity) -> SkPathConvexityType {
-        unsafe { mem::transmute(convexity as i32) }
-    }
-
-    pub(crate) fn native_to_path(convexity: SkPathConvexityType) -> SkPath_Convexity {
-        unsafe { mem::transmute(convexity as u8) }
-    }
-}
-
-#[test]
-fn test_path_convexity_layout() {
-    assert_eq!(mem::size_of::<SkPath_Convexity>(), mem::size_of::<u8>());
-    assert_eq!(mem::size_of::<SkPathConvexityType>(), mem::size_of::<i32>());
-}
-
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(i32)]
 pub enum PathDirection {
@@ -63,11 +60,9 @@ pub enum PathDirection {
 }
 
 impl NativeTransmutable<SkPathDirection> for PathDirection {}
-impl NativeTransmutable<SkPath_Direction> for SkPathDirection {}
 #[test]
 fn test_direction_layout() {
     PathDirection::test_layout();
-    SkPathDirection::test_layout();
 }
 
 impl Default for PathDirection {

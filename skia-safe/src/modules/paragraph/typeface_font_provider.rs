@@ -113,7 +113,7 @@ mod tests {
     use crate::Typeface;
 
     #[test]
-    #[serial_test_derive::serial]
+    #[serial_test::serial]
     fn font_style_set_typeface_ref_counts() {
         let mut style_set = TypefaceFontStyleSet::new("");
         assert_eq!(style_set.native().ref_counted_base()._ref_cnt(), 1);
@@ -133,7 +133,7 @@ mod tests {
     }
 
     #[test]
-    #[serial_test_derive::serial]
+    #[serial_test::serial]
     fn treat_font_provider_as_font_mgr() {
         let mut font_collection = FontCollection::new();
         let typeface = Typeface::default();
