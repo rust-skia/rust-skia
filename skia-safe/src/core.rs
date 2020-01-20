@@ -282,9 +282,6 @@ pub use surface::BackendHandleAccess as SurfaceBackendHandleAccess;
 #[deprecated(since = "0.12.0", note = "use surface::ContentChangeMode")]
 pub use surface::ContentChangeMode as SurfaceContentChangeMode;
 
-#[cfg(feature = "gpu")]
-mod surface_gpu;
-
 mod surface_characterization;
 pub use surface_characterization::*;
 
