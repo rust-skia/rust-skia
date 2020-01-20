@@ -24,7 +24,7 @@ fn draw_lorem_ipsum(canvas: &mut Canvas) {
         font_collection.disable_font_fallback();
 
         let paragraph_style = ParagraphStyle::new();
-        let mut paragraph_builder = ParagraphBuilder::new(&paragraph_style, font_collection);
+        let mut paragraph_builder = ParagraphBuilder::new(&paragraph_style, &font_collection);
         let mut ts = TextStyle::new();
         ts.set_foreground_color(Paint::default());
         paragraph_builder.push_style(&ts);
