@@ -9,7 +9,7 @@ fn test_alpha_type_layout() {
     let _ = AlphaType::Premul;
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
 #[repr(i32)]
 pub enum ColorType {
     Unknown = SkColorType::kUnknown_SkColorType as _,
