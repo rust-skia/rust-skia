@@ -26,10 +26,10 @@ depot_tools = "a110bf6"
 default = []
 gl = []
 vulkan = []
-shaper = []
-textlayout = ["shaper"]
-# deprecated
+textlayout = []
+# deprecated since 0.25.0
 svg = []
+shaper = ["textlayout"]
 
 [dependencies]
 

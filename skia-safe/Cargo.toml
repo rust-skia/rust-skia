@@ -22,12 +22,12 @@ doctest = false
 default = []
 gl = ["gpu", "skia-bindings/gl"]
 vulkan = ["gpu", "skia-bindings/vulkan"]
-shaper = ["skia-bindings/shaper"]
-textlayout = ["shaper", "skia-bindings/textlayout"]
+textlayout = ["skia-bindings/textlayout"]
 # implied only, do not use
 gpu = []
-# deprecated since 0.25.0, forwarded to skia-bindings, which will warn.
+# deprecated since 0.25.0, forwarded to skia-bindings with the intend to print some warnings while build.rs is running
 svg = ["skia-bindings/svg"]
+shaper = ["textlayout", "skia-bindings/shaper"]
 
 [dependencies]
 bitflags = "1.0.4"

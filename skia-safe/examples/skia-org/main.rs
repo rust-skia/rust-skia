@@ -18,7 +18,7 @@ mod skpaint_overview;
 #[cfg(feature = "textlayout")]
 mod skparagraph_example;
 mod skpath_overview;
-#[cfg(feature = "shaper")]
+#[cfg(feature = "textlayout")]
 mod skshaper_example;
 
 fn main() {
@@ -120,7 +120,7 @@ fn main() {
         skpath_overview::draw::<Driver>(&out_path);
         skpaint_overview::draw::<Driver>(&out_path);
 
-        #[cfg(feature = "shaper")]
+        #[cfg(feature = "textlayout")]
         skshaper_example::draw::<Driver>(&out_path);
 
         #[cfg(feature = "textlayout")]

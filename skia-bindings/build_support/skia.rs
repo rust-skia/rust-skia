@@ -18,7 +18,6 @@ mod lib {
 mod feature_id {
     pub const GL: &str = "gl";
     pub const VULKAN: &str = "vulkan";
-    pub const SHAPER: &str = "shaper";
     pub const TEXTLAYOUT: &str = "textlayout";
 }
 
@@ -37,15 +36,6 @@ impl Default for BuildConfiguration {
             }
         };
 
-        let text_layout = {
-            match (cfg!(feature = "textlayout"), cfg!(feature = "shaper")) {
-                (false, false) => TextLayout::None,
-                (false, true) => TextLayout::ShaperOnly,
-                (true, false) => panic!("invalid feature configuration, feature 'shaper' must be enabled for feature 'textlayout'"),
-                (true, true) => TextLayout::ShaperAndParagraph,
-            }
-        };
-
         let skia_debug = {
             match cargo::env_var("SKIA_DEBUG") {
                 Some(v) if v != "0" => true,
@@ -60,7 +50,7 @@ impl Default for BuildConfiguration {
             features: Features {
                 gl: cfg!(feature = "gl"),
                 vulkan: cfg!(feature = "vulkan"),
-                text_layout,
+                text_layout: cfg!(feature = "textlayout"),
                 animation: false,
                 dng: false,
                 particles: false,
@@ -103,8 +93,8 @@ pub struct Features {
     /// Build with Vulkan support?
     pub vulkan: bool,
 
-    /// Features related to text layout.
-    pub text_layout: TextLayout,
+    /// Features related to text layout. Modules skshaper and skparagraph.
+    pub text_layout: bool,
 
     /// Build with animation support (yet unsupported, no wrappers).
     pub animation: bool,
@@ -119,84 +109,6 @@ pub struct Features {
 impl Features {
     pub fn gpu(&self) -> bool {
         self.gl || self.vulkan
-    }
-}
-
-#[derive(Clone, PartialEq, Eq, Debug)]
-pub enum TextLayout {
-    /// No text shaping or layout features.
-    None,
-    /// Builds the skshaper module, compiles harfbuzz & icu support.
-    ShaperOnly,
-    /// Builds the skshaper and the skparagraph module.
-    ShaperAndParagraph,
-}
-
-impl TextLayout {
-    fn skia_args(&self) -> Vec<(&'static str, String)> {
-        let mut args = Vec::new();
-        let (shaper, paragraph) = match self {
-            TextLayout::None => {
-                args.push(("skia_use_icu", no()));
-                (false, false)
-            }
-            TextLayout::ShaperOnly => (true, false),
-            TextLayout::ShaperAndParagraph => (true, true),
-        };
-
-        if shaper {
-            args.extend(vec![
-                ("skia_enable_skshaper", yes()),
-                ("skia_use_icu", yes()),
-                ("skia_use_system_icu", no()),
-                ("skia_use_harfbuzz", yes()),
-                ("skia_pdf_subset_harfbuzz", yes()),
-                ("skia_use_system_harfbuzz", no()),
-                ("skia_use_sfntly", no()),
-            ]);
-        }
-
-        if paragraph {
-            args.extend(vec![
-                ("skia_enable_skparagraph", yes()),
-                // note: currently, tests need to be enabled, because modules/skparagraph
-                // is not included in the default dependency configuration.
-                // ("paragraph_tests_enabled", no()),
-            ]);
-        }
-
-        args
-    }
-
-    fn sources(&self) -> Vec<PathBuf> {
-        match self {
-            TextLayout::None => Vec::new(),
-            TextLayout::ShaperOnly => vec!["src/shaper.cpp".into()],
-            TextLayout::ShaperAndParagraph => {
-                vec!["src/shaper.cpp".into(), "src/paragraph.cpp".into()]
-            }
-        }
-    }
-
-    fn patches(&self) -> Vec<Patch> {
-        match self {
-            TextLayout::ShaperAndParagraph => vec![Patch {
-                name: "skparagraph".into(),
-                marked_file: "BUILD.gn".into(),
-            }],
-            _ => Vec::new(),
-        }
-    }
-
-    fn ninja_files(&self) -> Vec<PathBuf> {
-        match self {
-            TextLayout::None => Vec::new(),
-            TextLayout::ShaperOnly => vec!["obj/modules/skshaper/skshaper.ninja".into()],
-            TextLayout::ShaperAndParagraph => vec![
-                "obj/modules/skshaper/skshaper.ninja".into(),
-                "obj/modules/skparagraph/skparagraph.ninja".into(),
-            ],
-        }
     }
 }
 
@@ -263,6 +175,11 @@ impl FinalBuildConfiguration {
                 ("cxx", quote("clang++")),
             ];
 
+            if features.vulkan {
+                args.push(("skia_use_vulkan", yes()));
+                args.push(("skia_enable_spirv_validation", no()));
+            }
+
             // further flags that limit the components of Skia debug builds.
             if build.skia_debug {
                 args.push(("skia_enable_atlas_text", no()));
@@ -273,11 +190,22 @@ impl FinalBuildConfiguration {
                 args.push(("skia_use_lua", no()));
             }
 
-            args.extend(features.text_layout.skia_args());
-
-            if features.vulkan {
-                args.push(("skia_use_vulkan", yes()));
-                args.push(("skia_enable_spirv_validation", no()));
+            if features.text_layout {
+                args.extend(vec![
+                    ("skia_enable_skshaper", yes()),
+                    ("skia_use_icu", yes()),
+                    ("skia_use_system_icu", no()),
+                    ("skia_use_harfbuzz", yes()),
+                    ("skia_pdf_subset_harfbuzz", yes()),
+                    ("skia_use_system_harfbuzz", no()),
+                    ("skia_use_sfntly", no()),
+                    ("skia_enable_skparagraph", yes()),
+                    // note: currently, tests need to be enabled, because modules/skparagraph
+                    // is not included in the default dependency configuration.
+                    // ("paragraph_tests_enabled", no()),
+                ]);
+            } else {
+                args.push(("skia_use_icu", no()));
             }
 
             let mut flags: Vec<&str> = vec![];
@@ -359,14 +287,18 @@ impl FinalBuildConfiguration {
         let ninja_files = {
             let mut files = Vec::new();
             files.push("obj/skia.ninja".into());
-            files.extend(features.text_layout.ninja_files());
+            if features.text_layout {
+                files.extend(vec![
+                    "obj/modules/skshaper/skshaper.ninja".into(),
+                    "obj/modules/skparagraph/skparagraph.ninja".into(),
+                ]);
+            }
             files
         };
 
         let binding_sources = {
             let mut sources: Vec<PathBuf> = Vec::new();
             sources.push("src/bindings.cpp".into());
-            sources.extend(features.text_layout.sources());
             if features.gl {
                 sources.push("src/gl.cpp".into());
             }
@@ -376,12 +308,26 @@ impl FinalBuildConfiguration {
             if features.gpu() {
                 sources.push("src/gpu.cpp".into());
             }
+            if features.text_layout {
+                sources.extend(vec!["src/shaper.cpp".into(), "src/paragraph.cpp".into()]);
+            }
             sources.push("src/svg.cpp".into());
             sources
         };
 
+        let skia_patches = {
+            if features.text_layout {
+                vec![Patch {
+                    name: "skparagraph".into(),
+                    marked_file: "BUILD.gn".into(),
+                }]
+            } else {
+                Vec::new()
+            }
+        };
+
         FinalBuildConfiguration {
-            skia_patches: features.text_layout.patches(),
+            skia_patches,
             gn_args,
             ninja_files,
             definitions: build.definitions.clone(),
@@ -440,19 +386,11 @@ impl BinariesConfiguration {
         if features.vulkan {
             feature_ids.push(feature_id::VULKAN);
         }
-        match features.text_layout {
-            TextLayout::None => {}
-            TextLayout::ShaperOnly => {
-                feature_ids.push(feature_id::SHAPER);
-                additional_files.push(ICUDTL_DAT.into());
-                built_libraries.push(lib::SKSHAPER.into());
-            }
-            TextLayout::ShaperAndParagraph => {
-                feature_ids.push(feature_id::TEXTLAYOUT);
-                additional_files.push(ICUDTL_DAT.into());
-                built_libraries.push(lib::SKPARAGRAPH.into());
-                built_libraries.push(lib::SKSHAPER.into());
-            }
+        if features.text_layout {
+            feature_ids.push(feature_id::TEXTLAYOUT);
+            additional_files.push(ICUDTL_DAT.into());
+            built_libraries.push(lib::SKPARAGRAPH.into());
+            built_libraries.push(lib::SKSHAPER.into());
         }
 
         let mut link_libraries = Vec::new();

@@ -11,5 +11,5 @@ pub use defaults::*;
 mod impls;
 pub use impls::*;
 
-#[cfg(feature = "shaper")]
+#[cfg(feature = "textlayout")]
 pub mod icu;
