@@ -235,15 +235,6 @@ extern "C" SkShader* C_SkImage_makeShader(const SkImage* self, SkTileMode tileMo
     return self->makeShader(tileMode1, tileMode2, localMatrix).release();
 }
 
-extern "C" void C_SkImage_getBackendTexture(
-        const SkImage* self,
-        bool flushPendingGrContextIO,
-        GrSurfaceOrigin* origin,
-        GrBackendTexture* result)
-{
-    *result = self->getBackendTexture(flushPendingGrContextIO, origin);
-}
-
 extern "C" SkData* C_SkImage_encodeToData(const SkImage* self, SkEncodedImageFormat imageFormat, int quality) {
     return self->encodeToData(imageFormat, quality).release();
 }
