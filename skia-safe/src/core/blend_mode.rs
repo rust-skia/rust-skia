@@ -1,5 +1,2 @@
-use skia_bindings::{SkBlendMode, SkBlendModeCoeff};
-
-pub type BlendMode = SkBlendMode;
-
-pub type BlendModeCoeff = SkBlendModeCoeff;
+pub use skia_bindings::SkBlendMode as BlendMode;
+pub use skia_bindings::SkBlendModeCoeff as BlendModeCoeff;
