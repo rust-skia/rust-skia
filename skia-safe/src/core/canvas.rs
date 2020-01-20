@@ -1,10 +1,12 @@
+#[cfg(feature = "gpu")]
+use crate::gpu;
 use crate::prelude::*;
-use crate::{gpu, u8cpu, Drawable, Pixmap};
 use crate::{
     scalar, vertices, Bitmap, BlendMode, ClipOp, Color, Data, Font, IPoint, IRect, ISize, Image,
     ImageFilter, ImageInfo, Matrix, Paint, Path, Picture, Point, QuickReject, RRect, Rect, Region,
     Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices,
 };
+use crate::{u8cpu, Drawable, Pixmap};
 use skia_bindings as sb;
 use skia_bindings::{
     SkAutoCanvasRestore, SkCanvas, SkCanvas_SaveLayerFlagsSet_kF16ColorType,
@@ -298,6 +300,7 @@ impl Canvas {
     }
 
     // TODO: test ref count consistency assuming it is not increased in the native part.
+    #[cfg(feature = "gpu")]
     pub fn gpu_context(&mut self) -> Option<gpu::Context> {
         gpu::Context::from_unshared_ptr(unsafe { sb::C_SkCanvas_getGrContext(self.native_mut()) })
     }

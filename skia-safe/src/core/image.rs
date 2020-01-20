@@ -1,9 +1,11 @@
+#[cfg(feature = "gpu")]
+use crate::gpu;
 use crate::prelude::*;
-use crate::{gpu, FilterQuality, ImageFilter, ImageGenerator, Pixmap};
 use crate::{
     AlphaType, Bitmap, ColorSpace, ColorType, Data, EncodedImageFormat, IPoint, IRect, ISize,
-    ImageInfo, Matrix, Paint, Picture, Shader, TileMode, YUVAIndex, YUVColorSpace,
+    ImageInfo, Matrix, Paint, Picture, Shader, TileMode,
 };
+use crate::{FilterQuality, ImageFilter, ImageGenerator, Pixmap};
 use skia_bindings as sb;
 use skia_bindings::{SkImage, SkRefCntBase};
 use std::mem;
@@ -78,7 +80,10 @@ impl RCHandle<SkImage> {
             )
         })
     }
+}
 
+#[cfg(feature = "gpu")]
+impl RCHandle<SkImage> {
     pub fn decode_to_texture(
         context: &mut gpu::Context,
         encoded: &[u8],
@@ -174,9 +179,9 @@ impl RCHandle<SkImage> {
     // TODO: rename to clone_from_yuva_textures() ?
     pub fn from_yuva_textures_copy(
         context: &mut gpu::Context,
-        yuv_color_space: YUVColorSpace,
+        yuv_color_space: crate::YUVColorSpace,
         yuva_textures: &[gpu::BackendTexture],
-        yuva_indices: &[YUVAIndex; 4],
+        yuva_indices: &[crate::YUVAIndex; 4],
         image_size: impl Into<ISize>,
         image_origin: gpu::SurfaceOrigin,
         image_color_space: impl Into<Option<ColorSpace>>,
@@ -197,9 +202,9 @@ impl RCHandle<SkImage> {
     #[allow(clippy::too_many_arguments)]
     pub fn from_yuva_textures_copy_with_external_backend(
         context: &mut gpu::Context,
-        yuv_color_space: YUVColorSpace,
+        yuv_color_space: crate::YUVColorSpace,
         yuva_textures: &[gpu::BackendTexture],
-        yuva_indices: &[YUVAIndex; 4],
+        yuva_indices: &[crate::YUVAIndex; 4],
         image_size: impl Into<ISize>,
         image_origin: gpu::SurfaceOrigin,
         backend_texture: &gpu::BackendTexture,
@@ -222,9 +227,9 @@ impl RCHandle<SkImage> {
 
     pub fn from_yuva_textures(
         context: &mut gpu::Context,
-        yuv_color_space: YUVColorSpace,
+        yuv_color_space: crate::YUVColorSpace,
         yuva_textures: &[gpu::BackendTexture],
-        yuva_indices: &[YUVAIndex; 4],
+        yuva_indices: &[crate::YUVAIndex; 4],
         image_size: impl Into<ISize>,
         image_origin: gpu::SurfaceOrigin,
         image_color_space: impl Into<Option<ColorSpace>>,
@@ -246,7 +251,7 @@ impl RCHandle<SkImage> {
 
     pub fn from_nv12_textures_copy(
         context: &mut gpu::Context,
-        yuv_color_space: YUVColorSpace,
+        yuv_color_space: crate::YUVColorSpace,
         nv12_textures: &[gpu::BackendTexture; 2],
         image_origin: gpu::SurfaceOrigin,
         image_color_space: impl Into<Option<ColorSpace>>,
@@ -264,7 +269,7 @@ impl RCHandle<SkImage> {
 
     pub fn from_nv12_textures_copy_with_external_backend(
         context: &mut gpu::Context,
-        yuv_color_space: YUVColorSpace,
+        yuv_color_space: crate::YUVColorSpace,
         nv12_textures: &[gpu::BackendTexture; 2],
         image_origin: gpu::SurfaceOrigin,
         backend_texture: &gpu::BackendTexture,
@@ -282,7 +287,9 @@ impl RCHandle<SkImage> {
             )
         })
     }
+}
 
+impl RCHandle<SkImage> {
     pub fn from_picture(
         picture: Picture,
         dimensions: impl Into<ISize>,
@@ -376,7 +383,10 @@ impl RCHandle<SkImage> {
     pub fn is_texture_backed(&self) -> bool {
         unsafe { self.native().isTextureBacked() }
     }
+}
 
+#[cfg(feature = "gpu")]
+impl RCHandle<SkImage> {
     pub fn is_valid(&self, context: &mut gpu::Context) -> bool {
         unsafe { self.native().isValid(context.native_mut()) }
     }
@@ -398,7 +408,9 @@ impl RCHandle<SkImage> {
         });
         (texture, origin)
     }
+}
 
+impl RCHandle<SkImage> {
     pub fn read_pixels<P>(
         &self,
         dst_info: &ImageInfo,
@@ -463,6 +475,7 @@ impl RCHandle<SkImage> {
         Image::from_ptr(unsafe { sb::C_SkImage_makeSubset(self.native(), rect.as_ref().native()) })
     }
 
+    #[cfg(feature = "gpu")]
     pub fn new_texture_image(
         &self,
         context: &mut gpu::Context,
@@ -482,6 +495,7 @@ impl RCHandle<SkImage> {
     }
 
     // TODO: rename to with_filter()?
+    #[cfg(feature = "gpu")]
     pub fn new_with_filter(
         &self,
         mut context: Option<&mut gpu::Context>,
@@ -496,6 +510,30 @@ impl RCHandle<SkImage> {
             sb::C_SkImage_makeWithFilter(
                 self.native(),
                 context.native_ptr_or_null_mut(),
+                filter.native(),
+                subset.into().native(),
+                clip_bounds.into().native(),
+                out_subset.native_mut(),
+                offset.native_mut(),
+            )
+        })
+        .map(|image| (image, out_subset, offset))
+    }
+
+    #[cfg(not(feature = "gpu"))]
+    pub fn new_with_filter(
+        &self,
+        filter: &ImageFilter,
+        clip_bounds: impl Into<IRect>,
+        subset: impl Into<IRect>,
+    ) -> Option<(Image, IRect, IPoint)> {
+        let mut out_subset = IRect::default();
+        let mut offset = IPoint::default();
+
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_makeWithFilter(
+                self.native(),
+                std::ptr::null_mut(),
                 filter.native(),
                 subset.into().native(),
                 clip_bounds.into().native(),

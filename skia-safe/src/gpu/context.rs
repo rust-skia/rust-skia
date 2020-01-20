@@ -1,11 +1,12 @@
-use crate::gpu::{gl, BackendFormat, MipMapped, Renderable};
-use crate::prelude::*;
-use skia_bindings as sb;
-use skia_bindings::{GrContext, SkRefCntBase};
-
+#[cfg(feature = "gl")]
+use super::gl;
 #[cfg(feature = "vulkan")]
 use super::vk;
+use crate::gpu::{BackendFormat, MipMapped, Renderable};
+use crate::prelude::*;
 use crate::{ColorType, Data, Image};
+use skia_bindings as sb;
+use skia_bindings::{GrContext, SkRefCntBase};
 
 pub type Context = RCHandle<GrContext>;
 
@@ -27,6 +28,7 @@ pub struct ResourceCacheUsage {
 
 impl RCHandle<GrContext> {
     // TODO: support variant with GrContextOptions
+    #[cfg(feature = "gl")]
     pub fn new_gl(interface: impl Into<Option<gl::Interface>>) -> Option<Context> {
         Context::from_ptr(unsafe { sb::C_GrContext_MakeGL(interface.into().into_ptr_or_null()) })
     }

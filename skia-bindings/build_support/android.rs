@@ -1,4 +1,5 @@
 use crate::build_support::cargo;
+use crate::build_support::skia::Features;
 
 /// API level Android 8, Oreo (the first one with full Vulkan support)
 pub const API_LEVEL: &str = "26";
@@ -38,4 +39,12 @@ pub fn additional_clang_args(target: &str, target_arch: &str) -> Vec<String> {
     }
 
     args
+}
+
+pub fn link_libraries(features: &Features) -> Vec<&str> {
+    let mut libs = vec!["log", "android", "c++_static", "c++abi"];
+    if features.gl {
+        libs.extend(vec!["EGL", "GLESv2"])
+    };
+    libs
 }

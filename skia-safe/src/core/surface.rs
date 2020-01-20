@@ -1,8 +1,9 @@
-use crate::gpu::{BackendRenderTarget, BackendTexture, Context, SurfaceOrigin};
+#[cfg(feature = "gpu")]
+use crate::gpu;
 use crate::prelude::*;
 use crate::{
-    Bitmap, Budgeted, Canvas, ColorSpace, ColorType, DeferredDisplayList, IPoint, IRect, ISize,
-    Image, ImageInfo, Paint, Pixmap, Size, SurfaceCharacterization, SurfaceProps,
+    Bitmap, Canvas, DeferredDisplayList, IPoint, IRect, ISize, Image, ImageInfo, Paint, Pixmap,
+    Size, SurfaceCharacterization, SurfaceProps,
 };
 use skia_bindings as sb;
 use skia_bindings::{SkRefCntBase, SkSurface};
@@ -74,14 +75,17 @@ impl RCHandle<SkSurface> {
             sb::C_SkSurface_MakeRasterN32Premul(size.width, size.height, ptr::null())
         })
     }
+}
 
+#[cfg(feature = "gpu")]
+impl RCHandle<SkSurface> {
     pub fn from_backend_texture(
-        context: &mut Context,
-        backend_texture: &BackendTexture,
-        origin: SurfaceOrigin,
+        context: &mut gpu::Context,
+        backend_texture: &gpu::BackendTexture,
+        origin: gpu::SurfaceOrigin,
         sample_count: impl Into<Option<usize>>,
-        color_type: ColorType,
-        color_space: impl Into<Option<ColorSpace>>,
+        color_type: crate::ColorType,
+        color_space: impl Into<Option<crate::ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
@@ -98,11 +102,11 @@ impl RCHandle<SkSurface> {
     }
 
     pub fn from_backend_render_target(
-        context: &mut Context,
-        backend_render_target: &BackendRenderTarget,
-        origin: SurfaceOrigin,
-        color_type: ColorType,
-        color_space: impl Into<Option<ColorSpace>>,
+        context: &mut gpu::Context,
+        backend_render_target: &gpu::BackendRenderTarget,
+        origin: gpu::SurfaceOrigin,
+        color_type: crate::ColorType,
+        color_space: impl Into<Option<crate::ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
@@ -118,12 +122,12 @@ impl RCHandle<SkSurface> {
     }
 
     pub fn from_backend_texture_as_render_target(
-        context: &mut Context,
-        backend_texture: &BackendTexture,
-        origin: SurfaceOrigin,
+        context: &mut gpu::Context,
+        backend_texture: &gpu::BackendTexture,
+        origin: gpu::SurfaceOrigin,
         sample_count: impl Into<Option<usize>>,
-        color_type: ColorType,
-        color_space: impl Into<Option<ColorSpace>>,
+        color_type: crate::ColorType,
+        color_space: impl Into<Option<crate::ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
@@ -140,12 +144,12 @@ impl RCHandle<SkSurface> {
     }
 
     pub fn new_render_target(
-        context: &mut Context,
-        budgeted: Budgeted,
+        context: &mut gpu::Context,
+        budgeted: crate::Budgeted,
         image_info: &ImageInfo,
         sample_count: impl Into<Option<usize>>,
         // not optional, because with vulkan, there is no clear default anymore.
-        surface_origin: SurfaceOrigin,
+        surface_origin: gpu::SurfaceOrigin,
         surface_props: Option<&SurfaceProps>,
         should_create_with_mips: impl Into<Option<bool>>,
     ) -> Option<Self> {
@@ -163,9 +167,9 @@ impl RCHandle<SkSurface> {
     }
 
     pub fn new_render_target_with_characterization(
-        context: &mut Context,
+        context: &mut gpu::Context,
         characterization: &SurfaceCharacterization,
-        budgeted: Budgeted,
+        budgeted: crate::Budgeted,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
             sb::C_SkSurface_MakeRenderTarget2(
@@ -179,9 +183,9 @@ impl RCHandle<SkSurface> {
     // TODO: support TextureReleaseProc / ReleaseContext
 
     pub fn from_backend_texture_with_caracterization(
-        context: &mut Context,
+        context: &mut gpu::Context,
         characterization: &SurfaceCharacterization,
-        backend_texture: &BackendTexture,
+        backend_texture: &gpu::BackendTexture,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
             sb::C_SkSurface_MakeFromBackendTexture2(
@@ -191,7 +195,9 @@ impl RCHandle<SkSurface> {
             )
         })
     }
+}
 
+impl RCHandle<SkSurface> {
     pub fn is_compatible(&self, characterization: &SurfaceCharacterization) -> bool {
         unsafe { self.native().isCompatible(characterization.native()) }
     }
@@ -223,19 +229,22 @@ impl RCHandle<SkSurface> {
         unsafe { self.native_mut().notifyContentWillChange(mode) }
         self
     }
+}
 
+#[cfg(feature = "gpu")]
+impl RCHandle<SkSurface> {
     #[deprecated(since = "0.14.0", note = "use get_backend_texture()")]
     pub fn backend_texture(
         &mut self,
         handle_access: BackendHandleAccess,
-    ) -> Option<BackendTexture> {
+    ) -> Option<gpu::BackendTexture> {
         self.get_backend_texture(handle_access)
     }
 
     pub fn get_backend_texture(
         &mut self,
         handle_access: BackendHandleAccess,
-    ) -> Option<BackendTexture> {
+    ) -> Option<gpu::BackendTexture> {
         unsafe {
             let mut backend_texture = construct(|bt| sb::C_GrBackendTexture_Construct(bt));
             sb::C_SkSurface_getBackendTexture(
@@ -244,7 +253,7 @@ impl RCHandle<SkSurface> {
                 &mut backend_texture as _,
             );
 
-            BackendTexture::from_native_if_valid(backend_texture)
+            gpu::BackendTexture::from_native_if_valid(backend_texture)
         }
     }
 
@@ -252,14 +261,14 @@ impl RCHandle<SkSurface> {
     pub fn backend_render_target(
         &mut self,
         handle_access: BackendHandleAccess,
-    ) -> Option<BackendRenderTarget> {
+    ) -> Option<gpu::BackendRenderTarget> {
         self.get_backend_render_target(handle_access)
     }
 
     pub fn get_backend_render_target(
         &mut self,
         handle_access: BackendHandleAccess,
-    ) -> Option<BackendRenderTarget> {
+    ) -> Option<gpu::BackendRenderTarget> {
         unsafe {
             let mut backend_render_target =
                 construct(|rt| sb::C_GrBackendRenderTarget_Construct(rt));
@@ -269,15 +278,15 @@ impl RCHandle<SkSurface> {
                 &mut backend_render_target as _,
             );
 
-            BackendRenderTarget::from_native_if_valid(backend_render_target)
+            gpu::BackendRenderTarget::from_native_if_valid(backend_render_target)
         }
     }
 
     // TODO: support variant with TextureReleaseProc and ReleaseContext
     pub fn replace_backend_texture(
         &mut self,
-        backend_texture: &BackendTexture,
-        origin: SurfaceOrigin,
+        backend_texture: &gpu::BackendTexture,
+        origin: gpu::SurfaceOrigin,
     ) -> bool {
         unsafe {
             self.native_mut().replaceBackendTexture(
@@ -288,7 +297,9 @@ impl RCHandle<SkSurface> {
             )
         }
     }
+}
 
+impl RCHandle<SkSurface> {
     pub fn canvas(&mut self) -> &mut Canvas {
         let canvas_ref = unsafe { &mut *self.native_mut().getCanvas() };
         Canvas::borrow_from_native(canvas_ref)
@@ -450,7 +461,7 @@ fn create() {
 fn test_raster_direct() {
     let image_info = ImageInfo::new(
         (20, 20),
-        ColorType::RGBA8888,
+        crate::ColorType::RGBA8888,
         crate::AlphaType::Unpremul,
         None,
     );

@@ -91,13 +91,7 @@
 #include "include/effects/SkTileImageFilter.h"
 #include "include/effects/SkTrimPathEffect.h"
 #include "include/effects/SkXfermodeImageFilter.h"
-// gpu/
-#include "include/gpu/GrContext.h"
-#include "include/gpu/GrBackendDrawableInfo.h"
-// gpu/gl
-#include "include/gpu/gl/GrGLExtensions.h"
-#include "include/gpu/gl/GrGLInterface.h"
-#include "include/gpu/gl/GrGLAssembleInterface.h"
+
 // pathops/
 #include "include/pathops/SkPathOps.h"
 // utils/
@@ -108,11 +102,6 @@
 #include "include/utils/SkParsePath.h"
 #include "include/utils/SkShadowUtils.h"
 #include "include/utils/SkTextUtils.h"
-
-template<typename T>
-inline sk_sp<T> sp(T* pt) {
-    return sk_sp<T>(pt);
-}
 
 //
 // codec/SkEncodedOrigin.h
@@ -144,94 +133,6 @@ extern "C" SkSurface* C_SkSurface_MakeRasterN32Premul(int width, int height, con
     return SkSurface::MakeRasterN32Premul(width, height, surfaceProps).release();
 }
 
-extern "C" SkSurface* C_SkSurface_MakeFromBackendTexture(
-        GrContext* context,
-        const GrBackendTexture* backendTexture,
-        GrSurfaceOrigin origin,
-        int sampleCnt,
-        SkColorType colorType,
-        SkColorSpace* colorSpace,
-        const SkSurfaceProps* surfaceProps) {
-    return SkSurface::MakeFromBackendTexture(
-            context,
-            *backendTexture,
-            origin,
-            sampleCnt,
-            colorType,
-            sp(colorSpace), surfaceProps).release();
-}
-
-extern "C" SkSurface* C_SkSurface_MakeFromBackendRenderTarget(
-        GrContext* context,
-        const GrBackendRenderTarget* backendRenderTarget,
-        GrSurfaceOrigin origin,
-        SkColorType colorType,
-        SkColorSpace* colorSpace,
-        const SkSurfaceProps* surfaceProps
-        ) {
-    return SkSurface::MakeFromBackendRenderTarget(
-            context,
-            *backendRenderTarget,
-            origin,
-            colorType,
-            sp(colorSpace),
-            surfaceProps).release();
-}
-
-extern "C" SkSurface* C_SkSurface_MakeFromBackendTextureAsRenderTarget(
-        GrContext* context,
-        const GrBackendTexture* backendTexture,
-        GrSurfaceOrigin origin,
-        int sampleCnt,
-        SkColorType colorType,
-        SkColorSpace* colorSpace,
-        const SkSurfaceProps* surfaceProps) {
-    return SkSurface::MakeFromBackendTextureAsRenderTarget(
-            context,
-            *backendTexture,
-            origin,
-            sampleCnt,
-            colorType,
-            sp(colorSpace), surfaceProps).release();
-}
-
-extern "C" SkSurface* C_SkSurface_MakeRenderTarget(
-    GrContext* context,
-    SkBudgeted budgeted,
-    const SkImageInfo* imageInfo,
-    int sampleCount, GrSurfaceOrigin surfaceOrigin,
-    const SkSurfaceProps* surfaceProps,
-    bool shouldCreateWithMips) {
-    return SkSurface::MakeRenderTarget(
-            context,
-            budgeted,
-            *imageInfo,
-            sampleCount,
-            surfaceOrigin,
-            surfaceProps,
-            shouldCreateWithMips).release();
-}
-
-extern "C" SkSurface* C_SkSurface_MakeRenderTarget2(
-        GrContext* context,
-        const SkSurfaceCharacterization& characterization,
-        SkBudgeted budgeted) {
-    return SkSurface::MakeRenderTarget(
-            context,
-            characterization,
-            budgeted).release();
-}
-
-extern "C" SkSurface *C_SkSurface_MakeFromBackendTexture2(
-        GrContext *context,
-        const SkSurfaceCharacterization &characterization,
-        const GrBackendTexture *backendTexture) {
-    return SkSurface::MakeFromBackendTexture(
-            context,
-            characterization,
-            *backendTexture).release();
-}
-
 extern "C" SkSurface* C_SkSurface_MakeNull(int width, int height) {
     return SkSurface::MakeNull(width, height).release();
 }
@@ -254,20 +155,6 @@ extern "C" SkImage* C_SkSurface_makeImageSnapshot(SkSurface* self, const SkIRect
     } else {
         return self->makeImageSnapshot().release();
     }
-}
-
-extern "C" void C_SkSurface_getBackendTexture(
-        SkSurface* self,
-        SkSurface::BackendHandleAccess handleAccess,
-        GrBackendTexture* backendTexture) {
-    *backendTexture = self->getBackendTexture(handleAccess);
-}
-
-extern "C" void C_SkSurface_getBackendRenderTarget(
-        SkSurface* self,
-        SkSurface::BackendHandleAccess handleAccess,
-        GrBackendRenderTarget *backendRenderTarget) {
-    *backendRenderTarget = self->getBackendRenderTarget(handleAccess);
 }
 
 extern "C" SkSurface* C_SkSurface_makeSurface(
@@ -310,10 +197,6 @@ extern "C" void C_SkSurfaceCharacterization_createColorSpace(const SkSurfaceChar
     *out = self->createColorSpace(sp(cs));
 }
 
-extern "C" const SkImageInfo* C_SkSurfaceCharacterization_imageInfo(const SkSurfaceCharacterization* self) {
-    return &self->imageInfo();
-}
-
 //
 // SkImage
 //
@@ -338,110 +221,6 @@ extern "C" SkImage* C_SkImage_DecodeToRaster(const void* encoded, size_t length,
     return SkImage::DecodeToRaster(encoded, length, subset).release();
 }
 
-extern "C" SkImage* C_SkImage_DecodeToTexture(GrContext* ctx, const void* encoded, size_t length, const SkIRect* subset) {
-    return SkImage::DecodeToTexture(ctx, encoded, length, subset).release();
-}
-
-extern "C" SkImage* C_SkImage_MakeFromCompressed(GrContext* context, SkData* encoded, int width, int height, SkImage::CompressionType type) {
-    return SkImage::MakeFromCompressed(context, sp(encoded), width, height, type).release();
-}
-
-extern "C" SkImage* C_SkImage_MakeFromTexture(
-        GrContext* context,
-        const GrBackendTexture* backendTexture,
-        GrSurfaceOrigin origin,
-        SkColorType colorType,
-        SkAlphaType alphaType,
-        SkColorSpace* colorSpace) {
-    return SkImage::MakeFromTexture(context, *backendTexture, origin, colorType, alphaType, sp(colorSpace)).release();
-}
-
-extern "C" SkImage* C_SkImage_MakeCrossContextFromPixmap(
-        GrContext* context,
-        const SkPixmap* pixmap,
-        bool buildMips,
-        bool limitToMaxTextureSize) {
-    return SkImage::MakeCrossContextFromPixmap(context, *pixmap, buildMips, limitToMaxTextureSize).release();
-}
-
-extern "C" SkImage* C_SkImage_MakeFromAdoptedTexture(
-        GrContext* context,
-        const GrBackendTexture* backendTexture,
-        GrSurfaceOrigin origin,
-        SkColorType colorType,
-        SkAlphaType alphaType,
-        SkColorSpace* colorSpace) {
-    return SkImage::MakeFromAdoptedTexture(context, *backendTexture, origin, colorType, alphaType, sp(colorSpace)).release();
-}
-
-extern "C" SkImage* C_SkImage_MakeFromYUVATexturesCopy(
-        GrContext* context,
-        SkYUVColorSpace yuvColorSpace,
-        const GrBackendTexture yuvaTextures[],
-        const SkYUVAIndex yuvaIndices[4],
-        SkISize imageSize,
-        GrSurfaceOrigin imageOrigin,
-        SkColorSpace* colorSpace) {
-    return SkImage::MakeFromYUVATexturesCopy(
-            context,
-            yuvColorSpace, yuvaTextures, yuvaIndices,
-            imageSize, imageOrigin, sp(colorSpace)).release();
-}
-
-extern "C" SkImage* C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend(
-        GrContext* context,
-        SkYUVColorSpace yuvColorSpace,
-        const GrBackendTexture yuvaTextures[],
-        const SkYUVAIndex yuvaIndices[4],
-        SkISize imageSize,
-        GrSurfaceOrigin imageOrigin,
-        const GrBackendTexture& backendTexture,
-        SkColorSpace* colorSpace) {
-    return SkImage::MakeFromYUVATexturesCopyWithExternalBackend(
-            context,
-            yuvColorSpace, yuvaTextures, yuvaIndices,
-            imageSize, imageOrigin, backendTexture,
-            sp(colorSpace)).release();
-}
-
-extern "C" SkImage* C_SkImage_MakeFromYUVATextures(
-        GrContext* context,
-        SkYUVColorSpace yuvColorSpace,
-        const GrBackendTexture yuvaTextures[],
-        const SkYUVAIndex yuvaIndices[4],
-        SkISize imageSize,
-        GrSurfaceOrigin imageOrigin,
-        SkColorSpace* colorSpace) {
-    return SkImage::MakeFromYUVATextures(
-            context,
-            yuvColorSpace, yuvaTextures, yuvaIndices,
-            imageSize, imageOrigin, sp(colorSpace)).release();
-}
-
-extern "C" SkImage* C_SkImage_MakeFromNV12TexturesCopy(
-        GrContext* context,
-        SkYUVColorSpace yuvColorSpace,
-        const GrBackendTexture nv12Textures[2],
-        GrSurfaceOrigin imageOrigin,
-        SkColorSpace* imageColorSpace) {
-    return SkImage::MakeFromNV12TexturesCopy(
-            context, yuvColorSpace, nv12Textures, imageOrigin,
-            sp(imageColorSpace)).release();
-}
-
-extern "C" SkImage* C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
-        GrContext* context,
-        SkYUVColorSpace yuvColorSpace,
-        const GrBackendTexture nv12Textures[2],
-        GrSurfaceOrigin imageOrigin,
-        const GrBackendTexture* backendTexture,
-        SkColorSpace* imageColorSpace) {
-    return SkImage::MakeFromNV12TexturesCopyWithExternalBackend(
-            context,
-            yuvColorSpace, nv12Textures, imageOrigin, *backendTexture,
-            sp(imageColorSpace)).release();
-}
-
 extern "C" SkImage* C_SkImage_MakeFromPicture(
         SkPicture* picture,
         const SkISize* dimensions,
@@ -456,15 +235,6 @@ extern "C" SkShader* C_SkImage_makeShader(const SkImage* self, SkTileMode tileMo
     return self->makeShader(tileMode1, tileMode2, localMatrix).release();
 }
 
-extern "C" void C_SkImage_getBackendTexture(
-        const SkImage* self,
-        bool flushPendingGrContextIO,
-        GrSurfaceOrigin* origin,
-        GrBackendTexture* result)
-{
-    *result = self->getBackendTexture(flushPendingGrContextIO, origin);
-}
-
 extern "C" SkData* C_SkImage_encodeToData(const SkImage* self, SkEncodedImageFormat imageFormat, int quality) {
     return self->encodeToData(imageFormat, quality).release();
 }
@@ -477,13 +247,6 @@ extern "C" SkImage* C_SkImage_makeSubset(const SkImage* self, const SkIRect* sub
     return self->makeSubset(*subset).release();
 }
 
-extern "C" SkImage* C_SkImage_makeTextureImage(
-        const SkImage* self,
-        GrContext* context,
-        GrMipMapped mipMapped) {
-    return self->makeTextureImage(context, mipMapped).release();
-}
-
 extern "C" SkImage* C_SkImage_makeNonTextureImage(const SkImage* self) {
     return self->makeNonTextureImage().release();
 }
@@ -492,6 +255,7 @@ extern "C" SkImage* C_SkImage_makeRasterImage(const SkImage* self) {
     return self->makeRasterImage().release();
 }
 
+// note: available without GPU support (GrContext may be null).
 extern "C" SkImage *C_SkImage_makeWithFilter(const SkImage *self, GrContext *context,
                                              const SkImageFilter *filter, const SkIRect *subset,
                                              const SkIRect *clipBounds, SkIRect *outSubset,
@@ -707,7 +471,7 @@ extern "C" void
 C_SkPathTypes_Types(SkPathFillType *, SkPathConvexityType *, SkPathDirection *, SkPathSegmentMask *, SkPathVerb *) {}
 
 //
-// SkCanvas
+// core/SkCanvas.h
 // Note: bindgen layout is broken, so we are forced to allocate Canvas instances on the heap only.
 //
 
@@ -745,10 +509,6 @@ extern "C" void C_SkCanvas_getBaseLayerSize(const SkCanvas* self, SkISize* size)
 
 extern "C" SkSurface* C_SkCanvas_makeSurface(SkCanvas* self, const SkImageInfo* info, const SkSurfaceProps* props) {
     return self->makeSurface(*info, props).release();
-}
-
-extern "C" GrContext* C_SkCanvas_getGrContext(SkCanvas* self) {
-    return self->getGrContext();
 }
 
 extern "C" bool C_SkCanvas_isClipEmpty(const SkCanvas* self) {
@@ -1080,25 +840,6 @@ extern "C" void C_SkRRect_setOval(SkRRect* self, const SkRect* oval) {
 
 extern "C" bool C_SkRRect_Equals(const SkRRect* lhs, const SkRRect* rhs) {
     return *lhs == *rhs;
-}
-
-//
-// gpu/GrBackendSurface.h
-//
-extern "C" void C_GrBackendRenderTarget_Construct(GrBackendRenderTarget* uninitialized) {
-    new(uninitialized) GrBackendRenderTarget();
-}
-
-extern "C" void C_GrBackendRenderTarget_destruct(GrBackendRenderTarget* self) {
-    self->~GrBackendRenderTarget();
-}
-
-extern "C" void C_GrBackendTexture_Construct(GrBackendTexture* uninitialized) {
-    new(uninitialized) GrBackendTexture();
-}
-
-extern "C" void C_GrBackendTexture_destruct(const GrBackendTexture* self) {
-    self->~GrBackendTexture();
 }
 
 //
@@ -1711,23 +1452,8 @@ extern "C" SkDrawLooper* C_SkDrawLooper_Deserialize(const void* data, size_t len
 // core/SkDrawable.h
 //
 
-extern "C" SkDrawable::GpuDrawHandler *C_SkDrawable_snapGpuDrawHandler(SkDrawable *self, GrBackendApi backendApi,
-                                                                       const SkMatrix *matrix,
-                                                                       const SkIRect *clipBounds,
-                                                                       const SkImageInfo *bufferInfo) {
-    return self->snapGpuDrawHandler(backendApi, *matrix, *clipBounds, *bufferInfo).release();
-}
-
 extern "C" SkDrawable* C_SkDrawable_Deserialize(const void* data, size_t length) {
     return SkDrawable::Deserialize(data, length).release();
-}
-
-extern "C" void C_SkDrawable_GpuDrawHandler_delete(SkDrawable::GpuDrawHandler *self) {
-    delete self;
-}
-
-extern "C" void C_SkDrawable_GpuDrawHandler_draw(SkDrawable::GpuDrawHandler *self, const GrBackendDrawableInfo *info) {
-    self->draw(*info);
 }
 
 //
@@ -1772,10 +1498,6 @@ extern "C" void C_SkImageGenerator_delete(SkImageGenerator *self) {
 
 extern "C" SkData *C_SkImageGenerator_refEncodedData(SkImageGenerator *self) {
     return self->refEncodedData().release();
-}
-
-extern "C" bool C_SkImageGenerator_isValid(const SkImageGenerator* self, GrContext* context) {
-    return self->isValid(context);
 }
 
 extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromEncoded(SkData *data) {
@@ -2731,138 +2453,6 @@ extern "C" void C_SkPDF_Metadata_destruct(SkPDF::Metadata* self) {
 
 extern "C" SkDocument* C_SkPDF_MakeDocument(SkWStream* stream, const SkPDF::Metadata* metadata) {
     return SkPDF::MakeDocument(stream, *metadata).release();
-}
-
-//
-// GrBackendFormat
-//
-
-
-extern "C" void C_GrBackendFormat_Construct(GrBackendFormat* uninitialized) {
-    new(uninitialized)GrBackendFormat();
-}
-
-extern "C" void C_GrBackendFormat_ConstructGL(GrBackendFormat* uninitialized, GrGLenum format, GrGLenum target) {
-    new(uninitialized)GrBackendFormat(GrBackendFormat::MakeGL(format, target));
-}
-
-extern "C" void C_GrBackendFormat_destruct(GrBackendFormat* self) {
-    self->~GrBackendFormat();
-}
-
-extern "C" bool C_GrBackendFormat_Equals(const GrBackendFormat* lhs, const GrBackendFormat* rhs) {
-    return *lhs == *rhs;
-}
-
-//
-// GrGLTextureInfo
-//
-
-extern "C" bool C_GrGLTextureInfo_Equals(const GrGLTextureInfo* lhs, const GrGLTextureInfo* rhs) {
-    return *lhs == *rhs;
-}
-
-//
-// GrGLFramebufferInfo
-//
-
-extern "C" bool C_GrGLFramebufferInfo_Equals(const GrGLFramebufferInfo* lhs, const GrGLFramebufferInfo* rhs) {
-    return *lhs == *rhs;
-}
-
-//
-// gpu/gl/
-//
-
-extern "C" void C_GPU_GL_Types(GrGLBackendState *) {}
-
-//
-// gpu/gl/GrGLInterface.h
-//
-
-extern "C" void C_GrGLExtensions_destruct(GrGLExtensions* self) {
-    self->~GrGLExtensions();
-}
-
-extern "C" void C_GrGLExtensions_reset(GrGLExtensions* self) {
-    self->reset();
-}
-
-//
-// gpu/gl/GrGLInterface.h
-//
-
-extern "C" const GrGLInterface* C_GrGLInterface_MakeNativeInterface() {
-    return GrGLMakeNativeInterface().release();
-}
-
-extern "C" GrGLExtensions* C_GrGLInterface_extensions(GrGLInterface* self) {
-    return &self->fExtensions;
-}
-
-//
-// gpu/gl/GrGLAssembleInterface.h
-//
-
-typedef const void* (*GLGetProcFnVoidPtr)(void* ctx, const char name[]);
-
-extern "C" const GrGLInterface* C_GrGLInterface_MakeAssembledInterface(void *ctx, GLGetProcFnVoidPtr get) {
-  return GrGLMakeAssembledInterface(ctx, reinterpret_cast<GrGLGetProc>(get)).release();
-}
-
-//
-// gpu/GrContext.h
-//
-
-extern "C" GrContext* C_GrContext_MakeGL(GrGLInterface* interface) {
-    if (interface)
-        return GrContext::MakeGL(sp(interface)).release();
-    else
-        return GrContext::MakeGL().release();
-}
-
-extern "C" bool C_GrContext_colorTypeSupportedAsSurface(const GrContext* self, SkColorType colorType) {
-    return self->colorTypeSupportedAsSurface(colorType);
-}
-
-extern "C" bool C_GrContext_abandoned(const GrContext* self) {
-    return self->abandoned();
-}
-
-extern "C" void C_GrContext_flush(GrContext* self) {
-    self->flush();
-}
-
-extern "C" size_t C_GrContext_ComputeImageSize(SkImage* image, GrMipMapped mm, bool useNextPow2) {
-    return GrContext::ComputeImageSize(sp(image), mm, useNextPow2);
-}
-
-extern "C" void C_GrContext_defaultBackendFormat(const GrContext* self, SkColorType ct, GrRenderable renderable, GrBackendFormat* result) {
-    *result = self->defaultBackendFormat(ct, renderable);
-}
-
-//
-// gpu/GrBackendDrawableInfo.h
-//
-
-extern "C" void C_GrBackendDrawableInfo_Construct(GrBackendDrawableInfo* uninitialized) {
-    new(uninitialized) GrBackendDrawableInfo();
-}
-
-extern "C" void C_GrBackendDrawableInfo_Construct2(GrBackendDrawableInfo* uninitialized, const GrVkDrawableInfo* info) {
-    new(uninitialized) GrBackendDrawableInfo(*info);
-}
-
-extern "C" void C_GrBackendDrawableInfo_destruct(GrBackendDrawableInfo* self) {
-    self->~GrBackendDrawableInfo();
-}
-
-extern "C" bool C_GrBackendDrawableInfo_isValid(const GrBackendDrawableInfo* self) {
-    return self->isValid();
-}
-
-extern "C" GrBackendApi C_GrBackendDrawableInfo_backend(const GrBackendDrawableInfo* self) {
-    return self->backend();
 }
 
 //

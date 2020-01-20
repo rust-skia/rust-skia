@@ -3,8 +3,10 @@ use std::path::Path;
 
 pub mod cpu;
 pub use cpu::CPU;
-pub mod opengl;
-pub use opengl::OpenGL;
+#[cfg(feature = "gl")]
+pub mod gl;
+#[cfg(feature = "gl")]
+pub use gl::OpenGL;
 pub mod pdf;
 pub use pdf::PDF;
 #[cfg(feature = "svg")]

@@ -1,4 +1,5 @@
 use clap::{App, Arg};
+#[cfg(feature = "gl")]
 use offscreen_gl_context::{GLContext, GLVersion, NativeGLContext};
 use std::path::{Path, PathBuf};
 
@@ -71,28 +72,31 @@ fn main() {
         }
     }
 
-    if drivers.contains(&drivers::OpenGL::NAME) {
-        let context = GLContext::<NativeGLContext>::create(
-            sparkle::gl::GlType::Gl,
-            GLVersion::MajorMinor(3, 3),
-            None,
-        )
-        .unwrap();
+    #[cfg(feature = "gl")]
+    {
+        if drivers.contains(&drivers::OpenGL::NAME) {
+            let context = GLContext::<NativeGLContext>::create(
+                sparkle::gl::GlType::Gl,
+                GLVersion::MajorMinor(3, 3),
+                None,
+            )
+            .unwrap();
 
-        context.make_current().unwrap();
-        draw_all::<drivers::OpenGL>(&out_path);
-    }
+            context.make_current().unwrap();
+            draw_all::<drivers::OpenGL>(&out_path);
+        }
 
-    if drivers.contains(&"opengl-es") {
-        let context = GLContext::<NativeGLContext>::create(
-            sparkle::gl::GlType::Gles,
-            GLVersion::MajorMinor(3, 3),
-            None,
-        )
-        .unwrap();
+        if drivers.contains(&"opengl-es") {
+            let context = GLContext::<NativeGLContext>::create(
+                sparkle::gl::GlType::Gles,
+                GLVersion::MajorMinor(3, 3),
+                None,
+            )
+            .unwrap();
 
-        context.make_current().unwrap();
-        draw_all::<drivers::OpenGL>(&out_path);
+            context.make_current().unwrap();
+            draw_all::<drivers::OpenGL>(&out_path);
+        }
     }
 
     #[cfg(feature = "vulkan")]
@@ -128,7 +132,10 @@ fn main() {
 }
 
 fn get_available_drivers() -> Vec<&'static str> {
-    let mut drivers = vec!["cpu", "pdf", "opengl", "opengl-es"];
+    let mut drivers = vec!["cpu", "pdf"];
+    if cfg!(feature = "gl") {
+        drivers.extend(vec!["opengl", "opengl-es"]);
+    }
     if cfg!(feature = "vulkan") {
         drivers.push("vulkan")
     }

@@ -2,6 +2,7 @@ mod codec;
 mod core;
 mod docs;
 mod effects;
+#[cfg(feature = "gpu")]
 pub mod gpu;
 mod interop;
 mod modules;
