@@ -45,7 +45,7 @@ Platform support for OpenGL or OpenGL ES can be enabled by enabling the feature 
 Vulkan support can be enabled by enabling the feature `vulkan`. To render the examples with Vulkan, use
 
 ```bash
-(cd skia-safe && cargo run --features vulkan --example skia-org -- [OUTPUT_DIR] --driver bulkan)
+(cd skia-safe && cargo run --features vulkan --example skia-org -- [OUTPUT_DIR] --driver vulkan)
 ```
 
 Note that Vulkan drivers need to be available. On Windows, they are most likely available already, on Linux [this article on linuxconfig.org](<https://linuxconfig.org/install-and-test-vulkan-on-linux>) might get you started, and on macOS with Metal support, [install the Vulkan SDK](<https://vulkan.lunarg.com/sdk/home>) for Mac and configure MoltenVK by setting the `DYLD_LIBRARY_PATH`, `VK_LAYER_PATH`, and `VK_ICD_FILENAMES` environment variables as described in `Documentation/getting_started_macos.html`.
