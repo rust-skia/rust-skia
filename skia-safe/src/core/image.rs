@@ -471,10 +471,17 @@ impl RCHandle<SkImage> {
         }
     }
 
-    // TODO: support quality!
     pub fn encode_to_data(&self, image_format: EncodedImageFormat) -> Option<Data> {
+        self.encode_to_data_with_quality(image_format, 100)
+    }
+
+    pub fn encode_to_data_with_quality(
+        &self,
+        image_format: EncodedImageFormat,
+        quality: i32,
+    ) -> Option<Data> {
         Data::from_ptr(unsafe {
-            sb::C_SkImage_encodeToData(self.native(), image_format.into_native())
+            sb::C_SkImage_encodeToData(self.native(), image_format.into_native(), quality)
         })
     }
 
