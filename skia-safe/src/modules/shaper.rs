@@ -590,7 +590,7 @@ mod tests {
     }
 
     #[test]
-    #[serial_test_derive::serial]
+    #[serial_test::serial]
     fn test_rtl_text_shaping() {
         skia_bindings::icu::init();
 

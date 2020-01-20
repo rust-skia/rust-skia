@@ -171,7 +171,7 @@ mod tests {
     use crate::FontMgr;
 
     #[test]
-    #[serial_test_derive::serial]
+    #[serial_test::serial]
     fn ref_counts() {
         let mut fc = FontCollection::new();
         assert_eq!(fc.native().ref_counted_base()._ref_cnt(), 1);

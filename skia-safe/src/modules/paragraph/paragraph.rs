@@ -182,7 +182,7 @@ impl<'a> Borrows<'a, Handle<sb::LineMetricsVector>> {
 }
 
 #[test]
-#[serial_test_derive::serial]
+#[serial_test::serial]
 fn test_line_metrics() {
     // note: some of the following code is copied from the skparagraph skia-org example.
     use crate::icu;
