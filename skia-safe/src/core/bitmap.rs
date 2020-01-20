@@ -95,7 +95,7 @@ impl Handle<SkBitmap> {
     }
 
     pub fn set_alpha_type(&mut self, alpha_type: AlphaType) -> bool {
-        unsafe { self.native_mut().setAlphaType(alpha_type.into_native()) }
+        unsafe { self.native_mut().setAlphaType(alpha_type) }
     }
 
     pub unsafe fn pixels(&mut self) -> *mut ffi::c_void {
@@ -389,12 +389,7 @@ impl Handle<SkBitmap> {
         Shader::from_ptr(unsafe {
             let tmx = tile_modes.map(|tm| tm.0).unwrap_or_default();
             let tmy = tile_modes.map(|tm| tm.1).unwrap_or_default();
-            sb::C_SkBitmap_makeShader(
-                self.native(),
-                tmx.into_native(),
-                tmy.into_native(),
-                local_matrix.native_ptr_or_null(),
-            )
+            sb::C_SkBitmap_makeShader(self.native(), tmx, tmy, local_matrix.native_ptr_or_null())
         })
         .unwrap()
     }

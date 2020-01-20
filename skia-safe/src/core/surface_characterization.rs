@@ -77,7 +77,7 @@ impl Handle<SkSurfaceCharacterization> {
     }
 
     pub fn origin(&self) -> SurfaceOrigin {
-        SurfaceOrigin::from_native(self.native().fOrigin)
+        self.native().fOrigin
     }
 
     pub fn width(&self) -> i32 {
@@ -119,7 +119,7 @@ impl Handle<SkSurfaceCharacterization> {
     }
 
     pub fn is_protected(&self) -> gpu::Protected {
-        gpu::Protected::from_native(self.native().fIsProtected)
+        self.native().fIsProtected
     }
 
     pub fn color_space(&self) -> Option<ColorSpace> {

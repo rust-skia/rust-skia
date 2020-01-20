@@ -61,7 +61,7 @@ impl RefHandle<SkImageGenerator> {
             self.native().queryYUVA8(
                 size_info.native_mut(),
                 indices.native_mut().as_mut_ptr(),
-                cs.native_mut(),
+                &mut cs,
             )
         }
         .if_true_some((size_info, indices, cs))
@@ -120,7 +120,7 @@ impl RefHandle<SkImageGenerator> {
                 picture.into_ptr(),
                 matrix.native_ptr_or_null(),
                 paint.native_ptr_or_null(),
-                bit_depth.into_native(),
+                bit_depth,
                 color_space.into().into_ptr_or_null(),
             )
         })

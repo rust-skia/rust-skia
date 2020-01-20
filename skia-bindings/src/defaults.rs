@@ -1,8 +1,10 @@
-//! This file contains Default trait implementations and functions for types that are
-//! used without a handle in skia-safe and get reexported from there.
+//! This file contains Default trait implementations for types that are
+//! re-exported from skia-safe.
 
-use crate::{SkBlendMode, SkBlendModeCoeff};
-use std::ffi::CStr;
+use crate::{
+    SkBlendMode, SkBlurStyle, SkCanvas_Lattice_RectType, SkClipOp, SkPaint_Cap, SkPaint_Join,
+    SkPathDirection, SkTileMode, SkYUVColorSpace,
+};
 
 impl Default for SkBlendMode {
     fn default() -> Self {
@@ -10,22 +12,52 @@ impl Default for SkBlendMode {
     }
 }
 
-impl SkBlendMode {
-    pub fn as_coeff(self) -> Option<(SkBlendModeCoeff, SkBlendModeCoeff)> {
-        let mut src = SkBlendModeCoeff::Zero;
-        let mut dst = SkBlendModeCoeff::Zero;
-        if unsafe { crate::SkBlendMode_AsCoeff(self, &mut src, &mut dst) } {
-            Some((src, dst))
-        } else {
-            None
-        }
+impl Default for SkPaint_Cap {
+    fn default() -> Self {
+        SkPaint_Cap::Default
     }
+}
 
-    pub fn name(self) -> &'static str {
-        unsafe {
-            let name_ptr = crate::SkBlendMode_Name(self);
-            CStr::from_ptr(name_ptr).to_str().unwrap()
-        }
+impl Default for SkPaint_Join {
+    fn default() -> Self {
+        SkPaint_Join::Default
+    }
+}
+
+impl Default for SkBlurStyle {
+    fn default() -> Self {
+        SkBlurStyle::Normal
+    }
+}
+
+impl Default for SkCanvas_Lattice_RectType {
+    fn default() -> Self {
+        SkCanvas_Lattice_RectType::Default
+    }
+}
+
+// This is the default for the canvas's clip functions.
+impl Default for SkClipOp {
+    fn default() -> Self {
+        SkClipOp::Intersect
+    }
+}
+
+impl Default for SkYUVColorSpace {
+    fn default() -> Self {
+        SkYUVColorSpace::Identity
+    }
+}
+
+impl Default for SkPathDirection {
+    fn default() -> Self {
+        SkPathDirection::CW
+    }
+}
+
+impl Default for SkTileMode {
+    fn default() -> Self {
+        SkTileMode::Clamp
     }
 }
 

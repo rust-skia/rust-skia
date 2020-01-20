@@ -45,7 +45,7 @@ impl RCHandle<SkDrawable> {
         GPUDrawHandler::from_ptr(unsafe {
             sb::C_SkDrawable_snapGpuDrawHandler(
                 self.native_mut(),
-                api.into_native(),
+                api,
                 matrix.native(),
                 clip_bounds.into().native(),
                 buffer_info.native(),

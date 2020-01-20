@@ -25,11 +25,7 @@ impl NativeFlattenable for SkMaskFilter {
 impl RCHandle<SkMaskFilter> {
     pub fn blur(style: BlurStyle, sigma: scalar, respect_ctm: impl Into<Option<bool>>) -> Self {
         Self::from_ptr(unsafe {
-            sb::C_SkMaskFilter_MakeBlur(
-                style.into_native(),
-                sigma,
-                respect_ctm.into().unwrap_or(true),
-            )
+            sb::C_SkMaskFilter_MakeBlur(style, sigma, respect_ctm.into().unwrap_or(true))
         })
         .unwrap()
     }
@@ -40,7 +36,7 @@ impl RCHandle<SkMaskFilter> {
 
     pub fn combine(filter_a: Self, filter_b: Self, mode: CoverageMode) -> Option<Self> {
         Self::from_ptr(unsafe {
-            sb::C_SkMaskFilter_Combine(filter_a.into_ptr(), filter_b.into_ptr(), mode.into_native())
+            sb::C_SkMaskFilter_Combine(filter_a.into_ptr(), filter_b.into_ptr(), mode)
         })
     }
 

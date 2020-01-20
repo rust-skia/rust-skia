@@ -53,7 +53,7 @@ impl Handle<GrBackendFormat> {
     }
 
     pub fn backend(&self) -> BackendAPI {
-        BackendAPI::from_native(self.native().fBackend)
+        self.native().fBackend
     }
 
     // texture_type() would return a private type.
@@ -64,10 +64,10 @@ impl Handle<GrBackendFormat> {
     }
 
     pub fn as_gl_format(&self) -> gl::Format {
-        gl::Format::from_native(unsafe {
+        unsafe {
             #[allow(clippy::map_clone)]
             self.native().asGLFormat()
-        })
+        }
     }
 
     #[deprecated(since = "0.19.0", note = "use as_vk_format()")]
@@ -116,7 +116,7 @@ impl Handle<GrBackendTexture> {
         Self::from_native_if_valid(GrBackendTexture::new(
             width,
             height,
-            mip_mapped.into_native(),
+            mip_mapped,
             gl_info.native(),
         ))
         .unwrap()
@@ -147,11 +147,11 @@ impl Handle<GrBackendTexture> {
     }
 
     pub fn has_mip_maps(&self) -> bool {
-        self.native().fMipMapped == GrMipMapped::kYes
+        self.native().fMipMapped == GrMipMapped::Yes
     }
 
     pub fn backend(&self) -> BackendAPI {
-        BackendAPI::from_native(self.native().fBackend)
+        self.native().fBackend
     }
 
     pub fn gl_texture_info(&self) -> Option<gl::TextureInfo> {
@@ -278,7 +278,7 @@ impl Handle<GrBackendRenderTarget> {
     }
 
     pub fn backend(&self) -> BackendAPI {
-        BackendAPI::from_native(self.native().fBackend)
+        self.native().fBackend
     }
 
     pub fn gl_framebuffer_info(&self) -> Option<gl::FramebufferInfo> {

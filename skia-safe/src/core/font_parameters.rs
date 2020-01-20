@@ -1,4 +1,4 @@
-pub type VariationAxis = variation::Axis;
+pub use variation::Axis as VariationAxis;
 
 pub mod variation {
     use crate::prelude::*;

@@ -12,7 +12,7 @@ pub mod merge_path_effect {
 
     pub fn new(one: PathEffect, two: PathEffect, op: PathOp) -> PathEffect {
         PathEffect::from_ptr(unsafe {
-            sb::C_SkMergePathEffect_Make(one.into_ptr(), two.into_ptr(), op.into_native())
+            sb::C_SkMergePathEffect_Make(one.into_ptr(), two.into_ptr(), op)
         })
         .unwrap()
     }
@@ -68,12 +68,7 @@ pub mod stroke_path_effect {
         miter: impl Into<Option<scalar>>,
     ) -> Option<PathEffect> {
         PathEffect::from_ptr(unsafe {
-            sb::C_SkStrokePathEffect_Make(
-                width,
-                join.into_native(),
-                cap.into_native(),
-                miter.into().unwrap_or(4.0),
-            )
+            sb::C_SkStrokePathEffect_Make(width, join, cap, miter.into().unwrap_or(4.0))
         })
     }
 }

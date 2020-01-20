@@ -4,7 +4,7 @@ use skia_bindings as sb;
 use skia_bindings::{SkIPoint, SkPoint};
 use std::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
-pub type IVector = IPoint;
+pub use IPoint as IVector;
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]

@@ -5,36 +5,19 @@ use crate::{
     Image, ImageInfo, Paint, Pixmap, Size, SurfaceCharacterization, SurfaceProps,
 };
 use skia_bindings as sb;
-use skia_bindings::{
-    SkRefCntBase, SkSurface, SkSurface_BackendHandleAccess, SkSurface_ContentChangeMode,
-};
+use skia_bindings::{SkRefCntBase, SkSurface};
 use std::ptr;
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum ContentChangeMode {
-    Discard = SkSurface_ContentChangeMode::kDiscard_ContentChangeMode as _,
-    Retain = SkSurface_ContentChangeMode::kRetain_ContentChangeMode as _,
-}
-
-impl NativeTransmutable<SkSurface_ContentChangeMode> for ContentChangeMode {}
+pub use skia_bindings::SkSurface_ContentChangeMode as ContentChangeMode;
 #[test]
-fn test_surface_content_change_mode() {
-    ContentChangeMode::test_layout()
+fn test_surface_content_change_mode_naming() {
+    let _ = ContentChangeMode::Retain;
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum BackendHandleAccess {
-    FlushRead = SkSurface_BackendHandleAccess::kFlushRead_BackendHandleAccess as _,
-    FlushWrite = SkSurface_BackendHandleAccess::kFlushWrite_BackendHandleAccess as _,
-    DiscardWrite = SkSurface_BackendHandleAccess::kDiscardWrite_BackendHandleAccess as _,
-}
-
-impl NativeTransmutable<SkSurface_BackendHandleAccess> for BackendHandleAccess {}
+pub use skia_bindings::SkSurface_BackendHandleAccess as BackendHandleAccess;
 #[test]
-fn test_surface_backend_handle_access_layout() {
-    BackendHandleAccess::test_layout()
+fn test_surface_backend_handle_access_naming() {
+    let _ = BackendHandleAccess::FlushWrite;
 }
 
 pub type Surface = RCHandle<SkSurface>;
@@ -105,7 +88,7 @@ impl RCHandle<SkSurface> {
             sb::C_SkSurface_MakeFromBackendTexture(
                 context.native_mut(),
                 backend_texture.native(),
-                origin.into_native(),
+                origin,
                 sample_count.into().unwrap_or(0).try_into().unwrap(),
                 color_type.into_native(),
                 color_space.into().into_ptr_or_null(),
@@ -126,7 +109,7 @@ impl RCHandle<SkSurface> {
             sb::C_SkSurface_MakeFromBackendRenderTarget(
                 context.native_mut(),
                 backend_render_target.native(),
-                origin.into_native(),
+                origin,
                 color_type.into_native(),
                 color_space.into().into_ptr_or_null(),
                 surface_props.native_ptr_or_null(),
@@ -147,7 +130,7 @@ impl RCHandle<SkSurface> {
             sb::C_SkSurface_MakeFromBackendTextureAsRenderTarget(
                 context.native_mut(),
                 backend_texture.native(),
-                origin.into_native(),
+                origin,
                 sample_count.into().unwrap_or(0).try_into().unwrap(),
                 color_type.into_native(),
                 color_space.into().into_ptr_or_null(),
@@ -172,7 +155,7 @@ impl RCHandle<SkSurface> {
                 budgeted.into_native(),
                 image_info.native(),
                 sample_count.into().unwrap_or(0).try_into().unwrap(),
-                surface_origin.into_native(),
+                surface_origin,
                 surface_props.native_ptr_or_null(),
                 should_create_with_mips.into().unwrap_or_default(),
             )
@@ -237,10 +220,7 @@ impl RCHandle<SkSurface> {
     }
 
     pub fn notify_content_will_change(&mut self, mode: ContentChangeMode) -> &mut Self {
-        unsafe {
-            self.native_mut()
-                .notifyContentWillChange(mode.into_native())
-        }
+        unsafe { self.native_mut().notifyContentWillChange(mode) }
         self
     }
 
@@ -260,7 +240,7 @@ impl RCHandle<SkSurface> {
             let mut backend_texture = construct(|bt| sb::C_GrBackendTexture_Construct(bt));
             sb::C_SkSurface_getBackendTexture(
                 self.native_mut(),
-                handle_access.into_native(),
+                handle_access,
                 &mut backend_texture as _,
             );
 
@@ -285,7 +265,7 @@ impl RCHandle<SkSurface> {
                 construct(|rt| sb::C_GrBackendRenderTarget_Construct(rt));
             sb::C_SkSurface_getBackendRenderTarget(
                 self.native_mut(),
-                handle_access.into_native(),
+                handle_access,
                 &mut backend_render_target as _,
             );
 
@@ -302,7 +282,7 @@ impl RCHandle<SkSurface> {
         unsafe {
             self.native_mut().replaceBackendTexture(
                 backend_texture.native(),
-                origin.into_native(),
+                origin,
                 None,
                 ptr::null_mut(),
             )

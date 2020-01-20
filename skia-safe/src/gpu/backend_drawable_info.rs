@@ -28,7 +28,7 @@ impl Handle<GrBackendDrawableInfo> {
     }
 
     pub fn backend(&self) -> BackendAPI {
-        BackendAPI::from_native(unsafe { sb::C_GrBackendDrawableInfo_backend(self.native()) })
+        unsafe { sb::C_GrBackendDrawableInfo_backend(self.native()) }
     }
 
     #[cfg(feature = "vulkan")]

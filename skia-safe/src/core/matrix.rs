@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::{scalar, Point, Point3, RSXform, Rect, Scalar, Size, Vector};
 use skia_bindings as sb;
-use skia_bindings::{SkMatrix, SkMatrix_ScaleToFit};
+use skia_bindings::SkMatrix;
 use std::ops::{Index, IndexMut};
 use std::slice;
 
@@ -15,19 +15,10 @@ bitflags! {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum ScaleToFit {
-    Fill = SkMatrix_ScaleToFit::kFill_ScaleToFit as _,
-    Start = SkMatrix_ScaleToFit::kStart_ScaleToFit as _,
-    Center = SkMatrix_ScaleToFit::kCenter_ScaleToFit as _,
-    End = SkMatrix_ScaleToFit::kEnd_ScaleToFit as _,
-}
-
-impl NativeTransmutable<SkMatrix_ScaleToFit> for ScaleToFit {}
+pub use skia_bindings::SkMatrix_ScaleToFit as ScaleToFit;
 #[test]
-fn test_matrix_scale_to_fit_layout() {
-    ScaleToFit::test_layout()
+fn test_matrix_scale_to_fit_naming() {
+    let _ = ScaleToFit::End;
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -519,11 +510,8 @@ impl Matrix {
         stf: ScaleToFit,
     ) -> bool {
         unsafe {
-            self.native_mut().setRectToRect(
-                src.as_ref().native(),
-                dst.as_ref().native(),
-                stf.into_native(),
-            )
+            self.native_mut()
+                .setRectToRect(src.as_ref().native(), dst.as_ref().native(), stf)
         }
     }
 

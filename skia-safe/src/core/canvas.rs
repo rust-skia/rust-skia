@@ -7,9 +7,9 @@ use crate::{
 };
 use skia_bindings as sb;
 use skia_bindings::{
-    SkAutoCanvasRestore, SkCanvas, SkCanvas_PointMode, SkCanvas_SaveLayerFlagsSet_kF16ColorType,
-    SkCanvas_SaveLayerFlagsSet_kInitWithPrevious_SaveLayerFlag, SkCanvas_SaveLayerRec,
-    SkCanvas_SrcRectConstraint, SkImage, SkImageFilter, SkMatrix, SkPaint, SkRect,
+    SkAutoCanvasRestore, SkCanvas, SkCanvas_SaveLayerFlagsSet_kF16ColorType,
+    SkCanvas_SaveLayerFlagsSet_kInitWithPrevious_SaveLayerFlag, SkCanvas_SaveLayerRec, SkImage,
+    SkImageFilter, SkMatrix, SkPaint, SkRect,
 };
 use std::convert::TryInto;
 use std::ffi::CString;
@@ -104,31 +104,18 @@ impl<'a> SaveLayerRec<'a> {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum PointMode {
-    Points = SkCanvas_PointMode::kPoints_PointMode as _,
-    Lines = SkCanvas_PointMode::kLines_PointMode as _,
-    Polygon = SkCanvas_PointMode::kPolygon_PointMode as _,
-}
+pub use sb::SkCanvas_PointMode as PointMode;
 
-impl NativeTransmutable<SkCanvas_PointMode> for PointMode {}
 #[test]
-fn test_canvas_point_mode_layout() {
-    PointMode::test_layout()
+fn test_canvas_point_mode_naming() {
+    let _ = PointMode::Polygon;
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum SrcRectConstraint {
-    Strict = SkCanvas_SrcRectConstraint::kStrict_SrcRectConstraint as _,
-    Fast = SkCanvas_SrcRectConstraint::kFast_SrcRectConstraint as _,
-}
+pub use sb::SkCanvas_SrcRectConstraint as SrcRectConstraint;
 
-impl NativeTransmutable<SkCanvas_SrcRectConstraint> for SrcRectConstraint {}
 #[test]
-fn test_src_rect_constraint_layout() {
-    SrcRectConstraint::test_layout()
+fn test_src_rect_constraint_naming() {
+    let _ = SrcRectConstraint::Fast;
 }
 
 /// Provides access to Canvas's pixels.
@@ -511,7 +498,7 @@ impl Canvas {
         unsafe {
             self.native_mut().clipRect(
                 rect.as_ref().native(),
-                op.into().unwrap_or_default().into_native(),
+                op.into().unwrap_or_default(),
                 do_anti_alias.into().unwrap_or_default(),
             )
         }
@@ -527,7 +514,7 @@ impl Canvas {
         unsafe {
             self.native_mut().clipRRect(
                 rrect.as_ref().native(),
-                op.into().unwrap_or_default().into_native(),
+                op.into().unwrap_or_default(),
                 do_anti_alias.into().unwrap_or_default(),
             )
         }
@@ -543,7 +530,7 @@ impl Canvas {
         unsafe {
             self.native_mut().clipPath(
                 path.native(),
-                op.into().unwrap_or_default().into_native(),
+                op.into().unwrap_or_default(),
                 do_anti_alias.into().unwrap_or_default(),
             )
         }
@@ -552,10 +539,8 @@ impl Canvas {
 
     pub fn clip_region(&mut self, device_rgn: &Region, op: impl Into<Option<ClipOp>>) -> &mut Self {
         unsafe {
-            self.native_mut().clipRegion(
-                device_rgn.native(),
-                op.into().unwrap_or_default().into_native(),
-            )
+            self.native_mut()
+                .clipRegion(device_rgn.native(), op.into().unwrap_or_default())
         }
         self
     }
@@ -600,12 +585,8 @@ impl Canvas {
 
     pub fn draw_points(&mut self, mode: PointMode, pts: &[Point], paint: &Paint) -> &mut Self {
         unsafe {
-            self.native_mut().drawPoints(
-                mode.into_native(),
-                pts.len(),
-                pts.native().as_ptr(),
-                paint.native(),
-            )
+            self.native_mut()
+                .drawPoints(mode, pts.len(), pts.native().as_ptr(), paint.native())
         }
         self
     }
@@ -767,7 +748,7 @@ impl Canvas {
                     src.native(),
                     dst.as_ref().native(),
                     paint.native(),
-                    constraint.into_native(),
+                    constraint,
                 )
             },
             None => unsafe {
@@ -833,7 +814,7 @@ impl Canvas {
                     src.as_ref().native(),
                     dst.as_ref().native(),
                     paint.native(),
-                    constraint.into_native(),
+                    constraint,
                 )
             },
             None => unsafe {
@@ -841,7 +822,7 @@ impl Canvas {
                     bitmap.native(),
                     dst.as_ref().native(),
                     paint.native(),
-                    constraint.into_native(),
+                    constraint,
                 )
             },
         }
@@ -1093,7 +1074,8 @@ impl QuickReject<Path> for Canvas {
 pub mod lattice {
     use crate::prelude::*;
     use crate::{Color, IRect};
-    use skia_bindings::{SkCanvas_Lattice, SkCanvas_Lattice_RectType};
+    use skia_bindings as sb;
+    use skia_bindings::SkCanvas_Lattice;
     use std::marker::PhantomData;
 
     #[derive(Debug)]
@@ -1125,7 +1107,7 @@ pub mod lattice {
             let native = SkCanvas_Lattice {
                 fXDivs: self.x_divs.as_ptr(),
                 fYDivs: self.y_divs.as_ptr(),
-                fRectTypes: self.rect_types.native().as_ptr_or_null(),
+                fRectTypes: self.rect_types.as_ptr_or_null(),
                 fXCount: self.x_divs.len().try_into().unwrap(),
                 fYCount: self.y_divs.len().try_into().unwrap(),
                 fBounds: self.bounds.native().as_ptr_or_null(),
@@ -1138,24 +1120,11 @@ pub mod lattice {
         }
     }
 
-    #[derive(Copy, Clone, PartialEq, Eq, Debug)]
-    #[repr(u8)]
-    pub enum RectType {
-        Default = SkCanvas_Lattice_RectType::kDefault as _,
-        Transparent = SkCanvas_Lattice_RectType::kTransparent as _,
-        FixedColor = SkCanvas_Lattice_RectType::kFixedColor as _,
-    }
+    pub use sb::SkCanvas_Lattice_RectType as RectType;
 
-    impl NativeTransmutable<SkCanvas_Lattice_RectType> for RectType {}
     #[test]
-    fn test_lattice_rect_type_layout() {
-        RectType::test_layout();
-    }
-
-    impl Default for RectType {
-        fn default() -> Self {
-            RectType::Default
-        }
+    fn test_lattice_rect_type_naming() {
+        let _ = RectType::FixedColor;
     }
 }
 

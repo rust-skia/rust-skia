@@ -2,8 +2,7 @@ use crate::prelude::*;
 use crate::{ColorFilter, FilterQuality, IRect, Matrix, NativeFlattenable, Rect};
 use skia_bindings as sb;
 use skia_bindings::{
-    SkColorFilter, SkFlattenable, SkImageFilter, SkImageFilter_CropRect,
-    SkImageFilter_MapDirection, SkRefCntBase,
+    SkColorFilter, SkFlattenable, SkImageFilter, SkImageFilter_CropRect, SkRefCntBase,
 };
 use std::ptr;
 
@@ -76,17 +75,10 @@ pub mod crop_rect {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum MapDirection {
-    Forward = SkImageFilter_MapDirection::kForward_MapDirection as _,
-    Reverse = SkImageFilter_MapDirection::kReverse_MapDirection as _,
-}
-
-impl NativeTransmutable<SkImageFilter_MapDirection> for MapDirection {}
+pub use skia_bindings::SkImageFilter_MapDirection as MapDirection;
 #[test]
-fn test_map_direction_layout() {
-    MapDirection::test_layout();
+fn test_map_direction_naming() {
+    let _ = MapDirection::Forward;
 }
 
 pub type ImageFilter = RCHandle<SkImageFilter>;
@@ -122,7 +114,7 @@ impl RCHandle<SkImageFilter> {
             self.native().filterBounds(
                 src.as_ref().native(),
                 ctm.native(),
-                map_direction.into_native(),
+                map_direction,
                 input_rect.into().native_ptr_or_null(),
             )
         })
@@ -199,11 +191,7 @@ impl RCHandle<SkImageFilter> {
     #[deprecated(since = "0.19.0", note = "use image_filters::matrix_transform()")]
     pub fn with_matrix(self, matrix: &Matrix, quality: FilterQuality) -> ImageFilter {
         ImageFilter::from_ptr(unsafe {
-            sb::C_SkImageFilter_MakeMatrixFilter(
-                matrix.native(),
-                quality.into_native(),
-                self.into_ptr(),
-            )
+            sb::C_SkImageFilter_MakeMatrixFilter(matrix.native(), quality, self.into_ptr())
         })
         .unwrap()
     }

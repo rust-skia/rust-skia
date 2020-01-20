@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use skia_bindings as sb;
-use skia_bindings::{SkFontStyle, SkFontStyle_Slant, SkFontStyle_Weight, SkFontStyle_Width};
+use skia_bindings::{SkFontStyle, SkFontStyle_Weight, SkFontStyle_Width};
 use std::ops::Deref;
 
 /// Wrapper type of a font weight.
@@ -129,19 +129,10 @@ impl Width {
     pub const ULTRA_EXPANDED: Self = Self(SkFontStyle_Width::kUltraExpanded_Width as _);
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum Slant {
-    Upright = SkFontStyle_Slant::kUpright_Slant as _,
-    Italic = SkFontStyle_Slant::kItalic_Slant as _,
-    Oblique = SkFontStyle_Slant::kOblique_Slant as _,
-}
-
-impl NativeTransmutable<SkFontStyle_Slant> for Slant {}
-
+pub use skia_bindings::SkFontStyle_Slant as Slant;
 #[test]
-fn test_slant_layout() {
-    Slant::test_layout()
+fn test_slant_naming() {
+    let _ = Slant::Upright;
 }
 
 // TODO: implement Display
@@ -170,12 +161,7 @@ impl Default for FontStyle {
 impl FontStyle {
     pub fn new(weight: Weight, width: Width, slant: Slant) -> Self {
         Self::construct(|fs| unsafe {
-            sb::C_SkFontStyle_Construct2(
-                fs,
-                weight.into_native(),
-                width.into_native(),
-                slant.into_native(),
-            )
+            sb::C_SkFontStyle_Construct2(fs, weight.into_native(), width.into_native(), slant)
         })
     }
 
@@ -188,7 +174,7 @@ impl FontStyle {
     }
 
     pub fn slant(self) -> Slant {
-        Slant::from_native(unsafe { sb::C_SkFontStyle_slant(self.native()) })
+        unsafe { sb::C_SkFontStyle_slant(self.native()) }
     }
 
     pub fn normal() -> FontStyle {
