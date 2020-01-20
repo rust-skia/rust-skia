@@ -22,11 +22,12 @@ doctest = false
 default = []
 gl = ["gpu", "skia-bindings/gl"]
 vulkan = ["gpu", "skia-bindings/vulkan"]
-svg = ["skia-bindings/svg"]
 shaper = ["skia-bindings/shaper"]
 textlayout = ["shaper", "skia-bindings/textlayout"]
 # implied only, do not use
 gpu = []
+# deprecated since 0.25.0, forwarded to skia-bindings, which will warn.
+svg = ["skia-bindings/svg"]
 
 [dependencies]
 bitflags = "1.0.4"

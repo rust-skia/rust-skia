@@ -65,11 +65,8 @@ fn main() {
         draw_all::<drivers::PDF>(&out_path);
     }
 
-    #[cfg(feature = "svg")]
-    {
-        if drivers.contains(&drivers::SVG::NAME) {
-            draw_all::<drivers::SVG>(&out_path);
-        }
+    if drivers.contains(&drivers::SVG::NAME) {
+        draw_all::<drivers::SVG>(&out_path);
     }
 
     #[cfg(feature = "gl")]
@@ -132,15 +129,12 @@ fn main() {
 }
 
 fn get_available_drivers() -> Vec<&'static str> {
-    let mut drivers = vec!["cpu", "pdf"];
+    let mut drivers = vec!["cpu", "pdf", "svg"];
     if cfg!(feature = "gl") {
         drivers.extend(vec!["opengl", "opengl-es"]);
     }
     if cfg!(feature = "vulkan") {
         drivers.push("vulkan")
-    }
-    if cfg!(feature = "svg") {
-        drivers.push("svg");
     }
     drivers
 }
