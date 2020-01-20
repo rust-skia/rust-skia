@@ -168,7 +168,7 @@ impl Handle<sb::Typefaces> {
 mod tests {
     use crate::prelude::*;
     use crate::textlayout::FontCollection;
-    use crate::FontMgr;
+    use crate::{FontMgr, FontStyle};
 
     #[test]
     #[serial_test::serial]
@@ -199,5 +199,25 @@ mod tests {
         assert_eq!(fm.native().ref_counted_base()._ref_cnt(), fm_base);
         drop(fm);
         drop(fc);
+    }
+
+    #[test]
+    #[serial_test::serial]
+    fn find_typefaces() {
+        let mut fc = FontCollection::new();
+        fc.set_default_font_manager(FontMgr::new(), None);
+        println!("find typeface:");
+        for typeface in fc.find_typefaces(
+            &[
+                "Arial",
+                "Tahoma",
+                "Fira Code",
+                "JetBrains Mono",
+                "Not Existing",
+            ],
+            FontStyle::default(),
+        ) {
+            println!("typeface: {}", typeface.family_name());
+        }
     }
 }
