@@ -50,21 +50,15 @@ Vulkan support can be enabled by enabling the feature `vulkan`. To render the ex
 
 Note that Vulkan drivers need to be available. On Windows, they are most likely available already, on Linux [this article on linuxconfig.org](<https://linuxconfig.org/install-and-test-vulkan-on-linux>) might get you started, and on macOS with Metal support, [install the Vulkan SDK](<https://vulkan.lunarg.com/sdk/home>) for Mac and configure MoltenVK by setting the `DYLD_LIBRARY_PATH`, `VK_LAYER_PATH`, and `VK_ICD_FILENAMES` environment variables as described in `Documentation/getting_started_macos.html`.
 
-### `svg`
-
-This feature enables the SVG rendering backend. To create a new Skia canvas that renders to SVG, use the function `skia_safe::svg::Canvas::new()`.
-
-### `shaper`
-
-The Cargo feature `shaper` enables text shaping with Harfbuzz and ICU. 
-
-On **Windows**, the file `icudtl.dat` must be available in your executable's directory. To provide the data file, either copy it from the build's output directory (shown when skia-bindings is compiled with `cargo build -vv | grep "ninja: Entering directory"`), or - if your executable directory is writable - invoke the function `skia_safe::icu::init()` before creating the `skia_safe::Shaper` object. 
-
-A simple example can be found [in the skia-org command line application](https://github.com/rust-skia/rust-skia/blob/master/skia-safe/examples/skia-org/skshaper_example.rs).
-
 ### `textlayout`
 
-This feature makes the Skia module skparagraph available, which contains types that are used to lay out paragraphs. In Rust, the types are available from the `skia_safe::textlayout` module. 
+The Cargo feature `textlayout` enables text shaping with Harfbuzz and ICU by providing bindings to the Skia modules skshaper and skparagraph. 
 
-A code snippet that lays out a paragraph can be found [in the skia-org example](https://github.com/rust-skia/rust-skia/blob/master/skia-safe/examples/skia-org/skshaper_example.rs).
+The skshaper module can be accessed through `skia_safe::Shaper` and the Rust bindings for skparagraph are in the `skia_safe::textlayout` module. 
+
+On **Windows**, the file `icudtl.dat` must be available in your executable's directory. To provide the data file, either copy it from the build's output directory (shown when skia-bindings is compiled with `cargo build -vv | grep "ninja: Entering directory"`), or - if your executable directory is writable - invoke the function `skia_safe::icu::init()` before using the `skia_safe::Shaper` object or the `skia_safe::textlayout` module. 
+
+Simple examples of the skshaper and skparagraph module bindings can be found [in the skia-org example command line application](https://github.com/rust-skia/rust-skia/blob/master/skia-safe/examples/skia-org).
+
+
 
