@@ -23,10 +23,6 @@ jobs:
           toolchain: stable
           features: 'gl'
           exampleArgs: ''
-        stable-svg:
-          toolchain: stable
-          features: 'svg'
-          exampleArgs: ''
         stable-shaper:
           toolchain: stable
           features: 'shaper'
@@ -37,21 +33,21 @@ jobs:
           exampleArgs: ''
         stable-all-features:
           toolchain: stable
-          features: 'gl,vulkan,svg,shaper,textlayout'
+          features: 'gl,vulkan,shaper,textlayout'
           exampleArgs: ''
       ${{ if eq(parameters.deployRelease, 'False') }}:
         stable-all-features:
           toolchain: stable
-          features: 'gl,vulkan,svg,shaper,textlayout'
+          features: 'gl,vulkan,shaper,textlayout'
           exampleArgs: '--driver cpu --driver pdf --driver svg'
         stable-all-features-debug:
           toolchain: stable
-          features: 'gl,vulkan,svg,shaper,textlayout'
+          features: 'gl,vulkan,shaper,textlayout'
           exampleArgs: ''
           skia_debug: '1'
         beta-all-features:
           toolchain: beta
-          features: 'gl,vulkan,svg,shaper,textlayout'
+          features: 'gl,vulkan,shaper,textlayout'
           exampleArgs: ''
 
   variables:
