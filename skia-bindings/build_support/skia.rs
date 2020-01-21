@@ -18,7 +18,6 @@ mod lib {
 mod feature_id {
     pub const GL: &str = "gl";
     pub const VULKAN: &str = "vulkan";
-    pub const SVG: &str = "svg";
     pub const SHAPER: &str = "shaper";
     pub const TEXTLAYOUT: &str = "textlayout";
 }
@@ -61,7 +60,6 @@ impl Default for BuildConfiguration {
             features: Features {
                 gl: cfg!(feature = "gl"),
                 vulkan: cfg!(feature = "vulkan"),
-                svg: cfg!(feature = "svg"),
                 text_layout,
                 animation: false,
                 dng: false,
@@ -104,9 +102,6 @@ pub struct Features {
 
     /// Build with Vulkan support?
     pub vulkan: bool,
-
-    /// Build with SVG support?
-    pub svg: bool,
 
     /// Features related to text layout.
     pub text_layout: TextLayout,
@@ -286,7 +281,7 @@ impl FinalBuildConfiguration {
             }
 
             let mut flags: Vec<&str> = vec![];
-            let mut use_expat = features.svg;
+            let mut use_expat = true;
 
             // target specific gn args.
             let target = cargo::target();
@@ -381,9 +376,7 @@ impl FinalBuildConfiguration {
             if features.gpu() {
                 sources.push("src/gpu.cpp".into());
             }
-            if features.svg {
-                sources.push("src/svg.cpp".into())
-            }
+            sources.push("src/svg.cpp".into());
             sources
         };
 
@@ -446,9 +439,6 @@ impl BinariesConfiguration {
         }
         if features.vulkan {
             feature_ids.push(feature_id::VULKAN);
-        }
-        if features.svg {
-            feature_ids.push(feature_id::SVG);
         }
         match features.text_layout {
             TextLayout::None => {}

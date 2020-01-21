@@ -9,9 +9,7 @@ pub mod gl;
 pub use gl::OpenGL;
 pub mod pdf;
 pub use pdf::PDF;
-#[cfg(feature = "svg")]
 pub mod svg;
-#[cfg(feature = "svg")]
 pub use svg::SVG;
 #[cfg(feature = "vulkan")]
 pub mod vulkan;
