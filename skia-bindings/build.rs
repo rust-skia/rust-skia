@@ -26,8 +26,13 @@ const SRC_BINDINGS_RS: &str = "src/bindings.rs";
 const SKIA_LICENSE: &str = "skia/LICENSE";
 
 fn main() {
+    // since 0.25.0
     if cfg!(feature = "svg") {
-        cargo::warning("the feature 'svg' has been removed. SVG and XML support is available in all build configurations");
+        cargo::warning("The feature 'svg' has been removed. SVG and XML support is available in all build configurations.");
+    }
+    // since 0.25.0
+    if cfg!(feature = "shaper") {
+        cargo::warning("The feature 'shaper' has been removed. To use the SkShaper bindings, enable the feature 'textlayout'.");
     }
 
     let build_config = skia::BuildConfiguration::default();

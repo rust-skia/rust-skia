@@ -15,39 +15,43 @@ jobs:
           toolchain: stable
           features: ''
           exampleArgs: ''
-        stable-vulkan:
-          toolchain: stable
-          features: 'vulkan'
-          exampleArgs: ''
         stable-gl:
           toolchain: stable
           features: 'gl'
           exampleArgs: ''
-        stable-shaper:
+        stable-vulkan:
           toolchain: stable
-          features: 'shaper'
+          features: 'vulkan'
           exampleArgs: ''
         stable-textlayout:
           toolchain: stable
           features: 'textlayout'
           exampleArgs: ''
+        stable-gl-textlayout:
+          toolchain: stable
+          features: 'gl,textlayout'
+          exampleArgs: ''
+        stable-vulkan-textlayout:
+          toolchain: stable
+          features: 'vulkan,textlayout'
+          exampleArgs: ''
         stable-all-features:
           toolchain: stable
-          features: 'gl,vulkan,shaper,textlayout'
+          features: 'gl,vulkan,textlayout'
           exampleArgs: ''
       ${{ if eq(parameters.deployRelease, 'False') }}:
         stable-all-features:
           toolchain: stable
-          features: 'gl,vulkan,shaper,textlayout'
+          features: 'gl,vulkan,textlayout'
           exampleArgs: '--driver cpu --driver pdf --driver svg'
         stable-all-features-debug:
           toolchain: stable
-          features: 'gl,vulkan,shaper,textlayout'
+          features: 'gl,vulkan,textlayout'
           exampleArgs: ''
           skia_debug: '1'
         beta-all-features:
           toolchain: beta
-          features: 'gl,vulkan,shaper,textlayout'
+          features: 'gl,vulkan,textlayout'
           exampleArgs: ''
 
   variables:

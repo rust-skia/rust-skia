@@ -47,7 +47,7 @@ There no support for WebAssembly yet. If you'd like to help out, take a look at 
 
 ### Bindings & Supported Features
 
-The supported bindings and Skia features are described in the [skia-safe package's readme](skia-safe/README.md) and prebuilt binaries are available for any single feature or for all features combined.
+The supported bindings and Skia features are described in the [skia-safe package's readme](skia-safe/README.md) and prebuilt binaries are available for most feature combinations.
 
 ## Building
 
