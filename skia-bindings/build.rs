@@ -32,7 +32,7 @@ fn main() {
     }
     // since 0.25.0
     if cfg!(feature = "shaper") {
-        cargo::warning("The feature 'shaper' has been removed. To use the SkShaper bindings, enable the feature 'textlayout' only.");
+        cargo::warning("The feature 'shaper' has been removed. To use the SkShaper bindings, enable the feature 'textlayout'.");
     }
 
     let build_config = skia::BuildConfiguration::default();
