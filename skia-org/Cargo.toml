@@ -19,7 +19,7 @@ edition = "2018"
 default = []
 gl = ["offscreen_gl_context", "sparkle", "skia-safe/gl"]
 vulkan = ["ash", "skia-safe/vulkan"]
-metal = ["metal-rs", "skia-safe/metal"]
+metal = ["metal-rs", "foreign-types", "cocoa", "objc", "skia-safe/metal"]
 textlayout = ["skia-safe/textlayout"]
 
 [dependencies]
@@ -35,3 +35,8 @@ clap = "2.33.0"
 ash = { version = "0.29", optional = true }
 # need to rename the package because of the feature with the same name.
 metal-rs = { package = "metal", version = "0.17.1", optional = true }
+# ... to access raw metal ptrs.
+foreign-types = { version = "0.3", optional = true }
+# ... for that NSAutoReleasePool to be able to free metal devices.
+cocoa = { version = "0.19", optional = true }
+objc = { version = "0.2.4", optional = true }

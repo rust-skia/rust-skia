@@ -314,6 +314,9 @@ impl FinalBuildConfiguration {
             if features.vulkan {
                 sources.push("src/vulkan.cpp".into());
             }
+            if features.metal {
+                sources.push("src/metal.cpp".into());
+            }
             if features.gpu() {
                 sources.push("src/gpu.cpp".into());
             }
