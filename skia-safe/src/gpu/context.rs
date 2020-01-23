@@ -7,7 +7,6 @@ use crate::prelude::*;
 use crate::{ColorType, Data, Image};
 use skia_bindings as sb;
 use skia_bindings::{GrContext, SkRefCntBase};
-use std::ffi;
 
 pub type Context = RCHandle<GrContext>;
 
@@ -47,9 +46,15 @@ impl RCHandle<GrContext> {
     }
 
     // TODO: support variant with GrContextOptions
+    /// # Safety
+    /// This function is unsafe because `device` and `queue` are untyped handles which need to exceed the
+    /// lifetime of the context returned.
     #[cfg(feature = "metal")]
-    pub fn new_metal(device: *mut ffi::c_void, queue: *mut ffi::c_void) -> Option<Context> {
-        Context::from_ptr(unsafe { sb::C_GrContext_MakeMetal(device, queue) })
+    pub unsafe fn new_metal(
+        device: *mut std::ffi::c_void,
+        queue: *mut std::ffi::c_void,
+    ) -> Option<Context> {
+        Context::from_ptr(sb::C_GrContext_MakeMetal(device, queue))
     }
 
     // TODO: threadSafeProxy()

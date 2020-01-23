@@ -24,10 +24,12 @@ impl DrawingDriver for Metal {
         let device = Device::system_default().expect("no Metal device");
         let queue = device.new_command_queue();
 
-        let mut context = gpu::Context::new_metal(
-            device.as_ptr() as *mut ffi::c_void,
-            queue.as_ptr() as *mut ffi::c_void,
-        )
+        let mut context = unsafe {
+            gpu::Context::new_metal(
+                device.as_ptr() as *mut ffi::c_void,
+                queue.as_ptr() as *mut ffi::c_void,
+            )
+        }
         .unwrap();
 
         let image_info = ImageInfo::new_n32_premul((width * 2, height * 2), None);
@@ -44,7 +46,9 @@ impl DrawingDriver for Metal {
 
         artifact::draw_image_on_surface(&mut surface, path, name, func);
 
+        #[allow(clippy::let_unit_value)]
         unsafe {
+            // the unit value here is needed  to type the return of msg_send().
             let () = msg_send![pool, release];
         }
     }
