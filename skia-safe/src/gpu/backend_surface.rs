@@ -107,7 +107,7 @@ impl NativeDrop for GrBackendTexture {
 
 impl NativeClone for GrBackendTexture {
     fn clone(&self) -> Self {
-        unsafe { GrBackendTexture::new3(self) }
+        construct(|texture| unsafe { sb::C_GrBackendTexture_CopyConstruct(texture, self) })
     }
 }
 
@@ -221,7 +221,9 @@ impl NativeDrop for GrBackendRenderTarget {
 
 impl NativeClone for GrBackendRenderTarget {
     fn clone(&self) -> Self {
-        unsafe { GrBackendRenderTarget::new4(self) }
+        construct(|render_target| unsafe {
+            sb::C_GrBackendRenderTarget_CopyConstruct(render_target, self)
+        })
     }
 }
 

@@ -145,25 +145,35 @@ extern "C" bool C_SkImageGenerator_isValid(const SkImageGenerator* self, GrConte
 // gpu/GrBackendSurface.h
 //
 
+// GrBackendRenderTarget
+
 extern "C" void C_GrBackendRenderTarget_Construct(GrBackendRenderTarget* uninitialized) {
     new(uninitialized) GrBackendRenderTarget();
+}
+
+extern "C" void C_GrBackendRenderTarget_CopyConstruct(GrBackendRenderTarget* uninitialized, const GrBackendRenderTarget* renderTarget) {
+    new(uninitialized) GrBackendRenderTarget(*renderTarget);
 }
 
 extern "C" void C_GrBackendRenderTarget_destruct(GrBackendRenderTarget* self) {
     self->~GrBackendRenderTarget();
 }
 
+// GrBackendTexture
+
 extern "C" void C_GrBackendTexture_Construct(GrBackendTexture* uninitialized) {
     new(uninitialized) GrBackendTexture();
+}
+
+extern "C" void C_GrBackendTexture_CopyConstruct(GrBackendTexture* uninitialized, const GrBackendTexture* texture) {
+    new(uninitialized) GrBackendTexture(*texture);
 }
 
 extern "C" void C_GrBackendTexture_destruct(const GrBackendTexture* self) {
     self->~GrBackendTexture();
 }
 
-//
 // GrBackendFormat
-//
 
 extern "C" void C_GrBackendFormat_Construct(GrBackendFormat* uninitialized) {
     new(uninitialized)GrBackendFormat();
