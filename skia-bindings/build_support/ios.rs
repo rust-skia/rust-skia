@@ -51,8 +51,8 @@ fn is_simulator(arch: &str) -> bool {
     }
 }
 
-pub(crate) fn link_libraries(_features: &Features) -> Vec<&str> {
-    vec![
+pub(crate) fn link_libraries(features: &Features) -> Vec<&str> {
+    let mut libs = vec![
         "c++",
         "framework=MobileCoreServices",
         "framework=CoreFoundation",
@@ -60,5 +60,12 @@ pub(crate) fn link_libraries(_features: &Features) -> Vec<&str> {
         "framework=CoreText",
         "framework=ImageIO",
         "framework=UIKit",
-    ]
+    ];
+
+    if features.metal {
+        libs.push("framework=Metal");
+        libs.push("framework=Foundation");
+    }
+
+    libs
 }

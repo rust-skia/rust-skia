@@ -50,6 +50,7 @@ impl Default for BuildConfiguration {
             features: Features {
                 gl: cfg!(feature = "gl"),
                 vulkan: cfg!(feature = "vulkan"),
+                metal: cfg!(feature = "metal"),
                 text_layout: cfg!(feature = "textlayout"),
                 animation: false,
                 dng: false,
@@ -93,6 +94,9 @@ pub struct Features {
     /// Build with Vulkan support?
     pub vulkan: bool,
 
+    /// Build with Metal support?
+    pub metal: bool,
+
     /// Features related to text layout. Modules skshaper and skparagraph.
     pub text_layout: bool,
 
@@ -108,7 +112,7 @@ pub struct Features {
 
 impl Features {
     pub fn gpu(&self) -> bool {
-        self.gl || self.vulkan
+        self.gl || self.vulkan || self.metal
     }
 }
 
@@ -178,6 +182,10 @@ impl FinalBuildConfiguration {
             if features.vulkan {
                 args.push(("skia_use_vulkan", yes()));
                 args.push(("skia_enable_spirv_validation", no()));
+            }
+
+            if features.metal {
+                args.push(("skia_use_metal", yes()));
             }
 
             // further flags that limit the components of Skia debug builds.
@@ -406,6 +414,10 @@ impl BinariesConfiguration {
                 link_libraries.extend(vec!["c++", "framework=ApplicationServices"]);
                 if features.gl {
                     link_libraries.push("framework=OpenGL");
+                }
+                if features.metal {
+                    link_libraries.push("framework=Metal");
+                    link_libraries.push("framework=Foundation");
                 }
             }
             (_, _, "windows", Some("msvc")) => {

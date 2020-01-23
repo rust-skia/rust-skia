@@ -22,6 +22,7 @@ doctest = false
 default = []
 gl = ["gpu", "skia-bindings/gl"]
 vulkan = ["gpu", "skia-bindings/vulkan"]
+metal = ["gpu", "skia-bindings/metal"]
 textlayout = ["skia-bindings/textlayout"]
 # implied only, do not use
 gpu = []
