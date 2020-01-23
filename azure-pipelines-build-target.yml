@@ -43,7 +43,8 @@ steps:
         set
         (cd skia-bindings && cargo clippy --release --features "$(features)" --all-targets --target ${{ parameters.target }} -- -D warnings)
         (cd skia-safe && cargo clippy --release --features "$(features)" --all-targets --target ${{ parameters.target }} -- -D warnings)
-      displayName: 'Clippy skia-bindings and skia-safe'
+        (cd skia-org && cargo clippy --release --features "$(features)" --all-targets --target ${{ parameters.target }} -- -D warnings)
+      displayName: 'Clippy skia-bindings, skia-safe, and skia-org'
 
   - ${{ if eq(parameters.runBinaries, True) }}:
 
@@ -54,7 +55,7 @@ steps:
       displayName: Test skia-safe
 
     - ${{ if ne(parameters.exampleArgs, '') }}:
-      - script: cd skia-safe && cargo run --release --features "$(features)" --target ${{ parameters.target }} --example skia-org "$(Build.ArtifactStagingDirectory)/skia-org" ${{ parameters.exampleArgs }}
+      - script: cd skia-org && cargo run --release --features "$(features)" --target ${{ parameters.target }} "$(Build.ArtifactStagingDirectory)/skia-org" ${{ parameters.exampleArgs }}
         displayName: 'Generate skia-org example images'
 
       - task: PublishBuildArtifacts@1
