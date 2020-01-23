@@ -1,6 +1,6 @@
 //! Full build support for the Skia library, SkiaBindings library and bindings.rs file.
 
-use crate::build_support::{android, binaries, cargo, clang, git, ios, llvm, vs};
+use crate::build_support::{android, binaries, cargo, clang, git, ios, llvm, vs, xcode};
 use cc::Build;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -679,6 +679,13 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
 
     let target = cargo::target();
     match target.as_strs() {
+        (_, "apple", "darwin", _) => {
+            if let Some(sdk) = xcode::get_sdk_path("macosx") {
+                builder = builder.clang_arg(format!("-isysroot{}", sdk.to_str().unwrap()));
+            } else {
+                cargo::warning(format!("failed to get macosx SDK path"))
+            }
+        }
         (arch, "linux", "android", _) => {
             let target = &target.to_string();
             cc_build.target(target);
