@@ -64,7 +64,6 @@ pub(crate) fn link_libraries(features: &Features) -> Vec<&str> {
 
     if features.metal {
         libs.push("framework=Metal");
-        libs.push("framework=Foundation");
     }
 
     libs
