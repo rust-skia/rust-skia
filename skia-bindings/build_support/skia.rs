@@ -24,7 +24,7 @@ mod feature_id {
 /// The defaults for the Skia build configuration.
 impl Default for BuildConfiguration {
     fn default() -> Self {
-        // m74: if we don't build the particles or the skottie library on macOS, the build fails with
+        // m74-m80: if we don't build the particles or the skottie library on macOS, the build fails with
         // for example:
         // [763/867] link libparticles.a
         // FAILED: libparticles.a
