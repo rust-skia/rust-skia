@@ -137,6 +137,7 @@ pub struct FinalBuildConfiguration {
 }
 
 impl FinalBuildConfiguration {
+    #[allow(clippy::cognitive_complexity)]
     pub fn from_build_configuration(build: &BuildConfiguration) -> FinalBuildConfiguration {
         let features = &build.features;
 
@@ -695,7 +696,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
             if let Some(sdk) = xcode::get_sdk_path("macosx") {
                 builder = builder.clang_arg(format!("-isysroot{}", sdk.to_str().unwrap()));
             } else {
-                cargo::warning(format!("failed to get macosx SDK path"))
+                cargo::warning("failed to get macosx SDK path")
             }
         }
         (arch, "linux", "android", _) => {
