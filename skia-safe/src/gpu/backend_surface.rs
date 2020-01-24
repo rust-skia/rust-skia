@@ -1,5 +1,7 @@
 #[cfg(feature = "gl")]
 use super::gl;
+#[cfg(feature = "metal")]
+use super::mtl;
 #[cfg(feature = "vulkan")]
 use super::vk;
 use super::BackendAPI;
@@ -49,6 +51,11 @@ impl Handle<GrBackendFormat> {
         })
     }
 
+    #[cfg(feature = "metal")]
+    pub fn new_metal(format: mtl::PixelFormat) -> Self {
+        Self::construct(|bf| unsafe { sb::C_GrBackendFormat_ConstructMtl(bf, format) })
+    }
+
     #[deprecated(since = "0.19.0", note = "use backend()")]
     pub fn backend_api(&self) -> BackendAPI {
         self.backend()
@@ -86,6 +93,11 @@ impl Handle<GrBackendFormat> {
         unsafe { self.native().asVkFormat(&mut r) }.if_true_some(r)
     }
 
+    #[cfg(feature = "metal")]
+    pub fn as_mtl_format(&self) -> mtl::PixelFormat {
+        unsafe { self.native().asMtlFormat() }
+    }
+
     pub fn to_texture_2d(&self) -> Option<Self> {
         let new = Self::from_native(unsafe { self.native().makeTexture2D() });
 
@@ -117,7 +129,7 @@ impl Handle<GrBackendTexture> {
         (width, height): (i32, i32),
         mip_mapped: super::MipMapped,
         gl_info: gl::TextureInfo,
-    ) -> BackendTexture {
+    ) -> Self {
         Self::from_native_if_valid(GrBackendTexture::new(
             width,
             height,
@@ -128,11 +140,23 @@ impl Handle<GrBackendTexture> {
     }
 
     #[cfg(feature = "vulkan")]
-    pub unsafe fn new_vulkan(
-        (width, height): (i32, i32),
-        vk_info: &vk::ImageInfo,
-    ) -> BackendTexture {
+    pub unsafe fn new_vulkan((width, height): (i32, i32), vk_info: &vk::ImageInfo) -> Self {
         Self::from_native_if_valid(GrBackendTexture::new1(width, height, vk_info.native())).unwrap()
+    }
+
+    #[cfg(feature = "metal")]
+    pub unsafe fn new_metal(
+        (width, height): (i32, i32),
+        mip_mapped: super::MipMapped,
+        mtl_info: &mtl::TextureInfo,
+    ) -> Self {
+        Self::from_native_if_valid(GrBackendTexture::new2(
+            width,
+            height,
+            mip_mapped,
+            mtl_info.native(),
+        ))
+        .unwrap()
     }
 
     pub(crate) unsafe fn from_native_if_valid(
@@ -191,6 +215,16 @@ impl Handle<GrBackendTexture> {
         self
     }
 
+    #[cfg(feature = "metal")]
+    pub fn metal_texture_info(&self) -> Option<mtl::TextureInfo> {
+        unsafe {
+            let mut texture_info = mtl::TextureInfo::default();
+            self.native()
+                .getMtlTextureInfo(texture_info.native_mut())
+                .if_true_some(texture_info)
+        }
+    }
+
     pub fn backend_format(&self) -> Option<BackendFormat> {
         let format = BackendFormat::from_native(unsafe { self.native().getBackendFormat() });
 
@@ -234,7 +268,7 @@ impl Handle<GrBackendRenderTarget> {
         sample_count: impl Into<Option<usize>>,
         stencil_bits: usize,
         info: gl::FramebufferInfo,
-    ) -> BackendRenderTarget {
+    ) -> Self {
         Self::from_native(unsafe {
             GrBackendRenderTarget::new(
                 width,
@@ -251,14 +285,25 @@ impl Handle<GrBackendRenderTarget> {
         (width, height): (i32, i32),
         sample_count: impl Into<Option<usize>>,
         info: &vk::ImageInfo,
-    ) -> BackendRenderTarget {
-        BackendRenderTarget::from_native(unsafe {
+    ) -> Self {
+        Self::from_native(unsafe {
             GrBackendRenderTarget::new2(
                 width,
                 height,
                 sample_count.into().unwrap_or(0).try_into().unwrap(),
                 info.native(),
             )
+        })
+    }
+
+    #[cfg(feature = "metal")]
+    pub fn new_metal(
+        (width, height): (i32, i32),
+        sample_cnt: i32,
+        mtl_info: &mtl::TextureInfo,
+    ) -> Self {
+        Self::from_native(unsafe {
+            GrBackendRenderTarget::new3(width, height, sample_cnt, mtl_info.native())
         })
     }
 
@@ -307,6 +352,12 @@ impl Handle<GrBackendRenderTarget> {
     pub fn set_vulkan_image_layout(&mut self, layout: vk::ImageLayout) -> &mut Self {
         unsafe { self.native_mut().setVkImageLayout(layout) }
         self
+    }
+
+    #[cfg(feature = "metal")]
+    pub fn metal_texture_info(&self) -> Option<mtl::TextureInfo> {
+        let mut info = mtl::TextureInfo::default();
+        unsafe { self.native().getMtlTextureInfo(info.native_mut()) }.if_true_some(info)
     }
 
     pub fn backend_format(&self) -> BackendFormat {
