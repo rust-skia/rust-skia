@@ -9,6 +9,10 @@ use crate::drivers::DrawingDriver;
 #[macro_use]
 extern crate ash;
 
+#[cfg(feature = "metal")]
+#[macro_use]
+extern crate objc;
+
 // TODO: think about making the examples more Rust-idiomatic, by using method chaining for Paint / Paths, for example.
 
 mod artifact;
@@ -113,6 +117,15 @@ fn main() {
         }
     }
 
+    #[cfg(feature = "metal")]
+    {
+        use drivers::metal::Metal;
+
+        if drivers.contains(&Metal::NAME) {
+            draw_all::<Metal>(&out_path)
+        }
+    }
+
     fn draw_all<Driver: DrawingDriver>(out_path: &Path) {
         let out_path = out_path.join(Driver::NAME);
 
@@ -135,6 +148,9 @@ fn get_available_drivers() -> Vec<&'static str> {
     }
     if cfg!(feature = "vulkan") {
         drivers.push("vulkan")
+    }
+    if cfg!(feature = "metal") {
+        drivers.push("metal")
     }
     drivers
 }

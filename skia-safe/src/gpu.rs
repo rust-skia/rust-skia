@@ -15,3 +15,6 @@ pub mod gl;
 
 #[cfg(feature = "vulkan")]
 pub mod vk;
+
+#[cfg(feature = "metal")]
+pub mod mtl;

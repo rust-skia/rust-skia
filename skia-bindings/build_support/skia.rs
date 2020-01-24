@@ -1,6 +1,6 @@
 //! Full build support for the Skia library, SkiaBindings library and bindings.rs file.
 
-use crate::build_support::{android, binaries, cargo, clang, git, ios, llvm, vs};
+use crate::build_support::{android, binaries, cargo, clang, git, ios, llvm, vs, xcode};
 use cc::Build;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -24,7 +24,7 @@ mod feature_id {
 /// The defaults for the Skia build configuration.
 impl Default for BuildConfiguration {
     fn default() -> Self {
-        // m74: if we don't build the particles or the skottie library on macOS, the build fails with
+        // m74-m80: if we don't build the particles or the skottie library on macOS, the build fails with
         // for example:
         // [763/867] link libparticles.a
         // FAILED: libparticles.a
@@ -50,6 +50,7 @@ impl Default for BuildConfiguration {
             features: Features {
                 gl: cfg!(feature = "gl"),
                 vulkan: cfg!(feature = "vulkan"),
+                metal: cfg!(feature = "metal"),
                 text_layout: cfg!(feature = "textlayout"),
                 animation: false,
                 dng: false,
@@ -93,6 +94,9 @@ pub struct Features {
     /// Build with Vulkan support?
     pub vulkan: bool,
 
+    /// Build with Metal support?
+    pub metal: bool,
+
     /// Features related to text layout. Modules skshaper and skparagraph.
     pub text_layout: bool,
 
@@ -108,7 +112,7 @@ pub struct Features {
 
 impl Features {
     pub fn gpu(&self) -> bool {
-        self.gl || self.vulkan
+        self.gl || self.vulkan || self.metal
     }
 }
 
@@ -133,6 +137,7 @@ pub struct FinalBuildConfiguration {
 }
 
 impl FinalBuildConfiguration {
+    #[allow(clippy::cognitive_complexity)]
     pub fn from_build_configuration(build: &BuildConfiguration) -> FinalBuildConfiguration {
         let features = &build.features;
 
@@ -178,6 +183,10 @@ impl FinalBuildConfiguration {
             if features.vulkan {
                 args.push(("skia_use_vulkan", yes()));
                 args.push(("skia_enable_spirv_validation", no()));
+            }
+
+            if features.metal {
+                args.push(("skia_use_metal", yes()));
             }
 
             // further flags that limit the components of Skia debug builds.
@@ -305,6 +314,9 @@ impl FinalBuildConfiguration {
             if features.vulkan {
                 sources.push("src/vulkan.cpp".into());
             }
+            if features.metal {
+                sources.push("src/metal.cpp".into());
+            }
             if features.gpu() {
                 sources.push("src/gpu.cpp".into());
             }
@@ -406,6 +418,10 @@ impl BinariesConfiguration {
                 link_libraries.extend(vec!["c++", "framework=ApplicationServices"]);
                 if features.gl {
                     link_libraries.push("framework=OpenGL");
+                }
+                if features.metal {
+                    link_libraries.push("framework=Metal");
+                    link_libraries.push("framework=Foundation");
                 }
             }
             (_, _, "windows", Some("msvc")) => {
@@ -679,6 +695,13 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
 
     let target = cargo::target();
     match target.as_strs() {
+        (_, "apple", "darwin", _) => {
+            if let Some(sdk) = xcode::get_sdk_path("macosx") {
+                builder = builder.clang_arg(format!("-isysroot{}", sdk.to_str().unwrap()));
+            } else {
+                cargo::warning("failed to get macosx SDK path")
+            }
+        }
         (arch, "linux", "android", _) => {
             let target = &target.to_string();
             cc_build.target(target);

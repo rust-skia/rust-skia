@@ -22,6 +22,7 @@ doctest = false
 default = []
 gl = ["gpu", "skia-bindings/gl"]
 vulkan = ["gpu", "skia-bindings/vulkan"]
+metal = ["gpu", "skia-bindings/metal"]
 textlayout = ["skia-bindings/textlayout"]
 # implied only, do not use
 gpu = []
@@ -35,14 +36,5 @@ skia-bindings = { version = "=0.25.0", path = "../skia-bindings" }
 lazy_static = "1.4"
 
 [dev-dependencies]
-# for skia-org
-# 0.25.1 fails to build on iOS targets on macOS: https://github.com/servo/rust-offscreen-rendering-context/pull/150 
-offscreen_gl_context = { git = "https://github.com/servo/rust-offscreen-rendering-context", rev = "1b9c74737635add2b9076e12df129cc3326c1287" }
-# offscreen_gl_context = "0.25.1"
-# for offscreen_gl_context 0.25
-# sparkle 0.1.9 fails to compile on macOS targeting aarch64-linux-android
-sparkle = "0.1.10"
-clap = "2.33.0"
-ash = "0.29"
 serial_test = "0.3"
 serial_test_derive = "0.3"

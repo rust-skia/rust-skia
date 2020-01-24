@@ -21,10 +21,10 @@ Skia-safe wraps most parts of the public Skia C++ APIs:
   - [x] Text shaping with [Harfbuzz](https://www.freedesktop.org/wiki/Software/HarfBuzz/) and [ICU](http://site.icu-project.org/home).
   - [x] Text layout (skparagraph)
   - [ ] Animation via [Skottie](https://skia.org/user/modules/skottie)
-- [ ] GPU Backends
+- [x] GPU Backends
   - [x] Vulkan
   - [x] OpenGL
-  - [ ] Metal
+  - [x] Metal
 
 Wrappers for functions that take callbacks and virtual classes are not supported right now. While we think they should be wrapped, the use cases related seem to be rather special, so we postponed that for now.
 
@@ -34,21 +34,25 @@ Skia-safe supports the following features that can be configured [via cargo](htt
 
 ### `gl`
 
-Platform support for OpenGL or OpenGL ES can be enabled by enabling the feature `gl`. Since version `0.25.0`, rust-skia is configured by default to enable CPU rendering only. Before that, OpenGL support was included in every feature configuration. To render the examples with OpenGL, use
+Platform support for OpenGL or OpenGL ES can be enabled by adding the feature `gl`. Since version `0.25.0`, rust-skia is configured by default to enable CPU rendering only. Before that, OpenGL support was included in every feature configuration. To render the examples with OpenGL, use
 
 ```bash
-(cd skia-safe && cargo run --features gl --example skia-org -- [OUTPUT_DIR] --driver opengl)
+(cd skia-org && cargo run --features gl [OUTPUT_DIR] --driver opengl)
 ```
 
 ### `vulkan`
 
-Vulkan support can be enabled by enabling the feature `vulkan`. To render the examples with Vulkan, use
+Vulkan support can be enabled by adding the feature `vulkan`. To render the examples with Vulkan, use
 
 ```bash
-(cd skia-safe && cargo run --features vulkan --example skia-org -- [OUTPUT_DIR] --driver vulkan)
+(cd skia-org && cargo run --features vulkan [OUTPUT_DIR] --driver vulkan)
 ```
 
 Note that Vulkan drivers need to be available. On Windows, they are most likely available already, on Linux [this article on linuxconfig.org](<https://linuxconfig.org/install-and-test-vulkan-on-linux>) might get you started, and on macOS with Metal support, [install the Vulkan SDK](<https://vulkan.lunarg.com/sdk/home>) for Mac and configure MoltenVK by setting the `DYLD_LIBRARY_PATH`, `VK_LAYER_PATH`, and `VK_ICD_FILENAMES` environment variables as described in `Documentation/getting_started_macos.html`.
+
+### `metal`
+
+Support for Metal on macOS and iOS targets can be enabled by adding the feature `metal`.
 
 ### `textlayout`
 

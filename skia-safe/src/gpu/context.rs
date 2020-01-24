@@ -45,6 +45,18 @@ impl RCHandle<GrContext> {
         }
     }
 
+    // TODO: support variant with GrContextOptions
+    /// # Safety
+    /// This function is unsafe because `device` and `queue` are untyped handles which need to exceed the
+    /// lifetime of the context returned.
+    #[cfg(feature = "metal")]
+    pub unsafe fn new_metal(
+        device: *mut std::ffi::c_void,
+        queue: *mut std::ffi::c_void,
+    ) -> Option<Context> {
+        Context::from_ptr(sb::C_GrContext_MakeMetal(device, queue))
+    }
+
     // TODO: threadSafeProxy()
 
     pub fn reset(&mut self, backend_state: Option<u32>) -> &mut Self {

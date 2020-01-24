@@ -21,7 +21,6 @@ The repository consists of two cargo packages in the folders `/skia-bindings` an
 We did our best to cover most of the Skia API, but you'll find a lot of blind spots by looking closer:
 
 - GPU API support is incomplete, specifically functions that use callbacks.
-- [Metal](https://en.wikipedia.org/wiki/Metal_(API)) isn't supported at all.
 - Supporting [Skottie](https://skia.org/user/modules/skottie) would be a nice addition.
 
 For larger contributions, make yourself familiar with the [various wrapper types](https://github.com/rust-skia/rust-skia/wiki) of skia-safe and consider to file an issue beforehand to give us a heads up and to receive additional directions.

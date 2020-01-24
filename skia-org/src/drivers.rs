@@ -7,6 +7,8 @@ pub use cpu::CPU;
 pub mod gl;
 #[cfg(feature = "gl")]
 pub use gl::OpenGL;
+#[cfg(feature = "metal")]
+pub mod metal;
 pub mod pdf;
 pub use pdf::PDF;
 pub mod svg;

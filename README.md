@@ -67,19 +67,21 @@ The build script probes for `python --version` and `python2 --version` and uses 
 
 ### On macOS
 
-- Install the XCode command line developer tools with
+- Install the Command Line Tools for Xcode with
 
   ```bash
   xcode-select --install
   ```
 
-- **macOS Mojave and newer**: install the SDK headers, for example:
+  or download and install the [Command Line Tools for Xcode](https://developer.apple.com/download/more/).
+
+- **macOS Mojave only**: install the SDK headers:
 
   ```bash
   sudo open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg
   ```
 
-  otherwise the Skia build _may_ fail to build `SkJpegUtility.cpp` and the binding generation _will_ fail with  `'TargetConditionals.h' file not found` . Also note that the command line developer tools _and_ SDK headers _should_ be reinstalled after an update of XCode.
+  If not installed, the Skia build _may_ fail to build `SkJpegUtility.cpp` and the binding generation _will_ fail with  `'TargetConditionals.h' file not found` . Also note that the Command Line Tools _and_ SDK headers _should_ be reinstalled after an update of XCode.
 
 - As an alternative to Apple's XCode LLVM, install LLVM via `brew install llvm` or `brew install llvm` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` like instructed. 
 
@@ -202,21 +204,21 @@ cargo run --example icon 512
 It has a single optional parameter which is the size in pixels for the PNG file.
 Without parameters, it’ll produce PNG frames for the [animated version](https://matracas.org/tmp/rust-skia-icon.html).
 
-The other examples are taken from [Skia's website](https://skia.org/) and [ported to the Rust API](skia-safe/examples/skia-org).
+The other examples are taken from [Skia's website](https://skia.org/) and [ported to the Rust API](skia-org/).
 
 ```bash
-cargo run --example skia-org -- [OUTPUT_DIR]
+cargo run -- [OUTPUT_DIR]
 ```
 
 to generate some Skia drawn PNG images in the directory `OUTPUT_DIR`. To render with OpenGL, use
 
 ```bash
-cargo run --example skia-org -- [OUTPUT_DIR] --driver opengl
+cargo run -- [OUTPUT_DIR] --driver opengl
 ```
 
 And to show the drivers that are supported
 ```bash 
-cargo run --example skia-org -- --help
+cargo run -- --help
 ```
 
 Some examples:
