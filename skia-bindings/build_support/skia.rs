@@ -1280,11 +1280,22 @@ pub struct Patch {
     marked_file: PathBuf,
 }
 
+/// Applies and reverses patches to the skia repository.
+///
+/// # Why use `--ignore-whitespace`?
+///
+/// On Windows, and if `skia-safe` is referred from a `cargo.toml` with a `git =` entry
+/// pointing to the rust-skia repository, and depending on the global settings
+/// of git, cargo may check out the skia submodule with CRLF line endings, which causes
+/// `git apply` to fail.
 impl Patch {
     fn apply(&self, root_dir: &Path) {
         if !self.is_applied(root_dir) {
             let patch_file = PathBuf::from("..").join(self.name.clone() + ".patch");
-            git::run(&["apply", patch_file.to_str().unwrap()], Some(root_dir));
+            git::run(
+                &["apply", "--ignore-whitespace", patch_file.to_str().unwrap()],
+                Some(root_dir),
+            );
         }
     }
 
@@ -1292,7 +1303,12 @@ impl Patch {
         if self.is_applied(root_dir) {
             let patch_file = PathBuf::from("..").join(self.name.clone() + ".patch");
             git::run(
-                &["apply", "--reverse", patch_file.to_str().unwrap()],
+                &[
+                    "apply",
+                    "--ignore-whitespace",
+                    "--reverse",
+                    patch_file.to_str().unwrap(),
+                ],
                 Some(root_dir),
             );
         }
