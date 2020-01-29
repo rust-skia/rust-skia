@@ -38,7 +38,7 @@ Because building Skia takes a lot of time and needs tools that may be missing, t
 | Platform | Binaries |
 | -------- | -------- |
 |  Windows | `x86_64-pc-windows-msvc` |
-| Linux Ubuntu 18 (16 should work, too). | `x86_64-unknown-linux-gnu` |
+| Linux Ubuntu 16, 18<br />CentOS 7, 8 | `x86_64-unknown-linux-gnu` |
 | macOS    | `x86_64-apple-darwin` |
 | Android  | `aarch64-linux-android`<br/>`x86_64-linux-android` |
 | iOS      | `aarch64-apple-ios`<br/>`x86_64-apple-ios` |
