@@ -723,12 +723,12 @@ impl Matrix {
     }
 
     #[deprecated(since = "0.0.0", note = "removed without replacement")]
-    pub fn fixed_step_in_x(&self, y: scalar) -> ! {
+    pub fn fixed_step_in_x(&self, _y: scalar) -> ! {
         unimplemented!("removed without replacement")
     }
 
     #[deprecated(since = "0.0.0", note = "removed without replacement")]
-    pub fn cheap_equal_to(&self, other: &Matrix) -> ! {
+    pub fn cheap_equal_to(&self, _other: &Matrix) -> ! {
         unimplemented!("removed without replacement")
     }
 
