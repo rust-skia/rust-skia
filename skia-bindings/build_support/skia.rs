@@ -736,6 +736,7 @@ const OPAQUE_TYPES: &[&str] = &[
     "GrContextOptions_PersistentCache",
     "GrContextOptions_ShaderErrorHandler",
     "Sk1DPathEffect",
+    "SkBBoxHierarchy", // vtable
     "SkBBHFactory",
     "SkBitmap_Allocator",
     "SkBitmap_HeapAllocator",
