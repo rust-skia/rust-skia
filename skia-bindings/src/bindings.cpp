@@ -662,7 +662,7 @@ extern "C" bool C_SkMatrix44_Equals(const SkMatrix44* self, const SkMatrix44* rh
 
 // SkMatrix44_SkMatrix conversion.
 extern "C" void C_SkMatrix44_SkMatrix(const SkMatrix44* self, SkMatrix* m) {
-    *m = *self;
+    *m = SkMatrix(*self);
 }
 
 extern "C" void C_SkMatrix44_Mul(const SkMatrix44* self, const SkMatrix44* rhs, SkMatrix44* result) {
@@ -699,10 +699,6 @@ extern "C" bool C_SkMatrix_hasPerspective(const SkMatrix* self) {
 
 extern "C" bool C_SkMatrix_invert(const SkMatrix* self, SkMatrix* inverse) {
     return self->invert(inverse);
-}
-
-extern "C" bool C_SkMatrix_cheapEqualTo(const SkMatrix* self, const SkMatrix* other) {
-    return self->cheapEqualTo(*other);
 }
 
 extern "C" void C_SkMatrix_setScaleTranslate(SkMatrix* self, SkScalar sx, SkScalar sy, SkScalar tx, SkScalar ty) {

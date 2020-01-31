@@ -25,7 +25,8 @@ fn test_caching_hint_naming() {
 pub use skia_bindings::SkImage_CompressionType as CompressionType;
 #[test]
 fn test_compression_type_naming() {
-    let _ = CompressionType::ETC1;
+    // m81: preserve the underscore characters for consistency.
+    let _ = CompressionType::BC1_RGBA8_UNORM;
 }
 
 pub type Image = RCHandle<SkImage>;
