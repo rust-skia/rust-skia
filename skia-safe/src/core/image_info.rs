@@ -363,7 +363,12 @@ impl Handle<SkImageInfo> {
     }
 
     pub fn valid_row_bytes(&self, row_bytes: usize) -> bool {
-        row_bytes >= self.min_row_bytes()
+        if row_bytes < self.min_row_bytes() {
+            return false;
+        }
+        let shift = self.shift_per_pixel();
+        let aligned_row_bytes = row_bytes >> shift << shift;
+        return aligned_row_bytes == row_bytes;
     }
 
     pub fn reset(&mut self) -> &mut Self {
