@@ -5,6 +5,12 @@ use skia_bindings::SkMatrix;
 use std::ops::{Index, IndexMut};
 use std::slice;
 
+pub use skia_bindings::SkApplyPerspectiveClip as ApplyPerspectiveClip;
+#[test]
+fn test_apply_perspective_clip_naming() {
+    let _ = ApplyPerspectiveClip::Yes;
+}
+
 bitflags! {
     pub struct TypeMask: u32 {
         const IDENTITY = sb::SkMatrix_TypeMask_kIdentity_Mask as u32;
@@ -472,8 +478,16 @@ impl Matrix {
         self
     }
 
+    #[deprecated(
+        since = "0.0.0",
+        note = "use post_scale((1.0 / x as scalar, 1.0 / y as scalar), None)"
+    )]
     pub fn post_idiv(&mut self, (div_x, div_y): (i32, i32)) -> bool {
-        unsafe { self.native_mut().postIDiv(div_x, div_y) }
+        if div_x == 0 || div_y == 0 {
+            return false;
+        }
+        self.post_scale((1.0 / div_x as scalar, 1.0 / div_y as scalar), None);
+        true
     }
 
     pub fn post_rotate(&mut self, degrees: scalar, pivot: impl Into<Option<Point>>) -> &mut Self {
@@ -577,6 +591,10 @@ impl Matrix {
         m
     }
 
+    pub fn normalize_perspective(&mut self) {
+        unsafe { sb::C_SkMatrix_normalizePerspective(self.native_mut()) }
+    }
+
     pub fn map_points(&self, dst: &mut [Point], src: &[Point]) {
         assert!(dst.len() >= src.len());
 
@@ -602,6 +620,18 @@ impl Matrix {
 
         unsafe {
             self.native().mapHomogeneousPoints(
+                dst.native_mut().as_mut_ptr(),
+                src.native().as_ptr(),
+                src.len().try_into().unwrap(),
+            )
+        };
+    }
+
+    pub fn map_homogeneous_points_2d(&self, dst: &mut [Point3], src: &[Point]) {
+        assert!(dst.len() >= src.len());
+
+        unsafe {
+            self.native().mapHomogeneousPoints1(
                 dst.native_mut().as_mut_ptr(),
                 src.native().as_ptr(),
                 src.len().try_into().unwrap(),
@@ -646,9 +676,17 @@ impl Matrix {
     }
 
     pub fn map_rect(&self, rect: impl AsRef<Rect>) -> (Rect, bool) {
+        self.map_rect_with_perspective_clip(rect, ApplyPerspectiveClip::Yes)
+    }
+
+    pub fn map_rect_with_perspective_clip(
+        &self,
+        rect: impl AsRef<Rect>,
+        perspective_clip: ApplyPerspectiveClip,
+    ) -> (Rect, bool) {
         let mut rect = *rect.as_ref();
         let ptr = rect.native_mut();
-        let rect_stays_rect = unsafe { self.native().mapRect(ptr, ptr) };
+        let rect_stays_rect = unsafe { self.native().mapRect(ptr, ptr, perspective_clip) };
         (rect, rect_stays_rect)
     }
 
@@ -679,22 +717,19 @@ impl Matrix {
         }
     }
 
-    pub fn is_fixed_step_in_x(&self) -> bool {
-        unsafe { self.native().isFixedStepInX() }
+    #[deprecated(since = "0.0.0", note = "removed without replacement")]
+    pub fn is_fixed_step_in_x(&self) -> ! {
+        unimplemented!("removed without replacement")
     }
 
-    pub fn fixed_step_in_x(&self, y: scalar) -> Option<Vector> {
-        if self.is_fixed_step_in_x() {
-            Some(Vector::from_native(unsafe {
-                self.native().fixedStepInX(y)
-            }))
-        } else {
-            None
-        }
+    #[deprecated(since = "0.0.0", note = "removed without replacement")]
+    pub fn fixed_step_in_x(&self, y: scalar) -> ! {
+        unimplemented!("removed without replacement")
     }
 
-    pub fn cheap_equal_to(&self, other: &Matrix) -> bool {
-        unsafe { sb::C_SkMatrix_cheapEqualTo(self.native(), other.native()) }
+    #[deprecated(since = "0.0.0", note = "removed without replacement")]
+    pub fn cheap_equal_to(&self, other: &Matrix) -> ! {
+        unimplemented!("removed without replacement")
     }
 
     pub fn dump(&self) {

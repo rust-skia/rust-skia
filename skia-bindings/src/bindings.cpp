@@ -679,7 +679,7 @@ extern "C" void C_SkMatrix44_MulV4(const SkMatrix44* self, const SkVector4* rhs,
 }
 
 //
-// SkMatrix
+// core/SkMatrix.h
 //
 
 extern "C" bool C_SkMatrix_Equals(const SkMatrix* self, const SkMatrix* rhs) {
@@ -712,6 +712,10 @@ extern "C" void C_SkMatrix_setScaleTranslate(SkMatrix* self, SkScalar sx, SkScal
 
 extern "C" bool C_SkMatrix_isFinite(const SkMatrix* self) {
     return self->isFinite();
+}
+
+extern "C" void C_SkMatrix_normalizePerspective(SkMatrix* self) {
+    self->normalizePerspective();
 }
 
 //
