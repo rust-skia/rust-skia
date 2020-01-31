@@ -227,8 +227,13 @@ extern "C" void C_SkSurfaceCharacterization_createColorSpace(const SkSurfaceChar
 }
 
 //
-// SkImage
+// core/SkImage.h
 //
+
+extern "C" SkImage *C_SkImage_MakeRasterFromCompressed(SkData *data, int width, int height, SkImage::CompressionType
+type) {
+    return SkImage::MakeRasterFromCompressed(sp(data), width, height, type).release();
+}
 
 extern "C" SkImage* C_SkImage_MakeRasterData(const SkImageInfo* info, SkData* pixels, size_t rowBytes) {
     return SkImage::MakeRasterData(*info, sp(pixels), rowBytes).release();
@@ -280,8 +285,8 @@ extern "C" SkImage* C_SkImage_makeNonTextureImage(const SkImage* self) {
     return self->makeNonTextureImage().release();
 }
 
-extern "C" SkImage* C_SkImage_makeRasterImage(const SkImage* self) {
-    return self->makeRasterImage().release();
+extern "C" SkImage* C_SkImage_makeRasterImage(const SkImage* self, SkImage::CachingHint cachingHint) {
+    return self->makeRasterImage(cachingHint).release();
 }
 
 // note: available without GPU support (GrContext may be null).

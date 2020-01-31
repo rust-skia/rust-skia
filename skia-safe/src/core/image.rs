@@ -84,10 +84,8 @@ impl RCHandle<SkImage> {
             )
         })
     }
-}
 
-#[cfg(feature = "gpu")]
-impl RCHandle<SkImage> {
+    #[cfg(feature = "gpu")]
     pub fn decode_to_texture(
         context: &mut gpu::Context,
         encoded: &[u8],
@@ -103,27 +101,78 @@ impl RCHandle<SkImage> {
         })
     }
 
-    // TODO: this is experimental, should probably be removed.
-    pub fn from_compressed(
+    #[cfg(feature = "gpu")]
+    pub fn new_texture_from_compressed(
         context: &mut gpu::Context,
         data: Data,
-        size: impl Into<ISize>,
-        c_type: CompressionType,
+        dimensions: impl Into<ISize>,
+        ct: CompressionType,
+        mip_mapped: impl Into<Option<gpu::MipMapped>>,
+        protected: impl Into<Option<gpu::Protected>>,
     ) -> Option<Image> {
-        let size = size.into();
+        let dimensions = dimensions.into();
+        let mip_mapped = mip_mapped.into().unwrap_or(gpu::MipMapped::No);
+        let protected = protected.into().unwrap_or(gpu::Protected::No);
+
         Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeFromCompressed(
+            sb::C_SkImage_MakeTextureFromCompressed(
                 context.native_mut(),
                 data.into_ptr(),
-                size.width,
-                size.height,
-                c_type,
+                dimensions.width,
+                dimensions.height,
+                ct,
+                mip_mapped,
+                protected,
             )
         })
     }
 
-    // TODO: add variant with TextureReleaseProc
+    #[deprecated(
+        since = "0.0.0",
+        note = "soon to be deprecated (m81), use new_text_from_compressed"
+    )]
+    #[cfg(feature = "gpu")]
+    pub fn from_compressed(
+        context: &mut gpu::Context,
+        data: Data,
+        dimensions: impl Into<ISize>,
+        ct: CompressionType,
+    ) -> Option<Image> {
+        let dimensions = dimensions.into();
+        let mip_mapped = gpu::MipMapped::No;
+        let protected = gpu::Protected::No;
 
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_MakeFromCompressed(
+                context.native_mut(),
+                data.into_ptr(),
+                dimensions.width,
+                dimensions.height,
+                ct,
+                mip_mapped,
+                protected,
+            )
+        })
+    }
+
+    pub fn new_raster_from_compressed(
+        data: Data,
+        dimensions: impl Into<ISize>,
+        ct: CompressionType,
+    ) -> Option<Image> {
+        let dimensions = dimensions.into();
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_MakeRasterFromCompressed(
+                data.into_ptr(),
+                dimensions.width,
+                dimensions.height,
+                ct,
+            )
+        })
+    }
+
+    #[cfg(feature = "gpu")]
+    // TODO: add variant with TextureReleaseProc
     pub fn from_texture(
         context: &mut gpu::Context,
         backend_texture: &gpu::BackendTexture,
@@ -144,7 +193,21 @@ impl RCHandle<SkImage> {
         })
     }
 
+    // TODO: MakeFromCompressedTexture
+
+    #[deprecated(since = "0.0.0", note = "renamed, use new_cross_context_from_pixmap")]
+    #[cfg(feature = "gpu")]
     pub fn from_pixmap_cross_context(
+        context: &mut gpu::Context,
+        pixmap: &Pixmap,
+        build_mips: bool,
+        limit_to_max_texture_size: impl Into<Option<bool>>,
+    ) -> Option<Image> {
+        Self::new_cross_context_from_pixmap(context, pixmap, build_mips, limit_to_max_texture_size)
+    }
+
+    #[cfg(feature = "gpu")]
+    pub fn new_cross_context_from_pixmap(
         context: &mut gpu::Context,
         pixmap: &Pixmap,
         build_mips: bool,
@@ -160,6 +223,7 @@ impl RCHandle<SkImage> {
         })
     }
 
+    #[cfg(feature = "gpu")]
     pub fn from_adopted_texture(
         context: &mut gpu::Context,
         backend_texture: &gpu::BackendTexture,
@@ -181,6 +245,7 @@ impl RCHandle<SkImage> {
     }
 
     // TODO: rename to clone_from_yuva_textures() ?
+    #[cfg(feature = "gpu")]
     pub fn from_yuva_textures_copy(
         context: &mut gpu::Context,
         yuv_color_space: crate::YUVColorSpace,
@@ -204,6 +269,7 @@ impl RCHandle<SkImage> {
     }
 
     #[allow(clippy::too_many_arguments)]
+    #[cfg(feature = "gpu")]
     pub fn from_yuva_textures_copy_with_external_backend(
         context: &mut gpu::Context,
         yuv_color_space: crate::YUVColorSpace,
@@ -229,6 +295,7 @@ impl RCHandle<SkImage> {
         })
     }
 
+    #[cfg(feature = "gpu")]
     pub fn from_yuva_textures(
         context: &mut gpu::Context,
         yuv_color_space: crate::YUVColorSpace,
@@ -253,6 +320,7 @@ impl RCHandle<SkImage> {
 
     // TODO: MakeFromYUVAPixmaps()
 
+    #[cfg(feature = "gpu")]
     pub fn from_nv12_textures_copy(
         context: &mut gpu::Context,
         yuv_color_space: crate::YUVColorSpace,
@@ -271,6 +339,7 @@ impl RCHandle<SkImage> {
         })
     }
 
+    #[cfg(feature = "gpu")]
     pub fn from_nv12_textures_copy_with_external_backend(
         context: &mut gpu::Context,
         yuv_color_space: crate::YUVColorSpace,
@@ -291,9 +360,7 @@ impl RCHandle<SkImage> {
             )
         })
     }
-}
 
-impl RCHandle<SkImage> {
     pub fn from_picture(
         picture: Picture,
         dimensions: impl Into<ISize>,
@@ -387,20 +454,20 @@ impl RCHandle<SkImage> {
     pub fn is_texture_backed(&self) -> bool {
         unsafe { self.native().isTextureBacked() }
     }
-}
 
-#[cfg(feature = "gpu")]
-impl RCHandle<SkImage> {
+    #[cfg(feature = "gpu")]
     pub fn is_valid(&self, context: &mut gpu::Context) -> bool {
         unsafe { self.native().isValid(context.native_mut()) }
     }
 
     // TODO: flush(GrContext*, GrFlushInfo&).
 
+    #[cfg(feature = "gpu")]
     pub fn flush(&mut self, context: &mut gpu::Context) {
         unsafe { self.native_mut().flush1(context.native_mut()) }
     }
 
+    #[cfg(feature = "gpu")]
     pub fn backend_texture(
         &self,
         flush_pending_gr_context_io: bool,
@@ -412,9 +479,7 @@ impl RCHandle<SkImage> {
         });
         (texture, origin)
     }
-}
 
-impl RCHandle<SkImage> {
     pub fn read_pixels<P>(
         &self,
         dst_info: &ImageInfo,
@@ -495,7 +560,13 @@ impl RCHandle<SkImage> {
     }
 
     pub fn new_raster_image(&self) -> Option<Image> {
-        Image::from_ptr(unsafe { sb::C_SkImage_makeRasterImage(self.native()) })
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_makeRasterImage(self.native(), CachingHint::Disallow)
+        })
+    }
+
+    pub fn new_raster_image_with_caching_hint(&self, caching_hint: CachingHint) -> Option<Image> {
+        Image::from_ptr(unsafe { sb::C_SkImage_makeRasterImage(self.native(), caching_hint) })
     }
 
     // TODO: rename to with_filter()?

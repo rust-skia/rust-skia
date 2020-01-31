@@ -121,19 +121,6 @@ extern "C" const SkImageInfo* C_SkSurfaceCharacterization_imageInfo(const SkSurf
 }
 
 //
-// core/SkImage.h
-//
-
-extern "C" void C_SkImage_getBackendTexture(
-        const SkImage* self,
-        bool flushPendingGrContextIO,
-        GrSurfaceOrigin* origin,
-        GrBackendTexture* result)
-{
-    *result = self->getBackendTexture(flushPendingGrContextIO, origin);
-}
-
-//
 // core/SkImageGenerator.h
 //
 
@@ -266,12 +253,30 @@ extern "C" void C_SkDrawable_GpuDrawHandler_draw(SkDrawable::GpuDrawHandler *sel
 // core/SkImage.h
 //
 
-extern "C" SkImage* C_SkImage_DecodeToTexture(GrContext* ctx, const void* encoded, size_t length, const SkIRect* subset) {
-    return SkImage::DecodeToTexture(ctx, encoded, length, subset).release();
+
+extern "C" SkImage *C_SkImage_MakeTextureFromCompressed(GrContext *context, SkData *data, int width, int height,
+                                                SkImage::CompressionType type, GrMipMapped mipMapped,
+                                                GrProtected prot) {
+    return SkImage::MakeTextureFromCompressed(context, sp(data), width, height, type, mipMapped, prot).release();
 }
 
-extern "C" SkImage* C_SkImage_MakeFromCompressed(GrContext* context, SkData* encoded, int width, int height, SkImage::CompressionType type) {
-    return SkImage::MakeFromCompressed(context, sp(encoded), width, height, type).release();
+extern "C" void C_SkImage_getBackendTexture(
+        const SkImage* self,
+        bool flushPendingGrContextIO,
+        GrSurfaceOrigin* origin,
+        GrBackendTexture* result)
+{
+    *result = self->getBackendTexture(flushPendingGrContextIO, origin);
+}
+
+extern "C" SkImage *C_SkImage_MakeFromCompressed(GrContext *context, SkData *encoded, int width, int height,
+                                                 SkImage::CompressionType type, GrMipMapped mipMapped, GrProtected 
+                                                 prot) {
+    return SkImage::MakeFromCompressed(context, sp(encoded), width, height, type, mipMapped, prot).release();
+}
+
+extern "C" SkImage* C_SkImage_DecodeToTexture(GrContext* ctx, const void* encoded, size_t length, const SkIRect* subset) {
+    return SkImage::DecodeToTexture(ctx, encoded, length, subset).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromTexture(
