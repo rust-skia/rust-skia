@@ -1034,8 +1034,8 @@ impl Canvas {
         unsafe { sb::C_SkCanvas_isClipEmpty(self.native()) }
     }
 
-    pub fn total_matrix(&self) -> &Matrix {
-        Matrix::from_native_ref(unsafe { &self.native().getTotalMatrix() })
+    pub fn total_matrix(&self) -> Matrix {
+        Matrix::from_native(unsafe { self.native().getTotalMatrix() })
     }
 
     //
