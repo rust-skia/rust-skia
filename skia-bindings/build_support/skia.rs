@@ -799,6 +799,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     //
     // core/ effects/
     //
+    ("SkApplyPerspectiveClip", rewrite::k_xxx),
     ("SkBlendMode", rewrite::k_xxx),
     ("SkBlendModeCoeff", rewrite::k_xxx),
     ("SkBlurStyle", rewrite::k_xxx_name),
@@ -828,7 +829,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     // SkStrokeRec_InitStyle
     ("InitStyle", rewrite::k_xxx_name),
     // SkBlurImageFilter_TileMode
-    // SkMatrixConvulutionImageFilter_TileMode
+    // SkMatrixConvolutionImageFilter_TileMode
     ("TileMode", rewrite::k_xxx_name),
     // SkCanvas_*
     ("PointMode", rewrite::k_xxx_name),
