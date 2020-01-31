@@ -848,7 +848,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     // SkImage_*
     ("BitDepth", rewrite::k_xxx),
     ("CachingHint", rewrite::k_xxx_name),
-    ("CompressionType", rewrite::k_xxx_name),
+    ("CompressionType", rewrite::k_xxx),
     // SkImageFilter_MapDirection
     ("MapDirection", rewrite::k_xxx_name),
     // SkInterpolatorBase_Result
