@@ -6,7 +6,10 @@
 //!
 //! See also: https://github.com/rust-lang/rfcs/issues/1880
 
-use crate::{SkAlphaType, SkBlendMode, SkBlendModeCoeff, SkPathFillType, SkPathVerb};
+use crate::{
+    SkAlphaType, SkBlendMode, SkBlendModeCoeff, SkImage_CompressionType,
+    SkImage_kCompressionTypeCount, SkPathFillType, SkPathVerb,
+};
 use std::ffi::CStr;
 
 impl SkBlendMode {
@@ -68,4 +71,10 @@ impl SkAlphaType {
     pub fn is_opaque(self) -> bool {
         self == SkAlphaType::Opaque
     }
+}
+
+impl SkImage_CompressionType {
+    pub const COUNT: usize = SkImage_kCompressionTypeCount as _;
+    #[deprecated(since = "0.0.0", note = "same as ETC2_RGB8_UNORM")]
+    pub const ETC1: Self = SkImage_CompressionType::ETC2_RGB8_UNORM;
 }
