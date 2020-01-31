@@ -524,6 +524,10 @@ extern "C" bool C_SkCanvas_isClipRect(const SkCanvas* self) {
     return self->isClipRect();
 }
 
+extern "C" void C_SkCanvas_getTotalMatrix(const SkCanvas* self, SkMatrix* matrix) {
+    *matrix = self->getTotalMatrix();
+}
+
 extern "C" void C_SkCanvas_discard(SkCanvas* self) {
     self->discard();
 }
