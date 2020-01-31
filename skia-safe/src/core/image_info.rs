@@ -368,7 +368,7 @@ impl Handle<SkImageInfo> {
         }
         let shift = self.shift_per_pixel();
         let aligned_row_bytes = row_bytes >> shift << shift;
-        return aligned_row_bytes == row_bytes;
+        aligned_row_bytes == row_bytes
     }
 
     pub fn reset(&mut self) -> &mut Self {
