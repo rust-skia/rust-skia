@@ -68,7 +68,7 @@ impl Target {
             self.architecture.as_str(),
             self.vendor.as_str(),
             self.system.as_str(),
-            self.abi.as_ref().map(|s| s.as_str()),
+            self.abi.as_deref(),
         )
     }
 }
