@@ -1,4 +1,33 @@
+#include "bindings.h"
+#include "include/core/SkSurface.h"
 #include "include/gpu/GrContext.h"
+
+//
+// core/SkSurface.h
+//
+
+extern "C" SkSurface *C_SkSurface_MakeFromCAMetalLayer(GrContext *context,
+                                                       GrMTLHandle layer,
+                                                       GrSurfaceOrigin origin,
+                                                       int sampleCnt,
+                                                       SkColorType colorType,
+                                                       SkColorSpace *colorSpace,
+                                                       const SkSurfaceProps *surfaceProps,
+                                                       GrMTLHandle *drawable) {
+    return SkSurface::MakeFromCAMetalLayer(context, layer, origin, sampleCnt, colorType, sp(colorSpace), surfaceProps,
+                                           drawable).release();
+}
+
+static SkSurface *MakeFromMTKView(GrContext *context,
+                                  GrMTLHandle mtkView,
+                                  GrSurfaceOrigin origin,
+                                  int sampleCnt,
+                                  SkColorType colorType,
+                                  SkColorSpace *colorSpace,
+                                  const SkSurfaceProps *surfaceProps) {
+    return SkSurface::MakeFromMTKView(context, mtkView, origin, sampleCnt, colorType, sp(colorSpace), surfaceProps
+    ).release();
+}
 
 //
 // gpu/GrContext.h
