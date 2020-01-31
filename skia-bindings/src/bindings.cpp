@@ -1519,7 +1519,7 @@ extern "C" const SkImageFilter* C_SkImageFilter_getInput(const SkImageFilter* se
 }
 
 //
-// SkImageGenerator
+// core/SkImageGenerator.h
 //
 
 extern "C" void C_SkImageGenerator_delete(SkImageGenerator *self) {
@@ -1528,6 +1528,10 @@ extern "C" void C_SkImageGenerator_delete(SkImageGenerator *self) {
 
 extern "C" SkData *C_SkImageGenerator_refEncodedData(SkImageGenerator *self) {
     return self->refEncodedData().release();
+}
+
+extern "C" bool C_SkImageGenerator_texturesAreCacheable(const SkImageGenerator* self) {
+    return self->texturesAreCacheable();
 }
 
 extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromEncoded(SkData *data) {
