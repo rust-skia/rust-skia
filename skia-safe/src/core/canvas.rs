@@ -1035,7 +1035,7 @@ impl Canvas {
     }
 
     pub fn total_matrix(&self) -> &Matrix {
-        Matrix::from_native_ref(unsafe { &*self.native().getTotalMatrix() })
+        Matrix::from_native_ref(unsafe { &self.native().getTotalMatrix() })
     }
 
     //
