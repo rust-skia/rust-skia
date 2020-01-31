@@ -1,3 +1,4 @@
+use crate::core::matrix::ApplyPerspectiveClip;
 use crate::interop::DynamicMemoryWStream;
 use crate::prelude::*;
 use crate::{
@@ -796,14 +797,36 @@ impl Handle<SkPath> {
 
     #[must_use]
     pub fn with_transform(&self, matrix: &Matrix) -> Path {
+        self.with_transform_with_perspective_clip(matrix, ApplyPerspectiveClip::Yes)
+    }
+
+    pub fn with_transform_with_perspective_clip(
+        &self,
+        matrix: &Matrix,
+        perspective_clip: ApplyPerspectiveClip,
+    ) -> Path {
         let mut path = Path::default();
-        unsafe { self.native().transform(matrix.native(), path.native_mut()) };
+        unsafe {
+            self.native()
+                .transform(matrix.native(), path.native_mut(), perspective_clip)
+        };
         path
     }
 
     pub fn transform(&mut self, matrix: &Matrix) -> &mut Self {
+        self.transform_with_perspective_clip(matrix, ApplyPerspectiveClip::Yes)
+    }
+
+    pub fn transform_with_perspective_clip(
+        &mut self,
+        matrix: &Matrix,
+        perspective_clip: ApplyPerspectiveClip,
+    ) -> &mut Self {
         let self_ptr = self.native_mut() as *mut _;
-        unsafe { self.native().transform(matrix.native(), self_ptr) };
+        unsafe {
+            self.native()
+                .transform(matrix.native(), self_ptr, perspective_clip)
+        };
         self
     }
 
