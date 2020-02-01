@@ -105,6 +105,7 @@ impl RefHandle<SkImageGenerator> {
 
     // TODO: generateTexture()
 
+    #[cfg(feature = "gpu")]
     pub fn textures_are_cacheable(&self) -> bool {
         unsafe { sb::C_SkImageGenerator_texturesAreCacheable(self.native()) }
     }

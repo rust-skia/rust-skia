@@ -1538,10 +1538,6 @@ extern "C" SkData *C_SkImageGenerator_refEncodedData(SkImageGenerator *self) {
     return self->refEncodedData().release();
 }
 
-extern "C" bool C_SkImageGenerator_texturesAreCacheable(const SkImageGenerator* self) {
-    return self->texturesAreCacheable();
-}
-
 extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromEncoded(SkData *data) {
     return SkImageGenerator::MakeFromEncoded(sp(data)).release();
 }
