@@ -155,10 +155,10 @@ impl AshGraphics {
                                 None
                             }
                         })
-                        .nth(0)
+                        .next()
                 })
                 .filter_map(|v| v)
-                .nth(0)
+                .next()
                 .expect("Failed to find a suitable Vulkan device.")
         };
 
