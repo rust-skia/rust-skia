@@ -1148,7 +1148,7 @@ mod prerequisites {
             let archive_url = &format!("{}/{}", repo_url, short_hash);
             println!("DOWNLOADING: {}", archive_url);
             let archive = utils::download(archive_url)
-                .unwrap_or_else(|_| panic!("Failed to download {}", archive_url));
+                .unwrap_or_else(|err| panic!("Failed to download {} ({})", archive_url, err));
 
             // unpack
             {
