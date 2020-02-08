@@ -202,7 +202,7 @@ cargo run --example icon 512
 ```
 
 It has a single optional parameter which is the size in pixels for the PNG file.
-Without parameters, it’ll produce PNG frames for the [animated version](https://matracas.org/tmp/rust-skia-icon.html).
+Without parameters, it’ll produce PNG frames for the animated version.
 
 The other examples are taken from [Skia's website](https://skia.org/) and [ported to the Rust API](skia-org/).
 
