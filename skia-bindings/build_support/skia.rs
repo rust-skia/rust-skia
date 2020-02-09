@@ -51,6 +51,7 @@ impl Default for BuildConfiguration {
                 gl: cfg!(feature = "gl"),
                 vulkan: cfg!(feature = "vulkan"),
                 metal: cfg!(feature = "metal"),
+                dawn: cfg!(feature = "dawn"),
                 text_layout: cfg!(feature = "textlayout"),
                 animation: false,
                 dng: false,
@@ -97,6 +98,9 @@ pub struct Features {
     /// Build with Metal support?
     pub metal: bool,
 
+    /// Build with Google's native implementation of WebGPU?
+    pub dawn: bool,
+
     /// Features related to text layout. Modules skshaper and skparagraph.
     pub text_layout: bool,
 
@@ -112,7 +116,7 @@ pub struct Features {
 
 impl Features {
     pub fn gpu(&self) -> bool {
-        self.gl || self.vulkan || self.metal
+        self.gl || self.vulkan || self.metal || self.dawn
     }
 }
 
@@ -187,6 +191,14 @@ impl FinalBuildConfiguration {
 
             if features.metal {
                 args.push(("skia_use_metal", yes()));
+            }
+
+            if features.dawn {
+                args.push(("skia_use_dawn", yes()));
+                args.push((
+                    "dawn_enable_vulkan",
+                    if features.vulkan { yes() } else { no() },
+                ));
             }
 
             // further flags that limit the components of Skia debug builds.
@@ -662,6 +674,20 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
     builder = builder.clang_arg(format!("-I{}", include_path.display()));
     cc_build.include(include_path);
 
+    {
+        let dawn_path = &output_directory.join("gen/third_party/externals/dawn/src/include");
+
+        builder = builder.clang_arg(format!("-I{}", dawn_path.display()));
+        cc_build.include(dawn_path);
+    }
+
+    {
+        let dawn_path = &current_dir.join("skia/third_party/externals/dawn/src/include");
+
+        builder = builder.clang_arg(format!("-I{}", dawn_path.display()));
+        cc_build.include(dawn_path);
+    }
+
     let definitions = {
         let mut definitions = Vec::new();
 
@@ -1101,6 +1127,7 @@ mod prerequisites {
             // we are in a crate.
             download_dependencies();
         } else {
+            /*
             // we are not in a crate, assuming we are in our git repo.
             // so just update all submodules.
             assert!(
@@ -1113,6 +1140,7 @@ mod prerequisites {
                     .success(),
                 "`git submodule update` failed"
             );
+            */
         }
     }
 

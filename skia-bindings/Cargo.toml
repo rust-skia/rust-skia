@@ -23,10 +23,11 @@ skia = "3e98c0e1d1"
 depot_tools = "a110bf6"
 
 [features]
-default = []
+default = ["dawn"]
 gl = []
 vulkan = []
 metal = []
+dawn = []
 textlayout = []
 # deprecated since 0.25.0
 svg = []
