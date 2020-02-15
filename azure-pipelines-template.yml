@@ -71,10 +71,8 @@ jobs:
   - ${{ if eq(parameters.platform, 'macOS') }}:
     # macOS
     - bash: |
-        sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
-        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain ${TOOLCHAIN}
-        echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
-      displayName: Install SDK Headers & Rust
+        echo "##vso[task.setvariable variable=PATH;]/usr/local/opt/llvm/bin:$PATH"
+      displayName: Set path to clang / llvm-config
 
   - ${{ if eq(parameters.platform, 'Windows') }}:
     # Windows.

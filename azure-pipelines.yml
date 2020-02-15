@@ -33,7 +33,7 @@ stages:
       androidNDK: 'r20b'
       androidAPILevel: '26'
       androidBinExt: ''
-      image: 'macOS-10.14'
+      image: 'macOS-10.15'
       deployRelease: ${{ eq(variables['build.SourceBranchName'], 'release') }}
 
   - template: 'azure-pipelines-template.yml'
