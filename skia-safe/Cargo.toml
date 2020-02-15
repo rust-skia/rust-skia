@@ -37,4 +37,4 @@ lazy_static = "1.4"
 
 [dev-dependencies]
 serial_test = "0.3"
-serial_test_derive = "0.3"
+serial_test_derive = "0.4"
