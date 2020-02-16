@@ -9,6 +9,7 @@ use skia_bindings as sb;
 use skia_bindings::{GrContext, SkRefCntBase};
 
 pub type Context = RCHandle<GrContext>;
+unsafe impl Send for Context {}
 
 impl NativeRefCountedBase for GrContext {
     type Base = SkRefCntBase;

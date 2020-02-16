@@ -6,6 +6,7 @@ use skia_bindings::SkDeferredDisplayListRecorder;
 pub use private::DeferredDisplayList;
 
 pub type DeferredDisplayListRecorder = Handle<SkDeferredDisplayListRecorder>;
+unsafe impl Send for DeferredDisplayListRecorder {}
 
 impl NativeDrop for SkDeferredDisplayListRecorder {
     fn drop(&mut self) {
@@ -40,6 +41,7 @@ pub(crate) mod private {
     use skia_bindings::SkDeferredDisplayList;
 
     pub type DeferredDisplayList = RefHandle<SkDeferredDisplayList>;
+unsafe impl Send for DeferredDisplayList {}
 
     impl NativeDrop for SkDeferredDisplayList {
         fn drop(&mut self) {

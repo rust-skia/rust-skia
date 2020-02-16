@@ -6,6 +6,7 @@ use std::ops::{Deref, DerefMut};
 use std::ptr;
 
 pub type TypefaceFontStyleSet = RCHandle<sb::skia_textlayout_TypefaceFontStyleSet>;
+unsafe impl Send for TypefaceFontStyleSet {}
 
 impl NativeRefCountedBase for sb::skia_textlayout_TypefaceFontStyleSet {
     type Base = sb::SkRefCntBase;
@@ -45,6 +46,7 @@ impl RCHandle<sb::skia_textlayout_TypefaceFontStyleSet> {
 }
 
 pub type TypefaceFontProvider = RCHandle<sb::skia_textlayout_TypefaceFontProvider>;
+unsafe impl Send for TypefaceFontProvider {}
 
 impl NativeRefCountedBase for sb::skia_textlayout_TypefaceFontProvider {
     type Base = sb::SkRefCntBase;

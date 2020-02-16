@@ -8,6 +8,7 @@ use std::marker::PhantomData;
 use std::{iter, mem, ptr};
 
 pub type Region = Handle<SkRegion>;
+unsafe impl Send for Region {}
 
 impl NativeDrop for SkRegion {
     fn drop(&mut self) {

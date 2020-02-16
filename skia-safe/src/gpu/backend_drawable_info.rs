@@ -6,6 +6,7 @@ use skia_bindings as sb;
 use skia_bindings::GrBackendDrawableInfo;
 
 pub type BackendDrawableInfo = Handle<GrBackendDrawableInfo>;
+unsafe impl Send for BackendDrawableInfo {}
 
 impl NativeDrop for GrBackendDrawableInfo {
     fn drop(&mut self) {

@@ -4,6 +4,7 @@ use skia_bindings as sb;
 use skia_bindings::SkPathMeasure;
 
 pub type PathMeasure = Handle<SkPathMeasure>;
+unsafe impl Send for PathMeasure {}
 
 impl NativeDrop for SkPathMeasure {
     fn drop(&mut self) {

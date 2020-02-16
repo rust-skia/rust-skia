@@ -7,6 +7,7 @@ use skia_bindings::skia_textlayout_FontCollection;
 use std::ffi;
 
 pub type FontCollection = RCHandle<skia_textlayout_FontCollection>;
+unsafe impl Send for FontCollection {}
 
 impl NativeRefCountedBase for skia_textlayout_FontCollection {
     type Base = sb::SkRefCntBase;
@@ -141,6 +142,7 @@ impl RCHandle<skia_textlayout_FontCollection> {
 }
 
 type Typefaces = Handle<sb::Typefaces>;
+unsafe impl Send for Typefaces {}
 
 impl NativeDrop for sb::Typefaces {
     fn drop(&mut self) {

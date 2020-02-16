@@ -78,6 +78,7 @@ fn test_vertices_vertex_mode_naming() {
 }
 
 pub type Vertices = RCHandle<SkVertices>;
+unsafe impl Send for Vertices {}
 
 impl NativeRefCounted for SkVertices {
     fn _ref(&self) {
@@ -241,6 +242,7 @@ bitflags! {
 }
 
 pub type Builder = Handle<SkVertices_Builder>;
+unsafe impl Send for Builder {}
 
 impl NativeDrop for SkVertices_Builder {
     fn drop(&mut self) {

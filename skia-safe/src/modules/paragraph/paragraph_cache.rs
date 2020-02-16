@@ -3,6 +3,7 @@ use skia_bindings as sb;
 use skia_bindings::skia_textlayout_ParagraphCache;
 
 pub type ParagraphCache = Handle<skia_textlayout_ParagraphCache>;
+unsafe impl Send for ParagraphCache {}
 
 impl NativeDrop for skia_textlayout_ParagraphCache {
     fn drop(&mut self) {

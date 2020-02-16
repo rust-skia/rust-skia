@@ -29,6 +29,7 @@ fn test_compression_type_naming() {
 }
 
 pub type Image = RCHandle<SkImage>;
+unsafe impl Send for Image {}
 
 impl NativeBase<SkRefCntBase> for SkImage {}
 

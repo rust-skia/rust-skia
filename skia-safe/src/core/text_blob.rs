@@ -8,6 +8,7 @@ use std::convert::TryInto;
 use std::{ptr, slice};
 
 pub type TextBlob = RCHandle<SkTextBlob>;
+unsafe impl Send for TextBlob {}
 
 impl NativeRefCounted for SkTextBlob {
     fn _ref(&self) {
@@ -134,6 +135,7 @@ impl RCHandle<SkTextBlob> {
 }
 
 pub type TextBlobBuilder = Handle<SkTextBlobBuilder>;
+unsafe impl Send for TextBlobBuilder {}
 
 impl NativeDrop for SkTextBlobBuilder {
     fn drop(&mut self) {
@@ -228,6 +230,7 @@ impl Handle<SkTextBlobBuilder> {
 }
 
 pub type TextBlobIter<'a> = Borrows<'a, Handle<SkTextBlob_Iter>>;
+unsafe impl<'a> Send for TextBlobIter<'a> {}
 
 pub struct TextBlobRun<'a> {
     typeface: *mut SkTypeface,

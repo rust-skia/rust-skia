@@ -4,6 +4,7 @@ use skia_bindings as sb;
 use skia_bindings::{SkDrawLooper, SkDrawLooper_BlurShadowRec, SkFlattenable, SkRefCntBase};
 
 pub type DrawLooper = RCHandle<SkDrawLooper>;
+unsafe impl Send for DrawLooper {}
 
 impl NativeBase<SkRefCntBase> for SkDrawLooper {}
 

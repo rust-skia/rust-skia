@@ -9,6 +9,7 @@ use std::mem;
 use std::os::raw::c_char;
 
 pub type FontStyleSet = RCHandle<SkFontStyleSet>;
+unsafe impl Send for FontStyleSet {}
 
 impl NativeBase<SkRefCntBase> for SkFontStyleSet {}
 
@@ -75,6 +76,7 @@ impl RCHandle<SkFontStyleSet> {
 }
 
 pub type FontMgr = RCHandle<SkFontMgr>;
+unsafe impl Send for FontMgr {}
 
 impl NativeBase<SkRefCntBase> for SkFontMgr {}
 

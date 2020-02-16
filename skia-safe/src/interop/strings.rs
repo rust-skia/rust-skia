@@ -5,6 +5,7 @@ use skia_bindings::SkStrings;
 use std::ops::Index;
 
 pub type Strings = Handle<SkStrings>;
+unsafe impl Send for Strings {}
 
 impl NativeDrop for SkStrings {
     fn drop(&mut self) {

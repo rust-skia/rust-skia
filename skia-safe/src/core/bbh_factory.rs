@@ -3,6 +3,7 @@ use skia_bindings::SkBBHFactory;
 
 // TODO: complete the implementation
 pub type BBHFactory = Handle<SkBBHFactory>;
+unsafe impl Send for BBHFactory {}
 
 impl NativeDrop for SkBBHFactory {
     fn drop(&mut self) {

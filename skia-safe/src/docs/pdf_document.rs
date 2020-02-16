@@ -67,6 +67,7 @@ pub mod pdf {
     //
 
     type InternalMetadata = Handle<SkPDF_Metadata>;
+unsafe impl Send for InternalMetadata {}
     impl NativeDrop for SkPDF_Metadata {
         fn drop(&mut self) {
             unsafe { sb::C_SkPDF_Metadata_destruct(self) }

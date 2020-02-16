@@ -13,6 +13,7 @@ fn test_interpolator_result_naming() {
 }
 
 pub type Interpolator = Handle<SkInterpolator>;
+unsafe impl Send for Interpolator {}
 
 impl NativeDrop for SkInterpolator {
     fn drop(&mut self) {

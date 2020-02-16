@@ -4,6 +4,7 @@ use skia_bindings::GrGLExtensions;
 use std::ffi::CString;
 
 pub type Extensions = Handle<GrGLExtensions>;
+unsafe impl Send for Extensions {}
 
 impl NativeDrop for GrGLExtensions {
     fn drop(&mut self) {

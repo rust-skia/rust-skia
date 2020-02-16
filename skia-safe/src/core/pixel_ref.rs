@@ -4,6 +4,7 @@ use skia_bindings::{SkPixelRef, SkRefCntBase};
 use std::os::raw::c_void;
 
 pub type PixelRef = RCHandle<SkPixelRef>;
+unsafe impl Send for PixelRef {}
 unsafe impl Sync for RCHandle<SkPixelRef> {}
 
 impl NativeRefCountedBase for SkPixelRef {

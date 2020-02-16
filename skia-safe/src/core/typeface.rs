@@ -22,6 +22,7 @@ pub struct LocalizedString {
 }
 
 pub type Typeface = RCHandle<SkTypeface>;
+unsafe impl Send for Typeface {}
 
 impl NativeRefCountedBase for SkTypeface {
     type Base = SkRefCntBase;
@@ -254,6 +255,7 @@ impl RCHandle<SkTypeface> {
 }
 
 pub type LocalizedStringsIter = RefHandle<SkTypeface_LocalizedStrings>;
+unsafe impl Send for LocalizedStringsIter {}
 
 impl NativeDrop for SkTypeface_LocalizedStrings {
     fn drop(&mut self) {

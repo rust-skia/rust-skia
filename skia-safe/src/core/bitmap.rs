@@ -9,6 +9,7 @@ use skia_bindings::SkBitmap;
 use std::{ffi, ptr};
 
 pub type Bitmap = Handle<SkBitmap>;
+unsafe impl Send for Bitmap {}
 
 impl NativeDrop for SkBitmap {
     fn drop(&mut self) {

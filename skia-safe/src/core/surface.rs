@@ -22,6 +22,7 @@ fn test_surface_backend_handle_access_naming() {
 }
 
 pub type Surface = RCHandle<SkSurface>;
+unsafe impl Send for Surface {}
 
 impl NativeRefCountedBase for SkSurface {
     type Base = SkRefCntBase;

@@ -6,6 +6,7 @@ use skia_bindings as sb;
 use std::ops::{Index, Range};
 
 pub type Paragraph = RefHandle<sb::skia_textlayout_Paragraph>;
+unsafe impl Send for Paragraph {}
 
 impl NativeDrop for sb::skia_textlayout_Paragraph {
     fn drop(&mut self) {
@@ -112,6 +113,7 @@ impl RefHandle<sb::skia_textlayout_Paragraph> {
 }
 
 pub type TextBoxes = Handle<sb::TextBoxes>;
+unsafe impl Send for TextBoxes {}
 
 impl NativeDrop for sb::TextBoxes {
     fn drop(&mut self) {
@@ -147,6 +149,7 @@ impl Handle<sb::TextBoxes> {
 }
 
 pub type LineMetricsVector<'a> = Borrows<'a, Handle<sb::LineMetricsVector>>;
+unsafe impl Send for LineMetricsVector<'a> {}
 
 impl NativeDrop for sb::LineMetricsVector {
     fn drop(&mut self) {

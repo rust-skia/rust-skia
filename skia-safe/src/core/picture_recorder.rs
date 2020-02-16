@@ -11,6 +11,7 @@ bitflags! {
 }
 
 pub type PictureRecorder = Handle<SkPictureRecorder>;
+unsafe impl Send for PictureRecorder {}
 
 impl NativeDrop for SkPictureRecorder {
     fn drop(&mut self) {
