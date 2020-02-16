@@ -82,6 +82,7 @@ fn test_map_direction_naming() {
 }
 
 pub type ImageFilter = RCHandle<SkImageFilter>;
+unsafe impl Sync for ImageFilter {}
 unsafe impl Send for ImageFilter {}
 
 impl NativeBase<SkRefCntBase> for SkImageFilter {}

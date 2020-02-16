@@ -88,6 +88,7 @@ impl MemoryStream<'_> {
 }
 
 pub type DynamicMemoryWStream = Handle<SkDynamicMemoryWStream>;
+unsafe impl Sync for DynamicMemoryWStream {}
 unsafe impl Send for DynamicMemoryWStream {}
 
 impl NativeBase<SkWStream> for SkDynamicMemoryWStream {}

@@ -7,6 +7,7 @@ use std::ops::Index;
 use std::{mem, slice};
 
 pub type DataTable = RCHandle<SkDataTable>;
+unsafe impl Sync for DataTable {}
 unsafe impl Send for DataTable {}
 
 impl NativeRefCountedBase for SkDataTable {

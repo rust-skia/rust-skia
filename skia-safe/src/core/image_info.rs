@@ -79,6 +79,7 @@ fn test_yuv_color_space_naming() {
 }
 
 pub type ColorInfo = Handle<SkColorInfo>;
+unsafe impl Sync for ColorInfo {}
 unsafe impl Send for ColorInfo {}
 
 impl NativeDrop for SkColorInfo {
@@ -164,6 +165,7 @@ impl Handle<SkColorInfo> {
 }
 
 pub type ImageInfo = Handle<SkImageInfo>;
+unsafe impl Sync for ImageInfo {}
 unsafe impl Send for ImageInfo {}
 
 impl NativeDrop for SkImageInfo {

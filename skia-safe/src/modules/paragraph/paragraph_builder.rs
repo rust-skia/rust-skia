@@ -4,6 +4,7 @@ use skia_bindings as sb;
 use std::os::raw;
 
 pub type ParagraphBuilder = RefHandle<sb::skia_textlayout_ParagraphBuilder>;
+unsafe impl Sync for ParagraphBuilder {}
 unsafe impl Send for ParagraphBuilder {}
 
 impl NativeDrop for sb::skia_textlayout_ParagraphBuilder {

@@ -5,7 +5,7 @@ use std::os::raw::c_void;
 
 pub type PixelRef = RCHandle<SkPixelRef>;
 unsafe impl Send for PixelRef {}
-unsafe impl Sync for RCHandle<SkPixelRef> {}
+unsafe impl Sync for PixelRef {}
 
 impl NativeRefCountedBase for SkPixelRef {
     type Base = SkRefCntBase;

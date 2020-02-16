@@ -6,6 +6,7 @@ use skia_bindings as sb;
 use std::ops::{Index, Range};
 
 pub type Paragraph = RefHandle<sb::skia_textlayout_Paragraph>;
+unsafe impl Sync for Paragraph {}
 unsafe impl Send for Paragraph {}
 
 impl NativeDrop for sb::skia_textlayout_Paragraph {
@@ -113,6 +114,7 @@ impl RefHandle<sb::skia_textlayout_Paragraph> {
 }
 
 pub type TextBoxes = Handle<sb::TextBoxes>;
+unsafe impl Sync for TextBoxes {}
 unsafe impl Send for TextBoxes {}
 
 impl NativeDrop for sb::TextBoxes {
@@ -149,6 +151,7 @@ impl Handle<sb::TextBoxes> {
 }
 
 pub type LineMetricsVector<'a> = Borrows<'a, Handle<sb::LineMetricsVector>>;
+unsafe impl Sync for LineMetricsVector<'a> {}
 unsafe impl Send for LineMetricsVector<'a> {}
 
 impl NativeDrop for sb::LineMetricsVector {

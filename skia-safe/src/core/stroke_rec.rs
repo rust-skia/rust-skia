@@ -18,6 +18,7 @@ fn test_stroke_rec_style_naming() {
 }
 
 pub type StrokeRec = Handle<SkStrokeRec>;
+unsafe impl Sync for StrokeRec {}
 unsafe impl Send for StrokeRec {}
 
 impl NativeDrop for SkStrokeRec {

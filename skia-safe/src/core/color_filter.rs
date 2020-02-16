@@ -10,6 +10,7 @@ bitflags! {
 }
 
 pub type ColorFilter = RCHandle<SkColorFilter>;
+unsafe impl Sync for ColorFilter {}
 unsafe impl Send for ColorFilter {}
 
 impl NativeBase<SkRefCntBase> for SkColorFilter {}

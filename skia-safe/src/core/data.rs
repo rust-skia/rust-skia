@@ -6,6 +6,7 @@ use std::ops::Deref;
 use std::slice;
 
 pub type Data = RCHandle<SkData>;
+unsafe impl Sync for Data {}
 unsafe impl Send for Data {}
 
 impl NativeRefCounted for SkData {

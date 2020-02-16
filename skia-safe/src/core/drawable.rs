@@ -6,6 +6,7 @@ use skia_bindings as sb;
 use skia_bindings::{SkDrawable, SkFlattenable, SkRefCntBase};
 
 pub type Drawable = RCHandle<SkDrawable>;
+unsafe impl Sync for Drawable {}
 unsafe impl Send for Drawable {}
 
 impl NativeRefCountedBase for SkDrawable {
@@ -88,6 +89,7 @@ pub mod gpu_draw_handler {
     use skia_bindings::SkDrawable_GpuDrawHandler;
 
     pub type GPUDrawHandler = RefHandle<SkDrawable_GpuDrawHandler>;
+unsafe impl Sync for GPUDrawHandler {}
 unsafe impl Send for GPUDrawHandler {}
 
     impl NativeDrop for SkDrawable_GpuDrawHandler {

@@ -8,6 +8,7 @@ use std::marker::PhantomData;
 use std::{iter, mem, ptr};
 
 pub type Region = Handle<SkRegion>;
+unsafe impl Sync for Region {}
 unsafe impl Send for Region {}
 
 impl NativeDrop for SkRegion {

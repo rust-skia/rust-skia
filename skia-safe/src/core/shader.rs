@@ -35,6 +35,7 @@ impl<'a> GradientInfo<'a> {
 }
 
 pub type Shader = RCHandle<SkShader>;
+unsafe impl Sync for Shader {}
 unsafe impl Send for Shader {}
 
 impl NativeBase<SkRefCntBase> for SkShader {}

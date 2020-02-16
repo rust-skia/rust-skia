@@ -100,6 +100,7 @@ impl PlaceholderStyle {
 }
 
 pub type TextStyle = Handle<sb::skia_textlayout_TextStyle>;
+unsafe impl Sync for TextStyle {}
 unsafe impl Send for TextStyle {}
 
 impl NativeDrop for sb::skia_textlayout_TextStyle {

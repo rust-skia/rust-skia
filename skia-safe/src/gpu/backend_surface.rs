@@ -10,6 +10,7 @@ use skia_bindings as sb;
 use skia_bindings::{GrBackendFormat, GrBackendRenderTarget, GrBackendTexture, GrMipMapped};
 
 pub type BackendFormat = Handle<GrBackendFormat>;
+unsafe impl Sync for BackendFormat {}
 unsafe impl Send for BackendFormat {}
 
 impl NativeDrop for GrBackendFormat {
@@ -111,6 +112,7 @@ impl Handle<GrBackendFormat> {
 }
 
 pub type BackendTexture = Handle<GrBackendTexture>;
+unsafe impl Sync for BackendTexture {}
 unsafe impl Send for BackendTexture {}
 
 impl NativeDrop for GrBackendTexture {
@@ -248,6 +250,7 @@ impl Handle<GrBackendTexture> {
 }
 
 pub type BackendRenderTarget = Handle<GrBackendRenderTarget>;
+unsafe impl Sync for BackendRenderTarget {}
 unsafe impl Send for BackendRenderTarget {}
 
 impl NativeDrop for GrBackendRenderTarget {

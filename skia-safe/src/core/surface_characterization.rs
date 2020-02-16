@@ -6,6 +6,7 @@ use skia_bindings as sb;
 use skia_bindings::SkSurfaceCharacterization;
 
 pub type SurfaceCharacterization = Handle<SkSurfaceCharacterization>;
+unsafe impl Sync for SurfaceCharacterization {}
 unsafe impl Send for SurfaceCharacterization {}
 
 impl NativeDrop for SkSurfaceCharacterization {

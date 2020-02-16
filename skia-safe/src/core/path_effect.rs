@@ -73,6 +73,7 @@ pub struct DashInfo {
 }
 
 pub type PathEffect = RCHandle<SkPathEffect>;
+unsafe impl Sync for PathEffect {}
 unsafe impl Send for PathEffect {}
 
 impl NativeBase<SkRefCntBase> for SkPathEffect {}

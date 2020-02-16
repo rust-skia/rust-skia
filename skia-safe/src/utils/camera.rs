@@ -261,6 +261,7 @@ impl Camera3D {
 // so we let Skia do the allocation.
 
 pub type View3D = RefHandle<Sk3DView>;
+unsafe impl Sync for View3D {}
 unsafe impl Send for View3D {}
 
 impl Default for View3D {

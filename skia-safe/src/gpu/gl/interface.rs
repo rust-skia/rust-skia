@@ -6,6 +6,7 @@ use std::ffi::c_void;
 use std::os::raw;
 
 pub type Interface = RCHandle<GrGLInterface>;
+unsafe impl Sync for Interface {}
 unsafe impl Send for Interface {}
 
 impl NativeRefCountedBase for GrGLInterface {

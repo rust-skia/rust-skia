@@ -35,6 +35,7 @@ pub struct LayerInfo {
 }
 
 pub type Builder = Handle<SkLayerDrawLooper_Builder>;
+unsafe impl Sync for Builder {}
 unsafe impl Send for Builder {}
 
 impl NativeDrop for SkLayerDrawLooper_Builder {

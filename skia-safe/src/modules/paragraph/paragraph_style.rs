@@ -6,6 +6,7 @@ use skia_bindings as sb;
 use std::slice;
 
 pub type StrutStyle = Handle<sb::skia_textlayout_StrutStyle>;
+unsafe impl Sync for StrutStyle {}
 unsafe impl Send for StrutStyle {}
 
 impl NativeDrop for sb::skia_textlayout_StrutStyle {
@@ -104,6 +105,7 @@ impl Handle<sb::skia_textlayout_StrutStyle> {
 }
 
 pub type ParagraphStyle = Handle<sb::skia_textlayout_ParagraphStyle>;
+unsafe impl Sync for ParagraphStyle {}
 unsafe impl Send for ParagraphStyle {}
 
 impl NativeDrop for sb::skia_textlayout_ParagraphStyle {

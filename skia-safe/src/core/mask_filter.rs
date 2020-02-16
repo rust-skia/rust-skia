@@ -4,6 +4,7 @@ use skia_bindings as sb;
 use skia_bindings::{SkFlattenable, SkMaskFilter, SkRefCntBase};
 
 pub type MaskFilter = RCHandle<SkMaskFilter>;
+unsafe impl Sync for MaskFilter {}
 unsafe impl Send for MaskFilter {}
 
 impl NativeBase<SkRefCntBase> for SkMaskFilter {}

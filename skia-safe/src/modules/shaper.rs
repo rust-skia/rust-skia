@@ -11,6 +11,7 @@ use std::marker::PhantomData;
 use std::os::raw;
 
 pub type Shaper = RefHandle<SkShaper>;
+unsafe impl Sync for Shaper {}
 unsafe impl Send for Shaper {}
 unsafe impl Send for Shaper {}
 
@@ -79,6 +80,7 @@ where
 }
 
 pub type FontRunIterator = RefHandle<SkShaper_FontRunIterator>;
+unsafe impl Sync for FontRunIterator {}
 unsafe impl Send for FontRunIterator {}
 
 impl NativeBase<SkShaper_RunIterator> for SkShaper_FontRunIterator {}
@@ -128,6 +130,7 @@ impl RefHandle<SkShaper> {
 }
 
 pub type BiDiRunIterator = RefHandle<SkShaper_BiDiRunIterator>;
+unsafe impl Sync for BiDiRunIterator {}
 unsafe impl Send for BiDiRunIterator {}
 
 impl NativeBase<SkShaper_RunIterator> for SkShaper_BiDiRunIterator {}
@@ -170,6 +173,7 @@ impl RefHandle<SkShaper> {
 }
 
 pub type ScriptRunIterator = RefHandle<SkShaper_ScriptRunIterator>;
+unsafe impl Sync for ScriptRunIterator {}
 unsafe impl Send for ScriptRunIterator {}
 
 impl NativeBase<SkShaper_RunIterator> for SkShaper_ScriptRunIterator {}
@@ -220,6 +224,7 @@ impl RefHandle<SkShaper> {
 }
 
 pub type LanguageRunIterator = RefHandle<SkShaper_LanguageRunIterator>;
+unsafe impl Sync for LanguageRunIterator {}
 unsafe impl Send for LanguageRunIterator {}
 
 impl NativeBase<SkShaper_RunIterator> for SkShaper_LanguageRunIterator {}

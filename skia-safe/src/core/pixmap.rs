@@ -11,6 +11,7 @@ use std::os::raw;
 use std::{ptr, slice};
 
 pub type Pixmap = Handle<SkPixmap>;
+unsafe impl Sync for Pixmap {}
 unsafe impl Send for Pixmap {}
 
 impl NativeDrop for SkPixmap {

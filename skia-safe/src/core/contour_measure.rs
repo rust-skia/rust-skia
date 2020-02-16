@@ -4,6 +4,7 @@ use skia_bindings as sb;
 use skia_bindings::{SkContourMeasure, SkContourMeasureIter, SkRefCntBase};
 
 pub type ContourMeasure = RCHandle<SkContourMeasure>;
+unsafe impl Sync for ContourMeasure {}
 unsafe impl Send for ContourMeasure {}
 
 impl NativeRefCountedBase for SkContourMeasure {
@@ -85,6 +86,7 @@ impl RCHandle<SkContourMeasure> {
 }
 
 pub type ContourMeasureIter = Handle<SkContourMeasureIter>;
+unsafe impl Sync for ContourMeasureIter {}
 unsafe impl Send for ContourMeasureIter {}
 
 impl NativeDrop for SkContourMeasureIter {

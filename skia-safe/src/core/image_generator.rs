@@ -10,6 +10,7 @@ use skia_bindings::SkImageGenerator;
 use std::ffi::c_void;
 
 pub type ImageGenerator = RefHandle<SkImageGenerator>;
+unsafe impl Sync for ImageGenerator {}
 unsafe impl Send for ImageGenerator {}
 
 impl NativeDrop for SkImageGenerator {
