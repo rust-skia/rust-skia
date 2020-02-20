@@ -1,6 +1,7 @@
 #include "bindings.h"
 // codec/
 #include "include/codec/SkEncodedOrigin.h"
+#include "include/codec/SkCodec.h"
 // core/
 #include "include/core/SkAnnotation.h"
 #include "include/core/SkBlendMode.h"
@@ -102,6 +103,34 @@
 #include "include/utils/SkParsePath.h"
 #include "include/utils/SkShadowUtils.h"
 #include "include/utils/SkTextUtils.h"
+
+//
+// codec/SkCodec.h
+//
+
+extern "C" SkCodec* C_SkCodec_MakeFromData(SkData* data) {
+    return SkCodec::MakeFromData(sp(data)).release();
+}
+
+extern "C" void C_SkCodec_getInfo(const SkCodec* self, SkImageInfo* info) {
+    *info = self->getInfo();
+}
+
+extern "C" SkISize C_SkCodec_dimensions(const SkCodec* self) {
+    return self->dimensions();
+}
+
+extern "C" SkIRect C_SkCodec_bounds(const SkCodec* self) {
+    return self->bounds();
+}
+
+extern "C" SkEncodedOrigin C_SkCodec_getOrigin(const SkCodec* self) {
+    return self->getOrigin();
+}
+
+extern "C" SkEncodedImageFormat C_SkCodec_getEncodedFormat(const SkCodec* self) {
+    return self->getEncodedFormat();
+}
 
 //
 // codec/SkEncodedOrigin.h
