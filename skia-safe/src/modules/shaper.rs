@@ -13,7 +13,6 @@ use std::os::raw;
 pub type Shaper = RefHandle<SkShaper>;
 unsafe impl Sync for Shaper {}
 unsafe impl Send for Shaper {}
-unsafe impl Send for Shaper {}
 
 impl NativeDrop for SkShaper {
     fn drop(&mut self) {

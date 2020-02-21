@@ -151,8 +151,8 @@ impl Handle<sb::TextBoxes> {
 }
 
 pub type LineMetricsVector<'a> = Borrows<'a, Handle<sb::LineMetricsVector>>;
-unsafe impl Sync for LineMetricsVector<'a> {}
-unsafe impl Send for LineMetricsVector<'a> {}
+unsafe impl<'a> Sync for LineMetricsVector<'a> {}
+unsafe impl<'a> Send for LineMetricsVector<'a> {}
 
 impl NativeDrop for sb::LineMetricsVector {
     fn drop(&mut self) {
