@@ -1,6 +1,6 @@
 //! Full build support for the Skia library, SkiaBindings library and bindings.rs file.
 
-use crate::build_support::{android, binaries, cargo, clang, git, ios, llvm, vs, xcode};
+use crate::build_support::{android, binaries, cargo, clang, ios, llvm, vs, xcode};
 use cc::Build;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
