@@ -24,18 +24,6 @@ mod feature_id {
 /// The defaults for the Skia build configuration.
 impl Default for BuildConfiguration {
     fn default() -> Self {
-        // m74-m80: if we don't build the particles or the skottie library on macOS, the build fails with
-        // for example:
-        // [763/867] link libparticles.a
-        // FAILED: libparticles.a
-        let all_skia_libs = {
-            match cargo::target().as_strs() {
-                (_, "apple", "darwin", _) => true,
-                (_, "apple", "ios", _) => true,
-                _ => false,
-            }
-        };
-
         let skia_debug = {
             match cargo::env_var("SKIA_DEBUG") {
                 Some(v) if v != "0" => true,
@@ -56,7 +44,6 @@ impl Default for BuildConfiguration {
                 dng: false,
                 particles: false,
             },
-            all_skia_libs,
             definitions: Vec::new(),
         }
     }
@@ -77,10 +64,6 @@ pub struct BuildConfiguration {
 
     /// The Skia feature set to compile.
     features: Features,
-
-    /// As of M74, There is a bug in the Skia macOS build
-    /// that requires all libraries to be built, otherwise the build will fail.
-    all_skia_libs: bool,
 
     /// Additional preprocessor definitions that will override predefined ones.
     definitions: Definitions,
@@ -155,24 +138,8 @@ impl FinalBuildConfiguration {
                 ("skia_use_system_libpng", no()),
                 ("skia_use_libwebp", no()),
                 ("skia_use_system_zlib", no()),
-                (
-                    "skia_enable_skottie",
-                    if features.animation || build.all_skia_libs {
-                        yes()
-                    } else {
-                        no()
-                    },
-                ),
                 ("skia_use_xps", no()),
                 ("skia_use_dng_sdk", if features.dng { yes() } else { no() }),
-                (
-                    "skia_enable_particles",
-                    if features.particles || build.all_skia_libs {
-                        yes()
-                    } else {
-                        no()
-                    },
-                ),
                 ("cc", quote("clang")),
                 ("cxx", quote("clang++")),
             ];
@@ -269,12 +236,6 @@ impl FinalBuildConfiguration {
                 args.push(("skia_use_system_expat", no()));
             } else {
                 args.push(("skia_use_expat", no()));
-            }
-
-            if build.all_skia_libs {
-                // m78: modules/particles forgets to set SKIA_IMPLEMENTATION=1 and so
-                // expects system vulkan headers.
-                flags.push("-DSKIA_IMPLEMENTATION=1");
             }
 
             if !flags.is_empty() {
