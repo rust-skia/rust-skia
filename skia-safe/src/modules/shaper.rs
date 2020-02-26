@@ -51,7 +51,13 @@ impl RefHandle<SkShaper> {
     pub fn new(font_mgr: impl Into<Option<FontMgr>>) -> Self {
         Self::from_ptr(unsafe { sb::C_SkShaper_Make(font_mgr.into().into_ptr_or_null()) }).unwrap()
     }
+
+    pub fn new_core_text() -> Option<Self> {
+        Self::from_ptr(unsafe { sb::C_SkShaper_MakeCoreText() })
+    }
 }
+
+pub use skia_bindings::SkShaper_Feature as Feature;
 
 pub trait RunIterator {
     fn consume(&mut self);
@@ -391,6 +397,38 @@ impl RefHandle<SkShaper> {
                 bidi_run_iterator.native_mut(),
                 script_run_iterator.native_mut(),
                 language_run_iterator.native_mut(),
+                width,
+                &mut run_handler._base,
+            )
+        }
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn shape_with_iterators_and_features(
+        &self,
+        utf8: &str,
+        font_run_iterator: &mut FontRunIterator,
+        bidi_run_iterator: &mut BiDiRunIterator,
+        script_run_iterator: &mut ScriptRunIterator,
+        language_run_iterator: &mut LanguageRunIterator,
+        features: &[Feature],
+        width: scalar,
+        run_handler: &mut dyn RunHandler,
+    ) {
+        let bytes = utf8.as_bytes();
+        let param = rust_run_handler::new_param(run_handler);
+        let mut run_handler = rust_run_handler::from_param(&param);
+        unsafe {
+            sb::C_SkShaper_shape3(
+                self.native(),
+                bytes.as_ptr() as _,
+                bytes.len(),
+                font_run_iterator.native_mut(),
+                bidi_run_iterator.native_mut(),
+                script_run_iterator.native_mut(),
+                language_run_iterator.native_mut(),
+                features.as_ptr(),
+                features.len(),
                 width,
                 &mut run_handler._base,
             )
