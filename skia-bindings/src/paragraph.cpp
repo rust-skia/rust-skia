@@ -336,6 +336,14 @@ extern "C" {
         self->resetShadows();
     }
 
+    void C_TextStyle_addFontFeature(TextStyle* self, const SkString* fontFeature, int value) {
+        self->addFontFeature(*fontFeature, value);
+    }
+
+    void C_TextStyle_resetFontFeatures(TextStyle* self) {
+        self->resetFontFeatures();
+    }
+    
     const SkString* C_TextStyle_getFontFamilies(const TextStyle* self, size_t* count) {
         auto& v = self->getFontFamilies();
         *count = v.size();
@@ -351,16 +359,22 @@ extern "C" {
     }
 }
 
+struct FontFeatures {
+    std::vector<FontFeature> fontFeatures;
+};
+
+extern "C" const FontFeature *C_FontFeatures_ptr_count(const FontFeatures *features, size_t *count) {
+    *count = features->fontFeatures.size();
+    return &features->fontFeatures.front();
+}
 
 struct TextShadows {
     std::vector<TextShadow> textShadows;
 };
 
-extern "C" {
-    const TextShadow* C_TextShadows_ptr_count(const TextShadows* shadows, size_t* count) {
-        *count = shadows->textShadows.size();
-        return &shadows->textShadows.front();
-    }
+extern "C" const TextShadow *C_TextShadows_ptr_count(const TextShadows *shadows, size_t *count) {
+    *count = shadows->textShadows.size();
+    return &shadows->textShadows.front();
 }
 
 //
