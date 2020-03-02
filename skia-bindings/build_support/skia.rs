@@ -544,6 +544,8 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .blacklist_type("SkLRUCache_Entry")
         //   not used at all:
         .blacklist_type("std::vector.*")
+        // too much template magic:
+        .blacklist_type("SkRuntimeEffect_ConstIterable.*")
         // Vulkan reexports that got swallowed by making them opaque.
         // (these can not be whitelisted by a extern "C" function)
         .whitelist_type("VkPhysicalDeviceFeatures")
@@ -772,6 +774,10 @@ const OPAQUE_TYPES: &[&str] = &[
     "SkShaper_ScriptRunIterator",
     "SkContourMeasure",
     "SkDocument",
+    // tuples:
+    "SkRuntimeEffect_EffectResult",
+    "SkRuntimeEffect_ByteCodeResult",
+    "SkRuntimeEffect_SpecializeResult",
 ];
 
 #[derive(Debug)]
@@ -865,6 +871,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("Op", rewrite::k_xxx_name_opt),
     // SkRRect_*
     // TODO: remove kLastType?
+    // SkRuntimeEffect_Variable_Type
     ("Type", rewrite::k_xxx_name_opt),
     ("Corner", rewrite::k_xxx_name),
     // SkShader_GradientType
@@ -882,6 +889,10 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("VertexMode", rewrite::k_xxx_name),
     // SkYUVAIndex_Index
     ("Index", rewrite::k_xxx_name),
+    // SkRuntimeEffect_Variable_Qualifier
+    ("Qualifier", rewrite::k_xxx),
+    // private type that leaks through SkRuntimeEffect_Variable
+    ("GrSLType", rewrite::k_xxx_name),
     //
     // gpu/
     //

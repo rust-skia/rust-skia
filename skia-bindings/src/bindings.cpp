@@ -1,3 +1,6 @@
+#include <cassert>
+#include <tuple>
+
 #include "bindings.h"
 // codec/
 #include "include/codec/SkEncodedOrigin.h"
@@ -85,6 +88,10 @@
 #include "include/effects/SkOverdrawColorFilter.h"
 #include "include/effects/SkPaintImageFilter.h"
 #include "include/effects/SkPictureImageFilter.h"
+
+#include "include/effects/SkRuntimeEffect.h"
+#include "src/sksl/SkSLByteCode.h"
+
 #include "include/effects/SkPerlinNoiseShader.h"
 #include "include/effects/SkShaderMaskFilter.h"
 #include "include/effects/SkTableColorFilter.h"
@@ -2247,6 +2254,47 @@ extern "C" SkImageFilter *C_SkPictureImageFilter_Make(SkPicture *picture, const 
     }
 }
 
+//
+// effects/SkRuntimeEffect.h
+//
+
+extern "C" {
+
+SkRuntimeEffect* C_SkRuntimeEffect_Make(const SkString &sksl, SkString* error) {
+    auto r = SkRuntimeEffect::Make(sksl);
+    *error = std::get<1>(r);
+    return std::get<0>(r).release();
+}
+
+SkShader *C_SkRuntimeEffect_makeShader(SkRuntimeEffect *self, SkData *inputs, SkShader **children, size_t childCount,
+                                       const SkMatrix *localMatrix, bool isOpaque) {
+    auto childrenSPs = reinterpret_cast<sk_sp<SkShader> *>(children);
+    return self->makeShader(sp(inputs), childrenSPs, childCount, localMatrix, isOpaque).release();
+}
+
+SkColorFilter* C_SkRuntimeEffect_makeColorFilter(SkRuntimeEffect* self, SkData* inputs) {
+    return self->makeColorFilter(sp(inputs)).release();
+}
+
+const SkRuntimeEffect::Variable* C_SkRuntimeEffect_inputs(const SkRuntimeEffect* self, size_t* count) {
+    auto inputs = self->inputs();
+    *count = inputs.count();
+    return &*inputs.begin();
+}
+
+const SkString* C_SkRuntimeEffect_children(const SkRuntimeEffect* self, size_t* count) {
+    auto children = self->children();
+    *count = children.count();
+    return &*children.begin();
+}
+
+SkSL::ByteCode* C_SkRuntimeEffect_toByteCode(SkRuntimeEffect* self, const void* inputs, SkString* error) {
+    auto r = self->toByteCode(inputs);
+    *error = std::get<1>(r);
+    return std::get<0>(r).release();
+}
+
+}
 
 //
 // effects/SkShaderMaskFilter.h
