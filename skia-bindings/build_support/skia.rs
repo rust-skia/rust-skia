@@ -778,6 +778,9 @@ const OPAQUE_TYPES: &[&str] = &[
     "SkRuntimeEffect_EffectResult",
     "SkRuntimeEffect_ByteCodeResult",
     "SkRuntimeEffect_SpecializeResult",
+    // derives from std::string
+    "SkSL::String",
+    "std::basic_string",
 ];
 
 #[derive(Debug)]
