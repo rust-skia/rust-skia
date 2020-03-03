@@ -781,6 +781,7 @@ const OPAQUE_TYPES: &[&str] = &[
     // derives from std::string
     "SkSL::String",
     "std::basic_string",
+    "std::basic_string_value_type",
 ];
 
 #[derive(Debug)]
