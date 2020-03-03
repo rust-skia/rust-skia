@@ -4,7 +4,7 @@ use super::gl;
 use super::vk;
 use crate::gpu::{BackendFormat, MipMapped, Renderable};
 use crate::prelude::*;
-use crate::{ColorType, Data, Image};
+use crate::{image, ColorType, Data, Image};
 use skia_bindings as sb;
 use skia_bindings::{GrContext, SkRefCntBase};
 
@@ -247,8 +247,25 @@ impl RCHandle<GrContext> {
         format
     }
 
-    // TODO: support createBackendTexture (several variants) and deleteBackendTexture(),
+    // TODO: wrap createBackendTexture (several variants)
     //       introduced in m76, m77, and m79
+
+    pub fn compressed_backend_format(&self, compression: image::CompressionType) -> BackendFormat {
+        let mut backend_format = BackendFormat::default();
+        unsafe {
+            sb::C_GrContext_compressedBackendFormat(
+                self.native(),
+                compression,
+                backend_format.native_mut(),
+            )
+        };
+        backend_format
+    }
+
+    // TODO: wrap createCompressedBackendTexture (several variants)
+    //       introduced in m81
+
+    // TODO: wrap deleteBackendTexture(),
 
     pub fn precompile_shader(&mut self, key: &Data, data: &Data) -> bool {
         unsafe {

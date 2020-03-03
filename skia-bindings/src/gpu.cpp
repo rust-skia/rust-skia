@@ -198,6 +198,10 @@ extern "C" void C_GrContext_defaultBackendFormat(const GrContext* self, SkColorT
     *result = self->defaultBackendFormat(ct, renderable);
 }
 
+extern "C" void C_GrContext_compressedBackendFormat(const GrContext* self, SkImage::CompressionType compression, GrBackendFormat* result) {
+    *result = self->compressedBackendFormat(compression);
+}
+
 //
 // gpu/GrBackendDrawableInfo.h
 //

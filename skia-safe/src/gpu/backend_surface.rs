@@ -336,6 +336,10 @@ impl Handle<GrBackendRenderTarget> {
         self.native().fBackend
     }
 
+    pub fn is_framebuffer_only(&self) -> bool {
+        self.native().fFramebufferOnly
+    }
+
     #[cfg(feature = "gl")]
     pub fn gl_framebuffer_info(&self) -> Option<gl::FramebufferInfo> {
         let mut info = gl::FramebufferInfo::default();
