@@ -123,11 +123,11 @@ impl RCHandle<SkRuntimeEffect> {
     }
 
     pub fn source(&self) -> &str {
-        self.native().fSkSL.as_str()
+        unsafe { (*sb::C_SkRuntimeEffect_source(self.native())).as_str() }
     }
 
     pub fn index(&self) -> i32 {
-        self.native().fIndex
+        unsafe { sb::C_SkRuntimeEffect_index(self.native()) }
     }
 
     pub fn input_size(&self) -> usize {
@@ -135,7 +135,7 @@ impl RCHandle<SkRuntimeEffect> {
     }
 
     pub fn uniform_size(&self) -> usize {
-        self.native().fUniformSize
+        unsafe { sb::C_SkRuntimeEffect_uniformSize(self.native()) }
     }
 
     pub fn inputs(&self) -> &[Variable] {

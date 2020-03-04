@@ -2276,6 +2276,18 @@ SkColorFilter* C_SkRuntimeEffect_makeColorFilter(SkRuntimeEffect* self, SkData* 
     return self->makeColorFilter(sp(inputs)).release();
 }
 
+const SkString *C_SkRuntimeEffect_source(const SkRuntimeEffect *self) {
+    return &self->source();
+}
+
+int C_SkRuntimeEffect_index(const SkRuntimeEffect *self) {
+    return self->index();
+}
+
+size_t C_SkRuntimeEffect_uniformSize(const SkRuntimeEffect *self) {
+    return self->uniformSize();
+}
+
 const SkRuntimeEffect::Variable* C_SkRuntimeEffect_inputs(const SkRuntimeEffect* self, size_t* count) {
     auto inputs = self->inputs();
     *count = inputs.count();

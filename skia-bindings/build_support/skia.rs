@@ -782,6 +782,8 @@ const OPAQUE_TYPES: &[&str] = &[
     "SkSL::String",
     "std::basic_string",
     "std::basic_string_value_type",
+    // wrong size on macOS and Linux
+    "SkRuntimeEffect",
 ];
 
 #[derive(Debug)]
