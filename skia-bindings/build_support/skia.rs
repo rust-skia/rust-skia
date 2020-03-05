@@ -774,17 +774,19 @@ const OPAQUE_TYPES: &[&str] = &[
     "SkShaper_ScriptRunIterator",
     "SkContourMeasure",
     "SkDocument",
-    // tuples:
+    // m81: tuples:
     "SkRuntimeEffect_EffectResult",
     "SkRuntimeEffect_ByteCodeResult",
     "SkRuntimeEffect_SpecializeResult",
-    // derives from std::string
+    // m81: derives from std::string
     "SkSL::String",
     "std::basic_string",
     "std::basic_string_value_type",
-    // wrong size on macOS and Linux
+    // m81: wrong size on macOS and Linux
     "SkRuntimeEffect",
     "GrShaderCaps",
+    // m81: yet experimental
+    "SkM44",
 ];
 
 #[derive(Debug)]
