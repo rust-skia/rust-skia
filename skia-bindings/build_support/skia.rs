@@ -784,6 +784,7 @@ const OPAQUE_TYPES: &[&str] = &[
     "std::basic_string_value_type",
     // wrong size on macOS and Linux
     "SkRuntimeEffect",
+    "GrShaderCaps",
 ];
 
 #[derive(Debug)]
