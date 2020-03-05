@@ -26,7 +26,7 @@ textlayout = ["skia-safe/textlayout"]
 skia-safe = { path = "../skia-safe" }
 
 # 0.25.1 fails to build on iOS targets on macOS: https://github.com/servo/rust-offscreen-rendering-context/pull/150 
-offscreen_gl_context = { git = "https://github.com/servo/rust-offscreen-rendering-context", rev = "1b9c74737635add2b9076e12df129cc3326c1287", optional = true }
+offscreen_gl_context = { git = "https://github.com/rust-skia/rust-offscreen-rendering-context", rev = "1b9c74737635add2b9076e12df129cc3326c1287", optional = true }
 # offscreen_gl_context = "0.25.1"
 # for offscreen_gl_context 0.25
 # sparkle 0.1.9 fails to compile on macOS targeting aarch64-linux-android
