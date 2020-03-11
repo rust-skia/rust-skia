@@ -75,6 +75,6 @@ impl SkAlphaType {
 
 impl SkImage_CompressionType {
     pub const COUNT: usize = SkImage_kCompressionTypeCount as _;
-    #[deprecated(since = "0.0.0", note = "same as ETC2_RGB8_UNORM")]
+    #[deprecated(since = "0.27.0", note = "same as ETC2_RGB8_UNORM")]
     pub const ETC1: Self = SkImage_CompressionType::ETC2_RGB8_UNORM;
 }

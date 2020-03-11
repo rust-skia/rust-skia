@@ -479,7 +479,7 @@ impl Matrix {
     }
 
     #[deprecated(
-        since = "0.0.0",
+        since = "0.27.0",
         note = "use post_scale((1.0 / x as scalar, 1.0 / y as scalar), None)"
     )]
     pub fn post_idiv(&mut self, (div_x, div_y): (i32, i32)) -> bool {
@@ -717,17 +717,17 @@ impl Matrix {
         }
     }
 
-    #[deprecated(since = "0.0.0", note = "removed without replacement")]
+    #[deprecated(since = "0.27.0", note = "removed without replacement")]
     pub fn is_fixed_step_in_x(&self) -> ! {
         unimplemented!("removed without replacement")
     }
 
-    #[deprecated(since = "0.0.0", note = "removed without replacement")]
+    #[deprecated(since = "0.27.0", note = "removed without replacement")]
     pub fn fixed_step_in_x(&self, _y: scalar) -> ! {
         unimplemented!("removed without replacement")
     }
 
-    #[deprecated(since = "0.0.0", note = "removed without replacement")]
+    #[deprecated(since = "0.27.0", note = "removed without replacement")]
     pub fn cheap_equal_to(&self, _other: &Matrix) -> ! {
         unimplemented!("removed without replacement")
     }

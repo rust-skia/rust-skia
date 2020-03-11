@@ -128,7 +128,7 @@ impl RCHandle<SkImage> {
     }
 
     #[deprecated(
-        since = "0.0.0",
+        since = "0.27.0",
         note = "soon to be deprecated (m81), use new_text_from_compressed"
     )]
     #[cfg(feature = "gpu")]
@@ -195,7 +195,7 @@ impl RCHandle<SkImage> {
 
     // TODO: MakeFromCompressedTexture
 
-    #[deprecated(since = "0.0.0", note = "renamed, use new_cross_context_from_pixmap")]
+    #[deprecated(since = "0.27.0", note = "renamed, use new_cross_context_from_pixmap")]
     #[cfg(feature = "gpu")]
     pub fn from_pixmap_cross_context(
         context: &mut gpu::Context,
