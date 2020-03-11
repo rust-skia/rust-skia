@@ -105,6 +105,11 @@ impl RefHandle<SkImageGenerator> {
 
     // TODO: generateTexture()
 
+    #[cfg(feature = "gpu")]
+    pub fn textures_are_cacheable(&self) -> bool {
+        unsafe { sb::C_SkImageGenerator_texturesAreCacheable(self.native()) }
+    }
+
     pub fn from_encoded(encoded: Data) -> Option<Self> {
         Self::from_ptr(unsafe { sb::C_SkImageGenerator_MakeFromEncoded(encoded.into_ptr()) })
     }

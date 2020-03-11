@@ -276,6 +276,7 @@ impl IRect {
         )
     }
 
+    #[deprecated(since = "0.27.0", note = "removed without replacement")]
     #[must_use]
     pub fn empty() -> &'static Self {
         &EMPTY_IRECT

@@ -1,3 +1,6 @@
+#include <cassert>
+#include <tuple>
+
 #include "bindings.h"
 // codec/
 #include "include/codec/SkEncodedOrigin.h"
@@ -85,6 +88,10 @@
 #include "include/effects/SkOverdrawColorFilter.h"
 #include "include/effects/SkPaintImageFilter.h"
 #include "include/effects/SkPictureImageFilter.h"
+
+#include "include/effects/SkRuntimeEffect.h"
+#include "src/sksl/SkSLByteCode.h"
+
 #include "include/effects/SkPerlinNoiseShader.h"
 #include "include/effects/SkShaderMaskFilter.h"
 #include "include/effects/SkTableColorFilter.h"
@@ -227,8 +234,13 @@ extern "C" void C_SkSurfaceCharacterization_createColorSpace(const SkSurfaceChar
 }
 
 //
-// SkImage
+// core/SkImage.h
 //
+
+extern "C" SkImage *C_SkImage_MakeRasterFromCompressed(SkData *data, int width, int height, SkImage::CompressionType
+type) {
+    return SkImage::MakeRasterFromCompressed(sp(data), width, height, type).release();
+}
 
 extern "C" SkImage* C_SkImage_MakeRasterData(const SkImageInfo* info, SkData* pixels, size_t rowBytes) {
     return SkImage::MakeRasterData(*info, sp(pixels), rowBytes).release();
@@ -280,8 +292,8 @@ extern "C" SkImage* C_SkImage_makeNonTextureImage(const SkImage* self) {
     return self->makeNonTextureImage().release();
 }
 
-extern "C" SkImage* C_SkImage_makeRasterImage(const SkImage* self) {
-    return self->makeRasterImage().release();
+extern "C" SkImage* C_SkImage_makeRasterImage(const SkImage* self, SkImage::CachingHint cachingHint) {
+    return self->makeRasterImage(cachingHint).release();
 }
 
 // note: available without GPU support (GrContext may be null).
@@ -548,6 +560,10 @@ extern "C" bool C_SkCanvas_isClipRect(const SkCanvas* self) {
     return self->isClipRect();
 }
 
+extern "C" void C_SkCanvas_getTotalMatrix(const SkCanvas* self, SkMatrix* matrix) {
+    *matrix = self->getTotalMatrix();
+}
+
 extern "C" void C_SkCanvas_discard(SkCanvas* self) {
     self->discard();
 }
@@ -691,7 +707,7 @@ extern "C" bool C_SkMatrix44_Equals(const SkMatrix44* self, const SkMatrix44* rh
 
 // SkMatrix44_SkMatrix conversion.
 extern "C" void C_SkMatrix44_SkMatrix(const SkMatrix44* self, SkMatrix* m) {
-    *m = *self;
+    *m = SkMatrix(*self);
 }
 
 extern "C" void C_SkMatrix44_Mul(const SkMatrix44* self, const SkMatrix44* rhs, SkMatrix44* result) {
@@ -703,7 +719,7 @@ extern "C" void C_SkMatrix44_MulV4(const SkMatrix44* self, const SkVector4* rhs,
 }
 
 //
-// SkMatrix
+// core/SkMatrix.h
 //
 
 extern "C" bool C_SkMatrix_Equals(const SkMatrix* self, const SkMatrix* rhs) {
@@ -730,16 +746,16 @@ extern "C" bool C_SkMatrix_invert(const SkMatrix* self, SkMatrix* inverse) {
     return self->invert(inverse);
 }
 
-extern "C" bool C_SkMatrix_cheapEqualTo(const SkMatrix* self, const SkMatrix* other) {
-    return self->cheapEqualTo(*other);
-}
-
 extern "C" void C_SkMatrix_setScaleTranslate(SkMatrix* self, SkScalar sx, SkScalar sy, SkScalar tx, SkScalar ty) {
     self->setScaleTranslate(sx, sy, tx, ty);
 }
 
 extern "C" bool C_SkMatrix_isFinite(const SkMatrix* self) {
     return self->isFinite();
+}
+
+extern "C" void C_SkMatrix_normalizePerspective(SkMatrix* self) {
+    self->normalizePerspective();
 }
 
 //
@@ -1518,7 +1534,7 @@ extern "C" const SkImageFilter* C_SkImageFilter_getInput(const SkImageFilter* se
 }
 
 //
-// SkImageGenerator
+// core/SkImageGenerator.h
 //
 
 extern "C" void C_SkImageGenerator_delete(SkImageGenerator *self) {
@@ -2238,6 +2254,59 @@ extern "C" SkImageFilter *C_SkPictureImageFilter_Make(SkPicture *picture, const 
     }
 }
 
+//
+// effects/SkRuntimeEffect.h
+//
+
+extern "C" {
+
+SkRuntimeEffect* C_SkRuntimeEffect_Make(const SkString &sksl, SkString* error) {
+    auto r = SkRuntimeEffect::Make(sksl);
+    *error = std::get<1>(r);
+    return std::get<0>(r).release();
+}
+
+SkShader *C_SkRuntimeEffect_makeShader(SkRuntimeEffect *self, SkData *inputs, SkShader **children, size_t childCount,
+                                       const SkMatrix *localMatrix, bool isOpaque) {
+    auto childrenSPs = reinterpret_cast<sk_sp<SkShader> *>(children);
+    return self->makeShader(sp(inputs), childrenSPs, childCount, localMatrix, isOpaque).release();
+}
+
+SkColorFilter* C_SkRuntimeEffect_makeColorFilter(SkRuntimeEffect* self, SkData* inputs) {
+    return self->makeColorFilter(sp(inputs)).release();
+}
+
+const SkString *C_SkRuntimeEffect_source(const SkRuntimeEffect *self) {
+    return &self->source();
+}
+
+int C_SkRuntimeEffect_index(const SkRuntimeEffect *self) {
+    return self->index();
+}
+
+size_t C_SkRuntimeEffect_uniformSize(const SkRuntimeEffect *self) {
+    return self->uniformSize();
+}
+
+const SkRuntimeEffect::Variable* C_SkRuntimeEffect_inputs(const SkRuntimeEffect* self, size_t* count) {
+    auto inputs = self->inputs();
+    *count = inputs.count();
+    return &*inputs.begin();
+}
+
+const SkString* C_SkRuntimeEffect_children(const SkRuntimeEffect* self, size_t* count) {
+    auto children = self->children();
+    *count = children.count();
+    return &*children.begin();
+}
+
+SkSL::ByteCode* C_SkRuntimeEffect_toByteCode(SkRuntimeEffect* self, const void* inputs, SkString* error) {
+    auto r = self->toByteCode(inputs);
+    *error = std::get<1>(r);
+    return std::get<0>(r).release();
+}
+
+}
 
 //
 // effects/SkShaderMaskFilter.h

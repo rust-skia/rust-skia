@@ -8,7 +8,8 @@ mod interop;
 mod modules;
 mod pathops;
 mod prelude;
-mod private;
+// The module private may contain types that leak.
+pub mod private;
 pub mod svg;
 // TODO: We don't export utils/* into the crate's root yet. Should we?
 pub mod utils;

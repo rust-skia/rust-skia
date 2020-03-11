@@ -28,6 +28,8 @@ impl Handle<SkPictureRecorder> {
         Self::from_native(unsafe { SkPictureRecorder::new() })
     }
 
+    // TODO: beginRecording with BBoxHierarchy
+
     pub fn begin_recording(
         &mut self,
         bounds: impl AsRef<Rect>,
@@ -35,7 +37,7 @@ impl Handle<SkPictureRecorder> {
         record_flags: impl Into<Option<RecordFlags>>,
     ) -> &mut Canvas {
         let canvas_ref = unsafe {
-            &mut *self.native_mut().beginRecording(
+            &mut *self.native_mut().beginRecording1(
                 bounds.as_ref().native(),
                 bbh_factory.native_ptr_or_null_mut(),
                 record_flags

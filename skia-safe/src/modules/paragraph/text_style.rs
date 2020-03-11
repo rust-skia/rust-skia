@@ -66,7 +66,25 @@ fn placeholder_alignment_member_naming() {
     let _ = PlaceholderAlignment::AboveBaseline;
 }
 
-#[derive(Clone, PartialEq, Default, Debug)]
+pub type FontFeature = Handle<sb::skia_textlayout_FontFeature>;
+
+impl NativeDrop for sb::skia_textlayout_FontFeature {
+    fn drop(&mut self) {
+        panic!("internal error, a FontFeature value can't be dropped in Rust");
+    }
+}
+
+impl Handle<sb::skia_textlayout_FontFeature> {
+    pub fn name(&self) -> &str {
+        self.native().fName.as_str()
+    }
+
+    pub fn value(&self) -> i32 {
+        self.native().fValue
+    }
+}
+
+#[derive(Clone, Default, Debug)]
 pub struct PlaceholderStyle {
     pub width: scalar,
     pub height: scalar,
@@ -79,6 +97,12 @@ impl NativeTransmutable<sb::skia_textlayout_PlaceholderStyle> for PlaceholderSty
 #[test]
 fn placeholder_style_layout() {
     PlaceholderStyle::test_layout()
+}
+
+impl PartialEq for PlaceholderStyle {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe { self.native().equals(other.native()) }
+    }
 }
 
 impl PlaceholderStyle {
@@ -136,6 +160,10 @@ impl Handle<sb::skia_textlayout_TextStyle> {
 
     pub fn equals(&self, other: &TextStyle) -> bool {
         *self == *other
+    }
+
+    pub fn equals_by_fonts(&self, that: &TextStyle) -> bool {
+        unsafe { self.native().equalsByFonts(that.native()) }
     }
 
     pub fn match_one_attribute(&self, style_type: StyleType, other: &TextStyle) -> bool {
@@ -215,6 +243,24 @@ impl Handle<sb::skia_textlayout_TextStyle> {
     pub fn reset_shadows(&mut self) -> &mut Self {
         unsafe { sb::C_TextStyle_resetShadows(self.native_mut()) }
         self
+    }
+
+    pub fn font_features(&self) -> &[FontFeature] {
+        unsafe {
+            let ff: &sb::FontFeatures = transmute_ref(&self.native().fFontFeatures);
+            let mut cnt = 0;
+            let ptr = FontFeature::from_native_ref(&*sb::C_FontFeatures_ptr_count(ff, &mut cnt));
+            slice::from_raw_parts(ptr, cnt)
+        }
+    }
+
+    pub fn add_font_feature(&mut self, font_feature: impl AsRef<str>, value: i32) {
+        let font_feature = interop::String::from_str(font_feature);
+        unsafe { sb::C_TextStyle_addFontFeature(self.native_mut(), font_feature.native(), value) }
+    }
+
+    pub fn reset_font_features(&mut self) {
+        unsafe { sb::C_TextStyle_resetFontFeatures(self.native_mut()) }
     }
 
     pub fn font_size(&self) -> scalar {

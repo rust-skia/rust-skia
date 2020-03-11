@@ -1034,8 +1034,12 @@ impl Canvas {
         unsafe { sb::C_SkCanvas_isClipEmpty(self.native()) }
     }
 
-    pub fn total_matrix(&self) -> &Matrix {
-        Matrix::from_native_ref(unsafe { &*self.native().getTotalMatrix() })
+    pub fn total_matrix(&self) -> Matrix {
+        let mut matrix = Matrix::default();
+        // TODO: why is Matrix not safe to return from getTotalMatrix()
+        // testcase `test_total_matrix` below crashes with an access violation.
+        unsafe { sb::C_SkCanvas_getTotalMatrix(self.native(), matrix.native_mut()) };
+        matrix
     }
 
     //
@@ -1244,13 +1248,13 @@ mod tests {
     }
 
     #[test]
-    fn test_total_matrix_transmutation() {
+    fn test_total_matrix() {
         let mut c = Canvas::new((2, 2), None).unwrap();
-        let matrix_ref = c.total_matrix();
-        assert_eq!(Matrix::default(), *matrix_ref);
+        let total = c.total_matrix();
+        assert_eq!(Matrix::default(), total);
         c.rotate(0.1, None);
-        let matrix_ref = c.total_matrix();
-        assert_ne!(Matrix::default(), *matrix_ref);
+        let total = c.total_matrix();
+        assert_ne!(Matrix::default(), total);
     }
 
     #[test]

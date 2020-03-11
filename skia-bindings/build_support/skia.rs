@@ -544,6 +544,8 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .blacklist_type("SkLRUCache_Entry")
         //   not used at all:
         .blacklist_type("std::vector.*")
+        // too much template magic:
+        .blacklist_type("SkRuntimeEffect_ConstIterable.*")
         // Vulkan reexports that got swallowed by making them opaque.
         // (these can not be whitelisted by a extern "C" function)
         .whitelist_type("VkPhysicalDeviceFeatures")
@@ -736,6 +738,7 @@ const OPAQUE_TYPES: &[&str] = &[
     "GrContextOptions_PersistentCache",
     "GrContextOptions_ShaderErrorHandler",
     "Sk1DPathEffect",
+    "SkBBoxHierarchy", // vtable
     "SkBBHFactory",
     "SkBitmap_Allocator",
     "SkBitmap_HeapAllocator",
@@ -771,6 +774,19 @@ const OPAQUE_TYPES: &[&str] = &[
     "SkShaper_ScriptRunIterator",
     "SkContourMeasure",
     "SkDocument",
+    // m81: tuples:
+    "SkRuntimeEffect_EffectResult",
+    "SkRuntimeEffect_ByteCodeResult",
+    "SkRuntimeEffect_SpecializeResult",
+    // m81: derives from std::string
+    "SkSL::String",
+    "std::basic_string",
+    "std::basic_string_value_type",
+    // m81: wrong size on macOS and Linux
+    "SkRuntimeEffect",
+    "GrShaderCaps",
+    // m81: yet experimental
+    "SkM44",
 ];
 
 #[derive(Debug)]
@@ -799,6 +815,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     //
     // core/ effects/
     //
+    ("SkApplyPerspectiveClip", rewrite::k_xxx),
     ("SkBlendMode", rewrite::k_xxx),
     ("SkBlendModeCoeff", rewrite::k_xxx),
     ("SkBlurStyle", rewrite::k_xxx_name),
@@ -828,7 +845,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     // SkStrokeRec_InitStyle
     ("InitStyle", rewrite::k_xxx_name),
     // SkBlurImageFilter_TileMode
-    // SkMatrixConvulutionImageFilter_TileMode
+    // SkMatrixConvolutionImageFilter_TileMode
     ("TileMode", rewrite::k_xxx_name),
     // SkCanvas_*
     ("PointMode", rewrite::k_xxx_name),
@@ -848,7 +865,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     // SkImage_*
     ("BitDepth", rewrite::k_xxx),
     ("CachingHint", rewrite::k_xxx_name),
-    ("CompressionType", rewrite::k_xxx_name),
+    ("CompressionType", rewrite::k_xxx),
     // SkImageFilter_MapDirection
     ("MapDirection", rewrite::k_xxx_name),
     // SkInterpolatorBase_Result
@@ -863,6 +880,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("Op", rewrite::k_xxx_name_opt),
     // SkRRect_*
     // TODO: remove kLastType?
+    // SkRuntimeEffect_Variable_Type
     ("Type", rewrite::k_xxx_name_opt),
     ("Corner", rewrite::k_xxx_name),
     // SkShader_GradientType
@@ -880,6 +898,10 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("VertexMode", rewrite::k_xxx_name),
     // SkYUVAIndex_Index
     ("Index", rewrite::k_xxx_name),
+    // SkRuntimeEffect_Variable_Qualifier
+    ("Qualifier", rewrite::k_xxx),
+    // private type that leaks through SkRuntimeEffect_Variable
+    ("GrSLType", rewrite::k_xxx_name),
     //
     // gpu/
     //

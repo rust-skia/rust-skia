@@ -143,6 +143,54 @@ impl RCHandle<SkSurface> {
         })
     }
 
+    #[cfg(feature = "metal")]
+    pub fn from_ca_metal_layer(
+        context: &mut gpu::Context,
+        layer: gpu::mtl::Handle,
+        origin: gpu::SurfaceOrigin,
+        sample_count: impl Into<Option<usize>>,
+        color_type: crate::Colortype,
+        color_space: impl Into<Option<crate::ColorSpace>>,
+        surface_props: Option<&SurfaceProps>,
+    ) -> Option<(Self, gpu::mtl::Handle)> {
+        let mut drawable = ptr::null_mut();
+        Self::from_ptr(unsafe {
+            sb::C_SkSurface_MakeFromCAMetalLayer(
+                context.native_mut(),
+                layer,
+                origin,
+                sample_count.into().unwrap_or(0).try_into().unwrap(),
+                color_type.into_native(),
+                color_space.into().into_ptr_or_null(),
+                surface_props.native_ptr_or_null(),
+                &mut drawable,
+            )
+        })
+        .map(|surface| (surface, drawable))
+    }
+
+    #[cfg(feature = "metal")]
+    pub fn from_ca_mtk_view(
+        context: &mut gpu::Context,
+        mtk_view: gpu::mtl::Handle,
+        origin: gpu::SurfaceOrigin,
+        sample_count: impl Into<Option<usize>>,
+        color_type: crate::Colortype,
+        color_space: impl Into<Option<crate::ColorSpace>>,
+        surface_props: Option<&SurfaceProps>,
+    ) -> Option<Self> {
+        Self::from_ptr(unsafe {
+            sb::C_SkSurface_MakeFromMTKView(
+                context.native_mut(),
+                mtk_view,
+                origin,
+                sample_count.into().unwrap_or(0).try_into().unwrap(),
+                color_type.into_native(),
+                color_space.into().into_ptr_or_null(),
+                surface_props.native_ptr_or_null(),
+            )
+        })
+    }
     pub fn new_render_target(
         context: &mut gpu::Context,
         budgeted: crate::Budgeted,

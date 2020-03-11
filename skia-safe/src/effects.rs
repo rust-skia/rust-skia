@@ -42,6 +42,7 @@ pub mod overdraw_color_filter;
 pub mod paint_image_filter;
 pub mod perlin_noise_shader;
 pub mod picture_image_filter;
+pub mod runtime_effect;
 pub mod shader_mask_filter;
 pub mod table_color_filter;
 pub mod table_mask_filter;

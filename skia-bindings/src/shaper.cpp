@@ -17,6 +17,10 @@ extern "C" SkShaper* C_SkShaper_MakeShapeDontWrapOrReorder(SkFontMgr* fontMgr) {
     return SkShaper::MakeShapeDontWrapOrReorder(sk_sp<SkFontMgr>(fontMgr)).release();
 }
 
+extern "C" SkShaper* C_SkShaper_MakeCoreText() {
+    return SkShaper::MakeCoreText().release();
+}
+
 extern "C" SkShaper* C_SkShaper_Make(SkFontMgr* fontMgr) {
     return SkShaper::Make(sk_sp<SkFontMgr>(fontMgr)).release();
 }
@@ -179,6 +183,19 @@ C_SkShaper_shape2(const SkShaper *self, const char *utf8, size_t utf8Bytes, SkSh
                   SkShaper::LanguageRunIterator *languageRunIterator, SkScalar width,
                   SkShaper::RunHandler *runHandler) {
     self->shape(utf8, utf8Bytes, *fontRunIterator, *bidiRunIterator, *scriptRunIterator, *languageRunIterator, width,
+                runHandler);
+}
+
+extern "C" void
+C_SkShaper_shape3(const SkShaper *self, const char *utf8, size_t utf8Bytes, SkShaper::FontRunIterator *fontRunIterator,
+                  SkShaper::BiDiRunIterator *bidiRunIterator,
+                  SkShaper::ScriptRunIterator *scriptRunIterator,
+                  SkShaper::LanguageRunIterator *languageRunIterator,
+                  const SkShaper::Feature *features, size_t featuresSize,
+                  SkScalar width,
+                  SkShaper::RunHandler *runHandler) {
+    self->shape(utf8, utf8Bytes, *fontRunIterator, *bidiRunIterator, *scriptRunIterator, *languageRunIterator, features,
+                featuresSize, width,
                 runHandler);
 }
 
