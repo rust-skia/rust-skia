@@ -29,6 +29,7 @@
 #include "include/core/SkImageFilter.h"
 #include "include/core/SkImageGenerator.h"
 #include "include/core/SkImageInfo.h"
+#include "include/core/SkMatrix44.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPath.h"
@@ -103,7 +104,6 @@
 // pathops/
 #include "include/pathops/SkPathOps.h"
 // utils/
-#include "include/utils/Sk3D.h"
 #include "include/utils/SkCamera.h"
 #include "include/utils/SkInterpolator.h"
 #include "include/utils/SkNullCanvas.h"
@@ -1227,16 +1227,9 @@ extern "C" SkVertices* C_SkVertices_MakeCopy(
     const SkPoint positions[],
     const SkPoint texs[],
     const SkColor colors[],
-    const SkVertices::BoneIndices boneIndices[],
-    const SkVertices::BoneWeights boneWeights[],
     int indexCount,
-    const uint16_t indices[],
-    bool isVolatile) {
-    return SkVertices::MakeCopy(mode, vertexCount, positions, texs, colors, boneIndices, boneWeights, indexCount, indices, isVolatile).release();
-}
-
-extern "C" SkVertices* C_SkVertices_applyBones(const SkVertices* self, const SkVertices::Bone bones[], int boneCount) {
-    return self->applyBones(bones, boneCount).release();
+    const uint16_t indices[]) {
+    return SkVertices::MakeCopy(mode, vertexCount, positions, texs, colors, indexCount, indices).release();
 }
 
 extern "C" SkVertices* C_SkVertices_Decode(const void* buffer, size_t length) {
@@ -1245,14 +1238,6 @@ extern "C" SkVertices* C_SkVertices_Decode(const void* buffer, size_t length) {
 
 extern "C" SkData* C_SkVertices_encode(const SkVertices* self) {
     return self->encode().release();
-}
-
-//
-// SkVertices::Bone
-//
-
-extern "C" SkRect C_SkVertices_Bone_mapRect(const SkVertices::Bone* self, const SkRect* rect) {
-    return self->mapRect(*rect);
 }
 
 //
@@ -1678,10 +1663,6 @@ extern "C" SkMaskFilter* C_SkMaskFilter_Compose(SkMaskFilter* outer, SkMaskFilte
 
 extern "C" SkMaskFilter* C_SkMaskFilter_Combine(SkMaskFilter* filterA, SkMaskFilter* filterB, SkCoverageMode coverageMode) {
     return SkMaskFilter::MakeCombine(sp(filterA), sp(filterB), coverageMode).release();
-}
-
-extern "C" SkMaskFilter* C_SkMaskFilter_makeWithMatrix(const SkMaskFilter* self, const SkMatrix* matrix) {
-    return self->makeWithMatrix(*matrix).release();
 }
 
 extern "C" SkMaskFilter* C_SkMaskFilter_Deserialize(const void* data, size_t length) {
@@ -2230,8 +2211,8 @@ SkPathEffect* C_SkStrokePathEffect_Make(SkScalar width, SkPaint::Join join, SkPa
 // effects/SkOverdrawColorFilter.h
 //
 
-extern "C" SkColorFilter* C_SkOverdrawColorFilter_Make(const SkPMColor colors[SkOverdrawColorFilter::kNumColors]) {
-    return SkOverdrawColorFilter::Make(colors).release();
+extern "C" SkColorFilter* C_SkOverdrawColorFilter_MakeWithSkColors(const SkColor colors[SkOverdrawColorFilter::kNumColors]) {
+    return SkOverdrawColorFilter::MakeWithSkColors(colors).release();
 }
 
 //
@@ -2280,8 +2261,8 @@ const SkString *C_SkRuntimeEffect_source(const SkRuntimeEffect *self) {
     return &self->source();
 }
 
-int C_SkRuntimeEffect_index(const SkRuntimeEffect *self) {
-    return self->index();
+uint32_t C_SkRuntimeEffect_hash(const SkRuntimeEffect *self) {
+    return self->hash();
 }
 
 size_t C_SkRuntimeEffect_uniformSize(const SkRuntimeEffect *self) {
