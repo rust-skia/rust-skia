@@ -823,6 +823,8 @@ const OPAQUE_TYPES: &[&str] = &[
     // referred from SkPath, but not used:
     "SkPathRef",
     "SkMutex",
+    // m82: private
+    "SkIDChangeListener",
 ];
 
 const BLACKLISTED_TYPES: &[&str] = &[
