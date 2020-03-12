@@ -786,8 +786,6 @@ const OPAQUE_TYPES: &[&str] = &[
     // m81: wrong size on macOS and Linux
     "SkRuntimeEffect",
     "GrShaderCaps",
-    // m81: yet experimental
-    "SkM44",
 ];
 
 #[derive(Debug)]
