@@ -818,8 +818,6 @@ const OPAQUE_TYPES: &[&str] = &[
     // m81: wrong size on macOS and Linux
     "SkRuntimeEffect",
     "GrShaderCaps",
-    // m81: yet experimental
-    "SkM44",
     // more stuff we don't need that was tracked down fixing:
     // https://github.com/rust-skia/rust-skia/issues/318
     // referred from SkPath, but not used:
