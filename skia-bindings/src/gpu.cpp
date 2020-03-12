@@ -385,12 +385,3 @@ extern "C" SkImage* C_SkImage_makeTextureImage(
         GrMipMapped mipMapped) {
     return self->makeTextureImage(context, mipMapped).release();
 }
-
-//
-// core/SkImageGenerator.h
-//
-
-extern "C" bool C_SkImageGenerator_texturesAreCacheable(const SkImageGenerator* self) {
-    return self->texturesAreCacheable();
-}
-
