@@ -63,6 +63,9 @@ pub use data::*;
 mod data_table;
 pub use data_table::*;
 
+mod deferred_display_list;
+pub use deferred_display_list::*;
+
 mod deferred_display_list_recorder;
 pub use deferred_display_list_recorder::*;
 
