@@ -48,12 +48,16 @@ impl V2 {
 
     const COMPONENTS: usize = 2;
 
-    pub fn as_slice(&self) -> &[f32] {
+    pub fn as_array(&self) -> &[f32; Self::COMPONENTS] {
         unsafe { slice::from_raw_parts(&self.x, Self::COMPONENTS) }
+            .try_into()
+            .unwrap()
     }
 
-    pub fn as_mut_slice(&mut self) -> &mut [f32] {
+    pub fn as_mut_array(&mut self) -> &mut [f32; Self::COMPONENTS] {
         unsafe { slice::from_raw_parts_mut(&mut self.x, Self::COMPONENTS) }
+            .try_into()
+            .unwrap()
     }
 }
 
@@ -175,12 +179,16 @@ impl V3 {
 
     const COMPONENTS: usize = 3;
 
-    pub fn as_slice(&self) -> &[f32] {
+    pub fn as_array(&self) -> &[f32; Self::COMPONENTS] {
         unsafe { slice::from_raw_parts(&self.x, Self::COMPONENTS) }
+            .try_into()
+            .unwrap()
     }
 
-    pub fn as_mut_slice(&mut self) -> &mut [f32] {
+    pub fn as_mut_array(&mut self) -> &mut [f32; Self::COMPONENTS] {
         unsafe { slice::from_raw_parts_mut(&mut self.x, Self::COMPONENTS) }
+            .try_into()
+            .unwrap()
     }
 }
 
@@ -279,12 +287,16 @@ impl V4 {
 
     const COMPONENTS: usize = 4;
 
-    pub fn ptr(&self) -> &[f32] {
+    pub fn as_array(&self) -> &[f32; Self::COMPONENTS] {
         unsafe { slice::from_raw_parts(&self.x, Self::COMPONENTS) }
+            .try_into()
+            .unwrap()
     }
 
-    pub fn ptr_mut(&mut self) -> &mut [f32] {
+    pub fn as_mut_array(&mut self) -> &mut [f32; Self::COMPONENTS] {
         unsafe { slice::from_raw_parts_mut(&mut self.x, Self::COMPONENTS) }
+            .try_into()
+            .unwrap()
     }
 }
 
@@ -469,22 +481,20 @@ impl M44 {
         m
     }
 
-    pub fn get_col_major(&self, v: &mut [scalar]) {
+    pub fn get_col_major(&self, v: &mut [scalar; Self::COMPONENTS]) {
         v.copy_from_slice(&self.mat)
     }
 
-    pub fn get_row_major(&self, v: &mut [scalar]) {
-        assert_eq!(v.len(), Self::COMPONENTS);
+    pub fn get_row_major(&self, v: &mut [scalar; Self::COMPONENTS]) {
         unsafe { self.native().getRowMajor(v.as_mut_ptr()) }
     }
 
-    pub fn set_col_major(&mut self, v: &[scalar]) -> &mut Self {
+    pub fn set_col_major(&mut self, v: &[scalar; Self::COMPONENTS]) -> &mut Self {
         self.mat.copy_from_slice(v);
         self
     }
 
-    pub fn set_row_major(&mut self, v: &[scalar]) -> &mut Self {
-        assert_eq!(v.len(), Self::COMPONENTS);
+    pub fn set_row_major(&mut self, v: &[scalar; Self::COMPONENTS]) -> &mut Self {
         unsafe { self.native_mut().setRowMajor(v.as_ptr()) };
         self
     }
@@ -612,8 +622,7 @@ impl M44 {
         self
     }
 
-    pub fn set_concat_16(&mut self, a: &M44, col_major: &[scalar]) -> &mut Self {
-        assert_eq!(col_major.len(), Self::COMPONENTS);
+    pub fn set_concat_16(&mut self, a: &M44, col_major: &[scalar; Self::COMPONENTS]) -> &mut Self {
         unsafe {
             self.native_mut()
                 .setConcat16(a.native(), col_major.as_ptr())
@@ -625,9 +634,8 @@ impl M44 {
         self.set_concat_16(a, &b.mat)
     }
 
-    pub fn pre_concat_16(&mut self, col_major: &[scalar]) -> &mut Self {
-        assert_eq!(col_major.len(), Self::COMPONENTS);
-        self.set_concat_16(&self, col_major)
+    pub fn pre_concat_16(&mut self, col_major: &[scalar; Self::COMPONENTS]) -> &mut Self {
+        self.set_concat_16(&self.clone(), col_major)
     }
 
     pub fn invert(&self) -> Option<M44> {
