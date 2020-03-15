@@ -25,10 +25,10 @@ pub fn map_points(dst: &mut [Point], m4: &Matrix44, src: &[Point3]) {
     assert_eq!(src.len(), dst.len());
 
     let m44: M44 = m4.into();
-    src.iter().enumerate().map(|(i, p)| {
+    src.iter().enumerate().for_each(|(i, p)| {
         let v3: V3 = (*p).into();
         let mapped = &m44 * v3;
-        Point::new(mapped.x, mapped.y)
+        dst[i] = Point::new(mapped.x, mapped.y);
     });
 }
 

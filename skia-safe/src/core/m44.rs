@@ -550,7 +550,7 @@ impl M44 {
     }
 
     pub fn row(&self, i: usize) -> V4 {
-        assert!(i >= 0 && i <= 3);
+        assert!(i <= 3);
         V4::new(
             self.mat[i + 0],
             self.mat[i + 4],
@@ -560,7 +560,7 @@ impl M44 {
     }
 
     pub fn col(&self, i: usize) -> V4 {
-        assert!(i >= 0 && i <= 3);
+        assert!(i <= 3);
         V4::new(
             self.mat[i * 4 + 0],
             self.mat[i * 4 + 1],
@@ -570,7 +570,7 @@ impl M44 {
     }
 
     pub fn set_row(&mut self, i: usize, v: &V4) {
-        assert!(i >= 0 && i <= 3);
+        assert!(i <= 3);
         self.mat[i + 0] = v.x;
         self.mat[i + 4] = v.y;
         self.mat[i + 8] = v.z;
@@ -578,8 +578,8 @@ impl M44 {
     }
 
     pub fn set_col(&mut self, i: usize, v: &V4) {
-        assert!(i >= 0 && i <= 3);
-        self.mat[i * 4..i * 4 + V4::COMPONENTS].copy_from_slice(v.ptr());
+        assert!(i <= 3);
+        self.mat[i * 4..i * 4 + V4::COMPONENTS].copy_from_slice(v.as_array());
     }
 
     pub fn set_identity(&mut self) -> &mut Self {
