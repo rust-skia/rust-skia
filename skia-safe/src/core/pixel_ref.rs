@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::ISize;
 use skia_bindings as sb;
 use skia_bindings::{SkPixelRef, SkRefCntBase};
 use std::os::raw::c_void;
@@ -12,6 +13,10 @@ impl NativeRefCountedBase for SkPixelRef {
 
 impl RCHandle<SkPixelRef> {
     // TODO: wrap constructor with pixels borrowed.
+
+    pub fn dimensions(&self) -> ISize {
+        ISize::new(self.width(), self.height())
+    }
 
     pub fn width(&self) -> i32 {
         unsafe { sb::C_SkPixelRef_width(self.native()) }
