@@ -29,6 +29,7 @@
 #include "include/core/SkImageFilter.h"
 #include "include/core/SkImageGenerator.h"
 #include "include/core/SkImageInfo.h"
+#include "include/core/SkM44.h"
 #include "include/core/SkMatrix44.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkPaint.h"
@@ -686,6 +687,17 @@ extern "C" SkData* C_SkColorSpace_serialize(const SkColorSpace* self) {
 
 extern "C" SkColorSpace* C_SkColorSpace_Deserialize(const void* data, size_t length) {
     return SkColorSpace::Deserialize(data, length).release();
+}
+
+//
+// SkM44
+//
+
+
+extern "C" void C_M44_Types(SkV2 *) {};
+
+extern "C" bool C_M44_equals(const SkM44 *self, const SkM44 *other) {
+    return *self == *other;
 }
 
 //

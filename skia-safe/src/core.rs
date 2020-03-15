@@ -158,6 +158,9 @@ pub use image_generator::*;
 mod image_info;
 pub use image_info::*;
 
+mod m44;
+pub use m44::*;
+
 mod mask_filter;
 pub use mask_filter::*;
 
