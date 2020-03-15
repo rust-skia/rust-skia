@@ -553,6 +553,10 @@ extern "C" SkSurface* C_SkCanvas_makeSurface(SkCanvas* self, const SkImageInfo* 
     return self->makeSurface(*info, props).release();
 }
 
+extern "C" void C_SkCanvas_clipShader(SkCanvas* self, SkShader* shader, SkClipOp op) {
+    self->clipShader(sp(shader), op);
+}
+
 extern "C" bool C_SkCanvas_isClipEmpty(const SkCanvas* self) {
     return self->isClipEmpty();
 }

@@ -2,9 +2,9 @@
 use crate::gpu;
 use crate::prelude::*;
 use crate::{
-    scalar, vertices, Bitmap, BlendMode, ClipOp, Color, Data, Font, IPoint, IRect, ISize, Image,
-    ImageFilter, ImageInfo, Matrix, Paint, Path, Picture, Point, QuickReject, RRect, Rect, Region,
-    Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices,
+    scalar, Bitmap, BlendMode, ClipOp, Color, Data, Font, IPoint, IRect, ISize, Image, ImageFilter,
+    ImageInfo, Matrix, Paint, Path, Picture, Point, QuickReject, RRect, Rect, Region, Shader,
+    Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices, M44,
 };
 use crate::{u8cpu, Drawable, Pixmap};
 use skia_bindings as sb;
@@ -482,6 +482,11 @@ impl Canvas {
         self
     }
 
+    pub fn concat_44(&mut self, m: &M44) -> &mut Self {
+        unsafe { self.native_mut().concat44(m.native()) }
+        self
+    }
+
     pub fn set_matrix(&mut self, matrix: &Matrix) -> &mut Self {
         unsafe { self.native_mut().setMatrix(matrix.native()) }
         self
@@ -535,6 +540,17 @@ impl Canvas {
                 path.native(),
                 op.into().unwrap_or_default(),
                 do_anti_alias.into().unwrap_or_default(),
+            )
+        }
+        self
+    }
+
+    pub fn clip_shader(&mut self, shader: Shader, op: impl Into<Option<ClipOp>>) -> &mut Self {
+        unsafe {
+            sb::C_SkCanvas_clipShader(
+                self.native_mut(),
+                shader.into_ptr(),
+                op.into().unwrap_or(ClipOp::Intersect),
             )
         }
         self
@@ -832,42 +848,6 @@ impl Canvas {
         self
     }
 
-    pub fn draw_bitmap_nine(
-        &mut self,
-        bitmap: &Bitmap,
-        center: impl AsRef<IRect>,
-        dst: impl AsRef<Rect>,
-        paint: Option<&Paint>,
-    ) -> &mut Self {
-        unsafe {
-            self.native_mut().drawBitmapNine(
-                bitmap.native(),
-                center.as_ref().native(),
-                dst.as_ref().native(),
-                paint.native_ptr_or_null(),
-            )
-        }
-        self
-    }
-
-    pub fn draw_bitmap_lattice(
-        &mut self,
-        bitmap: &Bitmap,
-        lattice: &Lattice,
-        dst: impl AsRef<Rect>,
-        paint: Option<&Paint>,
-    ) -> &mut Self {
-        unsafe {
-            self.native_mut().drawBitmapLattice(
-                bitmap.native(),
-                &lattice.native().native,
-                dst.as_ref().native(),
-                paint.native_ptr_or_null(),
-            )
-        }
-        self
-    }
-
     pub fn draw_image_lattice(
         &mut self,
         image: impl AsRef<Image>,
@@ -950,24 +930,15 @@ impl Canvas {
     pub fn draw_vertices(
         &mut self,
         vertices: &Vertices,
-        bones: Option<&[vertices::Bone]>,
-        mode: BlendMode,
+        mode: impl Into<Option<BlendMode>>,
         paint: &Paint,
     ) -> &mut Self {
-        match bones {
-            Some(bones) => unsafe {
-                self.native_mut().drawVertices2(
-                    vertices.native(),
-                    bones.native().as_ptr(),
-                    bones.len().try_into().unwrap(),
-                    mode,
-                    paint.native(),
-                )
-            },
-            None => unsafe {
-                self.native_mut()
-                    .drawVertices(vertices.native(), mode, paint.native())
-            },
+        unsafe {
+            self.native_mut().drawVertices(
+                vertices.native(),
+                mode.into().unwrap_or(BlendMode::Modulate),
+                paint.native(),
+            )
         }
         self
     }
@@ -1040,6 +1011,10 @@ impl Canvas {
         // testcase `test_total_matrix` below crashes with an access violation.
         unsafe { sb::C_SkCanvas_getTotalMatrix(self.native(), matrix.native_mut()) };
         matrix
+    }
+
+    pub fn local_to_device(&self) -> M44 {
+        M44::from_native(unsafe { self.native().getLocalToDevice() })
     }
 
     //
