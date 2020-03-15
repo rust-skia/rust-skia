@@ -19,6 +19,12 @@ impl NativeClone for sb::skia_textlayout_StrutStyle {
     }
 }
 
+impl NativePartialEq for sb::skia_textlayout_StrutStyle {
+    fn eq(&self, rhs: &Self) -> bool {
+        unsafe { sb::C_StrutStyle_equals(self, rhs) }
+    }
+}
+
 impl Default for Handle<sb::skia_textlayout_StrutStyle> {
     fn default() -> Self {
         Self::new()

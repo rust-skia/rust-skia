@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use crate::Rect;
 use skia_bindings as sb;
+use std::cmp::{max, min};
+use std::ops::Range;
 
 pub use sb::skia_textlayout_Affinity as Affinity;
 pub use sb::skia_textlayout_RectHeightStyle as RectHeightStyle;
@@ -49,7 +51,7 @@ impl RangeExtensions for Range<usize> {
     }
 
     fn intersects(&self, other: &Self) -> bool {
-        self.start.max(other.start) <= self.end.min(other.end)
+        max(self.start, other.start) <= min(self.end, other.end)
     }
 
     fn empty(&self) -> bool {
@@ -63,4 +65,3 @@ pub const EMPTY_RANGE: Range<usize> = Range {
 };
 
 pub use sb::skia_textlayout_TextBaseline as TextBaseline;
-use std::ops::Range;
