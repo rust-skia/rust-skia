@@ -336,10 +336,20 @@ impl RCHandle<SkSurface> {
         backend_texture: &gpu::BackendTexture,
         origin: gpu::SurfaceOrigin,
     ) -> bool {
+        self.replace_backend_texture_with_mode(backend_texture, origin, ContentChangeMode::Retain)
+    }
+
+    pub fn replace_backend_texture_with_mode(
+        &mut self,
+        backend_texture: &gpu::BackendTexture,
+        origin: gpu::SurfaceOrigin,
+        mode: impl Into<Option<ContentChangeMode>>,
+    ) -> bool {
         unsafe {
             self.native_mut().replaceBackendTexture(
                 backend_texture.native(),
                 origin,
+                mode.into().unwrap_or(ContentChangeMode::Retain),
                 None,
                 ptr::null_mut(),
             )
