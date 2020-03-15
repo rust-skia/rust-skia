@@ -324,10 +324,13 @@ pub use un_pre_multiply::*;
 
 pub mod vertices;
 #[deprecated(since = "0.12.0", note = "use vertices::Bone")]
+#[allow(deprecated)]
 pub use vertices::Bone as VerticesBone;
 #[deprecated(since = "0.12.0", note = "use vertices::BoneIndices")]
+#[allow(deprecated)]
 pub use vertices::BoneIndices;
 #[deprecated(since = "0.12.0", note = "use vertices::BoneWeights")]
+#[allow(deprecated)]
 pub use vertices::BoneWeights;
 #[deprecated(since = "0.12.0", note = "use vertices::Builder")]
 pub use vertices::Builder as VerticesBuilder;
