@@ -60,7 +60,6 @@ impl Handle<SkSurfaceCharacterization> {
         color_type: ColorType,
         backend_format: &gpu::BackendFormat,
     ) -> Self {
-        let mut characterization = Self::default();
         Self::from_native(unsafe {
             self.native()
                 .createBackendFormat(color_type.into_native(), backend_format.native())
