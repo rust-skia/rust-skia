@@ -420,6 +420,7 @@ impl M44 {
         }
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         m0: scalar,
         m1: scalar,
@@ -499,6 +500,7 @@ impl M44 {
         self
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn set_44(
         &mut self,
         m0: scalar,
@@ -552,7 +554,7 @@ impl M44 {
     pub fn row(&self, i: usize) -> V4 {
         assert!(i <= 3);
         V4::new(
-            self.mat[i + 0],
+            self.mat[i],
             self.mat[i + 4],
             self.mat[i + 8],
             self.mat[i + 12],
@@ -562,7 +564,7 @@ impl M44 {
     pub fn col(&self, i: usize) -> V4 {
         assert!(i <= 3);
         V4::new(
-            self.mat[i * 4 + 0],
+            self.mat[i * 4],
             self.mat[i * 4 + 1],
             self.mat[i * 4 + 2],
             self.mat[i * 4 + 3],
@@ -571,7 +573,7 @@ impl M44 {
 
     pub fn set_row(&mut self, i: usize, v: &V4) {
         assert!(i <= 3);
-        self.mat[i + 0] = v.x;
+        self.mat[i] = v.x;
         self.mat[i + 4] = v.y;
         self.mat[i + 8] = v.z;
         self.mat[i + 12] = v.w;
