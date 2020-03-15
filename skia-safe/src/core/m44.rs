@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::{scalar, Matrix};
+use crate::{scalar, Matrix, Matrix44};
 use bitflags::_core::ops::{AddAssign, MulAssign};
 use skia_bindings as sb;
 use skia_bindings::{Sk3LookAt, Sk3Perspective, SkM44, SkV2, SkV3, SkV4};
@@ -674,6 +674,14 @@ impl M44 {
     pub fn perspective(near: f32, far: f32, angle: f32) -> Self {
         Self::from_native(unsafe { Sk3Perspective(near, far, angle) })
     }
+
+    // helper
+
+    pub fn to_matrix44(&self) -> Matrix44 {
+        let mut m = Matrix44::default();
+        m.set_col_major(&self.mat);
+        m
+    }
 }
 
 impl Mul for &M44 {
@@ -727,5 +735,15 @@ impl From<&Matrix> for M44 {
 impl From<Matrix> for M44 {
     fn from(m: Matrix) -> Self {
         M44::from(&m)
+    }
+}
+
+impl From<&Matrix44> for M44 {
+    fn from(m: &Matrix44) -> Self {
+        let mut rm: [f32; 16] = Default::default();
+        m.as_col_major(&mut rm);
+        let mut m = M44::default();
+        m.set_col_major(&rm);
+        m
     }
 }
