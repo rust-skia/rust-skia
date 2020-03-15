@@ -126,8 +126,13 @@ impl RCHandle<SkRuntimeEffect> {
         unsafe { (*sb::C_SkRuntimeEffect_source(self.native())).as_str() }
     }
 
-    pub fn index(&self) -> i32 {
-        unsafe { sb::C_SkRuntimeEffect_index(self.native()) }
+    #[deprecated(since = "0.0.0", note = "removed without replacement")]
+    pub fn index(&self) -> ! {
+        unimplemented!("removed without replacement")
+    }
+
+    pub fn hash(&self) -> u32 {
+        unsafe { sb::C_SkRuntimeEffect_hash(self.native()) }
     }
 
     pub fn input_size(&self) -> usize {
