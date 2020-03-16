@@ -6,6 +6,7 @@ use super::mtl;
 use super::vk;
 use super::BackendAPI;
 use crate::prelude::*;
+use crate::ISize;
 use skia_bindings as sb;
 use skia_bindings::{GrBackendFormat, GrBackendRenderTarget, GrBackendTexture, GrMipMapped};
 
@@ -167,6 +168,10 @@ impl Handle<GrBackendTexture> {
             .if_true_then_some(|| BackendTexture::from_native(backend_texture))
     }
 
+    pub fn dimensions(&self) -> ISize {
+        ISize::new(self.width(), self.height())
+    }
+
     pub fn width(&self) -> i32 {
         self.native().fWidth
     }
@@ -314,6 +319,10 @@ impl Handle<GrBackendRenderTarget> {
         backend_render_target
             .is_valid()
             .if_true_some(backend_render_target)
+    }
+
+    pub fn dimensions(&self) -> ISize {
+        ISize::new(self.width(), self.height())
     }
 
     pub fn width(&self) -> i32 {
