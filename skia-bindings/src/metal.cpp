@@ -18,13 +18,13 @@ extern "C" SkSurface *C_SkSurface_MakeFromCAMetalLayer(GrContext *context,
                                            drawable).release();
 }
 
-static SkSurface *MakeFromMTKView(GrContext *context,
-                                  GrMTLHandle mtkView,
-                                  GrSurfaceOrigin origin,
-                                  int sampleCnt,
-                                  SkColorType colorType,
-                                  SkColorSpace *colorSpace,
-                                  const SkSurfaceProps *surfaceProps) {
+extern "C" SkSurface *C_SkSurface_MakeFromMTKView(GrContext *context,
+                                                  GrMTLHandle mtkView,
+                                                  GrSurfaceOrigin origin,
+                                                  int sampleCnt,
+                                                  SkColorType colorType,
+                                                  SkColorSpace *colorSpace,
+                                                  const SkSurfaceProps *surfaceProps) {
     return SkSurface::MakeFromMTKView(context, mtkView, origin, sampleCnt, colorType, sp(colorSpace), surfaceProps
     ).release();
 }
