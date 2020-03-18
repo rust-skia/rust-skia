@@ -37,7 +37,7 @@ steps:
       export SKIA_BINARIES_KEY=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/key.txt")
       echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
       echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
-    displayName: 'Build all targets in skia-safe for ${{ parameters.target }}'
+    displayName: 'Build all targets in skia-safe for ${{ parameters.target }} with features "${{ parameters.features }}"'
 
   - ${{ if eq(parameters.runClippy, True) }}:
     - bash: |
