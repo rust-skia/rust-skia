@@ -149,11 +149,11 @@ impl RCHandle<SkSurface> {
         layer: gpu::mtl::Handle,
         origin: gpu::SurfaceOrigin,
         sample_count: impl Into<Option<usize>>,
-        color_type: crate::Colortype,
+        color_type: crate::ColorType,
         color_space: impl Into<Option<crate::ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<(Self, gpu::mtl::Handle)> {
-        let mut drawable = ptr::null_mut();
+        let mut drawable = ptr::null();
         Self::from_ptr(unsafe {
             sb::C_SkSurface_MakeFromCAMetalLayer(
                 context.native_mut(),
@@ -175,7 +175,7 @@ impl RCHandle<SkSurface> {
         mtk_view: gpu::mtl::Handle,
         origin: gpu::SurfaceOrigin,
         sample_count: impl Into<Option<usize>>,
-        color_type: crate::Colortype,
+        color_type: crate::ColorType,
         color_space: impl Into<Option<crate::ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
