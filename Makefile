@@ -29,7 +29,7 @@ crate-bindings-build:
 publish: package-bindings package-safe publish-bindings wait publish-safe
 
 .PHONY: publish-only
-publish-only: publish-bindings publish-safe
+publish-only: publish-bindings wait publish-safe
 
 .PHONY: publish-bindings
 publish-bindings:
