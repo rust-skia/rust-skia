@@ -51,10 +51,10 @@ steps:
   - ${{ if eq(parameters.runBinaries, True) }}:
 
     - script: cd skia-bindings && cargo test --release --features "${{ parameters.features }}" --target ${{ parameters.target }} -vv -- --test-threads=1 --nocapture
-      displayName: Test skia-bindings
+      displayName: 'Test skia-bindings'
 
     - script: cd skia-safe && cargo test --release --features "${{ parameters.features }}" --target ${{ parameters.target }} -vv -- --test-threads=1 --nocapture
-      displayName: Test skia-safe
+      displayName: 'Test skia-safe'
 
     - ${{ if ne(parameters.exampleArgs, '') }}:
       - script: cd skia-org && cargo run --release --features "${{ parameters.features }}" --target ${{ parameters.target }} "$(Build.ArtifactStagingDirectory)/skia-org" ${{ parameters.exampleArgs }}
