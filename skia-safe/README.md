@@ -6,7 +6,7 @@ For information about the supported build targets and how to run the examples, p
 
 ## Documentation
 
-Function level documentation is [not yet](https://github.com/rust-skia/rust-skia/issues/23) available. To get started, take a look at the [Rust examples](https://github.com/rust-skia/rust-skia/tree/master/skia-safe/examples/skia-org) or the [Skia documentation](https://skia.org). 
+Function level documentation is [not yet](https://github.com/rust-skia/rust-skia/issues/23) available. To get started, take a look at the [Rust examples](https://github.com/rust-skia/rust-skia/tree/master/skia-org/src/) or the [Skia documentation](https://skia.org). 
 
 ## Bindings & Wrappers
 
@@ -62,7 +62,7 @@ The skshaper module can be accessed through `skia_safe::Shaper` and the Rust bi
 
 On **Windows**, the file `icudtl.dat` must be available in your executable's directory. To provide the data file, either copy it from the build's output directory (shown when skia-bindings is compiled with `cargo build -vv | grep "ninja: Entering directory"`), or - if your executable directory is writable - invoke the function `skia_safe::icu::init()` before using the `skia_safe::Shaper` object or the `skia_safe::textlayout` module. 
 
-Simple examples of the skshaper and skparagraph module bindings can be found [in the skia-org example command line application](https://github.com/rust-skia/rust-skia/blob/master/skia-safe/examples/skia-org).
+Simple examples of the skshaper and skparagraph module bindings can be found [in the skia-org example command line application](https://github.com/rust-skia/rust-skia/blob/master/skia-org/src/).
 
 
 
