@@ -60,11 +60,11 @@ impl SubAssign for Point3 {
     }
 }
 
-impl Mul<(scalar, Point3)> for Point3 {
-    type Output = Self;
+impl Mul<Point3> for scalar {
+    type Output = Point3;
 
-    fn mul(self, (t, p): (scalar, Point3)) -> Self::Output {
-        Self::new(t * p.x, t * p.y, t * p.z)
+    fn mul(self, p: Point3) -> Self::Output {
+        Point3::new(self * p.x, self * p.y, self * p.z)
     }
 }
 
