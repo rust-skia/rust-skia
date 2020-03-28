@@ -4,11 +4,11 @@ use skia_safe::{
 };
 use std::path;
 
-pub fn draw<Driver: DrawingDriver>(path: &path::Path) {
+pub fn draw(driver: &mut impl DrawingDriver, path: &path::Path) {
     let path = path.join("SkCanvas-Overview");
-    Driver::draw_image_256(&path, "heptagram", draw_heptagram);
-    Driver::draw_image_256(&path, "rotated-rectangle", draw_rotated_rectangle);
-    Driver::draw_image_256(&path, "hello-skia", draw_hello_skia);
+    driver.draw_image_256(&path, "heptagram", draw_heptagram);
+    driver.draw_image_256(&path, "rotated-rectangle", draw_rotated_rectangle);
+    driver.draw_image_256(&path, "hello-skia", draw_hello_skia);
 }
 
 fn draw_heptagram(canvas: &mut Canvas) {

@@ -21,9 +21,11 @@ pub use vulkan::Vulkan;
 pub trait DrawingDriver {
     const NAME: &'static str;
 
-    fn draw_image(size: (i32, i32), path: &Path, name: &str, func: impl Fn(&mut Canvas));
+    fn new() -> Self;
 
-    fn draw_image_256(path: &Path, name: &str, func: impl Fn(&mut Canvas)) {
-        Self::draw_image((256, 256), path, name, func)
+    fn draw_image(&mut self, size: (i32, i32), path: &Path, name: &str, func: impl Fn(&mut Canvas));
+
+    fn draw_image_256(&mut self, path: &Path, name: &str, func: impl Fn(&mut Canvas)) {
+        self.draw_image((256, 256), path, name, func)
     }
 }

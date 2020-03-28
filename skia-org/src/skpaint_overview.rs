@@ -8,47 +8,47 @@ use skia_safe::{
 };
 use std::path;
 
-pub fn draw<Driver: DrawingDriver>(path: &path::Path) {
+pub fn draw(driver: &mut impl DrawingDriver, path: &path::Path) {
     let path = &path.join("SkPaint-Overview");
 
-    Driver::draw_image_256(path, "01-three-paints", draw_three_paints);
-    Driver::draw_image_256(path, "02-fill-and-stroke", draw_fill_and_stroke);
-    Driver::draw_image_256(path, "03-gradient", draw_gradient);
-    Driver::draw_image((576, 640), path, "04-transfer-modes", draw_transfer_modes);
-    Driver::draw_image_256(path, "05-bitmap-shader", draw_bitmap_shader);
-    Driver::draw_image_256(
+    driver.draw_image_256(path, "01-three-paints", draw_three_paints);
+    driver.draw_image_256(path, "02-fill-and-stroke", draw_fill_and_stroke);
+    driver.draw_image_256(path, "03-gradient", draw_gradient);
+    driver.draw_image((576, 640), path, "04-transfer-modes", draw_transfer_modes);
+    driver.draw_image_256(path, "05-bitmap-shader", draw_bitmap_shader);
+    driver.draw_image_256(
         path,
         "06-radial-gradient-shader",
         draw_radial_gradient_shader,
     );
-    Driver::draw_image_256(
+    driver.draw_image_256(
         path,
         "07-two-point-conical-shader",
         draw_two_point_conical_shader,
     );
-    Driver::draw_image_256(path, "08-sweep-gradient-shader", draw_sweep_gradient_shader);
-    Driver::draw_image_256(
+    driver.draw_image_256(path, "08-sweep-gradient-shader", draw_sweep_gradient_shader);
+    driver.draw_image_256(
         path,
         "09-fractal-perlin-noise-shader",
         draw_fractal_perlin_noise_shader,
     );
-    Driver::draw_image_256(
+    driver.draw_image_256(
         path,
         "10-turbulence-perlin-noise-shader",
         draw_turbulence_perlin_noise_shader,
     );
-    Driver::draw_image_256(path, "11-compose-shader", draw_compose_shader);
-    Driver::draw_image_256(path, "12-mask-filter", draw_mask_filter);
-    Driver::draw_image((256, 128), path, "13-color-filter", draw_color_filter);
-    Driver::draw_image_256(path, "14-table-color-filter", draw_color_table_color_filter);
-    Driver::draw_image_256(path, "15-path-2d-effect", draw_path_2d_effect);
-    Driver::draw_image_256(path, "16-line-2d-effect", draw_line_2d_effect);
-    Driver::draw_image_256(path, "17-path-1d-effect", draw_path_1d_effect);
-    Driver::draw_image_256(path, "18-corner-path-effect", draw_corner_path_effect);
-    Driver::draw_image_256(path, "19-dash-path-effect", draw_dash_path_effect);
-    Driver::draw_image_256(path, "20-discrete-path-effect", draw_discrete_path_effect);
-    Driver::draw_image_256(path, "21-compose-path-effect", draw_compose_path_effect);
-    Driver::draw_image_256(path, "22-sum-path-effect", draw_sum_path_effect);
+    driver.draw_image_256(path, "11-compose-shader", draw_compose_shader);
+    driver.draw_image_256(path, "12-mask-filter", draw_mask_filter);
+    driver.draw_image((256, 128), path, "13-color-filter", draw_color_filter);
+    driver.draw_image_256(path, "14-table-color-filter", draw_color_table_color_filter);
+    driver.draw_image_256(path, "15-path-2d-effect", draw_path_2d_effect);
+    driver.draw_image_256(path, "16-line-2d-effect", draw_line_2d_effect);
+    driver.draw_image_256(path, "17-path-1d-effect", draw_path_1d_effect);
+    driver.draw_image_256(path, "18-corner-path-effect", draw_corner_path_effect);
+    driver.draw_image_256(path, "19-dash-path-effect", draw_dash_path_effect);
+    driver.draw_image_256(path, "20-discrete-path-effect", draw_discrete_path_effect);
+    driver.draw_image_256(path, "21-compose-path-effect", draw_compose_path_effect);
+    driver.draw_image_256(path, "22-sum-path-effect", draw_sum_path_effect);
 }
 
 fn draw_three_paints(canvas: &mut Canvas) {

@@ -10,47 +10,61 @@ use std::os::raw;
 use std::path::Path;
 use std::ptr;
 
-pub enum Vulkan {}
+#[allow(dead_code)]
+pub struct Vulkan {
+    // ordered for drop order
+    context: gpu::Context,
+    ash_graphics: AshGraphics,
+}
 
 impl DrawingDriver for Vulkan {
     const NAME: &'static str = "vulkan";
 
+    fn new() -> Self {
+        let ash_graphics = unsafe { AshGraphics::new("skia-org") };
+        let context = {
+            let get_proc = |of| unsafe {
+                match ash_graphics.get_proc(of) {
+                    Some(f) => f as _,
+                    None => {
+                        println!("resolve of {} failed", of.name().to_str().unwrap());
+                        ptr::null()
+                    }
+                }
+            };
+
+            let backend_context = unsafe {
+                gpu::vk::BackendContext::new(
+                    ash_graphics.instance.handle().as_raw() as _,
+                    ash_graphics.physical_device.as_raw() as _,
+                    ash_graphics.device.handle().as_raw() as _,
+                    (
+                        ash_graphics.queue_and_index.0.as_raw() as _,
+                        ash_graphics.queue_and_index.1,
+                    ),
+                    &get_proc,
+                )
+            };
+
+            gpu::Context::new_vulkan(&backend_context).unwrap()
+        };
+
+        Self {
+            ash_graphics,
+            context,
+        }
+    }
+
     fn draw_image(
+        &mut self,
         (width, height): (i32, i32),
         path: &Path,
         name: &str,
         func: impl Fn(&mut Canvas),
     ) {
-        let ash_graphics = unsafe { AshGraphics::new("skia-org") };
-
-        let get_proc = |of| unsafe {
-            match ash_graphics.get_proc(of) {
-                Some(f) => f as _,
-                None => {
-                    println!("resolve of {} failed", of.name().to_str().unwrap());
-                    ptr::null()
-                }
-            }
-        };
-
-        let backend_context = unsafe {
-            gpu::vk::BackendContext::new(
-                ash_graphics.instance.handle().as_raw() as _,
-                ash_graphics.physical_device.as_raw() as _,
-                ash_graphics.device.handle().as_raw() as _,
-                (
-                    ash_graphics.queue_and_index.0.as_raw() as _,
-                    ash_graphics.queue_and_index.1,
-                ),
-                &get_proc,
-            )
-        };
-
-        let mut context = gpu::Context::new_vulkan(&backend_context).unwrap();
-
         let image_info = ImageInfo::new_n32_premul((width * 2, height * 2), None);
         let mut surface = Surface::new_render_target(
-            &mut context,
+            &mut self.context,
             Budgeted::YES,
             &image_info,
             None,
