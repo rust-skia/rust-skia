@@ -5,6 +5,7 @@ use ash::vk;
 use ash::vk::Handle;
 use ash::{Entry, Instance};
 use skia_safe::{gpu, Budgeted, Canvas, ImageInfo, Surface};
+use std::convert::TryInto;
 use std::ffi::{c_void, CString};
 use std::os::raw;
 use std::path::Path;
@@ -91,9 +92,9 @@ impl AshGraphics {
 
         detected_version.map(|ver| {
             (
-                vk_version_major!(ver) as _,
-                vk_version_minor!(ver) as _,
-                vk_version_patch!(ver) as _,
+                vk::version_major(ver).try_into().unwrap(),
+                vk::version_minor(ver).try_into().unwrap(),
+                vk::version_patch(ver).try_into().unwrap(),
             )
         })
     }
@@ -101,11 +102,17 @@ impl AshGraphics {
     pub unsafe fn new(app_name: &str) -> AshGraphics {
         let entry = Entry::new().unwrap();
 
-        let minimum_version = vk_make_version!(1, 0, 0);
+        let minimum_version = vk::make_version(1, 0, 0);
 
         let instance: Instance = {
             let api_version = Self::vulkan_version()
-                .map(|(major, minor, patch)| vk_make_version!(major, minor, patch))
+                .map(|(major, minor, patch)| {
+                    vk::make_version(
+                        major.try_into().unwrap(),
+                        minor.try_into().unwrap(),
+                        patch.try_into().unwrap(),
+                    )
+                })
                 .unwrap_or(minimum_version);
 
             let app_name = CString::new(app_name).unwrap();

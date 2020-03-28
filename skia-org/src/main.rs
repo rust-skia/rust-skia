@@ -6,7 +6,6 @@ use std::path::{Path, PathBuf};
 use crate::drivers::DrawingDriver;
 
 #[cfg(feature = "vulkan")]
-#[macro_use]
 extern crate ash;
 
 #[cfg(feature = "metal")]
