@@ -61,15 +61,15 @@ fn main() {
     };
 
     if drivers.contains(&drivers::CPU::NAME) {
-        draw_all::<drivers::CPU>(&out_path);
+        draw_all(&mut drivers::CPU::new(), &out_path);
     }
 
     if drivers.contains(&drivers::PDF::NAME) {
-        draw_all::<drivers::PDF>(&out_path);
+        draw_all(&mut drivers::PDF::new(), &out_path);
     }
 
     if drivers.contains(&drivers::SVG::NAME) {
-        draw_all::<drivers::SVG>(&out_path);
+        draw_all(&mut drivers::SVG::new(), &out_path);
     }
 
     #[cfg(feature = "gl")]
@@ -83,7 +83,7 @@ fn main() {
             .unwrap();
 
             context.make_current().unwrap();
-            draw_all::<drivers::OpenGL>(&out_path);
+            draw_all(&mut drivers::OpenGL::new(), &out_path);
         }
 
         if drivers.contains(&"opengl-es") {
@@ -95,7 +95,7 @@ fn main() {
             .unwrap();
 
             context.make_current().unwrap();
-            draw_all::<drivers::OpenGL>(&out_path);
+            draw_all(&mut drivers::OpenGL::new(), &out_path);
         }
     }
 
@@ -112,7 +112,7 @@ fn main() {
                 None => println!("Failed to detect Vulkan version, falling back to 1.0.0"),
             }
 
-            draw_all::<Vulkan>(&out_path)
+            draw_all(&mut drivers::Vulkan::new(), &out_path)
         }
     }
 
@@ -121,22 +121,22 @@ fn main() {
         use drivers::metal::Metal;
 
         if drivers.contains(&Metal::NAME) {
-            draw_all::<Metal>(&out_path)
+            draw_all(&mut Metal::new(), &out_path)
         }
     }
 
-    fn draw_all<Driver: DrawingDriver>(out_path: &Path) {
+    fn draw_all<Driver: DrawingDriver>(driver: &mut Driver, out_path: &Path) {
         let out_path = out_path.join(Driver::NAME);
 
-        skcanvas_overview::draw::<Driver>(&out_path);
-        skpath_overview::draw::<Driver>(&out_path);
-        skpaint_overview::draw::<Driver>(&out_path);
+        skcanvas_overview::draw(driver, &out_path);
+        skpath_overview::draw(driver, &out_path);
+        skpaint_overview::draw(driver, &out_path);
 
         #[cfg(feature = "textlayout")]
-        skshaper_example::draw::<Driver>(&out_path);
+        skshaper_example::draw(driver, &out_path);
 
         #[cfg(feature = "textlayout")]
-        skparagraph_example::draw::<Driver>(&out_path);
+        skparagraph_example::draw(driver, &out_path);
     }
 }
 

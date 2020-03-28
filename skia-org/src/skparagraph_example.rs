@@ -3,12 +3,12 @@ use skia_safe::textlayout::{FontCollection, ParagraphBuilder, ParagraphStyle, Te
 use skia_safe::{icu, Canvas, FontMgr, Paint, Point};
 use std::path;
 
-pub fn draw<Driver: DrawingDriver>(path: &path::Path) {
+pub fn draw(driver: &mut impl DrawingDriver, path: &path::Path) {
     let path = path.join("SkParagraph-Example");
 
     icu::init();
 
-    Driver::draw_image_256(&path, "lorem-ipsum", draw_lorem_ipsum);
+    driver.draw_image_256(&path, "lorem-ipsum", draw_lorem_ipsum);
 }
 
 fn draw_lorem_ipsum(canvas: &mut Canvas) {
