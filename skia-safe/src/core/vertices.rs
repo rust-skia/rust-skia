@@ -80,10 +80,6 @@ impl RCHandle<SkVertices> {
         Rect::from_native_ref(&self.native().fBounds)
     }
 
-    pub fn has_per_vertex_data(&self) -> bool {
-        self.per_vertex_data().is_some()
-    }
-
     pub fn has_colors(&self) -> bool {
         self.colors().is_some()
     }
@@ -109,18 +105,9 @@ impl RCHandle<SkVertices> {
         self.native().fIndexCount.try_into().unwrap()
     }
 
-    pub fn per_vertex_data_count(&self) -> usize {
-        self.native().fPerVertexDataCount.try_into().unwrap()
-    }
-
     pub fn positions(&self) -> &[Point] {
         let positions: *const SkPoint = self.native().fPositions;
         unsafe { slice::from_raw_parts(positions as _, self.vertex_count()) }
-    }
-
-    pub fn per_vertex_data(&self) -> Option<&[f32]> {
-        let data: *const f32 = self.native().fPerVertexData.into_option()?;
-        Some(unsafe { slice::from_raw_parts(data, self.per_vertex_data_count()) })
     }
 
     pub fn tex_coords(&self) -> Option<&[Point]> {
@@ -210,61 +197,9 @@ impl Handle<SkVertices_Builder> {
         !self.native().fVertices.fPtr.is_null()
     }
 
-    pub fn vertex_count(&self) -> usize {
-        unsafe { self.native().vertexCount() }.try_into().unwrap()
-    }
-
-    pub fn index_count(&self) -> usize {
-        unsafe { self.native().indexCount() }.try_into().unwrap()
-    }
-
     #[deprecated(since = "0.0.0", note = "returns false")]
     pub fn is_volatile(&self) -> bool {
         false
-    }
-
-    pub fn per_vertex_data_count(&self) -> usize {
-        unsafe { self.native().perVertexDataCount() }
-            .try_into()
-            .unwrap()
-    }
-
-    pub fn positions(&mut self) -> &mut [Point] {
-        unsafe {
-            let positions: *mut SkPoint = self.native_mut().positions();
-            slice::from_raw_parts_mut(positions as _, self.vertex_count())
-        }
-    }
-
-    pub fn indices(&mut self) -> Option<&mut [u16]> {
-        unsafe {
-            let indices = self.native_mut().indices().into_option()?;
-            Some(slice::from_raw_parts_mut(indices as _, self.index_count()))
-        }
-    }
-
-    pub fn per_vertex_data(&mut self) -> Option<&mut [f32]> {
-        unsafe {
-            let data = self.native_mut().perVertexData().into_option()?;
-            Some(slice::from_raw_parts_mut(
-                data as _,
-                self.per_vertex_data_count(),
-            ))
-        }
-    }
-
-    pub fn tex_coords(&mut self) -> Option<&mut [Point]> {
-        unsafe {
-            let coords: *mut SkPoint = self.native_mut().texCoords().into_option()?;
-            Some(slice::from_raw_parts_mut(coords as _, self.vertex_count()))
-        }
-    }
-
-    pub fn colors(&mut self) -> Option<&mut [Color]> {
-        unsafe {
-            let colors: *mut SkColor = self.native_mut().colors().into_option()?;
-            Some(slice::from_raw_parts_mut(colors as _, self.vertex_count()))
-        }
     }
 
     #[deprecated(since = "0.0.0", note = "returns None")]

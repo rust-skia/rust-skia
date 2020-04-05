@@ -204,12 +204,6 @@ impl Default for ImageInfo {
     }
 }
 
-impl PartialEq for ImageInfo {
-    fn eq(&self, other: &Self) -> bool {
-        unsafe { sb::C_GrVkImageInfo_Equals(self.native(), other.native()) }
-    }
-}
-
 impl ImageInfo {
     /// # Safety
     /// The Vulkan `image` and `alloc` must outlive the lifetime of the ImageInfo returned.
@@ -285,11 +279,6 @@ impl ImageInfo {
             info.ycbcr_conversion_info,
             info.protected,
         )
-    }
-
-    pub fn update_image_layout(&mut self, layout: vk::ImageLayout) -> &mut Self {
-        unsafe { sb::C_GrVkImageInfo_updateImageLayout(self.native_mut(), layout) }
-        self
     }
 }
 

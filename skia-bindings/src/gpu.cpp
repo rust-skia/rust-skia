@@ -1,6 +1,7 @@
 #include "bindings.h"
 #include "include/gpu/GrContext.h"
 #include "include/gpu/GrBackendDrawableInfo.h"
+#include "include/core/SkCanvas.h"
 #include "include/core/SkDrawable.h"
 #include "include/core/SkSurface.h"
 #include "include/core/SkSurfaceCharacterization.h"
@@ -182,7 +183,7 @@ extern "C" bool C_GrContext_colorTypeSupportedAsSurface(const GrContext* self, S
     return self->colorTypeSupportedAsSurface(colorType);
 }
 
-extern "C" bool C_GrContext_abandoned(const GrContext* self) {
+extern "C" bool C_GrContext_abandoned(GrContext* self) {
     return self->abandoned();
 }
 

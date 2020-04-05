@@ -176,44 +176,17 @@ pub mod shaders {
         .unwrap()
     }
 
-    pub fn blend(
-        mode: BlendMode,
-        dst: Shader,
-        src: Shader,
-        local_matrix: Option<&Matrix>,
-    ) -> Shader {
-        Shader::from_ptr(unsafe {
-            sb::C_SkShaders_Blend(
-                mode,
-                dst.into_ptr(),
-                src.into_ptr(),
-                local_matrix.native_ptr_or_null(),
-            )
-        })
-        .unwrap()
+    pub fn blend(mode: BlendMode, dst: Shader, src: Shader) -> Shader {
+        Shader::from_ptr(unsafe { sb::C_SkShaders_Blend(mode, dst.into_ptr(), src.into_ptr()) })
+            .unwrap()
     }
 
-    pub fn lerp(t: f32, dst: Shader, src: Shader, local_matrix: Option<&Matrix>) -> Option<Shader> {
-        Shader::from_ptr(unsafe {
-            sb::C_SkShaders_Lerp(
-                t,
-                dst.into_ptr(),
-                src.into_ptr(),
-                local_matrix.native_ptr_or_null(),
-            )
-        })
+    pub fn lerp(t: f32, dst: Shader, src: Shader) -> Option<Shader> {
+        Shader::from_ptr(unsafe { sb::C_SkShaders_Lerp(t, dst.into_ptr(), src.into_ptr()) })
     }
 
-    // TODO: rename as soon it's clear from the documentation what it does.
-    pub fn lerp2(red: Shader, dst: Shader, src: Shader, local_matrix: Option<&Matrix>) -> Shader {
-        Shader::from_ptr(unsafe {
-            sb::C_SkShaders_Lerp2(
-                red.into_ptr(),
-                dst.into_ptr(),
-                src.into_ptr(),
-                local_matrix.native_ptr_or_null(),
-            )
-        })
-        .unwrap()
+    #[deprecated(since = "0.0.0", note = "removed without replacement")]
+    pub fn lerp2(_red: Shader, _dst: Shader, _src: Shader, _local_matrix: Option<&Matrix>) -> ! {
+        panic!("removed without replacement");
     }
 }

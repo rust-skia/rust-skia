@@ -54,6 +54,7 @@
 #include "include/core/SkTextBlob.h"
 #include "include/core/SkTypeface.h"
 #include "include/core/SkTypes.h"
+#include "include/core/SkVertices.h"
 #include "include/core/SkYUVAIndex.h"
 #include "include/core/SkYUVASizeInfo.h"
 // docs/
@@ -1737,16 +1738,12 @@ extern "C" SkShader* C_SkShaders_Color2(const SkColor4f* color, SkColorSpace* co
     return SkShaders::Color(*color, sp(colorSpace)).release();
 }
 
-extern "C" SkShader* C_SkShaders_Blend(SkBlendMode mode, SkShader* dst, SkShader* src, const SkMatrix* localMatrix) {
-    return SkShaders::Blend(mode, sp(dst), sp(src), localMatrix).release();
+extern "C" SkShader* C_SkShaders_Blend(SkBlendMode mode, SkShader* dst, SkShader* src) {
+    return SkShaders::Blend(mode, sp(dst), sp(src)).release();
 }
 
-extern "C" SkShader* C_SkShaders_Lerp(float t, SkShader* dst, SkShader* src, const SkMatrix* localMatrix) {
-    return SkShaders::Lerp(t, sp(dst), sp(src), localMatrix).release();
-}
-
-extern "C" SkShader* C_SkShaders_Lerp2(SkShader* red, SkShader* dst, SkShader* src, const SkMatrix* localMatrix) {
-    return SkShaders::Lerp(sp(red), sp(dst), sp(src), localMatrix).release();
+extern "C" SkShader* C_SkShaders_Lerp(float t, SkShader* dst, SkShader* src) {
+    return SkShaders::Lerp(t, sp(dst), sp(src)).release();
 }
 
 extern "C" SkShader* C_SkShader_Deserialize(const void* data, size_t length) {

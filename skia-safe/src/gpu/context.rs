@@ -81,8 +81,8 @@ impl RCHandle<GrContext> {
     }
 
     // TODO: is_...?
-    pub fn abandoned(&self) -> bool {
-        unsafe { sb::C_GrContext_abandoned(self.native()) }
+    pub fn abandoned(&mut self) -> bool {
+        unsafe { sb::C_GrContext_abandoned(self.native_mut()) }
     }
 
     pub fn release_resources_and_abandon(&mut self) -> &mut Self {
