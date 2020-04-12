@@ -3,6 +3,7 @@
 #include "include/gpu/gl/GrGLExtensions.h"
 #include "include/gpu/gl/GrGLInterface.h"
 #include "include/gpu/gl/GrGLAssembleInterface.h"
+#include "src/gpu/gl/GrGLUtil.h"
 
 //
 // GrGLTextureInfo
@@ -25,6 +26,14 @@ extern "C" bool C_GrGLFramebufferInfo_Equals(const GrGLFramebufferInfo* lhs, con
 //
 
 extern "C" void C_GPU_GL_Types(GrGLBackendState *) {}
+
+extern "C" GrGLFormat C_GrGLFormatFromGLEnum(GrGLenum glFormat) {
+    return GrGLFormatFromGLEnum(glFormat);
+}
+
+extern "C" GrGLenum C_GrGLFormatToEnum(GrGLFormat format) {
+    return GrGLFormatToEnum(format);
+}
 
 //
 // gpu/gl/GrGLInterface.h

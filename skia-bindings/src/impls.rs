@@ -78,3 +78,17 @@ impl SkImage_CompressionType {
     #[deprecated(since = "0.27.0", note = "same as ETC2_RGB8_UNORM")]
     pub const ETC1: Self = SkImage_CompressionType::ETC2_RGB8_UNORM;
 }
+
+#[cfg(feature = "gl")]
+impl From<crate::GrGLenum> for crate::GrGLFormat {
+    fn from(e: crate::GrGLenum) -> Self {
+        unsafe { crate::C_GrGLFormatFromGLEnum(e) }
+    }
+}
+
+#[cfg(feature = "gl")]
+impl From<crate::GrGLFormat> for crate::GrGLenum {
+    fn from(format: crate::GrGLFormat) -> Self {
+        unsafe { crate::C_GrGLFormatToEnum(format) }
+    }
+}
