@@ -14,6 +14,46 @@ fn test_format_naming() {
     let _ = Format::COMPRESSED_ETC1_RGB8;
 }
 
+#[test]
+fn test_support_from_format_to_enum_and_back() {
+    let e: Enum = Format::ALPHA8.into();
+    let f: Format = e.into();
+    assert_eq!(f, Format::ALPHA8);
+}
+
+#[test]
+fn test_all_formats_exhaustive() {
+    let x = Format::ALPHA8;
+    // !!!!!
+    // IF this match is not exhaustive anymore, the implementations of the format conversions
+    // need to be updated, too.
+    match x {
+        Format::Unknown => {}
+        Format::RGBA8 => {}
+        Format::R8 => {}
+        Format::ALPHA8 => {}
+        Format::LUMINANCE8 => {}
+        Format::BGRA8 => {}
+        Format::RGB565 => {}
+        Format::RGBA16F => {}
+        Format::R16F => {}
+        Format::RGB8 => {}
+        Format::RG8 => {}
+        Format::RGB10_A2 => {}
+        Format::RGBA4 => {}
+        Format::SRGB8_ALPHA8 => {}
+        Format::COMPRESSED_ETC1_RGB8 => {}
+        Format::COMPRESSED_RGB8_ETC2 => {}
+        Format::COMPRESSED_RGB8_BC1 => {}
+        Format::COMPRESSED_RGBA8_BC1 => {}
+        Format::R16 => {}
+        Format::RG16 => {}
+        Format::RGBA16 => {}
+        Format::RG16F => {}
+        Format::LUMINANCE16F => {}
+    }
+}
+
 pub use skia_bindings::GrGLenum as Enum;
 pub use skia_bindings::GrGLuint as UInt;
 
