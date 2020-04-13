@@ -271,6 +271,13 @@ impl<N: NativeDrop> Handle<N> {
         mem::swap(&mut self.0, native);
         self
     }
+
+    /// Consumes the wrapper and returns the native type.
+    pub(crate) fn into_native(mut self) -> N {
+        let r = mem::replace(&mut self.0, unsafe { mem::zeroed() });
+        mem::forget(self);
+        r
+    }
 }
 
 pub(crate) trait ReplaceWith<Other> {
@@ -449,6 +456,12 @@ impl<N: NativeDrop> RefHandle<N> {
     /// to and will call its NativeDrop implementation if it goes out of scope.
     pub(crate) fn from_ptr(ptr: *mut N) -> Option<Self> {
         ptr.into_option().map(Self)
+    }
+
+    pub(crate) fn into_ptr(self) -> *mut N {
+        let p = self.0;
+        mem::forget(self);
+        p
     }
 }
 
