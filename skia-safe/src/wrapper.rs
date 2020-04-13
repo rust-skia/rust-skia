@@ -2,6 +2,7 @@
 ///!
 ///! This module is only meant to be used by external code. Internal code should continue to use the traits in
 ///! the `prelude` module.
+use crate::prelude::*;
 
 /// This trait supports the conversion of a wrapper type into it's native C/C++ and back.
 ///
