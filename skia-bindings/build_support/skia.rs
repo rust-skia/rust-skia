@@ -18,6 +18,7 @@ mod lib {
 mod feature_id {
     pub const GL: &str = "gl";
     pub const VULKAN: &str = "vulkan";
+    pub const METAL: &str = "metal";
     pub const TEXTLAYOUT: &str = "textlayout";
 }
 
@@ -96,6 +97,26 @@ pub struct Features {
 impl Features {
     pub fn gpu(&self) -> bool {
         self.gl || self.vulkan || self.metal
+    }
+
+    /// Feature Ids used to look up prebuilt binaries.
+    pub fn ids(&self) -> Vec<&str> {
+        let mut feature_ids = Vec::new();
+
+        if self.gl {
+            feature_ids.push(feature_id::GL);
+        }
+        if self.vulkan {
+            feature_ids.push(feature_id::VULKAN);
+        }
+        if self.metal {
+            feature_ids.push(feature_id::METAL);
+        }
+        if self.text_layout {
+            feature_ids.push(feature_id::TEXTLAYOUT);
+        }
+
+        feature_ids
     }
 }
 
@@ -336,16 +357,9 @@ impl BinariesConfiguration {
 
         let mut built_libraries = Vec::new();
         let mut additional_files = Vec::new();
-        let mut feature_ids = Vec::new();
+        let feature_ids = features.ids();
 
-        if features.gl {
-            feature_ids.push(feature_id::GL);
-        }
-        if features.vulkan {
-            feature_ids.push(feature_id::VULKAN);
-        }
         if features.text_layout {
-            feature_ids.push(feature_id::TEXTLAYOUT);
             additional_files.push(ICUDTL_DAT.into());
             built_libraries.push(lib::SKPARAGRAPH.into());
             built_libraries.push(lib::SKSHAPER.into());
