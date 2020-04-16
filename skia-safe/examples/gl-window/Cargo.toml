@@ -1,0 +1,13 @@
+[package]
+name = "rust-skia-game-test"
+version = "0.1.0"
+authors = ["Jeremy Apthorp <nornagon@nornagon.net>"]
+edition = "2018"
+
+[dependencies]
+glutin = "0.24"
+gl = "0.14.0"
+
+[dependencies.skia-safe]
+version = "0"
+features = ["gl"]
