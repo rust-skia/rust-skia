@@ -644,7 +644,7 @@ where
 
 /// Trait to use native types that as a rust type
 /// _inplace_ with the same size and field layout.
-pub(crate) trait NativeTransmutable<NT: Sized>: Sized {
+pub trait NativeTransmutable<NT: Sized>: Sized {
     /// Provides access to the native value through a
     /// transmuted reference to the Rust value.
     fn native(&self) -> &NT {

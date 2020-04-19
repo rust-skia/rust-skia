@@ -1,4 +1,4 @@
-///! FFI Interopability for skia-safe's wrapper types.
+///! FFI interopability for skia-safe's wrapper types.
 ///!
 ///! This module is only meant to be used by external code. Internal code should continue to use the traits in
 ///! the `prelude` module.
@@ -22,6 +22,10 @@ where
     fn wrap(ptr: *mut N) -> Option<Self>;
     /// Unwraps the wrapper type into the native pointer.
     fn unwrap(self) -> *mut N;
+    /// Access the wrapped pointer.
+    fn inner(&self) -> &N;
+    /// Access the wrapped pointer.
+    fn inner_mut(&mut self) -> &mut N;
 }
 
 /// A trait that supports the conversion from a native value into its Rust wrapper type and back.
@@ -38,11 +42,15 @@ where
 pub unsafe trait ValueWrapper<N> {
     fn wrap(native: N) -> Self;
     fn unwrap(self) -> N;
+    fn inner(&self) -> &N;
+    fn inner_mut(&mut self) -> &mut N;
 }
 
 pub unsafe trait RefWrapper<N> {
     fn wrap_ref(native: &N) -> &Self;
     fn wrap_mut(native: &mut N) -> &mut Self;
+    fn inner(&self) -> &N;
+    fn inner_mut(&mut self) -> &mut N;
 }
 
 //
@@ -63,7 +71,16 @@ where
     fn unwrap(self) -> N {
         self.into_native()
     }
+
+    fn inner(&self) -> &N {
+        self.native()
+    }
+
+    fn inner_mut(&mut self) -> &mut N {
+        self.native_mut()
+    }
 }
+
 unsafe impl<N> RefWrapper<N> for Handle<N>
 where
     N: NativeDrop,
@@ -74,6 +91,14 @@ where
 
     fn wrap_mut(native: &mut N) -> &mut Self {
         Self::from_native_ref_mut(native)
+    }
+
+    fn inner(&self) -> &N {
+        self.native()
+    }
+
+    fn inner_mut(&mut self) -> &mut N {
+        self.native_mut()
     }
 }
 
@@ -92,6 +117,14 @@ where
     fn unwrap(self) -> *mut N {
         self.into_ptr()
     }
+
+    fn inner(&self) -> &N {
+        self.native()
+    }
+
+    fn inner_mut(&mut self) -> &mut N {
+        self.native_mut()
+    }
 }
 
 //
@@ -108,5 +141,13 @@ where
 
     fn unwrap(self) -> *mut N {
         self.into_ptr()
+    }
+
+    fn inner(&self) -> &N {
+        self.native()
+    }
+
+    fn inner_mut(&mut self) -> &mut N {
+        self.native_mut()
     }
 }
