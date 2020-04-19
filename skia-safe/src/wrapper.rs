@@ -4,15 +4,16 @@
 ///! the `prelude` module.
 use crate::prelude::*;
 
-/// This trait supports the conversion of a wrapper type into it's native C/C++ and back.
+/// This trait supports the conversion of a wrapper into it's wrapped C/C++ pointer and back.
+///
+/// The wrapped value can be accessed through the functions `inner` and `inner_mut`.
 ///
 /// # Safety
 ///
-/// The native type `N` _should_ be treated as opaque, because its definition may change
-/// without adhering to semantic versioning and largely depends on what the tool bindgen
-/// is able to generate.
+/// The native value `N` _should_ be treated as opaque, because its definition may change
+/// without adhering to semantic versioning and depends on what the tool bindgen is able to generate.
 ///
-/// Converting from a Rust wrapper type to a native type loses the automatic ability to free associated memory.
+/// Converting from a Rust wrapper to the wrapped value loses the automatic ability to free associated resources.
 pub unsafe trait PointerWrapper<N>
 where
     Self: Sized,
@@ -28,17 +29,18 @@ where
     fn inner_mut(&mut self) -> &mut N;
 }
 
-/// A trait that supports the conversion from a native value into its Rust wrapper type and back.
+/// A trait that supports the conversion from a C/C++ value into its Rust wrapper and back.
 ///
-/// This is implemented for all wrapper types that manage memory in Rust without an pointer indirection.
+/// The wrapped value can be accessed through the functions `inner` and `inner_mut`.
+///
+/// This trait is implemented for all wrapper types that manage C++/C values in Rust without an pointer indirection.
 ///
 /// # Safety
 ///
 /// The native type `N` _should_ be treated as opaque, because its definition may change
-/// without adhering to semantic versioning and largely depends on what the tool bindgen
-/// is able to generate.
+/// without adhering to semantic versioning and depends on what the tool bindgen is able to generate.
 ///
-/// Converting from a Rust wrapper type to a native type may lose the automatic ability to free associated memory.
+/// Converting from a Rust wrapper to a wrapped value may lose the automatic ability to free associated memory.
 pub unsafe trait ValueWrapper<N> {
     fn wrap(native: N) -> Self;
     fn unwrap(self) -> N;
@@ -46,6 +48,37 @@ pub unsafe trait ValueWrapper<N> {
     fn inner_mut(&mut self) -> &mut N;
 }
 
+/// A trait that supports the conversion from a C/C++ value into its Rust wrapper and back.
+///
+/// The wrapped value can be accessed through the functions `inner` and `inner_mut`.
+///
+/// This trait is implemented for for all types that implement `NativeTransmutable<N>`.
+///
+/// # Safety
+///
+/// The native type `N` _should_ be treated as opaque, because its definition may change
+/// without adhering to semantic versioning and depends on what the tool bindgen is able to generate.
+///
+/// Converting from a Rust wrapper to a wrapped value may lose the automatic ability to free associated memory.
+pub unsafe trait NativeTransmutableWrapper<N> {
+    fn wrap(native: N) -> Self;
+    fn unwrap(self) -> N;
+    fn inner(&self) -> &N;
+    fn inner_mut(&mut self) -> &mut N;
+}
+
+/// A trait that supports the conversion from a C/C++ reference into its Rust wrapper and back.
+///
+/// The wrapped value can be accessed through the functions `inner` and `inner_mut`.
+///
+/// This trait is implemented for all wrapper types that wrap C/C++ references.
+///
+/// # Safety
+///
+/// The native type `N` _should_ be treated as opaque, because its definition may change
+/// without adhering to semantic versioning and depends on what the tool bindgen is able to generate.
+///
+/// Converting from a Rust wrapper to a wrapped value may lose the automatic ability to free associated memory.
 pub unsafe trait RefWrapper<N> {
     fn wrap_ref(native: &N) -> &Self;
     fn wrap_mut(native: &mut N) -> &mut Self;
