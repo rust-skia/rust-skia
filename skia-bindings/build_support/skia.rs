@@ -35,7 +35,6 @@ impl Default for BuildConfiguration {
         BuildConfiguration {
             on_windows: cargo::host().is_windows(),
             skia_debug,
-            keep_inline_functions: true,
             features: Features {
                 gl: cfg!(feature = "gl"),
                 vulkan: cfg!(feature = "vulkan"),
@@ -58,10 +57,6 @@ pub struct BuildConfiguration {
 
     /// Build Skia in a debug configuration?
     skia_debug: bool,
-
-    /// Configure Skia builds to keep inline functions to
-    /// prevent linker errors.
-    keep_inline_functions: bool,
 
     /// The Skia feature set to compile.
     features: Features,
