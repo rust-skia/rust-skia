@@ -16,6 +16,11 @@ steps:
   - bash: |
       rustup target add ${{ parameters.target }}
     displayName: 'Install Rust target ${{ parameters.target }}'
+  # At least on Linux / debug configurations we run out of disk space on the azure VM, so 
+  # we chose to run `cargo clean` even though it might slow down the builds. 
+  - bash: |
+      cargo clean
+    displayName: 'cargo clean'
 
   # Note: features are ignored when set in the workspace. This is a known bug in cargo (#5015), so cd into skia-safe instead.
   # Also be sure that the bindings.rs file is rebuilt (https://github.com/rust-skia/rust-skia/issues/10)
