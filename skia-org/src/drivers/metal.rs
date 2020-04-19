@@ -14,14 +14,14 @@ pub struct Metal {
     context: gpu::Context,
     queue: CommandQueue,
     device: Device,
-    pool: Pool,
+    pool: AutoreleasePool,
 }
 
 impl DrawingDriver for Metal {
     const NAME: &'static str = "metal";
 
     fn new() -> Self {
-        let pool = Pool(unsafe { NSAutoreleasePool::new(cocoa::base::nil) });
+        let pool = AutoreleasePool::new();
 
         let device = Device::system_default().expect("no Metal device");
         let queue = device.new_command_queue();
@@ -49,6 +49,8 @@ impl DrawingDriver for Metal {
         name: &str,
         func: impl Fn(&mut Canvas),
     ) {
+        let _image_pool = AutoreleasePool::new();
+
         let image_info = ImageInfo::new_n32_premul((width * 2, height * 2), None);
         let mut surface = Surface::new_render_target(
             &mut self.context,
@@ -65,9 +67,15 @@ impl DrawingDriver for Metal {
     }
 }
 
-struct Pool(*mut objc::runtime::Object);
+struct AutoreleasePool(*mut objc::runtime::Object);
 
-impl Drop for Pool {
+impl AutoreleasePool {
+    fn new() -> Self {
+        Self(unsafe { NSAutoreleasePool::new(cocoa::base::nil) })
+    }
+}
+
+impl Drop for AutoreleasePool {
     fn drop(&mut self) {
         #[allow(clippy::let_unit_value)]
         unsafe {
