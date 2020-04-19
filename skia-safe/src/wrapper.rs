@@ -184,3 +184,30 @@ where
         self.native_mut()
     }
 }
+
+//
+// NativeTransmutable<N>
+//
+
+unsafe impl<N, T> NativeTransmutableWrapper<N> for T
+where
+    N: Sized,
+    T: Sized,
+    T: NativeTransmutable<N>,
+{
+    fn wrap(native: N) -> Self {
+        Self::from_native(native)
+    }
+
+    fn unwrap(self) -> N {
+        Self::into_native(self)
+    }
+
+    fn inner(&self) -> &N {
+        self.native()
+    }
+
+    fn inner_mut(&mut self) -> &mut N {
+        self.native_mut()
+    }
+}
