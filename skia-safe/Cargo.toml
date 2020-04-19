@@ -38,3 +38,7 @@ lazy_static = "1.4"
 [dev-dependencies]
 serial_test = "0.4"
 serial_test_derive = "0.4"
+# gl-window
+glutin = "0.24"
+gl-rs = { package = "gl", version = "0.14.0" }
+

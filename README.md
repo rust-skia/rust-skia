@@ -191,7 +191,9 @@ For situations in which Skia does not build or needs to be configured differentl
 
 Please share your build experience so that we can try to automate the build and get to the point where `cargo build` _is_ sufficient to build the bindings _including_ Skia, and if that is not possible, clearly prompts to what's missing.
 
-## Examples
+## Example Applications
+
+### icon
 
 The `icon` example generates the rust-skia icon in the current directory.
 It computes the position of all the gear teeth etc. based on parameters such as the number of teeth and wheel radius.
@@ -204,6 +206,8 @@ cargo run --example icon 512
 
 It has a single optional parameter which is the size in pixels for the PNG file.
 Without parameters, it’ll produce PNG frames for the animated version.
+
+### skia-org
 
 The other examples are taken from [Skia's website](https://skia.org/) and [ported to the Rust API](skia-org/).
 
@@ -222,7 +226,15 @@ And to show the drivers that are supported
 cargo run -- --help
 ```
 
-Some examples:
+### gl-window
+
+An example that opens an OpenGL Window and draws a line with skia-safe (contributed by [@nornagon](https://github.com/nornagon)).
+
+```bash
+(cd skia-safe && cargo run --example gl-window --features "gl")
+```
+
+## Example Images
 
 Fill, Radial Gradients, Stroke, Stroke with Gradient, Transparency:
 [![Rust-skia icon](artwork/rust-skia-icon_512x512.png)](https://matracas.org/tmp/rust-skia-icon.html)
