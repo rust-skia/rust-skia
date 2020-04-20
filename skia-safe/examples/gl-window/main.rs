@@ -80,7 +80,7 @@ fn main() {
 
         #[allow(deprecated)]
         match event {
-            Event::LoopDestroyed => return,
+            Event::LoopDestroyed => {}
             Event::WindowEvent { event, .. } => match event {
                 WindowEvent::Resized(physical_size) => windowed_context.resize(physical_size),
                 WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
@@ -94,12 +94,11 @@ fn main() {
                     ..
                 } => {
                     if modifiers.logo() {
-                        match virtual_keycode {
-                            Some(VirtualKeyCode::Q) => *control_flow = ControlFlow::Exit,
-                            _ => (),
+                        if let Some(VirtualKeyCode::Q) = virtual_keycode {
+                            *control_flow = ControlFlow::Exit;
                         }
                     }
-                    x = x + 1;
+                    x += 1;
                     windowed_context.window().request_redraw();
                 }
                 _ => (),
@@ -110,8 +109,8 @@ fn main() {
                     let mut paint = Paint::default();
 
                     canvas.clear(Color::WHITE);
-                    paint.set_color(Color::new(0xffff0000));
-                    canvas.draw_line((x + 0, 0), (x + 100, 100), &paint);
+                    paint.set_color(Color::new(0xffff_0000));
+                    canvas.draw_line((x, 0), (x + 100, 100), &paint);
                 }
                 surface.canvas().flush();
                 windowed_context.swap_buffers().unwrap();
