@@ -1,9 +1,14 @@
-#[cfg(not(feature = "gl"))]
+#[cfg(target_os = "android")]
+fn main() {
+    println!("This example is not supported on Android (https://github.com/rust-windowing/winit/issues/948).")
+}
+
+#[cfg(all(not(target_os = "android"), not(feature = "gl")))]
 fn main() {
     println!("To run this example, invoke cargo with --feature \"gl\".")
 }
 
-#[cfg(feature = "gl")]
+#[cfg(all(not(target_os = "android"), feature = "gl"))]
 fn main() {
     use skia_safe::gpu::gl::FramebufferInfo;
     use skia_safe::gpu::{BackendRenderTarget, Context, SurfaceOrigin};
