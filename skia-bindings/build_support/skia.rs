@@ -233,7 +233,7 @@ impl FinalBuildConfiguration {
                         );
                     }
                 }
-                (arch, "linux", "android", _) => {
+                (arch, "linux", "android", _) | (arch, "linux", "androideabi", _) => {
                     args.push(("ndk", quote(&android::ndk())));
                     // TODO: make API-level configurable?
                     args.push(("ndk_api", android::API_LEVEL.into()));
@@ -390,7 +390,7 @@ impl BinariesConfiguration {
                     link_libraries.push("opengl32");
                 }
             }
-            (_, "linux", "android", _) => {
+            (_, "linux", "android", _) | (_, "linux", "androideabi", _) => {
                 link_libraries.extend(android::link_libraries(features));
             }
             (_, "apple", "ios", _) => {
@@ -639,7 +639,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
                 cargo::warning("failed to get macosx SDK path")
             }
         }
-        (arch, "linux", "android", _) => {
+        (arch, "linux", "android", _) | (arch, "linux", "androideabi", _) => {
             let target = &target.to_string();
             cc_build.target(target);
             for arg in android::additional_clang_args(target, arch) {
