@@ -18,7 +18,8 @@ steps:
     displayName: 'Install Rust target ${{ parameters.target }}'
 
   # Note: features are ignored when set in the workspace. This is a known bug in cargo (#5015), so cd into skia-safe instead.
-  # Also be sure that the bindings.rs file is rebuilt (https://github.com/rust-skia/rust-skia/issues/10)
+  # Also be sure that the bindings.rs file is rebuilt (#10)
+  # `cargo clean` needs to run to prevent running out of disk space on the Linux VM with stable-all-features-debug configurations (#323).
   - bash: |
       set -e
       if [ "${{ parameters.androidEnv }}" == "true" ]; then
@@ -30,7 +31,7 @@ steps:
         export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=${{ parameters.target }}$(androidAPILevel)-clang$(androidBinExt)
         echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
       fi
-      touch skia-bindings/build.rs
+      cargo clean
       set
       (cd skia-safe && cargo build --release --features "${{ parameters.features }}" --all-targets --target ${{ parameters.target }} -vv)
       export SKIA_BINARIES_TAG=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/tag.txt")

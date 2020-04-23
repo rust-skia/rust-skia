@@ -404,7 +404,7 @@ impl Handle<SkFont> {
                 glyphs.as_ptr(),
                 count.try_into().unwrap(),
                 pos.native_mut().as_mut_ptr(),
-                origin.native().clone(),
+                *origin.native(),
             )
         }
     }
