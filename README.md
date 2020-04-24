@@ -155,13 +155,19 @@ For example, to compile for `aarch64`:
    ```bash
    rustup target install aarch64-linux-android
    ```
-2. Download the [r21 NDK](https://developer.android.com/ndk/downloads) for your host architecture and unzip it.
+2. Download the [r21b NDK](https://developer.android.com/ndk/downloads) for your host architecture and unzip it.
 3. Compile your package for the `aarch64-linux-android` target:
 
 On **macOS**:
 
 ```bash
-ANDROID_NDK=:path-to-android-ndk-r21 PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin CC_aarch64_linux_android=aarch64-linux-android26-clang CXX_aarch64_linux_android=aarch64-linux-android26-clang++ CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android26-clang cargo build --target aarch64-linux-android -vv
+export ANDROID_NDK=:path-to-android-ndk-r21b
+export PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin
+export CC_aarch64_linux_android=aarch64-linux-android26-clang
+export CXX_aarch64_linux_android=aarch64-linux-android26-clang++
+export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android26-clang
+
+cargo build -vv --target aarch64-linux-android
 ```
 
 Note: we don't support Apple's Clang 11 to build for Android on macOS, so you need to install LLVM and set the `PATH` like instructed.
@@ -169,13 +175,25 @@ Note: we don't support Apple's Clang 11 to build for Android on macOS, so you ne
 On **Linux**:
 
 ```bash
-ANDROID_NDK=:path-to-android-ndk-r21 PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin CC_aarch64_linux_android=aarch64-linux-android26-clang CXX_aarch64_linux_android=aarch64-linux-android26-clang++ CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android26-clang cargo build --target aarch64-linux-android -vv
+export ANDROID_NDK=:path-to-android-ndk-r21b
+export PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin
+export CC_aarch64_linux_android=aarch64-linux-android26-clang
+export CXX_aarch64_linux_android=aarch64-linux-android26-clang++
+export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android26-clang
+
+cargo build -vv --target aarch64-linux-android
 ```
 
 On **Windows** the Android NDK clang executable must be invoked through `.cmd` scripts:
 
 ```bash
-ANDROID_NDK=:path-to-android-ndk-r21 PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/windows-x86_64/bin CC_aarch64_linux_android=aarch64-linux-android26-clang.cmd CXX_aarch64_linux_android=aarch64-linux-android26-clang++.cmd CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android26-clang.cmd cargo build --target aarch64-linux-android -vv
+export ANDROID_NDK=:path-to-android-ndk-r21b
+export PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/windows-x86_64/bin
+export CC_aarch64_linux_android=aarch64-linux-android26-clang.cmd
+export CXX_aarch64_linux_android=aarch64-linux-android26-clang++.cmd
+export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android26-clang.cmd
+
+cargo build -vv --target aarch64-linux-android
 ```
 _Notes:_
 
