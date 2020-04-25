@@ -569,7 +569,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .whitelist_var("kAll_GrBackendState")
         //
         .use_core()
-        .clang_arg("-std=c++14")
+        .clang_arg("-std=c++17")
         // required for macOS LLVM 8 to pick up C++ headers:
         .clang_args(&["-x", "c++"])
         .clang_arg("-v");
@@ -627,7 +627,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
     cc_build.cpp(true).out_dir(output_directory);
 
     if !cfg!(windows) {
-        cc_build.flag("-std=c++14");
+        cc_build.flag("-std=c++17");
     }
 
     let target = cargo::target();
