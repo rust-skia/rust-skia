@@ -552,6 +552,7 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         //   pulls in a std::map<>, which we treat as opaque, but bindgen creates wrong bindings for
         //   std::_Tree* types
         .blacklist_type("std::_Tree.*")
+        .blacklist_type("std::_Rb_tree.*") // c++17
         .blacklist_type("std::map.*")
         //   debug builds:
         .blacklist_type("SkLRUCache")
