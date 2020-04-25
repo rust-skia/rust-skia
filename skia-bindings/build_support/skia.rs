@@ -548,23 +548,6 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .constified_enum("SkCanvas_SaveLayerFlagsSet")
         .constified_enum("GrVkAlloc_Flag")
         .constified_enum("GrGLBackendState")
-        // modules/skparagraph
-        //   pulls in a std::map<>, which we treat as opaque, but bindgen creates wrong bindings for
-        //   std::_Tree* types
-        .blacklist_type("std::_Tree.*")
-        // Linux c++17
-        .blacklist_type("std::_Rb_tree.*")
-        // Linux c++17 with SKIA_DEBUG=1
-        .blacklist_type("std::__cxx.*")
-        .blacklist_type("std::array.*")
-        .blacklist_type("std::map.*")
-        //   debug builds:
-        .blacklist_type("SkLRUCache")
-        .blacklist_type("SkLRUCache_Entry")
-        //   not used at all:
-        .blacklist_type("std::vector.*")
-        // too much template magic:
-        .blacklist_type("SkRuntimeEffect_ConstIterable.*")
         // Vulkan reexports that got swallowed by making them opaque.
         // (these can not be whitelisted by a extern "C" function)
         .whitelist_type("VkPhysicalDeviceFeatures")
@@ -585,6 +568,10 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
 
     for opaque_type in OPAQUE_TYPES {
         builder = builder.opaque_type(opaque_type)
+    }
+
+    for t in BLACKLISTED_TYPES {
+        builder = builder.blacklist_type(t);
     }
 
     let mut cc_build = Build::new();
@@ -806,6 +793,26 @@ const OPAQUE_TYPES: &[&str] = &[
     "GrShaderCaps",
     // m81: yet experimental
     "SkM44",
+];
+
+const BLACKLISTED_TYPES: &[&str] = &[
+    // modules/skparagraph
+    //   pulls in a std::map<>, which we treat as opaque, but bindgen creates wrong bindings for
+    //   std::_Tree* types
+    "std::_Tree.*",
+    "std::map.*",
+    //   debug builds:
+    "SkLRUCache",
+    "SkLRUCache_Entry",
+    //   not used at all:
+    "std::vector.*",
+    // too much template magic:
+    "SkRuntimeEffect_ConstIterable.*",
+    // Linux LLVM9 c++17
+    "std::_Rb_tree.*",
+    // Linux LLVM9 c++17 with SKIA_DEBUG=1
+    "std::__cxx.*",
+    "std::array.*",
 ];
 
 #[derive(Debug)]
