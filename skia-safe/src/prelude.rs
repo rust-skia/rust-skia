@@ -191,10 +191,14 @@ where
     }
 }
 
-/// Trait that enables access to a native representation by reference.
-pub(crate) trait NativeAccess<N> {
+/// Trait that enables access to a native representation of a wrapper type.
+pub trait NativeAccess<N> {
+    /// Provides shared access to the native type of the wrapper.
     fn native(&self) -> &N;
+
+    /// Provides exclusive access to the native type of the wrapper.
     fn native_mut(&mut self) -> &mut N;
+
     // Returns a ptr to the native mutable value.
     unsafe fn native_mut_force(&self) -> *mut N {
         self.native() as *const N as *mut N
@@ -266,6 +270,13 @@ impl<N: NativeDrop> Handle<N> {
     pub(crate) fn replace_native(mut self, native: &mut N) -> Self {
         mem::swap(&mut self.0, native);
         self
+    }
+
+    /// Consumes the wrapper and returns the native type.
+    pub(crate) fn into_native(mut self) -> N {
+        let r = mem::replace(&mut self.0, unsafe { mem::zeroed() });
+        mem::forget(self);
+        r
     }
 }
 
@@ -441,10 +452,16 @@ impl<N: NativeDrop> NativeAccess<N> for RefHandle<N> {
 impl<N: NativeDrop> RefHandle<N> {
     /// Creates a RefHandle from a native pointer.
     ///
-    /// From this time on the RefHandle ownes the object that the pointer points
-    /// to and will call it's NativeDrop implementation it it goes out of scope.
+    /// From this time on, the handle owns the object that the pointer points
+    /// to and will call its NativeDrop implementation if it goes out of scope.
     pub(crate) fn from_ptr(ptr: *mut N) -> Option<Self> {
         ptr.into_option().map(Self)
+    }
+
+    pub(crate) fn into_ptr(self) -> *mut N {
+        let p = self.0;
+        mem::forget(self);
+        p
     }
 }
 
@@ -627,7 +644,7 @@ where
 
 /// Trait to use native types that as a rust type
 /// _inplace_ with the same size and field layout.
-pub(crate) trait NativeTransmutable<NT: Sized>: Sized {
+pub trait NativeTransmutable<NT: Sized>: Sized {
     /// Provides access to the native value through a
     /// transmuted reference to the Rust value.
     fn native(&self) -> &NT {

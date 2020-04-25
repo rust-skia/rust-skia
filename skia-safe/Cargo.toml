@@ -26,7 +26,7 @@ metal = ["gpu", "skia-bindings/metal"]
 textlayout = ["skia-bindings/textlayout"]
 # implied only, do not use
 gpu = []
-# deprecated since 0.25.0, forwarded to skia-bindings with the intend to print some warnings while build.rs is running
+# deprecated since 0.25.0, forwarded to skia-bindings with the intent to show warnings while build.rs is running
 svg = ["skia-bindings/svg"]
 shaper = ["textlayout", "skia-bindings/shaper"]
 
