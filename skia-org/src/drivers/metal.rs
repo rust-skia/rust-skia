@@ -54,7 +54,7 @@ impl DrawingDriver for Metal {
         let image_info = ImageInfo::new_n32_premul((width * 2, height * 2), None);
         let mut surface = Surface::new_render_target(
             &mut self.context,
-            Budgeted::YES,
+            Budgeted::Yes,
             &image_info,
             None,
             gpu::SurfaceOrigin::TopLeft,

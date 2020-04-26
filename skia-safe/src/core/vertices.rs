@@ -56,11 +56,11 @@ impl Attribute {
         Self { tp }
     }
 
-    pub fn channel_count(&self) -> usize {
+    pub fn channel_count(self) -> usize {
         unsafe { self.native().channelCount() }.try_into().unwrap()
     }
 
-    pub fn bytes_per_vertec(&self) -> usize {
+    pub fn bytes_per_vertex(self) -> usize {
         unsafe { self.native().bytesPerVertex() }
     }
 }
