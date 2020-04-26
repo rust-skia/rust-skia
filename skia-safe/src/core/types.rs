@@ -82,9 +82,16 @@ fn test_budgeted_layout() {
     Budgeted::test_layout()
 }
 
+#[allow(non_upper_case_globals)]
 impl Budgeted {
+    #[deprecated(since = "0.0.0", note = "use No")]
     pub const NO: Budgeted = Budgeted(false);
+    #[deprecated(since = "0.0.0", note = "use Yes")]
     pub const YES: Budgeted = Budgeted(true);
+
+    // we want this look like enum case names.
+    pub const No: Budgeted = Budgeted(false);
+    pub const Yes: Budgeted = Budgeted(true);
 }
 
 // TODO: BackingFit

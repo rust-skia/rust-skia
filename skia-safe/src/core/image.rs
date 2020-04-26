@@ -2,8 +2,8 @@
 use crate::gpu;
 use crate::prelude::*;
 use crate::{
-    AlphaType, Bitmap, ColorSpace, ColorType, Data, EncodedImageFormat, IPoint, IRect, ISize,
-    ImageInfo, Matrix, Paint, Picture, Shader, TileMode,
+    AlphaType, Bitmap, Budgeted, ColorSpace, ColorType, Data, EncodedImageFormat, IPoint, IRect,
+    ISize, ImageInfo, Matrix, Paint, Picture, Shader, TileMode,
 };
 use crate::{FilterQuality, ImageFilter, ImageGenerator, Pixmap};
 use skia_bindings as sb;
@@ -550,8 +550,22 @@ impl RCHandle<SkImage> {
         context: &mut gpu::Context,
         mip_mapped: gpu::MipMapped,
     ) -> Option<Image> {
+        self.new_texture_image_budgeted(context, mip_mapped, Budgeted::Yes)
+    }
+
+    pub fn new_texture_image_budgeted(
+        &self,
+        context: &mut gpu::Context,
+        mip_mapped: gpu::MipMapped,
+        budgeted: Budgeted,
+    ) -> Option<Image> {
         Image::from_ptr(unsafe {
-            sb::C_SkImage_makeTextureImage(self.native(), context.native_mut(), mip_mapped)
+            sb::C_SkImage_makeTextureImage(
+                self.native(),
+                context.native_mut(),
+                mip_mapped,
+                budgeted.into_native(),
+            )
         })
     }
 

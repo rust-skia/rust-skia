@@ -383,6 +383,7 @@ extern "C" SkImage* C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
 extern "C" SkImage* C_SkImage_makeTextureImage(
         const SkImage* self,
         GrContext* context,
-        GrMipMapped mipMapped) {
-    return self->makeTextureImage(context, mipMapped).release();
+        GrMipMapped mipMapped,
+        SkBudgeted budgeted) {
+    return self->makeTextureImage(context, mipMapped, budgeted).release();
 }
