@@ -136,7 +136,7 @@ impl Handle<SkColorInfo> {
     }
 
     pub fn is_opaque(&self) -> bool {
-        self.alpha_type().is_opaque()
+        self.alpha_type().is_opaque() || self.color_type().is_always_opaque()
     }
 
     pub fn is_gamma_close_to_srgb(&self) -> bool {
