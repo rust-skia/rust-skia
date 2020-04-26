@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::{Color, Data, Point, Rect};
 use skia_bindings as sb;
-use skia_bindings::{SkColor, SkPoint, SkVertices, SkVertices_Builder};
+use skia_bindings::{SkColor, SkPoint, SkVertices, SkVertices_Attribute, SkVertices_Builder};
 use std::{ptr, slice};
 
 #[deprecated(since = "0.0.0", note = "removed without replacement")]
@@ -21,6 +21,48 @@ pub use skia_bindings::SkVertices_VertexMode as VertexMode;
 #[test]
 fn test_vertices_vertex_mode_naming() {
     let _ = VertexMode::Triangles;
+}
+
+#[repr(u8)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+pub enum AttributeType {
+    Float = sb::SkVertices_Attribute_Type::Float as _,
+    Float2 = sb::SkVertices_Attribute_Type::Float2 as _,
+    Float3 = sb::SkVertices_Attribute_Type::Float3 as _,
+    Float4 = sb::SkVertices_Attribute_Type::Float4 as _,
+    Byte4UNorm = sb::SkVertices_Attribute_Type::Byte4_unorm as _,
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+pub struct Attribute {
+    pub tp: AttributeType,
+}
+
+impl NativeTransmutable<SkVertices_Attribute> for Attribute {}
+
+#[test]
+fn test_attribute_layout() {
+    Attribute::test_layout()
+}
+
+impl Default for Attribute {
+    fn default() -> Self {
+        Attribute::new(AttributeType::Float)
+    }
+}
+
+impl Attribute {
+    pub fn new(tp: AttributeType) -> Self {
+        Self { tp }
+    }
+
+    pub fn channel_count(&self) -> usize {
+        unsafe { self.native().channelCount() }.try_into().unwrap()
+    }
+
+    pub fn bytes_per_vertec(&self) -> usize {
+        unsafe { self.native().bytesPerVertex() }
+    }
 }
 
 pub type Vertices = RCHandle<SkVertices>;
@@ -68,10 +110,13 @@ impl RCHandle<SkVertices> {
         .unwrap()
     }
 
+    pub const MAX_CUSTOM_ATTRIBUTES: usize = 8;
+
     pub fn unique_id(&self) -> u32 {
         self.native().fUniqueID
     }
 
+    #[deprecated(since = "0.0.0", note = "will be removed without replacement")]
     pub fn mode(&self) -> VertexMode {
         self.native().fMode
     }
@@ -80,10 +125,14 @@ impl RCHandle<SkVertices> {
         Rect::from_native_ref(&self.native().fBounds)
     }
 
+    #[deprecated(since = "0.0.0", note = "will be removed without replacement")]
+    #[allow(deprecated)]
     pub fn has_colors(&self) -> bool {
         self.colors().is_some()
     }
 
+    #[deprecated(since = "0.0.0", note = "will be removed without replacement")]
+    #[allow(deprecated)]
     pub fn has_tex_coords(&self) -> bool {
         self.tex_coords().is_some()
     }
@@ -93,28 +142,38 @@ impl RCHandle<SkVertices> {
         false
     }
 
+    #[deprecated(since = "0.0.0", note = "will be removed without replacement")]
+    #[allow(deprecated)]
     pub fn has_indices(&self) -> bool {
         self.indices().is_some()
     }
 
+    #[deprecated(since = "0.0.0", note = "will be removed without replacement")]
     pub fn vertex_count(&self) -> usize {
         self.native().fVertexCount.try_into().unwrap()
     }
 
+    #[deprecated(since = "0.0.0", note = "will be removed without replacement")]
     pub fn index_count(&self) -> usize {
         self.native().fIndexCount.try_into().unwrap()
     }
 
+    #[deprecated(since = "0.0.0", note = "will be removed without replacement")]
+    #[allow(deprecated)]
     pub fn positions(&self) -> &[Point] {
         let positions: *const SkPoint = self.native().fPositions;
         unsafe { slice::from_raw_parts(positions as _, self.vertex_count()) }
     }
 
+    #[deprecated(since = "0.0.0", note = "will be removed without replacement")]
+    #[allow(deprecated)]
     pub fn tex_coords(&self) -> Option<&[Point]> {
         let texs: *const SkPoint = self.native().fTexs.into_option()?;
         Some(unsafe { slice::from_raw_parts(texs as _, self.vertex_count()) })
     }
 
+    #[deprecated(since = "0.0.0", note = "will be removed without replacement")]
+    #[allow(deprecated)]
     pub fn colors(&self) -> Option<&[Color]> {
         let colors: *const SkColor = self.native().fColors.into_option()?;
         Some(unsafe { slice::from_raw_parts(colors as _, self.vertex_count()) })
@@ -132,6 +191,8 @@ impl RCHandle<SkVertices> {
         None
     }
 
+    #[deprecated(since = "0.0.0", note = "will be removed without replacement")]
+    #[allow(deprecated)]
     pub fn indices(&self) -> Option<&[u16]> {
         let indices = self.native().fIndices.into_option()?;
         Some(unsafe { slice::from_raw_parts_mut(indices as _, self.index_count()) })
@@ -195,6 +256,51 @@ impl Handle<SkVertices_Builder> {
 
     pub fn is_valid(&self) -> bool {
         !self.native().fVertices.fPtr.is_null()
+    }
+
+    pub fn positions(&mut self) -> &mut [Point] {
+        unsafe {
+            let vertices = &*self.native().fVertices.fPtr;
+            slice::from_raw_parts_mut(
+                Point::from_native_ref_mut(&mut *vertices.fPositions),
+                vertices.fVertexCount.try_into().unwrap(),
+            )
+        }
+    }
+
+    pub fn indices(&mut self) -> Option<&mut [u16]> {
+        unsafe {
+            let vertices = &*self.native().fVertices.fPtr;
+            let indices = vertices.fIndices.into_option()?;
+            Some(slice::from_raw_parts_mut(
+                indices,
+                vertices.fIndexCount.try_into().unwrap(),
+            ))
+        }
+    }
+
+    // TODO: customData()
+
+    pub fn tex_coords(&mut self) -> Option<&mut [Point]> {
+        unsafe {
+            let vertices = &*self.native().fVertices.fPtr;
+            let coords = vertices.fTexs.into_option()?;
+            Some(slice::from_raw_parts_mut(
+                Point::from_native_ref_mut(&mut *coords),
+                vertices.fVertexCount.try_into().unwrap(),
+            ))
+        }
+    }
+
+    pub fn colors(&mut self) -> Option<&mut [Color]> {
+        unsafe {
+            let vertices = &*self.native().fVertices.fPtr;
+            let colors = vertices.fColors.into_option()?;
+            Some(slice::from_raw_parts_mut(
+                Color::from_native_ref_mut(&mut *colors),
+                vertices.fVertexCount.try_into().unwrap(),
+            ))
+        }
     }
 
     #[deprecated(since = "0.0.0", note = "returns false")]
