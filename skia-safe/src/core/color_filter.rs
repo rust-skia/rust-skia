@@ -53,6 +53,9 @@ impl RCHandle<SkColorFilter> {
             .if_true_some(matrix)
     }
 
+    // TODO: appendStages()
+    // TODO: program()
+
     pub fn flags(&self) -> self::Flags {
         Flags::from_bits_truncate(unsafe { sb::C_SkColorFilter_getFlags(self.native()) })
     }
@@ -76,7 +79,6 @@ impl RCHandle<SkColorFilter> {
         })
     }
 
-    #[must_use]
     pub fn composed(&self, inner: impl Into<ColorFilter>) -> Option<Self> {
         ColorFilter::from_ptr(unsafe {
             sb::C_SkColorFilter_makeComposed(self.native(), inner.into().into_ptr())
