@@ -1,6 +1,7 @@
 //! Full build support for the Skia library, SkiaBindings library and bindings.rs file.
 
 use crate::build_support::{android, binaries, cargo, clang, ios, llvm, vs, xcode};
+use bindgen::{CodegenConfig, EnumVariation};
 use cc::Build;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -35,7 +36,6 @@ impl Default for BuildConfiguration {
         BuildConfiguration {
             on_windows: cargo::host().is_windows(),
             skia_debug,
-            keep_inline_functions: true,
             features: Features {
                 gl: cfg!(feature = "gl"),
                 vulkan: cfg!(feature = "vulkan"),
@@ -58,10 +58,6 @@ pub struct BuildConfiguration {
 
     /// Build Skia in a debug configuration?
     skia_debug: bool,
-
-    /// Configure Skia builds to keep inline functions to
-    /// prevent linker errors.
-    keep_inline_functions: bool,
 
     /// The Skia feature set to compile.
     features: Features,
@@ -548,6 +544,34 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         .constified_enum("SkCanvas_SaveLayerFlagsSet")
         .constified_enum("GrVkAlloc_Flag")
         .constified_enum("GrGLBackendState")
+        // not used:
+        .blacklist_type("SkPathRef_Editor")
+        .blacklist_function("SkPathRef_Editor_Editor")
+        // private types that pull in inline functions that cannot be linked:
+        // https://github.com/rust-skia/rust-skia/issues/318
+        .raw_line("pub enum GrContext_Base {}")
+        .blacklist_type("GrContext_Base")
+        .blacklist_function("GrContext_Base_.*")
+        .raw_line("pub enum GrImageContext {}")
+        .blacklist_type("GrImageContext")
+        .raw_line("pub enum GrImageContextPriv {}")
+        .blacklist_type("GrImageContextPriv")
+        .raw_line("pub enum GrContextThreadSafeProxy {}")
+        .blacklist_type("GrContextThreadSafeProxy")
+        .raw_line("pub enum GrContextThreadSafeProxyPriv {}")
+        .blacklist_type("GrContextThreadSafeProxyPriv")
+        .raw_line("pub enum GrRecordingContext {}")
+        .blacklist_type("GrRecordingContext")
+        .raw_line("pub enum GrRecordingContextPriv {}")
+        .blacklist_type("GrRecordingContextPriv")
+        .raw_line("pub enum GrContextPriv {}")
+        .blacklist_type("GrContextPriv")
+        .raw_line("fn GrContext_priv(_: &GrContext) -> GrContextPriv { panic!(\"unexpected\") }")
+        .raw_line("fn GrContext_priv1(_: &GrContext) -> GrContextPriv { panic!(\"unexpected\") }")
+        .blacklist_function("GrContext_priv.*")
+        .raw_line("fn SkDeferredDisplayList_priv(_: &SkDeferredDisplayList) -> SkDeferredDisplayListPriv { panic!(\"unexpected\") }")
+        .raw_line("fn SkDeferredDisplayList_priv1(_: &SkDeferredDisplayList) -> SkDeferredDisplayListPriv { panic!(\"unexpected\") }")
+        .blacklist_function("SkDeferredDisplayList_priv.*")
         // Vulkan reexports that got swallowed by making them opaque.
         // (these can not be whitelisted by a extern "C" function)
         .whitelist_type("VkPhysicalDeviceFeatures")
@@ -555,6 +579,13 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
         // misc
         .whitelist_var("SK_Color.*")
         .whitelist_var("kAll_GrBackendState")
+        //
+        // don't generate destructors: https://github.com/rust-skia/rust-skia/issues/318
+        .with_codegen_config({
+            let mut config = CodegenConfig::default();
+            config.remove(CodegenConfig::DESTRUCTORS);
+            config
+        })
         //
         .use_core()
         .clang_arg("-std=c++17")
@@ -694,7 +725,6 @@ const OPAQUE_TYPES: &[&str] = &[
     "SkDeferredDisplayList_PendingPathsMap",
     // Types for which a bindgen layout is wrong causing types that contain
     // fields of them to fail their layout test.
-
     // Windows:
     "std::atomic",
     "std::function",
@@ -704,11 +734,7 @@ const OPAQUE_TYPES: &[&str] = &[
     // Ubuntu 18 LLVM 6: all types derived from SkWeakRefCnt
     "SkWeakRefCnt",
     "GrContext",
-    "GrContextThreadSafeProxy",
-    "GrContext_Base",
     "GrGLInterface",
-    "GrImageContext",
-    "GrRecordingContext",
     "GrSurfaceProxy",
     "Sk2DPathEffect",
     "SkCornerPathEffect",
@@ -793,6 +819,11 @@ const OPAQUE_TYPES: &[&str] = &[
     "GrShaderCaps",
     // m81: yet experimental
     "SkM44",
+    // more stuff we don't need that was tracked down fixing:
+    // https://github.com/rust-skia/rust-skia/issues/318
+    // referred from SkPath, but not used:
+    "SkPathRef",
+    "SkMutex",
 ];
 
 const BLACKLISTED_TYPES: &[&str] = &[
@@ -1184,7 +1215,6 @@ mod prerequisites {
     }
 }
 
-use bindgen::EnumVariation;
 pub use definitions::{Definition, Definitions};
 
 pub(crate) mod definitions {
