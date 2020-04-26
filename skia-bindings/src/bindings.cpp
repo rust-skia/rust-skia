@@ -2294,6 +2294,12 @@ const SkString* C_SkRuntimeEffect_children(const SkRuntimeEffect* self, size_t* 
     return &*children.begin();
 }
 
+const SkRuntimeEffect::Varying* C_SkRuntimeEffect_varyings(const SkRuntimeEffect* self, size_t* count) {
+    auto varyings = self->varyings();
+    *count = varyings.count();
+    return &*varyings.begin();
+}
+
 SkSL::ByteCode* C_SkRuntimeEffect_toByteCode(SkRuntimeEffect* self, const void* inputs, SkString* error) {
     auto r = self->toByteCode(inputs);
     *error = std::get<1>(r);

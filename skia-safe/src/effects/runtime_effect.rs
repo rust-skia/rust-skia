@@ -2,14 +2,16 @@ use crate::interop::AsStr;
 use crate::prelude::*;
 use crate::{interop, ColorFilter, Data, Matrix, Shader};
 use skia_bindings as sb;
-use skia_bindings::{SkRefCntBase, SkRuntimeEffect, SkRuntimeEffect_Variable};
+use skia_bindings::{
+    SkRefCntBase, SkRuntimeEffect, SkRuntimeEffect_Variable, SkRuntimeEffect_Varying,
+};
 use std::slice;
 
 pub type Variable = Handle<SkRuntimeEffect_Variable>;
 
 impl NativeDrop for SkRuntimeEffect_Variable {
     fn drop(&mut self) {
-        panic!("native type SkRuntimeEffect_Variable can't be owned in Rust");
+        panic!("native type SkRuntimeEffect::Variable can't be owned by Rust");
     }
 }
 
@@ -71,6 +73,24 @@ pub mod variable {
         pub struct Flags : u32 {
             const ARRAY = sb::SkRuntimeEffect_Variable_Flags_kArray_Flag as _;
         }
+    }
+}
+
+pub type Varying = Handle<SkRuntimeEffect_Varying>;
+
+impl NativeDrop for SkRuntimeEffect_Varying {
+    fn drop(&mut self) {
+        panic!("native type SkRuntimeEffect::Varying can't be owned by Rust");
+    }
+}
+
+impl Handle<SkRuntimeEffect_Varying> {
+    pub fn name(&self) -> &str {
+        self.native().fName.as_str()
+    }
+
+    pub fn width(&self) -> i32 {
+        self.native().fWidth
     }
 }
 
@@ -157,6 +177,14 @@ impl RCHandle<SkRuntimeEffect> {
             let ptr = sb::C_SkRuntimeEffect_children(self.native(), &mut count);
             let slice = slice::from_raw_parts(ptr, count);
             slice.iter().map(|str| str.as_str())
+        }
+    }
+
+    pub fn varyings(&self) -> &[Varying] {
+        unsafe {
+            let mut count: usize = 0;
+            let ptr = sb::C_SkRuntimeEffect_varyings(self.native(), &mut count);
+            slice::from_raw_parts(Varying::from_native_ref(&*ptr), count)
         }
     }
 
