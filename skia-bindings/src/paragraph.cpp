@@ -323,7 +323,15 @@ extern "C" {
 
 extern "C" {
     void C_TextStyle_Types(const Block*, const Placeholder*) {}
-    
+
+    void C_FontFeature_CopyConstruct(FontFeature* uninitialized, const FontFeature* other) {
+        new(uninitialized) FontFeature(*other);
+    }
+
+    void C_FontFeature_destruct(FontFeature* self) {
+        self->~FontFeature();
+    }
+
     void C_TextStyle_CopyConstruct(TextStyle* uninitialized, const TextStyle* other) {
         new(uninitialized) TextStyle(*other);
     }
