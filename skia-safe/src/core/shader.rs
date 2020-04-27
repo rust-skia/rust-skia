@@ -3,7 +3,7 @@ use crate::{
     gradient_shader, scalar, Color, ColorFilter, Image, Matrix, NativeFlattenable, Point, TileMode,
 };
 use skia_bindings as sb;
-use skia_bindings::{SkFlattenable, SkPoint, SkRefCntBase, SkShader, SkShader_GradientInfo};
+use skia_bindings::{SkFlattenable, SkRefCntBase, SkShader};
 
 pub use skia_bindings::SkShader_GradientType as GradientTypeInternal;
 #[test]

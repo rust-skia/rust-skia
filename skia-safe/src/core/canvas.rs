@@ -1174,8 +1174,8 @@ impl AutoCanvasRestore {
 #[cfg(test)]
 mod tests {
     use crate::{
-        AlphaType, Canvas, ClipOp, Color, ColorType, ImageInfo, Matrix, OwnedCanvas, Rect,
-        SaveLayerRec,
+        canvas::SaveLayerRec, AlphaType, Canvas, ClipOp, Color, ColorType, ImageInfo, Matrix,
+        OwnedCanvas, Rect,
     };
 
     #[test]

@@ -1,7 +1,7 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
 use crate::prelude::*;
-use crate::{ColorSpace, ColorType, ISize, SurfaceProps};
+use crate::{ColorSpace, SurfaceProps};
 use skia_bindings as sb;
 use skia_bindings::SkSurfaceCharacterization;
 
@@ -57,7 +57,7 @@ impl Handle<SkSurfaceCharacterization> {
     #[cfg(feature = "gpu")]
     pub fn with_backend_format(
         &self,
-        color_type: ColorType,
+        color_type: crate::ColorType,
         backend_format: &gpu::BackendFormat,
     ) -> Self {
         Self::from_native(unsafe {
@@ -98,7 +98,7 @@ impl Handle<SkSurfaceCharacterization> {
         self.native().fOrigin
     }
 
-    pub fn dimensions(&self) -> ISize {
+    pub fn dimensions(&self) -> crate::ISize {
         self.image_info().dimensions()
     }
 
