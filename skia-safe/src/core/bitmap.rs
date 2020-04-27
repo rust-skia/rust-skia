@@ -73,11 +73,6 @@ impl Handle<SkBitmap> {
         self.pixmap().shift_per_pixel()
     }
 
-    #[deprecated(since = "0.12.0", note = "use is_empty()")]
-    pub fn empty(&self) -> bool {
-        self.is_empty()
-    }
-
     pub fn is_empty(&self) -> bool {
         self.info().is_empty()
     }
@@ -281,11 +276,6 @@ impl Handle<SkBitmap> {
         }
     }
 
-    #[deprecated(since = "0.12.0", note = "use is_ready_to_draw()")]
-    pub fn ready_to_draw(&self) -> bool {
-        self.is_ready_to_draw()
-    }
-
     pub fn is_ready_to_draw(&self) -> bool {
         unsafe { sb::C_SkBitmap_readyToDraw(self.native()) }
     }
@@ -368,15 +358,6 @@ impl Handle<SkBitmap> {
         let mut pixmap = Pixmap::default();
         unsafe { self.native().peekPixels(pixmap.native_mut()) }
             .if_true_then_some(|| pixmap.borrows(self))
-    }
-
-    #[deprecated(since = "0.12.0", note = "use to_shader()")]
-    pub fn as_shader<'a>(
-        &self,
-        tile_modes: impl Into<Option<(TileMode, TileMode)>>,
-        local_matrix: impl Into<Option<&'a Matrix>>,
-    ) -> Shader {
-        self.to_shader(tile_modes, local_matrix)
     }
 
     pub fn to_shader<'a>(

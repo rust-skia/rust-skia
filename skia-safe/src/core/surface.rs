@@ -281,14 +281,6 @@ impl RCHandle<SkSurface> {
 
 #[cfg(feature = "gpu")]
 impl RCHandle<SkSurface> {
-    #[deprecated(since = "0.14.0", note = "use get_backend_texture()")]
-    pub fn backend_texture(
-        &mut self,
-        handle_access: BackendHandleAccess,
-    ) -> Option<gpu::BackendTexture> {
-        self.get_backend_texture(handle_access)
-    }
-
     pub fn get_backend_texture(
         &mut self,
         handle_access: BackendHandleAccess,
@@ -303,14 +295,6 @@ impl RCHandle<SkSurface> {
 
             gpu::BackendTexture::from_native_if_valid(backend_texture)
         }
-    }
-
-    #[deprecated(since = "0.14.0", note = "use get_backend_render_target()")]
-    pub fn backend_render_target(
-        &mut self,
-        handle_access: BackendHandleAccess,
-    ) -> Option<gpu::BackendRenderTarget> {
-        self.get_backend_render_target(handle_access)
     }
 
     pub fn get_backend_render_target(
@@ -363,11 +347,6 @@ impl RCHandle<SkSurface> {
         Canvas::borrow_from_native(canvas_ref)
     }
 
-    #[deprecated(note = "use Surface::new_surface")]
-    pub fn new_compatible(&mut self, info: &ImageInfo) -> Option<Surface> {
-        self.new_surface(info)
-    }
-
     // TODO: why is self mutable here?
     pub fn new_surface(&mut self, info: &ImageInfo) -> Option<Surface> {
         Surface::from_ptr(unsafe { sb::C_SkSurface_makeSurface(self.native_mut(), info.native()) })
@@ -395,16 +374,6 @@ impl RCHandle<SkSurface> {
     }
 
     // TODO: why is self mutable here?
-    #[deprecated(note = "use Surface::draw()")]
-    pub fn draw_to_canvas(
-        &mut self,
-        canvas: impl AsMut<Canvas>,
-        size: impl Into<Size>,
-        paint: Option<&Paint>,
-    ) {
-        self.draw(canvas, size, paint)
-    }
-
     pub fn draw(
         &mut self,
         mut canvas: impl AsMut<Canvas>,

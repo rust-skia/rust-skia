@@ -30,21 +30,11 @@ impl NativeFlattenable for SkColorFilter {
 }
 
 impl RCHandle<SkColorFilter> {
-    #[deprecated(since = "0.14.0", note = "use to_a_color_mode()")]
-    pub fn to_color_mode(&self) -> Option<(Color, BlendMode)> {
-        self.to_a_color_mode()
-    }
-
     pub fn to_a_color_mode(&self) -> Option<(Color, BlendMode)> {
         let mut color: Color = 0.into();
         let mut mode: BlendMode = Default::default();
         unsafe { sb::C_SkColorFilter_asAColorMode(self.native(), color.native_mut(), &mut mode) }
             .if_true_some((color, mode))
-    }
-
-    #[deprecated(since = "0.14.0", note = "use to_a_color_matrix()")]
-    pub fn to_color_matrix(&self) -> Option<[scalar; 20]> {
-        self.to_a_color_matrix()
     }
 
     pub fn to_a_color_matrix(&self) -> Option<[scalar; 20]> {
@@ -103,11 +93,6 @@ pub mod color_filters {
     pub fn matrix(color_matrix: &ColorMatrix) -> ColorFilter {
         ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_Matrix(color_matrix.native()) })
             .unwrap()
-    }
-
-    #[deprecated(since = "0.14.0", note = "use matrix_row_major()")]
-    pub fn matrix_row_major_255(array: &[scalar; 20]) -> ColorFilter {
-        self::matrix_row_major(array)
     }
 
     pub fn matrix_row_major(array: &[scalar; 20]) -> ColorFilter {

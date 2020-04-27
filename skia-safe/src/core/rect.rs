@@ -88,11 +88,6 @@ impl IRect {
         self.top
     }
 
-    #[deprecated(since = "0.12.0", note = "will be removed without replacement")]
-    pub fn left_top(&self) -> IPoint {
-        (self.left, self.top).into()
-    }
-
     pub fn width(&self) -> i32 {
         sk32::can_overflow_sub(self.right, self.left)
     }
@@ -418,11 +413,6 @@ impl Rect {
         // value==value will be true iff value is not NaN
         // TODO: is it faster to say !accum or accum==accum?
         !accum.is_nan()
-    }
-
-    #[deprecated(since = "0.12.0", note = "removed without replacement")]
-    pub fn left_top(&self) -> Point {
-        (self.left, self.top).into()
     }
 
     pub fn x(&self) -> scalar {

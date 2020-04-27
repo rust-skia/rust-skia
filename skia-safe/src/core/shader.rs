@@ -83,63 +83,6 @@ impl RCHandle<SkShader> {
         unsafe { sb::C_SkShader_isAImage(self.native()) }
     }
 
-    #[deprecated(since = "0.11.0", note = "skbug.com/8941")]
-    pub fn as_a_gradient<'a>(
-        &self,
-        colors: &'a mut [Color],
-        color_offsets: &'a mut [scalar],
-    ) -> Option<(GradientType, GradientInfo<'a>)> {
-        assert_eq!(colors.len(), color_offsets.len());
-        let max_color_count = colors.len();
-        unsafe {
-            let mut info = SkShader_GradientInfo {
-                fColorCount: max_color_count.try_into().unwrap(),
-                fColors: colors.native_mut().as_mut_ptr(),
-                fColorOffsets: color_offsets.as_mut_ptr(),
-                fPoint: [SkPoint { fX: 0.0, fY: 0.0 }; 2],
-                fRadius: Default::default(),
-                fTileMode: TileMode::Clamp,
-                fGradientFlags: 0,
-            };
-
-            let gradient_type = sb::C_SkShader_asAGradient(self.native(), &mut info);
-            match gradient_type {
-                GradientTypeInternal::None => None,
-                GradientTypeInternal::Color => Some(GradientType::Color),
-                GradientTypeInternal::Linear => Some(GradientType::Linear(
-                    Point::from_native(info.fPoint[0]),
-                    Point::from_native(info.fPoint[1]),
-                )),
-                GradientTypeInternal::Radial => Some(GradientType::Radial(
-                    Point::from_native(info.fPoint[0]),
-                    info.fRadius[0],
-                )),
-                GradientTypeInternal::Sweep => {
-                    Some(GradientType::Sweep(Point::from_native(info.fPoint[0])))
-                }
-                GradientTypeInternal::Conical => Some(GradientType::Conical([
-                    (Point::from_native(info.fPoint[0]), info.fRadius[0]),
-                    (Point::from_native(info.fPoint[1]), info.fRadius[1]),
-                ])),
-            }
-            .map(move |t| {
-                let returned_color_count: usize = info.fColorCount.try_into().unwrap();
-                assert!(returned_color_count <= max_color_count);
-                (
-                    t,
-                    GradientInfo {
-                        colors: &colors[0..returned_color_count],
-                        color_offsets: &color_offsets[0..returned_color_count],
-                        tile_mode: TileMode::Clamp,
-                        gradient_flags: gradient_shader::Flags::from_bits_truncate(
-                            info.fGradientFlags,
-                        ),
-                    },
-                )
-            })
-        }
-    }
-
     pub fn with_local_matrix(&self, matrix: &Matrix) -> Self {
         Self::from_ptr(unsafe {
             sb::C_SkShader_makeWithLocalMatrix(self.native(), matrix.native())
