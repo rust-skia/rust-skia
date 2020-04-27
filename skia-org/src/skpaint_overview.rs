@@ -1,10 +1,9 @@
 use crate::{resources, DrawingDriver};
 use skia_safe::{
-    corner_path_effect, dash_path_effect, discrete_path_effect, gradient_shader,
+    color_filters, corner_path_effect, dash_path_effect, discrete_path_effect, gradient_shader,
     line_2d_path_effect, paint, path_1d_path_effect, path_2d_path_effect, perlin_noise_shader,
-    scalar, table_color_filter, AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color,
-    ColorFilters, Font, MaskFilter, Matrix, Paint, Path, PathEffect, Point, Rect, Shaders,
-    TextBlob, TileMode, Typeface,
+    scalar, shaders, table_color_filter, AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color,
+    Font, MaskFilter, Matrix, Paint, Path, PathEffect, Point, Rect, TextBlob, TileMode, Typeface,
 };
 use std::path;
 
@@ -294,7 +293,7 @@ fn draw_turbulence_perlin_noise_shader(canvas: &mut Canvas) {
 fn draw_compose_shader(canvas: &mut Canvas) {
     let colors = [Color::BLUE, Color::YELLOW];
     let paint = &mut Paint::default();
-    paint.set_shader(Shaders::blend(
+    paint.set_shader(shaders::blend(
         BlendMode::Difference,
         gradient_shader::radial(
             (128.0, 128.0),
@@ -328,7 +327,7 @@ fn draw_mask_filter(canvas: &mut Canvas) {
 fn draw_color_filter(c: &mut Canvas) {
     fn f(c: &mut Canvas, (x, y): (scalar, scalar), color_matrix: &[scalar; 20]) {
         let paint = &mut Paint::default();
-        paint.set_color_filter(ColorFilters::matrix_row_major(color_matrix));
+        paint.set_color_filter(color_filters::matrix_row_major(color_matrix));
 
         let image = &resources::mandrill();
 
