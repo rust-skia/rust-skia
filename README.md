@@ -4,8 +4,8 @@
 
 Skia Submodule Status: chrome/m81 ([pending changes][skiapending], [our changes][skiaours]).
 
-[skiapending]: https://github.com/rust-skia/skia/compare/m81-0.27.0...google:chrome/m81
-[skiaours]: https://github.com/google/skia/compare/chrome/m81...rust-skia:m81-0.27.0
+[skiapending]: https://github.com/rust-skia/skia/compare/m81-0.27.3...google:chrome/m81
+[skiaours]: https://github.com/google/skia/compare/chrome/m81...rust-skia:m81-0.27.3
 
 ## Goals
 
