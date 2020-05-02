@@ -121,7 +121,8 @@ pub fn key(repository_short_hash: &str, features: &[impl AsRef<str>], skia_debug
 
 /// Create the download URL for the prebuilt binaries archive.
 pub fn download_url(tag: impl AsRef<str>, key: impl AsRef<str>) -> String {
-    let binding_url = env::var("SKIA_BINDING_URL").unwrap_or("https://github.com/rust-skia/skia-binaries".to_string());
+    let binding_url = env::var("SKIA_BINDING_URL")
+        .unwrap_or("https://github.com/rust-skia/skia-binaries".to_string());
     format!(
         "{}/releases/download/{}/{}-{}.tar.gz",
         binding_url,
