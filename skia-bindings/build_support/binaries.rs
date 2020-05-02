@@ -7,6 +7,7 @@ use std::io;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use tar::Archive;
+use std::env;
 
 /// Export binaries if we are inside a git repository _and_
 /// the artifact staging directory is set.
@@ -120,8 +121,10 @@ pub fn key(repository_short_hash: &str, features: &[impl AsRef<str>], skia_debug
 
 /// Create the download URL for the prebuilt binaries archive.
 pub fn download_url(tag: impl AsRef<str>, key: impl AsRef<str>) -> String {
+    let binding_url = env::var("SKIA_BINDING_URL").unwrap_or("https://github.com/rust-skia/skia-binaries".to_string());
     format!(
-        "https://github.com/rust-skia/skia-binaries/releases/download/{}/{}-{}.tar.gz",
+        "{}/releases/download/{}/{}-{}.tar.gz",
+        binding_url,
         tag.as_ref(),
         ARCHIVE_NAME,
         key.as_ref()
