@@ -121,15 +121,11 @@ pub fn key(repository_short_hash: &str, features: &[impl AsRef<str>], skia_debug
 
 /// Create the download URL for the prebuilt binaries archive.
 pub fn download_url(tag: impl AsRef<str>, key: impl AsRef<str>) -> String {
-    let binding_url = env::var("SKIA_BINDING_URL")
-        .unwrap_or("https://github.com/rust-skia/skia-binaries".to_string());
-    format!(
-        "{}/releases/download/{}/{}-{}.tar.gz",
-        binding_url,
-        tag.as_ref(),
-        ARCHIVE_NAME,
-        key.as_ref()
-    )
+    let binding_url = env::var("SKIA_BINARIES_URL")
+        .unwrap_or_else(|_| "https://github.com/rust-skia/skia-binaries/releases/download/{tag}/skia-binaries-{key}.tar.gz".to_string());
+    binding_url
+        .replace("{tag}", tag.as_ref())
+        .replace("{key}", key.as_ref())
 }
 
 pub fn unpack(archive: impl Read, output_directory: &Path) -> io::Result<()> {
