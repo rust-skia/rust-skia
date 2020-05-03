@@ -2,7 +2,6 @@
 
 use crate::build_support::{azure, cargo, git, skia};
 use flate2::read::GzDecoder;
-use std::env;
 use std::fs;
 use std::io;
 use std::io::{Read, Write};
@@ -121,8 +120,8 @@ pub fn key(repository_short_hash: &str, features: &[impl AsRef<str>], skia_debug
 
 /// Create the download URL for the prebuilt binaries archive.
 pub fn download_url(tag: impl AsRef<str>, key: impl AsRef<str>) -> String {
-    let binding_url = env::var("SKIA_BINARIES_URL")
-        .unwrap_or_else(|_| "https://github.com/rust-skia/skia-binaries/releases/download/{tag}/skia-binaries-{key}.tar.gz".to_string());
+    let binding_url = cargo::env_var("SKIA_BINARIES_URL")
+        .unwrap_or_else(|| "https://github.com/rust-skia/skia-binaries/releases/download/{tag}/skia-binaries-{key}.tar.gz".to_string());
     binding_url
         .replace("{tag}", tag.as_ref())
         .replace("{key}", key.as_ref())
