@@ -2,12 +2,12 @@
 
 use crate::build_support::{azure, cargo, git, skia};
 use flate2::read::GzDecoder;
+use std::env;
 use std::fs;
 use std::io;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use tar::Archive;
-use std::env;
 
 /// Export binaries if we are inside a git repository _and_
 /// the artifact staging directory is set.
