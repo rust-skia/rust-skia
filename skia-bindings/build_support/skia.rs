@@ -157,6 +157,7 @@ impl FinalBuildConfiguration {
                 ("skia_use_system_zlib", no()),
                 ("skia_use_freetype", yes()),
                 ("skia_use_system_freetype2", no()),
+                ("skia_enable_fontmgr_custom", yes()),
                 ("skia_use_xps", no()),
                 ("skia_use_dng_sdk", if features.dng { yes() } else { no() }),
                 ("cc", quote("clang")),
