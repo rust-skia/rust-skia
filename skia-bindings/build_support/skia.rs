@@ -250,7 +250,7 @@ impl FinalBuildConfiguration {
                 (_, "apple", "darwin", _) => {
                     // Only use the system freetype on mac since we get compile issues otherwise.
                     // Using the non-system freetype on linux gives us errors loading typefaces.
-                    ("skia_use_system_freetype2", no()),
+                    ("skia_use_system_freetype2", no());
                 }
                 _ => {}
             }
