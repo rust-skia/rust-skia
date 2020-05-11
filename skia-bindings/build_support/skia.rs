@@ -156,7 +156,6 @@ impl FinalBuildConfiguration {
                 ("skia_use_libwebp", no()),
                 ("skia_use_system_zlib", no()),
                 ("skia_use_freetype", yes()),
-                ("skia_use_system_freetype2", no()),
                 ("skia_enable_fontmgr_custom", yes()),
                 ("skia_use_xps", no()),
                 ("skia_use_dng_sdk", if features.dng { yes() } else { no() }),
@@ -247,6 +246,11 @@ impl FinalBuildConfiguration {
                 (arch, "apple", "ios", _) => {
                     args.push(("target_os", quote("ios")));
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
+                }
+                (_, "apple", "darwin", _) => {
+                    // Only use the system freetype on mac since we get compile issues otherwise.
+                    // Using the non-system freetype on linux gives us errors loading typefaces.
+                    ("skia_use_system_freetype2", no()),
                 }
                 _ => {}
             }
