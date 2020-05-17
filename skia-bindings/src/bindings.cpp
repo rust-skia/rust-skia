@@ -1674,14 +1674,6 @@ extern "C" SkMaskFilter* C_SkMaskFilter_MakeBlur(SkBlurStyle style, SkScalar sig
     return SkMaskFilter::MakeBlur(style, sigma, respectCTM).release();
 }
 
-extern "C" SkMaskFilter* C_SkMaskFilter_Compose(SkMaskFilter* outer, SkMaskFilter* inner) {
-    return SkMaskFilter::MakeCompose(sp(outer), sp(inner)).release();
-}
-
-extern "C" SkMaskFilter* C_SkMaskFilter_Combine(SkMaskFilter* filterA, SkMaskFilter* filterB, SkCoverageMode coverageMode) {
-    return SkMaskFilter::MakeCombine(sp(filterA), sp(filterB), coverageMode).release();
-}
-
 extern "C" SkMaskFilter* C_SkMaskFilter_Deserialize(const void* data, size_t length) {
     return SkMaskFilter::Deserialize(data, length).release();
 }
@@ -2278,10 +2270,6 @@ uint32_t C_SkRuntimeEffect_hash(const SkRuntimeEffect *self) {
     return self->hash();
 }
 
-size_t C_SkRuntimeEffect_uniformSize(const SkRuntimeEffect *self) {
-    return self->uniformSize();
-}
-
 const SkRuntimeEffect::Variable* C_SkRuntimeEffect_inputs(const SkRuntimeEffect* self, size_t* count) {
     auto inputs = self->inputs();
     *count = inputs.count();
@@ -2298,12 +2286,6 @@ const SkRuntimeEffect::Varying* C_SkRuntimeEffect_varyings(const SkRuntimeEffect
     auto varyings = self->varyings();
     *count = varyings.count();
     return &*varyings.begin();
-}
-
-SkSL::ByteCode* C_SkRuntimeEffect_toByteCode(SkRuntimeEffect* self, const void* inputs, SkString* error) {
-    auto r = self->toByteCode(inputs);
-    *error = std::get<1>(r);
-    return std::get<0>(r).release();
 }
 
 }

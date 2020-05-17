@@ -43,7 +43,6 @@ impl SkPathVerb {
             SkPathVerb::Conic => 4,
             SkPathVerb::Cubic => 4,
             SkPathVerb::Close => 0,
-            SkPathVerb::Done => 0,
         }
     }
 }
