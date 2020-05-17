@@ -581,7 +581,7 @@ impl M44 {
 
     pub fn set_col(&mut self, i: usize, v: &V4) {
         assert!(i <= 3);
-        self.mat[i * 4..i * 4 + V4::COMPONENTS].copy_from_slice(v.as_array());
+        self.mat[(i * 4)..(i * 4 + V4::COMPONENTS)].copy_from_slice(v.as_array());
     }
 
     pub fn set_identity(&mut self) -> &mut Self {
@@ -696,6 +696,7 @@ impl M44 {
 
 impl Mul for &M44 {
     type Output = M44;
+
     fn mul(self, m: Self) -> Self::Output {
         M44::concat(self, &m)
     }
@@ -711,6 +712,7 @@ impl Mul<V4> for &M44 {
 
 impl Mul<V3> for &M44 {
     type Output = V3;
+
     fn mul(self, v: V3) -> Self::Output {
         let v4 = self.map(v.x, v.y, v.z, 0.0);
         V3::new(v4.x, v4.y, v4.z)
