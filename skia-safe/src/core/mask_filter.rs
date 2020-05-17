@@ -40,7 +40,7 @@ impl RCHandle<SkMaskFilter> {
         })
     }
 
-    #[deprecated(since = "0.0.0", note = "removed without replacement")]
+    #[deprecated(since = "0.29.0", note = "removed without replacement")]
     pub fn with_matrix(&self, _matrix: &Matrix) -> ! {
         unimplemented!("removed without replacement")
     }

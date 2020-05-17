@@ -106,7 +106,7 @@ impl RefHandle<SkImageGenerator> {
     // TODO: generateTexture()
 
     #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.0.0", note = "removed without replacement")]
+    #[deprecated(since = "0.29.0", note = "removed without replacement")]
     pub fn textures_are_cacheable(&self) -> ! {
         unimplemented!("removed without replacement")
     }

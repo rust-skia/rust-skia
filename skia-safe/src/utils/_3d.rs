@@ -3,7 +3,7 @@
 //!       Should we place them into a module?
 use crate::{Matrix44, Point, Point3, M44, V3};
 
-#[deprecated(since = "0.0.0", note = "use M44::look_at()")]
+#[deprecated(since = "0.29.0", note = "use M44::look_at()")]
 pub fn look_at(
     eye: impl Into<Point3>,
     center: impl Into<Point3>,
@@ -15,12 +15,12 @@ pub fn look_at(
     M44::look_at(&eye, &center, &up).to_matrix44()
 }
 
-#[deprecated(since = "0.0.0", note = "use M44::perspective()")]
+#[deprecated(since = "0.29.0", note = "use M44::perspective()")]
 pub fn perspective(near: f32, far: f32, angle: f32) -> Matrix44 {
     M44::perspective(near, far, angle).to_matrix44()
 }
 
-#[deprecated(since = "0.0.0", note = "use M44::map()")]
+#[deprecated(since = "0.29.0", note = "use M44::map()")]
 pub fn map_points(dst: &mut [Point], m4: &Matrix44, src: &[Point3]) {
     assert_eq!(src.len(), dst.len());
 
@@ -33,7 +33,7 @@ pub fn map_points(dst: &mut [Point], m4: &Matrix44, src: &[Point3]) {
 }
 
 impl Matrix44 {
-    #[deprecated(since = "0.0.0", note = "use M44::look_at()")]
+    #[deprecated(since = "0.29.0", note = "use M44::look_at()")]
     #[allow(deprecated)]
     pub fn look_at(
         eye: impl Into<Point3>,
@@ -43,13 +43,13 @@ impl Matrix44 {
         look_at(eye, center, up)
     }
 
-    #[deprecated(since = "0.0.0", note = "use M44::perspective()")]
+    #[deprecated(since = "0.29.0", note = "use M44::perspective()")]
     #[allow(deprecated)]
     pub fn perspective(near: f32, far: f32, angle: f32) -> Matrix44 {
         perspective(near, far, angle)
     }
 
-    #[deprecated(since = "0.0.0", note = "use M44::map() or M44::Mul")]
+    #[deprecated(since = "0.29.0", note = "use M44::map() or M44::Mul")]
     #[allow(deprecated)]
     pub fn map_points(&self, src: &[Point3], dst: &mut [Point]) -> &Self {
         map_points(dst, self, src);

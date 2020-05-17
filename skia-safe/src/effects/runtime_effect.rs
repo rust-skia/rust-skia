@@ -146,7 +146,7 @@ impl RCHandle<SkRuntimeEffect> {
         unsafe { (*sb::C_SkRuntimeEffect_source(self.native())).as_str() }
     }
 
-    #[deprecated(since = "0.0.0", note = "removed without replacement")]
+    #[deprecated(since = "0.29.0", note = "removed without replacement")]
     pub fn index(&self) -> ! {
         unimplemented!("removed without replacement")
     }

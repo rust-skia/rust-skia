@@ -84,9 +84,9 @@ fn test_budgeted_layout() {
 
 #[allow(non_upper_case_globals)]
 impl Budgeted {
-    #[deprecated(since = "0.0.0", note = "use No")]
+    #[deprecated(since = "0.29.0", note = "use No")]
     pub const NO: Budgeted = Budgeted(false);
-    #[deprecated(since = "0.0.0", note = "use Yes")]
+    #[deprecated(since = "0.29.0", note = "use Yes")]
     pub const YES: Budgeted = Budgeted(true);
 
     // we want this look like enum case names.

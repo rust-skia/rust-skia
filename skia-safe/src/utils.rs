@@ -1,5 +1,5 @@
 mod _3d;
-#[deprecated(since = "0.0.0", note = "use functions in M44")]
+#[deprecated(since = "0.29.0", note = "use functions in M44")]
 pub use _3d::*;
 
 mod camera;

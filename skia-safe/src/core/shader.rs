@@ -128,7 +128,7 @@ pub mod shaders {
         Shader::from_ptr(unsafe { sb::C_SkShaders_Lerp(t, dst.into_ptr(), src.into_ptr()) })
     }
 
-    #[deprecated(since = "0.0.0", note = "removed without replacement")]
+    #[deprecated(since = "0.29.0", note = "removed without replacement")]
     pub fn lerp2(_red: Shader, _dst: Shader, _src: Shader, _local_matrix: Option<&Matrix>) -> ! {
         panic!("removed without replacement");
     }

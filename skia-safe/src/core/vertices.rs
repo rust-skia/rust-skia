@@ -4,15 +4,15 @@ use skia_bindings as sb;
 use skia_bindings::{SkColor, SkPoint, SkVertices, SkVertices_Attribute, SkVertices_Builder};
 use std::{ptr, slice};
 
-#[deprecated(since = "0.0.0", note = "removed without replacement")]
+#[deprecated(since = "0.29.0", note = "removed without replacement")]
 pub type BoneIndices = [u32; 4];
 
-#[deprecated(since = "0.0.0", note = "removed without replacement")]
+#[deprecated(since = "0.29.0", note = "removed without replacement")]
 pub type BoneWeights = [u32; 4];
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 #[repr(C)]
-#[deprecated(since = "0.0.0", note = "removed without replacement")]
+#[deprecated(since = "0.29.0", note = "removed without replacement")]
 pub struct Bone {
     values: [f32; 6],
 }
@@ -116,7 +116,7 @@ impl RCHandle<SkVertices> {
         self.native().fUniqueID
     }
 
-    #[deprecated(since = "0.0.0", note = "will be removed without replacement")]
+    #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
     pub fn mode(&self) -> VertexMode {
         self.native().fMode
     }
@@ -125,85 +125,85 @@ impl RCHandle<SkVertices> {
         Rect::from_native_ref(&self.native().fBounds)
     }
 
-    #[deprecated(since = "0.0.0", note = "will be removed without replacement")]
+    #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
     #[allow(deprecated)]
     pub fn has_colors(&self) -> bool {
         self.colors().is_some()
     }
 
-    #[deprecated(since = "0.0.0", note = "will be removed without replacement")]
+    #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
     #[allow(deprecated)]
     pub fn has_tex_coords(&self) -> bool {
         self.tex_coords().is_some()
     }
 
-    #[deprecated(since = "0.0.0", note = "returns false")]
+    #[deprecated(since = "0.29.0", note = "returns false")]
     pub fn has_bones(&self) -> bool {
         false
     }
 
-    #[deprecated(since = "0.0.0", note = "will be removed without replacement")]
+    #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
     #[allow(deprecated)]
     pub fn has_indices(&self) -> bool {
         self.indices().is_some()
     }
 
-    #[deprecated(since = "0.0.0", note = "will be removed without replacement")]
+    #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
     pub fn vertex_count(&self) -> usize {
         self.native().fVertexCount.try_into().unwrap()
     }
 
-    #[deprecated(since = "0.0.0", note = "will be removed without replacement")]
+    #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
     pub fn index_count(&self) -> usize {
         self.native().fIndexCount.try_into().unwrap()
     }
 
-    #[deprecated(since = "0.0.0", note = "will be removed without replacement")]
+    #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
     #[allow(deprecated)]
     pub fn positions(&self) -> &[Point] {
         let positions: *const SkPoint = self.native().fPositions;
         unsafe { slice::from_raw_parts(positions as _, self.vertex_count()) }
     }
 
-    #[deprecated(since = "0.0.0", note = "will be removed without replacement")]
+    #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
     #[allow(deprecated)]
     pub fn tex_coords(&self) -> Option<&[Point]> {
         let texs: *const SkPoint = self.native().fTexs.into_option()?;
         Some(unsafe { slice::from_raw_parts(texs as _, self.vertex_count()) })
     }
 
-    #[deprecated(since = "0.0.0", note = "will be removed without replacement")]
+    #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
     #[allow(deprecated)]
     pub fn colors(&self) -> Option<&[Color]> {
         let colors: *const SkColor = self.native().fColors.into_option()?;
         Some(unsafe { slice::from_raw_parts(colors as _, self.vertex_count()) })
     }
 
-    #[deprecated(since = "0.0.0", note = "returns None")]
+    #[deprecated(since = "0.29.0", note = "returns None")]
     #[allow(deprecated)]
     pub fn bone_indices(&self) -> Option<&[BoneIndices]> {
         None
     }
 
-    #[deprecated(since = "0.0.0", note = "returns None")]
+    #[deprecated(since = "0.29.0", note = "returns None")]
     #[allow(deprecated)]
     pub fn bone_weights(&self) -> Option<&[BoneWeights]> {
         None
     }
 
-    #[deprecated(since = "0.0.0", note = "will be removed without replacement")]
+    #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
     #[allow(deprecated)]
     pub fn indices(&self) -> Option<&[u16]> {
         let indices = self.native().fIndices.into_option()?;
         Some(unsafe { slice::from_raw_parts_mut(indices as _, self.index_count()) })
     }
 
-    #[deprecated(since = "0.0.0", note = "returns false")]
+    #[deprecated(since = "0.29.0", note = "returns false")]
     pub fn is_volatile(&self) -> bool {
         false
     }
 
-    #[deprecated(since = "0.0.0", note = "removed without replacement")]
+    #[deprecated(since = "0.29.0", note = "removed without replacement")]
     #[allow(deprecated)]
     pub fn apply_bones(&self, _bones: &[Bone]) -> ! {
         unimplemented!("removed without replacement")
@@ -303,18 +303,18 @@ impl Handle<SkVertices_Builder> {
         }
     }
 
-    #[deprecated(since = "0.0.0", note = "returns false")]
+    #[deprecated(since = "0.29.0", note = "returns false")]
     pub fn is_volatile(&self) -> bool {
         false
     }
 
-    #[deprecated(since = "0.0.0", note = "returns None")]
+    #[deprecated(since = "0.29.0", note = "returns None")]
     #[allow(deprecated)]
     pub fn bone_indices(&mut self) -> Option<&mut [BoneIndices]> {
         None
     }
 
-    #[deprecated(since = "0.0.0", note = "returns None")]
+    #[deprecated(since = "0.29.0", note = "returns None")]
     #[allow(deprecated)]
     pub fn bone_weights(&mut self) -> Option<&mut [BoneWeights]> {
         None
