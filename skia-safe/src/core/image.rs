@@ -550,8 +550,23 @@ impl RCHandle<SkImage> {
         context: &mut gpu::Context,
         mip_mapped: gpu::MipMapped,
     ) -> Option<Image> {
+        self.new_texture_image_budgeted(context, mip_mapped, crate::Budgeted::Yes)
+    }
+
+    #[cfg(feature = "gpu")]
+    pub fn new_texture_image_budgeted(
+        &self,
+        context: &mut gpu::Context,
+        mip_mapped: gpu::MipMapped,
+        budgeted: crate::Budgeted,
+    ) -> Option<Image> {
         Image::from_ptr(unsafe {
-            sb::C_SkImage_makeTextureImage(self.native(), context.native_mut(), mip_mapped)
+            sb::C_SkImage_makeTextureImage(
+                self.native(),
+                context.native_mut(),
+                mip_mapped,
+                budgeted.into_native(),
+            )
         })
     }
 

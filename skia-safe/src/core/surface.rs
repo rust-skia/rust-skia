@@ -281,14 +281,6 @@ impl RCHandle<SkSurface> {
 
 #[cfg(feature = "gpu")]
 impl RCHandle<SkSurface> {
-    #[deprecated(since = "0.14.0", note = "use get_backend_texture()")]
-    pub fn backend_texture(
-        &mut self,
-        handle_access: BackendHandleAccess,
-    ) -> Option<gpu::BackendTexture> {
-        self.get_backend_texture(handle_access)
-    }
-
     pub fn get_backend_texture(
         &mut self,
         handle_access: BackendHandleAccess,
@@ -303,14 +295,6 @@ impl RCHandle<SkSurface> {
 
             gpu::BackendTexture::from_native_if_valid(backend_texture)
         }
-    }
-
-    #[deprecated(since = "0.14.0", note = "use get_backend_render_target()")]
-    pub fn backend_render_target(
-        &mut self,
-        handle_access: BackendHandleAccess,
-    ) -> Option<gpu::BackendRenderTarget> {
-        self.get_backend_render_target(handle_access)
     }
 
     pub fn get_backend_render_target(
@@ -336,10 +320,20 @@ impl RCHandle<SkSurface> {
         backend_texture: &gpu::BackendTexture,
         origin: gpu::SurfaceOrigin,
     ) -> bool {
+        self.replace_backend_texture_with_mode(backend_texture, origin, ContentChangeMode::Retain)
+    }
+
+    pub fn replace_backend_texture_with_mode(
+        &mut self,
+        backend_texture: &gpu::BackendTexture,
+        origin: gpu::SurfaceOrigin,
+        mode: impl Into<Option<ContentChangeMode>>,
+    ) -> bool {
         unsafe {
             self.native_mut().replaceBackendTexture(
                 backend_texture.native(),
                 origin,
+                mode.into().unwrap_or(ContentChangeMode::Retain),
                 None,
                 ptr::null_mut(),
             )
@@ -351,11 +345,6 @@ impl RCHandle<SkSurface> {
     pub fn canvas(&mut self) -> &mut Canvas {
         let canvas_ref = unsafe { &mut *self.native_mut().getCanvas() };
         Canvas::borrow_from_native(canvas_ref)
-    }
-
-    #[deprecated(note = "use Surface::new_surface")]
-    pub fn new_compatible(&mut self, info: &ImageInfo) -> Option<Surface> {
-        self.new_surface(info)
     }
 
     // TODO: why is self mutable here?
@@ -385,16 +374,6 @@ impl RCHandle<SkSurface> {
     }
 
     // TODO: why is self mutable here?
-    #[deprecated(note = "use Surface::draw()")]
-    pub fn draw_to_canvas(
-        &mut self,
-        canvas: impl AsMut<Canvas>,
-        size: impl Into<Size>,
-        paint: Option<&Paint>,
-    ) {
-        self.draw(canvas, size, paint)
-    }
-
     pub fn draw(
         &mut self,
         mut canvas: impl AsMut<Canvas>,

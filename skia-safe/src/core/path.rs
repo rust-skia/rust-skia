@@ -364,11 +364,6 @@ impl Handle<SkPath> {
         unsafe { self.native().countPoints().try_into().unwrap() }
     }
 
-    #[deprecated(note = "use get_point()")]
-    pub fn point(&self, index: usize) -> Option<Point> {
-        self.get_point(index)
-    }
-
     pub fn get_point(&self, index: usize) -> Option<Point> {
         let p = Point::from_native(unsafe { self.native().getPoint(index.try_into().unwrap()) });
         // assuming that count_points() is somewhat slow, we
@@ -378,11 +373,6 @@ impl Handle<SkPath> {
         } else {
             None
         }
-    }
-
-    #[deprecated(note = "use get_points()")]
-    pub fn points(&self, points: &mut [Point]) -> usize {
-        self.get_points(points)
     }
 
     pub fn get_points(&self, points: &mut [Point]) -> usize {
@@ -398,11 +388,6 @@ impl Handle<SkPath> {
 
     pub fn count_verbs(&self) -> usize {
         unsafe { self.native().countVerbs() }.try_into().unwrap()
-    }
-
-    #[deprecated(note = "use get_verbs()")]
-    pub fn verbs(&self, verbs: &mut [u8]) -> usize {
-        self.get_verbs(verbs)
     }
 
     pub fn get_verbs(&self, verbs: &mut [u8]) -> usize {

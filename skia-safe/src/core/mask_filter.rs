@@ -40,8 +40,8 @@ impl RCHandle<SkMaskFilter> {
         })
     }
 
-    pub fn with_matrix(&self, matrix: &Matrix) -> Self {
-        Self::from_ptr(unsafe { sb::C_SkMaskFilter_makeWithMatrix(self.native(), matrix.native()) })
-            .unwrap()
+    #[deprecated(since = "0.29.0", note = "removed without replacement")]
+    pub fn with_matrix(&self, _matrix: &Matrix) -> ! {
+        unimplemented!("removed without replacement")
     }
 }

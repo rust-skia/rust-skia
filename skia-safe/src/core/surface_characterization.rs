@@ -53,6 +53,23 @@ impl Handle<SkSurfaceCharacterization> {
         };
         characterization
     }
+
+    #[cfg(feature = "gpu")]
+    pub fn with_backend_format(
+        &self,
+        color_type: crate::ColorType,
+        backend_format: &gpu::BackendFormat,
+    ) -> Self {
+        Self::from_native(unsafe {
+            self.native()
+                .createBackendFormat(color_type.into_native(), backend_format.native())
+        })
+    }
+
+    #[cfg(feature = "gl")]
+    pub fn with_fbo0(&self, uses_glfbo0: bool) -> Self {
+        Self::from_native(unsafe { self.native().createFBO0(uses_glfbo0) })
+    }
 }
 
 #[cfg(feature = "gpu")]
@@ -79,6 +96,10 @@ impl Handle<SkSurfaceCharacterization> {
 
     pub fn origin(&self) -> gpu::SurfaceOrigin {
         self.native().fOrigin
+    }
+
+    pub fn dimensions(&self) -> crate::ISize {
+        self.image_info().dimensions()
     }
 
     pub fn width(&self) -> i32 {

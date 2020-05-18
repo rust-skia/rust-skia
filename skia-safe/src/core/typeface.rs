@@ -172,11 +172,6 @@ impl RCHandle<SkTypeface> {
         (unsafe { self.native().getTableTags(v.as_mut_ptr()) } != 0).if_true_some(v)
     }
 
-    #[deprecated(note = "use get_table_size()")]
-    pub fn table_size(&self, tag: FontTableTag) -> Option<usize> {
-        self.get_table_size(tag)
-    }
-
     pub fn get_table_size(&self, tag: FontTableTag) -> Option<usize> {
         let size = unsafe { self.native().getTableSize(tag) };
         if size != 0 {
@@ -184,11 +179,6 @@ impl RCHandle<SkTypeface> {
         } else {
             None
         }
-    }
-
-    #[deprecated(note = "use get_table_data()")]
-    pub fn table_data(&self, tag: FontTableTag, data: &mut [u8]) -> usize {
-        self.get_table_data(tag, data)
     }
 
     pub fn get_table_data(&self, tag: FontTableTag, data: &mut [u8]) -> usize {
@@ -209,11 +199,6 @@ impl RCHandle<SkTypeface> {
         } else {
             None
         }
-    }
-
-    #[deprecated(note = "use get_kerning_pair_adjustments()")]
-    pub fn kerning_pair_adjustments(&self, glyphs: &[GlyphId], adjustments: &mut [i32]) -> bool {
-        self.get_kerning_pair_adjustments(glyphs, adjustments)
     }
 
     // note: adjustments slice length must be equal to glyph's len - 1.

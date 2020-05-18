@@ -118,7 +118,7 @@ extern "C" {
     void C_StrutStyle_CopyConstruct(StrutStyle* uninitialized, const StrutStyle* other) {
         new(uninitialized) StrutStyle(*other);
     }
-
+    
     void C_StrutStyle_destruct(StrutStyle* self) {
         self->~StrutStyle();
     }
@@ -131,6 +131,10 @@ extern "C" {
 
     void C_StrutStyle_setFontFamilies(StrutStyle* self, const SkString* data, size_t count) {
         self->setFontFamilies(std::vector<SkString>(data, data + count));
+    }
+
+    bool C_StrutStyle_equals(const StrutStyle* self, const StrutStyle* rhs) {
+        return *self == *rhs;
     }
 }
 
@@ -319,7 +323,15 @@ extern "C" {
 
 extern "C" {
     void C_TextStyle_Types(const Block*, const Placeholder*) {}
-    
+
+    void C_FontFeature_CopyConstruct(FontFeature* uninitialized, const FontFeature* other) {
+        new(uninitialized) FontFeature(*other);
+    }
+
+    void C_FontFeature_destruct(FontFeature* self) {
+        self->~FontFeature();
+    }
+
     void C_TextStyle_CopyConstruct(TextStyle* uninitialized, const TextStyle* other) {
         new(uninitialized) TextStyle(*other);
     }

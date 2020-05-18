@@ -153,7 +153,8 @@ impl FinalBuildConfiguration {
                 ("skia_use_gl", if features.gl { yes() } else { no() }),
                 ("skia_use_system_libjpeg_turbo", no()),
                 ("skia_use_system_libpng", no()),
-                ("skia_use_libwebp", no()),
+                ("skia_use_libwebp_encode", no()),
+                ("skia_use_libwebp_decode", no()),
                 ("skia_use_system_zlib", no()),
                 ("skia_use_xps", no()),
                 ("skia_use_dng_sdk", if features.dng { yes() } else { no() }),
@@ -817,13 +818,13 @@ const OPAQUE_TYPES: &[&str] = &[
     // m81: wrong size on macOS and Linux
     "SkRuntimeEffect",
     "GrShaderCaps",
-    // m81: yet experimental
-    "SkM44",
     // more stuff we don't need that was tracked down fixing:
     // https://github.com/rust-skia/rust-skia/issues/318
     // referred from SkPath, but not used:
     "SkPathRef",
     "SkMutex",
+    // m82: private
+    "SkIDChangeListener",
 ];
 
 const BLACKLISTED_TYPES: &[&str] = &[

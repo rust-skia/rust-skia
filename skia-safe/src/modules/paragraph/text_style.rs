@@ -70,7 +70,19 @@ pub type FontFeature = Handle<sb::skia_textlayout_FontFeature>;
 
 impl NativeDrop for sb::skia_textlayout_FontFeature {
     fn drop(&mut self) {
-        panic!("internal error, a FontFeature value can't be dropped in Rust");
+        unsafe { sb::C_FontFeature_destruct(self) }
+    }
+}
+
+impl NativeClone for sb::skia_textlayout_FontFeature {
+    fn clone(&self) -> Self {
+        construct(|ts| unsafe { sb::C_FontFeature_CopyConstruct(ts, self) })
+    }
+}
+
+impl PartialEq for Handle<sb::skia_textlayout_FontFeature> {
+    fn eq(&self, other: &Self) -> bool {
+        self.name() == other.name() && self.value() == other.value()
     }
 }
 
@@ -84,7 +96,7 @@ impl Handle<sb::skia_textlayout_FontFeature> {
     }
 }
 
-#[derive(Clone, Default, Debug)]
+#[derive(Clone, Debug)]
 pub struct PlaceholderStyle {
     pub width: scalar,
     pub height: scalar,
@@ -102,6 +114,18 @@ fn placeholder_style_layout() {
 impl PartialEq for PlaceholderStyle {
     fn eq(&self, other: &Self) -> bool {
         unsafe { self.native().equals(other.native()) }
+    }
+}
+
+impl Default for PlaceholderStyle {
+    fn default() -> Self {
+        Self::new(
+            0.0,
+            0.0,
+            PlaceholderAlignment::Baseline,
+            TextBaseline::Alphabetic,
+            0.0,
+        )
     }
 }
 

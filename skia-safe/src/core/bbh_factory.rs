@@ -13,5 +13,5 @@ impl NativeDrop for SkBBHFactory {
     }
 }
 
-// TODO: complete the implementation
+// TODO: complete the wrapper functions
 impl Handle<SkBBHFactory> {}

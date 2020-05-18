@@ -192,72 +192,32 @@ impl Matrix {
         unsafe { self.native().preservesRightAngles(scalar::NEARLY_ZERO) }
     }
 
-    #[deprecated(since = "0.12.0", note = "use scale_x() ")]
-    pub fn get_scale_x(&self) -> scalar {
-        self.scale_x()
-    }
-
     pub fn scale_x(&self) -> scalar {
         self[Member::ScaleX]
-    }
-
-    #[deprecated(since = "0.12.0", note = "use scale_y()")]
-    pub fn get_scale_y(&self) -> scalar {
-        self.scale_y()
     }
 
     pub fn scale_y(&self) -> scalar {
         self[Member::ScaleY]
     }
 
-    #[deprecated(since = "0.12.0", note = "use skew_y()")]
-    pub fn get_skew_y(&self) -> scalar {
-        self.skew_y()
-    }
-
     pub fn skew_y(&self) -> scalar {
         self[Member::SkewY]
-    }
-
-    #[deprecated(since = "0.12.0", note = "use skew_x()")]
-    pub fn get_skew_x(&self) -> scalar {
-        self.skew_x()
     }
 
     pub fn skew_x(&self) -> scalar {
         self[Member::SkewX]
     }
 
-    #[deprecated(since = "0.12.0", note = "use translate_x()")]
-    pub fn get_translate_x(&self) -> scalar {
-        self.translate_x()
-    }
-
     pub fn translate_x(&self) -> scalar {
         self[Member::TransX]
-    }
-
-    #[deprecated(since = "0.12.0", note = "use translate_y()")]
-    pub fn get_translate_y(&self) -> scalar {
-        self.translate_y()
     }
 
     pub fn translate_y(&self) -> scalar {
         self[Member::TransY]
     }
 
-    #[deprecated(since = "0.12.0", note = "use persp_x()")]
-    pub fn get_persp_x(&self) -> scalar {
-        self.persp_x()
-    }
-
     pub fn persp_x(&self) -> scalar {
         self[Member::Persp0]
-    }
-
-    #[deprecated(since = "0.12.0", note = "use persp_y()")]
-    pub fn get_persp_y(&self) -> scalar {
-        self.persp_y()
     }
 
     pub fn persp_y(&self) -> scalar {
@@ -564,12 +524,6 @@ impl Matrix {
 
     pub fn set_affine_identity(affine: &mut [scalar; 6]) {
         unsafe { SkMatrix::SetAffineIdentity(affine.as_mut_ptr()) }
-    }
-
-    #[deprecated(since = "0.12.0", note = "use to_affine()")]
-    #[must_use]
-    pub fn as_affine(&self) -> Option<[scalar; 6]> {
-        self.to_affine()
     }
 
     #[must_use]

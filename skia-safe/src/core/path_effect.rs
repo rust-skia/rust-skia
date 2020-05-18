@@ -165,11 +165,6 @@ impl RCHandle<SkPathEffect> {
         .if_true_some(point_data)
     }
 
-    #[deprecated(since = "0.12.0", note = "use as_a_dash()")]
-    pub fn as_dash(&self) -> Option<DashInfo> {
-        self.as_a_dash()
-    }
-
     // TODO: rename to to_a_dash()?
     pub fn as_a_dash(&self) -> Option<DashInfo> {
         let mut dash_info = construct(|di| unsafe { sb::C_SkPathEffect_DashInfo_Construct(di) });

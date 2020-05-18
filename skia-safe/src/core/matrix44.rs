@@ -328,12 +328,6 @@ impl Matrix44 {
         self.set_concat(&m, &self.clone())
     }
 
-    #[deprecated(since = "0.12.0", note = "use invert()")]
-    #[must_use]
-    pub fn inverse(&self) -> Option<Matrix44> {
-        self.invert()
-    }
-
     #[must_use]
     pub fn invert(&self) -> Option<Matrix44> {
         let mut r = Matrix44::default();
