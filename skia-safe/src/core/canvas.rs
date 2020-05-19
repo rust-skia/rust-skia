@@ -483,7 +483,7 @@ impl Canvas {
     }
 
     pub fn concat_44(&mut self, m: &M44) -> &mut Self {
-        unsafe { self.native_mut().concat44(m.native()) }
+        unsafe { self.native_mut().concat1(m.native()) }
         self
     }
 

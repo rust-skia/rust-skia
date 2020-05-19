@@ -159,8 +159,9 @@ impl RCHandle<SkRuntimeEffect> {
         unsafe { self.native().inputSize() }
     }
 
-    pub fn uniform_size(&self) -> usize {
-        unsafe { sb::C_SkRuntimeEffect_uniformSize(self.native()) }
+    #[deprecated(since = "0.0.0", note = "removed without replacement")]
+    pub fn uniform_size(&self) -> ! {
+        panic!("removed without replacement")
     }
 
     pub fn inputs(&self) -> &[Variable] {

@@ -8,7 +8,7 @@
 
 use crate::{
     SkAlphaType, SkBlendMode, SkBlendModeCoeff, SkImage_CompressionType,
-    SkImage_kCompressionTypeCount, SkPathFillType, SkPathVerb,
+    SkImage_kCompressionTypeCount, SkPathFillType, SkPathVerb, SkPath_Verb,
 };
 use std::ffi::CStr;
 
@@ -31,18 +31,46 @@ impl SkBlendMode {
     }
 }
 
+//
+// m84 introduced two different variants of the Path verb types.
+// One with Done and one without.
+//
+
 impl SkPathVerb {
+    /// The maximum number of points an iterator will return for the verb.
+    pub const MAX_POINTS: usize = SkPath_Verb::MAX_POINTS;
+    /// The number of points an iterator will return for the verb.
+    pub fn points(self) -> usize {
+        SkPath_Verb::from(self).points()
+    }
+}
+
+impl SkPath_Verb {
     /// The maximum number of points an iterator will return for the verb.
     pub const MAX_POINTS: usize = 4;
     /// The number of points an iterator will return for the verb.
     pub fn points(self) -> usize {
         match self {
-            SkPathVerb::Move => 1,
-            SkPathVerb::Line => 2,
-            SkPathVerb::Quad => 3,
-            SkPathVerb::Conic => 4,
-            SkPathVerb::Cubic => 4,
-            SkPathVerb::Close => 0,
+            SkPath_Verb::Move => 1,
+            SkPath_Verb::Line => 2,
+            SkPath_Verb::Quad => 3,
+            SkPath_Verb::Conic => 3,
+            SkPath_Verb::Cubic => 4,
+            SkPath_Verb::Close => 0,
+            SkPath_Verb::Done => 0,
+        }
+    }
+}
+
+impl From<SkPathVerb> for SkPath_Verb {
+    fn from(v: SkPathVerb) -> Self {
+        match v {
+            SkPathVerb::Move => SkPath_Verb::Move,
+            SkPathVerb::Line => SkPath_Verb::Line,
+            SkPathVerb::Quad => SkPath_Verb::Quad,
+            SkPathVerb::Conic => SkPath_Verb::Conic,
+            SkPathVerb::Cubic => SkPath_Verb::Cubic,
+            SkPathVerb::Close => SkPath_Verb::Close,
         }
     }
 }

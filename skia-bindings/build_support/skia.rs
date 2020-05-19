@@ -995,6 +995,10 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("VkSamplerYcbcrModelConversion", rewrite::vk),
     ("VkSamplerYcbcrRange", rewrite::vk),
     ("VkStructureType", rewrite::vk),
+    //
+    // m84 SkPath::Verb
+    //
+    ("Verb", rewrite::k_xxx_name),
 ];
 
 pub(crate) mod rewrite {

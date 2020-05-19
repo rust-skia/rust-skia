@@ -12,6 +12,7 @@
 #include "include/core/SkColor.h"
 #include "include/core/SkColorFilter.h"
 #include "include/core/SkContourMeasure.h"
+#include "include/core/SkCoverageMode.h"
 #include "include/core/SkCubicMap.h"
 #include "include/core/SkDataTable.h"
 #include "include/core/SkDeferredDisplayListRecorder.h"
@@ -153,7 +154,7 @@ extern "C" void C_SkEncodedOriginToMatrix(SkEncodedOrigin origin, int w, int h, 
 // core/
 //
 
-extern "C" void C_Core_Types(SkCubicMap *, SkGraphics *) {};
+extern "C" void C_Core_Types(SkCubicMap *, SkGraphics *, SkCoverageMode *) {};
 
 //
 // core/SkSurface.h

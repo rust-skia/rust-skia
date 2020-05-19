@@ -229,10 +229,22 @@ impl Handle<SkPixmap> {
     }
 
     pub fn erase_4f(&self, color: impl AsRef<Color4f>, subset: Option<&IRect>) -> bool {
+        self.erase_with_colorspace(color, None, subset)
+    }
+
+    pub fn erase_with_colorspace(
+        &self,
+        color: impl AsRef<Color4f>,
+        cs: Option<&ColorSpace>,
+        subset: Option<&IRect>,
+    ) -> bool {
         let color = color.as_ref();
         unsafe {
-            self.native()
-                .erase1(color.native(), subset.native_ptr_or_null())
+            self.native().erase1(
+                color.native(),
+                cs.native_ptr_or_null_mut_force(),
+                subset.native_ptr_or_null(),
+            )
         }
     }
 }
