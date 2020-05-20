@@ -35,6 +35,12 @@ fn text_decoration_style_member_naming() {
     let _ = TextDecorationStyle::Solid;
 }
 
+pub use sb::skia_textlayout_TextDecorationMode as TextDecorationMode;
+#[test]
+fn text_decoration_mode_naming() {
+    let _ = TextDecorationMode::Gaps;
+}
+
 pub use sb::skia_textlayout_StyleType as StyleType;
 
 #[test]
@@ -46,6 +52,7 @@ fn style_type_member_naming() {
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct Decoration {
     pub ty: TextDecoration,
+    pub mode: TextDecorationMode,
     pub color: Color,
     pub style: TextDecorationStyle,
     pub thickness_multiplier: scalar,

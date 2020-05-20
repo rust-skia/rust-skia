@@ -982,6 +982,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     // TextStyle.h
     //
     ("TextDecorationStyle", rewrite::k_xxx),
+    ("TextDecorationMode", rewrite::k_xxx),
     ("StyleType", rewrite::k_xxx),
     ("PlaceholderAlignment", rewrite::k_xxx),
     //
