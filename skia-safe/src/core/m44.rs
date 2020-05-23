@@ -1,4 +1,5 @@
 use crate::prelude::*;
+#[allow(deprecated)]
 use crate::{scalar, Matrix, Matrix44, Scalars};
 use bitflags::_core::ops::{AddAssign, MulAssign};
 use skia_bindings as sb;
@@ -743,6 +744,7 @@ impl M44 {
 
     // helper
 
+    #[allow(deprecated)]
     pub fn to_matrix44(&self) -> Matrix44 {
         let mut m = Matrix44::default();
         m.set_col_major(&self.mat);
@@ -806,6 +808,7 @@ impl From<Matrix> for M44 {
     }
 }
 
+#[allow(deprecated)]
 impl From<&Matrix44> for M44 {
     fn from(m: &Matrix44) -> Self {
         let mut rm: [f32; 16] = Default::default();

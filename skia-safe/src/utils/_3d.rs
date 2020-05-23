@@ -1,6 +1,7 @@
 //! TODO: The original Skia function names in this module are prefixed with Sk3, but we
 //!       export them without a prefix.
 //!       Should we place them into a module?
+#![allow(deprecated)]
 use crate::{Matrix44, Point, Point3, M44, V3};
 
 #[deprecated(since = "0.29.0", note = "use M44::look_at()")]
@@ -34,7 +35,6 @@ pub fn map_points(dst: &mut [Point], m4: &Matrix44, src: &[Point3]) {
 
 impl Matrix44 {
     #[deprecated(since = "0.29.0", note = "use M44::look_at()")]
-    #[allow(deprecated)]
     pub fn look_at(
         eye: impl Into<Point3>,
         center: impl Into<Point3>,
@@ -44,13 +44,11 @@ impl Matrix44 {
     }
 
     #[deprecated(since = "0.29.0", note = "use M44::perspective()")]
-    #[allow(deprecated)]
     pub fn perspective(near: f32, far: f32, angle: f32) -> Matrix44 {
         perspective(near, far, angle)
     }
 
     #[deprecated(since = "0.29.0", note = "use M44::map() or M44::Mul")]
-    #[allow(deprecated)]
     pub fn map_points(&self, src: &[Point3], dst: &mut [Point]) -> &Self {
         map_points(dst, self, src);
         self
