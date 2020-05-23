@@ -32,6 +32,12 @@ impl Deref for FourByteTag {
     }
 }
 
+impl From<(char, char, char, char)> for FourByteTag {
+    fn from((a, b, c, d): (char, char, char, char)) -> Self {
+        Self::from_chars(a, b, c, d)
+    }
+}
+
 impl From<u32> for FourByteTag {
     fn from(v: u32) -> Self {
         Self::new(v)
@@ -39,7 +45,15 @@ impl From<u32> for FourByteTag {
 }
 
 impl FourByteTag {
-    // Canonical new.
+    pub fn from_chars(a: char, b: char, c: char, d: char) -> Self {
+        Self(
+            (a as u8 as u32) << 24
+                | (b as u8 as u32) << 16
+                | (c as u8 as u32) << 8
+                | d as u8 as u32,
+        )
+    }
+
     pub fn new(v: u32) -> Self {
         Self(v)
     }
