@@ -154,7 +154,7 @@ extern "C" void C_SkEncodedOriginToMatrix(SkEncodedOrigin origin, int w, int h, 
 // core/
 //
 
-extern "C" void C_Core_Types(SkCubicMap *, SkGraphics *, SkCoverageMode *) {};
+extern "C" void C_Core_Types(SkCubicMap *, SkGraphics *, SkCoverageMode *, SkColorChannelFlag *) {};
 
 //
 // core/SkSurface.h
