@@ -362,8 +362,8 @@ mod run_handler {
                     Point::from_native_ref_mut(&mut *buffer.positions),
                     glyph_count,
                 ),
-                offsets: offsets,
-                clusters: clusters,
+                offsets,
+                clusters,
                 point: Point::from_native(buffer.point),
             }
         }
