@@ -2255,6 +2255,12 @@ SkShader *C_SkRuntimeEffect_makeShader(SkRuntimeEffect *self, SkData *inputs, Sk
     return self->makeShader(sp(inputs), childrenSPs, childCount, localMatrix, isOpaque).release();
 }
 
+SkColorFilter *
+C_SkRuntimeEffect_makeColorFilter2(SkRuntimeEffect *self, SkData *inputs, SkColorFilter **children, size_t childCount) {
+    auto childrenSPs = reinterpret_cast<sk_sp<SkColorFilter> *>(children);
+    return self->makeColorFilter(sp(inputs), childrenSPs, childCount).release();
+}
+
 SkColorFilter* C_SkRuntimeEffect_makeColorFilter(SkRuntimeEffect* self, SkData* inputs) {
     return self->makeColorFilter(sp(inputs)).release();
 }
