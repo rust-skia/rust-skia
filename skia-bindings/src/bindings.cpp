@@ -2452,12 +2452,12 @@ SkImageFilter *C_SkImageFilters_Xfermode(SkBlendMode blendMode, SkImageFilter *b
     return SkImageFilters::Xfermode(blendMode, sp(background), sp(foreground), cropRect).release();
 }
 
-SkImageFilter *C_SkImageFilters_Dilate(int radiusX, int radiusY, SkImageFilter *input,
+SkImageFilter *C_SkImageFilters_Dilate(SkScalar radiusX, SkScalar radiusY, SkImageFilter *input,
                                        const SkIRect *cropRect) {
     return SkImageFilters::Dilate(radiusX, radiusY, sp(input), cropRect).release();
 }
 
-SkImageFilter *C_SkImageFilters_Erode(int radiusX, int radiusY, SkImageFilter *input,
+SkImageFilter *C_SkImageFilters_Erode(SkScalar radiusX, SkScalar radiusY, SkImageFilter *input,
                                       const SkIRect *cropRect) {
     return SkImageFilters::Erode(radiusX, radiusY, sp(input), cropRect).release();
 }
