@@ -46,14 +46,13 @@ fn test_attribute_type_layout() {
 }
 
 pub use skia_bindings::SkVertices_Attribute_Usage as AttributeUsage;
-
 #[test]
 fn test_attribute_usage_naming() {
     let _ = AttributeUsage::Vector;
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, Eq, Debug)]
 pub struct Attribute<'a> {
     pub ty: AttributeType,
     pub usage: AttributeUsage,
@@ -66,6 +65,12 @@ impl NativeTransmutable<SkVertices_Attribute> for Attribute<'_> {}
 #[test]
 fn test_attribute_layout() {
     Attribute::test_layout()
+}
+
+impl PartialEq for Attribute<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        self.ty == other.ty && self.usage == other.usage && self.marker_id == other.marker_id
+    }
 }
 
 impl Default for Attribute<'_> {
@@ -112,6 +117,10 @@ impl Attribute<'_> {
 
     pub fn bytes_per_vertex(self) -> usize {
         unsafe { self.native().bytesPerVertex() }
+    }
+
+    pub fn is_valid(self) -> bool {
+        unsafe { self.native().isValid() }
     }
 }
 
