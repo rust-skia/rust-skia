@@ -1,7 +1,3 @@
-#![deprecated(
-    since = "0.0.0",
-    note = "This entire module is deprecated, and will be removed at some point. SkCanvas has full support for 4x4 matrices using SkM44"
-)]
 #![allow(deprecated)]
 use crate::prelude::*;
 use crate::{scalar, Matrix, Scalar, Vector3};
@@ -22,7 +18,6 @@ pub struct Vector4 {
 impl NativeTransmutable<SkVector4> for Vector4 {}
 
 #[test]
-#[allow(deprecated)]
 fn test_vector4_layout() {
     Vector4::test_layout()
 }
@@ -93,7 +88,6 @@ pub struct Matrix44(SkMatrix44);
 
 impl NativeTransmutable<SkMatrix44> for Matrix44 {}
 #[test]
-#[allow(deprecated)]
 fn test_matrix44_layout() {
     Matrix44::test_layout()
 }
@@ -462,7 +456,6 @@ impl Map2<(&[f64], &mut [f64])> for Matrix44 {
 }
 
 #[test]
-#[allow(deprecated)]
 fn create_identity() {
     Matrix44::new_identity();
     let _identity = Matrix44::new_identity();
