@@ -463,10 +463,6 @@ extern "C" void C_SkPath_RawIter_destruct(SkPath::RawIter* self) {
     self->~RawIter();
 }
 
-extern "C" SkPath::Verb C_SkPath_RawIter_next(SkPath::RawIter* self, SkPoint pts[4]) {
-    return self->next(pts);
-}
-
 extern "C" SkPath::Verb C_SkPath_RawIter_peek(const SkPath::RawIter* self) {
     return self->peek();
 }

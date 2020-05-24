@@ -34,6 +34,10 @@ fn test_add_path_mode_naming() {
 pub use path_types::PathSegmentMask as SegmentMask;
 
 pub use skia_bindings::SkPath_Verb as Verb;
+#[test]
+pub fn test_verb_naming() {
+    let _ = Verb::Line;
+}
 
 #[repr(C)]
 pub struct Iter<'a>(SkPath_Iter, PhantomData<&'a Handle<SkPath>>);
@@ -115,7 +119,7 @@ impl<'a> Iterator for Iter<'a> {
 pub struct RawIter<'a>(SkPath_RawIter, PhantomData<&'a Handle<SkPath>>);
 
 #[allow(deprecated)]
-impl<'a> NativeAccess<SkPath_RawIter> for RawIter<'a> {
+impl NativeAccess<SkPath_RawIter> for RawIter<'_> {
     fn native(&self) -> &SkPath_RawIter {
         &self.0
     }
@@ -158,13 +162,8 @@ impl RawIter<'_> {
         unsafe { sb::C_SkPath_RawIter_peek(self.native()) }
     }
 
-    pub fn conic_weight(&self) -> Option<scalar> {
-        #[allow(clippy::map_clone)]
-        self.native()
-            .fIter
-            .fWeights
-            .into_option()
-            .map(|cw| unsafe { *cw })
+    pub fn conic_weight(&self) -> scalar {
+        self.native().fConicWeight
     }
 }
 
@@ -175,15 +174,8 @@ impl Iterator for RawIter<'_> {
     fn next(&mut self) -> Option<Self::Item> {
         let mut points = [Point::default(); Verb::MAX_POINTS];
 
-        let verb = unsafe {
-            sb::C_SkPath_RawIter_next(self.native_mut(), points.native_mut().as_mut_ptr())
-        };
-
-        if verb != Verb::Done {
-            Some((verb, points[0..verb.points()].into()))
-        } else {
-            None
-        }
+        let verb = unsafe { self.native_mut().next(points.native_mut().as_mut_ptr()) };
+        (verb != Verb::Done).if_true_some((verb, points[0..verb.points()].into()))
     }
 }
 
