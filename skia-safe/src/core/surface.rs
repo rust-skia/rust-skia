@@ -281,6 +281,10 @@ impl RCHandle<SkSurface> {
 
 #[cfg(feature = "gpu")]
 impl RCHandle<SkSurface> {
+    pub fn context(&mut self) -> Option<gpu::Context> {
+        gpu::Context::from_unshared_ptr(unsafe { self.native_mut().getContext() })
+    }
+
     pub fn get_backend_texture(
         &mut self,
         handle_access: BackendHandleAccess,
