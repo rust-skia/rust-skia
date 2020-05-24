@@ -3,9 +3,9 @@ use crate::{scalar, Font, FontMgr, FourByteTag, Point, TextBlob};
 pub use run_handler::RunHandler;
 use skia_bindings as sb;
 use skia_bindings::{
-    SkShaper, SkShaper_BiDiRunIterator, SkShaper_FontRunIterator, SkShaper_LanguageRunIterator,
-    SkShaper_RunHandler, SkShaper_RunIterator, SkShaper_ScriptRunIterator,
-    SkTextBlobBuilderRunHandler,
+    RustRunHandler, SkShaper, SkShaper_BiDiRunIterator, SkShaper_FontRunIterator,
+    SkShaper_LanguageRunIterator, SkShaper_RunHandler, SkShaper_RunIterator,
+    SkShaper_ScriptRunIterator, SkTextBlobBuilderRunHandler,
 };
 use std::ffi::CStr;
 use std::marker::PhantomData;
@@ -391,34 +391,41 @@ mod run_handler {
     }
 }
 
+pub trait AsRunHandler<'a> {
+    type RunHandler: AsNativeRunHandler + 'a;
+    fn as_run_handler<'b>(&'b mut self) -> Self::RunHandler
+    where
+        'b: 'a;
+}
+
 /// A trait for accessing the native run handler instance used in the shape_native* functions.
 pub trait AsNativeRunHandler {
     fn as_native_run_handler(&mut self) -> &mut SkShaper_RunHandler;
 }
 
-impl RefHandle<SkShaper> {
-    pub fn shape(
-        &self,
-        utf8: &str,
-        font: &Font,
-        left_to_right: bool,
-        width: scalar,
-        run_handler: &mut dyn RunHandler,
-    ) {
-        let param = rust_run_handler::new_param(run_handler);
-        let mut run_handler = rust_run_handler::from_param(&param);
-        self.shape_native(utf8, font, left_to_right, width, &mut run_handler)
-    }
+impl<'a, T: RunHandler> AsRunHandler<'a> for T {
+    type RunHandler = RustRunHandler;
 
-    pub fn shape_native(
+    fn as_run_handler<'b>(&'b mut self) -> Self::RunHandler
+    where
+        'b: 'a,
+    {
+        let param = rust_run_handler::new_param(self);
+        rust_run_handler::from_param(&param)
+    }
+}
+
+impl RefHandle<SkShaper> {
+    pub fn shape<'a, 'b: 'a>(
         &self,
         utf8: &str,
         font: &Font,
         left_to_right: bool,
         width: scalar,
-        run_handler: &mut impl AsNativeRunHandler,
+        run_handler: &'b mut impl AsRunHandler<'a>,
     ) {
         let bytes = utf8.as_bytes();
+        let mut run_handler = run_handler.as_run_handler();
 
         unsafe {
             sb::C_SkShaper_shape(
@@ -434,7 +441,7 @@ impl RefHandle<SkShaper> {
     }
 
     #[allow(clippy::too_many_arguments)]
-    pub fn shape_with_iterators(
+    pub fn shape_with_iterators<'a, 'b: 'a>(
         &self,
         utf8: &str,
         font_run_iterator: &mut FontRunIterator,
@@ -442,32 +449,10 @@ impl RefHandle<SkShaper> {
         script_run_iterator: &mut ScriptRunIterator,
         language_run_iterator: &mut LanguageRunIterator,
         width: scalar,
-        run_handler: &mut dyn RunHandler,
+        run_handler: &'b mut impl AsRunHandler<'a>,
     ) {
-        let param = rust_run_handler::new_param(run_handler);
-        let mut run_handler = rust_run_handler::from_param(&param);
-        self.shape_native_with_iterators(
-            utf8,
-            font_run_iterator,
-            bidi_run_iterator,
-            script_run_iterator,
-            language_run_iterator,
-            width,
-            &mut run_handler,
-        )
-    }
+        let mut run_handler = run_handler.as_run_handler();
 
-    #[allow(clippy::too_many_arguments)]
-    pub fn shape_native_with_iterators(
-        &self,
-        utf8: &str,
-        font_run_iterator: &mut FontRunIterator,
-        bidi_run_iterator: &mut BiDiRunIterator,
-        script_run_iterator: &mut ScriptRunIterator,
-        language_run_iterator: &mut LanguageRunIterator,
-        width: scalar,
-        run_handler: &mut impl AsNativeRunHandler,
-    ) {
         let bytes = utf8.as_bytes();
         unsafe {
             sb::C_SkShaper_shape2(
@@ -485,7 +470,7 @@ impl RefHandle<SkShaper> {
     }
 
     #[allow(clippy::too_many_arguments)]
-    pub fn shape_with_iterators_and_features(
+    pub fn shape_with_iterators_and_features<'a, 'b: 'a>(
         &self,
         utf8: &str,
         font_run_iterator: &mut FontRunIterator,
@@ -494,34 +479,10 @@ impl RefHandle<SkShaper> {
         language_run_iterator: &mut LanguageRunIterator,
         features: &[Feature],
         width: scalar,
-        run_handler: &mut dyn RunHandler,
+        run_handler: &'b mut impl AsRunHandler<'a>,
     ) {
-        let param = rust_run_handler::new_param(run_handler);
-        let mut run_handler = rust_run_handler::from_param(&param);
-        self.shape_native_with_iterators_and_features(
-            utf8,
-            font_run_iterator,
-            bidi_run_iterator,
-            script_run_iterator,
-            language_run_iterator,
-            features,
-            width,
-            &mut run_handler,
-        )
-    }
+        let mut run_handler = run_handler.as_run_handler();
 
-    #[allow(clippy::too_many_arguments)]
-    pub fn shape_native_with_iterators_and_features(
-        &self,
-        utf8: &str,
-        font_run_iterator: &mut FontRunIterator,
-        bidi_run_iterator: &mut BiDiRunIterator,
-        script_run_iterator: &mut ScriptRunIterator,
-        language_run_iterator: &mut LanguageRunIterator,
-        features: &[Feature],
-        width: scalar,
-        run_handler: &mut impl AsNativeRunHandler,
-    ) {
         let bytes = utf8.as_bytes();
         unsafe {
             sb::C_SkShaper_shape3(
@@ -651,6 +612,23 @@ impl TextBlobBuilderRunHandler<'_> {
     }
 }
 
+impl<'a> AsRunHandler<'a> for TextBlobBuilderRunHandler<'_> {
+    type RunHandler = &'a mut SkShaper_RunHandler;
+
+    fn as_run_handler<'b>(&'b mut self) -> Self::RunHandler
+    where
+        'b: 'a,
+    {
+        (*self).as_native_run_handler()
+    }
+}
+
+impl AsNativeRunHandler for &mut SkShaper_RunHandler {
+    fn as_native_run_handler(&mut self) -> &mut SkShaper_RunHandler {
+        self
+    }
+}
+
 impl AsNativeRunHandler for TextBlobBuilderRunHandler<'_> {
     fn as_native_run_handler(&mut self) -> &mut SkShaper_RunHandler {
         self.0.base_mut()
@@ -771,13 +749,15 @@ mod tests {
             TextBlobBuilderRunHandler::new(&str, Point::default());
 
         let shaper = Shaper::new(None);
-        shaper.shape_native(
+
+        shaper.shape(
             "العربية",
             &Font::default(),
             false,
             10000.0,
             &mut text_blob_builder_run_handler,
         );
+
         let blob = text_blob_builder_run_handler.make_blob().unwrap();
         let bounds = blob.bounds();
         assert!(bounds.width() > 0.0 && bounds.height() > 0.0);
