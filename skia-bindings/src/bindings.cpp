@@ -108,6 +108,7 @@
 #include "include/pathops/SkPathOps.h"
 // utils/
 #include "include/utils/SkCamera.h"
+#include "include/utils/SkCustomTypeface.h"
 #include "include/utils/SkInterpolator.h"
 #include "include/utils/SkNullCanvas.h"
 #include "include/utils/SkParsePath.h"
@@ -2554,7 +2555,12 @@ extern "C" void C_SkOpBuilder_destruct(SkOpBuilder* self) {
 // utils
 //
 
-extern "C" void C_Utils_Types(SkShadowFlags *, SkShadowUtils *, SkTextUtils *, SkParsePath *) {}
+extern "C" void C_Utils_Types(
+        SkShadowFlags *,
+        SkShadowUtils *,
+        SkTextUtils *,
+        SkParsePath *,
+        SkCustomTypefaceBuilder *) {}
 
 extern "C" Sk3DView* C_Sk3DView_new() {
     return new Sk3DView();
@@ -2564,6 +2570,33 @@ extern "C" void C_Sk3DView_delete(Sk3DView* self) {
     delete self;
 }
 
+extern "C" void C_SkCustomTypefaceBuilder_destruct(SkCustomTypefaceBuilder *self) {
+    self->~SkCustomTypefaceBuilder();
+}
+
+extern "C" SkTypeface *C_SkCustomTypefaceBuilder_detach(SkCustomTypefaceBuilder *self) {
+    return self->detach().release();
+}
+
+/* Th following wrappers may be needed as soon the Skia implementation finds its way into an official release (m84).
+extern "C" void
+C_SkCustomTypefaceBuilder_setGlyph1(SkCustomTypefaceBuilder *self, SkGlyphID glyph, float advance, const SkPath *path,
+                                    const SkPaint *paint) {
+    self->setGlyph(glyph, advance, *path, *paint);
+}
+
+extern "C" void
+C_SkCustomTypefaceBuilder_setGlyph2(SkCustomTypefaceBuilder *self, SkGlyphID glyph, float advance, SkImage *image,
+                                    float scale) {
+    self->setGlyph(glyph, advance, sp(image), scale);
+}
+
+extern "C" void
+C_SkCustomTypefaceBuilder_setGlyph3(SkCustomTypefaceBuilder *self, SkGlyphID glyph, float advance, SkPicture *picture) {
+    self->setGlyph(glyph, advance, sp(picture));
+}
+*/
+ 
 extern "C" void C_SkInterpolator_destruct(SkInterpolator* self) {
     self->~SkInterpolator();
 }
