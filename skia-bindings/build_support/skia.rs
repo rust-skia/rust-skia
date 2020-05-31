@@ -978,6 +978,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("TextAlign", rewrite::k_xxx),
     ("TextDirection", rewrite::k_xxx_uppercase),
     ("TextBaseline", rewrite::k_xxx),
+    ("TextHeightBehavior", rewrite::k_xxx),
     //
     // TextStyle.h
     //

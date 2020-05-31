@@ -29,9 +29,8 @@ impl TextDecoration {
 }
 
 pub use sb::skia_textlayout_TextDecorationStyle as TextDecorationStyle;
-
 #[test]
-fn text_decoration_style_member_naming() {
+fn text_decoration_style_naming() {
     let _ = TextDecorationStyle::Solid;
 }
 
@@ -42,7 +41,6 @@ fn text_decoration_mode_naming() {
 }
 
 pub use sb::skia_textlayout_StyleType as StyleType;
-
 #[test]
 fn style_type_member_naming() {
     let _ = StyleType::Foreground;
