@@ -205,13 +205,25 @@ impl RCHandle<GrContext> {
 
     // TODO: wait()
 
-    pub fn flush(&mut self) -> &mut Self {
-        unsafe { sb::C_GrContext_flush(self.native_mut()) }
+    pub fn flush_and_submit(&mut self) -> &mut Self {
+        unsafe { sb::C_GrContext_flushAndSubmit(self.native_mut()) }
         self
+    }
+
+    #[deprecated(since = "0.0.0", note = "use flush_and_submit()")]
+    pub fn flush(&mut self) -> &mut Self {
+        self.flush_and_submit()
     }
 
     // TODO: flush(GrFlushInfo, ..) two variants.
     // TODO: flushAndSignalSemaphores
+
+    pub fn submit(&mut self, sync_to_cpu: impl Into<Option<bool>>) -> bool {
+        unsafe {
+            self.native_mut()
+                .submit(sync_to_cpu.into().unwrap_or(false))
+        }
+    }
 
     pub fn check_async_work_completion(&mut self) {
         unsafe { self.native_mut().checkAsyncWorkCompletion() }
@@ -258,6 +270,10 @@ impl RCHandle<GrContext> {
 
     // TODO: wrap createBackendTexture (several variants)
     //       introduced in m76, m77, and m79
+    //       extended in m84 with finishedProc and finishedContext
+
+    // TODO: wrap updateBackendTexture (several variants)
+    //       introduced in m84
 
     pub fn compressed_backend_format(&self, compression: image::CompressionType) -> BackendFormat {
         let mut backend_format = BackendFormat::default();
@@ -273,6 +289,7 @@ impl RCHandle<GrContext> {
 
     // TODO: wrap createCompressedBackendTexture (several variants)
     //       introduced in m81
+    //       extended in m84 with finishedProc and finishedContext
 
     // TODO: wrap deleteBackendTexture(),
 

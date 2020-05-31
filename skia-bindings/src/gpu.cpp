@@ -187,8 +187,8 @@ extern "C" bool C_GrContext_abandoned(GrContext* self) {
     return self->abandoned();
 }
 
-extern "C" void C_GrContext_flush(GrContext* self) {
-    self->flush();
+extern "C" void C_GrContext_flushAndSubmit(GrContext* self) {
+    self->flushAndSubmit();
 }
 
 extern "C" size_t C_GrContext_ComputeImageSize(SkImage* image, GrMipMapped mm, bool useNextPow2) {
