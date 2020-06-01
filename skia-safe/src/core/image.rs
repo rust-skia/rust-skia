@@ -448,7 +448,7 @@ impl RCHandle<SkImage> {
     pub fn peek_pixels(&self) -> Option<Borrows<Pixmap>> {
         let mut pixmap = Pixmap::default();
         unsafe { self.native().peekPixels(pixmap.native_mut()) }
-            .if_false_then_some(|| pixmap.borrows(self))
+            .if_true_then_some(|| pixmap.borrows(self))
     }
 
     pub fn is_texture_backed(&self) -> bool {
