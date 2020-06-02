@@ -7,6 +7,7 @@ use crate::prelude::*;
 use crate::{image, ColorType, Data, Image};
 use skia_bindings as sb;
 use skia_bindings::{GrContext, SkRefCntBase};
+use std::time::Duration;
 
 pub type Context = RCHandle<GrContext>;
 
@@ -142,7 +143,15 @@ impl RCHandle<GrContext> {
         self
     }
 
-    // TODO: performDeferredCleanup()
+    pub fn perform_deferred_cleanup(&mut self, not_used: Duration) -> &mut Self {
+        unsafe {
+            sb::C_GrContext_performDeferredCleanup(
+                self.native_mut(),
+                not_used.as_millis().try_into().unwrap(),
+            )
+        }
+        self
+    }
 
     pub fn purge_unlocked_resources(
         &mut self,

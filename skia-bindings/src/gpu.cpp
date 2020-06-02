@@ -203,6 +203,10 @@ extern "C" void C_GrContext_compressedBackendFormat(const GrContext* self, SkIma
     *result = self->compressedBackendFormat(compression);
 }
 
+extern "C" void C_GrContext_performDeferredCleanup(GrContext* self, long msNotUsed) {
+    self->performDeferredCleanup(std::chrono::milliseconds(msNotUsed));
+}
+
 //
 // gpu/GrBackendDrawableInfo.h
 //
