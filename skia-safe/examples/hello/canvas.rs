@@ -70,7 +70,7 @@ impl Canvas {
     pub fn begin_path(&mut self) {
         let new_path = Path::new();
         self.surface.canvas().draw_path(&self.path, &self.paint);
-        mem::replace(&mut self.path, new_path);
+        let _ = mem::replace(&mut self.path, new_path);
     }
 
     #[inline]

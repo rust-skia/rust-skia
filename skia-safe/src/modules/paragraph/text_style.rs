@@ -461,6 +461,8 @@ fn placeholder_layout() {
 
 impl Default for Placeholder {
     fn default() -> Self {
+        #[allow(clippy::unknown_clippy_lints)]
+        #[allow(clippy::reversed_empty_ranges)] // 1.45 lint
         Self {
             range: EMPTY_RANGE,
             style: Default::default(),
