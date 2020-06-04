@@ -457,6 +457,24 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
     build_skia(build, config, &ninja);
 }
 
+/// An offline build.
+///
+/// An offline build expects the Skia source tree including all third party dependencies
+/// to be available.
+pub fn build_offline(
+    build: &FinalBuildConfiguration,
+    config: &BinariesConfiguration,
+    ninja_command: Option<&Path>,
+) {
+    let python2 = prerequisites::locate_python2_cmd();
+    configure_skia(&build, &config, &python2);
+    build_skia(
+        &build,
+        &config,
+        ninja_command.unwrap_or(&ninja::default_exe_name()),
+    );
+}
+
 /// Prepares the build and returns the ninja command to use for building Skia.
 pub fn fetch_dependencies(python2: &Path) -> PathBuf {
     prerequisites::resolve_dependencies();
@@ -479,7 +497,7 @@ pub fn fetch_dependencies(python2: &Path) -> PathBuf {
     env::current_dir()
         .unwrap()
         .join("depot_tools")
-        .join(ninja_default_exe_name())
+        .join(ninja::default_exe_name())
 }
 
 /// Configures Skia by calling gn
@@ -1078,7 +1096,7 @@ pub(crate) mod rewrite {
     }
 }
 
-pub(crate) mod prerequisites {
+pub mod prerequisites {
     use crate::build_support::{cargo, utils};
     use flate2::read::GzDecoder;
     use std::ffi::OsStr;
@@ -1301,6 +1319,10 @@ pub(crate) mod definitions {
     }
 }
 
-pub(crate) fn ninja_default_exe_name() -> PathBuf {
-    if cfg!(windows) { "ninja.exe" } else { "ninja" }.into()
+mod ninja {
+    use std::path::PathBuf;
+
+    pub fn default_exe_name() -> PathBuf {
+        if cfg!(windows) { "ninja.exe" } else { "ninja" }.into()
+    }
 }

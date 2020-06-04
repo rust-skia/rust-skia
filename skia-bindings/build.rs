@@ -1,5 +1,4 @@
 mod build_support;
-use crate::build_support::skia::FinalBuildConfiguration;
 use build_support::{binaries, cargo, git, skia, utils};
 use std::io::Cursor;
 use std::path::Path;
@@ -56,17 +55,15 @@ fn main() {
     if let Some(offline_source_dir) = env::offline_source_dir() {
         println!("STARTING OFFLINE BUILD");
 
-        let final_configuration =
-            FinalBuildConfiguration::from_build_configuration(&build_config, &offline_source_dir);
+        let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
+            &build_config,
+            &offline_source_dir,
+        );
 
-        let python2 = skia::prerequisites::locate_python2_cmd();
-        skia::configure_skia(&final_configuration, &binaries_config, &python2);
-        skia::build_skia(
+        skia::build_offline(
             &final_configuration,
             &binaries_config,
-            env::offline_ninja_command()
-                .as_deref()
-                .unwrap_or(&skia::ninja_default_exe_name()),
+            env::offline_ninja_command().as_deref(),
         );
     } else {
         //
@@ -99,7 +96,7 @@ fn main() {
 
         if build_skia {
             println!("STARTING A FULL BUILD");
-            let final_configuration = FinalBuildConfiguration::from_build_configuration(
+            let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
                 &build_config,
                 &std::env::current_dir().unwrap().join("skia"),
             );
