@@ -1096,7 +1096,7 @@ pub(crate) mod rewrite {
     }
 }
 
-pub mod prerequisites {
+mod prerequisites {
     use crate::build_support::{cargo, utils};
     use flate2::read::GzDecoder;
     use std::ffi::OsStr;
