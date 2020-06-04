@@ -53,7 +53,7 @@ fn main() {
     // offline build?
     //
 
-    let binaries_config = if let Some(offline_source_dir) = env::offline_source_dir() {
+    if let Some(offline_source_dir) = env::offline_source_dir() {
         println!("STARTING OFFLINE BUILD");
 
         let final_configuration =
@@ -68,8 +68,6 @@ fn main() {
                 .as_deref()
                 .unwrap_or(&skia::ninja_default_exe_name()),
         );
-
-        binaries_config
     } else {
         //
         // is the download of prebuilt binaries possible?
@@ -107,8 +105,6 @@ fn main() {
             );
             skia::build(&final_configuration, &binaries_config);
         }
-
-        binaries_config
     };
 
     binaries_config.commit_to_cargo();
