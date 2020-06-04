@@ -457,7 +457,7 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
     build_skia(build, config, &ninja);
 }
 
-/// An offline build.
+/// Build Skia without any network access.
 ///
 /// An offline build expects the Skia source tree including all third party dependencies
 /// to be available.
