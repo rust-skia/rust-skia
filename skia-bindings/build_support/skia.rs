@@ -681,6 +681,9 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
                 cargo::warning("failed to get macosx SDK path")
             }
         }
+        (_, _, "windows", Some("gnu")) => {
+            builder = builder.clang_arg(format!("--target={}", target.to_string()));
+        }
         (arch, "linux", "android", _) | (arch, "linux", "androideabi", _) => {
             let target = &target.to_string();
             cc_build.target(target);
