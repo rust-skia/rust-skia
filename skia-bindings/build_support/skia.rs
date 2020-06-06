@@ -158,8 +158,6 @@ impl FinalBuildConfiguration {
                 ("skia_use_system_zlib", no()),
                 ("skia_use_xps", no()),
                 ("skia_use_dng_sdk", if features.dng { yes() } else { no() }),
-                ("cc", quote("clang")),
-                ("cxx", quote("clang++")),
             ];
 
             if features.vulkan {
@@ -201,6 +199,7 @@ impl FinalBuildConfiguration {
 
             let mut flags: Vec<&str> = vec![];
             let mut use_expat = true;
+            let mut use_gcc = false;
 
             // target specific gn args.
             let target = cargo::target();
@@ -230,6 +229,12 @@ impl FinalBuildConfiguration {
                         );
                     }
                 }
+                (_, _, "windows", Some("gnu")) if build.on_windows => {
+                    if let Some(win_vc) = vs::resolve_win_vc() {
+                        args.push(("win_vc", quote(win_vc.to_str().unwrap())))
+                    }
+                    use_gcc = true;
+                }
                 (arch, "linux", "android", _) | (arch, "linux", "androideabi", _) => {
                     args.push(("ndk", quote(&android::ndk())));
                     // TODO: make API-level configurable?
@@ -247,6 +252,14 @@ impl FinalBuildConfiguration {
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
                 }
                 _ => {}
+            }
+
+            if use_gcc {
+                args.push(("cc", quote("gcc")));
+                args.push(("cxx", quote("g++")));
+            } else {
+                args.push(("cc", quote("clang")));
+                args.push(("cxx", quote("clang++")));
             }
 
             if use_expat {
@@ -382,6 +395,12 @@ impl BinariesConfiguration {
                 }
             }
             (_, _, "windows", Some("msvc")) => {
+                link_libraries.extend(vec!["usp10", "ole32", "user32", "gdi32", "fontsub"]);
+                if features.gl {
+                    link_libraries.push("opengl32");
+                }
+            }
+            (_, _, "windows", Some("gnu")) => {
                 link_libraries.extend(vec!["usp10", "ole32", "user32", "gdi32", "fontsub"]);
                 if features.gl {
                     link_libraries.push("opengl32");
