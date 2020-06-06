@@ -145,6 +145,12 @@ jobs:
       ${{ if and(eq(parameters.platform, 'macOS'), eq(parameters.deployRelease, 'False')) }}:
         features: '$(features),metal'
 
+  - ${{ if eq(parameters.platform, 'Windows') }}:
+    - template: 'azure-pipelines-build-target.yml'
+      parameters:
+        target: 'x86_64-pc-windows-gnu'
+        releaseBinaries: ${{ parameters.deployRelease }}
+
   - ${{ if eq(parameters.platform, 'macOS') }}:
     - template: 'azure-pipelines-build-target.yml'
       parameters:
