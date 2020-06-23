@@ -30,6 +30,10 @@ mod env {
     pub fn offline_ninja_command() -> Option<PathBuf> {
         cargo::env_var("SKIA_OFFLINE_NINJA_COMMAND").map(PathBuf::from)
     }
+
+    pub fn offline_gn_command() -> Option<PathBuf> {
+        cargo::env_var("SKIA_OFFLINE_GN_COMMAND").map(PathBuf::from)
+    }
 }
 
 const SRC_BINDINGS_RS: &str = "src/bindings.rs";
@@ -64,6 +68,7 @@ fn main() {
             &final_configuration,
             &binaries_config,
             env::offline_ninja_command().as_deref(),
+            env::offline_gn_command().as_deref(),
         );
     } else {
         //

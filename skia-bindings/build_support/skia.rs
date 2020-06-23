@@ -453,7 +453,7 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
     let python2 = &prerequisites::locate_python2_cmd();
     println!("Python 2 found: {:?}", python2);
     let ninja = fetch_dependencies(&python2);
-    configure_skia(build, config, &python2);
+    configure_skia(build, config, &python2, None);
     build_skia(build, config, &ninja);
 }
 
@@ -465,9 +465,10 @@ pub fn build_offline(
     build: &FinalBuildConfiguration,
     config: &BinariesConfiguration,
     ninja_command: Option<&Path>,
+    gn_command: Option<&Path>,
 ) {
     let python2 = prerequisites::locate_python2_cmd();
-    configure_skia(&build, &config, &python2);
+    configure_skia(&build, &config, &python2, gn_command);
     build_skia(
         &build,
         &config,
@@ -505,6 +506,7 @@ pub fn configure_skia(
     build: &FinalBuildConfiguration,
     config: &BinariesConfiguration,
     python2: &Path,
+    gn_command: Option<&Path>,
 ) {
     let gn_args = build
         .gn_args
@@ -513,7 +515,9 @@ pub fn configure_skia(
         .collect::<Vec<String>>()
         .join(" ");
 
-    let gn_command = build.skia_source_dir.join("bin").join("gn");
+    let gn_command = gn_command
+        .map(|p| p.to_owned())
+        .unwrap_or_else(|| build.skia_source_dir.join("bin").join("gn"));
 
     println!("Skia args: {}", &gn_args);
 
