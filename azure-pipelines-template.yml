@@ -87,10 +87,11 @@ jobs:
       displayName: Install LLVM on Windows
 
   # All platforms (Linux images have Rust preinstalled and in the PATH).
+  # Note that self updates do not seem to work for some targets, so we disable them for now.
   - bash: |
       set -e
       rustup default ${TOOLCHAIN}
-      rustup update ${TOOLCHAIN}
+      rustup update --no-self-update ${TOOLCHAIN}
       rustup component add clippy --toolchain ${TOOLCHAIN}
       rustup component add rustfmt --toolchain ${TOOLCHAIN}
       rustc -Vv
