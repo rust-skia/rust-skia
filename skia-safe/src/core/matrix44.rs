@@ -7,7 +7,7 @@ use std::ops;
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Debug)]
-#[deprecated(since = "0.0.0", note = "use V4 instead")]
+#[deprecated(since = "0.30.0", note = "use V4 instead")]
 pub struct Vector4 {
     x: scalar,
     y: scalar,
@@ -83,7 +83,7 @@ bitflags! {
 
 #[derive(Copy, Clone)]
 #[repr(transparent)]
-#[deprecated(since = "0.0.0", note = "use M44 instead")]
+#[deprecated(since = "0.30.0", note = "use M44 instead")]
 pub struct Matrix44(SkMatrix44);
 
 impl NativeTransmutable<SkMatrix44> for Matrix44 {}

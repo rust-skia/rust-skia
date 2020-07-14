@@ -113,7 +113,7 @@ impl<'a> Iterator for Iter<'a> {
 
 #[repr(C)]
 #[deprecated(
-    since = "0.0.0",
+    since = "0.30.0",
     note = "User Iter instead, RawIter will soon be removed."
 )]
 pub struct RawIter<'a>(SkPath_RawIter, PhantomData<&'a Handle<SkPath>>);

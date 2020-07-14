@@ -210,7 +210,7 @@ impl RCHandle<GrContext> {
         self
     }
 
-    #[deprecated(since = "0.0.0", note = "use flush_and_submit()")]
+    #[deprecated(since = "0.30.0", note = "use flush_and_submit()")]
     pub fn flush(&mut self) -> &mut Self {
         self.flush_and_submit()
     }

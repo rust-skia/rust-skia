@@ -505,20 +505,20 @@ impl M44 {
         unsafe { self.native().getRowMajor(v.as_mut_ptr()) }
     }
 
-    #[deprecated(since = "0.0.0", note = "use M44::col_major() instead")]
+    #[deprecated(since = "0.30.0", note = "use M44::col_major() instead")]
     pub fn set_col_major(&mut self, v: &[scalar; Self::COMPONENTS]) -> &mut Self {
         *self = Self::col_major(v);
         self
     }
 
-    #[deprecated(since = "0.0.0", note = "use M44::row_major() instead")]
+    #[deprecated(since = "0.30.0", note = "use M44::row_major() instead")]
     pub fn set_row_major(&mut self, v: &[scalar; Self::COMPONENTS]) -> &mut Self {
         *self = Self::row_major(v);
         self
     }
 
     #[allow(clippy::too_many_arguments)]
-    #[deprecated(since = "0.0.0", note = "use Self::new() instead")]
+    #[deprecated(since = "0.30.0", note = "use Self::new() instead")]
     pub fn set_44(
         &mut self,
         m0: scalar,
@@ -638,7 +638,7 @@ impl M44 {
         self
     }
 
-    #[deprecated(since = "0.0.0", note = "use M44::col_major() and M44::set_concat()")]
+    #[deprecated(since = "0.30.0", note = "use M44::col_major() and M44::set_concat()")]
     pub fn set_concat_16(&mut self, a: &M44, col_major: &[scalar; Self::COMPONENTS]) -> &mut Self {
         self.set_concat(a, &Self::col_major(col_major))
     }
@@ -650,7 +650,7 @@ impl M44 {
         self
     }
 
-    #[deprecated(since = "0.0.0", note = "use M44::col_major() and M44::pre_concat()")]
+    #[deprecated(since = "0.30.0", note = "use M44::col_major() and M44::pre_concat()")]
     #[allow(deprecated)]
     pub fn pre_concat_16(&mut self, col_major: &[scalar; Self::COMPONENTS]) -> &mut Self {
         self.set_concat_16(&self.clone(), col_major)

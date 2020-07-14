@@ -187,7 +187,7 @@ impl RCHandle<SkRuntimeEffect> {
         unsafe { self.native().inputSize() }
     }
 
-    #[deprecated(since = "0.0.0", note = "removed without replacement")]
+    #[deprecated(since = "0.30.0", note = "removed without replacement")]
     pub fn uniform_size(&self) -> ! {
         panic!("removed without replacement")
     }

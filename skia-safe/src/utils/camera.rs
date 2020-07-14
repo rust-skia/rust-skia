@@ -5,7 +5,7 @@ use skia_bindings as sb;
 use skia_bindings::{Sk3DView, SkCamera3D, SkMatrix3D, SkPatch3D, SkPoint3D, SkUnit3D};
 
 #[deprecated(
-    since = "0.0.0",
+    since = "0.30.0",
     note = "Skia now has support for a 4x matrix (core::M44) in core::Canvas."
 )]
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
@@ -43,7 +43,7 @@ impl Unit3D {
 }
 
 #[deprecated(
-    since = "0.0.0",
+    since = "0.30.0",
     note = "Skia now has support for a 4x matrix (core::M44) in core::Canvas."
 )]
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
@@ -80,14 +80,14 @@ impl Point3D {
 }
 
 #[deprecated(
-    since = "0.0.0",
+    since = "0.30.0",
     note = "Skia now has support for a 4x matrix (core::M44) in core::Canvas."
 )]
 pub type Vector3D = Point3D;
 
 // note: Default is an empty matrix, and not the identity matrix, which is generated with reset()!
 #[deprecated(
-    since = "0.0.0",
+    since = "0.30.0",
     note = "Skia now has support for a 4x matrix (core::M44) in core::Canvas."
 )]
 #[derive(Clone, PartialEq, Default, Debug)]
@@ -192,7 +192,7 @@ impl Matrix3D {
 }
 
 #[deprecated(
-    since = "0.0.0",
+    since = "0.30.0",
     note = "Skia now has support for a 4x matrix (core::M44) in core::Canvas."
 )]
 #[derive(Clone, PartialEq, Debug)]
@@ -234,7 +234,7 @@ impl Patch3D {
 }
 
 #[deprecated(
-    since = "0.0.0",
+    since = "0.30.0",
     note = "Skia now has support for a 4x matrix (core::M44) in core::Canvas."
 )]
 #[derive(Clone, PartialEq, Debug)]
@@ -286,7 +286,7 @@ impl Camera3D {
 // so we let Skia do the allocation.
 
 #[deprecated(
-    since = "0.0.0",
+    since = "0.30.0",
     note = "Skia now has support for a 4x matrix (core::M44) in core::Canvas."
 )]
 pub type View3D = RefHandle<Sk3DView>;

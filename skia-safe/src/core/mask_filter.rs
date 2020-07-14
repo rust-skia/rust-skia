@@ -30,12 +30,12 @@ impl RCHandle<SkMaskFilter> {
         .unwrap()
     }
 
-    #[deprecated(since = "0.0.0", note = "removed without replacement")]
+    #[deprecated(since = "0.30.0", note = "removed without replacement")]
     pub fn compose(_outer: Self, _inner: Self) -> ! {
         panic!("removed without replacement")
     }
 
-    #[deprecated(since = "0.0.0", note = "removed without replacement")]
+    #[deprecated(since = "0.30.0", note = "removed without replacement")]
     pub fn combine(_filter_a: Self, _filter_b: Self, _mode: CoverageMode) -> ! {
         panic!("removed without replacement")
     }

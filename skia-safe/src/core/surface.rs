@@ -467,7 +467,7 @@ impl RCHandle<SkSurface> {
         }
     }
 
-    #[deprecated(since = "0.0.0", note = "Use flush_and_submit()")]
+    #[deprecated(since = "0.30.0", note = "Use flush_and_submit()")]
     pub fn flush(&mut self) {
         self.flush_and_submit()
     }
