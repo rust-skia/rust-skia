@@ -1376,10 +1376,6 @@ extern "C" uint32_t C_SkColorFilter_getFlags(const SkColorFilter* self) {
     return self->getFlags();
 }
 
-extern "C" SkColorFilter* C_SkColorFilter_Deserialize(const void* data, size_t size) {
-    return SkColorFilter::Deserialize(data, size).release();
-}
-
 //
 // SkColorFilters
 //
@@ -2247,12 +2243,6 @@ SkShader *C_SkRuntimeEffect_makeShader(SkRuntimeEffect *self, SkData *inputs, Sk
                                        const SkMatrix *localMatrix, bool isOpaque) {
     auto childrenSPs = reinterpret_cast<sk_sp<SkShader> *>(children);
     return self->makeShader(sp(inputs), childrenSPs, childCount, localMatrix, isOpaque).release();
-}
-
-SkColorFilter *
-C_SkRuntimeEffect_makeColorFilter2(SkRuntimeEffect *self, SkData *inputs, SkColorFilter **children, size_t childCount) {
-    auto childrenSPs = reinterpret_cast<sk_sp<SkColorFilter> *>(children);
-    return self->makeColorFilter(sp(inputs), childrenSPs, childCount).release();
 }
 
 SkColorFilter* C_SkRuntimeEffect_makeColorFilter(SkRuntimeEffect* self, SkData* inputs) {
