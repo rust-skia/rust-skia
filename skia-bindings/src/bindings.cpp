@@ -1376,6 +1376,12 @@ extern "C" uint32_t C_SkColorFilter_getFlags(const SkColorFilter* self) {
     return self->getFlags();
 }
 
+extern "C" SkColorFilter* C_SkColorFilter_Deserialize(const void* data, size_t length) {
+    // TODO: there is no "official" Deserialize wrapper in SkColorFilter, so we
+    //       are not sure if deserialization is supported at all.
+    return static_cast<SkColorFilter*>(SkFlattenable::Deserialize(SkFlattenable::kSkColorFilter_Type, data, length).release());
+}
+
 //
 // SkColorFilters
 //

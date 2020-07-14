@@ -139,18 +139,18 @@ impl Handle<GrBackendTexture> {
         mip_mapped: super::MipMapped,
         gl_info: gl::TextureInfo,
     ) -> Self {
-        Self::from_native_if_valid(GrBackendTexture::new(
-            width,
-            height,
-            mip_mapped,
-            gl_info.native(),
-        ))
+        Self::from_native_if_valid(construct(|texture| {
+            sb::C_GrBackendTexture_ConstructGL(texture, width, height, mip_mapped, gl_info.native())
+        }))
         .unwrap()
     }
 
     #[cfg(feature = "vulkan")]
     pub unsafe fn new_vulkan((width, height): (i32, i32), vk_info: &vk::ImageInfo) -> Self {
-        Self::from_native_if_valid(GrBackendTexture::new1(width, height, vk_info.native())).unwrap()
+        Self::from_native_if_valid(construct(|texture| {
+            sb::C_GrBackendTexture_ConstructVk(texture, width, height, vk_info.native())
+        }))
+        .unwrap()
     }
 
     #[cfg(feature = "metal")]
@@ -159,12 +159,15 @@ impl Handle<GrBackendTexture> {
         mip_mapped: super::MipMapped,
         mtl_info: &mtl::TextureInfo,
     ) -> Self {
-        Self::from_native_if_valid(GrBackendTexture::new2(
-            width,
-            height,
-            mip_mapped,
-            mtl_info.native(),
-        ))
+        Self::from_native_if_valid(construct(|texture| {
+            sb::C_GrBackendTexture_ConstructMtl(
+                texture,
+                width,
+                height,
+                mip_mapped,
+                mtl_info.native(),
+            )
+        }))
         .unwrap()
     }
 
@@ -284,15 +287,16 @@ impl Handle<GrBackendRenderTarget> {
         stencil_bits: usize,
         info: gl::FramebufferInfo,
     ) -> Self {
-        Self::from_native(unsafe {
-            GrBackendRenderTarget::new(
+        Self::from_native(construct(|target| unsafe {
+            sb::C_GrBackendRenderTarget_ConstructGL(
+                target,
                 width,
                 height,
                 sample_count.into().unwrap_or(0).try_into().unwrap(),
                 stencil_bits.try_into().unwrap(),
                 info.native(),
             )
-        })
+        }))
     }
 
     #[cfg(feature = "vulkan")]
@@ -301,14 +305,15 @@ impl Handle<GrBackendRenderTarget> {
         sample_count: impl Into<Option<usize>>,
         info: &vk::ImageInfo,
     ) -> Self {
-        Self::from_native(unsafe {
-            GrBackendRenderTarget::new2(
+        Self::from_native(construct(|target| unsafe {
+            sb::C_GrBackendRenderTarget_ConstructVk(
+                target,
                 width,
                 height,
                 sample_count.into().unwrap_or(0).try_into().unwrap(),
                 info.native(),
             )
-        })
+        }))
     }
 
     #[cfg(feature = "metal")]
@@ -317,9 +322,15 @@ impl Handle<GrBackendRenderTarget> {
         sample_cnt: i32,
         mtl_info: &mtl::TextureInfo,
     ) -> Self {
-        Self::from_native(unsafe {
-            GrBackendRenderTarget::new3(width, height, sample_cnt, mtl_info.native())
-        })
+        Self::from_native(construct(|target| unsafe {
+            sb::C_GrBackendRenderTarget_ConstructMtl(
+                target,
+                width,
+                height,
+                sample_cnt,
+                mtl_info.native(),
+            )
+        }))
     }
 
     pub(crate) fn from_native_if_valid(

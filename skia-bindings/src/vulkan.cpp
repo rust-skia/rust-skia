@@ -14,11 +14,19 @@ extern "C" void C_GrBackendFormat_ConstructVk2(GrBackendFormat* uninitialized, c
     new(uninitialized)GrBackendFormat(GrBackendFormat::MakeVk(*ycbcrInfo));
 }
 
+extern "C" void C_GrBackendTexture_ConstructVk(GrBackendTexture* uninitialized, int width, int height, const GrVkImageInfo* vkInfo) {
+    new(uninitialized)GrBackendTexture(width, height, *vkInfo);
+}
+
+extern "C" void C_GrBackendRenderTarget_ConstructVk(GrBackendRenderTarget* uninitialized, int width, int height, int sampleCnt, const GrVkImageInfo* vkInfo) {
+    new(uninitialized)GrBackendRenderTarget(width, height, sampleCnt, *vkInfo);
+}
+
 extern "C" bool C_GrBackendDrawableInfo_getVkDrawableInfo(const GrBackendDrawableInfo* self, GrVkDrawableInfo* info) {
     return self->getVkDrawableInfo(info);
 }
 
-extern "C" void C_GPU_VK_Types(GrVkExtensionFlags *, GrVkFeatureFlags *) {}
+extern "C" void C_GPU_VK_Types(GrVkExtensionFlags *, GrVkFeatureFlags *, VkBuffer *) {}
 
 // The GrVkBackendContext struct binding's length is too short
 // because of the std::function that is used in it.

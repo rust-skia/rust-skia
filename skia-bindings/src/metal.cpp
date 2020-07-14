@@ -61,3 +61,12 @@ extern "C" bool C_GrMtlTextureInfo_Equals(const GrMtlTextureInfo* lhs, const GrM
 extern "C" void C_GrBackendFormat_ConstructMtl(GrBackendFormat* uninitialized, GrMTLPixelFormat format) {
     new(uninitialized)GrBackendFormat(GrBackendFormat::MakeMtl(format));
 }
+
+
+extern "C" void C_GrBackendTexture_ConstructMtl(GrBackendTexture* uninitialized, int width, int height, GrMipMapped mipMapped, const GrMtlTextureInfo* mtlInfo) {
+    new(uninitialized)GrBackendTexture(width, height, mipMapped, *mtlInfo);
+}
+
+extern "C" void C_GrBackendRenderTarget_ConstructMtl(GrBackendRenderTarget* uninitialized, int width, int height, int sampleCnt, const GrMtlTextureInfo* mtlInfo) {
+    new(uninitialized)GrBackendRenderTarget(width, height, sampleCnt, *mtlInfo);
+}

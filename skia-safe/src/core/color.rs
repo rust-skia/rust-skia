@@ -288,6 +288,21 @@ impl From<Color> for Color4f {
     }
 }
 
+// Add all Color::From implementations to Color4f, so that
+// function signatures can promote Into<Color> to Into<Color4f>.
+
+impl From<u32> for Color4f {
+    fn from(color: u32) -> Self {
+        Color::from(color).into()
+    }
+}
+
+impl From<RGB> for Color4f {
+    fn from(rgb: RGB) -> Self {
+        Color::from(rgb).into()
+    }
+}
+
 impl Color4f {
     pub const fn new(r: f32, g: f32, b: f32, a: f32) -> Color4f {
         Self { r, g, b, a }

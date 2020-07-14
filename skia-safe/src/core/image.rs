@@ -469,8 +469,14 @@ impl RCHandle<SkImage> {
     // TODO: flush(GrContext*, GrFlushInfo&).
 
     #[cfg(feature = "gpu")]
+    pub fn flush_and_submit(&mut self, context: &mut gpu::Context) {
+        unsafe { self.native_mut().flushAndSubmit(context.native_mut()) }
+    }
+
+    #[cfg(feature = "gpu")]
+    #[deprecated(since = "0.0.0", note = "use flushAndSubmit()")]
     pub fn flush(&mut self, context: &mut gpu::Context) {
-        unsafe { self.native_mut().flush1(context.native_mut()) }
+        self.flush_and_submit(context)
     }
 
     #[cfg(feature = "gpu")]

@@ -121,26 +121,17 @@ impl RCHandle<SkSurface> {
         })
     }
 
+    #[deprecated(since = "0.0.0", note = "removed without replacement")]
     pub fn from_backend_texture_as_render_target(
-        context: &mut gpu::Context,
-        backend_texture: &gpu::BackendTexture,
-        origin: gpu::SurfaceOrigin,
-        sample_count: impl Into<Option<usize>>,
-        color_type: crate::ColorType,
-        color_space: impl Into<Option<crate::ColorSpace>>,
-        surface_props: Option<&SurfaceProps>,
-    ) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            sb::C_SkSurface_MakeFromBackendTextureAsRenderTarget(
-                context.native_mut(),
-                backend_texture.native(),
-                origin,
-                sample_count.into().unwrap_or(0).try_into().unwrap(),
-                color_type.into_native(),
-                color_space.into().into_ptr_or_null(),
-                surface_props.native_ptr_or_null(),
-            )
-        })
+        _context: &mut gpu::Context,
+        _backend_texture: &gpu::BackendTexture,
+        _origin: gpu::SurfaceOrigin,
+        _sample_count: impl Into<Option<usize>>,
+        _color_type: crate::ColorType,
+        _color_space: impl Into<Option<crate::ColorSpace>>,
+        _surface_props: Option<&SurfaceProps>,
+    ) -> ! {
+        panic!("removed without replacement")
     }
 
     #[cfg(feature = "metal")]

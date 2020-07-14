@@ -148,24 +148,13 @@ impl RCHandle<SkRuntimeEffect> {
         })
     }
 
+    #[deprecated(since = "0.0.0", note = "removed without replacement")]
     pub fn make_color_filter_with_children(
         &mut self,
-        inputs: impl Into<Data>,
-        children: impl IntoIterator<Item = ColorFilter>,
-    ) -> Option<ColorFilter> {
-        let mut children: Vec<_> = children
-            .into_iter()
-            .map(|color_filter| color_filter.into_ptr())
-            .collect();
-
-        ColorFilter::from_ptr(unsafe {
-            sb::C_SkRuntimeEffect_makeColorFilter2(
-                self.native_mut(),
-                inputs.into().into_ptr(),
-                children.as_mut_ptr(),
-                children.len(),
-            )
-        })
+        _inputs: impl Into<Data>,
+        _children: impl IntoIterator<Item = ColorFilter>,
+    ) -> ! {
+        panic!("removed without replacement")
     }
 
     pub fn make_color_filter(&mut self, inputs: impl Into<Data>) -> Option<ColorFilter> {

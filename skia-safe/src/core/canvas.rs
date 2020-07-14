@@ -2,9 +2,9 @@
 use crate::gpu;
 use crate::prelude::*;
 use crate::{
-    scalar, Bitmap, BlendMode, ClipOp, Color, Data, Font, IPoint, IRect, ISize, Image, ImageFilter,
-    ImageInfo, Matrix, Paint, Path, Picture, Point, QuickReject, RRect, Rect, Region, Shader,
-    Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices, M44,
+    scalar, Bitmap, BlendMode, ClipOp, Color, Color4f, Data, Font, IPoint, IRect, ISize, Image,
+    ImageFilter, ImageInfo, Matrix, Paint, Path, Picture, Point, QuickReject, RRect, Rect, Region,
+    Shader, Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices, M44,
 };
 use crate::{u8cpu, Drawable, Pixmap};
 use skia_bindings as sb;
@@ -582,17 +582,17 @@ impl Canvas {
 
     pub fn draw_color(
         &mut self,
-        color: impl Into<Color>,
+        color: impl Into<Color4f>,
         mode: impl Into<Option<BlendMode>>,
     ) -> &mut Self {
         unsafe {
             self.native_mut()
-                .drawColor(color.into().into_native(), mode.into().unwrap_or_default())
+                .drawColor(&color.into().into_native(), mode.into().unwrap_or_default())
         }
         self
     }
 
-    pub fn clear(&mut self, color: impl Into<Color>) -> &mut Self {
+    pub fn clear(&mut self, color: impl Into<Color4f>) -> &mut Self {
         self.draw_color(color, BlendMode::Src)
     }
 
