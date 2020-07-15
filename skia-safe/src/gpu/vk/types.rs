@@ -182,6 +182,7 @@ pub struct ImageInfo {
     pub current_queue_family: u32,
     pub protected: Protected,
     pub ycbcr_conversion_info: YcbcrConversionInfo,
+    pub sharing_mode: vk::SharingMode,
 }
 unsafe impl Send for ImageInfo {}
 unsafe impl Sync for ImageInfo {}
@@ -194,7 +195,7 @@ fn test_image_info_layout() {
 
 impl Default for ImageInfo {
     fn default() -> Self {
-        ImageInfo {
+        Self {
             image: vk::NULL_HANDLE.into(),
             alloc: Alloc::default(),
             tiling: vk::ImageTiling::OPTIMAL,
@@ -204,6 +205,7 @@ impl Default for ImageInfo {
             current_queue_family: vk::QUEUE_FAMILY_IGNORED,
             protected: Protected::No,
             ycbcr_conversion_info: Default::default(),
+            sharing_mode: vk::SharingMode::EXCLUSIVE,
         }
     }
 }
@@ -221,13 +223,15 @@ impl ImageInfo {
         level_count: u32,
         current_queue_family: impl Into<Option<u32>>,
         ycbcr_conversion_info: impl Into<Option<YcbcrConversionInfo>>,
-        protected: impl Into<Option<Protected>>, // added in m77
-    ) -> ImageInfo {
+        protected: impl Into<Option<Protected>>, // m77
+        sharing_mode: impl Into<Option<vk::SharingMode>>, // m85
+    ) -> Self {
         let current_queue_family = current_queue_family
             .into()
             .unwrap_or(vk::QUEUE_FAMILY_IGNORED);
         let ycbcr_conversion_info = ycbcr_conversion_info.into().unwrap_or_default();
         let protected = protected.into().unwrap_or(Protected::No);
+        let sharing_mode = sharing_mode.into().unwrap_or(vk::SharingMode::EXCLUSIVE);
         Self {
             image,
             alloc,
@@ -238,6 +242,7 @@ impl ImageInfo {
             current_queue_family,
             protected,
             ycbcr_conversion_info,
+            sharing_mode,
         }
     }
 
@@ -254,8 +259,9 @@ impl ImageInfo {
         level_count: u32,
         current_queue_family: impl Into<Option<u32>>,
         ycbcr_conversion_info: impl Into<Option<YcbcrConversionInfo>>,
-        protected: impl Into<Option<Protected>>, // added in m77
-    ) -> ImageInfo {
+        protected: impl Into<Option<Protected>>, // m77
+        sharing_mode: impl Into<Option<vk::SharingMode>>,
+    ) -> Self {
         Self::new(
             image,
             alloc,
@@ -266,12 +272,13 @@ impl ImageInfo {
             current_queue_family,
             ycbcr_conversion_info,
             protected,
+            sharing_mode,
         )
     }
 
     /// # Safety
     /// The Vulkan `info.image` and `info.alloc` must outlive the lifetime of the ImageInfo returned.
-    pub unsafe fn from_info(info: &ImageInfo, layout: vk::ImageLayout) -> ImageInfo {
+    pub unsafe fn from_info(info: &ImageInfo, layout: vk::ImageLayout) -> Self {
         Self::new(
             info.image,
             info.alloc,
@@ -282,6 +289,7 @@ impl ImageInfo {
             info.current_queue_family,
             info.ycbcr_conversion_info,
             info.protected,
+            info.sharing_mode,
         )
     }
 }

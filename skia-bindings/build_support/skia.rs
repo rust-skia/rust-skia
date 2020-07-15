@@ -1061,6 +1061,8 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("Verb", rewrite::k_xxx_name),
     // m84: SkVertices::Attribute::Usage
     ("Usage", rewrite::k_xxx),
+    // m85: VkSharingMode
+    ("VkSharingMode", rewrite::vk),
 ];
 
 pub(crate) mod rewrite {
