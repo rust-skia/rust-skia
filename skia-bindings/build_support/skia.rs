@@ -978,10 +978,12 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("TextAlign", rewrite::k_xxx),
     ("TextDirection", rewrite::k_xxx_uppercase),
     ("TextBaseline", rewrite::k_xxx),
+    ("TextHeightBehavior", rewrite::k_xxx),
     //
     // TextStyle.h
     //
     ("TextDecorationStyle", rewrite::k_xxx),
+    ("TextDecorationMode", rewrite::k_xxx),
     ("StyleType", rewrite::k_xxx),
     ("PlaceholderAlignment", rewrite::k_xxx),
     //
@@ -995,6 +997,10 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("VkSamplerYcbcrModelConversion", rewrite::vk),
     ("VkSamplerYcbcrRange", rewrite::vk),
     ("VkStructureType", rewrite::vk),
+    // m84: SkPath::Verb
+    ("Verb", rewrite::k_xxx_name),
+    // m84: SkVertices::Attribute::Usage
+    ("Usage", rewrite::k_xxx),
 ];
 
 pub(crate) mod rewrite {

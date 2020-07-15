@@ -108,6 +108,12 @@ pub mod textlayout {
         }
     }
 
+    impl Default for crate::skia_textlayout_TextDecorationMode {
+        fn default() -> Self {
+            Self::Gaps
+        }
+    }
+
     impl Default for crate::skia_textlayout_StyleType {
         fn default() -> Self {
             Self::AllAttributes

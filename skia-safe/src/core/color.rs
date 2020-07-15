@@ -201,8 +201,21 @@ fn color_channel_naming() {
     let _ = ColorChannel::R;
 }
 
-// decided not to directly support SkRGBA4f for now because of the
-// lack of const generics.
+bitflags! {
+    pub struct ColorChannelFlag: u32 {
+        const RED = sb::SkColorChannelFlag::kRed_SkColorChannelFlag as _;
+        const GREEN = sb::SkColorChannelFlag::kGreen_SkColorChannelFlag as _;
+        const BLUE = sb::SkColorChannelFlag::kBlue_SkColorChannelFlag as _;
+        const ALPHA = sb::SkColorChannelFlag::kAlpha_SkColorChannelFlag as _;
+        const GRAY = sb::SkColorChannelFlag::kGray_SkColorChannelFlag as _;
+        const RG = Self::RED.bits | Self::GREEN.bits;
+        const RGB = Self::RG.bits | Self::BLUE.bits;
+        const RGBA = Self::RGB.bits | Self::ALPHA.bits;
+    }
+}
+
+// TODO: SkRGBA4f
+
 #[derive(Clone, PartialEq, Debug)]
 #[repr(C)]
 pub struct Color4f {

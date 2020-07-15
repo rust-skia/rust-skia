@@ -281,6 +281,10 @@ impl RCHandle<SkSurface> {
 
 #[cfg(feature = "gpu")]
 impl RCHandle<SkSurface> {
+    pub fn context(&mut self) -> Option<gpu::Context> {
+        gpu::Context::from_unshared_ptr(unsafe { self.native_mut().getContext() })
+    }
+
     pub fn get_backend_texture(
         &mut self,
         handle_access: BackendHandleAccess,
@@ -457,14 +461,19 @@ impl RCHandle<SkSurface> {
         SurfaceProps::from_native_ref(unsafe { &*sb::C_SkSurface_props(self.native()) })
     }
 
-    pub fn flush(&mut self) {
+    pub fn flush_and_submit(&mut self) {
         unsafe {
-            self.native_mut().flush();
+            self.native_mut().flushAndSubmit();
         }
     }
 
+    #[deprecated(since = "0.30.0", note = "Use flush_and_submit()")]
+    pub fn flush(&mut self) {
+        self.flush_and_submit()
+    }
+
     // TODO: flush(access, FlushInfo)
-    // TODO: flush(access, FlshFlags, semaphores)
+    // TODO: flush(access, FlushFlags, semaphores)
     // TODO: wait()
 
     pub fn characterize(&self) -> Option<SurfaceCharacterization> {

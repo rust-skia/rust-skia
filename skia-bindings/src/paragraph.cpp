@@ -13,6 +13,9 @@
 #include "modules/skparagraph/include/TextStyle.h"
 #include "modules/skparagraph/include/TypefaceFontProvider.h"
 
+// m84: needs definition of SkFontData
+#include "src/core/SkFontDescriptor.h"
+
 using namespace skia::textlayout;
 
 //

@@ -30,14 +30,14 @@ impl RCHandle<SkMaskFilter> {
         .unwrap()
     }
 
-    pub fn compose(outer: Self, inner: Self) -> Option<Self> {
-        Self::from_ptr(unsafe { sb::C_SkMaskFilter_Compose(outer.into_ptr(), inner.into_ptr()) })
+    #[deprecated(since = "0.30.0", note = "removed without replacement")]
+    pub fn compose(_outer: Self, _inner: Self) -> ! {
+        panic!("removed without replacement")
     }
 
-    pub fn combine(filter_a: Self, filter_b: Self, mode: CoverageMode) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            sb::C_SkMaskFilter_Combine(filter_a.into_ptr(), filter_b.into_ptr(), mode)
-        })
+    #[deprecated(since = "0.30.0", note = "removed without replacement")]
+    pub fn combine(_filter_a: Self, _filter_b: Self, _mode: CoverageMode) -> ! {
+        panic!("removed without replacement")
     }
 
     #[deprecated(since = "0.29.0", note = "removed without replacement")]

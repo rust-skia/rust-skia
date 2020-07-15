@@ -1,5 +1,6 @@
 use crate::prelude::*;
-use crate::{scalar, Matrix, Matrix44};
+#[allow(deprecated)]
+use crate::{scalar, Matrix, Matrix44, Scalars};
 use bitflags::_core::ops::{AddAssign, MulAssign};
 use skia_bindings as sb;
 use skia_bindings::{Sk3LookAt, Sk3Perspective, SkM44, SkV2, SkV3, SkV4};
@@ -464,6 +465,20 @@ impl M44 {
         m
     }
 
+    pub fn row_major(r: &[scalar; Self::COMPONENTS]) -> Self {
+        Self::new(
+            r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13],
+            r[14], r[15],
+        )
+    }
+
+    pub fn col_major(c: &[scalar; Self::COMPONENTS]) -> Self {
+        Self::new(
+            c[0], c[4], c[8], c[12], c[1], c[5], c[9], c[13], c[2], c[6], c[10], c[14], c[3], c[7],
+            c[11], c[15],
+        )
+    }
+
     pub fn translate(x: scalar, y: scalar, z: scalar) -> Self {
         Self::new(
             1.0, 0.0, 0.0, x, 0.0, 1.0, 0.0, y, 0.0, 0.0, 1.0, z, 0.0, 0.0, 0.0, 1.0,
@@ -490,17 +505,20 @@ impl M44 {
         unsafe { self.native().getRowMajor(v.as_mut_ptr()) }
     }
 
+    #[deprecated(since = "0.30.0", note = "use M44::col_major() instead")]
     pub fn set_col_major(&mut self, v: &[scalar; Self::COMPONENTS]) -> &mut Self {
-        self.mat.copy_from_slice(v);
+        *self = Self::col_major(v);
         self
     }
 
+    #[deprecated(since = "0.30.0", note = "use M44::row_major() instead")]
     pub fn set_row_major(&mut self, v: &[scalar; Self::COMPONENTS]) -> &mut Self {
-        unsafe { self.native_mut().setRowMajor(v.as_ptr()) };
+        *self = Self::row_major(v);
         self
     }
 
     #[allow(clippy::too_many_arguments)]
+    #[deprecated(since = "0.30.0", note = "use Self::new() instead")]
     pub fn set_44(
         &mut self,
         m0: scalar,
@@ -520,22 +538,9 @@ impl M44 {
         m14: scalar,
         m15: scalar,
     ) -> &mut Self {
-        self.mat[0] = m0;
-        self.mat[1] = m1;
-        self.mat[2] = m2;
-        self.mat[3] = m3;
-        self.mat[4] = m4;
-        self.mat[5] = m5;
-        self.mat[6] = m6;
-        self.mat[7] = m7;
-        self.mat[8] = m8;
-        self.mat[9] = m9;
-        self.mat[10] = m10;
-        self.mat[11] = m11;
-        self.mat[12] = m12;
-        self.mat[13] = m13;
-        self.mat[14] = m14;
-        self.mat[15] = m15;
+        *self = Self::new(
+            m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15,
+        );
         self
     }
 
@@ -585,21 +590,30 @@ impl M44 {
     }
 
     pub fn set_identity(&mut self) -> &mut Self {
-        self.set_44(
-            1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
-        )
+        *self = Self {
+            mat: [
+                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+            ],
+        };
+        self
     }
 
     pub fn set_translate(&mut self, x: scalar, y: scalar, z: scalar) -> &mut Self {
-        self.set_44(
-            1.0, 0.0, 0.0, x, 0.0, 1.0, 0.0, y, 0.0, 0.0, 1.0, z, 0.0, 0.0, 0.0, 1.0,
-        )
+        *self = Self {
+            mat: [
+                1.0, 0.0, 0.0, x, 0.0, 1.0, 0.0, y, 0.0, 0.0, 1.0, z, 0.0, 0.0, 0.0, 1.0,
+            ],
+        };
+        self
     }
 
     pub fn set_scale(&mut self, x: scalar, y: scalar, z: scalar) -> &mut Self {
-        self.set_44(
-            x, 0.0, 0.0, 0.0, 0.0, y, 0.0, 0.0, 0.0, 0.0, z, 0.0, 0.0, 0.0, 0.0, 1.0,
-        )
+        *self = Self {
+            mat: [
+                x, 0.0, 0.0, 0.0, 0.0, y, 0.0, 0.0, 0.0, 0.0, z, 0.0, 0.0, 0.0, 0.0, 1.0,
+            ],
+        };
+        self
     }
 
     pub fn set_rotate_unit_sin_cos(
@@ -624,20 +638,46 @@ impl M44 {
         self
     }
 
+    #[deprecated(since = "0.30.0", note = "use M44::col_major() and M44::set_concat()")]
     pub fn set_concat_16(&mut self, a: &M44, col_major: &[scalar; Self::COMPONENTS]) -> &mut Self {
-        unsafe {
-            self.native_mut()
-                .setConcat16(a.native(), col_major.as_ptr())
-        };
-        self
+        self.set_concat(a, &Self::col_major(col_major))
     }
 
     pub fn set_concat(&mut self, a: &M44, b: &M44) -> &mut Self {
-        self.set_concat_16(a, &b.mat)
+        unsafe {
+            self.native_mut().setConcat(a.native(), b.native());
+        }
+        self
     }
 
+    #[deprecated(since = "0.30.0", note = "use M44::col_major() and M44::pre_concat()")]
+    #[allow(deprecated)]
     pub fn pre_concat_16(&mut self, col_major: &[scalar; Self::COMPONENTS]) -> &mut Self {
         self.set_concat_16(&self.clone(), col_major)
+    }
+
+    pub fn pre_concat(&mut self, m: &M44) -> &mut Self {
+        unsafe {
+            let self_ptr = self.native() as *const _;
+            self.native_mut().setConcat(self_ptr, m.native());
+        }
+        self
+    }
+
+    pub fn post_concat(&mut self, m: &M44) -> &mut Self {
+        unsafe {
+            let self_ptr = self.native() as *const _;
+            self.native_mut().setConcat(m.native(), self_ptr);
+        }
+        self
+    }
+
+    pub fn normalize_perspective(&mut self) {
+        unsafe { self.native_mut().normalizePerspective() }
+    }
+
+    pub fn is_finite(&self) -> bool {
+        self.mat.are_finite()
     }
 
     pub fn invert(&self) -> Option<M44> {
@@ -645,6 +685,7 @@ impl M44 {
         unsafe { self.native().invert(m.native_mut()) }.if_true_some(m)
     }
 
+    #[warn(unused)]
     pub fn transpose(&self) -> M44 {
         Self::from_native(unsafe { self.native().transpose() })
     }
@@ -662,18 +703,34 @@ impl M44 {
         Matrix::new_all(m[0], m[4], m[12], m[1], m[5], m[13], m[3], m[7], m[15])
     }
 
-    pub fn pre_translate(&mut self, x: scalar, y: scalar) -> &mut Self {
-        unsafe { self.native_mut().preTranslate(x, y) };
+    pub fn pre_translate(
+        &mut self,
+        x: scalar,
+        y: scalar,
+        z: impl Into<Option<scalar>>,
+    ) -> &mut Self {
+        unsafe {
+            self.native_mut()
+                .preTranslate(x, y, z.into().unwrap_or(0.0))
+        };
+        self
+    }
+
+    pub fn post_translate(
+        &mut self,
+        x: scalar,
+        y: scalar,
+        z: impl Into<Option<scalar>>,
+    ) -> &mut Self {
+        unsafe {
+            self.native_mut()
+                .postTranslate(x, y, z.into().unwrap_or(0.0))
+        };
         self
     }
 
     pub fn pre_scale(&mut self, x: scalar, y: scalar) -> &mut Self {
         unsafe { self.native_mut().preScale(x, y) };
-        self
-    }
-
-    pub fn pre_concat(&mut self, m: &Matrix) -> &mut Self {
-        unsafe { self.native_mut().preConcat(m.native()) };
         self
     }
 
@@ -687,6 +744,7 @@ impl M44 {
 
     // helper
 
+    #[allow(deprecated)]
     pub fn to_matrix44(&self) -> Matrix44 {
         let mut m = Matrix44::default();
         m.set_col_major(&self.mat);
@@ -750,12 +808,11 @@ impl From<Matrix> for M44 {
     }
 }
 
+#[allow(deprecated)]
 impl From<&Matrix44> for M44 {
     fn from(m: &Matrix44) -> Self {
         let mut rm: [f32; 16] = Default::default();
         m.as_col_major(&mut rm);
-        let mut m = M44::default();
-        m.set_col_major(&rm);
-        m
+        M44::col_major(&rm)
     }
 }

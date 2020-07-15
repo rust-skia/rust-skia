@@ -313,7 +313,7 @@ pub fn xfermode<'a>(
 }
 
 pub fn dilate<'a>(
-    (radius_x, radius_y): (i32, i32),
+    (radius_x, radius_y): (scalar, scalar),
     input: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
@@ -328,7 +328,7 @@ pub fn dilate<'a>(
 }
 
 pub fn erode<'a>(
-    (radius_x, radius_y): (i32, i32),
+    (radius_x, radius_y): (scalar, scalar),
     input: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {

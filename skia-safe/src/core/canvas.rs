@@ -9,9 +9,8 @@ use crate::{
 use crate::{u8cpu, Drawable, Pixmap};
 use skia_bindings as sb;
 use skia_bindings::{
-    SkAutoCanvasRestore, SkCanvas, SkCanvas_SaveLayerFlagsSet_kF16ColorType,
-    SkCanvas_SaveLayerFlagsSet_kInitWithPrevious_SaveLayerFlag, SkCanvas_SaveLayerRec, SkImage,
-    SkImageFilter, SkMatrix, SkPaint, SkRect,
+    SkAutoCanvasRestore, SkCanvas, SkCanvas_SaveLayerRec, SkImage, SkImageFilter, SkMatrix,
+    SkPaint, SkRect,
 };
 use std::convert::TryInto;
 use std::ffi::CString;
@@ -23,8 +22,9 @@ pub use lattice::Lattice;
 
 bitflags! {
     pub struct SaveLayerFlags: u32 {
-        const INIT_WITH_PREVIOUS = SkCanvas_SaveLayerFlagsSet_kInitWithPrevious_SaveLayerFlag as _;
-        const F16_COLOR_TYPE = SkCanvas_SaveLayerFlagsSet_kF16ColorType as _;
+        const PRESERVE_LCD_TEXT = sb::SkCanvas_SaveLayerFlagsSet_kPreserveLCDText_SaveLayerFlag as _;
+        const INIT_WITH_PREVIOUS = sb::SkCanvas_SaveLayerFlagsSet_kInitWithPrevious_SaveLayerFlag as _;
+        const F16_COLOR_TYPE = sb::SkCanvas_SaveLayerFlagsSet_kF16ColorType as _;
     }
 }
 
@@ -483,7 +483,7 @@ impl Canvas {
     }
 
     pub fn concat_44(&mut self, m: &M44) -> &mut Self {
-        unsafe { self.native_mut().concat44(m.native()) }
+        unsafe { self.native_mut().concat1(m.native()) }
         self
     }
 
@@ -1005,16 +1005,16 @@ impl Canvas {
         unsafe { sb::C_SkCanvas_isClipEmpty(self.native()) }
     }
 
+    pub fn local_to_device(&self) -> M44 {
+        M44::from_native(unsafe { self.native().getLocalToDevice() })
+    }
+
     pub fn total_matrix(&self) -> Matrix {
         let mut matrix = Matrix::default();
         // TODO: why is Matrix not safe to return from getTotalMatrix()
         // testcase `test_total_matrix` below crashes with an access violation.
         unsafe { sb::C_SkCanvas_getTotalMatrix(self.native(), matrix.native_mut()) };
         matrix
-    }
-
-    pub fn local_to_device(&self) -> M44 {
-        M44::from_native(unsafe { self.native().getLocalToDevice() })
     }
 
     //

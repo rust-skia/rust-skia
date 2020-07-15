@@ -6,7 +6,7 @@ use crate::{
     Rect, Vector,
 };
 use skia_bindings as sb;
-use skia_bindings::{SkPath, SkPathVerb, SkPath_Iter, SkPath_RawIter};
+use skia_bindings::{SkPath, SkPath_Iter, SkPath_RawIter};
 use std::marker::PhantomData;
 use std::mem::forget;
 
@@ -33,12 +33,16 @@ fn test_add_path_mode_naming() {
 
 pub use path_types::PathSegmentMask as SegmentMask;
 
-pub use path_types::PathVerb as Verb;
+pub use skia_bindings::SkPath_Verb as Verb;
+#[test]
+pub fn test_verb_naming() {
+    let _ = Verb::Line;
+}
 
 #[repr(C)]
 pub struct Iter<'a>(SkPath_Iter, PhantomData<&'a Handle<SkPath>>);
 
-impl<'a> NativeAccess<SkPath_Iter> for Iter<'a> {
+impl NativeAccess<SkPath_Iter> for Iter<'_> {
     fn native(&self) -> &SkPath_Iter {
         &self.0
     }
@@ -47,19 +51,19 @@ impl<'a> NativeAccess<SkPath_Iter> for Iter<'a> {
     }
 }
 
-impl<'a> Drop for Iter<'a> {
+impl Drop for Iter<'_> {
     fn drop(&mut self) {
         unsafe { sb::C_SkPath_Iter_destruct(&mut self.0) }
     }
 }
 
-impl<'a> Default for Iter<'a> {
+impl Default for Iter<'_> {
     fn default() -> Self {
         Iter(unsafe { SkPath_Iter::new() }, PhantomData)
     }
 }
 
-impl<'a> Iter<'a> {
+impl Iter<'_> {
     pub fn new(path: &Path, force_close: bool) -> Iter {
         Iter(
             unsafe { SkPath_Iter::new1(path.native(), force_close) },
@@ -98,9 +102,7 @@ impl<'a> Iterator for Iter<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let mut points = [Point::default(); Verb::MAX_POINTS];
-        let verb = SkPathVerb::from_native(unsafe {
-            self.native_mut().next(points.native_mut().as_mut_ptr())
-        });
+        let verb = unsafe { self.native_mut().next(points.native_mut().as_mut_ptr()) };
         if verb != Verb::Done {
             Some((verb, points[0..verb.points()].into()))
         } else {
@@ -110,9 +112,14 @@ impl<'a> Iterator for Iter<'a> {
 }
 
 #[repr(C)]
+#[deprecated(
+    since = "0.30.0",
+    note = "User Iter instead, RawIter will soon be removed."
+)]
 pub struct RawIter<'a>(SkPath_RawIter, PhantomData<&'a Handle<SkPath>>);
 
-impl<'a> NativeAccess<SkPath_RawIter> for RawIter<'a> {
+#[allow(deprecated)]
+impl NativeAccess<SkPath_RawIter> for RawIter<'_> {
     fn native(&self) -> &SkPath_RawIter {
         &self.0
     }
@@ -121,13 +128,15 @@ impl<'a> NativeAccess<SkPath_RawIter> for RawIter<'a> {
     }
 }
 
-impl<'a> Drop for RawIter<'a> {
+#[allow(deprecated)]
+impl Drop for RawIter<'_> {
     fn drop(&mut self) {
         unsafe { sb::C_SkPath_RawIter_destruct(&mut self.0) }
     }
 }
 
-impl<'a> Default for RawIter<'a> {
+#[allow(deprecated)]
+impl Default for RawIter<'_> {
     fn default() -> Self {
         RawIter(
             construct(|ri| unsafe { sb::C_SkPath_RawIter_Construct(ri) }),
@@ -136,47 +145,37 @@ impl<'a> Default for RawIter<'a> {
     }
 }
 
-impl<'a> RawIter<'a> {
+#[allow(deprecated)]
+impl RawIter<'_> {
     pub fn new(path: &Path) -> RawIter {
         RawIter::default().set_path(path)
     }
 
     pub fn set_path(mut self, path: &Path) -> RawIter {
-        unsafe { self.0.fRawIter.setPathRef(path.native().fPathRef.fPtr) };
+        unsafe { self.native_mut().setPath(path.native()) }
         let r = RawIter(self.0, PhantomData);
         forget(self);
         r
     }
 
     pub fn peek(&self) -> Verb {
-        SkPathVerb::from_native(unsafe { sb::C_SkPath_RawIter_peek(self.native()) })
+        unsafe { sb::C_SkPath_RawIter_peek(self.native()) }
     }
 
-    pub fn conic_weight(&self) -> Option<scalar> {
-        #[allow(clippy::map_clone)]
-        self.native()
-            .fRawIter
-            .fConicWeights
-            .into_option()
-            .map(|cw| unsafe { *cw })
+    pub fn conic_weight(&self) -> scalar {
+        self.native().fConicWeight
     }
 }
 
-impl<'a> Iterator for RawIter<'a> {
+#[allow(deprecated)]
+impl Iterator for RawIter<'_> {
     type Item = (Verb, Vec<Point>);
 
     fn next(&mut self) -> Option<Self::Item> {
         let mut points = [Point::default(); Verb::MAX_POINTS];
 
-        let verb = SkPathVerb::from_native(unsafe {
-            sb::C_SkPath_RawIter_next(self.native_mut(), points.native_mut().as_mut_ptr())
-        });
-
-        if verb != Verb::Done {
-            Some((verb, points[0..verb.points()].into()))
-        } else {
-            None
-        }
+        let verb = unsafe { self.native_mut().next(points.native_mut().as_mut_ptr()) };
+        (verb != Verb::Done).if_true_some((verb, points[0..verb.points()].into()))
     }
 }
 

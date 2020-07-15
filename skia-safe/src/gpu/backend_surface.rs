@@ -68,6 +68,10 @@ impl Handle<GrBackendFormat> {
 
     // texture_type() would return a private type.
 
+    pub fn channel_mask(&self) -> u32 {
+        unsafe { self.native().channelMask() }
+    }
+
     #[deprecated(since = "0.19.0", note = "use as_gl_format()")]
     #[cfg(feature = "gl")]
     pub fn gl_format(&self) -> Option<gl::Enum> {
