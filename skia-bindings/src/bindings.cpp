@@ -281,6 +281,11 @@ extern "C" SkShader* C_SkImage_makeShader(const SkImage* self, SkTileMode tileMo
     return self->makeShader(tileMode1, tileMode2, localMatrix).release();
 }
 
+extern "C" SkShader *C_SkImage_makeShader2(const SkImage *self, SkTileMode tileMode1, SkTileMode tileMode2, const SkMatrix *localMatrix, SkFilterQuality filterQuality)
+{
+    return self->makeShader(tileMode1, tileMode2, localMatrix, filterQuality).release();
+}
+
 extern "C" SkData* C_SkImage_encodeToData(const SkImage* self, SkEncodedImageFormat imageFormat, int quality) {
     return self->encodeToData(imageFormat, quality).release();
 }
