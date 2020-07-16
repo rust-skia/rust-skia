@@ -450,6 +450,8 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
     let python2 = &prerequisites::locate_python2_cmd();
     println!("Python 2 found: {:?}", python2);
 
+    println!("Synchronizing Skia dependencies");
+
     assert!(
         Command::new(python2)
             .arg("skia/tools/git-sync-deps")
