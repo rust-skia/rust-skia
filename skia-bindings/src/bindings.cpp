@@ -1364,18 +1364,6 @@ extern "C" SkColorFilter* C_SkColorFilter_makeComposed(const SkColorFilter* self
     return self->makeComposed(sp(inner)).release();
 }
 
-extern "C" bool C_SkColorFilter_asAColorMode(const SkColorFilter* self, SkColor* color, SkBlendMode* mode) {
-    return self->asAColorMode(color, mode);
-}
-
-extern "C" bool C_SkColorFilter_asAColorMatrix(const SkColorFilter* self, SkScalar matrix[20]) {
-    return self->asAColorMatrix(matrix);
-}
-
-extern "C" uint32_t C_SkColorFilter_getFlags(const SkColorFilter* self) {
-    return self->getFlags();
-}
-
 extern "C" SkColorFilter* C_SkColorFilter_Deserialize(const void* data, size_t length) {
     // TODO: there is no "official" Deserialize wrapper in SkColorFilter, so we
     //       are not sure if deserialization is supported at all.
