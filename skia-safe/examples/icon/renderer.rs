@@ -331,7 +331,7 @@ fn triangle(
 }
 
 fn gradient(paint: &mut Paint, center: (f32, f32), radii: (f32, f32), colors: (Color, Color)) {
-    let mut matrix = Matrix::new_scale((1.0, radii.1 / radii.0));
+    let mut matrix = Matrix::scale((1.0, radii.1 / radii.0));
     matrix.post_translate((center.0, center.1));
     paint.set_shader(gradient_shader::radial(
         (0.0, 0.0),

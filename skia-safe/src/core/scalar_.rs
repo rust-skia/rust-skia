@@ -48,3 +48,7 @@ where
         self.iter().fold(T::ZERO, |prod, value| prod * *value) == T::ZERO
     }
 }
+
+pub fn radians_to_degrees(radians: scalar) -> scalar {
+    radians * (180.0 / std::f32::consts::PI)
+}

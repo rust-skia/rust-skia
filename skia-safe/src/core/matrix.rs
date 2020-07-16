@@ -2,7 +2,7 @@ use crate::prelude::*;
 use crate::{scalar, Point, Point3, RSXform, Rect, Scalar, Size, Vector};
 use skia_bindings as sb;
 use skia_bindings::SkMatrix;
-use std::ops::{Index, IndexMut};
+use std::ops::{Index, IndexMut, Mul};
 use std::slice;
 
 pub use skia_bindings::SkApplyPerspectiveClip as ApplyPerspectiveClip;
@@ -12,12 +12,12 @@ fn test_apply_perspective_clip_naming() {
 }
 
 bitflags! {
-    pub struct TypeMask: u32 {
-        const IDENTITY = sb::SkMatrix_TypeMask_kIdentity_Mask as u32;
-        const TRANSLATE = sb::SkMatrix_TypeMask_kTranslate_Mask as u32;
-        const SCALE = sb::SkMatrix_TypeMask_kScale_Mask as u32;
-        const AFFINE = sb::SkMatrix_TypeMask_kAffine_Mask as u32;
-        const PERSPECTIVE = sb::SkMatrix_TypeMask_kPerspective_Mask as u32;
+    pub struct TypeMask: i32 {
+        const IDENTITY = sb::SkMatrix_TypeMask_kIdentity_Mask;
+        const TRANSLATE = sb::SkMatrix_TypeMask_kTranslate_Mask;
+        const SCALE = sb::SkMatrix_TypeMask_kScale_Mask;
+        const AFFINE = sb::SkMatrix_TypeMask_kAffine_Mask;
+        const PERSPECTIVE = sb::SkMatrix_TypeMask_kPerspective_Mask;
     }
 }
 
@@ -31,7 +31,7 @@ fn test_matrix_scale_to_fit_naming() {
 #[repr(C)]
 pub struct Matrix {
     mat: [scalar; 9usize],
-    type_mask: u32,
+    type_mask: i32,
 }
 
 impl NativeTransmutable<SkMatrix> for Matrix {}
@@ -43,6 +43,13 @@ fn test_matrix_layout() {
 impl PartialEq for Matrix {
     fn eq(&self, rhs: &Self) -> bool {
         unsafe { sb::C_SkMatrix_Equals(self.native(), rhs.native()) }
+    }
+}
+
+impl Mul for Matrix {
+    type Output = Self;
+    fn mul(self, rhs: Matrix) -> Self::Output {
+        Matrix::concat(&self, &rhs)
     }
 }
 
@@ -125,16 +132,36 @@ impl Matrix {
         }
     }
 
-    pub fn new_scale((sx, sy): (scalar, scalar)) -> Matrix {
+    #[deprecated(since = "0.0.0", note = "use Matrix::scale()")]
+    pub fn new_scale(scale: (scalar, scalar)) -> Matrix {
+        Self::scale(scale)
+    }
+
+    pub fn scale((sx, sy): (scalar, scalar)) -> Matrix {
         let mut m = Matrix::new();
         m.set_scale((sx, sy), None);
         m
     }
 
+    #[deprecated(since = "0.0.0", note = "use Matrix::translate()")]
     pub fn new_trans(d: impl Into<Vector>) -> Matrix {
+        Self::translate(d)
+    }
+
+    pub fn translate(d: impl Into<Vector>) -> Matrix {
         let mut m = Matrix::new();
         m.set_translate(d);
         m
+    }
+
+    pub fn rotate_deg(deg: scalar) -> Matrix {
+        let mut m = Matrix::new();
+        m.set_rotate(deg, None);
+        m
+    }
+
+    pub fn rotate_rad(rad: scalar) -> Matrix {
+        Self::rotate_deg(crate::core::scalar_::radians_to_degrees(rad))
     }
 
     #[allow(clippy::too_many_arguments)]
