@@ -821,6 +821,21 @@ impl Handle<SkPath> {
         unsafe { self.native().getLastPt(last_pt.native_mut()) }.if_true_some(last_pt)
     }
 
+    pub fn make_transform(
+        &mut self,
+        m: &Matrix,
+        pc: impl Into<Option<ApplyPerspectiveClip>>,
+    ) -> Path {
+        self.with_transform_with_perspective_clip(
+            &m,
+            pc.into().unwrap_or(ApplyPerspectiveClip::Yes),
+        )
+    }
+
+    pub fn make_scale(&mut self, (sx, sy): (scalar, scalar)) -> Path {
+        self.make_transform(&Matrix::scale((sx, sy)), ApplyPerspectiveClip::No)
+    }
+
     pub fn set_last_pt(&mut self, p: impl Into<Point>) -> &mut Self {
         let p = p.into();
         unsafe { self.native_mut().setLastPt(p.x, p.y) };
