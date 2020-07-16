@@ -463,8 +463,8 @@ impl RCHandle<SkSurface> {
         self.flush_and_submit()
     }
 
-    // TODO: flush(access, FlushInfo)
-    // TODO: flush(access, FlushFlags, semaphores)
+    // TODO: flush(BackendSurfaceAccess, FlushInfo)
+    // TODO: flush(FlushInfo, GrBackendSurfaceMutableState)
     // TODO: wait()
 
     pub fn characterize(&self) -> Option<SurfaceCharacterization> {
