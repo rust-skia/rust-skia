@@ -680,6 +680,8 @@ fn bindgen_gen(build: &FinalBuildConfiguration, current_dir: &Path, output_direc
     }
 
     println!("COMPILING BINDINGS: {:?}", build.binding_sources);
+    // we add skia-bindings later on.
+    cc_build.cargo_metadata(false);
     cc_build.compile(lib::SKIA_BINDINGS);
 
     println!("GENERATING BINDINGS");
