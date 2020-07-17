@@ -34,6 +34,16 @@ Whenever a new version of `rust-skia` is built from the `release` branch on our 
 
 And whenever the build script detects that `skia-bindings` is built from inside a crate _and_ a prebuilt archive is available that matches the repository's hash, platform, and features, it downloads the package, unpacks it, and skips the full build step of Skia and the bindings.
 
+## Offline Builds
+
+A full build of Skia downloads several repositories from the Internet. For specific scenarios, like, for example, [a packaging script](https://github.com/rust-skia/rust-skia/issues/340), it can be useful to build Skia offline. To configure that, the build script supports the following environment variables:
+
+| Variable                     | Description                                                  | Default                            |
+| ---------------------------- | ------------------------------------------------------------ | ---------------------------------- |
+| `SKIA_OFFLINE_SOURCE_DIR`    | An absolute path pointing to a complete Skia source tree including all dependencies. Setting this variable activates the offline build mode. |                                    |
+| `SKIA_OFFLINE_NINJA_COMMAND` | The ninja command to run. This can be either a filename, or a absolute path to the ninja executable. | `ninja` or `ninja.exe`  on Windows |
+| `SKIA_OFFLINE_GN_COMMAND`    | The `gn` command to run. Either an absolute path or a path relative to Skia's source directory. | `bin/gn`                           |
+
 ## Build Customization
 
 Besides of the features `gl`, `vulkan`, `metal`, and `textlayout` that can be directly specified when the package is added as a cargo dependency, the Skia build can be customized further in `build.rs` by adjusting one of two structs that are defined in `build_support/skia.rs`:

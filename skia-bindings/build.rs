@@ -1,5 +1,4 @@
 mod build_support;
-use crate::build_support::skia::FinalBuildConfiguration;
 use build_support::{binaries, cargo, git, skia, utils};
 use std::io::Cursor;
 use std::path::Path;
@@ -8,6 +7,7 @@ use std::{fs, io};
 /// Environment variables used by this build script.
 mod env {
     use crate::build_support::cargo;
+    use std::path::PathBuf;
 
     /// Returns true if the download should be forced. This can be used to test prebuilt binaries
     /// from within a repository build. If this environment variable is not set, binaries
@@ -19,6 +19,20 @@ mod env {
     /// Force to build skia, even if there is a binary available.
     pub fn force_skia_build() -> bool {
         cargo::env_var("FORCE_SKIA_BUILD").is_some()
+    }
+
+    /// The path to the skia source directory.
+    pub fn offline_source_dir() -> Option<PathBuf> {
+        cargo::env_var("SKIA_OFFLINE_SOURCE_DIR").map(PathBuf::from)
+    }
+
+    /// The full path of the ninja command to run. Only relevent when SKIA_OFFLINE_SOURCE_DIR is set.
+    pub fn offline_ninja_command() -> Option<PathBuf> {
+        cargo::env_var("SKIA_OFFLINE_NINJA_COMMAND").map(PathBuf::from)
+    }
+
+    pub fn offline_gn_command() -> Option<PathBuf> {
+        cargo::env_var("SKIA_OFFLINE_GN_COMMAND").map(PathBuf::from)
     }
 }
 
@@ -39,38 +53,61 @@ fn main() {
     let binaries_config = skia::BinariesConfiguration::from_cargo_env(&build_config);
 
     //
-    // is the download of prebuilt binaries possible?
+    // offline build?
     //
 
-    let build_skia = env::force_skia_build() || {
-        if let Some((tag, key)) = should_try_download_binaries(&binaries_config) {
-            println!(
-                "TRYING TO DOWNLOAD AND INSTALL SKIA BINARIES: {}/{}",
-                tag, key
-            );
-            let url = binaries::download_url(tag, key);
-            println!("  FROM: {}", url);
-            if let Err(e) = download_and_install(url, &binaries_config.output_directory) {
-                println!("DOWNLOAD AND INSTALL FAILED: {}", e);
-                true
+    if let Some(offline_source_dir) = env::offline_source_dir() {
+        println!("STARTING OFFLINE BUILD");
+
+        let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
+            &build_config,
+            &offline_source_dir,
+        );
+
+        skia::build_offline(
+            &final_configuration,
+            &binaries_config,
+            env::offline_ninja_command().as_deref(),
+            env::offline_gn_command().as_deref(),
+        );
+    } else {
+        //
+        // is the download of prebuilt binaries possible?
+        //
+
+        let build_skia = env::force_skia_build() || {
+            if let Some((tag, key)) = should_try_download_binaries(&binaries_config) {
+                println!(
+                    "TRYING TO DOWNLOAD AND INSTALL SKIA BINARIES: {}/{}",
+                    tag, key
+                );
+                let url = binaries::download_url(tag, key);
+                println!("  FROM: {}", url);
+                if let Err(e) = download_and_install(url, &binaries_config.output_directory) {
+                    println!("DOWNLOAD AND INSTALL FAILED: {}", e);
+                    true
+                } else {
+                    println!("DOWNLOAD AND INSTALL SUCCEEDED");
+                    false
+                }
             } else {
-                println!("DOWNLOAD AND INSTALL SUCCEEDED");
-                false
+                true
             }
-        } else {
-            true
+        };
+
+        //
+        // full build?
+        //
+
+        if build_skia {
+            println!("STARTING A FULL BUILD");
+            let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
+                &build_config,
+                &std::env::current_dir().unwrap().join("skia"),
+            );
+            skia::build(&final_configuration, &binaries_config);
         }
     };
-
-    //
-    // full build?
-    //
-
-    if build_skia {
-        println!("STARTING A FULL BUILD");
-        let final_configuration = FinalBuildConfiguration::from_build_configuration(&build_config);
-        skia::build(&final_configuration, &binaries_config);
-    }
 
     binaries_config.commit_to_cargo();
 
