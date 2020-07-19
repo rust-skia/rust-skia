@@ -436,8 +436,20 @@ impl BinariesConfiguration {
         // On Linux, the order is significant, first the static libraries we built, and then
         // the system libraries.
 
+        let target = cargo::target();
+
         for lib in &self.built_libraries {
-            cargo::add_link_lib(format!("static={}", lib));
+            // Prefixing the libraries we built with `static=` causes linker errors on Windows.
+            // https://github.com/rust-skia/rust-skia/pull/354
+            let kind_prefix = {
+                if target.is_windows() {
+                    ""
+                } else {
+                    "static="
+                }
+            };
+
+            cargo::add_link_lib(format!("{}{}", kind_prefix, lib));
         }
 
         cargo::add_link_libs(&self.link_libraries);
