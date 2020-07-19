@@ -437,7 +437,7 @@ impl BinariesConfiguration {
         // the system libraries.
 
         for lib in &self.built_libraries {
-            cargo::add_link_lib(format!("{}", lib));
+            cargo::add_link_lib(lib);
         }
 
         cargo::add_link_libs(&self.link_libraries);
