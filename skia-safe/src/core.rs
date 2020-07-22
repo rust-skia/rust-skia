@@ -53,6 +53,7 @@ pub mod document;
 pub use document::Document;
 
 pub mod draw_looper;
+#[allow(deprecated)]
 pub use draw_looper::DrawLooper;
 
 pub mod drawable;

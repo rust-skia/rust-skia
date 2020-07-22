@@ -6,6 +6,8 @@ pub use _2d_path_effect::*;
 
 pub mod alpha_threshold_filter;
 pub mod arithmetic_image_filter;
+#[deprecated(since = "0.0.0", note = "No longer supported")]
+#[allow(deprecated)]
 pub mod blur_draw_looper;
 pub mod blur_image_filter;
 pub mod color_filter_image_filter;
@@ -23,6 +25,8 @@ pub mod high_contrast_filter;
 pub use high_contrast_filter::{high_contrast_config, HighContrastConfig};
 pub mod image_filters;
 pub mod image_source;
+#[deprecated(since = "0.0.0", note = "No longer supported")]
+#[allow(deprecated)]
 pub mod layer_draw_looper;
 pub mod lighting_image_filter;
 pub mod luma_color_filter;
