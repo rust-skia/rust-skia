@@ -99,6 +99,7 @@
 
 #include "include/effects/SkPerlinNoiseShader.h"
 #include "include/effects/SkShaderMaskFilter.h"
+#include "include/effects/SkStrokeAndFillPathEffect.h"
 #include "include/effects/SkTableColorFilter.h"
 #include "include/effects/SkTableMaskFilter.h"
 #include "include/effects/SkTileImageFilter.h"
@@ -2282,6 +2283,14 @@ const SkRuntimeEffect::Varying* C_SkRuntimeEffect_varyings(const SkRuntimeEffect
 
 extern "C" SkMaskFilter* C_SkShaderMaskFilter_Make(SkShader* shader) {
     return SkShaderMaskFilter::Make(sp(shader)).release();
+}
+
+//
+// effects/SkStrokeAndFillPathEffect.h
+//
+
+extern "C" SkPathEffect* C_SkStrokeAndFillePathEffect_Make() {
+    return SkStrokeAndFillPathEffect::Make().release();
 }
 
 //

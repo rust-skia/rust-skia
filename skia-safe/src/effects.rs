@@ -49,6 +49,7 @@ pub mod picture_image_filter;
 pub mod runtime_effect;
 pub use runtime_effect::RuntimeEffect;
 pub mod shader_mask_filter;
+pub mod stroke_and_fill_path_effect;
 pub mod table_color_filter;
 pub mod table_mask_filter;
 pub mod tile_image_filter;
