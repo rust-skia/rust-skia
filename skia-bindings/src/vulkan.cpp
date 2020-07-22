@@ -101,3 +101,11 @@ extern "C" bool C_GrVkAlloc_Equals(const GrVkAlloc* lhs, const GrVkAlloc* rhs) {
 extern "C" bool C_GrVkYcbcrConversionInfo_Equals(const GrVkYcbcrConversionInfo* lhs, const GrVkYcbcrConversionInfo* rhs) {
     return *lhs == *rhs;
 }
+
+//
+// gpu/GrBackendSurfaceMutableState.h
+//
+
+extern "C" void C_GrBackendSurfaceMutableState_ConstructVK(GrBackendSurfaceMutableState* uninitialized, VkImageLayout layout, uint32_t queueFamilyIndex) {
+    new(uninitialized)GrBackendSurfaceMutableState(layout, queueFamilyIndex);
+}

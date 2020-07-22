@@ -4,7 +4,7 @@ use super::gl;
 use super::mtl;
 #[cfg(feature = "vulkan")]
 use super::vk;
-use super::BackendAPI;
+use super::{BackendAPI, BackendSurfaceMutableState};
 use crate::prelude::*;
 use crate::ISize;
 use skia_bindings as sb;
@@ -396,6 +396,10 @@ impl Handle<GrBackendRenderTarget> {
 
     pub fn backend_format(&self) -> BackendFormat {
         BackendFormat::from_native(unsafe { self.native().getBackendFormat() })
+    }
+
+    pub fn set_mutable_stat(&mut self, state: &BackendSurfaceMutableState) {
+        unsafe { self.native_mut().setMutableState(state.native()) }
     }
 
     pub fn is_protected(&self) -> bool {

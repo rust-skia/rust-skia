@@ -159,6 +159,14 @@ extern "C" bool C_GrBackendFormat_Equals(const GrBackendFormat* lhs, const GrBac
 }
 
 //
+// gpu/GrBackendSurfaceMutableState.h
+//
+
+extern "C" void C_GrBackendSurfaceMutableState_destruct(GrBackendSurfaceMutableState* self) {
+    self->~GrBackendSurfaceMutableState();
+}
+
+//
 // gpu/GrContext.h
 //
 
