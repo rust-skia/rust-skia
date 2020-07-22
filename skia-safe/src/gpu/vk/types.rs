@@ -75,7 +75,7 @@ impl Alloc {
 #[repr(C)]
 pub struct YcbcrConversionInfo {
     pub format: vk::Format,
-    pub external_format: u64,
+    pub external_format: i64,
     pub ycrbcr_model: vk::SamplerYcbcrModelConversion,
     pub ycbcr_range: vk::SamplerYcbcrRange,
     pub x_chroma_offset: vk::ChromaLocation,
@@ -117,7 +117,7 @@ impl YcbcrConversionInfo {
     #[allow(clippy::too_many_arguments)]
     pub fn new_with_format(
         format: vk::Format,
-        external_format: u64,
+        external_format: i64,
         ycrbcr_model: vk::SamplerYcbcrModelConversion,
         ycbcr_range: vk::SamplerYcbcrRange,
         x_chroma_offset: vk::ChromaLocation,
@@ -149,7 +149,7 @@ impl YcbcrConversionInfo {
         y_chroma_offset: vk::ChromaLocation,
         chroma_filter: vk::Filter,
         force_explicit_reconstruction: vk::Bool32,
-        external_format: u64,
+        external_format: i64,
         external_format_features: vk::FormatFeatureFlags,
     ) -> YcbcrConversionInfo {
         Self::new_with_format(
@@ -287,6 +287,27 @@ impl ImageInfo {
             info.format,
             info.level_count,
             info.current_queue_family,
+            info.ycbcr_conversion_info,
+            info.protected,
+            info.sharing_mode,
+        )
+    }
+
+    /// # Safety
+    /// The Vulkan `info.image` and `info.alloc` must outlive the lifetime of the ImageInfo returned.
+    pub unsafe fn from_info_with_queue_index(
+        info: &ImageInfo,
+        layout: vk::ImageLayout,
+        family_queue_index: u32,
+    ) -> Self {
+        Self::new(
+            info.image,
+            info.alloc,
+            info.tiling,
+            layout,
+            info.format,
+            info.level_count,
+            family_queue_index,
             info.ycbcr_conversion_info,
             info.protected,
             info.sharing_mode,
