@@ -36,6 +36,7 @@
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPath.h"
+#include "include/core/SkPathBuilder.h"
 #include "include/core/SkPathMeasure.h"
 #include "include/core/SkPathTypes.h"
 #include "include/core/SkPicture.h"
@@ -501,6 +502,31 @@ extern "C" const SkRect* C_SkPath_getBounds(const SkPath* self) {
 
 extern "C" uint32_t C_SkPath_getSegmentMasks(const SkPath* self) {
     return self->getSegmentMasks();
+}
+
+//
+// core/SkPathBuilder.h
+//
+
+extern "C" void C_SkPathBuilder_destruct(SkPathBuilder* self) {
+    self->~SkPathBuilder();
+}
+
+extern "C" void C_SkPathBuilder_snapshot(SkPathBuilder* self, SkPath* path) {
+    *path = self->snapshot();
+}
+
+extern "C" void C_SkPathBuilder_detach(SkPathBuilder* self, SkPath* path) {
+    *path = self->detach();
+}
+
+extern "C" void C_SkPathBuilder_Make(
+    const SkPoint *points, int pointCount,
+    const uint8_t *verbs, int verbCount,
+    const SkScalar *weights, int cubicWeightCount,
+    SkPathFillType fillType, bool isVolatile, SkPath *path)
+{
+    *path = SkPathBuilder::Make(points, pointCount, verbs, verbCount, weights, cubicWeightCount, fillType, isVolatile);
 }
 
 //

@@ -137,6 +137,9 @@ pub use paint::Style as PaintStyle;
 pub mod path;
 pub use path::Path;
 
+mod path_builder;
+pub use path_builder::PathBuilder;
+
 pub mod path_effect;
 pub use path_effect::PathEffect;
 
