@@ -39,5 +39,5 @@ metal-rs = { package = "metal", version = "0.17.1", optional = true }
 # ... to access raw metal ptrs.
 foreign-types = { version = "0.3", optional = true }
 # ... for that NSAutoReleasePool to be able to free metal devices.
-cocoa = { version = "0.22", optional = true }
+cocoa = { version = "0.23", optional = true }
 objc = { version = "0.2.4", optional = true }
