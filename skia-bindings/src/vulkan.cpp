@@ -4,6 +4,7 @@
 #include "include/gpu/vk/GrVkVulkan.h"
 #include "include/gpu/vk/GrVkTypes.h"
 #include "include/gpu/vk/GrVkBackendContext.h"
+#include "include/gpu/vk/GrVkExtensions.h"
 
 extern "C" void C_GrBackendFormat_ConstructVk(GrBackendFormat* uninitialized, VkFormat format) {
     new(uninitialized)GrBackendFormat(GrBackendFormat::MakeVk(format));
@@ -41,13 +42,17 @@ extern "C" void* C_GrVkBackendContext_New(
     context.fDevice = static_cast<VkDevice>(device);
     context.fQueue = static_cast<VkQueue>(queue);
     context.fGraphicsQueueIndex = graphicsQueueIndex;
-
+    context.fVkExtensions = new GrVkExtensions();
     context.fGetProc = *(reinterpret_cast<GetProcFn*>(&getProc));
     return &context;
 }
 
 extern "C" void C_GrVkBackendContext_Delete(void* vkBackendContext) {
-    delete static_cast<GrVkBackendContext*>(vkBackendContext);
+    auto bc = static_cast<GrVkBackendContext*>(vkBackendContext);
+    if (bc) {
+        delete bc->fVkExtensions;
+    }
+    delete bc;
 }
 
 extern "C" GrContext* C_GrContext_MakeVulkan(const GrVkBackendContext* vkBackendContext) {
