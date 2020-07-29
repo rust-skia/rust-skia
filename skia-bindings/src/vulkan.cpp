@@ -26,24 +26,33 @@ extern "C" void C_GPU_VK_Types(GrVkExtensionFlags *, GrVkFeatureFlags *) {}
 typedef PFN_vkVoidFunction (*GetProcFn)(const char* name, VkInstance instance, VkDevice device);
 typedef const void* (*GetProcFnVoidPtr)(const char* name, VkInstance instance, VkDevice device);
 
-extern "C" void* C_GrVkBackendContext_New(
-        void* instance,
-        void* physicalDevice,
-        void* device,
-        void* queue,
-        uint32_t graphicsQueueIndex,
+extern "C" void *C_GrVkBackendContext_New(
+    void *instance,
+    void *physicalDevice,
+    void *device,
+    void *queue,
+    uint32_t graphicsQueueIndex,
 
-        /* PFN_vkVoidFunction makes us trouble on the Rust side */
-        GetProcFnVoidPtr getProc) {
+    /* PFN_vkVoidFunction makes us trouble on the Rust side */
+    GetProcFnVoidPtr getProc,
+    const char *const *instanceExtensions, size_t instanceExtensionCount,
+    const char *const *deviceExtensions, size_t deviceExtensionCount)
+{
+    auto vkInstance = static_cast<VkInstance>(instance);
+    auto vkPhysicalDevice = static_cast<VkPhysicalDevice>(physicalDevice);
+    auto vkDevice = static_cast<VkDevice>(device);
+    auto vkGetProc = *(reinterpret_cast<GetProcFn *>(&getProc));
 
-    auto& context = *new GrVkBackendContext();
-    context.fInstance = static_cast<VkInstance>(instance);
-    context.fPhysicalDevice = static_cast<VkPhysicalDevice>(physicalDevice);
-    context.fDevice = static_cast<VkDevice>(device);
+    auto &extensions = *new GrVkExtensions();
+    extensions.init(vkGetProc, vkInstance, vkPhysicalDevice, instanceExtensionCount, instanceExtensions, deviceExtensionCount, deviceExtensions);
+    auto &context = *new GrVkBackendContext();
+    context.fInstance = vkInstance;
+    context.fPhysicalDevice = vkPhysicalDevice;
+    context.fDevice = vkDevice;
     context.fQueue = static_cast<VkQueue>(queue);
     context.fGraphicsQueueIndex = graphicsQueueIndex;
-    context.fVkExtensions = new GrVkExtensions();
-    context.fGetProc = *(reinterpret_cast<GetProcFn*>(&getProc));
+    context.fVkExtensions = &extensions;
+    context.fGetProc = vkGetProc;
     return &context;
 }
 
