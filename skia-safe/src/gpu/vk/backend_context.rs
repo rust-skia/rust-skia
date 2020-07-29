@@ -1,10 +1,12 @@
-use super::{Device, GetProc, GetProcOf, Instance, PhysicalDevice, Queue};
+use super::{Device, GetProc, GetProcOf, Instance, PhysicalDevice, Queue, Version};
+use crate::gpu;
 use crate::prelude::*;
 use ffi::CString;
 use raw::c_char;
 use skia_bindings as sb;
 use skia_bindings::{GrVkExtensionFlags, GrVkFeatureFlags};
 use std::cell::RefCell;
+use std::ops::Deref;
 use std::os::raw;
 use std::{ffi, mem};
 
@@ -121,6 +123,18 @@ impl BackendContext<'_> {
         );
         drop(resolver);
         BackendContext { native, get_proc }
+    }
+
+    pub fn set_protected_context(&mut self, protected_context: gpu::Protected) -> &mut Self {
+        unsafe { sb::C_GrVkBackendContext_setProtectedContext(self.native as _, protected_context) }
+        self
+    }
+
+    pub fn set_max_api_version(&mut self, version: impl Into<Version>) -> &mut Self {
+        unsafe {
+            sb::C_GrVkBackendContext_setMaxAPIVersion(self.native as _, *version.into().deref())
+        }
+        self
     }
 
     pub(crate) unsafe fn begin_resolving(&self) -> impl Drop {

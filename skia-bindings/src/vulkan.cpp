@@ -22,6 +22,8 @@ extern "C" void C_GPU_VK_Types(GrVkExtensionFlags *, GrVkFeatureFlags *) {}
 
 // The GrVkBackendContext struct binding's length is too short
 // because of the std::function that is used in it.
+// TODO: verify if this is actually true for the latest bindings (it doesn't seem so, because all skia-bindings testcases work and 
+// GrVkBackendContext seems to be generated).
 
 typedef PFN_vkVoidFunction (*GetProcFn)(const char* name, VkInstance instance, VkDevice device);
 typedef const void* (*GetProcFnVoidPtr)(const char* name, VkInstance instance, VkDevice device);
@@ -62,6 +64,14 @@ extern "C" void C_GrVkBackendContext_Delete(void* vkBackendContext) {
         delete bc->fVkExtensions;
     }
     delete bc;
+}
+
+extern "C" void C_GrVkBackendContext_setProtectedContext(GrVkBackendContext *self, GrProtected protectedContext) {
+    self->fProtectedContext = protectedContext;
+}
+
+extern "C" void C_GrVkBackendContext_setMaxAPIVersion(GrVkBackendContext *self, uint32_t maxAPIVersion) {
+    self->fMaxAPIVersion = maxAPIVersion;
 }
 
 extern "C" GrContext* C_GrContext_MakeVulkan(const GrVkBackendContext* vkBackendContext) {
