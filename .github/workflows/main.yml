@@ -55,9 +55,9 @@ jobs:
         architecture: 'x64'
       if: runner.os == 'Windows'
 
-    - name: Python 2 Version (Windows only)
+    - name: Python Version (Windows only)
       run: |
-        python2 --version
+        python --version
       if: runner.os == 'Windows'
 
     - name: Build
