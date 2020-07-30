@@ -27,15 +27,26 @@ jobs:
         fetch-depth: 1
         submodules: true
 
-    - name: Install Ninja (needed for shaderc-sys, Windows only)
+    # - name: Install Ninja (needed for shaderc-sys, Windows only)
+    #   run: |
+    #     choco install ninja
+    #   if: runner.os == 'Windows'
+
+    # - name: Ninja --version (Windows only)
+    #   run: |
+    #     ninja --version
+    #   if: runner.os == 'Windows'
+
+    - name: LLVM (Windows only)
       run: |
-        choco install ninja
+        choco install llvm
       if: runner.os == 'Windows'
 
-    - name: Ninja --version (Windows only)
+    # remove LLVM on macOS so that only Apple's clang is used
+    - name: Remove LLVM (macOS)
       run: |
-        ninja --version
-      if: runner.os == 'Windows'
+        brew uninstall llvm
+      if: runner.os == 'macOS'
 
 #    - name: Setup Python 2 (Windows only)
 #      uses: actions/setup-python@v1
@@ -65,5 +76,12 @@ jobs:
           fetch-depth: 1
           submodules: true
       - name: Install Rust
-        run: rustup update stable && rustup default stable && rustup component add rustfmt
-      - run: cargo fmt -- --check
+        run: |
+          rustup update stable
+          rustup default stable 
+          rustup component add rustfmt
+      - name: Generate missing bindings.rs file
+        run: |
+          echo > skia-bindings/src/bindings.rs
+      - run: | 
+          cargo fmt -- --check
