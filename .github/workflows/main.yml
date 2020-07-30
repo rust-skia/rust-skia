@@ -1,0 +1,69 @@
+name: Rust
+on: [push]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [windows-latest, macOS-latest, ubuntu-latest]
+        rust: [stable, beta]
+      fail-fast: false
+
+    steps:
+    - name: Install Rust
+      uses: hecrj/setup-rust-action@master
+      with:
+        rust-version: ${{ matrix.rust }}
+
+    - name: Install Clippy
+      run: |
+        rustup component add clippy
+      shell: bash
+
+    - uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+        submodules: true
+
+    - name: Install Ninja (needed for shaderc-sys, Windows only)
+      run: |
+        choco install ninja
+      if: runner.os == 'Windows'
+
+    - name: Ninja --version (Windows only)
+      run: |
+        ninja --version
+      if: runner.os == 'Windows'
+
+#    - name: Setup Python 2 (Windows only)
+#      uses: actions/setup-python@v1
+#      with:
+#        python-version: '2.x'
+#        architecture: 'x64'
+#      if: runner.os == 'Windows'
+
+    - name: Build
+      run: cargo build -vv --release
+      shell: bash
+
+#    - name: Run Clippy
+#      run: cargo clippy -vv --release --workspace
+#      shell: bash
+
+    - name: Run Tests
+      run: cargo test -vv --release --workspace -- --test-threads 1
+      shell: bash
+
+  rustfmt:
+    name: Check Rust Formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Install Rust
+        run: rustup update stable && rustup default stable && rustup component add rustfmt
+      - run: cargo fmt -- --check
