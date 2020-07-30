@@ -48,12 +48,17 @@ jobs:
         brew uninstall llvm
       if: runner.os == 'macOS'
 
-#    - name: Setup Python 2 (Windows only)
-#      uses: actions/setup-python@v1
-#      with:
-#        python-version: '2.x'
-#        architecture: 'x64'
-#      if: runner.os == 'Windows'
+    - name: Setup Python 2 (Windows only)
+      uses: actions/setup-python@v2
+      with:
+        python-version: '2.7.18'
+        architecture: 'x64'
+      if: runner.os == 'Windows'
+
+    - name: Python 2 Version (Windows only)
+      run: |
+        python2 --version
+      if: runner.os == 'Windows'
 
     - name: Build
       run: cargo build -vv --release
