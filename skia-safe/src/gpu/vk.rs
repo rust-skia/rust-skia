@@ -1,4 +1,5 @@
 use skia_bindings as sb;
+use std::ops::Deref;
 use std::ptr;
 
 mod backend_context;
@@ -108,5 +109,46 @@ impl From<NullHandle> for RenderPass {
 impl From<NullHandle> for u64 {
     fn from(_: NullHandle) -> Self {
         0
+    }
+}
+
+#[repr(transparent)]
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
+pub struct Version(u32);
+
+impl Version {
+    pub fn new(major: usize, minor: usize, patch: usize) -> Self {
+        ((((major & 0x3ff) << 22) | ((minor & 0x3ff) << 12) | (patch & 0xfff)) as u32).into()
+    }
+
+    pub fn major(&self) -> usize {
+        (self.deref() >> 22) as _
+    }
+
+    pub fn minor(&self) -> usize {
+        ((self.deref() >> 12) & 0x3ff) as _
+    }
+
+    pub fn patch(&self) -> usize {
+        ((self.deref()) & 0xfff) as _
+    }
+}
+
+impl From<u32> for Version {
+    fn from(v: u32) -> Self {
+        Self(v)
+    }
+}
+
+impl From<(usize, usize, usize)> for Version {
+    fn from((major, minor, patch): (usize, usize, usize)) -> Self {
+        Self::new(major, minor, patch)
+    }
+}
+
+impl Deref for Version {
+    type Target = u32;
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
