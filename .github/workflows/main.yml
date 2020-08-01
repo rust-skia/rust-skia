@@ -26,26 +26,16 @@ jobs:
       with:
         submodules: true
 
-    # - name: Install Ninja (needed for shaderc-sys, Windows only)
-    #   run: |
-    #     choco install ninja
-    #   if: runner.os == 'Windows'
-
-    # - name: Ninja --version (Windows only)
-    #   run: |
-    #     ninja --version
-    #   if: runner.os == 'Windows'
-
-    - name: LLVM (Windows only)
-      run: |
-        choco install llvm
-      if: runner.os == 'Windows'
-
     # remove LLVM on macOS so that only Apple's clang is used
     - name: Remove LLVM (macOS)
       run: |
         brew uninstall llvm
       if: runner.os == 'macOS'
+
+    - name: LLVM (Windows only)
+      run: |
+        choco install llvm
+      if: runner.os == 'Windows'
 
     - name: Setup Python 2 (Windows only)
       uses: actions/setup-python@v2
