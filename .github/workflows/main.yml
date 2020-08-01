@@ -7,7 +7,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [windows-latest, macOS-latest, ubuntu-latest]
+        os: [windows-2019, macOS-10.15, ubuntu-20.04]
         rust: [stable, beta]
       fail-fast: false
 
