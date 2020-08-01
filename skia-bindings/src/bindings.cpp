@@ -1,5 +1,6 @@
 #include <cassert>
 #include <tuple>
+#include <vector>
 
 #include "bindings.h"
 // codec/
@@ -2526,6 +2527,20 @@ C_SkImageFilters_SpotLitSpecular(const SkPoint3 &location,
 //
 // docs/SkPDFDocument.h
 //
+
+extern "C" void C_SkPDF_AttributeList_destruct(SkPDF::AttributeList *self) {
+    self->~AttributeList();
+}
+
+extern "C" void C_SkPDF_AttributeList_appendFloatArray(SkPDF::AttributeList *self, const char *owner, const char *name, const float *const value, size_t len) {
+    std::vector<float> v(value, value + len);
+    self->appendFloatArray(owner, name, v);
+}
+
+extern "C" void C_SkPDF_AttributeList_appendStringArray(SkPDF::AttributeList *self, const char *owner, const char *name, const SkString *const value, size_t len) {
+    std::vector<SkString> v(value, value + len);
+    self->appendStringArray(owner, name, v);
+}
 
 extern "C" void C_SkPDF_Metadata_Construct(SkPDF::Metadata* uninitialized) {
     new(uninitialized)SkPDF::Metadata();

@@ -926,6 +926,10 @@ type EnumEntry = (&'static str, fn(&str, &str) -> String);
 
 const ENUM_TABLE: &[EnumEntry] = &[
     //
+    // codec/
+    //
+    ("DocumentStructureType", rewrite::k_xxx),
+    //
     // core/ effects/
     //
     ("SkApplyPerspectiveClip", rewrite::k_xxx),

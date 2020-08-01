@@ -16,6 +16,14 @@ fn sendable_implements_send() {
     assert::send::<Sendable<ColorFilter>>();
 }
 
+mod codec {
+    use skia_safe::Codec;
+    use static_assertions::*;
+
+    // Codec seems to call into SkPngChunkReader*
+    assert_not_impl_any!(Codec: Send, Sync);
+}
+
 mod core {
     use skia_safe::{
         font_parameters, image_filter, path, path_effect, region, typeface, vertices, Bitmap,
@@ -100,6 +108,12 @@ mod core {
     assert_impl_all!(vertices::Builder: Send, Sync);
     assert_impl_all!(YUVAIndex: Send, Sync);
     assert_impl_all!(YUVASizeInfo: Send, Sync);
+}
+
+mod docs {
+    use skia_safe::pdf;
+    use static_assertions::*;
+    assert_impl_all!(pdf::AttributeList: Send, Sync);
 }
 
 pub mod assert {
