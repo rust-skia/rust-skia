@@ -2542,6 +2542,45 @@ extern "C" void C_SkPDF_AttributeList_appendStringArray(SkPDF::AttributeList *se
     self->appendStringArray(owner, name, v);
 }
 
+extern "C" SkPDF::StructureElementNode *C_SkPDF_StructureElementNode_New() {
+    return new SkPDF::StructureElementNode();
+}
+
+extern "C" void C_SkPDF_StructureElementNode_delete(SkPDF::StructureElementNode *self) {
+    delete self;
+}
+
+extern "C" void C_SkPDF_StructureElementNode_setChildVector(SkPDF::StructureElementNode *self, SkPDF::StructureElementNode **nodes, size_t len)
+{
+    self->fChildVector = std::vector<std::unique_ptr<SkPDF::StructureElementNode>>();
+    self->fChildVector.reserve(len);
+    for (size_t i = 0; i != len; ++i)
+    {
+        auto node = nodes[i];
+        nodes[i] = nullptr;
+        self->fChildVector.push_back(std::unique_ptr<SkPDF::StructureElementNode>(node));
+    }
+}
+
+extern "C" void C_SkPDF_StructElementNode_appendChild(SkPDF::StructureElementNode *self, SkPDF::StructureElementNode *node)
+{
+    self->fChildVector.push_back(std::unique_ptr<SkPDF::StructureElementNode>(node));
+}
+
+extern "C" size_t C_SkPDF_StructureElementNode_getChildVector(const SkPDF::StructureElementNode *self, SkPDF::StructureElementNode **nodes)
+{
+    if (self->fChildVector.empty())
+    {
+        *nodes = nullptr;
+        return 0;
+    }
+    else
+    {
+        *nodes = &*self->fChildVector.front();
+        return self->fChildVector.size();
+    }
+}
+
 extern "C" void C_SkPDF_Metadata_Construct(SkPDF::Metadata* uninitialized) {
     new(uninitialized)SkPDF::Metadata();
 }

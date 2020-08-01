@@ -114,6 +114,8 @@ mod docs {
     use skia_safe::pdf;
     use static_assertions::*;
     assert_impl_all!(pdf::AttributeList: Send, Sync);
+    assert_not_impl_any!(pdf::StructureElementNode: Send, Sync);
+    assert_not_impl_any!(pdf::Metadata: Send, Sync);
 }
 
 pub mod assert {

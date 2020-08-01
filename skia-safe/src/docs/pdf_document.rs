@@ -2,11 +2,12 @@ pub mod pdf {
     use crate::interop::{self, DynamicMemoryWStream, SetStr};
     use crate::prelude::*;
     use crate::{scalar, DateTime, Document};
+    use interop::AsStr;
     use skia_bindings as sb;
-    use skia_bindings::{SkPDF_AttributeList, SkPDF_Metadata};
+    use skia_bindings::{SkPDF_AttributeList, SkPDF_Metadata, SkPDF_StructureElementNode};
+    use std::{ffi::CString, mem, ptr, slice};
 
     pub use sb::SkPDF_DocumentStructureType as DocumentStructureType;
-    use std::ffi::CString;
     #[test]
     fn document_structure_type_naming() {
         let _ = DocumentStructureType::BibEntry;
@@ -21,11 +22,13 @@ pub mod pdf {
             unsafe { sb::C_SkPDF_AttributeList_destruct(self) }
         }
     }
+
     impl Default for AttributeList {
         fn default() -> Self {
             AttributeList::from_native(unsafe { SkPDF_AttributeList::new() })
         }
     }
+
     impl AttributeList {
         pub fn append_int(
             &mut self,
@@ -116,9 +119,119 @@ pub mod pdf {
         }
     }
 
-    // TODO: StructureElementNode
+    #[repr(transparent)]
+    #[derive(Debug)]
+    pub struct StructureElementNode(*mut SkPDF_StructureElementNode);
 
-    #[derive(Clone, Debug, Default)]
+    impl NativeAccess<SkPDF_StructureElementNode> for StructureElementNode {
+        fn native(&self) -> &SkPDF_StructureElementNode {
+            unsafe { &*self.0 }
+        }
+        fn native_mut(&mut self) -> &mut SkPDF_StructureElementNode {
+            unsafe { &mut *self.0 }
+        }
+    }
+
+    impl Drop for StructureElementNode {
+        fn drop(&mut self) {
+            unsafe { sb::C_SkPDF_StructureElementNode_delete(self.native_mut()) }
+        }
+    }
+
+    impl Default for StructureElementNode {
+        fn default() -> Self {
+            Self::new("")
+        }
+    }
+
+    impl StructureElementNode {
+        pub fn new(type_string: impl AsRef<str>) -> Self {
+            let mut node = Self::default();
+            node.set_type_string(type_string);
+            node
+        }
+
+        pub fn set_type_string(&mut self, type_string: impl AsRef<str>) -> &mut Self {
+            self.native_mut().fTypeString.set_str(type_string);
+            self
+        }
+
+        pub fn type_string(&self) -> &str {
+            self.native().fTypeString.as_str()
+        }
+
+        pub fn set_child_vector(
+            &mut self,
+            mut child_vector: Vec<StructureElementNode>,
+        ) -> &mut Self {
+            // strategy is to move them out by setting them to nullptr (drop() will handle a nullptr on the rust side)
+            unsafe {
+                sb::C_SkPDF_StructureElementNode_setChildVector(
+                    self.native_mut(),
+                    child_vector.as_mut_ptr() as _,
+                    child_vector.len(),
+                )
+            }
+            debug_assert!(child_vector.iter().all(|node| node.0.is_null()));
+            self
+        }
+
+        pub fn append_child(&mut self, node: StructureElementNode) -> &mut Self {
+            unsafe {
+                sb::C_SkPDF_StructElementNode_appendChild(self.native_mut(), node.0);
+            }
+            mem::forget(node);
+            self
+        }
+
+        pub fn child_vector(&self) -> &[StructureElementNode] {
+            let mut ptr = ptr::null_mut();
+            let len =
+                unsafe { sb::C_SkPDF_StructureElementNode_getChildVector(self.native(), &mut ptr) };
+            if len == 0 {
+                &[]
+            } else {
+                unsafe { slice::from_raw_parts(ptr as _, len) }
+            }
+        }
+
+        pub fn set_node_id(&mut self, node_id: i32) -> &mut Self {
+            self.native_mut().fNodeId = node_id;
+            self
+        }
+
+        pub fn node_id(&self) -> i32 {
+            self.native().fNodeId
+        }
+
+        pub fn attributes(&self) -> &AttributeList {
+            AttributeList::from_native_ref(&self.native().fAttributes)
+        }
+
+        pub fn attributes_mut(&mut self) -> &mut AttributeList {
+            AttributeList::from_native_ref_mut(&mut self.native_mut().fAttributes)
+        }
+
+        pub fn set_alt(&mut self, alt: impl AsRef<str>) -> &mut Self {
+            self.native_mut().fAlt.set_str(alt);
+            self
+        }
+
+        pub fn alt(&self) -> &str {
+            self.native().fAlt.as_str()
+        }
+
+        pub fn set_lang(&mut self, lang: impl AsRef<str>) -> &mut Self {
+            self.native_mut().fLang.set_str(lang);
+            self
+        }
+
+        pub fn lang(&self) -> &str {
+            self.native().fLang.as_str()
+        }
+    }
+
+    #[derive(Debug, Default)]
     pub struct Metadata {
         pub title: String,
         pub author: String,
@@ -131,7 +244,8 @@ pub mod pdf {
         pub raster_dpi: Option<scalar>,
         pub pdfa: bool,
         pub encoding_quality: Option<i32>,
-        // TODO: fStructureElementTreeRoot
+        // TODO: this is not supported yet
+        structure_element_tree_root: Option<StructureElementNode>,
     }
 
     // TODO: SetNodeId
@@ -158,6 +272,10 @@ pub mod pdf {
             internal.fPDFA = metadata.pdfa;
             if let Some(encoding_quality) = metadata.encoding_quality {
                 internal.fEncodingQuality = encoding_quality
+            }
+            if let Some(_structure_element_tree_root) = &metadata.structure_element_tree_root {
+                // TODO: How can we be sure that the tree root is not being dropped while the document is processed?
+                unimplemented!("");
             }
         }
 
