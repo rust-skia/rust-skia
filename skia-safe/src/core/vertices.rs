@@ -125,6 +125,8 @@ impl Attribute<'_> {
 }
 
 pub type Vertices = RCHandle<SkVertices>;
+unsafe impl Send for Vertices {}
+unsafe impl Sync for Vertices {}
 
 impl NativeRefCounted for SkVertices {
     fn _ref(&self) {
@@ -289,6 +291,8 @@ bitflags! {
 }
 
 pub type Builder = Handle<SkVertices_Builder>;
+unsafe impl Send for Builder {}
+unsafe impl Sync for Builder {}
 
 impl NativeDrop for SkVertices_Builder {
     fn drop(&mut self) {

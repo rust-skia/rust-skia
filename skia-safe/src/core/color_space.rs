@@ -100,6 +100,8 @@ pub mod named_transfer_fn {
 }
 
 pub type ColorSpace = RCHandle<SkColorSpace>;
+unsafe impl Send for ColorSpace {}
+unsafe impl Sync for ColorSpace {}
 
 impl NativeRefCounted for SkColorSpace {
     fn _ref(&self) {

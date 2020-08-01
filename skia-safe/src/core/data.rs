@@ -7,6 +7,7 @@ use std::slice;
 
 pub type Data = RCHandle<SkData>;
 unsafe impl Send for Data {}
+unsafe impl Sync for Data {}
 
 impl NativeRefCounted for SkData {
     fn _ref(&self) {
@@ -54,7 +55,7 @@ impl RCHandle<SkData> {
     }
 
     // TODO:
-    // pub fn writable_data(&mut self) -> &mut [u8]
+    // pub unsafe fn writable_data(&mut self) -> &mut [u8]
 
     pub fn copy_range(&self, offset: usize, buffer: &mut [u8]) -> &Self {
         buffer.copy_from_slice(&self.as_bytes()[offset..offset + buffer.len()]);

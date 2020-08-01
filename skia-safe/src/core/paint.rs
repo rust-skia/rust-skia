@@ -27,6 +27,8 @@ pub fn test_join_naming() {
 }
 
 pub type Paint = Handle<SkPaint>;
+unsafe impl Send for Paint {}
+unsafe impl Sync for Paint {}
 
 impl NativeDrop for SkPaint {
     fn drop(&mut self) {
