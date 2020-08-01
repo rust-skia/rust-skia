@@ -9,6 +9,8 @@ use std::ffi::CStr;
 use std::slice;
 
 pub type Variable = Handle<SkRuntimeEffect_Variable>;
+unsafe impl Send for Variable {}
+unsafe impl Sync for Variable {}
 
 impl NativeDrop for SkRuntimeEffect_Variable {
     fn drop(&mut self) {
@@ -85,6 +87,8 @@ pub mod variable {
 }
 
 pub type Varying = Handle<SkRuntimeEffect_Varying>;
+unsafe impl Send for Varying {}
+unsafe impl Sync for Varying {}
 
 impl NativeDrop for SkRuntimeEffect_Varying {
     fn drop(&mut self) {

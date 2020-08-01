@@ -113,9 +113,18 @@ mod core {
 mod docs {
     use skia_safe::pdf;
     use static_assertions::*;
+
     assert_impl_all!(pdf::AttributeList: Send, Sync);
     assert_not_impl_any!(pdf::StructureElementNode: Send, Sync);
     assert_not_impl_any!(pdf::Metadata: Send, Sync);
+}
+
+mod effects {
+    use skia_safe::{runtime_effect, RuntimeEffect};
+    use static_assertions::*;
+
+    assert_impl_all!(runtime_effect::Variable: Send, Sync);
+    assert_not_impl_any!(RuntimeEffect: Send, Sync);
 }
 
 pub mod assert {
