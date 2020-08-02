@@ -127,6 +127,48 @@ mod effects {
     assert_not_impl_any!(RuntimeEffect: Send, Sync);
 }
 
+mod textlayout {
+    use skia_safe::textlayout::{
+        Block, Decoration, FontCollection, FontFamilies, FontFeature, Paragraph, ParagraphBuilder,
+        ParagraphCache, Placeholder, PlaceholderStyle, StrutStyle, TextShadow, TextStyle,
+        TypefaceFontProvider, TypefaceFontStyleSet,
+    };
+    use static_assertions::*;
+
+    // RC _and_ mutable, forbid shared mutability.
+    assert_not_impl_any!(FontCollection: Send, Sync);
+    // ParagraphCache seems to be fully thread safe, but I don't think it is itself meant to be shared between threads.
+    assert_not_impl_any!(ParagraphCache: Send, Sync);
+    assert_impl_all!(Paragraph: Send, Sync);
+    assert_impl_all!(ParagraphBuilder: Send, Sync);
+    assert_impl_all!(StrutStyle: Send, Sync);
+    assert_impl_all!(TextShadow: Send, Sync);
+    assert_impl_all!(Decoration: Send, Sync);
+    assert_impl_all!(FontFeature: Send, Sync);
+    assert_impl_all!(PlaceholderStyle: Send, Sync);
+    assert_impl_all!(TextStyle: Send, Sync);
+    assert_impl_all!(Block: Send, Sync);
+    assert_impl_all!(Placeholder: Send, Sync);
+    assert_not_impl_any!(TypefaceFontStyleSet: Send, Sync);
+    assert_not_impl_any!(TypefaceFontProvider: Send, Sync);
+    assert_not_impl_any!(FontFamilies: Send, Sync);
+}
+
+mod shaper {
+    use skia_safe::shaper::{
+        BiDiRunIterator, FontRunIterator, LanguageRunIterator, ScriptRunIterator,
+        TextBlobBuilderRunHandler,
+    };
+    use skia_safe::Shaper;
+    use static_assertions::*;
+    assert_impl_all!(Shaper: Send, Sync);
+    assert_not_impl_any!(FontRunIterator: Send, Sync);
+    assert_not_impl_any!(BiDiRunIterator: Send, Sync);
+    assert_not_impl_any!(ScriptRunIterator: Send, Sync);
+    assert_not_impl_any!(LanguageRunIterator: Send, Sync);
+    assert_not_impl_any!(TextBlobBuilderRunHandler: Send, Sync);
+}
+
 pub mod assert {
     pub fn send<T: Send>() {}
     pub fn sync<T: Sync>() {}

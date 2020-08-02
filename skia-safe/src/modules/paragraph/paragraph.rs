@@ -6,6 +6,8 @@ use skia_bindings as sb;
 use std::ops::{Index, Range};
 
 pub type Paragraph = RefHandle<sb::skia_textlayout_Paragraph>;
+unsafe impl Send for Paragraph {}
+unsafe impl Sync for Paragraph {}
 
 impl NativeDrop for sb::skia_textlayout_Paragraph {
     fn drop(&mut self) {
