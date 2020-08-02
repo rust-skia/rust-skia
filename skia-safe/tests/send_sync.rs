@@ -153,6 +153,7 @@ mod gpu {
     #[cfg(feature = "metal")]
     mod mtl {
         use skia_safe::gpu::mtl::TextureInfo;
+        use static_assertions::*;
         assert_impl_all!(TextureInfo: Send, Sync);
     }
 
