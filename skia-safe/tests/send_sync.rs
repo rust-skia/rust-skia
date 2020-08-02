@@ -127,6 +127,60 @@ mod effects {
     assert_not_impl_any!(RuntimeEffect: Send, Sync);
 }
 
+#[cfg(feature = "gpu")]
+mod gpu {
+    use skia_safe::gpu::{BackendFormat, BackendRenderTarget, BackendTexture, Context};
+    use static_assertions::*;
+    assert_impl_all!(BackendFormat: Send, Sync);
+    assert_impl_all!(BackendTexture: Send, Sync);
+    assert_impl_all!(BackendRenderTarget: Send, Sync);
+    // The implementation checks for single ownership before mutation, so
+    // no Send and Sync can be supported.
+    // If RC is 1, it can be sent to other threads with `Sendable`.
+    assert_not_impl_any!(Context: Send, Sync);
+
+    #[cfg(feature = "gl")]
+    mod gl {
+        use skia_safe::gpu::gl::{Extensions, FramebufferInfo, Interface, TextureInfo};
+        use static_assertions::*;
+        assert_impl_all!(Extensions: Send, Sync);
+        // RC & mutable (extensions_mut() ... we could make this function unsafe)
+        assert_not_impl_any!(Interface: Send, Sync);
+        assert_impl_all!(TextureInfo: Send, Sync);
+        assert_impl_all!(FramebufferInfo: Send, Sync);
+    }
+
+    #[cfg(feature = "metal")]
+    mod mtl {
+        use skia_safe::gpu::mtl::TextureInfo;
+        assert_impl_all!(TextureInfo: Send, Sync);
+    }
+
+    #[cfg(feature = "vulkan")]
+    mod vulkan {
+        use skia_safe::gpu::vk::{
+            Alloc, BackendContext, DrawableInfo, GetProcOf, ImageInfo, YcbcrConversionInfo,
+        };
+        use skia_safe::gpu::BackendDrawableInfo;
+        use static_assertions::*;
+        // TODO: BackendContext is referencing get_proc and is used only temporarily for building
+        //       the context.
+        assert_not_impl_any!(BackendContext: Send, Sync);
+        // already Copy & Clone, and highly unsafe.
+        assert_impl_all!(Alloc: Send, Sync);
+        assert_impl_all!(YcbcrConversionInfo: Send, Sync);
+        assert_impl_all!(ImageInfo: Send, Sync);
+        // GetProc could be Send & Sync , but does it make sense (it's already Copy & Clone)
+        assert_not_impl_any!(GetProcOf: Send, Sync);
+        assert_impl_all!(DrawableInfo: Send, Sync);
+        assert_impl_all!(BackendDrawableInfo: Send, Sync);
+        // Note that we can't make most of vk.rs re-export of native Vulkan types Send nor Sync,
+        // because they are just re-exports of simple pointers, which already implements a negative
+        // Send & Sync that can not be overriden...
+    }
+}
+
+#[cfg(feature = "textlayout")]
 mod textlayout {
     use skia_safe::textlayout::{
         Block, Decoration, FontCollection, FontFamilies, FontFeature, Paragraph, ParagraphBuilder,
@@ -154,6 +208,7 @@ mod textlayout {
     assert_not_impl_any!(FontFamilies: Send, Sync);
 }
 
+#[cfg(feature = "textlayout")]
 mod shaper {
     use skia_safe::shaper::{
         BiDiRunIterator, FontRunIterator, LanguageRunIterator, ScriptRunIterator,
