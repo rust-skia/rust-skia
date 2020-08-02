@@ -169,6 +169,26 @@ mod shaper {
     assert_not_impl_any!(TextBlobBuilderRunHandler: Send, Sync);
 }
 
+mod pathops {
+    use skia_safe::OpBuilder;
+    use static_assertions::*;
+    assert_impl_all!(OpBuilder: Send, Sync);
+}
+
+mod svg {
+    use skia_safe::svg::Canvas;
+    use static_assertions::*;
+    assert_not_impl_any!(Canvas: Send, Sync);
+}
+
+mod utils {
+    use skia_safe::utils::{interpolator::TimeToT, CustomTypefaceBuilder, Interpolator};
+    use static_assertions::*;
+    assert_impl_all!(CustomTypefaceBuilder: Send, Sync);
+    assert_impl_all!(Interpolator: Send, Sync);
+    assert_impl_all!(TimeToT: Send, Sync);
+}
+
 pub mod assert {
     pub fn send<T: Send>() {}
     pub fn sync<T: Sync>() {}
