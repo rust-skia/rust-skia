@@ -854,16 +854,16 @@ pub trait NativeBase<Base> {
     }
 }
 
-pub struct Sendable<H: Mutable>(H);
-unsafe impl<H: Mutable> Send for Sendable<H> {}
+pub struct Sendable<H: ConditionallySend>(H);
+unsafe impl<H: ConditionallySend> Send for Sendable<H> {}
 
-impl<H: Mutable> Sendable<H> {
+impl<H: ConditionallySend> Sendable<H> {
     pub fn unwrap(self) -> H {
         self.0
     }
 }
 
-pub trait Mutable: Sized {
+pub trait ConditionallySend: Sized {
     /// Returns `true` if the handle can be sent to another thread.
     fn can_send(&self) -> bool;
     /// Wrap the handle in a type that can be sent to another thread and unwrapped there.
@@ -872,9 +872,9 @@ pub trait Mutable: Sized {
     fn wrap_send(self) -> Result<Sendable<Self>, Self>;
 }
 
-/// Every `RCHandle<H>` is considered mutable and can only be sent to
+/// `RCHandle<H>` is conditionally Send and can be sent to
 /// another thread when its reference count is 1.
-impl<H: NativeRefCountedBase> Mutable for RCHandle<H> {
+impl<H: NativeRefCountedBase> ConditionallySend for RCHandle<H> {
     fn can_send(&self) -> bool {
         self.native().unique()
     }

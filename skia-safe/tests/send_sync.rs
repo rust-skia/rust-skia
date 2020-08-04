@@ -1,4 +1,4 @@
-use skia_safe::{color_filters, BlendMode, Color, ColorFilter, Mutable, Sendable};
+use skia_safe::{color_filters, BlendMode, Color, ColorFilter, ConditionallySend, Sendable};
 
 /// Test if RCHandle<> types can be wrapped into a Sendable and unwrapped.
 #[test]
