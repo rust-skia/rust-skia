@@ -3,6 +3,8 @@ use skia_bindings as sb;
 use skia_bindings::SkColorMatrix;
 
 pub type ColorMatrix = Handle<SkColorMatrix>;
+unsafe impl Send for ColorMatrix {}
+unsafe impl Sync for ColorMatrix {}
 
 impl NativeDrop for SkColorMatrix {
     fn drop(&mut self) {}

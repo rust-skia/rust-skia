@@ -4,6 +4,8 @@ use skia_bindings as sb;
 use skia_bindings::SkCustomTypefaceBuilder;
 
 pub type CustomTypefaceBuilder = Handle<SkCustomTypefaceBuilder>;
+unsafe impl Send for CustomTypefaceBuilder {}
+unsafe impl Sync for CustomTypefaceBuilder {}
 
 impl NativeDrop for SkCustomTypefaceBuilder {
     fn drop(&mut self) {

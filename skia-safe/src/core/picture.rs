@@ -5,6 +5,8 @@ use skia_bindings as sb;
 use skia_bindings::{SkPicture, SkRefCntBase};
 
 pub type Picture = RCHandle<SkPicture>;
+unsafe impl Sync for Picture {}
+unsafe impl Send for Picture {}
 
 impl NativeRefCountedBase for SkPicture {
     type Base = SkRefCntBase;

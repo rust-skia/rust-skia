@@ -8,6 +8,8 @@ pub use skia_bindings::GrMTLHandle as Handle;
 pub use skia_bindings::GrMTLPixelFormat as PixelFormat;
 
 pub type TextureInfo = prelude::Handle<GrMtlTextureInfo>;
+unsafe impl Send for TextureInfo {}
+unsafe impl Sync for TextureInfo {}
 
 impl NativeDrop for GrMtlTextureInfo {
     fn drop(&mut self) {

@@ -38,6 +38,7 @@ lazy_static = "1.4"
 [dev-dependencies]
 serial_test = "0.4"
 serial_test_derive = "0.4"
+static_assertions = "1.1"
 
 # gl-window
 [target.'cfg(not(target_os = "android"))'.dev-dependencies]

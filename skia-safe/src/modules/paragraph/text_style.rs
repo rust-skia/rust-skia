@@ -72,6 +72,8 @@ fn placeholder_alignment_member_naming() {
 }
 
 pub type FontFeature = Handle<sb::skia_textlayout_FontFeature>;
+unsafe impl Send for FontFeature {}
+unsafe impl Sync for FontFeature {}
 
 impl NativeDrop for sb::skia_textlayout_FontFeature {
     fn drop(&mut self) {
@@ -153,6 +155,8 @@ impl PlaceholderStyle {
 }
 
 pub type TextStyle = Handle<sb::skia_textlayout_TextStyle>;
+unsafe impl Send for TextStyle {}
+unsafe impl Sync for TextStyle {}
 
 impl NativeDrop for sb::skia_textlayout_TextStyle {
     fn drop(&mut self) {

@@ -22,6 +22,8 @@ pub struct LocalizedString {
 }
 
 pub type Typeface = RCHandle<SkTypeface>;
+unsafe impl Send for Typeface {}
+unsafe impl Sync for Typeface {}
 
 impl NativeRefCountedBase for SkTypeface {
     type Base = SkRefCntBase;

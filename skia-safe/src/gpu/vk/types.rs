@@ -21,6 +21,8 @@ pub struct Alloc {
     pub backend_memory: GraphicsBackendMemory,
     uses_system_heap: bool,
 }
+unsafe impl Send for Alloc {}
+unsafe impl Sync for Alloc {}
 
 impl NativeTransmutable<GrVkAlloc> for Alloc {}
 #[test]
@@ -181,6 +183,8 @@ pub struct ImageInfo {
     pub protected: Protected,
     pub ycbcr_conversion_info: YcbcrConversionInfo,
 }
+unsafe impl Send for ImageInfo {}
+unsafe impl Sync for ImageInfo {}
 
 impl NativeTransmutable<GrVkImageInfo> for ImageInfo {}
 #[test]
@@ -319,6 +323,8 @@ pub struct DrawableInfo {
     pub draw_bounds: *mut vk::Rect2D,
     pub image: vk::Image,
 }
+unsafe impl Send for DrawableInfo {}
+unsafe impl Sync for DrawableInfo {}
 
 impl Default for DrawableInfo {
     fn default() -> Self {

@@ -10,6 +10,8 @@ use skia_bindings::SkImageGenerator;
 use std::ffi::c_void;
 
 pub type ImageGenerator = RefHandle<SkImageGenerator>;
+unsafe impl Send for ImageGenerator {}
+unsafe impl Sync for ImageGenerator {}
 
 impl NativeDrop for SkImageGenerator {
     fn drop(&mut self) {
@@ -70,7 +72,6 @@ impl RefHandle<SkImageGenerator> {
         .if_true_some((size_info, indices, cs))
     }
 
-    // TODO: why does planes need to be a mutable reference?
     pub fn get_yuva8_planes(
         &mut self,
         size_info: &YUVASizeInfo,

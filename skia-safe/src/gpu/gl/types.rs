@@ -57,7 +57,7 @@ fn test_all_formats_exhaustive() {
 pub use skia_bindings::GrGLenum as Enum;
 pub use skia_bindings::GrGLuint as UInt;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Eq, Debug)]
 #[repr(C)]
 pub struct TextureInfo {
     pub target: Enum,
@@ -98,7 +98,7 @@ impl TextureInfo {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(C)]
 pub struct FramebufferInfo {
     pub fboid: UInt,

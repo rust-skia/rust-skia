@@ -64,5 +64,25 @@ On **Windows**, the file `icudtl.dat` must be available in your executable's dir
 
 Simple examples of the skshaper and skparagraph module bindings can be found [in the skia-org example command line application](https://github.com/rust-skia/rust-skia/blob/master/skia-org/src/).
 
+## Multithreading
 
+Conflicting with Rust philosophy, we've decided to fully support Skia's reference counting semantics, which means that all reference counted types can be cloned and modified from within the same thread. To send a reference counted type to another thread, its reference count must be 1, and must be wrapped with the `Sendable` type and then unwrapped in the receiving thread. The following functions support the sending mechanism:
+
+Every mutable reference counted type implements the following two functions:
+
+`can_send(&self) -> bool` 
+
+returns `true` if the handle can be sent to another thread right now.
+
+`wrap_send(self) -> Result<Sendable<Self>, Self>` 
+
+wraps the handle into a `Sendable` type that implements `Send`.
+
+And the `Sendable` type implements:
+
+`unwrap(self)`
+
+which unwraps the original handle.
+
+For more information about the various wrapper types, take a look [at the rust-skia wiki](https://github.com/rust-skia/rust-skia/wiki/Wrapper-Types).
 

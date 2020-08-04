@@ -291,6 +291,7 @@ impl Camera3D {
 )]
 pub type View3D = RefHandle<Sk3DView>;
 unsafe impl Send for View3D {}
+unsafe impl Sync for View3D {}
 
 impl Default for View3D {
     fn default() -> Self {
