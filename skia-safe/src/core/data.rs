@@ -68,6 +68,13 @@ impl RCHandle<SkData> {
             .unwrap()
     }
 
+    /// Constructs Data from a given byte slice without copying it.
+    ///
+    /// Users must make sure that the underlying slice will outlive the lifetime of the Data.
+    pub unsafe fn new_bytes(data: &[u8]) -> Self {
+        Data::from_ptr(sb::C_SkData_MakeWithoutCopy(data.as_ptr() as _, data.len())).unwrap()
+    }
+
     pub unsafe fn new_uninitialized(length: usize) -> Data {
         Data::from_ptr(sb::C_SkData_MakeUninitialized(length)).unwrap()
     }
