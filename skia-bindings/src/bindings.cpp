@@ -1248,14 +1248,6 @@ extern "C" SkVertices* C_SkVertices_MakeCopy(
     return SkVertices::MakeCopy(mode, vertexCount, positions, texs, colors, indexCount, indices).release();
 }
 
-extern "C" SkVertices* C_SkVertices_Decode(const void* buffer, size_t length) {
-    return SkVertices::Decode(buffer, length).release();
-}
-
-extern "C" SkData* C_SkVertices_encode(const SkVertices* self) {
-    return self->encode().release();
-}
-
 //
 // SkVertices::Builder
 //
