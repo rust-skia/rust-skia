@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::{Color, Data, Point, Rect};
+use crate::{Color, Point, Rect};
 use skia_bindings as sb;
 use skia_bindings::{
     SkColor, SkPoint, SkVertices, SkVertices_Attribute, SkVertices_Attribute_Type,
@@ -274,12 +274,14 @@ impl RCHandle<SkVertices> {
         unsafe { self.native().approximateSize() }
     }
 
-    pub fn decode(buffer: &[u8]) -> Option<Vertices> {
-        Vertices::from_ptr(unsafe { sb::C_SkVertices_Decode(buffer.as_ptr() as _, buffer.len()) })
+    #[deprecated(since = "0.31.0", note = "removed without replacement")]
+    pub fn decode(_buffer: &[u8]) -> ! {
+        panic!("removed without replacement");
     }
 
-    pub fn encode(&self) -> Data {
-        Data::from_ptr(unsafe { sb::C_SkVertices_encode(self.native()) }).unwrap()
+    #[deprecated(since = "0.31.0", note = "removed without replacement")]
+    pub fn encode(&self) -> ! {
+        panic!("removed without replacement");
     }
 }
 
