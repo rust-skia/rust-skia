@@ -121,13 +121,17 @@ pub mod shaders {
         .unwrap()
     }
 
-    pub fn blend(mode: BlendMode, dst: Shader, src: Shader) -> Shader {
-        Shader::from_ptr(unsafe { sb::C_SkShaders_Blend(mode, dst.into_ptr(), src.into_ptr()) })
-            .unwrap()
+    pub fn blend(mode: BlendMode, dst: impl AsOwned<Shader>, src: impl AsOwned<Shader>) -> Shader {
+        Shader::from_ptr(unsafe {
+            sb::C_SkShaders_Blend(mode, dst.as_owned().into_ptr(), src.as_owned().into_ptr())
+        })
+        .unwrap()
     }
 
-    pub fn lerp(t: f32, dst: Shader, src: Shader) -> Option<Shader> {
-        Shader::from_ptr(unsafe { sb::C_SkShaders_Lerp(t, dst.into_ptr(), src.into_ptr()) })
+    pub fn lerp(t: f32, dst: impl AsOwned<Shader>, src: impl AsOwned<Shader>) -> Option<Shader> {
+        Shader::from_ptr(unsafe {
+            sb::C_SkShaders_Lerp(t, dst.as_owned().into_ptr(), src.as_owned().into_ptr())
+        })
     }
 
     #[deprecated(since = "0.29.0", note = "removed without replacement")]
