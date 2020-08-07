@@ -114,9 +114,9 @@ pub mod shaders {
         Shader::from_ptr(unsafe { sb::C_SkShaders_Color(color.into_native()) }).unwrap()
     }
 
-    pub fn color_in_space(color: impl AsRef<Color4f>, space: ColorSpace) -> Shader {
+    pub fn color_in_space(color: impl AsRef<Color4f>, space: impl AsOwned<ColorSpace>) -> Shader {
         Shader::from_ptr(unsafe {
-            sb::C_SkShaders_Color2(color.as_ref().native(), space.into_ptr())
+            sb::C_SkShaders_Color2(color.as_ref().native(), space.as_owned().into_ptr())
         })
         .unwrap()
     }

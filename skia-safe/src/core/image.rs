@@ -648,9 +648,15 @@ impl RCHandle<SkImage> {
         })
     }
 
-    pub fn reinterpret_color_space(&self, new_color_space: ColorSpace) -> Option<Image> {
+    pub fn reinterpret_color_space(
+        &self,
+        new_color_space: impl AsOwned<ColorSpace>,
+    ) -> Option<Image> {
         Image::from_ptr(unsafe {
-            sb::C_SkImage_reinterpretColorSpace(self.native(), new_color_space.into_ptr())
+            sb::C_SkImage_reinterpretColorSpace(
+                self.native(),
+                new_color_space.as_owned().into_ptr(),
+            )
         })
     }
 }
