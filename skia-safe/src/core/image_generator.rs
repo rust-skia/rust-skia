@@ -112,8 +112,10 @@ impl RefHandle<SkImageGenerator> {
         unimplemented!("removed without replacement")
     }
 
-    pub fn from_encoded(encoded: Data) -> Option<Self> {
-        Self::from_ptr(unsafe { sb::C_SkImageGenerator_MakeFromEncoded(encoded.into_ptr()) })
+    pub fn from_encoded(encoded: impl AsOwned<Data>) -> Option<Self> {
+        Self::from_ptr(unsafe {
+            sb::C_SkImageGenerator_MakeFromEncoded(encoded.as_owned().into_ptr())
+        })
     }
 
     pub fn from_picture(

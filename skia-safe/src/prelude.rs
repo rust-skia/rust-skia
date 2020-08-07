@@ -893,13 +893,13 @@ pub trait AsOwned<OwnedT> {
     fn as_owned(self) -> OwnedT;
 }
 
-impl<T: NativeRefCountedBase> AsOwned<RCHandle<T>> for RCHandle<T> {
+impl<T: NativeRefCounted> AsOwned<RCHandle<T>> for RCHandle<T> {
     fn as_owned(self) -> Self {
         self
     }
 }
 
-impl<T: NativeRefCountedBase> AsOwned<RCHandle<T>> for &RCHandle<T> {
+impl<T: NativeRefCounted> AsOwned<RCHandle<T>> for &RCHandle<T> {
     fn as_owned(self) -> RCHandle<T> {
         self.clone()
     }

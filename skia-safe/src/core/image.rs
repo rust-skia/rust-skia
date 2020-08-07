@@ -45,9 +45,13 @@ impl NativeRefCountedBase for SkImage {
 impl RCHandle<SkImage> {
     // TODO: MakeRasterCopy()
 
-    pub fn from_raster_data(info: &ImageInfo, pixels: Data, row_bytes: usize) -> Option<Image> {
+    pub fn from_raster_data(
+        info: &ImageInfo,
+        pixels: impl AsOwned<Data>,
+        row_bytes: usize,
+    ) -> Option<Image> {
         Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeRasterData(info.native(), pixels.into_ptr(), row_bytes)
+            sb::C_SkImage_MakeRasterData(info.native(), pixels.as_owned().into_ptr(), row_bytes)
         })
     }
 
@@ -71,9 +75,12 @@ impl RCHandle<SkImage> {
         image
     }
 
-    pub fn from_encoded(data: Data, subset: Option<IRect>) -> Option<Image> {
+    pub fn from_encoded(data: impl AsOwned<Data>, subset: Option<IRect>) -> Option<Image> {
         Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeFromEncoded(data.into_ptr(), subset.native().as_ptr_or_null())
+            sb::C_SkImage_MakeFromEncoded(
+                data.as_owned().into_ptr(),
+                subset.native().as_ptr_or_null(),
+            )
         })
     }
 
@@ -158,14 +165,14 @@ impl RCHandle<SkImage> {
     }
 
     pub fn new_raster_from_compressed(
-        data: Data,
+        data: impl AsOwned<Data>,
         dimensions: impl Into<ISize>,
         ct: CompressionType,
     ) -> Option<Image> {
         let dimensions = dimensions.into();
         Image::from_ptr(unsafe {
             sb::C_SkImage_MakeRasterFromCompressed(
-                data.into_ptr(),
+                data.as_owned().into_ptr(),
                 dimensions.width,
                 dimensions.height,
                 ct,
@@ -364,7 +371,7 @@ impl RCHandle<SkImage> {
     }
 
     pub fn from_picture(
-        picture: Picture,
+        picture: impl AsOwned<Picture>,
         dimensions: impl Into<ISize>,
         matrix: Option<&Matrix>,
         paint: Option<&Paint>,
@@ -373,7 +380,7 @@ impl RCHandle<SkImage> {
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_MakeFromPicture(
-                picture.into_ptr(),
+                picture.as_owned().into_ptr(),
                 dimensions.into().native(),
                 matrix.native_ptr_or_null(),
                 paint.native_ptr_or_null(),

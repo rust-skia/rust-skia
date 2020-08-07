@@ -117,10 +117,13 @@ impl RCHandle<SkTypeface> {
 
     // TODO: MakeFromStream()?
 
-    pub fn from_data(data: Data, index: impl Into<Option<usize>>) -> Option<Typeface> {
+    pub fn from_data(
+        data: impl AsOwned<Data>,
+        index: impl Into<Option<usize>>,
+    ) -> Option<Typeface> {
         Typeface::from_ptr(unsafe {
             sb::C_SkTypeface_MakeFromData(
-                data.into_ptr(),
+                data.as_owned().into_ptr(),
                 index.into().unwrap_or_default().try_into().unwrap(),
             )
         })

@@ -150,11 +150,12 @@ pub fn drop_shadow_only<'a>(
 }
 
 pub fn image<'a>(
-    image: Image,
+    image: impl AsOwned<Image>,
     src_rect: impl Into<Option<&'a Rect>>,
     dst_rect: impl Into<Option<&'a Rect>>,
     filter_quality: impl Into<Option<FilterQuality>>,
 ) -> Option<ImageFilter> {
+    let image = image.as_owned();
     let image_rect = Rect::from_iwh(image.width(), image.height());
     let src_rect = src_rect.into().unwrap_or(&image_rect);
     let dst_rect = dst_rect.into().unwrap_or(&image_rect);

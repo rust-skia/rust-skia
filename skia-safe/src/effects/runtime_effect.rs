@@ -127,7 +127,7 @@ pub fn new(sksl: impl AsRef<str>) -> Result<RuntimeEffect, String> {
 impl RCHandle<SkRuntimeEffect> {
     pub fn make_shader<'a>(
         &mut self,
-        inputs: Data,
+        inputs: impl AsOwned<Data>,
         children: impl IntoIterator<Item = Shader>,
         local_matrix: impl Into<Option<&'a Matrix>>,
         is_opaque: bool,
@@ -139,7 +139,7 @@ impl RCHandle<SkRuntimeEffect> {
         Shader::from_ptr(unsafe {
             sb::C_SkRuntimeEffect_makeShader(
                 self.native_mut(),
-                inputs.into_ptr(),
+                inputs.as_owned().into_ptr(),
                 children.as_mut_ptr(),
                 children.len(),
                 local_matrix.into().native_ptr_or_null(),
@@ -150,7 +150,7 @@ impl RCHandle<SkRuntimeEffect> {
 
     pub fn make_color_filter_with_children(
         &mut self,
-        inputs: Data,
+        inputs: impl AsOwned<Data>,
         children: impl IntoIterator<Item = ColorFilter>,
     ) -> Option<ColorFilter> {
         let mut children: Vec<_> = children
@@ -161,16 +161,16 @@ impl RCHandle<SkRuntimeEffect> {
         ColorFilter::from_ptr(unsafe {
             sb::C_SkRuntimeEffect_makeColorFilter2(
                 self.native_mut(),
-                inputs.into_ptr(),
+                inputs.as_owned().into_ptr(),
                 children.as_mut_ptr(),
                 children.len(),
             )
         })
     }
 
-    pub fn make_color_filter(&mut self, inputs: Data) -> Option<ColorFilter> {
+    pub fn make_color_filter(&mut self, inputs: impl AsOwned<Data>) -> Option<ColorFilter> {
         ColorFilter::from_ptr(unsafe {
-            sb::C_SkRuntimeEffect_makeColorFilter(self.native_mut(), inputs.into_ptr())
+            sb::C_SkRuntimeEffect_makeColorFilter(self.native_mut(), inputs.as_owned().into_ptr())
         })
     }
 
