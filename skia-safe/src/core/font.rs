@@ -36,23 +36,30 @@ impl Default for Font {
 }
 
 impl Handle<SkFont> {
-    pub fn new(typeface: impl Into<Typeface>, size: impl Into<Option<scalar>>) -> Self {
+    pub fn new(typeface: impl AsOwned<Typeface>, size: impl Into<Option<scalar>>) -> Self {
         Self::from_typeface(typeface, size)
     }
 
-    pub fn from_typeface(typeface: impl Into<Typeface>, size: impl Into<Option<scalar>>) -> Self {
+    pub fn from_typeface(
+        typeface: impl AsOwned<Typeface>,
+        size: impl Into<Option<scalar>>,
+    ) -> Self {
         match size.into() {
             None => Self::construct(|font| unsafe {
-                sb::C_SkFont_ConstructFromTypeface(font, typeface.into().into_ptr())
+                sb::C_SkFont_ConstructFromTypeface(font, typeface.as_owned().into_ptr())
             }),
             Some(size) => Self::construct(|font| unsafe {
-                sb::C_SkFont_ConstructFromTypefaceWithSize(font, typeface.into().into_ptr(), size)
+                sb::C_SkFont_ConstructFromTypefaceWithSize(
+                    font,
+                    typeface.as_owned().into_ptr(),
+                    size,
+                )
             }),
         }
     }
 
     pub fn from_typeface_with_params(
-        typeface: impl Into<Typeface>,
+        typeface: impl AsOwned<Typeface>,
         size: scalar,
         scale: scalar,
         skew: scalar,
@@ -60,7 +67,7 @@ impl Handle<SkFont> {
         Self::construct(|font| unsafe {
             sb::C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(
                 font,
-                typeface.into().into_ptr(),
+                typeface.as_owned().into_ptr(),
                 size,
                 scale,
                 skew,
@@ -180,8 +187,8 @@ impl Handle<SkFont> {
         self.native().fSkewX
     }
 
-    pub fn set_typeface(&mut self, tf: impl Into<Typeface>) -> &mut Self {
-        unsafe { sb::C_SkFont_setTypeface(self.native_mut(), tf.into().into_ptr()) }
+    pub fn set_typeface(&mut self, tf: impl AsOwned<Typeface>) -> &mut Self {
+        unsafe { sb::C_SkFont_setTypeface(self.native_mut(), tf.as_owned().into_ptr()) }
         self
     }
 
