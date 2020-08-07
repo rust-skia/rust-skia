@@ -97,16 +97,22 @@ impl NativeFlattenable for SkPathEffect {
 }
 
 impl RCHandle<SkPathEffect> {
-    pub fn sum(first: PathEffect, second: PathEffect) -> PathEffect {
+    pub fn sum(first: impl AsOwned<PathEffect>, second: impl AsOwned<PathEffect>) -> PathEffect {
         PathEffect::from_ptr(unsafe {
-            sb::C_SkPathEffect_MakeSum(first.into_ptr(), second.into_ptr())
+            sb::C_SkPathEffect_MakeSum(first.as_owned().into_ptr(), second.as_owned().into_ptr())
         })
         .unwrap()
     }
 
-    pub fn compose(first: PathEffect, second: PathEffect) -> PathEffect {
+    pub fn compose(
+        first: impl AsOwned<PathEffect>,
+        second: impl AsOwned<PathEffect>,
+    ) -> PathEffect {
         PathEffect::from_ptr(unsafe {
-            sb::C_SkPathEffect_MakeCompose(first.into_ptr(), second.into_ptr())
+            sb::C_SkPathEffect_MakeCompose(
+                first.as_owned().into_ptr(),
+                second.as_owned().into_ptr(),
+            )
         })
         .unwrap()
     }
