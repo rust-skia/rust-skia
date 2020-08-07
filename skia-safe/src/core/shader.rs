@@ -92,9 +92,9 @@ impl RCHandle<SkShader> {
         .unwrap()
     }
 
-    pub fn with_color_filter(&self, color_filter: ColorFilter) -> Self {
+    pub fn with_color_filter(&self, color_filter: impl AsOwned<ColorFilter>) -> Self {
         Self::from_ptr(unsafe {
-            sb::C_SkShader_makeWithColorFilter(self.native(), color_filter.into_ptr())
+            sb::C_SkShader_makeWithColorFilter(self.native(), color_filter.as_owned().into_ptr())
         })
         .unwrap()
     }

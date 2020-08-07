@@ -71,9 +71,9 @@ impl RCHandle<SkColorFilter> {
         })
     }
 
-    pub fn composed(&self, inner: impl Into<ColorFilter>) -> Option<Self> {
+    pub fn composed(&self, inner: impl AsOwned<ColorFilter>) -> Option<Self> {
         ColorFilter::from_ptr(unsafe {
-            sb::C_SkColorFilter_makeComposed(self.native(), inner.into().into_ptr())
+            sb::C_SkColorFilter_makeComposed(self.native(), inner.as_owned().into_ptr())
         })
     }
 
@@ -86,9 +86,12 @@ pub mod color_filters {
     use crate::{scalar, BlendMode, Color, ColorFilter, ColorMatrix};
     use skia_bindings as sb;
 
-    pub fn compose(outer: ColorFilter, inner: ColorFilter) -> Option<ColorFilter> {
+    pub fn compose(
+        outer: impl AsOwned<ColorFilter>,
+        inner: impl AsOwned<ColorFilter>,
+    ) -> Option<ColorFilter> {
         ColorFilter::from_ptr(unsafe {
-            sb::C_SkColorFilters_Compose(outer.into_ptr(), inner.into_ptr())
+            sb::C_SkColorFilters_Compose(outer.as_owned().into_ptr(), inner.as_owned().into_ptr())
         })
     }
 
@@ -119,9 +122,13 @@ pub mod color_filters {
         ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_SRGBToLinearGamma() }).unwrap()
     }
 
-    pub fn lerp(t: f32, dst: ColorFilter, src: ColorFilter) -> Option<ColorFilter> {
+    pub fn lerp(
+        t: f32,
+        dst: impl AsOwned<ColorFilter>,
+        src: impl AsOwned<ColorFilter>,
+    ) -> Option<ColorFilter> {
         ColorFilter::from_ptr(unsafe {
-            sb::C_SkColorFilters_Lerp(t, dst.into_ptr(), src.into_ptr())
+            sb::C_SkColorFilters_Lerp(t, dst.as_owned().into_ptr(), src.as_owned().into_ptr())
         })
     }
 }

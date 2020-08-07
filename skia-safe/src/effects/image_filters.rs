@@ -67,13 +67,13 @@ pub fn blur<'a>(
 }
 
 pub fn color_filter<'a>(
-    cf: ColorFilter,
+    cf: impl AsOwned<ColorFilter>,
     input: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
         sb::C_SkImageFilters_ColorFilter(
-            cf.into_ptr(),
+            cf.as_owned().into_ptr(),
             input.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
         )
