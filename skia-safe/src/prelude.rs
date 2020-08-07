@@ -887,3 +887,20 @@ impl<H: NativeRefCountedBase> ConditionallySend for RCHandle<H> {
         }
     }
 }
+
+/// A trait that expects either a reference or a value to move.
+pub trait AsOwned<OwnedT> {
+    fn as_owned(self) -> OwnedT;
+}
+
+impl<T: NativeRefCountedBase> AsOwned<RCHandle<T>> for RCHandle<T> {
+    fn as_owned(self) -> Self {
+        self
+    }
+}
+
+impl<T: NativeRefCountedBase> AsOwned<RCHandle<T>> for &RCHandle<T> {
+    fn as_owned(self) -> RCHandle<T> {
+        self.clone()
+    }
+}
