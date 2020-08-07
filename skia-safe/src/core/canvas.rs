@@ -547,13 +547,13 @@ impl Canvas {
 
     pub fn clip_shader(
         &mut self,
-        shader: impl AsOwned<Shader>,
+        shader: impl Into<Shader>,
         op: impl Into<Option<ClipOp>>,
     ) -> &mut Self {
         unsafe {
             sb::C_SkCanvas_clipShader(
                 self.native_mut(),
-                shader.as_owned().into_ptr(),
+                shader.into().into_ptr(),
                 op.into().unwrap_or(ClipOp::Intersect),
             )
         }

@@ -6,21 +6,17 @@ pub mod merge_path_effect {
 
     impl RCHandle<SkPathEffect> {
         pub fn merge(
-            one: impl AsOwned<PathEffect>,
-            two: impl AsOwned<PathEffect>,
+            one: impl Into<PathEffect>,
+            two: impl Into<PathEffect>,
             op: PathOp,
         ) -> PathEffect {
             new(one, two, op)
         }
     }
 
-    pub fn new(
-        one: impl AsOwned<PathEffect>,
-        two: impl AsOwned<PathEffect>,
-        op: PathOp,
-    ) -> PathEffect {
+    pub fn new(one: impl Into<PathEffect>, two: impl Into<PathEffect>, op: PathOp) -> PathEffect {
         PathEffect::from_ptr(unsafe {
-            sb::C_SkMergePathEffect_Make(one.as_owned().into_ptr(), two.as_owned().into_ptr(), op)
+            sb::C_SkMergePathEffect_Make(one.into().into_ptr(), two.into().into_ptr(), op)
         })
         .unwrap()
     }

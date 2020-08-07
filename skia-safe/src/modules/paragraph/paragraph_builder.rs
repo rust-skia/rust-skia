@@ -58,9 +58,9 @@ impl RefHandle<sb::skia_textlayout_ParagraphBuilder> {
         Paragraph::from_ptr(unsafe { sb::C_ParagraphBuilder_Build(self.native_mut()) }).unwrap()
     }
 
-    pub fn new(style: &ParagraphStyle, font_collection: impl AsOwned<FontCollection>) -> Self {
+    pub fn new(style: &ParagraphStyle, font_collection: impl Into<FontCollection>) -> Self {
         Self::from_ptr(unsafe {
-            sb::C_ParagraphBuilder_make(style.native(), font_collection.as_owned().into_ptr())
+            sb::C_ParagraphBuilder_make(style.native(), font_collection.into().into_ptr())
         })
         .unwrap()
     }

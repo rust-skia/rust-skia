@@ -38,8 +38,8 @@ impl NativeRefCountedBase for SkCodec {
 }
 
 impl RCHandle<SkCodec> {
-    pub fn from_data(data: impl AsOwned<Data>) -> Option<Codec> {
-        Codec::from_ptr(unsafe { sb::C_SkCodec_MakeFromData(data.as_owned().into_ptr()) })
+    pub fn from_data(data: impl Into<Data>) -> Option<Codec> {
+        Codec::from_ptr(unsafe { sb::C_SkCodec_MakeFromData(data.into().into_ptr()) })
     }
 
     pub fn info(&self) -> ImageInfo {

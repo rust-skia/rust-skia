@@ -160,8 +160,8 @@ impl ColorSpace {
 
     // TODO: writeToMemory()?
 
-    pub fn deserialize(data: impl AsOwned<Data>) -> ColorSpace {
-        let data = data.as_owned();
+    pub fn deserialize(data: impl Into<Data>) -> ColorSpace {
+        let data = data.into();
         let bytes = data.as_bytes();
         ColorSpace::from_ptr(unsafe {
             sb::C_SkColorSpace_Deserialize(bytes.as_ptr() as _, bytes.len())

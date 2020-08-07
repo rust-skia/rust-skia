@@ -71,9 +71,9 @@ impl RCHandle<SkColorFilter> {
         })
     }
 
-    pub fn composed(&self, inner: impl AsOwned<ColorFilter>) -> Option<Self> {
+    pub fn composed(&self, inner: impl Into<ColorFilter>) -> Option<Self> {
         ColorFilter::from_ptr(unsafe {
-            sb::C_SkColorFilter_makeComposed(self.native(), inner.as_owned().into_ptr())
+            sb::C_SkColorFilter_makeComposed(self.native(), inner.into().into_ptr())
         })
     }
 
@@ -87,11 +87,11 @@ pub mod color_filters {
     use skia_bindings as sb;
 
     pub fn compose(
-        outer: impl AsOwned<ColorFilter>,
-        inner: impl AsOwned<ColorFilter>,
+        outer: impl Into<ColorFilter>,
+        inner: impl Into<ColorFilter>,
     ) -> Option<ColorFilter> {
         ColorFilter::from_ptr(unsafe {
-            sb::C_SkColorFilters_Compose(outer.as_owned().into_ptr(), inner.as_owned().into_ptr())
+            sb::C_SkColorFilters_Compose(outer.into().into_ptr(), inner.into().into_ptr())
         })
     }
 
@@ -124,11 +124,11 @@ pub mod color_filters {
 
     pub fn lerp(
         t: f32,
-        dst: impl AsOwned<ColorFilter>,
-        src: impl AsOwned<ColorFilter>,
+        dst: impl Into<ColorFilter>,
+        src: impl Into<ColorFilter>,
     ) -> Option<ColorFilter> {
         ColorFilter::from_ptr(unsafe {
-            sb::C_SkColorFilters_Lerp(t, dst.as_owned().into_ptr(), src.as_owned().into_ptr())
+            sb::C_SkColorFilters_Lerp(t, dst.into().into_ptr(), src.into().into_ptr())
         })
     }
 }
