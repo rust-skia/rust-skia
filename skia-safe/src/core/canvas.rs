@@ -1002,7 +1002,7 @@ impl Canvas {
     }
 
     pub fn is_clip_rect(&self) -> bool {
-        unsafe { sb::C_SkCanvas_isClipEmpty(self.native()) }
+        unsafe { sb::C_SkCanvas_isClipRect(self.native()) }
     }
 
     pub fn local_to_device(&self) -> M44 {
