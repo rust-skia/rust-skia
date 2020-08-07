@@ -275,9 +275,10 @@ pub fn paint<'a>(paint: &Paint, crop_rect: impl Into<Option<&'a IRect>>) -> Opti
 }
 
 pub fn picture<'a>(
-    picture: Picture,
+    picture: impl AsOwned<Picture>,
     target_rect: impl Into<Option<&'a Rect>>,
 ) -> Option<ImageFilter> {
+    let picture = picture.as_owned();
     let picture_rect = picture.cull_rect();
     let target_rect = target_rect.into().unwrap_or(&picture_rect);
 

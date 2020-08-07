@@ -120,7 +120,7 @@ impl RefHandle<SkImageGenerator> {
 
     pub fn from_picture(
         size: ISize,
-        picture: Picture,
+        picture: impl AsOwned<Picture>,
         matrix: Option<&Matrix>,
         paint: Option<&Paint>,
         bit_depth: image::BitDepth,
@@ -129,7 +129,7 @@ impl RefHandle<SkImageGenerator> {
         Self::from_ptr(unsafe {
             sb::C_SkImageGenerator_MakeFromPicture(
                 size.native(),
-                picture.into_ptr(),
+                picture.as_owned().into_ptr(),
                 matrix.native_ptr_or_null(),
                 paint.native_ptr_or_null(),
                 bit_depth,
