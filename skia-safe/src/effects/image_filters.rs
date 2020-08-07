@@ -80,9 +80,12 @@ pub fn color_filter<'a>(
     })
 }
 
-pub fn compose(outer: ImageFilter, inner: ImageFilter) -> Option<ImageFilter> {
+pub fn compose(
+    outer: impl AsOwned<ImageFilter>,
+    inner: impl AsOwned<ImageFilter>,
+) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
-        sb::C_SkImageFilters_Compose(outer.into_ptr(), inner.into_ptr())
+        sb::C_SkImageFilters_Compose(outer.as_owned().into_ptr(), inner.as_owned().into_ptr())
     })
 }
 
@@ -90,7 +93,7 @@ pub fn displacement_map<'a>(
     (x_channel_selector, y_channel_selector): (ColorChannel, ColorChannel),
     scale: scalar,
     displacement: impl Into<Option<ImageFilter>>,
-    color: ImageFilter,
+    color: impl AsOwned<ImageFilter>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
@@ -99,7 +102,7 @@ pub fn displacement_map<'a>(
             y_channel_selector,
             scale,
             displacement.into().into_ptr_or_null(),
-            color.into_ptr(),
+            color.as_owned().into_ptr(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
