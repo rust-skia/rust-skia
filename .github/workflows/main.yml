@@ -9,22 +9,23 @@ jobs:
       matrix:
         os: [windows-2019, macOS-10.15, ubuntu-20.04]
         edition: [stable, beta]
+        include:
+          - os: 'windows-2019'
+            host-target: 'x86_64-pc-windows-msvc'
+            host-os: 'Windows'
+            features: 'gl,vulkan,textlayout'
+
+          - os: 'macOS-10.15'
+            host-target: 'x86_64-apple-darwin'
+            host-os: 'macOS'
+            features: 'gl,vulkan,textlayout,metal'
+
+          - os: 'ubuntu-20.04'
+            host-target: 'x86_64-unknown-linux-gnu'
+            host-os: 'Linux'
+            features: 'gl,vulkan,textlayout'
+
       fail-fast: false
-      include:
-        - os: 'windows-2019'
-          host-target: 'x86_64-pc-windows-msvc'
-          host-os: 'Windows'
-          features: 'gl,vulkan,textlayout'
-
-        - os: 'macOS-10.15'
-          host-target: 'x86_64-apple-darwin'
-          host-os: 'macOS'
-          features: 'gl,vulkan,textlayout,metal'
-
-        - os: 'ubuntu-20.04'
-          host-target: 'x86_64-unknown-linux-gnu'
-          host-os: 'Linux'
-          features: 'gl,vulkan,textlayout'
 
     steps:
     - name: 'Build on ${{ matrix.host-os }} Host with Host Target ${{ matrix.host-target }}'
