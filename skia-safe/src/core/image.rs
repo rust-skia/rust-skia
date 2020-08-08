@@ -45,9 +45,13 @@ impl NativeRefCountedBase for SkImage {
 impl RCHandle<SkImage> {
     // TODO: MakeRasterCopy()
 
-    pub fn from_raster_data(info: &ImageInfo, pixels: Data, row_bytes: usize) -> Option<Image> {
+    pub fn from_raster_data(
+        info: &ImageInfo,
+        pixels: impl Into<Data>,
+        row_bytes: usize,
+    ) -> Option<Image> {
         Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeRasterData(info.native(), pixels.into_ptr(), row_bytes)
+            sb::C_SkImage_MakeRasterData(info.native(), pixels.into().into_ptr(), row_bytes)
         })
     }
 
@@ -71,9 +75,9 @@ impl RCHandle<SkImage> {
         image
     }
 
-    pub fn from_encoded(data: Data, subset: Option<IRect>) -> Option<Image> {
+    pub fn from_encoded(data: impl Into<Data>, subset: Option<IRect>) -> Option<Image> {
         Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeFromEncoded(data.into_ptr(), subset.native().as_ptr_or_null())
+            sb::C_SkImage_MakeFromEncoded(data.into().into_ptr(), subset.native().as_ptr_or_null())
         })
     }
 
@@ -158,14 +162,14 @@ impl RCHandle<SkImage> {
     }
 
     pub fn new_raster_from_compressed(
-        data: Data,
+        data: impl Into<Data>,
         dimensions: impl Into<ISize>,
         ct: CompressionType,
     ) -> Option<Image> {
         let dimensions = dimensions.into();
         Image::from_ptr(unsafe {
             sb::C_SkImage_MakeRasterFromCompressed(
-                data.into_ptr(),
+                data.into().into_ptr(),
                 dimensions.width,
                 dimensions.height,
                 ct,
@@ -364,7 +368,7 @@ impl RCHandle<SkImage> {
     }
 
     pub fn from_picture(
-        picture: Picture,
+        picture: impl Into<Picture>,
         dimensions: impl Into<ISize>,
         matrix: Option<&Matrix>,
         paint: Option<&Paint>,
@@ -373,7 +377,7 @@ impl RCHandle<SkImage> {
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_MakeFromPicture(
-                picture.into_ptr(),
+                picture.into().into_ptr(),
                 dimensions.into().native(),
                 matrix.native_ptr_or_null(),
                 paint.native_ptr_or_null(),
@@ -648,9 +652,9 @@ impl RCHandle<SkImage> {
         })
     }
 
-    pub fn reinterpret_color_space(&self, new_color_space: ColorSpace) -> Option<Image> {
+    pub fn reinterpret_color_space(&self, new_color_space: impl Into<ColorSpace>) -> Option<Image> {
         Image::from_ptr(unsafe {
-            sb::C_SkImage_reinterpretColorSpace(self.native(), new_color_space.into_ptr())
+            sb::C_SkImage_reinterpretColorSpace(self.native(), new_color_space.into().into_ptr())
         })
     }
 }

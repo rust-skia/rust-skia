@@ -4,12 +4,12 @@ use skia_bindings as sb;
 use skia_bindings::{SkImage, SkImageFilter};
 
 impl RCHandle<SkImageFilter> {
-    pub fn from_image(image: Image) -> Option<Self> {
+    pub fn from_image(image: impl Into<Image>) -> Option<Self> {
         image_filters::image(image, None, None, None)
     }
 
     pub fn from_image_rect(
-        image: Image,
+        image: impl Into<Image>,
         src_rect: impl AsRef<Rect>,
         dst_rect: impl AsRef<Rect>,
         filter_quality: FilterQuality,

@@ -53,8 +53,8 @@ impl ArithmeticFPInputs {
 #[deprecated(since = "0.19.0", note = "use image_filters::arithmetic()")]
 pub fn new<'a>(
     inputs: impl Into<ArithmeticFPInputs>,
-    background: ImageFilter,
-    foreground: ImageFilter,
+    background: impl Into<ImageFilter>,
+    foreground: impl Into<ImageFilter>,
     crop_rect: impl Into<Option<&'a image_filter::CropRect>>,
 ) -> Option<ImageFilter> {
     let inputs = inputs.into();
@@ -65,8 +65,8 @@ pub fn new<'a>(
             inputs.k[2],
             inputs.k[3],
             inputs.enforce_pm_color,
-            background.into_ptr(),
-            foreground.into_ptr(),
+            background.into().into_ptr(),
+            foreground.into().into_ptr(),
             crop_rect.into().native_ptr_or_null(),
         )
     })

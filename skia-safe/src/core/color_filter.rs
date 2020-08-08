@@ -86,9 +86,12 @@ pub mod color_filters {
     use crate::{scalar, BlendMode, Color, ColorFilter, ColorMatrix};
     use skia_bindings as sb;
 
-    pub fn compose(outer: ColorFilter, inner: ColorFilter) -> Option<ColorFilter> {
+    pub fn compose(
+        outer: impl Into<ColorFilter>,
+        inner: impl Into<ColorFilter>,
+    ) -> Option<ColorFilter> {
         ColorFilter::from_ptr(unsafe {
-            sb::C_SkColorFilters_Compose(outer.into_ptr(), inner.into_ptr())
+            sb::C_SkColorFilters_Compose(outer.into().into_ptr(), inner.into().into_ptr())
         })
     }
 
@@ -119,9 +122,13 @@ pub mod color_filters {
         ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_SRGBToLinearGamma() }).unwrap()
     }
 
-    pub fn lerp(t: f32, dst: ColorFilter, src: ColorFilter) -> Option<ColorFilter> {
+    pub fn lerp(
+        t: f32,
+        dst: impl Into<ColorFilter>,
+        src: impl Into<ColorFilter>,
+    ) -> Option<ColorFilter> {
         ColorFilter::from_ptr(unsafe {
-            sb::C_SkColorFilters_Lerp(t, dst.into_ptr(), src.into_ptr())
+            sb::C_SkColorFilters_Lerp(t, dst.into().into_ptr(), src.into().into_ptr())
         })
     }
 }

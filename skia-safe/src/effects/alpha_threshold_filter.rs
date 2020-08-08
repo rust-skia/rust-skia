@@ -20,7 +20,7 @@ pub fn new<'a>(
     region: &Region,
     inner_min: scalar,
     outer_max: scalar,
-    input: ImageFilter,
+    input: impl Into<ImageFilter>,
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
@@ -28,7 +28,7 @@ pub fn new<'a>(
             region.native(),
             inner_min,
             outer_max,
-            input.into_ptr(),
+            input.into().into_ptr(),
             crop_rect.into().native_ptr_or_null(),
         )
     })

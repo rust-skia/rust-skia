@@ -72,6 +72,15 @@ impl From<(Image, f32)> for TypefaceGlyph<'_> {
     }
 }
 
+impl From<(&Image, f32)> for TypefaceGlyph<'_> {
+    fn from((image, scale): (&Image, f32)) -> Self {
+        Self::Image {
+            image: image.clone(),
+            scale,
+        }
+    }
+}
+
 #[test]
 fn build_custom_typeface() {
     let mut builder = CustomTypefaceBuilder::new(2);

@@ -5,7 +5,7 @@ use skia_bindings::{SkImageFilter, SkPicture};
 
 impl RCHandle<SkImageFilter> {
     pub fn from_picture<'a>(
-        picture: Picture,
+        picture: impl Into<Picture>,
         crop_rect: impl Into<Option<&'a Rect>>,
     ) -> Option<Self> {
         image_filters::picture(picture, crop_rect)
@@ -30,10 +30,13 @@ impl RCHandle<SkPicture> {
 
 #[deprecated(since = "0.19.0", note = "use image_filters::picture")]
 pub fn from_picture<'a>(
-    picture: Picture,
+    picture: impl Into<Picture>,
     target_rect: impl Into<Option<&'a Rect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
-        sb::C_SkPictureImageFilter_Make(picture.into_ptr(), target_rect.into().native_ptr_or_null())
+        sb::C_SkPictureImageFilter_Make(
+            picture.into().into_ptr(),
+            target_rect.into().native_ptr_or_null(),
+        )
     })
 }

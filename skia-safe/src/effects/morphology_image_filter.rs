@@ -29,14 +29,14 @@ pub mod dilate_image_filter {
     #[deprecated(since = "0.19.0", note = "use image_filters::dilate")]
     pub fn new<'a>(
         (radius_x, radius_y): (i32, i32),
-        input: ImageFilter,
+        input: impl Into<ImageFilter>,
         crop_rect: impl Into<Option<&'a CropRect>>,
     ) -> Option<ImageFilter> {
         ImageFilter::from_ptr(unsafe {
             sb::C_SkDilateImageFilter_Make(
                 radius_x,
                 radius_y,
-                input.into_ptr(),
+                input.into().into_ptr(),
                 crop_rect.into().native_ptr_or_null(),
             )
         })
@@ -45,21 +45,21 @@ pub mod dilate_image_filter {
 
 pub mod erode_image_filter {
     use crate::image_filter::CropRect;
-    use crate::prelude::{IntoPtr, NativePointerOrNull2};
+    use crate::prelude::*;
     use crate::ImageFilter;
     use skia_bindings as sb;
 
     #[deprecated(since = "0.19.0", note = "use image_filters::erode")]
     pub fn new<'a>(
         (radius_x, radius_y): (i32, i32),
-        input: ImageFilter,
+        input: impl Into<ImageFilter>,
         crop_rect: impl Into<Option<&'a CropRect>>,
     ) -> Option<ImageFilter> {
         ImageFilter::from_ptr(unsafe {
             sb::C_SkErodeImageFilter_Make(
                 radius_x,
                 radius_y,
-                input.into_ptr(),
+                input.into().into_ptr(),
                 crop_rect.into().native_ptr_or_null(),
             )
         })

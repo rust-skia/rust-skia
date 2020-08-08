@@ -34,7 +34,7 @@ fn test_tile_mode_layout() {
 #[deprecated(since = "0.19.0", note = "use image_filters::blur")]
 pub fn new<'a>(
     (sigma_x, sigma_y): (scalar, scalar),
-    input: ImageFilter,
+    input: impl Into<ImageFilter>,
     crop_rect: impl Into<Option<&'a CropRect>>,
     tile_mode: impl Into<Option<TileMode>>,
 ) -> Option<ImageFilter> {
@@ -42,7 +42,7 @@ pub fn new<'a>(
         sb::C_SkBlurImageFilter_Make(
             sigma_x,
             sigma_y,
-            input.into_ptr(),
+            input.into().into_ptr(),
             crop_rect.into().native_ptr_or_null(),
             tile_mode
                 .into()

@@ -16,7 +16,7 @@ impl RCHandle<SkImageFilter> {
 #[deprecated(since = "0.19.0", note = "use image_filters::offset")]
 pub fn new<'a>(
     delta: impl Into<Vector>,
-    input: ImageFilter,
+    input: impl Into<ImageFilter>,
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     let delta = delta.into();
@@ -24,7 +24,7 @@ pub fn new<'a>(
         sb::C_SkOffsetImageFilter_Make(
             delta.x,
             delta.y,
-            input.into_ptr(),
+            input.into().into_ptr(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
