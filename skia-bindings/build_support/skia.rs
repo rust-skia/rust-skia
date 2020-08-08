@@ -20,6 +20,7 @@ mod feature_id {
     pub const GL: &str = "gl";
     pub const VULKAN: &str = "vulkan";
     pub const METAL: &str = "metal";
+    pub const D3D: &str = "d3d";
     pub const TEXTLAYOUT: &str = "textlayout";
 }
 
@@ -40,6 +41,7 @@ impl Default for BuildConfiguration {
                 gl: cfg!(feature = "gl"),
                 vulkan: cfg!(feature = "vulkan"),
                 metal: cfg!(feature = "metal"),
+                d3d: cfg!(feature = "d3d"),
                 text_layout: cfg!(feature = "textlayout"),
                 animation: false,
                 dng: false,
@@ -77,6 +79,9 @@ pub struct Features {
     /// Build with Metal support?
     pub metal: bool,
 
+    /// Build with Direct3D support?
+    pub d3d: bool,
+
     /// Features related to text layout. Modules skshaper and skparagraph.
     pub text_layout: bool,
 
@@ -92,7 +97,7 @@ pub struct Features {
 
 impl Features {
     pub fn gpu(&self) -> bool {
-        self.gl || self.vulkan || self.metal
+        self.gl || self.vulkan || self.metal || self.d3d
     }
 
     /// Feature Ids used to look up prebuilt binaries.
@@ -107,6 +112,9 @@ impl Features {
         }
         if self.metal {
             feature_ids.push(feature_id::METAL);
+        }
+        if self.d3d {
+            feature_ids.push(feature_id::D3D);
         }
         if self.text_layout {
             feature_ids.push(feature_id::TEXTLAYOUT);
@@ -175,6 +183,10 @@ impl FinalBuildConfiguration {
 
             if features.metal {
                 args.push(("skia_use_metal", yes()));
+            }
+
+            if features.d3d {
+                args.push(("skia_use_direct3d", yes()))
             }
 
             // further flags that limit the components of Skia debug builds.
@@ -389,9 +401,12 @@ impl BinariesConfiguration {
                 }
             }
             (_, _, "windows", Some("msvc")) => {
-                link_libraries.extend(vec!["usp10", "ole32", "user32", "gdi32", "fontsub"]);
+                link_libraries.extend(&["usp10", "ole32", "user32", "gdi32", "fontsub"]);
                 if features.gl {
                     link_libraries.push("opengl32");
+                }
+                if features.d3d {
+                    link_libraries.extend(&["d3d12", "dxgi", "d3dcompiler"]);
                 }
             }
             (_, "linux", "android", _) | (_, "linux", "androideabi", _) => {

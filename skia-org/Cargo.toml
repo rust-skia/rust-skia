@@ -20,6 +20,7 @@ default = []
 gl = ["offscreen_gl_context", "sparkle", "skia-safe/gl"]
 vulkan = ["ash", "skia-safe/vulkan"]
 metal = ["metal-rs", "foreign-types", "cocoa", "objc", "skia-safe/metal"]
+d3d = ["skia-safe/d3d"]
 textlayout = ["skia-safe/textlayout"]
 
 [dependencies]

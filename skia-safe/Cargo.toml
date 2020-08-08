@@ -23,6 +23,7 @@ default = []
 gl = ["gpu", "skia-bindings/gl"]
 vulkan = ["gpu", "skia-bindings/vulkan"]
 metal = ["gpu", "skia-bindings/metal"]
+d3d = ["gpu", "skia-bindings/d3d"]
 textlayout = ["skia-bindings/textlayout"]
 # implied only, do not use
 gpu = []
