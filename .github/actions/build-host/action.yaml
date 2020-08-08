@@ -31,11 +31,6 @@ runs:
       rustup component add clippy
     shell: bash
 
-  - uses: actions/checkout@v2
-    with:
-      # depth 1 is default
-      submodules: true
-
   # remove LLVM on macOS so that only Apple's clang is used
   - name: Remove LLVM (macOS)
     run: |

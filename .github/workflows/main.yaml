@@ -28,6 +28,11 @@ jobs:
       fail-fast: false
 
     steps:
+    - uses: actions/checkout@v2
+      with:
+        # depth 1 is default
+        submodules: true
+
     - name: 'Build on ${{ matrix.host-os }} Host with Host Target ${{ matrix.host-target }}'
       uses: ./.github/actions/build-host
       with:
