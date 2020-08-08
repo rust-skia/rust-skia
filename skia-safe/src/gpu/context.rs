@@ -62,8 +62,8 @@ impl RCHandle<GrContext> {
 
     // TODO: support variant with GrContextOptions
     #[cfg(feature = "d3d")]
-    pub fn new_d3d(backend_context: &d3d::BackendContext) -> Option<Context> {
-        unsafe { Context::from_ptr(sb::C_GrContext_MakeDirect3D(backend_context.native())) }
+    pub unsafe fn new_d3d(backend_context: &d3d::BackendContext) -> Option<Context> {
+        Context::from_ptr(sb::C_GrContext_MakeDirect3D(backend_context.native()))
     }
 
     // TODO: threadSafeProxy()
