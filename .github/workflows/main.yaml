@@ -34,7 +34,7 @@ jobs:
         submodules: true
 
     - name: 'Build on ${{ matrix.host-os }} Host with Host Target ${{ matrix.host-target }}'
-      uses: ./.github/actions/build-host/action.yaml
+      uses: ./.github/actions/build-host
       with:
         host-os: ${{ matrix.host-os }}
         rust-edition: ${{ matrix.edition }}
