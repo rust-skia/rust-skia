@@ -3,10 +3,24 @@ use crate::gpu;
 use crate::prelude::*;
 use skia_bindings as sb;
 use skia_bindings::{AsIUnknown, GrD3DTextureResourceInfo};
+use std::ptr;
 
 #[repr(transparent)]
 #[allow(non_camel_case_types)]
 pub struct cp<T: AsIUnknown>(*mut T);
+
+pub fn safe_com_add_ref<T: AsIUnknown>(obj: *mut T) -> *mut T {
+    if !obj.is_null() {
+        unsafe { sb::C_IUnknown_AddRef(obj as _) }
+    }
+    obj
+}
+
+pub fn safe_com_release<T: AsIUnknown>(obj: *mut T) {
+    if !obj.is_null() {
+        unsafe { sb::C_IUnknown_Release(obj as _) }
+    }
+}
 
 impl<T: AsIUnknown> NativeTransmutable<skia_bindings::gr_cp<T>> for cp<T> {}
 #[test]
@@ -16,24 +30,56 @@ fn test_cp_layout() {
 
 impl<T: AsIUnknown> Drop for cp<T> {
     fn drop(&mut self) {
-        unsafe { sb::C_IUnknown_Release(self.0 as _) }
+        safe_com_release(self.0);
     }
 }
 
 impl<T: AsIUnknown> Clone for cp<T> {
     fn clone(&self) -> Self {
-        Self::new(self.0)
+        Self::from_ptr(safe_com_add_ref(self.0))
     }
 }
 
+impl<T: AsIUnknown> Default for cp<T> {
+    fn default() -> Self {
+        Self::from_ptr(ptr::null_mut())
+    }
+}
+
+impl<T: AsIUnknown> PartialEq for cp<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
+
+impl<T: AsIUnknown> Eq for cp<T> {}
+
 impl<T: AsIUnknown> cp<T> {
-    /// Creates a new smart pointer for D3D types.
-    ///
-    /// Asserts if ptr is `null`, increases the reference count.
-    pub fn new(ptr: *mut T) -> Self {
-        assert!(!ptr.is_null());
-        unsafe { sb::C_IUnknown_AddRef(ptr as _) };
+    pub fn from_ptr(ptr: *mut T) -> Self {
         cp(ptr)
+    }
+
+    pub fn get(&self) -> *mut T {
+        self.0
+    }
+
+    pub fn reset(&mut self, object: *mut T) {
+        let old = self.0;
+        self.0 = object;
+        safe_com_release(old);
+    }
+
+    pub fn retain(&mut self, object: *mut T) {
+        if self.0 != object {
+            self.reset(safe_com_add_ref(object))
+        }
+    }
+
+    #[must_use]
+    pub fn release(&mut self) -> *mut T {
+        let obj = self.0;
+        self.0 = ptr::null_mut();
+        obj
     }
 }
 
