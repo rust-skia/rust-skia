@@ -5,7 +5,7 @@ project (skia-bindings)
 
 include_directories(skia-bindings/skia)
 
-add_compile_definitions(SK_SHAPER_HARFBUZZ_AVAILABLE, SK_VULKAN, SK_XML, SK_METAL)
+add_compile_definitions(SK_SHAPER_HARFBUZZ_AVAILABLE, SK_VULKAN, SK_XML, SK_METAL, SK_DIRECT3D)
 
 add_library(skiabindings
         skia-bindings/src/bindings.cpp
@@ -16,4 +16,5 @@ add_library(skiabindings
         skia-bindings/src/svg.cpp
         skia-bindings/src/vulkan.cpp
         skia-bindings/src/metal.cpp
+        skia-bindings/src/d3d.cpp
         )

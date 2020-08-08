@@ -1,3 +1,5 @@
+#[cfg(feature = "d3d")]
+use super::d3d;
 #[cfg(feature = "gl")]
 use super::gl;
 #[cfg(feature = "metal")]
@@ -59,6 +61,11 @@ impl Handle<GrBackendFormat> {
         Self::construct(|bf| unsafe { sb::C_GrBackendFormat_ConstructMtl(bf, format) })
     }
 
+    #[cfg(feature = "d3d")]
+    pub fn new_dxgi(format: d3d::DXGI_FORMAT) -> Self {
+        Self::construct(|bf| unsafe { sb::C_GrBackendFormat_ConstructDxgi(bf, format) })
+    }
+
     #[deprecated(since = "0.19.0", note = "use backend()")]
     pub fn backend_api(&self) -> BackendAPI {
         self.backend()
@@ -103,6 +110,12 @@ impl Handle<GrBackendFormat> {
     #[cfg(feature = "metal")]
     pub fn as_mtl_format(&self) -> mtl::PixelFormat {
         unsafe { self.native().asMtlFormat() }
+    }
+
+    #[cfg(feature = "d3d")]
+    pub fn as_dxgi_format(&self) -> Option<d3d::DXGI_FORMAT> {
+        let mut f = d3d::DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
+        unsafe { self.native().asDxgiFormat(&mut f) }.if_true_some(f)
     }
 
     pub fn to_texture_2d(&self) -> Option<Self> {
@@ -168,6 +181,16 @@ impl Handle<GrBackendTexture> {
                 mtl_info.native(),
             )
         }))
+        .unwrap()
+    }
+
+    #[cfg(feature = "d3d")]
+    pub fn new_d3d((width, height): (i32, i32), d3d_info: &d3d::TextureResourceInfo) -> Self {
+        unsafe {
+            Self::from_native_if_valid(construct(|texture| {
+                sb::C_GrBackendTexture_ConstructD3D(texture, width, height, d3d_info.native())
+            }))
+        }
         .unwrap()
     }
 
@@ -239,6 +262,22 @@ impl Handle<GrBackendTexture> {
                 .getMtlTextureInfo(texture_info.native_mut())
                 .if_true_some(texture_info)
         }
+    }
+
+    #[cfg(feature = "d3d")]
+    pub fn d3d_texture_resource_info(&self) -> Option<d3d::TextureResourceInfo> {
+        unsafe {
+            let mut resource_info = sb::GrD3DTextureResourceInfo::default();
+            self.native()
+                .getD3DTextureResourceInfo(&mut resource_info)
+                .if_true_then_some(|| d3d::TextureResourceInfo::from_native(resource_info))
+        }
+    }
+
+    #[cfg(feature = "d3d")]
+    pub fn set_d3d_resource_state(&mut self, resource_state: d3d::ResourceStateEnum) -> &mut Self {
+        unsafe { self.native_mut().setD3DResourceState(resource_state) }
+        self
     }
 
     pub fn backend_format(&self) -> Option<BackendFormat> {
@@ -333,6 +372,23 @@ impl Handle<GrBackendRenderTarget> {
         }))
     }
 
+    #[cfg(feature = "d3d")]
+    pub fn new_d3d(
+        (width, height): (i32, i32),
+        sample_cnt: i32,
+        d3d_info: &d3d::TextureResourceInfo,
+    ) -> Self {
+        Self::from_native(construct(|brt| unsafe {
+            sb::C_GrBackendRenderTarget_ConstructD3D(
+                brt,
+                width,
+                height,
+                sample_cnt,
+                d3d_info.native(),
+            )
+        }))
+    }
+
     pub(crate) fn from_native_if_valid(
         native: GrBackendRenderTarget,
     ) -> Option<BackendRenderTarget> {
@@ -392,6 +448,19 @@ impl Handle<GrBackendRenderTarget> {
     pub fn metal_texture_info(&self) -> Option<mtl::TextureInfo> {
         let mut info = mtl::TextureInfo::default();
         unsafe { self.native().getMtlTextureInfo(info.native_mut()) }.if_true_some(info)
+    }
+
+    #[cfg(feature = "d3d")]
+    pub fn d3d_texture_resource_info(&self) -> Option<d3d::TextureResourceInfo> {
+        let mut info = sb::GrD3DTextureResourceInfo::default();
+        unsafe { self.native().getD3DTextureResourceInfo(&mut info) }
+            .if_true_then_some(|| d3d::TextureResourceInfo::from_native(info))
+    }
+
+    #[cfg(feature = "d3d")]
+    pub fn set_d3d_resource_state(&mut self, resource_state: d3d::ResourceStateEnum) -> &mut Self {
+        unsafe { self.native_mut().setD3DResourceState(resource_state) }
+        self
     }
 
     pub fn backend_format(&self) -> BackendFormat {

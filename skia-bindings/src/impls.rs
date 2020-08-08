@@ -119,3 +119,40 @@ impl From<crate::GrGLFormat> for crate::GrGLenum {
         unsafe { crate::C_GrGLFormatToEnum(format) }
     }
 }
+
+#[cfg(feature = "d3d")]
+/// This marker trait that makes it possible to use the cp smartpointer for D3D types.
+pub unsafe trait AsIUnknown {}
+
+#[cfg(feature = "d3d")]
+mod d3d {
+    use super::AsIUnknown;
+    use std::marker::PhantomData;
+
+    unsafe impl AsIUnknown for crate::IDXGIAdapter1 {}
+    unsafe impl AsIUnknown for crate::ID3D12Device {}
+    unsafe impl AsIUnknown for crate::ID3D12CommandQueue {}
+    unsafe impl AsIUnknown for crate::ID3D12Resource {}
+
+    impl<T> Default for crate::gr_cp<T> {
+        fn default() -> Self {
+            Self {
+                fObject: std::ptr::null_mut(),
+                _phantom_0: PhantomData,
+            }
+        }
+    }
+
+    impl Default for crate::GrD3DTextureResourceInfo {
+        fn default() -> Self {
+            Self {
+                fResource: Default::default(),
+                fResourceState: crate::D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON,
+                fFormat: crate::DXGI_FORMAT::DXGI_FORMAT_UNKNOWN,
+                fLevelCount: 0,
+                fSampleQualityLevel: 0,
+                fProtected: crate::GrProtected::No,
+            }
+        }
+    }
+}

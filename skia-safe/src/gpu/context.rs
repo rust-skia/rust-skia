@@ -1,3 +1,5 @@
+#[cfg(feature = "d3d")]
+use super::d3d;
 #[cfg(feature = "gl")]
 use super::gl;
 #[cfg(feature = "vulkan")]
@@ -56,6 +58,12 @@ impl RCHandle<GrContext> {
         queue: *mut std::ffi::c_void,
     ) -> Option<Context> {
         Context::from_ptr(sb::C_GrContext_MakeMetal(device, queue))
+    }
+
+    // TODO: support variant with GrContextOptions
+    #[cfg(feature = "d3d")]
+    pub fn new_d3d(backend_context: &d3d::BackendContext) -> Option<Context> {
+        unsafe { Context::from_ptr(sb::C_GrContext_MakeDirect3D(backend_context.native())) }
     }
 
     // TODO: threadSafeProxy()
