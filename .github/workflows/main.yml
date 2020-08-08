@@ -16,13 +16,11 @@ jobs:
           host-os: 'Windows'
           features: 'gl,vulkan,textlayout'
 
-      include:
         - os: 'macOS-10.15'
           host-target: 'x86_64-apple-darwin'
           host-os: 'macOS'
           features: 'gl,vulkan,textlayout,metal'
 
-      include:
         - os: 'ubuntu-20.04'
           host-target: 'x86_64-unknown-linux-gnu'
           host-os: 'Linux'
