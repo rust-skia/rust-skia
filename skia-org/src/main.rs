@@ -142,10 +142,10 @@ fn main() {
         skpaint_overview::draw(driver, &out_path);
 
         #[cfg(feature = "textlayout")]
-        skshaper_example::draw(driver, &out_path);
-
-        #[cfg(feature = "textlayout")]
-        skparagraph_example::draw(driver, &out_path);
+        {
+            skshaper_example::draw(driver, &out_path);
+            skparagraph_example::draw(driver, &out_path);
+        }
     }
 }
 
