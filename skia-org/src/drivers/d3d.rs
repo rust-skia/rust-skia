@@ -10,7 +10,7 @@ use std::ptr;
 use winapi::{
     shared::{
         dxgi::{CreateDXGIFactory1, IDXGIAdapter1, IDXGIFactory1},
-        winerror::S_OK,
+        winerror::{HRESULT, S_OK},
     },
     um::{
         d3d12::{
@@ -37,19 +37,13 @@ impl DrawingDriver for D3D {
             let r = unsafe {
                 CreateDXGIFactory1(&IDXGIFactory1::uuidof(), &mut factory as *mut _ as _)
             };
-            if r != S_OK {
-                panic!("failed to create DXGI factory");
-            }
-            unsafe { ComPtr::from_raw(factory) }
+            wrap_cp(r, factory).expect("failed to create DXGI factory")
         };
 
         let adapter = {
             let mut adapter: *mut IDXGIAdapter1 = ptr::null_mut();
             let r = unsafe { factory.EnumAdapters1(0, &mut adapter as *mut _ as _) };
-            if r != S_OK {
-                panic!("failed to create DXGI adapter");
-            }
-            unsafe { ComPtr::from_raw(adapter) }
+            wrap_cp(r, adapter).expect("failed to create DXGI adapter")
         };
 
         let device = {
@@ -62,20 +56,17 @@ impl DrawingDriver for D3D {
                     &mut device as *mut _ as _,
                 )
             };
-            if r != S_OK {
-                panic!("failed to create D3D device")
-            }
-            unsafe { ComPtr::from_raw(device) }
+            wrap_cp(r, device).expect("failed to create D3D device")
         };
 
         let queue = {
-            let mut queue: *mut ID3D12CommandQueue = ptr::null_mut();
             let desc = D3D12_COMMAND_QUEUE_DESC {
                 Type: D3D12_COMMAND_LIST_TYPE_DIRECT,
                 Priority: D3D12_COMMAND_QUEUE_PRIORITY_NORMAL as _,
                 Flags: D3D12_COMMAND_QUEUE_FLAG_NONE,
                 NodeMask: 0,
             };
+            let mut queue: *mut ID3D12CommandQueue = ptr::null_mut();
             let r = unsafe {
                 device.CreateCommandQueue(
                     &desc,
@@ -83,10 +74,7 @@ impl DrawingDriver for D3D {
                     &mut queue as *mut _ as _,
                 )
             };
-            if r != S_OK {
-                panic!("failed to create D3D device")
-            }
-            unsafe { ComPtr::from_raw(queue) }
+            wrap_cp(r, queue).expect("failed to create D3D command queue")
         };
 
         let backend_context = d3d::BackendContext {
@@ -121,7 +109,16 @@ impl DrawingDriver for D3D {
 
         artifact::draw_image_on_surface(&mut surface, path, name, func);
     }
+
     fn draw_image_256(&mut self, path: &Path, name: &str, func: impl Fn(&mut Canvas)) {
         self.draw_image((256, 256), path, name, func)
+    }
+}
+
+fn wrap_cp<T: winapi::Interface>(hr: HRESULT, ptr: *mut T) -> Option<ComPtr<T>> {
+    if hr == S_OK {
+        Some(unsafe { ComPtr::from_raw(ptr as _) })
+    } else {
+        None
     }
 }
