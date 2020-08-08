@@ -60,7 +60,7 @@ runs:
     if: runner.os == 'Windows'
 
   - name: Build Host Target
-    uses: ./.github/actions/build-target
+    uses: ./.github/actions/build-target.yaml
     with:
       target: '${{ inputs.host-target }}'
       features: '${{ inputs.features }}'

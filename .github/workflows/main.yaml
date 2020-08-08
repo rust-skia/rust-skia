@@ -29,7 +29,7 @@ jobs:
 
     steps:
     - name: 'Build on ${{ matrix.host-os }} Host with Host Target ${{ matrix.host-target }}'
-      uses: ./.github/actions/build-host
+      uses: ./.github/actions/build-host.yaml
       with:
         host-os: ${{ matrix.host-os }}
         rust-edition: ${{ matrix.edition }}
