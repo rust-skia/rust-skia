@@ -18,7 +18,7 @@ use winapi::{
             D3D12_COMMAND_QUEUE_DESC, D3D12_COMMAND_QUEUE_FLAG_NONE,
             D3D12_COMMAND_QUEUE_PRIORITY_NORMAL,
         },
-        d3dcommon::D3D_FEATURE_LEVEL_12_0,
+        d3dcommon::D3D_FEATURE_LEVEL_11_0,
     },
     Interface,
 };
@@ -56,8 +56,8 @@ impl DrawingDriver for D3D {
             let mut device: *mut ID3D12Device = ptr::null_mut();
             let r = unsafe {
                 D3D12CreateDevice(
-                    ptr::null_mut(),
-                    D3D_FEATURE_LEVEL_12_0,
+                    adapter.as_raw() as _,
+                    D3D_FEATURE_LEVEL_11_0,
                     &ID3D12Device::uuidof(),
                     &mut device as *mut _ as _,
                 )
