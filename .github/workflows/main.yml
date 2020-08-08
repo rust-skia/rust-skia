@@ -8,62 +8,38 @@ jobs:
     strategy:
       matrix:
         os: [windows-2019, macOS-10.15, ubuntu-20.04]
-        rust: [stable, beta]
+        edition: [stable, beta]
       fail-fast: false
+      include:
+        - os: 'windows-2019'
+          host-target: 'x86_64-pc-windows-msvc'
+          host-os: 'Windows'
+          features: 'gl,vulkan,textlayout'
+
+      include:
+        - os: 'macOS-10.15'
+          host-target: 'x86_64-apple-darwin'
+          host-os: 'macOS'
+          features: 'gl,vulkan,textlayout,metal'
+
+      include:
+        - os: 'ubuntu-20.04'
+          host-target: 'x86_64-unknown-linux-gnu'
+          host-os: 'Linux'
+          features: 'gl,vulkan,textlayout'
 
     steps:
-    - name: Install Rust
-      uses: hecrj/setup-rust-action@master
+    - name: 'Build on ${{ matrix.host-os }} Host with Host Target ${{ matrix.host-target }}'
+      uses: ./.github/workflows/build-host
       with:
-        rust-version: ${{ matrix.rust }}
-
-    - name: Install Clippy
-      run: |
-        rustup component add clippy
-      shell: bash
-
-    - uses: actions/checkout@v2
-      with:
-        submodules: true
-
-    # remove LLVM on macOS so that only Apple's clang is used
-    - name: Remove LLVM (macOS)
-      run: |
-        brew uninstall llvm
-      if: runner.os == 'macOS'
-
-    - name: LLVM (Windows only)
-      run: |
-        choco install llvm
-      if: runner.os == 'Windows'
-
-    - name: Setup Python 2 (Windows only)
-      uses: actions/setup-python@v2
-      with:
-        python-version: '2.7.18'
-        architecture: 'x64'
-      if: runner.os == 'Windows'
-
-    - name: Python Version (Windows only)
-      run: |
-        python --version
-      if: runner.os == 'Windows'
-
-    - name: Build
-      run: cargo build -vv --release
-      shell: bash
-
-#    - name: Run Clippy
-#      run: cargo clippy -vv --release --workspace
-#      shell: bash
-
-    - name: Run Tests
-      run: cargo test -vv --release --workspace -- --test-threads 1
-      shell: bash
+        host-os: ${{ matrix.host-os }}
+        rust-edition: ${{ matrix.edition }}
+        host-target: ${{ matrix.host-target }}
+        features: ${{ matrix.features }}
 
   rustfmt:
     name: Check Rust Formatting
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v1
         with:
