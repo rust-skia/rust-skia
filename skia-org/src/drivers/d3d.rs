@@ -6,20 +6,14 @@ use skia_safe::{
     Budgeted, Canvas, ImageInfo, Surface,
 };
 use std::path::Path;
-use std::ptr;
+use std::{ffi, ptr};
 use winapi::{
     shared::{
-        dxgi::{CreateDXGIFactory1, IDXGIAdapter1, IDXGIFactory1},
+        dxgi,
+        guiddef::GUID,
         winerror::{HRESULT, S_OK},
     },
-    um::{
-        d3d12::{
-            D3D12CreateDevice, ID3D12CommandQueue, ID3D12Device, D3D12_COMMAND_LIST_TYPE_DIRECT,
-            D3D12_COMMAND_QUEUE_DESC, D3D12_COMMAND_QUEUE_FLAG_NONE,
-            D3D12_COMMAND_QUEUE_PRIORITY_NORMAL,
-        },
-        d3dcommon::D3D_FEATURE_LEVEL_11_0,
-    },
+    um::{d3d12, d3dcommon},
     Interface,
 };
 use wio::com::ComPtr;
@@ -32,49 +26,33 @@ impl DrawingDriver for D3D {
     const NAME: &'static str = "d3d";
 
     fn new() -> Self {
-        let factory = {
-            let mut factory: *mut IDXGIFactory1 = ptr::null_mut();
-            let r = unsafe {
-                CreateDXGIFactory1(&IDXGIFactory1::uuidof(), &mut factory as *mut _ as _)
-            };
-            wrap_cp(r, factory).expect("failed to create DXGI factory")
-        };
+        let factory: ComPtr<dxgi::IDXGIFactory1> =
+            resolve_interface(|iid, ptr| unsafe { dxgi::CreateDXGIFactory1(iid, ptr) })
+                .expect_ok("Creating DXGI factory");
 
-        let adapter = {
-            let mut adapter: *mut IDXGIAdapter1 = ptr::null_mut();
-            let r = unsafe { factory.EnumAdapters1(0, &mut adapter as *mut _ as _) };
-            wrap_cp(r, adapter).expect("failed to create DXGI adapter")
-        };
+        let adapter = resolve_specific(|ptr| unsafe { factory.EnumAdapters1(0, ptr) })
+            .expect_ok("Creating DXGI Adapter");
 
-        let device = {
-            let mut device: *mut ID3D12Device = ptr::null_mut();
-            let r = unsafe {
-                D3D12CreateDevice(
-                    adapter.as_raw() as _,
-                    D3D_FEATURE_LEVEL_11_0,
-                    &ID3D12Device::uuidof(),
-                    &mut device as *mut _ as _,
-                )
-            };
-            wrap_cp(r, device).expect("failed to create D3D device")
-        };
+        let device: ComPtr<d3d12::ID3D12Device> = resolve_interface(|iid, ptr| unsafe {
+            d3d12::D3D12CreateDevice(
+                adapter.as_raw() as _,
+                d3dcommon::D3D_FEATURE_LEVEL_11_0,
+                iid,
+                ptr,
+            )
+        })
+        .expect_ok("Creating D3D device");
 
-        let queue = {
-            let desc = D3D12_COMMAND_QUEUE_DESC {
-                Type: D3D12_COMMAND_LIST_TYPE_DIRECT,
-                Priority: D3D12_COMMAND_QUEUE_PRIORITY_NORMAL as _,
-                Flags: D3D12_COMMAND_QUEUE_FLAG_NONE,
+        let queue: ComPtr<d3d12::ID3D12CommandQueue> = {
+            let desc = d3d12::D3D12_COMMAND_QUEUE_DESC {
+                Type: d3d12::D3D12_COMMAND_LIST_TYPE_DIRECT,
+                Priority: d3d12::D3D12_COMMAND_QUEUE_PRIORITY_NORMAL as _,
+                Flags: d3d12::D3D12_COMMAND_QUEUE_FLAG_NONE,
                 NodeMask: 0,
             };
-            let mut queue: *mut ID3D12CommandQueue = ptr::null_mut();
-            let r = unsafe {
-                device.CreateCommandQueue(
-                    &desc,
-                    &ID3D12CommandQueue::uuidof(),
-                    &mut queue as *mut _ as _,
-                )
-            };
-            wrap_cp(r, queue).expect("failed to create D3D command queue")
+
+            resolve_interface(|iid, ptr| unsafe { device.CreateCommandQueue(&desc, iid, ptr) })
+                .expect_ok("Creating command queue")
         };
 
         let backend_context = d3d::BackendContext {
@@ -115,10 +93,39 @@ impl DrawingDriver for D3D {
     }
 }
 
-fn wrap_cp<T: winapi::Interface>(hr: HRESULT, ptr: *mut T) -> Option<ComPtr<T>> {
-    if hr == S_OK {
-        Some(unsafe { ComPtr::from_raw(ptr as _) })
+fn resolve_interface<T: Interface>(
+    f: impl FnOnce(&GUID, *mut *mut ffi::c_void) -> HRESULT,
+) -> Result<ComPtr<T>, HRESULT> {
+    let mut ptr: *mut T = ptr::null_mut();
+    let r = f(&T::uuidof(), &mut ptr as *mut _ as _);
+    if r == S_OK {
+        Ok(unsafe { ComPtr::from_raw(ptr) })
     } else {
-        None
+        Err(r)
+    }
+}
+
+fn resolve_specific<T: Interface>(
+    f: impl FnOnce(*mut *mut T) -> HRESULT,
+) -> Result<ComPtr<T>, HRESULT> {
+    let mut ptr: *mut T = ptr::null_mut();
+    let r = f(&mut ptr);
+    if r == S_OK {
+        Ok(unsafe { ComPtr::from_raw(ptr) })
+    } else {
+        Err(r)
+    }
+}
+
+trait ExpectOk<T> {
+    fn expect_ok(self, msg: &str) -> T;
+}
+
+impl<T> ExpectOk<T> for Result<T, HRESULT> {
+    fn expect_ok(self, msg: &str) -> T {
+        match self {
+            Ok(r) => r,
+            Err(hr) => panic!("{} failed. {:x}", msg, hr),
+        }
     }
 }
