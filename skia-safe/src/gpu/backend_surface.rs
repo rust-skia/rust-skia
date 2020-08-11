@@ -63,7 +63,9 @@ impl Handle<GrBackendFormat> {
 
     #[cfg(feature = "d3d")]
     pub fn new_dxgi(format: d3d::DXGI_FORMAT) -> Self {
-        Self::construct(|bf| unsafe { sb::C_GrBackendFormat_ConstructDxgi(bf, format) })
+        Self::construct(|bf| unsafe {
+            sb::C_GrBackendFormat_ConstructDxgi(bf, format.into_native())
+        })
     }
 
     #[deprecated(since = "0.19.0", note = "use backend()")]
@@ -114,8 +116,8 @@ impl Handle<GrBackendFormat> {
 
     #[cfg(feature = "d3d")]
     pub fn as_dxgi_format(&self) -> Option<d3d::DXGI_FORMAT> {
-        let mut f = d3d::DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
-        unsafe { self.native().asDxgiFormat(&mut f) }.if_true_some(f)
+        let mut f = sb::DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
+        unsafe { self.native().asDxgiFormat(&mut f) }.if_true_some(d3d::DXGI_FORMAT::from_native(f))
     }
 
     pub fn to_texture_2d(&self) -> Option<Self> {

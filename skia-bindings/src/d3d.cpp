@@ -11,18 +11,6 @@
 #include "include/gpu/d3d/GrD3DBackendContext.h"
 
 //
-// gpu/d3d
-//
-
-extern "C" void C_IUnknown_AddRef(IUnknown* self) {
-    self->AddRef();
-}
-
-extern "C" void C_IUnknown_Release(IUnknown* self) {
-    self->Release();
-}
-
-//
 // gpu/GrBackendSurface.h
 //
 

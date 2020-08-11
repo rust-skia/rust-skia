@@ -2,7 +2,7 @@ use crate::artifact;
 use crate::drivers::DrawingDriver;
 use skia_safe::{
     gpu,
-    gpu::{d3d, d3d::cp, Protected},
+    gpu::{d3d, Protected},
     Budgeted, Canvas, ImageInfo, Surface,
 };
 use std::path::Path;
@@ -56,9 +56,9 @@ impl DrawingDriver for D3D {
         };
 
         let backend_context = d3d::BackendContext {
-            adapter: cp::from_ptr(adapter.into_raw() as _),
-            device: cp::from_ptr(device.into_raw() as _),
-            queue: cp::from_ptr(queue.into_raw() as _),
+            adapter,
+            device,
+            queue,
             protected_context: Protected::No,
         };
 
