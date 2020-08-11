@@ -269,10 +269,13 @@ impl Handle<GrBackendTexture> {
     #[cfg(feature = "d3d")]
     pub fn d3d_texture_resource_info(&self) -> Option<d3d::TextureResourceInfo> {
         unsafe {
-            let mut resource_info = sb::GrD3DTextureResourceInfo::default();
+            let mut info = sb::GrD3DTextureResourceInfo::default();
             self.native()
-                .getD3DTextureResourceInfo(&mut resource_info)
-                .if_true_then_some(|| d3d::TextureResourceInfo::from_native(resource_info))
+                .getD3DTextureResourceInfo(&mut info)
+                .if_true_then_some(|| {
+                    assert!(!info.fResource.fObject.is_null());
+                    d3d::TextureResourceInfo::from_native(info)
+                })
         }
     }
 
@@ -455,8 +458,10 @@ impl Handle<GrBackendRenderTarget> {
     #[cfg(feature = "d3d")]
     pub fn d3d_texture_resource_info(&self) -> Option<d3d::TextureResourceInfo> {
         let mut info = sb::GrD3DTextureResourceInfo::default();
-        unsafe { self.native().getD3DTextureResourceInfo(&mut info) }
-            .if_true_then_some(|| d3d::TextureResourceInfo::from_native(info))
+        unsafe { self.native().getD3DTextureResourceInfo(&mut info) }.if_true_then_some(|| {
+            assert!(!info.fResource.fObject.is_null());
+            d3d::TextureResourceInfo::from_native(info)
+        })
     }
 
     #[cfg(feature = "d3d")]
