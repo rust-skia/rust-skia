@@ -121,18 +121,8 @@ impl From<crate::GrGLFormat> for crate::GrGLenum {
 }
 
 #[cfg(feature = "d3d")]
-/// This marker trait that makes it possible to use the cp smartpointer for D3D types.
-pub unsafe trait AsIUnknown {}
-
-#[cfg(feature = "d3d")]
 mod d3d {
-    use super::AsIUnknown;
     use std::marker::PhantomData;
-
-    unsafe impl AsIUnknown for crate::IDXGIAdapter1 {}
-    unsafe impl AsIUnknown for crate::ID3D12Device {}
-    unsafe impl AsIUnknown for crate::ID3D12CommandQueue {}
-    unsafe impl AsIUnknown for crate::ID3D12Resource {}
 
     impl<T> Default for crate::gr_cp<T> {
         fn default() -> Self {
