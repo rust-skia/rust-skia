@@ -250,6 +250,7 @@ fn chain_ring(
     canvas.restore();
 }
 
+#[allow(clippy::many_single_char_names)]
 fn triangle(
     canvas: &mut skia_safe::canvas::Canvas,
     center: (i32, i32),
