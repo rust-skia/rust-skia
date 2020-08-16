@@ -75,18 +75,13 @@ impl Color {
         Self(argb)
     }
 
-    // note: we don't use the u8cpu type here, because we trust the Rust
+    // note: we don't use the u8cpu type in the arguments here, because we trust the Rust
     // compiler to optimize the storage type.
-    pub fn from_argb(a: u8, r: u8, g: u8, b: u8) -> Color {
-        Self(
-            (u8cpu::from(a) << 24)
-                | (u8cpu::from(r) << 16)
-                | (u8cpu::from(g) << 8)
-                | (u8cpu::from(b)),
-        )
+    pub const fn from_argb(a: u8, r: u8, g: u8, b: u8) -> Color {
+        Self(((a as u8cpu) << 24) | ((r as u8cpu) << 16) | ((g as u8cpu) << 8) | (b as u8cpu))
     }
 
-    pub fn from_rgb(r: u8, g: u8, b: u8) -> Color {
+    pub const fn from_rgb(r: u8, g: u8, b: u8) -> Color {
         Self::from_argb(0xff, r, g, b)
     }
 
