@@ -2,6 +2,7 @@ use crate::prelude::*;
 use crate::scalar;
 use skia_bindings as sb;
 use skia_bindings::{SkISize, SkSize};
+use std::ops::{Div, DivAssign, Mul, MulAssign};
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
@@ -147,5 +148,31 @@ impl From<ISize> for Size {
 impl From<(i32, i32)> for Size {
     fn from(source: (i32, i32)) -> Self {
         (source.0 as scalar, source.1 as scalar).into()
+    }
+}
+
+impl Div<scalar> for Size {
+    type Output = Self;
+    fn div(self, rhs: scalar) -> Self {
+        Self::new(self.width / rhs, self.height / rhs)
+    }
+}
+
+impl DivAssign<scalar> for Size {
+    fn div_assign(&mut self, rhs: scalar) {
+        *self = *self / rhs
+    }
+}
+
+impl Mul<scalar> for Size {
+    type Output = Self;
+    fn mul(self, rhs: scalar) -> Self {
+        Self::new(self.width * rhs, self.height * rhs)
+    }
+}
+
+impl MulAssign<scalar> for Size {
+    fn mul_assign(&mut self, rhs: scalar) {
+        *self = *self * rhs
     }
 }
