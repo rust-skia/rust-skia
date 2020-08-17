@@ -303,10 +303,6 @@ impl Point {
     }
 }
 
-//
-// From
-//
-
 impl From<(i32, i32)> for IPoint {
     fn from(source: (i32, i32)) -> Self {
         IPoint::new(source.0, source.1)
