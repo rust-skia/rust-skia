@@ -20,15 +20,12 @@ impl NativeDrop for SkPictureRecorder {
     }
 }
 
-// TODO: why is the word "recording" used in all the functions, should we
-// remove it?
-
 impl Handle<SkPictureRecorder> {
     pub fn new() -> Self {
         Self::from_native(unsafe { SkPictureRecorder::new() })
     }
 
-    // TODO: beginRecording with BBoxHierarchy
+    // TODO: wrap beginRecording with BBoxHierarchy
 
     pub fn begin_recording(
         &mut self,
