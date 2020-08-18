@@ -1,5 +1,5 @@
-use crate::core::matrix::ApplyPerspectiveClip;
 use crate::interop::DynamicMemoryWStream;
+use crate::matrix::ApplyPerspectiveClip;
 use crate::prelude::*;
 use crate::{
     path_types, scalar, Data, Matrix, PathConvexityType, PathDirection, PathFillType, Point, RRect,

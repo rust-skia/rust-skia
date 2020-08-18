@@ -260,7 +260,7 @@ impl ImageInfo {
         current_queue_family: impl Into<Option<u32>>,
         ycbcr_conversion_info: impl Into<Option<YcbcrConversionInfo>>,
         protected: impl Into<Option<Protected>>, // m77
-        sharing_mode: impl Into<Option<vk::SharingMode>>,
+        sharing_mode: impl Into<Option<vk::SharingMode>>, // m85
     ) -> Self {
         Self::new(
             image,

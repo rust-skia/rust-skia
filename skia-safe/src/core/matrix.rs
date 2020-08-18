@@ -1,3 +1,4 @@
+use super::scalar_;
 use crate::prelude::*;
 use crate::{scalar, Point, Point3, RSXform, Rect, Scalar, Size, Vector};
 use skia_bindings as sb;
@@ -13,7 +14,7 @@ fn test_apply_perspective_clip_naming() {
 
 bitflags! {
     // m85: On Windows the SkMatrix_TypeMask is defined as i32,
-    // but we stick to u32 (macOS / Linux), because there is no need to propagate
+    // but we stick to u32 (macOS / Linux), because there is no need to leak
     // the platform difference to the Rust side.
     pub struct TypeMask: u32 {
         const IDENTITY = sb::SkMatrix_TypeMask_kIdentity_Mask as _;
@@ -164,7 +165,7 @@ impl Matrix {
     }
 
     pub fn rotate_rad(rad: scalar) -> Matrix {
-        Self::rotate_deg(crate::core::scalar_::radians_to_degrees(rad))
+        Self::rotate_deg(scalar_::radians_to_degrees(rad))
     }
 
     #[allow(clippy::too_many_arguments)]
