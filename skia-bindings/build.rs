@@ -18,8 +18,7 @@ mod env {
 
     /// Force to build skia, even if there is a binary available.
     pub fn force_skia_build() -> bool {
-        true
-        //cargo::env_var("FORCE_SKIA_BUILD").is_some()
+        cargo::env_var("FORCE_SKIA_BUILD").is_some()
     }
 
     /// The path to the skia source directory.
