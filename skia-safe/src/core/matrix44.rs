@@ -1,3 +1,4 @@
+#![allow(deprecated)]
 use crate::prelude::*;
 use crate::{scalar, Matrix, Scalar, Vector3};
 use skia_bindings as sb;
@@ -6,6 +7,7 @@ use std::ops;
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Debug)]
+#[deprecated(since = "0.30.0", note = "use V4 instead")]
 pub struct Vector4 {
     x: scalar,
     y: scalar,
@@ -81,6 +83,7 @@ bitflags! {
 
 #[derive(Copy, Clone)]
 #[repr(transparent)]
+#[deprecated(since = "0.30.0", note = "use M44 instead")]
 pub struct Matrix44(SkMatrix44);
 
 impl NativeTransmutable<SkMatrix44> for Matrix44 {}
@@ -271,23 +274,29 @@ impl Matrix44 {
 
     pub fn set_translate(&mut self, d: impl Into<Vector3>) -> &mut Self {
         let d = d.into();
-        unsafe { self.native_mut().setTranslate(d.x, d.y, d.z) }
+        unsafe {
+            self.native_mut().setTranslate(d.x, d.y, d.z);
+        }
         self
     }
 
     pub fn pre_translate(&mut self, d: impl Into<Vector3>) -> &mut Self {
         let d = d.into();
-        unsafe { self.native_mut().preTranslate(d.x, d.y, d.z) }
+        unsafe {
+            self.native_mut().preTranslate(d.x, d.y, d.z);
+        }
         self
     }
 
     pub fn post_translate(&mut self, d: impl Into<Vector3>) -> &mut Self {
         let d = d.into();
-        unsafe { self.native_mut().postTranslate(d.x, d.y, d.z) }
+        unsafe {
+            self.native_mut().postTranslate(d.x, d.y, d.z);
+        }
         self
     }
 
-    // Note: set_scale(), pre_scale() and post_scale() is implemented as a Trait below.
+    // Note: set_scale(), pre_scale() and post_scale() are implemented as a Trait below.
 
     pub fn set_rotate_degrees_about(
         &mut self,
@@ -320,12 +329,6 @@ impl Matrix44 {
 
     pub fn post_concat(&mut self, m: &Self) -> &mut Self {
         self.set_concat(&m, &self.clone())
-    }
-
-    #[deprecated(since = "0.12.0", note = "use invert()")]
-    #[must_use]
-    pub fn inverse(&self) -> Option<Matrix44> {
-        self.invert()
     }
 
     #[must_use]
@@ -383,17 +386,23 @@ impl SetPrePostScale<scalar> for Matrix44 {
 
 impl SetPrePostScale<(scalar, scalar, scalar)> for Matrix44 {
     fn set_scale(&mut self, (sx, sy, sz): (scalar, scalar, scalar)) -> &mut Self {
-        unsafe { self.native_mut().setScale(sx, sy, sz) }
+        unsafe {
+            self.native_mut().setScale(sx, sy, sz);
+        }
         self
     }
 
     fn pre_scale(&mut self, (sx, sy, sz): (scalar, scalar, scalar)) -> &mut Self {
-        unsafe { self.native_mut().preScale(sx, sy, sz) }
+        unsafe {
+            self.native_mut().preScale(sx, sy, sz);
+        }
         self
     }
 
     fn post_scale(&mut self, (sx, sy, sz): (scalar, scalar, scalar)) -> &mut Self {
-        unsafe { self.native_mut().postScale(sx, sy, sz) }
+        unsafe {
+            self.native_mut().postScale(sx, sy, sz);
+        }
         self
     }
 }

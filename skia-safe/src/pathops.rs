@@ -3,37 +3,19 @@
 use crate::prelude::*;
 use crate::{Path, Rect};
 use skia_bindings as sb;
-use skia_bindings::{SkOpBuilder, SkPath, SkPathOp};
+use skia_bindings::{SkOpBuilder, SkPath};
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum PathOp {
-    Difference = SkPathOp::kDifference_SkPathOp as _,
-    Intersect = SkPathOp::kIntersect_SkPathOp as _,
-    Union = SkPathOp::kUnion_SkPathOp as _,
-    XOR = SkPathOp::kXOR_SkPathOp as _,
-    ReverseDifference = SkPathOp::kReverseDifference_SkPathOp as _,
-}
-
-impl NativeTransmutable<SkPathOp> for PathOp {}
+pub use skia_bindings::SkPathOp as PathOp;
 #[test]
-fn test_path_op_layout() {
-    PathOp::test_layout();
+fn test_path_op_naming() {
+    let _ = PathOp::XOR;
 }
 
 // TODO: I am not so sure if we should export these global functions.
 
 pub fn op(one: &Path, two: &Path, op: PathOp) -> Option<Path> {
     let mut result = Path::default();
-    unsafe {
-        sb::Op(
-            one.native(),
-            two.native(),
-            op.into_native(),
-            result.native_mut(),
-        )
-    }
-    .if_true_some(result)
+    unsafe { sb::Op(one.native(), two.native(), op, result.native_mut()) }.if_true_some(result)
 }
 
 pub fn simplify(path: &Path) -> Option<Path> {
@@ -68,7 +50,7 @@ impl Default for Handle<SkOpBuilder> {
 impl Handle<SkOpBuilder> {
     pub fn add(&mut self, path: &Path, operator: PathOp) -> &mut Self {
         unsafe {
-            self.native_mut().add(path.native(), operator.into_native());
+            self.native_mut().add(path.native(), operator);
         }
         self
     }

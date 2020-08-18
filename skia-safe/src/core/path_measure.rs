@@ -84,6 +84,8 @@ impl Handle<SkPathMeasure> {
                 distance,
                 m.native_mut(),
                 // note: depending on the OS, different representation types are generated for MatrixFlags
+                #[allow(clippy::unknown_clippy_lints)]
+                #[allow(clippy::useless_conversion)] // 1.45 lint
                 flags.into().unwrap_or_default().bits().try_into().unwrap(),
             )
         }

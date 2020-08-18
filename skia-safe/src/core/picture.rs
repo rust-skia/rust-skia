@@ -81,8 +81,8 @@ impl RCHandle<SkPicture> {
         Shader::from_ptr(unsafe {
             sb::C_SkPicture_makeShader(
                 self.native(),
-                tmx.into_native(),
-                tmy.into_native(),
+                tmx,
+                tmy,
                 local_matrix.native_ptr_or_null(),
                 tile_rect.native_ptr_or_null(),
             )

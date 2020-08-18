@@ -40,6 +40,15 @@ impl From<([f32; 4], bool)> for ArithmeticFPInputs {
     }
 }
 
+impl ArithmeticFPInputs {
+    pub fn new(k0: f32, k1: f32, k2: f32, k3: f32, enforce_pm_color: bool) -> Self {
+        Self {
+            k: [k0, k1, k2, k3],
+            enforce_pm_color,
+        }
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 #[deprecated(since = "0.19.0", note = "use image_filters::arithmetic()")]
 pub fn new<'a>(

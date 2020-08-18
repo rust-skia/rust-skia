@@ -3,6 +3,7 @@ use crate::private::safe32::{sk32, sk64};
 use crate::{scalar, Contains, IPoint, ISize, IVector, Point, Size, Vector};
 use skia_bindings as sb;
 use skia_bindings::{SkIRect, SkRect};
+use std::cmp::{max, min};
 use std::mem;
 
 #[repr(C)]
@@ -85,11 +86,6 @@ impl IRect {
 
     pub fn y(&self) -> i32 {
         self.top
-    }
-
-    #[deprecated(since = "0.12.0", note = "will be removed without replacement")]
-    pub fn left_top(&self) -> IPoint {
-        (self.left, self.top).into()
     }
 
     pub fn width(&self) -> i32 {
@@ -248,10 +244,10 @@ impl IRect {
     fn intersect_no_empty_check_(a: &Self, b: &Self) -> Option<Self> {
         debug_assert!(!a.is_empty_64() && !b.is_empty_64());
         let r = IRect::new(
-            a.left.max(b.left),
-            a.top.max(b.top),
-            a.right.min(b.right),
-            a.bottom.min(b.bottom),
+            max(a.left, b.left),
+            max(a.top, b.top),
+            min(a.right, b.right),
+            min(a.bottom, b.bottom),
         );
         r.is_empty().if_false_some(r)
     }
@@ -269,13 +265,14 @@ impl IRect {
     #[must_use]
     pub fn sorted(&self) -> Self {
         Self::new(
-            self.left.min(self.right),
-            self.top.min(self.bottom),
-            self.left.max(self.right),
-            self.top.max(self.bottom),
+            min(self.left, self.right),
+            min(self.top, self.bottom),
+            max(self.left, self.right),
+            max(self.top, self.bottom),
         )
     }
 
+    #[deprecated(since = "0.27.0", note = "removed without replacement")]
     #[must_use]
     pub fn empty() -> &'static Self {
         &EMPTY_IRECT
@@ -416,11 +413,6 @@ impl Rect {
         // value==value will be true iff value is not NaN
         // TODO: is it faster to say !accum or accum==accum?
         !accum.is_nan()
-    }
-
-    #[deprecated(since = "0.12.0", note = "removed without replacement")]
-    pub fn left_top(&self) -> Point {
-        (self.left, self.top).into()
     }
 
     pub fn x(&self) -> scalar {

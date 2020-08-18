@@ -1,12 +1,16 @@
 use clap::{App, Arg};
+#[cfg(feature = "gl")]
 use offscreen_gl_context::{GLContext, GLVersion, NativeGLContext};
 use std::path::{Path, PathBuf};
 
 use crate::drivers::DrawingDriver;
 
 #[cfg(feature = "vulkan")]
-#[macro_use]
 extern crate ash;
+
+#[cfg(feature = "metal")]
+#[macro_use]
+extern crate objc;
 
 // TODO: think about making the examples more Rust-idiomatic, by using method chaining for Paint / Paths, for example.
 
@@ -17,7 +21,7 @@ mod skpaint_overview;
 #[cfg(feature = "textlayout")]
 mod skparagraph_example;
 mod skpath_overview;
-#[cfg(feature = "shaper")]
+#[cfg(feature = "textlayout")]
 mod skshaper_example;
 
 fn main() {
@@ -57,42 +61,42 @@ fn main() {
     };
 
     if drivers.contains(&drivers::CPU::NAME) {
-        draw_all::<drivers::CPU>(&out_path);
+        draw_all(&mut drivers::CPU::new(), &out_path);
     }
 
     if drivers.contains(&drivers::PDF::NAME) {
-        draw_all::<drivers::PDF>(&out_path);
+        draw_all(&mut drivers::PDF::new(), &out_path);
     }
 
-    #[cfg(feature = "svg")]
+    if drivers.contains(&drivers::SVG::NAME) {
+        draw_all(&mut drivers::SVG::new(), &out_path);
+    }
+
+    #[cfg(feature = "gl")]
     {
-        if drivers.contains(&drivers::SVG::NAME) {
-            draw_all::<drivers::SVG>(&out_path);
+        if drivers.contains(&drivers::OpenGL::NAME) {
+            let context = GLContext::<NativeGLContext>::create(
+                sparkle::gl::GlType::Gl,
+                GLVersion::MajorMinor(3, 3),
+                None,
+            )
+            .unwrap();
+
+            context.make_current().unwrap();
+            draw_all(&mut drivers::OpenGL::new(), &out_path);
         }
-    }
 
-    if drivers.contains(&drivers::OpenGL::NAME) {
-        let context = GLContext::<NativeGLContext>::create(
-            sparkle::gl::GlType::Gl,
-            GLVersion::MajorMinor(3, 3),
-            None,
-        )
-        .unwrap();
+        if drivers.contains(&"opengl-es") {
+            let context = GLContext::<NativeGLContext>::create(
+                sparkle::gl::GlType::Gles,
+                GLVersion::MajorMinor(3, 3),
+                None,
+            )
+            .unwrap();
 
-        context.make_current().unwrap();
-        draw_all::<drivers::OpenGL>(&out_path);
-    }
-
-    if drivers.contains(&"opengl-es") {
-        let context = GLContext::<NativeGLContext>::create(
-            sparkle::gl::GlType::Gles,
-            GLVersion::MajorMinor(3, 3),
-            None,
-        )
-        .unwrap();
-
-        context.make_current().unwrap();
-        draw_all::<drivers::OpenGL>(&out_path);
+            context.make_current().unwrap();
+            draw_all(&mut drivers::OpenGL::new(), &out_path);
+        }
     }
 
     #[cfg(feature = "vulkan")]
@@ -108,32 +112,44 @@ fn main() {
                 None => println!("Failed to detect Vulkan version, falling back to 1.0.0"),
             }
 
-            draw_all::<Vulkan>(&out_path)
+            draw_all(&mut drivers::Vulkan::new(), &out_path)
         }
     }
 
-    fn draw_all<Driver: DrawingDriver>(out_path: &Path) {
+    #[cfg(feature = "metal")]
+    {
+        use drivers::metal::Metal;
+
+        if drivers.contains(&Metal::NAME) {
+            draw_all(&mut Metal::new(), &out_path)
+        }
+    }
+
+    fn draw_all<Driver: DrawingDriver>(driver: &mut Driver, out_path: &Path) {
         let out_path = out_path.join(Driver::NAME);
 
-        skcanvas_overview::draw::<Driver>(&out_path);
-        skpath_overview::draw::<Driver>(&out_path);
-        skpaint_overview::draw::<Driver>(&out_path);
-
-        #[cfg(feature = "shaper")]
-        skshaper_example::draw::<Driver>(&out_path);
+        skcanvas_overview::draw(driver, &out_path);
+        skpath_overview::draw(driver, &out_path);
+        skpaint_overview::draw(driver, &out_path);
 
         #[cfg(feature = "textlayout")]
-        skparagraph_example::draw::<Driver>(&out_path);
+        skshaper_example::draw(driver, &out_path);
+
+        #[cfg(feature = "textlayout")]
+        skparagraph_example::draw(driver, &out_path);
     }
 }
 
 fn get_available_drivers() -> Vec<&'static str> {
-    let mut drivers = vec!["cpu", "pdf", "opengl", "opengl-es"];
+    let mut drivers = vec!["cpu", "pdf", "svg"];
+    if cfg!(feature = "gl") {
+        drivers.extend(vec!["opengl", "opengl-es"]);
+    }
     if cfg!(feature = "vulkan") {
         drivers.push("vulkan")
     }
-    if cfg!(feature = "svg") {
-        drivers.push("svg");
+    if cfg!(feature = "metal") {
+        drivers.push("metal")
     }
     drivers
 }

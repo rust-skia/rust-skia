@@ -1,11 +1,13 @@
-use crate::gpu::{gl, BackendFormat, MipMapped, Renderable};
-use crate::prelude::*;
-use skia_bindings as sb;
-use skia_bindings::{GrContext, SkRefCntBase};
-
+#[cfg(feature = "gl")]
+use super::gl;
 #[cfg(feature = "vulkan")]
 use super::vk;
-use crate::{ColorType, Data, Image};
+use crate::gpu::{BackendFormat, MipMapped, Renderable};
+use crate::prelude::*;
+use crate::{image, ColorType, Data, Image};
+use skia_bindings as sb;
+use skia_bindings::{GrContext, SkRefCntBase};
+use std::time::Duration;
 
 pub type Context = RCHandle<GrContext>;
 
@@ -27,6 +29,7 @@ pub struct ResourceCacheUsage {
 
 impl RCHandle<GrContext> {
     // TODO: support variant with GrContextOptions
+    #[cfg(feature = "gl")]
     pub fn new_gl(interface: impl Into<Option<gl::Interface>>) -> Option<Context> {
         Context::from_ptr(unsafe { sb::C_GrContext_MakeGL(interface.into().into_ptr_or_null()) })
     }
@@ -41,6 +44,18 @@ impl RCHandle<GrContext> {
             drop(end_resolving);
             context
         }
+    }
+
+    // TODO: support variant with GrContextOptions
+    /// # Safety
+    /// This function is unsafe because `device` and `queue` are untyped handles which need to exceed the
+    /// lifetime of the context returned.
+    #[cfg(feature = "metal")]
+    pub unsafe fn new_metal(
+        device: *mut std::ffi::c_void,
+        queue: *mut std::ffi::c_void,
+    ) -> Option<Context> {
+        Context::from_ptr(sb::C_GrContext_MakeMetal(device, queue))
     }
 
     // TODO: threadSafeProxy()
@@ -67,8 +82,8 @@ impl RCHandle<GrContext> {
     }
 
     // TODO: is_...?
-    pub fn abandoned(&self) -> bool {
-        unsafe { sb::C_GrContext_abandoned(self.native()) }
+    pub fn abandoned(&mut self) -> bool {
+        unsafe { sb::C_GrContext_abandoned(self.native_mut()) }
     }
 
     pub fn release_resources_and_abandon(&mut self) -> &mut Self {
@@ -128,7 +143,15 @@ impl RCHandle<GrContext> {
         self
     }
 
-    // TODO: performDeferredCleanup()
+    pub fn perform_deferred_cleanup(&mut self, not_used: Duration) -> &mut Self {
+        unsafe {
+            sb::C_GrContext_performDeferredCleanup(
+                self.native_mut(),
+                not_used.as_millis().try_into().unwrap(),
+            )
+        }
+        self
+    }
 
     pub fn purge_unlocked_resources(
         &mut self,
@@ -182,13 +205,25 @@ impl RCHandle<GrContext> {
 
     // TODO: wait()
 
-    pub fn flush(&mut self) -> &mut Self {
-        unsafe { sb::C_GrContext_flush(self.native_mut()) }
+    pub fn flush_and_submit(&mut self) -> &mut Self {
+        unsafe { sb::C_GrContext_flushAndSubmit(self.native_mut()) }
         self
+    }
+
+    #[deprecated(since = "0.30.0", note = "use flush_and_submit()")]
+    pub fn flush(&mut self) -> &mut Self {
+        self.flush_and_submit()
     }
 
     // TODO: flush(GrFlushInfo, ..) two variants.
     // TODO: flushAndSignalSemaphores
+
+    pub fn submit(&mut self, sync_to_cpu: impl Into<Option<bool>>) -> bool {
+        unsafe {
+            self.native_mut()
+                .submit(sync_to_cpu.into().unwrap_or(false))
+        }
+    }
 
     pub fn check_async_work_completion(&mut self) {
         unsafe { self.native_mut().checkAsyncWorkCompletion() }
@@ -214,7 +249,7 @@ impl RCHandle<GrContext> {
         unsafe {
             sb::C_GrContext_ComputeImageSize(
                 image.as_ref().clone().into_ptr(),
-                mip_mapped.into_native(),
+                mip_mapped,
                 use_next_pow2.into().unwrap_or_default(),
             )
         }
@@ -226,15 +261,37 @@ impl RCHandle<GrContext> {
             sb::C_GrContext_defaultBackendFormat(
                 self.native(),
                 ct.into_native(),
-                renderable.into_native(),
+                renderable,
                 format.native_mut(),
             )
         };
         format
     }
 
-    // TODO: support createBackendTexture (several variants) and deleteBackendTexture(),
+    // TODO: wrap createBackendTexture (several variants)
     //       introduced in m76, m77, and m79
+    //       extended in m84 with finishedProc and finishedContext
+
+    // TODO: wrap updateBackendTexture (several variants)
+    //       introduced in m84
+
+    pub fn compressed_backend_format(&self, compression: image::CompressionType) -> BackendFormat {
+        let mut backend_format = BackendFormat::default();
+        unsafe {
+            sb::C_GrContext_compressedBackendFormat(
+                self.native(),
+                compression,
+                backend_format.native_mut(),
+            )
+        };
+        backend_format
+    }
+
+    // TODO: wrap createCompressedBackendTexture (several variants)
+    //       introduced in m81
+    //       extended in m84 with finishedProc and finishedContext
+
+    // TODO: wrap deleteBackendTexture(),
 
     pub fn precompile_shader(&mut self, key: &Data, data: &Data) -> bool {
         unsafe {

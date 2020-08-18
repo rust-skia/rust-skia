@@ -21,7 +21,6 @@ The repository consists of two cargo packages in the folders `/skia-bindings` an
 We did our best to cover most of the Skia API, but you'll find a lot of blind spots by looking closer:
 
 - GPU API support is incomplete, specifically functions that use callbacks.
-- [Metal](https://en.wikipedia.org/wiki/Metal_(API)) isn't supported at all.
 - Supporting [Skottie](https://skia.org/user/modules/skottie) would be a nice addition.
 
 For larger contributions, make yourself familiar with the [various wrapper types](https://github.com/rust-skia/rust-skia/wiki) of skia-safe and consider to file an issue beforehand to give us a heads up and to receive additional directions.
@@ -32,7 +31,7 @@ Examples should be added to `/skia-safe/examples` or directly to the `/skia-safe
 
 ## Updating Skia
 
-Since the beginning of this project, the maintainer team is updating rust-skia to match the Skia API version in the latest stable Chrome release. A new Chrome release [is scheduled](https://chromium.googlesource.com/chromium/src/+/master/docs/process/release_cycle.md) about every 7 weeks and most changes for the upcoming version are already settled when the current release is out, so there is enough time to update rust-skia. For most new Skia releases, the changes are trivial and can be integrated without breaking backwards compatibility on the Rust side.
+Since the beginning of this project, the maintainer team is updating rust-skia to match the Skia API version in the latest stable Chrome release. A new Chrome release [is scheduled](https://chromium.googlesource.com/chromium/src/+/master/docs/process/release_cycle.md) about every 6 weeks and most changes for the upcoming version are already settled when the current release is out, so there is enough time to update rust-skia. For most new Skia releases, the changes are trivial and can be integrated without breaking backwards compatibility on the Rust side.
 
 Even though this puts some pressure on dependent projects, we'd try to keep rust-skia updated, because falling behind Chrome's and Flutter's development to keep Skia _modern_ is not an option.
 

@@ -1,9 +1,7 @@
 use crate::prelude::*;
-use crate::{Canvas, SurfaceCharacterization};
+use crate::{Canvas, DeferredDisplayList, SurfaceCharacterization};
 use skia_bindings as sb;
 use skia_bindings::SkDeferredDisplayListRecorder;
-
-pub use private::DeferredDisplayList;
 
 pub type DeferredDisplayListRecorder = Handle<SkDeferredDisplayListRecorder>;
 
@@ -30,20 +28,6 @@ impl Handle<SkDeferredDisplayListRecorder> {
         })
     }
 
-    // TODO: makePromiseTexture()?
-    // TODO: makeYUVAPromiseTexture()?
-}
-
-pub(crate) mod private {
-    use crate::prelude::*;
-    use skia_bindings as sb;
-    use skia_bindings::SkDeferredDisplayList;
-
-    pub type DeferredDisplayList = RefHandle<SkDeferredDisplayList>;
-
-    impl NativeDrop for SkDeferredDisplayList {
-        fn drop(&mut self) {
-            unsafe { sb::C_SkDeferredDisplayList_delete(self) }
-        }
-    }
+    // TODO: makePromiseTexture()
+    // TODO: makeYUVAPromiseTexture()
 }

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use skia_bindings as sb;
-use skia_bindings::{SkFontStyle, SkFontStyle_Slant, SkFontStyle_Weight, SkFontStyle_Width};
+use skia_bindings::{SkFontStyle, SkFontStyle_Weight, SkFontStyle_Width};
 use std::ops::Deref;
 
 /// Wrapper type of a font weight.
@@ -33,29 +33,6 @@ impl Deref for Weight {
 
 #[allow(non_upper_case_globals)]
 impl Weight {
-    #[deprecated(note = "use INVISIBLE")]
-    pub const Invisible: Self = Self(SkFontStyle_Weight::kInvisible_Weight as _);
-    #[deprecated(note = "use THIN")]
-    pub const Thin: Self = Self(SkFontStyle_Weight::kThin_Weight as _);
-    #[deprecated(note = "use EXTRA_LIGHT")]
-    pub const ExtraLight: Self = Self(SkFontStyle_Weight::kExtraLight_Weight as _);
-    #[deprecated(note = "use LIGHT")]
-    pub const Light: Self = Self(SkFontStyle_Weight::kLight_Weight as _);
-    #[deprecated(note = "use NORMAL")]
-    pub const Normal: Self = Self(SkFontStyle_Weight::kNormal_Weight as _);
-    #[deprecated(note = "use MEDIUM")]
-    pub const Medium: Self = Self(SkFontStyle_Weight::kMedium_Weight as _);
-    #[deprecated(note = "use SEMI_BOLD")]
-    pub const SemiBold: Self = Self(SkFontStyle_Weight::kSemiBold_Weight as _);
-    #[deprecated(note = "use BOLD")]
-    pub const Bold: Self = Self(SkFontStyle_Weight::kBold_Weight as _);
-    #[deprecated(note = "use EXTRA_BOLD")]
-    pub const ExtraBold: Self = Self(SkFontStyle_Weight::kExtraBold_Weight as _);
-    #[deprecated(note = "use BLACK")]
-    pub const Black: Self = Self(SkFontStyle_Weight::kBlack_Weight as _);
-    #[deprecated(note = "use EXTRA_BLACK")]
-    pub const ExtraBlack: Self = Self(SkFontStyle_Weight::kExtraBlack_Weight as _);
-
     pub const INVISIBLE: Self = Self(SkFontStyle_Weight::kInvisible_Weight as _);
     pub const THIN: Self = Self(SkFontStyle_Weight::kThin_Weight as _);
     pub const EXTRA_LIGHT: Self = Self(SkFontStyle_Weight::kExtraLight_Weight as _);
@@ -99,25 +76,6 @@ impl Deref for Width {
 
 #[allow(non_upper_case_globals)]
 impl Width {
-    #[deprecated(note = "use ULTRA_CONDENSED")]
-    pub const UltraCondensed: Self = Self(SkFontStyle_Width::kUltraCondensed_Width as _);
-    #[deprecated(note = "use EXTRA_CONDENSED")]
-    pub const ExtraCondensed: Self = Self(SkFontStyle_Width::kExtraCondensed_Width as _);
-    #[deprecated(note = "use CONDENSED")]
-    pub const Condensed: Self = Self(SkFontStyle_Width::kCondensed_Width as _);
-    #[deprecated(note = "use SEMI_CONDENSED")]
-    pub const SemiCondensed: Self = Self(SkFontStyle_Width::kSemiCondensed_Width as _);
-    #[deprecated(note = "use NORMAL")]
-    pub const Normal: Self = Self(SkFontStyle_Width::kNormal_Width as _);
-    #[deprecated(note = "use SEMI_EXPANDED")]
-    pub const SemiExpanded: Self = Self(SkFontStyle_Width::kSemiExpanded_Width as _);
-    #[deprecated(note = "use EXPANDED")]
-    pub const Expanded: Self = Self(SkFontStyle_Width::kExpanded_Width as _);
-    #[deprecated(note = "use EXTRA_EXPANDED")]
-    pub const ExtraExpanded: Self = Self(SkFontStyle_Width::kExtraExpanded_Width as _);
-    #[deprecated(note = "use ULTRA_EXPANDED")]
-    pub const UltraExpanded: Self = Self(SkFontStyle_Width::kUltraExpanded_Width as _);
-
     pub const ULTRA_CONDENSED: Self = Self(SkFontStyle_Width::kUltraCondensed_Width as _);
     pub const EXTRA_CONDENSED: Self = Self(SkFontStyle_Width::kExtraCondensed_Width as _);
     pub const CONDENSED: Self = Self(SkFontStyle_Width::kCondensed_Width as _);
@@ -129,19 +87,10 @@ impl Width {
     pub const ULTRA_EXPANDED: Self = Self(SkFontStyle_Width::kUltraExpanded_Width as _);
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum Slant {
-    Upright = SkFontStyle_Slant::kUpright_Slant as _,
-    Italic = SkFontStyle_Slant::kItalic_Slant as _,
-    Oblique = SkFontStyle_Slant::kOblique_Slant as _,
-}
-
-impl NativeTransmutable<SkFontStyle_Slant> for Slant {}
-
+pub use skia_bindings::SkFontStyle_Slant as Slant;
 #[test]
-fn test_slant_layout() {
-    Slant::test_layout()
+fn test_slant_naming() {
+    let _ = Slant::Upright;
 }
 
 // TODO: implement Display
@@ -170,12 +119,7 @@ impl Default for FontStyle {
 impl FontStyle {
     pub fn new(weight: Weight, width: Width, slant: Slant) -> Self {
         Self::construct(|fs| unsafe {
-            sb::C_SkFontStyle_Construct2(
-                fs,
-                weight.into_native(),
-                width.into_native(),
-                slant.into_native(),
-            )
+            sb::C_SkFontStyle_Construct2(fs, weight.into_native(), width.into_native(), slant)
         })
     }
 
@@ -188,7 +132,7 @@ impl FontStyle {
     }
 
     pub fn slant(self) -> Slant {
-        Slant::from_native(unsafe { sb::C_SkFontStyle_slant(self.native()) })
+        unsafe { sb::C_SkFontStyle_slant(self.native()) }
     }
 
     pub fn normal() -> FontStyle {

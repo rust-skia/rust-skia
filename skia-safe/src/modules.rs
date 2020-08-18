@@ -1,8 +1,8 @@
 #[cfg(feature = "textlayout")]
 pub(crate) mod paragraph;
-#[cfg(feature = "shaper")]
+#[cfg(feature = "textlayout")]
 pub mod shaper;
-#[cfg(feature = "shaper")]
+#[cfg(feature = "textlayout")]
 pub use shaper::{icu, Shaper};
 
 // Export everything below paragraph under textlayout

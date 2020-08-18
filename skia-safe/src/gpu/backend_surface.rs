@@ -1,10 +1,14 @@
-use super::{gl, BackendAPI, MipMapped};
-use crate::prelude::*;
-use skia_bindings as sb;
-use skia_bindings::{GrBackendFormat, GrBackendRenderTarget, GrBackendTexture, GrMipMapped};
-
+#[cfg(feature = "gl")]
+use super::gl;
+#[cfg(feature = "metal")]
+use super::mtl;
 #[cfg(feature = "vulkan")]
 use super::vk;
+use super::BackendAPI;
+use crate::prelude::*;
+use crate::ISize;
+use skia_bindings as sb;
+use skia_bindings::{GrBackendFormat, GrBackendRenderTarget, GrBackendTexture, GrMipMapped};
 
 pub type BackendFormat = Handle<GrBackendFormat>;
 
@@ -31,6 +35,7 @@ impl Handle<GrBackendFormat> {
         Self::construct(|bf| unsafe { sb::C_GrBackendFormat_Construct(bf) })
     }
 
+    #[cfg(feature = "gl")]
     pub fn new_gl(format: gl::Enum, target: gl::Enum) -> Self {
         Self::construct(|bf| unsafe { sb::C_GrBackendFormat_ConstructGL(bf, format, target) })
     }
@@ -47,27 +52,38 @@ impl Handle<GrBackendFormat> {
         })
     }
 
+    #[cfg(feature = "metal")]
+    pub fn new_metal(format: mtl::PixelFormat) -> Self {
+        Self::construct(|bf| unsafe { sb::C_GrBackendFormat_ConstructMtl(bf, format) })
+    }
+
     #[deprecated(since = "0.19.0", note = "use backend()")]
     pub fn backend_api(&self) -> BackendAPI {
         self.backend()
     }
 
     pub fn backend(&self) -> BackendAPI {
-        BackendAPI::from_native(self.native().fBackend)
+        self.native().fBackend
     }
 
     // texture_type() would return a private type.
 
+    pub fn channel_mask(&self) -> u32 {
+        unsafe { self.native().channelMask() }
+    }
+
     #[deprecated(since = "0.19.0", note = "use as_gl_format()")]
+    #[cfg(feature = "gl")]
     pub fn gl_format(&self) -> Option<gl::Enum> {
         Some(self.as_gl_format() as _)
     }
 
+    #[cfg(feature = "gl")]
     pub fn as_gl_format(&self) -> gl::Format {
-        gl::Format::from_native(unsafe {
+        unsafe {
             #[allow(clippy::map_clone)]
             self.native().asGLFormat()
-        })
+        }
     }
 
     #[deprecated(since = "0.19.0", note = "use as_vk_format()")]
@@ -80,6 +96,11 @@ impl Handle<GrBackendFormat> {
     pub fn as_vk_format(&self) -> Option<vk::Format> {
         let mut r = vk::Format::UNDEFINED;
         unsafe { self.native().asVkFormat(&mut r) }.if_true_some(r)
+    }
+
+    #[cfg(feature = "metal")]
+    pub fn as_mtl_format(&self) -> mtl::PixelFormat {
+        unsafe { self.native().asMtlFormat() }
     }
 
     pub fn to_texture_2d(&self) -> Option<Self> {
@@ -103,31 +124,44 @@ impl NativeDrop for GrBackendTexture {
 
 impl NativeClone for GrBackendTexture {
     fn clone(&self) -> Self {
-        unsafe { GrBackendTexture::new3(self) }
+        construct(|texture| unsafe { sb::C_GrBackendTexture_CopyConstruct(texture, self) })
     }
 }
 
 impl Handle<GrBackendTexture> {
+    #[cfg(feature = "gl")]
     pub unsafe fn new_gl(
         (width, height): (i32, i32),
-        mip_mapped: MipMapped,
+        mip_mapped: super::MipMapped,
         gl_info: gl::TextureInfo,
-    ) -> BackendTexture {
+    ) -> Self {
         Self::from_native_if_valid(GrBackendTexture::new(
             width,
             height,
-            mip_mapped.into_native(),
+            mip_mapped,
             gl_info.native(),
         ))
         .unwrap()
     }
 
     #[cfg(feature = "vulkan")]
-    pub unsafe fn new_vulkan(
-        (width, height): (i32, i32),
-        vk_info: &vk::ImageInfo,
-    ) -> BackendTexture {
+    pub unsafe fn new_vulkan((width, height): (i32, i32), vk_info: &vk::ImageInfo) -> Self {
         Self::from_native_if_valid(GrBackendTexture::new1(width, height, vk_info.native())).unwrap()
+    }
+
+    #[cfg(feature = "metal")]
+    pub unsafe fn new_metal(
+        (width, height): (i32, i32),
+        mip_mapped: super::MipMapped,
+        mtl_info: &mtl::TextureInfo,
+    ) -> Self {
+        Self::from_native_if_valid(GrBackendTexture::new2(
+            width,
+            height,
+            mip_mapped,
+            mtl_info.native(),
+        ))
+        .unwrap()
     }
 
     pub(crate) unsafe fn from_native_if_valid(
@@ -136,6 +170,10 @@ impl Handle<GrBackendTexture> {
         backend_texture
             .fIsValid
             .if_true_then_some(|| BackendTexture::from_native(backend_texture))
+    }
+
+    pub fn dimensions(&self) -> ISize {
+        ISize::new(self.width(), self.height())
     }
 
     pub fn width(&self) -> i32 {
@@ -147,13 +185,14 @@ impl Handle<GrBackendTexture> {
     }
 
     pub fn has_mip_maps(&self) -> bool {
-        self.native().fMipMapped == GrMipMapped::kYes
+        self.native().fMipMapped == GrMipMapped::Yes
     }
 
     pub fn backend(&self) -> BackendAPI {
-        BackendAPI::from_native(self.native().fBackend)
+        self.native().fBackend
     }
 
+    #[cfg(feature = "gl")]
     pub fn gl_texture_info(&self) -> Option<gl::TextureInfo> {
         unsafe {
             let mut texture_info = gl::TextureInfo::default();
@@ -163,6 +202,7 @@ impl Handle<GrBackendTexture> {
         }
     }
 
+    #[cfg(feature = "gl")]
     pub fn gl_texture_parameters_modified(&mut self) {
         unsafe { self.native_mut().glTextureParametersModified() }
     }
@@ -182,6 +222,16 @@ impl Handle<GrBackendTexture> {
     pub fn set_vulkan_image_layout(&mut self, layout: vk::ImageLayout) -> &mut Self {
         unsafe { self.native_mut().setVkImageLayout(layout) }
         self
+    }
+
+    #[cfg(feature = "metal")]
+    pub fn metal_texture_info(&self) -> Option<mtl::TextureInfo> {
+        unsafe {
+            let mut texture_info = mtl::TextureInfo::default();
+            self.native()
+                .getMtlTextureInfo(texture_info.native_mut())
+                .if_true_some(texture_info)
+        }
     }
 
     pub fn backend_format(&self) -> Option<BackendFormat> {
@@ -214,17 +264,20 @@ impl NativeDrop for GrBackendRenderTarget {
 
 impl NativeClone for GrBackendRenderTarget {
     fn clone(&self) -> Self {
-        unsafe { GrBackendRenderTarget::new4(self) }
+        construct(|render_target| unsafe {
+            sb::C_GrBackendRenderTarget_CopyConstruct(render_target, self)
+        })
     }
 }
 
 impl Handle<GrBackendRenderTarget> {
+    #[cfg(feature = "gl")]
     pub fn new_gl(
         (width, height): (i32, i32),
         sample_count: impl Into<Option<usize>>,
         stencil_bits: usize,
         info: gl::FramebufferInfo,
-    ) -> BackendRenderTarget {
+    ) -> Self {
         Self::from_native(unsafe {
             GrBackendRenderTarget::new(
                 width,
@@ -241,14 +294,25 @@ impl Handle<GrBackendRenderTarget> {
         (width, height): (i32, i32),
         sample_count: impl Into<Option<usize>>,
         info: &vk::ImageInfo,
-    ) -> BackendRenderTarget {
-        BackendRenderTarget::from_native(unsafe {
+    ) -> Self {
+        Self::from_native(unsafe {
             GrBackendRenderTarget::new2(
                 width,
                 height,
                 sample_count.into().unwrap_or(0).try_into().unwrap(),
                 info.native(),
             )
+        })
+    }
+
+    #[cfg(feature = "metal")]
+    pub fn new_metal(
+        (width, height): (i32, i32),
+        sample_cnt: i32,
+        mtl_info: &mtl::TextureInfo,
+    ) -> Self {
+        Self::from_native(unsafe {
+            GrBackendRenderTarget::new3(width, height, sample_cnt, mtl_info.native())
         })
     }
 
@@ -259,6 +323,10 @@ impl Handle<GrBackendRenderTarget> {
         backend_render_target
             .is_valid()
             .if_true_some(backend_render_target)
+    }
+
+    pub fn dimensions(&self) -> ISize {
+        ISize::new(self.width(), self.height())
     }
 
     pub fn width(&self) -> i32 {
@@ -278,9 +346,14 @@ impl Handle<GrBackendRenderTarget> {
     }
 
     pub fn backend(&self) -> BackendAPI {
-        BackendAPI::from_native(self.native().fBackend)
+        self.native().fBackend
     }
 
+    pub fn is_framebuffer_only(&self) -> bool {
+        self.native().fFramebufferOnly
+    }
+
+    #[cfg(feature = "gl")]
     pub fn gl_framebuffer_info(&self) -> Option<gl::FramebufferInfo> {
         let mut info = gl::FramebufferInfo::default();
         unsafe { self.native().getGLFramebufferInfo(info.native_mut()) }.if_true_some(info)
@@ -296,6 +369,12 @@ impl Handle<GrBackendRenderTarget> {
     pub fn set_vulkan_image_layout(&mut self, layout: vk::ImageLayout) -> &mut Self {
         unsafe { self.native_mut().setVkImageLayout(layout) }
         self
+    }
+
+    #[cfg(feature = "metal")]
+    pub fn metal_texture_info(&self) -> Option<mtl::TextureInfo> {
+        let mut info = mtl::TextureInfo::default();
+        unsafe { self.native().getMtlTextureInfo(info.native_mut()) }.if_true_some(info)
     }
 
     pub fn backend_format(&self) -> BackendFormat {

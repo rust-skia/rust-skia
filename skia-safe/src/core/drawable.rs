@@ -1,7 +1,9 @@
+#[cfg(feature = "gpu")]
+use crate::gpu;
 use crate::prelude::*;
-use crate::{gpu, Canvas, IRect, ImageInfo, Matrix, NativeFlattenable, Point, Rect};
+use crate::{Canvas, Matrix, NativeFlattenable, Point, Rect};
 use skia_bindings as sb;
-use skia_bindings::{SkDrawable, SkDrawable_GpuDrawHandler, SkFlattenable, SkRefCntBase};
+use skia_bindings::{SkDrawable, SkFlattenable, SkRefCntBase};
 
 pub type Drawable = RCHandle<SkDrawable>;
 
@@ -35,17 +37,18 @@ impl RCHandle<SkDrawable> {
         }
     }
 
+    #[cfg(feature = "gpu")]
     pub fn snap_gpu_draw_handler(
         &mut self,
         api: gpu::BackendAPI,
         matrix: &Matrix,
-        clip_bounds: impl Into<IRect>,
-        buffer_info: &ImageInfo,
-    ) -> Option<GPUDrawHandler> {
-        GPUDrawHandler::from_ptr(unsafe {
+        clip_bounds: impl Into<crate::IRect>,
+        buffer_info: &crate::ImageInfo,
+    ) -> Option<gpu_draw_handler::GPUDrawHandler> {
+        gpu_draw_handler::GPUDrawHandler::from_ptr(unsafe {
             sb::C_SkDrawable_snapGpuDrawHandler(
                 self.native_mut(),
-                api.into_native(),
+                api,
                 matrix.native(),
                 clip_bounds.into().native(),
                 buffer_info.native(),
@@ -73,18 +76,29 @@ impl RCHandle<SkDrawable> {
     }
 }
 
-pub type GPUDrawHandler = RefHandle<SkDrawable_GpuDrawHandler>;
+#[cfg(feature = "gpu")]
+pub use gpu_draw_handler::*;
 
-impl NativeDrop for SkDrawable_GpuDrawHandler {
-    fn drop(&mut self) {
-        unsafe { sb::C_SkDrawable_GpuDrawHandler_delete(self) }
+#[cfg(feature = "gpu")]
+pub mod gpu_draw_handler {
+    use crate::gpu;
+    use crate::prelude::*;
+    use skia_bindings as sb;
+    use skia_bindings::SkDrawable_GpuDrawHandler;
+
+    pub type GPUDrawHandler = RefHandle<SkDrawable_GpuDrawHandler>;
+
+    impl NativeDrop for SkDrawable_GpuDrawHandler {
+        fn drop(&mut self) {
+            unsafe { sb::C_SkDrawable_GpuDrawHandler_delete(self) }
+        }
     }
-}
 
-impl RefHandle<SkDrawable_GpuDrawHandler> {
-    pub fn draw(&mut self, info: &gpu::BackendDrawableInfo) {
-        unsafe {
-            sb::C_SkDrawable_GpuDrawHandler_draw(self.native_mut(), info.native());
+    impl RefHandle<SkDrawable_GpuDrawHandler> {
+        pub fn draw(&mut self, info: &gpu::BackendDrawableInfo) {
+            unsafe {
+                sb::C_SkDrawable_GpuDrawHandler_draw(self.native_mut(), info.native());
+            }
         }
     }
 }

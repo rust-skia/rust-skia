@@ -3,17 +3,27 @@ use crate::{ISize, Matrix};
 use skia_bindings as sb;
 use skia_bindings::SkEncodedOrigin;
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+// Even though possible, we are not using the rewritten SkEncodedOrigin enum,
+// because of the to_matrix() implementation below, which needs passed an ISize and so
+// can not be implemented in the skia-bindings crate.
 #[repr(i32)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum EncodedOrigin {
-    TopLeft = SkEncodedOrigin::kTopLeft_SkEncodedOrigin as _,
-    TopRight = SkEncodedOrigin::kTopRight_SkEncodedOrigin as _,
-    BottomRight = SkEncodedOrigin::kBottomRight_SkEncodedOrigin as _,
-    BottomLeft = SkEncodedOrigin::kBottomLeft_SkEncodedOrigin as _,
-    LeftTop = SkEncodedOrigin::kLeftTop_SkEncodedOrigin as _,
-    RightTop = SkEncodedOrigin::kRightTop_SkEncodedOrigin as _,
-    RightBottom = SkEncodedOrigin::kRightBottom_SkEncodedOrigin as _,
-    LeftBottom = SkEncodedOrigin::kLeftBottom_SkEncodedOrigin as _,
+    TopLeft = SkEncodedOrigin::TopLeft as _,
+    TopRight = SkEncodedOrigin::TopRight as _,
+    BottomRight = SkEncodedOrigin::BottomRight as _,
+    BottomLeft = SkEncodedOrigin::BottomLeft as _,
+    LeftTop = SkEncodedOrigin::LeftTop as _,
+    RightTop = SkEncodedOrigin::RightTop as _,
+    RightBottom = SkEncodedOrigin::RightBottom as _,
+    LeftBottom = SkEncodedOrigin::LeftBottom as _,
+}
+
+impl NativeTransmutable<SkEncodedOrigin> for EncodedOrigin {}
+
+#[test]
+fn test_encoded_origin_layout() {
+    EncodedOrigin::test_layout();
 }
 
 impl Default for EncodedOrigin {
@@ -22,13 +32,10 @@ impl Default for EncodedOrigin {
     }
 }
 
-impl NativeTransmutable<SkEncodedOrigin> for EncodedOrigin {}
-#[test]
-fn test_encoded_origin_layout() {
-    EncodedOrigin::test_layout()
-}
-
 impl EncodedOrigin {
+    pub const LAST: Self = EncodedOrigin::LeftBottom;
+    pub const DEFAULT: Self = EncodedOrigin::TopLeft;
+
     pub fn to_matrix(self, size: impl Into<ISize>) -> Matrix {
         let size = size.into();
         let mut m = Matrix::default();

@@ -1,30 +1,15 @@
 use crate::prelude::*;
 use crate::{ColorSpace, IPoint, IRect, ISize};
 use skia_bindings as sb;
-use skia_bindings::{SkAlphaType, SkColorInfo, SkColorType, SkImageInfo, SkYUVColorSpace};
+use skia_bindings::{SkColorInfo, SkColorType, SkImageInfo};
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum AlphaType {
-    Unknown = SkAlphaType::kUnknown_SkAlphaType as _,
-    Opaque = SkAlphaType::kOpaque_SkAlphaType as _,
-    Premul = SkAlphaType::kPremul_SkAlphaType as _,
-    Unpremul = SkAlphaType::kUnpremul_SkAlphaType as _,
-}
-
-impl NativeTransmutable<SkAlphaType> for AlphaType {}
+pub use skia_bindings::SkAlphaType as AlphaType;
 #[test]
 fn test_alpha_type_layout() {
-    AlphaType::test_layout()
+    let _ = AlphaType::Premul;
 }
 
-impl AlphaType {
-    pub fn is_opaque(self) -> bool {
-        self == AlphaType::Opaque
-    }
-}
-
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
 #[repr(i32)]
 pub enum ColorType {
     Unknown = SkColorType::kUnknown_SkColorType as _,
@@ -35,7 +20,9 @@ pub enum ColorType {
     RGB888x = SkColorType::kRGB_888x_SkColorType as _,
     BGRA8888 = SkColorType::kBGRA_8888_SkColorType as _,
     RGBA1010102 = SkColorType::kRGBA_1010102_SkColorType as _,
+    BGRA1010102 = SkColorType::kBGRA_1010102_SkColorType as _,
     RGB101010x = SkColorType::kRGB_101010x_SkColorType as _,
+    BGR101010x = SkColorType::kBGR_101010x_SkColorType as _,
     Gray8 = SkColorType::kGray_8_SkColorType as _,
     RGBAF16Norm = SkColorType::kRGBA_F16Norm_SkColorType as _,
     RGBAF16 = SkColorType::kRGBA_F16_SkColorType as _,
@@ -81,35 +68,16 @@ impl ColorType {
     pub fn validate_alpha_type(self, alpha_type: AlphaType) -> Option<AlphaType> {
         let mut alpha_type_r = AlphaType::Unknown;
         unsafe {
-            sb::SkColorTypeValidateAlphaType(
-                self.into_native(),
-                alpha_type.into_native(),
-                alpha_type_r.native_mut(),
-            )
+            sb::SkColorTypeValidateAlphaType(self.into_native(), alpha_type, &mut alpha_type_r)
         }
         .if_true_some(alpha_type_r)
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum YUVColorSpace {
-    JPEG = SkYUVColorSpace::kJPEG_SkYUVColorSpace as _,
-    Rec601 = SkYUVColorSpace::kRec601_SkYUVColorSpace as _,
-    Rec709 = SkYUVColorSpace::kRec709_SkYUVColorSpace as _,
-    Identity = SkYUVColorSpace::kIdentity_SkYUVColorSpace as _,
-}
-
-impl NativeTransmutable<SkYUVColorSpace> for YUVColorSpace {}
+pub use skia_bindings::SkYUVColorSpace as YUVColorSpace;
 #[test]
-fn test_yuv_color_space_layout() {
-    YUVColorSpace::test_layout()
-}
-
-impl Default for YUVColorSpace {
-    fn default() -> Self {
-        YUVColorSpace::Identity
-    }
+fn test_yuv_color_space_naming() {
+    let _ = YUVColorSpace::JPEG;
 }
 
 pub type ColorInfo = Handle<SkColorInfo>;
@@ -149,7 +117,7 @@ impl Handle<SkColorInfo> {
             sb::C_SkColorInfo_Construct2(
                 color_info,
                 ct.into_native(),
-                at.into_native(),
+                at,
                 cs.into().into_ptr_or_null(),
             )
         })
@@ -164,11 +132,11 @@ impl Handle<SkColorInfo> {
     }
 
     pub fn alpha_type(&self) -> AlphaType {
-        AlphaType::from_native(self.native().fAlphaType)
+        self.native().fAlphaType
     }
 
     pub fn is_opaque(&self) -> bool {
-        self.alpha_type().is_opaque()
+        self.alpha_type().is_opaque() || self.color_type().is_always_opaque()
     }
 
     pub fn is_gamma_close_to_srgb(&self) -> bool {
@@ -243,7 +211,7 @@ impl Handle<SkImageInfo> {
                 dimensions.width,
                 dimensions.height,
                 ct.into_native(),
-                at.into_native(),
+                at,
                 cs.into().into_ptr_or_null(),
             )
         }
@@ -276,7 +244,7 @@ impl Handle<SkImageInfo> {
                 image_info.native_mut(),
                 dimensions.width,
                 dimensions.height,
-                at.into_native(),
+                at,
             );
         }
         image_info
@@ -397,7 +365,12 @@ impl Handle<SkImageInfo> {
     }
 
     pub fn valid_row_bytes(&self, row_bytes: usize) -> bool {
-        row_bytes >= self.min_row_bytes()
+        if row_bytes < self.min_row_bytes() {
+            return false;
+        }
+        let shift = self.shift_per_pixel();
+        let aligned_row_bytes = row_bytes >> shift << shift;
+        aligned_row_bytes == row_bytes
     }
 
     pub fn reset(&mut self) -> &mut Self {

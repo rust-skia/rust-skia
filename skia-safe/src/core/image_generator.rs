@@ -1,7 +1,9 @@
+#[cfg(feature = "gpu")]
+use crate::gpu;
 use crate::prelude::*;
 use crate::{
-    gpu, image, ColorSpace, Data, ISize, ImageInfo, Matrix, Paint, Picture, YUVAIndex,
-    YUVASizeInfo, YUVColorSpace,
+    image, ColorSpace, Data, ISize, ImageInfo, Matrix, Paint, Picture, YUVAIndex, YUVASizeInfo,
+    YUVColorSpace,
 };
 use skia_bindings as sb;
 use skia_bindings::SkImageGenerator;
@@ -28,6 +30,7 @@ impl RefHandle<SkImageGenerator> {
         ImageInfo::from_native_ref(&self.native().fInfo)
     }
 
+    #[cfg(feature = "gpu")]
     pub fn is_valid(&self, mut context: Option<&mut gpu::Context>) -> bool {
         unsafe { sb::C_SkImageGenerator_isValid(self.native(), context.native_ptr_or_null_mut()) }
     }
@@ -61,7 +64,7 @@ impl RefHandle<SkImageGenerator> {
             self.native().queryYUVA8(
                 size_info.native_mut(),
                 indices.native_mut().as_mut_ptr(),
-                cs.native_mut(),
+                &mut cs,
             )
         }
         .if_true_some((size_info, indices, cs))
@@ -102,6 +105,12 @@ impl RefHandle<SkImageGenerator> {
 
     // TODO: generateTexture()
 
+    #[cfg(feature = "gpu")]
+    #[deprecated(since = "0.29.0", note = "removed without replacement")]
+    pub fn textures_are_cacheable(&self) -> ! {
+        unimplemented!("removed without replacement")
+    }
+
     pub fn from_encoded(encoded: Data) -> Option<Self> {
         Self::from_ptr(unsafe { sb::C_SkImageGenerator_MakeFromEncoded(encoded.into_ptr()) })
     }
@@ -120,7 +129,7 @@ impl RefHandle<SkImageGenerator> {
                 picture.into_ptr(),
                 matrix.native_ptr_or_null(),
                 paint.native_ptr_or_null(),
-                bit_depth.into_native(),
+                bit_depth,
                 color_space.into().into_ptr_or_null(),
             )
         })

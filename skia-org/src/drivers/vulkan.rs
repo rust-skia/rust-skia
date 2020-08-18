@@ -5,53 +5,68 @@ use ash::vk;
 use ash::vk::Handle;
 use ash::{Entry, Instance};
 use skia_safe::{gpu, Budgeted, Canvas, ImageInfo, Surface};
+use std::convert::TryInto;
 use std::ffi::{c_void, CString};
 use std::os::raw;
 use std::path::Path;
 use std::ptr;
 
-pub enum Vulkan {}
+#[allow(dead_code)]
+pub struct Vulkan {
+    // ordered for drop order
+    context: gpu::Context,
+    ash_graphics: AshGraphics,
+}
 
 impl DrawingDriver for Vulkan {
     const NAME: &'static str = "vulkan";
 
+    fn new() -> Self {
+        let ash_graphics = unsafe { AshGraphics::new("skia-org") };
+        let context = {
+            let get_proc = |of| unsafe {
+                match ash_graphics.get_proc(of) {
+                    Some(f) => f as _,
+                    None => {
+                        println!("resolve of {} failed", of.name().to_str().unwrap());
+                        ptr::null()
+                    }
+                }
+            };
+
+            let backend_context = unsafe {
+                gpu::vk::BackendContext::new(
+                    ash_graphics.instance.handle().as_raw() as _,
+                    ash_graphics.physical_device.as_raw() as _,
+                    ash_graphics.device.handle().as_raw() as _,
+                    (
+                        ash_graphics.queue_and_index.0.as_raw() as _,
+                        ash_graphics.queue_and_index.1,
+                    ),
+                    &get_proc,
+                )
+            };
+
+            gpu::Context::new_vulkan(&backend_context).unwrap()
+        };
+
+        Self {
+            ash_graphics,
+            context,
+        }
+    }
+
     fn draw_image(
+        &mut self,
         (width, height): (i32, i32),
         path: &Path,
         name: &str,
         func: impl Fn(&mut Canvas),
     ) {
-        let ash_graphics = unsafe { AshGraphics::new("skia-org") };
-
-        let get_proc = |of| unsafe {
-            match ash_graphics.get_proc(of) {
-                Some(f) => f as _,
-                None => {
-                    println!("resolve of {} failed", of.name().to_str().unwrap());
-                    ptr::null()
-                }
-            }
-        };
-
-        let backend_context = unsafe {
-            gpu::vk::BackendContext::new(
-                ash_graphics.instance.handle().as_raw() as _,
-                ash_graphics.physical_device.as_raw() as _,
-                ash_graphics.device.handle().as_raw() as _,
-                (
-                    ash_graphics.queue_and_index.0.as_raw() as _,
-                    ash_graphics.queue_and_index.1,
-                ),
-                &get_proc,
-            )
-        };
-
-        let mut context = gpu::Context::new_vulkan(&backend_context).unwrap();
-
         let image_info = ImageInfo::new_n32_premul((width * 2, height * 2), None);
         let mut surface = Surface::new_render_target(
-            &mut context,
-            Budgeted::YES,
+            &mut self.context,
+            Budgeted::Yes,
             &image_info,
             None,
             gpu::SurfaceOrigin::TopLeft,
@@ -91,9 +106,9 @@ impl AshGraphics {
 
         detected_version.map(|ver| {
             (
-                vk_version_major!(ver) as _,
-                vk_version_minor!(ver) as _,
-                vk_version_patch!(ver) as _,
+                vk::version_major(ver).try_into().unwrap(),
+                vk::version_minor(ver).try_into().unwrap(),
+                vk::version_patch(ver).try_into().unwrap(),
             )
         })
     }
@@ -101,11 +116,17 @@ impl AshGraphics {
     pub unsafe fn new(app_name: &str) -> AshGraphics {
         let entry = Entry::new().unwrap();
 
-        let minimum_version = vk_make_version!(1, 0, 0);
+        let minimum_version = vk::make_version(1, 0, 0);
 
         let instance: Instance = {
             let api_version = Self::vulkan_version()
-                .map(|(major, minor, patch)| vk_make_version!(major, minor, patch))
+                .map(|(major, minor, patch)| {
+                    vk::make_version(
+                        major.try_into().unwrap(),
+                        minor.try_into().unwrap(),
+                        patch.try_into().unwrap(),
+                    )
+                })
                 .unwrap_or(minimum_version);
 
             let app_name = CString::new(app_name).unwrap();
@@ -155,10 +176,10 @@ impl AshGraphics {
                                 None
                             }
                         })
-                        .nth(0)
+                        .next()
                 })
                 .filter_map(|v| v)
-                .nth(0)
+                .next()
                 .expect("Failed to find a suitable Vulkan device.")
         };
 

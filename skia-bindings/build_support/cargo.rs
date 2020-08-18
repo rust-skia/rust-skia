@@ -6,6 +6,10 @@ use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
 use std::{env, fmt, fs, io};
 
+pub fn warning(warn: impl AsRef<str>) {
+    println!("cargo:warning={}", warn.as_ref());
+}
+
 pub fn output_directory() -> PathBuf {
     PathBuf::from(env::var("OUT_DIR").unwrap())
 }
@@ -64,7 +68,7 @@ impl Target {
             self.architecture.as_str(),
             self.vendor.as_str(),
             self.system.as_str(),
-            self.abi.as_ref().map(|s| s.as_str()),
+            self.abi.as_deref(),
         )
     }
 }

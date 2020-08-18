@@ -1,14 +1,15 @@
 # <img alt="" width="48" align="top" src="artwork/rust-skia-icon_512x512.png"/> Safe Rust bindings to the [Skia Graphics Library](https://skia.org/).
 
-[![crates.io](https://img.shields.io/crates/v/skia-safe)](https://crates.io/crates/skia-safe) [![license](https://img.shields.io/crates/l/skia-safe)](LICENSE) [![Build Status](https://dev.azure.com/pragmatrix-github/rust-skia/_apis/build/status/rust-skia.rust-skia?branchName=master)](https://dev.azure.com/pragmatrix-github/rust-skia/_build/latest?branchName=master)
+[![crates.io](https://img.shields.io/crates/v/skia-safe)](https://crates.io/crates/skia-safe) [![license](https://img.shields.io/crates/l/skia-safe)](LICENSE) [![Build Status](https://dev.azure.com/pragmatrix-github/rust-skia/_apis/build/status/rust-skia.rust-skia?branchName=master)](https://dev.azure.com/pragmatrix-github/rust-skia/_build/latest?definitionId=2&branchName=master)
 
-Skia Submodule Status: chrome/m79 ([pending changes][skiapending]).
+Skia Submodule Status: chrome/m84 ([pending changes][skiapending], [our changes][skiaours]).
 
-[skiapending]: https://github.com/google/skia/compare/2542bdfcd6...chrome/m79
+[skiapending]: https://github.com/rust-skia/skia/compare/m84-0.30.1...google:chrome/m84
+[skiaours]: https://github.com/google/skia/compare/chrome/m84...rust-skia:m84-0.30.1
 
 ## Goals
 
-This project attempts to provide _up to date_ safe bindings that bridge idiomatic Rust with Skia's C++ API on all major desktop, mobile, and [WebAssembly](https://en.wikipedia.org/wiki/WebAssembly) platforms, including GPU rendering support for [Vulkan](https://en.wikipedia.org/wiki/Vulkan_(API)), [Metal](https://en.wikipedia.org/wiki/Metal_(API)), and [OpenGL](https://en.wikipedia.org/wiki/OpenGL).
+This project attempts to provide _up to date_ safe bindings that bridge idiomatic Rust with Skia's C++ API on all major desktop and mobile platforms, including GPU rendering support for [Vulkan](https://en.wikipedia.org/wiki/Vulkan_(API)), [Metal](https://en.wikipedia.org/wiki/Metal_(API)), and [OpenGL](https://en.wikipedia.org/wiki/OpenGL).
 
 ## Status
 
@@ -38,7 +39,7 @@ Because building Skia takes a lot of time and needs tools that may be missing, t
 | Platform | Binaries |
 | -------- | -------- |
 |  Windows | `x86_64-pc-windows-msvc` |
-| Linux Ubuntu 18 (16 should work, too). | `x86_64-unknown-linux-gnu` |
+| Linux Ubuntu 16, 18<br />CentOS 7, 8 | `x86_64-unknown-linux-gnu` |
 | macOS    | `x86_64-apple-darwin` |
 | Android  | `aarch64-linux-android`<br/>`x86_64-linux-android` |
 | iOS      | `aarch64-apple-ios`<br/>`x86_64-apple-ios` |
@@ -47,7 +48,7 @@ There no support for WebAssembly yet. If you'd like to help out, take a look at 
 
 ### Bindings & Supported Features
 
-The supported bindings and Skia features are described in the [skia-safe package's readme](skia-safe/README.md) and prebuilt binaries are available for any single feature or for all features combined.
+The supported bindings and Skia features are described in the [skia-safe package's readme](skia-safe/README.md) and prebuilt binaries are available for most feature combinations.
 
 ## Building
 
@@ -67,19 +68,21 @@ The build script probes for `python --version` and `python2 --version` and uses 
 
 ### On macOS
 
-- Install the XCode command line developer tools with
+- Install the Command Line Tools for Xcode with
 
   ```bash
   xcode-select --install
   ```
 
-- **macOS Mojave and newer**: install the SDK headers, for example:
+  or download and install the [Command Line Tools for Xcode](https://developer.apple.com/download/more/).
+
+- **macOS Mojave only**: install the SDK headers:
 
   ```bash
   sudo open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg
   ```
 
-  otherwise the Skia build _may_ fail to build `SkJpegUtility.cpp` and the binding generation _will_ fail with  `'TargetConditionals.h' file not found` . Also note that the command line developer tools _and_ SDK headers _should_ be reinstalled after an update of XCode.
+  If not installed, the Skia build _may_ fail to build `SkJpegUtility.cpp` and the binding generation _will_ fail with  `'TargetConditionals.h' file not found` . Also note that the Command Line Tools _and_ SDK headers _should_ be reinstalled after an update of XCode.
 
 - As an alternative to Apple's XCode LLVM, install LLVM via `brew install llvm` or `brew install llvm` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` like instructed. 
 
@@ -152,25 +155,45 @@ For example, to compile for `aarch64`:
    ```bash
    rustup target install aarch64-linux-android
    ```
-2. Download the [r20b NDK](https://developer.android.com/ndk/downloads) for your host architecture and unzip it.
+2. Download the [r21b NDK](https://developer.android.com/ndk/downloads) for your host architecture and unzip it.
 3. Compile your package for the `aarch64-linux-android` target:
 
 On **macOS**:
 
 ```bash
-ANDROID_NDK=:path-to-android-ndk-r20b PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin CC_aarch64_linux_android=aarch64-linux-android26-clang CXX_aarch64_linux_android=aarch64-linux-android26-clang++ CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android26-clang cargo build --target aarch64-linux-android -vv
+export ANDROID_NDK=:path-to-android-ndk-r21b
+export PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin
+export CC_aarch64_linux_android=aarch64-linux-android26-clang
+export CXX_aarch64_linux_android=aarch64-linux-android26-clang++
+export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android26-clang
+
+cargo build -vv --target aarch64-linux-android
 ```
+
+Note: we don't support Apple's Clang 11 to build for Android on macOS, so you need to install LLVM and set the `PATH` like instructed.
 
 On **Linux**:
 
 ```bash
-ANDROID_NDK=:path-to-android-ndk-r20b PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin CC_aarch64_linux_android=aarch64-linux-android26-clang CXX_aarch64_linux_android=aarch64-linux-android26-clang++ CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android26-clang cargo build --target aarch64-linux-android -vv
+export ANDROID_NDK=:path-to-android-ndk-r21b
+export PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin
+export CC_aarch64_linux_android=aarch64-linux-android26-clang
+export CXX_aarch64_linux_android=aarch64-linux-android26-clang++
+export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android26-clang
+
+cargo build -vv --target aarch64-linux-android
 ```
 
 On **Windows** the Android NDK clang executable must be invoked through `.cmd` scripts:
 
 ```bash
-ANDROID_NDK=:path-to-android-ndk-r20b PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/windows-x86_64/bin CC_aarch64_linux_android=aarch64-linux-android26-clang.cmd CXX_aarch64_linux_android=aarch64-linux-android26-clang++.cmd CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android26-clang.cmd cargo build --target aarch64-linux-android -vv
+export ANDROID_NDK=:path-to-android-ndk-r21b
+export PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/windows-x86_64/bin
+export CC_aarch64_linux_android=aarch64-linux-android26-clang.cmd
+export CXX_aarch64_linux_android=aarch64-linux-android26-clang++.cmd
+export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android26-clang.cmd
+
+cargo build -vv --target aarch64-linux-android
 ```
 _Notes:_
 
@@ -188,7 +211,9 @@ For situations in which Skia does not build or needs to be configured differentl
 
 Please share your build experience so that we can try to automate the build and get to the point where `cargo build` _is_ sufficient to build the bindings _including_ Skia, and if that is not possible, clearly prompts to what's missing.
 
-## Examples
+## Example Applications
+
+### icon
 
 The `icon` example generates the rust-skia icon in the current directory.
 It computes the position of all the gear teeth etc. based on parameters such as the number of teeth and wheel radius.
@@ -200,26 +225,36 @@ cargo run --example icon 512
 ```
 
 It has a single optional parameter which is the size in pixels for the PNG file.
-Without parameters, it’ll produce PNG frames for the [animated version](https://matracas.org/tmp/rust-skia-icon.html).
+Without parameters, it’ll produce PNG frames for the animated version.
 
-The other examples are taken from [Skia's website](https://skia.org/) and [ported to the Rust API](skia-safe/examples/skia-org).
+### skia-org
+
+The other examples are taken from [Skia's website](https://skia.org/) and [ported to the Rust API](skia-org/).
 
 ```bash
-cargo run --example skia-org -- [OUTPUT_DIR]
+cargo run -- [OUTPUT_DIR]
 ```
 
 to generate some Skia drawn PNG images in the directory `OUTPUT_DIR`. To render with OpenGL, use
 
 ```bash
-cargo run --example skia-org -- [OUTPUT_DIR] --driver opengl
+cargo run -- [OUTPUT_DIR] --driver opengl
 ```
 
 And to show the drivers that are supported
 ```bash 
-cargo run --example skia-org -- --help
+cargo run -- --help
 ```
 
-Some examples:
+### gl-window
+
+An example that opens an OpenGL Window and draws a line with skia-safe (contributed by [@nornagon](https://github.com/nornagon)).
+
+```bash
+(cd skia-safe && cargo run --example gl-window --features "gl")
+```
+
+## Example Images
 
 Fill, Radial Gradients, Stroke, Stroke with Gradient, Transparency:
 [![Rust-skia icon](artwork/rust-skia-icon_512x512.png)](https://matracas.org/tmp/rust-skia-icon.html)

@@ -1,5 +1,65 @@
 //! This file contains Default trait implementations for types that are
-//! used without a handle in skia-safe and get reexported from there.
+//! re-exported from skia-safe.
+
+use crate::{
+    SkBlendMode, SkBlurStyle, SkCanvas_Lattice_RectType, SkClipOp, SkPaint_Cap, SkPaint_Join,
+    SkPathDirection, SkTileMode, SkYUVColorSpace,
+};
+
+impl Default for SkBlendMode {
+    fn default() -> Self {
+        SkBlendMode::SrcOver
+    }
+}
+
+impl Default for SkPaint_Cap {
+    fn default() -> Self {
+        SkPaint_Cap::Default
+    }
+}
+
+impl Default for SkPaint_Join {
+    fn default() -> Self {
+        SkPaint_Join::Default
+    }
+}
+
+impl Default for SkBlurStyle {
+    fn default() -> Self {
+        SkBlurStyle::Normal
+    }
+}
+
+impl Default for SkCanvas_Lattice_RectType {
+    fn default() -> Self {
+        SkCanvas_Lattice_RectType::Default
+    }
+}
+
+// This is the default for the canvas's clip functions.
+impl Default for SkClipOp {
+    fn default() -> Self {
+        SkClipOp::Intersect
+    }
+}
+
+impl Default for SkYUVColorSpace {
+    fn default() -> Self {
+        SkYUVColorSpace::Identity
+    }
+}
+
+impl Default for SkPathDirection {
+    fn default() -> Self {
+        SkPathDirection::CW
+    }
+}
+
+impl Default for SkTileMode {
+    fn default() -> Self {
+        SkTileMode::Clamp
+    }
+}
 
 #[cfg(feature = "textlayout")]
 pub mod textlayout {
@@ -45,6 +105,12 @@ pub mod textlayout {
     impl Default for crate::skia_textlayout_TextDecorationStyle {
         fn default() -> Self {
             Self::Solid
+        }
+    }
+
+    impl Default for crate::skia_textlayout_TextDecorationMode {
+        fn default() -> Self {
+            Self::Gaps
         }
     }
 

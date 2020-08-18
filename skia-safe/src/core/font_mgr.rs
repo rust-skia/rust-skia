@@ -166,11 +166,6 @@ impl RCHandle<SkFontMgr> {
         })
     }
 
-    #[deprecated(since = "0.12.0", note = "use new_from_data()")]
-    pub fn new_from_bytes(&self, bytes: &[u8], ttc_index: Option<usize>) -> Option<Typeface> {
-        self.new_from_data(bytes, ttc_index)
-    }
-
     pub fn new_from_data(
         &self,
         bytes: &[u8],
@@ -198,7 +193,7 @@ mod tests {
     use crate::FontMgr;
 
     #[test]
-    #[serial_test_derive::serial]
+    #[serial_test::serial]
     fn create_all_typefaces() {
         let font_mgr = FontMgr::default();
         let families = font_mgr.count_families();

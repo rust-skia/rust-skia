@@ -4,21 +4,13 @@ use crate::{
     Unichar,
 };
 use skia_bindings as sb;
-use skia_bindings::{SkFont, SkFont_Edging, SkFont_PrivFlags};
+use skia_bindings::{SkFont, SkFont_PrivFlags};
 use std::ptr;
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum Edging {
-    Alias = SkFont_Edging::kAlias as _,
-    AntiAlias = SkFont_Edging::kAntiAlias as _,
-    SubpixelAntiAlias = SkFont_Edging::kSubpixelAntiAlias as _,
-}
-
-impl NativeTransmutable<SkFont_Edging> for Edging {}
+pub use skia_bindings::SkFont_Edging as Edging;
 #[test]
-fn test_font_edging_layout() {
-    Edging::test_layout()
+fn test_font_edging_naming() {
+    let _ = Edging::Alias;
 }
 
 pub type Font = Handle<SkFont>;
@@ -55,31 +47,6 @@ impl Handle<SkFont> {
                 sb::C_SkFont_ConstructFromTypefaceWithSize(font, typeface.into().into_ptr(), size)
             }),
         }
-    }
-
-    #[deprecated(since = "0.12.0", note = "use from_typeface() or new()")]
-    pub fn from_typeface_with_size(typeface: impl Into<Typeface>, size: scalar) -> Self {
-        Self::construct(|font| unsafe {
-            sb::C_SkFont_ConstructFromTypefaceWithSize(font, typeface.into().into_ptr(), size)
-        })
-    }
-
-    #[deprecated(since = "0.12.0", note = "use from_typeface_with_params()")]
-    pub fn from_typeface_with_size_scale_and_skew(
-        typeface: impl Into<Typeface>,
-        size: scalar,
-        scale: scalar,
-        skew: scalar,
-    ) -> Self {
-        Self::construct(|font| unsafe {
-            sb::C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(
-                font,
-                typeface.into().into_ptr(),
-                size,
-                scale,
-                skew,
-            )
-        })
     }
 
     pub fn from_typeface_with_params(
@@ -163,21 +130,21 @@ impl Handle<SkFont> {
     }
 
     pub fn edging(&self) -> Edging {
-        Edging::from_native(unsafe { sb::C_SkFont_getEdging(self.native()) })
+        unsafe { sb::C_SkFont_getEdging(self.native()) }
     }
 
     pub fn set_edging(&mut self, edging: Edging) -> &mut Self {
-        unsafe { self.native_mut().setEdging(edging.into_native()) }
+        unsafe { self.native_mut().setEdging(edging) }
         self
     }
 
     pub fn set_hinting(&mut self, hinting: FontHinting) -> &mut Self {
-        unsafe { self.native_mut().setHinting(hinting.into_native()) }
+        unsafe { self.native_mut().setHinting(hinting) }
         self
     }
 
     pub fn hinting(&self) -> FontHinting {
-        FontHinting::from_native(unsafe { sb::C_SkFont_getHinting(self.native()) })
+        unsafe { sb::C_SkFont_getHinting(self.native()) }
     }
 
     #[must_use]
@@ -334,24 +301,8 @@ impl Handle<SkFont> {
         }
     }
 
-    #[deprecated(since = "0.12.0", note = "use get_widths")]
-    pub fn widths(&self, glyphs: &[GlyphId], widths: &mut [scalar]) {
-        self.get_widths(glyphs, widths)
-    }
-
     pub fn get_widths(&self, glyphs: &[GlyphId], widths: &mut [scalar]) {
         self.get_widths_bounds(glyphs, Some(widths), None, None)
-    }
-
-    #[deprecated(since = "0.12.0", note = "use get_widths_bounds()")]
-    pub fn widths_bounds(
-        &self,
-        glyphs: &[GlyphId],
-        widths: Option<&mut [scalar]>,
-        bounds: Option<&mut [Rect]>,
-        paint: Option<&Paint>,
-    ) {
-        self.get_widths_bounds(glyphs, widths, bounds, paint)
     }
 
     pub fn get_widths_bounds(
@@ -387,18 +338,8 @@ impl Handle<SkFont> {
         }
     }
 
-    #[deprecated(since = "0.12.0", note = "use get_bounds()")]
-    pub fn bounds(&self, glyphs: &[GlyphId], bounds: &mut [Rect], paint: Option<&Paint>) {
-        self.get_bounds(glyphs, bounds, paint)
-    }
-
     pub fn get_bounds(&self, glyphs: &[GlyphId], bounds: &mut [Rect], paint: Option<&Paint>) {
         self.get_widths_bounds(glyphs, None, Some(bounds), paint)
-    }
-
-    #[deprecated(since = "0.12.0", note = "use get_pos()")]
-    pub fn pos(&self, glyphs: &[GlyphId], pos: &mut [Point], origin: Option<Point>) {
-        self.get_pos(glyphs, pos, origin)
     }
 
     pub fn get_pos(&self, glyphs: &[GlyphId], pos: &mut [Point], origin: Option<Point>) {
@@ -412,14 +353,9 @@ impl Handle<SkFont> {
                 glyphs.as_ptr(),
                 count.try_into().unwrap(),
                 pos.native_mut().as_mut_ptr(),
-                origin.native().clone(),
+                *origin.native(),
             )
         }
-    }
-
-    #[deprecated(since = "0.12.0", note = "use get_x_pos()")]
-    pub fn x_pos(&self, glyphs: &[GlyphId], xpos: &mut [scalar], origin: Option<scalar>) {
-        self.get_x_pos(glyphs, xpos, origin)
     }
 
     pub fn get_x_pos(&self, glyphs: &[GlyphId], xpos: &mut [scalar], origin: Option<scalar>) {
@@ -435,11 +371,6 @@ impl Handle<SkFont> {
                 origin,
             )
         }
-    }
-
-    #[deprecated(since = "0.12.0", note = "use get_path()")]
-    pub fn path(&self, glyph_id: GlyphId) -> Option<Path> {
-        self.get_path(glyph_id)
     }
 
     pub fn get_path(&self, glyph_id: GlyphId) -> Option<Path> {

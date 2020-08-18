@@ -1,4 +1,4 @@
-pub type VariationAxis = variation::Axis;
+pub use variation::Axis as VariationAxis;
 
 pub mod variation {
     use crate::prelude::*;
@@ -22,11 +22,6 @@ pub mod variation {
     }
 
     impl Axis {
-        #[deprecated(since = "0.12.0", note = "use is_hidden()")]
-        pub fn hidden(&self) -> bool {
-            self.is_hidden()
-        }
-
         pub fn is_hidden(&self) -> bool {
             unsafe { sb::C_SkFontParameters_Variation_Axis_isHidden(self.native()) }
         }

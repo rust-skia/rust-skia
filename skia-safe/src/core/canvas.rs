@@ -1,15 +1,16 @@
+#[cfg(feature = "gpu")]
+use crate::gpu;
 use crate::prelude::*;
-use crate::{gpu, u8cpu, Drawable, Pixmap};
 use crate::{
-    scalar, vertices, Bitmap, BlendMode, ClipOp, Color, Data, Font, IPoint, IRect, ISize, Image,
-    ImageFilter, ImageInfo, Matrix, Paint, Path, Picture, Point, QuickReject, RRect, Rect, Region,
-    Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices,
+    scalar, Bitmap, BlendMode, ClipOp, Color, Data, Font, IPoint, IRect, ISize, Image, ImageFilter,
+    ImageInfo, Matrix, Paint, Path, Picture, Point, QuickReject, RRect, Rect, Region, Shader,
+    Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices, M44,
 };
+use crate::{u8cpu, Drawable, Pixmap};
 use skia_bindings as sb;
 use skia_bindings::{
-    SkAutoCanvasRestore, SkCanvas, SkCanvas_PointMode, SkCanvas_SaveLayerFlagsSet_kF16ColorType,
-    SkCanvas_SaveLayerFlagsSet_kInitWithPrevious_SaveLayerFlag, SkCanvas_SaveLayerRec,
-    SkCanvas_SrcRectConstraint, SkImage, SkImageFilter, SkMatrix, SkPaint, SkRect,
+    SkAutoCanvasRestore, SkCanvas, SkCanvas_SaveLayerRec, SkImage, SkImageFilter, SkMatrix,
+    SkPaint, SkRect,
 };
 use std::convert::TryInto;
 use std::ffi::CString;
@@ -21,8 +22,9 @@ pub use lattice::Lattice;
 
 bitflags! {
     pub struct SaveLayerFlags: u32 {
-        const INIT_WITH_PREVIOUS = SkCanvas_SaveLayerFlagsSet_kInitWithPrevious_SaveLayerFlag as _;
-        const F16_COLOR_TYPE = SkCanvas_SaveLayerFlagsSet_kF16ColorType as _;
+        const PRESERVE_LCD_TEXT = sb::SkCanvas_SaveLayerFlagsSet_kPreserveLCDText_SaveLayerFlag as _;
+        const INIT_WITH_PREVIOUS = sb::SkCanvas_SaveLayerFlagsSet_kInitWithPrevious_SaveLayerFlag as _;
+        const F16_COLOR_TYPE = sb::SkCanvas_SaveLayerFlagsSet_kF16ColorType as _;
     }
 }
 
@@ -104,31 +106,18 @@ impl<'a> SaveLayerRec<'a> {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum PointMode {
-    Points = SkCanvas_PointMode::kPoints_PointMode as _,
-    Lines = SkCanvas_PointMode::kLines_PointMode as _,
-    Polygon = SkCanvas_PointMode::kPolygon_PointMode as _,
-}
+pub use sb::SkCanvas_PointMode as PointMode;
 
-impl NativeTransmutable<SkCanvas_PointMode> for PointMode {}
 #[test]
-fn test_canvas_point_mode_layout() {
-    PointMode::test_layout()
+fn test_canvas_point_mode_naming() {
+    let _ = PointMode::Polygon;
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum SrcRectConstraint {
-    Strict = SkCanvas_SrcRectConstraint::kStrict_SrcRectConstraint as _,
-    Fast = SkCanvas_SrcRectConstraint::kFast_SrcRectConstraint as _,
-}
+pub use sb::SkCanvas_SrcRectConstraint as SrcRectConstraint;
 
-impl NativeTransmutable<SkCanvas_SrcRectConstraint> for SrcRectConstraint {}
 #[test]
-fn test_src_rect_constraint_layout() {
-    SrcRectConstraint::test_layout()
+fn test_src_rect_constraint_naming() {
+    let _ = SrcRectConstraint::Fast;
 }
 
 /// Provides access to Canvas's pixels.
@@ -156,9 +145,10 @@ impl NativeAccess<SkCanvas> for Canvas {
     }
 }
 
-/// This is the type representing a canvas that is owned and dropped
+/// A type representing a canvas that is owned and dropped
 /// when it goes out of scope _and_ is bound to a the lifetime of another
-/// instance. Function resolvement is done via the Deref trait.
+/// instance.
+/// Function resolvement is done via the Deref trait.
 #[repr(transparent)]
 pub struct OwnedCanvas<'lt>(*mut Canvas, PhantomData<&'lt ()>);
 
@@ -310,8 +300,21 @@ impl Canvas {
     }
 
     // TODO: test ref count consistency assuming it is not increased in the native part.
+    #[cfg(feature = "gpu")]
     pub fn gpu_context(&mut self) -> Option<gpu::Context> {
         gpu::Context::from_unshared_ptr(unsafe { sb::C_SkCanvas_getGrContext(self.native_mut()) })
+    }
+
+    /// # Safety
+    /// This function is unsafe because it is not clear how exactly the lifetime of the canvas
+    /// relates to surface returned.
+    /// TODO: It might be possible to make this safe by returning a _kind of_ reference to the
+    ///       Surface that can not be cloned and stays bound to the lifetime of canvas.
+    ///       But even then, the Surface might exist twice then, which is confusing, but
+    ///       probably safe, because the first instance is borrowed by the canvas.
+    /// See also `OwnedCanvas`, `Surface::canvas()`.
+    pub unsafe fn surface(&mut self) -> Option<Surface> {
+        Surface::from_unshared_ptr(self.native_mut().getSurface())
     }
 
     pub fn access_top_layer_pixels(&mut self) -> Option<TopLayerPixels> {
@@ -479,6 +482,11 @@ impl Canvas {
         self
     }
 
+    pub fn concat_44(&mut self, m: &M44) -> &mut Self {
+        unsafe { self.native_mut().concat1(m.native()) }
+        self
+    }
+
     pub fn set_matrix(&mut self, matrix: &Matrix) -> &mut Self {
         unsafe { self.native_mut().setMatrix(matrix.native()) }
         self
@@ -498,7 +506,7 @@ impl Canvas {
         unsafe {
             self.native_mut().clipRect(
                 rect.as_ref().native(),
-                op.into().unwrap_or_default().into_native(),
+                op.into().unwrap_or_default(),
                 do_anti_alias.into().unwrap_or_default(),
             )
         }
@@ -514,7 +522,7 @@ impl Canvas {
         unsafe {
             self.native_mut().clipRRect(
                 rrect.as_ref().native(),
-                op.into().unwrap_or_default().into_native(),
+                op.into().unwrap_or_default(),
                 do_anti_alias.into().unwrap_or_default(),
             )
         }
@@ -530,8 +538,19 @@ impl Canvas {
         unsafe {
             self.native_mut().clipPath(
                 path.native(),
-                op.into().unwrap_or_default().into_native(),
+                op.into().unwrap_or_default(),
                 do_anti_alias.into().unwrap_or_default(),
+            )
+        }
+        self
+    }
+
+    pub fn clip_shader(&mut self, shader: Shader, op: impl Into<Option<ClipOp>>) -> &mut Self {
+        unsafe {
+            sb::C_SkCanvas_clipShader(
+                self.native_mut(),
+                shader.into_ptr(),
+                op.into().unwrap_or(ClipOp::Intersect),
             )
         }
         self
@@ -539,10 +558,8 @@ impl Canvas {
 
     pub fn clip_region(&mut self, device_rgn: &Region, op: impl Into<Option<ClipOp>>) -> &mut Self {
         unsafe {
-            self.native_mut().clipRegion(
-                device_rgn.native(),
-                op.into().unwrap_or_default().into_native(),
-            )
+            self.native_mut()
+                .clipRegion(device_rgn.native(), op.into().unwrap_or_default())
         }
         self
     }
@@ -565,10 +582,8 @@ impl Canvas {
         mode: impl Into<Option<BlendMode>>,
     ) -> &mut Self {
         unsafe {
-            self.native_mut().drawColor(
-                color.into().into_native(),
-                mode.into().unwrap_or_default().into_native(),
-            )
+            self.native_mut()
+                .drawColor(color.into().into_native(), mode.into().unwrap_or_default())
         }
         self
     }
@@ -589,12 +604,8 @@ impl Canvas {
 
     pub fn draw_points(&mut self, mode: PointMode, pts: &[Point], paint: &Paint) -> &mut Self {
         unsafe {
-            self.native_mut().drawPoints(
-                mode.into_native(),
-                pts.len(),
-                pts.native().as_ptr(),
-                paint.native(),
-            )
+            self.native_mut()
+                .drawPoints(mode, pts.len(), pts.native().as_ptr(), paint.native())
         }
         self
     }
@@ -756,7 +767,7 @@ impl Canvas {
                     src.native(),
                     dst.as_ref().native(),
                     paint.native(),
-                    constraint.into_native(),
+                    constraint,
                 )
             },
             None => unsafe {
@@ -822,7 +833,7 @@ impl Canvas {
                     src.as_ref().native(),
                     dst.as_ref().native(),
                     paint.native(),
-                    constraint.into_native(),
+                    constraint,
                 )
             },
             None => unsafe {
@@ -830,45 +841,9 @@ impl Canvas {
                     bitmap.native(),
                     dst.as_ref().native(),
                     paint.native(),
-                    constraint.into_native(),
+                    constraint,
                 )
             },
-        }
-        self
-    }
-
-    pub fn draw_bitmap_nine(
-        &mut self,
-        bitmap: &Bitmap,
-        center: impl AsRef<IRect>,
-        dst: impl AsRef<Rect>,
-        paint: Option<&Paint>,
-    ) -> &mut Self {
-        unsafe {
-            self.native_mut().drawBitmapNine(
-                bitmap.native(),
-                center.as_ref().native(),
-                dst.as_ref().native(),
-                paint.native_ptr_or_null(),
-            )
-        }
-        self
-    }
-
-    pub fn draw_bitmap_lattice(
-        &mut self,
-        bitmap: &Bitmap,
-        lattice: &Lattice,
-        dst: impl AsRef<Rect>,
-        paint: Option<&Paint>,
-    ) -> &mut Self {
-        unsafe {
-            self.native_mut().drawBitmapLattice(
-                bitmap.native(),
-                &lattice.native().native,
-                dst.as_ref().native(),
-                paint.native_ptr_or_null(),
-            )
         }
         self
     }
@@ -955,27 +930,15 @@ impl Canvas {
     pub fn draw_vertices(
         &mut self,
         vertices: &Vertices,
-        bones: Option<&[vertices::Bone]>,
-        mode: BlendMode,
+        mode: impl Into<Option<BlendMode>>,
         paint: &Paint,
     ) -> &mut Self {
-        match bones {
-            Some(bones) => unsafe {
-                self.native_mut().drawVertices2(
-                    vertices.native(),
-                    bones.native().as_ptr(),
-                    bones.len().try_into().unwrap(),
-                    mode.into_native(),
-                    paint.native(),
-                )
-            },
-            None => unsafe {
-                self.native_mut().drawVertices(
-                    vertices.native(),
-                    mode.into_native(),
-                    paint.native(),
-                )
-            },
+        unsafe {
+            self.native_mut().drawVertices(
+                vertices.native(),
+                mode.into().unwrap_or(BlendMode::Modulate),
+                paint.native(),
+            )
         }
         self
     }
@@ -993,7 +956,7 @@ impl Canvas {
                 cubics.native().as_ptr(),
                 colors.native().as_ptr(),
                 tex_coords.native().as_ptr(),
-                mode.into().unwrap_or(BlendMode::Modulate).into_native(),
+                mode.into().unwrap_or(BlendMode::Modulate),
                 paint.native(),
             )
         }
@@ -1042,8 +1005,16 @@ impl Canvas {
         unsafe { sb::C_SkCanvas_isClipEmpty(self.native()) }
     }
 
-    pub fn total_matrix(&self) -> &Matrix {
-        Matrix::from_native_ref(unsafe { &*self.native().getTotalMatrix() })
+    pub fn local_to_device(&self) -> M44 {
+        M44::from_native(unsafe { self.native().getLocalToDevice() })
+    }
+
+    pub fn total_matrix(&self) -> Matrix {
+        let mut matrix = Matrix::default();
+        // TODO: why is Matrix not safe to return from getTotalMatrix()
+        // testcase `test_total_matrix` below crashes with an access violation.
+        unsafe { sb::C_SkCanvas_getTotalMatrix(self.native(), matrix.native_mut()) };
+        matrix
     }
 
     //
@@ -1085,7 +1056,8 @@ impl QuickReject<Path> for Canvas {
 pub mod lattice {
     use crate::prelude::*;
     use crate::{Color, IRect};
-    use skia_bindings::{SkCanvas_Lattice, SkCanvas_Lattice_RectType};
+    use skia_bindings as sb;
+    use skia_bindings::SkCanvas_Lattice;
     use std::marker::PhantomData;
 
     #[derive(Debug)]
@@ -1117,7 +1089,7 @@ pub mod lattice {
             let native = SkCanvas_Lattice {
                 fXDivs: self.x_divs.as_ptr(),
                 fYDivs: self.y_divs.as_ptr(),
-                fRectTypes: self.rect_types.native().as_ptr_or_null(),
+                fRectTypes: self.rect_types.as_ptr_or_null(),
                 fXCount: self.x_divs.len().try_into().unwrap(),
                 fYCount: self.y_divs.len().try_into().unwrap(),
                 fBounds: self.bounds.native().as_ptr_or_null(),
@@ -1130,24 +1102,11 @@ pub mod lattice {
         }
     }
 
-    #[derive(Copy, Clone, PartialEq, Eq, Debug)]
-    #[repr(u8)]
-    pub enum RectType {
-        Default = SkCanvas_Lattice_RectType::kDefault as _,
-        Transparent = SkCanvas_Lattice_RectType::kTransparent as _,
-        FixedColor = SkCanvas_Lattice_RectType::kFixedColor as _,
-    }
+    pub use sb::SkCanvas_Lattice_RectType as RectType;
 
-    impl NativeTransmutable<SkCanvas_Lattice_RectType> for RectType {}
     #[test]
-    fn test_lattice_rect_type_layout() {
-        RectType::test_layout();
-    }
-
-    impl Default for RectType {
-        fn default() -> Self {
-            RectType::Default
-        }
+    fn test_lattice_rect_type_naming() {
+        let _ = RectType::FixedColor;
     }
 }
 
@@ -1215,8 +1174,8 @@ impl AutoCanvasRestore {
 #[cfg(test)]
 mod tests {
     use crate::{
-        AlphaType, Canvas, ClipOp, Color, ColorType, ImageInfo, Matrix, OwnedCanvas, Rect,
-        SaveLayerRec,
+        canvas::SaveLayerRec, AlphaType, Canvas, ClipOp, Color, ColorType, ImageInfo, Matrix,
+        OwnedCanvas, Rect,
     };
 
     #[test]
@@ -1264,13 +1223,13 @@ mod tests {
     }
 
     #[test]
-    fn test_total_matrix_transmutation() {
+    fn test_total_matrix() {
         let mut c = Canvas::new((2, 2), None).unwrap();
-        let matrix_ref = c.total_matrix();
-        assert_eq!(Matrix::default(), *matrix_ref);
+        let total = c.total_matrix();
+        assert_eq!(Matrix::default(), total);
         c.rotate(0.1, None);
-        let matrix_ref = c.total_matrix();
-        assert_ne!(Matrix::default(), *matrix_ref);
+        let total = c.total_matrix();
+        assert_ne!(Matrix::default(), total);
     }
 
     #[test]

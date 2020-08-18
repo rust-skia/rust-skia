@@ -2,89 +2,126 @@ use crate::prelude::*;
 use crate::{Color, Data, Point, Rect};
 use skia_bindings as sb;
 use skia_bindings::{
-    SkColor, SkPoint, SkVertices, SkVertices_Bone, SkVertices_Builder, SkVertices_VertexMode,
+    SkColor, SkPoint, SkVertices, SkVertices_Attribute, SkVertices_Attribute_Type,
+    SkVertices_Builder,
 };
-#[cfg(test)]
-use skia_bindings::{SkVertices_BoneIndices, SkVertices_BoneWeights};
-#[cfg(test)]
-use std::mem;
-use std::ops::{Index, IndexMut};
+use std::ffi::CStr;
+use std::marker::PhantomData;
+use std::os::raw::c_char;
 use std::{ptr, slice};
 
+#[deprecated(since = "0.29.0", note = "removed without replacement")]
 pub type BoneIndices = [u32; 4];
 
-#[test]
-fn bone_indices_layout() {
-    assert_eq!(
-        mem::size_of::<BoneIndices>(),
-        mem::size_of::<SkVertices_BoneIndices>()
-    );
-}
-
+#[deprecated(since = "0.29.0", note = "removed without replacement")]
 pub type BoneWeights = [u32; 4];
-
-#[test]
-fn bone_weights_layout() {
-    assert_eq!(
-        mem::size_of::<BoneWeights>(),
-        mem::size_of::<SkVertices_BoneWeights>()
-    );
-}
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 #[repr(C)]
+#[deprecated(since = "0.29.0", note = "removed without replacement")]
 pub struct Bone {
     values: [f32; 6],
 }
 
-impl NativeTransmutable<SkVertices_Bone> for Bone {}
+pub use skia_bindings::SkVertices_VertexMode as VertexMode;
+#[test]
+fn test_vertices_vertex_mode_naming() {
+    let _ = VertexMode::Triangles;
+}
 
-impl Index<usize> for Bone {
-    type Output = f32;
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.values[index]
+#[repr(u8)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+pub enum AttributeType {
+    Float = sb::SkVertices_Attribute_Type::Float as _,
+    Float2 = sb::SkVertices_Attribute_Type::Float2 as _,
+    Float3 = sb::SkVertices_Attribute_Type::Float3 as _,
+    Float4 = sb::SkVertices_Attribute_Type::Float4 as _,
+    Byte4UNorm = sb::SkVertices_Attribute_Type::Byte4_unorm as _,
+}
+
+impl NativeTransmutable<SkVertices_Attribute_Type> for AttributeType {}
+#[test]
+fn test_attribute_type_layout() {
+    AttributeType::test_layout()
+}
+
+pub use skia_bindings::SkVertices_Attribute_Usage as AttributeUsage;
+#[test]
+fn test_attribute_usage_naming() {
+    let _ = AttributeUsage::Vector;
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Eq, Debug)]
+pub struct Attribute<'a> {
+    pub ty: AttributeType,
+    pub usage: AttributeUsage,
+    pub marker_id: u32,
+    marker_name: *const c_char,
+    pd: PhantomData<&'a CStr>,
+}
+
+impl NativeTransmutable<SkVertices_Attribute> for Attribute<'_> {}
+#[test]
+fn test_attribute_layout() {
+    Attribute::test_layout()
+}
+
+impl PartialEq for Attribute<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        self.ty == other.ty && self.usage == other.usage && self.marker_id == other.marker_id
     }
 }
 
-impl IndexMut<usize> for Bone {
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        &mut self.values[index]
+impl Default for Attribute<'_> {
+    fn default() -> Self {
+        Attribute::new(AttributeType::Float)
     }
 }
 
-impl Bone {
-    pub fn map_point(&self, point: impl Into<Point>) -> Point {
-        let point = point.into();
-        let values = &self.values;
-        let x = values[0] * point.x + values[2] * point.y + values[4];
-        let y = values[1] * point.x + values[3] * point.y + values[5];
-        Point::new(x, y)
+impl Attribute<'_> {
+    pub fn new(ty: AttributeType) -> Self {
+        Self::new_with_usage_and_marker(ty, None, None)
     }
 
-    pub fn map_rect(&self, rect: impl AsRef<Rect>) -> Rect {
-        Rect::from_native(unsafe {
-            sb::C_SkVertices_Bone_mapRect(self.native(), rect.as_ref().native())
+    pub fn new_with_usage_and_marker<'a>(
+        ty: AttributeType,
+        usage: impl Into<Option<AttributeUsage>>,
+        marker_name: impl Into<Option<&'a CStr>>,
+    ) -> Attribute<'a> {
+        let marker_name = marker_name
+            .into()
+            .map(|m| m.as_ptr())
+            .unwrap_or(ptr::null());
+
+        Attribute::from_native(unsafe {
+            SkVertices_Attribute::new(
+                ty.into_native(),
+                usage.into().unwrap_or(AttributeUsage::Raw),
+                marker_name,
+            )
         })
     }
-}
 
-#[test]
-fn test_bone_layout() {
-    Bone::test_layout();
-}
+    pub fn marker_name(&self) -> Option<&CStr> {
+        if !self.marker_name.is_null() {
+            unsafe { CStr::from_ptr(self.marker_name) }.into()
+        } else {
+            None
+        }
+    }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum VertexMode {
-    Triangles = SkVertices_VertexMode::kTriangles_VertexMode as _,
-    TriangleStrip = SkVertices_VertexMode::kTriangleStrip_VertexMode as _,
-    TriangleFan = SkVertices_VertexMode::kTriangleFan_VertexMode as _,
-}
+    pub fn channel_count(self) -> usize {
+        unsafe { self.native().channelCount() }.try_into().unwrap()
+    }
 
-impl NativeTransmutable<SkVertices_VertexMode> for VertexMode {}
-#[test]
-fn test_vertices_vertex_mode_layout() {
-    VertexMode::test_layout()
+    pub fn bytes_per_vertex(self) -> usize {
+        unsafe { self.native().bytesPerVertex() }
+    }
+
+    pub fn is_valid(self) -> bool {
+        unsafe { self.native().isValid() }
+    }
 }
 
 pub type Vertices = RCHandle<SkVertices>;
@@ -109,123 +146,126 @@ impl RCHandle<SkVertices> {
         positions: &[Point],
         texs: &[Point],
         colors: &[Color],
-        bone_indices_and_weights: Option<(&[BoneIndices], &[BoneWeights])>,
         indices: Option<&[u16]>,
-        is_volatile: impl Into<Option<bool>>,
     ) -> Vertices {
         let vertex_count = positions.len();
         assert_eq!(texs.len(), vertex_count);
         assert_eq!(colors.len(), vertex_count);
-        if let Some((bi, bw)) = bone_indices_and_weights {
-            assert_eq!(bi.len(), vertex_count);
-            assert_eq!(bw.len(), vertex_count);
-        }
-
-        let bone_indices = bone_indices_and_weights.map(|t| t.0);
-        let bone_weights = bone_indices_and_weights.map(|t| t.1);
-
-        let bone_indices_ptr = bone_indices.map(|bi| bi.as_ptr()).unwrap_or(ptr::null());
-        let bone_weights_ptr = bone_weights.map(|bw| bw.as_ptr()).unwrap_or(ptr::null());
 
         let indices_ptr = indices.map(|i| i.as_ptr()).unwrap_or(ptr::null());
         let indices_count = indices.map(|i| i.len()).unwrap_or(0);
 
         Vertices::from_ptr(unsafe {
             sb::C_SkVertices_MakeCopy(
-                mode.into_native(),
+                mode,
                 vertex_count as _,
                 positions.native().as_ptr(),
                 texs.native().as_ptr(),
                 colors.native().as_ptr(),
-                bone_indices_ptr as _,
-                bone_weights_ptr as _,
                 indices_count.try_into().unwrap(),
                 indices_ptr,
-                is_volatile.into().unwrap_or(true),
             )
         })
         .unwrap()
     }
 
+    pub const MAX_CUSTOM_ATTRIBUTES: usize = 8;
+
     pub fn unique_id(&self) -> u32 {
         self.native().fUniqueID
     }
 
+    #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
     pub fn mode(&self) -> VertexMode {
-        VertexMode::from_native(self.native().fMode)
+        self.native().fMode
     }
 
     pub fn bounds(&self) -> &Rect {
         Rect::from_native_ref(&self.native().fBounds)
     }
 
+    #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
+    #[allow(deprecated)]
     pub fn has_colors(&self) -> bool {
         self.colors().is_some()
     }
 
+    #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
+    #[allow(deprecated)]
     pub fn has_tex_coords(&self) -> bool {
         self.tex_coords().is_some()
     }
 
+    #[deprecated(since = "0.29.0", note = "returns false")]
     pub fn has_bones(&self) -> bool {
-        self.bone_indices().is_some()
+        false
     }
 
+    #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
+    #[allow(deprecated)]
     pub fn has_indices(&self) -> bool {
         self.indices().is_some()
     }
 
+    #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
     pub fn vertex_count(&self) -> usize {
-        self.native().fVertexCnt.try_into().unwrap()
+        self.native().fVertexCount.try_into().unwrap()
     }
 
+    #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
+    pub fn index_count(&self) -> usize {
+        self.native().fIndexCount.try_into().unwrap()
+    }
+
+    #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
+    #[allow(deprecated)]
     pub fn positions(&self) -> &[Point] {
         let positions: *const SkPoint = self.native().fPositions;
         unsafe { slice::from_raw_parts(positions as _, self.vertex_count()) }
     }
 
+    #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
+    #[allow(deprecated)]
     pub fn tex_coords(&self) -> Option<&[Point]> {
         let texs: *const SkPoint = self.native().fTexs.into_option()?;
         Some(unsafe { slice::from_raw_parts(texs as _, self.vertex_count()) })
     }
 
+    #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
+    #[allow(deprecated)]
     pub fn colors(&self) -> Option<&[Color]> {
         let colors: *const SkColor = self.native().fColors.into_option()?;
         Some(unsafe { slice::from_raw_parts(colors as _, self.vertex_count()) })
     }
 
+    #[deprecated(since = "0.29.0", note = "returns None")]
+    #[allow(deprecated)]
     pub fn bone_indices(&self) -> Option<&[BoneIndices]> {
-        let indices = self.native().fBoneIndices.into_option()?;
-        Some(unsafe { slice::from_raw_parts(indices as _, self.vertex_count()) })
+        None
     }
 
+    #[deprecated(since = "0.29.0", note = "returns None")]
+    #[allow(deprecated)]
     pub fn bone_weights(&self) -> Option<&[BoneWeights]> {
-        let weights = self.native().fBoneWeights.into_option()?;
-        Some(unsafe { slice::from_raw_parts(weights as _, self.vertex_count()) })
+        None
     }
 
-    pub fn index_count(&self) -> usize {
-        self.native().fIndexCnt.try_into().unwrap()
-    }
-
+    #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
+    #[allow(deprecated)]
     pub fn indices(&self) -> Option<&[u16]> {
         let indices = self.native().fIndices.into_option()?;
         Some(unsafe { slice::from_raw_parts_mut(indices as _, self.index_count()) })
     }
 
+    #[deprecated(since = "0.29.0", note = "returns false")]
     pub fn is_volatile(&self) -> bool {
-        self.native().fIsVolatile
+        false
     }
 
-    pub fn apply_bones(&self, bones: &[Bone]) -> Vertices {
-        Vertices::from_ptr(unsafe {
-            sb::C_SkVertices_applyBones(
-                self.native(),
-                bones.native().as_ptr(),
-                bones.len().try_into().unwrap(),
-            )
-        })
-        .unwrap()
+    #[deprecated(since = "0.29.0", note = "removed without replacement")]
+    #[allow(deprecated)]
+    pub fn apply_bones(&self, _bones: &[Bone]) -> ! {
+        unimplemented!("removed without replacement")
     }
 
     pub fn approximate_size(&self) -> usize {
@@ -245,8 +285,6 @@ bitflags! {
     pub struct BuilderFlags: u32 {
         const HAS_TEX_COORDS = sb::SkVertices_BuilderFlags_kHasTexCoords_BuilderFlag as u32;
         const HAS_COLORS = sb::SkVertices_BuilderFlags_kHasColors_BuilderFlag as u32;
-        const HAS_BONES = sb::SkVertices_BuilderFlags_kHasBones_BuilderFlag as u32;
-        const IS_NON_VOLATILE = sb::SkVertices_BuilderFlags_kIsNonVolatile_BuilderFlag as u32;
     }
 }
 
@@ -267,7 +305,7 @@ impl Handle<SkVertices_Builder> {
     ) -> Builder {
         Self::from_native(unsafe {
             SkVertices_Builder::new(
-                mode.into_native(),
+                mode,
                 vertex_count.try_into().unwrap(),
                 index_count.try_into().unwrap(),
                 flags.bits(),
@@ -279,58 +317,66 @@ impl Handle<SkVertices_Builder> {
         !self.native().fVertices.fPtr.is_null()
     }
 
-    pub fn vertex_count(&self) -> usize {
-        unsafe { self.native().vertexCount() }.try_into().unwrap()
-    }
-
-    pub fn index_count(&self) -> usize {
-        unsafe { self.native().indexCount() }.try_into().unwrap()
-    }
-
-    pub fn is_volatile(&self) -> bool {
-        unsafe { self.native().isVolatile() }
-    }
-
     pub fn positions(&mut self) -> &mut [Point] {
         unsafe {
-            let positions: *mut SkPoint = self.native_mut().positions();
-            slice::from_raw_parts_mut(positions as _, self.vertex_count())
-        }
-    }
-
-    pub fn tex_coords(&mut self) -> Option<&mut [Point]> {
-        unsafe {
-            let coords: *mut SkPoint = self.native_mut().texCoords().into_option()?;
-            Some(slice::from_raw_parts_mut(coords as _, self.vertex_count()))
-        }
-    }
-
-    pub fn colors(&mut self) -> Option<&mut [Color]> {
-        unsafe {
-            let colors: *mut SkColor = self.native_mut().colors().into_option()?;
-            Some(slice::from_raw_parts_mut(colors as _, self.vertex_count()))
-        }
-    }
-
-    pub fn bone_indices(&mut self) -> Option<&mut [BoneIndices]> {
-        unsafe {
-            let indices = self.native_mut().boneIndices().into_option()?;
-            Some(slice::from_raw_parts_mut(indices as _, self.vertex_count()))
-        }
-    }
-
-    pub fn bone_weights(&mut self) -> Option<&mut [BoneWeights]> {
-        unsafe {
-            let weights = self.native_mut().boneWeights().into_option()?;
-            Some(slice::from_raw_parts_mut(weights as _, self.vertex_count()))
+            let vertices = &*self.native().fVertices.fPtr;
+            slice::from_raw_parts_mut(
+                Point::from_native_ref_mut(&mut *vertices.fPositions),
+                vertices.fVertexCount.try_into().unwrap(),
+            )
         }
     }
 
     pub fn indices(&mut self) -> Option<&mut [u16]> {
         unsafe {
-            let indices = self.native_mut().indices().into_option()?;
-            Some(slice::from_raw_parts_mut(indices as _, self.index_count()))
+            let vertices = &*self.native().fVertices.fPtr;
+            let indices = vertices.fIndices.into_option()?;
+            Some(slice::from_raw_parts_mut(
+                indices,
+                vertices.fIndexCount.try_into().unwrap(),
+            ))
         }
+    }
+
+    // TODO: customData()
+
+    pub fn tex_coords(&mut self) -> Option<&mut [Point]> {
+        unsafe {
+            let vertices = &*self.native().fVertices.fPtr;
+            let coords = vertices.fTexs.into_option()?;
+            Some(slice::from_raw_parts_mut(
+                Point::from_native_ref_mut(&mut *coords),
+                vertices.fVertexCount.try_into().unwrap(),
+            ))
+        }
+    }
+
+    pub fn colors(&mut self) -> Option<&mut [Color]> {
+        unsafe {
+            let vertices = &*self.native().fVertices.fPtr;
+            let colors = vertices.fColors.into_option()?;
+            Some(slice::from_raw_parts_mut(
+                Color::from_native_ref_mut(&mut *colors),
+                vertices.fVertexCount.try_into().unwrap(),
+            ))
+        }
+    }
+
+    #[deprecated(since = "0.29.0", note = "returns false")]
+    pub fn is_volatile(&self) -> bool {
+        false
+    }
+
+    #[deprecated(since = "0.29.0", note = "returns None")]
+    #[allow(deprecated)]
+    pub fn bone_indices(&mut self) -> Option<&mut [BoneIndices]> {
+        None
+    }
+
+    #[deprecated(since = "0.29.0", note = "returns None")]
+    #[allow(deprecated)]
+    pub fn bone_weights(&mut self) -> Option<&mut [BoneWeights]> {
+        None
     }
 
     pub fn detach(mut self) -> Vertices {

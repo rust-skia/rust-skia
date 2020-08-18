@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use skia_bindings as sb;
-use skia_bindings::{SkColorMatrix, SkColorMatrix_Axis};
+use skia_bindings::SkColorMatrix;
 
 pub type ColorMatrix = Handle<SkColorMatrix>;
 
@@ -8,19 +8,54 @@ impl NativeDrop for SkColorMatrix {
     fn drop(&mut self) {}
 }
 
-impl NativePartialEq for SkColorMatrix {
-    fn eq(&self, rhs: &Self) -> bool {
-        unsafe { sb::C_SkColorMatrix_equals(self, rhs) }
+impl PartialEq for Handle<SkColorMatrix> {
+    fn eq(&self, other: &Self) -> bool {
+        let mut array_self = [0.0f32; 20];
+        let mut array_other = [0.0f32; 20];
+        self.get_row_major(&mut array_self);
+        other.get_row_major(&mut array_other);
+        array_self.eq(&array_other)
     }
 }
 
 impl Default for Handle<SkColorMatrix> {
     fn default() -> Self {
-        ColorMatrix::construct(|cm| unsafe { (*cm).setIdentity() })
+        ColorMatrix::construct(|cm| unsafe { sb::C_SkColorMatrix_Construct(cm) })
     }
 }
 
 impl Handle<SkColorMatrix> {
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
+        m00: f32,
+        m01: f32,
+        m02: f32,
+        m03: f32,
+        m04: f32,
+        m10: f32,
+        m11: f32,
+        m12: f32,
+        m13: f32,
+        m14: f32,
+        m20: f32,
+        m21: f32,
+        m22: f32,
+        m23: f32,
+        m24: f32,
+        m30: f32,
+        m31: f32,
+        m32: f32,
+        m33: f32,
+        m34: f32,
+    ) -> Self {
+        ColorMatrix::construct(|cm| unsafe {
+            sb::C_SkColorMatrix_Construct2(
+                cm, m00, m01, m02, m03, m04, m10, m11, m12, m13, m14, m20, m21, m22, m23, m24, m30,
+                m31, m32, m33, m34,
+            )
+        })
+    }
+
     pub fn set_identity(&mut self) {
         unsafe { self.native_mut().setIdentity() }
     }
@@ -36,33 +71,6 @@ impl Handle<SkColorMatrix> {
             self.native_mut()
                 .setScale(r_scale, g_scale, b_scale, a_scale.into().unwrap_or(1.0))
         }
-    }
-
-    pub fn set_row_major(&mut self, src: &[f32; 20]) {
-        self.set_20(src)
-    }
-
-    pub fn get_row_major(&mut self, dst: &mut [f32; 20]) {
-        self.get_20(dst);
-    }
-
-    pub fn set_rotate(&mut self, axis: Axis, degrees: f32) {
-        unsafe { self.native_mut().setRotate(axis.into_native(), degrees) }
-    }
-
-    pub fn set_sin_cos(&mut self, axis: Axis, sine: f32, cosine: f32) {
-        unsafe {
-            self.native_mut()
-                .setSinCos(axis.into_native(), sine, cosine)
-        }
-    }
-
-    pub fn pre_rotate(&mut self, axis: Axis, degrees: f32) {
-        unsafe { self.native_mut().preRotate(axis.into_native(), degrees) }
-    }
-
-    pub fn post_rotate(&mut self, axis: Axis, degrees: f32) {
-        unsafe { self.native_mut().postRotate(axis.into_native(), degrees) }
     }
 
     pub fn post_translate(&mut self, dr: f32, dg: f32, db: f32, da: f32) {
@@ -87,35 +95,15 @@ impl Handle<SkColorMatrix> {
         unsafe { self.native_mut().setSaturation(sat) }
     }
 
-    pub fn set_rgb_2_yuv(&mut self) {
-        unsafe { self.native_mut().setRGB2YUV() }
+    pub fn set_row_major(&mut self, src: &[f32; 20]) {
+        unsafe {
+            sb::C_SkColorMatrix_setRowMajor(self.native_mut(), src.as_ptr());
+        }
     }
 
-    pub fn set_yuv_2_rgb(&mut self) {
-        unsafe { self.native_mut().setYUV2RGB() }
+    pub fn get_row_major(&self, dst: &mut [f32; 20]) {
+        unsafe {
+            sb::C_SkColorMatrix_getRowMajor(self.native(), dst.as_mut_ptr());
+        }
     }
-
-    pub fn get_20<'a>(&self, m: &'a mut [f32; 20]) -> &'a mut [f32; 20] {
-        unsafe { sb::C_SkColorMatrix_get20(self.native(), m.as_mut_ptr()) };
-        m
-    }
-
-    pub fn set_20(&mut self, m: &[f32; 20]) {
-        unsafe { sb::C_SkColorMatrix_set20(self.native_mut(), m.as_ptr()) };
-    }
-}
-
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum Axis {
-    R = SkColorMatrix_Axis::kR_Axis as _,
-    G = SkColorMatrix_Axis::kG_Axis as _,
-    B = SkColorMatrix_Axis::kB_Axis as _,
-}
-
-impl NativeTransmutable<SkColorMatrix_Axis> for Axis {}
-
-#[test]
-fn test_axis_layout() {
-    Axis::test_layout();
 }

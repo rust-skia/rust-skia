@@ -2,8 +2,7 @@ use crate::prelude::*;
 use crate::{Contains, IPoint, IRect, IVector, Path, QuickReject};
 use skia_bindings as sb;
 use skia_bindings::{
-    SkRegion, SkRegion_Cliperator, SkRegion_Iterator, SkRegion_Op, SkRegion_RunHead,
-    SkRegion_Spanerator,
+    SkRegion, SkRegion_Cliperator, SkRegion_Iterator, SkRegion_RunHead, SkRegion_Spanerator,
 };
 use std::marker::PhantomData;
 use std::{iter, mem, ptr};
@@ -28,21 +27,10 @@ impl NativePartialEq for SkRegion {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum RegionOp {
-    Difference = SkRegion_Op::kDifference_Op as _,
-    Intersect = SkRegion_Op::kIntersect_Op as _,
-    Union = SkRegion_Op::kUnion_Op as _,
-    XOR = SkRegion_Op::kXOR_Op as _,
-    ReverseDifference = SkRegion_Op::kReverseDifference_Op as _,
-    Replace = SkRegion_Op::kReplace_Op as _,
-}
-
-impl NativeTransmutable<SkRegion_Op> for RegionOp {}
+pub use skia_bindings::SkRegion_Op as RegionOp;
 #[test]
-fn test_region_op_layout() {
-    RegionOp::test_layout()
+fn test_region_op_naming() {
+    let _ = RegionOp::ReverseDifference;
 }
 
 impl Handle<SkRegion> {
@@ -83,11 +71,6 @@ impl Handle<SkRegion> {
 
     pub fn compute_region_complexity(&self) -> usize {
         unsafe { self.native().computeRegionComplexity().try_into().unwrap() }
-    }
-
-    #[deprecated(since = "0.12.0", note = "use get_boundary_path()")]
-    pub fn boundary_path(&self, path: &mut Path) -> bool {
-        self.get_boundary_path(path)
     }
 
     pub fn get_boundary_path(&self, path: &mut Path) -> bool {
@@ -182,18 +165,12 @@ impl Handle<SkRegion> {
 
     pub fn op_rect(&mut self, rect: impl AsRef<IRect>, op: RegionOp) -> bool {
         let self_ptr = self.native_mut() as *const _;
-        unsafe {
-            self.native_mut()
-                .op1(self_ptr, rect.as_ref().native(), op.into_native())
-        }
+        unsafe { self.native_mut().op1(self_ptr, rect.as_ref().native(), op) }
     }
 
     pub fn op_region(&mut self, region: &Region, op: RegionOp) -> bool {
         let self_ptr = self.native_mut() as *const _;
-        unsafe {
-            self.native_mut()
-                .op2(self_ptr, region.native(), op.into_native())
-        }
+        unsafe { self.native_mut().op2(self_ptr, region.native(), op) }
     }
 
     pub fn op_rect_region(
@@ -204,7 +181,7 @@ impl Handle<SkRegion> {
     ) -> bool {
         unsafe {
             self.native_mut()
-                .op(rect.as_ref().native(), region.native(), op.into_native())
+                .op(rect.as_ref().native(), region.native(), op)
         }
     }
 
@@ -216,7 +193,7 @@ impl Handle<SkRegion> {
     ) -> bool {
         unsafe {
             self.native_mut()
-                .op1(region.native(), rect.as_ref().native(), op.into_native())
+                .op1(region.native(), rect.as_ref().native(), op)
         }
     }
 

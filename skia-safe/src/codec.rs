@@ -1,4 +1,7 @@
-// TODO: wrap SkAndroidCodec.h, SkCodec.h, SkCodecAnimation.h
+// TODO: wrap SkAndroidCodec.h, SkCodecAnimation.h
+
+mod decoder;
+pub use decoder::*;
 
 mod encoded_origin;
 pub use encoded_origin::*;

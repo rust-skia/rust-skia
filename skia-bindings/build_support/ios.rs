@@ -1,4 +1,5 @@
 use crate::build_support::clang;
+use crate::build_support::skia::Features;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
 
@@ -48,4 +49,22 @@ fn is_simulator(arch: &str) -> bool {
         "x86_64" => true,
         _ => false,
     }
+}
+
+pub(crate) fn link_libraries(features: &Features) -> Vec<&str> {
+    let mut libs = vec![
+        "c++",
+        "framework=MobileCoreServices",
+        "framework=CoreFoundation",
+        "framework=CoreGraphics",
+        "framework=CoreText",
+        "framework=ImageIO",
+        "framework=UIKit",
+    ];
+
+    if features.metal {
+        libs.push("framework=Metal");
+    }
+
+    libs
 }

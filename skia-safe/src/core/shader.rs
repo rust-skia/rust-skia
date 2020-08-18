@@ -3,27 +3,12 @@ use crate::{
     gradient_shader, scalar, Color, ColorFilter, Image, Matrix, NativeFlattenable, Point, TileMode,
 };
 use skia_bindings as sb;
-use skia_bindings::{
-    SkFlattenable, SkPoint, SkRefCntBase, SkShader, SkShader_GradientInfo, SkShader_GradientType,
-    SkTileMode,
-};
+use skia_bindings::{SkFlattenable, SkRefCntBase, SkShader};
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-#[allow(dead_code)]
-pub enum GradientTypeInternal {
-    None = SkShader_GradientType::kNone_GradientType as _,
-    Color = SkShader_GradientType::kColor_GradientType as _,
-    Linear = SkShader_GradientType::kLinear_GradientType as _,
-    Radial = SkShader_GradientType::kRadial_GradientType as _,
-    Sweep = SkShader_GradientType::kSweep_GradientType as _,
-    Conical = SkShader_GradientType::kConical_GradientType as _,
-}
-
-impl NativeTransmutable<SkShader_GradientType> for GradientTypeInternal {}
+pub use skia_bindings::SkShader_GradientType as GradientTypeInternal;
 #[test]
-fn test_shader_grandient_type_layout() {
-    GradientTypeInternal::test_layout()
+fn test_shader_grandient_type_naming() {
+    let _ = GradientTypeInternal::Linear;
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -88,7 +73,7 @@ impl RCHandle<SkShader> {
             let mut tile_mode = [TileMode::default(); 2];
             let image = Image::from_unshared_ptr(
                 self.native()
-                    .isAImage(matrix.native_mut(), tile_mode.native_mut().as_mut_ptr()),
+                    .isAImage(matrix.native_mut(), tile_mode.as_mut_ptr()),
             );
             image.map(|i| (i, matrix, (tile_mode[0], tile_mode[1])))
         }
@@ -96,66 +81,6 @@ impl RCHandle<SkShader> {
 
     pub fn is_a_image(&self) -> bool {
         unsafe { sb::C_SkShader_isAImage(self.native()) }
-    }
-
-    #[deprecated(since = "0.11.0", note = "skbug.com/8941")]
-    pub fn as_a_gradient<'a>(
-        &self,
-        colors: &'a mut [Color],
-        color_offsets: &'a mut [scalar],
-    ) -> Option<(GradientType, GradientInfo<'a>)> {
-        assert_eq!(colors.len(), color_offsets.len());
-        let max_color_count = colors.len();
-        unsafe {
-            let mut info = SkShader_GradientInfo {
-                fColorCount: max_color_count.try_into().unwrap(),
-                fColors: colors.native_mut().as_mut_ptr(),
-                fColorOffsets: color_offsets.as_mut_ptr(),
-                fPoint: [SkPoint { fX: 0.0, fY: 0.0 }; 2],
-                fRadius: Default::default(),
-                fTileMode: SkTileMode::kClamp,
-                fGradientFlags: 0,
-            };
-
-            let gradient_type = GradientTypeInternal::from_native(sb::C_SkShader_asAGradient(
-                self.native(),
-                &mut info,
-            ));
-            match gradient_type {
-                GradientTypeInternal::None => None,
-                GradientTypeInternal::Color => Some(GradientType::Color),
-                GradientTypeInternal::Linear => Some(GradientType::Linear(
-                    Point::from_native(info.fPoint[0]),
-                    Point::from_native(info.fPoint[1]),
-                )),
-                GradientTypeInternal::Radial => Some(GradientType::Radial(
-                    Point::from_native(info.fPoint[0]),
-                    info.fRadius[0],
-                )),
-                GradientTypeInternal::Sweep => {
-                    Some(GradientType::Sweep(Point::from_native(info.fPoint[0])))
-                }
-                GradientTypeInternal::Conical => Some(GradientType::Conical([
-                    (Point::from_native(info.fPoint[0]), info.fRadius[0]),
-                    (Point::from_native(info.fPoint[1]), info.fRadius[1]),
-                ])),
-            }
-            .map(move |t| {
-                let returned_color_count: usize = info.fColorCount.try_into().unwrap();
-                assert!(returned_color_count <= max_color_count);
-                (
-                    t,
-                    GradientInfo {
-                        colors: &colors[0..returned_color_count],
-                        color_offsets: &color_offsets[0..returned_color_count],
-                        tile_mode: TileMode::Clamp,
-                        gradient_flags: gradient_shader::Flags::from_bits_truncate(
-                            info.fGradientFlags,
-                        ),
-                    },
-                )
-            })
-        }
     }
 
     pub fn with_local_matrix(&self, matrix: &Matrix) -> Self {
@@ -194,44 +119,17 @@ pub mod shaders {
         .unwrap()
     }
 
-    pub fn blend(
-        mode: BlendMode,
-        dst: Shader,
-        src: Shader,
-        local_matrix: Option<&Matrix>,
-    ) -> Shader {
-        Shader::from_ptr(unsafe {
-            sb::C_SkShaders_Blend(
-                mode.into_native(),
-                dst.into_ptr(),
-                src.into_ptr(),
-                local_matrix.native_ptr_or_null(),
-            )
-        })
-        .unwrap()
+    pub fn blend(mode: BlendMode, dst: Shader, src: Shader) -> Shader {
+        Shader::from_ptr(unsafe { sb::C_SkShaders_Blend(mode, dst.into_ptr(), src.into_ptr()) })
+            .unwrap()
     }
 
-    pub fn lerp(t: f32, dst: Shader, src: Shader, local_matrix: Option<&Matrix>) -> Option<Shader> {
-        Shader::from_ptr(unsafe {
-            sb::C_SkShaders_Lerp(
-                t,
-                dst.into_ptr(),
-                src.into_ptr(),
-                local_matrix.native_ptr_or_null(),
-            )
-        })
+    pub fn lerp(t: f32, dst: Shader, src: Shader) -> Option<Shader> {
+        Shader::from_ptr(unsafe { sb::C_SkShaders_Lerp(t, dst.into_ptr(), src.into_ptr()) })
     }
 
-    // TODO: rename as soon it's clear from the documentation what it does.
-    pub fn lerp2(red: Shader, dst: Shader, src: Shader, local_matrix: Option<&Matrix>) -> Shader {
-        Shader::from_ptr(unsafe {
-            sb::C_SkShaders_Lerp2(
-                red.into_ptr(),
-                dst.into_ptr(),
-                src.into_ptr(),
-                local_matrix.native_ptr_or_null(),
-            )
-        })
-        .unwrap()
+    #[deprecated(since = "0.29.0", note = "removed without replacement")]
+    pub fn lerp2(_red: Shader, _dst: Shader, _src: Shader, _local_matrix: Option<&Matrix>) -> ! {
+        panic!("removed without replacement");
     }
 }

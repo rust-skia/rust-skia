@@ -2,5 +2,6 @@
 
 members = [
     "skia-bindings",
-    "skia-safe"
+    "skia-safe",
+    "skia-org"
 ]

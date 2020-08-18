@@ -1,0 +1,31 @@
+use skia_safe::Canvas;
+use std::path::Path;
+
+pub mod cpu;
+pub use cpu::CPU;
+#[cfg(feature = "gl")]
+pub mod gl;
+#[cfg(feature = "gl")]
+pub use gl::OpenGL;
+#[cfg(feature = "metal")]
+pub mod metal;
+pub mod pdf;
+pub use pdf::PDF;
+pub mod svg;
+pub use svg::SVG;
+#[cfg(feature = "vulkan")]
+pub mod vulkan;
+#[cfg(feature = "vulkan")]
+pub use vulkan::Vulkan;
+
+pub trait DrawingDriver {
+    const NAME: &'static str;
+
+    fn new() -> Self;
+
+    fn draw_image(&mut self, size: (i32, i32), path: &Path, name: &str, func: impl Fn(&mut Canvas));
+
+    fn draw_image_256(&mut self, path: &Path, name: &str, func: impl Fn(&mut Canvas)) {
+        self.draw_image((256, 256), path, name, func)
+    }
+}

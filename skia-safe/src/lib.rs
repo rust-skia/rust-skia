@@ -2,13 +2,15 @@ mod codec;
 mod core;
 mod docs;
 mod effects;
+#[cfg(feature = "gpu")]
 pub mod gpu;
 mod interop;
 mod modules;
 mod pathops;
 mod prelude;
-mod private;
-#[cfg(feature = "svg")]
+pub mod wrapper;
+// The module private may contain types that leak.
+pub mod private;
 pub mod svg;
 // TODO: We don't export utils/* into the crate's root yet. Should we?
 pub mod utils;

@@ -57,7 +57,7 @@ impl LayerInfo {
 
         SkLayerDrawLooper_LayerInfo {
             fPaintBits: paint_bits,
-            fColorMode: self.color_mode.into_native(),
+            fColorMode: self.color_mode,
             fOffset: self.offset.into_native(),
             fPostTranslate: self.post_translate,
         }

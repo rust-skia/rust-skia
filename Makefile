@@ -8,11 +8,28 @@ all:
 	@echo "make publish: publish the rust-skia packages to crates.io"
 	@echo "make publish-only: do not verify or build packages, only publish the the packages"
 
+# test various configuration from inside crates.
+
+.PHONY: crate-tests
+crate-tests: crate-bindings-binaries crate-bindings-build
+
+.PHONY: crate-bindings-binaries
+crate-bindings-binaries: export FORCE_SKIA_BINARIES_DOWNLOAD=1
+crate-bindings-binaries:
+	cd skia-bindings && cargo publish -vv --dry-run --features "gl,vulkan,textlayout"
+	cd skia-bindings && cargo publish -vv --dry-run 
+
+.PHONY: crate-bindings-build
+crate-bindings-build: export FORCE_SKIA_BUILD=1
+crate-bindings-build: 
+	cd skia-bindings && cargo publish -vv --dry-run --features "gl,vulkan,textlayout"
+	cd skia-bindings && cargo publish -vv --dry-run 
+
 .PHONY: publish
 publish: package-bindings package-safe publish-bindings wait publish-safe
 
 .PHONY: publish-only
-publish-only: publish-bindings publish-safe
+publish-only: publish-bindings wait publish-safe
 
 .PHONY: publish-bindings
 publish-bindings:

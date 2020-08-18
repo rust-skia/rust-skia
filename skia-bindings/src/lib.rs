@@ -8,5 +8,8 @@ pub use bindings::*;
 mod defaults;
 pub use defaults::*;
 
-#[cfg(feature = "shaper")]
+mod impls;
+pub use impls::*;
+
+#[cfg(feature = "textlayout")]
 pub mod icu;

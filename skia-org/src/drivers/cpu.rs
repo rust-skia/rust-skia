@@ -3,12 +3,17 @@ use crate::drivers::DrawingDriver;
 use skia_safe::{Canvas, Surface};
 use std::path::Path;
 
-pub enum CPU {}
+pub struct CPU;
 
 impl DrawingDriver for CPU {
     const NAME: &'static str = "cpu";
 
+    fn new() -> Self {
+        Self
+    }
+
     fn draw_image(
+        &mut self,
         (width, height): (i32, i32),
         path: &Path,
         name: &str,

@@ -1,40 +1,24 @@
-use crate::gpu::{BackendRenderTarget, BackendTexture, Context, SurfaceOrigin};
+#[cfg(feature = "gpu")]
+use crate::gpu;
 use crate::prelude::*;
 use crate::{
-    Bitmap, Budgeted, Canvas, ColorSpace, ColorType, DeferredDisplayList, IPoint, IRect, ISize,
-    Image, ImageInfo, Paint, Pixmap, Size, SurfaceCharacterization, SurfaceProps,
+    Bitmap, Canvas, DeferredDisplayList, IPoint, IRect, ISize, Image, ImageInfo, Paint, Pixmap,
+    Size, SurfaceCharacterization, SurfaceProps,
 };
 use skia_bindings as sb;
-use skia_bindings::{
-    SkRefCntBase, SkSurface, SkSurface_BackendHandleAccess, SkSurface_ContentChangeMode,
-};
+use skia_bindings::{SkRefCntBase, SkSurface};
 use std::ptr;
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum ContentChangeMode {
-    Discard = SkSurface_ContentChangeMode::kDiscard_ContentChangeMode as _,
-    Retain = SkSurface_ContentChangeMode::kRetain_ContentChangeMode as _,
-}
-
-impl NativeTransmutable<SkSurface_ContentChangeMode> for ContentChangeMode {}
+pub use skia_bindings::SkSurface_ContentChangeMode as ContentChangeMode;
 #[test]
-fn test_surface_content_change_mode() {
-    ContentChangeMode::test_layout()
+fn test_surface_content_change_mode_naming() {
+    let _ = ContentChangeMode::Retain;
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum BackendHandleAccess {
-    FlushRead = SkSurface_BackendHandleAccess::kFlushRead_BackendHandleAccess as _,
-    FlushWrite = SkSurface_BackendHandleAccess::kFlushWrite_BackendHandleAccess as _,
-    DiscardWrite = SkSurface_BackendHandleAccess::kDiscardWrite_BackendHandleAccess as _,
-}
-
-impl NativeTransmutable<SkSurface_BackendHandleAccess> for BackendHandleAccess {}
+pub use skia_bindings::SkSurface_BackendHandleAccess as BackendHandleAccess;
 #[test]
-fn test_surface_backend_handle_access_layout() {
-    BackendHandleAccess::test_layout()
+fn test_surface_backend_handle_access_naming() {
+    let _ = BackendHandleAccess::FlushWrite;
 }
 
 pub type Surface = RCHandle<SkSurface>;
@@ -91,21 +75,24 @@ impl RCHandle<SkSurface> {
             sb::C_SkSurface_MakeRasterN32Premul(size.width, size.height, ptr::null())
         })
     }
+}
 
+#[cfg(feature = "gpu")]
+impl RCHandle<SkSurface> {
     pub fn from_backend_texture(
-        context: &mut Context,
-        backend_texture: &BackendTexture,
-        origin: SurfaceOrigin,
+        context: &mut gpu::Context,
+        backend_texture: &gpu::BackendTexture,
+        origin: gpu::SurfaceOrigin,
         sample_count: impl Into<Option<usize>>,
-        color_type: ColorType,
-        color_space: impl Into<Option<ColorSpace>>,
+        color_type: crate::ColorType,
+        color_space: impl Into<Option<crate::ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
             sb::C_SkSurface_MakeFromBackendTexture(
                 context.native_mut(),
                 backend_texture.native(),
-                origin.into_native(),
+                origin,
                 sample_count.into().unwrap_or(0).try_into().unwrap(),
                 color_type.into_native(),
                 color_space.into().into_ptr_or_null(),
@@ -115,18 +102,18 @@ impl RCHandle<SkSurface> {
     }
 
     pub fn from_backend_render_target(
-        context: &mut Context,
-        backend_render_target: &BackendRenderTarget,
-        origin: SurfaceOrigin,
-        color_type: ColorType,
-        color_space: impl Into<Option<ColorSpace>>,
+        context: &mut gpu::Context,
+        backend_render_target: &gpu::BackendRenderTarget,
+        origin: gpu::SurfaceOrigin,
+        color_type: crate::ColorType,
+        color_space: impl Into<Option<crate::ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
             sb::C_SkSurface_MakeFromBackendRenderTarget(
                 context.native_mut(),
                 backend_render_target.native(),
-                origin.into_native(),
+                origin,
                 color_type.into_native(),
                 color_space.into().into_ptr_or_null(),
                 surface_props.native_ptr_or_null(),
@@ -135,19 +122,19 @@ impl RCHandle<SkSurface> {
     }
 
     pub fn from_backend_texture_as_render_target(
-        context: &mut Context,
-        backend_texture: &BackendTexture,
-        origin: SurfaceOrigin,
+        context: &mut gpu::Context,
+        backend_texture: &gpu::BackendTexture,
+        origin: gpu::SurfaceOrigin,
         sample_count: impl Into<Option<usize>>,
-        color_type: ColorType,
-        color_space: impl Into<Option<ColorSpace>>,
+        color_type: crate::ColorType,
+        color_space: impl Into<Option<crate::ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
             sb::C_SkSurface_MakeFromBackendTextureAsRenderTarget(
                 context.native_mut(),
                 backend_texture.native(),
-                origin.into_native(),
+                origin,
                 sample_count.into().unwrap_or(0).try_into().unwrap(),
                 color_type.into_native(),
                 color_space.into().into_ptr_or_null(),
@@ -156,13 +143,61 @@ impl RCHandle<SkSurface> {
         })
     }
 
+    #[cfg(feature = "metal")]
+    pub fn from_ca_metal_layer(
+        context: &mut gpu::Context,
+        layer: gpu::mtl::Handle,
+        origin: gpu::SurfaceOrigin,
+        sample_count: impl Into<Option<usize>>,
+        color_type: crate::ColorType,
+        color_space: impl Into<Option<crate::ColorSpace>>,
+        surface_props: Option<&SurfaceProps>,
+    ) -> Option<(Self, gpu::mtl::Handle)> {
+        let mut drawable = ptr::null();
+        Self::from_ptr(unsafe {
+            sb::C_SkSurface_MakeFromCAMetalLayer(
+                context.native_mut(),
+                layer,
+                origin,
+                sample_count.into().unwrap_or(0).try_into().unwrap(),
+                color_type.into_native(),
+                color_space.into().into_ptr_or_null(),
+                surface_props.native_ptr_or_null(),
+                &mut drawable,
+            )
+        })
+        .map(|surface| (surface, drawable))
+    }
+
+    #[cfg(feature = "metal")]
+    pub fn from_ca_mtk_view(
+        context: &mut gpu::Context,
+        mtk_view: gpu::mtl::Handle,
+        origin: gpu::SurfaceOrigin,
+        sample_count: impl Into<Option<usize>>,
+        color_type: crate::ColorType,
+        color_space: impl Into<Option<crate::ColorSpace>>,
+        surface_props: Option<&SurfaceProps>,
+    ) -> Option<Self> {
+        Self::from_ptr(unsafe {
+            sb::C_SkSurface_MakeFromMTKView(
+                context.native_mut(),
+                mtk_view,
+                origin,
+                sample_count.into().unwrap_or(0).try_into().unwrap(),
+                color_type.into_native(),
+                color_space.into().into_ptr_or_null(),
+                surface_props.native_ptr_or_null(),
+            )
+        })
+    }
     pub fn new_render_target(
-        context: &mut Context,
-        budgeted: Budgeted,
+        context: &mut gpu::Context,
+        budgeted: crate::Budgeted,
         image_info: &ImageInfo,
         sample_count: impl Into<Option<usize>>,
         // not optional, because with vulkan, there is no clear default anymore.
-        surface_origin: SurfaceOrigin,
+        surface_origin: gpu::SurfaceOrigin,
         surface_props: Option<&SurfaceProps>,
         should_create_with_mips: impl Into<Option<bool>>,
     ) -> Option<Self> {
@@ -172,7 +207,7 @@ impl RCHandle<SkSurface> {
                 budgeted.into_native(),
                 image_info.native(),
                 sample_count.into().unwrap_or(0).try_into().unwrap(),
-                surface_origin.into_native(),
+                surface_origin,
                 surface_props.native_ptr_or_null(),
                 should_create_with_mips.into().unwrap_or_default(),
             )
@@ -180,9 +215,9 @@ impl RCHandle<SkSurface> {
     }
 
     pub fn new_render_target_with_characterization(
-        context: &mut Context,
+        context: &mut gpu::Context,
         characterization: &SurfaceCharacterization,
-        budgeted: Budgeted,
+        budgeted: crate::Budgeted,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
             sb::C_SkSurface_MakeRenderTarget2(
@@ -196,9 +231,9 @@ impl RCHandle<SkSurface> {
     // TODO: support TextureReleaseProc / ReleaseContext
 
     pub fn from_backend_texture_with_caracterization(
-        context: &mut Context,
+        context: &mut gpu::Context,
         characterization: &SurfaceCharacterization,
-        backend_texture: &BackendTexture,
+        backend_texture: &gpu::BackendTexture,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
             sb::C_SkSurface_MakeFromBackendTexture2(
@@ -208,7 +243,9 @@ impl RCHandle<SkSurface> {
             )
         })
     }
+}
 
+impl RCHandle<SkSurface> {
     pub fn is_compatible(&self, characterization: &SurfaceCharacterization) -> bool {
         unsafe { self.native().isCompatible(characterization.native()) }
     }
@@ -237,86 +274,81 @@ impl RCHandle<SkSurface> {
     }
 
     pub fn notify_content_will_change(&mut self, mode: ContentChangeMode) -> &mut Self {
-        unsafe {
-            self.native_mut()
-                .notifyContentWillChange(mode.into_native())
-        }
+        unsafe { self.native_mut().notifyContentWillChange(mode) }
         self
     }
+}
 
-    #[deprecated(since = "0.14.0", note = "use get_backend_texture()")]
-    pub fn backend_texture(
-        &mut self,
-        handle_access: BackendHandleAccess,
-    ) -> Option<BackendTexture> {
-        self.get_backend_texture(handle_access)
+#[cfg(feature = "gpu")]
+impl RCHandle<SkSurface> {
+    pub fn context(&mut self) -> Option<gpu::Context> {
+        gpu::Context::from_unshared_ptr(unsafe { self.native_mut().getContext() })
     }
 
     pub fn get_backend_texture(
         &mut self,
         handle_access: BackendHandleAccess,
-    ) -> Option<BackendTexture> {
+    ) -> Option<gpu::BackendTexture> {
         unsafe {
             let mut backend_texture = construct(|bt| sb::C_GrBackendTexture_Construct(bt));
             sb::C_SkSurface_getBackendTexture(
                 self.native_mut(),
-                handle_access.into_native(),
+                handle_access,
                 &mut backend_texture as _,
             );
 
-            BackendTexture::from_native_if_valid(backend_texture)
+            gpu::BackendTexture::from_native_if_valid(backend_texture)
         }
-    }
-
-    #[deprecated(since = "0.14.0", note = "use get_backend_render_target()")]
-    pub fn backend_render_target(
-        &mut self,
-        handle_access: BackendHandleAccess,
-    ) -> Option<BackendRenderTarget> {
-        self.get_backend_render_target(handle_access)
     }
 
     pub fn get_backend_render_target(
         &mut self,
         handle_access: BackendHandleAccess,
-    ) -> Option<BackendRenderTarget> {
+    ) -> Option<gpu::BackendRenderTarget> {
         unsafe {
             let mut backend_render_target =
                 construct(|rt| sb::C_GrBackendRenderTarget_Construct(rt));
             sb::C_SkSurface_getBackendRenderTarget(
                 self.native_mut(),
-                handle_access.into_native(),
+                handle_access,
                 &mut backend_render_target as _,
             );
 
-            BackendRenderTarget::from_native_if_valid(backend_render_target)
+            gpu::BackendRenderTarget::from_native_if_valid(backend_render_target)
         }
     }
 
     // TODO: support variant with TextureReleaseProc and ReleaseContext
     pub fn replace_backend_texture(
         &mut self,
-        backend_texture: &BackendTexture,
-        origin: SurfaceOrigin,
+        backend_texture: &gpu::BackendTexture,
+        origin: gpu::SurfaceOrigin,
+    ) -> bool {
+        self.replace_backend_texture_with_mode(backend_texture, origin, ContentChangeMode::Retain)
+    }
+
+    pub fn replace_backend_texture_with_mode(
+        &mut self,
+        backend_texture: &gpu::BackendTexture,
+        origin: gpu::SurfaceOrigin,
+        mode: impl Into<Option<ContentChangeMode>>,
     ) -> bool {
         unsafe {
             self.native_mut().replaceBackendTexture(
                 backend_texture.native(),
-                origin.into_native(),
+                origin,
+                mode.into().unwrap_or(ContentChangeMode::Retain),
                 None,
                 ptr::null_mut(),
             )
         }
     }
+}
 
+impl RCHandle<SkSurface> {
     pub fn canvas(&mut self) -> &mut Canvas {
         let canvas_ref = unsafe { &mut *self.native_mut().getCanvas() };
         Canvas::borrow_from_native(canvas_ref)
-    }
-
-    #[deprecated(note = "use Surface::new_surface")]
-    pub fn new_compatible(&mut self, info: &ImageInfo) -> Option<Surface> {
-        self.new_surface(info)
     }
 
     // TODO: why is self mutable here?
@@ -346,16 +378,6 @@ impl RCHandle<SkSurface> {
     }
 
     // TODO: why is self mutable here?
-    #[deprecated(note = "use Surface::draw()")]
-    pub fn draw_to_canvas(
-        &mut self,
-        canvas: impl AsMut<Canvas>,
-        size: impl Into<Size>,
-        paint: Option<&Paint>,
-    ) {
-        self.draw(canvas, size, paint)
-    }
-
     pub fn draw(
         &mut self,
         mut canvas: impl AsMut<Canvas>,
@@ -439,14 +461,19 @@ impl RCHandle<SkSurface> {
         SurfaceProps::from_native_ref(unsafe { &*sb::C_SkSurface_props(self.native()) })
     }
 
-    pub fn flush(&mut self) {
+    pub fn flush_and_submit(&mut self) {
         unsafe {
-            self.native_mut().flush();
+            self.native_mut().flushAndSubmit();
         }
     }
 
+    #[deprecated(since = "0.30.0", note = "Use flush_and_submit()")]
+    pub fn flush(&mut self) {
+        self.flush_and_submit()
+    }
+
     // TODO: flush(access, FlushInfo)
-    // TODO: flush(access, FlshFlags, semaphores)
+    // TODO: flush(access, FlushFlags, semaphores)
     // TODO: wait()
 
     pub fn characterize(&self) -> Option<SurfaceCharacterization> {
@@ -470,7 +497,7 @@ fn create() {
 fn test_raster_direct() {
     let image_info = ImageInfo::new(
         (20, 20),
-        ColorType::RGBA8888,
+        crate::ColorType::RGBA8888,
         crate::AlphaType::Unpremul,
         None,
     );

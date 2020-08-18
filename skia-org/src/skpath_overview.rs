@@ -2,14 +2,14 @@ use crate::DrawingDriver;
 use skia_safe::{paint, Canvas, Color, Font, Paint, Path};
 use std::path;
 
-pub fn draw<Driver: DrawingDriver>(path: &path::Path) {
+pub fn draw(driver: &mut impl DrawingDriver, path: &path::Path) {
     let path = path.join("SkPath-Overview");
 
-    Driver::draw_image_256(&path, "example1", draw_example1);
-    Driver::draw_image_256(&path, "example2", draw_example2);
-    Driver::draw_image_256(&path, "example3", draw_example3);
-    Driver::draw_image_256(&path, "example4", draw_example4);
-    Driver::draw_image_256(&path, "example5", draw_example5);
+    driver.draw_image_256(&path, "example1", draw_example1);
+    driver.draw_image_256(&path, "example2", draw_example2);
+    driver.draw_image_256(&path, "example3", draw_example3);
+    driver.draw_image_256(&path, "example4", draw_example4);
+    driver.draw_image_256(&path, "example5", draw_example5);
 }
 
 fn draw_example1(canvas: &mut Canvas) {

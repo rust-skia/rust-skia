@@ -1,20 +1,12 @@
 use crate::prelude::*;
 use crate::{Canvas, Font, Paint, Path, Point, TextEncoding};
 use core::borrow::BorrowMut;
-use skia_bindings::{SkTextUtils, SkTextUtils_Align};
+use skia_bindings::SkTextUtils;
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-#[repr(i32)]
-pub enum Align {
-    Left = SkTextUtils_Align::kLeft_Align as _,
-    Center = SkTextUtils_Align::kCenter_Align as _,
-    Right = SkTextUtils_Align::kRight_Align as _,
-}
-
-impl NativeTransmutable<SkTextUtils_Align> for Align {}
+pub use skia_bindings::SkTextUtils_Align as Align;
 #[test]
 fn test_align_layout() {
-    Align::test_layout()
+    let _ = Align::Center;
 }
 
 pub fn draw_str(
@@ -37,7 +29,7 @@ pub fn draw_str(
             p.y,
             font.native(),
             paint.native(),
-            align.into_native(),
+            align,
         )
     }
 }

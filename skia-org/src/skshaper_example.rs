@@ -2,13 +2,13 @@ use crate::DrawingDriver;
 use skia_safe::{icu, Canvas, Font, Paint, Point, Shaper, Typeface};
 use std::path;
 
-pub fn draw<Driver: DrawingDriver>(path: &path::Path) {
+pub fn draw(driver: &mut impl DrawingDriver, path: &path::Path) {
     let path = path.join("SkShaper-Example");
 
     icu::init();
 
-    Driver::draw_image_256(&path, "rtl-shaped", draw_rtl_shaped);
-    Driver::draw_image_256(&path, "rtl-unshaped", draw_rtl_unshaped);
+    driver.draw_image_256(&path, "rtl-shaped", draw_rtl_shaped);
+    driver.draw_image_256(&path, "rtl-unshaped", draw_rtl_unshaped);
 }
 
 const RTL_TEXT: &str = "العربية";

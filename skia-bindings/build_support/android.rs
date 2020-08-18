@@ -1,4 +1,5 @@
 use crate::build_support::cargo;
+use crate::build_support::skia::Features;
 
 /// API level Android 8, Oreo (the first one with full Vulkan support)
 pub const API_LEVEL: &str = "26";
@@ -22,20 +23,26 @@ pub fn additional_clang_args(target: &str, target_arch: &str) -> Vec<String> {
         ("linux", "x86_64") => {}
         _ => {
             let ndk = ndk();
-
+            // this is what's done in the skia.ninja file:
             args.push(format!("--sysroot={}/sysroot", ndk));
-            args.push(format!("-I{}/sysroot/usr/include/{}", ndk, target));
-            // Adding C++ includes messes with LLVM 11 on macOS.
-            if cargo::host().system != "darwin" {
-                // TODO: test & support other CLang versions on macOS
-                args.push(format!(
-                    "-isystem{}/sources/cxx-stl/llvm-libc++/include",
-                    ndk
-                ));
-            }
+            args.push(format!("-I{}/sources/android/cpufeatures", ndk));
+            // note: Adding C++ includes messes with Apple's CLang 11 in the binding generator,
+            // Which means that only we support the official LLVM versions for Android builds on macOS.
+            args.push(format!(
+                "-isystem{}/sources/cxx-stl/llvm-libc++/include",
+                ndk
+            ));
             args.push(format!("--target={}", target));
         }
     }
 
     args
+}
+
+pub fn link_libraries(features: &Features) -> Vec<&str> {
+    let mut libs = vec!["log", "android", "c++_static", "c++abi"];
+    if features.gl {
+        libs.extend(vec!["EGL", "GLESv2"])
+    };
+    libs
 }

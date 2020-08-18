@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::scalar;
 use skia_bindings::SkPoint3;
-use std::ops::{Add, AddAssign, Neg, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Mul, Neg, Sub, SubAssign};
 
 pub type Vector3 = Point3;
 pub type Color3f = Point3;
@@ -57,6 +57,14 @@ impl Sub for Point3 {
 impl SubAssign for Point3 {
     fn sub_assign(&mut self, rhs: Point3) {
         *self = *self - rhs;
+    }
+}
+
+impl Mul<Point3> for scalar {
+    type Output = Point3;
+
+    fn mul(self, p: Point3) -> Self::Output {
+        Point3::new(self * p.x, self * p.y, self * p.z)
     }
 }
 

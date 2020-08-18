@@ -64,7 +64,7 @@ pub fn from_image_rect(
             image.into_ptr(),
             src_rect.as_ref().native(),
             dst_rect.as_ref().native(),
-            filter_quality.into_native(),
+            filter_quality,
         )
     })
 }

@@ -73,11 +73,6 @@ impl Handle<SkBitmap> {
         self.pixmap().shift_per_pixel()
     }
 
-    #[deprecated(since = "0.12.0", note = "use is_empty()")]
-    pub fn empty(&self) -> bool {
-        self.is_empty()
-    }
-
     pub fn is_empty(&self) -> bool {
         self.info().is_empty()
     }
@@ -95,7 +90,7 @@ impl Handle<SkBitmap> {
     }
 
     pub fn set_alpha_type(&mut self, alpha_type: AlphaType) -> bool {
-        unsafe { self.native_mut().setAlphaType(alpha_type.into_native()) }
+        unsafe { self.native_mut().setAlphaType(alpha_type) }
     }
 
     pub unsafe fn pixels(&mut self) -> *mut ffi::c_void {
@@ -281,11 +276,6 @@ impl Handle<SkBitmap> {
         }
     }
 
-    #[deprecated(since = "0.12.0", note = "use is_ready_to_draw()")]
-    pub fn ready_to_draw(&self) -> bool {
-        self.is_ready_to_draw()
-    }
-
     pub fn is_ready_to_draw(&self) -> bool {
         unsafe { sb::C_SkBitmap_readyToDraw(self.native()) }
     }
@@ -370,15 +360,6 @@ impl Handle<SkBitmap> {
             .if_true_then_some(|| pixmap.borrows(self))
     }
 
-    #[deprecated(since = "0.12.0", note = "use to_shader()")]
-    pub fn as_shader<'a>(
-        &self,
-        tile_modes: impl Into<Option<(TileMode, TileMode)>>,
-        local_matrix: impl Into<Option<&'a Matrix>>,
-    ) -> Shader {
-        self.to_shader(tile_modes, local_matrix)
-    }
-
     pub fn to_shader<'a>(
         &self,
         tile_modes: impl Into<Option<(TileMode, TileMode)>>,
@@ -389,12 +370,7 @@ impl Handle<SkBitmap> {
         Shader::from_ptr(unsafe {
             let tmx = tile_modes.map(|tm| tm.0).unwrap_or_default();
             let tmy = tile_modes.map(|tm| tm.1).unwrap_or_default();
-            sb::C_SkBitmap_makeShader(
-                self.native(),
-                tmx.into_native(),
-                tmy.into_native(),
-                local_matrix.native_ptr_or_null(),
-            )
+            sb::C_SkBitmap_makeShader(self.native(), tmx, tmy, local_matrix.native_ptr_or_null())
         })
         .unwrap()
     }

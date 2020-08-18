@@ -25,27 +25,23 @@ impl NativeFlattenable for SkMaskFilter {
 impl RCHandle<SkMaskFilter> {
     pub fn blur(style: BlurStyle, sigma: scalar, respect_ctm: impl Into<Option<bool>>) -> Self {
         Self::from_ptr(unsafe {
-            sb::C_SkMaskFilter_MakeBlur(
-                style.into_native(),
-                sigma,
-                respect_ctm.into().unwrap_or(true),
-            )
+            sb::C_SkMaskFilter_MakeBlur(style, sigma, respect_ctm.into().unwrap_or(true))
         })
         .unwrap()
     }
 
-    pub fn compose(outer: Self, inner: Self) -> Option<Self> {
-        Self::from_ptr(unsafe { sb::C_SkMaskFilter_Compose(outer.into_ptr(), inner.into_ptr()) })
+    #[deprecated(since = "0.30.0", note = "removed without replacement")]
+    pub fn compose(_outer: Self, _inner: Self) -> ! {
+        panic!("removed without replacement")
     }
 
-    pub fn combine(filter_a: Self, filter_b: Self, mode: CoverageMode) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            sb::C_SkMaskFilter_Combine(filter_a.into_ptr(), filter_b.into_ptr(), mode.into_native())
-        })
+    #[deprecated(since = "0.30.0", note = "removed without replacement")]
+    pub fn combine(_filter_a: Self, _filter_b: Self, _mode: CoverageMode) -> ! {
+        panic!("removed without replacement")
     }
 
-    pub fn with_matrix(&self, matrix: &Matrix) -> Self {
-        Self::from_ptr(unsafe { sb::C_SkMaskFilter_makeWithMatrix(self.native(), matrix.native()) })
-            .unwrap()
+    #[deprecated(since = "0.29.0", note = "removed without replacement")]
+    pub fn with_matrix(&self, _matrix: &Matrix) -> ! {
+        unimplemented!("removed without replacement")
     }
 }

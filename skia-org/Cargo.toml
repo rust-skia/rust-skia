@@ -1,0 +1,43 @@
+[package]
+name = "skia-org"
+
+description = "Example drawings for skia-safe, mostly ported from the skia.org website."
+homepage = "https://github.com/rust-skia/rust-skia"
+repository = "https://github.com/rust-skia/rust-skia"
+readme = "README.md"
+# 5 max
+keywords = ["skia", "rust-bindings", "vulkan", "opengl", "pdf"]
+# 6 max
+categories = ["api-bindings", "graphics", "multimedia::images", "rendering::graphics-api", "visualization"] 
+license = "MIT"
+
+version = "1.0.0"
+authors = ["Armin Sander <armin@replicator.org>"]
+edition = "2018"
+
+[features]
+default = []
+gl = ["offscreen_gl_context", "sparkle", "skia-safe/gl"]
+vulkan = ["ash", "skia-safe/vulkan"]
+metal = ["metal-rs", "foreign-types", "cocoa", "objc", "skia-safe/metal"]
+textlayout = ["skia-safe/textlayout"]
+
+[dependencies]
+skia-safe = { path = "../skia-safe" }
+
+# 0.25.1 fails to build on iOS targets on macOS: https://github.com/servo/rust-offscreen-rendering-context/pull/150 
+offscreen_gl_context = { git = "https://github.com/rust-skia/rust-offscreen-rendering-context", rev = "1b9c74737635add2b9076e12df129cc3326c1287", optional = true }
+# offscreen_gl_context = "0.25.1"
+# for offscreen_gl_context 0.25
+# sparkle 0.1.9 fails to compile on macOS targeting aarch64-linux-android
+# sparkle 0.1.25 is incompatible with offscreen_gl_context
+sparkle = { version = "=0.1.24", optional = true }
+clap = "2.33.0"
+ash = { version = "0.31", optional = true }
+# need to rename the package because of the feature with the same name.
+metal-rs = { package = "metal", version = "0.17.1", optional = true }
+# ... to access raw metal ptrs.
+foreign-types = { version = "0.3", optional = true }
+# ... for that NSAutoReleasePool to be able to free metal devices.
+cocoa = { version = "0.23", optional = true }
+objc = { version = "0.2.4", optional = true }

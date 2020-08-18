@@ -10,7 +10,11 @@ pub use self::context::*;
 mod types;
 pub use self::types::*;
 
+#[cfg(feature = "gl")]
 pub mod gl;
 
 #[cfg(feature = "vulkan")]
 pub mod vk;
+
+#[cfg(feature = "metal")]
+pub mod mtl;

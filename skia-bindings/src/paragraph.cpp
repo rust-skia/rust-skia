@@ -13,11 +13,40 @@
 #include "modules/skparagraph/include/TextStyle.h"
 #include "modules/skparagraph/include/TypefaceFontProvider.h"
 
+// m84: needs definition of SkFontData
+#include "src/core/SkFontDescriptor.h"
+
 using namespace skia::textlayout;
 
 //
 // FontCollection.h
 //
+
+struct Typefaces {
+    std::vector<sk_sp<SkTypeface>> typefaces;
+};
+
+extern "C" {
+    void C_Typefaces_construct(Typefaces* uninitialized) {
+        new(uninitialized)Typefaces();
+    }
+    
+    void C_Typefaces_destruct(Typefaces* self) {
+        self->~Typefaces();
+    }
+    
+    size_t C_Typefaces_count(const Typefaces* faces) {
+        return faces->typefaces.size();
+    }
+    
+    SkTypeface* C_Typefaces_get(const Typefaces* faces, size_t i) {
+        return faces->typefaces[i].get();
+    }
+    
+    SkTypeface* C_Typefaces_release(Typefaces* faces, size_t i) {
+        return faces->typefaces[i].release();
+    }
+}
 
 extern "C" {
     FontCollection* C_FontCollection_new() {
@@ -48,12 +77,9 @@ extern "C" {
         return self->getFallbackManager().release();
     }
 
-    SkTypeface* C_FontCollection_matchTypeface(FontCollection* self, const char* familyName, SkFontStyle fontStyle, const SkString* locale) {
-        return self->matchTypeface(familyName, fontStyle, *locale).release();
-    }
-
-    SkTypeface* C_FontCollection_matchDefaultTypeface(FontCollection* self, SkFontStyle fontStyle, const SkString* locale) {
-        return self->matchDefaultTypeface(fontStyle, *locale).release();
+    void C_FontCollection_findTypefaces(FontCollection* self, const SkStrings* familyNames, SkFontStyle fontStyle, Typefaces* typefaces) {
+        auto tfs = self->findTypefaces(familyNames->strings, fontStyle);
+        typefaces->typefaces = std::move(tfs);
     }
 
     SkTypeface* C_FontCollection_defaultFallback(FontCollection* self, SkUnichar unicode, SkFontStyle fontStyle, const SkString* locale) {
@@ -95,7 +121,7 @@ extern "C" {
     void C_StrutStyle_CopyConstruct(StrutStyle* uninitialized, const StrutStyle* other) {
         new(uninitialized) StrutStyle(*other);
     }
-
+    
     void C_StrutStyle_destruct(StrutStyle* self) {
         self->~StrutStyle();
     }
@@ -108,6 +134,10 @@ extern "C" {
 
     void C_StrutStyle_setFontFamilies(StrutStyle* self, const SkString* data, size_t count) {
         self->setFontFamilies(std::vector<SkString>(data, data + count));
+    }
+
+    bool C_StrutStyle_equals(const StrutStyle* self, const StrutStyle* rhs) {
+        return *self == *rhs;
     }
 }
 
@@ -296,7 +326,15 @@ extern "C" {
 
 extern "C" {
     void C_TextStyle_Types(const Block*, const Placeholder*) {}
-    
+
+    void C_FontFeature_CopyConstruct(FontFeature* uninitialized, const FontFeature* other) {
+        new(uninitialized) FontFeature(*other);
+    }
+
+    void C_FontFeature_destruct(FontFeature* self) {
+        self->~FontFeature();
+    }
+
     void C_TextStyle_CopyConstruct(TextStyle* uninitialized, const TextStyle* other) {
         new(uninitialized) TextStyle(*other);
     }
@@ -313,6 +351,14 @@ extern "C" {
         self->resetShadows();
     }
 
+    void C_TextStyle_addFontFeature(TextStyle* self, const SkString* fontFeature, int value) {
+        self->addFontFeature(*fontFeature, value);
+    }
+
+    void C_TextStyle_resetFontFeatures(TextStyle* self) {
+        self->resetFontFeatures();
+    }
+    
     const SkString* C_TextStyle_getFontFamilies(const TextStyle* self, size_t* count) {
         auto& v = self->getFontFamilies();
         *count = v.size();
@@ -328,16 +374,22 @@ extern "C" {
     }
 }
 
+struct FontFeatures {
+    std::vector<FontFeature> fontFeatures;
+};
+
+extern "C" const FontFeature *C_FontFeatures_ptr_count(const FontFeatures *features, size_t *count) {
+    *count = features->fontFeatures.size();
+    return &features->fontFeatures.front();
+}
 
 struct TextShadows {
     std::vector<TextShadow> textShadows;
 };
 
-extern "C" {
-    const TextShadow* C_TextShadows_ptr_count(const TextShadows* shadows, size_t* count) {
-        *count = shadows->textShadows.size();
-        return &shadows->textShadows.front();
-    }
+extern "C" const TextShadow *C_TextShadows_ptr_count(const TextShadows *shadows, size_t *count) {
+    *count = shadows->textShadows.size();
+    return &shadows->textShadows.front();
 }
 
 //

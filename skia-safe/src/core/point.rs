@@ -4,7 +4,7 @@ use skia_bindings as sb;
 use skia_bindings::{SkIPoint, SkPoint};
 use std::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
-pub type IVector = IPoint;
+pub use IPoint as IVector;
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
@@ -249,11 +249,6 @@ impl Point {
 
     pub fn set_length_xy(&mut self, x: scalar, y: scalar, length: scalar) -> bool {
         unsafe { self.native_mut().setLength1(x, y, length) }
-    }
-
-    #[deprecated(since = "0.12.0", note = "use set_length()")]
-    pub fn with_length(mut self, length: scalar) -> Option<Self> {
-        unsafe { self.native_mut().setLength(length) }.if_true_some(self)
     }
 
     #[must_use]

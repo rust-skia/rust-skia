@@ -1,0 +1,121 @@
+//! This file contains implementations for types that are
+//! re-exported in skia-safe.
+//!
+//! We could provide trait implementations in skia-safe, but then users of the library would have to
+//! import the implementation type _and_ the trait.
+//!
+//! See also: https://github.com/rust-lang/rfcs/issues/1880
+
+use crate::{
+    SkAlphaType, SkBlendMode, SkBlendModeCoeff, SkImage_CompressionType,
+    SkImage_kCompressionTypeCount, SkPathFillType, SkPathVerb, SkPath_Verb,
+};
+use std::ffi::CStr;
+
+impl SkBlendMode {
+    pub fn as_coeff(self) -> Option<(SkBlendModeCoeff, SkBlendModeCoeff)> {
+        let mut src = SkBlendModeCoeff::Zero;
+        let mut dst = SkBlendModeCoeff::Zero;
+        if unsafe { crate::SkBlendMode_AsCoeff(self, &mut src, &mut dst) } {
+            Some((src, dst))
+        } else {
+            None
+        }
+    }
+
+    pub fn name(self) -> &'static str {
+        unsafe {
+            let name_ptr = crate::SkBlendMode_Name(self);
+            CStr::from_ptr(name_ptr).to_str().unwrap()
+        }
+    }
+}
+
+//
+// m84 introduced two different variants of the Path verb types.
+// One with Done and one without.
+//
+
+impl SkPathVerb {
+    /// The maximum number of points an iterator will return for the verb.
+    pub const MAX_POINTS: usize = SkPath_Verb::MAX_POINTS;
+    /// The number of points an iterator will return for the verb.
+    pub fn points(self) -> usize {
+        SkPath_Verb::from(self).points()
+    }
+}
+
+impl SkPath_Verb {
+    /// The maximum number of points an iterator will return for the verb.
+    pub const MAX_POINTS: usize = 4;
+    /// The number of points an iterator will return for the verb.
+    pub fn points(self) -> usize {
+        match self {
+            SkPath_Verb::Move => 1,
+            SkPath_Verb::Line => 2,
+            SkPath_Verb::Quad => 3,
+            SkPath_Verb::Conic => 3,
+            SkPath_Verb::Cubic => 4,
+            SkPath_Verb::Close => 0,
+            SkPath_Verb::Done => 0,
+        }
+    }
+}
+
+impl From<SkPathVerb> for SkPath_Verb {
+    fn from(v: SkPathVerb) -> Self {
+        match v {
+            SkPathVerb::Move => SkPath_Verb::Move,
+            SkPathVerb::Line => SkPath_Verb::Line,
+            SkPathVerb::Quad => SkPath_Verb::Quad,
+            SkPathVerb::Conic => SkPath_Verb::Conic,
+            SkPathVerb::Cubic => SkPath_Verb::Cubic,
+            SkPathVerb::Close => SkPath_Verb::Close,
+        }
+    }
+}
+
+impl SkPathFillType {
+    pub fn is_even_odd(self) -> bool {
+        (self as i32 & 1) != 0
+    }
+
+    pub fn is_inverse(self) -> bool {
+        (self as i32 & 2) != 0
+    }
+
+    pub fn to_non_inverse(self) -> Self {
+        match self {
+            SkPathFillType::Winding => self,
+            SkPathFillType::EvenOdd => self,
+            SkPathFillType::InverseWinding => SkPathFillType::Winding,
+            SkPathFillType::InverseEvenOdd => SkPathFillType::EvenOdd,
+        }
+    }
+}
+
+impl SkAlphaType {
+    pub fn is_opaque(self) -> bool {
+        self == SkAlphaType::Opaque
+    }
+}
+
+impl SkImage_CompressionType {
+    pub const COUNT: usize = SkImage_kCompressionTypeCount as _;
+    #[deprecated(since = "0.27.0", note = "same as ETC2_RGB8_UNORM")]
+    pub const ETC1: Self = SkImage_CompressionType::ETC2_RGB8_UNORM;
+}
+
+#[cfg(feature = "gl")]
+impl From<crate::GrGLenum> for crate::GrGLFormat {
+    fn from(e: crate::GrGLenum) -> Self {
+        unsafe { crate::C_GrGLFormatFromGLEnum(e) }
+    }
+}
+
+#[cfg(feature = "gl")]
+impl From<crate::GrGLFormat> for crate::GrGLenum {
+    fn from(format: crate::GrGLFormat) -> Self {
+        unsafe { crate::C_GrGLFormatToEnum(format) }
+    }
+}
