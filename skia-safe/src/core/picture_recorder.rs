@@ -47,13 +47,16 @@ impl Handle<SkPictureRecorder> {
         Canvas::borrow_from_native(canvas_ref)
     }
 
-    pub fn recording_canvas(&mut self) -> &mut Canvas {
-        let canvas_ref = unsafe { &mut *self.native_mut().getRecordingCanvas() };
-
-        Canvas::borrow_from_native(canvas_ref)
+    pub fn recording_canvas(&mut self) -> Option<&mut Canvas> {
+        let canvas = unsafe { self.native_mut().getRecordingCanvas() };
+        if canvas.is_null() {
+            return None;
+        }
+        Some(Canvas::borrow_from_native(unsafe { &mut *canvas }))
     }
 
     pub fn finish_recording_as_picture(&mut self, cull_rect: Option<&Rect>) -> Option<Picture> {
+        self.recording_canvas()?;
         let cull_rect_ptr: *const SkRect =
             cull_rect.map(|r| r.native() as _).unwrap_or(ptr::null());
 
@@ -65,6 +68,7 @@ impl Handle<SkPictureRecorder> {
     }
 
     pub fn finish_recording_as_drawable(&mut self) -> Option<Drawable> {
+        self.recording_canvas()?;
         Drawable::from_ptr(unsafe {
             sb::C_SkPictureRecorder_finishRecordingAsDrawable(self.native_mut())
         })
