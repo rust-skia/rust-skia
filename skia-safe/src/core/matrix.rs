@@ -135,7 +135,7 @@ impl Matrix {
         }
     }
 
-    #[deprecated(since = "0.0.0", note = "use Matrix::scale()")]
+    #[deprecated(since = "0.33.0", note = "use Matrix::scale()")]
     pub fn new_scale(scale: (scalar, scalar)) -> Matrix {
         Self::scale(scale)
     }
@@ -146,7 +146,7 @@ impl Matrix {
         m
     }
 
-    #[deprecated(since = "0.0.0", note = "use Matrix::translate()")]
+    #[deprecated(since = "0.33.0", note = "use Matrix::translate()")]
     pub fn new_trans(d: impl Into<Vector>) -> Matrix {
         Self::translate(d)
     }

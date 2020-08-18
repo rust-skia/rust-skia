@@ -496,7 +496,7 @@ impl RCHandle<SkImage> {
     }
 
     #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.0.0", note = "use flushAndSubmit()")]
+    #[deprecated(since = "0.33.0", note = "use flushAndSubmit()")]
     pub fn flush(&mut self, context: &mut gpu::Context) {
         self.flush_and_submit(context)
     }

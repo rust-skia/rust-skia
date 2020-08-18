@@ -148,7 +148,7 @@ impl RCHandle<SkRuntimeEffect> {
         })
     }
 
-    #[deprecated(since = "0.0.0", note = "removed without replacement")]
+    #[deprecated(since = "0.33.0", note = "removed without replacement")]
     pub fn make_color_filter_with_children(
         &mut self,
         _inputs: impl Into<Data>,

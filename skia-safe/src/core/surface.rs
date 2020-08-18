@@ -121,7 +121,7 @@ impl RCHandle<SkSurface> {
         })
     }
 
-    #[deprecated(since = "0.0.0", note = "removed without replacement")]
+    #[deprecated(since = "0.33.0", note = "removed without replacement")]
     pub fn from_backend_texture_as_render_target(
         _context: &mut gpu::Context,
         _backend_texture: &gpu::BackendTexture,
