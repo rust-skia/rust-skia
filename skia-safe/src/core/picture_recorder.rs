@@ -74,3 +74,38 @@ impl Handle<SkPictureRecorder> {
         })
     }
 }
+
+#[test]
+fn good_case() {
+    let mut recorder = PictureRecorder::new();
+    let canvas = recorder.begin_recording(&Rect::new(0.0, 0.0, 100.0, 100.0), None, None);
+    canvas.clear(crate::Color::WHITE);
+    let _picture = recorder.finish_recording_as_picture(None).unwrap();
+}
+
+#[test]
+fn begin_recording_two_times() {
+    let mut recorder = PictureRecorder::new();
+    let canvas = recorder.begin_recording(&Rect::new(0.0, 0.0, 100.0, 100.0), None, None);
+    canvas.clear(crate::Color::WHITE);
+    assert!(recorder.recording_canvas().is_some());
+    let canvas = recorder.begin_recording(&Rect::new(0.0, 0.0, 100.0, 100.0), None, None);
+    canvas.clear(crate::Color::WHITE);
+    assert!(recorder.recording_canvas().is_some());
+}
+
+#[test]
+fn finishing_recording_two_times() {
+    let mut recorder = PictureRecorder::new();
+    let canvas = recorder.begin_recording(&Rect::new(0.0, 0.0, 100.0, 100.0), None, None);
+    canvas.clear(crate::Color::WHITE);
+    assert!(recorder.finish_recording_as_picture(None).is_some());
+    assert!(recorder.recording_canvas().is_none());
+    assert!(recorder.finish_recording_as_picture(None).is_none());
+}
+
+#[test]
+fn not_recording_no_canvas() {
+    let mut recorder = PictureRecorder::new();
+    assert!(recorder.recording_canvas().is_none());
+}
