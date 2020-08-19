@@ -310,6 +310,7 @@ impl RCHandle<SkImage> {
         image_size: impl Into<ISize>,
         image_origin: gpu::SurfaceOrigin,
         image_color_space: impl Into<Option<ColorSpace>>,
+        // TODO: m85 introduced textureReleaseProc and releaseContext here.
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_MakeFromYUVATextures(
@@ -451,6 +452,27 @@ impl RCHandle<SkImage> {
         .unwrap()
     }
 
+    pub fn to_shader_with_quality<'a>(
+        &self,
+        tile_modes: impl Into<Option<(TileMode, TileMode)>>,
+        local_matrix: impl Into<Option<&'a Matrix>>,
+        filter_quality: FilterQuality,
+    ) -> Shader {
+        let tile_modes = tile_modes.into();
+        let tm1 = tile_modes.map(|m| m.0).unwrap_or_default();
+        let tm2 = tile_modes.map(|m| m.1).unwrap_or_default();
+        Shader::from_ptr(unsafe {
+            sb::C_SkImage_makeShader2(
+                self.native(),
+                tm1,
+                tm2,
+                local_matrix.into().native_ptr_or_null(),
+                filter_quality,
+            )
+        })
+        .unwrap()
+    }
+
     pub fn peek_pixels(&self) -> Option<Borrows<Pixmap>> {
         let mut pixmap = Pixmap::default();
         unsafe { self.native().peekPixels(pixmap.native_mut()) }
@@ -469,8 +491,14 @@ impl RCHandle<SkImage> {
     // TODO: flush(GrContext*, GrFlushInfo&).
 
     #[cfg(feature = "gpu")]
+    pub fn flush_and_submit(&mut self, context: &mut gpu::Context) {
+        unsafe { self.native_mut().flushAndSubmit(context.native_mut()) }
+    }
+
+    #[cfg(feature = "gpu")]
+    #[deprecated(since = "0.33.0", note = "use flushAndSubmit()")]
     pub fn flush(&mut self, context: &mut gpu::Context) {
-        unsafe { self.native_mut().flush1(context.native_mut()) }
+        self.flush_and_submit(context)
     }
 
     #[cfg(feature = "gpu")]

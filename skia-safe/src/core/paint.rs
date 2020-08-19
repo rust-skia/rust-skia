@@ -121,6 +121,11 @@ impl Handle<SkPaint> {
         self
     }
 
+    pub fn set_stroke(&mut self, stroke: bool) -> &mut Self {
+        unsafe { self.native_mut().setStroke(stroke) }
+        self
+    }
+
     pub fn color(&self) -> Color {
         self.color4f().to_color()
     }

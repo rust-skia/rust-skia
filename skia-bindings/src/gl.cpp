@@ -136,3 +136,11 @@ extern "C" GrContext* C_GrContext_MakeGL(GrGLInterface* interface) {
 extern "C" void C_GrBackendFormat_ConstructGL(GrBackendFormat* uninitialized, GrGLenum format, GrGLenum target) {
     new(uninitialized)GrBackendFormat(GrBackendFormat::MakeGL(format, target));
 }
+
+extern "C" void C_GrBackendTexture_ConstructGL(GrBackendTexture* uninitialized, int width, int height, GrMipMapped mipMapped, const GrGLTextureInfo* glInfo) {
+    new(uninitialized)GrBackendTexture(width, height, mipMapped, *glInfo);
+}
+
+extern "C" void C_GrBackendRenderTarget_ConstructGL(GrBackendRenderTarget* uninitialized, int width, int height, int sampleCnt, int stencilBits, const GrGLFramebufferInfo* glInfo) {
+    new(uninitialized)GrBackendRenderTarget(width, height, sampleCnt, stencilBits, *glInfo);
+}

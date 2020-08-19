@@ -4,6 +4,9 @@ pub use self::backend_drawable_info::*;
 mod backend_surface;
 pub use self::backend_surface::*;
 
+mod backend_surface_mutable_state;
+pub use self::backend_surface_mutable_state::*;
+
 mod context;
 pub use self::context::*;
 

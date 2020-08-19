@@ -3,6 +3,7 @@ use crate::{scalar, BlurStyle, Color, NativeFlattenable, Paint, Rect, Vector};
 use skia_bindings as sb;
 use skia_bindings::{SkDrawLooper, SkDrawLooper_BlurShadowRec, SkFlattenable, SkRefCntBase};
 
+#[deprecated(since = "0.33.0", note = "No longer supported.")]
 pub type DrawLooper = RCHandle<SkDrawLooper>;
 
 impl NativeBase<SkRefCntBase> for SkDrawLooper {}

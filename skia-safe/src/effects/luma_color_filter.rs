@@ -12,5 +12,3 @@ impl RCHandle<SkColorFilter> {
 pub fn new() -> ColorFilter {
     ColorFilter::from_ptr(unsafe { sb::C_SkLumaColorFilter_Make() }).unwrap()
 }
-
-// TODO: asFragmentProcessor()

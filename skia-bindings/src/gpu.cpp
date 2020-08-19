@@ -45,23 +45,6 @@ extern "C" SkSurface* C_SkSurface_MakeFromBackendRenderTarget(
             surfaceProps).release();
 }
 
-extern "C" SkSurface* C_SkSurface_MakeFromBackendTextureAsRenderTarget(
-        GrContext* context,
-        const GrBackendTexture* backendTexture,
-        GrSurfaceOrigin origin,
-        int sampleCnt,
-        SkColorType colorType,
-        SkColorSpace* colorSpace,
-        const SkSurfaceProps* surfaceProps) {
-    return SkSurface::MakeFromBackendTextureAsRenderTarget(
-            context,
-            *backendTexture,
-            origin,
-            sampleCnt,
-            colorType,
-            sp(colorSpace), surfaceProps).release();
-}
-
 extern "C" SkSurface* C_SkSurface_MakeRenderTarget(
     GrContext* context,
     SkBudgeted budgeted,
@@ -173,6 +156,14 @@ extern "C" void C_GrBackendFormat_destruct(GrBackendFormat* self) {
 
 extern "C" bool C_GrBackendFormat_Equals(const GrBackendFormat* lhs, const GrBackendFormat* rhs) {
     return *lhs == *rhs;
+}
+
+//
+// gpu/GrBackendSurfaceMutableState.h
+//
+
+extern "C" void C_GrBackendSurfaceMutableState_destruct(GrBackendSurfaceMutableState* self) {
+    self->~GrBackendSurfaceMutableState();
 }
 
 //

@@ -14,8 +14,8 @@ impl NativeDrop for SkCustomTypefaceBuilder {
 }
 
 impl Handle<SkCustomTypefaceBuilder> {
-    pub fn new(num_glyphs: usize) -> Self {
-        Self::from_native(unsafe { SkCustomTypefaceBuilder::new(num_glyphs.try_into().unwrap()) })
+    pub fn new() -> Self {
+        Self::from_native(unsafe { SkCustomTypefaceBuilder::new() })
     }
 
     pub fn set_glyph<'a>(
@@ -83,7 +83,7 @@ impl From<(&Image, f32)> for TypefaceGlyph<'_> {
 
 #[test]
 fn build_custom_typeface() {
-    let mut builder = CustomTypefaceBuilder::new(2);
+    let mut builder = CustomTypefaceBuilder::new();
     let path = Path::new();
     builder.set_glyph(10u16, 0.0, &path);
     builder.set_glyph(11u16, 0.0, &path);

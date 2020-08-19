@@ -380,7 +380,7 @@ fn draw_path_2d_effect(canvas: &mut Canvas) {
         ));
     }
     path.close();
-    let matrix = &Matrix::new_scale((4.0 * scale, 4.0 * scale));
+    let matrix = &Matrix::scale((4.0 * scale, 4.0 * scale));
     let paint = &mut Paint::default();
     paint
         .set_path_effect(path_2d_path_effect::new(matrix, path))

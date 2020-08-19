@@ -1,5 +1,6 @@
 use crate::prelude::*;
-use crate::{BlendMode, DrawLooper, Vector};
+use crate::DrawLooper;
+use crate::{BlendMode, Vector};
 use skia_bindings as sb;
 use skia_bindings::{SkLayerDrawLooper_Builder, SkLayerDrawLooper_LayerInfo, SkPaint};
 

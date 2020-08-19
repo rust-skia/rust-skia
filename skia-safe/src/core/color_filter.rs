@@ -35,21 +35,24 @@ impl RCHandle<SkColorFilter> {
     pub fn to_a_color_mode(&self) -> Option<(Color, BlendMode)> {
         let mut color: Color = 0.into();
         let mut mode: BlendMode = Default::default();
-        unsafe { sb::C_SkColorFilter_asAColorMode(self.native(), color.native_mut(), &mut mode) }
+        unsafe { self.native().asAColorMode(color.native_mut(), &mut mode) }
             .if_true_some((color, mode))
     }
 
     pub fn to_a_color_matrix(&self) -> Option<[scalar; 20]> {
         let mut matrix: [scalar; 20] = Default::default();
-        unsafe { sb::C_SkColorFilter_asAColorMatrix(self.native(), matrix.as_mut_ptr()) }
-            .if_true_some(matrix)
+        unsafe { self.native().asAColorMatrix(&mut matrix[0]) }.if_true_some(matrix)
     }
 
     // TODO: appendStages()
     // TODO: program()
 
     pub fn flags(&self) -> self::Flags {
-        Flags::from_bits_truncate(unsafe { sb::C_SkColorFilter_getFlags(self.native()) })
+        Flags::from_bits_truncate(unsafe { self.native().getFlags() })
+    }
+
+    pub fn is_alpha_unchanged(&self) -> bool {
+        unsafe { self.native().isAlphaUnchanged() }
     }
 
     pub fn filter_color(&self, color: impl Into<Color>) -> Color {

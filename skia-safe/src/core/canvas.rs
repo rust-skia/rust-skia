@@ -2,15 +2,14 @@
 use crate::gpu;
 use crate::prelude::*;
 use crate::{
-    scalar, Bitmap, BlendMode, ClipOp, Color, Data, Font, IPoint, IRect, ISize, Image, ImageFilter,
-    ImageInfo, Matrix, Paint, Path, Picture, Point, QuickReject, RRect, Rect, Region, Shader,
-    Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices, M44,
+    scalar, Bitmap, BlendMode, ClipOp, Color, Color4f, Data, Font, IPoint, IRect, ISize, Image,
+    ImageFilter, ImageInfo, Matrix, Paint, Path, Picture, Point, QuickReject, RRect, Rect, Region,
+    Shader, Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices, M44,
 };
 use crate::{u8cpu, Drawable, Pixmap};
 use skia_bindings as sb;
 use skia_bindings::{
-    SkAutoCanvasRestore, SkCanvas, SkCanvas_SaveLayerRec, SkImage, SkImageFilter, SkMatrix,
-    SkPaint, SkRect,
+    SkAutoCanvasRestore, SkCanvas, SkCanvas_SaveLayerRec, SkImageFilter, SkPaint, SkRect,
 };
 use std::convert::TryInto;
 use std::ffi::CString;
@@ -38,10 +37,6 @@ pub struct SaveLayerRec<'a> {
     bounds: Option<&'a SkRect>,
     paint: Option<&'a SkPaint>,
     backdrop: Option<&'a SkImageFilter>,
-    // experimental
-    clip_mask: Option<&'a SkImage>,
-    // experimental
-    clip_matrix: Option<&'a SkMatrix>,
     flags: SaveLayerFlags,
 }
 
@@ -58,8 +53,6 @@ impl<'a> Default for SaveLayerRec<'a> {
             bounds: None,
             paint: None,
             backdrop: None,
-            clip_mask: None,
-            clip_matrix: None,
             flags: SaveLayerFlags::empty(),
         }
     }
@@ -87,18 +80,20 @@ impl<'a> SaveLayerRec<'a> {
         }
     }
 
-    pub fn clip_mask(self, clip_mask: &'a Image) -> Self {
-        Self {
-            clip_mask: Some(clip_mask.native()),
-            ..self
-        }
+    #[deprecated(
+        since = "0.33.0",
+        note = "removed without replacement, does not set clip_mask"
+    )]
+    pub fn clip_mask(self, _clip_mask: &'a Image) -> Self {
+        self
     }
 
-    pub fn clip_matrix(self, clip_matrix: &'a Matrix) -> Self {
-        Self {
-            clip_matrix: Some(clip_matrix.native()),
-            ..self
-        }
+    #[deprecated(
+        since = "0.33.0",
+        note = "removed without replacement, does not set clip_matrix"
+    )]
+    pub fn clip_matrix(self, _clip_matrix: &'a Matrix) -> Self {
+        self
     }
 
     pub fn flags(self, flags: SaveLayerFlags) -> Self {
@@ -582,17 +577,17 @@ impl Canvas {
 
     pub fn draw_color(
         &mut self,
-        color: impl Into<Color>,
+        color: impl Into<Color4f>,
         mode: impl Into<Option<BlendMode>>,
     ) -> &mut Self {
         unsafe {
             self.native_mut()
-                .drawColor(color.into().into_native(), mode.into().unwrap_or_default())
+                .drawColor(&color.into().into_native(), mode.into().unwrap_or_default())
         }
         self
     }
 
-    pub fn clear(&mut self, color: impl Into<Color>) -> &mut Self {
+    pub fn clear(&mut self, color: impl Into<Color4f>) -> &mut Self {
         self.draw_color(color, BlendMode::Src)
     }
 
@@ -1178,8 +1173,8 @@ impl AutoCanvasRestore {
 #[cfg(test)]
 mod tests {
     use crate::{
-        canvas::SaveLayerRec, AlphaType, Canvas, ClipOp, Color, ColorType, ImageInfo, Matrix,
-        OwnedCanvas, Rect,
+        canvas::SaveLayerFlags, canvas::SaveLayerRec, AlphaType, Canvas, ClipOp, Color, ColorType,
+        ImageInfo, Matrix, OwnedCanvas, Rect,
     };
 
     #[test]
@@ -1220,9 +1215,9 @@ mod tests {
     fn test_save_layer_rec_lifetimes() {
         let rect = Rect::default();
         {
-            let matrix = Matrix::default();
-
-            let _rec = SaveLayerRec::default().clip_matrix(&matrix).bounds(&rect);
+            let _rec = SaveLayerRec::default()
+                .flags(SaveLayerFlags::PRESERVE_LCD_TEXT)
+                .bounds(&rect);
         }
     }
 

@@ -36,6 +36,7 @@
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPath.h"
+#include "include/core/SkPathBuilder.h"
 #include "include/core/SkPathMeasure.h"
 #include "include/core/SkPathTypes.h"
 #include "include/core/SkPicture.h"
@@ -99,6 +100,7 @@
 
 #include "include/effects/SkPerlinNoiseShader.h"
 #include "include/effects/SkShaderMaskFilter.h"
+#include "include/effects/SkStrokeAndFillPathEffect.h"
 #include "include/effects/SkTableColorFilter.h"
 #include "include/effects/SkTableMaskFilter.h"
 #include "include/effects/SkTileImageFilter.h"
@@ -279,6 +281,11 @@ extern "C" SkImage* C_SkImage_MakeFromPicture(
 
 extern "C" SkShader* C_SkImage_makeShader(const SkImage* self, SkTileMode tileMode1, SkTileMode tileMode2, const SkMatrix* localMatrix) {
     return self->makeShader(tileMode1, tileMode2, localMatrix).release();
+}
+
+extern "C" SkShader *C_SkImage_makeShader2(const SkImage *self, SkTileMode tileMode1, SkTileMode tileMode2, const SkMatrix *localMatrix, SkFilterQuality filterQuality)
+{
+    return self->makeShader(tileMode1, tileMode2, localMatrix, filterQuality).release();
 }
 
 extern "C" SkData* C_SkImage_encodeToData(const SkImage* self, SkEncodedImageFormat imageFormat, int quality) {
@@ -495,6 +502,31 @@ extern "C" const SkRect* C_SkPath_getBounds(const SkPath* self) {
 
 extern "C" uint32_t C_SkPath_getSegmentMasks(const SkPath* self) {
     return self->getSegmentMasks();
+}
+
+//
+// core/SkPathBuilder.h
+//
+
+extern "C" void C_SkPathBuilder_destruct(SkPathBuilder* self) {
+    self->~SkPathBuilder();
+}
+
+extern "C" void C_SkPathBuilder_snapshot(SkPathBuilder* self, SkPath* path) {
+    *path = self->snapshot();
+}
+
+extern "C" void C_SkPathBuilder_detach(SkPathBuilder* self, SkPath* path) {
+    *path = self->detach();
+}
+
+extern "C" void C_SkPathBuilder_Make(
+    const SkPoint *points, int pointCount,
+    const uint8_t *verbs, int verbCount,
+    const SkScalar *weights, int cubicWeightCount,
+    SkPathFillType fillType, bool isVolatile, SkPath *path)
+{
+    *path = SkPathBuilder::Make(points, pointCount, verbs, verbCount, weights, cubicWeightCount, fillType, isVolatile);
 }
 
 //
@@ -1364,20 +1396,10 @@ extern "C" SkColorFilter* C_SkColorFilter_makeComposed(const SkColorFilter* self
     return self->makeComposed(sp(inner)).release();
 }
 
-extern "C" bool C_SkColorFilter_asAColorMode(const SkColorFilter* self, SkColor* color, SkBlendMode* mode) {
-    return self->asAColorMode(color, mode);
-}
-
-extern "C" bool C_SkColorFilter_asAColorMatrix(const SkColorFilter* self, SkScalar matrix[20]) {
-    return self->asAColorMatrix(matrix);
-}
-
-extern "C" uint32_t C_SkColorFilter_getFlags(const SkColorFilter* self) {
-    return self->getFlags();
-}
-
-extern "C" SkColorFilter* C_SkColorFilter_Deserialize(const void* data, size_t size) {
-    return SkColorFilter::Deserialize(data, size).release();
+extern "C" SkColorFilter* C_SkColorFilter_Deserialize(const void* data, size_t length) {
+    // TODO: there is no "official" Deserialize wrapper in SkColorFilter, so we
+    //       are not sure if deserialization is supported at all.
+    return static_cast<SkColorFilter*>(SkFlattenable::Deserialize(SkFlattenable::kSkColorFilter_Type, data, length).release());
 }
 
 //
@@ -2249,12 +2271,6 @@ SkShader *C_SkRuntimeEffect_makeShader(SkRuntimeEffect *self, SkData *inputs, Sk
     return self->makeShader(sp(inputs), childrenSPs, childCount, localMatrix, isOpaque).release();
 }
 
-SkColorFilter *
-C_SkRuntimeEffect_makeColorFilter2(SkRuntimeEffect *self, SkData *inputs, SkColorFilter **children, size_t childCount) {
-    auto childrenSPs = reinterpret_cast<sk_sp<SkColorFilter> *>(children);
-    return self->makeColorFilter(sp(inputs), childrenSPs, childCount).release();
-}
-
 SkColorFilter* C_SkRuntimeEffect_makeColorFilter(SkRuntimeEffect* self, SkData* inputs) {
     return self->makeColorFilter(sp(inputs)).release();
 }
@@ -2293,6 +2309,14 @@ const SkRuntimeEffect::Varying* C_SkRuntimeEffect_varyings(const SkRuntimeEffect
 
 extern "C" SkMaskFilter* C_SkShaderMaskFilter_Make(SkShader* shader) {
     return SkShaderMaskFilter::Make(sp(shader)).release();
+}
+
+//
+// effects/SkStrokeAndFillPathEffect.h
+//
+
+extern "C" SkPathEffect* C_SkStrokeAndFillePathEffect_Make() {
+    return SkStrokeAndFillPathEffect::Make().release();
 }
 
 //
