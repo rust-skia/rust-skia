@@ -2,8 +2,9 @@
 use super::d3d;
 #[cfg(feature = "gl")]
 use super::gl;
-#[cfg(feature = "vulkan")]
-use super::{vk, BackendRenderTarget, BackendSurfaceMutableState, BackendTexture};
+#[cfg(feature = "vk")]
+use super::vk;
+use super::{BackendRenderTarget, BackendSurfaceMutableState, BackendTexture};
 use crate::gpu::{BackendFormat, MipMapped, Renderable};
 use crate::prelude::*;
 use crate::{image, ColorType, Data, Image};
