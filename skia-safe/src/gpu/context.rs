@@ -2,7 +2,7 @@
 use super::d3d;
 #[cfg(feature = "gl")]
 use super::gl;
-#[cfg(feature = "vk")]
+#[cfg(feature = "vulkan")]
 use super::vk;
 use super::{BackendRenderTarget, BackendSurfaceMutableState, BackendTexture};
 use crate::gpu::{BackendFormat, MipMapped, Renderable};
