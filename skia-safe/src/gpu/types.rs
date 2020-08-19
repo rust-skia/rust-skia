@@ -40,10 +40,11 @@ fn test_surface_origin_naming() {
 
 // Note: BackendState is in gl/types.rs/
 
+// i32 on Windows, u32 on macOS, so we'd prefer to mal it to unsigned type in Rust.
 bitflags! {
-    pub struct FlushFlags: i32 {
-        const NONE = sb::GrFlushFlags_kNone_GrFlushFlags;
-        const SYNC_CPU = sb::GrFlushFlags_kSyncCpu_GrFlushFlag;
+    pub struct FlushFlags: u32 {
+        const NONE = sb::GrFlushFlags_kNone_GrFlushFlags as _;
+        const SYNC_CPU = sb::GrFlushFlags_kSyncCpu_GrFlushFlag as _;
     }
 }
 
