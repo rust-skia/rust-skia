@@ -588,12 +588,11 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         .default_enum_style(EnumVariation::Rust {
             non_exhaustive: false,
         })
+        .size_t_is_usize(true)
         .parse_callbacks(Box::new(ParseCallbacks))
         .raw_line("#![allow(clippy::all)]")
         // GrVkBackendContext contains u128 fields on macOS
         .raw_line("#![allow(improper_ctypes)]")
-        .size_t_is_usize(true)
-        .parse_callbacks(Box::new(ParseCallbacks))
         .whitelist_function("C_.*")
         .constified_enum(".*Mask")
         .constified_enum(".*Flags")
