@@ -25,6 +25,8 @@ Skia-safe wraps most parts of the public Skia C++ APIs:
   - [x] Vulkan
   - [x] OpenGL
   - [x] Metal
+  - [x] Direct3D
+  - [ ] WebGPU [Dawn](https://dawn.googlesource.com/dawn/)
 
 Wrappers for functions that take callbacks and virtual classes are not supported right now. While we think they should be wrapped, the use cases related seem to be rather special, so we postponed that for now.
 
@@ -53,6 +55,10 @@ Note that Vulkan drivers need to be available. On Windows, they are most likely 
 ### `metal`
 
 Support for Metal on macOS and iOS targets can be enabled by adding the feature `metal`.
+
+### `d3d`
+
+The Direct3D backend can be enabled for Windows targets by adding the feature `d3d`.
 
 ### `textlayout`
 

@@ -9,7 +9,7 @@ Skia Submodule Status: chrome/m85 ([pending changes][skiapending], [our changes]
 
 ## Goals
 
-This project attempts to provide _up to date_ safe bindings that bridge idiomatic Rust with Skia's C++ API on all major desktop and mobile platforms, including GPU rendering support for [Vulkan](https://en.wikipedia.org/wiki/Vulkan_(API)), [Metal](https://en.wikipedia.org/wiki/Metal_(API)), and [OpenGL](https://en.wikipedia.org/wiki/OpenGL).
+This project provides _up to date_ safe bindings that bridge idiomatic Rust with Skia's C++ API on desktop and mobile platforms, including GPU rendering backends for [Vulkan](https://en.wikipedia.org/wiki/Vulkan_(API)), [Metal](https://en.wikipedia.org/wiki/Metal_(API)), [OpenGL](https://en.wikipedia.org/wiki/OpenGL), and [Direct3D](https://en.wikipedia.org/wiki/Direct3D).
 
 ## Status
 
@@ -248,7 +248,7 @@ cargo run -- --help
 
 ### gl-window
 
-An example that opens an OpenGL Window and draws a line with skia-safe (contributed by [@nornagon](https://github.com/nornagon)).
+An example that opens an OpenGL Window and draws the rust-skia icon with skia-safe (contributed by [@nornagon](https://github.com/nornagon)).
 
 ```bash
 (cd skia-safe && cargo run --example gl-window --features "gl")
