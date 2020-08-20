@@ -119,3 +119,30 @@ impl From<crate::GrGLFormat> for crate::GrGLenum {
         unsafe { crate::C_GrGLFormatToEnum(format) }
     }
 }
+
+#[cfg(feature = "d3d")]
+mod d3d {
+    use std::marker::PhantomData;
+
+    impl<T> Default for crate::gr_cp<T> {
+        fn default() -> Self {
+            Self {
+                fObject: std::ptr::null_mut(),
+                _phantom_0: PhantomData,
+            }
+        }
+    }
+
+    impl Default for crate::GrD3DTextureResourceInfo {
+        fn default() -> Self {
+            Self {
+                fResource: Default::default(),
+                fResourceState: crate::D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON,
+                fFormat: crate::DXGI_FORMAT::DXGI_FORMAT_UNKNOWN,
+                fLevelCount: 0,
+                fSampleQualityLevel: 0,
+                fProtected: crate::GrProtected::No,
+            }
+        }
+    }
+}

@@ -21,3 +21,6 @@ pub mod vk;
 
 #[cfg(feature = "metal")]
 pub mod mtl;
+
+#[cfg(feature = "d3d")]
+pub mod d3d;

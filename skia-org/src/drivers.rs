@@ -17,6 +17,10 @@ pub use svg::SVG;
 pub mod vulkan;
 #[cfg(feature = "vulkan")]
 pub use vulkan::Vulkan;
+#[cfg(feature = "d3d")]
+pub mod d3d;
+#[cfg(feature = "d3d")]
+pub use d3d::D3D;
 
 pub trait DrawingDriver {
     const NAME: &'static str;

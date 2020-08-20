@@ -1,7 +1,10 @@
+#[cfg(feature = "d3d")]
+use super::d3d;
 #[cfg(feature = "gl")]
 use super::gl;
 #[cfg(feature = "vulkan")]
-use super::{vk, BackendRenderTarget, BackendSurfaceMutableState, BackendTexture};
+use super::vk;
+use super::{BackendRenderTarget, BackendSurfaceMutableState, BackendTexture};
 use crate::gpu::{BackendFormat, MipMapped, Renderable};
 use crate::prelude::*;
 use crate::{image, ColorType, Data, Image};
@@ -56,6 +59,12 @@ impl RCHandle<GrContext> {
         queue: *mut std::ffi::c_void,
     ) -> Option<Context> {
         Context::from_ptr(sb::C_GrContext_MakeMetal(device, queue))
+    }
+
+    // TODO: support variant with GrContextOptions
+    #[cfg(feature = "d3d")]
+    pub unsafe fn new_d3d(backend_context: &d3d::BackendContext) -> Option<Context> {
+        Context::from_ptr(sb::C_GrContext_MakeDirect3D(backend_context.native()))
     }
 
     // TODO: threadSafeProxy()

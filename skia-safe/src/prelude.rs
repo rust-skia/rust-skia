@@ -664,12 +664,18 @@ pub trait NativeTransmutable<NT: Sized>: Sized {
 
     /// Copies the native value to an equivalent Rust value.
     fn from_native(nt: NT) -> Self {
-        unsafe { mem::transmute_copy::<NT, Self>(&nt) }
+        let r = unsafe { mem::transmute_copy::<NT, Self>(&nt) };
+        // don't drop, the Rust type takes over.
+        mem::forget(nt);
+        r
     }
 
     /// Copies the rust type to an equivalent instance of the native type.
     fn into_native(self) -> NT {
-        unsafe { mem::transmute_copy::<Self, NT>(&self) }
+        let r = unsafe { mem::transmute_copy::<Self, NT>(&self) };
+        // don't drop, the native type takes over.
+        mem::forget(self);
+        r
     }
 
     /// Provides access to the Rust value through a

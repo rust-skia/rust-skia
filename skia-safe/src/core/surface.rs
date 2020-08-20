@@ -21,6 +21,12 @@ fn test_surface_backend_handle_access_naming() {
     let _ = BackendHandleAccess::FlushWrite;
 }
 
+pub use skia_bindings::SkSurface_BackendSurfaceAccess as BackendSurfaceAccess;
+#[test]
+fn test_surface_backend_surface_access_naming() {
+    let _ = BackendSurfaceAccess::Present;
+}
+
 pub type Surface = RCHandle<SkSurface>;
 
 impl NativeRefCountedBase for SkSurface {
@@ -459,11 +465,20 @@ impl RCHandle<SkSurface> {
     }
 
     #[deprecated(since = "0.30.0", note = "Use flush_and_submit()")]
+    // when removed, replace it with flush_with_access() and deprecate it.
     pub fn flush(&mut self) {
         self.flush_and_submit()
     }
 
-    // TODO: flush(BackendSurfaceAccess, FlushInfo)
+    #[cfg(feature = "gpu")]
+    pub fn flush_with_access_info(
+        &mut self,
+        access: BackendSurfaceAccess,
+        info: &gpu::FlushInfo,
+    ) -> gpu::SemaphoresSubmitted {
+        unsafe { self.native_mut().flush(access, info.native()) }
+    }
+
     // TODO: flush(FlushInfo, GrBackendSurfaceMutableState)
     // TODO: wait()
 
