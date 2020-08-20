@@ -155,13 +155,13 @@ For example, to compile for `aarch64`:
    ```bash
    rustup target install aarch64-linux-android
    ```
-2. Download the [r21b NDK](https://developer.android.com/ndk/downloads) for your host architecture and unzip it.
+2. Download the [r21d NDK](https://developer.android.com/ndk/downloads) for your host architecture and unzip it.
 3. Compile your package for the `aarch64-linux-android` target:
 
 On **macOS**:
 
 ```bash
-export ANDROID_NDK=:path-to-android-ndk-r21b
+export ANDROID_NDK=:path-to-android-ndk-r21d
 export PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin
 export CC_aarch64_linux_android=aarch64-linux-android26-clang
 export CXX_aarch64_linux_android=aarch64-linux-android26-clang++
@@ -175,7 +175,7 @@ Note: we don't support Apple's Clang 11 to build for Android on macOS, so you ne
 On **Linux**:
 
 ```bash
-export ANDROID_NDK=:path-to-android-ndk-r21b
+export ANDROID_NDK=:path-to-android-ndk-r21d
 export PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin
 export CC_aarch64_linux_android=aarch64-linux-android26-clang
 export CXX_aarch64_linux_android=aarch64-linux-android26-clang++
@@ -187,7 +187,7 @@ cargo build -vv --target aarch64-linux-android
 On **Windows** the Android NDK clang executable must be invoked through `.cmd` scripts:
 
 ```bash
-export ANDROID_NDK=:path-to-android-ndk-r21b
+export ANDROID_NDK=:path-to-android-ndk-r21d
 export PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/windows-x86_64/bin
 export CC_aarch64_linux_android=aarch64-linux-android26-clang.cmd
 export CXX_aarch64_linux_android=aarch64-linux-android26-clang++.cmd
