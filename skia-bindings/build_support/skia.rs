@@ -27,12 +27,7 @@ mod feature_id {
 /// The defaults for the Skia build configuration.
 impl Default for BuildConfiguration {
     fn default() -> Self {
-        let skia_debug = {
-            match cargo::env_var("SKIA_DEBUG") {
-                Some(v) if v != "0" => true,
-                _ => false,
-            }
-        };
+        let skia_debug = matches!(cargo::env_var("SKIA_DEBUG"), Some(v) if v != "0");
 
         BuildConfiguration {
             on_windows: cargo::host().is_windows(),
@@ -1288,10 +1283,8 @@ mod prerequisites {
         // infra/ contains very long filenames which may hit the max path restriction on Windows.
         // https://github.com/rust-skia/rust-skia/issues/169
         fn filter_skia(p: &Path) -> bool {
-            match p.components().next() {
-                Some(Component::Normal(name)) if name == OsStr::new("infra") => false,
-                _ => true,
-            }
+            !matches!(p.components().next(),
+                Some(Component::Normal(name)) if name == OsStr::new("infra"))
         }
 
         // we need only ninja from depot_tools.

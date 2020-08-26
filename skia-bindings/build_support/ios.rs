@@ -45,10 +45,7 @@ fn sdk_path(arch: &str) -> PathBuf {
 
 /// Returns true if the target architecture indicates that a simulator build is needed.
 fn is_simulator(arch: &str) -> bool {
-    match arch {
-        "x86_64" => true,
-        _ => false,
-    }
+    matches!(arch, "x86_64")
 }
 
 pub(crate) fn link_libraries(features: &Features) -> Vec<&str> {
