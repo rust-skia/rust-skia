@@ -83,7 +83,7 @@ jobs:
         architecture: 'x64'
     - bash: |
         set -e
-        choco install llvm --version 9.0.0
+        choco install llvm --version 10.0.0
       displayName: Install LLVM on Windows
 
   # All platforms (Linux images have Rust preinstalled and in the PATH).
