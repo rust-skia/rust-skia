@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 // cargo 1.45.1 / rustfmt 1.4.17-stable fails to process the relative path on Windows.
 #[rustfmt::skip]
 #[path = "../icon/renderer.rs"]
