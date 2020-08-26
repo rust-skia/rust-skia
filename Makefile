@@ -22,7 +22,7 @@ crate-bindings-binaries:
 .PHONY: crate-bindings-build
 crate-bindings-build: export FORCE_SKIA_BUILD=1
 crate-bindings-build: 
-	cd skia-bindings && cargo publish -vv --dry-run --features "gl,vulkan,textlayout"
+	cd skia-bindings && cargo publish -vv --dry-run --features "gl,vulkan,textlayout,d3d"
 	cd skia-bindings && cargo publish -vv --dry-run 
 
 .PHONY: publish
