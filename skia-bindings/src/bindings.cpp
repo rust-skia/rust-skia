@@ -142,6 +142,14 @@ extern "C" SkEncodedOrigin C_SkCodec_getOrigin(const SkCodec* self) {
     return self->getOrigin();
 }
 
+extern "C" SkISize C_SkCodec_getScaledDimensions(const SkCodec* self, float desiredScale) {
+    return self->getScaledDimensions(desiredScale);
+}
+
+extern "C" bool C_SkCodec_getValidSubset(const SkCodec* self, SkIRect* desiredSubset) {
+    return self->getValidSubset(desiredSubset);
+}
+
 extern "C" SkEncodedImageFormat C_SkCodec_getEncodedFormat(const SkCodec* self) {
     return self->getEncodedFormat();
 }

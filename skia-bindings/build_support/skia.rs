@@ -941,6 +941,8 @@ const ENUM_TABLE: &[EnumEntry] = &[
     // codec/
     //
     ("DocumentStructureType", rewrite::k_xxx),
+    ("ZeroInitialized", rewrite::k_xxx_name),
+    ("SelectionPolicy", rewrite::k_xxx),
     //
     // core/ effects/
     //
@@ -997,6 +999,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("CompressionType", rewrite::k_xxx),
     // SkImageFilter_MapDirection
     ("MapDirection", rewrite::k_xxx_name),
+    // SkCodec_Result
     // SkInterpolatorBase_Result
     ("Result", rewrite::k_xxx),
     // SkMatrix_ScaleToFit

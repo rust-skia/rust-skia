@@ -748,8 +748,7 @@ pub(crate) trait AsPointerOrNull<PointerT> {
     fn as_ptr_or_null(&self) -> *const PointerT;
 }
 
-pub(crate) trait AsPointerOrNullMut<PointerT> {
-    fn as_ptr_or_null(&self) -> *const PointerT;
+pub(crate) trait AsPointerOrNullMut<PointerT>: AsPointerOrNull<PointerT> {
     fn as_ptr_or_null_mut(&mut self) -> *mut PointerT;
 }
 
@@ -758,6 +757,15 @@ impl<E> AsPointerOrNull<E> for Option<E> {
         match self {
             Some(e) => e,
             None => ptr::null(),
+        }
+    }
+}
+
+impl<E> AsPointerOrNullMut<E> for Option<E> {
+    fn as_ptr_or_null_mut(&mut self) -> *mut E {
+        match self {
+            Some(e) => e,
+            None => ptr::null_mut(),
         }
     }
 }
@@ -771,14 +779,16 @@ impl<E> AsPointerOrNull<E> for Option<&[E]> {
     }
 }
 
-impl<E> AsPointerOrNullMut<E> for Option<&mut [E]> {
+impl<E> AsPointerOrNull<E> for Option<&mut [E]> {
     fn as_ptr_or_null(&self) -> *const E {
         match self {
             Some(slice) => slice.as_ptr(),
             None => ptr::null(),
         }
     }
+}
 
+impl<E> AsPointerOrNullMut<E> for Option<&mut [E]> {
     fn as_ptr_or_null_mut(&mut self) -> *mut E {
         match self {
             Some(slice) => slice.as_mut_ptr(),
@@ -796,14 +806,16 @@ impl<E> AsPointerOrNull<E> for Option<&Vec<E>> {
     }
 }
 
-impl<E> AsPointerOrNullMut<E> for Option<Vec<E>> {
+impl<E> AsPointerOrNull<E> for Option<Vec<E>> {
     fn as_ptr_or_null(&self) -> *const E {
         match self {
             Some(v) => v.as_ptr(),
             None => ptr::null(),
         }
     }
+}
 
+impl<E> AsPointerOrNullMut<E> for Option<Vec<E>> {
     fn as_ptr_or_null_mut(&mut self) -> *mut E {
         match self {
             Some(v) => v.as_mut_ptr(),
@@ -824,6 +836,8 @@ impl<'a, H> Deref for Borrows<'a, H> {
     }
 }
 
+// TODO: this is most likely unsafe because someone could replace the
+// value the reference is pointing to.
 impl<'a, H> DerefMut for Borrows<'a, H> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
