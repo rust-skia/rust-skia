@@ -1,5 +1,5 @@
 pub mod codec;
-#[deprecated(since = "0.0.0", note = "use codec::Result")]
+#[deprecated(since = "0.33.1", note = "use codec::Result")]
 pub use codec::Result as CodecResult;
 pub use codec::{Codec, EncodedOrigin};
 

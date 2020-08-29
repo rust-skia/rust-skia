@@ -111,7 +111,7 @@ impl RCHandle<SkCodec> {
     }
 
     #[deprecated(
-        since = "0.0.0",
+        since = "0.33.1",
         note = "Use the safe variant get_pixels_with_options()."
     )]
     pub unsafe fn get_pixels(
