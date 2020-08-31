@@ -374,7 +374,6 @@ impl RCHandle<SkSurface> {
         })
     }
 
-    // TODO: why is self mutable here?
     pub fn draw(
         &mut self,
         mut canvas: impl AsMut<Canvas>,
@@ -518,4 +517,32 @@ fn test_raster_direct() {
     .unwrap();
     let paint = Paint::default();
     surface.canvas().draw_circle((10, 10), 10.0, &paint);
+}
+
+#[test]
+fn test_drawing_as_mut_ergonomics() {
+    let mut surface = Surface::new_raster_n32_premul((16, 16)).unwrap();
+
+    // option1:
+    // - An _owned_ canvas can be drawn by transferring ownership.
+    {
+        let canvas = Canvas::new(ISize::new(16, 16), None).unwrap();
+        surface.draw(canvas, (10.0, 10.0), None);
+    }
+
+    // option2:
+    // - An &mut canvas can be drawn.
+
+    {
+        let mut canvas = Canvas::new(ISize::new(16, 16), None).unwrap();
+        surface.draw(&mut canvas, (10.0, 10.0), None);
+    }
+
+    // option3:
+    // - A canvas from another surface can be drawn.
+    {
+        let mut surface2 = Surface::new_raster_n32_premul((16, 16)).unwrap();
+        let canvas = surface2.canvas();
+        surface.draw(canvas, (10.0, 10.0), None);
+    }
 }
