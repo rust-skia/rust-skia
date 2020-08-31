@@ -41,14 +41,10 @@ impl<T> IntoOption for *const T {
 }
 
 impl<T> IntoOption for *mut T {
-    type Target = *mut T;
+    type Target = ptr::NonNull<T>;
 
     fn into_option(self) -> Option<Self::Target> {
-        if !self.is_null() {
-            Some(self)
-        } else {
-            None
-        }
+        ptr::NonNull::new(self)
     }
 }
 
@@ -437,7 +433,7 @@ where
 /// A wrapper type that represents a native type with a pointer to
 /// the native object.
 #[repr(transparent)]
-pub struct RefHandle<N: NativeDrop>(*mut N);
+pub struct RefHandle<N: NativeDrop>(ptr::NonNull<N>);
 
 impl<N: NativeDrop> Drop for RefHandle<N> {
     fn drop(&mut self) {
@@ -447,10 +443,10 @@ impl<N: NativeDrop> Drop for RefHandle<N> {
 
 impl<N: NativeDrop> NativeAccess<N> for RefHandle<N> {
     fn native(&self) -> &N {
-        unsafe { &*self.0 }
+        unsafe { self.0.as_ref() }
     }
     fn native_mut(&mut self) -> &mut N {
-        unsafe { &mut *self.0 }
+        unsafe { self.0.as_mut() }
     }
 }
 
@@ -460,11 +456,11 @@ impl<N: NativeDrop> RefHandle<N> {
     /// From this time on, the handle owns the object that the pointer points
     /// to and will call its NativeDrop implementation if it goes out of scope.
     pub(crate) fn from_ptr(ptr: *mut N) -> Option<Self> {
-        ptr.into_option().map(Self)
+        ptr::NonNull::new(ptr).map(Self)
     }
 
     pub(crate) fn into_ptr(self) -> *mut N {
-        let p = self.0;
+        let p = self.0.as_ptr();
         mem::forget(self);
         p
     }
@@ -473,7 +469,7 @@ impl<N: NativeDrop> RefHandle<N> {
 /// A wrapper type represented by a reference counted pointer
 /// to the native type.
 #[repr(transparent)]
-pub struct RCHandle<Native: NativeRefCounted>(*mut Native);
+pub struct RCHandle<Native: NativeRefCounted>(ptr::NonNull<Native>);
 
 /// A reference counted handle is cheap to clone, so we do support a conversion
 /// from a reference to a ref counter to an owned handle.
@@ -495,11 +491,7 @@ impl<N: NativeRefCounted> RCHandle<N> {
     /// Does not increase the reference count.
     #[inline]
     pub(crate) fn from_ptr(ptr: *mut N) -> Option<Self> {
-        if !ptr.is_null() {
-            Some(RCHandle(ptr))
-        } else {
-            None
-        }
+        ptr::NonNull::new(ptr).map(Self)
     }
 
     /// Creates an RCHandle from a pointer.
@@ -507,8 +499,8 @@ impl<N: NativeRefCounted> RCHandle<N> {
     /// Increases the reference count.
     #[inline]
     pub(crate) fn from_unshared_ptr(ptr: *mut N) -> Option<Self> {
-        ptr.into_option().map(|ptr| {
-            unsafe { (*ptr)._ref() };
+        ptr::NonNull::new(ptr).map(|ptr| {
+            unsafe { ptr.as_ref()._ref() };
             Self(ptr)
         })
     }
@@ -546,12 +538,12 @@ mod rc_handle_tests {
 impl<N: NativeRefCounted> NativeAccess<N> for RCHandle<N> {
     /// Returns a reference to the native representation.
     fn native(&self) -> &N {
-        unsafe { &*self.0 }
+        unsafe { self.0.as_ref() }
     }
 
     /// Returns a mutable reference to the native representation.
     fn native_mut(&mut self) -> &mut N {
-        unsafe { &mut *self.0 }
+        unsafe { self.0.as_mut() }
     }
 }
 
@@ -559,7 +551,7 @@ impl<N: NativeRefCounted> Clone for RCHandle<N> {
     fn clone(&self) -> Self {
         // Support shared mutability when a ref-counted handle is cloned.
         let ptr = self.0;
-        unsafe { (&*ptr)._ref() };
+        unsafe { ptr.as_ref()._ref() };
         Self(ptr)
     }
 }
@@ -567,7 +559,7 @@ impl<N: NativeRefCounted> Clone for RCHandle<N> {
 impl<N: NativeRefCounted> Drop for RCHandle<N> {
     #[inline]
     fn drop(&mut self) {
-        unsafe { &*self.0 }._unref();
+        unsafe { self.0.as_ref()._unref() };
     }
 }
 
@@ -584,7 +576,7 @@ pub(crate) trait IntoPtr<N> {
 
 impl<N: NativeRefCounted> IntoPtr<N> for RCHandle<N> {
     fn into_ptr(self) -> *mut N {
-        let ptr = self.0;
+        let ptr = self.0.as_ptr();
         mem::forget(self);
         ptr
     }
