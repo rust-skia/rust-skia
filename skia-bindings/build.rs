@@ -11,7 +11,7 @@ mod env {
 
     /// Returns true if the download should be forced. This can be used to test prebuilt binaries
     /// from within a repository build. If this environment variable is not set, binaries
-    /// are downloaded only in crate builds.
+    /// are downloaded in crate builds only.
     pub fn force_skia_binaries_download() -> bool {
         cargo::env_var("FORCE_SKIA_BINARIES_DOWNLOAD").is_some()
     }
@@ -76,7 +76,9 @@ fn main() {
         //
 
         let build_skia = env::force_skia_build() || {
-            if let Some((tag, key)) = should_try_download_binaries(&binaries_config) {
+            let force_download = env::force_skia_binaries_download();
+            if let Some((tag, key)) = should_try_download_binaries(&binaries_config, force_download)
+            {
                 println!(
                     "TRYING TO DOWNLOAD AND INSTALL SKIA BINARIES: {}/{}",
                     tag, key
@@ -85,6 +87,9 @@ fn main() {
                 println!("  FROM: {}", url);
                 if let Err(e) = download_and_install(url, &binaries_config.output_directory) {
                     println!("DOWNLOAD AND INSTALL FAILED: {}", e);
+                    if force_download {
+                        panic!("Downloading of binaries was forced but failed.")
+                    }
                     true
                 } else {
                     println!("DOWNLOAD AND INSTALL SUCCEEDED");
@@ -132,11 +137,14 @@ fn main() {
 }
 
 /// If the binaries should be downloaded, return the tag and the key.
-fn should_try_download_binaries(config: &skia::BinariesConfiguration) -> Option<(String, String)> {
+fn should_try_download_binaries(
+    config: &skia::BinariesConfiguration,
+    force: bool,
+) -> Option<(String, String)> {
     let tag = cargo::package_version();
 
     // for testing:
-    if env::force_skia_binaries_download() {
+    if force {
         // retrieve the hash from the repository above us.
         let half_hash = git::half_hash()?;
         return Some((tag, config.key(&half_hash)));
