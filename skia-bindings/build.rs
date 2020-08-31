@@ -9,19 +9,35 @@ mod env {
     use crate::build_support::cargo;
     use std::path::PathBuf;
 
-    /// Returns true if the download should be forced. This can be used to test prebuilt binaries
-    /// from within a repository build. If this environment variable is not set, binaries
-    /// are downloaded only in crate builds.
+    /// Returns `true` if the download of prebuilt binaries should be forced.
+    ///
+    /// This can be used to test and downlaod prebuilt binaries from within a repository build.
+    /// If this environment variable is not set, binaries are downloaded from crate builds only.
     pub fn force_skia_binaries_download() -> bool {
         cargo::env_var("FORCE_SKIA_BINARIES_DOWNLOAD").is_some()
     }
 
-    /// Force to build skia, even if there is a binary available.
+    /// The URL template to download the Skia binaries from.
+    ///
+    /// `{tag}` will be replaced by the Tag (usually the released skia-binding's crate's version).
+    /// `{key}` will be replaced by the Key (a combination of the repository hash, target, and features).
+    ///
+    /// `file://` URLs are supported for local testing.
+    pub fn skia_binaries_url() -> Option<String> {
+        cargo::env_var("SKIA_BINARIES_URL")
+    }
+
+    /// The default URL template to download the binaries from.
+    pub fn skia_binaries_url_default() -> String {
+        "https://github.com/rust-skia/skia-binaries/releases/download/{tag}/skia-binaries-{key}.tar.gz".into()
+    }
+
+    /// Force to build Skia, even if there is a binary available.
     pub fn force_skia_build() -> bool {
         cargo::env_var("FORCE_SKIA_BUILD").is_some()
     }
 
-    /// The path to the skia source directory.
+    /// The path to the Skia source directory.
     pub fn offline_source_dir() -> Option<PathBuf> {
         cargo::env_var("SKIA_OFFLINE_SOURCE_DIR").map(PathBuf::from)
     }
@@ -76,15 +92,24 @@ fn main() {
         //
 
         let build_skia = env::force_skia_build() || {
-            if let Some((tag, key)) = should_try_download_binaries(&binaries_config) {
+            let force_download = env::force_skia_binaries_download();
+            if let Some((tag, key)) = should_try_download_binaries(&binaries_config, force_download)
+            {
                 println!(
                     "TRYING TO DOWNLOAD AND INSTALL SKIA BINARIES: {}/{}",
                     tag, key
                 );
-                let url = binaries::download_url(tag, key);
+                let url = binaries::download_url(
+                    env::skia_binaries_url().unwrap_or_else(env::skia_binaries_url_default),
+                    tag,
+                    key,
+                );
                 println!("  FROM: {}", url);
                 if let Err(e) = download_and_install(url, &binaries_config.output_directory) {
                     println!("DOWNLOAD AND INSTALL FAILED: {}", e);
+                    if force_download {
+                        panic!("Downloading of binaries was forced but failed.")
+                    }
                     true
                 } else {
                     println!("DOWNLOAD AND INSTALL SUCCEEDED");
@@ -132,11 +157,14 @@ fn main() {
 }
 
 /// If the binaries should be downloaded, return the tag and the key.
-fn should_try_download_binaries(config: &skia::BinariesConfiguration) -> Option<(String, String)> {
+fn should_try_download_binaries(
+    config: &skia::BinariesConfiguration,
+    force: bool,
+) -> Option<(String, String)> {
     let tag = cargo::package_version();
 
     // for testing:
-    if env::force_skia_binaries_download() {
+    if force {
         // retrieve the hash from the repository above us.
         let half_hash = git::half_hash()?;
         return Some((tag, config.key(&half_hash)));
