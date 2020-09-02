@@ -160,8 +160,8 @@ impl RefHandle<Sk3DView> {
         m
     }
 
-    pub fn apply_to_canvas(&self, mut canvas: impl AsMut<Canvas>) -> &Self {
-        unsafe { self.native().applyToCanvas(canvas.as_mut().native_mut()) }
+    pub fn apply_to_canvas(&self, canvas: &mut Canvas) -> &Self {
+        unsafe { self.native().applyToCanvas(canvas.native_mut()) }
         self
     }
 
@@ -180,8 +180,6 @@ fn test_canvas_passing_syntax() {
     let view = View3D::default();
     // as mutable reference
     view.apply_to_canvas(&mut null_canvas);
-    // moved
-    view.apply_to_canvas(null_canvas);
 
     // and one with a mutable reference to a shared Canvas:
     let mut surface = Surface::new_raster_n32_premul((100, 100)).unwrap();
