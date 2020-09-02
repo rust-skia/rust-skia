@@ -94,19 +94,19 @@ impl DrawingDriver for D3D {
 }
 
 fn resolve_interface<T: Interface>(
-    f: impl FnOnce(&GUID, *mut *mut ffi::c_void) -> HRESULT,
+    f: impl FnOnce(&GUID, &mut *mut ffi::c_void) -> HRESULT,
 ) -> Result<ComPtr<T>, HRESULT> {
-    let mut ptr: *mut T = ptr::null_mut();
-    let r = f(&T::uuidof(), &mut ptr as *mut _ as _);
+    let mut ptr: *mut ffi::c_void = ptr::null_mut();
+    let r = f(&T::uuidof(), &mut ptr);
     if r == S_OK {
-        Ok(unsafe { ComPtr::from_raw(ptr) })
+        Ok(unsafe { ComPtr::from_raw(ptr as *mut T) })
     } else {
         Err(r)
     }
 }
 
 fn resolve_specific<T: Interface>(
-    f: impl FnOnce(*mut *mut T) -> HRESULT,
+    f: impl FnOnce(&mut *mut T) -> HRESULT,
 ) -> Result<ComPtr<T>, HRESULT> {
     let mut ptr: *mut T = ptr::null_mut();
     let r = f(&mut ptr);
