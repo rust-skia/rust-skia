@@ -342,7 +342,7 @@ impl<N: NativeDrop> NativeSliceAccess<N> for [Handle<N>] {
     fn native(&self) -> &[N] {
         let ptr = self
             .first()
-            .map(|f| f.native() as *const _)
+            .map(|f| f.native() as *const N)
             .unwrap_or(ptr::null());
         unsafe { slice::from_raw_parts(ptr, self.len()) }
     }
@@ -350,7 +350,7 @@ impl<N: NativeDrop> NativeSliceAccess<N> for [Handle<N>] {
     fn native_mut(&mut self) -> &mut [N] {
         let ptr = self
             .first_mut()
-            .map(|f| f.native_mut() as *mut _)
+            .map(|f| f.native_mut() as *mut N)
             .unwrap_or(ptr::null_mut());
         unsafe { slice::from_raw_parts_mut(ptr, self.len()) }
     }

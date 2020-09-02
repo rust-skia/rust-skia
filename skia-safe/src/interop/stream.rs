@@ -12,7 +12,7 @@ use std::ptr;
 
 /// Trait representing an Skia allocated Stream type with a base class of SkStream.
 #[repr(transparent)]
-pub struct Stream<N: NativeStreamBase>(*mut N);
+pub struct Stream<N: NativeStreamBase>(ptr::NonNull<N>);
 unsafe impl<N: NativeStreamBase> Send for Stream<N> {}
 
 pub trait NativeStreamBase {
@@ -22,15 +22,14 @@ pub trait NativeStreamBase {
 impl<T: NativeStreamBase> Drop for Stream<T> {
     fn drop(&mut self) {
         unsafe {
-            sb::C_SkStream_delete(self.0 as _);
+            sb::C_SkStream_delete(self.0.as_ptr() as *mut _);
         }
     }
 }
 
 impl<N: NativeStreamBase> Stream<N> {
     pub fn from_ptr(ptr: *mut N) -> Stream<N> {
-        assert_ne!(ptr, ptr::null_mut());
-        Stream(ptr)
+        Stream(ptr::NonNull::new(ptr).unwrap())
     }
 }
 
@@ -45,16 +44,16 @@ impl NativeStreamBase for SkStreamAsset {
 
 impl NativeAccess<SkStreamAsset> for Stream<SkStreamAsset> {
     fn native(&self) -> &SkStreamAsset {
-        unsafe { &*self.0 }
+        unsafe { self.0.as_ref() }
     }
     fn native_mut(&mut self) -> &mut SkStreamAsset {
-        unsafe { &mut *self.0 }
+        unsafe { self.0.as_mut() }
     }
 }
 
 #[repr(C)]
 pub struct MemoryStream<'a> {
-    native: *mut SkMemoryStream,
+    native: ptr::NonNull<SkMemoryStream>,
     pd: PhantomData<&'a ()>,
 }
 unsafe impl Send for MemoryStream<'_> {}
@@ -68,10 +67,10 @@ impl NativeStreamBase for SkMemoryStream {
 
 impl NativeAccess<SkMemoryStream> for MemoryStream<'_> {
     fn native(&self) -> &SkMemoryStream {
-        unsafe { &*self.native }
+        unsafe { self.native.as_ref() }
     }
     fn native_mut(&mut self) -> &mut SkMemoryStream {
-        unsafe { &mut *self.native }
+        unsafe { self.native.as_mut() }
     }
 }
 
@@ -81,7 +80,7 @@ impl MemoryStream<'_> {
         let ptr = unsafe { sb::C_SkMemoryStream_MakeDirect(bytes.as_ptr() as _, bytes.len()) };
 
         MemoryStream {
-            native: ptr,
+            native: ptr::NonNull::new(ptr).unwrap(),
             pd: PhantomData,
         }
     }

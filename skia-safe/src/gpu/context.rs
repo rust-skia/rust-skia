@@ -42,8 +42,9 @@ impl RCHandle<GrContext> {
     pub fn new_vulkan(backend_context: &vk::BackendContext) -> Option<Context> {
         unsafe {
             let end_resolving = backend_context.begin_resolving();
-            let context =
-                Context::from_ptr(sb::C_GrContext_MakeVulkan(backend_context.native as _));
+            let context = Context::from_ptr(sb::C_GrContext_MakeVulkan(
+                backend_context.native.as_ptr() as _,
+            ));
             drop(end_resolving);
             context
         }

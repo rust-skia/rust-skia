@@ -15,7 +15,7 @@ use std::convert::TryInto;
 use std::ffi::CString;
 use std::marker::PhantomData;
 use std::ops::{Deref, DerefMut};
-use std::slice;
+use std::{ptr, slice};
 
 pub use lattice::Lattice;
 
@@ -145,19 +145,19 @@ impl NativeAccess<SkCanvas> for Canvas {
 /// instance.
 /// Function resolvement is done via the Deref trait.
 #[repr(transparent)]
-pub struct OwnedCanvas<'lt>(*mut Canvas, PhantomData<&'lt ()>);
+pub struct OwnedCanvas<'lt>(ptr::NonNull<Canvas>, PhantomData<&'lt ()>);
 
 impl<'lt> Deref for OwnedCanvas<'lt> {
     type Target = Canvas;
 
     fn deref(&self) -> &Self::Target {
-        unsafe { &*self.0 }
+        unsafe { self.0.as_ref() }
     }
 }
 
 impl<'lt> DerefMut for OwnedCanvas<'lt> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        unsafe { &mut *self.0 }
+        unsafe { self.0.as_mut() }
     }
 }
 
@@ -1023,7 +1023,7 @@ impl Canvas {
     pub(crate) fn own_from_native_ptr<'lt>(native: *mut SkCanvas) -> Option<OwnedCanvas<'lt>> {
         if !native.is_null() {
             Some(OwnedCanvas::<'lt>(
-                Self::borrow_from_native(unsafe { &mut *native }),
+                ptr::NonNull::new(Self::borrow_from_native(unsafe { &mut *native })).unwrap(),
                 PhantomData,
             ))
         } else {

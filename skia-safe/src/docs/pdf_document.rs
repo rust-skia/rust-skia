@@ -121,14 +121,14 @@ pub mod pdf {
 
     #[repr(transparent)]
     #[derive(Debug)]
-    pub struct StructureElementNode(*mut SkPDF_StructureElementNode);
+    pub struct StructureElementNode(ptr::NonNull<SkPDF_StructureElementNode>);
 
     impl NativeAccess<SkPDF_StructureElementNode> for StructureElementNode {
         fn native(&self) -> &SkPDF_StructureElementNode {
-            unsafe { &*self.0 }
+            unsafe { self.0.as_ref() }
         }
         fn native_mut(&mut self) -> &mut SkPDF_StructureElementNode {
-            unsafe { &mut *self.0 }
+            unsafe { self.0.as_mut() }
         }
     }
 
@@ -172,13 +172,12 @@ pub mod pdf {
                     child_vector.len(),
                 )
             }
-            debug_assert!(child_vector.iter().all(|node| node.0.is_null()));
             self
         }
 
         pub fn append_child(&mut self, node: StructureElementNode) -> &mut Self {
             unsafe {
-                sb::C_SkPDF_StructElementNode_appendChild(self.native_mut(), node.0);
+                sb::C_SkPDF_StructElementNode_appendChild(self.native_mut(), node.0.as_ptr());
             }
             mem::forget(node);
             self
