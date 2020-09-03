@@ -374,16 +374,11 @@ impl RCHandle<SkSurface> {
         })
     }
 
-    pub fn draw(
-        &mut self,
-        mut canvas: impl AsMut<Canvas>,
-        size: impl Into<Size>,
-        paint: Option<&Paint>,
-    ) {
+    pub fn draw(&mut self, canvas: &mut Canvas, size: impl Into<Size>, paint: Option<&Paint>) {
         let size = size.into();
         unsafe {
             self.native_mut().draw(
-                canvas.as_mut().native_mut(),
+                canvas.native_mut(),
                 size.width,
                 size.height,
                 paint.native_ptr_or_null(),
@@ -520,29 +515,23 @@ fn test_raster_direct() {
 }
 
 #[test]
-fn test_drawing_as_mut_ergonomics() {
+fn test_drawing_owned_as_exclusive_ref_ergonomics() {
     let mut surface = Surface::new_raster_n32_premul((16, 16)).unwrap();
 
     // option1:
-    // - An _owned_ canvas can be drawn by transferring ownership.
-    {
-        let canvas = Canvas::new(ISize::new(16, 16), None).unwrap();
-        surface.draw(canvas, (10.0, 10.0), None);
-    }
-
-    // option2:
-    // - An &mut canvas can be drawn.
-
+    // - An &mut canvas can be drawn to.
     {
         let mut canvas = Canvas::new(ISize::new(16, 16), None).unwrap();
+        surface.draw(&mut canvas, (5.0, 5.0), None);
         surface.draw(&mut canvas, (10.0, 10.0), None);
     }
 
-    // option3:
-    // - A canvas from another surface can be drawn.
+    // option2:
+    // - A canvas from another surface can be drawn to.
     {
         let mut surface2 = Surface::new_raster_n32_premul((16, 16)).unwrap();
         let canvas = surface2.canvas();
+        surface.draw(canvas, (5.0, 5.0), None);
         surface.draw(canvas, (10.0, 10.0), None);
     }
 }

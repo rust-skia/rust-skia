@@ -174,15 +174,20 @@ impl<'lt> Default for OwnedCanvas<'lt> {
     }
 }
 
-// We implement AsMut for Canvas & OwnedCanvas
-// to simplify a number of API calls.
-// TODO: Should we support AsRef, too?
+#[deprecated(
+    since = "0.34.0",
+    note = "Use `&mut canvas` to pass an exclusive reference."
+)]
 impl AsMut<Canvas> for Canvas {
     fn as_mut(&mut self) -> &mut Canvas {
         self
     }
 }
 
+#[deprecated(
+    since = "0.34.0",
+    note = "Use `&mut canvas` to pass an exclusive reference."
+)]
 impl<'lt> AsMut<Canvas> for OwnedCanvas<'lt> {
     fn as_mut(&mut self) -> &mut Canvas {
         self.deref_mut()
@@ -1159,8 +1164,6 @@ pub enum AutoCanvasRestore {}
 
 impl AutoCanvasRestore {
     // TODO: rename to save(), add a method to Canvas, perhaps named auto_restored()?
-    // Note: Can't use AsMut here for the canvas, because it would break
-    //       the lifetime bound.
     pub fn guard(canvas: &mut Canvas, do_save: bool) -> AutoRestoredCanvas {
         let restore = construct(|acr| unsafe {
             sb::C_SkAutoCanvasRestore_Construct(acr, canvas.native_mut(), do_save)
