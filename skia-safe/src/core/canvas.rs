@@ -175,7 +175,7 @@ impl<'lt> Default for OwnedCanvas<'lt> {
 }
 
 #[deprecated(
-    since = "0.0.0",
+    since = "0.34.0",
     note = "Use `&mut canvas` to pass an exclusive reference."
 )]
 impl AsMut<Canvas> for Canvas {
@@ -185,7 +185,7 @@ impl AsMut<Canvas> for Canvas {
 }
 
 #[deprecated(
-    since = "0.0.0",
+    since = "0.34.0",
     note = "Use `&mut canvas` to pass an exclusive reference."
 )]
 impl<'lt> AsMut<Canvas> for OwnedCanvas<'lt> {
