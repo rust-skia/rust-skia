@@ -29,7 +29,8 @@ stages:
       androidNDK: 'r21d'
       androidAPILevel: '26'
       androidBinExt: ''
-      image: 'ubuntu-18.04'
+      vmImage: 'ubuntu-16.04'
+      container: 'ghcr.io/pragmatrix/rust-skia-linux:latest'
       deployRelease: ${{ eq(variables['build.SourceBranchName'], 'release') }}
 
   - template: 'azure-pipelines-template.yml'
@@ -40,7 +41,7 @@ stages:
       androidNDK: 'r21d'
       androidAPILevel: '26'
       androidBinExt: ''
-      image: 'macOS-10.15'
+      vmImage: 'macOS-10.15'
       deployRelease: ${{ eq(variables['build.SourceBranchName'], 'release') }}
 
   - template: 'azure-pipelines-template.yml'
@@ -52,7 +53,7 @@ stages:
       androidNDK: 'r21d'
       androidAPILevel: '26'
       androidBinExt: '.cmd'
-      image: 'windows-2019'
+      vmImage: 'windows-2019'
       deployRelease: ${{ eq(variables['build.SourceBranchName'], 'release') }}
 
 # Because deployment can not be done automatically, the Package stage got disabled for now.
