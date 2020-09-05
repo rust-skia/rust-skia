@@ -1,5 +1,6 @@
 parameters:
   # defaults:
+  container: ''
   androidHost: ''
   androidNDK: ''
 
@@ -57,7 +58,7 @@ jobs:
   variables:
     platform: ${{ parameters.platform }}
     platformTarget: ${{ parameters.platformTarget }}
-    image: ${{ parameters.image }}
+    vmImage: ${{ parameters.vmImage }}
     androidHost: ${{ parameters.androidHost }}
     androidNDK: ${{ parameters.androidNDK }}
     androidAPILevel: ${{ parameters.androidAPILevel }}
@@ -65,7 +66,10 @@ jobs:
     rust_backtrace: 1
 
   pool:
-    vmImage: $(image)
+    vmImage: $(vmImage)
+
+  ${{ if ne(parameters.container, '') }}:
+    container: ${{ parameters.container }}
 
   steps:
   - ${{ if eq(parameters.platform, 'macOS') }}:
@@ -85,6 +89,13 @@ jobs:
         set -e
         choco install llvm --version 10.0.0
       displayName: Install LLVM on Windows
+  
+  # Install Rust for the user if we are running inside a container
+  - ${{ if ne(parameters.container, '') }}:
+    - bash: |
+        curl https://sh.rustup.rs -sSf | sh -s -- -y
+        echo "##vso[task.setvariable variable=PATH;]$HOME/.cargo/bin:$PATH"
+      displayName: Install Rust (Container only)
 
   # All platforms (Linux images have Rust preinstalled and in the PATH).
   # Note that self updates do not seem to work for some targets, so we disable them for now.
@@ -98,13 +109,13 @@ jobs:
       cargo -V
     displayName: Update Rust, Install Clippy and Rustfmt and print Rust & Cargo Versions
 
-  - ${{ if eq(parameters.platform, 'Linux') }}:
-    # Linux Ubuntu 18.04 (Gl/glx.h and libgl)
-    - bash: |
-        set -e
-        sudo apt-get update
-        sudo apt-get install mesa-common-dev libgl1-mesa-dev libgl1
-      displayName: Install mesa-common-dev libgl1-mesa-dev and libgl1
+  # - ${{ if eq(parameters.platform, 'Linux') }}:
+  #   # Linux Ubuntu 18.04 (Gl/glx.h and libgl)
+  #   - bash: |
+  #       set -e
+  #       sudo apt-get update
+  #       sudo apt-get install mesa-common-dev libgl1-mesa-dev libgl1
+  #     displayName: Install mesa-common-dev libgl1-mesa-dev and libgl1
 
   - ${{ if ne(parameters.platform, 'Windows') }}:
     # Linux and macOS.
