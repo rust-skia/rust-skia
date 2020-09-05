@@ -39,6 +39,15 @@ jobs:
           toolchain: stable
           features: 'gl,vulkan,textlayout'
           exampleArgs: ''
+        ${{ if eq(parameters.platform, 'Windows') }}:
+          stable-d3d:
+            toolchain: stable
+            features: 'd3d'
+            exampleArgs: ''
+          stable-d3d-textlayout:
+            toolchain: stable
+            features: 'd3d,textlayout'
+            exampleArgs: ''
       ${{ if eq(parameters.deployRelease, 'False') }}:
         stable-all-features:
           toolchain: stable
