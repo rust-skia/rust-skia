@@ -776,7 +776,7 @@ impl Matrix {
         unsafe { sb::C_SkMatrix_isFinite(self.native()) }
     }
 
-    pub fn new_identity() -> Self {
+    pub const fn new_identity() -> Self {
         Self::new()
     }
 }
@@ -784,8 +784,9 @@ impl Matrix {
 impl IndexGet for Matrix {}
 impl IndexSet for Matrix {}
 
+pub const IDENTITY: Matrix = Matrix::new_identity();
+
 lazy_static! {
-    static ref IDENTITY: Matrix = Matrix::new_identity();
     static ref INVALID: Matrix = Matrix::from_native(unsafe { *SkMatrix::InvalidMatrix() });
 }
 
