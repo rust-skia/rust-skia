@@ -279,9 +279,12 @@ impl IRect {
     }
 }
 
-lazy_static! {
-    static ref EMPTY_IRECT: IRect = IRect::default();
-}
+pub const EMPTY_IRECT: IRect = IRect {
+    left: 0,
+    top: 0,
+    right: 0,
+    bottom: 0,
+};
 
 impl Contains<IPoint> for IRect {
     fn contains(&self, other: IPoint) -> bool {
