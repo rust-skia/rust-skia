@@ -1,3 +1,4 @@
+#![cfg(feature = "textlayout")]
 use skia_safe::shaper::run_handler::{Buffer, RunInfo};
 use skia_safe::shaper::RunHandler;
 use skia_safe::{Font, GlyphId, Point, Shaper};
