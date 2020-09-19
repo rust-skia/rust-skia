@@ -254,7 +254,7 @@ extern "C" void C_SkDrawable_GpuDrawHandler_draw(SkDrawable::GpuDrawHandler *sel
 //
 
 
-extern "C" SkImage *C_SkImage_MakeTextureFromCompressed(GrContext *context, SkData *data, int width, int height,
+extern "C" SkImage *C_SkImage_MakeTextureFromCompressed(GrDirectContext *context, SkData *data, int width, int height,
                                                 SkImage::CompressionType type, GrMipMapped mipMapped,
                                                 GrProtected prot) {
     return SkImage::MakeTextureFromCompressed(context, sp(data), width, height, type, mipMapped, prot).release();
@@ -269,16 +269,6 @@ extern "C" void C_SkImage_getBackendTexture(
     *result = self->getBackendTexture(flushPendingGrContextIO, origin);
 }
 
-extern "C" SkImage *C_SkImage_MakeFromCompressed(GrContext *context, SkData *encoded, int width, int height,
-                                                 SkImage::CompressionType type, GrMipMapped mipMapped, GrProtected 
-                                                 prot) {
-    return SkImage::MakeFromCompressed(context, sp(encoded), width, height, type, mipMapped, prot).release();
-}
-
-extern "C" SkImage* C_SkImage_DecodeToTexture(GrContext* ctx, const void* encoded, size_t length, const SkIRect* subset) {
-    return SkImage::DecodeToTexture(ctx, encoded, length, subset).release();
-}
-
 extern "C" SkImage* C_SkImage_MakeFromTexture(
         GrContext* context,
         const GrBackendTexture* backendTexture,
@@ -290,7 +280,7 @@ extern "C" SkImage* C_SkImage_MakeFromTexture(
 }
 
 extern "C" SkImage* C_SkImage_MakeCrossContextFromPixmap(
-        GrContext* context,
+        GrDirectContext* context,
         const SkPixmap* pixmap,
         bool buildMips,
         bool limitToMaxTextureSize) {
@@ -377,7 +367,7 @@ extern "C" SkImage* C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
 
 extern "C" SkImage* C_SkImage_makeTextureImage(
         const SkImage* self,
-        GrContext* context,
+        GrDirectContext* context,
         GrMipMapped mipMapped,
         SkBudgeted budgeted) {
     return self->makeTextureImage(context, mipMapped, budgeted).release();

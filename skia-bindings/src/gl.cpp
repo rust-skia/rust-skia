@@ -1,5 +1,13 @@
 #include "bindings.h"
+
+// for VSCode
+// TODO: remove that and add proper CMake support for VSCode
+#ifndef SK_GL
+    #define SK_GL
+#endif
+
 #include "include/gpu/GrContext.h"
+#include "include/gpu/GrDirectContext.h"
 #include "include/gpu/gl/GrGLExtensions.h"
 #include "include/gpu/gl/GrGLInterface.h"
 #include "include/gpu/gl/GrGLAssembleInterface.h"
@@ -126,11 +134,11 @@ extern "C" const GrGLInterface* C_GrGLInterface_MakeAssembledInterface(void *ctx
 // gpu/GrContext.h
 //
 
-extern "C" GrContext* C_GrContext_MakeGL(GrGLInterface* interface) {
+extern "C" GrDirectContext* C_GrDirectContext_MakeGL(GrGLInterface* interface) {
     if (interface)
-        return GrContext::MakeGL(sp(interface)).release();
+        return GrDirectContext::MakeGL(sp(interface)).release();
     else
-        return GrContext::MakeGL().release();
+        return GrDirectContext::MakeGL().release();
 }
 
 extern "C" void C_GrBackendFormat_ConstructGL(GrBackendFormat* uninitialized, GrGLenum format, GrGLenum target) {

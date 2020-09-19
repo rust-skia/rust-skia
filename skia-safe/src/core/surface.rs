@@ -481,8 +481,16 @@ impl RCHandle<SkSurface> {
         unsafe { self.native().characterize(sc.native_mut()) }.if_true_some(sc)
     }
 
-    pub fn draw_display_list(&mut self, deferred_display_list: &mut DeferredDisplayList) -> bool {
-        unsafe { self.native_mut().draw1(deferred_display_list.native_mut()) }
+    pub fn draw_display_list(
+        &mut self,
+        deferred_display_list: impl Into<DeferredDisplayList>,
+    ) -> bool {
+        unsafe {
+            sb::C_SkSurface_draw(
+                self.native_mut(),
+                deferred_display_list.into().into_ptr() as *const _,
+            )
+        }
     }
 }
 

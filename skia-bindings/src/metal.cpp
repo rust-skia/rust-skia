@@ -2,6 +2,7 @@
 
 #include "include/core/SkSurface.h"
 #include "include/gpu/GrContext.h"
+#include "include/gpu/GrDirectContext.h"
 
 //
 // core/SkSurface.h
@@ -34,8 +35,8 @@ extern "C" SkSurface *C_SkSurface_MakeFromMTKView(GrContext *context,
 // gpu/GrContext.h
 //
 
-extern "C" GrContext* C_GrContext_MakeMetal(void* device, void* queue) {
-    return GrContext::MakeMetal(device, queue).release();
+extern "C" GrDirectContext* C_GrContext_MakeMetal(void* device, void* queue) {
+    return GrDirectContext::MakeMetal(device, queue).release();
 }
 
 //

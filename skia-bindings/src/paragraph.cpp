@@ -335,6 +335,10 @@ extern "C" {
         self->~FontFeature();
     }
 
+    void C_TextStyle_Construct(TextStyle* uninitialized) {
+        new(uninitialized) TextStyle();
+    }
+
     void C_TextStyle_CopyConstruct(TextStyle* uninitialized, const TextStyle* other) {
         new(uninitialized) TextStyle(*other);
     }

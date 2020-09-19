@@ -50,8 +50,7 @@ mod core {
     assert_impl_all!(CubicMap: Send, Sync);
     assert_impl_all!(Data: Send, Sync);
     assert_impl_all!(DataTable: Send, Sync);
-    // SkSurface::draw function needs to mutate it
-    assert_not_impl_any!(DeferredDisplayList: Send, Sync);
+    assert_impl_all!(DeferredDisplayList: Send, Sync);
     assert_not_impl_any!(DeferredDisplayListRecorder: Send, Sync);
     assert_not_impl_any!(Document: Send, Sync);
     assert_not_impl_any!(Drawable: Send, Sync);
@@ -123,7 +122,7 @@ mod effects {
     use skia_safe::{runtime_effect, RuntimeEffect};
     use static_assertions::*;
 
-    assert_impl_all!(runtime_effect::Variable: Send, Sync);
+    assert_impl_all!(runtime_effect::Uniform: Send, Sync);
     assert_not_impl_any!(RuntimeEffect: Send, Sync);
 }
 

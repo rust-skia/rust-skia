@@ -8,6 +8,7 @@
 
 #include "include/gpu/GrBackendSurface.h"
 #include "include/gpu/GrContext.h"
+#include "include/gpu/GrDirectContext.h"
 #include "include/gpu/d3d/GrD3DBackendContext.h"
 
 //
@@ -30,6 +31,6 @@ extern "C" void C_GrBackendRenderTarget_ConstructD3D(GrBackendRenderTarget* unin
 // gpu/GrContext.h
 //
 
-extern "C" GrContext* C_GrContext_MakeDirect3D(const GrD3DBackendContext* backendContext) {
-    return GrContext::MakeDirect3D(*backendContext).release();
+extern "C" GrDirectContext* C_GrDirectContext_MakeDirect3D(const GrD3DBackendContext* backendContext) {
+    return GrDirectContext::MakeDirect3D(*backendContext).release();
 }

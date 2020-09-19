@@ -10,17 +10,23 @@ pub use self::backend_surface_mutable_state::*;
 mod context;
 pub use self::context::*;
 
-mod types;
-pub use self::types::*;
+#[cfg(feature = "d3d")]
+pub mod d3d;
+
+mod direct_context;
+pub use self::direct_context::*;
 
 #[cfg(feature = "gl")]
 pub mod gl;
 
-#[cfg(feature = "vulkan")]
-pub mod vk;
-
 #[cfg(feature = "metal")]
 pub mod mtl;
 
-#[cfg(feature = "d3d")]
-pub mod d3d;
+mod recording_context;
+pub use self::recording_context::*;
+
+mod types;
+pub use self::types::*;
+
+#[cfg(feature = "vulkan")]
+pub mod vk;

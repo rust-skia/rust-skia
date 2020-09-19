@@ -133,28 +133,15 @@ impl PathBuilder {
         }
     }
 
+    #[deprecated(since = "0.0.0", note = "Removed without replacement")]
     pub fn make(
-        points: &[Point],
-        verbs: &[u8],
-        conic_weights: &[scalar],
-        fill_type: PathFillType,
-        is_volatile: impl Into<Option<bool>>,
-    ) -> Path {
-        let mut path = Path::default();
-        unsafe {
-            sb::C_SkPathBuilder_Make(
-                points.native().as_ptr(),
-                points.len().try_into().unwrap(),
-                verbs.as_ptr(),
-                verbs.len().try_into().unwrap(),
-                conic_weights.as_ptr(),
-                conic_weights.len().try_into().unwrap(),
-                fill_type,
-                is_volatile.into().unwrap_or(false),
-                path.native_mut(),
-            )
-        }
-        path
+        _points: &[Point],
+        _verbs: &[u8],
+        _conic_weights: &[scalar],
+        _fill_type: PathFillType,
+        _is_volatile: impl Into<Option<bool>>,
+    ) -> ! {
+        panic!("Removed without replacement");
     }
 }
 

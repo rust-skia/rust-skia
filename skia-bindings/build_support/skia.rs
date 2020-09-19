@@ -199,7 +199,6 @@ impl FinalBuildConfiguration {
 
             // further flags that limit the components of Skia debug builds.
             if build.skia_debug {
-                args.push(("skia_enable_atlas_text", no()));
                 args.push(("skia_enable_spirv_validation", no()));
                 args.push(("skia_enable_tools", no()));
                 args.push(("skia_enable_vulkan_debug_layers", no()));
@@ -1071,7 +1070,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("GrGLFormat", rewrite::k_xxx),
     ("GrSurfaceOrigin", rewrite::k_xxx_name),
     ("GrBackendApi", rewrite::k_xxx),
-    ("GrMipMapped", rewrite::k_xxx),
+    ("GrMipmapped", rewrite::k_xxx),
     ("GrRenderable", rewrite::k_xxx),
     ("GrProtected", rewrite::k_xxx),
     //

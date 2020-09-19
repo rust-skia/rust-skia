@@ -224,6 +224,10 @@ extern "C" const SkSurfaceProps* C_SkSurface_props(const SkSurface* self) {
     return &self->props();
 }
 
+extern "C" bool C_SkSurface_draw(SkSurface* self, const SkDeferredDisplayList* displayList) {
+    return self->draw(sp(displayList));
+}
+
 //
 // core/SkSurfaceCharacterization.h
 //
@@ -265,16 +269,12 @@ extern "C" SkImage* C_SkImage_MakeFromBitmap(const SkBitmap* bitmap) {
     return SkImage::MakeFromBitmap(*bitmap).release();
 }
 
-extern "C" SkImage* C_SkImage_MakeFromGenerator(SkImageGenerator* imageGenerator, const SkIRect* subset) {
-    return SkImage::MakeFromGenerator(std::unique_ptr<SkImageGenerator>(imageGenerator), subset).release();
+extern "C" SkImage* C_SkImage_MakeFromGenerator(SkImageGenerator* imageGenerator) {
+    return SkImage::MakeFromGenerator(std::unique_ptr<SkImageGenerator>(imageGenerator)).release();
 }
 
-extern "C" SkImage* C_SkImage_MakeFromEncoded(SkData* encoded, const SkIRect* subset) {
-    return SkImage::MakeFromEncoded(sp(encoded), subset).release();
-}
-
-extern "C" SkImage* C_SkImage_DecodeToRaster(const void* encoded, size_t length, const SkIRect* subset) {
-    return SkImage::DecodeToRaster(encoded, length, subset).release();
+extern "C" SkImage* C_SkImage_MakeFromEncoded(SkData* encoded) {
+    return SkImage::MakeFromEncoded(sp(encoded)).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromPicture(
@@ -317,7 +317,7 @@ extern "C" SkImage* C_SkImage_makeRasterImage(const SkImage* self, SkImage::Cach
 }
 
 // note: available without GPU support (GrContext may be null).
-extern "C" SkImage *C_SkImage_makeWithFilter(const SkImage *self, GrContext *context,
+extern "C" SkImage *C_SkImage_makeWithFilter(const SkImage *self, GrRecordingContext *context,
                                              const SkImageFilter *filter, const SkIRect *subset,
                                              const SkIRect *clipBounds, SkIRect *outSubset,
                                              SkIPoint *offset) {
@@ -526,15 +526,6 @@ extern "C" void C_SkPathBuilder_snapshot(SkPathBuilder* self, SkPath* path) {
 
 extern "C" void C_SkPathBuilder_detach(SkPathBuilder* self, SkPath* path) {
     *path = self->detach();
-}
-
-extern "C" void C_SkPathBuilder_Make(
-    const SkPoint *points, int pointCount,
-    const uint8_t *verbs, int verbCount,
-    const SkScalar *weights, int cubicWeightCount,
-    SkPathFillType fillType, bool isVolatile, SkPath *path)
-{
-    *path = SkPathBuilder::Make(points, pointCount, verbs, verbCount, weights, cubicWeightCount, fillType, isVolatile);
 }
 
 //
@@ -1500,8 +1491,20 @@ extern "C" SkDeferredDisplayList* C_SkDeferredDisplayListRecorder_detach(SkDefer
     return self->detach().release();
 }
 
-extern "C" void C_SkDeferredDisplayList_delete(SkDeferredDisplayList* self) {
-    delete self;
+//
+// core/SkDeferredDisplayList.h
+//
+
+extern "C" void C_SkDeferredDisplayList_ref(const SkDeferredDisplayList* self) {
+    self->ref();
+}
+
+extern "C" void C_SkDeferredDisplayList_unref(const SkDeferredDisplayList* self) {
+    self->unref();
+}
+
+extern "C" bool C_SkDeferredDisplayList_unique(const SkDeferredDisplayList* self) {
+    return self->unique();
 }
 
 //
@@ -2291,10 +2294,10 @@ uint32_t C_SkRuntimeEffect_hash(const SkRuntimeEffect *self) {
     return self->hash();
 }
 
-const SkRuntimeEffect::Variable* C_SkRuntimeEffect_inputs(const SkRuntimeEffect* self, size_t* count) {
-    auto inputs = self->inputs();
-    *count = inputs.count();
-    return &*inputs.begin();
+const SkRuntimeEffect::Uniform* C_SkRuntimeEffect_uniforms(const SkRuntimeEffect* self, size_t* count) {
+    auto uniforms = self->uniforms();
+    *count = uniforms.count();
+    return &*uniforms.begin();
 }
 
 const SkString* C_SkRuntimeEffect_children(const SkRuntimeEffect* self, size_t* count) {

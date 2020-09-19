@@ -1,6 +1,11 @@
+#ifndef SK_VULKAN
+    #define SK_VULKAN
+#endif
+
 #include "include/gpu/GrBackendDrawableInfo.h"
 #include "include/gpu/GrBackendSurface.h"
 #include "include/gpu/GrContext.h"
+#include "include/gpu/GrDirectContext.h"
 #include "include/gpu/vk/GrVkVulkan.h"
 #include "include/gpu/vk/GrVkTypes.h"
 #include "include/gpu/vk/GrVkBackendContext.h"
@@ -82,8 +87,8 @@ extern "C" void C_GrVkBackendContext_setMaxAPIVersion(GrVkBackendContext *self, 
     self->fMaxAPIVersion = maxAPIVersion;
 }
 
-extern "C" GrContext* C_GrContext_MakeVulkan(const GrVkBackendContext* vkBackendContext) {
-    return GrContext::MakeVulkan(*vkBackendContext).release();
+extern "C" GrDirectContext* C_GrDirectContext_MakeVulkan(const GrVkBackendContext* vkBackendContext) {
+    return GrDirectContext::MakeVulkan(*vkBackendContext).release();
 }
 
 //

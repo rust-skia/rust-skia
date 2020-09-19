@@ -10,7 +10,7 @@ use super::{BackendAPI, BackendSurfaceMutableState};
 use crate::prelude::*;
 use crate::ISize;
 use skia_bindings as sb;
-use skia_bindings::{GrBackendFormat, GrBackendRenderTarget, GrBackendTexture, GrMipMapped};
+use skia_bindings::{GrBackendFormat, GrBackendRenderTarget, GrBackendTexture, GrMipmapped};
 
 pub type BackendFormat = Handle<GrBackendFormat>;
 unsafe impl Send for BackendFormat {}
@@ -217,7 +217,7 @@ impl Handle<GrBackendTexture> {
     }
 
     pub fn has_mip_maps(&self) -> bool {
-        self.native().fMipMapped == GrMipMapped::Yes
+        self.native().fMipmapped == GrMipmapped::Yes
     }
 
     pub fn backend(&self) -> BackendAPI {

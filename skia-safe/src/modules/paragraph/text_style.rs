@@ -184,11 +184,11 @@ impl Default for Handle<sb::skia_textlayout_TextStyle> {
 
 impl Handle<sb::skia_textlayout_TextStyle> {
     pub fn new() -> Self {
-        TextStyle::from_native(unsafe { sb::skia_textlayout_TextStyle::new() })
+        TextStyle::construct(|ts| unsafe { sb::C_TextStyle_Construct(ts) })
     }
 
     pub fn to_placeholder(&self) -> Self {
-        TextStyle::from_native(unsafe { sb::skia_textlayout_TextStyle::new1(self.native(), true) })
+        TextStyle::from_native(unsafe { sb::skia_textlayout_TextStyle::new(self.native(), true) })
     }
 
     pub fn equals(&self, other: &TextStyle) -> bool {
