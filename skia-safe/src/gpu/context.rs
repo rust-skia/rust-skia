@@ -6,7 +6,7 @@ use super::gl;
 use super::vk;
 use crate::gpu::{
     BackendFormat, BackendRenderTarget, BackendSurfaceMutableState, BackendTexture, DirectContext,
-    MipMapped, Renderable,
+    Mipmapped, Renderable,
 };
 use crate::prelude::*;
 use crate::{image, ColorType, Data, Image};
@@ -286,13 +286,13 @@ impl RCHandle<GrContext> {
 
     pub fn compute_image_size(
         image: impl AsRef<Image>,
-        mip_mapped: MipMapped,
+        mipmapped: Mipmapped,
         use_next_pow2: impl Into<Option<bool>>,
     ) -> usize {
         unsafe {
             sb::C_GrContext_ComputeImageSize(
                 image.as_ref().clone().into_ptr(),
-                mip_mapped,
+                mipmapped,
                 use_next_pow2.into().unwrap_or_default(),
             )
         }

@@ -270,7 +270,7 @@ extern "C" void C_SkImage_getBackendTexture(
 }
 
 extern "C" SkImage* C_SkImage_MakeFromTexture(
-        GrContext* context,
+        GrRecordingContext* context,
         const GrBackendTexture* backendTexture,
         GrSurfaceOrigin origin,
         SkColorType colorType,
@@ -288,7 +288,7 @@ extern "C" SkImage* C_SkImage_MakeCrossContextFromPixmap(
 }
 
 extern "C" SkImage* C_SkImage_MakeFromAdoptedTexture(
-        GrContext* context,
+        GrRecordingContext* context,
         const GrBackendTexture* backendTexture,
         GrSurfaceOrigin origin,
         SkColorType colorType,
@@ -298,7 +298,7 @@ extern "C" SkImage* C_SkImage_MakeFromAdoptedTexture(
 }
 
 extern "C" SkImage* C_SkImage_MakeFromYUVATexturesCopy(
-        GrContext* context,
+        GrRecordingContext* context,
         SkYUVColorSpace yuvColorSpace,
         const GrBackendTexture yuvaTextures[],
         const SkYUVAIndex yuvaIndices[4],
@@ -312,7 +312,7 @@ extern "C" SkImage* C_SkImage_MakeFromYUVATexturesCopy(
 }
 
 extern "C" SkImage* C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend(
-        GrContext* context,
+        GrRecordingContext* context,
         SkYUVColorSpace yuvColorSpace,
         const GrBackendTexture yuvaTextures[],
         const SkYUVAIndex yuvaIndices[4],

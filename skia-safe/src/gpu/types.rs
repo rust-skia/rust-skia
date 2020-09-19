@@ -16,8 +16,8 @@ pub use skia_bindings::GrMipmapped as Mipmapped;
 pub use skia_bindings::GrMipmapped as MipMapped;
 
 #[test]
-fn test_mip_mapped_naming() {
-    let _ = MipMapped::Yes;
+fn test_mipmapped_naming() {
+    let _ = Mipmapped::Yes;
 }
 
 // TODO: this should be a newtype(bool) I guess with implementations

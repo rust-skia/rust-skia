@@ -30,3 +30,22 @@ pub use self::types::*;
 
 #[cfg(feature = "vulkan")]
 pub mod vk;
+
+#[test]
+fn implicit_deref_conversion_from_direct_context_to_context_to_recording_context() {
+    fn _recording_context(_context: &RecordingContext) {}
+    fn _context(context: &Context) {
+        _recording_context(context)
+    }
+    fn _direct_context(context: &DirectContext) {
+        _context(context)
+    }
+
+    fn _recording_context_mut(_context: &mut RecordingContext) {}
+    fn _context_mut(context: &mut Context) {
+        _recording_context_mut(context)
+    }
+    fn _direct_context_mut(context: &mut DirectContext) {
+        _context_mut(context)
+    }
+}
