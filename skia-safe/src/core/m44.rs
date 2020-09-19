@@ -4,9 +4,11 @@ use crate::{scalar, Matrix, Matrix44, Scalars};
 use bitflags::_core::ops::{AddAssign, MulAssign};
 use skia_bindings as sb;
 use skia_bindings::{Sk3LookAt, Sk3Perspective, SkM44, SkV2, SkV3, SkV4};
-use std::f32;
-use std::ops::{Add, Mul, Neg, Sub, SubAssign};
-use std::slice;
+use std::{
+    f32,
+    ops::{Add, Div, DivAssign, Index, Mul, Neg, Sub, SubAssign},
+    slice,
+};
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
@@ -110,6 +112,13 @@ impl Mul<V2> for scalar {
     }
 }
 
+impl Div<scalar> for V2 {
+    type Output = V2;
+    fn div(self, s: scalar) -> Self::Output {
+        V2::new(self.x / s, self.y / s)
+    }
+}
+
 impl AddAssign for V2 {
     fn add_assign(&mut self, v: Self) {
         *self = *self + v
@@ -131,6 +140,12 @@ impl MulAssign for V2 {
 impl MulAssign<scalar> for V2 {
     fn mul_assign(&mut self, s: scalar) {
         *self = *self * s
+    }
+}
+
+impl DivAssign<scalar> for V2 {
+    fn div_assign(&mut self, s: scalar) {
+        *self = *self / s
     }
 }
 
@@ -373,6 +388,14 @@ impl MulAssign<scalar> for V4 {
     }
 }
 
+impl Index<usize> for V4 {
+    type Output = f32;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.as_array()[index]
+    }
+}
+
 #[repr(C)]
 #[derive(Clone)]
 pub struct M44 {
@@ -388,11 +411,7 @@ fn test_m44_layout() {
 
 impl Default for M44 {
     fn default() -> Self {
-        Self {
-            mat: [
-                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
-            ],
-        }
+        Self::new_identity()
     }
 }
 
@@ -405,8 +424,12 @@ impl PartialEq for M44 {
 impl M44 {
     const COMPONENTS: usize = 16;
 
-    pub fn new_identity() -> Self {
-        Self::default()
+    pub const fn new_identity() -> Self {
+        Self {
+            mat: [
+                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+            ],
+        }
     }
 
     pub fn concat(a: &Self, b: &Self) -> Self {
@@ -415,14 +438,14 @@ impl M44 {
         m
     }
 
-    pub fn nan() -> Self {
+    pub const fn nan() -> Self {
         Self {
             mat: [f32::NAN; Self::COMPONENTS],
         }
     }
 
     #[allow(clippy::too_many_arguments)]
-    pub fn new(
+    pub const fn new(
         m0: scalar,
         m1: scalar,
         m2: scalar,
