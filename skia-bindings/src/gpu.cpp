@@ -108,7 +108,7 @@ extern "C" const SkImageInfo* C_SkSurfaceCharacterization_imageInfo(const SkSurf
 // core/SkImageGenerator.h
 //
 
-extern "C" bool C_SkImageGenerator_isValid(const SkImageGenerator* self, GrContext* context) {
+extern "C" bool C_SkImageGenerator_isValid(const SkImageGenerator* self, GrRecordingContext* context) {
     return self->isValid(context);
 }
 

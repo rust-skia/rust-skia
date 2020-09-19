@@ -33,7 +33,7 @@ impl RefHandle<SkImageGenerator> {
     }
 
     #[cfg(feature = "gpu")]
-    pub fn is_valid(&self, mut context: Option<&mut gpu::Context>) -> bool {
+    pub fn is_valid(&self, mut context: Option<&mut gpu::RecordingContext>) -> bool {
         unsafe { sb::C_SkImageGenerator_isValid(self.native(), context.native_ptr_or_null_mut()) }
     }
 
@@ -51,6 +51,8 @@ impl RefHandle<SkImageGenerator> {
                 .getPixels(info.native(), pixels.as_mut_ptr() as _, row_bytes)
         }
     }
+
+    // TODO: m86: get_pixels(&Pixmap)
 
     pub fn query_yuva8(
         &self,
