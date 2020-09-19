@@ -10,13 +10,13 @@ use skia_bindings::{SkPath, SkPath_Iter, SkPath_RawIter};
 use std::marker::PhantomData;
 use std::mem::forget;
 
-#[deprecated(since = "0.25.0", note = "use path_types::PathDirection")]
+#[deprecated(since = "0.25.0", note = "use PathDirection")]
 pub use path_types::PathDirection as Direction;
 
-#[deprecated(since = "0.25.0", note = "use path_types::PathFillType")]
+#[deprecated(since = "0.25.0", note = "use PathFillType")]
 pub use path_types::PathFillType as FillType;
 
-#[deprecated(since = "0.25.0", note = "use path_types::PathConvexityType")]
+#[deprecated(since = "0.25.0", note = "use PathConvexityType")]
 pub use path_types::PathConvexityType as Convexity;
 
 pub use skia_bindings::SkPath_ArcSize as ArcSize;
@@ -562,20 +562,26 @@ impl Handle<SkPath> {
     pub fn quad_to(&mut self, p1: impl Into<Point>, p2: impl Into<Point>) -> &mut Self {
         let p1 = p1.into();
         let p2 = p2.into();
-        unsafe { self.native_mut().quadTo(p1.x, p1.y, p2.x, p2.y) };
+        unsafe {
+            self.native_mut().quadTo(p1.x, p1.y, p2.x, p2.y);
+        }
         self
     }
 
     pub fn r_quad_to(&mut self, dx1: impl Into<Vector>, dx2: impl Into<Vector>) -> &mut Self {
         let (dx1, dx2) = (dx1.into(), dx2.into());
-        unsafe { self.native_mut().rQuadTo(dx1.x, dx1.y, dx2.x, dx2.y) };
+        unsafe {
+            self.native_mut().rQuadTo(dx1.x, dx1.y, dx2.x, dx2.y);
+        }
         self
     }
 
     pub fn conic_to(&mut self, p1: impl Into<Point>, p2: impl Into<Point>, w: scalar) -> &mut Self {
         let p1 = p1.into();
         let p2 = p2.into();
-        unsafe { self.native_mut().conicTo(p1.x, p1.y, p2.x, p2.y, w) };
+        unsafe {
+            self.native_mut().conicTo(p1.x, p1.y, p2.x, p2.y, w);
+        }
         self
     }
 
@@ -586,7 +592,9 @@ impl Handle<SkPath> {
         w: scalar,
     ) -> &mut Self {
         let (d1, d2) = (d1.into(), d2.into());
-        unsafe { self.native_mut().rConicTo(d1.x, d1.y, d2.x, d2.y, w) };
+        unsafe {
+            self.native_mut().rConicTo(d1.x, d1.y, d2.x, d2.y, w);
+        }
         self
     }
 
@@ -599,8 +607,8 @@ impl Handle<SkPath> {
         let (p1, p2, p3) = (p1.into(), p2.into(), p3.into());
         unsafe {
             self.native_mut()
-                .cubicTo(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y)
-        };
+                .cubicTo(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
+        }
         self
     }
 
@@ -613,8 +621,8 @@ impl Handle<SkPath> {
         let (d1, d2, d3) = (d1.into(), d2.into(), d3.into());
         unsafe {
             self.native_mut()
-                .rCubicTo(d1.x, d1.y, d2.x, d2.y, d3.x, d3.y)
-        };
+                .rCubicTo(d1.x, d1.y, d2.x, d2.y, d3.x, d3.y);
+        }
         self
     }
 
@@ -631,8 +639,8 @@ impl Handle<SkPath> {
                 start_angle,
                 sweep_angle,
                 force_move_to,
-            )
-        };
+            );
+        }
         self
     }
 
@@ -643,7 +651,9 @@ impl Handle<SkPath> {
         radius: scalar,
     ) -> &mut Self {
         let (p1, p2) = (p1.into(), p2.into());
-        unsafe { self.native_mut().arcTo1(p1.x, p1.y, p2.x, p2.y, radius) };
+        unsafe {
+            self.native_mut().arcTo1(p1.x, p1.y, p2.x, p2.y, radius);
+        }
         self
     }
 
@@ -658,8 +668,8 @@ impl Handle<SkPath> {
         let (r, xy) = (r.into(), xy.into());
         unsafe {
             self.native_mut()
-                .arcTo2(r.x, r.y, x_axis_rotate, large_arc, sweep, xy.x, xy.y)
-        };
+                .arcTo2(r.x, r.y, x_axis_rotate, large_arc, sweep, xy.x, xy.y);
+        }
         self
     }
 
@@ -674,8 +684,8 @@ impl Handle<SkPath> {
         let (r, xy) = (r.into(), xy.into());
         unsafe {
             self.native_mut()
-                .rArcTo(r.x, r.y, x_axis_rotate, large_arc, sweep, xy.x, xy.y)
-        };
+                .rArcTo(r.x, r.y, x_axis_rotate, large_arc, sweep, xy.x, xy.y);
+        }
         self
     }
 
