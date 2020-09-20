@@ -74,7 +74,6 @@ impl RCHandle<GrDirectContext> {
             queue,
             options.into().native_ptr_or_null(),
         ))
-        .map(|c| c.into())
     }
 
     #[cfg(feature = "d3d")]
