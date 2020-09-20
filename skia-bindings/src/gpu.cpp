@@ -46,7 +46,7 @@ extern "C" SkSurface* C_SkSurface_MakeFromBackendRenderTarget(
 }
 
 extern "C" SkSurface* C_SkSurface_MakeRenderTarget(
-    GrContext* context,
+    GrRecordingContext* context,
     SkBudgeted budgeted,
     const SkImageInfo* imageInfo,
     int sampleCount, GrSurfaceOrigin surfaceOrigin,
@@ -63,7 +63,7 @@ extern "C" SkSurface* C_SkSurface_MakeRenderTarget(
 }
 
 extern "C" SkSurface* C_SkSurface_MakeRenderTarget2(
-        GrContext* context,
+        GrRecordingContext* context,
         const SkSurfaceCharacterization& characterization,
         SkBudgeted budgeted) {
     return SkSurface::MakeRenderTarget(

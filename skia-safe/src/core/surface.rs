@@ -59,6 +59,7 @@ impl RCHandle<SkSurface> {
         .map(move |surface| surface.borrows(pixels))
     }
 
+    // TODO: MakeRasterDirect(&Pixmap)
     // TODO: MakeRasterDirectReleaseProc()?
 
     pub fn new_raster(
@@ -189,11 +190,10 @@ impl RCHandle<SkSurface> {
         })
     }
     pub fn new_render_target(
-        context: &mut gpu::Context,
+        context: &mut gpu::RecordingContext,
         budgeted: crate::Budgeted,
         image_info: &ImageInfo,
         sample_count: impl Into<Option<usize>>,
-        // not optional, because with vulkan, there is no clear default anymore.
         surface_origin: gpu::SurfaceOrigin,
         surface_props: Option<&SurfaceProps>,
         should_create_with_mips: impl Into<Option<bool>>,
@@ -212,7 +212,7 @@ impl RCHandle<SkSurface> {
     }
 
     pub fn new_render_target_with_characterization(
-        context: &mut gpu::Context,
+        context: &mut gpu::RecordingContext,
         characterization: &SurfaceCharacterization,
         budgeted: crate::Budgeted,
     ) -> Option<Self> {
@@ -278,8 +278,16 @@ impl RCHandle<SkSurface> {
 
 #[cfg(feature = "gpu")]
 impl RCHandle<SkSurface> {
+    #[deprecated(
+        since = "0.0.0",
+        note = "Use recordingContext() and RecordingContext::as_direct_context()"
+    )]
     pub fn context(&mut self) -> Option<gpu::Context> {
         gpu::Context::from_unshared_ptr(unsafe { self.native_mut().getContext() })
+    }
+
+    pub fn recording_context(&mut self) -> Option<gpu::RecordingContext> {
+        gpu::RecordingContext::from_unshared_ptr(unsafe { self.native_mut().recordingContext() })
     }
 
     pub fn get_backend_texture(
@@ -431,9 +439,9 @@ impl RCHandle<SkSurface> {
         unsafe { self.native_mut().readPixels2(bitmap.native(), src.x, src.y) }
     }
 
-    // TODO: wrap AsyncReadResult (m79)
-    // TODO: wrap asyncRescaleAndReadPixels (m76/m79)
-    // TODO: wrap asyncRescaleAndReadPixelsYUV420 (m77/m79)
+    // TODO: AsyncReadResult, RescaleGamma (m79, m86)
+    // TODO: wrap asyncRescaleAndReadPixels (m76, m79)
+    // TODO: wrap asyncRescaleAndReadPixelsYUV420 (m77, m79)
 
     pub fn write_pixels_from_pixmap(&mut self, src: &Pixmap, dst: impl Into<IPoint>) {
         let dst = dst.into();
@@ -458,10 +466,12 @@ impl RCHandle<SkSurface> {
         }
     }
 
-    #[deprecated(since = "0.30.0", note = "Use flush_and_submit()")]
-    // when removed, replace it with flush_with_access() and deprecate it.
+    // After deprecated since 0.30.0 (m85), the default flush() behavior changed in m86.
+    // For more information, take a look at the documentation in Skia's SkSurface.h
+    #[cfg(feature = "gpu")]
     pub fn flush(&mut self) {
-        self.flush_and_submit()
+        let info = gpu::FlushInfo::default();
+        self.flush_with_mutable_state(&info, None);
     }
 
     #[cfg(feature = "gpu")]
@@ -473,7 +483,18 @@ impl RCHandle<SkSurface> {
         unsafe { self.native_mut().flush(access, info.native()) }
     }
 
-    // TODO: flush(FlushInfo, GrBackendSurfaceMutableState)
+    #[cfg(feature = "gpu")]
+    pub fn flush_with_mutable_state<'a>(
+        &mut self,
+        info: &gpu::FlushInfo,
+        new_state: impl Into<Option<&'a gpu::BackendSurfaceMutableState>>,
+    ) -> gpu::SemaphoresSubmitted {
+        unsafe {
+            self.native_mut()
+                .flush1(info.native(), new_state.into().native_ptr_or_null())
+        }
+    }
+
     // TODO: wait()
 
     pub fn characterize(&self) -> Option<SurfaceCharacterization> {
