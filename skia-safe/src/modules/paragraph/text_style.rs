@@ -103,7 +103,7 @@ impl Handle<sb::skia_textlayout_FontFeature> {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct PlaceholderStyle {
     pub width: scalar,
     pub height: scalar,
@@ -121,18 +121,6 @@ fn placeholder_style_layout() {
 impl PartialEq for PlaceholderStyle {
     fn eq(&self, other: &Self) -> bool {
         unsafe { self.native().equals(other.native()) }
-    }
-}
-
-impl Default for PlaceholderStyle {
-    fn default() -> Self {
-        Self::new(
-            0.0,
-            0.0,
-            PlaceholderAlignment::Baseline,
-            TextBaseline::Alphabetic,
-            0.0,
-        )
     }
 }
 
