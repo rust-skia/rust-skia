@@ -905,8 +905,8 @@ extern "C" uint32_t C_SkPicture_uniqueID(const SkPicture* self) {
     return self->uniqueID();
 }
 
-extern "C" int C_SkPicture_approximateOpCount(const SkPicture* self) {
-    return self->approximateOpCount();
+extern "C" int C_SkPicture_approximateOpCount(const SkPicture* self, bool nested) {
+    return self->approximateOpCount(nested);
 }
 
 // note: returning size_t produces a linker error.
