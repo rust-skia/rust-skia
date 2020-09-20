@@ -59,7 +59,7 @@ impl RCHandle<GrDirectContext> {
     pub unsafe fn new_metal(
         device: *mut std::ffi::c_void,
         queue: *mut std::ffi::c_void,
-    ) -> Option<Context> {
+    ) -> Option<DirectContext> {
         DirectContext::from_ptr(sb::C_GrContext_MakeMetal(device, queue)).map(|c| c.into())
     }
 
@@ -67,6 +67,5 @@ impl RCHandle<GrDirectContext> {
     #[cfg(feature = "d3d")]
     pub unsafe fn new_d3d(backend_context: &d3d::BackendContext) -> Option<DirectContext> {
         DirectContext::from_ptr(sb::C_GrDirectContext_MakeDirect3D(backend_context.native()))
-            .map(|dc| dc.into())
     }
 }

@@ -81,7 +81,7 @@ impl RCHandle<GrContext> {
     // TODO: support variant with GrContextOptions
     #[cfg(feature = "d3d")]
     pub unsafe fn new_d3d(backend_context: &d3d::BackendContext) -> Option<Context> {
-        DirectContext::new_metal(backend_context).map(|c| c.into())
+        DirectContext::new_d3d(backend_context).map(|c| c.into())
     }
 
     // TODO: threadSafeProxy()
