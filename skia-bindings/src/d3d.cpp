@@ -31,6 +31,11 @@ extern "C" void C_GrBackendRenderTarget_ConstructD3D(GrBackendRenderTarget* unin
 // gpu/GrContext.h
 //
 
-extern "C" GrDirectContext* C_GrDirectContext_MakeDirect3D(const GrD3DBackendContext* backendContext) {
+extern "C" GrDirectContext* C_GrDirectContext_MakeDirect3D(
+    const GrD3DBackendContext* backendContext,
+    const GrContextOptions* options) {
+    if (options) {
+        return GrDirectContext::MakeDirect3D(*backendContext, *options).release();
+    }
     return GrDirectContext::MakeDirect3D(*backendContext).release();
 }

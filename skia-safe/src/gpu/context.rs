@@ -59,12 +59,12 @@ pub struct ResourceCacheUsage {
 impl RCHandle<GrContext> {
     #[cfg(feature = "gl")]
     pub fn new_gl(interface: impl Into<Option<gl::Interface>>) -> Option<Context> {
-        DirectContext::new_gl(interface).map(|c| c.into())
+        DirectContext::new_gl(interface, None).map(|c| c.into())
     }
 
     #[cfg(feature = "vulkan")]
     pub fn new_vulkan(backend_context: &vk::BackendContext) -> Option<Context> {
-        DirectContext::new_vulkan(backend_context).map(|c| c.into())
+        DirectContext::new_vulkan(backend_context, None).map(|c| c.into())
     }
 
     /// # Safety
@@ -75,13 +75,13 @@ impl RCHandle<GrContext> {
         device: *mut std::ffi::c_void,
         queue: *mut std::ffi::c_void,
     ) -> Option<Context> {
-        DirectContext::new_metal(device, queue).map(|c| c.into())
+        DirectContext::new_metal(device, queue, None).map(|c| c.into())
     }
 
     // TODO: support variant with GrContextOptions
     #[cfg(feature = "d3d")]
     pub unsafe fn new_d3d(backend_context: &d3d::BackendContext) -> Option<Context> {
-        DirectContext::new_d3d(backend_context).map(|c| c.into())
+        DirectContext::new_d3d(backend_context, None).map(|c| c.into())
     }
 
     // TODO: threadSafeProxy()

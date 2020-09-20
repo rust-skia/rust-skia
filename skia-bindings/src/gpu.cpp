@@ -199,6 +199,14 @@ extern "C" void C_GrContext_performDeferredCleanup(GrContext* self, long msNotUs
 }
 
 //
+// gpu/GrContextOptions.h
+//
+
+extern "C" void C_GrContextOptions_Construct(GrContextOptions* unintialized) {
+    new(unintialized) GrContextOptions();
+}
+
+//
 // gpu/GrRecordingContext.h
 //
 

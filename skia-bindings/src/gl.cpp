@@ -134,11 +134,17 @@ extern "C" const GrGLInterface* C_GrGLInterface_MakeAssembledInterface(void *ctx
 // gpu/GrContext.h
 //
 
-extern "C" GrDirectContext* C_GrDirectContext_MakeGL(GrGLInterface* interface) {
-    if (interface)
+extern "C" GrDirectContext* C_GrDirectContext_MakeGL(GrGLInterface* interface, const GrContextOptions* options) {
+    if (interface) {
+        if (options) {
+            return GrDirectContext::MakeGL(sp(interface), *options).release();
+        } 
         return GrDirectContext::MakeGL(sp(interface)).release();
-    else
-        return GrDirectContext::MakeGL().release();
+    } 
+    if (options) {
+        return GrDirectContext::MakeGL(*options).release();
+    }
+    return GrDirectContext::MakeGL().release();
 }
 
 extern "C" void C_GrBackendFormat_ConstructGL(GrBackendFormat* uninitialized, GrGLenum format, GrGLenum target) {

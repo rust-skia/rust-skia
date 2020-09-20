@@ -87,7 +87,12 @@ extern "C" void C_GrVkBackendContext_setMaxAPIVersion(GrVkBackendContext *self, 
     self->fMaxAPIVersion = maxAPIVersion;
 }
 
-extern "C" GrDirectContext* C_GrDirectContext_MakeVulkan(const GrVkBackendContext* vkBackendContext) {
+extern "C" GrDirectContext* C_GrDirectContext_MakeVulkan(
+    const GrVkBackendContext* vkBackendContext,
+    const GrContextOptions* options) {
+    if (options) {
+        return GrDirectContext::MakeVulkan(*vkBackendContext, *options).release();
+    }
     return GrDirectContext::MakeVulkan(*vkBackendContext).release();
 }
 

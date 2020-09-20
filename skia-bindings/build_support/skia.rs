@@ -1113,6 +1113,8 @@ const ENUM_TABLE: &[EnumEntry] = &[
     // m86:
     ("SkSamplingMode", rewrite::k_xxx),
     ("SkMipmapMode", rewrite::k_xxx),
+    ("Enable", rewrite::k_xxx),
+    ("ShaderCacheStrategy", rewrite::k_xxx),
 ];
 
 pub(crate) mod rewrite {

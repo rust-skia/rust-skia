@@ -7,6 +7,9 @@ pub use self::backend_surface::*;
 mod backend_surface_mutable_state;
 pub use self::backend_surface_mutable_state::*;
 
+pub mod context_options;
+pub use self::context_options::ContextOptions;
+
 mod context;
 pub use self::context::*;
 
@@ -15,6 +18,9 @@ pub mod d3d;
 
 mod direct_context;
 pub use self::direct_context::*;
+
+mod driver_bug_workarounds;
+pub use self::driver_bug_workarounds::DriverBugWorkarounds;
 
 #[cfg(feature = "gl")]
 pub mod gl;
