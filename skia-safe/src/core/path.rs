@@ -215,8 +215,9 @@ impl Handle<SkPath> {
         fill_type: FillType,
         is_volatile: impl Into<Option<bool>>,
     ) -> Self {
-        Self::from_native(unsafe {
-            sb::SkPath_Make(
+        Self::construct(|path| unsafe {
+            sb::C_SkPath_Make(
+                path,
                 points.native().as_ptr(),
                 points.len().try_into().unwrap(),
                 verbs.as_ptr(),
@@ -230,8 +231,9 @@ impl Handle<SkPath> {
     }
 
     pub fn rect(rect: impl AsRef<Rect>, dir: impl Into<Option<PathDirection>>) -> Self {
-        Self::from_native(unsafe {
-            sb::SkPath_Rect(
+        Self::construct(|path| unsafe {
+            sb::C_SkPath_Rect(
+                path,
                 rect.as_ref().native(),
                 dir.into().unwrap_or(PathDirection::CW),
             )
@@ -239,8 +241,9 @@ impl Handle<SkPath> {
     }
 
     pub fn oval(oval: impl AsRef<Rect>, dir: impl Into<Option<PathDirection>>) -> Self {
-        Self::from_native(unsafe {
-            sb::SkPath_Oval(
+        Self::construct(|path| unsafe {
+            sb::C_SkPath_Oval(
+                path,
                 oval.as_ref().native(),
                 dir.into().unwrap_or(PathDirection::CW),
             )
@@ -253,8 +256,9 @@ impl Handle<SkPath> {
         dir: impl Into<Option<PathDirection>>,
     ) -> Self {
         let center = center.into();
-        Self::from_native(unsafe {
-            sb::SkPath_Circle(
+        Self::construct(|path| unsafe {
+            sb::C_SkPath_Circle(
+                path,
                 center.x,
                 center.y,
                 radius,
@@ -264,8 +268,9 @@ impl Handle<SkPath> {
     }
 
     pub fn rrect(rect: impl AsRef<RRect>, dir: impl Into<Option<PathDirection>>) -> Self {
-        Self::from_native(unsafe {
-            sb::SkPath_RRect(
+        Self::construct(|path| unsafe {
+            sb::C_SkPath_RRect(
+                path,
                 rect.as_ref().native(),
                 dir.into().unwrap_or(PathDirection::CW),
             )
@@ -278,8 +283,9 @@ impl Handle<SkPath> {
         fill_type: impl Into<Option<FillType>>,
         is_volatile: impl Into<Option<bool>>,
     ) -> Self {
-        Self::from_native(unsafe {
-            sb::SkPath_Polygon(
+        Self::construct(|path| unsafe {
+            sb::C_SkPath_Polygon(
+                path,
                 pts.native().as_ptr(),
                 pts.len().try_into().unwrap(),
                 is_closed,
@@ -294,7 +300,7 @@ impl Handle<SkPath> {
     }
 
     pub fn new() -> Self {
-        Self::from_native(unsafe { SkPath::new() })
+        Self::construct(|path| unsafe { sb::C_SkPath_Construct(path) })
     }
 
     pub fn is_interpolatable(&self, compare: &Path) -> bool {
@@ -1003,7 +1009,7 @@ fn test_get_points() {
 }
 
 #[test]
-fn fill_type() {
+fn test_fill_type() {
     let mut p = Path::default();
     assert_eq!(p.fill_type(), PathFillType::Winding);
     p.set_fill_type(PathFillType::EvenOdd);
@@ -1015,7 +1021,7 @@ fn fill_type() {
 }
 
 #[test]
-fn is_volatile() {
+fn test_is_volatile() {
     let mut p = Path::default();
     assert!(!p.is_volatile());
     p.set_is_volatile(true);
@@ -1023,7 +1029,7 @@ fn is_volatile() {
 }
 
 #[test]
-fn path_can_be_returned_from_native_fn() {
+fn test_path_rect() {
     let r = Rect::new(0.0, 0.0, 100.0, 100.0);
     let path = Path::rect(r, None);
     assert_eq!(*path.bounds(), r);

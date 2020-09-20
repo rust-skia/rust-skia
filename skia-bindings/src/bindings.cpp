@@ -456,6 +456,45 @@ extern "C" void C_SkPaint_setImageFilter(SkPaint* self, SkImageFilter* imageFilt
 // core/SkPath.h
 //
 
+extern "C" void C_SkPath_Construct(SkPath* uninitialized) {
+    new(uninitialized)SkPath();
+}
+
+extern "C" void C_SkPath_Make(SkPath* uninitialized, 
+    const SkPoint pts[], int pointCount,
+    const uint8_t vbs[], int verbCount,
+    const SkScalar ws[], int wCount,
+    SkPathFillType ft, bool isVolatile) {
+    new(uninitialized)SkPath(SkPath::Make(pts, pointCount, vbs, verbCount, ws, wCount, ft, isVolatile));
+}
+
+extern "C" void C_SkPath_Rect(SkPath* uninitialized,
+    const SkRect& r, SkPathDirection dir) {
+    new(uninitialized)SkPath(SkPath::Rect(r, dir));
+}
+
+extern "C" void C_SkPath_Oval(SkPath* uninitialized,
+    const SkRect& r, SkPathDirection dir) {
+    new(uninitialized)SkPath(SkPath::Oval(r, dir));
+}
+
+extern "C" void C_SkPath_Circle(SkPath* uninitialized,
+    SkScalar x, SkScalar y, SkScalar r, SkPathDirection dir) {
+    new(uninitialized)SkPath(SkPath::Circle(x, y, r, dir));
+}
+
+extern "C" void C_SkPath_RRect(SkPath* uninitialized,
+    const SkRRect& rr, SkPathDirection dir) {
+    new(uninitialized)SkPath(SkPath::RRect(rr, dir));
+}
+
+extern "C" void C_SkPath_Polygon(SkPath* uninitialized,
+    const SkPoint pts[], int count, bool isClosed,
+    SkPathFillType ft,
+    bool isVolatile) {
+    new(uninitialized)SkPath(SkPath::Polygon(pts, count, isClosed, ft, isVolatile));
+}
+
 extern "C" void C_SkPath_destruct(const SkPath* self) {
     self->~SkPath();
 }
