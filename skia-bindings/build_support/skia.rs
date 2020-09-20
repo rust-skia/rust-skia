@@ -652,8 +652,6 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         .blacklist_type("GrContextThreadSafeProxy")
         .raw_line("pub enum GrContextThreadSafeProxyPriv {}")
         .blacklist_type("GrContextThreadSafeProxyPriv")
-        .raw_line("pub enum GrRecordingContext {}")
-        .blacklist_type("GrRecordingContext")
         .raw_line("pub enum GrRecordingContextPriv {}")
         .blacklist_type("GrRecordingContextPriv")
         .raw_line("pub enum GrContextPriv {}")
@@ -921,6 +919,9 @@ const OPAQUE_TYPES: &[&str] = &[
     "SkMutex",
     // m82: private
     "SkIDChangeListener",
+    // m86:
+    "GrRecordingContext",
+    "GrDirectContext",
 ];
 
 const BLACKLISTED_TYPES: &[&str] = &[

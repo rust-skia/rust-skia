@@ -167,16 +167,20 @@ extern "C" void C_GrBackendSurfaceMutableState_destruct(GrBackendSurfaceMutableS
 }
 
 //
-// gpu/GrContext.h
+// gpu/GrRecordingContext.h
 //
 
-extern "C" bool C_GrContext_colorTypeSupportedAsSurface(const GrContext* self, SkColorType colorType) {
-    return self->colorTypeSupportedAsSurface(colorType);
+extern "C" void C_GrRecordingContext_defaultBackendFormat(const GrRecordingContext* self, SkColorType ct, GrRenderable renderable, GrBackendFormat* result) {
+    *result = self->defaultBackendFormat(ct, renderable);
 }
 
-extern "C" bool C_GrContext_abandoned(GrContext* self) {
+extern "C" bool C_GrRecordingContext_abandoned(GrRecordingContext* self) {
     return self->abandoned();
 }
+
+//
+// gpu/GrContext.h
+//
 
 extern "C" void C_GrContext_flushAndSubmit(GrContext* self) {
     self->flushAndSubmit();
@@ -186,16 +190,20 @@ extern "C" size_t C_GrContext_ComputeImageSize(SkImage* image, GrMipMapped mm, b
     return GrContext::ComputeImageSize(sp(image), mm, useNextPow2);
 }
 
-extern "C" void C_GrContext_defaultBackendFormat(const GrContext* self, SkColorType ct, GrRenderable renderable, GrBackendFormat* result) {
-    *result = self->defaultBackendFormat(ct, renderable);
-}
-
 extern "C" void C_GrContext_compressedBackendFormat(const GrContext* self, SkImage::CompressionType compression, GrBackendFormat* result) {
     *result = self->compressedBackendFormat(compression);
 }
 
 extern "C" void C_GrContext_performDeferredCleanup(GrContext* self, long msNotUsed) {
     self->performDeferredCleanup(std::chrono::milliseconds(msNotUsed));
+}
+
+//
+// gpu/GrRecordingContext.h
+//
+
+extern "C" bool C_GrRecordingContext_colorTypeSupportedAsSurface(const GrRecordingContext* self, SkColorType colorType) {
+    return self->colorTypeSupportedAsSurface(colorType);
 }
 
 //

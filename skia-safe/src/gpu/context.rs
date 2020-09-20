@@ -6,7 +6,7 @@ use super::gl;
 use super::vk;
 use crate::gpu::{
     BackendFormat, BackendRenderTarget, BackendSurfaceMutableState, BackendTexture, DirectContext,
-    Mipmapped, Renderable,
+    FlushInfo, Mipmapped, SemaphoresSubmitted,
 };
 use crate::prelude::*;
 use crate::{image, ColorType, Data, Image};
@@ -57,29 +57,16 @@ pub struct ResourceCacheUsage {
 }
 
 impl RCHandle<GrContext> {
-    // TODO: support variant with GrContextOptions
     #[cfg(feature = "gl")]
     pub fn new_gl(interface: impl Into<Option<gl::Interface>>) -> Option<Context> {
-        DirectContext::from_ptr(unsafe {
-            sb::C_GrDirectContext_MakeGL(interface.into().into_ptr_or_null())
-        })
-        .map(|dc| dc.into())
+        DirectContext::new_gl(interface).map(|c| c.into())
     }
 
-    // TODO: support variant with GrContextOptions
     #[cfg(feature = "vulkan")]
     pub fn new_vulkan(backend_context: &vk::BackendContext) -> Option<Context> {
-        unsafe {
-            let end_resolving = backend_context.begin_resolving();
-            let context = DirectContext::from_ptr(sb::C_GrDirectContext_MakeVulkan(
-                backend_context.native.as_ptr() as _,
-            ));
-            drop(end_resolving);
-            context.map(|c| c.into())
-        }
+        DirectContext::new_vulkan(backend_context).map(|c| c.into())
     }
 
-    // TODO: support variant with GrContextOptions
     /// # Safety
     /// This function is unsafe because `device` and `queue` are untyped handles which need to exceed the
     /// lifetime of the context returned.
@@ -88,14 +75,13 @@ impl RCHandle<GrContext> {
         device: *mut std::ffi::c_void,
         queue: *mut std::ffi::c_void,
     ) -> Option<Context> {
-        DirectContext::from_ptr(sb::C_GrContext_MakeMetal(device, queue)).map(|c| c.into())
+        DirectContext::new_metal(device, queue).map(|c| c.into())
     }
 
     // TODO: support variant with GrContextOptions
     #[cfg(feature = "d3d")]
     pub unsafe fn new_d3d(backend_context: &d3d::BackendContext) -> Option<Context> {
-        DirectContext::from_ptr(sb::C_GrDirectContext_MakeDirect3D(backend_context.native()))
-            .map(|dc| dc.into())
+        DirectContext::new_metal(backend_context).map(|c| c.into())
     }
 
     // TODO: threadSafeProxy()
@@ -121,12 +107,6 @@ impl RCHandle<GrContext> {
         self
     }
 
-    // TODO: is_...?
-    pub fn abandoned(&mut self) -> bool {
-        unsafe { sb::C_GrContext_abandoned(self.native_mut()) }
-    }
-
-    // TODO: is_...?
     pub fn oomed(&mut self) -> bool {
         unsafe { self.native_mut().oomed() }
     }
@@ -224,7 +204,6 @@ impl RCHandle<GrContext> {
         unsafe { self.native().maxRenderTargetSize() }
     }
 
-    // TODO: is_...?
     pub fn color_type_supported_as_image(&self, color_type: ColorType) -> bool {
         unsafe {
             self.native()
@@ -232,34 +211,20 @@ impl RCHandle<GrContext> {
         }
     }
 
-    // TODO: is_...?
-    pub fn color_type_supported_as_surface(&self, color_type: ColorType) -> bool {
-        unsafe {
-            sb::C_GrContext_colorTypeSupportedAsSurface(self.native(), color_type.into_native())
-        }
-    }
-
-    pub fn max_surface_sample_count_for_color_type(&self, color_type: ColorType) -> usize {
-        unsafe {
-            sb::GrRecordingContext_maxSurfaceSampleCountForColorType(
-                self.deref().native(),
-                color_type.into_native(),
-            )
-            .try_into()
-            .unwrap()
-        }
-    }
-
     // TODO: wait()
-
-    #[deprecated(since = "0.30.0", note = "use flush_and_submit()")]
-    pub fn flush(&mut self) -> &mut Self {
-        self.flush_and_submit()
-    }
 
     pub fn flush_and_submit(&mut self) -> &mut Self {
         unsafe { sb::C_GrContext_flushAndSubmit(self.native_mut()) }
         self
+    }
+
+    pub fn flush_with_info(&mut self, info: &FlushInfo) -> SemaphoresSubmitted {
+        unsafe { self.native_mut().flush(info.native()) }
+    }
+
+    #[deprecated(since = "0.30.0", note = "use flush_and_submit()")]
+    pub fn flush(&mut self) -> &mut Self {
+        self.flush_and_submit()
     }
 
     // TODO: flush(GrFlushInfo, ..)
@@ -298,19 +263,6 @@ impl RCHandle<GrContext> {
         }
     }
 
-    pub fn default_backend_format(&self, ct: ColorType, renderable: Renderable) -> BackendFormat {
-        let mut format = BackendFormat::default();
-        unsafe {
-            sb::C_GrContext_defaultBackendFormat(
-                self.native(),
-                ct.into_native(),
-                renderable,
-                format.native_mut(),
-            )
-        };
-        format
-    }
-
     // TODO: wrap createBackendTexture (several variants)
     //       introduced in m76, m77, and m79
     //       extended in m84 with finishedProc and finishedContext
@@ -333,6 +285,9 @@ impl RCHandle<GrContext> {
     // TODO: wrap createCompressedBackendTexture (several variants)
     //       introduced in m81
     //       extended in m84 with finishedProc and finishedContext
+
+    // TODO: wrap updateCompressedBackendTexture (two variants)
+    //       introduced in m86
 
     // TODO: add variant with GpuFinishedProc / GpuFinishedContext
     pub fn set_backend_texture_state(

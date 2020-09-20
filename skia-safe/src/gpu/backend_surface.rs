@@ -216,7 +216,12 @@ impl Handle<GrBackendTexture> {
         self.native().fHeight
     }
 
+    #[deprecated(since = "0.0.0", note = "Use has_mipmaps()")]
     pub fn has_mip_maps(&self) -> bool {
+        self.has_mipmaps()
+    }
+
+    pub fn has_mipmaps(&self) -> bool {
         self.native().fMipmapped == GrMipmapped::Yes
     }
 
