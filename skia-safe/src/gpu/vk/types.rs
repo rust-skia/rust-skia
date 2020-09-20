@@ -75,7 +75,7 @@ impl Alloc {
 #[repr(C)]
 pub struct YcbcrConversionInfo {
     pub format: vk::Format,
-    pub external_format: i64,
+    pub external_format: u64,
     pub ycrbcr_model: vk::SamplerYcbcrModelConversion,
     pub ycbcr_range: vk::SamplerYcbcrRange,
     pub x_chroma_offset: vk::ChromaLocation,
@@ -117,7 +117,7 @@ impl YcbcrConversionInfo {
     #[allow(clippy::too_many_arguments)]
     pub fn new_with_format(
         format: vk::Format,
-        external_format: i64,
+        external_format: u64,
         ycrbcr_model: vk::SamplerYcbcrModelConversion,
         ycbcr_range: vk::SamplerYcbcrRange,
         x_chroma_offset: vk::ChromaLocation,
@@ -149,7 +149,7 @@ impl YcbcrConversionInfo {
         y_chroma_offset: vk::ChromaLocation,
         chroma_filter: vk::Filter,
         force_explicit_reconstruction: vk::Bool32,
-        external_format: i64,
+        external_format: u64,
         external_format_features: vk::FormatFeatureFlags,
     ) -> YcbcrConversionInfo {
         Self::new_with_format(
