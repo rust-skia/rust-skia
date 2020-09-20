@@ -232,7 +232,6 @@ impl RCHandle<SkTypeface> {
     }
 
     // TODO: openStream()
-    // TODO: makeFontData()
     // TODO: createScalerContext()
 
     pub fn bounds(&self) -> Rect {
