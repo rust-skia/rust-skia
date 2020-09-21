@@ -124,7 +124,7 @@ pub struct TopLayerPixels<'a> {
     pub origin: IPoint,
 }
 
-/// The canvas type that is returned when it is managed by another instance,
+/// The canvas type that is returned when it is owned by another instance,
 /// like Surface, for example. For these cases, the Canvas' reference that is
 /// returned is bound to the lifetime of the owner.
 #[repr(transparent)]
@@ -141,7 +141,7 @@ impl NativeAccess<SkCanvas> for Canvas {
 }
 
 /// A type representing a canvas that is owned and dropped
-/// when it goes out of scope _and_ is bound to a the lifetime of another
+/// when it goes out of scope _and_ is bound to the lifetime of another
 /// instance.
 /// Function resolvement is done via the Deref trait.
 #[repr(transparent)]
