@@ -13,6 +13,12 @@ This project provides _up to date_ safe bindings that bridge idiomatic Rust with
 
 ## Status
 
+### Documentation
+
+Because we [can't build on docs.rs](https://docs.rs/crate/skia-safe/0.34.0/builds), the `cargo doc` output for skia-safe is manually created and uploaded to [rust-skia.github.io](https://rust-skia.github.io/doc/skia_safe).
+
+We are [planning to add function level documentation](https://github.com/rust-skia/rust-skia/issues/23) by linking to Skia's documentation through [intra doc links](https://github.com/rust-lang/rfcs/blob/master/text/1946-intra-rustdoc-links.md), which should be stabilized soon.
+
 ### Crate
 
 A prerelease crate is available from [crates.io](https://crates.io/crates/skia-safe) and adding

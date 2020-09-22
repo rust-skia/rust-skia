@@ -4,6 +4,7 @@ name = "skia-safe"
 description = "Safe Skia Bindings for Rust"
 homepage = "https://github.com/rust-skia/rust-skia"
 repository = "https://github.com/rust-skia/rust-skia"
+documentation = "https://rust-skia.github.io/doc/skia_safe"
 readme = "README.md"
 # 5 max
 keywords = ["skia", "rust-bindings", "vulkan", "opengl", "pdf"]
