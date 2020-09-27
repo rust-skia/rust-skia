@@ -169,7 +169,7 @@ impl FinalBuildConfiguration {
             }
 
             let mut args: Vec<(&str, String)> = vec![
-                ("is_official_build", no_if(build.skia_debug)),
+                ("is_official_build", yes_if(!build.skia_debug)),
                 ("is_debug", yes_if(build.skia_debug)),
                 ("skia_enable_gpu", yes_if(features.gpu())),
                 ("skia_use_gl", yes_if(features.gl)),
@@ -358,9 +358,6 @@ fn yes_if(y: bool) -> String {
     } else {
         no()
     }
-}
-fn no_if(no: bool) -> String {
-    yes_if(!no)
 }
 
 /// The configuration of the resulting binaries.
