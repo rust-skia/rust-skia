@@ -52,9 +52,9 @@ Because building Skia takes a lot of time and needs tools that may be missing, t
 
 There no support for WebAssembly yet. If you'd like to help out, take a look at issue [#39](https://github.com/rust-skia/rust-skia/issues/39).
 
-### Bindings & Supported Features
+### Wrappers & Codecs & Supported Features
 
-The supported bindings and Skia features are described in the [skia-safe package's readme](skia-safe/README.md) and prebuilt binaries are available for most feature combinations.
+The supported wrappers, Skia codecs, and additional Skia features are documented in the [skia-safe package's readme](skia-safe/README.md). Prebuilt binaries are available for most feature combinations.
 
 ## Building
 
