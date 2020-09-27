@@ -22,6 +22,7 @@ vulkan = ["ash", "skia-safe/vulkan"]
 metal = ["metal-rs", "foreign-types", "cocoa", "objc", "skia-safe/metal"]
 d3d = ["skia-safe/d3d", "winapi", "wio"]
 textlayout = ["skia-safe/textlayout"]
+webp = ["skia-safe/webp"]
 
 [dependencies]
 skia-safe = { path = "../skia-safe" }

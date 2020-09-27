@@ -40,6 +40,8 @@ By default, full builds and prebuilt binaries of all platforms support the follo
 
 [^1]: skia-safe versions before 0.34.1 had no support for decoding GIF images.
 
+In addition to that, support for the WEBP image format can be enabled through the features `webp-encode`, `webp-decode`, and `webp` explained below.
+
 ## Features
 
 Skia-safe supports the following features that can be configured [via cargo](https://doc.rust-lang.org/cargo/reference/manifest.html#the-features-section):
@@ -79,6 +81,10 @@ The skshaper module can be accessed through `skia_safe::Shaper` and the Rust bi
 On **Windows**, the file `icudtl.dat` must be available in your executable's directory. To provide the data file, either copy it from the build's output directory (shown when skia-bindings is compiled with `cargo build -vv | grep "ninja: Entering directory"`), or - if your executable directory is writable - invoke the function `skia_safe::icu::init()` before using the `skia_safe::Shaper` object or the `skia_safe::textlayout` module. 
 
 Simple examples of the skshaper and skparagraph module bindings can be found [in the skia-org example command line application](https://github.com/rust-skia/rust-skia/blob/master/skia-org/src/).
+
+### `webp-encode`, `webp-decode`, `webp`
+
+`webp-encode` enables support for encoding Skia bitmaps and images to the [WEBP](https://en.wikipedia.org/wiki/WebP) image format, and `web-decode` enables support for decoding WEBP to Skia bitmaps and images. The `webp` feature can be used as a shorthand to enable the `webp-encode` and `webp-decode` features.
 
 ## Multithreading
 

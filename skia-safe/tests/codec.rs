@@ -2,11 +2,11 @@
 use skia_safe::{codec, Bitmap, Data, EncodedImageFormat};
 
 /// The supported encoders.
-const SUPPORTED_ENCODERS: &[EncodedImageFormat] =
+const STANDARD_ENCODERS: &[EncodedImageFormat] =
     &[EncodedImageFormat::JPEG, EncodedImageFormat::PNG];
 
 /// The supported decoders.
-const SUPPORTED_DECODERS: &[EncodedImageFormat] = &[
+const STANDARD_DECODERS: &[EncodedImageFormat] = &[
     EncodedImageFormat::BMP,
     EncodedImageFormat::GIF,
     EncodedImageFormat::ICO,
@@ -15,8 +15,22 @@ const SUPPORTED_DECODERS: &[EncodedImageFormat] = &[
     EncodedImageFormat::WBMP,
 ];
 
+fn supported_encoders() -> Vec<EncodedImageFormat> {
+    let mut r = STANDARD_ENCODERS.to_vec();
+    #[cfg(feature = "webp-encode")]
+    r.push(EncodedImageFormat::WEBP);
+    r
+}
+
+fn supported_decoders() -> Vec<EncodedImageFormat> {
+    let mut r = STANDARD_DECODERS.to_vec();
+    #[cfg(feature = "webp-decode")]
+    r.push(EncodedImageFormat::WEBP);
+    r
+}
+
 #[test]
-fn encode() {
+fn test_supported_encoders() {
     const DIM: i32 = 16;
 
     let mut bitmap = Bitmap::new();
@@ -28,12 +42,12 @@ fn encode() {
         .filter(|format| bitmap.encode(*format, 100).is_some())
         .collect();
 
-    assert_eq!(&supported, &SUPPORTED_ENCODERS);
+    assert_eq!(supported, supported_encoders());
 }
 
 #[test]
-fn decode() {
-    let formats_supported: Vec<EncodedImageFormat> = DECODER_TESTS
+fn test_supported_decoders() {
+    let supported: Vec<EncodedImageFormat> = DECODER_TESTS
         .iter()
         .filter(|(format, bytes)| {
             let data = Data::new_copy(bytes);
@@ -46,7 +60,7 @@ fn decode() {
         .map(|(format, _bytes)| *format)
         .collect();
 
-    assert_eq!(&formats_supported, &SUPPORTED_DECODERS);
+    assert_eq!(supported, supported_decoders());
 }
 
 type DecoderTest = (EncodedImageFormat, &'static [u8]);
