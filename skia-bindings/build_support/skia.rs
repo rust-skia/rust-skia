@@ -700,6 +700,12 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         definitions::combine(definitions, build.definitions.clone())
     };
 
+    // Whether GIF decoding is supported,
+    // is decided by BUILD.gn based on the existence of the libgifcodec directory:
+    if !definitions.iter().any(|(v, _)| v == "SK_USE_LIBGIFCODEC") {
+        cargo::warning("GIF decoding support may be missing, does the directory skia/third_party/externals/libgifcodec/ exist?")
+    }
+
     for (name, value) in &definitions {
         match value {
             Some(value) => {

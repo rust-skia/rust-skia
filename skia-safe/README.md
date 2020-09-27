@@ -30,6 +30,16 @@ Skia-safe wraps most parts of the public Skia C++ APIs:
 
 Wrappers for functions that take callbacks and virtual classes are not supported right now. While we think they should be wrapped, the use cases related seem to be rather special, so we postponed that for now.
 
+## Codecs
+
+By default, full builds and prebuilt binaries of all platforms support the following image formats[^1]:
+
+| Decoding                       | Encoding  |
+| ------------------------------ | --------- |
+| BMP, GIF, ICO, JPEG, PNG, WBMP | JPEG, PNG |
+
+[^1]: skia-safe versions before 0.34.1 had no support for decoding GIF images.
+
 ## Features
 
 Skia-safe supports the following features that can be configured [via cargo](https://doc.rust-lang.org/cargo/reference/manifest.html#the-features-section):
