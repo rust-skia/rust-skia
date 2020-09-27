@@ -22,6 +22,8 @@ mod feature_id {
     pub const METAL: &str = "metal";
     pub const D3D: &str = "d3d";
     pub const TEXTLAYOUT: &str = "textlayout";
+    pub const WEBPE: &str = "webpe";
+    pub const WEBPD: &str = "webpd";
 }
 
 /// The defaults for the Skia build configuration.
@@ -38,6 +40,8 @@ impl Default for BuildConfiguration {
                 metal: cfg!(feature = "metal"),
                 d3d: cfg!(feature = "d3d"),
                 text_layout: cfg!(feature = "textlayout"),
+                webp_encode: cfg!(feature = "webp-encode"),
+                webp_decode: cfg!(feature = "webp-decode"),
                 animation: false,
                 dng: false,
                 particles: false,
@@ -80,6 +84,12 @@ pub struct Features {
     /// Features related to text layout. Modules skshaper and skparagraph.
     pub text_layout: bool,
 
+    /// Support the encoding of bitmap data to the WEBP image format.
+    pub webp_encode: bool,
+
+    /// Support the decoding of the WEBP image format to bitmap data.
+    pub webp_decode: bool,
+
     /// Build with animation support (yet unsupported, no wrappers).
     pub animation: bool,
 
@@ -113,6 +123,12 @@ impl Features {
         }
         if self.text_layout {
             feature_ids.push(feature_id::TEXTLAYOUT);
+        }
+        if self.webp_encode {
+            feature_ids.push(feature_id::WEBPE);
+        }
+        if self.webp_decode {
+            feature_ids.push(feature_id::WEBPD);
         }
 
         feature_ids
@@ -153,20 +169,17 @@ impl FinalBuildConfiguration {
             }
 
             let mut args: Vec<(&str, String)> = vec![
-                (
-                    "is_official_build",
-                    if build.skia_debug { no() } else { yes() },
-                ),
-                ("is_debug", if build.skia_debug { yes() } else { no() }),
-                ("skia_enable_gpu", if features.gpu() { yes() } else { no() }),
-                ("skia_use_gl", if features.gl { yes() } else { no() }),
+                ("is_official_build", no_if(build.skia_debug)),
+                ("is_debug", yes_if(build.skia_debug)),
+                ("skia_enable_gpu", yes_if(features.gpu())),
+                ("skia_use_gl", yes_if(features.gl)),
                 ("skia_use_system_libjpeg_turbo", no()),
                 ("skia_use_system_libpng", no()),
-                ("skia_use_libwebp_encode", no()),
-                ("skia_use_libwebp_decode", no()),
+                ("skia_use_libwebp_encode", yes_if(features.webp_encode)),
+                ("skia_use_libwebp_decode", yes_if(features.webp_decode)),
                 ("skia_use_system_zlib", no()),
                 ("skia_use_xps", no()),
-                ("skia_use_dng_sdk", if features.dng { yes() } else { no() }),
+                ("skia_use_dng_sdk", yes_if(features.dng)),
                 ("cc", quote("clang")),
                 ("cxx", quote("clang++")),
             ];
@@ -210,6 +223,10 @@ impl FinalBuildConfiguration {
                 ]);
             } else {
                 args.push(("skia_use_icu", no()));
+            }
+
+            if features.webp_encode || features.webp_decode {
+                args.push(("skia_use_system_libwebp", no()))
             }
 
             let mut flags: Vec<&str> = vec![];
@@ -334,6 +351,16 @@ fn yes() -> String {
 }
 fn no() -> String {
     "false".into()
+}
+fn yes_if(y: bool) -> String {
+    if y {
+        yes()
+    } else {
+        no()
+    }
+}
+fn no_if(no: bool) -> String {
+    yes_if(!no)
 }
 
 /// The configuration of the resulting binaries.
