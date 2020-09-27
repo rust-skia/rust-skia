@@ -52,16 +52,16 @@ jobs:
       ${{ if eq(parameters.deployRelease, 'False') }}:
         stable-all-features:
           toolchain: stable
-          features: 'gl,vulkan,textlayout'
+          features: 'gl,vulkan,textlayout,webp'
           exampleArgs: '--driver cpu --driver pdf --driver svg'
         stable-all-features-debug:
           toolchain: stable
-          features: 'gl,vulkan,textlayout'
+          features: 'gl,vulkan,textlayout,webp'
           exampleArgs: ''
           skia_debug: '1'
         beta-all-features:
           toolchain: beta
-          features: 'gl,vulkan,textlayout'
+          features: 'gl,vulkan,textlayout,webp'
           exampleArgs: ''
 
   variables:
