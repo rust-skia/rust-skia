@@ -9,6 +9,8 @@ fn test_arc_size_naming() {
 }
 
 pub type PathBuilder = Handle<SkPathBuilder>;
+unsafe impl Send for PathBuilder {}
+unsafe impl Sync for PathBuilder {}
 
 impl NativeDrop for SkPathBuilder {
     fn drop(&mut self) {

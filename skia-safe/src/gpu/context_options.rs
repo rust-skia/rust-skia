@@ -46,6 +46,8 @@ pub struct ContextOptions {
     pub max_cached_vulkan_secondary_command_buffers: raw::c_int,
     pub driver_bug_workarounds: DriverBugWorkarounds,
 }
+unsafe impl Send for ContextOptions {}
+unsafe impl Sync for ContextOptions {}
 
 impl Default for ContextOptions {
     fn default() -> Self {

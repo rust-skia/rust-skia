@@ -41,6 +41,8 @@ pub struct TextureResourceInfo {
     pub sample_quality_pattern: std::os::raw::c_uint,
     pub protected: gpu::Protected,
 }
+unsafe impl Send for TextureResourceInfo {}
+unsafe impl Sync for TextureResourceInfo {}
 
 impl TextureResourceInfo {
     pub fn from_resource(resource: cp<ID3D12Resource>) -> Self {
@@ -73,3 +75,5 @@ pub struct FenceInfo {
     pub fence: cp<d3d12::ID3D12Fence>,
     pub value: u64,
 }
+unsafe impl Send for FenceInfo {}
+unsafe impl Sync for FenceInfo {}

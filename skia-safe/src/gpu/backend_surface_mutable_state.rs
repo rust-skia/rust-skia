@@ -3,6 +3,8 @@ use skia_bindings as sb;
 use skia_bindings::GrBackendSurfaceMutableState;
 
 pub type BackendSurfaceMutableState = Handle<GrBackendSurfaceMutableState>;
+unsafe impl Send for BackendSurfaceMutableState {}
+unsafe impl Sync for BackendSurfaceMutableState {}
 
 impl NativeDrop for GrBackendSurfaceMutableState {
     fn drop(&mut self) {

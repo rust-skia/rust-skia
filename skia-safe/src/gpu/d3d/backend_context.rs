@@ -12,6 +12,7 @@ pub struct BackendContext {
     pub queue: cp<ID3D12CommandQueue>,
     pub protected_context: gpu::Protected,
 }
+unsafe impl Send for BackendContext {}
 
 impl NativeTransmutable<GrD3DBackendContext> for BackendContext {}
 #[test]
