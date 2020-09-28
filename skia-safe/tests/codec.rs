@@ -17,15 +17,17 @@ const STANDARD_DECODERS: &[EncodedImageFormat] = &[
 
 fn supported_encoders() -> Vec<EncodedImageFormat> {
     let mut r = STANDARD_ENCODERS.to_vec();
-    #[cfg(feature = "webp-encode")]
-    r.push(EncodedImageFormat::WEBP);
+    if cfg!(feature = "webp-encode") {
+        r.push(EncodedImageFormat::WEBP);
+    }
     r
 }
 
 fn supported_decoders() -> Vec<EncodedImageFormat> {
     let mut r = STANDARD_DECODERS.to_vec();
-    #[cfg(feature = "webp-decode")]
-    r.push(EncodedImageFormat::WEBP);
+    if cfg!(feature = "webp-decode") {
+        r.push(EncodedImageFormat::WEBP);
+    }
     r
 }
 
