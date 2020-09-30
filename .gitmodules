@@ -1,6 +1,6 @@
 [submodule "skia"]
 	path = skia-bindings/skia
-	url = https://github.com/rust-skia/skia.git
+	url = https://github.com/romanzes/skia.git
 [submodule "skia-bindings/depot_tools"]
 	path = skia-bindings/depot_tools
 	url = https://github.com/rust-skia/depot_tools.git
