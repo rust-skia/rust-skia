@@ -40,6 +40,10 @@ pub fn add_link_lib(lib: impl AsRef<str>) {
     println!("cargo:rustc-link-lib={}", lib.as_ref());
 }
 
+pub fn add_link_search(dir: impl AsRef<str>) {
+    println!("cargo:rustc-link-search={}", dir.as_ref());
+}
+
 #[derive(Clone, Debug)]
 pub struct Target {
     pub architecture: String,
