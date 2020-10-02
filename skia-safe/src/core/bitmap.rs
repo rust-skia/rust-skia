@@ -113,12 +113,12 @@ impl Handle<SkBitmap> {
         self.pixmap().is_opaque()
     }
 
-    #[deprecated(since = "0.0.0", note = "Removed without replacement")]
+    #[deprecated(since = "0.35.0", note = "Removed without replacement")]
     pub fn is_volatile(&self) -> ! {
         panic!("Removed without replacement")
     }
 
-    #[deprecated(since = "0.0.0", note = "Removed without replacement")]
+    #[deprecated(since = "0.35.0", note = "Removed without replacement")]
     pub fn set_is_volatile(&mut self, _is_volatile: bool) {
         panic!("Removed without replacement");
     }

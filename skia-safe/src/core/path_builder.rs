@@ -300,7 +300,7 @@ impl PathBuilder {
         }
     }
 
-    #[deprecated(since = "0.0.0", note = "Removed without replacement")]
+    #[deprecated(since = "0.35.0", note = "Removed without replacement")]
     pub fn make(
         _points: &[Point],
         _verbs: &[u8],

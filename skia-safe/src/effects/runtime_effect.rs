@@ -10,7 +10,7 @@ use std::slice;
 
 pub type Uniform = Handle<SkRuntimeEffect_Uniform>;
 
-#[deprecated(since = "0.0.0", note = "Use Uniform instead")]
+#[deprecated(since = "0.35.0", note = "Use Uniform instead")]
 pub type Variable = Uniform;
 
 unsafe impl Send for Uniform {}
@@ -170,7 +170,7 @@ impl RCHandle<SkRuntimeEffect> {
         unsafe { sb::C_SkRuntimeEffect_hash(self.native()) }
     }
 
-    #[deprecated(since = "0.0.0", note = "Use uniform_size() instead")]
+    #[deprecated(since = "0.35.0", note = "Use uniform_size() instead")]
     pub fn input_size(&self) -> usize {
         self.uniform_size()
     }
@@ -179,7 +179,7 @@ impl RCHandle<SkRuntimeEffect> {
         unsafe { self.native().uniformSize() }
     }
 
-    #[deprecated(since = "0.0.0", note = "Use uniforms() instead")]
+    #[deprecated(since = "0.35.0", note = "Use uniforms() instead")]
     pub fn inputs(&self) -> &[Uniform] {
         self.uniforms()
     }
@@ -209,7 +209,7 @@ impl RCHandle<SkRuntimeEffect> {
         }
     }
 
-    #[deprecated(since = "0.0.0", note = "Use find_uniform()")]
+    #[deprecated(since = "0.35.0", note = "Use find_uniform()")]
     pub fn find_input(&self, name: impl AsRef<CStr>) -> Option<&Uniform> {
         self.find_uniform(name)
     }

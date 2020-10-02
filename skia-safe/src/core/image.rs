@@ -107,13 +107,13 @@ impl RCHandle<SkImage> {
         Image::from_ptr(unsafe { sb::C_SkImage_MakeFromEncoded(data.into().into_ptr()) })
     }
 
-    #[deprecated(since = "0.0.0", note = "Removed without replacement")]
+    #[deprecated(since = "0.35.0", note = "Removed without replacement")]
     pub fn decode_to_raster(_encoded: &[u8], _subset: impl Into<Option<IRect>>) -> ! {
         panic!("Removed without replacement")
     }
 
     #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.0.0", note = "Removed without replacement")]
+    #[deprecated(since = "0.35.0", note = "Removed without replacement")]
     pub fn decode_to_texture(
         _context: &mut gpu::Context,
         _encoded: &[u8],
@@ -148,7 +148,7 @@ impl RCHandle<SkImage> {
         })
     }
 
-    #[deprecated(since = "0.0.0", note = "Removed without replacement")]
+    #[deprecated(since = "0.35.0", note = "Removed without replacement")]
     #[cfg(feature = "gpu")]
     pub fn from_compressed(
         _context: &mut gpu::RecordingContext,

@@ -12,7 +12,7 @@ fn test_backend_api_layout() {
 //       of From<bool> and Deref?
 pub use skia_bindings::GrMipmapped as Mipmapped;
 
-#[deprecated(since = "0.0.0", note = "Use Mipmapped (with a lowercase 'm')")]
+#[deprecated(since = "0.35.0", note = "Use Mipmapped (with a lowercase 'm')")]
 pub use skia_bindings::GrMipmapped as MipMapped;
 
 #[test]

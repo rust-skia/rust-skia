@@ -155,7 +155,7 @@ impl RCHandle<SkFontMgr> {
         })
     }
 
-    #[deprecated(since = "0.0.0", note = "Removed without replacement")]
+    #[deprecated(since = "0.35.0", note = "Removed without replacement")]
     pub fn match_face_style(&self, _typeface: impl AsRef<Typeface>, _style: FontStyle) -> ! {
         panic!("Removed without replacement")
     }

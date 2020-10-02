@@ -279,7 +279,7 @@ impl RCHandle<SkSurface> {
 #[cfg(feature = "gpu")]
 impl RCHandle<SkSurface> {
     #[deprecated(
-        since = "0.0.0",
+        since = "0.35.0",
         note = "Use recordingContext() and RecordingContext::as_direct_context()"
     )]
     pub fn context(&mut self) -> Option<gpu::Context> {
