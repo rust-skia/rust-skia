@@ -199,7 +199,6 @@ impl FinalBuildConfiguration {
 
             // further flags that limit the components of Skia debug builds.
             if build.skia_debug {
-                args.push(("skia_enable_atlas_text", no()));
                 args.push(("skia_enable_spirv_validation", no()));
                 args.push(("skia_enable_tools", no()));
                 args.push(("skia_enable_vulkan_debug_layers", no()));
@@ -650,8 +649,6 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         .blacklist_type("GrContextThreadSafeProxy")
         .raw_line("pub enum GrContextThreadSafeProxyPriv {}")
         .blacklist_type("GrContextThreadSafeProxyPriv")
-        .raw_line("pub enum GrRecordingContext {}")
-        .blacklist_type("GrRecordingContext")
         .raw_line("pub enum GrRecordingContextPriv {}")
         .blacklist_type("GrRecordingContextPriv")
         .raw_line("pub enum GrContextPriv {}")
@@ -919,6 +916,9 @@ const OPAQUE_TYPES: &[&str] = &[
     "SkMutex",
     // m82: private
     "SkIDChangeListener",
+    // m86:
+    "GrRecordingContext",
+    "GrDirectContext",
 ];
 
 const BLACKLISTED_TYPES: &[&str] = &[
@@ -1068,7 +1068,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("GrGLFormat", rewrite::k_xxx),
     ("GrSurfaceOrigin", rewrite::k_xxx_name),
     ("GrBackendApi", rewrite::k_xxx),
-    ("GrMipMapped", rewrite::k_xxx),
+    ("GrMipmapped", rewrite::k_xxx),
     ("GrRenderable", rewrite::k_xxx),
     ("GrProtected", rewrite::k_xxx),
     //
@@ -1105,8 +1105,13 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("Usage", rewrite::k_xxx),
     ("GrSemaphoresSubmitted", rewrite::k_xxx),
     ("BackendSurfaceAccess", rewrite::k_xxx),
-    // m85: VkSharingMode
+    // m85
     ("VkSharingMode", rewrite::vk),
+    // m86:
+    ("SkSamplingMode", rewrite::k_xxx),
+    ("SkMipmapMode", rewrite::k_xxx),
+    ("Enable", rewrite::k_xxx),
+    ("ShaderCacheStrategy", rewrite::k_xxx),
 ];
 
 pub(crate) mod rewrite {

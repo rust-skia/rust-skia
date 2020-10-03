@@ -97,7 +97,7 @@ pub use font_types::*;
 pub mod graphics;
 
 pub mod image;
-pub use image::Image;
+pub use image::{FilterOptions, Image, MipmapMode, SamplingMode};
 
 mod image_encoder;
 pub use image_encoder::*;

@@ -46,7 +46,7 @@ extern "C" SkSurface* C_SkSurface_MakeFromBackendRenderTarget(
 }
 
 extern "C" SkSurface* C_SkSurface_MakeRenderTarget(
-    GrContext* context,
+    GrRecordingContext* context,
     SkBudgeted budgeted,
     const SkImageInfo* imageInfo,
     int sampleCount, GrSurfaceOrigin surfaceOrigin,
@@ -63,7 +63,7 @@ extern "C" SkSurface* C_SkSurface_MakeRenderTarget(
 }
 
 extern "C" SkSurface* C_SkSurface_MakeRenderTarget2(
-        GrContext* context,
+        GrRecordingContext* context,
         const SkSurfaceCharacterization& characterization,
         SkBudgeted budgeted) {
     return SkSurface::MakeRenderTarget(
@@ -108,7 +108,7 @@ extern "C" const SkImageInfo* C_SkSurfaceCharacterization_imageInfo(const SkSurf
 // core/SkImageGenerator.h
 //
 
-extern "C" bool C_SkImageGenerator_isValid(const SkImageGenerator* self, GrContext* context) {
+extern "C" bool C_SkImageGenerator_isValid(const SkImageGenerator* self, GrRecordingContext* context) {
     return self->isValid(context);
 }
 
@@ -167,16 +167,20 @@ extern "C" void C_GrBackendSurfaceMutableState_destruct(GrBackendSurfaceMutableS
 }
 
 //
-// gpu/GrContext.h
+// gpu/GrRecordingContext.h
 //
 
-extern "C" bool C_GrContext_colorTypeSupportedAsSurface(const GrContext* self, SkColorType colorType) {
-    return self->colorTypeSupportedAsSurface(colorType);
+extern "C" void C_GrRecordingContext_defaultBackendFormat(const GrRecordingContext* self, SkColorType ct, GrRenderable renderable, GrBackendFormat* result) {
+    *result = self->defaultBackendFormat(ct, renderable);
 }
 
-extern "C" bool C_GrContext_abandoned(GrContext* self) {
+extern "C" bool C_GrRecordingContext_abandoned(GrRecordingContext* self) {
     return self->abandoned();
 }
+
+//
+// gpu/GrContext.h
+//
 
 extern "C" void C_GrContext_flushAndSubmit(GrContext* self) {
     self->flushAndSubmit();
@@ -186,16 +190,28 @@ extern "C" size_t C_GrContext_ComputeImageSize(SkImage* image, GrMipMapped mm, b
     return GrContext::ComputeImageSize(sp(image), mm, useNextPow2);
 }
 
-extern "C" void C_GrContext_defaultBackendFormat(const GrContext* self, SkColorType ct, GrRenderable renderable, GrBackendFormat* result) {
-    *result = self->defaultBackendFormat(ct, renderable);
-}
-
 extern "C" void C_GrContext_compressedBackendFormat(const GrContext* self, SkImage::CompressionType compression, GrBackendFormat* result) {
     *result = self->compressedBackendFormat(compression);
 }
 
 extern "C" void C_GrContext_performDeferredCleanup(GrContext* self, long msNotUsed) {
     self->performDeferredCleanup(std::chrono::milliseconds(msNotUsed));
+}
+
+//
+// gpu/GrContextOptions.h
+//
+
+extern "C" void C_GrContextOptions_Construct(GrContextOptions* unintialized) {
+    new(unintialized) GrContextOptions();
+}
+
+//
+// gpu/GrRecordingContext.h
+//
+
+extern "C" bool C_GrRecordingContext_colorTypeSupportedAsSurface(const GrRecordingContext* self, SkColorType colorType) {
+    return self->colorTypeSupportedAsSurface(colorType);
 }
 
 //
@@ -254,7 +270,7 @@ extern "C" void C_SkDrawable_GpuDrawHandler_draw(SkDrawable::GpuDrawHandler *sel
 //
 
 
-extern "C" SkImage *C_SkImage_MakeTextureFromCompressed(GrContext *context, SkData *data, int width, int height,
+extern "C" SkImage *C_SkImage_MakeTextureFromCompressed(GrDirectContext *context, SkData *data, int width, int height,
                                                 SkImage::CompressionType type, GrMipMapped mipMapped,
                                                 GrProtected prot) {
     return SkImage::MakeTextureFromCompressed(context, sp(data), width, height, type, mipMapped, prot).release();
@@ -269,18 +285,8 @@ extern "C" void C_SkImage_getBackendTexture(
     *result = self->getBackendTexture(flushPendingGrContextIO, origin);
 }
 
-extern "C" SkImage *C_SkImage_MakeFromCompressed(GrContext *context, SkData *encoded, int width, int height,
-                                                 SkImage::CompressionType type, GrMipMapped mipMapped, GrProtected 
-                                                 prot) {
-    return SkImage::MakeFromCompressed(context, sp(encoded), width, height, type, mipMapped, prot).release();
-}
-
-extern "C" SkImage* C_SkImage_DecodeToTexture(GrContext* ctx, const void* encoded, size_t length, const SkIRect* subset) {
-    return SkImage::DecodeToTexture(ctx, encoded, length, subset).release();
-}
-
 extern "C" SkImage* C_SkImage_MakeFromTexture(
-        GrContext* context,
+        GrRecordingContext* context,
         const GrBackendTexture* backendTexture,
         GrSurfaceOrigin origin,
         SkColorType colorType,
@@ -290,7 +296,7 @@ extern "C" SkImage* C_SkImage_MakeFromTexture(
 }
 
 extern "C" SkImage* C_SkImage_MakeCrossContextFromPixmap(
-        GrContext* context,
+        GrDirectContext* context,
         const SkPixmap* pixmap,
         bool buildMips,
         bool limitToMaxTextureSize) {
@@ -298,7 +304,7 @@ extern "C" SkImage* C_SkImage_MakeCrossContextFromPixmap(
 }
 
 extern "C" SkImage* C_SkImage_MakeFromAdoptedTexture(
-        GrContext* context,
+        GrRecordingContext* context,
         const GrBackendTexture* backendTexture,
         GrSurfaceOrigin origin,
         SkColorType colorType,
@@ -308,7 +314,7 @@ extern "C" SkImage* C_SkImage_MakeFromAdoptedTexture(
 }
 
 extern "C" SkImage* C_SkImage_MakeFromYUVATexturesCopy(
-        GrContext* context,
+        GrRecordingContext* context,
         SkYUVColorSpace yuvColorSpace,
         const GrBackendTexture yuvaTextures[],
         const SkYUVAIndex yuvaIndices[4],
@@ -322,7 +328,7 @@ extern "C" SkImage* C_SkImage_MakeFromYUVATexturesCopy(
 }
 
 extern "C" SkImage* C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend(
-        GrContext* context,
+        GrRecordingContext* context,
         SkYUVColorSpace yuvColorSpace,
         const GrBackendTexture yuvaTextures[],
         const SkYUVAIndex yuvaIndices[4],
@@ -377,7 +383,7 @@ extern "C" SkImage* C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
 
 extern "C" SkImage* C_SkImage_makeTextureImage(
         const SkImage* self,
-        GrContext* context,
+        GrDirectContext* context,
         GrMipMapped mipMapped,
         SkBudgeted budgeted) {
     return self->makeTextureImage(context, mipMapped, budgeted).release();

@@ -10,7 +10,7 @@ use super::{BackendAPI, BackendSurfaceMutableState};
 use crate::prelude::*;
 use crate::ISize;
 use skia_bindings as sb;
-use skia_bindings::{GrBackendFormat, GrBackendRenderTarget, GrBackendTexture, GrMipMapped};
+use skia_bindings::{GrBackendFormat, GrBackendRenderTarget, GrBackendTexture, GrMipmapped};
 
 pub type BackendFormat = Handle<GrBackendFormat>;
 unsafe impl Send for BackendFormat {}
@@ -151,11 +151,11 @@ impl Handle<GrBackendTexture> {
     #[cfg(feature = "gl")]
     pub unsafe fn new_gl(
         (width, height): (i32, i32),
-        mip_mapped: super::MipMapped,
+        mipmapped: super::Mipmapped,
         gl_info: gl::TextureInfo,
     ) -> Self {
         Self::from_native_if_valid(construct(|texture| {
-            sb::C_GrBackendTexture_ConstructGL(texture, width, height, mip_mapped, gl_info.native())
+            sb::C_GrBackendTexture_ConstructGL(texture, width, height, mipmapped, gl_info.native())
         }))
         .unwrap()
     }
@@ -171,7 +171,7 @@ impl Handle<GrBackendTexture> {
     #[cfg(feature = "metal")]
     pub unsafe fn new_metal(
         (width, height): (i32, i32),
-        mip_mapped: super::MipMapped,
+        mipmapped: super::Mipmapped,
         mtl_info: &mtl::TextureInfo,
     ) -> Self {
         Self::from_native_if_valid(construct(|texture| {
@@ -179,7 +179,7 @@ impl Handle<GrBackendTexture> {
                 texture,
                 width,
                 height,
-                mip_mapped,
+                mipmapped,
                 mtl_info.native(),
             )
         }))
@@ -216,8 +216,13 @@ impl Handle<GrBackendTexture> {
         self.native().fHeight
     }
 
+    #[deprecated(since = "0.35.0", note = "Use has_mipmaps()")]
     pub fn has_mip_maps(&self) -> bool {
-        self.native().fMipMapped == GrMipMapped::Yes
+        self.has_mipmaps()
+    }
+
+    pub fn has_mipmaps(&self) -> bool {
+        self.native().fMipmapped == GrMipmapped::Yes
     }
 
     pub fn backend(&self) -> BackendAPI {

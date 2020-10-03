@@ -140,7 +140,7 @@ mod d3d {
                 fResourceState: crate::D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON,
                 fFormat: crate::DXGI_FORMAT::DXGI_FORMAT_UNKNOWN,
                 fLevelCount: 0,
-                fSampleQualityLevel: 0,
+                fSampleQualityPattern: 0,
                 fProtected: crate::GrProtected::No,
             }
         }

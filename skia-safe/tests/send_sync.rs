@@ -26,14 +26,15 @@ mod codec {
 
 mod core {
     use skia_safe::{
-        font_parameters, image_filter, path, path_effect, region, typeface, vertices, Bitmap,
-        Canvas, Color, ColorFilter, ColorInfo, ColorSpace, ContourMeasure, ContourMeasureIter,
-        CubicMap, Data, DataTable, DeferredDisplayList, DeferredDisplayListRecorder, Document,
-        Drawable, Font, FontArguments, FontMetrics, FontMgr, FontStyle, FontStyleSet, Image,
-        ImageFilter, ImageGenerator, ImageInfo, MaskFilter, Matrix, OwnedCanvas, Paint, Path,
-        PathEffect, PathMeasure, Picture, PictureRecorder, PixelRef, Pixmap, RRect, RSXform,
-        Region, Shader, Surface, SurfaceCharacterization, SurfaceProps, TextBlob, TextBlobBuilder,
-        TextBlobIter, TextBlobRun, Typeface, Vertices, YUVAIndex, YUVASizeInfo, M44,
+        font_parameters, image::CubicResampler, image_filter, path, path_effect, region, typeface,
+        vertices, Bitmap, Canvas, Color, ColorFilter, ColorInfo, ColorSpace, ContourMeasure,
+        ContourMeasureIter, CubicMap, Data, DataTable, DeferredDisplayList,
+        DeferredDisplayListRecorder, Document, Drawable, FilterOptions, Font, FontArguments,
+        FontMetrics, FontMgr, FontStyle, FontStyleSet, Image, ImageFilter, ImageGenerator,
+        ImageInfo, MaskFilter, Matrix, OwnedCanvas, Paint, Path, PathBuilder, PathEffect,
+        PathMeasure, Picture, PictureRecorder, PixelRef, Pixmap, RRect, RSXform, Region, Shader,
+        Surface, SurfaceCharacterization, SurfaceProps, TextBlob, TextBlobBuilder, TextBlobIter,
+        TextBlobRun, Typeface, Vertices, YUVAIndex, YUVASizeInfo, M44,
     };
     use static_assertions::*;
 
@@ -48,13 +49,14 @@ mod core {
     assert_impl_all!(ContourMeasure: Send, Sync);
     assert_impl_all!(ContourMeasureIter: Send, Sync);
     assert_impl_all!(CubicMap: Send, Sync);
+    assert_impl_all!(CubicResampler: Send, Sync);
     assert_impl_all!(Data: Send, Sync);
     assert_impl_all!(DataTable: Send, Sync);
-    // SkSurface::draw function needs to mutate it
-    assert_not_impl_any!(DeferredDisplayList: Send, Sync);
+    assert_impl_all!(DeferredDisplayList: Send, Sync);
     assert_not_impl_any!(DeferredDisplayListRecorder: Send, Sync);
     assert_not_impl_any!(Document: Send, Sync);
     assert_not_impl_any!(Drawable: Send, Sync);
+    assert_impl_all!(FilterOptions: Send, Sync);
     assert_impl_all!(Font: Send, Sync);
     assert_not_impl_any!(FontArguments: Send, Sync);
     assert_impl_all!(FontMetrics: Send, Sync);
@@ -78,6 +80,7 @@ mod core {
     assert_impl_all!(Paint: Send, Sync);
     assert_not_impl_any!(path::Iter: Send, Sync);
     assert_impl_all!(Path: Send, Sync);
+    assert_impl_all!(PathBuilder: Send, Sync);
     assert_impl_all!(path_effect::PointData: Send, Sync);
     assert_impl_all!(path_effect::DashInfo: Send, Sync);
     assert_impl_all!(PathEffect: Send, Sync);
@@ -123,21 +126,29 @@ mod effects {
     use skia_safe::{runtime_effect, RuntimeEffect};
     use static_assertions::*;
 
-    assert_impl_all!(runtime_effect::Variable: Send, Sync);
+    assert_impl_all!(runtime_effect::Uniform: Send, Sync);
     assert_not_impl_any!(RuntimeEffect: Send, Sync);
 }
 
 #[cfg(feature = "gpu")]
 mod gpu {
-    use skia_safe::gpu::{BackendFormat, BackendRenderTarget, BackendTexture, Context};
+    use skia_safe::gpu::{
+        BackendFormat, BackendRenderTarget, BackendSurfaceMutableState, BackendTexture, Context,
+        ContextOptions, DirectContext, DriverBugWorkarounds, RecordingContext,
+    };
     use static_assertions::*;
     assert_impl_all!(BackendFormat: Send, Sync);
     assert_impl_all!(BackendTexture: Send, Sync);
     assert_impl_all!(BackendRenderTarget: Send, Sync);
-    // The implementation checks for single ownership before mutation, so
+    assert_impl_all!(BackendSurfaceMutableState: Send, Sync);
+    assert_impl_all!(ContextOptions: Send, Sync);
+    assert_impl_all!(DriverBugWorkarounds: Send, Sync);
+    // The Context implementation checks for single ownership before mutation, so
     // no Send and Sync can be supported.
-    // If RC is 1, it can be sent to other threads with `Sendable`.
+    // If RC is 1, it can be sent to other threads with `Sendable` / `ConditionallySend`.
     assert_not_impl_any!(Context: Send, Sync);
+    assert_not_impl_any!(DirectContext: Send, Sync);
+    assert_not_impl_any!(RecordingContext: Send, Sync);
 
     #[cfg(feature = "gl")]
     mod gl {
@@ -178,6 +189,17 @@ mod gpu {
         // Note that we can't make most of vk.rs re-export of native Vulkan types Send nor Sync,
         // because they are just re-exports of simple pointers, which already implements a negative
         // Send & Sync that can not be overriden...
+    }
+
+    #[cfg(feature = "d3d")]
+    mod d3d {
+        use skia_safe::gpu::d3d::{BackendContext, FenceInfo, TextureResourceInfo};
+        use static_assertions::*;
+        // not sure if BackendContext is Sync, so we'd set it to Send only for now.
+        assert_impl_all!(BackendContext: Send);
+        assert_not_impl_any!(BackendContext: Sync);
+        assert_impl_all!(TextureResourceInfo: Send, Sync);
+        assert_impl_all!(FenceInfo: Send, Sync);
     }
 }
 

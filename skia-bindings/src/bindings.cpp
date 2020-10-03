@@ -224,6 +224,10 @@ extern "C" const SkSurfaceProps* C_SkSurface_props(const SkSurface* self) {
     return &self->props();
 }
 
+extern "C" bool C_SkSurface_draw(SkSurface* self, const SkDeferredDisplayList* displayList) {
+    return self->draw(sp(displayList));
+}
+
 //
 // core/SkSurfaceCharacterization.h
 //
@@ -265,16 +269,12 @@ extern "C" SkImage* C_SkImage_MakeFromBitmap(const SkBitmap* bitmap) {
     return SkImage::MakeFromBitmap(*bitmap).release();
 }
 
-extern "C" SkImage* C_SkImage_MakeFromGenerator(SkImageGenerator* imageGenerator, const SkIRect* subset) {
-    return SkImage::MakeFromGenerator(std::unique_ptr<SkImageGenerator>(imageGenerator), subset).release();
+extern "C" SkImage* C_SkImage_MakeFromGenerator(SkImageGenerator* imageGenerator) {
+    return SkImage::MakeFromGenerator(std::unique_ptr<SkImageGenerator>(imageGenerator)).release();
 }
 
-extern "C" SkImage* C_SkImage_MakeFromEncoded(SkData* encoded, const SkIRect* subset) {
-    return SkImage::MakeFromEncoded(sp(encoded), subset).release();
-}
-
-extern "C" SkImage* C_SkImage_DecodeToRaster(const void* encoded, size_t length, const SkIRect* subset) {
-    return SkImage::DecodeToRaster(encoded, length, subset).release();
+extern "C" SkImage* C_SkImage_MakeFromEncoded(SkData* encoded) {
+    return SkImage::MakeFromEncoded(sp(encoded)).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromPicture(
@@ -291,7 +291,15 @@ extern "C" SkShader* C_SkImage_makeShader(const SkImage* self, SkTileMode tileMo
     return self->makeShader(tileMode1, tileMode2, localMatrix).release();
 }
 
-extern "C" SkShader *C_SkImage_makeShader2(const SkImage *self, SkTileMode tileMode1, SkTileMode tileMode2, const SkMatrix *localMatrix, SkFilterQuality filterQuality)
+extern "C" SkShader* C_SkImage_makeShaderWithFilterOptions(const SkImage* self, SkTileMode tileMode1, SkTileMode tileMode2, SkFilterOptions filterOptions, const SkMatrix* localMatrix) {
+    return self->makeShader(tileMode1, tileMode2, filterOptions, localMatrix).release();
+}
+
+extern "C" SkShader* C_SkImage_makeShaderWithCubicResampler(const SkImage* self, SkTileMode tileMode1, SkTileMode tileMode2, SkImage::CubicResampler cubicResampler, const SkMatrix* localMatrix) {
+    return self->makeShader(tileMode1, tileMode2, cubicResampler, localMatrix).release();
+}
+
+extern "C" SkShader *C_SkImage_makeShaderWithQuality(const SkImage *self, SkTileMode tileMode1, SkTileMode tileMode2, const SkMatrix *localMatrix, SkFilterQuality filterQuality)
 {
     return self->makeShader(tileMode1, tileMode2, localMatrix, filterQuality).release();
 }
@@ -304,8 +312,8 @@ extern "C" SkData* C_SkImage_refEncodedData(const SkImage* self) {
     return self->refEncodedData().release();
 }
 
-extern "C" SkImage* C_SkImage_makeSubset(const SkImage* self, const SkIRect* subset) {
-    return self->makeSubset(*subset).release();
+extern "C" SkImage* C_SkImage_makeSubset(const SkImage* self, const SkIRect* subset, GrDirectContext* direct) {
+    return self->makeSubset(*subset, direct).release();
 }
 
 extern "C" SkImage* C_SkImage_makeNonTextureImage(const SkImage* self) {
@@ -317,15 +325,15 @@ extern "C" SkImage* C_SkImage_makeRasterImage(const SkImage* self, SkImage::Cach
 }
 
 // note: available without GPU support (GrContext may be null).
-extern "C" SkImage *C_SkImage_makeWithFilter(const SkImage *self, GrContext *context,
+extern "C" SkImage *C_SkImage_makeWithFilter(const SkImage *self, GrRecordingContext *context,
                                              const SkImageFilter *filter, const SkIRect *subset,
                                              const SkIRect *clipBounds, SkIRect *outSubset,
                                              SkIPoint *offset) {
     return self->makeWithFilter(context, filter, *subset, *clipBounds, outSubset, offset).release();
 }
 
-extern "C" SkImage* C_SkImage_makeColorSpace(const SkImage* self, SkColorSpace* target) {
-    return self->makeColorSpace(sp(target)).release();
+extern "C" SkImage* C_SkImage_makeColorSpace(const SkImage* self, SkColorSpace* target, GrDirectContext* direct) {
+    return self->makeColorSpace(sp(target), direct).release();
 }
 
 extern "C" SkImage* C_SkImage_reinterpretColorSpace(const SkImage* self, SkColorSpace* newColorSpace) {
@@ -448,6 +456,45 @@ extern "C" void C_SkPaint_setImageFilter(SkPaint* self, SkImageFilter* imageFilt
 // core/SkPath.h
 //
 
+extern "C" void C_SkPath_Construct(SkPath* uninitialized) {
+    new(uninitialized) SkPath();
+}
+
+extern "C" void C_SkPath_Make(SkPath* uninitialized, 
+    const SkPoint pts[], int pointCount,
+    const uint8_t vbs[], int verbCount,
+    const SkScalar ws[], int wCount,
+    SkPathFillType ft, bool isVolatile) {
+    new(uninitialized) SkPath(SkPath::Make(pts, pointCount, vbs, verbCount, ws, wCount, ft, isVolatile));
+}
+
+extern "C" void C_SkPath_Rect(SkPath* uninitialized,
+    const SkRect& r, SkPathDirection dir) {
+    new(uninitialized) SkPath(SkPath::Rect(r, dir));
+}
+
+extern "C" void C_SkPath_Oval(SkPath* uninitialized,
+    const SkRect& r, SkPathDirection dir) {
+    new(uninitialized) SkPath(SkPath::Oval(r, dir));
+}
+
+extern "C" void C_SkPath_Circle(SkPath* uninitialized,
+    SkScalar x, SkScalar y, SkScalar r, SkPathDirection dir) {
+    new(uninitialized) SkPath(SkPath::Circle(x, y, r, dir));
+}
+
+extern "C" void C_SkPath_RRect(SkPath* uninitialized,
+    const SkRRect& rr, SkPathDirection dir) {
+    new(uninitialized) SkPath(SkPath::RRect(rr, dir));
+}
+
+extern "C" void C_SkPath_Polygon(SkPath* uninitialized,
+    const SkPoint pts[], int count, bool isClosed,
+    SkPathFillType ft,
+    bool isVolatile) {
+    new(uninitialized) SkPath(SkPath::Polygon(pts, count, isClosed, ft, isVolatile));
+}
+
 extern "C" void C_SkPath_destruct(const SkPath* self) {
     self->~SkPath();
 }
@@ -526,15 +573,6 @@ extern "C" void C_SkPathBuilder_snapshot(SkPathBuilder* self, SkPath* path) {
 
 extern "C" void C_SkPathBuilder_detach(SkPathBuilder* self, SkPath* path) {
     *path = self->detach();
-}
-
-extern "C" void C_SkPathBuilder_Make(
-    const SkPoint *points, int pointCount,
-    const uint8_t *verbs, int verbCount,
-    const SkScalar *weights, int cubicWeightCount,
-    SkPathFillType fillType, bool isVolatile, SkPath *path)
-{
-    *path = SkPathBuilder::Make(points, pointCount, verbs, verbCount, weights, cubicWeightCount, fillType, isVolatile);
 }
 
 //
@@ -906,8 +944,8 @@ extern "C" uint32_t C_SkPicture_uniqueID(const SkPicture* self) {
     return self->uniqueID();
 }
 
-extern "C" int C_SkPicture_approximateOpCount(const SkPicture* self) {
-    return self->approximateOpCount();
+extern "C" int C_SkPicture_approximateOpCount(const SkPicture* self, bool nested) {
+    return self->approximateOpCount(nested);
 }
 
 // note: returning size_t produces a linker error.
@@ -1500,8 +1538,20 @@ extern "C" SkDeferredDisplayList* C_SkDeferredDisplayListRecorder_detach(SkDefer
     return self->detach().release();
 }
 
-extern "C" void C_SkDeferredDisplayList_delete(SkDeferredDisplayList* self) {
-    delete self;
+//
+// core/SkDeferredDisplayList.h
+//
+
+extern "C" void C_SkDeferredDisplayList_ref(const SkDeferredDisplayList* self) {
+    self->ref();
+}
+
+extern "C" void C_SkDeferredDisplayList_unref(const SkDeferredDisplayList* self) {
+    self->unref();
+}
+
+extern "C" bool C_SkDeferredDisplayList_unique(const SkDeferredDisplayList* self) {
+    return self->unique();
 }
 
 //
@@ -2291,10 +2341,10 @@ uint32_t C_SkRuntimeEffect_hash(const SkRuntimeEffect *self) {
     return self->hash();
 }
 
-const SkRuntimeEffect::Variable* C_SkRuntimeEffect_inputs(const SkRuntimeEffect* self, size_t* count) {
-    auto inputs = self->inputs();
-    *count = inputs.count();
-    return &*inputs.begin();
+const SkRuntimeEffect::Uniform* C_SkRuntimeEffect_uniforms(const SkRuntimeEffect* self, size_t* count) {
+    auto uniforms = self->uniforms();
+    *count = uniforms.count();
+    return &*uniforms.begin();
 }
 
 const SkString* C_SkRuntimeEffect_children(const SkRuntimeEffect* self, size_t* count) {

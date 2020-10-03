@@ -10,13 +10,14 @@ bitflags! {
         const UNDERLINE_POSITION_IS_VALID = sb::SkFontMetrics_FontMetricsFlags_kUnderlinePositionIsValid_Flag as _;
         const STRIKEOUT_THICKNESS_IS_VALID = sb::SkFontMetrics_FontMetricsFlags_kStrikeoutThicknessIsValid_Flag as _;
         const STRIKEOUT_POSITION_IS_VALID = sb::SkFontMetrics_FontMetricsFlags_kStrikeoutPositionIsValid_Flag as _;
+        const BOUNDS_INVALID = sb::SkFontMetrics_FontMetricsFlags_kBoundsInvalid_Flag as _;
     }
 }
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct FontMetrics {
-    flags: self::Flags,
+    flags: Flags,
     pub top: scalar,
     pub ascent: scalar,
     pub descent: scalar,
@@ -66,5 +67,9 @@ impl FontMetrics {
 
     fn if_valid(&self, flag: self::Flags, value: scalar) -> Option<scalar> {
         self.flags.contains(flag).if_true_some(value)
+    }
+
+    pub fn has_bounds(&self) -> bool {
+        !self.flags.contains(Flags::BOUNDS_INVALID)
     }
 }

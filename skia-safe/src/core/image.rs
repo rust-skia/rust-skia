@@ -7,13 +7,47 @@ use crate::{
 };
 use crate::{FilterQuality, ImageFilter, ImageGenerator, Pixmap};
 use skia_bindings as sb;
-use skia_bindings::{SkImage, SkRefCntBase};
-use std::mem;
+use skia_bindings::{SkFilterOptions, SkImage, SkRefCntBase};
+use std::{mem, ptr};
+
+pub use skia_bindings::SkSamplingMode as SamplingMode;
+#[test]
+fn test_sampling_mode_naming() {
+    let _ = SamplingMode::Linear;
+}
+
+pub use skia_bindings::SkMipmapMode as MipmapMode;
+#[test]
+fn test_mipmap_mode_naming() {
+    let _ = MipmapMode::Nearest;
+}
+
+// TODO: Add MipmapBuilder as soon it's documented or
+//       SkMipmap made its way into the public interface.
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub struct FilterOptions {
+    pub sampling: SamplingMode,
+    pub mipmap: MipmapMode,
+}
+
+impl NativeTransmutable<SkFilterOptions> for FilterOptions {}
+#[test]
+fn test_filter_options_layout() {
+    FilterOptions::test_layout()
+}
 
 pub use skia_bindings::SkImage_BitDepth as BitDepth;
 #[test]
 fn test_bit_depth_naming() {
     let _ = BitDepth::F16;
+}
+
+pub use skia_bindings::SkImage_CubicResampler as CubicResampler;
+#[test]
+fn test_cubic_resampler_naming() {
+    let _ = CubicResampler { B: 0.0, C: 0.0 };
 }
 
 pub use skia_bindings::SkImage_CachingHint as CachingHint;
@@ -61,63 +95,44 @@ impl RCHandle<SkImage> {
         Image::from_ptr(unsafe { sb::C_SkImage_MakeFromBitmap(bitmap.native()) })
     }
 
-    pub fn from_generator(
-        mut image_generator: ImageGenerator,
-        subset: Option<&IRect>,
-    ) -> Option<Image> {
+    pub fn from_generator(mut image_generator: ImageGenerator) -> Option<Image> {
         let image = Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeFromGenerator(
-                image_generator.native_mut(),
-                subset.native_ptr_or_null(),
-            )
+            sb::C_SkImage_MakeFromGenerator(image_generator.native_mut())
         });
         mem::forget(image_generator);
         image
     }
 
-    pub fn from_encoded(data: impl Into<Data>, subset: Option<IRect>) -> Option<Image> {
-        Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeFromEncoded(data.into().into_ptr(), subset.native().as_ptr_or_null())
-        })
+    pub fn from_encoded(data: impl Into<Data>) -> Option<Image> {
+        Image::from_ptr(unsafe { sb::C_SkImage_MakeFromEncoded(data.into().into_ptr()) })
     }
 
-    pub fn decode_to_raster(encoded: &[u8], subset: impl Into<Option<IRect>>) -> Option<Image> {
-        Image::from_ptr(unsafe {
-            sb::C_SkImage_DecodeToRaster(
-                encoded.as_ptr() as _,
-                encoded.len(),
-                subset.into().into_native().as_ptr_or_null(),
-            )
-        })
+    #[deprecated(since = "0.35.0", note = "Removed without replacement")]
+    pub fn decode_to_raster(_encoded: &[u8], _subset: impl Into<Option<IRect>>) -> ! {
+        panic!("Removed without replacement")
     }
 
     #[cfg(feature = "gpu")]
+    #[deprecated(since = "0.35.0", note = "Removed without replacement")]
     pub fn decode_to_texture(
-        context: &mut gpu::Context,
-        encoded: &[u8],
-        subset: impl Into<Option<IRect>>,
-    ) -> Option<Image> {
-        Image::from_ptr(unsafe {
-            sb::C_SkImage_DecodeToTexture(
-                context.native_mut(),
-                encoded.as_ptr() as _,
-                encoded.len(),
-                subset.into().into_native().as_ptr_or_null(),
-            )
-        })
+        _context: &mut gpu::Context,
+        _encoded: &[u8],
+        _subset: impl Into<Option<IRect>>,
+    ) -> ! {
+        panic!("Removed without replacement")
     }
 
     #[cfg(feature = "gpu")]
     pub fn new_texture_from_compressed(
-        context: &mut gpu::Context,
+        context: &mut gpu::DirectContext,
         data: Data,
         dimensions: impl Into<ISize>,
         ct: CompressionType,
-        mip_mapped: impl Into<Option<gpu::MipMapped>>,
+        mipmapped: impl Into<Option<gpu::Mipmapped>>,
         protected: impl Into<Option<gpu::Protected>>,
     ) -> Option<Image> {
         let dimensions = dimensions.into();
-        let mip_mapped = mip_mapped.into().unwrap_or(gpu::MipMapped::No);
+        let mipmapped = mipmapped.into().unwrap_or(gpu::Mipmapped::No);
         let protected = protected.into().unwrap_or(gpu::Protected::No);
 
         Image::from_ptr(unsafe {
@@ -127,38 +142,21 @@ impl RCHandle<SkImage> {
                 dimensions.width,
                 dimensions.height,
                 ct,
-                mip_mapped,
+                mipmapped,
                 protected,
             )
         })
     }
 
-    #[deprecated(
-        since = "0.27.0",
-        note = "soon to be deprecated (m81), use new_text_from_compressed"
-    )]
+    #[deprecated(since = "0.35.0", note = "Removed without replacement")]
     #[cfg(feature = "gpu")]
     pub fn from_compressed(
-        context: &mut gpu::Context,
-        data: Data,
-        dimensions: impl Into<ISize>,
-        ct: CompressionType,
-    ) -> Option<Image> {
-        let dimensions = dimensions.into();
-        let mip_mapped = gpu::MipMapped::No;
-        let protected = gpu::Protected::No;
-
-        Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeFromCompressed(
-                context.native_mut(),
-                data.into_ptr(),
-                dimensions.width,
-                dimensions.height,
-                ct,
-                mip_mapped,
-                protected,
-            )
-        })
+        _context: &mut gpu::RecordingContext,
+        _data: Data,
+        _dimensions: impl Into<ISize>,
+        _ct: CompressionType,
+    ) -> ! {
+        panic!("Removed without replacement.")
     }
 
     pub fn new_raster_from_compressed(
@@ -180,7 +178,7 @@ impl RCHandle<SkImage> {
     #[cfg(feature = "gpu")]
     // TODO: add variant with TextureReleaseProc
     pub fn from_texture(
-        context: &mut gpu::Context,
+        context: &mut gpu::RecordingContext,
         backend_texture: &gpu::BackendTexture,
         origin: gpu::SurfaceOrigin,
         color_type: ColorType,
@@ -204,7 +202,7 @@ impl RCHandle<SkImage> {
     #[deprecated(since = "0.27.0", note = "renamed, use new_cross_context_from_pixmap")]
     #[cfg(feature = "gpu")]
     pub fn from_pixmap_cross_context(
-        context: &mut gpu::Context,
+        context: &mut gpu::DirectContext,
         pixmap: &Pixmap,
         build_mips: bool,
         limit_to_max_texture_size: impl Into<Option<bool>>,
@@ -214,7 +212,7 @@ impl RCHandle<SkImage> {
 
     #[cfg(feature = "gpu")]
     pub fn new_cross_context_from_pixmap(
-        context: &mut gpu::Context,
+        context: &mut gpu::DirectContext,
         pixmap: &Pixmap,
         build_mips: bool,
         limit_to_max_texture_size: impl Into<Option<bool>>,
@@ -231,9 +229,9 @@ impl RCHandle<SkImage> {
 
     #[cfg(feature = "gpu")]
     pub fn from_adopted_texture(
-        context: &mut gpu::Context,
+        context: &mut gpu::RecordingContext,
         backend_texture: &gpu::BackendTexture,
-        origin: gpu::SurfaceOrigin,
+        image_origin: gpu::SurfaceOrigin,
         color_type: ColorType,
         alpha_type: AlphaType,
         color_space: impl Into<Option<ColorSpace>>,
@@ -242,7 +240,7 @@ impl RCHandle<SkImage> {
             sb::C_SkImage_MakeFromAdoptedTexture(
                 context.native_mut(),
                 backend_texture.native(),
-                origin,
+                image_origin,
                 color_type.into_native(),
                 alpha_type,
                 color_space.into().into_ptr_or_null(),
@@ -253,7 +251,7 @@ impl RCHandle<SkImage> {
     // TODO: rename to clone_from_yuva_textures() ?
     #[cfg(feature = "gpu")]
     pub fn from_yuva_textures_copy(
-        context: &mut gpu::Context,
+        context: &mut gpu::RecordingContext,
         yuv_color_space: crate::YUVColorSpace,
         yuva_textures: &[gpu::BackendTexture],
         yuva_indices: &[crate::YUVAIndex; 4],
@@ -277,7 +275,7 @@ impl RCHandle<SkImage> {
     #[allow(clippy::too_many_arguments)]
     #[cfg(feature = "gpu")]
     pub fn from_yuva_textures_copy_with_external_backend(
-        context: &mut gpu::Context,
+        context: &mut gpu::RecordingContext,
         yuv_color_space: crate::YUVColorSpace,
         yuva_textures: &[gpu::BackendTexture],
         yuva_indices: &[crate::YUVAIndex; 4],
@@ -432,6 +430,50 @@ impl RCHandle<SkImage> {
         self.alpha_type().is_opaque()
     }
 
+    pub fn to_shader_with_filter_options<'a>(
+        &self,
+        tile_modes: impl Into<Option<(TileMode, TileMode)>>,
+        filter_options: FilterOptions,
+        local_matrix: impl Into<Option<&'a Matrix>>,
+    ) -> Shader {
+        let tile_modes = tile_modes.into();
+        let tm1 = tile_modes.map(|m| m.0).unwrap_or_default();
+        let tm2 = tile_modes.map(|m| m.1).unwrap_or_default();
+
+        Shader::from_ptr(unsafe {
+            sb::C_SkImage_makeShaderWithFilterOptions(
+                self.native(),
+                tm1,
+                tm2,
+                filter_options.into_native(),
+                local_matrix.into().native_ptr_or_null(),
+            )
+        })
+        .unwrap()
+    }
+
+    pub fn to_shader_with_cubic_resampler<'a>(
+        &self,
+        tile_modes: impl Into<Option<(TileMode, TileMode)>>,
+        cubic_resampler: CubicResampler,
+        local_matrix: impl Into<Option<&'a Matrix>>,
+    ) -> Shader {
+        let tile_modes = tile_modes.into();
+        let tm1 = tile_modes.map(|m| m.0).unwrap_or_default();
+        let tm2 = tile_modes.map(|m| m.1).unwrap_or_default();
+
+        Shader::from_ptr(unsafe {
+            sb::C_SkImage_makeShaderWithCubicResampler(
+                self.native(),
+                tm1,
+                tm2,
+                cubic_resampler,
+                local_matrix.into().native_ptr_or_null(),
+            )
+        })
+        .unwrap()
+    }
+
     pub fn to_shader<'a>(
         &self,
         tile_modes: impl Into<Option<(TileMode, TileMode)>>,
@@ -462,7 +504,7 @@ impl RCHandle<SkImage> {
         let tm1 = tile_modes.map(|m| m.0).unwrap_or_default();
         let tm2 = tile_modes.map(|m| m.1).unwrap_or_default();
         Shader::from_ptr(unsafe {
-            sb::C_SkImage_makeShader2(
+            sb::C_SkImage_makeShaderWithQuality(
                 self.native(),
                 tm1,
                 tm2,
@@ -484,21 +526,36 @@ impl RCHandle<SkImage> {
     }
 
     #[cfg(feature = "gpu")]
-    pub fn is_valid(&self, context: &mut gpu::Context) -> bool {
+    pub fn is_valid(&self, context: &mut gpu::RecordingContext) -> bool {
         unsafe { self.native().isValid(context.native_mut()) }
     }
 
-    // TODO: flush(GrContext*, GrFlushInfo&).
-
     #[cfg(feature = "gpu")]
-    pub fn flush_and_submit(&mut self, context: &mut gpu::Context) {
-        unsafe { self.native_mut().flushAndSubmit(context.native_mut()) }
+    pub fn flush_with_info(
+        &mut self,
+        context: &mut gpu::DirectContext,
+        flush_info: &gpu::FlushInfo,
+    ) -> gpu::SemaphoresSubmitted {
+        unsafe {
+            self.native_mut()
+                .flush(context.native_mut(), flush_info.native())
+        }
+    }
+
+    // TODO: m86: implement new flush() variant that is based on flush_with_info() as soon the old
+    // flush() is removed.
+    #[cfg(feature = "gpu")]
+    #[deprecated(
+        since = "0.33.0",
+        note = "use flushAndSubmit() or flush_with_info(,&gpu::FlushInfo::default())"
+    )]
+    pub fn flush(&mut self, context: &mut gpu::DirectContext) {
+        self.flush_and_submit(context)
     }
 
     #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.33.0", note = "use flushAndSubmit()")]
-    pub fn flush(&mut self, context: &mut gpu::Context) {
-        self.flush_and_submit(context)
+    pub fn flush_and_submit(&mut self, context: &mut gpu::DirectContext) {
+        unsafe { self.native_mut().flushAndSubmit(context.native_mut()) }
     }
 
     #[cfg(feature = "gpu")]
@@ -542,6 +599,10 @@ impl RCHandle<SkImage> {
         }
     }
 
+    // TODO:
+    // AsyncReadResult, ReadPixelsContext, ReadPixelsCallback, RescaleGamma,
+    // asyncRescaleAndReadPixels, asyncRescaleAndReadPixelsYUV420
+
     #[must_use]
     pub fn scale_pixels(
         &self,
@@ -575,30 +636,53 @@ impl RCHandle<SkImage> {
     }
 
     pub fn new_subset(&self, rect: impl AsRef<IRect>) -> Option<Image> {
-        Image::from_ptr(unsafe { sb::C_SkImage_makeSubset(self.native(), rect.as_ref().native()) })
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_makeSubset(self.native(), rect.as_ref().native(), ptr::null_mut())
+        })
     }
+
+    #[cfg(feature = "gpu")]
+    pub fn new_subset_with_context<'a>(
+        &self,
+        rect: impl AsRef<IRect>,
+        direct: impl Into<Option<&'a mut gpu::DirectContext>>,
+    ) -> Option<Image> {
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_makeSubset(
+                self.native(),
+                rect.as_ref().native(),
+                direct.into().native_ptr_or_null_mut(),
+            )
+        })
+    }
+
+    pub fn has_mipmaps(&self) -> bool {
+        unsafe { self.native().hasMipmaps() }
+    }
+
+    // TODO: withMipmaps()
 
     #[cfg(feature = "gpu")]
     pub fn new_texture_image(
         &self,
-        context: &mut gpu::Context,
-        mip_mapped: gpu::MipMapped,
+        context: &mut gpu::DirectContext,
+        mipmapped: gpu::Mipmapped,
     ) -> Option<Image> {
-        self.new_texture_image_budgeted(context, mip_mapped, crate::Budgeted::Yes)
+        self.new_texture_image_budgeted(context, mipmapped, crate::Budgeted::Yes)
     }
 
     #[cfg(feature = "gpu")]
     pub fn new_texture_image_budgeted(
         &self,
-        context: &mut gpu::Context,
-        mip_mapped: gpu::MipMapped,
+        context: &mut gpu::DirectContext,
+        mipmapped: gpu::Mipmapped,
         budgeted: crate::Budgeted,
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_makeTextureImage(
                 self.native(),
                 context.native_mut(),
-                mip_mapped,
+                mipmapped,
                 budgeted.into_native(),
             )
         })
@@ -622,7 +706,7 @@ impl RCHandle<SkImage> {
     #[cfg(feature = "gpu")]
     pub fn new_with_filter(
         &self,
-        mut context: Option<&mut gpu::Context>,
+        mut context: Option<&mut gpu::RecordingContext>,
         filter: &ImageFilter,
         clip_bounds: impl Into<IRect>,
         subset: impl Into<IRect>,
@@ -676,7 +760,26 @@ impl RCHandle<SkImage> {
 
     pub fn new_color_space(&self, color_space: impl Into<Option<ColorSpace>>) -> Option<Image> {
         Image::from_ptr(unsafe {
-            sb::C_SkImage_makeColorSpace(self.native(), color_space.into().into_ptr_or_null())
+            sb::C_SkImage_makeColorSpace(
+                self.native(),
+                color_space.into().into_ptr_or_null(),
+                ptr::null_mut(),
+            )
+        })
+    }
+
+    #[cfg(feature = "gpu")]
+    pub fn new_color_space_with_context<'a>(
+        &self,
+        color_space: impl Into<Option<ColorSpace>>,
+        direct: impl Into<Option<&'a mut gpu::DirectContext>>,
+    ) -> Option<Image> {
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_makeColorSpace(
+                self.native(),
+                color_space.into().into_ptr_or_null(),
+                direct.into().native_ptr_or_null_mut(),
+            )
         })
     }
 

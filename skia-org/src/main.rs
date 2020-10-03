@@ -173,12 +173,12 @@ pub(crate) mod resources {
     pub fn color_wheel() -> Image {
         let bytes = include_bytes!("resources/color_wheel.png");
         let data = Data::new_copy(bytes);
-        Image::from_encoded(data, None).unwrap()
+        Image::from_encoded(data).unwrap()
     }
 
     pub fn mandrill() -> Image {
         let bytes = include_bytes!("resources/mandrill_512.png");
         let data = Data::new_copy(bytes);
-        Image::from_encoded(data, None).unwrap()
+        Image::from_encoded(data).unwrap()
     }
 }

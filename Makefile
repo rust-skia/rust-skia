@@ -63,7 +63,7 @@ clean-packages:
 .PHONY: wait
 wait: 
 	@echo "published a package, Waiting for crates.io to catch up before publishing the next"
-	sleep 10
+	sleep 20
 
 .PHONY: update-doc
 update-doc:
