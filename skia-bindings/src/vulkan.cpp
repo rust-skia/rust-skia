@@ -100,10 +100,6 @@ extern "C" GrDirectContext* C_GrDirectContext_MakeVulkan(
 // GrVkTypes.h
 //
 
-extern "C" void C_GrVkAlloc_Construct(GrVkAlloc* uninitialized, VkDeviceMemory memory, VkDeviceSize offset, VkDeviceSize size, uint32_t flags) {
-    new (uninitialized) GrVkAlloc(memory, offset, size, flags);
-}
-
 extern "C" bool C_GrVkAlloc_Equals(const GrVkAlloc* lhs, const GrVkAlloc* rhs) {
     return *lhs == *rhs;
 }

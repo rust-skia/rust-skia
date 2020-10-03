@@ -543,14 +543,6 @@ extern "C" SkPathFillType C_SkPath_getFillType(const SkPath* self) {
     return self->getFillType();
 }
 
-extern "C" SkPathConvexityType C_SkPath_getConvexityType(const SkPath* self) {
-    return self->getConvexityType();
-}
-
-extern "C" SkPathConvexityType C_SkPath_getConvexityTypeOrUnknown(const SkPath* self) {
-    return self->getConvexityTypeOrUnknown();
-}
-
 extern "C" bool C_SkPath_isEmpty(const SkPath* self) {
     return self->isEmpty();
 }
@@ -604,7 +596,7 @@ extern "C" void C_SkPathMeasure_destruct(const SkPathMeasure* self) {
 //
 
 extern "C" void
-C_SkPathTypes_Types(SkPathFillType *, SkPathConvexityType *, SkPathDirection *, SkPathSegmentMask *, SkPathVerb *) {}
+C_SkPathTypes_Types(SkPathFillType *, SkPathDirection *, SkPathSegmentMask *, SkPathVerb *) {}
 
 //
 // core/SkCanvas.h
@@ -2412,10 +2404,6 @@ SkColorFilter* C_SkRuntimeEffect_makeColorFilter(SkRuntimeEffect* self, SkData* 
 
 const SkString *C_SkRuntimeEffect_source(const SkRuntimeEffect *self) {
     return &self->source();
-}
-
-uint32_t C_SkRuntimeEffect_hash(const SkRuntimeEffect *self) {
-    return self->hash();
 }
 
 const SkRuntimeEffect::Uniform* C_SkRuntimeEffect_uniforms(const SkRuntimeEffect* self, size_t* count) {
