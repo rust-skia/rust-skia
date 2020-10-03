@@ -418,6 +418,8 @@ impl BinariesConfiguration {
                 }
                 if features.metal {
                     link_libraries.push("framework=Metal");
+                    // MetalKit was added in m87 BUILD.gn.
+                    link_libraries.push("framework=MetalKit");
                     link_libraries.push("framework=Foundation");
                 }
             }
