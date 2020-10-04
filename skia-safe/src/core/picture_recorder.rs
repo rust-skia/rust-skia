@@ -16,10 +16,10 @@ impl NativeDrop for SkPictureRecorder {
 
 impl Handle<SkPictureRecorder> {
     pub fn new() -> Self {
-        Self::from_native_c(unsafe { SkPictureRecorder::new() })
+        Self::construct(|pr| unsafe { sb::C_SkPictureRecorder_Construct(pr) })
     }
 
-    // TODO: wrap beginRecording with BBoxHierarchy
+    // TODO: beginRecording with BBoxHierarchy
 
     pub fn begin_recording(
         &mut self,

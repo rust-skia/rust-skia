@@ -246,6 +246,21 @@ impl Handle<SkPath> {
         })
     }
 
+    pub fn oval_with_start_index(
+        oval: impl AsRef<Rect>,
+        dir: PathDirection,
+        start_index: usize,
+    ) -> Self {
+        Self::construct(|path| unsafe {
+            sb::C_SkPath_OvalWithStartIndex(
+                path,
+                oval.as_ref().native(),
+                dir,
+                start_index.try_into().unwrap(),
+            )
+        })
+    }
+
     pub fn circle(
         center: impl Into<Point>,
         radius: scalar,
@@ -269,6 +284,21 @@ impl Handle<SkPath> {
                 path,
                 rect.as_ref().native(),
                 dir.into().unwrap_or(PathDirection::CW),
+            )
+        })
+    }
+
+    pub fn rrect_with_start_index(
+        rect: impl AsRef<RRect>,
+        dir: PathDirection,
+        start_index: usize,
+    ) -> Self {
+        Self::construct(|path| unsafe {
+            sb::C_SkPath_RRectWithStartIndex(
+                path,
+                rect.as_ref().native(),
+                dir,
+                start_index.try_into().unwrap(),
             )
         })
     }

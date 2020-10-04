@@ -302,7 +302,7 @@ impl Canvas {
     // TODO: test ref count consistency assuming it is not increased in the native part.
     #[deprecated(
         since = "0.0.0",
-        note = "Removed, only recording_context() is support."
+        note = "Removed, only recording_context() is supported."
     )]
     #[cfg(feature = "gpu")]
     pub fn gpu_context(&mut self) -> ! {

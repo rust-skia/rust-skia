@@ -150,6 +150,11 @@ impl Handle<SkSurfaceCharacterization> {
         self.native().fUsesGLFBO0 == sb::SkSurfaceCharacterization_UsesGLFBO0::kYes
     }
 
+    pub fn vk_rt_supports_input_attachment(&self) -> bool {
+        self.native().fVkRTSupportsInputAttachment
+            == sb::SkSurfaceCharacterization_VkRTSupportsInputAttachment::kYes
+    }
+
     pub fn vulkan_secondary_cb_compatible(&self) -> bool {
         self.native().fVulkanSecondaryCBCompatible
             == sb::SkSurfaceCharacterization_VulkanSecondaryCBCompatible::kYes

@@ -143,7 +143,7 @@ impl RCHandle<SkSurface> {
 
     #[cfg(feature = "metal")]
     pub fn from_ca_metal_layer(
-        context: &mut gpu::Context,
+        context: &mut gpu::RecordingContext,
         layer: gpu::mtl::Handle,
         origin: gpu::SurfaceOrigin,
         sample_count: impl Into<Option<usize>>,
@@ -168,8 +168,30 @@ impl RCHandle<SkSurface> {
     }
 
     #[cfg(feature = "metal")]
+    #[deprecated(since = "0.0.0", note = "use from_mtk_view()")]
     pub fn from_ca_mtk_view(
         context: &mut gpu::Context,
+        mtk_view: gpu::mtl::Handle,
+        origin: gpu::SurfaceOrigin,
+        sample_count: impl Into<Option<usize>>,
+        color_type: crate::ColorType,
+        color_space: impl Into<Option<crate::ColorSpace>>,
+        surface_props: Option<&SurfaceProps>,
+    ) -> Option<Self> {
+        self.from_mtk_view(
+            context,
+            mtk_view,
+            origin,
+            sample_count,
+            color_type,
+            color_space,
+            surface_props,
+        )
+    }
+
+    #[cfg(feature = "metal")]
+    pub fn from_mtk_view(
+        context: &mut gpu::RecordingContext,
         mtk_view: gpu::mtl::Handle,
         origin: gpu::SurfaceOrigin,
         sample_count: impl Into<Option<usize>>,
