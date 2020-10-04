@@ -78,6 +78,21 @@ impl RCHandle<GrRecordingContext> {
         }
     }
 
+    pub fn max_texture_size(&self) -> i32 {
+        unsafe { self.native().maxTextureSize() }
+    }
+
+    pub fn max_render_target_size(&self) -> i32 {
+        unsafe { self.native().maxRenderTargetSize() }
+    }
+
+    pub fn color_type_supported_as_image(&self, color_type: ColorType) -> bool {
+        unsafe {
+            self.native()
+                .colorTypeSupportedAsImage(color_type.into_native())
+        }
+    }
+
     pub fn max_surface_sample_count_for_color_type(&self, color_type: ColorType) -> usize {
         unsafe {
             self.native()

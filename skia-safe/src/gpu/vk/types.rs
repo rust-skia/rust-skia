@@ -65,9 +65,14 @@ impl Alloc {
         size: vk::DeviceSize,
         flags: AllocFlag,
     ) -> Alloc {
-        Alloc::construct(|alloc| {
-            sb::C_GrVkAlloc_Construct(alloc, memory, offset, size, flags.bits())
-        })
+        Alloc {
+            memory,
+            offset,
+            size,
+            flags,
+            backend_memory: 0,
+            uses_system_heap: false,
+        }
     }
 }
 

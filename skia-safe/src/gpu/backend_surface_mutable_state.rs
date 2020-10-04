@@ -12,6 +12,14 @@ impl NativeDrop for GrBackendSurfaceMutableState {
     }
 }
 
+impl Default for BackendSurfaceMutableState {
+    fn default() -> Self {
+        BackendSurfaceMutableState::construct(|s| unsafe {
+            sb::C_GrBackendSurfaceMutableState_Construct(s)
+        })
+    }
+}
+
 impl BackendSurfaceMutableState {
     #[cfg(feature = "vulkan")]
     pub fn new_vk(layout: crate::gpu::vk::ImageLayout, queue_family_index: u32) -> Self {

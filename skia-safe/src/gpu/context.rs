@@ -9,7 +9,7 @@ use crate::gpu::{
     FlushInfo, Mipmapped, SemaphoresSubmitted,
 };
 use crate::prelude::*;
-use crate::{image, ColorType, Data, Image};
+use crate::{image, Data, Image};
 use skia_bindings as sb;
 use skia_bindings::{GrContext, GrDirectContext, GrRecordingContext, SkRefCntBase};
 use std::{
@@ -196,21 +196,6 @@ impl RCHandle<GrContext> {
         self
     }
 
-    pub fn max_texture_size(&self) -> i32 {
-        unsafe { self.native().maxTextureSize() }
-    }
-
-    pub fn max_render_target_size(&self) -> i32 {
-        unsafe { self.native().maxRenderTargetSize() }
-    }
-
-    pub fn color_type_supported_as_image(&self, color_type: ColorType) -> bool {
-        unsafe {
-            self.native()
-                .colorTypeSupportedAsImage(color_type.into_native())
-        }
-    }
-
     // TODO: wait()
 
     pub fn flush_and_submit(&mut self) -> &mut Self {
@@ -295,14 +280,26 @@ impl RCHandle<GrContext> {
         backend_texture: &BackendTexture,
         state: &BackendSurfaceMutableState,
     ) -> bool {
+        self.set_backend_texture_state_and_return_previous(backend_texture, state)
+            .is_some()
+    }
+
+    pub fn set_backend_texture_state_and_return_previous(
+        &mut self,
+        backend_texture: &BackendTexture,
+        state: &BackendSurfaceMutableState,
+    ) -> Option<BackendSurfaceMutableState> {
+        let mut previous = BackendSurfaceMutableState::default();
         unsafe {
             self.native_mut().setBackendTextureState(
                 backend_texture.native(),
                 state.native(),
+                previous.native_mut(),
                 None,
                 ptr::null_mut(),
             )
         }
+        .if_true_some(previous)
     }
 
     // TODO: add variant with GpuFinishedProc / GpuFinishedContext
@@ -311,14 +308,26 @@ impl RCHandle<GrContext> {
         target: &BackendRenderTarget,
         state: &BackendSurfaceMutableState,
     ) -> bool {
+        self.set_backend_render_target_state_and_return_previous(target, state)
+            .is_some()
+    }
+
+    pub fn set_backend_render_target_state_and_return_previous(
+        &mut self,
+        target: &BackendRenderTarget,
+        state: &BackendSurfaceMutableState,
+    ) -> Option<BackendSurfaceMutableState> {
+        let mut previous = BackendSurfaceMutableState::default();
         unsafe {
             self.native_mut().setBackendRenderTargetState(
                 target.native(),
                 state.native(),
+                previous.native_mut(),
                 None,
                 ptr::null_mut(),
             )
         }
+        .if_true_some(previous)
     }
 
     // TODO: wrap deleteBackendTexture(),

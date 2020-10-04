@@ -543,6 +543,10 @@ extern "C" SkPathFillType C_SkPath_getFillType(const SkPath* self) {
     return self->getFillType();
 }
 
+extern "C" bool C_SkPath_isConvex(const SkPath* self) {
+    return self->isConvex();
+}
+
 extern "C" bool C_SkPath_isEmpty(const SkPath* self) {
     return self->isEmpty();
 }

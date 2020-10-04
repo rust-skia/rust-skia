@@ -595,6 +595,38 @@ impl RCHandle<SkImage> {
 
         unsafe {
             self.native().readPixels(
+                ptr::null_mut(),
+                dst_info.native(),
+                pixels.as_mut_ptr() as _,
+                dst_row_bytes,
+                src.x,
+                src.y,
+                caching_hint,
+            )
+        }
+    }
+
+    #[cfg(feature = "gpu")]
+    pub fn read_pixels_with_context<'a, P>(
+        &self,
+        context: impl Into<Option<&'a mut gpu::DirectContext>>,
+        dst_info: &ImageInfo,
+        pixels: &mut [P],
+        dst_row_bytes: usize,
+        src: impl Into<IPoint>,
+        caching_hint: CachingHint,
+    ) -> bool {
+        if pixels.elements_size_of()
+            != (usize::try_from(dst_info.height()).unwrap() * dst_row_bytes)
+        {
+            return false;
+        }
+
+        let src = src.into();
+
+        unsafe {
+            self.native().readPixels(
+                context.into().native_ptr_or_null_mut(),
                 dst_info.native(),
                 pixels.as_mut_ptr() as _,
                 dst_row_bytes,

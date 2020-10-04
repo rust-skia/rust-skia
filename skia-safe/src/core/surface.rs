@@ -225,20 +225,13 @@ impl RCHandle<SkSurface> {
         })
     }
 
-    // TODO: support TextureReleaseProc / ReleaseContext
-
+    #[deprecated(since = "0.0.0", note = "Removed without replacement")]
     pub fn from_backend_texture_with_caracterization(
-        context: &mut gpu::Context,
-        characterization: &SurfaceCharacterization,
-        backend_texture: &gpu::BackendTexture,
-    ) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            sb::C_SkSurface_MakeFromBackendTexture2(
-                context.native_mut(),
-                characterization.native(),
-                backend_texture.native(),
-            )
-        })
+        _context: &mut gpu::Context,
+        _characterization: &SurfaceCharacterization,
+        _backend_texture: &gpu::BackendTexture,
+    ) -> ! {
+        panic!("Removed without replacement")
     }
 }
 
@@ -283,7 +276,9 @@ impl RCHandle<SkSurface> {
         note = "Use recordingContext() and RecordingContext::as_direct_context()"
     )]
     pub fn context(&mut self) -> Option<gpu::Context> {
-        gpu::Context::from_unshared_ptr(unsafe { self.native_mut().getContext() })
+        self.recording_context()
+            .and_then(|mut rc| rc.as_direct_context())
+            .map(|dc| dc.into())
     }
 
     pub fn recording_context(&mut self) -> Option<gpu::RecordingContext> {

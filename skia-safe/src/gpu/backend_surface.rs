@@ -386,7 +386,6 @@ impl Handle<GrBackendRenderTarget> {
     #[cfg(feature = "d3d")]
     pub fn new_d3d(
         (width, height): (i32, i32),
-        sample_cnt: i32,
         d3d_info: &d3d::TextureResourceInfo,
     ) -> Self {
         Self::construct(|brt| unsafe {
@@ -394,7 +393,6 @@ impl Handle<GrBackendRenderTarget> {
                 brt,
                 width,
                 height,
-                sample_cnt,
                 d3d_info.native(),
             )
         })

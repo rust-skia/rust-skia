@@ -166,10 +166,6 @@ impl RCHandle<SkRuntimeEffect> {
         unimplemented!("removed without replacement")
     }
 
-    pub fn hash(&self) -> u32 {
-        unsafe { sb::C_SkRuntimeEffect_hash(self.native()) }
-    }
-
     #[deprecated(since = "0.35.0", note = "Use uniform_size() instead")]
     pub fn input_size(&self) -> usize {
         self.uniform_size()
