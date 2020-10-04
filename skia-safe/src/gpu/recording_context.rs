@@ -1,6 +1,6 @@
-use crate::gpu::{BackendFormat, Renderable};
+use crate::gpu::{BackendAPI, BackendFormat, DirectContext, Renderable};
 use crate::prelude::*;
-use crate::ColorType;
+use crate::{image, ColorType};
 use skia_bindings as sb;
 use skia_bindings::{GrContext, GrDirectContext, GrRecordingContext, SkRefCntBase};
 
@@ -22,6 +22,18 @@ impl From<RCHandle<GrDirectContext>> for RCHandle<GrRecordingContext> {
 }
 
 impl RCHandle<GrRecordingContext> {
+    // From GrContext_Base
+    pub fn as_direct_context(&mut self) -> Option<DirectContext> {
+        DirectContext::from_unshared_ptr(unsafe {
+            sb::C_GrRecordingContext_asDirectContext(self.native_mut())
+        })
+    }
+
+    // From GrContext_Base
+    pub fn backend(&self) -> BackendAPI {
+        unsafe { sb::C_GrRecordingContext_backend(self.native()) }
+    }
+
     pub fn default_backend_format(&self, ct: ColorType, renderable: Renderable) -> BackendFormat {
         let mut format = BackendFormat::default();
         unsafe {
@@ -34,6 +46,24 @@ impl RCHandle<GrRecordingContext> {
         };
         format
     }
+
+    // From GrContext_Base
+    pub fn compressed_backend_format(
+        &self,
+        compression_type: image::CompressionType,
+    ) -> BackendFormat {
+        let mut format = BackendFormat::default();
+        unsafe {
+            sb::C_GrRecordingContext_compressedBackendFormat(
+                self.native(),
+                compression_type,
+                format.native_mut(),
+            )
+        }
+        format
+    }
+
+    // TODO: GrContext_Base::threadSafeProxy
 
     pub fn abandoned(&mut self) -> bool {
         unsafe { sb::C_GrRecordingContext_abandoned(self.native_mut()) }

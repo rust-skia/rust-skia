@@ -170,8 +170,23 @@ extern "C" void C_GrBackendSurfaceMutableState_destruct(GrBackendSurfaceMutableS
 // gpu/GrRecordingContext.h
 //
 
+// GrContext_Base.h
+extern "C" GrDirectContext* C_GrRecordingContext_asDirectContext(GrRecordingContext* self) {
+    return self->asDirectContext();
+}
+
+// GrContext_Base.h
+extern "C" GrBackendApi C_GrRecordingContext_backend(const GrRecordingContext* self) {
+    return self->backend();
+}
+
 extern "C" void C_GrRecordingContext_defaultBackendFormat(const GrRecordingContext* self, SkColorType ct, GrRenderable renderable, GrBackendFormat* result) {
     *result = self->defaultBackendFormat(ct, renderable);
+}
+
+// GrContext_Base.h
+extern "C" void C_GrRecordingContext_compressedBackendFormat(const GrRecordingContext* self, SkImage::CompressionType compressionType, GrBackendFormat* backendFormat) {
+    *backendFormat = self->compressedBackendFormat(compressionType);
 }
 
 extern "C" bool C_GrRecordingContext_abandoned(GrRecordingContext* self) {
