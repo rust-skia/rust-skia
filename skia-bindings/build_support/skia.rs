@@ -921,6 +921,9 @@ const OPAQUE_TYPES: &[&str] = &[
     // m86:
     "GrRecordingContext",
     "GrDirectContext",
+    // m87:
+    "GrD3DAlloc",
+    "GrD3DMemoryAllocator",
 ];
 
 const BLACKLISTED_TYPES: &[&str] = &[
