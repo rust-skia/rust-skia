@@ -59,7 +59,8 @@ regex = "1.2.1"
 heck = "0.3.1"
 
 # for downloading and extracting prebuilt binaries and skia / depot_tools archives:
-curl = "0.4.22"
+# curl = "0.4.22"
+ureq = "1.5.1"
 flate2 = "1.0.7"
 tar = "0.4.26"
 
