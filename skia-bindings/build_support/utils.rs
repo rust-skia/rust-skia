@@ -9,7 +9,7 @@ pub fn download(url: impl AsRef<str>) -> io::Result<Vec<u8>> {
     } else {
         let mut reader = resp.into_reader();
         let mut data = Vec::new();
-        let bits = reader.read_to_end(&mut data)?;
+        reader.read_to_end(&mut data)?;
         Ok(data)
     }
 }
