@@ -1123,8 +1123,8 @@ pub(crate) mod rewrite {
     }
 
     pub fn k_xxx(name: &str, variant: &str) -> String {
-        if variant.starts_with('k') {
-            variant[1..].into()
+        if let Some(stripped) = variant.strip_prefix('k') {
+            stripped.into()
         } else {
             panic!(
                 "Variant name '{}' of enum type '{}' is expected to start with a 'k'",
@@ -1356,8 +1356,8 @@ pub(crate) mod definitions {
             defines
                 .split_whitespace()
                 .map(|d| {
-                    if d.starts_with(prefix) {
-                        &d[prefix.len()..]
+                    if let Some(stripped) = d.strip_prefix(prefix) {
+                        stripped
                     } else {
                         panic!("missing '-D' prefix from a definition")
                     }
