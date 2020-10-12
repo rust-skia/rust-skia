@@ -5,14 +5,18 @@ pub mod merge_path_effect {
     use skia_bindings::SkPathEffect;
 
     impl RCHandle<SkPathEffect> {
-        pub fn merge(one: PathEffect, two: PathEffect, op: PathOp) -> PathEffect {
+        pub fn merge(
+            one: impl Into<PathEffect>,
+            two: impl Into<PathEffect>,
+            op: PathOp,
+        ) -> PathEffect {
             new(one, two, op)
         }
     }
 
-    pub fn new(one: PathEffect, two: PathEffect, op: PathOp) -> PathEffect {
+    pub fn new(one: impl Into<PathEffect>, two: impl Into<PathEffect>, op: PathOp) -> PathEffect {
         PathEffect::from_ptr(unsafe {
-            sb::C_SkMergePathEffect_Make(one.into_ptr(), two.into_ptr(), op)
+            sb::C_SkMergePathEffect_Make(one.into().into_ptr(), two.into().into_ptr(), op)
         })
         .unwrap()
     }

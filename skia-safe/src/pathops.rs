@@ -34,6 +34,8 @@ pub fn as_winding(path: &Path) -> Option<Path> {
 }
 
 pub type OpBuilder = Handle<SkOpBuilder>;
+unsafe impl Send for OpBuilder {}
+unsafe impl Sync for OpBuilder {}
 
 impl NativeDrop for SkOpBuilder {
     fn drop(&mut self) {

@@ -4,6 +4,8 @@ use skia_bindings as sb;
 use skia_bindings::SkCustomTypefaceBuilder;
 
 pub type CustomTypefaceBuilder = Handle<SkCustomTypefaceBuilder>;
+unsafe impl Send for CustomTypefaceBuilder {}
+unsafe impl Sync for CustomTypefaceBuilder {}
 
 impl NativeDrop for SkCustomTypefaceBuilder {
     fn drop(&mut self) {
@@ -12,8 +14,8 @@ impl NativeDrop for SkCustomTypefaceBuilder {
 }
 
 impl Handle<SkCustomTypefaceBuilder> {
-    pub fn new(num_glyphs: usize) -> Self {
-        Self::from_native(unsafe { SkCustomTypefaceBuilder::new(num_glyphs.try_into().unwrap()) })
+    pub fn new() -> Self {
+        Self::from_native(unsafe { SkCustomTypefaceBuilder::new() })
     }
 
     pub fn set_glyph<'a>(
@@ -70,9 +72,18 @@ impl From<(Image, f32)> for TypefaceGlyph<'_> {
     }
 }
 
+impl From<(&Image, f32)> for TypefaceGlyph<'_> {
+    fn from((image, scale): (&Image, f32)) -> Self {
+        Self::Image {
+            image: image.clone(),
+            scale,
+        }
+    }
+}
+
 #[test]
 fn build_custom_typeface() {
-    let mut builder = CustomTypefaceBuilder::new(2);
+    let mut builder = CustomTypefaceBuilder::new();
     let path = Path::new();
     builder.set_glyph(10u16, 0.0, &path);
     builder.set_glyph(11u16, 0.0, &path);

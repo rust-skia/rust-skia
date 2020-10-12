@@ -33,6 +33,8 @@ fn test_compression_type_naming() {
 }
 
 pub type Image = RCHandle<SkImage>;
+unsafe impl Send for Image {}
+unsafe impl Sync for Image {}
 
 impl NativeBase<SkRefCntBase> for SkImage {}
 
@@ -43,9 +45,13 @@ impl NativeRefCountedBase for SkImage {
 impl RCHandle<SkImage> {
     // TODO: MakeRasterCopy()
 
-    pub fn from_raster_data(info: &ImageInfo, pixels: Data, row_bytes: usize) -> Option<Image> {
+    pub fn from_raster_data(
+        info: &ImageInfo,
+        pixels: impl Into<Data>,
+        row_bytes: usize,
+    ) -> Option<Image> {
         Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeRasterData(info.native(), pixels.into_ptr(), row_bytes)
+            sb::C_SkImage_MakeRasterData(info.native(), pixels.into().into_ptr(), row_bytes)
         })
     }
 
@@ -69,9 +75,9 @@ impl RCHandle<SkImage> {
         image
     }
 
-    pub fn from_encoded(data: Data, subset: Option<IRect>) -> Option<Image> {
+    pub fn from_encoded(data: impl Into<Data>, subset: Option<IRect>) -> Option<Image> {
         Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeFromEncoded(data.into_ptr(), subset.native().as_ptr_or_null())
+            sb::C_SkImage_MakeFromEncoded(data.into().into_ptr(), subset.native().as_ptr_or_null())
         })
     }
 
@@ -156,14 +162,14 @@ impl RCHandle<SkImage> {
     }
 
     pub fn new_raster_from_compressed(
-        data: Data,
+        data: impl Into<Data>,
         dimensions: impl Into<ISize>,
         ct: CompressionType,
     ) -> Option<Image> {
         let dimensions = dimensions.into();
         Image::from_ptr(unsafe {
             sb::C_SkImage_MakeRasterFromCompressed(
-                data.into_ptr(),
+                data.into().into_ptr(),
                 dimensions.width,
                 dimensions.height,
                 ct,
@@ -304,6 +310,7 @@ impl RCHandle<SkImage> {
         image_size: impl Into<ISize>,
         image_origin: gpu::SurfaceOrigin,
         image_color_space: impl Into<Option<ColorSpace>>,
+        // TODO: m85 introduced textureReleaseProc and releaseContext here.
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_MakeFromYUVATextures(
@@ -362,7 +369,7 @@ impl RCHandle<SkImage> {
     }
 
     pub fn from_picture(
-        picture: Picture,
+        picture: impl Into<Picture>,
         dimensions: impl Into<ISize>,
         matrix: Option<&Matrix>,
         paint: Option<&Paint>,
@@ -371,7 +378,7 @@ impl RCHandle<SkImage> {
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_MakeFromPicture(
-                picture.into_ptr(),
+                picture.into().into_ptr(),
                 dimensions.into().native(),
                 matrix.native_ptr_or_null(),
                 paint.native_ptr_or_null(),
@@ -445,6 +452,27 @@ impl RCHandle<SkImage> {
         .unwrap()
     }
 
+    pub fn to_shader_with_quality<'a>(
+        &self,
+        tile_modes: impl Into<Option<(TileMode, TileMode)>>,
+        local_matrix: impl Into<Option<&'a Matrix>>,
+        filter_quality: FilterQuality,
+    ) -> Shader {
+        let tile_modes = tile_modes.into();
+        let tm1 = tile_modes.map(|m| m.0).unwrap_or_default();
+        let tm2 = tile_modes.map(|m| m.1).unwrap_or_default();
+        Shader::from_ptr(unsafe {
+            sb::C_SkImage_makeShader2(
+                self.native(),
+                tm1,
+                tm2,
+                local_matrix.into().native_ptr_or_null(),
+                filter_quality,
+            )
+        })
+        .unwrap()
+    }
+
     pub fn peek_pixels(&self) -> Option<Borrows<Pixmap>> {
         let mut pixmap = Pixmap::default();
         unsafe { self.native().peekPixels(pixmap.native_mut()) }
@@ -463,8 +491,14 @@ impl RCHandle<SkImage> {
     // TODO: flush(GrContext*, GrFlushInfo&).
 
     #[cfg(feature = "gpu")]
+    pub fn flush_and_submit(&mut self, context: &mut gpu::Context) {
+        unsafe { self.native_mut().flushAndSubmit(context.native_mut()) }
+    }
+
+    #[cfg(feature = "gpu")]
+    #[deprecated(since = "0.33.0", note = "use flushAndSubmit()")]
     pub fn flush(&mut self, context: &mut gpu::Context) {
-        unsafe { self.native_mut().flush1(context.native_mut()) }
+        self.flush_and_submit(context)
     }
 
     #[cfg(feature = "gpu")]
@@ -646,9 +680,9 @@ impl RCHandle<SkImage> {
         })
     }
 
-    pub fn reinterpret_color_space(&self, new_color_space: ColorSpace) -> Option<Image> {
+    pub fn reinterpret_color_space(&self, new_color_space: impl Into<ColorSpace>) -> Option<Image> {
         Image::from_ptr(unsafe {
-            sb::C_SkImage_reinterpretColorSpace(self.native(), new_color_space.into_ptr())
+            sb::C_SkImage_reinterpretColorSpace(self.native(), new_color_space.into().into_ptr())
         })
     }
 }

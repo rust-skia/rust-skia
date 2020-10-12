@@ -22,6 +22,8 @@ pub struct LocalizedString {
 }
 
 pub type Typeface = RCHandle<SkTypeface>;
+unsafe impl Send for Typeface {}
+unsafe impl Sync for Typeface {}
 
 impl NativeRefCountedBase for SkTypeface {
     type Base = SkRefCntBase;
@@ -115,10 +117,10 @@ impl RCHandle<SkTypeface> {
 
     // TODO: MakeFromStream()?
 
-    pub fn from_data(data: Data, index: impl Into<Option<usize>>) -> Option<Typeface> {
+    pub fn from_data(data: impl Into<Data>, index: impl Into<Option<usize>>) -> Option<Typeface> {
         Typeface::from_ptr(unsafe {
             sb::C_SkTypeface_MakeFromData(
-                data.into_ptr(),
+                data.into().into_ptr(),
                 index.into().unwrap_or_default().try_into().unwrap(),
             )
         })

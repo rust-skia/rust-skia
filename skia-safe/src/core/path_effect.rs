@@ -19,6 +19,9 @@ pub struct PointData {
     pub last: Path,
 }
 
+unsafe impl Send for PointData {}
+unsafe impl Sync for PointData {}
+
 impl NativeTransmutable<SkPathEffect_PointData> for PointData {}
 
 #[test]
@@ -73,6 +76,8 @@ pub struct DashInfo {
 }
 
 pub type PathEffect = RCHandle<SkPathEffect>;
+unsafe impl Send for PathEffect {}
+unsafe impl Sync for PathEffect {}
 
 impl NativeBase<SkRefCntBase> for SkPathEffect {}
 impl NativeBase<SkFlattenable> for SkPathEffect {}
@@ -92,16 +97,16 @@ impl NativeFlattenable for SkPathEffect {
 }
 
 impl RCHandle<SkPathEffect> {
-    pub fn sum(first: PathEffect, second: PathEffect) -> PathEffect {
+    pub fn sum(first: impl Into<PathEffect>, second: impl Into<PathEffect>) -> PathEffect {
         PathEffect::from_ptr(unsafe {
-            sb::C_SkPathEffect_MakeSum(first.into_ptr(), second.into_ptr())
+            sb::C_SkPathEffect_MakeSum(first.into().into_ptr(), second.into().into_ptr())
         })
         .unwrap()
     }
 
-    pub fn compose(first: PathEffect, second: PathEffect) -> PathEffect {
+    pub fn compose(first: impl Into<PathEffect>, second: impl Into<PathEffect>) -> PathEffect {
         PathEffect::from_ptr(unsafe {
-            sb::C_SkPathEffect_MakeCompose(first.into_ptr(), second.into_ptr())
+            sb::C_SkPathEffect_MakeCompose(first.into().into_ptr(), second.into().into_ptr())
         })
         .unwrap()
     }

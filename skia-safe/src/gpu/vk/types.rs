@@ -21,6 +21,8 @@ pub struct Alloc {
     pub backend_memory: GraphicsBackendMemory,
     uses_system_heap: bool,
 }
+unsafe impl Send for Alloc {}
+unsafe impl Sync for Alloc {}
 
 impl NativeTransmutable<GrVkAlloc> for Alloc {}
 #[test]
@@ -73,7 +75,7 @@ impl Alloc {
 #[repr(C)]
 pub struct YcbcrConversionInfo {
     pub format: vk::Format,
-    pub external_format: u64,
+    pub external_format: i64,
     pub ycrbcr_model: vk::SamplerYcbcrModelConversion,
     pub ycbcr_range: vk::SamplerYcbcrRange,
     pub x_chroma_offset: vk::ChromaLocation,
@@ -115,7 +117,7 @@ impl YcbcrConversionInfo {
     #[allow(clippy::too_many_arguments)]
     pub fn new_with_format(
         format: vk::Format,
-        external_format: u64,
+        external_format: i64,
         ycrbcr_model: vk::SamplerYcbcrModelConversion,
         ycbcr_range: vk::SamplerYcbcrRange,
         x_chroma_offset: vk::ChromaLocation,
@@ -147,7 +149,7 @@ impl YcbcrConversionInfo {
         y_chroma_offset: vk::ChromaLocation,
         chroma_filter: vk::Filter,
         force_explicit_reconstruction: vk::Bool32,
-        external_format: u64,
+        external_format: i64,
         external_format_features: vk::FormatFeatureFlags,
     ) -> YcbcrConversionInfo {
         Self::new_with_format(
@@ -180,7 +182,10 @@ pub struct ImageInfo {
     pub current_queue_family: u32,
     pub protected: Protected,
     pub ycbcr_conversion_info: YcbcrConversionInfo,
+    pub sharing_mode: vk::SharingMode,
 }
+unsafe impl Send for ImageInfo {}
+unsafe impl Sync for ImageInfo {}
 
 impl NativeTransmutable<GrVkImageInfo> for ImageInfo {}
 #[test]
@@ -190,7 +195,7 @@ fn test_image_info_layout() {
 
 impl Default for ImageInfo {
     fn default() -> Self {
-        ImageInfo {
+        Self {
             image: vk::NULL_HANDLE.into(),
             alloc: Alloc::default(),
             tiling: vk::ImageTiling::OPTIMAL,
@@ -200,6 +205,7 @@ impl Default for ImageInfo {
             current_queue_family: vk::QUEUE_FAMILY_IGNORED,
             protected: Protected::No,
             ycbcr_conversion_info: Default::default(),
+            sharing_mode: vk::SharingMode::EXCLUSIVE,
         }
     }
 }
@@ -217,13 +223,15 @@ impl ImageInfo {
         level_count: u32,
         current_queue_family: impl Into<Option<u32>>,
         ycbcr_conversion_info: impl Into<Option<YcbcrConversionInfo>>,
-        protected: impl Into<Option<Protected>>, // added in m77
-    ) -> ImageInfo {
+        protected: impl Into<Option<Protected>>, // m77
+        sharing_mode: impl Into<Option<vk::SharingMode>>, // m85
+    ) -> Self {
         let current_queue_family = current_queue_family
             .into()
             .unwrap_or(vk::QUEUE_FAMILY_IGNORED);
         let ycbcr_conversion_info = ycbcr_conversion_info.into().unwrap_or_default();
         let protected = protected.into().unwrap_or(Protected::No);
+        let sharing_mode = sharing_mode.into().unwrap_or(vk::SharingMode::EXCLUSIVE);
         Self {
             image,
             alloc,
@@ -234,6 +242,7 @@ impl ImageInfo {
             current_queue_family,
             protected,
             ycbcr_conversion_info,
+            sharing_mode,
         }
     }
 
@@ -250,8 +259,9 @@ impl ImageInfo {
         level_count: u32,
         current_queue_family: impl Into<Option<u32>>,
         ycbcr_conversion_info: impl Into<Option<YcbcrConversionInfo>>,
-        protected: impl Into<Option<Protected>>, // added in m77
-    ) -> ImageInfo {
+        protected: impl Into<Option<Protected>>, // m77
+        sharing_mode: impl Into<Option<vk::SharingMode>>, // m85
+    ) -> Self {
         Self::new(
             image,
             alloc,
@@ -262,12 +272,13 @@ impl ImageInfo {
             current_queue_family,
             ycbcr_conversion_info,
             protected,
+            sharing_mode,
         )
     }
 
     /// # Safety
     /// The Vulkan `info.image` and `info.alloc` must outlive the lifetime of the ImageInfo returned.
-    pub unsafe fn from_info(info: &ImageInfo, layout: vk::ImageLayout) -> ImageInfo {
+    pub unsafe fn from_info(info: &ImageInfo, layout: vk::ImageLayout) -> Self {
         Self::new(
             info.image,
             info.alloc,
@@ -278,6 +289,28 @@ impl ImageInfo {
             info.current_queue_family,
             info.ycbcr_conversion_info,
             info.protected,
+            info.sharing_mode,
+        )
+    }
+
+    /// # Safety
+    /// The Vulkan `info.image` and `info.alloc` must outlive the lifetime of the ImageInfo returned.
+    pub unsafe fn from_info_with_queue_index(
+        info: &ImageInfo,
+        layout: vk::ImageLayout,
+        family_queue_index: u32,
+    ) -> Self {
+        Self::new(
+            info.image,
+            info.alloc,
+            info.tiling,
+            layout,
+            info.format,
+            info.level_count,
+            family_queue_index,
+            info.ycbcr_conversion_info,
+            info.protected,
+            info.sharing_mode,
         )
     }
 }
@@ -319,6 +352,8 @@ pub struct DrawableInfo {
     pub draw_bounds: *mut vk::Rect2D,
     pub image: vk::Image,
 }
+unsafe impl Send for DrawableInfo {}
+unsafe impl Sync for DrawableInfo {}
 
 impl Default for DrawableInfo {
     fn default() -> Self {

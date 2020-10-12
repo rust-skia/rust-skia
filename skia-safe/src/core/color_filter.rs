@@ -10,6 +10,8 @@ bitflags! {
 }
 
 pub type ColorFilter = RCHandle<SkColorFilter>;
+unsafe impl Send for ColorFilter {}
+unsafe impl Sync for ColorFilter {}
 
 impl NativeBase<SkRefCntBase> for SkColorFilter {}
 
@@ -33,21 +35,24 @@ impl RCHandle<SkColorFilter> {
     pub fn to_a_color_mode(&self) -> Option<(Color, BlendMode)> {
         let mut color: Color = 0.into();
         let mut mode: BlendMode = Default::default();
-        unsafe { sb::C_SkColorFilter_asAColorMode(self.native(), color.native_mut(), &mut mode) }
+        unsafe { self.native().asAColorMode(color.native_mut(), &mut mode) }
             .if_true_some((color, mode))
     }
 
     pub fn to_a_color_matrix(&self) -> Option<[scalar; 20]> {
         let mut matrix: [scalar; 20] = Default::default();
-        unsafe { sb::C_SkColorFilter_asAColorMatrix(self.native(), matrix.as_mut_ptr()) }
-            .if_true_some(matrix)
+        unsafe { self.native().asAColorMatrix(&mut matrix[0]) }.if_true_some(matrix)
     }
 
     // TODO: appendStages()
     // TODO: program()
 
     pub fn flags(&self) -> self::Flags {
-        Flags::from_bits_truncate(unsafe { sb::C_SkColorFilter_getFlags(self.native()) })
+        Flags::from_bits_truncate(unsafe { self.native().getFlags() })
+    }
+
+    pub fn is_alpha_unchanged(&self) -> bool {
+        unsafe { self.native().isAlphaUnchanged() }
     }
 
     pub fn filter_color(&self, color: impl Into<Color>) -> Color {
@@ -84,9 +89,12 @@ pub mod color_filters {
     use crate::{scalar, BlendMode, Color, ColorFilter, ColorMatrix};
     use skia_bindings as sb;
 
-    pub fn compose(outer: ColorFilter, inner: ColorFilter) -> Option<ColorFilter> {
+    pub fn compose(
+        outer: impl Into<ColorFilter>,
+        inner: impl Into<ColorFilter>,
+    ) -> Option<ColorFilter> {
         ColorFilter::from_ptr(unsafe {
-            sb::C_SkColorFilters_Compose(outer.into_ptr(), inner.into_ptr())
+            sb::C_SkColorFilters_Compose(outer.into().into_ptr(), inner.into().into_ptr())
         })
     }
 
@@ -117,9 +125,13 @@ pub mod color_filters {
         ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_SRGBToLinearGamma() }).unwrap()
     }
 
-    pub fn lerp(t: f32, dst: ColorFilter, src: ColorFilter) -> Option<ColorFilter> {
+    pub fn lerp(
+        t: f32,
+        dst: impl Into<ColorFilter>,
+        src: impl Into<ColorFilter>,
+    ) -> Option<ColorFilter> {
         ColorFilter::from_ptr(unsafe {
-            sb::C_SkColorFilters_Lerp(t, dst.into_ptr(), src.into_ptr())
+            sb::C_SkColorFilters_Lerp(t, dst.into().into_ptr(), src.into().into_ptr())
         })
     }
 }

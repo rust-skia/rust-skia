@@ -1,13 +1,16 @@
+#[cfg(feature = "d3d")]
+use super::d3d;
 #[cfg(feature = "gl")]
 use super::gl;
 #[cfg(feature = "vulkan")]
 use super::vk;
+use super::{BackendRenderTarget, BackendSurfaceMutableState, BackendTexture};
 use crate::gpu::{BackendFormat, MipMapped, Renderable};
 use crate::prelude::*;
 use crate::{image, ColorType, Data, Image};
 use skia_bindings as sb;
 use skia_bindings::{GrContext, SkRefCntBase};
-use std::time::Duration;
+use std::{ptr, time::Duration};
 
 pub type Context = RCHandle<GrContext>;
 
@@ -39,8 +42,9 @@ impl RCHandle<GrContext> {
     pub fn new_vulkan(backend_context: &vk::BackendContext) -> Option<Context> {
         unsafe {
             let end_resolving = backend_context.begin_resolving();
-            let context =
-                Context::from_ptr(sb::C_GrContext_MakeVulkan(backend_context.native as _));
+            let context = Context::from_ptr(sb::C_GrContext_MakeVulkan(
+                backend_context.native.as_ptr() as _,
+            ));
             drop(end_resolving);
             context
         }
@@ -56,6 +60,12 @@ impl RCHandle<GrContext> {
         queue: *mut std::ffi::c_void,
     ) -> Option<Context> {
         Context::from_ptr(sb::C_GrContext_MakeMetal(device, queue))
+    }
+
+    // TODO: support variant with GrContextOptions
+    #[cfg(feature = "d3d")]
+    pub unsafe fn new_d3d(backend_context: &d3d::BackendContext) -> Option<Context> {
+        Context::from_ptr(sb::C_GrContext_MakeDirect3D(backend_context.native()))
     }
 
     // TODO: threadSafeProxy()
@@ -84,6 +94,11 @@ impl RCHandle<GrContext> {
     // TODO: is_...?
     pub fn abandoned(&mut self) -> bool {
         unsafe { sb::C_GrContext_abandoned(self.native_mut()) }
+    }
+
+    // TODO: is_...?
+    pub fn oomed(&mut self) -> bool {
+        unsafe { self.native_mut().oomed() }
     }
 
     pub fn release_resources_and_abandon(&mut self) -> &mut Self {
@@ -205,24 +220,20 @@ impl RCHandle<GrContext> {
 
     // TODO: wait()
 
-    pub fn flush_and_submit(&mut self) -> &mut Self {
-        unsafe { sb::C_GrContext_flushAndSubmit(self.native_mut()) }
-        self
-    }
-
     #[deprecated(since = "0.30.0", note = "use flush_and_submit()")]
     pub fn flush(&mut self) -> &mut Self {
         self.flush_and_submit()
     }
 
-    // TODO: flush(GrFlushInfo, ..) two variants.
-    // TODO: flushAndSignalSemaphores
+    pub fn flush_and_submit(&mut self) -> &mut Self {
+        unsafe { sb::C_GrContext_flushAndSubmit(self.native_mut()) }
+        self
+    }
 
-    pub fn submit(&mut self, sync_to_cpu: impl Into<Option<bool>>) -> bool {
-        unsafe {
-            self.native_mut()
-                .submit(sync_to_cpu.into().unwrap_or(false))
-        }
+    // TODO: flush(GrFlushInfo, ..)
+
+    pub fn submit(&mut self, sync_cpu: impl Into<Option<bool>>) -> bool {
+        unsafe { self.native_mut().submit(sync_cpu.into().unwrap_or(false)) }
     }
 
     pub fn check_async_work_completion(&mut self) {
@@ -290,6 +301,38 @@ impl RCHandle<GrContext> {
     // TODO: wrap createCompressedBackendTexture (several variants)
     //       introduced in m81
     //       extended in m84 with finishedProc and finishedContext
+
+    // TODO: add variant with GpuFinishedProc / GpuFinishedContext
+    pub fn set_backend_texture_state(
+        &mut self,
+        backend_texture: &BackendTexture,
+        state: &BackendSurfaceMutableState,
+    ) -> bool {
+        unsafe {
+            self.native_mut().setBackendTextureState(
+                backend_texture.native(),
+                state.native(),
+                None,
+                ptr::null_mut(),
+            )
+        }
+    }
+
+    // TODO: add variant with GpuFinishedProc / GpuFinishedContext
+    pub fn set_backend_render_target_state(
+        &mut self,
+        target: &BackendRenderTarget,
+        state: &BackendSurfaceMutableState,
+    ) -> bool {
+        unsafe {
+            self.native_mut().setBackendRenderTargetState(
+                target.native(),
+                state.native(),
+                None,
+                ptr::null_mut(),
+            )
+        }
+    }
 
     // TODO: wrap deleteBackendTexture(),
 

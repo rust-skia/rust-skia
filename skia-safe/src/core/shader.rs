@@ -35,6 +35,8 @@ impl<'a> GradientInfo<'a> {
 }
 
 pub type Shader = RCHandle<SkShader>;
+unsafe impl Send for Shader {}
+unsafe impl Sync for Shader {}
 
 impl NativeBase<SkRefCntBase> for SkShader {}
 impl NativeBase<SkFlattenable> for SkShader {}
@@ -90,9 +92,9 @@ impl RCHandle<SkShader> {
         .unwrap()
     }
 
-    pub fn with_color_filter(&self, color_filter: ColorFilter) -> Self {
+    pub fn with_color_filter(&self, color_filter: impl Into<ColorFilter>) -> Self {
         Self::from_ptr(unsafe {
-            sb::C_SkShader_makeWithColorFilter(self.native(), color_filter.into_ptr())
+            sb::C_SkShader_makeWithColorFilter(self.native(), color_filter.into().into_ptr())
         })
         .unwrap()
     }
@@ -112,20 +114,24 @@ pub mod shaders {
         Shader::from_ptr(unsafe { sb::C_SkShaders_Color(color.into_native()) }).unwrap()
     }
 
-    pub fn color_in_space(color: impl AsRef<Color4f>, space: ColorSpace) -> Shader {
+    pub fn color_in_space(color: impl AsRef<Color4f>, space: impl Into<ColorSpace>) -> Shader {
         Shader::from_ptr(unsafe {
-            sb::C_SkShaders_Color2(color.as_ref().native(), space.into_ptr())
+            sb::C_SkShaders_Color2(color.as_ref().native(), space.into().into_ptr())
         })
         .unwrap()
     }
 
-    pub fn blend(mode: BlendMode, dst: Shader, src: Shader) -> Shader {
-        Shader::from_ptr(unsafe { sb::C_SkShaders_Blend(mode, dst.into_ptr(), src.into_ptr()) })
-            .unwrap()
+    pub fn blend(mode: BlendMode, dst: impl Into<Shader>, src: impl Into<Shader>) -> Shader {
+        Shader::from_ptr(unsafe {
+            sb::C_SkShaders_Blend(mode, dst.into().into_ptr(), src.into().into_ptr())
+        })
+        .unwrap()
     }
 
-    pub fn lerp(t: f32, dst: Shader, src: Shader) -> Option<Shader> {
-        Shader::from_ptr(unsafe { sb::C_SkShaders_Lerp(t, dst.into_ptr(), src.into_ptr()) })
+    pub fn lerp(t: f32, dst: impl Into<Shader>, src: impl Into<Shader>) -> Option<Shader> {
+        Shader::from_ptr(unsafe {
+            sb::C_SkShaders_Lerp(t, dst.into().into_ptr(), src.into().into_ptr())
+        })
     }
 
     #[deprecated(since = "0.29.0", note = "removed without replacement")]

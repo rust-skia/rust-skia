@@ -1,5 +1,5 @@
-use crate::core::matrix::ApplyPerspectiveClip;
 use crate::interop::DynamicMemoryWStream;
+use crate::matrix::ApplyPerspectiveClip;
 use crate::prelude::*;
 use crate::{
     path_types, scalar, Data, Matrix, PathConvexityType, PathDirection, PathFillType, Point, RRect,
@@ -180,6 +180,8 @@ impl Iterator for RawIter<'_> {
 }
 
 pub type Path = Handle<SkPath>;
+unsafe impl Send for Path {}
+unsafe impl Sync for Path {}
 
 impl NativeDrop for SkPath {
     fn drop(&mut self) {
@@ -817,6 +819,21 @@ impl Handle<SkPath> {
     pub fn last_pt(&self) -> Option<Point> {
         let mut last_pt = Point::default();
         unsafe { self.native().getLastPt(last_pt.native_mut()) }.if_true_some(last_pt)
+    }
+
+    pub fn make_transform(
+        &mut self,
+        m: &Matrix,
+        pc: impl Into<Option<ApplyPerspectiveClip>>,
+    ) -> Path {
+        self.with_transform_with_perspective_clip(
+            &m,
+            pc.into().unwrap_or(ApplyPerspectiveClip::Yes),
+        )
+    }
+
+    pub fn make_scale(&mut self, (sx, sy): (scalar, scalar)) -> Path {
+        self.make_transform(&Matrix::scale((sx, sy)), ApplyPerspectiveClip::No)
     }
 
     pub fn set_last_pt(&mut self, p: impl Into<Point>) -> &mut Self {

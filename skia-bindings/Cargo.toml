@@ -9,7 +9,7 @@ keywords = ["skia", "rust-bindings", "vulkan", "opengl", "pdf"]
 categories = ["external-ffi-bindings", "graphics", "multimedia::images", "rendering::graphics-api", "visualization"]
 license = "MIT"
 
-version = "0.30.1"
+version = "0.34.2"
 authors = ["LongYinan <lynweklm@gmail.com>", "Armin Sander <armin@replicator.org>"]
 edition = "2018"
 build = "build.rs"
@@ -32,7 +32,7 @@ doctest = false
 # Metadata used from inside the packaged crate that defines where to download skia and depot_tools archives from.
 # Note: use short hashes here because of filesystem path size restrictions.
 [package.metadata]
-skia = "m84-0.30.1"
+skia = "m85-0.34.2"
 depot_tools = "a110bf6"
 
 [features]
@@ -40,7 +40,11 @@ default = []
 gl = []
 vulkan = []
 metal = []
+d3d = []
 textlayout = []
+webp = ["webp-encode", "webp-decode"]
+webp-encode = []
+webp-decode = []
 # deprecated since 0.25.0
 svg = []
 shaper = ["textlayout"]
@@ -49,9 +53,7 @@ shaper = ["textlayout"]
 
 [build-dependencies]
 cc = "1.0.37"
-# we'd like to reference specific bindgen versions here, because the generated
-# bindings are platform dependent and critical to this project.
-bindgen = "=0.55.0"
+bindgen = "0.55.1"
 # For enum variant name replacements.
 regex = "1.2.1"
 heck = "0.3.1"

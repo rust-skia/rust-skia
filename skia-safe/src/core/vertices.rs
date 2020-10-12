@@ -1,9 +1,8 @@
 use crate::prelude::*;
-use crate::{Color, Data, Point, Rect};
+use crate::{Color, Point, Rect};
 use skia_bindings as sb;
 use skia_bindings::{
-    SkColor, SkPoint, SkVertices, SkVertices_Attribute, SkVertices_Attribute_Type,
-    SkVertices_Builder,
+    SkPoint, SkVertices, SkVertices_Attribute, SkVertices_Attribute_Type, SkVertices_Builder,
 };
 use std::ffi::CStr;
 use std::marker::PhantomData;
@@ -125,6 +124,8 @@ impl Attribute<'_> {
 }
 
 pub type Vertices = RCHandle<SkVertices>;
+unsafe impl Send for Vertices {}
+unsafe impl Sync for Vertices {}
 
 impl NativeRefCounted for SkVertices {
     fn _ref(&self) {
@@ -227,15 +228,15 @@ impl RCHandle<SkVertices> {
     #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
     #[allow(deprecated)]
     pub fn tex_coords(&self) -> Option<&[Point]> {
-        let texs: *const SkPoint = self.native().fTexs.into_option()?;
-        Some(unsafe { slice::from_raw_parts(texs as _, self.vertex_count()) })
+        let texs = self.native().fTexs.into_option()?;
+        Some(unsafe { slice::from_raw_parts(texs.as_ptr() as *const _, self.vertex_count()) })
     }
 
     #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
     #[allow(deprecated)]
     pub fn colors(&self) -> Option<&[Color]> {
-        let colors: *const SkColor = self.native().fColors.into_option()?;
-        Some(unsafe { slice::from_raw_parts(colors as _, self.vertex_count()) })
+        let colors = self.native().fColors.into_option()?;
+        Some(unsafe { slice::from_raw_parts(colors.as_ptr() as *const _, self.vertex_count()) })
     }
 
     #[deprecated(since = "0.29.0", note = "returns None")]
@@ -254,7 +255,7 @@ impl RCHandle<SkVertices> {
     #[allow(deprecated)]
     pub fn indices(&self) -> Option<&[u16]> {
         let indices = self.native().fIndices.into_option()?;
-        Some(unsafe { slice::from_raw_parts_mut(indices as _, self.index_count()) })
+        Some(unsafe { slice::from_raw_parts_mut(indices.as_ptr(), self.index_count()) })
     }
 
     #[deprecated(since = "0.29.0", note = "returns false")]
@@ -272,12 +273,14 @@ impl RCHandle<SkVertices> {
         unsafe { self.native().approximateSize() }
     }
 
-    pub fn decode(buffer: &[u8]) -> Option<Vertices> {
-        Vertices::from_ptr(unsafe { sb::C_SkVertices_Decode(buffer.as_ptr() as _, buffer.len()) })
+    #[deprecated(since = "0.31.0", note = "removed without replacement")]
+    pub fn decode(_buffer: &[u8]) -> ! {
+        panic!("removed without replacement");
     }
 
-    pub fn encode(&self) -> Data {
-        Data::from_ptr(unsafe { sb::C_SkVertices_encode(self.native()) }).unwrap()
+    #[deprecated(since = "0.31.0", note = "removed without replacement")]
+    pub fn encode(&self) -> ! {
+        panic!("removed without replacement");
     }
 }
 
@@ -289,6 +292,8 @@ bitflags! {
 }
 
 pub type Builder = Handle<SkVertices_Builder>;
+unsafe impl Send for Builder {}
+unsafe impl Sync for Builder {}
 
 impl NativeDrop for SkVertices_Builder {
     fn drop(&mut self) {
@@ -332,7 +337,7 @@ impl Handle<SkVertices_Builder> {
             let vertices = &*self.native().fVertices.fPtr;
             let indices = vertices.fIndices.into_option()?;
             Some(slice::from_raw_parts_mut(
-                indices,
+                indices.as_ptr(),
                 vertices.fIndexCount.try_into().unwrap(),
             ))
         }
@@ -343,9 +348,9 @@ impl Handle<SkVertices_Builder> {
     pub fn tex_coords(&mut self) -> Option<&mut [Point]> {
         unsafe {
             let vertices = &*self.native().fVertices.fPtr;
-            let coords = vertices.fTexs.into_option()?;
+            let mut coords = vertices.fTexs.into_option()?;
             Some(slice::from_raw_parts_mut(
-                Point::from_native_ref_mut(&mut *coords),
+                Point::from_native_ref_mut(coords.as_mut()),
                 vertices.fVertexCount.try_into().unwrap(),
             ))
         }
@@ -354,9 +359,9 @@ impl Handle<SkVertices_Builder> {
     pub fn colors(&mut self) -> Option<&mut [Color]> {
         unsafe {
             let vertices = &*self.native().fVertices.fPtr;
-            let colors = vertices.fColors.into_option()?;
+            let mut colors = vertices.fColors.into_option()?;
             Some(slice::from_raw_parts_mut(
-                Color::from_native_ref_mut(&mut *colors),
+                Color::from_native_ref_mut(colors.as_mut()),
                 vertices.fVertexCount.try_into().unwrap(),
             ))
         }

@@ -27,6 +27,8 @@ pub fn test_join_naming() {
 }
 
 pub type Paint = Handle<SkPaint>;
+unsafe impl Send for Paint {}
+unsafe impl Sync for Paint {}
 
 impl NativeDrop for SkPaint {
     fn drop(&mut self) {
@@ -116,6 +118,11 @@ impl Handle<SkPaint> {
 
     pub fn set_style(&mut self, style: Style) -> &mut Self {
         unsafe { self.native_mut().setStyle(style) }
+        self
+    }
+
+    pub fn set_stroke(&mut self, stroke: bool) -> &mut Self {
+        unsafe { self.native_mut().setStroke(stroke) }
         self
     }
 

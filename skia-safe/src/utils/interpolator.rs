@@ -13,6 +13,8 @@ fn test_interpolator_result_naming() {
 }
 
 pub type Interpolator = Handle<SkInterpolator>;
+unsafe impl Send for Interpolator {}
+unsafe impl Sync for Interpolator {}
 
 impl NativeDrop for SkInterpolator {
     fn drop(&mut self) {
@@ -149,6 +151,7 @@ impl Handle<SkInterpolator> {
     }
 }
 
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct TimeToT {
     pub t: scalar,
     pub index: usize,

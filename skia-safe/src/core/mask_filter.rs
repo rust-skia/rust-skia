@@ -4,6 +4,8 @@ use skia_bindings as sb;
 use skia_bindings::{SkFlattenable, SkMaskFilter, SkRefCntBase};
 
 pub type MaskFilter = RCHandle<SkMaskFilter>;
+unsafe impl Send for MaskFilter {}
+unsafe impl Sync for MaskFilter {}
 
 impl NativeBase<SkRefCntBase> for SkMaskFilter {}
 impl NativeBase<SkFlattenable> for SkMaskFilter {}
@@ -23,11 +25,14 @@ impl NativeFlattenable for SkMaskFilter {
 }
 
 impl RCHandle<SkMaskFilter> {
-    pub fn blur(style: BlurStyle, sigma: scalar, respect_ctm: impl Into<Option<bool>>) -> Self {
+    pub fn blur(
+        style: BlurStyle,
+        sigma: scalar,
+        respect_ctm: impl Into<Option<bool>>,
+    ) -> Option<Self> {
         Self::from_ptr(unsafe {
             sb::C_SkMaskFilter_MakeBlur(style, sigma, respect_ctm.into().unwrap_or(true))
         })
-        .unwrap()
     }
 
     #[deprecated(since = "0.30.0", note = "removed without replacement")]

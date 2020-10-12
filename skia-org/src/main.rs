@@ -125,6 +125,15 @@ fn main() {
         }
     }
 
+    #[cfg(feature = "d3d")]
+    {
+        use drivers::d3d::D3D;
+
+        if drivers.contains(&D3D::NAME) {
+            draw_all(&mut D3D::new(), &out_path)
+        }
+    }
+
     fn draw_all<Driver: DrawingDriver>(driver: &mut Driver, out_path: &Path) {
         let out_path = out_path.join(Driver::NAME);
 
@@ -133,10 +142,10 @@ fn main() {
         skpaint_overview::draw(driver, &out_path);
 
         #[cfg(feature = "textlayout")]
-        skshaper_example::draw(driver, &out_path);
-
-        #[cfg(feature = "textlayout")]
-        skparagraph_example::draw(driver, &out_path);
+        {
+            skshaper_example::draw(driver, &out_path);
+            skparagraph_example::draw(driver, &out_path);
+        }
     }
 }
 
@@ -150,6 +159,9 @@ fn get_available_drivers() -> Vec<&'static str> {
     }
     if cfg!(feature = "metal") {
         drivers.push("metal")
+    }
+    if cfg!(feature = "d3d") {
+        drivers.push("d3d")
     }
     drivers
 }

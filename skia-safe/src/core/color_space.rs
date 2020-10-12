@@ -100,6 +100,8 @@ pub mod named_transfer_fn {
 }
 
 pub type ColorSpace = RCHandle<SkColorSpace>;
+unsafe impl Send for ColorSpace {}
+unsafe impl Sync for ColorSpace {}
 
 impl NativeRefCounted for SkColorSpace {
     fn _ref(&self) {
@@ -158,7 +160,8 @@ impl ColorSpace {
 
     // TODO: writeToMemory()?
 
-    pub fn deserialize(data: Data) -> ColorSpace {
+    pub fn deserialize(data: impl Into<Data>) -> ColorSpace {
+        let data = data.into();
         let bytes = data.as_bytes();
         ColorSpace::from_ptr(unsafe {
             sb::C_SkColorSpace_Deserialize(bytes.as_ptr() as _, bytes.len())

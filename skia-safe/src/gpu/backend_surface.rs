@@ -1,16 +1,20 @@
+#[cfg(feature = "d3d")]
+use super::d3d;
 #[cfg(feature = "gl")]
 use super::gl;
 #[cfg(feature = "metal")]
 use super::mtl;
 #[cfg(feature = "vulkan")]
 use super::vk;
-use super::BackendAPI;
+use super::{BackendAPI, BackendSurfaceMutableState};
 use crate::prelude::*;
 use crate::ISize;
 use skia_bindings as sb;
 use skia_bindings::{GrBackendFormat, GrBackendRenderTarget, GrBackendTexture, GrMipMapped};
 
 pub type BackendFormat = Handle<GrBackendFormat>;
+unsafe impl Send for BackendFormat {}
+unsafe impl Sync for BackendFormat {}
 
 impl NativeDrop for GrBackendFormat {
     fn drop(&mut self) {
@@ -55,6 +59,13 @@ impl Handle<GrBackendFormat> {
     #[cfg(feature = "metal")]
     pub fn new_metal(format: mtl::PixelFormat) -> Self {
         Self::construct(|bf| unsafe { sb::C_GrBackendFormat_ConstructMtl(bf, format) })
+    }
+
+    #[cfg(feature = "d3d")]
+    pub fn new_dxgi(format: d3d::DXGI_FORMAT) -> Self {
+        Self::construct(|bf| unsafe {
+            sb::C_GrBackendFormat_ConstructDxgi(bf, format.into_native())
+        })
     }
 
     #[deprecated(since = "0.19.0", note = "use backend()")]
@@ -103,6 +114,12 @@ impl Handle<GrBackendFormat> {
         unsafe { self.native().asMtlFormat() }
     }
 
+    #[cfg(feature = "d3d")]
+    pub fn as_dxgi_format(&self) -> Option<d3d::DXGI_FORMAT> {
+        let mut f = sb::DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
+        unsafe { self.native().asDxgiFormat(&mut f) }.if_true_some(d3d::DXGI_FORMAT::from_native(f))
+    }
+
     pub fn to_texture_2d(&self) -> Option<Self> {
         let new = Self::from_native(unsafe { self.native().makeTexture2D() });
 
@@ -115,6 +132,8 @@ impl Handle<GrBackendFormat> {
 }
 
 pub type BackendTexture = Handle<GrBackendTexture>;
+unsafe impl Send for BackendTexture {}
+unsafe impl Sync for BackendTexture {}
 
 impl NativeDrop for GrBackendTexture {
     fn drop(&mut self) {
@@ -135,18 +154,18 @@ impl Handle<GrBackendTexture> {
         mip_mapped: super::MipMapped,
         gl_info: gl::TextureInfo,
     ) -> Self {
-        Self::from_native_if_valid(GrBackendTexture::new(
-            width,
-            height,
-            mip_mapped,
-            gl_info.native(),
-        ))
+        Self::from_native_if_valid(construct(|texture| {
+            sb::C_GrBackendTexture_ConstructGL(texture, width, height, mip_mapped, gl_info.native())
+        }))
         .unwrap()
     }
 
     #[cfg(feature = "vulkan")]
     pub unsafe fn new_vulkan((width, height): (i32, i32), vk_info: &vk::ImageInfo) -> Self {
-        Self::from_native_if_valid(GrBackendTexture::new1(width, height, vk_info.native())).unwrap()
+        Self::from_native_if_valid(construct(|texture| {
+            sb::C_GrBackendTexture_ConstructVk(texture, width, height, vk_info.native())
+        }))
+        .unwrap()
     }
 
     #[cfg(feature = "metal")]
@@ -155,12 +174,25 @@ impl Handle<GrBackendTexture> {
         mip_mapped: super::MipMapped,
         mtl_info: &mtl::TextureInfo,
     ) -> Self {
-        Self::from_native_if_valid(GrBackendTexture::new2(
-            width,
-            height,
-            mip_mapped,
-            mtl_info.native(),
-        ))
+        Self::from_native_if_valid(construct(|texture| {
+            sb::C_GrBackendTexture_ConstructMtl(
+                texture,
+                width,
+                height,
+                mip_mapped,
+                mtl_info.native(),
+            )
+        }))
+        .unwrap()
+    }
+
+    #[cfg(feature = "d3d")]
+    pub fn new_d3d((width, height): (i32, i32), d3d_info: &d3d::TextureResourceInfo) -> Self {
+        unsafe {
+            Self::from_native_if_valid(construct(|texture| {
+                sb::C_GrBackendTexture_ConstructD3D(texture, width, height, d3d_info.native())
+            }))
+        }
         .unwrap()
     }
 
@@ -234,6 +266,25 @@ impl Handle<GrBackendTexture> {
         }
     }
 
+    #[cfg(feature = "d3d")]
+    pub fn d3d_texture_resource_info(&self) -> Option<d3d::TextureResourceInfo> {
+        unsafe {
+            let mut info = sb::GrD3DTextureResourceInfo::default();
+            self.native()
+                .getD3DTextureResourceInfo(&mut info)
+                .if_true_then_some(|| {
+                    assert!(!info.fResource.fObject.is_null());
+                    d3d::TextureResourceInfo::from_native(info)
+                })
+        }
+    }
+
+    #[cfg(feature = "d3d")]
+    pub fn set_d3d_resource_state(&mut self, resource_state: d3d::ResourceStateEnum) -> &mut Self {
+        unsafe { self.native_mut().setD3DResourceState(resource_state) }
+        self
+    }
+
     pub fn backend_format(&self) -> Option<BackendFormat> {
         let format = BackendFormat::from_native(unsafe { self.native().getBackendFormat() });
 
@@ -255,6 +306,8 @@ impl Handle<GrBackendTexture> {
 }
 
 pub type BackendRenderTarget = Handle<GrBackendRenderTarget>;
+unsafe impl Send for BackendRenderTarget {}
+unsafe impl Sync for BackendRenderTarget {}
 
 impl NativeDrop for GrBackendRenderTarget {
     fn drop(&mut self) {
@@ -278,15 +331,16 @@ impl Handle<GrBackendRenderTarget> {
         stencil_bits: usize,
         info: gl::FramebufferInfo,
     ) -> Self {
-        Self::from_native(unsafe {
-            GrBackendRenderTarget::new(
+        Self::from_native(construct(|target| unsafe {
+            sb::C_GrBackendRenderTarget_ConstructGL(
+                target,
                 width,
                 height,
                 sample_count.into().unwrap_or(0).try_into().unwrap(),
                 stencil_bits.try_into().unwrap(),
                 info.native(),
             )
-        })
+        }))
     }
 
     #[cfg(feature = "vulkan")]
@@ -295,14 +349,15 @@ impl Handle<GrBackendRenderTarget> {
         sample_count: impl Into<Option<usize>>,
         info: &vk::ImageInfo,
     ) -> Self {
-        Self::from_native(unsafe {
-            GrBackendRenderTarget::new2(
+        Self::from_native(construct(|target| unsafe {
+            sb::C_GrBackendRenderTarget_ConstructVk(
+                target,
                 width,
                 height,
                 sample_count.into().unwrap_or(0).try_into().unwrap(),
                 info.native(),
             )
-        })
+        }))
     }
 
     #[cfg(feature = "metal")]
@@ -311,9 +366,32 @@ impl Handle<GrBackendRenderTarget> {
         sample_cnt: i32,
         mtl_info: &mtl::TextureInfo,
     ) -> Self {
-        Self::from_native(unsafe {
-            GrBackendRenderTarget::new3(width, height, sample_cnt, mtl_info.native())
-        })
+        Self::from_native(construct(|target| unsafe {
+            sb::C_GrBackendRenderTarget_ConstructMtl(
+                target,
+                width,
+                height,
+                sample_cnt,
+                mtl_info.native(),
+            )
+        }))
+    }
+
+    #[cfg(feature = "d3d")]
+    pub fn new_d3d(
+        (width, height): (i32, i32),
+        sample_cnt: i32,
+        d3d_info: &d3d::TextureResourceInfo,
+    ) -> Self {
+        Self::from_native(construct(|brt| unsafe {
+            sb::C_GrBackendRenderTarget_ConstructD3D(
+                brt,
+                width,
+                height,
+                sample_cnt,
+                d3d_info.native(),
+            )
+        }))
     }
 
     pub(crate) fn from_native_if_valid(
@@ -377,8 +455,27 @@ impl Handle<GrBackendRenderTarget> {
         unsafe { self.native().getMtlTextureInfo(info.native_mut()) }.if_true_some(info)
     }
 
+    #[cfg(feature = "d3d")]
+    pub fn d3d_texture_resource_info(&self) -> Option<d3d::TextureResourceInfo> {
+        let mut info = sb::GrD3DTextureResourceInfo::default();
+        unsafe { self.native().getD3DTextureResourceInfo(&mut info) }.if_true_then_some(|| {
+            assert!(!info.fResource.fObject.is_null());
+            d3d::TextureResourceInfo::from_native(info)
+        })
+    }
+
+    #[cfg(feature = "d3d")]
+    pub fn set_d3d_resource_state(&mut self, resource_state: d3d::ResourceStateEnum) -> &mut Self {
+        unsafe { self.native_mut().setD3DResourceState(resource_state) }
+        self
+    }
+
     pub fn backend_format(&self) -> BackendFormat {
         BackendFormat::from_native(unsafe { self.native().getBackendFormat() })
+    }
+
+    pub fn set_mutable_stat(&mut self, state: &BackendSurfaceMutableState) {
+        unsafe { self.native_mut().setMutableState(state.native()) }
     }
 
     pub fn is_protected(&self) -> bool {

@@ -13,13 +13,13 @@ impl RCHandle<SkImageFilter> {
 pub fn new(
     src: impl AsRef<Rect>,
     dst: impl AsRef<Rect>,
-    input: ImageFilter,
+    input: impl Into<ImageFilter>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
         sb::C_SkTileImageFilter_Make(
             src.as_ref().native(),
             dst.as_ref().native(),
-            input.into_ptr(),
+            input.into().into_ptr(),
         )
     })
 }

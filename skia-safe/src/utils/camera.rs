@@ -1,195 +1,8 @@
 #![allow(deprecated)]
 use crate::prelude::*;
-use crate::{scalar, Canvas, Matrix};
+use crate::{scalar, Canvas, Matrix, M44, V3};
 use skia_bindings as sb;
-use skia_bindings::{Sk3DView, SkCamera3D, SkMatrix3D, SkPatch3D, SkPoint3D, SkUnit3D};
-
-#[deprecated(
-    since = "0.30.0",
-    note = "Skia now has support for a 4x matrix (core::M44) in core::Canvas."
-)]
-#[derive(Copy, Clone, PartialEq, Default, Debug)]
-#[repr(C)]
-pub struct Unit3D {
-    pub x: scalar,
-    pub y: scalar,
-    pub z: scalar,
-}
-
-impl NativeTransmutable<SkUnit3D> for Unit3D {}
-
-#[test]
-fn test_unit_3d_layout() {
-    Unit3D::test_layout();
-}
-
-impl Unit3D {
-    pub fn set(&mut self, x: scalar, y: scalar, z: scalar) -> &mut Self {
-        self.x = x;
-        self.y = y;
-        self.z = z;
-        self
-    }
-
-    pub fn dot(a: &Self, b: &Self) -> scalar {
-        unsafe { SkUnit3D::Dot(a.native(), b.native()) }
-    }
-
-    pub fn cross(a: &Self, b: &Self) -> Self {
-        let mut r = Self::default();
-        unsafe { SkUnit3D::Cross(a.native(), b.native(), r.native_mut()) };
-        r
-    }
-}
-
-#[deprecated(
-    since = "0.30.0",
-    note = "Skia now has support for a 4x matrix (core::M44) in core::Canvas."
-)]
-#[derive(Copy, Clone, PartialEq, Default, Debug)]
-#[repr(C)]
-pub struct Point3D {
-    pub x: scalar,
-    pub y: scalar,
-    pub z: scalar,
-}
-
-impl NativeTransmutable<SkPoint3D> for Point3D {}
-#[test]
-fn test_point_3d_layout() {
-    Point3D::test_layout();
-}
-
-impl From<(scalar, scalar, scalar)> for Point3D {
-    fn from((x, y, z): (scalar, scalar, scalar)) -> Self {
-        Point3D { x, y, z }
-    }
-}
-
-impl Point3D {
-    pub fn set(&mut self, x: scalar, y: scalar, z: scalar) -> &mut Self {
-        self.x = x;
-        self.y = y;
-        self.z = z;
-        self
-    }
-
-    pub fn normalize(&self, unit: &mut Unit3D) -> scalar {
-        unsafe { self.native().normalize(unit.native_mut()) }
-    }
-}
-
-#[deprecated(
-    since = "0.30.0",
-    note = "Skia now has support for a 4x matrix (core::M44) in core::Canvas."
-)]
-pub type Vector3D = Point3D;
-
-// note: Default is an empty matrix, and not the identity matrix, which is generated with reset()!
-#[deprecated(
-    since = "0.30.0",
-    note = "Skia now has support for a 4x matrix (core::M44) in core::Canvas."
-)]
-#[derive(Clone, PartialEq, Default, Debug)]
-#[repr(C)]
-pub struct Matrix3D {
-    pub mat: [[scalar; 4]; 3],
-}
-
-impl NativeTransmutable<SkMatrix3D> for Matrix3D {}
-#[test]
-fn test_matrix_3d_layout() {
-    Matrix3D::test_layout();
-}
-
-impl Matrix3D {
-    pub fn reset(&mut self) -> &mut Self {
-        unsafe {
-            self.native_mut().reset();
-        }
-        self
-    }
-
-    pub fn set_row(
-        &mut self,
-        row: usize,
-        a: scalar,
-        b: scalar,
-        c: scalar,
-        d: impl Into<Option<scalar>>,
-    ) -> &mut Self {
-        debug_assert!(row < self.mat.len());
-        let mat = &mut self.mat;
-        mat[row][0] = a;
-        mat[row][1] = b;
-        mat[row][2] = c;
-        mat[row][3] = d.into().unwrap_or_default();
-        self
-    }
-
-    pub fn set_rotate_x(&mut self, deg: scalar) -> &mut Self {
-        unsafe { self.native_mut().setRotateX(deg) }
-        self
-    }
-
-    pub fn set_rotate_y(&mut self, deg: scalar) -> &mut Self {
-        unsafe { self.native_mut().setRotateY(deg) }
-        self
-    }
-
-    pub fn set_rotate_z(&mut self, deg: scalar) -> &mut Self {
-        unsafe { self.native_mut().setRotateZ(deg) }
-        self
-    }
-
-    pub fn set_translate(&mut self, x: scalar, y: scalar, z: scalar) -> &mut Self {
-        unsafe { self.native_mut().setTranslate(x, y, z) }
-        self
-    }
-
-    pub fn pre_rotate_x(&mut self, deg: scalar) -> &mut Self {
-        unsafe { self.native_mut().preRotateX(deg) }
-        self
-    }
-
-    pub fn pre_rotate_y(&mut self, deg: scalar) -> &mut Self {
-        unsafe { self.native_mut().preRotateY(deg) }
-        self
-    }
-
-    pub fn pre_rotate_z(&mut self, deg: scalar) -> &mut Self {
-        unsafe { self.native_mut().preRotateZ(deg) }
-        self
-    }
-
-    pub fn pre_translate(&mut self, x: scalar, y: scalar, z: scalar) -> &mut Self {
-        unsafe { self.native_mut().preTranslate(x, y, z) }
-        self
-    }
-
-    pub fn set_concat(&mut self, a: &Self, b: &Self) -> &mut Self {
-        unsafe { self.native_mut().setConcat(a.native(), b.native()) }
-        self
-    }
-
-    pub fn map_point(&self, src: impl Into<Point3D>) -> Point3D {
-        let mut dst = Point3D::default();
-        unsafe {
-            self.native()
-                .mapPoint(src.into().native(), dst.native_mut())
-        };
-        dst
-    }
-
-    pub fn map_vector(&self, src: impl Into<Vector3D>) -> Vector3D {
-        let mut dst = Vector3D::default();
-        unsafe {
-            self.native()
-                .mapVector(src.into().native(), dst.native_mut())
-        };
-        dst
-    }
-}
+use skia_bindings::{Sk3DView, SkCamera3D, SkPatch3D};
 
 #[deprecated(
     since = "0.30.0",
@@ -198,9 +11,9 @@ impl Matrix3D {
 #[derive(Clone, PartialEq, Debug)]
 #[repr(C)]
 pub struct Patch3D {
-    pub u: Vector3D,
-    pub v: Vector3D,
-    pub origin: Point3D,
+    pub u: V3,
+    pub v: V3,
+    pub origin: V3,
 }
 
 impl NativeTransmutable<SkPatch3D> for Patch3D {}
@@ -221,13 +34,13 @@ impl Patch3D {
         self
     }
 
-    pub fn transform(&self, m: &Matrix3D) -> Self {
+    pub fn transform(&self, m: &M44) -> Self {
         let mut dst = Patch3D::default();
         unsafe { self.native().transform(m.native(), dst.native_mut()) }
         dst
     }
 
-    pub fn dot_with(&self, v: impl Into<Vector3D>) -> scalar {
+    pub fn dot_with(&self, v: impl Into<V3>) -> scalar {
         let v = v.into();
         unsafe { self.native().dotWith(v.x, v.y, v.z) }
     }
@@ -240,10 +53,10 @@ impl Patch3D {
 #[derive(Clone, PartialEq, Debug)]
 #[repr(C)]
 pub struct Camera3D {
-    pub location: Point3D,
-    pub axis: Point3D,
-    pub zenith: Point3D,
-    pub observer: Point3D,
+    pub location: V3,
+    pub axis: V3,
+    pub zenith: V3,
+    pub observer: V3,
     orientation: Matrix,
     need_to_update: bool,
 }
@@ -291,6 +104,7 @@ impl Camera3D {
 )]
 pub type View3D = RefHandle<Sk3DView>;
 unsafe impl Send for View3D {}
+unsafe impl Sync for View3D {}
 
 impl Default for View3D {
     fn default() -> Self {
@@ -319,7 +133,7 @@ impl RefHandle<Sk3DView> {
         self
     }
 
-    pub fn translate(&mut self, d: impl Into<Vector3D>) -> &mut Self {
+    pub fn translate(&mut self, d: impl Into<V3>) -> &mut Self {
         let d = d.into();
         unsafe { self.native_mut().translate(d.x, d.y, d.z) }
         self
@@ -346,12 +160,12 @@ impl RefHandle<Sk3DView> {
         m
     }
 
-    pub fn apply_to_canvas(&self, mut canvas: impl AsMut<Canvas>) -> &Self {
-        unsafe { self.native().applyToCanvas(canvas.as_mut().native_mut()) }
+    pub fn apply_to_canvas(&self, canvas: &mut Canvas) -> &Self {
+        unsafe { self.native().applyToCanvas(canvas.native_mut()) }
         self
     }
 
-    pub fn dot_with_normal(&self, d: impl Into<Vector3D>) -> scalar {
+    pub fn dot_with_normal(&self, d: impl Into<V3>) -> scalar {
         let d = d.into();
         unsafe { self.native().dotWithNormal(d.x, d.y, d.z) }
     }
@@ -366,8 +180,6 @@ fn test_canvas_passing_syntax() {
     let view = View3D::default();
     // as mutable reference
     view.apply_to_canvas(&mut null_canvas);
-    // moved
-    view.apply_to_canvas(null_canvas);
 
     // and one with a mutable reference to a shared Canvas:
     let mut surface = Surface::new_raster_n32_premul((100, 100)).unwrap();

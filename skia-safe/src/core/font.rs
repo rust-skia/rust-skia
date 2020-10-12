@@ -14,6 +14,8 @@ fn test_font_edging_naming() {
 }
 
 pub type Font = Handle<SkFont>;
+unsafe impl Send for Font {}
+unsafe impl Sync for Font {}
 
 impl NativeDrop for SkFont {
     fn drop(&mut self) {

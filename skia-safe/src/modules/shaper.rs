@@ -13,6 +13,7 @@ use std::os::raw;
 
 pub type Shaper = RefHandle<SkShaper>;
 unsafe impl Send for Shaper {}
+unsafe impl Sync for Shaper {}
 
 impl NativeDrop for SkShaper {
     fn drop(&mut self) {
@@ -264,7 +265,7 @@ impl RefHandle<SkShaper> {
     }
 }
 
-mod run_handler {
+pub mod run_handler {
     use crate::prelude::*;
     use crate::{Font, GlyphId, Point, Vector};
     use skia_bindings::{
@@ -347,14 +348,14 @@ mod run_handler {
             buffer: &SkShaper_RunHandler_Buffer,
             glyph_count: usize,
         ) -> Buffer {
-            let offsets = buffer.offsets.into_option().map(|offsets| {
-                slice::from_raw_parts_mut(Point::from_native_ref_mut(&mut *offsets), glyph_count)
+            let offsets = buffer.offsets.into_option().map(|mut offsets| {
+                slice::from_raw_parts_mut(Point::from_native_ref_mut(offsets.as_mut()), glyph_count)
             });
 
             let clusters = buffer
                 .clusters
                 .into_option()
-                .map(|clusters| slice::from_raw_parts_mut(clusters, glyph_count));
+                .map(|clusters| slice::from_raw_parts_mut(clusters.as_ptr(), glyph_count));
 
             Buffer {
                 glyphs: slice::from_raw_parts_mut(buffer.glyphs, glyph_count),
@@ -679,66 +680,6 @@ pub mod icu {
         #[cfg(all(windows, feature = "textlayout"))]
         crate::Shaper::new(None);
     }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::modules::shaper::TextBlobBuilderRunHandler;
-    use crate::shaper::run_handler::{Buffer, RunInfo};
-    use crate::shaper::RunHandler;
-    use crate::{Font, GlyphId, Point, Shaper};
-
-    #[derive(Default, Debug)]
-    pub struct DebugRunHandler {
-        glyphs: Vec<GlyphId>,
-        points: Vec<Point>,
-    }
-
-    impl RunHandler for DebugRunHandler {
-        fn begin_line(&mut self) {
-            println!("begin_line");
-        }
-
-        fn run_info(&mut self, info: &RunInfo) {
-            println!("run_info: {:?} {:?}", info.advance, info.utf8_range);
-        }
-
-        fn commit_run_info(&mut self) {
-            println!("commit_run_info");
-        }
-
-        fn run_buffer<'a>(&'a mut self, info: &RunInfo) -> Buffer {
-            println!("run_buffer {}", info.glyph_count);
-            let count = info.glyph_count;
-            self.glyphs.resize(count, 0);
-            self.points.resize(count, Point::default());
-            Buffer::new(&mut self.glyphs, &mut self.points, None)
-        }
-
-        fn commit_run_buffer(&mut self, _info: &RunInfo) {
-            println!("commit_run_buffer");
-            println!("state: {:?}", self);
-        }
-
-        fn commit_line(&mut self) {
-            println!("commit_line");
-        }
-    }
-
-    #[test]
-    #[serial_test::serial]
-    fn test_rtl_text_shaping() {
-        skia_bindings::icu::init();
-
-        let shaper = Shaper::new(None);
-        shaper.shape(
-            "العربية",
-            &Font::default(),
-            false,
-            10000.0,
-            &mut DebugRunHandler::default(),
-        );
-    }
 
     #[test]
     #[serial_test::serial]
@@ -746,13 +687,13 @@ mod tests {
         skia_bindings::icu::init();
         let str = "العربية";
         let mut text_blob_builder_run_handler =
-            TextBlobBuilderRunHandler::new(&str, Point::default());
+            crate::shaper::TextBlobBuilderRunHandler::new(&str, crate::Point::default());
 
-        let shaper = Shaper::new(None);
+        let shaper = crate::Shaper::new(None);
 
         shaper.shape(
             "العربية",
-            &Font::default(),
+            &crate::Font::default(),
             false,
             10000.0,
             &mut text_blob_builder_run_handler,

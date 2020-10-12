@@ -7,11 +7,17 @@ impl RCHandle<SkImageFilter> {
     pub fn displacement_map_effect<'a>(
         channel_selectors: (ColorChannel, ColorChannel),
         scale: scalar,
-        displacement: ImageFilter,
-        color: ImageFilter,
+        displacement: impl Into<ImageFilter>,
+        color: impl Into<ImageFilter>,
         crop_rect: impl Into<Option<&'a IRect>>,
     ) -> Option<Self> {
-        image_filters::displacement_map(channel_selectors, scale, displacement, color, crop_rect)
+        image_filters::displacement_map(
+            channel_selectors,
+            scale,
+            displacement.into(),
+            color,
+            crop_rect,
+        )
     }
 }
 
@@ -28,8 +34,8 @@ fn test_channel_selector_type_naming() {
 pub fn new<'a>(
     (x_channel_selector, y_channel_selector): (ChannelSelector, ChannelSelector),
     scale: scalar,
-    displacement: ImageFilter,
-    color: ImageFilter,
+    displacement: impl Into<ImageFilter>,
+    color: impl Into<ImageFilter>,
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
@@ -37,8 +43,8 @@ pub fn new<'a>(
             x_channel_selector,
             y_channel_selector,
             scale,
-            displacement.into_ptr(),
-            color.into_ptr(),
+            displacement.into().into_ptr(),
+            color.into().into_ptr(),
             crop_rect.into().native_ptr_or_null(),
         )
     })

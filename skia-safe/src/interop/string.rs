@@ -4,6 +4,8 @@ use skia_bindings::SkString;
 use std::{slice, str};
 
 pub type String = Handle<SkString>;
+unsafe impl Send for String {}
+unsafe impl Sync for String {}
 
 impl NativeDrop for SkString {
     fn drop(&mut self) {

@@ -1,4 +1,8 @@
-mod codec;
+pub mod codec;
+#[deprecated(since = "0.33.1", note = "use codec::Result")]
+pub use codec::Result as CodecResult;
+pub use codec::{Codec, EncodedOrigin};
+
 mod core;
 mod docs;
 mod effects;
@@ -21,10 +25,9 @@ extern crate bitflags;
 extern crate lazy_static;
 
 // Prelude re-exports
-pub use crate::prelude::Borrows;
+pub use crate::prelude::{Borrows, ConditionallySend, Sendable};
 
 /// All Sk* types are accessible via skia_safe::
-pub use crate::codec::*;
 pub use crate::core::*;
 pub use crate::docs::*;
 pub use crate::effects::*;

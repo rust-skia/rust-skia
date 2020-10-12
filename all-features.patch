@@ -1,0 +1,39 @@
+diff --git a/skia-bindings/Cargo.toml b/skia-bindings/Cargo.toml
+index 87e7ea7..df4903a 100644
+--- a/skia-bindings/Cargo.toml
++++ b/skia-bindings/Cargo.toml
+@@ -36,7 +36,7 @@ skia = "m86-0.33.0"
+ depot_tools = "a110bf6"
+ 
+ [features]
+-default = []
++default = ["gl", "vulkan", "d3d", "textlayout"]
+ gl = []
+ vulkan = []
+ metal = []
+diff --git a/skia-org/Cargo.toml b/skia-org/Cargo.toml
+index 5a33403..2e93fee 100644
+--- a/skia-org/Cargo.toml
++++ b/skia-org/Cargo.toml
+@@ -16,7 +16,7 @@ authors = ["Armin Sander <armin@replicator.org>"]
+ edition = "2018"
+ 
+ [features]
+-default = []
++default = ["gl", "vulkan", "d3d", "textlayout"]
+ gl = ["offscreen_gl_context", "sparkle", "skia-safe/gl"]
+ vulkan = ["ash", "skia-safe/vulkan"]
+ metal = ["metal-rs", "foreign-types", "cocoa", "objc", "skia-safe/metal"]
+diff --git a/skia-safe/Cargo.toml b/skia-safe/Cargo.toml
+index 37877ff..3ed3950 100644
+--- a/skia-safe/Cargo.toml
++++ b/skia-safe/Cargo.toml
+@@ -19,7 +19,7 @@ edition = "2018"
+ doctest = false
+ 
+ [features]
+-default = []
++default = ["gl", "vulkan", "d3d", "textlayout"]
+ gl = ["gpu", "skia-bindings/gl"]
+ vulkan = ["gpu", "skia-bindings/vulkan"]
+ metal = ["gpu", "skia-bindings/metal"]

@@ -18,14 +18,14 @@ impl RCHandle<SkImageFilter> {
 pub fn new<'a>(
     src_rect: impl AsRef<Rect>,
     inset: scalar,
-    input: ImageFilter,
+    input: impl Into<ImageFilter>,
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
         sb::C_SkMagnifierImageFilter_Make(
             src_rect.as_ref().native(),
             inset,
-            input.into_ptr(),
+            input.into().into_ptr(),
             crop_rect.into().native_ptr_or_null(),
         )
     })

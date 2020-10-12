@@ -67,22 +67,25 @@ pub fn blur<'a>(
 }
 
 pub fn color_filter<'a>(
-    cf: ColorFilter,
+    cf: impl Into<ColorFilter>,
     input: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
         sb::C_SkImageFilters_ColorFilter(
-            cf.into_ptr(),
+            cf.into().into_ptr(),
             input.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
 }
 
-pub fn compose(outer: ImageFilter, inner: ImageFilter) -> Option<ImageFilter> {
+pub fn compose(
+    outer: impl Into<ImageFilter>,
+    inner: impl Into<ImageFilter>,
+) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
-        sb::C_SkImageFilters_Compose(outer.into_ptr(), inner.into_ptr())
+        sb::C_SkImageFilters_Compose(outer.into().into_ptr(), inner.into().into_ptr())
     })
 }
 
@@ -90,7 +93,7 @@ pub fn displacement_map<'a>(
     (x_channel_selector, y_channel_selector): (ColorChannel, ColorChannel),
     scale: scalar,
     displacement: impl Into<Option<ImageFilter>>,
-    color: ImageFilter,
+    color: impl Into<ImageFilter>,
     crop_rect: impl Into<Option<&'a IRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
@@ -99,7 +102,7 @@ pub fn displacement_map<'a>(
             y_channel_selector,
             scale,
             displacement.into().into_ptr_or_null(),
-            color.into_ptr(),
+            color.into().into_ptr(),
             crop_rect.into().native_ptr_or_null(),
         )
     })
@@ -150,11 +153,12 @@ pub fn drop_shadow_only<'a>(
 }
 
 pub fn image<'a>(
-    image: Image,
+    image: impl Into<Image>,
     src_rect: impl Into<Option<&'a Rect>>,
     dst_rect: impl Into<Option<&'a Rect>>,
     filter_quality: impl Into<Option<FilterQuality>>,
 ) -> Option<ImageFilter> {
+    let image = image.into();
     let image_rect = Rect::from_iwh(image.width(), image.height());
     let src_rect = src_rect.into().unwrap_or(&image_rect);
     let dst_rect = dst_rect.into().unwrap_or(&image_rect);
@@ -271,9 +275,10 @@ pub fn paint<'a>(paint: &Paint, crop_rect: impl Into<Option<&'a IRect>>) -> Opti
 }
 
 pub fn picture<'a>(
-    picture: Picture,
+    picture: impl Into<Picture>,
     target_rect: impl Into<Option<&'a Rect>>,
 ) -> Option<ImageFilter> {
+    let picture = picture.into();
     let picture_rect = picture.cull_rect();
     let target_rect = target_rect.into().unwrap_or(&picture_rect);
 

@@ -10,7 +10,7 @@ fn test_align_layout() {
 }
 
 pub fn draw_str(
-    mut canvas: impl AsMut<Canvas>,
+    canvas: &mut Canvas,
     text: impl AsRef<str>,
     p: impl Into<Point>,
     font: &Font,
@@ -21,7 +21,7 @@ pub fn draw_str(
     let p = p.into();
     unsafe {
         SkTextUtils::Draw(
-            canvas.as_mut().native_mut(),
+            canvas.native_mut(),
             text.as_ptr() as _,
             text.len(),
             TextEncoding::UTF8.into_native(),

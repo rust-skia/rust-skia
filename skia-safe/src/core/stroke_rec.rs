@@ -18,6 +18,8 @@ fn test_stroke_rec_style_naming() {
 }
 
 pub type StrokeRec = Handle<SkStrokeRec>;
+unsafe impl Send for StrokeRec {}
+unsafe impl Sync for StrokeRec {}
 
 impl NativeDrop for SkStrokeRec {
     fn drop(&mut self) {

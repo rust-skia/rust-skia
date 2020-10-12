@@ -6,6 +6,8 @@ use skia_bindings as sb;
 use std::ops::{Index, Range};
 
 pub type Paragraph = RefHandle<sb::skia_textlayout_Paragraph>;
+unsafe impl Send for Paragraph {}
+unsafe impl Sync for Paragraph {}
 
 impl NativeDrop for sb::skia_textlayout_Paragraph {
     fn drop(&mut self) {
@@ -42,7 +44,7 @@ impl RefHandle<sb::skia_textlayout_Paragraph> {
         self.native().fLongestLine
     }
 
-    pub fn did_exceed_max_lines(&mut self) -> bool {
+    pub fn did_exceed_max_lines(&self) -> bool {
         self.native().fExceededMaxLines
     }
 
@@ -50,20 +52,20 @@ impl RefHandle<sb::skia_textlayout_Paragraph> {
         unsafe { sb::C_Paragraph_layout(self.native_mut(), width) }
     }
 
-    pub fn paint(&mut self, canvas: &mut Canvas, p: impl Into<Point>) {
+    pub fn paint(&self, canvas: &mut Canvas, p: impl Into<Point>) {
         let p = p.into();
-        unsafe { sb::C_Paragraph_paint(self.native_mut(), canvas.native_mut(), p.x, p.y) }
+        unsafe { sb::C_Paragraph_paint(self.native_mut_force(), canvas.native_mut(), p.x, p.y) }
     }
 
     pub fn get_rects_for_range(
-        &mut self,
+        &self,
         range: Range<usize>,
         rect_height_style: RectHeightStyle,
         rect_width_style: RectWidthStyle,
     ) -> TextBoxes {
         TextBoxes::construct(|tb| unsafe {
             sb::C_Paragraph_getRectsForRange(
-                self.native_mut(),
+                self.native_mut_force(),
                 range.start.try_into().unwrap(),
                 range.end.try_into().unwrap(),
                 rect_height_style,
@@ -73,41 +75,42 @@ impl RefHandle<sb::skia_textlayout_Paragraph> {
         })
     }
 
-    pub fn get_rects_for_placeholders(&mut self) -> TextBoxes {
+    pub fn get_rects_for_placeholders(&self) -> TextBoxes {
         TextBoxes::construct(|tb| unsafe {
-            sb::C_Paragraph_getRectsForPlaceholders(self.native_mut(), tb)
+            sb::C_Paragraph_getRectsForPlaceholders(self.native_mut_force(), tb)
         })
     }
 
-    pub fn get_glyph_position_at_coordinate(
-        &mut self,
-        p: impl Into<Point>,
-    ) -> PositionWithAffinity {
+    pub fn get_glyph_position_at_coordinate(&self, p: impl Into<Point>) -> PositionWithAffinity {
         let p = p.into();
         let mut r = Default::default();
-        unsafe { sb::C_Paragraph_getGlyphPositionAtCoordinate(self.native_mut(), p.x, p.y, &mut r) }
+        unsafe {
+            sb::C_Paragraph_getGlyphPositionAtCoordinate(self.native_mut_force(), p.x, p.y, &mut r)
+        }
         r
     }
 
-    pub fn get_word_boundary(&mut self, offset: u32) -> Range<usize> {
+    pub fn get_word_boundary(&self, offset: u32) -> Range<usize> {
         let mut range: [usize; 2] = Default::default();
-        unsafe { sb::C_Paragraph_getWordBoundary(self.native_mut(), offset, range.as_mut_ptr()) }
+        unsafe {
+            sb::C_Paragraph_getWordBoundary(self.native_mut_force(), offset, range.as_mut_ptr())
+        }
         range[0]..range[1]
     }
 
-    pub fn get_line_metrics(&mut self) -> LineMetricsVector {
+    pub fn get_line_metrics(&self) -> LineMetricsVector {
         Handle::<sb::LineMetricsVector>::construct(|lmv| unsafe {
-            sb::C_Paragraph_getLineMetrics(self.native_mut(), lmv)
+            sb::C_Paragraph_getLineMetrics(self.native_mut_force(), lmv)
         })
         .borrows(self)
     }
 
-    pub fn line_number(&mut self) -> usize {
-        unsafe { sb::C_Paragraph_lineNumber(self.native_mut()) }
+    pub fn line_number(&self) -> usize {
+        unsafe { sb::C_Paragraph_lineNumber(self.native_mut_force()) }
     }
 
-    pub fn mark_dirty(&mut self) {
-        unsafe { sb::C_Paragraph_markDirty(self.native_mut()) }
+    pub fn mark_dirty(&self) {
+        unsafe { sb::C_Paragraph_markDirty(self.native_mut_force()) }
     }
 }
 

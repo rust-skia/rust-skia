@@ -7,6 +7,7 @@ use std::slice;
 
 pub type Data = RCHandle<SkData>;
 unsafe impl Send for Data {}
+unsafe impl Sync for Data {}
 
 impl NativeRefCounted for SkData {
     fn _ref(&self) {
@@ -54,7 +55,7 @@ impl RCHandle<SkData> {
     }
 
     // TODO:
-    // pub fn writable_data(&mut self) -> &mut [u8]
+    // pub unsafe fn writable_data(&mut self) -> &mut [u8]
 
     pub fn copy_range(&self, offset: usize, buffer: &mut [u8]) -> &Self {
         buffer.copy_from_slice(&self.as_bytes()[offset..offset + buffer.len()]);
@@ -65,6 +66,13 @@ impl RCHandle<SkData> {
     pub fn new_copy(data: &[u8]) -> Self {
         Data::from_ptr(unsafe { sb::C_SkData_MakeWithCopy(data.as_ptr() as _, data.len()) })
             .unwrap()
+    }
+
+    /// Constructs Data from a given byte slice without copying it.
+    ///
+    /// Users must make sure that the underlying slice will outlive the lifetime of the Data.
+    pub unsafe fn new_bytes(data: &[u8]) -> Self {
+        Data::from_ptr(sb::C_SkData_MakeWithoutCopy(data.as_ptr() as _, data.len())).unwrap()
     }
 
     pub unsafe fn new_uninitialized(length: usize) -> Data {

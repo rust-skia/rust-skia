@@ -1,3 +1,9 @@
+#![allow(dead_code)]
+// cargo 1.45.1 / rustfmt 1.4.17-stable fails to process the relative path on Windows.
+#[rustfmt::skip]
+#[path = "../icon/renderer.rs"]
+mod renderer;
+
 #[cfg(target_os = "android")]
 fn main() {
     println!("This example is not supported on Android (https://github.com/rust-windowing/winit/issues/948).")
@@ -11,22 +17,22 @@ fn main() {
 #[cfg(all(not(target_os = "android"), feature = "gl"))]
 fn main() {
     use skia_safe::gpu::gl::FramebufferInfo;
-    use skia_safe::gpu::{BackendRenderTarget, Context, SurfaceOrigin};
-    use skia_safe::{Color, ColorType, Paint, Surface};
+    use skia_safe::gpu::{BackendRenderTarget, SurfaceOrigin};
+    use skia_safe::{Color, ColorType, Surface};
     use std::convert::TryInto;
 
     use glutin::event::{Event, KeyboardInput, VirtualKeyCode, WindowEvent};
     use glutin::event_loop::{ControlFlow, EventLoop};
     use glutin::window::WindowBuilder;
-    use glutin::{ContextBuilder, GlProfile};
-
+    use glutin::GlProfile;
+    type WindowedContext = glutin::ContextWrapper<glutin::PossiblyCurrent, glutin::window::Window>;
     use gl::types::*;
     use gl_rs as gl;
 
     let el = EventLoop::new();
     let wb = WindowBuilder::new().with_title("rust-skia-gl-window");
 
-    let cb = ContextBuilder::new()
+    let cb = glutin::ContextBuilder::new()
         .with_depth_buffer(0)
         .with_stencil_buffer(8)
         .with_pixel_format(24, 8)
@@ -45,40 +51,56 @@ fn main() {
 
     gl::load_with(|s| windowed_context.get_proc_address(&s));
 
-    let mut gr_context = Context::new_gl(None).unwrap();
+    let mut gr_context = skia_safe::gpu::Context::new_gl(None).unwrap();
 
-    let mut fboid: GLint = 0;
-    unsafe { gl::GetIntegerv(gl::FRAMEBUFFER_BINDING, &mut fboid) };
+    let fb_info = {
+        let mut fboid: GLint = 0;
+        unsafe { gl::GetIntegerv(gl::FRAMEBUFFER_BINDING, &mut fboid) };
 
-    let fb_info = FramebufferInfo {
-        fboid: fboid.try_into().unwrap(),
-        format: skia_safe::gpu::gl::Format::RGBA8.into(),
+        FramebufferInfo {
+            fboid: fboid.try_into().unwrap(),
+            format: skia_safe::gpu::gl::Format::RGBA8.into(),
+        }
     };
 
-    let size = windowed_context.window().inner_size();
-    let backend_render_target = BackendRenderTarget::new_gl(
-        (
-            size.width.try_into().unwrap(),
-            size.height.try_into().unwrap(),
-        ),
-        pixel_format.multisampling.map(|s| s.try_into().unwrap()),
-        pixel_format.stencil_bits.try_into().unwrap(),
-        fb_info,
-    );
-    let mut surface = Surface::from_backend_render_target(
-        &mut gr_context,
-        &backend_render_target,
-        SurfaceOrigin::BottomLeft,
-        ColorType::RGBA8888,
-        None,
-        None,
-    )
-    .unwrap();
+    windowed_context
+        .window()
+        .set_inner_size(glutin::dpi::Size::new(glutin::dpi::LogicalSize::new(
+            1024.0, 1024.0,
+        )));
 
-    let sf = windowed_context.window().scale_factor() as f32;
-    surface.canvas().scale((sf, sf));
+    fn create_surface(
+        windowed_context: &WindowedContext,
+        fb_info: &FramebufferInfo,
+        gr_context: &mut skia_safe::gpu::Context,
+    ) -> skia_safe::Surface {
+        let pixel_format = windowed_context.get_pixel_format();
+        let size = windowed_context.window().inner_size();
+        let backend_render_target = BackendRenderTarget::new_gl(
+            (
+                size.width.try_into().unwrap(),
+                size.height.try_into().unwrap(),
+            ),
+            pixel_format.multisampling.map(|s| s.try_into().unwrap()),
+            pixel_format.stencil_bits.try_into().unwrap(),
+            *fb_info,
+        );
+        Surface::from_backend_render_target(
+            gr_context,
+            &backend_render_target,
+            SurfaceOrigin::BottomLeft,
+            ColorType::RGBA8888,
+            None,
+            None,
+        )
+        .unwrap()
+    };
 
-    let mut x = 0;
+    let mut surface = create_surface(&windowed_context, &fb_info, &mut gr_context);
+    // let sf = windowed_context.window().scale_factor() as f32;
+    // surface.canvas().scale((sf, sf));
+
+    let mut frame = 0;
 
     el.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
@@ -87,7 +109,10 @@ fn main() {
         match event {
             Event::LoopDestroyed => {}
             Event::WindowEvent { event, .. } => match event {
-                WindowEvent::Resized(physical_size) => windowed_context.resize(physical_size),
+                WindowEvent::Resized(physical_size) => {
+                    surface = create_surface(&windowed_context, &fb_info, &mut gr_context);
+                    windowed_context.resize(physical_size)
+                }
                 WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
                 WindowEvent::KeyboardInput {
                     input:
@@ -103,7 +128,7 @@ fn main() {
                             *control_flow = ControlFlow::Exit;
                         }
                     }
-                    x += 1;
+                    frame += 1;
                     windowed_context.window().request_redraw();
                 }
                 _ => (),
@@ -111,11 +136,8 @@ fn main() {
             Event::RedrawRequested(_) => {
                 {
                     let canvas = surface.canvas();
-                    let mut paint = Paint::default();
-
                     canvas.clear(Color::WHITE);
-                    paint.set_color(Color::new(0xffff_0000));
-                    canvas.draw_line((x, 0), (x + 100, 100), &paint);
+                    renderer::render_frame(frame % 360, 12, 60, canvas);
                 }
                 surface.canvas().flush();
                 windowed_context.swap_buffers().unwrap();

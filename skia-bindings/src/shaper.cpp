@@ -18,7 +18,11 @@ extern "C" SkShaper* C_SkShaper_MakeShapeDontWrapOrReorder(SkFontMgr* fontMgr) {
 }
 
 extern "C" SkShaper* C_SkShaper_MakeCoreText() {
+#ifdef SK_SHAPER_CORETEXT_AVAILABLE
     return SkShaper::MakeCoreText().release();
+#else
+    return nullptr;
+#endif
 }
 
 extern "C" SkShaper* C_SkShaper_Make(SkFontMgr* fontMgr) {

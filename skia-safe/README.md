@@ -25,8 +25,22 @@ Skia-safe wraps most parts of the public Skia C++ APIs:
   - [x] Vulkan
   - [x] OpenGL
   - [x] Metal
+  - [x] Direct3D
+  - [ ] WebGPU [Dawn](https://dawn.googlesource.com/dawn/)
 
 Wrappers for functions that take callbacks and virtual classes are not supported right now. While we think they should be wrapped, the use cases related seem to be rather special, so we postponed that for now.
+
+## Codecs
+
+By default, full builds and prebuilt binaries of all platforms support the following image formats[^1]:
+
+| Decoding                       | Encoding  |
+| ------------------------------ | --------- |
+| BMP, GIF, ICO, JPEG, PNG, WBMP | JPEG, PNG |
+
+[^1]: skia-safe versions before 0.34.1 had no support for decoding GIF images.
+
+In addition to that, support for the WEBP image format can be enabled through the features `webp-encode`, `webp-decode`, and `webp` explained below.
 
 ## Features
 
@@ -54,6 +68,10 @@ Note that Vulkan drivers need to be available. On Windows, they are most likely 
 
 Support for Metal on macOS and iOS targets can be enabled by adding the feature `metal`.
 
+### `d3d`
+
+The Direct3D backend can be enabled for Windows targets by adding the feature `d3d`.
+
 ### `textlayout`
 
 The Cargo feature `textlayout` enables text shaping with Harfbuzz and ICU by providing bindings to the Skia modules skshaper and skparagraph. 
@@ -64,5 +82,29 @@ On **Windows**, the file `icudtl.dat` must be available in your executable's dir
 
 Simple examples of the skshaper and skparagraph module bindings can be found [in the skia-org example command line application](https://github.com/rust-skia/rust-skia/blob/master/skia-org/src/).
 
+### `webp-encode`, `webp-decode`, `webp`
 
+`webp-encode` enables support for encoding Skia bitmaps and images to the [WEBP](https://en.wikipedia.org/wiki/WebP) image format, and `web-decode` enables support for decoding WEBP to Skia bitmaps and images. The `webp` feature can be used as a shorthand to enable the `webp-encode` and `webp-decode` features.
+
+## Multithreading
+
+Conflicting with Rust philosophy, we've decided to fully support Skia's reference counting semantics, which means that all reference counted types can be cloned and modified from within the same thread. To send a reference counted type to another thread, its reference count must be 1, and must be wrapped with the `Sendable` type and then unwrapped in the receiving thread. The following functions support the sending mechanism:
+
+Every mutable reference counted type implements the following two functions:
+
+`can_send(&self) -> bool` 
+
+returns `true` if the handle can be sent to another thread right now.
+
+`wrap_send(self) -> Result<Sendable<Self>, Self>` 
+
+wraps the handle into a `Sendable` type that implements `Send`.
+
+And the `Sendable` type implements:
+
+`unwrap(self)`
+
+which unwraps the original handle.
+
+For more information about the various wrapper types, take a look [at the rust-skia wiki](https://github.com/rust-skia/rust-skia/wiki/Wrapper-Types).
 

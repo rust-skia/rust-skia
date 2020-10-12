@@ -52,7 +52,7 @@ impl<'a> Default for FontArguments<'a> {
     }
 }
 
-impl<'a> FontArguments<'a> {
+impl FontArguments<'_> {
     pub fn new() -> Self {
         Self::construct(|fa| unsafe {
             sb::C_SkFontArguments_construct(fa);
@@ -65,9 +65,10 @@ impl<'a> FontArguments<'a> {
     }
 
     // This function consumes self for it to be able to change its lifetime,
-    // because it borrows the coordinates referenced by FontArgumentsVariationPosition.
-    pub fn set_variation_design_position(mut self, position: VariationPosition) -> FontArguments /* not Self!! */
-    {
+    // because it borrows the coordinates referenced by VariationPosition.
+    //
+    // If we would return `Self`, position's Coordinates would not be borrowed.
+    pub fn set_variation_design_position(mut self, position: VariationPosition) -> FontArguments {
         let position = SkFontArguments_VariationPosition {
             coordinates: position.coordinates.native().as_ptr(),
             coordinateCount: position.coordinates.len().try_into().unwrap(),
@@ -112,9 +113,10 @@ fn access_coordinates() {
         value: 1.0,
     }]);
     let args = FontArguments::new();
-    let args = args.set_variation_design_position(VariationPosition {
+    let pos = VariationPosition {
         coordinates: coordinates.as_ref(),
-    });
+    };
+    let args = args.set_variation_design_position(pos);
     assert_eq!(args.variation_design_position().coordinates[0].value, 1.0);
     drop(args);
 }

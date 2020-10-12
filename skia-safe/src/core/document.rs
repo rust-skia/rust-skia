@@ -2,7 +2,7 @@ use crate::interop::DynamicMemoryWStream;
 use crate::prelude::*;
 use crate::{Canvas, Data, Rect, Size};
 use skia_bindings::{SkDocument, SkRefCntBase};
-use std::pin::Pin;
+use std::{pin::Pin, ptr};
 
 pub struct Document<State = state::Open> {
     // note: order matters here, first the document must be
@@ -19,6 +19,7 @@ impl NativeRefCountedBase for SkDocument {
 
 pub mod state {
     use skia_bindings::SkCanvas;
+    use std::ptr;
 
     /// Document is currently open. May contain several pages.
     pub struct Open {
@@ -27,7 +28,7 @@ pub mod state {
 
     /// Document is currently on a page and can be drawn onto.
     pub struct OnPage {
-        pub(crate) canvas: *mut SkCanvas,
+        pub(crate) canvas: ptr::NonNull<SkCanvas>,
         pub(crate) page: usize,
     }
 }
@@ -76,7 +77,7 @@ impl Document {
             stream: self.stream,
             document: self.document,
             state: state::OnPage {
-                canvas,
+                canvas: ptr::NonNull::new(canvas).unwrap(),
                 page: self.state.pages + 1,
             },
         } as _
@@ -100,7 +101,7 @@ impl Document<state::OnPage> {
 
     /// Borrows the canvas for the current page on the document.
     pub fn canvas(&mut self) -> &mut Canvas {
-        Canvas::borrow_from_native(unsafe { &mut *self.state.canvas })
+        Canvas::borrow_from_native(unsafe { self.state.canvas.as_mut() })
     }
 
     /// Ends the page.

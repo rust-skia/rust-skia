@@ -4,14 +4,14 @@ use skia_bindings as sb;
 use skia_bindings::SkImageFilter;
 
 impl RCHandle<SkImageFilter> {
-    pub fn compose(outer: ImageFilter, inner: ImageFilter) -> Option<Self> {
+    pub fn compose(outer: impl Into<ImageFilter>, inner: impl Into<ImageFilter>) -> Option<Self> {
         image_filters::compose(outer, inner)
     }
 }
 
 #[deprecated(since = "0.19.0", note = "use image_filters::compose")]
-pub fn new(outer: ImageFilter, inner: ImageFilter) -> Option<ImageFilter> {
+pub fn new(outer: impl Into<ImageFilter>, inner: impl Into<ImageFilter>) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
-        sb::C_SkComposeImageFilter_Make(outer.into_ptr(), inner.into_ptr())
+        sb::C_SkComposeImageFilter_Make(outer.into().into_ptr(), inner.into().into_ptr())
     })
 }

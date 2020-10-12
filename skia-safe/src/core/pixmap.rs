@@ -11,6 +11,8 @@ use std::os::raw;
 use std::{ptr, slice};
 
 pub type Pixmap = Handle<SkPixmap>;
+unsafe impl Send for Pixmap {}
+unsafe impl Sync for Pixmap {}
 
 impl NativeDrop for SkPixmap {
     fn drop(&mut self) {
@@ -41,9 +43,9 @@ impl Handle<SkPixmap> {
         assert!(pixels.len() >= height * row_bytes);
 
         let pm = Pixmap::from_native(SkPixmap {
-            fPixels: ptr::null(),
-            fRowBytes: 0,
-            fInfo: ImageInfo::new_unknown(None).native().clone(),
+            fPixels: pixels.as_ptr() as _,
+            fRowBytes: row_bytes,
+            fInfo: info.native().clone(),
         });
         pm.borrows(pixels)
     }

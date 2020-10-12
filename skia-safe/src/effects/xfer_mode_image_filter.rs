@@ -17,14 +17,14 @@ impl RCHandle<SkImageFilter> {
 #[deprecated(since = "0.19.0", note = "use image_filters::xfermode()")]
 pub fn new<'a>(
     blend_mode: BlendMode,
-    background: ImageFilter,
+    background: impl Into<ImageFilter>,
     foreground: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<Option<&'a CropRect>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
         sb::C_SkXfermodeImageFilter_Make(
             blend_mode,
-            background.into_ptr(),
+            background.into().into_ptr(),
             foreground.into().into_ptr_or_null(),
             crop_rect.into().native_ptr_or_null(),
         )

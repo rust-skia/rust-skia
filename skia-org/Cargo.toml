@@ -20,7 +20,9 @@ default = []
 gl = ["offscreen_gl_context", "sparkle", "skia-safe/gl"]
 vulkan = ["ash", "skia-safe/vulkan"]
 metal = ["metal-rs", "foreign-types", "cocoa", "objc", "skia-safe/metal"]
+d3d = ["skia-safe/d3d", "winapi", "wio"]
 textlayout = ["skia-safe/textlayout"]
+webp = ["skia-safe/webp"]
 
 [dependencies]
 skia-safe = { path = "../skia-safe" }
@@ -39,5 +41,8 @@ metal-rs = { package = "metal", version = "0.17.1", optional = true }
 # ... to access raw metal ptrs.
 foreign-types = { version = "0.3", optional = true }
 # ... for that NSAutoReleasePool to be able to free metal devices.
-cocoa = { version = "0.23", optional = true }
+cocoa = { version = "0.24", optional = true }
 objc = { version = "0.2.4", optional = true }
+# d3d
+winapi = { version = "0.3.9", optional = true, features = ["d3d12", "dxgi"] }
+wio = { version = "0.2.2", optional = true }

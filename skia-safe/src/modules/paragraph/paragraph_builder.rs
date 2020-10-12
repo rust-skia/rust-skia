@@ -4,6 +4,8 @@ use skia_bindings as sb;
 use std::os::raw;
 
 pub type ParagraphBuilder = RefHandle<sb::skia_textlayout_ParagraphBuilder>;
+unsafe impl Send for ParagraphBuilder {}
+unsafe impl Sync for ParagraphBuilder {}
 
 impl NativeDrop for sb::skia_textlayout_ParagraphBuilder {
     fn drop(&mut self) {
@@ -56,9 +58,9 @@ impl RefHandle<sb::skia_textlayout_ParagraphBuilder> {
         Paragraph::from_ptr(unsafe { sb::C_ParagraphBuilder_Build(self.native_mut()) }).unwrap()
     }
 
-    pub fn new(style: &ParagraphStyle, font_collection: FontCollection) -> Self {
+    pub fn new(style: &ParagraphStyle, font_collection: impl Into<FontCollection>) -> Self {
         Self::from_ptr(unsafe {
-            sb::C_ParagraphBuilder_make(style.native(), font_collection.into_ptr())
+            sb::C_ParagraphBuilder_make(style.native(), font_collection.into().into_ptr())
         })
         .unwrap()
     }

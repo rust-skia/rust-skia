@@ -9,6 +9,8 @@ use std::ffi::CStr;
 use std::slice;
 
 pub type Variable = Handle<SkRuntimeEffect_Variable>;
+unsafe impl Send for Variable {}
+unsafe impl Sync for Variable {}
 
 impl NativeDrop for SkRuntimeEffect_Variable {
     fn drop(&mut self) {
@@ -85,6 +87,8 @@ pub mod variable {
 }
 
 pub type Varying = Handle<SkRuntimeEffect_Varying>;
+unsafe impl Send for Varying {}
+unsafe impl Sync for Varying {}
 
 impl NativeDrop for SkRuntimeEffect_Varying {
     fn drop(&mut self) {
@@ -123,7 +127,7 @@ pub fn new(sksl: impl AsRef<str>) -> Result<RuntimeEffect, String> {
 impl RCHandle<SkRuntimeEffect> {
     pub fn make_shader<'a>(
         &mut self,
-        inputs: Data,
+        inputs: impl Into<Data>,
         children: impl IntoIterator<Item = Shader>,
         local_matrix: impl Into<Option<&'a Matrix>>,
         is_opaque: bool,
@@ -135,7 +139,7 @@ impl RCHandle<SkRuntimeEffect> {
         Shader::from_ptr(unsafe {
             sb::C_SkRuntimeEffect_makeShader(
                 self.native_mut(),
-                inputs.into_ptr(),
+                inputs.into().into_ptr(),
                 children.as_mut_ptr(),
                 children.len(),
                 local_matrix.into().native_ptr_or_null(),
@@ -144,29 +148,18 @@ impl RCHandle<SkRuntimeEffect> {
         })
     }
 
+    #[deprecated(since = "0.33.0", note = "removed without replacement")]
     pub fn make_color_filter_with_children(
         &mut self,
-        inputs: Data,
-        children: impl IntoIterator<Item = ColorFilter>,
-    ) -> Option<ColorFilter> {
-        let mut children: Vec<_> = children
-            .into_iter()
-            .map(|color_filter| color_filter.into_ptr())
-            .collect();
-
-        ColorFilter::from_ptr(unsafe {
-            sb::C_SkRuntimeEffect_makeColorFilter2(
-                self.native_mut(),
-                inputs.into_ptr(),
-                children.as_mut_ptr(),
-                children.len(),
-            )
-        })
+        _inputs: impl Into<Data>,
+        _children: impl IntoIterator<Item = ColorFilter>,
+    ) -> ! {
+        panic!("removed without replacement")
     }
 
-    pub fn make_color_filter(&mut self, inputs: Data) -> Option<ColorFilter> {
+    pub fn make_color_filter(&mut self, inputs: impl Into<Data>) -> Option<ColorFilter> {
         ColorFilter::from_ptr(unsafe {
-            sb::C_SkRuntimeEffect_makeColorFilter(self.native_mut(), inputs.into_ptr())
+            sb::C_SkRuntimeEffect_makeColorFilter(self.native_mut(), inputs.into().into_ptr())
         })
     }
 
