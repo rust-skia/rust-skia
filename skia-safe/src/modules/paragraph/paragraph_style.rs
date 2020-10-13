@@ -1,4 +1,4 @@
-use super::{FontFamilies, TextAlign, TextDirection, TextStyle};
+use super::{DrawOptions, FontFamilies, TextAlign, TextDirection, TextStyle};
 use crate::interop::{AsStr, FromStrs, SetStr};
 use crate::modules::paragraph::TextHeightBehavior;
 use crate::prelude::*;
@@ -36,7 +36,7 @@ impl Default for Handle<sb::skia_textlayout_StrutStyle> {
 
 impl Handle<sb::skia_textlayout_StrutStyle> {
     pub fn new() -> Self {
-        StrutStyle::from_native_c(unsafe { sb::skia_textlayout_StrutStyle::new() })
+        StrutStyle::construct(|ss| unsafe { sb::C_StrutStyle_Construct(ss) })
     }
 
     pub fn font_families(&self) -> FontFamilies {
@@ -141,7 +141,7 @@ impl Default for Handle<sb::skia_textlayout_ParagraphStyle> {
 
 impl Handle<sb::skia_textlayout_ParagraphStyle> {
     pub fn new() -> Self {
-        Self::from_native_c(unsafe { sb::skia_textlayout_ParagraphStyle::new() })
+        Self::construct(|ps| unsafe { sb::C_ParagraphStyle_Construct(ps) })
     }
 
     pub fn strut_style(&self) -> &StrutStyle {
@@ -195,6 +195,8 @@ impl Handle<sb::skia_textlayout_ParagraphStyle> {
         self
     }
 
+    // TODO: Support u16 ellipsis, but why? Doesn't SkString support UTF-8?
+
     pub fn ellipsis(&self) -> &str {
         self.native().fEllipsis.as_str()
     }
@@ -227,7 +229,7 @@ impl Handle<sb::skia_textlayout_ParagraphStyle> {
     }
 
     pub fn ellipsized(&self) -> bool {
-        !self.native().fEllipsis.as_str().is_empty()
+        unsafe { sb::C_ParagraphStyle_ellipsized(self.native()) }
     }
 
     pub fn effective_align(&self) -> TextAlign {
@@ -240,6 +242,15 @@ impl Handle<sb::skia_textlayout_ParagraphStyle> {
 
     pub fn turn_hinting_off(&mut self) -> &mut Self {
         self.native_mut().fHintingIsOn = false;
+        self
+    }
+
+    pub fn draw_options(&self) -> DrawOptions {
+        self.native().fDrawingOptions
+    }
+
+    pub fn set_draw_options(&mut self, value: DrawOptions) -> &mut Self {
+        self.native_mut().fDrawingOptions = value;
         self
     }
 }

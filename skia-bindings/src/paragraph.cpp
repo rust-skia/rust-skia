@@ -118,6 +118,10 @@ extern "C" {
 //
 
 extern "C" {
+    void C_StrutStyle_Construct(StrutStyle* uninitialized) {
+        new(uninitialized) StrutStyle();
+    }
+
     void C_StrutStyle_CopyConstruct(StrutStyle* uninitialized, const StrutStyle* other) {
         new(uninitialized) StrutStyle(*other);
     }
@@ -142,6 +146,10 @@ extern "C" {
 }
 
 extern "C" {
+    void C_ParagraphStyle_Construct(ParagraphStyle* uninitialized) {
+        new(uninitialized) ParagraphStyle();
+    }
+
     void C_ParagraphStyle_CopyConstruct(ParagraphStyle* uninitialized, const ParagraphStyle* other) {
         new(uninitialized) ParagraphStyle(*other);
     }
@@ -152,6 +160,10 @@ extern "C" {
 
     bool C_ParagraphStyle_Equals(const ParagraphStyle* left, const ParagraphStyle* right) {
         return *left == *right;
+    }
+
+    bool C_ParagraphStyle_ellipsized(const ParagraphStyle* self) {
+        return self->ellipsized();
     }
 }
 
