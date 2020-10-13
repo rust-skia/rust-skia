@@ -59,6 +59,7 @@ impl DrawingDriver for D3D {
             adapter,
             device,
             queue,
+            memory_allocator: None,
             protected_context: Protected::No,
         };
 
