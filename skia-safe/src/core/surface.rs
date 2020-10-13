@@ -178,7 +178,7 @@ impl RCHandle<SkSurface> {
         color_space: impl Into<Option<crate::ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
-        self.from_mtk_view(
+        Self::from_mtk_view(
             context,
             mtk_view,
             origin,
