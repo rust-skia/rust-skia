@@ -111,19 +111,20 @@ impl Handle<sb::skia_textlayout_StrutStyle> {
     }
 }
 
-pub type ParagraphStyle = Handle<sb::skia_textlayout_ParagraphStyle>;
+// Can't use Handle<> here, std::u16string maintains an interior pointer.
+pub type ParagraphStyle = RefHandle<sb::skia_textlayout_ParagraphStyle>;
 unsafe impl Send for ParagraphStyle {}
 unsafe impl Sync for ParagraphStyle {}
 
 impl NativeDrop for sb::skia_textlayout_ParagraphStyle {
     fn drop(&mut self) {
-        unsafe { sb::C_ParagraphStyle_destruct(self) }
+        unsafe { sb::C_ParagraphStyle_delete(self) }
     }
 }
 
-impl NativeClone for sb::skia_textlayout_ParagraphStyle {
+impl Clone for ParagraphStyle {
     fn clone(&self) -> Self {
-        construct(|ps| unsafe { sb::C_ParagraphStyle_CopyConstruct(ps, self) })
+        Self::from_ptr(unsafe { sb::C_ParagraphStyle_NewCopy(self.native()) }).unwrap()
     }
 }
 
@@ -133,15 +134,15 @@ impl NativePartialEq for sb::skia_textlayout_ParagraphStyle {
     }
 }
 
-impl Default for Handle<sb::skia_textlayout_ParagraphStyle> {
+impl Default for RefHandle<sb::skia_textlayout_ParagraphStyle> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl Handle<sb::skia_textlayout_ParagraphStyle> {
+impl RefHandle<sb::skia_textlayout_ParagraphStyle> {
     pub fn new() -> Self {
-        Self::construct(|ps| unsafe { sb::C_ParagraphStyle_Construct(ps) })
+        Self::from_ptr(unsafe { sb::C_ParagraphStyle_New() }).unwrap()
     }
 
     pub fn strut_style(&self) -> &StrutStyle {

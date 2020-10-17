@@ -146,16 +146,16 @@ extern "C" {
 }
 
 extern "C" {
-    void C_ParagraphStyle_Construct(ParagraphStyle* uninitialized) {
-        new(uninitialized) ParagraphStyle();
+    ParagraphStyle* C_ParagraphStyle_New() {
+        return new ParagraphStyle();
     }
 
-    void C_ParagraphStyle_CopyConstruct(ParagraphStyle* uninitialized, const ParagraphStyle* other) {
-        new(uninitialized) ParagraphStyle(*other);
+    ParagraphStyle* C_ParagraphStyle_NewCopy(const ParagraphStyle* other) {
+        return new ParagraphStyle(*other);
     }
 
-    void C_ParagraphStyle_destruct(ParagraphStyle* self) {
-        self->~ParagraphStyle();
+    void C_ParagraphStyle_delete(ParagraphStyle* self) {
+        delete self;
     }
 
     bool C_ParagraphStyle_Equals(const ParagraphStyle* left, const ParagraphStyle* right) {
