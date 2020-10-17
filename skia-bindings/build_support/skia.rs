@@ -660,6 +660,7 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         .raw_line("pub enum SkVerticesPriv {}")
         .blacklist_type("SkVerticesPriv")
         .blacklist_function("SkVertices_priv.*")
+        .blacklist_function("std::bitset_flip")
         // Vulkan reexports that got swallowed by making them opaque.
         // (these can not be whitelisted by a extern "C" function)
         .whitelist_type("VkPhysicalDeviceFeatures")
