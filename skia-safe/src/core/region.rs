@@ -37,11 +37,11 @@ fn test_region_op_naming() {
 
 impl Handle<SkRegion> {
     pub fn new() -> Region {
-        Self::from_native(unsafe { SkRegion::new() })
+        Self::from_native_c(unsafe { SkRegion::new() })
     }
 
     pub fn from_rect(rect: impl AsRef<IRect>) -> Region {
-        Self::from_native(unsafe { SkRegion::new2(rect.as_ref().native()) })
+        Self::from_native_c(unsafe { SkRegion::new2(rect.as_ref().native()) })
     }
 
     pub fn set(&mut self, src: &Region) -> bool {
@@ -348,7 +348,7 @@ impl<'a> Iterator<'a> {
     }
 
     pub fn new(region: &'a Region) -> Iterator<'a> {
-        Iterator::from_native(unsafe { SkRegion_Iterator::new(region.native()) })
+        Iterator::from_native_c(unsafe { SkRegion_Iterator::new(region.native()) })
     }
 
     pub fn rewind(&mut self) -> bool {
@@ -429,7 +429,7 @@ impl<'a> Drop for Cliperator<'a> {
 
 impl<'a> Cliperator<'a> {
     pub fn new(region: &'a Region, clip: impl AsRef<IRect>) -> Cliperator<'a> {
-        Cliperator::from_native(unsafe {
+        Cliperator::from_native_c(unsafe {
             SkRegion_Cliperator::new(region.native(), clip.as_ref().native())
         })
     }
@@ -477,7 +477,7 @@ impl<'a> Drop for Spanerator<'a> {
 
 impl<'a> Spanerator<'a> {
     pub fn new(region: &'a Region, y: i32, left: i32, right: i32) -> Spanerator<'a> {
-        Spanerator::from_native(unsafe {
+        Spanerator::from_native_c(unsafe {
             SkRegion_Spanerator::new(region.native(), y, left, right)
         })
     }

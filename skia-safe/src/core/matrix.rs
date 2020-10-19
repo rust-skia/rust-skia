@@ -787,7 +787,7 @@ impl IndexSet for Matrix {}
 pub const IDENTITY: Matrix = Matrix::new_identity();
 
 lazy_static! {
-    static ref INVALID: Matrix = Matrix::from_native(unsafe { *SkMatrix::InvalidMatrix() });
+    static ref INVALID: Matrix = Matrix::from_native_c(unsafe { sb::C_SkMatrix_InvalidMatrix() });
 }
 
 #[test]

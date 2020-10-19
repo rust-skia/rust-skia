@@ -147,7 +147,7 @@ impl NativeDrop for SkTextBlobBuilder {
 
 impl Handle<SkTextBlobBuilder> {
     pub fn new() -> Self {
-        Self::from_native(unsafe { SkTextBlobBuilder::new() })
+        Self::from_native_c(unsafe { SkTextBlobBuilder::new() })
     }
 
     pub fn make(&mut self) -> Option<TextBlob> {
@@ -246,7 +246,8 @@ impl TextBlobRun<'_> {
 
 impl<'a> Borrows<'a, Handle<SkTextBlob_Iter>> {
     pub fn new(text_blob: &'a TextBlob) -> Self {
-        Handle::from_native(unsafe { SkTextBlob_Iter::new(text_blob.native()) }).borrows(text_blob)
+        Handle::from_native_c(unsafe { SkTextBlob_Iter::new(text_blob.native()) })
+            .borrows(text_blob)
     }
 }
 

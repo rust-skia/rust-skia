@@ -42,7 +42,7 @@ impl BitOr for Color {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        Color::from_native(self.native() | rhs.native())
+        Color::from_native_c(self.native() | rhs.native())
     }
 }
 
@@ -50,7 +50,7 @@ impl BitAnd for Color {
     type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self::Output {
-        Color::from_native(self.native() & rhs.native())
+        Color::from_native_c(self.native() & rhs.native())
     }
 }
 
@@ -58,7 +58,7 @@ impl BitOr<u32> for Color {
     type Output = Self;
 
     fn bitor(self, rhs: u32) -> Self::Output {
-        self | Color::from_native(rhs)
+        self | Color::from_native_c(rhs)
     }
 }
 
@@ -66,7 +66,7 @@ impl BitAnd<u32> for Color {
     type Output = Self;
 
     fn bitand(self, rhs: u32) -> Self::Output {
-        self & (Color::from_native(rhs))
+        self & (Color::from_native_c(rhs))
     }
 }
 
@@ -175,7 +175,9 @@ impl From<(f32, f32, f32)> for HSV {
 
 impl HSV {
     pub fn to_color(&self, alpha: u8) -> Color {
-        Color::from_native(unsafe { SkHSVToColor(alpha.into(), [self.h, self.s, self.v].as_ptr()) })
+        Color::from_native_c(unsafe {
+            SkHSVToColor(alpha.into(), [self.h, self.s, self.v].as_ptr())
+        })
     }
 }
 

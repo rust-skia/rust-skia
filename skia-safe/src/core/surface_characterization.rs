@@ -29,9 +29,9 @@ impl NativePartialEq for SkSurfaceCharacterization {
 
 impl Default for Handle<SkSurfaceCharacterization> {
     fn default() -> Self {
-        SurfaceCharacterization::from_native(construct(|sc| unsafe {
+        SurfaceCharacterization::construct(|sc| unsafe {
             sb::C_SkSurfaceCharacterization_Construct(sc)
-        }))
+        })
     }
 }
 
@@ -41,7 +41,9 @@ impl Handle<SkSurfaceCharacterization> {
     #[cfg(feature = "gpu")]
     pub fn resized(&self, size: impl Into<crate::ISize>) -> Self {
         let size = size.into();
-        Self::from_native(unsafe { self.native().createResized(size.width, size.height) })
+        Self::from_native_c(unsafe {
+            sb::C_SkSurfaceCharacterization_createResized(self.native(), size.width, size.height)
+        })
     }
 
     pub fn with_color_space(&self, color_space: impl Into<Option<ColorSpace>>) -> Self {
@@ -62,15 +64,20 @@ impl Handle<SkSurfaceCharacterization> {
         color_type: crate::ColorType,
         backend_format: &gpu::BackendFormat,
     ) -> Self {
-        Self::from_native(unsafe {
-            self.native()
-                .createBackendFormat(color_type.into_native(), backend_format.native())
+        Self::from_native_c(unsafe {
+            sb::C_SkSurfaceCharacterization_createBackendFormat(
+                self.native(),
+                color_type.into_native(),
+                backend_format.native(),
+            )
         })
     }
 
     #[cfg(feature = "gl")]
     pub fn with_fbo0(&self, uses_glfbo0: bool) -> Self {
-        Self::from_native(unsafe { self.native().createFBO0(uses_glfbo0) })
+        Self::from_native_c(unsafe {
+            sb::C_SkSurfaceCharacterization_createFBO0(self.native(), uses_glfbo0)
+        })
     }
 }
 

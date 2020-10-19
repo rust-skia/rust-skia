@@ -93,7 +93,7 @@ impl Attribute<'_> {
             .map(|m| m.as_ptr())
             .unwrap_or(ptr::null());
 
-        Attribute::from_native(unsafe {
+        Attribute::from_native_c(unsafe {
             SkVertices_Attribute::new(
                 ty.into_native(),
                 usage.into().unwrap_or(AttributeUsage::Raw),
@@ -308,7 +308,7 @@ impl Handle<SkVertices_Builder> {
         index_count: usize,
         flags: BuilderFlags,
     ) -> Builder {
-        Self::from_native(unsafe {
+        Self::from_native_c(unsafe {
             SkVertices_Builder::new(
                 mode,
                 vertex_count.try_into().unwrap(),

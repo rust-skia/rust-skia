@@ -19,16 +19,21 @@ fn test_crop_rect_layout() {
 
 impl Default for CropRect {
     fn default() -> Self {
-        CropRect::from_native(SkImageFilter_CropRect {
+        CropRect::from_native_c(SkImageFilter_CropRect {
             fRect: Rect::default().into_native(),
             fFlags: 0,
         })
     }
 }
 
+#[test]
+fn test_crop_rect_default() {
+    let _ = CropRect::default();
+}
+
 impl CropRect {
     pub fn new(rect: impl AsRef<Rect>, flags: impl Into<Option<crop_rect::CropEdge>>) -> Self {
-        CropRect::from_native(SkImageFilter_CropRect {
+        CropRect::from_native_c(SkImageFilter_CropRect {
             fRect: rect.as_ref().into_native(),
             fFlags: flags.into().unwrap_or(crop_rect::CropEdge::HAS_ALL).bits(),
         })
@@ -112,8 +117,9 @@ impl RCHandle<SkImageFilter> {
         map_direction: MapDirection,
         input_rect: impl Into<Option<&'a IRect>>,
     ) -> IRect {
-        IRect::from_native(unsafe {
-            self.native().filterBounds(
+        IRect::from_native_c(unsafe {
+            sb::C_SkImageFilter_filterBounds(
+                self.native(),
                 src.as_ref().native(),
                 ctm.native(),
                 map_direction,
@@ -165,7 +171,7 @@ impl RCHandle<SkImageFilter> {
     }
 
     pub fn compute_fast_bounds(&self, bounds: impl AsRef<Rect>) -> Rect {
-        Rect::from_native(unsafe {
+        Rect::from_native_c(unsafe {
             sb::C_SkImageFilter_computeFastBounds(self.native(), bounds.as_ref().native())
         })
     }

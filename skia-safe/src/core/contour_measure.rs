@@ -112,7 +112,7 @@ impl Handle<SkContourMeasureIter> {
         force_closed: bool,
         res_scale: impl Into<Option<scalar>>,
     ) -> Self {
-        Self::from_native(unsafe {
+        Self::from_native_c(unsafe {
             SkContourMeasureIter::new1(path.native(), force_closed, res_scale.into().unwrap_or(1.0))
         })
     }

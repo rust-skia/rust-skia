@@ -316,10 +316,10 @@ impl RCHandle<SkSurface> {
             sb::C_SkSurface_getBackendRenderTarget(
                 self.native_mut(),
                 handle_access,
-                &mut backend_render_target as _,
+                &mut backend_render_target,
             );
 
-            gpu::BackendRenderTarget::from_native_if_valid(backend_render_target)
+            gpu::BackendRenderTarget::from_native_c_if_valid(backend_render_target)
         }
     }
 

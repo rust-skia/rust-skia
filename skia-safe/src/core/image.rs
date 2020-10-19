@@ -415,7 +415,7 @@ impl RCHandle<SkImage> {
     }
 
     pub fn color_type(&self) -> ColorType {
-        ColorType::from_native(unsafe { self.native().colorType() })
+        ColorType::from_native_c(unsafe { self.native().colorType() })
     }
 
     pub fn color_space(&self) -> ColorSpace {
@@ -562,13 +562,19 @@ impl RCHandle<SkImage> {
     pub fn backend_texture(
         &self,
         flush_pending_gr_context_io: bool,
-    ) -> (gpu::BackendTexture, gpu::SurfaceOrigin) {
+    ) -> Option<(gpu::BackendTexture, gpu::SurfaceOrigin)> {
         let mut origin = gpu::SurfaceOrigin::TopLeft;
-        let texture = gpu::BackendTexture::from_native(unsafe {
-            self.native()
-                .getBackendTexture(flush_pending_gr_context_io, &mut origin)
-        });
-        (texture, origin)
+        let mut backend_texture = unsafe { sb::GrBackendTexture::new() };
+        unsafe {
+            sb::C_SkImage_getBackendTexture(
+                self.native(),
+                flush_pending_gr_context_io,
+                &mut origin,
+                &mut backend_texture,
+            );
+            gpu::BackendTexture::from_native_if_valid(backend_texture)
+        }
+        .map(|texture| (texture, origin))
     }
 
     pub fn read_pixels<P>(

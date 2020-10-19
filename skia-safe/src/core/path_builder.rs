@@ -20,7 +20,7 @@ impl NativeDrop for SkPathBuilder {
 
 impl PathBuilder {
     pub fn new() -> Self {
-        Self::from_native(unsafe { SkPathBuilder::new() })
+        Self::from_native_c(unsafe { SkPathBuilder::new() })
     }
 
     pub fn snapshot(&mut self) -> Path {

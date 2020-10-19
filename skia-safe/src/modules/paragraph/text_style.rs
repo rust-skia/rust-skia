@@ -176,7 +176,7 @@ impl Handle<sb::skia_textlayout_TextStyle> {
     }
 
     pub fn to_placeholder(&self) -> Self {
-        TextStyle::from_native(unsafe { sb::skia_textlayout_TextStyle::new(self.native(), true) })
+        TextStyle::from_native_c(unsafe { sb::skia_textlayout_TextStyle::new(self.native(), true) })
     }
 
     pub fn equals(&self, other: &TextStyle) -> bool {
@@ -192,7 +192,7 @@ impl Handle<sb::skia_textlayout_TextStyle> {
     }
 
     pub fn color(&self) -> Color {
-        Color::from_native(self.native().fColor)
+        Color::from_native_c(self.native().fColor)
     }
 
     pub fn set_color(&mut self, color: impl Into<Color>) -> &mut Self {
@@ -239,7 +239,7 @@ impl Handle<sb::skia_textlayout_TextStyle> {
     }
 
     pub fn font_style(&self) -> FontStyle {
-        FontStyle::from_native(self.native().fFontStyle)
+        FontStyle::from_native_c(self.native().fFontStyle)
     }
 
     pub fn set_font_style(&mut self, font_style: FontStyle) -> &mut Self {

@@ -25,7 +25,7 @@ pub mod pdf {
 
     impl Default for AttributeList {
         fn default() -> Self {
-            AttributeList::from_native(unsafe { SkPDF_AttributeList::new() })
+            AttributeList::from_native_c(unsafe { SkPDF_AttributeList::new() })
         }
     }
 

@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use crate::{scalar, Point, Scalar};
+use skia_bindings as sb;
 use skia_bindings::SkCubicMap;
 
 #[derive(Copy, Clone)]
@@ -15,7 +16,7 @@ fn test_cubic_map_layout() {
 
 impl CubicMap {
     pub fn new(p1: impl Into<Point>, p2: impl Into<Point>) -> Self {
-        Self::from_native(unsafe {
+        Self::from_native_c(unsafe {
             SkCubicMap::new(p1.into().into_native(), p2.into().into_native())
         })
     }
@@ -31,6 +32,17 @@ impl CubicMap {
     }
 
     pub fn compute_from_t(&self, t: f32) -> Point {
-        Point::from_native(unsafe { self.native().computeFromT(t) })
+        Point::from_native_c(unsafe { sb::C_SkCubicMap_computeFromT(self.native(), t) })
     }
+}
+
+#[test]
+fn construct_cubic_map() {
+    let _ = CubicMap::new((10, 10), (100, 100));
+}
+
+#[test]
+fn test_compute_from_t() {
+    let cm = CubicMap::new((10, 10), (100, 100));
+    let _p = cm.compute_from_t(0.5);
 }

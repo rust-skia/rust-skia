@@ -42,7 +42,7 @@ impl RCHandle<SkTypeface> {
     }
 
     pub fn font_style(&self) -> FontStyle {
-        FontStyle::from_native(self.native().fStyle)
+        FontStyle::from_native_c(self.native().fStyle)
     }
 
     pub fn is_bold(&self) -> bool {
@@ -235,7 +235,7 @@ impl RCHandle<SkTypeface> {
     // TODO: createScalerContext()
 
     pub fn bounds(&self) -> Rect {
-        Rect::from_native(unsafe { self.native().getBounds() })
+        Rect::from_native_c(unsafe { sb::C_SkTypeface_getBounds(self.native()) })
     }
 }
 
