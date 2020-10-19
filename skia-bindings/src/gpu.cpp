@@ -100,19 +100,17 @@ extern "C" void C_SkSurface_getBackendRenderTarget(
 // core/SkSurfaceCharacterization.h
 //
 
-extern "C" SkSurfaceCharacterization C_SkSurfaceCharacterization_createResized(
-    const SkSurfaceCharacterization* self, int width, int height) {
-    return self->createResized(width, height);
+extern "C" void C_SkSurfaceCharacterization_createResized(
+    const SkSurfaceCharacterization* self, int width, int height, SkSurfaceCharacterization* uninitialized) {
+    new(uninitialized) SkSurfaceCharacterization(self->createResized(width, height));
 }
 
-extern "C" SkSurfaceCharacterization C_SkSurfaceCharacterization_createBackendFormat(
-    const SkSurfaceCharacterization* self, SkColorType colorType, const GrBackendFormat* backendFormat) {
-    return self->createBackendFormat(colorType, *backendFormat);
-}
-
-extern "C" SkSurfaceCharacterization C_SkSurfaceCharacterization_createFBO0(
-    const SkSurfaceCharacterization* self, bool usesGLFBO0) {
-    return self->createFBO0(usesGLFBO0);
+extern "C" void C_SkSurfaceCharacterization_createBackendFormat(
+    const SkSurfaceCharacterization* self, 
+    SkColorType colorType, 
+    const GrBackendFormat* backendFormat,
+    SkSurfaceCharacterization* uninitialized) {
+    new(uninitialized) SkSurfaceCharacterization(self->createBackendFormat(colorType, *backendFormat));
 }
 
 extern "C" const SkImageInfo* C_SkSurfaceCharacterization_imageInfo(const SkSurfaceCharacterization* self) {

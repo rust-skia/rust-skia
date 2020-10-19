@@ -892,8 +892,8 @@ extern "C" bool C_SkMatrix_isFinite(const SkMatrix* self) {
     return self->isFinite();
 }
 
-extern "C" SkMatrix C_SkMatrix_InvalidMatrix() {
-    return SkMatrix::InvalidMatrix();
+extern "C" const SkMatrix* C_SkMatrix_InvalidMatrix() {
+    return &SkMatrix::InvalidMatrix();
 }
 
 extern "C" void C_SkMatrix_normalizePerspective(SkMatrix* self) {

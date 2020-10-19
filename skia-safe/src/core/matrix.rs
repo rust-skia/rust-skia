@@ -749,7 +749,7 @@ impl Matrix {
     }
 
     pub fn invalid_matrix() -> &'static Matrix {
-        &INVALID
+        Self::from_native_ref(unsafe { &*sb::C_SkMatrix_InvalidMatrix() })
     }
 
     pub fn concat(a: &Matrix, b: &Matrix) -> Matrix {
@@ -785,10 +785,6 @@ impl IndexGet for Matrix {}
 impl IndexSet for Matrix {}
 
 pub const IDENTITY: Matrix = Matrix::new_identity();
-
-lazy_static! {
-    static ref INVALID: Matrix = Matrix::from_native_c(unsafe { sb::C_SkMatrix_InvalidMatrix() });
-}
 
 #[test]
 fn test_get_set_trait_compilation() {

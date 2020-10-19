@@ -41,8 +41,13 @@ impl Handle<SkSurfaceCharacterization> {
     #[cfg(feature = "gpu")]
     pub fn resized(&self, size: impl Into<crate::ISize>) -> Self {
         let size = size.into();
-        Self::from_native_c(unsafe {
-            sb::C_SkSurfaceCharacterization_createResized(self.native(), size.width, size.height)
+        Self::construct(|sc| unsafe {
+            sb::C_SkSurfaceCharacterization_createResized(
+                self.native(),
+                size.width,
+                size.height,
+                sc,
+            )
         })
     }
 
@@ -64,19 +69,20 @@ impl Handle<SkSurfaceCharacterization> {
         color_type: crate::ColorType,
         backend_format: &gpu::BackendFormat,
     ) -> Self {
-        Self::from_native_c(unsafe {
+        Self::construct(|sc| unsafe {
             sb::C_SkSurfaceCharacterization_createBackendFormat(
                 self.native(),
                 color_type.into_native(),
                 backend_format.native(),
+                sc,
             )
         })
     }
 
     #[cfg(feature = "gl")]
     pub fn with_fbo0(&self, uses_glfbo0: bool) -> Self {
-        Self::from_native_c(unsafe {
-            sb::C_SkSurfaceCharacterization_createFBO0(self.native(), uses_glfbo0)
+        Self::construct(|sc| unsafe {
+            sb::C_SkSurfaceCharacterization_createFBO0(self.native(), uses_glfbo0, sc)
         })
     }
 }
