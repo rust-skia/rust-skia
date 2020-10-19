@@ -15,7 +15,7 @@ impl NativeDrop for SkCustomTypefaceBuilder {
 
 impl Handle<SkCustomTypefaceBuilder> {
     pub fn new() -> Self {
-        Self::from_native(unsafe { SkCustomTypefaceBuilder::new() })
+        Self::from_native_c(unsafe { SkCustomTypefaceBuilder::new() })
     }
 
     pub fn set_glyph<'a>(

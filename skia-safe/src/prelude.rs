@@ -242,8 +242,7 @@ impl<N: NativeDrop> AsRef<Handle<N>> for Handle<N> {
 
 impl<N: NativeDrop> Handle<N> {
     /// Wrap a native instance into a handle.
-    /// TODO: rename to wrap_native() and mark as unsafe.
-    pub(crate) fn from_native(n: N) -> Self {
+    pub(crate) fn from_native_c(n: N) -> Self {
         Handle(n, PhantomData)
     }
 
@@ -262,7 +261,7 @@ impl<N: NativeDrop> Handle<N> {
     /// function that expects a pointer that points to
     /// uninitialized memory of the native type.
     pub(crate) fn construct(construct: impl FnOnce(*mut N)) -> Self {
-        Self::from_native(self::construct(construct))
+        Self::from_native_c(self::construct(construct))
     }
 
     /// Replaces the native instance with the one from this Handle, and
@@ -317,7 +316,7 @@ impl<N: NativeDrop> NativeAccess<N> for Handle<N> {
 
 impl<N: NativeDrop + NativeClone> Clone for Handle<N> {
     fn clone(&self) -> Self {
-        Self::from_native(self.0.clone())
+        Self::from_native_c(self.0.clone())
     }
 }
 
@@ -655,7 +654,10 @@ pub trait NativeTransmutable<NT: Sized>: Sized {
     }
 
     /// Copies the native value to an equivalent Rust value.
-    fn from_native(nt: NT) -> Self {
+    ///
+    /// The `_c` suffix is to remind callers that functions that return a native value from a C++
+    /// ABI can't be used. For example, C++ member functions must be wrapped in a extern "C" function.
+    fn from_native_c(nt: NT) -> Self {
         let r = unsafe { mem::transmute_copy::<NT, Self>(&nt) };
         // don't drop, the Rust type takes over.
         mem::forget(nt);
@@ -689,7 +691,7 @@ pub trait NativeTransmutable<NT: Sized>: Sized {
     }
 
     fn construct(construct: impl FnOnce(*mut NT)) -> Self {
-        Self::from_native(self::construct(construct))
+        Self::from_native_c(self::construct(construct))
     }
 }
 

@@ -6,12 +6,22 @@
     #define SK_GL
 #endif
 
+#include "include/core/SkSurfaceCharacterization.h"
 #include "include/gpu/GrContext.h"
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/gl/GrGLExtensions.h"
 #include "include/gpu/gl/GrGLInterface.h"
 #include "include/gpu/gl/GrGLAssembleInterface.h"
 #include "src/gpu/gl/GrGLDefines.h"
+
+// core/SurfaceCharacterization.h
+
+extern "C" void C_SkSurfaceCharacterization_createFBO0(
+    const SkSurfaceCharacterization* self, 
+    bool usesGLFBO0, 
+    SkSurfaceCharacterization* uninitialized) {
+    new(uninitialized) SkSurfaceCharacterization(self->createFBO0(usesGLFBO0));
+}
 
 //
 // GrGLTextureInfo

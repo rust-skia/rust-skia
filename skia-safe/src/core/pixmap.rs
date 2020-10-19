@@ -22,7 +22,7 @@ impl NativeDrop for SkPixmap {
 
 impl Default for Handle<SkPixmap> {
     fn default() -> Self {
-        Pixmap::from_native(SkPixmap {
+        Pixmap::from_native_c(SkPixmap {
             fPixels: ptr::null(),
             fRowBytes: 0,
             fInfo: construct(|ii| unsafe { sb::C_SkImageInfo_Construct(ii) }),
@@ -42,7 +42,7 @@ impl Handle<SkPixmap> {
         assert!(row_bytes >= width * info.bytes_per_pixel());
         assert!(pixels.len() >= height * row_bytes);
 
-        let pm = Pixmap::from_native(SkPixmap {
+        let pm = Pixmap::from_native_c(SkPixmap {
             fPixels: pixels.as_ptr() as _,
             fRowBytes: row_bytes,
             fInfo: info.native().clone(),
@@ -136,7 +136,7 @@ impl Handle<SkPixmap> {
     pub fn get_color(&self, p: impl Into<IPoint>) -> Color {
         let p = p.into();
         self.assert_pixel_exists(p);
-        Color::from_native(unsafe { self.native().getColor(p.x, p.y) })
+        Color::from_native_c(unsafe { self.native().getColor(p.x, p.y) })
     }
 
     pub fn get_alpha_f(&self, p: impl Into<IPoint>) -> f32 {

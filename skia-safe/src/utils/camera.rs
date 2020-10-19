@@ -24,7 +24,7 @@ fn test_patch_3d_layout() {
 
 impl Default for Patch3D {
     fn default() -> Self {
-        Patch3D::from_native(unsafe { SkPatch3D::new() })
+        Patch3D::from_native_c(unsafe { SkPatch3D::new() })
     }
 }
 
@@ -69,7 +69,7 @@ fn test_camera_3d_layout() {
 
 impl Default for Camera3D {
     fn default() -> Self {
-        Camera3D::from_native(unsafe { SkCamera3D::new() })
+        Camera3D::from_native_c(unsafe { SkCamera3D::new() })
     }
 }
 

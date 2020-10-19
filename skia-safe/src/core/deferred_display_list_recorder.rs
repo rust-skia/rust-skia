@@ -13,7 +13,7 @@ impl NativeDrop for SkDeferredDisplayListRecorder {
 
 impl Handle<SkDeferredDisplayListRecorder> {
     pub fn new(characterization: &SurfaceCharacterization) -> Self {
-        DeferredDisplayListRecorder::from_native(unsafe {
+        DeferredDisplayListRecorder::from_native_c(unsafe {
             SkDeferredDisplayListRecorder::new(characterization.native())
         })
     }

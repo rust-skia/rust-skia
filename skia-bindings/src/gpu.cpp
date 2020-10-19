@@ -100,6 +100,19 @@ extern "C" void C_SkSurface_getBackendRenderTarget(
 // core/SkSurfaceCharacterization.h
 //
 
+extern "C" void C_SkSurfaceCharacterization_createResized(
+    const SkSurfaceCharacterization* self, int width, int height, SkSurfaceCharacterization* uninitialized) {
+    new(uninitialized) SkSurfaceCharacterization(self->createResized(width, height));
+}
+
+extern "C" void C_SkSurfaceCharacterization_createBackendFormat(
+    const SkSurfaceCharacterization* self, 
+    SkColorType colorType, 
+    const GrBackendFormat* backendFormat,
+    SkSurfaceCharacterization* uninitialized) {
+    new(uninitialized) SkSurfaceCharacterization(self->createBackendFormat(colorType, *backendFormat));
+}
+
 extern "C" const SkImageInfo* C_SkSurfaceCharacterization_imageInfo(const SkSurfaceCharacterization* self) {
     return &self->imageInfo();
 }
@@ -130,6 +143,10 @@ extern "C" void C_GrBackendRenderTarget_destruct(GrBackendRenderTarget* self) {
     self->~GrBackendRenderTarget();
 }
 
+extern "C" void C_GrBackendRenderTarget_getBackendFormat(const GrBackendRenderTarget* self, GrBackendFormat* uninitialized) {
+    new(uninitialized) GrBackendFormat(self->getBackendFormat());
+}
+
 // GrBackendTexture
 
 extern "C" void C_GrBackendTexture_Construct(GrBackendTexture* uninitialized) {
@@ -144,6 +161,10 @@ extern "C" void C_GrBackendTexture_destruct(const GrBackendTexture* self) {
     self->~GrBackendTexture();
 }
 
+extern "C" void C_GrBackendTexture_getBackendFormat(const GrBackendTexture* self, GrBackendFormat* format) {
+    *format = self->getBackendFormat();
+}
+
 // GrBackendFormat
 
 extern "C" void C_GrBackendFormat_Construct(GrBackendFormat* uninitialized) {
@@ -156,6 +177,10 @@ extern "C" void C_GrBackendFormat_destruct(GrBackendFormat* self) {
 
 extern "C" bool C_GrBackendFormat_Equals(const GrBackendFormat* lhs, const GrBackendFormat* rhs) {
     return *lhs == *rhs;
+}
+
+extern "C" void C_GrBackendFormat_makeTexture2D(const GrBackendFormat* self, GrBackendFormat* format) {
+    *format = self->makeTexture2D();
 }
 
 //

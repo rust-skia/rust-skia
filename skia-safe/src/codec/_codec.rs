@@ -62,21 +62,21 @@ impl RCHandle<SkCodec> {
     }
 
     pub fn dimensions(&self) -> ISize {
-        ISize::from_native(unsafe { sb::C_SkCodec_dimensions(self.native()) })
+        ISize::from_native_c(unsafe { sb::C_SkCodec_dimensions(self.native()) })
     }
 
     pub fn bounds(&self) -> IRect {
-        IRect::from_native(unsafe { sb::C_SkCodec_bounds(self.native()) })
+        IRect::from_native_c(unsafe { sb::C_SkCodec_bounds(self.native()) })
     }
 
     // TODO: getICCProfile
 
     pub fn origin(&self) -> EncodedOrigin {
-        EncodedOrigin::from_native(unsafe { sb::C_SkCodec_getOrigin(self.native()) })
+        EncodedOrigin::from_native_c(unsafe { sb::C_SkCodec_getOrigin(self.native()) })
     }
 
     pub fn get_scaled_dimensions(&self, desired_scale: f32) -> ISize {
-        ISize::from_native(unsafe {
+        ISize::from_native_c(unsafe {
             sb::C_SkCodec_getScaledDimensions(self.native(), desired_scale)
         })
     }

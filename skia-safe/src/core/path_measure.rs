@@ -27,7 +27,7 @@ impl Default for MatrixFlags {
 
 impl Default for Handle<SkPathMeasure> {
     fn default() -> Self {
-        Self::from_native(unsafe { SkPathMeasure::new() })
+        Self::from_native_c(unsafe { SkPathMeasure::new() })
     }
 }
 
@@ -44,7 +44,7 @@ impl Handle<SkPathMeasure> {
         force_closed: bool,
         res_scale: impl Into<Option<scalar>>,
     ) -> Self {
-        Self::from_native(unsafe {
+        Self::from_native_c(unsafe {
             SkPathMeasure::new1(path.native(), force_closed, res_scale.into().unwrap_or(1.0))
         })
     }

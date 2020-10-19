@@ -18,7 +18,7 @@ fn text_shadow_layout() {
 
 impl Default for TextShadow {
     fn default() -> Self {
-        TextShadow::from_native(unsafe { sb::skia_textlayout_TextShadow::new() })
+        TextShadow::from_native_c(unsafe { sb::skia_textlayout_TextShadow::new() })
     }
 }
 
@@ -30,7 +30,7 @@ impl PartialEq for TextShadow {
 
 impl TextShadow {
     pub fn new(color: impl Into<Color>, offset: impl Into<Point>, blur_radius: f64) -> Self {
-        TextShadow::from_native(unsafe {
+        TextShadow::from_native_c(unsafe {
             sb::skia_textlayout_TextShadow::new1(
                 color.into().into_native(),
                 offset.into().into_native(),

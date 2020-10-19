@@ -68,7 +68,7 @@ impl RCHandle<SkDrawable> {
     }
 
     pub fn bounds(&mut self) -> Rect {
-        Rect::from_native(unsafe { self.native_mut().getBounds() })
+        Rect::from_native_c(unsafe { sb::C_SkDrawable_getBounds(self.native_mut()) })
     }
 
     pub fn notify_drawing_changed(&mut self) {

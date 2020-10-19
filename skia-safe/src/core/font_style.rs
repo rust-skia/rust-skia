@@ -124,11 +124,11 @@ impl FontStyle {
     }
 
     pub fn weight(self) -> Weight {
-        Weight::from_native(unsafe { sb::C_SkFontStyle_weight(self.native()) })
+        Weight::from_native_c(unsafe { sb::C_SkFontStyle_weight(self.native()) })
     }
 
     pub fn width(self) -> Width {
-        Width::from_native(unsafe { sb::C_SkFontStyle_width(self.native()) })
+        Width::from_native_c(unsafe { sb::C_SkFontStyle_width(self.native()) })
     }
 
     pub fn slant(self) -> Slant {

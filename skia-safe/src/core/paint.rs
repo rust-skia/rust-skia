@@ -56,13 +56,13 @@ impl NativeHash for SkPaint {
 
 impl Default for Handle<SkPaint> {
     fn default() -> Self {
-        Paint::from_native(unsafe { SkPaint::new() })
+        Paint::from_native_c(unsafe { SkPaint::new() })
     }
 }
 
 impl Handle<SkPaint> {
     pub fn new(color: impl AsRef<Color4f>, color_space: Option<&ColorSpace>) -> Paint {
-        Paint::from_native(unsafe {
+        Paint::from_native_c(unsafe {
             SkPaint::new1(
                 color.as_ref().native(),
                 color_space.native_ptr_or_null_mut_force(),
@@ -131,7 +131,7 @@ impl Handle<SkPaint> {
     }
 
     pub fn color4f(&self) -> Color4f {
-        Color4f::from_native(self.native().fColor4f)
+        Color4f::from_native_c(self.native().fColor4f)
     }
 
     pub fn set_color(&mut self, color: impl Into<Color>) -> &mut Self {

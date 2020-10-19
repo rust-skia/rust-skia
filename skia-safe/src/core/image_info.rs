@@ -50,7 +50,7 @@ impl ColorType {
     */
 
     pub fn n32() -> Self {
-        Self::from_native(SkColorType::kN32_SkColorType)
+        Self::from_native_c(SkColorType::kN32_SkColorType)
     }
 
     pub fn bytes_per_pixel(self) -> usize {
@@ -130,7 +130,7 @@ impl Handle<SkColorInfo> {
     }
 
     pub fn color_type(&self) -> ColorType {
-        ColorType::from_native(self.native().fColorType)
+        ColorType::from_native_c(self.native().fColorType)
     }
 
     pub fn alpha_type(&self) -> AlphaType {
@@ -307,7 +307,7 @@ impl Handle<SkImageInfo> {
     }
 
     pub fn dimensions(&self) -> ISize {
-        ISize::from_native(self.native().fDimensions)
+        ISize::from_native_c(self.native().fDimensions)
     }
 
     pub fn bounds(&self) -> IRect {

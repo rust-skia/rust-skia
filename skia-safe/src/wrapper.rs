@@ -98,7 +98,7 @@ where
     where
         N: NativeDrop,
     {
-        Self::from_native(native)
+        Self::from_native_c(native)
     }
 
     fn unwrap(self) -> N {
@@ -196,7 +196,7 @@ where
     T: NativeTransmutable<N>,
 {
     fn wrap(native: N) -> Self {
-        Self::from_native(native)
+        Self::from_native_c(native)
     }
 
     fn unwrap(self) -> N {

@@ -193,7 +193,7 @@ impl RRect {
     }
 
     pub fn radii(&self, corner: Corner) -> Vector {
-        Vector::from_native(self.native().fRadii[corner as usize])
+        Vector::from_native_c(self.native().fRadii[corner as usize])
     }
 
     pub fn bounds(&self) -> &Rect {

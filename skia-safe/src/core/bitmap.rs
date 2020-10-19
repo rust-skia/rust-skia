@@ -140,7 +140,7 @@ impl Handle<SkBitmap> {
     }
 
     pub fn get_subset(&self) -> IRect {
-        let origin = IPoint::from_native(unsafe { self.native().pixelRefOrigin() });
+        let origin = self.pixel_ref_origin();
         IRect::from_xywh(origin.x, origin.y, self.width(), self.height())
     }
 
@@ -259,7 +259,7 @@ impl Handle<SkBitmap> {
     }
 
     pub fn pixel_ref_origin(&self) -> IPoint {
-        IPoint::from_native(unsafe { self.native().pixelRefOrigin() })
+        IPoint::from_native_c(unsafe { sb::C_SkBitmap_pixelRefOrigin(self.native()) })
     }
 
     pub fn set_pixel_ref(
@@ -401,4 +401,16 @@ fn empty_bitmap_shader() {
 fn shader_with_tilemode() {
     let bm = Bitmap::new();
     let _shader = bm.to_shader((TileMode::Decal, TileMode::Mirror), None);
+}
+
+#[test]
+fn test_get_subset() {
+    let bm = Bitmap::new();
+    let _ = bm.get_subset();
+}
+
+#[test]
+fn test_pixel_ref_origin() {
+    let bm = Bitmap::new();
+    let _ = bm.pixel_ref_origin();
 }

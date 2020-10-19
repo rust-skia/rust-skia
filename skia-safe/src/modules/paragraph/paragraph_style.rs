@@ -36,7 +36,7 @@ impl Default for Handle<sb::skia_textlayout_StrutStyle> {
 
 impl Handle<sb::skia_textlayout_StrutStyle> {
     pub fn new() -> Self {
-        StrutStyle::from_native(unsafe { sb::skia_textlayout_StrutStyle::new() })
+        StrutStyle::from_native_c(unsafe { sb::skia_textlayout_StrutStyle::new() })
     }
 
     pub fn font_families(&self) -> FontFamilies {
@@ -57,7 +57,7 @@ impl Handle<sb::skia_textlayout_StrutStyle> {
     }
 
     pub fn font_style(&self) -> FontStyle {
-        FontStyle::from_native(self.native().fFontStyle)
+        FontStyle::from_native_c(self.native().fFontStyle)
     }
 
     pub fn set_font_style(&mut self, font_style: FontStyle) -> &mut Self {
@@ -141,7 +141,7 @@ impl Default for Handle<sb::skia_textlayout_ParagraphStyle> {
 
 impl Handle<sb::skia_textlayout_ParagraphStyle> {
     pub fn new() -> Self {
-        Self::from_native(unsafe { sb::skia_textlayout_ParagraphStyle::new() })
+        Self::from_native_c(unsafe { sb::skia_textlayout_ParagraphStyle::new() })
     }
 
     pub fn strut_style(&self) -> &StrutStyle {

@@ -457,7 +457,9 @@ impl Handle<SkPath> {
     }
 
     pub fn get_point(&self, index: usize) -> Option<Point> {
-        let p = Point::from_native(unsafe { self.native().getPoint(index.try_into().unwrap()) });
+        let p = Point::from_native_c(unsafe {
+            sb::C_SkPath_getPoint(self.native(), index.try_into().unwrap())
+        });
         // assuming that count_points() is somewhat slow, we
         // check the index when a Point(0,0) is returned.
         if p != Point::default() || index < self.count_points() {
@@ -510,7 +512,7 @@ impl Handle<SkPath> {
     }
 
     pub fn compute_tight_bounds(&self) -> Rect {
-        Rect::from_native(unsafe { self.native().computeTightBounds() })
+        Rect::from_native_c(unsafe { sb::C_SkPath_computeTightBounds(self.native()) })
     }
 
     pub fn conservatively_contains_rect(&self, rect: impl AsRef<Rect>) -> bool {

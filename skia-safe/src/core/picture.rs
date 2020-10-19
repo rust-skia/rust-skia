@@ -34,7 +34,7 @@ impl RCHandle<SkPicture> {
     }
 
     pub fn cull_rect(&self) -> Rect {
-        Rect::from_native(unsafe { sb::C_SkPicture_cullRect(self.native()) })
+        Rect::from_native_c(unsafe { sb::C_SkPicture_cullRect(self.native()) })
     }
 
     pub fn unique_id(&self) -> u32 {
