@@ -603,6 +603,10 @@ extern "C" void C_SkPathBuilder_Construct3(SkPathBuilder* uninitialized, const S
     new(uninitialized) SkPathBuilder(path);
 }
 
+extern "C" SkRect C_SkPathBuilder_computeBounds(const SkPathBuilder* self) {
+    return self->computeBounds();
+}
+
 extern "C" void C_SkPathBuilder_CopyConstruct(SkPathBuilder* uninitialized, const SkPathBuilder& pathBuilder) {
     new(uninitialized) SkPathBuilder(pathBuilder);
 }

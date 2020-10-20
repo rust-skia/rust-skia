@@ -45,7 +45,7 @@ impl PathBuilder {
     }
 
     pub fn compute_bounds(&self) -> Rect {
-        Rect::from_native(unsafe { self.native().computeBounds() })
+        Rect::from_native_c(unsafe { sb::C_SkPathBuilder_computeBounds(self.native()) })
     }
 
     pub fn snapshot(&self) -> Path {
