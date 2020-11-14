@@ -32,6 +32,8 @@ fn test_cp_layout() {
 // TODO: add remaining cp functions to ComPtr via traits (get, reset, retain).
 
 pub type Alloc = RCHandle<GrD3DAlloc>;
+unsafe impl Send for Alloc {}
+unsafe impl Sync for Alloc {}
 
 impl NativeRefCountedBase for GrD3DAlloc {
     type Base = SkRefCntBase;
@@ -40,6 +42,8 @@ impl NativeRefCountedBase for GrD3DAlloc {
 // TODO: support the implementation of custom D3D memory allocator's
 // virtual createResource() function.
 pub type MemoryAllocator = RCHandle<GrD3DMemoryAllocator>;
+unsafe impl Send for MemoryAllocator {}
+unsafe impl Sync for MemoryAllocator {}
 
 impl NativeRefCountedBase for GrD3DMemoryAllocator {
     type Base = SkRefCntBase;
