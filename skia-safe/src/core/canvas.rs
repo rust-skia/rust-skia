@@ -301,7 +301,7 @@ impl Canvas {
 
     // TODO: test ref count consistency assuming it is not increased in the native part.
     #[deprecated(
-        since = "0.0.0",
+        since = "0.36.0",
         note = "Removed, only recording_context() is supported."
     )]
     #[cfg(feature = "gpu")]

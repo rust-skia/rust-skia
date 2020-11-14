@@ -168,7 +168,7 @@ impl RCHandle<SkSurface> {
     }
 
     #[cfg(feature = "metal")]
-    #[deprecated(since = "0.0.0", note = "use from_mtk_view()")]
+    #[deprecated(since = "0.36.0", note = "use from_mtk_view()")]
     pub fn from_ca_mtk_view(
         context: &mut gpu::Context,
         mtk_view: gpu::mtl::Handle,
@@ -247,7 +247,7 @@ impl RCHandle<SkSurface> {
         })
     }
 
-    #[deprecated(since = "0.0.0", note = "Removed without replacement")]
+    #[deprecated(since = "0.36.0", note = "Removed without replacement")]
     pub fn from_backend_texture_with_caracterization(
         _context: &mut gpu::Context,
         _characterization: &SurfaceCharacterization,

@@ -361,12 +361,12 @@ impl Handle<SkPath> {
         self
     }
 
-    #[deprecated(since = "0.0.0", note = "Removed, use is_convex()")]
+    #[deprecated(since = "0.36.0", note = "Removed, use is_convex()")]
     pub fn convexity_type(&self) -> ! {
         panic!("Removed")
     }
 
-    #[deprecated(since = "0.0.0", note = "Removed, use is_convex()")]
+    #[deprecated(since = "0.36.0", note = "Removed, use is_convex()")]
     pub fn convexity_type_or_unknown(&self) -> ! {
         panic!("Removed")
     }
