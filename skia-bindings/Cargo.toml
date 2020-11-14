@@ -9,7 +9,7 @@ keywords = ["skia", "rust-bindings", "vulkan", "opengl", "pdf"]
 categories = ["external-ffi-bindings", "graphics", "multimedia::images", "rendering::graphics-api", "visualization"]
 license = "MIT"
 
-version = "0.35.1"
+version = "0.36.0"
 authors = ["LongYinan <lynweklm@gmail.com>", "Armin Sander <armin@replicator.org>"]
 edition = "2018"
 build = "build.rs"
@@ -32,7 +32,7 @@ doctest = false
 # Metadata used from inside the packaged crate that defines where to download skia and depot_tools archives from.
 # Note: use short hashes here because of filesystem path size restrictions.
 [package.metadata]
-skia = "m86-0.35.0"
+skia = "m87-0.36.1"
 depot_tools = "a110bf6"
 
 [features]

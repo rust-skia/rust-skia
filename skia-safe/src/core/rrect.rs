@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::{scalar, Matrix, Rect, Vector};
+use crate::{interop, scalar, Matrix, Rect, Vector};
 use skia_bindings as sb;
 use skia_bindings::SkRRect;
 use std::{mem, ptr};
@@ -263,6 +263,12 @@ impl RRect {
 
     pub fn dump(&self, as_hex: impl Into<Option<bool>>) {
         unsafe { self.native().dump(as_hex.into().unwrap_or_default()) }
+    }
+
+    pub fn dump_to_string(&self, as_hex: bool) -> String {
+        let mut str = interop::String::default();
+        unsafe { sb::C_SkRRect_dumpToString(self.native(), as_hex, str.native_mut()) }
+        str.to_string()
     }
 
     pub fn dump_hex(&self) {

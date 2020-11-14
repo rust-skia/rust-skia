@@ -82,10 +82,10 @@ jobs:
 
   steps:
   - ${{ if eq(parameters.platform, 'macOS') }}:
-    # macOS
+    # Uninstall LLVM to prevent conflicts with Apple's clang. 
     - bash: |
-        echo "##vso[task.setvariable variable=PATH;]/usr/local/opt/llvm/bin:$PATH"
-      displayName: Set path to clang / llvm-config
+        brew uninstall llvm
+      displayName: 'Uninstall LLVM'
 
   - ${{ if eq(parameters.platform, 'Windows') }}:
     # Windows.

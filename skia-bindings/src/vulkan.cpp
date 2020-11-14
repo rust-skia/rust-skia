@@ -100,10 +100,6 @@ extern "C" GrDirectContext* C_GrDirectContext_MakeVulkan(
 // GrVkTypes.h
 //
 
-extern "C" void C_GrVkAlloc_Construct(GrVkAlloc* uninitialized, VkDeviceMemory memory, VkDeviceSize offset, VkDeviceSize size, uint32_t flags) {
-    new (uninitialized) GrVkAlloc(memory, offset, size, flags);
-}
-
 extern "C" bool C_GrVkAlloc_Equals(const GrVkAlloc* lhs, const GrVkAlloc* rhs) {
     return *lhs == *rhs;
 }
@@ -115,6 +111,10 @@ extern "C" bool C_GrVkYcbcrConversionInfo_Equals(const GrVkYcbcrConversionInfo* 
 //
 // gpu/GrBackendSurfaceMutableState.h
 //
+
+extern "C" void C_GrBackendSurfaceMutableState_Construct(GrBackendSurfaceMutableState* uninitialized) {
+    new(uninitialized)GrBackendSurfaceMutableState();
+}
 
 extern "C" void C_GrBackendSurfaceMutableState_ConstructVK(GrBackendSurfaceMutableState* uninitialized, VkImageLayout layout, uint32_t queueFamilyIndex) {
     new(uninitialized)GrBackendSurfaceMutableState(layout, queueFamilyIndex);

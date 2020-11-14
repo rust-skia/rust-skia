@@ -2,8 +2,7 @@ use crate::interop::DynamicMemoryWStream;
 use crate::matrix::ApplyPerspectiveClip;
 use crate::prelude::*;
 use crate::{
-    path_types, scalar, Data, Matrix, PathConvexityType, PathDirection, PathFillType, Point, RRect,
-    Rect, Vector,
+    path_types, scalar, Data, Matrix, PathDirection, PathFillType, Point, RRect, Rect, Vector,
 };
 use skia_bindings as sb;
 use skia_bindings::{SkPath, SkPath_Iter, SkPath_RawIter};
@@ -15,9 +14,6 @@ pub use path_types::PathDirection as Direction;
 
 #[deprecated(since = "0.25.0", note = "use PathFillType")]
 pub use path_types::PathFillType as FillType;
-
-#[deprecated(since = "0.25.0", note = "use PathConvexityType")]
-pub use path_types::PathConvexityType as Convexity;
 
 pub use skia_bindings::SkPath_ArcSize as ArcSize;
 #[test]
@@ -250,6 +246,21 @@ impl Handle<SkPath> {
         })
     }
 
+    pub fn oval_with_start_index(
+        oval: impl AsRef<Rect>,
+        dir: PathDirection,
+        start_index: usize,
+    ) -> Self {
+        Self::construct(|path| unsafe {
+            sb::C_SkPath_OvalWithStartIndex(
+                path,
+                oval.as_ref().native(),
+                dir,
+                start_index.try_into().unwrap(),
+            )
+        })
+    }
+
     pub fn circle(
         center: impl Into<Point>,
         radius: scalar,
@@ -273,6 +284,21 @@ impl Handle<SkPath> {
                 path,
                 rect.as_ref().native(),
                 dir.into().unwrap_or(PathDirection::CW),
+            )
+        })
+    }
+
+    pub fn rrect_with_start_index(
+        rect: impl AsRef<RRect>,
+        dir: PathDirection,
+        start_index: usize,
+    ) -> Self {
+        Self::construct(|path| unsafe {
+            sb::C_SkPath_RRectWithStartIndex(
+                path,
+                rect.as_ref().native(),
+                dir,
+                start_index.try_into().unwrap(),
             )
         })
     }
@@ -335,36 +361,18 @@ impl Handle<SkPath> {
         self
     }
 
-    pub fn convexity_type(&self) -> PathConvexityType {
-        unsafe { sb::C_SkPath_getConvexityType(self.native()) }
+    #[deprecated(since = "0.36.0", note = "Removed, use is_convex()")]
+    pub fn convexity_type(&self) -> ! {
+        panic!("Removed")
     }
 
-    pub fn convexity_type_or_unknown(&self) -> PathConvexityType {
-        unsafe { sb::C_SkPath_getConvexityTypeOrUnknown(self.native()) }
-    }
-
-    pub fn set_convexity_type(&mut self, convexity: PathConvexityType) -> &mut Self {
-        unsafe { self.native_mut().setConvexityType(convexity) }
-        self
+    #[deprecated(since = "0.36.0", note = "Removed, use is_convex()")]
+    pub fn convexity_type_or_unknown(&self) -> ! {
+        panic!("Removed")
     }
 
     pub fn is_convex(&self) -> bool {
-        self.convexity_type() == PathConvexityType::Convex
-    }
-
-    #[deprecated(since = "0.25.0", note = "use convexity_type()")]
-    pub fn convexity(&self) -> PathConvexityType {
-        self.convexity_type()
-    }
-
-    #[deprecated(since = "0.25.0", note = "use convexity_type_or_unknown()")]
-    pub fn convexity_or_unknown(&self) -> PathConvexityType {
-        self.convexity_type_or_unknown()
-    }
-
-    #[deprecated(since = "0.25.0", note = "use set_convexity_type()")]
-    pub fn set_convexity(&mut self, convexity: PathConvexityType) -> &mut Self {
-        self.set_convexity_type(convexity)
+        unsafe { sb::C_SkPath_isConvex(self.native()) }
     }
 
     pub fn is_oval(&self) -> Option<Rect> {

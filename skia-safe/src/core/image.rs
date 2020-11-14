@@ -577,6 +577,59 @@ impl RCHandle<SkImage> {
         .map(|texture| (texture, origin))
     }
 
+    #[cfg(feature = "gpu")]
+    pub fn read_pixels_with_context<'a, P>(
+        &self,
+        context: impl Into<Option<&'a mut gpu::DirectContext>>,
+        dst_info: &ImageInfo,
+        pixels: &mut [P],
+        dst_row_bytes: usize,
+        src: impl Into<IPoint>,
+        caching_hint: CachingHint,
+    ) -> bool {
+        if pixels.elements_size_of()
+            != (usize::try_from(dst_info.height()).unwrap() * dst_row_bytes)
+        {
+            return false;
+        }
+
+        let src = src.into();
+
+        unsafe {
+            self.native().readPixels(
+                context.into().native_ptr_or_null_mut(),
+                dst_info.native(),
+                pixels.as_mut_ptr() as _,
+                dst_row_bytes,
+                src.x,
+                src.y,
+                caching_hint,
+            )
+        }
+    }
+
+    #[cfg(feature = "gpu")]
+    pub fn read_pixels_to_pixmap_with_context<'a>(
+        &self,
+        context: impl Into<Option<&'a mut gpu::DirectContext>>,
+        dst: &Pixmap,
+        src: impl Into<IPoint>,
+        caching_hint: CachingHint,
+    ) -> bool {
+        let src = src.into();
+
+        unsafe {
+            self.native().readPixels1(
+                context.into().native_ptr_or_null_mut(),
+                dst.native(),
+                src.x,
+                src.y,
+                caching_hint,
+            )
+        }
+    }
+
+    // _not_ deprecated, because we support separate functions in `gpu` feature builds.
     pub fn read_pixels<P>(
         &self,
         dst_info: &ImageInfo,
@@ -595,6 +648,7 @@ impl RCHandle<SkImage> {
 
         unsafe {
             self.native().readPixels(
+                ptr::null_mut(),
                 dst_info.native(),
                 pixels.as_mut_ptr() as _,
                 dst_row_bytes,
@@ -603,6 +657,19 @@ impl RCHandle<SkImage> {
                 caching_hint,
             )
         }
+    }
+
+    #[cfg(feature = "gpu")]
+    pub unsafe fn read_pixels_to_pixmap(
+        &self,
+        dst: &Pixmap,
+        src: impl Into<IPoint>,
+        caching_hint: CachingHint,
+    ) -> bool {
+        let src = src.into();
+
+        self.native()
+            .readPixels1(ptr::null_mut(), dst.native(), src.x, src.y, caching_hint)
     }
 
     // TODO:
@@ -666,7 +733,9 @@ impl RCHandle<SkImage> {
         unsafe { self.native().hasMipmaps() }
     }
 
-    // TODO: withMipmaps()
+    pub fn with_default_mipmaps(&self) -> Option<Image> {
+        Image::from_ptr(unsafe { sb::C_SkImage_withDefaultMipmaps(self.native()) })
+    }
 
     #[cfg(feature = "gpu")]
     pub fn new_texture_image(

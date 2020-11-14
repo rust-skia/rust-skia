@@ -110,6 +110,13 @@ pub mod color_filters {
             .unwrap()
     }
 
+    pub fn hsla_matrix_of_color_matrix(color_matrix: &ColorMatrix) -> ColorFilter {
+        ColorFilter::from_ptr(unsafe {
+            sb::C_SkColorFilters_HSLAMatrixOfColorMatrix(color_matrix.native())
+        })
+        .unwrap()
+    }
+
     pub fn hsla_matrix(row_major: &[f32; 20]) -> ColorFilter {
         ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_HSLAMatrix(row_major.as_ptr()) })
             .unwrap()

@@ -143,7 +143,7 @@ impl RCHandle<SkSurface> {
 
     #[cfg(feature = "metal")]
     pub fn from_ca_metal_layer(
-        context: &mut gpu::Context,
+        context: &mut gpu::RecordingContext,
         layer: gpu::mtl::Handle,
         origin: gpu::SurfaceOrigin,
         sample_count: impl Into<Option<usize>>,
@@ -168,8 +168,30 @@ impl RCHandle<SkSurface> {
     }
 
     #[cfg(feature = "metal")]
+    #[deprecated(since = "0.36.0", note = "use from_mtk_view()")]
     pub fn from_ca_mtk_view(
         context: &mut gpu::Context,
+        mtk_view: gpu::mtl::Handle,
+        origin: gpu::SurfaceOrigin,
+        sample_count: impl Into<Option<usize>>,
+        color_type: crate::ColorType,
+        color_space: impl Into<Option<crate::ColorSpace>>,
+        surface_props: Option<&SurfaceProps>,
+    ) -> Option<Self> {
+        Self::from_mtk_view(
+            context,
+            mtk_view,
+            origin,
+            sample_count,
+            color_type,
+            color_space,
+            surface_props,
+        )
+    }
+
+    #[cfg(feature = "metal")]
+    pub fn from_mtk_view(
+        context: &mut gpu::RecordingContext,
         mtk_view: gpu::mtl::Handle,
         origin: gpu::SurfaceOrigin,
         sample_count: impl Into<Option<usize>>,
@@ -225,20 +247,13 @@ impl RCHandle<SkSurface> {
         })
     }
 
-    // TODO: support TextureReleaseProc / ReleaseContext
-
+    #[deprecated(since = "0.36.0", note = "Removed without replacement")]
     pub fn from_backend_texture_with_caracterization(
-        context: &mut gpu::Context,
-        characterization: &SurfaceCharacterization,
-        backend_texture: &gpu::BackendTexture,
-    ) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            sb::C_SkSurface_MakeFromBackendTexture2(
-                context.native_mut(),
-                characterization.native(),
-                backend_texture.native(),
-            )
-        })
+        _context: &mut gpu::Context,
+        _characterization: &SurfaceCharacterization,
+        _backend_texture: &gpu::BackendTexture,
+    ) -> ! {
+        panic!("Removed without replacement")
     }
 }
 
@@ -283,7 +298,9 @@ impl RCHandle<SkSurface> {
         note = "Use recordingContext() and RecordingContext::as_direct_context()"
     )]
     pub fn context(&mut self) -> Option<gpu::Context> {
-        gpu::Context::from_unshared_ptr(unsafe { self.native_mut().getContext() })
+        self.recording_context()
+            .and_then(|mut rc| rc.as_direct_context())
+            .map(|dc| dc.into())
     }
 
     pub fn recording_context(&mut self) -> Option<gpu::RecordingContext> {

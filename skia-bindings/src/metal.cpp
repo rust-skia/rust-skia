@@ -8,7 +8,7 @@
 // core/SkSurface.h
 //
 
-extern "C" SkSurface *C_SkSurface_MakeFromCAMetalLayer(GrContext *context,
+extern "C" SkSurface *C_SkSurface_MakeFromCAMetalLayer(GrRecordingContext *context,
                                                        GrMTLHandle layer,
                                                        GrSurfaceOrigin origin,
                                                        int sampleCnt,
@@ -20,7 +20,7 @@ extern "C" SkSurface *C_SkSurface_MakeFromCAMetalLayer(GrContext *context,
                                            drawable).release();
 }
 
-extern "C" SkSurface *C_SkSurface_MakeFromMTKView(GrContext *context,
+extern "C" SkSurface *C_SkSurface_MakeFromMTKView(GrRecordingContext *context,
                                                   GrMTLHandle mtkView,
                                                   GrSurfaceOrigin origin,
                                                   int sampleCnt,

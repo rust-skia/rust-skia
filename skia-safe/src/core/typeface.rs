@@ -231,6 +231,12 @@ impl RCHandle<SkTypeface> {
         name.as_str().into()
     }
 
+    pub fn post_script_name(&self) -> Option<String> {
+        let mut name = interop::String::default();
+        unsafe { self.native().getPostScriptName(name.native_mut()) }
+            .if_true_then_some(|| name.as_str().into())
+    }
+
     // TODO: openStream()
     // TODO: createScalerContext()
 

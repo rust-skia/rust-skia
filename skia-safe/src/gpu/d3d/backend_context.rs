@@ -1,4 +1,4 @@
-use super::cp;
+use super::{cp, MemoryAllocator};
 use super::{ID3D12CommandQueue, ID3D12Device, IDXGIAdapter1};
 use crate::gpu;
 use crate::prelude::*;
@@ -10,6 +10,7 @@ pub struct BackendContext {
     pub adapter: cp<IDXGIAdapter1>,
     pub device: cp<ID3D12Device>,
     pub queue: cp<ID3D12CommandQueue>,
+    pub memory_allocator: Option<MemoryAllocator>,
     pub protected_context: gpu::Protected,
 }
 unsafe impl Send for BackendContext {}

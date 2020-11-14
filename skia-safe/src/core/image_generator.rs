@@ -54,6 +54,7 @@ impl RefHandle<SkImageGenerator> {
 
     // TODO: m86: get_pixels(&Pixmap)
 
+    #[deprecated(since = "0.36.0", note = "Use get_yuva_info()")]
     pub fn query_yuva8(
         &self,
     ) -> Option<(
@@ -74,6 +75,7 @@ impl RefHandle<SkImageGenerator> {
         .if_true_some((size_info, indices, cs))
     }
 
+    #[deprecated(since = "0.36.0", note = "Use get_yuva_planes()")]
     pub fn get_yuva8_planes(
         &mut self,
         size_info: &YUVASizeInfo,

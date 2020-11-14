@@ -65,9 +65,14 @@ impl Alloc {
         size: vk::DeviceSize,
         flags: AllocFlag,
     ) -> Alloc {
-        Alloc::construct(|alloc| {
-            sb::C_GrVkAlloc_Construct(alloc, memory, offset, size, flags.bits())
-        })
+        Alloc {
+            memory,
+            offset,
+            size,
+            flags,
+            backend_memory: 0,
+            uses_system_heap: false,
+        }
     }
 }
 
@@ -178,6 +183,8 @@ pub struct ImageInfo {
     pub tiling: vk::ImageTiling,
     pub layout: vk::ImageLayout,
     pub format: vk::Format,
+    pub image_usage_flags: vk::ImageUsageFlags,
+    pub sample_count: u32,
     pub level_count: u32,
     pub current_queue_family: u32,
     pub protected: Protected,
@@ -201,6 +208,8 @@ impl Default for ImageInfo {
             tiling: vk::ImageTiling::OPTIMAL,
             layout: vk::ImageLayout::UNDEFINED,
             format: vk::Format::UNDEFINED,
+            image_usage_flags: 0,
+            sample_count: 1,
             level_count: 0,
             current_queue_family: vk::QUEUE_FAMILY_IGNORED,
             protected: Protected::No,
@@ -243,6 +252,7 @@ impl ImageInfo {
             protected,
             ycbcr_conversion_info,
             sharing_mode,
+            ..Self::default()
         }
     }
 

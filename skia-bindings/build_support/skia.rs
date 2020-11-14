@@ -418,6 +418,8 @@ impl BinariesConfiguration {
                 }
                 if features.metal {
                     link_libraries.push("framework=Metal");
+                    // MetalKit was added in m87 BUILD.gn.
+                    link_libraries.push("framework=MetalKit");
                     link_libraries.push("framework=Foundation");
                 }
             }
@@ -658,6 +660,7 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         .raw_line("pub enum SkVerticesPriv {}")
         .blacklist_type("SkVerticesPriv")
         .blacklist_function("SkVertices_priv.*")
+        .blacklist_function("std::bitset_flip.*")
         // Vulkan reexports that got swallowed by making them opaque.
         // (these can not be whitelisted by a extern "C" function)
         .whitelist_type("VkPhysicalDeviceFeatures")
@@ -919,6 +922,9 @@ const OPAQUE_TYPES: &[&str] = &[
     // m86:
     "GrRecordingContext",
     "GrDirectContext",
+    // m87:
+    "GrD3DAlloc",
+    "GrD3DMemoryAllocator",
 ];
 
 const BLACKLISTED_TYPES: &[&str] = &[
@@ -1081,6 +1087,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("TextDirection", rewrite::k_xxx_uppercase),
     ("TextBaseline", rewrite::k_xxx),
     ("TextHeightBehavior", rewrite::k_xxx),
+    ("DrawOptions", rewrite::k_xxx),
     //
     // TextStyle.h
     //

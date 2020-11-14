@@ -300,9 +300,20 @@ impl Canvas {
     }
 
     // TODO: test ref count consistency assuming it is not increased in the native part.
+    #[deprecated(
+        since = "0.36.0",
+        note = "Removed, only recording_context() is supported."
+    )]
     #[cfg(feature = "gpu")]
-    pub fn gpu_context(&mut self) -> Option<gpu::Context> {
-        gpu::Context::from_unshared_ptr(unsafe { sb::C_SkCanvas_getGrContext(self.native_mut()) })
+    pub fn gpu_context(&mut self) -> ! {
+        panic!("Removed");
+    }
+
+    #[cfg(feature = "gpu")]
+    pub fn recording_context(&mut self) -> Option<gpu::RecordingContext> {
+        gpu::RecordingContext::from_unshared_ptr(unsafe {
+            sb::C_SkCanvas_recordingContext(self.native_mut())
+        })
     }
 
     /// # Safety

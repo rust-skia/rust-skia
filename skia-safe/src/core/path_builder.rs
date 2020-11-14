@@ -1,6 +1,7 @@
-use crate::{prelude::*, scalar, Path, PathDirection, PathFillType, Point, RRect, Rect};
+use crate::{prelude::*, scalar, Path, PathDirection, PathFillType, Point, RRect, Rect, Vector};
 use skia_bindings as sb;
 use skia_bindings::SkPathBuilder;
+use std::mem;
 
 pub use skia_bindings::SkPathBuilder_ArcSize as ArcSize;
 #[test]
@@ -18,14 +19,38 @@ impl NativeDrop for SkPathBuilder {
     }
 }
 
+impl Clone for PathBuilder {
+    fn clone(&self) -> Self {
+        Self::construct(|pb| unsafe { sb::C_SkPathBuilder_CopyConstruct(pb, self.native()) })
+    }
+}
+
 impl PathBuilder {
     pub fn new() -> Self {
-        Self::from_native_c(unsafe { SkPathBuilder::new() })
+        Self::construct(|pb| unsafe { sb::C_SkPathBuilder_Construct(pb) })
     }
 
-    pub fn snapshot(&mut self) -> Path {
+    /* m87: No Implementation.
+    pub fn new_fill_type(fill_type: PathFillType) -> Self {
+        Self::construct(|pb| unsafe { sb::C_SkPathBuilder_Construct2(pb, fill_type) })
+    }
+    */
+
+    pub fn new_path(path: &Path) -> Self {
+        Self::construct(|pb| unsafe { sb::C_SkPathBuilder_Construct3(pb, path.native()) })
+    }
+
+    pub fn fill_type(&self) -> PathFillType {
+        self.native().fFillType
+    }
+
+    pub fn compute_bounds(&self) -> Rect {
+        Rect::from_native_c(unsafe { sb::C_SkPathBuilder_computeBounds(self.native()) })
+    }
+
+    pub fn snapshot(&self) -> Path {
         let mut path = Path::default();
-        unsafe { sb::C_SkPathBuilder_snapshot(self.native_mut(), path.native_mut()) }
+        unsafe { sb::C_SkPathBuilder_snapshot(self.native(), path.native_mut()) }
         path
     }
 
@@ -101,6 +126,14 @@ impl PathBuilder {
     pub fn close(&mut self) -> &mut Self {
         unsafe {
             self.native_mut().close();
+        }
+        self
+    }
+
+    pub fn polyline_to(&mut self, points: &[Point]) -> &mut Self {
+        unsafe {
+            self.native_mut()
+                .polylineTo(points.native().as_ptr(), points.len().try_into().unwrap());
         }
         self
     }
@@ -298,6 +331,20 @@ impl PathBuilder {
                 extra_verb_count.try_into().unwrap(),
             )
         }
+    }
+
+    pub fn offset(&mut self, d: impl Into<Vector>) -> &mut Self {
+        let d = d.into();
+        unsafe {
+            self.native_mut().offset(d.x, d.y);
+        }
+        self
+    }
+
+    pub fn toggle_inverse_fill_type(&mut self) -> &mut Self {
+        let n = self.native_mut();
+        n.fFillType = unsafe { mem::transmute(n.fFillType as i32 ^ 2) };
+        self
     }
 
     #[deprecated(since = "0.35.0", note = "Removed without replacement")]

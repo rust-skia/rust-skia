@@ -324,6 +324,10 @@ extern "C" SkImage* C_SkImage_makeSubset(const SkImage* self, const SkIRect* sub
     return self->makeSubset(*subset, direct).release();
 }
 
+extern "C" SkImage* C_SkImage_withDefaultMipmaps(const SkImage* self) {
+    return self->withDefaultMipmaps().release();
+}
+
 extern "C" SkImage* C_SkImage_makeNonTextureImage(const SkImage* self) {
     return self->makeNonTextureImage().release();
 }
@@ -486,6 +490,11 @@ extern "C" void C_SkPath_Oval(SkPath* uninitialized,
     new(uninitialized) SkPath(SkPath::Oval(r, dir));
 }
 
+extern "C" void C_SkPath_OvalWithStartIndex(SkPath* uninitialized,
+    const SkRect& r, SkPathDirection dir, unsigned startIndex) {
+    new(uninitialized) SkPath(SkPath::Oval(r, dir, startIndex));
+}
+
 extern "C" void C_SkPath_Circle(SkPath* uninitialized,
     SkScalar x, SkScalar y, SkScalar r, SkPathDirection dir) {
     new(uninitialized) SkPath(SkPath::Circle(x, y, r, dir));
@@ -494,6 +503,11 @@ extern "C" void C_SkPath_Circle(SkPath* uninitialized,
 extern "C" void C_SkPath_RRect(SkPath* uninitialized,
     const SkRRect& rr, SkPathDirection dir) {
     new(uninitialized) SkPath(SkPath::RRect(rr, dir));
+}
+
+extern "C" void C_SkPath_RRectWithStartIndex(SkPath* uninitialized,
+    const SkRRect& r, SkPathDirection dir, unsigned startIndex) {
+    new(uninitialized) SkPath(SkPath::RRect(r, dir, startIndex));
 }
 
 extern "C" void C_SkPath_Polygon(SkPath* uninitialized,
@@ -543,12 +557,8 @@ extern "C" SkPathFillType C_SkPath_getFillType(const SkPath* self) {
     return self->getFillType();
 }
 
-extern "C" SkPathConvexityType C_SkPath_getConvexityType(const SkPath* self) {
-    return self->getConvexityType();
-}
-
-extern "C" SkPathConvexityType C_SkPath_getConvexityTypeOrUnknown(const SkPath* self) {
-    return self->getConvexityTypeOrUnknown();
+extern "C" bool C_SkPath_isConvex(const SkPath* self) {
+    return self->isConvex();
 }
 
 extern "C" bool C_SkPath_isEmpty(const SkPath* self) {
@@ -579,11 +589,33 @@ extern "C" uint32_t C_SkPath_getSegmentMasks(const SkPath* self) {
 // core/SkPathBuilder.h
 //
 
+extern "C" void C_SkPathBuilder_Construct(SkPathBuilder* uninitialized) {
+    new(uninitialized) SkPathBuilder();
+}
+
+/* m87: Implementation is missing.
+extern "C" void C_SkPathBuilder_Construct2(SkPathBuilder* uninitialized, SkPathFillType fillType) {
+    new(uninitialized) SkPathBuilder(fillType);
+}
+*/
+
+extern "C" void C_SkPathBuilder_Construct3(SkPathBuilder* uninitialized, const SkPath& path) {
+    new(uninitialized) SkPathBuilder(path);
+}
+
+extern "C" SkRect C_SkPathBuilder_computeBounds(const SkPathBuilder* self) {
+    return self->computeBounds();
+}
+
+extern "C" void C_SkPathBuilder_CopyConstruct(SkPathBuilder* uninitialized, const SkPathBuilder& pathBuilder) {
+    new(uninitialized) SkPathBuilder(pathBuilder);
+}
+
 extern "C" void C_SkPathBuilder_destruct(SkPathBuilder* self) {
     self->~SkPathBuilder();
 }
 
-extern "C" void C_SkPathBuilder_snapshot(SkPathBuilder* self, SkPath* path) {
+extern "C" void C_SkPathBuilder_snapshot(const SkPathBuilder* self, SkPath* path) {
     *path = self->snapshot();
 }
 
@@ -604,7 +636,7 @@ extern "C" void C_SkPathMeasure_destruct(const SkPathMeasure* self) {
 //
 
 extern "C" void
-C_SkPathTypes_Types(SkPathFillType *, SkPathConvexityType *, SkPathDirection *, SkPathSegmentMask *, SkPathVerb *) {}
+C_SkPathTypes_Types(SkPathFillType *, SkPathDirection *, SkPathSegmentMask *, SkPathVerb *) {}
 
 //
 // core/SkCanvas.h
@@ -1029,6 +1061,10 @@ extern "C" void C_SkRRect_setOval(SkRRect* self, const SkRect* oval) {
     self->setOval(*oval);
 }
 
+extern "C" void C_SkRRect_dumpToString(const SkRRect* self, bool asHex, SkString* str) {
+    *str = self->dumpToString(asHex);
+}
+
 extern "C" bool C_SkRRect_Equals(const SkRRect* lhs, const SkRRect* rhs) {
     return *lhs == *rhs;
 }
@@ -1398,6 +1434,10 @@ extern "C" SkVertices* C_SkVertices_Builder_detach(SkVertices::Builder* builder)
 // SkPictureRecorder
 //
 
+extern "C" void C_SkPictureRecorder_Construct(SkPictureRecorder *uninitialized) {
+    new(uninitialized) SkPictureRecorder();
+}
+
 extern "C" void C_SkPictureRecorder_destruct(SkPictureRecorder *self) {
     self->~SkPictureRecorder();
 }
@@ -1531,6 +1571,10 @@ extern "C" SkColorFilter* C_SkColorFilters_Matrix(const SkColorMatrix* colorMatr
 
 extern "C" SkColorFilter* C_SkColorFilters_MatrixRowMajor(const SkScalar array[20]) {
     return SkColorFilters::Matrix(array).release();
+}
+
+extern "C" SkColorFilter* C_SkColorFilters_HSLAMatrixOfColorMatrix(const SkColorMatrix& colorMatrix) {
+    return SkColorFilters::HSLAMatrix(colorMatrix).release();
 }
 
 extern "C" SkColorFilter* C_SkColorFilters_HSLAMatrix(const float rowMajor[20]) {
@@ -2412,10 +2456,6 @@ SkColorFilter* C_SkRuntimeEffect_makeColorFilter(SkRuntimeEffect* self, SkData* 
 
 const SkString *C_SkRuntimeEffect_source(const SkRuntimeEffect *self) {
     return &self->source();
-}
-
-uint32_t C_SkRuntimeEffect_hash(const SkRuntimeEffect *self) {
-    return self->hash();
 }
 
 const SkRuntimeEffect::Uniform* C_SkRuntimeEffect_uniforms(const SkRuntimeEffect* self, size_t* count) {

@@ -138,6 +138,10 @@ impl RCHandle<skia_textlayout_FontCollection> {
             &mut *sb::C_FontCollection_paragraphCache(self.native_mut())
         })
     }
+
+    pub fn clear_caches(&mut self) {
+        unsafe { self.native_mut().clearCaches() }
+    }
 }
 
 type Typefaces = Handle<sb::Typefaces>;

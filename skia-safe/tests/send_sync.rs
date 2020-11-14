@@ -187,19 +187,23 @@ mod gpu {
         assert_impl_all!(DrawableInfo: Send, Sync);
         assert_impl_all!(BackendDrawableInfo: Send, Sync);
         // Note that we can't make most of vk.rs re-export of native Vulkan types Send nor Sync,
-        // because they are just re-exports of simple pointers, which already implements a negative
-        // Send & Sync that can not be overriden...
+        // because they are just re-exports of simple pointers, which already implement
+        // !Send & !Sync that can not be overriden...
     }
 
     #[cfg(feature = "d3d")]
     mod d3d {
-        use skia_safe::gpu::d3d::{BackendContext, FenceInfo, TextureResourceInfo};
+        use skia_safe::gpu::d3d::{
+            Alloc, BackendContext, FenceInfo, MemoryAllocator, TextureResourceInfo,
+        };
         use static_assertions::*;
         // not sure if BackendContext is Sync, so we'd set it to Send only for now.
         assert_impl_all!(BackendContext: Send);
         assert_not_impl_any!(BackendContext: Sync);
         assert_impl_all!(TextureResourceInfo: Send, Sync);
         assert_impl_all!(FenceInfo: Send, Sync);
+        assert_impl_all!(Alloc: Send, Sync);
+        assert_impl_all!(MemoryAllocator: Send, Sync);
     }
 }
 

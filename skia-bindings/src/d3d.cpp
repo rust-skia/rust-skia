@@ -12,6 +12,14 @@
 #include "include/gpu/d3d/GrD3DBackendContext.h"
 
 //
+// gpu/d3d/GrD3DTypes.h
+//
+
+extern "C" void C_GrD3DTextureResourceInfo_Construct(GrD3DTextureResourceInfo* uninitialized) {
+    new(uninitialized) GrD3DTextureResourceInfo();
+}
+
+//
 // gpu/GrBackendSurface.h
 //
 
@@ -23,8 +31,8 @@ extern "C" void C_GrBackendTexture_ConstructD3D(GrBackendTexture* uninitialized,
     new(uninitialized)GrBackendTexture(width, height, *resourceInfo);
 }
 
-extern "C" void C_GrBackendRenderTarget_ConstructD3D(GrBackendRenderTarget* uninitialized, int width, int height, int sampleCnt, const GrD3DTextureResourceInfo* resourceInfo) {
-    new(uninitialized)GrBackendRenderTarget(width, height, sampleCnt, *resourceInfo);
+extern "C" void C_GrBackendRenderTarget_ConstructD3D(GrBackendRenderTarget* uninitialized, int width, int height, const GrD3DTextureResourceInfo* resourceInfo) {
+    new(uninitialized)GrBackendRenderTarget(width, height, *resourceInfo);
 }
 
 //

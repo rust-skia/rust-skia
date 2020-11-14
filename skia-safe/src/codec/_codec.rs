@@ -147,8 +147,8 @@ impl RCHandle<SkCodec> {
         }
     }
 
-    // TODO: queryYUV8
-    // TODO: getYUV8Planes
+    // TODO: queryYUVAInfo
+    // TODO: getYUVAPlanes
     // TODO: startIncrementalDecode
     // TODO: incrementalDecode
     // TODO: startScanlineDecode

@@ -72,16 +72,6 @@ extern "C" SkSurface* C_SkSurface_MakeRenderTarget2(
             budgeted).release();
 }
 
-extern "C" SkSurface *C_SkSurface_MakeFromBackendTexture2(
-        GrContext *context,
-        const SkSurfaceCharacterization &characterization,
-        const GrBackendTexture *backendTexture) {
-    return SkSurface::MakeFromBackendTexture(
-            context,
-            characterization,
-            *backendTexture).release();
-}
-
 extern "C" void C_SkSurface_getBackendTexture(
         SkSurface* self,
         SkSurface::BackendHandleAccess handleAccess,
@@ -282,8 +272,8 @@ extern "C" GrBackendApi C_GrBackendDrawableInfo_backend(const GrBackendDrawableI
 // core/SkCanvas.h
 //
 
-extern "C" GrContext* C_SkCanvas_getGrContext(SkCanvas* self) {
-    return self->getGrContext();
+extern "C" GrRecordingContext* C_SkCanvas_recordingContext(SkCanvas* self) {
+    return self->recordingContext();
 }
 
 //
