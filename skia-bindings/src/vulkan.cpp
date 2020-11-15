@@ -112,10 +112,6 @@ extern "C" bool C_GrVkYcbcrConversionInfo_Equals(const GrVkYcbcrConversionInfo* 
 // gpu/GrBackendSurfaceMutableState.h
 //
 
-extern "C" void C_GrBackendSurfaceMutableState_Construct(GrBackendSurfaceMutableState* uninitialized) {
-    new(uninitialized)GrBackendSurfaceMutableState();
-}
-
 extern "C" void C_GrBackendSurfaceMutableState_ConstructVK(GrBackendSurfaceMutableState* uninitialized, VkImageLayout layout, uint32_t queueFamilyIndex) {
     new(uninitialized)GrBackendSurfaceMutableState(layout, queueFamilyIndex);
 }

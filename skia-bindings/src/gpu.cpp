@@ -177,6 +177,10 @@ extern "C" void C_GrBackendFormat_makeTexture2D(const GrBackendFormat* self, GrB
 // gpu/GrBackendSurfaceMutableState.h
 //
 
+extern "C" void C_GrBackendSurfaceMutableState_Construct(GrBackendSurfaceMutableState* uninitialized) {
+    new(uninitialized)GrBackendSurfaceMutableState();
+}
+
 extern "C" void C_GrBackendSurfaceMutableState_destruct(GrBackendSurfaceMutableState* self) {
     self->~GrBackendSurfaceMutableState();
 }
