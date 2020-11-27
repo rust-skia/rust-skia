@@ -1887,7 +1887,7 @@ extern "C" SkISize C_SkSize_toFloor(const SkSize* size) {
 }
 
 //
-// SkShader
+// core/SkShader.h
 //
 
 extern "C" bool C_SkShader_isOpaque(const SkShader* self) {
@@ -1939,16 +1939,12 @@ extern "C" SkShader* C_SkShader_Deserialize(const void* data, size_t length) {
 }
 
 //
-// SkStream
+// core/SkStream.h
 //
 
 extern "C" void C_SkStream_delete(SkStream* stream) {
     delete stream;
 }
-
-//
-// SkWStream
-//
 
 extern "C" void C_SkWStream_destruct(SkWStream* self) {
     self->~SkWStream();
@@ -1958,17 +1954,9 @@ extern "C" bool C_SkWStream_write(SkWStream* self, const void* buffer, size_t si
     return self->write(buffer, size);
 }
 
-//
-// SkMemoryStream: public SkStreamMemory
-//
-
 extern "C" SkMemoryStream* C_SkMemoryStream_MakeDirect(const void* data, size_t length) {
     return SkMemoryStream::MakeDirect(data, length).release();
 }
-
-//
-// SkDynamicMemoryWStream : public SkWStream
-//
 
 extern "C" void C_SkDynamicMemoryWStream_Construct(SkDynamicMemoryWStream* uninitialized) {
     new(uninitialized) SkDynamicMemoryWStream();
@@ -1980,6 +1968,87 @@ extern "C" SkData* C_SkDynamicMemoryWStream_detachAsData(SkDynamicMemoryWStream*
 
 extern "C" SkStreamAsset* C_SkDynamicMemoryWStream_detachAsStream(SkDynamicMemoryWStream* self) {
     return self->detachAsStream().release();
+}
+
+//
+// core/SkYUVAInfo.h
+//
+
+extern "C" void C_SkYUVAInfo_Construct(SkYUVAInfo* uninitialized) {
+    new(uninitialized) SkYUVAInfo();
+}
+
+extern "C" void C_SkYUVAInfo_destruct(SkYUVAInfo* self) {
+    self->~SkYUVAInfo();
+}
+
+extern "C" int C_SkYUVAInfo_NumPlanes(SkYUVAInfo::PlanarConfig planarConfig) {
+    return SkYUVAInfo::NumPlanes(planarConfig);
+}
+
+extern "C" int C_SkYUVAInfo_NumChannelsInPlane(SkYUVAInfo::PlanarConfig planarConfig, int i) {
+    return SkYUVAInfo::NumChannelsInPlane(planarConfig, i);
+}
+
+extern "C" bool C_SkYUVAInfo_equals(const SkYUVAInfo* a, const SkYUVAInfo* b) {
+    return *a == *b;
+}
+
+//
+// core/SkYUVAPixmaps.h
+//
+
+extern "C" void C_SkYUVAPixmapInfo_construct(SkYUVAPixmapInfo* uninitialized) {
+    new(uninitialized) SkYUVAPixmapInfo();
+}
+
+extern "C" void C_SkYUVAPixmapInfo_destruct(SkYUVAPixmapInfo* self) {
+    self->~SkYUVAPixmapInfo();
+}
+
+extern "C" bool C_SkYUVAPixmapInfo_equals(const SkYUVAPixmapInfo* a, const SkYUVAPixmapInfo* b) {
+    return *a == *b;
+}
+
+extern "C" size_t C_SkYUVAPixmapInfo_rowBytes(const SkYUVAPixmapInfo* self, int i) {
+    return self->rowBytes(i);
+}
+
+extern "C" const SkImageInfo* C_SkYUVAPixmapInfo_planeInfo(const SkYUVAPixmapInfo* self, int i) {
+    return &self->planeInfo(i);
+}
+
+extern "C" bool C_SkYUVAPixmapInfo_isValid(const SkYUVAPixmapInfo* self) {
+    return self->isValid();
+}
+
+extern "C" void C_SkYUVAPixmapInfo_SupportedDataTypes_Construct(SkYUVAPixmapInfo::SupportedDataTypes* uninitialized) {
+    new(uninitialized) SkYUVAPixmapInfo::SupportedDataTypes();
+}
+
+extern "C" void C_SkYUVAPixmapInfo_SupportedDataTypes_destruct(SkYUVAPixmapInfo::SupportedDataTypes* self) {
+    self->~SupportedDataTypes();
+}
+
+extern "C" void C_SkYUVAPixmapInfo_SupportedDataTypes_All(SkYUVAPixmapInfo::SupportedDataTypes* uninitialized) {
+    new(uninitialized) SkYUVAPixmapInfo::SupportedDataTypes(SkYUVAPixmapInfo::SupportedDataTypes::All());
+}
+
+extern "C" bool C_SkYUVAPixmapInfo_SupportedDataTypes_supported(
+    const SkYUVAPixmapInfo::SupportedDataTypes* self, 
+    SkYUVAPixmapInfo::PlanarConfig pc, 
+    SkYUVAPixmapInfo::DataType dt) {
+    return self->supported(pc, dt);
+}
+
+extern "C" SkColorType C_SkYUVAPixmapInfo_DefaultColorTypeForDataType(SkYUVAPixmapInfo::DataType dt, int numChannels) {
+    return SkYUVAPixmapInfo::DefaultColorTypeForDataType(dt, numChannels);
+}
+
+extern "C" int C_SkYUVAPixmapInfo_NumChannelsAndDataType(SkColorType colorType, SkYUVAPixmapInfo::DataType* dataType) {
+    auto numDT = SkYUVAPixmapInfo::NumChannelsAndDataType(colorType);
+    *dataType = std::get<1>(numDT);
+    return std::get<0>(numDT);
 }
 
 //

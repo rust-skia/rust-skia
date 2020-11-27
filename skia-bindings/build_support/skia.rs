@@ -1238,6 +1238,12 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("SkMipmapMode", rewrite::k_xxx),
     ("Enable", rewrite::k_xxx),
     ("ShaderCacheStrategy", rewrite::k_xxx),
+    // m87:
+    // SkYUVAInfo_PlanarConfig
+    ("PlanarConfig", rewrite::k_xxx),
+    ("Siting", rewrite::k_xxx),
+    // SkYUVAPixmapInfo
+    ("DataType", rewrite::k_xxx),
 ];
 
 pub(crate) mod rewrite {
