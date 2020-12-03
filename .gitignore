@@ -1,4 +1,4 @@
 /Cargo.lock
-/target/
+target/
 /.cargo/credentials
 /cmake-build-debug/
