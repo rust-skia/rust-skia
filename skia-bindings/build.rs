@@ -68,10 +68,12 @@ fn main() {
     let build_config = skia::BuildConfiguration::default();
     let binaries_config = skia::BinariesConfiguration::from_cargo_env(&build_config);
 
+    // Used by both offline builds and binding generation
+    cargo::rerun_if_env_changed("SYSROOT");
+
     //
     // offline build?
     //
-
     if let Some(offline_source_dir) = env::offline_source_dir() {
         println!("STARTING OFFLINE BUILD");
 

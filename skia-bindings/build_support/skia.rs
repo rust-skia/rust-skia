@@ -34,6 +34,8 @@ impl Default for BuildConfiguration {
         BuildConfiguration {
             on_windows: cargo::host().is_windows(),
             skia_debug,
+            // `OPT_LEVEL` is set by Cargo itself.
+            opt_level: cargo::env_var("OPT_LEVEL"),
             features: Features {
                 gl: cfg!(feature = "gl"),
                 vulkan: cfg!(feature = "vulkan"),
@@ -47,6 +49,8 @@ impl Default for BuildConfiguration {
                 particles: false,
             },
             definitions: Vec::new(),
+            cc: cargo::env_var("CC").unwrap_or("clang".to_string()),
+            cxx: cargo::env_var("CXX").unwrap_or("clang++".to_string()),
         }
     }
 }
@@ -57,6 +61,10 @@ pub struct BuildConfiguration {
     /// Do we build _on_ a Windows OS?
     on_windows: bool,
 
+    /// Set the optimization level (0-3, s or z). Clang and GCC use the same notation
+    /// as Rust, so we just pass this option through from Cargo.
+    opt_level: Option<String>,
+
     /// Build Skia in a debug configuration?
     skia_debug: bool,
 
@@ -65,6 +73,12 @@ pub struct BuildConfiguration {
 
     /// Additional preprocessor definitions that will override predefined ones.
     definitions: Definitions,
+
+    /// C compiler to use
+    cc: String,
+
+    /// C++ compiler to use
+    cxx: String,
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -179,8 +193,8 @@ impl FinalBuildConfiguration {
                 ("skia_use_system_zlib", no()),
                 ("skia_use_xps", no()),
                 ("skia_use_dng_sdk", yes_if(features.dng)),
-                ("cc", quote("clang")),
-                ("cxx", quote("clang++")),
+                ("cc", quote(&build.cc)),
+                ("cxx", quote(&build.cxx)),
             ];
 
             if features.vulkan {
@@ -227,11 +241,30 @@ impl FinalBuildConfiguration {
                 args.push(("skia_use_system_libwebp", no()))
             }
 
-            let mut flags: Vec<&str> = vec![];
             let mut use_expat = true;
 
             // target specific gn args.
             let target = cargo::target();
+            let target_str = format!("--target={}", target.to_string());
+            let sysroot_arg;
+            let opt_level_arg;
+            let mut cflags: Vec<&str> = vec![&target_str];
+            let asmflags: Vec<&str> = vec![&target_str];
+
+            if let Some(sysroot) = cargo::env_var("SDKROOT") {
+                sysroot_arg = format!("--sysroot={}", sysroot);
+                cflags.push(&sysroot_arg);
+            }
+
+            if let Some(opt_level) = &build.opt_level {
+                if opt_level.parse::<usize>() != Ok(0) {
+                    cflags.push("-flto");
+                }
+
+                opt_level_arg = format!("-O{}", opt_level);
+                cflags.push(&opt_level_arg);
+            }
+
             match target.as_strs() {
                 (_, _, "windows", Some("msvc")) if build.on_windows => {
                     if let Some(win_vc) = vs::resolve_win_vc() {
@@ -243,11 +276,11 @@ impl FinalBuildConfiguration {
                     // and the compiler has to place the library name LIBCMT.lib into the .obj
                     // See https://docs.microsoft.com/en-us/cpp/build/reference/md-mt-ld-use-run-time-library?view=vs-2019
                     if cargo::target_crt_static() {
-                        flags.push("/MT");
+                        cflags.push("/MT");
                     }
                     // otherwise the C runtime should be linked dynamically
                     else {
-                        flags.push("/MD");
+                        cflags.push("/MD");
                     }
                     // Tell Skia's build system where LLVM is supposed to be located.
                     if let Some(llvm_home) = llvm::win::find_llvm_home() {
@@ -274,7 +307,10 @@ impl FinalBuildConfiguration {
                     args.push(("target_os", quote("ios")));
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
                 }
-                _ => {}
+                (arch, _, os, _) => {
+                    args.push(("target_cpu", quote(clang::target_arch(arch))));
+                    args.push(("target_os", quote(os)));
+                }
             }
 
             if use_expat {
@@ -284,12 +320,24 @@ impl FinalBuildConfiguration {
                 args.push(("skia_use_expat", no()));
             }
 
-            if !flags.is_empty() {
-                let flags: String = {
-                    let v: Vec<String> = flags.into_iter().map(quote).collect();
-                    v.join(",")
-                };
-                args.push(("extra_cflags", format!("[{}]", flags)));
+            if !cflags.is_empty() {
+                let cflags = format!(
+                    "[{}]",
+                    cflags.into_iter().map(quote).collect::<Vec<_>>().join(",")
+                );
+                args.push(("extra_cflags", cflags));
+            }
+
+            if !asmflags.is_empty() {
+                let asmflags = format!(
+                    "[{}]",
+                    asmflags
+                        .into_iter()
+                        .map(quote)
+                        .collect::<Vec<_>>()
+                        .join(",")
+                );
+                args.push(("extra_asmflags", asmflags));
             }
 
             args.into_iter()
@@ -612,13 +660,9 @@ pub fn build_skia(
 }
 
 fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
-    let mut builder = bindgen::Builder::default()
+    let builder = bindgen::Builder::default()
         .generate_comments(false)
         .layout_tests(true)
-        // on macOS some arrays that are used in opaque types get too large to support Debug.
-        // (for example High Sierra: [u16; 105])
-        // TODO: may reenable when const generics land in stable.
-        .derive_debug(false)
         .default_enum_style(EnumVariation::Rust {
             non_exhaustive: false,
         })
@@ -667,19 +711,30 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         // misc
         .whitelist_var("SK_Color.*")
         .whitelist_var("kAll_GrBackendState")
-        //
-        // don't generate destructors: https://github.com/rust-skia/rust-skia/issues/318
-        .with_codegen_config({
+        .use_core()
+        .clang_arg("-std=c++17")
+        .clang_args(&["-x", "c++"])
+        .clang_arg("-v");
+
+    // on macOS some arrays that are used in opaque types get too large to support Debug.
+    // (for example High Sierra: [u16; 105])
+    // TODO: may reenable when const generics land in stable.
+    let builder = if cfg!(target_os = "macos") {
+        builder.derive_debug(false)
+    } else {
+        builder
+    };
+
+    // don't generate destructors on Windows: https://github.com/rust-skia/rust-skia/issues/318
+    let mut builder = if cfg!(target_os = "windows") {
+        builder.with_codegen_config({
             let mut config = CodegenConfig::default();
             config.remove(CodegenConfig::DESTRUCTORS);
             config
         })
-        //
-        .use_core()
-        .clang_arg("-std=c++17")
-        // required for macOS LLVM 8 to pick up C++ headers:
-        .clang_args(&["-x", "c++"])
-        .clang_arg("-v");
+    } else {
+        builder
+    };
 
     for function in WHITELISTED_FUNCTIONS {
         builder = builder.whitelist_function(function)
@@ -746,18 +801,40 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
     }
 
     let target = cargo::target();
+
+    let target_str = &target.to_string();
+    cc_build.target(target_str);
+
+    let sdk;
+    let sysroot = cargo::env_var("SDKROOT");
+    let mut sysroot: Option<&str> = sysroot.as_ref().map(AsRef::as_ref);
+    let mut sysroot_flag = "--sysroot=";
+
     match target.as_strs() {
         (_, "apple", "darwin", _) => {
-            if let Some(sdk) = xcode::get_sdk_path("macosx") {
-                builder = builder.clang_arg(format!("-isysroot{}", sdk.to_str().unwrap()));
-            } else {
-                cargo::warning("failed to get macosx SDK path")
+            // macOS uses `-isysroot/path/to/sysroot`, but this doesn't appear
+            // to work for other targets. `--sysroot=` works for all targets,
+            // to my knowledge, but doesn't seem to be idiomatic for macOS
+            // compilation. To capture this, we allow manually setting sysroot
+            // on any platform, but we use `-isysroot` for OSX builds and `--sysroot`
+            // elsewhere. If you don't manually set the sysroot, we can automatically
+            // detect it, but this is only possible for macOS.
+            sysroot_flag = "-isysroot";
+
+            if sysroot.is_none() {
+                if let Some(macos_sdk) = xcode::get_sdk_path("macosx") {
+                    sdk = macos_sdk;
+                    sysroot = Some(
+                        sdk.to_str()
+                            .expect("macOS SDK path could not be converted to string"),
+                    );
+                } else {
+                    cargo::warning("failed to get macosx SDK path")
+                }
             }
         }
         (arch, "linux", "android", _) | (arch, "linux", "androideabi", _) => {
-            let target = &target.to_string();
-            cc_build.target(target);
-            for arg in android::additional_clang_args(target, arch) {
+            for arg in android::additional_clang_args(target_str, arch) {
                 builder = builder.clang_arg(arg);
             }
         }
@@ -767,6 +844,10 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
             }
         }
         _ => {}
+    }
+
+    if let Some(sysroot) = sysroot {
+        builder = builder.clang_arg(format!("{}{}", sysroot_flag, sysroot));
     }
 
     println!("COMPILING BINDINGS: {:?}", build.binding_sources);
