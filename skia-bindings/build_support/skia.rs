@@ -228,11 +228,18 @@ impl FinalBuildConfiguration {
                 args.push(("skia_use_system_libwebp", no()))
             }
 
-            let mut flags: Vec<&str> = vec![];
             let mut use_expat = true;
 
             // target specific gn args.
             let target = cargo::target();
+            let target_str = format!("--target={}", target.to_string());
+            let sysroot_arg;
+            let mut flags: Vec<&str> = vec![&target_str];
+            if let Ok(sysroot) = std::env::var("SYSROOT") {
+                sysroot_arg = format!("--sysroot={}", sysroot);
+                flags.push(&sysroot_arg);
+            }
+
             match target.as_strs() {
                 (_, _, "windows", Some("msvc")) if build.on_windows => {
                     if let Some(win_vc) = vs::resolve_win_vc() {
@@ -275,7 +282,10 @@ impl FinalBuildConfiguration {
                     args.push(("target_os", quote("ios")));
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
                 }
-                _ => {}
+                (arch, _, os, _) => {
+                    args.push(("target_cpu", quote(clang::target_arch(arch))));
+                    args.push(("target_os", quote(os)));
+                }
             }
 
             if use_expat {
@@ -286,11 +296,13 @@ impl FinalBuildConfiguration {
             }
 
             if !flags.is_empty() {
-                let flags: String = {
-                    let v: Vec<String> = flags.into_iter().map(quote).collect();
-                    v.join(",")
-                };
-                args.push(("extra_cflags", format!("[{}]", flags)));
+                let flags = format!(
+                    "[{}]",
+                    flags.into_iter().map(quote).collect::<Vec<_>>().join(",")
+                );
+                args.push(("extra_cflags", flags.clone()));
+                args.push(("extra_asmflags", flags.clone()));
+                args.push(("extra_ldflags", flags));
             }
 
             args.into_iter()
@@ -613,13 +625,9 @@ pub fn build_skia(
 }
 
 fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
-    let mut builder = bindgen::Builder::default()
+    let builder = bindgen::Builder::default()
         .generate_comments(false)
         .layout_tests(true)
-        // on macOS some arrays that are used in opaque types get too large to support Debug.
-        // (for example High Sierra: [u16; 105])
-        // TODO: may reenable when const generics land in stable.
-        .derive_debug(false)
         .default_enum_style(EnumVariation::Rust {
             non_exhaustive: false,
         })
@@ -668,19 +676,30 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         // misc
         .whitelist_var("SK_Color.*")
         .whitelist_var("kAll_GrBackendState")
-        //
-        // don't generate destructors: https://github.com/rust-skia/rust-skia/issues/318
-        .with_codegen_config({
+        .use_core()
+        .clang_arg("-std=c++17")
+        .clang_args(&["-x", "c++"])
+        .clang_arg("-v");
+
+    // on macOS some arrays that are used in opaque types get too large to support Debug.
+    // (for example High Sierra: [u16; 105])
+    // TODO: may reenable when const generics land in stable.
+    let builder = if cfg!(target_os = "macos") {
+        builder.derive_debug(false)
+    } else {
+        builder
+    };
+
+    // don't generate destructors on Windows: https://github.com/rust-skia/rust-skia/issues/318
+    let mut builder = if cfg!(target_os = "windows") {
+        builder.with_codegen_config({
             let mut config = CodegenConfig::default();
             config.remove(CodegenConfig::DESTRUCTORS);
             config
         })
-        //
-        .use_core()
-        .clang_arg("-std=c++17")
-        // required for macOS LLVM 8 to pick up C++ headers:
-        .clang_args(&["-x", "c++"])
-        .clang_arg("-v");
+    } else {
+        builder
+    };
 
     for function in WHITELISTED_FUNCTIONS {
         builder = builder.whitelist_function(function)
@@ -747,6 +766,10 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
     }
 
     let target = cargo::target();
+
+    let target_str = &target.to_string();
+    cc_build.target(target_str);
+
     match target.as_strs() {
         (_, "apple", "darwin", _) => {
             if let Some(sdk) = xcode::get_sdk_path("macosx") {
@@ -756,9 +779,7 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
             }
         }
         (arch, "linux", "android", _) | (arch, "linux", "androideabi", _) => {
-            let target = &target.to_string();
-            cc_build.target(target);
-            for arg in android::additional_clang_args(target, arch) {
+            for arg in android::additional_clang_args(target_str, arch) {
                 builder = builder.clang_arg(arg);
             }
         }
@@ -768,6 +789,10 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
             }
         }
         _ => {}
+    }
+
+    if let Ok(sysroot) = std::env::var("SYSROOT") {
+        builder = builder.clang_arg(format!("--sysroot={}", sysroot));
     }
 
     println!("COMPILING BINDINGS: {:?}", build.binding_sources);
