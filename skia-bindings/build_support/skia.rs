@@ -234,10 +234,17 @@ impl FinalBuildConfiguration {
             let target = cargo::target();
             let target_str = format!("--target={}", target.to_string());
             let sysroot_arg;
+            let opt_level_arg;
             let mut flags: Vec<&str> = vec![&target_str];
+
             if let Ok(sysroot) = std::env::var("SYSROOT") {
                 sysroot_arg = format!("--sysroot={}", sysroot);
                 flags.push(&sysroot_arg);
+            }
+
+            if let Ok(opt_level) = std::env::var("OPT_LEVEL") {
+                opt_level_arg = format!("-O{}", opt_level);
+                flags.push(&opt_level_arg);
             }
 
             match target.as_strs() {
@@ -502,13 +509,19 @@ impl BinariesConfiguration {
         cargo::add_link_libs(&self.link_libraries);
     }
 
-    pub fn key(&self, repository_short_hash: &str) -> String {
+    pub fn key(
+        &self,
+        repository_short_hash: &str,
+    ) -> String {
         binaries::key(repository_short_hash, &self.feature_ids, self.skia_debug)
     }
 }
 
 /// The full build of Skia, skia-bindings, and the generation of bindings.rs.
-pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
+pub fn build(
+    build: &FinalBuildConfiguration,
+    config: &BinariesConfiguration,
+) {
     let python2 = &prerequisites::locate_python2_cmd();
     println!("Python 2 found: {:?}", python2);
     let ninja = fetch_dependencies(&python2);
@@ -624,7 +637,10 @@ pub fn build_skia(
     generate_bindings(build, &config.output_directory)
 }
 
-fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
+fn generate_bindings(
+    build: &FinalBuildConfiguration,
+    output_directory: &Path,
+) {
     let builder = bindgen::Builder::default()
         .generate_comments(false)
         .layout_tests(true)
@@ -1150,11 +1166,17 @@ pub(crate) mod rewrite {
     use heck::ShoutySnakeCase;
     use regex::Regex;
 
-    pub fn k_xxx_uppercase(name: &str, variant: &str) -> String {
+    pub fn k_xxx_uppercase(
+        name: &str,
+        variant: &str,
+    ) -> String {
         k_xxx(name, variant).to_uppercase()
     }
 
-    pub fn k_xxx(name: &str, variant: &str) -> String {
+    pub fn k_xxx(
+        name: &str,
+        variant: &str,
+    ) -> String {
         if let Some(stripped) = variant.strip_prefix('k') {
             stripped.into()
         } else {
@@ -1165,11 +1187,17 @@ pub(crate) mod rewrite {
         }
     }
 
-    pub fn _k_xxx_enum(name: &str, variant: &str) -> String {
+    pub fn _k_xxx_enum(
+        name: &str,
+        variant: &str,
+    ) -> String {
         capture(name, variant, &format!("k(.*)_{}", name))
     }
 
-    pub fn k_xxx_name_opt(name: &str, variant: &str) -> String {
+    pub fn k_xxx_name_opt(
+        name: &str,
+        variant: &str,
+    ) -> String {
         let suffix = &format!("_{}", name);
         if variant.ends_with(suffix) {
             capture(name, variant, &format!("k(.*){}", suffix))
@@ -1178,16 +1206,26 @@ pub(crate) mod rewrite {
         }
     }
 
-    pub fn k_xxx_name(name: &str, variant: &str) -> String {
+    pub fn k_xxx_name(
+        name: &str,
+        variant: &str,
+    ) -> String {
         capture(name, variant, &format!("k(.*)_{}", name))
     }
 
-    pub fn vk(name: &str, variant: &str) -> String {
+    pub fn vk(
+        name: &str,
+        variant: &str,
+    ) -> String {
         let prefix = name.to_shouty_snake_case();
         capture(name, variant, &format!("{}_(.*)", prefix))
     }
 
-    fn capture(name: &str, variant: &str, pattern: &str) -> String {
+    fn capture(
+        name: &str,
+        variant: &str,
+        pattern: &str,
+    ) -> String {
         let re = Regex::new(pattern).unwrap();
         re.captures(variant).unwrap_or_else(|| {
             panic!(
@@ -1409,7 +1447,10 @@ pub(crate) mod definitions {
             .collect()
     }
 
-    pub fn combine(a: Definitions, b: Definitions) -> Definitions {
+    pub fn combine(
+        a: Definitions,
+        b: Definitions,
+    ) -> Definitions {
         remove_duplicates(a.into_iter().chain(b.into_iter()).collect())
     }
 
