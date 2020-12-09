@@ -36,6 +36,9 @@ impl Default for BuildConfiguration {
             skia_debug,
             features: Features {
                 gl: cfg!(feature = "gl"),
+                egl: cfg!(feature = "egl"),
+                wayland: cfg!(feature = "wayland"),
+                x11: cfg!(feature = "x11"),
                 vulkan: cfg!(feature = "vulkan"),
                 metal: cfg!(feature = "metal"),
                 d3d: cfg!(feature = "d3d"),
@@ -69,8 +72,17 @@ pub struct BuildConfiguration {
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Features {
-    /// Build with OpenGL / EGL support?
+    /// Build with OpenGL support?
     pub gl: bool,
+
+    /// Build with EGL support? If you set X11, setting this to false will use LibGL (GLX)
+    pub egl: bool,
+
+    /// Build with Wayland support? This requires EGL, as GLX does not work on Wayland.
+    pub wayland: bool,
+
+    /// Build with X11 support?
+    pub x11: bool,
 
     /// Build with Vulkan support?
     pub vulkan: bool,
@@ -173,6 +185,8 @@ impl FinalBuildConfiguration {
                 ("is_debug", yes_if(build.skia_debug)),
                 ("skia_enable_gpu", yes_if(features.gpu())),
                 ("skia_use_gl", yes_if(features.gl)),
+                ("skia_use_egl", yes_if(features.egl)),
+                ("skia_use_x11", yes_if(features.x11)),
                 ("skia_use_system_libjpeg_turbo", no()),
                 ("skia_use_system_libpng", no()),
                 ("skia_use_libwebp_encode", yes_if(features.webp_encode)),
@@ -232,19 +246,25 @@ impl FinalBuildConfiguration {
 
             // target specific gn args.
             let target = cargo::target();
-            let target_str = format!("--target={}", target.to_string());
+            let target_str: &str = &format!("--target={}", target.to_string());
             let sysroot_arg;
             let opt_level_arg;
-            let mut flags: Vec<&str> = vec![&target_str];
+            let mut cflags = vec![target_str];
+            let asmflags = vec![target_str];
 
-            if let Ok(sysroot) = std::env::var("SYSROOT") {
+            if let Some(sysroot) = cargo::env_var("SYSROOT") {
                 sysroot_arg = format!("--sysroot={}", sysroot);
-                flags.push(&sysroot_arg);
+                cflags.push(&sysroot_arg);
             }
 
-            if let Ok(opt_level) = std::env::var("OPT_LEVEL") {
+            // `OPT_LEVEL` is set by Cargo itself.
+            if let Some(opt_level) = cargo::env_var("OPT_LEVEL") {
+                if opt_level.parse::<usize>() != Ok(0) {
+                    cflags.push("-flto");
+                }
+
                 opt_level_arg = format!("-O{}", opt_level);
-                flags.push(&opt_level_arg);
+                cflags.push(&opt_level_arg);
             }
 
             match target.as_strs() {
@@ -258,11 +278,10 @@ impl FinalBuildConfiguration {
                     // and the compiler has to place the library name LIBCMT.lib into the .obj
                     // See https://docs.microsoft.com/en-us/cpp/build/reference/md-mt-ld-use-run-time-library?view=vs-2019
                     if cargo::target_crt_static() {
-                        flags.push("/MT");
-                    }
-                    // otherwise the C runtime should be linked dynamically
-                    else {
-                        flags.push("/MD");
+                        cflags.push("/MT");
+                    } else {
+                        // otherwise the C runtime should be linked dynamically
+                        cflags.push("/MD");
                     }
                     // Tell Skia's build system where LLVM is supposed to be located.
                     if let Some(llvm_home) = llvm::win::find_llvm_home() {
@@ -285,10 +304,6 @@ impl FinalBuildConfiguration {
                     // in the system.
                     use_expat = true;
                 }
-                (arch, "apple", "ios", _) => {
-                    args.push(("target_os", quote("ios")));
-                    args.push(("target_cpu", quote(clang::target_arch(arch))));
-                }
                 (arch, _, os, _) => {
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
                     args.push(("target_os", quote(os)));
@@ -302,14 +317,24 @@ impl FinalBuildConfiguration {
                 args.push(("skia_use_expat", no()));
             }
 
-            if !flags.is_empty() {
-                let flags = format!(
+            if !cflags.is_empty() {
+                let cflags = format!(
                     "[{}]",
-                    flags.into_iter().map(quote).collect::<Vec<_>>().join(",")
+                    cflags.into_iter().map(quote).collect::<Vec<_>>().join(",")
                 );
-                args.push(("extra_cflags", flags.clone()));
-                args.push(("extra_asmflags", flags.clone()));
-                args.push(("extra_ldflags", flags));
+                args.push(("extra_cflags", cflags));
+            }
+
+            if !asmflags.is_empty() {
+                let asmflags = format!(
+                    "[{}]",
+                    asmflags
+                        .into_iter()
+                        .map(quote)
+                        .collect::<Vec<_>>()
+                        .join(",")
+                );
+                args.push(("extra_asmflags", asmflags));
             }
 
             args.into_iter()
@@ -427,7 +452,18 @@ impl BinariesConfiguration {
             (_, "unknown", "linux", Some("gnu")) => {
                 link_libraries.extend(vec!["stdc++", "fontconfig", "freetype"]);
                 if features.gl {
-                    link_libraries.push("GL");
+                    if features.egl {
+                        link_libraries.push("EGL");
+                    }
+
+                    if features.x11 {
+                        link_libraries.push("GL");
+                    }
+
+                    if features.wayland {
+                        link_libraries.push("wayland-egl");
+                        link_libraries.push("GLESv2");
+                    }
                 }
             }
             (_, "apple", "darwin", _) => {
@@ -509,19 +545,13 @@ impl BinariesConfiguration {
         cargo::add_link_libs(&self.link_libraries);
     }
 
-    pub fn key(
-        &self,
-        repository_short_hash: &str,
-    ) -> String {
+    pub fn key(&self, repository_short_hash: &str) -> String {
         binaries::key(repository_short_hash, &self.feature_ids, self.skia_debug)
     }
 }
 
 /// The full build of Skia, skia-bindings, and the generation of bindings.rs.
-pub fn build(
-    build: &FinalBuildConfiguration,
-    config: &BinariesConfiguration,
-) {
+pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
     let python2 = &prerequisites::locate_python2_cmd();
     println!("Python 2 found: {:?}", python2);
     let ninja = fetch_dependencies(&python2);
@@ -637,10 +667,7 @@ pub fn build_skia(
     generate_bindings(build, &config.output_directory)
 }
 
-fn generate_bindings(
-    build: &FinalBuildConfiguration,
-    output_directory: &Path,
-) {
+fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
     let builder = bindgen::Builder::default()
         .generate_comments(false)
         .layout_tests(true)
@@ -807,7 +834,7 @@ fn generate_bindings(
         _ => {}
     }
 
-    if let Ok(sysroot) = std::env::var("SYSROOT") {
+    if let Some(sysroot) = cargo::env_var("SYSROOT") {
         builder = builder.clang_arg(format!("--sysroot={}", sysroot));
     }
 
@@ -1166,17 +1193,11 @@ pub(crate) mod rewrite {
     use heck::ShoutySnakeCase;
     use regex::Regex;
 
-    pub fn k_xxx_uppercase(
-        name: &str,
-        variant: &str,
-    ) -> String {
+    pub fn k_xxx_uppercase(name: &str, variant: &str) -> String {
         k_xxx(name, variant).to_uppercase()
     }
 
-    pub fn k_xxx(
-        name: &str,
-        variant: &str,
-    ) -> String {
+    pub fn k_xxx(name: &str, variant: &str) -> String {
         if let Some(stripped) = variant.strip_prefix('k') {
             stripped.into()
         } else {
@@ -1187,17 +1208,11 @@ pub(crate) mod rewrite {
         }
     }
 
-    pub fn _k_xxx_enum(
-        name: &str,
-        variant: &str,
-    ) -> String {
+    pub fn _k_xxx_enum(name: &str, variant: &str) -> String {
         capture(name, variant, &format!("k(.*)_{}", name))
     }
 
-    pub fn k_xxx_name_opt(
-        name: &str,
-        variant: &str,
-    ) -> String {
+    pub fn k_xxx_name_opt(name: &str, variant: &str) -> String {
         let suffix = &format!("_{}", name);
         if variant.ends_with(suffix) {
             capture(name, variant, &format!("k(.*){}", suffix))
@@ -1206,26 +1221,16 @@ pub(crate) mod rewrite {
         }
     }
 
-    pub fn k_xxx_name(
-        name: &str,
-        variant: &str,
-    ) -> String {
+    pub fn k_xxx_name(name: &str, variant: &str) -> String {
         capture(name, variant, &format!("k(.*)_{}", name))
     }
 
-    pub fn vk(
-        name: &str,
-        variant: &str,
-    ) -> String {
+    pub fn vk(name: &str, variant: &str) -> String {
         let prefix = name.to_shouty_snake_case();
         capture(name, variant, &format!("{}_(.*)", prefix))
     }
 
-    fn capture(
-        name: &str,
-        variant: &str,
-        pattern: &str,
-    ) -> String {
+    fn capture(name: &str, variant: &str, pattern: &str) -> String {
         let re = Regex::new(pattern).unwrap();
         re.captures(variant).unwrap_or_else(|| {
             panic!(
@@ -1447,10 +1452,7 @@ pub(crate) mod definitions {
             .collect()
     }
 
-    pub fn combine(
-        a: Definitions,
-        b: Definitions,
-    ) -> Definitions {
+    pub fn combine(a: Definitions, b: Definitions) -> Definitions {
         remove_duplicates(a.into_iter().chain(b.into_iter()).collect())
     }
 
