@@ -34,6 +34,8 @@ impl Default for BuildConfiguration {
         BuildConfiguration {
             on_windows: cargo::host().is_windows(),
             skia_debug,
+            // `OPT_LEVEL` is set by Cargo itself.
+            opt_level: cargo::env_var("OPT_LEVEL"),
             features: Features {
                 gl: cfg!(feature = "gl"),
                 egl: cfg!(feature = "egl"),
@@ -61,6 +63,10 @@ impl Default for BuildConfiguration {
 pub struct BuildConfiguration {
     /// Do we build _on_ a Windows OS?
     on_windows: bool,
+
+    /// Set the optimization level (0-3, s or z). Clang and GCC use the same notation
+    /// as Rust, so we just pass this option through from Cargo.
+    opt_level: Option<String>,
 
     /// Build Skia in a debug configuration?
     skia_debug: bool,
@@ -265,8 +271,7 @@ impl FinalBuildConfiguration {
                 cflags.push(&sysroot_arg);
             }
 
-            // `OPT_LEVEL` is set by Cargo itself.
-            if let Some(opt_level) = cargo::env_var("OPT_LEVEL") {
+            if let Some(opt_level) = &build.opt_level {
                 if opt_level.parse::<usize>() != Ok(0) {
                     cflags.push("-flto");
                 }
