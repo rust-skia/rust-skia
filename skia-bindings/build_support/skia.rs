@@ -50,6 +50,8 @@ impl Default for BuildConfiguration {
                 particles: false,
             },
             definitions: Vec::new(),
+            cc: cargo::env_var("CC").unwrap_or("clang".to_string()),
+            cxx: cargo::env_var("CXX").unwrap_or("clang++".to_string()),
         }
     }
 }
@@ -68,6 +70,12 @@ pub struct BuildConfiguration {
 
     /// Additional preprocessor definitions that will override predefined ones.
     definitions: Definitions,
+
+    /// C compiler to use
+    cc: String,
+
+    /// C++ compiler to use
+    cxx: String,
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -194,8 +202,8 @@ impl FinalBuildConfiguration {
                 ("skia_use_system_zlib", no()),
                 ("skia_use_xps", no()),
                 ("skia_use_dng_sdk", yes_if(features.dng)),
-                ("cc", quote("clang")),
-                ("cxx", quote("clang++")),
+                ("cc", quote(&build.cc)),
+                ("cxx", quote(&build.cxx)),
             ];
 
             if features.vulkan {
