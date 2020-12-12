@@ -96,7 +96,7 @@ jobs:
         architecture: 'x64'
     - bash: |
         set -e
-        choco install llvm --version 10.0.0
+        choco install llvm --version 11.0.0
       displayName: Install LLVM on Windows
   
   # Install Rust for the user if we are running inside a container
