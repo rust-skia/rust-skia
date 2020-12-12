@@ -1,7 +1,8 @@
 // Author: Alberto González Palomo https://sentido-labs.com
 // ©2019 Alberto González Palomo https://sentido-labs.com
 // Released under the MIT license: https://opensource.org/licenses/MIT
-
+#![allow(clippy::unknown_clippy_lints)]
+#![allow(clippy::unusual_byte_groupings)]
 use skia_safe::{
     gradient_shader, Color, Matrix, Paint, PaintJoin, PaintStyle, Path, Point, TileMode,
 };
