@@ -142,7 +142,7 @@ jobs:
       exampleArgs: '$(exampleArgs)'
       runClippy: true
       runTests: true
-      # As long we don't know why there are some DLLs are missing from the Windows Container, we
+      # As long we don't know which DLLs are missing from the Windows Container, we
       # can't generate artifacts.
       ${{ if ne(parameters.platform, 'Windows') }}:
         generateArtifacts: true
