@@ -86,18 +86,6 @@ jobs:
     - bash: |
         brew uninstall llvm
       displayName: 'Uninstall LLVM'
-
-  # - ${{ if eq(parameters.platform, 'Windows') }}:
-  #   # Windows.
-  #   - task: UsePythonVersion@0
-  #     inputs:
-  #       versionSpec: '2.x'
-  #       addToPath: true
-  #       architecture: 'x64'
-  #   - bash: |
-  #       set -e
-  #       choco install llvm --version 11.0.0
-  #     displayName: Install LLVM on Windows
   
   # Install Rust for the user if we are running inside a container on Linux
   - ${{ if and(ne(parameters.container, ''), eq(parameters.platform, 'Linux')) }}:
