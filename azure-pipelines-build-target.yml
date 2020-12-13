@@ -43,19 +43,13 @@ steps:
   - ${{ if eq(parameters.runClippy, True) }}:
     - bash: |
         set -e
-        set
-        (cd skia-bindings && cargo clippy --release --features "${{ parameters.features }}" --all-targets --target ${{ parameters.target }} -- -D warnings)
-        (cd skia-safe && cargo clippy --release --features "${{ parameters.features }}" --all-targets --target ${{ parameters.target }} -- -D warnings)
         (cd skia-org && cargo clippy --release --features "${{ parameters.features }}" --all-targets --target ${{ parameters.target }} -- -D warnings)
       displayName: 'Clippy skia-bindings, skia-safe, and skia-org'
 
   - ${{ if eq(parameters.runBinaries, True) }}:
 
-    - script: cd skia-bindings && cargo test --release --features "${{ parameters.features }}" --target ${{ parameters.target }} -vv -- --test-threads=1 --nocapture
-      displayName: 'Test skia-bindings'
-
-    - script: cd skia-safe && cargo test --release --features "${{ parameters.features }}" --target ${{ parameters.target }} -vv -- --test-threads=1 --nocapture
-      displayName: 'Test skia-safe'
+    - script: cd skia-org && cargo test --all --release --features "${{ parameters.features }}" --all-targets --target ${{ parameters.target }} -vv -- --test-threads=1 --nocapture
+      displayName: 'Test all workspace projects'
 
     - ${{ if ne(parameters.exampleArgs, '') }}:
       - script: cd skia-org && cargo run --release --features "${{ parameters.features }}" --target ${{ parameters.target }} "$(Build.ArtifactStagingDirectory)/skia-org" ${{ parameters.exampleArgs }}
