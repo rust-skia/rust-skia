@@ -142,10 +142,7 @@ jobs:
       exampleArgs: '$(exampleArgs)'
       runClippy: true
       runTests: true
-      # As long we don't know which DLLs are missing from the Windows Container, we
-      # can't generate artifacts.
-      ${{ if ne(parameters.platform, 'Windows') }}:
-        generateArtifacts: true
+      generateArtifacts: true
       releaseBinaries: ${{ parameters.deployRelease }}
       ${{ if and(eq(parameters.platform, 'macOS'), eq(parameters.deployRelease, 'False')) }}:
         features: '$(features),metal'
