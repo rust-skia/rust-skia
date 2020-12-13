@@ -32,7 +32,6 @@ steps:
         echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
       fi
       cargo clean
-      set
       (cd skia-safe && cargo build --release --features "${{ parameters.features }}" --all-targets --target ${{ parameters.target }} -vv)
       export SKIA_BINARIES_TAG=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/tag.txt")
       export SKIA_BINARIES_KEY=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/key.txt")
