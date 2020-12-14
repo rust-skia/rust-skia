@@ -156,7 +156,6 @@ pub struct FinalBuildConfiguration {
 }
 
 impl FinalBuildConfiguration {
-    #[allow(clippy::cognitive_complexity)]
     pub fn from_build_configuration(
         build: &BuildConfiguration,
         skia_source_dir: &Path,

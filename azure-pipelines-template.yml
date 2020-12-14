@@ -86,21 +86,9 @@ jobs:
     - bash: |
         brew uninstall llvm
       displayName: 'Uninstall LLVM'
-
-  - ${{ if eq(parameters.platform, 'Windows') }}:
-    # Windows.
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '2.x'
-        addToPath: true
-        architecture: 'x64'
-    - bash: |
-        set -e
-        choco install llvm --version 10.0.0
-      displayName: Install LLVM on Windows
   
-  # Install Rust for the user if we are running inside a container
-  - ${{ if ne(parameters.container, '') }}:
+  # Install Rust for the user if we are running inside a container on Linux
+  - ${{ if and(ne(parameters.container, ''), eq(parameters.platform, 'Linux')) }}:
     - bash: |
         curl https://sh.rustup.rs -sSf | sh -s -- -y
         echo "##vso[task.setvariable variable=PATH;]$HOME/.cargo/bin:$PATH"
@@ -117,14 +105,6 @@ jobs:
       rustc -Vv
       cargo -V
     displayName: Update Rust, Install Clippy and Rustfmt and print Rust & Cargo Versions
-
-  # - ${{ if eq(parameters.platform, 'Linux') }}:
-  #   # Linux Ubuntu 18.04 (Gl/glx.h and libgl)
-  #   - bash: |
-  #       set -e
-  #       sudo apt-get update
-  #       sudo apt-get install mesa-common-dev libgl1-mesa-dev libgl1
-  #     displayName: Install mesa-common-dev libgl1-mesa-dev and libgl1
 
   - ${{ if ne(parameters.platform, 'Windows') }}:
     # Linux and macOS.
@@ -161,7 +141,8 @@ jobs:
       target: '$(platformTarget)'
       exampleArgs: '$(exampleArgs)'
       runClippy: true
-      runBinaries: true
+      runTests: true
+      generateArtifacts: true
       releaseBinaries: ${{ parameters.deployRelease }}
       ${{ if and(eq(parameters.platform, 'macOS'), eq(parameters.deployRelease, 'False')) }}:
         features: '$(features),metal'

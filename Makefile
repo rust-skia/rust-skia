@@ -77,3 +77,13 @@ update-doc:
 	cd rust-skia.github.io && git push origin master	
 	rm -rf rust-skia.github.io
 
+build-flags-win=--release --features "gl,vulkan,d3d,textlayout,webp"
+
+.PHONY: azure-build-win
+azure-build-win:
+	cargo clean
+	cd skia-safe && cargo build ${build-flags-win} --all-targets
+	cd skia-org && cargo clippy ${build-flags-win} --all-targets -- -D warnings 
+	cd skia-org && cargo test --all ${build-flags-win} --all-targets -- --nocapture
+	cd skia-org && cargo run ${build-flags-win}
+
