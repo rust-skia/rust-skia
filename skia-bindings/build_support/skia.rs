@@ -262,9 +262,11 @@ impl FinalBuildConfiguration {
                     cflags.push("-flto");
                 }
                 */
-
-                opt_level_arg = format!("-O{}", opt_level);
-                cflags.push(&opt_level_arg);
+                // When targeting windows `-O` isn't supported.
+                if !target.is_windows() {
+                    opt_level_arg = format!("-O{}", opt_level);
+                    cflags.push(&opt_level_arg);
+                }
             }
 
             match target.as_strs() {
