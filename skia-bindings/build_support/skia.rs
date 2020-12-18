@@ -257,9 +257,11 @@ impl FinalBuildConfiguration {
             }
 
             if let Some(opt_level) = &build.opt_level {
+                /* LTO generates corrupt libraries on the host platforms when building with --release
                 if opt_level.parse::<usize>() != Ok(0) {
                     cflags.push("-flto");
                 }
+                */
 
                 opt_level_arg = format!("-O{}", opt_level);
                 cflags.push(&opt_level_arg);
