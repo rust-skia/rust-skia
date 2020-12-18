@@ -307,13 +307,9 @@ impl FinalBuildConfiguration {
                     // in the system.
                     use_expat = true;
                 }
-                (arch, "apple", "ios", _) => {
-                    args.push(("target_os", quote("ios")));
-                    args.push(("target_cpu", quote(clang::target_arch(arch))));
-                }
                 (arch, _, os, _) => {
-                    args.push(("target_cpu", quote(clang::target_arch(arch))));
                     args.push(("target_os", quote(os)));
+                    args.push(("target_cpu", quote(clang::target_arch(arch))));
                 }
             }
 
