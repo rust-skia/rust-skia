@@ -49,8 +49,8 @@ impl Default for BuildConfiguration {
                 particles: false,
             },
             definitions: Vec::new(),
-            cc: cargo::env_var("CC").unwrap_or("clang".to_string()),
-            cxx: cargo::env_var("CXX").unwrap_or("clang++".to_string()),
+            cc: cargo::env_var("CC").unwrap_or_else(|| "clang".to_string()),
+            cxx: cargo::env_var("CXX").unwrap_or_else(|| "clang++".to_string()),
         }
     }
 }
