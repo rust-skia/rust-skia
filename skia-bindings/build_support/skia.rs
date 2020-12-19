@@ -308,7 +308,12 @@ impl FinalBuildConfiguration {
                     use_expat = true;
                 }
                 (arch, _, os, _) => {
-                    args.push(("target_os", quote(os)));
+                    let skia_target_os = match os {
+                        "darwin" => "mac",
+                        "windows" => "win",
+                        _ => os,
+                    };
+                    args.push(("target_os", quote(skia_target_os)));
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
                 }
             }
