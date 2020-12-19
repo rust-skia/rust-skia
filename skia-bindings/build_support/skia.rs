@@ -721,15 +721,6 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         .clang_args(&["-x", "c++"])
         .clang_arg("-v");
 
-    // on macOS some arrays that are used in opaque types get too large to support Debug.
-    // (for example High Sierra: [u16; 105])
-    // TODO: may reenable when const generics land in stable.
-    let builder = if cfg!(target_os = "macos") {
-        builder.derive_debug(false)
-    } else {
-        builder
-    };
-
     // don't generate destructors on Windows: https://github.com/rust-skia/rust-skia/issues/318
     let mut builder = if cfg!(target_os = "windows") {
         builder.with_codegen_config({
