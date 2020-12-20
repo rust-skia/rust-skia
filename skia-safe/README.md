@@ -54,6 +54,16 @@ Platform support for OpenGL or OpenGL ES can be enabled by adding the feature `g
 (cd skia-org && cargo run --features gl [OUTPUT_DIR] --driver opengl)
 ```
 
+#### `egl`, `x11`, `wayland`
+
+These features are configure the Window manager integration. They are supported on Linux based platforms and enable the `gl` feature implicitly:
+
+`egl` uses EGL instead of GLX to set up OpenGL contexts, a prerequisite for enabling `wayland`.
+
+`x11` enables support for setting up X11 OpenGL contexts.
+
+`wayland` enables support for the [Wayland display server protocol](https://en.wikipedia.org/wiki/Wayland_(display_server_protocol)) and implicitly enables `egl`.
+
 ### `vulkan`
 
 Vulkan support can be enabled by adding the feature `vulkan`. To render the examples with Vulkan, use
