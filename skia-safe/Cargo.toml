@@ -20,7 +20,7 @@ edition = "2018"
 doctest = false
 
 [features]
-default = ["x11"]
+default = []
 gl = ["gpu", "skia-bindings/gl"]
 egl = ["gl", "skia-bindings/egl"]
 wayland = ["egl", "skia-bindings/wayland"]
