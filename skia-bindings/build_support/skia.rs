@@ -24,6 +24,9 @@ mod feature_id {
     pub const TEXTLAYOUT: &str = "textlayout";
     pub const WEBPE: &str = "webpe";
     pub const WEBPD: &str = "webpd";
+    pub const EGL: &str = "egl";
+    pub const X11: &str = "x11";
+    pub const WAYLAND: &str = "wayland";
 }
 
 /// The defaults for the Skia build configuration.
@@ -38,6 +41,9 @@ impl Default for BuildConfiguration {
             opt_level: cargo::env_var("OPT_LEVEL"),
             features: Features {
                 gl: cfg!(feature = "gl"),
+                egl: cfg!(feature = "egl"),
+                wayland: cfg!(feature = "wayland"),
+                x11: cfg!(feature = "x11"),
                 vulkan: cfg!(feature = "vulkan"),
                 metal: cfg!(feature = "metal"),
                 d3d: cfg!(feature = "d3d"),
@@ -83,8 +89,17 @@ pub struct BuildConfiguration {
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Features {
-    /// Build with OpenGL / EGL support?
+    /// Build with OpenGL support?
     pub gl: bool,
+
+    /// Build with EGL support? If you set X11, setting this to false will use LibGL (GLX)
+    pub egl: bool,
+
+    /// Build with Wayland support? This requires EGL, as GLX does not work on Wayland.
+    pub wayland: bool,
+
+    /// Build with X11 support?
+    pub x11: bool,
 
     /// Build with Vulkan support?
     pub vulkan: bool,
@@ -125,6 +140,15 @@ impl Features {
 
         if self.gl {
             feature_ids.push(feature_id::GL);
+        }
+        if self.egl {
+            feature_ids.push(feature_id::EGL);
+        }
+        if self.x11 {
+            feature_ids.push(feature_id::X11);
+        }
+        if self.wayland {
+            feature_ids.push(feature_id::WAYLAND);
         }
         if self.vulkan {
             feature_ids.push(feature_id::VULKAN);
@@ -186,6 +210,8 @@ impl FinalBuildConfiguration {
                 ("is_debug", yes_if(build.skia_debug)),
                 ("skia_enable_gpu", yes_if(features.gpu())),
                 ("skia_use_gl", yes_if(features.gl)),
+                ("skia_use_egl", yes_if(features.egl)),
+                ("skia_use_x11", yes_if(features.x11)),
                 ("skia_use_system_libjpeg_turbo", no()),
                 ("skia_use_system_libpng", no()),
                 ("skia_use_libwebp_encode", yes_if(features.webp_encode)),
@@ -245,7 +271,7 @@ impl FinalBuildConfiguration {
 
             // target specific gn args.
             let target = cargo::target();
-            let target_str = format!("--target={}", target.to_string());
+            let target_str: &str = &format!("--target={}", target.to_string());
             let sysroot_arg;
             let opt_level_arg;
             let mut cflags: Vec<&str> = vec![&target_str];
@@ -281,9 +307,8 @@ impl FinalBuildConfiguration {
                     // See https://docs.microsoft.com/en-us/cpp/build/reference/md-mt-ld-use-run-time-library?view=vs-2019
                     if cargo::target_crt_static() {
                         cflags.push("/MT");
-                    }
-                    // otherwise the C runtime should be linked dynamically
-                    else {
+                    } else {
+                        // otherwise the C runtime should be linked dynamically
                         cflags.push("/MD");
                     }
                     // Tell Skia's build system where LLVM is supposed to be located.
@@ -465,7 +490,18 @@ impl BinariesConfiguration {
             (_, "unknown", "linux", Some("gnu")) => {
                 link_libraries.extend(vec!["stdc++", "fontconfig", "freetype"]);
                 if features.gl {
-                    link_libraries.push("GL");
+                    if features.egl {
+                        link_libraries.push("EGL");
+                    }
+
+                    if features.x11 {
+                        link_libraries.push("GL");
+                    }
+
+                    if features.wayland {
+                        link_libraries.push("wayland-egl");
+                        link_libraries.push("GLESv2");
+                    }
                 }
             }
             (_, "apple", "darwin", _) => {
