@@ -148,6 +148,8 @@ jobs:
         features: '$(features),metal'
       ${{ if and(eq(parameters.platform, 'Windows'), eq(parameters.deployRelease, 'False')) }}:
         features: '$(features),d3d'
+      ${{ if and(eq(parameters.platform, 'Linux'), eq(parameters.deployRelease, 'False')) }}:
+        features: '$(features),egl,x11,wayland'
 
   - ${{ if eq(parameters.platform, 'macOS') }}:
     - template: 'azure-pipelines-build-target.yml'
