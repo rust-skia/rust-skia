@@ -24,6 +24,9 @@ mod feature_id {
     pub const TEXTLAYOUT: &str = "textlayout";
     pub const WEBPE: &str = "webpe";
     pub const WEBPD: &str = "webpd";
+    pub const EGL: &str = "egl";
+    pub const X11: &str = "x11";
+    pub const WAYLAND: &str = "wayland";
 }
 
 /// The defaults for the Skia build configuration.
@@ -137,6 +140,15 @@ impl Features {
 
         if self.gl {
             feature_ids.push(feature_id::GL);
+        }
+        if self.egl {
+            feature_ids.push(feature_id::EGL);
+        }
+        if self.x11 {
+            feature_ids.push(feature_id::X11);
+        }
+        if self.wayland {
+            feature_ids.push(feature_id::WAYLAND);
         }
         if self.vulkan {
             feature_ids.push(feature_id::VULKAN);
