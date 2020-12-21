@@ -7,7 +7,6 @@
 #endif
 
 #include "include/core/SkSurfaceCharacterization.h"
-#include "include/gpu/GrContext.h"
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/gl/GrGLExtensions.h"
 #include "include/gpu/gl/GrGLInterface.h"
