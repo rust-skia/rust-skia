@@ -2,7 +2,7 @@ use crate::gpu::{BackendAPI, BackendFormat, DirectContext, Renderable};
 use crate::prelude::*;
 use crate::{image, ColorType};
 use skia_bindings as sb;
-use skia_bindings::{GrContext, GrDirectContext, GrRecordingContext, SkRefCntBase};
+use skia_bindings::{GrDirectContext, GrRecordingContext, SkRefCntBase};
 
 pub type RecordingContext = RCHandle<GrRecordingContext>;
 
@@ -10,11 +10,6 @@ impl NativeRefCountedBase for GrRecordingContext {
     type Base = SkRefCntBase;
 }
 
-impl From<RCHandle<GrContext>> for RCHandle<GrRecordingContext> {
-    fn from(direct_context: RCHandle<GrContext>) -> Self {
-        unsafe { std::mem::transmute(direct_context) }
-    }
-}
 impl From<RCHandle<GrDirectContext>> for RCHandle<GrRecordingContext> {
     fn from(direct_context: RCHandle<GrDirectContext>) -> Self {
         unsafe { std::mem::transmute(direct_context) }

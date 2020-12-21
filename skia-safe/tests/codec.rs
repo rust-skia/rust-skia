@@ -101,6 +101,7 @@ const DECODER_TESTS: &[DecoderTest] = &[
 ];
 
 /// An exhaustive match for proving that we test all formats defined in Skia.
+/// If the match is not exhaustive anymore, update [ALL] below.
 #[test]
 fn test_encoder_enum() {
     match EncodedImageFormat::GIF {
@@ -116,6 +117,7 @@ fn test_encoder_enum() {
         EncodedImageFormat::ASTC => {}
         EncodedImageFormat::DNG => {}
         EncodedImageFormat::HEIF => {}
+        EncodedImageFormat::AVIF => {}
     }
 }
 
@@ -132,4 +134,5 @@ const ALL: &[EncodedImageFormat] = &[
     EncodedImageFormat::ASTC,
     EncodedImageFormat::DNG,
     EncodedImageFormat::HEIF,
+    EncodedImageFormat::AVIF,
 ];

@@ -248,6 +248,7 @@ impl RCHandle<SkImage> {
         })
     }
 
+    /*
     // TODO: rename to clone_from_yuva_textures() ?
     #[cfg(feature = "gpu")]
     pub fn from_yuva_textures_copy(
@@ -271,7 +272,9 @@ impl RCHandle<SkImage> {
             )
         })
     }
+    */
 
+    /*
     #[allow(clippy::too_many_arguments)]
     #[cfg(feature = "gpu")]
     pub fn from_yuva_textures_copy_with_external_backend(
@@ -298,6 +301,7 @@ impl RCHandle<SkImage> {
             )
         })
     }
+    */
 
     #[cfg(feature = "gpu")]
     pub fn from_yuva_textures(
@@ -326,22 +330,15 @@ impl RCHandle<SkImage> {
     // TODO: MakeFromYUVAPixmaps()
 
     #[cfg(feature = "gpu")]
+    #[deprecated(note = "Removed without replacement", since = "0.0.0")]
     pub fn from_nv12_textures_copy(
         context: &mut gpu::Context,
         yuv_color_space: crate::YUVColorSpace,
         nv12_textures: &[gpu::BackendTexture; 2],
         image_origin: gpu::SurfaceOrigin,
         image_color_space: impl Into<Option<ColorSpace>>,
-    ) -> Option<Image> {
-        Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeFromNV12TexturesCopy(
-                context.native_mut(),
-                yuv_color_space,
-                nv12_textures.native().as_ptr(),
-                image_origin,
-                image_color_space.into().into_ptr_or_null(),
-            )
-        })
+    ) -> ! {
+        panic!("Removed without replacement")
     }
 
     #[cfg(feature = "gpu")]

@@ -44,7 +44,7 @@ extern "C" bool C_GrGLFramebufferInfo_Equals(const GrGLFramebufferInfo* lhs, con
 
 extern "C" void C_GPU_GL_Types(GrGLBackendState *) {}
 
-// note: copied implementation here, because pulling in src/gpu/gl/GrGLUtil.h pulls in too many other types and
+// Copied implementation here, because pulling in src/gpu/gl/GrGLUtil.h pulls in too many other types and
 // increases the size of bindings.rs considerably.
 
 extern "C" GrGLFormat C_GrGLFormatFromGLEnum(GrGLenum glFormat) {
@@ -71,6 +71,9 @@ extern "C" GrGLFormat C_GrGLFormatFromGLEnum(GrGLenum glFormat) {
         case GR_GL_RG16:                 return GrGLFormat::kRG16;
         case GR_GL_RGBA16:               return GrGLFormat::kRGBA16;
         case GR_GL_RG16F:                return GrGLFormat::kRG16F;
+        case GR_GL_STENCIL_INDEX8:       return GrGLFormat::kSTENCIL_INDEX8;
+        case GR_GL_STENCIL_INDEX16:      return GrGLFormat::kSTENCIL_INDEX16;
+        case GR_GL_DEPTH24_STENCIL8:     return GrGLFormat::kDEPTH24_STENCIL8;
 
         default:                         return GrGLFormat::kUnknown;
     }
@@ -100,6 +103,9 @@ extern "C" GrGLenum C_GrGLFormatToEnum(GrGLFormat format) {
         case GrGLFormat::kRG16:                 return GR_GL_RG16;
         case GrGLFormat::kRGBA16:               return GR_GL_RGBA16;
         case GrGLFormat::kRG16F:                return GR_GL_RG16F;
+        case GrGLFormat::kSTENCIL_INDEX8:       return GR_GL_STENCIL_INDEX8;
+        case GrGLFormat::kSTENCIL_INDEX16:      return GR_GL_STENCIL_INDEX16;
+        case GrGLFormat::kDEPTH24_STENCIL8:     return GR_GL_DEPTH24_STENCIL8;
         case GrGLFormat::kUnknown:              return 0;
     }
     SkUNREACHABLE;

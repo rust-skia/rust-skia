@@ -51,7 +51,7 @@ fn main() {
 
     gl::load_with(|s| windowed_context.get_proc_address(&s));
 
-    let mut gr_context = skia_safe::gpu::Context::new_gl(None).unwrap();
+    let mut gr_context = skia_safe::gpu::DirectContext::new_gl(None, None).unwrap();
 
     let fb_info = {
         let mut fboid: GLint = 0;
@@ -72,7 +72,7 @@ fn main() {
     fn create_surface(
         windowed_context: &WindowedContext,
         fb_info: &FramebufferInfo,
-        gr_context: &mut skia_safe::gpu::Context,
+        gr_context: &mut skia_safe::gpu::DirectContext,
     ) -> skia_safe::Surface {
         let pixel_format = windowed_context.get_pixel_format();
         let size = windowed_context.window().inner_size();

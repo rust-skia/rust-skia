@@ -479,7 +479,13 @@ impl RCHandle<SkSurface> {
 
     pub fn flush_and_submit(&mut self) {
         unsafe {
-            self.native_mut().flushAndSubmit();
+            self.native_mut().flushAndSubmit(false);
+        }
+    }
+
+    pub fn flush_and_submit_and_sync_cpu(&mut self) {
+        unsafe {
+            self.native_mut().flushAndSubmit(true);
         }
     }
 

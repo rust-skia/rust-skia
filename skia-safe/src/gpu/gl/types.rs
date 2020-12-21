@@ -26,7 +26,7 @@ fn test_all_formats_exhaustive() {
     let x = Format::ALPHA8;
     // !!!!!
     // IF this match is not exhaustive anymore, the implementations of the format conversions
-    // need to be updated, too.
+    // need to be updated in `skia-bindings/src/gl.cpp`, too.
     match x {
         Format::Unknown => {}
         Format::RGBA8 => {}
@@ -51,6 +51,9 @@ fn test_all_formats_exhaustive() {
         Format::RGBA16 => {}
         Format::RG16F => {}
         Format::LUMINANCE16F => {}
+        Format::STENCIL_INDEX8 => {}
+        Format::STENCIL_INDEX16 => {}
+        Format::DEPTH24_STENCIL8 => {}
     }
 }
 
