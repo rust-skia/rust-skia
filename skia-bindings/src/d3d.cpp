@@ -35,7 +35,7 @@ extern "C" void C_GrBackendRenderTarget_ConstructD3D(GrBackendRenderTarget* unin
 }
 
 //
-// gpu/GrContext.h
+// gpu/GrDirectContext.h
 //
 
 extern "C" GrDirectContext* C_GrDirectContext_MakeDirect3D(

@@ -1,7 +1,6 @@
 #include "bindings.h"
 
 #include "include/core/SkSurface.h"
-#include "include/gpu/GrContext.h"
 #include "include/gpu/GrDirectContext.h"
 
 //
@@ -32,7 +31,7 @@ extern "C" SkSurface *C_SkSurface_MakeFromMTKView(GrRecordingContext *context,
 }
 
 //
-// gpu/GrContext.h
+// gpu/GrDirectContext.h
 //
 
 extern "C" GrDirectContext* C_GrContext_MakeMetal(void* device, void* queue, const GrContextOptions* options) {

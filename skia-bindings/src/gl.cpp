@@ -146,7 +146,7 @@ extern "C" const GrGLInterface* C_GrGLInterface_MakeAssembledInterface(void *ctx
 }
 
 //
-// gpu/GrContext.h
+// gpu/GrDirectContext.h
 //
 
 extern "C" GrDirectContext* C_GrDirectContext_MakeGL(GrGLInterface* interface, const GrContextOptions* options) {
