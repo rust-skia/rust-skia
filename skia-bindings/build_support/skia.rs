@@ -1044,6 +1044,8 @@ const OPAQUE_TYPES: &[&str] = &[
     // m87:
     "GrD3DAlloc",
     "GrD3DMemoryAllocator",
+    // m87, yuva_pixmaps
+    "std::tuple",
 ];
 
 const BLACKLISTED_TYPES: &[&str] = &[
