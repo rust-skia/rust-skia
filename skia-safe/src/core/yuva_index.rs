@@ -53,8 +53,4 @@ impl YUVAIndex {
         unsafe { sb::C_SkYUVAIndex_AreValidIndices(indices.native().as_ptr(), &mut num_planes) }
             .if_true_then_some(|| num_planes.try_into().unwrap())
     }
-
-    pub(crate) fn is_valid(self) -> bool {
-        self.index >= 0 && self.index < Self::INDEX_COUNT as i32
-    }
 }

@@ -133,7 +133,7 @@ mod effects {
 #[cfg(feature = "gpu")]
 mod gpu {
     use skia_safe::gpu::{
-        BackendFormat, BackendRenderTarget, BackendSurfaceMutableState, BackendTexture, Context,
+        BackendFormat, BackendRenderTarget, BackendSurfaceMutableState, BackendTexture,
         ContextOptions, DirectContext, DriverBugWorkarounds, RecordingContext,
     };
     use static_assertions::*;
@@ -146,7 +146,6 @@ mod gpu {
     // The Context implementation checks for single ownership before mutation, so
     // no Send and Sync can be supported.
     // If RC is 1, it can be sent to other threads with `Sendable` / `ConditionallySend`.
-    assert_not_impl_any!(Context: Send, Sync);
     assert_not_impl_any!(DirectContext: Send, Sync);
     assert_not_impl_any!(RecordingContext: Send, Sync);
 

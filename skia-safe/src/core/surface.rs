@@ -87,7 +87,7 @@ impl RCHandle<SkSurface> {
 #[cfg(feature = "gpu")]
 impl RCHandle<SkSurface> {
     pub fn from_backend_texture(
-        context: &mut gpu::Context,
+        context: &mut gpu::DirectContext,
         backend_texture: &gpu::BackendTexture,
         origin: gpu::SurfaceOrigin,
         sample_count: impl Into<Option<usize>>,
@@ -109,7 +109,7 @@ impl RCHandle<SkSurface> {
     }
 
     pub fn from_backend_render_target(
-        context: &mut gpu::Context,
+        context: &mut gpu::DirectContext,
         backend_render_target: &gpu::BackendRenderTarget,
         origin: gpu::SurfaceOrigin,
         color_type: crate::ColorType,
@@ -126,19 +126,6 @@ impl RCHandle<SkSurface> {
                 surface_props.native_ptr_or_null(),
             )
         })
-    }
-
-    #[deprecated(since = "0.33.0", note = "removed without replacement")]
-    pub fn from_backend_texture_as_render_target(
-        _context: &mut gpu::Context,
-        _backend_texture: &gpu::BackendTexture,
-        _origin: gpu::SurfaceOrigin,
-        _sample_count: impl Into<Option<usize>>,
-        _color_type: crate::ColorType,
-        _color_space: impl Into<Option<crate::ColorSpace>>,
-        _surface_props: Option<&SurfaceProps>,
-    ) -> ! {
-        panic!("removed without replacement")
     }
 
     #[cfg(feature = "metal")]
@@ -246,15 +233,6 @@ impl RCHandle<SkSurface> {
             )
         })
     }
-
-    #[deprecated(since = "0.36.0", note = "Removed without replacement")]
-    pub fn from_backend_texture_with_caracterization(
-        _context: &mut gpu::Context,
-        _characterization: &SurfaceCharacterization,
-        _backend_texture: &gpu::BackendTexture,
-    ) -> ! {
-        panic!("Removed without replacement")
-    }
 }
 
 impl RCHandle<SkSurface> {
@@ -293,16 +271,6 @@ impl RCHandle<SkSurface> {
 
 #[cfg(feature = "gpu")]
 impl RCHandle<SkSurface> {
-    #[deprecated(
-        since = "0.35.0",
-        note = "Use recordingContext() and RecordingContext::as_direct_context()"
-    )]
-    pub fn context(&mut self) -> Option<gpu::Context> {
-        self.recording_context()
-            .and_then(|mut rc| rc.as_direct_context())
-            .map(|dc| dc.into())
-    }
-
     pub fn recording_context(&mut self) -> Option<gpu::RecordingContext> {
         gpu::RecordingContext::from_unshared_ptr(unsafe { self.native_mut().recordingContext() })
     }

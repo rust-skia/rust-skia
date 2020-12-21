@@ -1,13 +1,9 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
 use crate::prelude::*;
-use crate::{
-    image, ColorSpace, Data, ISize, ImageInfo, Matrix, Paint, Picture, YUVAIndex, YUVASizeInfo,
-    YUVColorSpace,
-};
+use crate::{image, ColorSpace, Data, ISize, ImageInfo, Matrix, Paint, Picture};
 use skia_bindings as sb;
 use skia_bindings::SkImageGenerator;
-use std::ffi::c_void;
 
 pub type ImageGenerator = RefHandle<SkImageGenerator>;
 unsafe impl Send for ImageGenerator {}

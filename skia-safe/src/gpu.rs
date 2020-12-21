@@ -40,7 +40,7 @@ pub mod vk;
 #[test]
 fn implicit_deref_conversion_from_direct_context_to_context_to_recording_context() {
     fn _recording_context(_context: &RecordingContext) {}
-    fn _context(context: &Context) {
+    fn _context(context: &DirectContext) {
         _recording_context(context)
     }
     fn _direct_context(context: &DirectContext) {
@@ -48,7 +48,7 @@ fn implicit_deref_conversion_from_direct_context_to_context_to_recording_context
     }
 
     fn _recording_context_mut(_context: &mut RecordingContext) {}
-    fn _context_mut(context: &mut Context) {
+    fn _context_mut(context: &mut DirectContext) {
         _recording_context_mut(context)
     }
     fn _direct_context_mut(context: &mut DirectContext) {

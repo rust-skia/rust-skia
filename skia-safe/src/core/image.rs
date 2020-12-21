@@ -113,16 +113,6 @@ impl RCHandle<SkImage> {
     }
 
     #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.35.0", note = "Removed without replacement")]
-    pub fn decode_to_texture(
-        _context: &mut gpu::Context,
-        _encoded: &[u8],
-        _subset: impl Into<Option<IRect>>,
-    ) -> ! {
-        panic!("Removed without replacement")
-    }
-
-    #[cfg(feature = "gpu")]
     pub fn new_texture_from_compressed(
         context: &mut gpu::DirectContext,
         data: Data,
@@ -305,7 +295,7 @@ impl RCHandle<SkImage> {
 
     #[cfg(feature = "gpu")]
     pub fn from_yuva_textures(
-        context: &mut gpu::Context,
+        context: &mut gpu::DirectContext,
         yuv_color_space: crate::YUVColorSpace,
         yuva_textures: &[gpu::BackendTexture],
         yuva_indices: &[crate::YUVAIndex; 4],
@@ -332,18 +322,18 @@ impl RCHandle<SkImage> {
     #[cfg(feature = "gpu")]
     #[deprecated(note = "Removed without replacement", since = "0.0.0")]
     pub fn from_nv12_textures_copy(
-        context: &mut gpu::Context,
-        yuv_color_space: crate::YUVColorSpace,
-        nv12_textures: &[gpu::BackendTexture; 2],
-        image_origin: gpu::SurfaceOrigin,
-        image_color_space: impl Into<Option<ColorSpace>>,
+        _context: &mut gpu::DirectContext,
+        _yuv_color_space: crate::YUVColorSpace,
+        _nv12_textures: &[gpu::BackendTexture; 2],
+        _image_origin: gpu::SurfaceOrigin,
+        _image_color_space: impl Into<Option<ColorSpace>>,
     ) -> ! {
         panic!("Removed without replacement")
     }
 
     #[cfg(feature = "gpu")]
     pub fn from_nv12_textures_copy_with_external_backend(
-        context: &mut gpu::Context,
+        context: &mut gpu::DirectContext,
         yuv_color_space: crate::YUVColorSpace,
         nv12_textures: &[gpu::BackendTexture; 2],
         image_origin: gpu::SurfaceOrigin,
