@@ -884,7 +884,9 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
     }
 
     if let Some(sysroot) = sysroot {
-        builder = builder.clang_arg(format!("{}{}", sysroot_flag, sysroot));
+        let sysroot = format!("{}{}", sysroot_flag, sysroot);
+        builder = builder.clang_arg(&sysroot);
+        cc_build.flag(&sysroot);
     }
 
     println!("COMPILING BINDINGS: {:?}", build.binding_sources);
