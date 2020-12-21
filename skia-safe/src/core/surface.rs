@@ -157,7 +157,7 @@ impl RCHandle<SkSurface> {
     #[cfg(feature = "metal")]
     #[deprecated(since = "0.36.0", note = "use from_mtk_view()")]
     pub fn from_ca_mtk_view(
-        context: &mut gpu::Context,
+        context: &mut gpu::DirectContext,
         mtk_view: gpu::mtl::Handle,
         origin: gpu::SurfaceOrigin,
         sample_count: impl Into<Option<usize>>,
