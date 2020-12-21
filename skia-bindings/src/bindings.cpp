@@ -1998,7 +1998,7 @@ extern "C" bool C_SkYUVAInfo_equals(const SkYUVAInfo* a, const SkYUVAInfo* b) {
 // core/SkYUVAPixmaps.h
 //
 
-extern "C" void C_SkYUVAPixmapInfo_construct(SkYUVAPixmapInfo* uninitialized) {
+extern "C" void C_SkYUVAPixmapInfo_Construct(SkYUVAPixmapInfo* uninitialized) {
     new(uninitialized) SkYUVAPixmapInfo();
 }
 
@@ -2049,6 +2049,38 @@ extern "C" int C_SkYUVAPixmapInfo_NumChannelsAndDataType(SkColorType colorType, 
     auto numDT = SkYUVAPixmapInfo::NumChannelsAndDataType(colorType);
     *dataType = std::get<1>(numDT);
     return std::get<0>(numDT);
+}
+
+extern "C" void C_SkYUVAPixmaps_Construct(SkYUVAPixmaps* uninitialized) {
+    new(uninitialized) SkYUVAPixmaps();
+}
+
+extern "C" void C_SkYUVAPixmaps_destruct(SkYUVAPixmaps* self) {
+    self->~SkYUVAPixmaps();
+}
+
+extern "C" void C_SkYUVAPixmaps_Allocate(SkYUVAPixmaps* uninitialized, const SkYUVAPixmapInfo* yuvaPixmapInfo) {
+    new(uninitialized) SkYUVAPixmaps(SkYUVAPixmaps::Allocate(*yuvaPixmapInfo));
+}
+
+extern "C" void C_SkYUVAPixmaps_FromData(SkYUVAPixmaps* uninitialized, const SkYUVAPixmapInfo* yuvaPixmapInfo, SkData* data) {
+    new(uninitialized) SkYUVAPixmaps(SkYUVAPixmaps::FromData(*yuvaPixmapInfo, sp(data)));
+}
+
+extern "C" void C_SkYUVAPixmaps_FromExternalMemory(SkYUVAPixmaps* uninitialized, const SkYUVAPixmapInfo* yuvaPixmapInfo, void* memory) {
+    new(uninitialized) SkYUVAPixmaps(SkYUVAPixmaps::FromExternalMemory(*yuvaPixmapInfo, memory));
+}
+
+extern "C" void C_SkYUVAPixmaps_FromExternalPixmaps(SkYUVAPixmaps* uninitialized, const SkYUVAInfo* yuvaInfo, const SkPixmap pixmaps[SkYUVAPixmaps::kMaxPlanes]) {
+    new(uninitialized) SkYUVAPixmaps(SkYUVAPixmaps::FromExternalPixmaps(*yuvaInfo, pixmaps));
+}
+
+extern "C" const SkPixmap* C_SkYUVAPixmaps_planes(const SkYUVAPixmaps* self) {
+    return self->planes().data();
+}
+
+extern "C" bool C_SkYUVAPixmaps_isValid(const SkYUVAPixmaps* self) {
+    return self->isValid();
 }
 
 //

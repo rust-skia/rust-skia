@@ -127,13 +127,9 @@ impl YUVAInfo {
         yuva_info::num_planes(self.planar_config())
     }
 
-    pub fn num_channels_in_plane(&self, i: usize) -> usize {
+    pub fn num_channels_in_plane(&self, i: usize) -> Option<usize> {
         yuva_info::num_channels_in_plane(self.planar_config(), i)
     }
-}
-
-pub trait HasAlpha {
-    fn has_alpha(&self) -> bool;
 }
 
 pub mod yuva_info {
@@ -159,26 +155,17 @@ pub mod yuva_info {
     /// Currently this only has three-plane formats but more will be added as usage and testing of
     ///  this expands.
     pub use sb::SkYUVAInfo_PlanarConfig as PlanarConfig;
-    #[test]
-    fn test_planar_config_naming() {
-        let _ = PlanarConfig::Y_U_V_410;
-    }
 
     /// Describes how subsampled chroma values are sited relative to luma values.
     ///
     /// Currently only centered siting is supported but will expand to support additional sitings.
     pub use sb::SkYUVAInfo_Siting as Siting;
 
-    #[test]
-    fn test_siting_naming() {
-        let _ = Siting::Centered;
-    }
-
     /// Given image dimensions, a planar configuration, and origin, determine the expected size of
     /// each plane. Returns the number of expected planes. planeDimensions[0] through
     /// planeDimensons[<ret>] are written. The input image dimensions are as displayed (after the
     /// planes have been transformed to the intended display orientation). The plane dimensions
-    // are output as stored in memory.
+    /// are output as stored in memory.
     pub fn plane_dimensions(
         image_dimensions: impl Into<ISize>,
         config: PlanarConfig,
@@ -204,16 +191,33 @@ pub mod yuva_info {
             .unwrap()
     }
 
-    /// Number of Y, U, V, A channels in the ith plane for a given PlanarConfig (or 0 if i is
+    /// Number of Y, U, V, A channels in the ith plane for a given PlanarConfig (or `None` if i is
     /// invalid).
-    pub fn num_channels_in_plane(config: PlanarConfig, i: usize) -> usize {
-        unsafe { sb::C_SkYUVAInfo_NumChannelsInPlane(config, i.try_into().unwrap()) }
-            .try_into()
-            .unwrap()
+    pub fn num_channels_in_plane(config: PlanarConfig, i: usize) -> Option<usize> {
+        (i < num_planes(config)).if_true_then_some(|| {
+            unsafe { sb::C_SkYUVAInfo_NumChannelsInPlane(config, i.try_into().unwrap()) }
+                .try_into()
+                .unwrap()
+        })
     }
 
     /// Does the PlanarConfig have alpha values?
     pub fn has_alpha(config: PlanarConfig) -> bool {
         unsafe { sb::SkYUVAInfo_HasAlpha(config) }
+    }
+}
+
+#[cfg(test)]
+
+mod tests {
+    use crate::yuva_info;
+
+    #[test]
+    fn test_planar_config_naming() {
+        let _ = yuva_info::PlanarConfig::Y_U_V_410;
+    }
+    #[test]
+    fn test_siting_naming() {
+        let _ = yuva_info::Siting::Centered;
     }
 }

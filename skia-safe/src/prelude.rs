@@ -261,7 +261,15 @@ impl<N: NativeDrop> Handle<N> {
     /// function that expects a pointer that points to
     /// uninitialized memory of the native type.
     pub(crate) fn construct(construct: impl FnOnce(*mut N)) -> Self {
-        Self::from_native_c(self::construct(construct))
+        Self::try_construct(|i| {
+            construct(i);
+            true
+        })
+        .unwrap()
+    }
+
+    pub(crate) fn try_construct(construct: impl FnOnce(*mut N) -> bool) -> Option<Self> {
+        self::try_construct(construct).map(Self::from_native_c)
     }
 
     /// Replaces the native instance with the one from this Handle, and
@@ -293,9 +301,16 @@ impl<N: NativeDrop> ReplaceWith<Handle<N>> for N {
 /// Constructs a C++ object in place by calling a lambda that is meant to initialize
 /// the pointer to the Rust memory provided as a pointer.
 pub(crate) fn construct<N>(construct: impl FnOnce(*mut N)) -> N {
+    try_construct(|i| {
+        construct(i);
+        true
+    })
+    .unwrap()
+}
+
+pub(crate) fn try_construct<N>(construct: impl FnOnce(*mut N) -> bool) -> Option<N> {
     let mut instance = MaybeUninit::uninit();
-    construct(instance.as_mut_ptr());
-    unsafe { instance.assume_init() }
+    construct(instance.as_mut_ptr()).if_true_then_some(|| unsafe { instance.assume_init() })
 }
 
 impl<N: NativeDrop> Drop for Handle<N> {
@@ -691,7 +706,15 @@ pub trait NativeTransmutable<NT: Sized>: Sized {
     }
 
     fn construct(construct: impl FnOnce(*mut NT)) -> Self {
-        Self::from_native_c(self::construct(construct))
+        Self::try_construct(|i| {
+            construct(i);
+            true
+        })
+        .unwrap()
+    }
+
+    fn try_construct(construct: impl FnOnce(*mut NT) -> bool) -> Option<Self> {
+        self::try_construct(construct).map(Self::from_native_c)
     }
 }
 
