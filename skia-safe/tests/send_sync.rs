@@ -26,9 +26,9 @@ mod codec {
 
 mod core {
     use skia_safe::{
-        font_parameters, image::CubicResampler, image_filter, path, path_effect, region, typeface,
-        vertices, Bitmap, Canvas, Color, ColorFilter, ColorInfo, ColorSpace, ContourMeasure,
-        ContourMeasureIter, CubicMap, Data, DataTable, DeferredDisplayList,
+        font_parameters, image_filter, path, path_effect, region, typeface, vertices, Bitmap,
+        Canvas, Color, ColorFilter, ColorInfo, ColorSpace, ContourMeasure, ContourMeasureIter,
+        CubicMap, CubicResampler, Data, DataTable, DeferredDisplayList,
         DeferredDisplayListRecorder, Document, Drawable, FilterOptions, Font, FontArguments,
         FontMetrics, FontMgr, FontStyle, FontStyleSet, Image, ImageFilter, ImageGenerator,
         ImageInfo, MaskFilter, Matrix, OwnedCanvas, Paint, Path, PathBuilder, PathEffect,

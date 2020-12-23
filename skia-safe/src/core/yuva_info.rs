@@ -50,20 +50,18 @@ impl NativeTransmutable<SkYUVAInfo_Subsampling> for Subsampling {}
 /// Currently only centered siting is supported but will expand to support additional sitings.
 pub use sb::SkYUVAInfo_Siting as Siting;
 
-/// Given image dimensions, a planer configuration, subsampling, and origin, determine the
-/// expected size of each plane. Returns the number of expected planes. `plane_dimensions[0]`
-/// through `plane_dimensions[<ret>]` are written. The input image dimensions are as displayed
+/// Given image dimensions, a planer configuration, subsampling, and origin, determine the expected
+/// size of each plane. Returns the expected planes. The input image dimensions are as displayed
 /// (after the planes have been transformed to the intended display orientation). The plane
-/// dimensions are output as the planes are stored in memory (may be rotated from image
-/// dimensions).
+/// dimensions are output as the planes are stored in memory (may be rotated from image dimensions).
 pub fn plane_dimensions(
     image_dimensions: impl Into<ISize>,
     config: PlaneConfig,
     subsampling: Subsampling,
     origin: EncodedOrigin,
-    plane_dimensions: &mut [ISize; YUVAInfo::MAX_PLANES],
-) -> usize {
-    unsafe {
+) -> Vec<ISize> {
+    let mut plane_dimensions = [ISize::default(); YUVAInfo::MAX_PLANES];
+    let size: usize = unsafe {
         SkYUVAInfo::PlaneDimensions(
             image_dimensions.into().into_native(),
             config,
@@ -73,7 +71,9 @@ pub fn plane_dimensions(
         )
     }
     .try_into()
-    .unwrap()
+    .unwrap();
+
+    plane_dimensions[0..size].to_vec()
 }
 
 /// Number of planes for a given [PlaneConfig].
@@ -136,13 +136,13 @@ impl YUVAInfo {
         color_space: image_info::YUVColorSpace,
         origin: impl Into<Option<EncodedOrigin>>,
         siting_xy: impl Into<Option<(Siting, Siting)>>,
-    ) -> Self {
+    ) -> Option<Self> {
         let origin = origin.into().unwrap_or(EncodedOrigin::TopLeft);
         let (siting_x, siting_y) = siting_xy
             .into()
             .unwrap_or((Siting::Centered, Siting::Centered));
 
-        Self::from_native_c(unsafe {
+        let n = unsafe {
             SkYUVAInfo::new(
                 dimensions.into().into_native(),
                 config,
@@ -152,7 +152,8 @@ impl YUVAInfo {
                 siting_x,
                 siting_y,
             )
-        })
+        };
+        Self::native_is_valid(&n).if_true_then_some(|| Self::from_native_c(n))
     }
 
     pub fn plane_config(&self) -> PlaneConfig {
@@ -194,16 +195,14 @@ impl YUVAInfo {
         has_alpha(self.plane_config())
     }
 
-    /// Returns the number of planes and initializes `plane_dimensions[0]`..`plane_dimensions[<ret>]` to
-    /// the expected dimensions for each plane. Dimensions are as stored in memory, before
+    /// Returns the dimensions for each plane. Dimensions are as stored in memory, before
     /// transformation to image display space as indicated by [origin(&self)].
-    pub fn plane_dimensions(&self, plane_dimensions: &mut [ISize; Self::MAX_PLANES]) -> usize {
+    pub fn plane_dimensions(&self) -> Vec<ISize> {
         self::plane_dimensions(
             self.dimensions(),
             self.plane_config(),
             self.subsampling(),
             self.origin(),
-            plane_dimensions,
         )
     }
 
@@ -234,10 +233,14 @@ impl YUVAInfo {
     }
 
     /// Given a set of channel flags for each plane, converts `plane_config(&self)` to `YUVAIndex`
-    /// representation. Fails if the channel flags aren't valid for the [PlaneConfig] (i.e. don't have
-    /// enough channels in a plane).
+    /// representation. Fails if the channel flags aren't valid for the [PlaneConfig] (i.e. don't
+    /// have enough channels in a plane).
     pub fn to_yuva_indices(&self, channel_flags: &[u32; 4]) -> Option<[YUVAIndex; 4]> {
         get_yuva_indices(self.plane_config(), channel_flags)
+    }
+
+    pub(crate) fn native_is_valid(info: &SkYUVAInfo) -> bool {
+        info.fPlaneConfig != PlaneConfig::Unknown
     }
 }
 

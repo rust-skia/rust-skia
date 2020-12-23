@@ -28,25 +28,39 @@ impl NativeClone for GrBackendFormat {
     }
 }
 
+#[deprecated(
+    note = "The creation of invalid BackendFormats aren't suppored anymore",
+    since = "0.0.0"
+)]
 impl Default for BackendFormat {
     fn default() -> Self {
-        Self::new()
+        Self::new_invalid()
     }
 }
 
 impl Handle<GrBackendFormat> {
+    #[deprecated(
+        note = "The creation of invalid BackendFormats aren't suppored anymore",
+        since = "0.0.0"
+    )]
     pub fn new() -> Self {
+        Self::new_invalid()
+    }
+
+    pub(crate) fn new_invalid() -> Self {
         Self::construct(|bf| unsafe { sb::C_GrBackendFormat_Construct(bf) })
     }
 
     #[cfg(feature = "gl")]
     pub fn new_gl(format: gl::Enum, target: gl::Enum) -> Self {
         Self::construct(|bf| unsafe { sb::C_GrBackendFormat_ConstructGL(bf, format, target) })
+            .assert_valid()
     }
 
     #[cfg(feature = "vulkan")]
     pub fn new_vulkan(format: vk::Format) -> Self {
         Self::construct(|bf| unsafe { sb::C_GrBackendFormat_ConstructVk(bf, format) })
+            .assert_valid()
     }
 
     #[cfg(feature = "vulkan")]
@@ -54,11 +68,13 @@ impl Handle<GrBackendFormat> {
         Self::construct(|bf| unsafe {
             sb::C_GrBackendFormat_ConstructVk2(bf, conversion_info.native())
         })
+        .assert_valid()
     }
 
     #[cfg(feature = "metal")]
     pub fn new_metal(format: mtl::PixelFormat) -> Self {
         Self::construct(|bf| unsafe { sb::C_GrBackendFormat_ConstructMtl(bf, format) })
+            .assert_valid()
     }
 
     #[cfg(feature = "d3d")]
@@ -66,6 +82,7 @@ impl Handle<GrBackendFormat> {
         Self::construct(|bf| unsafe {
             sb::C_GrBackendFormat_ConstructDxgi(bf, format.into_native())
         })
+        .assert_valid()
     }
 
     #[deprecated(since = "0.19.0", note = "use backend()")]
@@ -77,16 +94,8 @@ impl Handle<GrBackendFormat> {
         self.native().fBackend
     }
 
-    // texture_type() would return a private type.
-
     pub fn channel_mask(&self) -> u32 {
         unsafe { self.native().channelMask() }
-    }
-
-    #[deprecated(since = "0.19.0", note = "use as_gl_format()")]
-    #[cfg(feature = "gl")]
-    pub fn gl_format(&self) -> Option<gl::Enum> {
-        Some(self.as_gl_format() as _)
     }
 
     #[cfg(feature = "gl")]
@@ -97,12 +106,6 @@ impl Handle<GrBackendFormat> {
         }
     }
 
-    #[deprecated(since = "0.19.0", note = "use as_vk_format()")]
-    #[cfg(feature = "vulkan")]
-    pub fn vulkan_format(&self) -> Option<vk::Format> {
-        self.as_vk_format()
-    }
-
     #[cfg(feature = "vulkan")]
     pub fn as_vk_format(&self) -> Option<vk::Format> {
         let mut r = vk::Format::UNDEFINED;
@@ -110,8 +113,10 @@ impl Handle<GrBackendFormat> {
     }
 
     #[cfg(feature = "metal")]
-    pub fn as_mtl_format(&self) -> mtl::PixelFormat {
-        unsafe { self.native().asMtlFormat() }
+    pub fn as_mtl_format(&self) -> Option<mtl::PixelFormat> {
+        let pixel_format = unsafe { self.native().asMtlFormat() };
+        // Mtl's PixelFormat == 0 is invalid.
+        (pixel_format != 0).if_true_some(pixel_format)
     }
 
     #[cfg(feature = "d3d")]
@@ -121,14 +126,28 @@ impl Handle<GrBackendFormat> {
             .if_true_some(d3d::DXGI_FORMAT::from_native_c(f))
     }
 
-    pub fn to_texture_2d(&self) -> Option<Self> {
-        let mut new = Self::new();
+    pub fn to_texture_2d(&self) -> Self {
+        let mut new = Self::new_invalid();
         unsafe { sb::C_GrBackendFormat_makeTexture2D(self.native(), new.native_mut()) };
-        new.is_valid().if_true_some(new)
+        assert!(Self::native_is_valid(new.native()));
+        new
     }
 
+    #[deprecated(
+        note = "Invalid BackendFormats arent's supported anymore",
+        since = "0.0.0"
+    )]
     pub fn is_valid(&self) -> bool {
         self.native().fValid
+    }
+
+    pub(crate) fn native_is_valid(format: &GrBackendFormat) -> bool {
+        format.fValid
+    }
+
+    pub(crate) fn assert_valid(self) -> Self {
+        assert!(Self::native_is_valid(self.native()));
+        self
     }
 }
 
@@ -148,7 +167,11 @@ impl NativeClone for GrBackendTexture {
     }
 }
 
-impl Handle<GrBackendTexture> {
+impl BackendTexture {
+    pub(crate) fn new_invalid() -> Self {
+        Self::construct(|t| unsafe { sb::C_GrBackendTexture_Construct(t) })
+    }
+
     #[cfg(feature = "gl")]
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn new_gl(
@@ -202,8 +225,7 @@ impl Handle<GrBackendTexture> {
     pub(crate) unsafe fn from_native_if_valid(
         backend_texture: GrBackendTexture,
     ) -> Option<BackendTexture> {
-        backend_texture
-            .fIsValid
+        Self::native_is_valid(&backend_texture)
             .if_true_then_some(|| BackendTexture::from_native_c(backend_texture))
     }
 
@@ -293,18 +315,27 @@ impl Handle<GrBackendTexture> {
         self
     }
 
-    pub fn backend_format(&self) -> Option<BackendFormat> {
-        let mut format = BackendFormat::new();
+    pub fn backend_format(&self) -> BackendFormat {
+        let mut format = BackendFormat::new_invalid();
         unsafe { sb::C_GrBackendTexture_getBackendFormat(self.native(), format.native_mut()) };
-        format.is_valid().if_true_some(format)
+        assert!(BackendFormat::native_is_valid(format.native()));
+        format
     }
 
     pub fn is_protected(&self) -> bool {
         unsafe { self.native().isProtected() }
     }
 
+    #[deprecated(
+        note = "Invalid BackendTextures aren't supported anymore",
+        since = "0.0.0"
+    )]
     pub fn is_valid(&self) -> bool {
         self.native().fIsValid
+    }
+
+    pub(crate) fn native_is_valid(texture: &GrBackendTexture) -> bool {
+        texture.fIsValid
     }
 
     #[allow(clippy::wrong_self_convention)]
@@ -331,7 +362,7 @@ impl NativeClone for GrBackendRenderTarget {
     }
 }
 
-impl Handle<GrBackendRenderTarget> {
+impl BackendRenderTarget {
     #[cfg(feature = "gl")]
     pub fn new_gl(
         (width, height): (i32, i32),
@@ -396,9 +427,7 @@ impl Handle<GrBackendRenderTarget> {
         native: GrBackendRenderTarget,
     ) -> Option<BackendRenderTarget> {
         let backend_render_target = BackendRenderTarget::from_native_c(native);
-        backend_render_target
-            .is_valid()
-            .if_true_some(backend_render_target)
+        Self::native_is_valid(backend_render_target.native()).if_true_some(backend_render_target)
     }
 
     pub fn dimensions(&self) -> ISize {
@@ -482,7 +511,15 @@ impl Handle<GrBackendRenderTarget> {
         unsafe { self.native().isProtected() }
     }
 
+    #[deprecated(
+        note = "Invalid BackendRenderTargets aren't supported anymore.",
+        since = "0.0.0"
+    )]
     pub fn is_valid(&self) -> bool {
         self.native().fIsValid
+    }
+
+    pub(crate) fn native_is_valid(rt: &GrBackendRenderTarget) -> bool {
+        rt.fIsValid
     }
 }

@@ -36,14 +36,35 @@ impl YUVAPixmapInfo {
     /// If `rowBytes` is [None] then bpp*width is assumed for each plane.
     pub fn new(
         info: &YUVAInfo,
-        color_types: &[ColorType; Self::MAX_PLANES],
-        row_bytes: Option<&[usize; Self::MAX_PLANES]>,
+        color_types: &[ColorType],
+        row_bytes: Option<&[usize]>,
     ) -> Option<Self> {
+        if color_types.len() != info.num_planes() {
+            return None;
+        }
+        if let Some(rb) = row_bytes {
+            if rb.len() != color_types.len() {
+                return None;
+            }
+        }
+        let mut color_types_array = [ColorType::Unknown; Self::MAX_PLANES];
+        color_types_array[..color_types.len()].copy_from_slice(color_types);
+
+        let mut row_bytes_array = [0; Self::MAX_PLANES];
+        let row_bytes_ptr = {
+            if let Some(row_bytes) = row_bytes {
+                row_bytes_array[..row_bytes.len()].copy_from_slice(row_bytes);
+                row_bytes_array.as_ptr()
+            } else {
+                ptr::null()
+            }
+        };
+
         let info = unsafe {
             SkYUVAPixmapInfo::new(
                 info.native(),
-                color_types.native().as_ptr(),
-                row_bytes.map(|rb| rb.as_ptr()).unwrap_or(ptr::null()),
+                color_types_array.native().as_ptr(),
+                row_bytes_ptr,
             )
         };
         Self::native_is_valid(&info).if_true_then_some(|| Self::from_native_c(info))
@@ -54,15 +75,20 @@ impl YUVAPixmapInfo {
     pub fn from_data_type(
         info: &YUVAInfo,
         data_type: DataType,
-        row_bytes: Option<&[usize; Self::MAX_PLANES]>,
+        row_bytes: Option<&[usize]>,
     ) -> Option<Self> {
-        let info = unsafe {
-            SkYUVAPixmapInfo::new1(
-                info.native(),
-                data_type,
-                row_bytes.map(|rb| rb.as_ptr()).unwrap_or(ptr::null()),
-            )
+        let mut row_bytes_array = [0; Self::MAX_PLANES];
+        let row_bytes_ptr = {
+            if let Some(row_bytes) = row_bytes {
+                row_bytes_array[..row_bytes.len()].copy_from_slice(row_bytes);
+                row_bytes_array.as_ptr()
+            } else {
+                ptr::null()
+            }
         };
+
+        let info = unsafe { SkYUVAPixmapInfo::new1(info.native(), data_type, row_bytes_ptr) };
+
         Self::native_is_valid(&info).if_true_then_some(|| Self::from_native_c(info))
     }
 
@@ -102,8 +128,8 @@ impl YUVAPixmapInfo {
     }
 
     /// Determine size to allocate for all planes. Optionally retrieves the per-plane sizes in
-    /// planeSizes if not [None]. If total size overflows will return SIZE_MAX and set all `plane_sizes`
-    /// to SIZE_MAX.
+    /// planeSizes if not [None]. If total size overflows will return SIZE_MAX and set all
+    /// `plane_sizes` to SIZE_MAX.
     pub fn compute_total_bytes(
         &self,
         plane_sizes: Option<&mut [usize; Self::MAX_PLANES]>,
@@ -117,14 +143,16 @@ impl YUVAPixmapInfo {
         }
     }
 
-    /// Takes an allocation that is assumed to be at least [compute_total_bytes(&self)] in size and configures
-    /// the first [numPlanes(&self)] entries in pixmaps array to point into that memory. The remaining
-    /// entries of pixmaps are default initialized. Returns [None] if this [YUVAPixmapInfo] not valid.
+    /// Takes an allocation that is assumed to be at least [compute_total_bytes(&self)] in size and
+    /// configures the first [numPlanes(&self)] entries in pixmaps array to point into that memory.
+    /// The remaining entries of pixmaps are default initialized. Returns [None] if this
+    /// [YUVAPixmapInfo] not valid.
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn init_pixmaps_from_single_allocation(
         &self,
         memory: *mut c_void,
     ) -> Option<[Pixmap; Self::MAX_PLANES]> {
+        // Can't return a Vec<Pixmap> because Pixmap's can't be cloned.
         let mut pixmaps: [Pixmap; Self::MAX_PLANES] = Default::default();
         self.native()
             .initPixmapsFromSingleAllocation(memory, pixmaps.native_mut().as_mut_ptr())
@@ -133,7 +161,7 @@ impl YUVAPixmapInfo {
 
     /// Returns `true` if this has been configured with a non-empty dimensioned [YUVAInfo] with
     /// compatible color types and row bytes.
-    fn native_is_valid(info: *const SkYUVAPixmapInfo) -> bool {
+    pub(crate) fn native_is_valid(info: *const SkYUVAPixmapInfo) -> bool {
         unsafe { sb::C_SkYUVAPixmapInfo_isValid(info) }
     }
 
@@ -203,15 +231,11 @@ impl YUVAPixmaps {
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn from_external_pixmaps(
         info: &YUVAInfo,
-        x_pixmaps: &[Pixmap; Self::MAX_PLANES],
+        pixmaps: &[Pixmap; Self::MAX_PLANES],
     ) -> Option<Self> {
-        Self::try_construct(|pixmaps| {
-            sb::C_SkYUVAPixmaps_FromExternalPixmaps(
-                pixmaps,
-                info.native(),
-                x_pixmaps.native().as_ptr(),
-            );
-            Self::native_is_valid(pixmaps)
+        Self::try_construct(|pms| {
+            sb::C_SkYUVAPixmaps_FromExternalPixmaps(pms, info.native(), pixmaps.native().as_ptr());
+            Self::native_is_valid(pms)
         })
     }
 
@@ -265,7 +289,7 @@ impl YUVAPixmaps {
         .if_true_some((info, indices))
     }
 
-    fn native_is_valid(pixmaps: *const SkYUVAPixmaps) -> bool {
+    pub(crate) fn native_is_valid(pixmaps: *const SkYUVAPixmaps) -> bool {
         unsafe { sb::C_SkYUVAPixmaps_isValid(pixmaps) }
     }
 }

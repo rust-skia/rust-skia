@@ -277,20 +277,16 @@ extern "C" GrBackendApi C_GrBackendDrawableInfo_backend(const GrBackendDrawableI
 // gpu/GrYUVABackendTextures.h
 //
 
-extern "C" void C_GrYUVABackendTextureInfo_Construct(GrYUVABackendTextureInfo* uninitialized) {
-    new(uninitialized) GrYUVABackendTextureInfo();
-}
-
 extern "C" void C_GrYUVABackendTextureInfo_destruct(GrYUVABackendTextureInfo* self) {
     self->~GrYUVABackendTextureInfo();
 }
 
-extern "C" bool C_GrYUVABackendTextureInfo_equals(const GrYUVABackendTextureInfo* a, const GrYUVABackendTextureInfo* b) {
-    return *a == *b;
+extern "C" void C_GrYUVABackendTextureInfo_CopyConstruct(GrYUVABackendTextureInfo* uninitialized, const GrYUVABackendTextureInfo* src) {
+    new(uninitialized) GrYUVABackendTextureInfo(*src);
 }
 
-extern "C" void C_GrYUVABackendTextures_Construct(GrYUVABackendTextures* uninitialized) {
-    new(uninitialized) GrYUVABackendTextures();
+extern "C" bool C_GrYUVABackendTextureInfo_equals(const GrYUVABackendTextureInfo* a, const GrYUVABackendTextureInfo* b) {
+    return *a == *b;
 }
 
 extern "C" void C_GrYUVABackendTextures_destruct(GrYUVABackendTextures* self) {
