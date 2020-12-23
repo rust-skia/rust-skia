@@ -25,7 +25,7 @@ impl RCHandle<SkImageFilter> {
             tile_mode,
             convolve_alpha,
             self,
-            crop_rect,
+            crop_rect.into().map(|r| r.into()),
         )
     }
 }

@@ -16,7 +16,7 @@ impl RCHandle<SkImageFilter> {
             scale,
             displacement.into(),
             color,
-            crop_rect,
+            crop_rect.into().map(|r| r.into()),
         )
     }
 }

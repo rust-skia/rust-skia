@@ -10,7 +10,7 @@ impl RCHandle<SkImageFilter> {
         sigma: (scalar, scalar),
         tile_mode: impl Into<Option<crate::TileMode>>,
     ) -> Option<Self> {
-        image_filters::blur(sigma, tile_mode, self, crop_rect)
+        image_filters::blur(sigma, tile_mode, self, crop_rect.into().map(|r| r.into()))
     }
 }
 

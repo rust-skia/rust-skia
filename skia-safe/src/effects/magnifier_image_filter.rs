@@ -10,7 +10,7 @@ impl RCHandle<SkImageFilter> {
         src_rect: impl AsRef<Rect>,
         inset: scalar,
     ) -> Option<Self> {
-        image_filters::magnifier(src_rect, inset, self, crop_rect)
+        image_filters::magnifier(src_rect, inset, self, crop_rect.into().map(|r| r.into()))
     }
 }
 

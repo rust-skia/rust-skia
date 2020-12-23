@@ -9,7 +9,7 @@ impl RCHandle<SkImageFilter> {
         crop_rect: impl Into<Option<&'a IRect>>,
         delta: impl Into<Vector>,
     ) -> Option<Self> {
-        image_filters::offset(delta, self, crop_rect)
+        image_filters::offset(delta, self, crop_rect.into().map(|r| r.into()))
     }
 }
 

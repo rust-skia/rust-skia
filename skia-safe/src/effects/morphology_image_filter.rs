@@ -8,7 +8,7 @@ impl RCHandle<SkImageFilter> {
         crop_rect: impl Into<Option<&'a IRect>>,
         radii: (scalar, scalar),
     ) -> Option<Self> {
-        image_filters::dilate(radii, self, crop_rect)
+        image_filters::dilate(radii, self, crop_rect.into().map(|r| r.into()))
     }
 
     pub fn erode<'a>(
@@ -16,7 +16,7 @@ impl RCHandle<SkImageFilter> {
         crop_rect: impl Into<Option<&'a IRect>>,
         radii: (scalar, scalar),
     ) -> Option<Self> {
-        image_filters::erode(radii, self, crop_rect)
+        image_filters::erode(radii, self, crop_rect.into().map(|r| r.into()))
     }
 }
 

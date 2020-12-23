@@ -18,7 +18,7 @@ impl RCHandle<SkImageFilter> {
             surface_scale,
             kd,
             self,
-            crop_rect,
+            crop_rect.into().map(|r| r.into()),
         )
     }
 
@@ -30,7 +30,14 @@ impl RCHandle<SkImageFilter> {
         surface_scale: scalar,
         kd: scalar,
     ) -> Option<Self> {
-        image_filters::point_lit_diffuse(location, light_color, surface_scale, kd, self, crop_rect)
+        image_filters::point_lit_diffuse(
+            location,
+            light_color,
+            surface_scale,
+            kd,
+            self,
+            crop_rect.into().map(|r| r.into()),
+        )
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -54,7 +61,7 @@ impl RCHandle<SkImageFilter> {
             surface_scale,
             kd,
             self,
-            crop_rect,
+            crop_rect.into().map(|r| r.into()),
         )
     }
 
@@ -74,7 +81,7 @@ impl RCHandle<SkImageFilter> {
             ks,
             shininess,
             self,
-            crop_rect,
+            crop_rect.into().map(|r| r.into()),
         )
     }
 
@@ -94,7 +101,7 @@ impl RCHandle<SkImageFilter> {
             ks,
             shininess,
             self,
-            crop_rect,
+            crop_rect.into().map(|r| r.into()),
         )
     }
 
@@ -121,7 +128,7 @@ impl RCHandle<SkImageFilter> {
             ks,
             shininess,
             self,
-            crop_rect,
+            crop_rect.into().map(|r| r.into()),
         )
     }
 }

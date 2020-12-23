@@ -2655,25 +2655,36 @@ extern "C" {
 
 SkImageFilter *
 C_SkImageFilters_AlphaThreshold(const SkRegion &region, SkScalar innerMin, SkScalar outerMax, SkImageFilter *input,
-                                const SkIRect *cropRect) {
-    return SkImageFilters::AlphaThreshold(region, innerMin, outerMax, sp(input), cropRect).release();
+                                const SkImageFilters::CropRect *cropRect) {
+    return SkImageFilters::AlphaThreshold(region, innerMin, outerMax, sp(input), *cropRect).release();
 }
 
 SkImageFilter *C_SkImageFilters_Arithmetic(float k1, float k2, float k3, float k4, bool enforcePMColor,
                                            SkImageFilter *background,
                                            SkImageFilter *foreground,
-                                           const SkIRect *cropRect) {
+                                           const SkImageFilters::CropRect *cropRect) {
     return SkImageFilters::Arithmetic(k1, k2, k3, k4, enforcePMColor, sp(background),
-                                      sp(foreground), cropRect).release();
+                                      sp(foreground), *cropRect).release();
+}
+
+SkImageFilter *C_SkImageFilters_Blend(SkBlendMode mode,
+                                      SkImageFilter *background,
+                                      SkImageFilter *foreground,
+                                      const SkImageFilters::CropRect *cropRect)
+{
+    return SkImageFilters::Blend(mode, sp(background),
+                                 sp(foreground), *cropRect)
+        .release();
 }
 
 SkImageFilter *C_SkImageFilters_Blur(SkScalar sigmaX, SkScalar sigmaY, SkTileMode tileMode,
-                                     SkImageFilter *input, const SkIRect *cropRect) {
-    return SkImageFilters::Blur(sigmaX, sigmaY, tileMode, sp(input), cropRect).release();
+                                     SkImageFilter *input, const SkImageFilters::CropRect *cropRect)
+{
+    return SkImageFilters::Blur(sigmaX, sigmaY, tileMode, sp(input), *cropRect).release();
 }
 
-SkImageFilter *C_SkImageFilters_ColorFilter(SkColorFilter *cf, SkImageFilter *input, const SkIRect *cropRect) {
-    return SkImageFilters::ColorFilter(sp(cf), sp(input), cropRect).release();
+SkImageFilter *C_SkImageFilters_ColorFilter(SkColorFilter *cf, SkImageFilter *input, const SkImageFilters::CropRect *cropRect) {
+    return SkImageFilters::ColorFilter(sp(cf), sp(input), *cropRect).release();
 }
 
 SkImageFilter *C_SkImageFilters_Compose(SkImageFilter *outer, SkImageFilter *inner) {
@@ -2684,23 +2695,23 @@ SkImageFilter *C_SkImageFilters_DisplacementMap(SkColorChannel xChannelSelector,
                                                 SkColorChannel yChannelSelector,
                                                 SkScalar scale, SkImageFilter *displacement,
                                                 SkImageFilter *color,
-                                                const SkIRect *cropRect) {
+                                                const SkImageFilters::CropRect *cropRect) {
     return SkImageFilters::DisplacementMap(xChannelSelector, yChannelSelector, scale, sp(displacement), sp(color),
-                                           cropRect).release();
+                                           *cropRect).release();
 }
 
 SkImageFilter *C_SkImageFilters_DropShadow(SkScalar dx, SkScalar dy,
                                            SkScalar sigmaX, SkScalar sigmaY,
                                            SkColor color, SkImageFilter *input,
-                                           const SkIRect *cropRect) {
-    return SkImageFilters::DropShadow(dx, dy, sigmaX, sigmaY, color, sp(input), cropRect).release();
+                                           const SkImageFilters::CropRect *cropRect) {
+    return SkImageFilters::DropShadow(dx, dy, sigmaX, sigmaY, color, sp(input), *cropRect).release();
 }
 
 SkImageFilter *C_SkImageFilters_DropShadowOnly(SkScalar dx, SkScalar dy,
                                                SkScalar sigmaX, SkScalar sigmaY,
                                                SkColor color, SkImageFilter *input,
-                                               const SkIRect *cropRect) {
-    return SkImageFilters::DropShadowOnly(dx, dy, sigmaX, sigmaY, color, sp(input), cropRect).release();
+                                               const SkImageFilters::CropRect *cropRect) {
+    return SkImageFilters::DropShadowOnly(dx, dy, sigmaX, sigmaY, color, sp(input), *cropRect).release();
 }
 
 SkImageFilter *C_SkImageFilters_Image(SkImage *image, const SkRect *srcRect,
@@ -2710,8 +2721,8 @@ SkImageFilter *C_SkImageFilters_Image(SkImage *image, const SkRect *srcRect,
 
 SkImageFilter *C_SkImageFilters_Magnifier(const SkRect *srcRect, SkScalar inset,
                                           SkImageFilter *input,
-                                          const SkIRect *cropRect) {
-    return SkImageFilters::Magnifier(*srcRect, inset, sp(input), cropRect).release();
+                                          const SkImageFilters::CropRect *cropRect) {
+    return SkImageFilters::Magnifier(*srcRect, inset, sp(input), *cropRect).release();
 }
 
 SkImageFilter *C_SkImageFilters_MatrixConvolution(const SkISize *kernelSize,
@@ -2719,9 +2730,9 @@ SkImageFilter *C_SkImageFilters_MatrixConvolution(const SkISize *kernelSize,
                                                   SkScalar bias, const SkIPoint *kernelOffset,
                                                   SkTileMode tileMode, bool convolveAlpha,
                                                   SkImageFilter *input,
-                                                  const SkIRect *cropRect) {
+                                                  const SkImageFilters::CropRect *cropRect) {
     return SkImageFilters::MatrixConvolution(*kernelSize, kernel, gain, bias, *kernelOffset, tileMode, convolveAlpha,
-                                             sp(input), cropRect).release();
+                                             sp(input), *cropRect).release();
 }
 
 SkImageFilter *C_SkImageFilters_MatrixTransform(const SkMatrix *matrix,
@@ -2732,27 +2743,33 @@ SkImageFilter *C_SkImageFilters_MatrixTransform(const SkMatrix *matrix,
 }
 
 SkImageFilter *C_SkImageFilters_Merge(SkImageFilter *const filters[], int count,
-                                      const SkIRect *cropRect) {
+                                      const SkImageFilters::CropRect *cropRect) {
     auto array = new sk_sp<SkImageFilter>[count];
     for (int i = 0; i < count; ++i) {
         array[i] = sp(filters[i]);
     }
-    auto imageFilter = SkImageFilters::Merge(array, count, cropRect).release();
+    auto imageFilter = SkImageFilters::Merge(array, count, *cropRect).release();
     delete[] array;
     return imageFilter;
 }
 
 SkImageFilter *C_SkImageFilters_Offset(SkScalar dx, SkScalar dy, SkImageFilter *input,
-                                       const SkIRect *cropRect) {
-    return SkImageFilters::Offset(dx, dy, sp(input), cropRect).release();
+                                       const SkImageFilters::CropRect *cropRect) {
+    return SkImageFilters::Offset(dx, dy, sp(input), *cropRect).release();
 }
 
-SkImageFilter *C_SkImageFilters_Paint(const SkPaint *paint, const SkIRect *cropRect) {
-    return SkImageFilters::Paint(*paint, cropRect).release();
+SkImageFilter *C_SkImageFilters_Paint(const SkPaint *paint, const SkImageFilters::CropRect *cropRect) {
+    return SkImageFilters::Paint(*paint, *cropRect).release();
 }
 
 SkImageFilter *C_SkImageFilters_Picture(SkPicture *pic, const SkRect *targetRect) {
     return SkImageFilters::Picture(sp(pic), *targetRect).release();
+}
+
+SkImageFilter *C_SkImageFilters_Shader(SkShader *shader,
+                                       const SkImageFilters::CropRect *cropRect)
+{
+    return SkImageFilters::Shader(sp(shader), *cropRect).release();
 }
 
 SkImageFilter *C_SkImageFilters_Tile(const SkRect *src, const SkRect *dst,
@@ -2762,59 +2779,60 @@ SkImageFilter *C_SkImageFilters_Tile(const SkRect *src, const SkRect *dst,
 
 SkImageFilter *C_SkImageFilters_Xfermode(SkBlendMode blendMode, SkImageFilter *background,
                                          SkImageFilter *foreground,
-                                         const SkIRect *cropRect) {
-    return SkImageFilters::Xfermode(blendMode, sp(background), sp(foreground), cropRect).release();
+                                         const SkImageFilters::CropRect *cropRect) {
+    return SkImageFilters::Xfermode(blendMode, sp(background), sp(foreground), *cropRect).release();
 }
 
 SkImageFilter *C_SkImageFilters_Dilate(SkScalar radiusX, SkScalar radiusY, SkImageFilter *input,
-                                       const SkIRect *cropRect) {
-    return SkImageFilters::Dilate(radiusX, radiusY, sp(input), cropRect).release();
+                                    const SkImageFilters::CropRect *cropRect) {
+    return SkImageFilters::Dilate(radiusX, radiusY, sp(input), *cropRect).release();
 }
 
 SkImageFilter *C_SkImageFilters_Erode(SkScalar radiusX, SkScalar radiusY, SkImageFilter *input,
-                                      const SkIRect *cropRect) {
-    return SkImageFilters::Erode(radiusX, radiusY, sp(input), cropRect).release();
+                                      const SkImageFilters::CropRect *cropRect) {
+    return SkImageFilters::Erode(radiusX, radiusY, sp(input), *cropRect).release();
 }
 
 SkImageFilter *C_SkImageFilters_DistantLitDiffuse(const SkPoint3 *direction, SkColor lightColor,
                                                   SkScalar surfaceScale, SkScalar kd,
                                                   SkImageFilter *input,
-                                                  const SkIRect *cropRect) {
-    return SkImageFilters::DistantLitDiffuse(*direction, lightColor, surfaceScale, kd, sp(input), cropRect).release();
+                                                  const SkImageFilters::CropRect *cropRect)
+{
+    return SkImageFilters::DistantLitDiffuse(*direction, lightColor, surfaceScale, kd, sp(input), *cropRect).release();
 }
 
 SkImageFilter *C_SkImageFilters_PointLitDiffuse(const SkPoint3 *direction, SkColor lightColor,
                                                 SkScalar surfaceScale, SkScalar kd,
                                                 SkImageFilter *input,
-                                                const SkIRect *cropRect) {
-    return SkImageFilters::PointLitDiffuse(*direction, lightColor, surfaceScale, kd, sp(input), cropRect).release();
+                                                const SkImageFilters::CropRect *cropRect) {
+    return SkImageFilters::PointLitDiffuse(*direction, lightColor, surfaceScale, kd, sp(input), *cropRect).release();
 }
 
 SkImageFilter *
 C_SkImageFilters_SpotLitDiffuse(const SkPoint3 *location,
                                 const SkPoint3 *target, SkScalar specularExponent, SkScalar cutoffAngle,
                                 SkColor lightColor, SkScalar surfaceScale, SkScalar kd,
-                                SkImageFilter *input, const SkIRect *cropRect) {
+                                SkImageFilter *input, const SkImageFilters::CropRect *cropRect) {
     return SkImageFilters::SpotLitDiffuse(*location, *target, specularExponent, cutoffAngle, lightColor,
-                                          surfaceScale, kd, sp(input), cropRect).release();
+                                          surfaceScale, kd, sp(input), *cropRect).release();
 }
 
 SkImageFilter *
 C_ImageFilters_DistantLitSpecular(const SkPoint3 *direction,
                                   SkColor lightColor, SkScalar surfaceScale, SkScalar ks,
                                   SkScalar shininess, SkImageFilter *input,
-                                  const SkIRect *cropRect) {
+                                  const SkImageFilters::CropRect *cropRect) {
     return SkImageFilters::DistantLitSpecular(*direction, lightColor, surfaceScale, ks, shininess,
-                                              sp(input), cropRect).release();
+                                              sp(input), *cropRect).release();
 }
 
 SkImageFilter *
 C_SkImageFilters_PointLitSpecular(const SkPoint3 &location,
                                   SkColor lightColor, SkScalar surfaceScale, SkScalar ks,
                                   SkScalar shininess, SkImageFilter *input,
-                                  const SkIRect *cropRect) {
+                                  const SkImageFilters::CropRect *cropRect) {
     return SkImageFilters::PointLitSpecular(location, lightColor, surfaceScale, ks, shininess,
-                                            sp(input), cropRect).release();
+                                            sp(input), *cropRect).release();
 }
 
 SkImageFilter *
@@ -2822,10 +2840,10 @@ C_SkImageFilters_SpotLitSpecular(const SkPoint3 &location,
                                  const SkPoint3 &target, SkScalar specularExponent, SkScalar cutoffAngle,
                                  SkColor lightColor, SkScalar surfaceScale, SkScalar ks,
                                  SkScalar shininess, SkImageFilter *input,
-                                 const SkIRect *cropRect) {
+                                 const SkImageFilters::CropRect *cropRect) {
     return SkImageFilters::SpotLitSpecular(location, target, specularExponent, cutoffAngle, lightColor,
                                            surfaceScale, ks, shininess, sp(input),
-                                           cropRect).release();
+                                           *cropRect).release();
 }
 
 }

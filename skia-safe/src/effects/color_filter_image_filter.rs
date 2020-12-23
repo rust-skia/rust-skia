@@ -9,7 +9,7 @@ impl RCHandle<SkImageFilter> {
         crop_rect: impl Into<Option<&'a IRect>>,
         cf: impl Into<ColorFilter>,
     ) -> Option<Self> {
-        image_filters::color_filter(cf, self, crop_rect)
+        image_filters::color_filter(cf, self, crop_rect.into().map(|r| r.into()))
     }
 }
 

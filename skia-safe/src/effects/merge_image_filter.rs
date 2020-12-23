@@ -9,7 +9,7 @@ impl RCHandle<SkImageFilter> {
         filters: impl IntoIterator<Item = Option<Self>>,
         crop_rect: impl Into<Option<&'a IRect>>,
     ) -> Option<Self> {
-        image_filters::merge(filters, crop_rect)
+        image_filters::merge(filters, crop_rect.into().map(|r| r.into()))
     }
 }
 
