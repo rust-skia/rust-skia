@@ -258,7 +258,7 @@ impl RCHandle<GrDirectContext> {
     }
 
     // TODO: dumpMemoryStatistics()
-    
+
     pub fn supports_distance_field_text(&self) -> bool {
         unsafe { self.native().supportsDistanceFieldText() }
     }
