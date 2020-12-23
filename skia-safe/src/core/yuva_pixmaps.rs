@@ -212,6 +212,7 @@ impl YUVAPixmapInfo {
     /// Takes an allocation that is assumed to be at least `computeTotalBytes()` in size and configures
     /// the first `numPlanes()` entries in pixmaps array to point into that memory. The remaining
     /// entries of pixmaps are default initialized. Returns `None` if this `YUVAPixmapInfo` not valid.
+    #[allow(clippy::clippy::missing_safety_doc)]
     pub unsafe fn init_pixmaps_from_single_allocation(
         &self,
         memory: *mut c_void,
@@ -267,6 +268,7 @@ impl YUVAPixmaps {
     /// Use passed in memory as backing store for pixmaps' pixels. Caller must ensure memory remains
     /// allocated while pixmaps are in use. There must be at least
     /// `YUVAPixmapInfo::computeTotalBytes()` allocated starting at memory.
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn from_external_memory(info: &YUVAPixmapInfo, memory: *mut c_void) -> Option<Self> {
         Self::try_construct(|pixmaps| {
             sb::C_SkYUVAPixmaps_FromExternalMemory(pixmaps, info.native(), memory);
@@ -278,6 +280,7 @@ impl YUVAPixmaps {
     /// memory so the caller must ensure it remains valid. Will return `None` if
     /// the YUVAInfo isn't compatible with the `Pixmap` array (number of planes, plane dimensions,
     /// sufficient color channels in planes, ...).
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn from_external_pixmaps(
         info: &YUVAInfo,
         x_pixmaps: &[Pixmap; Self::MAX_PLANES],
