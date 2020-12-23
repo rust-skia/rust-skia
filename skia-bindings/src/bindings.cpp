@@ -232,8 +232,8 @@ extern "C" const SkSurfaceProps* C_SkSurface_props(const SkSurface* self) {
     return &self->props();
 }
 
-extern "C" bool C_SkSurface_draw(SkSurface* self, const SkDeferredDisplayList* displayList) {
-    return self->draw(sp(displayList));
+extern "C" bool C_SkSurface_draw(SkSurface* self, const SkDeferredDisplayList* displayList, int xOffset, int yOffset) {
+    return self->draw(sp(displayList), xOffset, yOffset);
 }
 
 //

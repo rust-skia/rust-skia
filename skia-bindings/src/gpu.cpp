@@ -13,7 +13,7 @@
 //
 
 extern "C" SkSurface* C_SkSurface_MakeFromBackendTexture(
-        GrDirectContext* context,
+        GrRecordingContext* context,
         const GrBackendTexture* backendTexture,
         GrSurfaceOrigin origin,
         int sampleCnt,
@@ -30,7 +30,7 @@ extern "C" SkSurface* C_SkSurface_MakeFromBackendTexture(
 }
 
 extern "C" SkSurface* C_SkSurface_MakeFromBackendRenderTarget(
-        GrDirectContext* context,
+        GrRecordingContext* context,
         const GrBackendRenderTarget* backendRenderTarget,
         GrSurfaceOrigin origin,
         SkColorType colorType,

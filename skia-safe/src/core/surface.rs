@@ -2,8 +2,8 @@
 use crate::gpu;
 use crate::prelude::*;
 use crate::{
-    Bitmap, Canvas, DeferredDisplayList, IPoint, IRect, ISize, Image, ImageInfo, Paint, Pixmap,
-    Size, SurfaceCharacterization, SurfaceProps,
+    Bitmap, Canvas, DeferredDisplayList, IPoint, IRect, ISize, IVector, Image, ImageInfo, Paint,
+    Pixmap, Size, SurfaceCharacterization, SurfaceProps,
 };
 use skia_bindings as sb;
 use skia_bindings::{SkRefCntBase, SkSurface};
@@ -87,7 +87,7 @@ impl RCHandle<SkSurface> {
 #[cfg(feature = "gpu")]
 impl RCHandle<SkSurface> {
     pub fn from_backend_texture(
-        context: &mut gpu::DirectContext,
+        context: &mut gpu::RecordingContext,
         backend_texture: &gpu::BackendTexture,
         origin: gpu::SurfaceOrigin,
         sample_count: impl Into<Option<usize>>,
@@ -109,7 +109,7 @@ impl RCHandle<SkSurface> {
     }
 
     pub fn from_backend_render_target(
-        context: &mut gpu::DirectContext,
+        context: &mut gpu::RecordingContext,
         backend_render_target: &gpu::BackendRenderTarget,
         origin: gpu::SurfaceOrigin,
         color_type: crate::ColorType,
@@ -451,7 +451,7 @@ impl RCHandle<SkSurface> {
         }
     }
 
-    pub fn flush_and_submit_and_sync_cpu(&mut self) {
+    pub fn flush_submit_and_sync_cpu(&mut self) {
         unsafe {
             self.native_mut().flushAndSubmit(true);
         }
@@ -497,10 +497,21 @@ impl RCHandle<SkSurface> {
         &mut self,
         deferred_display_list: impl Into<DeferredDisplayList>,
     ) -> bool {
+        self.draw_display_list_with_offset(deferred_display_list, IVector::default())
+    }
+
+    pub fn draw_display_list_with_offset(
+        &mut self,
+        deferred_display_list: impl Into<DeferredDisplayList>,
+        offset: impl Into<IVector>,
+    ) -> bool {
+        let offset = offset.into();
         unsafe {
             sb::C_SkSurface_draw(
                 self.native_mut(),
                 deferred_display_list.into().into_ptr() as *const _,
+                offset.x,
+                offset.y,
             )
         }
     }
