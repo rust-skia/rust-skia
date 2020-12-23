@@ -387,8 +387,9 @@ mod tests {
 
     #[test]
     fn recommended_color_type() {
-        assert!(
-            YUVAPixmaps::recommended_rgba_color_type(super::DataType::Float16) == ColorType::Alpha8
+        assert_eq!(
+            YUVAPixmaps::recommended_rgba_color_type(super::DataType::Float16),
+            ColorType::RGBAF16
         );
     }
 }
