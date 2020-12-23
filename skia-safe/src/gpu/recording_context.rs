@@ -96,4 +96,6 @@ impl RCHandle<GrRecordingContext> {
         .try_into()
         .unwrap()
     }
+
+    // TODO: Wrap Arenas (if used).
 }
