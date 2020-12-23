@@ -30,7 +30,7 @@ impl RCHandle<GrRecordingContext> {
     }
 
     pub fn default_backend_format(&self, ct: ColorType, renderable: Renderable) -> BackendFormat {
-        let mut format = BackendFormat::default();
+        let mut format = BackendFormat::new_invalid();
         unsafe {
             sb::C_GrRecordingContext_defaultBackendFormat(
                 self.native(),
@@ -47,7 +47,7 @@ impl RCHandle<GrRecordingContext> {
         &self,
         compression_type: image::CompressionType,
     ) -> BackendFormat {
-        let mut format = BackendFormat::default();
+        let mut format = BackendFormat::new_invalid();
         unsafe {
             sb::C_GrRecordingContext_compressedBackendFormat(
                 self.native(),

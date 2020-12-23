@@ -28,19 +28,9 @@ impl NativeClone for GrBackendFormat {
     }
 }
 
-#[deprecated(
-    note = "The creation of invalid BackendFormats aren't suppored anymore",
-    since = "0.0.0"
-)]
-impl Default for BackendFormat {
-    fn default() -> Self {
-        Self::new_invalid()
-    }
-}
-
 impl Handle<GrBackendFormat> {
     #[deprecated(
-        note = "The creation of invalid BackendFormats aren't suppored anymore",
+        note = "The creation of invalid BackendFormats isn't supported anymore",
         since = "0.0.0"
     )]
     pub fn new() -> Self {

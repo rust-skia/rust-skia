@@ -293,7 +293,7 @@ impl RCHandle<GrDirectContext> {
     //       introduced in m84
 
     pub fn compressed_backend_format(&self, compression: image::CompressionType) -> BackendFormat {
-        let mut backend_format = BackendFormat::default();
+        let mut backend_format = BackendFormat::new_invalid();
         unsafe {
             sb::C_GrDirectContext_compressedBackendFormat(
                 self.native(),
