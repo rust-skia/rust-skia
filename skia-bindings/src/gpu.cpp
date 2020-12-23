@@ -1,6 +1,7 @@
 #include "bindings.h"
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/GrBackendDrawableInfo.h"
+#include "include/gpu/GrYUVABackendTextures.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkDrawable.h"
 #include "include/core/SkSurface.h"
@@ -270,6 +271,34 @@ extern "C" bool C_GrBackendDrawableInfo_isValid(const GrBackendDrawableInfo* sel
 
 extern "C" GrBackendApi C_GrBackendDrawableInfo_backend(const GrBackendDrawableInfo* self) {
     return self->backend();
+}
+
+//
+// gpu/GrYUVABackendTextures.h
+//
+
+extern "C" void C_GrYUVABackendTextureInfo_Construct(GrYUVABackendTextureInfo* uninitialized) {
+    new(uninitialized) GrYUVABackendTextureInfo();
+}
+
+extern "C" void C_GrYUVABackendTextureInfo_destruct(GrYUVABackendTextureInfo* self) {
+    self->~GrYUVABackendTextureInfo();
+}
+
+extern "C" bool C_GrYUVABackendTextureInfo_equals(const GrYUVABackendTextureInfo* a, const GrYUVABackendTextureInfo* b) {
+    return *a == *b;
+}
+
+extern "C" void C_GrYUVABackendTextures_Construct(GrYUVABackendTextures* uninitialized) {
+    new(uninitialized) GrYUVABackendTextures();
+}
+
+extern "C" void C_GrYUVABackendTextures_destruct(GrYUVABackendTextures* self) {
+    self->~GrYUVABackendTextures();
+}
+
+extern "C" const GrBackendTexture* C_GrYUVABackendTextures_textures(const GrYUVABackendTextures* self) {
+    return self->textures().data();
 }
 
 //

@@ -1246,6 +1246,9 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("Siting", rewrite::k_xxx),
     // SkYUVAPixmapInfo
     ("DataType", rewrite::k_xxx),
+    // m88:
+    // SkYUVAInfo_*
+    ("PlaneConfig", rewrite::k_xxx),
 ];
 
 pub(crate) mod rewrite {

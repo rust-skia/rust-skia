@@ -42,7 +42,7 @@ impl RCHandle<SkDataTable> {
         unsafe { self.at_t(index) }
     }
 
-    #[allow(clippy::clippy::missing_safety_doc)]
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn at_t<T: Copy>(&self, index: usize) -> &[T] {
         assert!(index < self.count());
         let mut size = usize::default();

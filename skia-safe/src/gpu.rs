@@ -37,6 +37,9 @@ pub use self::types::*;
 #[cfg(feature = "vulkan")]
 pub mod vk;
 
+mod yuva_backend_textures;
+pub use yuva_backend_textures::*;
+
 #[test]
 fn implicit_deref_conversion_from_direct_context_to_context_to_recording_context() {
     fn _recording_context(_context: &RecordingContext) {}

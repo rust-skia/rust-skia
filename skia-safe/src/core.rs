@@ -185,6 +185,9 @@ pub use rrect::RRect;
 mod rsxform;
 pub use rsxform::*;
 
+mod sampling_options;
+pub use sampling_options::*;
+
 mod scalar_;
 pub use scalar_::*;
 
@@ -239,8 +242,8 @@ pub use yuva_index::YUVAIndex;
 pub mod yuva_info;
 pub use yuva_info::YUVAInfo;
 
-mod yuva_pixmaps;
-pub use yuva_pixmaps::*;
+pub mod yuva_pixmaps;
+pub use yuva_pixmaps::{yuva_pixmap_info, YUVAPixmapInfo, YUVAPixmaps};
 
 mod yuva_size_info;
 pub use yuva_size_info::*;

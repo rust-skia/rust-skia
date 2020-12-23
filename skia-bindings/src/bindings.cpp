@@ -1981,11 +1981,18 @@ extern "C" void C_SkYUVAInfo_destruct(SkYUVAInfo* self) {
     self->~SkYUVAInfo();
 }
 
-extern "C" int C_SkYUVAInfo_NumPlanes(SkYUVAInfo::PlanarConfig planarConfig) {
-    return SkYUVAInfo::NumPlanes(planarConfig);
+extern "C" int C_SkYUVAInfo_NumPlanes(SkYUVAInfo::PlaneConfig planeConfig) {
+    return SkYUVAInfo::NumPlanes(planeConfig);
 }
 
-extern "C" int C_SkYUVAInfo_NumChannelsInPlane(SkYUVAInfo::PlanarConfig planarConfig, int i) {
+extern "C" bool C_SkYUVAInfo_GetYUVAIndices(
+    SkYUVAInfo::PlaneConfig planeConfig,
+    const uint32_t planeChannelFlags[SkYUVAInfo::kMaxPlanes],
+    SkYUVAIndex indices[SkYUVAIndex::kIndexCount]) {
+    return SkYUVAInfo::GetYUVAIndices(planeConfig, planeChannelFlags, indices);
+}
+
+extern "C" int C_SkYUVAInfo_NumChannelsInPlane(SkYUVAInfo::PlaneConfig planarConfig, int i) {
     return SkYUVAInfo::NumChannelsInPlane(planarConfig, i);
 }
 
@@ -2031,7 +2038,7 @@ extern "C" void C_SkYUVAPixmapInfo_SupportedDataTypes_All(SkYUVAPixmapInfo::Supp
 
 extern "C" bool C_SkYUVAPixmapInfo_SupportedDataTypes_supported(
     const SkYUVAPixmapInfo::SupportedDataTypes* self, 
-    SkYUVAPixmapInfo::PlanarConfig pc, 
+    SkYUVAPixmapInfo::PlaneConfig pc, 
     SkYUVAPixmapInfo::DataType dt) {
     return self->supported(pc, dt);
 }
@@ -2054,6 +2061,10 @@ extern "C" void C_SkYUVAPixmaps_destruct(SkYUVAPixmaps* self) {
     self->~SkYUVAPixmaps();
 }
 
+extern "C" void C_SkYUVAPixmaps_MakeCopy(const SkYUVAPixmaps* self, SkYUVAPixmaps* uninitialized) {
+    new(uninitialized) SkYUVAPixmaps(SkYUVAPixmaps::MakeCopy(*self));
+}
+
 extern "C" void C_SkYUVAPixmaps_Allocate(SkYUVAPixmaps* uninitialized, const SkYUVAPixmapInfo* yuvaPixmapInfo) {
     new(uninitialized) SkYUVAPixmaps(SkYUVAPixmaps::Allocate(*yuvaPixmapInfo));
 }
@@ -2068,6 +2079,10 @@ extern "C" void C_SkYUVAPixmaps_FromExternalMemory(SkYUVAPixmaps* uninitialized,
 
 extern "C" void C_SkYUVAPixmaps_FromExternalPixmaps(SkYUVAPixmaps* uninitialized, const SkYUVAInfo* yuvaInfo, const SkPixmap pixmaps[SkYUVAPixmaps::kMaxPlanes]) {
     new(uninitialized) SkYUVAPixmaps(SkYUVAPixmaps::FromExternalPixmaps(*yuvaInfo, pixmaps));
+}
+
+extern "C" void C_SkYUVAPixmaps_pixmapsInfo(const SkYUVAPixmaps* self, SkYUVAPixmapInfo* uninitialized) {
+    new(uninitialized) SkYUVAPixmapInfo(self->pixmapsInfo());
 }
 
 extern "C" const SkPixmap* C_SkYUVAPixmaps_planes(const SkYUVAPixmaps* self) {

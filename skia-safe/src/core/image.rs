@@ -1,53 +1,31 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
-use crate::prelude::*;
+use crate::{prelude::*, CubicResampler};
 use crate::{
     AlphaType, Bitmap, ColorSpace, ColorType, Data, EncodedImageFormat, IPoint, IRect, ISize,
     ImageInfo, Matrix, Paint, Picture, Shader, TileMode,
 };
 use crate::{FilterQuality, ImageFilter, ImageGenerator, Pixmap};
 use skia_bindings as sb;
-use skia_bindings::{SkFilterOptions, SkImage, SkRefCntBase};
+use skia_bindings::{SkImage, SkRefCntBase};
 use std::{mem, ptr};
 
-pub use skia_bindings::SkSamplingMode as SamplingMode;
-#[test]
-fn test_sampling_mode_naming() {
-    let _ = SamplingMode::Linear;
-}
+#[deprecated(note = "Use skia_safe::SamplingMode", since = "0.0.0")]
+pub use super::SamplingMode;
 
-pub use skia_bindings::SkMipmapMode as MipmapMode;
-#[test]
-fn test_mipmap_mode_naming() {
-    let _ = MipmapMode::Nearest;
-}
+#[deprecated(note = "Use skia_safe::SkMipmapMode", since = "0.0.0")]
+pub use super::MipmapMode;
+
+#[deprecated(note = "Use skia_safe::FilterOptions", since = "0.0.0")]
+pub use super::FilterOptions;
 
 // TODO: Add MipmapBuilder as soon it's documented or
 //       SkMipmap made its way into the public interface.
-
-#[repr(C)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub struct FilterOptions {
-    pub sampling: SamplingMode,
-    pub mipmap: MipmapMode,
-}
-
-impl NativeTransmutable<SkFilterOptions> for FilterOptions {}
-#[test]
-fn test_filter_options_layout() {
-    FilterOptions::test_layout()
-}
 
 pub use skia_bindings::SkImage_BitDepth as BitDepth;
 #[test]
 fn test_bit_depth_naming() {
     let _ = BitDepth::F16;
-}
-
-pub use skia_bindings::SkImage_CubicResampler as CubicResampler;
-#[test]
-fn test_cubic_resampler_naming() {
-    let _ = CubicResampler { B: 0.0, C: 0.0 };
 }
 
 pub use skia_bindings::SkImage_CachingHint as CachingHint;
@@ -221,7 +199,7 @@ impl RCHandle<SkImage> {
     pub fn from_adopted_texture(
         context: &mut gpu::RecordingContext,
         backend_texture: &gpu::BackendTexture,
-        image_origin: gpu::SurfaceOrigin,
+        texture_origin: gpu::SurfaceOrigin,
         color_type: ColorType,
         alpha_type: AlphaType,
         color_space: impl Into<Option<ColorSpace>>,
@@ -230,7 +208,7 @@ impl RCHandle<SkImage> {
             sb::C_SkImage_MakeFromAdoptedTexture(
                 context.native_mut(),
                 backend_texture.native(),
-                image_origin,
+                texture_origin,
                 color_type.into_native(),
                 alpha_type,
                 color_space.into().into_ptr_or_null(),
@@ -454,7 +432,7 @@ impl RCHandle<SkImage> {
                 self.native(),
                 tm1,
                 tm2,
-                cubic_resampler,
+                cubic_resampler.into_native(),
                 local_matrix.into().native_ptr_or_null(),
             )
         })
@@ -647,6 +625,7 @@ impl RCHandle<SkImage> {
     }
 
     #[cfg(feature = "gpu")]
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn read_pixels_to_pixmap(
         &self,
         dst: &Pixmap,

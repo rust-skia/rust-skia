@@ -96,6 +96,7 @@ impl RCHandle<GrDirectContext> {
     }
 
     #[cfg(feature = "d3d")]
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn new_d3d<'a>(
         backend_context: &d3d::BackendContext,
         options: impl Into<Option<&'a ContextOptions>>,

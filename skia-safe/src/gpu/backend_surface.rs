@@ -150,6 +150,7 @@ impl NativeClone for GrBackendTexture {
 
 impl Handle<GrBackendTexture> {
     #[cfg(feature = "gl")]
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn new_gl(
         (width, height): (i32, i32),
         mipmapped: super::Mipmapped,
@@ -162,6 +163,7 @@ impl Handle<GrBackendTexture> {
     }
 
     #[cfg(feature = "vulkan")]
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn new_vulkan((width, height): (i32, i32), vk_info: &vk::ImageInfo) -> Self {
         Self::from_native_if_valid(construct(|texture| {
             sb::C_GrBackendTexture_ConstructVk(texture, width, height, vk_info.native())

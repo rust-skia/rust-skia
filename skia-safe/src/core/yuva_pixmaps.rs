@@ -5,7 +5,7 @@ use crate::{
 use skia_bindings as sb;
 use skia_bindings::{SkYUVAPixmapInfo, SkYUVAPixmaps};
 use std::{ffi::c_void, ptr, slice};
-use yuva_pixmap_info::{DataType, SupportedDataTypes};
+use yuva_pixmap_info::SupportedDataTypes;
 
 /// [YUVAInfo] combined with per-plane [ColorType]s and row bytes. Fully specifies the [Pixmap]`s
 /// for a YUVA image without the actual pixel memory and data.
@@ -120,7 +120,7 @@ impl YUVAPixmapInfo {
     /// Takes an allocation that is assumed to be at least [compute_total_bytes(&self)] in size and configures
     /// the first [numPlanes(&self)] entries in pixmaps array to point into that memory. The remaining
     /// entries of pixmaps are default initialized. Returns [None] if this [YUVAPixmapInfo] not valid.
-    #[allow(clippy::clippy::missing_safety_doc)]
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn init_pixmaps_from_single_allocation(
         &self,
         memory: *mut c_void,
@@ -153,8 +153,20 @@ impl NativeDrop for SkYUVAPixmaps {
     }
 }
 
+impl NativeClone for SkYUVAPixmaps {
+    fn clone(&self) -> Self {
+        construct(|pixmaps| unsafe { sb::C_SkYUVAPixmaps_MakeCopy(self, pixmaps) })
+    }
+}
+
+pub use yuva_pixmap_info::DataType;
+
 impl YUVAPixmaps {
     pub const MAX_PLANES: usize = YUVAPixmapInfo::MAX_PLANES;
+
+    pub fn recommended_rgba_color_type(dt: DataType) -> ColorType {
+        ColorType::from_native_c(unsafe { sb::SkYUVAPixmaps::RecommendedRGBAColorType(dt) })
+    }
 
     /// Allocate space for pixmaps' pixels in the [YUVAPixmaps].
     pub fn allocate(info: &YUVAPixmapInfo) -> Option<Self> {
@@ -207,6 +219,16 @@ impl YUVAPixmaps {
         YUVAInfo::from_native_ref(&self.native().fYUVAInfo)
     }
 
+    pub fn data_type(&self) -> DataType {
+        self.native().fDataType
+    }
+
+    pub fn pixmaps_info(&self) -> YUVAPixmapInfo {
+        YUVAPixmapInfo::construct(|info| unsafe {
+            sb::C_SkYUVAPixmaps_pixmapsInfo(self.native(), info)
+        })
+    }
+
     /// Number of pixmap planes.
     pub fn num_planes(&self) -> usize {
         self.yuva_info().num_planes()
@@ -225,15 +247,22 @@ impl YUVAPixmaps {
         &self.planes()[i]
     }
 
+    /// Computes a [YUVAIndex] representation of the planar layout.
+    pub fn to_yuva_indices(&self) -> [YUVAIndex; YUVAIndex::INDEX_COUNT] {
+        let mut indices = [YUVAIndex::default(); YUVAIndex::INDEX_COUNT];
+        unsafe { self.native().toYUVAIndices(indices[0].native_mut()) };
+        indices
+    }
+
     /// Conversion to legacy YUVA data structures.
     pub fn to_legacy(&self) -> Option<(YUVASizeInfo, [YUVAIndex; 4])> {
         let mut info = YUVASizeInfo::default();
-        let mut index = [YUVAIndex::default(); 4];
+        let mut indices = [YUVAIndex::default(); 4];
         unsafe {
             self.native()
-                .toLegacy(info.native_mut(), &mut index.native_mut()[0])
+                .toLegacy(info.native_mut(), &mut indices.native_mut()[0])
         }
-        .if_true_some((info, index))
+        .if_true_some((info, indices))
     }
 
     fn native_is_valid(pixmaps: *const SkYUVAPixmaps) -> bool {
@@ -246,7 +275,8 @@ pub mod yuva_pixmap_info {
     use skia_bindings as sb;
     use skia_bindings::SkYUVAPixmapInfo_SupportedDataTypes;
 
-    pub use crate::yuva_info::PlanarConfig;
+    pub use crate::yuva_info::PlaneConfig;
+    pub use crate::yuva_info::Subsampling;
 
     /// Data type for Y, U, V, and possibly A channels independent of how values are packed into
     /// planes.
@@ -280,14 +310,14 @@ pub mod yuva_pixmap_info {
             })
         }
 
-        /// All legal combinations of [PlanarConfig] and [DataType] are supported.
+        /// All legal combinations of [PlaneConfig] and [DataType] are supported.
         pub fn all() -> Self {
             Handle::construct(|sdt| unsafe { sb::C_SkYUVAPixmapInfo_SupportedDataTypes_All(sdt) })
         }
 
         /// Checks whether there is a supported combination of color types for planes structured
-        /// as indicated by [PlanarConfig] with channel data types as indicated by [DataType].
-        pub fn supported(&self, pc: PlanarConfig, dt: DataType) -> bool {
+        /// as indicated by [PlaneConfig] with channel data types as indicated by [DataType].
+        pub fn supported(&self, pc: PlaneConfig, dt: DataType) -> bool {
             unsafe { sb::C_SkYUVAPixmapInfo_SupportedDataTypes_supported(self.native(), pc, dt) }
         }
 
@@ -324,10 +354,17 @@ pub mod yuva_pixmap_info {
 
 #[cfg(test)]
 mod tests {
-    use crate::yuva_pixmap_info;
+    use crate::{yuva_pixmap_info, ColorType, YUVAPixmaps};
 
     #[test]
     fn test_data_type_naming() {
         let _ = yuva_pixmap_info::DataType::Float16;
+    }
+
+    #[test]
+    fn recommended_color_type() {
+        assert!(
+            YUVAPixmaps::recommended_rgba_color_type(super::DataType::Float16) == ColorType::Alpha8
+        );
     }
 }

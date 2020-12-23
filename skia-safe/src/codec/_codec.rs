@@ -114,7 +114,7 @@ impl RCHandle<SkCodec> {
         since = "0.33.1",
         note = "Use the safe variant get_pixels_with_options()."
     )]
-    #[allow(clippy::clippy::missing_safety_doc)]
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn get_pixels(
         &mut self,
         info: &ImageInfo,
@@ -125,7 +125,7 @@ impl RCHandle<SkCodec> {
             .getPixels(info.native(), pixels, row_bytes, ptr::null())
     }
 
-    #[allow(clippy::clippy::missing_safety_doc)]
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn get_pixels_to_pixmap(
         &mut self,
         pixmap: &Pixmap,
