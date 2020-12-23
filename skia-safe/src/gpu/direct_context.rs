@@ -107,7 +107,6 @@ impl RCHandle<GrDirectContext> {
         ))
     }
 
-    // TODO: threadSafeProxy()
     pub fn reset(&mut self, backend_state: Option<u32>) -> &mut Self {
         unsafe {
             self.native_mut()
@@ -128,6 +127,8 @@ impl RCHandle<GrDirectContext> {
         }
         self
     }
+
+    // TODO: threadSafeProxy()
 
     pub fn oomed(&mut self) -> bool {
         unsafe { self.native_mut().oomed() }
@@ -227,16 +228,26 @@ impl RCHandle<GrDirectContext> {
         self
     }
 
+    pub fn flush_submit_and_sync_cpu(&mut self) -> &mut Self {
+        self.flush(&FlushInfo::default());
+        self.submit(true);
+        self
+    }
+
+    #[deprecated(note = "Use flush()", since = "0.0.0")]
     pub fn flush_with_info(&mut self, info: &FlushInfo) -> SemaphoresSubmitted {
-        unsafe { self.native_mut().flush(info.native()) }
+        self.flush(info)
     }
 
-    #[deprecated(since = "0.30.0", note = "use flush_and_submit()")]
-    pub fn flush(&mut self) -> &mut Self {
-        self.flush_and_submit()
+    pub fn flush<'a>(&mut self, info: impl Into<Option<&'a FlushInfo>>) -> SemaphoresSubmitted {
+        let n = self.native_mut();
+        if let Some(info) = info.into() {
+            unsafe { n.flush(info.native()) }
+        } else {
+            let info = FlushInfo::default();
+            unsafe { n.flush(info.native()) }
+        }
     }
-
-    // TODO: flush(GrFlushInfo, ..)
 
     pub fn submit(&mut self, sync_cpu: impl Into<Option<bool>>) -> bool {
         unsafe { self.native_mut().submit(sync_cpu.into().unwrap_or(false)) }
@@ -246,6 +257,8 @@ impl RCHandle<GrDirectContext> {
         unsafe { self.native_mut().checkAsyncWorkCompletion() }
     }
 
+    // TODO: dumpMemoryStatistics()
+    
     pub fn supports_distance_field_text(&self) -> bool {
         unsafe { self.native().supportsDistanceFieldText() }
     }
