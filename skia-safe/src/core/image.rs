@@ -1,6 +1,6 @@
+use crate::prelude::*;
 #[cfg(feature = "gpu")]
-use crate::gpu;
-use crate::{prelude::*, CubicResampler};
+use crate::{gpu, SamplingOptions};
 use crate::{
     AlphaType, Bitmap, ColorSpace, ColorType, Data, EncodedImageFormat, IPoint, IRect, ISize,
     ImageInfo, Matrix, Paint, Picture, Shader, TileMode,
@@ -18,6 +18,8 @@ pub use super::MipmapMode;
 
 #[deprecated(note = "Use skia_safe::FilterOptions", since = "0.0.0")]
 pub use super::FilterOptions;
+
+pub use super::CubicResampler;
 
 // TODO: Add MipmapBuilder as soon it's documented or
 //       SkMipmap made its way into the public interface.
@@ -216,86 +218,39 @@ impl RCHandle<SkImage> {
         })
     }
 
-    /*
-    // TODO: rename to clone_from_yuva_textures() ?
-    #[cfg(feature = "gpu")]
-    pub fn from_yuva_textures_copy(
-        context: &mut gpu::RecordingContext,
-        yuv_color_space: crate::YUVColorSpace,
-        yuva_textures: &[gpu::BackendTexture],
-        yuva_indices: &[crate::YUVAIndex; 4],
-        image_size: impl Into<ISize>,
-        image_origin: gpu::SurfaceOrigin,
-        image_color_space: impl Into<Option<ColorSpace>>,
-    ) -> Option<Image> {
-        Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeFromYUVATexturesCopy(
-                context.native_mut(),
-                yuv_color_space,
-                yuva_textures.native().as_ptr(),
-                yuva_indices.native().as_ptr(),
-                image_size.into().into_native(),
-                image_origin,
-                image_color_space.into().into_ptr_or_null(),
-            )
-        })
-    }
-    */
-
-    /*
-    #[allow(clippy::too_many_arguments)]
-    #[cfg(feature = "gpu")]
-    pub fn from_yuva_textures_copy_with_external_backend(
-        context: &mut gpu::RecordingContext,
-        yuv_color_space: crate::YUVColorSpace,
-        yuva_textures: &[gpu::BackendTexture],
-        yuva_indices: &[crate::YUVAIndex; 4],
-        image_size: impl Into<ISize>,
-        image_origin: gpu::SurfaceOrigin,
-        backend_texture: &gpu::BackendTexture,
-        image_color_space: impl Into<Option<ColorSpace>>,
-        // TODO: m78 introduced textureReleaseProc and releaseContext here.
-    ) -> Option<Image> {
-        Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend(
-                context.native_mut(),
-                yuv_color_space,
-                yuva_textures.native().as_ptr(),
-                yuva_indices.native().as_ptr(),
-                image_size.into().into_native(),
-                image_origin,
-                backend_texture.native(),
-                image_color_space.into().into_ptr_or_null(),
-            )
-        })
-    }
-    */
-
     #[cfg(feature = "gpu")]
     pub fn from_yuva_textures(
-        context: &mut gpu::DirectContext,
-        yuv_color_space: crate::YUVColorSpace,
-        yuva_textures: &[gpu::BackendTexture],
-        yuva_indices: &[crate::YUVAIndex; 4],
-        image_size: impl Into<ISize>,
-        image_origin: gpu::SurfaceOrigin,
+        context: &mut gpu::RecordingContext,
+        yuva_textures: &gpu::YUVABackendTextures,
         image_color_space: impl Into<Option<ColorSpace>>,
-        // TODO: m85 introduced textureReleaseProc and releaseContext here.
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_MakeFromYUVATextures(
                 context.native_mut(),
-                yuv_color_space,
-                yuva_textures.native().as_ptr(),
-                yuva_indices.native().as_ptr(),
-                image_size.into().into_native(),
-                image_origin,
+                yuva_textures.native(),
                 image_color_space.into().into_ptr_or_null(),
             )
         })
     }
 
-    // TODO: MakeFromYUVAPixmaps()
+    #[cfg(feature = "gpu")]
+    pub fn from_yuva_pixmaps(
+        context: &mut gpu::RecordingContext,
+        yuva_pixmaps: &crate::YUVAPixmaps,
+        build_mips: impl Into<Option<gpu::Mipmapped>>,
+        limit_to_max_texture_size: impl Into<Option<bool>>,
+        image_color_space: impl Into<Option<ColorSpace>>,
+    ) -> Option<Image> {
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_MakeFromYUVAPixmaps(
+                context.native_mut(),
+                yuva_pixmaps.native(),
+                build_mips.into().unwrap_or(gpu::Mipmapped::No),
+                limit_to_max_texture_size.into().unwrap_or(false),
+                image_color_space.into().into_ptr_or_null(),
+            )
+        })
+    }
 
     #[cfg(feature = "gpu")]
     #[deprecated(note = "Removed without replacement", since = "0.0.0")]
@@ -311,10 +266,10 @@ impl RCHandle<SkImage> {
 
     #[cfg(feature = "gpu")]
     pub fn from_nv12_textures_copy_with_external_backend(
-        context: &mut gpu::DirectContext,
+        context: &mut gpu::RecordingContext,
         yuv_color_space: crate::YUVColorSpace,
         nv12_textures: &[gpu::BackendTexture; 2],
-        image_origin: gpu::SurfaceOrigin,
+        texture_origin: gpu::SurfaceOrigin,
         backend_texture: &gpu::BackendTexture,
         image_color_space: impl Into<Option<ColorSpace>>,
         // TODO: m78 introduced textureReleaseProc and releaseContext here.
@@ -324,7 +279,7 @@ impl RCHandle<SkImage> {
                 context.native_mut(),
                 yuv_color_space,
                 nv12_textures.native().as_ptr(),
-                image_origin,
+                texture_origin,
                 backend_texture.native(),
                 image_color_space.into().into_ptr_or_null(),
             )
@@ -395,6 +350,49 @@ impl RCHandle<SkImage> {
         self.alpha_type().is_opaque()
     }
 
+    pub fn to_shader_with_sampling_options<'a>(
+        &self,
+        tile_modes: impl Into<Option<(TileMode, TileMode)>>,
+        sampling_options: &SamplingOptions,
+        local_matrix: impl Into<Option<&'a Matrix>>,
+    ) -> Shader {
+        let tile_modes = tile_modes.into();
+        let tm1 = tile_modes.map(|m| m.0).unwrap_or_default();
+        let tm2 = tile_modes.map(|m| m.1).unwrap_or_default();
+
+        Shader::from_ptr(unsafe {
+            sb::C_SkImage_makeShaderWithSamplingOptions(
+                self.native(),
+                tm1,
+                tm2,
+                sampling_options.native(),
+                local_matrix.into().native_ptr_or_null(),
+            )
+        })
+        .unwrap()
+    }
+
+    pub fn to_shader_with_cubic_resampler<'a>(
+        &self,
+        tile_modes: impl Into<Option<(TileMode, TileMode)>>,
+        cubic_resampler: CubicResampler,
+        local_matrix: impl Into<Option<&'a Matrix>>,
+    ) -> Option<Shader> {
+        let tile_modes = tile_modes.into();
+        let tm1 = tile_modes.map(|m| m.0).unwrap_or_default();
+        let tm2 = tile_modes.map(|m| m.1).unwrap_or_default();
+
+        Shader::from_ptr(unsafe {
+            sb::C_SkImage_makeShaderWithCubicResampler(
+                self.native(),
+                tm1,
+                tm2,
+                cubic_resampler.into_native(),
+                local_matrix.into().native_ptr_or_null(),
+            )
+        })
+    }
+
     pub fn to_shader_with_filter_options<'a>(
         &self,
         tile_modes: impl Into<Option<(TileMode, TileMode)>>,
@@ -411,28 +409,6 @@ impl RCHandle<SkImage> {
                 tm1,
                 tm2,
                 filter_options.into_native(),
-                local_matrix.into().native_ptr_or_null(),
-            )
-        })
-        .unwrap()
-    }
-
-    pub fn to_shader_with_cubic_resampler<'a>(
-        &self,
-        tile_modes: impl Into<Option<(TileMode, TileMode)>>,
-        cubic_resampler: CubicResampler,
-        local_matrix: impl Into<Option<&'a Matrix>>,
-    ) -> Shader {
-        let tile_modes = tile_modes.into();
-        let tm1 = tile_modes.map(|m| m.0).unwrap_or_default();
-        let tm2 = tile_modes.map(|m| m.1).unwrap_or_default();
-
-        Shader::from_ptr(unsafe {
-            sb::C_SkImage_makeShaderWithCubicResampler(
-                self.native(),
-                tm1,
-                tm2,
-                cubic_resampler.into_native(),
                 local_matrix.into().native_ptr_or_null(),
             )
         })

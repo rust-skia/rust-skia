@@ -299,12 +299,16 @@ extern "C" SkShader* C_SkImage_makeShader(const SkImage* self, SkTileMode tileMo
     return self->makeShader(tileMode1, tileMode2, localMatrix).release();
 }
 
-extern "C" SkShader* C_SkImage_makeShaderWithFilterOptions(const SkImage* self, SkTileMode tileMode1, SkTileMode tileMode2, SkFilterOptions filterOptions, const SkMatrix* localMatrix) {
-    return self->makeShader(tileMode1, tileMode2, filterOptions, localMatrix).release();
+extern "C" SkShader* C_SkImage_makeShaderWithSamplingOptions(const SkImage* self, SkTileMode tileMode1, SkTileMode tileMode2, const SkSamplingOptions* samplingOptions, const SkMatrix* localMatrix) {
+    return self->makeShader(tileMode1, tileMode2, *samplingOptions, localMatrix).release();
 }
 
 extern "C" SkShader* C_SkImage_makeShaderWithCubicResampler(const SkImage* self, SkTileMode tileMode1, SkTileMode tileMode2, SkImage::CubicResampler cubicResampler, const SkMatrix* localMatrix) {
     return self->makeShader(tileMode1, tileMode2, cubicResampler, localMatrix).release();
+}
+
+extern "C" SkShader* C_SkImage_makeShaderWithFilterOptions(const SkImage* self, SkTileMode tileMode1, SkTileMode tileMode2, SkFilterOptions filterOptions, const SkMatrix* localMatrix) {
+    return self->makeShader(tileMode1, tileMode2, filterOptions, localMatrix).release();
 }
 
 extern "C" SkShader *C_SkImage_makeShaderWithQuality(const SkImage *self, SkTileMode tileMode1, SkTileMode tileMode2, const SkMatrix *localMatrix, SkFilterQuality filterQuality)
