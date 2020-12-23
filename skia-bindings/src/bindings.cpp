@@ -1998,10 +1998,6 @@ extern "C" bool C_SkYUVAInfo_equals(const SkYUVAInfo* a, const SkYUVAInfo* b) {
 // core/SkYUVAPixmaps.h
 //
 
-extern "C" void C_SkYUVAPixmapInfo_Construct(SkYUVAPixmapInfo* uninitialized) {
-    new(uninitialized) SkYUVAPixmapInfo();
-}
-
 extern "C" void C_SkYUVAPixmapInfo_destruct(SkYUVAPixmapInfo* self) {
     self->~SkYUVAPixmapInfo();
 }

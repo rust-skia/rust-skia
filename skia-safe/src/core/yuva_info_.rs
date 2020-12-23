@@ -29,8 +29,8 @@ impl NativePartialEq for YUVAInfo {
 impl YUVAInfo {
     pub const MAX_PLANES: usize = sb::SkYUVAInfo_kMaxPlanes as _;
 
-    /// 'dimensions' should specify the size of the full resolution image (after planes have been
-    /// oriented to how the image is displayed as indicated by 'origin').
+    /// `dimensions` should specify the size of the full resolution image (after planes have been
+    /// oriented to how the image is displayed as indicated by `origin`).
     pub fn new(
         dimensions: impl Into<ISize>,
         config: yuva_info::PlanarConfig,
@@ -93,9 +93,9 @@ impl YUVAInfo {
         yuva_info::has_alpha(self.planar_config())
     }
 
-    /// Returns the number of planes and initializes planeDimensions[0]..planeDimensions[<ret>] to
+    /// Returns the number of planes and initializes `planeDimensions[0]`..`planeDimensions[<ret>]` to
     /// the expected dimensions for each plane. Dimensions are as stored in memory, before
-    /// transformation to image display space as indicated by origin().
+    /// transformation to image display space as indicated by [origin(&self)].
     pub fn plane_dimensions(&self, plane_dimensions: &mut [ISize; Self::MAX_PLANES]) -> usize {
         yuva_info::plane_dimensions(
             self.dimensions(),
@@ -106,8 +106,8 @@ impl YUVAInfo {
     }
 
     /// Given a per-plane row bytes, determine size to allocate for all planes. Optionally retrieves
-    /// the per-plane byte sizes in planeSizes if not null. If total size overflows will return
-    /// SIZE_MAX and set all planeSizes to SIZE_MAX.
+    /// the per-plane byte sizes in planeSizes if not [None]. If total size overflows will return
+    /// `SIZE_MAX` and set all planeSizes to `SIZE_MAX`.
     pub fn compute_total_bytes(
         &self,
         row_bytes: &[usize; Self::MAX_PLANES],
@@ -162,8 +162,8 @@ pub mod yuva_info {
     pub use sb::SkYUVAInfo_Siting as Siting;
 
     /// Given image dimensions, a planar configuration, and origin, determine the expected size of
-    /// each plane. Returns the number of expected planes. planeDimensions[0] through
-    /// planeDimensons[<ret>] are written. The input image dimensions are as displayed (after the
+    /// each plane. Returns the number of expected planes. `planeDimensions[0]` through
+    /// `planeDimensons[<ret>]` are written. The input image dimensions are as displayed (after the
     /// planes have been transformed to the intended display orientation). The plane dimensions
     /// are output as stored in memory.
     pub fn plane_dimensions(
@@ -184,14 +184,14 @@ pub mod yuva_info {
         .unwrap()
     }
 
-    /// Number of planes for a given PlanarConfig.
+    /// Number of planes for a given [PlanarConfig].
     pub fn num_planes(config: PlanarConfig) -> usize {
         unsafe { sb::C_SkYUVAInfo_NumPlanes(config) }
             .try_into()
             .unwrap()
     }
 
-    /// Number of Y, U, V, A channels in the ith plane for a given PlanarConfig (or `None` if i is
+    /// Number of Y, U, V, A channels in the ith plane for a given [PlanarConfig] (or [None] if i is
     /// invalid).
     pub fn num_channels_in_plane(config: PlanarConfig, i: usize) -> Option<usize> {
         (i < num_planes(config)).if_true_then_some(|| {
@@ -201,14 +201,13 @@ pub mod yuva_info {
         })
     }
 
-    /// Does the PlanarConfig have alpha values?
+    /// Does the [PlanarConfig] have alpha values?
     pub fn has_alpha(config: PlanarConfig) -> bool {
         unsafe { sb::SkYUVAInfo_HasAlpha(config) }
     }
 }
 
 #[cfg(test)]
-
 mod tests {
     use crate::yuva_info;
 
