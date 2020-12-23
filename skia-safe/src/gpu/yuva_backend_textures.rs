@@ -9,7 +9,3 @@ impl NativeDrop for GrYUVABackendTextureInfo {
         unsafe { sb::C_GrYUVABackendTextureInfo_destruct(self) }
     }
 }
-
-impl YUVABackendTextureInfo {
-    pub fn new()
-}
