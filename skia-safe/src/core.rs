@@ -236,8 +236,8 @@ pub use vertices::Vertices;
 pub mod yuva_index;
 pub use yuva_index::YUVAIndex;
 
-mod yuva_info_;
-pub use yuva_info_::*;
+pub mod yuva_info;
+pub use yuva_info::YUVAInfo;
 
 mod yuva_pixmaps;
 pub use yuva_pixmaps::*;
