@@ -1,9 +1,9 @@
-use crate::prelude::*;
 #[cfg(feature = "gpu")]
-use crate::{gpu, SamplingOptions};
+use crate::gpu;
+use crate::prelude::*;
 use crate::{
     AlphaType, Bitmap, ColorSpace, ColorType, Data, EncodedImageFormat, IPoint, IRect, ISize,
-    ImageInfo, Matrix, Paint, Picture, Shader, TileMode,
+    ImageInfo, Matrix, Paint, Picture, SamplingOptions, Shader, TileMode,
 };
 use crate::{FilterQuality, ImageFilter, ImageGenerator, Pixmap};
 use skia_bindings as sb;
