@@ -30,12 +30,13 @@ impl Default for TextureInfo {
 }
 
 impl prelude::Handle<GrMtlTextureInfo> {
-    /// #Safety
+    /// # Safety
     ///
     /// Unsafe because the texture provided must either be null or pointing to a Metal texture.
     /// This function consumes the texture and releases it as soon TextureInfo is dropped.
     ///
-    /// If the texture needs to be used otherwise, it's reference count must be increased before calling this function.
+    /// If the texture needs to be used otherwise, it's reference count must be increased before
+    /// calling this function.
     pub unsafe fn new(texture: *const ffi::c_void) -> Self {
         Self::construct(|ti| sb::C_GrMtlTextureInfo_Construct(ti, texture))
     }

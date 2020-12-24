@@ -62,6 +62,7 @@ impl Handle<GrBackendFormat> {
     }
 
     #[cfg(feature = "metal")]
+    #[allow(clippy::missing_safety_doc)]
     pub fn new_metal(format: mtl::PixelFormat) -> Self {
         Self::construct(|bf| unsafe { sb::C_GrBackendFormat_ConstructMtl(bf, format) })
             .assert_valid()
@@ -185,6 +186,7 @@ impl BackendTexture {
     }
 
     #[cfg(feature = "metal")]
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn new_metal(
         (width, height): (i32, i32),
         mipmapped: super::Mipmapped,
