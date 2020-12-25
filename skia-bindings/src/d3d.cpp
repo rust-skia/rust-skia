@@ -7,7 +7,6 @@
 #endif
 
 #include "include/gpu/GrBackendSurface.h"
-#include "include/gpu/GrContext.h"
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/d3d/GrD3DBackendContext.h"
 
@@ -36,7 +35,7 @@ extern "C" void C_GrBackendRenderTarget_ConstructD3D(GrBackendRenderTarget* unin
 }
 
 //
-// gpu/GrContext.h
+// gpu/GrDirectContext.h
 //
 
 extern "C" GrDirectContext* C_GrDirectContext_MakeDirect3D(

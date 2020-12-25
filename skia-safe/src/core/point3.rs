@@ -127,7 +127,7 @@ impl Point3 {
         Self::dot_product(*self, vec)
     }
 
-    #[allow(clippy::clippy::many_single_char_names)]
+    #[allow(clippy::many_single_char_names)]
     pub fn cross_product(a: Self, b: Self) -> Self {
         let x = a.y * b.z - a.z * b.y;
         let y = a.z * b.x - a.x * b.z;

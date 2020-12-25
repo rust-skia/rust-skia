@@ -206,6 +206,8 @@ impl RefHandle<SkShaper> {
         .borrows(utf8)
     }
 
+    // TODO: wrap MakeSkUnicodeHbScriptRunIterator (m88: uses type SkUnicode defined in src/).
+
     pub fn new_hb_icu_script_run_iterator(utf8: &str) -> Borrows<ScriptRunIterator> {
         let bytes = utf8.as_bytes();
         ScriptRunIterator::from_ptr(unsafe {

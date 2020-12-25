@@ -2,58 +2,8 @@ use crate::prelude::NativeTransmutable;
 use skia_bindings as sb;
 use skia_bindings::{GrGLFramebufferInfo, GrGLTextureInfo};
 
-pub use skia_bindings::GrGLStandard as Standard;
-#[test]
-fn test_standard_naming() {
-    let _ = Standard::GLES;
-}
-
 pub use skia_bindings::GrGLFormat as Format;
-#[test]
-fn test_format_naming() {
-    let _ = Format::COMPRESSED_ETC1_RGB8;
-}
-
-#[test]
-fn test_support_from_format_to_enum_and_back() {
-    let e: Enum = Format::ALPHA8.into();
-    let f: Format = e.into();
-    assert_eq!(f, Format::ALPHA8);
-}
-
-#[test]
-fn test_all_formats_exhaustive() {
-    let x = Format::ALPHA8;
-    // !!!!!
-    // IF this match is not exhaustive anymore, the implementations of the format conversions
-    // need to be updated, too.
-    match x {
-        Format::Unknown => {}
-        Format::RGBA8 => {}
-        Format::R8 => {}
-        Format::ALPHA8 => {}
-        Format::LUMINANCE8 => {}
-        Format::BGRA8 => {}
-        Format::RGB565 => {}
-        Format::RGBA16F => {}
-        Format::R16F => {}
-        Format::RGB8 => {}
-        Format::RG8 => {}
-        Format::RGB10_A2 => {}
-        Format::RGBA4 => {}
-        Format::SRGB8_ALPHA8 => {}
-        Format::COMPRESSED_ETC1_RGB8 => {}
-        Format::COMPRESSED_RGB8_ETC2 => {}
-        Format::COMPRESSED_RGB8_BC1 => {}
-        Format::COMPRESSED_RGBA8_BC1 => {}
-        Format::R16 => {}
-        Format::RG16 => {}
-        Format::RGBA16 => {}
-        Format::RG16F => {}
-        Format::LUMINANCE16F => {}
-    }
-}
-
+pub use skia_bindings::GrGLStandard as Standard;
 pub use skia_bindings::GrGLenum as Enum;
 pub use skia_bindings::GrGLuint as UInt;
 
@@ -66,10 +16,6 @@ pub struct TextureInfo {
 }
 
 impl NativeTransmutable<GrGLTextureInfo> for TextureInfo {}
-#[test]
-fn test_texture_info_layout() {
-    TextureInfo::test_layout()
-}
 
 impl PartialEq for TextureInfo {
     fn eq(&self, other: &Self) -> bool {
@@ -106,10 +52,6 @@ pub struct FramebufferInfo {
 }
 
 impl NativeTransmutable<GrGLFramebufferInfo> for FramebufferInfo {}
-#[test]
-fn test_framebuffer_info_layout() {
-    FramebufferInfo::test_layout()
-}
 
 impl Default for FramebufferInfo {
     fn default() -> Self {
@@ -144,3 +86,79 @@ bitflags! {
 }
 
 // TODO: BackendState::ALL
+
+#[cfg(test)]
+mod tests {
+    use crate::prelude::NativeTransmutable;
+
+    use super::{Enum, Format, Standard};
+
+    #[test]
+    fn test_standard_naming() {
+        let _ = Standard::GLES;
+    }
+
+    #[test]
+    fn test_format_naming() {
+        let _ = Format::COMPRESSED_ETC1_RGB8;
+    }
+
+    #[test]
+    fn test_support_from_format_to_enum_and_back() {
+        let e: Enum = Format::ALPHA8.into();
+        let f: Format = e.into();
+        assert_eq!(f, Format::ALPHA8);
+    }
+
+    #[test]
+    fn test_all_formats_exhaustive() {
+        let x = Format::ALPHA8;
+        // !!!!!
+        // IF this match is not exhaustive anymore, the implementations of the format conversions
+        // need to be updated in `skia-bindings/src/gl.cpp`, too.
+        match x {
+            Format::Unknown => {}
+            Format::RGBA8 => {}
+            Format::R8 => {}
+            Format::ALPHA8 => {}
+            Format::LUMINANCE8 => {}
+            Format::BGRA8 => {}
+            Format::RGB565 => {}
+            Format::RGBA16F => {}
+            Format::R16F => {}
+            Format::RGB8 => {}
+            Format::RG8 => {}
+            Format::RGB10_A2 => {}
+            Format::RGBA4 => {}
+            Format::SRGB8_ALPHA8 => {}
+            Format::COMPRESSED_ETC1_RGB8 => {}
+            Format::COMPRESSED_RGB8_ETC2 => {}
+            Format::COMPRESSED_RGB8_BC1 => {}
+            Format::COMPRESSED_RGBA8_BC1 => {}
+            Format::R16 => {}
+            Format::RG16 => {}
+            Format::RGBA16 => {}
+            Format::RG16F => {}
+            Format::LUMINANCE16F => {}
+            Format::STENCIL_INDEX8 => {}
+            Format::STENCIL_INDEX16 => {}
+            Format::DEPTH24_STENCIL8 => {}
+        }
+    }
+
+    #[test]
+    fn test_format_last_color_and_last_exists() {
+        let _ = Format::Last;
+        let _ = Format::LastColorFormat;
+    }
+
+    #[test]
+    fn test_texture_info_layout() {
+        super::TextureInfo::test_layout()
+    }
+
+    #[test]
+    fn test_framebuffer_info_layout() {
+        super::FramebufferInfo::test_layout()
+    }
+}

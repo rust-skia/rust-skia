@@ -93,6 +93,7 @@ impl Handle<SkBitmap> {
         unsafe { self.native_mut().setAlphaType(alpha_type) }
     }
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn pixels(&mut self) -> *mut ffi::c_void {
         self.pixmap().writable_addr()
     }
@@ -223,6 +224,7 @@ impl Handle<SkBitmap> {
             .expect("Bitmap::alloc_n32_pixels_failed")
     }
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn install_pixels(
         &mut self,
         image_info: &ImageInfo,
@@ -313,6 +315,7 @@ impl Handle<SkBitmap> {
         self.pixmap().get_alpha_f(p)
     }
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn get_addr(&self, p: impl Into<IPoint>) -> *const ffi::c_void {
         let p = p.into();
         self.native().getAddr(p.x, p.y)
@@ -328,6 +331,7 @@ impl Handle<SkBitmap> {
         }
     }
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn read_pixels(
         &self,
         dst_info: &ImageInfo,

@@ -27,6 +27,7 @@ impl RCHandle<SkPixelRef> {
         unsafe { sb::C_SkPixelRef_height(self.native()) }
     }
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn pixels(&self) -> *mut c_void {
         sb::C_SkPixelRef_pixels(self.native())
     }

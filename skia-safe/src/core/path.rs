@@ -538,9 +538,9 @@ impl Handle<SkPath> {
         self
     }
 
-    pub fn shrink_to_fit(&mut self) -> &mut Self {
-        unsafe { self.native_mut().shrinkToFit() }
-        self
+    #[deprecated(since = "0.37.0", note = "Removed without replacement")]
+    pub fn shrink_to_fit(&mut self) -> ! {
+        panic!("Removed without replacement");
     }
 
     pub fn move_to(&mut self, p: impl Into<Point>) -> &mut Self {
@@ -761,7 +761,7 @@ impl Handle<SkPath> {
         let start = dir_start.map(|ds| ds.1).unwrap_or_default();
         unsafe {
             self.native_mut()
-                .addRect1(rect.as_ref().native(), dir, start.try_into().unwrap())
+                .addRect(rect.as_ref().native(), dir, start.try_into().unwrap())
         };
         self
     }

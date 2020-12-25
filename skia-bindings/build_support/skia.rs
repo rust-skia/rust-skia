@@ -1044,6 +1044,8 @@ const OPAQUE_TYPES: &[&str] = &[
     // m87:
     "GrD3DAlloc",
     "GrD3DMemoryAllocator",
+    // m87, yuva_pixmaps
+    "std::tuple",
 ];
 
 const BLACKLISTED_TYPES: &[&str] = &[
@@ -1238,6 +1240,15 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("SkMipmapMode", rewrite::k_xxx),
     ("Enable", rewrite::k_xxx),
     ("ShaderCacheStrategy", rewrite::k_xxx),
+    // m87:
+    // SkYUVAInfo_PlanarConfig
+    ("PlanarConfig", rewrite::k_xxx),
+    ("Siting", rewrite::k_xxx),
+    // SkYUVAPixmapInfo
+    ("DataType", rewrite::k_xxx),
+    // m88:
+    // SkYUVAInfo_*
+    ("PlaneConfig", rewrite::k_xxx),
 ];
 
 pub(crate) mod rewrite {

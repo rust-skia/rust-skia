@@ -13,12 +13,20 @@ impl RCHandle<SkImageFilter> {
         shadow_mode: ShadowMode,
     ) -> Option<Self> {
         match shadow_mode {
-            ShadowMode::DrawShadowAndForeground => {
-                image_filters::drop_shadow(delta, sigma, color, self, crop_rect)
-            }
-            ShadowMode::DrawShadowOnly => {
-                image_filters::drop_shadow_only(delta, sigma, color, self, crop_rect)
-            }
+            ShadowMode::DrawShadowAndForeground => image_filters::drop_shadow(
+                delta,
+                sigma,
+                color,
+                self,
+                crop_rect.into().map(|r| r.into()),
+            ),
+            ShadowMode::DrawShadowOnly => image_filters::drop_shadow_only(
+                delta,
+                sigma,
+                color,
+                self,
+                crop_rect.into().map(|r| r.into()),
+            ),
         }
     }
 }

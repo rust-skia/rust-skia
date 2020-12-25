@@ -81,6 +81,7 @@ impl Handle<SkPixmap> {
         self.native().fRowBytes
     }
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn addr(&self) -> *const c_void {
         self.native().fPixels
     }
@@ -153,6 +154,7 @@ impl Handle<SkPixmap> {
         assert!(p.y >= 0 && p.y < self.height());
     }
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn addr_at(&self, p: impl Into<IPoint>) -> *const c_void {
         let p = p.into();
         (self.addr() as *const raw::c_char).add(self.info().compute_offset(p, self.row_bytes()))
@@ -162,10 +164,12 @@ impl Handle<SkPixmap> {
     // TODO: addr8(), addr16(), addr32(), addr64(), addrF16(),
     //       addr8_at(), addr16_at(), addr32_at(), addr64_at(), addrF16_at()
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn writable_addr(&self) -> *mut c_void {
         self.addr() as _
     }
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn writable_addr_at(&self, p: impl Into<IPoint>) -> *mut c_void {
         self.addr_at(p) as _
     }

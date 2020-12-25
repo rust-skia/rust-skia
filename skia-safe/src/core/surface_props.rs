@@ -67,7 +67,7 @@ pub fn test_surface_props_layout() {
 
 impl Clone for SurfaceProps {
     fn clone(&self) -> Self {
-        Self::from_native_c(unsafe { SkSurfaceProps::new3(self.native()) })
+        Self::from_native_c(unsafe { SkSurfaceProps::new2(self.native()) })
     }
 }
 
@@ -90,7 +90,7 @@ impl SurfaceProps {
 
     pub fn new(flags: SurfacePropsFlags, pixel_geometry: PixelGeometry) -> SurfaceProps {
         Self::from_native_c(unsafe {
-            SkSurfaceProps::new(flags.bits(), pixel_geometry.into_native())
+            SkSurfaceProps::new1(flags.bits(), pixel_geometry.into_native())
         })
     }
 
