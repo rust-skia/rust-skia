@@ -10,13 +10,13 @@ use skia_bindings as sb;
 use skia_bindings::{SkImage, SkRefCntBase};
 use std::{mem, ptr};
 
-#[deprecated(note = "Use skia_safe::SamplingMode", since = "0.0.0")]
+#[deprecated(note = "Use skia_safe::SamplingMode", since = "0.37.0")]
 pub use super::SamplingMode;
 
-#[deprecated(note = "Use skia_safe::SkMipmapMode", since = "0.0.0")]
+#[deprecated(note = "Use skia_safe::SkMipmapMode", since = "0.37.0")]
 pub use super::MipmapMode;
 
-#[deprecated(note = "Use skia_safe::FilterOptions", since = "0.0.0")]
+#[deprecated(note = "Use skia_safe::FilterOptions", since = "0.37.0")]
 pub use super::FilterOptions;
 
 pub use super::CubicResampler;
@@ -253,7 +253,7 @@ impl RCHandle<SkImage> {
     }
 
     #[cfg(feature = "gpu")]
-    #[deprecated(note = "Removed without replacement", since = "0.0.0")]
+    #[deprecated(note = "Removed without replacement", since = "0.37.0")]
     pub fn from_nv12_textures_copy(
         _context: &mut gpu::DirectContext,
         _yuv_color_space: crate::YUVColorSpace,

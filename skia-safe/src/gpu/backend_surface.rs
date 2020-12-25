@@ -31,7 +31,7 @@ impl NativeClone for GrBackendFormat {
 impl Handle<GrBackendFormat> {
     #[deprecated(
         note = "The creation of invalid BackendFormats isn't supported anymore",
-        since = "0.0.0"
+        since = "0.37.0"
     )]
     pub fn new() -> Self {
         Self::new_invalid()
@@ -126,7 +126,7 @@ impl Handle<GrBackendFormat> {
 
     #[deprecated(
         note = "Invalid BackendFormats arent's supported anymore",
-        since = "0.0.0"
+        since = "0.37.0"
     )]
     pub fn is_valid(&self) -> bool {
         self.native().fValid
@@ -320,7 +320,7 @@ impl BackendTexture {
 
     #[deprecated(
         note = "Invalid BackendTextures aren't supported anymore",
-        since = "0.0.0"
+        since = "0.37.0"
     )]
     pub fn is_valid(&self) -> bool {
         self.native().fIsValid
@@ -503,10 +503,7 @@ impl BackendRenderTarget {
         unsafe { self.native().isProtected() }
     }
 
-    #[deprecated(
-        note = "Invalid BackendRenderTargets aren't supported anymore.",
-        since = "0.0.0"
-    )]
+    #[deprecated(note = "All BackendRenderTargets must be valid.", since = "0.37.0")]
     pub fn is_valid(&self) -> bool {
         self.native().fIsValid
     }

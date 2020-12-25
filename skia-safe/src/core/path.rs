@@ -538,7 +538,7 @@ impl Handle<SkPath> {
         self
     }
 
-    #[deprecated(note = "Removed without replacement", since = "0.0.0")]
+    #[deprecated(note = "Removed without replacement", since = "0.37.0")]
     pub fn shrink_to_fit(&mut self) -> ! {
         panic!("Removed without replacement");
     }

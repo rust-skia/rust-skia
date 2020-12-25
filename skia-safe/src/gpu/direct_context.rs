@@ -234,7 +234,7 @@ impl RCHandle<GrDirectContext> {
         self
     }
 
-    #[deprecated(note = "Use flush()", since = "0.0.0")]
+    #[deprecated(note = "Use flush()", since = "0.37.0")]
     pub fn flush_with_info(&mut self, info: &FlushInfo) -> SemaphoresSubmitted {
         self.flush(info)
     }
