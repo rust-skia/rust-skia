@@ -8,6 +8,8 @@ use std::ptr;
 /// Specifies the structure of planes for a YUV image with optional alpha. The actual planar data
 /// is not part of this structure and depending on usage is in external textures or pixmaps.
 pub type YUVAInfo = Handle<SkYUVAInfo>;
+unsafe impl Send for YUVAInfo {}
+unsafe impl Sync for YUVAInfo {}
 
 impl NativeDrop for SkYUVAInfo {
     fn drop(&mut self) {

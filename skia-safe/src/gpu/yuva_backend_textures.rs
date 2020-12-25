@@ -7,6 +7,8 @@ use skia_bindings::{GrYUVABackendTextureInfo, GrYUVABackendTextures};
 
 /// A description of a set [BackendTexture]s that hold the planar data described by a [YUVAInfo].
 pub type YUVABackendTextureInfo = Handle<GrYUVABackendTextureInfo>;
+unsafe impl Send for YUVABackendTextureInfo {}
+unsafe impl Sync for YUVABackendTextureInfo {}
 
 impl NativeDrop for GrYUVABackendTextureInfo {
     fn drop(&mut self) {
@@ -92,6 +94,8 @@ impl YUVABackendTextureInfo {
 
 /// A set of [BackendTexture]s that hold the planar data for an image described a [YUVAInfo].
 pub type YUVABackendTextures = Handle<GrYUVABackendTextures>;
+unsafe impl Send for YUVABackendTextures {}
+unsafe impl Sync for YUVABackendTextures {}
 
 impl NativeDrop for GrYUVABackendTextures {
     fn drop(&mut self) {

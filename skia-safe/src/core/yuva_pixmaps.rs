@@ -10,6 +10,8 @@ use yuva_pixmap_info::SupportedDataTypes;
 /// [YUVAInfo] combined with per-plane [ColorType]s and row bytes. Fully specifies the [Pixmap]`s
 /// for a YUVA image without the actual pixel memory and data.
 pub type YUVAPixmapInfo = Handle<SkYUVAPixmapInfo>;
+unsafe impl Send for YUVAPixmapInfo {}
+unsafe impl Sync for YUVAPixmapInfo {}
 
 impl NativeDrop for SkYUVAPixmapInfo {
     fn drop(&mut self) {
@@ -174,6 +176,8 @@ impl YUVAPixmapInfo {
 /// Helper to store [Pixmap] planes as described by a [YUVAPixmapInfo]. Can be responsible for
 /// allocating/freeing memory for pixmaps or use external memory.
 pub type YUVAPixmaps = Handle<SkYUVAPixmaps>;
+unsafe impl Send for YUVAPixmaps {}
+unsafe impl Sync for YUVAPixmaps {}
 
 impl NativeDrop for SkYUVAPixmaps {
     fn drop(&mut self) {
@@ -307,6 +311,8 @@ pub mod yuva_pixmap_info {
     pub use skia_bindings::SkYUVAPixmapInfo_DataType as DataType;
 
     pub type SupportedDataTypes = Handle<SkYUVAPixmapInfo_SupportedDataTypes>;
+    unsafe impl Send for SupportedDataTypes {}
+    unsafe impl Sync for SupportedDataTypes {}
 
     impl NativeDrop for SkYUVAPixmapInfo_SupportedDataTypes {
         fn drop(&mut self) {
