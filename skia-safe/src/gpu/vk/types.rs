@@ -257,36 +257,6 @@ impl ImageInfo {
     }
 
     /// # Safety
-    /// The Vulkan `image` and `alloc` must outlive the lifetime of the ImageInfo returned.
-    #[deprecated(since = "0.19.0", note = "use new()")]
-    #[allow(clippy::too_many_arguments)]
-    pub unsafe fn from_image(
-        image: vk::Image,
-        alloc: Alloc,
-        tiling: vk::ImageTiling,
-        layout: vk::ImageLayout,
-        format: vk::Format,
-        level_count: u32,
-        current_queue_family: impl Into<Option<u32>>,
-        ycbcr_conversion_info: impl Into<Option<YcbcrConversionInfo>>,
-        protected: impl Into<Option<Protected>>, // m77
-        sharing_mode: impl Into<Option<vk::SharingMode>>, // m85
-    ) -> Self {
-        Self::new(
-            image,
-            alloc,
-            tiling,
-            layout,
-            format,
-            level_count,
-            current_queue_family,
-            ycbcr_conversion_info,
-            protected,
-            sharing_mode,
-        )
-    }
-
-    /// # Safety
     /// The Vulkan `info.image` and `info.alloc` must outlive the lifetime of the ImageInfo returned.
     pub unsafe fn from_info(info: &ImageInfo, layout: vk::ImageLayout) -> Self {
         Self::new(

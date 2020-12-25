@@ -137,11 +137,12 @@ mod docs {
 }
 
 mod effects {
-    use skia_safe::{runtime_effect, RuntimeEffect};
+    use skia_safe::{image_filters, runtime_effect, RuntimeEffect};
     use static_assertions::*;
 
     assert_impl_all!(runtime_effect::Uniform: Send, Sync);
     assert_not_impl_any!(RuntimeEffect: Send, Sync);
+    assert_impl_all!(image_filters::CropRect: Send, Sync);
 }
 
 #[cfg(feature = "gpu")]

@@ -16,7 +16,7 @@ pub mod d3d;
 mod direct_context;
 pub use self::direct_context::*;
 
-#[deprecated(note = "Use RecordingContext or DirectContext", since = "0.37.0")]
+#[deprecated(since = "0.37.0", note = "Use RecordingContext or DirectContext")]
 pub type Context = DirectContext;
 
 mod driver_bug_workarounds;

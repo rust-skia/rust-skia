@@ -76,11 +76,6 @@ impl Handle<GrBackendFormat> {
         .assert_valid()
     }
 
-    #[deprecated(since = "0.19.0", note = "use backend()")]
-    pub fn backend_api(&self) -> BackendAPI {
-        self.backend()
-    }
-
     pub fn backend(&self) -> BackendAPI {
         self.native().fBackend
     }
@@ -503,7 +498,7 @@ impl BackendRenderTarget {
         unsafe { self.native().isProtected() }
     }
 
-    #[deprecated(note = "All BackendRenderTargets must be valid.", since = "0.37.0")]
+    #[deprecated(since = "0.37.0", note = "BackendRenderTargets must be valid.")]
     pub fn is_valid(&self) -> bool {
         self.native().fIsValid
     }

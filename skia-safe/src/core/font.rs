@@ -96,11 +96,6 @@ impl Handle<SkFont> {
         (SkFont_PrivFlags::from(self.native().fFlags) & flag) != 0
     }
 
-    #[deprecated(since = "0.15.0", note = "use set_force_auto_hinting()")]
-    pub fn set_force_autohinting(&mut self, force_auto_hinting: bool) -> &mut Self {
-        self.set_force_auto_hinting(force_auto_hinting)
-    }
-
     pub fn set_force_auto_hinting(&mut self, force_auto_hinting: bool) -> &mut Self {
         unsafe { self.native_mut().setForceAutoHinting(force_auto_hinting) }
         self

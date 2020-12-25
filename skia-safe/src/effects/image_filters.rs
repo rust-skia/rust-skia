@@ -380,7 +380,7 @@ pub fn tile(
     })
 }
 
-#[deprecated(note = "Prefer the more idiomatic blend function", since = "0.37.0")]
+#[deprecated(since = "0.37.0", note = "Prefer the more idiomatic blend function")]
 pub fn xfermode(
     blend_mode: BlendMode,
     background: impl Into<Option<ImageFilter>>,
