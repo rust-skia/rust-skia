@@ -81,7 +81,7 @@ impl Alloc {
 pub struct YcbcrConversionInfo {
     pub format: vk::Format,
     pub external_format: u64,
-    pub ycrbcr_model: vk::SamplerYcbcrModelConversion,
+    pub ycbcr_model: vk::SamplerYcbcrModelConversion,
     pub ycbcr_range: vk::SamplerYcbcrRange,
     pub x_chroma_offset: vk::ChromaLocation,
     pub y_chroma_offset: vk::ChromaLocation,
@@ -107,7 +107,7 @@ impl Default for YcbcrConversionInfo {
         YcbcrConversionInfo {
             format: vk::Format::UNDEFINED,
             external_format: 0,
-            ycrbcr_model: vk::SamplerYcbcrModelConversion::RGB_IDENTITY,
+            ycbcr_model: vk::SamplerYcbcrModelConversion::RGB_IDENTITY,
             ycbcr_range: vk::SamplerYcbcrRange::ITU_FULL,
             x_chroma_offset: vk::ChromaLocation::COSITED_EVEN,
             y_chroma_offset: vk::ChromaLocation::COSITED_EVEN,
@@ -123,7 +123,7 @@ impl YcbcrConversionInfo {
     pub fn new_with_format(
         format: vk::Format,
         external_format: u64,
-        ycrbcr_model: vk::SamplerYcbcrModelConversion,
+        ycbcr_model: vk::SamplerYcbcrModelConversion,
         ycbcr_range: vk::SamplerYcbcrRange,
         x_chroma_offset: vk::ChromaLocation,
         y_chroma_offset: vk::ChromaLocation,
@@ -131,12 +131,12 @@ impl YcbcrConversionInfo {
         force_explicit_reconstruction: vk::Bool32,
         format_features: vk::FormatFeatureFlags,
     ) -> YcbcrConversionInfo {
-        debug_assert!(ycrbcr_model != vk::SamplerYcbcrModelConversion::RGB_IDENTITY);
+        debug_assert!(ycbcr_model != vk::SamplerYcbcrModelConversion::RGB_IDENTITY);
         debug_assert!((format != vk::Format::UNDEFINED) ^ (external_format != 0));
         YcbcrConversionInfo {
             format,
             external_format,
-            ycrbcr_model,
+            ycbcr_model,
             ycbcr_range,
             x_chroma_offset,
             y_chroma_offset,
@@ -148,7 +148,7 @@ impl YcbcrConversionInfo {
 
     #[allow(clippy::too_many_arguments)]
     pub fn new(
-        ycrbcr_model: vk::SamplerYcbcrModelConversion,
+        ycbcr_model: vk::SamplerYcbcrModelConversion,
         ycbcr_range: vk::SamplerYcbcrRange,
         x_chroma_offset: vk::ChromaLocation,
         y_chroma_offset: vk::ChromaLocation,
@@ -160,7 +160,7 @@ impl YcbcrConversionInfo {
         Self::new_with_format(
             vk::Format::UNDEFINED,
             external_format,
-            ycrbcr_model,
+            ycbcr_model,
             ycbcr_range,
             x_chroma_offset,
             y_chroma_offset,
@@ -171,7 +171,7 @@ impl YcbcrConversionInfo {
     }
 
     pub fn is_valid(&self) -> bool {
-        self.ycrbcr_model != vk::SamplerYcbcrModelConversion::RGB_IDENTITY
+        self.ycbcr_model != vk::SamplerYcbcrModelConversion::RGB_IDENTITY
     }
 }
 

@@ -1,4 +1,4 @@
-///! FFI interopability for skia-safe's wrapper types.
+///! FFI interoperability for skia-safe's wrapper types.
 ///!
 ///! This module is only meant to be used by external code. Internal code should continue to use the traits in
 ///! the `prelude` module.

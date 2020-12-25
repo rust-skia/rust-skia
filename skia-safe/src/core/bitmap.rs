@@ -344,8 +344,8 @@ impl Handle<SkBitmap> {
             .readPixels(dst_info.native(), dst_pixels, dst_row_bytes, src_x, src_y)
     }
 
-    // TOOD: read_pixels(Pixmap)
-    // TOOD: write_pixels(Pixmap)
+    // TODO: read_pixels(Pixmap)
+    // TODO: write_pixels(Pixmap)
 
     pub fn extract_alpha(&self, dst: &mut Self, paint: Option<&Paint>) -> Option<IPoint> {
         let mut offset = IPoint::default();
@@ -402,7 +402,7 @@ fn empty_bitmap_shader() {
 }
 
 #[test]
-fn shader_with_tilemode() {
+fn shader_with_tile_mode() {
     let bm = Bitmap::new();
     let _shader = bm.to_shader((TileMode::Decal, TileMode::Mirror), None);
 }

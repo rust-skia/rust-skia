@@ -7,7 +7,7 @@ use skia_bindings::{SkFlattenable, SkRefCntBase, SkShader};
 
 pub use skia_bindings::SkShader_GradientType as GradientTypeInternal;
 #[test]
-fn test_shader_grandient_type_naming() {
+fn test_shader_gradient_type_naming() {
     let _ = GradientTypeInternal::Linear;
 }
 

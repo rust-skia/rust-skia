@@ -31,7 +31,7 @@ impl Deref for RCHandle<SkData> {
 }
 
 impl PartialEq for RCHandle<SkData> {
-    // Although there is an implementation in SkData for equality testig, we
+    // Although there is an implementation in SkData for equality testing, we
     // prefer to stay on the Rust side for that.
     fn eq(&self, other: &Self) -> bool {
         self.deref().eq(other.deref())
