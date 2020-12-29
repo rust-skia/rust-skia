@@ -131,7 +131,7 @@ impl RCHandle<SkImageFilter> {
     pub fn color_filter_node(&self) -> Option<ColorFilter> {
         let mut filter_ptr: *mut SkColorFilter = ptr::null_mut();
         if unsafe { sb::C_SkImageFilter_isColorFilterNode(self.native(), &mut filter_ptr) } {
-            // according to the documentation, this must be set to a ref'd colorfilter
+            // according to the documentation, this must be set to a ref'd color filter
             // (which is one with an increased ref count I assume).
             ColorFilter::from_ptr(filter_ptr)
         } else {

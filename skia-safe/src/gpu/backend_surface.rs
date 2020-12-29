@@ -120,7 +120,7 @@ impl Handle<GrBackendFormat> {
     }
 
     #[deprecated(
-        note = "Invalid BackendFormats arent's supported anymore",
+        note = "Invalid BackendFormats are not supported anymore",
         since = "0.37.0"
     )]
     pub fn is_valid(&self) -> bool {

@@ -55,10 +55,10 @@ mod core {
     assert_impl_all!(font_parameters::variation::Axis: Send, Sync);
     assert_impl_all!(FontStyle: Send, Sync);
     // core/image.rs
-    // SkImage cannot be modified after it is created. SkImage may allocate additional
-    // storage as needed; for instance, an encoded SkImage may decode when drawn.
-    // > So far the implementatio seems to handle the "allocate additional storage as needed"
-    // > in a thread safe way.
+    // SkImage cannot be modified after it is created. SkImage may allocate additional storage as
+    // needed; for instance, an encoded SkImage may decode when drawn.
+    // > So far the implementation seems to handle the "allocate additional storage as needed" in a
+    // > thread safe way.
     assert_impl_all!(Image: Send, Sync);
     assert_impl_all!(image::SamplingMode: Send, Sync);
     assert_impl_all!(image::MipmapMode: Send, Sync);
@@ -200,7 +200,7 @@ mod gpu {
         assert_impl_all!(BackendDrawableInfo: Send, Sync);
         // Note that we can't make most of vk.rs re-export of native Vulkan types Send nor Sync,
         // because they are just re-exports of simple pointers, which already implement
-        // !Send & !Sync that can not be overriden...
+        // !Send & !Sync that can not be overridden...
     }
 
     #[cfg(feature = "d3d")]

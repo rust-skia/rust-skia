@@ -284,7 +284,7 @@ impl PathBuilder {
         start_index: impl Into<Option<usize>>,
     ) -> &mut Self {
         let dir = dir.into().unwrap_or(PathDirection::CW);
-        // m86: default start index changed from 0 to 6 or 7 dependening on the path's direction.
+        // m86: default start index changed from 0 to 6 or 7 depending on the path's direction.
         let start_index =
             start_index
                 .into()

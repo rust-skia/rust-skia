@@ -709,7 +709,7 @@ impl Contains<Point> for Rect {
 
 impl Contains<Rect> for Rect {
     fn contains(&self, r: Rect) -> bool {
-        // todo: can we eliminate the this->isempty check?
+        // TODO: can we eliminate the this->is_empty check?
         !r.is_empty()
             && !self.is_empty()
             && self.left <= r.left
@@ -721,7 +721,7 @@ impl Contains<Rect> for Rect {
 
 impl Contains<IRect> for Rect {
     fn contains(&self, r: IRect) -> bool {
-        // todo: can we eliminate the this->isEmpty check?
+        // TODO: can we eliminate the this->isEmpty check?
         !r.is_empty()
             && !self.is_empty()
             && self.left <= r.left as scalar

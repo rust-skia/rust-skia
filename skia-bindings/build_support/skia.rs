@@ -11,8 +11,8 @@ use std::{env, fs};
 mod lib {
     pub const SKIA: &str = "skia";
     pub const SKIA_BINDINGS: &str = "skia-bindings";
-    pub const SKSHAPER: &str = "skshaper";
-    pub const SKPARAGRAPH: &str = "skparagraph";
+    pub const SK_SHAPER: &str = "skshaper";
+    pub const SK_PARAGRAPH: &str = "skparagraph";
 }
 
 /// Feature identifiers define the additional configuration parts of the binaries to download.
@@ -480,8 +480,8 @@ impl BinariesConfiguration {
 
         if features.text_layout {
             additional_files.push(ICUDTL_DAT.into());
-            built_libraries.push(lib::SKPARAGRAPH.into());
-            built_libraries.push(lib::SKSHAPER.into());
+            built_libraries.push(lib::SK_PARAGRAPH.into());
+            built_libraries.push(lib::SK_SHAPER.into());
         }
 
         let mut link_libraries = Vec::new();

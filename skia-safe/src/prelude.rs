@@ -272,9 +272,8 @@ impl<N: NativeDrop> Handle<N> {
         self::try_construct(construct).map(Self::from_native_c)
     }
 
-    /// Replaces the native instance with the one from this Handle, and
-    /// returns the replaced one wrapped in  a Rust Handle without
-    /// deinitializing either one.
+    /// Replaces the native instance with the one from this Handle, and returns the replaced one
+    /// wrapped in a Rust Handle without dropping either one.
     pub(crate) fn replace_native(mut self, native: &mut N) -> Self {
         mem::swap(&mut self.0, native);
         self
@@ -880,7 +879,7 @@ impl<T: Sized> BorrowsFrom for T {
     }
 }
 
-/// Declares a baseclass for a native type.
+/// Declares a base class for a native type.
 pub trait NativeBase<Base> {
     fn base(&self) -> &Base {
         unsafe { &*(self as *const Self as *const Base) }

@@ -86,7 +86,7 @@ impl Default for SurfaceProps {
 }
 
 impl SurfaceProps {
-    // TODO: do we need to wrap the construcor(s) with InitType?
+    // TODO: do we need to wrap the constructor(s) with InitType?
 
     pub fn new(flags: SurfacePropsFlags, pixel_geometry: PixelGeometry) -> SurfaceProps {
         Self::from_native_c(unsafe {
