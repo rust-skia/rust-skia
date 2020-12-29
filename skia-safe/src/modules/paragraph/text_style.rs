@@ -12,7 +12,7 @@ bitflags! {
         const NO_DECORATION = sb::skia_textlayout_TextDecoration::kNoDecoration as _;
         const UNDERLINE = sb::skia_textlayout_TextDecoration::kUnderline as _;
         const OVERLINE = sb::skia_textlayout_TextDecoration::kOverline as _;
-        const LINE_THROUGH = sb::skia_textlayout_TextDecoration::kOverline as _;
+        const LINE_THROUGH = sb::skia_textlayout_TextDecoration::kLineThrough as _;
     }
 }
 
