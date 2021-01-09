@@ -60,6 +60,8 @@ bindgen = "0.56.0"
 # For enum variant name replacements.
 regex = "1.2.1"
 heck = "0.3.1"
+# Version 1.1.0 causes a stack overflow in the binding generation.
+thread_local = "~1.0.1"
 
 # for downloading and extracting prebuilt binaries and skia / depot_tools archives:
 ureq = "1.5.1"
