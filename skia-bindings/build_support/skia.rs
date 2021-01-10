@@ -487,7 +487,7 @@ impl BinariesConfiguration {
         let mut link_libraries = Vec::new();
 
         match target.as_strs() {
-            (_, "unknown", "linux", Some("gnu")) => {
+            (_, "unknown", "linux", _) => {
                 link_libraries.extend(vec!["stdc++", "fontconfig", "freetype"]);
                 if features.gl {
                     if features.egl {
