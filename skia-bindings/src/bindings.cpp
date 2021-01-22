@@ -58,8 +58,6 @@
 #include "include/core/SkTypeface.h"
 #include "include/core/SkTypes.h"
 #include "include/core/SkVertices.h"
-#include "include/core/SkYUVAIndex.h"
-#include "include/core/SkYUVASizeInfo.h"
 // docs/
 #include "include/docs/SkPDFDocument.h"
 // effects/
@@ -295,25 +293,12 @@ extern "C" SkImage* C_SkImage_MakeFromPicture(
     return SkImage::MakeFromPicture(sp(picture), *dimensions, matrix, paint, bitDepth, sp(colorSpace)).release();
 }
 
-extern "C" SkShader* C_SkImage_makeShader(const SkImage* self, SkTileMode tileMode1, SkTileMode tileMode2, const SkMatrix* localMatrix) {
-    return self->makeShader(tileMode1, tileMode2, localMatrix).release();
-}
 
-extern "C" SkShader* C_SkImage_makeShaderWithSamplingOptions(const SkImage* self, SkTileMode tileMode1, SkTileMode tileMode2, const SkSamplingOptions* samplingOptions, const SkMatrix* localMatrix) {
+extern "C" SkShader* C_SkImage_makeShader(
+    const SkImage* self, 
+    SkTileMode tileMode1, SkTileMode tileMode2, 
+    const SkSamplingOptions* samplingOptions, const SkMatrix* localMatrix) {
     return self->makeShader(tileMode1, tileMode2, *samplingOptions, localMatrix).release();
-}
-
-extern "C" SkShader* C_SkImage_makeShaderWithCubicResampler(const SkImage* self, SkTileMode tileMode1, SkTileMode tileMode2, SkImage::CubicResampler cubicResampler, const SkMatrix* localMatrix) {
-    return self->makeShader(tileMode1, tileMode2, cubicResampler, localMatrix).release();
-}
-
-extern "C" SkShader* C_SkImage_makeShaderWithFilterOptions(const SkImage* self, SkTileMode tileMode1, SkTileMode tileMode2, SkFilterOptions filterOptions, const SkMatrix* localMatrix) {
-    return self->makeShader(tileMode1, tileMode2, filterOptions, localMatrix).release();
-}
-
-extern "C" SkShader *C_SkImage_makeShaderWithQuality(const SkImage *self, SkTileMode tileMode1, SkTileMode tileMode2, const SkMatrix *localMatrix, SkFilterQuality filterQuality)
-{
-    return self->makeShader(tileMode1, tileMode2, localMatrix, filterQuality).release();
 }
 
 extern "C" SkData* C_SkImage_encodeToData(const SkImage* self, SkEncodedImageFormat imageFormat, int quality) {
@@ -995,8 +980,12 @@ extern "C" bool C_SkBitmap_extractAlpha(const SkBitmap* self, SkBitmap* dst, con
     return self->extractAlpha(dst, paint, offset);
 }
 
-extern "C" SkShader* C_SkBitmap_makeShader(const SkBitmap* self, SkTileMode tmx, SkTileMode tmy, const SkMatrix* localMatrix) {
-    return self->makeShader(tmx, tmy, localMatrix).release();
+extern "C" SkShader* C_SkBitmap_makeShader(
+    const SkBitmap* self, 
+    SkTileMode tmx, SkTileMode tmy, 
+    const SkSamplingOptions* sampling,
+    const SkMatrix* localMatrix) {
+    return self->makeShader(tmx, tmy, *sampling, localMatrix).release();
 }
 
 //
@@ -1261,17 +1250,21 @@ extern "C" bool C_SkTypeface_LocalizedStrings_next(SkTypeface::LocalizedStrings*
 // core/SkYUVAIndex.h
 //
 
+/*
 extern "C" bool C_SkYUVAIndex_AreValidIndices(const SkYUVAIndex yuvaIndices[4], int* numPlanes) {
     return SkYUVAIndex::AreValidIndices(yuvaIndices, numPlanes);
 }
+*/
 
 //
 // core/SkYUVASizeInfo.h
 //
 
+/*
 extern "C" bool C_SkYUVASizeInfo_equals(const SkYUVASizeInfo* l, const SkYUVASizeInfo* r) {
     return *l == *r;
 }
+*/
 
 //
 // core/SkFlattenable.h
@@ -1989,12 +1982,14 @@ extern "C" int C_SkYUVAInfo_NumPlanes(SkYUVAInfo::PlaneConfig planeConfig) {
     return SkYUVAInfo::NumPlanes(planeConfig);
 }
 
+/*
 extern "C" bool C_SkYUVAInfo_GetYUVAIndices(
     SkYUVAInfo::PlaneConfig planeConfig,
     const uint32_t planeChannelFlags[SkYUVAInfo::kMaxPlanes],
     SkYUVAIndex indices[SkYUVAIndex::kIndexCount]) {
     return SkYUVAInfo::GetYUVAIndices(planeConfig, planeChannelFlags, indices);
 }
+*/
 
 extern "C" int C_SkYUVAInfo_NumChannelsInPlane(SkYUVAInfo::PlaneConfig planarConfig, int i) {
     return SkYUVAInfo::NumChannelsInPlane(planarConfig, i);
@@ -2152,9 +2147,11 @@ extern "C" SkShader* C_SkPerlinNoiseShader_MakeTurbulence(SkScalar baseFrequency
     return SkPerlinNoiseShader::MakeTurbulence(baseFrequencyX, baseFrequencyY, numOctaves, seed, tileSize).release();
 }
 
+/*
 extern "C" SkShader* C_SkPerlinNoiseShader_MakeImprovedNoise(SkScalar baseFrequencyX, SkScalar baseFrequencyY, int numOctaves, SkScalar z) {
     return SkPerlinNoiseShader::MakeImprovedNoise(baseFrequencyX, baseFrequencyY, numOctaves, z).release();
 }
+*/
 
 //
 // effects/SkPath1DPathEffect.h
