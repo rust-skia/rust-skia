@@ -998,6 +998,10 @@ extern "C" SkShader* C_SkBitmap_makeShader(
     return self->makeShader(tmx, tmy, *sampling, localMatrix).release();
 }
 
+extern "C" SkImage* C_SkBitmap_asImage(const SkBitmap* self) {
+    return self->asImage().release();
+}
+
 //
 // core/SkPicture.h
 //
