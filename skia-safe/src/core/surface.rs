@@ -1,9 +1,8 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
-use crate::prelude::*;
 use crate::{
-    Bitmap, Canvas, DeferredDisplayList, IPoint, IRect, ISize, IVector, Image, ImageInfo, Paint,
-    Pixmap, Size, SurfaceCharacterization, SurfaceProps,
+    prelude::*, Bitmap, Canvas, DeferredDisplayList, IPoint, IRect, ISize, IVector, Image,
+    ImageInfo, Paint, Pixmap, SamplingOptions, Size, SurfaceCharacterization, SurfaceProps,
 };
 use skia_bindings as sb;
 use skia_bindings::{SkRefCntBase, SkSurface};
@@ -367,13 +366,21 @@ impl RCHandle<SkSurface> {
         })
     }
 
-    pub fn draw(&mut self, canvas: &mut Canvas, size: impl Into<Size>, paint: Option<&Paint>) {
+    pub fn draw(
+        &mut self,
+        canvas: &mut Canvas,
+        size: impl Into<Size>,
+        sampling: impl Into<SamplingOptions>,
+        paint: Option<&Paint>,
+    ) {
         let size = size.into();
+        let sampling = sampling.into();
         unsafe {
             self.native_mut().draw(
                 canvas.native_mut(),
                 size.width,
                 size.height,
+                sampling.native(),
                 paint.native_ptr_or_null(),
             )
         }
@@ -553,8 +560,8 @@ fn test_drawing_owned_as_exclusive_ref_ergonomics() {
     // - An &mut canvas can be drawn to.
     {
         let mut canvas = Canvas::new(ISize::new(16, 16), None).unwrap();
-        surface.draw(&mut canvas, (5.0, 5.0), None);
-        surface.draw(&mut canvas, (10.0, 10.0), None);
+        surface.draw(&mut canvas, (5.0, 5.0), SamplingOptions::default(), None);
+        surface.draw(&mut canvas, (10.0, 10.0), SamplingOptions::default(), None);
     }
 
     // option2:
@@ -562,7 +569,7 @@ fn test_drawing_owned_as_exclusive_ref_ergonomics() {
     {
         let mut surface2 = Surface::new_raster_n32_premul((16, 16)).unwrap();
         let canvas = surface2.canvas();
-        surface.draw(canvas, (5.0, 5.0), None);
-        surface.draw(canvas, (10.0, 10.0), None);
+        surface.draw(canvas, (5.0, 5.0), SamplingOptions::default(), None);
+        surface.draw(canvas, (10.0, 10.0), SamplingOptions::default(), None);
     }
 }

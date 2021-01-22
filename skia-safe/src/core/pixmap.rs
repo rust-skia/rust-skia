@@ -1,7 +1,6 @@
-use crate::prelude::*;
 use crate::{
-    AlphaType, Color, Color4f, ColorSpace, ColorType, FilterQuality, IPoint, IRect, ISize,
-    ImageInfo,
+    prelude::*, AlphaType, Color, Color4f, ColorSpace, ColorType, IPoint, IRect, ISize, ImageInfo,
+    SamplingOptions,
 };
 use skia_bindings as sb;
 use skia_bindings::SkPixmap;
@@ -220,8 +219,9 @@ impl Handle<SkPixmap> {
         }
     }
 
-    pub fn scale_pixels(&self, dst: &Pixmap, filter_quality: FilterQuality) -> bool {
-        unsafe { self.native().scalePixels(dst.native(), filter_quality) }
+    pub fn scale_pixels(&self, dst: &Pixmap, sampling: impl Into<SamplingOptions>) -> bool {
+        let sampling = sampling.into();
+        unsafe { self.native().scalePixels(dst.native(), sampling.native()) }
     }
 
     pub fn erase(&self, color: impl Into<Color>, subset: Option<&IRect>) -> bool {

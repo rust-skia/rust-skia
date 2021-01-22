@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, SamplingOptions};
 use crate::{
     AlphaType, Color, ColorSpace, ColorType, IPoint, IRect, ISize, ImageInfo, Paint, PixelRef,
     Pixmap,
@@ -369,16 +369,23 @@ impl Handle<SkBitmap> {
     pub fn to_shader<'a>(
         &self,
         tile_modes: impl Into<Option<(TileMode, TileMode)>>,
+        sampling: impl Into<SamplingOptions>,
         local_matrix: impl Into<Option<&'a Matrix>>,
-    ) -> Shader {
+    ) -> Option<Shader> {
         let tile_modes = tile_modes.into();
+        let sampling = sampling.into();
         let local_matrix = local_matrix.into();
         Shader::from_ptr(unsafe {
             let tmx = tile_modes.map(|tm| tm.0).unwrap_or_default();
             let tmy = tile_modes.map(|tm| tm.1).unwrap_or_default();
-            sb::C_SkBitmap_makeShader(self.native(), tmx, tmy, local_matrix.native_ptr_or_null())
+            sb::C_SkBitmap_makeShader(
+                self.native(),
+                tmx,
+                tmy,
+                sampling.native(),
+                local_matrix.native_ptr_or_null(),
+            )
         })
-        .unwrap()
     }
 }
 
@@ -398,13 +405,17 @@ fn get_info() {
 #[test]
 fn empty_bitmap_shader() {
     let bm = Bitmap::new();
-    let _shader = bm.to_shader(None, None);
+    let _shader = bm.to_shader(None, SamplingOptions::default(), None);
 }
 
 #[test]
 fn shader_with_tile_mode() {
     let bm = Bitmap::new();
-    let _shader = bm.to_shader((TileMode::Decal, TileMode::Mirror), None);
+    let _shader = bm.to_shader(
+        (TileMode::Decal, TileMode::Mirror),
+        SamplingOptions::default(),
+        None,
+    );
 }
 
 #[test]

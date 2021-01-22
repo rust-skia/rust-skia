@@ -675,6 +675,16 @@ extern "C" SkRect C_SkCanvas_getLocalClipBounds(const SkCanvas* self) {
     return self->getLocalClipBounds();
 }
 
+extern "C" void C_SkCanvas_drawImageNine(SkCanvas *self, const SkImage *image, const SkIRect *center, const SkRect *dest, const SkPaint *paint) 
+{
+    return self->drawImageNine(image, *center, *dest, paint);
+}
+
+extern "C" void C_SkCanvas_drawImageLattice(SkCanvas *self, const SkImage *image, const SkCanvas::Lattice *lattice, const SkRect *dst, const SkPaint *paint)
+{
+    return self->drawImageLattice(image, *lattice, *dst, paint);
+}
+
 extern "C" SkIRect C_SkCanvas_getDeviceClipBounds(const SkCanvas* self) {
     return self->getDeviceClipBounds();
 }

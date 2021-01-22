@@ -1234,7 +1234,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     // m85
     ("VkSharingMode", rewrite::vk),
     // m86:
-    ("SkSamplingMode", rewrite::k_xxx),
+    ("SkFilterMode", rewrite::k_xxx),
     ("SkMipmapMode", rewrite::k_xxx),
     ("Enable", rewrite::k_xxx),
     ("ShaderCacheStrategy", rewrite::k_xxx),

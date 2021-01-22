@@ -2,9 +2,9 @@
 use crate::gpu;
 use crate::prelude::*;
 use crate::{
-    scalar, Bitmap, BlendMode, ClipOp, Color, Color4f, Data, Font, IPoint, IRect, ISize, Image,
-    ImageFilter, ImageInfo, Matrix, Paint, Path, Picture, Point, QuickReject, RRect, Rect, Region,
-    Shader, Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices, M44,
+    scalar, Bitmap, BlendMode, ClipOp, Color, Color4f, Data, FilterMode, Font, IPoint, IRect,
+    ISize, Image, ImageFilter, ImageInfo, Matrix, Paint, Path, Picture, Point, QuickReject, RRect,
+    Rect, Region, Shader, Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices, M44,
 };
 use crate::{u8cpu, Drawable, Pixmap};
 use skia_bindings as sb;
@@ -490,8 +490,11 @@ impl Canvas {
         self
     }
 
+    // set_matrix M44 is defined as trait below.
+
+    #[deprecated(since = "0.0.0", note = "Use M44 version")]
     pub fn set_matrix(&mut self, matrix: &Matrix) -> &mut Self {
-        unsafe { self.native_mut().setMatrix(matrix.native()) }
+        unsafe { self.native_mut().setMatrix1(matrix.native()) }
         self
     }
 
@@ -788,6 +791,7 @@ impl Canvas {
         self
     }
 
+    #[deprecated(since = "0.0.0", note = "Pass FilterMode explicitly.")]
     pub fn draw_image_nine(
         &mut self,
         image: impl AsRef<Image>,
@@ -796,7 +800,9 @@ impl Canvas {
         paint: Option<&Paint>,
     ) -> &mut Self {
         unsafe {
-            self.native_mut().drawImageNine(
+            // Call the legacy function through a wrapper to avoid computing the filter mode.
+            sb::C_SkCanvas_drawImageNine(
+                self.native_mut(),
                 image.as_ref().native(),
                 center.as_ref().native(),
                 dst.as_ref().native(),
@@ -855,6 +861,7 @@ impl Canvas {
         self
     }
 
+    #[deprecated(since = "0.0.0", note = "Pass FilterMode explicitly.")]
     pub fn draw_image_lattice(
         &mut self,
         image: impl AsRef<Image>,
@@ -863,7 +870,8 @@ impl Canvas {
         paint: Option<&Paint>,
     ) -> &mut Self {
         unsafe {
-            self.native_mut().drawImageLattice(
+            sb::C_SkCanvas_drawImageLattice(
+                self.native_mut(),
                 image.as_ref().native(),
                 &lattice.native().native,
                 dst.as_ref().native(),
@@ -1019,7 +1027,7 @@ impl Canvas {
     pub fn total_matrix(&self) -> Matrix {
         let mut matrix = Matrix::default();
         // TODO: why is Matrix not safe to return from getTotalMatrix()
-        // testcase `test_total_matrix` below crashes with an access violation.
+        // test case `test_total_matrix` below crashes with an access violation.
         unsafe { sb::C_SkCanvas_getTotalMatrix(self.native(), matrix.native_mut()) };
         matrix
     }
@@ -1053,6 +1061,83 @@ impl QuickReject<Rect> for Canvas {
 impl QuickReject<Path> for Canvas {
     fn quick_reject(&self, other: &Path) -> bool {
         unsafe { self.native().quickReject1(other.native()) }
+    }
+}
+
+pub trait SetMatrix {
+    fn set_matrix(&mut self, matrix: &M44) -> &mut Self;
+}
+
+impl SetMatrix for Canvas {
+    fn set_matrix(&mut self, matrix: &M44) -> &mut Self {
+        unsafe { self.native_mut().setMatrix(matrix.native()) }
+        self
+    }
+}
+
+pub trait DrawImageNine {
+    fn draw_image_nine(
+        &mut self,
+        image: impl AsRef<Image>,
+        center: impl AsRef<IRect>,
+        dst: impl AsRef<Rect>,
+        filter_mode: FilterMode,
+        paint: Option<&Paint>,
+    ) -> &mut Self;
+}
+
+impl DrawImageNine for Canvas {
+    fn draw_image_nine(
+        &mut self,
+        image: impl AsRef<Image>,
+        center: impl AsRef<IRect>,
+        dst: impl AsRef<Rect>,
+        filter_mode: FilterMode,
+        paint: Option<&Paint>,
+    ) -> &mut Self {
+        unsafe {
+            self.native_mut().drawImageNine(
+                image.as_ref().native(),
+                center.as_ref().native(),
+                dst.as_ref().native(),
+                filter_mode,
+                paint.native_ptr_or_null(),
+            )
+        }
+        self
+    }
+}
+
+pub trait DrawImageLattice {
+    fn draw_image_lattice(
+        &mut self,
+        image: impl AsRef<Image>,
+        lattice: &Lattice,
+        filter: FilterMode,
+        dst: impl AsRef<Rect>,
+        paint: Option<&Paint>,
+    ) -> &mut Self;
+}
+
+impl DrawImageLattice for Canvas {
+    fn draw_image_lattice(
+        &mut self,
+        image: impl AsRef<Image>,
+        lattice: &Lattice,
+        filter: FilterMode,
+        dst: impl AsRef<Rect>,
+        paint: Option<&Paint>,
+    ) -> &mut Self {
+        unsafe {
+            self.native_mut().drawImageLattice(
+                image.as_ref().native(),
+                &lattice.native().native,
+                dst.as_ref().native(),
+                filter,
+                paint.native_ptr_or_null(),
+            )
+        }
+        self
     }
 }
 

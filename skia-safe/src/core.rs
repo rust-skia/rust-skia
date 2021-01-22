@@ -97,7 +97,7 @@ pub use font_types::*;
 pub mod graphics;
 
 pub mod image;
-pub use image::{FilterOptions, Image, MipmapMode, SamplingMode};
+pub use image::Image;
 
 mod image_encoder;
 pub use image_encoder::*;
@@ -236,20 +236,14 @@ pub use un_pre_multiply::*;
 pub mod vertices;
 pub use vertices::Vertices;
 
-pub mod yuva_index;
-pub use yuva_index::YUVAIndex;
-
 pub mod yuva_info;
 pub use yuva_info::YUVAInfo;
 
 pub mod yuva_pixmaps;
 pub use yuva_pixmaps::{yuva_pixmap_info, YUVAPixmapInfo, YUVAPixmaps};
 
-mod yuva_size_info;
-pub use yuva_size_info::*;
-
 //
-// Skia specific traits used for overloading.
+// Skia specific traits used for overloading functions.
 //
 
 pub trait Contains<T> {

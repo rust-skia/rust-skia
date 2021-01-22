@@ -1,7 +1,10 @@
 use crate::prelude::*;
-use skia_bindings::{SkCubicResampler, SkFilterOptions, SkSamplingOptions};
+use skia_bindings::{SkCubicResampler, SkSamplingOptions};
 
-pub use skia_bindings::SkSamplingMode as SamplingMode;
+pub use skia_bindings::SkFilterMode as FilterMode;
+
+#[deprecated(since = "0.0.0", note = "Use FilterMode")]
+pub type SamplingMode = FilterMode;
 
 pub use skia_bindings::SkMipmapMode as MipmapMode;
 
@@ -28,17 +31,16 @@ pub struct CubicResampler {
 
 impl NativeTransmutable<SkCubicResampler> for CubicResampler {}
 
-#[repr(C)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[deprecated(since = "0.0.0", note = "Use SamplingOptions")]
 pub struct FilterOptions {
-    pub sampling: SamplingMode,
+    pub sampling: FilterMode,
     pub mipmap: MipmapMode,
 }
 
-impl NativeTransmutable<SkFilterOptions> for FilterOptions {}
-
 #[repr(C)]
 #[derive(Debug, Copy, Clone, PartialEq)]
+#[allow(deprecated)]
 pub struct SamplingOptions {
     pub use_cubic: bool,
     /// use if `use_cubic` is `true`
@@ -50,6 +52,7 @@ pub struct SamplingOptions {
 impl NativeTransmutable<SkSamplingOptions> for SamplingOptions {}
 
 impl Default for SamplingOptions {
+    #[allow(deprecated)]
     fn default() -> Self {
         Self {
             use_cubic: false,
@@ -63,6 +66,7 @@ impl Default for SamplingOptions {
     }
 }
 
+#[allow(deprecated)]
 impl From<FilterOptions> for SamplingOptions {
     fn from(filter: FilterOptions) -> Self {
         Self {
@@ -74,6 +78,7 @@ impl From<FilterOptions> for SamplingOptions {
 }
 
 impl From<CubicResampler> for SamplingOptions {
+    #[allow(deprecated)]
     fn from(cubic: CubicResampler) -> Self {
         Self {
             use_cubic: true,
@@ -93,18 +98,13 @@ mod tests {
 
     #[test]
     fn test_naming() {
-        let _ = super::SamplingMode::Linear;
+        let _ = super::FilterMode::Linear;
         let _ = super::MipmapMode::Nearest;
     }
 
     #[test]
-    fn test_cubic_sampler_layout() {
+    fn test_sampler_layout() {
         super::CubicResampler::test_layout();
-    }
-
-    #[test]
-    fn test_filter_options_layout() {
-        super::FilterOptions::test_layout()
     }
 
     #[test]

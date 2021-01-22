@@ -1,7 +1,4 @@
-use crate::{
-    prelude::*, ColorType, Data, ImageInfo, Pixmap, YUVAIndex, YUVAInfo, YUVASizeInfo,
-    YUVColorSpace,
-};
+use crate::{prelude::*, ColorType, Data, ImageInfo, Pixmap, YUVAInfo, YUVColorSpace};
 use skia_bindings as sb;
 use skia_bindings::{SkYUVAPixmapInfo, SkYUVAPixmaps};
 use std::{ffi::c_void, ptr, slice};
@@ -275,23 +272,28 @@ impl YUVAPixmaps {
         &self.planes()[i]
     }
 
+    /*
     /// Computes a [YUVAIndex] representation of the planar layout.
     pub fn to_yuva_indices(&self) -> [YUVAIndex; YUVAIndex::INDEX_COUNT] {
         let mut indices = [YUVAIndex::default(); YUVAIndex::INDEX_COUNT];
         unsafe { self.native().toYUVAIndices(indices[0].native_mut()) };
         indices
     }
+    */
 
-    /// Conversion to legacy YUVA data structures.
-    pub fn to_legacy(&self) -> Option<(YUVASizeInfo, [YUVAIndex; 4])> {
-        let mut info = YUVASizeInfo::default();
-        let mut indices = [YUVAIndex::default(); 4];
-        unsafe {
-            self.native()
-                .toLegacy(info.native_mut(), &mut indices.native_mut()[0])
+    /*
+
+        /// Conversion to legacy YUVA data structures.
+        pub fn to_legacy(&self) -> Option<(YUVASizeInfo, [YUVAIndex; 4])> {
+            let mut info = YUVASizeInfo::default();
+            let mut indices = [YUVAIndex::default(); 4];
+            unsafe {
+                self.native()
+                    .toLegacy(info.native_mut(), &mut indices.native_mut()[0])
+            }
+            .if_true_some((info, indices))
         }
-        .if_true_some((info, indices))
-    }
+    */
 
     pub(crate) fn native_is_valid(pixmaps: *const SkYUVAPixmaps) -> bool {
         unsafe { sb::C_SkYUVAPixmaps_isValid(pixmaps) }

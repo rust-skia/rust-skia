@@ -122,6 +122,7 @@ mod tests {
             Format::R8 => {}
             Format::ALPHA8 => {}
             Format::LUMINANCE8 => {}
+            Format::LUMINANCE8_ALPHA8 => {}
             Format::BGRA8 => {}
             Format::RGB565 => {}
             Format::RGBA16F => {}

@@ -1,5 +1,5 @@
 use super::image_info;
-use crate::{prelude::*, EncodedOrigin, ISize, YUVAIndex};
+use crate::{prelude::*, EncodedOrigin, ISize};
 use skia_bindings as sb;
 use skia_bindings::{SkYUVAInfo, SkYUVAInfo_Subsampling};
 
@@ -95,6 +95,7 @@ pub fn num_channels_in_plane(config: PlaneConfig, i: usize) -> Option<usize> {
     })
 }
 
+/*
 /// Given a [PlaneConfig] and a set of channel flags for each plane, convert to [YUVAIndex]
 /// representation. Fails if channel flags aren't valid for the [PlaneConfig] (i.e. don't have
 /// enough channels in a plane).
@@ -108,6 +109,7 @@ pub fn get_yuva_indices(
     }
     .if_true_some(indices)
 }
+*/
 
 /// Does the [PlaneConfig] have alpha values?
 pub fn has_alpha(config: PlaneConfig) -> bool {
@@ -234,12 +236,14 @@ impl YUVAInfo {
         num_channels_in_plane(self.plane_config(), i)
     }
 
+    /*/
     /// Given a set of channel flags for each plane, converts `plane_config(&self)` to `YUVAIndex`
     /// representation. Fails if the channel flags aren't valid for the [PlaneConfig] (i.e. don't
     /// have enough channels in a plane).
     pub fn to_yuva_indices(&self, channel_flags: &[u32; 4]) -> Option<[YUVAIndex; 4]> {
         get_yuva_indices(self.plane_config(), channel_flags)
     }
+    */
 
     pub(crate) fn native_is_valid(info: &SkYUVAInfo) -> bool {
         info.fPlaneConfig != PlaneConfig::Unknown
