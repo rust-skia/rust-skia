@@ -237,8 +237,8 @@ extern "C" void C_GrDirectContext_performDeferredCleanup(GrDirectContext* self, 
 // gpu/GrContextOptions.h
 //
 
-extern "C" void C_GrContextOptions_Construct(GrContextOptions* unintialized) {
-    new(unintialized) GrContextOptions();
+extern "C" void C_GrContextOptions_Construct(GrContextOptions* uninitialized) {
+    new(uninitialized) GrContextOptions();
 }
 
 //

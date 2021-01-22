@@ -1162,9 +1162,9 @@ extern "C" SkTextBlob* C_SkTextBlob_MakeFromText(const void* text, size_t byteLe
 }
 
 extern "C" SkTextBlob *C_SkTextBlob_MakeFromPosTextH(const void *text, size_t byteLength,
-                                                     const SkScalar xpos[], SkScalar constY, const SkFont *font,
+                                                     const SkScalar xPos[], SkScalar constY, const SkFont *font,
                                                      SkTextEncoding encoding) {
-    return SkTextBlob::MakeFromPosTextH(text, byteLength, xpos, constY, *font, encoding).release();
+    return SkTextBlob::MakeFromPosTextH(text, byteLength, xPos, constY, *font, encoding).release();
 }
 
 extern "C" SkTextBlob *C_SkTextBlob_MakeFromPosText(const void *text, size_t byteLength,
@@ -1828,8 +1828,8 @@ extern "C" SkPathEffect* C_SkPathEffect_MakeCompose(SkPathEffect* outer, SkPathE
     return SkPathEffect::MakeCompose(sp(outer), sp(inner)).release();
 }
 
-extern "C" void C_SkPathEffect_PointData_Construct(SkPathEffect::PointData* unitialized) {
-    new(unitialized) SkPathEffect::PointData();
+extern "C" void C_SkPathEffect_PointData_Construct(SkPathEffect::PointData* uninitialized) {
+    new(uninitialized) SkPathEffect::PointData();
 }
 
 extern "C" void C_SkPathEffect_PointData_deletePoints(SkPathEffect::PointData* self) {
@@ -2473,7 +2473,7 @@ C_SkMergeImageFilter_Make(SkImageFilter *const filters[], int count, const SkIma
 }
 
 //
-// effects/SkMorphologyImageFiter.h
+// effects/SkMorphologyImageFilter.h
 //
 
 extern "C" SkImageFilter *C_SkDilateImageFilter_Make(int radiusX, int radiusY, SkImageFilter *input,
