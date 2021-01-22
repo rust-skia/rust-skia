@@ -432,8 +432,8 @@ impl RCHandle<SkSurface> {
     }
 
     // TODO: AsyncReadResult, RescaleGamma (m79, m86)
-    // TODO: wrap asyncRescaleAndReadPixels (m76, m79)
-    // TODO: wrap asyncRescaleAndReadPixelsYUV420 (m77, m79)
+    // TODO: wrap asyncRescaleAndReadPixels (m76, m79, m89)
+    // TODO: wrap asyncRescaleAndReadPixelsYUV420 (m77, m79, m89)
 
     pub fn write_pixels_from_pixmap(&mut self, src: &Pixmap, dst: impl Into<IPoint>) {
         let dst = dst.into();

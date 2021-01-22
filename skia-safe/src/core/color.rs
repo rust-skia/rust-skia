@@ -205,6 +205,7 @@ bitflags! {
         const BLUE = sb::SkColorChannelFlag::kBlue_SkColorChannelFlag as _;
         const ALPHA = sb::SkColorChannelFlag::kAlpha_SkColorChannelFlag as _;
         const GRAY = sb::SkColorChannelFlag::kGray_SkColorChannelFlag as _;
+        const GRAY_ALPHA = Self::GRAY.bits | Self::ALPHA.bits;
         const RG = Self::RED.bits | Self::GREEN.bits;
         const RGB = Self::RG.bits | Self::BLUE.bits;
         const RGBA = Self::RGB.bits | Self::ALPHA.bits;

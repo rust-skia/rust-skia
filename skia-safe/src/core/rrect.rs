@@ -152,7 +152,7 @@ impl RRect {
     }
 
     pub fn set_oval(&mut self, oval: impl AsRef<Rect>) {
-        unsafe { sb::C_SkRRect_setOval(self.native_mut(), oval.as_ref().native()) }
+        unsafe { self.native_mut().setOval(oval.as_ref().native()) }
     }
 
     pub fn set_rect_xy(&mut self, rect: impl AsRef<Rect>, x_rad: scalar, y_rad: scalar) {

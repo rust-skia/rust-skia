@@ -389,21 +389,6 @@ extern "C" SkImage* C_SkImage_MakeFromYUVAPixmaps(
     return SkImage::MakeFromYUVAPixmaps(context, *pixmaps, buildMips, limitToMaxTextureSize, sp(imageColorSpace)).release();
 }
 
-/*
-extern "C" SkImage* C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
-        GrRecordingContext* context,
-        SkYUVColorSpace yuvColorSpace,
-        const GrBackendTexture nv12Textures[2],
-        GrSurfaceOrigin textureOrigin,
-        const GrBackendTexture* backendTexture,
-        SkColorSpace* imageColorSpace) {
-    return SkImage::MakeFromNV12TexturesCopyWithExternalBackend(
-            context,
-            yuvColorSpace, nv12Textures, textureOrigin, *backendTexture,
-            sp(imageColorSpace)).release();
-}
-*/
-
 extern "C" SkImage* C_SkImage_makeTextureImage(
         const SkImage* self,
         GrDirectContext* context,

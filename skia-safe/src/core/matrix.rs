@@ -1,6 +1,5 @@
 use super::scalar_;
-use crate::prelude::*;
-use crate::{scalar, Point, Point3, RSXform, Rect, Scalar, Size, Vector};
+use crate::{prelude::*, scalar, Point, Point3, RSXform, Rect, Scalar, Size, Vector};
 use skia_bindings as sb;
 use skia_bindings::SkMatrix;
 use std::ops::{Index, IndexMut, Mul};
@@ -636,15 +635,29 @@ impl Matrix {
         };
     }
 
-    pub fn map_xy(&self, x: scalar, y: scalar) -> Point {
-        self.map_point((x, y))
-    }
-
     pub fn map_point(&self, point: impl Into<Point>) -> Point {
         let point = point.into();
         let mut p = Point::default();
         unsafe { self.native().mapXY(point.x, point.y, p.native_mut()) };
         p
+    }
+
+    pub fn map_xy(&self, x: scalar, y: scalar) -> Point {
+        self.map_point((x, y))
+    }
+
+    pub fn map_origin(&self) -> Point {
+        let mut x = self.translate_x();
+        let mut y = self.translate_y();
+        if self.has_perspective() {
+            let mut w = self[Member::Persp2];
+            if w != 0.0 {
+                w = 1.0 / w;
+            }
+            x *= w;
+            y *= w;
+        }
+        Point::new(x, y)
     }
 
     pub fn map_vectors(&self, dst: &mut [Vector], src: &[Vector]) {

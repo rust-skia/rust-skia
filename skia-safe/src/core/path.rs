@@ -979,6 +979,19 @@ impl Handle<SkPath> {
         unsafe { self.native().dump(ptr::null_mut(), true) }
     }
 
+    pub fn dump_arrays_as_data(&self, dump_as_hex: bool) -> Data {
+        let mut stream = DynamicMemoryWStream::new();
+        unsafe {
+            self.native()
+                .dumpArrays(stream.native_mut().base_mut(), dump_as_hex);
+        }
+        stream.detach_as_data()
+    }
+
+    pub fn dump_arrays(&self) {
+        unsafe { self.native().dumpArrays(ptr::null_mut(), false) }
+    }
+
     // TODO: writeToMemory()?
 
     pub fn serialize(&self) -> Data {

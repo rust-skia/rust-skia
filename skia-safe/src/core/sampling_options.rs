@@ -8,7 +8,7 @@ pub type SamplingMode = FilterMode;
 
 pub use skia_bindings::SkMipmapMode as MipmapMode;
 
-/// Specify B and C (each between 0...1) to create a shader that applies the corresponding
+/// Specify `b` and `c` (each between 0...1) to create a shader that applies the corresponding
 /// cubic reconstruction filter to the image.
 ///
 /// Example values:
@@ -43,25 +43,31 @@ pub struct FilterOptions {
 #[allow(deprecated)]
 pub struct SamplingOptions {
     pub use_cubic: bool,
-    /// use if `use_cubic` is `true`
     pub cubic: CubicResampler,
-    /// use if `use_cubic` is `false`
-    pub filter: FilterOptions,
+    pub filter: FilterMode,
+    pub mipmap: MipmapMode,
 }
 
 impl NativeTransmutable<SkSamplingOptions> for SamplingOptions {}
 
 impl Default for SamplingOptions {
-    #[allow(deprecated)]
     fn default() -> Self {
         Self {
             use_cubic: false,
             // ignored
             cubic: CubicResampler { b: 0.0, c: 0.0 },
-            filter: FilterOptions {
-                sampling: SamplingMode::Nearest,
-                mipmap: MipmapMode::None,
-            },
+            filter: FilterMode::Nearest,
+            mipmap: MipmapMode::None,
+        }
+    }
+}
+
+impl SamplingOptions {
+    pub fn new(filter_mode: FilterMode, mm: MipmapMode) -> Self {
+        Self {
+            filter: filter_mode,
+            mipmap: mm,
+            ..Default::default()
         }
     }
 }
@@ -72,7 +78,8 @@ impl From<FilterOptions> for SamplingOptions {
         Self {
             use_cubic: false,
             cubic: CubicResampler { b: 0.0, c: 0.0 },
-            filter,
+            filter: filter.sampling,
+            mipmap: filter.mipmap,
         }
     }
 }
@@ -83,14 +90,12 @@ impl From<CubicResampler> for SamplingOptions {
         Self {
             use_cubic: true,
             cubic,
-            // ignored
-            filter: FilterOptions {
-                sampling: SamplingMode::Nearest,
-                mipmap: MipmapMode::None,
-            },
+            ..Default::default()
         }
     }
 }
+
+// TODO: Wrap SamplingOptions From<(MSkFilterQuality, MediumBehavior)>
 
 #[cfg(test)]
 mod tests {

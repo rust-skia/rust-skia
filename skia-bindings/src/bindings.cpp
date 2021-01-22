@@ -1063,10 +1063,6 @@ extern "C" void C_SkRRect_setRect(SkRRect* self, const SkRect* rect) {
     self->setRect(*rect);
 }
 
-extern "C" void C_SkRRect_setOval(SkRRect* self, const SkRect* oval) {
-    self->setOval(*oval);
-}
-
 extern "C" void C_SkRRect_dumpToString(const SkRRect* self, bool asHex, SkString* str) {
     *str = self->dumpToString(asHex);
 }
@@ -1992,18 +1988,21 @@ extern "C" void C_SkYUVAInfo_destruct(SkYUVAInfo* self) {
     self->~SkYUVAInfo();
 }
 
+extern "C" void C_SkYUVAInfo_SubsamplingFactors(SkYUVAInfo::Subsampling subsampling, int factors[2]) {
+    auto f = SkYUVAInfo::SubsamplingFactors(subsampling);
+    factors[0] = std::get<0>(f);
+    factors[1] = std::get<1>(f);
+}
+
+extern "C" void C_SkYUVAInfo_PlaneSubsamplingFactors(SkYUVAInfo::PlaneConfig planeConfig, SkYUVAInfo::Subsampling subsampling, int planeIdx, int factors[2]) {
+    auto f = SkYUVAInfo::PlaneSubsamplingFactors(planeConfig, subsampling, planeIdx);
+    factors[0] = std::get<0>(f);
+    factors[1] = std::get<1>(f);
+}
+
 extern "C" int C_SkYUVAInfo_NumPlanes(SkYUVAInfo::PlaneConfig planeConfig) {
     return SkYUVAInfo::NumPlanes(planeConfig);
 }
-
-/*
-extern "C" bool C_SkYUVAInfo_GetYUVAIndices(
-    SkYUVAInfo::PlaneConfig planeConfig,
-    const uint32_t planeChannelFlags[SkYUVAInfo::kMaxPlanes],
-    SkYUVAIndex indices[SkYUVAIndex::kIndexCount]) {
-    return SkYUVAInfo::GetYUVAIndices(planeConfig, planeChannelFlags, indices);
-}
-*/
 
 extern "C" int C_SkYUVAInfo_NumChannelsInPlane(SkYUVAInfo::PlaneConfig planarConfig, int i) {
     return SkYUVAInfo::NumChannelsInPlane(planarConfig, i);
@@ -2011,6 +2010,14 @@ extern "C" int C_SkYUVAInfo_NumChannelsInPlane(SkYUVAInfo::PlaneConfig planarCon
 
 extern "C" bool C_SkYUVAInfo_equals(const SkYUVAInfo* a, const SkYUVAInfo* b) {
     return *a == *b;
+}
+
+extern "C" void C_SkYUVAInfo_makeSubsampling(const SkYUVAInfo* self, SkYUVAInfo::Subsampling subsampling, SkYUVAInfo* uninitialized) {
+    new(uninitialized) SkYUVAInfo(self->makeSubsampling(subsampling));
+}
+
+extern "C" void C_SkYUVAInfo_makeDimensions(const SkYUVAInfo* self, const SkISize* dimensions, SkYUVAInfo* uninitialized) {
+    new(uninitialized) SkYUVAInfo(self->makeDimensions(*dimensions));
 }
 
 //

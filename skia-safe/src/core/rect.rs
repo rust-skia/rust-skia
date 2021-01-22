@@ -38,23 +38,35 @@ impl IRect {
         }
     }
 
+    #[must_use]
     pub const fn new_empty() -> Self {
         Self::new(0, 0, 0, 0)
     }
 
+    #[must_use]
     pub fn from_wh(w: i32, h: i32) -> Self {
         Self::from_size((w, h))
     }
 
+    #[must_use]
     pub fn from_size(size: impl Into<ISize>) -> Self {
         let size = size.into();
         Self::new(0, 0, size.width, size.height)
     }
 
+    #[must_use]
+    pub fn from_pt_size(pt: impl Into<IPoint>, size: impl Into<ISize>) -> Self {
+        let pt = pt.into();
+        let size = size.into();
+        Self::from_xywh(pt.x, pt.y, size.width, size.height)
+    }
+
+    #[must_use]
     pub const fn from_ltrb(l: i32, t: i32, r: i32, b: i32) -> Self {
         Self::new(l, t, r, b)
     }
 
+    #[must_use]
     pub fn from_xywh(x: i32, y: i32, w: i32, h: i32) -> Self {
         IRect {
             left: x,

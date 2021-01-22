@@ -1,11 +1,10 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
-use crate::prelude::*;
 use crate::{
-    AlphaType, Bitmap, ColorSpace, ColorType, Data, EncodedImageFormat, IPoint, IRect, ISize,
-    ImageInfo, Matrix, Paint, Picture, SamplingOptions, Shader, TileMode,
+    prelude::*, AlphaType, Bitmap, ColorSpace, ColorType, Data, EncodedImageFormat, IPoint, IRect,
+    ISize, ImageFilter, ImageGenerator, ImageInfo, Matrix, Paint, Picture, Pixmap, SamplingOptions,
+    Shader, TileMode,
 };
-use crate::{ImageFilter, ImageGenerator, Pixmap};
 use skia_bindings as sb;
 use skia_bindings::{SkImage, SkRefCntBase};
 use std::{mem, ptr};
@@ -234,30 +233,6 @@ impl RCHandle<SkImage> {
         panic!("Removed without replacement")
     }
 
-    /*
-        #[cfg(feature = "gpu")]
-        pub fn from_nv12_textures_copy_with_external_backend(
-            context: &mut gpu::RecordingContext,
-            yuv_color_space: crate::YUVColorSpace,
-            nv12_textures: &[gpu::BackendTexture; 2],
-            texture_origin: gpu::SurfaceOrigin,
-            backend_texture: &gpu::BackendTexture,
-            image_color_space: impl Into<Option<ColorSpace>>,
-            // TODO: m78 introduced textureReleaseProc and releaseContext here.
-        ) -> Option<Image> {
-            Image::from_ptr(unsafe {
-                sb::C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
-                    context.native_mut(),
-                    yuv_color_space,
-                    nv12_textures.native().as_ptr(),
-                    texture_origin,
-                    backend_texture.native(),
-                    image_color_space.into().into_ptr_or_null(),
-                )
-            })
-        }
-    */
-
     pub fn from_picture(
         picture: impl Into<Picture>,
         dimensions: impl Into<ISize>,
@@ -329,8 +304,8 @@ impl RCHandle<SkImage> {
         local_matrix: impl Into<Option<&'a Matrix>>,
     ) -> Option<Shader> {
         let tile_modes = tile_modes.into();
-        let tm1 = tile_modes.map(|m| m.0).unwrap_or_default();
-        let tm2 = tile_modes.map(|m| m.1).unwrap_or_default();
+        let tm1 = tile_modes.map(|(tm, _)| tm).unwrap_or_default();
+        let tm2 = tile_modes.map(|(_, tm)| tm).unwrap_or_default();
         let sampling = sampling.into();
 
         Shader::from_ptr(unsafe {
