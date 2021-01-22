@@ -9,8 +9,8 @@ index 87e7ea7..df4903a 100644
 -default = []
 +default = ["gl", "vulkan", "metal", "textlayout", "webp"]
  gl = []
- vulkan = []
- metal = []
+ egl = []
+ wayland = []
 diff --git a/skia-org/Cargo.toml b/skia-org/Cargo.toml
 index 5a33403..2e93fee 100644
 --- a/skia-org/Cargo.toml
@@ -22,8 +22,8 @@ index 5a33403..2e93fee 100644
 -default = []
 +default = ["gl", "vulkan", "metal", "textlayout", "webp"]
  gl = ["offscreen_gl_context", "sparkle", "skia-safe/gl"]
- vulkan = ["ash", "skia-safe/vulkan"]
- metal = ["metal-rs", "foreign-types", "cocoa", "objc", "skia-safe/metal"]
+ egl = ["gl", "skia-safe/egl"]
+ x11 = ["gl", "skia-safe/x11"]
 diff --git a/skia-safe/Cargo.toml b/skia-safe/Cargo.toml
 index 37877ff..3ed3950 100644
 --- a/skia-safe/Cargo.toml
@@ -35,5 +35,6 @@ index 37877ff..3ed3950 100644
 -default = []
 +default = ["gl", "vulkan", "metal", "textlayout", "webp"]
  gl = ["gpu", "skia-bindings/gl"]
- vulkan = ["gpu", "skia-bindings/vulkan"]
- metal = ["gpu", "skia-bindings/metal"]
+ egl = ["gl", "skia-bindings/egl"]
+ x11 = ["gl", "skia-bindings/x11"]
+
