@@ -2117,7 +2117,7 @@ extern "C" bool C_SkYUVAPixmaps_isValid(const SkYUVAPixmaps* self) {
 // effects/
 //
 
-extern "C" void C_Effects_Types(SkTableMaskFilter *) {}
+extern "C" void C_Effects_Types(SkTableMaskFilter *, SkImageFilters::Dither *) {}
 
 //
 // effects/SkGradientShader.h
@@ -2167,12 +2167,6 @@ extern "C" SkShader* C_SkPerlinNoiseShader_MakeFractalNoise(SkScalar baseFrequen
 extern "C" SkShader* C_SkPerlinNoiseShader_MakeTurbulence(SkScalar baseFrequencyX, SkScalar baseFrequencyY, int numOctaves, SkScalar seed, const SkISize* tileSize) {
     return SkPerlinNoiseShader::MakeTurbulence(baseFrequencyX, baseFrequencyY, numOctaves, seed, tileSize).release();
 }
-
-/*
-extern "C" SkShader* C_SkPerlinNoiseShader_MakeImprovedNoise(SkScalar baseFrequencyX, SkScalar baseFrequencyY, int numOctaves, SkScalar z) {
-    return SkPerlinNoiseShader::MakeImprovedNoise(baseFrequencyX, baseFrequencyY, numOctaves, z).release();
-}
-*/
 
 //
 // effects/SkPath1DPathEffect.h
@@ -2785,9 +2779,10 @@ SkImageFilter *C_SkImageFilters_Picture(SkPicture *pic, const SkRect *targetRect
 }
 
 SkImageFilter *C_SkImageFilters_Shader(SkShader *shader,
+                                       SkImageFilters::Dither dither,
                                        const SkImageFilters::CropRect *cropRect)
 {
-    return SkImageFilters::Shader(sp(shader), *cropRect).release();
+    return SkImageFilters::Shader(sp(shader), dither, *cropRect).release();
 }
 
 SkImageFilter *C_SkImageFilters_Tile(const SkRect *src, const SkRect *dst,

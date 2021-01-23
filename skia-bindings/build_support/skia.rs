@@ -1247,6 +1247,8 @@ const ENUM_TABLE: &[EnumEntry] = &[
     // m88:
     // SkYUVAInfo_*
     ("PlaneConfig", rewrite::k_xxx),
+    // m89, SkImageFilters::Dither
+    ("Dither", rewrite::k_xxx),
 ];
 
 pub(crate) mod rewrite {

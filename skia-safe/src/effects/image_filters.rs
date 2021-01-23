@@ -360,9 +360,19 @@ pub fn picture<'a>(
     })
 }
 
+pub use skia_bindings::SkImageFilters_Dither as Dither;
+
 pub fn shader(shader: impl Into<Shader>, crop_rect: impl Into<CropRect>) -> Option<ImageFilter> {
+    shader_with_dither(shader, Dither::No, crop_rect)
+}
+
+pub fn shader_with_dither(
+    shader: impl Into<Shader>,
+    dither: Dither,
+    crop_rect: impl Into<CropRect>,
+) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
-        sb::C_SkImageFilters_Shader(shader.into().into_ptr(), crop_rect.into().native())
+        sb::C_SkImageFilters_Shader(shader.into().into_ptr(), dither, crop_rect.into().native())
     })
 }
 
@@ -569,8 +579,13 @@ pub fn spot_lit_specular(
 
 #[cfg(test)]
 mod tests {
-    use super::CropRect;
+    use super::{CropRect, Dither};
     use crate::{prelude::NativeTransmutable, IRect, Rect};
+
+    #[test]
+    fn test_dither_naming() {
+        let _ = Dither::Yes;
+    }
 
     #[test]
     fn test_crop_rect_layout() {
