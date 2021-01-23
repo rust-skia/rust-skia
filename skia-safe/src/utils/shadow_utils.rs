@@ -1,5 +1,4 @@
-use crate::prelude::*;
-use crate::{scalar, Canvas, Color, Path, Point3};
+use crate::{prelude::*, scalar, Canvas, Color, Matrix, Path, Point3, Rect};
 use skia_bindings as sb;
 use skia_bindings::SkShadowUtils;
 
@@ -34,6 +33,29 @@ pub fn draw_shadow(
             flags.into().unwrap_or_else(ShadowFlags::empty).bits(),
         )
     }
+}
+
+pub fn local_bounds(
+    ctm: &Matrix,
+    path: &Path,
+    z_plane_params: impl Into<Point3>,
+    light_pos: impl Into<Point3>,
+    light_radius: scalar,
+    flags: u32,
+) -> Option<Rect> {
+    let mut r = crate::Rect::default();
+    unsafe {
+        SkShadowUtils::GetLocalBounds(
+            ctm.native(),
+            path.native(),
+            z_plane_params.into().native(),
+            light_pos.into().native(),
+            light_radius,
+            flags,
+            r.native_mut(),
+        )
+    }
+    .if_true_some(r)
 }
 
 impl Canvas {
