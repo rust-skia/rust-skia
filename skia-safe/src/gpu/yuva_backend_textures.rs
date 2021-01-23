@@ -152,12 +152,4 @@ impl YUVABackendTextures {
     pub(crate) fn native_is_valid(n: &GrYUVABackendTextures) -> bool {
         YUVAInfo::native_is_valid(&n.fYUVAInfo)
     }
-
-    /*
-    pub fn to_yuva_indices(&self) -> Vec<YUVAIndex> {
-        let mut indices = [YUVAIndex::default(); YUVAIndex::INDEX_COUNT];
-        unsafe { self.native().toYUVAIndices(indices[0].native_mut()) };
-        indices[0..self.num_planes()].to_vec()
-    }
-    */
 }
