@@ -50,7 +50,6 @@ wio = { version = "0.2.2", optional = true }
 
 [dev-dependencies]
 serial_test = "0.5"
-serial_test_derive = "0.5"
 static_assertions = "1.1"
 
 # gl-window
