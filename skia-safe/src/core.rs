@@ -185,8 +185,11 @@ pub use rrect::RRect;
 mod rsxform;
 pub use rsxform::*;
 
-mod sampling_options;
-pub use sampling_options::*;
+pub mod sampling_options;
+#[allow(deprecated)]
+pub use sampling_options::{
+    CubicResampler, FilterMode, FilterOptions, MipmapMode, SamplingMode, SamplingOptions,
+};
 
 mod scalar_;
 pub use scalar_::*;
