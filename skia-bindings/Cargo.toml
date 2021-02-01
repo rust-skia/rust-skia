@@ -64,7 +64,7 @@ heck = "0.3.1"
 thread_local = "~1.0.1"
 
 # for downloading and extracting prebuilt binaries and skia / depot_tools archives:
-ureq = "1.5.1"
+ureq = "2.0.1"
 flate2 = "1.0.7"
 tar = "0.4.26"
 
