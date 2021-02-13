@@ -393,8 +393,7 @@ impl FinalBuildConfiguration {
         };
 
         let binding_sources = {
-            let mut sources: Vec<PathBuf> = Vec::new();
-            sources.push("src/bindings.cpp".into());
+            let mut sources: Vec<PathBuf> = vec!["src/bindings.cpp".into()];
             if features.gl {
                 sources.push("src/gl.cpp".into());
             }
