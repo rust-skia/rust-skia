@@ -381,8 +381,7 @@ impl FinalBuildConfiguration {
         };
 
         let ninja_files = {
-            let mut files = Vec::new();
-            files.push("obj/skia.ninja".into());
+            let mut files = vec!["obj/skia.ninja".into()];
             if features.text_layout {
                 files.extend(vec![
                     "obj/modules/skshaper/skshaper.ninja".into(),
