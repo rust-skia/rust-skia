@@ -104,10 +104,10 @@ impl Default for Matrix44 {
     }
 }
 
-impl Into<Matrix> for Matrix44 {
-    fn into(self) -> Matrix {
+impl From<Matrix44> for Matrix {
+    fn from(m44: Matrix44) -> Self {
         let mut m = Matrix::new_identity();
-        unsafe { sb::C_SkMatrix44_SkMatrix(self.native(), m.native_mut()) };
+        unsafe { sb::C_SkMatrix44_SkMatrix(m44.native(), m.native_mut()) };
         m
     }
 }
