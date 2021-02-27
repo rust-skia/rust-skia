@@ -3,8 +3,10 @@
 use crate::build_support::{android, binaries, cargo, clang, ios, llvm, vs, xcode};
 use bindgen::{CodegenConfig, EnumVariation};
 use cc::Build;
-use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+use std::{
+    path::{Path, PathBuf},
+};
 use std::{env, fs};
 
 /// The libraries to link with.
@@ -594,44 +596,27 @@ impl BinariesConfiguration {
     }
 }
 
-/// The full build of Skia, skia-bindings, and the generation of bindings.rs.
-pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration, ninja_command: Option<PathBuf>, gn_command: Option<PathBuf>) {
-    let python2 = &prerequisites::locate_python2_cmd();
-    println!("Python 2 found: {:?}", python2);
-    let ninja = ninja_command.unwrap_or_else(|| fetch_dependencies(build.use_system_libraries, &python2));
-    configure_skia(build, config, &python2, gn_command.as_deref());
-    build_skia(build, config, &ninja);
-}
-
-/// Build Skia without any network access.
-///
-/// An offline build expects the Skia source tree including all third party dependencies
-/// to be available.
-pub fn build_offline(
+/// Orchestrates the entire build of Skia based on the arguments provided.
+pub fn build(
     build: &FinalBuildConfiguration,
     config: &BinariesConfiguration,
     ninja_command: Option<PathBuf>,
     gn_command: Option<PathBuf>,
+    offline: bool,
 ) {
-    let python2 = prerequisites::locate_python2_cmd();
-    configure_skia(&build, &config, &python2, gn_command.as_deref());
-    build_skia(
-        &build,
-        &config,
-        &ninja_command.unwrap_or(ninja::default_exe_name()),
-    );
-}
+    let python2 = &prerequisites::locate_python2_cmd();
+    println!("Python 2 found: {:?}", python2);
 
-/// Prepares the build and returns the ninja and gn commands to use for building Skia.
-pub fn fetch_dependencies(use_system_libraries: bool, python2: &Path) -> PathBuf {
-    prerequisites::resolve_dependencies();
+    let ninja = ninja_command.unwrap_or_else(|| {
+        env::current_dir()
+            .unwrap()
+            .join("depot_tools")
+            .join(ninja::default_exe_name())
+    });
 
-    // call Skia's git-sync-deps
-
-    println!("Synchronizing Skia dependencies");
-
-    // skip if using system libraries
-    if !use_system_libraries {
+    if !offline && !build.use_system_libraries {
+        println!("Synchronizing Skia dependencies");
+        prerequisites::resolve_dependencies();
         assert!(
             Command::new(python2)
                 .arg("skia/tools/git-sync-deps")
@@ -644,10 +629,8 @@ pub fn fetch_dependencies(use_system_libraries: bool, python2: &Path) -> PathBuf
         );
     }
 
-    env::current_dir()
-        .unwrap()
-        .join("depot_tools")
-        .join(ninja::default_exe_name())
+    configure_skia(build, config, &python2, gn_command.as_deref());
+    build_skia(build, config, &ninja);
 }
 
 /// Configures Skia by calling gn
@@ -1324,7 +1307,7 @@ mod prerequisites {
     use std::path::{Path, PathBuf};
     use std::process::{Command, Stdio};
 
-    /// Resolves the full path 
+    /// Resolves the full path
     pub fn locate_python2_cmd() -> PathBuf {
         const PYTHON_CMDS: [&str; 4] = ["python", "python2", "python.exe", "python2.exe"];
         env::split_paths(&cargo::env_var("PATH").unwrap_or_default())

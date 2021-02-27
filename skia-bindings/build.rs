@@ -54,8 +54,8 @@ mod env {
     }
 
     /// The path to the Skia source directory.
-    pub fn offline_source_dir() -> Option<PathBuf> {
-        cargo::env_var("SKIA_OFFLINE_SOURCE_DIR").map(PathBuf::from)
+    pub fn source_dir() -> Option<PathBuf> {
+        cargo::env_var("SKIA_SOURCE_DIR").map(PathBuf::from)
     }
 }
 
@@ -76,22 +76,23 @@ fn main() {
     let binaries_config = skia::BinariesConfiguration::from_cargo_env(&build_config);
 
     //
-    // offline build?
+    // skip attempting to download?
     //
-    if let Some(offline_source_dir) = env::offline_source_dir() {
+    if let Some(source_dir) = env::source_dir() {
         println!("STARTING OFFLINE BUILD");
 
         let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
             &build_config,
             env::use_system_libraries(),
-            &offline_source_dir,
+            &source_dir,
         );
 
-        skia::build_offline(
+        skia::build(
             &final_configuration,
             &binaries_config,
             env::ninja_command(),
             env::gn_command(),
+            true,
         );
     } else {
         //
@@ -143,6 +144,7 @@ fn main() {
                 &binaries_config,
                 env::ninja_command(),
                 env::gn_command(),
+                false,
             );
         }
     };
