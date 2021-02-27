@@ -196,6 +196,7 @@ pub struct FinalBuildConfiguration {
 impl FinalBuildConfiguration {
     pub fn from_build_configuration(
         build: &BuildConfiguration,
+        use_system_libraries: bool,
         skia_source_dir: &Path,
     ) -> FinalBuildConfiguration {
         let features = &build.features;
@@ -212,11 +213,14 @@ impl FinalBuildConfiguration {
                 ("skia_use_gl", yes_if(features.gl)),
                 ("skia_use_egl", yes_if(features.egl)),
                 ("skia_use_x11", yes_if(features.x11)),
-                ("skia_use_system_libjpeg_turbo", no()),
-                ("skia_use_system_libpng", no()),
+                (
+                    "skia_use_system_libjpeg_turbo",
+                    yes_if(use_system_libraries),
+                ),
+                ("skia_use_system_libpng", yes_if(use_system_libraries)),
                 ("skia_use_libwebp_encode", yes_if(features.webp_encode)),
                 ("skia_use_libwebp_decode", yes_if(features.webp_decode)),
-                ("skia_use_system_zlib", no()),
+                ("skia_use_system_zlib", yes_if(use_system_libraries)),
                 ("skia_use_xps", no()),
                 ("skia_use_dng_sdk", yes_if(features.dng)),
                 ("cc", quote(&build.cc)),
@@ -249,10 +253,10 @@ impl FinalBuildConfiguration {
                 args.extend(vec![
                     ("skia_enable_skshaper", yes()),
                     ("skia_use_icu", yes()),
-                    ("skia_use_system_icu", no()),
+                    ("skia_use_system_icu", yes_if(use_system_libraries)),
                     ("skia_use_harfbuzz", yes()),
                     ("skia_pdf_subset_harfbuzz", yes()),
-                    ("skia_use_system_harfbuzz", no()),
+                    ("skia_use_system_harfbuzz", yes_if(use_system_libraries)),
                     ("skia_use_sfntly", no()),
                     ("skia_enable_skparagraph", yes()),
                     // note: currently, tests need to be enabled, because modules/skparagraph
@@ -264,7 +268,7 @@ impl FinalBuildConfiguration {
             }
 
             if features.webp_encode || features.webp_decode {
-                args.push(("skia_use_system_libwebp", no()))
+                args.push(("skia_use_system_libwebp", yes_if(use_system_libraries)))
             }
 
             let mut use_expat = true;
@@ -325,7 +329,7 @@ impl FinalBuildConfiguration {
                     // TODO: make API-level configurable?
                     args.push(("ndk_api", android::API_LEVEL.into()));
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
-                    args.push(("skia_use_system_freetype2", no()));
+                    args.push(("skia_use_system_freetype2", yes_if(use_system_libraries)));
                     args.push(("skia_enable_fontmgr_android", yes()));
                     // Enabling fontmgr_android implicitly enables expat.
                     // We make this explicit to avoid relying on an expat installed
@@ -350,7 +354,7 @@ impl FinalBuildConfiguration {
 
             if use_expat {
                 args.push(("skia_use_expat", yes()));
-                args.push(("skia_use_system_expat", no()));
+                args.push(("skia_use_system_expat", yes_if(use_system_libraries)));
             } else {
                 args.push(("skia_use_expat", no()));
             }

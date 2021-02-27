@@ -37,16 +37,26 @@ mod env {
         cargo::env_var("FORCE_SKIA_BUILD").is_some()
     }
 
+    /// A boolean specifying whether to build Skia's dependencies or not. If not, the system's
+    /// provided libraries are used.
+    pub fn use_system_libraries() -> bool {
+        cargo::env_var("SKIA_USE_SYSTEM_LIBRARIES").is_some()
+    }
+
     /// The path to the Skia source directory.
     pub fn offline_source_dir() -> Option<PathBuf> {
         cargo::env_var("SKIA_OFFLINE_SOURCE_DIR").map(PathBuf::from)
     }
 
-    /// The full path of the ninja command to run. Only relevent when SKIA_OFFLINE_SOURCE_DIR is set.
+    /// The full path of the ninja command to run. Only relevant when `SKIA_OFFLINE_SOURCE_DIR` is set.
     pub fn offline_ninja_command() -> Option<PathBuf> {
         cargo::env_var("SKIA_OFFLINE_NINJA_COMMAND").map(PathBuf::from)
     }
 
+    /// The full path of the gn command to run. As with [`offline_ninja_command`], it is only
+    /// relevant when `SKIA_OFFLINE_SOURCE_DIR` is set.
+    ///
+    /// [`offline_ninja_command`]: ./fn.offline_ninja_command.html
     pub fn offline_gn_command() -> Option<PathBuf> {
         cargo::env_var("SKIA_OFFLINE_GN_COMMAND").map(PathBuf::from)
     }
@@ -76,6 +86,7 @@ fn main() {
 
         let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
             &build_config,
+            env::use_system_libraries(),
             &offline_source_dir,
         );
 
@@ -127,6 +138,7 @@ fn main() {
             println!("STARTING A FULL BUILD");
             let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
                 &build_config,
+                env::use_system_libraries(),
                 &std::env::current_dir().unwrap().join("skia"),
             );
             skia::build(&final_configuration, &binaries_config);
