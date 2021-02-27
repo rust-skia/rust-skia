@@ -46,9 +46,9 @@ this, the executables used can be set using the following environment variables:
 
 ### Changing the Skia source directory
 
-In some cases, one may wish to provide an alternate Skia source directory, for whatever reason.
-This can be achieved by setting `SKIA_SOURCE_DIR`, which must be an absolute path to a Skia source
-directory with all dependencies.
+In some cases, one may wish to provide an alternate Skia source directory.  This can be achieved by
+setting `SKIA_SOURCE_DIR`, which must be an absolute path to a Skia source directory with all
+dependencies.
 
 ### Using system libraries
 
