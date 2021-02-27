@@ -34,7 +34,7 @@ Whenever a new version of `rust-skia` is built from the `release` branch on our 
 
 And whenever the build script detects that `skia-bindings` is built from inside a crate _and_ a prebuilt archive is available that matches the repository's hash, platform, and features, it downloads the package, unpacks it, and skips the full build step of Skia and the bindings.
 
-## Using system libraries
+### Using system libraries
 
 By default numerous libraries Skia depends upon are built in addition to Skia itself. In the event
 that this is not wanted (say, if the crate is being built as part of a package's build routine,)
