@@ -191,6 +191,9 @@ pub struct FinalBuildConfiguration {
 
     /// The binding source files to compile.
     pub binding_sources: Vec<PathBuf>,
+
+    /// Whether to use system libraries or not.
+    pub use_system_libraries: bool,
 }
 
 impl FinalBuildConfiguration {
@@ -425,6 +428,7 @@ impl FinalBuildConfiguration {
             ninja_files,
             definitions: build.definitions.clone(),
             binding_sources,
+            use_system_libraries,
         }
     }
 }
@@ -591,11 +595,11 @@ impl BinariesConfiguration {
 }
 
 /// The full build of Skia, skia-bindings, and the generation of bindings.rs.
-pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
+pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration, ninja_command: Option<PathBuf>, gn_command: Option<PathBuf>) {
     let python2 = &prerequisites::locate_python2_cmd();
     println!("Python 2 found: {:?}", python2);
-    let ninja = fetch_dependencies(&python2);
-    configure_skia(build, config, &python2, None);
+    let ninja = ninja_command.unwrap_or_else(|| fetch_dependencies(build.use_system_libraries, &python2));
+    configure_skia(build, config, &python2, gn_command.as_deref());
     build_skia(build, config, &ninja);
 }
 
@@ -606,36 +610,39 @@ pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
 pub fn build_offline(
     build: &FinalBuildConfiguration,
     config: &BinariesConfiguration,
-    ninja_command: Option<&Path>,
-    gn_command: Option<&Path>,
+    ninja_command: Option<PathBuf>,
+    gn_command: Option<PathBuf>,
 ) {
     let python2 = prerequisites::locate_python2_cmd();
-    configure_skia(&build, &config, &python2, gn_command);
+    configure_skia(&build, &config, &python2, gn_command.as_deref());
     build_skia(
         &build,
         &config,
-        ninja_command.unwrap_or(&ninja::default_exe_name()),
+        &ninja_command.unwrap_or(ninja::default_exe_name()),
     );
 }
 
-/// Prepares the build and returns the ninja command to use for building Skia.
-pub fn fetch_dependencies(python2: &Path) -> PathBuf {
+/// Prepares the build and returns the ninja and gn commands to use for building Skia.
+pub fn fetch_dependencies(use_system_libraries: bool, python2: &Path) -> PathBuf {
     prerequisites::resolve_dependencies();
 
     // call Skia's git-sync-deps
 
     println!("Synchronizing Skia dependencies");
 
-    assert!(
-        Command::new(python2)
-            .arg("skia/tools/git-sync-deps")
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .status()
-            .unwrap()
-            .success(),
-        "`skia/tools/git-sync-deps` failed"
-    );
+    // skip if using system libraries
+    if !use_system_libraries {
+        assert!(
+            Command::new(python2)
+                .arg("skia/tools/git-sync-deps")
+                .stdout(Stdio::inherit())
+                .stderr(Stdio::inherit())
+                .status()
+                .unwrap()
+                .success(),
+            "`skia/tools/git-sync-deps` failed"
+        );
+    }
 
     env::current_dir()
         .unwrap()
@@ -1309,6 +1316,7 @@ pub(crate) mod rewrite {
 mod prerequisites {
     use crate::build_support::{cargo, utils};
     use flate2::read::GzDecoder;
+    use std::env;
     use std::ffi::OsStr;
     use std::fs;
     use std::io::Cursor;
@@ -1316,22 +1324,23 @@ mod prerequisites {
     use std::path::{Path, PathBuf};
     use std::process::{Command, Stdio};
 
+    /// Resolves the full path 
     pub fn locate_python2_cmd() -> PathBuf {
-        const PYTHON_CMDS: [&str; 2] = ["python", "python2"];
-        for python in PYTHON_CMDS.as_ref() {
-            println!("Probing '{}'", python);
-            if let Some(true) = is_python_version_2(python) {
-                return python.into();
-            }
-        }
-
-        panic!(">>>>> Probing for Python 2 failed, please make sure that it's available in PATH, probed executables are: {:?} <<<<<", PYTHON_CMDS);
+        const PYTHON_CMDS: [&str; 4] = ["python", "python2", "python.exe", "python2.exe"];
+        env::split_paths(&cargo::env_var("PATH").unwrap_or_default())
+            .fold(None, |path_directory, buf|
+                path_directory.or_else(||
+                    PYTHON_CMDS.iter()
+                        .fold(None, |path, executable_name|
+                            path.or_else(||
+                                is_python_version_2(buf.join(executable_name))))))
+            .expect(&format!("Probing for Python 2 failed, please make sure that it's available in PATH, probed executables are: {:?}", PYTHON_CMDS))
     }
 
     /// Returns true if the given python executable is python version 2.
     /// or None if the executable was not found.
-    pub fn is_python_version_2(exe: impl AsRef<str>) -> Option<bool> {
-        Command::new(exe.as_ref())
+    pub fn is_python_version_2(exe: PathBuf) -> Option<PathBuf> {
+        Command::new(&exe)
             .arg("--version")
             .output()
             .map(|output| {
@@ -1345,6 +1354,7 @@ mod prerequisites {
                 str.starts_with("Python 2.")
             })
             .ok()
+            .and(Some(exe))
     }
 
     /// Resolve the skia and depot_tools subdirectory contents, either by checking out the

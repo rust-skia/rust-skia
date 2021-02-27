@@ -43,22 +43,19 @@ mod env {
         cargo::env_var("SKIA_USE_SYSTEM_LIBRARIES").is_some()
     }
 
+    /// The full path of the ninja command to run.
+    pub fn ninja_command() -> Option<PathBuf> {
+        cargo::env_var("SKIA_NINJA_COMMAND").map(PathBuf::from)
+    }
+
+    /// The full path of the gn command to run.
+    pub fn gn_command() -> Option<PathBuf> {
+        cargo::env_var("SKIA_GN_COMMAND").map(PathBuf::from)
+    }
+
     /// The path to the Skia source directory.
     pub fn offline_source_dir() -> Option<PathBuf> {
         cargo::env_var("SKIA_OFFLINE_SOURCE_DIR").map(PathBuf::from)
-    }
-
-    /// The full path of the ninja command to run. Only relevant when `SKIA_OFFLINE_SOURCE_DIR` is set.
-    pub fn offline_ninja_command() -> Option<PathBuf> {
-        cargo::env_var("SKIA_OFFLINE_NINJA_COMMAND").map(PathBuf::from)
-    }
-
-    /// The full path of the gn command to run. As with [`offline_ninja_command`], it is only
-    /// relevant when `SKIA_OFFLINE_SOURCE_DIR` is set.
-    ///
-    /// [`offline_ninja_command`]: ./fn.offline_ninja_command.html
-    pub fn offline_gn_command() -> Option<PathBuf> {
-        cargo::env_var("SKIA_OFFLINE_GN_COMMAND").map(PathBuf::from)
     }
 }
 
@@ -93,8 +90,8 @@ fn main() {
         skia::build_offline(
             &final_configuration,
             &binaries_config,
-            env::offline_ninja_command().as_deref(),
-            env::offline_gn_command().as_deref(),
+            env::ninja_command(),
+            env::gn_command(),
         );
     } else {
         //
@@ -141,7 +138,12 @@ fn main() {
                 env::use_system_libraries(),
                 &std::env::current_dir().unwrap().join("skia"),
             );
-            skia::build(&final_configuration, &binaries_config);
+            skia::build(
+                &final_configuration,
+                &binaries_config,
+                env::ninja_command(),
+                env::gn_command(),
+            );
         }
     };
 
