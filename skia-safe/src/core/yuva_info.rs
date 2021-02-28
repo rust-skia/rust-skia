@@ -257,7 +257,7 @@ impl YUVAInfo {
     }
 
     /// Returns a [YUVAInfo] that is identical to this one but with the passed [Subsampling]. If the
-    /// passed [Subsampling] is not [Subsampling::444] and this info's [PlaneConfig] is not
+    /// passed [Subsampling] is not [Subsampling::S444] and this info's [PlaneConfig] is not
     /// compatible with chroma subsampling (because Y is in the same plane as UV) then the result
     /// will be `None`.
     pub fn with_subsampling(&self, subsampling: Subsampling) -> Option<Self> {
