@@ -104,6 +104,8 @@ mod core {
     assert_impl_all!(vertices::Builder: Send, Sync);
     // core/sampling_options.rs
     assert_impl_all!(CubicResampler: Send, Sync);
+    assert_impl_all!(FilterMode: Send, Sync);
+    assert_impl_all!(sampling_options::MediumBehavior: Send, Sync);
     assert_impl_all!(SamplingOptions: Send, Sync);
     // core/yuva_info.rs
     assert_impl_all!(YUVAInfo: Send, Sync);
@@ -136,6 +138,7 @@ mod effects {
     assert_impl_all!(runtime_effect::Uniform: Send, Sync);
     assert_not_impl_any!(RuntimeEffect: Send, Sync);
     assert_impl_all!(image_filters::CropRect: Send, Sync);
+    assert_impl_all!(image_filters::Dither: Send, Sync);
 }
 
 #[cfg(feature = "gpu")]
@@ -173,6 +176,7 @@ mod gpu {
         use skia_safe::gpu::mtl::*;
         use static_assertions::*;
         assert_impl_all!(TextureInfo: Send, Sync);
+        assert_impl_all!(BackendContext: Send, Sync);
     }
 
     #[cfg(feature = "vulkan")]

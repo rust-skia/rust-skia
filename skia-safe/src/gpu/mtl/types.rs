@@ -33,7 +33,7 @@ impl TextureInfo {
     /// # Safety
     ///
     /// Unsafe because the texture provided must either be `null` or pointing to a Metal texture by
-    /// providing a pointer.
+    /// providing a raw pointer.
     ///
     /// This function retains the texture and releases it as soon TextureInfo is dropped.
     pub unsafe fn new(texture: Handle) -> Self {
