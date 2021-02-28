@@ -39,11 +39,15 @@ extern "C" SkSurface *C_SkSurface_MakeFromMTKView(GrRecordingContext *context,
 // gpu/GrDirectContext.h
 //
 
-extern "C" GrDirectContext* C_GrContext_MakeMetal(void* device, void* queue, const GrContextOptions* options) {
-    if (options) {  
-        return GrDirectContext::MakeMetal(device, queue, *options).release();    
+extern "C" GrDirectContext *C_GrContext_MakeMetal(
+    const GrMtlBackendContext *context,
+    const GrContextOptions *options)
+{
+    if (options)
+    {
+        return GrDirectContext::MakeMetal(*context, *options).release();
     }
-    return GrDirectContext::MakeMetal(device, queue).release();
+    return GrDirectContext::MakeMetal(*context).release();
 }
 
 //

@@ -79,20 +79,17 @@ impl RCHandle<GrDirectContext> {
         }
     }
 
-    /// # Safety
-    /// This function is unsafe because `device` and `queue` are untyped handles which need to exceed the
-    /// lifetime of the context returned.
     #[cfg(feature = "metal")]
-    pub unsafe fn new_metal<'a>(
-        device: *mut std::ffi::c_void,
-        queue: *mut std::ffi::c_void,
+    pub fn new_metal<'a>(
+        backend: &crate::gpu::mtl::BackendContext,
         options: impl Into<Option<&'a ContextOptions>>,
     ) -> Option<DirectContext> {
-        DirectContext::from_ptr(sb::C_GrContext_MakeMetal(
-            device,
-            queue,
-            options.into().native_ptr_or_null(),
-        ))
+        DirectContext::from_ptr(unsafe {
+            sb::C_GrContext_MakeMetal(
+                backend.native(),
+                options.into().native_ptr_or_null(),
+            )
+        })
     }
 
     #[cfg(feature = "d3d")]
