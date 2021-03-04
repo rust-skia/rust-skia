@@ -17,7 +17,6 @@
 #include "include/core/SkCubicMap.h"
 #include "include/core/SkDataTable.h"
 #include "include/core/SkDeferredDisplayListRecorder.h"
-#include "include/core/SkDrawLooper.h"
 #include "include/core/SkDrawable.h"
 #include "include/core/SkDocument.h"
 #include "include/core/SkFlattenable.h"
@@ -63,47 +62,26 @@
 // effects/
 #include "include/effects/Sk1DPathEffect.h"
 #include "include/effects/Sk2DPathEffect.h"
-#include "include/effects/SkAlphaThresholdFilter.h"
-#include "include/effects/SkArithmeticImageFilter.h"
-#include "include/effects/SkBlurDrawLooper.h"
-#include "include/effects/SkBlurImageFilter.h"
-#include "include/effects/SkColorFilterImageFilter.h"
 #include "include/effects/SkColorMatrix.h"
 #include "include/effects/SkColorMatrixFilter.h"
-#include "include/effects/SkComposeImageFilter.h"
 #include "include/effects/SkCornerPathEffect.h"
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkDiscretePathEffect.h"
-#include "include/effects/SkDisplacementMapEffect.h"
-#include "include/effects/SkDropShadowImageFilter.h"
 #include "include/effects/SkGradientShader.h"
 #include "include/effects/SkHighContrastFilter.h"
 #include "include/effects/SkImageFilters.h"
-#include "include/effects/SkImageSource.h"
-#include "include/effects/SkLayerDrawLooper.h"
-#include "include/effects/SkLightingImageFilter.h"
 #include "include/effects/SkLumaColorFilter.h"
-#include "include/effects/SkMagnifierImageFilter.h"
-#include "include/effects/SkMatrixConvolutionImageFilter.h"
-#include "include/effects/SkMergeImageFilter.h"
-#include "include/effects/SkMorphologyImageFilter.h"
-#include "include/effects/SkOffsetImageFilter.h"
 #include "include/effects/SkOpPathEffect.h"
 #include "include/effects/SkOverdrawColorFilter.h"
-#include "include/effects/SkPaintImageFilter.h"
-#include "include/effects/SkPictureImageFilter.h"
 
 #include "include/effects/SkRuntimeEffect.h"
-#include "src/sksl/SkSLByteCode.h"
 
 #include "include/effects/SkPerlinNoiseShader.h"
 #include "include/effects/SkShaderMaskFilter.h"
 #include "include/effects/SkStrokeAndFillPathEffect.h"
 #include "include/effects/SkTableColorFilter.h"
 #include "include/effects/SkTableMaskFilter.h"
-#include "include/effects/SkTileImageFilter.h"
 #include "include/effects/SkTrimPathEffect.h"
-#include "include/effects/SkXfermodeImageFilter.h"
 
 // pathops/
 #include "include/pathops/SkPathOps.h"
@@ -675,6 +653,8 @@ extern "C" SkRect C_SkCanvas_getLocalClipBounds(const SkCanvas* self) {
     return self->getLocalClipBounds();
 }
 
+/*
+
 extern "C" void C_SkCanvas_drawImageNine(SkCanvas *self, const SkImage *image, const SkIRect *center, const SkRect *dest, const SkPaint *paint) 
 {
     return self->drawImageNine(image, *center, *dest, paint);
@@ -684,6 +664,8 @@ extern "C" void C_SkCanvas_drawImageLattice(SkCanvas *self, const SkImage *image
 {
     return self->drawImageLattice(image, *lattice, *dst, paint);
 }
+
+*/
 
 extern "C" SkIRect C_SkCanvas_getDeviceClipBounds(const SkCanvas* self) {
     return self->getDeviceClipBounds();
@@ -1656,6 +1638,8 @@ extern "C" bool C_SkDeferredDisplayList_unique(const SkDeferredDisplayList* self
 // core/SkDrawLooper.h
 //
 
+/*
+
 extern "C" bool C_SkDrawLooper_asABlurShadow(const SkDrawLooper* self, SkDrawLooper::BlurShadowRec& br) {
     return self->asABlurShadow(&br);
 }
@@ -1663,6 +1647,8 @@ extern "C" bool C_SkDrawLooper_asABlurShadow(const SkDrawLooper* self, SkDrawLoo
 extern "C" SkDrawLooper* C_SkDrawLooper_Deserialize(const void* data, size_t length) {
     return SkDrawLooper::Deserialize(data, length).release();
 }
+
+*/
 
 //
 // core/SkDrawable.h
@@ -1688,9 +1674,13 @@ extern "C" SkImageFilter* C_SkImageFilter_makeWithLocalMatrix(const SkImageFilte
     return self->makeWithLocalMatrix(*matrix).release();
 }
 
+/*
+
 extern "C" SkImageFilter* C_SkImageFilter_MakeMatrixFilter(const SkMatrix* matrix, SkFilterQuality quality, SkImageFilter* input) {
     return SkImageFilter::MakeMatrixFilter(*matrix, quality, sp(input)).release();
 }
+
+*/
 
 extern "C" SkImageFilter* C_SkImageFilter_Deserialize(const void* data, size_t length) {
     return SkImageFilter::Deserialize(data, length).release();
@@ -2188,15 +2178,21 @@ extern "C" SkPathEffect* C_SkPath2DPathEffect_Make(const SkMatrix* matrix, const
 // effects/SkAlphaThresholdFilter.h
 //
 
+/*
+
 extern "C" SkImageFilter *
 C_SkAlphaThresholdFilter_Make(const SkRegion &region, SkScalar innerMin, SkScalar outerMax, SkImageFilter *input,
                               const SkImageFilter::CropRect *cropRect) {
     return SkAlphaThresholdFilter::Make(region, innerMin, outerMax, sp(input), cropRect).release();
 }
 
+*/
+
 //
 // effects/SkArithmeticImageFilter.h
 //
+
+/*
 
 extern "C" SkImageFilter *C_SkArithmeticImageFilter_Make(float k1, float k2, float k3, float k4, bool enforcePMColor,
                                                          SkImageFilter *background,
@@ -2206,9 +2202,13 @@ extern "C" SkImageFilter *C_SkArithmeticImageFilter_Make(float k1, float k2, flo
                                          sp(foreground), cropRect).release();
 }
 
+*/
+
 //
 // effects/SkBlurDrawLooper.h
 //
+
+/*
 
 extern "C" SkDrawLooper* C_SkBlurDrawLooper_Make(SkColor color, SkScalar sigma, SkScalar dx, SkScalar dy) {
     return SkBlurDrawLooper::Make(color, sigma, dx, dy).release();
@@ -2219,9 +2219,13 @@ extern "C" SkDrawLooper* C_SkBlurDrawLooper_Make2(SkColor4f color, const SkColor
     return SkBlurDrawLooper::Make(color, const_cast<SkColorSpace*>(cs), sigma, dx, dy).release();
 }
 
+*/
+
 //
 // effects/SkBlurImageFilter.h
 //
+
+/*
 
 extern "C" SkImageFilter *C_SkBlurImageFilter_Make(SkScalar sigmaX, SkScalar sigmaY, SkImageFilter *input,
                                                    const SkImageFilter::CropRect *cropRect,
@@ -2229,14 +2233,20 @@ extern "C" SkImageFilter *C_SkBlurImageFilter_Make(SkScalar sigmaX, SkScalar sig
     return SkBlurImageFilter::Make(sigmaX, sigmaY, sp(input), cropRect, tileMode).release();
 }
 
+*/
+
 //
 // effects/SkColorFilterImageFilter.h
 //
+
+/*
 
 extern "C" SkImageFilter *C_SkColorFilterImageFilter_Make(SkColorFilter *cf, SkImageFilter *input,
                                                           const SkImageFilter::CropRect *cropRect) {
     return SkColorFilterImageFilter::Make(sp(cf), sp(input), cropRect).release();
 }
+
+*/
 
 //
 // effects/SkColorMatrix.h
@@ -2277,9 +2287,11 @@ extern "C" SkColorFilter *C_SkColorMatrixFilter_MakeLightingFilter(SkColor mul, 
 // effects/SkComposeImageFilter.h
 //
 
+/*
 extern "C" SkImageFilter *C_SkComposeImageFilter_Make(SkImageFilter *outer, SkImageFilter *inner) {
     return SkComposeImageFilter::Make(sp(outer), sp(inner)).release();
 }
+*/
 
 //
 // effects/SkCornerPathEffect.h
@@ -2309,6 +2321,8 @@ extern "C" SkPathEffect* C_SkDiscretePathEffect_Make(SkScalar segLength, SkScala
 // effects/SkDisplacementMapEffect.h
 //
 
+/*
+
 extern "C" SkImageFilter *C_SkDisplacementMapEffect_Make(SkDisplacementMapEffect::ChannelSelectorType xChannelSelector,
                                                          SkDisplacementMapEffect::ChannelSelectorType yChannelSelector,
                                                          SkScalar scale, SkImageFilter *displacement,
@@ -2319,9 +2333,13 @@ extern "C" SkImageFilter *C_SkDisplacementMapEffect_Make(SkDisplacementMapEffect
                                          sp(color), cropRect).release();
 }
 
+*/
+
 //
 // effects/SkDropShadowImageFilter.h
 //
+
+/*
 
 extern "C" SkImageFilter *C_SkDropShadowImageFilter_Make(SkScalar dx, SkScalar dy, SkScalar sigmaX, SkScalar sigmaY,
                                                          SkColor color, SkDropShadowImageFilter::ShadowMode shadowMode,
@@ -2330,6 +2348,8 @@ extern "C" SkImageFilter *C_SkDropShadowImageFilter_Make(SkScalar dx, SkScalar d
     return SkDropShadowImageFilter::Make(dx, dy, sigmaX, sigmaY, color, shadowMode, sp(input),
                                          cropRect).release();
 }
+
+*/
 
 //
 // effects/SkHighContrastFilter.h
@@ -2343,6 +2363,8 @@ extern "C" SkColorFilter* C_SkHighContrastFilter_Make(const SkHighContrastConfig
 // effects/SkImageSource.h
 //
 
+/*
+
 extern "C" SkImageFilter *C_SkImageSource_Make(SkImage *image) {
     return SkImageSource::Make(sp(image)).release();
 }
@@ -2353,9 +2375,13 @@ C_SkImageSource_Make2(SkImage* image, const SkRect &srcRect, const SkRect &dstRe
     return SkImageSource::Make(sp(image), srcRect, dstRect, filterQuality).release();
 }
 
+*/
+
 //
 // effects/SkLayerDrawLooper.h
 //
+
+/*
 
 extern "C" void C_SkLayerDrawLooper_Types(SkLayerDrawLooper *) {}
 
@@ -2367,9 +2393,13 @@ extern "C" SkDrawLooper* C_SkLayerDrawLooper_Builder_detach(SkLayerDrawLooper::B
     return self->detach().release();
 }
 
+*/
+
 //
 // effects/SkLightingImageFilter.h
 //
+
+/*
 
 extern "C" SkImageFilter *
 C_SkLightingImageFilter_MakeDistantLitDiffuse(const SkPoint3 &direction, SkColor lightColor, SkScalar surfaceScale,
@@ -2425,6 +2455,8 @@ C_SkLightingImageFilter_MakeSpotLitSpecular(const SkPoint3 &location,
                                                       cropRect).release();
 }
 
+*/
+
 //
 // effects/SkLumaColorFilter.h
 //
@@ -2437,15 +2469,21 @@ extern "C" SkColorFilter* C_SkLumaColorFilter_Make() {
 // effects/SkMagnifierImageFilter.h
 //
 
+/*
+
 extern "C" SkImageFilter *
 C_SkMagnifierImageFilter_Make(const SkRect &srcRect, SkScalar inset, SkImageFilter *input,
                               const SkImageFilter::CropRect *cropRect) {
     return SkMagnifierImageFilter::Make(srcRect, inset, sp(input), cropRect).release();
 }
 
+*/
+
 //
 // effects/SkMatrixConvolutionImageFilter.h
 //
+
+/*
 
 extern "C" SkImageFilter *
 C_SkMatrixConvolutionImageFilter_Make(const SkISize &kernelSize,
@@ -2461,9 +2499,13 @@ C_SkMatrixConvolutionImageFilter_Make(const SkISize &kernelSize,
                                                 sp(input), cropRect).release();
 }
 
+*/
+
 //
 // effects/SkMergeImageFilter.h
 //
+
+/*
 
 extern "C" SkImageFilter *
 C_SkMergeImageFilter_Make(SkImageFilter *const filters[], int count, const SkImageFilter::CropRect *cropRect) {
@@ -2476,9 +2518,13 @@ C_SkMergeImageFilter_Make(SkImageFilter *const filters[], int count, const SkIma
     return imageFilter;
 }
 
+*/
+
 //
 // effects/SkMorphologyImageFilter.h
 //
+
+/*
 
 extern "C" SkImageFilter *C_SkDilateImageFilter_Make(int radiusX, int radiusY, SkImageFilter *input,
                                                      const SkImageFilter::CropRect *cropRect) {
@@ -2490,14 +2536,20 @@ extern "C" SkImageFilter *C_SkErodeImageFilter_Make(int radiusX, int radiusY, Sk
     return SkErodeImageFilter::Make(radiusX, radiusY, sp(input), cropRect).release();
 }
 
+*/
+
 //
 // effects/SkOffsetImageFilter.h
 //
+
+/*
 
 extern "C" SkImageFilter *C_SkOffsetImageFilter_Make(SkScalar dx, SkScalar dy, SkImageFilter *input,
                                                      const SkImageFilter::CropRect *cropRect) {
     return SkOffsetImageFilter::Make(dx, dy, sp(input), cropRect).release();
 }
+
+*/
 
 //
 // effects/SkOpPathEffect.h
@@ -2535,13 +2587,19 @@ extern "C" SkColorFilter* C_SkOverdrawColorFilter_MakeWithSkColors(const SkColor
 // effects/SkPaintImageFilter.h
 //
 
+/*
+
 extern "C" SkImageFilter *C_SkPaintImageFilter_Make(const SkPaint &paint, const SkImageFilter::CropRect *cropRect) {
     return SkPaintImageFilter::Make(paint, cropRect).release();
 }
 
+*/
+
 //
 // effects/SkPictureImageFilter.h
 //
+
+/*
 
 extern "C" SkImageFilter *C_SkPictureImageFilter_Make(SkPicture *picture, const SkRect *cropRect) {
     if (cropRect) {
@@ -2551,17 +2609,23 @@ extern "C" SkImageFilter *C_SkPictureImageFilter_Make(SkPicture *picture, const 
     }
 }
 
+*/
+
 //
 // effects/SkRuntimeEffect.h
 //
 
 extern "C" {
 
+/*
+
 SkRuntimeEffect* C_SkRuntimeEffect_Make(const SkString &sksl, SkString* error) {
     auto r = SkRuntimeEffect::Make(sksl);
     *error = std::get<1>(r);
     return std::get<0>(r).release();
 }
+
+*/
 
 SkShader *C_SkRuntimeEffect_makeShader(SkRuntimeEffect *self, SkData *inputs, SkShader **children, size_t childCount,
                                        const SkMatrix *localMatrix, bool isOpaque) {
@@ -2629,9 +2693,13 @@ extern "C" SkColorFilter* C_SkTableColorFilter_MakeARGB(const uint8_t tableA[256
 // effects/SkTileImageFilter.h
 //
 
+/*
+
 extern "C" SkImageFilter *C_SkTileImageFilter_Make(const SkRect &src, const SkRect &dst, SkImageFilter *input) {
     return SkTileImageFilter::Make(src, dst, sp(input)).release();
 }
+
+*/
 
 //
 // effects/SkTrimPathEffect.h
@@ -2645,11 +2713,15 @@ extern "C" SkPathEffect *C_SkTrimPathEffect_Make(SkScalar startT, SkScalar stopT
 // effects/SkXfermodeImageFilter.h
 //
 
+/*
+
 extern "C" SkImageFilter *
 C_SkXfermodeImageFilter_Make(SkBlendMode mode, SkImageFilter *background, SkImageFilter *foreground,
                              const SkImageFilter::CropRect *cropRect) {
     return SkXfermodeImageFilter::Make(mode, sp(background), sp(foreground), cropRect).release();
 }
+
+*/
 
 //
 // effects/SkImageFilters.h
@@ -2719,8 +2791,9 @@ SkImageFilter *C_SkImageFilters_DropShadowOnly(SkScalar dx, SkScalar dy,
 }
 
 SkImageFilter *C_SkImageFilters_Image(SkImage *image, const SkRect *srcRect,
-                                      const SkRect *dstRect, SkFilterQuality filterQuality) {
-    return SkImageFilters::Image(sp(image), *srcRect, *dstRect, filterQuality).release();
+                                      const SkRect *dstRect, const SkSamplingOptions *sampling)
+{
+    return SkImageFilters::Image(sp(image), *srcRect, *dstRect, *sampling).release();
 }
 
 SkImageFilter *C_SkImageFilters_Magnifier(const SkRect *srcRect, SkScalar inset,
@@ -2740,10 +2813,10 @@ SkImageFilter *C_SkImageFilters_MatrixConvolution(const SkISize *kernelSize,
 }
 
 SkImageFilter *C_SkImageFilters_MatrixTransform(const SkMatrix *matrix,
-                                                SkFilterQuality filterQuality,
-                                                SkImageFilter *input) {
-
-    return SkImageFilters::MatrixTransform(*matrix, filterQuality, sp(input)).release();
+                                                const SkSamplingOptions *sampling,
+                                                SkImageFilter *input)
+{
+    return SkImageFilters::MatrixTransform(*matrix, *sampling, sp(input)).release();
 }
 
 SkImageFilter *C_SkImageFilters_Merge(SkImageFilter *const filters[], int count,
@@ -2782,11 +2855,13 @@ SkImageFilter *C_SkImageFilters_Tile(const SkRect *src, const SkRect *dst,
     return SkImageFilters::Tile(*src, *dst, sp(input)).release();
 }
 
+/*
 SkImageFilter *C_SkImageFilters_Xfermode(SkBlendMode blendMode, SkImageFilter *background,
                                          SkImageFilter *foreground,
                                          const SkImageFilters::CropRect *cropRect) {
     return SkImageFilters::Xfermode(blendMode, sp(background), sp(foreground), *cropRect).release();
 }
+*/
 
 SkImageFilter *C_SkImageFilters_Dilate(SkScalar radiusX, SkScalar radiusY, SkImageFilter *input,
                                     const SkImageFilters::CropRect *cropRect) {
