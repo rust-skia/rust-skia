@@ -127,8 +127,10 @@ impl RCHandle<SkSurface> {
         })
     }
 
+    #[allow(clippy::missing_safety_doc)]
+    #[allow(clippy::too_many_arguments)]
     #[cfg(feature = "metal")]
-    pub fn from_ca_metal_layer(
+    pub unsafe fn from_ca_metal_layer(
         context: &mut gpu::RecordingContext,
         layer: gpu::mtl::Handle,
         origin: gpu::SurfaceOrigin,
@@ -136,21 +138,18 @@ impl RCHandle<SkSurface> {
         color_type: crate::ColorType,
         color_space: impl Into<Option<crate::ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
-    ) -> Option<(Self, gpu::mtl::Handle)> {
-        let mut drawable = ptr::null();
-        Self::from_ptr(unsafe {
-            sb::C_SkSurface_MakeFromCAMetalLayer(
-                context.native_mut(),
-                layer,
-                origin,
-                sample_count.into().unwrap_or(0).try_into().unwrap(),
-                color_type.into_native(),
-                color_space.into().into_ptr_or_null(),
-                surface_props.native_ptr_or_null(),
-                &mut drawable,
-            )
-        })
-        .map(|surface| (surface, drawable))
+        drawable: *mut gpu::mtl::Handle,
+    ) -> Option<Self> {
+        Self::from_ptr(sb::C_SkSurface_MakeFromCAMetalLayer(
+            context.native_mut(),
+            layer,
+            origin,
+            sample_count.into().unwrap_or(0).try_into().unwrap(),
+            color_type.into_native(),
+            color_space.into().into_ptr_or_null(),
+            surface_props.native_ptr_or_null(),
+            drawable,
+        ))
     }
 
     #[cfg(feature = "metal")]
