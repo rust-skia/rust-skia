@@ -559,23 +559,57 @@ impl Bitmap {
         }
     }
 
+    /// Returns pixel at (x, y) as unpremultiplied color.
+    /// Returns black with alpha if [ColorType] is [ColorType::Alpha8]
+    ///
+    /// Input is not validated: out of bounds values of x or y trigger an assert().
+    ///
+    /// Fails if [ColorType] is [ColorType::Unknown] or pixel address is `nullptr`.
+    ///
+    /// [ColorSpace] in [ImageInfo] is ignored. Some color precision may be lost in the
+    /// conversion to unpremultiplied color; original pixel data may have additional
+    /// precision.
     pub fn get_color(&self, p: impl Into<IPoint>) -> Color {
         self.pixmap().get_color(p)
     }
 
+    /// Look up the pixel at (x,y) and return its alpha component, normalized to [0..1]. This is
+    /// roughly equivalent to [getColor().a()], but can be more efficient (and more precise if the
+    /// pixels store more than 8 bits per component).
     pub fn get_alpha_f(&self, p: impl Into<IPoint>) -> f32 {
         self.pixmap().get_alpha_f(p)
     }
 
+    /// Returns pixel address at (x, y).
+    ///
+    /// Input is not validated: out of bounds values of x or y, or kUnknown_SkColorType, trigger an
+    /// assert(). Returns `nullptr` if [ColorType] is [ColorType::Unknown], or [PixelRef] is
+    /// `nullptr`.
+    ///
+    /// Performs a lookup of pixel size; for better performance, call one of: `get_addr8()`,
+    /// `get_addr16()`, or `get_addr32()`.
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn get_addr(&self, p: impl Into<IPoint>) -> *const ffi::c_void {
         let p = p.into();
         self.native().getAddr(p.x, p.y)
     }
 
-    // TODO: get_addr_32()?
-    // TODO: get_addr_16()?
+    // TODO: get_addr_32(), get_addr_16(), get_addr_8()
 
+    /// Shares [PixelRef] with dst. Pixels are not copied; [Bitmap] and dst point to the same
+    /// pixels; dst [Self::bounds()] are set to the intersection of subset and the original
+    /// [Self::bounds()].
+    ///
+    /// Subset may be larger than [Self::bounds()]. Any area outside of [Self::bounds()] is ignored.
+    ///
+    /// Any contents of dst are discarded.
+    ///
+    /// Return `false` if:
+    /// - dst is `nullptr`
+    /// - [PixelRef] is `nullptr`
+    /// - subset does not intersect [Self::bounds()]
+    ///
+    /// example: https://fiddle.skia.org/c/@Bitmap_extractSubset
     pub fn extract_subset(&self, dst: &mut Self, subset: impl AsRef<IRect>) -> bool {
         unsafe {
             self.native()
@@ -583,6 +617,27 @@ impl Bitmap {
         }
     }
 
+    /// Copies a [crate::Rect] of pixels from [Bitmap] to `dst_pixels`. Copy starts at (`src_x`,
+    /// `src_y`), and does not exceed [Bitmap] `(width(), height())`.
+    ///
+    /// `dst_info` specifies width, height, [ColorType], [AlphaType], and [ColorSpace] of
+    /// destination.
+    /// `dst_row_bytes` specifics the gap from one destination row to the next.
+    /// Returns `true` if pixels are copied. Returns false if:
+    /// - `dst_info` has no address
+    /// - `dst_row_bytes` is less than `dst_info.min_row_bytes()`
+    /// - [PixelRef] is `nullptr`
+    ///
+    /// Pixels are copied only if pixel conversion is possible. If [Self::color_type()] is
+    /// [ColorType::Gray8], or [ColorType::Alpha8]; `dst_info.color_type()` must match.
+    /// If [Self::color_type()] is [ColorType::Gray8], `dst_info.color_space()` must match.
+    /// If [Self::alpha_type()] is [AlphaType::Opaque], `dst_info.alpha_type()` must
+    /// match. If [Self::color_space()] is `nullptr`, `dst_info.color_space()` must match. Returns
+    /// `false` if pixel conversion is not possible.
+    ///
+    /// `src_x` and `src_y` may be negative to copy only top or left of source. Returns
+    /// `false` if [Self::width()] or [Self::height()] is zero or negative.
+    /// Returns `false` if abs(src_x) >= [Self::width()], or if abs(src_y) >= [Self::height()].
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn read_pixels(
         &self,
@@ -599,6 +654,13 @@ impl Bitmap {
     // TODO: read_pixels(Pixmap)
     // TODO: write_pixels(Pixmap)
 
+    /// Sets dst to alpha described by pixels. Returns `false` if `dst` cannot be written to or
+    /// `dst` pixels cannot be allocated.
+    ///
+    /// If `paint` is not `None` and contains [crate::MaskFilter], [crate::MaskFilter] generates
+    /// mask alpha from [Bitmap]. Uses HeapAllocator to reserve memory for `dst` [PixelRef]. Returns
+    /// offset to top-left position for `dst` for alignment with [Bitmap]; (0, 0) unless
+    /// [crate::MaskFilter] generates mask.
     pub fn extract_alpha(&self, dst: &mut Self, paint: Option<&Paint>) -> Option<IPoint> {
         let mut offset = IPoint::default();
         unsafe {
@@ -612,6 +674,13 @@ impl Bitmap {
         .if_true_some(offset)
     }
 
+    /// Copies [Bitmap] pixel address, row bytes, and [ImageInfo] to pixmap, if address is
+    /// available, and returns [Some(Pixmap)]. If pixel address is not available, return `None` and
+    /// leave pixmap unchanged.
+    ///
+    /// pixmap contents become invalid on any future change to [Bitmap].
+    ///
+    /// example: https://fiddle.skia.org/c/@Bitmap_peekPixels
     pub fn peek_pixels(&self) -> Option<Borrows<Pixmap>> {
         let mut pixmap = Pixmap::default();
         unsafe { self.native().peekPixels(pixmap.native_mut()) }
