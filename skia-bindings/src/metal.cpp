@@ -73,7 +73,6 @@ extern "C" void C_GrMtlBackendContext_Destruct(GrMtlBackendContext* self) {
 
 extern "C" void C_GrMtlTextureInfo_Construct(GrMtlTextureInfo* unintialized, const void* texture) {
     new (unintialized) GrMtlTextureInfo();
-    unintialized->fTexture = sk_cf_obj<const void*>();
     unintialized->fTexture.retain(texture);
 }
 

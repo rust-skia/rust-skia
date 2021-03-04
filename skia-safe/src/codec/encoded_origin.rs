@@ -4,8 +4,8 @@ use skia_bindings as sb;
 use skia_bindings::SkEncodedOrigin;
 
 // Even though possible, we are not using the original SkEncodedOrigin enum, because of the
-// `to_matrix()` implementation below, which needs to an `ISize` and so can not be implemented in
-// the skia-bindings crate.
+// `to_matrix()` implementation below, which needs an `ISize` and so can not be implemented in the
+// skia-bindings crate.
 
 /// These values match the orientation www.exif.org/Exif2-2.PDF.
 #[repr(i32)]

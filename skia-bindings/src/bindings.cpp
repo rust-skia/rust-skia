@@ -1257,26 +1257,6 @@ extern "C" bool C_SkTypeface_LocalizedStrings_next(SkTypeface::LocalizedStrings*
 }
 
 //
-// core/SkYUVAIndex.h
-//
-
-/*
-extern "C" bool C_SkYUVAIndex_AreValidIndices(const SkYUVAIndex yuvaIndices[4], int* numPlanes) {
-    return SkYUVAIndex::AreValidIndices(yuvaIndices, numPlanes);
-}
-*/
-
-//
-// core/SkYUVASizeInfo.h
-//
-
-/*
-extern "C" bool C_SkYUVASizeInfo_equals(const SkYUVASizeInfo* l, const SkYUVASizeInfo* r) {
-    return *l == *r;
-}
-*/
-
-//
 // core/SkFlattenable.h
 //
 
@@ -2117,7 +2097,7 @@ extern "C" bool C_SkYUVAPixmaps_isValid(const SkYUVAPixmaps* self) {
 // effects/
 //
 
-extern "C" void C_Effects_Types(SkTableMaskFilter *, SkImageFilters::Dither *) {}
+extern "C" void C_Effects_Types(SkTableMaskFilter *) {}
 
 //
 // effects/SkGradientShader.h
