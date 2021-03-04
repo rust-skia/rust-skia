@@ -4,7 +4,7 @@ use skia_bindings::{SkCubicResampler, SkSamplingOptions, SkSamplingOptions_Mediu
 
 pub use skia_bindings::SkFilterMode as FilterMode;
 
-#[deprecated(since = "0.0.0", note = "Use FilterMode")]
+#[deprecated(since = "0.38.0", note = "Use FilterMode")]
 pub type SamplingMode = FilterMode;
 
 pub use skia_bindings::SkMipmapMode as MipmapMode;
@@ -33,7 +33,7 @@ pub struct CubicResampler {
 impl NativeTransmutable<SkCubicResampler> for CubicResampler {}
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-#[deprecated(since = "0.0.0", note = "Use SamplingOptions")]
+#[deprecated(since = "0.38.0", note = "Use SamplingOptions")]
 pub struct FilterOptions {
     pub sampling: FilterMode,
     pub mipmap: MipmapMode,

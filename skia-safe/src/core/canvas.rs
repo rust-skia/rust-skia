@@ -267,7 +267,7 @@ impl Canvas {
         unsafe { self.native().getProps(sp.native_mut()) }.if_true_some(sp)
     }
 
-    #[deprecated(since = "0.0.0", note = "Replace usage with DirectContext::flush()")]
+    #[deprecated(since = "0.38.0", note = "Replace usage with DirectContext::flush()")]
     pub fn flush(&mut self) -> &mut Self {
         unsafe {
             self.native_mut().flush();
@@ -864,7 +864,7 @@ impl Canvas {
         self
     }
 
-    #[deprecated(since = "0.0.0")]
+    #[deprecated(since = "0.38.0")]
     pub fn draw_bitmap(
         &mut self,
         bitmap: &Bitmap,
@@ -883,7 +883,7 @@ impl Canvas {
         self
     }
 
-    #[deprecated(since = "0.0.0")]
+    #[deprecated(since = "0.38.0")]
     pub fn draw_bitmap_rect(
         &mut self,
         bitmap: &Bitmap,
@@ -1082,7 +1082,7 @@ impl Canvas {
         self.local_to_device().to_m33()
     }
 
-    #[deprecated(since = "0.0.0")]
+    #[deprecated(since = "0.38.0")]
     pub fn total_matrix(&self) -> Matrix {
         let mut matrix = Matrix::default();
         unsafe { sb::C_SkCanvas_getTotalMatrix(self.native(), matrix.native_mut()) };
@@ -1122,7 +1122,7 @@ impl QuickReject<Path> for Canvas {
 }
 
 pub trait SetMatrix {
-    #[deprecated(since = "0.0.0", note = "Use M44 version")]
+    #[deprecated(since = "0.38.0", note = "Use M44 version")]
     fn set_matrix(&mut self, matrix: &Matrix) -> &mut Self;
 }
 
@@ -1134,7 +1134,7 @@ impl SetMatrix for Canvas {
 }
 
 pub trait DrawImageNine {
-    #[deprecated(since = "0.0.0", note = "Pass FilterMode explicitly.")]
+    #[deprecated(since = "0.38.0", note = "Pass FilterMode explicitly.")]
     fn draw_image_nine(
         &mut self,
         image: impl AsRef<Image>,
@@ -1167,7 +1167,7 @@ impl DrawImageNine for Canvas {
 }
 
 pub trait DrawImageLattice {
-    #[deprecated(since = "0.0.0", note = "Pass FilterMode explicitly.")]
+    #[deprecated(since = "0.38.0", note = "Pass FilterMode explicitly.")]
     fn draw_image_lattice(
         &mut self,
         image: impl AsRef<Image>,

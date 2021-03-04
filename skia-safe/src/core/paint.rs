@@ -107,12 +107,12 @@ impl Handle<SkPaint> {
         self
     }
 
-    #[deprecated(since = "0.0.0")]
+    #[deprecated(since = "0.38.0")]
     pub fn filter_quality(&self) -> FilterQuality {
         unsafe { sb::C_SkPaint_getFilterQuality(self.native()) }
     }
 
-    #[deprecated(since = "0.0.0")]
+    #[deprecated(since = "0.38.0")]
     pub fn set_filter_quality(&mut self, quality: FilterQuality) -> &mut Self {
         unsafe { self.native_mut().setFilterQuality(quality) }
         self
