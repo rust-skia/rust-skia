@@ -24,32 +24,27 @@ impl NativeDrop for SkRuntimeEffect_Uniform {
 
 impl Uniform {
     pub fn name(&self) -> &str {
-        self.native().fName.as_str()
+        self.native().name.as_str()
     }
 
     pub fn offset(&self) -> usize {
-        self.native().fOffset
+        self.native().offset
     }
 
     pub fn ty(&self) -> uniform::Type {
-        self.native().fType
+        self.native().type_
     }
 
     pub fn count(&self) -> i32 {
-        self.native().fCount
+        self.native().count
     }
 
     pub fn flags(&self) -> uniform::Flags {
-        uniform::Flags::from_bits(self.native().fFlags).unwrap()
+        uniform::Flags::from_bits(self.native().flags).unwrap()
     }
 
     pub fn marker(&self) -> u32 {
-        self.native().fMarker
-    }
-
-    #[cfg(feature = "gpu")]
-    pub fn gpu_type(&self) -> crate::private::gpu::SLType {
-        self.native().fGPUType
+        self.native().marker
     }
 
     pub fn is_array(&self) -> bool {
@@ -92,11 +87,11 @@ impl NativeDrop for SkRuntimeEffect_Varying {
 
 impl Varying {
     pub fn name(&self) -> &str {
-        self.native().fName.as_str()
+        self.native().name.as_str()
     }
 
     pub fn width(&self) -> i32 {
-        self.native().fWidth
+        self.native().width
     }
 }
 

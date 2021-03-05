@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, Image};
 use crate::{Data, EncodedImageFormat, EncodedOrigin, IRect, ISize, ImageInfo, Pixmap};
 use ffi::CStr;
 use skia_bindings as sb;
@@ -6,10 +6,6 @@ use skia_bindings::{SkCodec, SkCodec_Options, SkRefCntBase};
 use std::{ffi, ptr};
 
 pub use sb::SkCodec_Result as Result;
-#[test]
-fn test_codec_result_naming() {
-    let _ = Result::IncompleteInput;
-}
 
 // TODO: implement Display
 
@@ -20,24 +16,18 @@ pub fn result_to_string(result: Result) -> &'static str {
 }
 
 pub use sb::SkCodec_SelectionPolicy as SelectionPolicy;
-#[test]
-fn test_selection_policy_naming() {
-    let _ = SelectionPolicy::PreferStillImage;
-}
 
 pub use sb::SkCodec_ZeroInitialized as ZeroInitialized;
-#[test]
-fn test_zero_initialized_naming() {
-    let _ = ZeroInitialized::Yes;
-}
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct Options {
     pub zero_initialized: ZeroInitialized,
     pub subset: IRect,
     pub frame_index: usize,
     pub prior_frame: usize,
 }
+
+impl NativeTransmutable<SkCodec_Options> for Options {}
 
 pub type Codec = RCHandle<SkCodec>;
 
@@ -47,7 +37,7 @@ impl NativeRefCountedBase for SkCodec {
     type Base = SkRefCntBase;
 }
 
-impl RCHandle<SkCodec> {
+impl Codec {
     // TODO: wrap MakeFromStream
     // TODO: wrap from_data with SkPngChunkReader
 
@@ -149,6 +139,27 @@ impl RCHandle<SkCodec> {
         }
     }
 
+    pub fn get_image<'a>(
+        &mut self,
+        info: impl Into<Option<ImageInfo>>,
+        options: impl Into<Option<&'a Options>>,
+    ) -> std::result::Result<Image, Result> {
+        let info = info.into().unwrap_or_else(|| self.info());
+        let options: Option<&Options> = options.into();
+        let mut result = Result::InternalError;
+        match Image::from_ptr(unsafe {
+            sb::C_SkCodec_getImage(
+                self.native_mut(),
+                info.native(),
+                options.native_ptr_or_null(),
+                &mut result,
+            )
+        }) {
+            Some(image) => Ok(image),
+            None => Err(result),
+        }
+    }
+
     // TODO: queryYUVAInfo
     // TODO: getYUVAPlanes
     // TODO: startIncrementalDecode
@@ -167,4 +178,22 @@ impl RCHandle<SkCodec> {
     // TODO: RepetitionCountInfinite
     // TODO: getRepetitionCount
     // TODO: Register
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Options, Result, SelectionPolicy, ZeroInitialized};
+    use crate::prelude::*;
+
+    #[test]
+    fn test_layout() {
+        Options::test_layout();
+    }
+
+    #[test]
+    fn test_naming() {
+        let _ = Result::IncompleteInput;
+        let _ = SelectionPolicy::PreferStillImage;
+        let _ = ZeroInitialized::Yes;
+    }
 }

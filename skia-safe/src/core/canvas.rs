@@ -751,15 +751,7 @@ impl Canvas {
         paint: Option<&Paint>,
     ) -> &mut Self {
         let left_top = left_top.into();
-        unsafe {
-            self.native_mut().drawImage(
-                image.as_ref().native(),
-                left_top.x,
-                left_top.y,
-                paint.native_ptr_or_null(),
-            )
-        }
-        self
+        self.draw_image_with_sampling_options(image, left_top, SamplingOptions::default(), paint)
     }
 
     pub fn draw_image_rect(
@@ -769,25 +761,13 @@ impl Canvas {
         dst: impl AsRef<Rect>,
         paint: &Paint,
     ) -> &mut Self {
-        match src {
-            Some((src, constraint)) => unsafe {
-                self.native_mut().drawImageRect(
-                    image.as_ref().native(),
-                    src.native(),
-                    dst.as_ref().native(),
-                    paint.native(),
-                    constraint,
-                )
-            },
-            None => unsafe {
-                self.native_mut().drawImageRect2(
-                    image.as_ref().native(),
-                    dst.as_ref().native(),
-                    paint.native(),
-                )
-            },
-        }
-        self
+        self.draw_image_rect_with_sampling_options(
+            image,
+            src,
+            dst,
+            SamplingOptions::default(),
+            paint,
+        )
     }
 
     pub fn draw_image_with_sampling_options(
@@ -799,7 +779,7 @@ impl Canvas {
     ) -> &mut Self {
         let left_top = left_top.into();
         unsafe {
-            self.native_mut().drawImage1(
+            self.native_mut().drawImage(
                 image.as_ref().native(),
                 left_top.x,
                 left_top.y,
@@ -813,16 +793,15 @@ impl Canvas {
     pub fn draw_image_rect_with_sampling_options(
         &mut self,
         image: impl AsRef<Image>,
-        src: Option<&Rect>,
+        src: Option<(&Rect, SrcRectConstraint)>,
         dst: impl AsRef<Rect>,
         sampling: impl Into<SamplingOptions>,
         paint: &Paint,
-        constraint: SrcRectConstraint,
     ) -> &mut Self {
         let sampling = sampling.into();
         match src {
-            Some(src) => unsafe {
-                self.native_mut().drawImageRect3(
+            Some((src, constraint)) => unsafe {
+                self.native_mut().drawImageRect(
                     image.as_ref().native(),
                     src.native(),
                     dst.as_ref().native(),
@@ -832,12 +811,11 @@ impl Canvas {
                 )
             },
             None => unsafe {
-                self.native_mut().drawImageRect4(
+                self.native_mut().drawImageRect1(
                     image.as_ref().native(),
                     dst.as_ref().native(),
                     sampling.native(),
                     paint.native(),
-                    constraint,
                 )
             },
         }
@@ -860,57 +838,6 @@ impl Canvas {
                 filter_mode,
                 paint.native_ptr_or_null(),
             )
-        }
-        self
-    }
-
-    #[deprecated(since = "0.38.0")]
-    pub fn draw_bitmap(
-        &mut self,
-        bitmap: &Bitmap,
-        left_top: impl Into<Point>,
-        paint: Option<&Paint>,
-    ) -> &mut Self {
-        let left_top = left_top.into();
-        unsafe {
-            self.native_mut().drawBitmap(
-                bitmap.native(),
-                left_top.x,
-                left_top.y,
-                paint.native_ptr_or_null(),
-            )
-        }
-        self
-    }
-
-    #[deprecated(since = "0.38.0")]
-    pub fn draw_bitmap_rect(
-        &mut self,
-        bitmap: &Bitmap,
-        src: Option<&Rect>,
-        dst: impl AsRef<Rect>,
-        paint: &Paint,
-        constraint: impl Into<Option<SrcRectConstraint>>,
-    ) -> &mut Self {
-        let constraint = constraint.into().unwrap_or(SrcRectConstraint::Strict);
-        match src {
-            Some(src) => unsafe {
-                self.native_mut().drawBitmapRect(
-                    bitmap.native(),
-                    src.as_ref().native(),
-                    dst.as_ref().native(),
-                    paint.native(),
-                    constraint,
-                )
-            },
-            None => unsafe {
-                self.native_mut().drawBitmapRect2(
-                    bitmap.native(),
-                    dst.as_ref().native(),
-                    paint.native(),
-                    constraint,
-                )
-            },
         }
         self
     }
@@ -1133,71 +1060,6 @@ impl SetMatrix for Canvas {
     }
 }
 
-pub trait DrawImageNine {
-    #[deprecated(since = "0.38.0", note = "Pass FilterMode explicitly.")]
-    fn draw_image_nine(
-        &mut self,
-        image: impl AsRef<Image>,
-        center: impl AsRef<IRect>,
-        dst: impl AsRef<Rect>,
-        paint: Option<&Paint>,
-    ) -> &mut Self;
-}
-
-impl DrawImageNine for Canvas {
-    fn draw_image_nine(
-        &mut self,
-        image: impl AsRef<Image>,
-        center: impl AsRef<IRect>,
-        dst: impl AsRef<Rect>,
-        paint: Option<&Paint>,
-    ) -> &mut Self {
-        unsafe {
-            // Call the legacy function through a wrapper to avoid computing the filter mode.
-            sb::C_SkCanvas_drawImageNine(
-                self.native_mut(),
-                image.as_ref().native(),
-                center.as_ref().native(),
-                dst.as_ref().native(),
-                paint.native_ptr_or_null(),
-            )
-        }
-        self
-    }
-}
-
-pub trait DrawImageLattice {
-    #[deprecated(since = "0.38.0", note = "Pass FilterMode explicitly.")]
-    fn draw_image_lattice(
-        &mut self,
-        image: impl AsRef<Image>,
-        lattice: &Lattice,
-        dst: impl AsRef<Rect>,
-        paint: Option<&Paint>,
-    ) -> &mut Self;
-}
-
-impl DrawImageLattice for Canvas {
-    fn draw_image_lattice(
-        &mut self,
-        image: impl AsRef<Image>,
-        lattice: &Lattice,
-        dst: impl AsRef<Rect>,
-        paint: Option<&Paint>,
-    ) -> &mut Self {
-        unsafe {
-            sb::C_SkCanvas_drawImageLattice(
-                self.native_mut(),
-                image.as_ref().native(),
-                &lattice.native().native,
-                dst.as_ref().native(),
-                paint.native_ptr_or_null(),
-            )
-        }
-        self
-    }
-}
-
 //
 // Lattice
 //
@@ -1349,7 +1211,7 @@ mod tests {
             canvas.clear(Color::RED);
         }
 
-        // TODO: equals to 0xff0000ff on macOS, but why? Endianess should be the same.
+        // TODO: equals to 0xff0000ff on macOS, but why? Endianness should be the same.
         // assert_eq!(0xffff0000, pixels[0]);
     }
 

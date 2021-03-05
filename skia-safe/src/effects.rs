@@ -6,9 +6,6 @@ pub use _2d_path_effect::*;
 
 pub mod alpha_threshold_filter;
 pub mod arithmetic_image_filter;
-#[deprecated(since = "0.33.0", note = "No longer supported")]
-#[allow(deprecated)]
-pub mod blur_draw_looper;
 pub mod blur_image_filter;
 pub mod color_filter_image_filter;
 pub mod color_matrix;
@@ -19,15 +16,10 @@ pub mod corner_path_effect;
 pub mod dash_path_effect;
 pub mod discrete_path_effect;
 pub mod displacement_map_effect;
-pub mod drop_shadow_image_filter;
 pub mod gradient_shader;
 pub mod high_contrast_filter;
 pub use high_contrast_filter::{high_contrast_config, HighContrastConfig};
 pub mod image_filters;
-pub mod image_source;
-#[deprecated(since = "0.33.0", note = "No longer supported")]
-#[allow(deprecated)]
-pub mod layer_draw_looper;
 pub mod lighting_image_filter;
 pub mod luma_color_filter;
 pub mod magnifier_image_filter;
@@ -54,4 +46,3 @@ pub mod table_color_filter;
 pub mod table_mask_filter;
 pub mod tile_image_filter;
 pub mod trim_path_effect;
-pub mod xfer_mode_image_filter;

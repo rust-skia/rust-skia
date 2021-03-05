@@ -62,7 +62,6 @@ mod core {
     assert_impl_all!(image::CubicResampler: Send, Sync);
     assert_impl_all!(image::BitDepth: Send, Sync);
 
-    assert_impl_all!(image_filter::CropRect: Send, Sync);
     assert_impl_all!(ImageFilter: Send, Sync);
     assert_impl_all!(ImageGenerator: Send, Sync);
     assert_impl_all!(ColorInfo: Send, Sync);

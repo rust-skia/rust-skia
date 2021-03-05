@@ -130,6 +130,14 @@ extern "C" SkEncodedImageFormat C_SkCodec_getEncodedFormat(const SkCodec* self) 
     return self->getEncodedFormat();
 }
 
+extern "C" SkImage* C_SkCodec_getImage(
+    SkCodec *self, const SkImageInfo *info, const SkCodec::Options *opts, SkCodec::Result* result) {
+
+    auto r = self->getImage(*info, opts);
+    *result = std::get<1>(r);
+    return std::get<0>(r).release();
+}
+
 //
 // codec/SkEncodedOrigin.h
 //
@@ -2617,15 +2625,11 @@ extern "C" SkImageFilter *C_SkPictureImageFilter_Make(SkPicture *picture, const 
 
 extern "C" {
 
-/*
-
 SkRuntimeEffect* C_SkRuntimeEffect_Make(const SkString &sksl, SkString* error) {
     auto r = SkRuntimeEffect::Make(sksl);
-    *error = std::get<1>(r);
-    return std::get<0>(r).release();
+    *error = r.errorText;
+    return r.effect.release();
 }
-
-*/
 
 SkShader *C_SkRuntimeEffect_makeShader(SkRuntimeEffect *self, SkData *inputs, SkShader **children, size_t childCount,
                                        const SkMatrix *localMatrix, bool isOpaque) {

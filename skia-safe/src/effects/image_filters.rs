@@ -1,7 +1,7 @@
-use crate::{prelude::*, Shader};
+use crate::{prelude::*, CubicResampler, SamplingOptions, Shader};
 use crate::{
-    scalar, BlendMode, Color, ColorChannel, ColorFilter, FilterQuality, IPoint, IRect, ISize,
-    Image, ImageFilter, Matrix, Paint, Picture, Point3, Rect, Region, TileMode, Vector,
+    scalar, BlendMode, Color, ColorChannel, ColorFilter, IPoint, IRect, ISize, Image, ImageFilter,
+    Matrix, Paint, Picture, Point3, Rect, Region, TileMode, Vector,
 };
 use skia_bindings as sb;
 use skia_bindings::{SkImageFilter, SkImageFilters_CropRect};
@@ -19,6 +19,14 @@ impl CropRect {
         right: scalar::INFINITY,
         bottom: scalar::INFINITY,
     });
+
+    pub fn rect(&self) -> Option<Rect> {
+        if *self == Self::NO_CROP_RECT {
+            None
+        } else {
+            Some(self.0)
+        }
+    }
 }
 
 impl Default for CropRect {
@@ -229,20 +237,26 @@ pub fn image<'a>(
     image: impl Into<Image>,
     src_rect: impl Into<Option<&'a Rect>>,
     dst_rect: impl Into<Option<&'a Rect>>,
-    filter_quality: impl Into<Option<FilterQuality>>,
+    sampling_options: impl Into<Option<SamplingOptions>>,
 ) -> Option<ImageFilter> {
     let image = image.into();
     let image_rect = Rect::from_iwh(image.width(), image.height());
     let src_rect = src_rect.into().unwrap_or(&image_rect);
     let dst_rect = dst_rect.into().unwrap_or(&image_rect);
-    let filter_quality = filter_quality.into().unwrap_or(FilterQuality::High);
+    let sampling_options: SamplingOptions = sampling_options.into().unwrap_or_else(|| {
+        CubicResampler {
+            b: 1.0 / 3.0,
+            c: 1.0 / 3.0,
+        }
+        .into()
+    });
 
     ImageFilter::from_ptr(unsafe {
         sb::C_SkImageFilters_Image(
             image.into_ptr(),
             src_rect.as_ref().native(),
             dst_rect.as_ref().native(),
-            filter_quality,
+            sampling_options.native(),
         )
     })
 }
@@ -297,13 +311,13 @@ pub fn matrix_convolution(
 
 pub fn matrix_transform(
     matrix: &Matrix,
-    filter_quality: FilterQuality,
+    sampling_options: impl Into<SamplingOptions>,
     input: impl Into<Option<ImageFilter>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
         sb::C_SkImageFilters_MatrixTransform(
             matrix.native(),
-            filter_quality,
+            sampling_options.into().native(),
             input.into().into_ptr_or_null(),
         )
     })
@@ -386,23 +400,6 @@ pub fn tile(
             src.as_ref().native(),
             dst.as_ref().native(),
             input.into().into_ptr_or_null(),
-        )
-    })
-}
-
-#[deprecated(since = "0.37.0", note = "Prefer the more idiomatic blend function")]
-pub fn xfermode(
-    blend_mode: BlendMode,
-    background: impl Into<Option<ImageFilter>>,
-    foreground: impl Into<Option<ImageFilter>>,
-    crop_rect: impl Into<CropRect>,
-) -> Option<ImageFilter> {
-    ImageFilter::from_ptr(unsafe {
-        sb::C_SkImageFilters_Xfermode(
-            blend_mode,
-            background.into().into_ptr_or_null(),
-            foreground.into().into_ptr_or_null(),
-            crop_rect.into().native(),
         )
     })
 }
