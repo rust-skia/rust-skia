@@ -1,8 +1,8 @@
-use crate::prelude;
-use crate::prelude::{NativeAccess, NativeDrop, NativePartialEq};
+// Can't use crate::prelude::* here, because we declare Handle in this module, too.
+use crate::prelude::{self, NativeAccess, NativeDrop, NativePartialEq};
 use skia_bindings as sb;
 use skia_bindings::GrMtlTextureInfo;
-use std::{ffi, ptr};
+use std::ptr;
 
 pub use skia_bindings::GrMTLHandle as Handle;
 pub use skia_bindings::GrMTLPixelFormat as PixelFormat;
@@ -29,24 +29,28 @@ impl Default for TextureInfo {
     }
 }
 
-impl prelude::Handle<GrMtlTextureInfo> {
+impl TextureInfo {
     /// # Safety
     ///
-    /// Unsafe because the texture provided must either be null or pointing to a Metal texture.
-    /// This function consumes the texture and releases it as soon TextureInfo is dropped.
+    /// Unsafe because the texture provided must either be `null` or pointing to a Metal texture by
+    /// providing a raw pointer.
     ///
-    /// If the texture needs to be used otherwise, it's reference count must be increased before
-    /// calling this function.
-    pub unsafe fn new(texture: *const ffi::c_void) -> Self {
+    /// This function retains the texture and releases it as soon TextureInfo is dropped.
+    pub unsafe fn new(texture: Handle) -> Self {
         Self::construct(|ti| sb::C_GrMtlTextureInfo_Construct(ti, texture))
     }
 
-    pub fn texture(&self) -> *const ffi::c_void {
+    pub fn texture(&self) -> Handle {
         self.native().fTexture.fObject
     }
 }
 
-#[test]
-fn empty_texture_info() {
-    drop(TextureInfo::default());
+#[cfg(test)]
+mod tests {
+    use super::TextureInfo;
+
+    #[test]
+    fn default_texture_info() {
+        drop(TextureInfo::default());
+    }
 }

@@ -22,7 +22,7 @@ impl NativeDrop for SkRuntimeEffect_Uniform {
     }
 }
 
-impl Handle<SkRuntimeEffect_Uniform> {
+impl Uniform {
     pub fn name(&self) -> &str {
         self.native().fName.as_str()
     }
@@ -90,7 +90,7 @@ impl NativeDrop for SkRuntimeEffect_Varying {
     }
 }
 
-impl Handle<SkRuntimeEffect_Varying> {
+impl Varying {
     pub fn name(&self) -> &str {
         self.native().fName.as_str()
     }
@@ -118,7 +118,7 @@ pub fn new(sksl: impl AsRef<str>) -> Result<RuntimeEffect, String> {
     }
 }
 
-impl RCHandle<SkRuntimeEffect> {
+impl RuntimeEffect {
     pub fn make_shader<'a>(
         &mut self,
         inputs: impl Into<Data>,

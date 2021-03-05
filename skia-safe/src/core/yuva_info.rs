@@ -1,5 +1,5 @@
 use super::image_info;
-use crate::{prelude::*, EncodedOrigin, ISize, YUVAIndex};
+use crate::{prelude::*, EncodedOrigin, ISize, Matrix};
 use skia_bindings as sb;
 use skia_bindings::{SkYUVAInfo, SkYUVAInfo_Subsampling};
 
@@ -22,11 +22,12 @@ impl NativeDrop for SkYUVAInfo {
 /// mapped to the YUVA channels in the order specified, e.g. for kY_UV Y is in channel 0 of plane
 /// 0, U is in channel 0 of plane 1, and V is in channel 1 of plane 1. Channel ordering
 /// within a pixmap/texture given the channels it contains:
-/// A:               0:A
-/// Luminance/Gray:  0:Gray
-/// RG               0:R,    1:G
-/// RGB              0:R,    1:G, 2:B
-/// RGBA             0:R,    1:G, 2:B, 3:A
+/// A:                       0:A
+/// Luminance/Gray:          0:Gray
+/// Luminance/Gray + Alpha:  0:Gray, 1:A
+/// RG                       0:R,    1:G
+/// RGB                      0:R,    1:G, 2:B
+/// RGBA                     0:R,    1:G, 2:B, 3:A
 pub use sb::SkYUVAInfo_PlaneConfig as PlaneConfig;
 
 /// UV subsampling is also specified in the enum value names using J:a:b notation (e.g. 4:2:0 is
@@ -51,6 +52,33 @@ impl NativeTransmutable<SkYUVAInfo_Subsampling> for Subsampling {}
 ///
 /// Currently only centered siting is supported but will expand to support additional sitings.
 pub use sb::SkYUVAInfo_Siting as Siting;
+
+/// Ratio of Y/A values to U/V values in x and y.
+pub fn subsampling_factors(subsampling: Subsampling) -> (i32, i32) {
+    let mut factors: [i32; 2] = Default::default();
+    unsafe { sb::C_SkYUVAInfo_SubsamplingFactors(subsampling.into_native(), &mut factors[0]) };
+    (factors[0], factors[1])
+}
+
+/// `SubsamplingFactors(Subsampling)` if `plane_index` refers to a U/V plane and otherwise `(1, 1)`
+/// if inputs are valid. Invalid inputs consist of incompatible [PlaneConfig] [Subsampling]
+/// `plane_index` combinations. `(0, 0)` is returned for invalid inputs.
+pub fn plane_subsampling_factors(
+    plane: PlaneConfig,
+    subsampling: Subsampling,
+    plane_index: usize,
+) -> (i32, i32) {
+    let mut factors: [i32; 2] = Default::default();
+    unsafe {
+        sb::C_SkYUVAInfo_PlaneSubsamplingFactors(
+            plane,
+            subsampling.into_native(),
+            plane_index.try_into().unwrap(),
+            &mut factors[0],
+        )
+    };
+    (factors[0], factors[1])
+}
 
 /// Given image dimensions, a planer configuration, subsampling, and origin, determine the expected
 /// size of each plane. Returns the expected planes. The input image dimensions are as displayed
@@ -93,20 +121,6 @@ pub fn num_channels_in_plane(config: PlaneConfig, i: usize) -> Option<usize> {
             .try_into()
             .unwrap()
     })
-}
-
-/// Given a [PlaneConfig] and a set of channel flags for each plane, convert to [YUVAIndex]
-/// representation. Fails if channel flags aren't valid for the [PlaneConfig] (i.e. don't have
-/// enough channels in a plane).
-pub fn get_yuva_indices(
-    config: PlaneConfig,
-    channel_flags: &[u32; YUVAInfo::MAX_PLANES],
-) -> Option<[YUVAIndex; YUVAIndex::INDEX_COUNT]> {
-    let mut indices: [YUVAIndex; YUVAIndex::INDEX_COUNT] = Default::default();
-    unsafe {
-        sb::C_SkYUVAInfo_GetYUVAIndices(config, channel_flags.as_ptr(), indices[0].native_mut())
-    }
-    .if_true_some(indices)
 }
 
 /// Does the [PlaneConfig] have alpha values?
@@ -166,6 +180,10 @@ impl YUVAInfo {
         Subsampling::from_native_c(self.native().fSubsampling)
     }
 
+    pub fn plane_subsampling_factors(&self, plane_index: usize) -> (i32, i32) {
+        plane_subsampling_factors(self.plane_config(), self.subsampling(), plane_index)
+    }
+
     /// Dimensions of the full resolution image (after planes have been oriented to how the image
     /// is displayed as indicated by fOrigin).
     pub fn dimensions(&self) -> ISize {
@@ -193,6 +211,10 @@ impl YUVAInfo {
         EncodedOrigin::from_native_c(self.native().fOrigin)
     }
 
+    pub fn origin_matrix(&self) -> Matrix {
+        self.origin().to_matrix((self.width(), self.height()))
+    }
+
     pub fn has_alpha(&self) -> bool {
         has_alpha(self.plane_config())
     }
@@ -209,7 +231,7 @@ impl YUVAInfo {
     }
 
     /// Given a per-plane row bytes, determine size to allocate for all planes. Optionally retrieves
-    /// the per-plane byte sizes in planeSizes if not [None]. If total size overflows will return
+    /// the per-plane byte sizes in planeSizes if not `None`. If total size overflows will return
     /// `SIZE_MAX` and set all planeSizes to `SIZE_MAX`.
     pub fn compute_total_bytes(
         &self,
@@ -234,11 +256,24 @@ impl YUVAInfo {
         num_channels_in_plane(self.plane_config(), i)
     }
 
-    /// Given a set of channel flags for each plane, converts `plane_config(&self)` to `YUVAIndex`
-    /// representation. Fails if the channel flags aren't valid for the [PlaneConfig] (i.e. don't
-    /// have enough channels in a plane).
-    pub fn to_yuva_indices(&self, channel_flags: &[u32; 4]) -> Option<[YUVAIndex; 4]> {
-        get_yuva_indices(self.plane_config(), channel_flags)
+    /// Returns a [YUVAInfo] that is identical to this one but with the passed [Subsampling]. If the
+    /// passed [Subsampling] is not [Subsampling::S444] and this info's [PlaneConfig] is not
+    /// compatible with chroma subsampling (because Y is in the same plane as UV) then the result
+    /// will be `None`.
+    pub fn with_subsampling(&self, subsampling: Subsampling) -> Option<Self> {
+        Self::try_construct(|info| unsafe {
+            sb::C_SkYUVAInfo_makeSubsampling(self.native(), subsampling.into_native(), info);
+            Self::native_is_valid(&*info)
+        })
+    }
+
+    /// Returns a [YUVAInfo] that is identical to this one but with the passed dimensions. If the
+    /// passed dimensions is empty then the result will be `None`.
+    pub fn with_dimensions(&self, dimensions: impl Into<ISize>) -> Option<Self> {
+        Self::try_construct(|info| unsafe {
+            sb::C_SkYUVAInfo_makeDimensions(self.native(), dimensions.into().native(), info);
+            Self::native_is_valid(&*info)
+        })
     }
 
     pub(crate) fn native_is_valid(info: &SkYUVAInfo) -> bool {

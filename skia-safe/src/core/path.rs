@@ -6,8 +6,8 @@ use crate::{
 };
 use skia_bindings as sb;
 use skia_bindings::{SkPath, SkPath_Iter, SkPath_RawIter};
-use std::marker::PhantomData;
 use std::mem::forget;
+use std::{marker::PhantomData, ptr};
 
 #[deprecated(since = "0.25.0", note = "use PathDirection")]
 pub use path_types::PathDirection as Direction;
@@ -962,21 +962,34 @@ impl Handle<SkPath> {
         unsafe { self.native().contains(p.x, p.y) }
     }
 
-    pub fn dump_as_data(&self, force_close: bool, dump_as_hex: bool) -> Data {
+    pub fn dump_as_data(&self, dump_as_hex: bool) -> Data {
         let mut stream = DynamicMemoryWStream::new();
         unsafe {
             self.native()
-                .dump(stream.native_mut().base_mut(), force_close, dump_as_hex);
+                .dump(stream.native_mut().base_mut(), dump_as_hex);
         }
         stream.detach_as_data()
     }
 
     pub fn dump(&self) {
-        unsafe { self.native().dump1() }
+        unsafe { self.native().dump(ptr::null_mut(), false) }
     }
 
     pub fn dump_hex(&self) {
-        unsafe { self.native().dumpHex() }
+        unsafe { self.native().dump(ptr::null_mut(), true) }
+    }
+
+    pub fn dump_arrays_as_data(&self, dump_as_hex: bool) -> Data {
+        let mut stream = DynamicMemoryWStream::new();
+        unsafe {
+            self.native()
+                .dumpArrays(stream.native_mut().base_mut(), dump_as_hex);
+        }
+        stream.detach_as_data()
+    }
+
+    pub fn dump_arrays(&self) {
+        unsafe { self.native().dumpArrays(ptr::null_mut(), false) }
     }
 
     // TODO: writeToMemory()?

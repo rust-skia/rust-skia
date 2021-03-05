@@ -3,7 +3,8 @@ use skia_safe::{
     color_filters, corner_path_effect, dash_path_effect, discrete_path_effect, gradient_shader,
     line_2d_path_effect, paint, path_1d_path_effect, path_2d_path_effect, perlin_noise_shader,
     scalar, shaders, table_color_filter, AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color,
-    Font, MaskFilter, Matrix, Paint, Path, PathEffect, Point, Rect, TextBlob, TileMode, Typeface,
+    Font, MaskFilter, Matrix, Paint, Path, PathEffect, Point, Rect, SamplingOptions, TextBlob,
+    TileMode, Typeface,
 };
 use std::path;
 
@@ -220,7 +221,11 @@ fn draw_bitmap_shader(canvas: &mut Canvas) {
     let mut matrix = Matrix::default();
     matrix.set_scale((0.75, 0.75), None).pre_rotate(30.0, None);
     let paint = &mut Paint::default();
-    paint.set_shader(image.to_shader((TileMode::Repeat, TileMode::Repeat), &matrix));
+    paint.set_shader(image.to_shader(
+        (TileMode::Repeat, TileMode::Repeat),
+        SamplingOptions::default(),
+        &matrix,
+    ));
     canvas.draw_paint(paint);
 }
 

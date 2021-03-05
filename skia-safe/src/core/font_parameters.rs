@@ -22,6 +22,16 @@ pub mod variation {
     }
 
     impl Axis {
+        pub const fn new(tag: FourByteTag, min: f32, def: f32, max: f32, hidden: bool) -> Self {
+            Axis {
+                tag,
+                min,
+                def,
+                max,
+                flags: if hidden { 1 } else { 0 },
+            }
+        }
+
         pub fn is_hidden(&self) -> bool {
             unsafe { sb::C_SkFontParameters_Variation_Axis_isHidden(self.native()) }
         }

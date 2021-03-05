@@ -1,21 +1,22 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
-use crate::prelude::*;
 use crate::{
-    scalar, Bitmap, BlendMode, ClipOp, Color, Color4f, Data, Font, IPoint, IRect, ISize, Image,
-    ImageFilter, ImageInfo, Matrix, Paint, Path, Picture, Point, QuickReject, RRect, Rect, Region,
-    Shader, Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices, M44,
+    prelude::*, scalar, u8cpu, Bitmap, BlendMode, ClipOp, Color, Color4f, Data, Drawable,
+    FilterMode, Font, IPoint, IRect, ISize, Image, ImageFilter, ImageInfo, Matrix, Paint, Path,
+    Picture, Pixmap, Point, QuickReject, RRect, Rect, Region, SamplingOptions, Shader, Surface,
+    SurfaceProps, TextBlob, TextEncoding, Vector, Vertices, M44,
 };
-use crate::{u8cpu, Drawable, Pixmap};
 use skia_bindings as sb;
 use skia_bindings::{
     SkAutoCanvasRestore, SkCanvas, SkCanvas_SaveLayerRec, SkImageFilter, SkPaint, SkRect,
 };
-use std::convert::TryInto;
-use std::ffi::CString;
-use std::marker::PhantomData;
-use std::ops::{Deref, DerefMut};
-use std::{ptr, slice};
+use std::{
+    convert::TryInto,
+    ffi::CString,
+    marker::PhantomData,
+    ops::{Deref, DerefMut},
+    ptr, slice,
+};
 
 pub use lattice::Lattice;
 
@@ -266,6 +267,7 @@ impl Canvas {
         unsafe { self.native().getProps(sp.native_mut()) }.if_true_some(sp)
     }
 
+    #[deprecated(since = "0.38.0", note = "Replace usage with DirectContext::flush()")]
     pub fn flush(&mut self) -> &mut Self {
         unsafe {
             self.native_mut().flush();
@@ -490,7 +492,7 @@ impl Canvas {
         self
     }
 
-    pub fn set_matrix(&mut self, matrix: &Matrix) -> &mut Self {
+    pub fn set_matrix(&mut self, matrix: &M44) -> &mut Self {
         unsafe { self.native_mut().setMatrix(matrix.native()) }
         self
     }
@@ -788,11 +790,66 @@ impl Canvas {
         self
     }
 
+    pub fn draw_image_with_sampling_options(
+        &mut self,
+        image: impl AsRef<Image>,
+        left_top: impl Into<Point>,
+        sampling: impl Into<SamplingOptions>,
+        paint: Option<&Paint>,
+    ) -> &mut Self {
+        let left_top = left_top.into();
+        unsafe {
+            self.native_mut().drawImage1(
+                image.as_ref().native(),
+                left_top.x,
+                left_top.y,
+                sampling.into().native(),
+                paint.native_ptr_or_null(),
+            )
+        }
+        self
+    }
+
+    pub fn draw_image_rect_with_sampling_options(
+        &mut self,
+        image: impl AsRef<Image>,
+        src: Option<&Rect>,
+        dst: impl AsRef<Rect>,
+        sampling: impl Into<SamplingOptions>,
+        paint: &Paint,
+        constraint: SrcRectConstraint,
+    ) -> &mut Self {
+        let sampling = sampling.into();
+        match src {
+            Some(src) => unsafe {
+                self.native_mut().drawImageRect3(
+                    image.as_ref().native(),
+                    src.native(),
+                    dst.as_ref().native(),
+                    sampling.native(),
+                    paint.native(),
+                    constraint,
+                )
+            },
+            None => unsafe {
+                self.native_mut().drawImageRect4(
+                    image.as_ref().native(),
+                    dst.as_ref().native(),
+                    sampling.native(),
+                    paint.native(),
+                    constraint,
+                )
+            },
+        }
+        self
+    }
+
     pub fn draw_image_nine(
         &mut self,
         image: impl AsRef<Image>,
         center: impl AsRef<IRect>,
         dst: impl AsRef<Rect>,
+        filter_mode: FilterMode,
         paint: Option<&Paint>,
     ) -> &mut Self {
         unsafe {
@@ -800,12 +857,14 @@ impl Canvas {
                 image.as_ref().native(),
                 center.as_ref().native(),
                 dst.as_ref().native(),
+                filter_mode,
                 paint.native_ptr_or_null(),
             )
         }
         self
     }
 
+    #[deprecated(since = "0.38.0")]
     pub fn draw_bitmap(
         &mut self,
         bitmap: &Bitmap,
@@ -824,6 +883,7 @@ impl Canvas {
         self
     }
 
+    #[deprecated(since = "0.38.0")]
     pub fn draw_bitmap_rect(
         &mut self,
         bitmap: &Bitmap,
@@ -859,6 +919,7 @@ impl Canvas {
         &mut self,
         image: impl AsRef<Image>,
         lattice: &Lattice,
+        filter: FilterMode,
         dst: impl AsRef<Rect>,
         paint: Option<&Paint>,
     ) -> &mut Self {
@@ -867,6 +928,7 @@ impl Canvas {
                 image.as_ref().native(),
                 &lattice.native().native,
                 dst.as_ref().native(),
+                filter,
                 paint.native_ptr_or_null(),
             )
         }
@@ -1016,10 +1078,13 @@ impl Canvas {
         M44::construct(|m| unsafe { sb::C_SkCanvas_getLocalToDevice(self.native(), m) })
     }
 
+    pub fn local_to_device_as_3x3(&self) -> Matrix {
+        self.local_to_device().to_m33()
+    }
+
+    #[deprecated(since = "0.38.0")]
     pub fn total_matrix(&self) -> Matrix {
         let mut matrix = Matrix::default();
-        // TODO: why is Matrix not safe to return from getTotalMatrix()
-        // testcase `test_total_matrix` below crashes with an access violation.
         unsafe { sb::C_SkCanvas_getTotalMatrix(self.native(), matrix.native_mut()) };
         matrix
     }
@@ -1053,6 +1118,83 @@ impl QuickReject<Rect> for Canvas {
 impl QuickReject<Path> for Canvas {
     fn quick_reject(&self, other: &Path) -> bool {
         unsafe { self.native().quickReject1(other.native()) }
+    }
+}
+
+pub trait SetMatrix {
+    #[deprecated(since = "0.38.0", note = "Use M44 version")]
+    fn set_matrix(&mut self, matrix: &Matrix) -> &mut Self;
+}
+
+impl SetMatrix for Canvas {
+    fn set_matrix(&mut self, matrix: &Matrix) -> &mut Self {
+        unsafe { self.native_mut().setMatrix1(matrix.native()) }
+        self
+    }
+}
+
+pub trait DrawImageNine {
+    #[deprecated(since = "0.38.0", note = "Pass FilterMode explicitly.")]
+    fn draw_image_nine(
+        &mut self,
+        image: impl AsRef<Image>,
+        center: impl AsRef<IRect>,
+        dst: impl AsRef<Rect>,
+        paint: Option<&Paint>,
+    ) -> &mut Self;
+}
+
+impl DrawImageNine for Canvas {
+    fn draw_image_nine(
+        &mut self,
+        image: impl AsRef<Image>,
+        center: impl AsRef<IRect>,
+        dst: impl AsRef<Rect>,
+        paint: Option<&Paint>,
+    ) -> &mut Self {
+        unsafe {
+            // Call the legacy function through a wrapper to avoid computing the filter mode.
+            sb::C_SkCanvas_drawImageNine(
+                self.native_mut(),
+                image.as_ref().native(),
+                center.as_ref().native(),
+                dst.as_ref().native(),
+                paint.native_ptr_or_null(),
+            )
+        }
+        self
+    }
+}
+
+pub trait DrawImageLattice {
+    #[deprecated(since = "0.38.0", note = "Pass FilterMode explicitly.")]
+    fn draw_image_lattice(
+        &mut self,
+        image: impl AsRef<Image>,
+        lattice: &Lattice,
+        dst: impl AsRef<Rect>,
+        paint: Option<&Paint>,
+    ) -> &mut Self;
+}
+
+impl DrawImageLattice for Canvas {
+    fn draw_image_lattice(
+        &mut self,
+        image: impl AsRef<Image>,
+        lattice: &Lattice,
+        dst: impl AsRef<Rect>,
+        paint: Option<&Paint>,
+    ) -> &mut Self {
+        unsafe {
+            sb::C_SkCanvas_drawImageLattice(
+                self.native_mut(),
+                image.as_ref().native(),
+                &lattice.native().native,
+                dst.as_ref().native(),
+                paint.native_ptr_or_null(),
+            )
+        }
+        self
     }
 }
 
@@ -1180,7 +1322,7 @@ impl AutoCanvasRestore {
 mod tests {
     use crate::{
         canvas::SaveLayerFlags, canvas::SaveLayerRec, AlphaType, Canvas, ClipOp, Color, ColorType,
-        ImageInfo, Matrix, OwnedCanvas, Rect,
+        ImageInfo, OwnedCanvas, Rect,
     };
 
     #[test]
@@ -1225,16 +1367,6 @@ mod tests {
                 .flags(SaveLayerFlags::PRESERVE_LCD_TEXT)
                 .bounds(&rect);
         }
-    }
-
-    #[test]
-    fn test_total_matrix() {
-        let mut c = Canvas::new((2, 2), None).unwrap();
-        let total = c.total_matrix();
-        assert_eq!(Matrix::default(), total);
-        c.rotate(0.1, None);
-        let total = c.total_matrix();
-        assert_ne!(Matrix::default(), total);
     }
 
     #[test]
