@@ -386,11 +386,7 @@ impl Handle<SkImageInfo> {
 
     /// Returns `true` if the `row_bytes` are valid for the [ImageInfo] _and_ such an image would
     /// fit into the given `pixels`.
-    pub(crate) fn valid_pixels<P>(
-        &self,
-        row_bytes: usize,
-        pixels: &[P],
-    ) -> bool {
+    pub(crate) fn valid_pixels<P>(&self, row_bytes: usize, pixels: &[P]) -> bool {
         if !self.valid_row_bytes(row_bytes) {
             return false;
         }
