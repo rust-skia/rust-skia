@@ -6,10 +6,6 @@ use std::ops::{Index, IndexMut, Mul};
 use std::slice;
 
 pub use skia_bindings::SkApplyPerspectiveClip as ApplyPerspectiveClip;
-#[test]
-fn test_apply_perspective_clip_naming() {
-    let _ = ApplyPerspectiveClip::Yes;
-}
 
 bitflags! {
     // m85: On Windows the SkMatrix_TypeMask is defined as i32,
@@ -29,10 +25,6 @@ impl TypeMask {
 }
 
 pub use skia_bindings::SkMatrix_ScaleToFit as ScaleToFit;
-#[test]
-fn test_matrix_scale_to_fit_naming() {
-    let _ = ScaleToFit::End;
-}
 
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
@@ -42,10 +34,6 @@ pub struct Matrix {
 }
 
 impl NativeTransmutable<SkMatrix> for Matrix {}
-#[test]
-fn test_matrix_layout() {
-    Matrix::test_layout()
-}
 
 impl PartialEq for Matrix {
     fn eq(&self, rhs: &Self) -> bool {
@@ -140,41 +128,55 @@ impl Matrix {
     }
 
     #[deprecated(since = "0.33.0", note = "use Matrix::scale()")]
-    pub fn new_scale(scale: (scalar, scalar)) -> Matrix {
+    pub fn new_scale(scale: (scalar, scalar)) -> Self {
         Self::scale(scale)
     }
 
-    pub fn scale((sx, sy): (scalar, scalar)) -> Matrix {
-        let mut m = Matrix::new();
+    pub fn scale((sx, sy): (scalar, scalar)) -> Self {
+        let mut m = Self::new();
         m.set_scale((sx, sy), None);
         m
     }
 
     #[deprecated(since = "0.33.0", note = "use Matrix::translate()")]
-    pub fn new_trans(d: impl Into<Vector>) -> Matrix {
+    pub fn new_trans(d: impl Into<Vector>) -> Self {
         Self::translate(d)
     }
 
-    pub fn translate(d: impl Into<Vector>) -> Matrix {
-        let mut m = Matrix::new();
+    pub fn translate(d: impl Into<Vector>) -> Self {
+        let mut m = Self::new();
         m.set_translate(d);
         m
     }
 
-    pub fn rotate_deg(deg: scalar) -> Matrix {
-        let mut m = Matrix::new();
+    pub fn rotate_deg(deg: scalar) -> Self {
+        let mut m = Self::new();
         m.set_rotate(deg, None);
         m
     }
 
-    pub fn rotate_deg_pivot(deg: scalar, pivot: impl Into<Point>) -> Matrix {
-        let mut m = Matrix::new();
+    pub fn rotate_deg_pivot(deg: scalar, pivot: impl Into<Point>) -> Self {
+        let mut m = Self::new();
         m.set_rotate(deg, pivot.into());
         m
     }
 
-    pub fn rotate_rad(rad: scalar) -> Matrix {
+    pub fn rotate_rad(rad: scalar) -> Self {
         Self::rotate_deg(scalar_::radians_to_degrees(rad))
+    }
+
+    pub fn skew((kx, ky): (scalar, scalar)) -> Self {
+        let mut m = Self::new();
+        m.set_skew((kx, ky), None);
+        m
+    }
+
+    pub fn rect_to_rect(
+        src: impl AsRef<Rect>,
+        dst: impl AsRef<Rect>,
+        scale_to_fit: impl Into<Option<ScaleToFit>>,
+    ) -> Option<Self> {
+        Self::from_rect_to_rect(src, dst, scale_to_fit.into().unwrap_or(ScaleToFit::Fill))
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -188,8 +190,8 @@ impl Matrix {
         pers_0: scalar,
         pers_1: scalar,
         pers_2: scalar,
-    ) -> Matrix {
-        let mut m = Matrix::new();
+    ) -> Self {
+        let mut m = Self::new();
         m.set_all(
             scale_x, skew_x, trans_x, skew_y, scale_y, trans_y, pers_0, pers_1, pers_2,
         );
@@ -411,7 +413,7 @@ impl Matrix {
         self
     }
 
-    pub fn set_concat(&mut self, a: &Matrix, b: &Matrix) -> &mut Self {
+    pub fn set_concat(&mut self, a: &Self, b: &Self) -> &mut Self {
         unsafe {
             self.native_mut().setConcat(a.native(), b.native());
         }
@@ -458,7 +460,7 @@ impl Matrix {
         self
     }
 
-    pub fn pre_concat(&mut self, other: &Matrix) -> &mut Self {
+    pub fn pre_concat(&mut self, other: &Self) -> &mut Self {
         unsafe {
             self.native_mut().preConcat(other.native());
         }
@@ -540,8 +542,8 @@ impl Matrix {
         src: impl AsRef<Rect>,
         dst: impl AsRef<Rect>,
         stf: ScaleToFit,
-    ) -> Option<Matrix> {
-        let mut m = Matrix::new_identity();
+    ) -> Option<Self> {
+        let mut m = Self::new_identity();
         m.set_rect_to_rect(src, dst, stf).if_true_some(m)
     }
 
@@ -816,29 +818,50 @@ impl IndexSet for Matrix {}
 
 pub const IDENTITY: Matrix = Matrix::new_identity();
 
-#[test]
-fn test_get_set_trait_compilation() {
-    let mut m = Matrix::new_identity();
-    let _x = m.get(AffineMember::ScaleX);
-    m.set(AffineMember::ScaleX, 1.0);
-}
+#[cfg(test)]
+mod tests {
+    use super::{AffineMember, ApplyPerspectiveClip, Matrix, ScaleToFit, TypeMask};
+    use crate::prelude::*;
 
-#[test]
-#[allow(clippy::float_cmp)]
-fn test_tuple_to_vector() {
-    let mut m = Matrix::new_identity();
-    m.set_translate((10.0, 11.0));
-    assert_eq!(10.0, m.translate_x());
-    assert_eq!(11.0, m.translate_y());
-}
+    #[test]
+    fn test_apply_perspective_clip_naming() {
+        let _ = ApplyPerspectiveClip::Yes;
+    }
 
-#[test]
-fn setting_a_matrix_component_recomputes_typemask() {
-    let mut m = Matrix::default();
-    assert_eq!(TypeMask::IDENTITY, m.get_type());
-    m.set_persp_x(0.1);
-    assert_eq!(
-        TypeMask::TRANSLATE | TypeMask::SCALE | TypeMask::AFFINE | TypeMask::PERSPECTIVE,
-        m.get_type()
-    );
+    #[test]
+    fn test_matrix_scale_to_fit_naming() {
+        let _ = ScaleToFit::End;
+    }
+
+    #[test]
+    fn test_matrix_layout() {
+        Matrix::test_layout()
+    }
+
+    #[test]
+    fn test_get_set_trait_compilation() {
+        let mut m = Matrix::new_identity();
+        let _x = m.get(AffineMember::ScaleX);
+        m.set(AffineMember::ScaleX, 1.0);
+    }
+
+    #[test]
+    #[allow(clippy::float_cmp)]
+    fn test_tuple_to_vector() {
+        let mut m = Matrix::new_identity();
+        m.set_translate((10.0, 11.0));
+        assert_eq!(10.0, m.translate_x());
+        assert_eq!(11.0, m.translate_y());
+    }
+
+    #[test]
+    fn setting_a_matrix_component_recomputes_typemask() {
+        let mut m = Matrix::default();
+        assert_eq!(TypeMask::IDENTITY, m.get_type());
+        m.set_persp_x(0.1);
+        assert_eq!(
+            TypeMask::TRANSLATE | TypeMask::SCALE | TypeMask::AFFINE | TypeMask::PERSPECTIVE,
+            m.get_type()
+        );
+    }
 }

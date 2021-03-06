@@ -145,34 +145,41 @@ pub mod color_filters {
     }
 }
 
-#[test]
-fn color_mode_roundtrip() {
-    let color = Color::CYAN;
-    let mode = BlendMode::ColorBurn;
-    let cf = color_filters::blend(color, mode).unwrap();
-    let (c, m) = cf.to_a_color_mode().unwrap();
-    assert_eq!(color, c);
-    assert_eq!(mode, m);
-}
+#[cfg(test)]
 
-#[test]
-fn ref_count() {
-    let color = Color::CYAN;
-    let mode = BlendMode::ColorBurn;
-    let cf = color_filters::blend(color, mode).unwrap();
-    let rc = cf.native()._ref_cnt();
-    assert_eq!(1, rc);
-}
+mod tests {
+    use crate::prelude::*;
+    use crate::{color_filters, BlendMode, Color, Color4f, ColorSpace};
 
-#[test]
-fn filter_color() {
-    let color = Color::CYAN;
-    let mode = BlendMode::ColorBurn;
-    let cf = color_filters::blend(color, mode).unwrap();
-    let _fc = cf.filter_color(Color::DARK_GRAY);
-    let _fc = cf.filter_color4f(
-        Color4f::new(0.0, 0.0, 0.0, 0.0),
-        &ColorSpace::new_srgb(),
-        None,
-    );
+    #[test]
+    fn color_mode_roundtrip() {
+        let color = Color::CYAN;
+        let mode = BlendMode::ColorBurn;
+        let cf = color_filters::blend(color, mode).unwrap();
+        let (c, m) = cf.to_a_color_mode().unwrap();
+        assert_eq!(color, c);
+        assert_eq!(mode, m);
+    }
+
+    #[test]
+    fn ref_count() {
+        let color = Color::CYAN;
+        let mode = BlendMode::ColorBurn;
+        let cf = color_filters::blend(color, mode).unwrap();
+        let rc = cf.native()._ref_cnt();
+        assert_eq!(1, rc);
+    }
+
+    #[test]
+    fn filter_color() {
+        let color = Color::CYAN;
+        let mode = BlendMode::ColorBurn;
+        let cf = color_filters::blend(color, mode).unwrap();
+        let _fc = cf.filter_color(Color::DARK_GRAY);
+        let _fc = cf.filter_color4f(
+            Color4f::new(0.0, 0.0, 0.0, 0.0),
+            &ColorSpace::new_srgb(),
+            None,
+        );
+    }
 }

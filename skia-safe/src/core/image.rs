@@ -253,6 +253,10 @@ impl RCHandle<SkImage> {
         })
     }
 
+    // TODO:
+    // TODO: MakePromiseTexture
+    // TODO: MakePromiseYUVATexture
+
     pub fn image_info(&self) -> &ImageInfo {
         ImageInfo::from_native_ref(&self.native().fInfo)
     }
@@ -327,6 +331,10 @@ impl RCHandle<SkImage> {
 
     pub fn is_texture_backed(&self) -> bool {
         unsafe { self.native().isTextureBacked() }
+    }
+
+    pub fn texture_size(&self) -> usize {
+        unsafe { self.native().textureSize() }
     }
 
     #[cfg(feature = "gpu")]

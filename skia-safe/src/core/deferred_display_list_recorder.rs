@@ -27,7 +27,4 @@ impl Handle<SkDeferredDisplayListRecorder> {
             sb::C_SkDeferredDisplayListRecorder_detach(self.native_mut())
         })
     }
-
-    // TODO: makePromiseTexture()
-    // TODO: makeYUVAPromiseTexture()
 }

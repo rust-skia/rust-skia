@@ -145,7 +145,7 @@ impl NativeDrop for SkTextBlobBuilder {
     }
 }
 
-impl Handle<SkTextBlobBuilder> {
+impl TextBlobBuilder {
     pub fn new() -> Self {
         Self::from_native_c(unsafe { SkTextBlobBuilder::new() })
     }
@@ -229,6 +229,8 @@ impl Handle<SkTextBlobBuilder> {
             )
         }
     }
+
+    // TODO: allocRunText, allocRunTextPosH, allocRunTextPos, allocRunTextRSXform
 }
 
 pub type TextBlobIter<'a> = Borrows<'a, Handle<SkTextBlob_Iter>>;

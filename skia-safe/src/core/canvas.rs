@@ -519,6 +519,15 @@ impl Canvas {
         self
     }
 
+    pub fn clip_irect(
+        &mut self,
+        irect: impl AsRef<IRect>,
+        op: impl Into<Option<ClipOp>>,
+    ) -> &mut Self {
+        let r = Rect::from(*irect.as_ref());
+        self.clip_rect(r, op, false)
+    }
+
     pub fn clip_rrect(
         &mut self,
         rrect: impl AsRef<RRect>,

@@ -107,7 +107,6 @@ impl Handle<SkPaint> {
         self
     }
 
-    #[deprecated(since = "0.38.0")]
     pub fn filter_quality(&self) -> FilterQuality {
         unsafe { sb::C_SkPaint_getFilterQuality(self.native()) }
     }
