@@ -138,6 +138,26 @@ extern "C" SkImage* C_SkCodec_getImage(
     return std::get<0>(r).release();
 }
 
+extern "C" SkCodec::Result C_SkCodec_incrementalDecode(SkCodec* self, int* rowsDecoded) {
+    return self->incrementalDecode(rowsDecoded);
+}
+
+extern "C" SkCodec::SkScanlineOrder C_SkCodec_getScanlineOrder(const SkCodec* self) {
+    return self->getScanlineOrder();
+}
+
+extern "C" int C_SkCodec_nextScanline(const SkCodec* self) {
+    return self->nextScanline();
+}
+
+extern "C" int C_SkCodec_getFrameCount(SkCodec* self) {
+    return self->getFrameCount();
+}
+
+extern "C" int C_SkCodec_getRepetitionCount(SkCodec* self) {
+    return self->getRepetitionCount();
+}
+
 //
 // codec/SkEncodedOrigin.h
 //
@@ -2013,6 +2033,10 @@ extern "C" void C_SkYUVAInfo_makeDimensions(const SkYUVAInfo* self, const SkISiz
 //
 // core/SkYUVAPixmaps.h
 //
+
+extern "C" void C_SkYUVAPixmapInfo_Construct(SkYUVAPixmapInfo* uninitialized) {
+    new(uninitialized) SkYUVAPixmapInfo();
+}
 
 extern "C" void C_SkYUVAPixmapInfo_destruct(SkYUVAPixmapInfo* self) {
     self->~SkYUVAPixmapInfo();
