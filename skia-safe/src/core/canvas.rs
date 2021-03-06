@@ -14,6 +14,7 @@ use std::{
     convert::TryInto,
     ffi::CString,
     marker::PhantomData,
+    mem,
     ops::{Deref, DerefMut},
     ptr, slice,
 };
@@ -196,7 +197,7 @@ impl Canvas {
         props: Option<&SurfaceProps>,
     ) -> Option<OwnedCanvas<'pixels>> {
         let row_bytes = row_bytes.into().unwrap_or_else(|| info.min_row_bytes());
-        if row_bytes >= info.min_row_bytes() && pixels.len() >= info.compute_byte_size(row_bytes) {
+        if info.valid_pixels(row_bytes, pixels) {
             let ptr = unsafe {
                 sb::C_SkCanvas_MakeRasterDirect(
                     info.native(),
@@ -219,7 +220,7 @@ impl Canvas {
         let info = ImageInfo::new_n32_premul(size, None);
         let pixels_ptr: *mut u8 = pixels.as_mut_ptr() as _;
         let pixels_u8: &'pixels mut [u8] =
-            unsafe { slice::from_raw_parts_mut(pixels_ptr, pixels.elements_size_of()) };
+            unsafe { slice::from_raw_parts_mut(pixels_ptr, mem::size_of_val(pixels)) };
         Self::from_raster_direct(&info, pixels_u8, row_bytes, None)
     }
 

@@ -35,13 +35,7 @@ impl RefHandle<SkImageGenerator> {
 
     #[must_use]
     pub fn get_pixels(&mut self, info: &ImageInfo, pixels: &mut [u8], row_bytes: usize) -> bool {
-        // TODO: check if other functions similar to get_pixels use the same asserts:
-        assert!(info.height() > 0);
-        assert!(
-            pixels.len()
-                >= ((info.height() - 1) as usize) * row_bytes
-                    + ((info.width() as usize) * info.bytes_per_pixel())
-        );
+        assert!(info.valid_pixels(row_bytes, pixels));
         unsafe {
             self.native_mut()
                 .getPixels(info.native(), pixels.as_mut_ptr() as _, row_bytes)

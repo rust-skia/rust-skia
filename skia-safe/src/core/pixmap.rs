@@ -186,9 +186,7 @@ impl Handle<SkPixmap> {
         dst_row_bytes: usize,
         src: impl Into<IPoint>,
     ) -> bool {
-        if pixels.elements_size_of()
-            != (usize::try_from(dst_info.height()).unwrap() * dst_row_bytes)
-        {
+        if !dst_info.valid_pixels(dst_row_bytes, pixels) {
             return false;
         }
 

@@ -606,17 +606,6 @@ impl<N: NativeRefCounted> IntoPtrOrNull<N> for Option<RCHandle<N>> {
     }
 }
 
-/// Trait to compute how many bytes the elements of this type occupy in memory.
-pub(crate) trait ElementsSizeOf {
-    fn elements_size_of(&self) -> usize;
-}
-
-impl<N: Sized> ElementsSizeOf for [N] {
-    fn elements_size_of(&self) -> usize {
-        mem::size_of::<N>() * self.len()
-    }
-}
-
 /// Tag the type to automatically implement get() functions for
 /// all Index implementations.
 pub trait IndexGet {}
