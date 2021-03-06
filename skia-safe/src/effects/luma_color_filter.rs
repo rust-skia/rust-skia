@@ -1,10 +1,8 @@
-use crate::prelude::*;
 use crate::ColorFilter;
 use skia_bindings as sb;
-use skia_bindings::SkColorFilter;
 
-impl RCHandle<SkColorFilter> {
-    pub fn luma() -> ColorFilter {
+impl ColorFilter {
+    pub fn luma() -> Self {
         new()
     }
 }

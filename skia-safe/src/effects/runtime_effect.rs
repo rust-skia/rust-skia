@@ -1,12 +1,12 @@
-use crate::interop::AsStr;
 use crate::prelude::*;
 use crate::{interop, ColorFilter, Data, Matrix, Shader};
+use crate::{interop::AsStr, ImageInfo};
+use sb::SkRuntimeEffect_Options;
 use skia_bindings as sb;
 use skia_bindings::{
     SkRefCntBase, SkRuntimeEffect, SkRuntimeEffect_Uniform, SkRuntimeEffect_Varying,
 };
-use std::ffi::CStr;
-use std::slice;
+use std::{ffi::CStr, slice};
 
 pub type Uniform = Handle<SkRuntimeEffect_Uniform>;
 
@@ -101,22 +101,34 @@ impl NativeRefCountedBase for SkRuntimeEffect {
     type Base = SkRefCntBase;
 }
 
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Default)]
+pub struct Options {
+    pub inline_threshold: i32,
+}
+
+impl NativeTransmutable<SkRuntimeEffect_Options> for Options {}
+
 pub fn new(sksl: impl AsRef<str>) -> Result<RuntimeEffect, String> {
+    new_with_options(sksl, None)
+}
+
+pub fn new_with_options<'a>(
+    sksl: impl AsRef<str>,
+    options: impl Into<Option<&'a Options>>,
+) -> Result<RuntimeEffect, String> {
     let str = interop::String::from_str(sksl);
+    let options = options.into().copied().unwrap_or_default();
     let mut error = interop::String::default();
-    let effect = RuntimeEffect::from_ptr(unsafe {
-        sb::C_SkRuntimeEffect_Make(str.native(), error.native_mut())
-    });
-    match effect {
-        Some(runtime_effect) => Ok(runtime_effect),
-        None => Err(error.as_str().to_owned()),
-    }
+    RuntimeEffect::from_ptr(unsafe {
+        sb::C_SkRuntimeEffect_Make(str.native(), options.native(), error.native_mut())
+    })
+    .ok_or_else(|| error.as_str().to_owned())
 }
 
 impl RuntimeEffect {
     pub fn make_shader<'a>(
         &mut self,
-        inputs: impl Into<Data>,
+        uniforms: impl Into<Data>,
         children: impl IntoIterator<Item = Shader>,
         local_matrix: impl Into<Option<&'a Matrix>>,
         is_opaque: bool,
@@ -128,11 +140,40 @@ impl RuntimeEffect {
         Shader::from_ptr(unsafe {
             sb::C_SkRuntimeEffect_makeShader(
                 self.native_mut(),
-                inputs.into().into_ptr(),
+                uniforms.into().into_ptr(),
                 children.as_mut_ptr(),
                 children.len(),
                 local_matrix.into().native_ptr_or_null(),
                 is_opaque,
+            )
+        })
+    }
+
+    #[cfg(feature = "gpu")]
+    pub fn make_image<'a>(
+        &mut self,
+        context: &mut crate::gpu::RecordingContext,
+        uniforms: impl Into<Data>,
+        children: impl IntoIterator<Item = Shader>,
+        local_matrix: impl Into<Option<&'a Matrix>>,
+        result_info: ImageInfo,
+        mipmapped: bool,
+    ) -> Option<crate::Image> {
+        let mut children: Vec<_> = children
+            .into_iter()
+            .map(|shader| shader.into_ptr())
+            .collect();
+
+        crate::Image::from_ptr(unsafe {
+            sb::C_SkRuntimeEffect_makeImage(
+                self.native_mut(),
+                context.native_mut(),
+                uniforms.into().into_ptr(),
+                children.as_mut_ptr(),
+                children.len(),
+                local_matrix.into().native_ptr_or_null(),
+                result_info.native(),
+                mipmapped,
             )
         })
     }
@@ -222,3 +263,13 @@ impl RuntimeEffect {
 }
 
 // TODO: wrap SkRuntimeShaderBuilder
+
+#[cfg(test)]
+mod tests {
+    use crate::prelude::NativeTransmutable;
+
+    #[test]
+    fn options_layout() {
+        super::Options::test_layout()
+    }
+}

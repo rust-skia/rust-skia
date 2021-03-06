@@ -2654,16 +2654,36 @@ extern "C" SkImageFilter *C_SkPictureImageFilter_Make(SkPicture *picture, const 
 
 extern "C" {
 
-SkRuntimeEffect* C_SkRuntimeEffect_Make(const SkString &sksl, SkString* error) {
-    auto r = SkRuntimeEffect::Make(sksl);
+SkRuntimeEffect *C_SkRuntimeEffect_Make(
+    const SkString &sksl,
+    const SkRuntimeEffect::Options &options,
+    SkString *error)
+{
+    auto r = SkRuntimeEffect::Make(sksl, options);
     *error = r.errorText;
     return r.effect.release();
 }
 
-SkShader *C_SkRuntimeEffect_makeShader(SkRuntimeEffect *self, SkData *inputs, SkShader **children, size_t childCount,
+SkShader *C_SkRuntimeEffect_makeShader(SkRuntimeEffect *self, SkData *uniforms, SkShader **children, size_t childCount,
                                        const SkMatrix *localMatrix, bool isOpaque) {
     auto childrenSPs = reinterpret_cast<sk_sp<SkShader> *>(children);
-    return self->makeShader(sp(inputs), childrenSPs, childCount, localMatrix, isOpaque).release();
+    return self->makeShader(sp(uniforms), childrenSPs, childCount, localMatrix, isOpaque).release();
+}
+
+SkImage *C_SkRuntimeEffect_makeImage(
+    SkRuntimeEffect *self, 
+    GrRecordingContext* context,
+    SkData *uniforms, 
+    SkShader **children, size_t childCount,
+    const SkMatrix *localMatrix, 
+    const SkImageInfo& resultInfo, 
+    bool mipmapped) {
+    auto childrenSPs = reinterpret_cast<sk_sp<SkShader> *>(children);
+    return self->makeImage(
+        context, 
+        sp(uniforms), 
+        childrenSPs, childCount, 
+        localMatrix, resultInfo, mipmapped).release();
 }
 
 SkColorFilter* C_SkRuntimeEffect_makeColorFilter(SkRuntimeEffect* self, SkData* inputs) {
