@@ -265,22 +265,6 @@ impl RCHandle<GrDirectContext> {
         self
     }
 
-    /*
-        pub fn compute_image_size(
-            image: impl AsRef<Image>,
-            mipmapped: Mipmapped,
-            use_next_pow2: impl Into<Option<bool>>,
-        ) -> usize {
-            unsafe {
-                sb::C_GrDirectContext_ComputeImageSize(
-                    image.as_ref().clone().into_ptr(),
-                    mipmapped,
-                    use_next_pow2.into().unwrap_or_default(),
-                )
-            }
-        }
-    */
-
     // TODO: wrap createBackendTexture (several variants)
     //       introduced in m76, m77, and m79
     //       extended in m84 with finishedProc and finishedContext
