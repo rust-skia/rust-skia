@@ -1,12 +1,14 @@
-use crate::prelude::*;
-use crate::{interop, ColorFilter, Data, Matrix, Shader};
-use crate::{interop::AsStr, ImageInfo};
+use crate::{
+    interop::{self, AsStr},
+    prelude::*,
+    ColorFilter, Data, ImageInfo, Matrix, Shader,
+};
 use sb::SkRuntimeEffect_Options;
 use skia_bindings as sb;
 use skia_bindings::{
     SkRefCntBase, SkRuntimeEffect, SkRuntimeEffect_Uniform, SkRuntimeEffect_Varying,
 };
-use std::{ffi::CStr, slice};
+use std::ffi::CStr;
 
 pub type Uniform = Handle<SkRuntimeEffect_Uniform>;
 
@@ -220,7 +222,7 @@ impl RuntimeEffect {
         unsafe {
             let mut count: usize = 0;
             let ptr = sb::C_SkRuntimeEffect_uniforms(self.native(), &mut count);
-            slice::from_raw_parts(Uniform::from_native_ref(&*ptr), count)
+            safer::from_raw_parts(Uniform::from_native_ptr(ptr), count)
         }
     }
 
@@ -228,7 +230,7 @@ impl RuntimeEffect {
         unsafe {
             let mut count: usize = 0;
             let ptr = sb::C_SkRuntimeEffect_children(self.native(), &mut count);
-            let slice = slice::from_raw_parts(ptr, count);
+            let slice = safer::from_raw_parts(ptr, count);
             slice.iter().map(|str| str.as_str())
         }
     }
@@ -237,7 +239,7 @@ impl RuntimeEffect {
         unsafe {
             let mut count: usize = 0;
             let ptr = sb::C_SkRuntimeEffect_varyings(self.native(), &mut count);
-            slice::from_raw_parts(Varying::from_native_ref(&*ptr), count)
+            safer::from_raw_parts(Varying::from_native_ptr(ptr), count)
         }
     }
 

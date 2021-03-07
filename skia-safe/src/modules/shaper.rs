@@ -369,9 +369,9 @@ pub mod run_handler {
                 .map(|clusters| slice::from_raw_parts_mut(clusters.as_ptr(), glyph_count));
 
             Buffer {
-                glyphs: slice::from_raw_parts_mut(buffer.glyphs, glyph_count),
-                positions: slice::from_raw_parts_mut(
-                    Point::from_native_ref_mut(&mut *buffer.positions),
+                glyphs: safer::from_raw_parts_mut(buffer.glyphs, glyph_count),
+                positions: safer::from_raw_parts_mut(
+                    Point::from_native_ptr_mut(buffer.positions),
                     glyph_count,
                 ),
                 offsets,

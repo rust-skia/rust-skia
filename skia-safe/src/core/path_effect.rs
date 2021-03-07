@@ -5,7 +5,6 @@ use skia_bindings::{
     SkFlattenable, SkPathEffect, SkPathEffect_DashType, SkPathEffect_PointData, SkRefCntBase,
 };
 use std::os::raw;
-use std::slice;
 
 #[repr(C)]
 pub struct PointData {
@@ -53,7 +52,7 @@ impl Default for PointData {
 
 impl PointData {
     pub fn points(&self) -> &[Point] {
-        unsafe { slice::from_raw_parts(self.points, self.num_points.try_into().unwrap()) }
+        unsafe { safer::from_raw_parts(self.points, self.num_points.try_into().unwrap()) }
     }
 }
 

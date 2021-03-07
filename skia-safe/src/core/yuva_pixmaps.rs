@@ -1,7 +1,7 @@
 use crate::{prelude::*, ColorType, Data, ImageInfo, Pixmap, YUVAInfo, YUVColorSpace};
 use skia_bindings as sb;
 use skia_bindings::{SkYUVAPixmapInfo, SkYUVAPixmaps};
-use std::{ffi::c_void, ptr, slice};
+use std::{ffi::c_void, ptr};
 use yuva_pixmap_info::SupportedDataTypes;
 
 /// Data type for Y, U, V, and possibly A channels independent of how values are packed into planes.
@@ -268,8 +268,8 @@ impl YUVAPixmaps {
     /// Access the [Pixmap] planes.
     pub fn planes(&self) -> &[Pixmap] {
         unsafe {
-            let planes = Pixmap::from_native_ref(&*sb::C_SkYUVAPixmaps_planes(self.native()));
-            slice::from_raw_parts(planes, self.num_planes())
+            let planes = Pixmap::from_native_ptr(sb::C_SkYUVAPixmaps_planes(self.native()));
+            safer::from_raw_parts(planes, self.num_planes())
         }
     }
 

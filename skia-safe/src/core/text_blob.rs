@@ -170,7 +170,7 @@ impl TextBlobBuilder {
                 offset.y,
                 bounds.native_ptr_or_null(),
             );
-            slice::from_raw_parts_mut((*buffer).glyphs, count)
+            safer::from_raw_parts_mut((*buffer).glyphs, count)
         }
     }
 
@@ -189,8 +189,8 @@ impl TextBlobBuilder {
                 bounds.native_ptr_or_null(),
             );
             (
-                slice::from_raw_parts_mut((*buffer).glyphs, count),
-                slice::from_raw_parts_mut((*buffer).pos, count),
+                safer::from_raw_parts_mut((*buffer).glyphs, count),
+                safer::from_raw_parts_mut((*buffer).pos, count),
             )
         }
     }
@@ -208,8 +208,8 @@ impl TextBlobBuilder {
                 bounds.native_ptr_or_null(),
             );
             (
-                slice::from_raw_parts_mut((*buffer).glyphs, count),
-                slice::from_raw_parts_mut((*buffer).pos as *mut Point, count),
+                safer::from_raw_parts_mut((*buffer).glyphs, count),
+                safer::from_raw_parts_mut((*buffer).pos as *mut Point, count),
             )
         }
     }
@@ -224,8 +224,8 @@ impl TextBlobBuilder {
                 .native_mut()
                 .allocRunRSXform(font.native(), count.try_into().unwrap());
             (
-                slice::from_raw_parts_mut((*buffer).glyphs, count),
-                slice::from_raw_parts_mut((*buffer).pos as *mut RSXform, count),
+                safer::from_raw_parts_mut((*buffer).glyphs, count),
+                safer::from_raw_parts_mut((*buffer).pos as *mut RSXform, count),
             )
         }
     }
