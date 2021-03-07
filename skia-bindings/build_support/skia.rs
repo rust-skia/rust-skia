@@ -191,11 +191,15 @@ pub struct FinalBuildConfiguration {
 
     /// The binding source files to compile.
     pub binding_sources: Vec<PathBuf>,
+
+    /// Whether to use system libraries or not.
+    pub use_system_libraries: bool,
 }
 
 impl FinalBuildConfiguration {
     pub fn from_build_configuration(
         build: &BuildConfiguration,
+        use_system_libraries: bool,
         skia_source_dir: &Path,
     ) -> FinalBuildConfiguration {
         let features = &build.features;
@@ -212,11 +216,14 @@ impl FinalBuildConfiguration {
                 ("skia_use_gl", yes_if(features.gl)),
                 ("skia_use_egl", yes_if(features.egl)),
                 ("skia_use_x11", yes_if(features.x11)),
-                ("skia_use_system_libjpeg_turbo", no()),
-                ("skia_use_system_libpng", no()),
+                (
+                    "skia_use_system_libjpeg_turbo",
+                    yes_if(use_system_libraries),
+                ),
+                ("skia_use_system_libpng", yes_if(use_system_libraries)),
                 ("skia_use_libwebp_encode", yes_if(features.webp_encode)),
                 ("skia_use_libwebp_decode", yes_if(features.webp_decode)),
-                ("skia_use_system_zlib", no()),
+                ("skia_use_system_zlib", yes_if(use_system_libraries)),
                 ("skia_use_xps", no()),
                 ("skia_use_dng_sdk", yes_if(features.dng)),
                 ("cc", quote(&build.cc)),
@@ -249,10 +256,10 @@ impl FinalBuildConfiguration {
                 args.extend(vec![
                     ("skia_enable_skshaper", yes()),
                     ("skia_use_icu", yes()),
-                    ("skia_use_system_icu", no()),
+                    ("skia_use_system_icu", yes_if(use_system_libraries)),
                     ("skia_use_harfbuzz", yes()),
                     ("skia_pdf_subset_harfbuzz", yes()),
-                    ("skia_use_system_harfbuzz", no()),
+                    ("skia_use_system_harfbuzz", yes_if(use_system_libraries)),
                     ("skia_use_sfntly", no()),
                     ("skia_enable_skparagraph", yes()),
                     // note: currently, tests need to be enabled, because modules/skparagraph
@@ -264,7 +271,7 @@ impl FinalBuildConfiguration {
             }
 
             if features.webp_encode || features.webp_decode {
-                args.push(("skia_use_system_libwebp", no()))
+                args.push(("skia_use_system_libwebp", yes_if(use_system_libraries)))
             }
 
             let mut use_expat = true;
@@ -325,7 +332,7 @@ impl FinalBuildConfiguration {
                     // TODO: make API-level configurable?
                     args.push(("ndk_api", android::API_LEVEL.into()));
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
-                    args.push(("skia_use_system_freetype2", no()));
+                    args.push(("skia_use_system_freetype2", yes_if(use_system_libraries)));
                     args.push(("skia_enable_fontmgr_android", yes()));
                     // Enabling fontmgr_android implicitly enables expat.
                     // We make this explicit to avoid relying on an expat installed
@@ -350,7 +357,7 @@ impl FinalBuildConfiguration {
 
             if use_expat {
                 args.push(("skia_use_expat", yes()));
-                args.push(("skia_use_system_expat", no()));
+                args.push(("skia_use_system_expat", yes_if(use_system_libraries)));
             } else {
                 args.push(("skia_use_expat", no()));
             }
@@ -421,6 +428,7 @@ impl FinalBuildConfiguration {
             ninja_files,
             definitions: build.definitions.clone(),
             binding_sources,
+            use_system_libraries,
         }
     }
 }
@@ -586,57 +594,41 @@ impl BinariesConfiguration {
     }
 }
 
-/// The full build of Skia, skia-bindings, and the generation of bindings.rs.
-pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
-    let python2 = &prerequisites::locate_python2_cmd();
-    println!("Python 2 found: {:?}", python2);
-    let ninja = fetch_dependencies(&python2);
-    configure_skia(build, config, &python2, None);
-    build_skia(build, config, &ninja);
-}
-
-/// Build Skia without any network access.
-///
-/// An offline build expects the Skia source tree including all third party dependencies
-/// to be available.
-pub fn build_offline(
+/// Orchestrates the entire build of Skia based on the arguments provided.
+pub fn build(
     build: &FinalBuildConfiguration,
     config: &BinariesConfiguration,
-    ninja_command: Option<&Path>,
-    gn_command: Option<&Path>,
+    ninja_command: Option<PathBuf>,
+    gn_command: Option<PathBuf>,
+    offline: bool,
 ) {
-    let python2 = prerequisites::locate_python2_cmd();
-    configure_skia(&build, &config, &python2, gn_command);
-    build_skia(
-        &build,
-        &config,
-        ninja_command.unwrap_or(&ninja::default_exe_name()),
-    );
-}
+    let python2 = &prerequisites::locate_python2_cmd();
+    println!("Python 2 found: {:?}", python2);
 
-/// Prepares the build and returns the ninja command to use for building Skia.
-pub fn fetch_dependencies(python2: &Path) -> PathBuf {
-    prerequisites::resolve_dependencies();
-
-    // call Skia's git-sync-deps
-
-    println!("Synchronizing Skia dependencies");
-
-    assert!(
-        Command::new(python2)
-            .arg("skia/tools/git-sync-deps")
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .status()
+    let ninja = ninja_command.unwrap_or_else(|| {
+        env::current_dir()
             .unwrap()
-            .success(),
-        "`skia/tools/git-sync-deps` failed"
-    );
+            .join("depot_tools")
+            .join(ninja::default_exe_name())
+    });
 
-    env::current_dir()
-        .unwrap()
-        .join("depot_tools")
-        .join(ninja::default_exe_name())
+    if !offline && !build.use_system_libraries {
+        println!("Synchronizing Skia dependencies");
+        prerequisites::resolve_dependencies();
+        assert!(
+            Command::new(python2)
+                .arg("skia/tools/git-sync-deps")
+                .stdout(Stdio::inherit())
+                .stderr(Stdio::inherit())
+                .status()
+                .unwrap()
+                .success(),
+            "`skia/tools/git-sync-deps` failed"
+        );
+    }
+
+    configure_skia(build, config, &python2, gn_command.as_deref());
+    build_skia(build, config, &ninja);
 }
 
 /// Configures Skia by calling gn
@@ -1314,6 +1306,7 @@ mod prerequisites {
     use std::path::{Path, PathBuf};
     use std::process::{Command, Stdio};
 
+    /// Resolves the full path
     pub fn locate_python2_cmd() -> PathBuf {
         const PYTHON_CMDS: [&str; 2] = ["python", "python2"];
         for python in PYTHON_CMDS.as_ref() {

@@ -34,15 +34,27 @@ Whenever a new version of `rust-skia` is built from the `release` branch on our 
 
 And whenever the build script detects that `skia-bindings` is built from inside a crate _and_ a prebuilt archive is available that matches the repository's hash, platform, and features, it downloads the package, unpacks it, and skips the full build step of Skia and the bindings.
 
-## Offline Builds
+### Changing the executable used as `ninja` and `gn`
 
-A full build of Skia downloads several repositories from the Internet. For specific scenarios, like, for example, [a packaging script](https://github.com/rust-skia/rust-skia/issues/340), it can be useful to build Skia offline. To configure that, the build script supports the following environment variables:
+On some systems, the bundled `ninja` and `gn` executables may not work (as is on NixOS.) To remedy
+this, the executables used can be set using the following environment variables:
 
-| Variable                     | Description                                                  | Default                            |
-| ---------------------------- | ------------------------------------------------------------ | ---------------------------------- |
-| `SKIA_OFFLINE_SOURCE_DIR`    | An absolute path pointing to a complete Skia source tree including all dependencies. Setting this variable activates the offline build mode. |                                    |
-| `SKIA_OFFLINE_NINJA_COMMAND` | The ninja command to run. This can be either a filename, or a absolute path to the ninja executable. | `ninja` or `ninja.exe`  on Windows |
-| `SKIA_OFFLINE_GN_COMMAND`    | The `gn` command to run. Either an absolute path or a path relative to Skia's source directory. | `bin/gn`                           |
+| Variable             | Description                                                                                                | Default                                    |
+| -------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `SKIA_NINJA_COMMAND` | The `ninja` command to run. It can be either a command name or an absolute path.                           | `ninja` by default, `ninja.exe` on Windows |
+| `SKIA_GN_COMMAND`    | The `gn` command to run. It can be either a command name or a path that starts at Skia's source directory. | `bin/gn`                                   |
+
+### Changing the Skia source directory
+
+In some cases, one may wish to provide an alternate Skia source directory.  This can be achieved by
+setting `SKIA_SOURCE_DIR`, which must be an absolute path to a Skia source directory with all
+dependencies.
+
+### Using system libraries
+
+By default, numerous libraries Skia depends upon are built in addition to Skia itself. In the event
+that this is not wanted (say, if the crate is being built as part of a package's build routine,)
+this behavior can be disabled by setting the `SKIA_USE_SYSTEM_LIBRARIES` environment variable.
 
 ## Build Customization
 
