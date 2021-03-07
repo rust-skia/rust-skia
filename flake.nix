@@ -19,6 +19,7 @@
           shellHook = ''
             export CC="${pkgs.clang}/bin/clang"
             export CXX="${pkgs.clang}/bin/clang++"
+            rustup override set stable
             '';
 
           nativeBuildInputs = with pkgs; [ rustup python fontconfig clang ];
