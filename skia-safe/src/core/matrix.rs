@@ -24,6 +24,10 @@ bitflags! {
     }
 }
 
+impl TypeMask {
+    const UNKNOWN: u32 = sb::SkMatrix_kUnknown_Mask as _;
+}
+
 pub use skia_bindings::SkMatrix_ScaleToFit as ScaleToFit;
 #[test]
 fn test_matrix_scale_to_fit_naming() {
@@ -320,6 +324,7 @@ impl Matrix {
         self[Member::Persp0] = persp_0;
         self[Member::Persp1] = persp_1;
         self[Member::Persp2] = persp_2;
+        self.type_mask = TypeMask::UNKNOWN;
         self
     }
 
