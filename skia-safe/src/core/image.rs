@@ -333,6 +333,7 @@ impl RCHandle<SkImage> {
         unsafe { self.native().isTextureBacked() }
     }
 
+    #[cfg(feature = "gpu")]
     pub fn texture_size(&self) -> usize {
         unsafe { self.native().textureSize() }
     }

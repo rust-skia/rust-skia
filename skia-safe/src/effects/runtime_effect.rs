@@ -1,7 +1,7 @@
 use crate::{
     interop::{self, AsStr},
     prelude::*,
-    ColorFilter, Data, ImageInfo, Matrix, Shader,
+    ColorFilter, Data, Matrix, Shader,
 };
 use sb::SkRuntimeEffect_Options;
 use skia_bindings as sb;
@@ -158,7 +158,7 @@ impl RuntimeEffect {
         uniforms: impl Into<Data>,
         children: impl IntoIterator<Item = Shader>,
         local_matrix: impl Into<Option<&'a Matrix>>,
-        result_info: ImageInfo,
+        result_info: crate::ImageInfo,
         mipmapped: bool,
     ) -> Option<crate::Image> {
         let mut children: Vec<_> = children
