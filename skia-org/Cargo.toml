@@ -38,7 +38,7 @@ offscreen_gl_context = { git = "https://github.com/rust-skia/rust-offscreen-rend
 # sparkle 0.1.25 is incompatible with offscreen_gl_context
 sparkle = { version = "=0.1.24", optional = true }
 clap = "2.33.0"
-ash = { version = "0.31", optional = true }
+ash = { version = "0.32", optional = true }
 # need to rename the package because of the feature with the same name.
 metal-rs = { package = "metal", version = "0.17.1", optional = true }
 # ... to access raw metal ptrs.
