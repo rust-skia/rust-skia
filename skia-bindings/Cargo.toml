@@ -60,15 +60,8 @@ bindgen = "0.57.0"
 
 # For enum variant name replacements.
 
-# Regex 1.4.4 causes a stack overflow on Windows.
-# https://github.com/rust-lang/regex/issues/750 
-regex = "=1.4.3"
-# Version 1.1.0 also causes a stack overflow in the binding generation (can be
-# removed after updating to regex to >1.4.3).
-thread_local = "~1.0.1"
-
+regex = "1.4.5"
 heck = "0.3.1"
-
 
 # for downloading and extracting prebuilt binaries and skia / depot_tools archives:
 ureq = "2.0.1"
