@@ -1238,6 +1238,10 @@ extern "C" SkData* C_SkTypeface_copyTableData(const SkTypeface* self, SkFontTabl
     return self->copyTableData(tag).release();
 }
 
+extern "C" SkStreamAsset* C_SkTypeface_openStream(const SkTypeface* self, int* ttcIndex) {
+    return self->openStream(ttcIndex).release();
+}
+
 extern "C" SkRect C_SkTypeface_getBounds(const SkTypeface* self) {
     return self->getBounds();
 }
@@ -1930,6 +1934,14 @@ extern "C" SkShader* C_SkShader_Deserialize(const void* data, size_t length) {
 
 extern "C" void C_SkStream_delete(SkStream* stream) {
     delete stream;
+}
+
+extern "C" size_t C_SkStream_read(SkStream* stream, void* buffer, size_t len) {
+    return stream->read(buffer, len);
+}
+
+extern "C" size_t C_SkStreamAsset_getLength(const SkStreamAsset* self) {
+    return self->getLength();
 }
 
 extern "C" void C_SkWStream_destruct(SkWStream* self) {

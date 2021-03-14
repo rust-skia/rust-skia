@@ -28,8 +28,8 @@ impl<T: NativeStreamBase> Drop for Stream<T> {
 }
 
 impl<N: NativeStreamBase> Stream<N> {
-    pub fn from_ptr(ptr: *mut N) -> Stream<N> {
-        Stream(ptr::NonNull::new(ptr).unwrap())
+    pub fn from_ptr(ptr: *mut N) -> Option<Stream<N>> {
+        ptr::NonNull::new(ptr).map(Stream)
     }
 }
 
@@ -128,6 +128,7 @@ impl Handle<SkDynamicMemoryWStream> {
         StreamAsset::from_ptr(unsafe {
             sb::C_SkDynamicMemoryWStream_detachAsStream(self.native_mut())
         })
+        .unwrap()
     }
 }
 
