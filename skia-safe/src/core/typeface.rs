@@ -106,9 +106,9 @@ impl RCHandle<SkTypeface> {
     }
 
     pub fn from_name(family_name: impl AsRef<str>, font_style: FontStyle) -> Option<Typeface> {
-        let familiy_name = ffi::CString::new(family_name.as_ref()).ok()?;
+        let family_name = ffi::CString::new(family_name.as_ref()).ok()?;
         Typeface::from_ptr(unsafe {
-            sb::C_SkTypeface_MakeFromName(familiy_name.as_ptr(), *font_style.native())
+            sb::C_SkTypeface_MakeFromName(family_name.as_ptr(), *font_style.native())
         })
     }
 

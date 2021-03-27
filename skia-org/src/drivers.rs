@@ -2,17 +2,17 @@ use skia_safe::Canvas;
 use std::path::Path;
 
 pub mod cpu;
-pub use cpu::CPU;
+pub use cpu::Cpu;
 #[cfg(feature = "gl")]
 pub mod gl;
 #[cfg(feature = "gl")]
-pub use gl::OpenGL;
+pub use gl::OpenGl;
 #[cfg(feature = "metal")]
 pub mod metal;
 pub mod pdf;
-pub use pdf::PDF;
+pub use pdf::Pdf;
 pub mod svg;
-pub use svg::SVG;
+pub use svg::Svg;
 #[cfg(feature = "vulkan")]
 pub mod vulkan;
 #[cfg(feature = "vulkan")]

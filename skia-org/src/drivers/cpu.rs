@@ -3,9 +3,9 @@ use crate::drivers::DrawingDriver;
 use skia_safe::{Canvas, Surface};
 use std::path::Path;
 
-pub struct CPU;
+pub struct Cpu;
 
-impl DrawingDriver for CPU {
+impl DrawingDriver for Cpu {
     const NAME: &'static str = "cpu";
 
     fn new() -> Self {

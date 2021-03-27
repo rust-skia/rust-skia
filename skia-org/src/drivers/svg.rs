@@ -3,9 +3,9 @@ use crate::drivers::DrawingDriver;
 use skia_safe::Canvas;
 use std::path::Path;
 
-pub struct SVG;
+pub struct Svg;
 
-impl DrawingDriver for SVG {
+impl DrawingDriver for Svg {
     const NAME: &'static str = "svg";
 
     fn new() -> Self {

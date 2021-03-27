@@ -3,9 +3,9 @@ use crate::drivers::DrawingDriver;
 use skia_safe::Canvas;
 use std::path::Path;
 
-pub struct PDF;
+pub struct Pdf;
 
-impl DrawingDriver for PDF {
+impl DrawingDriver for Pdf {
     const NAME: &'static str = "pdf";
 
     fn new() -> Self {

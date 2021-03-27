@@ -94,7 +94,7 @@ fn main() {
             None,
         )
         .unwrap()
-    };
+    }
 
     let mut surface = create_surface(&windowed_context, &fb_info, &mut gr_context);
     // let sf = windowed_context.window().scale_factor() as f32;
