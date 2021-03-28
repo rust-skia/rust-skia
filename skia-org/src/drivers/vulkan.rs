@@ -51,8 +51,8 @@ impl DrawingDriver for Vulkan {
         };
 
         Self {
-            ash_graphics,
             context,
+            ash_graphics,
         }
     }
 
