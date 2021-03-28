@@ -59,12 +59,10 @@ jobs:
           features: 'gl,vulkan,textlayout,webp'
           exampleArgs: ''
           skia_debug: '1'
-# Disabled since 1.51 beta.1 because of a unresolvable conflict between stable and beta lints.
-# Reenable when 1.51 gets stable.
-#        beta-all-features:
-#          toolchain: beta
-#          features: 'gl,vulkan,textlayout,webp'
-#          exampleArgs: ''
+        beta-all-features:
+          toolchain: beta
+          features: 'gl,vulkan,textlayout,webp'
+          exampleArgs: ''
 
   variables:
     platform: ${{ parameters.platform }}

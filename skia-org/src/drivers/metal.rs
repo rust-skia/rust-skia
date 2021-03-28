@@ -37,10 +37,10 @@ impl DrawingDriver for Metal {
         let context = gpu::DirectContext::new_metal(&backend, None).unwrap();
 
         Self {
-            pool,
-            device,
-            queue,
             context,
+            queue,
+            device,
+            pool,
         }
     }
 
