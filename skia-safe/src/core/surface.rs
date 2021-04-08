@@ -368,17 +368,17 @@ impl RCHandle<SkSurface> {
     pub fn draw(
         &mut self,
         canvas: &mut Canvas,
-        size: impl Into<Point>,
+        offset: impl Into<Point>,
         sampling: impl Into<SamplingOptions>,
         paint: Option<&Paint>,
     ) {
-        let size = size.into();
+        let offset = offset.into();
         let sampling = sampling.into();
         unsafe {
             self.native_mut().draw(
                 canvas.native_mut(),
-                size.x,
-                size.y,
+                offset.x,
+                offset.y,
                 sampling.native(),
                 paint.native_ptr_or_null(),
             )
