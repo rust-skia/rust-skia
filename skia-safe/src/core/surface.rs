@@ -2,7 +2,7 @@
 use crate::gpu;
 use crate::{
     prelude::*, Bitmap, Canvas, DeferredDisplayList, IPoint, IRect, ISize, IVector, Image,
-    ImageInfo, Paint, Pixmap, SamplingOptions, Size, SurfaceCharacterization, SurfaceProps,
+    ImageInfo, Paint, Pixmap, Point, SamplingOptions, SurfaceCharacterization, SurfaceProps,
 };
 use skia_bindings as sb;
 use skia_bindings::{SkRefCntBase, SkSurface};
@@ -368,17 +368,17 @@ impl RCHandle<SkSurface> {
     pub fn draw(
         &mut self,
         canvas: &mut Canvas,
-        size: impl Into<Size>,
+        offset: impl Into<Point>,
         sampling: impl Into<SamplingOptions>,
         paint: Option<&Paint>,
     ) {
-        let size = size.into();
+        let offset = offset.into();
         let sampling = sampling.into();
         unsafe {
             self.native_mut().draw(
                 canvas.native_mut(),
-                size.width,
-                size.height,
+                offset.x,
+                offset.y,
                 sampling.native(),
                 paint.native_ptr_or_null(),
             )
