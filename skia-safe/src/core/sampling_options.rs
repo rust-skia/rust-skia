@@ -24,10 +24,26 @@ pub use skia_bindings::SkMipmapMode as MipmapMode;
 /// Desmos worksheet https://www.desmos.com/calculator/aghdpicrvr
 /// Nice overview https://entropymine.com/imageworsener/bicubic/
 #[repr(C)]
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct CubicResampler {
-    b: f32,
-    c: f32,
+    pub b: f32,
+    pub c: f32,
+}
+
+impl CubicResampler {
+    pub fn mitchell() -> Self {
+        Self {
+            b: 1.0 / 3.0,
+            c: 1.0 / 3.0,
+        }
+    }
+
+    pub fn catmull_rom() -> Self {
+        Self {
+            b: 0.0,
+            c: 1.0 / 2.0,
+        }
+    }
 }
 
 impl NativeTransmutable<SkCubicResampler> for CubicResampler {}
@@ -94,6 +110,17 @@ impl SamplingOptions {
                     .into_native(),
             )
         })
+    }
+}
+
+impl From<FilterMode> for SamplingOptions {
+    fn from(fm: FilterMode) -> Self {
+        Self {
+            use_cubic: false,
+            cubic: CubicResampler { b: 0.0, c: 0.0 },
+            filter: fm,
+            mipmap: MipmapMode::None,
+        }
     }
 }
 

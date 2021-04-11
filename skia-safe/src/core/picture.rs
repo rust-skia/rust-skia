@@ -1,6 +1,5 @@
 use crate::prelude::*;
-use crate::{Canvas, Data, Rect};
-use crate::{Matrix, Shader, TileMode};
+use crate::{Canvas, Data, FilterMode, Matrix, Rect, Shader, TileMode};
 use skia_bindings as sb;
 use skia_bindings::{SkPicture, SkRefCntBase};
 
@@ -76,6 +75,7 @@ impl RCHandle<SkPicture> {
     pub fn to_shader<'a, 'b>(
         &self,
         tm: impl Into<Option<(TileMode, TileMode)>>,
+        mode: FilterMode,
         local_matrix: impl Into<Option<&'a Matrix>>,
         tile_rect: impl Into<Option<&'b Rect>>,
     ) -> Shader {
@@ -90,6 +90,7 @@ impl RCHandle<SkPicture> {
                 self.native(),
                 tmx,
                 tmy,
+                mode,
                 local_matrix.native_ptr_or_null(),
                 tile_rect.native_ptr_or_null(),
             )

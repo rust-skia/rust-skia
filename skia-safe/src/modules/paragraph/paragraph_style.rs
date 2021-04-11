@@ -4,7 +4,6 @@ use crate::modules::paragraph::TextHeightBehavior;
 use crate::prelude::*;
 use crate::{interop, scalar, FontStyle};
 use skia_bindings as sb;
-use std::slice;
 
 pub type StrutStyle = Handle<sb::skia_textlayout_StrutStyle>;
 unsafe impl Send for StrutStyle {}
@@ -43,7 +42,7 @@ impl Handle<sb::skia_textlayout_StrutStyle> {
         unsafe {
             let mut count = 0;
             let ptr = sb::C_StrutStyle_getFontFamilies(self.native(), &mut count);
-            FontFamilies(slice::from_raw_parts(ptr, count))
+            FontFamilies(safer::from_raw_parts(ptr, count))
         }
     }
 

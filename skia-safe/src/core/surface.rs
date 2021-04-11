@@ -404,13 +404,9 @@ impl RCHandle<SkSurface> {
         dst_row_bytes: usize,
         src: impl Into<IPoint>,
     ) -> bool {
-        if dst_row_bytes < dst_info.min_row_bytes() {
+        if !dst_info.valid_pixels(dst_row_bytes, dst_pixels) {
             return false;
-        };
-        let height: usize = dst_info.height().try_into().unwrap();
-        if dst_pixels.len() < dst_row_bytes * height {
-            return false;
-        };
+        }
         let src = src.into();
         unsafe {
             self.native_mut().readPixels1(

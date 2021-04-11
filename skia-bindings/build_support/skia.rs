@@ -1241,6 +1241,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("PlaneConfig", rewrite::k_xxx),
     // m89, SkImageFilters::Dither
     ("Dither", rewrite::k_xxx),
+    ("SkScanlineOrder", rewrite::k_xxx_name),
 ];
 
 pub(crate) mod rewrite {

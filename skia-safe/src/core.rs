@@ -52,10 +52,6 @@ pub use deferred_display_list_recorder::*;
 pub mod document;
 pub use document::Document;
 
-pub mod draw_looper;
-#[allow(deprecated)]
-pub use draw_looper::DrawLooper;
-
 pub mod drawable;
 pub use drawable::Drawable;
 

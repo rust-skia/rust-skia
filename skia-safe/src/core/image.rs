@@ -253,6 +253,10 @@ impl RCHandle<SkImage> {
         })
     }
 
+    // TODO:
+    // TODO: MakePromiseTexture
+    // TODO: MakePromiseYUVATexture
+
     pub fn image_info(&self) -> &ImageInfo {
         ImageInfo::from_native_ref(&self.native().fInfo)
     }
@@ -330,6 +334,11 @@ impl RCHandle<SkImage> {
     }
 
     #[cfg(feature = "gpu")]
+    pub fn texture_size(&self) -> usize {
+        unsafe { self.native().textureSize() }
+    }
+
+    #[cfg(feature = "gpu")]
     pub fn is_valid(&self, context: &mut gpu::RecordingContext) -> bool {
         unsafe { self.native().isValid(context.native_mut()) }
     }
@@ -391,9 +400,7 @@ impl RCHandle<SkImage> {
         src: impl Into<IPoint>,
         caching_hint: CachingHint,
     ) -> bool {
-        if pixels.elements_size_of()
-            != (usize::try_from(dst_info.height()).unwrap() * dst_row_bytes)
-        {
+        if !dst_info.valid_pixels(dst_row_bytes, pixels) {
             return false;
         }
 
@@ -442,9 +449,7 @@ impl RCHandle<SkImage> {
         src: impl Into<IPoint>,
         caching_hint: CachingHint,
     ) -> bool {
-        if pixels.elements_size_of()
-            != (usize::try_from(dst_info.height()).unwrap() * dst_row_bytes)
-        {
+        if !dst_info.valid_pixels(dst_row_bytes, pixels) {
             return false;
         }
 

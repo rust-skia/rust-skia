@@ -6,9 +6,9 @@ use super::gl;
 use super::vk;
 use super::{
     BackendFormat, BackendRenderTarget, BackendSurfaceMutableState, BackendTexture, ContextOptions,
-    FlushInfo, Mipmapped, SemaphoresSubmitted,
+    FlushInfo, SemaphoresSubmitted,
 };
-use crate::{image, prelude::*, Data, Image};
+use crate::{image, prelude::*, Data};
 use skia_bindings as sb;
 use skia_bindings::{GrDirectContext, GrRecordingContext, SkRefCntBase};
 use std::{
@@ -263,20 +263,6 @@ impl RCHandle<GrDirectContext> {
             self.native_mut().storeVkPipelineCacheData();
         }
         self
-    }
-
-    pub fn compute_image_size(
-        image: impl AsRef<Image>,
-        mipmapped: Mipmapped,
-        use_next_pow2: impl Into<Option<bool>>,
-    ) -> usize {
-        unsafe {
-            sb::C_GrDirectContext_ComputeImageSize(
-                image.as_ref().clone().into_ptr(),
-                mipmapped,
-                use_next_pow2.into().unwrap_or_default(),
-            )
-        }
     }
 
     // TODO: wrap createBackendTexture (several variants)

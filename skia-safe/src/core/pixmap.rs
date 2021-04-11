@@ -4,10 +4,7 @@ use crate::{
 };
 use skia_bindings as sb;
 use skia_bindings::SkPixmap;
-use std::convert::TryInto;
-use std::ffi::c_void;
-use std::os::raw;
-use std::{ptr, slice};
+use std::{convert::TryInto, ffi::c_void, os::raw, ptr};
 
 pub type Pixmap = Handle<SkPixmap>;
 unsafe impl Send for Pixmap {}
@@ -186,9 +183,7 @@ impl Handle<SkPixmap> {
         dst_row_bytes: usize,
         src: impl Into<IPoint>,
     ) -> bool {
-        if pixels.elements_size_of()
-            != (usize::try_from(dst_info.height()).unwrap() * dst_row_bytes)
-        {
+        if !dst_info.valid_pixels(dst_row_bytes, pixels) {
             return false;
         }
 
@@ -212,7 +207,7 @@ impl Handle<SkPixmap> {
             let addr = dst.writable_addr() as *mut raw::c_char;
             self.read_pixels(
                 dst.info(),
-                slice::from_raw_parts_mut(addr, len),
+                safer::from_raw_parts_mut(addr, len),
                 row_bytes,
                 src,
             )

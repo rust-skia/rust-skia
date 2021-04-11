@@ -1,8 +1,7 @@
 use crate::prelude::*;
 use skia_bindings as sb;
 use skia_bindings::{SkFontArguments, SkFontArguments_VariationPosition};
-use std::marker::PhantomData;
-use std::{mem, slice};
+use std::{marker::PhantomData, mem};
 
 #[derive(Debug)]
 pub struct VariationPosition<'a> {
@@ -89,7 +88,7 @@ impl FontArguments<'_> {
         unsafe {
             let position = sb::C_SkFontArguments_getVariationDesignPosition(self.native());
             VariationPosition {
-                coordinates: slice::from_raw_parts(
+                coordinates: safer::from_raw_parts(
                     position.coordinates as *const _,
                     position.coordinateCount.try_into().unwrap(),
                 ),

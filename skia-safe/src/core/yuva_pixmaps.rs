@@ -1,8 +1,11 @@
 use crate::{prelude::*, ColorType, Data, ImageInfo, Pixmap, YUVAInfo, YUVColorSpace};
 use skia_bindings as sb;
 use skia_bindings::{SkYUVAPixmapInfo, SkYUVAPixmaps};
-use std::{ffi::c_void, ptr, slice};
+use std::{ffi::c_void, ptr};
 use yuva_pixmap_info::SupportedDataTypes;
+
+/// Data type for Y, U, V, and possibly A channels independent of how values are packed into planes.
+pub use yuva_pixmap_info::DataType;
 
 /// [YUVAInfo] combined with per-plane [ColorType]s and row bytes. Fully specifies the [Pixmap]`s
 /// for a YUVA image without the actual pixel memory and data.
@@ -151,11 +154,16 @@ impl YUVAPixmapInfo {
         &self,
         memory: *mut c_void,
     ) -> Option<[Pixmap; Self::MAX_PLANES]> {
-        // Can't return a Vec<Pixmap> because Pixmap's can't be cloned.
+        // Can't return a Vec<Pixmap> because Pixmaps can't be cloned.
         let mut pixmaps: [Pixmap; Self::MAX_PLANES] = Default::default();
         self.native()
             .initPixmapsFromSingleAllocation(memory, pixmaps.native_mut().as_mut_ptr())
             .if_true_some(pixmaps)
+    }
+
+    /// Is this valid and does it use color types allowed by the passed [SupportedDataTypes]?
+    pub fn is_supported(&self, data_types: &SupportedDataTypes) -> bool {
+        unsafe { self.native().isSupported(data_types.native()) }
     }
 
     /// Returns `true` if this has been configured with a non-empty dimensioned [YUVAInfo] with
@@ -164,9 +172,9 @@ impl YUVAPixmapInfo {
         unsafe { sb::C_SkYUVAPixmapInfo_isValid(info) }
     }
 
-    /// Is this valid and does it use color types allowed by the passed [SupportedDataTypes]?
-    pub fn is_supported(&self, data_types: &SupportedDataTypes) -> bool {
-        unsafe { self.native().isSupported(data_types.native()) }
+    /// Creates a native default instance that is invalid.
+    pub(crate) fn new_invalid() -> SkYUVAPixmapInfo {
+        construct(|pi| unsafe { sb::C_SkYUVAPixmapInfo_Construct(pi) })
     }
 }
 
@@ -187,8 +195,6 @@ impl NativeClone for SkYUVAPixmaps {
         construct(|pixmaps| unsafe { sb::C_SkYUVAPixmaps_MakeCopy(self, pixmaps) })
     }
 }
-
-pub use yuva_pixmap_info::DataType;
 
 impl YUVAPixmaps {
     pub const MAX_PLANES: usize = YUVAPixmapInfo::MAX_PLANES;
@@ -262,8 +268,8 @@ impl YUVAPixmaps {
     /// Access the [Pixmap] planes.
     pub fn planes(&self) -> &[Pixmap] {
         unsafe {
-            let planes = Pixmap::from_native_ref(&*sb::C_SkYUVAPixmaps_planes(self.native()));
-            slice::from_raw_parts(planes, self.num_planes())
+            let planes = Pixmap::from_native_ptr(sb::C_SkYUVAPixmaps_planes(self.native()));
+            safer::from_raw_parts(planes, self.num_planes())
         }
     }
 

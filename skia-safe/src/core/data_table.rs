@@ -1,10 +1,12 @@
 use crate::prelude::*;
 use skia_bindings as sb;
 use skia_bindings::{SkDataTable, SkRefCntBase};
-use std::convert::TryInto;
-use std::ffi::{c_void, CStr};
-use std::ops::Index;
-use std::{mem, slice};
+use std::{
+    convert::TryInto,
+    ffi::{c_void, CStr},
+    mem,
+    ops::Index,
+};
 
 pub type DataTable = RCHandle<SkDataTable>;
 unsafe impl Send for DataTable {}
@@ -50,7 +52,7 @@ impl RCHandle<SkDataTable> {
         let element_size = mem::size_of::<T>();
         assert_eq!(size % element_size, 0);
         let elements = size / element_size;
-        slice::from_raw_parts(ptr as _, elements)
+        safer::from_raw_parts(ptr as _, elements)
     }
 
     pub fn at_str(&self, index: usize) -> &CStr {

@@ -1,15 +1,11 @@
-use crate::prelude::*;
+use crate::{prelude::*, yuva_pixmap_info::SupportedDataTypes, Image, YUVAPixmapInfo, YUVAPixmaps};
 use crate::{Data, EncodedImageFormat, EncodedOrigin, IRect, ISize, ImageInfo, Pixmap};
 use ffi::CStr;
 use skia_bindings as sb;
 use skia_bindings::{SkCodec, SkCodec_Options, SkRefCntBase};
-use std::{ffi, ptr};
+use std::{ffi, mem, ptr};
 
 pub use sb::SkCodec_Result as Result;
-#[test]
-fn test_codec_result_naming() {
-    let _ = Result::IncompleteInput;
-}
 
 // TODO: implement Display
 
@@ -20,24 +16,18 @@ pub fn result_to_string(result: Result) -> &'static str {
 }
 
 pub use sb::SkCodec_SelectionPolicy as SelectionPolicy;
-#[test]
-fn test_selection_policy_naming() {
-    let _ = SelectionPolicy::PreferStillImage;
-}
 
 pub use sb::SkCodec_ZeroInitialized as ZeroInitialized;
-#[test]
-fn test_zero_initialized_naming() {
-    let _ = ZeroInitialized::Yes;
-}
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct Options {
     pub zero_initialized: ZeroInitialized,
-    pub subset: IRect,
+    pub subset: Option<IRect>,
     pub frame_index: usize,
     pub prior_frame: usize,
 }
+
+pub use sb::SkCodec_SkScanlineOrder as ScanlineOrder;
 
 pub type Codec = RCHandle<SkCodec>;
 
@@ -47,7 +37,7 @@ impl NativeRefCountedBase for SkCodec {
     type Base = SkRefCntBase;
 }
 
-impl RCHandle<SkCodec> {
+impl Codec {
     // TODO: wrap MakeFromStream
     // TODO: wrap from_data with SkPngChunkReader
 
@@ -143,28 +133,160 @@ impl RCHandle<SkCodec> {
     unsafe fn native_options(options: &Options) -> SkCodec_Options {
         SkCodec_Options {
             fZeroInitialized: options.zero_initialized,
-            fSubset: options.subset.native(),
+            fSubset: options.subset.native().as_ptr_or_null(),
             fFrameIndex: options.frame_index.try_into().unwrap(),
             fPriorFrame: options.prior_frame.try_into().unwrap(),
         }
     }
 
-    // TODO: queryYUVAInfo
-    // TODO: getYUVAPlanes
-    // TODO: startIncrementalDecode
-    // TODO: incrementalDecode
-    // TODO: startScanlineDecode
-    // TODO: getScanlines
-    // TODO: skipScanlines
-    // TODO: ScanlineOrder
-    // TODO: getScanlineOrder
-    // TODO: nextScanline
-    // TODO: outputScanline
-    // TODO: getFrameCount
-    // TODO: NoFrame
+    pub fn get_image<'a>(
+        &mut self,
+        info: impl Into<Option<ImageInfo>>,
+        options: impl Into<Option<&'a Options>>,
+    ) -> std::result::Result<Image, Result> {
+        let info = info.into().unwrap_or_else(|| self.info());
+        let options = options
+            .into()
+            .map(|options| unsafe { Self::native_options(options) });
+        let mut result = Result::InternalError;
+        Image::from_ptr(unsafe {
+            sb::C_SkCodec_getImage(
+                self.native_mut(),
+                info.native(),
+                options.as_ptr_or_null(),
+                &mut result,
+            )
+        })
+        .ok_or(result)
+    }
+
+    pub fn query_yuva_info(
+        &self,
+        supported_data_types: &SupportedDataTypes,
+    ) -> Option<YUVAPixmapInfo> {
+        let mut pixmap_info = YUVAPixmapInfo::new_invalid();
+        let r = unsafe {
+            self.native()
+                .queryYUVAInfo(supported_data_types.native(), &mut pixmap_info)
+        };
+        (r && YUVAPixmapInfo::native_is_valid(&pixmap_info))
+            .if_true_then_some(|| YUVAPixmapInfo::from_native_c(pixmap_info))
+    }
+
+    pub fn get_yuva_planes(&mut self, pixmaps: &YUVAPixmaps) -> Result {
+        unsafe { self.native_mut().getYUVAPlanes(pixmaps.native()) }
+    }
+
+    pub fn start_incremental_decode<'a>(
+        &mut self,
+        dst_info: &ImageInfo,
+        dst: &mut [u8],
+        row_bytes: usize,
+        options: impl Into<Option<&'a Options>>,
+    ) -> Result {
+        if !dst_info.valid_pixels(row_bytes, dst) {
+            return Result::InvalidParameters;
+        }
+        let options = options
+            .into()
+            .map(|options| unsafe { Self::native_options(options) });
+        unsafe {
+            self.native_mut().startIncrementalDecode(
+                dst_info.native(),
+                dst.as_mut_ptr() as _,
+                row_bytes,
+                options.as_ptr_or_null(),
+            )
+        }
+    }
+
+    pub fn incremental_decode(&mut self) -> (Result, Option<usize>) {
+        let mut rows_decoded = Default::default();
+        let r = unsafe { sb::C_SkCodec_incrementalDecode(self.native_mut(), &mut rows_decoded) };
+        if r == Result::IncompleteInput {
+            (r, Some(rows_decoded.try_into().unwrap()))
+        } else {
+            (r, None)
+        }
+    }
+
+    pub fn start_scanline_decode<'a>(
+        &mut self,
+        dst_info: &ImageInfo,
+        options: impl Into<Option<&'a Options>>,
+    ) -> Result {
+        let options = options
+            .into()
+            .map(|options| unsafe { Self::native_options(options) });
+        unsafe {
+            self.native_mut()
+                .startScanlineDecode(dst_info.native(), options.as_ptr_or_null())
+        }
+    }
+
+    pub fn get_scanlines(&mut self, dst: &mut [u8], count_lines: usize, row_bytes: usize) -> usize {
+        assert!(mem::size_of_val(dst) >= count_lines * row_bytes);
+        unsafe {
+            self.native_mut().getScanlines(
+                dst.as_mut_ptr() as _,
+                count_lines.try_into().unwrap(),
+                row_bytes,
+            )
+        }
+        .try_into()
+        .unwrap()
+    }
+
+    pub fn skip_scanlines(&mut self, count_lines: usize) -> bool {
+        unsafe {
+            self.native_mut()
+                .skipScanlines(count_lines.try_into().unwrap())
+        }
+    }
+
+    pub fn scanline_order(&self) -> ScanlineOrder {
+        unsafe { sb::C_SkCodec_getScanlineOrder(self.native()) }
+    }
+
+    pub fn next_scanline(&self) -> i32 {
+        unsafe { sb::C_SkCodec_nextScanline(self.native()) }
+    }
+
+    pub fn outbound_scanline(&self, input_scanline: i32) -> i32 {
+        unsafe { self.native().outputScanline(input_scanline) }
+    }
+
+    pub fn get_frame_count(&mut self) -> usize {
+        unsafe { sb::C_SkCodec_getFrameCount(self.native_mut()) }
+            .try_into()
+            .unwrap()
+    }
+
     // TODO: FrameInfo
     // TODO: getFrameInfo
-    // TODO: RepetitionCountInfinite
-    // TODO: getRepetitionCount
+
+    pub fn get_repetition_count(&mut self) -> Option<usize> {
+        const REPETITION_COUNT_INFINITE: i32 = -1;
+        let count = unsafe { sb::C_SkCodec_getRepetitionCount(self.native_mut()) };
+        if count != REPETITION_COUNT_INFINITE {
+            Some(count.try_into().unwrap())
+        } else {
+            None
+        }
+    }
+
     // TODO: Register
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Result, ScanlineOrder, SelectionPolicy, ZeroInitialized};
+
+    #[test]
+    fn test_naming() {
+        let _ = Result::IncompleteInput;
+        let _ = SelectionPolicy::PreferStillImage;
+        let _ = ZeroInitialized::Yes;
+        let _ = ScanlineOrder::BottomUp;
+    }
 }

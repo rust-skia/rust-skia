@@ -221,10 +221,6 @@ extern "C" void C_GrDirectContext_flushAndSubmit(GrDirectContext* self) {
     self->flushAndSubmit();
 }
 
-extern "C" size_t C_GrDirectContext_ComputeImageSize(SkImage* image, GrMipMapped mm, bool useNextPow2) {
-    return GrDirectContext::ComputeImageSize(sp(image), mm, useNextPow2);
-}
-
 extern "C" void C_GrDirectContext_compressedBackendFormat(const GrDirectContext* self, SkImage::CompressionType compression, GrBackendFormat* result) {
     *result = self->compressedBackendFormat(compression);
 }

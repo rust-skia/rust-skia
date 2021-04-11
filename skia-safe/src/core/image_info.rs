@@ -1,3 +1,5 @@
+use std::mem;
+
 use crate::prelude::*;
 use crate::{ColorSpace, IPoint, IRect, ISize};
 use skia_bindings as sb;
@@ -381,20 +383,41 @@ impl Handle<SkImageInfo> {
         unsafe { sb::C_SkImageInfo_reset(self.native_mut()) };
         self
     }
+
+    /// Returns `true` if the `row_bytes` are valid for [ImageInfo] _and_ an image would fit into
+    /// `pixels`.
+    pub(crate) fn valid_pixels<P>(&self, row_bytes: usize, pixels: &[P]) -> bool {
+        self.valid_row_bytes(row_bytes)
+            && mem::size_of_val(pixels) >= self.compute_byte_size(row_bytes)
+    }
 }
 
-#[test]
-fn ref_cnt_in_relation_to_color_space() {
-    let cs = ColorSpace::new_srgb();
-    let before = cs.native().ref_cnt();
-    {
-        let ii = ImageInfo::new_n32((10, 10), AlphaType::Premul, Some(cs.clone()));
-        // one for the capture in image info
-        assert_eq!(before + 1, cs.native().ref_cnt());
-        let cs2 = ii.color_space();
-        // and one for the returned one.
-        assert_eq!(before + 2, cs.native().ref_cnt());
-        drop(cs2);
+#[cfg(test)]
+
+mod tests {
+    use crate::prelude::*;
+    use crate::{AlphaType, ColorSpace, ImageInfo};
+    use std::mem;
+
+    #[test]
+    fn ref_cnt_in_relation_to_color_space() {
+        let cs = ColorSpace::new_srgb();
+        let before = cs.native().ref_cnt();
+        {
+            let ii = ImageInfo::new_n32((10, 10), AlphaType::Premul, Some(cs.clone()));
+            // one for the capture in image info
+            assert_eq!(before + 1, cs.native().ref_cnt());
+            let cs2 = ii.color_space();
+            // and one for the returned one.
+            assert_eq!(before + 2, cs.native().ref_cnt());
+            drop(cs2);
+        }
+        assert_eq!(before, cs.native().ref_cnt())
     }
-    assert_eq!(before, cs.native().ref_cnt())
+
+    #[test]
+    fn size_of_val_actually_counts_slices_bytes() {
+        let x: [u16; 4] = Default::default();
+        assert_eq!(mem::size_of_val(&x), 8);
+    }
 }

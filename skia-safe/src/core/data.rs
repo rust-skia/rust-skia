@@ -1,9 +1,10 @@
 use crate::prelude::*;
 use skia_bindings as sb;
 use skia_bindings::SkData;
-use std::ffi::{CStr, CString};
-use std::ops::Deref;
-use std::slice;
+use std::{
+    ffi::{CStr, CString},
+    ops::Deref,
+};
 
 pub type Data = RCHandle<SkData>;
 unsafe impl Send for Data {}
@@ -48,10 +49,7 @@ impl RCHandle<SkData> {
     }
 
     pub fn as_bytes(&self) -> &[u8] {
-        unsafe {
-            let bytes = self.native().fPtr as *const u8;
-            slice::from_raw_parts(bytes, self.size())
-        }
+        unsafe { safer::from_raw_parts(self.native().fPtr as _, self.size()) }
     }
 
     // TODO:

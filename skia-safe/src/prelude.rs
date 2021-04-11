@@ -257,6 +257,17 @@ impl<N: NativeDrop> Handle<N> {
         unsafe { transmute_ref_mut(n) }
     }
 
+    /// Converts a pointer to a native value into a pointer to the Rust value.
+    pub(crate) fn from_native_ptr(np: *const N) -> *const Self {
+        np as _
+    }
+
+    /// Converts a pointer to a mutable native value into a pointer to the mutable Rust value.
+    #[allow(unused)]
+    pub(crate) fn from_native_ptr_mut(np: *mut N) -> *mut Self {
+        np as _
+    }
+
     /// Constructs a C++ object in place by calling a
     /// function that expects a pointer that points to
     /// uninitialized memory of the native type.
@@ -606,17 +617,6 @@ impl<N: NativeRefCounted> IntoPtrOrNull<N> for Option<RCHandle<N>> {
     }
 }
 
-/// Trait to compute how many bytes the elements of this type occupy in memory.
-pub(crate) trait ElementsSizeOf {
-    fn elements_size_of(&self) -> usize;
-}
-
-impl<N: Sized> ElementsSizeOf for [N] {
-    fn elements_size_of(&self) -> usize {
-        mem::size_of::<N>() * self.len()
-    }
-}
-
 /// Tag the type to automatically implement get() functions for
 /// all Index implementations.
 pub trait IndexGet {}
@@ -696,6 +696,16 @@ pub trait NativeTransmutable<NT: Sized>: Sized {
     /// transmuted reference to the native mutable value.
     fn from_native_ref_mut(nt: &mut NT) -> &mut Self {
         unsafe { transmute_ref_mut(nt) }
+    }
+
+    /// Converts a pointer to a native value into a pointer to the Rust value.
+    fn from_native_ptr(np: *const NT) -> *const Self {
+        np as _
+    }
+
+    /// Converts a pointer to a mutable native value into a pointer to the mutable Rust value.
+    fn from_native_ptr_mut(np: *mut NT) -> *mut Self {
+        np as _
     }
 
     /// Runs a test that proves that the native and the rust
@@ -921,5 +931,39 @@ impl<H: NativeRefCountedBase> ConditionallySend for RCHandle<H> {
         } else {
             Err(self)
         }
+    }
+}
+
+/// Functions that are (supposedly) _safer_ variants of the ones Rust provides.
+pub(crate) mod safer {
+    use core::slice;
+    use std::ptr;
+
+    /// Invokes [slice::from_raw_parts] with the `ptr` only when `len` != 0, otherwise passes
+    /// `ptr::NonNull::dangling()` as recommended.
+    ///
+    /// Panics if `len` != 0 and `ptr` is `null`.
+    pub unsafe fn from_raw_parts<'a, T>(ptr: *const T, len: usize) -> &'a [T] {
+        let ptr = if len == 0 {
+            ptr::NonNull::dangling().as_ptr()
+        } else {
+            assert!(!ptr.is_null());
+            ptr
+        };
+        slice::from_raw_parts(ptr, len)
+    }
+
+    /// Invokes [slice::from_raw_parts_mut] with the `ptr` only if `len` != 0, otherwise passes
+    /// `ptr::NonNull::dangling()` as recommended.
+    ///
+    /// Panics if `len` != 0 and `ptr` is `null`.
+    pub unsafe fn from_raw_parts_mut<'a, T>(ptr: *mut T, len: usize) -> &'a mut [T] {
+        let ptr = if len == 0 {
+            ptr::NonNull::dangling().as_ptr() as *mut _
+        } else {
+            assert!(!ptr.is_null());
+            ptr
+        };
+        slice::from_raw_parts_mut(ptr, len)
     }
 }
