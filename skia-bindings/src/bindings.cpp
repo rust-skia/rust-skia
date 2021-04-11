@@ -2294,14 +2294,14 @@ SkRuntimeEffect *C_SkRuntimeEffect_Make(
     return r.effect.release();
 }
 
-SkShader *C_SkRuntimeEffect_makeShader(SkRuntimeEffect *self, SkData *uniforms, SkShader **children, size_t childCount,
+SkShader *C_SkRuntimeEffect_makeShader(const SkRuntimeEffect *self, SkData *uniforms, SkShader **children, size_t childCount,
                                        const SkMatrix *localMatrix, bool isOpaque) {
     auto childrenSPs = reinterpret_cast<sk_sp<SkShader> *>(children);
     return self->makeShader(sp(uniforms), childrenSPs, childCount, localMatrix, isOpaque).release();
 }
 
 SkImage *C_SkRuntimeEffect_makeImage(
-    SkRuntimeEffect *self,
+    const SkRuntimeEffect *self,
     GrRecordingContext* context,
     SkData *uniforms,
     SkShader **children, size_t childCount,
@@ -2316,7 +2316,7 @@ SkImage *C_SkRuntimeEffect_makeImage(
         localMatrix, *resultInfo, mipmapped).release();
 }
 
-SkColorFilter* C_SkRuntimeEffect_makeColorFilter(SkRuntimeEffect* self, SkData* inputs) {
+SkColorFilter* C_SkRuntimeEffect_makeColorFilter(const SkRuntimeEffect* self, SkData* inputs) {
     return self->makeColorFilter(sp(inputs)).release();
 }
 

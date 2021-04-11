@@ -117,9 +117,10 @@ impl NativeRefCountedBase for SkRuntimeEffect {
     type Base = SkRefCntBase;
 }
 
+#[repr(C)]
 #[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
 pub struct Options {
-    pub inline_threshold: i32,
+    pub force_no_inline: bool,
 }
 
 impl NativeTransmutable<SkRuntimeEffect_Options> for Options {}
@@ -153,7 +154,7 @@ impl fmt::Debug for RuntimeEffect {
 
 impl RuntimeEffect {
     pub fn make_shader<'a>(
-        &mut self,
+        &self,
         uniforms: impl Into<Data>,
         children: impl IntoIterator<Item = Shader>,
         local_matrix: impl Into<Option<&'a Matrix>>,
@@ -165,7 +166,7 @@ impl RuntimeEffect {
             .collect();
         Shader::from_ptr(unsafe {
             sb::C_SkRuntimeEffect_makeShader(
-                self.native_mut(),
+                self.native(),
                 uniforms.into().into_ptr(),
                 children.as_mut_ptr(),
                 children.len(),
@@ -177,7 +178,7 @@ impl RuntimeEffect {
 
     #[cfg(feature = "gpu")]
     pub fn make_image<'a>(
-        &mut self,
+        &self,
         context: &mut crate::gpu::RecordingContext,
         uniforms: impl Into<Data>,
         children: impl IntoIterator<Item = Shader>,
@@ -192,7 +193,7 @@ impl RuntimeEffect {
 
         crate::Image::from_ptr(unsafe {
             sb::C_SkRuntimeEffect_makeImage(
-                self.native_mut(),
+                self.native(),
                 context.native_mut(),
                 uniforms.into().into_ptr(),
                 children.as_mut_ptr(),
@@ -204,28 +205,14 @@ impl RuntimeEffect {
         })
     }
 
-    #[deprecated(since = "0.33.0", note = "removed without replacement")]
-    pub fn make_color_filter_with_children(
-        &mut self,
-        _inputs: impl Into<Data>,
-        _children: impl IntoIterator<Item = ColorFilter>,
-    ) -> ! {
-        panic!("removed without replacement")
-    }
-
-    pub fn make_color_filter(&mut self, inputs: impl Into<Data>) -> Option<ColorFilter> {
+    pub fn make_color_filter(&self, inputs: impl Into<Data>) -> Option<ColorFilter> {
         ColorFilter::from_ptr(unsafe {
-            sb::C_SkRuntimeEffect_makeColorFilter(self.native_mut(), inputs.into().into_ptr())
+            sb::C_SkRuntimeEffect_makeColorFilter(self.native(), inputs.into().into_ptr())
         })
     }
 
     pub fn source(&self) -> &str {
         unsafe { (*sb::C_SkRuntimeEffect_source(self.native())).as_str() }
-    }
-
-    #[deprecated(since = "0.29.0", note = "removed without replacement")]
-    pub fn index(&self) -> ! {
-        unimplemented!("removed without replacement")
     }
 
     #[deprecated(since = "0.35.0", note = "Use uniform_size() instead")]
@@ -288,7 +275,7 @@ impl RuntimeEffect {
     }
 }
 
-// TODO: wrap SkRuntimeShaderBuilder
+// TODO: wrap SkRuntimeEffectBuilder, SkRuntimeShaderBuilder
 
 #[cfg(test)]
 mod tests {
