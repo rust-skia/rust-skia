@@ -17,11 +17,16 @@ fn sendable_implements_send() {
 }
 
 mod codec {
-    use skia_safe::Codec;
+    use skia_safe::{codec, Codec};
     use static_assertions::*;
 
     // Codec seems to call into SkPngChunkReader*
     assert_not_impl_any!(Codec: Send, Sync);
+
+    assert_impl_all!(codec::Result: Send, Sync);
+    assert_impl_all!(codec::SelectionPolicy: Send, Sync);
+    assert_impl_all!(codec::ZeroInitialized: Send, Sync);
+    assert_impl_all!(codec::ScanlineOrder: Send, Sync);
 }
 
 mod core {
@@ -135,7 +140,9 @@ mod effects {
     use static_assertions::*;
 
     assert_impl_all!(runtime_effect::Uniform: Send, Sync);
+    assert_impl_all!(runtime_effect::Varying: Send, Sync);
     assert_not_impl_any!(RuntimeEffect: Send, Sync);
+    assert_impl_all!(runtime_effect::Options: Send, Sync);
     assert_impl_all!(image_filters::CropRect: Send, Sync);
     assert_impl_all!(image_filters::Dither: Send, Sync);
 }
