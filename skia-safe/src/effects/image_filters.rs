@@ -323,7 +323,6 @@ pub fn matrix_transform(
     })
 }
 
-#[allow(clippy::new_ret_no_self)]
 pub fn merge(
     filters: impl IntoIterator<Item = Option<ImageFilter>>,
     crop_rect: impl Into<CropRect>,
@@ -591,7 +590,6 @@ impl ImageFilter {
         )
     }
 
-    #[allow(clippy::too_many_arguments)]
     pub fn arithmetic<'a>(
         inputs: impl Into<ArithmeticFPInputs>,
         background: impl Into<Option<Self>>,
@@ -857,7 +855,7 @@ impl ImageFilter {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct ArithmeticFPInputs {
     pub k: [f32; 4],
     pub enforce_pm_color: bool,

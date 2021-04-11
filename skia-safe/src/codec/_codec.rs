@@ -265,10 +265,10 @@ impl Codec {
     // TODO: FrameInfo
     // TODO: getFrameInfo
 
-    const REPETITION_COUNT_INFINITE: i32 = -1;
     pub fn get_repetition_count(&mut self) -> Option<usize> {
+        const REPETITION_COUNT_INFINITE: i32 = -1;
         let count = unsafe { sb::C_SkCodec_getRepetitionCount(self.native_mut()) };
-        if count != Self::REPETITION_COUNT_INFINITE {
+        if count != REPETITION_COUNT_INFINITE {
             Some(count.try_into().unwrap())
         } else {
             None
