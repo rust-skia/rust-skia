@@ -2,11 +2,13 @@ use crate::{prelude::*, scalar, BlendMode, Color, Color4f, ColorSpace, NativeFla
 use skia_bindings::{self as sb, SkColorFilter, SkFlattenable, SkRefCntBase};
 use std::fmt;
 
+/*
 bitflags! {
     pub struct Flags: u32 {
         const ALPHA_UNCHANGED = sb::SkColorFilter_Flags_kAlphaUnchanged_Flag as u32;
     }
 }
+*/
 
 pub type ColorFilter = RCHandle<SkColorFilter>;
 unsafe impl Send for ColorFilter {}
@@ -56,9 +58,11 @@ impl ColorFilter {
     // TODO: appendStages()
     // TODO: program()
 
+    /*
     pub fn flags(&self) -> self::Flags {
         Flags::from_bits_truncate(unsafe { self.native().getFlags() })
     }
+    */
 
     pub fn is_alpha_unchanged(&self) -> bool {
         unsafe { self.native().isAlphaUnchanged() }

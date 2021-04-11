@@ -829,7 +829,6 @@ extern "C" SkColorSpace* C_SkColorSpace_Deserialize(const void* data, size_t len
 // SkM44
 //
 
-
 extern "C" void C_SkM44_Types(SkV2 *) {};
 
 extern "C" bool C_SkM44_equals(const SkM44 *self, const SkM44 *other) {
@@ -844,13 +843,17 @@ extern "C" SkV4 C_SkM44_map(const SkM44* self, float x, float y, float z, float 
     return self->map(x, y, z, w);
 }
 
+/*
 extern "C" void C_Sk3LookAt(const SkV3* eye, const SkV3* center, const SkV3* up, SkM44* uninitialized) {
     new(uninitialized) SkM44(Sk3LookAt(*eye, *center, *up));
 }
+*/
 
+/*
 extern "C" void C_Sk3Perspective(float near, float far, float angle, SkM44* uninitialized) {
     new(uninitialized) SkM44(Sk3Perspective(near, far, angle));
 }
+*/
 
 //
 // SkMatrix44
@@ -1139,7 +1142,6 @@ extern "C" int C_SkFontStyle_width(const SkFontStyle* self) {
 extern "C" SkFontStyle::Slant C_SkFontStyle_slant(const SkFontStyle* self) {
     return self->slant();
 }
-
 
 //
 // SkTextBlob

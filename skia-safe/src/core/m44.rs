@@ -757,15 +757,19 @@ impl M44 {
         self
     }
 
+    /*
     pub fn look_at(eye: &V3, center: &V3, up: &V3) -> Self {
         Self::construct(|m| unsafe {
             sb::C_Sk3LookAt(eye.native(), center.native(), up.native(), m)
         })
     }
+    */
 
+    /*
     pub fn perspective(near: f32, far: f32, angle: f32) -> Self {
         Self::construct(|m| unsafe { sb::C_Sk3Perspective(near, far, angle, m) })
     }
+    */
 
     // helper
 

@@ -131,11 +131,13 @@ impl Paint {
         unsafe { sb::C_SkPaint_getFilterQuality(self.native()) }
     }
 
-    #[deprecated(since = "0.38.0")]
-    pub fn set_filter_quality(&mut self, quality: FilterQuality) -> &mut Self {
-        unsafe { self.native_mut().setFilterQuality(quality) }
-        self
-    }
+    /*
+        #[deprecated(since = "0.38.0")]
+        pub fn set_filter_quality(&mut self, quality: FilterQuality) -> &mut Self {
+            unsafe { self.native_mut().setFilterQuality(quality) }
+            self
+        }
+    */
 
     pub fn style(&self) -> Style {
         unsafe { sb::C_SkPaint_getStyle(self.native()) }
