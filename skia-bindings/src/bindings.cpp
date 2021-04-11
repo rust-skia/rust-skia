@@ -414,10 +414,6 @@ extern "C" bool C_SkPaint_Equals(const SkPaint* lhs, const SkPaint* rhs) {
     return *lhs == *rhs;
 }
 
-extern "C" SkFilterQuality C_SkPaint_getFilterQuality(const SkPaint* self) {
-    return self->getFilterQuality();
-}
-
 extern "C" SkPaint::Style C_SkPaint_getStyle(const SkPaint* self) {
     return self->getStyle();
 }

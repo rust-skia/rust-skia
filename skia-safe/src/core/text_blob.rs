@@ -177,14 +177,14 @@ impl TextBlobBuilder {
     ) -> &mut [GlyphId] {
         let offset = offset.into();
         unsafe {
-            let buffer = self.native_mut().allocRun(
+            let buffer = &*self.native_mut().allocRun(
                 font.native(),
                 count.try_into().unwrap(),
                 offset.x,
                 offset.y,
                 bounds.native_ptr_or_null(),
             );
-            safer::from_raw_parts_mut((*buffer).glyphs, count)
+            safer::from_raw_parts_mut(buffer.glyphs, count)
         }
     }
 
@@ -196,15 +196,15 @@ impl TextBlobBuilder {
         bounds: Option<&Rect>,
     ) -> (&mut [GlyphId], &mut [scalar]) {
         unsafe {
-            let buffer = self.native_mut().allocRunPosH(
+            let buffer = &*self.native_mut().allocRunPosH(
                 font.native(),
                 count.try_into().unwrap(),
                 y,
                 bounds.native_ptr_or_null(),
             );
             (
-                safer::from_raw_parts_mut((*buffer).glyphs, count),
-                safer::from_raw_parts_mut((*buffer).pos, count),
+                safer::from_raw_parts_mut(buffer.glyphs, count),
+                safer::from_raw_parts_mut(buffer.pos, count),
             )
         }
     }
@@ -216,14 +216,14 @@ impl TextBlobBuilder {
         bounds: Option<&Rect>,
     ) -> (&mut [GlyphId], &mut [Point]) {
         unsafe {
-            let buffer = self.native_mut().allocRunPos(
+            let buffer = &*self.native_mut().allocRunPos(
                 font.native(),
                 count.try_into().unwrap(),
                 bounds.native_ptr_or_null(),
             );
             (
-                safer::from_raw_parts_mut((*buffer).glyphs, count),
-                safer::from_raw_parts_mut((*buffer).pos as *mut Point, count),
+                safer::from_raw_parts_mut(buffer.glyphs, count),
+                safer::from_raw_parts_mut(buffer.pos as *mut Point, count),
             )
         }
     }
@@ -234,17 +234,112 @@ impl TextBlobBuilder {
         count: usize,
     ) -> (&mut [GlyphId], &mut [RSXform]) {
         unsafe {
-            let buffer = self
+            let buffer = &*self
                 .native_mut()
                 .allocRunRSXform(font.native(), count.try_into().unwrap());
             (
-                safer::from_raw_parts_mut((*buffer).glyphs, count),
-                safer::from_raw_parts_mut((*buffer).pos as *mut RSXform, count),
+                safer::from_raw_parts_mut(buffer.glyphs, count),
+                safer::from_raw_parts_mut(buffer.pos as *mut RSXform, count),
             )
         }
     }
 
-    // TODO: allocRunText, allocRunTextPosH, allocRunTextPos, allocRunTextRSXform
+    pub fn alloc_run_text(
+        &mut self,
+        font: &Font,
+        count: usize,
+        offset: impl Into<Point>,
+        text_byte_count: usize,
+        bounds: Option<&Rect>,
+    ) -> (&mut [GlyphId], &mut [u8], &mut [u32]) {
+        let offset = offset.into();
+        unsafe {
+            let buffer = &*self.native_mut().allocRunText(
+                font.native(),
+                count.try_into().unwrap(),
+                offset.x,
+                offset.y,
+                text_byte_count.try_into().unwrap(),
+                bounds.native_ptr_or_null(),
+            );
+            (
+                safer::from_raw_parts_mut(buffer.glyphs, count),
+                safer::from_raw_parts_mut(buffer.utf8text as *mut u8, text_byte_count),
+                safer::from_raw_parts_mut(buffer.clusters, count),
+            )
+        }
+    }
+
+    pub fn alloc_run_text_pos_h(
+        &mut self,
+        font: &Font,
+        count: usize,
+        y: scalar,
+        text_byte_count: usize,
+        bounds: Option<&Rect>,
+    ) -> (&mut [GlyphId], &mut [scalar], &mut [u8], &mut [u32]) {
+        unsafe {
+            let buffer = &*self.native_mut().allocRunTextPosH(
+                font.native(),
+                count.try_into().unwrap(),
+                y,
+                text_byte_count.try_into().unwrap(),
+                bounds.native_ptr_or_null(),
+            );
+            (
+                safer::from_raw_parts_mut(buffer.glyphs, count),
+                safer::from_raw_parts_mut(buffer.pos, count),
+                safer::from_raw_parts_mut(buffer.utf8text as *mut u8, text_byte_count),
+                safer::from_raw_parts_mut(buffer.clusters, count),
+            )
+        }
+    }
+
+    pub fn alloc_run_text_pos(
+        &mut self,
+        font: &Font,
+        count: usize,
+        text_byte_count: usize,
+        bounds: Option<&Rect>,
+    ) -> (&mut [GlyphId], &mut [Point], &mut [u8], &mut [u32]) {
+        unsafe {
+            let buffer = &*self.native_mut().allocRunTextPos(
+                font.native(),
+                count.try_into().unwrap(),
+                text_byte_count.try_into().unwrap(),
+                bounds.native_ptr_or_null(),
+            );
+            (
+                safer::from_raw_parts_mut(buffer.glyphs, count),
+                safer::from_raw_parts_mut(buffer.pos as *mut Point, count),
+                safer::from_raw_parts_mut(buffer.utf8text as *mut u8, text_byte_count),
+                safer::from_raw_parts_mut(buffer.clusters, count),
+            )
+        }
+    }
+
+    pub fn alloc_run_text_rsxform(
+        &mut self,
+        font: &Font,
+        count: usize,
+        text_byte_count: usize,
+        bounds: Option<&Rect>,
+    ) -> (&mut [GlyphId], &mut [RSXform], &mut [u8], &mut [u32]) {
+        unsafe {
+            let buffer = &*self.native_mut().allocRunTextPos(
+                font.native(),
+                count.try_into().unwrap(),
+                text_byte_count.try_into().unwrap(),
+                bounds.native_ptr_or_null(),
+            );
+            (
+                safer::from_raw_parts_mut(buffer.glyphs, count),
+                safer::from_raw_parts_mut(buffer.pos as *mut RSXform, count),
+                safer::from_raw_parts_mut(buffer.utf8text as *mut u8, text_byte_count),
+                safer::from_raw_parts_mut(buffer.clusters, count),
+            )
+        }
+    }
 }
 
 pub type TextBlobIter<'a> = Borrows<'a, Handle<SkTextBlob_Iter>>;
