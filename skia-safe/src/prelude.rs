@@ -934,7 +934,7 @@ impl<H: NativeRefCountedBase> ConditionallySend for RCHandle<H> {
     }
 }
 
-/// Functions that are _safer_ variants of the ones Rust provides.
+/// Functions that are (supposedly) _safer_ variants of the ones Rust provides.
 pub(crate) mod safer {
     use core::slice;
     use std::ptr;
@@ -942,7 +942,7 @@ pub(crate) mod safer {
     /// Invokes [slice::from_raw_parts] with the `ptr` only when `len` != 0, otherwise passes
     /// `ptr::NonNull::dangling()` as recommended.
     ///
-    /// Panics when `len` != 0 and `ptr` is `null`.
+    /// Panics if `len` != 0 and `ptr` is `null`.
     pub unsafe fn from_raw_parts<'a, T>(ptr: *const T, len: usize) -> &'a [T] {
         let ptr = if len == 0 {
             ptr::NonNull::dangling().as_ptr()
@@ -953,10 +953,10 @@ pub(crate) mod safer {
         slice::from_raw_parts(ptr, len)
     }
 
-    /// Invokes [slice::from_raw_parts_mut] with the `ptr` only when `len` != 0, otherwise passes
+    /// Invokes [slice::from_raw_parts_mut] with the `ptr` only if `len` != 0, otherwise passes
     /// `ptr::NonNull::dangling()` as recommended.
     ///
-    /// Panics when `len` != 0 and `ptr` is `null`.
+    /// Panics if `len` != 0 and `ptr` is `null`.
     pub unsafe fn from_raw_parts_mut<'a, T>(ptr: *mut T, len: usize) -> &'a mut [T] {
         let ptr = if len == 0 {
             ptr::NonNull::dangling().as_ptr() as *mut _
