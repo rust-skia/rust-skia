@@ -56,7 +56,7 @@ shaper = ["textlayout"]
 
 [build-dependencies]
 cc = "1.0.37"
-bindgen = "0.57.0"
+bindgen = "0.58.1"
 
 # For enum variant name replacements.
 

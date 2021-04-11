@@ -707,7 +707,7 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         .raw_line("#![allow(clippy::all)]")
         // GrVkBackendContext contains u128 fields on macOS
         .raw_line("#![allow(improper_ctypes)]")
-        .whitelist_function("C_.*")
+        .allowlist_function("C_.*")
         .constified_enum(".*Mask")
         .constified_enum(".*Flags")
         .constified_enum(".*Bits")
@@ -715,38 +715,38 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         .constified_enum("GrVkAlloc_Flag")
         .constified_enum("GrGLBackendState")
         // not used:
-        .blacklist_type("SkPathRef_Editor")
-        .blacklist_function("SkPathRef_Editor_Editor")
+        .blocklist_type("SkPathRef_Editor")
+        .blocklist_function("SkPathRef_Editor_Editor")
         // private types that pull in inline functions that cannot be linked:
         // https://github.com/rust-skia/rust-skia/issues/318
         .raw_line("pub enum GrContext_Base {}")
-        .blacklist_type("GrContext_Base")
-        .blacklist_function("GrContext_Base_.*")
+        .blocklist_type("GrContext_Base")
+        .blocklist_function("GrContext_Base_.*")
         .raw_line("pub enum GrImageContext {}")
-        .blacklist_type("GrImageContext")
+        .blocklist_type("GrImageContext")
         .raw_line("pub enum GrImageContextPriv {}")
-        .blacklist_type("GrImageContextPriv")
+        .blocklist_type("GrImageContextPriv")
         .raw_line("pub enum GrContextThreadSafeProxy {}")
-        .blacklist_type("GrContextThreadSafeProxy")
+        .blocklist_type("GrContextThreadSafeProxy")
         .raw_line("pub enum GrContextThreadSafeProxyPriv {}")
-        .blacklist_type("GrContextThreadSafeProxyPriv")
+        .blocklist_type("GrContextThreadSafeProxyPriv")
         .raw_line("pub enum GrRecordingContextPriv {}")
-        .blacklist_type("GrRecordingContextPriv")
+        .blocklist_type("GrRecordingContextPriv")
         .raw_line("pub enum GrContextPriv {}")
-        .blacklist_type("GrContextPriv")
-        .blacklist_function("GrContext_priv.*")
-        .blacklist_function("SkDeferredDisplayList_priv.*")
+        .blocklist_type("GrContextPriv")
+        .blocklist_function("GrContext_priv.*")
+        .blocklist_function("SkDeferredDisplayList_priv.*")
         .raw_line("pub enum SkVerticesPriv {}")
-        .blacklist_type("SkVerticesPriv")
-        .blacklist_function("SkVertices_priv.*")
-        .blacklist_function("std::bitset_flip.*")
+        .blocklist_type("SkVerticesPriv")
+        .blocklist_function("SkVertices_priv.*")
+        .blocklist_function("std::bitset_flip.*")
         // Vulkan reexports that got swallowed by making them opaque.
-        // (these can not be whitelisted by a extern "C" function)
-        .whitelist_type("VkPhysicalDeviceFeatures")
-        .whitelist_type("VkPhysicalDeviceFeatures2")
+        // (these can not be allowlisted by a extern "C" function)
+        .allowlist_type("VkPhysicalDeviceFeatures")
+        .allowlist_type("VkPhysicalDeviceFeatures2")
         // misc
-        .whitelist_var("SK_Color.*")
-        .whitelist_var("kAll_GrBackendState")
+        .allowlist_var("SK_Color.*")
+        .allowlist_var("kAll_GrBackendState")
         .use_core()
         .clang_arg("-std=c++17")
         .clang_args(&["-x", "c++"])
@@ -763,16 +763,16 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         builder
     };
 
-    for function in WHITELISTED_FUNCTIONS {
-        builder = builder.whitelist_function(function)
+    for function in ALLOWLISTED_FUNCTIONS {
+        builder = builder.allowlist_function(function)
     }
 
     for opaque_type in OPAQUE_TYPES {
         builder = builder.opaque_type(opaque_type)
     }
 
-    for t in BLACKLISTED_TYPES {
-        builder = builder.blacklist_type(t);
+    for t in BLOCKLISTED_TYPES {
+        builder = builder.blocklist_type(t);
     }
 
     let mut cc_build = Build::new();
@@ -893,7 +893,7 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         .expect("Couldn't write bindings!");
 }
 
-const WHITELISTED_FUNCTIONS: &[&str] = &[
+const ALLOWLISTED_FUNCTIONS: &[&str] = &[
     "SkAnnotateRectWithURL",
     "SkAnnotateNamedDestination",
     "SkAnnotateLinkToDestination",
@@ -901,7 +901,7 @@ const WHITELISTED_FUNCTIONS: &[&str] = &[
     "SkColorTypeIsAlwaysOpaque",
     "SkColorTypeValidateAlphaType",
     "SkRGBToHSV",
-    // this function does not whitelist (probably because of inlining):
+    // this function does not allowlist (probably because of inlining):
     "SkColorToHSV",
     "SkHSVToColor",
     "SkPreMultiplyARGB",
@@ -1038,7 +1038,7 @@ const OPAQUE_TYPES: &[&str] = &[
     "std::tuple",
 ];
 
-const BLACKLISTED_TYPES: &[&str] = &[
+const BLOCKLISTED_TYPES: &[&str] = &[
     // modules/skparagraph
     //   pulls in a std::map<>, which we treat as opaque, but bindgen creates wrong bindings for
     //   std::_Tree* types
