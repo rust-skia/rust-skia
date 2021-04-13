@@ -1019,7 +1019,10 @@ impl Canvas {
         self.local_to_device().to_m33()
     }
 
-    #[deprecated(since = "0.38.0", note = "use local_to_device() or local_to_device_as_3x3() instead")]
+    #[deprecated(
+        since = "0.38.0",
+        note = "use local_to_device() or local_to_device_as_3x3() instead"
+    )]
     pub fn total_matrix(&self) -> Matrix {
         let mut matrix = Matrix::default();
         unsafe { sb::C_SkCanvas_getTotalMatrix(self.native(), matrix.native_mut()) };
