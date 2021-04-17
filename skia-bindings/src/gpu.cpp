@@ -225,6 +225,10 @@ extern "C" void C_GrDirectContext_compressedBackendFormat(const GrDirectContext*
     *result = self->compressedBackendFormat(compression);
 }
 
+extern "C" void C_GrDirectContext_directContextId(const GrDirectContext* self, GrDirectContext::DirectContextID* r) {
+    *r = self->directContextID();
+}
+
 extern "C" void C_GrDirectContext_performDeferredCleanup(GrDirectContext* self, long msNotUsed) {
     self->performDeferredCleanup(std::chrono::milliseconds(msNotUsed));
 }

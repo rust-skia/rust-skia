@@ -36,6 +36,7 @@ pub struct ContextOptions {
     pub max_cached_vulkan_secondary_command_buffers: raw::c_int,
     pub suppress_mipmap_support: bool,
     pub driver_bug_workarounds: DriverBugWorkarounds,
+    pub enable_experimental_hardware_tessellation: bool,
 }
 unsafe impl Send for ContextOptions {}
 unsafe impl Sync for ContextOptions {}
