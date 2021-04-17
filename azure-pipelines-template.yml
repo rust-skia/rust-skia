@@ -154,6 +154,27 @@ jobs:
   - ${{ if eq(parameters.platform, 'macOS') }}:
     - template: 'azure-pipelines-build-target.yml'
       parameters:
+        target: 'aarch64-apple-darwin'
+        releaseBinaries: ${{ parameters.deployRelease }}
+        ${{ if eq(parameters.deployRelease, 'False') }}:
+          features: '$(features),metal'
+
+    - template: 'azure-pipelines-build-target.yml'
+      parameters:
+        target: 'aarch64-apple-ios'
+        releaseBinaries: ${{ parameters.deployRelease }}
+        ${{ if eq(parameters.deployRelease, 'False') }}:
+          features: '$(features),metal'
+
+    - template: 'azure-pipelines-build-target.yml'
+      parameters:
+        target: 'x86_64-apple-ios'
+        releaseBinaries: ${{ parameters.deployRelease }}
+        ${{ if eq(parameters.deployRelease, 'False') }}:
+          features: '$(features),metal'
+
+    - template: 'azure-pipelines-build-target.yml'
+      parameters:
         target: 'aarch64-linux-android'
         androidEnv: true
         releaseBinaries: ${{ parameters.deployRelease }}
@@ -168,20 +189,6 @@ jobs:
       parameters:
         target: 'i686-linux-android'
         androidEnv: true
-
-    - template: 'azure-pipelines-build-target.yml'
-      parameters:
-        target: 'aarch64-apple-ios'
-        releaseBinaries: ${{ parameters.deployRelease }}
-        ${{ if and(eq(parameters.platform, 'macOS'), eq(parameters.deployRelease, 'False')) }}:
-          features: '$(features),metal'
-
-    - template: 'azure-pipelines-build-target.yml'
-      parameters:
-        target: 'x86_64-apple-ios'
-        releaseBinaries: ${{ parameters.deployRelease }}
-        ${{ if and(eq(parameters.platform, 'macOS'), eq(parameters.deployRelease, 'False')) }}:
-          features: '$(features),metal'
 
   - ${{ if eq(parameters.platform, 'Linux') }}:
     - template: 'azure-pipelines-build-target.yml'
