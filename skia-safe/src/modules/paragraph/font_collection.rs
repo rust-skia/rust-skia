@@ -68,12 +68,12 @@ impl FontCollection {
         let font_manager = font_manager.into();
         unsafe {
             match default_family_name.into() {
-                Some(fname) => {
-                    let fname = ffi::CString::new(fname).unwrap();
+                Some(name) => {
+                    let name = ffi::CString::new(name).unwrap();
                     sb::C_FontCollection_setDefaultFontManager2(
                         self.native_mut(),
                         font_manager.into_ptr_or_null(),
-                        fname.as_ptr(),
+                        name.as_ptr(),
                     )
                 }
                 None => sb::C_FontCollection_setDefaultFontManager(
@@ -81,6 +81,22 @@ impl FontCollection {
                     font_manager.into_ptr_or_null(),
                 ),
             }
+        }
+    }
+
+    pub fn set_default_font_manager_and_family_names(
+        &mut self,
+        font_manager: impl Into<Option<FontMgr>>,
+        family_names: &[impl AsRef<str>],
+    ) {
+        let font_manager = font_manager.into();
+        let family_names = interop::Strings::from_strs(family_names);
+        unsafe {
+            sb::C_FontCollection_setDefaultFontManager3(
+                self.native_mut(),
+                font_manager.into_ptr_or_null(),
+                family_names.native(),
+            )
         }
     }
 
