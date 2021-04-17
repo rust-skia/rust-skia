@@ -831,6 +831,14 @@ extern "C" bool C_SkM44_equals(const SkM44 *self, const SkM44 *other) {
     return *self == *other;
 }
 
+extern "C" void C_SkM44_LookAt(const SkV3* eye, const SkV3* center, const SkV3* up, SkM44* uninitialized) {
+    new(uninitialized) SkM44(SkM44::LookAt(*eye, *center, *up));
+}
+
+extern "C" void C_SkM44_Perspective(float near, float far, float angle, SkM44* uninitialized) {
+    new(uninitialized) SkM44(SkM44::Perspective(near, far, angle));
+}
+
 extern "C" void C_SkM44_transpose(const SkM44* self, SkM44* uninitialized) {
     new(uninitialized) SkM44(self->transpose());
 }
@@ -838,18 +846,6 @@ extern "C" void C_SkM44_transpose(const SkM44* self, SkM44* uninitialized) {
 extern "C" SkV4 C_SkM44_map(const SkM44* self, float x, float y, float z, float w) {
     return self->map(x, y, z, w);
 }
-
-/*
-extern "C" void C_Sk3LookAt(const SkV3* eye, const SkV3* center, const SkV3* up, SkM44* uninitialized) {
-    new(uninitialized) SkM44(Sk3LookAt(*eye, *center, *up));
-}
-*/
-
-/*
-extern "C" void C_Sk3Perspective(float near, float far, float angle, SkM44* uninitialized) {
-    new(uninitialized) SkM44(Sk3Perspective(near, far, angle));
-}
-*/
 
 //
 // SkMatrix44

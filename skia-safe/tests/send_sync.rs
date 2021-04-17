@@ -161,6 +161,7 @@ mod gpu {
     // can be supported.
     // If RC is 1, it can be sent to other threads with `Sendable` / `ConditionallySend`.
     assert_not_impl_any!(DirectContext: Send, Sync);
+    assert_impl_all!(DirectContextId: Send, Sync);
     assert_not_impl_any!(RecordingContext: Send, Sync);
     // gpu/yuva_backend_textures.rs
     assert_impl_all!(YUVABackendTextureInfo: Send, Sync);
