@@ -278,11 +278,10 @@ impl FinalBuildConfiguration {
 
             // target specific gn args.
             let target = cargo::target();
-            let target_str: &str = &format!("--target={}", target.to_string());
             let sysroot_arg;
             let opt_level_arg;
-            let mut cflags: Vec<&str> = vec![&target_str];
-            let asmflags: Vec<&str> = vec![&target_str];
+            let mut cflags: Vec<&str> = vec![];
+            let asmflags: Vec<&str> = vec![];
 
             if let Some(sysroot) = cargo::env_var("SDKROOT") {
                 sysroot_arg = format!("--sysroot={}", sysroot);
