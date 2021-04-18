@@ -17,9 +17,9 @@ impl NativeDrop for SkPixmap {
     }
 }
 
-impl Default for Handle<SkPixmap> {
+impl Default for Pixmap {
     fn default() -> Self {
-        Pixmap::from_native_c(SkPixmap {
+        Self::from_native_c(SkPixmap {
             fPixels: ptr::null(),
             fRowBytes: 0,
             fInfo: construct(|ii| unsafe { sb::C_SkImageInfo_Construct(ii) }),
@@ -27,7 +27,7 @@ impl Default for Handle<SkPixmap> {
     }
 }
 
-impl Handle<SkPixmap> {
+impl Pixmap {
     pub fn new<'pixels>(
         info: &ImageInfo,
         pixels: &'pixels [u8],
@@ -278,8 +278,7 @@ impl Handle<SkPixmap> {
     }
 }
 
-/// Implement this trait to make a type compatible with [`Pixmap::pixels()`] and
-/// [`Pixmap::pixels_mut()`].
+/// Implement this trait to use a pixel type in [`Handle<Pixmap>::pixels()`].
 pub unsafe trait Pixel: Copy {
     /// `true` if the type matches the color type's format.
     fn matches_color_type(_ct: ColorType) -> bool;
