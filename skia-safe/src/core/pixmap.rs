@@ -210,9 +210,9 @@ impl Pixmap {
 
     /// Access the underlying pixels. This is a rust-skia specific function.
     ///
-    /// The `Pixel` type must implement the _unsafe_ trait [`Pixel`], which indicates if that the
-    /// type is [`Copy`] and can be used as either a pixel representation or a pixel component (for
-    /// example an u8 inside a 32 bit RGBA pixel).
+    /// The `Pixel` type must implement the _unsafe_ trait [`Pixel`] and must return `true` in
+    /// [`Pixel::matches_color_type()`] when matched against the [`ColorType`] of this Pixmap's
+    /// pixels.
     pub fn pixels<P: Pixel>(&self) -> Option<&[P]> {
         let addr = unsafe { self.addr() }.into_option()?;
 
