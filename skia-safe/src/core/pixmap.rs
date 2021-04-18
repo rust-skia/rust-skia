@@ -2,9 +2,10 @@ use crate::{
     prelude::*, AlphaType, Color, Color4f, ColorSpace, ColorType, IPoint, IRect, ISize, ImageInfo,
     SamplingOptions,
 };
+use core::slice;
 use skia_bindings as sb;
 use skia_bindings::SkPixmap;
-use std::{convert::TryInto, ffi::c_void, os::raw, ptr};
+use std::{convert::TryInto, ffi::c_void, mem, os::raw, ptr};
 
 pub type Pixmap = Handle<SkPixmap>;
 unsafe impl Send for Pixmap {}
@@ -16,9 +17,9 @@ impl NativeDrop for SkPixmap {
     }
 }
 
-impl Default for Handle<SkPixmap> {
+impl Default for Pixmap {
     fn default() -> Self {
-        Pixmap::from_native_c(SkPixmap {
+        Self::from_native_c(SkPixmap {
             fPixels: ptr::null(),
             fRowBytes: 0,
             fInfo: construct(|ii| unsafe { sb::C_SkImageInfo_Construct(ii) }),
@@ -26,7 +27,7 @@ impl Default for Handle<SkPixmap> {
     }
 }
 
-impl Handle<SkPixmap> {
+impl Pixmap {
     pub fn new<'pixels>(
         info: &ImageInfo,
         pixels: &'pixels [u8],
@@ -200,6 +201,33 @@ impl Handle<SkPixmap> {
         }
     }
 
+    /// Access the underlying pixels as a byte array. This is a rust-skia specific function.
+    pub fn bytes(&self) -> Option<&[u8]> {
+        let addr = unsafe { self.addr() }.into_option()?;
+        let len = self.compute_byte_size();
+        return Some(unsafe { slice::from_raw_parts(addr as *const u8, len) });
+    }
+
+    /// Access the underlying pixels. This is a rust-skia specific function.
+    ///
+    /// The `Pixel` type must implement the _unsafe_ trait [`Pixel`], which indicates if that the
+    /// type is [`Copy`] and can be used as either a pixel representation or a pixel component (for
+    /// example an u8 inside a 32 bit RGBA pixel).
+    pub fn pixels<P: Pixel>(&self) -> Option<&[P]> {
+        let addr = unsafe { self.addr() }.into_option()?;
+
+        let info = self.info();
+        let ct = info.color_type();
+        let pixel_size = mem::size_of::<P>();
+
+        if info.bytes_per_pixel() == pixel_size && P::matches_color_type(ct) {
+            let len = self.compute_byte_size() / pixel_size;
+            return Some(unsafe { slice::from_raw_parts(addr as *const P, len) });
+        }
+
+        None
+    }
+
     pub fn read_pixels_to_pixmap(&self, dst: &Pixmap, src: impl Into<IPoint>) -> bool {
         let row_bytes = dst.row_bytes();
         let len = usize::try_from(dst.height()).unwrap() * row_bytes;
@@ -247,5 +275,77 @@ impl Handle<SkPixmap> {
                 subset.native_ptr_or_null(),
             )
         }
+    }
+}
+
+/// Implement this trait to use a pixel type in [`Handle<Pixmap>::pixels()`].
+pub unsafe trait Pixel: Copy {
+    /// `true` if the type matches the color type's format.
+    fn matches_color_type(_ct: ColorType) -> bool;
+}
+
+unsafe impl Pixel for u8 {
+    fn matches_color_type(ct: ColorType) -> bool {
+        matches!(ct, ColorType::Alpha8 | ColorType::Gray8)
+    }
+}
+
+unsafe impl Pixel for [u8; 2] {
+    fn matches_color_type(ct: ColorType) -> bool {
+        matches!(ct, ColorType::R8G8UNorm | ColorType::A16UNorm)
+    }
+}
+
+unsafe impl Pixel for (u8, u8) {
+    fn matches_color_type(ct: ColorType) -> bool {
+        matches!(ct, ColorType::R8G8UNorm | ColorType::A16UNorm)
+    }
+}
+
+unsafe impl Pixel for [u8; 4] {
+    fn matches_color_type(ct: ColorType) -> bool {
+        matches!(
+            ct,
+            ColorType::RGBA8888 | ColorType::RGB888x | ColorType::BGRA8888
+        )
+    }
+}
+
+unsafe impl Pixel for (u8, u8, u8, u8) {
+    fn matches_color_type(ct: ColorType) -> bool {
+        matches!(
+            ct,
+            ColorType::RGBA8888 | ColorType::RGB888x | ColorType::BGRA8888
+        )
+    }
+}
+
+unsafe impl Pixel for [f32; 4] {
+    fn matches_color_type(ct: ColorType) -> bool {
+        matches!(ct, ColorType::RGBAF32)
+    }
+}
+
+unsafe impl Pixel for (f32, f32, f32, f32) {
+    fn matches_color_type(ct: ColorType) -> bool {
+        matches!(ct, ColorType::RGBAF32)
+    }
+}
+
+unsafe impl Pixel for u32 {
+    fn matches_color_type(ct: ColorType) -> bool {
+        ct == ColorType::n32()
+    }
+}
+
+unsafe impl Pixel for Color {
+    fn matches_color_type(ct: ColorType) -> bool {
+        ct == ColorType::n32()
+    }
+}
+
+unsafe impl Pixel for Color4f {
+    fn matches_color_type(ct: ColorType) -> bool {
+        ct == ColorType::RGBAF32
     }
 }
