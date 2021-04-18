@@ -40,6 +40,15 @@ jobs:
           toolchain: stable
           features: 'gl,vulkan,textlayout'
           exampleArgs: ''
+        ${{ if eq(parameters.platform, 'Linux') }}:
+          stable-gl-x11:
+            toolchain: stable
+            features: 'gl,x11'
+            exampleArgs: ''
+          stable-gl-textlayout-x11:
+            toolchain: stable
+            features: 'gl,textlayout,x11'
+            exampleArgs: ''
         ${{ if eq(parameters.platform, 'Windows') }}:
           stable-d3d:
             toolchain: stable
