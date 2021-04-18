@@ -279,10 +279,11 @@ impl FinalBuildConfiguration {
             // target specific gn args.
             let target = cargo::target();
             let target_str: &str = &format!("--target={}", target.to_string());
+            let mut set_target = true;
             let sysroot_arg;
             let opt_level_arg;
-            let mut cflags: Vec<&str> = vec![&target_str];
-            let asmflags: Vec<&str> = vec![&target_str];
+            let mut cflags: Vec<&str> = vec![];
+            let mut asmflags: Vec<&str> = vec![];
 
             if let Some(sysroot) = cargo::env_var("SDKROOT") {
                 sysroot_arg = format!("--sysroot={}", sysroot);
@@ -346,7 +347,13 @@ impl FinalBuildConfiguration {
                 }
                 (arch, _, os, _) => {
                     let skia_target_os = match os {
-                        "darwin" => "mac",
+                        "darwin" => {
+                            // Skia will take care to set a specific `-target` for the current macOS
+                            // version. So we don't push another target `--target` that may
+                            // conflict.
+                            set_target = false;
+                            "mac"
+                        }
                         "windows" => "win",
                         _ => os,
                     };
@@ -360,6 +367,11 @@ impl FinalBuildConfiguration {
                 args.push(("skia_use_system_expat", yes_if(use_system_libraries)));
             } else {
                 args.push(("skia_use_expat", no()));
+            }
+
+            if set_target {
+                cflags.push(target_str);
+                asmflags.push(target_str);
             }
 
             if !cflags.is_empty() {
