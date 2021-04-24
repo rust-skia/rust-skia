@@ -9,6 +9,7 @@ pub mod high_contrast_config {
     }
 }
 
+#[repr(C)]
 #[derive(Clone, PartialEq, Debug)]
 pub struct HighContrastConfig {
     pub grayscale: bool,

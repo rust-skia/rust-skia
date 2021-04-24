@@ -26,8 +26,8 @@ impl TypeMask {
 
 pub use skia_bindings::SkMatrix_ScaleToFit as ScaleToFit;
 
-#[derive(Copy, Clone, Debug)]
 #[repr(C)]
+#[derive(Copy, Clone, Debug)]
 pub struct Matrix {
     mat: [scalar; 9usize],
     type_mask: u32,
