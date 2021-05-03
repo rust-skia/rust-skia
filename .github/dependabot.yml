@@ -17,7 +17,3 @@ updates:
     - 1.0.3
     - 1.1.0
     - 1.1.1
-  - dependency-name: thread_local
-    versions:
-    - 1.1.2
-    - 1.1.3
