@@ -219,6 +219,7 @@ impl FinalBuildConfiguration {
                 ("skia_use_system_zlib", no()),
                 ("skia_use_freetype", yes()),
                 ("skia_use_fonthost_mac", no()),
+                ("skia_use_freetype_woff2", yes()),
                 ("skia_use_xps", no()),
                 ("skia_use_dng_sdk", yes_if(features.dng)),
                 ("cc", quote(&build.cc)),
