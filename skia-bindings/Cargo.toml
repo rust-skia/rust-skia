@@ -48,11 +48,15 @@ textlayout = []
 webp = ["webp-encode", "webp-decode"]
 webp-encode = []
 webp-decode = []
+# sys libraries
+use-system-jpeg-turbo = ["mozjpeg-sys"]
 # deprecated since 0.25.0
 svg = []
 shaper = ["textlayout"]
 
 [dependencies]
+
+mozjpeg-sys = { version = "0", features=["with_simd"], optional=true }
 
 [build-dependencies]
 cc = "1.0.37"
