@@ -51,8 +51,11 @@ webp-decode = []
 # deprecated since 0.25.0
 svg = []
 shaper = ["textlayout"]
+use-mozjpeg-sys = ["mozjpeg-sys"]
 
 [dependencies]
+
+mozjpeg-sys = { version = "0", features=["with_simd"], optional=true }
 
 [build-dependencies]
 cc = "1.0.37"

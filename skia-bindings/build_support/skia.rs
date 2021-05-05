@@ -284,6 +284,16 @@ impl FinalBuildConfiguration {
                 cflags.push(&sysroot_arg);
             }
 
+            let jpeg_sys_cflags: Vec<String>;
+            if cfg!(feature = "use-mozjpeg-sys") {
+                let paths = cargo::env_var("DEP_JPEG_INCLUDE").expect("mozjpeg-sys include path");
+                jpeg_sys_cflags = std::env::split_paths(&paths).map(|arg| {
+                    format!("-I{}", arg.display())
+                }).collect();
+                cflags.extend(jpeg_sys_cflags.iter().map(|x| -> &str { x.as_ref() }));
+                args.push(("skia_use_system_libjpeg_turbo", yes()));
+            }
+
             if let Some(opt_level) = &build.opt_level {
                 /* LTO generates corrupt libraries on the host platforms when building with --release
                 if opt_level.parse::<usize>() != Ok(0) {
@@ -696,7 +706,7 @@ pub fn build_skia(
     ninja_command: &Path,
 ) {
     let ninja_status = Command::new(ninja_command)
-        .args(&["-C", config.output_directory.to_str().unwrap()])
+        .args(&[":skia", "-C", config.output_directory.to_str().unwrap()])
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .status();
