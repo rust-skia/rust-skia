@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, FontMetrics, FontStyle};
 use crate::{GlyphId, Image, Paint, Path, Picture, Typeface};
 use skia_bindings as sb;
 use skia_bindings::SkCustomTypefaceBuilder;
@@ -15,7 +15,7 @@ impl NativeDrop for SkCustomTypefaceBuilder {
 
 impl Handle<SkCustomTypefaceBuilder> {
     pub fn new() -> Self {
-        Self::from_native(unsafe { SkCustomTypefaceBuilder::new() })
+        Self::from_native_c(unsafe { SkCustomTypefaceBuilder::new() })
     }
 
     pub fn set_glyph<'a>(
@@ -23,23 +23,41 @@ impl Handle<SkCustomTypefaceBuilder> {
         glyph_id: GlyphId,
         advance: f32,
         typeface_glyph: impl Into<TypefaceGlyph<'a>>,
-    ) {
+    ) -> &mut Self {
         unsafe {
             match typeface_glyph.into() {
                 TypefaceGlyph::Path(path) => {
                     self.native_mut().setGlyph(glyph_id, advance, path.native())
                 }
                 TypefaceGlyph::PathAndPaint(_path, _paint) => {
-                    unimplemented!("TypefaceGlyph::PathAndPaint is not supported yet, Skia implementation is missing (m84)")
+                    unimplemented!("TypefaceGlyph::PathAndPaint is not supported yet, Skia implementation is missing (last checked: m86)")
                 }
                 TypefaceGlyph::Image { .. } => {
-                    unimplemented!("TypefaceGlyph::PathAndPaint is not supported yet, Skia implementation is missing (m84)")
+                    unimplemented!("TypefaceGlyph::PathAndPaint is not supported yet, Skia implementation is missing (last checked: m86)")
                 }
                 TypefaceGlyph::Picture(_picture) => {
-                    unimplemented!("TypefaceGlyph::Picture is not supported yet, Skia implementation is missing (m84)")
+                    unimplemented!("TypefaceGlyph::Picture is not supported yet, Skia implementation is missing (last checked: m86)")
                 }
             }
         }
+        self
+    }
+
+    pub fn set_metrics(
+        &mut self,
+        font_metrics: &FontMetrics,
+        scale: impl Into<Option<f32>>,
+    ) -> &mut Self {
+        unsafe {
+            self.native_mut()
+                .setMetrics(font_metrics.native(), scale.into().unwrap_or(1.0))
+        }
+        self
+    }
+
+    pub fn set_font_style(&mut self, font_style: FontStyle) -> &mut Self {
+        unsafe { self.native_mut().setFontStyle(font_style.into_native()) }
+        self
     }
 
     pub fn detach(&mut self) -> Option<Typeface> {

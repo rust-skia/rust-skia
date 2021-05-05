@@ -5,14 +5,22 @@ use std::process::{Command, Stdio};
 
 // TODO: add support for 32 bit devices and simulators.
 
+pub fn extra_skia_cflags(arch: &str, flags: &mut Vec<&str>) {
+    if is_simulator(arch) {
+        flags.push("-mios-simulator-version-min=10.0");
+    } else {
+        flags.push("-miphoneos-version-min=10.0");
+    }
+}
+
 pub fn additional_clang_args(arch: &str) -> Vec<String> {
     let mut args: Vec<String> = Vec::new();
 
     if is_simulator(arch) {
-        args.push("-mios-simulator-version-min=7.0".into());
+        args.push("-mios-simulator-version-min=10.0".into());
         args.push("-m64".into());
     } else {
-        args.push("-miphoneos-version-min=7.0".into());
+        args.push("-miphoneos-version-min=10.0".into());
         args.push("-arch".into());
         args.push(clang::target_arch(arch).into());
     }

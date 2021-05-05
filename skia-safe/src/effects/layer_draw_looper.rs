@@ -45,7 +45,7 @@ impl NativeDrop for SkLayerDrawLooper_Builder {
 
 impl Default for Builder {
     fn default() -> Builder {
-        Self::from_native(unsafe { SkLayerDrawLooper_Builder::new() })
+        Self::from_native_c(unsafe { SkLayerDrawLooper_Builder::new() })
     }
 }
 

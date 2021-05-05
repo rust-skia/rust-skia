@@ -1,4 +1,4 @@
-use super::{FontFamilies, TextAlign, TextDirection, TextStyle};
+use super::{DrawOptions, FontFamilies, TextAlign, TextDirection, TextStyle};
 use crate::interop::{AsStr, FromStrs, SetStr};
 use crate::modules::paragraph::TextHeightBehavior;
 use crate::prelude::*;
@@ -36,7 +36,7 @@ impl Default for Handle<sb::skia_textlayout_StrutStyle> {
 
 impl Handle<sb::skia_textlayout_StrutStyle> {
     pub fn new() -> Self {
-        StrutStyle::from_native(unsafe { sb::skia_textlayout_StrutStyle::new() })
+        StrutStyle::construct(|ss| unsafe { sb::C_StrutStyle_Construct(ss) })
     }
 
     pub fn font_families(&self) -> FontFamilies {
@@ -57,7 +57,7 @@ impl Handle<sb::skia_textlayout_StrutStyle> {
     }
 
     pub fn font_style(&self) -> FontStyle {
-        FontStyle::from_native(self.native().fFontStyle)
+        FontStyle::from_native_c(self.native().fFontStyle)
     }
 
     pub fn set_font_style(&mut self, font_style: FontStyle) -> &mut Self {
@@ -111,19 +111,20 @@ impl Handle<sb::skia_textlayout_StrutStyle> {
     }
 }
 
-pub type ParagraphStyle = Handle<sb::skia_textlayout_ParagraphStyle>;
+// Can't use Handle<> here, std::u16string maintains an interior pointer.
+pub type ParagraphStyle = RefHandle<sb::skia_textlayout_ParagraphStyle>;
 unsafe impl Send for ParagraphStyle {}
 unsafe impl Sync for ParagraphStyle {}
 
 impl NativeDrop for sb::skia_textlayout_ParagraphStyle {
     fn drop(&mut self) {
-        unsafe { sb::C_ParagraphStyle_destruct(self) }
+        unsafe { sb::C_ParagraphStyle_delete(self) }
     }
 }
 
-impl NativeClone for sb::skia_textlayout_ParagraphStyle {
+impl Clone for ParagraphStyle {
     fn clone(&self) -> Self {
-        construct(|ps| unsafe { sb::C_ParagraphStyle_CopyConstruct(ps, self) })
+        Self::from_ptr(unsafe { sb::C_ParagraphStyle_NewCopy(self.native()) }).unwrap()
     }
 }
 
@@ -133,15 +134,15 @@ impl NativePartialEq for sb::skia_textlayout_ParagraphStyle {
     }
 }
 
-impl Default for Handle<sb::skia_textlayout_ParagraphStyle> {
+impl Default for RefHandle<sb::skia_textlayout_ParagraphStyle> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl Handle<sb::skia_textlayout_ParagraphStyle> {
+impl RefHandle<sb::skia_textlayout_ParagraphStyle> {
     pub fn new() -> Self {
-        Self::from_native(unsafe { sb::skia_textlayout_ParagraphStyle::new() })
+        Self::from_ptr(unsafe { sb::C_ParagraphStyle_New() }).unwrap()
     }
 
     pub fn strut_style(&self) -> &StrutStyle {
@@ -195,6 +196,8 @@ impl Handle<sb::skia_textlayout_ParagraphStyle> {
         self
     }
 
+    // TODO: Support u16 ellipsis, but why? Doesn't SkString support UTF-8?
+
     pub fn ellipsis(&self) -> &str {
         self.native().fEllipsis.as_str()
     }
@@ -227,7 +230,7 @@ impl Handle<sb::skia_textlayout_ParagraphStyle> {
     }
 
     pub fn ellipsized(&self) -> bool {
-        !self.native().fEllipsis.as_str().is_empty()
+        unsafe { sb::C_ParagraphStyle_ellipsized(self.native()) }
     }
 
     pub fn effective_align(&self) -> TextAlign {
@@ -240,6 +243,15 @@ impl Handle<sb::skia_textlayout_ParagraphStyle> {
 
     pub fn turn_hinting_off(&mut self) -> &mut Self {
         self.native_mut().fHintingIsOn = false;
+        self
+    }
+
+    pub fn draw_options(&self) -> DrawOptions {
+        self.native().fDrawingOptions
+    }
+
+    pub fn set_draw_options(&mut self, value: DrawOptions) -> &mut Self {
+        self.native_mut().fDrawingOptions = value;
         self
     }
 }

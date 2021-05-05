@@ -12,7 +12,7 @@ bitflags! {
         const NO_DECORATION = sb::skia_textlayout_TextDecoration::kNoDecoration as _;
         const UNDERLINE = sb::skia_textlayout_TextDecoration::kUnderline as _;
         const OVERLINE = sb::skia_textlayout_TextDecoration::kOverline as _;
-        const LINE_THROUGH = sb::skia_textlayout_TextDecoration::kOverline as _;
+        const LINE_THROUGH = sb::skia_textlayout_TextDecoration::kLineThrough as _;
     }
 }
 
@@ -103,7 +103,7 @@ impl Handle<sb::skia_textlayout_FontFeature> {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct PlaceholderStyle {
     pub width: scalar,
     pub height: scalar,
@@ -121,18 +121,6 @@ fn placeholder_style_layout() {
 impl PartialEq for PlaceholderStyle {
     fn eq(&self, other: &Self) -> bool {
         unsafe { self.native().equals(other.native()) }
-    }
-}
-
-impl Default for PlaceholderStyle {
-    fn default() -> Self {
-        Self::new(
-            0.0,
-            0.0,
-            PlaceholderAlignment::Baseline,
-            TextBaseline::Alphabetic,
-            0.0,
-        )
     }
 }
 
@@ -184,11 +172,11 @@ impl Default for Handle<sb::skia_textlayout_TextStyle> {
 
 impl Handle<sb::skia_textlayout_TextStyle> {
     pub fn new() -> Self {
-        TextStyle::from_native(unsafe { sb::skia_textlayout_TextStyle::new() })
+        TextStyle::construct(|ts| unsafe { sb::C_TextStyle_Construct(ts) })
     }
 
     pub fn to_placeholder(&self) -> Self {
-        TextStyle::from_native(unsafe { sb::skia_textlayout_TextStyle::new1(self.native(), true) })
+        TextStyle::from_native_c(unsafe { sb::skia_textlayout_TextStyle::new(self.native(), true) })
     }
 
     pub fn equals(&self, other: &TextStyle) -> bool {
@@ -204,7 +192,7 @@ impl Handle<sb::skia_textlayout_TextStyle> {
     }
 
     pub fn color(&self) -> Color {
-        Color::from_native(self.native().fColor)
+        Color::from_native_c(self.native().fColor)
     }
 
     pub fn set_color(&mut self, color: impl Into<Color>) -> &mut Self {
@@ -251,7 +239,7 @@ impl Handle<sb::skia_textlayout_TextStyle> {
     }
 
     pub fn font_style(&self) -> FontStyle {
-        FontStyle::from_native(self.native().fFontStyle)
+        FontStyle::from_native_c(self.native().fFontStyle)
     }
 
     pub fn set_font_style(&mut self, font_style: FontStyle) -> &mut Self {

@@ -135,13 +135,10 @@ mod d3d {
 
     impl Default for crate::GrD3DTextureResourceInfo {
         fn default() -> Self {
-            Self {
-                fResource: Default::default(),
-                fResourceState: crate::D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON,
-                fFormat: crate::DXGI_FORMAT::DXGI_FORMAT_UNKNOWN,
-                fLevelCount: 0,
-                fSampleQualityLevel: 0,
-                fProtected: crate::GrProtected::No,
+            let mut instance = std::mem::MaybeUninit::uninit();
+            unsafe {
+                crate::C_GrD3DTextureResourceInfo_Construct(instance.as_mut_ptr());
+                instance.assume_init()
             }
         }
     }

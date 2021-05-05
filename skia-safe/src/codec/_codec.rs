@@ -62,21 +62,21 @@ impl RCHandle<SkCodec> {
     }
 
     pub fn dimensions(&self) -> ISize {
-        ISize::from_native(unsafe { sb::C_SkCodec_dimensions(self.native()) })
+        ISize::from_native_c(unsafe { sb::C_SkCodec_dimensions(self.native()) })
     }
 
     pub fn bounds(&self) -> IRect {
-        IRect::from_native(unsafe { sb::C_SkCodec_bounds(self.native()) })
+        IRect::from_native_c(unsafe { sb::C_SkCodec_bounds(self.native()) })
     }
 
     // TODO: getICCProfile
 
     pub fn origin(&self) -> EncodedOrigin {
-        EncodedOrigin::from_native(unsafe { sb::C_SkCodec_getOrigin(self.native()) })
+        EncodedOrigin::from_native_c(unsafe { sb::C_SkCodec_getOrigin(self.native()) })
     }
 
     pub fn get_scaled_dimensions(&self, desired_scale: f32) -> ISize {
-        ISize::from_native(unsafe {
+        ISize::from_native_c(unsafe {
             sb::C_SkCodec_getScaledDimensions(self.native(), desired_scale)
         })
     }
@@ -114,6 +114,7 @@ impl RCHandle<SkCodec> {
         since = "0.33.1",
         note = "Use the safe variant get_pixels_with_options()."
     )]
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn get_pixels(
         &mut self,
         info: &ImageInfo,
@@ -124,6 +125,7 @@ impl RCHandle<SkCodec> {
             .getPixels(info.native(), pixels, row_bytes, ptr::null())
     }
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn get_pixels_to_pixmap(
         &mut self,
         pixmap: &Pixmap,
@@ -147,8 +149,8 @@ impl RCHandle<SkCodec> {
         }
     }
 
-    // TODO: queryYUV8
-    // TODO: getYUV8Planes
+    // TODO: queryYUVAInfo
+    // TODO: getYUVAPlanes
     // TODO: startIncrementalDecode
     // TODO: incrementalDecode
     // TODO: startScanlineDecode

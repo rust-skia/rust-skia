@@ -1,13 +1,15 @@
 # defaults:
 parameters:
-  # Run test cases and examples?
-  runBinaries: false
+  # Run all tests of all projects?
+  runTests: false
+  # Generate artifacts with skia-org?
+  generateArtifacts: false
   # Run Clippy on on the target?
   runClippy: false
   # Produce and release binaries to GitHub?
   releaseBinaries: 'False'
   exampleArgs: ''
-  # Set up Android environment? Not compatible with runBinaries or runClippy!
+  # Set up Android environment? Can't be used together with runTests, generateArtifacts or runClippy!
   androidEnv: false
   # The features to build
   features: '$(features)'
@@ -32,8 +34,7 @@ steps:
         echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
       fi
       cargo clean
-      set
-      (cd skia-safe && cargo build --release --features "${{ parameters.features }}" --all-targets --target ${{ parameters.target }} -vv)
+      (cd skia-safe && cargo build --release --features "${{ parameters.features }}" --all-targets --target ${{ parameters.target }})
       export SKIA_BINARIES_TAG=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/tag.txt")
       export SKIA_BINARIES_KEY=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/key.txt")
       echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
@@ -43,28 +44,21 @@ steps:
   - ${{ if eq(parameters.runClippy, True) }}:
     - bash: |
         set -e
-        set
-        (cd skia-bindings && cargo clippy --release --features "${{ parameters.features }}" --all-targets --target ${{ parameters.target }} -- -D warnings)
-        (cd skia-safe && cargo clippy --release --features "${{ parameters.features }}" --all-targets --target ${{ parameters.target }} -- -D warnings)
         (cd skia-org && cargo clippy --release --features "${{ parameters.features }}" --all-targets --target ${{ parameters.target }} -- -D warnings)
       displayName: 'Clippy skia-bindings, skia-safe, and skia-org'
 
-  - ${{ if eq(parameters.runBinaries, True) }}:
+  - ${{ if eq(parameters.runTests, True) }}:
+    - script: cd skia-org && cargo test --all --release --features "${{ parameters.features }}" --all-targets --target ${{ parameters.target }} -- --nocapture
+      displayName: 'Test all workspace projects'
 
-    - script: cd skia-bindings && cargo test --release --features "${{ parameters.features }}" --target ${{ parameters.target }} -vv -- --test-threads=1 --nocapture
-      displayName: 'Test skia-bindings'
+  - ${{ if and(eq(parameters.generateArtifacts, True), ne(parameters.exampleArgs, '')) }}:
+    - script: cd skia-org && cargo run --release --features "${{ parameters.features }}" --target ${{ parameters.target }} "$(Build.ArtifactStagingDirectory)/skia-org" ${{ parameters.exampleArgs }}
+      displayName: 'Generate skia-org example images'
 
-    - script: cd skia-safe && cargo test --release --features "${{ parameters.features }}" --target ${{ parameters.target }} -vv -- --test-threads=1 --nocapture
-      displayName: 'Test skia-safe'
-
-    - ${{ if ne(parameters.exampleArgs, '') }}:
-      - script: cd skia-org && cargo run --release --features "${{ parameters.features }}" --target ${{ parameters.target }} "$(Build.ArtifactStagingDirectory)/skia-org" ${{ parameters.exampleArgs }}
-        displayName: 'Generate skia-org example images'
-
-      - task: PublishBuildArtifacts@1
-        inputs:
-          pathtoPublish: '$(Build.ArtifactStagingDirectory)/skia-org'
-          artifactName: 'skia-org-examples-$(platform)-$(toolchain)'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathtoPublish: '$(Build.ArtifactStagingDirectory)/skia-org'
+        artifactName: 'skia-org-examples-$(platform)-$(toolchain)'
 
   - ${{ if eq(parameters.releaseBinaries, 'True') }}:
     - task: ArchiveFiles@2

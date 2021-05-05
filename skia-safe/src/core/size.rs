@@ -110,15 +110,15 @@ impl Size {
     }
 
     pub fn to_round(self) -> ISize {
-        ISize::from_native(unsafe { sb::C_SkSize_toRound(self.native()) })
+        ISize::from_native_c(unsafe { sb::C_SkSize_toRound(self.native()) })
     }
 
     pub fn to_ceil(self) -> ISize {
-        ISize::from_native(unsafe { sb::C_SkSize_toCeil(self.native()) })
+        ISize::from_native_c(unsafe { sb::C_SkSize_toCeil(self.native()) })
     }
 
     pub fn to_floor(self) -> ISize {
-        ISize::from_native(unsafe { sb::C_SkSize_toFloor(self.native()) })
+        ISize::from_native_c(unsafe { sb::C_SkSize_toFloor(self.native()) })
     }
 }
 

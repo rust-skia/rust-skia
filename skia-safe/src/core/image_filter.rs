@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::{ColorFilter, FilterQuality, IRect, Matrix, NativeFlattenable, Rect};
+use crate::{ColorFilter, IRect, Matrix, NativeFlattenable, Rect};
 use skia_bindings as sb;
 use skia_bindings::{
     SkColorFilter, SkFlattenable, SkImageFilter, SkImageFilter_CropRect, SkRefCntBase,
@@ -19,16 +19,21 @@ fn test_crop_rect_layout() {
 
 impl Default for CropRect {
     fn default() -> Self {
-        CropRect::from_native(SkImageFilter_CropRect {
+        CropRect::from_native_c(SkImageFilter_CropRect {
             fRect: Rect::default().into_native(),
             fFlags: 0,
         })
     }
 }
 
+#[test]
+fn test_crop_rect_default() {
+    let _ = CropRect::default();
+}
+
 impl CropRect {
     pub fn new(rect: impl AsRef<Rect>, flags: impl Into<Option<crop_rect::CropEdge>>) -> Self {
-        CropRect::from_native(SkImageFilter_CropRect {
+        CropRect::from_native_c(SkImageFilter_CropRect {
             fRect: rect.as_ref().into_native(),
             fFlags: flags.into().unwrap_or(crop_rect::CropEdge::HAS_ALL).bits(),
         })
@@ -112,8 +117,9 @@ impl RCHandle<SkImageFilter> {
         map_direction: MapDirection,
         input_rect: impl Into<Option<&'a IRect>>,
     ) -> IRect {
-        IRect::from_native(unsafe {
-            self.native().filterBounds(
+        IRect::from_native_c(unsafe {
+            sb::C_SkImageFilter_filterBounds(
+                self.native(),
                 src.as_ref().native(),
                 ctm.native(),
                 map_direction,
@@ -125,7 +131,7 @@ impl RCHandle<SkImageFilter> {
     pub fn color_filter_node(&self) -> Option<ColorFilter> {
         let mut filter_ptr: *mut SkColorFilter = ptr::null_mut();
         if unsafe { sb::C_SkImageFilter_isColorFilterNode(self.native(), &mut filter_ptr) } {
-            // according to the documentation, this must be set to a ref'd colorfilter
+            // according to the documentation, this must be set to a ref'd color filter
             // (which is one with an increased ref count I assume).
             ColorFilter::from_ptr(filter_ptr)
         } else {
@@ -165,7 +171,7 @@ impl RCHandle<SkImageFilter> {
     }
 
     pub fn compute_fast_bounds(&self, bounds: impl AsRef<Rect>) -> Rect {
-        Rect::from_native(unsafe {
+        Rect::from_native_c(unsafe {
             sb::C_SkImageFilter_computeFastBounds(self.native(), bounds.as_ref().native())
         })
     }
@@ -178,13 +184,5 @@ impl RCHandle<SkImageFilter> {
         ImageFilter::from_ptr(unsafe {
             sb::C_SkImageFilter_makeWithLocalMatrix(self.native(), matrix.native())
         })
-    }
-
-    #[deprecated(since = "0.19.0", note = "use image_filters::matrix_transform()")]
-    pub fn with_matrix(self, matrix: &Matrix, quality: FilterQuality) -> ImageFilter {
-        ImageFilter::from_ptr(unsafe {
-            sb::C_SkImageFilter_MakeMatrixFilter(matrix.native(), quality, self.into_ptr())
-        })
-        .unwrap()
     }
 }

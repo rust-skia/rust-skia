@@ -12,8 +12,8 @@ pub fn test_yuva_index_naming() {
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct YUVAIndex {
-    pub(crate) index: i32,
-    pub(crate) channel: ColorChannel,
+    pub index: i32,
+    pub channel: ColorChannel,
 }
 
 impl Default for YUVAIndex {
@@ -23,11 +23,6 @@ impl Default for YUVAIndex {
 }
 
 impl NativeTransmutable<SkYUVAIndex> for YUVAIndex {}
-
-#[test]
-fn test_yuva_index_layout() {
-    YUVAIndex::test_layout()
-}
 
 impl YUVAIndex {
     pub const INDEX_COUNT: usize = 4;
@@ -53,8 +48,14 @@ impl YUVAIndex {
         unsafe { sb::C_SkYUVAIndex_AreValidIndices(indices.native().as_ptr(), &mut num_planes) }
             .if_true_then_some(|| num_planes.try_into().unwrap())
     }
+}
 
-    pub(crate) fn is_valid(self) -> bool {
-        self.index >= 0 && self.index < Self::INDEX_COUNT as i32
+#[cfg(test)]
+mod tests {
+    use crate::prelude::NativeTransmutable;
+
+    #[test]
+    fn test_yuva_index_layout() {
+        super::YUVAIndex::test_layout()
     }
 }

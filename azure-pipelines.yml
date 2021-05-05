@@ -16,6 +16,7 @@ schedules:
   branches:
     include:
     - master
+  always: true
 
 stages:
 
@@ -54,6 +55,7 @@ stages:
       androidAPILevel: '26'
       androidBinExt: '.cmd'
       vmImage: 'windows-2019'
+      container: 'ghcr.io/pragmatrix/rust-skia-windows:latest'
       deployRelease: ${{ eq(variables['build.SourceBranchName'], 'release') }}
 
 # Because deployment can not be done automatically, the Package stage got disabled for now.

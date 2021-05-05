@@ -97,7 +97,7 @@ pub use font_types::*;
 pub mod graphics;
 
 pub mod image;
-pub use image::Image;
+pub use image::{FilterOptions, Image, MipmapMode, SamplingMode};
 
 mod image_encoder;
 pub use image_encoder::*;
@@ -185,6 +185,9 @@ pub use rrect::RRect;
 mod rsxform;
 pub use rsxform::*;
 
+mod sampling_options;
+pub use sampling_options::*;
+
 mod scalar_;
 pub use scalar_::*;
 
@@ -235,6 +238,12 @@ pub use vertices::Vertices;
 
 pub mod yuva_index;
 pub use yuva_index::YUVAIndex;
+
+pub mod yuva_info;
+pub use yuva_info::YUVAInfo;
+
+pub mod yuva_pixmaps;
+pub use yuva_pixmaps::{yuva_pixmap_info, YUVAPixmapInfo, YUVAPixmaps};
 
 mod yuva_size_info;
 pub use yuva_size_info::*;

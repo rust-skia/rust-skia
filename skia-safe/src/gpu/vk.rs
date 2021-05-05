@@ -27,6 +27,7 @@ pub use sb::VkFormatFeatureFlags as FormatFeatureFlags;
 pub use sb::VkImage as Image;
 pub use sb::VkImageLayout as ImageLayout;
 pub use sb::VkImageTiling as ImageTiling;
+pub use sb::VkImageUsageFlags as ImageUsageFlags;
 pub use sb::VkInstance as Instance;
 pub use sb::VkOffset2D as Offset2D;
 pub use sb::VkPhysicalDevice as PhysicalDevice;

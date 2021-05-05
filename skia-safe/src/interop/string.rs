@@ -34,9 +34,10 @@ impl Default for Handle<SkString> {
 }
 
 impl Handle<SkString> {
+    #[allow(clippy::should_implement_trait)]
     pub fn from_str(str: impl AsRef<str>) -> String {
         let bytes = str.as_ref().as_bytes();
-        Handle::from_native(unsafe { SkString::new3(bytes.as_ptr() as _, bytes.len()) })
+        Handle::from_native_c(unsafe { SkString::new3(bytes.as_ptr() as _, bytes.len()) })
     }
 
     pub fn as_str(&self) -> &str {

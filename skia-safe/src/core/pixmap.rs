@@ -22,7 +22,7 @@ impl NativeDrop for SkPixmap {
 
 impl Default for Handle<SkPixmap> {
     fn default() -> Self {
-        Pixmap::from_native(SkPixmap {
+        Pixmap::from_native_c(SkPixmap {
             fPixels: ptr::null(),
             fRowBytes: 0,
             fInfo: construct(|ii| unsafe { sb::C_SkImageInfo_Construct(ii) }),
@@ -42,7 +42,7 @@ impl Handle<SkPixmap> {
         assert!(row_bytes >= width * info.bytes_per_pixel());
         assert!(pixels.len() >= height * row_bytes);
 
-        let pm = Pixmap::from_native(SkPixmap {
+        let pm = Pixmap::from_native_c(SkPixmap {
             fPixels: pixels.as_ptr() as _,
             fRowBytes: row_bytes,
             fInfo: info.native().clone(),
@@ -81,6 +81,7 @@ impl Handle<SkPixmap> {
         self.native().fRowBytes
     }
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn addr(&self) -> *const c_void {
         self.native().fPixels
     }
@@ -136,7 +137,7 @@ impl Handle<SkPixmap> {
     pub fn get_color(&self, p: impl Into<IPoint>) -> Color {
         let p = p.into();
         self.assert_pixel_exists(p);
-        Color::from_native(unsafe { self.native().getColor(p.x, p.y) })
+        Color::from_native_c(unsafe { self.native().getColor(p.x, p.y) })
     }
 
     pub fn get_alpha_f(&self, p: impl Into<IPoint>) -> f32 {
@@ -153,6 +154,7 @@ impl Handle<SkPixmap> {
         assert!(p.y >= 0 && p.y < self.height());
     }
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn addr_at(&self, p: impl Into<IPoint>) -> *const c_void {
         let p = p.into();
         (self.addr() as *const raw::c_char).add(self.info().compute_offset(p, self.row_bytes()))
@@ -162,10 +164,12 @@ impl Handle<SkPixmap> {
     // TODO: addr8(), addr16(), addr32(), addr64(), addrF16(),
     //       addr8_at(), addr16_at(), addr32_at(), addr64_at(), addrF16_at()
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn writable_addr(&self) -> *mut c_void {
         self.addr() as _
     }
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn writable_addr_at(&self, p: impl Into<IPoint>) -> *mut c_void {
         self.addr_at(p) as _
     }

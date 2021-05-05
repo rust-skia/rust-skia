@@ -4,18 +4,37 @@ use super::d3d;
 use super::gl;
 #[cfg(feature = "vulkan")]
 use super::vk;
-use super::{BackendRenderTarget, BackendSurfaceMutableState, BackendTexture};
-use crate::gpu::{BackendFormat, MipMapped, Renderable};
-use crate::prelude::*;
-use crate::{image, ColorType, Data, Image};
+use super::{
+    BackendFormat, BackendRenderTarget, BackendSurfaceMutableState, BackendTexture, ContextOptions,
+    FlushInfo, Mipmapped, SemaphoresSubmitted,
+};
+use crate::{image, prelude::*, Data, Image};
 use skia_bindings as sb;
-use skia_bindings::{GrContext, SkRefCntBase};
-use std::{ptr, time::Duration};
+use skia_bindings::{GrDirectContext, GrRecordingContext, SkRefCntBase};
+use std::{
+    ops::{Deref, DerefMut},
+    ptr,
+    time::Duration,
+};
 
-pub type Context = RCHandle<GrContext>;
+pub type DirectContext = RCHandle<GrDirectContext>;
 
-impl NativeRefCountedBase for GrContext {
+impl NativeRefCountedBase for GrDirectContext {
     type Base = SkRefCntBase;
+}
+
+impl Deref for RCHandle<GrDirectContext> {
+    type Target = RCHandle<GrRecordingContext>;
+
+    fn deref(&self) -> &Self::Target {
+        unsafe { transmute_ref(self) }
+    }
+}
+
+impl DerefMut for RCHandle<GrDirectContext> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        unsafe { transmute_ref_mut(self) }
+    }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -30,45 +49,63 @@ pub struct ResourceCacheUsage {
     pub resource_bytes: usize,
 }
 
-impl RCHandle<GrContext> {
-    // TODO: support variant with GrContextOptions
+impl RCHandle<GrDirectContext> {
     #[cfg(feature = "gl")]
-    pub fn new_gl(interface: impl Into<Option<gl::Interface>>) -> Option<Context> {
-        Context::from_ptr(unsafe { sb::C_GrContext_MakeGL(interface.into().into_ptr_or_null()) })
+    pub fn new_gl<'a>(
+        interface: impl Into<Option<gl::Interface>>,
+        options: impl Into<Option<&'a ContextOptions>>,
+    ) -> Option<DirectContext> {
+        DirectContext::from_ptr(unsafe {
+            sb::C_GrDirectContext_MakeGL(
+                interface.into().into_ptr_or_null(),
+                options.into().native_ptr_or_null(),
+            )
+        })
     }
 
-    // TODO: support variant with GrContextOptions
     #[cfg(feature = "vulkan")]
-    pub fn new_vulkan(backend_context: &vk::BackendContext) -> Option<Context> {
+    pub fn new_vulkan<'a>(
+        backend_context: &vk::BackendContext,
+        options: impl Into<Option<&'a ContextOptions>>,
+    ) -> Option<DirectContext> {
         unsafe {
             let end_resolving = backend_context.begin_resolving();
-            let context = Context::from_ptr(sb::C_GrContext_MakeVulkan(
+            let context = DirectContext::from_ptr(sb::C_GrDirectContext_MakeVulkan(
                 backend_context.native.as_ptr() as _,
+                options.into().native_ptr_or_null(),
             ));
             drop(end_resolving);
             context
         }
     }
 
-    // TODO: support variant with GrContextOptions
     /// # Safety
     /// This function is unsafe because `device` and `queue` are untyped handles which need to exceed the
     /// lifetime of the context returned.
     #[cfg(feature = "metal")]
-    pub unsafe fn new_metal(
+    pub unsafe fn new_metal<'a>(
         device: *mut std::ffi::c_void,
         queue: *mut std::ffi::c_void,
-    ) -> Option<Context> {
-        Context::from_ptr(sb::C_GrContext_MakeMetal(device, queue))
+        options: impl Into<Option<&'a ContextOptions>>,
+    ) -> Option<DirectContext> {
+        DirectContext::from_ptr(sb::C_GrContext_MakeMetal(
+            device,
+            queue,
+            options.into().native_ptr_or_null(),
+        ))
     }
 
-    // TODO: support variant with GrContextOptions
     #[cfg(feature = "d3d")]
-    pub unsafe fn new_d3d(backend_context: &d3d::BackendContext) -> Option<Context> {
-        Context::from_ptr(sb::C_GrContext_MakeDirect3D(backend_context.native()))
+    #[allow(clippy::missing_safety_doc)]
+    pub unsafe fn new_d3d<'a>(
+        backend_context: &d3d::BackendContext,
+        options: impl Into<Option<&'a ContextOptions>>,
+    ) -> Option<DirectContext> {
+        DirectContext::from_ptr(sb::C_GrDirectContext_MakeDirect3D(
+            backend_context.native(),
+            options.into().native_ptr_or_null(),
+        ))
     }
-
-    // TODO: threadSafeProxy()
 
     pub fn reset(&mut self, backend_state: Option<u32>) -> &mut Self {
         unsafe {
@@ -86,23 +123,21 @@ impl RCHandle<GrContext> {
     pub fn abandon(&mut self) -> &mut Self {
         unsafe {
             // self.native_mut().abandonContext()
-            sb::GrContext_abandonContext(self.native_mut() as *mut _ as _)
+            sb::GrDirectContext_abandonContext(self.native_mut() as *mut _ as _)
         }
         self
     }
 
-    // TODO: is_...?
-    pub fn abandoned(&mut self) -> bool {
-        unsafe { sb::C_GrContext_abandoned(self.native_mut()) }
-    }
+    // TODO: threadSafeProxy()
 
-    // TODO: is_...?
     pub fn oomed(&mut self) -> bool {
         unsafe { self.native_mut().oomed() }
     }
 
     pub fn release_resources_and_abandon(&mut self) -> &mut Self {
-        unsafe { sb::GrContext_releaseResourcesAndAbandonContext(self.native_mut() as *mut _ as _) }
+        unsafe {
+            sb::GrDirectContext_releaseResourcesAndAbandonContext(self.native_mut() as *mut _ as _)
+        }
         self
     }
 
@@ -154,13 +189,13 @@ impl RCHandle<GrContext> {
     }
 
     pub fn free_gpu_resources(&mut self) -> &mut Self {
-        unsafe { sb::GrContext_freeGpuResources(self.native_mut() as *mut _ as _) }
+        unsafe { sb::GrDirectContext_freeGpuResources(self.native_mut() as *mut _ as _) }
         self
     }
 
     pub fn perform_deferred_cleanup(&mut self, not_used: Duration) -> &mut Self {
         unsafe {
-            sb::C_GrContext_performDeferredCleanup(
+            sb::C_GrDirectContext_performDeferredCleanup(
                 self.native_mut(),
                 not_used.as_millis().try_into().unwrap(),
             )
@@ -186,51 +221,33 @@ impl RCHandle<GrContext> {
         self
     }
 
-    pub fn max_texture_size(&self) -> i32 {
-        unsafe { self.native().maxTextureSize() }
-    }
-
-    pub fn max_render_target_size(&self) -> i32 {
-        unsafe { self.native().maxRenderTargetSize() }
-    }
-
-    // TODO: is_...?
-    pub fn color_type_supported_as_image(&self, color_type: ColorType) -> bool {
-        unsafe {
-            self.native()
-                .colorTypeSupportedAsImage(color_type.into_native())
-        }
-    }
-
-    // TODO: is_...?
-    pub fn color_type_supported_as_surface(&self, color_type: ColorType) -> bool {
-        unsafe {
-            sb::C_GrContext_colorTypeSupportedAsSurface(self.native(), color_type.into_native())
-        }
-    }
-
-    pub fn max_surface_sample_count_for_color_type(&self, color_type: ColorType) -> usize {
-        unsafe {
-            self.native()
-                .maxSurfaceSampleCountForColorType(color_type.into_native())
-                .try_into()
-                .unwrap()
-        }
-    }
-
     // TODO: wait()
 
-    #[deprecated(since = "0.30.0", note = "use flush_and_submit()")]
-    pub fn flush(&mut self) -> &mut Self {
-        self.flush_and_submit()
-    }
-
     pub fn flush_and_submit(&mut self) -> &mut Self {
-        unsafe { sb::C_GrContext_flushAndSubmit(self.native_mut()) }
+        unsafe { sb::C_GrDirectContext_flushAndSubmit(self.native_mut()) }
         self
     }
 
-    // TODO: flush(GrFlushInfo, ..)
+    pub fn flush_submit_and_sync_cpu(&mut self) -> &mut Self {
+        self.flush(&FlushInfo::default());
+        self.submit(true);
+        self
+    }
+
+    #[deprecated(since = "0.37.0", note = "Use flush()")]
+    pub fn flush_with_info(&mut self, info: &FlushInfo) -> SemaphoresSubmitted {
+        self.flush(info)
+    }
+
+    pub fn flush<'a>(&mut self, info: impl Into<Option<&'a FlushInfo>>) -> SemaphoresSubmitted {
+        let n = self.native_mut();
+        if let Some(info) = info.into() {
+            unsafe { n.flush(info.native()) }
+        } else {
+            let info = FlushInfo::default();
+            unsafe { n.flush(info.native()) }
+        }
+    }
 
     pub fn submit(&mut self, sync_cpu: impl Into<Option<bool>>) -> bool {
         unsafe { self.native_mut().submit(sync_cpu.into().unwrap_or(false)) }
@@ -239,6 +256,8 @@ impl RCHandle<GrContext> {
     pub fn check_async_work_completion(&mut self) {
         unsafe { self.native_mut().checkAsyncWorkCompletion() }
     }
+
+    // TODO: dumpMemoryStatistics()
 
     pub fn supports_distance_field_text(&self) -> bool {
         unsafe { self.native().supportsDistanceFieldText() }
@@ -254,29 +273,16 @@ impl RCHandle<GrContext> {
 
     pub fn compute_image_size(
         image: impl AsRef<Image>,
-        mip_mapped: MipMapped,
+        mipmapped: Mipmapped,
         use_next_pow2: impl Into<Option<bool>>,
     ) -> usize {
         unsafe {
-            sb::C_GrContext_ComputeImageSize(
+            sb::C_GrDirectContext_ComputeImageSize(
                 image.as_ref().clone().into_ptr(),
-                mip_mapped,
+                mipmapped,
                 use_next_pow2.into().unwrap_or_default(),
             )
         }
-    }
-
-    pub fn default_backend_format(&self, ct: ColorType, renderable: Renderable) -> BackendFormat {
-        let mut format = BackendFormat::default();
-        unsafe {
-            sb::C_GrContext_defaultBackendFormat(
-                self.native(),
-                ct.into_native(),
-                renderable,
-                format.native_mut(),
-            )
-        };
-        format
     }
 
     // TODO: wrap createBackendTexture (several variants)
@@ -287,9 +293,9 @@ impl RCHandle<GrContext> {
     //       introduced in m84
 
     pub fn compressed_backend_format(&self, compression: image::CompressionType) -> BackendFormat {
-        let mut backend_format = BackendFormat::default();
+        let mut backend_format = BackendFormat::new_invalid();
         unsafe {
-            sb::C_GrContext_compressedBackendFormat(
+            sb::C_GrDirectContext_compressedBackendFormat(
                 self.native(),
                 compression,
                 backend_format.native_mut(),
@@ -302,20 +308,35 @@ impl RCHandle<GrContext> {
     //       introduced in m81
     //       extended in m84 with finishedProc and finishedContext
 
+    // TODO: wrap updateCompressedBackendTexture (two variants)
+    //       introduced in m86
+
     // TODO: add variant with GpuFinishedProc / GpuFinishedContext
     pub fn set_backend_texture_state(
         &mut self,
         backend_texture: &BackendTexture,
         state: &BackendSurfaceMutableState,
     ) -> bool {
+        self.set_backend_texture_state_and_return_previous(backend_texture, state)
+            .is_some()
+    }
+
+    pub fn set_backend_texture_state_and_return_previous(
+        &mut self,
+        backend_texture: &BackendTexture,
+        state: &BackendSurfaceMutableState,
+    ) -> Option<BackendSurfaceMutableState> {
+        let mut previous = BackendSurfaceMutableState::default();
         unsafe {
             self.native_mut().setBackendTextureState(
                 backend_texture.native(),
                 state.native(),
+                previous.native_mut(),
                 None,
                 ptr::null_mut(),
             )
         }
+        .if_true_some(previous)
     }
 
     // TODO: add variant with GpuFinishedProc / GpuFinishedContext
@@ -324,14 +345,26 @@ impl RCHandle<GrContext> {
         target: &BackendRenderTarget,
         state: &BackendSurfaceMutableState,
     ) -> bool {
+        self.set_backend_render_target_state_and_return_previous(target, state)
+            .is_some()
+    }
+
+    pub fn set_backend_render_target_state_and_return_previous(
+        &mut self,
+        target: &BackendRenderTarget,
+        state: &BackendSurfaceMutableState,
+    ) -> Option<BackendSurfaceMutableState> {
+        let mut previous = BackendSurfaceMutableState::default();
         unsafe {
             self.native_mut().setBackendRenderTargetState(
                 target.native(),
                 state.native(),
+                previous.native_mut(),
                 None,
                 ptr::null_mut(),
             )
         }
+        .if_true_some(previous)
     }
 
     // TODO: wrap deleteBackendTexture(),

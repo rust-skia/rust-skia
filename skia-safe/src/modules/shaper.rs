@@ -186,7 +186,7 @@ impl NativeDrop for SkShaper_ScriptRunIterator {
 
 impl RefHandle<SkShaper_ScriptRunIterator> {
     pub fn current_script(&self) -> FourByteTag {
-        FourByteTag::from_native(unsafe {
+        FourByteTag::from_native_c(unsafe {
             sb::C_SkShaper_ScriptRunIterator_currentScript(self.native())
         })
     }
@@ -205,6 +205,8 @@ impl RefHandle<SkShaper> {
         .unwrap()
         .borrows(utf8)
     }
+
+    // TODO: wrap MakeSkUnicodeHbScriptRunIterator (m88: uses type SkUnicode defined in src/).
 
     pub fn new_hb_icu_script_run_iterator(utf8: &str) -> Borrows<ScriptRunIterator> {
         let bytes = utf8.as_bytes();
@@ -298,7 +300,7 @@ pub mod run_handler {
             RunInfo {
                 font: Font::from_native_ref(unsafe { &*ri.fFont }),
                 bidi_level: ri.fBidiLevel,
-                advance: Vector::from_native(ri.fAdvance),
+                advance: Vector::from_native_c(ri.fAdvance),
                 glyph_count: ri.glyphCount,
                 utf8_range: utf8_range.fBegin..utf8_range.fBegin + utf8_range.fSize,
             }
@@ -365,7 +367,7 @@ pub mod run_handler {
                 ),
                 offsets,
                 clusters,
-                point: Point::from_native(buffer.point),
+                point: Point::from_native_c(buffer.point),
             }
         }
 
@@ -609,7 +611,9 @@ impl TextBlobBuilderRunHandler<'_> {
     }
 
     pub fn end_point(&mut self) -> Point {
-        Point::from_native(unsafe { sb::C_SkTextBlobBuilderRunHandler_endPoint(self.native_mut()) })
+        Point::from_native_c(unsafe {
+            sb::C_SkTextBlobBuilderRunHandler_endPoint(self.native_mut())
+        })
     }
 }
 

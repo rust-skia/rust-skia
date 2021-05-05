@@ -1,6 +1,5 @@
 use crate::prelude::*;
-use crate::{image_filter, image_filters, IRect, ImageFilter};
-use skia_bindings as sb;
+use crate::{image_filters, IRect};
 use skia_bindings::SkImageFilter;
 
 impl RCHandle<SkImageFilter> {
@@ -20,7 +19,7 @@ impl RCHandle<SkImageFilter> {
             inputs.enforce_pm_color,
             background,
             foreground,
-            crop_rect,
+            crop_rect.into().map(|r| r.into()),
         )
     }
 }
@@ -47,27 +46,4 @@ impl ArithmeticFPInputs {
             enforce_pm_color,
         }
     }
-}
-
-#[allow(clippy::too_many_arguments)]
-#[deprecated(since = "0.19.0", note = "use image_filters::arithmetic()")]
-pub fn new<'a>(
-    inputs: impl Into<ArithmeticFPInputs>,
-    background: impl Into<ImageFilter>,
-    foreground: impl Into<ImageFilter>,
-    crop_rect: impl Into<Option<&'a image_filter::CropRect>>,
-) -> Option<ImageFilter> {
-    let inputs = inputs.into();
-    ImageFilter::from_ptr(unsafe {
-        sb::C_SkArithmeticImageFilter_Make(
-            inputs.k[0],
-            inputs.k[1],
-            inputs.k[2],
-            inputs.k[3],
-            inputs.enforce_pm_color,
-            background.into().into_ptr(),
-            foreground.into().into_ptr(),
-            crop_rect.into().native_ptr_or_null(),
-        )
-    })
 }

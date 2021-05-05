@@ -118,6 +118,10 @@ extern "C" {
 //
 
 extern "C" {
+    void C_StrutStyle_Construct(StrutStyle* uninitialized) {
+        new(uninitialized) StrutStyle();
+    }
+
     void C_StrutStyle_CopyConstruct(StrutStyle* uninitialized, const StrutStyle* other) {
         new(uninitialized) StrutStyle(*other);
     }
@@ -142,16 +146,24 @@ extern "C" {
 }
 
 extern "C" {
-    void C_ParagraphStyle_CopyConstruct(ParagraphStyle* uninitialized, const ParagraphStyle* other) {
-        new(uninitialized) ParagraphStyle(*other);
+    ParagraphStyle* C_ParagraphStyle_New() {
+        return new ParagraphStyle();
     }
 
-    void C_ParagraphStyle_destruct(ParagraphStyle* self) {
-        self->~ParagraphStyle();
+    ParagraphStyle* C_ParagraphStyle_NewCopy(const ParagraphStyle* other) {
+        return new ParagraphStyle(*other);
+    }
+
+    void C_ParagraphStyle_delete(ParagraphStyle* self) {
+        delete self;
     }
 
     bool C_ParagraphStyle_Equals(const ParagraphStyle* left, const ParagraphStyle* right) {
         return *left == *right;
+    }
+
+    bool C_ParagraphStyle_ellipsized(const ParagraphStyle* self) {
+        return self->ellipsized();
     }
 }
 
@@ -333,6 +345,10 @@ extern "C" {
 
     void C_FontFeature_destruct(FontFeature* self) {
         self->~FontFeature();
+    }
+
+    void C_TextStyle_Construct(TextStyle* uninitialized) {
+        new(uninitialized) TextStyle();
     }
 
     void C_TextStyle_CopyConstruct(TextStyle* uninitialized, const TextStyle* other) {

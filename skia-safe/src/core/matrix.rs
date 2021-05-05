@@ -164,6 +164,12 @@ impl Matrix {
         m
     }
 
+    pub fn rotate_deg_pivot(deg: scalar, pivot: impl Into<Point>) -> Matrix {
+        let mut m = Matrix::new();
+        m.set_rotate(deg, pivot.into());
+        m
+    }
+
     pub fn rotate_rad(rad: scalar) -> Matrix {
         Self::rotate_deg(scalar_::radians_to_degrees(rad))
     }
@@ -221,6 +227,12 @@ impl Matrix {
 
     pub fn preserves_right_angles(&self) -> bool {
         unsafe { self.native().preservesRightAngles(scalar::NEARLY_ZERO) }
+    }
+
+    pub fn rc(&self, r: usize, c: usize) -> scalar {
+        assert!(r <= 2);
+        assert!(c <= 2);
+        self[r * 3 + c]
     }
 
     pub fn scale_x(&self) -> scalar {
@@ -749,7 +761,7 @@ impl Matrix {
     }
 
     pub fn invalid_matrix() -> &'static Matrix {
-        &INVALID
+        Self::from_native_ref(unsafe { &*sb::C_SkMatrix_InvalidMatrix() })
     }
 
     pub fn concat(a: &Matrix, b: &Matrix) -> Matrix {
@@ -785,10 +797,6 @@ impl IndexGet for Matrix {}
 impl IndexSet for Matrix {}
 
 pub const IDENTITY: Matrix = Matrix::new_identity();
-
-lazy_static! {
-    static ref INVALID: Matrix = Matrix::from_native(unsafe { *SkMatrix::InvalidMatrix() });
-}
 
 #[test]
 fn test_get_set_trait_compilation() {

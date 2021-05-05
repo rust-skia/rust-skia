@@ -31,7 +31,7 @@ impl Deref for RCHandle<SkData> {
 }
 
 impl PartialEq for RCHandle<SkData> {
-    // Although there is an implementation in SkData for equality testig, we
+    // Although there is an implementation in SkData for equality testing, we
     // prefer to stay on the Rust side for that.
     fn eq(&self, other: &Self) -> bool {
         self.deref().eq(other.deref())
@@ -71,10 +71,12 @@ impl RCHandle<SkData> {
     /// Constructs Data from a given byte slice without copying it.
     ///
     /// Users must make sure that the underlying slice will outlive the lifetime of the Data.
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn new_bytes(data: &[u8]) -> Self {
         Data::from_ptr(sb::C_SkData_MakeWithoutCopy(data.as_ptr() as _, data.len())).unwrap()
     }
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn new_uninitialized(length: usize) -> Data {
         Data::from_ptr(sb::C_SkData_MakeUninitialized(length)).unwrap()
     }

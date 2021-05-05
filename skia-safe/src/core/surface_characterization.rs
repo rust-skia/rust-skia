@@ -29,9 +29,9 @@ impl NativePartialEq for SkSurfaceCharacterization {
 
 impl Default for Handle<SkSurfaceCharacterization> {
     fn default() -> Self {
-        SurfaceCharacterization::from_native(construct(|sc| unsafe {
+        SurfaceCharacterization::construct(|sc| unsafe {
             sb::C_SkSurfaceCharacterization_Construct(sc)
-        }))
+        })
     }
 }
 
@@ -41,7 +41,14 @@ impl Handle<SkSurfaceCharacterization> {
     #[cfg(feature = "gpu")]
     pub fn resized(&self, size: impl Into<crate::ISize>) -> Self {
         let size = size.into();
-        Self::from_native(unsafe { self.native().createResized(size.width, size.height) })
+        Self::construct(|sc| unsafe {
+            sb::C_SkSurfaceCharacterization_createResized(
+                self.native(),
+                size.width,
+                size.height,
+                sc,
+            )
+        })
     }
 
     pub fn with_color_space(&self, color_space: impl Into<Option<ColorSpace>>) -> Self {
@@ -62,15 +69,21 @@ impl Handle<SkSurfaceCharacterization> {
         color_type: crate::ColorType,
         backend_format: &gpu::BackendFormat,
     ) -> Self {
-        Self::from_native(unsafe {
-            self.native()
-                .createBackendFormat(color_type.into_native(), backend_format.native())
+        Self::construct(|sc| unsafe {
+            sb::C_SkSurfaceCharacterization_createBackendFormat(
+                self.native(),
+                color_type.into_native(),
+                backend_format.native(),
+                sc,
+            )
         })
     }
 
     #[cfg(feature = "gl")]
     pub fn with_fbo0(&self, uses_glfbo0: bool) -> Self {
-        Self::from_native(unsafe { self.native().createFBO0(uses_glfbo0) })
+        Self::construct(|sc| unsafe {
+            sb::C_SkSurfaceCharacterization_createFBO0(self.native(), uses_glfbo0, sc)
+        })
     }
 }
 
@@ -116,11 +129,6 @@ impl Handle<SkSurfaceCharacterization> {
         self.image_info().color_type()
     }
 
-    #[deprecated(since = "0.17.0", note = "use sample_count()")]
-    pub fn stencil_count(&self) -> usize {
-        self.sample_count()
-    }
-
     pub fn sample_count(&self) -> usize {
         self.native().fSampleCnt.try_into().unwrap()
     }
@@ -135,6 +143,11 @@ impl Handle<SkSurfaceCharacterization> {
 
     pub fn uses_glfbo0(&self) -> bool {
         self.native().fUsesGLFBO0 == sb::SkSurfaceCharacterization_UsesGLFBO0::kYes
+    }
+
+    pub fn vk_rt_supports_input_attachment(&self) -> bool {
+        self.native().fVkRTSupportsInputAttachment
+            == sb::SkSurfaceCharacterization_VkRTSupportsInputAttachment::kYes
     }
 
     pub fn vulkan_secondary_cb_compatible(&self) -> bool {

@@ -120,11 +120,6 @@ impl IRect {
         *self = Self::new_empty()
     }
 
-    #[deprecated(since = "0.19.0", note = "use set_ltrb()")]
-    pub fn set(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
-        self.set_ltrb(left, top, right, bottom)
-    }
-
     pub fn set_ltrb(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
         *self = Self::new(left, top, right, bottom);
     }
@@ -227,21 +222,11 @@ impl IRect {
         unsafe { r.native_mut().intersect(a.native(), b.native()) }.if_true_some(r)
     }
 
-    #[deprecated(since = "0.19.0", note = "removed without alternative")]
-    pub fn intersect_no_empty_check(a: &Self, b: &Self) -> Option<Self> {
-        Self::intersect_no_empty_check_(a, b)
-    }
-
     pub fn intersects(a: &Self, b: &Self) -> bool {
         Self::intersect(a, b).is_some()
     }
 
-    #[deprecated(since = "0.19.0", note = "removed without alternative")]
-    pub fn intersects_no_empty_check(a: &Self, b: &Self) -> bool {
-        Self::intersect_no_empty_check_(a, b).is_some()
-    }
-
-    fn intersect_no_empty_check_(a: &Self, b: &Self) -> Option<Self> {
+    pub fn intersect_no_empty_check_(a: &Self, b: &Self) -> Option<Self> {
         debug_assert!(!a.is_empty_64() && !b.is_empty_64());
         let r = IRect::new(
             max(a.left, b.left),
@@ -483,23 +468,8 @@ impl Rect {
         *self = Self::from_irect(irect)
     }
 
-    #[deprecated(since = "0.19.0", note = "use set_ltrb()")]
-    pub fn set(&mut self, left: scalar, top: scalar, right: scalar, bottom: scalar) {
-        self.set_ltrb(left, top, right, bottom)
-    }
-
     pub fn set_ltrb(&mut self, left: scalar, top: scalar, right: scalar, bottom: scalar) {
         *self = Self::new(left, top, right, bottom)
-    }
-
-    #[deprecated(since = "0.19.0", note = "use from_irect()")]
-    pub fn iset(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
-        *self = Self::from_irect(IRect::new(left, top, right, bottom))
-    }
-
-    #[deprecated(since = "0.19.0", note = "use from_isize()")]
-    pub fn iset_wh(&mut self, width: i32, height: i32) {
-        *self = Self::from_isize(ISize::new(width, height))
     }
 
     pub fn set_bounds(&mut self, points: &[Point]) {
@@ -607,43 +577,12 @@ impl Rect {
         unsafe { self.native_mut().intersect(r.as_ref().native()) }
     }
 
-    #[deprecated(since = "0.19.0", note = "use intersect()")]
-    pub fn intersect_ltrb(
-        &mut self,
-        left: scalar,
-        top: scalar,
-        right: scalar,
-        bottom: scalar,
-    ) -> bool {
-        self.intersect(Rect::new(left, top, right, bottom))
-    }
-
     #[must_use]
     pub fn intersect2(&mut self, a: impl AsRef<Rect>, b: impl AsRef<Rect>) -> bool {
         unsafe {
             self.native_mut()
                 .intersect1(a.as_ref().native(), b.as_ref().native())
         }
-    }
-
-    #[deprecated(since = "0.19.0", note = "use intersects()")]
-    pub fn intersects_ltrb(
-        &self,
-        left: scalar,
-        top: scalar,
-        right: scalar,
-        bottom: scalar,
-    ) -> bool {
-        Self::intersects_(
-            self.left,
-            self.top,
-            self.right,
-            self.bottom,
-            left,
-            top,
-            right,
-            bottom,
-        )
     }
 
     pub fn intersects(&self, r: impl AsRef<Rect>) -> bool {
@@ -680,11 +619,6 @@ impl Rect {
         let t = at.max(bt);
         let b = ab.min(bb);
         l < r && t < b
-    }
-
-    #[deprecated(since = "0.19.0", note = "use join()")]
-    pub fn join_ltrb(&mut self, left: scalar, top: scalar, right: scalar, bottom: scalar) {
-        self.join(Rect::new(left, top, right, bottom))
     }
 
     pub fn join(&mut self, r: impl AsRef<Rect>) {
@@ -775,7 +709,7 @@ impl Contains<Point> for Rect {
 
 impl Contains<Rect> for Rect {
     fn contains(&self, r: Rect) -> bool {
-        // todo: can we eliminate the this->isempty check?
+        // TODO: can we eliminate the this->is_empty check?
         !r.is_empty()
             && !self.is_empty()
             && self.left <= r.left
@@ -787,7 +721,7 @@ impl Contains<Rect> for Rect {
 
 impl Contains<IRect> for Rect {
     fn contains(&self, r: IRect) -> bool {
-        // todo: can we eliminate the this->isEmpty check?
+        // TODO: can we eliminate the this->isEmpty check?
         !r.is_empty()
             && !self.is_empty()
             && self.left <= r.left as scalar

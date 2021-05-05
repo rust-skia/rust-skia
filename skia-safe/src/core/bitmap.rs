@@ -93,6 +93,7 @@ impl Handle<SkBitmap> {
         unsafe { self.native_mut().setAlphaType(alpha_type) }
     }
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn pixels(&mut self) -> *mut ffi::c_void {
         self.pixmap().writable_addr()
     }
@@ -113,12 +114,14 @@ impl Handle<SkBitmap> {
         self.pixmap().is_opaque()
     }
 
-    pub fn is_volatile(&self) -> bool {
-        unsafe { self.native().isVolatile() }
+    #[deprecated(since = "0.35.0", note = "Removed without replacement")]
+    pub fn is_volatile(&self) -> ! {
+        panic!("Removed without replacement")
     }
 
-    pub fn set_is_volatile(&mut self, is_volatile: bool) {
-        unsafe { self.native_mut().setIsVolatile(is_volatile) }
+    #[deprecated(since = "0.35.0", note = "Removed without replacement")]
+    pub fn set_is_volatile(&mut self, _is_volatile: bool) {
+        panic!("Removed without replacement");
     }
 
     pub fn reset(&mut self) {
@@ -138,7 +141,7 @@ impl Handle<SkBitmap> {
     }
 
     pub fn get_subset(&self) -> IRect {
-        let origin = IPoint::from_native(unsafe { self.native().pixelRefOrigin() });
+        let origin = self.pixel_ref_origin();
         IRect::from_xywh(origin.x, origin.y, self.width(), self.height())
     }
 
@@ -221,6 +224,7 @@ impl Handle<SkBitmap> {
             .expect("Bitmap::alloc_n32_pixels_failed")
     }
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn install_pixels(
         &mut self,
         image_info: &ImageInfo,
@@ -257,7 +261,7 @@ impl Handle<SkBitmap> {
     }
 
     pub fn pixel_ref_origin(&self) -> IPoint {
-        IPoint::from_native(unsafe { self.native().pixelRefOrigin() })
+        IPoint::from_native_c(unsafe { sb::C_SkBitmap_pixelRefOrigin(self.native()) })
     }
 
     pub fn set_pixel_ref(
@@ -311,6 +315,7 @@ impl Handle<SkBitmap> {
         self.pixmap().get_alpha_f(p)
     }
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn get_addr(&self, p: impl Into<IPoint>) -> *const ffi::c_void {
         let p = p.into();
         self.native().getAddr(p.x, p.y)
@@ -326,6 +331,7 @@ impl Handle<SkBitmap> {
         }
     }
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn read_pixels(
         &self,
         dst_info: &ImageInfo,
@@ -338,8 +344,8 @@ impl Handle<SkBitmap> {
             .readPixels(dst_info.native(), dst_pixels, dst_row_bytes, src_x, src_y)
     }
 
-    // TOOD: read_pixels(Pixmap)
-    // TOOD: write_pixels(Pixmap)
+    // TODO: read_pixels(Pixmap)
+    // TODO: write_pixels(Pixmap)
 
     pub fn extract_alpha(&self, dst: &mut Self, paint: Option<&Paint>) -> Option<IPoint> {
         let mut offset = IPoint::default();
@@ -396,7 +402,19 @@ fn empty_bitmap_shader() {
 }
 
 #[test]
-fn shader_with_tilemode() {
+fn shader_with_tile_mode() {
     let bm = Bitmap::new();
     let _shader = bm.to_shader((TileMode::Decal, TileMode::Mirror), None);
+}
+
+#[test]
+fn test_get_subset() {
+    let bm = Bitmap::new();
+    let _ = bm.get_subset();
+}
+
+#[test]
+fn test_pixel_ref_origin() {
+    let bm = Bitmap::new();
+    let _ = bm.pixel_ref_origin();
 }

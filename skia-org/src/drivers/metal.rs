@@ -11,7 +11,7 @@ use std::path::Path;
 #[allow(dead_code)]
 pub struct Metal {
     // note: ordered for drop order
-    context: gpu::Context,
+    context: gpu::DirectContext,
     queue: CommandQueue,
     device: Device,
     pool: AutoreleasePool,
@@ -27,9 +27,10 @@ impl DrawingDriver for Metal {
         let queue = device.new_command_queue();
 
         let context = unsafe {
-            gpu::Context::new_metal(
+            gpu::DirectContext::new_metal(
                 device.as_ptr() as *mut ffi::c_void,
                 queue.as_ptr() as *mut ffi::c_void,
+                None,
             )
         }
         .unwrap();

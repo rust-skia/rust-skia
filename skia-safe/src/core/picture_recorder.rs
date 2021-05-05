@@ -4,12 +4,6 @@ use skia_bindings as sb;
 use skia_bindings::{SkPictureRecorder, SkRect};
 use std::ptr;
 
-bitflags! {
-    pub struct RecordFlags: u32 {
-        const PLAYBACK_DRAW_PICTURE = sb::SkPictureRecorder_RecordFlags_kPlaybackDrawPicture_RecordFlag as _;
-    }
-}
-
 pub type PictureRecorder = Handle<SkPictureRecorder>;
 
 impl NativeDrop for SkPictureRecorder {
@@ -22,25 +16,20 @@ impl NativeDrop for SkPictureRecorder {
 
 impl Handle<SkPictureRecorder> {
     pub fn new() -> Self {
-        Self::from_native(unsafe { SkPictureRecorder::new() })
+        Self::construct(|pr| unsafe { sb::C_SkPictureRecorder_Construct(pr) })
     }
 
-    // TODO: wrap beginRecording with BBoxHierarchy
+    // TODO: beginRecording with BBoxHierarchy
 
     pub fn begin_recording(
         &mut self,
         bounds: impl AsRef<Rect>,
         mut bbh_factory: Option<&mut BBHFactory>,
-        record_flags: impl Into<Option<RecordFlags>>,
     ) -> &mut Canvas {
         let canvas_ref = unsafe {
             &mut *self.native_mut().beginRecording1(
                 bounds.as_ref().native(),
                 bbh_factory.native_ptr_or_null_mut(),
-                record_flags
-                    .into()
-                    .unwrap_or_else(RecordFlags::empty)
-                    .bits(),
             )
         };
 
@@ -78,7 +67,7 @@ impl Handle<SkPictureRecorder> {
 #[test]
 fn good_case() {
     let mut recorder = PictureRecorder::new();
-    let canvas = recorder.begin_recording(&Rect::new(0.0, 0.0, 100.0, 100.0), None, None);
+    let canvas = recorder.begin_recording(&Rect::new(0.0, 0.0, 100.0, 100.0), None);
     canvas.clear(crate::Color::WHITE);
     let _picture = recorder.finish_recording_as_picture(None).unwrap();
 }
@@ -86,10 +75,10 @@ fn good_case() {
 #[test]
 fn begin_recording_two_times() {
     let mut recorder = PictureRecorder::new();
-    let canvas = recorder.begin_recording(&Rect::new(0.0, 0.0, 100.0, 100.0), None, None);
+    let canvas = recorder.begin_recording(&Rect::new(0.0, 0.0, 100.0, 100.0), None);
     canvas.clear(crate::Color::WHITE);
     assert!(recorder.recording_canvas().is_some());
-    let canvas = recorder.begin_recording(&Rect::new(0.0, 0.0, 100.0, 100.0), None, None);
+    let canvas = recorder.begin_recording(&Rect::new(0.0, 0.0, 100.0, 100.0), None);
     canvas.clear(crate::Color::WHITE);
     assert!(recorder.recording_canvas().is_some());
 }
@@ -97,7 +86,7 @@ fn begin_recording_two_times() {
 #[test]
 fn finishing_recording_two_times() {
     let mut recorder = PictureRecorder::new();
-    let canvas = recorder.begin_recording(&Rect::new(0.0, 0.0, 100.0, 100.0), None, None);
+    let canvas = recorder.begin_recording(&Rect::new(0.0, 0.0, 100.0, 100.0), None);
     canvas.clear(crate::Color::WHITE);
     assert!(recorder.finish_recording_as_picture(None).is_some());
     assert!(recorder.recording_canvas().is_none());

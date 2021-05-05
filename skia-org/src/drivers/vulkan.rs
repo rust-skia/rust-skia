@@ -14,7 +14,7 @@ use std::ptr;
 #[allow(dead_code)]
 pub struct Vulkan {
     // ordered for drop order
-    context: gpu::Context,
+    context: gpu::DirectContext,
     ash_graphics: AshGraphics,
 }
 
@@ -47,7 +47,7 @@ impl DrawingDriver for Vulkan {
                 )
             };
 
-            gpu::Context::new_vulkan(&backend_context).unwrap()
+            gpu::DirectContext::new_vulkan(&backend_context, None).unwrap()
         };
 
         Self {

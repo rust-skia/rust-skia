@@ -7,7 +7,7 @@ index 87e7ea7..df4903a 100644
  
  [features]
 -default = []
-+default = ["gl", "vulkan", "d3d", "textlayout"]
++default = ["gl", "vulkan", "metal", "textlayout", "webp"]
  gl = []
  vulkan = []
  metal = []
@@ -20,7 +20,7 @@ index 5a33403..2e93fee 100644
  
  [features]
 -default = []
-+default = ["gl", "vulkan", "d3d", "textlayout"]
++default = ["gl", "vulkan", "metal", "textlayout", "webp"]
  gl = ["offscreen_gl_context", "sparkle", "skia-safe/gl"]
  vulkan = ["ash", "skia-safe/vulkan"]
  metal = ["metal-rs", "foreign-types", "cocoa", "objc", "skia-safe/metal"]
@@ -33,7 +33,7 @@ index 37877ff..3ed3950 100644
  
  [features]
 -default = []
-+default = ["gl", "vulkan", "d3d", "textlayout"]
++default = ["gl", "vulkan", "metal", "textlayout", "webp"]
  gl = ["gpu", "skia-bindings/gl"]
  vulkan = ["gpu", "skia-bindings/vulkan"]
  metal = ["gpu", "skia-bindings/metal"]

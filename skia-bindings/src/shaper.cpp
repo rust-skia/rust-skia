@@ -1,3 +1,7 @@
+#ifndef SK_SHAPER_HARFBUZZ_AVAILABLE
+    #define SK_SHAPER_HARFBUZZ_AVAILABLE
+#endif
+
 #include "modules/skshaper/include/SkShaper.h"
 #include "include/core/SkFontMgr.h"
 

@@ -63,7 +63,7 @@ clean-packages:
 .PHONY: wait
 wait: 
 	@echo "published a package, Waiting for crates.io to catch up before publishing the next"
-	sleep 10
+	sleep 20
 
 .PHONY: update-doc
 update-doc:
@@ -76,4 +76,14 @@ update-doc:
 	cd rust-skia.github.io && git commit -m"Auto-Update of /doc" || true
 	cd rust-skia.github.io && git push origin master	
 	rm -rf rust-skia.github.io
+
+build-flags-win=--release --features "gl,vulkan,d3d,textlayout,webp"
+
+.PHONY: azure-build-win
+azure-build-win:
+	cargo clean
+	cd skia-safe && cargo build ${build-flags-win} --all-targets
+	cd skia-org && cargo clippy ${build-flags-win} --all-targets -- -D warnings 
+	cd skia-org && cargo test --all ${build-flags-win} --all-targets -- --nocapture
+	cd skia-org && cargo run ${build-flags-win}
 

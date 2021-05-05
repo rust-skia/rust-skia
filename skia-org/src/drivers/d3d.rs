@@ -19,7 +19,7 @@ use winapi::{
 use wio::com::ComPtr;
 
 pub struct D3D {
-    context: gpu::Context,
+    context: gpu::DirectContext,
 }
 
 impl DrawingDriver for D3D {
@@ -59,10 +59,11 @@ impl DrawingDriver for D3D {
             adapter,
             device,
             queue,
+            memory_allocator: None,
             protected_context: Protected::No,
         };
 
-        let context = unsafe { gpu::Context::new_d3d(&backend_context) }.unwrap();
+        let context = unsafe { gpu::DirectContext::new_d3d(&backend_context, None) }.unwrap();
         Self { context }
     }
 

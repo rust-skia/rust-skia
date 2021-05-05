@@ -9,7 +9,7 @@ keywords = ["skia", "rust-bindings", "vulkan", "opengl", "pdf"]
 categories = ["external-ffi-bindings", "graphics", "multimedia::images", "rendering::graphics-api", "visualization"]
 license = "MIT"
 
-version = "0.34.2"
+version = "0.37.0"
 authors = ["LongYinan <lynweklm@gmail.com>", "Armin Sander <armin@replicator.org>"]
 edition = "2018"
 build = "build.rs"
@@ -32,12 +32,15 @@ doctest = false
 # Metadata used from inside the packaged crate that defines where to download skia and depot_tools archives from.
 # Note: use short hashes here because of filesystem path size restrictions.
 [package.metadata]
-skia = "m85-0.34.2"
+skia = "m88-0.36.2"
 depot_tools = "a110bf6"
 
 [features]
 default = []
 gl = []
+egl = []
+wayland = []
+x11 = []
 vulkan = []
 metal = []
 d3d = []
@@ -53,15 +56,22 @@ shaper = ["textlayout"]
 
 [build-dependencies]
 cc = "1.0.37"
-bindgen = "0.55.1"
+bindgen = "0.56.0"
 # For enum variant name replacements.
 regex = "1.2.1"
 heck = "0.3.1"
+# Version 1.1.0 causes a stack overflow in the binding generation.
+thread_local = "~1.0.1"
 
 # for downloading and extracting prebuilt binaries and skia / depot_tools archives:
-curl = "0.4.22"
+ureq = "1.5.1"
 flate2 = "1.0.7"
 tar = "0.4.26"
+
+# On the CI we don't specify the libclang location explicitly and PATH contains
+# multiple of them. clang-sys version 1.0.2 changed the resolvement order.
+# https://github.com/KyleMayes/clang-sys/pull/118
+clang-sys = "=1.0.1"
 
 # for reading .cargo.vcs_info.json to get the repository sha1 that is used to download
 # the matching prebuilt binaries.

@@ -56,7 +56,8 @@ impl RCHandle<SkColorFilter> {
     }
 
     pub fn filter_color(&self, color: impl Into<Color>) -> Color {
-        Color::from_native(unsafe { self.native().filterColor(color.into().into_native()) })
+        // Color resolves to u32, so the C++ ABI can be used.
+        Color::from_native_c(unsafe { self.native().filterColor(color.into().into_native()) })
     }
 
     pub fn filter_color4f(
@@ -65,8 +66,9 @@ impl RCHandle<SkColorFilter> {
         src_color_space: &ColorSpace,
         dst_color_space: Option<&ColorSpace>,
     ) -> Color4f {
-        Color4f::from_native(unsafe {
-            self.native().filterColor4f(
+        Color4f::from_native_c(unsafe {
+            sb::C_SkColorFilter_filterColor4f(
+                self.native(),
                 color.as_ref().native(),
                 src_color_space.native_mut_force(),
                 dst_color_space.native_ptr_or_null_mut_force(),
@@ -106,6 +108,13 @@ pub mod color_filters {
     pub fn matrix_row_major(array: &[scalar; 20]) -> ColorFilter {
         ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_MatrixRowMajor(array.as_ptr()) })
             .unwrap()
+    }
+
+    pub fn hsla_matrix_of_color_matrix(color_matrix: &ColorMatrix) -> ColorFilter {
+        ColorFilter::from_ptr(unsafe {
+            sb::C_SkColorFilters_HSLAMatrixOfColorMatrix(color_matrix.native())
+        })
+        .unwrap()
     }
 
     pub fn hsla_matrix(row_major: &[f32; 20]) -> ColorFilter {
@@ -153,4 +162,17 @@ fn ref_count() {
     let cf = color_filters::blend(color, mode).unwrap();
     let rc = cf.native()._ref_cnt();
     assert_eq!(1, rc);
+}
+
+#[test]
+fn filter_color() {
+    let color = Color::CYAN;
+    let mode = BlendMode::ColorBurn;
+    let cf = color_filters::blend(color, mode).unwrap();
+    let _fc = cf.filter_color(Color::DARK_GRAY);
+    let _fc = cf.filter_color4f(
+        Color4f::new(0.0, 0.0, 0.0, 0.0),
+        &ColorSpace::new_srgb(),
+        None,
+    );
 }

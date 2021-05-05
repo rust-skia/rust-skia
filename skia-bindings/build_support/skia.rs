@@ -11,8 +11,8 @@ use std::{env, fs};
 mod lib {
     pub const SKIA: &str = "skia";
     pub const SKIA_BINDINGS: &str = "skia-bindings";
-    pub const SKSHAPER: &str = "skshaper";
-    pub const SKPARAGRAPH: &str = "skparagraph";
+    pub const SK_SHAPER: &str = "skshaper";
+    pub const SK_PARAGRAPH: &str = "skparagraph";
 }
 
 /// Feature identifiers define the additional configuration parts of the binaries to download.
@@ -24,6 +24,9 @@ mod feature_id {
     pub const TEXTLAYOUT: &str = "textlayout";
     pub const WEBPE: &str = "webpe";
     pub const WEBPD: &str = "webpd";
+    pub const EGL: &str = "egl";
+    pub const X11: &str = "x11";
+    pub const WAYLAND: &str = "wayland";
 }
 
 /// The defaults for the Skia build configuration.
@@ -34,8 +37,13 @@ impl Default for BuildConfiguration {
         BuildConfiguration {
             on_windows: cargo::host().is_windows(),
             skia_debug,
+            // `OPT_LEVEL` is set by Cargo itself.
+            opt_level: cargo::env_var("OPT_LEVEL"),
             features: Features {
                 gl: cfg!(feature = "gl"),
+                egl: cfg!(feature = "egl"),
+                wayland: cfg!(feature = "wayland"),
+                x11: cfg!(feature = "x11"),
                 vulkan: cfg!(feature = "vulkan"),
                 metal: cfg!(feature = "metal"),
                 d3d: cfg!(feature = "d3d"),
@@ -47,6 +55,8 @@ impl Default for BuildConfiguration {
                 particles: false,
             },
             definitions: Vec::new(),
+            cc: cargo::env_var("CC").unwrap_or_else(|| "clang".to_string()),
+            cxx: cargo::env_var("CXX").unwrap_or_else(|| "clang++".to_string()),
         }
     }
 }
@@ -57,6 +67,10 @@ pub struct BuildConfiguration {
     /// Do we build _on_ a Windows OS?
     on_windows: bool,
 
+    /// Set the optimization level (0-3, s or z). Clang and GCC use the same notation
+    /// as Rust, so we just pass this option through from Cargo.
+    opt_level: Option<String>,
+
     /// Build Skia in a debug configuration?
     skia_debug: bool,
 
@@ -65,12 +79,27 @@ pub struct BuildConfiguration {
 
     /// Additional preprocessor definitions that will override predefined ones.
     definitions: Definitions,
+
+    /// C compiler to use
+    cc: String,
+
+    /// C++ compiler to use
+    cxx: String,
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Features {
-    /// Build with OpenGL / EGL support?
+    /// Build with OpenGL support?
     pub gl: bool,
+
+    /// Build with EGL support? If you set X11, setting this to false will use LibGL (GLX)
+    pub egl: bool,
+
+    /// Build with Wayland support? This requires EGL, as GLX does not work on Wayland.
+    pub wayland: bool,
+
+    /// Build with X11 support?
+    pub x11: bool,
 
     /// Build with Vulkan support?
     pub vulkan: bool,
@@ -111,6 +140,15 @@ impl Features {
 
         if self.gl {
             feature_ids.push(feature_id::GL);
+        }
+        if self.egl {
+            feature_ids.push(feature_id::EGL);
+        }
+        if self.x11 {
+            feature_ids.push(feature_id::X11);
+        }
+        if self.wayland {
+            feature_ids.push(feature_id::WAYLAND);
         }
         if self.vulkan {
             feature_ids.push(feature_id::VULKAN);
@@ -156,7 +194,6 @@ pub struct FinalBuildConfiguration {
 }
 
 impl FinalBuildConfiguration {
-    #[allow(clippy::cognitive_complexity)]
     pub fn from_build_configuration(
         build: &BuildConfiguration,
         skia_source_dir: &Path,
@@ -173,6 +210,8 @@ impl FinalBuildConfiguration {
                 ("is_debug", yes_if(build.skia_debug)),
                 ("skia_enable_gpu", yes_if(features.gpu())),
                 ("skia_use_gl", yes_if(features.gl)),
+                ("skia_use_egl", yes_if(features.egl)),
+                ("skia_use_x11", yes_if(features.x11)),
                 ("skia_use_system_libjpeg_turbo", no()),
                 ("skia_use_system_libpng", no()),
                 ("skia_use_libwebp_encode", yes_if(features.webp_encode)),
@@ -182,8 +221,8 @@ impl FinalBuildConfiguration {
                 ("skia_use_fonthost_mac", no()),
                 ("skia_use_xps", no()),
                 ("skia_use_dng_sdk", yes_if(features.dng)),
-                ("cc", quote("clang")),
-                ("cxx", quote("clang++")),
+                ("cc", quote(&build.cc)),
+                ("cxx", quote(&build.cxx)),
             ];
 
             if features.vulkan {
@@ -201,7 +240,6 @@ impl FinalBuildConfiguration {
 
             // further flags that limit the components of Skia debug builds.
             if build.skia_debug {
-                args.push(("skia_enable_atlas_text", no()));
                 args.push(("skia_enable_spirv_validation", no()));
                 args.push(("skia_enable_tools", no()));
                 args.push(("skia_enable_vulkan_debug_layers", no()));
@@ -231,11 +269,34 @@ impl FinalBuildConfiguration {
                 args.push(("skia_use_system_libwebp", no()))
             }
 
-            let mut flags: Vec<&str> = vec![];
             let mut use_expat = true;
 
             // target specific gn args.
             let target = cargo::target();
+            let target_str: &str = &format!("--target={}", target.to_string());
+            let sysroot_arg;
+            let opt_level_arg;
+            let mut cflags: Vec<&str> = vec![&target_str];
+            let asmflags: Vec<&str> = vec![&target_str];
+
+            if let Some(sysroot) = cargo::env_var("SDKROOT") {
+                sysroot_arg = format!("--sysroot={}", sysroot);
+                cflags.push(&sysroot_arg);
+            }
+
+            if let Some(opt_level) = &build.opt_level {
+                /* LTO generates corrupt libraries on the host platforms when building with --release
+                if opt_level.parse::<usize>() != Ok(0) {
+                    cflags.push("-flto");
+                }
+                */
+                // When targeting windows `-O` isn't supported.
+                if !target.is_windows() {
+                    opt_level_arg = format!("-O{}", opt_level);
+                    cflags.push(&opt_level_arg);
+                }
+            }
+
             match target.as_strs() {
                 (_, _, "windows", Some("msvc")) if build.on_windows => {
                     if let Some(win_vc) = vs::resolve_win_vc() {
@@ -247,11 +308,10 @@ impl FinalBuildConfiguration {
                     // and the compiler has to place the library name LIBCMT.lib into the .obj
                     // See https://docs.microsoft.com/en-us/cpp/build/reference/md-mt-ld-use-run-time-library?view=vs-2019
                     if cargo::target_crt_static() {
-                        flags.push("/MT");
-                    }
-                    // otherwise the C runtime should be linked dynamically
-                    else {
-                        flags.push("/MD");
+                        cflags.push("/MT");
+                    } else {
+                        // otherwise the C runtime should be linked dynamically
+                        cflags.push("/MD");
                     }
                     // Tell Skia's build system where LLVM is supposed to be located.
                     if let Some(llvm_home) = llvm::win::find_llvm_home() {
@@ -274,15 +334,24 @@ impl FinalBuildConfiguration {
                     // in the system.
                     use_expat = true;
                 }
-                (arch, "apple", "darwin", _) => {
+                (_, "apple", "darwin", _) => {
                     args.push(("skia_use_system_freetype2", no()));
                     args.push(("skia_enable_fontmgr_custom_empty", yes()));
                 }
-                (arch, "apple", "ios", _) => {
+                (arch, _, "ios", _) => {
                     args.push(("target_os", quote("ios")));
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
+                    ios::extra_skia_cflags(arch, &mut cflags);
                 }
-                _ => {}
+                (arch, _, os, _) => {
+                    let skia_target_os = match os {
+                        "darwin" => "mac",
+                        "windows" => "win",
+                        _ => os,
+                    };
+                    args.push(("target_os", quote(skia_target_os)));
+                    args.push(("target_cpu", quote(clang::target_arch(arch))));
+                }
             }
 
             if use_expat {
@@ -292,12 +361,24 @@ impl FinalBuildConfiguration {
                 args.push(("skia_use_expat", no()));
             }
 
-            if !flags.is_empty() {
-                let flags: String = {
-                    let v: Vec<String> = flags.into_iter().map(quote).collect();
-                    v.join(",")
-                };
-                args.push(("extra_cflags", format!("[{}]", flags)));
+            if !cflags.is_empty() {
+                let cflags = format!(
+                    "[{}]",
+                    cflags.into_iter().map(quote).collect::<Vec<_>>().join(",")
+                );
+                args.push(("extra_cflags", cflags));
+            }
+
+            if !asmflags.is_empty() {
+                let asmflags = format!(
+                    "[{}]",
+                    asmflags
+                        .into_iter()
+                        .map(quote)
+                        .collect::<Vec<_>>()
+                        .join(",")
+                );
+                args.push(("extra_asmflags", asmflags));
             }
 
             args.into_iter()
@@ -405,17 +486,28 @@ impl BinariesConfiguration {
 
         if features.text_layout {
             additional_files.push(ICUDTL_DAT.into());
-            built_libraries.push(lib::SKPARAGRAPH.into());
-            built_libraries.push(lib::SKSHAPER.into());
+            built_libraries.push(lib::SK_PARAGRAPH.into());
+            built_libraries.push(lib::SK_SHAPER.into());
         }
 
         let mut link_libraries = Vec::new();
 
         match target.as_strs() {
-            (_, "unknown", "linux", Some("gnu")) => {
+            (_, "unknown", "linux", _) => {
                 link_libraries.extend(vec!["stdc++", "fontconfig", "freetype"]);
                 if features.gl {
-                    link_libraries.push("GL");
+                    if features.egl {
+                        link_libraries.push("EGL");
+                    }
+
+                    if features.x11 {
+                        link_libraries.push("GL");
+                    }
+
+                    if features.wayland {
+                        link_libraries.push("wayland-egl");
+                        link_libraries.push("GLESv2");
+                    }
                 }
             }
             (_, "apple", "darwin", _) => {
@@ -425,6 +517,8 @@ impl BinariesConfiguration {
                 }
                 if features.metal {
                     link_libraries.push("framework=Metal");
+                    // MetalKit was added in m87 BUILD.gn.
+                    link_libraries.push("framework=MetalKit");
                     link_libraries.push("framework=Foundation");
                 }
             }
@@ -471,10 +565,7 @@ impl BinariesConfiguration {
     /// Inform cargo that the library files of the given configuration are available and
     /// can be used as dependencies.
     pub fn commit_to_cargo(&self) {
-        println!(
-            "cargo:rustc-link-search={}",
-            self.output_directory.to_str().unwrap()
-        );
+        cargo::add_link_search(self.output_directory.to_str().unwrap());
 
         // On Linux, the order is significant, first the static libraries we built, and then
         // the system libraries.
@@ -621,13 +712,9 @@ pub fn build_skia(
 }
 
 fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
-    let mut builder = bindgen::Builder::default()
+    let builder = bindgen::Builder::default()
         .generate_comments(false)
         .layout_tests(true)
-        // on macOS some arrays that are used in opaque types get too large to support Debug.
-        // (for example High Sierra: [u16; 105])
-        // TODO: may reenable when const generics land in stable.
-        .derive_debug(false)
         .default_enum_style(EnumVariation::Rust {
             non_exhaustive: false,
         })
@@ -659,8 +746,6 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         .blacklist_type("GrContextThreadSafeProxy")
         .raw_line("pub enum GrContextThreadSafeProxyPriv {}")
         .blacklist_type("GrContextThreadSafeProxyPriv")
-        .raw_line("pub enum GrRecordingContext {}")
-        .blacklist_type("GrRecordingContext")
         .raw_line("pub enum GrRecordingContextPriv {}")
         .blacklist_type("GrRecordingContextPriv")
         .raw_line("pub enum GrContextPriv {}")
@@ -670,6 +755,7 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         .raw_line("pub enum SkVerticesPriv {}")
         .blacklist_type("SkVerticesPriv")
         .blacklist_function("SkVertices_priv.*")
+        .blacklist_function("std::bitset_flip.*")
         // Vulkan reexports that got swallowed by making them opaque.
         // (these can not be whitelisted by a extern "C" function)
         .whitelist_type("VkPhysicalDeviceFeatures")
@@ -677,19 +763,21 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         // misc
         .whitelist_var("SK_Color.*")
         .whitelist_var("kAll_GrBackendState")
-        //
-        // don't generate destructors: https://github.com/rust-skia/rust-skia/issues/318
-        .with_codegen_config({
+        .use_core()
+        .clang_arg("-std=c++17")
+        .clang_args(&["-x", "c++"])
+        .clang_arg("-v");
+
+    // don't generate destructors on Windows: https://github.com/rust-skia/rust-skia/issues/318
+    let mut builder = if cfg!(target_os = "windows") {
+        builder.with_codegen_config({
             let mut config = CodegenConfig::default();
             config.remove(CodegenConfig::DESTRUCTORS);
             config
         })
-        //
-        .use_core()
-        .clang_arg("-std=c++17")
-        // required for macOS LLVM 8 to pick up C++ headers:
-        .clang_args(&["-x", "c++"])
-        .clang_arg("-v");
+    } else {
+        builder
+    };
 
     for function in WHITELISTED_FUNCTIONS {
         builder = builder.whitelist_function(function)
@@ -756,18 +844,40 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
     }
 
     let target = cargo::target();
+
+    let target_str = &target.to_string();
+    cc_build.target(target_str);
+
+    let sdk;
+    let sysroot = cargo::env_var("SDKROOT");
+    let mut sysroot: Option<&str> = sysroot.as_ref().map(AsRef::as_ref);
+    let mut sysroot_flag = "--sysroot=";
+
     match target.as_strs() {
         (_, "apple", "darwin", _) => {
-            if let Some(sdk) = xcode::get_sdk_path("macosx") {
-                builder = builder.clang_arg(format!("-isysroot{}", sdk.to_str().unwrap()));
-            } else {
-                cargo::warning("failed to get macosx SDK path")
+            // macOS uses `-isysroot/path/to/sysroot`, but this doesn't appear
+            // to work for other targets. `--sysroot=` works for all targets,
+            // to my knowledge, but doesn't seem to be idiomatic for macOS
+            // compilation. To capture this, we allow manually setting sysroot
+            // on any platform, but we use `-isysroot` for OSX builds and `--sysroot`
+            // elsewhere. If you don't manually set the sysroot, we can automatically
+            // detect it, but this is only possible for macOS.
+            sysroot_flag = "-isysroot";
+
+            if sysroot.is_none() {
+                if let Some(macos_sdk) = xcode::get_sdk_path("macosx") {
+                    sdk = macos_sdk;
+                    sysroot = Some(
+                        sdk.to_str()
+                            .expect("macOS SDK path could not be converted to string"),
+                    );
+                } else {
+                    cargo::warning("failed to get macosx SDK path")
+                }
             }
         }
         (arch, "linux", "android", _) | (arch, "linux", "androideabi", _) => {
-            let target = &target.to_string();
-            cc_build.target(target);
-            for arg in android::additional_clang_args(target, arch) {
+            for arg in android::additional_clang_args(target_str, arch) {
                 builder = builder.clang_arg(arg);
             }
         }
@@ -777,6 +887,12 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
             }
         }
         _ => {}
+    }
+
+    if let Some(sysroot) = sysroot {
+        let sysroot = format!("{}{}", sysroot_flag, sysroot);
+        builder = builder.clang_arg(&sysroot);
+        cc_build.flag(&sysroot);
     }
 
     println!("COMPILING BINDINGS: {:?}", build.binding_sources);
@@ -928,6 +1044,14 @@ const OPAQUE_TYPES: &[&str] = &[
     "SkMutex",
     // m82: private
     "SkIDChangeListener",
+    // m86:
+    "GrRecordingContext",
+    "GrDirectContext",
+    // m87:
+    "GrD3DAlloc",
+    "GrD3DMemoryAllocator",
+    // m87, yuva_pixmaps
+    "std::tuple",
 ];
 
 const BLACKLISTED_TYPES: &[&str] = &[
@@ -1077,7 +1201,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("GrGLFormat", rewrite::k_xxx),
     ("GrSurfaceOrigin", rewrite::k_xxx_name),
     ("GrBackendApi", rewrite::k_xxx),
-    ("GrMipMapped", rewrite::k_xxx),
+    ("GrMipmapped", rewrite::k_xxx),
     ("GrRenderable", rewrite::k_xxx),
     ("GrProtected", rewrite::k_xxx),
     //
@@ -1090,6 +1214,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("TextDirection", rewrite::k_xxx_uppercase),
     ("TextBaseline", rewrite::k_xxx),
     ("TextHeightBehavior", rewrite::k_xxx),
+    ("DrawOptions", rewrite::k_xxx),
     //
     // TextStyle.h
     //
@@ -1114,8 +1239,22 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("Usage", rewrite::k_xxx),
     ("GrSemaphoresSubmitted", rewrite::k_xxx),
     ("BackendSurfaceAccess", rewrite::k_xxx),
-    // m85: VkSharingMode
+    // m85
     ("VkSharingMode", rewrite::vk),
+    // m86:
+    ("SkSamplingMode", rewrite::k_xxx),
+    ("SkMipmapMode", rewrite::k_xxx),
+    ("Enable", rewrite::k_xxx),
+    ("ShaderCacheStrategy", rewrite::k_xxx),
+    // m87:
+    // SkYUVAInfo_PlanarConfig
+    ("PlanarConfig", rewrite::k_xxx),
+    ("Siting", rewrite::k_xxx),
+    // SkYUVAPixmapInfo
+    ("DataType", rewrite::k_xxx),
+    // m88:
+    // SkYUVAInfo_*
+    ("PlaneConfig", rewrite::k_xxx),
 ];
 
 pub(crate) mod rewrite {
@@ -1127,8 +1266,8 @@ pub(crate) mod rewrite {
     }
 
     pub fn k_xxx(name: &str, variant: &str) -> String {
-        if variant.starts_with('k') {
-            variant[1..].into()
+        if let Some(stripped) = variant.strip_prefix('k') {
+            stripped.into()
         } else {
             panic!(
                 "Variant name '{}' of enum type '{}' is expected to start with a 'k'",
@@ -1360,8 +1499,8 @@ pub(crate) mod definitions {
             defines
                 .split_whitespace()
                 .map(|d| {
-                    if d.starts_with(prefix) {
-                        &d[prefix.len()..]
+                    if let Some(stripped) = d.strip_prefix(prefix) {
+                        stripped
                     } else {
                         panic!("missing '-D' prefix from a definition")
                     }

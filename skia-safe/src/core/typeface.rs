@@ -42,7 +42,7 @@ impl RCHandle<SkTypeface> {
     }
 
     pub fn font_style(&self) -> FontStyle {
-        FontStyle::from_native(self.native().fStyle)
+        FontStyle::from_native_c(self.native().fStyle)
     }
 
     pub fn is_bold(&self) -> bool {
@@ -231,12 +231,17 @@ impl RCHandle<SkTypeface> {
         name.as_str().into()
     }
 
+    pub fn post_script_name(&self) -> Option<String> {
+        let mut name = interop::String::default();
+        unsafe { self.native().getPostScriptName(name.native_mut()) }
+            .if_true_then_some(|| name.as_str().into())
+    }
+
     // TODO: openStream()
-    // TODO: makeFontData()
     // TODO: createScalerContext()
 
     pub fn bounds(&self) -> Rect {
-        Rect::from_native(unsafe { self.native().getBounds() })
+        Rect::from_native_c(unsafe { sb::C_SkTypeface_getBounds(self.native()) })
     }
 }
 

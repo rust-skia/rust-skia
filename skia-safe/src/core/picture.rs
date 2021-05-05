@@ -34,7 +34,7 @@ impl RCHandle<SkPicture> {
     }
 
     pub fn cull_rect(&self) -> Rect {
-        Rect::from_native(unsafe { sb::C_SkPicture_cullRect(self.native()) })
+        Rect::from_native_c(unsafe { sb::C_SkPicture_cullRect(self.native()) })
     }
 
     pub fn unique_id(&self) -> u32 {
@@ -53,8 +53,13 @@ impl RCHandle<SkPicture> {
     }
 
     pub fn approximate_op_count(&self) -> usize {
+        self.approximate_op_count_nested(false)
+    }
+
+    pub fn approximate_op_count_nested(&self, nested: impl Into<Option<bool>>) -> usize {
+        let nested = nested.into().unwrap_or(false);
         unsafe {
-            sb::C_SkPicture_approximateOpCount(self.native())
+            sb::C_SkPicture_approximateOpCount(self.native(), nested)
                 .try_into()
                 .unwrap()
         }

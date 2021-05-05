@@ -1,13 +1,13 @@
 #include "bindings.h"
 
 #include "include/core/SkSurface.h"
-#include "include/gpu/GrContext.h"
+#include "include/gpu/GrDirectContext.h"
 
 //
 // core/SkSurface.h
 //
 
-extern "C" SkSurface *C_SkSurface_MakeFromCAMetalLayer(GrContext *context,
+extern "C" SkSurface *C_SkSurface_MakeFromCAMetalLayer(GrRecordingContext *context,
                                                        GrMTLHandle layer,
                                                        GrSurfaceOrigin origin,
                                                        int sampleCnt,
@@ -19,7 +19,7 @@ extern "C" SkSurface *C_SkSurface_MakeFromCAMetalLayer(GrContext *context,
                                            drawable).release();
 }
 
-extern "C" SkSurface *C_SkSurface_MakeFromMTKView(GrContext *context,
+extern "C" SkSurface *C_SkSurface_MakeFromMTKView(GrRecordingContext *context,
                                                   GrMTLHandle mtkView,
                                                   GrSurfaceOrigin origin,
                                                   int sampleCnt,
@@ -31,11 +31,14 @@ extern "C" SkSurface *C_SkSurface_MakeFromMTKView(GrContext *context,
 }
 
 //
-// gpu/GrContext.h
+// gpu/GrDirectContext.h
 //
 
-extern "C" GrContext* C_GrContext_MakeMetal(void* device, void* queue) {
-    return GrContext::MakeMetal(device, queue).release();
+extern "C" GrDirectContext* C_GrContext_MakeMetal(void* device, void* queue, const GrContextOptions* options) {
+    if (options) {  
+        return GrDirectContext::MakeMetal(device, queue, *options).release();    
+    }
+    return GrDirectContext::MakeMetal(device, queue).release();
 }
 
 //

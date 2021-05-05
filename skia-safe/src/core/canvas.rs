@@ -174,20 +174,12 @@ impl<'lt> Default for OwnedCanvas<'lt> {
     }
 }
 
-#[deprecated(
-    since = "0.34.0",
-    note = "Use `&mut canvas` to pass an exclusive reference."
-)]
 impl AsMut<Canvas> for Canvas {
     fn as_mut(&mut self) -> &mut Canvas {
         self
     }
 }
 
-#[deprecated(
-    since = "0.34.0",
-    note = "Use `&mut canvas` to pass an exclusive reference."
-)]
 impl<'lt> AsMut<Canvas> for OwnedCanvas<'lt> {
     fn as_mut(&mut self) -> &mut Canvas {
         self.deref_mut()
@@ -300,9 +292,20 @@ impl Canvas {
     }
 
     // TODO: test ref count consistency assuming it is not increased in the native part.
+    #[deprecated(
+        since = "0.36.0",
+        note = "Removed, only recording_context() is supported."
+    )]
     #[cfg(feature = "gpu")]
-    pub fn gpu_context(&mut self) -> Option<gpu::Context> {
-        gpu::Context::from_unshared_ptr(unsafe { sb::C_SkCanvas_getGrContext(self.native_mut()) })
+    pub fn gpu_context(&mut self) -> ! {
+        panic!("Removed");
+    }
+
+    #[cfg(feature = "gpu")]
+    pub fn recording_context(&mut self) -> Option<gpu::RecordingContext> {
+        gpu::RecordingContext::from_unshared_ptr(unsafe {
+            sb::C_SkCanvas_recordingContext(self.native_mut())
+        })
     }
 
     /// # Safety
@@ -571,12 +574,12 @@ impl Canvas {
     // Note: quickReject() functions are implemented as a trait.
 
     pub fn local_clip_bounds(&self) -> Option<Rect> {
-        let r = Rect::from_native(unsafe { self.native().getLocalClipBounds() });
+        let r = Rect::from_native_c(unsafe { sb::C_SkCanvas_getLocalClipBounds(self.native()) });
         r.is_empty().if_false_some(r)
     }
 
     pub fn device_clip_bounds(&self) -> Option<IRect> {
-        let r = IRect::from_native(unsafe { self.native().getDeviceClipBounds() });
+        let r = IRect::from_native_c(unsafe { sb::C_SkCanvas_getDeviceClipBounds(self.native()) });
         r.is_empty().if_false_some(r)
     }
 
@@ -1010,7 +1013,7 @@ impl Canvas {
     }
 
     pub fn local_to_device(&self) -> M44 {
-        M44::from_native(unsafe { self.native().getLocalToDevice() })
+        M44::construct(|m| unsafe { sb::C_SkCanvas_getLocalToDevice(self.native(), m) })
     }
 
     pub fn total_matrix(&self) -> Matrix {
@@ -1257,5 +1260,14 @@ mod tests {
         c.clip_rect(Rect::default(), ClipOp::Difference, None);
         // both
         c.clip_rect(Rect::default(), ClipOp::Difference, true);
+    }
+
+    /// Regression test for: https://github.com/rust-skia/rust-skia/issues/427
+    #[test]
+    fn test_local_and_device_clip_bounds() {
+        let mut surface = crate::Surface::new_raster_n32_premul((100, 100)).unwrap();
+        let _ = surface.canvas().device_clip_bounds();
+        let _ = surface.canvas().local_clip_bounds();
+        let _ = surface.canvas().local_to_device();
     }
 }

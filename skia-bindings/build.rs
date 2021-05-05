@@ -71,7 +71,6 @@ fn main() {
     //
     // offline build?
     //
-
     if let Some(offline_source_dir) = env::offline_source_dir() {
         println!("STARTING OFFLINE BUILD");
 

@@ -26,7 +26,7 @@ impl NativeDrop for SkInterpolator {
 
 impl Default for Handle<SkInterpolator> {
     fn default() -> Self {
-        Handle::from_native(unsafe { SkInterpolator::new() })
+        Handle::from_native_c(unsafe { SkInterpolator::new() })
     }
 }
 
@@ -89,7 +89,7 @@ impl Handle<SkInterpolator> {
 /// Wrapper for SkInterpolator functions.
 impl Handle<SkInterpolator> {
     pub fn new(elem_count: usize, frame_count: usize) -> Self {
-        Handle::from_native(unsafe {
+        Handle::from_native_c(unsafe {
             SkInterpolator::new1(
                 elem_count.try_into().unwrap(),
                 frame_count.try_into().unwrap(),

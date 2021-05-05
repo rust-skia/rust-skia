@@ -89,3 +89,7 @@ pub fn set_flags(flags: impl AsRef<str>) {
 }
 
 // TODO: ImageGeneratorFromEncodedDataFactory
+
+pub fn allow_jit() {
+    unsafe { SkGraphics::AllowJIT() }
+}
