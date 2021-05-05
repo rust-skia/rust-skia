@@ -505,7 +505,9 @@ impl BinariesConfiguration {
         let feature_ids = features.ids();
 
         if features.text_layout {
-            additional_files.push(ICUDTL_DAT.into());
+            if target.is_windows() {
+                additional_files.push(ICUDTL_DAT.into());
+            }
             built_libraries.push(lib::SK_PARAGRAPH.into());
             built_libraries.push(lib::SK_SHAPER.into());
         }
