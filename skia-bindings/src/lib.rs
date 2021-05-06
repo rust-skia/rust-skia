@@ -13,3 +13,7 @@ pub use impls::*;
 
 #[cfg(feature = "textlayout")]
 pub mod icu;
+
+#[doc(hidden)]
+#[cfg(feature = "use-system-jpeg-turbo")]
+use mozjpeg_sys;

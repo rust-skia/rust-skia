@@ -216,10 +216,6 @@ impl FinalBuildConfiguration {
                 ("skia_use_gl", yes_if(features.gl)),
                 ("skia_use_egl", yes_if(features.egl)),
                 ("skia_use_x11", yes_if(features.x11)),
-                (
-                    "skia_use_system_libjpeg_turbo",
-                    yes_if(use_system_libraries),
-                ),
                 ("skia_use_system_libpng", yes_if(use_system_libraries)),
                 ("skia_use_libwebp_encode", yes_if(features.webp_encode)),
                 ("skia_use_libwebp_decode", yes_if(features.webp_decode)),
@@ -288,6 +284,21 @@ impl FinalBuildConfiguration {
             if let Some(sysroot) = cargo::env_var("SDKROOT") {
                 sysroot_arg = format!("--sysroot={}", sysroot);
                 cflags.push(&sysroot_arg);
+            }
+
+            let jpeg_sys_cflags: Vec<String>;
+            if cfg!(feature = "use-system-jpeg-turbo") {
+                let paths = cargo::env_var("DEP_JPEG_INCLUDE").expect("mozjpeg-sys include path");
+                jpeg_sys_cflags = std::env::split_paths(&paths)
+                    .map(|arg| format!("-I{}", arg.display()))
+                    .collect();
+                cflags.extend(jpeg_sys_cflags.iter().map(|x| -> &str { x.as_ref() }));
+                args.push(("skia_use_system_libjpeg_turbo", yes()));
+            } else {
+                args.push((
+                    "skia_use_system_libjpeg_turbo",
+                    yes_if(use_system_libraries),
+                ));
             }
 
             if let Some(opt_level) = &build.opt_level {
@@ -497,7 +508,9 @@ impl BinariesConfiguration {
         let feature_ids = features.ids();
 
         if features.text_layout {
-            additional_files.push(ICUDTL_DAT.into());
+            if target.is_windows() {
+                additional_files.push(ICUDTL_DAT.into());
+            }
             built_libraries.push(lib::SK_PARAGRAPH.into());
             built_libraries.push(lib::SK_SHAPER.into());
         }
@@ -691,7 +704,13 @@ pub fn build_skia(
     config: &BinariesConfiguration,
     ninja_command: &Path,
 ) {
+    // Libraries we explicitly want ninja to build.
+    let ninja_built_libraries = config
+        .built_libraries
+        .iter()
+        .filter(|x| *x != lib::SKIA_BINDINGS);
     let ninja_status = Command::new(ninja_command)
+        .args(ninja_built_libraries)
         .args(&["-C", config.output_directory.to_str().unwrap()])
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
