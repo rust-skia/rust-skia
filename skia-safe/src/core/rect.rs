@@ -465,7 +465,7 @@ impl Rect {
         self.top * 0.5 + self.bottom * 0.5
     }
 
-    pub fn to_quad(&self) -> [Point; 4] {
+    pub fn to_quad(self) -> [Point; 4] {
         let mut quad = [Point::default(); 4];
         unsafe { self.native().toQuad(quad.native_mut().as_mut_ptr()) }
         quad

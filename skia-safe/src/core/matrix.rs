@@ -576,7 +576,7 @@ impl Matrix {
     }
 
     #[must_use]
-    pub fn to_affine(&self) -> Option<[scalar; 6]> {
+    pub fn to_affine(self) -> Option<[scalar; 6]> {
         let mut affine = [scalar::default(); 6];
         unsafe { self.native().asAffine(affine.as_mut_ptr()) }.if_true_some(affine)
     }

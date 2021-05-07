@@ -59,7 +59,7 @@ impl RSXform {
         self.ty = t.y;
     }
 
-    pub fn to_quad(&self, size: impl Into<Size>) -> [Point; 4] {
+    pub fn to_quad(self, size: impl Into<Size>) -> [Point; 4] {
         let size = size.into();
         let mut quad: [Point; 4] = Default::default();
         unsafe {
@@ -69,7 +69,7 @@ impl RSXform {
         quad
     }
 
-    pub fn to_tri_strip(&self, size: impl Into<Size>) -> [Point; 4] {
+    pub fn to_tri_strip(self, size: impl Into<Size>) -> [Point; 4] {
         let size = size.into();
         let mut strip: [Point; 4] = Default::default();
         unsafe {
