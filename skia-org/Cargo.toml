@@ -36,7 +36,7 @@ offscreen_gl_context = { git = "https://github.com/rust-skia/rust-offscreen-rend
 # for offscreen_gl_context 0.25
 # sparkle 0.1.9 fails to compile on macOS targeting aarch64-linux-android
 # sparkle 0.1.25 is incompatible with offscreen_gl_context
-sparkle = { version = "=0.1.24", optional = true }
+sparkle = { version = "=0.1.25", optional = true }
 clap = "2.33.0"
 ash = { version = "0.32", optional = true }
 # need to rename the package because of the feature with the same name.
