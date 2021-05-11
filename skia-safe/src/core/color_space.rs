@@ -1,3 +1,5 @@
+use std::fmt;
+
 use super::Data;
 use crate::prelude::*;
 use skia_bindings as sb;
@@ -120,6 +122,12 @@ impl NativeRefCounted for SkColorSpace {
 impl NativePartialEq for SkColorSpace {
     fn eq(&self, rhs: &Self) -> bool {
         unsafe { skia_bindings::SkColorSpace_Equals(self, rhs) }
+    }
+}
+
+impl fmt::Debug for ColorSpace {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ColorSpace").finish()
     }
 }
 

@@ -1,4 +1,4 @@
-use std::mem;
+use std::{fmt, mem};
 
 use crate::prelude::*;
 use crate::{ColorSpace, IPoint, IRect, ISize};
@@ -109,13 +109,23 @@ impl NativePartialEq for SkColorInfo {
     }
 }
 
-impl Default for Handle<SkColorInfo> {
+impl Default for ColorInfo {
     fn default() -> Self {
         Self::construct(|color_info| unsafe { sb::C_SkColorInfo_Construct(color_info) })
     }
 }
 
-impl Handle<SkColorInfo> {
+impl fmt::Debug for ColorInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ColorInfo")
+            .field("color_space", &self.color_space())
+            .field("color_type", &self.color_type())
+            .field("alpha_type", &self.alpha_type())
+            .finish()
+    }
+}
+
+impl ColorInfo {
     pub fn new(ct: ColorType, at: AlphaType, cs: impl Into<Option<ColorSpace>>) -> Self {
         Self::construct(|color_info| unsafe {
             sb::C_SkColorInfo_Construct2(
@@ -201,7 +211,16 @@ impl Default for Handle<SkImageInfo> {
     }
 }
 
-impl Handle<SkImageInfo> {
+impl fmt::Debug for ImageInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ImageInfo")
+            .field("color_info", self.color_info())
+            .field("dimensions", &self.dimensions())
+            .finish()
+    }
+}
+
+impl ImageInfo {
     pub fn new(
         dimensions: impl Into<ISize>,
         ct: ColorType,

@@ -13,6 +13,7 @@ use skia_bindings::{
 use std::{
     convert::TryInto,
     ffi::CString,
+    fmt,
     marker::PhantomData,
     mem,
     ops::{Deref, DerefMut},
@@ -139,6 +140,20 @@ impl NativeAccess<SkCanvas> for Canvas {
 
     fn native_mut(&mut self) -> &mut SkCanvas {
         &mut self.0
+    }
+}
+
+impl fmt::Debug for Canvas {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Canvas")
+            .field("image_info", &self.image_info())
+            .field("props", &self.props())
+            .field("base_layer_size", &self.base_layer_size())
+            .field("save_count", &self.save_count())
+            .field("local_clip_bounds", &self.local_clip_bounds())
+            .field("device_clip_bounds", &self.device_clip_bounds())
+            .field("local_to_device", &self.local_to_device())
+            .finish()
     }
 }
 

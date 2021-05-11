@@ -2,7 +2,7 @@ use crate::prelude::*;
 use crate::{ColorFilter, IRect, Matrix, NativeFlattenable, Rect};
 use skia_bindings as sb;
 use skia_bindings::{SkColorFilter, SkFlattenable, SkImageFilter, SkRefCntBase};
-use std::ptr;
+use std::{fmt, iter, ptr};
 
 pub use skia_bindings::SkImageFilter_MapDirection as MapDirection;
 #[test]
@@ -31,7 +31,19 @@ impl NativeFlattenable for SkImageFilter {
     }
 }
 
-impl RCHandle<SkImageFilter> {
+impl fmt::Debug for ImageFilter {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let inputs: Vec<_> = self.inputs().collect();
+        f.debug_struct("ImageFilter")
+            .field("color_filter_node", &self.color_filter_node())
+            .field("as_a_color_filter", &self.to_a_color_filter())
+            .field("inputs", &inputs)
+            .field("can_compute_fast_bounds", &self.can_compute_fast_bounds())
+            .finish()
+    }
+}
+
+impl ImageFilter {
     // TODO: wrapfilterImage()? SkSpecialImage is declared in src/core/
 
     pub fn filter_bounds<'a>(
@@ -91,6 +103,20 @@ impl RCHandle<SkImageFilter> {
         assert!(i < self.count_inputs());
         ImageFilter::from_unshared_ptr(unsafe {
             sb::C_SkImageFilter_getInput(self.native(), i.try_into().unwrap()) as *mut _
+        })
+    }
+
+    pub fn inputs(&self) -> impl Iterator<Item = Option<ImageFilter>> + '_ {
+        let mut i = 0;
+        let count = self.count_inputs();
+        iter::from_fn(move || {
+            if i != count {
+                let input = self.get_input(i);
+                i += 1;
+                Some(input)
+            } else {
+                None
+            }
         })
     }
 

@@ -2,6 +2,7 @@ use crate::prelude::*;
 use crate::{scalar, BlendMode, Color, Color4f, ColorSpace, NativeFlattenable};
 use skia_bindings as sb;
 use skia_bindings::{SkColorFilter, SkFlattenable, SkRefCntBase};
+use std::fmt;
 
 bitflags! {
     pub struct Flags: u32 {
@@ -31,7 +32,17 @@ impl NativeFlattenable for SkColorFilter {
     }
 }
 
-impl RCHandle<SkColorFilter> {
+impl fmt::Debug for ColorFilter {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ColorFilter")
+            .field("as_a_color_mode", &self.to_a_color_mode())
+            .field("as_a_color_matrix", &self.to_a_color_matrix())
+            .field("flags", &self.flags())
+            .finish()
+    }
+}
+
+impl ColorFilter {
     pub fn to_a_color_mode(&self) -> Option<(Color, BlendMode)> {
         let mut color: Color = 0.into();
         let mut mode: BlendMode = Default::default();

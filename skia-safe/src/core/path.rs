@@ -6,7 +6,7 @@ use crate::{
 };
 use skia_bindings as sb;
 use skia_bindings::{SkPath, SkPath_Iter, SkPath_RawIter};
-use std::mem::forget;
+use std::{fmt, mem::forget};
 use std::{marker::PhantomData, ptr};
 
 #[deprecated(since = "0.25.0", note = "use PathDirection")]
@@ -203,7 +203,15 @@ impl Default for Handle<SkPath> {
     }
 }
 
-impl Handle<SkPath> {
+impl fmt::Debug for Path {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Path")
+            .field("fill_type", &self.fill_type())
+            .finish()
+    }
+}
+
+impl Path {
     pub fn new_from(
         points: &[Point],
         verbs: &[u8],

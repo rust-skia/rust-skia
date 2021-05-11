@@ -397,7 +397,7 @@ impl Index<usize> for V4 {
 }
 
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct M44 {
     mat: [f32; Self::COMPONENTS],
 }
