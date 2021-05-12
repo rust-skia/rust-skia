@@ -219,6 +219,7 @@ impl FinalBuildConfiguration {
                 ("skia_use_system_zlib", no()),
                 ("skia_use_freetype", yes()),
                 ("skia_use_fonthost_mac", no()),
+                ("skia_use_system_freetype2", no()),
                 ("skia_use_freetype_woff2", yes()),
                 ("skia_use_xps", no()),
                 ("skia_use_dng_sdk", yes_if(features.dng)),
@@ -286,13 +287,15 @@ impl FinalBuildConfiguration {
             }
 
             let jpeg_sys_cflags: Vec<String>;
-            if cfg!(feature = "use-mozjpeg-sys") {
+            if cfg!(feature = "use-system-jpeg-turbo") {
                 let paths = cargo::env_var("DEP_JPEG_INCLUDE").expect("mozjpeg-sys include path");
-                jpeg_sys_cflags = std::env::split_paths(&paths).map(|arg| {
-                    format!("-I{}", arg.display())
-                }).collect();
+                jpeg_sys_cflags = std::env::split_paths(&paths)
+                    .map(|arg| format!("-I{}", arg.display()))
+                    .collect();
                 cflags.extend(jpeg_sys_cflags.iter().map(|x| -> &str { x.as_ref() }));
                 args.push(("skia_use_system_libjpeg_turbo", yes()));
+            } else {
+                args.push(("skia_use_system_libjpeg_turbo", no()));
             }
 
             if let Some(opt_level) = &build.opt_level {
@@ -706,7 +709,13 @@ pub fn build_skia(
     config: &BinariesConfiguration,
     ninja_command: &Path,
 ) {
+    // Libraries we explicitly want ninja to build.
+    let ninja_built_libraries = config
+        .built_libraries
+        .iter()
+        .filter(|x| *x != lib::SKIA_BINDINGS);
     let ninja_status = Command::new(ninja_command)
+        .args(ninja_built_libraries)
         .args(&["-C", config.output_directory.to_str().unwrap()])
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())

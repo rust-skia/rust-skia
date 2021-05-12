@@ -32,6 +32,7 @@ textlayout = ["skia-bindings/textlayout"]
 webp = ["webp-encode", "webp-decode"]
 webp-encode = ["skia-bindings/webp-encode"]
 webp-decode = ["skia-bindings/webp-decode"]
+use-system-jpeg-turbo = ["skia-bindings/use-system-jpeg-turbo"]
 
 # implied only, do not use
 gpu = []
