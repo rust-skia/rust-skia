@@ -3,7 +3,7 @@ use crate::prelude::*;
 use crate::{scalar, Matrix, Scalar, Vector3};
 use skia_bindings as sb;
 use skia_bindings::{SkMatrix44, SkVector4};
-use std::ops;
+use std::{fmt, ops};
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -101,6 +101,15 @@ impl PartialEq for Matrix44 {
 impl Default for Matrix44 {
     fn default() -> Self {
         Matrix44::new_identity()
+    }
+}
+
+impl fmt::Debug for Matrix44 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Matrix44")
+            .field("mat", &self.native().fMat)
+            .field("type_mask", &self.get_type())
+            .finish()
     }
 }
 

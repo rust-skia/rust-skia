@@ -2,7 +2,7 @@ use crate::prelude::*;
 use crate::{BBHFactory, Canvas, Drawable, Picture, Rect};
 use skia_bindings as sb;
 use skia_bindings::{SkPictureRecorder, SkRect};
-use std::ptr;
+use std::{fmt, ptr};
 
 pub type PictureRecorder = Handle<SkPictureRecorder>;
 
@@ -14,7 +14,13 @@ impl NativeDrop for SkPictureRecorder {
     }
 }
 
-impl Handle<SkPictureRecorder> {
+impl fmt::Debug for PictureRecorder {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("PictureRecorder").finish()
+    }
+}
+
+impl PictureRecorder {
     pub fn new() -> Self {
         Self::construct(|pr| unsafe { sb::C_SkPictureRecorder_Construct(pr) })
     }
@@ -33,7 +39,7 @@ impl Handle<SkPictureRecorder> {
             )
         };
 
-        Canvas::borrow_from_native(canvas_ref)
+        Canvas::borrow_from_native_mut(canvas_ref)
     }
 
     pub fn recording_canvas(&mut self) -> Option<&mut Canvas> {
@@ -41,7 +47,7 @@ impl Handle<SkPictureRecorder> {
         if canvas.is_null() {
             return None;
         }
-        Some(Canvas::borrow_from_native(unsafe { &mut *canvas }))
+        Some(Canvas::borrow_from_native_mut(unsafe { &mut *canvas }))
     }
 
     pub fn finish_recording_as_picture(&mut self, cull_rect: Option<&Rect>) -> Option<Picture> {

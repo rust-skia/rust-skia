@@ -3,7 +3,7 @@ use crate::{scalar, Point, Scalar};
 use skia_bindings as sb;
 use skia_bindings::SkCubicMap;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 #[repr(transparent)]
 pub struct CubicMap(SkCubicMap);
 

@@ -1,12 +1,12 @@
-use crate::interop;
-use crate::interop::DynamicMemoryWStream;
-use crate::prelude::*;
-use crate::{FontStyle, Typeface, Unichar};
+use crate::{
+    interop::{self, DynamicMemoryWStream},
+    prelude::*,
+    FontStyle, Typeface, Unichar,
+};
+use core::fmt;
 use skia_bindings as sb;
 use skia_bindings::{SkFontMgr, SkFontStyleSet, SkRefCntBase};
-use std::ffi::CString;
-use std::mem;
-use std::os::raw::c_char;
+use std::{ffi::CString, iter, mem, os::raw::c_char};
 
 pub type FontStyleSet = RCHandle<SkFontStyleSet>;
 
@@ -16,13 +16,22 @@ impl NativeRefCountedBase for SkFontStyleSet {
     type Base = SkRefCntBase;
 }
 
-impl Default for RCHandle<SkFontStyleSet> {
+impl Default for FontStyleSet {
     fn default() -> Self {
         FontStyleSet::new_empty()
     }
 }
 
-impl RCHandle<SkFontStyleSet> {
+impl fmt::Debug for FontStyleSet {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("FontStyleSet")
+            // TODO: clarify why self has to be mut.
+            // .field("count", &self.count())
+            .finish()
+    }
+}
+
+impl FontStyleSet {
     pub fn count(&mut self) -> usize {
         unsafe {
             sb::C_SkFontStyleSet_count(self.native_mut())
@@ -82,13 +91,22 @@ impl NativeRefCountedBase for SkFontMgr {
     type Base = SkRefCntBase;
 }
 
-impl Default for RCHandle<SkFontMgr> {
+impl Default for FontMgr {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl RCHandle<SkFontMgr> {
+impl fmt::Debug for FontMgr {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let names: Vec<_> = self.family_names().collect();
+        f.debug_struct("FontMgr")
+            .field("family_names", &names)
+            .finish()
+    }
+}
+
+impl FontMgr {
     pub fn new() -> Self {
         FontMgr::from_ptr(unsafe { sb::C_SkFontMgr_RefDefault() }).unwrap()
     }
@@ -105,6 +123,20 @@ impl RCHandle<SkFontMgr> {
                 .getFamilyName(index.try_into().unwrap(), family_name.native_mut())
         }
         family_name.as_str().into()
+    }
+
+    pub fn family_names(&self) -> impl Iterator<Item = String> + '_ {
+        let mut i = 0;
+        let count = self.count_families();
+        iter::from_fn(move || {
+            if i != count {
+                let name = self.family_name(i);
+                i += 1;
+                Some(name)
+            } else {
+                None
+            }
+        })
     }
 
     pub fn new_styleset(&self, index: usize) -> FontStyleSet {

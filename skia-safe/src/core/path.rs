@@ -59,6 +59,16 @@ impl Default for Iter<'_> {
     }
 }
 
+impl fmt::Debug for Iter<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Iter")
+            .field("conic_weight", &self.conic_weight())
+            .field("is_close_line", &self.is_close_line())
+            .field("is_closed_contour", &self.is_closed_contour())
+            .finish()
+    }
+}
+
 impl Iter<'_> {
     pub fn new(path: &Path, force_close: bool) -> Iter {
         Iter(
@@ -207,6 +217,22 @@ impl fmt::Debug for Path {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Path")
             .field("fill_type", &self.fill_type())
+            .field("is_convex", &self.is_convex())
+            .field("is_oval", &self.is_oval())
+            .field("is_rrect", &self.is_rrect())
+            .field("is_empty", &self.is_empty())
+            .field("is_last_contour_closed", &self.is_last_contour_closed())
+            .field("is_finite", &self.is_finite())
+            .field("is_volatile", &self.is_volatile())
+            .field("is_line", &self.is_line())
+            .field("count_points", &self.count_points())
+            .field("count_verbs", &self.count_verbs())
+            .field("approximate_bytes_used", &self.approximate_bytes_used())
+            .field("bounds", &self.bounds())
+            .field("is_rect", &self.is_rect())
+            .field("segment_masks", &self.segment_masks())
+            .field("generation_id", &self.generation_id())
+            .field("is_valid", &self.is_valid())
             .finish()
     }
 }

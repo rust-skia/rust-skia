@@ -4,9 +4,8 @@ use crate::{
     prelude::*, Bitmap, Canvas, DeferredDisplayList, IPoint, IRect, ISize, IVector, Image,
     ImageInfo, Paint, Pixmap, Point, SamplingOptions, SurfaceCharacterization, SurfaceProps,
 };
-use skia_bindings as sb;
-use skia_bindings::{SkRefCntBase, SkSurface};
-use std::ptr;
+use skia_bindings::{self as sb, SkRefCntBase, SkSurface};
+use std::{fmt, ptr};
 
 pub use skia_bindings::SkSurface_ContentChangeMode as ContentChangeMode;
 #[test]
@@ -32,7 +31,18 @@ impl NativeRefCountedBase for SkSurface {
     type Base = SkRefCntBase;
 }
 
-impl RCHandle<SkSurface> {
+impl fmt::Debug for Surface {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Surface")
+            // self must be mutable (this goes through Canvas).
+            // .field("image_info", &self.image_info())
+            // .field("generation_id", &self.generation_id())
+            .field("props", &self.props())
+            .finish()
+    }
+}
+
+impl Surface {
     pub fn new_raster_direct<'pixels>(
         image_info: &ImageInfo,
         pixels: &'pixels mut [u8],
@@ -84,7 +94,7 @@ impl RCHandle<SkSurface> {
 }
 
 #[cfg(feature = "gpu")]
-impl RCHandle<SkSurface> {
+impl Surface {
     pub fn from_backend_texture(
         context: &mut gpu::RecordingContext,
         backend_texture: &gpu::BackendTexture,
@@ -233,7 +243,7 @@ impl RCHandle<SkSurface> {
     }
 }
 
-impl RCHandle<SkSurface> {
+impl Surface {
     pub fn is_compatible(&self, characterization: &SurfaceCharacterization) -> bool {
         unsafe { self.native().isCompatible(characterization.native()) }
     }
@@ -268,7 +278,7 @@ impl RCHandle<SkSurface> {
 }
 
 #[cfg(feature = "gpu")]
-impl RCHandle<SkSurface> {
+impl Surface {
     pub fn recording_context(&mut self) -> Option<gpu::RecordingContext> {
         gpu::RecordingContext::from_unshared_ptr(unsafe { self.native_mut().recordingContext() })
     }
@@ -333,10 +343,10 @@ impl RCHandle<SkSurface> {
     }
 }
 
-impl RCHandle<SkSurface> {
+impl Surface {
     pub fn canvas(&mut self) -> &mut Canvas {
         let canvas_ref = unsafe { &mut *self.native_mut().getCanvas() };
-        Canvas::borrow_from_native(canvas_ref)
+        Canvas::borrow_from_native_mut(canvas_ref)
     }
 
     // TODO: why is self mutable here?

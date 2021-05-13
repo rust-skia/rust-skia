@@ -5,7 +5,7 @@ use crate::{
 };
 use skia_bindings as sb;
 use skia_bindings::SkBitmap;
-use std::{ffi, ptr, fmt};
+use std::{ffi, fmt, ptr};
 
 /// [Bitmap] describes a two-dimensional raster pixel array. [Bitmap] is built on [ImageInfo],
 /// containing integer width and height, [ColorType] and [AlphaType] describing the pixel format,

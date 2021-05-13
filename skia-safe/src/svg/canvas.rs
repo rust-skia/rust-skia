@@ -30,7 +30,7 @@ impl Deref for Canvas {
 
 impl DerefMut for Canvas {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        crate::Canvas::borrow_from_native(unsafe { &mut *self.canvas })
+        crate::Canvas::borrow_from_native_mut(unsafe { &mut *self.canvas })
     }
 }
 

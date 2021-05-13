@@ -2,7 +2,7 @@ use crate::prelude::*;
 use crate::{interop, scalar, Matrix, Rect, Vector};
 use skia_bindings as sb;
 use skia_bindings::SkRRect;
-use std::{mem, ptr};
+use std::{fmt, mem, ptr};
 
 pub use skia_bindings::SkRRect_Type as Type;
 #[test]
@@ -35,6 +35,24 @@ impl PartialEq for RRect {
 impl Default for RRect {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl fmt::Debug for RRect {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("RRect")
+            .field("rect", &self.rect())
+            .field(
+                "radii",
+                &[
+                    self.radii(Corner::UpperLeft),
+                    self.radii(Corner::UpperRight),
+                    self.radii(Corner::LowerRight),
+                    self.radii(Corner::LowerLeft),
+                ],
+            )
+            .field("type", &self.get_type())
+            .finish()
     }
 }
 

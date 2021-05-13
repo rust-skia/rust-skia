@@ -2,10 +2,8 @@ use crate::{
     prelude::*, AlphaType, Color, Color4f, ColorSpace, ColorType, IPoint, IRect, ISize, ImageInfo,
     SamplingOptions,
 };
-use core::slice;
-use skia_bindings as sb;
-use skia_bindings::SkPixmap;
-use std::{convert::TryInto, ffi::c_void, fmt, mem, os::raw, ptr};
+use skia_bindings::{self as sb, SkPixmap};
+use std::{convert::TryInto, ffi::c_void, fmt, mem, os::raw, ptr, slice};
 
 pub type Pixmap = Handle<SkPixmap>;
 unsafe impl Send for Pixmap {}
@@ -30,7 +28,6 @@ impl Default for Pixmap {
 impl fmt::Debug for Pixmap {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Pixmap")
-            .field("pixels", &self.native().fPixels)
             .field("row_bytes", &self.row_bytes())
             .field("info", self.info())
             .finish()

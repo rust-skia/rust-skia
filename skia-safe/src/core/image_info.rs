@@ -1,9 +1,7 @@
-use std::{fmt, mem};
-
-use crate::prelude::*;
-use crate::{ColorSpace, IPoint, IRect, ISize};
+use crate::{prelude::*, ColorSpace, IPoint, IRect, ISize};
 use skia_bindings as sb;
 use skia_bindings::{SkColorInfo, SkColorType, SkImageInfo};
+use std::{fmt, mem};
 
 pub use skia_bindings::SkAlphaType as AlphaType;
 #[test]
@@ -11,7 +9,7 @@ fn test_alpha_type_layout() {
     let _ = AlphaType::Premul;
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 #[repr(i32)]
 pub enum ColorType {
     Unknown = SkColorType::kUnknown_SkColorType as _,
@@ -121,6 +119,10 @@ impl fmt::Debug for ColorInfo {
             .field("color_space", &self.color_space())
             .field("color_type", &self.color_type())
             .field("alpha_type", &self.alpha_type())
+            .field("is_opaque", &self.is_opaque())
+            .field("is_gamma_close_to_srgb", &self.is_gamma_close_to_srgb())
+            .field("bytes_per_pixel", &self.bytes_per_pixel())
+            .field("shift_per_pixel", &self.shift_per_pixel())
             .finish()
     }
 }

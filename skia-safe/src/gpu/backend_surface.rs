@@ -1,3 +1,5 @@
+use std::fmt;
+
 #[cfg(feature = "d3d")]
 use super::d3d;
 #[cfg(feature = "gl")]
@@ -7,10 +9,10 @@ use super::mtl;
 #[cfg(feature = "vulkan")]
 use super::vk;
 use super::{BackendAPI, BackendSurfaceMutableState};
-use crate::prelude::*;
-use crate::ISize;
-use skia_bindings as sb;
-use skia_bindings::{GrBackendFormat, GrBackendRenderTarget, GrBackendTexture, GrMipmapped};
+use crate::{prelude::*, ISize};
+use skia_bindings::{
+    self as sb, GrBackendFormat, GrBackendRenderTarget, GrBackendTexture, GrMipmapped,
+};
 
 pub type BackendFormat = Handle<GrBackendFormat>;
 unsafe impl Send for BackendFormat {}
@@ -28,7 +30,15 @@ impl NativeClone for GrBackendFormat {
     }
 }
 
-impl Handle<GrBackendFormat> {
+impl fmt::Debug for BackendFormat {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("BackendFormat")
+            .field("backend", &self.backend())
+            .finish()
+    }
+}
+
+impl BackendFormat {
     #[deprecated(
         note = "The creation of invalid BackendFormats isn't supported anymore",
         since = "0.37.0"

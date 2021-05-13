@@ -1,7 +1,6 @@
 use crate::{prelude::*, ColorType, Data, ImageInfo, Pixmap, YUVAInfo, YUVColorSpace};
-use skia_bindings as sb;
-use skia_bindings::{SkYUVAPixmapInfo, SkYUVAPixmaps};
-use std::{ffi::c_void, ptr};
+use skia_bindings::{self as sb, SkYUVAPixmapInfo, SkYUVAPixmaps};
+use std::{ffi::c_void, fmt, iter, ptr};
 use yuva_pixmap_info::SupportedDataTypes;
 
 /// Data type for Y, U, V, and possibly A channels independent of how values are packed into planes.
@@ -22,6 +21,19 @@ impl NativeDrop for SkYUVAPixmapInfo {
 impl NativePartialEq for SkYUVAPixmapInfo {
     fn eq(&self, rhs: &Self) -> bool {
         unsafe { sb::C_SkYUVAPixmapInfo_equals(self, rhs) }
+    }
+}
+
+impl fmt::Debug for YUVAPixmapInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let infos: Vec<_> = self.plane_infos().collect();
+        let row_bytes: Vec<_> = self.row_bytes_iter().collect();
+        f.debug_struct("YUVAPixmapInfo")
+            .field("yuva_info", &self.yuva_info())
+            .field("plane_infos", &infos)
+            .field("row_bytes", &row_bytes)
+            .field("data_type", &self.data_type())
+            .finish()
     }
 }
 
@@ -112,20 +124,50 @@ impl YUVAPixmapInfo {
         self.native().fDataType
     }
 
-    /// Row bytes for the ith plane. Returns [None] if `i` >= [numPlanes(&self)] or this [YUVAPixmapInfo] is
-    /// invalid.
+    /// Row bytes for the ith plane. Returns `None` if `i` >= [`Self::num_planes()`] or this
+    /// [YUVAPixmapInfo] is invalid.
     pub fn row_bytes(&self, i: usize) -> Option<usize> {
         (i < self.num_planes()).if_true_then_some(|| unsafe {
             sb::C_SkYUVAPixmapInfo_rowBytes(self.native(), i.try_into().unwrap())
         })
     }
 
-    /// Image info for the ith plane, or [None] if `i` >= [numPlanes(&self)]
+    /// Row bytes for all planes.
+    pub fn row_bytes_iter(&self) -> impl Iterator<Item = usize> + '_ {
+        let mut i = 0;
+        let count = self.num_planes();
+        iter::from_fn(move || {
+            if i != count {
+                let row_bytes = self.row_bytes(i).unwrap();
+                i += 1;
+                Some(row_bytes)
+            } else {
+                None
+            }
+        })
+    }
+
+    /// Image info for the ith plane, or `None` if `i` >= [`Self::num_planes()`]
     pub fn plane_info(&self, i: usize) -> Option<&ImageInfo> {
         (i < self.num_planes()).if_true_then_some(|| {
             ImageInfo::from_native_ref(unsafe {
                 &*sb::C_SkYUVAPixmapInfo_planeInfo(self.native(), i.try_into().unwrap())
             })
+        })
+    }
+
+    /// An iterator of all planes' image infos.
+    pub fn plane_infos(&self) -> impl Iterator<Item = &ImageInfo> {
+        let mut i = 0;
+        let count = self.num_planes();
+        iter::from_fn(move || {
+            if i != count {
+                let pi = self.plane_info(i).unwrap();
+                i += 1;
+                Some(pi)
+            } else {
+                None
+            }
         })
     }
 
@@ -193,6 +235,16 @@ impl NativeDrop for SkYUVAPixmaps {
 impl NativeClone for SkYUVAPixmaps {
     fn clone(&self) -> Self {
         construct(|pixmaps| unsafe { sb::C_SkYUVAPixmaps_MakeCopy(self, pixmaps) })
+    }
+}
+
+impl fmt::Debug for YUVAPixmaps {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("YUVAPixmaps")
+            .field("planes", &self.planes())
+            .field("yuva_info", &self.yuva_info())
+            .field("data_type", &self.data_type())
+            .finish()
     }
 }
 
@@ -284,6 +336,8 @@ impl YUVAPixmaps {
 }
 
 pub mod yuva_pixmap_info {
+    use std::fmt;
+
     use crate::{prelude::*, ColorType};
     use skia_bindings as sb;
     use skia_bindings::SkYUVAPixmapInfo_SupportedDataTypes;
@@ -311,6 +365,14 @@ pub mod yuva_pixmap_info {
             Self::construct(|sdt| unsafe {
                 sb::C_SkYUVAPixmapInfo_SupportedDataTypes_Construct(sdt)
             })
+        }
+    }
+
+    impl fmt::Debug for SupportedDataTypes {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            f.debug_struct("SupportedDataType")
+                .field("data_type_support", &self.native().fDataTypeSupport)
+                .finish()
         }
     }
 

@@ -50,6 +50,17 @@ fn test_save_layer_rec_layout() {
     SaveLayerRec::test_layout()
 }
 
+impl fmt::Debug for SaveLayerRec<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("SaveLayerRec")
+            .field("bounds", &self.bounds.map(Rect::from_native_ref))
+            .field("paint", &self.paint.map(Paint::from_native_ref))
+            // TODO: backdrop
+            .field("flags", &self.flags)
+            .finish()
+    }
+}
+
 impl<'a> Default for SaveLayerRec<'a> {
     fn default() -> Self {
         SaveLayerRec {
@@ -120,6 +131,7 @@ fn test_src_rect_constraint_naming() {
 
 /// Provides access to Canvas's pixels.
 /// Returned by Canvas::access_top_layer_pixels()
+#[derive(Debug)]
 pub struct TopLayerPixels<'a> {
     pub pixels: &'a mut [u8],
     pub info: ImageInfo,
@@ -157,14 +169,14 @@ impl fmt::Debug for Canvas {
     }
 }
 
-/// A type representing a canvas that is owned and dropped
-/// when it goes out of scope _and_ is bound to the lifetime of another
-/// instance.
-/// Function resolvement is done via the Deref trait.
+/// A type representing a canvas that is owned and dropped when it goes out of scope _and_ is bound
+/// to the lifetime of some value.
+///
+/// Function resolvement is done via the [`Deref`] trait.
 #[repr(transparent)]
 pub struct OwnedCanvas<'lt>(ptr::NonNull<Canvas>, PhantomData<&'lt ()>);
 
-impl<'lt> Deref for OwnedCanvas<'lt> {
+impl Deref for OwnedCanvas<'_> {
     type Target = Canvas;
 
     fn deref(&self) -> &Self::Target {
@@ -172,22 +184,30 @@ impl<'lt> Deref for OwnedCanvas<'lt> {
     }
 }
 
-impl<'lt> DerefMut for OwnedCanvas<'lt> {
+impl DerefMut for OwnedCanvas<'_> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         unsafe { self.0.as_mut() }
     }
 }
 
-impl<'lt> Drop for OwnedCanvas<'lt> {
+impl Drop for OwnedCanvas<'_> {
     fn drop(&mut self) {
         unsafe { sb::C_SkCanvas_delete(self.native()) }
     }
 }
 
-impl<'lt> Default for OwnedCanvas<'lt> {
+impl Default for OwnedCanvas<'_> {
     fn default() -> Self {
         let ptr = unsafe { sb::C_SkCanvas_newEmpty() };
         Canvas::own_from_native_ptr(ptr).unwrap()
+    }
+}
+
+impl fmt::Debug for OwnedCanvas<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("OwnedCanvas")
+            .field(&self.deref() as &Canvas)
+            .finish()
     }
 }
 
@@ -1051,7 +1071,7 @@ impl Canvas {
     pub(crate) fn own_from_native_ptr<'lt>(native: *mut SkCanvas) -> Option<OwnedCanvas<'lt>> {
         if !native.is_null() {
             Some(OwnedCanvas::<'lt>(
-                ptr::NonNull::new(Self::borrow_from_native(unsafe { &mut *native })).unwrap(),
+                ptr::NonNull::new(Self::borrow_from_native_mut(unsafe { &mut *native })).unwrap(),
                 PhantomData,
             ))
         } else {
@@ -1059,7 +1079,11 @@ impl Canvas {
         }
     }
 
-    pub(crate) fn borrow_from_native(native: &mut SkCanvas) -> &mut Self {
+    pub(crate) fn borrow_from_native(native: &SkCanvas) -> &Self {
+        unsafe { transmute_ref(native) }
+    }
+
+    pub(crate) fn borrow_from_native_mut(native: &mut SkCanvas) -> &mut Self {
         unsafe { transmute_ref_mut(native) }
     }
 }
@@ -1108,6 +1132,7 @@ pub mod lattice {
         pub colors: Option<&'a [Color]>,
     }
 
+    #[derive(Debug)]
     pub(crate) struct Ref<'a> {
         pub native: SkCanvas_Lattice,
         pd: PhantomData<&'a Lattice<'a>>,
@@ -1155,6 +1180,7 @@ pub mod lattice {
 
 /// A reference to a Canvas that restores the Canvas's state when
 /// it's being dropped.
+#[derive(Debug)]
 pub struct AutoRestoredCanvas<'a> {
     canvas: &'a mut Canvas,
     restore: SkAutoCanvasRestore,

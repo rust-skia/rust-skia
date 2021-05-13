@@ -1,3 +1,5 @@
+use std::fmt;
+
 #[cfg(feature = "gpu")]
 use crate::gpu;
 use crate::prelude::*;
@@ -15,7 +17,16 @@ impl NativeDrop for SkImageGenerator {
     }
 }
 
-impl RefHandle<SkImageGenerator> {
+impl fmt::Debug for ImageGenerator {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ImageGenerator")
+            .field("unique_id", &self.unique_id())
+            .field("info", &self.info())
+            .finish()
+    }
+}
+
+impl ImageGenerator {
     pub fn unique_id(&self) -> u32 {
         self.native().fUniqueID
     }
