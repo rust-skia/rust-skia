@@ -1,9 +1,7 @@
-use crate::prelude::*;
-use crate::{scalar, Color, Color4f, ColorSpace, Matrix, Point, Shader, TileMode};
+use crate::{prelude::*, scalar, Color, Color4f, ColorSpace, Matrix, Point, Shader, TileMode};
 use skia_bindings as sb;
-use skia_bindings::SkShader;
 
-impl RCHandle<SkShader> {
+impl Shader {
     pub fn linear_gradient<'a>(
         points: (impl Into<Point>, impl Into<Point>),
         colors: impl Into<GradientShaderColors<'a>>,
@@ -276,15 +274,16 @@ pub fn sweep<'a>(
     })
 }
 
-/// Type that represents either a slice of Color, or a slice of Color4f and a color space.
-/// Whenever this type is expected, it's either possible to directly pass a &[Color] , or
-/// a tuple of type (&[Color4f], &ColorSpace).
+/// Type that represents either a slice of [`Color`], or a slice of [`Color4f`] and a color space.
+/// Whenever this type is expected, it's either possible to directly pass a `&[Color]` , or
+/// a tuple of type `(&[Color4f], &ColorSpace)`.
+#[derive(Debug)]
 pub enum GradientShaderColors<'a> {
     Colors(&'a [Color]),
     ColorsInSpace(&'a [Color4f], ColorSpace),
 }
 
-impl<'a> GradientShaderColors<'a> {
+impl GradientShaderColors<'_> {
     pub fn len(&self) -> usize {
         match self {
             GradientShaderColors::Colors(colors) => colors.len(),

@@ -1,5 +1,4 @@
-use crate::prelude::*;
-use crate::{Color, ColorFilter};
+use crate::{prelude::*, Color, ColorFilter};
 use skia_bindings as sb;
 
 pub const NUM_COLORS: usize = 6;

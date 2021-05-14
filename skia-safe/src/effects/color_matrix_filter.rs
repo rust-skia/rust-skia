@@ -1,9 +1,7 @@
-use crate::prelude::*;
-use crate::{Color, ColorFilter};
+use crate::{prelude::*, Color, ColorFilter};
 use skia_bindings as sb;
-use skia_bindings::SkColorFilter;
 
-impl RCHandle<SkColorFilter> {
+impl ColorFilter {
     pub fn new_lighting(mul: impl Into<Color>, add: impl Into<Color>) -> Option<Self> {
         new_lighting(mul, add)
     }

@@ -3,12 +3,11 @@ use crate::{
     prelude::*,
     ColorFilter, Data, Matrix, Shader,
 };
-use sb::SkRuntimeEffect_Options;
-use skia_bindings as sb;
 use skia_bindings::{
-    SkRefCntBase, SkRuntimeEffect, SkRuntimeEffect_Uniform, SkRuntimeEffect_Varying,
+    self as sb, SkRefCntBase, SkRuntimeEffect, SkRuntimeEffect_Options, SkRuntimeEffect_Uniform,
+    SkRuntimeEffect_Varying,
 };
-use std::ffi::CStr;
+use std::{ffi::CStr, fmt};
 
 pub type Uniform = Handle<SkRuntimeEffect_Uniform>;
 
@@ -21,6 +20,12 @@ unsafe impl Sync for Uniform {}
 impl NativeDrop for SkRuntimeEffect_Uniform {
     fn drop(&mut self) {
         panic!("native type SkRuntimeEffect::Uniform can't be owned by Rust");
+    }
+}
+
+impl fmt::Debug for Uniform {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.native().fmt(f)
     }
 }
 
@@ -87,6 +92,15 @@ impl NativeDrop for SkRuntimeEffect_Varying {
     }
 }
 
+impl fmt::Debug for Varying {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Varying")
+            .field("name", &self.name())
+            .field("width", &self.width())
+            .finish()
+    }
+}
+
 impl Varying {
     pub fn name(&self) -> &str {
         self.native().name.as_str()
@@ -103,7 +117,7 @@ impl NativeRefCountedBase for SkRuntimeEffect {
     type Base = SkRefCntBase;
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug, Default)]
+#[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
 pub struct Options {
     pub inline_threshold: i32,
 }
@@ -125,6 +139,16 @@ pub fn new_with_options<'a>(
         sb::C_SkRuntimeEffect_Make(str.native(), options.native(), error.native_mut())
     })
     .ok_or_else(|| error.as_str().to_owned())
+}
+
+impl fmt::Debug for RuntimeEffect {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("RuntimeEffect")
+            .field("uniform_size", &self.uniform_size())
+            .field("uniforms", &self.uniforms())
+            .field("varyings", &self.varyings())
+            .finish()
+    }
 }
 
 impl RuntimeEffect {

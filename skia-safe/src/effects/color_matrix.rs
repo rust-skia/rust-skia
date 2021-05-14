@@ -1,3 +1,5 @@
+use std::fmt;
+
 use crate::prelude::*;
 use skia_bindings as sb;
 use skia_bindings::SkColorMatrix;
@@ -10,7 +12,7 @@ impl NativeDrop for SkColorMatrix {
     fn drop(&mut self) {}
 }
 
-impl PartialEq for Handle<SkColorMatrix> {
+impl PartialEq for ColorMatrix {
     fn eq(&self, other: &Self) -> bool {
         let mut array_self = [0.0f32; 20];
         let mut array_other = [0.0f32; 20];
@@ -20,13 +22,21 @@ impl PartialEq for Handle<SkColorMatrix> {
     }
 }
 
-impl Default for Handle<SkColorMatrix> {
+impl Default for ColorMatrix {
     fn default() -> Self {
         ColorMatrix::construct(|cm| unsafe { sb::C_SkColorMatrix_Construct(cm) })
     }
 }
 
-impl Handle<SkColorMatrix> {
+impl fmt::Debug for ColorMatrix {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ColorMatrix")
+            .field("mat", &self.native().fMat)
+            .finish()
+    }
+}
+
+impl ColorMatrix {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         m00: f32,

@@ -1,9 +1,7 @@
-use crate::prelude::*;
 use crate::{scalar, PathEffect};
 use skia_bindings as sb;
-use skia_bindings::SkPathEffect;
 
-impl RCHandle<SkPathEffect> {
+impl PathEffect {
     pub fn discrete(
         seg_length: scalar,
         dev: scalar,
