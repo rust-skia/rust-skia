@@ -1,8 +1,9 @@
-use crate::interop::{FromStrs, String};
-use crate::prelude::*;
-use skia_bindings as sb;
-use skia_bindings::SkStrings;
-use std::ops::Index;
+use crate::{
+    interop::{FromStrs, String},
+    prelude::*,
+};
+use skia_bindings::{self as sb, SkStrings};
+use std::{fmt, ops::Index};
 
 pub type Strings = Handle<SkStrings>;
 unsafe impl Send for Strings {}
@@ -13,6 +14,12 @@ impl NativeDrop for SkStrings {
         unsafe {
             sb::C_SkStrings_destruct(self);
         }
+    }
+}
+
+impl fmt::Debug for Strings {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Strings").field("len", &self.len()).finish()
     }
 }
 
@@ -37,7 +44,7 @@ impl Handle<SkStrings> {
     }
 }
 
-impl Index<usize> for Handle<SkStrings> {
+impl Index<usize> for Strings {
     type Output = String;
     fn index(&self, index: usize) -> &Self::Output {
         let mut count = 0;
@@ -47,7 +54,7 @@ impl Index<usize> for Handle<SkStrings> {
     }
 }
 
-impl FromStrs for Handle<SkStrings> {
+impl FromStrs for Strings {
     fn from_strs(strings: &[impl AsRef<str>]) -> Self {
         Strings::new(strings.iter().map(String::from_str).collect())
     }
