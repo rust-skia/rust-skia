@@ -1,6 +1,5 @@
 use crate::{prelude::*, scalar, Canvas, Color, Matrix, Path, Point3, Rect};
-use skia_bindings as sb;
-use skia_bindings::SkShadowUtils;
+use skia_bindings::{self as sb, SkShadowUtils};
 
 bitflags! {
     pub struct ShadowFlags: u32 {

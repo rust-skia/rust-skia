@@ -1,8 +1,8 @@
 #![allow(deprecated)]
-use crate::prelude::*;
-use crate::{scalar, Canvas, Matrix, M44, V3};
-use skia_bindings as sb;
-use skia_bindings::{Sk3DView, SkCamera3D, SkPatch3D};
+use std::fmt;
+
+use crate::{prelude::*, scalar, Canvas, Matrix, M44, V3};
+use skia_bindings::{self as sb, Sk3DView, SkCamera3D, SkPatch3D};
 
 #[deprecated(
     since = "0.30.0",
@@ -115,6 +115,12 @@ impl Default for View3D {
 impl NativeDrop for Sk3DView {
     fn drop(&mut self) {
         unsafe { sb::C_Sk3DView_delete(self) }
+    }
+}
+
+impl fmt::Debug for View3D {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("View3D").finish()
     }
 }
 

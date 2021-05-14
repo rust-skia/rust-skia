@@ -1,5 +1,4 @@
-use crate::prelude::*;
-use crate::{Canvas, Font, Paint, Path, Point, TextEncoding};
+use crate::{prelude::*, Canvas, Font, Paint, Path, Point, TextEncoding};
 use core::borrow::BorrowMut;
 use skia_bindings::SkTextUtils;
 

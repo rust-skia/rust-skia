@@ -1,7 +1,9 @@
-use crate::prelude::{Handle, IfBoolSome, NativeAccess};
-use crate::{interop, Path};
+use crate::{
+    interop,
+    prelude::{IfBoolSome, NativeAccess},
+    Path,
+};
 use skia_bindings as sb;
-use skia_bindings::SkPath;
 use std::ffi::CString;
 
 pub fn from_svg(svg: impl AsRef<str>) -> Option<Path> {
@@ -17,7 +19,7 @@ pub fn to_svg(path: &Path) -> String {
     svg.as_str().into()
 }
 
-impl Handle<SkPath> {
+impl Path {
     pub fn from_svg(svg: impl AsRef<str>) -> Option<Path> {
         from_svg(svg)
     }
