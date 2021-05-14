@@ -4,9 +4,10 @@ pub mod pdf {
         prelude::*,
         scalar, DateTime, Document,
     };
-    use skia_bindings as sb;
-    use skia_bindings::{SkPDF_AttributeList, SkPDF_Metadata, SkPDF_StructureElementNode};
-    use std::{ffi::CString, mem, ptr};
+    use skia_bindings::{
+        self as sb, SkPDF_AttributeList, SkPDF_Metadata, SkPDF_StructureElementNode,
+    };
+    use std::{ffi::CString, fmt, mem, ptr};
 
     pub use sb::SkPDF_DocumentStructureType as DocumentStructureType;
     #[test]
@@ -27,6 +28,12 @@ pub mod pdf {
     impl Default for AttributeList {
         fn default() -> Self {
             AttributeList::from_native_c(unsafe { SkPDF_AttributeList::new() })
+        }
+    }
+
+    impl fmt::Debug for AttributeList {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            f.debug_struct("AttributeList").finish()
         }
     }
 
@@ -121,7 +128,6 @@ pub mod pdf {
     }
 
     #[repr(transparent)]
-    #[derive(Debug)]
     pub struct StructureElementNode(ptr::NonNull<SkPDF_StructureElementNode>);
 
     impl NativeAccess<SkPDF_StructureElementNode> for StructureElementNode {
@@ -142,6 +148,19 @@ pub mod pdf {
     impl Default for StructureElementNode {
         fn default() -> Self {
             Self::new("")
+        }
+    }
+
+    impl fmt::Debug for StructureElementNode {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            f.debug_struct("StructureElementNode")
+                .field("type_string", &self.type_string())
+                .field("child_vector", &self.child_vector())
+                .field("node_id", &self.node_id())
+                .field("attributes", &self.attributes())
+                .field("alt", &self.alt())
+                .field("lang", &self.lang())
+                .finish()
         }
     }
 
@@ -228,7 +247,7 @@ pub mod pdf {
         }
     }
 
-    #[derive(Debug, Default)]
+    #[derive(Default, Debug)]
     pub struct Metadata {
         pub title: String,
         pub author: String,
@@ -292,6 +311,7 @@ pub mod pdf {
     //
 
     type InternalMetadata = Handle<SkPDF_Metadata>;
+
     impl NativeDrop for SkPDF_Metadata {
         fn drop(&mut self) {
             unsafe { sb::C_SkPDF_Metadata_destruct(self) }
