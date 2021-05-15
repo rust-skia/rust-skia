@@ -1,4 +1,4 @@
-use crate::{ColorFilter, prelude::*};
+use crate::{prelude::*, ColorFilter};
 use skia_bindings as sb;
 
 impl ColorFilter {

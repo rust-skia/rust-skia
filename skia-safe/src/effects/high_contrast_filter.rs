@@ -1,4 +1,4 @@
-use crate::{ColorFilter, high_contrast_config::InvertStyle, prelude::*, scalar};
+use crate::{high_contrast_config::InvertStyle, prelude::*, scalar, ColorFilter};
 use skia_bindings::{self as sb, SkHighContrastConfig};
 
 pub mod high_contrast_config {

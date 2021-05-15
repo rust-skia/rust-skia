@@ -1,8 +1,8 @@
 //! Wrapper for pathops/SkPathOps.h
 
-use std::fmt;
-use crate::{Path, Rect, prelude::*};
+use crate::{prelude::*, Path, Rect};
 use skia_bindings::{self as sb, SkOpBuilder};
+use std::fmt;
 
 pub use skia_bindings::SkPathOp as PathOp;
 #[test]
