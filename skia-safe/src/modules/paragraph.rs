@@ -35,6 +35,7 @@ pub use typeface_font_provider::*;
 /// Efficient reference type to a C++ vector of font family SkStrings.
 ///
 /// Use indexer or .iter() to access the Rust str references.
+#[derive(Debug)]
 pub struct FontFamilies<'a>(&'a [skia_bindings::SkString]);
 
 impl Index<usize> for FontFamilies<'_> {

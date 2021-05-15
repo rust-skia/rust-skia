@@ -1,10 +1,11 @@
-use crate::interop::FromStrs;
-use crate::prelude::*;
-use crate::textlayout::ParagraphCache;
-use crate::{interop, FontMgr, FontStyle, Typeface, Unichar};
-use skia_bindings as sb;
-use skia_bindings::skia_textlayout_FontCollection;
-use std::ffi;
+use crate::{
+    interop::{self, FromStrs},
+    prelude::*,
+    textlayout::ParagraphCache,
+    FontMgr, FontStyle, Typeface, Unichar,
+};
+use skia_bindings::{self as sb, skia_textlayout_FontCollection};
+use std::{ffi, fmt};
 
 pub type FontCollection = RCHandle<skia_textlayout_FontCollection>;
 
@@ -12,7 +13,18 @@ impl NativeRefCountedBase for skia_textlayout_FontCollection {
     type Base = sb::SkRefCntBase;
 }
 
-impl RCHandle<skia_textlayout_FontCollection> {
+impl fmt::Debug for FontCollection {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("FontCollection")
+            .field("font_managers_count", &self.font_managers_count())
+            .field("fallback_manager", &self.fallback_manager())
+            .field("font_fallback_enabled", &self.font_fallback_enabled())
+            .field("paragraph_cache", &self.paragraph_cache())
+            .finish()
+    }
+}
+
+impl FontCollection {
     pub fn new() -> Self {
         Self::from_ptr(unsafe { sb::C_FontCollection_new() }).unwrap()
     }
@@ -152,7 +164,7 @@ impl NativeDrop for sb::Typefaces {
     }
 }
 
-impl Handle<sb::Typefaces> {
+impl Typefaces {
     pub fn new() -> Self {
         Typefaces::construct(|tf| unsafe { sb::C_Typefaces_construct(tf) })
     }

@@ -1,7 +1,7 @@
 use super::{FontCollection, Paragraph, ParagraphStyle, PlaceholderStyle, TextStyle};
 use crate::prelude::*;
 use skia_bindings as sb;
-use std::os::raw;
+use std::{fmt, os::raw};
 
 pub type ParagraphBuilder = RefHandle<sb::skia_textlayout_ParagraphBuilder>;
 unsafe impl Send for ParagraphBuilder {}
@@ -13,7 +13,13 @@ impl NativeDrop for sb::skia_textlayout_ParagraphBuilder {
     }
 }
 
-impl RefHandle<sb::skia_textlayout_ParagraphBuilder> {
+impl fmt::Debug for ParagraphBuilder {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ParagraphBuilder").finish()
+    }
+}
+
+impl ParagraphBuilder {
     pub fn push_style(&mut self, style: &TextStyle) -> &mut Self {
         unsafe { sb::C_ParagraphBuilder_pushStyle(self.native_mut(), style.native()) }
         self

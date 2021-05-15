@@ -1,8 +1,9 @@
-use crate::prelude::*;
-use crate::Rect;
+use crate::{prelude::*, Rect};
 use skia_bindings as sb;
-use std::cmp::{max, min};
-use std::ops::Range;
+use std::{
+    cmp::{max, min},
+    ops::Range,
+};
 
 pub use sb::skia_textlayout_Affinity as Affinity;
 pub use sb::skia_textlayout_RectHeightStyle as RectHeightStyle;

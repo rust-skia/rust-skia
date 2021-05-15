@@ -1,8 +1,12 @@
+use std::fmt;
+
 use super::{DrawOptions, FontFamilies, TextAlign, TextDirection, TextStyle};
-use crate::interop::{AsStr, FromStrs, SetStr};
-use crate::modules::paragraph::TextHeightBehavior;
-use crate::prelude::*;
-use crate::{interop, scalar, FontStyle};
+use crate::{
+    interop::{self, AsStr, FromStrs, SetStr},
+    modules::paragraph::TextHeightBehavior,
+    prelude::*,
+    scalar, FontStyle,
+};
 use skia_bindings as sb;
 
 pub type StrutStyle = Handle<sb::skia_textlayout_StrutStyle>;
@@ -27,13 +31,27 @@ impl NativePartialEq for sb::skia_textlayout_StrutStyle {
     }
 }
 
-impl Default for Handle<sb::skia_textlayout_StrutStyle> {
+impl Default for StrutStyle {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl Handle<sb::skia_textlayout_StrutStyle> {
+impl fmt::Debug for StrutStyle {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("StrutStyle")
+            .field("font_families", &self.font_families())
+            .field("font_style", &self.font_style())
+            .field("font_size", &self.font_size())
+            .field("height", &self.height())
+            .field("leading", &self.leading())
+            .field("strut_enabled", &self.strut_enabled())
+            .field("force_strut_height", &self.force_strut_height())
+            .finish()
+    }
+}
+
+impl StrutStyle {
     pub fn new() -> Self {
         StrutStyle::construct(|ss| unsafe { sb::C_StrutStyle_Construct(ss) })
     }
@@ -133,13 +151,33 @@ impl NativePartialEq for sb::skia_textlayout_ParagraphStyle {
     }
 }
 
-impl Default for RefHandle<sb::skia_textlayout_ParagraphStyle> {
+impl Default for ParagraphStyle {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl RefHandle<sb::skia_textlayout_ParagraphStyle> {
+impl fmt::Debug for ParagraphStyle {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ParagraphStyle")
+            .field("strut_style", &self.strut_style())
+            .field("text_style", &self.text_style())
+            .field("text_direction", &self.text_direction())
+            .field("text_align", &self.text_align())
+            .field("max_lines", &self.max_lines())
+            .field("ellipsis", &self.ellipsis())
+            .field("height", &self.height())
+            .field("text_height_behavior", &self.text_height_behavior())
+            .field("unlimited_lines", &self.unlimited_lines())
+            .field("ellipsized", &self.ellipsized())
+            .field("effective_align", &self.effective_align())
+            .field("hinting_is_on", &self.hinting_is_on())
+            .field("draw_options", &self.draw_options())
+            .finish()
+    }
+}
+
+impl ParagraphStyle {
     pub fn new() -> Self {
         Self::from_ptr(unsafe { sb::C_ParagraphStyle_New() }).unwrap()
     }

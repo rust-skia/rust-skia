@@ -1,9 +1,10 @@
 use super::{PositionWithAffinity, RectHeightStyle, RectWidthStyle, TextBox};
-use crate::prelude::*;
-use crate::textlayout::LineMetrics;
-use crate::{scalar, Canvas, Point};
+use crate::{prelude::*, scalar, textlayout::LineMetrics, Canvas, Point};
 use skia_bindings as sb;
-use std::ops::{Index, Range};
+use std::{
+    fmt,
+    ops::{Index, Range},
+};
 
 pub type Paragraph = RefHandle<sb::skia_textlayout_Paragraph>;
 unsafe impl Send for Paragraph {}
@@ -15,7 +16,23 @@ impl NativeDrop for sb::skia_textlayout_Paragraph {
     }
 }
 
-impl RefHandle<sb::skia_textlayout_Paragraph> {
+impl fmt::Debug for Paragraph {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Paragraph")
+            .field("max_width", &self.max_width())
+            .field("height", &self.height())
+            .field("min_intrinsic_width", &self.min_intrinsic_width())
+            .field("max_intrinsic_width", &self.max_intrinsic_width())
+            .field("alphabetic_baseline", &self.alphabetic_baseline())
+            .field("ideographic_baseline", &self.ideographic_baseline())
+            .field("longest_line", &self.longest_line())
+            .field("did_exceed_max_lines", &self.did_exceed_max_lines())
+            .field("line_number", &self.line_number())
+            .finish()
+    }
+}
+
+impl Paragraph {
     pub fn max_width(&self) -> scalar {
         self.native().fWidth
     }
@@ -109,8 +126,8 @@ impl RefHandle<sb::skia_textlayout_Paragraph> {
         unsafe { sb::C_Paragraph_lineNumber(self.native_mut_force()) }
     }
 
-    pub fn mark_dirty(&self) {
-        unsafe { sb::C_Paragraph_markDirty(self.native_mut_force()) }
+    pub fn mark_dirty(&mut self) {
+        unsafe { sb::C_Paragraph_markDirty(self.native_mut()) }
     }
 }
 
@@ -122,7 +139,7 @@ impl NativeDrop for sb::TextBoxes {
     }
 }
 
-impl Index<usize> for Handle<sb::TextBoxes> {
+impl Index<usize> for TextBoxes {
     type Output = TextBox;
     fn index(&self, index: usize) -> &Self::Output {
         &self.as_slice()[index]
@@ -135,7 +152,13 @@ impl AsRef<[TextBox]> for TextBoxes {
     }
 }
 
-impl Handle<sb::TextBoxes> {
+impl fmt::Debug for TextBoxes {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("TextBoxes").field(&self.as_slice()).finish()
+    }
+}
+
+impl TextBoxes {
     pub fn iter(&self) -> impl Iterator<Item = &TextBox> {
         self.as_slice().iter()
     }
@@ -157,20 +180,28 @@ impl NativeDrop for sb::LineMetricsVector {
     }
 }
 
-impl<'a> Index<usize> for Borrows<'a, Handle<sb::LineMetricsVector>> {
+impl<'a> Index<usize> for LineMetricsVector<'a> {
     type Output = LineMetrics<'a>;
     fn index(&self, index: usize) -> &Self::Output {
         &self.as_slice()[index]
     }
 }
 
-impl<'a> AsRef<[LineMetrics<'a>]> for Borrows<'a, Handle<sb::LineMetricsVector>> {
+impl<'a> AsRef<[LineMetrics<'a>]> for LineMetricsVector<'a> {
     fn as_ref(&self) -> &[LineMetrics<'a>] {
         self.as_slice()
     }
 }
 
-impl<'a> Borrows<'a, Handle<sb::LineMetricsVector>> {
+impl fmt::Debug for LineMetricsVector<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("LineMetricsVector")
+            .field(&self.as_slice())
+            .finish()
+    }
+}
+
+impl<'a> LineMetricsVector<'a> {
     pub fn iter(&self) -> impl Iterator<Item = &'a LineMetrics<'a>> {
         self.as_slice().iter()
     }
