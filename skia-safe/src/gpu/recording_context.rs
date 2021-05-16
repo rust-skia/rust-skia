@@ -1,8 +1,12 @@
-use crate::gpu::{BackendAPI, BackendFormat, DirectContext, Renderable};
-use crate::prelude::*;
-use crate::{image, ColorType};
-use skia_bindings as sb;
-use skia_bindings::{GrDirectContext, GrRecordingContext, SkRefCntBase};
+use std::fmt;
+
+use crate::{
+    gpu::{BackendAPI, BackendFormat, DirectContext, Renderable},
+    image,
+    prelude::*,
+    ColorType,
+};
+use skia_bindings::{self as sb, GrRecordingContext, SkRefCntBase};
 
 pub type RecordingContext = RCHandle<GrRecordingContext>;
 
@@ -10,13 +14,23 @@ impl NativeRefCountedBase for GrRecordingContext {
     type Base = SkRefCntBase;
 }
 
-impl From<RCHandle<GrDirectContext>> for RCHandle<GrRecordingContext> {
-    fn from(direct_context: RCHandle<GrDirectContext>) -> Self {
+impl From<DirectContext> for RecordingContext {
+    fn from(direct_context: DirectContext) -> Self {
         unsafe { std::mem::transmute(direct_context) }
     }
 }
 
-impl RCHandle<GrRecordingContext> {
+impl fmt::Debug for RecordingContext {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("RecordingContext")
+            .field("backend", &self.backend())
+            .field("max_texture_size", &self.max_texture_size())
+            .field("max_render_target_size", &self.max_render_target_size())
+            .finish()
+    }
+}
+
+impl RecordingContext {
     // From GrContext_Base
     pub fn as_direct_context(&mut self) -> Option<DirectContext> {
         DirectContext::from_unshared_ptr(unsafe {

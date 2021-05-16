@@ -6,12 +6,12 @@ use super::gl;
 use super::vk;
 use super::{
     BackendFormat, BackendRenderTarget, BackendSurfaceMutableState, BackendTexture, ContextOptions,
-    FlushInfo, SemaphoresSubmitted,
+    FlushInfo, RecordingContext, SemaphoresSubmitted,
 };
 use crate::{image, prelude::*, Data};
-use skia_bindings as sb;
-use skia_bindings::{GrDirectContext, GrRecordingContext, SkRefCntBase};
+use skia_bindings::{self as sb, GrDirectContext, SkRefCntBase};
 use std::{
+    fmt,
     ops::{Deref, DerefMut},
     ptr,
     time::Duration,
@@ -23,15 +23,15 @@ impl NativeRefCountedBase for GrDirectContext {
     type Base = SkRefCntBase;
 }
 
-impl Deref for RCHandle<GrDirectContext> {
-    type Target = RCHandle<GrRecordingContext>;
+impl Deref for DirectContext {
+    type Target = RecordingContext;
 
     fn deref(&self) -> &Self::Target {
         unsafe { transmute_ref(self) }
     }
 }
 
-impl DerefMut for RCHandle<GrDirectContext> {
+impl DerefMut for DirectContext {
     fn deref_mut(&mut self) -> &mut Self::Target {
         unsafe { transmute_ref_mut(self) }
     }
@@ -49,7 +49,26 @@ pub struct ResourceCacheUsage {
     pub resource_bytes: usize,
 }
 
-impl RCHandle<GrDirectContext> {
+impl fmt::Debug for DirectContext {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("DirectContext")
+            .field("base", self as &RecordingContext)
+            .field("resource_cache_limits", &self.resource_cache_limits())
+            .field("resource_cache_limit", &self.resource_cache_limit())
+            .field("resource_cache_usage", &self.resource_cache_usage())
+            .field(
+                "resource_cache_purgeable_bytes",
+                &self.resource_cache_purgeable_bytes(),
+            )
+            .field(
+                "supports_distance_field_text",
+                &self.supports_distance_field_text(),
+            )
+            .finish()
+    }
+}
+
+impl DirectContext {
     #[cfg(feature = "gl")]
     pub fn new_gl<'a>(
         interface: impl Into<Option<gl::Interface>>,

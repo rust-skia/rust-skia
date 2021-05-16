@@ -1,8 +1,7 @@
 use super::{BackendFormat, BackendTexture, Mipmapped, SurfaceOrigin};
 use crate::{prelude::*, YUVAInfo, YUVColorSpace};
-use skia_bindings as sb;
-use skia_bindings::{GrYUVABackendTextureInfo, GrYUVABackendTextures};
-use std::iter;
+use skia_bindings::{self as sb, GrYUVABackendTextureInfo, GrYUVABackendTextures};
+use std::{fmt, iter};
 
 /// A description of a set [BackendTexture]s that hold the planar data described by a [YUVAInfo].
 pub type YUVABackendTextureInfo = Handle<GrYUVABackendTextureInfo>;
@@ -24,6 +23,18 @@ impl NativeClone for GrYUVABackendTextureInfo {
 impl NativePartialEq for GrYUVABackendTextureInfo {
     fn eq(&self, rhs: &Self) -> bool {
         unsafe { sb::C_GrYUVABackendTextureInfo_equals(self, rhs) }
+    }
+}
+
+impl fmt::Debug for YUVABackendTextureInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("YUVABackendTextureInfo")
+            .field("yuva_info", &self.yuva_info())
+            .field("yuv_color_space", &self.yuv_color_space())
+            .field("mipmapped", &self.mipmapped())
+            .field("texture_origin", &self.texture_origin())
+            .field("plane_formats", &self.plane_formats())
+            .finish()
     }
 }
 
@@ -78,11 +89,19 @@ impl YUVABackendTextureInfo {
         self.yuva_info().num_planes()
     }
 
-    /// Format of the ith plane, or [None] if i >= [num_planes(&self)]
+    /// Format of the ith plane, or `None` if `i >= Self::num_planes()`
     pub fn plane_format(&self, i: usize) -> Option<&BackendFormat> {
         (i < self.num_planes()).if_true_some(BackendFormat::from_native_ref(
             &self.native().fPlaneFormats[i],
         ))
+    }
+
+    /// All plane formats.
+    pub fn plane_formats(&self) -> &[BackendFormat] {
+        unsafe {
+            let formats = BackendFormat::from_native_ref(&self.native().fPlaneFormats[0]);
+            safer::from_raw_parts(formats, self.num_planes())
+        }
     }
 
     /// Returns `true` if this has been configured with a valid [YUVAInfo] with compatible texture.
@@ -99,6 +118,16 @@ unsafe impl Sync for YUVABackendTextures {}
 impl NativeDrop for GrYUVABackendTextures {
     fn drop(&mut self) {
         unsafe { sb::C_GrYUVABackendTextures_destruct(self) }
+    }
+}
+
+impl fmt::Debug for YUVABackendTextures {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("YUVABackendTextures")
+            .field("yuva_info", &self.yuva_info())
+            .field("texture_origin", &self.texture_origin())
+            .field("textures", &self.textures())
+            .finish()
     }
 }
 
