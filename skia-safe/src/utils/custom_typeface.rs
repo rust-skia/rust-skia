@@ -1,9 +1,6 @@
+use crate::{prelude::*, FontMetrics, FontStyle, GlyphId, Image, Paint, Path, Picture, Typeface};
+use skia_bindings::{self as sb, SkCustomTypefaceBuilder};
 use std::fmt;
-
-use crate::{prelude::*, FontMetrics, FontStyle};
-use crate::{GlyphId, Image, Paint, Path, Picture, Typeface};
-use skia_bindings as sb;
-use skia_bindings::SkCustomTypefaceBuilder;
 
 pub type CustomTypefaceBuilder = Handle<SkCustomTypefaceBuilder>;
 unsafe impl Send for CustomTypefaceBuilder {}

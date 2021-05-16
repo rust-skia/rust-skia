@@ -1,9 +1,6 @@
+use crate::{prelude::*, scalar, Matrix, Path, Point, Vector};
+use skia_bindings::{self as sb, SkContourMeasure, SkContourMeasureIter, SkRefCntBase};
 use std::fmt;
-
-use crate::prelude::*;
-use crate::{scalar, Matrix, Path, Point, Vector};
-use skia_bindings as sb;
-use skia_bindings::{SkContourMeasure, SkContourMeasureIter, SkRefCntBase};
 
 pub type ContourMeasure = RCHandle<SkContourMeasure>;
 unsafe impl Send for ContourMeasure {}

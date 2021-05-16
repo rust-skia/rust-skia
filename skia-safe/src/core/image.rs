@@ -5,8 +5,7 @@ use crate::{
     ISize, ImageFilter, ImageGenerator, ImageInfo, Matrix, Paint, Picture, Pixmap, SamplingOptions,
     Shader, TileMode,
 };
-use skia_bindings as sb;
-use skia_bindings::{SkImage, SkRefCntBase};
+use skia_bindings::{self as sb, SkImage, SkRefCntBase};
 use std::{fmt, mem, ptr};
 
 pub use super::CubicResampler;

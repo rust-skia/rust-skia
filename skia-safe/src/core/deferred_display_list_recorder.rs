@@ -1,9 +1,6 @@
+use crate::{prelude::*, Canvas, DeferredDisplayList, SurfaceCharacterization};
+use skia_bindings::{self as sb, SkDeferredDisplayListRecorder};
 use std::fmt;
-
-use crate::prelude::*;
-use crate::{Canvas, DeferredDisplayList, SurfaceCharacterization};
-use skia_bindings as sb;
-use skia_bindings::SkDeferredDisplayListRecorder;
 
 pub type DeferredDisplayListRecorder = Handle<SkDeferredDisplayListRecorder>;
 

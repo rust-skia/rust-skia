@@ -1,6 +1,5 @@
 use crate::{prelude::*, scalar, Path, PathDirection, PathFillType, Point, RRect, Rect, Vector};
-use skia_bindings as sb;
-use skia_bindings::SkPathBuilder;
+use skia_bindings::{self as sb, SkPathBuilder};
 use std::{fmt, mem};
 
 pub use skia_bindings::SkPathBuilder_ArcSize as ArcSize;

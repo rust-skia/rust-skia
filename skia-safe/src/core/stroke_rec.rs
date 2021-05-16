@@ -1,7 +1,6 @@
-use std::fmt;
-
 use crate::{paint, prelude::*, scalar, Paint, Path};
 use skia_bindings::{self as sb, SkStrokeRec};
+use std::fmt;
 
 pub use sb::SkStrokeRec_InitStyle as InitStyle;
 

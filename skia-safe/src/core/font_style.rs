@@ -1,6 +1,5 @@
 use crate::prelude::*;
-use skia_bindings as sb;
-use skia_bindings::{SkFontStyle, SkFontStyle_Weight, SkFontStyle_Width};
+use skia_bindings::{self as sb, SkFontStyle, SkFontStyle_Weight, SkFontStyle_Width};
 use std::{fmt, ops::Deref};
 
 /// Wrapper type of a font weight.

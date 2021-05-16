@@ -32,7 +32,7 @@ impl DerefMut for TypefaceFontStyleSet {
 impl fmt::Debug for TypefaceFontStyleSet {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("TypefaceFontStyleSet")
-            .field("font_style_set", self as &FontStyleSet)
+            .field("base", self as &FontStyleSet)
             .field("family_name", &self.family_name())
             .field("alias", &self.alias())
             .finish()
@@ -93,7 +93,7 @@ impl From<TypefaceFontProvider> for FontMgr {
 impl fmt::Debug for TypefaceFontProvider {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("TypefaceFontProvider")
-            .field("font_mgr", self as &FontMgr)
+            .field("base", self as &FontMgr)
             .finish()
     }
 }

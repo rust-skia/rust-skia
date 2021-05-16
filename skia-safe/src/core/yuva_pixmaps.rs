@@ -1,6 +1,6 @@
 use crate::{prelude::*, ColorType, Data, ImageInfo, Pixmap, YUVAInfo, YUVColorSpace};
 use skia_bindings::{self as sb, SkYUVAPixmapInfo, SkYUVAPixmaps};
-use std::{ffi::c_void, fmt, iter, ptr};
+use std::{ffi::c_void, fmt, ptr};
 use yuva_pixmap_info::SupportedDataTypes;
 
 /// Data type for Y, U, V, and possibly A channels independent of how values are packed into planes.
@@ -26,11 +26,11 @@ impl NativePartialEq for SkYUVAPixmapInfo {
 
 impl fmt::Debug for YUVAPixmapInfo {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let infos: Vec<_> = self.plane_infos().collect();
+        let plane_infos: Vec<_> = self.plane_infos().collect();
         let row_bytes: Vec<_> = self.row_bytes_iter().collect();
         f.debug_struct("YUVAPixmapInfo")
             .field("yuva_info", &self.yuva_info())
-            .field("plane_infos", &infos)
+            .field("plane_infos", &plane_infos)
             .field("row_bytes", &row_bytes)
             .field("data_type", &self.data_type())
             .finish()
@@ -134,17 +134,7 @@ impl YUVAPixmapInfo {
 
     /// Row bytes for all planes.
     pub fn row_bytes_iter(&self) -> impl Iterator<Item = usize> + '_ {
-        let mut i = 0;
-        let count = self.num_planes();
-        iter::from_fn(move || {
-            if i != count {
-                let row_bytes = self.row_bytes(i).unwrap();
-                i += 1;
-                Some(row_bytes)
-            } else {
-                None
-            }
-        })
+        (0..self.num_planes()).map(move |i| self.row_bytes(i).unwrap())
     }
 
     /// Image info for the ith plane, or `None` if `i` >= [`Self::num_planes()`]
@@ -158,17 +148,7 @@ impl YUVAPixmapInfo {
 
     /// An iterator of all planes' image infos.
     pub fn plane_infos(&self) -> impl Iterator<Item = &ImageInfo> {
-        let mut i = 0;
-        let count = self.num_planes();
-        iter::from_fn(move || {
-            if i != count {
-                let pi = self.plane_info(i).unwrap();
-                i += 1;
-                Some(pi)
-            } else {
-                None
-            }
-        })
+        (0..self.num_planes()).map(move |i| self.plane_info(i).unwrap())
     }
 
     /// Determine size to allocate for all planes. Optionally retrieves the per-plane sizes in
@@ -336,11 +316,9 @@ impl YUVAPixmaps {
 }
 
 pub mod yuva_pixmap_info {
-    use std::fmt;
-
     use crate::{prelude::*, ColorType};
-    use skia_bindings as sb;
-    use skia_bindings::SkYUVAPixmapInfo_SupportedDataTypes;
+    use skia_bindings::{self as sb, SkYUVAPixmapInfo_SupportedDataTypes};
+    use std::fmt;
 
     pub use crate::yuva_info::PlaneConfig;
     pub use crate::yuva_info::Subsampling;

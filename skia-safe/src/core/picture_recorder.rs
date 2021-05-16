@@ -1,7 +1,5 @@
-use crate::prelude::*;
-use crate::{BBHFactory, Canvas, Drawable, Picture, Rect};
-use skia_bindings as sb;
-use skia_bindings::{SkPictureRecorder, SkRect};
+use crate::{prelude::*, BBHFactory, Canvas, Drawable, Picture, Rect};
+use skia_bindings::{self as sb, SkPictureRecorder, SkRect};
 use std::{fmt, ptr};
 
 pub type PictureRecorder = Handle<SkPictureRecorder>;

@@ -1,7 +1,5 @@
-use crate::prelude::*;
-use crate::{interop, scalar, Matrix, Rect, Vector};
-use skia_bindings as sb;
-use skia_bindings::SkRRect;
+use crate::{interop, prelude::*, scalar, Matrix, Rect, Vector};
+use skia_bindings::{self as sb, SkRRect};
 use std::{fmt, mem, ptr};
 
 pub use skia_bindings::SkRRect_Type as Type;

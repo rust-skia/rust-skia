@@ -1,11 +1,8 @@
-use std::fmt;
-
 #[cfg(feature = "gpu")]
 use crate::gpu;
-use crate::prelude::*;
-use crate::{image, ColorSpace, Data, ISize, ImageInfo, Matrix, Paint, Picture};
-use skia_bindings as sb;
-use skia_bindings::SkImageGenerator;
+use crate::{image, prelude::*, ColorSpace, Data, ISize, ImageInfo, Matrix, Paint, Picture};
+use skia_bindings::{self as sb, SkImageGenerator};
+use std::fmt;
 
 pub type ImageGenerator = RefHandle<SkImageGenerator>;
 unsafe impl Send for ImageGenerator {}

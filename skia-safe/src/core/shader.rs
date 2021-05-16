@@ -1,10 +1,9 @@
-use std::fmt;
-
 use crate::{
     gradient_shader, prelude::*, scalar, Color, ColorFilter, Image, Matrix, NativeFlattenable,
     Point, TileMode,
 };
 use skia_bindings::{self as sb, SkFlattenable, SkRefCntBase, SkShader};
+use std::fmt;
 
 pub use skia_bindings::SkShader_GradientType as GradientTypeInternal;
 #[test]

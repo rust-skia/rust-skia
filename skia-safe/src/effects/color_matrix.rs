@@ -1,8 +1,6 @@
-use std::fmt;
-
 use crate::prelude::*;
-use skia_bindings as sb;
-use skia_bindings::SkColorMatrix;
+use skia_bindings::{self as sb, SkColorMatrix};
+use std::fmt;
 
 pub type ColorMatrix = Handle<SkColorMatrix>;
 unsafe impl Send for ColorMatrix {}

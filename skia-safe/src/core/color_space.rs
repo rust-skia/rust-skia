@@ -1,9 +1,7 @@
-use std::fmt;
-
 use super::Data;
 use crate::prelude::*;
-use skia_bindings as sb;
-use skia_bindings::{SkColorSpace, SkColorSpacePrimaries};
+use skia_bindings::{self as sb, SkColorSpace, SkColorSpacePrimaries};
+use std::fmt;
 
 #[derive(Clone, PartialEq, Debug)]
 #[repr(C)]

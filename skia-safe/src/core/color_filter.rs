@@ -1,7 +1,5 @@
-use crate::prelude::*;
-use crate::{scalar, BlendMode, Color, Color4f, ColorSpace, NativeFlattenable};
-use skia_bindings as sb;
-use skia_bindings::{SkColorFilter, SkFlattenable, SkRefCntBase};
+use crate::{prelude::*, scalar, BlendMode, Color, Color4f, ColorSpace, NativeFlattenable};
+use skia_bindings::{self as sb, SkColorFilter, SkFlattenable, SkRefCntBase};
 use std::fmt;
 
 bitflags! {

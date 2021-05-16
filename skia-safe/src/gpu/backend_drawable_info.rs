@@ -17,8 +17,8 @@ impl NativeDrop for GrBackendDrawableInfo {
 impl fmt::Debug for BackendDrawableInfo {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut d = f.debug_struct("BackendDrawableInfo");
-        d.field("is_valid", &self.is_valid())
-            .field("backend", &self.backend());
+        d.field("is_valid", &self.is_valid());
+        d.field("backend", &self.backend());
         #[cfg(feature = "vulkan")]
         d.field("vk_drawable_info", &self.get_vk_drawable_info());
         d.finish()

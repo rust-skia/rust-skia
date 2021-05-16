@@ -1,11 +1,9 @@
-use crate::prelude::*;
 use crate::{
-    scalar, BlendMode, Color, Color4f, ColorFilter, ColorSpace, FilterQuality, ImageFilter,
-    MaskFilter, Path, PathEffect, Rect, Shader,
+    prelude::*, scalar, BlendMode, Color, Color4f, ColorFilter, ColorSpace, FilterQuality,
+    ImageFilter, MaskFilter, Path, PathEffect, Rect, Shader,
 };
 use core::fmt;
-use skia_bindings as sb;
-use skia_bindings::SkPaint;
+use skia_bindings::{self as sb, SkPaint};
 use std::hash::{Hash, Hasher};
 use std::ptr;
 
@@ -64,8 +62,8 @@ impl Default for Handle<SkPaint> {
 impl fmt::Debug for Paint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Paint")
-            .field("anti_alias", &self.is_anti_alias())
-            .field("dither", &self.is_dither())
+            .field("is_anti_alias", &self.is_anti_alias())
+            .field("is_dither", &self.is_dither())
             .field("filter_quality", &self.filter_quality())
             .field("style", &self.style())
             .field("color", &self.color4f())

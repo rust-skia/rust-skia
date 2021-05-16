@@ -1,6 +1,4 @@
-use crate::interop::DynamicMemoryWStream;
-use crate::prelude::*;
-use crate::{Canvas, Data, Rect, Size};
+use crate::{interop::DynamicMemoryWStream, prelude::*, Canvas, Data, Rect, Size};
 use core::fmt;
 use skia_bindings::{SkDocument, SkRefCntBase};
 use std::{pin::Pin, ptr};
@@ -27,10 +25,9 @@ impl<State: fmt::Debug> fmt::Debug for Document<State> {
 }
 
 pub mod state {
+    use crate::Canvas;
     use skia_bindings::SkCanvas;
     use std::{fmt, ptr};
-
-    use crate::Canvas;
 
     /// Document is currently open. May contain several pages.
     #[derive(Debug)]

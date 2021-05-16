@@ -1,9 +1,6 @@
+use crate::{prelude::*, scalar, BlurStyle, CoverageMode, Matrix, NativeFlattenable};
+use skia_bindings::{self as sb, SkFlattenable, SkMaskFilter, SkRefCntBase};
 use std::fmt;
-
-use crate::prelude::*;
-use crate::{scalar, BlurStyle, CoverageMode, Matrix, NativeFlattenable};
-use skia_bindings as sb;
-use skia_bindings::{SkFlattenable, SkMaskFilter, SkRefCntBase};
 
 pub type MaskFilter = RCHandle<SkMaskFilter>;
 unsafe impl Send for MaskFilter {}

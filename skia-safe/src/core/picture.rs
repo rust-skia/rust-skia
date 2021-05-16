@@ -1,8 +1,6 @@
-use std::fmt;
-
 use crate::{prelude::*, Canvas, Data, FilterMode, Matrix, Rect, Shader, TileMode};
-use skia_bindings as sb;
-use skia_bindings::{SkPicture, SkRefCntBase};
+use skia_bindings::{self as sb, SkPicture, SkRefCntBase};
+use std::fmt;
 
 pub type Picture = RCHandle<SkPicture>;
 unsafe impl Sync for Picture {}

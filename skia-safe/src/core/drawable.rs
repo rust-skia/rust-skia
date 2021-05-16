@@ -1,11 +1,8 @@
-use std::fmt;
-
 #[cfg(feature = "gpu")]
 use crate::gpu;
-use crate::prelude::*;
-use crate::{Canvas, Matrix, NativeFlattenable, Point, Rect};
-use skia_bindings as sb;
-use skia_bindings::{SkDrawable, SkFlattenable, SkRefCntBase};
+use crate::{prelude::*, Canvas, Matrix, NativeFlattenable, Point, Rect};
+use skia_bindings::{self as sb, SkDrawable, SkFlattenable, SkRefCntBase};
+use std::fmt;
 
 pub type Drawable = RCHandle<SkDrawable>;
 
@@ -94,8 +91,7 @@ pub use gpu_draw_handler::*;
 #[cfg(feature = "gpu")]
 pub mod gpu_draw_handler {
     use crate::{gpu, prelude::*};
-    use skia_bindings as sb;
-    use skia_bindings::SkDrawable_GpuDrawHandler;
+    use skia_bindings::{self as sb, SkDrawable_GpuDrawHandler};
     use std::fmt;
 
     pub type GPUDrawHandler = RefHandle<SkDrawable_GpuDrawHandler>;

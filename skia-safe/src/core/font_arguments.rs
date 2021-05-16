@@ -1,6 +1,5 @@
 use crate::prelude::*;
-use skia_bindings as sb;
-use skia_bindings::{SkFontArguments, SkFontArguments_VariationPosition};
+use skia_bindings::{self as sb, SkFontArguments, SkFontArguments_VariationPosition};
 use std::{fmt, marker::PhantomData, mem};
 
 #[derive(Debug)]

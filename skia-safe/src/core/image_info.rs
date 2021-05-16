@@ -1,6 +1,5 @@
 use crate::{prelude::*, ColorSpace, IPoint, IRect, ISize};
-use skia_bindings as sb;
-use skia_bindings::{SkColorInfo, SkColorType, SkImageInfo};
+use skia_bindings::{self as sb, SkColorInfo, SkColorType, SkImageInfo};
 use std::{fmt, mem};
 
 pub use skia_bindings::SkAlphaType as AlphaType;

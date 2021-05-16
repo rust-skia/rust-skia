@@ -4,9 +4,8 @@ use crate::{
     FontStyle, Typeface, Unichar,
 };
 use core::fmt;
-use skia_bindings as sb;
-use skia_bindings::{SkFontMgr, SkFontStyleSet, SkRefCntBase};
-use std::{ffi::CString, iter, mem, os::raw::c_char};
+use skia_bindings::{self as sb, SkFontMgr, SkFontStyleSet, SkRefCntBase};
+use std::{ffi::CString, mem, os::raw::c_char};
 
 pub type FontStyleSet = RCHandle<SkFontStyleSet>;
 
@@ -126,17 +125,7 @@ impl FontMgr {
     }
 
     pub fn family_names(&self) -> impl Iterator<Item = String> + '_ {
-        let mut i = 0;
-        let count = self.count_families();
-        iter::from_fn(move || {
-            if i != count {
-                let name = self.family_name(i);
-                i += 1;
-                Some(name)
-            } else {
-                None
-            }
-        })
+        (0..self.count_families()).map(move |i| self.family_name(i))
     }
 
     pub fn new_styleset(&self, index: usize) -> FontStyleSet {

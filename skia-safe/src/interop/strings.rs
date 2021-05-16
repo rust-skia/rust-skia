@@ -19,7 +19,7 @@ impl NativeDrop for SkStrings {
 
 impl fmt::Debug for Strings {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("Strings").field("len", &self.len()).finish()
+        f.debug_tuple("Strings").field(&self.as_slice()).finish()
     }
 }
 
@@ -42,15 +42,18 @@ impl Handle<SkStrings> {
         }
         count
     }
+
+    pub fn as_slice(&self) -> &[String] {
+        let mut count = 0;
+        let ptr = unsafe { sb::C_SkStrings_ptr_count(self.native(), &mut count) };
+        unsafe { safer::from_raw_parts(ptr as *const String, count) }
+    }
 }
 
 impl Index<usize> for Strings {
     type Output = String;
     fn index(&self, index: usize) -> &Self::Output {
-        let mut count = 0;
-        let ptr = unsafe { sb::C_SkStrings_ptr_count(self.native(), &mut count) };
-        let slice = unsafe { safer::from_raw_parts(ptr as *const String, count) };
-        &slice[index]
+        &self.as_slice()[index]
     }
 }
 

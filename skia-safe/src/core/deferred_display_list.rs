@@ -1,8 +1,6 @@
-use std::fmt;
-
 use crate::prelude::*;
-use skia_bindings as sb;
-use skia_bindings::SkDeferredDisplayList;
+use skia_bindings::{self as sb, SkDeferredDisplayList};
+use std::fmt;
 
 // TODO: complete wrapper
 pub type DeferredDisplayList = RCHandle<SkDeferredDisplayList>;

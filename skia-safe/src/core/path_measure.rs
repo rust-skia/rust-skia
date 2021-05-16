@@ -1,9 +1,6 @@
+use crate::{prelude::*, scalar, Matrix, Path, Point, Vector};
+use skia_bindings::{self as sb, SkPathMeasure};
 use std::fmt;
-
-use crate::prelude::*;
-use crate::{scalar, Matrix, Path, Point, Vector};
-use skia_bindings as sb;
-use skia_bindings::SkPathMeasure;
 
 pub type PathMeasure = Handle<SkPathMeasure>;
 

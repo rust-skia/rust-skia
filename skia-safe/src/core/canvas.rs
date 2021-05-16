@@ -55,7 +55,10 @@ impl fmt::Debug for SaveLayerRec<'_> {
         f.debug_struct("SaveLayerRec")
             .field("bounds", &self.bounds.map(Rect::from_native_ref))
             .field("paint", &self.paint.map(Paint::from_native_ref))
-            // TODO: backdrop
+            .field(
+                "backdrop",
+                &ImageFilter::from_unshared_ptr_ref(&(self.backdrop.as_ptr_or_null() as *mut _)),
+            )
             .field("flags", &self.flags)
             .finish()
     }
@@ -205,9 +208,7 @@ impl Default for OwnedCanvas<'_> {
 
 impl fmt::Debug for OwnedCanvas<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_tuple("OwnedCanvas")
-            .field(&self.deref() as &Canvas)
-            .finish()
+        f.debug_tuple("OwnedCanvas").field(self as &Canvas).finish()
     }
 }
 

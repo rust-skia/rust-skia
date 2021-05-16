@@ -1,8 +1,6 @@
 #![allow(deprecated)]
-use crate::prelude::*;
-use crate::{scalar, Matrix, Scalar, Vector3};
-use skia_bindings as sb;
-use skia_bindings::{SkMatrix44, SkVector4};
+use crate::{prelude::*, scalar, Matrix, Scalar, Vector3};
+use skia_bindings::{self as sb, SkMatrix44, SkVector4};
 use std::{fmt, ops};
 
 #[repr(C)]
@@ -108,7 +106,7 @@ impl fmt::Debug for Matrix44 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Matrix44")
             .field("mat", &self.native().fMat)
-            .field("type_mask", &self.get_type())
+            .field("type", &self.get_type())
             .finish()
     }
 }

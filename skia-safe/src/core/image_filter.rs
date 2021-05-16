@@ -1,8 +1,6 @@
-use crate::prelude::*;
-use crate::{ColorFilter, IRect, Matrix, NativeFlattenable, Rect};
-use skia_bindings as sb;
-use skia_bindings::{SkColorFilter, SkFlattenable, SkImageFilter, SkRefCntBase};
-use std::{fmt, iter, ptr};
+use crate::{prelude::*, ColorFilter, IRect, Matrix, NativeFlattenable, Rect};
+use skia_bindings::{self as sb, SkColorFilter, SkFlattenable, SkImageFilter, SkRefCntBase};
+use std::{fmt, ptr};
 
 pub use skia_bindings::SkImageFilter_MapDirection as MapDirection;
 #[test]
@@ -107,17 +105,7 @@ impl ImageFilter {
     }
 
     pub fn inputs(&self) -> impl Iterator<Item = Option<ImageFilter>> + '_ {
-        let mut i = 0;
-        let count = self.count_inputs();
-        iter::from_fn(move || {
-            if i != count {
-                let input = self.get_input(i);
-                i += 1;
-                Some(input)
-            } else {
-                None
-            }
-        })
+        (0..self.count_inputs()).map(move |i| self.get_input(i))
     }
 
     pub fn compute_fast_bounds(&self, bounds: impl AsRef<Rect>) -> Rect {

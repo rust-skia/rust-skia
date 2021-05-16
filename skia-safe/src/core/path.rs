@@ -1,13 +1,9 @@
-use crate::interop::DynamicMemoryWStream;
-use crate::matrix::ApplyPerspectiveClip;
-use crate::prelude::*;
 use crate::{
-    path_types, scalar, Data, Matrix, PathDirection, PathFillType, Point, RRect, Rect, Vector,
+    interop::DynamicMemoryWStream, matrix::ApplyPerspectiveClip, path_types, prelude::*, scalar,
+    Data, Matrix, PathDirection, PathFillType, Point, RRect, Rect, Vector,
 };
-use skia_bindings as sb;
-use skia_bindings::{SkPath, SkPath_Iter, SkPath_RawIter};
-use std::{fmt, mem::forget};
-use std::{marker::PhantomData, ptr};
+use skia_bindings::{self as sb, SkPath, SkPath_Iter, SkPath_RawIter};
+use std::{fmt, marker::PhantomData, mem::forget, ptr};
 
 #[deprecated(since = "0.25.0", note = "use PathDirection")]
 pub use path_types::PathDirection as Direction;
