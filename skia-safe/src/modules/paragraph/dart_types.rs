@@ -21,8 +21,8 @@ fn test_reexported_enum_name_conversion() {
 
 pub use sb::skia_textlayout_PositionWithAffinity as PositionWithAffinity;
 
-#[derive(Copy, Clone, PartialEq, Debug)]
 #[repr(C)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct TextBox {
     pub rect: Rect,
     pub direct: TextDirection,

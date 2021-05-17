@@ -49,6 +49,7 @@ fn style_type_member_naming() {
     let _ = StyleType::LetterSpacing;
 }
 
+#[repr(C)]
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct Decoration {
     pub ty: TextDecoration,
@@ -114,6 +115,7 @@ impl FontFeature {
     }
 }
 
+#[repr(C)]
 #[derive(Clone, Default, Debug)]
 pub struct PlaceholderStyle {
     pub width: scalar,
@@ -433,6 +435,7 @@ pub type TextIndex = usize;
 pub type TextRange = Range<usize>;
 pub const EMPTY_TEXT: TextRange = EMPTY_RANGE;
 
+#[repr(C)]
 #[derive(Clone, PartialEq, Debug)]
 pub struct Block {
     pub range: TextRange,
@@ -475,6 +478,7 @@ pub type BlockRange = Range<usize>;
 pub const EMPTY_BLOCK: usize = EMPTY_INDEX;
 pub const EMPTY_BLOCKS: Range<usize> = EMPTY_RANGE;
 
+#[repr(C)]
 #[derive(Clone, PartialEq, Debug)]
 pub struct Placeholder {
     pub range: TextRange,

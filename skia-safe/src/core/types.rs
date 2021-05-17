@@ -86,6 +86,7 @@ pub type Unichar = skia_bindings::SkUnichar;
 // pub(crate) type MSec = skia_bindings::SkMSec;
 // pub(crate) const MSEC_MAX: u32 = std::i32::MAX as u32;
 
+#[repr(C)]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct Budgeted(bool);
 
