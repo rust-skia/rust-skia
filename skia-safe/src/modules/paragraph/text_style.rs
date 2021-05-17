@@ -116,7 +116,7 @@ impl FontFeature {
 }
 
 #[repr(C)]
-#[derive(Clone, Default, Default)]
+#[derive(Clone, Default, Debug)]
 pub struct PlaceholderStyle {
     pub width: scalar,
     pub height: scalar,
