@@ -141,13 +141,8 @@ fn test_canvas_point_mode_naming() {
 }
 
 /// [`SrcRectConstraint`] controls the behavior at the edge of source [`Rect`], provided to
-/// [`Canvas::draw_image_rect()`], trading off speed for precision.
-///
-/// [`crate::FilterQuality`] in [`Paint`] may sample multiple pixels in the image. Source [`Rect`]
-/// restricts the bounds of pixels that may be read. [`crate::FilterQuality`] may slow down if it
-/// cannot read outside the bounds, when sampling near the edge of source [`Rect`].
-/// [`SrcRectConstraint`] specifies whether an [`ImageFilter`] is allowed to read pixels outside
-/// source [`Rect`].
+/// [`Canvas::draw_image_rect()`] when there is any filtering. If kStrict is set, then extra code is
+/// used to ensure it nevers samples outside of the src-rect.
 pub use sb::SkCanvas_SrcRectConstraint as SrcRectConstraint;
 
 #[test]
