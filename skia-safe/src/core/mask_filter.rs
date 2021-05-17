@@ -1,7 +1,6 @@
-use crate::prelude::*;
-use crate::{scalar, BlurStyle, CoverageMode, Matrix, NativeFlattenable};
-use skia_bindings as sb;
-use skia_bindings::{SkFlattenable, SkMaskFilter, SkRefCntBase};
+use crate::{prelude::*, scalar, BlurStyle, CoverageMode, Matrix, NativeFlattenable};
+use skia_bindings::{self as sb, SkFlattenable, SkMaskFilter, SkRefCntBase};
+use std::fmt;
 
 pub type MaskFilter = RCHandle<SkMaskFilter>;
 unsafe impl Send for MaskFilter {}
@@ -24,7 +23,13 @@ impl NativeFlattenable for SkMaskFilter {
     }
 }
 
-impl RCHandle<SkMaskFilter> {
+impl fmt::Debug for MaskFilter {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("MaskFilter").finish()
+    }
+}
+
+impl MaskFilter {
     pub fn blur(
         style: BlurStyle,
         sigma: scalar,

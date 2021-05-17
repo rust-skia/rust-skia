@@ -1,13 +1,12 @@
 use crate::prelude::*;
-use skia_bindings as sb;
-use skia_bindings::{SkFontStyle, SkFontStyle_Weight, SkFontStyle_Width};
-use std::ops::Deref;
+use skia_bindings::{self as sb, SkFontStyle, SkFontStyle_Weight, SkFontStyle_Width};
+use std::{fmt, ops::Deref};
 
 /// Wrapper type of a font weight.
 ///
 /// Use Weight::from() to create a weight from an i32.
 /// Use *weight to pull out the wrapped value of the Weight.
-#[derive(Copy, Clone, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
 #[repr(transparent)]
 pub struct Weight(i32);
 
@@ -50,7 +49,7 @@ impl Weight {
 ///
 /// To create a width of a font from an i32, use Width::from().
 /// To access the underlying value of the font weight, dereference *weight.
-#[derive(Copy, Clone, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
 #[repr(transparent)]
 pub struct Width(i32);
 
@@ -113,6 +112,16 @@ impl PartialEq for FontStyle {
 impl Default for FontStyle {
     fn default() -> Self {
         FontStyle::construct(|fs| unsafe { sb::C_SkFontStyle_Construct(fs) })
+    }
+}
+
+impl fmt::Debug for FontStyle {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("FontStyle")
+            .field("weight", &self.weight())
+            .field("width", &self.width())
+            .field("slant", &self.slant())
+            .finish()
     }
 }
 

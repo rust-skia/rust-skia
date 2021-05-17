@@ -1,11 +1,10 @@
-use crate::prelude::*;
-use crate::{scalar, Font, GlyphId, Paint, Point, RSXform, Rect, TextEncoding, Typeface};
-use skia_bindings as sb;
-use skia_bindings::{
-    SkTextBlob, SkTextBlobBuilder, SkTextBlob_Iter, SkTextBlob_Iter_Run, SkTypeface,
+use crate::{
+    prelude::*, scalar, Font, GlyphId, Paint, Point, RSXform, Rect, TextEncoding, Typeface,
 };
-use std::convert::TryInto;
-use std::{ptr, slice};
+use skia_bindings::{
+    self as sb, SkTextBlob, SkTextBlobBuilder, SkTextBlob_Iter, SkTextBlob_Iter_Run, SkTypeface,
+};
+use std::{convert::TryInto, fmt, ptr, slice};
 
 pub type TextBlob = RCHandle<SkTextBlob>;
 unsafe impl Send for TextBlob {}
@@ -25,7 +24,16 @@ impl NativeRefCounted for SkTextBlob {
     }
 }
 
-impl RCHandle<SkTextBlob> {
+impl fmt::Debug for TextBlob {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("TextBlob")
+            .field("bounds", &self.bounds())
+            .field("unique_id", &self.unique_id())
+            .finish()
+    }
+}
+
+impl TextBlob {
     pub fn new(str: impl AsRef<str>, font: &Font) -> Option<Self> {
         Self::from_str(str, font)
     }
@@ -74,19 +82,19 @@ impl RCHandle<SkTextBlob> {
 
     pub fn from_pos_text_h(
         text: &[u8],
-        xpos: &[scalar],
+        x_pos: &[scalar],
         const_y: scalar,
         font: &Font,
         encoding: impl Into<Option<TextEncoding>>,
     ) -> Option<TextBlob> {
         let encoding = encoding.into().unwrap_or_default();
         // TODO: avoid that verification somehow.
-        assert_eq!(xpos.len(), font.count_text(text, encoding));
+        assert_eq!(x_pos.len(), font.count_text(text, encoding));
         TextBlob::from_ptr(unsafe {
             sb::C_SkTextBlob_MakeFromPosTextH(
                 text.as_ptr() as _,
                 text.len(),
-                xpos.as_ptr(),
+                x_pos.as_ptr(),
                 const_y,
                 font.native(),
                 encoding.into_native(),
@@ -142,6 +150,12 @@ unsafe impl Sync for TextBlobBuilder {}
 impl NativeDrop for SkTextBlobBuilder {
     fn drop(&mut self) {
         unsafe { sb::C_SkTextBlobBuilder_destruct(self) }
+    }
+}
+
+impl fmt::Debug for TextBlobBuilder {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("TextBlobBuilder").finish()
     }
 }
 
@@ -238,6 +252,15 @@ pub type TextBlobIter<'a> = Borrows<'a, Handle<SkTextBlob_Iter>>;
 pub struct TextBlobRun<'a> {
     typeface: *mut SkTypeface,
     pub glyph_indices: &'a [u16],
+}
+
+impl fmt::Debug for TextBlobRun<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("TextBlobRun")
+            .field("typeface", self.typeface())
+            .field("glyph_indices", &self.glyph_indices)
+            .finish()
+    }
 }
 
 impl TextBlobRun<'_> {

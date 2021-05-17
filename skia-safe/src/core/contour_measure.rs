@@ -1,7 +1,6 @@
-use crate::prelude::*;
-use crate::{scalar, Matrix, Path, Point, Vector};
-use skia_bindings as sb;
-use skia_bindings::{SkContourMeasure, SkContourMeasureIter, SkRefCntBase};
+use crate::{prelude::*, scalar, Matrix, Path, Point, Vector};
+use skia_bindings::{self as sb, SkContourMeasure, SkContourMeasureIter, SkRefCntBase};
+use std::fmt;
 
 pub type ContourMeasure = RCHandle<SkContourMeasure>;
 unsafe impl Send for ContourMeasure {}
@@ -25,7 +24,16 @@ impl Default for MatrixFlags {
     }
 }
 
-impl RCHandle<SkContourMeasure> {
+impl fmt::Debug for ContourMeasure {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ContourMeasure")
+            .field("length", &self.length())
+            .field("is_closed", &self.is_closed())
+            .finish()
+    }
+}
+
+impl ContourMeasure {
     pub fn length(&self) -> scalar {
         unsafe { sb::C_SkContourMeasure_length(self.native()) }
     }
@@ -91,7 +99,7 @@ impl NativeDrop for SkContourMeasureIter {
     }
 }
 
-impl Iterator for Handle<SkContourMeasureIter> {
+impl Iterator for ContourMeasureIter {
     type Item = ContourMeasure;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -99,7 +107,13 @@ impl Iterator for Handle<SkContourMeasureIter> {
     }
 }
 
-impl Handle<SkContourMeasureIter> {
+impl fmt::Debug for ContourMeasureIter {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ContourMeasureIter").finish()
+    }
+}
+
+impl ContourMeasureIter {
     // Canonical new:
     pub fn new(path: &Path, force_closed: bool, res_scale: impl Into<Option<scalar>>) -> Self {
         Self::from_path(path, force_closed, res_scale)

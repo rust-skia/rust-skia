@@ -4,7 +4,7 @@ use skia_bindings::{SkDataTable, SkRefCntBase};
 use std::{
     convert::TryInto,
     ffi::{c_void, CStr},
-    mem,
+    fmt, mem,
     ops::Index,
 };
 
@@ -24,7 +24,15 @@ impl Index<usize> for DataTable {
     }
 }
 
-impl RCHandle<SkDataTable> {
+impl fmt::Debug for DataTable {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("DataTable")
+            .field("count", &self.count())
+            .finish()
+    }
+}
+
+impl DataTable {
     pub fn is_empty(&self) -> bool {
         self.count() == 0
     }
@@ -89,9 +97,7 @@ impl RCHandle<SkDataTable> {
     }
 
     // TODO: wrap MakeArrayProc()
-}
 
-impl RCHandle<SkDataTable> {
     pub fn iter(&self) -> Iter {
         Iter {
             table: self,
@@ -101,6 +107,7 @@ impl RCHandle<SkDataTable> {
     }
 }
 
+#[derive(Debug)]
 pub struct Iter<'a> {
     table: &'a DataTable,
     count: usize,

@@ -1,7 +1,7 @@
 use super::{ID3D12Resource, D3D12_RESOURCE_STATES, DXGI_FORMAT};
-use crate::gpu;
-use crate::prelude::*;
+use crate::{gpu, prelude::*};
 use skia_bindings::{GrD3DAlloc, GrD3DMemoryAllocator, GrD3DTextureResourceInfo, SkRefCntBase};
+use std::fmt;
 use winapi::{
     shared::dxgiformat,
     shared::dxgitype,
@@ -39,6 +39,12 @@ impl NativeRefCountedBase for GrD3DAlloc {
     type Base = SkRefCntBase;
 }
 
+impl fmt::Debug for Alloc {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Alloc").finish()
+    }
+}
+
 // TODO: support the implementation of custom D3D memory allocator's
 // virtual createResource() function.
 pub type MemoryAllocator = RCHandle<GrD3DMemoryAllocator>;
@@ -49,8 +55,14 @@ impl NativeRefCountedBase for GrD3DMemoryAllocator {
     type Base = SkRefCntBase;
 }
 
+impl fmt::Debug for MemoryAllocator {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("MemoryAllocator").finish()
+    }
+}
+
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TextureResourceInfo {
     pub resource: cp<ID3D12Resource>,
     pub alloc: Option<Alloc>,
@@ -99,7 +111,7 @@ fn test_texture_resource_info_layout() {
 }
 
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct FenceInfo {
     pub fence: cp<d3d12::ID3D12Fence>,
     pub value: u64,

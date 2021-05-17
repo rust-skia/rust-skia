@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use skia_bindings as sb;
-use skia_bindings::{SkPixelGeometry, SkSurfaceProps};
+use skia_bindings::{self as sb, SkPixelGeometry, SkSurfaceProps};
+use std::fmt;
 
 // TODO: use the enum rewriter and strip underscores?
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -82,6 +82,15 @@ impl Eq for SurfaceProps {}
 impl Default for SurfaceProps {
     fn default() -> Self {
         SurfaceProps::new(Default::default(), Default::default())
+    }
+}
+
+impl fmt::Debug for SurfaceProps {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("SurfaceProps")
+            .field("flags", &self.flags())
+            .field("pixel_geometry", &self.pixel_geometry())
+            .finish()
     }
 }
 

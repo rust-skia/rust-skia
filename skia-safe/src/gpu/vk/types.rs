@@ -1,13 +1,12 @@
-use crate::gpu::vk;
-use crate::gpu::Protected;
-use crate::prelude::*;
-use skia_bindings as sb;
-use skia_bindings::{
-    GrVkAlloc, GrVkBackendMemory, GrVkDrawableInfo, GrVkImageInfo, GrVkYcbcrConversionInfo,
+use crate::{
+    gpu::{vk, Protected},
+    prelude::*,
 };
-use std::ffi::CStr;
-use std::os::raw;
-use std::ptr;
+use skia_bindings::{
+    self as sb, GrVkAlloc, GrVkBackendMemory, GrVkDrawableInfo, GrVkImageInfo,
+    GrVkYcbcrConversionInfo,
+};
+use std::{ffi::CStr, os::raw, ptr};
 
 pub type GraphicsBackendMemory = GrVkBackendMemory;
 

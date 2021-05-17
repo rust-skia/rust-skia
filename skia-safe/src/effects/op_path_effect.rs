@@ -1,10 +1,8 @@
 pub mod merge_path_effect {
-    use crate::prelude::*;
-    use crate::{PathEffect, PathOp};
+    use crate::{prelude::*, PathEffect, PathOp};
     use skia_bindings as sb;
-    use skia_bindings::SkPathEffect;
 
-    impl RCHandle<SkPathEffect> {
+    impl PathEffect {
         pub fn merge(
             one: impl Into<PathEffect>,
             two: impl Into<PathEffect>,
@@ -23,12 +21,10 @@ pub mod merge_path_effect {
 }
 
 pub mod matrix_path_effect {
-    use crate::prelude::*;
-    use crate::{Matrix, PathEffect, Vector};
+    use crate::{prelude::*, Matrix, PathEffect, Vector};
     use skia_bindings as sb;
-    use skia_bindings::SkPathEffect;
 
-    impl RCHandle<SkPathEffect> {
+    impl PathEffect {
         pub fn matrix_translate(d: impl Into<Vector>) -> Option<PathEffect> {
             new_translate(d)
         }
@@ -49,12 +45,10 @@ pub mod matrix_path_effect {
 }
 
 pub mod stroke_path_effect {
-    use crate::prelude::*;
     use crate::{paint, scalar, PathEffect};
     use skia_bindings as sb;
-    use skia_bindings::SkPathEffect;
 
-    impl RCHandle<SkPathEffect> {
+    impl PathEffect {
         pub fn stroke(
             width: scalar,
             join: paint::Join,

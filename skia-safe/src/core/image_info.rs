@@ -1,9 +1,6 @@
-use std::mem;
-
-use crate::prelude::*;
-use crate::{ColorSpace, IPoint, IRect, ISize};
-use skia_bindings as sb;
-use skia_bindings::{SkColorInfo, SkColorType, SkImageInfo};
+use crate::{prelude::*, ColorSpace, IPoint, IRect, ISize};
+use skia_bindings::{self as sb, SkColorInfo, SkColorType, SkImageInfo};
+use std::{fmt, mem};
 
 pub use skia_bindings::SkAlphaType as AlphaType;
 #[test]
@@ -11,7 +8,7 @@ fn test_alpha_type_layout() {
     let _ = AlphaType::Premul;
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 #[repr(i32)]
 pub enum ColorType {
     Unknown = SkColorType::kUnknown_SkColorType as _,
@@ -109,13 +106,27 @@ impl NativePartialEq for SkColorInfo {
     }
 }
 
-impl Default for Handle<SkColorInfo> {
+impl Default for ColorInfo {
     fn default() -> Self {
         Self::construct(|color_info| unsafe { sb::C_SkColorInfo_Construct(color_info) })
     }
 }
 
-impl Handle<SkColorInfo> {
+impl fmt::Debug for ColorInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ColorInfo")
+            .field("color_space", &self.color_space())
+            .field("color_type", &self.color_type())
+            .field("alpha_type", &self.alpha_type())
+            .field("is_opaque", &self.is_opaque())
+            .field("is_gamma_close_to_srgb", &self.is_gamma_close_to_srgb())
+            .field("bytes_per_pixel", &self.bytes_per_pixel())
+            .field("shift_per_pixel", &self.shift_per_pixel())
+            .finish()
+    }
+}
+
+impl ColorInfo {
     pub fn new(ct: ColorType, at: AlphaType, cs: impl Into<Option<ColorSpace>>) -> Self {
         Self::construct(|color_info| unsafe {
             sb::C_SkColorInfo_Construct2(
@@ -201,7 +212,16 @@ impl Default for Handle<SkImageInfo> {
     }
 }
 
-impl Handle<SkImageInfo> {
+impl fmt::Debug for ImageInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ImageInfo")
+            .field("color_info", self.color_info())
+            .field("dimensions", &self.dimensions())
+            .finish()
+    }
+}
+
+impl ImageInfo {
     pub fn new(
         dimensions: impl Into<ISize>,
         ct: ColorType,

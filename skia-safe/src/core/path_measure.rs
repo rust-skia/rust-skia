@@ -1,7 +1,6 @@
-use crate::prelude::*;
-use crate::{scalar, Matrix, Path, Point, Vector};
-use skia_bindings as sb;
-use skia_bindings::SkPathMeasure;
+use crate::{prelude::*, scalar, Matrix, Path, Point, Vector};
+use skia_bindings::{self as sb, SkPathMeasure};
+use std::fmt;
 
 pub type PathMeasure = Handle<SkPathMeasure>;
 
@@ -25,14 +24,24 @@ impl Default for MatrixFlags {
     }
 }
 
-impl Default for Handle<SkPathMeasure> {
+impl Default for PathMeasure {
     fn default() -> Self {
         Self::from_native_c(unsafe { SkPathMeasure::new() })
     }
 }
 
-impl Handle<SkPathMeasure> {
-    // Canonical new:
+impl fmt::Debug for PathMeasure {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("PathMeasure")
+            // TODO: self must be mut
+            // .field("length", &self.length())
+            // .field("is_closed", &self.is_closed())
+            // .field("next_contour", &self.next_contour())
+            .finish()
+    }
+}
+
+impl PathMeasure {
     pub fn new(path: &Path, force_closed: bool, res_scale: impl Into<Option<scalar>>) -> Self {
         Self::from_path(path, force_closed, res_scale)
     }

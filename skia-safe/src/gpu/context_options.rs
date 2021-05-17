@@ -1,13 +1,12 @@
-use crate::gpu::DriverBugWorkarounds;
-use crate::prelude::*;
-use skia_bindings as sb;
-use skia_bindings::GrContextOptions;
+use crate::{gpu::DriverBugWorkarounds, prelude::*};
+use skia_bindings::{self as sb, GrContextOptions};
 use std::os::raw;
 
 pub use skia_bindings::GrContextOptions_Enable as Enable;
 pub use skia_bindings::GrContextOptions_ShaderCacheStrategy as ShaderCacheStrategy;
 
 #[repr(C)]
+#[derive(Debug)]
 pub struct ContextOptions {
     pub suppress_prints: bool,
     pub skip_gl_error_checks: Enable,

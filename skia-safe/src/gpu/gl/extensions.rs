@@ -1,7 +1,6 @@
 use crate::prelude::*;
-use skia_bindings as sb;
-use skia_bindings::GrGLExtensions;
-use std::ffi::CString;
+use skia_bindings::{self as sb, GrGLExtensions};
+use std::{ffi::CString, fmt};
 
 pub type Extensions = Handle<GrGLExtensions>;
 unsafe impl Send for Extensions {}
@@ -19,7 +18,15 @@ impl NativeClone for GrGLExtensions {
     }
 }
 
-impl Handle<GrGLExtensions> {
+impl fmt::Debug for Extensions {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Extensions")
+            .field("is_initialized", &self.is_initialized())
+            .finish()
+    }
+}
+
+impl Extensions {
     // TODO: support new() / init?
 
     pub fn is_initialized(&self) -> bool {

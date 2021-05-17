@@ -1,11 +1,9 @@
-use crate::prelude::*;
-use crate::{Contains, IPoint, IRect, IVector, Path, QuickReject};
-use skia_bindings as sb;
+use crate::{prelude::*, Contains, IPoint, IRect, IVector, Path, QuickReject};
 use skia_bindings::{
-    SkRegion, SkRegion_Cliperator, SkRegion_Iterator, SkRegion_RunHead, SkRegion_Spanerator,
+    self as sb, SkRegion, SkRegion_Cliperator, SkRegion_Iterator, SkRegion_RunHead,
+    SkRegion_Spanerator,
 };
-use std::marker::PhantomData;
-use std::{iter, mem, ptr};
+use std::{fmt, iter, marker::PhantomData, mem, ptr};
 
 pub type Region = Handle<SkRegion>;
 unsafe impl Send for Region {}
@@ -29,13 +27,24 @@ impl NativePartialEq for SkRegion {
     }
 }
 
+impl fmt::Debug for Region {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Region")
+            .field("is_empty", &self.is_empty())
+            .field("is_rect", &self.is_rect())
+            .field("is_complex", &self.is_complex())
+            .field("bounds", &self.bounds())
+            .finish()
+    }
+}
+
 pub use skia_bindings::SkRegion_Op as RegionOp;
 #[test]
 fn test_region_op_naming() {
     let _ = RegionOp::ReverseDifference;
 }
 
-impl Handle<SkRegion> {
+impl Region {
     pub fn new() -> Region {
         Self::from_native_c(unsafe { SkRegion::new() })
     }
@@ -323,10 +332,19 @@ impl QuickReject<Region> for Region {
 #[repr(transparent)]
 pub struct Iterator<'a>(SkRegion_Iterator, PhantomData<&'a Region>);
 
-impl<'a> NativeTransmutable<SkRegion_Iterator> for Iterator<'a> {}
+impl NativeTransmutable<SkRegion_Iterator> for Iterator<'_> {}
 #[test]
 fn test_iterator_layout() {
     Iterator::test_layout();
+}
+
+impl fmt::Debug for Iterator<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Iterator")
+            .field("is_done", &self.is_done())
+            .field("rect", self.rect())
+            .finish()
+    }
 }
 
 impl<'a> Iterator<'a> {
@@ -375,7 +393,7 @@ impl<'a> Iterator<'a> {
     }
 }
 
-impl<'a> iter::Iterator for Iterator<'a> {
+impl iter::Iterator for Iterator<'_> {
     type Item = IRect;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -410,9 +428,18 @@ fn test_cliperator_layout() {
     Cliperator::test_layout();
 }
 
-impl<'a> Drop for Cliperator<'a> {
+impl Drop for Cliperator<'_> {
     fn drop(&mut self) {
         unsafe { sb::C_SkRegion_Cliperator_destruct(self.native_mut()) }
+    }
+}
+
+impl fmt::Debug for Cliperator<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Cliperator")
+            .field("is_done", &self.is_done())
+            .field("rect", &self.rect())
+            .finish()
     }
 }
 
@@ -452,15 +479,21 @@ impl<'a> iter::Iterator for Cliperator<'a> {
 #[repr(transparent)]
 pub struct Spanerator<'a>(SkRegion_Spanerator, PhantomData<&'a Region>);
 
-impl<'a> NativeTransmutable<SkRegion_Spanerator> for Spanerator<'a> {}
+impl NativeTransmutable<SkRegion_Spanerator> for Spanerator<'_> {}
 #[test]
 fn test_spanerator_layout() {
     Spanerator::test_layout();
 }
 
-impl<'a> Drop for Spanerator<'a> {
+impl Drop for Spanerator<'_> {
     fn drop(&mut self) {
         unsafe { sb::C_SkRegion_Spanerator_destruct(self.native_mut()) }
+    }
+}
+
+impl fmt::Debug for Spanerator<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Spanerator").finish()
     }
 }
 

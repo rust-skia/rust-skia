@@ -1,7 +1,7 @@
 use super::Handle;
 use crate::prelude::{self, NativeDrop};
-use skia_bindings as sb;
-use skia_bindings::GrMtlBackendContext;
+use skia_bindings::{self as sb, GrMtlBackendContext};
+use std::fmt;
 
 pub type BackendContext = prelude::Handle<GrMtlBackendContext>;
 unsafe impl Send for BackendContext {}
@@ -10,6 +10,12 @@ unsafe impl Sync for BackendContext {}
 impl NativeDrop for GrMtlBackendContext {
     fn drop(&mut self) {
         unsafe { sb::C_GrMtlBackendContext_Destruct(self) }
+    }
+}
+
+impl fmt::Debug for BackendContext {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("BackendContext").finish()
     }
 }
 

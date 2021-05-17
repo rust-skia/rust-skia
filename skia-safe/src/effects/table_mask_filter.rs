@@ -1,7 +1,5 @@
-use crate::prelude::*;
-use crate::{scalar, MaskFilter};
-use skia_bindings as sb;
-use skia_bindings::SkMaskFilter;
+use crate::{prelude::*, scalar, MaskFilter};
+use skia_bindings::{self as sb, SkMaskFilter};
 
 pub fn new_gamma_table(gamma: scalar) -> [u8; 256] {
     construct(|t| unsafe { sb::SkTableMaskFilter_MakeGammaTable(t as *mut u8, gamma) })
@@ -11,7 +9,7 @@ pub fn new_clip_table(min: u8, max: u8) -> [u8; 256] {
     construct(|t| unsafe { sb::SkTableMaskFilter_MakeClipTable(t as *mut u8, min, max) })
 }
 
-impl RCHandle<SkMaskFilter> {
+impl MaskFilter {
     pub fn table(table: &[u8; 256]) -> MaskFilter {
         new(table)
     }

@@ -1,14 +1,9 @@
 use super::{Device, GetProc, GetProcOf, Instance, PhysicalDevice, Queue, Version};
-use crate::gpu;
-use crate::prelude::*;
+use crate::{gpu, prelude::*};
 use ffi::CString;
 use raw::c_char;
-use skia_bindings as sb;
-use skia_bindings::{GrVkExtensionFlags, GrVkFeatureFlags};
-use std::cell::RefCell;
-use std::ops::Deref;
-use std::os::raw;
-use std::{ffi, mem, ptr};
+use skia_bindings::{self as sb, GrVkExtensionFlags, GrVkFeatureFlags};
+use std::{cell::RefCell, ffi, fmt, mem, ops::Deref, os::raw, ptr};
 
 bitflags! {
     pub struct ExtensionFlags : u32 {
@@ -52,6 +47,14 @@ pub struct BackendContext<'a> {
 impl<'a> Drop for BackendContext<'a> {
     fn drop(&mut self) {
         unsafe { sb::C_GrVkBackendContext_Delete(self.native.as_ptr()) }
+    }
+}
+
+impl fmt::Debug for BackendContext<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("BackendContext")
+            .field("native", &self.native)
+            .finish()
     }
 }
 

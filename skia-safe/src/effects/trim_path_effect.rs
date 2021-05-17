@@ -1,7 +1,5 @@
-use crate::prelude::*;
 use crate::{scalar, PathEffect};
 use skia_bindings as sb;
-use skia_bindings::SkPathEffect;
 
 pub use skia_bindings::SkTrimPathEffect_Mode as Mode;
 #[test]
@@ -9,7 +7,7 @@ fn test_mode_naming() {
     let _ = Mode::Inverted;
 }
 
-impl RCHandle<SkPathEffect> {
+impl PathEffect {
     pub fn trim(
         start_t: scalar,
         stop_t: scalar,

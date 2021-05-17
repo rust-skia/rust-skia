@@ -1,10 +1,12 @@
-use crate::interop::{MemoryStream, NativeStreamBase, StreamAsset};
-use crate::prelude::*;
-use crate::{font_arguments, interop, FontArguments};
-use crate::{font_parameters::VariationAxis, Data, FontStyle, GlyphId, Rect, Unichar};
-use skia_bindings as sb;
-use skia_bindings::{SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings};
-use std::{ffi, ptr};
+use crate::{
+    font_arguments,
+    font_parameters::VariationAxis,
+    interop::{self, MemoryStream, NativeStreamBase, StreamAsset},
+    prelude::*,
+    Data, FontArguments, FontStyle, GlyphId, Rect, Unichar,
+};
+use skia_bindings::{self as sb, SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings};
+use std::{ffi, fmt, ptr};
 
 pub type FontId = skia_bindings::SkFontID;
 pub type FontTableTag = skia_bindings::SkFontTableTag;
@@ -29,13 +31,25 @@ impl NativeRefCountedBase for SkTypeface {
     type Base = SkRefCntBase;
 }
 
-impl Default for RCHandle<SkTypeface> {
+impl Default for Typeface {
     fn default() -> Self {
         Typeface::from_ptr(unsafe { sb::C_SkTypeface_MakeDefault() }).unwrap()
     }
 }
 
-impl RCHandle<SkTypeface> {
+impl fmt::Debug for Typeface {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Typeface")
+            .field("font_style", &self.font_style())
+            .field("is_fixed_pitch", &self.is_fixed_pitch())
+            .field("unique_id", &self.unique_id())
+            .field("family_name", &self.family_name())
+            .field("bounds", &self.bounds())
+            .finish()
+    }
+}
+
+impl Typeface {
     // Canonical new:
     pub fn new(family_name: impl AsRef<str>, font_style: FontStyle) -> Option<Self> {
         Self::from_name(family_name, font_style)
@@ -93,7 +107,7 @@ impl RCHandle<SkTypeface> {
         }
     }
 
-    pub fn unique_id(self) -> FontId {
+    pub fn unique_id(&self) -> FontId {
         self.native().fUniqueID
     }
 
@@ -265,7 +279,13 @@ impl NativeDrop for SkTypeface_LocalizedStrings {
     }
 }
 
-impl Iterator for RefHandle<SkTypeface_LocalizedStrings> {
+impl fmt::Debug for LocalizedStringsIter {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("LocalizedStringsIter").finish()
+    }
+}
+
+impl Iterator for LocalizedStringsIter {
     type Item = LocalizedString;
 
     fn next(&mut self) -> Option<Self::Item> {

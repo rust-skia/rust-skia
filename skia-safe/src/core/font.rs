@@ -5,7 +5,7 @@ use crate::{
 };
 use skia_bindings as sb;
 use skia_bindings::{SkFont, SkFont_PrivFlags};
-use std::ptr;
+use std::{fmt, ptr};
 
 pub use skia_bindings::SkFont_Edging as Edging;
 #[test]
@@ -35,7 +35,28 @@ impl Default for Font {
     }
 }
 
-impl Handle<SkFont> {
+impl fmt::Debug for Font {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Font")
+            .field("is_force_auto_hinting", &self.is_force_auto_hinting())
+            .field("is_embedded_bitmaps", &self.is_embedded_bitmaps())
+            .field("is_subpixel", &self.is_subpixel())
+            .field("is_linear_metrics", &self.is_linear_metrics())
+            .field("is_embolden", &self.is_embolden())
+            .field("is_baseline_snap", &self.is_baseline_snap())
+            .field("edging", &self.edging())
+            .field("hinting", &self.hinting())
+            .field("typeface", &self.typeface())
+            .field("size", &self.size())
+            .field("scale_x", &self.scale_x())
+            .field("skew_x", &self.skew_x())
+            .field("metrics", &self.metrics())
+            .field("spacing", &self.spacing())
+            .finish()
+    }
+}
+
+impl Font {
     pub fn new(typeface: impl Into<Typeface>, size: impl Into<Option<scalar>>) -> Self {
         Self::from_typeface(typeface, size)
     }
@@ -355,16 +376,16 @@ impl Handle<SkFont> {
         }
     }
 
-    pub fn get_x_pos(&self, glyphs: &[GlyphId], xpos: &mut [scalar], origin: Option<scalar>) {
+    pub fn get_x_pos(&self, glyphs: &[GlyphId], x_pos: &mut [scalar], origin: Option<scalar>) {
         let count = glyphs.len();
-        assert_eq!(count, xpos.len());
+        assert_eq!(count, x_pos.len());
         let origin = origin.unwrap_or_default();
 
         unsafe {
             self.native().getXPos(
                 glyphs.as_ptr(),
                 count.try_into().unwrap(),
-                xpos.as_mut_ptr(),
+                x_pos.as_mut_ptr(),
                 origin,
             )
         }

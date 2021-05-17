@@ -3,6 +3,7 @@ use skia_bindings as sb;
 use skia_bindings::SkData;
 use std::{
     ffi::{CStr, CString},
+    fmt,
     ops::Deref,
 };
 
@@ -24,14 +25,14 @@ impl NativeRefCounted for SkData {
     }
 }
 
-impl Deref for RCHandle<SkData> {
+impl Deref for Data {
     type Target = [u8];
     fn deref(&self) -> &Self::Target {
         self.as_bytes()
     }
 }
 
-impl PartialEq for RCHandle<SkData> {
+impl PartialEq for Data {
     // Although there is an implementation in SkData for equality testing, we
     // prefer to stay on the Rust side for that.
     fn eq(&self, other: &Self) -> bool {
@@ -39,7 +40,13 @@ impl PartialEq for RCHandle<SkData> {
     }
 }
 
-impl RCHandle<SkData> {
+impl fmt::Debug for Data {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Data").field("size", &self.size()).finish()
+    }
+}
+
+impl Data {
     pub fn size(&self) -> usize {
         self.native().fSize
     }

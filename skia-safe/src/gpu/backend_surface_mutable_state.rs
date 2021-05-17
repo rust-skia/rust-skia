@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use skia_bindings as sb;
-use skia_bindings::GrBackendSurfaceMutableState;
+use skia_bindings::{self as sb, GrBackendSurfaceMutableState};
+use std::fmt;
 
 pub type BackendSurfaceMutableState = Handle<GrBackendSurfaceMutableState>;
 unsafe impl Send for BackendSurfaceMutableState {}
@@ -17,6 +17,12 @@ impl Default for BackendSurfaceMutableState {
         BackendSurfaceMutableState::construct(|s| unsafe {
             sb::C_GrBackendSurfaceMutableState_Construct(s)
         })
+    }
+}
+
+impl fmt::Debug for BackendSurfaceMutableState {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("BackendSurfaceMutableState").finish()
     }
 }
 

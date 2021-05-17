@@ -45,6 +45,7 @@ fn test_surface_origin_naming() {
 // Note: BackendState is in gl/types.rs/
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub struct FlushInfo {
     // TODO: wrap access to the following fields in a safe way:
     num_semaphores: std::os::raw::c_int,

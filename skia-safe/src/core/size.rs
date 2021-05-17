@@ -1,7 +1,5 @@
-use crate::prelude::*;
-use crate::scalar;
-use skia_bindings as sb;
-use skia_bindings::{SkISize, SkSize};
+use crate::{prelude::*, scalar};
+use skia_bindings::{self as sb, SkISize, SkSize};
 use std::ops::{Div, DivAssign, Mul, MulAssign};
 
 #[repr(C)]

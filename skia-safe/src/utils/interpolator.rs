@@ -1,10 +1,8 @@
 //! This wrapper combines SkInterpolatorBase and SkInterpolator into the type Interpolator.
 
-use crate::prelude::*;
-use crate::{scalar, Point};
-use skia_bindings as sb;
-use skia_bindings::{SkInterpolator, SkUnitCubicInterp};
-use std::time::Duration;
+use crate::{prelude::*, scalar, Point};
+use skia_bindings::{self as sb, SkInterpolator, SkUnitCubicInterp};
+use std::{fmt, time::Duration};
 
 pub use skia_bindings::SkInterpolatorBase_Result as Result;
 #[test]
@@ -24,14 +22,23 @@ impl NativeDrop for SkInterpolator {
     }
 }
 
-impl Default for Handle<SkInterpolator> {
+impl Default for Interpolator {
     fn default() -> Self {
         Handle::from_native_c(unsafe { SkInterpolator::new() })
     }
 }
 
+impl fmt::Debug for Interpolator {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Interpolator")
+            .field("duration", &self.duration())
+            .field("elem_count", &self.elem_count())
+            .finish()
+    }
+}
+
 /// Wrapper for functions that are implemented in SkInterpolatorBase
-impl Handle<SkInterpolator> {
+impl Interpolator {
     pub fn duration(&self) -> Option<(Duration, Duration)> {
         let mut start_time = 0;
         let mut end_time = 0;
@@ -87,7 +94,7 @@ impl Handle<SkInterpolator> {
 }
 
 /// Wrapper for SkInterpolator functions.
-impl Handle<SkInterpolator> {
+impl Interpolator {
     pub fn new(elem_count: usize, frame_count: usize) -> Self {
         Handle::from_native_c(unsafe {
             SkInterpolator::new1(
@@ -145,7 +152,7 @@ impl Handle<SkInterpolator> {
 }
 
 /// Additional functions that seem useful.
-impl Handle<SkInterpolator> {
+impl Interpolator {
     pub fn elem_count(&self) -> usize {
         self.native()._base.fElemCount.try_into().unwrap()
     }

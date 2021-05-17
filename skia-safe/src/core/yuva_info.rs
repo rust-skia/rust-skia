@@ -1,9 +1,8 @@
 use super::image_info;
 use crate::{prelude::*, EncodedOrigin, ISize, Matrix};
-use skia_bindings as sb;
-use skia_bindings::{SkYUVAInfo, SkYUVAInfo_Subsampling};
+use skia_bindings::{self as sb, SkYUVAInfo, SkYUVAInfo_Subsampling};
 
-use std::ptr;
+use std::{fmt, ptr};
 
 /// Specifies the structure of planes for a YUV image with optional alpha. The actual planar data
 /// is not part of this structure and depending on usage is in external textures or pixmaps.
@@ -35,7 +34,7 @@ pub use sb::SkYUVAInfo_PlaneConfig as PlaneConfig;
 /// sampled. Note that Subsampling values other than k444 are only valid with [PlaneConfig] values
 /// that have U and V in different planes than Y (and A, if present).
 #[repr(i32)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 pub enum Subsampling {
     Unknown = SkYUVAInfo_Subsampling::kUnknown as _,
     S444 = SkYUVAInfo_Subsampling::k444 as _,
@@ -137,6 +136,19 @@ impl Default for YUVAInfo {
 impl NativePartialEq for YUVAInfo {
     fn eq(&self, rhs: &Self) -> bool {
         unsafe { sb::C_SkYUVAInfo_equals(self.native(), rhs.native()) }
+    }
+}
+
+impl fmt::Debug for YUVAInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("YUVAInfo")
+            .field("dimensions", &self.dimensions())
+            .field("plane_config", &self.plane_config())
+            .field("subsampling", &self.subsampling())
+            .field("yuv_color_space", &self.yuv_color_space())
+            .field("origin", &self.origin())
+            .field("siting_xy", &self.siting_xy())
+            .finish()
     }
 }
 

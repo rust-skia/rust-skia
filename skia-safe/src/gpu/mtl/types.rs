@@ -1,8 +1,7 @@
 // Can't use crate::prelude::* here, because we declare Handle in this module, too.
 use crate::prelude::{self, NativeAccess, NativeDrop, NativePartialEq};
-use skia_bindings as sb;
-use skia_bindings::GrMtlTextureInfo;
-use std::ptr;
+use skia_bindings::{self as sb, GrMtlTextureInfo};
+use std::{fmt, ptr};
 
 pub use skia_bindings::GrMTLHandle as Handle;
 pub use skia_bindings::GrMTLPixelFormat as PixelFormat;
@@ -26,6 +25,14 @@ impl NativePartialEq for GrMtlTextureInfo {
 impl Default for TextureInfo {
     fn default() -> Self {
         unsafe { Self::new(ptr::null()) }
+    }
+}
+
+impl fmt::Debug for TextureInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("TextureInfo")
+            .field("texture", &self.texture())
+            .finish()
     }
 }
 

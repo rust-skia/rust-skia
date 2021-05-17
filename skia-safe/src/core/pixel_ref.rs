@@ -1,8 +1,6 @@
-use crate::prelude::*;
-use crate::ISize;
-use skia_bindings as sb;
-use skia_bindings::{SkPixelRef, SkRefCntBase};
-use std::os::raw::c_void;
+use crate::{prelude::*, ISize};
+use skia_bindings::{self as sb, SkPixelRef, SkRefCntBase};
+use std::{fmt, os::raw::c_void};
 
 pub type PixelRef = RCHandle<SkPixelRef>;
 unsafe impl Send for PixelRef {}
@@ -12,7 +10,18 @@ impl NativeRefCountedBase for SkPixelRef {
     type Base = SkRefCntBase;
 }
 
-impl RCHandle<SkPixelRef> {
+impl fmt::Debug for PixelRef {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("PixelRef")
+            .field("dimensions", &self.dimensions())
+            .field("row_bytes", &self.row_bytes())
+            .field("generation_id", &self.generation_id())
+            .field("is_immutable", &self.is_immutable())
+            .finish()
+    }
+}
+
+impl PixelRef {
     // TODO: wrap constructor with pixels borrowed.
 
     pub fn dimensions(&self) -> ISize {

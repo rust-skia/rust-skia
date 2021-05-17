@@ -1,14 +1,12 @@
-use crate::prelude::Handle;
-use crate::{Data, EncodedImageFormat};
-use skia_bindings::{SkBitmap, SkPixmap};
+use crate::{Bitmap, Data, EncodedImageFormat, Pixmap};
 
-impl Handle<SkPixmap> {
+impl Pixmap {
     pub fn encode(&self, format: EncodedImageFormat, quality: usize) -> Option<Data> {
         crate::encode::pixmap(self, format, quality)
     }
 }
 
-impl Handle<SkBitmap> {
+impl Bitmap {
     pub fn encode(&self, format: EncodedImageFormat, quality: usize) -> Option<Data> {
         crate::encode::bitmap(self, format, quality)
     }

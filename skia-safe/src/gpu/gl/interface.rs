@@ -1,14 +1,19 @@
-use crate::gpu::gl::Extensions;
-use crate::prelude::*;
-use skia_bindings as sb;
-use skia_bindings::{GrGLInterface, SkRefCntBase};
-use std::ffi::c_void;
-use std::os::raw;
+use crate::{gpu::gl::Extensions, prelude::*};
+use skia_bindings::{self as sb, GrGLInterface, SkRefCntBase};
+use std::{ffi::c_void, fmt, os::raw};
 
 pub type Interface = RCHandle<GrGLInterface>;
 
 impl NativeRefCountedBase for GrGLInterface {
     type Base = SkRefCntBase;
+}
+
+impl fmt::Debug for Interface {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Interface")
+            .field("extensions", &self.extensions())
+            .finish()
+    }
 }
 
 impl Interface {

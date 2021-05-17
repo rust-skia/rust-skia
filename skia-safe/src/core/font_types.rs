@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use skia_bindings::SkTextEncoding;
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 #[repr(i32)]
 pub enum TextEncoding {
     UTF8 = SkTextEncoding::kUTF8 as _,

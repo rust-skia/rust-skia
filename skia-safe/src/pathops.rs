@@ -1,9 +1,8 @@
 //! Wrapper for pathops/SkPathOps.h
 
-use crate::prelude::*;
-use crate::{Path, Rect};
-use skia_bindings as sb;
-use skia_bindings::{SkOpBuilder, SkPath};
+use crate::{prelude::*, Path, Rect};
+use skia_bindings::{self as sb, SkOpBuilder};
+use std::fmt;
 
 pub use skia_bindings::SkPathOp as PathOp;
 #[test]
@@ -49,7 +48,13 @@ impl Default for Handle<SkOpBuilder> {
     }
 }
 
-impl Handle<SkOpBuilder> {
+impl fmt::Debug for OpBuilder {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("OpBuilder").finish()
+    }
+}
+
+impl OpBuilder {
     pub fn add(&mut self, path: &Path, operator: PathOp) -> &mut Self {
         unsafe {
             self.native_mut().add(path.native(), operator);
@@ -63,7 +68,7 @@ impl Handle<SkOpBuilder> {
     }
 }
 
-impl Handle<SkPath> {
+impl Path {
     pub fn op(&self, path: &Path, path_op: PathOp) -> Option<Self> {
         op(self, path, path_op)
     }

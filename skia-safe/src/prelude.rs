@@ -252,7 +252,6 @@ impl<N: NativeDrop> Handle<N> {
     }
 
     /// Create a mutable reference to the Rust wrapper from a reference to the native type.
-    #[allow(dead_code)]
     pub(crate) fn from_native_ref_mut(n: &mut N) -> &mut Self {
         unsafe { transmute_ref_mut(n) }
     }

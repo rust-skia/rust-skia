@@ -1,12 +1,9 @@
-use crate::paragraph::TextStyle;
-use crate::prelude::*;
-use crate::FontMetrics;
-use skia_bindings as sb;
-use skia_bindings::{skia_textlayout_LineMetrics, skia_textlayout_StyleMetrics};
-use std::ops::Range;
-use std::{marker, mem, ptr};
+use crate::{paragraph::TextStyle, prelude::*, FontMetrics};
+use skia_bindings::{self as sb, skia_textlayout_LineMetrics, skia_textlayout_StyleMetrics};
+use std::{marker, mem, ops::Range, ptr};
 
 #[repr(C)]
+#[derive(Debug)]
 pub struct StyleMetrics<'a> {
     pub text_style: &'a TextStyle,
     pub font_metrics: FontMetrics,
@@ -29,6 +26,7 @@ impl<'a> StyleMetrics<'a> {
 }
 
 #[repr(C)]
+#[derive(Debug)]
 pub struct LineMetrics<'a> {
     pub start_index: usize,
     pub end_index: usize,
