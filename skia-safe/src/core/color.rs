@@ -12,7 +12,7 @@ use std::ops::{BitAnd, BitOr, Index, IndexMut, Mul};
 // Note: SkColor _is_ a u32, and therefore its components are
 // endian dependent, so we can't expose it as (transmuted) individual
 // argb fields.
-#[derive(Copy, Clone, PartialEq, Default, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
 #[repr(transparent)]
 pub struct Color(SkColor);
 
