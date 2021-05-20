@@ -29,14 +29,6 @@ pub fn set_font_cache_count_limit(count: i32) -> i32 {
     unsafe { SkGraphics::SetFontCacheCountLimit(count) }
 }
 
-pub fn font_cache_point_size_limit() -> i32 {
-    unsafe { SkGraphics::GetFontCachePointSizeLimit() }
-}
-
-pub fn set_font_cache_point_size_limit(max_point_size: i32) -> i32 {
-    unsafe { SkGraphics::SetFontCachePointSizeLimit(max_point_size) }
-}
-
 pub fn purge_font_cache() {
     unsafe { SkGraphics::PurgeFontCache() }
 }

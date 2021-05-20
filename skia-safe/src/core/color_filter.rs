@@ -2,12 +2,6 @@ use crate::{prelude::*, scalar, BlendMode, Color, Color4f, ColorSpace, NativeFla
 use skia_bindings::{self as sb, SkColorFilter, SkFlattenable, SkRefCntBase};
 use std::fmt;
 
-bitflags! {
-    pub struct Flags: u32 {
-        const ALPHA_UNCHANGED = sb::SkColorFilter_Flags_kAlphaUnchanged_Flag as u32;
-    }
-}
-
 pub type ColorFilter = RCHandle<SkColorFilter>;
 unsafe impl Send for ColorFilter {}
 unsafe impl Sync for ColorFilter {}
@@ -35,7 +29,7 @@ impl fmt::Debug for ColorFilter {
         f.debug_struct("ColorFilter")
             .field("as_a_color_mode", &self.to_a_color_mode())
             .field("as_a_color_matrix", &self.to_a_color_matrix())
-            .field("flags", &self.flags())
+            .field("is_alpha_unchanged", &self.is_alpha_unchanged())
             .finish()
     }
 }
@@ -51,13 +45,6 @@ impl ColorFilter {
     pub fn to_a_color_matrix(&self) -> Option<[scalar; 20]> {
         let mut matrix: [scalar; 20] = Default::default();
         unsafe { self.native().asAColorMatrix(&mut matrix[0]) }.if_true_some(matrix)
-    }
-
-    // TODO: appendStages()
-    // TODO: program()
-
-    pub fn flags(&self) -> self::Flags {
-        Flags::from_bits_truncate(unsafe { self.native().getFlags() })
     }
 
     pub fn is_alpha_unchanged(&self) -> bool {
@@ -90,9 +77,6 @@ impl ColorFilter {
             sb::C_SkColorFilter_makeComposed(self.native(), inner.into().into_ptr())
         })
     }
-
-    // TODO: asFragmentProcessor()
-    // TODO: affectsTransparentBlack()
 }
 
 pub mod color_filters {

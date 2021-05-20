@@ -1,6 +1,6 @@
 use crate::{
-    prelude::*, scalar, BlendMode, Color, Color4f, ColorFilter, ColorSpace, FilterQuality,
-    ImageFilter, MaskFilter, Path, PathEffect, Rect, Shader,
+    prelude::*, scalar, BlendMode, Color, Color4f, ColorFilter, ColorSpace, ImageFilter,
+    MaskFilter, Path, PathEffect, Rect, Shader,
 };
 use core::fmt;
 use skia_bindings::{self as sb, SkPaint};
@@ -64,7 +64,6 @@ impl fmt::Debug for Paint {
         f.debug_struct("Paint")
             .field("is_anti_alias", &self.is_anti_alias())
             .field("is_dither", &self.is_dither())
-            .field("filter_quality", &self.filter_quality())
             .field("style", &self.style())
             .field("color", &self.color4f())
             .field("stroke_width", &self.stroke_width())
@@ -124,16 +123,6 @@ impl Paint {
                 .fBitfields
                 .set_fDither(dither as _);
         }
-        self
-    }
-
-    pub fn filter_quality(&self) -> FilterQuality {
-        unsafe { sb::C_SkPaint_getFilterQuality(self.native()) }
-    }
-
-    #[deprecated(since = "0.38.0")]
-    pub fn set_filter_quality(&mut self, quality: FilterQuality) -> &mut Self {
-        unsafe { self.native_mut().setFilterQuality(quality) }
         self
     }
 

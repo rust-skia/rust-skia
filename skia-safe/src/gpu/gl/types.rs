@@ -80,7 +80,6 @@ bitflags! {
         const PROGRAM = sb::GrGLBackendState_kProgram_GrGLBackendState as _;
         const FIXED_FUNCTION = sb::GrGLBackendState_kFixedFunction_GrGLBackendState as _;
         const MISC = sb::GrGLBackendState_kMisc_GrGLBackendState as _;
-        const PATH_RENDERING = sb::GrGLBackendState_kPathRendering_GrGLBackendState as _;
     }
 }
 

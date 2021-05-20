@@ -759,12 +759,14 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         .blocklist_type("GrImageContextPriv")
         .raw_line("pub enum GrContextThreadSafeProxy {}")
         .blocklist_type("GrContextThreadSafeProxy")
-        .raw_line("pub enum GrContextThreadSafeProxyPriv {}")
         .blocklist_type("GrContextThreadSafeProxyPriv")
-        .raw_line("pub enum GrRecordingContextPriv {}")
+        .raw_line("pub enum GrContextThreadSafeProxyPriv {}")
         .blocklist_type("GrRecordingContextPriv")
-        .raw_line("pub enum GrContextPriv {}")
+        .raw_line("pub enum GrRecordingContextPriv {}")
+        .blocklist_function("GrRecordingContext_priv.*")
+        .blocklist_function("GrDirectContext_priv.*")
         .blocklist_type("GrContextPriv")
+        .raw_line("pub enum GrContextPriv {}")
         .blocklist_function("GrContext_priv.*")
         .blocklist_function("SkDeferredDisplayList_priv.*")
         .raw_line("pub enum SkVerticesPriv {}")
@@ -774,7 +776,9 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         // Vulkan reexports that got swallowed by making them opaque.
         // (these can not be allowlisted by a extern "C" function)
         .allowlist_type("VkPhysicalDeviceFeatures")
-        .allowlist_type("VkPhysicalDeviceFeatures2")
+        .allowlist_type("VkPhysicalDeviceFeatures2").
+        // m91: These functions are not actually implemented.
+        blocklist_function("SkCustomTypefaceBuilder_setGlyph[123].*")
         // misc
         .allowlist_var("SK_Color.*")
         .allowlist_var("kAll_GrBackendState")

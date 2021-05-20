@@ -520,6 +520,16 @@ impl M44 {
         m
     }
 
+    pub fn look_at(eye: &V3, center: &V3, up: &V3) -> Self {
+        Self::construct(|m| unsafe {
+            sb::C_SkM44_LookAt(eye.native(), center.native(), up.native(), m)
+        })
+    }
+
+    pub fn perspective(near: f32, far: f32, angle: f32) -> Self {
+        Self::construct(|m| unsafe { sb::C_SkM44_Perspective(near, far, angle, m) })
+    }
+
     pub fn get_col_major(&self, v: &mut [scalar; Self::COMPONENTS]) {
         v.copy_from_slice(&self.mat)
     }
@@ -755,16 +765,6 @@ impl M44 {
     pub fn pre_scale(&mut self, x: scalar, y: scalar) -> &mut Self {
         unsafe { self.native_mut().preScale(x, y) };
         self
-    }
-
-    pub fn look_at(eye: &V3, center: &V3, up: &V3) -> Self {
-        Self::construct(|m| unsafe {
-            sb::C_Sk3LookAt(eye.native(), center.native(), up.native(), m)
-        })
-    }
-
-    pub fn perspective(near: f32, far: f32, angle: f32) -> Self {
-        Self::construct(|m| unsafe { sb::C_Sk3Perspective(near, far, angle, m) })
     }
 
     // helper
