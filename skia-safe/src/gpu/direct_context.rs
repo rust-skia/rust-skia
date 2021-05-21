@@ -6,9 +6,9 @@ use super::gl;
 use super::vk;
 use super::{
     BackendFormat, BackendRenderTarget, BackendSurfaceMutableState, BackendTexture, ContextOptions,
-    FlushInfo, Mipmapped, SemaphoresSubmitted,
+    FlushInfo, SemaphoresSubmitted,
 };
-use crate::{image, prelude::*, Data, Image};
+use crate::{image, prelude::*, Data};
 use skia_bindings as sb;
 use skia_bindings::{GrDirectContext, GrRecordingContext, SkRefCntBase};
 use std::{
@@ -79,20 +79,14 @@ impl RCHandle<GrDirectContext> {
         }
     }
 
-    /// # Safety
-    /// This function is unsafe because `device` and `queue` are untyped handles which need to exceed the
-    /// lifetime of the context returned.
     #[cfg(feature = "metal")]
-    pub unsafe fn new_metal<'a>(
-        device: *mut std::ffi::c_void,
-        queue: *mut std::ffi::c_void,
+    pub fn new_metal<'a>(
+        backend: &crate::gpu::mtl::BackendContext,
         options: impl Into<Option<&'a ContextOptions>>,
     ) -> Option<DirectContext> {
-        DirectContext::from_ptr(sb::C_GrContext_MakeMetal(
-            device,
-            queue,
-            options.into().native_ptr_or_null(),
-        ))
+        DirectContext::from_ptr(unsafe {
+            sb::C_GrContext_MakeMetal(backend.native(), options.into().native_ptr_or_null())
+        })
     }
 
     #[cfg(feature = "d3d")]
@@ -269,20 +263,6 @@ impl RCHandle<GrDirectContext> {
             self.native_mut().storeVkPipelineCacheData();
         }
         self
-    }
-
-    pub fn compute_image_size(
-        image: impl AsRef<Image>,
-        mipmapped: Mipmapped,
-        use_next_pow2: impl Into<Option<bool>>,
-    ) -> usize {
-        unsafe {
-            sb::C_GrDirectContext_ComputeImageSize(
-                image.as_ref().clone().into_ptr(),
-                mipmapped,
-                use_next_pow2.into().unwrap_or_default(),
-            )
-        }
     }
 
     // TODO: wrap createBackendTexture (several variants)

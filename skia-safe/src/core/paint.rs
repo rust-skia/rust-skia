@@ -111,6 +111,7 @@ impl Handle<SkPaint> {
         unsafe { sb::C_SkPaint_getFilterQuality(self.native()) }
     }
 
+    #[deprecated(since = "0.38.0")]
     pub fn set_filter_quality(&mut self, quality: FilterQuality) -> &mut Self {
         unsafe { self.native_mut().setFilterQuality(quality) }
         self
@@ -336,7 +337,6 @@ fn union_flags() {
     let mut paint = Paint::default();
     assert!(!paint.is_anti_alias());
     assert!(!paint.is_dither());
-    assert_eq!(paint.filter_quality(), FilterQuality::None);
     assert_eq!(paint.style(), Style::Fill);
 
     {
@@ -344,21 +344,9 @@ fn union_flags() {
 
         assert!(paint.is_anti_alias());
         assert!(!paint.is_dither());
-        assert_eq!(paint.filter_quality(), FilterQuality::None);
         assert_eq!(paint.style(), Style::Fill);
 
         paint.set_anti_alias(false);
-    }
-
-    {
-        paint.set_filter_quality(FilterQuality::High);
-
-        assert!(!paint.is_anti_alias());
-        assert!(!paint.is_dither());
-        assert_eq!(paint.filter_quality(), FilterQuality::High);
-        assert_eq!(paint.style(), Style::Fill);
-
-        paint.set_filter_quality(FilterQuality::None);
     }
 
     {
@@ -366,7 +354,6 @@ fn union_flags() {
 
         assert!(!paint.is_anti_alias());
         assert!(!paint.is_dither());
-        assert_eq!(paint.filter_quality(), FilterQuality::None);
         assert_eq!(paint.style(), Style::StrokeAndFill);
 
         paint.set_style(Style::Fill);

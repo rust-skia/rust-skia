@@ -221,10 +221,6 @@ extern "C" void C_GrDirectContext_flushAndSubmit(GrDirectContext* self) {
     self->flushAndSubmit();
 }
 
-extern "C" size_t C_GrDirectContext_ComputeImageSize(SkImage* image, GrMipMapped mm, bool useNextPow2) {
-    return GrDirectContext::ComputeImageSize(sp(image), mm, useNextPow2);
-}
-
 extern "C" void C_GrDirectContext_compressedBackendFormat(const GrDirectContext* self, SkImage::CompressionType compression, GrBackendFormat* result) {
     *result = self->compressedBackendFormat(compression);
 }
@@ -237,8 +233,8 @@ extern "C" void C_GrDirectContext_performDeferredCleanup(GrDirectContext* self, 
 // gpu/GrContextOptions.h
 //
 
-extern "C" void C_GrContextOptions_Construct(GrContextOptions* unintialized) {
-    new(unintialized) GrContextOptions();
+extern "C" void C_GrContextOptions_Construct(GrContextOptions* uninitialized) {
+    new(uninitialized) GrContextOptions();
 }
 
 //
@@ -387,19 +383,6 @@ extern "C" SkImage* C_SkImage_MakeFromYUVAPixmaps(
     SkColorSpace* imageColorSpace
 ) {
     return SkImage::MakeFromYUVAPixmaps(context, *pixmaps, buildMips, limitToMaxTextureSize, sp(imageColorSpace)).release();
-}
-
-extern "C" SkImage* C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
-        GrRecordingContext* context,
-        SkYUVColorSpace yuvColorSpace,
-        const GrBackendTexture nv12Textures[2],
-        GrSurfaceOrigin textureOrigin,
-        const GrBackendTexture* backendTexture,
-        SkColorSpace* imageColorSpace) {
-    return SkImage::MakeFromNV12TexturesCopyWithExternalBackend(
-            context,
-            yuvColorSpace, nv12Textures, textureOrigin, *backendTexture,
-            sp(imageColorSpace)).release();
 }
 
 extern "C" SkImage* C_SkImage_makeTextureImage(

@@ -191,11 +191,15 @@ pub struct FinalBuildConfiguration {
 
     /// The binding source files to compile.
     pub binding_sources: Vec<PathBuf>,
+
+    /// Whether to use system libraries or not.
+    pub use_system_libraries: bool,
 }
 
 impl FinalBuildConfiguration {
     pub fn from_build_configuration(
         build: &BuildConfiguration,
+        use_system_libraries: bool,
         skia_source_dir: &Path,
     ) -> FinalBuildConfiguration {
         let features = &build.features;
@@ -212,11 +216,14 @@ impl FinalBuildConfiguration {
                 ("skia_use_gl", yes_if(features.gl)),
                 ("skia_use_egl", yes_if(features.egl)),
                 ("skia_use_x11", yes_if(features.x11)),
-                ("skia_use_system_libjpeg_turbo", no()),
-                ("skia_use_system_libpng", no()),
+                (
+                    "skia_use_system_libjpeg_turbo",
+                    yes_if(use_system_libraries),
+                ),
+                ("skia_use_system_libpng", yes_if(use_system_libraries)),
                 ("skia_use_libwebp_encode", yes_if(features.webp_encode)),
                 ("skia_use_libwebp_decode", yes_if(features.webp_decode)),
-                ("skia_use_system_zlib", no()),
+                ("skia_use_system_zlib", yes_if(use_system_libraries)),
                 ("skia_use_freetype", yes()),
                 ("skia_use_fonthost_mac", no()),
                 ("skia_use_system_freetype2", no()),
@@ -253,10 +260,10 @@ impl FinalBuildConfiguration {
                 args.extend(vec![
                     ("skia_enable_skshaper", yes()),
                     ("skia_use_icu", yes()),
-                    ("skia_use_system_icu", no()),
+                    ("skia_use_system_icu", yes_if(use_system_libraries)),
                     ("skia_use_harfbuzz", yes()),
                     ("skia_pdf_subset_harfbuzz", yes()),
-                    ("skia_use_system_harfbuzz", no()),
+                    ("skia_use_system_harfbuzz", yes_if(use_system_libraries)),
                     ("skia_use_sfntly", no()),
                     ("skia_enable_skparagraph", yes()),
                     // note: currently, tests need to be enabled, because modules/skparagraph
@@ -268,7 +275,7 @@ impl FinalBuildConfiguration {
             }
 
             if features.webp_encode || features.webp_decode {
-                args.push(("skia_use_system_libwebp", no()))
+                args.push(("skia_use_system_libwebp", yes_if(use_system_libraries)))
             }
 
             let mut use_expat = true;
@@ -276,10 +283,11 @@ impl FinalBuildConfiguration {
             // target specific gn args.
             let target = cargo::target();
             let target_str: &str = &format!("--target={}", target.to_string());
+            let mut set_target = true;
             let sysroot_arg;
             let opt_level_arg;
-            let mut cflags: Vec<&str> = vec![&target_str];
-            let asmflags: Vec<&str> = vec![&target_str];
+            let mut cflags: Vec<&str> = vec![];
+            let mut asmflags: Vec<&str> = vec![];
 
             if let Some(sysroot) = cargo::env_var("SDKROOT") {
                 sysroot_arg = format!("--sysroot={}", sysroot);
@@ -341,7 +349,7 @@ impl FinalBuildConfiguration {
                     // TODO: make API-level configurable?
                     args.push(("ndk_api", android::API_LEVEL.into()));
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
-                    args.push(("skia_use_system_freetype2", no()));
+                    args.push(("skia_use_system_freetype2", yes_if(use_system_libraries)));
                     args.push(("skia_enable_fontmgr_android", yes()));
                     // Enabling fontmgr_android implicitly enables expat.
                     // We make this explicit to avoid relying on an expat installed
@@ -359,7 +367,13 @@ impl FinalBuildConfiguration {
                 }
                 (arch, _, os, _) => {
                     let skia_target_os = match os {
-                        "darwin" => "mac",
+                        "darwin" => {
+                            // Skia will take care to set a specific `-target` for the current macOS
+                            // version. So we don't push another target `--target` that may
+                            // conflict.
+                            set_target = false;
+                            "mac"
+                        }
                         "windows" => "win",
                         _ => os,
                     };
@@ -370,9 +384,14 @@ impl FinalBuildConfiguration {
 
             if use_expat {
                 args.push(("skia_use_expat", yes()));
-                args.push(("skia_use_system_expat", no()));
+                args.push(("skia_use_system_expat", yes_if(use_system_libraries)));
             } else {
                 args.push(("skia_use_expat", no()));
+            }
+
+            if set_target {
+                cflags.push(target_str);
+                asmflags.push(target_str);
             }
 
             if !cflags.is_empty() {
@@ -401,8 +420,7 @@ impl FinalBuildConfiguration {
         };
 
         let ninja_files = {
-            let mut files = Vec::new();
-            files.push("obj/skia.ninja".into());
+            let mut files = vec!["obj/skia.ninja".into()];
             if features.text_layout {
                 files.extend(vec![
                     "obj/modules/skshaper/skshaper.ninja".into(),
@@ -413,8 +431,7 @@ impl FinalBuildConfiguration {
         };
 
         let binding_sources = {
-            let mut sources: Vec<PathBuf> = Vec::new();
-            sources.push("src/bindings.cpp".into());
+            let mut sources: Vec<PathBuf> = vec!["src/bindings.cpp".into()];
             if features.gl {
                 sources.push("src/gl.cpp".into());
             }
@@ -443,6 +460,7 @@ impl FinalBuildConfiguration {
             ninja_files,
             definitions: build.definitions.clone(),
             binding_sources,
+            use_system_libraries,
         }
     }
 }
@@ -608,57 +626,41 @@ impl BinariesConfiguration {
     }
 }
 
-/// The full build of Skia, skia-bindings, and the generation of bindings.rs.
-pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
-    let python2 = &prerequisites::locate_python2_cmd();
-    println!("Python 2 found: {:?}", python2);
-    let ninja = fetch_dependencies(&python2);
-    configure_skia(build, config, &python2, None);
-    build_skia(build, config, &ninja);
-}
-
-/// Build Skia without any network access.
-///
-/// An offline build expects the Skia source tree including all third party dependencies
-/// to be available.
-pub fn build_offline(
+/// Orchestrates the entire build of Skia based on the arguments provided.
+pub fn build(
     build: &FinalBuildConfiguration,
     config: &BinariesConfiguration,
-    ninja_command: Option<&Path>,
-    gn_command: Option<&Path>,
+    ninja_command: Option<PathBuf>,
+    gn_command: Option<PathBuf>,
+    offline: bool,
 ) {
-    let python2 = prerequisites::locate_python2_cmd();
-    configure_skia(&build, &config, &python2, gn_command);
-    build_skia(
-        &build,
-        &config,
-        ninja_command.unwrap_or(&ninja::default_exe_name()),
-    );
-}
+    let python2 = &prerequisites::locate_python2_cmd();
+    println!("Python 2 found: {:?}", python2);
 
-/// Prepares the build and returns the ninja command to use for building Skia.
-pub fn fetch_dependencies(python2: &Path) -> PathBuf {
-    prerequisites::resolve_dependencies();
-
-    // call Skia's git-sync-deps
-
-    println!("Synchronizing Skia dependencies");
-
-    assert!(
-        Command::new(python2)
-            .arg("skia/tools/git-sync-deps")
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .status()
+    let ninja = ninja_command.unwrap_or_else(|| {
+        env::current_dir()
             .unwrap()
-            .success(),
-        "`skia/tools/git-sync-deps` failed"
-    );
+            .join("depot_tools")
+            .join(ninja::default_exe_name())
+    });
 
-    env::current_dir()
-        .unwrap()
-        .join("depot_tools")
-        .join(ninja::default_exe_name())
+    if !offline && !build.use_system_libraries {
+        println!("Synchronizing Skia dependencies");
+        prerequisites::resolve_dependencies();
+        assert!(
+            Command::new(python2)
+                .arg("skia/tools/git-sync-deps")
+                .stdout(Stdio::inherit())
+                .stderr(Stdio::inherit())
+                .status()
+                .unwrap()
+                .success(),
+            "`skia/tools/git-sync-deps` failed"
+        );
+    }
+
+    configure_skia(build, config, &python2, gn_command.as_deref());
+    build_skia(build, config, &ninja);
 }
 
 /// Configures Skia by calling gn
@@ -743,7 +745,7 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         .raw_line("#![allow(clippy::all)]")
         // GrVkBackendContext contains u128 fields on macOS
         .raw_line("#![allow(improper_ctypes)]")
-        .whitelist_function("C_.*")
+        .allowlist_function("C_.*")
         .constified_enum(".*Mask")
         .constified_enum(".*Flags")
         .constified_enum(".*Bits")
@@ -751,38 +753,38 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         .constified_enum("GrVkAlloc_Flag")
         .constified_enum("GrGLBackendState")
         // not used:
-        .blacklist_type("SkPathRef_Editor")
-        .blacklist_function("SkPathRef_Editor_Editor")
+        .blocklist_type("SkPathRef_Editor")
+        .blocklist_function("SkPathRef_Editor_Editor")
         // private types that pull in inline functions that cannot be linked:
         // https://github.com/rust-skia/rust-skia/issues/318
         .raw_line("pub enum GrContext_Base {}")
-        .blacklist_type("GrContext_Base")
-        .blacklist_function("GrContext_Base_.*")
+        .blocklist_type("GrContext_Base")
+        .blocklist_function("GrContext_Base_.*")
         .raw_line("pub enum GrImageContext {}")
-        .blacklist_type("GrImageContext")
+        .blocklist_type("GrImageContext")
         .raw_line("pub enum GrImageContextPriv {}")
-        .blacklist_type("GrImageContextPriv")
+        .blocklist_type("GrImageContextPriv")
         .raw_line("pub enum GrContextThreadSafeProxy {}")
-        .blacklist_type("GrContextThreadSafeProxy")
+        .blocklist_type("GrContextThreadSafeProxy")
         .raw_line("pub enum GrContextThreadSafeProxyPriv {}")
-        .blacklist_type("GrContextThreadSafeProxyPriv")
+        .blocklist_type("GrContextThreadSafeProxyPriv")
         .raw_line("pub enum GrRecordingContextPriv {}")
-        .blacklist_type("GrRecordingContextPriv")
+        .blocklist_type("GrRecordingContextPriv")
         .raw_line("pub enum GrContextPriv {}")
-        .blacklist_type("GrContextPriv")
-        .blacklist_function("GrContext_priv.*")
-        .blacklist_function("SkDeferredDisplayList_priv.*")
+        .blocklist_type("GrContextPriv")
+        .blocklist_function("GrContext_priv.*")
+        .blocklist_function("SkDeferredDisplayList_priv.*")
         .raw_line("pub enum SkVerticesPriv {}")
-        .blacklist_type("SkVerticesPriv")
-        .blacklist_function("SkVertices_priv.*")
-        .blacklist_function("std::bitset_flip.*")
+        .blocklist_type("SkVerticesPriv")
+        .blocklist_function("SkVertices_priv.*")
+        .blocklist_function("std::bitset_flip.*")
         // Vulkan reexports that got swallowed by making them opaque.
-        // (these can not be whitelisted by a extern "C" function)
-        .whitelist_type("VkPhysicalDeviceFeatures")
-        .whitelist_type("VkPhysicalDeviceFeatures2")
+        // (these can not be allowlisted by a extern "C" function)
+        .allowlist_type("VkPhysicalDeviceFeatures")
+        .allowlist_type("VkPhysicalDeviceFeatures2")
         // misc
-        .whitelist_var("SK_Color.*")
-        .whitelist_var("kAll_GrBackendState")
+        .allowlist_var("SK_Color.*")
+        .allowlist_var("kAll_GrBackendState")
         .use_core()
         .clang_arg("-std=c++17")
         .clang_args(&["-x", "c++"])
@@ -799,16 +801,16 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         builder
     };
 
-    for function in WHITELISTED_FUNCTIONS {
-        builder = builder.whitelist_function(function)
+    for function in ALLOWLISTED_FUNCTIONS {
+        builder = builder.allowlist_function(function)
     }
 
     for opaque_type in OPAQUE_TYPES {
         builder = builder.opaque_type(opaque_type)
     }
 
-    for t in BLACKLISTED_TYPES {
-        builder = builder.blacklist_type(t);
+    for t in BLOCKLISTED_TYPES {
+        builder = builder.blocklist_type(t);
     }
 
     let mut cc_build = Build::new();
@@ -929,7 +931,7 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         .expect("Couldn't write bindings!");
 }
 
-const WHITELISTED_FUNCTIONS: &[&str] = &[
+const ALLOWLISTED_FUNCTIONS: &[&str] = &[
     "SkAnnotateRectWithURL",
     "SkAnnotateNamedDestination",
     "SkAnnotateLinkToDestination",
@@ -937,7 +939,7 @@ const WHITELISTED_FUNCTIONS: &[&str] = &[
     "SkColorTypeIsAlwaysOpaque",
     "SkColorTypeValidateAlphaType",
     "SkRGBToHSV",
-    // this function does not whitelist (probably because of inlining):
+    // this function does not allowlist (probably because of inlining):
     "SkColorToHSV",
     "SkHSVToColor",
     "SkPreMultiplyARGB",
@@ -1074,7 +1076,7 @@ const OPAQUE_TYPES: &[&str] = &[
     "std::tuple",
 ];
 
-const BLACKLISTED_TYPES: &[&str] = &[
+const BLOCKLISTED_TYPES: &[&str] = &[
     // modules/skparagraph
     //   pulls in a std::map<>, which we treat as opaque, but bindgen creates wrong bindings for
     //   std::_Tree* types
@@ -1262,7 +1264,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     // m85
     ("VkSharingMode", rewrite::vk),
     // m86:
-    ("SkSamplingMode", rewrite::k_xxx),
+    ("SkFilterMode", rewrite::k_xxx),
     ("SkMipmapMode", rewrite::k_xxx),
     ("Enable", rewrite::k_xxx),
     ("ShaderCacheStrategy", rewrite::k_xxx),
@@ -1275,6 +1277,9 @@ const ENUM_TABLE: &[EnumEntry] = &[
     // m88:
     // SkYUVAInfo_*
     ("PlaneConfig", rewrite::k_xxx),
+    // m89, SkImageFilters::Dither
+    ("Dither", rewrite::k_xxx),
+    ("SkScanlineOrder", rewrite::k_xxx_name),
 ];
 
 pub(crate) mod rewrite {
@@ -1340,6 +1345,7 @@ mod prerequisites {
     use std::path::{Path, PathBuf};
     use std::process::{Command, Stdio};
 
+    /// Resolves the full path
     pub fn locate_python2_cmd() -> PathBuf {
         const PYTHON_CMDS: [&str; 2] = ["python", "python2"];
         for python in PYTHON_CMDS.as_ref() {

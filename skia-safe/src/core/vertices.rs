@@ -222,7 +222,7 @@ impl RCHandle<SkVertices> {
     #[allow(deprecated)]
     pub fn positions(&self) -> &[Point] {
         let positions: *const SkPoint = self.native().fPositions;
-        unsafe { slice::from_raw_parts(positions as _, self.vertex_count()) }
+        unsafe { safer::from_raw_parts(positions as _, self.vertex_count()) }
     }
 
     #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
@@ -308,25 +308,24 @@ impl Handle<SkVertices_Builder> {
         index_count: usize,
         flags: BuilderFlags,
     ) -> Builder {
-        Self::from_native_c(unsafe {
+        let r = Self::from_native_c(unsafe {
             SkVertices_Builder::new(
                 mode,
                 vertex_count.try_into().unwrap(),
                 index_count.try_into().unwrap(),
                 flags.bits(),
             )
-        })
-    }
+        });
 
-    pub fn is_valid(&self) -> bool {
-        !self.native().fVertices.fPtr.is_null()
+        assert!(!r.native().fVertices.fPtr.is_null());
+        r
     }
 
     pub fn positions(&mut self) -> &mut [Point] {
         unsafe {
             let vertices = &*self.native().fVertices.fPtr;
-            slice::from_raw_parts_mut(
-                Point::from_native_ref_mut(&mut *vertices.fPositions),
+            safer::from_raw_parts_mut(
+                Point::from_native_ptr_mut(vertices.fPositions),
                 vertices.fVertexCount.try_into().unwrap(),
             )
         }

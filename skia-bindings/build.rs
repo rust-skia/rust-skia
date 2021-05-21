@@ -37,18 +37,25 @@ mod env {
         cargo::env_var("FORCE_SKIA_BUILD").is_some()
     }
 
+    /// A boolean specifying whether to build Skia's dependencies or not. If not, the system's
+    /// provided libraries are used.
+    pub fn use_system_libraries() -> bool {
+        cargo::env_var("SKIA_USE_SYSTEM_LIBRARIES").is_some()
+    }
+
+    /// The full path of the ninja command to run.
+    pub fn ninja_command() -> Option<PathBuf> {
+        cargo::env_var("SKIA_NINJA_COMMAND").map(PathBuf::from)
+    }
+
+    /// The full path of the gn command to run.
+    pub fn gn_command() -> Option<PathBuf> {
+        cargo::env_var("SKIA_GN_COMMAND").map(PathBuf::from)
+    }
+
     /// The path to the Skia source directory.
-    pub fn offline_source_dir() -> Option<PathBuf> {
-        cargo::env_var("SKIA_OFFLINE_SOURCE_DIR").map(PathBuf::from)
-    }
-
-    /// The full path of the ninja command to run. Only relevent when SKIA_OFFLINE_SOURCE_DIR is set.
-    pub fn offline_ninja_command() -> Option<PathBuf> {
-        cargo::env_var("SKIA_OFFLINE_NINJA_COMMAND").map(PathBuf::from)
-    }
-
-    pub fn offline_gn_command() -> Option<PathBuf> {
-        cargo::env_var("SKIA_OFFLINE_GN_COMMAND").map(PathBuf::from)
+    pub fn source_dir() -> Option<PathBuf> {
+        cargo::env_var("SKIA_SOURCE_DIR").map(PathBuf::from)
     }
 }
 
@@ -69,21 +76,23 @@ fn main() {
     let binaries_config = skia::BinariesConfiguration::from_cargo_env(&build_config);
 
     //
-    // offline build?
+    // skip attempting to download?
     //
-    if let Some(offline_source_dir) = env::offline_source_dir() {
+    if let Some(source_dir) = env::source_dir() {
         println!("STARTING OFFLINE BUILD");
 
         let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
             &build_config,
-            &offline_source_dir,
+            env::use_system_libraries(),
+            &source_dir,
         );
 
-        skia::build_offline(
+        skia::build(
             &final_configuration,
             &binaries_config,
-            env::offline_ninja_command().as_deref(),
-            env::offline_gn_command().as_deref(),
+            env::ninja_command(),
+            env::gn_command(),
+            true,
         );
     } else {
         //
@@ -127,9 +136,16 @@ fn main() {
             println!("STARTING A FULL BUILD");
             let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
                 &build_config,
+                env::use_system_libraries(),
                 &std::env::current_dir().unwrap().join("skia"),
             );
-            skia::build(&final_configuration, &binaries_config);
+            skia::build(
+                &final_configuration,
+                &binaries_config,
+                env::ninja_command(),
+                env::gn_command(),
+                false,
+            );
         }
     };
 

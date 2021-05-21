@@ -144,7 +144,7 @@ impl Handle<sb::TextBoxes> {
         unsafe {
             let mut count = 0;
             let ptr = sb::C_TextBoxes_ptr_count(self.native(), &mut count);
-            std::slice::from_raw_parts(ptr as *const TextBox, count)
+            safer::from_raw_parts(ptr as *const TextBox, count)
         }
     }
 }
@@ -179,7 +179,7 @@ impl<'a> Borrows<'a, Handle<sb::LineMetricsVector>> {
         unsafe {
             let mut count = 0;
             let ptr = sb::C_LineMetricsVector_ptr_count(self.native(), &mut count);
-            std::slice::from_raw_parts(ptr as *const LineMetrics, count)
+            safer::from_raw_parts(ptr as *const LineMetrics, count)
         }
     }
 }

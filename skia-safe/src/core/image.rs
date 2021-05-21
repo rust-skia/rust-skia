@@ -1,50 +1,19 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
-use crate::prelude::*;
 use crate::{
-    AlphaType, Bitmap, ColorSpace, ColorType, Data, EncodedImageFormat, IPoint, IRect, ISize,
-    ImageInfo, Matrix, Paint, Picture, SamplingOptions, Shader, TileMode,
+    prelude::*, AlphaType, Bitmap, ColorSpace, ColorType, Data, EncodedImageFormat, IPoint, IRect,
+    ISize, ImageFilter, ImageGenerator, ImageInfo, Matrix, Paint, Picture, Pixmap, SamplingOptions,
+    Shader, TileMode,
 };
-use crate::{FilterQuality, ImageFilter, ImageGenerator, Pixmap};
 use skia_bindings as sb;
 use skia_bindings::{SkImage, SkRefCntBase};
 use std::{mem, ptr};
 
-#[deprecated(since = "0.37.0", note = "Use skia_safe::SamplingMode")]
-pub use super::SamplingMode;
-
-#[deprecated(since = "0.37.0", note = "Use skia_safe::SkMipmapMode")]
-pub use super::MipmapMode;
-
-#[deprecated(since = "0.37.0", note = "Use skia_safe::FilterOptions")]
-pub use super::FilterOptions;
-
 pub use super::CubicResampler;
 
-// TODO: Add MipmapBuilder as soon it's documented or
-//       SkMipmap made its way into the public interface.
-
 pub use skia_bindings::SkImage_BitDepth as BitDepth;
-#[test]
-fn test_bit_depth_naming() {
-    let _ = BitDepth::F16;
-}
-
 pub use skia_bindings::SkImage_CachingHint as CachingHint;
-#[test]
-fn test_caching_hint_naming() {
-    let _ = CachingHint::Allow;
-}
-
 pub use skia_bindings::SkImage_CompressionType as CompressionType;
-#[test]
-fn test_compression_type_naming() {
-    // legacy type (replaced in m81 by ETC2_RGB8_UNORM)
-    #[allow(deprecated)]
-    let _ = CompressionType::ETC1;
-    // m81: preserve the underscore characters for consistency.
-    let _ = CompressionType::BC1_RGBA8_UNORM;
-}
 
 pub type Image = RCHandle<SkImage>;
 unsafe impl Send for Image {}
@@ -264,28 +233,6 @@ impl RCHandle<SkImage> {
         panic!("Removed without replacement")
     }
 
-    #[cfg(feature = "gpu")]
-    pub fn from_nv12_textures_copy_with_external_backend(
-        context: &mut gpu::RecordingContext,
-        yuv_color_space: crate::YUVColorSpace,
-        nv12_textures: &[gpu::BackendTexture; 2],
-        texture_origin: gpu::SurfaceOrigin,
-        backend_texture: &gpu::BackendTexture,
-        image_color_space: impl Into<Option<ColorSpace>>,
-        // TODO: m78 introduced textureReleaseProc and releaseContext here.
-    ) -> Option<Image> {
-        Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
-                context.native_mut(),
-                yuv_color_space,
-                nv12_textures.native().as_ptr(),
-                texture_origin,
-                backend_texture.native(),
-                image_color_space.into().into_ptr_or_null(),
-            )
-        })
-    }
-
     pub fn from_picture(
         picture: impl Into<Picture>,
         dimensions: impl Into<ISize>,
@@ -305,6 +252,10 @@ impl RCHandle<SkImage> {
             )
         })
     }
+
+    // TODO:
+    // TODO: MakePromiseTexture
+    // TODO: MakePromiseYUVATexture
 
     pub fn image_info(&self) -> &ImageInfo {
         ImageInfo::from_native_ref(&self.native().fInfo)
@@ -350,110 +301,26 @@ impl RCHandle<SkImage> {
         self.alpha_type().is_opaque()
     }
 
-    pub fn to_shader_with_sampling_options<'a>(
-        &self,
-        tile_modes: impl Into<Option<(TileMode, TileMode)>>,
-        sampling_options: &SamplingOptions,
-        local_matrix: impl Into<Option<&'a Matrix>>,
-    ) -> Shader {
-        let tile_modes = tile_modes.into();
-        let tm1 = tile_modes.map(|m| m.0).unwrap_or_default();
-        let tm2 = tile_modes.map(|m| m.1).unwrap_or_default();
-
-        Shader::from_ptr(unsafe {
-            sb::C_SkImage_makeShaderWithSamplingOptions(
-                self.native(),
-                tm1,
-                tm2,
-                sampling_options.native(),
-                local_matrix.into().native_ptr_or_null(),
-            )
-        })
-        .unwrap()
-    }
-
-    pub fn to_shader_with_cubic_resampler<'a>(
-        &self,
-        tile_modes: impl Into<Option<(TileMode, TileMode)>>,
-        cubic_resampler: CubicResampler,
-        local_matrix: impl Into<Option<&'a Matrix>>,
-    ) -> Option<Shader> {
-        let tile_modes = tile_modes.into();
-        let tm1 = tile_modes.map(|m| m.0).unwrap_or_default();
-        let tm2 = tile_modes.map(|m| m.1).unwrap_or_default();
-
-        Shader::from_ptr(unsafe {
-            sb::C_SkImage_makeShaderWithCubicResampler(
-                self.native(),
-                tm1,
-                tm2,
-                cubic_resampler.into_native(),
-                local_matrix.into().native_ptr_or_null(),
-            )
-        })
-    }
-
-    pub fn to_shader_with_filter_options<'a>(
-        &self,
-        tile_modes: impl Into<Option<(TileMode, TileMode)>>,
-        filter_options: FilterOptions,
-        local_matrix: impl Into<Option<&'a Matrix>>,
-    ) -> Shader {
-        let tile_modes = tile_modes.into();
-        let tm1 = tile_modes.map(|m| m.0).unwrap_or_default();
-        let tm2 = tile_modes.map(|m| m.1).unwrap_or_default();
-
-        Shader::from_ptr(unsafe {
-            sb::C_SkImage_makeShaderWithFilterOptions(
-                self.native(),
-                tm1,
-                tm2,
-                filter_options.into_native(),
-                local_matrix.into().native_ptr_or_null(),
-            )
-        })
-        .unwrap()
-    }
-
     pub fn to_shader<'a>(
         &self,
         tile_modes: impl Into<Option<(TileMode, TileMode)>>,
+        sampling: impl Into<SamplingOptions>,
         local_matrix: impl Into<Option<&'a Matrix>>,
-    ) -> Shader {
+    ) -> Option<Shader> {
         let tile_modes = tile_modes.into();
-        let tm1 = tile_modes.map(|m| m.0).unwrap_or_default();
-        let tm2 = tile_modes.map(|m| m.1).unwrap_or_default();
+        let tm1 = tile_modes.map(|(tm, _)| tm).unwrap_or_default();
+        let tm2 = tile_modes.map(|(_, tm)| tm).unwrap_or_default();
+        let sampling = sampling.into();
 
         Shader::from_ptr(unsafe {
             sb::C_SkImage_makeShader(
                 self.native(),
                 tm1,
                 tm2,
+                sampling.native(),
                 local_matrix.into().native_ptr_or_null(),
             )
         })
-        .unwrap()
-    }
-
-    pub fn to_shader_with_quality<'a>(
-        &self,
-        tile_modes: impl Into<Option<(TileMode, TileMode)>>,
-        local_matrix: impl Into<Option<&'a Matrix>>,
-        filter_quality: FilterQuality,
-    ) -> Shader {
-        let tile_modes = tile_modes.into();
-        let tm1 = tile_modes.map(|m| m.0).unwrap_or_default();
-        let tm2 = tile_modes.map(|m| m.1).unwrap_or_default();
-        Shader::from_ptr(unsafe {
-            sb::C_SkImage_makeShaderWithQuality(
-                self.native(),
-                tm1,
-                tm2,
-                local_matrix.into().native_ptr_or_null(),
-                filter_quality,
-            )
-        })
-        .unwrap()
     }
 
     pub fn peek_pixels(&self) -> Option<Borrows<Pixmap>> {
@@ -464,6 +331,11 @@ impl RCHandle<SkImage> {
 
     pub fn is_texture_backed(&self) -> bool {
         unsafe { self.native().isTextureBacked() }
+    }
+
+    #[cfg(feature = "gpu")]
+    pub fn texture_size(&self) -> usize {
+        unsafe { self.native().textureSize() }
     }
 
     #[cfg(feature = "gpu")]
@@ -528,9 +400,7 @@ impl RCHandle<SkImage> {
         src: impl Into<IPoint>,
         caching_hint: CachingHint,
     ) -> bool {
-        if pixels.elements_size_of()
-            != (usize::try_from(dst_info.height()).unwrap() * dst_row_bytes)
-        {
+        if !dst_info.valid_pixels(dst_row_bytes, pixels) {
             return false;
         }
 
@@ -579,9 +449,7 @@ impl RCHandle<SkImage> {
         src: impl Into<IPoint>,
         caching_hint: CachingHint,
     ) -> bool {
-        if pixels.elements_size_of()
-            != (usize::try_from(dst_info.height()).unwrap() * dst_row_bytes)
-        {
+        if !dst_info.valid_pixels(dst_row_bytes, pixels) {
             return false;
         }
 
@@ -622,13 +490,13 @@ impl RCHandle<SkImage> {
     pub fn scale_pixels(
         &self,
         dst: &Pixmap,
-        filter_quality: FilterQuality,
+        sampling: impl Into<SamplingOptions>,
         caching_hint: impl Into<Option<CachingHint>>,
     ) -> bool {
         unsafe {
             self.native().scalePixels(
                 dst.native(),
-                filter_quality,
+                sampling.into().native(),
                 caching_hint.into().unwrap_or(CachingHint::Allow),
             )
         }
@@ -804,5 +672,28 @@ impl RCHandle<SkImage> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_reinterpretColorSpace(self.native(), new_color_space.into().into_ptr())
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{BitDepth, CachingHint, CompressionType};
+
+    #[test]
+    fn test_bit_depth_naming() {
+        let _ = BitDepth::F16;
+    }
+
+    #[test]
+    fn test_caching_hint_naming() {
+        let _ = CachingHint::Allow;
+    }
+    #[test]
+    fn test_compression_type_naming() {
+        // legacy type (replaced in m81 by ETC2_RGB8_UNORM)
+        #[allow(deprecated)]
+        let _ = CompressionType::ETC1;
+        // m81: preserve the underscore characters for consistency.
+        let _ = CompressionType::BC1_RGBA8_UNORM;
     }
 }

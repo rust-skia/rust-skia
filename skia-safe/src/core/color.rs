@@ -205,6 +205,7 @@ bitflags! {
         const BLUE = sb::SkColorChannelFlag::kBlue_SkColorChannelFlag as _;
         const ALPHA = sb::SkColorChannelFlag::kAlpha_SkColorChannelFlag as _;
         const GRAY = sb::SkColorChannelFlag::kGray_SkColorChannelFlag as _;
+        const GRAY_ALPHA = Self::GRAY.bits | Self::ALPHA.bits;
         const RG = Self::RED.bits | Self::GREEN.bits;
         const RGB = Self::RG.bits | Self::BLUE.bits;
         const RGBA = Self::RGB.bits | Self::ALPHA.bits;
@@ -213,7 +214,7 @@ bitflags! {
 
 // TODO: SkRGBA4f
 
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 #[repr(C)]
 pub struct Color4f {
     pub r: f32,
@@ -355,10 +356,7 @@ impl Color4f {
     // TODO: FromBytes_RGBA
 
     pub fn to_opaque(&self) -> Self {
-        Self {
-            a: 1.0,
-            ..self.clone()
-        }
+        Self { a: 1.0, ..*self }
     }
 }
 
@@ -379,23 +377,34 @@ pub mod colors {
     pub const MAGENTA: Color4f = Color4f::new(1.0, 0.0, 1.0, 1.0);
 }
 
-#[test]
-#[allow(clippy::float_cmp)]
-pub fn color4f_array_access() {
-    let mut color = Color4f {
-        r: 0.1,
-        g: 0.2,
-        b: 0.3,
-        a: 0.4,
-    };
-    color[1] = 0.5;
-    assert_eq!(0.5, color.g);
-}
+#[cfg(test)]
+mod tests {
+    use super::{colors, Color, Color4f};
 
-#[test]
-pub fn color_color4f_conversion() {
-    let c = Color::from_argb(1, 2, 3, 4);
-    let cf = Color4f::from(c);
-    let c2 = cf.to_color();
-    assert_eq!(c, c2);
+    #[test]
+    #[allow(clippy::float_cmp)]
+    pub fn color4f_array_access() {
+        let mut color = Color4f {
+            r: 0.1,
+            g: 0.2,
+            b: 0.3,
+            a: 0.4,
+        };
+        color[1] = 0.5;
+        assert_eq!(0.5, color.g);
+    }
+
+    #[test]
+    pub fn color_color4f_conversion() {
+        let c = Color::from_argb(1, 2, 3, 4);
+        let cf = Color4f::from(c);
+        let c2 = cf.to_color();
+        assert_eq!(c, c2);
+    }
+
+    #[test]
+    pub fn color4f_value_can_be_passed_as_ref() {
+        fn passed_as_ref(_c: impl AsRef<Color4f>) {}
+        passed_as_ref(colors::BLACK);
+    }
 }

@@ -324,6 +324,11 @@ impl PathBuilder {
         self
     }
 
+    pub fn add_path(&mut self, path: &Path) -> &mut Self {
+        unsafe { self.native_mut().addPath(path.native()) };
+        self
+    }
+
     pub fn inc_reserve(&mut self, extra_pt_count: usize, extra_verb_count: usize) {
         unsafe {
             self.native_mut().incReserve(

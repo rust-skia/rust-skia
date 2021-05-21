@@ -3,11 +3,11 @@ use crate::drivers::DrawingDriver;
 use skia_safe::{gpu, Budgeted, Canvas, ImageInfo, Surface};
 use std::path::Path;
 
-pub struct OpenGL {
+pub struct OpenGl {
     context: gpu::DirectContext,
 }
 
-impl DrawingDriver for OpenGL {
+impl DrawingDriver for OpenGl {
     const NAME: &'static str = "opengl";
 
     fn new() -> Self {

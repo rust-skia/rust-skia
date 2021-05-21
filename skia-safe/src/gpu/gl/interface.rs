@@ -11,35 +11,23 @@ impl NativeRefCountedBase for GrGLInterface {
     type Base = SkRefCntBase;
 }
 
-impl RCHandle<GrGLInterface> {
-    pub fn new_native() -> Option<Interface> {
+impl Interface {
+    pub fn new_native() -> Option<Self> {
         Self::from_ptr(unsafe { sb::C_GrGLInterface_MakeNativeInterface() as _ })
     }
 
-    pub fn new_load_with<F>(loadfn: F) -> Option<Interface>
+    pub fn new_load_with<F>(load_fn: F) -> Option<Self>
     where
         F: FnMut(&str) -> *const c_void,
     {
         Self::from_ptr(unsafe {
             sb::C_GrGLInterface_MakeAssembledInterface(
-                &loadfn as *const _ as *mut c_void,
+                &load_fn as *const _ as *mut c_void,
                 Some(gl_get_proc_fn_wrapper::<F>),
             ) as _
         })
     }
-}
 
-unsafe extern "C" fn gl_get_proc_fn_wrapper<F>(
-    ctx: *mut c_void,
-    name: *const raw::c_char,
-) -> *const c_void
-where
-    F: FnMut(&str) -> *const c_void,
-{
-    (*(ctx as *mut F))(std::ffi::CStr::from_ptr(name).to_str().unwrap())
-}
-
-impl RCHandle<GrGLInterface> {
     pub fn validate(&self) -> bool {
         unsafe { self.native().validate() }
     }
@@ -59,4 +47,14 @@ impl RCHandle<GrGLInterface> {
     pub fn has_extension(&self, extension: impl AsRef<str>) -> bool {
         self.extensions().has(extension)
     }
+}
+
+unsafe extern "C" fn gl_get_proc_fn_wrapper<F>(
+    ctx: *mut c_void,
+    name: *const raw::c_char,
+) -> *const c_void
+where
+    F: FnMut(&str) -> *const c_void,
+{
+    (*(ctx as *mut F))(std::ffi::CStr::from_ptr(name).to_str().unwrap())
 }

@@ -69,9 +69,9 @@ impl Default for RCHandle<sb::skia_textlayout_TypefaceFontProvider> {
     }
 }
 
-impl Into<FontMgr> for TypefaceFontProvider {
-    fn into(self) -> FontMgr {
-        self.deref().clone()
+impl From<TypefaceFontProvider> for FontMgr {
+    fn from(provider: TypefaceFontProvider) -> Self {
+        provider.deref().clone()
     }
 }
 

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use skia_bindings as sb;
 use skia_bindings::SkString;
-use std::{slice, str};
+use std::str;
 
 pub type String = Handle<SkString>;
 unsafe impl Send for String {}
@@ -59,10 +59,8 @@ impl AsStr for SkString {
     fn as_str(&self) -> &str {
         let mut size = 0;
         let slice = unsafe {
-            slice::from_raw_parts(
-                sb::C_SkString_c_str_size(self, &mut size) as *const u8,
-                size,
-            )
+            let ptr = sb::C_SkString_c_str_size(self, &mut size) as *const u8;
+            safer::from_raw_parts(ptr, size)
         };
         str::from_utf8(slice).unwrap()
     }

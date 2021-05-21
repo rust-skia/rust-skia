@@ -1,9 +1,8 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
-use crate::prelude::*;
 use crate::{
-    Bitmap, Canvas, DeferredDisplayList, IPoint, IRect, ISize, IVector, Image, ImageInfo, Paint,
-    Pixmap, Size, SurfaceCharacterization, SurfaceProps,
+    prelude::*, Bitmap, Canvas, DeferredDisplayList, IPoint, IRect, ISize, IVector, Image,
+    ImageInfo, Paint, Pixmap, Point, SamplingOptions, SurfaceCharacterization, SurfaceProps,
 };
 use skia_bindings as sb;
 use skia_bindings::{SkRefCntBase, SkSurface};
@@ -128,8 +127,10 @@ impl RCHandle<SkSurface> {
         })
     }
 
+    #[allow(clippy::missing_safety_doc)]
+    #[allow(clippy::too_many_arguments)]
     #[cfg(feature = "metal")]
-    pub fn from_ca_metal_layer(
+    pub unsafe fn from_ca_metal_layer(
         context: &mut gpu::RecordingContext,
         layer: gpu::mtl::Handle,
         origin: gpu::SurfaceOrigin,
@@ -137,21 +138,18 @@ impl RCHandle<SkSurface> {
         color_type: crate::ColorType,
         color_space: impl Into<Option<crate::ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
-    ) -> Option<(Self, gpu::mtl::Handle)> {
-        let mut drawable = ptr::null();
-        Self::from_ptr(unsafe {
-            sb::C_SkSurface_MakeFromCAMetalLayer(
-                context.native_mut(),
-                layer,
-                origin,
-                sample_count.into().unwrap_or(0).try_into().unwrap(),
-                color_type.into_native(),
-                color_space.into().into_ptr_or_null(),
-                surface_props.native_ptr_or_null(),
-                &mut drawable,
-            )
-        })
-        .map(|surface| (surface, drawable))
+        drawable: *mut gpu::mtl::Handle,
+    ) -> Option<Self> {
+        Self::from_ptr(sb::C_SkSurface_MakeFromCAMetalLayer(
+            context.native_mut(),
+            layer,
+            origin,
+            sample_count.into().unwrap_or(0).try_into().unwrap(),
+            color_type.into_native(),
+            color_space.into().into_ptr_or_null(),
+            surface_props.native_ptr_or_null(),
+            drawable,
+        ))
     }
 
     #[cfg(feature = "metal")]
@@ -367,13 +365,21 @@ impl RCHandle<SkSurface> {
         })
     }
 
-    pub fn draw(&mut self, canvas: &mut Canvas, size: impl Into<Size>, paint: Option<&Paint>) {
-        let size = size.into();
+    pub fn draw(
+        &mut self,
+        canvas: &mut Canvas,
+        offset: impl Into<Point>,
+        sampling: impl Into<SamplingOptions>,
+        paint: Option<&Paint>,
+    ) {
+        let offset = offset.into();
+        let sampling = sampling.into();
         unsafe {
             self.native_mut().draw(
                 canvas.native_mut(),
-                size.width,
-                size.height,
+                offset.x,
+                offset.y,
+                sampling.native(),
                 paint.native_ptr_or_null(),
             )
         }
@@ -398,13 +404,9 @@ impl RCHandle<SkSurface> {
         dst_row_bytes: usize,
         src: impl Into<IPoint>,
     ) -> bool {
-        if dst_row_bytes < dst_info.min_row_bytes() {
+        if !dst_info.valid_pixels(dst_row_bytes, dst_pixels) {
             return false;
-        };
-        let height: usize = dst_info.height().try_into().unwrap();
-        if dst_pixels.len() < dst_row_bytes * height {
-            return false;
-        };
+        }
         let src = src.into();
         unsafe {
             self.native_mut().readPixels1(
@@ -425,8 +427,8 @@ impl RCHandle<SkSurface> {
     }
 
     // TODO: AsyncReadResult, RescaleGamma (m79, m86)
-    // TODO: wrap asyncRescaleAndReadPixels (m76, m79)
-    // TODO: wrap asyncRescaleAndReadPixelsYUV420 (m77, m79)
+    // TODO: wrap asyncRescaleAndReadPixels (m76, m79, m89)
+    // TODO: wrap asyncRescaleAndReadPixelsYUV420 (m77, m79, m89)
 
     pub fn write_pixels_from_pixmap(&mut self, src: &Pixmap, dst: impl Into<IPoint>) {
         let dst = dst.into();
@@ -553,8 +555,8 @@ fn test_drawing_owned_as_exclusive_ref_ergonomics() {
     // - An &mut canvas can be drawn to.
     {
         let mut canvas = Canvas::new(ISize::new(16, 16), None).unwrap();
-        surface.draw(&mut canvas, (5.0, 5.0), None);
-        surface.draw(&mut canvas, (10.0, 10.0), None);
+        surface.draw(&mut canvas, (5.0, 5.0), SamplingOptions::default(), None);
+        surface.draw(&mut canvas, (10.0, 10.0), SamplingOptions::default(), None);
     }
 
     // option2:
@@ -562,7 +564,7 @@ fn test_drawing_owned_as_exclusive_ref_ergonomics() {
     {
         let mut surface2 = Surface::new_raster_n32_premul((16, 16)).unwrap();
         let canvas = surface2.canvas();
-        surface.draw(canvas, (5.0, 5.0), None);
-        surface.draw(canvas, (10.0, 10.0), None);
+        surface.draw(canvas, (5.0, 5.0), SamplingOptions::default(), None);
+        surface.draw(canvas, (10.0, 10.0), SamplingOptions::default(), None);
     }
 }

@@ -1,9 +1,8 @@
-use std::{iter, slice};
-
 use super::{BackendFormat, BackendTexture, Mipmapped, SurfaceOrigin};
-use crate::{prelude::*, YUVAIndex, YUVAInfo, YUVColorSpace};
+use crate::{prelude::*, YUVAInfo, YUVColorSpace};
 use skia_bindings as sb;
 use skia_bindings::{GrYUVABackendTextureInfo, GrYUVABackendTextures};
+use std::iter;
 
 /// A description of a set [BackendTexture]s that hold the planar data described by a [YUVAInfo].
 pub type YUVABackendTextureInfo = Handle<GrYUVABackendTextureInfo>;
@@ -126,10 +125,10 @@ impl YUVABackendTextures {
 
     pub fn textures(&self) -> &[BackendTexture] {
         unsafe {
-            let textures = BackendTexture::from_native_ref(&*sb::C_GrYUVABackendTextures_textures(
+            let textures = BackendTexture::from_native_ptr(sb::C_GrYUVABackendTextures_textures(
                 self.native(),
             ));
-            slice::from_raw_parts(textures, self.num_planes())
+            safer::from_raw_parts(textures, self.num_planes())
         }
     }
 
@@ -151,11 +150,5 @@ impl YUVABackendTextures {
 
     pub(crate) fn native_is_valid(n: &GrYUVABackendTextures) -> bool {
         YUVAInfo::native_is_valid(&n.fYUVAInfo)
-    }
-
-    pub fn to_yuva_indices(&self) -> Vec<YUVAIndex> {
-        let mut indices = [YUVAIndex::default(); YUVAIndex::INDEX_COUNT];
-        unsafe { self.native().toYUVAIndices(indices[0].native_mut()) };
-        indices[0..self.num_planes()].to_vec()
     }
 }

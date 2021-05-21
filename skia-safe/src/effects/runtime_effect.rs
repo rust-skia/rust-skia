@@ -1,12 +1,14 @@
-use crate::interop::AsStr;
-use crate::prelude::*;
-use crate::{interop, ColorFilter, Data, Matrix, Shader};
+use crate::{
+    interop::{self, AsStr},
+    prelude::*,
+    ColorFilter, Data, Matrix, Shader,
+};
+use sb::SkRuntimeEffect_Options;
 use skia_bindings as sb;
 use skia_bindings::{
     SkRefCntBase, SkRuntimeEffect, SkRuntimeEffect_Uniform, SkRuntimeEffect_Varying,
 };
 use std::ffi::CStr;
-use std::slice;
 
 pub type Uniform = Handle<SkRuntimeEffect_Uniform>;
 
@@ -22,34 +24,29 @@ impl NativeDrop for SkRuntimeEffect_Uniform {
     }
 }
 
-impl Handle<SkRuntimeEffect_Uniform> {
+impl Uniform {
     pub fn name(&self) -> &str {
-        self.native().fName.as_str()
+        self.native().name.as_str()
     }
 
     pub fn offset(&self) -> usize {
-        self.native().fOffset
+        self.native().offset
     }
 
     pub fn ty(&self) -> uniform::Type {
-        self.native().fType
+        self.native().type_
     }
 
     pub fn count(&self) -> i32 {
-        self.native().fCount
+        self.native().count
     }
 
     pub fn flags(&self) -> uniform::Flags {
-        uniform::Flags::from_bits(self.native().fFlags).unwrap()
+        uniform::Flags::from_bits(self.native().flags).unwrap()
     }
 
     pub fn marker(&self) -> u32 {
-        self.native().fMarker
-    }
-
-    #[cfg(feature = "gpu")]
-    pub fn gpu_type(&self) -> crate::private::gpu::SLType {
-        self.native().fGPUType
+        self.native().marker
     }
 
     pub fn is_array(&self) -> bool {
@@ -90,13 +87,13 @@ impl NativeDrop for SkRuntimeEffect_Varying {
     }
 }
 
-impl Handle<SkRuntimeEffect_Varying> {
+impl Varying {
     pub fn name(&self) -> &str {
-        self.native().fName.as_str()
+        self.native().name.as_str()
     }
 
     pub fn width(&self) -> i32 {
-        self.native().fWidth
+        self.native().width
     }
 }
 
@@ -106,22 +103,34 @@ impl NativeRefCountedBase for SkRuntimeEffect {
     type Base = SkRefCntBase;
 }
 
-pub fn new(sksl: impl AsRef<str>) -> Result<RuntimeEffect, String> {
-    let str = interop::String::from_str(sksl);
-    let mut error = interop::String::default();
-    let effect = RuntimeEffect::from_ptr(unsafe {
-        sb::C_SkRuntimeEffect_Make(str.native(), error.native_mut())
-    });
-    match effect {
-        Some(runtime_effect) => Ok(runtime_effect),
-        None => Err(error.as_str().to_owned()),
-    }
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Default)]
+pub struct Options {
+    pub inline_threshold: i32,
 }
 
-impl RCHandle<SkRuntimeEffect> {
+impl NativeTransmutable<SkRuntimeEffect_Options> for Options {}
+
+pub fn new(sksl: impl AsRef<str>) -> Result<RuntimeEffect, String> {
+    new_with_options(sksl, None)
+}
+
+pub fn new_with_options<'a>(
+    sksl: impl AsRef<str>,
+    options: impl Into<Option<&'a Options>>,
+) -> Result<RuntimeEffect, String> {
+    let str = interop::String::from_str(sksl);
+    let options = options.into().copied().unwrap_or_default();
+    let mut error = interop::String::default();
+    RuntimeEffect::from_ptr(unsafe {
+        sb::C_SkRuntimeEffect_Make(str.native(), options.native(), error.native_mut())
+    })
+    .ok_or_else(|| error.as_str().to_owned())
+}
+
+impl RuntimeEffect {
     pub fn make_shader<'a>(
         &mut self,
-        inputs: impl Into<Data>,
+        uniforms: impl Into<Data>,
         children: impl IntoIterator<Item = Shader>,
         local_matrix: impl Into<Option<&'a Matrix>>,
         is_opaque: bool,
@@ -133,11 +142,40 @@ impl RCHandle<SkRuntimeEffect> {
         Shader::from_ptr(unsafe {
             sb::C_SkRuntimeEffect_makeShader(
                 self.native_mut(),
-                inputs.into().into_ptr(),
+                uniforms.into().into_ptr(),
                 children.as_mut_ptr(),
                 children.len(),
                 local_matrix.into().native_ptr_or_null(),
                 is_opaque,
+            )
+        })
+    }
+
+    #[cfg(feature = "gpu")]
+    pub fn make_image<'a>(
+        &mut self,
+        context: &mut crate::gpu::RecordingContext,
+        uniforms: impl Into<Data>,
+        children: impl IntoIterator<Item = Shader>,
+        local_matrix: impl Into<Option<&'a Matrix>>,
+        result_info: crate::ImageInfo,
+        mipmapped: bool,
+    ) -> Option<crate::Image> {
+        let mut children: Vec<_> = children
+            .into_iter()
+            .map(|shader| shader.into_ptr())
+            .collect();
+
+        crate::Image::from_ptr(unsafe {
+            sb::C_SkRuntimeEffect_makeImage(
+                self.native_mut(),
+                context.native_mut(),
+                uniforms.into().into_ptr(),
+                children.as_mut_ptr(),
+                children.len(),
+                local_matrix.into().native_ptr_or_null(),
+                result_info.native(),
+                mipmapped,
             )
         })
     }
@@ -184,7 +222,7 @@ impl RCHandle<SkRuntimeEffect> {
         unsafe {
             let mut count: usize = 0;
             let ptr = sb::C_SkRuntimeEffect_uniforms(self.native(), &mut count);
-            slice::from_raw_parts(Uniform::from_native_ref(&*ptr), count)
+            safer::from_raw_parts(Uniform::from_native_ptr(ptr), count)
         }
     }
 
@@ -192,7 +230,7 @@ impl RCHandle<SkRuntimeEffect> {
         unsafe {
             let mut count: usize = 0;
             let ptr = sb::C_SkRuntimeEffect_children(self.native(), &mut count);
-            let slice = slice::from_raw_parts(ptr, count);
+            let slice = safer::from_raw_parts(ptr, count);
             slice.iter().map(|str| str.as_str())
         }
     }
@@ -201,7 +239,7 @@ impl RCHandle<SkRuntimeEffect> {
         unsafe {
             let mut count: usize = 0;
             let ptr = sb::C_SkRuntimeEffect_varyings(self.native(), &mut count);
-            slice::from_raw_parts(Varying::from_native_ref(&*ptr), count)
+            safer::from_raw_parts(Varying::from_native_ptr(ptr), count)
         }
     }
 
@@ -227,3 +265,13 @@ impl RCHandle<SkRuntimeEffect> {
 }
 
 // TODO: wrap SkRuntimeShaderBuilder
+
+#[cfg(test)]
+mod tests {
+    use crate::prelude::NativeTransmutable;
+
+    #[test]
+    fn options_layout() {
+        super::Options::test_layout()
+    }
+}

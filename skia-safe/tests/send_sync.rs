@@ -17,11 +17,16 @@ fn sendable_implements_send() {
 }
 
 mod codec {
-    use skia_safe::Codec;
+    use skia_safe::{codec, Codec};
     use static_assertions::*;
 
     // Codec seems to call into SkPngChunkReader*
     assert_not_impl_any!(Codec: Send, Sync);
+
+    assert_impl_all!(codec::Result: Send, Sync);
+    assert_impl_all!(codec::SelectionPolicy: Send, Sync);
+    assert_impl_all!(codec::ZeroInitialized: Send, Sync);
+    assert_impl_all!(codec::ScanlineOrder: Send, Sync);
 }
 
 mod core {
@@ -46,7 +51,6 @@ mod core {
     assert_not_impl_any!(DeferredDisplayListRecorder: Send, Sync);
     assert_not_impl_any!(Document: Send, Sync);
     assert_not_impl_any!(Drawable: Send, Sync);
-    assert_impl_all!(FilterOptions: Send, Sync);
     assert_impl_all!(Font: Send, Sync);
     assert_not_impl_any!(FontArguments: Send, Sync);
     assert_impl_all!(FontMetrics: Send, Sync);
@@ -60,13 +64,9 @@ mod core {
     // > So far the implementation seems to handle the "allocate additional storage as needed" in a
     // > thread safe way.
     assert_impl_all!(Image: Send, Sync);
-    assert_impl_all!(image::SamplingMode: Send, Sync);
-    assert_impl_all!(image::MipmapMode: Send, Sync);
-    assert_impl_all!(image::FilterOptions: Send, Sync);
     assert_impl_all!(image::CubicResampler: Send, Sync);
     assert_impl_all!(image::BitDepth: Send, Sync);
 
-    assert_impl_all!(image_filter::CropRect: Send, Sync);
     assert_impl_all!(ImageFilter: Send, Sync);
     assert_impl_all!(ImageGenerator: Send, Sync);
     assert_impl_all!(ColorInfo: Send, Sync);
@@ -106,11 +106,10 @@ mod core {
     assert_not_impl_any!(vertices::Attribute: Send, Sync);
     assert_impl_all!(Vertices: Send, Sync);
     assert_impl_all!(vertices::Builder: Send, Sync);
-    assert_impl_all!(YUVAIndex: Send, Sync);
-    assert_impl_all!(YUVASizeInfo: Send, Sync);
     // core/sampling_options.rs
     assert_impl_all!(CubicResampler: Send, Sync);
-    assert_impl_all!(FilterOptions: Send, Sync);
+    assert_impl_all!(FilterMode: Send, Sync);
+    assert_impl_all!(sampling_options::MediumBehavior: Send, Sync);
     assert_impl_all!(SamplingOptions: Send, Sync);
     // core/yuva_info.rs
     assert_impl_all!(YUVAInfo: Send, Sync);
@@ -141,8 +140,11 @@ mod effects {
     use static_assertions::*;
 
     assert_impl_all!(runtime_effect::Uniform: Send, Sync);
+    assert_impl_all!(runtime_effect::Varying: Send, Sync);
     assert_not_impl_any!(RuntimeEffect: Send, Sync);
+    assert_impl_all!(runtime_effect::Options: Send, Sync);
     assert_impl_all!(image_filters::CropRect: Send, Sync);
+    assert_impl_all!(image_filters::Dither: Send, Sync);
 }
 
 #[cfg(feature = "gpu")]
@@ -180,6 +182,7 @@ mod gpu {
         use skia_safe::gpu::mtl::*;
         use static_assertions::*;
         assert_impl_all!(TextureInfo: Send, Sync);
+        assert_impl_all!(BackendContext: Send, Sync);
     }
 
     #[cfg(feature = "vulkan")]

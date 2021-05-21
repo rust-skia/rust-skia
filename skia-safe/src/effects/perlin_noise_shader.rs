@@ -21,14 +21,6 @@ impl RCHandle<SkShader> {
     ) -> Option<Self> {
         turbulence(base_frequency, num_octaves, seed, tile_size)
     }
-
-    pub fn improved_perlin_noise(
-        base_frequency: (scalar, scalar),
-        num_octaves: usize,
-        z: scalar,
-    ) -> Option<Self> {
-        improved_noise(base_frequency, num_octaves, z)
-    }
 }
 
 pub fn fractal_noise(
@@ -61,21 +53,6 @@ pub fn turbulence(
             num_octaves.try_into().unwrap(),
             seed,
             tile_size.into().native().as_ptr_or_null(),
-        )
-    })
-}
-
-pub fn improved_noise(
-    base_frequency: (scalar, scalar),
-    num_octaves: usize,
-    z: scalar,
-) -> Option<Shader> {
-    Shader::from_ptr(unsafe {
-        sb::C_SkPerlinNoiseShader_MakeImprovedNoise(
-            base_frequency.0,
-            base_frequency.1,
-            num_octaves.try_into().unwrap(),
-            z,
         )
     })
 }

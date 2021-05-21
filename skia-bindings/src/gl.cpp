@@ -53,6 +53,7 @@ extern "C" GrGLFormat C_GrGLFormatFromGLEnum(GrGLenum glFormat) {
         case GR_GL_R8:                   return GrGLFormat::kR8;
         case GR_GL_ALPHA8:               return GrGLFormat::kALPHA8;
         case GR_GL_LUMINANCE8:           return GrGLFormat::kLUMINANCE8;
+        case GR_GL_LUMINANCE8_ALPHA8:    return GrGLFormat::kLUMINANCE8_ALPHA8;
         case GR_GL_BGRA8:                return GrGLFormat::kBGRA8;
         case GR_GL_RGB565:               return GrGLFormat::kRGB565;
         case GR_GL_RGBA16F:              return GrGLFormat::kRGBA16F;
@@ -85,6 +86,7 @@ extern "C" GrGLenum C_GrGLFormatToEnum(GrGLFormat format) {
         case GrGLFormat::kR8:                   return GR_GL_R8;
         case GrGLFormat::kALPHA8:               return GR_GL_ALPHA8;
         case GrGLFormat::kLUMINANCE8:           return GR_GL_LUMINANCE8;
+        case GrGLFormat::kLUMINANCE8_ALPHA8:    return GR_GL_LUMINANCE8_ALPHA8;
         case GrGLFormat::kBGRA8:                return GR_GL_BGRA8;
         case GrGLFormat::kRGB565:               return GR_GL_RGB565;
         case GrGLFormat::kRGBA16F:              return GR_GL_RGBA16F;

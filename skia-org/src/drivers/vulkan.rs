@@ -6,7 +6,7 @@ use ash::vk::Handle;
 use ash::{Entry, Instance};
 use skia_safe::{gpu, Budgeted, Canvas, ImageInfo, Surface};
 use std::convert::TryInto;
-use std::ffi::{c_void, CString};
+use std::ffi::CString;
 use std::os::raw;
 use std::path::Path;
 use std::ptr;
@@ -51,8 +51,8 @@ impl DrawingDriver for Vulkan {
         };
 
         Self {
-            ash_graphics,
             context,
+            ash_graphics,
         }
     }
 
@@ -100,7 +100,7 @@ impl Drop for AshGraphics {
 // most code copied from here: https://github.com/MaikKlein/ash/blob/master/examples/src/lib.rs
 impl AshGraphics {
     pub fn vulkan_version() -> Option<(usize, usize, usize)> {
-        let entry = Entry::new().unwrap();
+        let entry = unsafe { Entry::new() }.unwrap();
 
         let detected_version = entry.try_enumerate_instance_version().unwrap_or(None);
 
@@ -167,7 +167,7 @@ impl AshGraphics {
                         .get_physical_device_queue_family_properties(*physical_device)
                         .iter()
                         .enumerate()
-                        .filter_map(|(index, ref info)| {
+                        .find_map(|(index, ref info)| {
                             let supports_graphic =
                                 info.queue_flags.contains(vk::QueueFlags::GRAPHICS);
                             if supports_graphic {
@@ -176,10 +176,8 @@ impl AshGraphics {
                                 None
                             }
                         })
-                        .next()
                 })
-                .filter_map(|v| v)
-                .next()
+                .find_map(|v| v)
                 .expect("Failed to find a suitable Vulkan device.")
         };
 
@@ -217,10 +215,7 @@ impl AshGraphics {
         }
     }
 
-    pub unsafe fn get_proc(
-        &self,
-        of: gpu::vk::GetProcOf,
-    ) -> Option<unsafe extern "system" fn() -> c_void> {
+    pub unsafe fn get_proc(&self, of: gpu::vk::GetProcOf) -> Option<unsafe extern "system" fn()> {
         match of {
             gpu::vk::GetProcOf::Instance(instance, name) => {
                 let ash_instance = vk::Instance::from_raw(instance as _);

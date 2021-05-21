@@ -1,7 +1,7 @@
-use crate::{prelude::*, Shader};
+use crate::{prelude::*, CubicResampler, SamplingOptions, Shader};
 use crate::{
-    scalar, BlendMode, Color, ColorChannel, ColorFilter, FilterQuality, IPoint, IRect, ISize,
-    Image, ImageFilter, Matrix, Paint, Picture, Point3, Rect, Region, TileMode, Vector,
+    scalar, BlendMode, Color, ColorChannel, ColorFilter, IPoint, IRect, ISize, Image, ImageFilter,
+    Matrix, Paint, Picture, Point3, Rect, Region, TileMode, Vector,
 };
 use skia_bindings as sb;
 use skia_bindings::{SkImageFilter, SkImageFilters_CropRect};
@@ -19,6 +19,14 @@ impl CropRect {
         right: scalar::INFINITY,
         bottom: scalar::INFINITY,
     });
+
+    pub fn rect(&self) -> Option<Rect> {
+        if *self == Self::NO_CROP_RECT {
+            None
+        } else {
+            Some(self.0)
+        }
+    }
 }
 
 impl Default for CropRect {
@@ -229,20 +237,26 @@ pub fn image<'a>(
     image: impl Into<Image>,
     src_rect: impl Into<Option<&'a Rect>>,
     dst_rect: impl Into<Option<&'a Rect>>,
-    filter_quality: impl Into<Option<FilterQuality>>,
+    sampling_options: impl Into<Option<SamplingOptions>>,
 ) -> Option<ImageFilter> {
     let image = image.into();
     let image_rect = Rect::from_iwh(image.width(), image.height());
     let src_rect = src_rect.into().unwrap_or(&image_rect);
     let dst_rect = dst_rect.into().unwrap_or(&image_rect);
-    let filter_quality = filter_quality.into().unwrap_or(FilterQuality::High);
+    let sampling_options: SamplingOptions = sampling_options.into().unwrap_or_else(|| {
+        CubicResampler {
+            b: 1.0 / 3.0,
+            c: 1.0 / 3.0,
+        }
+        .into()
+    });
 
     ImageFilter::from_ptr(unsafe {
         sb::C_SkImageFilters_Image(
             image.into_ptr(),
             src_rect.as_ref().native(),
             dst_rect.as_ref().native(),
-            filter_quality,
+            sampling_options.native(),
         )
     })
 }
@@ -297,19 +311,18 @@ pub fn matrix_convolution(
 
 pub fn matrix_transform(
     matrix: &Matrix,
-    filter_quality: FilterQuality,
+    sampling_options: impl Into<SamplingOptions>,
     input: impl Into<Option<ImageFilter>>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
         sb::C_SkImageFilters_MatrixTransform(
             matrix.native(),
-            filter_quality,
+            sampling_options.into().native(),
             input.into().into_ptr_or_null(),
         )
     })
 }
 
-#[allow(clippy::new_ret_no_self)]
 pub fn merge(
     filters: impl IntoIterator<Item = Option<ImageFilter>>,
     crop_rect: impl Into<CropRect>,
@@ -360,9 +373,19 @@ pub fn picture<'a>(
     })
 }
 
+pub use skia_bindings::SkImageFilters_Dither as Dither;
+
 pub fn shader(shader: impl Into<Shader>, crop_rect: impl Into<CropRect>) -> Option<ImageFilter> {
+    shader_with_dither(shader, Dither::No, crop_rect)
+}
+
+pub fn shader_with_dither(
+    shader: impl Into<Shader>,
+    dither: Dither,
+    crop_rect: impl Into<CropRect>,
+) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
-        sb::C_SkImageFilters_Shader(shader.into().into_ptr(), crop_rect.into().native())
+        sb::C_SkImageFilters_Shader(shader.into().into_ptr(), dither, crop_rect.into().native())
     })
 }
 
@@ -376,23 +399,6 @@ pub fn tile(
             src.as_ref().native(),
             dst.as_ref().native(),
             input.into().into_ptr_or_null(),
-        )
-    })
-}
-
-#[deprecated(since = "0.37.0", note = "Prefer the more idiomatic blend function")]
-pub fn xfermode(
-    blend_mode: BlendMode,
-    background: impl Into<Option<ImageFilter>>,
-    foreground: impl Into<Option<ImageFilter>>,
-    crop_rect: impl Into<CropRect>,
-) -> Option<ImageFilter> {
-    ImageFilter::from_ptr(unsafe {
-        sb::C_SkImageFilters_Xfermode(
-            blend_mode,
-            background.into().into_ptr_or_null(),
-            foreground.into().into_ptr_or_null(),
-            crop_rect.into().native(),
         )
     })
 }
@@ -567,10 +573,346 @@ pub fn spot_lit_specular(
     })
 }
 
+impl ImageFilter {
+    pub fn alpha_threshold<'a>(
+        self,
+        crop_rect: impl Into<Option<&'a IRect>>,
+        region: &Region,
+        inner_min: scalar,
+        outer_max: scalar,
+    ) -> Option<Self> {
+        alpha_threshold(
+            region,
+            inner_min,
+            outer_max,
+            self,
+            crop_rect.into().map(|r| r.into()),
+        )
+    }
+
+    pub fn arithmetic<'a>(
+        inputs: impl Into<ArithmeticFPInputs>,
+        background: impl Into<Option<Self>>,
+        foreground: impl Into<Option<Self>>,
+        crop_rect: impl Into<Option<&'a IRect>>,
+    ) -> Option<Self> {
+        let inputs = inputs.into();
+        arithmetic(
+            inputs.k[0],
+            inputs.k[1],
+            inputs.k[2],
+            inputs.k[3],
+            inputs.enforce_pm_color,
+            background,
+            foreground,
+            crop_rect.into().map(|r| r.into()),
+        )
+    }
+
+    pub fn blur<'a>(
+        self,
+        crop_rect: impl Into<Option<&'a IRect>>,
+        sigma: (scalar, scalar),
+        tile_mode: impl Into<Option<crate::TileMode>>,
+    ) -> Option<Self> {
+        blur(sigma, tile_mode, self, crop_rect.into().map(|r| r.into()))
+    }
+
+    pub fn color_filter<'a>(
+        self,
+        crop_rect: impl Into<Option<&'a IRect>>,
+        cf: impl Into<ColorFilter>,
+    ) -> Option<Self> {
+        color_filter(cf, self, crop_rect.into().map(|r| r.into()))
+    }
+
+    pub fn compose(outer: impl Into<ImageFilter>, inner: impl Into<ImageFilter>) -> Option<Self> {
+        compose(outer, inner)
+    }
+
+    pub fn displacement_map_effect<'a>(
+        channel_selectors: (ColorChannel, ColorChannel),
+        scale: scalar,
+        displacement: impl Into<ImageFilter>,
+        color: impl Into<ImageFilter>,
+        crop_rect: impl Into<Option<&'a IRect>>,
+    ) -> Option<Self> {
+        displacement_map(
+            channel_selectors,
+            scale,
+            displacement.into(),
+            color,
+            crop_rect.into().map(|r| r.into()),
+        )
+    }
+
+    pub fn distant_lit_diffuse_lighting<'a>(
+        self,
+        crop_rect: impl Into<Option<&'a IRect>>,
+        direction: impl Into<Point3>,
+        light_color: impl Into<Color>,
+        surface_scale: scalar,
+        kd: scalar,
+    ) -> Option<Self> {
+        distant_lit_diffuse(
+            direction,
+            light_color,
+            surface_scale,
+            kd,
+            self,
+            crop_rect.into().map(|r| r.into()),
+        )
+    }
+
+    pub fn point_lit_diffuse_lighting<'a>(
+        self,
+        crop_rect: impl Into<Option<&'a IRect>>,
+        location: impl Into<Point3>,
+        light_color: impl Into<Color>,
+        surface_scale: scalar,
+        kd: scalar,
+    ) -> Option<Self> {
+        point_lit_diffuse(
+            location,
+            light_color,
+            surface_scale,
+            kd,
+            self,
+            crop_rect.into().map(|r| r.into()),
+        )
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn spot_lit_diffuse_lighting<'a>(
+        self,
+        crop_rect: impl Into<Option<&'a IRect>>,
+        location: impl Into<Point3>,
+        target: impl Into<Point3>,
+        specular_exponent: scalar,
+        cutoff_angle: scalar,
+        light_color: impl Into<Color>,
+        surface_scale: scalar,
+        kd: scalar,
+    ) -> Option<Self> {
+        spot_lit_diffuse(
+            location,
+            target,
+            specular_exponent,
+            cutoff_angle,
+            light_color,
+            surface_scale,
+            kd,
+            self,
+            crop_rect.into().map(|r| r.into()),
+        )
+    }
+
+    pub fn distant_lit_specular_lighting<'a>(
+        self,
+        crop_rect: impl Into<Option<&'a IRect>>,
+        direction: impl Into<Point3>,
+        light_color: impl Into<Color>,
+        surface_scale: scalar,
+        ks: scalar,
+        shininess: scalar,
+    ) -> Option<Self> {
+        distant_lit_specular(
+            direction,
+            light_color,
+            surface_scale,
+            ks,
+            shininess,
+            self,
+            crop_rect.into().map(|r| r.into()),
+        )
+    }
+
+    pub fn point_lit_specular_lighting<'a>(
+        self,
+        crop_rect: impl Into<Option<&'a IRect>>,
+        location: impl Into<Point3>,
+        light_color: impl Into<Color>,
+        surface_scale: scalar,
+        ks: scalar,
+        shininess: scalar,
+    ) -> Option<Self> {
+        point_lit_specular(
+            location,
+            light_color,
+            surface_scale,
+            ks,
+            shininess,
+            self,
+            crop_rect.into().map(|r| r.into()),
+        )
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn spot_lit_specular_lighting<'a>(
+        self,
+        crop_rect: impl Into<Option<&'a IRect>>,
+        location: impl Into<Point3>,
+        target: impl Into<Point3>,
+        specular_exponent: scalar,
+        cutoff_angle: scalar,
+        light_color: impl Into<Color>,
+        surface_scale: scalar,
+        ks: scalar,
+        shininess: scalar,
+    ) -> Option<Self> {
+        spot_lit_specular(
+            location,
+            target,
+            specular_exponent,
+            cutoff_angle,
+            light_color,
+            surface_scale,
+            ks,
+            shininess,
+            self,
+            crop_rect.into().map(|r| r.into()),
+        )
+    }
+
+    pub fn magnifier<'a>(
+        self,
+        crop_rect: impl Into<Option<&'a IRect>>,
+        src_rect: impl AsRef<Rect>,
+        inset: scalar,
+    ) -> Option<Self> {
+        magnifier(src_rect, inset, self, crop_rect.into().map(|r| r.into()))
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn matrix_convolution<'a>(
+        self,
+        crop_rect: impl Into<Option<&'a IRect>>,
+        kernel_size: impl Into<ISize>,
+        kernel: &[scalar],
+        gain: scalar,
+        bias: scalar,
+        kernel_offset: impl Into<IPoint>,
+        tile_mode: crate::TileMode,
+        convolve_alpha: bool,
+    ) -> Option<Self> {
+        matrix_convolution(
+            kernel_size,
+            kernel,
+            gain,
+            bias,
+            kernel_offset,
+            tile_mode,
+            convolve_alpha,
+            self,
+            crop_rect.into().map(|r| r.into()),
+        )
+    }
+
+    pub fn merge<'a>(
+        filters: impl IntoIterator<Item = Option<Self>>,
+        crop_rect: impl Into<Option<&'a IRect>>,
+    ) -> Option<Self> {
+        merge(filters, crop_rect.into().map(|r| r.into()))
+    }
+
+    pub fn dilate<'a>(
+        self,
+        crop_rect: impl Into<Option<&'a IRect>>,
+        radii: (scalar, scalar),
+    ) -> Option<Self> {
+        dilate(radii, self, crop_rect.into().map(|r| r.into()))
+    }
+
+    pub fn erode<'a>(
+        self,
+        crop_rect: impl Into<Option<&'a IRect>>,
+        radii: (scalar, scalar),
+    ) -> Option<Self> {
+        erode(radii, self, crop_rect.into().map(|r| r.into()))
+    }
+
+    pub fn offset<'a>(
+        self,
+        crop_rect: impl Into<Option<&'a IRect>>,
+        delta: impl Into<Vector>,
+    ) -> Option<Self> {
+        offset(delta, self, crop_rect.into().map(|r| r.into()))
+    }
+
+    pub fn from_paint<'a>(paint: &Paint, crop_rect: impl Into<Option<&'a IRect>>) -> Option<Self> {
+        self::paint(paint, crop_rect.into().map(|r| r.into()))
+    }
+
+    pub fn from_picture<'a>(
+        picture: impl Into<Picture>,
+        crop_rect: impl Into<Option<&'a Rect>>,
+    ) -> Option<Self> {
+        self::picture(picture, crop_rect)
+    }
+
+    pub fn tile(self, src: impl AsRef<Rect>, dst: impl AsRef<Rect>) -> Option<Self> {
+        tile(src, dst, self)
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub struct ArithmeticFPInputs {
+    pub k: [f32; 4],
+    pub enforce_pm_color: bool,
+}
+
+impl From<([f32; 4], bool)> for ArithmeticFPInputs {
+    fn from((k, enforce_pm_color): ([f32; 4], bool)) -> Self {
+        ArithmeticFPInputs {
+            k,
+            enforce_pm_color,
+        }
+    }
+}
+
+impl ArithmeticFPInputs {
+    pub fn new(k0: f32, k1: f32, k2: f32, k3: f32, enforce_pm_color: bool) -> Self {
+        Self {
+            k: [k0, k1, k2, k3],
+            enforce_pm_color,
+        }
+    }
+}
+
+impl Paint {
+    pub fn as_image_filter<'a>(
+        &self,
+        crop_rect: impl Into<Option<&'a IRect>>,
+    ) -> Option<ImageFilter> {
+        paint(self, crop_rect.into().map(|r| r.into()))
+    }
+}
+
+impl Picture {
+    pub fn as_image_filter<'a>(
+        &self,
+        crop_rect: impl Into<Option<&'a Rect>>,
+    ) -> Option<ImageFilter> {
+        self.clone().into_image_filter(crop_rect)
+    }
+
+    pub fn into_image_filter<'a>(
+        self,
+        crop_rect: impl Into<Option<&'a Rect>>,
+    ) -> Option<ImageFilter> {
+        picture(self, crop_rect)
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::CropRect;
+    use super::{CropRect, Dither};
     use crate::{prelude::NativeTransmutable, IRect, Rect};
+
+    #[test]
+    fn test_dither_naming() {
+        let _ = Dither::Yes;
+    }
 
     #[test]
     fn test_crop_rect_layout() {

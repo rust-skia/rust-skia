@@ -45,7 +45,7 @@ impl From<u32> for FourByteTag {
 }
 
 impl FourByteTag {
-    pub fn from_chars(a: char, b: char, c: char, d: char) -> Self {
+    pub const fn from_chars(a: char, b: char, c: char, d: char) -> Self {
         Self(
             (a as u8 as u32) << 24
                 | (b as u8 as u32) << 16
@@ -54,7 +54,7 @@ impl FourByteTag {
         )
     }
 
-    pub fn new(v: u32) -> Self {
+    pub const fn new(v: u32) -> Self {
         Self(v)
     }
 

@@ -1,11 +1,13 @@
 use super::{FontFamilies, TextBaseline, TextShadow};
-use crate::interop::{AsStr, FromStrs, SetStr};
-use crate::prelude::*;
-use crate::textlayout::{RangeExtensions, EMPTY_INDEX, EMPTY_RANGE};
-use crate::{interop, scalar, Color, FontMetrics, FontStyle, Paint, Typeface};
+use crate::{
+    interop::{self, AsStr, FromStrs, SetStr},
+    prelude::*,
+    scalar,
+    textlayout::{RangeExtensions, EMPTY_INDEX, EMPTY_RANGE},
+    Color, FontMetrics, FontStyle, Paint, Typeface,
+};
 use skia_bindings as sb;
 use std::ops::Range;
-use std::slice;
 
 bitflags! {
     pub struct TextDecoration: u32 {
@@ -251,8 +253,8 @@ impl Handle<sb::skia_textlayout_TextStyle> {
         unsafe {
             let ts: &sb::TextShadows = transmute_ref(&self.native().fTextShadows);
             let mut cnt = 0;
-            let ptr = TextShadow::from_native_ref(&*sb::C_TextShadows_ptr_count(ts, &mut cnt));
-            slice::from_raw_parts(ptr, cnt)
+            let ptr = TextShadow::from_native_ptr(sb::C_TextShadows_ptr_count(ts, &mut cnt));
+            safer::from_raw_parts(ptr, cnt)
         }
     }
 
@@ -270,8 +272,8 @@ impl Handle<sb::skia_textlayout_TextStyle> {
         unsafe {
             let ff: &sb::FontFeatures = transmute_ref(&self.native().fFontFeatures);
             let mut cnt = 0;
-            let ptr = FontFeature::from_native_ref(&*sb::C_FontFeatures_ptr_count(ff, &mut cnt));
-            slice::from_raw_parts(ptr, cnt)
+            let ptr = FontFeature::from_native_ptr(sb::C_FontFeatures_ptr_count(ff, &mut cnt));
+            safer::from_raw_parts(ptr, cnt)
         }
     }
 
@@ -297,7 +299,7 @@ impl Handle<sb::skia_textlayout_TextStyle> {
         unsafe {
             let mut count = 0;
             let ptr = sb::C_TextStyle_getFontFamilies(self.native(), &mut count);
-            FontFamilies(slice::from_raw_parts(ptr, count))
+            FontFamilies(safer::from_raw_parts(ptr, count))
         }
     }
 
@@ -458,8 +460,7 @@ fn placeholder_layout() {
 
 impl Default for Placeholder {
     fn default() -> Self {
-        #[allow(clippy::unknown_clippy_lints)]
-        #[allow(clippy::reversed_empty_ranges)] // 1.45 lint
+        #[allow(clippy::reversed_empty_ranges)]
         Self {
             range: EMPTY_RANGE,
             style: Default::default(),

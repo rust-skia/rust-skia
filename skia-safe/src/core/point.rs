@@ -2,7 +2,7 @@ use crate::prelude::*;
 use crate::{scalar, ISize, Size};
 use skia_bindings as sb;
 use skia_bindings::{SkIPoint, SkPoint};
-use std::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 pub use IPoint as IVector;
 
@@ -190,6 +190,22 @@ impl MulAssign<scalar> for Point {
     fn mul_assign(&mut self, rhs: scalar) {
         self.x *= rhs;
         self.y *= rhs;
+    }
+}
+
+// `SkPoint.h` does not define a `/` operator, but we add it to complement Mul<>.
+
+impl Div<scalar> for Point {
+    type Output = Self;
+    fn div(self, rhs: scalar) -> Self {
+        Self::new(self.x / rhs, self.y / rhs)
+    }
+}
+
+impl DivAssign<scalar> for Point {
+    fn div_assign(&mut self, rhs: scalar) {
+        self.x /= rhs;
+        self.y /= rhs;
     }
 }
 

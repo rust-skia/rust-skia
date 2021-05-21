@@ -26,11 +26,12 @@ stages:
     parameters:
       platform: 'Linux'
       platformTarget: 'x86_64-unknown-linux-gnu'
-      androidHost: 'linux-x86_64'
-      androidNDK: 'r21d'
+      # The container we use has Android pre-installed.
+      # androidHost: 'linux-x86_64'
+      # androidNDK: 'r21e'
       androidAPILevel: '26'
       androidBinExt: ''
-      vmImage: 'ubuntu-16.04'
+      vmImage: 'ubuntu-20.04'
       container: 'ghcr.io/pragmatrix/rust-skia-linux:latest'
       deployRelease: ${{ eq(variables['build.SourceBranchName'], 'release') }}
 
@@ -39,7 +40,7 @@ stages:
       platform: 'macOS'
       platformTarget: 'x86_64-apple-darwin'
       androidHost: 'darwin-x86_64'
-      androidNDK: 'r21d'
+      androidNDK: 'r21e'
       androidAPILevel: '26'
       androidBinExt: ''
       vmImage: 'macOS-10.15'
@@ -51,7 +52,7 @@ stages:
       platformTarget: 'x86_64-pc-windows-msvc'
       # No Android builds for Windows, ATM.
       # androidHost: 'windows-x86_64'
-      androidNDK: 'r21d'
+      androidNDK: 'r21e'
       androidAPILevel: '26'
       androidBinExt: '.cmd'
       vmImage: 'windows-2019'
