@@ -2279,17 +2279,25 @@ extern "C" SkColorFilter* C_SkOverdrawColorFilter_MakeWithSkColors(const SkColor
 
 extern "C" {
 
-/*
-SkRuntimeEffect *C_SkRuntimeEffect_Make(
+SkRuntimeEffect *C_SkRuntimeEffect_MakeForColorFilter(
     const SkString *sksl,
     const SkRuntimeEffect::Options *options,
     SkString *error)
 {
-    auto r = SkRuntimeEffect::Make(*sksl, *options);
+    auto r = SkRuntimeEffect::MakeForColorFilter(*sksl, *options);
     *error = r.errorText;
     return r.effect.release();
 }
-*/
+
+SkRuntimeEffect *C_SkRuntimeEffect_MakeForShader(
+    const SkString *sksl,
+    const SkRuntimeEffect::Options *options,
+    SkString *error)
+{
+    auto r = SkRuntimeEffect::MakeForShader(*sksl, *options);
+    *error = r.errorText;
+    return r.effect.release();
+}
 
 SkShader *C_SkRuntimeEffect_makeShader(const SkRuntimeEffect *self, SkData *uniforms, SkShader **children, size_t childCount,
                                        const SkMatrix *localMatrix, bool isOpaque) {
@@ -2327,19 +2335,11 @@ const SkRuntimeEffect::Uniform* C_SkRuntimeEffect_uniforms(const SkRuntimeEffect
     return &*uniforms.begin();
 }
 
-/*
-const SkString* C_SkRuntimeEffect_children(const SkRuntimeEffect* self, size_t* count) {
+const SkRuntimeEffect::Child* C_SkRuntimeEffect_children(const SkRuntimeEffect* self, size_t* count) {
     auto children = self->children();
     *count = children.count();
     return &*children.begin();
 }
-
-const SkRuntimeEffect::Varying* C_SkRuntimeEffect_varyings(const SkRuntimeEffect* self, size_t* count) {
-    auto varyings = self->varyings();
-    *count = varyings.count();
-    return &*varyings.begin();
-}
-*/
 
 }
 
