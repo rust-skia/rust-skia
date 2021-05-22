@@ -88,7 +88,6 @@
 // utils/
 #include "include/utils/SkCamera.h"
 #include "include/utils/SkCustomTypeface.h"
-#include "include/utils/SkInterpolator.h"
 #include "include/utils/SkNullCanvas.h"
 #include "include/utils/SkParsePath.h"
 #include "include/utils/SkShadowUtils.h"
@@ -2280,6 +2279,7 @@ extern "C" SkColorFilter* C_SkOverdrawColorFilter_MakeWithSkColors(const SkColor
 
 extern "C" {
 
+/*
 SkRuntimeEffect *C_SkRuntimeEffect_Make(
     const SkString *sksl,
     const SkRuntimeEffect::Options *options,
@@ -2289,6 +2289,7 @@ SkRuntimeEffect *C_SkRuntimeEffect_Make(
     *error = r.errorText;
     return r.effect.release();
 }
+*/
 
 SkShader *C_SkRuntimeEffect_makeShader(const SkRuntimeEffect *self, SkData *uniforms, SkShader **children, size_t childCount,
                                        const SkMatrix *localMatrix, bool isOpaque) {
@@ -2326,6 +2327,7 @@ const SkRuntimeEffect::Uniform* C_SkRuntimeEffect_uniforms(const SkRuntimeEffect
     return &*uniforms.begin();
 }
 
+/*
 const SkString* C_SkRuntimeEffect_children(const SkRuntimeEffect* self, size_t* count) {
     auto children = self->children();
     *count = children.count();
@@ -2337,6 +2339,7 @@ const SkRuntimeEffect::Varying* C_SkRuntimeEffect_varyings(const SkRuntimeEffect
     *count = varyings.count();
     return &*varyings.begin();
 }
+*/
 
 }
 
@@ -2699,7 +2702,8 @@ C_SkCustomTypefaceBuilder_setGlyph3(SkCustomTypefaceBuilder *self, SkGlyphID gly
     self->setGlyph(glyph, advance, sp(picture));
 }
 */
- 
+
+/* 
 extern "C" void C_SkInterpolator_destruct(SkInterpolator* self) {
     self->~SkInterpolator();
 }
@@ -2715,6 +2719,7 @@ extern "C" void C_SkInterpolator_setReset(SkInterpolator* self, bool reset) {
 extern "C" void C_SkInterpolator_setMirror(SkInterpolator* self, bool mirror) {
     self->setMirror(mirror);
 }
+*/
 
 extern "C" SkCanvas* C_SkMakeNullCanvas() {
     return SkMakeNullCanvas().release();
