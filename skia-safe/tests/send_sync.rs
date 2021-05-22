@@ -103,7 +103,7 @@ mod core {
     assert_impl_all!(typeface::LocalizedString: Send, Sync);
     assert_impl_all!(Typeface: Send, Sync);
     assert_not_impl_any!(typeface::LocalizedStringsIter: Send, Sync);
-    assert_not_impl_any!(vertices::Attribute: Send, Sync);
+    // assert_not_impl_any!(vertices::Attribute: Send, Sync);
     assert_impl_all!(Vertices: Send, Sync);
     assert_impl_all!(vertices::Builder: Send, Sync);
     // core/sampling_options.rs
@@ -140,7 +140,7 @@ mod effects {
     use static_assertions::*;
 
     assert_impl_all!(runtime_effect::Uniform: Send, Sync);
-    assert_impl_all!(runtime_effect::Varying: Send, Sync);
+    // assert_impl_all!(runtime_effect::Varying: Send, Sync);
     assert_not_impl_any!(RuntimeEffect: Send, Sync);
     assert_impl_all!(runtime_effect::Options: Send, Sync);
     assert_impl_all!(image_filters::CropRect: Send, Sync);
@@ -271,12 +271,12 @@ mod svg {
 }
 
 mod utils {
-    use skia_safe::utils::interpolator::TimeToT;
+    // use skia_safe::utils::interpolator::TimeToT;
     use skia_safe::utils::*;
     use static_assertions::*;
     assert_impl_all!(CustomTypefaceBuilder: Send, Sync);
-    assert_impl_all!(Interpolator: Send, Sync);
-    assert_impl_all!(TimeToT: Send, Sync);
+    // assert_impl_all!(Interpolator: Send, Sync);
+    // assert_impl_all!(TimeToT: Send, Sync);
 }
 
 pub mod assert {

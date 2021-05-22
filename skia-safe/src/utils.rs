@@ -5,7 +5,7 @@ mod custom_typeface;
 pub use custom_typeface::*;
 
 pub mod interpolator;
-pub use interpolator::Interpolator;
+// pub use interpolator::Interpolator;
 
 mod null_canvas;
 pub use null_canvas::*;

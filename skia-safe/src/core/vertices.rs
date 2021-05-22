@@ -1,9 +1,9 @@
 use crate::{prelude::*, Color, Point, Rect};
 use skia_bindings::{
-    self as sb, SkPoint, SkVertices, SkVertices_Attribute, SkVertices_Attribute_Type,
+    self as sb, SkPoint, SkVertices, /* SkVertices_Attribute, SkVertices_Attribute_Type, */
     SkVertices_Builder,
 };
-use std::{ffi::CStr, fmt, marker::PhantomData, os::raw::c_char, ptr, slice};
+use std::{/* ffi::CStr, */ fmt, /* marker::PhantomData, os::raw::c_char, */ ptr, slice};
 
 #[deprecated(since = "0.29.0", note = "removed without replacement")]
 pub type BoneIndices = [u32; 4];
@@ -23,6 +23,8 @@ pub use skia_bindings::SkVertices_VertexMode as VertexMode;
 fn test_vertices_vertex_mode_naming() {
     let _ = VertexMode::Triangles;
 }
+
+/*
 
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -46,6 +48,9 @@ fn test_attribute_usage_naming() {
     let _ = AttributeUsage::Vector;
 }
 
+*/
+
+/*
 #[repr(C)]
 #[derive(Copy, Clone, Eq, Debug)]
 pub struct Attribute<'a> {
@@ -118,6 +123,8 @@ impl Attribute<'_> {
         unsafe { self.native().isValid() }
     }
 }
+
+*/
 
 pub type Vertices = RCHandle<SkVertices>;
 unsafe impl Send for Vertices {}

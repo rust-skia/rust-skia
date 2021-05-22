@@ -1,5 +1,6 @@
 //! This wrapper combines SkInterpolatorBase and SkInterpolator into the type Interpolator.
 
+/*
 use crate::{prelude::*, scalar, Point};
 use skia_bindings::{self as sb, SkInterpolator, SkUnitCubicInterp};
 use std::{fmt, time::Duration};
@@ -170,3 +171,5 @@ pub fn unit_cubic_interp(value: scalar, b: impl Into<Point>, c: impl Into<Point>
     let c = c.into();
     unsafe { SkUnitCubicInterp(value, b.x, b.y, c.x, c.y) }
 }
+
+*/

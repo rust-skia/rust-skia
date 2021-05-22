@@ -1,11 +1,11 @@
-use crate::{
-    interop::{self, AsStr},
-    prelude::*,
-    ColorFilter, Data, Matrix, Shader,
-};
+use crate::{interop::AsStr, prelude::*, ColorFilter, Data, Matrix, Shader};
 use skia_bindings::{
-    self as sb, SkRefCntBase, SkRuntimeEffect, SkRuntimeEffect_Options, SkRuntimeEffect_Uniform,
-    SkRuntimeEffect_Varying,
+    self as sb,
+    SkRefCntBase,
+    SkRuntimeEffect,
+    SkRuntimeEffect_Options,
+    SkRuntimeEffect_Uniform,
+    // SkRuntimeEffect_Varying,
 };
 use std::{ffi::CStr, fmt};
 
@@ -50,9 +50,9 @@ impl Uniform {
         uniform::Flags::from_bits(self.native().flags).unwrap()
     }
 
-    pub fn marker(&self) -> u32 {
-        self.native().marker
-    }
+    // pub fn marker(&self) -> u32 {
+    //     self.native().marker
+    // }
 
     pub fn is_array(&self) -> bool {
         self.flags().contains(uniform::Flags::ARRAY)
@@ -75,12 +75,14 @@ pub mod uniform {
     bitflags! {
         pub struct Flags : u32 {
             const ARRAY = sb::SkRuntimeEffect_Uniform_Flags_kArray_Flag as _;
-            const MARKER = sb::SkRuntimeEffect_Uniform_Flags_kMarker_Flag as _;
-            const MARKER_NORMALS = sb::SkRuntimeEffect_Uniform_Flags_kMarkerNormals_Flag as _;
+            // const MARKER = sb::SkRuntimeEffect_Uniform_Flags_kMarker_Flag as _;
+            // const MARKER_NORMALS = sb::SkRuntimeEffect_Uniform_Flags_kMarkerNormals_Flag as _;
             const SRGB_UNPREMUL = sb::SkRuntimeEffect_Uniform_Flags_kSRGBUnpremul_Flag as _;
         }
     }
 }
+
+/*
 
 pub type Varying = Handle<SkRuntimeEffect_Varying>;
 unsafe impl Send for Varying {}
@@ -111,6 +113,8 @@ impl Varying {
     }
 }
 
+*/
+
 pub type RuntimeEffect = RCHandle<SkRuntimeEffect>;
 
 impl NativeRefCountedBase for SkRuntimeEffect {
@@ -125,9 +129,14 @@ pub struct Options {
 
 impl NativeTransmutable<SkRuntimeEffect_Options> for Options {}
 
+/*
 pub fn new(sksl: impl AsRef<str>) -> Result<RuntimeEffect, String> {
     new_with_options(sksl, None)
 }
+
+*/
+
+/*
 
 pub fn new_with_options<'a>(
     sksl: impl AsRef<str>,
@@ -142,12 +151,14 @@ pub fn new_with_options<'a>(
     .ok_or_else(|| error.as_str().to_owned())
 }
 
+*/
+
 impl fmt::Debug for RuntimeEffect {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("RuntimeEffect")
             .field("uniform_size", &self.uniform_size())
             .field("uniforms", &self.uniforms())
-            .field("varyings", &self.varyings())
+            // .field("varyings", &self.varyings())
             .finish()
     }
 }
@@ -237,22 +248,22 @@ impl RuntimeEffect {
         }
     }
 
-    pub fn children(&self) -> impl Iterator<Item = &str> {
-        unsafe {
-            let mut count: usize = 0;
-            let ptr = sb::C_SkRuntimeEffect_children(self.native(), &mut count);
-            let slice = safer::from_raw_parts(ptr, count);
-            slice.iter().map(|str| str.as_str())
-        }
-    }
+    // pub fn children(&self) -> impl Iterator<Item = &str> {
+    //     unsafe {
+    //         let mut count: usize = 0;
+    //         let ptr = sb::C_SkRuntimeEffect_children(self.native(), &mut count);
+    //         let slice = safer::from_raw_parts(ptr, count);
+    //         slice.iter().map(|str| str.as_str())
+    //     }
+    // }
 
-    pub fn varyings(&self) -> &[Varying] {
-        unsafe {
-            let mut count: usize = 0;
-            let ptr = sb::C_SkRuntimeEffect_varyings(self.native(), &mut count);
-            safer::from_raw_parts(Varying::from_native_ptr(ptr), count)
-        }
-    }
+    // pub fn varyings(&self) -> &[Varying] {
+    //     unsafe {
+    //         let mut count: usize = 0;
+    //         let ptr = sb::C_SkRuntimeEffect_varyings(self.native(), &mut count);
+    //         safer::from_raw_parts(Varying::from_native_ptr(ptr), count)
+    //     }
+    // }
 
     #[deprecated(since = "0.35.0", note = "Use find_uniform()")]
     pub fn find_input(&self, name: impl AsRef<CStr>) -> Option<&Uniform> {
@@ -265,14 +276,14 @@ impl RuntimeEffect {
             .map(|ptr| Uniform::from_native_ref(unsafe { &*ptr }))
     }
 
-    pub fn find_child(&self, name: impl AsRef<CStr>) -> Option<usize> {
-        unsafe {
-            self.native()
-                .findChild(name.as_ref().as_ptr())
-                .try_into()
-                .ok()
-        }
-    }
+    // pub fn find_child(&self, name: impl AsRef<CStr>) -> Option<usize> {
+    //     unsafe {
+    //         self.native()
+    //             .findChild(name.as_ref().as_ptr())
+    //             .try_into()
+    //             .ok()
+    //     }
+    // }
 }
 
 // TODO: wrap SkRuntimeEffectBuilder, SkRuntimeShaderBuilder
