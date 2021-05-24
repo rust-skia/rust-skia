@@ -1,10 +1,7 @@
 use super::{PositionWithAffinity, RectHeightStyle, RectWidthStyle, TextBox};
-use crate::{prelude::*, scalar, textlayout::LineMetrics, Canvas, Point};
+use crate::{interop::VecSink, prelude::*, scalar, textlayout::LineMetrics, Canvas, Point};
 use skia_bindings as sb;
-use std::{
-    fmt,
-    ops::{Index, Range},
-};
+use std::{fmt, ops::Range};
 
 pub type Paragraph = RefHandle<sb::skia_textlayout_Paragraph>;
 unsafe impl Send for Paragraph {}
@@ -79,23 +76,48 @@ impl Paragraph {
         range: Range<usize>,
         rect_height_style: RectHeightStyle,
         rect_width_style: RectWidthStyle,
-    ) -> TextBoxes {
-        TextBoxes::construct(|tb| unsafe {
+    ) -> Vec<TextBox> {
+        let mut result: Vec<TextBox> = Vec::new();
+
+        let mut set_tb = |tbs: &[sb::skia_textlayout_TextBox]| {
+            result = tbs
+                .iter()
+                .map(|tb| TextBox::from_native_ref(tb))
+                .cloned()
+                .collect();
+        };
+
+        unsafe {
             sb::C_Paragraph_getRectsForRange(
                 self.native_mut_force(),
                 range.start.try_into().unwrap(),
                 range.end.try_into().unwrap(),
                 rect_height_style,
                 rect_width_style,
-                tb,
-            )
-        })
+                VecSink::new(&mut set_tb).native_mut(),
+            );
+        }
+        result
     }
 
-    pub fn get_rects_for_placeholders(&self) -> TextBoxes {
-        TextBoxes::construct(|tb| unsafe {
-            sb::C_Paragraph_getRectsForPlaceholders(self.native_mut_force(), tb)
-        })
+    pub fn get_rects_for_placeholders(&self) -> Vec<TextBox> {
+        let mut result: Vec<TextBox> = Vec::new();
+
+        let mut set_tb = |tbs: &[sb::skia_textlayout_TextBox]| {
+            result = tbs
+                .iter()
+                .map(|tb| TextBox::from_native_ref(tb))
+                .cloned()
+                .collect();
+        };
+
+        unsafe {
+            sb::C_Paragraph_getRectsForPlaceholders(
+                self.native_mut_force(),
+                VecSink::new(&mut set_tb).native_mut(),
+            )
+        }
+        result
     }
 
     pub fn get_glyph_position_at_coordinate(&self, p: impl Into<Point>) -> PositionWithAffinity {
@@ -115,11 +137,23 @@ impl Paragraph {
         range[0]..range[1]
     }
 
-    pub fn get_line_metrics(&self) -> LineMetricsVector {
-        Handle::<sb::LineMetricsVector>::construct(|lmv| unsafe {
-            sb::C_Paragraph_getLineMetrics(self.native_mut_force(), lmv)
-        })
-        .borrows(self)
+    pub fn get_line_metrics(&self) -> Vec<LineMetrics> {
+        let mut result: Vec<LineMetrics> = Vec::new();
+        let mut set_lm = |lms: &[sb::skia_textlayout_LineMetrics]| {
+            result = lms
+                .iter()
+                .map(|lm| LineMetrics::from_native_ref(lm).clone())
+                .collect();
+        };
+
+        unsafe {
+            sb::C_Paragraph_getLineMetrics(
+                self.native_mut_force(),
+                VecSink::new(&mut set_lm).native_mut(),
+            )
+        }
+
+        result
     }
 
     pub fn line_number(&self) -> usize {
@@ -131,89 +165,11 @@ impl Paragraph {
     }
 }
 
-pub type TextBoxes = Handle<sb::TextBoxes>;
+#[deprecated(since = "0.0.0", note = "Use Vec<TextBox>")]
+pub type TextBoxes = Vec<TextBox>;
 
-impl NativeDrop for sb::TextBoxes {
-    fn drop(&mut self) {
-        unsafe { sb::C_TextBoxes_destruct(self) }
-    }
-}
-
-impl Index<usize> for TextBoxes {
-    type Output = TextBox;
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.as_slice()[index]
-    }
-}
-
-impl AsRef<[TextBox]> for TextBoxes {
-    fn as_ref(&self) -> &[TextBox] {
-        self.as_slice()
-    }
-}
-
-impl fmt::Debug for TextBoxes {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_tuple("TextBoxes").field(&self.as_slice()).finish()
-    }
-}
-
-impl TextBoxes {
-    pub fn iter(&self) -> impl Iterator<Item = &TextBox> {
-        self.as_slice().iter()
-    }
-
-    pub fn as_slice(&self) -> &[TextBox] {
-        unsafe {
-            let mut count = 0;
-            let ptr = sb::C_TextBoxes_ptr_count(self.native(), &mut count);
-            safer::from_raw_parts(ptr as *const TextBox, count)
-        }
-    }
-}
-
-pub type LineMetricsVector<'a> = Borrows<'a, Handle<sb::LineMetricsVector>>;
-
-impl NativeDrop for sb::LineMetricsVector {
-    fn drop(&mut self) {
-        unsafe { sb::C_LineMetricsVector_destruct(self) }
-    }
-}
-
-impl<'a> Index<usize> for LineMetricsVector<'a> {
-    type Output = LineMetrics<'a>;
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.as_slice()[index]
-    }
-}
-
-impl<'a> AsRef<[LineMetrics<'a>]> for LineMetricsVector<'a> {
-    fn as_ref(&self) -> &[LineMetrics<'a>] {
-        self.as_slice()
-    }
-}
-
-impl fmt::Debug for LineMetricsVector<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_tuple("LineMetricsVector")
-            .field(&self.as_slice())
-            .finish()
-    }
-}
-
-impl<'a> LineMetricsVector<'a> {
-    pub fn iter(&self) -> impl Iterator<Item = &'a LineMetrics<'a>> {
-        self.as_slice().iter()
-    }
-
-    pub fn as_slice(&self) -> &'a [LineMetrics<'a>] {
-        unsafe {
-            let mut count = 0;
-            let ptr = sb::C_LineMetricsVector_ptr_count(self.native(), &mut count);
-            safer::from_raw_parts(ptr as *const LineMetrics, count)
-        }
-    }
-}
+#[deprecated(since = "0.0.0", note = "Use Vec<LineMetrics>")]
+pub type LineMetricsVector<'a> = Vec<LineMetrics<'a>>;
 
 #[test]
 #[serial_test::serial]

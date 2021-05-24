@@ -177,7 +177,7 @@ impl NativePartialEq for sb::skia_textlayout_TextStyle {
     }
 }
 
-impl Default for Handle<sb::skia_textlayout_TextStyle> {
+impl Default for TextStyle {
     fn default() -> Self {
         Self::new()
     }
@@ -207,7 +207,7 @@ impl fmt::Debug for TextStyle {
     }
 }
 
-impl Handle<sb::skia_textlayout_TextStyle> {
+impl TextStyle {
     pub fn new() -> Self {
         TextStyle::construct(|ts| unsafe { sb::C_TextStyle_Construct(ts) })
     }
@@ -286,10 +286,9 @@ impl Handle<sb::skia_textlayout_TextStyle> {
 
     pub fn shadows(&self) -> &[TextShadow] {
         unsafe {
-            let ts: &sb::TextShadows = transmute_ref(&self.native().fTextShadows);
-            let mut cnt = 0;
-            let ptr = TextShadow::from_native_ptr(sb::C_TextShadows_ptr_count(ts, &mut cnt));
-            safer::from_raw_parts(ptr, cnt)
+            let mut count = 0;
+            let ptr = sb::C_TextStyle_getShadows(&self.native().fTextShadows, &mut count);
+            safer::from_raw_parts(TextShadow::from_native_ptr(ptr), count)
         }
     }
 
@@ -305,10 +304,9 @@ impl Handle<sb::skia_textlayout_TextStyle> {
 
     pub fn font_features(&self) -> &[FontFeature] {
         unsafe {
-            let ff: &sb::FontFeatures = transmute_ref(&self.native().fFontFeatures);
-            let mut cnt = 0;
-            let ptr = FontFeature::from_native_ptr(sb::C_FontFeatures_ptr_count(ff, &mut cnt));
-            safer::from_raw_parts(ptr, cnt)
+            let mut count = 0;
+            let ptr = sb::C_TextStyle_getFontFeatures(&self.native().fFontFeatures, &mut count);
+            safer::from_raw_parts(FontFeature::from_native_ptr(ptr), count)
         }
     }
 

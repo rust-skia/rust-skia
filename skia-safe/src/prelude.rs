@@ -509,17 +509,22 @@ impl<N: NativeRefCounted> AsRef<RCHandle<N>> for RCHandle<N> {
 }
 
 impl<N: NativeRefCounted> RCHandle<N> {
-    /// Creates an RCHandle from a pointer.
-    /// Returns None if the pointer is null.
-    /// Does not increase the reference count.
+    /// Creates an reference counted handle from a native pointer.
+    ///
+    /// Takes ownership of the object the pointer points to, does not increase the reference count.
+    ///
+    /// Returns `None` if the pointer is `null`.
     #[inline]
     pub(crate) fn from_ptr(ptr: *mut N) -> Option<Self> {
         ptr::NonNull::new(ptr).map(Self)
     }
 
-    /// Creates an RCHandle from a pointer.
-    /// Returns None if the pointer is null.
-    /// Increases the reference count.
+    /// Creates an reference counted handle from a pointer.
+    ///
+    /// Returns `None` if the pointer is `null`.
+    ///
+    /// Shares ownership with the object referenced to by the pointer, therefore increases the
+    /// reference count.
     #[inline]
     pub(crate) fn from_unshared_ptr(ptr: *mut N) -> Option<Self> {
         ptr::NonNull::new(ptr).map(|ptr| {

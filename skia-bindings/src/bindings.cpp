@@ -1282,6 +1282,10 @@ extern "C" void C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(SkFont* unini
     new(uninitialized) SkFont(sp(typeface), size, scaleX, skewX);
 }
 
+extern "C" void C_SkFont_destruct(SkFont* self) {
+    self->~SkFont();
+}
+
 extern "C" bool C_SkFont_Equals(const SkFont* self, const SkFont* other) {
     return *self == *other;
 }
@@ -1306,8 +1310,16 @@ extern "C" void C_SkFont_setTypeface(SkFont* self, SkTypeface* tf) {
     self->setTypeface(sp(tf));
 }
 
-extern "C" void C_SkFont_destruct(SkFont* self) {
-    self->~SkFont();
+extern "C" void C_SkFont_getIntercepts(
+    const SkFont* self, 
+    const SkGlyphID glyphs[], 
+    int count, 
+    const SkPoint pos[], 
+    SkScalar top, SkScalar bottom, 
+    const SkPaint* paint, 
+    VecSink<SkScalar>* vs) {
+    auto r = self->getIntercepts(glyphs, count, pos, top, bottom, paint);
+    vs->set(r);
 }
 
 //
