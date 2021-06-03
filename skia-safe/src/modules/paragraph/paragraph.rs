@@ -163,6 +163,14 @@ impl Paragraph {
     pub fn mark_dirty(&mut self) {
         unsafe { sb::C_Paragraph_markDirty(self.native_mut()) }
     }
+
+    pub fn unresolved_glyphs(&mut self) -> Option<usize> {
+        unsafe { sb::C_Paragraph_unresolvedGlyphs(self.native_mut()) }
+            .try_into()
+            .ok()
+    }
+
+    // TODO: wrap visit()
 }
 
 #[deprecated(since = "0.0.0", note = "Use Vec<TextBox>")]
@@ -171,30 +179,34 @@ pub type TextBoxes = Vec<TextBox>;
 #[deprecated(since = "0.0.0", note = "Use Vec<LineMetrics>")]
 pub type LineMetricsVector<'a> = Vec<LineMetrics<'a>>;
 
-#[test]
-#[serial_test::serial]
-fn test_line_metrics() {
-    // note: some of the following code is copied from the skparagraph skia-org example.
-    use crate::icu;
-    use crate::textlayout::{FontCollection, ParagraphBuilder, ParagraphStyle, TextStyle};
-    use crate::FontMgr;
+#[cfg(test)]
+mod tests {
+    use crate::{
+        icu,
+        textlayout::{FontCollection, ParagraphBuilder, ParagraphStyle, TextStyle},
+        FontMgr,
+    };
 
-    icu::init();
+    #[test]
+    #[serial_test::serial]
+    fn test_line_metrics() {
+        icu::init();
 
-    let mut font_collection = FontCollection::new();
-    font_collection.set_default_font_manager(FontMgr::new(), None);
-    let paragraph_style = ParagraphStyle::new();
-    let mut paragraph_builder = ParagraphBuilder::new(&paragraph_style, font_collection);
-    let ts = TextStyle::new();
-    paragraph_builder.push_style(&ts);
-    paragraph_builder.add_text(LOREM_IPSUM);
-    let mut paragraph = paragraph_builder.build();
-    paragraph.layout(256.0);
+        let mut font_collection = FontCollection::new();
+        font_collection.set_default_font_manager(FontMgr::new(), None);
+        let paragraph_style = ParagraphStyle::new();
+        let mut paragraph_builder = ParagraphBuilder::new(&paragraph_style, font_collection);
+        let ts = TextStyle::new();
+        paragraph_builder.push_style(&ts);
+        paragraph_builder.add_text(LOREM_IPSUM);
+        let mut paragraph = paragraph_builder.build();
+        paragraph.layout(256.0);
 
-    let line_metrics = paragraph.get_line_metrics();
-    for (line, lm) in line_metrics.iter().enumerate() {
-        println!("line {}: width: {}", line + 1, lm.width)
+        let line_metrics = paragraph.get_line_metrics();
+        for (line, lm) in line_metrics.iter().enumerate() {
+            println!("line {}: width: {}", line + 1, lm.width)
+        }
+
+        static LOREM_IPSUM: &str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at leo at nulla tincidunt placerat. Proin eget purus augue. Quisque et est ullamcorper, pellentesque felis nec, pulvinar massa. Aliquam imperdiet, nulla ut dictum euismod, purus dui pulvinar risus, eu suscipit elit neque ac est. Nullam eleifend justo quis placerat ultricies. Vestibulum ut elementum velit. Praesent et dolor sit amet purus bibendum mattis. Aliquam erat volutpat.";
     }
-
-    static LOREM_IPSUM: &str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at leo at nulla tincidunt placerat. Proin eget purus augue. Quisque et est ullamcorper, pellentesque felis nec, pulvinar massa. Aliquam imperdiet, nulla ut dictum euismod, purus dui pulvinar risus, eu suscipit elit neque ac est. Nullam eleifend justo quis placerat ultricies. Vestibulum ut elementum velit. Praesent et dolor sit amet purus bibendum mattis. Aliquam erat volutpat.";
 }

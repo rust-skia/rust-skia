@@ -197,6 +197,7 @@ impl fmt::Debug for TextStyle {
             .field("font_families", &self.font_families())
             .field("height", &self.height())
             .field("height_override", &self.height_override())
+            .field("half_leading", &self.half_leading())
             .field("letter_spacing", &self.letter_spacing())
             .field("word_spacing", &self.word_spacing())
             .field("typeface", &self.typeface())
@@ -366,6 +367,15 @@ impl TextStyle {
 
     pub fn height_override(&self) -> bool {
         self.native().fHeightOverride
+    }
+
+    pub fn set_half_leading(&mut self, half_leading: bool) -> &mut Self {
+        self.native_mut().fHalfLeading = half_leading;
+        self
+    }
+
+    pub fn half_leading(&self) -> bool {
+        self.native().fHalfLeading
     }
 
     pub fn set_letter_spacing(&mut self, letter_spacing: scalar) -> &mut Self {

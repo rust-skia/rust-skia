@@ -236,6 +236,10 @@ extern "C" {
     void C_Paragraph_markDirty(Paragraph* self) {
         self->markDirty();
     }
+    
+    int32_t C_Paragraph_unresolvedGlyphs(Paragraph* self) {
+        return self->unresolvedGlyphs();
+    }
 }
 
 //
