@@ -307,9 +307,10 @@ extern "C" {
         self->~TextStyle();
     }
 
-    const TextShadow* C_TextStyle_getShadows(const std::vector<TextShadow>* self, size_t* len) {
-        *len = self->size();
-        return len != 0 ? self->data() : nullptr;
+    const TextShadow* C_TextStyle_getShadows(const std::vector<TextShadow>* self, size_t* len_ref) {
+        auto len = self->size();
+        *len_ref = len;
+        return len ? self->data() : nullptr;
     }
 
     void C_TextStyle_addShadow(TextStyle* self, const TextShadow* shadow) {
@@ -320,9 +321,10 @@ extern "C" {
         self->resetShadows();
     }
 
-    const FontFeature* C_TextStyle_getFontFeatures(const std::vector<FontFeature>* self, size_t* len) {
-        *len = self->size();
-        return len != 0 ? self->data() : nullptr;
+    const FontFeature* C_TextStyle_getFontFeatures(const std::vector<FontFeature>* self, size_t* len_ref) {
+        auto size = self->size();
+        *len_ref = size;
+        return size ? self->data() : nullptr;
     }
 
     void C_TextStyle_addFontFeature(TextStyle* self, const SkString* fontFeature, int value) {
