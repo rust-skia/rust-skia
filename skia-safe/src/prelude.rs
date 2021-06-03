@@ -2,13 +2,16 @@ use skia_bindings::{
     C_SkRefCntBase_ref, C_SkRefCntBase_unique, C_SkRefCntBase_unref, SkNVRefCnt, SkRefCnt,
     SkRefCntBase,
 };
-use std::hash::{Hash, Hasher};
-use std::mem::MaybeUninit;
-use std::ops::{Deref, DerefMut, Index, IndexMut};
-use std::{mem, ptr, slice};
+use std::{
+    hash::{Hash, Hasher},
+    marker::PhantomData,
+    mem::{self, MaybeUninit},
+    ops::{Deref, DerefMut, Index, IndexMut},
+    ptr, slice,
+};
+
 // Re-export TryFrom / TryInto to make them available in all modules that use prelude::*.
 pub use std::convert::{TryFrom, TryInto};
-use std::marker::PhantomData;
 
 /// Swiss army knife to convert any reference into any other.
 pub(crate) unsafe fn transmute_ref<FromT, ToT>(from: &FromT) -> &ToT {
@@ -658,7 +661,10 @@ where
 
 /// Trait to use native types that as a rust type
 /// _inplace_ with the same size and field layout.
-pub trait NativeTransmutable<NT: Sized>: Sized {
+pub trait NativeTransmutable<NT: Sized>: Sized
+where
+    Self: Sized,
+{
     /// Provides access to the native value through a
     /// transmuted reference to the Rust value.
     fn native(&self) -> &NT {

@@ -89,6 +89,7 @@
 #include "include/utils/SkCamera.h"
 #include "include/utils/SkCustomTypeface.h"
 #include "include/utils/SkNullCanvas.h"
+#include "include/utils/SkOrderedFontMgr.h"
 #include "include/utils/SkParsePath.h"
 #include "include/utils/SkShadowUtils.h"
 #include "include/utils/SkTextUtils.h"
@@ -2719,24 +2720,14 @@ C_SkCustomTypefaceBuilder_setGlyph3(SkCustomTypefaceBuilder *self, SkGlyphID gly
 }
 */
 
-/* 
-extern "C" void C_SkInterpolator_destruct(SkInterpolator* self) {
-    self->~SkInterpolator();
-}
-
-extern "C" void C_SkInterpolator_setRepeatCount(SkInterpolator* self, SkScalar repeatCount) {
-    self->setRepeatCount(repeatCount);
-}
-
-extern "C" void C_SkInterpolator_setReset(SkInterpolator* self, bool reset) {
-    self->setReset(reset);
-}
-
-extern "C" void C_SkInterpolator_setMirror(SkInterpolator* self, bool mirror) {
-    self->setMirror(mirror);
-}
-*/
-
 extern "C" SkCanvas* C_SkMakeNullCanvas() {
     return SkMakeNullCanvas().release();
+}
+
+extern "C" SkOrderedFontMgr* C_SkOrderedFontMgr_new() {
+    return new SkOrderedFontMgr();
+}
+
+extern "C" void C_SkOrderedFontMgr_append(SkOrderedFontMgr* self, SkFontMgr* fontMgr) {
+    self->append(sp(fontMgr));
 }
