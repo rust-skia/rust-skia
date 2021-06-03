@@ -830,6 +830,10 @@ extern "C" bool C_SkM44_equals(const SkM44 *self, const SkM44 *other) {
     return *self == *other;
 }
 
+extern "C" void C_SkM44_RectToRect(const SkRect* src, const SkRect* dst, SkM44* uninitialized) {
+    new(uninitialized) SkM44(SkM44::RectToRect(*src, *dst));
+}
+
 extern "C" void C_SkM44_LookAt(const SkV3* eye, const SkV3* center, const SkV3* up, SkM44* uninitialized) {
     new(uninitialized) SkM44(SkM44::LookAt(*eye, *center, *up));
 }
