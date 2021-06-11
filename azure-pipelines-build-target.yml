@@ -19,6 +19,17 @@ steps:
       rustup target add ${{ parameters.target }}
     displayName: 'Install Rust target ${{ parameters.target }}'
 
+  # We run clippy first, because:
+  # - it probably fails more often than `cargo build`.
+  # - it builds skia-bindings in a different context, which means that `cargo build` will build it again.
+  # - we need to reclaim the space wasted here, because of the 10GB limit in the Azure VM.
+  - ${{ if eq(parameters.runClippy, True) }}:
+    - bash: |
+        set -e
+        cargo clean
+        cargo clippy --release --features "${{ parameters.features }}" --all-targets --target ${{ parameters.target }} -- -D warnings
+      displayName: 'Clippy skia-bindings, skia-safe, and skia-org'
+
   # Note: features are ignored when set in the workspace. This is a known bug in cargo (#5015), so cd into skia-safe instead.
   # Also be sure that the bindings.rs file is rebuilt (#10)
   # `cargo clean` needs to run to prevent running out of disk space on the Linux VM with stable-all-features-debug configurations (#323).
@@ -40,12 +51,6 @@ steps:
       echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
       echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
     displayName: 'Build all targets in skia-safe for ${{ parameters.target }} with features "${{ parameters.features }}"'
-
-  - ${{ if eq(parameters.runClippy, True) }}:
-    - bash: |
-        set -e
-        cargo clippy --release --features "${{ parameters.features }}" --all-targets --target ${{ parameters.target }} -- -D warnings
-      displayName: 'Clippy skia-bindings, skia-safe, and skia-org'
 
   - ${{ if eq(parameters.runTests, True) }}:
     - script: cargo test --all --release --features "${{ parameters.features }}" --all-targets --target ${{ parameters.target }} -- --nocapture
