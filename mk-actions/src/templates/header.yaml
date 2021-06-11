@@ -1,0 +1,13 @@
+inputs:
+  # TODO: do we need that? runner.os should be sufficient.
+  host-os: 
+    description: 'The operating system of the host'
+    required: true
+
+  rust-edition:
+    description: 'The edition of rust to build with, like "stable" or "beta"'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
