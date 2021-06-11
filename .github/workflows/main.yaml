@@ -19,7 +19,7 @@ jobs:
           - os: 'ubuntu-20.04'
             host-os: 'Linux'
 
-      fail-fast: false
+      fail-fast: true
 
     steps:
     - uses: actions/checkout@v2
