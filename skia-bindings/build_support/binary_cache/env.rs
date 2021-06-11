@@ -20,7 +20,8 @@ pub fn skia_binaries_url() -> Option<String> {
 
 /// The default URL template to download the binaries from.
 pub fn skia_binaries_url_default() -> String {
-    "https://github.com/rust-skia/skia-binaries/releases/download/{tag}/skia-binaries-{key}.tar.gz".into()
+    "https://github.com/rust-skia/skia-binaries/releases/download/{tag}/skia-binaries-{key}.tar.gz"
+        .into()
 }
 
 /// Force to build Skia, even if there is a binary available.

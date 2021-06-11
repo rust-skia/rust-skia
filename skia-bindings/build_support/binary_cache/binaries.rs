@@ -1,11 +1,11 @@
 //! Support for exporting and building prebuilt binaries.
 
-use crate::build_support::{cargo, skia};
 use super::{azure, git};
-use std::{fs, io};
+use crate::build_support::{cargo, skia};
+use flate2::read::GzDecoder;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
-use flate2::read::GzDecoder;
+use std::{fs, io};
 
 /// Export binaries if we are inside a git repository _and_
 /// the artifact staging directory is set.

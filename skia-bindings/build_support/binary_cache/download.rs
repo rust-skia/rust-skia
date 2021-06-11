@@ -1,12 +1,12 @@
+use super::{binaries, env, git, utils, SRC_BINDINGS_RS};
 use crate::build_support::{cargo, skia};
-use super::{binaries, git, utils, env, SRC_BINDINGS_RS};
 use flate2::read::GzDecoder;
-use std::process::Command;
-use std::{io, io::Cursor};
-use std::path::{Path, PathBuf, Component};
-use std::process::Stdio;
-use std::fs;
 use std::ffi::OsStr;
+use std::fs;
+use std::path::{Component, Path, PathBuf};
+use std::process::Command;
+use std::process::Stdio;
+use std::{io, io::Cursor};
 
 /// Resolve the skia and depot_tools subdirectory contents, either by checking out the
 /// submodules, or when the build.rs was called outside of the git repository,
@@ -136,13 +136,10 @@ impl skia::BinariesConfiguration {
 }
 
 /// Returns whether the prepared download needs to be built.
-pub fn try_prepare_download(
-    binaries_config: &skia::BinariesConfiguration,
-) -> bool {
+pub fn try_prepare_download(binaries_config: &skia::BinariesConfiguration) -> bool {
     env::force_skia_build() || {
         let force_download = env::force_skia_binaries_download();
-        if let Some((tag, key)) = should_try_download_binaries(&binaries_config, force_download)
-        {
+        if let Some((tag, key)) = should_try_download_binaries(&binaries_config, force_download) {
             println!(
                 "TRYING TO DOWNLOAD AND INSTALL SKIA BINARIES: {}/{}",
                 tag, key
