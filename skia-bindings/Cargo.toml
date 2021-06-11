@@ -36,7 +36,7 @@ skia = "m91-0.39.3"
 depot_tools = "a110bf6"
 
 [features]
-default = []
+default = ["binary-cache"]
 gl = []
 egl = []
 wayland = []
@@ -53,6 +53,7 @@ use-system-jpeg-turbo = ["mozjpeg-sys"]
 # deprecated since 0.25.0
 svg = []
 shaper = ["textlayout"]
+binary-cache = ["ureq", "flate2", "tar"]
 
 [dependencies]
 
@@ -68,9 +69,9 @@ regex = "1.4.5"
 heck = "0.3.1"
 
 # for downloading and extracting prebuilt binaries and skia / depot_tools archives:
-ureq = "2.0.1"
-flate2 = "1.0.7"
-tar = "0.4.26"
+ureq = { version = "2.0.1", optional = true }
+flate2 = { version = "1.0.7", optional = true }
+tar = { version = "0.4.26", optional = true }
 
 # On the CI we don't specify the libclang location explicitly and PATH contains
 # multiple of them. clang-sys version 1.0.2 changed the resolvement order.

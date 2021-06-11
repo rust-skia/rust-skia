@@ -1,12 +1,11 @@
 //! Support for exporting and building prebuilt binaries.
 
-use crate::build_support::{azure, cargo, git, skia};
-use flate2::read::GzDecoder;
-use std::fs;
-use std::io;
+use crate::build_support::{cargo, skia};
+use super::{azure, git};
+use std::{fs, io};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
-use tar::Archive;
+use flate2::read::GzDecoder;
 
 /// Export binaries if we are inside a git repository _and_
 /// the artifact staging directory is set.
@@ -128,7 +127,7 @@ pub fn download_url(url_template: String, tag: impl AsRef<str>, key: impl AsRef<
 pub fn unpack(archive: impl Read, output_directory: &Path) -> io::Result<()> {
     let tar = GzDecoder::new(archive);
     // note: this creates the skia-bindings/ directory.
-    Archive::new(tar).unpack(output_directory)?;
+    tar::Archive::new(tar).unpack(output_directory)?;
     let binaries_dir = output_directory.join(ARCHIVE_NAME);
     let paths: Vec<PathBuf> = fs::read_dir(binaries_dir)?
         .map(|e| e.unwrap().path())

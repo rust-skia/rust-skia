@@ -1,6 +1,6 @@
 //! Full build support for the Skia library, SkiaBindings library and bindings.rs file.
 
-use crate::build_support::{android, binaries, cargo, clang, ios, llvm, vs, xcode};
+use crate::build_support::{android, cargo, clang, ios, llvm, vs, xcode};
 use bindgen::{CodegenConfig, EnumVariation};
 use cc::Build;
 use std::path::{Path, PathBuf};
@@ -613,10 +613,6 @@ impl BinariesConfiguration {
 
         cargo::add_link_libs(&self.link_libraries);
     }
-
-    pub fn key(&self, repository_short_hash: &str) -> String {
-        binaries::key(repository_short_hash, &self.feature_ids, self.skia_debug)
-    }
 }
 
 /// Orchestrates the entire build of Skia based on the arguments provided.
@@ -639,7 +635,8 @@ pub fn build(
 
     if !offline && !build.use_system_libraries {
         println!("Synchronizing Skia dependencies");
-        prerequisites::resolve_dependencies();
+        #[cfg(feature = "binary-cache")]
+        crate::build_support::binary_cache::resolve_dependencies();
         assert!(
             Command::new(python2)
                 .arg("skia/tools/git-sync-deps")
@@ -1333,14 +1330,8 @@ pub(crate) mod rewrite {
 }
 
 mod prerequisites {
-    use crate::build_support::{cargo, utils};
-    use flate2::read::GzDecoder;
-    use std::ffi::OsStr;
-    use std::fs;
-    use std::io::Cursor;
-    use std::path::Component;
-    use std::path::{Path, PathBuf};
-    use std::process::{Command, Stdio};
+    use std::path::PathBuf;
+    use std::process::Command;
 
     /// Resolves the full path
     pub fn locate_python2_cmd() -> PathBuf {
@@ -1357,7 +1348,7 @@ mod prerequisites {
 
     /// Returns true if the given python executable is python version 2.
     /// or None if the executable was not found.
-    pub fn is_python_version_2(exe: impl AsRef<str>) -> Option<bool> {
+    fn is_python_version_2(exe: impl AsRef<str>) -> Option<bool> {
         Command::new(exe.as_ref())
             .arg("--version")
             .output()
@@ -1372,127 +1363,6 @@ mod prerequisites {
                 str.starts_with("Python 2.")
             })
             .ok()
-    }
-
-    /// Resolve the skia and depot_tools subdirectory contents, either by checking out the
-    /// submodules, or when the build.rs was called outside of the git repository,
-    /// by downloading and unpacking them from GitHub.
-    pub fn resolve_dependencies() {
-        if cargo::is_crate() {
-            // we are in a crate.
-            download_dependencies();
-        } else {
-            // we are not in a crate, assuming we are in our git repo.
-            // so just update all submodules.
-            assert!(
-                Command::new("git")
-                    .args(&["submodule", "update", "--init", "--depth", "1"])
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .status()
-                    .unwrap()
-                    .success(),
-                "`git submodule update` failed"
-            );
-        }
-    }
-
-    /// Downloads the skia and depot_tools from their repositories.
-    ///
-    /// The hashes are taken from the Cargo.toml section [package.metadata].
-    fn download_dependencies() {
-        let metadata = cargo::get_metadata();
-
-        for dep in dependencies() {
-            let repo_url = dep.url;
-            let repo_name = dep.repo;
-
-            let dir = PathBuf::from(repo_name);
-
-            // directory exists => assume that the download of the archive was successful.
-            if dir.exists() {
-                continue;
-            }
-
-            // hash available?
-            let (_, short_hash) = metadata
-                .iter()
-                .find(|(n, _)| n == repo_name)
-                .expect("metadata entry not found");
-
-            // remove unpacking directory, github will format it to repo_name-hash
-            let unpack_dir = &PathBuf::from(format!("{}-{}", repo_name, short_hash));
-            if unpack_dir.is_dir() {
-                fs::remove_dir_all(unpack_dir).unwrap();
-            }
-
-            // download
-            let archive_url = &format!("{}/{}", repo_url, short_hash);
-            println!("DOWNLOADING: {}", archive_url);
-            let archive = utils::download(archive_url)
-                .unwrap_or_else(|err| panic!("Failed to download {} ({})", archive_url, err));
-
-            // unpack
-            {
-                let tar = GzDecoder::new(Cursor::new(archive));
-                let mut archive = tar::Archive::new(tar);
-                let dir = std::env::current_dir().unwrap();
-                for entry in archive.entries().expect("failed to iterate over archive") {
-                    let mut entry = entry.unwrap();
-                    let path = entry.path().unwrap();
-                    let mut components = path.components();
-                    let root = components.next().unwrap();
-                    // skip pax headers.
-                    if root.as_os_str() == unpack_dir.as_os_str()
-                        && (dep.path_filter)(components.as_path())
-                    {
-                        entry.unpack_in(&dir).unwrap();
-                    }
-                }
-            }
-
-            // move unpack directory to the target repository directory
-            fs::rename(unpack_dir, repo_name).expect("failed to move directory");
-        }
-    }
-
-    // Specifies where to download Skia and Depot Tools archives from.
-    //
-    // We use codeload.github.com, otherwise the short hash will be expanded to a full hash as the root
-    // directory inside the tar.gz, and we run into filesystem path length restrictions
-    // with Skia.
-    struct Dependency {
-        pub repo: &'static str,
-        pub url: &'static str,
-        pub path_filter: fn(&Path) -> bool,
-    }
-
-    fn dependencies() -> &'static [Dependency] {
-        return &[
-            Dependency {
-                repo: "skia",
-                url: "https://codeload.github.com/rust-skia/skia/tar.gz",
-                path_filter: filter_skia,
-            },
-            Dependency {
-                repo: "depot_tools",
-                url: "https://codeload.github.com/rust-skia/depot_tools/tar.gz",
-                path_filter: filter_depot_tools,
-            },
-        ];
-
-        // infra/ contains very long filenames which may hit the max path restriction on Windows.
-        // https://github.com/rust-skia/rust-skia/issues/169
-        fn filter_skia(p: &Path) -> bool {
-            !matches!(p.components().next(),
-                Some(Component::Normal(name)) if name == OsStr::new("infra"))
-        }
-
-        // we need only ninja from depot_tools.
-        // https://github.com/rust-skia/rust-skia/pull/165
-        fn filter_depot_tools(p: &Path) -> bool {
-            p.to_str().unwrap().starts_with("ninja")
-        }
     }
 }
 
