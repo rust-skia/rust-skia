@@ -1,4 +1,6 @@
 runs-on: windows-2019
+container: ghcr.io/pragmatrix/rust-skia-windows:latest
+
 steps:
 - uses: actions/checkout@v2
   with:
