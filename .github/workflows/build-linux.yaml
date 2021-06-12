@@ -1,8 +1,8 @@
-name: 'Rust Skia - Build'
+name: 'Rust Skia'
 on: [push]
 
 jobs:
-  build-linux:
+  build-linux-stable:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
@@ -11,6 +11,47 @@ jobs:
     
     - name: Install Rust
       uses: hecrj/setup-rust-action@master
+      with:
+        rust-version: stable
+    
+    - name: Install Clippy
+      run: rustup component add clippy
+    - name: 'Install Rust target x86_64-unknown-linux-gnu'
+      shell: bash
+      run: |
+        set -e
+        rustup target add x86_64-unknown-linux-gnu
+    
+    - name: 'Build all targets in skia-safe for x86_64-unknown-linux-gnu with features '
+      shell: bash
+      run: |
+        set -e
+        if [ "false" == "true" ]; then
+          TARGET=x86_64-unknown-linux-gnu
+          TARGET=${TARGET//-/_}
+          export CC_${TARGET}=x86_64-unknown-linux-gnu$(androidAPILevel)-clang$(androidBinExt)
+          export CXX_${TARGET}=x86_64-unknown-linux-gnu$(androidAPILevel)-clang++$(androidBinExt)
+          TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
+          export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-unknown-linux-gnu$(androidAPILevel)-clang$(androidBinExt)
+          echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
+        fi
+        cargo clean
+        cargo build -p skia-safe --all-targets --release --features "" --target x86_64-unknown-linux-gnu
+        export SKIA_BINARIES_TAG=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/tag.txt")
+        export SKIA_BINARIES_KEY=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/key.txt")
+        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
+        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+  build-linux-beta:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    
+    - name: Install Rust
+      uses: hecrj/setup-rust-action@master
+      with:
+        rust-version: beta
     
     - name: Install Clippy
       run: rustup component add clippy

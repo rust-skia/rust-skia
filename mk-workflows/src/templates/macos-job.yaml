@@ -6,6 +6,8 @@ steps:
 
 - name: Install Rust
   uses: hecrj/setup-rust-action@master
+  with:
+    rust-version: ${{rustToolchain}}
 
 - name: Install Clippy
   run: rustup component add clippy

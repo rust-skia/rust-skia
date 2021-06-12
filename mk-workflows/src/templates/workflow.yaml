@@ -1,4 +1,4 @@
-name: 'Rust Skia - Build'
+name: 'Rust Skia'
 on: [push]
 
 jobs:

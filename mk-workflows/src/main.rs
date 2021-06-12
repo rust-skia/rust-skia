@@ -3,31 +3,41 @@
 use std::{fs, iter, ops::Deref, path::PathBuf};
 
 fn main() {
-    build("windows", WINDOWS_JOB, &windows_targets());
-    build("linux", LINUX_JOB, &linux_targets());
-    build("macos", MACOS_JOB, &macos_targets());
+    for (os, job, targets) in &[
+        ("windows", WINDOWS_JOB, &windows_targets()),
+        ("linux", LINUX_JOB, &linux_targets()),
+        ("macos", MACOS_JOB, &macos_targets()),
+    ] {
+        build_workflow(os, job, targets, &["stable", "beta"]);
+    }
 }
 
-fn build(os: &str, job: &str, targets: &[Target]) {
+fn build_workflow(os: &str, job_template: &str, targets: &[Target], toolchains: &[&str]) {
     let workflow_name = format!("build-{}", os);
     let output_filename = PathBuf::new()
         .join(".github")
         .join("workflows")
         .join(format!("{}.yaml", workflow_name));
 
-    let job_name = workflow_name;
+        let header = WORKFLOW.to_string();
 
-    let header = WORKFLOW.to_string();
-    let job_header = format!("{}:", job_name).indented(1);
-    let job = job.to_string().indented(2);
+    let mut parts = vec![header];
 
-    let targets: Vec<String> = targets
+    for toolchain in toolchains {
+        let job_name = workflow_name.clone() + "-" + toolchain;
+
+        let job_header = format!("{}:", job_name).indented(1);
+        parts.push(job_header);
+        let job = build_job(job_template, toolchain).indented(2);
+        parts.push(job);
+
+        let targets: Vec<String> = targets
         .iter()
         .map(|t| build_target(&t).indented(2))
         .collect();
 
-    let mut parts = vec![header, job_header, job];
-    parts.extend(targets);
+        parts.extend(targets);
+    }
 
     // some parts won't end with \n, so be safe and join them with a newline.
     let contents = parts
@@ -80,6 +90,11 @@ fn macos_targets() -> Vec<Target> {
     [host].into()
 }
 
+fn build_job(template: &str, toolchain: &str) -> String {
+    let replacements = [("rustToolchain".to_owned(), toolchain.to_owned())];
+    render_template(template, &replacements)
+}
+
 fn build_target(target: &Target) -> String {
     let template_arguments: &[(&'static str, &dyn TemplateArgument)] = &[
         ("target", &target.target),
@@ -93,19 +108,18 @@ fn build_target(target: &Target) -> String {
     ];
     let replacements: Vec<(String, String)> = template_arguments
         .iter()
-        .map(|(name, value)| {
-            (
-                format!("${{{{{}}}}}", TemplateArgument::to_string(name)),
-                value.to_string(),
-            )
-        })
+        .map(|(name, value)| (TemplateArgument::to_string(name), value.to_string()))
         .collect();
 
-    let mut template = TARGET_TEMPLATE.to_owned();
+    render_template(TARGET_TEMPLATE, &replacements)
+}
 
-    replacements
-        .iter()
-        .for_each(|(pattern, value)| template = template.replace(pattern, value));
+fn render_template(template: &str, replacements: &[(String, String)]) -> String {
+    let mut template = template.to_owned();
+
+    replacements.iter().for_each(|(pattern, value)| {
+        template = template.replace(&format!("${{{{{}}}}}", pattern), value)
+    });
 
     if template.contains("${{") {
         panic!(
