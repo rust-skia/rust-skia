@@ -59,8 +59,8 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "d3d,gl,textlayout,vulkan,webp" --target x86_64-pc-windows-msvc
-        export SKIA_BINARIES_TAG=$(cat "${{ runner.temp }}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${{ runner.temp }}/skia-binaries/key.txt")
+        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
+        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
         echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
         echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
       env:
@@ -141,8 +141,8 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "d3d,gl,textlayout,vulkan,webp" --target x86_64-pc-windows-msvc
-        export SKIA_BINARIES_TAG=$(cat "${{ runner.temp }}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${{ runner.temp }}/skia-binaries/key.txt")
+        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
+        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
         echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
         echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
       env:
@@ -223,8 +223,8 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "d3d,gl,textlayout,vulkan,webp" --target x86_64-pc-windows-msvc
-        export SKIA_BINARIES_TAG=$(cat "${{ runner.temp }}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${{ runner.temp }}/skia-binaries/key.txt")
+        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
+        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
         echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
         echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
       env:
