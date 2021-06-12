@@ -3,6 +3,10 @@
 name: 'Rust Skia'
 on: [push]
 
+concurrency: 
+  group: 'build-windows-${{ github.ref }}'
+  cancel-in-progress: true
+
 jobs:
   build-windows-stable:
     runs-on: windows-2019

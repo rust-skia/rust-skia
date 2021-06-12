@@ -18,7 +18,7 @@ fn build_workflow(os: &str, job_template: &str, targets: &[Target], toolchains: 
         .join("workflows")
         .join(format!("{}.yaml", workflow_name));
 
-    let header = WORKFLOW.to_string();
+    let header = build_header(&workflow_name);
 
     let mut parts = vec![header];
 
@@ -92,6 +92,11 @@ fn macos_targets() -> Vec<Target> {
     [host].into()
 }
 
+fn build_header(workflow_name: &str) -> String {
+    let replacements = [("workflowName".to_owned(), workflow_name.to_owned())];
+    render_template(WORKFLOW, &replacements)
+}
+
 fn build_job(template: &str, toolchain: &str) -> String {
     let replacements = [("rustToolchain".to_owned(), toolchain.to_owned())];
     render_template(template, &replacements)
@@ -120,10 +125,10 @@ fn render_template(template: &str, replacements: &[(String, String)]) -> String 
     let mut template = template.to_owned();
 
     replacements.iter().for_each(|(pattern, value)| {
-        template = template.replace(&format!("${{{{{}}}}}", pattern), value)
+        template = template.replace(&format!("$[[{}]]", pattern), value)
     });
 
-    if template.contains("${{") {
+    if template.contains("$[[") {
         panic!(
             "Template contains template patterns after replacement: \n{}",
             template

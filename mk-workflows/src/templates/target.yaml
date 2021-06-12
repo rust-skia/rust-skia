@@ -1,24 +1,24 @@
-- name: 'Install Rust target ${{target}}'
+- name: 'Install Rust target $[[target]]'
   shell: bash
   run: |
     set -e
-    rustup target add ${{target}}
+    rustup target add $[[target]]
 
-- name: 'Build all targets in skia-safe for ${{target}} with features ${{features}}'
+- name: 'Build all targets in skia-safe for $[[target]] with features $[[features]]'
   shell: bash
   run: |
     set -e
-    if [ "${{androidEnv}}" == "true" ]; then
-      TARGET=${{target}}
+    if [ "$[[androidEnv]]" == "true" ]; then
+      TARGET=$[[target]]
       TARGET=${TARGET//-/_}
-      export CC_${TARGET}=${{target}}$(androidAPILevel)-clang$(androidBinExt)
-      export CXX_${TARGET}=${{target}}$(androidAPILevel)-clang++$(androidBinExt)
+      export CC_${TARGET}=$[[target]]$(androidAPILevel)-clang$(androidBinExt)
+      export CXX_${TARGET}=$[[target]]$(androidAPILevel)-clang++$(androidBinExt)
       TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
-      export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=${{target}}$(androidAPILevel)-clang$(androidBinExt)
+      export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=$[[target]]$(androidAPILevel)-clang$(androidBinExt)
       echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
     fi
     cargo clean
-    cargo build -p skia-safe --all-targets --release --features "${{features}}" --target ${{target}}
+    cargo build -p skia-safe --all-targets --release --features "$[[features]]" --target $[[target]]
     export SKIA_BINARIES_TAG=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/tag.txt")
     export SKIA_BINARIES_KEY=$(cat "$(Build.ArtifactStagingDirectory)/skia-binaries/key.txt")
     echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
