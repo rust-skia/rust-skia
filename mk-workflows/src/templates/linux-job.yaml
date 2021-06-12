@@ -3,8 +3,12 @@ container: ghcr.io/pragmatrix/rust-skia-linux:latest
 
 steps:
 - uses: actions/checkout@v2
-  with:
-    submodules: true
+# Our linux container does have git >= 2.18 installed, so we can't use submodules here.
+#  with:
+#    submodules: true
+
+#- name: Get submodules
+#  run: git submodule update --init --depth 1
 
 - name: Install Rust
   uses: hecrj/setup-rust-action@master
