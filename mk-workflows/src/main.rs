@@ -23,11 +23,14 @@ pub struct Workflow {
     host_bin_ext: &'static str,
 }
 
+#[derive(Default)]
 pub struct Job {
     name: &'static str,
     toolchain: &'static str,
     base_features: Features,
     skia_debug: bool,
+    // we may need to disable clippy for beta builds temporarily.
+    disable_clippy: bool,
     example_args: Option<String>,
 }
 
@@ -98,6 +101,7 @@ fn build_target(workflow: &Workflow, job: &Job, target: &Target) -> String {
     }
     .unwrap_or_default();
     let generate_artifacts = !example_args.is_empty();
+    let run_clippy = native_target && !job.disable_clippy;
 
     let template_arguments: &[(&'static str, &dyn fmt::Display)] = &[
         ("target", &target.target),
@@ -105,7 +109,7 @@ fn build_target(workflow: &Workflow, job: &Job, target: &Target) -> String {
         ("androidAPILevel", &config::DEFAULT_ANDROID_API_LEVEL),
         ("features", &features),
         ("runTests", &native_target),
-        ("runClippy", &native_target),
+        ("runClippy", &run_clippy),
         ("exampleArgs", &example_args),
         ("generateArtifacts", &generate_artifacts),
         ("releaseBinaries", &target.release_binaries),

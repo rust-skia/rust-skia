@@ -35,22 +35,21 @@ pub fn jobs() -> Vec<Job> {
             name: "stable-all-features",
             toolchain: "stable",
             base_features: "gl,vulkan,textlayout,webp".into(),
-            skia_debug: false,
             example_args: Some("--driver cpu --driver pdf --driver svg".into()),
+            ..Job::default()
         },
         Job {
             name: "stable-all-features-debug",
             toolchain: "stable",
             base_features: "gl,vulkan,textlayout,webp".into(),
             skia_debug: true,
-            example_args: None,
+            ..Job::default()
         },
         Job {
             name: "beta-all-features",
             toolchain: "beta",
             base_features: "gl,vulkan,textlayout,webp".into(),
-            skia_debug: false,
-            example_args: None,
+            ..Job::default()
         },
     ]
     .into()
