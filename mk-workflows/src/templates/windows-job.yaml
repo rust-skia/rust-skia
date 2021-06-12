@@ -1,5 +1,6 @@
 runs-on: windows-2019
-container: ghcr.io/pragmatrix/rust-skia-windows:latest
+# Containers are not supported on Windows.
+# container: ghcr.io/pragmatrix/rust-skia-windows:latest
 
 steps:
 - uses: actions/checkout@v2
