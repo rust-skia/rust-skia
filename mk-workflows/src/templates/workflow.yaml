@@ -1,0 +1,4 @@
+name: 'Rust Skia - Build'
+on: [push]
+
+jobs:

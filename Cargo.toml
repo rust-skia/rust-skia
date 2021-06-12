@@ -4,6 +4,6 @@ members = [
     "skia-bindings",
     "skia-safe",
     "skia-org",
-	"mk-actions"
+	"mk-workflows"
 ]
 

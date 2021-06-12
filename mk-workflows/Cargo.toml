@@ -1,5 +1,5 @@
 [package]
-name = "mk-actions"
+name = "mk-workflows"
 version = "0.1.0"
 authors = ["Armin Sander <armin@replicator.org>"]
 edition = "2018"

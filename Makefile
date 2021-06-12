@@ -87,3 +87,7 @@ azure-build-win:
 	cd skia-org && cargo test --all ${build-flags-win} --all-targets -- --nocapture
 	cd skia-org && cargo run ${build-flags-win}
 
+.PHONY: workflows
+workflows:
+	cargo run -p mk-workflows
+

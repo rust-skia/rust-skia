@@ -1,0 +1,11 @@
+runs-on: ubuntu-20.04
+steps:
+- uses: actions/checkout@v2
+  with:
+    submodules: true
+
+- name: Install Rust
+  uses: hecrj/setup-rust-action@master
+
+- name: Install Clippy
+  run: rustup component add clippy
