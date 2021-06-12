@@ -1,6 +1,5 @@
-//! This files builds the github actions file.
-
-use std::{fs, iter, ops::Deref, path::PathBuf};
+//! This program builds the github workflow files for the rust-skia project.
+use std::{fmt, fs, iter, ops::Deref, path::PathBuf};
 
 fn main() {
     for (os, job, targets) in &[
@@ -19,7 +18,7 @@ fn build_workflow(os: &str, job_template: &str, targets: &[Target], toolchains: 
         .join("workflows")
         .join(format!("{}.yaml", workflow_name));
 
-        let header = WORKFLOW.to_string();
+    let header = WORKFLOW.to_string();
 
     let mut parts = vec![header];
 
@@ -32,9 +31,9 @@ fn build_workflow(os: &str, job_template: &str, targets: &[Target], toolchains: 
         parts.push(job);
 
         let targets: Vec<String> = targets
-        .iter()
-        .map(|t| build_target(&t).indented(2))
-        .collect();
+            .iter()
+            .map(|t| build_target(&t).indented(2))
+            .collect();
 
         parts.extend(targets);
     }
@@ -66,6 +65,7 @@ impl Indent for String {
 fn windows_targets() -> Vec<Target> {
     let host = Target {
         target: "x86_64-pc-windows-msvc",
+        features: "gl,vulkan,textlayout,webp,d3d".into(),
         ..Target::windows_default()
     };
 
@@ -75,6 +75,7 @@ fn windows_targets() -> Vec<Target> {
 fn linux_targets() -> Vec<Target> {
     let host = Target {
         target: "x86_64-unknown-linux-gnu",
+        features: "gl,vulkan,textlayout,webp".into(),
         ..Target::windows_default()
     };
 
@@ -84,6 +85,7 @@ fn linux_targets() -> Vec<Target> {
 fn macos_targets() -> Vec<Target> {
     let host = Target {
         target: "x86_64-apple-darwin",
+        features: "gl,vulkan,textlayout,metal".into(),
         ..Target::windows_default()
     };
 
@@ -180,6 +182,20 @@ impl Deref for Features {
 
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl fmt::Display for Features {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> std::fmt::Result {
+        let features = self.0.join(",");
+        f.write_str(&features)
+    }
+}
+
+impl From<&str> for Features {
+    fn from(s: &str) -> Self {
+        let strs: Vec<String> = s.split(',').map(|s| s.to_owned()).collect();
+        Features(strs)
     }
 }
 
