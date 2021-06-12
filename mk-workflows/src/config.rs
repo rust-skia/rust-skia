@@ -1,4 +1,4 @@
-use crate::{Job, LINUX_JOB, MACOS_JOB, Target, WINDOWS_JOB, Workflow};
+use crate::{Job, Target, Workflow, LINUX_JOB, MACOS_JOB, WINDOWS_JOB};
 
 pub const DEFAULT_ANDROID_API_LEVEL: usize = 26;
 
@@ -57,31 +57,63 @@ pub fn jobs() -> Vec<Job> {
 }
 
 fn windows_targets() -> Vec<Target> {
-    let host = Target {
+    [Target {
         target: "x86_64-pc-windows-msvc",
         platform_features: "d3d".into(),
-        ..Target::windows_default()
-    };
-
-    [host].into()
+        ..Target::default()
+    }]
+    .into()
 }
 
 fn linux_targets() -> Vec<Target> {
-    let host = Target {
+    let mut targets = vec![Target {
         target: "x86_64-unknown-linux-gnu",
-        platform_features: "".into(),
-        ..Target::windows_default()
-    };
-
-    [host].into()
+        platform_features: "egl,x11,wayland".into(),
+        ..Default::default()
+    }];
+    targets.extend(android_targets());
+    targets
 }
 
 fn macos_targets() -> Vec<Target> {
-    let host = Target {
-        target: "x86_64-apple-darwin",
-        platform_features: "metal".into(),
-        ..Target::windows_default()
-    };
+    let mut targets = vec![
+        Target {
+            target: "x86_64-apple-darwin",
+            platform_features: "metal".into(),
+            ..Default::default()
+        },
+        Target {
+            target: "aarch64-apple-ios",
+            platform_features: "metal".into(),
+            ..Default::default()
+        },
+        Target {
+            target: "x86_64-apple-ios",
+            platform_features: "metal".into(),
+            ..Default::default()
+        },
+    ];
+    targets.extend(android_targets());
+    targets
+}
 
-    [host].into()
+fn android_targets() -> Vec<Target> {
+    [
+        Target {
+            target: "aarch64-linux-android",
+            android_env: true,
+            ..Default::default()
+        },
+        Target {
+            target: "x86_64-linux-android",
+            android_env: true,
+            ..Default::default()
+        },
+        Target {
+            target: "i686-linux-android",
+            android_env: true,
+            ..Default::default()
+        },
+    ]
+    .into()
 }

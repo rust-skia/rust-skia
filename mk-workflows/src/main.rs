@@ -137,7 +137,7 @@ fn render_template(template: &str, replacements: &[(String, String)]) -> String 
     template
 }
 
-#[derive(Debug)]
+#[derive(Default, Debug)]
 struct Target {
     target: &'static str,
     android_env: bool,
@@ -145,25 +145,10 @@ struct Target {
     release_binaries: bool,
 }
 
-impl Target {
-    const fn windows_default() -> Self {
-        Self {
-            target: "",
-            android_env: false,
-            platform_features: Features::none(),
-            release_binaries: false,
-        }
-    }
-}
-
 #[derive(Default, Debug)]
 struct Features(Vec<String>);
 
 impl Features {
-    pub const fn none() -> Self {
-        Self(vec![])
-    }
-
     pub fn join(&self, other: &Self) -> Self {
         let mut features = self.0.clone();
         features.extend(other.0.iter().cloned());
