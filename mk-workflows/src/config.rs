@@ -76,7 +76,7 @@ fn linux_targets() -> Vec<Target> {
 }
 
 fn macos_targets() -> Vec<Target> {
-    let mut targets = vec![
+    vec![
         Target {
             target: "x86_64-apple-darwin",
             platform_features: "metal".into(),
@@ -92,9 +92,7 @@ fn macos_targets() -> Vec<Target> {
             platform_features: "metal".into(),
             ..Default::default()
         },
-    ];
-    targets.extend(android_targets());
-    targets
+    ]
 }
 
 fn android_targets() -> Vec<Target> {
