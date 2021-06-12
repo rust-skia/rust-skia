@@ -34,13 +34,6 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
     
-    - name: 'Run Clippy'
-      shell: bash
-      if: true
-      run: |
-        cargo clean
-        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-darwin -- -D warnings
-    
     - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features gl,metal,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -62,6 +55,12 @@ jobs:
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
+    - name: 'Run Clippy'
+      shell: bash
+      if: true
+      run: |
+        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-darwin -- -D warnings
+    
     - name: 'Test all workspace projects'
       shell: bash
       if: true
@@ -72,7 +71,7 @@ jobs:
       shell: bash
       if: true
       run: |
-        cargo run --release --features gl,metal,textlayout,vulkan,webp --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" --driver cpu --drive pdf --driver svg
+        cargo run --release --features gl,metal,textlayout,vulkan,webp --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" --driver cpu --driver pdf --driver svg
       
     - name: 'Upload skia-org example images'
       if: true
@@ -84,13 +83,6 @@ jobs:
       shell: bash
       run: |
         rustup target add aarch64-apple-ios
-    
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clean
-        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target aarch64-apple-ios -- -D warnings
     
     - name: 'Build all targets in skia-safe for aarch64-apple-ios with features gl,metal,textlayout,vulkan,webp'
       shell: bash
@@ -112,6 +104,12 @@ jobs:
         echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+    
+    - name: 'Run Clippy'
+      shell: bash
+      if: false
+      run: |
+        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target aarch64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
@@ -136,13 +134,6 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
     
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clean
-        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-ios -- -D warnings
-    
     - name: 'Build all targets in skia-safe for x86_64-apple-ios with features gl,metal,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -163,6 +154,12 @@ jobs:
         echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+    
+    - name: 'Run Clippy'
+      shell: bash
+      if: false
+      run: |
+        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
@@ -187,13 +184,6 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
     
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clean
-        cargo clippy --release --features gl,textlayout,vulkan,webp --all-targets --target aarch64-linux-android -- -D warnings
-    
     - name: 'Build all targets in skia-safe for aarch64-linux-android with features gl,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -214,6 +204,12 @@ jobs:
         echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+    
+    - name: 'Run Clippy'
+      shell: bash
+      if: false
+      run: |
+        cargo clippy --release --features gl,textlayout,vulkan,webp --all-targets --target aarch64-linux-android -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
@@ -238,13 +234,6 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
     
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clean
-        cargo clippy --release --features gl,textlayout,vulkan,webp --all-targets --target x86_64-linux-android -- -D warnings
-    
     - name: 'Build all targets in skia-safe for x86_64-linux-android with features gl,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -265,6 +254,12 @@ jobs:
         echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+    
+    - name: 'Run Clippy'
+      shell: bash
+      if: false
+      run: |
+        cargo clippy --release --features gl,textlayout,vulkan,webp --all-targets --target x86_64-linux-android -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
@@ -289,13 +284,6 @@ jobs:
       run: |
         rustup target add i686-linux-android
     
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clean
-        cargo clippy --release --features gl,textlayout,vulkan,webp --all-targets --target i686-linux-android -- -D warnings
-    
     - name: 'Build all targets in skia-safe for i686-linux-android with features gl,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -316,6 +304,12 @@ jobs:
         echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+    
+    - name: 'Run Clippy'
+      shell: bash
+      if: false
+      run: |
+        cargo clippy --release --features gl,textlayout,vulkan,webp --all-targets --target i686-linux-android -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
@@ -361,13 +355,6 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
     
-    - name: 'Run Clippy'
-      shell: bash
-      if: true
-      run: |
-        cargo clean
-        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-darwin -- -D warnings
-    
     - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features gl,metal,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -388,6 +375,12 @@ jobs:
         echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+    
+    - name: 'Run Clippy'
+      shell: bash
+      if: true
+      run: |
+        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-darwin -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
@@ -412,13 +405,6 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios
     
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clean
-        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target aarch64-apple-ios -- -D warnings
-    
     - name: 'Build all targets in skia-safe for aarch64-apple-ios with features gl,metal,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -439,6 +425,12 @@ jobs:
         echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+    
+    - name: 'Run Clippy'
+      shell: bash
+      if: false
+      run: |
+        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target aarch64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
@@ -463,13 +455,6 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
     
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clean
-        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-ios -- -D warnings
-    
     - name: 'Build all targets in skia-safe for x86_64-apple-ios with features gl,metal,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -490,6 +475,12 @@ jobs:
         echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+    
+    - name: 'Run Clippy'
+      shell: bash
+      if: false
+      run: |
+        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
@@ -514,13 +505,6 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
     
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clean
-        cargo clippy --release --features gl,textlayout,vulkan,webp --all-targets --target aarch64-linux-android -- -D warnings
-    
     - name: 'Build all targets in skia-safe for aarch64-linux-android with features gl,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -541,6 +525,12 @@ jobs:
         echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+    
+    - name: 'Run Clippy'
+      shell: bash
+      if: false
+      run: |
+        cargo clippy --release --features gl,textlayout,vulkan,webp --all-targets --target aarch64-linux-android -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
@@ -565,13 +555,6 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
     
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clean
-        cargo clippy --release --features gl,textlayout,vulkan,webp --all-targets --target x86_64-linux-android -- -D warnings
-    
     - name: 'Build all targets in skia-safe for x86_64-linux-android with features gl,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -592,6 +575,12 @@ jobs:
         echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+    
+    - name: 'Run Clippy'
+      shell: bash
+      if: false
+      run: |
+        cargo clippy --release --features gl,textlayout,vulkan,webp --all-targets --target x86_64-linux-android -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
@@ -616,13 +605,6 @@ jobs:
       run: |
         rustup target add i686-linux-android
     
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clean
-        cargo clippy --release --features gl,textlayout,vulkan,webp --all-targets --target i686-linux-android -- -D warnings
-    
     - name: 'Build all targets in skia-safe for i686-linux-android with features gl,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -643,6 +625,12 @@ jobs:
         echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+    
+    - name: 'Run Clippy'
+      shell: bash
+      if: false
+      run: |
+        cargo clippy --release --features gl,textlayout,vulkan,webp --all-targets --target i686-linux-android -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
@@ -688,13 +676,6 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
     
-    - name: 'Run Clippy'
-      shell: bash
-      if: true
-      run: |
-        cargo clean
-        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-darwin -- -D warnings
-    
     - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features gl,metal,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -715,6 +696,12 @@ jobs:
         echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+    
+    - name: 'Run Clippy'
+      shell: bash
+      if: true
+      run: |
+        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-darwin -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
@@ -739,13 +726,6 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios
     
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clean
-        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target aarch64-apple-ios -- -D warnings
-    
     - name: 'Build all targets in skia-safe for aarch64-apple-ios with features gl,metal,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -766,6 +746,12 @@ jobs:
         echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+    
+    - name: 'Run Clippy'
+      shell: bash
+      if: false
+      run: |
+        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target aarch64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
@@ -790,13 +776,6 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
     
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clean
-        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-ios -- -D warnings
-    
     - name: 'Build all targets in skia-safe for x86_64-apple-ios with features gl,metal,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -817,6 +796,12 @@ jobs:
         echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+    
+    - name: 'Run Clippy'
+      shell: bash
+      if: false
+      run: |
+        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
@@ -841,13 +826,6 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
     
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clean
-        cargo clippy --release --features gl,textlayout,vulkan,webp --all-targets --target aarch64-linux-android -- -D warnings
-    
     - name: 'Build all targets in skia-safe for aarch64-linux-android with features gl,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -868,6 +846,12 @@ jobs:
         echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+    
+    - name: 'Run Clippy'
+      shell: bash
+      if: false
+      run: |
+        cargo clippy --release --features gl,textlayout,vulkan,webp --all-targets --target aarch64-linux-android -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
@@ -892,13 +876,6 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
     
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clean
-        cargo clippy --release --features gl,textlayout,vulkan,webp --all-targets --target x86_64-linux-android -- -D warnings
-    
     - name: 'Build all targets in skia-safe for x86_64-linux-android with features gl,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -919,6 +896,12 @@ jobs:
         echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+    
+    - name: 'Run Clippy'
+      shell: bash
+      if: false
+      run: |
+        cargo clippy --release --features gl,textlayout,vulkan,webp --all-targets --target x86_64-linux-android -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
@@ -943,13 +926,6 @@ jobs:
       run: |
         rustup target add i686-linux-android
     
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clean
-        cargo clippy --release --features gl,textlayout,vulkan,webp --all-targets --target i686-linux-android -- -D warnings
-    
     - name: 'Build all targets in skia-safe for i686-linux-android with features gl,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -970,6 +946,12 @@ jobs:
         echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+    
+    - name: 'Run Clippy'
+      shell: bash
+      if: false
+      run: |
+        cargo clippy --release --features gl,textlayout,vulkan,webp --all-targets --target i686-linux-android -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
