@@ -1,13 +1,11 @@
 - name: 'Install Rust target $[[target]]'
   shell: bash
   run: |
-    set -e
     rustup target add $[[target]]
 
 - name: 'Build all targets in skia-safe for $[[target]] with features $[[features]]'
   shell: bash
   run: |
-    set -e
     if [ "$[[androidEnv]]" == "true" ]; then
       TARGET=$[[target]]
       TARGET=${TARGET//-/_}

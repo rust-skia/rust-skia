@@ -29,13 +29,11 @@ jobs:
     - name: 'Install Rust target x86_64-apple-darwin'
       shell: bash
       run: |
-        set -e
         rustup target add x86_64-apple-darwin
     
     - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features gl,vulkan,textlayout,metal'
       shell: bash
       run: |
-        set -e
         if [ "false" == "true" ]; then
           TARGET=x86_64-apple-darwin
           TARGET=${TARGET//-/_}
@@ -72,13 +70,11 @@ jobs:
     - name: 'Install Rust target x86_64-apple-darwin'
       shell: bash
       run: |
-        set -e
         rustup target add x86_64-apple-darwin
     
     - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features gl,vulkan,textlayout,metal'
       shell: bash
       run: |
-        set -e
         if [ "false" == "true" ]; then
           TARGET=x86_64-apple-darwin
           TARGET=${TARGET//-/_}

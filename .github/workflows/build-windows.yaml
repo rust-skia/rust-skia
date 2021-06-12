@@ -38,13 +38,11 @@ jobs:
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
-        set -e
         rustup target add x86_64-pc-windows-msvc
     
     - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features gl,vulkan,textlayout,webp,d3d'
       shell: bash
       run: |
-        set -e
         if [ "false" == "true" ]; then
           TARGET=x86_64-pc-windows-msvc
           TARGET=${TARGET//-/_}
@@ -90,13 +88,11 @@ jobs:
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
-        set -e
         rustup target add x86_64-pc-windows-msvc
     
     - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features gl,vulkan,textlayout,webp,d3d'
       shell: bash
       run: |
-        set -e
         if [ "false" == "true" ]; then
           TARGET=x86_64-pc-windows-msvc
           TARGET=${TARGET//-/_}

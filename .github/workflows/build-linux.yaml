@@ -25,13 +25,11 @@ jobs:
     - name: 'Install Rust target x86_64-unknown-linux-gnu'
       shell: bash
       run: |
-        set -e
         rustup target add x86_64-unknown-linux-gnu
     
     - name: 'Build all targets in skia-safe for x86_64-unknown-linux-gnu with features gl,vulkan,textlayout,webp'
       shell: bash
       run: |
-        set -e
         if [ "false" == "true" ]; then
           TARGET=x86_64-unknown-linux-gnu
           TARGET=${TARGET//-/_}
@@ -64,13 +62,11 @@ jobs:
     - name: 'Install Rust target x86_64-unknown-linux-gnu'
       shell: bash
       run: |
-        set -e
         rustup target add x86_64-unknown-linux-gnu
     
     - name: 'Build all targets in skia-safe for x86_64-unknown-linux-gnu with features gl,vulkan,textlayout,webp'
       shell: bash
       run: |
-        set -e
         if [ "false" == "true" ]; then
           TARGET=x86_64-unknown-linux-gnu
           TARGET=${TARGET//-/_}
