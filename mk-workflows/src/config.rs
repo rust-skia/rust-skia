@@ -36,7 +36,7 @@ pub fn jobs() -> Vec<Job> {
             toolchain: "stable",
             base_features: "gl,vulkan,textlayout,webp".into(),
             skia_debug: false,
-            example_args: Some("--driver cpu --drive pdf --driver svg".into()),
+            example_args: Some("--driver cpu --driver pdf --driver svg".into()),
         },
         Job {
             name: "stable-all-features-debug",
