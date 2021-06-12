@@ -1,6 +1,8 @@
 runs-on: windows-2019
 # Containers are not supported on Windows.
 # container: ghcr.io/pragmatrix/rust-skia-windows:latest
+env: 
+  SKIA_DEBUG: $[[skiaDebug]]
 
 steps:
 - uses: actions/checkout@v2
