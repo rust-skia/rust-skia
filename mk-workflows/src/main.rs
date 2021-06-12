@@ -1,7 +1,8 @@
 //! This program builds the github workflow files for the rust-skia project.
 use std::{fmt, fs, iter, ops::Deref, path::PathBuf};
 
-const DEFAULT_ANDROID_API_LEVEL: usize = 26;
+mod config;
+
 const WORKFLOW: &str = include_str!("templates/workflow.yaml");
 const LINUX_JOB: &str = include_str!("templates/linux-job.yaml");
 const WINDOWS_JOB: &str = include_str!("templates/windows-job.yaml");
@@ -9,12 +10,12 @@ const MACOS_JOB: &str = include_str!("templates/macos-job.yaml");
 const TARGET_TEMPLATE: &str = include_str!("templates/target.yaml");
 
 fn main() {
-    for workflow in workflows() {
-        build_workflow(&workflow, &jobs());
+    for workflow in config::workflows() {
+        build_workflow(&workflow, &config::jobs());
     }
 }
 
-struct Workflow {
+pub struct Workflow {
     os: &'static str,
     build_host: &'static str,
     job_template: &'static str,
@@ -22,91 +23,7 @@ struct Workflow {
     host_bin_ext: &'static str,
 }
 
-fn workflows() -> Vec<Workflow> {
-    [
-        Workflow {
-            os: "windows",
-            build_host: "x86_64-pc-windows-msvc",
-            job_template: WINDOWS_JOB,
-            targets: windows_targets(),
-            host_bin_ext: ".exe",
-        },
-        Workflow {
-            os: "linux",
-            build_host: "x86_64-unknown-linux-gnu",
-            job_template: LINUX_JOB,
-            targets: linux_targets(),
-            host_bin_ext: "",
-        },
-        Workflow {
-            os: "macos",
-            build_host: "x86_64-apple-darwin",
-            job_template: MACOS_JOB,
-            targets: macos_targets(),
-            host_bin_ext: "",
-        },
-    ]
-    .into()
-}
-
-fn jobs() -> Vec<Job> {
-    [
-        Job {
-            name: "stable-all-features",
-            toolchain: "stable",
-            base_features: "gl,vulkan,textlayout,webp".into(),
-            skia_debug: false,
-            example_args: Some("--driver cpu --drive pdf --driver svg".into()),
-        },
-        Job {
-            name: "stable-all-features-debug",
-            toolchain: "stable",
-            base_features: "gl,vulkan,textlayout,webp".into(),
-            skia_debug: true,
-            example_args: None,
-        },
-        Job {
-            name: "beta-all-features",
-            toolchain: "beta",
-            base_features: "gl,vulkan,textlayout,webp".into(),
-            skia_debug: false,
-            example_args: None,
-        },
-    ]
-    .into()
-}
-
-fn windows_targets() -> Vec<Target> {
-    let host = Target {
-        target: "x86_64-pc-windows-msvc",
-        platform_features: "d3d".into(),
-        ..Target::windows_default()
-    };
-
-    [host].into()
-}
-
-fn linux_targets() -> Vec<Target> {
-    let host = Target {
-        target: "x86_64-unknown-linux-gnu",
-        platform_features: "".into(),
-        ..Target::windows_default()
-    };
-
-    [host].into()
-}
-
-fn macos_targets() -> Vec<Target> {
-    let host = Target {
-        target: "x86_64-apple-darwin",
-        platform_features: "metal".into(),
-        ..Target::windows_default()
-    };
-
-    [host].into()
-}
-
-struct Job {
+pub struct Job {
     name: &'static str,
     toolchain: &'static str,
     base_features: Features,
@@ -185,7 +102,7 @@ fn build_target(workflow: &Workflow, job: &Job, target: &Target) -> String {
     let template_arguments: &[(&'static str, &dyn fmt::Display)] = &[
         ("target", &target.target),
         ("androidEnv", &target.android_env),
-        ("androidAPILevel", &DEFAULT_ANDROID_API_LEVEL),
+        ("androidAPILevel", &config::DEFAULT_ANDROID_API_LEVEL),
         ("features", &features),
         ("runTests", &native_target),
         ("runClippy", &native_target),
