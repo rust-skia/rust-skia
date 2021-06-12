@@ -1,4 +1,4 @@
-name: 'Rust Skia - Check Formatting'
+name: 'Check Formatting'
 on: [push]
 
 jobs:

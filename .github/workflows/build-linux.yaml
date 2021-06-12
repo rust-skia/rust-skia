@@ -14,17 +14,17 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
-    # Our linux container does have git >= 2.18 installed, so we can't use submodules here.
-    #  with:
-    #    submodules: true
-    
-    #- name: Get submodules
-    #  run: git submodule update --init --depth 1
-    
-    - name: Install Rust
-      uses: hecrj/setup-rust-action@master
       with:
-        rust-version: stable
+        submodules: true
+    
+    - name: Prepare Rustup
+      run: (cd /github/home && ln -s /root/.cargo)
+    
+    - name: Update Rustup and Rust
+      run: rustup update
+    
+    - name: Configure Rust Toolchain
+      run: rustup default stable
     
     - name: Install Clippy
       run: rustup component add clippy
@@ -57,17 +57,17 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
-    # Our linux container does have git >= 2.18 installed, so we can't use submodules here.
-    #  with:
-    #    submodules: true
-    
-    #- name: Get submodules
-    #  run: git submodule update --init --depth 1
-    
-    - name: Install Rust
-      uses: hecrj/setup-rust-action@master
       with:
-        rust-version: beta
+        submodules: true
+    
+    - name: Prepare Rustup
+      run: (cd /github/home && ln -s /root/.cargo)
+    
+    - name: Update Rustup and Rust
+      run: rustup update
+    
+    - name: Configure Rust Toolchain
+      run: rustup default beta
     
     - name: Install Clippy
       run: rustup component add clippy
