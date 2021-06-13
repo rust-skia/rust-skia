@@ -95,6 +95,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -167,6 +168,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -239,6 +241,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -332,6 +335,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -404,6 +408,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -476,6 +481,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -569,6 +575,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -641,6 +648,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -713,6 +721,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -806,6 +815,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -878,6 +888,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -950,6 +961,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -1043,6 +1055,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -1115,6 +1128,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -1187,6 +1201,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -1280,6 +1295,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -1352,6 +1368,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -1424,6 +1441,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -1517,6 +1535,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -1589,6 +1608,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -1661,6 +1681,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -1754,6 +1775,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -1826,6 +1848,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -1898,6 +1921,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -1991,6 +2015,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -2063,6 +2088,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -2135,6 +2161,7 @@ jobs:
       if: true
       uses: ncipollo/release-action@v1
       with:
+        user: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
