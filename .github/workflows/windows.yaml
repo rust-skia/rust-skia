@@ -62,7 +62,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "d3d,gl,textlayout,vulkan,webp" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -96,17 +96,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: false
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
   windows-stable-all-features-debug:
@@ -163,7 +166,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "d3d,gl,textlayout,vulkan,webp" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -197,17 +200,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: false
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
   windows-beta-all-features:
@@ -264,7 +270,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "d3d,gl,textlayout,vulkan,webp" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -298,17 +304,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: false
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
   windows-release:
@@ -365,7 +374,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -399,17 +408,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
   windows-release-gl:
@@ -466,7 +478,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -500,17 +512,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
   windows-release-vulkan:
@@ -567,7 +582,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "vulkan" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -601,17 +616,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
   windows-release-textlayout:
@@ -668,7 +686,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "textlayout" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -702,17 +720,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
   windows-release-gl-textlayout:
@@ -769,7 +790,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -803,17 +824,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
   windows-release-vulkan-textlayout:
@@ -870,7 +894,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "vulkan,textlayout" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -904,17 +928,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
   windows-release-gl-vulkan-textlayout:
@@ -971,7 +998,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,vulkan,textlayout" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1005,17 +1032,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
   windows-release-d3d:
@@ -1072,7 +1102,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "d3d" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1106,17 +1136,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
   windows-release-d3d-textlayout:
@@ -1173,7 +1206,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "d3d,textlayout" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1207,16 +1240,19 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true

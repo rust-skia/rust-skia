@@ -52,7 +52,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "egl,gl,textlayout,vulkan,wayland,webp,x11" --target x86_64-unknown-linux-gnu
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -86,17 +86,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: false
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-linux-android'
@@ -120,7 +123,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan,webp" --target aarch64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -154,17 +157,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: false
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-linux-android'
@@ -188,7 +194,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan,webp" --target x86_64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -222,17 +228,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: false
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target i686-linux-android'
@@ -256,7 +265,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan,webp" --target i686-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -290,17 +299,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: false
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
   linux-stable-all-features-debug:
@@ -347,7 +359,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "egl,gl,textlayout,vulkan,wayland,webp,x11" --target x86_64-unknown-linux-gnu
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -381,17 +393,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: false
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-linux-android'
@@ -415,7 +430,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan,webp" --target aarch64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -449,17 +464,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: false
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-linux-android'
@@ -483,7 +501,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan,webp" --target x86_64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -517,17 +535,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: false
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target i686-linux-android'
@@ -551,7 +572,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan,webp" --target i686-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -585,17 +606,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: false
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
   linux-beta-all-features:
@@ -642,7 +666,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "egl,gl,textlayout,vulkan,wayland,webp,x11" --target x86_64-unknown-linux-gnu
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -676,17 +700,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: false
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-linux-android'
@@ -710,7 +737,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan,webp" --target aarch64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -744,17 +771,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: false
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-linux-android'
@@ -778,7 +808,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan,webp" --target x86_64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -812,17 +842,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: false
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target i686-linux-android'
@@ -846,7 +879,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan,webp" --target i686-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -880,17 +913,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: false
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
   linux-release:
@@ -937,7 +973,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "" --target x86_64-unknown-linux-gnu
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -971,17 +1007,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-linux-android'
@@ -1005,7 +1044,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "" --target aarch64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1039,17 +1078,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-linux-android'
@@ -1073,7 +1115,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "" --target x86_64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1107,17 +1149,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target i686-linux-android'
@@ -1141,7 +1186,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "" --target i686-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1175,17 +1220,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
   linux-release-gl:
@@ -1232,7 +1280,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl" --target x86_64-unknown-linux-gnu
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1266,17 +1314,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-linux-android'
@@ -1300,7 +1351,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl" --target aarch64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1334,17 +1385,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-linux-android'
@@ -1368,7 +1422,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl" --target x86_64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1402,17 +1456,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target i686-linux-android'
@@ -1436,7 +1493,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl" --target i686-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1470,17 +1527,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
   linux-release-vulkan:
@@ -1527,7 +1587,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "vulkan" --target x86_64-unknown-linux-gnu
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1561,17 +1621,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-linux-android'
@@ -1595,7 +1658,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "vulkan" --target aarch64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1629,17 +1692,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-linux-android'
@@ -1663,7 +1729,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "vulkan" --target x86_64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1697,17 +1763,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target i686-linux-android'
@@ -1731,7 +1800,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "vulkan" --target i686-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1765,17 +1834,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
   linux-release-textlayout:
@@ -1822,7 +1894,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "textlayout" --target x86_64-unknown-linux-gnu
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1856,17 +1928,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-linux-android'
@@ -1890,7 +1965,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "textlayout" --target aarch64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1924,17 +1999,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-linux-android'
@@ -1958,7 +2036,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "textlayout" --target x86_64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1992,17 +2070,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target i686-linux-android'
@@ -2026,7 +2107,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "textlayout" --target i686-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2060,17 +2141,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
   linux-release-gl-textlayout:
@@ -2117,7 +2201,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout" --target x86_64-unknown-linux-gnu
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2151,17 +2235,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-linux-android'
@@ -2185,7 +2272,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout" --target aarch64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2219,17 +2306,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-linux-android'
@@ -2253,7 +2343,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout" --target x86_64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2287,17 +2377,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target i686-linux-android'
@@ -2321,7 +2414,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout" --target i686-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2355,17 +2448,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
   linux-release-vulkan-textlayout:
@@ -2412,7 +2508,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "vulkan,textlayout" --target x86_64-unknown-linux-gnu
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2446,17 +2542,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-linux-android'
@@ -2480,7 +2579,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "vulkan,textlayout" --target aarch64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2514,17 +2613,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-linux-android'
@@ -2548,7 +2650,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "vulkan,textlayout" --target x86_64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2582,17 +2684,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target i686-linux-android'
@@ -2616,7 +2721,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "vulkan,textlayout" --target i686-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2650,17 +2755,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
   linux-release-gl-vulkan-textlayout:
@@ -2707,7 +2815,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,vulkan,textlayout" --target x86_64-unknown-linux-gnu
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2741,17 +2849,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-linux-android'
@@ -2775,7 +2886,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,vulkan,textlayout" --target aarch64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2809,17 +2920,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-linux-android'
@@ -2843,7 +2957,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,vulkan,textlayout" --target x86_64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2877,17 +2991,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target i686-linux-android'
@@ -2911,7 +3028,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,vulkan,textlayout" --target i686-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2945,17 +3062,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
   linux-release-gl-x11:
@@ -3002,7 +3122,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,x11" --target x86_64-unknown-linux-gnu
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -3036,17 +3156,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-linux-android'
@@ -3070,7 +3193,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,x11" --target aarch64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -3104,17 +3227,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-linux-android'
@@ -3138,7 +3264,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,x11" --target x86_64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -3172,17 +3298,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target i686-linux-android'
@@ -3206,7 +3335,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,x11" --target i686-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -3240,17 +3369,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
   linux-release-gl-textlayout-x11:
@@ -3297,7 +3429,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout,x11" --target x86_64-unknown-linux-gnu
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -3331,17 +3463,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-linux-android'
@@ -3365,7 +3500,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout,x11" --target aarch64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -3399,17 +3534,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-linux-android'
@@ -3433,7 +3571,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout,x11" --target x86_64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -3467,17 +3605,20 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
     - name: 'Install Rust target i686-linux-android'
@@ -3501,7 +3642,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout,x11" --target i686-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -3535,16 +3676,19 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
       if: true
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
         replacesArtifacts: true
         commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
