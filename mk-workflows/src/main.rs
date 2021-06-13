@@ -3,7 +3,8 @@ use std::{fmt, fs, iter, ops::Deref, path::PathBuf};
 
 mod config;
 
-const WORKFLOW: &str = include_str!("templates/workflow.yaml");
+const QA_WORKFLOW: &str = include_str!("templates/qa-workflow.yaml");
+const RELEASE_WORKFLOW: &str = include_str!("templates/release-workflow.yaml");
 const LINUX_JOB: &str = include_str!("templates/linux-job.yaml");
 const WINDOWS_JOB: &str = include_str!("templates/windows-job.yaml");
 const MACOS_JOB: &str = include_str!("templates/macos-job.yaml");
@@ -117,17 +118,14 @@ fn build_workflow(workflow: &Workflow, jobs: &[Job]) {
 }
 
 fn build_header(workflow_name: &str, workflow_kind: WorkflowKind) -> String {
-    let mut replacements: Vec<_> = [("workflowName".to_owned(), workflow_name.to_owned())].into();
+    let replacements: Vec<_> = [("workflowName".to_owned(), workflow_name.to_owned())].into();
 
-    {
-        let filter = match workflow_kind {
-            WorkflowKind::QA => "branches-ignore: release",
-            WorkflowKind::Release => "branches: release",
-        };
-        replacements.push(("workflowFilter".into(), filter.into()));
-    }
-
-    render_template(WORKFLOW, &replacements)
+    let workflow = match workflow_kind {
+        WorkflowKind::QA => QA_WORKFLOW,
+        WorkflowKind::Release => RELEASE_WORKFLOW,
+    };
+    
+    render_template(workflow, &replacements)
 }
 
 fn build_job(template: &str, job: &Job) -> String {
