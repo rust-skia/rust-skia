@@ -96,6 +96,10 @@ Simple examples of the skshaper and skparagraph module bindings can be found [in
 
 `webp-encode` enables support for encoding Skia bitmaps and images to the [WEBP](https://en.wikipedia.org/wiki/WebP) image format, and `web-decode` enables support for decoding WEBP to Skia bitmaps and images. The `webp` feature can be used as a shorthand to enable the `webp-encode` and `webp-decode` features.
 
+### `binary-cache`
+
+`binary-cache` enables download pre-built skia binaries instead of building them locally, it is enabled by default.
+
 ## Multithreading
 
 Conflicting with Rust philosophy, we've decided to fully support Skia's reference counting semantics, which means that all reference counted types can be cloned and modified from within the same thread. To send a reference counted type to another thread, its reference count must be 1, and must be wrapped with the `Sendable` type and then unwrapped in the receiving thread. The following functions support the sending mechanism:
