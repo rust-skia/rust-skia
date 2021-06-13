@@ -61,6 +61,7 @@
   if: $[[releaseBinaries]]
   uses: ncipollo/release-action@v1
   with:
+    repo: skia-binaries
     allowUpdates: true
     replacesArtifacts: true
     commit: release
