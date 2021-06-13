@@ -109,7 +109,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-linux-android'
       shell: bash
@@ -182,7 +182,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-linux-android'
       shell: bash
@@ -255,7 +255,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target i686-linux-android'
       shell: bash
@@ -328,7 +328,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   linux-qa-stable-all-features-debug:
     runs-on: ubuntu-20.04
@@ -423,7 +423,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-linux-android'
       shell: bash
@@ -496,7 +496,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-linux-android'
       shell: bash
@@ -569,7 +569,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target i686-linux-android'
       shell: bash
@@ -642,7 +642,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   linux-qa-beta-all-features:
     runs-on: ubuntu-20.04
@@ -737,7 +737,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-linux-android'
       shell: bash
@@ -810,7 +810,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-linux-android'
       shell: bash
@@ -883,7 +883,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target i686-linux-android'
       shell: bash
@@ -956,5 +956,5 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true

@@ -119,7 +119,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   windows-qa-stable-all-features-debug:
     runs-on: windows-2019
@@ -224,7 +224,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   windows-qa-beta-all-features:
     runs-on: windows-2019
@@ -329,5 +329,5 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true

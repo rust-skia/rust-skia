@@ -103,7 +103,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-apple-ios'
       shell: bash
@@ -176,7 +176,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-apple-ios'
       shell: bash
@@ -249,7 +249,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   macos-release-release-gl:
     runs-on: macOS-10.15
@@ -343,7 +343,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-apple-ios'
       shell: bash
@@ -416,7 +416,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-apple-ios'
       shell: bash
@@ -489,7 +489,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   macos-release-release-vulkan:
     runs-on: macOS-10.15
@@ -583,7 +583,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-apple-ios'
       shell: bash
@@ -656,7 +656,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-apple-ios'
       shell: bash
@@ -729,7 +729,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   macos-release-release-textlayout:
     runs-on: macOS-10.15
@@ -823,7 +823,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-apple-ios'
       shell: bash
@@ -896,7 +896,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-apple-ios'
       shell: bash
@@ -969,7 +969,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   macos-release-release-gl-textlayout:
     runs-on: macOS-10.15
@@ -1063,7 +1063,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-apple-ios'
       shell: bash
@@ -1136,7 +1136,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-apple-ios'
       shell: bash
@@ -1209,7 +1209,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   macos-release-release-vulkan-textlayout:
     runs-on: macOS-10.15
@@ -1303,7 +1303,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-apple-ios'
       shell: bash
@@ -1376,7 +1376,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-apple-ios'
       shell: bash
@@ -1449,7 +1449,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   macos-release-release-gl-vulkan-textlayout:
     runs-on: macOS-10.15
@@ -1543,7 +1543,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-apple-ios'
       shell: bash
@@ -1616,7 +1616,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-apple-ios'
       shell: bash
@@ -1689,7 +1689,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   macos-release-release-metal:
     runs-on: macOS-10.15
@@ -1783,7 +1783,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-apple-ios'
       shell: bash
@@ -1856,7 +1856,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-apple-ios'
       shell: bash
@@ -1929,7 +1929,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   macos-release-release-metal-textlayout:
     runs-on: macOS-10.15
@@ -2023,7 +2023,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target aarch64-apple-ios'
       shell: bash
@@ -2096,7 +2096,7 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
     - name: 'Install Rust target x86_64-apple-ios'
       shell: bash
@@ -2169,5 +2169,5 @@ jobs:
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
