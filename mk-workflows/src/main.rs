@@ -15,12 +15,30 @@ fn main() {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct Workflow {
+    kind: WorkflowKind,
     host_os: HostOS,
     host_target: &'static str,
     job_template: &'static str,
     targets: Vec<Target>,
     host_bin_ext: &'static str,
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+enum WorkflowKind {
+    QA,
+    Release,
+}
+
+impl fmt::Display for WorkflowKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let n = match self {
+            WorkflowKind::QA => "qa",
+            WorkflowKind::Release => "release",
+        };
+        f.write_str(n)
+    }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -50,7 +68,6 @@ pub struct Job {
     // we may need to disable clippy for beta builds temporarily.
     disable_clippy: bool,
     example_args: Option<String>,
-    release_binaries: bool,
 }
 
 fn build_workflow(workflow: &Workflow, jobs: &[Job]) {
@@ -58,31 +75,27 @@ fn build_workflow(workflow: &Workflow, jobs: &[Job]) {
     let job_template = workflow.job_template;
     let targets = &workflow.targets;
 
-    let workflow_name = host_os.to_string();
+    let workflow_name = format!("{}-{}", host_os.to_string(), workflow.kind.to_string());
     let output_filename = PathBuf::new()
         .join(".github")
         .join("workflows")
         .join(format!("{}.yaml", workflow_name));
 
-    let header = build_header(&workflow_name);
+    let header = build_header(&workflow_name, workflow.kind);
 
     let mut parts = vec![header];
 
     for job in jobs {
-        let job_name = workflow_name.clone() + "-" + job.name;
-        let job_name = format!("{}:", job_name).indented(1);
-        parts.push(job_name);
+        {
+            let job_name = workflow_name.clone() + "-" + job.name;
+            let job_name = format!("{}:", job_name).indented(1);
+            parts.push(job_name);
+        }
 
-        let job_filter = if job.release_binaries {
-            "if: github.ref == 'refs/heads/release'"
-        } else {
-            "if: github.ref != 'refs/heads/release'"
-        };
-
-        parts.push(job_filter.to_string().indented(2));
-
-        let job_header = build_job(job_template, &job).indented(2);
-        parts.push(job_header);
+        {
+            let job_header = build_job(job_template, &job).indented(2);
+            parts.push(job_header);
+        }
 
         let targets: Vec<String> = targets
             .iter()
@@ -103,8 +116,17 @@ fn build_workflow(workflow: &Workflow, jobs: &[Job]) {
     fs::write(output_filename, contents).unwrap();
 }
 
-fn build_header(workflow_name: &str) -> String {
-    let replacements = [("workflowName".to_owned(), workflow_name.to_owned())];
+fn build_header(workflow_name: &str, workflow_kind: WorkflowKind) -> String {
+    let mut replacements: Vec<_> = [("workflowName".to_owned(), workflow_name.to_owned())].into();
+
+    {
+        let filter = match workflow_kind {
+            WorkflowKind::QA => "branches-ignore: release",
+            WorkflowKind::Release => "branches: release",
+        };
+        replacements.push(("workflowFilter".into(), filter.into()));
+    }
+
     render_template(WORKFLOW, &replacements)
 }
 
@@ -121,7 +143,7 @@ fn build_job(template: &str, job: &Job) -> String {
 fn build_target(workflow: &Workflow, job: &Job, target: &Target) -> String {
     let mut features = job.features.clone();
     // if we are releasing binaries, we want the exact set of features specified.
-    if !job.release_binaries {
+    if workflow.kind == WorkflowKind::QA {
         features = features.join(&target.platform_features);
     }
     let native_target = workflow.host_target == target.target;
@@ -133,6 +155,7 @@ fn build_target(workflow: &Workflow, job: &Job, target: &Target) -> String {
     .unwrap_or_default();
     let generate_artifacts = !example_args.is_empty();
     let run_clippy = native_target && !job.disable_clippy;
+    let release_binaries = workflow.kind == WorkflowKind::Release;
 
     let template_arguments: &[(&'static str, &dyn fmt::Display)] = &[
         ("target", &target.target),
@@ -143,7 +166,7 @@ fn build_target(workflow: &Workflow, job: &Job, target: &Target) -> String {
         ("runClippy", &run_clippy),
         ("exampleArgs", &example_args),
         ("generateArtifacts", &generate_artifacts),
-        ("releaseBinaries", &job.release_binaries),
+        ("releaseBinaries", &release_binaries),
         ("hostBinExt", &workflow.host_bin_ext),
     ];
 
@@ -172,7 +195,7 @@ fn render_template(template: &str, replacements: &[(String, String)]) -> String 
     template
 }
 
-#[derive(Default, Debug)]
+#[derive(Clone, Default, Debug)]
 struct Target {
     target: &'static str,
     android_env: bool,

@@ -1,59 +1,65 @@
-use crate::{Features, HostOS, Job, Target, Workflow, LINUX_JOB, MACOS_JOB, WINDOWS_JOB};
+use crate::{
+    Features, HostOS, Job, Target, Workflow, WorkflowKind, LINUX_JOB, MACOS_JOB, WINDOWS_JOB,
+};
 
 pub const DEFAULT_ANDROID_API_LEVEL: usize = 26;
 
 pub fn workflows() -> Vec<Workflow> {
-    [
-        Workflow {
+    let mut workflows = Vec::new();
+    for kind in [WorkflowKind::QA, WorkflowKind::Release] {
+        workflows.push(Workflow {
+            kind,
             host_os: HostOS::Windows,
             host_target: "x86_64-pc-windows-msvc",
             job_template: WINDOWS_JOB,
             targets: windows_targets(),
             host_bin_ext: ".exe",
-        },
-        Workflow {
+        });
+        workflows.push(Workflow {
+            kind,
             host_os: HostOS::Linux,
             host_target: "x86_64-unknown-linux-gnu",
             job_template: LINUX_JOB,
             targets: linux_targets(),
             host_bin_ext: "",
-        },
-        Workflow {
+        });
+        workflows.push(Workflow {
+            kind,
             host_os: HostOS::MacOS,
             host_target: "x86_64-apple-darwin",
             job_template: MACOS_JOB,
             targets: macos_targets(),
             host_bin_ext: "",
-        },
-    ]
-    .into()
+        });
+    }
+    workflows
 }
 
 pub fn jobs(workflow: &Workflow) -> Vec<Job> {
-    qa_jobs()
-        .into_iter()
-        .chain(binaries_jobs(workflow))
-        .collect()
+    match workflow.kind {
+        WorkflowKind::QA => qa_jobs(),
+        WorkflowKind::Release => release_jobs(workflow),
+    }
 }
 
 pub fn qa_jobs() -> Vec<Job> {
     [
         Job {
-            name: "qa-stable-all-features",
+            name: "stable-all-features",
             toolchain: "stable",
             features: "gl,vulkan,textlayout,webp".into(),
             example_args: Some("--driver cpu --driver pdf --driver svg".into()),
             ..Job::default()
         },
         Job {
-            name: "qa-stable-all-features-debug",
+            name: "stable-all-features-debug",
             toolchain: "stable",
             features: "gl,vulkan,textlayout,webp".into(),
             skia_debug: true,
             ..Job::default()
         },
         Job {
-            name: "qa-beta-all-features",
+            name: "beta-all-features",
             toolchain: "beta",
             features: "gl,vulkan,textlayout,webp".into(),
             ..Job::default()
@@ -63,7 +69,7 @@ pub fn qa_jobs() -> Vec<Job> {
 }
 
 /// Jobs for releasing prebuilt binaries.
-pub fn binaries_jobs(workflow: &Workflow) -> Vec<Job> {
+pub fn release_jobs(workflow: &Workflow) -> Vec<Job> {
     let mut jobs: Vec<_> = [
         job("release", ""),
         job("release-gl", "gl"),
@@ -75,19 +81,19 @@ pub fn binaries_jobs(workflow: &Workflow) -> Vec<Job> {
     ]
     .into();
 
-    if workflow.host_os == HostOS::Linux {
-        jobs.push(job("release-gl-x11", "gl,x11"));
-        jobs.push(job("release-gl-textlayout-x11", "gl,textlayout,x11"));
-    }
-
-    if workflow.host_os == HostOS::Windows {
-        jobs.push(job("release-d3d", "d3d"));
-        jobs.push(job("release-d3d-textlayout", "d3d,textlayout"));
-    }
-
-    if workflow.host_os == HostOS::MacOS {
-        jobs.push(job("release-metal", "metal"));
-        jobs.push(job("release-metal-textlayout", "metal,textlayout"));
+    match workflow.host_os {
+        HostOS::Windows => {
+            jobs.push(job("release-d3d", "d3d"));
+            jobs.push(job("release-d3d-textlayout", "d3d,textlayout"));
+        }
+        HostOS::Linux => {
+            jobs.push(job("release-gl-x11", "gl,x11"));
+            jobs.push(job("release-gl-textlayout-x11", "gl,textlayout,x11"));
+        }
+        HostOS::MacOS => {
+            jobs.push(job("release-metal", "metal"));
+            jobs.push(job("release-metal-textlayout", "metal,textlayout"));
+        }
     }
 
     return jobs;
@@ -96,7 +102,6 @@ pub fn binaries_jobs(workflow: &Workflow) -> Vec<Job> {
         Job {
             name,
             toolchain: "stable",
-            release_binaries: true,
             features: features.into(),
             ..Job::default()
         }
