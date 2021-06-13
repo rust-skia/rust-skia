@@ -111,7 +111,7 @@ jobs:
       if: false
       uses: ncipollo/release-action@v1
       with:
-        user: rust-skia
+        owner: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -216,7 +216,7 @@ jobs:
       if: false
       uses: ncipollo/release-action@v1
       with:
-        user: rust-skia
+        owner: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
@@ -321,7 +321,7 @@ jobs:
       if: false
       uses: ncipollo/release-action@v1
       with:
-        user: rust-skia
+        owner: rust-skia
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
