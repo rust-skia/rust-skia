@@ -49,10 +49,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl,metal,textlayout,vulkan,webp" --target x86_64-apple-darwin
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -60,19 +59,19 @@ jobs:
       shell: bash
       if: true
       run: |
-        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-darwin -- -D warnings
+        cargo clippy --release --features "gl,metal,textlayout,vulkan,webp" --all-targets --target x86_64-apple-darwin -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
-        cargo test --all --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-darwin -- --nocapture
+        cargo test --all --release --features "gl,metal,textlayout,vulkan,webp" --all-targets --target x86_64-apple-darwin -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: true
       run: |
-        cargo run --release --features gl,metal,textlayout,vulkan,webp --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" --driver cpu --driver pdf --driver svg
+        cargo run --release --features "gl,metal,textlayout,vulkan,webp" --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" --driver cpu --driver pdf --driver svg
       
     - name: 'Upload skia-org example images'
       if: true
@@ -86,7 +85,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -95,7 +94,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -118,10 +117,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl,metal,textlayout,vulkan,webp" --target aarch64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -129,19 +127,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target aarch64-apple-ios -- -D warnings
+        cargo clippy --release --features "gl,metal,textlayout,vulkan,webp" --all-targets --target aarch64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features gl,metal,textlayout,vulkan,webp --all-targets --target aarch64-apple-ios -- --nocapture
+        cargo test --all --release --features "gl,metal,textlayout,vulkan,webp" --all-targets --target aarch64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features gl,metal,textlayout,vulkan,webp --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "gl,metal,textlayout,vulkan,webp" --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -155,7 +153,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -164,7 +162,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -187,10 +185,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl,metal,textlayout,vulkan,webp" --target x86_64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -198,19 +195,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-ios -- -D warnings
+        cargo clippy --release --features "gl,metal,textlayout,vulkan,webp" --all-targets --target x86_64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-ios -- --nocapture
+        cargo test --all --release --features "gl,metal,textlayout,vulkan,webp" --all-targets --target x86_64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features gl,metal,textlayout,vulkan,webp --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "gl,metal,textlayout,vulkan,webp" --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -224,7 +221,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -233,7 +230,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -278,10 +275,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl,metal,textlayout,vulkan,webp" --target x86_64-apple-darwin
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -289,19 +285,19 @@ jobs:
       shell: bash
       if: true
       run: |
-        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-darwin -- -D warnings
+        cargo clippy --release --features "gl,metal,textlayout,vulkan,webp" --all-targets --target x86_64-apple-darwin -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
-        cargo test --all --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-darwin -- --nocapture
+        cargo test --all --release --features "gl,metal,textlayout,vulkan,webp" --all-targets --target x86_64-apple-darwin -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features gl,metal,textlayout,vulkan,webp --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "gl,metal,textlayout,vulkan,webp" --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -315,7 +311,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -324,7 +320,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -347,10 +343,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl,metal,textlayout,vulkan,webp" --target aarch64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -358,19 +353,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target aarch64-apple-ios -- -D warnings
+        cargo clippy --release --features "gl,metal,textlayout,vulkan,webp" --all-targets --target aarch64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features gl,metal,textlayout,vulkan,webp --all-targets --target aarch64-apple-ios -- --nocapture
+        cargo test --all --release --features "gl,metal,textlayout,vulkan,webp" --all-targets --target aarch64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features gl,metal,textlayout,vulkan,webp --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "gl,metal,textlayout,vulkan,webp" --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -384,7 +379,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -393,7 +388,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -416,10 +411,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl,metal,textlayout,vulkan,webp" --target x86_64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -427,19 +421,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-ios -- -D warnings
+        cargo clippy --release --features "gl,metal,textlayout,vulkan,webp" --all-targets --target x86_64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-ios -- --nocapture
+        cargo test --all --release --features "gl,metal,textlayout,vulkan,webp" --all-targets --target x86_64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features gl,metal,textlayout,vulkan,webp --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "gl,metal,textlayout,vulkan,webp" --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -453,7 +447,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -462,7 +456,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -507,10 +501,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl,metal,textlayout,vulkan,webp" --target x86_64-apple-darwin
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -518,19 +511,19 @@ jobs:
       shell: bash
       if: true
       run: |
-        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-darwin -- -D warnings
+        cargo clippy --release --features "gl,metal,textlayout,vulkan,webp" --all-targets --target x86_64-apple-darwin -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
-        cargo test --all --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-darwin -- --nocapture
+        cargo test --all --release --features "gl,metal,textlayout,vulkan,webp" --all-targets --target x86_64-apple-darwin -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features gl,metal,textlayout,vulkan,webp --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "gl,metal,textlayout,vulkan,webp" --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -544,7 +537,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -553,7 +546,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -576,10 +569,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl,metal,textlayout,vulkan,webp" --target aarch64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -587,19 +579,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target aarch64-apple-ios -- -D warnings
+        cargo clippy --release --features "gl,metal,textlayout,vulkan,webp" --all-targets --target aarch64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features gl,metal,textlayout,vulkan,webp --all-targets --target aarch64-apple-ios -- --nocapture
+        cargo test --all --release --features "gl,metal,textlayout,vulkan,webp" --all-targets --target aarch64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features gl,metal,textlayout,vulkan,webp --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "gl,metal,textlayout,vulkan,webp" --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -613,7 +605,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -622,7 +614,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -645,10 +637,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl,metal,textlayout,vulkan,webp" --target x86_64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -656,19 +647,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-ios -- -D warnings
+        cargo clippy --release --features "gl,metal,textlayout,vulkan,webp" --all-targets --target x86_64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features gl,metal,textlayout,vulkan,webp --all-targets --target x86_64-apple-ios -- --nocapture
+        cargo test --all --release --features "gl,metal,textlayout,vulkan,webp" --all-targets --target x86_64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features gl,metal,textlayout,vulkan,webp --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "gl,metal,textlayout,vulkan,webp" --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -682,7 +673,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -691,7 +682,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -736,10 +727,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "" --target x86_64-apple-darwin
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -747,19 +737,19 @@ jobs:
       shell: bash
       if: true
       run: |
-        cargo clippy --release --features  --all-targets --target x86_64-apple-darwin -- -D warnings
+        cargo clippy --release --features "" --all-targets --target x86_64-apple-darwin -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
-        cargo test --all --release --features  --all-targets --target x86_64-apple-darwin -- --nocapture
+        cargo test --all --release --features "" --all-targets --target x86_64-apple-darwin -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features  --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "" --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -773,7 +763,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -782,7 +772,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -805,10 +795,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "" --target aarch64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -816,19 +805,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features  --all-targets --target aarch64-apple-ios -- -D warnings
+        cargo clippy --release --features "" --all-targets --target aarch64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features  --all-targets --target aarch64-apple-ios -- --nocapture
+        cargo test --all --release --features "" --all-targets --target aarch64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features  --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "" --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -842,7 +831,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -851,7 +840,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -874,10 +863,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "" --target x86_64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -885,19 +873,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features  --all-targets --target x86_64-apple-ios -- -D warnings
+        cargo clippy --release --features "" --all-targets --target x86_64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features  --all-targets --target x86_64-apple-ios -- --nocapture
+        cargo test --all --release --features "" --all-targets --target x86_64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features  --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "" --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -911,7 +899,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -920,7 +908,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -965,10 +953,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl" --target x86_64-apple-darwin
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -976,19 +963,19 @@ jobs:
       shell: bash
       if: true
       run: |
-        cargo clippy --release --features gl --all-targets --target x86_64-apple-darwin -- -D warnings
+        cargo clippy --release --features "gl" --all-targets --target x86_64-apple-darwin -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
-        cargo test --all --release --features gl --all-targets --target x86_64-apple-darwin -- --nocapture
+        cargo test --all --release --features "gl" --all-targets --target x86_64-apple-darwin -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features gl --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "gl" --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -1002,7 +989,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -1011,7 +998,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -1034,10 +1021,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl" --target aarch64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1045,19 +1031,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features gl --all-targets --target aarch64-apple-ios -- -D warnings
+        cargo clippy --release --features "gl" --all-targets --target aarch64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features gl --all-targets --target aarch64-apple-ios -- --nocapture
+        cargo test --all --release --features "gl" --all-targets --target aarch64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features gl --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "gl" --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -1071,7 +1057,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -1080,7 +1066,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -1103,10 +1089,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl" --target x86_64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1114,19 +1099,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features gl --all-targets --target x86_64-apple-ios -- -D warnings
+        cargo clippy --release --features "gl" --all-targets --target x86_64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features gl --all-targets --target x86_64-apple-ios -- --nocapture
+        cargo test --all --release --features "gl" --all-targets --target x86_64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features gl --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "gl" --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -1140,7 +1125,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -1149,7 +1134,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -1194,10 +1179,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "vulkan" --target x86_64-apple-darwin
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1205,19 +1189,19 @@ jobs:
       shell: bash
       if: true
       run: |
-        cargo clippy --release --features vulkan --all-targets --target x86_64-apple-darwin -- -D warnings
+        cargo clippy --release --features "vulkan" --all-targets --target x86_64-apple-darwin -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
-        cargo test --all --release --features vulkan --all-targets --target x86_64-apple-darwin -- --nocapture
+        cargo test --all --release --features "vulkan" --all-targets --target x86_64-apple-darwin -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features vulkan --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "vulkan" --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -1231,7 +1215,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -1240,7 +1224,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -1263,10 +1247,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "vulkan" --target aarch64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1274,19 +1257,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features vulkan --all-targets --target aarch64-apple-ios -- -D warnings
+        cargo clippy --release --features "vulkan" --all-targets --target aarch64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features vulkan --all-targets --target aarch64-apple-ios -- --nocapture
+        cargo test --all --release --features "vulkan" --all-targets --target aarch64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features vulkan --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "vulkan" --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -1300,7 +1283,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -1309,7 +1292,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -1332,10 +1315,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "vulkan" --target x86_64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1343,19 +1325,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features vulkan --all-targets --target x86_64-apple-ios -- -D warnings
+        cargo clippy --release --features "vulkan" --all-targets --target x86_64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features vulkan --all-targets --target x86_64-apple-ios -- --nocapture
+        cargo test --all --release --features "vulkan" --all-targets --target x86_64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features vulkan --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "vulkan" --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -1369,7 +1351,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -1378,7 +1360,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -1423,10 +1405,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "textlayout" --target x86_64-apple-darwin
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1434,19 +1415,19 @@ jobs:
       shell: bash
       if: true
       run: |
-        cargo clippy --release --features textlayout --all-targets --target x86_64-apple-darwin -- -D warnings
+        cargo clippy --release --features "textlayout" --all-targets --target x86_64-apple-darwin -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
-        cargo test --all --release --features textlayout --all-targets --target x86_64-apple-darwin -- --nocapture
+        cargo test --all --release --features "textlayout" --all-targets --target x86_64-apple-darwin -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features textlayout --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "textlayout" --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -1460,7 +1441,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -1469,7 +1450,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -1492,10 +1473,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "textlayout" --target aarch64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1503,19 +1483,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features textlayout --all-targets --target aarch64-apple-ios -- -D warnings
+        cargo clippy --release --features "textlayout" --all-targets --target aarch64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features textlayout --all-targets --target aarch64-apple-ios -- --nocapture
+        cargo test --all --release --features "textlayout" --all-targets --target aarch64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features textlayout --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "textlayout" --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -1529,7 +1509,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -1538,7 +1518,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -1561,10 +1541,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "textlayout" --target x86_64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1572,19 +1551,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features textlayout --all-targets --target x86_64-apple-ios -- -D warnings
+        cargo clippy --release --features "textlayout" --all-targets --target x86_64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features textlayout --all-targets --target x86_64-apple-ios -- --nocapture
+        cargo test --all --release --features "textlayout" --all-targets --target x86_64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features textlayout --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "textlayout" --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -1598,7 +1577,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -1607,7 +1586,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -1652,10 +1631,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout" --target x86_64-apple-darwin
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1663,19 +1641,19 @@ jobs:
       shell: bash
       if: true
       run: |
-        cargo clippy --release --features gl,textlayout --all-targets --target x86_64-apple-darwin -- -D warnings
+        cargo clippy --release --features "gl,textlayout" --all-targets --target x86_64-apple-darwin -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
-        cargo test --all --release --features gl,textlayout --all-targets --target x86_64-apple-darwin -- --nocapture
+        cargo test --all --release --features "gl,textlayout" --all-targets --target x86_64-apple-darwin -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features gl,textlayout --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "gl,textlayout" --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -1689,7 +1667,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -1698,7 +1676,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -1721,10 +1699,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout" --target aarch64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1732,19 +1709,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features gl,textlayout --all-targets --target aarch64-apple-ios -- -D warnings
+        cargo clippy --release --features "gl,textlayout" --all-targets --target aarch64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features gl,textlayout --all-targets --target aarch64-apple-ios -- --nocapture
+        cargo test --all --release --features "gl,textlayout" --all-targets --target aarch64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features gl,textlayout --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "gl,textlayout" --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -1758,7 +1735,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -1767,7 +1744,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -1790,10 +1767,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout" --target x86_64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1801,19 +1777,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features gl,textlayout --all-targets --target x86_64-apple-ios -- -D warnings
+        cargo clippy --release --features "gl,textlayout" --all-targets --target x86_64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features gl,textlayout --all-targets --target x86_64-apple-ios -- --nocapture
+        cargo test --all --release --features "gl,textlayout" --all-targets --target x86_64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features gl,textlayout --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "gl,textlayout" --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -1827,7 +1803,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -1836,7 +1812,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -1881,10 +1857,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "vulkan,textlayout" --target x86_64-apple-darwin
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1892,19 +1867,19 @@ jobs:
       shell: bash
       if: true
       run: |
-        cargo clippy --release --features vulkan,textlayout --all-targets --target x86_64-apple-darwin -- -D warnings
+        cargo clippy --release --features "vulkan,textlayout" --all-targets --target x86_64-apple-darwin -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
-        cargo test --all --release --features vulkan,textlayout --all-targets --target x86_64-apple-darwin -- --nocapture
+        cargo test --all --release --features "vulkan,textlayout" --all-targets --target x86_64-apple-darwin -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features vulkan,textlayout --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "vulkan,textlayout" --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -1918,7 +1893,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -1927,7 +1902,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -1950,10 +1925,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "vulkan,textlayout" --target aarch64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -1961,19 +1935,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features vulkan,textlayout --all-targets --target aarch64-apple-ios -- -D warnings
+        cargo clippy --release --features "vulkan,textlayout" --all-targets --target aarch64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features vulkan,textlayout --all-targets --target aarch64-apple-ios -- --nocapture
+        cargo test --all --release --features "vulkan,textlayout" --all-targets --target aarch64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features vulkan,textlayout --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "vulkan,textlayout" --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -1987,7 +1961,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -1996,7 +1970,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -2019,10 +1993,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "vulkan,textlayout" --target x86_64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2030,19 +2003,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features vulkan,textlayout --all-targets --target x86_64-apple-ios -- -D warnings
+        cargo clippy --release --features "vulkan,textlayout" --all-targets --target x86_64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features vulkan,textlayout --all-targets --target x86_64-apple-ios -- --nocapture
+        cargo test --all --release --features "vulkan,textlayout" --all-targets --target x86_64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features vulkan,textlayout --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "vulkan,textlayout" --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -2056,7 +2029,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -2065,7 +2038,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -2110,10 +2083,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl,vulkan,textlayout" --target x86_64-apple-darwin
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2121,19 +2093,19 @@ jobs:
       shell: bash
       if: true
       run: |
-        cargo clippy --release --features gl,vulkan,textlayout --all-targets --target x86_64-apple-darwin -- -D warnings
+        cargo clippy --release --features "gl,vulkan,textlayout" --all-targets --target x86_64-apple-darwin -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
-        cargo test --all --release --features gl,vulkan,textlayout --all-targets --target x86_64-apple-darwin -- --nocapture
+        cargo test --all --release --features "gl,vulkan,textlayout" --all-targets --target x86_64-apple-darwin -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features gl,vulkan,textlayout --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "gl,vulkan,textlayout" --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -2147,7 +2119,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -2156,7 +2128,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -2179,10 +2151,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl,vulkan,textlayout" --target aarch64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2190,19 +2161,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features gl,vulkan,textlayout --all-targets --target aarch64-apple-ios -- -D warnings
+        cargo clippy --release --features "gl,vulkan,textlayout" --all-targets --target aarch64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features gl,vulkan,textlayout --all-targets --target aarch64-apple-ios -- --nocapture
+        cargo test --all --release --features "gl,vulkan,textlayout" --all-targets --target aarch64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features gl,vulkan,textlayout --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "gl,vulkan,textlayout" --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -2216,7 +2187,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -2225,7 +2196,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -2248,10 +2219,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl,vulkan,textlayout" --target x86_64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2259,19 +2229,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features gl,vulkan,textlayout --all-targets --target x86_64-apple-ios -- -D warnings
+        cargo clippy --release --features "gl,vulkan,textlayout" --all-targets --target x86_64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features gl,vulkan,textlayout --all-targets --target x86_64-apple-ios -- --nocapture
+        cargo test --all --release --features "gl,vulkan,textlayout" --all-targets --target x86_64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features gl,vulkan,textlayout --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "gl,vulkan,textlayout" --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -2285,7 +2255,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -2294,7 +2264,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -2339,10 +2309,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "metal" --target x86_64-apple-darwin
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2350,19 +2319,19 @@ jobs:
       shell: bash
       if: true
       run: |
-        cargo clippy --release --features metal --all-targets --target x86_64-apple-darwin -- -D warnings
+        cargo clippy --release --features "metal" --all-targets --target x86_64-apple-darwin -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
-        cargo test --all --release --features metal --all-targets --target x86_64-apple-darwin -- --nocapture
+        cargo test --all --release --features "metal" --all-targets --target x86_64-apple-darwin -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features metal --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "metal" --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -2376,7 +2345,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -2385,7 +2354,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -2408,10 +2377,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "metal" --target aarch64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2419,19 +2387,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features metal --all-targets --target aarch64-apple-ios -- -D warnings
+        cargo clippy --release --features "metal" --all-targets --target aarch64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features metal --all-targets --target aarch64-apple-ios -- --nocapture
+        cargo test --all --release --features "metal" --all-targets --target aarch64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features metal --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "metal" --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -2445,7 +2413,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -2454,7 +2422,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -2477,10 +2445,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "metal" --target x86_64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2488,19 +2455,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features metal --all-targets --target x86_64-apple-ios -- -D warnings
+        cargo clippy --release --features "metal" --all-targets --target x86_64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features metal --all-targets --target x86_64-apple-ios -- --nocapture
+        cargo test --all --release --features "metal" --all-targets --target x86_64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features metal --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "metal" --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -2514,7 +2481,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -2523,7 +2490,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -2568,10 +2535,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "metal,textlayout" --target x86_64-apple-darwin
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2579,19 +2545,19 @@ jobs:
       shell: bash
       if: true
       run: |
-        cargo clippy --release --features metal,textlayout --all-targets --target x86_64-apple-darwin -- -D warnings
+        cargo clippy --release --features "metal,textlayout" --all-targets --target x86_64-apple-darwin -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
-        cargo test --all --release --features metal,textlayout --all-targets --target x86_64-apple-darwin -- --nocapture
+        cargo test --all --release --features "metal,textlayout" --all-targets --target x86_64-apple-darwin -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features metal,textlayout --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "metal,textlayout" --target x86_64-apple-darwin "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -2605,7 +2571,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -2614,7 +2580,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -2637,10 +2603,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "metal,textlayout" --target aarch64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2648,19 +2613,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features metal,textlayout --all-targets --target aarch64-apple-ios -- -D warnings
+        cargo clippy --release --features "metal,textlayout" --all-targets --target aarch64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features metal,textlayout --all-targets --target aarch64-apple-ios -- --nocapture
+        cargo test --all --release --features "metal,textlayout" --all-targets --target aarch64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features metal,textlayout --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "metal,textlayout" --target aarch64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -2674,7 +2639,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -2683,7 +2648,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
@@ -2706,10 +2671,9 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "metal,textlayout" --target x86_64-apple-ios
-        export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-        export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-        echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -2717,19 +2681,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features metal,textlayout --all-targets --target x86_64-apple-ios -- -D warnings
+        cargo clippy --release --features "metal,textlayout" --all-targets --target x86_64-apple-ios -- -D warnings
     
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features metal,textlayout --all-targets --target x86_64-apple-ios -- --nocapture
+        cargo test --all --release --features "metal,textlayout" --all-targets --target x86_64-apple-ios -- --nocapture
       
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features metal,textlayout --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
+        cargo run --release --features "metal,textlayout" --target x86_64-apple-ios "${{ runner.temp }}/skia-org" 
       
     - name: 'Upload skia-org example images'
       if: false
@@ -2743,7 +2707,7 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        files: '${{ runner.temp }}/skia-binaries'
+        files: '${{ env.SKIA_BINARIES_PATH }}'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
     - name: 'Release binaries'
@@ -2752,7 +2716,7 @@ jobs:
       with:
         replacesArtifacts: true
         commit: release
-        tag: '${{env.SKIA_BINARIES_TAG }}'
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true

@@ -17,10 +17,9 @@
     fi
     cargo clean
     cargo build -p skia-safe --all-targets --release --features "$[[features]]" --target $[[target]]
-    export SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")
-    export SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")
-    echo "##vso[task.setvariable variable=SKIA_BINARIES_TAG;]${SKIA_BINARIES_TAG}"
-    echo "##vso[task.setvariable variable=SKIA_BINARIES_KEY;]${SKIA_BINARIES_KEY}"
+    echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
+    echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+    echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
   env:
     BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
 
@@ -28,19 +27,19 @@
   shell: bash
   if: $[[runClippy]]
   run: |
-    cargo clippy --release --features $[[features]] --all-targets --target $[[target]] -- -D warnings
+    cargo clippy --release --features "$[[features]]" --all-targets --target $[[target]] -- -D warnings
 
 - name: 'Test all workspace projects'
   shell: bash
   if: $[[runTests]]
   run: |
-    cargo test --all --release --features $[[features]] --all-targets --target $[[target]] -- --nocapture
+    cargo test --all --release --features "$[[features]]" --all-targets --target $[[target]] -- --nocapture
   
 - name: 'Generate skia-org example images'
   shell: bash
   if: $[[generateArtifacts]]
   run: |
-    cargo run --release --features $[[features]] --target $[[target]] "${{ runner.temp }}/skia-org" $[[exampleArgs]]
+    cargo run --release --features "$[[features]]" --target $[[target]] "${{ runner.temp }}/skia-org" $[[exampleArgs]]
   
 - name: 'Upload skia-org example images'
   if: $[[generateArtifacts]]
@@ -54,7 +53,7 @@
   uses: master-atul/tar-action@v1.0.2
   with:
     command: c
-    files: '${{ runner.temp }}/skia-binaries'
+    files: '${{ env.SKIA_BINARIES_PATH }}'
     outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
 
 - name: 'Release binaries'
@@ -63,7 +62,7 @@
   with:
     replacesArtifacts: true
     commit: release
-    tag: '${{env.SKIA_BINARIES_TAG }}'
+    tag: '${{ env.SKIA_BINARIES_TAG }}'
     artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     token: ${{ secrets.GITHUB_TOKEN }}
     prerelease: true
