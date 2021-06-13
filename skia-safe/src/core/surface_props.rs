@@ -128,5 +128,5 @@ fn create() {
         props.flags()
     );
     assert_eq!(PixelGeometry::RGBH, props.pixel_geometry());
-    assert_eq!(true, props.is_use_device_independent_fonts());
+    assert!(props.is_use_device_independent_fonts());
 }

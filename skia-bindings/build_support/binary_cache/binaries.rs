@@ -1,18 +1,20 @@
 //! Support for exporting and building prebuilt binaries.
 
-use super::{azure, git};
+use super::{git, github_actions};
 use crate::build_support::{cargo, skia};
 use flate2::read::GzDecoder;
-use std::io::{Read, Write};
-use std::path::{Path, PathBuf};
-use std::{fs, io};
+use std::{
+    fs,
+    io::{self, Read, Write},
+    path::{Path, PathBuf},
+};
 
 /// Export binaries if we are inside a git repository _and_
 /// the artifact staging directory is set.
 /// The git repository test is important to support package verifications.
 pub fn should_export() -> Option<PathBuf> {
     git::half_hash()?;
-    azure::artifact_staging_directory()
+    github_actions::artifact_staging_directory()
 }
 
 /// Export the binaries to a target directory.
@@ -55,8 +57,8 @@ fn prepare_export_directory(key: &str, artifacts: &Path) -> io::Result<PathBuf> 
     let binaries = artifacts.join("skia-binaries");
     fs::create_dir_all(&binaries)?;
 
-    // this is primarily for azure to know the tag and the key of the binaries,
-    // but they can stay inside the archive.
+    // this is primarily for GitHub Actions to know the tag and the key of the binaries, but they
+    // can stay inside the archive.
 
     {
         let mut tag_file = fs::File::create(binaries.join("tag.txt")).unwrap();

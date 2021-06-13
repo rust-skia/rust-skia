@@ -1,0 +1,20 @@
+runs-on: macOS-10.15
+env: 
+  SKIA_DEBUG: $[[skiaDebug]]
+
+steps:
+- uses: actions/checkout@v2
+  with:
+    submodules: true
+
+- name: Install Rust
+  uses: hecrj/setup-rust-action@master
+  with:
+    rust-version: $[[rustToolchain]]
+
+- name: Install Clippy
+  run: rustup component add clippy
+
+# remove LLVM on macOS so that only Apple's clang is used
+- name: Remove LLVM (macOS)
+  run: brew uninstall llvm

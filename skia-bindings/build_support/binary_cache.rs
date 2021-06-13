@@ -1,9 +1,9 @@
-mod azure;
 mod binaries;
 mod download;
 mod env;
 mod export;
 mod git;
+mod github_actions;
 mod utils;
 
 const SRC_BINDINGS_RS: &str = "src/bindings.rs";
