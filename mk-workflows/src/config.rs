@@ -6,7 +6,8 @@ pub const DEFAULT_ANDROID_API_LEVEL: usize = 26;
 
 pub fn workflows() -> Vec<Workflow> {
     let mut workflows = Vec::new();
-    for kind in [WorkflowKind::QA, WorkflowKind::Release] {
+    for kind in &[WorkflowKind::QA, WorkflowKind::Release] {
+        let kind = *kind;
         workflows.push(Workflow {
             kind,
             host_os: HostOS::Windows,
