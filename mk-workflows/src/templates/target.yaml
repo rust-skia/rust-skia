@@ -17,8 +17,8 @@
     fi
     cargo clean
     cargo build -p skia-safe --all-targets --release --features "$[[features]]" --target $[[target]]
-    echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
-    echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+    echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
+    echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
     echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
   env:
     BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}

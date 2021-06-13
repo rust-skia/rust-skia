@@ -60,8 +60,8 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "d3d,gl,textlayout,vulkan,webp" --target x86_64-pc-windows-msvc
-        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
@@ -161,8 +161,8 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "d3d,gl,textlayout,vulkan,webp" --target x86_64-pc-windows-msvc
-        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
@@ -262,8 +262,8 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "d3d,gl,textlayout,vulkan,webp" --target x86_64-pc-windows-msvc
-        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
@@ -363,8 +363,8 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "" --target x86_64-pc-windows-msvc
-        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
@@ -464,8 +464,8 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl" --target x86_64-pc-windows-msvc
-        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
@@ -565,8 +565,8 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "vulkan" --target x86_64-pc-windows-msvc
-        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
@@ -666,8 +666,8 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "textlayout" --target x86_64-pc-windows-msvc
-        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
@@ -767,8 +767,8 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout" --target x86_64-pc-windows-msvc
-        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
@@ -868,8 +868,8 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "vulkan,textlayout" --target x86_64-pc-windows-msvc
-        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
@@ -969,8 +969,8 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl,vulkan,textlayout" --target x86_64-pc-windows-msvc
-        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
@@ -1070,8 +1070,8 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "d3d" --target x86_64-pc-windows-msvc
-        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
@@ -1171,8 +1171,8 @@ jobs:
         fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "d3d,textlayout" --target x86_64-pc-windows-msvc
-        echo "SKIA_BINARIES_TAG=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_KEY=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
