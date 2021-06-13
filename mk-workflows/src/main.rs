@@ -11,35 +11,54 @@ const TARGET_TEMPLATE: &str = include_str!("templates/target.yaml");
 
 fn main() {
     for workflow in config::workflows() {
-        build_workflow(&workflow, &config::jobs());
+        build_workflow(&workflow, &config::jobs(&workflow));
     }
 }
 
 pub struct Workflow {
-    os: &'static str,
-    build_host: &'static str,
+    host_os: HostOS,
+    host_target: &'static str,
     job_template: &'static str,
     targets: Vec<Target>,
     host_bin_ext: &'static str,
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+enum HostOS {
+    Windows,
+    Linux,
+    MacOS,
+}
+
+impl fmt::Display for HostOS {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use HostOS::*;
+        f.write_str(match self {
+            Windows => "windows",
+            Linux => "linux",
+            MacOS => "macos",
+        })
+    }
 }
 
 #[derive(Default)]
 pub struct Job {
     name: &'static str,
     toolchain: &'static str,
-    base_features: Features,
+    features: Features,
     skia_debug: bool,
     // we may need to disable clippy for beta builds temporarily.
     disable_clippy: bool,
     example_args: Option<String>,
+    release_binaries: bool,
 }
 
 fn build_workflow(workflow: &Workflow, jobs: &[Job]) {
-    let os = workflow.os;
+    let host_os = workflow.host_os;
     let job_template = workflow.job_template;
     let targets = &workflow.targets;
 
-    let workflow_name = os.to_owned();
+    let workflow_name = host_os.to_string();
     let output_filename = PathBuf::new()
         .join(".github")
         .join("workflows")
@@ -53,6 +72,14 @@ fn build_workflow(workflow: &Workflow, jobs: &[Job]) {
         let job_name = workflow_name.clone() + "-" + job.name;
         let job_name = format!("{}:", job_name).indented(1);
         parts.push(job_name);
+
+        let job_filter = if job.release_binaries {
+            "if: github.ref == 'refs/heads/release'"
+        } else {
+            "if: github.ref != 'refs/heads/release'"
+        };
+
+        parts.push(job_filter.to_string().indented(2));
 
         let job_header = build_job(job_template, &job).indented(2);
         parts.push(job_header);
@@ -92,8 +119,12 @@ fn build_job(template: &str, job: &Job) -> String {
 }
 
 fn build_target(workflow: &Workflow, job: &Job, target: &Target) -> String {
-    let features = job.base_features.join(&target.platform_features);
-    let native_target = workflow.build_host == target.target;
+    let mut features = job.features.clone();
+    // if we are releasing binaries, we want the exact set of features specified.
+    if !job.release_binaries {
+        features = features.join(&target.platform_features);
+    }
+    let native_target = workflow.host_target == target.target;
     let example_args = if native_target {
         job.example_args.clone()
     } else {
@@ -112,7 +143,7 @@ fn build_target(workflow: &Workflow, job: &Job, target: &Target) -> String {
         ("runClippy", &run_clippy),
         ("exampleArgs", &example_args),
         ("generateArtifacts", &generate_artifacts),
-        ("releaseBinaries", &target.release_binaries),
+        ("releaseBinaries", &job.release_binaries),
         ("hostBinExt", &workflow.host_bin_ext),
     ];
 
@@ -146,10 +177,9 @@ struct Target {
     target: &'static str,
     android_env: bool,
     platform_features: Features,
-    release_binaries: bool,
 }
 
-#[derive(Default, Debug)]
+#[derive(Clone, Default, Debug)]
 struct Features(Vec<String>);
 
 impl Features {
@@ -194,11 +224,11 @@ impl From<&str> for Features {
     }
 }
 
-trait Indent {
+trait Indented {
     fn indented(&self, i: usize) -> Self;
 }
 
-impl Indent for String {
+impl Indented for String {
     fn indented(&self, i: usize) -> String {
         let prefix: String = iter::repeat("  ").take(i).collect();
         let indented_lines: Vec<String> = self.lines().map(|l| prefix.clone() + l).collect();
