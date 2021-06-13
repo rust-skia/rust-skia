@@ -110,7 +110,6 @@ jobs:
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
-        commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
@@ -215,7 +214,6 @@ jobs:
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
-        commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
@@ -320,7 +318,6 @@ jobs:
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
-        commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
@@ -425,7 +422,6 @@ jobs:
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
-        commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
@@ -530,7 +526,6 @@ jobs:
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
-        commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
@@ -635,7 +630,6 @@ jobs:
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
-        commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
@@ -740,7 +734,6 @@ jobs:
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
-        commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
@@ -845,7 +838,6 @@ jobs:
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
-        commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
@@ -950,7 +942,6 @@ jobs:
         repo: skia-binaries
         allowUpdates: true
         replacesArtifacts: true
-        commit: release
         tag: '${{ env.SKIA_BINARIES_TAG }}'
         artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
         artifactErrorsFailBuild: true
