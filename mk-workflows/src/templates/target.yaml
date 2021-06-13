@@ -19,7 +19,7 @@
     cargo build -p skia-safe --all-targets --release --features "$[[features]]" --target $[[target]]
     echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
     echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-    echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
+    echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
   env:
     BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
 
@@ -39,21 +39,21 @@
   shell: bash
   if: $[[generateArtifacts]]
   run: |
-    cargo run --release --features "$[[features]]" --target $[[target]] "${{ runner.temp }}/skia-org" $[[exampleArgs]]
-  
+    cargo run --release --features "$[[features]]" --target $[[target]] "${{ env.SKIA_STAGING_PATH }}/skia-org" $[[exampleArgs]]
+
 - name: 'Upload skia-org example images'
   if: $[[generateArtifacts]]
   uses: actions/upload-artifact@v2
   with:
     name: skia-org-images-$[[target]]
-    path: ${{ runner.temp }}/skia-org
+    path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
 - name: 'Compress binaries'
   if: $[[releaseBinaries]]
   uses: master-atul/tar-action@v1.0.2
   with:
     command: c
-    cwd: '${{ env.SKIA_BINARIES_PATH }}'
+    cwd: '${{ env.SKIA_STAGING_PATH }}'
     files: 'skia-binaries'
     outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
 

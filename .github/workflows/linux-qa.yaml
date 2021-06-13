@@ -59,7 +59,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "egl,gl,textlayout,vulkan,wayland,webp,x11" --target x86_64-unknown-linux-gnu
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
+        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -79,21 +79,21 @@ jobs:
       shell: bash
       if: true
       run: |
-        cargo run --release --features "egl,gl,textlayout,vulkan,wayland,webp,x11" --target x86_64-unknown-linux-gnu "${{ runner.temp }}/skia-org" --driver cpu --driver pdf --driver svg
-      
+        cargo run --release --features "egl,gl,textlayout,vulkan,wayland,webp,x11" --target x86_64-unknown-linux-gnu "${{ env.SKIA_STAGING_PATH }}/skia-org" --driver cpu --driver pdf --driver svg
+    
     - name: 'Upload skia-org example images'
       if: true
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-x86_64-unknown-linux-gnu
-        path: ${{ runner.temp }}/skia-org
+        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
     
     - name: 'Compress binaries'
       if: false
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
@@ -132,7 +132,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan,webp" --target aarch64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
+        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -152,21 +152,21 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo run --release --features "gl,textlayout,vulkan,webp" --target aarch64-linux-android "${{ runner.temp }}/skia-org" 
-      
+        cargo run --release --features "gl,textlayout,vulkan,webp" --target aarch64-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+    
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-aarch64-linux-android
-        path: ${{ runner.temp }}/skia-org
+        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
     
     - name: 'Compress binaries'
       if: false
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
@@ -205,7 +205,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan,webp" --target x86_64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
+        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -225,21 +225,21 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo run --release --features "gl,textlayout,vulkan,webp" --target x86_64-linux-android "${{ runner.temp }}/skia-org" 
-      
+        cargo run --release --features "gl,textlayout,vulkan,webp" --target x86_64-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+    
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-x86_64-linux-android
-        path: ${{ runner.temp }}/skia-org
+        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
     
     - name: 'Compress binaries'
       if: false
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
@@ -278,7 +278,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan,webp" --target i686-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
+        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -298,21 +298,21 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo run --release --features "gl,textlayout,vulkan,webp" --target i686-linux-android "${{ runner.temp }}/skia-org" 
-      
+        cargo run --release --features "gl,textlayout,vulkan,webp" --target i686-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+    
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-i686-linux-android
-        path: ${{ runner.temp }}/skia-org
+        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
     
     - name: 'Compress binaries'
       if: false
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
@@ -373,7 +373,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "egl,gl,textlayout,vulkan,wayland,webp,x11" --target x86_64-unknown-linux-gnu
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
+        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -393,21 +393,21 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo run --release --features "egl,gl,textlayout,vulkan,wayland,webp,x11" --target x86_64-unknown-linux-gnu "${{ runner.temp }}/skia-org" 
-      
+        cargo run --release --features "egl,gl,textlayout,vulkan,wayland,webp,x11" --target x86_64-unknown-linux-gnu "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+    
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-x86_64-unknown-linux-gnu
-        path: ${{ runner.temp }}/skia-org
+        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
     
     - name: 'Compress binaries'
       if: false
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
@@ -446,7 +446,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan,webp" --target aarch64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
+        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -466,21 +466,21 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo run --release --features "gl,textlayout,vulkan,webp" --target aarch64-linux-android "${{ runner.temp }}/skia-org" 
-      
+        cargo run --release --features "gl,textlayout,vulkan,webp" --target aarch64-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+    
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-aarch64-linux-android
-        path: ${{ runner.temp }}/skia-org
+        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
     
     - name: 'Compress binaries'
       if: false
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
@@ -519,7 +519,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan,webp" --target x86_64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
+        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -539,21 +539,21 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo run --release --features "gl,textlayout,vulkan,webp" --target x86_64-linux-android "${{ runner.temp }}/skia-org" 
-      
+        cargo run --release --features "gl,textlayout,vulkan,webp" --target x86_64-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+    
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-x86_64-linux-android
-        path: ${{ runner.temp }}/skia-org
+        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
     
     - name: 'Compress binaries'
       if: false
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
@@ -592,7 +592,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan,webp" --target i686-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
+        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -612,21 +612,21 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo run --release --features "gl,textlayout,vulkan,webp" --target i686-linux-android "${{ runner.temp }}/skia-org" 
-      
+        cargo run --release --features "gl,textlayout,vulkan,webp" --target i686-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+    
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-i686-linux-android
-        path: ${{ runner.temp }}/skia-org
+        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
     
     - name: 'Compress binaries'
       if: false
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
@@ -687,7 +687,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "egl,gl,textlayout,vulkan,wayland,webp,x11" --target x86_64-unknown-linux-gnu
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
+        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -707,21 +707,21 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo run --release --features "egl,gl,textlayout,vulkan,wayland,webp,x11" --target x86_64-unknown-linux-gnu "${{ runner.temp }}/skia-org" 
-      
+        cargo run --release --features "egl,gl,textlayout,vulkan,wayland,webp,x11" --target x86_64-unknown-linux-gnu "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+    
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-x86_64-unknown-linux-gnu
-        path: ${{ runner.temp }}/skia-org
+        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
     
     - name: 'Compress binaries'
       if: false
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
@@ -760,7 +760,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan,webp" --target aarch64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
+        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -780,21 +780,21 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo run --release --features "gl,textlayout,vulkan,webp" --target aarch64-linux-android "${{ runner.temp }}/skia-org" 
-      
+        cargo run --release --features "gl,textlayout,vulkan,webp" --target aarch64-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+    
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-aarch64-linux-android
-        path: ${{ runner.temp }}/skia-org
+        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
     
     - name: 'Compress binaries'
       if: false
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
@@ -833,7 +833,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan,webp" --target x86_64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
+        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -853,21 +853,21 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo run --release --features "gl,textlayout,vulkan,webp" --target x86_64-linux-android "${{ runner.temp }}/skia-org" 
-      
+        cargo run --release --features "gl,textlayout,vulkan,webp" --target x86_64-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+    
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-x86_64-linux-android
-        path: ${{ runner.temp }}/skia-org
+        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
     
     - name: 'Compress binaries'
       if: false
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
@@ -906,7 +906,7 @@ jobs:
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan,webp" --target i686-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
+        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
     
@@ -926,21 +926,21 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo run --release --features "gl,textlayout,vulkan,webp" --target i686-linux-android "${{ runner.temp }}/skia-org" 
-      
+        cargo run --release --features "gl,textlayout,vulkan,webp" --target i686-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+    
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-i686-linux-android
-        path: ${{ runner.temp }}/skia-org
+        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
     
     - name: 'Compress binaries'
       if: false
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
-        cwd: '${{ env.SKIA_BINARIES_PATH }}'
+        cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
     
