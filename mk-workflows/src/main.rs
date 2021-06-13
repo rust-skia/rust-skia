@@ -124,7 +124,7 @@ fn build_header(workflow_name: &str, workflow_kind: WorkflowKind) -> String {
         WorkflowKind::QA => QA_WORKFLOW,
         WorkflowKind::Release => RELEASE_WORKFLOW,
     };
-    
+
     render_template(workflow, &replacements)
 }
 
