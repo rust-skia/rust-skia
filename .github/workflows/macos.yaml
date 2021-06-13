@@ -8,7 +8,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  macos-stable-all-features:
+  macos-qa-stable-all-features:
     if: github.ref != 'refs/heads/release'
     runs-on: macOS-10.15
     env: 
@@ -243,7 +243,7 @@ jobs:
         artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
-  macos-stable-all-features-debug:
+  macos-qa-stable-all-features-debug:
     if: github.ref != 'refs/heads/release'
     runs-on: macOS-10.15
     env: 
@@ -478,7 +478,7 @@ jobs:
         artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
-  macos-beta-all-features:
+  macos-qa-beta-all-features:
     if: github.ref != 'refs/heads/release'
     runs-on: macOS-10.15
     env: 

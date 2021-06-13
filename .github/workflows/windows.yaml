@@ -8,7 +8,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  windows-stable-all-features:
+  windows-qa-stable-all-features:
     if: github.ref != 'refs/heads/release'
     runs-on: windows-2019
     # Containers are not supported on Windows.
@@ -112,7 +112,7 @@ jobs:
         artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
-  windows-stable-all-features-debug:
+  windows-qa-stable-all-features-debug:
     if: github.ref != 'refs/heads/release'
     runs-on: windows-2019
     # Containers are not supported on Windows.
@@ -216,7 +216,7 @@ jobs:
         artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
-  windows-beta-all-features:
+  windows-qa-beta-all-features:
     if: github.ref != 'refs/heads/release'
     runs-on: windows-2019
     # Containers are not supported on Windows.

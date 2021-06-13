@@ -8,7 +8,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  linux-stable-all-features:
+  linux-qa-stable-all-features:
     if: github.ref != 'refs/heads/release'
     runs-on: ubuntu-20.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
@@ -315,7 +315,7 @@ jobs:
         artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
-  linux-stable-all-features-debug:
+  linux-qa-stable-all-features-debug:
     if: github.ref != 'refs/heads/release'
     runs-on: ubuntu-20.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
@@ -622,7 +622,7 @@ jobs:
         artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
-  linux-beta-all-features:
+  linux-qa-beta-all-features:
     if: github.ref != 'refs/heads/release'
     runs-on: ubuntu-20.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
