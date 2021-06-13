@@ -6,9 +6,7 @@ on:
     branches-ignore:
       - release
   schedule:
-    cron: '0 0 * * *'
-    branches-ignore:
-      - release
+    - cron: '0 0 * * *'
 
 concurrency:
   group: 'linux-qa-${{ github.ref }}'
