@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use std::fs;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
-pub struct FinalBindingsBuildConfiguration {
+pub struct FinalBuildConfiguration {
     /// The binding source files to compile.
     pub binding_sources: Vec<PathBuf>,
 
@@ -18,11 +18,11 @@ pub struct FinalBindingsBuildConfiguration {
     pub ninja_files: Vec<PathBuf>,
 }
 
-impl FinalBindingsBuildConfiguration {
+impl FinalBuildConfiguration {
     pub fn from_build_configuration(
         features: &features::Features,
         skia_source_dir: &Path,
-    ) -> FinalBindingsBuildConfiguration {
+    ) -> FinalBuildConfiguration {
         let ninja_files = {
             let mut files = vec!["obj/skia.ninja".into()];
             if features.text_layout {
@@ -58,7 +58,7 @@ impl FinalBindingsBuildConfiguration {
             sources
         };
 
-        FinalBindingsBuildConfiguration {
+        FinalBuildConfiguration {
             skia_source_dir: skia_source_dir.into(),
             ninja_files,
             binding_sources,
@@ -66,7 +66,7 @@ impl FinalBindingsBuildConfiguration {
     }
 }
 
-pub fn generate_bindings(build: &FinalBindingsBuildConfiguration, output_directory: &Path) {
+pub fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
     let builder = bindgen::Builder::default()
         .generate_comments(false)
         .layout_tests(true)

@@ -7,8 +7,8 @@ pub mod clang;
 pub mod features;
 pub mod ios;
 pub mod llvm;
-pub mod skia;
-pub mod skia_c_bindings;
+pub mod build_skia;
+pub mod bind_skia;
 pub mod vs;
 pub mod xcode;
 

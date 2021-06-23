@@ -1,5 +1,5 @@
 mod build_support;
-use build_support::{cargo, skia, skia_c_bindings, features, binaries_config};
+use build_support::{cargo, build_skia, bind_skia, features, binaries_config};
 
 /// Environment variables used by this build script.
 mod env {
@@ -45,7 +45,6 @@ fn main() {
     let skia_debug = env::is_skia_debug();
     let features = features::Features::default();
     let binaries_config = binaries_config::BinariesConfiguration::from_features(&features, skia_debug);
-    let build_config = skia::BuildConfiguration::from_features(features.clone(), skia_debug);
 
     //
     // skip attempting to download?
@@ -53,24 +52,25 @@ fn main() {
     if let Some(source_dir) = env::source_dir() {
         println!("STARTING OFFLINE BUILD");
 
-        let bindings_config = skia_c_bindings::FinalBindingsBuildConfiguration::from_build_configuration(
+        let bindings_config = bind_skia::FinalBuildConfiguration::from_build_configuration(
             &features,
             &source_dir,
         );
-        let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
+        let build_config = build_skia::BuildConfiguration::from_features(features, skia_debug);
+        let final_configuration = build_skia::FinalBuildConfiguration::from_build_configuration(
             &build_config,
             env::use_system_libraries(),
             &source_dir,
         );
 
-        skia::build(
+        build_skia::build(
             &final_configuration,
             &binaries_config,
             env::ninja_command(),
             env::gn_command(),
             true,
         );
-        skia_c_bindings::generate_bindings(&bindings_config, &binaries_config.output_directory);
+        bind_skia::generate_bindings(&bindings_config, &binaries_config.output_directory);
     } else {
         //
         // is the download of prebuilt binaries possible?
@@ -90,23 +90,24 @@ fn main() {
             let source_dir = std::env::current_dir().unwrap().join("skia");
 
             println!("STARTING A FULL BUILD");
-            let bindings_config = skia_c_bindings::FinalBindingsBuildConfiguration::from_build_configuration(
+            let bindings_config = bind_skia::FinalBuildConfiguration::from_build_configuration(
                 &features,
                 &source_dir,
             );
-            let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
+            let build_config = build_skia::BuildConfiguration::from_features(features, skia_debug);
+            let final_configuration = build_skia::FinalBuildConfiguration::from_build_configuration(
                 &build_config,
                 env::use_system_libraries(),
                 &source_dir,
             );
-            skia::build(
+            build_skia::build(
                 &final_configuration,
                 &binaries_config,
                 env::ninja_command(),
                 env::gn_command(),
                 false,
             );
-            skia_c_bindings::generate_bindings(&bindings_config, &binaries_config.output_directory);
+            bind_skia::generate_bindings(&bindings_config, &binaries_config.output_directory);
         }
     };
 
