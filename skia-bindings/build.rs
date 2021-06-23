@@ -1,5 +1,5 @@
 mod build_support;
-use build_support::{cargo, skia};
+use build_support::{cargo, skia, skia_c_bindings};
 
 /// Environment variables used by this build script.
 mod env {
@@ -47,8 +47,14 @@ fn main() {
     if let Some(source_dir) = env::source_dir() {
         println!("STARTING OFFLINE BUILD");
 
+
+        let bindings_config = skia_c_bindings::FinalBindingsBuildConfiguration::from_build_configuration(
+            &build_config,
+            &source_dir,
+        );
         let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
             &build_config,
+            bindings_config,
             env::use_system_libraries(),
             &source_dir,
         );
@@ -76,11 +82,18 @@ fn main() {
         //
 
         if build_skia {
+            let source_dir = std::env::current_dir().unwrap().join("skia");
+
             println!("STARTING A FULL BUILD");
+            let bindings_config = skia_c_bindings::FinalBindingsBuildConfiguration::from_build_configuration(
+                &build_config,
+                &source_dir,
+            );
             let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
                 &build_config,
+                bindings_config,
                 env::use_system_libraries(),
-                &std::env::current_dir().unwrap().join("skia"),
+                &source_dir,
             );
             skia::build(
                 &final_configuration,
