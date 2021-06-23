@@ -1,5 +1,5 @@
 use super::{binaries, env, git, utils, SRC_BINDINGS_RS};
-use crate::build_support::{cargo, skia};
+use crate::build_support::{cargo, binaries_config};
 use flate2::read::GzDecoder;
 use std::ffi::OsStr;
 use std::fs;
@@ -129,14 +129,14 @@ fn dependencies() -> &'static [Dependency] {
     }
 }
 
-impl skia::BinariesConfiguration {
+impl binaries_config::BinariesConfiguration {
     pub fn key(&self, repository_short_hash: &str) -> String {
         binaries::key(repository_short_hash, &self.feature_ids, self.skia_debug)
     }
 }
 
 /// Returns whether the prepared download needs to be built.
-pub fn try_prepare_download(binaries_config: &skia::BinariesConfiguration) -> bool {
+pub fn try_prepare_download(binaries_config: &binaries_config::BinariesConfiguration) -> bool {
     env::force_skia_build() || {
         let force_download = env::force_skia_binaries_download();
         if let Some((tag, key)) = should_try_download_binaries(binaries_config, force_download) {
@@ -168,7 +168,7 @@ pub fn try_prepare_download(binaries_config: &skia::BinariesConfiguration) -> bo
 
 /// If the binaries should be downloaded, return the tag and the key.
 fn should_try_download_binaries(
-    config: &skia::BinariesConfiguration,
+    config: &binaries_config::BinariesConfiguration,
     force: bool,
 ) -> Option<(String, String)> {
     let tag = cargo::package_version();

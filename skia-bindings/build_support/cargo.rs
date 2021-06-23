@@ -32,16 +32,16 @@ pub fn rerun_if_env_changed(name: impl AsRef<str>) {
     println!("cargo:rerun-if-env-changed={}", name.as_ref())
 }
 
-pub fn add_link_libs(libs: &[impl AsRef<str>]) {
-    libs.iter().for_each(|s| add_link_lib(s.as_ref()))
+pub fn add_link_libs<T: AsRef<str>>(libs: impl IntoIterator<Item = T>) {
+    libs.into_iter().for_each(|s| add_link_lib(s.as_ref()))
 }
 
 pub fn add_link_lib(lib: impl AsRef<str>) {
     println!("cargo:rustc-link-lib={}", lib.as_ref());
 }
 
-pub fn add_static_link_libs(target: &Target, libs: &[impl AsRef<str>]) {
-    libs.iter().for_each(|s| add_static_link_lib(target, s.as_ref()))
+pub fn add_static_link_libs<T: AsRef<str>>(target: &Target, libs: impl IntoIterator<Item = T>) {
+    libs.into_iter().for_each(|s| add_static_link_lib(target, s.as_ref()))
 }
 
 pub fn add_static_link_lib(target: &Target, lib: impl AsRef<str>) {

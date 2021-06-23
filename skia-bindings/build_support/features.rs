@@ -41,6 +41,7 @@ pub struct Features {
 }
 
 impl Default for Features {
+    /// Build a Features set based on the current environment cargo supplies us with.
     fn default() -> Self {
         Features {
             gl: cfg!(feature = "gl"),

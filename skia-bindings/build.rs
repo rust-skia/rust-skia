@@ -1,5 +1,5 @@
 mod build_support;
-use build_support::{cargo, skia, skia_c_bindings, features};
+use build_support::{cargo, skia, skia_c_bindings, features, binaries_config};
 
 /// Environment variables used by this build script.
 mod env {
@@ -26,6 +26,10 @@ mod env {
     pub fn source_dir() -> Option<PathBuf> {
         cargo::env_var("SKIA_SOURCE_DIR").map(PathBuf::from)
     }
+
+    pub fn is_skia_debug() -> bool {
+        matches!(cargo::env_var("SKIA_DEBUG"), Some(v) if v != "0")
+    }
 }
 
 fn main() {
@@ -38,10 +42,10 @@ fn main() {
         cargo::warning("The feature 'shaper' has been removed. To use the SkShaper bindings, enable the feature 'textlayout'.");
     }
 
+    let skia_debug = env::is_skia_debug();
     let features = features::Features::default();
-    let build_config = skia::BuildConfiguration::from(features.clone());
-    let mut binaries_config = skia::BinariesConfiguration::from_cargo_env(&build_config);
-    binaries_config.other_built_libraries.push(skia_c_bindings::lib::SKIA_BINDINGS.into());
+    let binaries_config = binaries_config::BinariesConfiguration::from_features(&features, skia_debug);
+    let build_config = skia::BuildConfiguration::from_features(features.clone(), skia_debug);
 
     //
     // skip attempting to download?

@@ -1,12 +1,10 @@
-use crate::build_support::{android, cargo, ios, xcode, features};
+//! Full build support for the SkiaBindings library, and bindings.rs file.
+
+use crate::build_support::{android, cargo, ios, xcode, features, binaries_config};
 use bindgen::{CodegenConfig, EnumVariation};
 use cc::Build;
 use std::path::{Path, PathBuf};
 use std::fs;
-
-pub mod lib {
-    pub const SKIA_BINDINGS: &str = "skia-bindings";
-}
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct FinalBindingsBuildConfiguration {
@@ -262,7 +260,7 @@ pub fn generate_bindings(build: &FinalBindingsBuildConfiguration, output_directo
     println!("COMPILING BINDINGS: {:?}", build.binding_sources);
     // we add skia-bindings later on.
     cc_build.cargo_metadata(false);
-    cc_build.compile(lib::SKIA_BINDINGS);
+    cc_build.compile(binaries_config::lib::SKIA_BINDINGS);
 
     println!("GENERATING BINDINGS");
     let bindings = builder.generate().expect("Unable to generate bindings");
