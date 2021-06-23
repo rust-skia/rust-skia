@@ -55,11 +55,8 @@ fn generate_bindings(
     skia_source_dir: &std::path::Path,
 ) {
     // Emit the ninja definitions, to help debug build consistency.
-    bind_skia::definitions::save_definitions(
-        &definitions,
-        &binaries_config.output_directory,
-    )
-    .expect("failed to write ninja defines");
+    bind_skia::definitions::save_definitions(&definitions, &binaries_config.output_directory)
+        .expect("failed to write ninja defines");
 
     let bindings_config = bind_skia::FinalBuildConfiguration::from_build_configuration(
         features,
