@@ -1,6 +1,6 @@
 //! Full build support for the SkiaBindings library, and bindings.rs file.
 
-use crate::build_support::{android, cargo, ios, xcode, features, binaries_config};
+use crate::build_support::{android, binaries_config, cargo, features, ios, xcode};
 use bindgen::{CodegenConfig, EnumVariation};
 use cc::Build;
 use std::path::{Path, PathBuf};
@@ -167,7 +167,11 @@ pub fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Pat
 
     // Whether GIF decoding is supported,
     // is decided by BUILD.gn based on the existence of the libgifcodec directory:
-    if !build.definitions.iter().any(|(v, _)| v == "SK_USE_LIBGIFCODEC") {
+    if !build
+        .definitions
+        .iter()
+        .any(|(v, _)| v == "SK_USE_LIBGIFCODEC")
+    {
         cargo::warning("GIF decoding support may be missing, does the directory skia/third_party/externals/libgifcodec/ exist?")
     }
 
@@ -671,35 +675,38 @@ pub(crate) mod definitions {
     pub type Definitions = Vec<Definition>;
 
     pub fn from_env() -> Definitions {
-        let env_string = env::skia_lib_definitions()
-            .expect("must include library definition environment");
+        let env_string =
+            env::skia_lib_definitions().expect("must include library definition environment");
         from_defines_str(&env_string)
     }
 
     #[cfg(feature = "build-from-source")]
     mod ninja {
+        use super::{from_defines_str, Definitions};
         use crate::build_support::features;
-        use super::{Definitions, from_defines_str};
         use std::collections::HashSet;
-        use std::path::{Path, PathBuf};
         use std::fs;
-    
+        use std::path::{Path, PathBuf};
+
         // Extracts definitions from ninja files that need to be parsed for build consistency.
-        pub fn from_ninja_features(features: &features::Features, output_directory: &Path) -> Definitions {
+        pub fn from_ninja_features(
+            features: &features::Features,
+            output_directory: &Path,
+        ) -> Definitions {
             let ninja_files = ninja_files_for_features(features);
             from_ninja_files(ninja_files, output_directory)
         }
 
         fn from_ninja_files(ninja_files: Vec<PathBuf>, output_directory: &Path) -> Definitions {
             let mut definitions = Vec::new();
-        
+
             for ninja_file in &ninja_files {
                 let ninja_file = output_directory.join(ninja_file);
                 println!("ninja_file: {:?}", &ninja_file);
                 let contents = fs::read_to_string(ninja_file).unwrap();
                 definitions = combine(definitions, from_ninja_file_content(contents))
             }
-        
+
             definitions
         }
 
@@ -731,7 +738,7 @@ pub(crate) mod definitions {
         fn combine(a: Definitions, b: Definitions) -> Definitions {
             remove_duplicates(a.into_iter().chain(b.into_iter()).collect())
         }
-    
+
         fn remove_duplicates(mut definitions: Definitions) -> Definitions {
             let mut uniques = HashSet::new();
             definitions.retain(|e| uniques.insert(e.0.clone()));

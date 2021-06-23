@@ -1,7 +1,7 @@
 //! Support for exporting and building prebuilt binaries.
 
 use super::{git, github_actions};
-use crate::build_support::{cargo, binaries_config};
+use crate::build_support::{binaries_config, cargo};
 use flate2::read::GzDecoder;
 use std::{
     fs,

@@ -1,4 +1,4 @@
-use crate::build_support::{android, cargo, ios, features};
+use crate::build_support::{android, cargo, features, ios};
 use std::path::PathBuf;
 
 /// The libraries to link with.
@@ -130,7 +130,10 @@ impl BinariesConfiguration {
     }
 
     pub fn built_libraries(&self) -> impl Iterator<Item = &str> {
-        self.ninja_built_libraries.iter().chain(self.other_built_libraries.iter()).map(|x| x.as_str())
+        self.ninja_built_libraries
+            .iter()
+            .chain(self.other_built_libraries.iter())
+            .map(|x| x.as_str())
     }
 
     /// Inform cargo that the library files of the given configuration are available and

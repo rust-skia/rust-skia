@@ -1,5 +1,4 @@
 /// Environment variables used by this build script.
-
 use crate::build_support::cargo;
 use std::path::PathBuf;
 

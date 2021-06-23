@@ -41,7 +41,8 @@ pub fn add_link_lib(lib: impl AsRef<str>) {
 }
 
 pub fn add_static_link_libs<T: AsRef<str>>(target: &Target, libs: impl IntoIterator<Item = T>) {
-    libs.into_iter().for_each(|s| add_static_link_lib(target, s.as_ref()))
+    libs.into_iter()
+        .for_each(|s| add_static_link_lib(target, s.as_ref()))
 }
 
 pub fn add_static_link_lib(target: &Target, lib: impl AsRef<str>) {

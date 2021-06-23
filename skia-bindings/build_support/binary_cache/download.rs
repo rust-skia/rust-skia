@@ -1,5 +1,5 @@
 use super::{binaries, env, git, utils, SRC_BINDINGS_RS};
-use crate::build_support::{cargo, binaries_config};
+use crate::build_support::{binaries_config, cargo};
 use flate2::read::GzDecoder;
 use std::ffi::OsStr;
 use std::fs;

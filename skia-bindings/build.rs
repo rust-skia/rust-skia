@@ -1,5 +1,5 @@
 mod build_support;
-use build_support::{cargo, bind_skia, features, binaries_config};
+use build_support::{binaries_config, bind_skia, cargo, features};
 
 #[cfg(feature = "build-from-source")]
 use build_support::build_skia;
@@ -25,7 +25,13 @@ mod env {
 }
 
 #[cfg(feature = "build-from-source")]
-fn build_from_source(features: features::Features, binaries_config: &binaries_config::BinariesConfiguration, skia_source_dir: &std::path::Path, skia_debug: bool, offline: bool) {
+fn build_from_source(
+    features: features::Features,
+    binaries_config: &binaries_config::BinariesConfiguration,
+    skia_source_dir: &std::path::Path,
+    skia_debug: bool,
+    offline: bool,
+) {
     let build_config = build_skia::BuildConfiguration::from_features(features, skia_debug);
     let final_configuration = build_skia::FinalBuildConfiguration::from_build_configuration(
         &build_config,
@@ -42,7 +48,12 @@ fn build_from_source(features: features::Features, binaries_config: &binaries_co
     );
 }
 
-fn generate_bindings(features: &features::Features, definitions: Vec<bind_skia::Definition>, binaries_config: &binaries_config::BinariesConfiguration, skia_source_dir: &std::path::Path) {
+fn generate_bindings(
+    features: &features::Features,
+    definitions: Vec<bind_skia::Definition>,
+    binaries_config: &binaries_config::BinariesConfiguration,
+    skia_source_dir: &std::path::Path,
+) {
     let bindings_config = bind_skia::FinalBuildConfiguration::from_build_configuration(
         features,
         definitions,
@@ -63,7 +74,8 @@ fn main() {
 
     let skia_debug = env::is_skia_debug();
     let features = features::Features::default();
-    let binaries_config = binaries_config::BinariesConfiguration::from_features(&features, skia_debug);
+    let binaries_config =
+        binaries_config::BinariesConfiguration::from_features(&features, skia_debug);
 
     //
     // skip attempting to download?
@@ -83,8 +95,17 @@ fn main() {
 
             #[cfg(feature = "build-from-source")]
             {
-                let definitions = bind_skia::definitions::from_ninja_features(&features, &binaries_config.output_directory);
-                build_from_source(features.clone(), &binaries_config, &source_dir, skia_debug, true);
+                let definitions = bind_skia::definitions::from_ninja_features(
+                    &features,
+                    &binaries_config.output_directory,
+                );
+                build_from_source(
+                    features.clone(),
+                    &binaries_config,
+                    &source_dir,
+                    skia_debug,
+                    true,
+                );
                 generate_bindings(&features, definitions, &binaries_config, &source_dir);
             }
         }
@@ -111,8 +132,17 @@ fn main() {
             #[cfg(feature = "build-from-source")]
             {
                 let source_dir = std::env::current_dir().unwrap().join("skia");
-                let definitions = bind_skia::definitions::from_ninja_features(&features, &binaries_config.output_directory);
-                build_from_source(features.clone(), &binaries_config, &source_dir, skia_debug, true);
+                let definitions = bind_skia::definitions::from_ninja_features(
+                    &features,
+                    &binaries_config.output_directory,
+                );
+                build_from_source(
+                    features.clone(),
+                    &binaries_config,
+                    &source_dir,
+                    skia_debug,
+                    true,
+                );
                 generate_bindings(&features, definitions, &binaries_config, &source_dir);
             }
         }
