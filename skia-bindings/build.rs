@@ -1,5 +1,5 @@
 mod build_support;
-use build_support::{cargo, skia, skia_c_bindings};
+use build_support::{cargo, skia, skia_c_bindings, features};
 
 /// Environment variables used by this build script.
 mod env {
@@ -38,7 +38,8 @@ fn main() {
         cargo::warning("The feature 'shaper' has been removed. To use the SkShaper bindings, enable the feature 'textlayout'.");
     }
 
-    let build_config = skia::BuildConfiguration::default();
+    let features = features::Features::default();
+    let build_config = skia::BuildConfiguration::from(features.clone());
     let mut binaries_config = skia::BinariesConfiguration::from_cargo_env(&build_config);
     binaries_config.other_built_libraries.push(skia_c_bindings::lib::SKIA_BINDINGS.into());
 
@@ -48,9 +49,8 @@ fn main() {
     if let Some(source_dir) = env::source_dir() {
         println!("STARTING OFFLINE BUILD");
 
-
         let bindings_config = skia_c_bindings::FinalBindingsBuildConfiguration::from_build_configuration(
-            &build_config,
+            &features,
             &source_dir,
         );
         let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
@@ -87,7 +87,7 @@ fn main() {
 
             println!("STARTING A FULL BUILD");
             let bindings_config = skia_c_bindings::FinalBindingsBuildConfiguration::from_build_configuration(
-                &build_config,
+                &features,
                 &source_dir,
             );
             let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(

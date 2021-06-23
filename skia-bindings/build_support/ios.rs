@@ -1,5 +1,5 @@
 use crate::build_support::clang;
-use crate::build_support::skia::Features;
+use crate::build_support::features::Features;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
 

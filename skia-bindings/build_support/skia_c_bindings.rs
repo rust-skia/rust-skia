@@ -1,4 +1,4 @@
-use crate::build_support::{android, cargo, ios, xcode, skia};
+use crate::build_support::{android, cargo, ios, xcode, features};
 use bindgen::{CodegenConfig, EnumVariation};
 use cc::Build;
 use std::path::{Path, PathBuf};
@@ -22,11 +22,9 @@ pub struct FinalBindingsBuildConfiguration {
 
 impl FinalBindingsBuildConfiguration {
     pub fn from_build_configuration(
-        build: &skia::BuildConfiguration,
+        features: &features::Features,
         skia_source_dir: &Path,
     ) -> FinalBindingsBuildConfiguration {
-        let features = &build.features;
-
         let ninja_files = {
             let mut files = vec!["obj/skia.ninja".into()];
             if features.text_layout {
