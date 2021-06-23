@@ -16,7 +16,7 @@ crate-tests: crate-bindings-binaries crate-bindings-build
 .PHONY: crate-bindings-binaries
 crate-bindings-binaries: export FORCE_SKIA_BINARIES_DOWNLOAD=1
 crate-bindings-binaries:
-	cd skia-bindings && cargo publish -vv --dry-run --features "gl,vulkan,textlayout,binary-cache"
+	cd skia-bindings && cargo publish -vv --dry-run --features "gl,vulkan,textlayout,binary-cache,build-from-source"
 	cd skia-bindings && cargo publish -vv --dry-run 
 
 .PHONY: crate-bindings-build

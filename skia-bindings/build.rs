@@ -1,35 +1,54 @@
 mod build_support;
-use build_support::{cargo, build_skia, bind_skia, features, binaries_config};
+use build_support::{cargo, bind_skia, features, binaries_config};
+
+#[cfg(feature = "build-from-source")]
+use build_support::build_skia;
 
 /// Environment variables used by this build script.
 mod env {
     use crate::build_support::cargo;
     use std::path::PathBuf;
 
-    /// A boolean specifying whether to build Skia's dependencies or not. If not, the system's
-    /// provided libraries are used.
-    pub fn use_system_libraries() -> bool {
-        cargo::env_var("SKIA_USE_SYSTEM_LIBRARIES").is_some()
-    }
-
-    /// The full path of the ninja command to run.
-    pub fn ninja_command() -> Option<PathBuf> {
-        cargo::env_var("SKIA_NINJA_COMMAND").map(PathBuf::from)
-    }
-
-    /// The full path of the gn command to run.
-    pub fn gn_command() -> Option<PathBuf> {
-        cargo::env_var("SKIA_GN_COMMAND").map(PathBuf::from)
-    }
-
     /// The path to the Skia source directory.
     pub fn source_dir() -> Option<PathBuf> {
         cargo::env_var("SKIA_SOURCE_DIR").map(PathBuf::from)
     }
 
+    /// The path to where a pre-built Skia library can be found.
+    pub fn skia_lib_search_path() -> Option<PathBuf> {
+        cargo::env_var("SKIA_LIBRARY_SEARCH_PATH").map(PathBuf::from)
+    }
+
     pub fn is_skia_debug() -> bool {
         matches!(cargo::env_var("SKIA_DEBUG"), Some(v) if v != "0")
     }
+}
+
+#[cfg(feature = "build-from-source")]
+fn build_from_source(features: features::Features, binaries_config: &binaries_config::BinariesConfiguration, skia_source_dir: &std::path::Path, skia_debug: bool, offline: bool) {
+    let build_config = build_skia::BuildConfiguration::from_features(features, skia_debug);
+    let final_configuration = build_skia::FinalBuildConfiguration::from_build_configuration(
+        &build_config,
+        build_skia::env::use_system_libraries(),
+        &skia_source_dir,
+    );
+
+    build_skia::build(
+        &final_configuration,
+        binaries_config,
+        build_skia::env::ninja_command(),
+        build_skia::env::gn_command(),
+        offline,
+    );
+}
+
+fn generate_bindings(features: &features::Features, definitions: Vec<bind_skia::Definition>, binaries_config: &binaries_config::BinariesConfiguration, skia_source_dir: &std::path::Path) {
+    let bindings_config = bind_skia::FinalBuildConfiguration::from_build_configuration(
+        features,
+        definitions,
+        skia_source_dir,
+    );
+    bind_skia::generate_bindings(&bindings_config, &binaries_config.output_directory);
 }
 
 fn main() {
@@ -50,27 +69,25 @@ fn main() {
     // skip attempting to download?
     //
     if let Some(source_dir) = env::source_dir() {
-        println!("STARTING OFFLINE BUILD");
+        if let Some(search_path) = env::skia_lib_search_path() {
+            println!("STARTING BIND AGAINST SYSTEM SKIA");
 
-        let bindings_config = bind_skia::FinalBuildConfiguration::from_build_configuration(
-            &features,
-            &source_dir,
-        );
-        let build_config = build_skia::BuildConfiguration::from_features(features, skia_debug);
-        let final_configuration = build_skia::FinalBuildConfiguration::from_build_configuration(
-            &build_config,
-            env::use_system_libraries(),
-            &source_dir,
-        );
+            cargo::add_link_search(&search_path.to_str().unwrap());
 
-        build_skia::build(
-            &final_configuration,
-            &binaries_config,
-            env::ninja_command(),
-            env::gn_command(),
-            true,
-        );
-        bind_skia::generate_bindings(&bindings_config, &binaries_config.output_directory);
+            let definitions = bind_skia::definitions::from_env();
+            generate_bindings(&features, definitions, &binaries_config, &source_dir);
+        } else {
+            println!("STARTING OFFLINE BUILD");
+
+            assert!(cfg!(feature = "build-from-source"));
+
+            #[cfg(feature = "build-from-source")]
+            {
+                let definitions = bind_skia::definitions::from_ninja_features(&features, &binaries_config.output_directory);
+                build_from_source(features.clone(), &binaries_config, &source_dir, skia_debug, true);
+                generate_bindings(&features, definitions, &binaries_config, &source_dir);
+            }
+        }
     } else {
         //
         // is the download of prebuilt binaries possible?
@@ -87,27 +104,17 @@ fn main() {
         //
 
         if build_skia {
-            let source_dir = std::env::current_dir().unwrap().join("skia");
-
             println!("STARTING A FULL BUILD");
-            let bindings_config = bind_skia::FinalBuildConfiguration::from_build_configuration(
-                &features,
-                &source_dir,
-            );
-            let build_config = build_skia::BuildConfiguration::from_features(features, skia_debug);
-            let final_configuration = build_skia::FinalBuildConfiguration::from_build_configuration(
-                &build_config,
-                env::use_system_libraries(),
-                &source_dir,
-            );
-            build_skia::build(
-                &final_configuration,
-                &binaries_config,
-                env::ninja_command(),
-                env::gn_command(),
-                false,
-            );
-            bind_skia::generate_bindings(&bindings_config, &binaries_config.output_directory);
+
+            assert!(cfg!(feature = "build-from-source"));
+
+            #[cfg(feature = "build-from-source")]
+            {
+                let source_dir = std::env::current_dir().unwrap().join("skia");
+                let definitions = bind_skia::definitions::from_ninja_features(&features, &binaries_config.output_directory);
+                build_from_source(features.clone(), &binaries_config, &source_dir, skia_debug, true);
+                generate_bindings(&features, definitions, &binaries_config, &source_dir);
+            }
         }
     };
 

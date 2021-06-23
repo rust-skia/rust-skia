@@ -4,7 +4,14 @@ use crate::build_support::{android, cargo, ios, xcode, features, binaries_config
 use bindgen::{CodegenConfig, EnumVariation};
 use cc::Build;
 use std::path::{Path, PathBuf};
-use std::fs;
+
+pub mod env {
+    use crate::build_support::cargo;
+
+    pub fn skia_lib_definitions() -> Option<String> {
+        cargo::env_var("SKIA_BUILD_DEFINES")
+    }
+}
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct FinalBuildConfiguration {
@@ -14,26 +21,16 @@ pub struct FinalBuildConfiguration {
     /// The Skia source directory.
     pub skia_source_dir: PathBuf,
 
-    /// ninja files that need to be parsed for further definitions.
-    pub ninja_files: Vec<PathBuf>,
+    /// Further definitions needed for build consistency.
+    pub definitions: Definitions,
 }
 
 impl FinalBuildConfiguration {
     pub fn from_build_configuration(
         features: &features::Features,
+        definitions: Definitions,
         skia_source_dir: &Path,
     ) -> FinalBuildConfiguration {
-        let ninja_files = {
-            let mut files = vec!["obj/skia.ninja".into()];
-            if features.text_layout {
-                files.extend(vec![
-                    "obj/modules/skshaper/skshaper.ninja".into(),
-                    "obj/modules/skparagraph/skparagraph.ninja".into(),
-                ]);
-            }
-            files
-        };
-
         let binding_sources = {
             let mut sources: Vec<PathBuf> = vec!["src/bindings.cpp".into()];
             if features.gl {
@@ -60,8 +57,8 @@ impl FinalBuildConfiguration {
 
         FinalBuildConfiguration {
             skia_source_dir: skia_source_dir.into(),
-            ninja_files,
             binding_sources,
+            definitions,
         }
     }
 }
@@ -168,25 +165,13 @@ pub fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Pat
     builder = builder.clang_arg(format!("-I{}", include_path.display()));
     cc_build.include(include_path);
 
-    let definitions = {
-        let mut definitions = Vec::new();
-
-        for ninja_file in &build.ninja_files {
-            let ninja_file = output_directory.join(ninja_file);
-            let contents = fs::read_to_string(ninja_file).unwrap();
-            definitions = definitions::combine(definitions, definitions::from_ninja(contents))
-        }
-
-        definitions
-    };
-
     // Whether GIF decoding is supported,
     // is decided by BUILD.gn based on the existence of the libgifcodec directory:
-    if !definitions.iter().any(|(v, _)| v == "SK_USE_LIBGIFCODEC") {
+    if !build.definitions.iter().any(|(v, _)| v == "SK_USE_LIBGIFCODEC") {
         cargo::warning("GIF decoding support may be missing, does the directory skia/third_party/externals/libgifcodec/ exist?")
     }
 
-    for (name, value) in &definitions {
+    for (name, value) in &build.definitions {
         match value {
             Some(value) => {
                 cc_build.define(name, value.as_str());
@@ -678,37 +663,97 @@ pub(crate) mod rewrite {
 pub use definitions::{Definition, Definitions};
 
 pub(crate) mod definitions {
-    use std::collections::HashSet;
+    use super::env;
 
     /// A preprocessor definition.
     pub type Definition = (String, Option<String>);
     /// A container for a number of preprocessor definitions.
     pub type Definitions = Vec<Definition>;
 
-    /// Parse a defines = line from a ninja build file.
-    pub fn from_ninja(ninja_file: impl AsRef<str>) -> Definitions {
-        let lines: Vec<&str> = ninja_file.as_ref().lines().collect();
-        let defines = {
-            let prefix = "defines = ";
-            let defines = lines
-                .into_iter()
-                .find(|s| s.starts_with(prefix))
-                .expect("missing a line with the prefix 'defines =' in a .ninja file");
-            &defines[prefix.len()..]
-        };
-        let defines: Vec<&str> = {
-            let prefix = "-D";
-            defines
-                .split_whitespace()
-                .map(|d| {
-                    if let Some(stripped) = d.strip_prefix(prefix) {
-                        stripped
-                    } else {
-                        panic!("missing '-D' prefix from a definition")
-                    }
-                })
-                .collect()
-        };
+    pub fn from_env() -> Definitions {
+        let env_string = env::skia_lib_definitions()
+            .expect("must include library definition environment");
+        from_defines_str(&env_string)
+    }
+
+    #[cfg(feature = "build-from-source")]
+    mod ninja {
+        use crate::build_support::features;
+        use super::{Definitions, from_defines_str};
+        use std::collections::HashSet;
+        use std::path::{Path, PathBuf};
+        use std::fs;
+    
+        // Extracts definitions from ninja files that need to be parsed for build consistency.
+        pub fn from_ninja_features(features: &features::Features, output_directory: &Path) -> Definitions {
+            let ninja_files = ninja_files_for_features(features);
+            from_ninja_files(ninja_files, output_directory)
+        }
+
+        fn from_ninja_files(ninja_files: Vec<PathBuf>, output_directory: &Path) -> Definitions {
+            let mut definitions = Vec::new();
+        
+            for ninja_file in &ninja_files {
+                let ninja_file = output_directory.join(ninja_file);
+                println!("ninja_file: {:?}", &ninja_file);
+                let contents = fs::read_to_string(ninja_file).unwrap();
+                definitions = combine(definitions, from_ninja_file_content(contents))
+            }
+        
+            definitions
+        }
+
+        /// Parse a defines = line from a ninja build file.
+        fn from_ninja_file_content(ninja_file: impl AsRef<str>) -> Definitions {
+            let lines: Vec<&str> = ninja_file.as_ref().lines().collect();
+            let defines = {
+                let prefix = "defines = ";
+                let defines = lines
+                    .into_iter()
+                    .find(|s| s.starts_with(prefix))
+                    .expect("missing a line with the prefix 'defines =' in a .ninja file");
+                &defines[prefix.len()..]
+            };
+            from_defines_str(defines)
+        }
+
+        fn ninja_files_for_features(features: &features::Features) -> Vec<PathBuf> {
+            let mut files = vec!["obj/skia.ninja".into()];
+            if features.text_layout {
+                files.extend(vec![
+                    "obj/modules/skshaper/skshaper.ninja".into(),
+                    "obj/modules/skparagraph/skparagraph.ninja".into(),
+                ]);
+            }
+            files
+        }
+
+        fn combine(a: Definitions, b: Definitions) -> Definitions {
+            remove_duplicates(a.into_iter().chain(b.into_iter()).collect())
+        }
+    
+        fn remove_duplicates(mut definitions: Definitions) -> Definitions {
+            let mut uniques = HashSet::new();
+            definitions.retain(|e| uniques.insert(e.0.clone()));
+            definitions
+        }
+    }
+
+    #[cfg(feature = "build-from-source")]
+    pub use ninja::from_ninja_features;
+
+    fn from_defines_str(defines: &str) -> Definitions {
+        const PREFIX: &str = "-D";
+        let defines: Vec<&str> = defines
+            .split_whitespace()
+            .map(|d| {
+                if let Some(stripped) = d.strip_prefix(PREFIX) {
+                    stripped
+                } else {
+                    panic!("missing '{}' prefix from a definition", PREFIX)
+                }
+            })
+            .collect();
         defines
             .into_iter()
             .map(|d| {
@@ -720,15 +765,5 @@ pub(crate) mod definitions {
                 }
             })
             .collect()
-    }
-
-    pub fn combine(a: Definitions, b: Definitions) -> Definitions {
-        remove_duplicates(a.into_iter().chain(b.into_iter()).collect())
-    }
-
-    fn remove_duplicates(mut definitions: Definitions) -> Definitions {
-        let mut uniques = HashSet::new();
-        definitions.retain(|e| uniques.insert(e.0.clone()));
-        definitions
     }
 }
