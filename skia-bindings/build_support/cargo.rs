@@ -40,6 +40,20 @@ pub fn add_link_lib(lib: impl AsRef<str>) {
     println!("cargo:rustc-link-lib={}", lib.as_ref());
 }
 
+pub fn add_static_link_libs(target: &Target, libs: &[impl AsRef<str>]) {
+    libs.iter().for_each(|s| add_static_link_lib(target, s.as_ref()))
+}
+
+pub fn add_static_link_lib(target: &Target, lib: impl AsRef<str>) {
+    // Prefixing the libraries we built with `static=` causes linker errors on Windows.
+    // https://github.com/rust-skia/rust-skia/pull/354
+    if target.is_windows() {
+        println!("cargo:rustc-link-lib={}", lib.as_ref());
+    } else {
+        println!("cargo:rustc-link-lib=static={}", lib.as_ref());
+    }
+}
+
 pub fn add_link_search(dir: impl AsRef<str>) {
     println!("cargo:rustc-link-search={}", dir.as_ref());
 }

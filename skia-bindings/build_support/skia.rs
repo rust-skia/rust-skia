@@ -1,6 +1,6 @@
 //! Full build support for the Skia library, SkiaBindings library and bindings.rs file.
 
-use crate::build_support::{android, cargo, clang, ios, llvm, skia_c_bindings, vs};
+use crate::build_support::{android, cargo, clang, ios, llvm, vs};
 use std::env;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -51,7 +51,6 @@ impl Default for BuildConfiguration {
                 dng: false,
                 particles: false,
             },
-            definitions: Vec::new(),
             cc: cargo::env_var("CC").unwrap_or_else(|| "clang".to_string()),
             cxx: cargo::env_var("CXX").unwrap_or_else(|| "clang++".to_string()),
         }
@@ -72,10 +71,7 @@ pub struct BuildConfiguration {
     skia_debug: bool,
 
     /// The Skia feature set to compile.
-    features: Features,
-
-    /// Additional preprocessor definitions that will override predefined ones.
-    definitions: skia_c_bindings::Definitions,
+    pub features: Features,
 
     /// C compiler to use
     cc: String,
@@ -181,66 +177,11 @@ pub struct FinalBuildConfiguration {
 
     /// Whether to use system libraries or not.
     pub use_system_libraries: bool,
-
-    /// Binding build configuration.
-    pub bindings_config: skia_c_bindings::FinalBindingsBuildConfiguration,
-}
-
-impl skia_c_bindings::FinalBindingsBuildConfiguration {
-    pub fn from_build_configuration(
-        build: &BuildConfiguration,
-        skia_source_dir: &Path,
-    ) -> skia_c_bindings::FinalBindingsBuildConfiguration {
-        let features = &build.features;
-
-        let ninja_files = {
-            let mut files = vec!["obj/skia.ninja".into()];
-            if features.text_layout {
-                files.extend(vec![
-                    "obj/modules/skshaper/skshaper.ninja".into(),
-                    "obj/modules/skparagraph/skparagraph.ninja".into(),
-                ]);
-            }
-            files
-        };
-
-        let binding_sources = {
-            let mut sources: Vec<PathBuf> = vec!["src/bindings.cpp".into()];
-            if features.gl {
-                sources.push("src/gl.cpp".into());
-            }
-            if features.vulkan {
-                sources.push("src/vulkan.cpp".into());
-            }
-            if features.metal {
-                sources.push("src/metal.cpp".into());
-            }
-            if features.d3d {
-                sources.push("src/d3d.cpp".into());
-            }
-            if features.gpu() {
-                sources.push("src/gpu.cpp".into());
-            }
-            if features.text_layout {
-                sources.extend(vec!["src/shaper.cpp".into(), "src/paragraph.cpp".into()]);
-            }
-            sources.push("src/svg.cpp".into());
-            sources
-        };
-
-        skia_c_bindings::FinalBindingsBuildConfiguration {
-            skia_source_dir: skia_source_dir.into(),
-            ninja_files,
-            definitions: build.definitions.clone(),
-            binding_sources,
-        }
-    }
 }
 
 impl FinalBuildConfiguration {
     pub fn from_build_configuration(
         build: &BuildConfiguration,
-        bindings_config: skia_c_bindings::FinalBindingsBuildConfiguration,
         use_system_libraries: bool,
         skia_source_dir: &Path,
     ) -> FinalBuildConfiguration {
@@ -456,7 +397,6 @@ impl FinalBuildConfiguration {
             skia_source_dir: skia_source_dir.into(),
             gn_args,
             use_system_libraries,
-            bindings_config,
         }
     }
 }
@@ -488,7 +428,10 @@ pub struct BinariesConfiguration {
     pub link_libraries: Vec<String>,
 
     /// The static Skia libraries skia-bindings provides and dependent projects need to link with.
-    pub built_libraries: Vec<String>,
+    pub ninja_built_libraries: Vec<String>,
+
+    /// The static Skia libraries skia-bindings provides and dependent projects need to link with.
+    pub other_built_libraries: Vec<String>,
 
     /// Additional files relative to the output_directory
     /// that are needed to build dependent projects.
@@ -508,7 +451,7 @@ impl BinariesConfiguration {
         let features = &build.features;
         let target = cargo::target();
 
-        let mut built_libraries = Vec::new();
+        let mut ninja_built_libraries = Vec::new();
         let mut additional_files = Vec::new();
         let feature_ids = features.ids();
 
@@ -516,8 +459,8 @@ impl BinariesConfiguration {
             if target.is_windows() {
                 additional_files.push(ICUDTL_DAT.into());
             }
-            built_libraries.push(lib::SK_PARAGRAPH.into());
-            built_libraries.push(lib::SK_SHAPER.into());
+            ninja_built_libraries.push(lib::SK_PARAGRAPH.into());
+            ninja_built_libraries.push(lib::SK_SHAPER.into());
         }
 
         let mut link_libraries = Vec::new();
@@ -576,8 +519,7 @@ impl BinariesConfiguration {
             .unwrap()
             .into();
 
-        built_libraries.push(lib::SKIA.into());
-        built_libraries.push(skia_c_bindings::lib::SKIA_BINDINGS.into());
+        ninja_built_libraries.push(lib::SKIA.into());
 
         BinariesConfiguration {
             feature_ids: feature_ids.into_iter().map(|f| f.to_string()).collect(),
@@ -586,7 +528,8 @@ impl BinariesConfiguration {
                 .into_iter()
                 .map(|lib| lib.to_string())
                 .collect(),
-            built_libraries,
+            ninja_built_libraries,
+            other_built_libraries: vec![],
             additional_files,
             skia_debug: build.skia_debug,
         }
@@ -602,20 +545,8 @@ impl BinariesConfiguration {
 
         let target = cargo::target();
 
-        for lib in &self.built_libraries {
-            // Prefixing the libraries we built with `static=` causes linker errors on Windows.
-            // https://github.com/rust-skia/rust-skia/pull/354
-            let kind_prefix = {
-                if target.is_windows() {
-                    ""
-                } else {
-                    "static="
-                }
-            };
-
-            cargo::add_link_lib(format!("{}{}", kind_prefix, lib));
-        }
-
+        cargo::add_static_link_libs(&target, &self.ninja_built_libraries);
+        cargo::add_static_link_libs(&target, &self.other_built_libraries);
         cargo::add_link_libs(&self.link_libraries);
     }
 }
@@ -655,7 +586,7 @@ pub fn build(
     }
 
     configure_skia(build, config, python2, gn_command.as_deref());
-    build_skia(build, config, &ninja);
+    build_skia(config, &ninja);
 }
 
 /// Configures Skia by calling gn
@@ -701,18 +632,9 @@ pub fn configure_skia(
 ///
 /// This function assumes that all prerequisites are in place and that the output directory
 /// contains a fully configured Skia source tree generated by gn.
-pub fn build_skia(
-    build: &FinalBuildConfiguration,
-    config: &BinariesConfiguration,
-    ninja_command: &Path,
-) {
-    // Libraries we explicitly want ninja to build.
-    let ninja_built_libraries = config
-        .built_libraries
-        .iter()
-        .filter(|x| *x != skia_c_bindings::lib::SKIA_BINDINGS);
+pub fn build_skia(config: &BinariesConfiguration, ninja_command: &Path) {
     let ninja_status = Command::new(ninja_command)
-        .args(ninja_built_libraries)
+        .args(&config.ninja_built_libraries)
         .args(&["-C", config.output_directory.to_str().unwrap()])
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
@@ -724,8 +646,6 @@ pub fn build_skia(
             .success(),
         "`ninja` returned an error, please check the output for details."
     );
-
-    skia_c_bindings::generate_bindings(&build.bindings_config, &config.output_directory)
 }
 
 mod prerequisites {

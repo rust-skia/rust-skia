@@ -1,4 +1,4 @@
-use crate::build_support::{android, cargo, ios, xcode};
+use crate::build_support::{android, cargo, ios, xcode, skia};
 use bindgen::{CodegenConfig, EnumVariation};
 use cc::Build;
 use std::path::{Path, PathBuf};
@@ -18,10 +18,56 @@ pub struct FinalBindingsBuildConfiguration {
 
     /// ninja files that need to be parsed for further definitions.
     pub ninja_files: Vec<PathBuf>,
+}
 
-    /// The additional definitions (cloned from the definitions of
-    /// the BuildConfiguration).
-    pub definitions: Definitions,
+impl FinalBindingsBuildConfiguration {
+    pub fn from_build_configuration(
+        build: &skia::BuildConfiguration,
+        skia_source_dir: &Path,
+    ) -> FinalBindingsBuildConfiguration {
+        let features = &build.features;
+
+        let ninja_files = {
+            let mut files = vec!["obj/skia.ninja".into()];
+            if features.text_layout {
+                files.extend(vec![
+                    "obj/modules/skshaper/skshaper.ninja".into(),
+                    "obj/modules/skparagraph/skparagraph.ninja".into(),
+                ]);
+            }
+            files
+        };
+
+        let binding_sources = {
+            let mut sources: Vec<PathBuf> = vec!["src/bindings.cpp".into()];
+            if features.gl {
+                sources.push("src/gl.cpp".into());
+            }
+            if features.vulkan {
+                sources.push("src/vulkan.cpp".into());
+            }
+            if features.metal {
+                sources.push("src/metal.cpp".into());
+            }
+            if features.d3d {
+                sources.push("src/d3d.cpp".into());
+            }
+            if features.gpu() {
+                sources.push("src/gpu.cpp".into());
+            }
+            if features.text_layout {
+                sources.extend(vec!["src/shaper.cpp".into(), "src/paragraph.cpp".into()]);
+            }
+            sources.push("src/svg.cpp".into());
+            sources
+        };
+
+        FinalBindingsBuildConfiguration {
+            skia_source_dir: skia_source_dir.into(),
+            ninja_files,
+            binding_sources,
+        }
+    }
 }
 
 pub fn generate_bindings(build: &FinalBindingsBuildConfiguration, output_directory: &Path) {
@@ -135,7 +181,7 @@ pub fn generate_bindings(build: &FinalBindingsBuildConfiguration, output_directo
             definitions = definitions::combine(definitions, definitions::from_ninja(contents))
         }
 
-        definitions::combine(definitions, build.definitions.clone())
+        definitions
     };
 
     // Whether GIF decoding is supported,

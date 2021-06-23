@@ -39,7 +39,11 @@ pub fn export(
 
     let target = cargo::target();
 
-    for lib in &config.built_libraries {
+    for lib in &config.ninja_built_libraries {
+        let filename = &target.library_to_filename(lib);
+        fs::copy(output_directory.join(filename), export_dir.join(filename))?;
+    }
+    for lib in &config.other_built_libraries {
         let filename = &target.library_to_filename(lib);
         fs::copy(output_directory.join(filename), export_dir.join(filename))?;
     }

@@ -39,7 +39,8 @@ fn main() {
     }
 
     let build_config = skia::BuildConfiguration::default();
-    let binaries_config = skia::BinariesConfiguration::from_cargo_env(&build_config);
+    let mut binaries_config = skia::BinariesConfiguration::from_cargo_env(&build_config);
+    binaries_config.other_built_libraries.push(skia_c_bindings::lib::SKIA_BINDINGS.into());
 
     //
     // skip attempting to download?
@@ -54,7 +55,6 @@ fn main() {
         );
         let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
             &build_config,
-            bindings_config,
             env::use_system_libraries(),
             &source_dir,
         );
@@ -66,6 +66,7 @@ fn main() {
             env::gn_command(),
             true,
         );
+        skia_c_bindings::generate_bindings(&bindings_config, &binaries_config.output_directory);
     } else {
         //
         // is the download of prebuilt binaries possible?
@@ -91,7 +92,6 @@ fn main() {
             );
             let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
                 &build_config,
-                bindings_config,
                 env::use_system_libraries(),
                 &source_dir,
             );
@@ -102,6 +102,7 @@ fn main() {
                 env::gn_command(),
                 false,
             );
+            skia_c_bindings::generate_bindings(&bindings_config, &binaries_config.output_directory);
         }
     };
 
