@@ -668,6 +668,9 @@ pub use definitions::{Definition, Definitions};
 
 pub(crate) mod definitions {
     use super::env;
+    use std::fs;
+    use std::io::Write;
+    use std::path::Path;
 
     /// A preprocessor definition.
     pub type Definition = (String, Option<String>);
@@ -678,6 +681,22 @@ pub(crate) mod definitions {
         let env_string =
             env::skia_lib_definitions().expect("must include library definition environment");
         from_defines_str(&env_string)
+    }
+
+    pub fn save_definitions(
+        definitions: &Definitions,
+        output_directory: impl AsRef<Path>,
+    ) -> std::io::Result<()> {
+        fs::create_dir_all(&output_directory)?;
+        let mut file = fs::File::create(output_directory.as_ref().join("ninja_defines.txt"))?;
+        for (name, value) in definitions.iter() {
+            if let Some(value) = value {
+                writeln!(file, "-D{}={}", name, value)?;
+            } else {
+                writeln!(file, "-D{}", name)?;
+            }
+        }
+        writeln!(file)
     }
 
     #[cfg(feature = "build-from-source")]

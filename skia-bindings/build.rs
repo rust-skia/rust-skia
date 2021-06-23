@@ -54,16 +54,12 @@ fn generate_bindings(
     binaries_config: &binaries_config::BinariesConfiguration,
     skia_source_dir: &std::path::Path,
 ) {
-    // Emit the ninja definitions, to aid build consistency.
-    println!("ninja definitions:");
-    for (name, value) in definitions.iter() {
-        if let Some(value) = value {
-            println!("  -D{}={}", name, value);
-        } else {
-            println!("  -D{}", name);
-        }
-    }
-    println!();
+    // Emit the ninja definitions, to help debug build consistency.
+    bind_skia::definitions::save_definitions(
+        &definitions,
+        &binaries_config.output_directory,
+    )
+    .expect("failed to write ninja defines");
 
     let bindings_config = bind_skia::FinalBuildConfiguration::from_build_configuration(
         features,
@@ -106,16 +102,16 @@ fn main() {
 
             #[cfg(feature = "build-from-source")]
             {
-                let definitions = bind_skia::definitions::from_ninja_features(
-                    &features,
-                    &binaries_config.output_directory,
-                );
                 build_from_source(
                     features.clone(),
                     &binaries_config,
                     &source_dir,
                     skia_debug,
                     true,
+                );
+                let definitions = bind_skia::definitions::from_ninja_features(
+                    &features,
+                    &binaries_config.output_directory,
                 );
                 generate_bindings(&features, definitions, &binaries_config, &source_dir);
             }
@@ -143,16 +139,16 @@ fn main() {
             #[cfg(feature = "build-from-source")]
             {
                 let source_dir = std::env::current_dir().unwrap().join("skia");
-                let definitions = bind_skia::definitions::from_ninja_features(
-                    &features,
-                    &binaries_config.output_directory,
-                );
                 build_from_source(
                     features.clone(),
                     &binaries_config,
                     &source_dir,
                     skia_debug,
                     true,
+                );
+                let definitions = bind_skia::definitions::from_ninja_features(
+                    &features,
+                    &binaries_config.output_directory,
                 );
                 generate_bindings(&features, definitions, &binaries_config, &source_dir);
             }
