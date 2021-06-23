@@ -36,7 +36,7 @@ skia = "m91-0.39.3"
 depot_tools = "a110bf6"
 
 [features]
-default = []
+default = ["binary-cache", "build-from-source"]
 gl = []
 egl = []
 wayland = []
