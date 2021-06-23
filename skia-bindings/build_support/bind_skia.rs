@@ -702,7 +702,6 @@ pub(crate) mod definitions {
 
             for ninja_file in &ninja_files {
                 let ninja_file = output_directory.join(ninja_file);
-                println!("ninja_file: {:?}", &ninja_file);
                 let contents = fs::read_to_string(ninja_file).unwrap();
                 definitions = combine(definitions, from_ninja_file_content(contents))
             }

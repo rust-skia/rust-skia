@@ -54,6 +54,17 @@ fn generate_bindings(
     binaries_config: &binaries_config::BinariesConfiguration,
     skia_source_dir: &std::path::Path,
 ) {
+    // Emit the ninja definitions, to aid build consistency.
+    println!("ninja definitions:");
+    for (name, value) in definitions.iter() {
+        if let Some(value) = value {
+            println!("  -D{}={}", name, value);
+        } else {
+            println!("  -D{}", name);
+        }
+    }
+    println!();
+
     let bindings_config = bind_skia::FinalBuildConfiguration::from_build_configuration(
         features,
         definitions,
