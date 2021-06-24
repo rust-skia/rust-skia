@@ -1,5 +1,8 @@
+#![allow(clippy::upper_case_acronyms)]
+// Allow uppercase acronyms like QA and MacOS.
+
 //! This program builds the github workflow files for the rust-skia project.
-use std::{fmt, fs, iter, ops::Deref, path::PathBuf};
+use std::{fmt, fs, ops::Deref, path::PathBuf};
 
 mod config;
 
@@ -94,13 +97,13 @@ fn build_workflow(workflow: &Workflow, jobs: &[Job]) {
         }
 
         {
-            let job_header = build_job(job_template, &job).indented(2);
+            let job_header = build_job(job_template, job).indented(2);
             parts.push(job_header);
         }
 
         let targets: Vec<String> = targets
             .iter()
-            .map(|t| build_target(&workflow, &job, &t).indented(2))
+            .map(|t| build_target(workflow, job, t).indented(2))
             .collect();
 
         parts.extend(targets);
@@ -251,7 +254,7 @@ trait Indented {
 
 impl Indented for String {
     fn indented(&self, i: usize) -> String {
-        let prefix: String = iter::repeat("  ").take(i).collect();
+        let prefix: String = "  ".repeat(i);
         let indented_lines: Vec<String> = self.lines().map(|l| prefix.clone() + l).collect();
 
         indented_lines.join("\n")
