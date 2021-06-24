@@ -95,8 +95,6 @@ fn main() {
         } else {
             println!("STARTING OFFLINE BUILD");
 
-            assert!(cfg!(feature = "build-from-source"));
-
             #[cfg(feature = "build-from-source")]
             {
                 build_from_source(
@@ -130,8 +128,6 @@ fn main() {
 
         if build_skia {
             println!("STARTING A FULL BUILD");
-
-            assert!(cfg!(feature = "build-from-source"));
 
             #[cfg(feature = "build-from-source")]
             {

@@ -684,7 +684,7 @@ pub(crate) mod definitions {
     }
 
     pub fn save_definitions(
-        definitions: &Definitions,
+        definitions: &[Definition],
         output_directory: impl AsRef<Path>,
     ) -> std::io::Result<()> {
         fs::create_dir_all(&output_directory)?;
