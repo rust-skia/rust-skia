@@ -327,7 +327,7 @@ pub fn build(
         );
     }
 
-    configure_skia(build, config, &python2, gn_command.as_deref());
+    configure_skia(build, config, python2, gn_command.as_deref());
     build_skia(config, &ninja);
 }
 

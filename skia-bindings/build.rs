@@ -36,7 +36,7 @@ fn build_from_source(
     let final_configuration = build_skia::FinalBuildConfiguration::from_build_configuration(
         &build_config,
         build_skia::env::use_system_libraries(),
-        &skia_source_dir,
+        skia_source_dir,
     );
 
     build_skia::build(

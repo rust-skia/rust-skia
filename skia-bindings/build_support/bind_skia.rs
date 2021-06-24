@@ -730,11 +730,11 @@ pub(crate) mod definitions {
 
         /// Parse a defines = line from a ninja build file.
         fn from_ninja_file_content(ninja_file: impl AsRef<str>) -> Definitions {
-            let lines: Vec<&str> = ninja_file.as_ref().lines().collect();
             let defines = {
                 let prefix = "defines = ";
-                let defines = lines
-                    .into_iter()
+                let defines = ninja_file
+                    .as_ref()
+                    .lines()
                     .find(|s| s.starts_with(prefix))
                     .expect("missing a line with the prefix 'defines =' in a .ninja file");
                 &defines[prefix.len()..]
