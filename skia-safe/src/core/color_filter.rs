@@ -16,7 +16,7 @@ impl NativeBase<SkFlattenable> for SkColorFilter {}
 
 impl NativeFlattenable for SkColorFilter {
     fn native_flattenable(&self) -> &SkFlattenable {
-        &self.base()
+        self.base()
     }
 
     fn native_deserialize(data: &[u8]) -> *mut Self {

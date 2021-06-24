@@ -331,11 +331,11 @@ impl Matrix44 {
     }
 
     pub fn pre_concat(&mut self, m: &Self) -> &mut Self {
-        self.set_concat(&self.clone(), &m)
+        self.set_concat(&self.clone(), m)
     }
 
     pub fn post_concat(&mut self, m: &Self) -> &mut Self {
-        self.set_concat(&m, &self.clone())
+        self.set_concat(m, &self.clone())
     }
 
     #[must_use]

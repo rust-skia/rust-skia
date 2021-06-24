@@ -167,7 +167,7 @@ impl AshGraphics {
                         .get_physical_device_queue_family_properties(*physical_device)
                         .iter()
                         .enumerate()
-                        .find_map(|(index, ref info)| {
+                        .find_map(|(index, info)| {
                             let supports_graphic =
                                 info.queue_flags.contains(vk::QueueFlags::GRAPHICS);
                             if supports_graphic {

@@ -258,7 +258,7 @@ fn draw_two_point_conical_shader(canvas: &mut Canvas) {
         None,
         None,
     ));
-    canvas.draw_paint(&paint);
+    canvas.draw_paint(paint);
 }
 
 fn draw_sweep_gradient_shader(canvas: &mut Canvas) {

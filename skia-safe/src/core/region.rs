@@ -144,11 +144,11 @@ impl Region {
 
     pub fn quick_reject_rect(&self, rect: impl AsRef<IRect>) -> bool {
         let rect = rect.as_ref();
-        self.is_empty() || rect.is_empty() || !IRect::intersects(&self.bounds(), rect)
+        self.is_empty() || rect.is_empty() || !IRect::intersects(self.bounds(), rect)
     }
 
     pub fn quick_reject_region(&self, rgn: &Region) -> bool {
-        self.is_empty() || rgn.is_empty() || !IRect::intersects(&self.bounds(), &rgn.bounds())
+        self.is_empty() || rgn.is_empty() || !IRect::intersects(self.bounds(), rgn.bounds())
     }
 
     pub fn translate(&mut self, d: impl Into<IVector>) {
