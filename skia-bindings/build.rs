@@ -141,7 +141,7 @@ fn main() {
                     &binaries_config,
                     &source_dir,
                     skia_debug,
-                    true,
+                    false,
                 );
                 let definitions = bind_skia::definitions::from_ninja_features(
                     &features,
