@@ -649,7 +649,7 @@ pub fn build(
         );
     }
 
-    configure_skia(build, config, &python2, gn_command.as_deref());
+    configure_skia(build, config, python2, gn_command.as_deref());
     build_skia(build, config, &ninja);
 }
 
@@ -1381,7 +1381,7 @@ pub(crate) mod definitions {
 
     /// Parse a defines = line from a ninja build file.
     pub fn from_ninja(ninja_file: impl AsRef<str>) -> Definitions {
-        let lines: Vec<&str> = ninja_file.as_ref().lines().collect();
+        let lines = ninja_file.as_ref().lines();
         let defines = {
             let prefix = "defines = ";
             let defines = lines

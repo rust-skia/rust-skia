@@ -736,7 +736,7 @@ pub mod icu {
         skia_bindings::icu::init();
         let str = "العربية";
         let mut text_blob_builder_run_handler =
-            crate::shaper::TextBlobBuilderRunHandler::new(&str, crate::Point::default());
+            crate::shaper::TextBlobBuilderRunHandler::new(str, crate::Point::default());
 
         let shaper = crate::Shaper::new(None);
 

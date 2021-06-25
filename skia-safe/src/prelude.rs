@@ -236,7 +236,7 @@ pub struct Handle<N: NativeDrop>(
 
 impl<N: NativeDrop> AsRef<Handle<N>> for Handle<N> {
     fn as_ref(&self) -> &Self {
-        &self
+        self
     }
 }
 
@@ -504,7 +504,7 @@ impl<N: NativeRefCounted> From<&RCHandle<N>> for RCHandle<N> {
 
 impl<N: NativeRefCounted> AsRef<RCHandle<N>> for RCHandle<N> {
     fn as_ref(&self) -> &Self {
-        &self
+        self
     }
 }
 

@@ -967,10 +967,7 @@ impl Path {
         m: &Matrix,
         pc: impl Into<Option<ApplyPerspectiveClip>>,
     ) -> Path {
-        self.with_transform_with_perspective_clip(
-            &m,
-            pc.into().unwrap_or(ApplyPerspectiveClip::Yes),
-        )
+        self.with_transform_with_perspective_clip(m, pc.into().unwrap_or(ApplyPerspectiveClip::Yes))
     }
 
     pub fn make_scale(&mut self, (sx, sy): (scalar, scalar)) -> Path {

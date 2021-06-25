@@ -781,7 +781,7 @@ impl Mul for &M44 {
     type Output = M44;
 
     fn mul(self, m: Self) -> Self::Output {
-        M44::concat(self, &m)
+        M44::concat(self, m)
     }
 }
 

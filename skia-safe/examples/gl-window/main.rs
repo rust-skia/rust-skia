@@ -49,7 +49,7 @@ fn main() {
         pixel_format
     );
 
-    gl::load_with(|s| windowed_context.get_proc_address(&s));
+    gl::load_with(|s| windowed_context.get_proc_address(s));
 
     let mut gr_context = skia_safe::gpu::DirectContext::new_gl(None, None).unwrap();
 

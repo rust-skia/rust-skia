@@ -50,7 +50,7 @@ impl NativeRefCountedBase for SkShader {
 
 impl NativeFlattenable for SkShader {
     fn native_flattenable(&self) -> &SkFlattenable {
-        &self.base()
+        self.base()
     }
 
     fn native_deserialize(data: &[u8]) -> *mut Self {
