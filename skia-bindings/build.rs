@@ -1,8 +1,5 @@
 mod build_support;
-use build_support::{binaries_config, bind_skia, cargo, features};
-
-#[cfg(feature = "build-from-source")]
-use build_support::build_skia;
+use build_support::{binaries_config, bind_skia, cargo, features, build_skia};
 
 /// Environment variables used by this build script.
 mod env {
@@ -24,7 +21,6 @@ mod env {
     }
 }
 
-#[cfg(feature = "build-from-source")]
 fn build_from_source(
     features: features::Features,
     binaries_config: &binaries_config::BinariesConfiguration,
@@ -95,21 +91,18 @@ fn main() {
         } else {
             println!("STARTING OFFLINE BUILD");
 
-            #[cfg(feature = "build-from-source")]
-            {
-                build_from_source(
-                    features.clone(),
-                    &binaries_config,
-                    &source_dir,
-                    skia_debug,
-                    true,
-                );
-                let definitions = bind_skia::definitions::from_ninja_features(
-                    &features,
-                    &binaries_config.output_directory,
-                );
-                generate_bindings(&features, definitions, &binaries_config, &source_dir);
-            }
+            build_from_source(
+                features.clone(),
+                &binaries_config,
+                &source_dir,
+                skia_debug,
+                true,
+            );
+            let definitions = bind_skia::definitions::from_ninja_features(
+                &features,
+                &binaries_config.output_directory,
+            );
+            generate_bindings(&features, definitions, &binaries_config, &source_dir);
         }
     } else {
         //
@@ -129,22 +122,19 @@ fn main() {
         if build_skia {
             println!("STARTING A FULL BUILD");
 
-            #[cfg(feature = "build-from-source")]
-            {
-                let source_dir = std::env::current_dir().unwrap().join("skia");
-                build_from_source(
-                    features.clone(),
-                    &binaries_config,
-                    &source_dir,
-                    skia_debug,
-                    false,
-                );
-                let definitions = bind_skia::definitions::from_ninja_features(
-                    &features,
-                    &binaries_config.output_directory,
-                );
-                generate_bindings(&features, definitions, &binaries_config, &source_dir);
-            }
+            let source_dir = std::env::current_dir().unwrap().join("skia");
+            build_from_source(
+                features.clone(),
+                &binaries_config,
+                &source_dir,
+                skia_debug,
+                false,
+            );
+            let definitions = bind_skia::definitions::from_ninja_features(
+                &features,
+                &binaries_config.output_directory,
+            );
+            generate_bindings(&features, definitions, &binaries_config, &source_dir);
         }
     };
 

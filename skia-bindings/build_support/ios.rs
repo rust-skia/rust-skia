@@ -4,7 +4,6 @@ use std::path::PathBuf;
 use std::process::{Command, Stdio};
 
 // TODO: add support for 32 bit devices and simulators.
-#[cfg(feature = "build-from-source")]
 pub fn extra_skia_cflags(arch: &str, flags: &mut Vec<&str>) {
     if is_simulator(arch) {
         flags.push("-mios-simulator-version-min=10.0");

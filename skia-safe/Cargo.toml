@@ -20,7 +20,7 @@ edition = "2018"
 doctest = false
 
 [features]
-default = ["binary-cache", "build-from-source"]
+default = ["binary-cache"]
 gl = ["gpu", "skia-bindings/gl"]
 egl = ["gl", "skia-bindings/egl"]
 x11 = ["gl", "skia-bindings/x11"]
@@ -34,7 +34,6 @@ webp-encode = ["skia-bindings/webp-encode"]
 webp-decode = ["skia-bindings/webp-decode"]
 use-system-jpeg-turbo = ["skia-bindings/use-system-jpeg-turbo"]
 binary-cache = ["skia-bindings/binary-cache"]
-build-from-source = ["skia-bindings/build-from-source"]
 
 # implied only, do not use
 gpu = []

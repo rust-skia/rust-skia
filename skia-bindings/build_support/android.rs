@@ -2,7 +2,6 @@ use crate::build_support::cargo;
 use crate::build_support::features::Features;
 
 /// API level Android 8, Oreo (the first one with full Vulkan support)
-#[cfg(feature = "build-from-source")]
 pub const API_LEVEL: &str = "26";
 
 pub fn ndk() -> String {

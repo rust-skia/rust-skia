@@ -667,10 +667,12 @@ pub(crate) mod rewrite {
 pub use definitions::{Definition, Definitions};
 
 pub(crate) mod definitions {
+    use crate::build_support::features;
     use super::env;
+    use std::collections::HashSet;
     use std::fs;
     use std::io::Write;
-    use std::path::Path;
+    use std::path::{Path, PathBuf};
 
     /// A preprocessor definition.
     pub type Definition = (String, Option<String>);
@@ -699,73 +701,61 @@ pub(crate) mod definitions {
         writeln!(file)
     }
 
-    #[cfg(feature = "build-from-source")]
-    mod ninja {
-        use super::{from_defines_str, Definitions};
-        use crate::build_support::features;
-        use std::collections::HashSet;
-        use std::fs;
-        use std::path::{Path, PathBuf};
-
-        // Extracts definitions from ninja files that need to be parsed for build consistency.
-        pub fn from_ninja_features(
-            features: &features::Features,
-            output_directory: &Path,
-        ) -> Definitions {
-            let ninja_files = ninja_files_for_features(features);
-            from_ninja_files(ninja_files, output_directory)
-        }
-
-        fn from_ninja_files(ninja_files: Vec<PathBuf>, output_directory: &Path) -> Definitions {
-            let mut definitions = Vec::new();
-
-            for ninja_file in &ninja_files {
-                let ninja_file = output_directory.join(ninja_file);
-                let contents = fs::read_to_string(ninja_file).unwrap();
-                definitions = combine(definitions, from_ninja_file_content(contents))
-            }
-
-            definitions
-        }
-
-        /// Parse a defines = line from a ninja build file.
-        fn from_ninja_file_content(ninja_file: impl AsRef<str>) -> Definitions {
-            let defines = {
-                let prefix = "defines = ";
-                let defines = ninja_file
-                    .as_ref()
-                    .lines()
-                    .find(|s| s.starts_with(prefix))
-                    .expect("missing a line with the prefix 'defines =' in a .ninja file");
-                &defines[prefix.len()..]
-            };
-            from_defines_str(defines)
-        }
-
-        fn ninja_files_for_features(features: &features::Features) -> Vec<PathBuf> {
-            let mut files = vec!["obj/skia.ninja".into()];
-            if features.text_layout {
-                files.extend(vec![
-                    "obj/modules/skshaper/skshaper.ninja".into(),
-                    "obj/modules/skparagraph/skparagraph.ninja".into(),
-                ]);
-            }
-            files
-        }
-
-        fn combine(a: Definitions, b: Definitions) -> Definitions {
-            remove_duplicates(a.into_iter().chain(b.into_iter()).collect())
-        }
-
-        fn remove_duplicates(mut definitions: Definitions) -> Definitions {
-            let mut uniques = HashSet::new();
-            definitions.retain(|e| uniques.insert(e.0.clone()));
-            definitions
-        }
+    // Extracts definitions from ninja files that need to be parsed for build consistency.
+    pub fn from_ninja_features(
+        features: &features::Features,
+        output_directory: &Path,
+    ) -> Definitions {
+        let ninja_files = ninja_files_for_features(features);
+        from_ninja_files(ninja_files, output_directory)
     }
 
-    #[cfg(feature = "build-from-source")]
-    pub use ninja::from_ninja_features;
+    fn from_ninja_files(ninja_files: Vec<PathBuf>, output_directory: &Path) -> Definitions {
+        let mut definitions = Vec::new();
+
+        for ninja_file in &ninja_files {
+            let ninja_file = output_directory.join(ninja_file);
+            let contents = fs::read_to_string(ninja_file).unwrap();
+            definitions = combine(definitions, from_ninja_file_content(contents))
+        }
+
+        definitions
+    }
+
+    /// Parse a defines = line from a ninja build file.
+    fn from_ninja_file_content(ninja_file: impl AsRef<str>) -> Definitions {
+        let defines = {
+            let prefix = "defines = ";
+            let defines = ninja_file
+                .as_ref()
+                .lines()
+                .find(|s| s.starts_with(prefix))
+                .expect("missing a line with the prefix 'defines =' in a .ninja file");
+            &defines[prefix.len()..]
+        };
+        from_defines_str(defines)
+    }
+
+    fn ninja_files_for_features(features: &features::Features) -> Vec<PathBuf> {
+        let mut files = vec!["obj/skia.ninja".into()];
+        if features.text_layout {
+            files.extend(vec![
+                "obj/modules/skshaper/skshaper.ninja".into(),
+                "obj/modules/skparagraph/skparagraph.ninja".into(),
+            ]);
+        }
+        files
+    }
+
+    fn combine(a: Definitions, b: Definitions) -> Definitions {
+        remove_duplicates(a.into_iter().chain(b.into_iter()).collect())
+    }
+
+    fn remove_duplicates(mut definitions: Definitions) -> Definitions {
+        let mut uniques = HashSet::new();
+        definitions.retain(|e| uniques.insert(e.0.clone()));
+        definitions
+    }
 
     fn from_defines_str(defines: &str) -> Definitions {
         const PREFIX: &str = "-D";

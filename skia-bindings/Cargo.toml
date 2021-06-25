@@ -36,7 +36,7 @@ skia = "m91-0.39.3"
 depot_tools = "a110bf6"
 
 [features]
-default = ["binary-cache", "build-from-source"]
+default = ["binary-cache"]
 gl = []
 egl = []
 wayland = []
@@ -54,7 +54,6 @@ use-system-jpeg-turbo = ["mozjpeg-sys"]
 svg = []
 shaper = ["textlayout"]
 binary-cache = ["ureq", "flate2", "tar"]
-build-from-source = []
 
 [dependencies]
 
