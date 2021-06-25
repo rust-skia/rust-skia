@@ -1,22 +1,22 @@
 diff --git a/skia-bindings/Cargo.toml b/skia-bindings/Cargo.toml
-index 58c2b82..df769fd 100644
+index eca516a4..6a697344 100644
 --- a/skia-bindings/Cargo.toml
 +++ b/skia-bindings/Cargo.toml
-@@ -36,7 +36,7 @@ skia = "m88-0.36.2"
+@@ -36,7 +36,7 @@ skia = "m91-0.39.3"
  depot_tools = "a110bf6"
  
  [features]
--default = []
-+default = ["gl", "vulkan", "d3d", "textlayout", "webp"]
+-default = ["binary-cache"]
++default = ["binary-cache", "gl", "vulkan", "d3d", "textlayout", "webp"]
  gl = []
  egl = []
  wayland = []
 diff --git a/skia-org/Cargo.toml b/skia-org/Cargo.toml
-index aa116a4..ff69332 100644
+index 3c085d6b..321d86b0 100644
 --- a/skia-org/Cargo.toml
 +++ b/skia-org/Cargo.toml
-@@ -16,7 +16,7 @@ authors = ["Armin Sander <armin@replicator.org>"]
- edition = "2018"
+@@ -18,7 +18,7 @@ edition = "2018"
+ default-run = "skia-org"
  
  [features]
 -default = []
@@ -24,23 +24,16 @@ index aa116a4..ff69332 100644
  gl = ["offscreen_gl_context", "sparkle", "skia-safe/gl"]
  egl = ["gl", "skia-safe/egl"]
  x11 = ["gl", "skia-safe/x11"]
-@@ -48,4 +48,4 @@ cocoa = { version = "0.24", optional = true }
- objc = { version = "0.2.4", optional = true }
- # d3d
- winapi = { version = "0.3.9", optional = true, features = ["d3d12", "dxgi"] }
--wio = { version = "0.2.2", optional = true }
-\ No newline at end of file
-+wio = { version = "0.2.2", optional = true }
 diff --git a/skia-safe/Cargo.toml b/skia-safe/Cargo.toml
-index be0a97d..38b8e5c 100644
+index 6ddd6479..0f84729f 100644
 --- a/skia-safe/Cargo.toml
 +++ b/skia-safe/Cargo.toml
 @@ -20,7 +20,7 @@ edition = "2018"
  doctest = false
  
  [features]
--default = []
-+default = ["gl", "vulkan", "d3d", "textlayout", "webp"]
+-default = ["binary-cache"]
++default = ["binary-cache", "gl", "vulkan", "d3d", "textlayout", "webp"]
  gl = ["gpu", "skia-bindings/gl"]
  egl = ["gl", "skia-bindings/egl"]
  x11 = ["gl", "skia-bindings/x11"]
