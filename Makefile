@@ -114,5 +114,6 @@ prepare-local-build:
 	find target -name "skia.lib" -type f -exec cp {} tmp/ \;
 
 build-local-build:
+	cargo clean
 	SKIA_SOURCE_DIR=$(shell pwd)/skia-bindings/skia SKIA_BUILD_DEFINES=`cat tmp/skia-defines.txt` SKIA_LIBRARY_SEARCH_PATH=tmp cargo build --release --no-default-features -vv --features ${local-build-features}
 
