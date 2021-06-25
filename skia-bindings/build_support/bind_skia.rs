@@ -690,7 +690,7 @@ pub(crate) mod definitions {
         output_directory: impl AsRef<Path>,
     ) -> std::io::Result<()> {
         fs::create_dir_all(&output_directory)?;
-        let mut file = fs::File::create(output_directory.as_ref().join("ninja_defines.txt"))?;
+        let mut file = fs::File::create(output_directory.as_ref().join("skia-defines.txt"))?;
         for (name, value) in definitions.iter() {
             if let Some(value) = value {
                 writeln!(file, "-D{}={}", name, value)?;
