@@ -1,5 +1,5 @@
 mod build_support;
-use build_support::{binaries_config, bind_skia, cargo, features, build_skia};
+use build_support::{binaries_config, bind_skia, cargo, features, skia};
 
 /// Environment variables used by this build script.
 mod env {
@@ -28,18 +28,18 @@ fn build_from_source(
     skia_debug: bool,
     offline: bool,
 ) {
-    let build_config = build_skia::BuildConfiguration::from_features(features, skia_debug);
-    let final_configuration = build_skia::FinalBuildConfiguration::from_build_configuration(
+    let build_config = skia::BuildConfiguration::from_features(features, skia_debug);
+    let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
         &build_config,
-        build_skia::env::use_system_libraries(),
+        skia::env::use_system_libraries(),
         skia_source_dir,
     );
 
-    build_skia::build(
+    skia::build(
         &final_configuration,
         binaries_config,
-        build_skia::env::ninja_command(),
-        build_skia::env::gn_command(),
+        skia::env::ninja_command(),
+        skia::env::gn_command(),
         offline,
     );
 }
