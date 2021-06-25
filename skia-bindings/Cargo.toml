@@ -33,7 +33,7 @@ doctest = false
 # Note: use short hashes here because of filesystem path size restrictions.
 [package.metadata]
 skia = "m91-0.39.3"
-depot_tools = "a110bf6"
+depot_tools = "fade894"
 
 [features]
 default = ["binary-cache"]
