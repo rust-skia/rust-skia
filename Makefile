@@ -92,9 +92,9 @@ workflows:
 	cargo run -p mk-workflows
 
 # Tests local builds based on the env vars `SKIA_BUILD_DEFINES` and `SKIA_LIBRARY_SEARCH_PATH`.
-# 
-# This builds first a set of libraries, copies them away and then tries to build with the libraries
-# defined externally.
+#
+# This builds a set of libraries, copies them away and then tries to build with the libraries
+# referenced through `SKIA_LIBRARY_SEARCH_PATH`.
 #
 # https://github.com/rust-skia/rust-skia/pull/527
 
