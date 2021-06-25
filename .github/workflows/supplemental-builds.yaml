@@ -38,3 +38,34 @@ jobs:
       shell: bash
       run: |
         make test-local-build
+
+  windows-link-dead-code:
+    runs-on: windows-2019
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Install Rust
+      uses: hecrj/setup-rust-action@master
+      with:
+        rust-version: stable
+
+    - name: Setup Python 2
+      uses: actions/setup-python@v2
+      with:
+        python-version: '2.7.18'
+        architecture: 'x64'
+
+    - name: Python Version
+      run: python --version
+
+    - name: Install LLVM
+      run: choco install llvm
+
+    - name: 'Build with RUSTFLAGS=-Clink-dead-code (#318)'
+      run: |
+        cargo build --features gl,vulkan,d3d,textlayout,webp
+      env:
+        RUSTFLAGS: '-Clink-dead-code'
