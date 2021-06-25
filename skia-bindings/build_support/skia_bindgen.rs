@@ -667,8 +667,8 @@ pub(crate) mod rewrite {
 pub use definitions::{Definition, Definitions};
 
 pub(crate) mod definitions {
-    use crate::build_support::features;
     use super::env;
+    use crate::build_support::features;
     use std::collections::HashSet;
     use std::fs;
     use std::io::Write;

@@ -2,12 +2,12 @@
 
 pub mod android;
 pub mod binaries_config;
-pub mod skia_bindgen;
-pub mod skia;
 pub mod cargo;
 pub mod clang;
 pub mod features;
 pub mod ios;
+pub mod skia;
+pub mod skia_bindgen;
 pub mod xcode;
 
 #[cfg(feature = "binary-cache")]

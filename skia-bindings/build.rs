@@ -1,5 +1,5 @@
 mod build_support;
-use build_support::{binaries_config, skia_bindgen, cargo, features, skia};
+use build_support::{binaries_config, cargo, features, skia, skia_bindgen};
 
 /// Environment variables used by this build script.
 mod env {
