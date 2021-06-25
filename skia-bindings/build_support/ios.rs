@@ -1,10 +1,9 @@
 use crate::build_support::clang;
-use crate::build_support::skia::Features;
+use crate::build_support::features::Features;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
 
 // TODO: add support for 32 bit devices and simulators.
-
 pub fn extra_skia_cflags(arch: &str, flags: &mut Vec<&str>) {
     if is_simulator(arch) {
         flags.push("-mios-simulator-version-min=10.0");

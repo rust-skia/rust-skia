@@ -1,7 +1,7 @@
 //! Additional VS detection support for Skia.
 //! TODO: sophisticate this: https://github.com/alexcrichton/cc-rs/blob/master/src/windows_registry.rs
 
-use super::cargo;
+use crate::build_support::cargo;
 use std::path::PathBuf;
 
 pub fn resolve_win_vc() -> Option<PathBuf> {
