@@ -2,7 +2,7 @@
 
 pub mod android;
 pub mod binaries_config;
-pub mod bind_skia;
+pub mod skia_bindgen;
 pub mod skia;
 pub mod cargo;
 pub mod clang;

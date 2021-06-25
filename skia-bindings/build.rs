@@ -1,5 +1,5 @@
 mod build_support;
-use build_support::{binaries_config, bind_skia, cargo, features, skia};
+use build_support::{binaries_config, skia_bindgen, cargo, features, skia};
 
 /// Environment variables used by this build script.
 mod env {
@@ -46,20 +46,20 @@ fn build_from_source(
 
 fn generate_bindings(
     features: &features::Features,
-    definitions: Vec<bind_skia::Definition>,
+    definitions: Vec<skia_bindgen::Definition>,
     binaries_config: &binaries_config::BinariesConfiguration,
     skia_source_dir: &std::path::Path,
 ) {
     // Emit the ninja definitions, to help debug build consistency.
-    bind_skia::definitions::save_definitions(&definitions, &binaries_config.output_directory)
+    skia_bindgen::definitions::save_definitions(&definitions, &binaries_config.output_directory)
         .expect("failed to write ninja defines");
 
-    let bindings_config = bind_skia::FinalBuildConfiguration::from_build_configuration(
+    let bindings_config = skia_bindgen::FinalBuildConfiguration::from_build_configuration(
         features,
         definitions,
         skia_source_dir,
     );
-    bind_skia::generate_bindings(&bindings_config, &binaries_config.output_directory);
+    skia_bindgen::generate_bindings(&bindings_config, &binaries_config.output_directory);
 }
 
 fn main() {
@@ -86,7 +86,7 @@ fn main() {
 
             cargo::add_link_search(&search_path.to_str().unwrap());
 
-            let definitions = bind_skia::definitions::from_env();
+            let definitions = skia_bindgen::definitions::from_env();
             generate_bindings(&features, definitions, &binaries_config, &source_dir);
         } else {
             println!("STARTING OFFLINE BUILD");
@@ -98,7 +98,7 @@ fn main() {
                 skia_debug,
                 true,
             );
-            let definitions = bind_skia::definitions::from_ninja_features(
+            let definitions = skia_bindgen::definitions::from_ninja_features(
                 &features,
                 &binaries_config.output_directory,
             );
@@ -130,7 +130,7 @@ fn main() {
                 skia_debug,
                 false,
             );
-            let definitions = bind_skia::definitions::from_ninja_features(
+            let definitions = skia_bindgen::definitions::from_ninja_features(
                 &features,
                 &binaries_config.output_directory,
             );
