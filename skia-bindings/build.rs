@@ -1,5 +1,7 @@
-mod build_support;
 use build_support::{binaries_config, cargo, features, skia, skia_bindgen};
+use std::fs;
+
+mod build_support;
 
 /// Environment variables used by this build script.
 mod env {
@@ -52,7 +54,7 @@ fn generate_bindings(
 ) {
     // Emit the ninja definitions, to help debug build consistency.
     skia_bindgen::definitions::save_definitions(&definitions, &binaries_config.output_directory)
-        .expect("failed to write ninja defines");
+        .expect("failed to write Skia defines");
 
     let bindings_config = skia_bindgen::FinalBuildConfiguration::from_build_configuration(
         features,
@@ -85,6 +87,32 @@ fn main() {
             println!("STARTING BIND AGAINST SYSTEM SKIA");
 
             cargo::add_link_search(&search_path.to_str().unwrap());
+
+            fs::create_dir_all(&binaries_config.output_directory).unwrap_or_else(|e| {
+                panic!(
+                    "Failed to create output directory: '{}': {}",
+                    binaries_config.output_directory.display(),
+                    e
+                );
+            });
+
+            // This step is needed for `icudtl.dat`, which is expected at `OUT_DIR/skia` on Windows,
+            // see `icu.rs`.
+            for additional_file in &binaries_config.additional_files {
+                let source = search_path.join(additional_file);
+                fs::copy(
+                    &source,
+                    &binaries_config.output_directory.join(additional_file),
+                )
+                .unwrap_or_else(|e| {
+                    panic!(
+                        "Failed to copy '{}' to '{}': {}",
+                        source.display(),
+                        binaries_config.output_directory.display(),
+                        e
+                    )
+                });
+            }
 
             let definitions = skia_bindgen::definitions::from_env();
             generate_bindings(&features, definitions, &binaries_config, &source_dir);

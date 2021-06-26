@@ -98,9 +98,9 @@ workflows:
 #
 # https://github.com/rust-skia/rust-skia/pull/527
 
-local-build-features=gl,vulkan,webp
+local-build-features=gl,vulkan,webp,textlayout
 
-.PHONY: test-local-build build-local-build prepare-local-build
+.PHONY: test-local-build prepare-local-build build-local-build
 test-local-build: prepare-local-build build-local-build
 
 prepare-local-build:
@@ -108,12 +108,13 @@ prepare-local-build:
 	cargo build --release --features ${local-build-features}
 	rm -rf tmp/
 	mkdir -p tmp/
-	find target -name "libskia*.a" -type f -exec cp {} tmp/ \;
+	find target -name "libsk*.a" -type f -exec cp {} tmp/ \;
 	find target -name "skia-defines.txt" -type f -exec cp {} tmp/ \;
 	# Windows
-	find target -name "skia.lib" -type f -exec cp {} tmp/ \;
+	find target -name "sk*.lib" -type f -exec cp {} tmp/ \;
+	find target -name "icudtl.dat" -type f -exec cp {} tmp/ \;
 
 build-local-build:
 	cargo clean
-	SKIA_SOURCE_DIR=$(shell pwd)/skia-bindings/skia SKIA_BUILD_DEFINES=`cat tmp/skia-defines.txt` SKIA_LIBRARY_SEARCH_PATH=tmp cargo build --release --no-default-features -vv --features ${local-build-features}
+	SKIA_SOURCE_DIR=$(shell pwd)/skia-bindings/skia SKIA_BUILD_DEFINES=`cat tmp/skia-defines.txt` SKIA_LIBRARY_SEARCH_PATH=$(shell pwd)/tmp cargo build --release --no-default-features -vv --features ${local-build-features}
 
