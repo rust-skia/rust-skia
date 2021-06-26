@@ -1,7 +1,7 @@
 use crate::artifact;
 use crate::drivers::DrawingDriver;
 use cocoa::foundation::NSAutoreleasePool;
-use foreign_types::ForeignType;
+use foreign_types_shared::ForeignType;
 use metal_rs::*;
 use skia_safe::gpu::{self, mtl};
 use skia_safe::{Budgeted, Canvas, ImageInfo, Surface};
