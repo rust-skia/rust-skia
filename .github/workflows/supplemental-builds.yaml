@@ -39,6 +39,21 @@ jobs:
       run: |
         make test-local-build
 
+  # https://github.com/rust-skia/rust-skia/issues/535
+  # linux-arm64-build:
+  #   runs-on: ubuntu-20.04
+  #   container: ghcr.io/pragmatrix/rust-skia-linux-arm64:latest
+
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #     with:
+  #       submodules: true
+
+  #   - name: 'Build arm64 (#535)'
+  #     shell: bash
+  #     run: |
+  #       cargo build -vv --features "gl"
+
   windows-link-dead-code:
     runs-on: windows-2019
 
