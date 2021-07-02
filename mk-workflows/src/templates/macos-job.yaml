@@ -1,6 +1,7 @@
 runs-on: macOS-10.15
 env: 
   SKIA_DEBUG: $[[skiaDebug]]
+  MACOSX_DEPLOYMENT_TARGET: '10.13'
 
 steps:
 - uses: actions/checkout@v2
