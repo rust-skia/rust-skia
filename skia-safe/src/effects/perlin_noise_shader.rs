@@ -1,9 +1,7 @@
-use crate::prelude::*;
-use crate::{scalar, ISize, Shader};
+use crate::{prelude::*, scalar, ISize, Shader};
 use skia_bindings as sb;
-use skia_bindings::SkShader;
 
-impl RCHandle<SkShader> {
+impl Shader {
     pub fn fractal_perlin_noise(
         base_frequency: (scalar, scalar),
         num_octaves: usize,

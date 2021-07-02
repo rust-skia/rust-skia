@@ -1,13 +1,6 @@
-use crate::prelude::*;
-use crate::{scalar, BlendMode, Color, Color4f, ColorSpace, NativeFlattenable};
-use skia_bindings as sb;
-use skia_bindings::{SkColorFilter, SkFlattenable, SkRefCntBase};
-
-bitflags! {
-    pub struct Flags: u32 {
-        const ALPHA_UNCHANGED = sb::SkColorFilter_Flags_kAlphaUnchanged_Flag as u32;
-    }
-}
+use crate::{prelude::*, scalar, BlendMode, Color, Color4f, ColorSpace, NativeFlattenable};
+use skia_bindings::{self as sb, SkColorFilter, SkFlattenable, SkRefCntBase};
+use std::fmt;
 
 pub type ColorFilter = RCHandle<SkColorFilter>;
 unsafe impl Send for ColorFilter {}
@@ -23,7 +16,7 @@ impl NativeBase<SkFlattenable> for SkColorFilter {}
 
 impl NativeFlattenable for SkColorFilter {
     fn native_flattenable(&self) -> &SkFlattenable {
-        &self.base()
+        self.base()
     }
 
     fn native_deserialize(data: &[u8]) -> *mut Self {
@@ -31,7 +24,17 @@ impl NativeFlattenable for SkColorFilter {
     }
 }
 
-impl RCHandle<SkColorFilter> {
+impl fmt::Debug for ColorFilter {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ColorFilter")
+            .field("as_a_color_mode", &self.to_a_color_mode())
+            .field("as_a_color_matrix", &self.to_a_color_matrix())
+            .field("is_alpha_unchanged", &self.is_alpha_unchanged())
+            .finish()
+    }
+}
+
+impl ColorFilter {
     pub fn to_a_color_mode(&self) -> Option<(Color, BlendMode)> {
         let mut color: Color = 0.into();
         let mut mode: BlendMode = Default::default();
@@ -42,13 +45,6 @@ impl RCHandle<SkColorFilter> {
     pub fn to_a_color_matrix(&self) -> Option<[scalar; 20]> {
         let mut matrix: [scalar; 20] = Default::default();
         unsafe { self.native().asAColorMatrix(&mut matrix[0]) }.if_true_some(matrix)
-    }
-
-    // TODO: appendStages()
-    // TODO: program()
-
-    pub fn flags(&self) -> self::Flags {
-        Flags::from_bits_truncate(unsafe { self.native().getFlags() })
     }
 
     pub fn is_alpha_unchanged(&self) -> bool {
@@ -81,9 +77,6 @@ impl RCHandle<SkColorFilter> {
             sb::C_SkColorFilter_makeComposed(self.native(), inner.into().into_ptr())
         })
     }
-
-    // TODO: asFragmentProcessor()
-    // TODO: affectsTransparentBlack()
 }
 
 pub mod color_filters {

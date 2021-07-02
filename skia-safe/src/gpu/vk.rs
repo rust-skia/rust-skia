@@ -46,6 +46,7 @@ pub const QUEUE_FAMILY_IGNORED: u32 = !0;
 // VK_NULL_HANDLE and conversions.
 //
 
+#[derive(Debug)]
 pub struct NullHandle;
 pub const NULL_HANDLE: NullHandle = NullHandle;
 

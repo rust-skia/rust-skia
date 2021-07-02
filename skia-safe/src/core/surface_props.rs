@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use skia_bindings as sb;
-use skia_bindings::{SkPixelGeometry, SkSurfaceProps};
+use skia_bindings::{self as sb, SkPixelGeometry, SkSurfaceProps};
+use std::fmt;
 
 // TODO: use the enum rewriter and strip underscores?
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -85,6 +85,15 @@ impl Default for SurfaceProps {
     }
 }
 
+impl fmt::Debug for SurfaceProps {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("SurfaceProps")
+            .field("flags", &self.flags())
+            .field("pixel_geometry", &self.pixel_geometry())
+            .finish()
+    }
+}
+
 impl SurfaceProps {
     // TODO: do we need to wrap the constructor(s) with InitType?
 
@@ -119,5 +128,5 @@ fn create() {
         props.flags()
     );
     assert_eq!(PixelGeometry::RGBH, props.pixel_geometry());
-    assert_eq!(true, props.is_use_device_independent_fonts());
+    assert!(props.is_use_device_independent_fonts());
 }

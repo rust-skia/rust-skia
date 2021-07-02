@@ -1,5 +1,5 @@
 use crate::build_support::cargo;
-use crate::build_support::skia::Features;
+use crate::build_support::features::Features;
 
 /// API level Android 8, Oreo (the first one with full Vulkan support)
 pub const API_LEVEL: &str = "26";

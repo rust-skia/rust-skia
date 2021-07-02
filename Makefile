@@ -16,13 +16,13 @@ crate-tests: crate-bindings-binaries crate-bindings-build
 .PHONY: crate-bindings-binaries
 crate-bindings-binaries: export FORCE_SKIA_BINARIES_DOWNLOAD=1
 crate-bindings-binaries:
-	cd skia-bindings && cargo publish -vv --dry-run --features "gl,vulkan,textlayout"
+	cd skia-bindings && cargo publish -vv --dry-run --features "gl,vulkan,textlayout,binary-cache"
 	cd skia-bindings && cargo publish -vv --dry-run 
 
 .PHONY: crate-bindings-build
 crate-bindings-build: export FORCE_SKIA_BUILD=1
 crate-bindings-build: 
-	cd skia-bindings && cargo publish -vv --dry-run --features "gl,vulkan,textlayout,d3d"
+	cd skia-bindings && cargo publish -vv --dry-run --no-default-features --features "gl,vulkan,textlayout,d3d"
 	cd skia-bindings && cargo publish -vv --dry-run 
 
 .PHONY: publish
@@ -79,11 +79,41 @@ update-doc:
 
 build-flags-win=--release --features "gl,vulkan,d3d,textlayout,webp"
 
-.PHONY: azure-build-win
-azure-build-win:
+.PHONY: github-build-win
+github-build-win:
 	cargo clean
-	cd skia-safe && cargo build ${build-flags-win} --all-targets
-	cd skia-org && cargo clippy ${build-flags-win} --all-targets -- -D warnings 
-	cd skia-org && cargo test --all ${build-flags-win} --all-targets -- --nocapture
-	cd skia-org && cargo run ${build-flags-win}
+	cargo build -p skia-safe ${build-flags-win} --all-targets
+	cd cargo clippy ${build-flags-win} --all-targets -- -D warnings 
+	cd cargo test --all ${build-flags-win} --all-targets -- --nocapture
+	cd cargo run ${build-flags-win}
+
+.PHONY: workflows
+workflows:
+	cargo run -p mk-workflows
+
+# Tests local builds based on the env vars `SKIA_BUILD_DEFINES` and `SKIA_LIBRARY_SEARCH_PATH`.
+#
+# This builds a set of libraries, copies them away and then tries to build with the libraries
+# referenced through `SKIA_LIBRARY_SEARCH_PATH`.
+#
+# https://github.com/rust-skia/rust-skia/pull/527
+
+local-build-features=gl,vulkan,webp
+
+.PHONY: test-local-build build-local-build prepare-local-build
+test-local-build: prepare-local-build build-local-build
+
+prepare-local-build:
+	cargo clean
+	cargo build --release --features ${local-build-features}
+	rm -rf tmp/
+	mkdir -p tmp/
+	find target -name "libskia*.a" -type f -exec cp {} tmp/ \;
+	find target -name "skia-defines.txt" -type f -exec cp {} tmp/ \;
+	# Windows
+	find target -name "skia.lib" -type f -exec cp {} tmp/ \;
+
+build-local-build:
+	cargo clean
+	SKIA_SOURCE_DIR=$(shell pwd)/skia-bindings/skia SKIA_BUILD_DEFINES=`cat tmp/skia-defines.txt` SKIA_LIBRARY_SEARCH_PATH=tmp cargo build --release --no-default-features -vv --features ${local-build-features}
 

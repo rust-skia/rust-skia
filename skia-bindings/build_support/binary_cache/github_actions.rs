@@ -2,7 +2,7 @@
 use crate::build_support::cargo;
 use std::path::PathBuf;
 
-/// Are we running on azure-pipelines?
+/// Are we running on github?
 pub fn is_active() -> bool {
     artifact_staging_directory().is_some()
 }

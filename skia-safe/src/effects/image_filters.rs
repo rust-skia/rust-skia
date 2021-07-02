@@ -1,10 +1,9 @@
-use crate::{prelude::*, CubicResampler, SamplingOptions, Shader};
 use crate::{
-    scalar, BlendMode, Color, ColorChannel, ColorFilter, IPoint, IRect, ISize, Image, ImageFilter,
-    Matrix, Paint, Picture, Point3, Rect, Region, TileMode, Vector,
+    prelude::*, scalar, BlendMode, Color, ColorChannel, ColorFilter, CubicResampler, IPoint, IRect,
+    ISize, Image, ImageFilter, Matrix, Paint, Picture, Point3, Rect, Region, SamplingOptions,
+    Shader, TileMode, Vector,
 };
-use skia_bindings as sb;
-use skia_bindings::{SkImageFilter, SkImageFilters_CropRect};
+use skia_bindings::{self as sb, SkImageFilter, SkImageFilters_CropRect};
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Debug)]

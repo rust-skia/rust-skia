@@ -3,9 +3,12 @@ use crate::prelude::*;
 use crate::{Data, Rect};
 use skia_bindings as sb;
 use skia_bindings::SkCanvas;
-use std::ops::{Deref, DerefMut};
 use std::pin::Pin;
 use std::ptr;
+use std::{
+    fmt,
+    ops::{Deref, DerefMut},
+};
 
 pub struct Canvas {
     canvas: *mut SkCanvas,
@@ -24,13 +27,13 @@ impl Deref for Canvas {
     type Target = crate::Canvas;
 
     fn deref(&self) -> &Self::Target {
-        crate::Canvas::borrow_from_native(unsafe { &mut *self.canvas })
+        crate::Canvas::borrow_from_native(unsafe { &*self.canvas })
     }
 }
 
 impl DerefMut for Canvas {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        crate::Canvas::borrow_from_native(unsafe { &mut *self.canvas })
+        crate::Canvas::borrow_from_native_mut(unsafe { &mut *self.canvas })
     }
 }
 
@@ -39,6 +42,18 @@ bitflags! {
     pub struct Flags : u32 {
         const CONVERT_TEXT_TO_PATHS = sb::SkSVGCanvas_kConvertTextToPaths_Flag as _;
         const NO_PRETTY_XML = sb::SkSVGCanvas_kNoPrettyXML_Flag as _;
+    }
+}
+
+impl fmt::Debug for Canvas {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Canvas")
+            .field(
+                "canvas",
+                crate::Canvas::borrow_from_native(unsafe { &*self.canvas }),
+            )
+            .field("stream", &self.stream)
+            .finish()
     }
 }
 

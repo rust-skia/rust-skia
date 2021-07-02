@@ -1,9 +1,8 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
-use crate::prelude::*;
-use crate::{Canvas, Matrix, NativeFlattenable, Point, Rect};
-use skia_bindings as sb;
-use skia_bindings::{SkDrawable, SkFlattenable, SkRefCntBase};
+use crate::{prelude::*, Canvas, Matrix, NativeFlattenable, Point, Rect};
+use skia_bindings::{self as sb, SkDrawable, SkFlattenable, SkRefCntBase};
+use std::fmt;
 
 pub type Drawable = RCHandle<SkDrawable>;
 
@@ -21,7 +20,17 @@ impl NativeFlattenable for SkDrawable {
     }
 }
 
-impl RCHandle<SkDrawable> {
+impl fmt::Debug for Drawable {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Drawable")
+            // TODO: clarify why &self has to be mut here.
+            // .field("generation_id", &self.generation_id())
+            // .field("bounds", &self.bounds())
+            .finish()
+    }
+}
+
+impl Drawable {
     pub fn draw(&mut self, canvas: &mut Canvas, matrix: Option<&Matrix>) {
         unsafe {
             self.native_mut()
@@ -81,10 +90,9 @@ pub use gpu_draw_handler::*;
 
 #[cfg(feature = "gpu")]
 pub mod gpu_draw_handler {
-    use crate::gpu;
-    use crate::prelude::*;
-    use skia_bindings as sb;
-    use skia_bindings::SkDrawable_GpuDrawHandler;
+    use crate::{gpu, prelude::*};
+    use skia_bindings::{self as sb, SkDrawable_GpuDrawHandler};
+    use std::fmt;
 
     pub type GPUDrawHandler = RefHandle<SkDrawable_GpuDrawHandler>;
 
@@ -94,7 +102,13 @@ pub mod gpu_draw_handler {
         }
     }
 
-    impl RefHandle<SkDrawable_GpuDrawHandler> {
+    impl fmt::Debug for GPUDrawHandler {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            f.debug_struct("GPUDrawHandler").finish()
+        }
+    }
+
+    impl GPUDrawHandler {
         pub fn draw(&mut self, info: &gpu::BackendDrawableInfo) {
             unsafe {
                 sb::C_SkDrawable_GpuDrawHandler_draw(self.native_mut(), info.native());

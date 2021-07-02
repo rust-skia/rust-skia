@@ -12,7 +12,7 @@ keywords = ["skia", "rust-bindings", "vulkan", "opengl", "pdf"]
 categories = ["api-bindings", "graphics", "multimedia::images", "rendering::graphics-api", "visualization"] 
 license = "MIT"
 
-version = "0.39.1"
+version = "0.40.2"
 authors = ["Armin Sander <armin@replicator.org>"]
 edition = "2018"
 
@@ -20,7 +20,7 @@ edition = "2018"
 doctest = false
 
 [features]
-default = []
+default = ["binary-cache"]
 gl = ["gpu", "skia-bindings/gl"]
 egl = ["gl", "skia-bindings/egl"]
 x11 = ["gl", "skia-bindings/x11"]
@@ -33,6 +33,7 @@ webp = ["webp-encode", "webp-decode"]
 webp-encode = ["skia-bindings/webp-encode"]
 webp-decode = ["skia-bindings/webp-decode"]
 use-system-jpeg-turbo = ["skia-bindings/use-system-jpeg-turbo"]
+binary-cache = ["skia-bindings/binary-cache"]
 
 # implied only, do not use
 gpu = []
@@ -43,7 +44,7 @@ shaper = ["textlayout", "skia-bindings/shaper"]
 [dependencies]
 bitflags = "1.2"
 lazy_static = "1.4"
-skia-bindings = { version = "=0.39.1", path = "../skia-bindings" }
+skia-bindings = { version = "=0.40.2", path = "../skia-bindings", default-features = false }
 # for d3d types
 winapi = { version = "0.3.9", features = ["d3d12", "dxgi"], optional = true }
 # for ComPtr
@@ -55,6 +56,6 @@ static_assertions = "1.1"
 
 # gl-window
 [target.'cfg(not(target_os = "android"))'.dev-dependencies]
-glutin = "0.26"
+glutin = "0.27"
 gl-rs = { package = "gl", version = "0.14.0" }
 

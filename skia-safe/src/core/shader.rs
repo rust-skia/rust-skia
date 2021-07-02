@@ -1,9 +1,9 @@
-use crate::prelude::*;
 use crate::{
-    gradient_shader, scalar, Color, ColorFilter, Image, Matrix, NativeFlattenable, Point, TileMode,
+    gradient_shader, prelude::*, scalar, Color, ColorFilter, Image, Matrix, NativeFlattenable,
+    Point, TileMode,
 };
-use skia_bindings as sb;
-use skia_bindings::{SkFlattenable, SkRefCntBase, SkShader};
+use skia_bindings::{self as sb, SkFlattenable, SkRefCntBase, SkShader};
+use std::fmt;
 
 pub use skia_bindings::SkShader_GradientType as GradientTypeInternal;
 #[test]
@@ -50,7 +50,7 @@ impl NativeRefCountedBase for SkShader {
 
 impl NativeFlattenable for SkShader {
     fn native_flattenable(&self) -> &SkFlattenable {
-        &self.base()
+        self.base()
     }
 
     fn native_deserialize(data: &[u8]) -> *mut Self {
@@ -58,13 +58,22 @@ impl NativeFlattenable for SkShader {
     }
 }
 
-impl Default for RCHandle<SkShader> {
+impl Default for Shader {
     fn default() -> Self {
         shaders::empty()
     }
 }
 
-impl RCHandle<SkShader> {
+impl fmt::Debug for Shader {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Shader")
+            .field("is_opaque", &self.is_opaque())
+            .field("image", &self.image())
+            .finish()
+    }
+}
+
+impl Shader {
     pub fn is_opaque(&self) -> bool {
         unsafe { sb::C_SkShader_isOpaque(self.native()) }
     }

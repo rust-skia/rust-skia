@@ -1,9 +1,8 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
-use crate::prelude::*;
-use crate::{ColorSpace, SurfaceProps};
-use skia_bindings as sb;
-use skia_bindings::SkSurfaceCharacterization;
+use crate::{prelude::*, ColorSpace, SurfaceProps};
+use skia_bindings::{self as sb, SkSurfaceCharacterization};
+use std::fmt;
 
 pub type SurfaceCharacterization = Handle<SkSurfaceCharacterization>;
 unsafe impl Send for SurfaceCharacterization {}
@@ -27,7 +26,7 @@ impl NativePartialEq for SkSurfaceCharacterization {
     }
 }
 
-impl Default for Handle<SkSurfaceCharacterization> {
+impl Default for SurfaceCharacterization {
     fn default() -> Self {
         SurfaceCharacterization::construct(|sc| unsafe {
             sb::C_SkSurfaceCharacterization_Construct(sc)
@@ -35,9 +34,36 @@ impl Default for Handle<SkSurfaceCharacterization> {
     }
 }
 
+impl fmt::Debug for SurfaceCharacterization {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut d = f.debug_struct("SurfaceCharacterization");
+        #[cfg(feature = "gpu")]
+        let d = d
+            .field("cache_max_resource_bytes", &self.cache_max_resource_bytes())
+            .field("image_info", &self.image_info())
+            .field("backend_format", &self.backend_format())
+            .field("origin", &self.origin())
+            .field("sample_count", &self.sample_count())
+            .field("is_textureable", &self.is_textureable())
+            .field("is_mip_mapped", &self.is_mip_mapped())
+            .field("uses_glfbo0", &self.uses_glfbo0())
+            .field(
+                "vk_rt_supports_input_attachment",
+                &self.vk_rt_supports_input_attachment(),
+            )
+            .field(
+                "vulkan_secondary_cb_compatible",
+                &self.vulkan_secondary_cb_compatible(),
+            )
+            .field("is_protected", &self.is_protected())
+            .field("color_space", &self.color_space());
+        d.field("surface_props", &self.surface_props()).finish()
+    }
+}
+
 // TODO: there is an alternative for when SK_SUPPORT_GPU is not set, of which the
 //       layout differs, should we support that?
-impl Handle<SkSurfaceCharacterization> {
+impl SurfaceCharacterization {
     #[cfg(feature = "gpu")]
     pub fn resized(&self, size: impl Into<crate::ISize>) -> Self {
         let size = size.into();
@@ -88,7 +114,7 @@ impl Handle<SkSurfaceCharacterization> {
 }
 
 #[cfg(feature = "gpu")]
-impl Handle<SkSurfaceCharacterization> {
+impl SurfaceCharacterization {
     // TODO: contextInfo() / refContextInfo()
 
     pub fn cache_max_resource_bytes(&self) -> usize {

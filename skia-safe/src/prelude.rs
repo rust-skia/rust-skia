@@ -236,7 +236,7 @@ pub struct Handle<N: NativeDrop>(
 
 impl<N: NativeDrop> AsRef<Handle<N>> for Handle<N> {
     fn as_ref(&self) -> &Self {
-        &self
+        self
     }
 }
 
@@ -252,7 +252,6 @@ impl<N: NativeDrop> Handle<N> {
     }
 
     /// Create a mutable reference to the Rust wrapper from a reference to the native type.
-    #[allow(dead_code)]
     pub(crate) fn from_native_ref_mut(n: &mut N) -> &mut Self {
         unsafe { transmute_ref_mut(n) }
     }
@@ -505,7 +504,7 @@ impl<N: NativeRefCounted> From<&RCHandle<N>> for RCHandle<N> {
 
 impl<N: NativeRefCounted> AsRef<RCHandle<N>> for RCHandle<N> {
     fn as_ref(&self) -> &Self {
-        &self
+        self
     }
 }
 

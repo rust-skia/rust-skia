@@ -1,0 +1,86 @@
+# Supplemental workflow for testing alternative build configurations.
+
+name: 'supplemental-builds'
+on:
+  push:
+    branches-ignore:
+      - release
+  pull_request:
+    branches-ignore:
+      - release
+  schedule:
+    - cron: '0 0 * * *'
+
+concurrency:
+  group: 'supplemental-builds-${{ github.ref }}'
+  cancel-in-progress: true
+
+jobs:
+  linux-local-build:
+    runs-on: ubuntu-20.04
+    container: ghcr.io/pragmatrix/rust-skia-linux:latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Prepare Rustup
+      run: (cd /github/home && ln -s /root/.cargo)
+
+    - name: Update Rustup and Rust
+      run: rustup update
+
+    - name: Configure Rust Toolchain
+      run: rustup default stable
+
+    - name: 'Test local builds (#527)'
+      shell: bash
+      run: |
+        make test-local-build
+
+  # https://github.com/rust-skia/rust-skia/issues/535
+  # linux-arm64-build:
+  #   runs-on: ubuntu-20.04
+  #   container: ghcr.io/pragmatrix/rust-skia-linux-arm64:latest
+
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #     with:
+  #       submodules: true
+
+  #   - name: 'Build arm64 (#535)'
+  #     shell: bash
+  #     run: |
+  #       cargo build -vv --features "gl"
+
+  windows-link-dead-code:
+    runs-on: windows-2019
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Install Rust
+      uses: hecrj/setup-rust-action@master
+      with:
+        rust-version: stable
+
+    - name: Setup Python 2
+      uses: actions/setup-python@v2
+      with:
+        python-version: '2.7.18'
+        architecture: 'x64'
+
+    - name: Python Version
+      run: python --version
+
+    - name: Install LLVM
+      run: choco install llvm
+
+    - name: 'Build with RUSTFLAGS=-Clink-dead-code (#318)'
+      run: |
+        cargo build --features gl,vulkan,d3d,textlayout,webp
+      env:
+        RUSTFLAGS: '-Clink-dead-code'

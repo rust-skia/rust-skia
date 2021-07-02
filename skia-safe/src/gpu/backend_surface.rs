@@ -7,10 +7,11 @@ use super::mtl;
 #[cfg(feature = "vulkan")]
 use super::vk;
 use super::{BackendAPI, BackendSurfaceMutableState};
-use crate::prelude::*;
-use crate::ISize;
-use skia_bindings as sb;
-use skia_bindings::{GrBackendFormat, GrBackendRenderTarget, GrBackendTexture, GrMipmapped};
+use crate::{prelude::*, ISize};
+use skia_bindings::{
+    self as sb, GrBackendFormat, GrBackendRenderTarget, GrBackendTexture, GrMipmapped,
+};
+use std::fmt;
 
 pub type BackendFormat = Handle<GrBackendFormat>;
 unsafe impl Send for BackendFormat {}
@@ -28,7 +29,24 @@ impl NativeClone for GrBackendFormat {
     }
 }
 
-impl Handle<GrBackendFormat> {
+impl fmt::Debug for BackendFormat {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut d = f.debug_struct("BackendFormat");
+        d.field("backend", &self.backend());
+        d.field("channel_mask", &self.channel_mask());
+        #[cfg(feature = "gl")]
+        d.field("gl_format", &self.as_gl_format());
+        #[cfg(feature = "vulkan")]
+        d.field("vk_format", &self.as_vk_format());
+        #[cfg(feature = "metal")]
+        d.field("mtl_format", &self.as_mtl_format());
+        #[cfg(feature = "d3d")]
+        d.field("dxgi_format", &self.as_dxgi_format());
+        d.finish()
+    }
+}
+
+impl BackendFormat {
     #[deprecated(
         note = "The creation of invalid BackendFormats isn't supported anymore",
         since = "0.37.0"
@@ -150,6 +168,29 @@ impl NativeDrop for GrBackendTexture {
 impl NativeClone for GrBackendTexture {
     fn clone(&self) -> Self {
         construct(|texture| unsafe { sb::C_GrBackendTexture_CopyConstruct(texture, self) })
+    }
+}
+
+impl fmt::Debug for BackendTexture {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut d = f.debug_struct("BackendTexture");
+        d.field("dimensions", &self.dimensions());
+        d.field("has_mipmaps", &self.has_mipmaps());
+        d.field("backend", &self.backend());
+        #[cfg(feature = "gl")]
+        d.field("gl_texture_info", &self.gl_texture_info());
+        #[cfg(feature = "vulkan")]
+        d.field("vulkan_image_info", &self.vulkan_image_info());
+        #[cfg(feature = "metal")]
+        d.field("metal_texture_info", &self.metal_texture_info());
+        #[cfg(feature = "d3d")]
+        d.field(
+            "d3d_texture_resource_info",
+            &self.d3d_texture_resource_info(),
+        );
+        d.field("backend_format", &self.backend_format());
+        d.field("is_protected", &self.is_protected());
+        d.finish()
     }
 }
 
@@ -346,6 +387,31 @@ impl NativeClone for GrBackendRenderTarget {
         construct(|render_target| unsafe {
             sb::C_GrBackendRenderTarget_CopyConstruct(render_target, self)
         })
+    }
+}
+
+impl fmt::Debug for BackendRenderTarget {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut d = f.debug_struct("BackendRenderTarget");
+        d.field("dimensions", &self.dimensions());
+        d.field("sample_count", &self.sample_count());
+        d.field("stencil_bits", &self.stencil_bits());
+        d.field("backend", &self.backend());
+        d.field("is_framebuffer_only", &self.is_framebuffer_only());
+        #[cfg(feature = "gl")]
+        d.field("gl_framebuffer_info", &self.gl_framebuffer_info());
+        #[cfg(feature = "vulkan")]
+        d.field("vulkan_image_info", &self.vulkan_image_info());
+        #[cfg(feature = "metal")]
+        d.field("metal_texture_info", &self.metal_texture_info());
+        #[cfg(feature = "d3d")]
+        d.field(
+            "d3d_texture_resource_info",
+            &self.d3d_texture_resource_info(),
+        );
+        d.field("backend_format", &self.backend_format());
+        d.field("is_protected", &self.is_protected());
+        d.finish()
     }
 }
 

@@ -5,9 +5,8 @@ use crate::{
     ISize, ImageFilter, ImageGenerator, ImageInfo, Matrix, Paint, Picture, Pixmap, SamplingOptions,
     Shader, TileMode,
 };
-use skia_bindings as sb;
-use skia_bindings::{SkImage, SkRefCntBase};
-use std::{mem, ptr};
+use skia_bindings::{self as sb, SkImage, SkRefCntBase};
+use std::{fmt, mem, ptr};
 
 pub use super::CubicResampler;
 
@@ -25,7 +24,25 @@ impl NativeRefCountedBase for SkImage {
     type Base = SkRefCntBase;
 }
 
-impl RCHandle<SkImage> {
+impl fmt::Debug for Image {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut d = f.debug_struct("Image");
+        let d = d
+            .field("image_info", &self.image_info())
+            .field("unique_id", &self.unique_id())
+            .field("alpha_type", &self.alpha_type())
+            .field("color_type", &self.color_type())
+            .field("color_space", &self.color_space())
+            .field("is_texture_backed", &self.is_texture_backed());
+        #[cfg(feature = "gpu")]
+        let d = d.field("texture_size", &self.texture_size());
+        d.field("has_mipmaps", &self.has_mipmaps())
+            .field("is_lazy_generated", &self.is_lazy_generated())
+            .finish()
+    }
+}
+
+impl Image {
     // TODO: MakeRasterCopy()
 
     pub fn from_raster_data(
@@ -253,7 +270,6 @@ impl RCHandle<SkImage> {
         })
     }
 
-    // TODO:
     // TODO: MakePromiseTexture
     // TODO: MakePromiseYUVATexture
 

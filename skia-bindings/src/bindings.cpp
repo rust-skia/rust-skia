@@ -414,10 +414,6 @@ extern "C" bool C_SkPaint_Equals(const SkPaint* lhs, const SkPaint* rhs) {
     return *lhs == *rhs;
 }
 
-extern "C" SkFilterQuality C_SkPaint_getFilterQuality(const SkPaint* self) {
-    return self->getFilterQuality();
-}
-
 extern "C" SkPaint::Style C_SkPaint_getStyle(const SkPaint* self) {
     return self->getStyle();
 }
@@ -829,11 +825,18 @@ extern "C" SkColorSpace* C_SkColorSpace_Deserialize(const void* data, size_t len
 // SkM44
 //
 
-
 extern "C" void C_SkM44_Types(SkV2 *) {};
 
 extern "C" bool C_SkM44_equals(const SkM44 *self, const SkM44 *other) {
     return *self == *other;
+}
+
+extern "C" void C_SkM44_LookAt(const SkV3* eye, const SkV3* center, const SkV3* up, SkM44* uninitialized) {
+    new(uninitialized) SkM44(SkM44::LookAt(*eye, *center, *up));
+}
+
+extern "C" void C_SkM44_Perspective(float near, float far, float angle, SkM44* uninitialized) {
+    new(uninitialized) SkM44(SkM44::Perspective(near, far, angle));
 }
 
 extern "C" void C_SkM44_transpose(const SkM44* self, SkM44* uninitialized) {
@@ -842,14 +845,6 @@ extern "C" void C_SkM44_transpose(const SkM44* self, SkM44* uninitialized) {
 
 extern "C" SkV4 C_SkM44_map(const SkM44* self, float x, float y, float z, float w) {
     return self->map(x, y, z, w);
-}
-
-extern "C" void C_Sk3LookAt(const SkV3* eye, const SkV3* center, const SkV3* up, SkM44* uninitialized) {
-    new(uninitialized) SkM44(Sk3LookAt(*eye, *center, *up));
-}
-
-extern "C" void C_Sk3Perspective(float near, float far, float angle, SkM44* uninitialized) {
-    new(uninitialized) SkM44(Sk3Perspective(near, far, angle));
 }
 
 //
@@ -1139,7 +1134,6 @@ extern "C" int C_SkFontStyle_width(const SkFontStyle* self) {
 extern "C" SkFontStyle::Slant C_SkFontStyle_slant(const SkFontStyle* self) {
     return self->slant();
 }
-
 
 //
 // SkTextBlob
@@ -2296,14 +2290,14 @@ SkRuntimeEffect *C_SkRuntimeEffect_Make(
     return r.effect.release();
 }
 
-SkShader *C_SkRuntimeEffect_makeShader(SkRuntimeEffect *self, SkData *uniforms, SkShader **children, size_t childCount,
+SkShader *C_SkRuntimeEffect_makeShader(const SkRuntimeEffect *self, SkData *uniforms, SkShader **children, size_t childCount,
                                        const SkMatrix *localMatrix, bool isOpaque) {
     auto childrenSPs = reinterpret_cast<sk_sp<SkShader> *>(children);
     return self->makeShader(sp(uniforms), childrenSPs, childCount, localMatrix, isOpaque).release();
 }
 
 SkImage *C_SkRuntimeEffect_makeImage(
-    SkRuntimeEffect *self,
+    const SkRuntimeEffect *self,
     GrRecordingContext* context,
     SkData *uniforms,
     SkShader **children, size_t childCount,
@@ -2318,7 +2312,7 @@ SkImage *C_SkRuntimeEffect_makeImage(
         localMatrix, *resultInfo, mipmapped).release();
 }
 
-SkColorFilter* C_SkRuntimeEffect_makeColorFilter(SkRuntimeEffect* self, SkData* inputs) {
+SkColorFilter* C_SkRuntimeEffect_makeColorFilter(const SkRuntimeEffect* self, SkData* inputs) {
     return self->makeColorFilter(sp(inputs)).release();
 }
 

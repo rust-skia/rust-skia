@@ -3,12 +3,11 @@ use crate::{
     prelude::*,
     ColorFilter, Data, Matrix, Shader,
 };
-use sb::SkRuntimeEffect_Options;
-use skia_bindings as sb;
 use skia_bindings::{
-    SkRefCntBase, SkRuntimeEffect, SkRuntimeEffect_Uniform, SkRuntimeEffect_Varying,
+    self as sb, SkRefCntBase, SkRuntimeEffect, SkRuntimeEffect_Options, SkRuntimeEffect_Uniform,
+    SkRuntimeEffect_Varying,
 };
-use std::ffi::CStr;
+use std::{ffi::CStr, fmt};
 
 pub type Uniform = Handle<SkRuntimeEffect_Uniform>;
 
@@ -21,6 +20,12 @@ unsafe impl Sync for Uniform {}
 impl NativeDrop for SkRuntimeEffect_Uniform {
     fn drop(&mut self) {
         panic!("native type SkRuntimeEffect::Uniform can't be owned by Rust");
+    }
+}
+
+impl fmt::Debug for Uniform {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.native().fmt(f)
     }
 }
 
@@ -87,6 +92,15 @@ impl NativeDrop for SkRuntimeEffect_Varying {
     }
 }
 
+impl fmt::Debug for Varying {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Varying")
+            .field("name", &self.name())
+            .field("width", &self.width())
+            .finish()
+    }
+}
+
 impl Varying {
     pub fn name(&self) -> &str {
         self.native().name.as_str()
@@ -103,9 +117,10 @@ impl NativeRefCountedBase for SkRuntimeEffect {
     type Base = SkRefCntBase;
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug, Default)]
+#[repr(C)]
+#[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
 pub struct Options {
-    pub inline_threshold: i32,
+    pub force_no_inline: bool,
 }
 
 impl NativeTransmutable<SkRuntimeEffect_Options> for Options {}
@@ -127,9 +142,19 @@ pub fn new_with_options<'a>(
     .ok_or_else(|| error.as_str().to_owned())
 }
 
+impl fmt::Debug for RuntimeEffect {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("RuntimeEffect")
+            .field("uniform_size", &self.uniform_size())
+            .field("uniforms", &self.uniforms())
+            .field("varyings", &self.varyings())
+            .finish()
+    }
+}
+
 impl RuntimeEffect {
     pub fn make_shader<'a>(
-        &mut self,
+        &self,
         uniforms: impl Into<Data>,
         children: impl IntoIterator<Item = Shader>,
         local_matrix: impl Into<Option<&'a Matrix>>,
@@ -141,7 +166,7 @@ impl RuntimeEffect {
             .collect();
         Shader::from_ptr(unsafe {
             sb::C_SkRuntimeEffect_makeShader(
-                self.native_mut(),
+                self.native(),
                 uniforms.into().into_ptr(),
                 children.as_mut_ptr(),
                 children.len(),
@@ -153,7 +178,7 @@ impl RuntimeEffect {
 
     #[cfg(feature = "gpu")]
     pub fn make_image<'a>(
-        &mut self,
+        &self,
         context: &mut crate::gpu::RecordingContext,
         uniforms: impl Into<Data>,
         children: impl IntoIterator<Item = Shader>,
@@ -168,7 +193,7 @@ impl RuntimeEffect {
 
         crate::Image::from_ptr(unsafe {
             sb::C_SkRuntimeEffect_makeImage(
-                self.native_mut(),
+                self.native(),
                 context.native_mut(),
                 uniforms.into().into_ptr(),
                 children.as_mut_ptr(),
@@ -180,28 +205,14 @@ impl RuntimeEffect {
         })
     }
 
-    #[deprecated(since = "0.33.0", note = "removed without replacement")]
-    pub fn make_color_filter_with_children(
-        &mut self,
-        _inputs: impl Into<Data>,
-        _children: impl IntoIterator<Item = ColorFilter>,
-    ) -> ! {
-        panic!("removed without replacement")
-    }
-
-    pub fn make_color_filter(&mut self, inputs: impl Into<Data>) -> Option<ColorFilter> {
+    pub fn make_color_filter(&self, inputs: impl Into<Data>) -> Option<ColorFilter> {
         ColorFilter::from_ptr(unsafe {
-            sb::C_SkRuntimeEffect_makeColorFilter(self.native_mut(), inputs.into().into_ptr())
+            sb::C_SkRuntimeEffect_makeColorFilter(self.native(), inputs.into().into_ptr())
         })
     }
 
     pub fn source(&self) -> &str {
         unsafe { (*sb::C_SkRuntimeEffect_source(self.native())).as_str() }
-    }
-
-    #[deprecated(since = "0.29.0", note = "removed without replacement")]
-    pub fn index(&self) -> ! {
-        unimplemented!("removed without replacement")
     }
 
     #[deprecated(since = "0.35.0", note = "Use uniform_size() instead")]
@@ -264,7 +275,7 @@ impl RuntimeEffect {
     }
 }
 
-// TODO: wrap SkRuntimeShaderBuilder
+// TODO: wrap SkRuntimeEffectBuilder, SkRuntimeShaderBuilder
 
 #[cfg(test)]
 mod tests {

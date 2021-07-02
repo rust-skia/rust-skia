@@ -73,6 +73,10 @@ extern "C" {
         self->setDefaultFontManager(spFromConst(fontManager), defaultFamilyName);
     }
 
+    void C_FontCollection_setDefaultFontManager3(FontCollection* self, const SkFontMgr* fontManager, const SkStrings* familyNames) {
+        self->setDefaultFontManager(spFromConst(fontManager), familyNames->strings);
+    }
+
     SkFontMgr* C_FontCollection_getFallbackManager(const FontCollection* self) {
         return self->getFallbackManager().release();
     }

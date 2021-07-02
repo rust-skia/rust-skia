@@ -1,7 +1,6 @@
-use crate::prelude::*;
-use crate::{Canvas, Data, FilterMode, Matrix, Rect, Shader, TileMode};
-use skia_bindings as sb;
-use skia_bindings::{SkPicture, SkRefCntBase};
+use crate::{prelude::*, Canvas, Data, FilterMode, Matrix, Rect, Shader, TileMode};
+use skia_bindings::{self as sb, SkPicture, SkRefCntBase};
+use std::fmt;
 
 pub type Picture = RCHandle<SkPicture>;
 unsafe impl Sync for Picture {}
@@ -11,7 +10,18 @@ impl NativeRefCountedBase for SkPicture {
     type Base = SkRefCntBase;
 }
 
-impl RCHandle<SkPicture> {
+impl fmt::Debug for Picture {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Picture")
+            .field("cull_rect", &self.cull_rect())
+            .field("unique_id", &self.unique_id())
+            .field("approximate_op_count", &self.approximate_op_count())
+            .field("approximate_bytes_used", &self.approximate_bytes_used())
+            .finish()
+    }
+}
+
+impl Picture {
     // TODO: wrap MakeFromStream
 
     // TODO: may support SkSerialProces in MakeFromData?

@@ -1,0 +1,21 @@
+runs-on: ubuntu-20.04
+container: ghcr.io/pragmatrix/rust-skia-linux:latest
+env: 
+  SKIA_DEBUG: $[[skiaDebug]]
+
+steps:
+- uses: actions/checkout@v2
+  with:
+    submodules: true
+
+- name: Prepare Rustup
+  run: (cd /github/home && ln -s /root/.cargo)
+
+- name: Update Rustup and Rust
+  run: rustup update
+
+- name: Configure Rust Toolchain
+  run: rustup default $[[rustToolchain]]
+
+- name: Install Clippy
+  run: rustup component add clippy

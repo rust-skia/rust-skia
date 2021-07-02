@@ -7,7 +7,7 @@ use crate::{
     Color, FontMetrics, FontStyle, Paint, Typeface,
 };
 use skia_bindings as sb;
-use std::ops::Range;
+use std::{fmt, ops::Range};
 
 bitflags! {
     pub struct TextDecoration: u32 {
@@ -49,6 +49,7 @@ fn style_type_member_naming() {
     let _ = StyleType::LetterSpacing;
 }
 
+#[repr(C)]
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct Decoration {
     pub ty: TextDecoration,
@@ -89,13 +90,22 @@ impl NativeClone for sb::skia_textlayout_FontFeature {
     }
 }
 
-impl PartialEq for Handle<sb::skia_textlayout_FontFeature> {
+impl PartialEq for FontFeature {
     fn eq(&self, other: &Self) -> bool {
         self.name() == other.name() && self.value() == other.value()
     }
 }
 
-impl Handle<sb::skia_textlayout_FontFeature> {
+impl fmt::Debug for FontFeature {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("FontFeature")
+            .field(&self.name())
+            .field(&self.value())
+            .finish()
+    }
+}
+
+impl FontFeature {
     pub fn name(&self) -> &str {
         self.native().fName.as_str()
     }
@@ -105,7 +115,8 @@ impl Handle<sb::skia_textlayout_FontFeature> {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[repr(C)]
+#[derive(Clone, Default, Debug)]
 pub struct PlaceholderStyle {
     pub width: scalar,
     pub height: scalar,
@@ -169,6 +180,30 @@ impl NativePartialEq for sb::skia_textlayout_TextStyle {
 impl Default for Handle<sb::skia_textlayout_TextStyle> {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl fmt::Debug for TextStyle {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("TextStyle")
+            .field("color", &self.color())
+            .field("foreground", &self.foreground())
+            .field("background", &self.background())
+            .field("decoration", &self.decoration())
+            .field("font_style", &self.font_style())
+            .field("shadows", &self.shadows())
+            .field("font_features", &self.font_features())
+            .field("font_size", &self.font_size())
+            .field("font_families", &self.font_families())
+            .field("height", &self.height())
+            .field("height_override", &self.height_override())
+            .field("letter_spacing", &self.letter_spacing())
+            .field("word_spacing", &self.word_spacing())
+            .field("typeface", &self.typeface())
+            .field("locale", &self.locale())
+            .field("text_baseline", &self.text_baseline())
+            .field("is_placeholder", &self.is_placeholder())
+            .finish()
     }
 }
 
@@ -400,7 +435,8 @@ pub type TextIndex = usize;
 pub type TextRange = Range<usize>;
 pub const EMPTY_TEXT: TextRange = EMPTY_RANGE;
 
-#[derive(Clone, PartialEq)]
+#[repr(C)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct Block {
     pub range: TextRange,
     pub style: TextStyle,
@@ -442,7 +478,8 @@ pub type BlockRange = Range<usize>;
 pub const EMPTY_BLOCK: usize = EMPTY_INDEX;
 pub const EMPTY_BLOCKS: Range<usize> = EMPTY_RANGE;
 
-#[derive(Clone, PartialEq)]
+#[repr(C)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct Placeholder {
     pub range: TextRange,
     pub style: PlaceholderStyle,

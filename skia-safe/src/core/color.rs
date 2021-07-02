@@ -12,7 +12,7 @@ use std::ops::{BitAnd, BitOr, Index, IndexMut, Mul};
 // Note: SkColor _is_ a u32, and therefore its components are
 // endian dependent, so we can't expose it as (transmuted) individual
 // argb fields.
-#[derive(Copy, Clone, PartialEq, Default, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
 #[repr(transparent)]
 pub struct Color(SkColor);
 
@@ -174,7 +174,7 @@ impl From<(f32, f32, f32)> for HSV {
 }
 
 impl HSV {
-    pub fn to_color(&self, alpha: u8) -> Color {
+    pub fn to_color(self, alpha: u8) -> Color {
         Color::from_native_c(unsafe {
             SkHSVToColor(alpha.into(), [self.h, self.s, self.v].as_ptr())
         })
@@ -338,7 +338,7 @@ impl Color4f {
             && self.b <= 1.0
     }
 
-    pub fn to_color(&self) -> Color {
+    pub fn to_color(self) -> Color {
         fn c(f: f32) -> u8 {
             (f.max(0.0).min(1.0) * 255.0) as u8
         }
@@ -355,8 +355,8 @@ impl Color4f {
     // TODO: toBytes_RGBA()
     // TODO: FromBytes_RGBA
 
-    pub fn to_opaque(&self) -> Self {
-        Self { a: 1.0, ..*self }
+    pub fn to_opaque(self) -> Self {
+        Self { a: 1.0, ..self }
     }
 }
 

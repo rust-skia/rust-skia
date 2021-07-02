@@ -6,6 +6,7 @@ pub mod variation {
     use skia_bindings as sb;
     use skia_bindings::SkFontParameters_Variation_Axis;
 
+    #[repr(C)]
     #[derive(Clone, PartialEq, Default, Debug)]
     pub struct Axis {
         pub tag: FourByteTag,

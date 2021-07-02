@@ -3,3 +3,5 @@ target/
 /.cargo/credentials
 /cmake-build-debug/
 .direnv/
+/tmp/
+

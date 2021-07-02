@@ -1,11 +1,11 @@
 # <img alt="" width="48" align="top" src="artwork/rust-skia-icon_512x512.png"/> Safe Rust bindings to the [Skia Graphics Library](https://skia.org/).
 
-[![crates.io](https://img.shields.io/crates/v/skia-safe)](https://crates.io/crates/skia-safe) [![license](https://img.shields.io/crates/l/skia-safe)](LICENSE) [![Build Status](https://dev.azure.com/pragmatrix-github/rust-skia/_apis/build/status/rust-skia.rust-skia?branchName=master)](https://dev.azure.com/pragmatrix-github/rust-skia/_build/latest?definitionId=2&branchName=master)
+[![crates.io](https://img.shields.io/crates/v/skia-safe)](https://crates.io/crates/skia-safe) [![license](https://img.shields.io/crates/l/skia-safe)](LICENSE) [![Windows QA](https://github.com/rust-skia/rust-skia/actions/workflows/windows-qa.yaml/badge.svg?branch=master)](https://github.com/rust-skia/rust-skia/actions/workflows/windows-qa.yaml) [![Linux QA](https://github.com/rust-skia/rust-skia/actions/workflows/linux-qa.yaml/badge.svg?branch=master)](https://github.com/rust-skia/rust-skia/actions/workflows/linux-qa.yaml) [![macOS QA](https://github.com/rust-skia/rust-skia/actions/workflows/macos-qa.yaml/badge.svg?branch=master)](https://github.com/rust-skia/rust-skia/actions/workflows/macos-qa.yaml)
 
-Skia Submodule Status: chrome/m90 ([upstream changes][skia-upstream], [our changes][skia-ours]).
+Skia Submodule Status: chrome/m91 ([upstream changes][skia-upstream], [our changes][skia-ours]).
 
-[skia-upstream]: https://github.com/rust-skia/skia/compare/m90-0.38.3...google:chrome/m90
-[skia-ours]: https://github.com/google/skia/compare/chrome/m90...rust-skia:m90-0.38.3
+[skia-upstream]: https://github.com/rust-skia/skia/compare/m91-0.39.4...google:chrome/m91
+[skia-ours]: https://github.com/google/skia/compare/chrome/m91...rust-skia:m91-0.39.4
 
 ## Goals
 
@@ -17,7 +17,7 @@ This project provides _up to date_ safe bindings that bridge idiomatic Rust with
 
 Because we [can't build on docs.rs](https://docs.rs/crate/skia-safe/0.34.0/builds), the `cargo doc` output for skia-safe is manually created and uploaded to [rust-skia.github.io](https://rust-skia.github.io/doc/skia_safe).
 
-We are [planning to add function level documentation](https://github.com/rust-skia/rust-skia/issues/23) by linking to Skia's documentation through [intra doc links](https://github.com/rust-lang/rfcs/blob/master/text/1946-intra-rustdoc-links.md), which should be stabilized soon.
+We (slowly) [add more documentation](https://github.com/rust-skia/rust-skia/issues/446) by converting Skia's Doxygen comments to Rust.
 
 ### Crate
 
@@ -257,7 +257,13 @@ cargo run -- --help
 An example that opens an OpenGL Window and draws the rust-skia icon with skia-safe (contributed by [@nornagon](https://github.com/nornagon)).
 
 ```bash
-(cd skia-safe && cargo run --example gl-window --features "gl")
+cargo run --example gl-window --features gl
+```
+
+On Linux the feature `x11` needs to be enabled:
+
+```bash
+cargo run --example gl-window --features gl,x11
 ```
 
 ## Example Images

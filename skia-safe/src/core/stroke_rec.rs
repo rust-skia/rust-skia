@@ -1,7 +1,6 @@
-use crate::prelude::*;
-use crate::{paint, scalar, Paint, Path};
-use skia_bindings as sb;
-use skia_bindings::SkStrokeRec;
+use crate::{paint, prelude::*, scalar, Paint, Path};
+use skia_bindings::{self as sb, SkStrokeRec};
+use std::fmt;
 
 pub use sb::SkStrokeRec_InitStyle as InitStyle;
 
@@ -35,7 +34,20 @@ impl NativeClone for SkStrokeRec {
     }
 }
 
-impl Handle<SkStrokeRec> {
+impl fmt::Debug for StrokeRec {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("StrokeRec")
+            .field("style", &self.style())
+            .field("width", &self.width())
+            .field("miter", &self.miter())
+            .field("cap", &self.cap())
+            .field("join", &self.join())
+            .field("res_scale", &self.res_scale())
+            .finish()
+    }
+}
+
+impl StrokeRec {
     pub fn new(init_style: InitStyle) -> Self {
         Self::from_native_c(unsafe { SkStrokeRec::new(init_style) })
     }

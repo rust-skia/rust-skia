@@ -1,7 +1,6 @@
-use crate::{prelude::*, FontMetrics, FontStyle};
-use crate::{GlyphId, Image, Paint, Path, Picture, Typeface};
-use skia_bindings as sb;
-use skia_bindings::SkCustomTypefaceBuilder;
+use crate::{prelude::*, FontMetrics, FontStyle, GlyphId, Image, Paint, Path, Picture, Typeface};
+use skia_bindings::{self as sb, SkCustomTypefaceBuilder};
+use std::fmt;
 
 pub type CustomTypefaceBuilder = Handle<SkCustomTypefaceBuilder>;
 unsafe impl Send for CustomTypefaceBuilder {}
@@ -13,7 +12,13 @@ impl NativeDrop for SkCustomTypefaceBuilder {
     }
 }
 
-impl Handle<SkCustomTypefaceBuilder> {
+impl fmt::Debug for CustomTypefaceBuilder {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("CustomTypefaceBuilder").finish()
+    }
+}
+
+impl CustomTypefaceBuilder {
     pub fn new() -> Self {
         Self::from_native_c(unsafe { SkCustomTypefaceBuilder::new() })
     }
@@ -65,6 +70,7 @@ impl Handle<SkCustomTypefaceBuilder> {
     }
 }
 
+#[derive(Debug)]
 pub enum TypefaceGlyph<'a> {
     Path(&'a Path),
     PathAndPaint(&'a Path, &'a Paint),

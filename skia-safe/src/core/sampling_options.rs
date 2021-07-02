@@ -1,5 +1,4 @@
-use crate::prelude::*;
-use crate::FilterQuality;
+use crate::{prelude::*, FilterQuality};
 use skia_bindings::{SkCubicResampler, SkSamplingOptions, SkSamplingOptions_MediumBehavior};
 
 pub use skia_bindings::SkFilterMode as FilterMode;
@@ -48,14 +47,14 @@ impl CubicResampler {
 
 impl NativeTransmutable<SkCubicResampler> for CubicResampler {}
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 #[deprecated(since = "0.38.0", note = "Use SamplingOptions")]
 pub struct FilterOptions {
     pub sampling: FilterMode,
     pub mipmap: MipmapMode,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 #[repr(i32)]
 pub enum MediumBehavior {
     AsMipmapNearest = SkSamplingOptions_MediumBehavior::kMedium_asMipmapNearest as _,
@@ -65,7 +64,7 @@ pub enum MediumBehavior {
 impl NativeTransmutable<SkSamplingOptions_MediumBehavior> for MediumBehavior {}
 
 #[repr(C)]
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 #[allow(deprecated)]
 pub struct SamplingOptions {
     pub use_cubic: bool,

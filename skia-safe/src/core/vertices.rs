@@ -1,13 +1,9 @@
-use crate::prelude::*;
-use crate::{Color, Point, Rect};
-use skia_bindings as sb;
+use crate::{prelude::*, Color, Point, Rect};
 use skia_bindings::{
-    SkPoint, SkVertices, SkVertices_Attribute, SkVertices_Attribute_Type, SkVertices_Builder,
+    self as sb, SkPoint, SkVertices, SkVertices_Attribute, SkVertices_Attribute_Type,
+    SkVertices_Builder,
 };
-use std::ffi::CStr;
-use std::marker::PhantomData;
-use std::os::raw::c_char;
-use std::{ptr, slice};
+use std::{ffi::CStr, fmt, marker::PhantomData, os::raw::c_char, ptr, slice};
 
 #[deprecated(since = "0.29.0", note = "removed without replacement")]
 pub type BoneIndices = [u32; 4];
@@ -141,7 +137,17 @@ impl NativeRefCounted for SkVertices {
     }
 }
 
-impl RCHandle<SkVertices> {
+impl fmt::Debug for Vertices {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Vertices")
+            .field("unique_id", &self.unique_id())
+            .field("bounds", &self.bounds())
+            .field("approximate_size", &self.approximate_size())
+            .finish()
+    }
+}
+
+impl Vertices {
     pub fn new_copy(
         mode: VertexMode,
         positions: &[Point],
@@ -301,7 +307,13 @@ impl NativeDrop for SkVertices_Builder {
     }
 }
 
-impl Handle<SkVertices_Builder> {
+impl fmt::Debug for Builder {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Builder").finish()
+    }
+}
+
+impl Builder {
     pub fn new(
         mode: VertexMode,
         vertex_count: usize,

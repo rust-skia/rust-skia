@@ -1,66 +1,66 @@
 mod build_support;
-use build_support::{binaries, cargo, git, skia, utils};
-use std::io::Cursor;
-use std::path::Path;
-use std::{fs, io};
+use build_support::{binaries_config, cargo, features, skia, skia_bindgen};
 
 /// Environment variables used by this build script.
 mod env {
     use crate::build_support::cargo;
     use std::path::PathBuf;
 
-    /// Returns `true` if the download of prebuilt binaries should be forced.
-    ///
-    /// This can be used to test and downlaod prebuilt binaries from within a repository build.
-    /// If this environment variable is not set, binaries are downloaded from crate builds only.
-    pub fn force_skia_binaries_download() -> bool {
-        cargo::env_var("FORCE_SKIA_BINARIES_DOWNLOAD").is_some()
-    }
-
-    /// The URL template to download the Skia binaries from.
-    ///
-    /// `{tag}` will be replaced by the Tag (usually the released skia-binding's crate's version).
-    /// `{key}` will be replaced by the Key (a combination of the repository hash, target, and features).
-    ///
-    /// `file://` URLs are supported for local testing.
-    pub fn skia_binaries_url() -> Option<String> {
-        cargo::env_var("SKIA_BINARIES_URL")
-    }
-
-    /// The default URL template to download the binaries from.
-    pub fn skia_binaries_url_default() -> String {
-        "https://github.com/rust-skia/skia-binaries/releases/download/{tag}/skia-binaries-{key}.tar.gz".into()
-    }
-
-    /// Force to build Skia, even if there is a binary available.
-    pub fn force_skia_build() -> bool {
-        cargo::env_var("FORCE_SKIA_BUILD").is_some()
-    }
-
-    /// A boolean specifying whether to build Skia's dependencies or not. If not, the system's
-    /// provided libraries are used.
-    pub fn use_system_libraries() -> bool {
-        cargo::env_var("SKIA_USE_SYSTEM_LIBRARIES").is_some()
-    }
-
-    /// The full path of the ninja command to run.
-    pub fn ninja_command() -> Option<PathBuf> {
-        cargo::env_var("SKIA_NINJA_COMMAND").map(PathBuf::from)
-    }
-
-    /// The full path of the gn command to run.
-    pub fn gn_command() -> Option<PathBuf> {
-        cargo::env_var("SKIA_GN_COMMAND").map(PathBuf::from)
-    }
-
     /// The path to the Skia source directory.
     pub fn source_dir() -> Option<PathBuf> {
         cargo::env_var("SKIA_SOURCE_DIR").map(PathBuf::from)
     }
+
+    /// The path to where a pre-built Skia library can be found.
+    pub fn skia_lib_search_path() -> Option<PathBuf> {
+        cargo::env_var("SKIA_LIBRARY_SEARCH_PATH").map(PathBuf::from)
+    }
+
+    pub fn is_skia_debug() -> bool {
+        matches!(cargo::env_var("SKIA_DEBUG"), Some(v) if v != "0")
+    }
 }
 
-const SRC_BINDINGS_RS: &str = "src/bindings.rs";
-const SKIA_LICENSE: &str = "skia/LICENSE";
+fn build_from_source(
+    features: features::Features,
+    binaries_config: &binaries_config::BinariesConfiguration,
+    skia_source_dir: &std::path::Path,
+    skia_debug: bool,
+    offline: bool,
+) {
+    let build_config = skia::BuildConfiguration::from_features(features, skia_debug);
+    let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
+        &build_config,
+        skia::env::use_system_libraries(),
+        skia_source_dir,
+    );
+
+    skia::build(
+        &final_configuration,
+        binaries_config,
+        skia::env::ninja_command(),
+        skia::env::gn_command(),
+        offline,
+    );
+}
+
+fn generate_bindings(
+    features: &features::Features,
+    definitions: Vec<skia_bindgen::Definition>,
+    binaries_config: &binaries_config::BinariesConfiguration,
+    skia_source_dir: &std::path::Path,
+) {
+    // Emit the ninja definitions, to help debug build consistency.
+    skia_bindgen::definitions::save_definitions(&definitions, &binaries_config.output_directory)
+        .expect("failed to write ninja defines");
+
+    let bindings_config = skia_bindgen::FinalBuildConfiguration::from_build_configuration(
+        features,
+        definitions,
+        skia_source_dir,
+    );
+    skia_bindgen::generate_bindings(&bindings_config, &binaries_config.output_directory);
+}
 
 fn main() {
     // since 0.25.0
@@ -72,61 +72,48 @@ fn main() {
         cargo::warning("The feature 'shaper' has been removed. To use the SkShaper bindings, enable the feature 'textlayout'.");
     }
 
-    let build_config = skia::BuildConfiguration::default();
-    let binaries_config = skia::BinariesConfiguration::from_cargo_env(&build_config);
+    let skia_debug = env::is_skia_debug();
+    let features = features::Features::default();
+    let binaries_config =
+        binaries_config::BinariesConfiguration::from_features(&features, skia_debug);
 
     //
     // skip attempting to download?
     //
     if let Some(source_dir) = env::source_dir() {
-        println!("STARTING OFFLINE BUILD");
+        if let Some(search_path) = env::skia_lib_search_path() {
+            println!("STARTING BIND AGAINST SYSTEM SKIA");
 
-        let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
-            &build_config,
-            env::use_system_libraries(),
-            &source_dir,
-        );
+            cargo::add_link_search(&search_path.to_str().unwrap());
 
-        skia::build(
-            &final_configuration,
-            &binaries_config,
-            env::ninja_command(),
-            env::gn_command(),
-            true,
-        );
+            let definitions = skia_bindgen::definitions::from_env();
+            generate_bindings(&features, definitions, &binaries_config, &source_dir);
+        } else {
+            println!("STARTING OFFLINE BUILD");
+
+            build_from_source(
+                features.clone(),
+                &binaries_config,
+                &source_dir,
+                skia_debug,
+                true,
+            );
+            let definitions = skia_bindgen::definitions::from_ninja_features(
+                &features,
+                &binaries_config.output_directory,
+            );
+            generate_bindings(&features, definitions, &binaries_config, &source_dir);
+        }
     } else {
         //
         // is the download of prebuilt binaries possible?
         //
 
-        let build_skia = env::force_skia_build() || {
-            let force_download = env::force_skia_binaries_download();
-            if let Some((tag, key)) = should_try_download_binaries(&binaries_config, force_download)
-            {
-                println!(
-                    "TRYING TO DOWNLOAD AND INSTALL SKIA BINARIES: {}/{}",
-                    tag, key
-                );
-                let url = binaries::download_url(
-                    env::skia_binaries_url().unwrap_or_else(env::skia_binaries_url_default),
-                    tag,
-                    key,
-                );
-                println!("  FROM: {}", url);
-                if let Err(e) = download_and_install(url, &binaries_config.output_directory) {
-                    println!("DOWNLOAD AND INSTALL FAILED: {}", e);
-                    if force_download {
-                        panic!("Downloading of binaries was forced but failed.")
-                    }
-                    true
-                } else {
-                    println!("DOWNLOAD AND INSTALL SUCCEEDED");
-                    false
-                }
-            } else {
-                true
-            }
-        };
+        #[allow(unused_variables)]
+        let build_skia = true;
+
+        #[cfg(feature = "binary-cache")]
+        let build_skia = build_support::binary_cache::try_prepare_download(&binaries_config);
 
         //
         // full build?
@@ -134,76 +121,27 @@ fn main() {
 
         if build_skia {
             println!("STARTING A FULL BUILD");
-            let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
-                &build_config,
-                env::use_system_libraries(),
-                &std::env::current_dir().unwrap().join("skia"),
-            );
-            skia::build(
-                &final_configuration,
+
+            let source_dir = std::env::current_dir().unwrap().join("skia");
+            build_from_source(
+                features.clone(),
                 &binaries_config,
-                env::ninja_command(),
-                env::gn_command(),
+                &source_dir,
+                skia_debug,
                 false,
             );
+            let definitions = skia_bindgen::definitions::from_ninja_features(
+                &features,
+                &binaries_config.output_directory,
+            );
+            generate_bindings(&features, definitions, &binaries_config, &source_dir);
         }
     };
 
     binaries_config.commit_to_cargo();
 
-    //
-    // publish binaries?
-    //
-
-    if let Some(staging_directory) = binaries::should_export() {
-        println!(
-            "DETECTED AZURE, exporting binaries to {}",
-            staging_directory.to_str().unwrap()
-        );
-
-        println!("EXPORTING BINARIES");
-        let source_files = &[
-            (SRC_BINDINGS_RS, "bindings.rs"),
-            (SKIA_LICENSE, "LICENSE_SKIA"),
-        ];
-        binaries::export(&binaries_config, source_files, &staging_directory)
-            .expect("EXPORTING BINARIES FAILED")
+    #[cfg(feature = "binary-cache")]
+    if let Some(staging_directory) = build_support::binary_cache::should_export() {
+        build_support::binary_cache::publish(&binaries_config, &*staging_directory);
     }
-}
-
-/// If the binaries should be downloaded, return the tag and the key.
-fn should_try_download_binaries(
-    config: &skia::BinariesConfiguration,
-    force: bool,
-) -> Option<(String, String)> {
-    let tag = cargo::package_version();
-
-    // for testing:
-    if force {
-        // retrieve the hash from the repository above us.
-        let half_hash = git::half_hash()?;
-        return Some((tag, config.key(&half_hash)));
-    }
-
-    // are we building inside a crate?
-    if let Ok(ref full_hash) = cargo::crate_repository_hash() {
-        let half_hash = git::trim_hash(full_hash);
-        return Some((tag, config.key(&half_hash)));
-    }
-
-    None
-}
-
-fn download_and_install(url: impl AsRef<str>, output_directory: &Path) -> io::Result<()> {
-    let archive = utils::download(url)?;
-    println!(
-        "UNPACKING ARCHIVE INTO: {}",
-        output_directory.to_str().unwrap()
-    );
-    binaries::unpack(Cursor::new(archive), output_directory)?;
-    // TODO: verify key?
-    println!("INSTALLING BINDINGS");
-    fs::copy(output_directory.join("bindings.rs"), SRC_BINDINGS_RS)?;
-
-    Ok(())
 }

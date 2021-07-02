@@ -397,7 +397,7 @@ impl Index<usize> for V4 {
 }
 
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct M44 {
     mat: [f32; Self::COMPONENTS],
 }
@@ -518,6 +518,16 @@ impl M44 {
         let mut m = Self::default();
         m.set_rotate(axis, radians);
         m
+    }
+
+    pub fn look_at(eye: &V3, center: &V3, up: &V3) -> Self {
+        Self::construct(|m| unsafe {
+            sb::C_SkM44_LookAt(eye.native(), center.native(), up.native(), m)
+        })
+    }
+
+    pub fn perspective(near: f32, far: f32, angle: f32) -> Self {
+        Self::construct(|m| unsafe { sb::C_SkM44_Perspective(near, far, angle, m) })
     }
 
     pub fn get_col_major(&self, v: &mut [scalar; Self::COMPONENTS]) {
@@ -757,16 +767,6 @@ impl M44 {
         self
     }
 
-    pub fn look_at(eye: &V3, center: &V3, up: &V3) -> Self {
-        Self::construct(|m| unsafe {
-            sb::C_Sk3LookAt(eye.native(), center.native(), up.native(), m)
-        })
-    }
-
-    pub fn perspective(near: f32, far: f32, angle: f32) -> Self {
-        Self::construct(|m| unsafe { sb::C_Sk3Perspective(near, far, angle, m) })
-    }
-
     // helper
 
     #[allow(deprecated)]
@@ -781,7 +781,7 @@ impl Mul for &M44 {
     type Output = M44;
 
     fn mul(self, m: Self) -> Self::Output {
-        M44::concat(self, &m)
+        M44::concat(self, m)
     }
 }
 

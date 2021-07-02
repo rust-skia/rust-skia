@@ -1,7 +1,7 @@
-use crate::prelude::*;
-use crate::{Color, Point};
+use crate::{prelude::*, Color, Point};
 use skia_bindings as sb;
 
+#[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct TextShadow {
     pub color: Color,

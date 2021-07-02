@@ -1,26 +1,27 @@
 //! Support for exporting and building prebuilt binaries.
 
-use crate::build_support::{azure, cargo, git, skia};
+use super::{git, github_actions};
+use crate::build_support::{binaries_config, cargo};
 use flate2::read::GzDecoder;
-use std::fs;
-use std::io;
-use std::io::{Read, Write};
-use std::path::{Path, PathBuf};
-use tar::Archive;
+use std::{
+    fs,
+    io::{self, Read, Write},
+    path::{Path, PathBuf},
+};
 
 /// Export binaries if we are inside a git repository _and_
 /// the artifact staging directory is set.
 /// The git repository test is important to support package verifications.
 pub fn should_export() -> Option<PathBuf> {
     git::half_hash()?;
-    azure::artifact_staging_directory()
+    github_actions::artifact_staging_directory()
 }
 
 /// Export the binaries to a target directory.
 ///
 /// `source_files` are additional files from below skia-bindings/ that are copied to the target directory.
 pub fn export(
-    config: &skia::BinariesConfiguration,
+    config: &binaries_config::BinariesConfiguration,
     source_files: &[(&str, &str)],
     target_dir: &Path,
 ) -> io::Result<()> {
@@ -38,7 +39,7 @@ pub fn export(
 
     let target = cargo::target();
 
-    for lib in &config.built_libraries {
+    for lib in config.built_libraries() {
         let filename = &target.library_to_filename(lib);
         fs::copy(output_directory.join(filename), export_dir.join(filename))?;
     }
@@ -56,8 +57,8 @@ fn prepare_export_directory(key: &str, artifacts: &Path) -> io::Result<PathBuf> 
     let binaries = artifacts.join("skia-binaries");
     fs::create_dir_all(&binaries)?;
 
-    // this is primarily for azure to know the tag and the key of the binaries,
-    // but they can stay inside the archive.
+    // this is primarily for GitHub Actions to know the tag and the key of the binaries, but they
+    // can stay inside the archive.
 
     {
         let mut tag_file = fs::File::create(binaries.join("tag.txt")).unwrap();
@@ -128,7 +129,7 @@ pub fn download_url(url_template: String, tag: impl AsRef<str>, key: impl AsRef<
 pub fn unpack(archive: impl Read, output_directory: &Path) -> io::Result<()> {
     let tar = GzDecoder::new(archive);
     // note: this creates the skia-bindings/ directory.
-    Archive::new(tar).unpack(output_directory)?;
+    tar::Archive::new(tar).unpack(output_directory)?;
     let binaries_dir = output_directory.join(ARCHIVE_NAME);
     let paths: Vec<PathBuf> = fs::read_dir(binaries_dir)?
         .map(|e| e.unwrap().path())

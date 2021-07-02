@@ -1,13 +1,12 @@
-use crate::gpu::DriverBugWorkarounds;
-use crate::prelude::*;
-use skia_bindings as sb;
-use skia_bindings::GrContextOptions;
+use crate::{gpu::DriverBugWorkarounds, prelude::*};
+use skia_bindings::{self as sb, GrContextOptions};
 use std::os::raw;
 
 pub use skia_bindings::GrContextOptions_Enable as Enable;
 pub use skia_bindings::GrContextOptions_ShaderCacheStrategy as ShaderCacheStrategy;
 
 #[repr(C)]
+#[derive(Debug)]
 pub struct ContextOptions {
     pub suppress_prints: bool,
     pub skip_gl_error_checks: Enable,
@@ -37,6 +36,7 @@ pub struct ContextOptions {
     pub max_cached_vulkan_secondary_command_buffers: raw::c_int,
     pub suppress_mipmap_support: bool,
     pub driver_bug_workarounds: DriverBugWorkarounds,
+    pub enable_experimental_hardware_tessellation: bool,
 }
 unsafe impl Send for ContextOptions {}
 unsafe impl Sync for ContextOptions {}

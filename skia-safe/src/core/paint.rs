@@ -1,10 +1,9 @@
-use crate::prelude::*;
 use crate::{
-    scalar, BlendMode, Color, Color4f, ColorFilter, ColorSpace, FilterQuality, ImageFilter,
+    prelude::*, scalar, BlendMode, Color, Color4f, ColorFilter, ColorSpace, ImageFilter,
     MaskFilter, Path, PathEffect, Rect, Shader,
 };
-use skia_bindings as sb;
-use skia_bindings::SkPaint;
+use core::fmt;
+use skia_bindings::{self as sb, SkPaint};
 use std::hash::{Hash, Hasher};
 use std::ptr;
 
@@ -60,7 +59,27 @@ impl Default for Handle<SkPaint> {
     }
 }
 
-impl Handle<SkPaint> {
+impl fmt::Debug for Paint {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Paint")
+            .field("is_anti_alias", &self.is_anti_alias())
+            .field("is_dither", &self.is_dither())
+            .field("style", &self.style())
+            .field("color", &self.color4f())
+            .field("stroke_width", &self.stroke_width())
+            .field("stroke_miter", &self.stroke_miter())
+            .field("stroke_cap", &self.stroke_cap())
+            .field("stroke_join", &self.stroke_join())
+            .field("color_filter", &self.color_filter())
+            .field("blend_mode", &self.blend_mode())
+            .field("path_effect", &self.path_effect())
+            .field("mask_filter", &self.mask_filter())
+            .field("image_filter", &self.image_filter())
+            .finish()
+    }
+}
+
+impl Paint {
     pub fn new<'a>(
         color: impl AsRef<Color4f>,
         color_space: impl Into<Option<&'a ColorSpace>>,
@@ -104,16 +123,6 @@ impl Handle<SkPaint> {
                 .fBitfields
                 .set_fDither(dither as _);
         }
-        self
-    }
-
-    pub fn filter_quality(&self) -> FilterQuality {
-        unsafe { sb::C_SkPaint_getFilterQuality(self.native()) }
-    }
-
-    #[deprecated(since = "0.38.0")]
-    pub fn set_filter_quality(&mut self, quality: FilterQuality) -> &mut Self {
-        unsafe { self.native_mut().setFilterQuality(quality) }
         self
     }
 

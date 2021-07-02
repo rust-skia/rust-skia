@@ -14,6 +14,7 @@ pub use impls::*;
 #[cfg(feature = "textlayout")]
 pub mod icu;
 
+#[allow(unused_imports)]
 #[doc(hidden)]
 #[cfg(feature = "use-system-jpeg-turbo")]
 use mozjpeg_sys;

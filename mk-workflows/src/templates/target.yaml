@@ -1,0 +1,72 @@
+- name: 'Install Rust target $[[target]]'
+  shell: bash
+  run: |
+    rustup target add $[[target]]
+
+- name: 'Build all targets in skia-safe for $[[target]] with features $[[features]]'
+  shell: bash
+  run: |
+    if [ "$[[androidEnv]]" == "true" ]; then
+      TARGET=$[[target]]
+      TARGET=${TARGET//-/_}
+      export CC_${TARGET}=$[[target]]$[[androidAPILevel]]-clang$[[hostBinExt]]
+      export CXX_${TARGET}=$[[target]]$[[androidAPILevel]]-clang++$[[hostBinExt]]
+      TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
+      export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=$[[target]]$[[androidAPILevel]]-clang$[[hostBinExt]]
+      echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
+    fi
+    cargo clean
+    cargo build -p skia-safe --all-targets --release --features "$[[features]]" --target $[[target]]
+    echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
+    echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
+    echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
+  env:
+    BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+
+- name: 'Run Clippy'
+  shell: bash
+  if: $[[runClippy]]
+  run: |
+    cargo clippy --release --features "$[[features]]" --all-targets --target $[[target]] -- -D warnings
+
+- name: 'Test all workspace projects'
+  shell: bash
+  if: $[[runTests]]
+  run: |
+    cargo test --all --release --features "$[[features]]" --all-targets --target $[[target]] -- --nocapture
+  
+- name: 'Generate skia-org example images'
+  shell: bash
+  if: $[[generateArtifacts]]
+  run: |
+    cargo run --release --features "$[[features]]" --target $[[target]] "${{ env.SKIA_STAGING_PATH }}/skia-org" $[[exampleArgs]]
+
+- name: 'Upload skia-org example images'
+  if: $[[generateArtifacts]]
+  uses: actions/upload-artifact@v2
+  with:
+    name: skia-org-images-$[[target]]
+    path: ${{ env.SKIA_STAGING_PATH }}/skia-org
+
+- name: 'Compress binaries'
+  if: $[[releaseBinaries]]
+  uses: master-atul/tar-action@v1.0.2
+  with:
+    command: c
+    cwd: '${{ env.SKIA_STAGING_PATH }}'
+    files: 'skia-binaries'
+    outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+
+- name: 'Release binaries'
+  if: $[[releaseBinaries]]
+  uses: ncipollo/release-action@v1
+  with:
+    owner: rust-skia
+    repo: skia-binaries
+    allowUpdates: true
+    replacesArtifacts: true
+    tag: '${{ env.SKIA_BINARIES_TAG }}'
+    artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+    artifactErrorsFailBuild: true
+    token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
+    prerelease: true

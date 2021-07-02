@@ -1,9 +1,7 @@
-use crate::prelude::*;
-use crate::ColorFilter;
+use crate::{prelude::*, ColorFilter};
 use skia_bindings as sb;
-use skia_bindings::SkColorFilter;
 
-impl RCHandle<SkColorFilter> {
+impl ColorFilter {
     pub fn from_table(table: &[u8; 256]) -> Self {
         from_table(table)
     }

@@ -9,7 +9,7 @@ keywords = ["skia", "rust-bindings", "vulkan", "opengl", "pdf"]
 categories = ["external-ffi-bindings", "graphics", "multimedia::images", "rendering::graphics-api", "visualization"]
 license = "MIT"
 
-version = "0.39.1"
+version = "0.40.2"
 authors = ["LongYinan <lynweklm@gmail.com>", "Armin Sander <armin@replicator.org>"]
 edition = "2018"
 build = "build.rs"
@@ -32,11 +32,11 @@ doctest = false
 # Metadata used from inside the packaged crate that defines where to download skia and depot_tools archives from.
 # Note: use short hashes here because of filesystem path size restrictions.
 [package.metadata]
-skia = "m90-0.38.3"
-depot_tools = "a110bf6"
+skia = "m91-0.39.4"
+depot_tools = "fade894"
 
 [features]
-default = []
+default = ["binary-cache"]
 gl = []
 egl = []
 wayland = []
@@ -53,6 +53,7 @@ use-system-jpeg-turbo = ["mozjpeg-sys"]
 # deprecated since 0.25.0
 svg = []
 shaper = ["textlayout"]
+binary-cache = ["ureq", "flate2", "tar"]
 
 [dependencies]
 
@@ -68,9 +69,9 @@ regex = "1.4.5"
 heck = "0.3.1"
 
 # for downloading and extracting prebuilt binaries and skia / depot_tools archives:
-ureq = "2.0.1"
-flate2 = "1.0.7"
-tar = "0.4.26"
+ureq = { version = "2.0.1", optional = true }
+flate2 = { version = "1.0.7", optional = true }
+tar = { version = "0.4.26", optional = true }
 
 # On the CI we don't specify the libclang location explicitly and PATH contains
 # multiple of them. clang-sys version 1.0.2 changed the resolvement order.

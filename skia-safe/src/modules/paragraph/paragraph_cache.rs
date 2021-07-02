@@ -1,6 +1,7 @@
+use std::fmt;
+
 use crate::prelude::*;
-use skia_bindings as sb;
-use skia_bindings::skia_textlayout_ParagraphCache;
+use skia_bindings::{self as sb, skia_textlayout_ParagraphCache};
 
 pub type ParagraphCache = Handle<skia_textlayout_ParagraphCache>;
 
@@ -10,7 +11,13 @@ impl NativeDrop for skia_textlayout_ParagraphCache {
     }
 }
 
-impl Handle<skia_textlayout_ParagraphCache> {
+impl fmt::Debug for ParagraphCache {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ParagraphCache").finish()
+    }
+}
+
+impl ParagraphCache {
     pub fn new() -> ParagraphCache {
         ParagraphCache::from_native_c(unsafe { skia_textlayout_ParagraphCache::new() })
     }

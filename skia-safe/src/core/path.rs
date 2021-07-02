@@ -1,13 +1,9 @@
-use crate::interop::DynamicMemoryWStream;
-use crate::matrix::ApplyPerspectiveClip;
-use crate::prelude::*;
 use crate::{
-    path_types, scalar, Data, Matrix, PathDirection, PathFillType, Point, RRect, Rect, Vector,
+    interop::DynamicMemoryWStream, matrix::ApplyPerspectiveClip, path_types, prelude::*, scalar,
+    Data, Matrix, PathDirection, PathFillType, Point, RRect, Rect, Vector,
 };
-use skia_bindings as sb;
-use skia_bindings::{SkPath, SkPath_Iter, SkPath_RawIter};
-use std::mem::forget;
-use std::{marker::PhantomData, ptr};
+use skia_bindings::{self as sb, SkPath, SkPath_Iter, SkPath_RawIter};
+use std::{fmt, marker::PhantomData, mem::forget, ptr};
 
 #[deprecated(since = "0.25.0", note = "use PathDirection")]
 pub use path_types::PathDirection as Direction;
@@ -56,6 +52,16 @@ impl Drop for Iter<'_> {
 impl Default for Iter<'_> {
     fn default() -> Self {
         Iter(unsafe { SkPath_Iter::new() }, PhantomData)
+    }
+}
+
+impl fmt::Debug for Iter<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Iter")
+            .field("conic_weight", &self.conic_weight())
+            .field("is_close_line", &self.is_close_line())
+            .field("is_closed_contour", &self.is_closed_contour())
+            .finish()
     }
 }
 
@@ -203,7 +209,31 @@ impl Default for Handle<SkPath> {
     }
 }
 
-impl Handle<SkPath> {
+impl fmt::Debug for Path {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Path")
+            .field("fill_type", &self.fill_type())
+            .field("is_convex", &self.is_convex())
+            .field("is_oval", &self.is_oval())
+            .field("is_rrect", &self.is_rrect())
+            .field("is_empty", &self.is_empty())
+            .field("is_last_contour_closed", &self.is_last_contour_closed())
+            .field("is_finite", &self.is_finite())
+            .field("is_volatile", &self.is_volatile())
+            .field("is_line", &self.is_line())
+            .field("count_points", &self.count_points())
+            .field("count_verbs", &self.count_verbs())
+            .field("approximate_bytes_used", &self.approximate_bytes_used())
+            .field("bounds", &self.bounds())
+            .field("is_rect", &self.is_rect())
+            .field("segment_masks", &self.segment_masks())
+            .field("generation_id", &self.generation_id())
+            .field("is_valid", &self.is_valid())
+            .finish()
+    }
+}
+
+impl Path {
     pub fn new_from(
         points: &[Point],
         verbs: &[u8],
@@ -937,10 +967,7 @@ impl Handle<SkPath> {
         m: &Matrix,
         pc: impl Into<Option<ApplyPerspectiveClip>>,
     ) -> Path {
-        self.with_transform_with_perspective_clip(
-            &m,
-            pc.into().unwrap_or(ApplyPerspectiveClip::Yes),
-        )
+        self.with_transform_with_perspective_clip(m, pc.into().unwrap_or(ApplyPerspectiveClip::Yes))
     }
 
     pub fn make_scale(&mut self, (sx, sy): (scalar, scalar)) -> Path {

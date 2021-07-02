@@ -49,7 +49,7 @@ fn main() {
         pixel_format
     );
 
-    gl::load_with(|s| windowed_context.get_proc_address(&s));
+    gl::load_with(|s| windowed_context.get_proc_address(s));
 
     let mut gr_context = skia_safe::gpu::DirectContext::new_gl(None, None).unwrap();
 
@@ -96,11 +96,27 @@ fn main() {
         .unwrap()
     }
 
-    let mut surface = create_surface(&windowed_context, &fb_info, &mut gr_context);
+    let surface = create_surface(&windowed_context, &fb_info, &mut gr_context);
     // let sf = windowed_context.window().scale_factor() as f32;
     // surface.canvas().scale((sf, sf));
 
     let mut frame = 0;
+
+    // Guarantee the drop order inside the FnMut closure. `WindowedContext` _must_ be dropped after
+    // `DirectContext`.
+    //
+    // https://github.com/rust-skia/rust-skia/issues/476
+    struct Env {
+        surface: Surface,
+        gr_context: skia_safe::gpu::DirectContext,
+        windowed_context: WindowedContext,
+    }
+
+    let mut env = Env {
+        surface,
+        gr_context,
+        windowed_context,
+    };
 
     el.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
@@ -110,8 +126,9 @@ fn main() {
             Event::LoopDestroyed => {}
             Event::WindowEvent { event, .. } => match event {
                 WindowEvent::Resized(physical_size) => {
-                    surface = create_surface(&windowed_context, &fb_info, &mut gr_context);
-                    windowed_context.resize(physical_size)
+                    env.surface =
+                        create_surface(&env.windowed_context, &fb_info, &mut env.gr_context);
+                    env.windowed_context.resize(physical_size)
                 }
                 WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
                 WindowEvent::KeyboardInput {
@@ -129,18 +146,18 @@ fn main() {
                         }
                     }
                     frame += 1;
-                    windowed_context.window().request_redraw();
+                    env.windowed_context.window().request_redraw();
                 }
                 _ => (),
             },
             Event::RedrawRequested(_) => {
                 {
-                    let canvas = surface.canvas();
+                    let canvas = env.surface.canvas();
                     canvas.clear(Color::WHITE);
                     renderer::render_frame(frame % 360, 12, 60, canvas);
                 }
-                surface.canvas().flush();
-                windowed_context.swap_buffers().unwrap();
+                env.surface.canvas().flush();
+                env.windowed_context.swap_buffers().unwrap();
             }
             _ => (),
         }

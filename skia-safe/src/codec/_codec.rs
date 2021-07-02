@@ -3,7 +3,7 @@ use crate::{Data, EncodedImageFormat, EncodedOrigin, IRect, ISize, ImageInfo, Pi
 use ffi::CStr;
 use skia_bindings as sb;
 use skia_bindings::{SkCodec, SkCodec_Options, SkRefCntBase};
-use std::{ffi, mem, ptr};
+use std::{ffi, fmt, mem, ptr};
 
 pub use sb::SkCodec_Result as Result;
 
@@ -35,6 +35,20 @@ impl NativeBase<SkRefCntBase> for SkCodec {}
 
 impl NativeRefCountedBase for SkCodec {
     type Base = SkRefCntBase;
+}
+
+impl fmt::Debug for Codec {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Codec")
+            .field("info", &self.info())
+            .field("dimensions", &self.dimensions())
+            .field("bounds", &self.bounds())
+            .field("origin", &self.origin())
+            .field("encoded_format", &self.encoded_format())
+            .field("scanline_order", &self.scanline_order())
+            .field("next_scanline", &self.next_scanline())
+            .finish()
+    }
 }
 
 impl Codec {

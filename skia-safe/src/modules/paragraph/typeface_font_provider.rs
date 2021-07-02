@@ -1,9 +1,14 @@
-use crate::interop::AsStr;
-use crate::prelude::*;
-use crate::{interop, FontMgr, FontStyleSet, Typeface};
+use crate::{
+    interop::{self, AsStr},
+    prelude::*,
+    FontMgr, FontStyleSet, Typeface,
+};
 use skia_bindings as sb;
-use std::ops::{Deref, DerefMut};
-use std::ptr;
+use std::{
+    fmt,
+    ops::{Deref, DerefMut},
+    ptr,
+};
 
 pub type TypefaceFontStyleSet = RCHandle<sb::skia_textlayout_TypefaceFontStyleSet>;
 
@@ -11,20 +16,30 @@ impl NativeRefCountedBase for sb::skia_textlayout_TypefaceFontStyleSet {
     type Base = sb::SkRefCntBase;
 }
 
-impl Deref for RCHandle<sb::skia_textlayout_TypefaceFontStyleSet> {
+impl Deref for TypefaceFontStyleSet {
     type Target = FontStyleSet;
     fn deref(&self) -> &Self::Target {
         unsafe { transmute_ref(self) }
     }
 }
 
-impl DerefMut for RCHandle<sb::skia_textlayout_TypefaceFontStyleSet> {
+impl DerefMut for TypefaceFontStyleSet {
     fn deref_mut(&mut self) -> &mut Self::Target {
         unsafe { transmute_ref_mut(self) }
     }
 }
 
-impl RCHandle<sb::skia_textlayout_TypefaceFontStyleSet> {
+impl fmt::Debug for TypefaceFontStyleSet {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("TypefaceFontStyleSet")
+            .field("base", self as &FontStyleSet)
+            .field("family_name", &self.family_name())
+            .field("alias", &self.alias())
+            .finish()
+    }
+}
+
+impl TypefaceFontStyleSet {
     pub fn new(family_name: impl AsRef<str>) -> Self {
         let family = interop::String::from_str(family_name.as_ref());
         Self::from_ptr(unsafe { sb::C_TypefaceFontStyleSet_new(family.native()) }).unwrap()
@@ -50,20 +65,20 @@ impl NativeRefCountedBase for sb::skia_textlayout_TypefaceFontProvider {
     type Base = sb::SkRefCntBase;
 }
 
-impl Deref for RCHandle<sb::skia_textlayout_TypefaceFontProvider> {
+impl Deref for TypefaceFontProvider {
     type Target = FontMgr;
     fn deref(&self) -> &Self::Target {
         unsafe { transmute_ref(self) }
     }
 }
 
-impl DerefMut for RCHandle<sb::skia_textlayout_TypefaceFontProvider> {
+impl DerefMut for TypefaceFontProvider {
     fn deref_mut(&mut self) -> &mut Self::Target {
         unsafe { transmute_ref_mut(self) }
     }
 }
 
-impl Default for RCHandle<sb::skia_textlayout_TypefaceFontProvider> {
+impl Default for TypefaceFontProvider {
     fn default() -> Self {
         Self::new()
     }
@@ -75,7 +90,15 @@ impl From<TypefaceFontProvider> for FontMgr {
     }
 }
 
-impl RCHandle<sb::skia_textlayout_TypefaceFontProvider> {
+impl fmt::Debug for TypefaceFontProvider {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("TypefaceFontProvider")
+            .field("base", self as &FontMgr)
+            .finish()
+    }
+}
+
+impl TypefaceFontProvider {
     pub fn new() -> Self {
         Self::from_ptr(unsafe { sb::C_TypefaceFontProvider_new() }).unwrap()
     }

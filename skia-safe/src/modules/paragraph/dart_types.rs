@@ -1,8 +1,9 @@
-use crate::prelude::*;
-use crate::Rect;
+use crate::{prelude::*, Rect};
 use skia_bindings as sb;
-use std::cmp::{max, min};
-use std::ops::Range;
+use std::{
+    cmp::{max, min},
+    ops::Range,
+};
 
 pub use sb::skia_textlayout_Affinity as Affinity;
 pub use sb::skia_textlayout_RectHeightStyle as RectHeightStyle;
@@ -20,8 +21,8 @@ fn test_reexported_enum_name_conversion() {
 
 pub use sb::skia_textlayout_PositionWithAffinity as PositionWithAffinity;
 
-#[derive(Copy, Clone, PartialEq, Debug)]
 #[repr(C)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct TextBox {
     pub rect: Rect,
     pub direct: TextDirection,

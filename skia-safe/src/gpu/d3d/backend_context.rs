@@ -1,11 +1,9 @@
-use super::{cp, MemoryAllocator};
-use super::{ID3D12CommandQueue, ID3D12Device, IDXGIAdapter1};
-use crate::gpu;
-use crate::prelude::*;
+use super::{cp, ID3D12CommandQueue, ID3D12Device, IDXGIAdapter1, MemoryAllocator};
+use crate::{gpu, prelude::*};
 use skia_bindings::GrD3DBackendContext;
 
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BackendContext {
     pub adapter: cp<IDXGIAdapter1>,
     pub device: cp<ID3D12Device>,

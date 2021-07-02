@@ -1,4 +1,4 @@
-#![allow(clippy::clippy::upper_case_acronyms)]
+#![allow(clippy::upper_case_acronyms)]
 
 pub mod codec;
 #[deprecated(since = "0.33.1", note = "use codec::Result")]

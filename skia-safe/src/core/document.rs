@@ -1,6 +1,5 @@
-use crate::interop::DynamicMemoryWStream;
-use crate::prelude::*;
-use crate::{Canvas, Data, Rect, Size};
+use crate::{interop::DynamicMemoryWStream, prelude::*, Canvas, Data, Rect, Size};
+use core::fmt;
 use skia_bindings::{SkDocument, SkRefCntBase};
 use std::{pin::Pin, ptr};
 
@@ -17,30 +16,52 @@ impl NativeRefCountedBase for SkDocument {
     type Base = SkRefCntBase;
 }
 
+impl<State: fmt::Debug> fmt::Debug for Document<State> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Document")
+            .field("state", &self.state)
+            .finish()
+    }
+}
+
 pub mod state {
+    use crate::Canvas;
     use skia_bindings::SkCanvas;
-    use std::ptr;
+    use std::{fmt, ptr};
 
     /// Document is currently open. May contain several pages.
+    #[derive(Debug)]
     pub struct Open {
         pub(crate) pages: usize,
     }
 
     /// Document is currently on a page and can be drawn onto.
     pub struct OnPage {
-        pub(crate) canvas: ptr::NonNull<SkCanvas>,
         pub(crate) page: usize,
+        pub(crate) canvas: ptr::NonNull<SkCanvas>,
+    }
+
+    impl fmt::Debug for OnPage {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            f.debug_struct("OnPage")
+                .field("page", &self.page)
+                .field(
+                    "canvas",
+                    Canvas::borrow_from_native(unsafe { self.canvas.as_ref() }),
+                )
+                .finish()
+        }
     }
 }
 
-impl<S> Document<S> {
+impl<State> Document<State> {
     pub fn abort(mut self) {
         unsafe { self.document.native_mut().abort() }
         drop(self)
     }
 }
 
-impl Document {
+impl Document<state::Open> {
     pub(crate) fn new(
         stream: Pin<Box<DynamicMemoryWStream>>,
         document: RCHandle<SkDocument>,
@@ -101,7 +122,7 @@ impl Document<state::OnPage> {
 
     /// Borrows the canvas for the current page on the document.
     pub fn canvas(&mut self) -> &mut Canvas {
-        Canvas::borrow_from_native(unsafe { self.state.canvas.as_mut() })
+        Canvas::borrow_from_native_mut(unsafe { self.state.canvas.as_mut() })
     }
 
     /// Ends the page.
