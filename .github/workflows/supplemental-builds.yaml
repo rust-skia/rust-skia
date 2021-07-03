@@ -84,3 +84,37 @@ jobs:
         cargo build --features gl,vulkan,d3d,textlayout,webp
       env:
         RUSTFLAGS: '-Clink-dead-code'
+
+  windows-x86:
+    runs-on: windows-2019
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Install Rust
+      uses: hecrj/setup-rust-action@master
+      with:
+        rust-version: nightly
+
+    - name: Setup Python 2
+      uses: actions/setup-python@v2
+      with:
+        python-version: '2.7.18'
+        architecture: 'x64'
+
+    - name: Python Version
+      run: python --version
+
+    - name: Install LLVM
+      run: choco install llvm
+
+    - name: 'Install Rust target i686-pc-windows-msvc'
+      shell: bash
+      run: |
+        rustup target add i686-pc-windows-msvc
+    
+    - name: 'Build target i686-pc-windows-msvc (#540)'
+      run: |
+        cargo build --features gl,vulkan,d3d,textlayout,webp --target i686-pc-windows-msvc

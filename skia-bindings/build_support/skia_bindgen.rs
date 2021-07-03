@@ -1,7 +1,7 @@
 //! Full build support for the SkiaBindings library, and bindings.rs file.
 
 use crate::build_support::{android, binaries_config, cargo, features, ios, xcode};
-use bindgen::{CodegenConfig, EnumVariation};
+use bindgen::{CodegenConfig, EnumVariation, RustTarget};
 use cc::Build;
 use std::path::{Path, PathBuf};
 
@@ -64,7 +64,7 @@ impl FinalBuildConfiguration {
 }
 
 pub fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
-    let builder = bindgen::Builder::default()
+    let mut builder = bindgen::Builder::default()
         .generate_comments(false)
         .layout_tests(true)
         .default_enum_style(EnumVariation::Rust {
@@ -127,16 +127,22 @@ pub fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Pat
         .clang_args(&["-x", "c++"])
         .clang_arg("-v");
 
-    // don't generate destructors on Windows: https://github.com/rust-skia/rust-skia/issues/318
-    let mut builder = if cfg!(target_os = "windows") {
-        builder.with_codegen_config({
+    let target = cargo::target();
+
+    // Don't generate destructors for Windows targets: https://github.com/rust-skia/rust-skia/issues/318
+    if target.is_windows() {
+        builder = builder.with_codegen_config({
             let mut config = CodegenConfig::default();
             config.remove(CodegenConfig::DESTRUCTORS);
             config
-        })
-    } else {
-        builder
-    };
+        });
+    }
+
+    // 32-bit Windows needs `thiscall` support.
+    // https://github.com/rust-skia/rust-skia/issues/540
+    if target.is_windows() && target.architecture == "i686" {
+        builder = builder.rust_target(RustTarget::Nightly);
+    }
 
     for function in ALLOWLISTED_FUNCTIONS {
         builder = builder.allowlist_function(function)
