@@ -1,5 +1,8 @@
 use crate::build_support::{android, cargo, features, ios};
-use std::path::PathBuf;
+use std::{
+    fs, io,
+    path::{Path, PathBuf},
+};
 
 /// The libraries to link with.
 pub mod lib {
@@ -148,5 +151,34 @@ impl BinariesConfiguration {
 
         cargo::add_static_link_libs(&target, self.built_libraries());
         cargo::add_link_libs(&self.link_libraries);
+    }
+
+    /// Import library and additional files from `from_dir` to the output directory.
+    pub fn import(&self, from_dir: &Path) -> io::Result<()> {
+        let output_directory = &self.output_directory;
+        self.copy_libs_and_additional_files(from_dir, output_directory)
+    }
+
+    /// Export library and additional files from the output directory to a `to_dir`.
+    pub fn export(&self, to_dir: &Path) -> io::Result<()> {
+        let output_directory = &self.output_directory;
+        self.copy_libs_and_additional_files(output_directory, to_dir)
+    }
+
+    fn copy_libs_and_additional_files(&self, from_dir: &Path, to_dir: &Path) -> io::Result<()> {
+        fs::create_dir_all(&to_dir)?;
+
+        let target = cargo::target();
+
+        for lib in self.built_libraries() {
+            let filename = &target.library_to_filename(lib);
+            fs::copy(from_dir.join(filename), to_dir.join(filename))?;
+        }
+
+        for file in &self.additional_files {
+            fs::copy(from_dir.join(file), to_dir.join(file))?;
+        }
+
+        Ok(())
     }
 }

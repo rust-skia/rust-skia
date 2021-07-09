@@ -19,7 +19,8 @@ pub fn should_export() -> Option<PathBuf> {
 
 /// Export the binaries to a target directory.
 ///
-/// `source_files` are additional files from below skia-bindings/ that are copied to the target directory.
+/// `source_files` are additional files from below skia-bindings/ that are copied to the target
+/// directory.
 pub fn export(
     config: &binaries_config::BinariesConfiguration,
     source_files: &[(&str, &str)],
@@ -35,20 +36,7 @@ pub fn export(
         fs::copy(PathBuf::from(src), export_dir.join(PathBuf::from(dst)))?;
     }
 
-    let output_directory = &config.output_directory;
-
-    let target = cargo::target();
-
-    for lib in config.built_libraries() {
-        let filename = &target.library_to_filename(lib);
-        fs::copy(output_directory.join(filename), export_dir.join(filename))?;
-    }
-
-    for file in &config.additional_files {
-        fs::copy(output_directory.join(file), export_dir.join(file))?;
-    }
-
-    Ok(())
+    config.export(&export_dir)
 }
 
 /// Prepares the binaries directory and sets the tag.txt and key.txt
