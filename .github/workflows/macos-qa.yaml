@@ -20,6 +20,7 @@ jobs:
     runs-on: macOS-10.15
     env: 
       SKIA_DEBUG: 0
+      MACOSX_DEPLOYMENT_TARGET: '10.14'
     
     steps:
     - uses: actions/checkout@v2
@@ -257,6 +258,7 @@ jobs:
     runs-on: macOS-10.15
     env: 
       SKIA_DEBUG: 1
+      MACOSX_DEPLOYMENT_TARGET: '10.14'
     
     steps:
     - uses: actions/checkout@v2
@@ -494,6 +496,7 @@ jobs:
     runs-on: macOS-10.15
     env: 
       SKIA_DEBUG: 0
+      MACOSX_DEPLOYMENT_TARGET: '10.14'
     
     steps:
     - uses: actions/checkout@v2

@@ -224,6 +224,9 @@ impl FinalBuildConfiguration {
                             // version. So we don't push another target `--target` that may
                             // conflict.
                             set_target = false;
+                            // Add macOS specific environment variables that affect the output of a
+                            // build.
+                            cargo::rerun_if_changed("MACOSX_DEPLOYMENT_TARGET");
                             "mac"
                         }
                         "windows" => "win",
