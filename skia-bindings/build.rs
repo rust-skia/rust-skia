@@ -85,7 +85,7 @@ fn main() {
         if let Some(search_path) = env::skia_lib_search_path() {
             println!("STARTING BIND AGAINST SYSTEM SKIA");
 
-            binaries_config.import(&search_path).unwrap();
+            binaries_config.import(&search_path, false).unwrap();
 
             let definitions = skia_bindgen::definitions::from_env();
             generate_bindings(&features, definitions, &binaries_config, &source_dir);

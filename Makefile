@@ -113,6 +113,8 @@ prepare-local-build:
 	# Windows
 	find target -name "sk*.lib" -type f -exec cp {} tmp/ \;
 	find target -name "icudtl.dat" -type f -exec cp {} tmp/ \;
+	# The bindings are expected to be regenerated in a local build.
+	rm tmp/*-bindings.*
 
 build-local-build:
 	cargo clean
