@@ -1,5 +1,6 @@
-mod build_support;
 use build_support::{binaries_config, cargo, features, skia, skia_bindgen};
+
+mod build_support;
 
 /// Environment variables used by this build script.
 mod env {
@@ -52,7 +53,7 @@ fn generate_bindings(
 ) {
     // Emit the ninja definitions, to help debug build consistency.
     skia_bindgen::definitions::save_definitions(&definitions, &binaries_config.output_directory)
-        .expect("failed to write ninja defines");
+        .expect("failed to write Skia defines");
 
     let bindings_config = skia_bindgen::FinalBuildConfiguration::from_build_configuration(
         features,
@@ -84,7 +85,7 @@ fn main() {
         if let Some(search_path) = env::skia_lib_search_path() {
             println!("STARTING BIND AGAINST SYSTEM SKIA");
 
-            cargo::add_link_search(&search_path.to_str().unwrap());
+            binaries_config.import(&search_path, false).unwrap();
 
             let definitions = skia_bindgen::definitions::from_env();
             generate_bindings(&features, definitions, &binaries_config, &source_dir);
