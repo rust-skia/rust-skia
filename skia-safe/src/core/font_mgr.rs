@@ -128,7 +128,7 @@ impl FontMgr {
         (0..self.count_families()).map(move |i| self.family_name(i))
     }
 
-    #[deprecated(since = "0.0.0", note = "Use new_style_set")]
+    #[deprecated(since = "0.41.0", note = "Use new_style_set")]
     pub fn new_styleset(&self, index: usize) -> FontStyleSet {
         self.new_style_set(index)
     }

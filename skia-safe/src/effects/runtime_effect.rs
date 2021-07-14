@@ -81,7 +81,7 @@ pub mod uniform {
     }
 }
 
-#[deprecated(since = "0.0.0", note = "Use Child instead")]
+#[deprecated(since = "0.41.0", note = "Use Child")]
 pub type Varying = Child;
 
 pub type Child = Handle<SkRuntimeEffect_Child>;

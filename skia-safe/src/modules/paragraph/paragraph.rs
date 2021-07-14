@@ -173,10 +173,10 @@ impl Paragraph {
     // TODO: wrap visit()
 }
 
-#[deprecated(since = "0.0.0", note = "Use Vec<TextBox>")]
+#[deprecated(since = "0.41.0", note = "Use Vec<TextBox>")]
 pub type TextBoxes = Vec<TextBox>;
 
-#[deprecated(since = "0.0.0", note = "Use Vec<LineMetrics>")]
+#[deprecated(since = "0.41.0", note = "Use Vec<LineMetrics>")]
 pub type LineMetricsVector<'a> = Vec<LineMetrics<'a>>;
 
 #[cfg(test)]
