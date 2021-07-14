@@ -131,10 +131,12 @@ impl TypefaceFontProvider {
 
 #[cfg(test)]
 mod tests {
-    use super::super::{FontCollection, TypefaceFontProvider};
-    use super::TypefaceFontStyleSet;
-    use crate::prelude::{NativeAccess, NativeRefCounted, NativeRefCountedBase};
-    use crate::Typeface;
+    use super::{TypefaceFontProvider, TypefaceFontStyleSet};
+    use crate::{
+        prelude::{NativeAccess, NativeRefCounted, NativeRefCountedBase},
+        textlayout::FontCollection,
+        Typeface,
+    };
 
     #[test]
     #[serial_test::serial]

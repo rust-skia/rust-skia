@@ -166,6 +166,7 @@ pub struct TopLayerPixels<'a> {
 }
 
 /// Used to pass either a slice of [`Point`] or [`RSXform`] to [`Canvas::draw_glyphs_at`].
+#[derive(Clone, Debug)]
 pub enum GlyphPositions<'a> {
     Points(&'a [Point]),
     RSXforms(&'a [RSXform]),

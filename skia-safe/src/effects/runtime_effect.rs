@@ -96,7 +96,25 @@ impl NativeDrop for SkRuntimeEffect_Child {
 
 impl fmt::Debug for Child {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.native().fmt(f)
+        f.debug_struct("Child")
+            .field("name", &self.name())
+            .field("type", &self.ty())
+            .field("index", &self.index())
+            .finish()
+    }
+}
+
+impl Child {
+    pub fn name(&self) -> &str {
+        self.native().name.as_str()
+    }
+
+    pub fn ty(&self) -> ChildType {
+        self.native().type_
+    }
+
+    pub fn index(&self) -> usize {
+        self.native().index.try_into().unwrap()
     }
 }
 
@@ -131,6 +149,7 @@ impl fmt::Debug for RuntimeEffect {
         f.debug_struct("RuntimeEffect")
             .field("uniform_size", &self.uniform_size())
             .field("uniforms", &self.uniforms())
+            .field("children", &self.children())
             .finish()
     }
 }
