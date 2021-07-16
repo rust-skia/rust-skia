@@ -1,4 +1,4 @@
-use crate::{prelude::*, Contains, IPoint, IRect, IVector, Path, QuickReject};
+use crate::{native_transmutable, prelude::*, Contains, IPoint, IRect, IVector, Path, QuickReject};
 use skia_bindings::{
     self as sb, SkRegion, SkRegion_Cliperator, SkRegion_Iterator, SkRegion_RunHead,
     SkRegion_Spanerator,
@@ -332,11 +332,7 @@ impl QuickReject<Region> for Region {
 #[repr(transparent)]
 pub struct Iterator<'a>(SkRegion_Iterator, PhantomData<&'a Region>);
 
-impl NativeTransmutable<SkRegion_Iterator> for Iterator<'_> {}
-#[test]
-fn test_iterator_layout() {
-    Iterator::test_layout();
-}
+native_transmutable!(SkRegion_Iterator, Iterator<'_>, iterator_layout);
 
 impl fmt::Debug for Iterator<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -422,11 +418,7 @@ fn test_iterator() {
 #[repr(transparent)]
 pub struct Cliperator<'a>(SkRegion_Cliperator, PhantomData<&'a Region>);
 
-impl<'a> NativeTransmutable<SkRegion_Cliperator> for Cliperator<'a> {}
-#[test]
-fn test_cliperator_layout() {
-    Cliperator::test_layout();
-}
+native_transmutable!(SkRegion_Cliperator, Cliperator<'_>, cliperator_layout);
 
 impl Drop for Cliperator<'_> {
     fn drop(&mut self) {
@@ -479,11 +471,7 @@ impl<'a> iter::Iterator for Cliperator<'a> {
 #[repr(transparent)]
 pub struct Spanerator<'a>(SkRegion_Spanerator, PhantomData<&'a Region>);
 
-impl NativeTransmutable<SkRegion_Spanerator> for Spanerator<'_> {}
-#[test]
-fn test_spanerator_layout() {
-    Spanerator::test_layout();
-}
+native_transmutable!(SkRegion_Spanerator, Spanerator<'_>, spanerator_layout);
 
 impl Drop for Spanerator<'_> {
     fn drop(&mut self) {

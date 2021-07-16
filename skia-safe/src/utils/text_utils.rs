@@ -4,7 +4,7 @@ use skia_bindings::SkTextUtils;
 
 pub use skia_bindings::SkTextUtils_Align as Align;
 #[test]
-fn test_align_layout() {
+fn test_align_naming() {
     let _ = Align::Center;
 }
 

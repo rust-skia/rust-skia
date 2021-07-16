@@ -1,3 +1,4 @@
+use crate::native_transmutable;
 use crate::{gpu::DriverBugWorkarounds, prelude::*};
 use skia_bindings::{self as sb, GrContextOptions};
 use std::os::raw;
@@ -53,11 +54,10 @@ impl ContextOptions {
     }
 }
 
-impl NativeTransmutable<GrContextOptions> for ContextOptions {}
+native_transmutable!(GrContextOptions, ContextOptions, context_options_layout);
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::NativeTransmutable;
     #[test]
     fn test_enable_naming() {
         let _ = super::Enable::Yes;
@@ -66,10 +66,5 @@ mod tests {
     #[test]
     fn test_shader_cache_strategy_naming() {
         let _ = super::ShaderCacheStrategy::BackendSource;
-    }
-
-    #[test]
-    fn test_context_options_layout() {
-        super::ContextOptions::test_layout()
     }
 }

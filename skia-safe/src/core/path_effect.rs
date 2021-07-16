@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{native_transmutable, prelude::*};
 use crate::{scalar, Matrix, NativeFlattenable, Path, Point, Rect, StrokeRec, Vector};
 use skia_bindings as sb;
 use skia_bindings::{
@@ -22,14 +22,13 @@ pub struct PointData {
 unsafe impl Send for PointData {}
 unsafe impl Sync for PointData {}
 
-impl NativeTransmutable<SkPathEffect_PointData> for PointData {}
+native_transmutable!(SkPathEffect_PointData, PointData, point_data_layout);
 
 #[test]
-fn test_point_data_layout() {
+fn test_point_data_fields_layout() {
     Point::test_layout();
     Vector::test_layout();
     Rect::test_layout();
-    PointData::test_layout();
 }
 
 impl Drop for PointData {

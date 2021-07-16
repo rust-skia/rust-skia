@@ -1,6 +1,7 @@
 use super::{FontFamilies, TextBaseline, TextShadow};
 use crate::{
     interop::{self, AsStr, FromStrs, SetStr},
+    native_transmutable,
     prelude::*,
     scalar,
     textlayout::{RangeExtensions, EMPTY_INDEX, EMPTY_RANGE},
@@ -59,12 +60,11 @@ pub struct Decoration {
     pub thickness_multiplier: scalar,
 }
 
-impl NativeTransmutable<sb::skia_textlayout_Decoration> for Decoration {}
-
-#[test]
-fn decoration_layout() {
-    Decoration::test_layout();
-}
+native_transmutable!(
+    sb::skia_textlayout_Decoration,
+    Decoration,
+    decoration_layout
+);
 
 pub use sb::skia_textlayout_PlaceholderAlignment as PlaceholderAlignment;
 
@@ -125,11 +125,11 @@ pub struct PlaceholderStyle {
     pub baseline_offset: scalar,
 }
 
-impl NativeTransmutable<sb::skia_textlayout_PlaceholderStyle> for PlaceholderStyle {}
-#[test]
-fn placeholder_style_layout() {
-    PlaceholderStyle::test_layout()
-}
+native_transmutable!(
+    sb::skia_textlayout_PlaceholderStyle,
+    PlaceholderStyle,
+    placeholder_style_layout
+);
 
 impl PartialEq for PlaceholderStyle {
     fn eq(&self, other: &Self) -> bool {
@@ -450,11 +450,7 @@ pub struct Block {
     pub style: TextStyle,
 }
 
-impl NativeTransmutable<sb::skia_textlayout_Block> for Block {}
-#[test]
-fn block_layout() {
-    Block::test_layout()
-}
+native_transmutable!(sb::skia_textlayout_Block, Block, block_layout);
 
 impl Default for Block {
     fn default() -> Self {
@@ -496,12 +492,11 @@ pub struct Placeholder {
     pub text_before: TextRange,
 }
 
-impl NativeTransmutable<sb::skia_textlayout_Placeholder> for Placeholder {}
-
-#[test]
-fn placeholder_layout() {
-    Placeholder::test_layout()
-}
+native_transmutable!(
+    sb::skia_textlayout_Placeholder,
+    Placeholder,
+    placeholder_layout
+);
 
 impl Default for Placeholder {
     fn default() -> Self {

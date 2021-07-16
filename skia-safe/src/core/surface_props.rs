@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{native_transmutable, prelude::*};
 use skia_bindings::{self as sb, SkPixelGeometry, SkSurfaceProps};
 use std::fmt;
 
@@ -13,11 +13,7 @@ pub enum PixelGeometry {
     BGRV = SkPixelGeometry::kBGR_V_SkPixelGeometry as _,
 }
 
-impl NativeTransmutable<SkPixelGeometry> for PixelGeometry {}
-#[test]
-fn test_pixel_geometry_layout() {
-    PixelGeometry::test_layout()
-}
+native_transmutable!(SkPixelGeometry, PixelGeometry, pixel_geometry_layout);
 
 impl PixelGeometry {
     pub fn is_rgb(self) -> bool {
@@ -60,10 +56,7 @@ impl Default for SurfacePropsFlags {
 #[repr(transparent)]
 pub struct SurfaceProps(SkSurfaceProps);
 
-impl NativeTransmutable<SkSurfaceProps> for SurfaceProps {}
-pub fn test_surface_props_layout() {
-    SurfaceProps::test_layout()
-}
+native_transmutable!(SkSurfaceProps, SurfaceProps, surface_props_layout);
 
 impl Clone for SurfaceProps {
     fn clone(&self) -> Self {

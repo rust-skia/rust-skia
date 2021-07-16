@@ -1,5 +1,7 @@
 use super::scalar_;
-use crate::{prelude::*, scalar, Point, Point3, RSXform, Rect, Scalar, Size, Vector};
+use crate::{
+    native_transmutable, prelude::*, scalar, Point, Point3, RSXform, Rect, Scalar, Size, Vector,
+};
 use skia_bindings as sb;
 use skia_bindings::SkMatrix;
 use std::ops::{Index, IndexMut, Mul};
@@ -33,7 +35,7 @@ pub struct Matrix {
     type_mask: u32,
 }
 
-impl NativeTransmutable<SkMatrix> for Matrix {}
+native_transmutable!(SkMatrix, Matrix, matrix_layout);
 
 impl PartialEq for Matrix {
     fn eq(&self, rhs: &Self) -> bool {
@@ -831,11 +833,6 @@ mod tests {
     #[test]
     fn test_matrix_scale_to_fit_naming() {
         let _ = ScaleToFit::End;
-    }
-
-    #[test]
-    fn test_matrix_layout() {
-        Matrix::test_layout()
     }
 
     #[test]

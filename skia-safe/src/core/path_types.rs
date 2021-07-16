@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{native_transmutable, prelude::*};
 use skia_bindings as sb;
 use skia_bindings::{SkPathVerb, SkPath_Verb};
 
@@ -29,8 +29,4 @@ fn test_path_verb_naming() {
     let _ = PathVerb::Conic;
 }
 
-impl NativeTransmutable<SkPath_Verb> for SkPathVerb {}
-#[test]
-fn test_verb_layout() {
-    SkPathVerb::test_layout();
-}
+native_transmutable!(SkPath_Verb, SkPathVerb, path_verb_layout);

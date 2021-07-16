@@ -1,9 +1,8 @@
-use crate::{prelude::*, Rect};
+use crate::{native_transmutable, prelude::*, Rect};
 #[allow(deprecated)]
 use crate::{scalar, Matrix, Matrix44, Scalars};
 use bitflags::_core::ops::{AddAssign, MulAssign};
-use skia_bindings as sb;
-use skia_bindings::{SkM44, SkV2, SkV3, SkV4};
+use skia_bindings::{self as sb, SkM44, SkV2, SkV3, SkV4};
 use std::{
     f32,
     ops::{Add, Div, DivAssign, Index, Mul, Neg, Sub, SubAssign},
@@ -17,12 +16,7 @@ pub struct V2 {
     pub y: f32,
 }
 
-impl NativeTransmutable<SkV2> for V2 {}
-
-#[test]
-fn test_v2_layout() {
-    V2::test_layout();
-}
+native_transmutable!(SkV2, V2, v2_layout);
 
 impl V2 {
     pub const fn new(x: f32, y: f32) -> Self {
@@ -157,12 +151,7 @@ pub struct V3 {
     pub z: f32,
 }
 
-impl NativeTransmutable<SkV3> for V3 {}
-
-#[test]
-fn test_v3_layout() {
-    V3::test_layout();
-}
+native_transmutable!(SkV3, V3, v3_layout);
 
 impl V3 {
     pub const fn new(x: f32, y: f32, z: f32) -> Self {
@@ -289,12 +278,7 @@ pub struct V4 {
     pub w: f32,
 }
 
-impl NativeTransmutable<SkV4> for V4 {}
-
-#[test]
-fn test_v4_layout() {
-    V4::test_layout();
-}
+native_transmutable!(SkV4, V4, v4_layout);
 
 impl V4 {
     pub const fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
@@ -402,12 +386,7 @@ pub struct M44 {
     mat: [f32; Self::COMPONENTS],
 }
 
-impl NativeTransmutable<SkM44> for M44 {}
-
-#[test]
-fn test_m44_layout() {
-    M44::test_layout()
-}
+native_transmutable!(SkM44, M44, m44_layout);
 
 impl Default for M44 {
     fn default() -> Self {

@@ -1,10 +1,10 @@
-use crate::prelude::*;
+use crate::{native_transmutable, prelude::*};
 use skia_bindings as sb;
 use std::ptr;
 
 pub use skia_bindings::GrBackendApi as BackendAPI;
 #[test]
-fn test_backend_api_layout() {
+fn test_backend_api_naming() {
     let _ = BackendAPI::Dawn;
 }
 
@@ -70,11 +70,7 @@ impl Default for FlushInfo {
     }
 }
 
-impl NativeTransmutable<sb::GrFlushInfo> for FlushInfo {}
-#[test]
-fn test_flush_info_layout() {
-    FlushInfo::test_layout();
-}
+native_transmutable!(sb::GrFlushInfo, FlushInfo, flush_info_layout);
 
 pub use sb::GrSemaphoresSubmitted as SemaphoresSubmitted;
 #[test]

@@ -1,4 +1,4 @@
-use crate::{prelude::*, scalar};
+use crate::{native_transmutable, prelude::*, scalar};
 use skia_bindings::{self as sb, SkISize, SkSize};
 use std::ops::{Div, DivAssign, Mul, MulAssign};
 
@@ -9,12 +9,7 @@ pub struct ISize {
     pub height: i32,
 }
 
-impl NativeTransmutable<SkISize> for ISize {}
-
-#[test]
-fn test_isize_layout() {
-    ISize::test_layout()
-}
+native_transmutable!(SkISize, ISize, isize_layout);
 
 impl ISize {
     pub const fn new(w: i32, h: i32) -> ISize {
@@ -62,12 +57,7 @@ pub struct Size {
     pub height: scalar,
 }
 
-impl NativeTransmutable<SkSize> for Size {}
-
-#[test]
-fn test_size_layout() {
-    Size::test_layout()
-}
+native_transmutable!(SkSize, Size, size_layout);
 
 impl Size {
     pub const fn new(w: scalar, h: scalar) -> Size {

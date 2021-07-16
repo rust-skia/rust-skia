@@ -1,4 +1,4 @@
-use crate::{prelude::*, Rect};
+use crate::{native_transmutable, prelude::*, Rect};
 use skia_bindings as sb;
 use std::{
     cmp::{max, min},
@@ -28,12 +28,7 @@ pub struct TextBox {
     pub direct: TextDirection,
 }
 
-impl NativeTransmutable<sb::skia_textlayout_TextBox> for TextBox {}
-
-#[test]
-fn text_box_layout() {
-    TextBox::test_layout()
-}
+native_transmutable!(sb::skia_textlayout_TextBox, TextBox, text_box_layout);
 
 pub const EMPTY_INDEX: usize = std::usize::MAX;
 

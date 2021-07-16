@@ -1,4 +1,5 @@
 use super::image_info;
+use crate::native_transmutable;
 use crate::{prelude::*, EncodedOrigin, ISize, Matrix};
 use skia_bindings::{self as sb, SkYUVAInfo, SkYUVAInfo_Subsampling};
 
@@ -45,7 +46,7 @@ pub enum Subsampling {
     S410 = SkYUVAInfo_Subsampling::k410 as _,
 }
 
-impl NativeTransmutable<SkYUVAInfo_Subsampling> for Subsampling {}
+native_transmutable!(SkYUVAInfo_Subsampling, Subsampling, subsampling_layout);
 
 /// Describes how subsampled chroma values are sited relative to luma values.
 ///
@@ -295,16 +296,9 @@ impl YUVAInfo {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::NativeTransmutable;
-
     #[test]
     fn test_plane_config_naming() {
         let _ = super::PlaneConfig::Y_U_V;
-    }
-
-    #[test]
-    fn test_subsampling_layout() {
-        super::Subsampling::test_layout();
     }
 
     #[test]

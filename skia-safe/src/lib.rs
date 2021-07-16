@@ -38,9 +38,7 @@ pub use crate::pathops::*;
 
 #[cfg(test)]
 mod transmutation_tests {
-
-    use crate::prelude::NativeTransmutableSliceAccess;
-    use crate::Point;
+    use crate::{prelude::NativeTransmutableSliceAccess, Point};
     use skia_bindings::SkPoint;
 
     #[test]

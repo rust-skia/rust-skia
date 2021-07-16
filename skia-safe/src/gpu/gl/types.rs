@@ -1,3 +1,4 @@
+use crate::native_transmutable;
 use crate::prelude::*;
 use skia_bindings::{self as sb, GrGLFramebufferInfo, GrGLTextureInfo};
 
@@ -14,7 +15,7 @@ pub struct TextureInfo {
     pub format: Enum,
 }
 
-impl NativeTransmutable<GrGLTextureInfo> for TextureInfo {}
+native_transmutable!(GrGLTextureInfo, TextureInfo, text_info_layout);
 
 impl PartialEq for TextureInfo {
     fn eq(&self, other: &Self) -> bool {
@@ -50,7 +51,11 @@ pub struct FramebufferInfo {
     pub format: Enum,
 }
 
-impl NativeTransmutable<GrGLFramebufferInfo> for FramebufferInfo {}
+native_transmutable!(
+    GrGLFramebufferInfo,
+    FramebufferInfo,
+    framebuffer_info_layout
+);
 
 impl Default for FramebufferInfo {
     fn default() -> Self {
@@ -87,8 +92,6 @@ bitflags! {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::NativeTransmutable;
-
     use super::{Enum, Format, Standard};
 
     #[test]
@@ -149,15 +152,5 @@ mod tests {
     fn test_format_last_color_and_last_exists() {
         let _ = Format::Last;
         let _ = Format::LastColorFormat;
-    }
-
-    #[test]
-    fn test_texture_info_layout() {
-        super::TextureInfo::test_layout()
-    }
-
-    #[test]
-    fn test_framebuffer_info_layout() {
-        super::FramebufferInfo::test_layout()
     }
 }

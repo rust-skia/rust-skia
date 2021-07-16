@@ -1,5 +1,5 @@
 use super::Data;
-use crate::prelude::*;
+use crate::{native_transmutable, prelude::*};
 use skia_bindings::{self as sb, SkColorSpace, SkColorSpacePrimaries};
 use std::fmt;
 
@@ -16,11 +16,11 @@ pub struct ColorSpacePrimaries {
     wy: f32,
 }
 
-impl NativeTransmutable<SkColorSpacePrimaries> for ColorSpacePrimaries {}
-#[test]
-fn test_color_space_primaries_layout() {
-    ColorSpacePrimaries::test_layout()
-}
+native_transmutable!(
+    SkColorSpacePrimaries,
+    ColorSpacePrimaries,
+    color_space_primaries_layout
+);
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct ColorSpaceTransferFn {

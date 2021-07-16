@@ -1,10 +1,10 @@
-use crate::{prelude::*, ColorSpace, IPoint, IRect, ISize};
+use crate::{native_transmutable, prelude::*, ColorSpace, IPoint, IRect, ISize};
 use skia_bindings::{self as sb, SkColorInfo, SkColorType, SkImageInfo};
 use std::{fmt, mem};
 
 pub use skia_bindings::SkAlphaType as AlphaType;
 #[test]
-fn test_alpha_type_layout() {
+fn test_alpha_type_naming() {
     let _ = AlphaType::Premul;
 }
 
@@ -34,11 +34,7 @@ pub enum ColorType {
     R16G16B16A16UNorm = SkColorType::kR16G16B16A16_unorm_SkColorType as _,
 }
 
-impl NativeTransmutable<SkColorType> for ColorType {}
-#[test]
-fn test_color_type_layout() {
-    ColorType::test_layout()
-}
+native_transmutable!(SkColorType, ColorType, color_type_layout);
 
 impl ColorType {
     // error[E0658]: dereferencing raw pointers in constants is unstable (see issue #51911)

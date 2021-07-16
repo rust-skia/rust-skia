@@ -1,4 +1,4 @@
-use crate::{interop, prelude::*, scalar, Matrix, Rect, Vector};
+use crate::{interop, native_transmutable, prelude::*, scalar, Matrix, Rect, Vector};
 use skia_bindings::{self as sb, SkRRect};
 use std::{fmt, mem, ptr};
 
@@ -18,11 +18,7 @@ fn test_rrect_corner_naming() {
 #[repr(transparent)]
 pub struct RRect(SkRRect);
 
-impl NativeTransmutable<SkRRect> for RRect {}
-#[test]
-fn test_rrect_layout() {
-    RRect::test_layout()
-}
+native_transmutable!(SkRRect, RRect, rrect_layout);
 
 impl PartialEq for RRect {
     fn eq(&self, rhs: &Self) -> bool {

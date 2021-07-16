@@ -1,4 +1,6 @@
-use crate::{high_contrast_config::InvertStyle, prelude::*, scalar, ColorFilter};
+use crate::{
+    high_contrast_config::InvertStyle, native_transmutable, prelude::*, scalar, ColorFilter,
+};
 use skia_bindings::{self as sb, SkHighContrastConfig};
 
 pub mod high_contrast_config {
@@ -17,11 +19,11 @@ pub struct HighContrastConfig {
     pub contrast: scalar,
 }
 
-impl NativeTransmutable<SkHighContrastConfig> for HighContrastConfig {}
-#[test]
-fn high_contrast_config_layout() {
-    HighContrastConfig::test_layout();
-}
+native_transmutable!(
+    SkHighContrastConfig,
+    HighContrastConfig,
+    high_contrast_config
+);
 
 impl Default for HighContrastConfig {
     fn default() -> Self {

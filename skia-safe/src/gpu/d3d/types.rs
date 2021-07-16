@@ -1,5 +1,5 @@
 use super::{ID3D12Resource, D3D12_RESOURCE_STATES, DXGI_FORMAT};
-use crate::{gpu, prelude::*};
+use crate::{gpu, native_transmutable, prelude::*};
 use skia_bindings::{GrD3DAlloc, GrD3DMemoryAllocator, GrD3DTextureResourceInfo, SkRefCntBase};
 use std::fmt;
 use winapi::{
@@ -104,11 +104,11 @@ impl From<cp<ID3D12Resource>> for TextureResourceInfo {
     }
 }
 
-impl NativeTransmutable<GrD3DTextureResourceInfo> for TextureResourceInfo {}
-#[test]
-fn test_texture_resource_info_layout() {
-    TextureResourceInfo::test_layout();
-}
+native_transmutable!(
+    GrD3DTextureResourceInfo,
+    TextureResourceInfo,
+    texture_resource_info_layout
+);
 
 #[repr(C)]
 #[derive(Clone, Debug)]

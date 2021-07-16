@@ -8,7 +8,7 @@ use super::{
     BackendFormat, BackendRenderTarget, BackendSurfaceMutableState, BackendTexture, ContextOptions,
     FlushInfo, RecordingContext, SemaphoresSubmitted,
 };
-use crate::{image, prelude::*, Data};
+use crate::{image, native_transmutable, prelude::*, Data};
 use skia_bindings::{self as sb, GrDirectContext, GrDirectContext_DirectContextID, SkRefCntBase};
 use std::{
     fmt,
@@ -23,7 +23,11 @@ pub struct DirectContextId {
     id: u32,
 }
 
-impl NativeTransmutable<GrDirectContext_DirectContextID> for DirectContextId {}
+native_transmutable!(
+    GrDirectContext_DirectContextID,
+    DirectContextId,
+    direct_context_id_layout
+);
 
 pub type DirectContext = RCHandle<GrDirectContext>;
 
@@ -387,15 +391,5 @@ impl DirectContext {
         let mut id = DirectContextId { id: 0 };
         unsafe { sb::C_GrDirectContext_directContextId(self.native(), id.native_mut()) }
         id
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_direct_context_id_layout() {
-        DirectContextId::test_layout();
     }
 }

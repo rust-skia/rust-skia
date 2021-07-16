@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{native_transmutable, prelude::*};
 use skia_bindings::{self as sb, SkFontArguments, SkFontArguments_VariationPosition};
 use std::{fmt, marker::PhantomData, mem};
 
@@ -8,8 +8,7 @@ pub struct VariationPosition<'a> {
 }
 
 pub mod variation_position {
-    use crate::prelude::*;
-    use crate::FourByteTag;
+    use crate::{native_transmutable, prelude::*, FourByteTag};
     use skia_bindings::SkFontArguments_VariationPosition_Coordinate;
 
     #[derive(Copy, Clone, PartialEq, Default, Debug)]
@@ -19,11 +18,11 @@ pub mod variation_position {
         pub value: f32,
     }
 
-    impl NativeTransmutable<SkFontArguments_VariationPosition_Coordinate> for Coordinate {}
-    #[test]
-    fn test_coordinate_layout() {
-        Coordinate::test_layout()
-    }
+    native_transmutable!(
+        SkFontArguments_VariationPosition_Coordinate,
+        Coordinate,
+        coordinate_layout
+    );
 }
 
 #[repr(C)]
@@ -32,11 +31,7 @@ pub struct FontArguments<'a> {
     pd: PhantomData<&'a [variation_position::Coordinate]>,
 }
 
-impl NativeTransmutable<SkFontArguments> for FontArguments<'_> {}
-#[test]
-fn test_font_arguments_layout() {
-    FontArguments::test_layout()
-}
+native_transmutable!(SkFontArguments, FontArguments<'_>, font_arguments_layout);
 
 impl Drop for FontArguments<'_> {
     fn drop(&mut self) {

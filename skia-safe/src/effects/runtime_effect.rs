@@ -1,5 +1,6 @@
 use crate::{
     interop::{self, AsStr},
+    native_transmutable,
     prelude::*,
     ColorFilter, Data, Matrix, Shader,
 };
@@ -128,7 +129,7 @@ pub struct Options {
     pub enforce_es2_restrictions: bool,
 }
 
-impl NativeTransmutable<SkRuntimeEffect_Options> for Options {}
+native_transmutable!(SkRuntimeEffect_Options, Options, options_layout);
 
 impl Default for Options {
     fn default() -> Self {
@@ -294,13 +295,6 @@ impl RuntimeEffect {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::NativeTransmutable;
-
-    #[test]
-    fn options_layout() {
-        super::Options::test_layout()
-    }
-
     #[test]
     fn test_child_type_naming() {
         let _ = super::ChildType::ColorFilter;

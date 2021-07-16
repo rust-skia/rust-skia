@@ -1,10 +1,10 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
 use crate::{
-    prelude::*, scalar, u8cpu, Bitmap, BlendMode, ClipOp, Color, Color4f, Data, Drawable,
-    FilterMode, Font, GlyphId, IPoint, IRect, ISize, Image, ImageFilter, ImageInfo, Matrix, Paint,
-    Path, Picture, Pixmap, Point, QuickReject, RRect, RSXform, Rect, Region, SamplingOptions,
-    Shader, Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices, M44,
+    native_transmutable, prelude::*, scalar, u8cpu, Bitmap, BlendMode, ClipOp, Color, Color4f,
+    Data, Drawable, FilterMode, Font, GlyphId, IPoint, IRect, ISize, Image, ImageFilter, ImageInfo,
+    Matrix, Paint, Path, Picture, Pixmap, Point, QuickReject, RRect, RSXform, Rect, Region,
+    SamplingOptions, Shader, Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices, M44,
 };
 use skia_bindings as sb;
 use skia_bindings::{
@@ -46,12 +46,11 @@ pub struct SaveLayerRec<'a> {
     flags: SaveLayerFlags,
 }
 
-impl<'a> NativeTransmutable<SkCanvas_SaveLayerRec> for SaveLayerRec<'a> {}
-
-#[test]
-fn test_save_layer_rec_layout() {
-    SaveLayerRec::test_layout()
-}
+native_transmutable!(
+    SkCanvas_SaveLayerRec,
+    SaveLayerRec<'_>,
+    save_layer_rec_layout
+);
 
 impl fmt::Debug for SaveLayerRec<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

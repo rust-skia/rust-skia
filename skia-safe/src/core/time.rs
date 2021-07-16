@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{native_transmutable, prelude::*};
 use skia_bindings::SkTime_DateTime;
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
@@ -14,10 +14,6 @@ pub struct DateTime {
     pub second: u8,
 }
 
-impl NativeTransmutable<SkTime_DateTime> for DateTime {}
-#[test]
-fn test_date_time_layout() {
-    DateTime::test_layout();
-}
+native_transmutable!(SkTime_DateTime, DateTime, date_time_layout);
 
 // TODO: may wrap SkAutoTime?

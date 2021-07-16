@@ -1,7 +1,7 @@
 use crate::{
-    prelude::*, scalar, BlendMode, Color, ColorChannel, ColorFilter, CubicResampler, IPoint, IRect,
-    ISize, Image, ImageFilter, Matrix, Paint, Picture, Point3, Rect, Region, SamplingOptions,
-    Shader, TileMode, Vector,
+    native_transmutable, prelude::*, scalar, BlendMode, Color, ColorChannel, ColorFilter,
+    CubicResampler, IPoint, IRect, ISize, Image, ImageFilter, Matrix, Paint, Picture, Point3, Rect,
+    Region, SamplingOptions, Shader, TileMode, Vector,
 };
 use skia_bindings::{self as sb, SkImageFilter, SkImageFilters_CropRect};
 
@@ -9,7 +9,7 @@ use skia_bindings::{self as sb, SkImageFilter, SkImageFilters_CropRect};
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct CropRect(Rect);
 
-impl NativeTransmutable<SkImageFilters_CropRect> for CropRect {}
+native_transmutable!(SkImageFilters_CropRect, CropRect, crop_rect_layout);
 
 impl CropRect {
     pub const NO_CROP_RECT: CropRect = CropRect(Rect {
@@ -906,16 +906,11 @@ impl Picture {
 #[cfg(test)]
 mod tests {
     use super::{CropRect, Dither};
-    use crate::{prelude::NativeTransmutable, IRect, Rect};
+    use crate::{IRect, Rect};
 
     #[test]
     fn test_dither_naming() {
         let _ = Dither::Yes;
-    }
-
-    #[test]
-    fn test_crop_rect_layout() {
-        super::CropRect::test_layout();
     }
 
     fn cr(crop_rect: impl Into<CropRect>) -> CropRect {
