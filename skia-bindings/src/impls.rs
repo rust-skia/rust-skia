@@ -4,7 +4,7 @@
 //! We could provide trait implementations in skia-safe, but then users of the library would have to
 //! import the implementation type _and_ the trait.
 //!
-//! See also: https://github.com/rust-lang/rfcs/issues/1880
+//! See also: <https://github.com/rust-lang/rfcs/issues/1880>
 
 use crate::{
     SkAlphaType, SkBlendMode, SkBlendModeCoeff, SkImage_CompressionType,
