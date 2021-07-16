@@ -1,13 +1,10 @@
 use crate::{
-    prelude::*, scalar, BlendMode, Color, Color4f, ColorFilter, ColorSpace, ImageFilter,
-    MaskFilter, Path, PathEffect, Rect, Shader,
+    prelude::*, scalar, Color, Color4f, ColorFilter, ColorSpace, ImageFilter, MaskFilter, Path,
+    PathEffect, Rect, Shader,
 };
 use core::fmt;
 use skia_bindings::{self as sb, SkPaint};
-use std::{
-    hash::{Hash, Hasher},
-    ptr,
-};
+use std::ptr;
 
 pub use sb::SkPaint_Style as Style;
 variant_name!(Style::Fill, style_naming);
@@ -39,12 +36,6 @@ impl NativePartialEq for SkPaint {
     }
 }
 
-impl NativeHash for SkPaint {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        unsafe { self.getHash() }.hash(state)
-    }
-}
-
 impl Default for Handle<SkPaint> {
     fn default() -> Self {
         Paint::from_native_c(unsafe { SkPaint::new() })
@@ -63,7 +54,7 @@ impl fmt::Debug for Paint {
             .field("stroke_cap", &self.stroke_cap())
             .field("stroke_join", &self.stroke_join())
             .field("color_filter", &self.color_filter())
-            .field("blend_mode", &self.blend_mode())
+            // .field("blend_mode", &self.blend_mode())
             .field("path_effect", &self.path_effect())
             .field("mask_filter", &self.mask_filter())
             .field("image_filter", &self.image_filter())
@@ -265,23 +256,25 @@ impl Paint {
         self
     }
 
-    pub fn blend_mode(&self) -> BlendMode {
-        unsafe { sb::C_SkPaint_getBlendMode(self.native()) }
-    }
+    /*
+        pub fn blend_mode(&self) -> BlendMode {
+            unsafe { sb::C_SkPaint_getBlendMode(self.native()) }
+        }
 
-    pub fn is_src_over(&self) -> bool {
-        self.blend_mode() == BlendMode::SrcOver
-    }
+        pub fn is_src_over(&self) -> bool {
+            self.blend_mode() == BlendMode::SrcOver
+        }
 
-    pub fn set_blend_mode(&mut self, mode: BlendMode) -> &mut Self {
-        unsafe {
-            self.native_mut()
-                .__bindgen_anon_1
-                .fBitfields
-                .set_fBlendMode(mode as _);
-        };
-        self
-    }
+        pub fn set_blend_mode(&mut self, mode: BlendMode) -> &mut Self {
+            unsafe {
+                self.native_mut()
+                    .__bindgen_anon_1
+                    .fBitfields
+                    .set_fBlendMode(mode as _);
+            };
+            self
+        }
+    */
 
     pub fn path_effect(&self) -> Option<PathEffect> {
         PathEffect::from_unshared_ptr(self.native().fPathEffect.fPtr)

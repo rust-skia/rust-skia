@@ -1,6 +1,4 @@
-use crate::{prelude::*, Rect};
-#[allow(deprecated)]
-use crate::{scalar, Matrix, Matrix44, Scalars};
+use crate::{prelude::*, scalar, Matrix, Rect, Scalars};
 use bitflags::_core::ops::{AddAssign, MulAssign};
 use skia_bindings::{self as sb, SkM44, SkV2, SkV3, SkV4};
 use std::{
@@ -755,15 +753,6 @@ impl M44 {
         unsafe { self.native_mut().preScale1(x, y, z) };
         self
     }
-
-    // helper
-
-    #[allow(deprecated)]
-    pub fn to_matrix44(&self) -> Matrix44 {
-        let mut m = Matrix44::default();
-        m.set_col_major(&self.mat);
-        m
-    }
 }
 
 impl Mul for &M44 {
@@ -819,15 +808,6 @@ impl From<&Matrix> for M44 {
 impl From<Matrix> for M44 {
     fn from(m: Matrix) -> Self {
         M44::from(&m)
-    }
-}
-
-#[allow(deprecated)]
-impl From<&Matrix44> for M44 {
-    fn from(m: &Matrix44) -> Self {
-        let mut rm: [f32; 16] = Default::default();
-        m.as_col_major(&mut rm);
-        M44::col_major(&rm)
     }
 }
 

@@ -116,10 +116,6 @@ pub use mask_filter::*;
 pub mod matrix;
 pub use matrix::Matrix;
 
-pub mod matrix44;
-#[allow(deprecated)]
-pub use matrix44::{Matrix44, Vector4};
-
 mod milestone;
 pub use milestone::*;
 
