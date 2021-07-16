@@ -615,7 +615,7 @@ impl Bitmap {
     /// - [PixelRef] is `nullptr`
     /// - subset does not intersect [Self::bounds()]
     ///
-    /// example: https://fiddle.skia.org/c/@Bitmap_extractSubset
+    /// example: <https://fiddle.skia.org/c/@Bitmap_extractSubset>
     pub fn extract_subset(&self, dst: &mut Self, subset: impl AsRef<IRect>) -> bool {
         unsafe {
             self.native()
@@ -686,7 +686,7 @@ impl Bitmap {
     ///
     /// pixmap contents become invalid on any future change to [Bitmap].
     ///
-    /// example: https://fiddle.skia.org/c/@Bitmap_peekPixels
+    /// example: <https://fiddle.skia.org/c/@Bitmap_peekPixels>
     pub fn peek_pixels(&self) -> Option<Borrows<Pixmap>> {
         let mut pixmap = Pixmap::default();
         unsafe { self.native().peekPixels(pixmap.native_mut()) }

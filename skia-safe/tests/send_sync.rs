@@ -276,6 +276,8 @@ mod utils {
     use skia_safe::utils::*;
     use static_assertions::*;
     assert_impl_all!(CustomTypefaceBuilder: Send, Sync);
+    assert_not_impl_any!(OrderedFontMgr: Send, Sync);
+    assert_impl_all!(parse_path::PathEncoding: Send, Sync);
 }
 
 pub mod assert {

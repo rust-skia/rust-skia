@@ -19,9 +19,9 @@ pub use skia_bindings::SkMipmapMode as MipmapMode;
 ///         Don P. Mitchell
 ///         Arun N. Netravali
 ///         1988
-/// https://www.cs.utexas.edu/~fussell/courses/cs384g-fall2013/lectures/mitchell/Mitchell.pdf
-/// Desmos worksheet https://www.desmos.com/calculator/aghdpicrvr
-/// Nice overview https://entropymine.com/imageworsener/bicubic/
+/// <https://www.cs.utexas.edu/~fussell/courses/cs384g-fall2013/lectures/mitchell/Mitchell.pdf>
+/// Desmos worksheet <https://www.desmos.com/calculator/aghdpicrvr>
+/// Nice overview <https://entropymine.com/imageworsener/bicubic/>
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct CubicResampler {

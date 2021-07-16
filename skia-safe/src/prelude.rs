@@ -13,7 +13,7 @@ use std::{
 // Re-export TryFrom / TryInto to make them available in all modules that use prelude::*.
 pub use std::convert::{TryFrom, TryInto};
 
-/// Swiss army knife to convert any reference into any other.
+/// Convert any reference into any other.
 pub(crate) unsafe fn transmute_ref<FromT, ToT>(from: &FromT) -> &ToT {
     // TODO: can we do this statically for all instantiations of transmute_ref?
     debug_assert_eq!(mem::size_of::<FromT>(), mem::size_of::<ToT>());

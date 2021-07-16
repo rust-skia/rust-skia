@@ -5,12 +5,7 @@ use crate::{
 };
 use sb::SkRuntimeEffect_Child;
 use skia_bindings::{
-    self as sb,
-    SkRefCntBase,
-    SkRuntimeEffect,
-    SkRuntimeEffect_Options,
-    SkRuntimeEffect_Uniform,
-    // SkRuntimeEffect_Varying,
+    self as sb, SkRefCntBase, SkRuntimeEffect, SkRuntimeEffect_Options, SkRuntimeEffect_Uniform,
 };
 use std::{ffi::CStr, fmt};
 
