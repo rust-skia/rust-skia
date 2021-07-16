@@ -4,8 +4,8 @@
 
 Skia Submodule Status: chrome/m92 ([upstream changes][skia-upstream], [our changes][skia-ours]).
 
-[skia-upstream]: https://github.com/rust-skia/skia/compare/m92-0.40.2...google:chrome/m92
-[skia-ours]: https://github.com/google/skia/compare/chrome/m92...rust-skia:m92-0.40.2
+[skia-upstream]: https://github.com/rust-skia/skia/compare/m93-0.41.0...google:chrome/m93
+[skia-ours]: https://github.com/google/skia/compare/chrome/m93...rust-skia:m93-0.41.0
 
 ## Goals
 
