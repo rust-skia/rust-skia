@@ -133,11 +133,13 @@ pub mod shaders {
         .unwrap()
     }
 
+    /*
     pub fn lerp(t: f32, dst: impl Into<Shader>, src: impl Into<Shader>) -> Option<Shader> {
         Shader::from_ptr(unsafe {
             sb::C_SkShaders_Lerp(t, dst.into().into_ptr(), src.into().into_ptr())
         })
     }
+    */
 
     #[deprecated(since = "0.29.0", note = "removed without replacement")]
     pub fn lerp2(_red: Shader, _dst: Shader, _src: Shader, _local_matrix: Option<&Matrix>) -> ! {

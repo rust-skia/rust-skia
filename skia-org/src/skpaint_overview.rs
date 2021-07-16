@@ -209,7 +209,8 @@ fn draw_transfer_modes(canvas: &mut Canvas) {
             .draw_color(Color::LIGHT_GRAY, BlendMode::default())
             .save_layer(&Default::default());
         canvas.clear(Color::TRANSPARENT).draw_paint(dst);
-        src.set_blend_mode(*mode);
+        // TODO: Use Blender.
+        // src.set_blend_mode(*mode);
         canvas.draw_paint(src).draw_rect(rect, stroke);
     }
 }

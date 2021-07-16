@@ -80,7 +80,7 @@ mod core {
     assert_not_impl_any!(path::Iter: Send, Sync);
     assert_impl_all!(Path: Send, Sync);
     assert_impl_all!(PathBuilder: Send, Sync);
-    assert_impl_all!(path_effect::PointData: Send, Sync);
+    // assert_impl_all!(path_effect::PointData: Send, Sync);
     assert_impl_all!(path_effect::DashInfo: Send, Sync);
     assert_impl_all!(PathEffect: Send, Sync);
     assert_not_impl_any!(PathMeasure: Send, Sync);

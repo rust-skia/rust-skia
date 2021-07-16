@@ -233,9 +233,11 @@ impl RuntimeEffect {
         })
     }
 
+    /*
     pub fn source(&self) -> &str {
         unsafe { (*sb::C_SkRuntimeEffect_source(self.native())).as_str() }
     }
+    */
 
     #[deprecated(since = "0.35.0", note = "Use uniform_size() instead")]
     pub fn input_size(&self) -> usize {
