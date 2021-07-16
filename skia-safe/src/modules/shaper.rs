@@ -1,4 +1,4 @@
-use crate::{prelude::*, scalar, Font, FontMgr, FourByteTag, Point, TextBlob};
+use crate::{prelude::*, scalar, unsafe_send_sync, Font, FontMgr, FourByteTag, Point, TextBlob};
 use skia_bindings::{
     self as sb, RustRunHandler, SkShaper, SkShaper_BiDiRunIterator, SkShaper_FontRunIterator,
     SkShaper_LanguageRunIterator, SkShaper_RunHandler, SkShaper_RunIterator,
@@ -9,8 +9,7 @@ use std::{ffi::CStr, fmt, marker::PhantomData, os::raw};
 pub use run_handler::RunHandler;
 
 pub type Shaper = RefHandle<SkShaper>;
-unsafe impl Send for Shaper {}
-unsafe impl Sync for Shaper {}
+unsafe_send_sync!(Shaper);
 
 impl NativeDrop for SkShaper {
     fn drop(&mut self) {

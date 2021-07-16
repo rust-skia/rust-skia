@@ -3,7 +3,7 @@ use crate::{
     font_parameters::VariationAxis,
     interop::{self, MemoryStream, NativeStreamBase, StreamAsset},
     prelude::*,
-    Data, FontArguments, FontStyle, GlyphId, Rect, Unichar,
+    unsafe_send_sync, Data, FontArguments, FontStyle, GlyphId, Rect, Unichar,
 };
 use skia_bindings::{self as sb, SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings};
 use std::{ffi, fmt, ptr};
@@ -24,8 +24,7 @@ pub struct LocalizedString {
 }
 
 pub type Typeface = RCHandle<SkTypeface>;
-unsafe impl Send for Typeface {}
-unsafe impl Sync for Typeface {}
+unsafe_send_sync!(Typeface);
 
 impl NativeRefCountedBase for SkTypeface {
     type Base = SkRefCntBase;

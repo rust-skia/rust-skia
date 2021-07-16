@@ -1,4 +1,4 @@
-use crate::{native_transmutable, prelude::*};
+use crate::{native_transmutable, prelude::*, unsafe_send_sync};
 use crate::{scalar, Matrix, NativeFlattenable, Path, Point, Rect, StrokeRec, Vector};
 use skia_bindings as sb;
 use skia_bindings::{
@@ -19,8 +19,7 @@ pub struct PointData {
     pub last: Path,
 }
 
-unsafe impl Send for PointData {}
-unsafe impl Sync for PointData {}
+unsafe_send_sync!(PointData);
 
 native_transmutable!(SkPathEffect_PointData, PointData, point_data_layout);
 
@@ -75,8 +74,7 @@ pub struct DashInfo {
 }
 
 pub type PathEffect = RCHandle<SkPathEffect>;
-unsafe impl Send for PathEffect {}
-unsafe impl Sync for PathEffect {}
+unsafe_send_sync!(PathEffect);
 
 impl NativeBase<SkRefCntBase> for SkPathEffect {}
 impl NativeBase<SkFlattenable> for SkPathEffect {}

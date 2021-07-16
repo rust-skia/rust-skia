@@ -1,5 +1,6 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
+use crate::unsafe_send_sync;
 use crate::{
     prelude::*, AlphaType, Bitmap, ColorSpace, ColorType, Data, EncodedImageFormat, IPoint, IRect,
     ISize, ImageFilter, ImageGenerator, ImageInfo, Matrix, Paint, Picture, Pixmap, SamplingOptions,
@@ -15,8 +16,7 @@ pub use skia_bindings::SkImage_CachingHint as CachingHint;
 pub use skia_bindings::SkImage_CompressionType as CompressionType;
 
 pub type Image = RCHandle<SkImage>;
-unsafe impl Send for Image {}
-unsafe impl Sync for Image {}
+unsafe_send_sync!(Image);
 
 impl NativeBase<SkRefCntBase> for SkImage {}
 

@@ -1,10 +1,9 @@
-use crate::prelude::*;
+use crate::{prelude::*, unsafe_send_sync};
 use skia_bindings::{self as sb, SkString};
 use std::{fmt, str};
 
 pub type String = Handle<SkString>;
-unsafe impl Send for String {}
-unsafe impl Sync for String {}
+unsafe_send_sync!(String);
 
 impl NativeDrop for SkString {
     fn drop(&mut self) {

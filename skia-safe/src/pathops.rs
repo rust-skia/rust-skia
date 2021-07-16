@@ -1,6 +1,6 @@
 //! Wrapper for pathops/SkPathOps.h
 
-use crate::{prelude::*, Path, Rect};
+use crate::{prelude::*, unsafe_send_sync, Path, Rect};
 use skia_bindings::{self as sb, SkOpBuilder};
 use std::fmt;
 
@@ -33,8 +33,7 @@ pub fn as_winding(path: &Path) -> Option<Path> {
 }
 
 pub type OpBuilder = Handle<SkOpBuilder>;
-unsafe impl Send for OpBuilder {}
-unsafe impl Sync for OpBuilder {}
+unsafe_send_sync!(OpBuilder);
 
 impl NativeDrop for SkOpBuilder {
     fn drop(&mut self) {

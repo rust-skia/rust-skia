@@ -1,12 +1,13 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
-use crate::{image, prelude::*, ColorSpace, Data, ISize, ImageInfo, Matrix, Paint, Picture};
+use crate::{
+    image, prelude::*, unsafe_send_sync, ColorSpace, Data, ISize, ImageInfo, Matrix, Paint, Picture,
+};
 use skia_bindings::{self as sb, SkImageGenerator};
 use std::fmt;
 
 pub type ImageGenerator = RefHandle<SkImageGenerator>;
-unsafe impl Send for ImageGenerator {}
-unsafe impl Sync for ImageGenerator {}
+unsafe_send_sync!(ImageGenerator);
 
 impl NativeDrop for SkImageGenerator {
     fn drop(&mut self) {

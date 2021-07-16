@@ -659,18 +659,6 @@ where
     }
 }
 
-/// Macro to mark a Rust type as [`NativeTransmutable`] and tests its layout.
-#[macro_export]
-macro_rules! native_transmutable {
-    ($nt:ty, $rt:ty, $test_fn:ident) => {
-        impl NativeTransmutable<$nt> for $rt {}
-        #[test]
-        fn $test_fn() {
-            <$rt>::test_layout();
-        }
-    };
-}
-
 /// Trait to mark a native type that can be treated a Rust type _inplace_ with the same size and
 /// field layout.
 pub trait NativeTransmutable<NT: Sized>: Sized

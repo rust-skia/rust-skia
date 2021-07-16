@@ -1,6 +1,6 @@
 use crate::{
-    prelude::*, scalar, BlendMode, Color, Color4f, ColorFilter, ColorSpace, ImageFilter,
-    MaskFilter, Path, PathEffect, Rect, Shader,
+    prelude::*, scalar, unsafe_send_sync, BlendMode, Color, Color4f, ColorFilter, ColorSpace,
+    ImageFilter, MaskFilter, Path, PathEffect, Rect, Shader,
 };
 use core::fmt;
 use skia_bindings::{self as sb, SkPaint};
@@ -26,8 +26,7 @@ pub fn test_join_naming() {
 }
 
 pub type Paint = Handle<SkPaint>;
-unsafe impl Send for Paint {}
-unsafe impl Sync for Paint {}
+unsafe_send_sync!(Paint);
 
 impl NativeDrop for SkPaint {
     fn drop(&mut self) {

@@ -5,7 +5,7 @@ use crate::{
     prelude::*,
     scalar,
     textlayout::{RangeExtensions, EMPTY_INDEX, EMPTY_RANGE},
-    Color, FontMetrics, FontStyle, Paint, Typeface,
+    unsafe_send_sync, Color, FontMetrics, FontStyle, Paint, Typeface,
 };
 use skia_bindings as sb;
 use std::{fmt, ops::Range};
@@ -75,8 +75,7 @@ fn placeholder_alignment_member_naming() {
 }
 
 pub type FontFeature = Handle<sb::skia_textlayout_FontFeature>;
-unsafe impl Send for FontFeature {}
-unsafe impl Sync for FontFeature {}
+unsafe_send_sync!(FontFeature);
 
 impl NativeDrop for sb::skia_textlayout_FontFeature {
     fn drop(&mut self) {
@@ -156,8 +155,7 @@ impl PlaceholderStyle {
 }
 
 pub type TextStyle = Handle<sb::skia_textlayout_TextStyle>;
-unsafe impl Send for TextStyle {}
-unsafe impl Sync for TextStyle {}
+unsafe_send_sync!(TextStyle);
 
 impl NativeDrop for sb::skia_textlayout_TextStyle {
     fn drop(&mut self) {

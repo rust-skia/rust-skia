@@ -1,12 +1,11 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
-use crate::{prelude::*, ColorSpace, SurfaceProps};
+use crate::{prelude::*, unsafe_send_sync, ColorSpace, SurfaceProps};
 use skia_bindings::{self as sb, SkSurfaceCharacterization};
 use std::fmt;
 
 pub type SurfaceCharacterization = Handle<SkSurfaceCharacterization>;
-unsafe impl Send for SurfaceCharacterization {}
-unsafe impl Sync for SurfaceCharacterization {}
+unsafe_send_sync!(SurfaceCharacterization);
 
 impl NativeDrop for SkSurfaceCharacterization {
     fn drop(&mut self) {

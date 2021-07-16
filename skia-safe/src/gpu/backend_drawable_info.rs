@@ -1,12 +1,11 @@
 #[cfg(feature = "vulkan")]
 use crate::gpu::vk;
-use crate::{gpu::BackendAPI, prelude::*};
+use crate::{gpu::BackendAPI, prelude::*, unsafe_send_sync};
 use skia_bindings::{self as sb, GrBackendDrawableInfo};
 use std::fmt;
 
 pub type BackendDrawableInfo = Handle<GrBackendDrawableInfo>;
-unsafe impl Send for BackendDrawableInfo {}
-unsafe impl Sync for BackendDrawableInfo {}
+unsafe_send_sync!(BackendDrawableInfo);
 
 impl NativeDrop for GrBackendDrawableInfo {
     fn drop(&mut self) {

@@ -2,7 +2,7 @@ pub mod pdf {
     use crate::{
         interop::{self, AsStr, DynamicMemoryWStream, SetStr},
         prelude::*,
-        scalar, DateTime, Document,
+        scalar, unsafe_send_sync, DateTime, Document,
     };
     use skia_bindings::{
         self as sb, SkPDF_AttributeList, SkPDF_Metadata, SkPDF_StructureElementNode,
@@ -16,8 +16,7 @@ pub mod pdf {
     }
 
     pub type AttributeList = Handle<SkPDF_AttributeList>;
-    unsafe impl Send for AttributeList {}
-    unsafe impl Sync for AttributeList {}
+    unsafe_send_sync!(AttributeList);
 
     impl NativeDrop for SkPDF_AttributeList {
         fn drop(&mut self) {

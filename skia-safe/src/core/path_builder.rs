@@ -1,4 +1,7 @@
-use crate::{prelude::*, scalar, Path, PathDirection, PathFillType, Point, RRect, Rect, Vector};
+use crate::{
+    prelude::*, scalar, unsafe_send_sync, Path, PathDirection, PathFillType, Point, RRect, Rect,
+    Vector,
+};
 use skia_bindings::{self as sb, SkPathBuilder};
 use std::{fmt, mem};
 
@@ -9,8 +12,7 @@ fn test_arc_size_naming() {
 }
 
 pub type PathBuilder = Handle<SkPathBuilder>;
-unsafe impl Send for PathBuilder {}
-unsafe impl Sync for PathBuilder {}
+unsafe_send_sync!(PathBuilder);
 
 impl NativeDrop for SkPathBuilder {
     fn drop(&mut self) {

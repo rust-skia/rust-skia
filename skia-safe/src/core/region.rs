@@ -1,4 +1,7 @@
-use crate::{native_transmutable, prelude::*, Contains, IPoint, IRect, IVector, Path, QuickReject};
+use crate::{
+    native_transmutable, prelude::*, unsafe_send_sync, Contains, IPoint, IRect, IVector, Path,
+    QuickReject,
+};
 use skia_bindings::{
     self as sb, SkRegion, SkRegion_Cliperator, SkRegion_Iterator, SkRegion_RunHead,
     SkRegion_Spanerator,
@@ -6,8 +9,7 @@ use skia_bindings::{
 use std::{fmt, iter, marker::PhantomData, mem, ptr};
 
 pub type Region = Handle<SkRegion>;
-unsafe impl Send for Region {}
-unsafe impl Sync for Region {}
+unsafe_send_sync!(Region);
 
 impl NativeDrop for SkRegion {
     fn drop(&mut self) {

@@ -1,6 +1,6 @@
 use crate::{
-    gradient_shader, prelude::*, scalar, Color, ColorFilter, Image, Matrix, NativeFlattenable,
-    Point, TileMode,
+    gradient_shader, prelude::*, scalar, unsafe_send_sync, Color, ColorFilter, Image, Matrix,
+    NativeFlattenable, Point, TileMode,
 };
 use skia_bindings::{self as sb, SkFlattenable, SkRefCntBase, SkShader};
 use std::fmt;
@@ -35,8 +35,7 @@ impl<'a> GradientInfo<'a> {
 }
 
 pub type Shader = RCHandle<SkShader>;
-unsafe impl Send for Shader {}
-unsafe impl Sync for Shader {}
+unsafe_send_sync!(Shader);
 
 impl NativeBase<SkRefCntBase> for SkShader {}
 impl NativeBase<SkFlattenable> for SkShader {}

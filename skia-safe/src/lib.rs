@@ -11,6 +11,7 @@ mod effects;
 #[cfg(feature = "gpu")]
 pub mod gpu;
 mod interop;
+mod macros;
 mod modules;
 mod pathops;
 mod prelude;

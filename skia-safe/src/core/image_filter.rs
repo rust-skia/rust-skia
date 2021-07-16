@@ -1,4 +1,4 @@
-use crate::{prelude::*, ColorFilter, IRect, Matrix, NativeFlattenable, Rect};
+use crate::{prelude::*, unsafe_send_sync, ColorFilter, IRect, Matrix, NativeFlattenable, Rect};
 use skia_bindings::{self as sb, SkColorFilter, SkFlattenable, SkImageFilter, SkRefCntBase};
 use std::{fmt, ptr};
 
@@ -9,8 +9,7 @@ fn test_map_direction_naming() {
 }
 
 pub type ImageFilter = RCHandle<SkImageFilter>;
-unsafe impl Send for ImageFilter {}
-unsafe impl Sync for ImageFilter {}
+unsafe_send_sync!(ImageFilter);
 
 impl NativeBase<SkRefCntBase> for SkImageFilter {}
 impl NativeBase<SkFlattenable> for SkImageFilter {}

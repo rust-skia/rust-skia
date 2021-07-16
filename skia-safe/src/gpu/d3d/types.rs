@@ -1,5 +1,5 @@
 use super::{ID3D12Resource, D3D12_RESOURCE_STATES, DXGI_FORMAT};
-use crate::{gpu, native_transmutable, prelude::*};
+use crate::{gpu, native_transmutable, prelude::*, unsafe_send_sync};
 use skia_bindings::{GrD3DAlloc, GrD3DMemoryAllocator, GrD3DTextureResourceInfo, SkRefCntBase};
 use std::fmt;
 use winapi::{
@@ -32,8 +32,7 @@ fn test_cp_layout() {
 // TODO: add remaining cp functions to ComPtr via traits (get, reset, retain).
 
 pub type Alloc = RCHandle<GrD3DAlloc>;
-unsafe impl Send for Alloc {}
-unsafe impl Sync for Alloc {}
+unsafe_send_sync!(Alloc);
 
 impl NativeRefCountedBase for GrD3DAlloc {
     type Base = SkRefCntBase;
@@ -48,8 +47,7 @@ impl fmt::Debug for Alloc {
 // TODO: support the implementation of custom D3D memory allocator's
 // virtual createResource() and createAliasingResource() functions.
 pub type MemoryAllocator = RCHandle<GrD3DMemoryAllocator>;
-unsafe impl Send for MemoryAllocator {}
-unsafe impl Sync for MemoryAllocator {}
+unsafe_send_sync!(MemoryAllocator);
 
 impl NativeRefCountedBase for GrD3DMemoryAllocator {
     type Base = SkRefCntBase;
@@ -73,8 +71,7 @@ pub struct TextureResourceInfo {
     pub sample_quality_pattern: std::os::raw::c_uint,
     pub protected: gpu::Protected,
 }
-unsafe impl Send for TextureResourceInfo {}
-unsafe impl Sync for TextureResourceInfo {}
+unsafe_send_sync!(TextureResourceInfo);
 
 impl TextureResourceInfo {
     pub fn from_resource(resource: cp<ID3D12Resource>) -> Self {
@@ -116,5 +113,5 @@ pub struct FenceInfo {
     pub fence: cp<d3d12::ID3D12Fence>,
     pub value: u64,
 }
-unsafe impl Send for FenceInfo {}
-unsafe impl Sync for FenceInfo {}
+
+unsafe_send_sync!(FenceInfo);

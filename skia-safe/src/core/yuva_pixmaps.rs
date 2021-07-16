@@ -1,4 +1,6 @@
-use crate::{prelude::*, ColorType, Data, ImageInfo, Pixmap, YUVAInfo, YUVColorSpace};
+use crate::{
+    prelude::*, unsafe_send_sync, ColorType, Data, ImageInfo, Pixmap, YUVAInfo, YUVColorSpace,
+};
 use skia_bindings::{self as sb, SkYUVAPixmapInfo, SkYUVAPixmaps};
 use std::{ffi::c_void, fmt, ptr};
 use yuva_pixmap_info::SupportedDataTypes;
@@ -9,8 +11,7 @@ pub use yuva_pixmap_info::DataType;
 /// [YUVAInfo] combined with per-plane [ColorType]s and row bytes. Fully specifies the [Pixmap]`s
 /// for a YUVA image without the actual pixel memory and data.
 pub type YUVAPixmapInfo = Handle<SkYUVAPixmapInfo>;
-unsafe impl Send for YUVAPixmapInfo {}
-unsafe impl Sync for YUVAPixmapInfo {}
+unsafe_send_sync!(YUVAPixmapInfo);
 
 impl NativeDrop for SkYUVAPixmapInfo {
     fn drop(&mut self) {
@@ -203,8 +204,7 @@ impl YUVAPixmapInfo {
 /// Helper to store [Pixmap] planes as described by a [YUVAPixmapInfo]. Can be responsible for
 /// allocating/freeing memory for pixmaps or use external memory.
 pub type YUVAPixmaps = Handle<SkYUVAPixmaps>;
-unsafe impl Send for YUVAPixmaps {}
-unsafe impl Sync for YUVAPixmaps {}
+unsafe_send_sync!(YUVAPixmaps);
 
 impl NativeDrop for SkYUVAPixmaps {
     fn drop(&mut self) {
@@ -316,7 +316,7 @@ impl YUVAPixmaps {
 }
 
 pub mod yuva_pixmap_info {
-    use crate::{prelude::*, ColorType};
+    use crate::{prelude::*, unsafe_send_sync, ColorType};
     use skia_bindings::{self as sb, SkYUVAPixmapInfo_SupportedDataTypes};
     use std::fmt;
 
@@ -328,8 +328,7 @@ pub mod yuva_pixmap_info {
     pub use skia_bindings::SkYUVAPixmapInfo_DataType as DataType;
 
     pub type SupportedDataTypes = Handle<SkYUVAPixmapInfo_SupportedDataTypes>;
-    unsafe impl Send for SupportedDataTypes {}
-    unsafe impl Sync for SupportedDataTypes {}
+    unsafe_send_sync!(SupportedDataTypes);
 
     impl NativeDrop for SkYUVAPixmapInfo_SupportedDataTypes {
         fn drop(&mut self) {

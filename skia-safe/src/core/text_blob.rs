@@ -1,5 +1,6 @@
 use crate::{
-    prelude::*, scalar, Font, GlyphId, Paint, Point, RSXform, Rect, TextEncoding, Typeface,
+    prelude::*, scalar, unsafe_send_sync, Font, GlyphId, Paint, Point, RSXform, Rect, TextEncoding,
+    Typeface,
 };
 use skia_bindings::{
     self as sb, SkTextBlob, SkTextBlobBuilder, SkTextBlob_Iter, SkTextBlob_Iter_Run, SkTypeface,
@@ -7,8 +8,7 @@ use skia_bindings::{
 use std::{convert::TryInto, fmt, ptr, slice};
 
 pub type TextBlob = RCHandle<SkTextBlob>;
-unsafe impl Send for TextBlob {}
-unsafe impl Sync for TextBlob {}
+unsafe_send_sync!(TextBlob);
 
 impl NativeRefCounted for SkTextBlob {
     fn _ref(&self) {
@@ -144,8 +144,7 @@ impl TextBlob {
 }
 
 pub type TextBlobBuilder = Handle<SkTextBlobBuilder>;
-unsafe impl Send for TextBlobBuilder {}
-unsafe impl Sync for TextBlobBuilder {}
+unsafe_send_sync!(TextBlobBuilder);
 
 impl NativeDrop for SkTextBlobBuilder {
     fn drop(&mut self) {

@@ -2,7 +2,7 @@ use crate::{
     interop::{self, AsStr},
     native_transmutable,
     prelude::*,
-    ColorFilter, Data, Matrix, Shader,
+    unsafe_send_sync, ColorFilter, Data, Matrix, Shader,
 };
 use sb::SkRuntimeEffect_Child;
 use skia_bindings::{
@@ -11,12 +11,10 @@ use skia_bindings::{
 use std::{ffi::CStr, fmt};
 
 pub type Uniform = Handle<SkRuntimeEffect_Uniform>;
+unsafe_send_sync!(Uniform);
 
 #[deprecated(since = "0.35.0", note = "Use Uniform instead")]
 pub type Variable = Uniform;
-
-unsafe impl Send for Uniform {}
-unsafe impl Sync for Uniform {}
 
 impl NativeDrop for SkRuntimeEffect_Uniform {
     fn drop(&mut self) {
@@ -81,8 +79,7 @@ pub mod uniform {
 pub type Varying = Child;
 
 pub type Child = Handle<SkRuntimeEffect_Child>;
-unsafe impl Send for Child {}
-unsafe impl Sync for Child {}
+unsafe_send_sync!(Child);
 
 impl NativeDrop for SkRuntimeEffect_Child {
     fn drop(&mut self) {

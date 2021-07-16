@@ -1,6 +1,6 @@
 use crate::{
-    interop::VecSink, prelude::*, scalar, FontHinting, FontMetrics, GlyphId, Paint, Path, Point,
-    Rect, TextEncoding, Typeface, Unichar,
+    interop::VecSink, prelude::*, scalar, unsafe_send_sync, FontHinting, FontMetrics, GlyphId,
+    Paint, Path, Point, Rect, TextEncoding, Typeface, Unichar,
 };
 use skia_bindings::{self as sb, SkFont, SkFont_PrivFlags};
 use std::{fmt, ptr};
@@ -12,8 +12,7 @@ fn test_font_edging_naming() {
 }
 
 pub type Font = Handle<SkFont>;
-unsafe impl Send for Font {}
-unsafe impl Sync for Font {}
+unsafe_send_sync!(Font);
 
 impl NativeDrop for SkFont {
     fn drop(&mut self) {

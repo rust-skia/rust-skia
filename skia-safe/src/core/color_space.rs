@@ -1,5 +1,5 @@
 use super::Data;
-use crate::{native_transmutable, prelude::*};
+use crate::{native_transmutable, prelude::*, unsafe_send_sync};
 use skia_bindings::{self as sb, SkColorSpace, SkColorSpacePrimaries};
 use std::fmt;
 
@@ -100,8 +100,7 @@ pub mod named_transfer_fn {
 }
 
 pub type ColorSpace = RCHandle<SkColorSpace>;
-unsafe impl Send for ColorSpace {}
-unsafe impl Sync for ColorSpace {}
+unsafe_send_sync!(ColorSpace);
 
 impl NativeRefCounted for SkColorSpace {
     fn _ref(&self) {

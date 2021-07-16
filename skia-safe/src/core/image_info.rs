@@ -1,3 +1,4 @@
+use crate::unsafe_send_sync;
 use crate::{native_transmutable, prelude::*, ColorSpace, IPoint, IRect, ISize};
 use skia_bindings::{self as sb, SkColorInfo, SkColorType, SkImageInfo};
 use std::{fmt, mem};
@@ -76,8 +77,7 @@ fn test_yuv_color_space_naming() {
 }
 
 pub type ColorInfo = Handle<SkColorInfo>;
-unsafe impl Send for ColorInfo {}
-unsafe impl Sync for ColorInfo {}
+unsafe_send_sync!(ColorInfo);
 
 impl NativeDrop for SkColorInfo {
     fn drop(&mut self) {
@@ -176,8 +176,7 @@ impl ColorInfo {
 }
 
 pub type ImageInfo = Handle<SkImageInfo>;
-unsafe impl Send for ImageInfo {}
-unsafe impl Sync for ImageInfo {}
+unsafe_send_sync!(ImageInfo);
 
 impl NativeDrop for SkImageInfo {
     fn drop(&mut self) {

@@ -1,10 +1,12 @@
-use crate::{prelude::*, FontMetrics, FontStyle, GlyphId, Image, Paint, Path, Picture, Typeface};
+use crate::{
+    prelude::*, unsafe_send_sync, FontMetrics, FontStyle, GlyphId, Image, Paint, Path, Picture,
+    Typeface,
+};
 use skia_bindings::{self as sb, SkCustomTypefaceBuilder};
 use std::fmt;
 
 pub type CustomTypefaceBuilder = Handle<SkCustomTypefaceBuilder>;
-unsafe impl Send for CustomTypefaceBuilder {}
-unsafe impl Sync for CustomTypefaceBuilder {}
+unsafe_send_sync!(CustomTypefaceBuilder);
 
 impl NativeDrop for SkCustomTypefaceBuilder {
     fn drop(&mut self) {

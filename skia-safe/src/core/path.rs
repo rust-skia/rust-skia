@@ -1,3 +1,4 @@
+use crate::unsafe_send_sync;
 use crate::{
     interop::DynamicMemoryWStream, matrix::ApplyPerspectiveClip, path_types, prelude::*, scalar,
     Data, Matrix, PathDirection, PathFillType, Point, RRect, Rect, Vector,
@@ -182,8 +183,7 @@ impl Iterator for RawIter<'_> {
 }
 
 pub type Path = Handle<SkPath>;
-unsafe impl Send for Path {}
-unsafe impl Sync for Path {}
+unsafe_send_sync!(Path);
 
 impl NativeDrop for SkPath {
     fn drop(&mut self) {

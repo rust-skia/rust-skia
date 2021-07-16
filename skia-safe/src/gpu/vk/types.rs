@@ -2,6 +2,7 @@ use crate::{
     gpu::{vk, Protected},
     native_transmutable,
     prelude::*,
+    unsafe_send_sync,
 };
 use skia_bindings::{
     self as sb, GrVkAlloc, GrVkBackendMemory, GrVkDrawableInfo, GrVkImageInfo,
@@ -21,8 +22,7 @@ pub struct Alloc {
     pub backend_memory: GraphicsBackendMemory,
     uses_system_heap: bool,
 }
-unsafe impl Send for Alloc {}
-unsafe impl Sync for Alloc {}
+unsafe_send_sync!(Alloc);
 
 native_transmutable!(GrVkAlloc, Alloc, alloc_layout);
 
@@ -187,8 +187,7 @@ pub struct ImageInfo {
     pub ycbcr_conversion_info: YcbcrConversionInfo,
     pub sharing_mode: vk::SharingMode,
 }
-unsafe impl Send for ImageInfo {}
-unsafe impl Sync for ImageInfo {}
+unsafe_send_sync!(ImageInfo);
 
 native_transmutable!(GrVkImageInfo, ImageInfo, image_info_layout);
 
@@ -324,8 +323,7 @@ pub struct DrawableInfo {
     pub draw_bounds: *mut vk::Rect2D,
     pub image: vk::Image,
 }
-unsafe impl Send for DrawableInfo {}
-unsafe impl Sync for DrawableInfo {}
+unsafe_send_sync!(DrawableInfo);
 
 impl Default for DrawableInfo {
     fn default() -> Self {

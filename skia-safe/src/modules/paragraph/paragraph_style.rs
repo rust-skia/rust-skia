@@ -5,13 +5,12 @@ use crate::{
     interop::{self, AsStr, FromStrs, SetStr},
     modules::paragraph::TextHeightBehavior,
     prelude::*,
-    scalar, FontStyle,
+    scalar, unsafe_send_sync, FontStyle,
 };
 use skia_bindings as sb;
 
 pub type StrutStyle = Handle<sb::skia_textlayout_StrutStyle>;
-unsafe impl Send for StrutStyle {}
-unsafe impl Sync for StrutStyle {}
+unsafe_send_sync!(StrutStyle);
 
 impl NativeDrop for sb::skia_textlayout_StrutStyle {
     fn drop(&mut self) {
@@ -150,8 +149,7 @@ impl StrutStyle {
 
 // Can't use Handle<> here, std::u16string maintains an interior pointer.
 pub type ParagraphStyle = RefHandle<sb::skia_textlayout_ParagraphStyle>;
-unsafe impl Send for ParagraphStyle {}
-unsafe impl Sync for ParagraphStyle {}
+unsafe_send_sync!(ParagraphStyle);
 
 impl NativeDrop for sb::skia_textlayout_ParagraphStyle {
     fn drop(&mut self) {

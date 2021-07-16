@@ -1,5 +1,5 @@
-use crate::native_transmutable;
 use crate::{gpu::DriverBugWorkarounds, prelude::*};
+use crate::{native_transmutable, unsafe_send_sync};
 use skia_bindings::{self as sb, GrContextOptions};
 use std::os::raw;
 
@@ -39,8 +39,7 @@ pub struct ContextOptions {
     pub driver_bug_workarounds: DriverBugWorkarounds,
     pub enable_experimental_hardware_tessellation: bool,
 }
-unsafe impl Send for ContextOptions {}
-unsafe impl Sync for ContextOptions {}
+unsafe_send_sync!(ContextOptions);
 
 impl Default for ContextOptions {
     fn default() -> Self {

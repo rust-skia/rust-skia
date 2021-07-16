@@ -1,4 +1,4 @@
-use crate::{prelude::*, Color, Point, Rect};
+use crate::{prelude::*, unsafe_send_sync, Color, Point, Rect};
 use skia_bindings::{self as sb, SkPoint, SkVertices, SkVertices_Builder};
 use std::{fmt, ptr, slice};
 
@@ -22,8 +22,7 @@ fn test_vertices_vertex_mode_naming() {
 }
 
 pub type Vertices = RCHandle<SkVertices>;
-unsafe impl Send for Vertices {}
-unsafe impl Sync for Vertices {}
+unsafe_send_sync!(Vertices);
 
 impl NativeRefCounted for SkVertices {
     fn _ref(&self) {
@@ -200,8 +199,7 @@ bitflags! {
 }
 
 pub type Builder = Handle<SkVertices_Builder>;
-unsafe impl Send for Builder {}
-unsafe impl Sync for Builder {}
+unsafe_send_sync!(Builder);
 
 impl NativeDrop for SkVertices_Builder {
     fn drop(&mut self) {

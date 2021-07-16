@@ -1,11 +1,10 @@
-use crate::prelude::*;
+use crate::{prelude::*, unsafe_send_sync};
 use skia_bindings::{self as sb, SkDeferredDisplayList};
 use std::fmt;
 
 // TODO: complete wrapper
 pub type DeferredDisplayList = RCHandle<SkDeferredDisplayList>;
-unsafe impl Send for DeferredDisplayList {}
-unsafe impl Sync for DeferredDisplayList {}
+unsafe_send_sync!(DeferredDisplayList);
 
 impl fmt::Debug for DeferredDisplayList {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
