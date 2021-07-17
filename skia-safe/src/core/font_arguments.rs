@@ -8,7 +8,7 @@ pub struct VariationPosition<'a> {
 }
 
 pub mod variation_position {
-    use crate::{prelude::*, FourByteTag};
+    use crate::FourByteTag;
     use skia_bindings::SkFontArguments_VariationPosition_Coordinate;
 
     #[derive(Copy, Clone, PartialEq, Default, Debug)]

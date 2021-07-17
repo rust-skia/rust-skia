@@ -93,7 +93,7 @@ bitflags! {
 
 #[cfg(test)]
 mod tests {
-    use super::{Enum, Format, Standard};
+    use super::{Enum, Format};
 
     #[test]
     fn test_support_from_format_to_enum_and_back() {

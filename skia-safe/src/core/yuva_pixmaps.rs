@@ -407,7 +407,7 @@ pub mod yuva_pixmap_info {
 
 #[cfg(test)]
 mod tests {
-    use crate::{yuva_pixmap_info, ColorType, YUVAPixmaps};
+    use crate::{ColorType, YUVAPixmaps};
 
     #[test]
     fn recommended_color_type() {

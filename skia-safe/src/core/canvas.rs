@@ -2211,10 +2211,8 @@ impl SetMatrix for Canvas {
 //
 
 pub mod lattice {
-    use crate::{prelude::*, variant_name};
-    use crate::{Color, IRect};
-    use skia_bindings as sb;
-    use skia_bindings::SkCanvas_Lattice;
+    use crate::{prelude::*, Color, IRect};
+    use skia_bindings::{self as sb, SkCanvas_Lattice};
     use std::marker::PhantomData;
 
     /// [`Lattice`] divides [`crate::Bitmap`] or [`crate::Image`] into a rectangular grid.
@@ -2275,7 +2273,7 @@ pub mod lattice {
     /// Optional setting per rectangular grid entry to make it transparent,
     /// or to fill the grid entry with a color.
     pub use sb::SkCanvas_Lattice_RectType as RectType;
-    variant_name!(RectType::FixedColor, lattice_rect_type_naming);
+    variant_name!(RectType::FixedColor, rect_type_naming);
 }
 
 #[derive(Debug)]

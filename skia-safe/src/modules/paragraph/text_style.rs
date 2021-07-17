@@ -66,14 +66,7 @@ native_transmutable!(
 );
 
 pub use sb::skia_textlayout_PlaceholderAlignment as PlaceholderAlignment;
-variant_name!(
-    PlaceholderAlignment::Baseline,
-    placeholder_alignment_naming_1
-);
-variant_name!(
-    PlaceholderAlignment::AboveBaseline,
-    placeholder_alignment_naming_2
-);
+variant_name!(PlaceholderAlignment::Baseline, placeholder_alignment_naming);
 
 pub type FontFeature = Handle<sb::skia_textlayout_FontFeature>;
 unsafe_send_sync!(FontFeature);

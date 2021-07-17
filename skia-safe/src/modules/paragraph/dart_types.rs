@@ -1,4 +1,4 @@
-use crate::{prelude::*, Rect};
+use crate::Rect;
 use skia_bindings as sb;
 use std::{
     cmp::{max, min},

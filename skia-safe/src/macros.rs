@@ -1,12 +1,13 @@
 #![macro_use]
 
-/// Macro to mark a Rust type as [`NativeTransmutable`] and tests its layout.
+/// Macro to mark a Rust type as [`NativeTransmutable`] and test its layout.
 #[macro_export]
 macro_rules! native_transmutable {
     ($nt:ty, $rt:ty, $test_fn:ident) => {
-        impl NativeTransmutable<$nt> for $rt {}
+        impl crate::prelude::NativeTransmutable<$nt> for $rt {}
         #[test]
         fn $test_fn() {
+            use crate::prelude::NativeTransmutable;
             <$rt>::test_layout();
         }
     };
@@ -21,6 +22,7 @@ macro_rules! unsafe_send_sync {
     };
 }
 
+/// Macro that verifies a variant name at compile time.
 #[macro_export]
 macro_rules! variant_name {
     ($t:expr, $test_fn:ident) => {

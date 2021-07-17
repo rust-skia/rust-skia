@@ -6,7 +6,7 @@ use skia_bindings::{self as sb, SkFlattenable, SkRefCntBase, SkShader};
 use std::fmt;
 
 pub use skia_bindings::SkShader_GradientType as GradientTypeInternal;
-variant_name!(GradientTypeInternal::Linear, shader_gradient_type_naming);
+variant_name!(GradientTypeInternal::Linear, gradient_type_internal_naming);
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub enum GradientType {

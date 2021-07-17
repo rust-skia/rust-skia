@@ -906,7 +906,7 @@ impl Picture {
 
 #[cfg(test)]
 mod tests {
-    use super::{CropRect, Dither};
+    use super::CropRect;
     use crate::{IRect, Rect};
 
     fn cr(crop_rect: impl Into<CropRect>) -> CropRect {

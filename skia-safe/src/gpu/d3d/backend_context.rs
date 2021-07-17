@@ -1,5 +1,5 @@
 use super::{cp, ID3D12CommandQueue, ID3D12Device, IDXGIAdapter1, MemoryAllocator};
-use crate::{gpu, prelude::*};
+use crate::gpu;
 use skia_bindings::GrD3DBackendContext;
 
 #[repr(C)]

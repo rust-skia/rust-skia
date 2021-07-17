@@ -1,4 +1,3 @@
-use crate::prelude::*;
 use skia_bindings::{self as sb, SkPathVerb, SkPath_Verb};
 
 pub use skia_bindings::SkPathFillType as PathFillType;

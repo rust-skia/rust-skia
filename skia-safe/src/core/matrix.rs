@@ -7,7 +7,7 @@ use std::{
 };
 
 pub use skia_bindings::SkApplyPerspectiveClip as ApplyPerspectiveClip;
-variant_name!(ApplyPerspectiveClip::Yes, perpective_clip_naming);
+variant_name!(ApplyPerspectiveClip::Yes, perspective_clip_naming);
 
 bitflags! {
     // m85: On Windows the SkMatrix_TypeMask is defined as i32,
@@ -823,7 +823,7 @@ pub const IDENTITY: Matrix = Matrix::new_identity();
 
 #[cfg(test)]
 mod tests {
-    use super::{AffineMember, ApplyPerspectiveClip, Matrix, ScaleToFit, TypeMask};
+    use super::{AffineMember, Matrix, TypeMask};
     use crate::prelude::*;
 
     #[test]

@@ -1,5 +1,4 @@
 use crate::{prelude::*, FilterQuality};
-use crate::{prelude::*, FilterQuality};
 use skia_bindings::{SkCubicResampler, SkSamplingOptions, SkSamplingOptions_MediumBehavior};
 
 pub use skia_bindings::SkFilterMode as FilterMode;

@@ -6,7 +6,7 @@ pub use skia_bindings::SkRRect_Type as Type;
 variant_name!(Type::Complex, rrect_type_naming);
 
 pub use skia_bindings::SkRRect_Corner as Corner;
-variant_name!(Corner::LowerLef, rrect_corner_naming);
+variant_name!(Corner::LowerLeft, rrect_corner_naming);
 
 #[derive(Copy, Clone)]
 #[repr(transparent)]
