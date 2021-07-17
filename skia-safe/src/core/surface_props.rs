@@ -1,4 +1,4 @@
-use crate::{native_transmutable, prelude::*};
+use crate::prelude::*;
 use skia_bindings::{self as sb, SkPixelGeometry, SkSurfaceProps};
 use std::fmt;
 

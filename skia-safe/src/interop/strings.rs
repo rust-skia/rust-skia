@@ -1,7 +1,6 @@
 use crate::{
     interop::{FromStrs, String},
     prelude::*,
-    unsafe_send_sync,
 };
 use skia_bindings::{self as sb, SkStrings};
 use std::{fmt, ops::Index};

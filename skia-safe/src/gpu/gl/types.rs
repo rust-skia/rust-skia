@@ -1,9 +1,10 @@
-use crate::native_transmutable;
 use crate::prelude::*;
 use skia_bindings::{self as sb, GrGLFramebufferInfo, GrGLTextureInfo};
 
 pub use skia_bindings::GrGLFormat as Format;
+variant_name!(Format::ALPHA8, format_naming);
 pub use skia_bindings::GrGLStandard as Standard;
+variant_name!(Standard::GLES, standard_naming);
 pub use skia_bindings::GrGLenum as Enum;
 pub use skia_bindings::GrGLuint as UInt;
 
@@ -93,16 +94,6 @@ bitflags! {
 #[cfg(test)]
 mod tests {
     use super::{Enum, Format, Standard};
-
-    #[test]
-    fn test_standard_naming() {
-        let _ = Standard::GLES;
-    }
-
-    #[test]
-    fn test_format_naming() {
-        let _ = Format::COMPRESSED_ETC1_RGB8;
-    }
 
     #[test]
     fn test_support_from_format_to_enum_and_back() {

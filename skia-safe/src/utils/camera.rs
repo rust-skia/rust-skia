@@ -1,5 +1,5 @@
 #![allow(deprecated)]
-use crate::{native_transmutable, prelude::*, scalar, unsafe_send_sync, Canvas, Matrix, M44, V3};
+use crate::{prelude::*, scalar, Canvas, Matrix, M44, V3};
 use skia_bindings::{self as sb, Sk3DView, SkCamera3D, SkPatch3D};
 use std::fmt;
 

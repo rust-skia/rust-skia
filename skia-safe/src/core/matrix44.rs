@@ -1,5 +1,5 @@
 #![allow(deprecated)]
-use crate::{native_transmutable, prelude::*, scalar, Matrix, Scalar, Vector3};
+use crate::{prelude::*, scalar, Matrix, Scalar, Vector3};
 use skia_bindings::{self as sb, SkMatrix44, SkVector4};
 use std::{fmt, ops};
 

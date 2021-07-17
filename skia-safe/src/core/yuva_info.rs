@@ -1,7 +1,6 @@
 use super::image_info;
-use crate::{native_transmutable, prelude::*, unsafe_send_sync, EncodedOrigin, ISize, Matrix};
+use crate::{prelude::*, EncodedOrigin, ISize, Matrix};
 use skia_bindings::{self as sb, SkYUVAInfo, SkYUVAInfo_Subsampling};
-
 use std::{fmt, ptr};
 
 /// Specifies the structure of planes for a YUV image with optional alpha. The actual planar data
@@ -27,6 +26,7 @@ impl NativeDrop for SkYUVAInfo {
 /// RGB                      0:R,    1:G, 2:B
 /// RGBA                     0:R,    1:G, 2:B, 3:A
 pub use sb::SkYUVAInfo_PlaneConfig as PlaneConfig;
+variant_name!(PlaneConfig::YUV, plane_config_naming);
 
 /// UV subsampling is also specified in the enum value names using J:a:b notation (e.g. 4:2:0 is
 /// 1/2 horizontal and 1/2 vertical resolution for U and V). If alpha is present it is not sub-
@@ -50,6 +50,7 @@ native_transmutable!(SkYUVAInfo_Subsampling, Subsampling, subsampling_layout);
 ///
 /// Currently only centered siting is supported but will expand to support additional sitings.
 pub use sb::SkYUVAInfo_Siting as Siting;
+variant_name!(Siting::Centered, siting_naming);
 
 /// Ratio of Y/A values to U/V values in x and y.
 pub fn subsampling_factors(subsampling: Subsampling) -> (i32, i32) {
@@ -289,18 +290,5 @@ impl YUVAInfo {
 
     pub(crate) fn native_is_valid(info: &SkYUVAInfo) -> bool {
         info.fPlaneConfig != PlaneConfig::Unknown
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn test_plane_config_naming() {
-        let _ = super::PlaneConfig::Y_U_V;
-    }
-
-    #[test]
-    fn test_siting_naming() {
-        let _ = super::Siting::Centered;
     }
 }

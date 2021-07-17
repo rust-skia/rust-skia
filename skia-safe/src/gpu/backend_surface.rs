@@ -7,7 +7,7 @@ use super::mtl;
 #[cfg(feature = "vulkan")]
 use super::vk;
 use super::{BackendAPI, BackendSurfaceMutableState, Mipmapped};
-use crate::{prelude::*, unsafe_send_sync, ISize};
+use crate::{prelude::*, ISize};
 use skia_bindings::{
     self as sb, GrBackendFormat, GrBackendRenderTarget, GrBackendTexture, GrMipmapped,
 };

@@ -1,3 +1,5 @@
+#![macro_use]
+
 /// Macro to mark a Rust type as [`NativeTransmutable`] and tests its layout.
 #[macro_export]
 macro_rules! native_transmutable {
@@ -16,5 +18,15 @@ macro_rules! unsafe_send_sync {
     ($t: ty) => {
         unsafe impl Send for $t {}
         unsafe impl Sync for $t {}
+    };
+}
+
+#[macro_export]
+macro_rules! variant_name {
+    ($t:expr, $test_fn:ident) => {
+        #[test]
+        fn $test_fn() {
+            let _ = $t;
+        }
     };
 }

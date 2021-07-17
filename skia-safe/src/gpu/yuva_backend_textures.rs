@@ -1,5 +1,5 @@
 use super::{BackendFormat, BackendTexture, Mipmapped, SurfaceOrigin};
-use crate::{prelude::*, unsafe_send_sync, YUVAInfo, YUVColorSpace};
+use crate::{prelude::*, YUVAInfo, YUVColorSpace};
 use skia_bindings::{self as sb, GrYUVABackendTextureInfo, GrYUVABackendTextures};
 use std::{fmt, iter};
 

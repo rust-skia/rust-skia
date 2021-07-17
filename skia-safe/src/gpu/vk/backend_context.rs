@@ -1,5 +1,5 @@
 use super::{Device, GetProc, GetProcOf, Instance, PhysicalDevice, Queue, Version};
-use crate::{gpu, native_transmutable, prelude::*};
+use crate::{gpu, prelude::*};
 use ffi::CString;
 use raw::c_char;
 use skia_bindings::{self as sb, GrVkExtensionFlags, GrVkFeatureFlags};

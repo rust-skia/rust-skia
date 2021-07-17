@@ -1,4 +1,4 @@
-use crate::{prelude::*, unsafe_send_sync, Color, Point, Rect};
+use crate::{prelude::*, Color, Point, Rect};
 use skia_bindings::{self as sb, SkPoint, SkVertices, SkVertices_Builder};
 use std::{fmt, ptr, slice};
 
@@ -16,10 +16,7 @@ pub struct Bone {
 }
 
 pub use skia_bindings::SkVertices_VertexMode as VertexMode;
-#[test]
-fn test_vertices_vertex_mode_naming() {
-    let _ = VertexMode::Triangles;
-}
+variant_name!(VertexMode::Triangles, vertex_mode_naming);
 
 pub type Vertices = RCHandle<SkVertices>;
 unsafe_send_sync!(Vertices);

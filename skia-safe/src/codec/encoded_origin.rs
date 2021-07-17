@@ -1,4 +1,4 @@
-use crate::{native_transmutable, prelude::*, ISize, Matrix};
+use crate::{prelude::*, ISize, Matrix};
 use skia_bindings::{self as sb, SkEncodedOrigin};
 
 // Even though possible, we are not using the original SkEncodedOrigin enum, because of the

@@ -1,8 +1,5 @@
-use crate::native_transmutable;
-use crate::prelude::*;
-use crate::scalar;
-use skia_bindings as sb;
-use skia_bindings::SkFontMetrics;
+use crate::{prelude::*, scalar};
+use skia_bindings::{self as sb, SkFontMetrics};
 
 bitflags! {
     #[derive(Default)]

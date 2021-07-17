@@ -1,13 +1,15 @@
-use crate::native_transmutable;
+use crate::{prelude::*, FilterQuality};
 use crate::{prelude::*, FilterQuality};
 use skia_bindings::{SkCubicResampler, SkSamplingOptions, SkSamplingOptions_MediumBehavior};
 
 pub use skia_bindings::SkFilterMode as FilterMode;
+variant_name!(FilterMode::Linear, filter_mode_naming);
 
 #[deprecated(since = "0.38.0", note = "Use FilterMode")]
 pub type SamplingMode = FilterMode;
 
 pub use skia_bindings::SkMipmapMode as MipmapMode;
+variant_name!(MipmapMode::Nearest, mipmap_mode_naming);
 
 /// Specify `b` and `c` (each between 0...1) to create a shader that applies the corresponding
 /// cubic reconstruction filter to the image.
@@ -154,14 +156,5 @@ impl From<CubicResampler> for SamplingOptions {
 impl From<FilterQuality> for SamplingOptions {
     fn from(quality: FilterQuality) -> Self {
         Self::from_filter_quality(quality, None)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn test_naming() {
-        let _ = super::FilterMode::Linear;
-        let _ = super::MipmapMode::Nearest;
     }
 }

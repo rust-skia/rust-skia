@@ -1,6 +1,6 @@
 use crate::{
-    prelude::*, unsafe_send_sync, AlphaType, Color, Color4f, ColorSpace, ColorType, IPoint, IRect,
-    ISize, ImageInfo, SamplingOptions,
+    prelude::*, AlphaType, Color, Color4f, ColorSpace, ColorType, IPoint, IRect, ISize, ImageInfo,
+    SamplingOptions,
 };
 use skia_bindings::{self as sb, SkPixmap};
 use std::{convert::TryInto, ffi::c_void, fmt, mem, os::raw, ptr, slice};

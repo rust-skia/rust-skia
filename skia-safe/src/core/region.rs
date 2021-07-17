@@ -1,7 +1,4 @@
-use crate::{
-    native_transmutable, prelude::*, unsafe_send_sync, Contains, IPoint, IRect, IVector, Path,
-    QuickReject,
-};
+use crate::{prelude::*, Contains, IPoint, IRect, IVector, Path, QuickReject};
 use skia_bindings::{
     self as sb, SkRegion, SkRegion_Cliperator, SkRegion_Iterator, SkRegion_RunHead,
     SkRegion_Spanerator,
@@ -41,10 +38,7 @@ impl fmt::Debug for Region {
 }
 
 pub use skia_bindings::SkRegion_Op as RegionOp;
-#[test]
-fn test_region_op_naming() {
-    let _ = RegionOp::ReverseDifference;
-}
+variant_name!(RegionOp::ReverseDifference, region_op_naming);
 
 impl Region {
     pub fn new() -> Region {

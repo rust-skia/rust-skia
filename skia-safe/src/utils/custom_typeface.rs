@@ -1,7 +1,4 @@
-use crate::{
-    prelude::*, unsafe_send_sync, FontMetrics, FontStyle, GlyphId, Image, Paint, Path, Picture,
-    Typeface,
-};
+use crate::{prelude::*, FontMetrics, FontStyle, GlyphId, Image, Paint, Path, Picture, Typeface};
 use skia_bindings::{self as sb, SkCustomTypefaceBuilder};
 use std::fmt;
 

@@ -1,7 +1,5 @@
 use super::{PositionWithAffinity, RectHeightStyle, RectWidthStyle, TextBox};
-use crate::{
-    interop::VecSink, prelude::*, scalar, textlayout::LineMetrics, unsafe_send_sync, Canvas, Point,
-};
+use crate::{interop::VecSink, prelude::*, scalar, textlayout::LineMetrics, Canvas, Point};
 use skia_bindings as sb;
 use std::{fmt, ops::Range};
 

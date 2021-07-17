@@ -1,6 +1,4 @@
-use crate::{
-    prelude::*, scalar, unsafe_send_sync, BlendMode, Color, Color4f, ColorSpace, NativeFlattenable,
-};
+use crate::{prelude::*, scalar, BlendMode, Color, Color4f, ColorSpace, NativeFlattenable};
 use skia_bindings::{self as sb, SkColorFilter, SkFlattenable, SkRefCntBase};
 use std::fmt;
 

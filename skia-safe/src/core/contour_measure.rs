@@ -1,4 +1,4 @@
-use crate::{prelude::*, scalar, unsafe_send_sync, Matrix, Path, Point, Vector};
+use crate::{prelude::*, scalar, Matrix, Path, Point, Vector};
 use skia_bindings::{self as sb, SkContourMeasure, SkContourMeasureIter, SkRefCntBase};
 use std::fmt;
 

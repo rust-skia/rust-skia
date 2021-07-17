@@ -1,29 +1,22 @@
 use crate::{
-    prelude::*, scalar, unsafe_send_sync, BlendMode, Color, Color4f, ColorFilter, ColorSpace,
-    ImageFilter, MaskFilter, Path, PathEffect, Rect, Shader,
+    prelude::*, scalar, BlendMode, Color, Color4f, ColorFilter, ColorSpace, ImageFilter,
+    MaskFilter, Path, PathEffect, Rect, Shader,
 };
 use core::fmt;
 use skia_bindings::{self as sb, SkPaint};
-use std::hash::{Hash, Hasher};
-use std::ptr;
+use std::{
+    hash::{Hash, Hasher},
+    ptr,
+};
 
 pub use sb::SkPaint_Style as Style;
-#[test]
-pub fn test_style_naming() {
-    let _ = Style::Fill;
-}
+variant_name!(Style::Fill, style_naming);
 
 pub use sb::SkPaint_Cap as Cap;
-#[test]
-pub fn test_cap_naming() {
-    let _ = Cap::Butt;
-}
+variant_name!(Cap::Butt, cap_naming);
 
 pub use sb::SkPaint_Join as Join;
-#[test]
-pub fn test_join_naming() {
-    let _ = Join::Miter;
-}
+variant_name!(Join::Miter, join_naming);
 
 pub type Paint = Handle<SkPaint>;
 unsafe_send_sync!(Paint);

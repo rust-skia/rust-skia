@@ -1,11 +1,13 @@
-use crate::{prelude::*, yuva_pixmap_info::SupportedDataTypes, Image, YUVAPixmapInfo, YUVAPixmaps};
-use crate::{Data, EncodedImageFormat, EncodedOrigin, IRect, ISize, ImageInfo, Pixmap};
+use crate::{
+    prelude::*, yuva_pixmap_info::SupportedDataTypes, Data, EncodedImageFormat, EncodedOrigin,
+    IRect, ISize, Image, ImageInfo, Pixmap, YUVAPixmapInfo, YUVAPixmaps,
+};
 use ffi::CStr;
-use skia_bindings as sb;
-use skia_bindings::{SkCodec, SkCodec_Options, SkRefCntBase};
+use skia_bindings::{self as sb, SkCodec, SkCodec_Options, SkRefCntBase};
 use std::{ffi, fmt, mem, ptr};
 
 pub use sb::SkCodec_Result as Result;
+variant_name!(Result::IncompleteInput, result_naming);
 
 // TODO: implement Display
 
@@ -16,8 +18,10 @@ pub fn result_to_string(result: Result) -> &'static str {
 }
 
 pub use sb::SkCodec_SelectionPolicy as SelectionPolicy;
+variant_name!(SelectionPolicy::PreferStillImage, selection_policy_naming);
 
 pub use sb::SkCodec_ZeroInitialized as ZeroInitialized;
+variant_name!(ZeroInitialized::Yes, zero_initialized_naming);
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct Options {
@@ -28,6 +32,7 @@ pub struct Options {
 }
 
 pub use sb::SkCodec_SkScanlineOrder as ScanlineOrder;
+variant_name!(ScanlineOrder::BottomUp, scanline_order_naming);
 
 pub type Codec = RCHandle<SkCodec>;
 
@@ -290,17 +295,4 @@ impl Codec {
     }
 
     // TODO: Register
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{Result, ScanlineOrder, SelectionPolicy, ZeroInitialized};
-
-    #[test]
-    fn test_naming() {
-        let _ = Result::IncompleteInput;
-        let _ = SelectionPolicy::PreferStillImage;
-        let _ = ZeroInitialized::Yes;
-        let _ = ScanlineOrder::BottomUp;
-    }
 }

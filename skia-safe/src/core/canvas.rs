@@ -1,14 +1,14 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
 use crate::{
-    native_transmutable, prelude::*, scalar, u8cpu, Bitmap, BlendMode, ClipOp, Color, Color4f,
-    Data, Drawable, FilterMode, Font, GlyphId, IPoint, IRect, ISize, Image, ImageFilter, ImageInfo,
-    Matrix, Paint, Path, Picture, Pixmap, Point, QuickReject, RRect, RSXform, Rect, Region,
-    SamplingOptions, Shader, Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices, M44,
+    prelude::*, scalar, u8cpu, Bitmap, BlendMode, ClipOp, Color, Color4f, Data, Drawable,
+    FilterMode, Font, GlyphId, IPoint, IRect, ISize, Image, ImageFilter, ImageInfo, Matrix, Paint,
+    Path, Picture, Pixmap, Point, QuickReject, RRect, RSXform, Rect, Region, SamplingOptions,
+    Shader, Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices, M44,
 };
-use skia_bindings as sb;
 use skia_bindings::{
-    SkAutoCanvasRestore, SkCanvas, SkCanvas_SaveLayerRec, SkImageFilter, SkPaint, SkRect,
+    self as sb, SkAutoCanvasRestore, SkCanvas, SkCanvas_SaveLayerRec, SkImageFilter, SkPaint,
+    SkRect,
 };
 use std::{
     convert::TryInto,
@@ -133,21 +133,13 @@ impl<'a> SaveLayerRec<'a> {
 
 /// Selects if an array of points are drawn as discrete points, as lines, or as an open polygon.
 pub use sb::SkCanvas_PointMode as PointMode;
-
-#[test]
-fn test_canvas_point_mode_naming() {
-    let _ = PointMode::Polygon;
-}
+variant_name!(PointMode::Polygon, point_mode_naming);
 
 /// [`SrcRectConstraint`] controls the behavior at the edge of source [`Rect`], provided to
 /// [`Canvas::draw_image_rect()`] when there is any filtering. If kStrict is set, then extra code is
 /// used to ensure it nevers samples outside of the src-rect.
 pub use sb::SkCanvas_SrcRectConstraint as SrcRectConstraint;
-
-#[test]
-fn test_src_rect_constraint_naming() {
-    let _ = SrcRectConstraint::Fast;
-}
+variant_name!(SrcRectConstraint::Fast, src_rect_constraint_naming);
 
 /// Provides access to Canvas's pixels.
 ///
@@ -2219,7 +2211,7 @@ impl SetMatrix for Canvas {
 //
 
 pub mod lattice {
-    use crate::prelude::*;
+    use crate::{prelude::*, variant_name};
     use crate::{Color, IRect};
     use skia_bindings as sb;
     use skia_bindings::SkCanvas_Lattice;
@@ -2283,11 +2275,7 @@ pub mod lattice {
     /// Optional setting per rectangular grid entry to make it transparent,
     /// or to fill the grid entry with a color.
     pub use sb::SkCanvas_Lattice_RectType as RectType;
-
-    #[test]
-    fn test_lattice_rect_type_naming() {
-        let _ = RectType::FixedColor;
-    }
+    variant_name!(RectType::FixedColor, lattice_rect_type_naming);
 }
 
 #[derive(Debug)]

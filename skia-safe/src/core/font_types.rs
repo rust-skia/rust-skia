@@ -1,4 +1,4 @@
-use crate::{native_transmutable, prelude::*};
+use crate::prelude::*;
 use skia_bindings::SkTextEncoding;
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
@@ -20,7 +20,4 @@ impl Default for TextEncoding {
 }
 
 pub use skia_bindings::SkFontHinting as FontHinting;
-#[test]
-fn test_font_hinting_naming() {
-    let _ = FontHinting::Full;
-}
+variant_name!(FontHinting::Full, font_hinting_naming);

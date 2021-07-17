@@ -1,4 +1,4 @@
-use crate::{prelude::*, unsafe_send_sync};
+use crate::prelude::*;
 use skia_bindings::{self as sb, SkDeferredDisplayList};
 use std::fmt;
 

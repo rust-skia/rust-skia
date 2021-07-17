@@ -1,13 +1,13 @@
 use super::scalar_;
-use crate::{
-    native_transmutable, prelude::*, scalar, Point, Point3, RSXform, Rect, Scalar, Size, Vector,
+use crate::{prelude::*, scalar, Point, Point3, RSXform, Rect, Scalar, Size, Vector};
+use skia_bindings::{self as sb, SkMatrix};
+use std::{
+    ops::{Index, IndexMut, Mul},
+    slice,
 };
-use skia_bindings as sb;
-use skia_bindings::SkMatrix;
-use std::ops::{Index, IndexMut, Mul};
-use std::slice;
 
 pub use skia_bindings::SkApplyPerspectiveClip as ApplyPerspectiveClip;
+variant_name!(ApplyPerspectiveClip::Yes, perpective_clip_naming);
 
 bitflags! {
     // m85: On Windows the SkMatrix_TypeMask is defined as i32,
@@ -27,6 +27,7 @@ impl TypeMask {
 }
 
 pub use skia_bindings::SkMatrix_ScaleToFit as ScaleToFit;
+variant_name!(ScaleToFit::Fill, scale_to_fit_naming);
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
@@ -824,16 +825,6 @@ pub const IDENTITY: Matrix = Matrix::new_identity();
 mod tests {
     use super::{AffineMember, ApplyPerspectiveClip, Matrix, ScaleToFit, TypeMask};
     use crate::prelude::*;
-
-    #[test]
-    fn test_apply_perspective_clip_naming() {
-        let _ = ApplyPerspectiveClip::Yes;
-    }
-
-    #[test]
-    fn test_matrix_scale_to_fit_naming() {
-        let _ = ScaleToFit::End;
-    }
 
     #[test]
     fn test_get_set_trait_compilation() {

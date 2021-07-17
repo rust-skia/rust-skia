@@ -8,22 +8,19 @@ use skia_bindings::{self as sb, SkRefCntBase, SkSurface};
 use std::{fmt, ptr};
 
 pub use skia_bindings::SkSurface_ContentChangeMode as ContentChangeMode;
-#[test]
-fn test_surface_content_change_mode_naming() {
-    let _ = ContentChangeMode::Retain;
-}
+variant_name!(ContentChangeMode::Retain, content_change_mode_naming);
 
 pub use skia_bindings::SkSurface_BackendHandleAccess as BackendHandleAccess;
-#[test]
-fn test_surface_backend_handle_access_naming() {
-    let _ = BackendHandleAccess::FlushWrite;
-}
+variant_name!(
+    BackendHandleAccess::FlushWrite,
+    backend_handle_access_naming
+);
 
 pub use skia_bindings::SkSurface_BackendSurfaceAccess as BackendSurfaceAccess;
-#[test]
-fn test_surface_backend_surface_access_naming() {
-    let _ = BackendSurfaceAccess::Present;
-}
+variant_name!(
+    BackendSurfaceAccess::Present,
+    surface_backend_surface_access_naming
+);
 
 pub type Surface = RCHandle<SkSurface>;
 

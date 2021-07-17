@@ -1,4 +1,4 @@
-use crate::{native_transmutable, prelude::*};
+use crate::prelude::*;
 use skia_bindings::{self as sb, SkFontArguments, SkFontArguments_VariationPosition};
 use std::{fmt, marker::PhantomData, mem};
 
@@ -8,7 +8,7 @@ pub struct VariationPosition<'a> {
 }
 
 pub mod variation_position {
-    use crate::{native_transmutable, prelude::*, FourByteTag};
+    use crate::{prelude::*, FourByteTag};
     use skia_bindings::SkFontArguments_VariationPosition_Coordinate;
 
     #[derive(Copy, Clone, PartialEq, Default, Debug)]

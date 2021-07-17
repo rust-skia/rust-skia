@@ -3,7 +3,7 @@ use crate::{
     font_parameters::VariationAxis,
     interop::{self, MemoryStream, NativeStreamBase, StreamAsset},
     prelude::*,
-    unsafe_send_sync, Data, FontArguments, FontStyle, GlyphId, Rect, Unichar,
+    Data, FontArguments, FontStyle, GlyphId, Rect, Unichar,
 };
 use skia_bindings::{self as sb, SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings};
 use std::{ffi, fmt, ptr};
@@ -12,10 +12,10 @@ pub type FontId = skia_bindings::SkFontID;
 pub type FontTableTag = skia_bindings::SkFontTableTag;
 
 pub use skia_bindings::SkTypeface_SerializeBehavior as SerializeBehavior;
-#[test]
-fn test_typeface_serialize_behavior_naming() {
-    let _ = SerializeBehavior::DontIncludeData;
-}
+variant_name!(
+    SerializeBehavior::DontIncludeData,
+    serialize_behavior_naming
+);
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct LocalizedString {

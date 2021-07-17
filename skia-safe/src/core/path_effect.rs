@@ -1,8 +1,7 @@
-use crate::{native_transmutable, prelude::*, unsafe_send_sync};
-use crate::{scalar, Matrix, NativeFlattenable, Path, Point, Rect, StrokeRec, Vector};
-use skia_bindings as sb;
+use crate::{prelude::*, scalar, Matrix, NativeFlattenable, Path, Point, Rect, StrokeRec, Vector};
 use skia_bindings::{
-    SkFlattenable, SkPathEffect, SkPathEffect_DashType, SkPathEffect_PointData, SkRefCntBase,
+    self as sb, SkFlattenable, SkPathEffect, SkPathEffect_DashType, SkPathEffect_PointData,
+    SkRefCntBase,
 };
 use std::{fmt, os::raw};
 

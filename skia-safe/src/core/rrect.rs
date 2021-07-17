@@ -1,18 +1,12 @@
-use crate::{interop, native_transmutable, prelude::*, scalar, Matrix, Rect, Vector};
+use crate::{interop, prelude::*, scalar, Matrix, Rect, Vector};
 use skia_bindings::{self as sb, SkRRect};
 use std::{fmt, mem, ptr};
 
 pub use skia_bindings::SkRRect_Type as Type;
-#[test]
-fn test_rrect_type_naming() {
-    let _ = Type::Complex;
-}
+variant_name!(Type::Complex, rrect_type_naming);
 
 pub use skia_bindings::SkRRect_Corner as Corner;
-#[test]
-fn test_rrect_corner_naming() {
-    let _ = Corner::LowerLeft;
-}
+variant_name!(Corner::LowerLef, rrect_corner_naming);
 
 #[derive(Copy, Clone)]
 #[repr(transparent)]

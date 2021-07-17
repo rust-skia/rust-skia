@@ -1,15 +1,12 @@
 use crate::{
-    gradient_shader, prelude::*, scalar, unsafe_send_sync, Color, ColorFilter, Image, Matrix,
-    NativeFlattenable, Point, TileMode,
+    gradient_shader, prelude::*, scalar, Color, ColorFilter, Image, Matrix, NativeFlattenable,
+    Point, TileMode,
 };
 use skia_bindings::{self as sb, SkFlattenable, SkRefCntBase, SkShader};
 use std::fmt;
 
 pub use skia_bindings::SkShader_GradientType as GradientTypeInternal;
-#[test]
-fn test_shader_gradient_type_naming() {
-    let _ = GradientTypeInternal::Linear;
-}
+variant_name!(GradientTypeInternal::Linear, shader_gradient_type_naming);
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub enum GradientType {

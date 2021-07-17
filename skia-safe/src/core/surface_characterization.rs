@@ -1,6 +1,6 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
-use crate::{prelude::*, unsafe_send_sync, ColorSpace, SurfaceProps};
+use crate::{prelude::*, ColorSpace, SurfaceProps};
 use skia_bindings::{self as sb, SkSurfaceCharacterization};
 use std::fmt;
 

@@ -1,4 +1,4 @@
-use crate::{prelude::*, unsafe_send_sync, ISize};
+use crate::{prelude::*, ISize};
 use skia_bindings::{self as sb, SkPixelRef, SkRefCntBase};
 use std::{fmt, os::raw::c_void};
 

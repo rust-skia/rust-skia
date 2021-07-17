@@ -1,12 +1,9 @@
-use crate::{native_transmutable, prelude::*};
+use crate::prelude::*;
 use skia_bindings as sb;
 use std::ptr;
 
 pub use skia_bindings::GrBackendApi as BackendAPI;
-#[test]
-fn test_backend_api_naming() {
-    let _ = BackendAPI::Dawn;
-}
+variant_name!(BackendAPI::Dawn, backend_api_naming);
 
 // TODO: this should be a newtype(bool) I guess with implementations
 //       of From<bool> and Deref?
@@ -14,33 +11,20 @@ pub use skia_bindings::GrMipmapped as Mipmapped;
 
 #[deprecated(since = "0.35.0", note = "Use Mipmapped (with a lowercase 'm')")]
 pub use skia_bindings::GrMipmapped as MipMapped;
-
-#[test]
-fn test_mipmapped_naming() {
-    let _ = Mipmapped::Yes;
-}
+variant_name!(Mipmapped::Yes, mipmapped_naming);
 
 // TODO: this should be a newtype(bool) I guess with implementations
 //       of From<bool> and Deref?
 pub use skia_bindings::GrRenderable as Renderable;
-#[test]
-fn test_renderable_naming() {
-    let _ = Renderable::No;
-}
+variant_name!(Renderable::No, renderable_naming);
 
 // TODO: this should be a newtype(bool) I guess with implementations
 //       of From<bool> and Deref?
 pub use skia_bindings::GrProtected as Protected;
-#[test]
-fn test_protected_naming() {
-    let _ = Protected::Yes;
-}
+variant_name!(Protected::Yes, protected_naming);
 
 pub use skia_bindings::GrSurfaceOrigin as SurfaceOrigin;
-#[test]
-fn test_surface_origin_naming() {
-    let _ = SurfaceOrigin::TopLeft;
-}
+variant_name!(SurfaceOrigin::BottomLeft, surface_origin_naming);
 
 // Note: BackendState is in gl/types.rs/
 
@@ -73,9 +57,6 @@ impl Default for FlushInfo {
 native_transmutable!(sb::GrFlushInfo, FlushInfo, flush_info_layout);
 
 pub use sb::GrSemaphoresSubmitted as SemaphoresSubmitted;
-#[test]
-fn test_semaphores_submitted_naming() {
-    let _ = SemaphoresSubmitted::Yes;
-}
+variant_name!(SemaphoresSubmitted::Yes, semaphores_submitted_naming);
 
 // TODO: wrap GrPrepareForExternalIORequests

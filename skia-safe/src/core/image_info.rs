@@ -1,13 +1,9 @@
-use crate::unsafe_send_sync;
-use crate::{native_transmutable, prelude::*, ColorSpace, IPoint, IRect, ISize};
+use crate::{prelude::*, ColorSpace, IPoint, IRect, ISize};
 use skia_bindings::{self as sb, SkColorInfo, SkColorType, SkImageInfo};
 use std::{fmt, mem};
 
 pub use skia_bindings::SkAlphaType as AlphaType;
-#[test]
-fn test_alpha_type_naming() {
-    let _ = AlphaType::Premul;
-}
+variant_name!(AlphaType::Premul, alpha_type_naming);
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 #[repr(i32)]
@@ -71,10 +67,7 @@ impl ColorType {
 }
 
 pub use skia_bindings::SkYUVColorSpace as YUVColorSpace;
-#[test]
-fn test_yuv_color_space_naming() {
-    let _ = YUVColorSpace::JPEG;
-}
+variant_name!(YUVColorSpace::JPEG, yuv_color_space_naming);
 
 pub type ColorInfo = Handle<SkColorInfo>;
 unsafe_send_sync!(ColorInfo);

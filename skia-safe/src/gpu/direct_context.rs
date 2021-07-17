@@ -8,7 +8,7 @@ use super::{
     BackendFormat, BackendRenderTarget, BackendSurfaceMutableState, BackendTexture, ContextOptions,
     FlushInfo, RecordingContext, SemaphoresSubmitted,
 };
-use crate::{image, native_transmutable, prelude::*, Data};
+use crate::{image, prelude::*, Data};
 use skia_bindings::{self as sb, GrDirectContext, GrDirectContext_DirectContextID, SkRefCntBase};
 use std::{
     fmt,

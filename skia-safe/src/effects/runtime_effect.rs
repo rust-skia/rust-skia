@@ -1,8 +1,7 @@
 use crate::{
     interop::{self, AsStr},
-    native_transmutable,
     prelude::*,
-    unsafe_send_sync, ColorFilter, Data, Matrix, Shader,
+    ColorFilter, Data, Matrix, Shader,
 };
 use sb::SkRuntimeEffect_Child;
 use skia_bindings::{
@@ -62,10 +61,7 @@ pub mod uniform {
     use skia_bindings as sb;
 
     pub use sb::SkRuntimeEffect_Uniform_Type as Type;
-    #[test]
-    fn test_type_naming() {
-        let _ = Type::Float2x2;
-    }
+    variant_name!(Type::Float2x2, type_naming);
 
     bitflags! {
         pub struct Flags : u32 {
@@ -112,6 +108,7 @@ impl Child {
 }
 
 pub use sb::SkRuntimeEffect_Child_Type as ChildType;
+variant_name!(ChildType::Shader, child_type_naming);
 
 pub type RuntimeEffect = RCHandle<SkRuntimeEffect>;
 
@@ -289,11 +286,3 @@ impl RuntimeEffect {
 }
 
 // TODO: wrap SkRuntimeEffectBuilder, SkRuntimeShaderBuilder
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn test_child_type_naming() {
-        let _ = super::ChildType::ColorFilter;
-    }
-}

@@ -1,7 +1,4 @@
-use crate::{
-    prelude::{self, NativeAccess, NativeDrop, NativePartialEq},
-    unsafe_send_sync,
-};
+use crate::prelude::{self, NativeAccess, NativeDrop, NativePartialEq};
 use skia_bindings::{self as sb, GrMtlTextureInfo};
 use std::{fmt, ptr};
 

@@ -1,4 +1,4 @@
-use crate::{native_transmutable, prelude::*};
+use crate::prelude::*;
 use skia_bindings::{self as sb, SkFontStyle, SkFontStyle_Weight, SkFontStyle_Width};
 use std::{fmt, ops::Deref};
 
@@ -77,10 +77,7 @@ impl Width {
 }
 
 pub use skia_bindings::SkFontStyle_Slant as Slant;
-#[test]
-fn test_slant_naming() {
-    let _ = Slant::Upright;
-}
+variant_name!(Slant::Upright, slant_naming);
 
 // TODO: implement Display
 #[derive(Copy, Clone)]

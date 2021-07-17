@@ -1,12 +1,11 @@
-use crate::{
-    prelude::*, unsafe_send_sync, ColorType, Data, ImageInfo, Pixmap, YUVAInfo, YUVColorSpace,
-};
+use crate::{prelude::*, ColorType, Data, ImageInfo, Pixmap, YUVAInfo, YUVColorSpace};
 use skia_bindings::{self as sb, SkYUVAPixmapInfo, SkYUVAPixmaps};
 use std::{ffi::c_void, fmt, ptr};
 use yuva_pixmap_info::SupportedDataTypes;
 
 /// Data type for Y, U, V, and possibly A channels independent of how values are packed into planes.
 pub use yuva_pixmap_info::DataType;
+variant_name!(DataType::Float16, data_type_naming);
 
 /// [YUVAInfo] combined with per-plane [ColorType]s and row bytes. Fully specifies the [Pixmap]`s
 /// for a YUVA image without the actual pixel memory and data.
@@ -316,7 +315,7 @@ impl YUVAPixmaps {
 }
 
 pub mod yuva_pixmap_info {
-    use crate::{prelude::*, unsafe_send_sync, ColorType};
+    use crate::{prelude::*, ColorType};
     use skia_bindings::{self as sb, SkYUVAPixmapInfo_SupportedDataTypes};
     use std::fmt;
 
@@ -409,11 +408,6 @@ pub mod yuva_pixmap_info {
 #[cfg(test)]
 mod tests {
     use crate::{yuva_pixmap_info, ColorType, YUVAPixmaps};
-
-    #[test]
-    fn test_data_type_naming() {
-        let _ = yuva_pixmap_info::DataType::Float16;
-    }
 
     #[test]
     fn recommended_color_type() {

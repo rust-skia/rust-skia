@@ -1,4 +1,4 @@
-use crate::{native_transmutable, prelude::*, scalar};
+use crate::{prelude::*, scalar};
 use skia_bindings::{self as sb, SkISize, SkSize};
 use std::ops::{Div, DivAssign, Mul, MulAssign};
 

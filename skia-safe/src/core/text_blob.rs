@@ -1,6 +1,5 @@
 use crate::{
-    prelude::*, scalar, unsafe_send_sync, Font, GlyphId, Paint, Point, RSXform, Rect, TextEncoding,
-    Typeface,
+    prelude::*, scalar, Font, GlyphId, Paint, Point, RSXform, Rect, TextEncoding, Typeface,
 };
 use skia_bindings::{
     self as sb, SkTextBlob, SkTextBlobBuilder, SkTextBlob_Iter, SkTextBlob_Iter_Run, SkTypeface,

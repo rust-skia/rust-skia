@@ -1,5 +1,4 @@
 use crate::{
-    native_transmutable,
     prelude::*,
     private::safe32::{sk32, sk64},
     scalar, Contains, IPoint, ISize, IVector, Point, Size, Vector,

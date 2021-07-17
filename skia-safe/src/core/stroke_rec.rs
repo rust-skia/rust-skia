@@ -1,21 +1,12 @@
-use crate::unsafe_send_sync;
 use crate::{paint, prelude::*, scalar, Paint, Path};
 use skia_bindings::{self as sb, SkStrokeRec};
 use std::fmt;
 
 pub use sb::SkStrokeRec_InitStyle as InitStyle;
-
-#[test]
-fn test_stroke_rec_init_style_naming() {
-    let _ = InitStyle::Hairline;
-}
+variant_name!(InitStyle::Hairline, init_style_naming);
 
 pub use sb::SkStrokeRec_Style as Style;
-
-#[test]
-fn test_stroke_rec_style_naming() {
-    let _ = Style::Hairline;
-}
+variant_name!(Style::Stroke, style_naming);
 
 pub type StrokeRec = Handle<SkStrokeRec>;
 unsafe_send_sync!(StrokeRec);

@@ -13,6 +13,7 @@ pub fn from_svg(svg: impl AsRef<str>) -> Option<Path> {
 }
 
 pub use skia_bindings::SkParsePath_PathEncoding as PathEncoding;
+variant_name!(PathEncoding::Absolute, path_encoding_naming);
 
 impl Path {
     pub fn from_svg(svg: impl AsRef<str>) -> Option<Path> {
@@ -36,14 +37,4 @@ pub fn to_svg_with_encoding(path: &Path, encoding: PathEncoding) -> String {
     let mut svg = interop::String::default();
     unsafe { sb::SkParsePath_ToSVGString(path.native(), svg.native_mut(), encoding) };
     svg.as_str().into()
-}
-
-#[cfg(test)]
-mod tests {
-    use super::PathEncoding;
-
-    #[test]
-    fn test_path_encoding_naming() {
-        let _ = PathEncoding::Absolute;
-    }
 }

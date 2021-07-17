@@ -1,6 +1,4 @@
-use crate::{
-    prelude::*, scalar, unsafe_send_sync, BlurStyle, CoverageMode, Matrix, NativeFlattenable,
-};
+use crate::{prelude::*, scalar, BlurStyle, CoverageMode, Matrix, NativeFlattenable};
 use skia_bindings::{self as sb, SkFlattenable, SkMaskFilter, SkRefCntBase};
 use std::fmt;
 

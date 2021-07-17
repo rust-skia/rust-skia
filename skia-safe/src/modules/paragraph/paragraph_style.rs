@@ -5,7 +5,7 @@ use crate::{
     interop::{self, AsStr, FromStrs, SetStr},
     modules::paragraph::TextHeightBehavior,
     prelude::*,
-    scalar, unsafe_send_sync, FontStyle,
+    scalar, FontStyle,
 };
 use skia_bindings as sb;
 

@@ -1,5 +1,5 @@
 use super::{FontCollection, Paragraph, ParagraphStyle, PlaceholderStyle, TextStyle};
-use crate::{prelude::*, unsafe_send_sync};
+use crate::prelude::*;
 use skia_bindings as sb;
 use std::{fmt, os::raw};
 

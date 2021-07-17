@@ -1,8 +1,5 @@
 use super::Handle;
-use crate::{
-    prelude::{self, NativeDrop},
-    unsafe_send_sync,
-};
+use crate::prelude::{self, NativeDrop};
 use skia_bindings::{self as sb, GrMtlBackendContext};
 use std::fmt;
 

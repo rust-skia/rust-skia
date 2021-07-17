@@ -1,14 +1,10 @@
 //! Wrapper for pathops/SkPathOps.h
-
-use crate::{prelude::*, unsafe_send_sync, Path, Rect};
+use crate::{prelude::*, Path, Rect};
 use skia_bindings::{self as sb, SkOpBuilder};
 use std::fmt;
 
 pub use skia_bindings::SkPathOp as PathOp;
-#[test]
-fn test_path_op_naming() {
-    let _ = PathOp::XOR;
-}
+variant_name!(PathOp::XOR, path_op_naming);
 
 // TODO: I am not so sure if we should export these global functions.
 

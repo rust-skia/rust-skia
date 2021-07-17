@@ -1,5 +1,5 @@
 use super::{ID3D12Resource, D3D12_RESOURCE_STATES, DXGI_FORMAT};
-use crate::{gpu, native_transmutable, prelude::*, unsafe_send_sync};
+use crate::{gpu, prelude::*};
 use skia_bindings::{GrD3DAlloc, GrD3DMemoryAllocator, GrD3DTextureResourceInfo, SkRefCntBase};
 use std::fmt;
 use winapi::{

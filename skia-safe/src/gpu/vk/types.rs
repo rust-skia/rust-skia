@@ -1,8 +1,6 @@
 use crate::{
     gpu::{vk, Protected},
-    native_transmutable,
     prelude::*,
-    unsafe_send_sync,
 };
 use skia_bindings::{
     self as sb, GrVkAlloc, GrVkBackendMemory, GrVkDrawableInfo, GrVkImageInfo,

@@ -1,6 +1,6 @@
 #[cfg(feature = "vulkan")]
 use crate::gpu::vk;
-use crate::{gpu::BackendAPI, prelude::*, unsafe_send_sync};
+use crate::{gpu::BackendAPI, prelude::*};
 use skia_bindings::{self as sb, GrBackendDrawableInfo};
 use std::fmt;
 

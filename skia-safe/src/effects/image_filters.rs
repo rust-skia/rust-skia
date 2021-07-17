@@ -1,7 +1,7 @@
 use crate::{
-    native_transmutable, prelude::*, scalar, BlendMode, Color, ColorChannel, ColorFilter,
-    CubicResampler, IPoint, IRect, ISize, Image, ImageFilter, Matrix, Paint, Picture, Point3, Rect,
-    Region, SamplingOptions, Shader, TileMode, Vector,
+    prelude::*, scalar, BlendMode, Color, ColorChannel, ColorFilter, CubicResampler, IPoint, IRect,
+    ISize, Image, ImageFilter, Matrix, Paint, Picture, Point3, Rect, Region, SamplingOptions,
+    Shader, TileMode, Vector,
 };
 use skia_bindings::{self as sb, SkImageFilter, SkImageFilters_CropRect};
 
@@ -373,6 +373,7 @@ pub fn picture<'a>(
 }
 
 pub use skia_bindings::SkImageFilters_Dither as Dither;
+variant_name!(Dither::Yes, dither_naming);
 
 pub fn shader(shader: impl Into<Shader>, crop_rect: impl Into<CropRect>) -> Option<ImageFilter> {
     shader_with_dither(shader, Dither::No, crop_rect)
@@ -907,11 +908,6 @@ impl Picture {
 mod tests {
     use super::{CropRect, Dither};
     use crate::{IRect, Rect};
-
-    #[test]
-    fn test_dither_naming() {
-        let _ = Dither::Yes;
-    }
 
     fn cr(crop_rect: impl Into<CropRect>) -> CropRect {
         crop_rect.into()

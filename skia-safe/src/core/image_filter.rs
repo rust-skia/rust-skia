@@ -1,12 +1,9 @@
-use crate::{prelude::*, unsafe_send_sync, ColorFilter, IRect, Matrix, NativeFlattenable, Rect};
+use crate::{prelude::*, ColorFilter, IRect, Matrix, NativeFlattenable, Rect};
 use skia_bindings::{self as sb, SkColorFilter, SkFlattenable, SkImageFilter, SkRefCntBase};
 use std::{fmt, ptr};
 
 pub use skia_bindings::SkImageFilter_MapDirection as MapDirection;
-#[test]
-fn test_map_direction_naming() {
-    let _ = MapDirection::Forward;
-}
+variant_name!(MapDirection::Forward, map_direction_naming);
 
 pub type ImageFilter = RCHandle<SkImageFilter>;
 unsafe_send_sync!(ImageFilter);

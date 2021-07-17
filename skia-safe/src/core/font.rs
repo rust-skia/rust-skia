@@ -1,15 +1,12 @@
 use crate::{
-    interop::VecSink, prelude::*, scalar, unsafe_send_sync, FontHinting, FontMetrics, GlyphId,
-    Paint, Path, Point, Rect, TextEncoding, Typeface, Unichar,
+    interop::VecSink, prelude::*, scalar, FontHinting, FontMetrics, GlyphId, Paint, Path, Point,
+    Rect, TextEncoding, Typeface, Unichar,
 };
 use skia_bindings::{self as sb, SkFont, SkFont_PrivFlags};
 use std::{fmt, ptr};
 
 pub use skia_bindings::SkFont_Edging as Edging;
-#[test]
-fn test_font_edging_naming() {
-    let _ = Edging::Alias;
-}
+variant_name!(Edging::Alias, font_edging_naming);
 
 pub type Font = Handle<SkFont>;
 unsafe_send_sync!(Font);

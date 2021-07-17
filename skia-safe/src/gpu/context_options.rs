@@ -1,10 +1,14 @@
 use crate::{gpu::DriverBugWorkarounds, prelude::*};
-use crate::{native_transmutable, unsafe_send_sync};
 use skia_bindings::{self as sb, GrContextOptions};
 use std::os::raw;
 
 pub use skia_bindings::GrContextOptions_Enable as Enable;
+variant_name!(Enable::Yes, enable_naming);
 pub use skia_bindings::GrContextOptions_ShaderCacheStrategy as ShaderCacheStrategy;
+variant_name!(
+    ShaderCacheStrategy::BackendSource,
+    shader_cache_strategy_naming
+);
 
 #[repr(C)]
 #[derive(Debug)]
@@ -54,16 +58,3 @@ impl ContextOptions {
 }
 
 native_transmutable!(GrContextOptions, ContextOptions, context_options_layout);
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn test_enable_naming() {
-        let _ = super::Enable::Yes;
-    }
-
-    #[test]
-    fn test_shader_cache_strategy_naming() {
-        let _ = super::ShaderCacheStrategy::BackendSource;
-    }
-}

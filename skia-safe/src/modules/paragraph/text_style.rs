@@ -1,11 +1,10 @@
 use super::{FontFamilies, TextBaseline, TextShadow};
 use crate::{
     interop::{self, AsStr, FromStrs, SetStr},
-    native_transmutable,
     prelude::*,
     scalar,
     textlayout::{RangeExtensions, EMPTY_INDEX, EMPTY_RANGE},
-    unsafe_send_sync, Color, FontMetrics, FontStyle, Paint, Typeface,
+    Color, FontMetrics, FontStyle, Paint, Typeface,
 };
 use skia_bindings as sb;
 use std::{fmt, ops::Range};
@@ -67,12 +66,14 @@ native_transmutable!(
 );
 
 pub use sb::skia_textlayout_PlaceholderAlignment as PlaceholderAlignment;
-
-#[test]
-fn placeholder_alignment_member_naming() {
-    let _ = PlaceholderAlignment::Baseline;
-    let _ = PlaceholderAlignment::AboveBaseline;
-}
+variant_name!(
+    PlaceholderAlignment::Baseline,
+    placeholder_alignment_naming_1
+);
+variant_name!(
+    PlaceholderAlignment::AboveBaseline,
+    placeholder_alignment_naming_2
+);
 
 pub type FontFeature = Handle<sb::skia_textlayout_FontFeature>;
 unsafe_send_sync!(FontFeature);

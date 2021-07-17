@@ -2,7 +2,7 @@ pub mod pdf {
     use crate::{
         interop::{self, AsStr, DynamicMemoryWStream, SetStr},
         prelude::*,
-        scalar, unsafe_send_sync, DateTime, Document,
+        scalar, DateTime, Document,
     };
     use skia_bindings::{
         self as sb, SkPDF_AttributeList, SkPDF_Metadata, SkPDF_StructureElementNode,

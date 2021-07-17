@@ -1,4 +1,4 @@
-use crate::{prelude::*, scalar, unsafe_send_sync, Font, FontMgr, FourByteTag, Point, TextBlob};
+use crate::{prelude::*, scalar, Font, FontMgr, FourByteTag, Point, TextBlob};
 use skia_bindings::{
     self as sb, RustRunHandler, SkShaper, SkShaper_BiDiRunIterator, SkShaper_FontRunIterator,
     SkShaper_LanguageRunIterator, SkShaper_RunHandler, SkShaper_RunIterator,

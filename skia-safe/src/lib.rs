@@ -1,4 +1,7 @@
+#![macro_use]
 #![allow(clippy::upper_case_acronyms)]
+
+mod macros;
 
 pub mod codec;
 #[deprecated(since = "0.33.1", note = "use codec::Result")]
@@ -11,7 +14,6 @@ mod effects;
 #[cfg(feature = "gpu")]
 pub mod gpu;
 mod interop;
-mod macros;
 mod modules;
 mod pathops;
 mod prelude;
