@@ -43,6 +43,8 @@ bitflags! {
     pub struct SurfacePropsFlags: u32 {
         const USE_DEVICE_INDEPENDENT_FONTS =
             sb::SkSurfaceProps_Flags_kUseDeviceIndependentFonts_Flag as u32;
+        const DYNAMIC_MSAA =
+            sb::SkSurfaceProps_Flags_kDynamicMSAA_Flag as u32;
     }
 }
 

@@ -1904,12 +1904,6 @@ extern "C" SkShader* C_SkShaders_Blend(SkBlendMode mode, SkShader* dst, SkShader
     return SkShaders::Blend(mode, sp(dst), sp(src)).release();
 }
 
-/*
-extern "C" SkShader* C_SkShaders_Lerp(float t, SkShader* dst, SkShader* src) {
-    return SkShaders::Lerp(t, sp(dst), sp(src)).release();
-}
-*/
-
 extern "C" SkShader* C_SkShader_Deserialize(const void* data, size_t length) {
     // note: dynamic_cast may lead to a linker error here on iOS x86_64
     // https://github.com/rust-skia/rust-skia/issues/146
