@@ -451,11 +451,19 @@ extern "C" void C_SkPaint_setColorFilter(SkPaint* self, SkColorFilter* colorFilt
     self->setColorFilter(sp(colorFilter));
 }
 
-/*
-extern "C" SkBlendMode C_SkPaint_getBlendMode(const SkPaint* self) {
-    return self->getBlendMode();
+extern "C" bool C_SkPaint_asBlendMode(const SkPaint* self, SkBlendMode* mode) {
+    auto r = self->asBlendMode();
+    if (r.has_value()) {
+        *mode = *r;
+        return true;
+    } else {
+        return false;
+    }
 }
-*/
+
+extern "C" void C_SkPaint_setBlender(SkPaint* self, SkBlender* blender) {
+    self->setBlender(sp(blender));
+}
 
 extern "C" void C_SkPaint_setPathEffect(SkPaint* self, SkPathEffect* pathEffect) {
     self->setPathEffect(sp(pathEffect));
@@ -1525,9 +1533,7 @@ extern "C" SkColorFilter* C_SkColorFilter_makeComposed(const SkColorFilter* self
 }
 
 extern "C" SkColorFilter* C_SkColorFilter_Deserialize(const void* data, size_t length) {
-    // TODO: there is no "official" Deserialize wrapper in SkColorFilter, so we
-    //       are not sure if deserialization is supported at all.
-    return static_cast<SkColorFilter*>(SkFlattenable::Deserialize(SkFlattenable::kSkColorFilter_Type, data, length).release());
+    return SkColorFilter::Deserialize(data, length).release();
 }
 
 extern "C" SkColor4f C_SkColorFilter_filterColor4f(

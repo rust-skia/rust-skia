@@ -1,8 +1,10 @@
+use crate::Blender;
 use crate::{
-    prelude::*, scalar, Color, Color4f, ColorFilter, ColorSpace, ImageFilter, MaskFilter, Path,
-    PathEffect, Rect, Shader,
+    prelude::*, scalar, BlendMode, Color, Color4f, ColorFilter, ColorSpace, ImageFilter,
+    MaskFilter, Matrix, Path, PathEffect, Rect, Shader,
 };
 use core::fmt;
+
 use skia_bindings::{self as sb, SkPaint};
 use std::ptr;
 
@@ -236,6 +238,25 @@ impl Paint {
         .if_true_some(r)
     }
 
+    pub fn get_fill_path_with_matrix(
+        &self,
+        src: &Path,
+        cull_rect: Option<&Rect>,
+        matrix: &Matrix,
+    ) -> Option<Path> {
+        let mut r = Path::default();
+
+        let cull_rect_ptr = cull_rect
+            .map(|r| r.native() as *const _)
+            .unwrap_or(ptr::null());
+
+        unsafe {
+            self.native()
+                .getFillPath1(src.native(), r.native_mut(), cull_rect_ptr, matrix.native())
+        }
+        .if_true_some(r)
+    }
+
     pub fn shader(&self) -> Option<Shader> {
         Shader::from_unshared_ptr(self.native().fShader.fPtr)
     }
@@ -256,25 +277,40 @@ impl Paint {
         self
     }
 
-    /*
-        pub fn blend_mode(&self) -> BlendMode {
-            unsafe { sb::C_SkPaint_getBlendMode(self.native()) }
-        }
+    pub fn as_blend_mode(&self) -> Option<BlendMode> {
+        let mut bm = BlendMode::default();
+        unsafe { sb::C_SkPaint_asBlendMode(self.native(), &mut bm) }.if_true_some(bm)
+    }
 
-        pub fn is_src_over(&self) -> bool {
-            self.blend_mode() == BlendMode::SrcOver
-        }
+    pub fn blend_mode_or(&self, default_mode: BlendMode) -> BlendMode {
+        unsafe { self.native().getBlendMode_or(default_mode) }
+    }
 
-        pub fn set_blend_mode(&mut self, mode: BlendMode) -> &mut Self {
-            unsafe {
-                self.native_mut()
-                    .__bindgen_anon_1
-                    .fBitfields
-                    .set_fBlendMode(mode as _);
-            };
-            self
-        }
-    */
+    #[deprecated(
+        since = "0.0.0",
+        note = "Use as_blend_mode() or blend_mode_or() instead."
+    )]
+    pub fn blend_mode(&self) -> BlendMode {
+        self.blend_mode_or(BlendMode::SrcOver)
+    }
+
+    pub fn is_src_over(&self) -> bool {
+        unsafe { self.native().isSrcOver() }
+    }
+
+    pub fn set_blend_mode(&mut self, mode: BlendMode) -> &mut Self {
+        unsafe { self.native_mut().setBlendMode(mode) }
+        self
+    }
+
+    pub fn blender(&self) -> Option<Blender> {
+        Blender::from_unshared_ptr(self.native().fBlender.fPtr)
+    }
+
+    pub fn set_blender(&mut self, blender: impl Into<Option<Blender>>) -> &mut Self {
+        unsafe { sb::C_SkPaint_setBlender(self.native_mut(), blender.into().into_ptr_or_null()) }
+        self
+    }
 
     pub fn path_effect(&self) -> Option<PathEffect> {
         PathEffect::from_unshared_ptr(self.native().fPathEffect.fPtr)

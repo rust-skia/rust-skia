@@ -1,5 +1,4 @@
 mod annotation;
-mod blender;
 pub use annotation::annotate;
 
 mod bbh_factory;
@@ -10,6 +9,9 @@ pub use bitmap::*;
 
 mod blend_mode;
 pub use blend_mode::*;
+
+mod blender;
+pub use blender::*;
 
 mod blur_types;
 pub use blur_types::*;
