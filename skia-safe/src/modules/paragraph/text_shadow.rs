@@ -9,12 +9,11 @@ pub struct TextShadow {
     pub blur_sigma: f64,
 }
 
-impl NativeTransmutable<sb::skia_textlayout_TextShadow> for TextShadow {}
-
-#[test]
-fn text_shadow_layout() {
-    TextShadow::test_layout()
-}
+native_transmutable!(
+    sb::skia_textlayout_TextShadow,
+    TextShadow,
+    text_shadow_layout
+);
 
 impl Default for TextShadow {
     fn default() -> Self {

@@ -9,12 +9,11 @@ pub struct StyleMetrics<'a> {
     pub font_metrics: FontMetrics,
 }
 
-impl NativeTransmutable<skia_textlayout_StyleMetrics> for StyleMetrics<'_> {}
-
-#[test]
-fn test_style_metrics_layout() {
-    StyleMetrics::test_layout();
-}
+native_transmutable!(
+    skia_textlayout_StyleMetrics,
+    StyleMetrics<'_>,
+    style_metrics_layout
+);
 
 impl<'a> StyleMetrics<'a> {
     pub fn new(style: &'a TextStyle, metrics: impl Into<Option<FontMetrics>>) -> Self {
@@ -46,21 +45,20 @@ pub struct LineMetrics<'a> {
     pd: marker::PhantomData<&'a StyleMetrics<'a>>,
 }
 
-impl NativeTransmutable<skia_textlayout_LineMetrics> for LineMetrics<'_> {}
+native_transmutable!(
+    skia_textlayout_LineMetrics,
+    LineMetrics<'_>,
+    line_metrics_layout
+);
 
 // Internal Line Metrics mirror to compute what the map takes up space.
-// If the size of the structure does not match, the NativeTransmutable test below will fail.
+// If the size of the structure does not match, the NativeTransmutable test above will fail.
 #[repr(C)]
 struct LMInternal {
     start_end: [usize; 4],
     hard_break: bool,
     seven_metrics: [f64; 7],
     line_number: usize,
-}
-
-#[test]
-fn test_line_metrics_layout() {
-    LineMetrics::test_layout();
 }
 
 impl<'a> LineMetrics<'a> {

@@ -59,24 +59,17 @@ pub struct Decoration {
     pub thickness_multiplier: scalar,
 }
 
-impl NativeTransmutable<sb::skia_textlayout_Decoration> for Decoration {}
-
-#[test]
-fn decoration_layout() {
-    Decoration::test_layout();
-}
+native_transmutable!(
+    sb::skia_textlayout_Decoration,
+    Decoration,
+    decoration_layout
+);
 
 pub use sb::skia_textlayout_PlaceholderAlignment as PlaceholderAlignment;
-
-#[test]
-fn placeholder_alignment_member_naming() {
-    let _ = PlaceholderAlignment::Baseline;
-    let _ = PlaceholderAlignment::AboveBaseline;
-}
+variant_name!(PlaceholderAlignment::Baseline, placeholder_alignment_naming);
 
 pub type FontFeature = Handle<sb::skia_textlayout_FontFeature>;
-unsafe impl Send for FontFeature {}
-unsafe impl Sync for FontFeature {}
+unsafe_send_sync!(FontFeature);
 
 impl NativeDrop for sb::skia_textlayout_FontFeature {
     fn drop(&mut self) {
@@ -125,11 +118,11 @@ pub struct PlaceholderStyle {
     pub baseline_offset: scalar,
 }
 
-impl NativeTransmutable<sb::skia_textlayout_PlaceholderStyle> for PlaceholderStyle {}
-#[test]
-fn placeholder_style_layout() {
-    PlaceholderStyle::test_layout()
-}
+native_transmutable!(
+    sb::skia_textlayout_PlaceholderStyle,
+    PlaceholderStyle,
+    placeholder_style_layout
+);
 
 impl PartialEq for PlaceholderStyle {
     fn eq(&self, other: &Self) -> bool {
@@ -156,8 +149,7 @@ impl PlaceholderStyle {
 }
 
 pub type TextStyle = Handle<sb::skia_textlayout_TextStyle>;
-unsafe impl Send for TextStyle {}
-unsafe impl Sync for TextStyle {}
+unsafe_send_sync!(TextStyle);
 
 impl NativeDrop for sb::skia_textlayout_TextStyle {
     fn drop(&mut self) {
@@ -450,11 +442,7 @@ pub struct Block {
     pub style: TextStyle,
 }
 
-impl NativeTransmutable<sb::skia_textlayout_Block> for Block {}
-#[test]
-fn block_layout() {
-    Block::test_layout()
-}
+native_transmutable!(sb::skia_textlayout_Block, Block, block_layout);
 
 impl Default for Block {
     fn default() -> Self {
@@ -496,12 +484,11 @@ pub struct Placeholder {
     pub text_before: TextRange,
 }
 
-impl NativeTransmutable<sb::skia_textlayout_Placeholder> for Placeholder {}
-
-#[test]
-fn placeholder_layout() {
-    Placeholder::test_layout()
-}
+native_transmutable!(
+    sb::skia_textlayout_Placeholder,
+    Placeholder,
+    placeholder_layout
+);
 
 impl Default for Placeholder {
     fn default() -> Self {

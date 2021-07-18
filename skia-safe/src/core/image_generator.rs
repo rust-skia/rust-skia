@@ -5,8 +5,7 @@ use skia_bindings::{self as sb, SkImageGenerator};
 use std::fmt;
 
 pub type ImageGenerator = RefHandle<SkImageGenerator>;
-unsafe impl Send for ImageGenerator {}
-unsafe impl Sync for ImageGenerator {}
+unsafe_send_sync!(ImageGenerator);
 
 impl NativeDrop for SkImageGenerator {
     fn drop(&mut self) {

@@ -1,7 +1,5 @@
-use crate::prelude::NativeTransmutable;
-use crate::{ISize, Matrix};
-use skia_bindings as sb;
-use skia_bindings::SkEncodedOrigin;
+use crate::{prelude::*, ISize, Matrix};
+use skia_bindings::{self as sb, SkEncodedOrigin};
 
 // Even though possible, we are not using the original SkEncodedOrigin enum, because of the
 // `to_matrix()` implementation below, which needs an `ISize` and so can not be implemented in the
@@ -29,7 +27,7 @@ pub enum EncodedOrigin {
     LeftBottom = SkEncodedOrigin::LeftBottom as _,
 }
 
-impl NativeTransmutable<SkEncodedOrigin> for EncodedOrigin {}
+native_transmutable!(SkEncodedOrigin, EncodedOrigin, encoded_origin_layout);
 
 impl Default for EncodedOrigin {
     fn default() -> Self {
@@ -62,15 +60,5 @@ impl EncodedOrigin {
     /// and height of the source data are swapped relative to a correctly oriented destination.
     pub fn swaps_width_height(self) -> bool {
         (self as i32) >= EncodedOrigin::LeftTop as i32
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::{prelude::NativeTransmutable, EncodedOrigin};
-
-    #[test]
-    fn test_encoded_origin_layout() {
-        EncodedOrigin::test_layout();
     }
 }

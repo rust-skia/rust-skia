@@ -6,8 +6,7 @@ use skia_bindings::{self as sb, SkPixmap};
 use std::{convert::TryInto, ffi::c_void, fmt, mem, os::raw, ptr, slice};
 
 pub type Pixmap = Handle<SkPixmap>;
-unsafe impl Send for Pixmap {}
-unsafe impl Sync for Pixmap {}
+unsafe_send_sync!(Pixmap);
 
 impl NativeDrop for SkPixmap {
     fn drop(&mut self) {

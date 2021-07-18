@@ -1,6 +1,5 @@
 use crate::prelude::*;
-use skia_bindings as sb;
-use skia_bindings::SkData;
+use skia_bindings::{self as sb, SkData};
 use std::{
     ffi::{CStr, CString},
     fmt,
@@ -8,8 +7,7 @@ use std::{
 };
 
 pub type Data = RCHandle<SkData>;
-unsafe impl Send for Data {}
-unsafe impl Sync for Data {}
+unsafe_send_sync!(Data);
 
 impl NativeRefCounted for SkData {
     fn _ref(&self) {

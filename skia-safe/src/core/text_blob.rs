@@ -7,8 +7,7 @@ use skia_bindings::{
 use std::{convert::TryInto, fmt, ptr, slice};
 
 pub type TextBlob = RCHandle<SkTextBlob>;
-unsafe impl Send for TextBlob {}
-unsafe impl Sync for TextBlob {}
+unsafe_send_sync!(TextBlob);
 
 impl NativeRefCounted for SkTextBlob {
     fn _ref(&self) {
@@ -144,8 +143,7 @@ impl TextBlob {
 }
 
 pub type TextBlobBuilder = Handle<SkTextBlobBuilder>;
-unsafe impl Send for TextBlobBuilder {}
-unsafe impl Sync for TextBlobBuilder {}
+unsafe_send_sync!(TextBlobBuilder);
 
 impl NativeDrop for SkTextBlobBuilder {
     fn drop(&mut self) {

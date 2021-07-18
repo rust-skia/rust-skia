@@ -9,8 +9,7 @@ use std::{ffi::CStr, fmt, marker::PhantomData, os::raw};
 pub use run_handler::RunHandler;
 
 pub type Shaper = RefHandle<SkShaper>;
-unsafe impl Send for Shaper {}
-unsafe impl Sync for Shaper {}
+unsafe_send_sync!(Shaper);
 
 impl NativeDrop for SkShaper {
     fn drop(&mut self) {

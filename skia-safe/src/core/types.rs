@@ -1,4 +1,4 @@
-use crate::prelude::NativeTransmutable;
+use crate::prelude::*;
 use skia_bindings::{SkBudgeted, SkFourByteTag};
 use std::ops::Deref;
 
@@ -18,12 +18,7 @@ pub(crate) const SK_MIN_S32: i32 = -SK_MAX_S32;
 #[repr(transparent)]
 pub struct FourByteTag(SkFourByteTag);
 
-impl NativeTransmutable<SkFourByteTag> for FourByteTag {}
-
-#[test]
-fn test_four_byte_tag_layout() {
-    FourByteTag::test_layout()
-}
+native_transmutable!(SkFourByteTag, FourByteTag, four_byte_tag_layout);
 
 impl Deref for FourByteTag {
     type Target = u32;
@@ -90,12 +85,7 @@ pub type Unichar = skia_bindings::SkUnichar;
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct Budgeted(bool);
 
-impl NativeTransmutable<SkBudgeted> for Budgeted {}
-
-#[test]
-fn test_budgeted_layout() {
-    Budgeted::test_layout()
-}
+native_transmutable!(SkBudgeted, Budgeted, budgeted_layout);
 
 #[allow(non_upper_case_globals)]
 impl Budgeted {

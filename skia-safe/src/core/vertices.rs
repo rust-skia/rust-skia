@@ -16,14 +16,10 @@ pub struct Bone {
 }
 
 pub use skia_bindings::SkVertices_VertexMode as VertexMode;
-#[test]
-fn test_vertices_vertex_mode_naming() {
-    let _ = VertexMode::Triangles;
-}
+variant_name!(VertexMode::Triangles, vertex_mode_naming);
 
 pub type Vertices = RCHandle<SkVertices>;
-unsafe impl Send for Vertices {}
-unsafe impl Sync for Vertices {}
+unsafe_send_sync!(Vertices);
 
 impl NativeRefCounted for SkVertices {
     fn _ref(&self) {
@@ -200,8 +196,7 @@ bitflags! {
 }
 
 pub type Builder = Handle<SkVertices_Builder>;
-unsafe impl Send for Builder {}
-unsafe impl Sync for Builder {}
+unsafe_send_sync!(Builder);
 
 impl NativeDrop for SkVertices_Builder {
     fn drop(&mut self) {

@@ -1,8 +1,7 @@
 #![allow(deprecated)]
-use std::fmt;
-
 use crate::{prelude::*, scalar, Canvas, Matrix, M44, V3};
 use skia_bindings::{self as sb, Sk3DView, SkCamera3D, SkPatch3D};
+use std::fmt;
 
 #[deprecated(
     since = "0.30.0",
@@ -16,11 +15,7 @@ pub struct Patch3D {
     pub origin: V3,
 }
 
-impl NativeTransmutable<SkPatch3D> for Patch3D {}
-#[test]
-fn test_patch_3d_layout() {
-    Patch3D::test_layout();
-}
+native_transmutable!(SkPatch3D, Patch3D, patch_3d_layout);
 
 impl Default for Patch3D {
     fn default() -> Self {
@@ -61,11 +56,7 @@ pub struct Camera3D {
     need_to_update: bool,
 }
 
-impl NativeTransmutable<SkCamera3D> for Camera3D {}
-#[test]
-fn test_camera_3d_layout() {
-    Camera3D::test_layout();
-}
+native_transmutable!(SkCamera3D, Camera3D, camera_3d_layout);
 
 impl Default for Camera3D {
     fn default() -> Self {
@@ -103,8 +94,7 @@ impl Camera3D {
     note = "Skia now has support for a 4x matrix (core::M44) in core::Canvas."
 )]
 pub type View3D = RefHandle<Sk3DView>;
-unsafe impl Send for View3D {}
-unsafe impl Sync for View3D {}
+unsafe_send_sync!(View3D);
 
 impl Default for View3D {
     fn default() -> Self {

@@ -9,7 +9,7 @@ use skia_bindings::{self as sb, SkImageFilter, SkImageFilters_CropRect};
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct CropRect(Rect);
 
-impl NativeTransmutable<SkImageFilters_CropRect> for CropRect {}
+native_transmutable!(SkImageFilters_CropRect, CropRect, crop_rect_layout);
 
 impl CropRect {
     pub const NO_CROP_RECT: CropRect = CropRect(Rect {
@@ -373,6 +373,7 @@ pub fn picture<'a>(
 }
 
 pub use skia_bindings::SkImageFilters_Dither as Dither;
+variant_name!(Dither::Yes, dither_naming);
 
 pub fn shader(shader: impl Into<Shader>, crop_rect: impl Into<CropRect>) -> Option<ImageFilter> {
     shader_with_dither(shader, Dither::No, crop_rect)
@@ -905,18 +906,8 @@ impl Picture {
 
 #[cfg(test)]
 mod tests {
-    use super::{CropRect, Dither};
-    use crate::{prelude::NativeTransmutable, IRect, Rect};
-
-    #[test]
-    fn test_dither_naming() {
-        let _ = Dither::Yes;
-    }
-
-    #[test]
-    fn test_crop_rect_layout() {
-        super::CropRect::test_layout();
-    }
+    use super::CropRect;
+    use crate::{IRect, Rect};
 
     fn cr(crop_rect: impl Into<CropRect>) -> CropRect {
         crop_rect.into()

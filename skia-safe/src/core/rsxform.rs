@@ -1,5 +1,4 @@
-use crate::prelude::*;
-use crate::{scalar, Point, Size, Vector};
+use crate::{prelude::*, scalar, Point, Size, Vector};
 use skia_bindings::SkRSXform;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -12,11 +11,7 @@ pub struct RSXform {
     pub ty: scalar,
 }
 
-impl NativeTransmutable<SkRSXform> for RSXform {}
-#[test]
-fn test_rsxform_layout() {
-    RSXform::test_layout()
-}
+native_transmutable!(SkRSXform, RSXform, rsxform_layout);
 
 impl RSXform {
     pub fn new(scos: scalar, ssin: scalar, t: impl Into<Vector>) -> Self {

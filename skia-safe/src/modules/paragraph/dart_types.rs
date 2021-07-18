@@ -1,4 +1,4 @@
-use crate::{prelude::*, Rect};
+use crate::Rect;
 use skia_bindings as sb;
 use std::{
     cmp::{max, min},
@@ -6,18 +6,18 @@ use std::{
 };
 
 pub use sb::skia_textlayout_Affinity as Affinity;
+variant_name!(Affinity::Downstream, affinity_naming);
 pub use sb::skia_textlayout_RectHeightStyle as RectHeightStyle;
+variant_name!(
+    RectHeightStyle::IncludeLineSpacingBottom,
+    rect_height_style_naming
+);
 pub use sb::skia_textlayout_RectWidthStyle as RectWidthStyle;
+variant_name!(RectWidthStyle::Max, rect_width_style_naming);
 pub use sb::skia_textlayout_TextAlign as TextAlign;
+variant_name!(TextAlign::End, text_align_naming);
 pub use sb::skia_textlayout_TextDirection as TextDirection;
-#[test]
-fn test_reexported_enum_name_conversion() {
-    let _ = Affinity::Downstream;
-    let _ = RectHeightStyle::IncludeLineSpacingBottom;
-    let _ = RectWidthStyle::Max;
-    let _ = TextAlign::End;
-    let _ = TextDirection::LTR;
-}
+variant_name!(TextDirection::LTR, text_direction_naming);
 
 pub use sb::skia_textlayout_PositionWithAffinity as PositionWithAffinity;
 
@@ -28,12 +28,7 @@ pub struct TextBox {
     pub direct: TextDirection,
 }
 
-impl NativeTransmutable<sb::skia_textlayout_TextBox> for TextBox {}
-
-#[test]
-fn text_box_layout() {
-    TextBox::test_layout()
-}
+native_transmutable!(sb::skia_textlayout_TextBox, TextBox, text_box_layout);
 
 pub const EMPTY_INDEX: usize = std::usize::MAX;
 
@@ -83,21 +78,15 @@ pub const EMPTY_RANGE: Range<usize> = Range {
 };
 
 pub use sb::skia_textlayout_TextBaseline as TextBaseline;
-#[test]
-fn test_text_baseline_naming() {
-    let _ = TextBaseline::Alphabetic;
-}
+variant_name!(TextBaseline::Alphabetic, text_baseline_naming);
 
 pub use sb::skia_textlayout_TextHeightBehavior as TextHeightBehavior;
-#[test]
-fn test_text_height_behavior_naming() {
-    let _ = TextHeightBehavior::DisableFirstAscent;
-}
+variant_name!(
+    TextHeightBehavior::DisableFirstAscent,
+    text_height_behavior_naming
+);
 
 // m84: LineMetricStyle is declared but not used in the public API yet.
 
 pub use sb::skia_textlayout_DrawOptions as DrawOptions;
-#[test]
-fn test_draw_options_naming() {
-    let _ = DrawOptions::Replay;
-}
+variant_name!(DrawOptions::Replay, draw_options_naming);

@@ -1,10 +1,8 @@
 pub use variation::Axis as VariationAxis;
 
 pub mod variation {
-    use crate::prelude::*;
-    use crate::FourByteTag;
-    use skia_bindings as sb;
-    use skia_bindings::SkFontParameters_Variation_Axis;
+    use crate::{prelude::*, FourByteTag};
+    use skia_bindings::{self as sb, SkFontParameters_Variation_Axis};
 
     #[repr(C)]
     #[derive(Clone, PartialEq, Default, Debug)]
@@ -16,11 +14,7 @@ pub mod variation {
         flags: u16,
     }
 
-    impl NativeTransmutable<SkFontParameters_Variation_Axis> for Axis {}
-    #[test]
-    fn test_variation_axis_layout() {
-        Axis::test_layout()
-    }
+    native_transmutable!(SkFontParameters_Variation_Axis, Axis, axis_layout);
 
     impl Axis {
         pub const fn new(tag: FourByteTag, min: f32, def: f32, max: f32, hidden: bool) -> Self {

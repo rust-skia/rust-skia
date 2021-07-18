@@ -16,8 +16,7 @@ pub mod pdf {
     }
 
     pub type AttributeList = Handle<SkPDF_AttributeList>;
-    unsafe impl Send for AttributeList {}
-    unsafe impl Sync for AttributeList {}
+    unsafe_send_sync!(AttributeList);
 
     impl NativeDrop for SkPDF_AttributeList {
         fn drop(&mut self) {

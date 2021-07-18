@@ -6,9 +6,9 @@ use crate::{
     Path, Picture, Pixmap, Point, QuickReject, RRect, RSXform, Rect, Region, SamplingOptions,
     Shader, Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices, M44,
 };
-use skia_bindings as sb;
 use skia_bindings::{
-    SkAutoCanvasRestore, SkCanvas, SkCanvas_SaveLayerRec, SkImageFilter, SkPaint, SkRect,
+    self as sb, SkAutoCanvasRestore, SkCanvas, SkCanvas_SaveLayerRec, SkImageFilter, SkPaint,
+    SkRect,
 };
 use std::{
     convert::TryInto,
@@ -46,12 +46,11 @@ pub struct SaveLayerRec<'a> {
     flags: SaveLayerFlags,
 }
 
-impl<'a> NativeTransmutable<SkCanvas_SaveLayerRec> for SaveLayerRec<'a> {}
-
-#[test]
-fn test_save_layer_rec_layout() {
-    SaveLayerRec::test_layout()
-}
+native_transmutable!(
+    SkCanvas_SaveLayerRec,
+    SaveLayerRec<'_>,
+    save_layer_rec_layout
+);
 
 impl fmt::Debug for SaveLayerRec<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -134,21 +133,13 @@ impl<'a> SaveLayerRec<'a> {
 
 /// Selects if an array of points are drawn as discrete points, as lines, or as an open polygon.
 pub use sb::SkCanvas_PointMode as PointMode;
-
-#[test]
-fn test_canvas_point_mode_naming() {
-    let _ = PointMode::Polygon;
-}
+variant_name!(PointMode::Polygon, point_mode_naming);
 
 /// [`SrcRectConstraint`] controls the behavior at the edge of source [`Rect`], provided to
 /// [`Canvas::draw_image_rect()`] when there is any filtering. If kStrict is set, then extra code is
 /// used to ensure it nevers samples outside of the src-rect.
 pub use sb::SkCanvas_SrcRectConstraint as SrcRectConstraint;
-
-#[test]
-fn test_src_rect_constraint_naming() {
-    let _ = SrcRectConstraint::Fast;
-}
+variant_name!(SrcRectConstraint::Fast, src_rect_constraint_naming);
 
 /// Provides access to Canvas's pixels.
 ///
@@ -2220,10 +2211,8 @@ impl SetMatrix for Canvas {
 //
 
 pub mod lattice {
-    use crate::prelude::*;
-    use crate::{Color, IRect};
-    use skia_bindings as sb;
-    use skia_bindings::SkCanvas_Lattice;
+    use crate::{prelude::*, Color, IRect};
+    use skia_bindings::{self as sb, SkCanvas_Lattice};
     use std::marker::PhantomData;
 
     /// [`Lattice`] divides [`crate::Bitmap`] or [`crate::Image`] into a rectangular grid.
@@ -2284,11 +2273,7 @@ pub mod lattice {
     /// Optional setting per rectangular grid entry to make it transparent,
     /// or to fill the grid entry with a color.
     pub use sb::SkCanvas_Lattice_RectType as RectType;
-
-    #[test]
-    fn test_lattice_rect_type_naming() {
-        let _ = RectType::FixedColor;
-    }
+    variant_name!(RectType::FixedColor, rect_type_naming);
 }
 
 #[derive(Debug)]

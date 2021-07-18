@@ -3,8 +3,7 @@ use skia_bindings::{self as sb, SkCustomTypefaceBuilder};
 use std::fmt;
 
 pub type CustomTypefaceBuilder = Handle<SkCustomTypefaceBuilder>;
-unsafe impl Send for CustomTypefaceBuilder {}
-unsafe impl Sync for CustomTypefaceBuilder {}
+unsafe_send_sync!(CustomTypefaceBuilder);
 
 impl NativeDrop for SkCustomTypefaceBuilder {
     fn drop(&mut self) {

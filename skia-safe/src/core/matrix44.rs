@@ -13,12 +13,7 @@ pub struct Vector4 {
     w: scalar,
 }
 
-impl NativeTransmutable<SkVector4> for Vector4 {}
-
-#[test]
-fn test_vector4_layout() {
-    Vector4::test_layout()
-}
+native_transmutable!(SkVector4, Vector4, vector4_layout);
 
 impl Default for Vector4 {
     fn default() -> Self {
@@ -84,11 +79,7 @@ bitflags! {
 #[deprecated(since = "0.30.0", note = "use M44 instead")]
 pub struct Matrix44(SkMatrix44);
 
-impl NativeTransmutable<SkMatrix44> for Matrix44 {}
-#[test]
-fn test_matrix44_layout() {
-    Matrix44::test_layout()
-}
+native_transmutable!(SkMatrix44, Matrix44, matrix44_layout);
 
 impl PartialEq for Matrix44 {
     fn eq(&self, rhs: &Self) -> bool {

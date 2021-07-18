@@ -3,14 +3,10 @@ use skia_bindings::{self as sb, SkPathBuilder};
 use std::{fmt, mem};
 
 pub use skia_bindings::SkPathBuilder_ArcSize as ArcSize;
-#[test]
-fn test_arc_size_naming() {
-    let _ = ArcSize::Large;
-}
+variant_name!(ArcSize::Large, arc_size_naming);
 
 pub type PathBuilder = Handle<SkPathBuilder>;
-unsafe impl Send for PathBuilder {}
-unsafe impl Sync for PathBuilder {}
+unsafe_send_sync!(PathBuilder);
 
 impl NativeDrop for SkPathBuilder {
     fn drop(&mut self) {

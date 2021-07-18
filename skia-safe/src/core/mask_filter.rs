@@ -3,8 +3,7 @@ use skia_bindings::{self as sb, SkFlattenable, SkMaskFilter, SkRefCntBase};
 use std::fmt;
 
 pub type MaskFilter = RCHandle<SkMaskFilter>;
-unsafe impl Send for MaskFilter {}
-unsafe impl Sync for MaskFilter {}
+unsafe_send_sync!(MaskFilter);
 
 impl NativeBase<SkRefCntBase> for SkMaskFilter {}
 impl NativeBase<SkFlattenable> for SkMaskFilter {}

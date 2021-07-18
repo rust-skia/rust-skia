@@ -10,12 +10,10 @@ use skia_bindings::{
 use std::{ffi::CStr, fmt};
 
 pub type Uniform = Handle<SkRuntimeEffect_Uniform>;
+unsafe_send_sync!(Uniform);
 
 #[deprecated(since = "0.35.0", note = "Use Uniform instead")]
 pub type Variable = Uniform;
-
-unsafe impl Send for Uniform {}
-unsafe impl Sync for Uniform {}
 
 impl NativeDrop for SkRuntimeEffect_Uniform {
     fn drop(&mut self) {
@@ -63,10 +61,7 @@ pub mod uniform {
     use skia_bindings as sb;
 
     pub use sb::SkRuntimeEffect_Uniform_Type as Type;
-    #[test]
-    fn test_type_naming() {
-        let _ = Type::Float2x2;
-    }
+    variant_name!(Type::Float2x2, type_naming);
 
     bitflags! {
         pub struct Flags : u32 {
@@ -80,8 +75,7 @@ pub mod uniform {
 pub type Varying = Child;
 
 pub type Child = Handle<SkRuntimeEffect_Child>;
-unsafe impl Send for Child {}
-unsafe impl Sync for Child {}
+unsafe_send_sync!(Child);
 
 impl NativeDrop for SkRuntimeEffect_Child {
     fn drop(&mut self) {
@@ -114,6 +108,7 @@ impl Child {
 }
 
 pub use sb::SkRuntimeEffect_Child_Type as ChildType;
+variant_name!(ChildType::Shader, child_type_naming);
 
 pub type RuntimeEffect = RCHandle<SkRuntimeEffect>;
 
@@ -128,7 +123,7 @@ pub struct Options {
     pub enforce_es2_restrictions: bool,
 }
 
-impl NativeTransmutable<SkRuntimeEffect_Options> for Options {}
+native_transmutable!(SkRuntimeEffect_Options, Options, options_layout);
 
 impl Default for Options {
     fn default() -> Self {
@@ -291,18 +286,3 @@ impl RuntimeEffect {
 }
 
 // TODO: wrap SkRuntimeEffectBuilder, SkRuntimeShaderBuilder
-
-#[cfg(test)]
-mod tests {
-    use crate::prelude::NativeTransmutable;
-
-    #[test]
-    fn options_layout() {
-        super::Options::test_layout()
-    }
-
-    #[test]
-    fn test_child_type_naming() {
-        let _ = super::ChildType::ColorFilter;
-    }
-}

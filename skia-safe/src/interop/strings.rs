@@ -6,8 +6,7 @@ use skia_bindings::{self as sb, SkStrings};
 use std::{fmt, ops::Index};
 
 pub type Strings = Handle<SkStrings>;
-unsafe impl Send for Strings {}
-unsafe impl Sync for Strings {}
+unsafe_send_sync!(Strings);
 
 impl NativeDrop for SkStrings {
     fn drop(&mut self) {

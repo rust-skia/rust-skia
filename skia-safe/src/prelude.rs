@@ -659,8 +659,8 @@ where
     }
 }
 
-/// Trait to use native types that as a rust type
-/// _inplace_ with the same size and field layout.
+/// Trait to mark a native type that can be treated a Rust type _inplace_ with the same size and
+/// field layout.
 pub trait NativeTransmutable<NT: Sized>: Sized
 where
     Self: Sized,

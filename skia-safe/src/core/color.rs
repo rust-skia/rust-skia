@@ -1,7 +1,5 @@
-use crate::prelude::*;
-use crate::u8cpu;
-use skia_bindings as sb;
-use skia_bindings::{SkColor, SkColor4f, SkHSVToColor, SkPMColor, SkRGBToHSV};
+use crate::{prelude::*, u8cpu};
+use skia_bindings::{self as sb, SkColor, SkColor4f, SkHSVToColor, SkPMColor, SkRGBToHSV};
 use std::ops::{BitAnd, BitOr, Index, IndexMut, Mul};
 
 // TODO: What should we do with SkAlpha?
@@ -16,11 +14,7 @@ use std::ops::{BitAnd, BitOr, Index, IndexMut, Mul};
 #[repr(transparent)]
 pub struct Color(SkColor);
 
-impl NativeTransmutable<SkColor> for Color {}
-#[test]
-fn test_color_layout() {
-    Color::test_layout();
-}
+native_transmutable!(SkColor, Color, color_layout);
 
 impl From<u32> for Color {
     fn from(argb: u32) -> Self {
@@ -223,11 +217,7 @@ pub struct Color4f {
     pub a: f32,
 }
 
-impl NativeTransmutable<SkColor4f> for Color4f {}
-#[test]
-fn test_color4f_layout() {
-    Color4f::test_layout();
-}
+native_transmutable!(SkColor4f, Color4f, color4f_layout);
 
 impl AsRef<Self> for Color4f {
     fn as_ref(&self) -> &Self {

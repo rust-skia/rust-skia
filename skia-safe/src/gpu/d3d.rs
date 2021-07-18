@@ -1,4 +1,3 @@
-use crate::prelude::*;
 use skia_bindings as sb;
 use winapi::{shared::dxgi, shared::dxgiformat, um::d3d12};
 
@@ -19,8 +18,4 @@ pub use d3d12::D3D12_RESOURCE_STATES;
 pub use dxgi::IDXGIAdapter1;
 pub use dxgiformat::DXGI_FORMAT;
 
-impl NativeTransmutable<sb::DXGI_FORMAT> for dxgiformat::DXGI_FORMAT {}
-#[test]
-fn test_dxgi_format_layout() {
-    dxgiformat::DXGI_FORMAT::test_layout();
-}
+native_transmutable!(sb::DXGI_FORMAT, dxgiformat::DXGI_FORMAT, dxgi_format_layout);

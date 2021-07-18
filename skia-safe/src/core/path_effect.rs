@@ -1,8 +1,7 @@
-use crate::prelude::*;
-use crate::{scalar, Matrix, NativeFlattenable, Path, Point, Rect, StrokeRec, Vector};
-use skia_bindings as sb;
+use crate::{prelude::*, scalar, Matrix, NativeFlattenable, Path, Point, Rect, StrokeRec, Vector};
 use skia_bindings::{
-    SkFlattenable, SkPathEffect, SkPathEffect_DashType, SkPathEffect_PointData, SkRefCntBase,
+    self as sb, SkFlattenable, SkPathEffect, SkPathEffect_DashType, SkPathEffect_PointData,
+    SkRefCntBase,
 };
 use std::{fmt, os::raw};
 
@@ -19,17 +18,15 @@ pub struct PointData {
     pub last: Path,
 }
 
-unsafe impl Send for PointData {}
-unsafe impl Sync for PointData {}
+unsafe_send_sync!(PointData);
 
-impl NativeTransmutable<SkPathEffect_PointData> for PointData {}
+native_transmutable!(SkPathEffect_PointData, PointData, point_data_layout);
 
 #[test]
-fn test_point_data_layout() {
+fn test_point_data_fields_layout() {
     Point::test_layout();
     Vector::test_layout();
     Rect::test_layout();
-    PointData::test_layout();
 }
 
 impl Drop for PointData {
@@ -76,8 +73,7 @@ pub struct DashInfo {
 }
 
 pub type PathEffect = RCHandle<SkPathEffect>;
-unsafe impl Send for PathEffect {}
-unsafe impl Sync for PathEffect {}
+unsafe_send_sync!(PathEffect);
 
 impl NativeBase<SkRefCntBase> for SkPathEffect {}
 impl NativeBase<SkFlattenable> for SkPathEffect {}

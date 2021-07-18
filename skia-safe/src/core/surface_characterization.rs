@@ -5,8 +5,7 @@ use skia_bindings::{self as sb, SkSurfaceCharacterization};
 use std::fmt;
 
 pub type SurfaceCharacterization = Handle<SkSurfaceCharacterization>;
-unsafe impl Send for SurfaceCharacterization {}
-unsafe impl Sync for SurfaceCharacterization {}
+unsafe_send_sync!(SurfaceCharacterization);
 
 impl NativeDrop for SkSurfaceCharacterization {
     fn drop(&mut self) {

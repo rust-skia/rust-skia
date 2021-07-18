@@ -4,8 +4,7 @@ use skia_bindings as sb;
 use std::{fmt, os::raw};
 
 pub type ParagraphBuilder = RefHandle<sb::skia_textlayout_ParagraphBuilder>;
-unsafe impl Send for ParagraphBuilder {}
-unsafe impl Sync for ParagraphBuilder {}
+unsafe_send_sync!(ParagraphBuilder);
 
 impl NativeDrop for sb::skia_textlayout_ParagraphBuilder {
     fn drop(&mut self) {

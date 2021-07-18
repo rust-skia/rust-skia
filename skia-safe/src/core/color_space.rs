@@ -16,11 +16,11 @@ pub struct ColorSpacePrimaries {
     wy: f32,
 }
 
-impl NativeTransmutable<SkColorSpacePrimaries> for ColorSpacePrimaries {}
-#[test]
-fn test_color_space_primaries_layout() {
-    ColorSpacePrimaries::test_layout()
-}
+native_transmutable!(
+    SkColorSpacePrimaries,
+    ColorSpacePrimaries,
+    color_space_primaries_layout
+);
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct ColorSpaceTransferFn {
@@ -100,8 +100,7 @@ pub mod named_transfer_fn {
 }
 
 pub type ColorSpace = RCHandle<SkColorSpace>;
-unsafe impl Send for ColorSpace {}
-unsafe impl Sync for ColorSpace {}
+unsafe_send_sync!(ColorSpace);
 
 impl NativeRefCounted for SkColorSpace {
     fn _ref(&self) {

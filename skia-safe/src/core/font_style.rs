@@ -10,12 +10,7 @@ use std::{fmt, ops::Deref};
 #[repr(transparent)]
 pub struct Weight(i32);
 
-impl NativeTransmutable<i32> for Weight {}
-
-#[test]
-fn test_weight_layout() {
-    Weight::test_layout()
-}
+native_transmutable!(i32, Weight, weight_layout);
 
 impl From<i32> for Weight {
     fn from(weight: i32) -> Self {
@@ -53,12 +48,7 @@ impl Weight {
 #[repr(transparent)]
 pub struct Width(i32);
 
-impl NativeTransmutable<i32> for Width {}
-
-#[test]
-fn test_width_layout() {
-    Width::test_layout()
-}
+native_transmutable!(i32, Width, width_layout);
 
 impl From<i32> for Width {
     fn from(width: i32) -> Self {
@@ -87,21 +77,14 @@ impl Width {
 }
 
 pub use skia_bindings::SkFontStyle_Slant as Slant;
-#[test]
-fn test_slant_naming() {
-    let _ = Slant::Upright;
-}
+variant_name!(Slant::Upright, slant_naming);
 
 // TODO: implement Display
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct FontStyle(SkFontStyle);
 
-impl NativeTransmutable<SkFontStyle> for FontStyle {}
-#[test]
-fn test_font_style_layout() {
-    FontStyle::test_layout()
-}
+native_transmutable!(SkFontStyle, FontStyle, font_style_layout);
 
 impl PartialEq for FontStyle {
     fn eq(&self, rhs: &Self) -> bool {

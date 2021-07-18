@@ -3,8 +3,7 @@ use skia_bindings::{self as sb, SkContourMeasure, SkContourMeasureIter, SkRefCnt
 use std::fmt;
 
 pub type ContourMeasure = RCHandle<SkContourMeasure>;
-unsafe impl Send for ContourMeasure {}
-unsafe impl Sync for ContourMeasure {}
+unsafe_send_sync!(ContourMeasure);
 
 impl NativeRefCountedBase for SkContourMeasure {
     type Base = SkRefCntBase;
@@ -88,8 +87,7 @@ impl ContourMeasure {
 }
 
 pub type ContourMeasureIter = Handle<SkContourMeasureIter>;
-unsafe impl Send for ContourMeasureIter {}
-unsafe impl Sync for ContourMeasureIter {}
+unsafe_send_sync!(ContourMeasureIter);
 
 impl NativeDrop for SkContourMeasureIter {
     fn drop(&mut self) {
