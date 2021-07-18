@@ -1,4 +1,5 @@
 mod annotation;
+mod blender;
 pub use annotation::annotate;
 
 mod bbh_factory;

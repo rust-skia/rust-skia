@@ -36,6 +36,7 @@ mod core {
     // SkBitmap is not thread safe. Each thread must have its own copy of SkBitmap fields,
     // although threads may share the underlying pixel array.
     assert_not_impl_any!(Bitmap: Send, Sync);
+    assert_impl_all!(Blender: Send, Sync);
     assert_not_impl_any!(Canvas: Send, Sync);
     assert_impl_all!(canvas::TopLayerPixels: Send, Sync);
     assert_impl_all!(canvas::GlyphPositions: Send, Sync);

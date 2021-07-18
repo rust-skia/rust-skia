@@ -172,6 +172,20 @@ extern "C" void C_SkEncodedOriginToMatrix(SkEncodedOrigin origin, int w, int h, 
 extern "C" void C_Core_Types(SkGraphics *, SkCoverageMode *, SkColorChannelFlag *) {};
 
 //
+// core/SkBlender.h
+//
+
+extern "C" SkBlender* C_SkBlender_Mode(SkBlendMode mode) {
+    return SkBlender::Mode(mode).release();
+}
+
+extern "C" SkBlender* C_SkBlender_Deserialize(const void* data, size_t length) {
+    return static_cast<SkBlender*>(SkFlattenable::Deserialize(SkFlattenable::kSkBlender_Type, data, length).release());
+}
+
+
+
+//
 // core/SkCubicMap.h
 //
 
