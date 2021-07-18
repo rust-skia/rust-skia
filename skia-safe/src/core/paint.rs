@@ -56,7 +56,7 @@ impl fmt::Debug for Paint {
             .field("stroke_cap", &self.stroke_cap())
             .field("stroke_join", &self.stroke_join())
             .field("color_filter", &self.color_filter())
-            // .field("blend_mode", &self.blend_mode())
+            .field("blend_mode", &self.as_blend_mode())
             .field("path_effect", &self.path_effect())
             .field("mask_filter", &self.mask_filter())
             .field("image_filter", &self.image_filter())
