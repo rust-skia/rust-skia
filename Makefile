@@ -117,9 +117,11 @@ prepare-local-build:
 	rm -rf tmp/
 	mkdir -p tmp/
 	find target -name "libsk*.a" -type f -exec cp {} tmp/ \;
+	find target -name "libicu.a" -type f -exec cp {} tmp/ \;
 	find target -name "skia-defines.txt" -type f -exec cp {} tmp/ \;
 	# Windows
 	find target -name "sk*.lib" -type f -exec cp {} tmp/ \;
+	find target -name "icu.lib" -type f -exec cp {} tmp/ \;
 	find target -name "icudtl.dat" -type f -exec cp {} tmp/ \;
 	# The bindings are expected to be regenerated in a local build.
 	rm tmp/*-bindings.*
