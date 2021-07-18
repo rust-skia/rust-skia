@@ -40,8 +40,8 @@ pub struct ContextOptions {
     pub internal_multisample_count: raw::c_int,
     pub max_cached_vulkan_secondary_command_buffers: raw::c_int,
     pub suppress_mipmap_support: bool,
-    pub driver_bug_workarounds: DriverBugWorkarounds,
     pub enable_experimental_hardware_tessellation: bool,
+    pub driver_bug_workarounds: DriverBugWorkarounds,
 }
 unsafe_send_sync!(ContextOptions);
 
