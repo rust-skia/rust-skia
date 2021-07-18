@@ -218,11 +218,16 @@ impl DirectContext {
         self
     }
 
-    pub fn perform_deferred_cleanup(&mut self, not_used: Duration) -> &mut Self {
+    pub fn perform_deferred_cleanup(
+        &mut self,
+        not_used: Duration,
+        scratch_resources_only: impl Into<Option<bool>>,
+    ) -> &mut Self {
         unsafe {
             sb::C_GrDirectContext_performDeferredCleanup(
                 self.native_mut(),
                 not_used.as_millis().try_into().unwrap(),
+                scratch_resources_only.into().unwrap_or(false),
             )
         }
         self
