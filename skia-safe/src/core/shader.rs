@@ -106,8 +106,7 @@ impl Shader {
 }
 
 pub mod shaders {
-    use crate::prelude::*;
-    use crate::{BlendMode, Color, Color4f, ColorSpace, Matrix, Shader};
+    use crate::{prelude::*, BlendMode, Color, Color4f, ColorSpace, Shader};
     use skia_bindings as sb;
 
     pub fn empty() -> Shader {
@@ -131,18 +130,5 @@ pub mod shaders {
             sb::C_SkShaders_Blend(mode, dst.into().into_ptr(), src.into().into_ptr())
         })
         .unwrap()
-    }
-
-    /*
-    pub fn lerp(t: f32, dst: impl Into<Shader>, src: impl Into<Shader>) -> Option<Shader> {
-        Shader::from_ptr(unsafe {
-            sb::C_SkShaders_Lerp(t, dst.into().into_ptr(), src.into().into_ptr())
-        })
-    }
-    */
-
-    #[deprecated(since = "0.29.0", note = "removed without replacement")]
-    pub fn lerp2(_red: Shader, _dst: Shader, _src: Shader, _local_matrix: Option<&Matrix>) -> ! {
-        panic!("removed without replacement");
     }
 }
