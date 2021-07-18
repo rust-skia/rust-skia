@@ -32,7 +32,7 @@ variant_name!(SurfaceOrigin::BottomLeft, surface_origin_naming);
 #[derive(Debug)]
 pub struct FlushInfo {
     // TODO: wrap access to the following fields in a safe way:
-    num_semaphores: std::os::raw::c_int,
+    num_semaphores: usize,
     signal_semaphores: *mut sb::GrBackendSemaphore,
     finished_proc: sb::GrGpuFinishedProc,
     finished_context: sb::GrGpuFinishedContext,

@@ -41,6 +41,7 @@ pub struct ContextOptions {
     pub max_cached_vulkan_secondary_command_buffers: raw::c_int,
     pub suppress_mipmap_support: bool,
     pub enable_experimental_hardware_tessellation: bool,
+    pub reduced_shader_variations: bool,
     pub driver_bug_workarounds: DriverBugWorkarounds,
 }
 unsafe_send_sync!(ContextOptions);
