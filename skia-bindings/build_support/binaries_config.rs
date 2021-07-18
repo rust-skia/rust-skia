@@ -182,13 +182,27 @@ impl BinariesConfiguration {
 
         for lib in self.built_libraries(copy_bindings_libraries) {
             let filename = &target.library_to_filename(lib);
-            fs::copy(from_dir.join(filename), to_dir.join(filename))?;
+            copy(filename, from_dir, to_dir)?;
         }
 
-        for file in &self.additional_files {
-            fs::copy(from_dir.join(file), to_dir.join(file))?;
+        for filename in &self.additional_files {
+            copy(filename, from_dir, to_dir)?;
         }
 
-        Ok(())
+        return Ok(());
+
+        fn copy(file_name: &Path, from_dir: &Path, to_dir: &Path) -> io::Result<()> {
+            let from_path = from_dir.join(file_name);
+            let to_path = to_dir.join(file_name);
+            fs::copy(&from_path, &to_path).map(|_| ()).map_err(|e| {
+                eprintln!(
+                    "COPY OPERATION FAILED: from '{}' to '{}': {}",
+                    from_path.display(),
+                    to_path.display(),
+                    e.to_string()
+                );
+                e
+            })
+        }
     }
 }
