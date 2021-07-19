@@ -61,6 +61,7 @@
 // effects/
 #include "include/effects/Sk1DPathEffect.h"
 #include "include/effects/Sk2DPathEffect.h"
+#include "include/effects/SkBlenders.h"
 #include "include/effects/SkColorMatrix.h"
 #include "include/effects/SkColorMatrixFilter.h"
 #include "include/effects/SkCornerPathEffect.h"
@@ -2100,6 +2101,14 @@ extern "C" bool C_SkYUVAPixmaps_isValid(const SkYUVAPixmaps* self) {
 extern "C" void C_Effects_Types(SkTableMaskFilter *) {}
 
 //
+// effects/SkBlenders.h
+//
+
+extern "C" SkBlender* C_SkBlenders_Arithmetic(float k1, float k2, float k3, float k4, bool enforcePremul) {
+    return SkBlenders::Arithmetic(k1, k2, k3, k4, enforcePremul).release();
+}
+
+//
 // effects/SkGradientShader.h
 //
 
@@ -2305,10 +2314,22 @@ SkRuntimeEffect *C_SkRuntimeEffect_MakeForShader(
     return r.effect.release();
 }
 
-SkShader *C_SkRuntimeEffect_makeShader(const SkRuntimeEffect *self, SkData *uniforms, SkShader **children, size_t childCount,
-                                       const SkMatrix *localMatrix, bool isOpaque) {
-    auto childrenSPs = reinterpret_cast<sk_sp<SkShader> *>(children);
-    return self->makeShader(sp(uniforms), childrenSPs, childCount, localMatrix, isOpaque).release();
+SkRuntimeEffect *C_SkRuntimeEffect_MakeForBlender(
+    const SkString *sksl,
+    const SkRuntimeEffect::Options *options,
+    SkString *error)
+{
+    auto r = SkRuntimeEffect::MakeForBlender(*sksl, *options);
+    *error = r.errorText;
+    return r.effect.release();
+}
+
+SkShader *C_SkRuntimeEffect_makeShader(
+    const SkRuntimeEffect *self, SkData *uniforms,
+    SkRuntimeEffect::ChildPtr *children, size_t childCount,
+    const SkMatrix *localMatrix, bool isOpaque)
+{
+    return self->makeShader(sp(uniforms), SkSpan<SkRuntimeEffect::ChildPtr>(children, childCount), localMatrix, isOpaque).release();
 }
 
 SkImage *C_SkRuntimeEffect_makeImage(
@@ -2327,15 +2348,17 @@ SkImage *C_SkRuntimeEffect_makeImage(
         localMatrix, *resultInfo, mipmapped).release();
 }
 
-SkColorFilter* C_SkRuntimeEffect_makeColorFilter(const SkRuntimeEffect* self, SkData* inputs) {
-    return self->makeColorFilter(sp(inputs)).release();
+SkColorFilter *C_SkRuntimeEffect_makeColorFilter(
+    const SkRuntimeEffect *self, SkData *inputs, SkRuntimeEffect::ChildPtr *children, size_t childCount)
+{
+    return self->makeColorFilter(sp(inputs), SkSpan<SkRuntimeEffect::ChildPtr>(children, childCount)).release();
 }
 
-/*
-const SkString *C_SkRuntimeEffect_source(const SkRuntimeEffect *self) {
-    return &self->source();
+const unsigned char* C_SkRuntimeEffect_source(const SkRuntimeEffect *self, size_t* len) {
+    auto& str = self->source();
+    *len = str.length();
+    return (const unsigned char*) str.data();
 }
-*/
 
 const SkRuntimeEffect::Uniform* C_SkRuntimeEffect_uniforms(const SkRuntimeEffect* self, size_t* count) {
     auto uniforms = self->uniforms();
