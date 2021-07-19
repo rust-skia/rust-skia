@@ -4,6 +4,8 @@ pub use _1d_path_effect::*;
 mod _2d_path_effect;
 pub use _2d_path_effect::*;
 
+pub mod blenders;
+
 pub mod color_matrix;
 pub use color_matrix::ColorMatrix;
 

@@ -409,6 +409,8 @@ const OPAQUE_TYPES: &[&str] = &[
     "GrD3DMemoryAllocator",
     // m87, yuva_pixmaps
     "std::tuple",
+    // m93: private, exposed by Paint::asBlendMode(), fails layout tests.
+    "skstd::optional",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[

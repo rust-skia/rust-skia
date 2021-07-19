@@ -23,6 +23,7 @@ impl<T: 'static> VecSink<'_, T> {
         }
     }
 
+    #[allow(unused)]
     pub fn new_mut(v: &mut dyn FnMut(&mut [T])) -> VecSink<T> {
         VecSink {
             sink: sb::VecSink {

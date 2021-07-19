@@ -7,7 +7,8 @@ use std::{
     marker::PhantomData,
     mem::{self, MaybeUninit},
     ops::{Deref, DerefMut, Index, IndexMut},
-    ptr, slice,
+    ptr::{self, NonNull},
+    slice,
 };
 
 // Re-export TryFrom / TryInto to make them available in all modules that use prelude::*.
@@ -540,6 +541,11 @@ impl<N: NativeRefCounted> RCHandle<N> {
     /// to the native type.
     pub(crate) fn from_unshared_ptr_ref(n: &*mut N) -> &Option<Self> {
         unsafe { transmute_ref(n) }
+    }
+
+    /// Returns the pointer to the handle.
+    pub(crate) fn as_ptr(&self) -> &NonNull<N> {
+        &self.0
     }
 }
 
