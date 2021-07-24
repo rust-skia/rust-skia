@@ -61,7 +61,7 @@ mozjpeg-sys = { version = "0", features=["with_simd"], optional=true }
 
 [build-dependencies]
 cc = "1.0.37"
-bindgen = "0.58.1"
+bindgen = "0.59.0"
 
 # For enum variant name replacements.
 
