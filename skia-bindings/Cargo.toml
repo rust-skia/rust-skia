@@ -57,7 +57,7 @@ binary-cache = ["ureq", "flate2", "tar"]
 
 [dependencies]
 
-mozjpeg-sys = { version = "0", features=["with_simd"], optional=true }
+mozjpeg-sys = { version = "1", features=["with_simd"], optional=true }
 
 [build-dependencies]
 cc = "1.0.37"
