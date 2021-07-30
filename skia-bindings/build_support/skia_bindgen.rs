@@ -765,7 +765,7 @@ pub(crate) mod definitions {
 
     fn from_defines_str(defines: &str) -> Definitions {
         const PREFIX: &str = "-D";
-        let defines: Vec<&str> = defines
+        defines
             .split_whitespace()
             .map(|d| {
                 if let Some(stripped) = d.strip_prefix(PREFIX) {
@@ -774,9 +774,6 @@ pub(crate) mod definitions {
                     panic!("missing '{}' prefix from a definition", PREFIX)
                 }
             })
-            .collect();
-        defines
-            .into_iter()
             .map(|d| {
                 let items: Vec<&str> = d.splitn(2, '=').collect();
                 match items.len() {
