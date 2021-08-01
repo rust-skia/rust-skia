@@ -8,7 +8,15 @@ all:
 	@echo "make publish: publish the rust-skia packages to crates.io"
 	@echo "make publish-only: do not verify or build packages, only publish the the packages"
 
-# test various configuration from inside crates.
+# Test before releases.
+
+.PHONY: macos-qa
+macos-qa:
+	# https://github.com/rust-skia/rust-skia/issues/548
+	cargo +nightly build -Z build-std --target x86_64-apple-ios-macabi --release
+	cargo +nightly build -Z build-std --target aarch64-apple-ios-macabi --release
+
+# Test various configuration from inside crates.
 
 .PHONY: crate-tests
 crate-tests: crate-bindings-binaries crate-bindings-build
