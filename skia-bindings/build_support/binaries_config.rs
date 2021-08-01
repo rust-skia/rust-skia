@@ -104,8 +104,8 @@ impl BinariesConfiguration {
             (_, "linux", "android", _) | (_, "linux", "androideabi", _) => {
                 link_libraries.extend(android::link_libraries(features));
             }
-            (_, "apple", "ios", _) => {
-                link_libraries.extend(ios::link_libraries(features));
+            (_, "apple", "ios", abi) => {
+                link_libraries.extend(ios::link_libraries(abi, features));
             }
             _ => panic!("unsupported target: {:?}", cargo::target()),
         };

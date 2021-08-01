@@ -238,8 +238,8 @@ pub fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Pat
                 builder = builder.clang_arg(arg);
             }
         }
-        (arch, "apple", "ios", _) => {
-            for arg in ios::additional_clang_args(arch) {
+        (arch, "apple", "ios", abi) => {
+            for arg in ios::additional_clang_args(arch, abi) {
                 builder = builder.clang_arg(arg);
             }
         }
