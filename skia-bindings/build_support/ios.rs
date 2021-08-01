@@ -1,62 +1,86 @@
-use crate::build_support::clang;
-use crate::build_support::features::Features;
-use std::path::PathBuf;
-use std::process::{Command, Stdio};
+use crate::build_support::{clang, features::Features};
+use std::{
+    path::PathBuf,
+    process::{Command, Stdio},
+};
+use Platform::*;
+
+#[derive(Copy, Clone)]
+enum Platform {
+    IOSSimulator,
+    IOSDevice,
+    Catalyst,
+}
+
+impl Platform {
+    fn new(arch: &str, abi: Option<&str>) -> Self {
+        match () {
+            () if abi == Some("macabi") => Catalyst,
+            () if arch == "x86_64" => IOSSimulator,
+            () => IOSDevice,
+        }
+    }
+
+    fn flags(self) -> &'static str {
+        match self {
+            IOSSimulator => "-mios-simulator-version-min=10.0",
+            IOSDevice => "-miphoneos-version-min=10.0",
+            // If we go below 13.0, the Skia build emits warnings.
+            Catalyst => "-miphoneos-version-min=13.0",
+        }
+    }
+
+    /// Resolve the iOS SDK path by starting `xcrun`.
+    fn sdk_path(self) -> PathBuf {
+        let sdk_path = Command::new("xcrun")
+            .arg("--show-sdk-path")
+            .arg("--sdk")
+            .arg(self.sdk_name())
+            .stderr(Stdio::inherit())
+            .output()
+            .expect("Failed to invoke xcrun")
+            .stdout;
+
+        let string = String::from_utf8(sdk_path).expect("failed to resolve iOS SDK path");
+        PathBuf::from(string.trim())
+    }
+
+    fn sdk_name(self) -> &'static str {
+        match self {
+            IOSSimulator => "iphonesimulator",
+            IOSDevice => "iphoneos",
+            Catalyst => "macosx",
+        }
+    }
+}
 
 // TODO: add support for 32 bit devices and simulators.
 pub fn extra_skia_cflags(arch: &str, abi: Option<&str>, flags: &mut Vec<&str>) {
-    if is_simulator(arch, abi) {
-        flags.push("-mios-simulator-version-min=10.0");
-    } else {
-        flags.push("-miphoneos-version-min=10.0");
-    }
+    flags.push(Platform::new(arch, abi).flags());
 }
 
 pub fn additional_clang_args(arch: &str, abi: Option<&str>) -> Vec<String> {
     let mut args: Vec<String> = Vec::new();
 
-    if is_simulator(arch, abi) {
-        args.push("-mios-simulator-version-min=10.0".into());
-        args.push("-m64".into());
-    } else {
-        args.push("-miphoneos-version-min=10.0".into());
-        args.push("-arch".into());
-        args.push(clang::target_arch(arch).into());
+    let platform = Platform::new(arch, abi);
+
+    args.push(platform.flags().into());
+
+    match platform {
+        IOSSimulator => {
+            args.push("-m64".into());
+        }
+        IOSDevice | Catalyst => {
+            args.push("-arch".into());
+            args.push(clang::target_arch(arch).into());
+        }
     }
 
     args.push("-isysroot".into());
-    args.push(sdk_path(arch, abi).to_str().unwrap().into());
+    args.push(platform.sdk_path().to_str().unwrap().into());
     args.push("-fembed-bitcode".into());
 
     args
-}
-
-/// Resolve the iOS SDK path by starting `xcrun`.
-fn sdk_path(arch: &str, abi: Option<&str>) -> PathBuf {
-    let sdk_path = Command::new("xcrun")
-        .arg("--show-sdk-path")
-        .arg("--sdk")
-        .arg(sdk_name(arch, abi))
-        .stderr(Stdio::inherit())
-        .output()
-        .expect("Failed to invoke xcrun")
-        .stdout;
-
-    let string = String::from_utf8(sdk_path).expect("failed to resolve iOS SDK path");
-    PathBuf::from(string.trim())
-}
-
-/// Returns `true` if the target architecture indicates that a simulator build is needed.
-fn is_simulator(arch: &str, abi: Option<&str>) -> bool {
-    sdk_name(arch, abi) == "iphonesimulator"
-}
-
-fn sdk_name(arch: &str, abi: Option<&str>) -> &'static str {
-    match () {
-        () if abi == Some("macabi") => "macosx",
-        () if arch == "x86_64" => "iphonesimulator",
-        () => "iphoneos",
-    }
 }
 
 pub(crate) fn link_libraries(abi: Option<&str>, features: &Features) -> Vec<&'static str> {
