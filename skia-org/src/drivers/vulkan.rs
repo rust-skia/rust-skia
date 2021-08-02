@@ -1,15 +1,10 @@
-use crate::artifact;
-use crate::drivers::DrawingDriver;
-use ash::version::{DeviceV1_0, EntryV1_0, InstanceV1_0};
-use ash::vk;
-use ash::vk::Handle;
-use ash::{Entry, Instance};
+use crate::{artifact, drivers::DrawingDriver};
+use ash::{
+    vk::{self, Handle},
+    Entry, Instance,
+};
 use skia_safe::{gpu, Budgeted, Canvas, ImageInfo, Surface};
-use std::convert::TryInto;
-use std::ffi::CString;
-use std::os::raw;
-use std::path::Path;
-use std::ptr;
+use std::{convert::TryInto, ffi::CString, os::raw, path::Path, ptr};
 
 #[allow(dead_code)]
 pub struct Vulkan {
@@ -106,9 +101,9 @@ impl AshGraphics {
 
         detected_version.map(|ver| {
             (
-                vk::version_major(ver).try_into().unwrap(),
-                vk::version_minor(ver).try_into().unwrap(),
-                vk::version_patch(ver).try_into().unwrap(),
+                vk::api_version_major(ver).try_into().unwrap(),
+                vk::api_version_minor(ver).try_into().unwrap(),
+                vk::api_version_patch(ver).try_into().unwrap(),
             )
         })
     }
@@ -116,12 +111,13 @@ impl AshGraphics {
     pub unsafe fn new(app_name: &str) -> AshGraphics {
         let entry = Entry::new().unwrap();
 
-        let minimum_version = vk::make_version(1, 0, 0);
+        let minimum_version = vk::make_api_version(0, 1, 0, 0);
 
         let instance: Instance = {
             let api_version = Self::vulkan_version()
                 .map(|(major, minor, patch)| {
-                    vk::make_version(
+                    vk::make_api_version(
+                        0,
                         major.try_into().unwrap(),
                         minor.try_into().unwrap(),
                         patch.try_into().unwrap(),
