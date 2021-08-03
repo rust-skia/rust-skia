@@ -93,7 +93,7 @@ pub(crate) fn link_libraries(abi: Option<&str>, features: &Features) -> Vec<&'st
     ];
 
     if abi != Some("macabi") {
-        libs.extend(["framework=MobileCoreServices", "framework=UIKit"]);
+        libs.extend(vec!["framework=MobileCoreServices", "framework=UIKit"]);
     }
 
     if features.metal {
