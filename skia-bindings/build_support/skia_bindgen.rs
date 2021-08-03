@@ -161,12 +161,12 @@ pub fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Pat
     for source in &build.binding_sources {
         cc_build.file(source);
         let source = source.to_str().unwrap();
-        cargo::rerun_if_changed(source);
+        cargo::rerun_if_file_changed(source);
         builder = builder.header(source);
     }
 
     let include_path = &build.skia_source_dir;
-    cargo::rerun_if_changed(include_path.join("include"));
+    cargo::rerun_if_file_changed(include_path.join("include"));
 
     builder = builder.clang_arg(format!("-I{}", include_path.display()));
     cc_build.include(include_path);
