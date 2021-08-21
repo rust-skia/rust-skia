@@ -287,7 +287,7 @@ impl Paint {
     }
 
     #[deprecated(
-        since = "0.0.0",
+        since = "0.42.0",
         note = "Use as_blend_mode() or blend_mode_or() instead."
     )]
     pub fn blend_mode(&self) -> BlendMode {
