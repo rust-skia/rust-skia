@@ -64,6 +64,9 @@ impl ParagraphBuilder {
     }
 
     pub fn new(style: &ParagraphStyle, font_collection: impl Into<FontCollection>) -> Self {
+        #[cfg(feature = "embed-icudtl")]
+        crate::icu::init();
+
         Self::from_ptr(unsafe {
             sb::C_ParagraphBuilder_make(style.native(), font_collection.into().into_ptr())
         })

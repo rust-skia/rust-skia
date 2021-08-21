@@ -6,8 +6,8 @@ index 078c8119..2d5f02b0 100644
  depot_tools = "fade894"
  
  [features]
--default = ["binary-cache"]
-+default = ["binary-cache", "gl", "vulkan", "metal", "textlayout", "webp"]
+-default = ["binary-cache", "embed-icudtl"]
++default = ["binary-cache", "embed-icudtl, "gl", "vulkan", "metal", "textlayout", "webp"]
  gl = []
  egl = []
  wayland = []
@@ -32,8 +32,8 @@ index 6ddd6479..cba4092e 100644
  doctest = false
  
  [features]
--default = ["binary-cache"]
-+default = ["binary-cache", "gl", "vulkan", "metal", "textlayout", "webp"]
+-default = ["binary-cache", "embed-icudtl"]
++default = ["binary-cache", "embed-icudtl", "gl", "vulkan", "metal", "textlayout", "webp"]
  gl = ["gpu", "skia-bindings/gl"]
  egl = ["gl", "skia-bindings/egl"]
  x11 = ["gl", "skia-bindings/x11"]

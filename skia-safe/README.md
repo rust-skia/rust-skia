@@ -88,17 +88,23 @@ The Cargo feature `textlayout` enables text shaping with Harfbuzz and ICU by pro
 
 The skshaper module can be accessed through `skia_safe::Shaper` and the Rust bindings for skparagraph are in the `skia_safe::textlayout` module. 
 
-On **Windows**, the file `icudtl.dat` must be available in your executable's directory. To provide the data file, either copy it from the build's output directory (shown when skia-bindings is compiled with `cargo build -vv | grep "ninja: Entering directory"`), or - if your executable directory is writable - invoke the function `skia_safe::icu::init()` before using the `skia_safe::Shaper` object or the `skia_safe::textlayout` module. 
-
-Simple examples of the skshaper and skparagraph module bindings can be found [in the skia-org example command line application](https://github.com/rust-skia/rust-skia/blob/master/skia-org/src/).
-
 ### `webp-encode`, `webp-decode`, `webp`
 
 `webp-encode` enables support for encoding Skia bitmaps and images to the [WEBP](https://en.wikipedia.org/wiki/WebP) image format, and `web-decode` enables support for decoding WEBP to Skia bitmaps and images. The `webp` feature can be used as a shorthand to enable the `webp-encode` and `webp-decode` features.
 
-### `binary-cache`
+### `binary-cache` (enabled by default)
 
-`binary-cache` enables download pre-built skia binaries instead of building them locally, it is enabled by default.
+`binary-cache` enables download pre-built skia binaries instead of building them locally.
+
+### `embed-icudtl` (enabled by default)
+
+Usually when Skia is used on **Windows**, the file `icudtl.dat` must be available in your executable's directory. But if this default feature is enabled, the `icudtl.dat` file is directly embedded in Rust and is automatically initialized before any of the `textlayout` features are used.
+
+If this feature is disabled, the `icudtl.dat` file needs to be copied from the build's output directory to the executable's directory. If your executable directory is writable, this can be done by calling the function `skia_safe::icu::init()` before the `skia_safe::textlayout` module is used.
+
+The output directory is displayed when skia-bindings is compiled with `cargo build -vv | grep "ninja: Entering directory"`, 
+
+Simple examples of how to use the `skshaper` and `skparagraph` module bindings can be found [in the skia-org example command line application](https://github.com/rust-skia/rust-skia/blob/master/skia-org/src/).
 
 ## Multithreading
 
