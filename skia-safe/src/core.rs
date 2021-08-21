@@ -10,6 +10,9 @@ pub use bitmap::*;
 mod blend_mode;
 pub use blend_mode::*;
 
+mod blender;
+pub use blender::*;
+
 mod blur_types;
 pub use blur_types::*;
 
@@ -115,10 +118,6 @@ pub use mask_filter::*;
 
 pub mod matrix;
 pub use matrix::Matrix;
-
-pub mod matrix44;
-#[allow(deprecated)]
-pub use matrix44::{Matrix44, Vector4};
 
 mod milestone;
 pub use milestone::*;

@@ -13,6 +13,7 @@ all:
 .PHONY: macos-qa
 macos-qa:
 	# https://github.com/rust-skia/rust-skia/issues/548
+	rustup update nightly
 	cargo +nightly build -Z build-std --target x86_64-apple-ios-macabi --release
 	cargo +nightly build -Z build-std --target aarch64-apple-ios-macabi --release
 
@@ -117,9 +118,11 @@ prepare-local-build:
 	rm -rf tmp/
 	mkdir -p tmp/
 	find target -name "libsk*.a" -type f -exec cp {} tmp/ \;
+	find target -name "libicu.a" -type f -exec cp {} tmp/ \;
 	find target -name "skia-defines.txt" -type f -exec cp {} tmp/ \;
 	# Windows
 	find target -name "sk*.lib" -type f -exec cp {} tmp/ \;
+	find target -name "icu.lib" -type f -exec cp {} tmp/ \;
 	find target -name "icudtl.dat" -type f -exec cp {} tmp/ \;
 	# The bindings are expected to be regenerated in a local build.
 	rm tmp/*-bindings.*

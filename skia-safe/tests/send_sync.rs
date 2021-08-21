@@ -36,6 +36,7 @@ mod core {
     // SkBitmap is not thread safe. Each thread must have its own copy of SkBitmap fields,
     // although threads may share the underlying pixel array.
     assert_not_impl_any!(Bitmap: Send, Sync);
+    assert_impl_all!(Blender: Send, Sync);
     assert_not_impl_any!(Canvas: Send, Sync);
     assert_impl_all!(canvas::TopLayerPixels: Send, Sync);
     assert_impl_all!(canvas::GlyphPositions: Send, Sync);
@@ -80,7 +81,6 @@ mod core {
     assert_not_impl_any!(path::Iter: Send, Sync);
     assert_impl_all!(Path: Send, Sync);
     assert_impl_all!(PathBuilder: Send, Sync);
-    assert_impl_all!(path_effect::PointData: Send, Sync);
     assert_impl_all!(path_effect::DashInfo: Send, Sync);
     assert_impl_all!(PathEffect: Send, Sync);
     assert_not_impl_any!(PathMeasure: Send, Sync);
@@ -125,6 +125,7 @@ mod core {
     assert_impl_all!(yuva_pixmap_info::SupportedDataTypes: Send, Sync);
     assert_impl_all!(YUVAPixmaps: Send, Sync);
     assert_impl_all!(yuva_pixmaps::DataType: Send, Sync);
+    assert_impl_all!(runtime_effect::ChildPtr: Send, Sync);
 }
 
 mod docs {
