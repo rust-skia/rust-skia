@@ -340,7 +340,7 @@ impl From<ColorFilter> for ChildPtr {
 }
 
 impl ChildPtr {
-    // We are treating ChildPtr's as a _reference_ to a smart pointer: no reference counters are
+    // We are treating [`ChildPtr`]s as a _reference_ to a smart pointer: no reference counters are
     // changed (no drop() is called either).
     //
     // Skia will copy the pointers and increase the reference counters if it uses the actual

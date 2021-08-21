@@ -1802,17 +1802,6 @@ extern "C" SkPathEffect* C_SkPathEffect_MakeCompose(SkPathEffect* outer, SkPathE
     return SkPathEffect::MakeCompose(sp(outer), sp(inner)).release();
 }
 
-/*
-extern "C" void C_SkPathEffect_PointData_Construct(SkPathEffect::PointData* uninitialized) {
-    new(uninitialized) SkPathEffect::PointData();
-}
-
-extern "C" void C_SkPathEffect_PointData_deletePoints(SkPathEffect::PointData* self) {
-    delete [] self->fPoints;
-    self->fPoints = nullptr;
-}
-*/
-
 extern "C" void C_SkPathEffect_DashInfo_Construct(SkPathEffect::DashInfo* uninitialized) {
     new(uninitialized) SkPathEffect::DashInfo();
 }
