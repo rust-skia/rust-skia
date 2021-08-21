@@ -13,6 +13,7 @@ all:
 .PHONY: macos-qa
 macos-qa:
 	# https://github.com/rust-skia/rust-skia/issues/548
+	rustup update nightly
 	cargo +nightly build -Z build-std --target x86_64-apple-ios-macabi --release
 	cargo +nightly build -Z build-std --target aarch64-apple-ios-macabi --release
 
