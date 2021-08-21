@@ -35,18 +35,27 @@ impl Shaper {
     }
 
     pub fn new_shaper_driven_wrapper(font_mgr: impl Into<Option<FontMgr>>) -> Option<Self> {
+        #[cfg(feature = "embed-icudtl")]
+        crate::icu::init();
+
         Self::from_ptr(unsafe {
             sb::C_SkShaper_MakeShaperDrivenWrapper(font_mgr.into().into_ptr_or_null())
         })
     }
 
     pub fn new_shape_then_wrap(font_mgr: impl Into<Option<FontMgr>>) -> Option<Self> {
+        #[cfg(feature = "embed-icudtl")]
+        crate::icu::init();
+
         Self::from_ptr(unsafe {
             sb::C_SkShaper_MakeShapeThenWrap(font_mgr.into().into_ptr_or_null())
         })
     }
 
     pub fn new_shape_dont_wrap_or_reorder(font_mgr: impl Into<Option<FontMgr>>) -> Option<Self> {
+        #[cfg(feature = "embed-icudtl")]
+        crate::icu::init();
+
         Self::from_ptr(unsafe {
             sb::C_SkShaper_MakeShapeDontWrapOrReorder(font_mgr.into().into_ptr_or_null())
         })
@@ -57,10 +66,16 @@ impl Shaper {
     }
 
     pub fn new_core_text() -> Option<Self> {
+        #[cfg(feature = "embed-icudtl")]
+        crate::icu::init();
+
         Self::from_ptr(unsafe { sb::C_SkShaper_MakeCoreText() })
     }
 
     pub fn new(font_mgr: impl Into<Option<FontMgr>>) -> Self {
+        #[cfg(feature = "embed-icudtl")]
+        crate::icu::init();
+
         Self::from_ptr(unsafe { sb::C_SkShaper_Make(font_mgr.into().into_ptr_or_null()) }).unwrap()
     }
 
@@ -712,27 +727,25 @@ impl Shaper {
 
 pub mod icu {
 
-    /// On Windows, this function writes the file `icudtl.dat` into the current
-    /// executable's directory making sure that it's available when text shaping is used in Skia.
+    /// On Windows, and if the default feature "embed-icudtl" is _not_ set, this function writes the
+    /// file `icudtl.dat` into the current executable's directory making sure that it's available
+    /// when text shaping is used in Skia.
     ///
     /// If your executable directory can not be written to, make sure that `icudtl.dat` is
     /// available.
     ///
     /// Note that it is currently not possible to load `icudtl.dat` from another location.
+    ///
+    /// If the default feature "embed-icudtl" is set, the `icudtl.dat` file is directly used from
+    /// memory, so no `icudtl.dat` file is needed.
     pub fn init() {
         skia_bindings::icu::init();
-
-        // Since m80, there is an initialization problem of icu in the module skparagraph,
-        // which we do not understand yet, but powering up an harfbuzz Shaper compensates
-        // for that.
-        #[cfg(all(windows, feature = "textlayout"))]
-        crate::Shaper::new(None);
     }
 
     #[test]
     #[serial_test::serial]
     fn test_text_blob_builder_run_handler() {
-        skia_bindings::icu::init();
+        init();
         let str = "العربية";
         let mut text_blob_builder_run_handler =
             crate::shaper::TextBlobBuilderRunHandler::new(str, crate::Point::default());
@@ -755,7 +768,7 @@ pub mod icu {
     #[test]
     #[serial_test::serial]
     fn icu_init_is_idempotent() {
-        skia_bindings::icu::init();
-        skia_bindings::icu::init();
+        init();
+        init();
     }
 }

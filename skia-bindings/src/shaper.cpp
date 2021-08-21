@@ -8,9 +8,7 @@
 #include "include/core/SkFontMgr.h"
 
 #if defined(_WIN32)
-
 #include "third_party/icu/SkLoadICU.h"
-
 #endif
 
 extern "C" SkShaper* C_SkShaper_MakePrimitive() {

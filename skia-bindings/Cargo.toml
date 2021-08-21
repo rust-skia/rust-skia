@@ -36,7 +36,7 @@ skia = "m93-0.42.0"
 depot_tools = "fade894"
 
 [features]
-default = ["binary-cache"]
+default = ["binary-cache", "embed-icudtl"]
 gl = []
 egl = []
 wayland = []
@@ -54,6 +54,7 @@ use-system-jpeg-turbo = ["mozjpeg-sys"]
 svg = []
 shaper = ["textlayout"]
 binary-cache = ["ureq", "flate2", "tar"]
+embed-icudtl = []
 
 [dependencies]
 
