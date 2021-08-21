@@ -2346,7 +2346,7 @@ SkColorFilter *C_SkRuntimeEffect_makeColorFilter(
 const unsigned char* C_SkRuntimeEffect_source(const SkRuntimeEffect *self, size_t* len) {
     auto& str = self->source();
     *len = str.length();
-    return (const unsigned char*) str.data();
+    return reinterpret_cast<const unsigned char*>(str.data());
 }
 
 const SkRuntimeEffect::Uniform* C_SkRuntimeEffect_uniforms(const SkRuntimeEffect* self, size_t* count) {

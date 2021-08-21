@@ -1,6 +1,6 @@
 #![macro_use]
 
-/// Macro to mark a Rust type as [`NativeTransmutable`] and test its layout.
+/// Macro to mark a Rust type as NativeTransmutable and test its layout.
 #[macro_export]
 macro_rules! native_transmutable {
     ($nt:ty, $rt:ty, $test_fn:ident) => {
