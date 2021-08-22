@@ -106,7 +106,7 @@ impl Shader {
 }
 
 pub mod shaders {
-    use crate::{prelude::*, BlendMode, Color, Color4f, ColorSpace, Shader};
+    use crate::{prelude::*, BlendMode, Blender, Color, Color4f, ColorSpace, Shader};
     use skia_bindings as sb;
 
     pub fn empty() -> Shader {
@@ -125,9 +125,17 @@ pub mod shaders {
         .unwrap()
     }
 
-    pub fn blend(mode: BlendMode, dst: impl Into<Shader>, src: impl Into<Shader>) -> Shader {
+    pub fn blend(
+        blender: impl Into<Blender>,
+        dst: impl Into<Shader>,
+        src: impl Into<Shader>,
+    ) -> Shader {
         Shader::from_ptr(unsafe {
-            sb::C_SkShaders_Blend(mode, dst.into().into_ptr(), src.into().into_ptr())
+            sb::C_SkShaders_Blend(
+                blender.into().into_ptr(),
+                dst.into().into_ptr(),
+                src.into().into_ptr(),
+            )
         })
         .unwrap()
     }

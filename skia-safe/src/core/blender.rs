@@ -34,3 +34,9 @@ impl NativeFlattenable for SkBlender {
         unsafe { sb::C_SkBlender_Deserialize(data.as_ptr() as _, data.len()) }
     }
 }
+
+impl From<BlendMode> for Blender {
+    fn from(mode: BlendMode) -> Self {
+        Blender::mode(mode)
+    }
+}
