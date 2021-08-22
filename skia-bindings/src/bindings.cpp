@@ -1890,8 +1890,8 @@ extern "C" SkShader* C_SkShaders_Color2(const SkColor4f* color, SkColorSpace* co
     return SkShaders::Color(*color, sp(colorSpace)).release();
 }
 
-extern "C" SkShader* C_SkShaders_Blend(SkBlendMode mode, SkShader* dst, SkShader* src) {
-    return SkShaders::Blend(mode, sp(dst), sp(src)).release();
+extern "C" SkShader* C_SkShaders_Blend(SkBlender* blender, SkShader* dst, SkShader* src) {
+    return SkShaders::Blend(sp(blender), sp(dst), sp(src)).release();
 }
 
 extern "C" SkShader* C_SkShader_Deserialize(const void* data, size_t length) {
@@ -2329,7 +2329,6 @@ SkImage *C_SkRuntimeEffect_makeImage(
     const SkMatrix *localMatrix,
     const SkImageInfo *resultInfo,
     bool mipmapped) {
-    auto childrenSPs = reinterpret_cast<sk_sp<SkShader> *>(children);
     return self->makeImage(
         context,
         sp(uniforms),
@@ -2341,6 +2340,12 @@ SkColorFilter *C_SkRuntimeEffect_makeColorFilter(
     const SkRuntimeEffect *self, SkData *inputs, SkRuntimeEffect::ChildPtr *children, size_t childCount)
 {
     return self->makeColorFilter(sp(inputs), SkSpan<SkRuntimeEffect::ChildPtr>(children, childCount)).release();
+}
+
+SkBlender *C_SkRuntimeEffect_makeBlender(
+    const SkRuntimeEffect *self, SkData *uniforms, SkRuntimeEffect::ChildPtr *children, size_t childCount)
+{
+    return self->makeBlender(sp(uniforms), SkSpan<SkRuntimeEffect::ChildPtr>(children, childCount)).release();
 }
 
 const unsigned char* C_SkRuntimeEffect_source(const SkRuntimeEffect *self, size_t* len) {
@@ -2419,12 +2424,12 @@ SkImageFilter *C_SkImageFilters_Arithmetic(float k1, float k2, float k3, float k
                                       sp(foreground), *cropRect).release();
 }
 
-SkImageFilter *C_SkImageFilters_Blend(SkBlendMode mode,
+SkImageFilter *C_SkImageFilters_Blend(SkBlender *blender,
                                       SkImageFilter *background,
                                       SkImageFilter *foreground,
                                       const SkImageFilters::CropRect *cropRect)
 {
-    return SkImageFilters::Blend(mode, sp(background),
+    return SkImageFilters::Blend(sp(blender), sp(background),
                                  sp(foreground), *cropRect)
         .release();
 }

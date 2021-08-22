@@ -106,7 +106,7 @@ impl Shader {
 }
 
 pub mod shaders {
-    use crate::{prelude::*, BlendMode, Blender, Color, Color4f, ColorSpace, Shader};
+    use crate::{prelude::*, Blender, Color, Color4f, ColorSpace, Shader};
     use skia_bindings as sb;
 
     pub fn empty() -> Shader {

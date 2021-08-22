@@ -1,5 +1,5 @@
 use crate::{
-    prelude::*, scalar, BlendMode, Color, ColorChannel, ColorFilter, CubicResampler, IPoint, IRect,
+    prelude::*, scalar, Blender, Color, ColorChannel, ColorFilter, CubicResampler, IPoint, IRect,
     ISize, Image, ImageFilter, Matrix, Paint, Picture, Point3, Rect, Region, SamplingOptions,
     Shader, TileMode, Vector,
 };
@@ -114,14 +114,14 @@ pub fn arithmetic(
 }
 
 pub fn blend(
-    mode: BlendMode,
+    mode: impl Into<Blender>,
     background: impl Into<Option<ImageFilter>>,
     foreground: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<CropRect>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
         sb::C_SkImageFilters_Blend(
-            mode,
+            mode.into().into_ptr(),
             background.into().into_ptr_or_null(),
             foreground.into().into_ptr_or_null(),
             crop_rect.into().native(),

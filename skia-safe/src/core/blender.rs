@@ -12,6 +12,8 @@ impl NativeRefCountedBase for SkBlender {
     type Base = SkRefCntBase;
 }
 
+impl NativeBase<SkFlattenable> for SkBlender {}
+
 impl Blender {
     /// Create a blender that implements the specified [`BlendMode`].
     pub fn mode(mode: BlendMode) -> Blender {
