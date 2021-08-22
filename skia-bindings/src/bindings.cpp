@@ -1899,7 +1899,7 @@ extern "C" SkShader* C_SkShader_Deserialize(const void* data, size_t length) {
     // https://github.com/rust-skia/rust-skia/issues/146
     // "typeinfo for SkShader", referenced from:
     //      _C_SkShader_Deserialize in libcanvasnative.a(bindings.o)
-    return (SkShader*)(SkShader::Deserialize(SkFlattenable::Type::kSkShaderBase_Type, data, length).release());
+    return (SkShader*)(SkShader::Deserialize(SkFlattenable::Type::kSkShader_Type, data, length).release());
 }
 
 //
@@ -2325,7 +2325,7 @@ SkImage *C_SkRuntimeEffect_makeImage(
     const SkRuntimeEffect *self,
     GrRecordingContext* context,
     SkData *uniforms,
-    SkShader **children, size_t childCount,
+    SkRuntimeEffect::ChildPtr *children, size_t childCount,
     const SkMatrix *localMatrix,
     const SkImageInfo *resultInfo,
     bool mipmapped) {
@@ -2333,7 +2333,7 @@ SkImage *C_SkRuntimeEffect_makeImage(
     return self->makeImage(
         context,
         sp(uniforms),
-        childrenSPs, childCount,
+        SkSpan<SkRuntimeEffect::ChildPtr>(children, childCount),
         localMatrix, *resultInfo, mipmapped).release();
 }
 
