@@ -3,7 +3,7 @@ use crate::{
     prelude::*,
     ColorFilter, Data, Matrix, Shader,
 };
-use sb::SkRuntimeEffect_Child;
+use sb::{SkFlattenable, SkRuntimeEffect_Child};
 use skia_bindings::{
     self as sb, SkRefCntBase, SkRuntimeEffect, SkRuntimeEffect_Options, SkRuntimeEffect_Uniform,
 };
@@ -107,7 +107,7 @@ impl Child {
     }
 }
 
-pub use sb::SkRuntimeEffect_Child_Type as ChildType;
+pub use sb::SkRuntimeEffect_ChildType as ChildType;
 variant_name!(ChildType::Shader, child_type_naming);
 
 pub type RuntimeEffect = RCHandle<SkRuntimeEffect>;
@@ -220,22 +220,26 @@ impl RuntimeEffect {
         &self,
         context: &mut crate::gpu::RecordingContext,
         uniforms: impl Into<Data>,
-        children: impl IntoIterator<Item = Shader>,
+        children: impl Into<Option<&'a [ChildPtr]>>,
         local_matrix: impl Into<Option<&'a Matrix>>,
         result_info: crate::ImageInfo,
         mipmapped: bool,
     ) -> Option<crate::Image> {
         let mut children: Vec<_> = children
-            .into_iter()
-            .map(|shader| shader.into_ptr())
-            .collect();
+            .into()
+            .map(|c| c.iter().map(|child_ptr| child_ptr.native()).collect())
+            .unwrap_or_default();
+        let children_ptr = children
+            .first_mut()
+            .map(|c| c.deref_mut() as *mut _)
+            .unwrap_or(ptr::null_mut());
 
         crate::Image::from_ptr(unsafe {
             sb::C_SkRuntimeEffect_makeImage(
                 self.native(),
                 context.native_mut(),
                 uniforms.into().into_ptr(),
-                children.as_mut_ptr(),
+                children_ptr,
                 children.len(),
                 local_matrix.into().native_ptr_or_null(),
                 result_info.native(),
@@ -346,26 +350,17 @@ impl ChildPtr {
     // Skia will copy the pointers and increase the reference counters if it uses the actual
     // objects.
     pub(self) fn native(&self) -> Borrows<sb::SkRuntimeEffect_ChildPtr> {
-        match self {
-            ChildPtr::Shader(shader) => sb::SkRuntimeEffect_ChildPtr {
-                shader: sb::sk_sp {
-                    fPtr: shader.as_ptr().as_ptr(),
-                    _phantom_0: PhantomData,
-                },
-                colorFilter: sb::sk_sp {
-                    fPtr: ptr::null_mut(),
-                    _phantom_0: PhantomData,
-                },
-            },
-            ChildPtr::ColorFilter(color_filter) => sb::SkRuntimeEffect_ChildPtr {
-                shader: sb::sk_sp {
-                    fPtr: ptr::null_mut(),
-                    _phantom_0: PhantomData,
-                },
-                colorFilter: sb::sk_sp {
-                    fPtr: color_filter.as_ptr().as_ptr(),
-                    _phantom_0: PhantomData,
-                },
+        let flattenable: *mut SkFlattenable = match self {
+            // casting to &T &mut T is UB, so we don't use the base() indirection and directly cast
+            // to a pointer.
+            ChildPtr::Shader(shader) => unsafe { shader.native_mut_force() as _ },
+            ChildPtr::ColorFilter(color_filter) => unsafe { color_filter.native_mut_force() as _ },
+        };
+
+        sb::SkRuntimeEffect_ChildPtr {
+            fChild: sb::sk_sp {
+                fPtr: flattenable,
+                _phantom_0: PhantomData,
             },
         }
         .borrows(self)

@@ -1,5 +1,4 @@
-use crate::{prelude::*, FilterQuality};
-use skia_bindings::{SkCubicResampler, SkSamplingOptions, SkSamplingOptions_MediumBehavior};
+use skia_bindings::{SkCubicResampler, SkSamplingOptions};
 
 pub use skia_bindings::SkFilterMode as FilterMode;
 variant_name!(FilterMode::Linear, filter_mode_naming);
@@ -56,19 +55,6 @@ pub struct FilterOptions {
     pub mipmap: MipmapMode,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
-#[repr(i32)]
-pub enum MediumBehavior {
-    AsMipmapNearest = SkSamplingOptions_MediumBehavior::kMedium_asMipmapNearest as _,
-    AsMipmapLinear = SkSamplingOptions_MediumBehavior::kMedium_asMipmapLinear as _,
-}
-
-native_transmutable!(
-    SkSamplingOptions_MediumBehavior,
-    MediumBehavior,
-    medium_behavior_layout
-);
-
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Debug)]
 #[allow(deprecated)]
@@ -100,21 +86,6 @@ impl SamplingOptions {
             mipmap: mm,
             ..Default::default()
         }
-    }
-
-    pub fn from_filter_quality(
-        filter_quality: FilterQuality,
-        medium_behavior: impl Into<Option<MediumBehavior>>,
-    ) -> Self {
-        Self::from_native_c(unsafe {
-            SkSamplingOptions::new(
-                filter_quality,
-                medium_behavior
-                    .into()
-                    .unwrap_or(MediumBehavior::AsMipmapNearest)
-                    .into_native(),
-            )
-        })
     }
 }
 
@@ -149,11 +120,5 @@ impl From<CubicResampler> for SamplingOptions {
             cubic,
             ..Default::default()
         }
-    }
-}
-
-impl From<FilterQuality> for SamplingOptions {
-    fn from(quality: FilterQuality) -> Self {
-        Self::from_filter_quality(quality, None)
     }
 }

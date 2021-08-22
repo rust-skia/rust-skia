@@ -531,7 +531,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("Op", rewrite::k_xxx_name_opt),
     // SkRRect_*
     // TODO: remove kLastType?
-    // SkRuntimeEffect_Variable_Type
+    // SkRuntimeEffect_Uniform_Type
     ("Type", rewrite::k_xxx_name_opt),
     ("Corner", rewrite::k_xxx_name),
     // SkShader_GradientType
@@ -617,6 +617,8 @@ const ENUM_TABLE: &[EnumEntry] = &[
     // m89, SkImageFilters::Dither
     ("Dither", rewrite::k_xxx),
     ("SkScanlineOrder", rewrite::k_xxx_name),
+    // m94: SkRuntimeEffect::ChildType
+    ("ChildType", rewrite::k_xxx_name_opt),
 ];
 
 pub(crate) mod rewrite {

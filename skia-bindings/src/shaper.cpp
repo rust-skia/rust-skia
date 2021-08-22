@@ -1,6 +1,9 @@
 #ifndef SK_SHAPER_HARFBUZZ_AVAILABLE
     #define SK_SHAPER_HARFBUZZ_AVAILABLE
 #endif
+#ifndef SK_USING_THIRD_PARTY_ICU
+    #define SK_USING_THIRD_PARTY_ICU
+#endif
 
 #include "bindings.h"
 

@@ -24,3 +24,8 @@ unused_dirs=\
 .PHONY: rm-unused
 rm-unused:
 	cd skia && git rm -r ${unused_dirs}
+
+.PHONY: rm-externals
+rm-externals:
+	rm -rf skia/third_party/externals/*
+

@@ -64,9 +64,6 @@ pub use encoded_image_format::*;
 // unsupported, because it's used in experimental APIs only.
 // mod executor;
 
-mod filter_quality;
-pub use filter_quality::*;
-
 mod flattenable;
 pub use flattenable::*;
 

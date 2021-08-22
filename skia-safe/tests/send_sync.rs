@@ -110,7 +110,6 @@ mod core {
     // core/sampling_options.rs
     assert_impl_all!(CubicResampler: Send, Sync);
     assert_impl_all!(FilterMode: Send, Sync);
-    assert_impl_all!(sampling_options::MediumBehavior: Send, Sync);
     assert_impl_all!(SamplingOptions: Send, Sync);
     // core/yuva_info.rs
     assert_impl_all!(YUVAInfo: Send, Sync);

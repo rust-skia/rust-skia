@@ -544,6 +544,7 @@ impl<N: NativeRefCounted> RCHandle<N> {
     }
 
     /// Returns the pointer to the handle.
+    #[allow(unused)]
     pub(crate) fn as_ptr(&self) -> &NonNull<N> {
         &self.0
     }
