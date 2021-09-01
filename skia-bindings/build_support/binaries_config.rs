@@ -54,7 +54,7 @@ impl BinariesConfiguration {
         let feature_ids = features.ids();
 
         if features.text_layout {
-            if target.is_windows() && !cfg!(feature = "embed-icudtl") {
+            if target.is_windows() {
                 additional_files.push(ICUDTL_DAT.into());
             }
             ninja_built_libraries.push(lib::SK_PARAGRAPH.into());
