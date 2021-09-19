@@ -7,7 +7,7 @@ index 078c8119..2d5f02b0 100644
  
  [features]
 -default = ["binary-cache", "embed-icudtl"]
-+default = ["binary-cache", "embed-icudtl, "gl", "vulkan", "metal", "textlayout", "webp"]
++default = ["binary-cache", "embed-icudtl", "gl", "vulkan", "metal", "textlayout", "webp"]
  gl = []
  egl = []
  wayland = []
