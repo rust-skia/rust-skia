@@ -1,9 +1,9 @@
 use crate::{
     interop::{self, AsStr},
     prelude::*,
-    ColorFilter, Data, Matrix, Shader,
+    Blender, ColorFilter, Data, Matrix, Shader,
 };
-use sb::SkRuntimeEffect_Child;
+use sb::{SkFlattenable, SkRuntimeEffect_Child};
 use skia_bindings::{
     self as sb, SkRefCntBase, SkRuntimeEffect, SkRuntimeEffect_Options, SkRuntimeEffect_Uniform,
 };
@@ -71,6 +71,9 @@ pub mod uniform {
     }
 }
 
+pub use sb::SkRuntimeEffect_ChildType as ChildType;
+variant_name!(ChildType::Shader, child_type_naming);
+
 #[deprecated(since = "0.41.0", note = "Use Child")]
 pub type Varying = Child;
 
@@ -107,9 +110,6 @@ impl Child {
     }
 }
 
-pub use sb::SkRuntimeEffect_Child_Type as ChildType;
-variant_name!(ChildType::Shader, child_type_naming);
-
 pub type RuntimeEffect = RCHandle<SkRuntimeEffect>;
 
 impl NativeRefCountedBase for SkRuntimeEffect {
@@ -121,6 +121,7 @@ impl NativeRefCountedBase for SkRuntimeEffect {
 pub struct Options {
     pub force_no_inline: bool,
     enforce_es2_restrictions: bool,
+    allow_frag_coord: bool,
 }
 
 native_transmutable!(SkRuntimeEffect_Options, Options, options_layout);
@@ -130,6 +131,7 @@ impl Default for Options {
         Options {
             force_no_inline: false,
             enforce_es2_restrictions: true,
+            allow_frag_coord: false,
         }
     }
 }
@@ -220,22 +222,26 @@ impl RuntimeEffect {
         &self,
         context: &mut crate::gpu::RecordingContext,
         uniforms: impl Into<Data>,
-        children: impl IntoIterator<Item = Shader>,
+        children: impl Into<Option<&'a [ChildPtr]>>,
         local_matrix: impl Into<Option<&'a Matrix>>,
         result_info: crate::ImageInfo,
         mipmapped: bool,
     ) -> Option<crate::Image> {
         let mut children: Vec<_> = children
-            .into_iter()
-            .map(|shader| shader.into_ptr())
-            .collect();
+            .into()
+            .map(|c| c.iter().map(|child_ptr| child_ptr.native()).collect())
+            .unwrap_or_default();
+        let children_ptr = children
+            .first_mut()
+            .map(|c| c.deref_mut() as *mut _)
+            .unwrap_or(ptr::null_mut());
 
         crate::Image::from_ptr(unsafe {
             sb::C_SkRuntimeEffect_makeImage(
                 self.native(),
                 context.native_mut(),
                 uniforms.into().into_ptr(),
-                children.as_mut_ptr(),
+                children_ptr,
                 children.len(),
                 local_matrix.into().native_ptr_or_null(),
                 result_info.native(),
@@ -261,6 +267,29 @@ impl RuntimeEffect {
             sb::C_SkRuntimeEffect_makeColorFilter(
                 self.native(),
                 inputs.into().into_ptr(),
+                children_ptr,
+                children.len(),
+            )
+        })
+    }
+
+    pub fn make_blender<'a>(
+        &self,
+        uniforms: impl Into<Data>,
+        children: impl Into<Option<&'a [ChildPtr]>>,
+    ) -> Option<Blender> {
+        let mut children: Vec<_> = children
+            .into()
+            .map(|c| c.iter().map(|child_ptr| child_ptr.native()).collect())
+            .unwrap_or_default();
+        let children_ptr = children
+            .first_mut()
+            .map(|c| c.deref_mut() as *mut _)
+            .unwrap_or(ptr::null_mut());
+        Blender::from_ptr(unsafe {
+            sb::C_SkRuntimeEffect_makeBlender(
+                self.native(),
+                uniforms.into().into_ptr(),
                 children_ptr,
                 children.len(),
             )
@@ -325,6 +354,7 @@ impl RuntimeEffect {
 pub enum ChildPtr {
     Shader(Shader),
     ColorFilter(ColorFilter),
+    Blender(Blender),
 }
 
 impl From<Shader> for ChildPtr {
@@ -339,33 +369,39 @@ impl From<ColorFilter> for ChildPtr {
     }
 }
 
+impl From<Blender> for ChildPtr {
+    fn from(blender: Blender) -> Self {
+        Self::Blender(blender)
+    }
+}
+
 impl ChildPtr {
+    pub fn ty(&self) -> ChildType {
+        match self {
+            ChildPtr::Shader(_) => ChildType::Shader,
+            ChildPtr::ColorFilter(_) => ChildType::ColorFilter,
+            ChildPtr::Blender(_) => ChildType::Blender,
+        }
+    }
+
     // We are treating [`ChildPtr`]s as a _reference_ to a smart pointer: no reference counters are
     // changed (no drop() is called either).
     //
     // Skia will copy the pointers and increase the reference counters if it uses the actual
     // objects.
     pub(self) fn native(&self) -> Borrows<sb::SkRuntimeEffect_ChildPtr> {
-        match self {
-            ChildPtr::Shader(shader) => sb::SkRuntimeEffect_ChildPtr {
-                shader: sb::sk_sp {
-                    fPtr: shader.as_ptr().as_ptr(),
-                    _phantom_0: PhantomData,
-                },
-                colorFilter: sb::sk_sp {
-                    fPtr: ptr::null_mut(),
-                    _phantom_0: PhantomData,
-                },
-            },
-            ChildPtr::ColorFilter(color_filter) => sb::SkRuntimeEffect_ChildPtr {
-                shader: sb::sk_sp {
-                    fPtr: ptr::null_mut(),
-                    _phantom_0: PhantomData,
-                },
-                colorFilter: sb::sk_sp {
-                    fPtr: color_filter.as_ptr().as_ptr(),
-                    _phantom_0: PhantomData,
-                },
+        let flattenable: *mut SkFlattenable = match self {
+            // casting to &T &mut T is UB, so we don't use the base() indirection and directly cast
+            // to a pointer.
+            ChildPtr::Shader(shader) => unsafe { shader.native_mut_force() as _ },
+            ChildPtr::ColorFilter(color_filter) => unsafe { color_filter.native_mut_force() as _ },
+            ChildPtr::Blender(blender) => unsafe { blender.native_mut_force() as _ },
+        };
+
+        sb::SkRuntimeEffect_ChildPtr {
+            fChild: sb::sk_sp {
+                fPtr: flattenable,
+                _phantom_0: PhantomData,
             },
         }
         .borrows(self)

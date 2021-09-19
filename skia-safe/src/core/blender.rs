@@ -12,6 +12,8 @@ impl NativeRefCountedBase for SkBlender {
     type Base = SkRefCntBase;
 }
 
+impl NativeBase<SkFlattenable> for SkBlender {}
+
 impl Blender {
     /// Create a blender that implements the specified [`BlendMode`].
     pub fn mode(mode: BlendMode) -> Blender {
@@ -32,5 +34,11 @@ impl NativeFlattenable for SkBlender {
 
     fn native_deserialize(data: &[u8]) -> *mut Self {
         unsafe { sb::C_SkBlender_Deserialize(data.as_ptr() as _, data.len()) }
+    }
+}
+
+impl From<BlendMode> for Blender {
+    fn from(mode: BlendMode) -> Self {
+        Blender::mode(mode)
     }
 }
