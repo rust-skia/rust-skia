@@ -29,6 +29,7 @@ pub enum ColorType {
     A16UNorm = SkColorType::kA16_unorm_SkColorType as _,
     R16G16UNorm = SkColorType::kR16G16_unorm_SkColorType as _,
     R16G16B16A16UNorm = SkColorType::kR16G16B16A16_unorm_SkColorType as _,
+    SRGBA8888 = SkColorType::kSRGBA_8888_SkColorType as _,
 }
 
 native_transmutable!(SkColorType, ColorType, color_type_layout);
