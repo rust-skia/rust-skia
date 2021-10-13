@@ -10,6 +10,7 @@ pub mod lib {
     pub const SKIA_BINDINGS: &str = "skia-bindings";
     pub const SK_SHAPER: &str = "skshaper";
     pub const SK_PARAGRAPH: &str = "skparagraph";
+    pub const SVG: &str = "svg";
     pub const SK_UNICODE: &str = "skunicode";
 }
 
@@ -125,6 +126,7 @@ impl BinariesConfiguration {
             .into();
 
         ninja_built_libraries.push(lib::SKIA.into());
+        ninja_built_libraries.push(lib::SVG.into());
         binding_libraries.push(lib::SKIA_BINDINGS.into());
 
         BinariesConfiguration {
