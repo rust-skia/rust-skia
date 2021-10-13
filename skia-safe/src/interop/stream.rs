@@ -4,7 +4,6 @@
 //! Bindings that wrap functions that use Skia stream types _must_ use Rust streams instead.
 
 use crate::{prelude::*, Data};
-use skia_bindings as sb;
 use skia_bindings::{
     self as sb, SkDynamicMemoryWStream, SkMemoryStream, SkStream, SkStreamAsset, SkWStream,
 };
