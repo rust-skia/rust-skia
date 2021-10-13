@@ -51,6 +51,8 @@ skia-bindings = { version = "=0.45.0", path = "../skia-bindings", default-featur
 winapi = { version = "0.3.9", features = ["d3d12", "dxgi"], optional = true }
 # for ComPtr
 wio = { version = "0.2.2", optional = true }
+reqwest = { version = "0.11", features = ["blocking"] }
+base64 = { version = "0.13.0"}
 
 [dev-dependencies]
 serial_test = "0.5"
