@@ -7,7 +7,7 @@ use crate::prelude::*;
 use crate::Data;
 use skia_bindings as sb;
 use skia_bindings::{SkDynamicMemoryWStream, SkMemoryStream, SkStream, SkStreamAsset, SkWStream};
-use std::{fmt, marker::PhantomData, ffi, ptr, io};
+use std::{ffi, fmt, io, marker::PhantomData, ptr};
 
 /// Trait representing an Skia allocated Stream type with a base class of SkStream.
 #[repr(transparent)]
@@ -156,8 +156,6 @@ impl DynamicMemoryWStream {
     }
 }
 
-
-
 pub struct RustStream<'a> {
     inner: Handle<sb::RustStream>,
     _phantom: PhantomData<&'a mut ()>,
@@ -182,8 +180,8 @@ impl<'a> RustStream<'a> {
             buf: *mut ffi::c_void,
             count: usize,
         ) -> usize
-            where
-                T: io::Read,
+        where
+            T: io::Read,
         {
             let val: &mut T = &mut *(val as *mut _);
 
@@ -238,90 +236,90 @@ impl<'a> RustStream<'a> {
         );
 
         #[cfg(feature = "nightly")]
-            {
-                trait MaybeSeek {
-                    fn maybe_seek(&mut self, from: io::SeekFrom) -> Option<u64>;
-                }
-
-                impl<T> MaybeSeek for T {
-                    default fn maybe_seek(&mut self, _: io::SeekFrom) -> Option<u64> {
-                        None
-                    }
-                }
-
-                impl<T> MaybeSeek for T
-                    where
-                        T: io::Seek,
-                {
-                    fn maybe_seek(&mut self, from: io::SeekFrom) -> Option<u64> {
-                        self.seek(from).ok()
-                    }
-                }
-
-                unsafe extern "C" fn seek_start_trampoline<T: MaybeSeek>(
-                    val: *mut ffi::c_void,
-                    pos: usize,
-                ) -> bool {
-                    let val: &mut T = &mut *(val as *mut _);
-
-                    // This is OK because we just abort if it panics anyway, we don't try
-                    // to continue at all.
-                    let val = std::panic::AssertUnwindSafe(val);
-
-                    match std::panic::catch_unwind(move || {
-                        val.0.maybe_seek(io::SeekFrom::Start(pos as _)).is_some()
-                    }) {
-                        Ok(res) => res,
-                        Err(_) => {
-                            println!("Panic in FFI callback for `SkStream::seek`");
-                            std::process::abort();
-                        }
-                    }
-                }
-
-                unsafe extern "C" fn seek_current_trampoline<T: MaybeSeek>(
-                    val: *mut ffi::c_void,
-                    offset: libc::c_long,
-                ) -> bool {
-                    let val: &mut T = &mut *(val as *mut _);
-
-                    // This is OK because we just abort if it panics anyway, we don't try
-                    // to continue at all.
-                    let val = std::panic::AssertUnwindSafe(val);
-
-                    match std::panic::catch_unwind(move || {
-                        val.0
-                            .maybe_seek(io::SeekFrom::Current(offset as _))
-                            .is_some()
-                    }) {
-                        Ok(res) => res,
-                        Err(_) => {
-                            println!("Panic in FFI callback for `SkStream::move`");
-                            std::process::abort();
-                        }
-                    }
-                }
-
-                length = if let Some(cur) = val.maybe_seek(io::SeekFrom::Current(0)) {
-                    let length = val.maybe_seek(io::SeekFrom::End(0)).unwrap();
-
-                    val.maybe_seek(io::SeekFrom::Start(cur));
-
-                    length as usize
-                } else {
-                    std::usize::MAX
-                };
-
-                seek_start = Some(seek_start_trampoline::<T>);
-                seek_current = Some(seek_current_trampoline::<T>);
+        {
+            trait MaybeSeek {
+                fn maybe_seek(&mut self, from: io::SeekFrom) -> Option<u64>;
             }
+
+            impl<T> MaybeSeek for T {
+                default fn maybe_seek(&mut self, _: io::SeekFrom) -> Option<u64> {
+                    None
+                }
+            }
+
+            impl<T> MaybeSeek for T
+            where
+                T: io::Seek,
+            {
+                fn maybe_seek(&mut self, from: io::SeekFrom) -> Option<u64> {
+                    self.seek(from).ok()
+                }
+            }
+
+            unsafe extern "C" fn seek_start_trampoline<T: MaybeSeek>(
+                val: *mut ffi::c_void,
+                pos: usize,
+            ) -> bool {
+                let val: &mut T = &mut *(val as *mut _);
+
+                // This is OK because we just abort if it panics anyway, we don't try
+                // to continue at all.
+                let val = std::panic::AssertUnwindSafe(val);
+
+                match std::panic::catch_unwind(move || {
+                    val.0.maybe_seek(io::SeekFrom::Start(pos as _)).is_some()
+                }) {
+                    Ok(res) => res,
+                    Err(_) => {
+                        println!("Panic in FFI callback for `SkStream::seek`");
+                        std::process::abort();
+                    }
+                }
+            }
+
+            unsafe extern "C" fn seek_current_trampoline<T: MaybeSeek>(
+                val: *mut ffi::c_void,
+                offset: libc::c_long,
+            ) -> bool {
+                let val: &mut T = &mut *(val as *mut _);
+
+                // This is OK because we just abort if it panics anyway, we don't try
+                // to continue at all.
+                let val = std::panic::AssertUnwindSafe(val);
+
+                match std::panic::catch_unwind(move || {
+                    val.0
+                        .maybe_seek(io::SeekFrom::Current(offset as _))
+                        .is_some()
+                }) {
+                    Ok(res) => res,
+                    Err(_) => {
+                        println!("Panic in FFI callback for `SkStream::move`");
+                        std::process::abort();
+                    }
+                }
+            }
+
+            length = if let Some(cur) = val.maybe_seek(io::SeekFrom::Current(0)) {
+                let length = val.maybe_seek(io::SeekFrom::End(0)).unwrap();
+
+                val.maybe_seek(io::SeekFrom::Start(cur));
+
+                length as usize
+            } else {
+                std::usize::MAX
+            };
+
+            seek_start = Some(seek_start_trampoline::<T>);
+            seek_current = Some(seek_current_trampoline::<T>);
+        }
 
         #[cfg(not(feature = "nightly"))]
-            {
-                length = usize::MAX;
-                seek_start = None;
-                seek_current = None;
-            }
+        {
+            length = usize::MAX;
+            seek_start = None;
+            seek_current = None;
+        }
 
         RustStream {
             inner: Handle::construct(|ptr| unsafe {
@@ -338,9 +336,6 @@ impl<'a> RustStream<'a> {
         }
     }
 }
-
-
-
 
 #[test]
 fn detaching_empty_dynamic_memory_w_stream_leads_to_non_null_data() {

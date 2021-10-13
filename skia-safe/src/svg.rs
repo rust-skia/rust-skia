@@ -3,9 +3,13 @@ use std::{error::Error, fmt, io};
 use skia_bindings as sb;
 use skia_bindings::{SkData, SkTypeface};
 
-use crate::{Data, interop::RustStream, prelude::{NativeAccess, NativeDrop, NativeRefCounted}, RCHandle, Size};
 use crate::interop::{MemoryStream, NativeStreamBase};
 use crate::prelude::{IntoPtr, NativeTransmutable};
+use crate::{
+    interop::RustStream,
+    prelude::{NativeAccess, NativeDrop, NativeRefCounted},
+    Data, RCHandle, Size,
+};
 
 pub use self::canvas::Canvas;
 
@@ -55,8 +59,10 @@ impl From<SvgLoadError> for io::Error {
     }
 }
 
-
-extern "C" fn handle_load_type_face(resource_path: *const ::std::os::raw::c_char, resource_name: *const ::std::os::raw::c_char) -> *mut SkTypeface {
+extern "C" fn handle_load_type_face(
+    resource_path: *const ::std::os::raw::c_char,
+    resource_name: *const ::std::os::raw::c_char,
+) -> *mut SkTypeface {
     let data = Data::from_ptr(handle_load(resource_path, resource_name));
     match data {
         None => {}
@@ -70,8 +76,10 @@ extern "C" fn handle_load_type_face(resource_path: *const ::std::os::raw::c_char
     crate::Typeface::default().into_ptr()
 }
 
-
-extern "C" fn handle_load(resource_path: *const ::std::os::raw::c_char, resource_name: *const ::std::os::raw::c_char) -> *mut SkData {
+extern "C" fn handle_load(
+    resource_path: *const ::std::os::raw::c_char,
+    resource_name: *const ::std::os::raw::c_char,
+) -> *mut SkData {
     unsafe {
         let mut is_base64 = false;
         if resource_path.is_null() {
@@ -89,7 +97,11 @@ extern "C" fn handle_load(resource_path: *const ::std::os::raw::c_char, resource
             let mut data = SvgDom::handle_load_base64(resource_name.to_string_lossy().as_ref());
             data.into_ptr()
         } else {
-            let path = format!("{}/{}", resource_path.to_string_lossy(), resource_name.to_string_lossy());
+            let path = format!(
+                "{}/{}",
+                resource_path.to_string_lossy(),
+                resource_name.to_string_lossy()
+            );
             match reqwest::blocking::get(path).map(|v| v.text().unwrap_or_default()) {
                 Ok(res) => {
                     let data = crate::Data::new_copy(res.as_bytes());
@@ -103,7 +115,6 @@ extern "C" fn handle_load(resource_path: *const ::std::os::raw::c_char, resource
         }
     }
 }
-
 
 impl SvgDom {
     fn handle_load_base64(data: &str) -> crate::Data {
@@ -128,7 +139,13 @@ impl SvgDom {
     pub fn from_bytes(stream: &[u8]) -> Result<Self, SvgLoadError> {
         let mut ms = MemoryStream::from_bytes(stream);
 
-        let out = unsafe { sb::C_SkSVGDOM_MakeFromStream(ms.native_mut().as_stream_mut(), Some(handle_load), Some(handle_load_type_face)) };
+        let out = unsafe {
+            sb::C_SkSVGDOM_MakeFromStream(
+                ms.native_mut().as_stream_mut(),
+                Some(handle_load),
+                Some(handle_load_type_face),
+            )
+        };
         Self::from_ptr(out).ok_or(SvgLoadError)
     }
 
@@ -140,7 +157,6 @@ impl SvgDom {
         unsafe { sb::C_SkSVGDOM_setContainerSize(self.native_mut(), size.native()) }
     }
 }
-
 
 type StaticCharVec = &'static [char];
 
