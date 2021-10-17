@@ -94,7 +94,7 @@ extern "C" fn handle_load(
         }
 
         if is_base64 {
-            let mut data = SvgDom::handle_load_base64(resource_name.to_string_lossy().as_ref());
+            let data = SvgDom::handle_load_base64(resource_name.to_string_lossy().as_ref());
             data.into_ptr()
         } else {
             let path = format!(
@@ -126,7 +126,7 @@ impl SvgDom {
         crate::Data::new_empty()
     }
     pub fn read<R: io::Read>(mut reader: R) -> Result<Self, SvgLoadError> {
-        let mut reader = unsafe { RustStream::new(&mut reader) };
+        let mut reader = RustStream::new(&mut reader);
         let stream = reader.stream_mut();
 
         let out = unsafe {
