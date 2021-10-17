@@ -118,7 +118,7 @@ extern "C" fn handle_load(
 
 impl SvgDom {
     fn handle_load_base64(data: &str) -> crate::Data {
-        let data: Vec<_> = data.split(",").collect();
+        let data: Vec<_> = data.split(',').collect();
         if data.len() > 1 {
             let result = decode_base64(data[1]);
             return crate::Data::new_copy(result.as_slice());
@@ -177,7 +177,7 @@ fn decode_base64(value: &str) -> Vec<u8> {
     if input.len() % 4 == 0 {
         if input.ends_with("==") {
             input = &input[..input.len() - 2]
-        } else if input.ends_with("=") {
+        } else if input.ends_with('=') {
             input = &input[..input.len() - 1]
         }
     }
@@ -194,8 +194,6 @@ fn decode_base64(value: &str) -> Vec<u8> {
     }
     match base64::decode_config(&input, base64::STANDARD.decode_allow_trailing_bits(true)) {
         Ok(bytes) => bytes,
-        Err(_) => {
-            return Vec::new();
-        }
+        Err(_) => Vec::new()
     }
 }

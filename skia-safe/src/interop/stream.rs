@@ -230,10 +230,7 @@ impl<'a> RustStream<'a> {
             } else {
                 let buf: &mut [u8] = std::slice::from_raw_parts_mut(buf as _, count as _);
 
-                match val.read(buf) {
-                    Ok(bytes) => bytes,
-                    Err(_) => 0,
-                }
+                val.read(buf).unwrap_or(0)
             }
         }
 
