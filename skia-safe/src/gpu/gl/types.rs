@@ -8,7 +8,7 @@ variant_name!(Standard::GLES, standard_naming);
 pub use skia_bindings::GrGLenum as Enum;
 pub use skia_bindings::GrGLuint as UInt;
 
-#[derive(Copy, Clone, Eq, Debug)]
+#[derive(Copy, Clone, Eq, Default, Debug)]
 #[repr(C)]
 pub struct TextureInfo {
     pub target: Enum,
@@ -24,17 +24,6 @@ impl PartialEq for TextureInfo {
     }
 }
 
-// TODO: does this make sense?
-impl Default for TextureInfo {
-    fn default() -> Self {
-        TextureInfo {
-            target: 0,
-            id: 0,
-            format: 0,
-        }
-    }
-}
-
 impl TextureInfo {
     pub fn from_target_and_id(target: Enum, id: Enum) -> Self {
         Self {
@@ -45,7 +34,7 @@ impl TextureInfo {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
 #[repr(C)]
 pub struct FramebufferInfo {
     pub fboid: UInt,
@@ -57,15 +46,6 @@ native_transmutable!(
     FramebufferInfo,
     framebuffer_info_layout
 );
-
-impl Default for FramebufferInfo {
-    fn default() -> Self {
-        FramebufferInfo {
-            fboid: 0,
-            format: 0,
-        }
-    }
-}
 
 impl FramebufferInfo {
     pub fn from_fboid(fboid: UInt) -> Self {

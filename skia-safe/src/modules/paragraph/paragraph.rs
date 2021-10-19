@@ -79,11 +79,7 @@ impl Paragraph {
         let mut result: Vec<TextBox> = Vec::new();
 
         let mut set_tb = |tbs: &[sb::skia_textlayout_TextBox]| {
-            result = tbs
-                .iter()
-                .map(|tb| TextBox::from_native_ref(tb))
-                .cloned()
-                .collect();
+            result = tbs.iter().map(TextBox::from_native_ref).cloned().collect();
         };
 
         unsafe {
@@ -103,11 +99,7 @@ impl Paragraph {
         let mut result: Vec<TextBox> = Vec::new();
 
         let mut set_tb = |tbs: &[sb::skia_textlayout_TextBox]| {
-            result = tbs
-                .iter()
-                .map(|tb| TextBox::from_native_ref(tb))
-                .cloned()
-                .collect();
+            result = tbs.iter().map(TextBox::from_native_ref).cloned().collect();
         };
 
         unsafe {

@@ -368,9 +368,11 @@ pub fn configure_skia(
         .output()
         .expect("gn error");
 
-    if output.status.code() != Some(0) {
-        panic!("{:?}", String::from_utf8(output.stdout).unwrap());
-    }
+    assert!(
+        output.status.code() == Some(0),
+        "{:?}",
+        String::from_utf8(output.stdout).unwrap()
+    );
 }
 
 /// Builds Skia.
