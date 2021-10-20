@@ -219,12 +219,11 @@ fn render_template(template: &str, replacements: &[(String, String)]) -> String 
         template = template.replace(&format!("$[[{}]]", pattern), value)
     });
 
-    if template.contains("$[[") {
-        panic!(
-            "Template contains template patterns after replacement: \n{}",
-            template
-        );
-    }
+    assert!(
+        !template.contains("$[["),
+        "Template contains template patterns after replacement: \n{}",
+        template
+    );
 
     template
 }

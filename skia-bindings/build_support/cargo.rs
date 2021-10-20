@@ -126,9 +126,7 @@ pub fn host() -> Target {
 fn parse_target(target_str: impl AsRef<str>) -> Target {
     let target_str = target_str.as_ref();
     let target: Vec<String> = target_str.split('-').map(|s| s.into()).collect();
-    if target.len() < 3 {
-        panic!("Failed to parse TARGET {}", target_str);
-    }
+    assert!(target.len() >= 3, "Failed to parse TARGET {}", target_str);
 
     let abi = if target.len() > 3 {
         Some(target[3].clone())
@@ -178,8 +176,7 @@ pub fn package_version() -> String {
     env::var("CARGO_PKG_VERSION").unwrap().as_str().into()
 }
 
-/// Parses Cargo.toml and returns the metadadata specifed in the
-/// [package.metadata] section.
+/// Parses Cargo.toml and returns the metadata specified in the [package.metadata] section.
 pub fn get_metadata() -> Vec<(String, String)> {
     use toml::{de, value};
 

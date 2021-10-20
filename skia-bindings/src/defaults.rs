@@ -93,6 +93,9 @@ pub mod textlayout {
         }
     }
 
+    // TODO: Remove as soon we are building with Rust stable >= 1.57
+    #[allow(unknown_lints)]
+    #[allow(clippy::derivable_impls)]
     impl Default for crate::skia_textlayout_PositionWithAffinity {
         fn default() -> Self {
             Self {

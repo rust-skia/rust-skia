@@ -15,7 +15,7 @@ fn draw_heptagram(canvas: &mut Canvas) {
     const SCALE: scalar = 256.0;
     const R: scalar = 0.45 * SCALE;
     #[allow(clippy::excessive_precision)]
-    const TAU: scalar = 6.283_185_3;
+    const TAU: scalar = std::f32::consts::TAU;
     let mut path = Path::default();
     path.move_to((R, 0.0));
     for i in 1..7 {

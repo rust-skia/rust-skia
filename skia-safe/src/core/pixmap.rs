@@ -285,9 +285,14 @@ impl Pixmap {
 }
 
 /// Implement this trait to use a pixel type in [`Handle<Pixmap>::pixels()`].
+///
+/// # Safety
+///
+/// This trait is unsafe because external [`Pixel`] implementations may lie about their
+/// [`ColorType`] or fail to match the alignment of the pixels stored in [`Handle<Pixmap>`].
 pub unsafe trait Pixel: Copy {
     /// `true` if the type matches the color type's format.
-    fn matches_color_type(_ct: ColorType) -> bool;
+    fn matches_color_type(ct: ColorType) -> bool;
 }
 
 unsafe impl Pixel for u8 {
