@@ -403,6 +403,7 @@ const OPAQUE_TYPES: &[&str] = &[
     "GrD3DMemoryAllocator",
     // m87, yuva_pixmaps
     "std::tuple",
+    "std::tuple_.*",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[
