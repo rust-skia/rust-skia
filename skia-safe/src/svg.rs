@@ -194,6 +194,6 @@ fn decode_base64(value: &str) -> Vec<u8> {
     }
     match base64::decode_config(&input, base64::STANDARD.decode_allow_trailing_bits(true)) {
         Ok(bytes) => bytes,
-        Err(_) => Vec::new()
+        Err(_) => Vec::new(),
     }
 }
