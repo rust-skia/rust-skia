@@ -3,6 +3,7 @@
 #include "include/svg/SkSVGCanvas.h"
 
 #include "modules/svg/include/SkSVGDOM.h"
+#include "modules/svg/include/SkSVGNode.h"
 #include "modules/skresources/include/SkResources.h"
 
 #include "include/core/SkStream.h"
