@@ -63,6 +63,9 @@ impl BinariesConfiguration {
             // Since M94, icu sources are embedded in skunicode
             ninja_built_libraries.push(lib::SK_UNICODE.into());
         }
+        if features.svg {
+            ninja_built_libraries.push(lib::SVG.into());
+        }
 
         let mut link_libraries = Vec::new();
 
@@ -126,7 +129,6 @@ impl BinariesConfiguration {
             .into();
 
         ninja_built_libraries.push(lib::SKIA.into());
-        ninja_built_libraries.push(lib::SVG.into());
         binding_libraries.push(lib::SKIA_BINDINGS.into());
 
         BinariesConfiguration {
