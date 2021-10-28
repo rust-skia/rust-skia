@@ -449,8 +449,13 @@ const OPAQUE_TYPES: &[&str] = &[
     "std::tuple",
     // Homebrew macOS LLVM 13
     "std::tuple_.*",
+    // m93: private, exposed by Paint::asBlendMode(), fails layout tests.
+    "skstd::optional",
     // m100
     "std::optional",
+    // Feature `svg`:
+    "SkSVGNode",
+    "skresources::ResourceProvider",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[
@@ -471,6 +476,10 @@ const BLOCKLISTED_TYPES: &[&str] = &[
     // Linux LLVM9 c++17 with SKIA_DEBUG=1
     "std::__cxx.*",
     "std::array.*",
+    // These two are not used with feature `svg` and conflict with the `Type` rewriter that would
+    // create invalid identifiers.
+    "SkSVGFontWeight",
+    "SkSVGFontWeight_Type",
 ];
 
 #[derive(Debug)]
@@ -580,7 +589,8 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("ContentChangeMode", rewrite::k_xxx_name),
     ("BackendHandleAccess", rewrite::k_xxx_name),
     // SkTextUtils_Align
-    ("Align", rewrite::k_xxx_name),
+    // We need name_opt to cover SkSVGPreserveAspectRatio_Align
+    ("Align", rewrite::k_xxx_name_opt),
     // SkTrimPathEffect_Mode
     ("Mode", rewrite::k_xxx),
     // SkTypeface_SerializeBehavior
