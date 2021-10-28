@@ -44,25 +44,26 @@ pub fn jobs(workflow: &Workflow) -> Vec<Job> {
 }
 
 pub fn qa_jobs() -> Vec<Job> {
+    const QA_ALL_FEATURES: &str = "gl,vulkan,textlayout,svg,webp";
     [
         Job {
             name: "stable-all-features",
             toolchain: "stable",
-            features: "gl,vulkan,textlayout,webp".into(),
+            features: QA_ALL_FEATURES.into(),
             example_args: Some("--driver cpu --driver pdf --driver svg".into()),
             ..Job::default()
         },
         Job {
             name: "stable-all-features-debug",
             toolchain: "stable",
-            features: "gl,vulkan,textlayout,webp".into(),
+            features: QA_ALL_FEATURES.into(),
             skia_debug: true,
             ..Job::default()
         },
         Job {
             name: "beta-all-features",
             toolchain: "beta",
-            features: "gl,vulkan,textlayout,webp".into(),
+            features: QA_ALL_FEATURES.into(),
             ..Job::default()
         },
     ]
