@@ -73,7 +73,7 @@ impl FinalBuildConfiguration {
             let mut args: Vec<(&str, String)> = vec![
                 ("is_official_build", yes_if(!build.skia_debug)),
                 ("is_debug", yes_if(build.skia_debug)),
-                ("skia_enable_svg", yes()),
+                ("skia_enable_svg", yes_if(features.svg)),
                 ("skia_enable_gpu", yes_if(features.gpu())),
                 ("skia_use_gl", yes_if(features.gl)),
                 ("skia_use_egl", yes_if(features.egl)),
