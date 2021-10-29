@@ -50,8 +50,8 @@ webp-encode = []
 webp-decode = []
 # sys libraries
 use-system-jpeg-turbo = ["mozjpeg-sys"]
-# deprecated since 0.25.0
-svg = []
+# `textlayout` because `SkSVGTextContext::SkSVGTextContext()` invokes `SkShaper::Make`.
+svg = ["textlayout"]
 shaper = ["textlayout"]
 binary-cache = ["ureq", "flate2", "tar"]
 embed-icudtl = ["lazy_static"]
