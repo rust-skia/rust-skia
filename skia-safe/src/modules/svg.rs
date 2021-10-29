@@ -1,3 +1,4 @@
+use std::io::Read;
 use std::{error::Error, fmt, io};
 
 use skia_bindings as sb;
@@ -98,9 +99,14 @@ extern "C" fn handle_load(
                 resource_path.to_string_lossy(),
                 resource_name.to_string_lossy()
             );
-            match reqwest::blocking::get(path).map(|v| v.text().unwrap_or_default()) {
-                Ok(res) => {
-                    let data = crate::Data::new_copy(res.as_bytes());
+            match ureq::get(&path).call() {
+                Ok(response) => {
+                    let mut reader = response.into_reader();
+                    let mut data = Vec::new();
+                    if reader.read_to_end(&mut data).is_err() {
+                        data.clear();
+                    };
+                    let data = crate::Data::new_copy(&data);
                     data.into_ptr()
                 }
                 Err(_) => {
