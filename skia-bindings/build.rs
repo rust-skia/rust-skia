@@ -78,10 +78,6 @@ fn generate_bindings(
 
 fn main() {
     // since 0.25.0
-    if cfg!(feature = "svg") {
-        cargo::warning("The feature 'svg' has been removed. SVG and XML support is available in all build configurations.");
-    }
-    // since 0.25.0
     if cfg!(feature = "shaper") {
         cargo::warning("The feature 'shaper' has been removed. To use the SkShaper bindings, enable the feature 'textlayout'.");
     }
