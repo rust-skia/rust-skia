@@ -14,16 +14,6 @@ typedef SkData* (*loadSkData)(const char resource_path[], const char resource_na
 
 typedef SkTypeface* (*loadSkTypeface)(const char resource_path[], const char resource_name[]);
 
-
-extern "C" void C_SVG_Types(SkSVGCanvas *) {}
-
-extern "C" SkCanvas* C_SkSVGCanvas_Make(const SkRect* bounds, SkWStream* writer, uint32_t flags) {
-    return SkSVGCanvas::Make(*bounds, writer, flags).release();
-}
-
-
-
-
 class ImageResourceProvider final : public skresources::ResourceProvider {
 
 private:

@@ -85,6 +85,10 @@
 
 // pathops/
 #include "include/pathops/SkPathOps.h"
+
+// svg/
+#include "include/svg/SkSVGCanvas.h"
+
 // utils/
 #include "include/utils/SkCamera.h"
 #include "include/utils/SkCustomTypeface.h"
@@ -2717,6 +2721,16 @@ extern "C" void C_SkOpBuilder_Construct(SkOpBuilder* uninitialized) {
 
 extern "C" void C_SkOpBuilder_destruct(SkOpBuilder* self) {
     self->~SkOpBuilder();
+}
+
+//
+// svg/
+//
+
+extern "C" void C_SVG_Types(SkSVGCanvas *) {}
+
+extern "C" SkCanvas* C_SkSVGCanvas_Make(const SkRect* bounds, SkWStream* writer, uint32_t flags) {
+    return SkSVGCanvas::Make(*bounds, writer, flags).release();
 }
 
 //
