@@ -2,6 +2,8 @@
 pub(crate) mod paragraph;
 #[cfg(feature = "textlayout")]
 pub mod shaper;
+#[cfg(feature = "svg")]
+pub mod svg;
 #[cfg(feature = "textlayout")]
 pub use shaper::{icu, Shaper};
 

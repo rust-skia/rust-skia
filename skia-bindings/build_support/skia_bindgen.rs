@@ -51,7 +51,9 @@ impl FinalBuildConfiguration {
             if features.text_layout {
                 sources.extend(vec!["src/shaper.cpp".into(), "src/paragraph.cpp".into()]);
             }
-            sources.push("src/svg.cpp".into());
+            if features.svg {
+                sources.push("src/svg.cpp".into());
+            }
             sources
         };
 

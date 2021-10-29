@@ -7,7 +7,9 @@ use crate::prelude::*;
 use crate::Data;
 use skia_bindings as sb;
 use skia_bindings::{SkDynamicMemoryWStream, SkMemoryStream, SkStream, SkStreamAsset, SkWStream};
-use std::{ffi, fmt, io, marker::PhantomData, ptr};
+#[cfg(feature = "svg")]
+use std::{ffi, io};
+use std::{fmt, marker::PhantomData, ptr};
 
 /// Trait representing an Skia allocated Stream type with a base class of SkStream.
 #[repr(transparent)]
@@ -156,23 +158,28 @@ impl DynamicMemoryWStream {
     }
 }
 
+#[cfg(feature = "svg")]
 pub struct RustStream<'a> {
     inner: Handle<sb::RustStream>,
     _phantom: PhantomData<&'a mut ()>,
 }
 
+#[cfg(feature = "svg")]
 impl RustStream<'_> {
     pub fn stream_mut(&mut self) -> &mut SkStream {
         self.inner.native_mut().base_mut()
     }
 }
 
+#[cfg(feature = "svg")]
 impl NativeBase<SkStream> for sb::RustStream {}
 
+#[cfg(feature = "svg")]
 impl NativeDrop for sb::RustStream {
     fn drop(&mut self) {}
 }
 
+#[cfg(feature = "svg")]
 impl<'a> RustStream<'a> {
     pub fn new<T: io::Read>(val: &'a mut T) -> Self {
         unsafe extern "C" fn read_trampoline<T>(
