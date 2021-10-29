@@ -797,12 +797,15 @@ pub(crate) mod definitions {
     }
 
     fn ninja_files_for_features(features: &features::Features) -> Vec<PathBuf> {
-        let mut files = vec!["obj/skia.ninja".into(), "obj/modules/svg/svg.ninja".into()];
+        let mut files = vec!["obj/skia.ninja".into()];
         if features.text_layout {
             files.extend(vec![
                 "obj/modules/skshaper/skshaper.ninja".into(),
                 "obj/modules/skparagraph/skparagraph.ninja".into(),
             ]);
+        }
+        if features.svg {
+            files.push("obj/modules/svg/svg.ninja".into());
         }
         files
     }
