@@ -1,15 +1,14 @@
-use std::io::Read;
-use std::{error::Error, fmt, io};
-
+use crate::{
+    interop::{MemoryStream, NativeStreamBase, RustStream},
+    prelude::{IntoPtr, NativeAccess, NativeDrop, NativeRefCounted, NativeTransmutable},
+    Data, RCHandle, Size,
+};
 use skia_bindings as sb;
 use skia_bindings::{SkData, SkTypeface};
-
-use crate::interop::{MemoryStream, NativeStreamBase};
-use crate::prelude::{IntoPtr, NativeTransmutable};
-use crate::{
-    interop::RustStream,
-    prelude::{NativeAccess, NativeDrop, NativeRefCounted},
-    Data, RCHandle, Size,
+use std::{
+    error::Error,
+    fmt,
+    io::{self, Read},
 };
 
 pub type Dom = RCHandle<sb::SkSVGDOM>;
