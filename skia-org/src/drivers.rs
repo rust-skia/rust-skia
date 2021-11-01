@@ -3,25 +3,32 @@ use skia_safe::Canvas;
 use std::{fmt::Display, path::Path, str::FromStr};
 
 pub mod cpu;
-pub use cpu::Cpu;
+#[cfg(feature = "d3d")]
+pub mod d3d;
 #[cfg(feature = "gl")]
 pub mod gl;
-#[cfg(feature = "gl")]
-pub use gl::OpenGl;
 #[cfg(feature = "metal")]
 pub mod metal;
 pub mod pdf;
-pub use pdf::Pdf;
 pub mod svg;
-pub use svg::Svg;
+#[cfg(feature = "svg")]
+pub mod svg_render;
 #[cfg(feature = "vulkan")]
 pub mod vulkan;
-#[cfg(feature = "vulkan")]
-pub use vulkan::Vulkan;
-#[cfg(feature = "d3d")]
-pub mod d3d;
+
+pub use cpu::Cpu;
 #[cfg(feature = "d3d")]
 pub use d3d::D3D;
+#[cfg(feature = "gl")]
+pub use gl::OpenGl;
+#[cfg(feature = "metal")]
+pub use metal::Metal;
+pub use pdf::Pdf;
+pub use svg::Svg;
+#[cfg(feature = "svg")]
+pub use svg_render::SvgRender;
+#[cfg(feature = "vulkan")]
+pub use vulkan::Vulkan;
 
 pub trait DrawingDriver {
     const DRIVER: Driver;

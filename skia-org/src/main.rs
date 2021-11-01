@@ -1,8 +1,9 @@
 use crate::drivers::DrawingDriver;
 use clap::Parser;
+use std::path::{Path, PathBuf};
+
 #[cfg(feature = "gl")]
 use offscreen_gl_context::{GLContext, GLVersion, NativeGLContext};
-use std::path::{Path, PathBuf};
 
 #[cfg(feature = "vulkan")]
 extern crate ash;
@@ -61,8 +62,17 @@ fn main() {
         draw_all(&mut drivers::Svg::new(), &out_path);
     }
 
+    #[cfg(feature = "svg")]
+    {
+        use drivers::render_svg::*;
+        if drivers.contains(&RenderSvg::NAME) {
+            draw_all(&mut RenderSvg::new(), &out_path);
+        }
+    }
+
     #[cfg(feature = "gl")]
     {
+        use drivers::gl::*;
         if drivers.contains(&Driver::OpenGl) {
             let context = GLContext::<NativeGLContext>::create(
                 sparkle::gl::GlType::Gl,
@@ -72,7 +82,7 @@ fn main() {
             .unwrap();
 
             context.make_current().unwrap();
-            draw_all(&mut drivers::OpenGl::new(), &out_path);
+            draw_all(&mut OpenGl::new(), &out_path);
         }
 
         if drivers.contains(&Driver::OpenGlEs) {
@@ -84,7 +94,7 @@ fn main() {
             .unwrap();
 
             context.make_current().unwrap();
-            draw_all(&mut drivers::OpenGl::new(), &out_path);
+            draw_all(&mut OpenGl::new(), &out_path);
         }
     }
 
@@ -100,7 +110,7 @@ fn main() {
                 None => println!("Failed to detect Vulkan version, falling back to 1.0.0"),
             }
 
-            draw_all(&mut drivers::Vulkan::new(), &out_path)
+            draw_all(&mut Vulkan::new(), &out_path)
         }
     }
 
@@ -135,6 +145,26 @@ fn main() {
             skparagraph_example::draw(driver, &out_path);
         }
     }
+}
+
+fn get_available_drivers() -> Vec<&'static str> {
+    let mut drivers = vec!["cpu", "pdf", "svg"];
+    if cfg!(feature = "gl") {
+        drivers.extend(vec!["opengl", "opengl-es"]);
+    }
+    if cfg!(feature = "vulkan") {
+        drivers.push("vulkan")
+    }
+    if cfg!(feature = "metal") {
+        drivers.push("metal")
+    }
+    if cfg!(feature = "d3d") {
+        drivers.push("d3d")
+    }
+    if cfg!(feature = "svg") {
+        drivers.push("render-svg")
+    }
+    drivers
 }
 
 pub(crate) mod resources {
