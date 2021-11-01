@@ -12,7 +12,7 @@ use crate::{
     Data, RCHandle, Size,
 };
 
-pub type SvgDom = RCHandle<sb::SkSVGDOM>;
+pub type Dom = RCHandle<sb::SkSVGDOM>;
 
 impl NativeDrop for sb::SkSVGDOM {
     fn drop(&mut self) {}
@@ -36,22 +36,22 @@ impl NativeRefCounted for sb::SkSVGDOM {
 /// details so we can't return a more expressive error type, but we still use this instead of
 /// `Option` to express the intent and allow for `Try`.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct SvgLoadError;
+pub struct LoadError;
 
-impl fmt::Display for SvgLoadError {
+impl fmt::Display for LoadError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Failed to load svg (reason unknown)")
     }
 }
 
-impl Error for SvgLoadError {
+impl Error for LoadError {
     fn description(&self) -> &str {
         "Failed to load svg (reason unknown)"
     }
 }
 
-impl From<SvgLoadError> for io::Error {
-    fn from(other: SvgLoadError) -> Self {
+impl From<LoadError> for io::Error {
+    fn from(other: LoadError) -> Self {
         io::Error::new(io::ErrorKind::Other, other)
     }
 }
@@ -91,7 +91,7 @@ extern "C" fn handle_load(
         }
 
         if is_base64 {
-            let data = SvgDom::handle_load_base64(resource_name.to_string_lossy().as_ref());
+            let data = Dom::handle_load_base64(resource_name.to_string_lossy().as_ref());
             data.into_ptr()
         } else {
             let path = format!(
@@ -118,7 +118,7 @@ extern "C" fn handle_load(
     }
 }
 
-impl SvgDom {
+impl Dom {
     fn handle_load_base64(data: &str) -> crate::Data {
         let data: Vec<_> = data.split(',').collect();
         if data.len() > 1 {
@@ -127,7 +127,7 @@ impl SvgDom {
         }
         crate::Data::new_empty()
     }
-    pub fn read<R: io::Read>(mut reader: R) -> Result<Self, SvgLoadError> {
+    pub fn read<R: io::Read>(mut reader: R) -> Result<Self, LoadError> {
         let mut reader = RustStream::new(&mut reader);
         let stream = reader.stream_mut();
 
@@ -135,11 +135,11 @@ impl SvgDom {
             sb::C_SkSVGDOM_MakeFromStream(stream, Some(handle_load), Some(handle_load_type_face))
         };
 
-        Self::from_ptr(out).ok_or(SvgLoadError)
+        Self::from_ptr(out).ok_or(LoadError)
     }
 
-    pub fn from_bytes(stream: &[u8]) -> Result<Self, SvgLoadError> {
-        let mut ms = MemoryStream::from_bytes(stream);
+    pub fn from_bytes(svg: &[u8]) -> Result<Self, LoadError> {
+        let mut ms = MemoryStream::from_bytes(svg);
 
         let out = unsafe {
             sb::C_SkSVGDOM_MakeFromStream(
@@ -148,7 +148,7 @@ impl SvgDom {
                 Some(handle_load_type_face),
             )
         };
-        Self::from_ptr(out).ok_or(SvgLoadError)
+        Self::from_ptr(out).ok_or(LoadError)
     }
 
     pub fn render(&self, canvas: &mut crate::Canvas) {
