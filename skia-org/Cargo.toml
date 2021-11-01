@@ -28,6 +28,7 @@ metal = ["metal-rs", "foreign-types-shared", "cocoa", "objc", "skia-safe/metal"]
 d3d = ["skia-safe/d3d", "winapi", "wio"]
 textlayout = ["skia-safe/textlayout"]
 webp = ["skia-safe/webp"]
+svg = ["skia-safe/svg"]
 
 [dependencies]
 skia-safe = { path = "../skia-safe" }

@@ -3,7 +3,7 @@ use clap::{App, Arg};
 use offscreen_gl_context::{GLContext, GLVersion, NativeGLContext};
 use std::path::{Path, PathBuf};
 
-use crate::drivers::DrawingDriver;
+use crate::drivers::{cpu, pdf, svg, DrawingDriver};
 
 #[cfg(feature = "vulkan")]
 extern crate ash;
@@ -60,21 +60,30 @@ fn main() {
         }
     };
 
-    if drivers.contains(&drivers::Cpu::NAME) {
-        draw_all(&mut drivers::Cpu::new(), &out_path);
+    if drivers.contains(&cpu::Cpu::NAME) {
+        draw_all(&mut cpu::Cpu::new(), &out_path);
     }
 
-    if drivers.contains(&drivers::Pdf::NAME) {
-        draw_all(&mut drivers::Pdf::new(), &out_path);
+    if drivers.contains(&pdf::Pdf::NAME) {
+        draw_all(&mut pdf::Pdf::new(), &out_path);
     }
 
-    if drivers.contains(&drivers::Svg::NAME) {
-        draw_all(&mut drivers::Svg::new(), &out_path);
+    if drivers.contains(&svg::Svg::NAME) {
+        draw_all(&mut svg::Svg::new(), &out_path);
+    }
+
+    #[cfg(feature = "svg")]
+    {
+        use drivers::svg_render::*;
+        if drivers.contains(&SvgRender::NAME) {
+            draw_all(&mut SvgRender::new(), &out_path);
+        }
     }
 
     #[cfg(feature = "gl")]
     {
-        if drivers.contains(&drivers::OpenGl::NAME) {
+        use drivers::gl::*;
+        if drivers.contains(&OpenGl::NAME) {
             let context = GLContext::<NativeGLContext>::create(
                 sparkle::gl::GlType::Gl,
                 GLVersion::MajorMinor(3, 3),
@@ -83,7 +92,7 @@ fn main() {
             .unwrap();
 
             context.make_current().unwrap();
-            draw_all(&mut drivers::OpenGl::new(), &out_path);
+            draw_all(&mut OpenGl::new(), &out_path);
         }
 
         if drivers.contains(&"opengl-es") {
@@ -95,14 +104,13 @@ fn main() {
             .unwrap();
 
             context.make_current().unwrap();
-            draw_all(&mut drivers::OpenGl::new(), &out_path);
+            draw_all(&mut OpenGl::new(), &out_path);
         }
     }
 
     #[cfg(feature = "vulkan")]
     {
-        use drivers::vulkan::AshGraphics;
-        use drivers::Vulkan;
+        use drivers::vulkan::*;
 
         if drivers.contains(&Vulkan::NAME) {
             match AshGraphics::vulkan_version() {
@@ -112,7 +120,7 @@ fn main() {
                 None => println!("Failed to detect Vulkan version, falling back to 1.0.0"),
             }
 
-            draw_all(&mut drivers::Vulkan::new(), &out_path)
+            draw_all(&mut Vulkan::new(), &out_path)
         }
     }
 
@@ -162,6 +170,9 @@ fn get_available_drivers() -> Vec<&'static str> {
     }
     if cfg!(feature = "d3d") {
         drivers.push("d3d")
+    }
+    if cfg!(feature = "svg") {
+        drivers.push("svg-render")
     }
     drivers
 }
