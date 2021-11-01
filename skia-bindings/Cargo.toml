@@ -55,6 +55,7 @@ svg = []
 shaper = ["textlayout"]
 binary-cache = ["ureq", "flate2", "tar"]
 embed-icudtl = []
+embed-freetype = []
 
 [dependencies]
 

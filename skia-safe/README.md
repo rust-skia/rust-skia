@@ -106,6 +106,10 @@ The output directory is displayed when skia-bindings is compiled with `cargo bui
 
 Simple examples of how to use the `skshaper` and `skparagraph` module bindings can be found [in the skia-org example command line application](https://github.com/rust-skia/rust-skia/blob/master/skia-org/src/).
 
+### `embed-freetype`
+
+On most platforms, Skia builds and runs well with the [FreeType](https://freetype.org/) version that is already installed. If you encounter FreeType related build errors on older platforms (like with for example Debian 9 "stretch"), `embed-freetype` makes sure that FreeType is built and embedded alongside with Skia.
+
 ## Multithreading
 
 Conflicting with Rust philosophy, we've decided to fully support Skia's reference counting semantics, which means that all reference counted types can be cloned and modified from within the same thread. To send a reference counted type to another thread, its reference count must be 1, and must be wrapped with the `Sendable` type and then unwrapped in the receiving thread. The following functions support the sending mechanism:

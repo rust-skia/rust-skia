@@ -35,6 +35,7 @@ webp-decode = ["skia-bindings/webp-decode"]
 use-system-jpeg-turbo = ["skia-bindings/use-system-jpeg-turbo"]
 binary-cache = ["skia-bindings/binary-cache"]
 embed-icudtl = ["skia-bindings/embed-icudtl"]
+embed-freetype = ["skia-bindings/embed-freetype"]
 
 # implied only, do not use
 gpu = []
