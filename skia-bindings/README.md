@@ -52,9 +52,9 @@ dependencies.
 
 ### Using system libraries
 
-By default, numerous libraries Skia depends upon are built in addition to Skia itself. In the event
-that this is not wanted (say, if the crate is being built as part of a package's build routine,)
-this behavior can be disabled by setting the `SKIA_USE_SYSTEM_LIBRARIES` environment variable.
+By default, numerous libraries Skia depends upon are built in addition to Skia itself. In the event that this is not wanted (say, if the crate is being built as part of a package's build routine,) this behavior can be disabled by setting the `SKIA_USE_SYSTEM_LIBRARIES` environment variable.
+
+Also note that there is one exception here. [FreeType](https://freetype.org/) is only embedded on Android platforms by default. If your platform does not support a more recent FreeType version, skia-bindings must be built with the feature `embed-freetype`.
 
 ## Build Customization
 
