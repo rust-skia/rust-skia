@@ -59,6 +59,7 @@ embed-freetype = []
 
 [dependencies]
 mozjpeg-sys = { version = "1", features = ["with_simd"], optional = true }
+lazy_static = "1.4.0"
 
 [build-dependencies]
 cc = "1.0.37"
