@@ -13,15 +13,15 @@ pub fn init() {
         use std::fs;
 
         let path = env::current_exe()
-            .expect("failed to resolve the current executable's path")
+            .expect("Failed to resolve the current executable's path")
             .parent()
-            .expect("current executable's path does not point to a directory")
+            .expect("Current executable's parent path does not point to a directory")
             .join("icudtl.dat");
         if path.exists() {
             return;
         };
-        fs::write(path, &icu_dtl[..])
-            .expect("failed to write icudtl.dat into the current executable's directory");
+        fs::write(path, &icudtl[..])
+            .expect("Failed to write icudtl.dat into the current executable's directory");
     }
 }
 
