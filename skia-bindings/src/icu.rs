@@ -1,7 +1,7 @@
 #[cfg(windows)]
 pub fn init() {
     use std::env;
-    let icudtl = include_bytes!(concat!(env!("OUT_DIR"), "/skia/icudtl.dat"));
+    static icudtl: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/skia/icudtl.dat"));
 
     #[cfg(feature = "embed-icudtl")]
     {
