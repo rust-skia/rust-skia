@@ -10,6 +10,9 @@
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/d3d/GrD3DBackendContext.h"
 
+// Additional types not yet referenced.
+extern "C" void C_GrD3DTypes(GrD3DSurfaceInfo *) {};
+
 //
 // gpu/d3d/GrD3DTypes.h
 //
