@@ -1,5 +1,6 @@
+use crate::gpu;
 use crate::prelude::*;
-use skia_bindings::{self as sb, GrGLFramebufferInfo, GrGLTextureInfo};
+use skia_bindings::{self as sb, GrGLFramebufferInfo, GrGLSurfaceInfo, GrGLTextureInfo};
 
 pub use skia_bindings::GrGLFormat as Format;
 variant_name!(Format::ALPHA8, format_naming);
@@ -52,6 +53,18 @@ impl FramebufferInfo {
         Self { fboid, format: 0 }
     }
 }
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(C)]
+pub struct SurfaceInfo {
+    pub sample_count: u32,
+    pub level_count: u32,
+    pub protected: gpu::Protected,
+    pub target: Enum,
+    pub format: Enum,
+}
+
+native_transmutable!(GrGLSurfaceInfo, SurfaceInfo, surface_info_layout);
 
 bitflags! {
     pub struct BackendState: u32 {

@@ -13,6 +13,9 @@
 #include "include/gpu/gl/GrGLAssembleInterface.h"
 #include "src/gpu/gl/GrGLDefines.h"
 
+// Additional types not yet referenced.
+extern "C" void C_GrGLTypes(GrGLSurfaceInfo *) {};
+
 // core/SurfaceCharacterization.h
 
 extern "C" void C_SkSurfaceCharacterization_createFBO0(
