@@ -59,7 +59,7 @@
 
 - name: 'Release binaries'
   if: $[[releaseBinaries]]
-  uses: ncipollo/release-action@v1
+  uses: pragmatrix/release-action@exp
   with:
     owner: rust-skia
     repo: skia-binaries

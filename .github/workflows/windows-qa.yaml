@@ -109,7 +109,7 @@ jobs:
     
     - name: 'Release binaries'
       if: false
-      uses: ncipollo/release-action@v1
+      uses: pragmatrix/release-action@exp
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -213,7 +213,7 @@ jobs:
     
     - name: 'Release binaries'
       if: false
-      uses: ncipollo/release-action@v1
+      uses: pragmatrix/release-action@exp
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -317,7 +317,7 @@ jobs:
     
     - name: 'Release binaries'
       if: false
-      uses: ncipollo/release-action@v1
+      uses: pragmatrix/release-action@exp
       with:
         owner: rust-skia
         repo: skia-binaries
