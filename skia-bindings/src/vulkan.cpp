@@ -10,6 +10,9 @@
 #include "include/gpu/vk/GrVkBackendContext.h"
 #include "include/gpu/vk/GrVkExtensions.h"
 
+// Additional types not yet referenced.
+extern "C" void C_GrVkTypes(GrVkSurfaceInfo *) {};
+
 extern "C" void C_GrBackendFormat_ConstructVk(GrBackendFormat* uninitialized, VkFormat format) {
     new(uninitialized)GrBackendFormat(GrBackendFormat::MakeVk(format));
 }

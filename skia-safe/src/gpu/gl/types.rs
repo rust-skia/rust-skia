@@ -66,6 +66,18 @@ pub struct SurfaceInfo {
 
 native_transmutable!(GrGLSurfaceInfo, SurfaceInfo, surface_info_layout);
 
+impl Default for SurfaceInfo {
+    fn default() -> Self {
+        Self {
+            sample_count: 1,
+            level_count: 0,
+            protected: gpu::Protected::No,
+            target: 0,
+            format: 0,
+        }
+    }
+}
+
 bitflags! {
     pub struct BackendState: u32 {
         const RENDER_TARGET = sb::GrGLBackendState_kRenderTarget_GrGLBackendState as _;
