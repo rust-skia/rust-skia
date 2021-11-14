@@ -187,6 +187,7 @@ impl fmt::Debug for TextStyle {
             .field("font_features", &self.font_features())
             .field("font_size", &self.font_size())
             .field("font_families", &self.font_families())
+            .field("baseline_shift", &self.baseline_shift())
             .field("height", &self.height())
             .field("height_override", &self.height_override())
             .field("half_leading", &self.half_leading())
@@ -335,6 +336,15 @@ impl TextStyle {
         unsafe {
             sb::C_TextStyle_setFontFamilies(self.native_mut(), families.as_ptr(), families.len())
         }
+        self
+    }
+
+    pub fn baseline_shift(&self) -> scalar {
+        self.native().fBaselineShift
+    }
+
+    pub fn set_baseline_shift(&mut self, baseline_shift: scalar) -> &mut Self {
+        self.native_mut().fBaselineShift = baseline_shift;
         self
     }
 
