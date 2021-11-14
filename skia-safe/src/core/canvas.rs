@@ -35,7 +35,7 @@ bitflags! {
 }
 
 /// [`SaveLayerRec`] contains the state used to create the layer.
-#[allow(dead_code)]
+#[repr(C)]
 pub struct SaveLayerRec<'a> {
     // We _must_ store _references_ to the native types here, because not all of them are native
     // transmutable, like ImageFilter or Image, which are represented as ref counted pointers and so
@@ -44,6 +44,7 @@ pub struct SaveLayerRec<'a> {
     paint: Option<&'a SkPaint>,
     backdrop: Option<&'a SkImageFilter>,
     flags: SaveLayerFlags,
+    experimental_backdrop_scale: scalar,
 }
 
 native_transmutable!(
@@ -62,6 +63,10 @@ impl fmt::Debug for SaveLayerRec<'_> {
                 &ImageFilter::from_unshared_ptr_ref(&(self.backdrop.as_ptr_or_null() as *mut _)),
             )
             .field("flags", &self.flags)
+            .field(
+                "experimental_backdrop_scale",
+                &self.experimental_backdrop_scale,
+            )
             .finish()
     }
 }
@@ -77,6 +82,7 @@ impl<'a> Default for SaveLayerRec<'a> {
             paint: None,
             backdrop: None,
             flags: SaveLayerFlags::empty(),
+            experimental_backdrop_scale: 1.0,
         }
     }
 }

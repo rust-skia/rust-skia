@@ -82,6 +82,42 @@ impl Image {
         panic!("Removed without replacement")
     }
 
+    pub fn new_raster_from_compressed(
+        data: impl Into<Data>,
+        dimensions: impl Into<ISize>,
+        ct: CompressionType,
+    ) -> Option<Image> {
+        let dimensions = dimensions.into();
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_MakeRasterFromCompressed(
+                data.into().into_ptr(),
+                dimensions.width,
+                dimensions.height,
+                ct,
+            )
+        })
+    }
+
+    pub fn from_picture(
+        picture: impl Into<Picture>,
+        dimensions: impl Into<ISize>,
+        matrix: Option<&Matrix>,
+        paint: Option<&Paint>,
+        bit_depth: BitDepth,
+        color_space: impl Into<Option<ColorSpace>>,
+    ) -> Option<Image> {
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_MakeFromPicture(
+                picture.into().into_ptr(),
+                dimensions.into().native(),
+                matrix.native_ptr_or_null(),
+                paint.native_ptr_or_null(),
+                bit_depth,
+                color_space.into().into_ptr_or_null(),
+            )
+        })
+    }
+
     #[cfg(feature = "gpu")]
     pub fn new_texture_from_compressed(
         context: &mut gpu::DirectContext,
@@ -117,22 +153,6 @@ impl Image {
         _ct: CompressionType,
     ) -> ! {
         panic!("Removed without replacement.")
-    }
-
-    pub fn new_raster_from_compressed(
-        data: impl Into<Data>,
-        dimensions: impl Into<ISize>,
-        ct: CompressionType,
-    ) -> Option<Image> {
-        let dimensions = dimensions.into();
-        Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeRasterFromCompressed(
-                data.into().into_ptr(),
-                dimensions.width,
-                dimensions.height,
-                ct,
-            )
-        })
     }
 
     #[cfg(feature = "gpu")]
@@ -254,26 +274,6 @@ impl Image {
         panic!("Removed without replacement")
     }
 
-    pub fn from_picture(
-        picture: impl Into<Picture>,
-        dimensions: impl Into<ISize>,
-        matrix: Option<&Matrix>,
-        paint: Option<&Paint>,
-        bit_depth: BitDepth,
-        color_space: impl Into<Option<ColorSpace>>,
-    ) -> Option<Image> {
-        Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeFromPicture(
-                picture.into().into_ptr(),
-                dimensions.into().native(),
-                matrix.native_ptr_or_null(),
-                paint.native_ptr_or_null(),
-                bit_depth,
-                color_space.into().into_ptr_or_null(),
-            )
-        })
-    }
-
     // TODO: MakePromiseTexture
     // TODO: MakePromiseYUVATexture
 
@@ -364,31 +364,32 @@ impl Image {
     }
 
     #[cfg(feature = "gpu")]
-    pub fn flush_with_info(
-        &mut self,
+    pub fn flush<'a>(
+        &self,
         context: &mut gpu::DirectContext,
-        flush_info: &gpu::FlushInfo,
+        flush_info: impl Into<Option<&'a gpu::FlushInfo>>,
     ) -> gpu::SemaphoresSubmitted {
+        let flush_info_default = gpu::FlushInfo::default();
+        let flush_info = flush_info.into().unwrap_or(&flush_info_default);
         unsafe {
-            self.native_mut()
+            self.native()
                 .flush(context.native_mut(), flush_info.native())
         }
     }
 
-    // TODO: m86: implement new flush() variant that is based on flush_with_info() as soon the old
-    // flush() is removed.
     #[cfg(feature = "gpu")]
-    #[deprecated(
-        since = "0.33.0",
-        note = "use flushAndSubmit() or flush_with_info(,&gpu::FlushInfo::default())"
-    )]
-    pub fn flush(&mut self, context: &mut gpu::DirectContext) {
-        self.flush_and_submit(context)
+    #[deprecated(since = "0.0.0", note = "use flush()")]
+    pub fn flush_with_info(
+        &self,
+        context: &mut gpu::DirectContext,
+        flush_info: &gpu::FlushInfo,
+    ) -> gpu::SemaphoresSubmitted {
+        self.flush(context, flush_info)
     }
 
     #[cfg(feature = "gpu")]
-    pub fn flush_and_submit(&mut self, context: &mut gpu::DirectContext) {
-        unsafe { self.native_mut().flushAndSubmit(context.native_mut()) }
+    pub fn flush_and_submit(&self, context: &mut gpu::DirectContext) {
+        unsafe { self.native().flushAndSubmit(context.native_mut()) }
     }
 
     #[cfg(feature = "gpu")]
