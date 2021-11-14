@@ -8,6 +8,8 @@
 #include "include/gpu/mtl/GrMtlBackendContext.h"
 #include "include/gpu/GrDirectContext.h"
 
+extern "C" void C_GrMtlTypes(GrMTLTextureUsage*, GrMtlSurfaceInfo *) {};
+
 //
 // core/SkSurface.h
 //

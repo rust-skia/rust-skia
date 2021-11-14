@@ -1,9 +1,9 @@
 use crate::{
-    gpu::{vk, Protected},
+    gpu::{self, vk, Protected},
     prelude::*,
 };
 use skia_bindings::{
-    self as sb, GrVkAlloc, GrVkBackendMemory, GrVkDrawableInfo, GrVkImageInfo,
+    self as sb, GrVkAlloc, GrVkBackendMemory, GrVkDrawableInfo, GrVkImageInfo, GrVkSurfaceInfo,
     GrVkYcbcrConversionInfo,
 };
 use std::{ffi::CStr, os::raw, ptr};
@@ -47,6 +47,7 @@ bitflags! {
     pub struct AllocFlag : u32 {
         const NONCOHERENT = sb::GrVkAlloc_Flag_kNoncoherent_Flag as _;
         const MAPPABLE = sb::GrVkAlloc_Flag_kMappable_Flag as _;
+        const LAZILY_ALLOCATED = sb::GrVkAlloc_Flag_kLazilyAllocated_Flag as _;
     }
 }
 
@@ -70,7 +71,7 @@ impl Alloc {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Eq, Debug)]
 #[repr(C)]
 pub struct YcbcrConversionInfo {
     pub format: vk::Format,
@@ -321,6 +322,8 @@ pub struct DrawableInfo {
     pub draw_bounds: *mut vk::Rect2D,
     pub image: vk::Image,
 }
+
+native_transmutable!(GrVkDrawableInfo, DrawableInfo, drawable_info_layout);
 unsafe_send_sync!(DrawableInfo);
 
 impl Default for DrawableInfo {
@@ -336,4 +339,33 @@ impl Default for DrawableInfo {
     }
 }
 
-native_transmutable!(GrVkDrawableInfo, DrawableInfo, drawable_info_layout);
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(C)]
+pub struct SurfaceInfo {
+    pub sample_count: u32,
+    pub level_count: u32,
+    pub protected: gpu::Protected,
+
+    pub image_tiling: vk::ImageTiling,
+    pub format: vk::Format,
+    pub image_usage_flags: vk::ImageUsageFlags,
+    pub ycbcr_conversion_info: vk::YcbcrConversionInfo,
+    pub sharing_mode: vk::SharingMode,
+}
+
+native_transmutable!(GrVkSurfaceInfo, SurfaceInfo, surface_info_layout);
+
+impl Default for SurfaceInfo {
+    fn default() -> Self {
+        Self {
+            sample_count: 1,
+            level_count: 0,
+            protected: Protected::No,
+            image_tiling: vk::ImageTiling::OPTIMAL,
+            format: vk::Format::UNDEFINED,
+            image_usage_flags: 0,
+            ycbcr_conversion_info: Default::default(),
+            sharing_mode: vk::SharingMode::EXCLUSIVE,
+        }
+    }
+}
