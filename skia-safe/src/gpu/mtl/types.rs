@@ -1,9 +1,14 @@
-use crate::prelude::{self, NativeAccess, NativeDrop, NativePartialEq};
-use skia_bindings::{self as sb, GrMtlTextureInfo};
+use crate::{
+    gpu,
+    prelude::{self, NativeAccess, NativeDrop, NativePartialEq},
+};
+use skia_bindings::{self as sb, GrMtlSurfaceInfo, GrMtlTextureInfo};
 use std::{fmt, ptr};
 
 pub use skia_bindings::GrMTLHandle as Handle;
 pub use skia_bindings::GrMTLPixelFormat as PixelFormat;
+pub use skia_bindings::GrMTLStorageMode as StorageMode;
+pub use skia_bindings::GrMTLTextureUsage as TextureUsage;
 
 pub type TextureInfo = prelude::Handle<GrMtlTextureInfo>;
 unsafe_send_sync!(TextureInfo);
@@ -47,6 +52,33 @@ impl TextureInfo {
 
     pub fn texture(&self) -> Handle {
         self.native().fTexture.fObject
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(C)]
+pub struct SurfaceInfo {
+    pub sample_count: u32,
+    pub level_count: u32,
+    pub protected: gpu::Protected,
+
+    pub format: PixelFormat,
+    pub usage: TextureUsage,
+    pub storage_mode: StorageMode,
+}
+
+native_transmutable!(GrMtlSurfaceInfo, SurfaceInfo, surface_info_layout);
+
+impl Default for SurfaceInfo {
+    fn default() -> Self {
+        Self {
+            sample_count: 1,
+            level_count: 0,
+            protected: gpu::Protected::No,
+            format: 0,
+            usage: 0,
+            storage_mode: 0,
+        }
     }
 }
 
