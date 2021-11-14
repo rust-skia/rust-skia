@@ -124,9 +124,12 @@ pub struct SurfaceInfo {
     pub sample_count: u32,
     pub level_count: u32,
     pub protected: gpu::Protected,
+
     pub format: DXGI_FORMAT,
     pub sample_quality_pattern: c_uint,
 }
+
+native_transmutable!(GrD3DSurfaceInfo, SurfaceInfo, surface_info_layout);
 
 impl Default for SurfaceInfo {
     fn default() -> Self {
@@ -139,5 +142,3 @@ impl Default for SurfaceInfo {
         }
     }
 }
-
-native_transmutable!(GrD3DSurfaceInfo, SurfaceInfo, surface_info_layout);

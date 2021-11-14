@@ -60,6 +60,7 @@ pub struct SurfaceInfo {
     pub sample_count: u32,
     pub level_count: u32,
     pub protected: gpu::Protected,
+
     pub target: Enum,
     pub format: Enum,
 }

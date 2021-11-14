@@ -345,6 +345,7 @@ pub struct SurfaceInfo {
     pub sample_count: u32,
     pub level_count: u32,
     pub protected: gpu::Protected,
+
     pub image_tiling: vk::ImageTiling,
     pub format: vk::Format,
     pub image_usage_flags: vk::ImageUsageFlags,
