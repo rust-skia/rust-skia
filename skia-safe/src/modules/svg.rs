@@ -113,6 +113,12 @@ extern "C" fn handle_load(
     }
 }
 
+impl fmt::Debug for Dom {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Dom").finish()
+    }
+}
+
 impl Dom {
     fn handle_load_base64(data: &str) -> Data {
         let data: Vec<_> = data.split(',').collect();
