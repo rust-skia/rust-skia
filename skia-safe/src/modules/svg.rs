@@ -13,6 +13,8 @@ use std::{
 };
 
 pub type Dom = RCHandle<sb::SkSVGDOM>;
+unsafe impl Send for Dom {}
+unsafe impl Sync for Dom {}
 
 impl NativeRefCounted for sb::SkSVGDOM {
     fn _ref(&self) {
