@@ -1,7 +1,7 @@
 use crate::{
     interop::{MemoryStream, NativeStreamBase, RustStream},
     prelude::*,
-    Data, RCHandle, Size,
+    Canvas, Data, RCHandle, Size, Typeface,
 };
 use skia_bindings as sb;
 use skia_bindings::{SkData, SkTypeface};
@@ -59,13 +59,13 @@ extern "C" fn handle_load_type_face(
     match data {
         None => {}
         Some(data) => {
-            if let Some(typeface) = crate::Typeface::from_data(data, None) {
+            if let Some(typeface) = Typeface::from_data(data, None) {
                 return typeface.into_ptr();
             }
         }
     }
 
-    crate::Typeface::default().into_ptr()
+    Typeface::default().into_ptr()
 }
 
 extern "C" fn handle_load(
@@ -101,11 +101,11 @@ extern "C" fn handle_load(
                     if reader.read_to_end(&mut data).is_err() {
                         data.clear();
                     };
-                    let data = crate::Data::new_copy(&data);
+                    let data = Data::new_copy(&data);
                     data.into_ptr()
                 }
                 Err(_) => {
-                    let data = crate::Data::new_empty();
+                    let data = Data::new_empty();
                     data.into_ptr()
                 }
             }
@@ -114,14 +114,15 @@ extern "C" fn handle_load(
 }
 
 impl Dom {
-    fn handle_load_base64(data: &str) -> crate::Data {
+    fn handle_load_base64(data: &str) -> Data {
         let data: Vec<_> = data.split(',').collect();
         if data.len() > 1 {
             let result = decode_base64(data[1]);
-            return crate::Data::new_copy(result.as_slice());
+            return Data::new_copy(result.as_slice());
         }
-        crate::Data::new_empty()
+        Data::new_empty()
     }
+
     pub fn read<R: io::Read>(mut reader: R) -> Result<Self, LoadError> {
         let mut reader = RustStream::new(&mut reader);
         let stream = reader.stream_mut();
@@ -146,7 +147,7 @@ impl Dom {
         Self::from_ptr(out).ok_or(LoadError)
     }
 
-    pub fn render(&self, canvas: &mut crate::Canvas) {
+    pub fn render(&self, canvas: &mut Canvas) {
         unsafe { sb::SkSVGDOM::render(self.native() as &_, canvas.native_mut()) }
     }
 
