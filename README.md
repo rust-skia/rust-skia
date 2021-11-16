@@ -341,10 +341,11 @@ More details can be found at [CONTRIBUTING.md](https://github.com/rust-skia/rust
 
 ## Notable Contributions
 
-- Denis Kolodin ([@DenisKolodin](https://github.com/DenisKolodin)) added build support for Android.
+- Denis Kolodin ([@DenisKolodin](https://github.com/DenisKolodin)) contributed build support for Android.
 - Alberto González Palomo ([@AlbertoGP](https://github.com/AlbertoGP)) designed the Rust-Skia Logo and the example program that renders it.
 - Luper Rouch ([@flupke](https://github.com/flupke), sponsored by [Jitter](https://jitter.video/))
   added build support for the `wasm32-unknown-emscripten` target.
+- Osei Fortune ([@triniwiz](https://github.com/triniwiz)) contributed rendering SVG files.
 
 ## Maintainers
 
