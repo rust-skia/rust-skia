@@ -1,6 +1,6 @@
 use crate::{
     interop::{MemoryStream, NativeStreamBase, RustStream},
-    prelude::{IntoPtr, NativeAccess, NativeDrop, NativeRefCounted, NativeTransmutable},
+    prelude::*,
     Data, RCHandle, Size,
 };
 use skia_bindings as sb;
@@ -12,10 +12,6 @@ use std::{
 };
 
 pub type Dom = RCHandle<sb::SkSVGDOM>;
-
-impl NativeDrop for sb::SkSVGDOM {
-    fn drop(&mut self) {}
-}
 
 impl NativeRefCounted for sb::SkSVGDOM {
     fn _ref(&self) {
