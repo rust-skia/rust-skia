@@ -1906,6 +1906,8 @@ impl Canvas {
         paint: &Paint,
     ) -> &mut Self {
         let origin = origin.into();
+        #[cfg(feature = "embed-icudtl")]
+        skia_bindings::icu::init();
         unsafe {
             self.native_mut().drawTextBlob(
                 blob.as_ref().native(),
