@@ -70,6 +70,6 @@ impl ParagraphBuilder {
         Self::from_ptr(unsafe {
             sb::C_ParagraphBuilder_make(style.native(), font_collection.into().into_ptr())
         })
-        .unwrap()
+        .expect("Unicode initialization error")
     }
 }
