@@ -9,6 +9,7 @@ use std::{
     error::Error,
     fmt,
     io::{self, Read},
+    str::FromStr,
 };
 
 pub type Dom = RCHandle<sb::SkSVGDOM>;
@@ -116,6 +117,14 @@ extern "C" fn handle_load(
 impl fmt::Debug for Dom {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Dom").finish()
+    }
+}
+
+impl FromStr for Dom {
+    type Err = LoadError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::from_bytes(s.as_bytes())
     }
 }
 
