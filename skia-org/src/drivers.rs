@@ -10,9 +10,9 @@ pub mod gl;
 #[cfg(feature = "metal")]
 pub mod metal;
 pub mod pdf;
-pub mod svg;
 #[cfg(feature = "svg")]
 pub mod render_svg;
+pub mod svg;
 #[cfg(feature = "vulkan")]
 pub mod vulkan;
 
