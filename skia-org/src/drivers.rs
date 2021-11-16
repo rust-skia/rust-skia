@@ -11,7 +11,7 @@ pub mod metal;
 pub mod pdf;
 pub mod svg;
 #[cfg(feature = "svg")]
-pub mod svg_render;
+pub mod render_svg;
 #[cfg(feature = "vulkan")]
 pub mod vulkan;
 

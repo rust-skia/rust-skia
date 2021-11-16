@@ -74,9 +74,9 @@ fn main() {
 
     #[cfg(feature = "svg")]
     {
-        use drivers::svg_render::*;
-        if drivers.contains(&SvgRender::NAME) {
-            draw_all(&mut SvgRender::new(), &out_path);
+        use drivers::render_svg::*;
+        if drivers.contains(&RenderSvg::NAME) {
+            draw_all(&mut RenderSvg::new(), &out_path);
         }
     }
 
@@ -172,7 +172,7 @@ fn get_available_drivers() -> Vec<&'static str> {
         drivers.push("d3d")
     }
     if cfg!(feature = "svg") {
-        drivers.push("svg-render")
+        drivers.push("render-svg")
     }
     drivers
 }
