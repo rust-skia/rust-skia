@@ -185,7 +185,9 @@ impl NativeBase<SkStream> for sb::RustStream {}
 
 #[cfg(feature = "svg")]
 impl NativeDrop for sb::RustStream {
-    fn drop(&mut self) {}
+    fn drop(&mut self) {
+        unsafe { sb::C_RustStream_destruct(self) }
+    }
 }
 
 #[cfg(feature = "svg")]
@@ -350,15 +352,33 @@ impl<'a> RustStream<'a> {
     }
 }
 
-#[test]
-fn detaching_empty_dynamic_memory_w_stream_leads_to_non_null_data() {
-    let mut stream = DynamicMemoryWStream::new();
-    let data = stream.detach_as_data();
-    assert_eq!(0, data.size())
-}
+#[cfg(test)]
+mod tests {
+    use super::{MemoryStream, RustStream};
+    use crate::interop::DynamicMemoryWStream;
 
-#[test]
-fn memory_stream_from_bytes() {
-    let stream = MemoryStream::from_bytes(&[1, 2, 3]);
-    drop(stream);
+    #[test]
+    fn detaching_empty_dynamic_memory_w_stream_leads_to_non_null_data() {
+        let mut stream = DynamicMemoryWStream::new();
+        let data = stream.detach_as_data();
+        assert_eq!(0, data.size())
+    }
+
+    #[test]
+    fn memory_stream_from_bytes() {
+        let stream = MemoryStream::from_bytes(&[1, 2, 3]);
+        drop(stream);
+    }
+
+    #[test]
+    fn read_from_rust_stream() {
+        let mut data: &[u8] = &[12u8, 13u8, 14u8];
+        let mut stream = RustStream::new(&mut data);
+
+        let mut first_byte = 0i8;
+        unsafe {
+            stream.stream_mut().readS8(&mut first_byte);
+        }
+        assert_eq!(first_byte, 12i8)
+    }
 }
