@@ -1,0 +1,24 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(Windows) Launch",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/target/debug/skia-org.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}",
+            "environment": [],
+            "console": "externalTerminal"
+        },
+        {
+            "name": "(OSX) Launch",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceRoot}/target/debug/skia-org",
+            "args": [],
+            "cwd": "${workspaceRoot}"
+        }
+    ]
+}
