@@ -215,3 +215,22 @@ fn decode_base64(value: &str) -> Vec<u8> {
         Err(_) => Vec::new(),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Dom;
+    use crate::Canvas;
+
+    #[test]
+    fn render_simple_svg() {
+        // https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/410.svg
+        let svg = r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+            <path d="M30,1h40l29,29v40l-29,29h-40l-29-29v-40z" stroke="#;000" fill="none"/>
+            <path d="M31,3h38l28,28v38l-28,28h-38l-28-28v-38z" fill="#a23"/>
+            <text x="50" y="68" font-size="48" fill="#FFF" text-anchor="middle"><![CDATA[410]]></text>
+            </svg>"##;
+        let mut canvas = Canvas::new((256, 256), None).unwrap();
+        let dom = str::parse::<Dom>(svg).unwrap();
+        dom.render(&mut canvas)
+    }
+}
