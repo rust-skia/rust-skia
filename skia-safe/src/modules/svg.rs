@@ -151,7 +151,8 @@ impl Dom {
         unsafe { sb::SkSVGDOM::render(self.native() as &_, canvas.native_mut()) }
     }
 
-    pub fn container_size(&mut self, size: &Size) {
+    pub fn container_size(&mut self, size: impl Into<Size>) {
+        let size = size.into();
         unsafe { sb::C_SkSVGDOM_setContainerSize(self.native_mut(), size.native()) }
     }
 }
