@@ -179,3 +179,9 @@ extern "C" void C_RustStream_construct(
 ) {
     new(out) RustStream(data, length, read, seekAbsolute, seekRelative);
 }
+
+extern "C" void C_RustStream_destruct(
+    RustStream *stream
+) {
+    stream->~RustStream();
+}
