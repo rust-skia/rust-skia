@@ -163,7 +163,11 @@ extern "C" {
     void C_LineMetrics_destruct(LineMetrics* self) {
         self->~LineMetrics();
     }
-    
+
+    void C_LineMetrics_CopyConstruct(LineMetrics* uninitialized, const LineMetrics* from) {
+        new(uninitialized)LineMetrics(*from);
+    }
+
     size_t C_LineMetrics_fLineMetrics_count(const LineMetrics* self, size_t begin, size_t end) {
         auto lower = self->fLineMetrics.lower_bound(begin);
         auto upper = self->fLineMetrics.upper_bound(end);

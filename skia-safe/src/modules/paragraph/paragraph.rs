@@ -128,6 +128,7 @@ impl Paragraph {
         range[0]..range[1]
     }
 
+    /// TODO: find a way to prevent the excessive cloning of LineMetrics.
     pub fn get_line_metrics(&self) -> Vec<LineMetrics> {
         let mut result: Vec<LineMetrics> = Vec::new();
         let mut set_lm = |lms: &[sb::skia_textlayout_LineMetrics]| {

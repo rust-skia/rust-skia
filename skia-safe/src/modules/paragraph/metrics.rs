@@ -25,7 +25,7 @@ impl<'a> StyleMetrics<'a> {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct LineMetrics<'a> {
     pub start_index: usize,
     pub end_index: usize,
@@ -50,6 +50,18 @@ native_transmutable!(
     LineMetrics<'_>,
     line_metrics_layout
 );
+
+impl<'a> Clone for LineMetrics<'a> {
+    fn clone(&self) -> Self {
+        Self::construct(|lm| unsafe { sb::C_LineMetrics_CopyConstruct(lm, self.native()) })
+    }
+}
+
+impl<'a> Drop for LineMetrics<'a> {
+    fn drop(&mut self) {
+        unsafe { sb::C_LineMetrics_destruct(self.native_mut()) }
+    }
+}
 
 // Internal Line Metrics mirror to compute what the map takes up space.
 // If the size of the structure does not match, the NativeTransmutable test above will fail.
