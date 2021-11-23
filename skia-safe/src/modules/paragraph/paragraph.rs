@@ -133,7 +133,7 @@ impl Paragraph {
         let mut set_lm = |lms: &[sb::skia_textlayout_LineMetrics]| {
             result = lms
                 .iter()
-                .map(|lm| LineMetrics::from_native_ref(lm))
+                .map(LineMetrics::from_native_ref)
                 .collect();
         };
 
