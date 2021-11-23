@@ -6,10 +6,7 @@ use skia_bindings::{self as sb, SkFlattenable, SkRefCntBase, SkShader};
 use std::fmt;
 
 pub use skia_bindings::SkShader_GradientType as GradientTypeInternal;
-#[test]
-fn test_shader_gradient_type_naming() {
-    let _ = GradientTypeInternal::Linear;
-}
+variant_name!(GradientTypeInternal::Linear, gradient_type_internal_naming);
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub enum GradientType {
@@ -35,8 +32,7 @@ impl<'a> GradientInfo<'a> {
 }
 
 pub type Shader = RCHandle<SkShader>;
-unsafe impl Send for Shader {}
-unsafe impl Sync for Shader {}
+unsafe_send_sync!(Shader);
 
 impl NativeBase<SkRefCntBase> for SkShader {}
 impl NativeBase<SkFlattenable> for SkShader {}
@@ -110,8 +106,7 @@ impl Shader {
 }
 
 pub mod shaders {
-    use crate::prelude::*;
-    use crate::{BlendMode, Color, Color4f, ColorSpace, Matrix, Shader};
+    use crate::{prelude::*, Blender, Color, Color4f, ColorSpace, Shader};
     use skia_bindings as sb;
 
     pub fn empty() -> Shader {
@@ -130,21 +125,18 @@ pub mod shaders {
         .unwrap()
     }
 
-    pub fn blend(mode: BlendMode, dst: impl Into<Shader>, src: impl Into<Shader>) -> Shader {
+    pub fn blend(
+        blender: impl Into<Blender>,
+        dst: impl Into<Shader>,
+        src: impl Into<Shader>,
+    ) -> Shader {
         Shader::from_ptr(unsafe {
-            sb::C_SkShaders_Blend(mode, dst.into().into_ptr(), src.into().into_ptr())
+            sb::C_SkShaders_Blend(
+                blender.into().into_ptr(),
+                dst.into().into_ptr(),
+                src.into().into_ptr(),
+            )
         })
         .unwrap()
-    }
-
-    pub fn lerp(t: f32, dst: impl Into<Shader>, src: impl Into<Shader>) -> Option<Shader> {
-        Shader::from_ptr(unsafe {
-            sb::C_SkShaders_Lerp(t, dst.into().into_ptr(), src.into().into_ptr())
-        })
-    }
-
-    #[deprecated(since = "0.29.0", note = "removed without replacement")]
-    pub fn lerp2(_red: Shader, _dst: Shader, _src: Shader, _local_matrix: Option<&Matrix>) -> ! {
-        panic!("removed without replacement");
     }
 }

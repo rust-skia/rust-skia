@@ -97,7 +97,7 @@ fn build_workflow(workflow: &Workflow, jobs: &[Job]) {
         }
 
         {
-            let job_header = build_job(job_template, job).indented(2);
+            let job_header = build_job(workflow, job_template, job, targets).indented(2);
             parts.push(job_header);
         }
 
@@ -131,22 +131,46 @@ fn build_header(workflow_name: &str, workflow_kind: WorkflowKind) -> String {
     render_template(workflow, &replacements)
 }
 
-fn build_job(template: &str, job: &Job) -> String {
+fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[Target]) -> String {
     let skia_debug = if job.skia_debug { "1" } else { "0" };
 
-    let replacements = [
+    let mut replacements = vec![
         ("rustToolchain".into(), job.toolchain.into()),
         ("skiaDebug".into(), skia_debug.into()),
     ];
+
+    if let Some(macosx_deployment_target) = macosx_deployment_target(workflow, job, targets) {
+        replacements.push((
+            "macosxDeploymentTarget".into(),
+            macosx_deployment_target.into(),
+        ))
+    }
+
     render_template(template, &replacements)
 }
 
-fn build_target(workflow: &Workflow, job: &Job, target: &Target) -> String {
-    let mut features = job.features.clone();
-    // if we are releasing binaries, we want the exact set of features specified.
-    if workflow.kind == WorkflowKind::QA {
-        features = features.join(&target.platform_features);
+fn macosx_deployment_target(
+    workflow: &Workflow,
+    job: &Job,
+    targets: &[Target],
+) -> Option<&'static str> {
+    if let HostOS::MacOS = workflow.host_os {
+        let metal = "metal".to_owned();
+        if targets
+            .iter()
+            .any(|target| effective_features(workflow, job, target).contains(&metal))
+        {
+            Some("10.14")
+        } else {
+            Some("10.13")
+        }
+    } else {
+        None
     }
+}
+
+fn build_target(workflow: &Workflow, job: &Job, target: &Target) -> String {
+    let features = effective_features(workflow, job, target);
     let native_target = workflow.host_target == target.target;
     let example_args = if native_target {
         job.example_args.clone()
@@ -177,6 +201,15 @@ fn build_target(workflow: &Workflow, job: &Job, target: &Target) -> String {
         .collect();
 
     render_template(TARGET_TEMPLATE, &replacements)
+}
+
+fn effective_features(workflow: &Workflow, job: &Job, target: &Target) -> Features {
+    let mut features = job.features.clone();
+    // if we are releasing binaries, we want the exact set of features specified.
+    if workflow.kind == WorkflowKind::QA {
+        features = features.join(&target.platform_features);
+    }
+    features
 }
 
 fn render_template(template: &str, replacements: &[(String, String)]) -> String {

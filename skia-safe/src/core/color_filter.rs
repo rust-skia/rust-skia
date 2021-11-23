@@ -3,8 +3,7 @@ use skia_bindings::{self as sb, SkColorFilter, SkFlattenable, SkRefCntBase};
 use std::fmt;
 
 pub type ColorFilter = RCHandle<SkColorFilter>;
-unsafe impl Send for ColorFilter {}
-unsafe impl Sync for ColorFilter {}
+unsafe_send_sync!(ColorFilter);
 
 impl NativeBase<SkRefCntBase> for SkColorFilter {}
 

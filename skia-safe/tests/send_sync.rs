@@ -36,7 +36,10 @@ mod core {
     // SkBitmap is not thread safe. Each thread must have its own copy of SkBitmap fields,
     // although threads may share the underlying pixel array.
     assert_not_impl_any!(Bitmap: Send, Sync);
+    assert_impl_all!(Blender: Send, Sync);
     assert_not_impl_any!(Canvas: Send, Sync);
+    assert_impl_all!(canvas::TopLayerPixels: Send, Sync);
+    assert_impl_all!(canvas::GlyphPositions: Send, Sync);
     assert_not_impl_any!(OwnedCanvas: Send, Sync);
     assert_impl_all!(Color: Send, Sync);
     assert_impl_all!(ColorFilter: Send, Sync);
@@ -78,7 +81,6 @@ mod core {
     assert_not_impl_any!(path::Iter: Send, Sync);
     assert_impl_all!(Path: Send, Sync);
     assert_impl_all!(PathBuilder: Send, Sync);
-    assert_impl_all!(path_effect::PointData: Send, Sync);
     assert_impl_all!(path_effect::DashInfo: Send, Sync);
     assert_impl_all!(PathEffect: Send, Sync);
     assert_not_impl_any!(PathMeasure: Send, Sync);
@@ -103,13 +105,11 @@ mod core {
     assert_impl_all!(typeface::LocalizedString: Send, Sync);
     assert_impl_all!(Typeface: Send, Sync);
     assert_not_impl_any!(typeface::LocalizedStringsIter: Send, Sync);
-    assert_not_impl_any!(vertices::Attribute: Send, Sync);
     assert_impl_all!(Vertices: Send, Sync);
     assert_impl_all!(vertices::Builder: Send, Sync);
     // core/sampling_options.rs
     assert_impl_all!(CubicResampler: Send, Sync);
     assert_impl_all!(FilterMode: Send, Sync);
-    assert_impl_all!(sampling_options::MediumBehavior: Send, Sync);
     assert_impl_all!(SamplingOptions: Send, Sync);
     // core/yuva_info.rs
     assert_impl_all!(YUVAInfo: Send, Sync);
@@ -124,6 +124,7 @@ mod core {
     assert_impl_all!(yuva_pixmap_info::SupportedDataTypes: Send, Sync);
     assert_impl_all!(YUVAPixmaps: Send, Sync);
     assert_impl_all!(yuva_pixmaps::DataType: Send, Sync);
+    assert_impl_all!(runtime_effect::ChildPtr: Send, Sync);
 }
 
 mod docs {
@@ -140,7 +141,8 @@ mod effects {
     use static_assertions::*;
 
     assert_impl_all!(runtime_effect::Uniform: Send, Sync);
-    assert_impl_all!(runtime_effect::Varying: Send, Sync);
+    assert_impl_all!(runtime_effect::Child: Send, Sync);
+    assert_impl_all!(runtime_effect::ChildType: Send, Sync);
     assert_not_impl_any!(RuntimeEffect: Send, Sync);
     assert_impl_all!(runtime_effect::Options: Send, Sync);
     assert_impl_all!(image_filters::CropRect: Send, Sync);
@@ -271,12 +273,11 @@ mod svg {
 }
 
 mod utils {
-    use skia_safe::utils::interpolator::TimeToT;
     use skia_safe::utils::*;
     use static_assertions::*;
     assert_impl_all!(CustomTypefaceBuilder: Send, Sync);
-    assert_impl_all!(Interpolator: Send, Sync);
-    assert_impl_all!(TimeToT: Send, Sync);
+    assert_not_impl_any!(OrderedFontMgr: Send, Sync);
+    assert_impl_all!(parse_path::PathEncoding: Send, Sync);
 }
 
 pub mod assert {

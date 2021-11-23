@@ -81,10 +81,9 @@ impl FinalBuildConfiguration {
                 ("skia_use_libwebp_encode", yes_if(features.webp_encode)),
                 ("skia_use_libwebp_decode", yes_if(features.webp_decode)),
                 ("skia_use_system_zlib", yes_if(use_system_libraries)),
-                ("skia_use_fonthost_mac", no()),
-                ("skia_use_system_freetype2", no()),
-                ("skia_use_freetype_woff2", yes()),
                 ("skia_use_freetype", yes()),
+                ("skia_use_fonthost_mac", no()),
+                ("skia_use_freetype_woff2", yes()),
                 ("skia_use_xps", no()),
                 ("skia_use_dng_sdk", yes_if(features.dng)),
                 ("cc", quote(&build.cc)),
@@ -216,17 +215,14 @@ impl FinalBuildConfiguration {
                     // in the system.
                     use_expat = true;
                 }
-                (arch, _, "darwin", _) => {
+                (_, "apple", "darwin", _) => {
                     args.push(("skia_use_system_freetype2", no()));
                     args.push(("skia_enable_fontmgr_custom_empty", yes()));
-                    set_target = false;
-                    args.push(("target_os", quote("mac")));
-                    args.push(("target_cpu", quote(clang::target_arch(arch))));
                 }
-                (arch, _, "ios", _) => {
+                (arch, _, "ios", abi) => {
                     args.push(("target_os", quote("ios")));
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
-                    ios::extra_skia_cflags(arch, &mut cflags);
+                    ios::extra_skia_cflags(arch, abi, &mut cflags);
                 }
                 (arch, _, os, _) => {
                     let skia_target_os = match os {
@@ -235,6 +231,9 @@ impl FinalBuildConfiguration {
                             // version. So we don't push another target `--target` that may
                             // conflict.
                             set_target = false;
+                            // Add macOS specific environment variables that affect the output of a
+                            // build.
+                            cargo::rerun_if_env_var_changed("MACOSX_DEPLOYMENT_TARGET");
                             "mac"
                         }
                         "windows" => "win",

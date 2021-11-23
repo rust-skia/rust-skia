@@ -16,8 +16,7 @@ pub mod pdf {
     }
 
     pub type AttributeList = Handle<SkPDF_AttributeList>;
-    unsafe impl Send for AttributeList {}
-    unsafe impl Sync for AttributeList {}
+    unsafe_send_sync!(AttributeList);
 
     impl NativeDrop for SkPDF_AttributeList {
         fn drop(&mut self) {
@@ -294,6 +293,10 @@ pub mod pdf {
                 unimplemented!("");
             }
         }
+
+        // We enable harfbuzz font sub-setting in PDF documents if textlayout is enabled.
+        #[cfg(all(feature = "textlayout", feature = "embed-icudtl"))]
+        crate::icu::init();
 
         // we can't move the memory stream around anymore as soon it's referred by
         // the document.

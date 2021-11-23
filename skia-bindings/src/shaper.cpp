@@ -1,9 +1,18 @@
 #ifndef SK_SHAPER_HARFBUZZ_AVAILABLE
     #define SK_SHAPER_HARFBUZZ_AVAILABLE
 #endif
+#ifndef SK_USING_THIRD_PARTY_ICU
+    #define SK_USING_THIRD_PARTY_ICU
+#endif
+
+#include "bindings.h"
 
 #include "modules/skshaper/include/SkShaper.h"
 #include "include/core/SkFontMgr.h"
+
+#if defined(_WIN32)
+#include "third_party/icu/SkLoadICU.h"
+#endif
 
 extern "C" SkShaper* C_SkShaper_MakePrimitive() {
     return SkShaper::MakePrimitive().release();
@@ -112,11 +121,6 @@ extern "C" SkShaper::LanguageRunIterator* C_SkShaper_TrivialLanguageRunIterator_
 extern "C" void C_SkShaper_RunHandler_delete(SkShaper::RunHandler* self) {
     delete self;
 }
-
-extern "C" struct TraitObject {
-    void* data;
-    void* vtable;
-};
 
 namespace RunHandler {
     extern "C" typedef void (*BeginLine)(TraitObject);

@@ -8,7 +8,16 @@ all:
 	@echo "make publish: publish the rust-skia packages to crates.io"
 	@echo "make publish-only: do not verify or build packages, only publish the the packages"
 
-# test various configuration from inside crates.
+# Test before releases.
+
+.PHONY: macos-qa
+macos-qa:
+	# https://github.com/rust-skia/rust-skia/issues/548
+	rustup update nightly
+	cargo +nightly build -Z build-std --target x86_64-apple-ios-macabi --release
+	cargo +nightly build -Z build-std --target aarch64-apple-ios-macabi --release
+
+# Test various configuration from inside crates.
 
 .PHONY: crate-tests
 crate-tests: crate-bindings-binaries crate-bindings-build
@@ -22,7 +31,7 @@ crate-bindings-binaries:
 .PHONY: crate-bindings-build
 crate-bindings-build: export FORCE_SKIA_BUILD=1
 crate-bindings-build: 
-	cd skia-bindings && cargo publish -vv --dry-run --no-default-features --features "gl,vulkan,textlayout,d3d"
+	cd skia-bindings && cargo publish -vv --dry-run --features "gl,vulkan,textlayout,d3d"
 	cd skia-bindings && cargo publish -vv --dry-run 
 
 .PHONY: publish
@@ -98,9 +107,9 @@ workflows:
 #
 # https://github.com/rust-skia/rust-skia/pull/527
 
-local-build-features=gl,vulkan,webp
+local-build-features=gl,vulkan,webp,textlayout
 
-.PHONY: test-local-build build-local-build prepare-local-build
+.PHONY: test-local-build prepare-local-build build-local-build
 test-local-build: prepare-local-build build-local-build
 
 prepare-local-build:
@@ -108,12 +117,17 @@ prepare-local-build:
 	cargo build --release --features ${local-build-features}
 	rm -rf tmp/
 	mkdir -p tmp/
-	find target -name "libskia*.a" -type f -exec cp {} tmp/ \;
+	find target -name "libsk*.a" -type f -exec cp {} tmp/ \;
+	find target -name "libicu.a" -type f -exec cp {} tmp/ \;
 	find target -name "skia-defines.txt" -type f -exec cp {} tmp/ \;
 	# Windows
-	find target -name "skia.lib" -type f -exec cp {} tmp/ \;
+	find target -name "sk*.lib" -type f -exec cp {} tmp/ \;
+	find target -name "icu.lib" -type f -exec cp {} tmp/ \;
+	find target -name "icudtl.dat" -type f -exec cp {} tmp/ \;
+	# The bindings are expected to be regenerated in a local build.
+	rm tmp/*-bindings.*
 
 build-local-build:
 	cargo clean
-	SKIA_SOURCE_DIR=$(shell pwd)/skia-bindings/skia SKIA_BUILD_DEFINES=`cat tmp/skia-defines.txt` SKIA_LIBRARY_SEARCH_PATH=tmp cargo build --release --no-default-features -vv --features ${local-build-features}
+	SKIA_SOURCE_DIR=$(shell pwd)/skia-bindings/skia SKIA_BUILD_DEFINES=`cat tmp/skia-defines.txt` SKIA_LIBRARY_SEARCH_PATH=$(shell pwd)/tmp cargo build --release --no-default-features -vv --features ${local-build-features}
 

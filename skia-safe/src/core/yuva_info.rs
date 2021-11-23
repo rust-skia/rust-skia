@@ -1,14 +1,12 @@
 use super::image_info;
 use crate::{prelude::*, EncodedOrigin, ISize, Matrix};
 use skia_bindings::{self as sb, SkYUVAInfo, SkYUVAInfo_Subsampling};
-
 use std::{fmt, ptr};
 
 /// Specifies the structure of planes for a YUV image with optional alpha. The actual planar data
 /// is not part of this structure and depending on usage is in external textures or pixmaps.
 pub type YUVAInfo = Handle<SkYUVAInfo>;
-unsafe impl Send for YUVAInfo {}
-unsafe impl Sync for YUVAInfo {}
+unsafe_send_sync!(YUVAInfo);
 
 impl NativeDrop for SkYUVAInfo {
     fn drop(&mut self) {
@@ -28,6 +26,7 @@ impl NativeDrop for SkYUVAInfo {
 /// RGB                      0:R,    1:G, 2:B
 /// RGBA                     0:R,    1:G, 2:B, 3:A
 pub use sb::SkYUVAInfo_PlaneConfig as PlaneConfig;
+variant_name!(PlaneConfig::YUV, plane_config_naming);
 
 /// UV subsampling is also specified in the enum value names using J:a:b notation (e.g. 4:2:0 is
 /// 1/2 horizontal and 1/2 vertical resolution for U and V). If alpha is present it is not sub-
@@ -45,12 +44,13 @@ pub enum Subsampling {
     S410 = SkYUVAInfo_Subsampling::k410 as _,
 }
 
-impl NativeTransmutable<SkYUVAInfo_Subsampling> for Subsampling {}
+native_transmutable!(SkYUVAInfo_Subsampling, Subsampling, subsampling_layout);
 
 /// Describes how subsampled chroma values are sited relative to luma values.
 ///
 /// Currently only centered siting is supported but will expand to support additional sitings.
 pub use sb::SkYUVAInfo_Siting as Siting;
+variant_name!(Siting::Centered, siting_naming);
 
 /// Ratio of Y/A values to U/V values in x and y.
 pub fn subsampling_factors(subsampling: Subsampling) -> (i32, i32) {
@@ -290,25 +290,5 @@ impl YUVAInfo {
 
     pub(crate) fn native_is_valid(info: &SkYUVAInfo) -> bool {
         info.fPlaneConfig != PlaneConfig::Unknown
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::prelude::NativeTransmutable;
-
-    #[test]
-    fn test_plane_config_naming() {
-        let _ = super::PlaneConfig::Y_U_V;
-    }
-
-    #[test]
-    fn test_subsampling_layout() {
-        super::Subsampling::test_layout();
-    }
-
-    #[test]
-    fn test_siting_naming() {
-        let _ = super::Siting::Centered;
     }
 }

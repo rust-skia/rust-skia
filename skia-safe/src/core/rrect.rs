@@ -3,26 +3,16 @@ use skia_bindings::{self as sb, SkRRect};
 use std::{fmt, mem, ptr};
 
 pub use skia_bindings::SkRRect_Type as Type;
-#[test]
-fn test_rrect_type_naming() {
-    let _ = Type::Complex;
-}
+variant_name!(Type::Complex, rrect_type_naming);
 
 pub use skia_bindings::SkRRect_Corner as Corner;
-#[test]
-fn test_rrect_corner_naming() {
-    let _ = Corner::LowerLeft;
-}
+variant_name!(Corner::LowerLeft, rrect_corner_naming);
 
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct RRect(SkRRect);
 
-impl NativeTransmutable<SkRRect> for RRect {}
-#[test]
-fn test_rrect_layout() {
-    RRect::test_layout()
-}
+native_transmutable!(SkRRect, RRect, rrect_layout);
 
 impl PartialEq for RRect {
     fn eq(&self, rhs: &Self) -> bool {

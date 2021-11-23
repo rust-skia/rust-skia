@@ -1,5 +1,8 @@
 use crate::build_support::{android, cargo, features, ios};
-use std::path::PathBuf;
+use std::{
+    fs, io,
+    path::{Path, PathBuf},
+};
 
 /// The libraries to link with.
 pub mod lib {
@@ -7,6 +10,7 @@ pub mod lib {
     pub const SKIA_BINDINGS: &str = "skia-bindings";
     pub const SK_SHAPER: &str = "skshaper";
     pub const SK_PARAGRAPH: &str = "skparagraph";
+    pub const SK_UNICODE: &str = "skunicode";
 }
 
 /// The configuration of the resulting binaries.
@@ -24,8 +28,9 @@ pub struct BinariesConfiguration {
     /// The static Skia libraries built by ninja that dependent projects need to link with.
     pub ninja_built_libraries: Vec<String>,
 
-    /// Other static Skia libraries skia-bindings provides that dependent projects need to link with.
-    pub other_built_libraries: Vec<String>,
+    /// Static libraries that are generated in the binding process dependent projects need to link
+    /// with.
+    pub binding_libraries: Vec<String>,
 
     /// Additional files relative to the output_directory
     /// that are needed to build dependent projects.
@@ -44,7 +49,7 @@ impl BinariesConfiguration {
         let target = cargo::target();
 
         let mut ninja_built_libraries = Vec::new();
-        let mut other_built_libraries = Vec::new();
+        let mut binding_libraries = Vec::new();
         let mut additional_files = Vec::new();
         let feature_ids = features.ids();
 
@@ -54,6 +59,8 @@ impl BinariesConfiguration {
             }
             ninja_built_libraries.push(lib::SK_PARAGRAPH.into());
             ninja_built_libraries.push(lib::SK_SHAPER.into());
+            // Since M94, icu sources are embedded in skunicode
+            ninja_built_libraries.push(lib::SK_UNICODE.into());
         }
 
         let mut link_libraries = Vec::new();
@@ -100,8 +107,8 @@ impl BinariesConfiguration {
             (_, "linux", "android", _) | (_, "linux", "androideabi", _) => {
                 link_libraries.extend(android::link_libraries(features));
             }
-            (_, "apple", "ios", _) => {
-                link_libraries.extend(ios::link_libraries(features));
+            (_, "apple", "ios", abi) => {
+                link_libraries.extend(ios::link_libraries(abi, features));
             }
             _ => panic!("unsupported target: {:?}", cargo::target()),
         };
@@ -113,7 +120,7 @@ impl BinariesConfiguration {
             .into();
 
         ninja_built_libraries.push(lib::SKIA.into());
-        other_built_libraries.push(lib::SKIA_BINDINGS.into());
+        binding_libraries.push(lib::SKIA_BINDINGS.into());
 
         BinariesConfiguration {
             feature_ids: feature_ids.into_iter().map(|f| f.to_string()).collect(),
@@ -123,16 +130,20 @@ impl BinariesConfiguration {
                 .map(|lib| lib.to_string())
                 .collect(),
             ninja_built_libraries,
-            other_built_libraries,
+            binding_libraries,
             additional_files,
             skia_debug,
         }
     }
 
-    pub fn built_libraries(&self) -> impl Iterator<Item = &str> {
+    pub fn built_libraries(&self, include_bindings: bool) -> impl Iterator<Item = &str> {
         self.ninja_built_libraries
             .iter()
-            .chain(self.other_built_libraries.iter())
+            .chain(if include_bindings {
+                self.binding_libraries.iter()
+            } else {
+                [].iter()
+            })
             .map(|x| x.as_str())
     }
 
@@ -146,7 +157,55 @@ impl BinariesConfiguration {
 
         let target = cargo::target();
 
-        cargo::add_static_link_libs(&target, self.built_libraries());
+        cargo::add_static_link_libs(&target, self.built_libraries(true));
         cargo::add_link_libs(&self.link_libraries);
+    }
+
+    /// Import library and additional files from `from_dir` to the output directory.
+    pub fn import(&self, from_dir: &Path, import_bindings_libraries: bool) -> io::Result<()> {
+        let output_directory = &self.output_directory;
+        self.copy_libs_and_additional_files(from_dir, output_directory, import_bindings_libraries)
+    }
+
+    /// Export library and additional files from the output directory to a `to_dir`.
+    pub fn export(&self, to_dir: &Path) -> io::Result<()> {
+        let output_directory = &self.output_directory;
+        self.copy_libs_and_additional_files(output_directory, to_dir, true)
+    }
+
+    fn copy_libs_and_additional_files(
+        &self,
+        from_dir: &Path,
+        to_dir: &Path,
+        copy_bindings_libraries: bool,
+    ) -> io::Result<()> {
+        fs::create_dir_all(&to_dir)?;
+
+        let target = cargo::target();
+
+        for lib in self.built_libraries(copy_bindings_libraries) {
+            let filename = &target.library_to_filename(lib);
+            copy(filename, from_dir, to_dir)?;
+        }
+
+        for filename in &self.additional_files {
+            copy(filename, from_dir, to_dir)?;
+        }
+
+        return Ok(());
+
+        fn copy(file_name: &Path, from_dir: &Path, to_dir: &Path) -> io::Result<()> {
+            let from_path = from_dir.join(file_name);
+            let to_path = to_dir.join(file_name);
+            fs::copy(&from_path, &to_path).map(|_| ()).map_err(|e| {
+                eprintln!(
+                    "COPY OPERATION FAILED: from '{}' to '{}': {}",
+                    from_path.display(),
+                    to_path.display(),
+                    e.to_string()
+                );
+                e
+            })
+        }
     }
 }

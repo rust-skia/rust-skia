@@ -1,9 +1,6 @@
-use crate::prelude::*;
-#[allow(deprecated)]
-use crate::{scalar, Matrix, Matrix44, Scalars};
+use crate::{prelude::*, scalar, Matrix, Rect, Scalars};
 use bitflags::_core::ops::{AddAssign, MulAssign};
-use skia_bindings as sb;
-use skia_bindings::{SkM44, SkV2, SkV3, SkV4};
+use skia_bindings::{self as sb, SkM44, SkV2, SkV3, SkV4};
 use std::{
     f32,
     ops::{Add, Div, DivAssign, Index, Mul, Neg, Sub, SubAssign},
@@ -17,12 +14,7 @@ pub struct V2 {
     pub y: f32,
 }
 
-impl NativeTransmutable<SkV2> for V2 {}
-
-#[test]
-fn test_v2_layout() {
-    V2::test_layout();
-}
+native_transmutable!(SkV2, V2, v2_layout);
 
 impl V2 {
     pub const fn new(x: f32, y: f32) -> Self {
@@ -157,12 +149,7 @@ pub struct V3 {
     pub z: f32,
 }
 
-impl NativeTransmutable<SkV3> for V3 {}
-
-#[test]
-fn test_v3_layout() {
-    V3::test_layout();
-}
+native_transmutable!(SkV3, V3, v3_layout);
 
 impl V3 {
     pub const fn new(x: f32, y: f32, z: f32) -> Self {
@@ -289,12 +276,7 @@ pub struct V4 {
     pub w: f32,
 }
 
-impl NativeTransmutable<SkV4> for V4 {}
-
-#[test]
-fn test_v4_layout() {
-    V4::test_layout();
-}
+native_transmutable!(SkV4, V4, v4_layout);
 
 impl V4 {
     pub const fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
@@ -402,12 +384,7 @@ pub struct M44 {
     mat: [f32; Self::COMPONENTS],
 }
 
-impl NativeTransmutable<SkM44> for M44 {}
-
-#[test]
-fn test_m44_layout() {
-    M44::test_layout()
-}
+native_transmutable!(SkM44, M44, m44_layout);
 
 impl Default for M44 {
     fn default() -> Self {
@@ -518,6 +495,11 @@ impl M44 {
         let mut m = Self::default();
         m.set_rotate(axis, radians);
         m
+    }
+
+    pub fn rect_to_rect(src: impl AsRef<Rect>, dst: impl AsRef<Rect>) -> Self {
+        let (src, dst) = (src.as_ref(), dst.as_ref());
+        Self::construct(|m| unsafe { sb::C_SkM44_RectToRect(src.native(), dst.native(), m) })
     }
 
     pub fn look_at(eye: &V3, center: &V3, up: &V3) -> Self {
@@ -767,13 +749,9 @@ impl M44 {
         self
     }
 
-    // helper
-
-    #[allow(deprecated)]
-    pub fn to_matrix44(&self) -> Matrix44 {
-        let mut m = Matrix44::default();
-        m.set_col_major(&self.mat);
-        m
+    pub fn pre_scale_xyz(&mut self, x: scalar, y: scalar, z: scalar) -> &mut Self {
+        unsafe { self.native_mut().preScale1(x, y, z) };
+        self
     }
 }
 
@@ -830,15 +808,6 @@ impl From<&Matrix> for M44 {
 impl From<Matrix> for M44 {
     fn from(m: Matrix) -> Self {
         M44::from(&m)
-    }
-}
-
-#[allow(deprecated)]
-impl From<&Matrix44> for M44 {
-    fn from(m: &Matrix44) -> Self {
-        let mut rm: [f32; 16] = Default::default();
-        m.as_col_major(&mut rm);
-        M44::col_major(&rm)
     }
 }
 

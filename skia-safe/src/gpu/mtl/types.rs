@@ -1,4 +1,3 @@
-// Can't use crate::prelude::* here, because we declare Handle in this module, too.
 use crate::prelude::{self, NativeAccess, NativeDrop, NativePartialEq};
 use skia_bindings::{self as sb, GrMtlTextureInfo};
 use std::{fmt, ptr};
@@ -7,8 +6,7 @@ pub use skia_bindings::GrMTLHandle as Handle;
 pub use skia_bindings::GrMTLPixelFormat as PixelFormat;
 
 pub type TextureInfo = prelude::Handle<GrMtlTextureInfo>;
-unsafe impl Send for TextureInfo {}
-unsafe impl Sync for TextureInfo {}
+unsafe_send_sync!(TextureInfo);
 
 impl NativeDrop for GrMtlTextureInfo {
     fn drop(&mut self) {

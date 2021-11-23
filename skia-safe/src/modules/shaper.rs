@@ -9,8 +9,7 @@ use std::{ffi::CStr, fmt, marker::PhantomData, os::raw};
 pub use run_handler::RunHandler;
 
 pub type Shaper = RefHandle<SkShaper>;
-unsafe impl Send for Shaper {}
-unsafe impl Sync for Shaper {}
+unsafe_send_sync!(Shaper);
 
 impl NativeDrop for SkShaper {
     fn drop(&mut self) {
@@ -36,18 +35,27 @@ impl Shaper {
     }
 
     pub fn new_shaper_driven_wrapper(font_mgr: impl Into<Option<FontMgr>>) -> Option<Self> {
+        #[cfg(feature = "embed-icudtl")]
+        crate::icu::init();
+
         Self::from_ptr(unsafe {
             sb::C_SkShaper_MakeShaperDrivenWrapper(font_mgr.into().into_ptr_or_null())
         })
     }
 
     pub fn new_shape_then_wrap(font_mgr: impl Into<Option<FontMgr>>) -> Option<Self> {
+        #[cfg(feature = "embed-icudtl")]
+        crate::icu::init();
+
         Self::from_ptr(unsafe {
             sb::C_SkShaper_MakeShapeThenWrap(font_mgr.into().into_ptr_or_null())
         })
     }
 
     pub fn new_shape_dont_wrap_or_reorder(font_mgr: impl Into<Option<FontMgr>>) -> Option<Self> {
+        #[cfg(feature = "embed-icudtl")]
+        crate::icu::init();
+
         Self::from_ptr(unsafe {
             sb::C_SkShaper_MakeShapeDontWrapOrReorder(font_mgr.into().into_ptr_or_null())
         })
@@ -58,10 +66,16 @@ impl Shaper {
     }
 
     pub fn new_core_text() -> Option<Self> {
+        #[cfg(feature = "embed-icudtl")]
+        crate::icu::init();
+
         Self::from_ptr(unsafe { sb::C_SkShaper_MakeCoreText() })
     }
 
     pub fn new(font_mgr: impl Into<Option<FontMgr>>) -> Self {
+        #[cfg(feature = "embed-icudtl")]
+        crate::icu::init();
+
         Self::from_ptr(unsafe { sb::C_SkShaper_Make(font_mgr.into().into_ptr_or_null()) }).unwrap()
     }
 
@@ -457,7 +471,7 @@ impl<'a, T: RunHandler> AsRunHandler<'a> for T {
     where
         'b: 'a,
     {
-        let param = rust_run_handler::new_param(self);
+        let param = unsafe { rust_run_handler::new_param(self) };
         rust_run_handler::from_param(&param)
     }
 }
@@ -568,9 +582,9 @@ mod rust_run_handler {
         }
     }
 
-    pub fn new_param(run_handler: &mut dyn RunHandler) -> RustRunHandler_Param {
+    pub unsafe fn new_param(run_handler: &mut dyn RunHandler) -> RustRunHandler_Param {
         RustRunHandler_Param {
-            trait_: unsafe { mem::transmute(run_handler) },
+            trait_: mem::transmute(run_handler),
             beginLine: Some(begin_line),
             runInfo: Some(run_info),
             commitRunInfo: Some(commit_run_info),
@@ -713,27 +727,25 @@ impl Shaper {
 
 pub mod icu {
 
-    /// On Windows, this function writes the file `icudtl.dat` into the current
-    /// executable's directory making sure that it's available when text shaping is used in Skia.
+    /// On Windows, and if the default feature "embed-icudtl" is _not_ set, this function writes the
+    /// file `icudtl.dat` into the current executable's directory making sure that it's available
+    /// when text shaping is used in Skia.
     ///
     /// If your executable directory can not be written to, make sure that `icudtl.dat` is
     /// available.
     ///
     /// Note that it is currently not possible to load `icudtl.dat` from another location.
+    ///
+    /// If the default feature "embed-icudtl" is set, the `icudtl.dat` file is directly used from
+    /// memory, so no `icudtl.dat` file is needed.
     pub fn init() {
         skia_bindings::icu::init();
-
-        // Since m80, there is an initialization problem of icu in the module skparagraph,
-        // which we do not understand yet, but powering up an harfbuzz Shaper compensates
-        // for that.
-        #[cfg(all(windows, feature = "textlayout"))]
-        crate::Shaper::new(None);
     }
 
     #[test]
     #[serial_test::serial]
     fn test_text_blob_builder_run_handler() {
-        skia_bindings::icu::init();
+        init();
         let str = "العربية";
         let mut text_blob_builder_run_handler =
             crate::shaper::TextBlobBuilderRunHandler::new(str, crate::Point::default());
@@ -751,5 +763,12 @@ pub mod icu {
         let blob = text_blob_builder_run_handler.make_blob().unwrap();
         let bounds = blob.bounds();
         assert!(bounds.width() > 0.0 && bounds.height() > 0.0);
+    }
+
+    #[test]
+    #[serial_test::serial]
+    fn icu_init_is_idempotent() {
+        init();
+        init();
     }
 }

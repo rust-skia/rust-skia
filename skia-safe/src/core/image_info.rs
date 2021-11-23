@@ -3,10 +3,7 @@ use skia_bindings::{self as sb, SkColorInfo, SkColorType, SkImageInfo};
 use std::{fmt, mem};
 
 pub use skia_bindings::SkAlphaType as AlphaType;
-#[test]
-fn test_alpha_type_layout() {
-    let _ = AlphaType::Premul;
-}
+variant_name!(AlphaType::Premul, alpha_type_naming);
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 #[repr(i32)]
@@ -34,11 +31,7 @@ pub enum ColorType {
     R16G16B16A16UNorm = SkColorType::kR16G16B16A16_unorm_SkColorType as _,
 }
 
-impl NativeTransmutable<SkColorType> for ColorType {}
-#[test]
-fn test_color_type_layout() {
-    ColorType::test_layout()
-}
+native_transmutable!(SkColorType, ColorType, color_type_layout);
 
 impl ColorType {
     // error[E0658]: dereferencing raw pointers in constants is unstable (see issue #51911)
@@ -74,14 +67,10 @@ impl ColorType {
 }
 
 pub use skia_bindings::SkYUVColorSpace as YUVColorSpace;
-#[test]
-fn test_yuv_color_space_naming() {
-    let _ = YUVColorSpace::JPEG;
-}
+variant_name!(YUVColorSpace::JPEG, yuv_color_space_naming);
 
 pub type ColorInfo = Handle<SkColorInfo>;
-unsafe impl Send for ColorInfo {}
-unsafe impl Sync for ColorInfo {}
+unsafe_send_sync!(ColorInfo);
 
 impl NativeDrop for SkColorInfo {
     fn drop(&mut self) {
@@ -180,8 +169,7 @@ impl ColorInfo {
 }
 
 pub type ImageInfo = Handle<SkImageInfo>;
-unsafe impl Send for ImageInfo {}
-unsafe impl Sync for ImageInfo {}
+unsafe_send_sync!(ImageInfo);
 
 impl NativeDrop for SkImageInfo {
     fn drop(&mut self) {

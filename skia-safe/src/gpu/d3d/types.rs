@@ -32,8 +32,7 @@ fn test_cp_layout() {
 // TODO: add remaining cp functions to ComPtr via traits (get, reset, retain).
 
 pub type Alloc = RCHandle<GrD3DAlloc>;
-unsafe impl Send for Alloc {}
-unsafe impl Sync for Alloc {}
+unsafe_send_sync!(Alloc);
 
 impl NativeRefCountedBase for GrD3DAlloc {
     type Base = SkRefCntBase;
@@ -46,10 +45,9 @@ impl fmt::Debug for Alloc {
 }
 
 // TODO: support the implementation of custom D3D memory allocator's
-// virtual createResource() function.
+// virtual createResource() and createAliasingResource() functions.
 pub type MemoryAllocator = RCHandle<GrD3DMemoryAllocator>;
-unsafe impl Send for MemoryAllocator {}
-unsafe impl Sync for MemoryAllocator {}
+unsafe_send_sync!(MemoryAllocator);
 
 impl NativeRefCountedBase for GrD3DMemoryAllocator {
     type Base = SkRefCntBase;
@@ -73,8 +71,7 @@ pub struct TextureResourceInfo {
     pub sample_quality_pattern: std::os::raw::c_uint,
     pub protected: gpu::Protected,
 }
-unsafe impl Send for TextureResourceInfo {}
-unsafe impl Sync for TextureResourceInfo {}
+unsafe_send_sync!(TextureResourceInfo);
 
 impl TextureResourceInfo {
     pub fn from_resource(resource: cp<ID3D12Resource>) -> Self {
@@ -104,11 +101,11 @@ impl From<cp<ID3D12Resource>> for TextureResourceInfo {
     }
 }
 
-impl NativeTransmutable<GrD3DTextureResourceInfo> for TextureResourceInfo {}
-#[test]
-fn test_texture_resource_info_layout() {
-    TextureResourceInfo::test_layout();
-}
+native_transmutable!(
+    GrD3DTextureResourceInfo,
+    TextureResourceInfo,
+    texture_resource_info_layout
+);
 
 #[repr(C)]
 #[derive(Clone, Debug)]
@@ -116,5 +113,5 @@ pub struct FenceInfo {
     pub fence: cp<d3d12::ID3D12Fence>,
     pub value: u64,
 }
-unsafe impl Send for FenceInfo {}
-unsafe impl Sync for FenceInfo {}
+
+unsafe_send_sync!(FenceInfo);

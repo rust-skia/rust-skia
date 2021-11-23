@@ -3,11 +3,11 @@ index eca516a4..6a697344 100644
 --- a/skia-bindings/Cargo.toml
 +++ b/skia-bindings/Cargo.toml
 @@ -36,7 +36,7 @@ skia = "m91-0.39.3"
- depot_tools = "a110bf6"
+ depot_tools = "fade894"
  
  [features]
--default = ["binary-cache"]
-+default = ["binary-cache", "gl", "vulkan", "d3d", "textlayout", "webp"]
+-default = ["binary-cache", "embed-icudtl"]
++default = ["binary-cache", "embed-icudtl", "gl", "vulkan", "d3d", "textlayout", "webp"]
  gl = []
  egl = []
  wayland = []
@@ -32,8 +32,8 @@ index 6ddd6479..0f84729f 100644
  doctest = false
  
  [features]
--default = ["binary-cache"]
-+default = ["binary-cache", "gl", "vulkan", "d3d", "textlayout", "webp"]
+-default = ["binary-cache", "embed-icudtl"]
++default = ["binary-cache", "embed-icudtl", "gl", "vulkan", "d3d", "textlayout", "webp"]
  gl = ["gpu", "skia-bindings/gl"]
  egl = ["gl", "skia-bindings/egl"]
  x11 = ["gl", "skia-bindings/x11"]

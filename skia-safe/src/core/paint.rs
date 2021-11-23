@@ -1,33 +1,24 @@
+use crate::Blender;
 use crate::{
     prelude::*, scalar, BlendMode, Color, Color4f, ColorFilter, ColorSpace, ImageFilter,
-    MaskFilter, Path, PathEffect, Rect, Shader,
+    MaskFilter, Matrix, Path, PathEffect, Rect, Shader,
 };
 use core::fmt;
+
 use skia_bindings::{self as sb, SkPaint};
-use std::hash::{Hash, Hasher};
 use std::ptr;
 
 pub use sb::SkPaint_Style as Style;
-#[test]
-pub fn test_style_naming() {
-    let _ = Style::Fill;
-}
+variant_name!(Style::Fill, style_naming);
 
 pub use sb::SkPaint_Cap as Cap;
-#[test]
-pub fn test_cap_naming() {
-    let _ = Cap::Butt;
-}
+variant_name!(Cap::Butt, cap_naming);
 
 pub use sb::SkPaint_Join as Join;
-#[test]
-pub fn test_join_naming() {
-    let _ = Join::Miter;
-}
+variant_name!(Join::Miter, join_naming);
 
 pub type Paint = Handle<SkPaint>;
-unsafe impl Send for Paint {}
-unsafe impl Sync for Paint {}
+unsafe_send_sync!(Paint);
 
 impl NativeDrop for SkPaint {
     fn drop(&mut self) {
@@ -44,12 +35,6 @@ impl NativeClone for SkPaint {
 impl NativePartialEq for SkPaint {
     fn eq(&self, rhs: &Self) -> bool {
         unsafe { sb::C_SkPaint_Equals(self, rhs) }
-    }
-}
-
-impl NativeHash for SkPaint {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        unsafe { self.getHash() }.hash(state)
     }
 }
 
@@ -71,7 +56,7 @@ impl fmt::Debug for Paint {
             .field("stroke_cap", &self.stroke_cap())
             .field("stroke_join", &self.stroke_join())
             .field("color_filter", &self.color_filter())
-            .field("blend_mode", &self.blend_mode())
+            .field("blend_mode", &self.as_blend_mode())
             .field("path_effect", &self.path_effect())
             .field("mask_filter", &self.mask_filter())
             .field("image_filter", &self.image_filter())
@@ -253,6 +238,25 @@ impl Paint {
         .if_true_some(r)
     }
 
+    pub fn get_fill_path_with_matrix(
+        &self,
+        src: &Path,
+        cull_rect: Option<&Rect>,
+        matrix: &Matrix,
+    ) -> Option<Path> {
+        let mut r = Path::default();
+
+        let cull_rect_ptr = cull_rect
+            .map(|r| r.native() as *const _)
+            .unwrap_or(ptr::null());
+
+        unsafe {
+            self.native()
+                .getFillPath1(src.native(), r.native_mut(), cull_rect_ptr, matrix.native())
+        }
+        .if_true_some(r)
+    }
+
     pub fn shader(&self) -> Option<Shader> {
         Shader::from_unshared_ptr(self.native().fShader.fPtr)
     }
@@ -273,21 +277,38 @@ impl Paint {
         self
     }
 
+    pub fn as_blend_mode(&self) -> Option<BlendMode> {
+        let mut bm = BlendMode::default();
+        unsafe { sb::C_SkPaint_asBlendMode(self.native(), &mut bm) }.if_true_some(bm)
+    }
+
+    pub fn blend_mode_or(&self, default_mode: BlendMode) -> BlendMode {
+        unsafe { self.native().getBlendMode_or(default_mode) }
+    }
+
+    #[deprecated(
+        since = "0.42.0",
+        note = "Use as_blend_mode() or blend_mode_or() instead."
+    )]
     pub fn blend_mode(&self) -> BlendMode {
-        unsafe { sb::C_SkPaint_getBlendMode(self.native()) }
+        self.blend_mode_or(BlendMode::SrcOver)
     }
 
     pub fn is_src_over(&self) -> bool {
-        self.blend_mode() == BlendMode::SrcOver
+        unsafe { self.native().isSrcOver() }
     }
 
     pub fn set_blend_mode(&mut self, mode: BlendMode) -> &mut Self {
-        unsafe {
-            self.native_mut()
-                .__bindgen_anon_1
-                .fBitfields
-                .set_fBlendMode(mode as _);
-        };
+        unsafe { self.native_mut().setBlendMode(mode) }
+        self
+    }
+
+    pub fn blender(&self) -> Option<Blender> {
+        Blender::from_unshared_ptr(self.native().fBlender.fPtr)
+    }
+
+    pub fn set_blender(&mut self, blender: impl Into<Option<Blender>>) -> &mut Self {
+        unsafe { sb::C_SkPaint_setBlender(self.native_mut(), blender.into().into_ptr_or_null()) }
         self
     }
 

@@ -3,8 +3,7 @@ use skia_bindings::{self as sb, GrGLExtensions};
 use std::{ffi::CString, fmt};
 
 pub type Extensions = Handle<GrGLExtensions>;
-unsafe impl Send for Extensions {}
-unsafe impl Sync for Extensions {}
+unsafe_send_sync!(Extensions);
 
 impl NativeDrop for GrGLExtensions {
     fn drop(&mut self) {

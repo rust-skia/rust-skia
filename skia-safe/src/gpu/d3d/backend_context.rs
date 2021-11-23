@@ -1,5 +1,5 @@
 use super::{cp, ID3D12CommandQueue, ID3D12Device, IDXGIAdapter1, MemoryAllocator};
-use crate::{gpu, prelude::*};
+use crate::gpu;
 use skia_bindings::GrD3DBackendContext;
 
 #[repr(C)]
@@ -13,8 +13,4 @@ pub struct BackendContext {
 }
 unsafe impl Send for BackendContext {}
 
-impl NativeTransmutable<GrD3DBackendContext> for BackendContext {}
-#[test]
-fn test_backend_context_layout() {
-    BackendContext::test_layout();
-}
+native_transmutable!(GrD3DBackendContext, BackendContext, backend_context_layout);

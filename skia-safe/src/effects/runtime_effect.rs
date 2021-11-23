@@ -1,21 +1,19 @@
 use crate::{
     interop::{self, AsStr},
     prelude::*,
-    ColorFilter, Data, Matrix, Shader,
+    Blender, ColorFilter, Data, Matrix, Shader,
 };
+use sb::{SkFlattenable, SkRuntimeEffect_Child};
 use skia_bindings::{
     self as sb, SkRefCntBase, SkRuntimeEffect, SkRuntimeEffect_Options, SkRuntimeEffect_Uniform,
-    SkRuntimeEffect_Varying,
 };
-use std::{ffi::CStr, fmt};
+use std::{ffi::CStr, fmt, marker::PhantomData, ops::DerefMut, ptr};
 
 pub type Uniform = Handle<SkRuntimeEffect_Uniform>;
+unsafe_send_sync!(Uniform);
 
 #[deprecated(since = "0.35.0", note = "Use Uniform instead")]
 pub type Variable = Uniform;
-
-unsafe impl Send for Uniform {}
-unsafe impl Sync for Uniform {}
 
 impl NativeDrop for SkRuntimeEffect_Uniform {
     fn drop(&mut self) {
@@ -50,10 +48,6 @@ impl Uniform {
         uniform::Flags::from_bits(self.native().flags).unwrap()
     }
 
-    pub fn marker(&self) -> u32 {
-        self.native().marker
-    }
-
     pub fn is_array(&self) -> bool {
         self.flags().contains(uniform::Flags::ARRAY)
     }
@@ -67,47 +61,52 @@ pub mod uniform {
     use skia_bindings as sb;
 
     pub use sb::SkRuntimeEffect_Uniform_Type as Type;
-    #[test]
-    fn test_type_naming() {
-        let _ = Type::Float2x2;
-    }
+    variant_name!(Type::Float2x2, type_naming);
 
     bitflags! {
         pub struct Flags : u32 {
             const ARRAY = sb::SkRuntimeEffect_Uniform_Flags_kArray_Flag as _;
-            const MARKER = sb::SkRuntimeEffect_Uniform_Flags_kMarker_Flag as _;
-            const MARKER_NORMALS = sb::SkRuntimeEffect_Uniform_Flags_kMarkerNormals_Flag as _;
             const SRGB_UNPREMUL = sb::SkRuntimeEffect_Uniform_Flags_kSRGBUnpremul_Flag as _;
         }
     }
 }
 
-pub type Varying = Handle<SkRuntimeEffect_Varying>;
-unsafe impl Send for Varying {}
-unsafe impl Sync for Varying {}
+pub use sb::SkRuntimeEffect_ChildType as ChildType;
+variant_name!(ChildType::Shader, child_type_naming);
 
-impl NativeDrop for SkRuntimeEffect_Varying {
+#[deprecated(since = "0.41.0", note = "Use Child")]
+pub type Varying = Child;
+
+pub type Child = Handle<SkRuntimeEffect_Child>;
+unsafe_send_sync!(Child);
+
+impl NativeDrop for SkRuntimeEffect_Child {
     fn drop(&mut self) {
-        panic!("native type SkRuntimeEffect::Varying can't be owned by Rust");
+        panic!("native type SkRuntimeEffect::Child can't be owned in Rust");
     }
 }
 
-impl fmt::Debug for Varying {
+impl fmt::Debug for Child {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("Varying")
+        f.debug_struct("Child")
             .field("name", &self.name())
-            .field("width", &self.width())
+            .field("type", &self.ty())
+            .field("index", &self.index())
             .finish()
     }
 }
 
-impl Varying {
+impl Child {
     pub fn name(&self) -> &str {
         self.native().name.as_str()
     }
 
-    pub fn width(&self) -> i32 {
-        self.native().width
+    pub fn ty(&self) -> ChildType {
+        self.native().type_
+    }
+
+    pub fn index(&self) -> usize {
+        self.native().index.try_into().unwrap()
     }
 }
 
@@ -118,28 +117,23 @@ impl NativeRefCountedBase for SkRuntimeEffect {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct Options {
     pub force_no_inline: bool,
+    enforce_es2_restrictions: bool,
+    allow_frag_coord: bool,
 }
 
-impl NativeTransmutable<SkRuntimeEffect_Options> for Options {}
+native_transmutable!(SkRuntimeEffect_Options, Options, options_layout);
 
-pub fn new(sksl: impl AsRef<str>) -> Result<RuntimeEffect, String> {
-    new_with_options(sksl, None)
-}
-
-pub fn new_with_options<'a>(
-    sksl: impl AsRef<str>,
-    options: impl Into<Option<&'a Options>>,
-) -> Result<RuntimeEffect, String> {
-    let str = interop::String::from_str(sksl);
-    let options = options.into().copied().unwrap_or_default();
-    let mut error = interop::String::default();
-    RuntimeEffect::from_ptr(unsafe {
-        sb::C_SkRuntimeEffect_Make(str.native(), options.native(), error.native_mut())
-    })
-    .ok_or_else(|| error.as_str().to_owned())
+impl Default for Options {
+    fn default() -> Self {
+        Options {
+            force_no_inline: false,
+            enforce_es2_restrictions: true,
+            allow_frag_coord: false,
+        }
+    }
 }
 
 impl fmt::Debug for RuntimeEffect {
@@ -147,28 +141,75 @@ impl fmt::Debug for RuntimeEffect {
         f.debug_struct("RuntimeEffect")
             .field("uniform_size", &self.uniform_size())
             .field("uniforms", &self.uniforms())
-            .field("varyings", &self.varyings())
+            .field("children", &self.children())
             .finish()
     }
 }
 
 impl RuntimeEffect {
+    pub fn make_for_color_filer<'a>(
+        sksl: impl AsRef<str>,
+        options: impl Into<Option<&'a Options>>,
+    ) -> Result<RuntimeEffect, String> {
+        let str = interop::String::from_str(sksl);
+        let options = options.into().copied().unwrap_or_default();
+        let mut error = interop::String::default();
+        RuntimeEffect::from_ptr(unsafe {
+            sb::C_SkRuntimeEffect_MakeForColorFilter(
+                str.native(),
+                options.native(),
+                error.native_mut(),
+            )
+        })
+        .ok_or_else(|| error.to_string())
+    }
+
+    pub fn make_for_shader<'a>(
+        sksl: impl AsRef<str>,
+        options: impl Into<Option<&'a Options>>,
+    ) -> Result<RuntimeEffect, String> {
+        let str = interop::String::from_str(sksl);
+        let options = options.into().copied().unwrap_or_default();
+        let mut error = interop::String::default();
+        RuntimeEffect::from_ptr(unsafe {
+            sb::C_SkRuntimeEffect_MakeForShader(str.native(), options.native(), error.native_mut())
+        })
+        .ok_or_else(|| error.to_string())
+    }
+
+    pub fn make_for_blender<'a>(
+        sksl: impl AsRef<str>,
+        options: impl Into<Option<&'a Options>>,
+    ) -> Result<RuntimeEffect, String> {
+        let str = interop::String::from_str(sksl);
+        let options = options.into().copied().unwrap_or_default();
+        let mut error = interop::String::default();
+        RuntimeEffect::from_ptr(unsafe {
+            sb::C_SkRuntimeEffect_MakeForBlender(str.native(), options.native(), error.native_mut())
+        })
+        .ok_or_else(|| error.to_string())
+    }
+
     pub fn make_shader<'a>(
         &self,
         uniforms: impl Into<Data>,
-        children: impl IntoIterator<Item = Shader>,
+        children: &[ChildPtr],
         local_matrix: impl Into<Option<&'a Matrix>>,
         is_opaque: bool,
     ) -> Option<Shader> {
         let mut children: Vec<_> = children
-            .into_iter()
-            .map(|shader| shader.into_ptr())
+            .iter()
+            .map(|child_ptr| child_ptr.native())
             .collect();
+        let children_ptr = children
+            .first_mut()
+            .map(|c| c.deref_mut() as *mut _)
+            .unwrap_or(ptr::null_mut());
         Shader::from_ptr(unsafe {
             sb::C_SkRuntimeEffect_makeShader(
                 self.native(),
                 uniforms.into().into_ptr(),
-                children.as_mut_ptr(),
+                children_ptr,
                 children.len(),
                 local_matrix.into().native_ptr_or_null(),
                 is_opaque,
@@ -181,22 +222,26 @@ impl RuntimeEffect {
         &self,
         context: &mut crate::gpu::RecordingContext,
         uniforms: impl Into<Data>,
-        children: impl IntoIterator<Item = Shader>,
+        children: impl Into<Option<&'a [ChildPtr]>>,
         local_matrix: impl Into<Option<&'a Matrix>>,
         result_info: crate::ImageInfo,
         mipmapped: bool,
     ) -> Option<crate::Image> {
         let mut children: Vec<_> = children
-            .into_iter()
-            .map(|shader| shader.into_ptr())
-            .collect();
+            .into()
+            .map(|c| c.iter().map(|child_ptr| child_ptr.native()).collect())
+            .unwrap_or_default();
+        let children_ptr = children
+            .first_mut()
+            .map(|c| c.deref_mut() as *mut _)
+            .unwrap_or(ptr::null_mut());
 
         crate::Image::from_ptr(unsafe {
             sb::C_SkRuntimeEffect_makeImage(
                 self.native(),
                 context.native_mut(),
                 uniforms.into().into_ptr(),
-                children.as_mut_ptr(),
+                children_ptr,
                 children.len(),
                 local_matrix.into().native_ptr_or_null(),
                 result_info.native(),
@@ -205,14 +250,56 @@ impl RuntimeEffect {
         })
     }
 
-    pub fn make_color_filter(&self, inputs: impl Into<Data>) -> Option<ColorFilter> {
+    pub fn make_color_filter<'a>(
+        &self,
+        inputs: impl Into<Data>,
+        children: impl Into<Option<&'a [ChildPtr]>>,
+    ) -> Option<ColorFilter> {
+        let mut children: Vec<_> = children
+            .into()
+            .map(|c| c.iter().map(|child_ptr| child_ptr.native()).collect())
+            .unwrap_or_default();
+        let children_ptr = children
+            .first_mut()
+            .map(|c| c.deref_mut() as *mut _)
+            .unwrap_or(ptr::null_mut());
         ColorFilter::from_ptr(unsafe {
-            sb::C_SkRuntimeEffect_makeColorFilter(self.native(), inputs.into().into_ptr())
+            sb::C_SkRuntimeEffect_makeColorFilter(
+                self.native(),
+                inputs.into().into_ptr(),
+                children_ptr,
+                children.len(),
+            )
+        })
+    }
+
+    pub fn make_blender<'a>(
+        &self,
+        uniforms: impl Into<Data>,
+        children: impl Into<Option<&'a [ChildPtr]>>,
+    ) -> Option<Blender> {
+        let mut children: Vec<_> = children
+            .into()
+            .map(|c| c.iter().map(|child_ptr| child_ptr.native()).collect())
+            .unwrap_or_default();
+        let children_ptr = children
+            .first_mut()
+            .map(|c| c.deref_mut() as *mut _)
+            .unwrap_or(ptr::null_mut());
+        Blender::from_ptr(unsafe {
+            sb::C_SkRuntimeEffect_makeBlender(
+                self.native(),
+                uniforms.into().into_ptr(),
+                children_ptr,
+                children.len(),
+            )
         })
     }
 
     pub fn source(&self) -> &str {
-        unsafe { (*sb::C_SkRuntimeEffect_source(self.native())).as_str() }
+        let mut len = 0;
+        let ptr = unsafe { sb::C_SkRuntimeEffect_source(self.native(), &mut len) };
+        std::str::from_utf8(unsafe { safer::from_raw_parts(ptr, len) }).unwrap()
     }
 
     #[deprecated(since = "0.35.0", note = "Use uniform_size() instead")]
@@ -237,20 +324,11 @@ impl RuntimeEffect {
         }
     }
 
-    pub fn children(&self) -> impl Iterator<Item = &str> {
+    pub fn children(&self) -> &[Child] {
         unsafe {
             let mut count: usize = 0;
             let ptr = sb::C_SkRuntimeEffect_children(self.native(), &mut count);
-            let slice = safer::from_raw_parts(ptr, count);
-            slice.iter().map(|str| str.as_str())
-        }
-    }
-
-    pub fn varyings(&self) -> &[Varying] {
-        unsafe {
-            let mut count: usize = 0;
-            let ptr = sb::C_SkRuntimeEffect_varyings(self.native(), &mut count);
-            safer::from_raw_parts(Varying::from_native_ptr(ptr), count)
+            safer::from_raw_parts(Child::from_native_ptr(ptr), count)
         }
     }
 
@@ -265,24 +343,69 @@ impl RuntimeEffect {
             .map(|ptr| Uniform::from_native_ref(unsafe { &*ptr }))
     }
 
-    pub fn find_child(&self, name: impl AsRef<CStr>) -> Option<usize> {
-        unsafe {
-            self.native()
-                .findChild(name.as_ref().as_ptr())
-                .try_into()
-                .ok()
+    pub fn find_child(&self, name: impl AsRef<CStr>) -> Option<&Child> {
+        unsafe { self.native().findChild(name.as_ref().as_ptr()) }
+            .into_option()
+            .map(|ptr| Child::from_native_ref(unsafe { &*ptr }))
+    }
+}
+
+#[derive(Clone, Debug)]
+pub enum ChildPtr {
+    Shader(Shader),
+    ColorFilter(ColorFilter),
+    Blender(Blender),
+}
+
+impl From<Shader> for ChildPtr {
+    fn from(shader: Shader) -> Self {
+        Self::Shader(shader)
+    }
+}
+
+impl From<ColorFilter> for ChildPtr {
+    fn from(color_filter: ColorFilter) -> Self {
+        Self::ColorFilter(color_filter)
+    }
+}
+
+impl From<Blender> for ChildPtr {
+    fn from(blender: Blender) -> Self {
+        Self::Blender(blender)
+    }
+}
+
+impl ChildPtr {
+    pub fn ty(&self) -> ChildType {
+        match self {
+            ChildPtr::Shader(_) => ChildType::Shader,
+            ChildPtr::ColorFilter(_) => ChildType::ColorFilter,
+            ChildPtr::Blender(_) => ChildType::Blender,
         }
     }
-}
 
-// TODO: wrap SkRuntimeEffectBuilder, SkRuntimeShaderBuilder
+    // We are treating [`ChildPtr`]s as a _reference_ to a smart pointer: no reference counters are
+    // changed (no drop() is called either).
+    //
+    // Skia will copy the pointers and increase the reference counters if it uses the actual
+    // objects.
+    pub(self) fn native(&self) -> Borrows<sb::SkRuntimeEffect_ChildPtr> {
+        let flattenable: *mut SkFlattenable = match self {
+            // casting to &T &mut T is UB, so we don't use the base() indirection and directly cast
+            // to a pointer.
+            ChildPtr::Shader(shader) => unsafe { shader.native_mut_force() as _ },
+            ChildPtr::ColorFilter(color_filter) => unsafe { color_filter.native_mut_force() as _ },
+            ChildPtr::Blender(blender) => unsafe { blender.native_mut_force() as _ },
+        };
 
-#[cfg(test)]
-mod tests {
-    use crate::prelude::NativeTransmutable;
-
-    #[test]
-    fn options_layout() {
-        super::Options::test_layout()
+        sb::SkRuntimeEffect_ChildPtr {
+            fChild: sb::sk_sp {
+                fPtr: flattenable,
+                _phantom_0: PhantomData,
+            },
+        }
+        .borrows(self)
     }
 }
+
+// TODO: wrap SkRuntimeEffectBuilder, SkRuntimeShaderBuilder, SkRuntimeBlendBuilder

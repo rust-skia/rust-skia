@@ -1,18 +1,10 @@
-use crate::prelude::*;
-use skia_bindings as sb;
-use skia_bindings::{SkPathVerb, SkPath_Verb};
+use skia_bindings::{self as sb, SkPathVerb, SkPath_Verb};
 
 pub use skia_bindings::SkPathFillType as PathFillType;
-#[test]
-pub fn test_fill_type_naming() {
-    let _ = PathFillType::InverseEvenOdd;
-}
+variant_name!(PathFillType::InverseEvenOdd, path_fill_type_naming);
 
 pub use skia_bindings::SkPathDirection as PathDirection;
-#[test]
-fn test_direction_naming() {
-    let _ = PathDirection::CW;
-}
+variant_name!(PathDirection::CW, path_direction_naming);
 
 bitflags! {
     pub struct PathSegmentMask: u32 {
@@ -24,13 +16,6 @@ bitflags! {
 }
 
 pub use skia_bindings::SkPathVerb as PathVerb;
-#[test]
-fn test_path_verb_naming() {
-    let _ = PathVerb::Conic;
-}
+variant_name!(PathVerb::Conic, path_verb_naming);
 
-impl NativeTransmutable<SkPath_Verb> for SkPathVerb {}
-#[test]
-fn test_verb_layout() {
-    SkPathVerb::test_layout();
-}
+native_transmutable!(SkPath_Verb, SkPathVerb, path_verb_layout);

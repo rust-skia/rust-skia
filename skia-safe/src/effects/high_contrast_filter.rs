@@ -17,11 +17,11 @@ pub struct HighContrastConfig {
     pub contrast: scalar,
 }
 
-impl NativeTransmutable<SkHighContrastConfig> for HighContrastConfig {}
-#[test]
-fn high_contrast_config_layout() {
-    HighContrastConfig::test_layout();
-}
+native_transmutable!(
+    SkHighContrastConfig,
+    HighContrastConfig,
+    high_contrast_config
+);
 
 impl Default for HighContrastConfig {
     fn default() -> Self {

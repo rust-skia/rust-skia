@@ -2,7 +2,9 @@ use crate::prelude::*;
 use skia_bindings::{self as sb, GrGLFramebufferInfo, GrGLTextureInfo};
 
 pub use skia_bindings::GrGLFormat as Format;
+variant_name!(Format::ALPHA8, format_naming);
 pub use skia_bindings::GrGLStandard as Standard;
+variant_name!(Standard::GLES, standard_naming);
 pub use skia_bindings::GrGLenum as Enum;
 pub use skia_bindings::GrGLuint as UInt;
 
@@ -14,7 +16,7 @@ pub struct TextureInfo {
     pub format: Enum,
 }
 
-impl NativeTransmutable<GrGLTextureInfo> for TextureInfo {}
+native_transmutable!(GrGLTextureInfo, TextureInfo, text_info_layout);
 
 impl PartialEq for TextureInfo {
     fn eq(&self, other: &Self) -> bool {
@@ -50,7 +52,11 @@ pub struct FramebufferInfo {
     pub format: Enum,
 }
 
-impl NativeTransmutable<GrGLFramebufferInfo> for FramebufferInfo {}
+native_transmutable!(
+    GrGLFramebufferInfo,
+    FramebufferInfo,
+    framebuffer_info_layout
+);
 
 impl Default for FramebufferInfo {
     fn default() -> Self {
@@ -87,19 +93,7 @@ bitflags! {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::NativeTransmutable;
-
-    use super::{Enum, Format, Standard};
-
-    #[test]
-    fn test_standard_naming() {
-        let _ = Standard::GLES;
-    }
-
-    #[test]
-    fn test_format_naming() {
-        let _ = Format::COMPRESSED_ETC1_RGB8;
-    }
+    use super::{Enum, Format};
 
     #[test]
     fn test_support_from_format_to_enum_and_back() {
@@ -149,15 +143,5 @@ mod tests {
     fn test_format_last_color_and_last_exists() {
         let _ = Format::Last;
         let _ = Format::LastColorFormat;
-    }
-
-    #[test]
-    fn test_texture_info_layout() {
-        super::TextureInfo::test_layout()
-    }
-
-    #[test]
-    fn test_framebuffer_info_layout() {
-        super::FramebufferInfo::test_layout()
     }
 }

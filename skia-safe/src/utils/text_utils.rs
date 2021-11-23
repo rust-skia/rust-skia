@@ -3,10 +3,7 @@ use core::borrow::BorrowMut;
 use skia_bindings::SkTextUtils;
 
 pub use skia_bindings::SkTextUtils_Align as Align;
-#[test]
-fn test_align_layout() {
-    let _ = Align::Center;
-}
+variant_name!(Align::Center, align_naming);
 
 pub fn draw_str(
     canvas: &mut Canvas,

@@ -23,7 +23,11 @@ pub struct DirectContextId {
     id: u32,
 }
 
-impl NativeTransmutable<GrDirectContext_DirectContextID> for DirectContextId {}
+native_transmutable!(
+    GrDirectContext_DirectContextID,
+    DirectContextId,
+    direct_context_id_layout
+);
 
 pub type DirectContext = RCHandle<GrDirectContext>;
 
@@ -214,11 +218,16 @@ impl DirectContext {
         self
     }
 
-    pub fn perform_deferred_cleanup(&mut self, not_used: Duration) -> &mut Self {
+    pub fn perform_deferred_cleanup(
+        &mut self,
+        not_used: Duration,
+        scratch_resources_only: impl Into<Option<bool>>,
+    ) -> &mut Self {
         unsafe {
             sb::C_GrDirectContext_performDeferredCleanup(
                 self.native_mut(),
                 not_used.as_millis().try_into().unwrap(),
+                scratch_resources_only.into().unwrap_or(false),
             )
         }
         self
@@ -387,15 +396,5 @@ impl DirectContext {
         let mut id = DirectContextId { id: 0 };
         unsafe { sb::C_GrDirectContext_directContextId(self.native(), id.native_mut()) }
         id
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_direct_context_id_layout() {
-        DirectContextId::test_layout();
     }
 }

@@ -1,21 +1,15 @@
-use crate::prelude::*;
 use crate::{
-    scalar, FontHinting, FontMetrics, GlyphId, Paint, Path, Point, Rect, TextEncoding, Typeface,
-    Unichar,
+    interop::VecSink, prelude::*, scalar, FontHinting, FontMetrics, GlyphId, Paint, Path, Point,
+    Rect, TextEncoding, Typeface, Unichar,
 };
-use skia_bindings as sb;
-use skia_bindings::{SkFont, SkFont_PrivFlags};
+use skia_bindings::{self as sb, SkFont, SkFont_PrivFlags};
 use std::{fmt, ptr};
 
 pub use skia_bindings::SkFont_Edging as Edging;
-#[test]
-fn test_font_edging_naming() {
-    let _ = Edging::Alias;
-}
+variant_name!(Edging::Alias, edging_naming);
 
 pub type Font = Handle<SkFont>;
-unsafe impl Send for Font {}
-unsafe impl Sync for Font {}
+unsafe_send_sync!(Font);
 
 impl NativeDrop for SkFont {
     fn drop(&mut self) {
@@ -389,6 +383,32 @@ impl Font {
                 origin,
             )
         }
+    }
+
+    pub fn get_intercepts<'a>(
+        &self,
+        glyphs: &[GlyphId],
+        pos: &[Point],
+        (top, bottom): (scalar, scalar),
+        paint: impl Into<Option<&'a Paint>>,
+    ) -> Vec<scalar> {
+        assert_eq!(glyphs.len(), pos.len());
+        let count = glyphs.len().try_into().unwrap();
+        let mut r: Vec<scalar> = Vec::new();
+        let mut set = |scalars: &[scalar]| r = scalars.to_vec();
+        unsafe {
+            sb::C_SkFont_getIntercepts(
+                self.native(),
+                glyphs.as_ptr(),
+                count,
+                pos.native().as_ptr(),
+                top,
+                bottom,
+                paint.into().native_ptr_or_null(),
+                VecSink::new(&mut set).native_mut(),
+            );
+        }
+        r
     }
 
     pub fn get_path(&self, glyph_id: GlyphId) -> Option<Path> {

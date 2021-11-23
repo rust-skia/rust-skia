@@ -3,7 +3,12 @@ use skia_bindings::{self as sb, GrContextOptions};
 use std::os::raw;
 
 pub use skia_bindings::GrContextOptions_Enable as Enable;
+variant_name!(Enable::Yes, enable_naming);
 pub use skia_bindings::GrContextOptions_ShaderCacheStrategy as ShaderCacheStrategy;
+variant_name!(
+    ShaderCacheStrategy::BackendSource,
+    shader_cache_strategy_naming
+);
 
 #[repr(C)]
 #[derive(Debug)]
@@ -35,11 +40,11 @@ pub struct ContextOptions {
     pub internal_multisample_count: raw::c_int,
     pub max_cached_vulkan_secondary_command_buffers: raw::c_int,
     pub suppress_mipmap_support: bool,
-    pub driver_bug_workarounds: DriverBugWorkarounds,
     pub enable_experimental_hardware_tessellation: bool,
+    pub reduced_shader_variations: bool,
+    pub driver_bug_workarounds: DriverBugWorkarounds,
 }
-unsafe impl Send for ContextOptions {}
-unsafe impl Sync for ContextOptions {}
+unsafe_send_sync!(ContextOptions);
 
 impl Default for ContextOptions {
     fn default() -> Self {
@@ -53,23 +58,4 @@ impl ContextOptions {
     }
 }
 
-impl NativeTransmutable<GrContextOptions> for ContextOptions {}
-
-#[cfg(test)]
-mod tests {
-    use crate::prelude::NativeTransmutable;
-    #[test]
-    fn test_enable_naming() {
-        let _ = super::Enable::Yes;
-    }
-
-    #[test]
-    fn test_shader_cache_strategy_naming() {
-        let _ = super::ShaderCacheStrategy::BackendSource;
-    }
-
-    #[test]
-    fn test_context_options_layout() {
-        super::ContextOptions::test_layout()
-    }
-}
+native_transmutable!(GrContextOptions, ContextOptions, context_options_layout);

@@ -6,15 +6,14 @@ use skia_bindings as sb;
 pub struct TextShadow {
     pub color: Color,
     pub offset: Point,
-    pub blur_radius: f64,
+    pub blur_sigma: f64,
 }
 
-impl NativeTransmutable<sb::skia_textlayout_TextShadow> for TextShadow {}
-
-#[test]
-fn text_shadow_layout() {
-    TextShadow::test_layout()
-}
+native_transmutable!(
+    sb::skia_textlayout_TextShadow,
+    TextShadow,
+    text_shadow_layout
+);
 
 impl Default for TextShadow {
     fn default() -> Self {
@@ -29,12 +28,12 @@ impl PartialEq for TextShadow {
 }
 
 impl TextShadow {
-    pub fn new(color: impl Into<Color>, offset: impl Into<Point>, blur_radius: f64) -> Self {
+    pub fn new(color: impl Into<Color>, offset: impl Into<Point>, blur_sigma: f64) -> Self {
         TextShadow::from_native_c(unsafe {
             sb::skia_textlayout_TextShadow::new1(
                 color.into().into_native(),
                 offset.into().into_native(),
-                blur_radius,
+                blur_sigma,
             )
         })
     }

@@ -1,7 +1,5 @@
-use crate::prelude::*;
-use crate::scalar;
-use skia_bindings as sb;
-use skia_bindings::SkFontMetrics;
+use crate::{prelude::*, scalar};
+use skia_bindings::{self as sb, SkFontMetrics};
 
 bitflags! {
     #[derive(Default)]
@@ -35,12 +33,7 @@ pub struct FontMetrics {
     strikeout_position: scalar,
 }
 
-impl NativeTransmutable<SkFontMetrics> for FontMetrics {}
-
-#[test]
-fn test_font_metrics_layout() {
-    FontMetrics::test_layout();
-}
+native_transmutable!(SkFontMetrics, FontMetrics, font_metrics_layout);
 
 impl FontMetrics {
     pub fn underline_thickness(&self) -> Option<scalar> {

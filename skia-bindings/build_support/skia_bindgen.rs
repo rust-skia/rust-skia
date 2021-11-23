@@ -1,7 +1,7 @@
 //! Full build support for the SkiaBindings library, and bindings.rs file.
 
 use crate::build_support::{android, binaries_config, cargo, features, ios, xcode};
-use bindgen::{CodegenConfig, EnumVariation};
+use bindgen::{CodegenConfig, EnumVariation, RustTarget};
 use cc::Build;
 use std::path::{Path, PathBuf};
 
@@ -64,7 +64,7 @@ impl FinalBuildConfiguration {
 }
 
 pub fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
-    let builder = bindgen::Builder::default()
+    let mut builder = bindgen::Builder::default()
         .generate_comments(false)
         .layout_tests(true)
         .default_enum_style(EnumVariation::Rust {
@@ -127,16 +127,22 @@ pub fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Pat
         .clang_args(&["-x", "c++"])
         .clang_arg("-v");
 
-    // don't generate destructors on Windows: https://github.com/rust-skia/rust-skia/issues/318
-    let mut builder = if cfg!(target_os = "windows") {
-        builder.with_codegen_config({
+    let target = cargo::target();
+
+    // Don't generate destructors for Windows targets: https://github.com/rust-skia/rust-skia/issues/318
+    if target.is_windows() {
+        builder = builder.with_codegen_config({
             let mut config = CodegenConfig::default();
             config.remove(CodegenConfig::DESTRUCTORS);
             config
-        })
-    } else {
-        builder
-    };
+        });
+    }
+
+    // 32-bit Windows needs `thiscall` support.
+    // https://github.com/rust-skia/rust-skia/issues/540
+    if target.is_windows() && target.architecture == "i686" {
+        builder = builder.rust_target(RustTarget::Nightly);
+    }
 
     for function in ALLOWLISTED_FUNCTIONS {
         builder = builder.allowlist_function(function)
@@ -155,12 +161,12 @@ pub fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Pat
     for source in &build.binding_sources {
         cc_build.file(source);
         let source = source.to_str().unwrap();
-        cargo::rerun_if_changed(source);
+        cargo::rerun_if_file_changed(source);
         builder = builder.header(source);
     }
 
     let include_path = &build.skia_source_dir;
-    cargo::rerun_if_changed(include_path.join("include"));
+    cargo::rerun_if_file_changed(include_path.join("include"));
 
     builder = builder.clang_arg(format!("-I{}", include_path.display()));
     cc_build.include(include_path);
@@ -232,8 +238,8 @@ pub fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Pat
                 builder = builder.clang_arg(arg);
             }
         }
-        (arch, "apple", "ios", _) => {
-            for arg in ios::additional_clang_args(arch) {
+        (arch, "apple", "ios", abi) => {
+            for arg in ios::additional_clang_args(arch, abi) {
                 builder = builder.clang_arg(arg);
             }
         }
@@ -403,7 +409,8 @@ const OPAQUE_TYPES: &[&str] = &[
     "GrD3DMemoryAllocator",
     // m87, yuva_pixmaps
     "std::tuple",
-    "std::tuple_.*",
+    // m93: private, exposed by Paint::asBlendMode(), fails layout tests.
+    "skstd::optional",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[
@@ -524,7 +531,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("Op", rewrite::k_xxx_name_opt),
     // SkRRect_*
     // TODO: remove kLastType?
-    // SkRuntimeEffect_Variable_Type
+    // SkRuntimeEffect_Uniform_Type
     ("Type", rewrite::k_xxx_name_opt),
     ("Corner", rewrite::k_xxx_name),
     // SkShader_GradientType
@@ -610,6 +617,8 @@ const ENUM_TABLE: &[EnumEntry] = &[
     // m89, SkImageFilters::Dither
     ("Dither", rewrite::k_xxx),
     ("SkScanlineOrder", rewrite::k_xxx_name),
+    // m94: SkRuntimeEffect::ChildType
+    ("ChildType", rewrite::k_xxx_name_opt),
 ];
 
 pub(crate) mod rewrite {
@@ -760,7 +769,7 @@ pub(crate) mod definitions {
 
     fn from_defines_str(defines: &str) -> Definitions {
         const PREFIX: &str = "-D";
-        let defines: Vec<&str> = defines
+        defines
             .split_whitespace()
             .map(|d| {
                 if let Some(stripped) = d.strip_prefix(PREFIX) {
@@ -769,9 +778,6 @@ pub(crate) mod definitions {
                     panic!("missing '{}' prefix from a definition", PREFIX)
                 }
             })
-            .collect();
-        defines
-            .into_iter()
             .map(|d| {
                 let items: Vec<&str> = d.splitn(2, '=').collect();
                 match items.len() {

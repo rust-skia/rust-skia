@@ -6,7 +6,7 @@ use super::gl;
 use super::mtl;
 #[cfg(feature = "vulkan")]
 use super::vk;
-use super::{BackendAPI, BackendSurfaceMutableState};
+use super::{BackendAPI, BackendSurfaceMutableState, Mipmapped};
 use crate::{prelude::*, ISize};
 use skia_bindings::{
     self as sb, GrBackendFormat, GrBackendRenderTarget, GrBackendTexture, GrMipmapped,
@@ -14,8 +14,7 @@ use skia_bindings::{
 use std::fmt;
 
 pub type BackendFormat = Handle<GrBackendFormat>;
-unsafe impl Send for BackendFormat {}
-unsafe impl Sync for BackendFormat {}
+unsafe_send_sync!(BackendFormat);
 
 impl NativeDrop for GrBackendFormat {
     fn drop(&mut self) {
@@ -156,8 +155,7 @@ impl BackendFormat {
 }
 
 pub type BackendTexture = Handle<GrBackendTexture>;
-unsafe impl Send for BackendTexture {}
-unsafe impl Sync for BackendTexture {}
+unsafe_send_sync!(BackendTexture);
 
 impl NativeDrop for GrBackendTexture {
     fn drop(&mut self) {
@@ -175,7 +173,7 @@ impl fmt::Debug for BackendTexture {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut d = f.debug_struct("BackendTexture");
         d.field("dimensions", &self.dimensions());
-        d.field("has_mipmaps", &self.has_mipmaps());
+        d.field("mipmapped", &self.mipmapped());
         d.field("backend", &self.backend());
         #[cfg(feature = "gl")]
         d.field("gl_texture_info", &self.gl_texture_info());
@@ -267,6 +265,10 @@ impl BackendTexture {
 
     pub fn height(&self) -> i32 {
         self.native().fHeight
+    }
+
+    pub fn mipmapped(&self) -> Mipmapped {
+        self.native().fMipmapped
     }
 
     #[deprecated(since = "0.35.0", note = "Use has_mipmaps()")]
@@ -373,8 +375,7 @@ impl BackendTexture {
 }
 
 pub type BackendRenderTarget = Handle<GrBackendRenderTarget>;
-unsafe impl Send for BackendRenderTarget {}
-unsafe impl Sync for BackendRenderTarget {}
+unsafe_send_sync!(BackendRenderTarget);
 
 impl NativeDrop for GrBackendRenderTarget {
     fn drop(&mut self) {

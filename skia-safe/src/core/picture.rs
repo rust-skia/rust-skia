@@ -3,8 +3,7 @@ use skia_bindings::{self as sb, SkPicture, SkRefCntBase};
 use std::fmt;
 
 pub type Picture = RCHandle<SkPicture>;
-unsafe impl Sync for Picture {}
-unsafe impl Send for Picture {}
+unsafe_send_sync!(Picture);
 
 impl NativeRefCountedBase for SkPicture {
     type Base = SkRefCntBase;

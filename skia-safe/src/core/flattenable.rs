@@ -1,7 +1,5 @@
-use crate::prelude::*;
-use crate::Data;
-use skia_bindings as sb;
-use skia_bindings::SkFlattenable;
+use crate::{prelude::*, Data};
+use skia_bindings::{self as sb, SkFlattenable};
 use std::ffi::CStr;
 
 // TODO: getFactory()?

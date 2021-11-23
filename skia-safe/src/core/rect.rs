@@ -1,10 +1,13 @@
-use crate::prelude::*;
-use crate::private::safe32::{sk32, sk64};
-use crate::{scalar, Contains, IPoint, ISize, IVector, Point, Size, Vector};
-use skia_bindings as sb;
-use skia_bindings::{SkIRect, SkRect};
-use std::cmp::{max, min};
-use std::mem;
+use crate::{
+    prelude::*,
+    private::safe32::{sk32, sk64},
+    scalar, Contains, IPoint, ISize, IVector, Point, Size, Vector,
+};
+use skia_bindings::{self as sb, SkIRect, SkRect};
+use std::{
+    cmp::{max, min},
+    mem,
+};
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
@@ -15,12 +18,7 @@ pub struct IRect {
     pub bottom: i32,
 }
 
-impl NativeTransmutable<SkIRect> for IRect {}
-
-#[test]
-fn test_irect_layout() {
-    IRect::test_layout();
-}
+native_transmutable!(SkIRect, IRect, irect_layout);
 
 impl AsRef<IRect> for IRect {
     fn as_ref(&self) -> &IRect {
@@ -145,6 +143,14 @@ impl IRect {
         self.top = 0;
         self.right = width;
         self.bottom = height;
+    }
+
+    pub fn set_size(&mut self, size: impl Into<ISize>) {
+        let size = size.into();
+        self.left = 0;
+        self.top = 0;
+        self.right = size.width;
+        self.bottom = size.height;
     }
 
     #[must_use]
@@ -328,12 +334,7 @@ pub struct Rect {
     pub bottom: scalar,
 }
 
-impl NativeTransmutable<SkRect> for Rect {}
-
-#[test]
-fn test_rect_layout() {
-    Rect::test_layout();
-}
+native_transmutable!(SkRect, Rect, rect_layout);
 
 impl AsRef<Rect> for Rect {
     fn as_ref(&self) -> &Rect {

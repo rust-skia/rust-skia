@@ -13,11 +13,7 @@ pub enum PixelGeometry {
     BGRV = SkPixelGeometry::kBGR_V_SkPixelGeometry as _,
 }
 
-impl NativeTransmutable<SkPixelGeometry> for PixelGeometry {}
-#[test]
-fn test_pixel_geometry_layout() {
-    PixelGeometry::test_layout()
-}
+native_transmutable!(SkPixelGeometry, PixelGeometry, pixel_geometry_layout);
 
 impl PixelGeometry {
     pub fn is_rgb(self) -> bool {
@@ -47,6 +43,8 @@ bitflags! {
     pub struct SurfacePropsFlags: u32 {
         const USE_DEVICE_INDEPENDENT_FONTS =
             sb::SkSurfaceProps_Flags_kUseDeviceIndependentFonts_Flag as u32;
+        const DYNAMIC_MSAA =
+            sb::SkSurfaceProps_Flags_kDynamicMSAA_Flag as u32;
     }
 }
 
@@ -60,10 +58,7 @@ impl Default for SurfacePropsFlags {
 #[repr(transparent)]
 pub struct SurfaceProps(SkSurfaceProps);
 
-impl NativeTransmutable<SkSurfaceProps> for SurfaceProps {}
-pub fn test_surface_props_layout() {
-    SurfaceProps::test_layout()
-}
+native_transmutable!(SkSurfaceProps, SurfaceProps, surface_props_layout);
 
 impl Clone for SurfaceProps {
     fn clone(&self) -> Self {
@@ -105,6 +100,10 @@ impl SurfaceProps {
 
     pub fn flags(self) -> SurfacePropsFlags {
         SurfacePropsFlags::from_bits_truncate(self.native().fFlags)
+    }
+
+    pub fn clone_with_pixel_geometry(&self, new_pixel_geometry: PixelGeometry) -> Self {
+        Self::new(self.flags(), new_pixel_geometry)
     }
 
     pub fn pixel_geometry(self) -> PixelGeometry {

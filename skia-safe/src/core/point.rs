@@ -1,7 +1,5 @@
-use crate::prelude::*;
-use crate::{scalar, ISize, Size};
-use skia_bindings as sb;
-use skia_bindings::{SkIPoint, SkPoint};
+use crate::{prelude::*, scalar, ISize, Size};
+use skia_bindings::{self as sb, SkIPoint, SkPoint};
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 pub use IPoint as IVector;
@@ -13,11 +11,7 @@ pub struct IPoint {
     pub y: i32,
 }
 
-impl NativeTransmutable<SkIPoint> for IPoint {}
-#[test]
-fn test_ipoint_layout() {
-    IPoint::test_layout()
-}
+native_transmutable!(SkIPoint, IPoint, ipoint_layout);
 
 impl Neg for IPoint {
     type Output = IPoint;
@@ -109,12 +103,7 @@ pub struct Point {
     pub y: scalar,
 }
 
-impl NativeTransmutable<SkPoint> for Point {}
-
-#[test]
-fn test_point_layout() {
-    Point::test_layout()
-}
+native_transmutable!(SkPoint, Point, point_layout);
 
 impl Neg for Point {
     type Output = Point;

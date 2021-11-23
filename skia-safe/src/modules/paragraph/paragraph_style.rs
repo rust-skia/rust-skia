@@ -10,8 +10,7 @@ use crate::{
 use skia_bindings as sb;
 
 pub type StrutStyle = Handle<sb::skia_textlayout_StrutStyle>;
-unsafe impl Send for StrutStyle {}
-unsafe impl Sync for StrutStyle {}
+unsafe_send_sync!(StrutStyle);
 
 impl NativeDrop for sb::skia_textlayout_StrutStyle {
     fn drop(&mut self) {
@@ -47,6 +46,8 @@ impl fmt::Debug for StrutStyle {
             .field("leading", &self.leading())
             .field("strut_enabled", &self.strut_enabled())
             .field("force_strut_height", &self.force_strut_height())
+            .field("height_override", &self.height_override())
+            .field("half_leading", &self.half_leading())
             .finish()
     }
 }
@@ -126,12 +127,29 @@ impl StrutStyle {
         self.native_mut().fForceHeight = force_height;
         self
     }
+
+    pub fn height_override(&self) -> bool {
+        self.native().fHeightOverride
+    }
+
+    pub fn set_height_override(&mut self, height_override: bool) -> &mut Self {
+        self.native_mut().fHeightOverride = height_override;
+        self
+    }
+
+    pub fn half_leading(&self) -> bool {
+        self.native().fHalfLeading
+    }
+
+    pub fn set_half_leading(&mut self, half_leading: bool) -> &mut Self {
+        self.native_mut().fHalfLeading = half_leading;
+        self
+    }
 }
 
 // Can't use Handle<> here, std::u16string maintains an interior pointer.
 pub type ParagraphStyle = RefHandle<sb::skia_textlayout_ParagraphStyle>;
-unsafe impl Send for ParagraphStyle {}
-unsafe impl Sync for ParagraphStyle {}
+unsafe_send_sync!(ParagraphStyle);
 
 impl NativeDrop for sb::skia_textlayout_ParagraphStyle {
     fn drop(&mut self) {

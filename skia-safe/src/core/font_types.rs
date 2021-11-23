@@ -1,4 +1,3 @@
-use crate::prelude::*;
 use skia_bindings::SkTextEncoding;
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
@@ -11,11 +10,7 @@ pub enum TextEncoding {
     GlyphId = SkTextEncoding::kGlyphID as _,
 }
 
-impl NativeTransmutable<SkTextEncoding> for TextEncoding {}
-#[test]
-fn test_text_encoding_layout() {
-    TextEncoding::test_layout()
-}
+native_transmutable!(SkTextEncoding, TextEncoding, text_encoding_layout);
 
 impl Default for TextEncoding {
     fn default() -> Self {
@@ -24,7 +19,4 @@ impl Default for TextEncoding {
 }
 
 pub use skia_bindings::SkFontHinting as FontHinting;
-#[test]
-fn test_font_hinting_naming() {
-    let _ = FontHinting::Full;
-}
+variant_name!(FontHinting::Full, font_hinting_naming);

@@ -12,24 +12,15 @@ pub use path_types::PathDirection as Direction;
 pub use path_types::PathFillType as FillType;
 
 pub use skia_bindings::SkPath_ArcSize as ArcSize;
-#[test]
-fn test_arc_size_naming() {
-    let _ = ArcSize::Small;
-}
+variant_name!(ArcSize::Small, arc_size_naming);
 
 pub use skia_bindings::SkPath_AddPathMode as AddPathMode;
-#[test]
-fn test_add_path_mode_naming() {
-    let _ = AddPathMode::Append;
-}
+variant_name!(AddPathMode::Append, append_naming);
 
 pub use path_types::PathSegmentMask as SegmentMask;
 
 pub use skia_bindings::SkPath_Verb as Verb;
-#[test]
-pub fn test_verb_naming() {
-    let _ = Verb::Line;
-}
+variant_name!(Verb::Line, verb_naming);
 
 #[repr(C)]
 pub struct Iter<'a>(SkPath_Iter, PhantomData<&'a Handle<SkPath>>);
@@ -182,8 +173,7 @@ impl Iterator for RawIter<'_> {
 }
 
 pub type Path = Handle<SkPath>;
-unsafe impl Send for Path {}
-unsafe impl Sync for Path {}
+unsafe_send_sync!(Path);
 
 impl NativeDrop for SkPath {
     fn drop(&mut self) {

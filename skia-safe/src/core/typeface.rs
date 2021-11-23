@@ -3,19 +3,19 @@ use crate::{
     font_parameters::VariationAxis,
     interop::{self, MemoryStream, NativeStreamBase, StreamAsset},
     prelude::*,
-    Data, FontArguments, FontStyle, GlyphId, Rect, Unichar,
+    Data, FontArguments, FontStyle, GlyphId, Rect, TextEncoding, Unichar,
 };
 use skia_bindings::{self as sb, SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings};
-use std::{ffi, fmt, ptr};
+use std::{ffi, fmt, mem, ptr};
 
 pub type FontId = skia_bindings::SkFontID;
 pub type FontTableTag = skia_bindings::SkFontTableTag;
 
 pub use skia_bindings::SkTypeface_SerializeBehavior as SerializeBehavior;
-#[test]
-fn test_typeface_serialize_behavior_naming() {
-    let _ = SerializeBehavior::DontIncludeData;
-}
+variant_name!(
+    SerializeBehavior::DontIncludeData,
+    serialize_behavior_naming
+);
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct LocalizedString {
@@ -24,8 +24,7 @@ pub struct LocalizedString {
 }
 
 pub type Typeface = RCHandle<SkTypeface>;
-unsafe impl Send for Typeface {}
-unsafe impl Sync for Typeface {}
+unsafe_send_sync!(Typeface);
 
 impl NativeRefCountedBase for SkTypeface {
     type Base = SkRefCntBase;
@@ -169,6 +168,30 @@ impl Typeface {
                 glyphs.as_mut_ptr(),
             )
         }
+    }
+
+    pub fn str_to_glyphs(&self, str: impl AsRef<str>, glyphs: &mut [GlyphId]) -> usize {
+        self.text_to_glyphs(str.as_ref().as_bytes(), TextEncoding::UTF8, glyphs)
+    }
+
+    pub fn text_to_glyphs<C>(
+        &self,
+        text: &[C],
+        encoding: TextEncoding,
+        glyphs: &mut [GlyphId],
+    ) -> usize {
+        let byte_length = mem::size_of_val(text);
+        unsafe {
+            self.native().textToGlyphs(
+                text.as_ptr() as _,
+                byte_length,
+                encoding.into_native(),
+                glyphs.as_mut_ptr(),
+                glyphs.len().try_into().unwrap(),
+            )
+        }
+        .try_into()
+        .unwrap()
     }
 
     pub fn unichar_to_glyph(&self, unichar: Unichar) -> GlyphId {

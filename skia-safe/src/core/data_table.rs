@@ -1,6 +1,5 @@
 use crate::prelude::*;
-use skia_bindings as sb;
-use skia_bindings::{SkDataTable, SkRefCntBase};
+use skia_bindings::{self as sb, SkDataTable, SkRefCntBase};
 use std::{
     convert::TryInto,
     ffi::{c_void, CStr},
@@ -9,8 +8,7 @@ use std::{
 };
 
 pub type DataTable = RCHandle<SkDataTable>;
-unsafe impl Send for DataTable {}
-unsafe impl Sync for DataTable {}
+unsafe_send_sync!(DataTable);
 
 impl NativeRefCountedBase for SkDataTable {
     type Base = SkRefCntBase;

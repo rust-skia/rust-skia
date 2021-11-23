@@ -1,5 +1,4 @@
-use crate::prelude::*;
-use crate::scalar;
+use crate::{prelude::*, scalar};
 use skia_bindings::SkPoint3;
 use std::ops::{Add, AddAssign, Mul, Neg, Sub, SubAssign};
 
@@ -14,12 +13,7 @@ pub struct Point3 {
     pub z: scalar,
 }
 
-impl NativeTransmutable<SkPoint3> for Point3 {}
-
-#[test]
-fn test_point3_layout() {
-    Point3::test_layout()
-}
+native_transmutable!(SkPoint3, Point3, point3_layout);
 
 impl From<(scalar, scalar, scalar)> for Point3 {
     fn from((x, y, z): (scalar, scalar, scalar)) -> Self {

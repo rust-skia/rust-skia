@@ -11,12 +11,16 @@ use std::{fmt, mem, ptr};
 pub use super::CubicResampler;
 
 pub use skia_bindings::SkImage_BitDepth as BitDepth;
+variant_name!(BitDepth::F16, bit_depth_naming);
+
 pub use skia_bindings::SkImage_CachingHint as CachingHint;
+variant_name!(CachingHint::Allow, caching_hint_naming);
+
 pub use skia_bindings::SkImage_CompressionType as CompressionType;
+variant_name!(CompressionType::BC1_RGBA8_UNORM, compression_type_naming);
 
 pub type Image = RCHandle<SkImage>;
-unsafe impl Send for Image {}
-unsafe impl Sync for Image {}
+unsafe_send_sync!(Image);
 
 impl NativeBase<SkRefCntBase> for SkImage {}
 
@@ -688,28 +692,5 @@ impl Image {
         Image::from_ptr(unsafe {
             sb::C_SkImage_reinterpretColorSpace(self.native(), new_color_space.into().into_ptr())
         })
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{BitDepth, CachingHint, CompressionType};
-
-    #[test]
-    fn test_bit_depth_naming() {
-        let _ = BitDepth::F16;
-    }
-
-    #[test]
-    fn test_caching_hint_naming() {
-        let _ = CachingHint::Allow;
-    }
-    #[test]
-    fn test_compression_type_naming() {
-        // legacy type (replaced in m81 by ETC2_RGB8_UNORM)
-        #[allow(deprecated)]
-        let _ = CompressionType::ETC1;
-        // m81: preserve the underscore characters for consistency.
-        let _ = CompressionType::BC1_RGBA8_UNORM;
     }
 }
