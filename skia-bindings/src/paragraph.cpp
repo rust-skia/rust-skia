@@ -160,14 +160,6 @@ extern "C" {
 //
 
 extern "C" {
-    void C_LineMetrics_destruct(LineMetrics* self) {
-        self->~LineMetrics();
-    }
-
-    void C_LineMetrics_CopyConstruct(LineMetrics* uninitialized, const LineMetrics* from) {
-        new(uninitialized)LineMetrics(*from);
-    }
-
     size_t C_LineMetrics_styleMetricsCount(const LineMetrics* self) {
         return self->fLineMetrics.size();
     }
