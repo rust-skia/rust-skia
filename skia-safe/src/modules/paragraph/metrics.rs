@@ -1,6 +1,6 @@
 use crate::{paragraph::TextStyle, prelude::*, FontMetrics};
 use skia_bindings::{self as sb, skia_textlayout_LineMetrics, skia_textlayout_StyleMetrics};
-use std::{marker, mem, ops::Range, ptr};
+use std::{marker::PhantomData, ops::Range, ptr};
 
 #[repr(C)]
 #[derive(Clone, Debug)]
@@ -24,8 +24,7 @@ impl<'a> StyleMetrics<'a> {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LineMetrics<'a> {
     pub start_index: usize,
     pub end_index: usize,
@@ -40,37 +39,8 @@ pub struct LineMetrics<'a> {
     pub left: f64,
     pub baseline: f64,
     pub line_number: usize,
-    line_metrics:
-        [u8; mem::size_of::<skia_textlayout_LineMetrics>() - mem::size_of::<LMInternal>()],
-    pd: marker::PhantomData<&'a StyleMetrics<'a>>,
-}
-
-native_transmutable!(
-    skia_textlayout_LineMetrics,
-    LineMetrics<'_>,
-    line_metrics_layout
-);
-
-impl<'a> Clone for LineMetrics<'a> {
-    fn clone(&self) -> Self {
-        Self::construct(|lm| unsafe { sb::C_LineMetrics_CopyConstruct(lm, self.native()) })
-    }
-}
-
-impl<'a> Drop for LineMetrics<'a> {
-    fn drop(&mut self) {
-        unsafe { sb::C_LineMetrics_destruct(self.native_mut()) }
-    }
-}
-
-// Internal Line Metrics mirror to compute what the map takes up space.
-// If the size of the structure does not match, the NativeTransmutable test above will fail.
-#[repr(C)]
-struct LMInternal {
-    start_end: [usize; 4],
-    hard_break: bool,
-    seven_metrics: [f64; 7],
-    line_number: usize,
+    style_metrics: Vec<sb::IndexedStyleMetrics>,
+    pd: PhantomData<&'a StyleMetrics<'a>>,
 }
 
 impl<'a> LineMetrics<'a> {
@@ -78,35 +48,79 @@ impl<'a> LineMetrics<'a> {
 
     /// Returns the number of style metrics in the given index range.
     pub fn get_style_metrics_count(&self, range: Range<usize>) -> usize {
-        unsafe { sb::C_LineMetrics_fLineMetrics_count(self.native(), range.start, range.end) }
+        let lower = self
+            .style_metrics
+            .partition_point(|ism| ism.index < range.start);
+        let upper = self
+            .style_metrics
+            .partition_point(|ism| ism.index < range.end);
+        upper - lower
     }
 
     /// Returns indices and references to style metrics in the given range.
-    pub fn get_style_metrics(&self, range: Range<usize>) -> Vec<StyleMetricsRecord<'a>> {
-        let count = self.get_style_metrics_count(range.clone());
-        let mut v: Vec<(usize, *mut StyleMetrics<'a>)> = vec![(0, ptr::null_mut()); count];
-        unsafe {
-            sb::C_LineMetrics_fLineMetrics_getRange(
-                self.native(),
-                range.start,
-                range.end,
-                v.as_mut_ptr() as *mut sb::StyleMetricsRecord,
-            );
-            // TODO: can the second allocation of that vec be avoided? Transmuting the vec is
-            //       UB beginning with Rust 1.40.
-            v.into_iter()
-                .map(|v| mem::transmute::<(usize, *mut StyleMetrics<'a>), StyleMetricsRecord>(v))
-                .collect()
+    pub fn get_style_metrics(&'a self, range: Range<usize>) -> Vec<(usize, &'a StyleMetrics<'a>)> {
+        let lower = self
+            .style_metrics
+            .partition_point(|ism| ism.index < range.start);
+        let upper = self
+            .style_metrics
+            .partition_point(|ism| ism.index < range.end);
+        self.style_metrics[lower..upper]
+            .iter()
+            .map(|ism| (ism.index, StyleMetrics::from_native_ref(&ism.metrics)))
+            .collect()
+    }
+
+    // We can't use a `std::map` in rust, it does not seem to be safe to move. So we copy it into a
+    // sorted Vec.
+    pub(crate) fn from_native_ref<'b>(lm: &skia_textlayout_LineMetrics) -> LineMetrics<'b> {
+        let sm_count = unsafe { sb::C_LineMetrics_styleMetricsCount(lm) };
+        let mut style_metrics = vec![
+            sb::IndexedStyleMetrics {
+                index: 0,
+                metrics: sb::skia_textlayout_StyleMetrics {
+                    text_style: ptr::null(),
+                    font_metrics: sb::SkFontMetrics {
+                        fFlags: 0,
+                        fTop: 0.0,
+                        fAscent: 0.0,
+                        fDescent: 0.0,
+                        fBottom: 0.0,
+                        fLeading: 0.0,
+                        fAvgCharWidth: 0.0,
+                        fMaxCharWidth: 0.0,
+                        fXMin: 0.0,
+                        fXMax: 0.0,
+                        fXHeight: 0.0,
+                        fCapHeight: 0.0,
+                        fUnderlineThickness: 0.0,
+                        fUnderlinePosition: 0.0,
+                        fStrikeoutThickness: 0.0,
+                        fStrikeoutPosition: 0.0
+                    }
+                }
+            };
+            sm_count
+        ];
+
+        unsafe { sb::C_LineMetrics_getAllStyleMetrics(lm, style_metrics.as_mut_ptr()) }
+
+        LineMetrics {
+            start_index: lm.fStartIndex,
+            end_index: lm.fEndIndex,
+            end_excluding_whitespaces: lm.fEndExcludingWhitespaces,
+            end_including_newline: lm.fEndIncludingNewline,
+            hard_break: lm.fHardBreak,
+            ascent: lm.fAscent,
+            descent: lm.fDescent,
+            unscaled_ascent: lm.fUnscaledAscent,
+            height: lm.fHeight,
+            width: lm.fWidth,
+            left: lm.fLeft,
+            baseline: lm.fBaseline,
+            line_number: lm.fLineNumber,
+            style_metrics,
+            pd: PhantomData,
         }
     }
-}
-
-type StyleMetricsRecord<'a> = (usize, &'a StyleMetrics<'a>);
-
-#[test]
-fn test_style_metrics_record_layout() {
-    assert_eq!(
-        mem::size_of::<(usize, *mut StyleMetrics)>(),
-        mem::size_of::<sb::StyleMetricsRecord>()
-    )
 }
