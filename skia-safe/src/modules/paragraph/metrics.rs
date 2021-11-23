@@ -24,7 +24,7 @@ impl<'a> StyleMetrics<'a> {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct LineMetrics<'a> {
     pub start_index: usize,
     pub end_index: usize,
