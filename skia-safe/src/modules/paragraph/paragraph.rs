@@ -131,10 +131,7 @@ impl Paragraph {
     pub fn get_line_metrics(&self) -> Vec<LineMetrics> {
         let mut result: Vec<LineMetrics> = Vec::new();
         let mut set_lm = |lms: &[sb::skia_textlayout_LineMetrics]| {
-            result = lms
-                .iter()
-                .map(|lm| LineMetrics::from_native_ref(lm).clone())
-                .collect();
+            result = lms.iter().map(LineMetrics::from_native_ref).collect();
         };
 
         unsafe {
@@ -199,5 +196,25 @@ mod tests {
         }
 
         static LOREM_IPSUM: &str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at leo at nulla tincidunt placerat. Proin eget purus augue. Quisque et est ullamcorper, pellentesque felis nec, pulvinar massa. Aliquam imperdiet, nulla ut dictum euismod, purus dui pulvinar risus, eu suscipit elit neque ac est. Nullam eleifend justo quis placerat ultricies. Vestibulum ut elementum velit. Praesent et dolor sit amet purus bibendum mattis. Aliquam erat volutpat.";
+    }
+
+    /// Regression test for <https://github.com/rust-skia/rust-skia/issues/585>
+    #[test]
+    #[serial_test::serial]
+    fn test_style_metrics() {
+        icu::init();
+
+        let mut style = ParagraphStyle::new();
+        let ts = TextStyle::new();
+        style.set_text_style(&ts);
+        let mut font_collection = FontCollection::new();
+        font_collection.set_default_font_manager(FontMgr::default(), None);
+        let mut paragraph_builder = ParagraphBuilder::new(&style, font_collection);
+        paragraph_builder.add_text("Lorem ipsum dolor sit amet\n");
+        let mut paragraph = paragraph_builder.build();
+        paragraph.layout(100.0);
+
+        let line_metrics = &paragraph.get_line_metrics()[0];
+        line_metrics.get_style_metrics(line_metrics.start_index..line_metrics.end_index);
     }
 }

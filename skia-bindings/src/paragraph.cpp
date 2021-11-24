@@ -160,27 +160,21 @@ extern "C" {
 //
 
 extern "C" {
-    void C_LineMetrics_destruct(LineMetrics* self) {
-        self->~LineMetrics();
+    size_t C_LineMetrics_styleMetricsCount(const LineMetrics* self) {
+        return self->fLineMetrics.size();
     }
-    
-    size_t C_LineMetrics_fLineMetrics_count(const LineMetrics* self, size_t begin, size_t end) {
-        auto lower = self->fLineMetrics.lower_bound(begin);
-        auto upper = self->fLineMetrics.upper_bound(end);
-        return std::distance(lower, upper);
-    }
-    
-    struct StyleMetricsRecord {
+
+    struct IndexedStyleMetrics {
         size_t index;
-        const StyleMetrics* metrics;
+        StyleMetrics metrics;
     };
-    
-    void C_LineMetrics_fLineMetrics_getRange(const LineMetrics* self, size_t begin, size_t end, StyleMetricsRecord* array) {
-        auto lower = self->fLineMetrics.lower_bound(begin);
-        auto upper = self->fLineMetrics.upper_bound(end);
-        for (auto it = lower; it != upper; it++)
-        {
-            *array++ = StyleMetricsRecord { it->first, &it->second };
+
+    void C_LineMetrics_getAllStyleMetrics(const LineMetrics* self, IndexedStyleMetrics* result) {
+        auto begin = self->fLineMetrics.begin();
+        auto end = self->fLineMetrics.end();
+
+        for (auto it = begin; it != end; ++it) {
+            *result++ = IndexedStyleMetrics { it->first, it->second };
         }
     }
 }
