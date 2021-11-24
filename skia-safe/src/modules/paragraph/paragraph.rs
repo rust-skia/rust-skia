@@ -131,10 +131,7 @@ impl Paragraph {
     pub fn get_line_metrics(&self) -> Vec<LineMetrics> {
         let mut result: Vec<LineMetrics> = Vec::new();
         let mut set_lm = |lms: &[sb::skia_textlayout_LineMetrics]| {
-            result = lms
-                .iter()
-                .map(LineMetrics::from_native_ref)
-                .collect();
+            result = lms.iter().map(LineMetrics::from_native_ref).collect();
         };
 
         unsafe {
