@@ -149,15 +149,6 @@ mod effects {
     assert_impl_all!(image_filters::Dither: Send, Sync);
 }
 
-#[cfg(feature = "svg")]
-mod svg {
-    use skia_safe::svg::*;
-    use static_assertions::*;
-
-    assert_impl_all!(Dom: Send, Sync);
-    assert_impl_all!(LoadError: Send, Sync);
-}
-
 #[cfg(feature = "gpu")]
 mod gpu {
     use skia_safe::gpu::*;
@@ -284,6 +275,15 @@ mod svg {
     use skia_safe::svg::*;
     use static_assertions::*;
     assert_not_impl_any!(Canvas: Send, Sync);
+}
+
+#[cfg(feature = "svg")]
+mod render_svg {
+    use skia_safe::svg::*;
+    use static_assertions::*;
+
+    assert_impl_all!(Dom: Send, Sync);
+    assert_impl_all!(LoadError: Send, Sync);
 }
 
 mod utils {
