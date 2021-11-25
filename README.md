@@ -45,7 +45,7 @@ Because building Skia takes a lot of time and needs tools that may be missing, t
 | Platform | Binaries |
 | -------- | -------- |
 |  Windows | `x86_64-pc-windows-msvc` |
-| Linux Ubuntu 16, 18<br />CentOS 7, 8 | `x86_64-unknown-linux-gnu` |
+| Linux Ubuntu 16+<br />CentOS 7, 8 | `x86_64-unknown-linux-gnu` |
 | macOS    | `x86_64-apple-darwin` |
 | Android  | `aarch64-linux-android`<br/>`x86_64-linux-android` |
 | iOS      | `aarch64-apple-ios`<br/>`x86_64-apple-ios` |
@@ -122,8 +122,9 @@ The build script probes for `python --version` and `python2 --version` and uses 
 #### Ubuntu 16+
 
 - LLVM/Clang should be available already, if not, [install the latest version](http://releases.llvm.org/download.html).
-
 - If OpenGL libraries are missing, install the drivers for you graphics card, or a mesa package like `libgl1-mesa-dev`.
+- For **X11**, build with feature `x11`.
+- For **Wayland**, install `libwayland-dev` and build with the `wayland` feature.
 
 #### CentOS 7
 
