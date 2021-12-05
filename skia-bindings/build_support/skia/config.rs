@@ -139,7 +139,7 @@ impl FinalBuildConfiguration {
 
             // target specific gn args.
             let target = cargo::target();
-            let target_str: &str = &format!("--target={}", target.to_string());
+            let target_str: &str = &format!("--target={}", target);
             let mut set_target = true;
             let sysroot_arg;
             let opt_level_arg;
