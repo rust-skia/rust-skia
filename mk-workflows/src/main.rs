@@ -79,7 +79,7 @@ fn build_workflow(workflow: &Workflow, jobs: &[Job]) {
     let job_template = workflow.job_template;
     let targets = &workflow.targets;
 
-    let workflow_name = format!("{}-{}", host_os.to_string(), workflow.kind.to_string());
+    let workflow_name = format!("{}-{}", host_os, workflow.kind);
     let output_filename = PathBuf::new()
         .join(".github")
         .join("workflows")

@@ -202,7 +202,7 @@ impl BinariesConfiguration {
                     "COPY OPERATION FAILED: from '{}' to '{}': {}",
                     from_path.display(),
                     to_path.display(),
-                    e.to_string()
+                    e
                 );
                 e
             })
