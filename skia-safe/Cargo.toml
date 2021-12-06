@@ -58,6 +58,6 @@ static_assertions = "1.1"
 
 # gl-window
 [target.'cfg(not(target_os = "android"))'.dev-dependencies]
-glutin = "0.27"
+glutin = "0.28"
 gl-rs = { package = "gl", version = "0.14.0" }
 
