@@ -98,7 +98,7 @@ The build script probes for `python --version` and `python2 --version` and uses 
 
 - Have the latest versions of `git` and Rust ready.
 
-- [Install Visual Studio 2019 Build Tools](https://visualstudio.microsoft.com/downloads/) or one of the IDE releases. If you installed the IDE, make sure that the [Desktop Development with C++ workload](https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=vs-2019) is installed.
+- [Install Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) or one of the other IDE editions. If you installed the IDE, make sure that the [Desktop Development with C++ workload](https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=msvc-170) is installed.
 
 - Install the [latest LLVM](http://releases.llvm.org/download.html) distribution.
 
