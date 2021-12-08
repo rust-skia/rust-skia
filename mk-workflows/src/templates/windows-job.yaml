@@ -1,4 +1,4 @@
-runs-on: windows-2019
+runs-on: windows-2022
 # Containers are not supported on Windows.
 # container: ghcr.io/pragmatrix/rust-skia-windows:latest
 env: 

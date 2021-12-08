@@ -9,13 +9,13 @@ pub fn resolve_win_vc() -> Option<PathBuf> {
         return Some(PathBuf::from(install_dir));
     }
 
-    [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC",
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC",
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Professional\\VC",
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC",
-    ]
-    .iter()
-    .map(PathBuf::from)
-    .find(|pb| pb.exists())
+    let releases = [("Program Files", "2022"), ("Program Files (x86)", "2019")];
+    let editions = ["BuildTools", "Enterprise", "Professional", "Community"];
+
+    releases
+        .iter()
+        .flat_map(|r| editions.iter().map(move |e| (r, e)))
+        .map(|((rp, r), ed)| format!("C:\\{}\\Microsoft Visual Studio\\{}\\{}\\VC", rp, r, ed))
+        .map(PathBuf::from)
+        .find(|pb| pb.exists())
 }
