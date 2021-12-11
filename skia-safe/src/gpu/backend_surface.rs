@@ -65,15 +65,29 @@ impl BackendFormat {
     }
 
     #[cfg(feature = "vulkan")]
-    pub fn new_vulkan(format: vk::Format) -> Self {
-        Self::construct(|bf| unsafe { sb::C_GrBackendFormat_ConstructVk(bf, format) })
-            .assert_valid()
+    pub fn new_vulkan(
+        format: vk::Format,
+        will_use_drm_format_modifiers: impl Into<Option<bool>>,
+    ) -> Self {
+        let will_use_drm_format_modifiers = will_use_drm_format_modifiers.into().unwrap_or(false);
+        Self::construct(|bf| unsafe {
+            sb::C_GrBackendFormat_ConstructVk(bf, format, will_use_drm_format_modifiers)
+        })
+        .assert_valid()
     }
 
     #[cfg(feature = "vulkan")]
-    pub fn new_vulkan_ycbcr(conversion_info: &vk::YcbcrConversionInfo) -> Self {
+    pub fn new_vulkan_ycbcr(
+        conversion_info: &vk::YcbcrConversionInfo,
+        will_use_drm_format_modifiers: impl Into<Option<bool>>,
+    ) -> Self {
+        let will_use_drm_format_modifiers = will_use_drm_format_modifiers.into().unwrap_or(false);
         Self::construct(|bf| unsafe {
-            sb::C_GrBackendFormat_ConstructVk2(bf, conversion_info.native())
+            sb::C_GrBackendFormat_ConstructVk2(
+                bf,
+                conversion_info.native(),
+                will_use_drm_format_modifiers,
+            )
         })
         .assert_valid()
     }
