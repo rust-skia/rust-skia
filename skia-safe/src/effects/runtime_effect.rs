@@ -66,7 +66,7 @@ pub mod uniform {
     bitflags! {
         pub struct Flags : u32 {
             const ARRAY = sb::SkRuntimeEffect_Uniform_Flags_kArray_Flag as _;
-            const SRGB_UNPREMUL = sb::SkRuntimeEffect_Uniform_Flags_kSRGBUnpremul_Flag as _;
+            const COLOR = sb::SkRuntimeEffect_Uniform_Flags_kColor_Flag as _;
         }
     }
 }

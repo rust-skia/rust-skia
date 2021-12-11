@@ -320,7 +320,6 @@ pub struct DrawableInfo {
     pub compatible_render_pass: vk::RenderPass,
     pub format: vk::Format,
     pub draw_bounds: *mut vk::Rect2D,
-    pub image: vk::Image,
 }
 
 native_transmutable!(GrVkDrawableInfo, DrawableInfo, drawable_info_layout);
@@ -334,7 +333,6 @@ impl Default for DrawableInfo {
             compatible_render_pass: vk::NULL_HANDLE.into(),
             format: vk::Format::UNDEFINED,
             draw_bounds: ptr::null_mut(),
-            image: vk::NULL_HANDLE.into(),
         }
     }
 }

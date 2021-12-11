@@ -10,7 +10,9 @@ use std::{fmt, ptr};
 pub use skia_bindings::SkSurface_ContentChangeMode as ContentChangeMode;
 variant_name!(ContentChangeMode::Retain, content_change_mode_naming);
 
+#[cfg(feature = "gpu")]
 pub use skia_bindings::SkSurface_BackendHandleAccess as BackendHandleAccess;
+#[cfg(feature = "gpu")]
 variant_name!(
     BackendHandleAccess::FlushWrite,
     backend_handle_access_naming

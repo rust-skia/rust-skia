@@ -2356,14 +2356,14 @@ const unsigned char* C_SkRuntimeEffect_source(const SkRuntimeEffect *self, size_
 
 const SkRuntimeEffect::Uniform* C_SkRuntimeEffect_uniforms(const SkRuntimeEffect* self, size_t* count) {
     auto uniforms = self->uniforms();
-    *count = uniforms.count();
-    return &*uniforms.begin();
+    *count = uniforms.size();
+    return uniforms.begin();
 }
 
 const SkRuntimeEffect::Child* C_SkRuntimeEffect_children(const SkRuntimeEffect* self, size_t* count) {
     auto children = self->children();
-    *count = children.count();
-    return &*children.begin();
+    *count = children.size();
+    return children.begin();
 }
 
 }
