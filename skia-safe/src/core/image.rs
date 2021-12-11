@@ -378,7 +378,7 @@ impl Image {
     }
 
     #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.0.0", note = "use flush()")]
+    #[deprecated(since = "0.46.0", note = "use flush()")]
     pub fn flush_with_info(
         &self,
         context: &mut gpu::DirectContext,
