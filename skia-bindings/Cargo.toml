@@ -67,7 +67,7 @@ bindgen = "0.59.0"
 
 # For enum variant name replacements.
 regex = "1.4.5"
-heck = "0.3.1"
+heck = "0.4.0"
 
 # For downloading and extracting prebuilt binaries and skia / depot_tools archives:
 ureq = { version = "2.0.1", optional = true }

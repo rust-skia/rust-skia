@@ -624,7 +624,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
 ];
 
 pub(crate) mod rewrite {
-    use heck::ShoutySnakeCase;
+    use heck::ToShoutySnakeCase;
     use regex::Regex;
 
     pub fn k_xxx_uppercase(name: &str, variant: &str) -> String {
