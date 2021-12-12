@@ -139,16 +139,13 @@ impl FinalBuildConfiguration {
 
             // target specific gn args.
             let target = cargo::target();
-            let target_str: &str = &format!("--target={}", target);
+            let target_str = format!("--target={}", target);
             let mut set_target = true;
-            let sysroot_arg;
-            let opt_level_arg;
-            let mut cflags: Vec<&str> = vec![];
-            let mut asmflags: Vec<&str> = vec![];
+            let mut cflags: Vec<String> = Vec::new();
+            let mut asmflags: Vec<String> = Vec::new();
 
             if let Some(sysroot) = cargo::env_var("SDKROOT") {
-                sysroot_arg = format!("--sysroot={}", sysroot);
-                cflags.push(&sysroot_arg);
+                cflags.push(format!("--sysroot={}", sysroot));
             }
 
             let jpeg_sys_cflags: Vec<String>;
@@ -157,7 +154,7 @@ impl FinalBuildConfiguration {
                 jpeg_sys_cflags = std::env::split_paths(&paths)
                     .map(|arg| format!("-I{}", arg.display()))
                     .collect();
-                cflags.extend(jpeg_sys_cflags.iter().map(|x| -> &str { x.as_ref() }));
+                cflags.extend(jpeg_sys_cflags);
                 args.push(("skia_use_system_libjpeg_turbo", yes()));
             } else {
                 args.push((
@@ -174,8 +171,7 @@ impl FinalBuildConfiguration {
                 */
                 // When targeting windows `-O` isn't supported.
                 if !target.is_windows() {
-                    opt_level_arg = format!("-O{}", opt_level);
-                    cflags.push(&opt_level_arg);
+                    cflags.push(format!("-O{}", opt_level));
                 }
             }
 
@@ -184,16 +180,18 @@ impl FinalBuildConfiguration {
                     if let Some(win_vc) = vs::resolve_win_vc() {
                         args.push(("win_vc", quote(win_vc.to_str().unwrap())))
                     }
-                    // Code on MSVC needs to be compiled differently (e.g. with /MT or /MD) depending on the runtime being linked.
-                    // (See https://doc.rust-lang.org/reference/linkage.html#static-and-dynamic-c-runtimes)
-                    // When static feature is enabled (target-feature=+crt-static) the C runtime should be statically linked
-                    // and the compiler has to place the library name LIBCMT.lib into the .obj
-                    // See https://docs.microsoft.com/en-us/cpp/build/reference/md-mt-ld-use-run-time-library?view=vs-2019
+                    // Code on MSVC needs to be compiled differently (e.g. with /MT or /MD)
+                    // depending on the runtime being linked. (See
+                    // https://doc.rust-lang.org/reference/linkage.html#static-and-dynamic-c-runtimes)
+                    // When static feature is enabled (target-feature=+crt-static) the C runtime
+                    // should be statically linked and the compiler has to place the library name
+                    // LIBCMT.lib into the .obj See
+                    // https://docs.microsoft.com/en-us/cpp/build/reference/md-mt-ld-use-run-time-library?view=vs-2019
                     if cargo::target_crt_static() {
-                        cflags.push("/MT");
+                        cflags.push("/MT".into());
                     } else {
                         // otherwise the C runtime should be linked dynamically
-                        cflags.push("/MD");
+                        cflags.push("/MD".into());
                     }
                     // Tell Skia's build system where LLVM is supposed to be located.
                     if let Some(llvm_home) = llvm::win::find_llvm_home() {
@@ -206,7 +204,6 @@ impl FinalBuildConfiguration {
                 }
                 (arch, "linux", "android", _) | (arch, "linux", "androideabi", _) => {
                     args.push(("ndk", quote(&android::ndk())));
-                    // TODO: make API-level configurable?
                     args.push(("ndk_api", android::API_LEVEL.into()));
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
                     if !features.embed_freetype {
@@ -217,11 +214,12 @@ impl FinalBuildConfiguration {
                     // We make this explicit to avoid relying on an expat installed
                     // in the system.
                     use_expat = true;
+                    cflags.extend(android::extra_skia_cflags())
                 }
                 (arch, _, "ios", abi) => {
                     args.push(("target_os", quote("ios")));
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
-                    ios::extra_skia_cflags(arch, abi, &mut cflags);
+                    cflags.extend(ios::extra_skia_cflags(arch, abi));
                 }
                 (arch, _, os, _) => {
                     let skia_target_os = match os {
@@ -251,14 +249,18 @@ impl FinalBuildConfiguration {
             }
 
             if set_target {
-                cflags.push(target_str);
+                cflags.push(target_str.clone());
                 asmflags.push(target_str);
             }
 
             if !cflags.is_empty() {
                 let cflags = format!(
                     "[{}]",
-                    cflags.into_iter().map(quote).collect::<Vec<_>>().join(",")
+                    cflags
+                        .into_iter()
+                        .map(|s| quote(&s))
+                        .collect::<Vec<_>>()
+                        .join(",")
                 );
                 args.push(("extra_cflags", cflags));
             }
@@ -268,7 +270,7 @@ impl FinalBuildConfiguration {
                     "[{}]",
                     asmflags
                         .into_iter()
-                        .map(quote)
+                        .map(|s| quote(&s))
                         .collect::<Vec<_>>()
                         .join(",")
                 );

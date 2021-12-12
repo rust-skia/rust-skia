@@ -55,8 +55,8 @@ impl Platform {
 }
 
 // TODO: add support for 32 bit devices and simulators.
-pub fn extra_skia_cflags(arch: &str, abi: Option<&str>, flags: &mut Vec<&str>) {
-    flags.push(Platform::new(arch, abi).flags());
+pub fn extra_skia_cflags(arch: &str, abi: Option<&str>) -> Vec<String> {
+    vec![Platform::new(arch, abi).flags().into()]
 }
 
 pub fn additional_clang_args(arch: &str, abi: Option<&str>) -> Vec<String> {
