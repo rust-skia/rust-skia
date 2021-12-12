@@ -52,6 +52,10 @@ impl Uniform {
         self.flags().contains(uniform::Flags::ARRAY)
     }
 
+    pub fn is_color(&self) -> bool {
+        self.flags().contains(uniform::Flags::COLOR)
+    }
+
     pub fn size_in_bytes(&self) -> usize {
         unsafe { self.native().sizeInBytes() }
     }
@@ -295,6 +299,8 @@ impl RuntimeEffect {
             )
         })
     }
+
+    // TODO: wrap MakeTraced
 
     pub fn source(&self) -> &str {
         let mut len = 0;
