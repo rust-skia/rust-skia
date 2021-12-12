@@ -74,7 +74,24 @@ impl Image {
     }
 
     pub fn from_encoded(data: impl Into<Data>) -> Option<Image> {
-        Image::from_ptr(unsafe { sb::C_SkImage_MakeFromEncoded(data.into().into_ptr()) })
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_MakeFromEncoded(data.into().into_ptr(), ptr::null())
+        })
+    }
+
+    pub fn from_encoded_with_alpha_type(
+        data: impl Into<Data>,
+        alpha_type: impl Into<Option<AlphaType>>,
+    ) -> Option<Image> {
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_MakeFromEncoded(
+                data.into().into_ptr(),
+                alpha_type
+                    .into()
+                    .map(|at| &at as *const _)
+                    .unwrap_or(ptr::null()),
+            )
+        })
     }
 
     #[deprecated(since = "0.35.0", note = "Removed without replacement")]
@@ -334,6 +351,28 @@ impl Image {
 
         Shader::from_ptr(unsafe {
             sb::C_SkImage_makeShader(
+                self.native(),
+                tm1,
+                tm2,
+                sampling.native(),
+                local_matrix.into().native_ptr_or_null(),
+            )
+        })
+    }
+
+    pub fn to_raw_shader<'a>(
+        &self,
+        tile_modes: impl Into<Option<(TileMode, TileMode)>>,
+        sampling: impl Into<SamplingOptions>,
+        local_matrix: impl Into<Option<&'a Matrix>>,
+    ) -> Option<Shader> {
+        let tile_modes = tile_modes.into();
+        let tm1 = tile_modes.map(|(tm, _)| tm).unwrap_or_default();
+        let tm2 = tile_modes.map(|(_, tm)| tm).unwrap_or_default();
+        let sampling = sampling.into();
+
+        Shader::from_ptr(unsafe {
+            sb::C_SkImage_makeRawShader(
                 self.native(),
                 tm1,
                 tm2,

@@ -136,6 +136,44 @@ impl Surface {
         })
     }
 
+    pub fn new_render_target(
+        context: &mut gpu::RecordingContext,
+        budgeted: crate::Budgeted,
+        image_info: &ImageInfo,
+        sample_count: impl Into<Option<usize>>,
+        surface_origin: impl Into<Option<gpu::SurfaceOrigin>>,
+        surface_props: Option<&SurfaceProps>,
+        should_create_with_mips: impl Into<Option<bool>>,
+    ) -> Option<Self> {
+        Self::from_ptr(unsafe {
+            sb::C_SkSurface_MakeRenderTarget(
+                context.native_mut(),
+                budgeted.into_native(),
+                image_info.native(),
+                sample_count.into().unwrap_or(0).try_into().unwrap(),
+                surface_origin
+                    .into()
+                    .unwrap_or(gpu::SurfaceOrigin::BottomLeft),
+                surface_props.native_ptr_or_null(),
+                should_create_with_mips.into().unwrap_or_default(),
+            )
+        })
+    }
+
+    pub fn new_render_target_with_characterization(
+        context: &mut gpu::RecordingContext,
+        characterization: &SurfaceCharacterization,
+        budgeted: crate::Budgeted,
+    ) -> Option<Self> {
+        Self::from_ptr(unsafe {
+            sb::C_SkSurface_MakeRenderTarget2(
+                context.native_mut(),
+                characterization.native(),
+                budgeted.into_native(),
+            )
+        })
+    }
+
     #[allow(clippy::missing_safety_doc)]
     #[allow(clippy::too_many_arguments)]
     #[cfg(feature = "metal")]
@@ -202,41 +240,6 @@ impl Surface {
                 color_type.into_native(),
                 color_space.into().into_ptr_or_null(),
                 surface_props.native_ptr_or_null(),
-            )
-        })
-    }
-    pub fn new_render_target(
-        context: &mut gpu::RecordingContext,
-        budgeted: crate::Budgeted,
-        image_info: &ImageInfo,
-        sample_count: impl Into<Option<usize>>,
-        surface_origin: gpu::SurfaceOrigin,
-        surface_props: Option<&SurfaceProps>,
-        should_create_with_mips: impl Into<Option<bool>>,
-    ) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            sb::C_SkSurface_MakeRenderTarget(
-                context.native_mut(),
-                budgeted.into_native(),
-                image_info.native(),
-                sample_count.into().unwrap_or(0).try_into().unwrap(),
-                surface_origin,
-                surface_props.native_ptr_or_null(),
-                should_create_with_mips.into().unwrap_or_default(),
-            )
-        })
-    }
-
-    pub fn new_render_target_with_characterization(
-        context: &mut gpu::RecordingContext,
-        characterization: &SurfaceCharacterization,
-        budgeted: crate::Budgeted,
-    ) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            sb::C_SkSurface_MakeRenderTarget2(
-                context.native_mut(),
-                characterization.native(),
-                budgeted.into_native(),
             )
         })
     }

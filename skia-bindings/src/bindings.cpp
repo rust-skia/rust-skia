@@ -299,8 +299,8 @@ extern "C" SkImage* C_SkImage_MakeFromGenerator(SkImageGenerator* imageGenerator
     return SkImage::MakeFromGenerator(std::unique_ptr<SkImageGenerator>(imageGenerator)).release();
 }
 
-extern "C" SkImage* C_SkImage_MakeFromEncoded(SkData* encoded) {
-    return SkImage::MakeFromEncoded(sp(encoded)).release();
+extern "C" SkImage* C_SkImage_MakeFromEncoded(SkData* encoded, const SkAlphaType* alphaType) {
+    return SkImage::MakeFromEncoded(sp(encoded), opt(alphaType)).release();
 }
 
 extern "C" SkImage* C_SkImage_MakeFromPicture(
@@ -319,6 +319,13 @@ extern "C" SkShader* C_SkImage_makeShader(
     SkTileMode tileMode1, SkTileMode tileMode2, 
     const SkSamplingOptions* samplingOptions, const SkMatrix* localMatrix) {
     return self->makeShader(tileMode1, tileMode2, *samplingOptions, localMatrix).release();
+}
+
+extern "C" SkShader* C_SkImage_makeRawShader(
+    const SkImage* self, 
+    SkTileMode tileMode1, SkTileMode tileMode2, 
+    const SkSamplingOptions* samplingOptions, const SkMatrix* localMatrix) {
+    return self->makeRawShader(tileMode1, tileMode2, *samplingOptions, localMatrix).release();
 }
 
 extern "C" SkData* C_SkImage_encodeToData(const SkImage* self, SkEncodedImageFormat imageFormat, int quality) {
@@ -398,6 +405,10 @@ extern "C" SkData* C_SkData_MakeSubset(const SkData* src, size_t offset, size_t 
 
 extern "C" SkData* C_SkData_MakeUninitialized(size_t length) {
     return SkData:: MakeUninitialized(length).release();
+}
+
+extern "C" SkData* C_SkData_MakeZeroInitialized(size_t length) {
+    return SkData:: MakeZeroInitialized(length).release();
 }
 
 extern "C" SkData* C_SkData_MakeWithCString(const char* cstr) {
@@ -1716,8 +1727,8 @@ extern "C" SkData *C_SkImageGenerator_refEncodedData(SkImageGenerator *self) {
     return self->refEncodedData().release();
 }
 
-extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromEncoded(SkData *data) {
-    return SkImageGenerator::MakeFromEncoded(sp(data)).release();
+extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromEncoded(SkData *data, const SkAlphaType* alphaType) {
+    return SkImageGenerator::MakeFromEncoded(sp(data), opt(alphaType)).release();
 }
 
 extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromPicture(

@@ -1,8 +1,10 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
-use crate::{image, prelude::*, ColorSpace, Data, ISize, ImageInfo, Matrix, Paint, Picture};
+use crate::{
+    image, prelude::*, AlphaType, ColorSpace, Data, ISize, ImageInfo, Matrix, Paint, Picture,
+};
 use skia_bindings::{self as sb, SkImageGenerator};
-use std::fmt;
+use std::{fmt, ptr};
 
 pub type ImageGenerator = RefHandle<SkImageGenerator>;
 unsafe_send_sync!(ImageGenerator);
@@ -60,7 +62,24 @@ impl ImageGenerator {
     }
 
     pub fn from_encoded(encoded: impl Into<Data>) -> Option<Self> {
-        Self::from_ptr(unsafe { sb::C_SkImageGenerator_MakeFromEncoded(encoded.into().into_ptr()) })
+        Self::from_ptr(unsafe {
+            sb::C_SkImageGenerator_MakeFromEncoded(encoded.into().into_ptr(), ptr::null())
+        })
+    }
+
+    pub fn from_encoded_with_alpha_type(
+        encoded: impl Into<Data>,
+        alpha_type: impl Into<Option<AlphaType>>,
+    ) -> Option<Self> {
+        Self::from_ptr(unsafe {
+            sb::C_SkImageGenerator_MakeFromEncoded(
+                encoded.into().into_ptr(),
+                alpha_type
+                    .into()
+                    .map(|at| &at as *const _)
+                    .unwrap_or(ptr::null()),
+            )
+        })
     }
 
     pub fn from_picture(

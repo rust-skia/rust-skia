@@ -1033,9 +1033,6 @@ impl Canvas {
         self
     }
 
-    // TODO: markCTM
-    // TODO: findMarkedCTM
-
     pub fn concat_44(&mut self, m: &M44) -> &mut Self {
         unsafe { self.native_mut().concat1(m.native()) }
         self
@@ -1962,37 +1959,35 @@ impl Canvas {
     /// If `paint` contains an [`Shader`] and vertices does not contain tex coords, the shader is
     /// mapped using the vertices' positions.
     ///
-    /// If vertices colors are defined in vertices, and [`Paint`] `paint` contains [`Shader`],
-    /// [`BlendMode`] mode combines vertices colors with [`Shader`].
+    /// [`BlendMode`] is ignored if [`Vertices`] does not have colors. Otherwise, it combines
+    ///   - the [`Shader`] if [`Paint`] contains [`Shader`
+    ///   - or the opaque [`Paint`] color if [`Paint`] does not contain [`Shader`]
+    /// as the src of the blend and the interpolated vertex colors as the dst.
     ///
+    /// [`MaskFilter`], [`PathEffect`], and antialiasing on [`Paint`] are ignored.
+    //
     /// - `vertices` triangle mesh to draw
-    /// - `mode` combines vertices colors with [`Shader`], if both are present
-    /// - `paint` specifies the [`Shader`], used as [`Vertices`] texture, may be `None`
+    /// - `mode` combines vertices' colors with [`Shader`] if present or [`Paint`] opaque color if
+    ///   not. Ignored if the vertices do not contain color.
+    /// - `paint` specifies the [`Shader`], used as [`Vertices`] texture, and [`ColorFilter`].
     ///
+    /// example: <https://fiddle.skia.org/c/@Canvas_drawVertices>
     /// example: <https://fiddle.skia.org/c/@Canvas_drawVertices_2>
     pub fn draw_vertices(
         &mut self,
         vertices: &Vertices,
-        mode: impl Into<Option<BlendMode>>,
-        paint: Option<&Paint>,
+        mode: BlendMode,
+        paint: &Paint,
     ) -> &mut Self {
         unsafe {
-            self.native_mut().drawVertices(
-                vertices.native(),
-                mode.into().unwrap_or(BlendMode::Modulate),
-                paint.native_ptr_or_null(),
-            )
+            self.native_mut()
+                .drawVertices(vertices.native(), mode, paint.native())
         }
         self
     }
 
     /// Draws a Coons patch: the interpolation of four cubics with shared corners,
     /// associating a color, and optionally a texture [`Point`], with each corner.
-    ///
-    /// Coons patch uses clip and [`Matrix`], `paint` [`Shader`], [`crate::ColorFilter`],
-    /// alpha, [`ImageFilter`], and [`BlendMode`]. If [`Shader`] is provided it is treated
-    /// as Coons patch texture; [`BlendMode`] mode combines color colors and [`Shader`] if
-    /// both are provided.
     ///
     /// [`Point`] array cubics specifies four [`Path`] cubic starting at the top-left corner,
     /// in clockwise order, sharing every fourth point. The last [`Path`] cubic ends at the
@@ -2005,28 +2000,40 @@ impl Canvas {
     /// corners in top-left, top-right, bottom-right, bottom-left order. If `tex_coords` is
     /// `None`, [`Shader`] is mapped using positions (derived from cubics).
     ///
+    /// [`BlendMode`] is ignored if colors is `None`. Otherwise, it combines
+    ///   - the [`Shader`] if [`Paint`] contains [`Shader`]
+    ///   - or the opaque [`Paint`] color if [`Paint`] does not contain [`Shader`]
+    /// as the src of the blend and the interpolated patch colors as the dst.
+    ///
+    /// [`MaskFilter`], [`SkPathEffect`], and antialiasing on [`Paint`] are ignored.
+    ///
     /// - `cubics` [`Path`] cubic array, sharing common points
     /// - `colors` color array, one for each corner
     /// - `tex_coords` [`Point`] array of texture coordinates, mapping [`Shader`] to corners;
     ///   may be `None`
-    /// - `mode` [`BlendMode`] for colors, and for [`Shader`] if `paint` has one
+    /// - `mode` combines patch's colors with [`Shader`] if present or [`Paint`] opaque color if
+    ///    not. Ignored if colors is `None`.
     /// - `paint` [`Shader`], [`crate::ColorFilter`], [`BlendMode`], used to draw
-    pub fn draw_patch(
+    pub fn draw_patch<'a>(
         &mut self,
         cubics: &[Point; 12],
-        colors: &[Color; 4],
+        colors: impl Into<Option<&'a [Color; 4]>>,
         tex_coords: Option<&[Point; 4]>,
-        mode: impl Into<Option<BlendMode>>,
+        mode: BlendMode,
         paint: &Paint,
     ) -> &mut Self {
+        let colors = colors
+            .into()
+            .map(|c| c.native().as_ptr())
+            .unwrap_or(ptr::null());
         unsafe {
             self.native_mut().drawPatch(
                 cubics.native().as_ptr(),
-                colors.native().as_ptr(),
+                colors,
                 tex_coords
                     .map(|tc| tc.native().as_ptr())
                     .unwrap_or(ptr::null()),
-                mode.into().unwrap_or(BlendMode::Modulate),
+                mode,
                 paint.native(),
             )
         }
