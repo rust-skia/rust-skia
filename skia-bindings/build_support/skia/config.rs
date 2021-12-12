@@ -332,8 +332,8 @@ pub fn build(
     gn_command: Option<PathBuf>,
     offline: bool,
 ) {
-    let python2 = &prerequisites::locate_python2_cmd();
-    println!("Python 2 found: {:?}", python2);
+    let python = &prerequisites::locate_python3_cmd();
+    println!("Python 3 found: {:?}", python);
 
     let ninja = ninja_command.unwrap_or_else(|| {
         env::current_dir()
@@ -347,7 +347,7 @@ pub fn build(
         #[cfg(feature = "binary-cache")]
         crate::build_support::binary_cache::resolve_dependencies();
         assert!(
-            Command::new(python2)
+            Command::new(python)
                 .arg("skia/tools/git-sync-deps")
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit())
@@ -358,7 +358,7 @@ pub fn build(
         );
     }
 
-    configure_skia(build, config, python2, gn_command.as_deref());
+    configure_skia(build, config, python, gn_command.as_deref());
     build_skia(config, &ninja);
 }
 
@@ -366,7 +366,7 @@ pub fn build(
 pub fn configure_skia(
     build: &FinalBuildConfiguration,
     config: &binaries_config::BinariesConfiguration,
-    python2: &Path,
+    python: &Path,
     gn_command: Option<&Path>,
 ) {
     let gn_args = build
@@ -386,7 +386,7 @@ pub fn configure_skia(
         .args(&[
             "gen",
             config.output_directory.to_str().unwrap(),
-            &format!("--script-executable={}", python2.to_str().unwrap()),
+            &format!("--script-executable={}", python.to_str().unwrap()),
             &format!("--args={}", gn_args),
         ])
         .envs(env::vars())
@@ -428,21 +428,21 @@ mod prerequisites {
     use std::process::Command;
 
     /// Resolves the full path
-    pub fn locate_python2_cmd() -> PathBuf {
-        const PYTHON_CMDS: [&str; 2] = ["python", "python2"];
+    pub fn locate_python3_cmd() -> PathBuf {
+        const PYTHON_CMDS: [&str; 2] = ["python", "python3"];
         for python in PYTHON_CMDS.as_ref() {
             println!("Probing '{}'", python);
-            if let Some(true) = is_python_version_2(python) {
+            if let Some(true) = is_python_version_3(python) {
                 return python.into();
             }
         }
 
-        panic!(">>>>> Probing for Python 2 failed, please make sure that it's available in PATH, probed executables are: {:?} <<<<<", PYTHON_CMDS);
+        panic!(">>>>> Probing for Python 3 failed, please make sure that it's available in PATH, probed executables are: {:?} <<<<<", PYTHON_CMDS);
     }
 
-    /// Returns true if the given python executable is python version 2.
-    /// or None if the executable was not found.
-    fn is_python_version_2(exe: impl AsRef<str>) -> Option<bool> {
+    /// Returns `true` if the given python executable identifies itself as a python version 3
+    /// executable. Returns `None` if the executable was not found.
+    fn is_python_version_3(exe: impl AsRef<str>) -> Option<bool> {
         Command::new(exe.as_ref())
             .arg("--version")
             .output()
@@ -454,7 +454,7 @@ mod prerequisites {
                 }
                 // Don't parse version output, for example output
                 // might be "Python 2.7.15+"
-                str.starts_with("Python 2.")
+                str.starts_with("Python 3.")
             })
             .ok()
     }
