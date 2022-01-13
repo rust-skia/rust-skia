@@ -1,4 +1,4 @@
-use crate::{artifact, drivers::DrawingDriver};
+use crate::{artifact, drivers::DrawingDriver, Driver};
 use ash::{
     vk::{self, Handle},
     Entry, Instance,
@@ -14,7 +14,7 @@ pub struct Vulkan {
 }
 
 impl DrawingDriver for Vulkan {
-    const NAME: &'static str = "vulkan";
+    const DRIVER: Driver = Driver::Vulkan;
 
     fn new() -> Self {
         let ash_graphics = unsafe { AshGraphics::new("skia-org") };

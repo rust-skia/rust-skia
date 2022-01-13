@@ -1,12 +1,11 @@
-use crate::artifact;
-use crate::drivers::DrawingDriver;
+use crate::{artifact, drivers::DrawingDriver, Driver};
 use skia_safe::Canvas;
 use std::path::Path;
 
 pub struct Svg;
 
 impl DrawingDriver for Svg {
-    const NAME: &'static str = "svg";
+    const DRIVER: Driver = Driver::Svg;
 
     fn new() -> Self {
         Self
