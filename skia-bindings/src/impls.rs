@@ -84,12 +84,14 @@ impl SkPathFillType {
         (self as i32 & 2) != 0
     }
 
+    #[must_use]
     pub fn to_non_inverse(self) -> Self {
+        use SkPathFillType::*;
         match self {
-            SkPathFillType::Winding => self,
-            SkPathFillType::EvenOdd => self,
-            SkPathFillType::InverseWinding => SkPathFillType::Winding,
-            SkPathFillType::InverseEvenOdd => SkPathFillType::EvenOdd,
+            Winding => self,
+            EvenOdd => self,
+            InverseWinding => Winding,
+            InverseEvenOdd => EvenOdd,
         }
     }
 }
