@@ -153,7 +153,8 @@ impl Region {
         unsafe { self.native().translate(d.x, d.y, self_ptr) }
     }
 
-    pub fn translated(&self, d: impl Into<IVector>) -> Region {
+    #[must_use]
+    pub fn translated(&self, d: impl Into<IVector>) -> Self {
         let mut r = self.clone();
         r.translate(d);
         r

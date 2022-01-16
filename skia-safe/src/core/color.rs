@@ -345,6 +345,7 @@ impl Color4f {
     // TODO: toBytes_RGBA()
     // TODO: FromBytes_RGBA
 
+    #[must_use]
     pub fn to_opaque(self) -> Self {
         Self { a: 1.0, ..self }
     }

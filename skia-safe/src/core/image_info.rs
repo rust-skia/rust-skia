@@ -148,14 +148,17 @@ impl ColorInfo {
         unsafe { sb::C_SkColorInfo_gammaCloseToSRGB(self.native()) }
     }
 
+    #[must_use]
     pub fn with_alpha_type(&self, new_alpha_type: AlphaType) -> Self {
         Self::new(self.color_type(), new_alpha_type, self.color_space())
     }
 
+    #[must_use]
     pub fn with_color_type(&self, new_color_type: ColorType) -> Self {
         Self::new(new_color_type, self.alpha_type(), self.color_space())
     }
 
+    #[must_use]
     pub fn with_color_space(&self, cs: impl Into<Option<ColorSpace>>) -> Self {
         Self::new(self.color_type(), self.alpha_type(), cs)
     }
@@ -329,10 +332,12 @@ impl ImageInfo {
         self.color_info().is_gamma_close_to_srgb()
     }
 
+    #[must_use]
     pub fn with_dimensions(&self, new_dimensions: impl Into<ISize>) -> Self {
         Self::from_color_info(new_dimensions, self.color_info().clone())
     }
 
+    #[must_use]
     pub fn with_alpha_type(&self, new_alpha_type: AlphaType) -> Self {
         Self::from_color_info(
             self.dimensions(),
@@ -340,6 +345,7 @@ impl ImageInfo {
         )
     }
 
+    #[must_use]
     pub fn with_color_type(&self, new_color_type: ColorType) -> Self {
         Self::from_color_info(
             self.dimensions(),
@@ -347,6 +353,7 @@ impl ImageInfo {
         )
     }
 
+    #[must_use]
     pub fn with_color_space(&self, new_color_space: impl Into<Option<ColorSpace>>) -> Self {
         Self::from_color_info(
             self.dimensions(),

@@ -206,6 +206,7 @@ impl TextStyle {
         TextStyle::construct(|ts| unsafe { sb::C_TextStyle_Construct(ts) })
     }
 
+    #[must_use]
     pub fn to_placeholder(&self) -> Self {
         TextStyle::from_native_c(unsafe { sb::skia_textlayout_TextStyle::new(self.native(), true) })
     }

@@ -535,6 +535,7 @@ impl Rect {
         *self = Self::from_iwh(width, height)
     }
 
+    #[must_use]
     pub fn with_offset(&self, d: impl Into<Vector>) -> Self {
         let d = d.into();
         Self::new(
@@ -545,6 +546,7 @@ impl Rect {
         )
     }
 
+    #[must_use]
     pub fn with_inset(&self, d: impl Into<Vector>) -> Self {
         let d = d.into();
         Self::new(
@@ -555,6 +557,7 @@ impl Rect {
         )
     }
 
+    #[must_use]
     pub fn with_outset(&self, d: impl Into<Vector>) -> Self {
         let d = d.into();
         Self::new(
@@ -573,6 +576,7 @@ impl Rect {
         *self = self.with_offset_to(new_p)
     }
 
+    #[must_use]
     pub fn with_offset_to(&self, new_p: impl Into<Point>) -> Self {
         let new_p = new_p.into();
         Self::new(new_p.x, new_p.y, new_p.x - self.left, new_p.y - self.top)

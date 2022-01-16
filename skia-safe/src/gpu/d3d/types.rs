@@ -89,6 +89,7 @@ impl TextureResourceInfo {
         }
     }
 
+    #[must_use]
     pub fn with_state(self, resource_state: D3D12_RESOURCE_STATES) -> Self {
         Self {
             resource_state,

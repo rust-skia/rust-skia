@@ -917,6 +917,7 @@ impl Path {
         self.with_transform_with_perspective_clip(matrix, ApplyPerspectiveClip::Yes)
     }
 
+    #[must_use]
     pub fn with_transform_with_perspective_clip(
         &self,
         matrix: &Matrix,
@@ -952,6 +953,7 @@ impl Path {
         unsafe { self.native().getLastPt(last_pt.native_mut()) }.if_true_some(last_pt)
     }
 
+    #[must_use]
     pub fn make_transform(
         &mut self,
         m: &Matrix,
@@ -960,6 +962,7 @@ impl Path {
         self.with_transform_with_perspective_clip(m, pc.into().unwrap_or(ApplyPerspectiveClip::Yes))
     }
 
+    #[must_use]
     pub fn make_scale(&mut self, (sx, sy): (scalar, scalar)) -> Path {
         self.make_transform(&Matrix::scale((sx, sy)), ApplyPerspectiveClip::No)
     }

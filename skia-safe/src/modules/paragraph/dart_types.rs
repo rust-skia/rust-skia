@@ -37,6 +37,7 @@ pub trait RangeExtensions {
     fn shift(&mut self, d: usize);
     fn contains(&self, other: &Self) -> bool;
     fn intersects(&self, other: &Self) -> bool;
+    #[must_use]
     fn intersection(&self, other: &Self) -> Self;
     fn empty(&self) -> bool;
 }

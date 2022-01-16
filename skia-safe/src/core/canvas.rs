@@ -89,6 +89,7 @@ impl<'a> Default for SaveLayerRec<'a> {
 
 impl<'a> SaveLayerRec<'a> {
     /// Hints at layer size limit
+    #[must_use]
     pub fn bounds(self, bounds: &'a Rect) -> Self {
         Self {
             bounds: Some(bounds.native()),
@@ -97,6 +98,7 @@ impl<'a> SaveLayerRec<'a> {
     }
 
     /// Modifies overlay
+    #[must_use]
     pub fn paint(self, paint: &'a Paint) -> Self {
         Self {
             paint: Some(paint.native()),
@@ -108,6 +110,7 @@ impl<'a> SaveLayerRec<'a> {
     /// [`SaveLayerFlags::INIT_WITH_PREVIOUS`] on [`Self::flags`]: the current layer is copied into
     /// the new layer, rather than initializing the new layer with transparent-black. This is then
     /// filtered by [`Self::backdrop`] (respecting the current clip).
+    #[must_use]
     pub fn backdrop(self, backdrop: &'a ImageFilter) -> Self {
         Self {
             backdrop: Some(backdrop.native()),
@@ -119,6 +122,7 @@ impl<'a> SaveLayerRec<'a> {
         since = "0.33.0",
         note = "removed without replacement, does not set clip_mask"
     )]
+    #[must_use]
     pub fn clip_mask(self, _clip_mask: &'a Image) -> Self {
         self
     }
@@ -127,11 +131,13 @@ impl<'a> SaveLayerRec<'a> {
         since = "0.33.0",
         note = "removed without replacement, does not set clip_matrix"
     )]
+    #[must_use]
     pub fn clip_matrix(self, _clip_matrix: &'a Matrix) -> Self {
         self
     }
 
     /// Preserves LCD text, creates with prior layer contents
+    #[must_use]
     pub fn flags(self, flags: SaveLayerFlags) -> Self {
         Self { flags, ..self }
     }

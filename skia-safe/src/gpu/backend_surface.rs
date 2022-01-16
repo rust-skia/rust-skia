@@ -143,6 +143,7 @@ impl BackendFormat {
             .if_true_some(d3d::DXGI_FORMAT::from_native_c(f))
     }
 
+    #[must_use]
     pub fn to_texture_2d(&self) -> Self {
         let mut new = Self::new_invalid();
         unsafe { sb::C_GrBackendFormat_makeTexture2D(self.native(), new.native_mut()) };
