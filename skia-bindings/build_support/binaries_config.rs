@@ -110,6 +110,11 @@ impl BinariesConfiguration {
             (_, "apple", "ios", abi) => {
                 link_libraries.extend(ios::link_libraries(abi, features));
             }
+            ("wasm32", "unknown", "emscripten", _) => {
+                if features.gl {
+                    link_libraries.extend(["GL"]);
+                }
+            }
             _ => panic!("unsupported target: {:?}", cargo::target()),
         };
 

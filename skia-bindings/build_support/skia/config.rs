@@ -221,6 +221,15 @@ impl FinalBuildConfiguration {
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
                     cflags.extend(ios::extra_skia_cflags(arch, abi));
                 }
+                ("wasm32", "unknown", "emscripten", _) => {
+                    args.push(("cc", quote("emcc")));
+                    args.push(("cxx", quote("em++")));
+                    args.push(("skia_gl_standard", quote("webgl")));
+                    args.push(("skia_use_freetype", yes()));
+                    args.push(("skia_use_system_freetype2", no()));
+                    args.push(("skia_use_webgl", yes_if(features.gpu())));
+                    args.push(("target_cpu", quote("wasm")));
+                }
                 (arch, _, os, _) => {
                     let skia_target_os = match os {
                         "darwin" => {
