@@ -1,12 +1,11 @@
-use crate::artifact;
-use crate::drivers::DrawingDriver;
+use crate::{artifact, drivers::DrawingDriver, Driver};
 use skia_safe::{Canvas, Surface};
 use std::path::Path;
 
 pub struct Cpu;
 
 impl DrawingDriver for Cpu {
-    const NAME: &'static str = "cpu";
+    const DRIVER: Driver = Driver::Cpu;
 
     fn new() -> Self {
         Self

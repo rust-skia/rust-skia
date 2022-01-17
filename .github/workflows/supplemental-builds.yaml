@@ -81,7 +81,9 @@ jobs:
 
     - name: 'Build with RUSTFLAGS=-Clink-dead-code (#318)'
       run: |
-        cargo build --features gl,vulkan,d3d,textlayout,webp
+        # See https://github.com/rust-lang/rust/issues/90056 why we have to provide a target.
+        # proc-macro-error 1.0.4 causes a no metadata found: failed to decompress metadata error.
+        cargo build --features gl,vulkan,d3d,textlayout,webp --target x86_64-pc-windows-msvc
       env:
         RUSTFLAGS: '-Clink-dead-code'
 
