@@ -147,7 +147,7 @@ impl StrutStyle {
     }
 }
 
-// Can't use Handle<> here, std::u16string maintains an interior pointer.
+// Can't use `Handle<>` here, `std::u16string` maintains an interior pointer.
 pub type ParagraphStyle = RefHandle<sb::skia_textlayout_ParagraphStyle>;
 unsafe_send_sync!(ParagraphStyle);
 
@@ -308,5 +308,18 @@ impl ParagraphStyle {
     pub fn set_draw_options(&mut self, value: DrawOptions) -> &mut Self {
         self.native_mut().fDrawingOptions = value;
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::ParagraphStyle;
+
+    // Regression test for https://github.com/rust-skia/rust-skia/issues/607
+    #[test]
+    fn paragraph_style_supports_equality() {
+        let a = ParagraphStyle::default();
+        let b = ParagraphStyle::default();
+        assert_eq!(a, b)
     }
 }

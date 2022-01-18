@@ -468,6 +468,12 @@ impl<N: NativeDrop> Drop for RefHandle<N> {
     }
 }
 
+impl<N: NativeDrop + NativePartialEq> PartialEq for RefHandle<N> {
+    fn eq(&self, rhs: &Self) -> bool {
+        self.native().eq(rhs.native())
+    }
+}
+
 impl<N: NativeDrop> NativeAccess<N> for RefHandle<N> {
     fn native(&self) -> &N {
         unsafe { self.0.as_ref() }
