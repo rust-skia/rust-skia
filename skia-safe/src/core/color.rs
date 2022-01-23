@@ -103,7 +103,7 @@ impl Color {
     pub const TRANSPARENT: Self = Self(sb::SK_ColorTRANSPARENT);
     pub const BLACK: Self = Self(sb::SK_ColorBLACK);
     pub const DARK_GRAY: Self = Self(sb::SK_ColorDKGRAY);
-    pub const GRAY: Self = Self(sb::SK_ColorLTGRAY);
+    pub const GRAY: Self = Self(sb::SK_ColorGRAY);
     pub const LIGHT_GRAY: Self = Self(sb::SK_ColorLTGRAY);
     pub const WHITE: Self = Self(sb::SK_ColorWHITE);
     pub const RED: Self = Self(sb::SK_ColorRED);
