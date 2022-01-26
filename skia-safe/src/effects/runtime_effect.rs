@@ -52,6 +52,10 @@ impl Uniform {
         self.flags().contains(uniform::Flags::ARRAY)
     }
 
+    pub fn is_color(&self) -> bool {
+        self.flags().contains(uniform::Flags::COLOR)
+    }
+
     pub fn size_in_bytes(&self) -> usize {
         unsafe { self.native().sizeInBytes() }
     }
@@ -66,7 +70,7 @@ pub mod uniform {
     bitflags! {
         pub struct Flags : u32 {
             const ARRAY = sb::SkRuntimeEffect_Uniform_Flags_kArray_Flag as _;
-            const SRGB_UNPREMUL = sb::SkRuntimeEffect_Uniform_Flags_kSRGBUnpremul_Flag as _;
+            const COLOR = sb::SkRuntimeEffect_Uniform_Flags_kColor_Flag as _;
         }
     }
 }
@@ -295,6 +299,8 @@ impl RuntimeEffect {
             )
         })
     }
+
+    // TODO: wrap MakeTraced
 
     pub fn source(&self) -> &str {
         let mut len = 0;

@@ -9,12 +9,6 @@ pub mod pdf {
     };
     use std::{ffi::CString, fmt, mem, ptr};
 
-    pub use sb::SkPDF_DocumentStructureType as DocumentStructureType;
-    #[test]
-    fn document_structure_type_naming() {
-        let _ = DocumentStructureType::BibEntry;
-    }
-
     pub type AttributeList = Handle<SkPDF_AttributeList>;
     unsafe_send_sync!(AttributeList);
 

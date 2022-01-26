@@ -1,9 +1,10 @@
 #ifndef SKIA_BINDINGS_BINDINGS_H
 #define SKIA_BINDINGS_BINDINGS_H
 
+#include <vector>
 #include "include/core/SkRefCnt.h"
 #include "include/core/SkString.h"
-#include <vector>
+#include "include/private/SkTOptional.h"
 
 template<typename T>
 inline sk_sp<T> spFromConst(const T* pt) {
@@ -13,6 +14,11 @@ inline sk_sp<T> spFromConst(const T* pt) {
 template<typename T>
 inline sk_sp<T> sp(T* pt) {
     return sk_sp<T>(pt);
+}
+
+template<typename T>
+inline skstd::optional<T> opt(const T* pt) {
+    return pt ? skstd::optional<T>(*pt) : skstd::nullopt;
 }
 
 extern "C" struct TraitObject {
