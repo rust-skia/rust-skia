@@ -4,6 +4,7 @@
         "EMCC",
         "emscripten",
         "RGBX",
-        "antialiasing"
+        "antialiasing",
+        "RGBX"
     ]
 }
