@@ -1964,12 +1964,13 @@ impl Canvas {
     ///   - or the opaque [`Paint`] color if [`Paint`] does not contain [`Shader`]
     /// as the src of the blend and the interpolated vertex colors as the dst.
     ///
-    /// [`MaskFilter`], [`PathEffect`], and antialiasing on [`Paint`] are ignored.
+    /// [`crate::MaskFilter`], [`crate::PathEffect`], and antialiasing on [`Paint`] are ignored.
     //
     /// - `vertices` triangle mesh to draw
     /// - `mode` combines vertices' colors with [`Shader`] if present or [`Paint`] opaque color if
     ///   not. Ignored if the vertices do not contain color.
-    /// - `paint` specifies the [`Shader`], used as [`Vertices`] texture, and [`ColorFilter`].
+    /// - `paint` specifies the [`Shader`], used as [`Vertices`] texture, and
+    ///   [`crate::ColorFilter`].
     ///
     /// example: <https://fiddle.skia.org/c/@Canvas_drawVertices>
     /// example: <https://fiddle.skia.org/c/@Canvas_drawVertices_2>
@@ -2005,7 +2006,7 @@ impl Canvas {
     ///   - or the opaque [`Paint`] color if [`Paint`] does not contain [`Shader`]
     /// as the src of the blend and the interpolated patch colors as the dst.
     ///
-    /// [`MaskFilter`], [`SkPathEffect`], and antialiasing on [`Paint`] are ignored.
+    /// [`crate::MaskFilter`], [`crate::PathEffect`], and antialiasing on [`Paint`] are ignored.
     ///
     /// - `cubics` [`Path`] cubic array, sharing common points
     /// - `colors` color array, one for each corner
