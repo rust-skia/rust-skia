@@ -11,7 +11,7 @@ fn main() {
 
 #[cfg(all(not(target_os = "android"), not(feature = "gl")))]
 fn main() {
-    println!("To run this example, invoke cargo with --feature \"gl\".")
+    println!("To run this example, invoke cargo with --features \"gl\".")
 }
 
 #[cfg(all(not(target_os = "android"), feature = "gl"))]
