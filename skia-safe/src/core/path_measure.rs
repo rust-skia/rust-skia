@@ -41,6 +41,22 @@ impl fmt::Debug for PathMeasure {
     }
 }
 
+/// Warning: Even if you pass in a `PathMeasure` with multiple contours, most of this struct's functions, including `length` only return the value for the first contour on the path (which is why they aren't `const`). You must exhaust `PathMeasure::next_contour`.
+///
+/// ```
+/// use skia_safe::Path;
+/// use std::f64::consts::PI;
+/// let path = Path::circle((0., 0.), 10, None);
+/// let path2 = Path::circle((100., 100.), 27, None);
+/// let mut measure = skia::PathMeasure::new(&skp, false, None);
+/// let mut lengths = vec![measure.length()];
+/// while measure.next_contour() {
+///     lengths.push(measure.length());
+/// }
+/// assert_eq!(lengths.first().unwrap() as i64, (2. * PI * 10.0) as i64);
+/// assert_eq!(lengths.get(1).unwrap() as i64, (2. * PI * 27.0) as i64);
+/// ```
+///
 impl PathMeasure {
     pub fn new(path: &Path, force_closed: bool, res_scale: impl Into<Option<scalar>>) -> Self {
         Self::from_native_c(unsafe {
@@ -62,12 +78,10 @@ impl PathMeasure {
         self
     }
 
-    // TODO: why is getLength() non-const.
     pub fn length(&mut self) -> scalar {
         unsafe { self.native_mut().getLength() }
     }
 
-    // TODO: why is getPosTan() non-const?
     // TODO: rename to get_pos_tan(), because the function has arguments?
     pub fn pos_tan(&mut self, distance: scalar) -> Option<(Point, Vector)> {
         let mut position = Point::default();
@@ -79,7 +93,6 @@ impl PathMeasure {
         .if_true_some((position, tangent))
     }
 
-    // TODO: why is getMatrix() non-const?
     // TODO: rename to get_matrix(), because the function has arguments?
     pub fn matrix(
         &mut self,
@@ -99,7 +112,6 @@ impl PathMeasure {
         .if_true_some(m)
     }
 
-    // TODO: why is getSegment() non-const?
     // TODO: rename to get_segment(), because the function has arguments?
     pub fn segment(
         &mut self,
@@ -115,7 +127,6 @@ impl PathMeasure {
         .if_true_some(p)
     }
 
-    // TODO: why is isClosed() non-const?
     #[allow(clippy::wrong_self_convention)]
     pub fn is_closed(&mut self) -> bool {
         unsafe { self.native_mut().isClosed() }
