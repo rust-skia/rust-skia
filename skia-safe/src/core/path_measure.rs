@@ -43,19 +43,18 @@ impl fmt::Debug for PathMeasure {
 
 impl PathMeasure {
     pub fn new(path: &Path, force_closed: bool, res_scale: impl Into<Option<scalar>>) -> Self {
-        Self::from_path(path, force_closed, res_scale)
+        Self::from_native_c(unsafe {
+            SkPathMeasure::new1(path.native(), force_closed, res_scale.into().unwrap_or(1.0))
+        })
     }
 
-    // TODO: rename for_path / of_path?
-    // TODO: deprecate in favor of new()?
+    #[deprecated(since = "0.48.0", note = "Use PathMeasure::new")]
     pub fn from_path(
         path: &Path,
         force_closed: bool,
         res_scale: impl Into<Option<scalar>>,
     ) -> Self {
-        Self::from_native_c(unsafe {
-            SkPathMeasure::new1(path.native(), force_closed, res_scale.into().unwrap_or(1.0))
-        })
+        Self::new(path, force_closed, res_scale)
     }
 
     pub fn set_path(&mut self, path: &Path, force_closed: bool) -> &mut Self {
