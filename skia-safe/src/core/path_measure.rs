@@ -44,19 +44,19 @@ impl fmt::Debug for PathMeasure {
 /// Warning: Even if you pass in a `PathMeasure` with multiple contours, most of this struct's functions, including `length` only return the value for the first contour on the path (which is why they aren't `const`). You must exhaust `PathMeasure::next_contour`.
 ///
 /// ```
-/// use skia_safe::Path;
+/// use skia_safe::{PathMeasure, Point};
 /// use std::f64::consts::PI;
-/// let path = Path::circle((0., 0.), 10, None);
-/// let path2 = Path::circle((100., 100.), 27, None);
-/// let mut measure = skia::PathMeasure::new(&skp, false, None);
+/// let mut path = Path::circle((0., 0.), 10.0, None);
+/// path.add_path(&Path::circle((100., 100.), 27.0, None), Point::default(), None);
+/// let mut measure = PathMeasure::new(&path, false, None);
 /// let mut lengths = vec![measure.length()];
 /// while measure.next_contour() {
 ///     lengths.push(measure.length());
 /// }
-/// assert_eq!(lengths.first().unwrap() as i64, (2. * PI * 10.0) as i64);
-/// assert_eq!(lengths.get(1).unwrap() as i64, (2. * PI * 27.0) as i64);
+/// assert_eq!(*lengths.first().unwrap() as i64, (2. * PI * 10.0) as i64);
+/// assert_eq!(*lengths.get(1).unwrap() as i64, (2. * PI * 27.0) as i64);
+/// eprintln!("Circle lengths: {:?}", &lengths);
 /// ```
-///
 impl PathMeasure {
     pub fn new(path: &Path, force_closed: bool, res_scale: impl Into<Option<scalar>>) -> Self {
         Self::from_native_c(unsafe {
