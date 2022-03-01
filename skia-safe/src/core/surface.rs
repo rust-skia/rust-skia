@@ -221,8 +221,9 @@ impl Surface {
         )
     }
 
+    #[allow(clippy::missing_safety_doc)]
     #[cfg(feature = "metal")]
-    pub fn from_mtk_view(
+    pub unsafe fn from_mtk_view(
         context: &mut gpu::RecordingContext,
         mtk_view: gpu::mtl::Handle,
         origin: gpu::SurfaceOrigin,
