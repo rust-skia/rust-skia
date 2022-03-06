@@ -42,8 +42,6 @@ jobs:
   linux-wasm:
     runs-on: ubuntu-20.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
-    env:
-      EMCC_CFLAGS: '-s ERROR_ON_UNDEFINED_SYMBOLS=0'
 
     steps:
     - uses: actions/checkout@v2
@@ -65,7 +63,7 @@ jobs:
     - name: 'Build with Target wasm32-unknown-emscripten'
       shell: bash
       run: |
-        cd wasm-example && cargo build --target wasm32-unknown-emscripten
+        source /emsdk/emsdk_env.sh && cd wasm-example && cargo build --target wasm32-unknown-emscripten
 
   # https://github.com/rust-skia/rust-skia/issues/535
   # linux-arm64-build:
