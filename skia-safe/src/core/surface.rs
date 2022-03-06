@@ -199,9 +199,10 @@ impl Surface {
         ))
     }
 
+    #[allow(clippy::missing_safety_doc)]
     #[cfg(feature = "metal")]
     #[deprecated(since = "0.36.0", note = "use from_mtk_view()")]
-    pub fn from_ca_mtk_view(
+    pub unsafe fn from_ca_mtk_view(
         context: &mut gpu::DirectContext,
         mtk_view: gpu::mtl::Handle,
         origin: gpu::SurfaceOrigin,
@@ -232,7 +233,7 @@ impl Surface {
         color_space: impl Into<Option<crate::ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
-        Self::from_ptr(unsafe {
+        Self::from_ptr(
             sb::C_SkSurface_MakeFromMTKView(
                 context.native_mut(),
                 mtk_view,
@@ -242,7 +243,7 @@ impl Surface {
                 color_space.into().into_ptr_or_null(),
                 surface_props.native_ptr_or_null(),
             )
-        })
+        )
     }
 }
 
