@@ -233,17 +233,15 @@ impl Surface {
         color_space: impl Into<Option<crate::ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
-        Self::from_ptr(
-            sb::C_SkSurface_MakeFromMTKView(
-                context.native_mut(),
-                mtk_view,
-                origin,
-                sample_count.into().unwrap_or(0).try_into().unwrap(),
-                color_type.into_native(),
-                color_space.into().into_ptr_or_null(),
-                surface_props.native_ptr_or_null(),
-            )
-        )
+        Self::from_ptr(sb::C_SkSurface_MakeFromMTKView(
+            context.native_mut(),
+            mtk_view,
+            origin,
+            sample_count.into().unwrap_or(0).try_into().unwrap(),
+            color_type.into_native(),
+            color_space.into().into_ptr_or_null(),
+            surface_props.native_ptr_or_null(),
+        ))
     }
 }
 
