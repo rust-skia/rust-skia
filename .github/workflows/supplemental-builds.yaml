@@ -39,6 +39,34 @@ jobs:
       run: |
         make test-local-build
 
+  linux-wasm:
+    runs-on: ubuntu-20.04
+    container: ghcr.io/pragmatrix/rust-skia-linux:latest
+    env:
+      EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Prepare Rustup
+      run: (cd /github/home && ln -s /root/.cargo)
+
+    - name: Update Rustup and Rust
+      run: rustup update
+
+    - name: Configure Rust Toolchain
+      run: rustup default stable
+
+    - name: Install wasm32-unknown-emscripten Target
+      run: rustup target add wasm32-unknown-emscripten
+
+    - name: 'Build with Target wasm32-unknown-emscripten'
+      shell: bash
+      run: |
+        source /emsdk/emsdk_env.sh && cd wasm-example && cargo build --target wasm32-unknown-emscripten
+
   # https://github.com/rust-skia/rust-skia/issues/535
   # linux-arm64-build:
   #   runs-on: ubuntu-20.04
