@@ -110,38 +110,40 @@ mod tests {
 
     #[test]
     fn test_all_formats_exhaustive() {
-        let x = Format::ALPHA8;
+        use Format::*;
+        let x = ALPHA8;
         // !!!!!
         // IF this match is not exhaustive anymore, the implementations of the format conversions
         // need to be updated in `skia-bindings/src/gl.cpp`, too.
         match x {
-            Format::Unknown => {}
-            Format::RGBA8 => {}
-            Format::R8 => {}
-            Format::ALPHA8 => {}
-            Format::LUMINANCE8 => {}
-            Format::LUMINANCE8_ALPHA8 => {}
-            Format::BGRA8 => {}
-            Format::RGB565 => {}
-            Format::RGBA16F => {}
-            Format::R16F => {}
-            Format::RGB8 => {}
-            Format::RG8 => {}
-            Format::RGB10_A2 => {}
-            Format::RGBA4 => {}
-            Format::SRGB8_ALPHA8 => {}
-            Format::COMPRESSED_ETC1_RGB8 => {}
-            Format::COMPRESSED_RGB8_ETC2 => {}
-            Format::COMPRESSED_RGB8_BC1 => {}
-            Format::COMPRESSED_RGBA8_BC1 => {}
-            Format::R16 => {}
-            Format::RG16 => {}
-            Format::RGBA16 => {}
-            Format::RG16F => {}
-            Format::LUMINANCE16F => {}
-            Format::STENCIL_INDEX8 => {}
-            Format::STENCIL_INDEX16 => {}
-            Format::DEPTH24_STENCIL8 => {}
+            Unknown => {}
+            RGBA8 => {}
+            R8 => {}
+            ALPHA8 => {}
+            LUMINANCE8 => {}
+            LUMINANCE8_ALPHA8 => {}
+            BGRA8 => {}
+            RGB565 => {}
+            RGBA16F => {}
+            R16F => {}
+            RGB8 => {}
+            RGBX8 => {}
+            RG8 => {}
+            RGB10_A2 => {}
+            RGBA4 => {}
+            SRGB8_ALPHA8 => {}
+            COMPRESSED_ETC1_RGB8 => {}
+            COMPRESSED_RGB8_ETC2 => {}
+            COMPRESSED_RGB8_BC1 => {}
+            COMPRESSED_RGBA8_BC1 => {}
+            R16 => {}
+            RG16 => {}
+            RGBA16 => {}
+            RG16F => {}
+            LUMINANCE16F => {}
+            STENCIL_INDEX8 => {}
+            STENCIL_INDEX16 => {}
+            DEPTH24_STENCIL8 => {}
         }
     }
 

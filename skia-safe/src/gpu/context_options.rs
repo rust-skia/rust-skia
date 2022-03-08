@@ -42,6 +42,7 @@ pub struct ContextOptions {
     pub suppress_mipmap_support: bool,
     pub enable_experimental_hardware_tessellation: bool,
     pub reduced_shader_variations: bool,
+    pub allow_msaa_on_new_intel: bool,
     pub driver_bug_workarounds: DriverBugWorkarounds,
 }
 unsafe_send_sync!(ContextOptions);
@@ -59,3 +60,5 @@ impl ContextOptions {
 }
 
 native_transmutable!(GrContextOptions, ContextOptions, context_options_layout);
+
+// TODO: PersistentCache, ShaderErrorHandler
