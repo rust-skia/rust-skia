@@ -471,6 +471,11 @@ impl Surface {
         }
     }
 
+    #[allow(non_snake_case)]
+    pub fn resolveMSAA(&mut self) {
+        unsafe { self.native_mut().resolveMSAA() }
+    }
+
     // After deprecated since 0.30.0 (m85), the default flush() behavior changed in m86.
     // For more information, take a look at the documentation in Skia's SkSurface.h
     #[cfg(feature = "gpu")]

@@ -289,6 +289,8 @@ impl Typeface {
             })
     }
 
+    // TODO: openExistingStream()
+
     // TODO: createScalerContext()
 
     pub fn bounds(&self) -> Rect {
