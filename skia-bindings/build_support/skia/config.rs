@@ -74,6 +74,7 @@ impl FinalBuildConfiguration {
                 ("is_official_build", yes_if(!build.skia_debug)),
                 ("is_debug", yes_if(build.skia_debug)),
                 ("skia_enable_gpu", yes_if(features.gpu())),
+                ("skia_enable_skottie", no()),
                 ("skia_use_gl", yes_if(features.gl)),
                 ("skia_use_egl", yes_if(features.egl)),
                 ("skia_use_x11", yes_if(features.x11)),
