@@ -199,7 +199,6 @@ impl RuntimeEffect {
         uniforms: impl Into<Data>,
         children: &[ChildPtr],
         local_matrix: impl Into<Option<&'a Matrix>>,
-        is_opaque: bool,
     ) -> Option<Shader> {
         let mut children: Vec<_> = children
             .iter()
@@ -216,7 +215,6 @@ impl RuntimeEffect {
                 children_ptr,
                 children.len(),
                 local_matrix.into().native_ptr_or_null(),
-                is_opaque,
             )
         })
     }

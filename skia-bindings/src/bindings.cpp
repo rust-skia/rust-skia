@@ -2327,9 +2327,12 @@ SkRuntimeEffect *C_SkRuntimeEffect_MakeForBlender(
 SkShader *C_SkRuntimeEffect_makeShader(
     const SkRuntimeEffect *self, SkData *uniforms,
     SkRuntimeEffect::ChildPtr *children, size_t childCount,
-    const SkMatrix *localMatrix, bool isOpaque)
+    const SkMatrix *localMatrix)
 {
-    return self->makeShader(sp(uniforms), SkSpan<SkRuntimeEffect::ChildPtr>(children, childCount), localMatrix, isOpaque).release();
+    return self->makeShader(
+        sp(uniforms), 
+        SkSpan<SkRuntimeEffect::ChildPtr>(children, childCount), 
+        localMatrix).release();
 }
 
 SkImage *C_SkRuntimeEffect_makeImage(
