@@ -273,6 +273,10 @@ extern "C" {
         return self->Build().release();
     }
 
+    void C_ParagraphBuilder_Reset(ParagraphBuilder* self) {
+        return self->Reset();
+    }
+
     ParagraphBuilder* C_ParagraphBuilder_make(const ParagraphStyle* style, const FontCollection* fontCollection) {
         return ParagraphBuilder::make(*style, spFromConst(fontCollection)).release();
     }

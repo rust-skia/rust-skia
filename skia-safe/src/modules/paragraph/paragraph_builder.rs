@@ -63,6 +63,10 @@ impl ParagraphBuilder {
         Paragraph::from_ptr(unsafe { sb::C_ParagraphBuilder_Build(self.native_mut()) }).unwrap()
     }
 
+    pub fn reset(&mut self) {
+        unsafe { sb::C_ParagraphBuilder_Reset(self.native_mut()) }
+    }
+
     pub fn new(style: &ParagraphStyle, font_collection: impl Into<FontCollection>) -> Self {
         #[cfg(feature = "embed-icudtl")]
         crate::icu::init();
