@@ -3,8 +3,9 @@
         "antialiasing",
         "EMCC",
         "emscripten",
+        "emsdk",
         "RGBX",
-        "antialiasing",
-        "RGBX"
+        "skottie",
+        "webgl"
     ]
 }
