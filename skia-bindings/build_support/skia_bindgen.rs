@@ -196,7 +196,10 @@ pub fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Pat
 
     cc_build.cpp(true).out_dir(output_directory);
 
-    if !cfg!(windows) {
+    if cfg!(windows) {
+        // m100: See also skia/BUILD.gn `config("cpp17")`
+        cc_build.flag("/std:c++17");
+    } else {
         cc_build.flag("-std=c++17");
     }
 
