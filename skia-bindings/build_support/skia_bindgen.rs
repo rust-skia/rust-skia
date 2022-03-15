@@ -440,8 +440,8 @@ const OPAQUE_TYPES: &[&str] = &[
     "std::tuple",
     // Homebrew macOS LLVM 13
     "std::tuple_.*",
-    // m93: private, exposed by Paint::asBlendMode(), fails layout tests.
-    "skstd::optional",
+    // m100
+    "std::optional",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[
