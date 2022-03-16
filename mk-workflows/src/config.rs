@@ -46,21 +46,21 @@ pub fn jobs(workflow: &Workflow) -> Vec<Job> {
 pub fn qa_jobs() -> Vec<Job> {
     [
         Job {
-            name: "stable-all-features",
+            name: "stable-all-features".into(),
             toolchain: "stable",
             features: "gl,vulkan,textlayout,webp".into(),
             example_args: Some("--driver cpu --driver pdf --driver svg".into()),
             ..Job::default()
         },
         Job {
-            name: "stable-all-features-debug",
+            name: "stable-all-features-debug".into(),
             toolchain: "stable",
             features: "gl,vulkan,textlayout,webp".into(),
             skia_debug: true,
             ..Job::default()
         },
         Job {
-            name: "beta-all-features",
+            name: "beta-all-features".into(),
             toolchain: "beta",
             features: "gl,vulkan,textlayout,webp".into(),
             ..Job::default()
@@ -86,6 +86,17 @@ pub fn release_jobs(workflow: &Workflow) -> Vec<Job> {
         HostOS::Windows => {
             jobs.push(job("release-d3d", "d3d"));
             jobs.push(job("release-d3d-textlayout", "d3d,textlayout"));
+
+            let static_jobs: Vec<_> = jobs
+                .iter()
+                .cloned()
+                .map(|j| Job {
+                    name: j.name + "-static",
+                    crt_static: true,
+                    ..j
+                })
+                .collect();
+            jobs.extend(static_jobs);
         }
         HostOS::Linux => {
             jobs.push(job("release-gl-x11", "gl,x11"));
@@ -101,7 +112,7 @@ pub fn release_jobs(workflow: &Workflow) -> Vec<Job> {
 
     fn job(name: &'static str, features: impl Into<Features>) -> Job {
         Job {
-            name,
+            name: name.into(),
             toolchain: "stable",
             features: features.into(),
             ..Job::default()

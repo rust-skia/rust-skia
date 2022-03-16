@@ -22,6 +22,7 @@ jobs:
     # container: ghcr.io/pragmatrix/rust-skia-windows:latest
     env: 
       SKIA_DEBUG: 0
+      RUSTFLAGS: ''
     
     steps:
     - uses: actions/checkout@v2
@@ -126,6 +127,7 @@ jobs:
     # container: ghcr.io/pragmatrix/rust-skia-windows:latest
     env: 
       SKIA_DEBUG: 1
+      RUSTFLAGS: ''
     
     steps:
     - uses: actions/checkout@v2
@@ -230,6 +232,7 @@ jobs:
     # container: ghcr.io/pragmatrix/rust-skia-windows:latest
     env: 
       SKIA_DEBUG: 0
+      RUSTFLAGS: ''
     
     steps:
     - uses: actions/checkout@v2

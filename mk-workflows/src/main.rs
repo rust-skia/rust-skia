@@ -63,12 +63,13 @@ impl fmt::Display for HostOS {
     }
 }
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct Job {
-    name: &'static str,
+    name: String,
     toolchain: &'static str,
     features: Features,
     skia_debug: bool,
+    crt_static: bool,
     // we may need to disable clippy for beta builds temporarily.
     disable_clippy: bool,
     example_args: Option<String>,
@@ -83,7 +84,7 @@ fn build_workflow(workflow: &Workflow, jobs: &[Job]) {
     let output_filename = PathBuf::new()
         .join(".github")
         .join("workflows")
-        .join(format!("{}.yaml", workflow_name));
+        .join(format!("{workflow_name}.yaml"));
 
     let header = build_header(&workflow_name, workflow.kind);
 
@@ -91,8 +92,9 @@ fn build_workflow(workflow: &Workflow, jobs: &[Job]) {
 
     for job in jobs {
         {
-            let job_name = workflow_name.clone() + "-" + job.name;
-            let job_name = format!("{}:", job_name).indented(1);
+            let job_name = &job.name;
+            let job_name = format!("{workflow_name}-{job_name}");
+            let job_name = format!("{job_name}:").indented(1);
             parts.push(job_name);
         }
 
@@ -134,9 +136,16 @@ fn build_header(workflow_name: &str, workflow_kind: WorkflowKind) -> String {
 fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[Target]) -> String {
     let skia_debug = if job.skia_debug { "1" } else { "0" };
 
+    let rust_flags = if job.crt_static {
+        "-C target-feature=+crt-static"
+    } else {
+        ""
+    };
+
     let mut replacements = vec![
         ("rustToolchain".into(), job.toolchain.into()),
         ("skiaDebug".into(), skia_debug.into()),
+        ("rustFlags".into(), rust_flags.into()),
     ];
 
     if let Some(macosx_deployment_target) = macosx_deployment_target(workflow, job, targets) {
