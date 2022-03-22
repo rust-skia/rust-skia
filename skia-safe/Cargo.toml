@@ -61,3 +61,11 @@ static_assertions = "1.1"
 glutin = "0.28"
 gl-rs = { package = "gl", version = "0.14.0" }
 
+# metal-window
+[target.'cfg(target_os = "macos")'.dev-dependencies]
+metal-rs = { package = "metal", version = "0.23.1" }
+winit = "0.26.1"
+objc = "0.2.7"
+cocoa = "0.24.0"
+core-graphics-types = "0.1.1"
+foreign-types-shared = "0.1.1"
