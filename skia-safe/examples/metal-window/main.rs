@@ -1,5 +1,3 @@
-use skia_safe::{scalar, Canvas, Color4f, ColorType, Paint, Point, Rect, Size, Surface};
-
 #[cfg(not(target_os = "macos"))]
 fn main() {
     println!("This example is only supported on macos")
@@ -9,6 +7,9 @@ fn main() {
 fn main() {
     println!("To run this example, invoke cargo with --features \"metal\".")
 }
+
+#[cfg(all(target_os = "macos", feature = "metal"))]
+use skia_safe::{scalar, Canvas, Color4f, ColorType, Paint, Point, Rect, Size, Surface};
 
 #[cfg(all(target_os = "macos", feature = "metal"))]
 fn main() {
@@ -130,6 +131,7 @@ fn main() {
 }
 
 /// Renders a rectangle that occupies exactly half of the canvas
+#[cfg(all(target_os = "macos", feature = "metal"))]
 fn draw(canvas: &mut Canvas) {
     let canvas_size = Size::from(canvas.base_layer_size());
 
