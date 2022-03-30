@@ -392,7 +392,7 @@ impl Path {
     }
 
     pub fn is_convex(&self) -> bool {
-        unsafe { sb::C_SkPath_isConvex(self.native()) }
+        unsafe { self.native().isConvex() }
     }
 
     pub fn is_oval(&self) -> Option<Rect> {
@@ -416,7 +416,7 @@ impl Path {
     }
 
     pub fn is_empty(&self) -> bool {
-        unsafe { sb::C_SkPath_isEmpty(self.native()) }
+        unsafe { self.native().isEmpty() }
     }
 
     pub fn is_last_contour_closed(&self) -> bool {
@@ -424,7 +424,7 @@ impl Path {
     }
 
     pub fn is_finite(&self) -> bool {
-        unsafe { sb::C_SkPath_isFinite(self.native()) }
+        unsafe { self.native().isFinite() }
     }
 
     pub fn is_volatile(&self) -> bool {
@@ -974,7 +974,7 @@ impl Path {
     }
 
     pub fn segment_masks(&self) -> SegmentMask {
-        SegmentMask::from_bits_truncate(unsafe { sb::C_SkPath_getSegmentMasks(self.native()) })
+        SegmentMask::from_bits_truncate(unsafe { self.native().getSegmentMasks() })
     }
 
     pub fn contains(&self, p: impl Into<Point>) -> bool {
@@ -1036,7 +1036,7 @@ impl Path {
     }
 
     pub fn is_valid(&self) -> bool {
-        unsafe { sb::C_SkPath_isValid(self.native()) }
+        unsafe { self.native().isValid() }
     }
 }
 

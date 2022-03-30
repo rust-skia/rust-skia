@@ -1,6 +1,9 @@
 mod annotation;
 pub use annotation::annotate;
 
+mod alpha_type;
+pub use alpha_type::*;
+
 mod bbh_factory;
 pub use bbh_factory::*;
 
@@ -30,6 +33,9 @@ pub use color_filter::{color_filters, ColorFilter};
 
 mod color_space;
 pub use color_space::*;
+
+mod color_type;
+pub use color_type::*;
 
 pub mod contour_measure;
 pub use contour_measure::{ContourMeasure, ContourMeasureIter};

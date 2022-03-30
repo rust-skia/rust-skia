@@ -379,6 +379,8 @@ impl From<Blender> for ChildPtr {
     }
 }
 
+// TODO: Create `ChildPtr` from a Flattenable?
+
 impl ChildPtr {
     pub fn ty(&self) -> ChildType {
         match self {
