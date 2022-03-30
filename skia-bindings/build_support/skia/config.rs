@@ -228,6 +228,8 @@ impl FinalBuildConfiguration {
                     args.push(("skia_gl_standard", quote("webgl")));
                     args.push(("skia_use_freetype", yes()));
                     args.push(("skia_use_system_freetype2", no()));
+                    // Default causes linker Error: Undefined symbol `SK_EMBEDDED_FONTS`.
+                    args.push(("skia_enable_fontmgr_custom_embedded", no()));
                     args.push(("skia_use_webgl", yes_if(features.gpu())));
                     args.push(("target_cpu", quote("wasm")));
                 }
