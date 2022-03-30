@@ -1,3 +1,4 @@
+#include "include/core/SkCanvas.h"
 #include "include/svg/SkSVGCanvas.h"
 
 extern "C" void C_SVG_Types(SkSVGCanvas *) {}
