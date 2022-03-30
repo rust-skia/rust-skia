@@ -6,6 +6,7 @@
         "emsdk",
         "RGBX",
         "skottie",
-        "webgl"
+        "webgl",
+        "wuffs"
     ]
 }
