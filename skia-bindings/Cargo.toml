@@ -74,11 +74,6 @@ ureq = { version = "2.0.1", optional = true }
 flate2 = { version = "1.0.7", optional = true }
 tar = { version = "0.4.26", optional = true }
 
-# On the CI we don't specify the libclang location explicitly and PATH contains
-# multiple of them. clang-sys version 1.0.2 changed the resolvement order.
-# https://github.com/KyleMayes/clang-sys/pull/118
-clang-sys = "=1.0.1"
-
 # For reading .cargo.vcs_info.json to get the repository sha1 that is used to download
 # the matching prebuilt binaries.
 serde_json = "1.0.39"
