@@ -471,8 +471,8 @@ impl Surface {
         }
     }
 
-    #[allow(non_snake_case)]
-    pub fn resolveMSAA(&mut self) {
+    #[cfg(feature = "gpu")]
+    pub fn resolve_msaa(&mut self) {
         unsafe { self.native_mut().resolveMSAA() }
     }
 
