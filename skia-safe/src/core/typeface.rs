@@ -9,7 +9,7 @@ use skia_bindings::{self as sb, SkRefCntBase, SkTypeface, SkTypeface_LocalizedSt
 use std::{ffi, fmt, mem, ptr};
 
 pub type TypefaceId = skia_bindings::SkTypefaceID;
-#[deprecated(since = "0.0.0", note = "use TypefaceId")]
+#[deprecated(since = "0.49.0", note = "use TypefaceId")]
 pub type FontId = TypefaceId;
 pub type FontTableTag = skia_bindings::SkFontTableTag;
 
