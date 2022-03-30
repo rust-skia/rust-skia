@@ -1352,9 +1352,18 @@ extern "C" void C_SkFontArguments_setVariationDesignPosition(SkFontArguments* se
     self->setVariationDesignPosition(position);
 }
 
+extern "C" void C_SkFontArguments_setPalette(SkFontArguments* self, SkFontArguments::Palette palette) {
+    self->setPalette(palette);
+}
+
 extern "C" SkFontArguments::VariationPosition
 C_SkFontArguments_getVariationDesignPosition(const SkFontArguments *self) {
     return self->getVariationDesignPosition();
+}
+
+extern "C" SkFontArguments::Palette
+C_SkFontArguments_getPalette(const SkFontArguments *self) {
+    return self->getPalette();
 }
 
 //
@@ -2327,9 +2336,12 @@ SkRuntimeEffect *C_SkRuntimeEffect_MakeForBlender(
 SkShader *C_SkRuntimeEffect_makeShader(
     const SkRuntimeEffect *self, SkData *uniforms,
     SkRuntimeEffect::ChildPtr *children, size_t childCount,
-    const SkMatrix *localMatrix, bool isOpaque)
+    const SkMatrix *localMatrix)
 {
-    return self->makeShader(sp(uniforms), SkSpan<SkRuntimeEffect::ChildPtr>(children, childCount), localMatrix, isOpaque).release();
+    return self->makeShader(
+        sp(uniforms), 
+        SkSpan<SkRuntimeEffect::ChildPtr>(children, childCount), 
+        localMatrix).release();
 }
 
 SkImage *C_SkRuntimeEffect_makeImage(

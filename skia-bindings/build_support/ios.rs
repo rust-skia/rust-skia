@@ -25,8 +25,8 @@ impl Platform {
         match self {
             IOSSimulator => "-mios-simulator-version-min=10.0",
             IOSDevice => "-miphoneos-version-min=10.0",
-            // If we go below 13.0, the Skia build emits warnings.
-            Catalyst => "-miphoneos-version-min=13.0",
+            // m100, XCode 13.2 fails to build with version 13
+            Catalyst => "-miphoneos-version-min=14.0",
         }
     }
 
