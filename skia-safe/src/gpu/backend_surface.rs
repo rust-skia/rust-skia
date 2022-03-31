@@ -117,10 +117,12 @@ impl BackendFormat {
 
     #[cfg(feature = "gl")]
     pub fn as_gl_format(&self) -> gl::Format {
-        unsafe {
-            #[allow(clippy::map_clone)]
-            self.native().asGLFormat()
-        }
+        unsafe { self.native().asGLFormat() }
+    }
+
+    #[cfg(feature = "gl")]
+    pub fn as_gl_format_enum(&self) -> gl::Enum {
+        unsafe { self.native().asGLFormatEnum() }
     }
 
     #[cfg(feature = "vulkan")]
