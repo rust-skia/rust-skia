@@ -83,7 +83,7 @@ jobs:
   #       cargo build -vv --features "gl"
 
   windows-link-dead-code:
-    runs-on: windows-2019
+    runs-on: windows-2022
 
     steps:
     - uses: actions/checkout@v2
@@ -116,7 +116,7 @@ jobs:
         RUSTFLAGS: '-Clink-dead-code'
 
   windows-x86:
-    runs-on: windows-2019
+    runs-on: windows-2022
 
     steps:
     - uses: actions/checkout@v2
