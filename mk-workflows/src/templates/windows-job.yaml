@@ -3,6 +3,7 @@ runs-on: windows-2022
 # container: ghcr.io/pragmatrix/rust-skia-windows:latest
 env: 
   SKIA_DEBUG: $[[skiaDebug]]
+  RUSTFLAGS: '$[[rustFlags]]'
 
 steps:
 - uses: actions/checkout@v2
