@@ -146,6 +146,11 @@ fn macos_targets() -> Vec<Target> {
             ..Default::default()
         },
         Target {
+            target: "aarch64-apple-ios-sim",
+            platform_features: "metal".into(),
+            ..Default::default()
+        },
+        Target {
             target: "x86_64-apple-ios",
             platform_features: "metal".into(),
             ..Default::default()
