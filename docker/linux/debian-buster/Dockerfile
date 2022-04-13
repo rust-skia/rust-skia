@@ -1,6 +1,4 @@
-# This Dockerfile is outdated, recent Skia versions need full C++ 17 compiler support. Use
-# `debian-buster` instead, or - not recommended - an older version of rust-skia.
-FROM debian:stretch-backports
+FROM debian:buster
 
 RUN apt-get update
 
@@ -13,7 +11,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install tzdata
 # `ninja.build` for the ninja build system Skia uses.
 # `clang` for the binding generator.
 RUN apt-get install -y \
-	clang-7 \
+	clang \
 	gcc \
 	g++ \
 	curl \
@@ -28,9 +26,6 @@ RUN apt-get install -y \
 
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
-
-RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-7 90
-RUN update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-7 90
 
 COPY . /rust-skia/
 WORKDIR /rust-skia/
