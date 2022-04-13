@@ -140,7 +140,7 @@ impl FinalBuildConfiguration {
 
             // target specific gn args.
             let target = cargo::target();
-            let target_str = format!("--target={}", target);
+            let mut target_str = format!("--target={}", target);
             let mut set_target = true;
             let mut cflags: Vec<String> = Vec::new();
             let mut asmflags: Vec<String> = Vec::new();
@@ -220,6 +220,14 @@ impl FinalBuildConfiguration {
                 (arch, _, "ios", abi) => {
                     args.push(("target_os", quote("ios")));
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
+                    // m100: Needed for aarch64 simulators, requires cherry Skia pick
+                    // 0361abf39d1504966799b1cdb5450e07f88b2bc2 (until milestone 102).
+                    if ios::is_simulator(arch, abi) {
+                        args.push(("ios_use_simulator", yes()));
+                    }
+                    if let Some(specific_target) = ios::specific_target(arch, abi) {
+                        target_str = format!("--target={}", specific_target);
+                    }
                     cflags.extend(ios::extra_skia_cflags(arch, abi));
                 }
                 ("wasm32", "unknown", "emscripten", _) => {
