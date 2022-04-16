@@ -52,6 +52,7 @@ pub fn qa_jobs() -> Vec<Job> {
             example_args: Some("--driver cpu --driver pdf --driver svg".into()),
             ..Job::default()
         },
+        /*
         Job {
             name: "stable-all-features-debug",
             toolchain: "stable",
@@ -59,6 +60,7 @@ pub fn qa_jobs() -> Vec<Job> {
             skia_debug: true,
             ..Job::default()
         },
+        */
         Job {
             name: "beta-all-features",
             toolchain: "beta",
