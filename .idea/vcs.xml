@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia-bindings/depot_tools" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia-bindings/skia" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia-bindings/skia/third_party/externals/d3d12allocator" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia-bindings/skia/third_party/externals/expat" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia-bindings/skia/third_party/externals/freetype" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia-bindings/skia/third_party/externals/harfbuzz" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia-bindings/skia/third_party/externals/icu" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia-bindings/skia/third_party/externals/libgifcodec" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia-bindings/skia/third_party/externals/libjpeg-turbo" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia-bindings/skia/third_party/externals/libpng" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia-bindings/skia/third_party/externals/libwebp" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia-bindings/skia/third_party/externals/piex" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia-bindings/skia/third_party/externals/spirv-cross" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia-bindings/skia/third_party/externals/zlib" vcs="Git" />
+  </component>
+</project>

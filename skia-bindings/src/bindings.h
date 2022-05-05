@@ -3,7 +3,9 @@
 
 #include "include/core/SkRefCnt.h"
 #include "include/core/SkString.h"
+
 #include <vector>
+#include "modules/skresources/include/SkResources.h"
 
 template<typename T>
 inline sk_sp<T> spFromConst(const T* pt) {
@@ -41,5 +43,8 @@ template<typename T> struct VecSink {
 struct SkStrings {
     std::vector<SkString> strings;
 };
+
+typedef SkData* (*loadSkData)(const char resource_path[], const char resource_name[]);
+
 
 #endif //SKIA_BINDINGS_BINDINGS_H

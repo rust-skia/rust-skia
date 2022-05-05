@@ -126,6 +126,7 @@ impl BinariesConfiguration {
             .into();
 
         ninja_built_libraries.push(lib::SKIA.into());
+        ninja_built_libraries.push(lib::SVG.into());
         binding_libraries.push(lib::SKIA_BINDINGS.into());
 
         BinariesConfiguration {
