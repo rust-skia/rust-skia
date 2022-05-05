@@ -1,10 +1,3 @@
-use crate::{
-    interop::{MemoryStream, NativeStreamBase, RustStream},
-    prelude::*,
-    Canvas, Data, RCHandle, Size, Typeface,
-};
-use skia_bindings as sb;
-use skia_bindings::{SkData, SkTypeface};
 use std::{
     error::Error,
     fmt,
@@ -12,8 +5,19 @@ use std::{
     str::FromStr,
 };
 
+use skia_bindings as sb;
+use skia_bindings::{SkData, SkTypeface};
+
+use crate::{
+    Canvas,
+    Data,
+    interop::{MemoryStream, NativeStreamBase, RustStream}, prelude::*, RCHandle, Size, Typeface,
+};
+
 pub type Dom = RCHandle<sb::SkSVGDOM>;
+
 unsafe impl Send for Dom {}
+
 unsafe impl Sync for Dom {}
 
 impl NativeRefCounted for sb::SkSVGDOM {
@@ -88,15 +92,28 @@ extern "C" fn handle_load(
             is_base64 = true;
         }
 
+        if cfg!(windows) {
+            if !resource_name.to_string_lossy().starts_with("data:") {
+                is_base64 = false;
+            }
+        }
+
         if is_base64 {
             let data = Dom::handle_load_base64(resource_name.to_string_lossy().as_ref());
             data.into_ptr()
         } else {
-            let path = format!(
-                "{}/{}",
-                resource_path.to_string_lossy(),
-                resource_name.to_string_lossy()
-            );
+            // url returned in the resource_name on windows
+            // https://github.com/rust-skia/rust-skia/pull/569#issuecomment-978034696
+            let path = if cfg!(windows) {
+                resource_name.to_string_lossy().to_string()
+            } else {
+                format!(
+                    "{}/{}",
+                    resource_path.to_string_lossy(),
+                    resource_name.to_string_lossy()
+                )
+            };
+
             match ureq::get(&path).call() {
                 Ok(response) => {
                     let mut reader = response.into_reader();
@@ -220,8 +237,9 @@ fn decode_base64(value: &str) -> Vec<u8> {
 
 #[cfg(test)]
 mod tests {
-    use super::Dom;
     use crate::Canvas;
+
+    use super::Dom;
 
     #[test]
     fn render_simple_svg() {
