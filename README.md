@@ -49,6 +49,7 @@ Because building Skia takes a lot of time and needs tools that may be missing, t
 | macOS                             | `x86_64-apple-darwin`                              |
 | Android                           | `aarch64-linux-android`<br/>`x86_64-linux-android` |
 | iOS                               | `aarch64-apple-ios`<br/>`x86_64-apple-ios`         |
+| WebAssembly                       | `wasm32-unknown-emscripten`                        |
 
 ### Wrappers & Codecs & Supported Features
 

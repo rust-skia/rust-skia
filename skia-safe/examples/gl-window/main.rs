@@ -9,12 +9,17 @@ fn main() {
     println!("This example is not supported on Android (https://github.com/rust-windowing/winit/issues/948).")
 }
 
-#[cfg(all(not(target_os = "android"), not(feature = "gl")))]
+#[cfg(target_os = "emscripten")]
+fn main() {
+    println!("This example is not supported on Emscripten (https://github.com/rust-windowing/glutin/issues/1349)")
+}
+
+#[cfg(all(not(target_os = "android"), not(target_os = "emscripten"), not(feature = "gl")))]
 fn main() {
     println!("To run this example, invoke cargo with --features \"gl\".")
 }
 
-#[cfg(all(not(target_os = "android"), feature = "gl"))]
+#[cfg(all(not(target_os = "android"), not(target_os = "emscripten"), feature = "gl"))]
 fn main() {
     use gl::types::*;
     use gl_rs as gl;
