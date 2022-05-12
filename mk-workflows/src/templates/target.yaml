@@ -15,7 +15,9 @@
       export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=$[[target]]$[[androidAPILevel]]-clang$[[hostBinExt]]
       echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
     fi
-    source /emsdk/emsdk_env.sh
+    if [ "$[[emscriptenEnv]]" == "true" ]; then
+      source /emsdk/emsdk_env.sh
+    fi
     cargo clean
     cargo build -p skia-safe --all-targets --release --features "$[[features]]" --target $[[target]]
     echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}

@@ -185,6 +185,7 @@ fn build_target(workflow: &Workflow, job: &Job, target: &Target) -> String {
     let template_arguments: &[(&'static str, &dyn fmt::Display)] = &[
         ("target", &target.target),
         ("androidEnv", &target.android_env),
+        ("emscriptenEnv", &target.emscripten_env),
         ("androidAPILevel", &config::DEFAULT_ANDROID_API_LEVEL),
         ("features", &features),
         ("runTests", &native_target),
@@ -232,6 +233,7 @@ fn render_template(template: &str, replacements: &[(String, String)]) -> String 
 struct Target {
     target: &'static str,
     android_env: bool,
+    emscripten_env: bool,
     platform_features: Features,
 }
 

@@ -60,7 +60,9 @@ jobs:
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-pc-windows-msvc26-clang.exe
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
         fi
-        source /emsdk/emsdk_env.sh
+        if [ "false" == "true" ]; then
+          source /emsdk/emsdk_env.sh
+        fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
@@ -166,7 +168,9 @@ jobs:
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-pc-windows-msvc26-clang.exe
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
         fi
-        source /emsdk/emsdk_env.sh
+        if [ "false" == "true" ]; then
+          source /emsdk/emsdk_env.sh
+        fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
@@ -272,7 +276,9 @@ jobs:
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-pc-windows-msvc26-clang.exe
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
         fi
-        source /emsdk/emsdk_env.sh
+        if [ "false" == "true" ]; then
+          source /emsdk/emsdk_env.sh
+        fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "vulkan" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
@@ -378,7 +384,9 @@ jobs:
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-pc-windows-msvc26-clang.exe
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
         fi
-        source /emsdk/emsdk_env.sh
+        if [ "false" == "true" ]; then
+          source /emsdk/emsdk_env.sh
+        fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "textlayout" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
@@ -484,7 +492,9 @@ jobs:
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-pc-windows-msvc26-clang.exe
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
         fi
-        source /emsdk/emsdk_env.sh
+        if [ "false" == "true" ]; then
+          source /emsdk/emsdk_env.sh
+        fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl,textlayout" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
@@ -590,7 +600,9 @@ jobs:
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-pc-windows-msvc26-clang.exe
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
         fi
-        source /emsdk/emsdk_env.sh
+        if [ "false" == "true" ]; then
+          source /emsdk/emsdk_env.sh
+        fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "vulkan,textlayout" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
@@ -696,7 +708,9 @@ jobs:
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-pc-windows-msvc26-clang.exe
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
         fi
-        source /emsdk/emsdk_env.sh
+        if [ "false" == "true" ]; then
+          source /emsdk/emsdk_env.sh
+        fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "gl,vulkan,textlayout" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
@@ -802,7 +816,9 @@ jobs:
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-pc-windows-msvc26-clang.exe
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
         fi
-        source /emsdk/emsdk_env.sh
+        if [ "false" == "true" ]; then
+          source /emsdk/emsdk_env.sh
+        fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "d3d" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
@@ -908,7 +924,9 @@ jobs:
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-pc-windows-msvc26-clang.exe
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
         fi
-        source /emsdk/emsdk_env.sh
+        if [ "false" == "true" ]; then
+          source /emsdk/emsdk_env.sh
+        fi
         cargo clean
         cargo build -p skia-safe --all-targets --release --features "d3d,textlayout" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}

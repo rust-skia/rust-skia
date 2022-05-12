@@ -185,6 +185,7 @@ fn android_targets() -> Vec<Target> {
 fn wasm_targets() -> Vec<Target> {
     [Target {
         target: "wasm32-unknown-emscripten",
+        emscripten_env: true,
         ..Default::default()
     }]
     .into()
