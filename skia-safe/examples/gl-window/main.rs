@@ -14,12 +14,20 @@ fn main() {
     println!("This example is not supported on Emscripten (https://github.com/rust-windowing/glutin/issues/1349)")
 }
 
-#[cfg(all(not(target_os = "android"), not(target_os = "emscripten"), not(feature = "gl")))]
+#[cfg(all(
+    not(target_os = "android"),
+    not(target_os = "emscripten"),
+    not(feature = "gl")
+))]
 fn main() {
     println!("To run this example, invoke cargo with --features \"gl\".")
 }
 
-#[cfg(all(not(target_os = "android"), not(target_os = "emscripten"), feature = "gl"))]
+#[cfg(all(
+    not(target_os = "android"),
+    not(target_os = "emscripten"),
+    feature = "gl"
+))]
 fn main() {
     use gl::types::*;
     use gl_rs as gl;
