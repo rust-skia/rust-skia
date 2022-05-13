@@ -127,6 +127,7 @@ fn linux_targets() -> Vec<Target> {
         ..Default::default()
     }];
     targets.extend(android_targets());
+    targets.extend(wasm_targets());
     targets
 }
 
@@ -178,5 +179,14 @@ fn android_targets() -> Vec<Target> {
             ..Default::default()
         },
     ]
+    .into()
+}
+
+fn wasm_targets() -> Vec<Target> {
+    [Target {
+        target: "wasm32-unknown-emscripten",
+        emscripten_env: true,
+        ..Default::default()
+    }]
     .into()
 }
