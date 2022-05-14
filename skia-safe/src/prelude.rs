@@ -246,27 +246,32 @@ impl<N: NativeDrop> AsRef<Handle<N>> for Handle<N> {
 
 impl<N: NativeDrop> Handle<N> {
     /// Wrap a native instance into a handle.
+    #[must_use]
     pub(crate) fn from_native_c(n: N) -> Self {
         Handle(n, PhantomData)
     }
 
     /// Create a reference to the Rust wrapper from a reference to the native type.
+    #[must_use]
     pub(crate) fn from_native_ref(n: &N) -> &Self {
         unsafe { transmute_ref(n) }
     }
 
     /// Create a mutable reference to the Rust wrapper from a reference to the native type.
+    #[must_use]
     pub(crate) fn from_native_ref_mut(n: &mut N) -> &mut Self {
         unsafe { transmute_ref_mut(n) }
     }
 
     /// Converts a pointer to a native value into a pointer to the Rust value.
+    #[must_use]
     pub(crate) fn from_native_ptr(np: *const N) -> *const Self {
         np as _
     }
 
     /// Converts a pointer to a mutable native value into a pointer to the mutable Rust value.
     #[allow(unused)]
+    #[must_use]
     pub(crate) fn from_native_ptr_mut(np: *mut N) -> *mut Self {
         np as _
     }
@@ -274,6 +279,7 @@ impl<N: NativeDrop> Handle<N> {
     /// Constructs a C++ object in place by calling a
     /// function that expects a pointer that points to
     /// uninitialized memory of the native type.
+    #[must_use]
     pub(crate) fn construct(construct: impl FnOnce(*mut N)) -> Self {
         Self::try_construct(|i| {
             construct(i);
@@ -282,18 +288,21 @@ impl<N: NativeDrop> Handle<N> {
         .unwrap()
     }
 
+    #[must_use]
     pub(crate) fn try_construct(construct: impl FnOnce(*mut N) -> bool) -> Option<Self> {
         self::try_construct(construct).map(Self::from_native_c)
     }
 
     /// Replaces the native instance with the one from this Handle, and returns the replaced one
     /// wrapped in a Rust Handle without dropping either one.
+    #[must_use]
     pub(crate) fn replace_native(mut self, native: &mut N) -> Self {
         mem::swap(&mut self.0, native);
         self
     }
 
     /// Consumes the wrapper and returns the native type.
+    #[must_use]
     pub(crate) fn into_native(mut self) -> N {
         let r = mem::replace(&mut self.0, unsafe { mem::zeroed() });
         mem::forget(self);
@@ -313,6 +322,7 @@ impl<N: NativeDrop> ReplaceWith<Handle<N>> for N {
 
 /// Constructs a C++ object in place by calling a lambda that is meant to initialize
 /// the pointer to the Rust memory provided as a pointer.
+#[must_use]
 pub(crate) fn construct<N>(construct: impl FnOnce(*mut N)) -> N {
     try_construct(|i| {
         construct(i);
@@ -321,6 +331,7 @@ pub(crate) fn construct<N>(construct: impl FnOnce(*mut N)) -> N {
     .unwrap()
 }
 
+#[must_use]
 pub(crate) fn try_construct<N>(construct: impl FnOnce(*mut N) -> bool) -> Option<N> {
     let mut instance = MaybeUninit::uninit();
     construct(instance.as_mut_ptr()).if_true_then_some(|| unsafe { instance.assume_init() })
