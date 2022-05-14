@@ -305,6 +305,11 @@ extern "C" {
         new(uninitialized) TextStyle(*other);
     }
 
+    void C_TextStyle_cloneForPlaceholder(const TextStyle* self, TextStyle* uninitialized) {
+        // m102: We assume that they just forgot to mark `TextStyle::cloneForPlaceholder` as const.
+        new (uninitialized) TextStyle(const_cast<TextStyle*>(self)->cloneForPlaceholder());
+    }
+
     void C_TextStyle_destruct(TextStyle* self) {
         self->~TextStyle();
     }

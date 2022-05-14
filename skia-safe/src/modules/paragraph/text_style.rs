@@ -206,9 +206,15 @@ impl TextStyle {
         TextStyle::construct(|ts| unsafe { sb::C_TextStyle_Construct(ts) })
     }
 
+    #[deprecated(note = "Use clone_for_placeholder", since = "0.0.0")]
     #[must_use]
     pub fn to_placeholder(&self) -> Self {
-        TextStyle::from_native_c(unsafe { sb::skia_textlayout_TextStyle::new(self.native(), true) })
+        self.clone_for_placeholder()
+    }
+
+    #[must_use]
+    pub fn clone_for_placeholder(&self) -> Self {
+        TextStyle::construct(|ts| unsafe { sb::C_TextStyle_cloneForPlaceholder(self.native(), ts) })
     }
 
     pub fn equals(&self, other: &TextStyle) -> bool {
