@@ -104,8 +104,10 @@ impl RecordingContext {
 
     pub fn max_surface_sample_count_for_color_type(&self, color_type: ColorType) -> usize {
         unsafe {
-            self.native()
-                .maxSurfaceSampleCountForColorType(color_type.into_native())
+            sb::C_GrRecordingContext_maxSurfaceSampleCountForColorType(
+                self.native(),
+                color_type.into_native(),
+            )
         }
         .try_into()
         .unwrap()

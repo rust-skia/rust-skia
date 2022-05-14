@@ -554,10 +554,6 @@ extern "C" SkData* C_SkPath_serialize(const SkPath* self) {
     return self->serialize().release();
 }
 
-extern "C" bool C_SkPath_isValid(const SkPath* self) {
-    return self->isValid();
-}
-
 extern "C" void C_SkPath_Iter_destruct(SkPath::Iter* self) {
     self->~Iter();
 }
@@ -582,18 +578,6 @@ extern "C" SkPathFillType C_SkPath_getFillType(const SkPath* self) {
     return self->getFillType();
 }
 
-extern "C" bool C_SkPath_isConvex(const SkPath* self) {
-    return self->isConvex();
-}
-
-extern "C" bool C_SkPath_isEmpty(const SkPath* self) {
-    return self->isEmpty();
-}
-
-extern "C" bool C_SkPath_isFinite(const SkPath* self) {
-    return self->isFinite();
-}
-
 extern "C" SkPoint C_SkPath_getPoint(const SkPath* self, int index) {
     return self->getPoint(index);
 }
@@ -604,10 +588,6 @@ extern "C" const SkRect* C_SkPath_getBounds(const SkPath* self) {
 
 extern "C" SkRect C_SkPath_computeTightBounds(const SkPath* self) {
     return self->computeTightBounds();
-}
-
-extern "C" uint32_t C_SkPath_getSegmentMasks(const SkPath* self) {
-    return self->getSegmentMasks();
 }
 
 //
