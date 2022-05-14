@@ -110,7 +110,7 @@ impl Pixmap {
     }
 
     pub fn color_space(&self) -> Option<ColorSpace> {
-        self.info().color_space()
+        ColorSpace::from_unshared_ptr(unsafe { self.native().colorSpace() })
     }
 
     pub fn is_opaque(&self) -> bool {
@@ -345,13 +345,13 @@ unsafe impl Pixel for (f32, f32, f32, f32) {
 
 unsafe impl Pixel for u32 {
     fn matches_color_type(ct: ColorType) -> bool {
-        ct == ColorType::n32()
+        ct == ColorType::N32
     }
 }
 
 unsafe impl Pixel for Color {
     fn matches_color_type(ct: ColorType) -> bool {
-        ct == ColorType::n32()
+        ct == ColorType::N32
     }
 }
 

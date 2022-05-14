@@ -230,7 +230,7 @@ impl Image {
         backend_texture: &gpu::BackendTexture,
         texture_origin: gpu::SurfaceOrigin,
         color_type: ColorType,
-        alpha_type: AlphaType,
+        alpha_type: impl Into<Option<AlphaType>>,
         color_space: impl Into<Option<ColorSpace>>,
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
@@ -239,7 +239,7 @@ impl Image {
                 backend_texture.native(),
                 texture_origin,
                 color_type.into_native(),
-                alpha_type,
+                alpha_type.into().unwrap_or(AlphaType::Premul),
                 color_space.into().into_ptr_or_null(),
             )
         })
