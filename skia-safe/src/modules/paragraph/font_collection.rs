@@ -7,6 +7,8 @@ use crate::{
 use skia_bindings::{self as sb, skia_textlayout_FontCollection};
 use std::{ffi, fmt, ptr};
 
+use super::FontArguments;
+
 pub type FontCollection = RCHandle<skia_textlayout_FontCollection>;
 
 impl NativeRefCountedBase for skia_textlayout_FontCollection {
@@ -109,6 +111,15 @@ impl FontCollection {
         family_names: &[impl AsRef<str>],
         font_style: FontStyle,
     ) -> Vec<Typeface> {
+        self.find_typefaces_with_font_arguments(family_names, font_style, None)
+    }
+
+    pub fn find_typefaces_with_font_arguments<'fa>(
+        &mut self,
+        family_names: &[impl AsRef<str>],
+        font_style: FontStyle,
+        font_args: impl Into<Option<&'fa FontArguments>>,
+    ) -> Vec<Typeface> {
         let family_names = interop::Strings::from_strs(family_names);
 
         let mut typefaces: Vec<Typeface> = Vec::new();
@@ -128,6 +139,7 @@ impl FontCollection {
                 self.native_mut(),
                 family_names.native(),
                 font_style.into_native(),
+                font_args.into().native_ptr_or_null(),
                 VecSink::new_mut(&mut set_typefaces).native_mut(),
             )
         };
