@@ -227,9 +227,9 @@ pub trait NativeHash {
     fn hash<H: Hasher>(&self, state: &mut H);
 }
 
-/// Wraps a native type that can be represented and used in Rust memory.
+/// Wraps a native type that can be represented in Rust memory.
 ///
-/// This type requires the trait `NativeDrop` to be implemented.
+/// This type requires an implementation of the `NativeDrop` trait.
 #[repr(transparent)]
 pub struct Handle<N: NativeDrop>(
     N,
