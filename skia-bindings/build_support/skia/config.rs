@@ -348,6 +348,10 @@ pub fn build(
         crate::build_support::binary_cache::resolve_dependencies();
         assert!(
             Command::new(python)
+                // Explicitly providing `GIT_SYNC_DEPS_PATH` fixes a problem with `git-sync-deps`
+                // accidentally resolving an absolute directory for `GIT_SYNC_DEPS_PATH` when MingW
+                // Python 3 runs on Windows under MSys.
+                .env("GIT_SYNC_DEPS_PATH", "skia/DEPS")
                 .arg("skia/tools/git-sync-deps")
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit())
