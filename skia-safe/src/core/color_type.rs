@@ -33,7 +33,7 @@ pub enum ColorType {
 native_transmutable!(SkColorType, ColorType, color_type_layout);
 
 impl ColorType {
-    #[deprecated(note = "Use ColorType::N32 ")]
+    #[deprecated(since = "0.51.0", note = "Use ColorType::N32 ")]
     pub const fn n32() -> Self {
         Self::N32
     }
