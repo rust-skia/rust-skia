@@ -206,7 +206,7 @@ impl TextStyle {
         TextStyle::construct(|ts| unsafe { sb::C_TextStyle_Construct(ts) })
     }
 
-    #[deprecated(note = "Use clone_for_placeholder", since = "0.51.0")]
+    #[deprecated(since = "0.51.0", note = "Use clone_for_placeholder")]
     #[must_use]
     pub fn to_placeholder(&self) -> Self {
         self.clone_for_placeholder()

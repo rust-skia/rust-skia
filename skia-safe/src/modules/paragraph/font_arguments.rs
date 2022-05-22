@@ -1,6 +1,6 @@
 use crate::{prelude::*, Typeface};
 use skia_bindings::{self as sb, skia_textlayout_FontArguments};
-use std::fmt;
+use std::{fmt, hash};
 
 pub type FontArguments = Handle<skia_textlayout_FontArguments>;
 unsafe_send_sync!(FontArguments);
@@ -32,7 +32,7 @@ impl NativePartialEq for skia_textlayout_FontArguments {
 }
 
 impl NativeHash for skia_textlayout_FontArguments {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+    fn hash<H: hash::Hasher>(&self, state: &mut H) {
         state.write_usize(unsafe { sb::C_FontArguments_hash(self) })
     }
 }
