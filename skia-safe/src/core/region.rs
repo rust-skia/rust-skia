@@ -341,7 +341,7 @@ impl fmt::Debug for Iterator<'_> {
 }
 
 impl<'a> Iterator<'a> {
-    pub fn new_empty() -> Iterator<'a> {
+    pub fn new_empty() -> Self {
         Iterator::construct(|iterator| unsafe {
             sb::C_SkRegion_Iterator_Construct(iterator);
         })
@@ -358,9 +358,7 @@ impl<'a> Iterator<'a> {
     pub fn reset(mut self, region: &Region) -> Iterator {
         unsafe {
             self.native_mut().reset(region.native());
-            let r = mem::transmute_copy(&self);
-            mem::forget(self);
-            r
+            mem::transmute(self)
         }
     }
 
