@@ -59,17 +59,15 @@ The supported wrappers, Skia codecs, and additional Skia features are documented
 
 If the target platform or feature configuration is not available as a prebuilt binary, skia-bindings' `build.rs` will try to build Skia and generate the Rust bindings.
 
-To prepare for that, **LLVM** and **Python 2** are needed:
+To prepare for that, **LLVM** and **Python 3** are needed:
 
 **LLVM**
 
 We recommend the version that comes preinstalled with your platform, or, if not available, the [latest official LLVM release](http://releases.llvm.org/download.html). To see which version of LLVM/Clang is installed on your system, use `clang --version`.
 
-**Python 2**
+**Python 3**
 
-Python version 2.7 _must_ be available.
-
-The build script probes for `python --version` and `python2 --version` and uses the first one that looks like a version 2 executable for building Skia.
+The build script probes for `python --version` and `python3 --version` and uses the first one that looks like a version 3 executable for building Skia.
 
 ### On macOS
 
@@ -105,11 +103,11 @@ The build script probes for `python --version` and `python2 --version` and uses 
 
 - [MSYS2](https://www.msys2.org/):
 
-  - Install Python2 with `pacman -S python2`.
+  - Install Python 3 with `pacman -S python`.
 
 - Windows Shell (`Cmd.exe`):
 
-  - Download and install Python version 2 from [python.org](https://www.python.org/downloads/release/python-2716/).
+  - Download and install Python 3 from [python.org](https://www.python.org/downloads).
 
 - Install and select the MSVC toolchain:
   ```bash
@@ -130,7 +128,7 @@ The build script probes for `python --version` and `python2 --version` and uses 
 - Install the following packages:
 
   ```bash
-  sudo yum install gcc openssl-devel libX11-devel python2 fontconfig-devel mesa-libGL-devel
+  sudo yum install gcc openssl-devel libX11-devel python3 fontconfig-devel mesa-libGL-devel
   ```
 
 - [Install and enable the LLVM toolset 7](https://www.softwarecollections.org/en/scls/rhscl/llvm-toolset-7.0/)
@@ -142,13 +140,13 @@ The build script probes for `python --version` and `python2 --version` and uses 
 - Install the following packages:
 
   ```bash
-  sudo yum install gcc openssl-devel libX11-devel python2 clang fontconfig-devel mesa-libGL-devel
+  sudo yum install gcc openssl-devel libX11-devel python3 clang fontconfig-devel mesa-libGL-devel
   ```
 
-- Set `/usr/bin/python2` as the default `python` command:
+- Set `/usr/bin/python3` as the default `python` command:
 
   ```bash
-  sudo alternatives --set python /usr/bin/python2
+  sudo alternatives --set python /usr/bin/python3
   ```
 
 ### For Android
