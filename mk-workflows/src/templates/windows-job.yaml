@@ -18,12 +18,6 @@ steps:
   run: rustup component add clippy
   shell: bash
 
-- name: Setup Python 2
-  uses: actions/setup-python@v2
-  with:
-    python-version: '2.7.18'
-    architecture: 'x64'
-
 - name: Python Version
   run: python --version
 

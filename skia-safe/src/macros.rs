@@ -4,10 +4,10 @@
 #[macro_export]
 macro_rules! native_transmutable {
     ($nt:ty, $rt:ty, $test_fn:ident) => {
-        impl crate::prelude::NativeTransmutable<$nt> for $rt {}
+        impl $crate::prelude::NativeTransmutable<$nt> for $rt {}
         #[test]
         fn $test_fn() {
-            use crate::prelude::NativeTransmutable;
+            use $crate::prelude::NativeTransmutable;
             <$rt>::test_layout();
         }
     };
