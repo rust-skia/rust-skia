@@ -64,7 +64,7 @@ impl ColorInfo {
     }
 
     pub fn color_space(&self) -> Option<ColorSpace> {
-        ColorSpace::from_unshared_ptr(self.native().fColorSpace.fPtr)
+        ColorSpace::from_unshared_ptr(unsafe { self.native().colorSpace() })
     }
 
     pub fn color_type(&self) -> ColorType {
@@ -80,22 +80,29 @@ impl ColorInfo {
     }
 
     pub fn is_gamma_close_to_srgb(&self) -> bool {
-        unsafe { sb::C_SkColorInfo_gammaCloseToSRGB(self.native()) }
+        unsafe { self.native().gammaCloseToSRGB() }
     }
 
     #[must_use]
     pub fn with_alpha_type(&self, new_alpha_type: AlphaType) -> Self {
-        Self::new(self.color_type(), new_alpha_type, self.color_space())
+        Self::construct(|ci| unsafe {
+            sb::C_SkColorInfo_makeAlphaType(self.native(), new_alpha_type, ci)
+        })
     }
 
     #[must_use]
     pub fn with_color_type(&self, new_color_type: ColorType) -> Self {
-        Self::new(new_color_type, self.alpha_type(), self.color_space())
+        Self::construct(|ci| unsafe {
+            sb::C_SkColorInfo_makeColorType(self.native(), new_color_type.into_native(), ci)
+        })
     }
 
     #[must_use]
     pub fn with_color_space(&self, cs: impl Into<Option<ColorSpace>>) -> Self {
-        Self::new(self.color_type(), self.alpha_type(), cs)
+        let color_space: Option<ColorSpace> = cs.into();
+        Self::construct(|ci| unsafe {
+            sb::C_SkColorInfo_makeColorSpace(self.native(), color_space.into_ptr_or_null(), ci)
+        })
     }
 
     pub fn bytes_per_pixel(&self) -> usize {
@@ -156,19 +163,16 @@ impl ImageInfo {
         cs: impl Into<Option<ColorSpace>>,
     ) -> Self {
         let dimensions = dimensions.into();
-        let mut image_info = Self::default();
-
-        unsafe {
+        ImageInfo::construct(|ii| unsafe {
             sb::C_SkImageInfo_Make(
-                image_info.native_mut(),
                 dimensions.width,
                 dimensions.height,
                 ct.into_native(),
                 at,
                 cs.into().into_ptr_or_null(),
+                ii,
             )
-        }
-        image_info
+        })
     }
 
     pub fn from_color_info(dimensions: impl Into<ISize>, color_info: ColorInfo) -> Self {
@@ -186,41 +190,52 @@ impl ImageInfo {
         at: AlphaType,
         cs: impl Into<Option<ColorSpace>>,
     ) -> ImageInfo {
-        Self::new(dimensions, ColorType::n32(), at, cs)
+        let dimensions = dimensions.into();
+        Self::construct(|ii| unsafe {
+            sb::C_SkImageInfo_MakeN32(
+                dimensions.width,
+                dimensions.height,
+                at,
+                cs.into().into_ptr_or_null(),
+                ii,
+            )
+        })
     }
 
     pub fn new_s32(dimensions: impl Into<ISize>, at: AlphaType) -> ImageInfo {
         let dimensions = dimensions.into();
-        let mut image_info = Self::default();
-        unsafe {
-            sb::C_SkImageInfo_MakeS32(
-                image_info.native_mut(),
-                dimensions.width,
-                dimensions.height,
-                at,
-            );
-        }
-        image_info
+        Self::construct(|ii| unsafe {
+            sb::C_SkImageInfo_MakeS32(dimensions.width, dimensions.height, at, ii)
+        })
     }
 
     pub fn new_n32_premul(
         dimensions: impl Into<ISize>,
         cs: impl Into<Option<ColorSpace>>,
     ) -> ImageInfo {
-        Self::new(dimensions, ColorType::n32(), AlphaType::Premul, cs)
+        let dimensions = dimensions.into();
+        Self::construct(|ii| unsafe {
+            sb::C_SkImageInfo_MakeN32Premul(
+                dimensions.width,
+                dimensions.height,
+                cs.into().into_ptr_or_null(),
+                ii,
+            )
+        })
     }
 
     pub fn new_a8(dimensions: impl Into<ISize>) -> ImageInfo {
-        Self::new(dimensions, ColorType::Alpha8, AlphaType::Premul, None)
+        let dimensions = dimensions.into();
+        Self::construct(|ii| unsafe {
+            sb::C_SkImageInfo_MakeA8(dimensions.width, dimensions.height, ii)
+        })
     }
 
     pub fn new_unknown(dimensions: Option<ISize>) -> ImageInfo {
-        Self::new(
-            dimensions.unwrap_or_default(),
-            ColorType::Unknown,
-            AlphaType::Unknown,
-            None,
-        )
+        let dimensions = dimensions.unwrap_or_default();
+        Self::construct(|ii| unsafe {
+            sb::C_SkImageInfo_MakeUnknown(dimensions.width, dimensions.height, ii)
+        })
     }
 
     pub fn width(&self) -> i32 {
@@ -240,7 +255,7 @@ impl ImageInfo {
     }
 
     pub fn color_space(&self) -> Option<ColorSpace> {
-        self.color_info().color_space()
+        ColorSpace::from_unshared_ptr(unsafe { self.native().colorSpace() })
     }
 
     pub fn is_empty(&self) -> bool {
@@ -290,10 +305,13 @@ impl ImageInfo {
 
     #[must_use]
     pub fn with_color_space(&self, new_color_space: impl Into<Option<ColorSpace>>) -> Self {
-        Self::from_color_info(
-            self.dimensions(),
-            self.color_info().with_color_space(new_color_space),
-        )
+        Self::construct(|ii| unsafe {
+            sb::C_SkImageInfo_makeColorSpace(
+                self.native(),
+                new_color_space.into().into_ptr_or_null(),
+                ii,
+            )
+        })
     }
 
     pub fn bytes_per_pixel(&self) -> usize {

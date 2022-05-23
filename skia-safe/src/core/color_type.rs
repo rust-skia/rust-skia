@@ -33,16 +33,16 @@ pub enum ColorType {
 native_transmutable!(SkColorType, ColorType, color_type_layout);
 
 impl ColorType {
-    // error[E0658]: dereferencing raw pointers in constants is unstable (see issue #51911)
-    /*
-    pub const N32 : Self = unsafe {
-        *((&SkColorType::kN32_SkColorType) as *const _ as *const _)
-    };
-    */
-
-    pub fn n32() -> Self {
-        Self::from_native_c(SkColorType::kN32_SkColorType)
+    #[deprecated(since = "0.51.0", note = "Use ColorType::N32 ")]
+    pub const fn n32() -> Self {
+        Self::N32
     }
+
+    pub const N32: Self = unsafe { *((&SkColorType::kN32_SkColorType) as *const _ as *const _) };
+
+    pub const COUNT: usize =
+        unsafe { *((&SkColorType::kLastEnum_SkColorType) as *const _ as *const _) } as usize
+            + 1usize;
 
     pub fn bytes_per_pixel(self) -> usize {
         unsafe {
@@ -62,5 +62,18 @@ impl ColorType {
             sb::SkColorTypeValidateAlphaType(self.into_native(), alpha_type, &mut alpha_type_r)
         }
         .if_true_some(alpha_type_r)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn n32_matches() {
+        assert_eq!(
+            ColorType::from_native_c(skia_bindings::SkColorType::kN32_SkColorType),
+            ColorType::N32
+        );
     }
 }

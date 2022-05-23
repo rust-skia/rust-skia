@@ -246,6 +246,7 @@ mod textlayout {
     assert_impl_all!(TextStyle: Send, Sync);
     assert_impl_all!(Block: Send, Sync);
     assert_impl_all!(Placeholder: Send, Sync);
+    assert_impl_all!(FontArguments: Send, Sync);
     assert_not_impl_any!(TypefaceFontStyleSet: Send, Sync);
     assert_not_impl_any!(TypefaceFontProvider: Send, Sync);
     assert_not_impl_any!(FontFamilies: Send, Sync);

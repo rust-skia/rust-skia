@@ -110,7 +110,7 @@ impl Bitmap {
     /// Returns [ColorSpace], the range of colors, associated with [ImageInfo]. The returned
     /// [ColorSpace] is immutable.
     pub fn color_space(&self) -> Option<ColorSpace> {
-        self.pixmap().color_space()
+        ColorSpace::from_unshared_ptr(unsafe { self.native().colorSpace() })
     }
 
     /// Returns number of bytes per pixel required by [ColorType].

@@ -88,6 +88,3 @@ variant_name!(
 );
 
 // m84: LineMetricStyle is declared but not used in the public API yet.
-
-pub use sb::skia_textlayout_DrawOptions as DrawOptions;
-variant_name!(DrawOptions::Replay, draw_options_naming);

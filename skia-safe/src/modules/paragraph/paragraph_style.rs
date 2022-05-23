@@ -1,6 +1,4 @@
-use std::fmt;
-
-use super::{DrawOptions, FontFamilies, TextAlign, TextDirection, TextStyle};
+use super::{FontFamilies, TextAlign, TextDirection, TextStyle};
 use crate::{
     interop::{self, AsStr, FromStrs, SetStr},
     modules::paragraph::TextHeightBehavior,
@@ -8,6 +6,7 @@ use crate::{
     scalar, FontStyle,
 };
 use skia_bindings as sb;
+use std::fmt;
 
 pub type StrutStyle = Handle<sb::skia_textlayout_StrutStyle>;
 unsafe_send_sync!(StrutStyle);
@@ -190,7 +189,6 @@ impl fmt::Debug for ParagraphStyle {
             .field("ellipsized", &self.ellipsized())
             .field("effective_align", &self.effective_align())
             .field("hinting_is_on", &self.hinting_is_on())
-            .field("draw_options", &self.draw_options())
             .finish()
     }
 }
@@ -298,15 +296,6 @@ impl ParagraphStyle {
 
     pub fn turn_hinting_off(&mut self) -> &mut Self {
         self.native_mut().fHintingIsOn = false;
-        self
-    }
-
-    pub fn draw_options(&self) -> DrawOptions {
-        self.native().fDrawingOptions
-    }
-
-    pub fn set_draw_options(&mut self, value: DrawOptions) -> &mut Self {
-        self.native_mut().fDrawingOptions = value;
         self
     }
 }

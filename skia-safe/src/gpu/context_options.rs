@@ -28,7 +28,6 @@ pub struct ContextOptions {
     pub glyphs_as_paths_font_size: f32,
     pub allow_multiple_glyph_cache_textures: Enable,
     pub avoid_stencil_buffers: bool,
-    pub sharpen_mipmapped_textures: bool,
     pub use_draw_instead_of_clear: Enable,
     pub reduce_ops_task_splitting: Enable,
     pub prefer_external_images_over_es3: bool,

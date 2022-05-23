@@ -758,8 +758,17 @@ extern "C" bool C_SkColorInfo_Equals(const SkColorInfo* lhs, const SkColorInfo* 
     return *lhs == *rhs;
 }
 
-extern "C" bool C_SkColorInfo_gammaCloseToSRGB(const SkColorInfo* self) {
-    return self->gammaCloseToSRGB();
+
+extern "C" void C_SkColorInfo_makeAlphaType(const SkColorInfo* self, SkAlphaType newAlphaType, SkColorInfo* uninitialized) {
+    new (uninitialized) SkColorInfo(self->makeAlphaType(newAlphaType));
+}
+
+extern "C" void C_SkColorInfo_makeColorType(const SkColorInfo* self, SkColorType newColorType, SkColorInfo* uninitialized) {
+    new (uninitialized) SkColorInfo(self->makeColorType(newColorType));
+}
+
+extern "C" void C_SkColorInfo_makeColorSpace(const SkColorInfo* self, SkColorSpace* newColorSpace, SkColorInfo* uninitialized) {
+    new (uninitialized) SkColorInfo(self->makeColorSpace(sp(newColorSpace)));
 }
 
 extern "C" void C_SkImageInfo_Construct(SkImageInfo* uninitialized) {
@@ -778,12 +787,32 @@ extern "C" bool C_SkImageInfo_Equals(const SkImageInfo* lhs, const SkImageInfo* 
     return *lhs == *rhs;
 }
 
-extern "C" void C_SkImageInfo_Make(SkImageInfo* self, int width, int height, SkColorType ct, SkAlphaType at, SkColorSpace* cs) {
-    *self = SkImageInfo::Make(width, height, ct, at, sp(cs));
+extern "C" void C_SkImageInfo_Make(int width, int height, SkColorType ct, SkAlphaType at, SkColorSpace* cs, SkImageInfo* uninitialized) {
+    new (uninitialized) SkImageInfo(SkImageInfo::Make(width, height, ct, at, sp(cs)));
 }
 
-extern "C" void C_SkImageInfo_MakeS32(SkImageInfo* self, int width, int height, SkAlphaType at) {
-    *self = SkImageInfo::MakeS32(width, height, at);
+extern "C" void C_SkImageInfo_MakeN32(int width, int height, SkAlphaType at, SkColorSpace* cs, SkImageInfo* uninitialized) {
+    new (uninitialized) SkImageInfo(SkImageInfo::MakeN32(width, height, at, sp(cs)));
+}
+
+extern "C" void C_SkImageInfo_MakeS32(int width, int height, SkAlphaType at, SkImageInfo* uninitialized) {
+    new (uninitialized) SkImageInfo(SkImageInfo::MakeS32(width, height, at));
+}
+
+extern "C" void C_SkImageInfo_MakeN32Premul(int width, int height, SkColorSpace* cs, SkImageInfo* uninitialized) {
+    new (uninitialized) SkImageInfo(SkImageInfo::MakeN32Premul(width, height, sp(cs)));
+}
+
+extern "C" void C_SkImageInfo_MakeA8(int width, int height, SkImageInfo* uninitialized) {
+    new (uninitialized) SkImageInfo(SkImageInfo::MakeA8(width, height));
+}
+
+extern "C" void C_SkImageInfo_MakeUnknown(int width, int height, SkImageInfo* uninitialized) {
+    new (uninitialized) SkImageInfo(SkImageInfo::MakeUnknown(width, height));
+}
+
+extern "C" void C_SkImageInfo_makeColorSpace(const SkImageInfo* self, SkColorSpace* cs, SkImageInfo* uninitialized) {
+    new (uninitialized) SkImageInfo(self->makeColorSpace(sp(cs)));
 }
 
 extern "C" void C_SkImageInfo_reset(SkImageInfo* self) {
@@ -1820,10 +1849,6 @@ extern "C" void C_SkPixmap_destruct(SkPixmap* self) {
 
 extern "C" void C_SkPixmap_setColorSpace(SkPixmap* self, SkColorSpace* colorSpace) {
     self->setColorSpace(sp(colorSpace));
-}
-
-extern "C" SkISize C_SkPixmap_dimensions(const SkPixmap *self) {
-    return self->dimensions();
 }
 
 //
