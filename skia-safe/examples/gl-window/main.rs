@@ -41,7 +41,6 @@ fn main() {
         gpu::{gl::FramebufferInfo, BackendRenderTarget, SurfaceOrigin},
         Color, ColorType, Surface,
     };
-    use std::convert::TryInto;
 
     type WindowedContext = glutin::ContextWrapper<glutin::PossiblyCurrent, glutin::window::Window>;
 
