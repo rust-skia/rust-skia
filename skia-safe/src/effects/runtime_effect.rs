@@ -123,9 +123,9 @@ impl NativeRefCountedBase for SkRuntimeEffect {
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct Options {
-    pub force_no_inline: bool,
+    pub force_unoptimized: bool,
     enforce_es2_restrictions: bool,
-    allow_frag_coord: bool,
+    use_private_rt_shader_module: bool,
 }
 
 native_transmutable!(SkRuntimeEffect_Options, Options, options_layout);
@@ -133,9 +133,9 @@ native_transmutable!(SkRuntimeEffect_Options, Options, options_layout);
 impl Default for Options {
     fn default() -> Self {
         Options {
-            force_no_inline: false,
+            force_unoptimized: false,
             enforce_es2_restrictions: true,
-            allow_frag_coord: false,
+            use_private_rt_shader_module: false,
         }
     }
 }
