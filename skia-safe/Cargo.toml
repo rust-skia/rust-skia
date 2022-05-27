@@ -14,7 +14,7 @@ license = "MIT"
 
 version = "0.51.0"
 authors = ["Armin Sander <armin@replicator.org>"]
-edition = "2018"
+edition = "2021"
 
 [lib]
 doctest = false

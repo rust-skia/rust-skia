@@ -11,7 +11,7 @@ license = "MIT"
 
 version = "0.51.0"
 authors = ["LongYinan <lynweklm@gmail.com>", "Armin Sander <armin@replicator.org>"]
-edition = "2018"
+edition = "2021"
 build = "build.rs"
 links = "skia"
 include = [ 

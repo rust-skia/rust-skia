@@ -13,7 +13,7 @@ license = "MIT"
 
 version = "1.0.0"
 authors = ["Armin Sander <armin@replicator.org>"]
-edition = "2018"
+edition = "2021"
 
 default-run = "skia-org"
 
