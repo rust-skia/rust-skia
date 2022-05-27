@@ -150,6 +150,8 @@ variant_name!(PointMode::Polygon, point_mode_naming);
 /// [`SrcRectConstraint`] controls the behavior at the edge of source [`Rect`], provided to
 /// [`Canvas::draw_image_rect()`] when there is any filtering. If kStrict is set, then extra code is
 /// used to ensure it nevers samples outside of the src-rect.
+///
+/// [`SrcRectConstraint::Strict`] disables the use of mipmaps and anisotropic filtering.
 pub use sb::SkCanvas_SrcRectConstraint as SrcRectConstraint;
 variant_name!(SrcRectConstraint::Fast, src_rect_constraint_naming);
 
