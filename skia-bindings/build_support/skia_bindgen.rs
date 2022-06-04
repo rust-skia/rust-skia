@@ -246,9 +246,10 @@ pub fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Pat
                 builder = builder.clang_arg(arg);
             }
         }
-        (_, "unknown", "linux", Some("musl")) => {
-            cc_build.include("/usr/include/c++/10.3.1");
-            cc_build.include("/usr/include/c++/10.3.1/x86_64-alpine-linux-musl");
+        (arch, "unknown", "linux", Some("musl")) => {
+            let cpp = "10.3.1";
+            cc_build.include(format!("/usr/include/c++/{}", cpp));
+            cc_build.include(format!("/usr/include/c++/{}/{}-alpine-linux-musl", cpp, arch));
         }
         ("wasm32", "unknown", "emscripten", _) => {
             // visibility=default, otherwise some types may be missing:

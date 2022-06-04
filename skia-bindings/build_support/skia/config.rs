@@ -255,8 +255,9 @@ impl FinalBuildConfiguration {
                         }
                         ("windows", _) => "win",
                         ("linux", Some("musl")) => {
-                            cflags.push("-I/usr/include/c++/10.3.1".into());
-                            cflags.push("-I/usr/include/c++/10.3.1/x86_64-alpine-linux-musl".into());
+                            let cpp = "10.3.1";
+                            cflags.push(format!("-I/usr/include/c++/{}", cpp));
+                            cflags.push(format!("-I/usr/include/c++/{}/{}-alpine-linux-musl", cpp, arch));
                             os
                         },
                         (_, _) => os,
