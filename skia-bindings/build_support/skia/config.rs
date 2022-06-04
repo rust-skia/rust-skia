@@ -241,9 +241,9 @@ impl FinalBuildConfiguration {
                     args.push(("skia_use_webgl", yes_if(features.gpu())));
                     args.push(("target_cpu", quote("wasm")));
                 }
-                (arch, _, os, _) => {
-                    let skia_target_os = match os {
-                        "darwin" => {
+                (arch, _, os, abi) => {
+                    let skia_target_os = match (os, abi) {
+                        ("darwin", _) => {
                             // Skia will take care to set a specific `-target` for the current macOS
                             // version. So we don't push another target `--target` that may
                             // conflict.
@@ -253,8 +253,13 @@ impl FinalBuildConfiguration {
                             cargo::rerun_if_env_var_changed("MACOSX_DEPLOYMENT_TARGET");
                             "mac"
                         }
-                        "windows" => "win",
-                        _ => os,
+                        ("windows", _) => "win",
+                        ("linux", Some("musl")) => {
+                            cflags.push("-I/usr/include/c++/10.3.1".into());
+                            cflags.push("-I/usr/include/c++/10.3.1/x86_64-alpine-linux-musl".into());
+                            os
+                        },
+                        (_, _) => os,
                     };
                     args.push(("target_os", quote(skia_target_os)));
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
