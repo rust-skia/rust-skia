@@ -18,6 +18,9 @@ RUN apk add --update --no-cache --repository http://dl-cdn.alpinelinux.org/alpin
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
 ENV PATH="/root/.cargo/bin:${PATH}"
 
+#
+# the rest of the file is just to test that the build succeeds (remove before merging)
+#
 WORKDIR /code
 
 RUN git clone --depth 1 --branch "0.50.0" https://github.com/rust-skia/rust-skia.git && \

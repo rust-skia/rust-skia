@@ -18,17 +18,20 @@ RUN apk add --update --no-cache --repository http://dl-cdn.alpinelinux.org/alpin
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
 ENV PATH="/root/.cargo/bin:${PATH}"
 
+# fake the <asm/hwcap.h> include used by "skia/third_party/externals/zlib/cpu_features.c"
+# which doesn't exist on aarch64-alpine but is requested anyway due to an `ifdef ARMV8_OS_LINUX`
+RUN mkdir /usr/include/c++/10.3.1/aarch64-alpine-linux-musl/asm && \
+    touch /usr/include/c++/10.3.1/aarch64-alpine-linux-musl/asm/hwcap.h
+
+#
+# the rest of the file is just to test that the build succeeds (remove before merging)
+#
 WORKDIR /code
 
 RUN git clone --depth 1 --branch "0.50.0" https://github.com/rust-skia/rust-skia.git && \
     cd rust-skia && \
     git submodule update --init --depth 1 skia-bindings/skia && \
     git submodule update --init --depth 1 skia-bindings/depot_tools
-
-# fake the <asm/hwcap.h> include used by "skia/third_party/externals/zlib/cpu_features.c"
-# which doesn't exist on aarch64-alpine but is requested anyway due to an `ifdef ARMV8_OS_LINUX`
-RUN mkdir /usr/include/c++/10.3.1/aarch64-alpine-linux-musl/asm && \
-    touch /usr/include/c++/10.3.1/aarch64-alpine-linux-musl/asm/hwcap.h
 
 RUN cd rust-skia && \
     cargo build --features=embed-freetype
