@@ -257,9 +257,12 @@ impl FinalBuildConfiguration {
                         ("linux", Some("musl")) => {
                             let cpp = "10.3.1";
                             cflags.push(format!("-I/usr/include/c++/{}", cpp));
-                            cflags.push(format!("-I/usr/include/c++/{}/{}-alpine-linux-musl", cpp, arch));
+                            cflags.push(format!(
+                                "-I/usr/include/c++/{}/{}-alpine-linux-musl",
+                                cpp, arch
+                            ));
                             os
-                        },
+                        }
                         (_, _) => os,
                     };
                     args.push(("target_os", quote(skia_target_os)));
