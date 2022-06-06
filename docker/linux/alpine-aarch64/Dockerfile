@@ -23,15 +23,9 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 RUN mkdir -p /usr/include/c++/10.3.1/aarch64-alpine-linux-musl/asm && \
     touch /usr/include/c++/10.3.1/aarch64-alpine-linux-musl/asm/hwcap.h
 
-#
-# the rest of the file is just to test that the build succeeds (remove before merging)
-#
-WORKDIR /code
+# WORKDIR /code
 
-RUN git clone --depth 1 --branch "0.50.0" https://github.com/rust-skia/rust-skia.git && \
-    cd rust-skia && \
-    git submodule update --init --depth 1 skia-bindings/skia && \
-    git submodule update --init --depth 1 skia-bindings/depot_tools
+# COPY . /code/rust-skia/
 
-RUN cd rust-skia && \
-    cargo build --features=embed-freetype
+# RUN cd rust-skia && \
+#     cargo build --features=embed-freetype
