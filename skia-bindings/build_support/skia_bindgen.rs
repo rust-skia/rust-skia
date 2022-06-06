@@ -246,6 +246,14 @@ pub fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Pat
                 builder = builder.clang_arg(arg);
             }
         }
+        (arch, "unknown", "linux", Some("musl")) => {
+            let cpp = "10.3.1";
+            cc_build.include(format!("/usr/include/c++/{}", cpp));
+            cc_build.include(format!(
+                "/usr/include/c++/{}/{}-alpine-linux-musl",
+                cpp, arch
+            ));
+        }
         ("wasm32", "unknown", "emscripten", _) => {
             // visibility=default, otherwise some types may be missing:
             // https://github.com/rust-lang/rust-bindgen/issues/751#issuecomment-555735577
