@@ -20,7 +20,7 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 
 # fake the <asm/hwcap.h> include used by "skia/third_party/externals/zlib/cpu_features.c"
 # which doesn't exist on aarch64-alpine but is requested anyway due to an `ifdef ARMV8_OS_LINUX`
-RUN mkdir /usr/include/c++/10.3.1/aarch64-alpine-linux-musl/asm && \
+RUN mkdir -p /usr/include/c++/10.3.1/aarch64-alpine-linux-musl/asm && \
     touch /usr/include/c++/10.3.1/aarch64-alpine-linux-musl/asm/hwcap.h
 
 #
