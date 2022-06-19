@@ -4,6 +4,7 @@
 
 #include "bindings.h"
 
+#include "include/core/SkColorSpace.h"
 #include "include/core/SkSurface.h"
 #include "include/gpu/mtl/GrMtlBackendContext.h"
 #include "include/gpu/GrDirectContext.h"

@@ -304,10 +304,6 @@ extern "C" {
         self->addPlaceholder(*placeholderStyle);
     }
 
-    void C_ParagraphBuilder_setParagraphStyle(ParagraphBuilder* self, const ParagraphStyle* style) {
-        self->setParagraphStyle(*style);
-    }
-
     Paragraph* C_ParagraphBuilder_Build(ParagraphBuilder* self) {
         return self->Build().release();
     }

@@ -54,11 +54,6 @@ impl ParagraphBuilder {
         self
     }
 
-    pub fn set_paragraph_style(&mut self, style: &ParagraphStyle) -> &mut Self {
-        unsafe { sb::C_ParagraphBuilder_setParagraphStyle(self.native_mut(), style.native()) }
-        self
-    }
-
     pub fn build(&mut self) -> Paragraph {
         Paragraph::from_ptr(unsafe { sb::C_ParagraphBuilder_Build(self.native_mut()) }).unwrap()
     }
