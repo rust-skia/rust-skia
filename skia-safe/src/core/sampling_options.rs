@@ -95,7 +95,6 @@ impl From<FilterMode> for SamplingOptions {
     fn from(fm: FilterMode) -> Self {
         Self {
             filter: fm,
-            mipmap: MipmapMode::None,
             ..Default::default()
         }
     }
