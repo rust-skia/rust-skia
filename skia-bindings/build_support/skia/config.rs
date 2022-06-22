@@ -236,10 +236,15 @@ impl FinalBuildConfiguration {
                     args.push(("skia_gl_standard", quote("webgl")));
                     args.push(("skia_use_freetype", yes()));
                     args.push(("skia_use_system_freetype2", no()));
-                    // Default causes linker Error: Undefined symbol `SK_EMBEDDED_FONTS`.
-                    args.push(("skia_enable_fontmgr_custom_embedded", no()));
                     args.push(("skia_use_webgl", yes_if(features.gpu())));
                     args.push(("target_cpu", quote("wasm")));
+
+                    // The custom embedded font manager is enabled by default on WASM, but depends
+                    // on the undefined symbol `SK_EMBEDDED_FONTS`. Enable the custom empty font
+                    // manager instead so typeface creation still works.
+                    // See https://github.com/rust-skia/rust-skia/issues/648
+                    args.push(("skia_enable_fontmgr_custom_embedded", no()));
+                    args.push(("skia_enable_fontmgr_custom_empty", yes()));
                 }
                 (arch, _, os, abi) => {
                     let skia_target_os = match (os, abi) {
