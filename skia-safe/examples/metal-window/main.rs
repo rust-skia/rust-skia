@@ -16,7 +16,6 @@ fn main() {
     use cocoa::{appkit::NSView, base::id as cocoa_id};
 
     use core_graphics_types::geometry::CGSize;
-    use std::mem;
 
     use foreign_types_shared::{ForeignType, ForeignTypeRef};
     use metal_rs::{Device, MTLPixelFormat, MetalLayer};
@@ -54,7 +53,7 @@ fn main() {
         unsafe {
             let view = window.ns_view() as cocoa_id;
             view.setWantsLayer(YES);
-            view.setLayer(mem::transmute(layer.as_ref()));
+            view.setLayer(layer.as_ref() as *const _ as _);
         }
         layer.set_drawable_size(CGSize::new(draw_size.width as f64, draw_size.height as f64));
         layer
