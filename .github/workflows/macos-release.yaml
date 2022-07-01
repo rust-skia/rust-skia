@@ -29,10 +29,6 @@ jobs:
     
     - name: Install Clippy
       run: rustup component add clippy
-    
-    # remove LLVM on macOS so that only Apple's clang is used
-    - name: Remove LLVM (macOS)
-      run: brew uninstall llvm
     - name: 'Install Rust target x86_64-apple-darwin'
       shell: bash
       run: |
@@ -431,10 +427,6 @@ jobs:
     
     - name: Install Clippy
       run: rustup component add clippy
-    
-    # remove LLVM on macOS so that only Apple's clang is used
-    - name: Remove LLVM (macOS)
-      run: brew uninstall llvm
     - name: 'Install Rust target x86_64-apple-darwin'
       shell: bash
       run: |
@@ -833,10 +825,6 @@ jobs:
     
     - name: Install Clippy
       run: rustup component add clippy
-    
-    # remove LLVM on macOS so that only Apple's clang is used
-    - name: Remove LLVM (macOS)
-      run: brew uninstall llvm
     - name: 'Install Rust target x86_64-apple-darwin'
       shell: bash
       run: |
@@ -1235,10 +1223,6 @@ jobs:
     
     - name: Install Clippy
       run: rustup component add clippy
-    
-    # remove LLVM on macOS so that only Apple's clang is used
-    - name: Remove LLVM (macOS)
-      run: brew uninstall llvm
     - name: 'Install Rust target x86_64-apple-darwin'
       shell: bash
       run: |
@@ -1637,10 +1621,6 @@ jobs:
     
     - name: Install Clippy
       run: rustup component add clippy
-    
-    # remove LLVM on macOS so that only Apple's clang is used
-    - name: Remove LLVM (macOS)
-      run: brew uninstall llvm
     - name: 'Install Rust target x86_64-apple-darwin'
       shell: bash
       run: |
@@ -2039,10 +2019,6 @@ jobs:
     
     - name: Install Clippy
       run: rustup component add clippy
-    
-    # remove LLVM on macOS so that only Apple's clang is used
-    - name: Remove LLVM (macOS)
-      run: brew uninstall llvm
     - name: 'Install Rust target x86_64-apple-darwin'
       shell: bash
       run: |
@@ -2441,10 +2417,6 @@ jobs:
     
     - name: Install Clippy
       run: rustup component add clippy
-    
-    # remove LLVM on macOS so that only Apple's clang is used
-    - name: Remove LLVM (macOS)
-      run: brew uninstall llvm
     - name: 'Install Rust target x86_64-apple-darwin'
       shell: bash
       run: |
@@ -2843,10 +2815,6 @@ jobs:
     
     - name: Install Clippy
       run: rustup component add clippy
-    
-    # remove LLVM on macOS so that only Apple's clang is used
-    - name: Remove LLVM (macOS)
-      run: brew uninstall llvm
     - name: 'Install Rust target x86_64-apple-darwin'
       shell: bash
       run: |
@@ -3245,10 +3213,6 @@ jobs:
     
     - name: Install Clippy
       run: rustup component add clippy
-    
-    # remove LLVM on macOS so that only Apple's clang is used
-    - name: Remove LLVM (macOS)
-      run: brew uninstall llvm
     - name: 'Install Rust target x86_64-apple-darwin'
       shell: bash
       run: |
