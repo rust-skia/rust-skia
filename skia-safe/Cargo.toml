@@ -53,7 +53,7 @@ winapi = { version = "0.3.9", features = ["d3d12", "dxgi"], optional = true }
 wio = { version = "0.2.2", optional = true }
 
 [dev-dependencies]
-serial_test = "0.7"
+serial_test = "0.8"
 static_assertions = "1.1"
 
 # gl-window
