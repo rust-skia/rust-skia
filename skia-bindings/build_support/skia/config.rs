@@ -202,7 +202,7 @@ impl FinalBuildConfiguration {
                             "Unable to locate LLVM installation. skia-bindings can not be built."
                         );
                     }
-					args.push(("target_cpu", quote(clang::target_arch(arch))));
+                    args.push(("target_cpu", quote(clang::target_arch(arch))));
                 }
                 (arch, "linux", "android", _) | (arch, "linux", "androideabi", _) => {
                     args.push(("ndk", quote(&android::ndk())));
