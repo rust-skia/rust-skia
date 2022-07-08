@@ -177,7 +177,7 @@ impl FinalBuildConfiguration {
             }
 
             match target.as_strs() {
-                (_, _, "windows", Some("msvc")) if build.on_windows => {
+                (arch, _, "windows", Some("msvc")) if build.on_windows => {
                     if let Some(win_vc) = vs::resolve_win_vc() {
                         args.push(("win_vc", quote(win_vc.to_str().unwrap())))
                     }
@@ -202,6 +202,7 @@ impl FinalBuildConfiguration {
                             "Unable to locate LLVM installation. skia-bindings can not be built."
                         );
                     }
+					args.push(("target_cpu", quote(clang::target_arch(arch))));
                 }
                 (arch, "linux", "android", _) | (arch, "linux", "androideabi", _) => {
                     args.push(("ndk", quote(&android::ndk())));
