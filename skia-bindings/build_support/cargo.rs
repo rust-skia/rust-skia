@@ -114,7 +114,9 @@ pub fn target() -> Target {
 }
 
 pub fn target_crt_static() -> bool {
-    cfg!(target_feature = "crt-static")
+    env::var("CARGO_CFG_TARGET_FEATURE")
+        .map(|features| features.contains("crt-static"))
+        .unwrap_or(false)
 }
 
 pub fn host() -> Target {
