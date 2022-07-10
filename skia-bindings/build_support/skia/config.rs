@@ -177,7 +177,7 @@ impl FinalBuildConfiguration {
             }
 
             match target.as_strs() {
-                (_, _, "windows", Some("msvc")) if build.on_windows => {
+                (arch, _, "windows", Some("msvc")) if build.on_windows => {
                     if let Some(win_vc) = vs::resolve_win_vc() {
                         args.push(("win_vc", quote(win_vc.to_str().unwrap())))
                     }
@@ -201,6 +201,13 @@ impl FinalBuildConfiguration {
                         panic!(
                             "Unable to locate LLVM installation. skia-bindings can not be built."
                         );
+                    }
+                    // Setting `target_cpu` to `i686` or `x86`, nightly builds would lead to
+                    // > 'C:/Program' is not recognized as an internal or external command
+                    // Without it, the executables pop out just fine. See the GH job
+                    // `supplemental-builds/windows-x86`.
+                    if arch != "i686" {
+                        args.push(("target_cpu", quote(clang::target_arch(arch))));
                     }
                 }
                 (arch, "linux", "android", _) | (arch, "linux", "androideabi", _) => {
