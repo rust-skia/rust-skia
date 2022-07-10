@@ -202,7 +202,13 @@ impl FinalBuildConfiguration {
                             "Unable to locate LLVM installation. skia-bindings can not be built."
                         );
                     }
-                    args.push(("target_cpu", quote(clang::target_arch(arch))));
+                    // Setting `target_cpu` to `i686` or `x86`, nightly builds would lead to
+                    // > 'C:/Program' is not recognized as an internal or external command
+                    // Without it, the executables pop out just fine. See the GH job
+                    // `supplemental-builds/windows-x86`.
+                    if arch != "i686" {
+                        args.push(("target_cpu", quote(clang::target_arch(arch))));
+                    }
                 }
                 (arch, "linux", "android", _) | (arch, "linux", "androideabi", _) => {
                     args.push(("ndk", quote(&android::ndk())));
