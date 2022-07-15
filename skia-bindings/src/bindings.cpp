@@ -2642,11 +2642,6 @@ extern "C" void C_SkPDF_AttributeList_appendFloatArray(SkPDF::AttributeList *sel
     self->appendFloatArray(owner, name, v);
 }
 
-extern "C" void C_SkPDF_AttributeList_appendStringArray(SkPDF::AttributeList *self, const char *owner, const char *name, const SkString *const value, size_t len) {
-    std::vector<SkString> v(value, value + len);
-    self->appendStringArray(owner, name, v);
-}
-
 extern "C" SkPDF::StructureElementNode *C_SkPDF_StructureElementNode_New() {
     return new SkPDF::StructureElementNode();
 }

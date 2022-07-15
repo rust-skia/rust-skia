@@ -6,6 +6,7 @@
         "emscripten",
         "emsdk",
         "fembed",
+        "libcanvasnative",
         "macabi",
         "mios",
         "miphoneos",
