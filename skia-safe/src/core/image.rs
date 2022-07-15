@@ -1,5 +1,6 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
+use crate::SurfaceProps;
 use crate::{
     prelude::*, AlphaType, Bitmap, ColorSpace, ColorType, Data, EncodedImageFormat, IPoint, IRect,
     ISize, ImageFilter, ImageGenerator, ImageInfo, Matrix, Paint, Picture, Pixmap, SamplingOptions,
@@ -123,6 +124,26 @@ impl Image {
         bit_depth: BitDepth,
         color_space: impl Into<Option<ColorSpace>>,
     ) -> Option<Image> {
+        Self::from_picture_with_props(
+            picture,
+            dimensions,
+            matrix,
+            paint,
+            bit_depth,
+            color_space,
+            SurfaceProps::default(),
+        )
+    }
+
+    pub fn from_picture_with_props(
+        picture: impl Into<Picture>,
+        dimensions: impl Into<ISize>,
+        matrix: Option<&Matrix>,
+        paint: Option<&Paint>,
+        bit_depth: BitDepth,
+        color_space: impl Into<Option<ColorSpace>>,
+        props: SurfaceProps,
+    ) -> Option<Image> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_MakeFromPicture(
                 picture.into().into_ptr(),
@@ -131,6 +152,7 @@ impl Image {
                 paint.native_ptr_or_null(),
                 bit_depth,
                 color_space.into().into_ptr_or_null(),
+                props.native(),
             )
         })
     }

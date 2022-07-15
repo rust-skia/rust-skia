@@ -309,8 +309,18 @@ extern "C" SkImage* C_SkImage_MakeFromPicture(
         const SkMatrix* matrix,
         const SkPaint* paint,
         SkImage::BitDepth bitDepth,
-        SkColorSpace* colorSpace) {
-    return SkImage::MakeFromPicture(sp(picture), *dimensions, matrix, paint, bitDepth, sp(colorSpace)).release();
+        SkColorSpace* colorSpace,
+        const SkSurfaceProps* props) {
+    return 
+        SkImage::MakeFromPicture(
+            sp(picture),
+            *dimensions,
+            matrix,
+            paint,
+            bitDepth,
+            sp(colorSpace),
+            *props
+        ).release();
 }
 
 
@@ -1755,14 +1765,18 @@ extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromPicture(
         const SkMatrix *matrix,
         const SkPaint *paint,
         SkImage::BitDepth bd,
-        SkColorSpace *cs) {
-    return SkImageGenerator::MakeFromPicture(
+        SkColorSpace *cs,
+        const SkSurfaceProps* props) {
+    return 
+        SkImageGenerator::MakeFromPicture(
             *size,
             sp(picture),
             matrix,
             paint,
             bd,
-            sp(cs)).release();
+            sp(cs),
+            *props
+        ).release();
 }
 
 //

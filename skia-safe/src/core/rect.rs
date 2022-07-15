@@ -452,10 +452,6 @@ impl Rect {
         self.native().fBottom - self.native().fTop
     }
 
-    pub fn center(&self) -> Point {
-        Point::from((self.center_x(), self.center_y()))
-    }
-
     pub fn center_x(&self) -> scalar {
         // don't use (fLeft + fBottom) * 0.5 as that might overflow before the 0.5
         self.left * 0.5 + self.right * 0.5
@@ -464,6 +460,10 @@ impl Rect {
     pub fn center_y(&self) -> scalar {
         // don't use (fTop + fBottom) * 0.5 as that might overflow before the 0.5
         self.top * 0.5 + self.bottom * 0.5
+    }
+
+    pub fn center(&self) -> Point {
+        Point::from((self.center_x(), self.center_y()))
     }
 
     pub fn to_quad(self) -> [Point; 4] {
