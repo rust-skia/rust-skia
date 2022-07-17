@@ -578,7 +578,7 @@ impl Bitmap {
     pub fn erase(&self, c: impl Into<Color>, area: impl AsRef<IRect>) {
         unsafe {
             self.native()
-                .erase2(c.into().into_native(), area.as_ref().native())
+                .erase1(c.into().into_native(), area.as_ref().native())
         }
     }
 
