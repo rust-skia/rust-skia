@@ -71,6 +71,8 @@ pub mod uniform {
         pub struct Flags : u32 {
             const ARRAY = sb::SkRuntimeEffect_Uniform_Flags_kArray_Flag as _;
             const COLOR = sb::SkRuntimeEffect_Uniform_Flags_kColor_Flag as _;
+            const VERTEX = sb::SkRuntimeEffect_Uniform_Flags_kVertex_Flag as _;
+            const FRAGMENT = sb::SkRuntimeEffect_Uniform_Flags_kFragment_Flag as _;
         }
     }
 }

@@ -34,7 +34,7 @@ pub const EMPTY_INDEX: usize = std::usize::MAX;
 
 pub trait RangeExtensions {
     fn width(&self) -> usize;
-    fn shift(&mut self, d: usize);
+    fn shift(&mut self, d: isize);
     fn contains(&self, other: &Self) -> bool;
     fn intersects(&self, other: &Self) -> bool;
     #[must_use]
@@ -47,9 +47,16 @@ impl RangeExtensions for Range<usize> {
         self.end - self.start
     }
 
-    fn shift(&mut self, d: usize) {
-        self.start += d;
-        self.end += d;
+    fn shift(&mut self, d: isize) {
+        if d >= 0 {
+            let u = d as usize;
+            self.start += u;
+            self.end += u;
+        } else {
+            let u = -d as usize;
+            self.start -= u;
+            self.end -= u;
+        }
     }
 
     fn contains(&self, other: &Self) -> bool {

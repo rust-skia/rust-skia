@@ -2353,12 +2353,12 @@ SkRuntimeEffect *C_SkRuntimeEffect_MakeForBlender(
 }
 
 SkShader *C_SkRuntimeEffect_makeShader(
-    const SkRuntimeEffect *self, SkData *uniforms,
+    const SkRuntimeEffect *self, const SkData *uniforms,
     SkRuntimeEffect::ChildPtr *children, size_t childCount,
     const SkMatrix *localMatrix)
 {
     return self->makeShader(
-        sp(uniforms), 
+        sp(uniforms),
         SkSpan<SkRuntimeEffect::ChildPtr>(children, childCount), 
         localMatrix).release();
 }
@@ -2366,7 +2366,7 @@ SkShader *C_SkRuntimeEffect_makeShader(
 SkImage *C_SkRuntimeEffect_makeImage(
     const SkRuntimeEffect *self,
     GrRecordingContext* context,
-    SkData *uniforms,
+    const SkData *uniforms,
     SkRuntimeEffect::ChildPtr *children, size_t childCount,
     const SkMatrix *localMatrix,
     const SkImageInfo *resultInfo,
@@ -2379,13 +2379,13 @@ SkImage *C_SkRuntimeEffect_makeImage(
 }
 
 SkColorFilter *C_SkRuntimeEffect_makeColorFilter(
-    const SkRuntimeEffect *self, SkData *inputs, SkRuntimeEffect::ChildPtr *children, size_t childCount)
+    const SkRuntimeEffect *self, const SkData *inputs, SkRuntimeEffect::ChildPtr *children, size_t childCount)
 {
     return self->makeColorFilter(sp(inputs), SkSpan<SkRuntimeEffect::ChildPtr>(children, childCount)).release();
 }
 
 SkBlender *C_SkRuntimeEffect_makeBlender(
-    const SkRuntimeEffect *self, SkData *uniforms, SkRuntimeEffect::ChildPtr *children, size_t childCount)
+    const SkRuntimeEffect *self, const SkData *uniforms, SkRuntimeEffect::ChildPtr *children, size_t childCount)
 {
     return self->makeBlender(sp(uniforms), SkSpan<SkRuntimeEffect::ChildPtr>(children, childCount)).release();
 }
