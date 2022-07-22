@@ -10,7 +10,7 @@ If possible, add a small test case for you changes.
 
 Your PR will be built for and tested on a number of targets on the CI before it can be merged. If that fails, we are probably able to help out.
 
-If you'd like the changes in your PR to be released to [crates.io](https://crates.io/) timely, please say so, because we prefer to align crate releases with major [updates to Chrome stable](https://www.chromestatus.com/features/schedule).
+If you'd like the changes in your PR to be released to [crates.io](https://crates.io/) timely, please say so, because we prefer to align crate releases with major [updates to Chrome stable](https://chromestatus.com/roadmap).
 
 ## Repository organization
 
