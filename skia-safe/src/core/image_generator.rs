@@ -2,6 +2,7 @@
 use crate::gpu;
 use crate::{
     image, prelude::*, AlphaType, ColorSpace, Data, ISize, ImageInfo, Matrix, Paint, Picture,
+    SurfaceProps,
 };
 use skia_bindings::{self as sb, SkImageGenerator};
 use std::{fmt, ptr};
@@ -90,6 +91,26 @@ impl ImageGenerator {
         bit_depth: image::BitDepth,
         color_space: impl Into<Option<ColorSpace>>,
     ) -> Option<Self> {
+        Self::from_picture_with_props(
+            size,
+            picture,
+            matrix,
+            paint,
+            bit_depth,
+            color_space,
+            SurfaceProps::default(),
+        )
+    }
+
+    pub fn from_picture_with_props(
+        size: ISize,
+        picture: impl Into<Picture>,
+        matrix: Option<&Matrix>,
+        paint: Option<&Paint>,
+        bit_depth: image::BitDepth,
+        color_space: impl Into<Option<ColorSpace>>,
+        props: SurfaceProps,
+    ) -> Option<Self> {
         Self::from_ptr(unsafe {
             sb::C_SkImageGenerator_MakeFromPicture(
                 size.native(),
@@ -98,6 +119,7 @@ impl ImageGenerator {
                 paint.native_ptr_or_null(),
                 bit_depth,
                 color_space.into().into_ptr_or_null(),
+                props.native(),
             )
         })
     }

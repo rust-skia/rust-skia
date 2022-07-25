@@ -1,6 +1,6 @@
 pub mod pdf {
     use crate::{
-        interop::{self, AsStr, DynamicMemoryWStream, SetStr},
+        interop::{AsStr, DynamicMemoryWStream, SetStr},
         prelude::*,
         scalar, DateTime, Document,
     };
@@ -61,22 +61,6 @@ pub mod pdf {
             self
         }
 
-        pub fn append_string(
-            &mut self,
-            owner: impl AsRef<str>,
-            name: impl AsRef<str>,
-            value: impl AsRef<str>,
-        ) -> &mut Self {
-            let owner = CString::new(owner.as_ref()).unwrap();
-            let name = CString::new(name.as_ref()).unwrap();
-            let value = CString::new(value.as_ref()).unwrap();
-            unsafe {
-                self.native_mut()
-                    .appendString(owner.as_ptr(), name.as_ptr(), value.as_ptr())
-            }
-            self
-        }
-
         pub fn append_float_array(
             &mut self,
             owner: impl AsRef<str>,
@@ -91,28 +75,6 @@ pub mod pdf {
                     owner.as_ptr(),
                     name.as_ptr(),
                     value.as_ptr(),
-                    value.len(),
-                )
-            }
-            self
-        }
-
-        pub fn append_string_array(
-            &mut self,
-            owner: impl AsRef<str>,
-            name: impl AsRef<str>,
-            value: &[impl AsRef<str>],
-        ) -> &mut Self {
-            let owner = CString::new(owner.as_ref()).unwrap();
-            let name = CString::new(name.as_ref()).unwrap();
-            let value: Vec<interop::String> = value.iter().map(interop::String::from_str).collect();
-
-            unsafe {
-                sb::C_SkPDF_AttributeList_appendStringArray(
-                    self.native_mut(),
-                    owner.as_ptr(),
-                    name.as_ptr(),
-                    value.native().as_ptr(),
                     value.len(),
                 )
             }
@@ -327,5 +289,4 @@ fn create_attribute_list() {
     use pdf::AttributeList;
     let mut _al = AttributeList::default();
     _al.append_float_array("Owner", "Name", &[1.0, 2.0, 3.0]);
-    _al.append_string_array("Owner", "Name", &["A", "B", "C"]);
 }

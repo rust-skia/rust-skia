@@ -351,6 +351,8 @@ impl Surface {
         Canvas::borrow_from_native_mut(canvas_ref)
     }
 
+    // TODO: capabilities()
+
     // TODO: why is self mutable here?
     pub fn new_surface(&mut self, info: &ImageInfo) -> Option<Surface> {
         Surface::from_ptr(unsafe { sb::C_SkSurface_makeSurface(self.native_mut(), info.native()) })

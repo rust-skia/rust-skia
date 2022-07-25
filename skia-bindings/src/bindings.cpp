@@ -309,8 +309,18 @@ extern "C" SkImage* C_SkImage_MakeFromPicture(
         const SkMatrix* matrix,
         const SkPaint* paint,
         SkImage::BitDepth bitDepth,
-        SkColorSpace* colorSpace) {
-    return SkImage::MakeFromPicture(sp(picture), *dimensions, matrix, paint, bitDepth, sp(colorSpace)).release();
+        SkColorSpace* colorSpace,
+        const SkSurfaceProps* props) {
+    return 
+        SkImage::MakeFromPicture(
+            sp(picture),
+            *dimensions,
+            matrix,
+            paint,
+            bitDepth,
+            sp(colorSpace),
+            *props
+        ).release();
 }
 
 
@@ -1755,14 +1765,18 @@ extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromPicture(
         const SkMatrix *matrix,
         const SkPaint *paint,
         SkImage::BitDepth bd,
-        SkColorSpace *cs) {
-    return SkImageGenerator::MakeFromPicture(
+        SkColorSpace *cs,
+        const SkSurfaceProps* props) {
+    return 
+        SkImageGenerator::MakeFromPicture(
             *size,
             sp(picture),
             matrix,
             paint,
             bd,
-            sp(cs)).release();
+            sp(cs),
+            *props
+        ).release();
 }
 
 //
@@ -2339,12 +2353,12 @@ SkRuntimeEffect *C_SkRuntimeEffect_MakeForBlender(
 }
 
 SkShader *C_SkRuntimeEffect_makeShader(
-    const SkRuntimeEffect *self, SkData *uniforms,
+    const SkRuntimeEffect *self, const SkData *uniforms,
     SkRuntimeEffect::ChildPtr *children, size_t childCount,
     const SkMatrix *localMatrix)
 {
     return self->makeShader(
-        sp(uniforms), 
+        sp(uniforms),
         SkSpan<SkRuntimeEffect::ChildPtr>(children, childCount), 
         localMatrix).release();
 }
@@ -2352,7 +2366,7 @@ SkShader *C_SkRuntimeEffect_makeShader(
 SkImage *C_SkRuntimeEffect_makeImage(
     const SkRuntimeEffect *self,
     GrRecordingContext* context,
-    SkData *uniforms,
+    const SkData *uniforms,
     SkRuntimeEffect::ChildPtr *children, size_t childCount,
     const SkMatrix *localMatrix,
     const SkImageInfo *resultInfo,
@@ -2365,13 +2379,13 @@ SkImage *C_SkRuntimeEffect_makeImage(
 }
 
 SkColorFilter *C_SkRuntimeEffect_makeColorFilter(
-    const SkRuntimeEffect *self, SkData *inputs, SkRuntimeEffect::ChildPtr *children, size_t childCount)
+    const SkRuntimeEffect *self, const SkData *inputs, SkRuntimeEffect::ChildPtr *children, size_t childCount)
 {
     return self->makeColorFilter(sp(inputs), SkSpan<SkRuntimeEffect::ChildPtr>(children, childCount)).release();
 }
 
 SkBlender *C_SkRuntimeEffect_makeBlender(
-    const SkRuntimeEffect *self, SkData *uniforms, SkRuntimeEffect::ChildPtr *children, size_t childCount)
+    const SkRuntimeEffect *self, const SkData *uniforms, SkRuntimeEffect::ChildPtr *children, size_t childCount)
 {
     return self->makeBlender(sp(uniforms), SkSpan<SkRuntimeEffect::ChildPtr>(children, childCount)).release();
 }
@@ -2640,11 +2654,6 @@ extern "C" void C_SkPDF_AttributeList_destruct(SkPDF::AttributeList *self) {
 extern "C" void C_SkPDF_AttributeList_appendFloatArray(SkPDF::AttributeList *self, const char *owner, const char *name, const float *const value, size_t len) {
     std::vector<float> v(value, value + len);
     self->appendFloatArray(owner, name, v);
-}
-
-extern "C" void C_SkPDF_AttributeList_appendStringArray(SkPDF::AttributeList *self, const char *owner, const char *name, const SkString *const value, size_t len) {
-    std::vector<SkString> v(value, value + len);
-    self->appendStringArray(owner, name, v);
 }
 
 extern "C" SkPDF::StructureElementNode *C_SkPDF_StructureElementNode_New() {
