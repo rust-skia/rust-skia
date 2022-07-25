@@ -7,7 +7,7 @@ use sb::{SkFlattenable, SkRuntimeEffect_Child};
 use skia_bindings::{
     self as sb, SkRefCntBase, SkRuntimeEffect, SkRuntimeEffect_Options, SkRuntimeEffect_Uniform,
 };
-use std::{ffi::CStr, fmt, marker::PhantomData, ops::DerefMut, ptr};
+use std::{fmt, marker::PhantomData, ops::DerefMut, ptr};
 
 pub type Uniform = Handle<SkRuntimeEffect_Uniform>;
 unsafe_send_sync!(Uniform);
@@ -339,20 +339,26 @@ impl RuntimeEffect {
     }
 
     #[deprecated(since = "0.35.0", note = "Use find_uniform()")]
-    pub fn find_input(&self, name: impl AsRef<CStr>) -> Option<&Uniform> {
+    pub fn find_input(&self, name: impl AsRef<str>) -> Option<&Uniform> {
         self.find_uniform(name)
     }
 
-    pub fn find_uniform(&self, name: impl AsRef<CStr>) -> Option<&Uniform> {
-        unsafe { self.native().findUniform(name.as_ref().as_ptr()) }
-            .into_option()
-            .map(|ptr| Uniform::from_native_ref(unsafe { &*ptr }))
+    pub fn find_uniform(&self, name: impl AsRef<str>) -> Option<&Uniform> {
+        let name = name.as_ref().as_bytes();
+        unsafe {
+            sb::C_SkRuntimeEffect_findUniform(self.native(), name.as_ptr() as *const i8, name.len())
+        }
+        .into_option()
+        .map(|ptr| Uniform::from_native_ref(unsafe { &*ptr }))
     }
 
-    pub fn find_child(&self, name: impl AsRef<CStr>) -> Option<&Child> {
-        unsafe { self.native().findChild(name.as_ref().as_ptr()) }
-            .into_option()
-            .map(|ptr| Child::from_native_ref(unsafe { &*ptr }))
+    pub fn find_child(&self, name: impl AsRef<str>) -> Option<&Child> {
+        let name = name.as_ref().as_bytes();
+        unsafe {
+            sb::C_SkRuntimeEffect_findChild(self.native(), name.as_ptr() as *const i8, name.len())
+        }
+        .into_option()
+        .map(|ptr| Child::from_native_ref(unsafe { &*ptr }))
     }
 }
 

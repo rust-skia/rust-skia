@@ -1813,6 +1813,13 @@ extern "C" {
     }
 }
 
+// std::string_view interop (since m105).
+
+extern "C" const char* C_string_view_c_str_size(const std::string_view* self, size_t* size) {
+    *size = self->size();
+    return self->data();
+}
+
 //
 // core/SkStrokeRec.h
 //
@@ -2410,6 +2417,16 @@ const SkRuntimeEffect::Child* C_SkRuntimeEffect_children(const SkRuntimeEffect* 
     auto children = self->children();
     *count = children.size();
     return children.begin();
+}
+
+const SkRuntimeEffect::Uniform* C_SkRuntimeEffect_findUniform(
+    const SkRuntimeEffect* self, const char* name, size_t count) {
+    return self->findUniform(std::string_view(name, count));
+}
+
+const SkRuntimeEffect::Child* C_SkRuntimeEffect_findChild(
+    const SkRuntimeEffect* self, const char* name, size_t count) {
+    return self->findChild(std::string_view(name, count));
 }
 
 }
