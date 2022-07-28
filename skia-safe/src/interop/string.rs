@@ -74,7 +74,18 @@ impl AsStr for sb::std_string_view {
     fn as_str(&self) -> &str {
         let slice = unsafe {
             let mut size = 0;
-            let ptr = sb::C_string_view_c_str_size(self, &mut size) as *const u8;
+            let ptr = sb::C_string_view_ptr_size(self, &mut size) as *const u8;
+            safer::from_raw_parts(ptr, size)
+        };
+        str::from_utf8(slice).unwrap_or_default()
+    }
+}
+
+impl AsStr for sb::std_string {
+    fn as_str(&self) -> &str {
+        let slice = unsafe {
+            let mut size = 0;
+            let ptr = sb::C_string_ptr_size(self, &mut size) as *const u8;
             safer::from_raw_parts(ptr, size)
         };
         str::from_utf8(slice).unwrap_or_default()

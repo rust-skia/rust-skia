@@ -73,6 +73,7 @@ pub mod uniform {
             const COLOR = sb::SkRuntimeEffect_Uniform_Flags_kColor_Flag as _;
             const VERTEX = sb::SkRuntimeEffect_Uniform_Flags_kVertex_Flag as _;
             const FRAGMENT = sb::SkRuntimeEffect_Uniform_Flags_kFragment_Flag as _;
+            const HALF_PRECISION = sb::SkRuntimeEffect_Uniform_Flags_kHalfPrecision_Flag as _;
         }
     }
 }
@@ -359,6 +360,18 @@ impl RuntimeEffect {
         }
         .into_option()
         .map(|ptr| Child::from_native_ref(unsafe { &*ptr }))
+    }
+
+    pub fn allow_shader(&self) -> bool {
+        unsafe { sb::C_SkRuntimeEffect_allowShader(self.native()) }
+    }
+
+    pub fn allow_color_filter(&self) -> bool {
+        unsafe { sb::C_SkRuntimeEffect_allowColorFilter(self.native()) }
+    }
+
+    pub fn allow_blender(&self) -> bool {
+        unsafe { sb::C_SkRuntimeEffect_allowBlender(self.native()) }
     }
 }
 

@@ -464,6 +464,19 @@ impl Canvas {
         unsafe { self.native().getProps(sp.native_mut()) }.if_true_some(sp)
     }
 
+    /// Returns the [`SurfaceProps`] associated with the canvas (i.e., at the base of the layer
+    /// stack).
+    pub fn base_props(&self) -> SurfaceProps {
+        SurfaceProps::from_native_c(unsafe { self.native().getBaseProps() })
+    }
+
+    /// Returns the [`SurfaceProps`] associated with the canvas that are currently active (i.e., at
+    /// the top of the layer stack). This can differ from [`Self::base_props`] depending on the flags
+    /// passed to saveLayer (see [`SaveLayerFlags`]).
+    pub fn top_props(&self) -> SurfaceProps {
+        SurfaceProps::from_native_c(unsafe { self.native().getTopProps() })
+    }
+
     /// Triggers the immediate execution of all pending draw operations.
     /// If [`Canvas`] is associated with GPU surface, resolves all pending GPU operations.
     /// If [`Canvas`] is associated with raster surface, has no effect; raster draw operations are

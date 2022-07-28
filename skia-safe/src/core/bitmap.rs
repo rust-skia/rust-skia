@@ -608,8 +608,21 @@ impl Bitmap {
         self.pixmap().get_color(p)
     }
 
+    /// Returns pixel at `(x, y)` as unpremultiplied color.
+    /// Returns black with alpha if [ColorType] is [ColorType::Alpha8]
+    ///
+    /// Input is not validated: out of bounds values of x or y trigger an `assert()`.
+    ///
+    /// Fails if [ColorType] is [ColorType::Unknown] or pixel address is `None`.
+    ///
+    /// [`ColorSpace`] in [`ImageInfo`] is ignored. Some color precision may be lost in the
+    /// conversion to unpremultiplied color.
+    pub fn get_color_4f(&self, p: impl Into<IPoint>) -> Color4f {
+        self.pixmap().get_color_4f(p)
+    }
+
     /// Look up the pixel at `(x,y)` and return its alpha component, normalized to `[0..1]`. This is
-    /// roughly equivalent to [`getColor().a()`], but can be more efficient (and more precise if the
+    /// roughly equivalent to `get_color().a()`, but can be more efficient (and more precise if the
     /// pixels store more than 8 bits per component).
     pub fn get_alpha_f(&self, p: impl Into<IPoint>) -> f32 {
         self.pixmap().get_alpha_f(p)

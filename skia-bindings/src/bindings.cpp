@@ -1813,11 +1813,18 @@ extern "C" {
     }
 }
 
-// std::string_view interop (since m105).
+// `std::string_view` interop (since m105).
 
-extern "C" const char* C_string_view_c_str_size(const std::string_view* self, size_t* size) {
+extern "C" const char* C_string_view_ptr_size(const std::string_view* self, size_t* size) {
     *size = self->size();
-    return self->data();
+    return *size ? self->data() : nullptr;
+}
+
+// and for completeness `std::string`
+
+extern "C" const char* C_string_ptr_size(const std::string* self, size_t* size) {
+    *size = self->size();
+    return *size ? self->data() : nullptr;
 }
 
 //
@@ -2427,6 +2434,18 @@ const SkRuntimeEffect::Uniform* C_SkRuntimeEffect_findUniform(
 const SkRuntimeEffect::Child* C_SkRuntimeEffect_findChild(
     const SkRuntimeEffect* self, const char* name, size_t count) {
     return self->findChild(std::string_view(name, count));
+}
+
+bool C_SkRuntimeEffect_allowShader(const SkRuntimeEffect* self) {
+    return self->allowShader();
+}
+
+bool C_SkRuntimeEffect_allowColorFilter(const SkRuntimeEffect* self) {
+    return self->allowColorFilter();
+}
+
+bool C_SkRuntimeEffect_allowBlender(const SkRuntimeEffect* self) {
+    return self->allowBlender();
 }
 
 }
