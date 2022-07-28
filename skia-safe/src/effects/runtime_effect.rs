@@ -126,8 +126,8 @@ impl NativeRefCountedBase for SkRuntimeEffect {
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct Options {
     pub force_unoptimized: bool,
-    enforce_es2_restrictions: bool,
     use_private_rt_shader_module: bool,
+    max_version_allowed: sb::SkSL_Version,
 }
 
 native_transmutable!(SkRuntimeEffect_Options, Options, options_layout);
@@ -136,8 +136,8 @@ impl Default for Options {
     fn default() -> Self {
         Options {
             force_unoptimized: false,
-            enforce_es2_restrictions: true,
             use_private_rt_shader_module: false,
+            max_version_allowed: sb::SkSL_Version::k100,
         }
     }
 }
