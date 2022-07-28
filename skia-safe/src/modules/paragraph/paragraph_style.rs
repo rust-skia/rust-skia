@@ -189,6 +189,7 @@ impl fmt::Debug for ParagraphStyle {
             .field("ellipsized", &self.ellipsized())
             .field("effective_align", &self.effective_align())
             .field("hinting_is_on", &self.hinting_is_on())
+            .field("replace_tab_characters", &self.replace_tab_characters())
             .finish()
     }
 }
@@ -296,6 +297,15 @@ impl ParagraphStyle {
 
     pub fn turn_hinting_off(&mut self) -> &mut Self {
         self.native_mut().fHintingIsOn = false;
+        self
+    }
+
+    pub fn replace_tab_characters(&self) -> bool {
+        self.native().fReplaceTabCharacters
+    }
+
+    pub fn set_replace_tab_characters(&mut self, value: bool) -> &mut Self {
+        self.native_mut().fReplaceTabCharacters = value;
         self
     }
 }
