@@ -107,7 +107,7 @@ impl Mul<V2> for scalar {
 
 impl Div<V2> for scalar {
     type Output = V2;
- 
+
     fn div(self, v: V2) -> Self::Output {
         V2::new(self / v.x, self / v.y)
     }
