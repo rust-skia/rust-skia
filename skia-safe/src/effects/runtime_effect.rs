@@ -346,20 +346,16 @@ impl RuntimeEffect {
 
     pub fn find_uniform(&self, name: impl AsRef<str>) -> Option<&Uniform> {
         let name = name.as_ref().as_bytes();
-        unsafe {
-            sb::C_SkRuntimeEffect_findUniform(self.native(), name.as_ptr() as *const i8, name.len())
-        }
-        .into_option()
-        .map(|ptr| Uniform::from_native_ref(unsafe { &*ptr }))
+        unsafe { sb::C_SkRuntimeEffect_findUniform(self.native(), name.as_ptr() as _, name.len()) }
+            .into_option()
+            .map(|ptr| Uniform::from_native_ref(unsafe { &*ptr }))
     }
 
     pub fn find_child(&self, name: impl AsRef<str>) -> Option<&Child> {
         let name = name.as_ref().as_bytes();
-        unsafe {
-            sb::C_SkRuntimeEffect_findChild(self.native(), name.as_ptr() as *const i8, name.len())
-        }
-        .into_option()
-        .map(|ptr| Child::from_native_ref(unsafe { &*ptr }))
+        unsafe { sb::C_SkRuntimeEffect_findChild(self.native(), name.as_ptr() as _, name.len()) }
+            .into_option()
+            .map(|ptr| Child::from_native_ref(unsafe { &*ptr }))
     }
 
     pub fn allow_shader(&self) -> bool {
