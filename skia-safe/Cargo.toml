@@ -64,7 +64,7 @@ gl-rs = { package = "gl", version = "0.14.0" }
 # metal-window
 [target.'cfg(target_os = "macos")'.dev-dependencies]
 metal-rs = { package = "metal", version = "0.23.1" }
-winit = "0.26.1"
+winit = "0.27.0"
 objc = "0.2.7"
 cocoa = "0.24.0"
 core-graphics-types = "0.1.1"
