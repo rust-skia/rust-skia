@@ -1,6 +1,7 @@
 //! Full build support for the Skia library.
 
 use super::{llvm, vs};
+use crate::build_support::cargo::Target;
 use crate::build_support::{android, binaries_config, cargo, clang, features, ios};
 use std::env;
 use std::path::{Path, PathBuf};
@@ -27,19 +28,34 @@ pub struct BuildConfiguration {
 
     /// C++ compiler to use
     cxx: String,
+
+    /// Optional target
+    pub target: Option<Target>,
 }
 
 /// Builds a Skia configuration from a Features set.
 impl BuildConfiguration {
     pub fn from_features(features: features::Features, skia_debug: bool) -> Self {
+        let cc = cargo::env_var("CLANGCC")
+            .or_else(|| cargo::env_var("CC"))
+            .unwrap_or_else(|| "clang".to_string());
+        let target = cc.find("--target=").and_then(|target_option_offset| {
+            cc[(target_option_offset + "--target=".len())..]
+                .split_once(' ')
+                .map(|(target_str, ..)| crate::build_support::cargo::parse_target(target_str))
+        });
+
         BuildConfiguration {
             on_windows: cargo::host().is_windows(),
             // `OPT_LEVEL` is set by Cargo itself.
             opt_level: cargo::env_var("OPT_LEVEL"),
             features,
             skia_debug,
-            cc: cargo::env_var("CC").unwrap_or_else(|| "clang".to_string()),
-            cxx: cargo::env_var("CXX").unwrap_or_else(|| "clang++".to_string()),
+            cc,
+            cxx: cargo::env_var("CLANGCXX")
+                .or_else(|| cargo::env_var("CXX"))
+                .unwrap_or_else(|| "clang++".to_string()),
+            target,
         }
     }
 }
@@ -139,13 +155,15 @@ impl FinalBuildConfiguration {
             let mut use_expat = true;
 
             // target specific gn args.
-            let target = cargo::target();
+            let target = build.target.clone().unwrap_or_else(cargo::target);
             let mut target_str = format!("--target={}", target);
             let mut set_target = true;
             let mut cflags: Vec<String> = Vec::new();
             let mut asmflags: Vec<String> = Vec::new();
 
-            if let Some(sysroot) = cargo::env_var("SDKROOT") {
+            if let Some(sysroot) =
+                cargo::env_var("SDKTARGETSYSROOT").or_else(|| cargo::env_var("SDKROOT"))
+            {
                 cflags.push(format!("--sysroot={}", sysroot));
             }
 

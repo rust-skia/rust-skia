@@ -63,7 +63,11 @@ impl FinalBuildConfiguration {
     }
 }
 
-pub fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
+pub fn generate_bindings(
+    build: &FinalBuildConfiguration,
+    output_directory: &Path,
+    target: Option<Target>,
+) {
     let mut builder = bindgen::Builder::default()
         .generate_comments(false)
         .layout_tests(true)
@@ -127,7 +131,7 @@ pub fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Pat
         .clang_args(&["-x", "c++"])
         .clang_arg("-v");
 
-    let target = cargo::target();
+    let target = target.unwrap_or_else(cargo::target);
 
     // Don't generate destructors for Windows targets: https://github.com/rust-skia/rust-skia/issues/318
     if target.is_windows() {
@@ -203,13 +207,12 @@ pub fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Pat
         cc_build.flag("-std=c++17");
     }
 
-    let target = cargo::target();
-
     let target_str = &target.to_string();
     cc_build.target(target_str);
+    builder = builder.clang_arg(format!("--target={}", target_str));
 
     let sdk;
-    let sysroot = cargo::env_var("SDKROOT");
+    let sysroot = cargo::env_var("SDKTARGETSYSROOT").or_else(|| cargo::env_var("SDKROOT"));
     let mut sysroot: Option<&str> = sysroot.as_ref().map(AsRef::as_ref);
     let mut sysroot_flag = "--sysroot=";
 
@@ -714,6 +717,8 @@ pub(crate) mod rewrite {
 }
 
 pub use definitions::{Definition, Definitions};
+
+use super::cargo::Target;
 
 pub(crate) mod definitions {
     use super::env;
