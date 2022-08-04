@@ -84,6 +84,6 @@ It's possible to cross compile Skia and the Rust bindings for different architec
 
  For linking your Rust application, you may also need to instruct cargo to use the correct linker and look for native library dependencies (such as Skia's FreeType dependency) in the sysroot. This can for be done via a `.cargo/config` file or via environment variables. For example if your Rust target platform is `aarch64-unknown-linux-gnu` and you're Yocto SDK's target is `aarch64-poky-linux`:
 
- * `CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=$SDKTARGETSYSROOT/usr/bin/aarch64-poky-linux/aarch64-poky-linux-g++`
+ * `CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-poky-linux-g++`
  * `RUSTFLAGS="-Clink-args=--sysroot=$SDKTARGETSYSROOT"`
 
