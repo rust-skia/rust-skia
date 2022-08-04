@@ -206,6 +206,8 @@ pub fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Pat
     builder = builder.clang_arg(format!("--target={}", target_str));
 
     let sdk;
+    // SDKROOT is the environment variable used on macOS to specify the sysroot. SDKTARGETSYSROOT is the environment
+    // variable set in Yocto Linux SDKs when cross-compiling.
     let sysroot = cargo::env_var("SDKTARGETSYSROOT").or_else(|| cargo::env_var("SDKROOT"));
     let mut sysroot: Option<&str> = sysroot.as_ref().map(AsRef::as_ref);
     let mut sysroot_flag = "--sysroot=";
