@@ -55,7 +55,7 @@ impl BuildConfiguration {
                 let target_str = target_tail
                     .split_once(' ')
                     .map_or(target_tail, |(target_str, ..)| target_str);
-                crate::build_support::cargo::parse_target(target_str)
+                cargo::parse_target(target_str)
             })
             .unwrap_or_else(cargo::target);
 
