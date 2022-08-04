@@ -173,6 +173,8 @@ impl FinalBuildConfiguration {
             let mut cflags: Vec<String> = Vec::new();
             let mut asmflags: Vec<String> = Vec::new();
 
+            // SDKROOT is the environment variable used on macOS to specify the sysroot. SDKTARGETSYSROOT is the environment
+            // variable set in Yocto Linux SDKs when cross-compiling.
             if let Some(sysroot) =
                 cargo::env_var("SDKTARGETSYSROOT").or_else(|| cargo::env_var("SDKROOT"))
             {
