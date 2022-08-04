@@ -1,6 +1,7 @@
 //! Full build support for the Skia library.
 
 use super::{llvm, vs};
+use crate::build_support::cargo::Target;
 use crate::build_support::{android, binaries_config, cargo, clang, features, ios};
 use std::env;
 use std::path::{Path, PathBuf};
@@ -27,19 +28,46 @@ pub struct BuildConfiguration {
 
     /// C++ compiler to use
     cxx: String,
+
+    /// The target (arch-vendor-os-abi)
+    target: Target,
 }
 
 /// Builds a Skia configuration from a Features set.
 impl BuildConfiguration {
     pub fn from_features(features: features::Features, skia_debug: bool) -> Self {
+        // Yocto SDKs set CLANGCC/CLANGCXX, which is a better choice to determine clang,
+        // as CC/CXX are likely referring to gcc.
+        let cc = cargo::env_var("CLANGCC")
+            .or_else(|| cargo::env_var("CC"))
+            .unwrap_or_else(|| "clang".to_string());
+        let cxx = cargo::env_var("CLANGCXX")
+            .or_else(|| cargo::env_var("CXX"))
+            .unwrap_or_else(|| "clang++".to_string());
+
+        // It's possible that the provided command line for the compiler already includes --target.
+        // We assume that it's most specific/appropriate, extract and use is. It might for example include
+        // a vendor infix, while cargo targets usually don't.
+        let target = cc
+            .find("--target=")
+            .map(|target_option_offset| {
+                let target_tail = &cc[(target_option_offset + "--target=".len())..];
+                let target_str = target_tail
+                    .split_once(' ')
+                    .map_or(target_tail, |(target_str, ..)| target_str);
+                cargo::parse_target(target_str)
+            })
+            .unwrap_or_else(cargo::target);
+
         BuildConfiguration {
             on_windows: cargo::host().is_windows(),
             // `OPT_LEVEL` is set by Cargo itself.
             opt_level: cargo::env_var("OPT_LEVEL"),
             features,
             skia_debug,
-            cc: cargo::env_var("CC").unwrap_or_else(|| "clang".to_string()),
-            cxx: cargo::env_var("CXX").unwrap_or_else(|| "clang++".to_string()),
+            cc,
+            cxx,
+            target,
         }
     }
 }
@@ -55,6 +83,12 @@ pub struct FinalBuildConfiguration {
 
     /// Whether to use system libraries or not.
     pub use_system_libraries: bool,
+
+    /// The target (arch-vendor-os-abi)
+    pub target: Target,
+
+    /// An optional target sysroot
+    pub sysroot: Option<String>,
 }
 
 impl FinalBuildConfiguration {
@@ -64,6 +98,10 @@ impl FinalBuildConfiguration {
         skia_source_dir: &Path,
     ) -> FinalBuildConfiguration {
         let features = &build.features;
+
+        // SDKROOT is the environment variable used on macOS to specify the sysroot. SDKTARGETSYSROOT is the environment
+        // variable set in Yocto Linux SDKs when cross-compiling.
+        let sysroot = cargo::env_var("SDKTARGETSYSROOT").or_else(|| cargo::env_var("SDKROOT"));
 
         let gn_args = {
             fn quote(s: &str) -> String {
@@ -139,13 +177,13 @@ impl FinalBuildConfiguration {
             let mut use_expat = true;
 
             // target specific gn args.
-            let target = cargo::target();
+            let target = &build.target;
             let mut target_str = format!("--target={}", target);
             let mut set_target = true;
             let mut cflags: Vec<String> = Vec::new();
             let mut asmflags: Vec<String> = Vec::new();
 
-            if let Some(sysroot) = cargo::env_var("SDKROOT") {
+            if let Some(sysroot) = &sysroot {
                 cflags.push(format!("--sysroot={}", sysroot));
             }
 
@@ -327,6 +365,8 @@ impl FinalBuildConfiguration {
             skia_source_dir: skia_source_dir.into(),
             gn_args,
             use_system_libraries,
+            target: build.target.clone(),
+            sysroot,
         }
     }
 }

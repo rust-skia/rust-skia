@@ -68,3 +68,22 @@ This struct represents the top level build configuration for `skia-bindings` and
 
 The `FinalBuildConfiguration` is created from the `BuildConfiguration` and contains name value pairs used by GN to parameterize the Skia build and preprocessor defines used to create the `src/bindings.rs` file and the `skia-bindings` library.
 
+## Cross Compiling for Linux
+
+It's possible to cross compile Skia and the Rust bindings for different architectures on Linux. Set the following environment variables and then invoke cargo with the desired [--target triple](https://doc.rust-lang.org/cargo/commands/cargo-build.html#compilation-options):
+
+ * `CLANGCC`: Command line to invoke clang to cross-compile C code for the desired target architecure. This command line may include a `--target=<triple>` option.
+ * `CLANGCXX`: Command line to invoke clang to cross-compile C++ code for the desired target architecure. This command line may include a `--target=<triple>` option.
+ * `SDKTARGETSYSROOT`: Path to the target sysroot.
+ * Either:
+   * `CC`/`CXX` providing command lines to cross-compile (clang is not required) and `HOST_CC` providing a command line for build for the host.
+   * `CC_<target>`/`CXX_<target>` providing command lines to cross-compile (clang is not required).
+
+ When using a Yocto SDK for cross-compiling, all of the above environment variables will be set when entering the Yocto SDK environment by sourcing the `environment-setup-*` script,
+ and `CC`/`CXX` are set to cross-compile. That means it is also necessary to set `HOST_CC`, which usually works when set to just `gcc`.
+
+ For linking your Rust application, you may also need to instruct cargo to use the correct linker and look for native library dependencies (such as Skia's FreeType dependency) in the sysroot. This can for be done via a `.cargo/config` file or via environment variables. For example if your Rust target platform is `aarch64-unknown-linux-gnu` and you're Yocto SDK's target is `aarch64-poky-linux`:
+
+ * `CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-poky-linux-g++`
+ * `RUSTFLAGS="-Clink-args=--sysroot=$SDKTARGETSYSROOT"`
+

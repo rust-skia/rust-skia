@@ -1,6 +1,6 @@
 //! Full build support for the SkiaBindings library, and bindings.rs file.
 
-use crate::build_support::{android, binaries_config, cargo, features, ios, xcode};
+use crate::build_support::{android, binaries_config, cargo, cargo::Target, features, ios, xcode};
 use bindgen::{CodegenConfig, EnumVariation, RustTarget};
 use cc::Build;
 use std::path::{Path, PathBuf};
@@ -63,7 +63,12 @@ impl FinalBuildConfiguration {
     }
 }
 
-pub fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
+pub fn generate_bindings(
+    build: &FinalBuildConfiguration,
+    output_directory: &Path,
+    target: Target,
+    sysroot: Option<&str>,
+) {
     let mut builder = bindgen::Builder::default()
         .generate_comments(false)
         .layout_tests(true)
@@ -126,8 +131,6 @@ pub fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Pat
         .clang_arg("-std=c++17")
         .clang_args(&["-x", "c++"])
         .clang_arg("-v");
-
-    let target = cargo::target();
 
     // Don't generate destructors for Windows targets: https://github.com/rust-skia/rust-skia/issues/318
     if target.is_windows() {
@@ -203,14 +206,12 @@ pub fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Pat
         cc_build.flag("-std=c++17");
     }
 
-    let target = cargo::target();
-
     let target_str = &target.to_string();
     cc_build.target(target_str);
+    builder = builder.clang_arg(format!("--target={}", target_str));
 
     let sdk;
-    let sysroot = cargo::env_var("SDKROOT");
-    let mut sysroot: Option<&str> = sysroot.as_ref().map(AsRef::as_ref);
+    let mut sysroot = sysroot;
     let mut sysroot_flag = "--sysroot=";
 
     match target.as_strs() {

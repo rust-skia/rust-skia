@@ -59,7 +59,7 @@ pub fn add_link_search(dir: impl AsRef<str>) {
     println!("cargo:rustc-link-search={}", dir.as_ref());
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Target {
     pub architecture: String,
     pub vendor: String,
@@ -125,7 +125,7 @@ pub fn host() -> Target {
     parse_target(host_str)
 }
 
-fn parse_target(target_str: impl AsRef<str>) -> Target {
+pub fn parse_target(target_str: impl AsRef<str>) -> Target {
     let target_str = target_str.as_ref();
     let target: Vec<String> = target_str.split('-').map(|s| s.into()).collect();
     assert!(target.len() >= 3, "Failed to parse TARGET {}", target_str);
