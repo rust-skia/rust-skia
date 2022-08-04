@@ -43,10 +43,15 @@ impl BuildConfiguration {
             .or_else(|| cargo::env_var("CXX"))
             .unwrap_or_else(|| "clang++".to_string());
 
-        let target = cc.find("--target=").and_then(|target_option_offset| {
-            cc[(target_option_offset + "--target=".len())..]
+        // It's possible that the provided command line for the compiler already includes --target.
+        // We assume that it's most specific/appropriate, extract and use is. It might for example include
+        // a vendor infix, while cargo targets usually don't.
+        let target = cc.find("--target=").map(|target_option_offset| {
+            let target_tail = &cc[(target_option_offset + "--target=".len())..];
+            let target_str = target_tail
                 .split_once(' ')
-                .map(|(target_str, ..)| crate::build_support::cargo::parse_target(target_str))
+                .map_or(target_tail, |(target_str, ..)| target_str);
+            crate::build_support::cargo::parse_target(target_str)
         });
 
         BuildConfiguration {
