@@ -32,7 +32,7 @@ fn build_from_source(
     skia_source_dir: &std::path::Path,
     skia_debug: bool,
     offline: bool,
-) -> Target {
+) -> skia::FinalBuildConfiguration {
     let build_config = skia::BuildConfiguration::from_features(features, skia_debug);
     let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
         &build_config,
@@ -48,7 +48,7 @@ fn build_from_source(
         offline,
     );
 
-    build_config.target
+    final_configuration
 }
 
 fn generate_bindings(
@@ -57,6 +57,7 @@ fn generate_bindings(
     binaries_config: &binaries_config::BinariesConfiguration,
     skia_source_dir: &std::path::Path,
     target: Target,
+    sysroot: Option<&str>,
 ) {
     // Emit the ninja definitions, to help debug build consistency.
     skia_bindgen::definitions::save_definitions(&definitions, &binaries_config.output_directory)
@@ -67,7 +68,12 @@ fn generate_bindings(
         definitions,
         skia_source_dir,
     );
-    skia_bindgen::generate_bindings(&bindings_config, &binaries_config.output_directory, target);
+    skia_bindgen::generate_bindings(
+        &bindings_config,
+        &binaries_config.output_directory,
+        target,
+        sysroot,
+    );
 }
 
 fn main() {
@@ -101,11 +107,12 @@ fn main() {
                 &binaries_config,
                 &source_dir,
                 cargo::target(),
+                None,
             );
         } else {
             println!("STARTING OFFLINE BUILD");
 
-            let target = build_from_source(
+            let final_build_configuration = build_from_source(
                 features.clone(),
                 &binaries_config,
                 &source_dir,
@@ -121,7 +128,11 @@ fn main() {
                 definitions,
                 &binaries_config,
                 &source_dir,
-                target,
+                final_build_configuration.target,
+                final_build_configuration
+                    .sysroot
+                    .as_ref()
+                    .map(AsRef::as_ref),
             );
         }
     } else {
@@ -143,7 +154,7 @@ fn main() {
             println!("STARTING A FULL BUILD");
 
             let source_dir = std::env::current_dir().unwrap().join("skia");
-            let target = build_from_source(
+            let final_build_configuration = build_from_source(
                 features.clone(),
                 &binaries_config,
                 &source_dir,
@@ -159,7 +170,11 @@ fn main() {
                 definitions,
                 &binaries_config,
                 &source_dir,
-                target,
+                final_build_configuration.target,
+                final_build_configuration
+                    .sysroot
+                    .as_ref()
+                    .map(AsRef::as_ref),
             );
         }
     };

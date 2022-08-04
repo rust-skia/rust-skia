@@ -30,7 +30,7 @@ pub struct BuildConfiguration {
     cxx: String,
 
     /// The target (arch-vendor-os-abi)
-    pub target: Target,
+    target: Target,
 }
 
 /// Builds a Skia configuration from a Features set.
@@ -83,6 +83,12 @@ pub struct FinalBuildConfiguration {
 
     /// Whether to use system libraries or not.
     pub use_system_libraries: bool,
+
+    /// The target (arch-vendor-os-abi)
+    pub target: Target,
+
+    /// An optional target sysroot
+    pub sysroot: Option<String>,
 }
 
 impl FinalBuildConfiguration {
@@ -92,6 +98,10 @@ impl FinalBuildConfiguration {
         skia_source_dir: &Path,
     ) -> FinalBuildConfiguration {
         let features = &build.features;
+
+        // SDKROOT is the environment variable used on macOS to specify the sysroot. SDKTARGETSYSROOT is the environment
+        // variable set in Yocto Linux SDKs when cross-compiling.
+        let sysroot = cargo::env_var("SDKTARGETSYSROOT").or_else(|| cargo::env_var("SDKROOT"));
 
         let gn_args = {
             fn quote(s: &str) -> String {
@@ -173,11 +183,7 @@ impl FinalBuildConfiguration {
             let mut cflags: Vec<String> = Vec::new();
             let mut asmflags: Vec<String> = Vec::new();
 
-            // SDKROOT is the environment variable used on macOS to specify the sysroot. SDKTARGETSYSROOT is the environment
-            // variable set in Yocto Linux SDKs when cross-compiling.
-            if let Some(sysroot) =
-                cargo::env_var("SDKTARGETSYSROOT").or_else(|| cargo::env_var("SDKROOT"))
-            {
+            if let Some(sysroot) = &sysroot {
                 cflags.push(format!("--sysroot={}", sysroot));
             }
 
@@ -359,6 +365,8 @@ impl FinalBuildConfiguration {
             skia_source_dir: skia_source_dir.into(),
             gn_args,
             use_system_libraries,
+            target: build.target.clone(),
+            sysroot,
         }
     }
 }
