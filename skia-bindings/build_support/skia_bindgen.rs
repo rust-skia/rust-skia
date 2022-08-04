@@ -1,6 +1,6 @@
 //! Full build support for the SkiaBindings library, and bindings.rs file.
 
-use crate::build_support::{android, binaries_config, cargo, features, ios, xcode};
+use crate::build_support::{android, binaries_config, cargo, cargo::Target, features, ios, xcode};
 use bindgen::{CodegenConfig, EnumVariation, RustTarget};
 use cc::Build;
 use std::path::{Path, PathBuf};
@@ -63,11 +63,7 @@ impl FinalBuildConfiguration {
     }
 }
 
-pub fn generate_bindings(
-    build: &FinalBuildConfiguration,
-    output_directory: &Path,
-    target: Option<Target>,
-) {
+pub fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path, target: Target) {
     let mut builder = bindgen::Builder::default()
         .generate_comments(false)
         .layout_tests(true)
@@ -130,8 +126,6 @@ pub fn generate_bindings(
         .clang_arg("-std=c++17")
         .clang_args(&["-x", "c++"])
         .clang_arg("-v");
-
-    let target = target.unwrap_or_else(cargo::target);
 
     // Don't generate destructors for Windows targets: https://github.com/rust-skia/rust-skia/issues/318
     if target.is_windows() {
@@ -717,8 +711,6 @@ pub(crate) mod rewrite {
 }
 
 pub use definitions::{Definition, Definitions};
-
-use super::cargo::Target;
 
 pub(crate) mod definitions {
     use super::env;

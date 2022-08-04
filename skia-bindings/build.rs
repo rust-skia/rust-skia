@@ -32,7 +32,7 @@ fn build_from_source(
     skia_source_dir: &std::path::Path,
     skia_debug: bool,
     offline: bool,
-) -> Option<Target> {
+) -> Target {
     let build_config = skia::BuildConfiguration::from_features(features, skia_debug);
     let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
         &build_config,
@@ -56,7 +56,7 @@ fn generate_bindings(
     definitions: Vec<skia_bindgen::Definition>,
     binaries_config: &binaries_config::BinariesConfiguration,
     skia_source_dir: &std::path::Path,
-    target: Option<Target>,
+    target: Target,
 ) {
     // Emit the ninja definitions, to help debug build consistency.
     skia_bindgen::definitions::save_definitions(&definitions, &binaries_config.output_directory)
@@ -95,7 +95,13 @@ fn main() {
             binaries_config.import(&search_path, false).unwrap();
 
             let definitions = skia_bindgen::definitions::from_env();
-            generate_bindings(&features, definitions, &binaries_config, &source_dir, None);
+            generate_bindings(
+                &features,
+                definitions,
+                &binaries_config,
+                &source_dir,
+                cargo::target(),
+            );
         } else {
             println!("STARTING OFFLINE BUILD");
 

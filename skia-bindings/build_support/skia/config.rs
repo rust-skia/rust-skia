@@ -29,8 +29,8 @@ pub struct BuildConfiguration {
     /// C++ compiler to use
     cxx: String,
 
-    /// Optional target
-    pub target: Option<Target>,
+    /// The target (arch-vendor-os-abi)
+    pub target: Target,
 }
 
 /// Builds a Skia configuration from a Features set.
@@ -48,13 +48,16 @@ impl BuildConfiguration {
         // It's possible that the provided command line for the compiler already includes --target.
         // We assume that it's most specific/appropriate, extract and use is. It might for example include
         // a vendor infix, while cargo targets usually don't.
-        let target = cc.find("--target=").map(|target_option_offset| {
-            let target_tail = &cc[(target_option_offset + "--target=".len())..];
-            let target_str = target_tail
-                .split_once(' ')
-                .map_or(target_tail, |(target_str, ..)| target_str);
-            crate::build_support::cargo::parse_target(target_str)
-        });
+        let target = cc
+            .find("--target=")
+            .map(|target_option_offset| {
+                let target_tail = &cc[(target_option_offset + "--target=".len())..];
+                let target_str = target_tail
+                    .split_once(' ')
+                    .map_or(target_tail, |(target_str, ..)| target_str);
+                crate::build_support::cargo::parse_target(target_str)
+            })
+            .unwrap_or_else(cargo::target);
 
         BuildConfiguration {
             on_windows: cargo::host().is_windows(),
@@ -164,7 +167,7 @@ impl FinalBuildConfiguration {
             let mut use_expat = true;
 
             // target specific gn args.
-            let target = build.target.clone().unwrap_or_else(cargo::target);
+            let target = &build.target;
             let mut target_str = format!("--target={}", target);
             let mut set_target = true;
             let mut cflags: Vec<String> = Vec::new();
