@@ -36,6 +36,8 @@ pub struct BuildConfiguration {
 /// Builds a Skia configuration from a Features set.
 impl BuildConfiguration {
     pub fn from_features(features: features::Features, skia_debug: bool) -> Self {
+        // Yocto SDKs set CLANGCC/CLANGCXX, which is a better choice to determine clang,
+        // as CC/CXX are likely referring to gcc.
         let cc = cargo::env_var("CLANGCC")
             .or_else(|| cargo::env_var("CC"))
             .unwrap_or_else(|| "clang".to_string());
