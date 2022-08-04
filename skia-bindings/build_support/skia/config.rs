@@ -39,6 +39,10 @@ impl BuildConfiguration {
         let cc = cargo::env_var("CLANGCC")
             .or_else(|| cargo::env_var("CC"))
             .unwrap_or_else(|| "clang".to_string());
+        let cxx = cargo::env_var("CLANGCXX")
+            .or_else(|| cargo::env_var("CXX"))
+            .unwrap_or_else(|| "clang++".to_string());
+
         let target = cc.find("--target=").and_then(|target_option_offset| {
             cc[(target_option_offset + "--target=".len())..]
                 .split_once(' ')
@@ -52,9 +56,7 @@ impl BuildConfiguration {
             features,
             skia_debug,
             cc,
-            cxx: cargo::env_var("CLANGCXX")
-                .or_else(|| cargo::env_var("CXX"))
-                .unwrap_or_else(|| "clang++".to_string()),
+            cxx,
             target,
         }
     }
