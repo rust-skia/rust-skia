@@ -58,7 +58,7 @@ static_assertions = "1.1"
 
 # gl-window
 [target.'cfg(all(not(target_os = "android"), not(target_os = "emscripten")))'.dev-dependencies]
-glutin = "0.28"
+glutin = "0.29"
 gl-rs = { package = "gl", version = "0.14.0" }
 
 # metal-window
