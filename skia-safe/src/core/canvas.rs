@@ -423,14 +423,21 @@ impl Canvas {
     /// Returns [`Canvas`] that can be used to draw into bitmap
     ///
     /// example: <https://fiddle.skia.org/c/@Canvas_const_SkBitmap_const_SkSurfaceProps>
-    pub fn from_bitmap<'lt>(bitmap: &Bitmap, props: Option<&SurfaceProps>) -> OwnedCanvas<'lt> {
+    pub fn from_bitmap<'lt>(
+        bitmap: &Bitmap,
+        props: Option<&SurfaceProps>,
+    ) -> Option<OwnedCanvas<'lt>> {
+        // <https://github.com/rust-skia/rust-skia/issues/669>
+        if !bitmap.is_ready_to_draw() {
+            return None;
+        }
         let props_ptr = props.native_ptr_or_null();
         let ptr = if props_ptr.is_null() {
             unsafe { sb::C_SkCanvas_newFromBitmap(bitmap.native()) }
         } else {
             unsafe { sb::C_SkCanvas_newFromBitmapAndProps(bitmap.native(), props_ptr) }
         };
-        Canvas::own_from_native_ptr(ptr).unwrap()
+        Canvas::own_from_native_ptr(ptr)
     }
 
     /// Returns [`ImageInfo`] for [`Canvas`]. If [`Canvas`] is not associated with raster surface or

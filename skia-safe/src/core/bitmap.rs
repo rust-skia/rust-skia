@@ -762,7 +762,10 @@ impl Bitmap {
 #[cfg(test)]
 mod tests {
     use super::TileMode;
-    use crate::{Bitmap, SamplingOptions};
+    use crate::{
+        encode, AlphaType, Bitmap, Canvas, ColorSpace, ColorType, EncodedImageFormat, ImageInfo,
+        SamplingOptions,
+    };
 
     #[test]
     fn create_clone_and_drop() {
@@ -803,5 +806,26 @@ mod tests {
     fn test_pixel_ref_origin() {
         let bm = Bitmap::new();
         let _ = bm.pixel_ref_origin();
+    }
+
+    /// Test for: <https://github.com/rust-skia/rust-skia/issues/669>
+    #[test]
+    fn cant_get_a_canvas_for_a_non_drawable_bitmap() {
+        let info = ImageInfo::new(
+            (400, 400),
+            ColorType::BGRA8888,
+            AlphaType::Premul,
+            ColorSpace::new_srgb(),
+        );
+        let mut bitmap = Bitmap::new();
+        if !bitmap.set_info(&info, None) {
+            panic!("set_info failed");
+        }
+
+        let canvas = Canvas::from_bitmap(&bitmap, None);
+        assert!(canvas.is_none());
+
+        let encoded = encode::bitmap(&bitmap, EncodedImageFormat::PNG, 100);
+        assert!(encoded.is_none());
     }
 }
