@@ -74,13 +74,15 @@ wait:
 	@echo "published a package, Waiting for crates.io to catch up before publishing the next"
 	sleep 20
 
+doc-features-win="gl,vulkan,d3d,textlayout,webp"
+
 .PHONY: update-doc
 update-doc:
 	cargo clean
 	rm -rf rust-skia.github.io
 	git clone git@github.com:rust-skia/rust-skia.github.io.git
-	cd skia-safe && cargo doc --no-deps --lib --features gl,vulkan,d3d,textlayout
-	cp -r target/doc rust-skia.github.io/doc
+	cd skia-safe && cargo doc --no-deps --lib --features ${doc-features-win}
+	cp -r target/doc rust-skia.github.io/
 	cd rust-skia.github.io && git add --all
 	cd rust-skia.github.io && git commit -m"Auto-Update of /doc" || true
 	cd rust-skia.github.io && git push origin master	
