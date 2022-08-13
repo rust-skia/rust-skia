@@ -655,17 +655,27 @@ impl Image {
         })
     }
 
+    #[deprecated(since = "0.54.0", note = "use to_non_texture_image()")]
     pub fn new_non_texture_image(&self) -> Option<Image> {
+        self.to_non_texture_image()
+    }
+
+    pub fn to_non_texture_image(&self) -> Option<Image> {
         Image::from_ptr(unsafe { sb::C_SkImage_makeNonTextureImage(self.native()) })
     }
 
+    #[deprecated(since = "0.54.0", note = "use to_raster_image()")]
     pub fn new_raster_image(&self) -> Option<Image> {
-        Image::from_ptr(unsafe {
-            sb::C_SkImage_makeRasterImage(self.native(), CachingHint::Disallow)
-        })
+        self.to_raster_image(None)
     }
 
+    #[deprecated(since = "0.54.0", note = "use to_raster_image()")]
     pub fn new_raster_image_with_caching_hint(&self, caching_hint: CachingHint) -> Option<Image> {
+        self.to_raster_image(caching_hint)
+    }
+
+    pub fn to_raster_image(&self, caching_hint: impl Into<Option<CachingHint>>) -> Option<Image> {
+        let caching_hint = caching_hint.into().unwrap_or(CachingHint::Disallow);
         Image::from_ptr(unsafe { sb::C_SkImage_makeRasterImage(self.native(), caching_hint) })
     }
 
