@@ -173,8 +173,9 @@ fn consume_tokens(tokens: &[RefToken]) -> (usize, String) {
             if *word == "nullptr" {
                 return (1, "`None`".into());
             }
-            if let Some(new_function_name) = convert_c_function(word) {
-                return (1, format!("`{new_function_name}`"));
+            if is_multi_word_identifier(word) {
+                let identifier = word.to_snake_case();
+                return (1, format!("`{identifier}`"));
             }
             (1, word.to_string())
         }
@@ -231,13 +232,29 @@ fn k_case_ty(word: &str) -> Option<String> {
     None
 }
 
-fn convert_c_function(word: &str) -> Option<String> {
-    if let Some(fn_name) = word.strip_suffix("()") {
-        if fn_name.to_lower_camel_case() == fn_name {
-            return Some(fn_name.to_snake_case() + "()");
-        }
+// fn convert_c_function(word: &str) -> Option<String> {
+//     if let Some(fn_name) = word.strip_suffix("()") {
+//         if fn_name.to_lower_camel_case() == fn_name {
+//             return Some(fn_name.to_snake_case() + "()");
+//         }
+//     }
+//     None
+// }
+
+fn is_multi_word_identifier(word: &str) -> bool {
+    assert!(!word.is_empty());
+    if !word.chars().all(|c| c.is_alphanumeric()) {
+        return false;
     }
-    None
+    if !word.chars().next().unwrap().is_lowercase() {
+        return false;
+    }
+
+    if !word.chars().skip(1).any(|c| c.is_uppercase()) {
+        return false;
+    }
+
+    true
 }
 
 /// Converts references like `Path::updateBoundsCache` or `Path::Verb`.
@@ -265,7 +282,7 @@ fn indent_size(source: &str, is_indent: impl Fn(u8) -> bool) -> Option<usize> {
 enum Token {
     Word(String),
     Whitespace(String),
-    /// Phrase separator only, ,.;
+    /// Phrase separator only, ,.();
     Separator(String),
 }
 
@@ -317,7 +334,7 @@ enum TokenClass {
 
 impl TokenClass {
     pub fn classify(c: char) -> TokenClass {
-        if c == '.' || c == ';' || c == ',' {
+        if c == '.' || c == ';' || c == ',' || c == '(' || c == ')' {
             return TokenClass::Separator;
         }
         if c.is_whitespace() {
