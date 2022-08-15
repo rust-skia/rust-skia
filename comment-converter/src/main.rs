@@ -178,10 +178,12 @@ fn consume_until_ws(tokens: &[RefToken]) -> (usize, String) {
 }
 
 fn sk_reference(word: &str) -> Option<&str> {
-    if word == "Skia" {
-        return None;
+    if let Some(stripped) = word.strip_prefix("Sk") {
+        if stripped.to_upper_camel_case() == stripped {
+            return Some(stripped);
+        }
     }
-    word.strip_prefix("Sk")
+    None
 }
 
 fn k_case_ty(word: &str) -> Option<String> {
