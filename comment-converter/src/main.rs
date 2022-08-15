@@ -1,6 +1,7 @@
 use anyhow::Result;
 use heck::{ToLowerCamelCase, ToSnakeCase, ToUpperCamelCase};
 use std::{
+    fmt,
     io::{self, Read, Write},
     str,
 };
@@ -134,15 +135,22 @@ fn consume_tokens(tokens: &[RefToken]) -> (usize, String) {
         [Word("@param"), Whitespace(" "), Word(name), ..] => (3, format!("- `{name}` ")),
         [Word("@return"), Whitespace(_), Word(_), ..] => (2, "Returns: ".into()),
         [Word(word), ..] => {
-            if let Some(reference) = word.strip_prefix("Sk") {
-                let reference = convert_sk_reference(reference);
+            if let Some(sk_ref) = sk_reference(word) {
+                let reference = convert_sk_reference(sk_ref);
                 return (1, format!("[`{reference}`]"));
             }
+            if let Some(k_case_ty) = k_case_ty(word) {
+                return (1, format!("[`{k_case_ty}`]"));
+            }
             if word.starts_with("https://") {
-                return (1, format!("<{word}>"));
+                let (consumed, link) = consume_until_ws(tokens);
+                return (consumed, format!("<{link}>"));
             }
             if *word == "true" || *word == "false" {
                 return (1, format!("`{word}`"));
+            }
+            if *word == "nullptr" {
+                return (1, "`None`".into());
             }
             if let Some(new_function_name) = convert_c_function(word) {
                 return (1, format!("`{new_function_name}`"));
@@ -153,6 +161,42 @@ fn consume_tokens(tokens: &[RefToken]) -> (usize, String) {
         [Separator(sep), ..] => (1, sep.to_string()),
         [] => panic!("Internal error"),
     }
+}
+
+fn consume_until_ws(tokens: &[RefToken]) -> (usize, String) {
+    let mut r = String::new();
+
+    #[allow(clippy::needless_range_loop)]
+    for i in 0..tokens.len() {
+        if matches!(tokens[i], RefToken::Whitespace(_)) {
+            return (i, r);
+        }
+        r += tokens[i].as_str()
+    }
+
+    (tokens.len(), r)
+}
+
+fn sk_reference(word: &str) -> Option<&str> {
+    if word == "Skia" {
+        return None;
+    }
+    word.strip_prefix("Sk")
+}
+
+fn k_case_ty(word: &str) -> Option<String> {
+    if let Some(k) = word.strip_prefix('k') {
+        if let Some((case, ty)) = k.split_once('_') {
+            let ty = if let Some(ty) = ty.strip_prefix("Sk") {
+                ty
+            } else {
+                ty
+            };
+            return Some(format!("{ty}::{case}"));
+        }
+    }
+
+    None
 }
 
 fn convert_c_function(word: &str) -> Option<String> {
@@ -207,6 +251,29 @@ enum RefToken<'a> {
     Word(&'a str),
     Whitespace(&'a str),
     Separator(&'a str),
+}
+
+impl fmt::Display for RefToken<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use RefToken::*;
+        let str = match self {
+            Word(w) => w,
+            Whitespace(ws) => ws,
+            Separator(sep) => sep,
+        };
+        f.write_str(str)
+    }
+}
+
+impl RefToken<'_> {
+    fn as_str(&self) -> &str {
+        use RefToken::*;
+        match self {
+            Word(w) => w,
+            Whitespace(ws) => ws,
+            Separator(sep) => sep,
+        }
+    }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
