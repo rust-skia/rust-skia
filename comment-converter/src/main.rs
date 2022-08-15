@@ -144,12 +144,8 @@ fn consume_tokens(tokens: &[RefToken]) -> (usize, String) {
         }
         [Word(word), Separator("()"), ..] => process_function(2, word),
         [Word(word), ..] => {
-            if let Some(sk_ref) = sk_reference(word) {
-                let reference = convert_reference(sk_ref);
-                return (1, format!("[`{reference}`]"));
-            }
-            if let Some(gr_ref) = gr_reference(word) {
-                let reference = convert_reference(gr_ref);
+            if let Some(reference) = reference(["Sk", "Gr"], word) {
+                let reference = convert_reference(reference);
                 return (1, format!("[`{reference}`]"));
             }
             if let Some(k_case_ty) = k_case_ty(word) {
@@ -179,12 +175,8 @@ fn consume_tokens(tokens: &[RefToken]) -> (usize, String) {
 
 fn process_function(consumed: usize, word: &str) -> (usize, String) {
     // Looks like a function reference.
-    if let Some(sk_ref) = sk_reference(word) {
-        let reference = convert_reference(sk_ref);
-        return (consumed, format!("[`{reference}()`]"));
-    }
-    if let Some(gr_ref) = gr_reference(word) {
-        let reference = convert_reference(gr_ref);
+    if let Some(reference) = reference(["Sk", "Gr"], word) {
+        let reference = convert_reference(reference);
         return (consumed, format!("[`{reference}()`]"));
     }
     let function_name = word.to_snake_case();
@@ -205,19 +197,13 @@ fn consume_until_ws(tokens: &[RefToken]) -> (usize, String) {
     (tokens.len(), r)
 }
 
-fn sk_reference(word: &str) -> Option<&str> {
-    if let Some(stripped) = word.strip_prefix("Sk") {
-        if !stripped.is_empty() && stripped.chars().next().unwrap().is_uppercase() {
-            return Some(stripped);
-        }
-    }
-    None
-}
-
-fn gr_reference(word: &str) -> Option<&str> {
-    if let Some(stripped) = word.strip_prefix("Gr") {
-        if !stripped.is_empty() && stripped.chars().next().unwrap().is_uppercase() {
-            return Some(stripped);
+fn reference<'a>(prefixes: impl AsRef<[&'a str]>, word: &str) -> Option<&str> {
+    let prefixes = prefixes.as_ref();
+    for prefix in prefixes {
+        if let Some(stripped) = word.strip_prefix(prefix) {
+            if !stripped.is_empty() && stripped.chars().next().unwrap().is_uppercase() {
+                return Some(stripped);
+            }
         }
     }
     None
