@@ -136,7 +136,21 @@ fn consume_tokens(tokens: &[RefToken]) -> (usize, String) {
             let param = name.to_snake_case();
             (3, format!("- `{param}` "))
         }
+        [Word("@note"), Whitespace(" "), ..] => (2, "Note: ".into()),
         [Word("@return"), Whitespace(_), Word(_), ..] => (2, "Returns: ".into()),
+        [Word(word), Separator("()"), ..] => {
+            // Looks like a function reference.
+            if let Some(sk_ref) = sk_reference(word) {
+                let reference = convert_reference(sk_ref);
+                return (2, format!("[`{reference}()`]"));
+            }
+            if let Some(gr_ref) = gr_reference(word) {
+                let reference = convert_reference(gr_ref);
+                return (2, format!("[`{reference}()`]"));
+            }
+            let function_name = word.to_snake_case();
+            (2, format!("`{function_name}()`"))
+        }
         [Word(word), ..] => {
             if let Some(sk_ref) = sk_reference(word) {
                 let reference = convert_reference(sk_ref);
