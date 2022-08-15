@@ -41,9 +41,13 @@ fn comment(str: &str) -> String {
         let is_last = i == lines.len() - 1;
 
         let line = &mut lines[i];
-        let convert = !((is_last && line.trim().is_empty()) || line.starts_with("/// "));
+        let convert = !((is_last && line.trim().is_empty()) || line.starts_with("///"));
         if convert {
-            *line = format!("/// {line}");
+            *line = if line.trim().is_empty() {
+                "///".into()
+            } else {
+                format!("/// {line}")
+            }
         }
     }
 
