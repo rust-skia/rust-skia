@@ -132,7 +132,10 @@ fn process_tokens(tokens: &[Token]) -> String {
 fn consume_tokens(tokens: &[RefToken]) -> (usize, String) {
     use RefToken::*;
     match tokens {
-        [Word("@param"), Whitespace(" "), Word(name), ..] => (3, format!("- `{name}` ")),
+        [Word("@param"), Whitespace(" "), Word(name), ..] => {
+            let param = name.to_snake_case();
+            (3, format!("- `{param}` "))
+        }
         [Word("@return"), Whitespace(_), Word(_), ..] => (2, "Returns: ".into()),
         [Word(word), ..] => {
             if let Some(sk_ref) = sk_reference(word) {
