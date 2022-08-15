@@ -136,7 +136,11 @@ fn consume_tokens(tokens: &[RefToken]) -> (usize, String) {
         [Word("@return"), Whitespace(_), Word(_), ..] => (2, "Returns: ".into()),
         [Word(word), ..] => {
             if let Some(sk_ref) = sk_reference(word) {
-                let reference = convert_sk_reference(sk_ref);
+                let reference = convert_reference(sk_ref);
+                return (1, format!("[`{reference}`]"));
+            }
+            if let Some(gr_ref) = gr_reference(word) {
+                let reference = convert_reference(gr_ref);
                 return (1, format!("[`{reference}`]"));
             }
             if let Some(k_case_ty) = k_case_ty(word) {
@@ -179,7 +183,16 @@ fn consume_until_ws(tokens: &[RefToken]) -> (usize, String) {
 
 fn sk_reference(word: &str) -> Option<&str> {
     if let Some(stripped) = word.strip_prefix("Sk") {
-        if stripped.to_upper_camel_case() == stripped {
+        if !stripped.is_empty() && stripped.chars().next().unwrap().is_uppercase() {
+            return Some(stripped);
+        }
+    }
+    None
+}
+
+fn gr_reference(word: &str) -> Option<&str> {
+    if let Some(stripped) = word.strip_prefix("Gr") {
+        if !stripped.is_empty() && stripped.chars().next().unwrap().is_uppercase() {
             return Some(stripped);
         }
     }
@@ -211,7 +224,7 @@ fn convert_c_function(word: &str) -> Option<String> {
 }
 
 /// Converts references like `Path::updateBoundsCache` or `Path::Verb`.
-fn convert_sk_reference(reference: &str) -> String {
+fn convert_reference(reference: &str) -> String {
     if let Some((type_name, sub_name)) = reference.split_once("::") {
         // Nested type: like Path::Verb -> path::Verb.
         if sub_name.to_upper_camel_case() == sub_name {
