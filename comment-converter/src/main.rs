@@ -1,7 +1,6 @@
 use anyhow::Result;
 use heck::{ToLowerCamelCase, ToSnakeCase, ToUpperCamelCase};
 use std::{
-    fmt,
     io::{self, Read, Write},
     str,
 };
@@ -239,15 +238,6 @@ fn k_case_ty(word: &str) -> Option<String> {
     None
 }
 
-// fn convert_c_function(word: &str) -> Option<String> {
-//     if let Some(fn_name) = word.strip_suffix("()") {
-//         if fn_name.to_lower_camel_case() == fn_name {
-//             return Some(fn_name.to_snake_case() + "()");
-//         }
-//     }
-//     None
-// }
-
 fn is_multi_word_identifier(word: &str) -> bool {
     assert!(!word.is_empty());
     if !word.chars().all(|c| c.is_alphanumeric()) {
@@ -307,18 +297,6 @@ enum RefToken<'a> {
     Word(&'a str),
     Whitespace(&'a str),
     Separator(&'a str),
-}
-
-impl fmt::Display for RefToken<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use RefToken::*;
-        let str = match self {
-            Word(w) => w,
-            Whitespace(ws) => ws,
-            Separator(sep) => sep,
-        };
-        f.write_str(str)
-    }
 }
 
 impl RefToken<'_> {
