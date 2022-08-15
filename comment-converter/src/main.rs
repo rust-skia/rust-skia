@@ -1,5 +1,5 @@
 use anyhow::Result;
-use heck::{ToLowerCamelCase, ToSnakeCase};
+use heck::{ToLowerCamelCase, ToSnakeCase, ToUpperCamelCase};
 use std::{
     io::{self, Read, Write},
     str,
@@ -131,7 +131,7 @@ fn consume_tokens(tokens: &[RefToken]) -> (usize, String) {
         [Word("@return"), Whitespace(_), Word(_), ..] => (2, "Returns: ".into()),
         [Word(word), ..] => {
             if let Some(reference) = word.strip_prefix("Sk") {
-                let reference = convert_reference(reference);
+                let reference = convert_sk_reference(reference);
                 return (1, format!("[`{reference}`]"));
             }
             if word.starts_with("https://") {
@@ -146,6 +146,7 @@ fn consume_tokens(tokens: &[RefToken]) -> (usize, String) {
             (1, word.to_string())
         }
         [Whitespace(ws), ..] => (1, ws.to_string()),
+        [Separator(sep), ..] => (1, sep.to_string()),
         [] => panic!("Internal error"),
     }
 }
@@ -159,24 +160,33 @@ fn is_c_function(word: &str) -> Option<String> {
     None
 }
 
-/// Converts references like `Path::updateBoundsCache` to snake case function names.
-fn convert_reference(reference: &str) -> String {
-    match reference.split_once("::") {
-        Some((type_name, fun_name)) => {
-            let fun_name = fun_name.to_snake_case();
-            format!("{type_name}::{fun_name}")
+/// Converts references like `Path::updateBoundsCache` or `Path::Verb`.
+fn convert_sk_reference(reference: &str) -> String {
+    if let Some((type_name, sub_name)) = reference.split_once("::") {
+        // Nested type: like Path::Verb -> path::Verb.
+        if sub_name.to_upper_camel_case() == sub_name {
+            let module_name = type_name.to_snake_case();
+            return format!("{module_name}::{sub_name}");
         }
-        None => reference.into(),
+        // Nested function: like `Path::updateBoundsCache`
+        if sub_name.to_lower_camel_case() == sub_name {
+            let fun_name = sub_name.to_snake_case();
+            return format!("{type_name}::{fun_name}");
+        }
     }
+    reference.into()
 }
 
 fn indent_size(source: &str, is_indent: impl Fn(u8) -> bool) -> Option<usize> {
     source.bytes().position(|b| !is_indent(b))
 }
 
+/// A token in the original comment.
 enum Token {
     Word(String),
     Whitespace(String),
+    /// Phrase separator only, ,.;
+    Separator(String),
 }
 
 impl Token {
@@ -184,6 +194,7 @@ impl Token {
         match self {
             Token::Word(w) => RefToken::Word(w),
             Token::Whitespace(ws) => RefToken::Whitespace(ws),
+            Token::Separator(ws) => RefToken::Separator(ws),
         }
     }
 }
@@ -191,43 +202,57 @@ impl Token {
 enum RefToken<'a> {
     Word(&'a str),
     Whitespace(&'a str),
+    Separator(&'a str),
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+enum TokenClass {
+    Word,
+    Whitespace,
+    Separator,
+}
+
+impl TokenClass {
+    pub fn classify(c: char) -> TokenClass {
+        if c == '.' || c == ';' || c == ',' {
+            return TokenClass::Separator;
+        }
+        if c.is_whitespace() {
+            return TokenClass::Whitespace;
+        }
+        TokenClass::Word
+    }
+
+    pub fn to_token(self, str: &str) -> Token {
+        assert!(!str.is_empty());
+        match self {
+            TokenClass::Word => Token::Word(str.into()),
+            TokenClass::Whitespace => Token::Whitespace(str.into()),
+            TokenClass::Separator => Token::Separator(str.into()),
+        }
+    }
 }
 
 fn tokenize(source: &str) -> Vec<Token> {
-    use Token::*;
     let mut current = None;
+    let mut str = String::new();
     let mut r = Vec::new();
 
-    for c in source.chars() {
-        match current {
-            None => {
-                if c.is_whitespace() {
-                    current = Some(Whitespace(c.into()))
-                } else {
-                    current = Some(Word(c.into()))
-                }
+    for (_, c) in source.chars().enumerate() {
+        let token_class = TokenClass::classify(c);
+        if current != Some(token_class) {
+            if let Some(current) = current {
+                r.push(current.to_token(&str));
             }
-            Some(Word(ref mut str)) => {
-                if !c.is_whitespace() {
-                    str.push(c);
-                } else {
-                    r.push(current.take().unwrap());
-                    current = Some(Whitespace(c.into()))
-                }
-            }
-            Some(Whitespace(ref mut str)) => {
-                if c.is_whitespace() {
-                    str.push(c);
-                } else {
-                    r.push(current.take().unwrap());
-                    current = Some(Word(c.into()))
-                }
-            }
+            current = Some(token_class);
+            str = c.to_string()
+        } else {
+            str.push(c)
         }
     }
 
-    if let Some(last) = current.take() {
-        r.push(last);
+    if let Some(last) = current {
+        r.push(last.to_token(&str));
     }
 
     r
