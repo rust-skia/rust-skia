@@ -131,9 +131,9 @@ fn process_tokens(tokens: &[Token]) -> String {
 fn consume_tokens(tokens: &[RefToken]) -> (usize, String) {
     use RefToken::*;
     match tokens {
-        [Word("@param"), Whitespace(" "), Word(name), ..] => {
+        [Word("@param"), Whitespace(" "), Word(name), Whitespace(_), ..] => {
             let param = name.to_snake_case();
-            (3, format!("- `{param}` "))
+            (4, format!("* `{param}` - "))
         }
         [Word("@note"), Whitespace(" "), ..] => (2, "Note: ".into()),
         [Word("@return"), Whitespace(_), Word(_), ..] => (2, "Returns: ".into()),
