@@ -365,7 +365,7 @@ fn tokenize(source: &str) -> Vec<Token> {
     let mut str = String::new();
     let mut r = Vec::new();
 
-    for (_, c) in source.chars().enumerate() {
+    for c in source.chars() {
         let token_class = TokenClass::classify(c);
         if current != Some(token_class) {
             if let Some(current) = current {
