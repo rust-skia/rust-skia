@@ -232,11 +232,9 @@ fn is_multi_word_identifier(word: &str) -> bool {
     if !word.chars().next().unwrap().is_lowercase() {
         return false;
     }
-
     if !word.chars().skip(1).any(|c| c.is_uppercase()) {
         return false;
     }
-
     true
 }
 
