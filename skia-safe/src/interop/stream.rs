@@ -205,11 +205,11 @@ impl<'a> RustStream<'a> {
 
                 // This is OK because we just abort if it panics anyway, we don't try
                 // to continue at all.
-                let val = std::panic::AssertUnwindSafe(val);
+                let mut val = std::panic::AssertUnwindSafe(val);
 
                 let out_bytes = match std::panic::catch_unwind(move || {
                     while count > 0 {
-                        let bytes = match val.0.read(&mut buf[..count.min(BUF_SIZE)]) {
+                        let bytes = match val.read(&mut buf[..count.min(BUF_SIZE)]) {
                             Ok(0) => break,
                             Ok(bytes) => bytes,
                             Err(_) => 0,
