@@ -147,26 +147,6 @@ fn main() {
     }
 }
 
-fn get_available_drivers() -> Vec<&'static str> {
-    let mut drivers = vec!["cpu", "pdf", "svg"];
-    if cfg!(feature = "gl") {
-        drivers.extend(vec!["opengl", "opengl-es"]);
-    }
-    if cfg!(feature = "vulkan") {
-        drivers.push("vulkan")
-    }
-    if cfg!(feature = "metal") {
-        drivers.push("metal")
-    }
-    if cfg!(feature = "d3d") {
-        drivers.push("d3d")
-    }
-    if cfg!(feature = "svg") {
-        drivers.push("render-svg")
-    }
-    drivers
-}
-
 pub(crate) mod resources {
 
     use skia_safe::{Data, Image};
