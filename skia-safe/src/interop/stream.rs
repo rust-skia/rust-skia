@@ -164,11 +164,13 @@ impl DynamicMemoryWStream {
     }
 }
 
+#[allow(unused)]
 pub struct RustStream<'a> {
     inner: Handle<sb::RustStream>,
     _phantom: PhantomData<&'a mut ()>,
 }
 
+#[allow(unused)]
 impl RustStream<'_> {
     pub fn stream_mut(&mut self) -> &mut SkStream {
         self.inner.native_mut().base_mut()
@@ -183,6 +185,7 @@ impl NativeDrop for sb::RustStream {
     }
 }
 
+#[allow(unused)]
 impl<'a> RustStream<'a> {
     pub fn new<T: io::Read>(val: &'a mut T) -> Self {
         unsafe extern "C" fn read_trampoline<T>(
