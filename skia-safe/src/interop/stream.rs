@@ -9,9 +9,6 @@ use skia_bindings::{
 };
 use std::{ffi, fmt, io, marker::PhantomData, ptr};
 
-#[cfg(feature = "svg")]
-use std::{ffi, io};
-
 /// Trait representing an Skia allocated Stream type with a base class of SkStream.
 #[repr(transparent)]
 pub struct Stream<N: NativeStreamBase>(ptr::NonNull<N>);
