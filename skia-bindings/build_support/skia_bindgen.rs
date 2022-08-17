@@ -409,6 +409,8 @@ const OPAQUE_TYPES: &[&str] = &[
     "GrD3DMemoryAllocator",
     // m87, yuva_pixmaps
     "std::tuple",
+    // Homebrew macOS LLVM 13
+    "std::tuple_.*",
     // m93: private, exposed by Paint::asBlendMode(), fails layout tests.
     "skstd::optional",
 ];
