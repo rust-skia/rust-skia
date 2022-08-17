@@ -245,6 +245,7 @@ impl<'a> RustStream<'a> {
             Option<unsafe extern "C" fn(_, _) -> _>,
         );
 
+        // Requires feature "specialization" <https://github.com/rust-lang/rust/issues/31844>
         #[cfg(feature = "nightly")]
         {
             trait MaybeSeek {
@@ -277,7 +278,7 @@ impl<'a> RustStream<'a> {
                 let val = std::panic::AssertUnwindSafe(val);
 
                 match std::panic::catch_unwind(move || {
-                    val.0.maybe_seek(io::SeekFrom::Start(pos as _)).is_some()
+                    val.maybe_seek(io::SeekFrom::Start(pos as _)).is_some()
                 }) {
                     Ok(res) => res,
                     Err(_) => {
@@ -298,9 +299,7 @@ impl<'a> RustStream<'a> {
                 let val = std::panic::AssertUnwindSafe(val);
 
                 match std::panic::catch_unwind(move || {
-                    val.0
-                        .maybe_seek(io::SeekFrom::Current(offset as _))
-                        .is_some()
+                    val.maybe_seek(io::SeekFrom::Current(offset as _)).is_some()
                 }) {
                     Ok(res) => res,
                     Err(_) => {
