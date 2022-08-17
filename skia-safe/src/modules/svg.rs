@@ -9,9 +9,9 @@ use skia_bindings as sb;
 use skia_bindings::{SkData, SkTypeface};
 
 use crate::{
-    Canvas,
-    Data,
-    interop::{MemoryStream, NativeStreamBase, RustStream}, prelude::*, RCHandle, Size, Typeface,
+    interop::{MemoryStream, NativeStreamBase, RustStream},
+    prelude::*,
+    Canvas, Data, RCHandle, Size, Typeface,
 };
 
 pub type Dom = RCHandle<sb::SkSVGDOM>;
