@@ -65,7 +65,7 @@ fn main() {
     #[cfg(feature = "svg")]
     {
         use drivers::render_svg::*;
-        if drivers.contains(&RenderSvg::NAME) {
+        if drivers.contains(&Driver::RenderSvg) {
             draw_all(&mut RenderSvg::new(), &out_path);
         }
     }
@@ -100,7 +100,7 @@ fn main() {
 
     #[cfg(feature = "vulkan")]
     {
-        use drivers::vulkan::AshGraphics;
+        use drivers::vulkan::{AshGraphics, Vulkan};
 
         if drivers.contains(&Driver::Vulkan) {
             match AshGraphics::vulkan_version() {

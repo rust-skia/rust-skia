@@ -24,9 +24,9 @@ pub use gl::OpenGl;
 #[cfg(feature = "metal")]
 pub use metal::Metal;
 pub use pdf::Pdf;
-pub use svg::Svg;
 #[cfg(feature = "svg")]
-pub use svg_render::SvgRender;
+pub use render_svg::RenderSvg;
+pub use svg::Svg;
 #[cfg(feature = "vulkan")]
 pub use vulkan::Vulkan;
 
@@ -57,6 +57,8 @@ pub enum Driver {
     Metal,
     #[cfg(feature = "d3d")]
     D3d,
+    #[cfg(feature = "svg")]
+    RenderSvg,
 }
 
 impl FromStr for Driver {
@@ -100,6 +102,8 @@ impl Display for Driver {
             Metal => "metal",
             #[cfg(feature = "d3d")]
             D3d => "d3d",
+            #[cfg(feature = "svg")]
+            RenderSvg => "render-svg",
         };
         f.write_str(name)
     }

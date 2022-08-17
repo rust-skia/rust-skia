@@ -1,11 +1,11 @@
-use crate::{artifact, DrawingDriver};
+use crate::{artifact, DrawingDriver, Driver};
 use skia_safe::{svg, Canvas, Rect, Surface};
 use std::path::Path;
 
 pub struct RenderSvg;
 
 impl DrawingDriver for RenderSvg {
-    const NAME: &'static str = "render-svg";
+    const DRIVER: Driver = Driver::RenderSvg;
 
     fn new() -> Self {
         Self
