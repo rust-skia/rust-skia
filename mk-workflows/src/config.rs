@@ -187,6 +187,9 @@ fn wasm_targets() -> Vec<Target> {
     [Target {
         target: "wasm32-unknown-emscripten",
         emscripten_env: true,
+        // `svg` does not build in skia-safe because of the `ureq` dependency (although it builds in
+        // skia-bindings just fine): <https://github.com/briansmith/ring/issues/1043>
+        disabled_features: "svg".into(),
         ..Default::default()
     }]
     .into()
