@@ -92,10 +92,8 @@ extern "C" fn handle_load(
             is_base64 = true;
         }
 
-        if cfg!(windows) {
-            if !resource_name.to_string_lossy().starts_with("data:") {
-                is_base64 = false;
-            }
+        if cfg!(windows) && !resource_name.to_string_lossy().starts_with("data:") {
+            is_base64 = false;
         }
 
         if is_base64 {
