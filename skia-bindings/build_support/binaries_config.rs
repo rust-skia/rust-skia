@@ -10,6 +10,8 @@ pub mod lib {
     pub const SKIA_BINDINGS: &str = "skia-bindings";
     pub const SK_SHAPER: &str = "skshaper";
     pub const SK_PARAGRAPH: &str = "skparagraph";
+    pub const SVG: &str = "svg";
+    pub const SK_RESOURCES: &str = "skresources";
     pub const SK_UNICODE: &str = "skunicode";
 }
 
@@ -61,6 +63,10 @@ impl BinariesConfiguration {
             ninja_built_libraries.push(lib::SK_SHAPER.into());
             // Since M94, icu sources are embedded in skunicode
             ninja_built_libraries.push(lib::SK_UNICODE.into());
+        }
+        if features.svg {
+            ninja_built_libraries.push(lib::SVG.into());
+            ninja_built_libraries.push(lib::SK_RESOURCES.into());
         }
 
         let mut link_libraries = Vec::new();

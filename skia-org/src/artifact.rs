@@ -1,7 +1,5 @@
 use skia_safe::{Canvas, EncodedImageFormat, Surface};
-use std::fs;
-use std::io::Write;
-use std::path::Path;
+use std::{fs, io::Write, path::Path};
 
 pub fn draw_image_on_surface(
     surface: &mut Surface,

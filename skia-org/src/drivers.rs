@@ -3,25 +3,32 @@ use skia_safe::Canvas;
 use std::{fmt::Display, path::Path, str::FromStr};
 
 pub mod cpu;
-pub use cpu::Cpu;
+#[cfg(feature = "d3d")]
+pub mod d3d;
 #[cfg(feature = "gl")]
 pub mod gl;
-#[cfg(feature = "gl")]
-pub use gl::OpenGl;
 #[cfg(feature = "metal")]
 pub mod metal;
 pub mod pdf;
-pub use pdf::Pdf;
+#[cfg(feature = "svg")]
+pub mod render_svg;
 pub mod svg;
-pub use svg::Svg;
 #[cfg(feature = "vulkan")]
 pub mod vulkan;
-#[cfg(feature = "vulkan")]
-pub use vulkan::Vulkan;
-#[cfg(feature = "d3d")]
-pub mod d3d;
+
+pub use cpu::Cpu;
 #[cfg(feature = "d3d")]
 pub use d3d::D3D;
+#[cfg(feature = "gl")]
+pub use gl::OpenGl;
+#[cfg(feature = "metal")]
+pub use metal::Metal;
+pub use pdf::Pdf;
+#[cfg(feature = "svg")]
+pub use render_svg::RenderSvg;
+pub use svg::Svg;
+#[cfg(feature = "vulkan")]
+pub use vulkan::Vulkan;
 
 pub trait DrawingDriver {
     const DRIVER: Driver;
@@ -50,6 +57,8 @@ pub enum Driver {
     Metal,
     #[cfg(feature = "d3d")]
     D3d,
+    #[cfg(feature = "svg")]
+    RenderSvg,
 }
 
 impl FromStr for Driver {
@@ -93,6 +102,8 @@ impl Display for Driver {
             Metal => "metal",
             #[cfg(feature = "d3d")]
             D3d => "d3d",
+            #[cfg(feature = "svg")]
+            RenderSvg => "render-svg",
         };
         f.write_str(name)
     }

@@ -277,6 +277,15 @@ mod svg {
     assert_not_impl_any!(Canvas: Send, Sync);
 }
 
+#[cfg(feature = "svg")]
+mod render_svg {
+    use skia_safe::svg::*;
+    use static_assertions::*;
+
+    assert_impl_all!(Dom: Send, Sync);
+    assert_impl_all!(LoadError: Send, Sync);
+}
+
 mod utils {
     use skia_safe::utils::*;
     use static_assertions::*;
