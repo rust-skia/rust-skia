@@ -190,6 +190,7 @@ impl fmt::Debug for BackendTexture {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut d = f.debug_struct("BackendTexture");
         d.field("dimensions", &self.dimensions());
+        d.field("label", &self.label());
         d.field("mipmapped", &self.mipmapped());
         d.field("backend", &self.backend());
         #[cfg(feature = "gl")]

@@ -149,6 +149,9 @@ impl fmt::Debug for RuntimeEffect {
             .field("uniform_size", &self.uniform_size())
             .field("uniforms", &self.uniforms())
             .field("children", &self.children())
+            .field("allow_shader", &self.allow_shader())
+            .field("allow_color_filter", &self.allow_color_filter())
+            .field("allow_blender", &self.allow_blender())
             .finish()
     }
 }
