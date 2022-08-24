@@ -1596,6 +1596,10 @@ extern "C" SkColorFilter* C_SkColorFilters_Compose(SkColorFilter* outer, SkColor
     return SkColorFilters::Compose(sp(outer), sp(inner)).release();
 }
 
+extern "C" SkColorFilter* C_SkColorFilters_Blend2(const SkColor4f* c, SkColorSpace* colorSpace, SkBlendMode blendMode) {
+    return SkColorFilters::Blend(*c, sp(colorSpace), blendMode).release();
+}
+
 extern "C" SkColorFilter* C_SkColorFilters_Blend(const SkColor c, SkBlendMode blendMode) {
     return SkColorFilters::Blend(c, blendMode).release();
 }
@@ -2796,24 +2800,10 @@ extern "C" SkTypeface *C_SkCustomTypefaceBuilder_detach(SkCustomTypefaceBuilder 
     return self->detach().release();
 }
 
-/* Th following wrappers may be needed as soon the Skia implementation finds its way into an official release (m84).
 extern "C" void
-C_SkCustomTypefaceBuilder_setGlyph1(SkCustomTypefaceBuilder *self, SkGlyphID glyph, float advance, const SkPath *path,
-                                    const SkPaint *paint) {
-    self->setGlyph(glyph, advance, *path, *paint);
+C_SkCustomTypefaceBuilder_setGlyph(SkCustomTypefaceBuilder *self, SkGlyphID glyph, float advance, SkDrawable* drawable, const SkRect* bounds) {
+    self->setGlyph(glyph, advance, sp(drawable), *bounds);
 }
-
-extern "C" void
-C_SkCustomTypefaceBuilder_setGlyph2(SkCustomTypefaceBuilder *self, SkGlyphID glyph, float advance, SkImage *image,
-                                    float scale) {
-    self->setGlyph(glyph, advance, sp(image), scale);
-}
-
-extern "C" void
-C_SkCustomTypefaceBuilder_setGlyph3(SkCustomTypefaceBuilder *self, SkGlyphID glyph, float advance, SkPicture *picture) {
-    self->setGlyph(glyph, advance, sp(picture));
-}
-*/
 
 extern "C" SkCanvas* C_SkMakeNullCanvas() {
     return SkMakeNullCanvas().release();
