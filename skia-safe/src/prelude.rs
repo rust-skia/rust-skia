@@ -695,16 +695,16 @@ where
         unsafe { transmute_ref(self) }
     }
 
-    /// Provides mutable access to the native value through a
-    /// transmuted reference to the Rust value.
+    /// Provides mutable access to the native value through a transmuted reference to the Rust
+    /// value.
     fn native_mut(&mut self) -> &mut NT {
         unsafe { transmute_ref_mut(self) }
     }
 
     /// Copies the native value to an equivalent Rust value.
     ///
-    /// The `_c` suffix is to remind callers that functions that return a native value from a C++
-    /// ABI can't be used. For example, C++ member functions must be wrapped in a extern "C" function.
+    /// The `_c` suffix is to remind callers that values that requires C++ ABI features can't be
+    /// used here.
     fn from_native_c(nt: NT) -> Self {
         let r = unsafe { mem::transmute_copy::<NT, Self>(&nt) };
         // don't drop, the Rust type takes over.

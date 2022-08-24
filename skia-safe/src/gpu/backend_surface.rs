@@ -7,7 +7,7 @@ use super::mtl;
 #[cfg(feature = "vulkan")]
 use super::vk;
 use super::{BackendAPI, BackendSurfaceMutableState, Mipmapped};
-use crate::{prelude::*, ISize};
+use crate::{interop::AsStr, prelude::*, ISize};
 use skia_bindings::{
     self as sb, GrBackendFormat, GrBackendRenderTarget, GrBackendTexture, GrMipmapped,
 };
@@ -190,6 +190,7 @@ impl fmt::Debug for BackendTexture {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut d = f.debug_struct("BackendTexture");
         d.field("dimensions", &self.dimensions());
+        d.field("label", &self.label());
         d.field("mipmapped", &self.mipmapped());
         d.field("backend", &self.backend());
         #[cfg(feature = "gl")]
@@ -221,8 +222,28 @@ impl BackendTexture {
         mipmapped: super::Mipmapped,
         gl_info: gl::TextureInfo,
     ) -> Self {
+        Self::new_gl_with_label((width, height), mipmapped, gl_info, "")
+    }
+
+    #[cfg(feature = "gl")]
+    #[allow(clippy::missing_safety_doc)]
+    pub unsafe fn new_gl_with_label(
+        (width, height): (i32, i32),
+        mipmapped: super::Mipmapped,
+        gl_info: gl::TextureInfo,
+        label: impl AsRef<str>,
+    ) -> Self {
+        let str = label.as_ref().as_bytes();
         Self::from_native_if_valid(construct(|texture| {
-            sb::C_GrBackendTexture_ConstructGL(texture, width, height, mipmapped, gl_info.native())
+            sb::C_GrBackendTexture_ConstructGL(
+                texture,
+                width,
+                height,
+                mipmapped,
+                gl_info.native(),
+                str.as_ptr() as _,
+                str.len(),
+            )
         }))
         .unwrap()
     }
@@ -230,8 +251,26 @@ impl BackendTexture {
     #[cfg(feature = "vulkan")]
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn new_vulkan((width, height): (i32, i32), vk_info: &vk::ImageInfo) -> Self {
+        Self::new_vulkan_with_label((width, height), vk_info, "")
+    }
+
+    #[cfg(feature = "vulkan")]
+    #[allow(clippy::missing_safety_doc)]
+    pub unsafe fn new_vulkan_with_label(
+        (width, height): (i32, i32),
+        vk_info: &vk::ImageInfo,
+        label: impl AsRef<str>,
+    ) -> Self {
+        let label = label.as_ref().as_bytes();
         Self::from_native_if_valid(construct(|texture| {
-            sb::C_GrBackendTexture_ConstructVk(texture, width, height, vk_info.native())
+            sb::C_GrBackendTexture_ConstructVk(
+                texture,
+                width,
+                height,
+                vk_info.native(),
+                label.as_ptr() as _,
+                label.len(),
+            )
         }))
         .unwrap()
     }
@@ -243,6 +282,18 @@ impl BackendTexture {
         mipmapped: super::Mipmapped,
         mtl_info: &mtl::TextureInfo,
     ) -> Self {
+        Self::new_metal_with_label((width, height), mipmapped, mtl_info, "")
+    }
+
+    #[cfg(feature = "metal")]
+    #[allow(clippy::missing_safety_doc)]
+    pub unsafe fn new_metal_with_label(
+        (width, height): (i32, i32),
+        mipmapped: super::Mipmapped,
+        mtl_info: &mtl::TextureInfo,
+        label: impl AsRef<str>,
+    ) -> Self {
+        let label = label.as_ref().as_bytes();
         Self::from_native_if_valid(construct(|texture| {
             sb::C_GrBackendTexture_ConstructMtl(
                 texture,
@@ -250,6 +301,8 @@ impl BackendTexture {
                 height,
                 mipmapped,
                 mtl_info.native(),
+                label.as_ptr() as _,
+                label.len(),
             )
         }))
         .unwrap()
@@ -257,9 +310,26 @@ impl BackendTexture {
 
     #[cfg(feature = "d3d")]
     pub fn new_d3d((width, height): (i32, i32), d3d_info: &d3d::TextureResourceInfo) -> Self {
+        Self::new_d3d_with_label((width, height), d3d_info, "")
+    }
+
+    #[cfg(feature = "d3d")]
+    pub fn new_d3d_with_label(
+        (width, height): (i32, i32),
+        d3d_info: &d3d::TextureResourceInfo,
+        label: impl AsRef<str>,
+    ) -> Self {
+        let label = label.as_ref().as_bytes();
         unsafe {
             Self::from_native_if_valid(construct(|texture| {
-                sb::C_GrBackendTexture_ConstructD3D(texture, width, height, d3d_info.native())
+                sb::C_GrBackendTexture_ConstructD3D(
+                    texture,
+                    width,
+                    height,
+                    d3d_info.native(),
+                    label.as_ptr() as _,
+                    label.len(),
+                )
             }))
         }
         .unwrap()
@@ -282,6 +352,10 @@ impl BackendTexture {
 
     pub fn height(&self) -> i32 {
         self.native().fHeight
+    }
+
+    pub fn label(&self) -> &str {
+        self.native().fLabel.as_str()
     }
 
     pub fn mipmapped(&self) -> Mipmapped {

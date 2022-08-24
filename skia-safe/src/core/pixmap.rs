@@ -143,6 +143,12 @@ impl Pixmap {
         Color::from_native_c(unsafe { self.native().getColor(p.x, p.y) })
     }
 
+    pub fn get_color_4f(&self, p: impl Into<IPoint>) -> Color4f {
+        let p = p.into();
+        self.assert_pixel_exists(p);
+        Color4f::from_native_c(unsafe { self.native().getColor4f(p.x, p.y) })
+    }
+
     pub fn get_alpha_f(&self, p: impl Into<IPoint>) -> f32 {
         let p = p.into();
         self.assert_pixel_exists(p);

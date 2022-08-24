@@ -12,6 +12,7 @@
         "miphoneos",
         "RGBX",
         "skottie",
+        "unoptimized",
         "webgl",
         "wuffs"
     ]
