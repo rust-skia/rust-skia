@@ -22,7 +22,7 @@ pub use skia_bindings::SkPath_AddPathMode as AddPathMode;
 variant_name!(AddPathMode::Append, append_naming);
 
 /// SegmentMask constants correspond to each drawing Verb type in [`Path`]; for
-/// instance, if [`Path`] only contains lines, only the [`SegmentMask::Line`] bit is set.
+/// instance, if [`Path`] only contains lines, only the [`SegmentMask::LINE`] bit is set.
 pub use path_types::PathSegmentMask as SegmentMask;
 
 /// Verb instructs [`Path`] how to interpret one or more [`Point`] and optional conic weight;
@@ -56,7 +56,7 @@ impl Default for Iter<'_> {
     /// [`Verb::Done`].
     /// Call `set_path` to initialize [`Iter`] at a later time.
     ///
-    /// Returns: [`path::Iter`] of empty [`Path`]
+    /// Returns: [`Iter`] of empty [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_Iter_Iter>
     fn default() -> Self {
@@ -625,17 +625,17 @@ impl Path {
     }
 
     /// Returns if [`Path`] is empty.
-    /// Empty [`Path`] may have FillType but has no [`Point`], [`path::Verb`], or conic weight.
-    /// [`Path()`] constructs empty [`Path`]; `reset()` and `rewind()` make [`Path`] empty.
+    /// Empty [`Path`] may have FillType but has no [`Point`], [`Verb`], or conic weight.
+    /// [`Path::default()`] constructs empty [`Path`]; `reset()` and `rewind()` make [`Path`] empty.
     ///
-    /// Returns: `true` if the path contains no [`path::Verb`] array
+    /// Returns: `true` if the path contains no [`Verb`] array
     pub fn is_empty(&self) -> bool {
         unsafe { self.native().isEmpty() }
     }
 
     /// Returns if contour is closed.
-    /// Contour is closed if [`Path`] [`path::Verb`] array was last modified by `close()`. When stroked,
-    /// closed contour draws [`paint::Join`] instead of [`paint::Cap`] at first and last [`Point`].
+    /// Contour is closed if [`Path`] [`Verb`] array was last modified by `close()`. When stroked,
+    /// closed contour draws [`crate::paint::Join`] instead of [`crate::paint::Cap`] at first and last [`Point`].
     ///
     /// Returns: `true` if the last contour ends with a [`Verb::Close`]
     ///
@@ -655,7 +655,7 @@ impl Path {
 
     /// Returns `true` if the path is volatile; it will not be altered or discarded
     /// by the caller after it is drawn. [`Path`] by default have volatile set `false`, allowing
-    /// [`Surface`] to attach a cache of data which speeds repeated drawing. If `true`, [`Surface`]
+    /// [`crate::Surface`] to attach a cache of data which speeds repeated drawing. If `true`, [`crate::Surface`]
     /// may not speed repeated drawing.
     ///
     /// Returns: `true` if caller will alter [`Path`] after drawing
@@ -665,10 +665,10 @@ impl Path {
 
     /// Specifies whether [`Path`] is volatile; whether it will be altered or discarded
     /// by the caller after it is drawn. [`Path`] by default have volatile set `false`, allowing
-    /// [`BaseDevice`] to attach a cache of data which speeds repeated drawing.
+    /// `BaseDevice` to attach a cache of data which speeds repeated drawing.
     ///
     /// Mark temporary paths, discarded or modified after use, as volatile
-    /// to inform [`BaseDevice`] that the path need not be cached.
+    /// to inform `BaseDevice` that the path need not be cached.
     ///
     /// Mark animating [`Path`] volatile to improve performance.
     /// Mark unchanging [`Path`] non-volatile to improve repeated rendering.
@@ -756,7 +756,7 @@ impl Path {
     }
 
     /// Returns `true` if [`Path`] contains only one line;
-    /// [`path::Verb`] array has two entries: [`Verb::Move`], [`Verb::Line`].
+    /// [`Verb`] array has two entries: [`Verb::Move`], [`Verb::Line`].
     /// If [`Path`] contains one line and line is not `None`, line is set to
     /// line start point and line end point.
     /// Returns `false` if [`Path`] is not one line; line is unaltered.
@@ -856,7 +856,7 @@ impl Path {
         unsafe { self.native().approximateBytesUsed() }
     }
 
-    /// Exchanges the verb array, [`Point`] array, weights, and [`path::FillType`] with other.
+    /// Exchanges the verb array, [`Point`] array, weights, and [`FillType`] with other.
     /// Cached state is also exchanged. `swap()` internally exchanges pointers, so
     /// it is lightweight and does not allocate memory.
     ///
@@ -988,7 +988,7 @@ impl Path {
         self
     }
 
-    /// Adds line from last point to (x, y). If [`Path`] is empty, or last [`path::Verb`] is
+    /// Adds line from last point to (x, y). If [`Path`] is empty, or last [`Verb`] is
     /// [`Verb::Close`], last point is set to (0, 0) before adding line.
     ///
     /// `line_to()` appends [`Verb::Move`] to verb array and (0, 0) to [`Point`] array, if needed.
@@ -1007,7 +1007,7 @@ impl Path {
         self
     }
 
-    /// Adds line from last point to vector (dx, dy). If [`Path`] is empty, or last [`path::Verb`] is
+    /// Adds line from last point to vector (dx, dy). If [`Path`] is empty, or last [`Verb`] is
     /// [`Verb::Close`], last point is set to (0, 0) before adding line.
     ///
     /// Appends [`Verb::Move`] to verb array and (0, 0) to [`Point`] array, if needed;
@@ -1031,7 +1031,7 @@ impl Path {
     }
 
     /// Adds quad from last point towards (x1, y1), to (x2, y2).
-    /// If [`Path`] is empty, or last [`path::Verb`] is [`Verb::Close`], last point is set to (0, 0)
+    /// If [`Path`] is empty, or last [`Verb`] is [`Verb::Close`], last point is set to (0, 0)
     /// before adding quad.
     ///
     /// Appends [`Verb::Move`] to verb array and (0, 0) to [`Point`] array, if needed;
@@ -1055,7 +1055,7 @@ impl Path {
     }
 
     /// Adds quad from last point towards vector (dx1, dy1), to vector (dx2, dy2).
-    /// If [`Path`] is empty, or last [`path::Verb`]
+    /// If [`Path`] is empty, or last [`Verb`]
     /// is [`Verb::Close`], last point is set to (0, 0) before adding quad.
     ///
     /// Appends [`Verb::Move`] to verb array and (0, 0) to [`Point`] array,
@@ -1084,7 +1084,7 @@ impl Path {
     }
 
     /// Adds conic from last point towards (x1, y1), to (x2, y2), weighted by w.
-    /// If [`Path`] is empty, or last [`path::Verb`] is [`Verb::Close`], last point is set to (0, 0)
+    /// If [`Path`] is empty, or last [`Verb`] is [`Verb::Close`], last point is set to (0, 0)
     /// before adding conic.
     ///
     /// Appends [`Verb::Move`] to verb array and (0, 0) to [`Point`] array, if needed.
@@ -1114,7 +1114,7 @@ impl Path {
     }
 
     /// Adds conic from last point towards vector (dx1, dy1), to vector (dx2, dy2),
-    /// weighted by w. If [`Path`] is empty, or last [`path::Verb`]
+    /// weighted by w. If [`Path`] is empty, or last [`Verb`]
     /// is [`Verb::Close`], last point is set to (0, 0) before adding conic.
     ///
     /// Appends [`Verb::Move`] to verb array and (0, 0) to [`Point`] array,
@@ -1151,7 +1151,7 @@ impl Path {
     }
 
     /// Adds cubic from last point towards (x1, y1), then towards (x2, y2), ending at
-    /// (x3, y3). If [`Path`] is empty, or last [`path::Verb`] is [`Verb::Close`], last point is set to
+    /// (x3, y3). If [`Path`] is empty, or last [`Verb`] is [`Verb::Close`], last point is set to
     /// (0, 0) before adding cubic.
     ///
     /// Appends [`Verb::Move`] to verb array and (0, 0) to [`Point`] array, if needed;
@@ -1181,7 +1181,7 @@ impl Path {
 
     /// Adds cubic from last point towards vector (dx1, dy1), then towards
     /// vector (dx2, dy2), to vector (dx3, dy3).
-    /// If [`Path`] is empty, or last [`path::Verb`]
+    /// If [`Path`] is empty, or last [`Verb`]
     /// is [`Verb::Close`], last point is set to (0, 0) before adding cubic.
     ///
     /// Appends [`Verb::Move`] to verb array and (0, 0) to [`Point`] array,
@@ -1366,11 +1366,11 @@ impl Path {
 
     /// Appends [`Verb::Close`] to [`Path`]. A closed contour connects the first and last [`Point`]
     /// with line, forming a continuous loop. Open and closed contour draw the same
-    /// with [`paint::FillStyle`]. With [`paint::StrokeStyle`], open contour draws
-    /// [`paint::Cap`] at contour start and end; closed contour draws
-    /// [`paint::Join`] at contour start and end.
+    /// with fill style. With stroke style, open contour draws
+    /// [`crate::paint::Cap`] at contour start and end; closed contour draws
+    /// [`crate::paint::Join`] at contour start and end.
     ///
-    /// `close()` has no effect if [`Path`] is empty or last [`Path`] [`path::Verb`] is [`Verb::Close`].
+    /// `close()` has no effect if [`Path`] is empty or last [`Path`] [`Verb`] is [`Verb::Close`].
     ///
     /// Returns: reference to [`Path`]
     ///
@@ -1475,12 +1475,12 @@ impl Path {
     /// This start point also acts as the implied beginning of the subsequent,
     /// contour, if it does not have an explicit `move_to`(). e.g.
     ///
-    ///     `path.add_rect(...)`
-    ///     // if we don't say `move_to()` here, we will use the rect's start point
-    ///     `path.line_to`(...)`
+    /// `path.add_rect(...)`
+    /// // if we don't say `move_to()` here, we will use the rect's start point
+    /// `path.line_to`(...)`
     ///
     /// * `rect` - [`Rect`] to add as a closed contour
-    /// * `dir` - [`path::Direction`] to orient the new contour
+    /// * `dir` - [`Direction`] to orient the new contour
     /// * `start` - initial corner of [`Rect`] to add
     /// Returns: reference to [`Path`]
     ///
@@ -1505,7 +1505,7 @@ impl Path {
     /// clockwise if dir is [`Direction::CW`], counterclockwise if dir is [`Direction::CCW`].
     ///
     /// * `oval` - bounds of ellipse added
-    /// * `dir` - [`path::Direction`] to wind ellipse
+    /// * `dir` - [`Direction`] to wind ellipse
     /// * `start` - index of initial point of ellipse
     /// Returns: reference to [`Path`]
     ///
@@ -1532,7 +1532,7 @@ impl Path {
     ///
     /// * `p` - center of circle
     /// * `radius` - distance from center to edge
-    /// * `dir` - [`path::Direction`] to wind circle
+    /// * `dir` - [`Direction`] to wind circle
     /// Returns: reference to [`Path`]
     pub fn add_circle(
         &mut self,
@@ -1592,7 +1592,7 @@ impl Path {
     /// * `rect` - bounds of [`RRect`]
     /// * `rx` - x-axis radius of rounded corners on the [`RRect`]
     /// * `ry` - y-axis radius of rounded corners on the [`RRect`]
-    /// * `dir` - [`path::Direction`] to wind [`RRect`]
+    /// * `dir` - [`Direction`] to wind [`RRect`]
     /// Returns: reference to [`Path`]
     pub fn add_round_rect(
         &mut self,
@@ -1613,7 +1613,7 @@ impl Path {
     /// start determines the first point of rrect to add.
     ///
     /// * `rrect` - bounds and radii of rounded rectangle
-    /// * `dir` - [`path::Direction`] to wind [`RRect`]
+    /// * `dir` - [`PathDirection`] to wind [`RRect`]
     /// * `start` - index of initial point of [`RRect`]
     /// Returns: reference to [`Path`]
     ///
@@ -1632,10 +1632,10 @@ impl Path {
         self
     }
 
-    /// Adds contour created from line array, adding (pts.len() - 1) line segments.
-    /// Contour added starts at pts[0], then adds a line for every additional [`Point`]
+    /// Adds contour created from line array, adding `pts.len() - 1` line segments.
+    /// Contour added starts at `pts[0]`, then adds a line for every additional [`Point`]
     /// in pts slice. If close is `true`, appends [`Verb::Close`] to [`Path`], connecting
-    /// pts[pts.len() - 1] and pts[0].
+    /// `pts[pts.len() - 1]` and `pts[0]`.
     ///
     /// If count is zero, append [`Verb::Move`] to path.
     /// Has no effect if ps.len() is less than one.
@@ -1864,7 +1864,7 @@ impl Path {
     /// Set `dump_as_hex` `true` to generate exact binary representations
     /// of floating point numbers used in [`Point`] array and conic weights.
     ///
-    /// * `dump_as_hex` - `true` if [`Scalar`] values are written as hexadecimal
+    /// * `dump_as_hex` - `true` if scalar values are written as hexadecimal
     ///
     /// example: <https://fiddle.skia.org/c/@Path_dump>
     pub fn dump_as_data(&self, dump_as_hex: bool) -> Data {
@@ -1906,7 +1906,7 @@ impl Path {
     /// Writes [`Path`] to buffer, returning the buffer written to, wrapped in [`Data`].
     ///
     /// `serialize()` writes [`FillType`], verb array, [`Point`] array, conic weight, and
-    /// additionally writes computed information like [`path::Convexity`] and bounds.
+    /// additionally writes computed information like convexity and bounds.
     ///
     /// `serialize()` should only be used in concert with `read_from_memory`().
     /// The format used for [`Path`] in memory is not guaranteed.
