@@ -449,7 +449,7 @@ pub fn configure_skia(
     println!("Skia args: {}", &gn_args);
 
     let output = Command::new(gn_command)
-        .args(&[
+        .args([
             "gen",
             config.output_directory.to_str().unwrap(),
             &format!("--script-executable={}", python.to_str().unwrap()),
@@ -477,7 +477,7 @@ pub fn build_skia(config: &binaries_config::BinariesConfiguration, ninja_command
     let ninja_status = Command::new(ninja_command)
         // Order of arguments do matter here: See <https://github.com/rust-skia/rust-skia/pull/643>
         // for details.
-        .args(&["-C", config.output_directory.to_str().unwrap()])
+        .args(["-C", config.output_directory.to_str().unwrap()])
         .args(&config.ninja_built_libraries)
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())

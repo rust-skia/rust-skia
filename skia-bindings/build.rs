@@ -179,6 +179,6 @@ fn main() {
 
     #[cfg(feature = "binary-cache")]
     if let Some(staging_directory) = build_support::binary_cache::should_export() {
-        build_support::binary_cache::publish(&binaries_config, &*staging_directory);
+        build_support::binary_cache::publish(&binaries_config, &staging_directory);
     }
 }

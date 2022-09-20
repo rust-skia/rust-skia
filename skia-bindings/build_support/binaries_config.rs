@@ -102,12 +102,12 @@ impl BinariesConfiguration {
                 }
             }
             (_, _, "windows", Some("msvc")) => {
-                link_libraries.extend(&["usp10", "ole32", "user32", "gdi32", "fontsub"]);
+                link_libraries.extend(["usp10", "ole32", "user32", "gdi32", "fontsub"]);
                 if features.gl {
                     link_libraries.push("opengl32");
                 }
                 if features.d3d {
-                    link_libraries.extend(&["d3d12", "dxgi", "d3dcompiler"]);
+                    link_libraries.extend(["d3d12", "dxgi", "d3dcompiler"]);
                 }
             }
             (_, "linux", "android", _) | (_, "linux", "androideabi", _) => {
@@ -190,7 +190,7 @@ impl BinariesConfiguration {
         to_dir: &Path,
         copy_bindings_libraries: bool,
     ) -> io::Result<()> {
-        fs::create_dir_all(&to_dir)?;
+        fs::create_dir_all(to_dir)?;
 
         let target = cargo::target();
 

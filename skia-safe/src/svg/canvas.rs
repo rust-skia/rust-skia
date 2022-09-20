@@ -94,7 +94,7 @@ mod tests {
     fn test_svg() {
         use crate::Paint;
 
-        let mut canvas = Canvas::new(&Rect::from_size((20, 20)), None);
+        let mut canvas = Canvas::new(Rect::from_size((20, 20)), None);
         let paint = Paint::default();
         canvas.draw_circle((10, 10), 10.0, &paint);
         let data = canvas.end();
@@ -107,7 +107,7 @@ mod tests {
     #[test]
     fn test_svg_without_ending() {
         use crate::Paint;
-        let mut canvas = Canvas::new(&Rect::from_size((20, 20)), None);
+        let mut canvas = Canvas::new(Rect::from_size((20, 20)), None);
         let paint = Paint::default();
         canvas.draw_circle((10, 10), 10.0, &paint);
     }
