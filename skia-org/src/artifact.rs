@@ -17,7 +17,7 @@ pub fn draw_image_on_surface(
 }
 
 pub fn write_file(bytes: &[u8], path: &Path, name: &str, ext: &str) {
-    fs::create_dir_all(&path).expect("failed to create directory");
+    fs::create_dir_all(path).expect("failed to create directory");
 
     let mut file_path = path.join(name);
     file_path.set_extension(ext);

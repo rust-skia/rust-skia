@@ -395,8 +395,8 @@ fn set_color4f_color_space() {
     let mut paint = Paint::default();
     let color = Color4f::from(Color::DARK_GRAY);
     let color_space = ColorSpace::new_srgb();
-    paint.set_color4f(&color, None);
-    paint.set_color4f(&color, &color_space);
+    paint.set_color4f(color, None);
+    paint.set_color4f(color, &color_space);
     let color2 = Color4f::from(Color::DARK_GRAY);
     paint.set_color4f(color2, Some(&color_space));
 }

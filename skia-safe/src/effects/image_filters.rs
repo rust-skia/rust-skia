@@ -917,7 +917,9 @@ mod tests {
     fn test_crop_conversion_options() {
         assert_eq!(cr(None), CropRect::NO_CROP_RECT);
         assert_eq!(cr(CropRect::NO_CROP_RECT), CropRect::NO_CROP_RECT);
-        assert_eq!(cr(&CropRect::NO_CROP_RECT), CropRect::NO_CROP_RECT);
+        #[allow(clippy::needless_borrow)]
+        let cr_ref = cr(&CropRect::NO_CROP_RECT);
+        assert_eq!(cr_ref, CropRect::NO_CROP_RECT);
         let irect = IRect {
             left: 1,
             top: 2,
@@ -925,7 +927,9 @@ mod tests {
             bottom: 4,
         };
         assert_eq!(cr(irect), CropRect(Rect::from(irect)));
-        assert_eq!(cr(&irect), CropRect(Rect::from(irect)));
+        #[allow(clippy::needless_borrow)]
+        let cr_by_ref = cr(&irect);
+        assert_eq!(cr_by_ref, CropRect(Rect::from(irect)));
         let rect = Rect {
             left: 1.0,
             top: 2.0,
@@ -933,6 +937,8 @@ mod tests {
             bottom: 4.0,
         };
         assert_eq!(cr(rect), CropRect(rect));
-        assert_eq!(cr(&rect), CropRect(rect));
+        #[allow(clippy::needless_borrow)]
+        let cr_by_ref = cr(&rect);
+        assert_eq!(cr_by_ref, CropRect(rect));
     }
 }

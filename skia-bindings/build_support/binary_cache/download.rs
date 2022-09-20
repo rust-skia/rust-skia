@@ -22,7 +22,7 @@ pub fn resolve_dependencies() {
     // Not in a crate, assuming a git repo. Update all submodules.
     assert!(
         Command::new("git")
-            .args(&["submodule", "update", "--init", "--depth", "1"])
+            .args(["submodule", "update", "--init", "--depth", "1"])
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
             .status()
