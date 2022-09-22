@@ -201,11 +201,14 @@ pub fn generate_bindings(
 
     cc_build.cpp(true).out_dir(output_directory);
 
-    if cfg!(windows) {
-        // m100: See also skia/BUILD.gn `config("cpp17")`
-        cc_build.flag("/std:c++17");
-    } else {
-        cc_build.flag("-std=c++17");
+    {
+        let cpp17 = if target.builds_with_msvc() {
+            // m100: See also skia/BUILD.gn `config("cpp17")`
+            "/std:c++17"
+        } else {
+            "-std=c++17"
+        };
+        cc_build.flag(cpp17);
     }
 
     let target_str = &target.to_string();
