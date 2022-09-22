@@ -72,6 +72,10 @@ impl Target {
         self.system == "windows"
     }
 
+    pub fn builds_with_msvc(&self) -> bool {
+        self.abi.as_deref() == Some("msvc")
+    }
+
     /// Convert a library name to a filename.
     pub fn library_to_filename(&self, name: impl AsRef<str>) -> PathBuf {
         let name = name.as_ref();
