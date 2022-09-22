@@ -73,7 +73,7 @@ impl Target {
     }
 
     pub fn builds_with_msvc(&self) -> bool {
-        self.abi == Some("msvc".into())
+        self.abi.as_deref() == Some("msvc")
     }
 
     /// Convert a library name to a filename.
