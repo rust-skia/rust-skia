@@ -23,12 +23,15 @@ pub struct FinalBuildConfiguration {
 
     /// Further definitions needed for build consistency.
     pub definitions: Definitions,
+
+    pub cflags: Vec<String>,
 }
 
 impl FinalBuildConfiguration {
     pub fn from_build_configuration(
         features: &features::Features,
         definitions: Definitions,
+        cflags: Vec<String>,
         skia_source_dir: &Path,
     ) -> FinalBuildConfiguration {
         let binding_sources = {
@@ -61,6 +64,7 @@ impl FinalBuildConfiguration {
             skia_source_dir: skia_source_dir.into(),
             binding_sources,
             definitions,
+            cflags,
         }
     }
 }
@@ -197,6 +201,11 @@ pub fn generate_bindings(
                 builder = builder.clang_arg(format!("-D{}", name));
             }
         }
+    }
+
+    for flag in &build.cflags {
+        cc_build.flag(flag);
+        builder = builder.clang_arg(flag)
     }
 
     cc_build.cpp(true).out_dir(output_directory);

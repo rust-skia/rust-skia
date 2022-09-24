@@ -54,6 +54,7 @@ fn build_from_source(
 fn generate_bindings(
     features: &features::Features,
     definitions: Vec<skia_bindgen::Definition>,
+    cflags: Vec<String>,
     binaries_config: &binaries_config::BinariesConfiguration,
     skia_source_dir: &std::path::Path,
     target: Target,
@@ -66,6 +67,7 @@ fn generate_bindings(
     let bindings_config = skia_bindgen::FinalBuildConfiguration::from_build_configuration(
         features,
         definitions,
+        cflags,
         skia_source_dir,
     );
     skia_bindgen::generate_bindings(
@@ -100,6 +102,7 @@ fn main() {
             generate_bindings(
                 &features,
                 definitions,
+                Vec::new(),
                 &binaries_config,
                 &source_dir,
                 cargo::target(),
@@ -122,6 +125,7 @@ fn main() {
             generate_bindings(
                 &features,
                 definitions,
+                final_build_configuration.flags,
                 &binaries_config,
                 &source_dir,
                 final_build_configuration.target,
@@ -164,6 +168,7 @@ fn main() {
             generate_bindings(
                 &features,
                 definitions,
+                final_build_configuration.flags,
                 &binaries_config,
                 &source_dir,
                 final_build_configuration.target,
