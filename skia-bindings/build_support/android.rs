@@ -16,13 +16,13 @@ pub fn ndk() -> String {
 
 fn host_tag() -> String {
     // Because this is part of build.rs, the target_os is actually the host system 
-    if cfg!(windows) {
+    if cfg!(target_os = "windows") {
         "windows-x86_64"
     }
-    else if cfg!(linux) {
+    else if cfg!(target_os = "linux") {
         "linux-x86_64"
     }
-    else if cfg!(macos) {
+    else if cfg!(target_os = "macos") {
         "darwin-x86_64"
     }
     else {
