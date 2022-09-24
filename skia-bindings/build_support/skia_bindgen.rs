@@ -1,6 +1,8 @@
 //! Full build support for the SkiaBindings library, and bindings.rs file.
 
-use crate::build_support::{android, binaries_config, cargo, cargo::Target, features, ios, xcode};
+use crate::build_support::{
+    android, binaries_config, cargo, cargo::Target, features, ios, macos, xcode,
+};
 use bindgen::{CodegenConfig, EnumVariation, RustTarget};
 use cc::Build;
 use std::path::{Path, PathBuf};
@@ -23,15 +25,12 @@ pub struct FinalBuildConfiguration {
 
     /// Further definitions needed for build consistency.
     pub definitions: Definitions,
-
-    pub cflags: Vec<String>,
 }
 
 impl FinalBuildConfiguration {
     pub fn from_build_configuration(
         features: &features::Features,
         definitions: Definitions,
-        cflags: Vec<String>,
         skia_source_dir: &Path,
     ) -> FinalBuildConfiguration {
         let binding_sources = {
@@ -64,7 +63,6 @@ impl FinalBuildConfiguration {
             skia_source_dir: skia_source_dir.into(),
             binding_sources,
             definitions,
-            cflags,
         }
     }
 }
@@ -203,11 +201,6 @@ pub fn generate_bindings(
         }
     }
 
-    for flag in &build.cflags {
-        cc_build.flag(flag);
-        builder = builder.clang_arg(flag)
-    }
-
     cc_build.cpp(true).out_dir(output_directory);
 
     {
@@ -249,6 +242,10 @@ pub fn generate_bindings(
                 } else {
                     cargo::warning("failed to get macosx SDK path")
                 }
+            }
+
+            for arg in macos::additional_clang_args() {
+                builder = builder.clang_arg(arg);
             }
         }
         (arch, "linux", "android", _) | (arch, "linux", "androideabi", _) => {

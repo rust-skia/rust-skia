@@ -89,9 +89,6 @@ pub struct FinalBuildConfiguration {
 
     /// An optional target sysroot
     pub sysroot: Option<String>,
-
-    /// Additional flags definitions.
-    pub flags: Vec<String>,
 }
 
 impl FinalBuildConfiguration {
@@ -102,11 +99,11 @@ impl FinalBuildConfiguration {
     ) -> FinalBuildConfiguration {
         let features = &build.features;
 
-        // SDKROOT is the environment variable used on macOS to specify the sysroot. SDKTARGETSYSROOT is the environment
-        // variable set in Yocto Linux SDKs when cross-compiling.
+        // `SDKROOT` is the environment variable used on macOS to specify the sysroot.
+        // `SDKTARGETSYSROOT` is the environment variable set in Yocto Linux SDKs when
+        // cross-compiling.
         let sysroot = cargo::env_var("SDKTARGETSYSROOT").or_else(|| cargo::env_var("SDKROOT"));
 
-        let mut cflags: Vec<String> = Vec::new();
         let gn_args = {
             fn quote(s: &str) -> String {
                 format!("\"{}\"", s)
@@ -188,6 +185,7 @@ impl FinalBuildConfiguration {
             let target = &build.target;
             let mut target_str = format!("--target={}", target);
             let mut set_target = true;
+            let mut cflags: Vec<String> = Vec::new();
             let mut asmflags: Vec<String> = Vec::new();
 
             if let Some(sysroot) = &sysroot {
@@ -305,18 +303,7 @@ impl FinalBuildConfiguration {
                             // version. So we don't push another target `--target` that may
                             // conflict.
                             set_target = false;
-                            // Add macOS specific environment variables that affect the output of a
-                            // build.
-
-                            let deployment_target = cargo::env_var("MACOSX_DEPLOYMENT_TARGET");
-
-                            if let Some(deployment_target) = deployment_target {
-                                let deployment_target =
-                                    macos::deployment_target_6(&deployment_target);
-                                cflags.push(format!(
-                                    "-D__MAC_OS_X_VERSION_MAX_ALLOWED={deployment_target}"
-                                ));
-                            }
+                            cflags.extend(macos::extra_skia_cflags());
                             "mac"
                         }
                         ("windows", _) => "win",
@@ -352,8 +339,8 @@ impl FinalBuildConfiguration {
                 let cflags = format!(
                     "[{}]",
                     cflags
-                        .iter()
-                        .map(|s| quote(s))
+                        .into_iter()
+                        .map(|s| quote(&s))
                         .collect::<Vec<_>>()
                         .join(",")
                 );
@@ -383,7 +370,6 @@ impl FinalBuildConfiguration {
             use_system_libraries,
             target: build.target.clone(),
             sysroot,
-            flags: cflags,
         }
     }
 }

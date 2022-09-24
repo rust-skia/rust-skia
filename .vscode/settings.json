@@ -15,9 +15,11 @@
         "mios",
         "miphoneos",
         "RGBX",
+        "SDKTARGETSYSROOT",
         "skottie",
         "unoptimized",
         "webgl",
-        "wuffs"
+        "wuffs",
+        "Yocto"
     ]
 }
