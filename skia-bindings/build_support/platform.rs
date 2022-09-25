@@ -1,44 +1,30 @@
-use std::collections::{HashMap, HashSet};
+//! All the configuration settings that can be resolved statically for a platform target. From the
+//! environment, and current build configurations.
 
-use self::{
-    alpine::Alpine,
-    android::Android,
-    generic::Generic,
-    ios::Ios,
-    macos::MacOS,
-    prelude::quote,
-    wasm::Emscripten,
-    windows::{WindowsGeneric, WindowsMsvc},
-};
+use self::prelude::quote;
 use super::{cargo::Platform, clang, skia::BuildConfiguration};
+use std::collections::{HashMap, HashSet};
 
 pub mod alpine;
 pub mod android;
+pub mod emscripten;
 mod generic;
 pub mod ios;
 pub mod macos;
-pub mod wasm;
 mod windows;
 
-/// All details that can be resolved statically for a platform target. From the environment, and
-/// current build configurations.
-pub trait TargetDetails {
-    /// Additional Skia GN arguments.
-    fn args(&self, config: &BuildConfiguration, builder: &mut ArgBuilder);
-}
-
-impl BuildConfiguration {
-    pub fn target_details(&self) -> Box<dyn TargetDetails> {
-        match self.target.as_strs() {
-            ("wasm32", "unknown", "emscripten", _) => Box::new(Emscripten),
-            (_, "linux", "android", _) | (_, "linux", "androideabi", _) => Box::new(Android),
-            (_, "apple", "darwin", _) => Box::new(MacOS),
-            (_, "apple", "ios", _) => Box::new(Ios),
-            (_, _, "windows", Some("msvc")) if self.on_windows => Box::new(WindowsMsvc),
-            (_, _, "windows", _) => Box::new(WindowsGeneric),
-            (_, "unknown", "linux", Some("musl")) => Box::new(Alpine),
-            _ => Box::new(Generic),
+pub fn build_args(config: &BuildConfiguration, builder: &mut ArgBuilder) {
+    match config.target.as_strs() {
+        ("wasm32", "unknown", "emscripten", _) => emscripten::args(config, builder),
+        (_, "linux", "android", _) | (_, "linux", "androideabi", _) => {
+            android::args(config, builder)
         }
+        (_, "apple", "darwin", _) => macos::args(config, builder),
+        (_, "apple", "ios", _) => ios::args(config, builder),
+        (_, _, "windows", Some("msvc")) if config.on_windows => windows::msvc_args(config, builder),
+        (_, _, "windows", _) => windows::generic_args(config, builder),
+        (_, "unknown", "linux", Some("musl")) => alpine::musl_args(config, builder),
+        _ => generic::args(config, builder),
     }
 }
 
@@ -54,6 +40,8 @@ pub struct ArgBuilder {
     sysroot: Option<String>,
     sysroot_prefix: String,
     bindgen_clang_args: HashSet<String>,
+
+    link_libraries: Vec<String>,
 }
 
 impl ArgBuilder {
@@ -68,6 +56,8 @@ impl ArgBuilder {
             sysroot: sysroot.map(|s| s.into()),
             sysroot_prefix: "--sysroot=".into(),
             bindgen_clang_args: HashSet::default(),
+
+            link_libraries: Vec::new(),
         }
     }
 
@@ -137,7 +127,7 @@ impl ArgBuilder {
 
 pub mod prelude {
     pub use self::skia::BuildConfiguration;
-    pub use super::{ArgBuilder, TargetDetails};
+    pub use super::ArgBuilder;
     pub use crate::build_support::{cargo, clang, skia};
 
     pub fn quote(s: &str) -> String {
