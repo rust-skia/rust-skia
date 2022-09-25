@@ -4,7 +4,7 @@ pub struct Generic;
 
 impl PlatformDetails for Generic {
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
-        args(config, builder)
+        gn_args(config, builder)
     }
 
     fn link_libraries(&self, features: &Features) -> Vec<String> {
@@ -12,7 +12,7 @@ impl PlatformDetails for Generic {
     }
 }
 
-pub fn args(config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
+pub fn gn_args(config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
     builder.target_os_and_default_cpu(&config.target.system);
 }
 

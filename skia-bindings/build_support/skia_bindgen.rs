@@ -29,7 +29,7 @@ impl Configuration {
         features: &features::Features,
         definitions: Definitions,
         skia_source_dir: &Path,
-    ) -> Configuration {
+    ) -> Self {
         let binding_sources = {
             let mut sources: Vec<PathBuf> = vec!["src/bindings.cpp".into()];
             if features.gl {
@@ -56,7 +56,7 @@ impl Configuration {
             sources
         };
 
-        Configuration {
+        Self {
             skia_source_dir: skia_source_dir.into(),
             binding_sources,
             definitions,

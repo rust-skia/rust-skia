@@ -61,8 +61,8 @@ impl PlatformDetails for Msvc {
 pub struct Generic;
 
 impl PlatformDetails for Generic {
-    fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
-        generic_args(config, builder)
+    fn gn_args(&self, _config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
+        builder.target_os_and_default_cpu("win");
     }
 
     fn link_libraries(&self, features: &Features) -> Vec<String> {
@@ -70,11 +70,7 @@ impl PlatformDetails for Generic {
     }
 }
 
-pub fn generic_args(_config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
-    builder.target_os_and_default_cpu("win");
-}
-
-pub fn generic_link_libraries(features: &Features) -> Vec<String> {
+fn generic_link_libraries(features: &Features) -> Vec<String> {
     let mut libs = vec!["usp10", "ole32", "user32", "gdi32", "fontsub"];
     if features.gl {
         libs.push("opengl32");

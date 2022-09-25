@@ -4,7 +4,7 @@ pub struct Linux;
 
 impl PlatformDetails for Linux {
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
-        args(config, builder)
+        gn_args(config, builder)
     }
 
     fn link_libraries(&self, features: &Features) -> Vec<String> {
@@ -12,8 +12,8 @@ impl PlatformDetails for Linux {
     }
 }
 
-pub fn args(config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
-    generic::args(config, builder);
+pub fn gn_args(config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
+    generic::gn_args(config, builder);
 }
 
 pub fn link_libraries(features: &Features) -> Vec<String> {

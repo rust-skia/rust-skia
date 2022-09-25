@@ -4,7 +4,7 @@ pub struct Musl;
 
 impl PlatformDetails for Musl {
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
-        linux::args(config, builder);
+        linux::gn_args(config, builder);
         let target = &config.target;
 
         builder.cflags(flags(target));
