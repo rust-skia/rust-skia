@@ -19,64 +19,57 @@ pub mod linux;
 pub mod macos;
 mod windows;
 
-pub fn build_args(config: &BuildConfiguration, builder: &mut ArgBuilder) {
-    let (arg_fn, _) = resolve_fns(&config.target);
-    arg_fn(config, builder)
+pub fn gn_args(config: &BuildConfiguration, mut builder: GnArgsBuilder) -> Vec<(String, String)> {
+    details(&config.target).gn_args(config, &mut builder);
+    builder.into_gn_args()
 }
 
-pub fn resolve_link_libraries(features: &Features, target: &Platform) -> Vec<String> {
-    let (_, ll_fn) = resolve_fns(target);
+pub fn bindgen_and_cc_args(target: &Platform, sysroot: Option<&str>) -> (Vec<String>, Vec<String>) {
+    let mut builder = BindgenArgsBuilder::new(sysroot);
+    details(target).bindgen_args(target, &mut builder);
+    builder.into_bindgen_and_cc_args()
+}
+
+pub fn link_libraries(features: &Features, target: &Platform) -> Vec<String> {
     let mut builder = LinkLibrariesBuilder::default();
-    ll_fn(features, &mut builder);
+    details(target).link_libraries(features, &mut builder);
     builder.into_link_libraries()
 }
 
+pub trait PlatformDetails {
+    fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder);
+    fn bindgen_args(&self, _target: &Platform, _builder: &mut BindgenArgsBuilder) {}
+    fn link_libraries(&self, features: &Features, builder: &mut LinkLibrariesBuilder);
+}
+
 #[allow(clippy::type_complexity)]
-fn resolve_fns(
-    target: &Platform,
-) -> (
-    fn(&BuildConfiguration, &mut ArgBuilder),
-    fn(&Features, &mut LinkLibrariesBuilder),
-) {
+fn details(target: &Platform) -> Box<dyn PlatformDetails> {
     let host = cargo::host();
     match target.as_strs() {
-        ("wasm32", "unknown", "emscripten", _) => (emscripten::args, emscripten::link_libraries),
-        (_, "linux", "android", _) | (_, "linux", "androideabi", _) => {
-            (android::args, android::link_libraries)
-        }
-        (_, "apple", "darwin", _) => (macos::args, macos::link_libraries),
-        (_, "apple", "ios", _) => (ios::args, ios::link_libraries),
-        (_, _, "windows", Some("msvc")) if host.is_windows() => {
-            (windows::msvc_args, windows::msvc_link_libraries)
-        }
-        (_, _, "windows", _) => (windows::generic_args, windows::generic_link_libraries),
-        (_, "unknown", "linux", Some("musl")) => (alpine::musl_args, alpine::musl_link_libraries),
-        (_, "unknown", "linux", _) => (linux::args, linux::link_libraries),
-        _ => (generic::args, generic::link_libraries),
+        ("wasm32", "unknown", "emscripten", _) => Box::new(emscripten::Emscripten),
+        (_, "linux", "android", _) | (_, "linux", "androideabi", _) => Box::new(android::Android),
+        (_, "apple", "darwin", _) => Box::new(macos::MacOs),
+        (_, "apple", "ios", _) => Box::new(ios::Ios),
+        (_, _, "windows", Some("msvc")) if host.is_windows() => Box::new(windows::Msvc),
+        (_, _, "windows", _) => Box::new(windows::Generic),
+        (_, "unknown", "linux", Some("musl")) => Box::new(alpine::Musl),
+        (_, "unknown", "linux", _) => Box::new(linux::Linux),
+        _ => Box::new(generic::Generic),
     }
 }
 
 #[derive(Debug)]
-pub struct ArgBuilder {
+pub struct GnArgsBuilder {
     config_target: Platform,
     use_system_libraries: bool,
     target: Option<String>,
     skia_args: HashMap<String, String>,
     skia_cflags: HashSet<String>,
     skia_asmflags: HashSet<String>,
-
-    /// sysroot if set explicitly.
-    sysroot: Option<String>,
-    sysroot_prefix: String,
-    bindgen_clang_args: HashSet<String>,
 }
 
-impl ArgBuilder {
-    pub fn new(
-        config: &BuildConfiguration,
-        use_system_libraries: bool,
-        sysroot: Option<&str>,
-    ) -> Self {
+impl GnArgsBuilder {
+    pub fn new(config: &BuildConfiguration, use_system_libraries: bool) -> Self {
         Self {
             config_target: config.target.clone(),
             use_system_libraries,
@@ -84,10 +77,6 @@ impl ArgBuilder {
             skia_args: HashMap::default(),
             skia_cflags: HashSet::default(),
             skia_asmflags: HashSet::default(),
-
-            sysroot: sysroot.map(|s| s.into()),
-            sysroot_prefix: "--sysroot=".into(),
-            bindgen_clang_args: HashSet::default(),
         }
     }
 
@@ -134,36 +123,7 @@ impl ArgBuilder {
         );
     }
 
-    /// Is the sysroot set explicitly?
-    pub fn sysroot(&self) -> Option<&str> {
-        self.sysroot.as_deref()
-    }
-
-    /// Set the sysroot.
-    pub fn set_sysroot(&mut self, sysroot: impl Into<String>) {
-        self.sysroot = Some(sysroot.into())
-    }
-
-    /// If a sysroot is set, we use the default prefix `--sysroot=` for setting it, but some
-    /// platforms may object.
-    pub fn sysroot_prefix(&mut self, prefix: impl Into<String>) {
-        self.sysroot_prefix = prefix.into();
-    }
-
-    /// Set a Bindgen Clang arg.
-    pub fn clang_arg(&mut self, arg: impl Into<String>) -> &mut Self {
-        self.bindgen_clang_args.insert(arg.into());
-        self
-    }
-
-    /// Set multiple Bindgen Clang arguments.
-    pub fn clang_args(&mut self, arguments: impl IntoIterator<Item = String>) {
-        arguments.into_iter().for_each(|s| {
-            self.clang_arg(s);
-        });
-    }
-
-    pub fn into_build_args(mut self) -> BuildArgs {
+    pub fn into_gn_args(mut self) -> Vec<(String, String)> {
         if let Some(target) = &self.target {
             let target = &format!("--target={target}");
             self.skia_cflag(target);
@@ -194,15 +154,67 @@ impl ArgBuilder {
             self.skia("extra_asmflags", asmflags);
         }
 
-        BuildArgs {
-            gn_args: self.skia_args.into_iter().collect(),
-        }
+        self.skia_args.into_iter().collect()
     }
 }
 
 #[derive(Debug)]
-pub struct BuildArgs {
-    pub gn_args: Vec<(String, String)>,
+pub struct BindgenArgsBuilder {
+    /// sysroot if set explicitly.
+    sysroot: Option<String>,
+    sysroot_prefix: String,
+    bindgen_clang_args: HashSet<String>,
+}
+
+impl BindgenArgsBuilder {
+    pub fn new(sysroot: Option<&str>) -> Self {
+        Self {
+            sysroot: sysroot.map(|s| s.into()),
+            sysroot_prefix: "--sysroot=".into(),
+            bindgen_clang_args: HashSet::default(),
+        }
+    }
+
+    /// Is the sysroot set explicitly?
+    pub fn sysroot(&self) -> Option<&str> {
+        self.sysroot.as_deref()
+    }
+
+    /// Set the sysroot.
+    pub fn set_sysroot(&mut self, sysroot: impl Into<String>) {
+        self.sysroot = Some(sysroot.into())
+    }
+
+    /// If a sysroot is set, we use the default prefix `--sysroot=` for setting it, but some
+    /// platforms may object.
+    pub fn sysroot_prefix(&mut self, prefix: impl Into<String>) {
+        self.sysroot_prefix = prefix.into();
+    }
+
+    /// Set a Bindgen Clang arg.
+    pub fn clang_arg(&mut self, arg: impl Into<String>) -> &mut Self {
+        self.bindgen_clang_args.insert(arg.into());
+        self
+    }
+
+    /// Set multiple Bindgen Clang arguments.
+    pub fn clang_args(&mut self, arguments: impl IntoIterator<Item = String>) {
+        arguments.into_iter().for_each(|s| {
+            self.clang_arg(s);
+        });
+    }
+
+    pub fn into_bindgen_and_cc_args(mut self) -> (Vec<String>, Vec<String>) {
+        let mut cc_build_args = Vec::new();
+
+        if let Some(sysroot) = &self.sysroot {
+            let sysroot_arg = format!("{}{}", self.sysroot_prefix, sysroot);
+            self.clang_arg(&sysroot_arg);
+            cc_build_args.push(sysroot_arg);
+        }
+
+        (self.bindgen_clang_args.into_iter().collect(), cc_build_args)
+    }
 }
 
 #[derive(Debug, Default)]
@@ -228,8 +240,8 @@ impl LinkLibrariesBuilder {
 }
 
 pub mod prelude {
-    pub use self::skia::BuildConfiguration;
-    pub use super::{ArgBuilder, LinkLibrariesBuilder};
+    pub use self::{cargo::Platform, skia::BuildConfiguration};
+    pub use super::{BindgenArgsBuilder, GnArgsBuilder, LinkLibrariesBuilder, PlatformDetails};
     pub use crate::build_support::{cargo, clang, features::Features, skia};
 
     pub fn quote(s: &str) -> String {

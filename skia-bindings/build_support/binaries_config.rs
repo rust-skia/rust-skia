@@ -71,7 +71,7 @@ impl BinariesConfiguration {
             ninja_built_libraries.push(lib::SK_RESOURCES.into());
         }
 
-        let link_libraries = platform::resolve_link_libraries(features, &target);
+        let link_libraries = platform::link_libraries(features, &target);
 
         let output_directory = cargo::output_directory()
             .join(SKIA_OUTPUT_DIR)

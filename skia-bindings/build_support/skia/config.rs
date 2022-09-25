@@ -4,7 +4,7 @@ use crate::build_support::{
     binaries_config,
     cargo::{self, Target},
     features,
-    platform::{self, prelude::*, BuildArgs},
+    platform::{self, prelude::*},
 };
 use std::{
     env,
@@ -83,8 +83,8 @@ pub struct FinalBuildConfiguration {
     /// The Skia source directory.
     pub skia_source_dir: PathBuf,
 
-    /// Everything needed to set up GN args and Clang configurations.
-    pub build_args: BuildArgs,
+    /// Arguments passed to GN.
+    pub gn_args: Vec<(String, String)>,
 
     /// Whether to use system libraries or not.
     pub use_system_libraries: bool,
@@ -109,9 +109,9 @@ impl FinalBuildConfiguration {
         // cross-compiling.
         let sysroot = cargo::env_var("SDKTARGETSYSROOT").or_else(|| cargo::env_var("SDKROOT"));
 
-        let mut builder = ArgBuilder::new(build, use_system_libraries, sysroot.as_deref());
+        let mut builder = GnArgsBuilder::new(build, use_system_libraries);
 
-        let build_args = {
+        let gn_args = {
             builder
                 .skia("is_official_build", yes_if(!build.skia_debug))
                 .skia("is_debug", yes_if(build.skia_debug))
@@ -222,15 +222,13 @@ impl FinalBuildConfiguration {
             builder.skia("skia_use_expat", yes());
             builder.skia("skia_use_system_expat", yes_if(use_system_libraries));
 
-            // Platform specific args
-            platform::build_args(build, &mut builder);
-
-            builder.into_build_args()
+            // Add platform specific args
+            platform::gn_args(build, builder)
         };
 
         FinalBuildConfiguration {
             skia_source_dir: skia_source_dir.into(),
-            build_args,
+            gn_args,
             use_system_libraries,
             target: build.target.clone(),
             sysroot,
@@ -302,7 +300,6 @@ pub fn configure_skia(
     gn_command: Option<&Path>,
 ) {
     let gn_args = build
-        .build_args
         .gn_args
         .iter()
         .map(|(name, value)| name.clone() + "=" + value)

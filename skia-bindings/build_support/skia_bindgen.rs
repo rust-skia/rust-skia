@@ -1,8 +1,5 @@
 //! Full build support for the SkiaBindings library, and bindings.rs file.
-
-use crate::build_support::{
-    android, binaries_config, cargo, cargo::Target, features, ios, macos, xcode,
-};
+use crate::build_support::{binaries_config, cargo, cargo::Target, features, platform};
 use bindgen::{CodegenConfig, EnumVariation, RustTarget};
 use cc::Build;
 use std::path::{Path, PathBuf};
@@ -136,7 +133,8 @@ pub fn generate_bindings(
         .clang_args(&["-x", "c++"])
         .clang_arg("-v");
 
-    // Don't generate destructors for Windows targets: https://github.com/rust-skia/rust-skia/issues/318
+    // Don't generate destructors for Windows targets:
+    // <https://github.com/rust-skia/rust-skia/issues/318>
     if target.is_windows() {
         builder = builder.with_codegen_config({
             let mut config = CodegenConfig::default();
@@ -146,7 +144,7 @@ pub fn generate_bindings(
     }
 
     // 32-bit Windows needs `thiscall` support.
-    // https://github.com/rust-skia/rust-skia/issues/540
+    // <https://github.com/rust-skia/rust-skia/issues/540>
     if target.is_windows() && target.architecture == "i686" {
         builder = builder.rust_target(RustTarget::Nightly);
     }
@@ -217,88 +215,16 @@ pub fn generate_bindings(
     cc_build.target(target_str);
     builder = builder.clang_arg(format!("--target={}", target_str));
 
-    let mut sysroot: Option<String> = sysroot.map(|s| s.into());
-    let mut sysroot_flag = "--sysroot=";
-
-    match target.as_strs() {
-        (_, "apple", "darwin", _) => {
-            // macOS uses `-isysroot/path/to/sysroot`, but this doesn't appear
-            // to work for other targets. `--sysroot=` works for all targets,
-            // to my knowledge, but doesn't seem to be idiomatic for macOS
-            // compilation. To capture this, we allow manually setting sysroot
-            // on any platform, but we use `-isysroot` for OSX builds and `--sysroot`
-            // elsewhere. If you don't manually set the sysroot, we can automatically
-            // detect it, but this is only possible for macOS.
-            sysroot_flag = "-isysroot";
-
-            if sysroot.is_none() {
-                if let Some(macos_sdk) = xcode::get_sdk_path("macosx") {
-                    let sdk = macos_sdk;
-                    sysroot = Some(
-                        sdk.to_str()
-                            .expect("macOS SDK path could not be converted to string")
-                            .into(),
-                    );
-                } else {
-                    cargo::warning("failed to get macosx SDK path")
-                }
-            }
-
-            for arg in macos::additional_clang_args() {
-                builder = builder.clang_arg(arg);
-            }
+    // Platform specific arguments and flags.
+    {
+        let (bindgen_args, cc_args) = platform::bindgen_and_cc_args(&target, sysroot);
+        for arg in bindgen_args {
+            builder = builder.clang_arg(arg)
         }
-        (arch, "linux", "android", _) | (arch, "linux", "androideabi", _) => {
-            for arg in android::additional_clang_args(target_str, arch) {
-                builder = builder.clang_arg(arg);
-            }
-        }
-        (arch, "apple", "ios", abi) => {
-            for arg in ios::additional_clang_args(arch, abi) {
-                builder = builder.clang_arg(arg);
-            }
-        }
-        (arch, "unknown", "linux", Some("musl")) => {
-            let cpp = "10.3.1";
-            cc_build.include(format!("/usr/include/c++/{}", cpp));
-            cc_build.include(format!(
-                "/usr/include/c++/{}/{}-alpine-linux-musl",
-                cpp, arch
-            ));
-        }
-        ("wasm32", "unknown", "emscripten", _) => {
-            // visibility=default, otherwise some types may be missing:
-            // <https://github.com/rust-lang/rust-bindgen/issues/751#issuecomment-555735577>
-            builder = builder.clang_arg("-fvisibility=default");
 
-            let emsdk_base_dir = match std::env::var("EMSDK") {
-                Ok(val) => val,
-                Err(_e) => panic!("please set the EMSDK environment variable to the root of your Emscripten installation"),
-            };
-
-            // Add C++ includes (otherwise build will fail with <cmath> not found)
-            let add_sys_include = |builder: bindgen::Builder, path: &str| -> bindgen::Builder {
-                let cflag = format!(
-                    "-isystem{}/upstream/emscripten/system/{}",
-                    emsdk_base_dir, path
-                );
-                builder.clang_arg(&cflag)
-            };
-
-            builder = builder.clang_arg("-nobuiltininc");
-            builder = add_sys_include(builder, "lib/libc/musl/arch/emscripten");
-            builder = add_sys_include(builder, "lib/libc/musl/arch/generic");
-            builder = add_sys_include(builder, "lib/libcxx/include");
-            builder = add_sys_include(builder, "lib/libc/musl/include");
-            builder = add_sys_include(builder, "include");
+        for arg in cc_args {
+            cc_build.flag(&arg);
         }
-        _ => {}
-    }
-
-    if let Some(sysroot) = sysroot {
-        let sysroot = format!("{}{}", sysroot_flag, sysroot);
-        builder = builder.clang_arg(&sysroot);
-        cc_build.flag(&sysroot);
     }
 
     println!("COMPILING BINDINGS: {:?}", build.binding_sources);

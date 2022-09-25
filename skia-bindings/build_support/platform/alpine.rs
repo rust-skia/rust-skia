@@ -1,9 +1,26 @@
 use super::{linux, prelude::*};
 
-pub fn musl_args(config: &BuildConfiguration, builder: &mut ArgBuilder) {
-    linux::args(config, builder);
+pub struct Musl;
 
-    let arch = &config.target.architecture;
+impl PlatformDetails for Musl {
+    fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
+        linux::args(config, builder);
+        let target = &config.target;
+
+        builder.skia_cflags(flags(target));
+    }
+
+    fn bindgen_args(&self, target: &Platform, builder: &mut BindgenArgsBuilder) {
+        builder.clang_args(flags(target))
+    }
+
+    fn link_libraries(&self, features: &Features, builder: &mut LinkLibrariesBuilder) {
+        linux::link_libraries(features, builder)
+    }
+}
+
+fn flags(target: &Platform) -> Vec<String> {
+    let arch = &target.architecture;
     let cpp = "10.3.1";
 
     let flags = [
@@ -11,10 +28,5 @@ pub fn musl_args(config: &BuildConfiguration, builder: &mut ArgBuilder) {
         format!("-I/usr/include/c++/{cpp}/{arch}-alpine-linux-musl"),
     ];
 
-    builder.skia_cflags(flags.clone());
-    builder.clang_args(flags);
-}
-
-pub fn musl_link_libraries(features: &Features, builder: &mut LinkLibrariesBuilder) {
-    linux::link_libraries(features, builder)
+    flags.into_iter().collect()
 }

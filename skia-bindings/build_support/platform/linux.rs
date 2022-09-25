@@ -1,7 +1,18 @@
 use super::{generic, prelude::*};
-use crate::build_support::features::Features;
 
-pub fn args(config: &BuildConfiguration, builder: &mut ArgBuilder) {
+pub struct Linux;
+
+impl PlatformDetails for Linux {
+    fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
+        args(config, builder)
+    }
+
+    fn link_libraries(&self, features: &Features, builder: &mut LinkLibrariesBuilder) {
+        link_libraries(features, builder)
+    }
+}
+
+pub fn args(config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
     generic::args(config, builder);
 }
 
