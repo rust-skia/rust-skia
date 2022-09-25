@@ -59,8 +59,9 @@ fn resolve_fns(
 #[derive(Debug)]
 pub struct ArgBuilder {
     config_target: Platform,
+    use_system_libraries: bool,
     target: Option<String>,
-    args: HashMap<String, String>,
+    skia_args: HashMap<String, String>,
     skia_cflags: HashSet<String>,
     skia_asmflags: HashSet<String>,
 
@@ -71,11 +72,16 @@ pub struct ArgBuilder {
 }
 
 impl ArgBuilder {
-    pub fn new(config: &BuildConfiguration, sysroot: Option<&str>) -> Self {
+    pub fn new(
+        config: &BuildConfiguration,
+        use_system_libraries: bool,
+        sysroot: Option<&str>,
+    ) -> Self {
         Self {
             config_target: config.target.clone(),
+            use_system_libraries,
             target: Some(config.target.to_string()),
-            args: HashMap::default(),
+            skia_args: HashMap::default(),
             skia_cflags: HashSet::default(),
             skia_asmflags: HashSet::default(),
 
@@ -85,6 +91,10 @@ impl ArgBuilder {
         }
     }
 
+    pub fn use_system_libraries(&self) -> bool {
+        self.use_system_libraries
+    }
+
     /// Overwrite the default target.
     pub fn target(&mut self, target: impl Into<Option<String>>) {
         self.target = target.into();
@@ -92,7 +102,7 @@ impl ArgBuilder {
 
     /// Set a Skia GN arg.
     pub fn skia(&mut self, name: impl Into<String>, value: impl Into<String>) -> &mut Self {
-        self.args.insert(name.into(), value.into());
+        self.skia_args.insert(name.into(), value.into());
         self
     }
 
@@ -107,6 +117,11 @@ impl ArgBuilder {
         flags.into_iter().for_each(|s| {
             self.skia_cflag(s);
         });
+    }
+
+    pub fn skia_asmflag(&mut self, flag: impl Into<String>) -> &mut Self {
+        self.skia_asmflags.insert(flag.into());
+        self
     }
 
     /// Explicitly set `target_os` to the value and `target_cpu` to clang's default. By default,
@@ -147,6 +162,47 @@ impl ArgBuilder {
             self.clang_arg(s);
         });
     }
+
+    pub fn into_build_args(mut self) -> BuildArgs {
+        if let Some(target) = &self.target {
+            let target = &format!("--target={target}");
+            self.skia_cflag(target);
+            self.skia_asmflag(target);
+        }
+
+        if !self.skia_cflags.is_empty() {
+            let cflags = format!(
+                "[{}]",
+                self.skia_cflags
+                    .iter()
+                    .map(|s| quote(s))
+                    .collect::<Vec<_>>()
+                    .join(",")
+            );
+            self.skia("extra_cflags", cflags);
+        }
+
+        if !self.skia_asmflags.is_empty() {
+            let asmflags = format!(
+                "[{}]",
+                self.skia_asmflags
+                    .iter()
+                    .map(|s| quote(s))
+                    .collect::<Vec<_>>()
+                    .join(",")
+            );
+            self.skia("extra_asmflags", asmflags);
+        }
+
+        BuildArgs {
+            gn_args: self.skia_args.into_iter().collect(),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct BuildArgs {
+    pub gn_args: Vec<(String, String)>,
 }
 
 #[derive(Debug, Default)]

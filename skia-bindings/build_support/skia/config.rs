@@ -1,11 +1,16 @@
 //! Full build support for the Skia library.
 
-use super::{llvm, vs};
-use crate::build_support::cargo::Target;
-use crate::build_support::{android, binaries_config, cargo, clang, features, ios, macos};
-use std::env;
-use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio};
+use crate::build_support::{
+    binaries_config,
+    cargo::{self, Target},
+    features,
+    platform::{self, prelude::*, BuildArgs},
+};
+use std::{
+    env,
+    path::{Path, PathBuf},
+    process::{Command, Stdio},
+};
 
 /// The build configuration for Skia.
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -73,13 +78,13 @@ impl BuildConfiguration {
 }
 
 /// This is the final, low level build configuration.
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Debug)]
 pub struct FinalBuildConfiguration {
     /// The Skia source directory.
     pub skia_source_dir: PathBuf,
 
-    /// The name value pairs passed as arguments to gn.
-    pub gn_args: Vec<(String, String)>,
+    /// Everything needed to set up GN args and Clang configurations.
+    pub build_args: BuildArgs,
 
     /// Whether to use system libraries or not.
     pub use_system_libraries: bool,
@@ -104,90 +109,86 @@ impl FinalBuildConfiguration {
         // cross-compiling.
         let sysroot = cargo::env_var("SDKTARGETSYSROOT").or_else(|| cargo::env_var("SDKROOT"));
 
-        let gn_args = {
-            fn quote(s: &str) -> String {
-                format!("\"{}\"", s)
-            }
+        let mut builder = ArgBuilder::new(build, use_system_libraries, sysroot.as_deref());
 
-            let mut args: Vec<(&str, String)> = vec![
-                ("is_official_build", yes_if(!build.skia_debug)),
-                ("is_debug", yes_if(build.skia_debug)),
-                ("skia_enable_svg", yes_if(features.svg)),
-                ("skia_enable_gpu", yes_if(features.gpu())),
-                ("skia_enable_skottie", no()),
-                // Always enable PDF document support, because it gets switched off for WASM builds.
-                // See <https://github.com/rust-skia/rust-skia/issues/694>
-                ("skia_enable_pdf", yes()),
-                ("skia_use_gl", yes_if(features.gl)),
-                ("skia_use_egl", yes_if(features.egl)),
-                ("skia_use_x11", yes_if(features.x11)),
-                ("skia_use_system_libpng", yes_if(use_system_libraries)),
-                ("skia_use_libwebp_encode", yes_if(features.webp_encode)),
-                ("skia_use_libwebp_decode", yes_if(features.webp_decode)),
-                ("skia_use_system_zlib", yes_if(use_system_libraries)),
-                ("skia_use_xps", no()),
-                ("skia_use_dng_sdk", yes_if(features.dng)),
-                ("cc", quote(&build.cc)),
-                ("cxx", quote(&build.cxx)),
-            ];
+        let build_args = {
+            builder
+                .skia("is_official_build", yes_if(!build.skia_debug))
+                .skia("is_debug", yes_if(build.skia_debug))
+                .skia("skia_enable_svg", yes_if(features.svg))
+                .skia("skia_enable_gpu", yes_if(features.gpu()))
+                .skia("skia_enable_skottie", no());
+
+            // Always enable PDF document support, because it gets switched off for WASM builds.
+            // See <https://github.com/rust-skia/rust-skia/issues/694>
+            builder
+                .skia("skia_enable_pdf", yes())
+                .skia("skia_use_gl", yes_if(features.gl))
+                .skia("skia_use_egl", yes_if(features.egl))
+                .skia("skia_use_x11", yes_if(features.x11))
+                .skia("skia_use_system_libpng", yes_if(use_system_libraries))
+                .skia("skia_use_libwebp_encode", yes_if(features.webp_encode))
+                .skia("skia_use_libwebp_decode", yes_if(features.webp_decode))
+                .skia("skia_use_system_zlib", yes_if(use_system_libraries))
+                .skia("skia_use_xps", no())
+                .skia("skia_use_dng_sdk", yes_if(features.dng))
+                .skia("cc", quote(&build.cc))
+                .skia("cxx", quote(&build.cxx));
 
             if features.vulkan {
-                args.push(("skia_use_vulkan", yes()));
-                args.push(("skia_enable_spirv_validation", no()));
+                builder
+                    .skia("skia_use_vulkan", yes())
+                    .skia("skia_enable_spirv_validation", no());
             }
 
             if features.metal {
-                args.push(("skia_use_metal", yes()));
+                builder.skia("skia_use_metal", yes());
             }
 
             if features.d3d {
-                args.push(("skia_use_direct3d", yes()))
+                builder.skia("skia_use_direct3d", yes());
             }
 
             // further flags that limit the components of Skia debug builds.
             if build.skia_debug {
-                args.push(("skia_enable_spirv_validation", no()));
-                args.push(("skia_enable_tools", no()));
-                args.push(("skia_enable_vulkan_debug_layers", no()));
-                args.push(("skia_use_libheif", no()));
-                args.push(("skia_use_lua", no()));
+                builder
+                    .skia("skia_enable_spirv_validation", no())
+                    .skia("skia_enable_tools", no())
+                    .skia("skia_enable_vulkan_debug_layers", no())
+                    .skia("skia_use_libheif", no())
+                    .skia("skia_use_lua", no());
             }
 
             if features.text_layout {
-                args.extend(vec![
-                    ("skia_enable_skshaper", yes()),
-                    ("skia_use_icu", yes()),
-                    ("skia_use_system_icu", yes_if(use_system_libraries)),
-                    ("skia_use_harfbuzz", yes()),
-                    ("skia_pdf_subset_harfbuzz", yes()),
-                    ("skia_use_system_harfbuzz", yes_if(use_system_libraries)),
-                    ("skia_use_sfntly", no()),
-                    ("skia_enable_skparagraph", yes()),
-                    // note: currently, tests need to be enabled, because modules/skparagraph
-                    // is not included in the default dependency configuration.
-                    // ("paragraph_tests_enabled", no()),
-                ]);
+                builder
+                    .skia("skia_enable_skshaper", yes())
+                    .skia("skia_use_icu", yes())
+                    .skia("skia_use_system_icu", yes_if(use_system_libraries))
+                    .skia("skia_use_harfbuzz", yes())
+                    .skia("skia_pdf_subset_harfbuzz", yes())
+                    .skia("skia_use_system_harfbuzz", yes_if(use_system_libraries))
+                    .skia("skia_use_sfntly", no())
+                    .skia("skia_enable_skparagraph", yes());
+                // note: currently, tests need to be enabled, because modules/skparagraph
+                // is not included in the default dependency configuration.
+                // ("paragraph_tests_enabled", no()),
             } else {
-                args.push(("skia_use_icu", no()));
+                builder.skia("skia_use_icu", no());
             }
 
             if features.webp_encode || features.webp_decode {
-                args.push(("skia_use_system_libwebp", yes_if(use_system_libraries)))
+                builder.skia("skia_use_system_libwebp", yes_if(use_system_libraries));
             }
 
             if features.embed_freetype {
-                args.push(("skia_use_system_freetype2", no()));
+                builder.skia("skia_use_system_freetype2", no());
             }
 
             // target specific gn args.
             let target = &build.target;
-            let mut target_str = format!("--target={}", target);
-            let mut set_target = true;
-            let mut cflags: Vec<String> = Vec::new();
-            let mut asmflags: Vec<String> = Vec::new();
 
             if let Some(sysroot) = &sysroot {
-                cflags.push(format!("--sysroot={}", sysroot));
+                builder.skia_cflag(format!("--sysroot={}", sysroot));
             }
 
             let jpeg_sys_cflags: Vec<String>;
@@ -196,169 +197,40 @@ impl FinalBuildConfiguration {
                 jpeg_sys_cflags = std::env::split_paths(&paths)
                     .map(|arg| format!("-I{}", arg.display()))
                     .collect();
-                cflags.extend(jpeg_sys_cflags);
-                args.push(("skia_use_system_libjpeg_turbo", yes()));
+                builder.skia_cflags(jpeg_sys_cflags);
+                builder.skia("skia_use_system_libjpeg_turbo", yes());
             } else {
-                args.push((
+                builder.skia(
                     "skia_use_system_libjpeg_turbo",
                     yes_if(use_system_libraries),
-                ));
+                );
             }
 
             if let Some(opt_level) = &build.opt_level {
                 /* LTO generates corrupt libraries on the host platforms when building with --release
                 if opt_level.parse::<usize>() != Ok(0) {
-                    cflags.push("-flto");
+                    builder.skia_cflag("-flto");
                 }
                 */
                 // When targeting windows `-O` isn't supported.
                 if !target.is_windows() {
-                    cflags.push(format!("-O{}", opt_level));
-                }
-            }
-
-            match target.as_strs() {
-                (arch, _, "windows", Some("msvc")) if build.on_windows => {
-                    if let Some(win_vc) = vs::resolve_win_vc() {
-                        args.push(("win_vc", quote(win_vc.to_str().unwrap())))
-                    }
-                    // Code on MSVC needs to be compiled differently (e.g. with /MT or /MD)
-                    // depending on the runtime being linked. (See
-                    // https://doc.rust-lang.org/reference/linkage.html#static-and-dynamic-c-runtimes)
-                    // When static feature is enabled (target-feature=+crt-static) the C runtime
-                    // should be statically linked and the compiler has to place the library name
-                    // LIBCMT.lib into the .obj See
-                    // https://docs.microsoft.com/en-us/cpp/build/reference/md-mt-ld-use-run-time-library?view=vs-2019
-                    if cargo::target_crt_static() {
-                        cflags.push("/MT".into());
-                    } else {
-                        // otherwise the C runtime should be linked dynamically
-                        cflags.push("/MD".into());
-                    }
-                    // Tell Skia's build system where LLVM is supposed to be located.
-                    if let Some(llvm_home) = llvm::win::find_llvm_home() {
-                        args.push(("clang_win", quote(&llvm_home)));
-                    } else {
-                        panic!(
-                            "Unable to locate LLVM installation. skia-bindings can not be built."
-                        );
-                    }
-                    // Setting `target_cpu` to `i686` or `x86`, nightly builds would lead to
-                    // > 'C:/Program' is not recognized as an internal or external command
-                    // Without it, the executables pop out just fine. See the GH job
-                    // `supplemental-builds/windows-x86`.
-                    if arch != "i686" {
-                        args.push(("target_cpu", quote(clang::target_arch(arch))));
-                    }
-                }
-                (arch, "linux", "android", _) | (arch, "linux", "androideabi", _) => {
-                    args.push(("ndk", quote(&android::ndk())));
-                    args.push(("ndk_api", android::API_LEVEL.into()));
-                    args.push(("target_cpu", quote(clang::target_arch(arch))));
-                    if !features.embed_freetype {
-                        args.push(("skia_use_system_freetype2", yes_if(use_system_libraries)));
-                    }
-                    // Note: Enabling fontmgr_android implies expat.
-                    args.push(("skia_enable_fontmgr_android", yes()));
-                    cflags.extend(android::extra_skia_cflags())
-                }
-                (arch, _, "ios", abi) => {
-                    args.push(("target_os", quote("ios")));
-                    args.push(("target_cpu", quote(clang::target_arch(arch))));
-                    // m100: Needed for aarch64 simulators, requires cherry Skia pick
-                    // 0361abf39d1504966799b1cdb5450e07f88b2bc2 (until milestone 102).
-                    if ios::is_simulator(arch, abi) {
-                        args.push(("ios_use_simulator", yes()));
-                    }
-                    if let Some(specific_target) = ios::specific_target(arch, abi) {
-                        target_str = format!("--target={}", specific_target);
-                    }
-                    cflags.extend(ios::extra_skia_cflags(arch, abi));
-                }
-                ("wasm32", "unknown", "emscripten", _) => {
-                    args.push(("cc", quote("emcc")));
-                    args.push(("cxx", quote("em++")));
-                    args.push(("skia_gl_standard", quote("webgl")));
-                    args.push(("skia_use_freetype", yes()));
-                    args.push(("skia_use_system_freetype2", no()));
-                    args.push(("skia_use_webgl", yes_if(features.gpu())));
-                    args.push(("target_cpu", quote("wasm")));
-
-                    // The custom embedded font manager is enabled by default on WASM, but depends
-                    // on the undefined symbol `SK_EMBEDDED_FONTS`. Enable the custom empty font
-                    // manager instead so typeface creation still works.
-                    // See https://github.com/rust-skia/rust-skia/issues/648
-                    args.push(("skia_enable_fontmgr_custom_embedded", no()));
-                    args.push(("skia_enable_fontmgr_custom_empty", yes()));
-                }
-                (arch, _, os, abi) => {
-                    let skia_target_os = match (os, abi) {
-                        ("darwin", _) => {
-                            // Skia will take care to set a specific `--target` for the current
-                            // macOS version. So we don't push another target `--target` that may
-                            // conflict.
-                            set_target = false;
-                            cflags.extend(macos::extra_skia_cflags());
-                            "mac"
-                        }
-                        ("windows", _) => "win",
-                        ("linux", Some("musl")) => {
-                            let cpp = "10.3.1";
-                            cflags.push(format!("-I/usr/include/c++/{}", cpp));
-                            cflags.push(format!(
-                                "-I/usr/include/c++/{}/{}-alpine-linux-musl",
-                                cpp, arch
-                            ));
-                            os
-                        }
-                        (_, _) => os,
-                    };
-                    args.push(("target_os", quote(skia_target_os)));
-                    args.push(("target_cpu", quote(clang::target_arch(arch))));
+                    builder.skia_cflag(format!("-O{}", opt_level));
                 }
             }
 
             // Always compile expat
-            args.push(("skia_use_expat", yes()));
-            args.push(("skia_use_system_expat", yes_if(use_system_libraries)));
+            builder.skia("skia_use_expat", yes());
+            builder.skia("skia_use_system_expat", yes_if(use_system_libraries));
 
-            if set_target {
-                cflags.push(target_str.clone());
-                asmflags.push(target_str);
-            }
+            // Platform specific args
+            platform::build_args(build, &mut builder);
 
-            if !cflags.is_empty() {
-                let cflags = format!(
-                    "[{}]",
-                    cflags
-                        .into_iter()
-                        .map(|s| quote(&s))
-                        .collect::<Vec<_>>()
-                        .join(",")
-                );
-                args.push(("extra_cflags", cflags));
-            }
-
-            if !asmflags.is_empty() {
-                let asmflags = format!(
-                    "[{}]",
-                    asmflags
-                        .into_iter()
-                        .map(|s| quote(&s))
-                        .collect::<Vec<_>>()
-                        .join(",")
-                );
-                args.push(("extra_asmflags", asmflags));
-            }
-
-            args.into_iter()
-                .map(|(key, value)| (key.to_string(), value))
-                .collect()
+            builder.into_build_args()
         };
 
         FinalBuildConfiguration {
             skia_source_dir: skia_source_dir.into(),
-            gn_args,
+            build_args,
             use_system_libraries,
             target: build.target.clone(),
             sysroot,
@@ -430,6 +302,7 @@ pub fn configure_skia(
     gn_command: Option<&Path>,
 ) {
     let gn_args = build
+        .build_args
         .gn_args
         .iter()
         .map(|(name, value)| name.clone() + "=" + value)
