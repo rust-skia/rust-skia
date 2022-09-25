@@ -1,9 +1,9 @@
+use super::platform;
 use crate::build_support::{cargo, features};
 use std::{
     fs, io,
     path::{Path, PathBuf},
 };
-use super::platform;
 
 /// The libraries to link with.
 pub mod lib {
