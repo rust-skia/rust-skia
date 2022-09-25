@@ -179,8 +179,6 @@ impl FinalBuildConfiguration {
                 args.push(("skia_use_system_freetype2", no()));
             }
 
-            let mut use_expat = true;
-
             // target specific gn args.
             let target = &build.target;
             let mut target_str = format!("--target={}", target);
@@ -260,11 +258,8 @@ impl FinalBuildConfiguration {
                     if !features.embed_freetype {
                         args.push(("skia_use_system_freetype2", yes_if(use_system_libraries)));
                     }
+                    // Note: Enabling fontmgr_android implies expat.
                     args.push(("skia_enable_fontmgr_android", yes()));
-                    // Enabling fontmgr_android implicitly enables expat.
-                    // We make this explicit to avoid relying on an expat installed
-                    // in the system.
-                    use_expat = true;
                     cflags.extend(android::extra_skia_cflags())
                 }
                 (arch, _, "ios", abi) => {
@@ -323,12 +318,9 @@ impl FinalBuildConfiguration {
                 }
             }
 
-            if use_expat {
-                args.push(("skia_use_expat", yes()));
-                args.push(("skia_use_system_expat", yes_if(use_system_libraries)));
-            } else {
-                args.push(("skia_use_expat", no()));
-            }
+            // Always compile expat
+            args.push(("skia_use_expat", yes()));
+            args.push(("skia_use_system_expat", yes_if(use_system_libraries)));
 
             if set_target {
                 cflags.push(target_str.clone());
