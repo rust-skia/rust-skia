@@ -7,17 +7,19 @@ impl PlatformDetails for Generic {
         args(config, builder)
     }
 
-    fn link_libraries(&self, features: &Features, builder: &mut LinkLibrariesBuilder) {
-        link_libraries(features, builder)
+    fn link_libraries(&self, features: &Features) -> Vec<String> {
+        link_libraries(features)
     }
 }
 
 pub fn args(config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
-    builder.skia_target_os_and_default_cpu(&config.target.system);
+    builder.target_os_and_default_cpu(&config.target.system);
 }
 
-pub fn link_libraries(features: &Features, builder: &mut LinkLibrariesBuilder) {
+pub fn link_libraries(features: &Features) -> Vec<String> {
     if features.gl {
-        builder.link_library("GL");
+        vec!["GL".into()]
+    } else {
+        Vec::new()
     }
 }

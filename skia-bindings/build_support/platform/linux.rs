@@ -7,8 +7,8 @@ impl PlatformDetails for Linux {
         args(config, builder)
     }
 
-    fn link_libraries(&self, features: &Features, builder: &mut LinkLibrariesBuilder) {
-        link_libraries(features, builder)
+    fn link_libraries(&self, features: &Features) -> Vec<String> {
+        link_libraries(features)
     }
 }
 
@@ -16,20 +16,23 @@ pub fn args(config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
     generic::args(config, builder);
 }
 
-pub fn link_libraries(features: &Features, builder: &mut LinkLibrariesBuilder) {
-    builder.link_libraries(["stdc++", "fontconfig", "freetype"]);
+pub fn link_libraries(features: &Features) -> Vec<String> {
+    let mut libs = vec!["stdc++", "fontconfig", "freetype"];
 
     if features.gl {
         if features.egl {
-            builder.link_library("EGL");
+            libs.push("EGL");
         }
 
         if features.x11 {
-            builder.link_library("GL");
+            libs.push("GL");
         }
 
         if features.wayland {
-            builder.link_library("wayland-egl").link_library("GLESv2");
+            libs.push("wayland-egl");
+            libs.push("GLESv2");
         }
     }
+
+    libs.iter().map(|l| l.to_string()).collect()
 }

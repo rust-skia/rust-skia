@@ -31,15 +31,13 @@ pub fn bindgen_and_cc_args(target: &Target, sysroot: Option<&str>) -> (Vec<Strin
 }
 
 pub fn link_libraries(features: &Features, target: &Target) -> Vec<String> {
-    let mut builder = LinkLibrariesBuilder::default();
-    details(target).link_libraries(features, &mut builder);
-    builder.into_link_libraries()
+    details(target).link_libraries(features)
 }
 
 pub trait PlatformDetails {
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder);
     fn bindgen_args(&self, _target: &Target, _builder: &mut BindgenArgsBuilder) {}
-    fn link_libraries(&self, features: &Features, builder: &mut LinkLibrariesBuilder);
+    fn link_libraries(&self, features: &Features) -> Vec<String>;
 }
 
 #[allow(clippy::type_complexity)]
@@ -60,23 +58,21 @@ fn details(target: &Target) -> Box<dyn PlatformDetails> {
 
 #[derive(Debug)]
 pub struct GnArgsBuilder {
-    config_target: Target,
+    target_arch: String,
     use_system_libraries: bool,
-    target: Option<String>,
-    skia_args: HashMap<String, String>,
+    target_str: Option<String>,
+    gn_args: HashMap<String, String>,
     skia_cflags: HashSet<String>,
-    skia_asmflags: HashSet<String>,
 }
 
 impl GnArgsBuilder {
-    pub fn new(config: &BuildConfiguration, use_system_libraries: bool) -> Self {
+    pub fn new(target: &Target, use_system_libraries: bool) -> Self {
         Self {
-            config_target: config.target.clone(),
+            target_arch: target.architecture.clone(),
             use_system_libraries,
-            target: Some(config.target.to_string()),
-            skia_args: HashMap::default(),
+            target_str: Some(target.to_string()),
+            gn_args: HashMap::default(),
             skia_cflags: HashSet::default(),
-            skia_asmflags: HashSet::default(),
         }
     }
 
@@ -86,48 +82,42 @@ impl GnArgsBuilder {
 
     /// Overwrite the default target.
     pub fn target(&mut self, target: impl Into<Option<String>>) {
-        self.target = target.into();
+        self.target_str = target.into();
     }
 
     /// Set a Skia GN arg.
-    pub fn skia(&mut self, name: impl Into<String>, value: impl Into<String>) -> &mut Self {
-        self.skia_args.insert(name.into(), value.into());
+    pub fn arg(&mut self, name: impl Into<String>, value: impl Into<String>) -> &mut Self {
+        self.gn_args.insert(name.into(), value.into());
         self
     }
 
     /// Set a Skia C flag.
-    pub fn skia_cflag(&mut self, flag: impl Into<String>) -> &mut Self {
+    pub fn cflag(&mut self, flag: impl Into<String>) -> &mut Self {
         self.skia_cflags.insert(flag.into());
         self
     }
 
     /// Set multiple Skia C flags.
-    pub fn skia_cflags(&mut self, flags: impl IntoIterator<Item = String>) {
+    pub fn cflags(&mut self, flags: impl IntoIterator<Item = String>) {
         flags.into_iter().for_each(|s| {
-            self.skia_cflag(s);
+            self.cflag(s);
         });
-    }
-
-    pub fn skia_asmflag(&mut self, flag: impl Into<String>) -> &mut Self {
-        self.skia_asmflags.insert(flag.into());
-        self
     }
 
     /// Explicitly set `target_os` to the value and `target_cpu` to clang's default. By default,
     /// none of them are set.
-    pub fn skia_target_os_and_default_cpu(&mut self, os: impl Into<String>) {
-        self.skia("target_os", quote(&os.into()));
-        self.skia(
-            "target_cpu",
-            quote(clang::target_arch(&self.config_target.architecture)),
-        );
+    pub fn target_os_and_default_cpu(&mut self, os: impl Into<String>) {
+        self.arg("target_os", quote(&os.into()));
+        self.arg("target_cpu", quote(clang::target_arch(&self.target_arch)));
     }
 
     pub fn into_gn_args(mut self) -> Vec<(String, String)> {
-        if let Some(target) = &self.target {
-            let target = &format!("--target={target}");
-            self.skia_cflag(target);
-            self.skia_asmflag(target);
+        let mut asmflags = Vec::new();
+
+        if let Some(target) = &self.target_str {
+            let target = format!("--target={target}");
+            self.cflag(&target);
+            asmflags.push(target);
         }
 
         if !self.skia_cflags.is_empty() {
@@ -139,22 +129,22 @@ impl GnArgsBuilder {
                     .collect::<Vec<_>>()
                     .join(",")
             );
-            self.skia("extra_cflags", cflags);
+            self.arg("extra_cflags", cflags);
         }
 
-        if !self.skia_asmflags.is_empty() {
+        if !asmflags.is_empty() {
             let asmflags = format!(
                 "[{}]",
-                self.skia_asmflags
+                asmflags
                     .iter()
                     .map(|s| quote(s))
                     .collect::<Vec<_>>()
                     .join(",")
             );
-            self.skia("extra_asmflags", asmflags);
+            self.arg("extra_asmflags", asmflags);
         }
 
-        self.skia_args.into_iter().collect()
+        self.gn_args.into_iter().collect()
     }
 }
 
@@ -175,7 +165,6 @@ impl BindgenArgsBuilder {
         }
     }
 
-    /// Is the sysroot set explicitly?
     pub fn sysroot(&self) -> Option<&str> {
         self.sysroot.as_deref()
     }
@@ -192,15 +181,15 @@ impl BindgenArgsBuilder {
     }
 
     /// Set a Bindgen Clang arg.
-    pub fn clang_arg(&mut self, arg: impl Into<String>) -> &mut Self {
+    pub fn arg(&mut self, arg: impl Into<String>) -> &mut Self {
         self.bindgen_clang_args.insert(arg.into());
         self
     }
 
     /// Set multiple Bindgen Clang arguments.
-    pub fn clang_args(&mut self, arguments: impl IntoIterator<Item = String>) {
+    pub fn args(&mut self, arguments: impl IntoIterator<Item = String>) {
         arguments.into_iter().for_each(|s| {
-            self.clang_arg(s);
+            self.arg(s);
         });
     }
 
@@ -209,7 +198,7 @@ impl BindgenArgsBuilder {
 
         if let Some(sysroot) = &self.sysroot {
             let sysroot_arg = format!("{}{}", self.sysroot_prefix, sysroot);
-            self.clang_arg(&sysroot_arg);
+            self.arg(&sysroot_arg);
             cc_build_args.push(sysroot_arg);
         }
 
@@ -217,31 +206,9 @@ impl BindgenArgsBuilder {
     }
 }
 
-#[derive(Debug, Default)]
-pub struct LinkLibrariesBuilder {
-    link_libraries: Vec<String>,
-}
-
-impl LinkLibrariesBuilder {
-    pub fn link_library(&mut self, library: impl AsRef<str>) -> &mut Self {
-        self.link_libraries.push(library.as_ref().into());
-        self
-    }
-
-    pub fn link_libraries(&mut self, libraries: impl IntoIterator<Item = impl AsRef<str>>) {
-        libraries.into_iter().for_each(|ll| {
-            self.link_library(ll);
-        });
-    }
-
-    pub fn into_link_libraries(self) -> Vec<String> {
-        self.link_libraries
-    }
-}
-
 pub mod prelude {
     pub use self::{cargo::Target, skia::BuildConfiguration};
-    pub use super::{BindgenArgsBuilder, GnArgsBuilder, LinkLibrariesBuilder, PlatformDetails};
+    pub use super::{BindgenArgsBuilder, GnArgsBuilder, PlatformDetails};
     pub use crate::build_support::{cargo, clang, features::Features, skia};
 
     pub fn quote(s: &str) -> String {

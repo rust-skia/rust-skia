@@ -109,86 +109,86 @@ impl FinalBuildConfiguration {
         // cross-compiling.
         let sysroot = cargo::env_var("SDKTARGETSYSROOT").or_else(|| cargo::env_var("SDKROOT"));
 
-        let mut builder = GnArgsBuilder::new(build, use_system_libraries);
+        let mut builder = GnArgsBuilder::new(&build.target, use_system_libraries);
 
         let gn_args = {
             builder
-                .skia("is_official_build", yes_if(!build.skia_debug))
-                .skia("is_debug", yes_if(build.skia_debug))
-                .skia("skia_enable_svg", yes_if(features.svg))
-                .skia("skia_enable_gpu", yes_if(features.gpu()))
-                .skia("skia_enable_skottie", no());
+                .arg("is_official_build", yes_if(!build.skia_debug))
+                .arg("is_debug", yes_if(build.skia_debug))
+                .arg("skia_enable_svg", yes_if(features.svg))
+                .arg("skia_enable_gpu", yes_if(features.gpu()))
+                .arg("skia_enable_skottie", no());
 
             // Always enable PDF document support, because it gets switched off for WASM builds.
             // See <https://github.com/rust-skia/rust-skia/issues/694>
             builder
-                .skia("skia_enable_pdf", yes())
-                .skia("skia_use_gl", yes_if(features.gl))
-                .skia("skia_use_egl", yes_if(features.egl))
-                .skia("skia_use_x11", yes_if(features.x11))
-                .skia("skia_use_system_libpng", yes_if(use_system_libraries))
-                .skia("skia_use_libwebp_encode", yes_if(features.webp_encode))
-                .skia("skia_use_libwebp_decode", yes_if(features.webp_decode))
-                .skia("skia_use_system_zlib", yes_if(use_system_libraries))
-                .skia("skia_use_xps", no())
-                .skia("skia_use_dng_sdk", yes_if(features.dng))
-                .skia("cc", quote(&build.cc))
-                .skia("cxx", quote(&build.cxx));
+                .arg("skia_enable_pdf", yes())
+                .arg("skia_use_gl", yes_if(features.gl))
+                .arg("skia_use_egl", yes_if(features.egl))
+                .arg("skia_use_x11", yes_if(features.x11))
+                .arg("skia_use_system_libpng", yes_if(use_system_libraries))
+                .arg("skia_use_libwebp_encode", yes_if(features.webp_encode))
+                .arg("skia_use_libwebp_decode", yes_if(features.webp_decode))
+                .arg("skia_use_system_zlib", yes_if(use_system_libraries))
+                .arg("skia_use_xps", no())
+                .arg("skia_use_dng_sdk", yes_if(features.dng))
+                .arg("cc", quote(&build.cc))
+                .arg("cxx", quote(&build.cxx));
 
             if features.vulkan {
                 builder
-                    .skia("skia_use_vulkan", yes())
-                    .skia("skia_enable_spirv_validation", no());
+                    .arg("skia_use_vulkan", yes())
+                    .arg("skia_enable_spirv_validation", no());
             }
 
             if features.metal {
-                builder.skia("skia_use_metal", yes());
+                builder.arg("skia_use_metal", yes());
             }
 
             if features.d3d {
-                builder.skia("skia_use_direct3d", yes());
+                builder.arg("skia_use_direct3d", yes());
             }
 
             // further flags that limit the components of Skia debug builds.
             if build.skia_debug {
                 builder
-                    .skia("skia_enable_spirv_validation", no())
-                    .skia("skia_enable_tools", no())
-                    .skia("skia_enable_vulkan_debug_layers", no())
-                    .skia("skia_use_libheif", no())
-                    .skia("skia_use_lua", no());
+                    .arg("skia_enable_spirv_validation", no())
+                    .arg("skia_enable_tools", no())
+                    .arg("skia_enable_vulkan_debug_layers", no())
+                    .arg("skia_use_libheif", no())
+                    .arg("skia_use_lua", no());
             }
 
             if features.text_layout {
                 builder
-                    .skia("skia_enable_skshaper", yes())
-                    .skia("skia_use_icu", yes())
-                    .skia("skia_use_system_icu", yes_if(use_system_libraries))
-                    .skia("skia_use_harfbuzz", yes())
-                    .skia("skia_pdf_subset_harfbuzz", yes())
-                    .skia("skia_use_system_harfbuzz", yes_if(use_system_libraries))
-                    .skia("skia_use_sfntly", no())
-                    .skia("skia_enable_skparagraph", yes());
+                    .arg("skia_enable_skshaper", yes())
+                    .arg("skia_use_icu", yes())
+                    .arg("skia_use_system_icu", yes_if(use_system_libraries))
+                    .arg("skia_use_harfbuzz", yes())
+                    .arg("skia_pdf_subset_harfbuzz", yes())
+                    .arg("skia_use_system_harfbuzz", yes_if(use_system_libraries))
+                    .arg("skia_use_sfntly", no())
+                    .arg("skia_enable_skparagraph", yes());
                 // note: currently, tests need to be enabled, because modules/skparagraph
                 // is not included in the default dependency configuration.
                 // ("paragraph_tests_enabled", no()),
             } else {
-                builder.skia("skia_use_icu", no());
+                builder.arg("skia_use_icu", no());
             }
 
             if features.webp_encode || features.webp_decode {
-                builder.skia("skia_use_system_libwebp", yes_if(use_system_libraries));
+                builder.arg("skia_use_system_libwebp", yes_if(use_system_libraries));
             }
 
             if features.embed_freetype {
-                builder.skia("skia_use_system_freetype2", no());
+                builder.arg("skia_use_system_freetype2", no());
             }
 
             // target specific gn args.
             let target = &build.target;
 
             if let Some(sysroot) = &sysroot {
-                builder.skia_cflag(format!("--sysroot={}", sysroot));
+                builder.cflag(format!("--sysroot={}", sysroot));
             }
 
             let jpeg_sys_cflags: Vec<String>;
@@ -197,10 +197,10 @@ impl FinalBuildConfiguration {
                 jpeg_sys_cflags = std::env::split_paths(&paths)
                     .map(|arg| format!("-I{}", arg.display()))
                     .collect();
-                builder.skia_cflags(jpeg_sys_cflags);
-                builder.skia("skia_use_system_libjpeg_turbo", yes());
+                builder.cflags(jpeg_sys_cflags);
+                builder.arg("skia_use_system_libjpeg_turbo", yes());
             } else {
-                builder.skia(
+                builder.arg(
                     "skia_use_system_libjpeg_turbo",
                     yes_if(use_system_libraries),
                 );
@@ -214,13 +214,13 @@ impl FinalBuildConfiguration {
                 */
                 // When targeting windows `-O` isn't supported.
                 if !target.is_windows() {
-                    builder.skia_cflag(format!("-O{}", opt_level));
+                    builder.cflag(format!("-O{}", opt_level));
                 }
             }
 
             // Always compile expat
-            builder.skia("skia_use_expat", yes());
-            builder.skia("skia_use_system_expat", yes_if(use_system_libraries));
+            builder.arg("skia_use_expat", yes());
+            builder.arg("skia_use_system_expat", yes_if(use_system_libraries));
 
             // Add platform specific args
             platform::gn_args(build, builder)

@@ -17,8 +17,8 @@ impl PlatformDetails for MacOs {
         // build.
         cargo::rerun_if_env_var_changed("MACOSX_DEPLOYMENT_TARGET");
 
-        builder.skia_target_os_and_default_cpu("mac");
-        builder.skia_cflags(flags());
+        builder.target_os_and_default_cpu("mac");
+        builder.cflags(flags());
     }
 
     fn bindgen_args(&self, _target: &Target, builder: &mut BindgenArgsBuilder) {
@@ -43,20 +43,22 @@ impl PlatformDetails for MacOs {
             }
         }
 
-        builder.clang_args(flags());
+        builder.args(flags());
     }
 
-    fn link_libraries(&self, features: &Features, builder: &mut LinkLibrariesBuilder) {
-        builder.link_libraries(["c++", "framework=ApplicationServices"]);
+    fn link_libraries(&self, features: &Features) -> Vec<String> {
+        let mut libs = vec!["c++", "framework=ApplicationServices"];
         if features.gl {
-            builder.link_library("framework=OpenGL");
+            libs.push("framework=OpenGL");
         }
         if features.metal {
-            builder.link_library("framework=Metal");
+            libs.push("framework=Metal");
             // MetalKit was added in m87 BUILD.gn.
-            builder.link_library("framework=MetalKit");
-            builder.link_library("framework=Foundation");
+            libs.push("framework=MetalKit");
+            libs.push("framework=Foundation");
         }
+
+        libs.iter().map(|l| l.to_string()).collect()
     }
 }
 

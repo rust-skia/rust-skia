@@ -7,7 +7,7 @@ pub struct Msvc;
 impl PlatformDetails for Msvc {
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
         if let Some(win_vc) = resolve_vc() {
-            builder.skia(
+            builder.arg(
                 "win_vc",
                 quote(
                     win_vc
@@ -19,7 +19,7 @@ impl PlatformDetails for Msvc {
 
         // Tell Skia's build system where LLVM is supposed to be located.
         if let Some(llvm_home) = llvm::find_home() {
-            builder.skia("clang_win", quote(&llvm_home));
+            builder.arg("clang_win", quote(&llvm_home));
         } else {
             panic!("Unable to locate LLVM installation. skia-bindings can not be built.");
         }
@@ -32,7 +32,7 @@ impl PlatformDetails for Msvc {
         {
             let arch = &config.target.architecture;
             if arch != "i686" {
-                builder.skia("target_cpu", quote(clang::target_arch(arch)));
+                builder.arg("target_cpu", quote(clang::target_arch(arch)));
             }
         }
 
@@ -50,11 +50,11 @@ impl PlatformDetails for Msvc {
             "/MD"
         };
 
-        builder.skia_cflag(runtime_library);
+        builder.cflag(runtime_library);
     }
 
-    fn link_libraries(&self, features: &Features, builder: &mut LinkLibrariesBuilder) {
-        generic_link_libraries(features, builder)
+    fn link_libraries(&self, features: &Features) -> Vec<String> {
+        generic_link_libraries(features)
     }
 }
 
@@ -65,23 +65,25 @@ impl PlatformDetails for Generic {
         generic_args(config, builder)
     }
 
-    fn link_libraries(&self, features: &Features, builder: &mut LinkLibrariesBuilder) {
-        generic_link_libraries(features, builder);
+    fn link_libraries(&self, features: &Features) -> Vec<String> {
+        generic_link_libraries(features)
     }
 }
 
 pub fn generic_args(_config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
-    builder.skia_target_os_and_default_cpu("win");
+    builder.target_os_and_default_cpu("win");
 }
 
-pub fn generic_link_libraries(features: &Features, builder: &mut LinkLibrariesBuilder) {
-    builder.link_libraries(["usp10", "ole32", "user32", "gdi32", "fontsub"]);
+pub fn generic_link_libraries(features: &Features) -> Vec<String> {
+    let mut libs = vec!["usp10", "ole32", "user32", "gdi32", "fontsub"];
     if features.gl {
-        builder.link_library("opengl32");
+        libs.push("opengl32");
     }
     if features.d3d {
-        builder.link_libraries(["d3d12", "dxgi", "d3dcompiler"]);
+        libs.extend(["d3d12", "dxgi", "d3dcompiler"]);
     }
+
+    libs.iter().map(|l| l.to_string()).collect()
 }
 
 /// Visual Studio VC detection support

@@ -3,7 +3,6 @@ use std::{
     fs, io,
     path::{Path, PathBuf},
 };
-
 use super::platform;
 
 /// The libraries to link with.

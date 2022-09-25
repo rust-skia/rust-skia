@@ -1,4 +1,4 @@
-use super::prelude::*;
+use super::{generic, prelude::*};
 
 pub struct Emscripten;
 
@@ -7,29 +7,29 @@ impl PlatformDetails for Emscripten {
         let features = &config.features;
 
         builder
-            .skia("cc", quote("emcc"))
-            .skia("cxx", quote("em++"))
-            .skia("skia_gl_standard", quote("webgl"))
-            .skia("skia_use_freetype", yes())
-            .skia("skia_use_system_freetype2", no())
-            .skia("skia_use_webgl", yes_if(features.gpu()))
-            .skia("target_cpu", quote("wasm"));
+            .arg("cc", quote("emcc"))
+            .arg("cxx", quote("em++"))
+            .arg("skia_gl_standard", quote("webgl"))
+            .arg("skia_use_freetype", yes())
+            .arg("skia_use_system_freetype2", no())
+            .arg("skia_use_webgl", yes_if(features.gpu()))
+            .arg("target_cpu", quote("wasm"));
 
         // The custom embedded font manager is enabled by default on WASM, but depends
         // on the undefined symbol `SK_EMBEDDED_FONTS`. Enable the custom empty font
         // manager instead so typeface creation still works.
         // See https://github.com/rust-skia/rust-skia/issues/648
         builder
-            .skia("skia_enable_fontmgr_custom_embedded", no())
-            .skia("skia_enable_fontmgr_custom_empty", yes());
+            .arg("skia_enable_fontmgr_custom_embedded", no())
+            .arg("skia_enable_fontmgr_custom_empty", yes());
     }
 
     fn bindgen_args(&self, _target: &cargo::Target, builder: &mut BindgenArgsBuilder) {
-        builder.clang_arg("-nobuiltininc");
+        builder.arg("-nobuiltininc");
 
         // visibility=default, otherwise some types may be missing:
         // <https://github.com/rust-lang/rust-bindgen/issues/751#issuecomment-555735577>
-        builder.clang_arg("-fvisibility=default");
+        builder.arg("-fvisibility=default");
 
         let emsdk_base_dir = match std::env::var("EMSDK") {
             Ok(val) => val,
@@ -40,7 +40,7 @@ impl PlatformDetails for Emscripten {
 
         // Add C++ includes (otherwise build will fail with <cmath> not found)
         let mut add_sys_include = |path: &str| {
-            builder.clang_arg(format!(
+            builder.arg(format!(
                 "-isystem{emsdk_base_dir}/upstream/emscripten/system/{path}",
             ));
         };
@@ -52,9 +52,7 @@ impl PlatformDetails for Emscripten {
         add_sys_include("include");
     }
 
-    fn link_libraries(&self, features: &Features, builder: &mut LinkLibrariesBuilder) {
-        if features.gl {
-            builder.link_library("GL");
-        }
+    fn link_libraries(&self, features: &Features) -> Vec<String> {
+        generic::link_libraries(features)
     }
 }
