@@ -67,6 +67,9 @@ pub struct Target {
     pub abi: Option<String>,
 }
 
+// TODO: Rename `Target` to `Platform`.
+pub type Platform = Target;
+
 impl Target {
     pub fn is_windows(&self) -> bool {
         self.system == "windows"
@@ -93,6 +96,11 @@ impl Target {
             self.system.as_str(),
             self.abi.as_deref(),
         )
+    }
+
+    pub fn arch_abi(&self) -> (&str, Option<&str>) {
+        let (arch, _vendor, _system, abi) = self.as_strs();
+        (arch, abi)
     }
 }
 

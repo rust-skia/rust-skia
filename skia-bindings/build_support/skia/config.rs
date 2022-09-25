@@ -11,26 +11,26 @@ use std::process::{Command, Stdio};
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct BuildConfiguration {
     /// Do we build _on_ a Windows OS?
-    on_windows: bool,
+    pub on_windows: bool,
 
     /// Set the optimization level (0-3, s or z). Clang and GCC use the same notation
     /// as Rust, so we just pass this option through from Cargo.
-    opt_level: Option<String>,
+    pub opt_level: Option<String>,
 
     /// Build Skia in a debug configuration?
-    skia_debug: bool,
+    pub skia_debug: bool,
 
     /// The Skia feature set to compile.
-    features: features::Features,
+    pub features: features::Features,
 
     /// C compiler to use
-    cc: String,
+    pub cc: String,
 
     /// C++ compiler to use
-    cxx: String,
+    pub cxx: String,
 
     /// The target (arch-vendor-os-abi)
-    target: Target,
+    pub target: Target,
 }
 
 /// Builds a Skia configuration from a Features set.
@@ -299,8 +299,8 @@ impl FinalBuildConfiguration {
                 (arch, _, os, abi) => {
                     let skia_target_os = match (os, abi) {
                         ("darwin", _) => {
-                            // Skia will take care to set a specific `-target` for the current macOS
-                            // version. So we don't push another target `--target` that may
+                            // Skia will take care to set a specific `--target` for the current
+                            // macOS version. So we don't push another target `--target` that may
                             // conflict.
                             set_target = false;
                             cflags.extend(macos::extra_skia_cflags());

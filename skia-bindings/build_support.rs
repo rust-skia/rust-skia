@@ -9,6 +9,7 @@ pub mod clang;
 pub mod features;
 pub mod ios;
 pub mod macos;
+pub mod platform;
 pub mod skia;
 pub mod skia_bindgen;
 pub mod xcode;

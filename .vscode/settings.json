@@ -4,6 +4,7 @@
         "antialiasing",
         "arct",
         "beziers",
+        "cflag",
         "cpufeatures",
         "EMCC",
         "emscripten",
