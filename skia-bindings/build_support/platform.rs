@@ -32,11 +32,11 @@ impl BuildConfiguration {
         match self.target.as_strs() {
             ("wasm32", "unknown", "emscripten", _) => Box::new(Emscripten),
             (_, "linux", "android", _) | (_, "linux", "androideabi", _) => Box::new(Android),
+            (_, "apple", "darwin", _) => Box::new(MacOS),
+            (_, "apple", "ios", _) => Box::new(Ios),
             (_, _, "windows", Some("msvc")) if self.on_windows => Box::new(WindowsMsvc),
             (_, _, "windows", _) => Box::new(WindowsGeneric),
-            (_, _, "darwin", _) => Box::new(MacOS),
-            (_, _, "linux", Some("musl")) => Box::new(Alpine),
-            (_, _, "ios", _) => Box::new(Ios),
+            (_, "unknown", "linux", Some("musl")) => Box::new(Alpine),
             _ => Box::new(Generic),
         }
     }
