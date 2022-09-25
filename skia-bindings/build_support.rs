@@ -10,4 +10,3 @@ pub mod features;
 pub mod platform;
 pub mod skia;
 pub mod skia_bindgen;
-pub mod xcode;

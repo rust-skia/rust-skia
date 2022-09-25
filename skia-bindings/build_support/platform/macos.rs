@@ -1,5 +1,9 @@
+use std::{
+    path::PathBuf,
+    process::{Command, Stdio},
+};
+
 use super::prelude::*;
-use crate::build_support::xcode;
 
 pub struct MacOs;
 
@@ -28,7 +32,7 @@ impl PlatformDetails for MacOs {
         builder.sysroot_prefix("-isysroot");
 
         if builder.sysroot().is_none() {
-            if let Some(macos_sdk) = xcode::get_sdk_path("macosx") {
+            if let Some(macos_sdk) = get_sdk_path("macosx") {
                 let sdk = macos_sdk;
                 builder.set_sysroot(
                     sdk.to_str()
@@ -74,6 +78,20 @@ fn deployment_target_6(macosx_deployment_target: &str) -> String {
     let split: Vec<_> = macosx_deployment_target.split('.').collect();
     let joined = split.join("");
     dbg!(format!("{:0<6}", joined))
+}
+
+/// Returns the current SDK path.
+pub fn get_sdk_path(sdk: impl AsRef<str>) -> Option<PathBuf> {
+    let mut cmd = Command::new("xcrun");
+    cmd.arg("--sdk").arg(sdk.as_ref()).arg("--show-sdk-path");
+    let output = cmd.stderr(Stdio::inherit()).output().ok()?;
+    if output.status.code() != Some(0) {
+        return None;
+    }
+    Some({
+        let str = String::from_utf8(output.stdout).unwrap();
+        PathBuf::from(str.trim())
+    })
 }
 
 #[cfg(test)]
