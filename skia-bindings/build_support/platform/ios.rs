@@ -12,13 +12,15 @@ impl TargetDetails for Ios {
         // m100: Needed for aarch64 simulators, requires cherry Skia pick
         // 0361abf39d1504966799b1cdb5450e07f88b2bc2 (until milestone 102).
         if ios::is_simulator(arch, abi) {
-            builder.arg("ios_use_simulator", yes());
+            builder.skia("ios_use_simulator", yes());
         }
 
-        builder.cflags(ios::extra_skia_cflags(arch, abi));
+        builder.skia_cflags(ios::extra_skia_cflags(arch, abi));
 
         if let Some(specific_target) = ios::specific_target(arch, abi) {
             builder.target(specific_target);
         }
+
+        builder.clang_args(ios::additional_clang_args(&config.target.to_string(), abi))
     }
 }

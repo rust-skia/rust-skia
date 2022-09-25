@@ -47,55 +47,91 @@ pub struct ArgBuilder {
     config_target: Platform,
     target: Option<String>,
     args: HashMap<String, String>,
-    cflags: HashSet<String>,
-    asmflags: HashSet<String>,
+    skia_cflags: HashSet<String>,
+    skia_asmflags: HashSet<String>,
+
+    /// sysroot if set explicitly.
+    sysroot: Option<String>,
+    sysroot_prefix: String,
+    bindgen_clang_args: HashSet<String>,
 }
 
 impl ArgBuilder {
-    pub fn new(config: &BuildConfiguration) -> Self {
+    pub fn new(config: &BuildConfiguration, sysroot: Option<&str>) -> Self {
         Self {
             config_target: config.target.clone(),
             target: Some(config.target.to_string()),
             args: HashMap::default(),
-            cflags: HashSet::default(),
-            asmflags: HashSet::default(),
+            skia_cflags: HashSet::default(),
+            skia_asmflags: HashSet::default(),
+
+            sysroot: sysroot.map(|s| s.into()),
+            sysroot_prefix: "--sysroot=".into(),
+            bindgen_clang_args: HashSet::default(),
         }
     }
 
     /// Overwrite the default target.
-    pub fn target(&mut self, target: impl Into<Option<String>>) -> &mut Self {
+    pub fn target(&mut self, target: impl Into<Option<String>>) {
         self.target = target.into();
-        self
     }
 
     /// Set a Skia GN arg.
-    pub fn arg(&mut self, name: impl Into<String>, value: impl Into<String>) -> &mut Self {
+    pub fn skia(&mut self, name: impl Into<String>, value: impl Into<String>) -> &mut Self {
         self.args.insert(name.into(), value.into());
         self
     }
 
-    /// Set a Skia c flag.
-    pub fn cflag(&mut self, flag: impl Into<String>) -> &mut Self {
-        self.cflags.insert(flag.into());
+    /// Set a Skia C flag.
+    pub fn skia_cflag(&mut self, flag: impl Into<String>) -> &mut Self {
+        self.skia_cflags.insert(flag.into());
         self
     }
 
-    /// Set multiple Skia c flags.
-    pub fn cflags(&mut self, flags: impl IntoIterator<Item = String>) -> &mut Self {
+    /// Set multiple Skia C flags.
+    pub fn skia_cflags(&mut self, flags: impl IntoIterator<Item = String>) {
         flags.into_iter().for_each(|s| {
-            self.cflag(s);
+            self.skia_cflag(s);
         });
-        self
     }
 
     /// Explicitly set `target_os` to the value and `target_cpu` to clang's default. By default,
     /// none of them are set.
-    pub fn skia_target_os_and_default_cpu(&mut self, os: impl Into<String>) -> &mut Self {
-        self.arg("target_os", quote(&os.into()));
-        self.arg(
+    pub fn skia_target_os_and_default_cpu(&mut self, os: impl Into<String>) {
+        self.skia("target_os", quote(&os.into()));
+        self.skia(
             "target_cpu",
             quote(clang::target_arch(&self.config_target.architecture)),
-        )
+        );
+    }
+
+    /// Is the sysroot set explicitly?
+    pub fn sysroot(&self) -> Option<&str> {
+        self.sysroot.as_deref()
+    }
+
+    /// Set the sysroot.
+    pub fn set_sysroot(&mut self, sysroot: impl Into<String>) {
+        self.sysroot = Some(sysroot.into())
+    }
+
+    /// If a sysroot is set, we use the default prefix `--sysroot=` for setting it, but some
+    /// platforms may object.
+    pub fn sysroot_prefix(&mut self, prefix: impl Into<String>) {
+        self.sysroot_prefix = prefix.into();
+    }
+
+    /// Set a Bindgen Clang arg.
+    pub fn clang_arg(&mut self, arg: impl Into<String>) -> &mut Self {
+        self.bindgen_clang_args.insert(arg.into());
+        self
+    }
+
+    /// Set multiple Bindgen Clang arguments.
+    pub fn clang_args(&mut self, arguments: impl IntoIterator<Item = String>) {
+        arguments.into_iter().for_each(|s| {
+            self.clang_arg(s);
+        });
     }
 }
 

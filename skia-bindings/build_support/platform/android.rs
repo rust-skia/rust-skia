@@ -10,15 +10,19 @@ impl TargetDetails for Android {
         let (arch, _) = config.target.arch_abi();
 
         builder
-            .arg("ndk", quote(&android::ndk()))
-            .arg("ndk_api", android::API_LEVEL)
-            .arg("target_cpu", quote(clang::target_arch(arch)))
-            .arg("skia_enable_fontmgr_android", yes());
+            .skia("ndk", quote(&android::ndk()))
+            .skia("ndk_api", android::API_LEVEL)
+            .skia("target_cpu", quote(clang::target_arch(arch)))
+            .skia("skia_enable_fontmgr_android", yes());
 
         if !config.features.embed_freetype {
-            builder.arg("skia_use_system_freetype2", yes_if(use_system_libraries));
+            builder.skia("skia_use_system_freetype2", yes_if(use_system_libraries));
         }
 
-        builder.cflags(android::extra_skia_cflags());
+        builder.skia_cflags(android::extra_skia_cflags());
+        builder.clang_args(android::additional_clang_args(
+            &config.target.to_string(),
+            arch,
+        ));
     }
 }

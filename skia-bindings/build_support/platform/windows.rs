@@ -10,7 +10,7 @@ pub struct WindowsGeneric;
 impl TargetDetails for WindowsMsvc {
     fn args(&self, config: &BuildConfiguration, builder: &mut ArgBuilder) {
         if let Some(win_vc) = vs::resolve_win_vc() {
-            builder.arg(
+            builder.skia(
                 "win_vc",
                 quote(
                     win_vc
@@ -22,7 +22,7 @@ impl TargetDetails for WindowsMsvc {
 
         // Tell Skia's build system where LLVM is supposed to be located.
         if let Some(llvm_home) = llvm::win::find_llvm_home() {
-            builder.arg("clang_win", quote(&llvm_home));
+            builder.skia("clang_win", quote(&llvm_home));
         } else {
             panic!("Unable to locate LLVM installation. skia-bindings can not be built.");
         }
@@ -35,7 +35,7 @@ impl TargetDetails for WindowsMsvc {
         {
             let arch = &config.target.architecture;
             if arch != "i686" {
-                builder.arg("target_cpu", quote(clang::target_arch(arch)));
+                builder.skia("target_cpu", quote(clang::target_arch(arch)));
             }
         }
 
@@ -53,7 +53,7 @@ impl TargetDetails for WindowsMsvc {
             "/MD"
         };
 
-        builder.cflag(runtime_library);
+        builder.skia_cflag(runtime_library);
     }
 }
 

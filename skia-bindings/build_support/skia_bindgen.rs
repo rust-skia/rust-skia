@@ -217,8 +217,7 @@ pub fn generate_bindings(
     cc_build.target(target_str);
     builder = builder.clang_arg(format!("--target={}", target_str));
 
-    let sdk;
-    let mut sysroot = sysroot;
+    let mut sysroot: Option<String> = sysroot.map(|s| s.into());
     let mut sysroot_flag = "--sysroot=";
 
     match target.as_strs() {
@@ -234,10 +233,11 @@ pub fn generate_bindings(
 
             if sysroot.is_none() {
                 if let Some(macos_sdk) = xcode::get_sdk_path("macosx") {
-                    sdk = macos_sdk;
+                    let sdk = macos_sdk;
                     sysroot = Some(
                         sdk.to_str()
-                            .expect("macOS SDK path could not be converted to string"),
+                            .expect("macOS SDK path could not be converted to string")
+                            .into(),
                     );
                 } else {
                     cargo::warning("failed to get macosx SDK path")
@@ -268,7 +268,7 @@ pub fn generate_bindings(
         }
         ("wasm32", "unknown", "emscripten", _) => {
             // visibility=default, otherwise some types may be missing:
-            // https://github.com/rust-lang/rust-bindgen/issues/751#issuecomment-555735577
+            // <https://github.com/rust-lang/rust-bindgen/issues/751#issuecomment-555735577>
             builder = builder.clang_arg("-fvisibility=default");
 
             let emsdk_base_dir = match std::env::var("EMSDK") {
