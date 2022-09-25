@@ -26,6 +26,7 @@
         "SDKTARGETSYSROOT",
         "skottie",
         "unoptimized",
+        "USERPROFILE",
         "webgl",
         "wuffs",
         "Yocto"
