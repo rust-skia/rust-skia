@@ -24,11 +24,14 @@ pub fn build_args(config: &BuildConfiguration, builder: &mut ArgBuilder) {
     arg_fn(config, builder)
 }
 
-pub fn build_libraries(features: &Features, target: &Platform, builder: &mut LinkLibrariesBuilder) {
+pub fn resolve_link_libraries(features: &Features, target: &Platform) -> Vec<String> {
     let (_, ll_fn) = resolve_fns(target);
-    ll_fn(features, builder);
+    let mut builder = LinkLibrariesBuilder::default();
+    ll_fn(features, &mut builder);
+    builder.into_link_libraries()
 }
 
+#[allow(clippy::type_complexity)]
 fn resolve_fns(
     target: &Platform,
 ) -> (
@@ -161,6 +164,10 @@ impl LinkLibrariesBuilder {
         libraries.into_iter().for_each(|ll| {
             self.link_library(ll);
         });
+    }
+
+    pub fn into_link_libraries(self) -> Vec<String> {
+        self.link_libraries
     }
 }
 

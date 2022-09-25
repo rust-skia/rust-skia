@@ -1,7 +1,7 @@
 use super::prelude::*;
 use crate::build_support::{macos, xcode};
 
-pub fn args(config: &BuildConfiguration, builder: &mut ArgBuilder) {
+pub fn args(_config: &BuildConfiguration, builder: &mut ArgBuilder) {
     // Skia will take care to set a specific `--target` for the current macOS version. So we
     // don't push another target `--target` that may conflict.
     builder.target(None);
