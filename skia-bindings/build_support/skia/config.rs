@@ -236,20 +236,6 @@ impl FinalBuildConfiguration {
     }
 }
 
-fn yes() -> String {
-    "true".into()
-}
-fn no() -> String {
-    "false".into()
-}
-fn yes_if(y: bool) -> String {
-    if y {
-        yes()
-    } else {
-        no()
-    }
-}
-
 /// Orchestrates the entire build of Skia based on the arguments provided.
 pub fn build(
     build: &FinalBuildConfiguration,

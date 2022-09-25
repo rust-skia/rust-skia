@@ -24,7 +24,7 @@ impl PlatformDetails for Android {
         builder.skia_cflags(android::extra_skia_cflags());
     }
 
-    fn bindgen_args(&self, target: &Platform, builder: &mut BindgenArgsBuilder) {
+    fn bindgen_args(&self, target: &Target, builder: &mut BindgenArgsBuilder) {
         builder.clang_args(android::additional_clang_args(
             &target.to_string(),
             &target.architecture,

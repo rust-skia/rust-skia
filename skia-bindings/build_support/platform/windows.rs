@@ -6,7 +6,7 @@ pub struct Msvc;
 
 impl PlatformDetails for Msvc {
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
-        if let Some(win_vc) = resolve_win_vc() {
+        if let Some(win_vc) = resolve_vc() {
             builder.skia(
                 "win_vc",
                 quote(
@@ -84,9 +84,9 @@ pub fn generic_link_libraries(features: &Features, builder: &mut LinkLibrariesBu
     }
 }
 
-/// Visual Studio detection support
+/// Visual Studio VC detection support
 /// TODO: sophisticate: <https://github.com/alexcrichton/cc-rs/blob/master/src/windows_registry.rs0>
-fn resolve_win_vc() -> Option<PathBuf> {
+fn resolve_vc() -> Option<PathBuf> {
     if let Some(install_dir) = cargo::env_var("VCINSTALLDIR") {
         return Some(PathBuf::from(install_dir));
     }
@@ -103,9 +103,8 @@ fn resolve_win_vc() -> Option<PathBuf> {
 }
 
 mod llvm {
-    use std::path::PathBuf;
-
     use crate::build_support::cargo;
+    use std::path::PathBuf;
 
     /// Locate the LLVM installation which can be used to build skia.
     /// If the environment variable `LLVM_HOME` is present it will
@@ -122,8 +121,8 @@ mod llvm {
             let userprofile =
                 cargo::env_var("USERPROFILE").expect("Unable to resolve %USERPROFILE%");
             let common_roots = [
-                String::from("C:\\Program Files\\LLVM"),
-                String::from("C:\\LLVM"),
+                "C:\\Program Files\\LLVM".into(),
+                "C:\\LLVM".into(),
                 format!("{}\\scoop\\apps\\llvm\\current", userprofile),
             ];
             for root in &common_roots {

@@ -10,7 +10,7 @@ impl PlatformDetails for Musl {
         builder.skia_cflags(flags(target));
     }
 
-    fn bindgen_args(&self, target: &Platform, builder: &mut BindgenArgsBuilder) {
+    fn bindgen_args(&self, target: &Target, builder: &mut BindgenArgsBuilder) {
         builder.clang_args(flags(target))
     }
 
@@ -19,7 +19,7 @@ impl PlatformDetails for Musl {
     }
 }
 
-fn flags(target: &Platform) -> Vec<String> {
+fn flags(target: &Target) -> Vec<String> {
     let arch = &target.architecture;
     let cpp = "10.3.1";
 

@@ -24,7 +24,7 @@ impl PlatformDetails for Emscripten {
             .skia("skia_enable_fontmgr_custom_empty", yes());
     }
 
-    fn bindgen_args(&self, _target: &cargo::Platform, builder: &mut BindgenArgsBuilder) {
+    fn bindgen_args(&self, _target: &cargo::Target, builder: &mut BindgenArgsBuilder) {
         builder.clang_arg("-nobuiltininc");
 
         // visibility=default, otherwise some types may be missing:

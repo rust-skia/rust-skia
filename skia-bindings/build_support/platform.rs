@@ -3,7 +3,7 @@
 
 use self::prelude::quote;
 use super::{
-    cargo::{self, Platform},
+    cargo::{self, Target},
     clang,
     features::Features,
     skia::BuildConfiguration,
@@ -24,13 +24,13 @@ pub fn gn_args(config: &BuildConfiguration, mut builder: GnArgsBuilder) -> Vec<(
     builder.into_gn_args()
 }
 
-pub fn bindgen_and_cc_args(target: &Platform, sysroot: Option<&str>) -> (Vec<String>, Vec<String>) {
+pub fn bindgen_and_cc_args(target: &Target, sysroot: Option<&str>) -> (Vec<String>, Vec<String>) {
     let mut builder = BindgenArgsBuilder::new(sysroot);
     details(target).bindgen_args(target, &mut builder);
     builder.into_bindgen_and_cc_args()
 }
 
-pub fn link_libraries(features: &Features, target: &Platform) -> Vec<String> {
+pub fn link_libraries(features: &Features, target: &Target) -> Vec<String> {
     let mut builder = LinkLibrariesBuilder::default();
     details(target).link_libraries(features, &mut builder);
     builder.into_link_libraries()
@@ -38,12 +38,12 @@ pub fn link_libraries(features: &Features, target: &Platform) -> Vec<String> {
 
 pub trait PlatformDetails {
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder);
-    fn bindgen_args(&self, _target: &Platform, _builder: &mut BindgenArgsBuilder) {}
+    fn bindgen_args(&self, _target: &Target, _builder: &mut BindgenArgsBuilder) {}
     fn link_libraries(&self, features: &Features, builder: &mut LinkLibrariesBuilder);
 }
 
 #[allow(clippy::type_complexity)]
-fn details(target: &Platform) -> Box<dyn PlatformDetails> {
+fn details(target: &Target) -> Box<dyn PlatformDetails> {
     let host = cargo::host();
     match target.as_strs() {
         ("wasm32", "unknown", "emscripten", _) => Box::new(emscripten::Emscripten),
@@ -60,7 +60,7 @@ fn details(target: &Platform) -> Box<dyn PlatformDetails> {
 
 #[derive(Debug)]
 pub struct GnArgsBuilder {
-    config_target: Platform,
+    config_target: Target,
     use_system_libraries: bool,
     target: Option<String>,
     skia_args: HashMap<String, String>,
@@ -240,7 +240,7 @@ impl LinkLibrariesBuilder {
 }
 
 pub mod prelude {
-    pub use self::{cargo::Platform, skia::BuildConfiguration};
+    pub use self::{cargo::Target, skia::BuildConfiguration};
     pub use super::{BindgenArgsBuilder, GnArgsBuilder, LinkLibrariesBuilder, PlatformDetails};
     pub use crate::build_support::{cargo, clang, features::Features, skia};
 

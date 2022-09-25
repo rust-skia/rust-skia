@@ -13,7 +13,7 @@ pub mod env {
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
-pub struct FinalBuildConfiguration {
+pub struct Configuration {
     /// The binding source files to compile.
     pub binding_sources: Vec<PathBuf>,
 
@@ -24,12 +24,12 @@ pub struct FinalBuildConfiguration {
     pub definitions: Definitions,
 }
 
-impl FinalBuildConfiguration {
-    pub fn from_build_configuration(
+impl Configuration {
+    pub fn new(
         features: &features::Features,
         definitions: Definitions,
         skia_source_dir: &Path,
-    ) -> FinalBuildConfiguration {
+    ) -> Configuration {
         let binding_sources = {
             let mut sources: Vec<PathBuf> = vec!["src/bindings.cpp".into()];
             if features.gl {
@@ -56,7 +56,7 @@ impl FinalBuildConfiguration {
             sources
         };
 
-        FinalBuildConfiguration {
+        Configuration {
             skia_source_dir: skia_source_dir.into(),
             binding_sources,
             definitions,
@@ -65,7 +65,7 @@ impl FinalBuildConfiguration {
 }
 
 pub fn generate_bindings(
-    build: &FinalBuildConfiguration,
+    build: &Configuration,
     output_directory: &Path,
     target: Target,
     sysroot: Option<&str>,
@@ -666,10 +666,12 @@ pub use definitions::{Definition, Definitions};
 pub(crate) mod definitions {
     use super::env;
     use crate::build_support::features;
-    use std::collections::HashSet;
-    use std::fs;
-    use std::io::Write;
-    use std::path::{Path, PathBuf};
+    use std::{
+        collections::HashSet,
+        fs,
+        io::Write,
+        path::{Path, PathBuf},
+    };
 
     /// A preprocessor definition.
     pub type Definition = (String, Option<String>);

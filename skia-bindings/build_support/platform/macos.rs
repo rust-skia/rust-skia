@@ -1,5 +1,5 @@
 use super::prelude::*;
-use crate::build_support::{macos, xcode};
+use crate::build_support::xcode;
 
 pub struct MacOs;
 
@@ -14,10 +14,10 @@ impl PlatformDetails for MacOs {
         cargo::rerun_if_env_var_changed("MACOSX_DEPLOYMENT_TARGET");
 
         builder.skia_target_os_and_default_cpu("mac");
-        builder.skia_cflags(macos::extra_skia_cflags());
+        builder.skia_cflags(flags());
     }
 
-    fn bindgen_args(&self, _target: &Platform, builder: &mut BindgenArgsBuilder) {
+    fn bindgen_args(&self, _target: &Target, builder: &mut BindgenArgsBuilder) {
         // macOS uses `-isysroot/path/to/sysroot`, but this doesn't appear
         // to work for other targets. `--sysroot=` works for all targets,
         // to my knowledge, but doesn't seem to be idiomatic for macOS
@@ -39,7 +39,7 @@ impl PlatformDetails for MacOs {
             }
         }
 
-        builder.clang_args(macos::additional_clang_args());
+        builder.clang_args(flags());
     }
 
     fn link_libraries(&self, features: &Features, builder: &mut LinkLibrariesBuilder) {
@@ -53,5 +53,35 @@ impl PlatformDetails for MacOs {
             builder.link_library("framework=MetalKit");
             builder.link_library("framework=Foundation");
         }
+    }
+}
+
+fn flags() -> Vec<String> {
+    let deployment_target = cargo::env_var("MACOSX_DEPLOYMENT_TARGET");
+
+    if let Some(deployment_target) = deployment_target {
+        let deployment_target = deployment_target_6(&deployment_target);
+        return vec![format!(
+            "-D__MAC_OS_X_VERSION_MAX_ALLOWED={deployment_target}"
+        )];
+    }
+    Vec::new()
+}
+
+/// 6 digit deployment target.
+fn deployment_target_6(macosx_deployment_target: &str) -> String {
+    // use remove_matches as soon it's stable.
+    let split: Vec<_> = macosx_deployment_target.split('.').collect();
+    let joined = split.join("");
+    dbg!(format!("{:0<6}", joined))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::deployment_target_6;
+
+    #[test]
+    fn deployment_target_6_digit_conversion() {
+        assert!(deployment_target_6("10.16"), "101600")
     }
 }
