@@ -1,5 +1,5 @@
 use super::prelude::*;
-use crate::build_support::xcode;
+use crate::build_support::{macos, xcode};
 
 pub struct MacOS;
 
@@ -35,5 +35,8 @@ impl TargetDetails for MacOS {
                 cargo::warning("failed to get macosx SDK path")
             }
         }
+
+        builder.skia_cflags(macos::extra_skia_cflags());
+        builder.clang_args(macos::additional_clang_args());
     }
 }
