@@ -46,3 +46,9 @@ pub fn args(config: &BuildConfiguration, builder: &mut ArgBuilder) {
     add_sys_include("lib/libc/musl/include");
     add_sys_include("include");
 }
+
+pub fn link_libraries(features: &Features, builder: &mut LinkLibrariesBuilder) {
+    if features.gl {
+        builder.link_library("GL");
+    }
+}

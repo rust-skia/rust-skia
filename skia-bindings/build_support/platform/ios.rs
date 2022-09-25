@@ -20,3 +20,8 @@ pub fn args(config: &BuildConfiguration, builder: &mut ArgBuilder) {
 
     builder.clang_args(ios::additional_clang_args(&config.target.to_string(), abi))
 }
+
+pub fn link_libraries(features: &Features, builder: &mut LinkLibrariesBuilder) {
+    let abi = cargo::target().abi;
+    builder.link_libraries(ios::link_libraries(abi.as_deref(), features))
+}

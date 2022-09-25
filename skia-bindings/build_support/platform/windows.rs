@@ -52,6 +52,20 @@ pub fn msvc_args(config: &BuildConfiguration, builder: &mut ArgBuilder) {
     builder.skia_cflag(runtime_library);
 }
 
+pub fn msvc_link_libraries(features: &Features, builder: &mut LinkLibrariesBuilder) {
+    generic_link_libraries(features, builder)
+}
+
 pub fn generic_args(_config: &BuildConfiguration, builder: &mut ArgBuilder) {
     builder.skia_target_os_and_default_cpu("win");
+}
+
+pub fn generic_link_libraries(features: &Features, builder: &mut LinkLibrariesBuilder) {
+    builder.link_libraries(["usp10", "ole32", "user32", "gdi32", "fontsub"]);
+    if features.gl {
+        builder.link_library("opengl32");
+    }
+    if features.d3d {
+        builder.link_libraries(["d3d12", "dxgi", "d3dcompiler"]);
+    }
 }

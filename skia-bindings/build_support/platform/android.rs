@@ -22,3 +22,7 @@ pub fn args(config: &BuildConfiguration, builder: &mut ArgBuilder) {
         arch,
     ));
 }
+
+pub fn link_libraries(features: &Features, builder: &mut LinkLibrariesBuilder) {
+    builder.link_libraries(android::link_libraries(features));
+}

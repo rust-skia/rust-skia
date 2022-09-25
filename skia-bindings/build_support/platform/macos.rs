@@ -1,7 +1,7 @@
 use super::prelude::*;
 use crate::build_support::{macos, xcode};
 
-pub fn args(_config: &BuildConfiguration, builder: &mut ArgBuilder) {
+pub fn args(config: &BuildConfiguration, builder: &mut ArgBuilder) {
     // Skia will take care to set a specific `--target` for the current macOS version. So we
     // don't push another target `--target` that may conflict.
     builder.target(None);
@@ -35,4 +35,17 @@ pub fn args(_config: &BuildConfiguration, builder: &mut ArgBuilder) {
 
     builder.skia_cflags(macos::extra_skia_cflags());
     builder.clang_args(macos::additional_clang_args());
+}
+
+pub fn link_libraries(features: &Features, builder: &mut LinkLibrariesBuilder) {
+    builder.link_libraries(["c++", "framework=ApplicationServices"]);
+    if features.gl {
+        builder.link_library("framework=OpenGL");
+    }
+    if features.metal {
+        builder.link_library("framework=Metal");
+        // MetalKit was added in m87 BUILD.gn.
+        builder.link_library("framework=MetalKit");
+        builder.link_library("framework=Foundation");
+    }
 }

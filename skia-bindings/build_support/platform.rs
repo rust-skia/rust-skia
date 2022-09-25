@@ -2,7 +2,12 @@
 //! environment, and current build configurations.
 
 use self::prelude::quote;
-use super::{cargo::Platform, clang, skia::BuildConfiguration};
+use super::{
+    cargo::{self, Platform},
+    clang,
+    features::Features,
+    skia::BuildConfiguration,
+};
 use std::collections::{HashMap, HashSet};
 
 pub mod alpine;
@@ -10,21 +15,41 @@ pub mod android;
 pub mod emscripten;
 mod generic;
 pub mod ios;
+pub mod linux;
 pub mod macos;
 mod windows;
 
 pub fn build_args(config: &BuildConfiguration, builder: &mut ArgBuilder) {
-    match config.target.as_strs() {
-        ("wasm32", "unknown", "emscripten", _) => emscripten::args(config, builder),
+    let (arg_fn, _) = resolve_fns(&config.target);
+    arg_fn(config, builder)
+}
+
+pub fn build_libraries(features: &Features, target: &Platform, builder: &mut LinkLibrariesBuilder) {
+    let (_, ll_fn) = resolve_fns(target);
+    ll_fn(features, builder);
+}
+
+fn resolve_fns(
+    target: &Platform,
+) -> (
+    fn(&BuildConfiguration, &mut ArgBuilder),
+    fn(&Features, &mut LinkLibrariesBuilder),
+) {
+    let host = cargo::host();
+    match target.as_strs() {
+        ("wasm32", "unknown", "emscripten", _) => (emscripten::args, emscripten::link_libraries),
         (_, "linux", "android", _) | (_, "linux", "androideabi", _) => {
-            android::args(config, builder)
+            (android::args, android::link_libraries)
         }
-        (_, "apple", "darwin", _) => macos::args(config, builder),
-        (_, "apple", "ios", _) => ios::args(config, builder),
-        (_, _, "windows", Some("msvc")) if config.on_windows => windows::msvc_args(config, builder),
-        (_, _, "windows", _) => windows::generic_args(config, builder),
-        (_, "unknown", "linux", Some("musl")) => alpine::musl_args(config, builder),
-        _ => generic::args(config, builder),
+        (_, "apple", "darwin", _) => (macos::args, macos::link_libraries),
+        (_, "apple", "ios", _) => (ios::args, ios::link_libraries),
+        (_, _, "windows", Some("msvc")) if host.is_windows() => {
+            (windows::msvc_args, windows::msvc_link_libraries)
+        }
+        (_, _, "windows", _) => (windows::generic_args, windows::generic_link_libraries),
+        (_, "unknown", "linux", Some("musl")) => (alpine::musl_args, alpine::musl_link_libraries),
+        (_, "unknown", "linux", _) => (linux::args, linux::link_libraries),
+        _ => (generic::args, generic::link_libraries),
     }
 }
 
@@ -40,8 +65,6 @@ pub struct ArgBuilder {
     sysroot: Option<String>,
     sysroot_prefix: String,
     bindgen_clang_args: HashSet<String>,
-
-    link_libraries: Vec<String>,
 }
 
 impl ArgBuilder {
@@ -56,8 +79,6 @@ impl ArgBuilder {
             sysroot: sysroot.map(|s| s.into()),
             sysroot_prefix: "--sysroot=".into(),
             bindgen_clang_args: HashSet::default(),
-
-            link_libraries: Vec::new(),
         }
     }
 
@@ -125,10 +146,28 @@ impl ArgBuilder {
     }
 }
 
+#[derive(Debug, Default)]
+pub struct LinkLibrariesBuilder {
+    link_libraries: Vec<String>,
+}
+
+impl LinkLibrariesBuilder {
+    pub fn link_library(&mut self, library: impl AsRef<str>) -> &mut Self {
+        self.link_libraries.push(library.as_ref().into());
+        self
+    }
+
+    pub fn link_libraries(&mut self, libraries: impl IntoIterator<Item = impl AsRef<str>>) {
+        libraries.into_iter().for_each(|ll| {
+            self.link_library(ll);
+        });
+    }
+}
+
 pub mod prelude {
     pub use self::skia::BuildConfiguration;
-    pub use super::ArgBuilder;
-    pub use crate::build_support::{cargo, clang, skia};
+    pub use super::{ArgBuilder, LinkLibrariesBuilder};
+    pub use crate::build_support::{cargo, clang, features::Features, skia};
 
     pub fn quote(s: &str) -> String {
         format!("\"{}\"", s)
