@@ -25,6 +25,7 @@
         "nobuiltininc",
         "RGBX",
         "SDKTARGETSYSROOT",
+        "skgpu",
         "skottie",
         "unoptimized",
         "USERPROFILE",

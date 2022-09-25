@@ -417,6 +417,8 @@ const OPAQUE_TYPES: &[&str] = &[
     // Feature `svg`:
     "SkSVGNode",
     "skresources::ResourceProvider",
+    // m107 (layout failure)
+    "skgpu::VulkanMemoryAllocator",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[
