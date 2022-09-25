@@ -1,4 +1,4 @@
-use crate::{prelude::*, FontMetrics, FontStyle, GlyphId, Image, Paint, Path, Picture, Typeface};
+use crate::{prelude::*, Drawable, FontMetrics, FontStyle, GlyphId, Path, Rect, Typeface};
 use skia_bindings::{self as sb, SkCustomTypefaceBuilder};
 use std::fmt;
 
@@ -29,19 +29,16 @@ impl CustomTypefaceBuilder {
         typeface_glyph: impl Into<TypefaceGlyph<'a>>,
     ) -> &mut Self {
         unsafe {
+            use TypefaceGlyph::*;
             match typeface_glyph.into() {
-                TypefaceGlyph::Path(path) => {
-                    self.native_mut().setGlyph(glyph_id, advance, path.native())
-                }
-                TypefaceGlyph::PathAndPaint(_path, _paint) => {
-                    unimplemented!("TypefaceGlyph::PathAndPaint is not supported yet, Skia implementation is missing (last checked: m86)")
-                }
-                TypefaceGlyph::Image { .. } => {
-                    unimplemented!("TypefaceGlyph::PathAndPaint is not supported yet, Skia implementation is missing (last checked: m86)")
-                }
-                TypefaceGlyph::Picture(_picture) => {
-                    unimplemented!("TypefaceGlyph::Picture is not supported yet, Skia implementation is missing (last checked: m86)")
-                }
+                Path(path) => self.native_mut().setGlyph(glyph_id, advance, path.native()),
+                DrawableAndBounds(drawable, bounds) => sb::C_SkCustomTypefaceBuilder_setGlyph(
+                    self.native_mut(),
+                    glyph_id,
+                    advance,
+                    drawable.into_ptr(),
+                    bounds.native(),
+                ),
             }
         }
         self
@@ -72,9 +69,7 @@ impl CustomTypefaceBuilder {
 #[derive(Debug)]
 pub enum TypefaceGlyph<'a> {
     Path(&'a Path),
-    PathAndPaint(&'a Path, &'a Paint),
-    Image { image: Image, scale: f32 },
-    Picture(Picture),
+    DrawableAndBounds(Drawable, Rect),
 }
 
 impl<'a> From<&'a Path> for TypefaceGlyph<'a> {
@@ -83,24 +78,9 @@ impl<'a> From<&'a Path> for TypefaceGlyph<'a> {
     }
 }
 
-impl<'a> From<(&'a Path, &'a Paint)> for TypefaceGlyph<'a> {
-    fn from((path, paint): (&'a Path, &'a Paint)) -> Self {
-        Self::PathAndPaint(path, paint)
-    }
-}
-
-impl From<(Image, f32)> for TypefaceGlyph<'_> {
-    fn from((image, scale): (Image, f32)) -> Self {
-        Self::Image { image, scale }
-    }
-}
-
-impl From<(&Image, f32)> for TypefaceGlyph<'_> {
-    fn from((image, scale): (&Image, f32)) -> Self {
-        Self::Image {
-            image: image.clone(),
-            scale,
-        }
+impl From<(Drawable, Rect)> for TypefaceGlyph<'_> {
+    fn from((drawable, bounds): (Drawable, Rect)) -> Self {
+        Self::DrawableAndBounds(drawable, bounds)
     }
 }
 

@@ -1,6 +1,8 @@
 //! Full build support for the SkiaBindings library, and bindings.rs file.
 
-use crate::build_support::{android, binaries_config, cargo, cargo::Target, features, ios, xcode};
+use crate::build_support::{
+    android, binaries_config, cargo, cargo::Target, features, ios, macos, xcode,
+};
 use bindgen::{CodegenConfig, EnumVariation, RustTarget};
 use cc::Build;
 use std::path::{Path, PathBuf};
@@ -240,6 +242,10 @@ pub fn generate_bindings(
                 } else {
                     cargo::warning("failed to get macosx SDK path")
                 }
+            }
+
+            for arg in macos::additional_clang_args() {
+                builder = builder.clang_arg(arg);
             }
         }
         (arch, "linux", "android", _) | (arch, "linux", "androideabi", _) => {

@@ -79,7 +79,7 @@ impl ColorFilter {
 }
 
 pub mod color_filters {
-    use crate::prelude::*;
+    use crate::{prelude::*, Color4f, ColorSpace};
     use crate::{scalar, BlendMode, Color, ColorFilter, ColorMatrix};
     use skia_bindings as sb;
 
@@ -102,6 +102,8 @@ pub mod color_filters {
             .unwrap()
     }
 
+    // A version of Matrix which operates in HSLA space instead of RGBA.
+    // I.e. HSLA-to-RGBA(Matrix(RGBA-to-HSLA(input))).
     pub fn hsla_matrix_of_color_matrix(color_matrix: &ColorMatrix) -> ColorFilter {
         ColorFilter::from_ptr(unsafe {
             sb::C_SkColorFilters_HSLAMatrixOfColorMatrix(color_matrix.native())
@@ -109,6 +111,7 @@ pub mod color_filters {
         .unwrap()
     }
 
+    /// See [`hsla_matrix_of_color_matrix()`]
     pub fn hsla_matrix(row_major: &[f32; 20]) -> ColorFilter {
         ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_HSLAMatrix(row_major.as_ptr()) })
             .unwrap()
@@ -116,6 +119,22 @@ pub mod color_filters {
 
     pub fn blend(c: impl Into<Color>, mode: BlendMode) -> Option<ColorFilter> {
         ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_Blend(c.into().into_native(), mode) })
+    }
+
+    /// Blends between the constant color (src) and input color (dst) based on the [`BlendMode`].
+    /// If the color space is `None`, the constant color is assumed to be defined in sRGB.
+    pub fn blend_with_color_space(
+        c: impl Into<Color4f>,
+        color_space: impl Into<Option<ColorSpace>>,
+        mode: BlendMode,
+    ) -> Option<ColorFilter> {
+        ColorFilter::from_ptr(unsafe {
+            sb::C_SkColorFilters_Blend2(
+                c.into().native(),
+                color_space.into().into_ptr_or_null(),
+                mode,
+            )
+        })
     }
 
     pub fn linear_to_srgb_gamma() -> ColorFilter {

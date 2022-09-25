@@ -2,7 +2,7 @@
 
 use super::{llvm, vs};
 use crate::build_support::cargo::Target;
-use crate::build_support::{android, binaries_config, cargo, clang, features, ios};
+use crate::build_support::{android, binaries_config, cargo, clang, features, ios, macos};
 use std::env;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -99,8 +99,9 @@ impl FinalBuildConfiguration {
     ) -> FinalBuildConfiguration {
         let features = &build.features;
 
-        // SDKROOT is the environment variable used on macOS to specify the sysroot. SDKTARGETSYSROOT is the environment
-        // variable set in Yocto Linux SDKs when cross-compiling.
+        // `SDKROOT` is the environment variable used on macOS to specify the sysroot.
+        // `SDKTARGETSYSROOT` is the environment variable set in Yocto Linux SDKs when
+        // cross-compiling.
         let sysroot = cargo::env_var("SDKTARGETSYSROOT").or_else(|| cargo::env_var("SDKROOT"));
 
         let gn_args = {
@@ -302,9 +303,7 @@ impl FinalBuildConfiguration {
                             // version. So we don't push another target `--target` that may
                             // conflict.
                             set_target = false;
-                            // Add macOS specific environment variables that affect the output of a
-                            // build.
-                            cargo::rerun_if_env_var_changed("MACOSX_DEPLOYMENT_TARGET");
+                            cflags.extend(macos::extra_skia_cflags());
                             "mac"
                         }
                         ("windows", _) => "win",
