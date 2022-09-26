@@ -8,6 +8,9 @@ steps:
   with:
     submodules: true
 
+- name: Fix git dubious ownership errors when synchronizing Skia dependencies
+  run: git config --global --add safe.directory '*'
+
 - name: Prepare Rustup
   run: (cd /github/home && ln -s /root/.cargo)
 
