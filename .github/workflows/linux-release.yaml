@@ -18,6 +18,9 @@ jobs:
       SKIA_DEBUG: 0
     
     steps:
+    - name: Attempt to fix git dubious ownership warnings
+      run: git config --global --add safe.directory '*'
+    
     - uses: actions/checkout@v2
       with:
         submodules: true
@@ -420,6 +423,9 @@ jobs:
       SKIA_DEBUG: 0
     
     steps:
+    - name: Attempt to fix git dubious ownership warnings
+      run: git config --global --add safe.directory '*'
+    
     - uses: actions/checkout@v2
       with:
         submodules: true
@@ -822,6 +828,9 @@ jobs:
       SKIA_DEBUG: 0
     
     steps:
+    - name: Attempt to fix git dubious ownership warnings
+      run: git config --global --add safe.directory '*'
+    
     - uses: actions/checkout@v2
       with:
         submodules: true
@@ -1224,6 +1233,9 @@ jobs:
       SKIA_DEBUG: 0
     
     steps:
+    - name: Attempt to fix git dubious ownership warnings
+      run: git config --global --add safe.directory '*'
+    
     - uses: actions/checkout@v2
       with:
         submodules: true
@@ -1626,6 +1638,9 @@ jobs:
       SKIA_DEBUG: 0
     
     steps:
+    - name: Attempt to fix git dubious ownership warnings
+      run: git config --global --add safe.directory '*'
+    
     - uses: actions/checkout@v2
       with:
         submodules: true
@@ -2028,6 +2043,9 @@ jobs:
       SKIA_DEBUG: 0
     
     steps:
+    - name: Attempt to fix git dubious ownership warnings
+      run: git config --global --add safe.directory '*'
+    
     - uses: actions/checkout@v2
       with:
         submodules: true
@@ -2430,6 +2448,9 @@ jobs:
       SKIA_DEBUG: 0
     
     steps:
+    - name: Attempt to fix git dubious ownership warnings
+      run: git config --global --add safe.directory '*'
+    
     - uses: actions/checkout@v2
       with:
         submodules: true
@@ -2832,6 +2853,9 @@ jobs:
       SKIA_DEBUG: 0
     
     steps:
+    - name: Attempt to fix git dubious ownership warnings
+      run: git config --global --add safe.directory '*'
+    
     - uses: actions/checkout@v2
       with:
         submodules: true
@@ -3234,6 +3258,9 @@ jobs:
       SKIA_DEBUG: 0
     
     steps:
+    - name: Attempt to fix git dubious ownership warnings
+      run: git config --global --add safe.directory '*'
+    
     - uses: actions/checkout@v2
       with:
         submodules: true

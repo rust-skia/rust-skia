@@ -4,6 +4,9 @@ env:
   SKIA_DEBUG: $[[skiaDebug]]
 
 steps:
+- name: Attempt to fix git dubious ownership warnings
+  run: git config --global --add safe.directory '*'
+
 - uses: actions/checkout@v2
   with:
     submodules: true
