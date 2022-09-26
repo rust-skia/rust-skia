@@ -54,6 +54,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-unknown-linux-gnu26-clang
           export CXX_${TARGET}=x86_64-unknown-linux-gnu26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-unknown-linux-gnu26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -130,6 +131,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-linux-android26-clang
           export CXX_${TARGET}=aarch64-linux-android26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-linux-android26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -206,6 +208,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-linux-android26-clang
           export CXX_${TARGET}=x86_64-linux-android26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-linux-android26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -282,6 +285,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=i686-linux-android26-clang
           export CXX_${TARGET}=i686-linux-android26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=i686-linux-android26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -358,6 +362,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=wasm32-unknown-emscripten26-clang
           export CXX_${TARGET}=wasm32-unknown-emscripten26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=wasm32-unknown-emscripten26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -459,6 +464,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-unknown-linux-gnu26-clang
           export CXX_${TARGET}=x86_64-unknown-linux-gnu26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-unknown-linux-gnu26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -535,6 +541,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-linux-android26-clang
           export CXX_${TARGET}=aarch64-linux-android26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-linux-android26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -611,6 +618,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-linux-android26-clang
           export CXX_${TARGET}=x86_64-linux-android26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-linux-android26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -687,6 +695,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=i686-linux-android26-clang
           export CXX_${TARGET}=i686-linux-android26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=i686-linux-android26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -763,6 +772,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=wasm32-unknown-emscripten26-clang
           export CXX_${TARGET}=wasm32-unknown-emscripten26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=wasm32-unknown-emscripten26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"

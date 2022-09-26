@@ -42,6 +42,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-apple-darwin26-clang
           export CXX_${TARGET}=x86_64-apple-darwin26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-apple-darwin26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -118,6 +119,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-darwin26-clang
           export CXX_${TARGET}=aarch64-apple-darwin26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-darwin26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -194,6 +196,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-ios26-clang
           export CXX_${TARGET}=aarch64-apple-ios26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-ios26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -270,6 +273,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-ios-sim26-clang
           export CXX_${TARGET}=aarch64-apple-ios-sim26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-ios-sim26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -346,6 +350,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-apple-ios26-clang
           export CXX_${TARGET}=x86_64-apple-ios26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-apple-ios26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -440,6 +445,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-apple-darwin26-clang
           export CXX_${TARGET}=x86_64-apple-darwin26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-apple-darwin26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -516,6 +522,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-darwin26-clang
           export CXX_${TARGET}=aarch64-apple-darwin26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-darwin26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -592,6 +599,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-ios26-clang
           export CXX_${TARGET}=aarch64-apple-ios26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-ios26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -668,6 +676,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-ios-sim26-clang
           export CXX_${TARGET}=aarch64-apple-ios-sim26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-ios-sim26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -744,6 +753,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-apple-ios26-clang
           export CXX_${TARGET}=x86_64-apple-ios26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-apple-ios26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -838,6 +848,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-apple-darwin26-clang
           export CXX_${TARGET}=x86_64-apple-darwin26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-apple-darwin26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -914,6 +925,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-darwin26-clang
           export CXX_${TARGET}=aarch64-apple-darwin26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-darwin26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -990,6 +1002,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-ios26-clang
           export CXX_${TARGET}=aarch64-apple-ios26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-ios26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -1066,6 +1079,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-ios-sim26-clang
           export CXX_${TARGET}=aarch64-apple-ios-sim26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-ios-sim26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -1142,6 +1156,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-apple-ios26-clang
           export CXX_${TARGET}=x86_64-apple-ios26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-apple-ios26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -1236,6 +1251,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-apple-darwin26-clang
           export CXX_${TARGET}=x86_64-apple-darwin26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-apple-darwin26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -1312,6 +1328,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-darwin26-clang
           export CXX_${TARGET}=aarch64-apple-darwin26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-darwin26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -1388,6 +1405,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-ios26-clang
           export CXX_${TARGET}=aarch64-apple-ios26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-ios26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -1464,6 +1482,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-ios-sim26-clang
           export CXX_${TARGET}=aarch64-apple-ios-sim26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-ios-sim26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -1540,6 +1559,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-apple-ios26-clang
           export CXX_${TARGET}=x86_64-apple-ios26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-apple-ios26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -1634,6 +1654,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-apple-darwin26-clang
           export CXX_${TARGET}=x86_64-apple-darwin26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-apple-darwin26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -1710,6 +1731,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-darwin26-clang
           export CXX_${TARGET}=aarch64-apple-darwin26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-darwin26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -1786,6 +1808,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-ios26-clang
           export CXX_${TARGET}=aarch64-apple-ios26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-ios26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -1862,6 +1885,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-ios-sim26-clang
           export CXX_${TARGET}=aarch64-apple-ios-sim26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-ios-sim26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -1938,6 +1962,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-apple-ios26-clang
           export CXX_${TARGET}=x86_64-apple-ios26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-apple-ios26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -2032,6 +2057,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-apple-darwin26-clang
           export CXX_${TARGET}=x86_64-apple-darwin26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-apple-darwin26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -2108,6 +2134,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-darwin26-clang
           export CXX_${TARGET}=aarch64-apple-darwin26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-darwin26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -2184,6 +2211,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-ios26-clang
           export CXX_${TARGET}=aarch64-apple-ios26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-ios26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -2260,6 +2288,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-ios-sim26-clang
           export CXX_${TARGET}=aarch64-apple-ios-sim26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-ios-sim26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -2336,6 +2365,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-apple-ios26-clang
           export CXX_${TARGET}=x86_64-apple-ios26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-apple-ios26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -2430,6 +2460,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-apple-darwin26-clang
           export CXX_${TARGET}=x86_64-apple-darwin26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-apple-darwin26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -2506,6 +2537,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-darwin26-clang
           export CXX_${TARGET}=aarch64-apple-darwin26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-darwin26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -2582,6 +2614,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-ios26-clang
           export CXX_${TARGET}=aarch64-apple-ios26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-ios26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -2658,6 +2691,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-ios-sim26-clang
           export CXX_${TARGET}=aarch64-apple-ios-sim26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-ios-sim26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -2734,6 +2768,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-apple-ios26-clang
           export CXX_${TARGET}=x86_64-apple-ios26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-apple-ios26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -2828,6 +2863,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-apple-darwin26-clang
           export CXX_${TARGET}=x86_64-apple-darwin26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-apple-darwin26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -2904,6 +2940,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-darwin26-clang
           export CXX_${TARGET}=aarch64-apple-darwin26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-darwin26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -2980,6 +3017,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-ios26-clang
           export CXX_${TARGET}=aarch64-apple-ios26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-ios26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -3056,6 +3094,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-ios-sim26-clang
           export CXX_${TARGET}=aarch64-apple-ios-sim26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-ios-sim26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -3132,6 +3171,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-apple-ios26-clang
           export CXX_${TARGET}=x86_64-apple-ios26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-apple-ios26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -3226,6 +3266,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-apple-darwin26-clang
           export CXX_${TARGET}=x86_64-apple-darwin26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-apple-darwin26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -3302,6 +3343,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-darwin26-clang
           export CXX_${TARGET}=aarch64-apple-darwin26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-darwin26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -3378,6 +3420,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-ios26-clang
           export CXX_${TARGET}=aarch64-apple-ios26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-ios26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -3454,6 +3497,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=aarch64-apple-ios-sim26-clang
           export CXX_${TARGET}=aarch64-apple-ios-sim26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-apple-ios-sim26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -3530,6 +3574,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-apple-ios26-clang
           export CXX_${TARGET}=x86_64-apple-ios26-clang++
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-apple-ios26-clang
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
