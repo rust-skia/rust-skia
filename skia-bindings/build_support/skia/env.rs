@@ -1,4 +1,4 @@
-/// Environment variables used by this build script.
+/// Environment variables used for configuring the Skia build.
 use crate::build_support::cargo;
 use std::path::PathBuf;
 

@@ -1,16 +1,50 @@
-use std::fs::File;
-use std::io::Read;
-use std::path::Path;
-
+use super::prelude::*;
+use crate::build_support::{cargo, features::Features};
 use regex::Regex;
+use std::{fs::File, io::Read, path::Path};
 
-use crate::build_support::cargo;
-use crate::build_support::features::Features;
+pub struct Android;
 
 /// API level Android 8, Oreo (the first one with full Vulkan support)
-pub const API_LEVEL: &str = "26";
+const API_LEVEL: &str = "26";
 
-pub fn ndk() -> String {
+impl PlatformDetails for Android {
+    fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
+        // TODO: this may belong into BuildConfiguration
+        let (arch, _) = config.target.arch_abi();
+
+        builder
+            .arg("ndk", quote(&ndk()))
+            .arg("ndk_api", API_LEVEL)
+            .arg("target_cpu", quote(clang::target_arch(arch)))
+            .arg("skia_enable_fontmgr_android", yes());
+
+        if !config.features.embed_freetype {
+            builder.arg(
+                "skia_use_system_freetype2",
+                yes_if(builder.use_system_libraries()),
+            );
+        }
+
+        builder.cflags(extra_skia_cflags());
+    }
+
+    fn bindgen_args(&self, target: &Target, builder: &mut BindgenArgsBuilder) {
+        builder.args(additional_clang_args(
+            &target.to_string(),
+            &target.architecture,
+        ));
+    }
+
+    fn link_libraries(&self, features: &Features) -> Vec<String> {
+        link_libraries(features)
+            .iter()
+            .map(|l| l.to_string())
+            .collect()
+    }
+}
+
+fn ndk() -> String {
     cargo::env_var("ANDROID_NDK").expect("ANDROID_NDK variable not set")
 }
 
@@ -27,6 +61,7 @@ fn host_tag() -> String {
     }
     .to_string()
 }
+
 /// Get NDK major version from source.properties
 fn ndk_major_version(ndk_dir: &Path) -> u32 {
     // Capture version from the line with Pkg.Revision
@@ -44,10 +79,6 @@ fn ndk_major_version(ndk_dir: &Path) -> u32 {
         .expect("source.properties did not match the regex");
     // Capture 0 is the whole line of text
     captures[1].parse().expect("could not parse major version")
-}
-
-pub fn extra_skia_cflags() -> Vec<String> {
-    vec![format!("-D__ANDROID_API__={}", API_LEVEL)]
 }
 
 pub fn additional_clang_args(target: &str, target_arch: &str) -> Vec<String> {
@@ -82,6 +113,10 @@ pub fn additional_clang_args(target: &str, target_arch: &str) -> Vec<String> {
     args.push(format!("--target={}", target));
     args.extend(extra_skia_cflags());
     args
+}
+
+pub fn extra_skia_cflags() -> Vec<String> {
+    vec![format!("-D__ANDROID_API__={}", API_LEVEL)]
 }
 
 pub fn link_libraries(features: &Features) -> Vec<&str> {

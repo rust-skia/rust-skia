@@ -63,11 +63,7 @@ fn generate_bindings(
     skia_bindgen::definitions::save_definitions(&definitions, &binaries_config.output_directory)
         .expect("failed to write Skia defines");
 
-    let bindings_config = skia_bindgen::FinalBuildConfiguration::from_build_configuration(
-        features,
-        definitions,
-        skia_source_dir,
-    );
+    let bindings_config = skia_bindgen::Configuration::new(features, definitions, skia_source_dir);
     skia_bindgen::generate_bindings(
         &bindings_config,
         &binaries_config.output_directory,

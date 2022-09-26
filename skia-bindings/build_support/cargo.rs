@@ -94,6 +94,11 @@ impl Target {
             self.abi.as_deref(),
         )
     }
+
+    pub fn arch_abi(&self) -> (&str, Option<&str>) {
+        let (arch, _vendor, _system, abi) = self.as_strs();
+        (arch, abi)
+    }
 }
 
 impl Display for Target {
