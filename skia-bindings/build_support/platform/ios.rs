@@ -28,7 +28,7 @@ impl PlatformDetails for Ios {
 
     fn bindgen_args(&self, target: &Target, builder: &mut BindgenArgsBuilder) {
         builder.args(additional_clang_args(
-            &target.to_string(),
+            &target.architecture,
             target.abi.as_deref(),
         ))
     }
