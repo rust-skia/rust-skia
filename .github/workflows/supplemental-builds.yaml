@@ -25,6 +25,9 @@ jobs:
       with:
         submodules: true
 
+    - name: Fix git dubious ownership errors when synchronizing Skia dependencies
+      run: git config --global --add safe.directory '*'
+
     - name: Prepare Rustup
       run: (cd /github/home && ln -s /root/.cargo)
 
@@ -46,12 +49,12 @@ jobs:
       EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
 
     steps:
-    - name: Attempt to fix git dubious ownership warnings
-      run: git config --global --add safe.directory '*'
-
     - uses: actions/checkout@v2
       with:
         submodules: true
+
+    - name: Fix git dubious ownership errors when synchronizing Skia dependencies
+      run: git config --global --add safe.directory '*'
 
     - name: Prepare Rustup
       run: (cd /github/home && ln -s /root/.cargo)
