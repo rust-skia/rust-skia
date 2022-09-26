@@ -170,10 +170,14 @@ pub fn generate_bindings(
         builder = builder.header(source);
     }
 
+    let mut bindgen_args = Vec::new();
+    let mut cc_defines = Vec::new();
+    let mut cc_args = Vec::new();
+
     let include_path = &build.skia_source_dir;
     cargo::rerun_if_file_changed(include_path.join("include"));
 
-    builder = builder.clang_arg(format!("-I{}", include_path.display()));
+    bindgen_args.push(format!("-I{}", include_path.display()));
     cc_build.include(include_path);
 
     // Whether GIF decoding is supported,
@@ -189,12 +193,12 @@ pub fn generate_bindings(
     for (name, value) in &build.definitions {
         match value {
             Some(value) => {
-                cc_build.define(name, value.as_str());
-                builder = builder.clang_arg(format!("-D{}={}", name, value));
+                cc_defines.push((name, value.as_str()));
+                bindgen_args.push(format!("-D{}={}", name, value));
             }
             None => {
-                cc_build.define(name, "");
-                builder = builder.clang_arg(format!("-D{}", name));
+                cc_defines.push((name, ""));
+                bindgen_args.push(format!("-D{}", name));
             }
         }
     }
@@ -208,37 +212,57 @@ pub fn generate_bindings(
         } else {
             "-std=c++17"
         };
-        cc_build.flag(cpp17);
+        cc_args.push(cpp17.into());
     }
 
     let target_str = &target.to_string();
     cc_build.target(target_str);
-    builder = builder.clang_arg(format!("--target={}", target_str));
+    bindgen_args.push(format!("--target={}", target_str));
 
     // Platform specific arguments and flags.
     {
-        let (bindgen_args, cc_args) = platform::bindgen_and_cc_args(&target, sysroot);
-        for arg in bindgen_args {
-            builder = builder.clang_arg(arg)
+        let (bindgen, cc) = platform::bindgen_and_cc_args(&target, sysroot);
+        bindgen_args.extend(bindgen);
+        cc_args.extend(cc);
+    }
+
+    {
+        println!("COMPILING BINDINGS: {:?}", build.binding_sources);
+        println!(
+            "  DEFINES: {}",
+            cc_defines
+                .iter()
+                .map(|(n, v)| format!("{n}={v}"))
+                .collect::<Vec<_>>()
+                .join(" ")
+        );
+        println!("  ARGS: {}", cc_args.join(" "));
+
+        for (var, val) in cc_defines {
+            cc_build.define(var, val);
         }
 
         for arg in cc_args {
             cc_build.flag(&arg);
         }
+
+        // we add skia-bindings later on.
+        cc_build.cargo_metadata(false);
+        cc_build.compile(binaries_config::lib::SKIA_BINDINGS);
     }
 
-    println!("COMPILING BINDINGS: {:?}", build.binding_sources);
-    // we add skia-bindings later on.
-    cc_build.cargo_metadata(false);
-    cc_build.compile(binaries_config::lib::SKIA_BINDINGS);
+    {
+        println!("GENERATING BINDINGS");
+        println!("  ARGS: {}", bindgen_args.join(" "));
 
-    println!("GENERATING BINDINGS");
-    let bindings = builder.generate().expect("Unable to generate bindings");
+        builder = builder.clang_args(bindgen_args);
 
-    let out_path = PathBuf::from("src");
-    bindings
-        .write_to_file(out_path.join("bindings.rs"))
-        .expect("Couldn't write bindings!");
+        let bindings = builder.generate().expect("Unable to generate bindings");
+        let out_path = PathBuf::from("src");
+        bindings
+            .write_to_file(out_path.join("bindings.rs"))
+            .expect("Couldn't write bindings!");
+    }
 }
 
 const ALLOWLISTED_FUNCTIONS: &[&str] = &[

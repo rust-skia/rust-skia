@@ -8,7 +8,6 @@ use super::{
     features::Features,
     skia::BuildConfiguration,
 };
-use std::collections::{HashMap, HashSet};
 
 pub mod alpine;
 pub mod android;
@@ -61,8 +60,8 @@ pub struct GnArgsBuilder {
     target_arch: String,
     use_system_libraries: bool,
     target_str: Option<String>,
-    gn_args: HashMap<String, String>,
-    skia_cflags: HashSet<String>,
+    gn_args: Vec<(String, String)>,
+    skia_cflags: Vec<String>,
 }
 
 impl GnArgsBuilder {
@@ -71,8 +70,8 @@ impl GnArgsBuilder {
             target_arch: target.architecture.clone(),
             use_system_libraries,
             target_str: Some(target.to_string()),
-            gn_args: HashMap::default(),
-            skia_cflags: HashSet::default(),
+            gn_args: Vec::default(),
+            skia_cflags: Vec::default(),
         }
     }
 
@@ -87,13 +86,13 @@ impl GnArgsBuilder {
 
     /// Set a Skia GN arg.
     pub fn arg(&mut self, name: impl Into<String>, value: impl Into<String>) -> &mut Self {
-        self.gn_args.insert(name.into(), value.into());
+        self.gn_args.push((name.into(), value.into()));
         self
     }
 
     /// Set a Skia C flag.
     pub fn cflag(&mut self, flag: impl Into<String>) -> &mut Self {
-        self.skia_cflags.insert(flag.into());
+        self.skia_cflags.push(flag.into());
         self
     }
 
@@ -153,7 +152,7 @@ pub struct BindgenArgsBuilder {
     /// sysroot if set explicitly.
     sysroot: Option<String>,
     sysroot_prefix: String,
-    bindgen_clang_args: HashSet<String>,
+    bindgen_clang_args: Vec<String>,
 }
 
 impl BindgenArgsBuilder {
@@ -161,7 +160,7 @@ impl BindgenArgsBuilder {
         Self {
             sysroot: sysroot.map(|s| s.into()),
             sysroot_prefix: "--sysroot=".into(),
-            bindgen_clang_args: HashSet::default(),
+            bindgen_clang_args: Vec::new(),
         }
     }
 
@@ -182,7 +181,7 @@ impl BindgenArgsBuilder {
 
     /// Set a Bindgen Clang arg.
     pub fn arg(&mut self, arg: impl Into<String>) -> &mut Self {
-        self.bindgen_clang_args.insert(arg.into());
+        self.bindgen_clang_args.push(arg.into());
         self
     }
 
