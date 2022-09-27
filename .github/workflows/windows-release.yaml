@@ -50,6 +50,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-pc-windows-msvc26-clang.exe
           export CXX_${TARGET}=x86_64-pc-windows-msvc26-clang++.exe
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-pc-windows-msvc26-clang.exe
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -152,6 +153,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-pc-windows-msvc26-clang.exe
           export CXX_${TARGET}=x86_64-pc-windows-msvc26-clang++.exe
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-pc-windows-msvc26-clang.exe
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -254,6 +256,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-pc-windows-msvc26-clang.exe
           export CXX_${TARGET}=x86_64-pc-windows-msvc26-clang++.exe
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-pc-windows-msvc26-clang.exe
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -356,6 +359,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-pc-windows-msvc26-clang.exe
           export CXX_${TARGET}=x86_64-pc-windows-msvc26-clang++.exe
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-pc-windows-msvc26-clang.exe
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -458,6 +462,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-pc-windows-msvc26-clang.exe
           export CXX_${TARGET}=x86_64-pc-windows-msvc26-clang++.exe
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-pc-windows-msvc26-clang.exe
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -560,6 +565,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-pc-windows-msvc26-clang.exe
           export CXX_${TARGET}=x86_64-pc-windows-msvc26-clang++.exe
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-pc-windows-msvc26-clang.exe
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -662,6 +668,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-pc-windows-msvc26-clang.exe
           export CXX_${TARGET}=x86_64-pc-windows-msvc26-clang++.exe
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-pc-windows-msvc26-clang.exe
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -764,6 +771,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-pc-windows-msvc26-clang.exe
           export CXX_${TARGET}=x86_64-pc-windows-msvc26-clang++.exe
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-pc-windows-msvc26-clang.exe
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -866,6 +874,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-pc-windows-msvc26-clang.exe
           export CXX_${TARGET}=x86_64-pc-windows-msvc26-clang++.exe
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-pc-windows-msvc26-clang.exe
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -968,6 +977,7 @@ jobs:
           TARGET=${TARGET//-/_}
           export CC_${TARGET}=x86_64-pc-windows-msvc26-clang.exe
           export CXX_${TARGET}=x86_64-pc-windows-msvc26-clang++.exe
+          export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
           export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-pc-windows-msvc26-clang.exe
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"

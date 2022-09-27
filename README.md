@@ -153,48 +153,53 @@ The build script probes for `python --version` and `python3 --version` and uses 
 
 Cross compilation to Android is supported for targeting 64 bit ARM and Intel x86 architectures (`aarch64` and `x86_64`) for API Level 26 (Oreo, Android 8):
 
+We recommend to use [cargo apk](https://crates.io/crates/cargo-apk), but if that does not work for you, following are some instructions on how we build Android targets with GitHub Actions:
+
 For example, to compile for `aarch64`:
 
-1. Install the rust target:
+1. Install the Rust target:
    ```bash
    rustup target install aarch64-linux-android
    ```
-2. Download the [r21e NDK](https://developer.android.com/ndk/downloads) for your host architecture and unzip it.
+2. Download the [r25b NDK](https://developer.android.com/ndk/downloads) (or newer) for your host architecture and unzip it.
 3. Compile your package for the `aarch64-linux-android` target:
 
 On **macOS**:
 
 ```bash
-export ANDROID_NDK=:path-to-android-ndk-r21e
+export ANDROID_NDK=:path-to-android-ndk-r25b
 export PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin
 export CC_aarch64_linux_android=aarch64-linux-android26-clang
 export CXX_aarch64_linux_android=aarch64-linux-android26-clang++
+export AR_aarch64_linux_android=llvm-ar
 export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android26-clang
 
 cargo build -vv --target aarch64-linux-android
 ```
 
-Note: we don't support Apple's Clang 11 to build for Android on macOS, so you need to install LLVM and set the `PATH` like instructed.
+We don't support Apple's Clang to build for Android on macOS, so you need to install LLVM and set the `PATH` like instructed.
 
 On **Linux**:
 
 ```bash
-export ANDROID_NDK=:path-to-android-ndk-r21e
+export ANDROID_NDK=:path-to-android-ndk-r25b
 export PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin
 export CC_aarch64_linux_android=aarch64-linux-android26-clang
 export CXX_aarch64_linux_android=aarch64-linux-android26-clang++
+export AR_aarch64_linux_android=llvm-ar
 export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android26-clang
 
 cargo build -vv --target aarch64-linux-android
 ```
 
-On **Windows** the Android NDK clang executable must be invoked through `.cmd` scripts:
+On **Windows** the Android NDK Clang executable must be invoked through `.cmd` scripts:
 
 ```bash
-export ANDROID_NDK=:path-to-android-ndk-r21e
+export ANDROID_NDK=:path-to-android-ndk-r25b
 export PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/windows-x86_64/bin
 export CC_aarch64_linux_android=aarch64-linux-android26-clang.cmd
 export CXX_aarch64_linux_android=aarch64-linux-android26-clang++.cmd
+export AR_aarch64_linux_android=llvm-ar
 export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android26-clang.cmd
 
 cargo build -vv --target aarch64-linux-android
@@ -202,6 +207,7 @@ cargo build -vv --target aarch64-linux-android
 
 _Notes:_
 
+- At the time of this writing, the Rust compiler will [automatically add a `-lgcc` argument](https://github.com/rust-windowing/android-ndk-rs/issues/149) to the linker, which results in a linker error, because newer NDKs do not contain `libgcc.a` anymore. To fix this, we created a workaround and [copy `libunwind.a` over to `libgcc.a`](https://github.com/pragmatrix/rust-skia-containers/blob/master/linux/Dockerfile#L48-L52). Cargo apk does something [similar](https://github.com/rust-windowing/android-ndk-rs/issues/149#issuecomment-963988601).
 - The `CARGO_TARGET_${TARGET}_LINKER` environment variable name [needs to be all uppercase](https://github.com/rust-lang/cargo/issues/1109#issuecomment-386850387).
 - In some older shells (for example macOS High Sierra), environment variable replacement can not be used when the variable was defined on the same line. Therefore the `ANDROID_NDK` variable must be defined before it's used in the `PATH` variable.
 - Rebuilding skia-bindings with a different target may cause linker errors, in that case `touch skia-bindings/build.rs` will force a rebuild ([#10](https://github.com/rust-skia/rust-skia/issues/10)).
