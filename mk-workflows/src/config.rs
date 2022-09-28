@@ -47,7 +47,7 @@ pub fn qa_jobs() -> Vec<Job> {
     const QA_ALL_FEATURES: &str = "gl,vulkan,textlayout,svg,webp";
     [
         Job {
-            name: "stable-all-features",
+            name: "stable-all-features".into(),
             toolchain: "stable",
             features: QA_ALL_FEATURES.into(),
             example_args: Some("--driver cpu --driver pdf --driver svg".into()),
@@ -63,7 +63,7 @@ pub fn qa_jobs() -> Vec<Job> {
         },
         */
         Job {
-            name: "beta-all-features",
+            name: "beta-all-features".into(),
             toolchain: "beta",
             features: QA_ALL_FEATURES.into(),
             ..Job::default()
@@ -75,41 +75,65 @@ pub fn qa_jobs() -> Vec<Job> {
 /// Jobs for releasing prebuilt binaries.
 pub fn release_jobs(workflow: &Workflow) -> Vec<Job> {
     let mut jobs: Vec<_> = [
-        job("release", ""),
-        job("release-gl", "gl"),
-        job("release-vulkan", "vulkan"),
-        job("release-textlayout", "textlayout"),
-        job("release-gl-textlayout", "gl,textlayout"),
-        job("release-vulkan-textlayout", "vulkan,textlayout"),
-        job("release-gl-vulkan-textlayout", "gl,vulkan,textlayout"),
+        release_job(""),
+        release_job("gl"),
+        release_job("vulkan"),
+        release_job("textlayout"),
+        release_job("gl,textlayout"),
+        release_job("vulkan,textlayout"),
+        release_job("gl,vulkan,textlayout"),
     ]
     .into();
 
     match workflow.host_os {
         HostOS::Windows => {
-            jobs.push(job("release-d3d", "d3d"));
-            jobs.push(job("release-d3d-textlayout", "d3d,textlayout"));
-            jobs.push(job("release-d3d-gl-textlayout", "d3d,gl,textlayout"));
+            jobs.push(release_job("d3d"));
+            jobs.push(release_job("d3d,textlayout"));
+            jobs.push(release_job("d3d,gl,textlayout"));
         }
         HostOS::Linux => {
-            jobs.push(job("release-gl-x11", "gl,x11"));
-            jobs.push(job("release-gl-textlayout-x11", "gl,textlayout,x11"));
+            jobs.push(release_job("gl,x11"));
+            jobs.push(release_job("gl,textlayout,x11"));
         }
         HostOS::MacOS => {
-            jobs.push(job("release-metal", "metal"));
-            jobs.push(job("release-metal-textlayout", "metal,textlayout"));
+            jobs.push(release_job("metal"));
+            jobs.push(release_job("metal,textlayout"));
         }
     }
 
-    return jobs;
+    jobs.extend(freya_release_jobs(workflow));
 
-    fn job(name: &'static str, features: impl Into<Features>) -> Job {
-        Job {
-            name,
-            toolchain: "stable",
-            features: features.into(),
-            ..Job::default()
+    jobs
+}
+
+/// Specific binary releases for the Freya GUI library <https://github.com/marc2332/freya>
+/// <https://github.com/rust-skia/rust-skia/issues/706>
+fn freya_release_jobs(workflow: &Workflow) -> Vec<Job> {
+    match workflow.host_os {
+        HostOS::Windows | HostOS::MacOS => {
+            vec![release_job("gl,textlayout,svg")]
         }
+        HostOS::Linux => {
+            vec![release_job("gl,textlayout,svg,x11")]
+        }
+    }
+}
+
+fn release_job(features: impl Into<Features>) -> Job {
+    let features = features.into();
+    let name = {
+        let name = features.name("-");
+        if !name.is_empty() {
+            format!("release-{name}")
+        } else {
+            "release".into()
+        }
+    };
+    Job {
+        name,
+        toolchain: "stable",
+        features,
+        ..Job::default()
     }
 }
 
