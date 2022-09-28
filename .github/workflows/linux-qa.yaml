@@ -82,7 +82,7 @@ jobs:
       if: true
       run: |
         cargo test --all --release --features "egl,gl,svg,textlayout,vulkan,wayland,webp,x11" --all-targets --target x86_64-unknown-linux-gnu -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: true
@@ -159,7 +159,7 @@ jobs:
       if: false
       run: |
         cargo test --all --release --features "gl,svg,textlayout,vulkan,webp" --all-targets --target aarch64-linux-android -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
@@ -236,7 +236,7 @@ jobs:
       if: false
       run: |
         cargo test --all --release --features "gl,svg,textlayout,vulkan,webp" --all-targets --target x86_64-linux-android -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
@@ -313,7 +313,7 @@ jobs:
       if: false
       run: |
         cargo test --all --release --features "gl,svg,textlayout,vulkan,webp" --all-targets --target i686-linux-android -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
@@ -390,7 +390,7 @@ jobs:
       if: false
       run: |
         cargo test --all --release --features "gl,textlayout,vulkan,webp" --all-targets --target wasm32-unknown-emscripten -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
@@ -492,7 +492,7 @@ jobs:
       if: true
       run: |
         cargo test --all --release --features "egl,gl,svg,textlayout,vulkan,wayland,webp,x11" --all-targets --target x86_64-unknown-linux-gnu -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
@@ -569,7 +569,7 @@ jobs:
       if: false
       run: |
         cargo test --all --release --features "gl,svg,textlayout,vulkan,webp" --all-targets --target aarch64-linux-android -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
@@ -646,7 +646,7 @@ jobs:
       if: false
       run: |
         cargo test --all --release --features "gl,svg,textlayout,vulkan,webp" --all-targets --target x86_64-linux-android -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
@@ -723,7 +723,7 @@ jobs:
       if: false
       run: |
         cargo test --all --release --features "gl,svg,textlayout,vulkan,webp" --all-targets --target i686-linux-android -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
@@ -800,7 +800,7 @@ jobs:
       if: false
       run: |
         cargo test --all --release --features "gl,textlayout,vulkan,webp" --all-targets --target wasm32-unknown-emscripten -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false

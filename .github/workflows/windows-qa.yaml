@@ -83,7 +83,7 @@ jobs:
       if: true
       run: |
         cargo test --all --release --features "d3d,gl,svg,textlayout,vulkan,webp" --all-targets --target x86_64-pc-windows-msvc -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: true
@@ -186,7 +186,7 @@ jobs:
       if: true
       run: |
         cargo test --all --release --features "d3d,gl,svg,textlayout,vulkan,webp" --all-targets --target x86_64-pc-windows-msvc -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false

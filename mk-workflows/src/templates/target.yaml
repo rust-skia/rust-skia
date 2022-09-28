@@ -39,7 +39,7 @@
   if: $[[runTests]]
   run: |
     cargo test --all --release --features "$[[features]]" --all-targets --target $[[target]] -- --nocapture
-  
+
 - name: 'Generate skia-org example images'
   shell: bash
   if: $[[generateArtifacts]]
