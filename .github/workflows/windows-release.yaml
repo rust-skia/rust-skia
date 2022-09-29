@@ -17,31 +17,31 @@ jobs:
     # container: ghcr.io/pragmatrix/rust-skia-windows:latest
     env: 
       SKIA_DEBUG: 0
-    
+
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
-    
+
     - name: Install Rust
       uses: hecrj/setup-rust-action@master
       with:
         rust-version: stable
-    
+
     - name: Install Clippy
       run: rustup component add clippy
       shell: bash
-    
+
     - name: Python Version
       run: python --version
-    
+
     - name: Install LLVM
       run: choco install llvm
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
         rustup target add x86_64-pc-windows-msvc
-    
+
     - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features '
       shell: bash
       run: |
@@ -66,32 +66,32 @@ jobs:
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
         EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-    
+
     - name: 'Run Clippy'
       shell: bash
       if: true
       run: |
         cargo clippy --release --features "" --all-targets --target x86_64-pc-windows-msvc -- -D warnings
-    
+
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
         cargo test --all --release --features "" --all-targets --target x86_64-pc-windows-msvc -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
         cargo run --release --features "" --target x86_64-pc-windows-msvc "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-    
+
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-x86_64-pc-windows-msvc
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-    
+
     - name: 'Compress binaries'
       if: true
       uses: master-atul/tar-action@v1.0.2
@@ -100,7 +100,7 @@ jobs:
         cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-    
+
     - name: 'Release binaries'
       if: true
       uses: pragmatrix/release-action@exp
@@ -120,31 +120,31 @@ jobs:
     # container: ghcr.io/pragmatrix/rust-skia-windows:latest
     env: 
       SKIA_DEBUG: 0
-    
+
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
-    
+
     - name: Install Rust
       uses: hecrj/setup-rust-action@master
       with:
         rust-version: stable
-    
+
     - name: Install Clippy
       run: rustup component add clippy
       shell: bash
-    
+
     - name: Python Version
       run: python --version
-    
+
     - name: Install LLVM
       run: choco install llvm
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
         rustup target add x86_64-pc-windows-msvc
-    
+
     - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features gl'
       shell: bash
       run: |
@@ -169,32 +169,32 @@ jobs:
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
         EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-    
+
     - name: 'Run Clippy'
       shell: bash
       if: true
       run: |
         cargo clippy --release --features "gl" --all-targets --target x86_64-pc-windows-msvc -- -D warnings
-    
+
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
         cargo test --all --release --features "gl" --all-targets --target x86_64-pc-windows-msvc -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
         cargo run --release --features "gl" --target x86_64-pc-windows-msvc "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-    
+
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-x86_64-pc-windows-msvc
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-    
+
     - name: 'Compress binaries'
       if: true
       uses: master-atul/tar-action@v1.0.2
@@ -203,7 +203,7 @@ jobs:
         cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-    
+
     - name: 'Release binaries'
       if: true
       uses: pragmatrix/release-action@exp
@@ -223,31 +223,31 @@ jobs:
     # container: ghcr.io/pragmatrix/rust-skia-windows:latest
     env: 
       SKIA_DEBUG: 0
-    
+
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
-    
+
     - name: Install Rust
       uses: hecrj/setup-rust-action@master
       with:
         rust-version: stable
-    
+
     - name: Install Clippy
       run: rustup component add clippy
       shell: bash
-    
+
     - name: Python Version
       run: python --version
-    
+
     - name: Install LLVM
       run: choco install llvm
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
         rustup target add x86_64-pc-windows-msvc
-    
+
     - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features vulkan'
       shell: bash
       run: |
@@ -272,32 +272,32 @@ jobs:
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
         EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-    
+
     - name: 'Run Clippy'
       shell: bash
       if: true
       run: |
         cargo clippy --release --features "vulkan" --all-targets --target x86_64-pc-windows-msvc -- -D warnings
-    
+
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
         cargo test --all --release --features "vulkan" --all-targets --target x86_64-pc-windows-msvc -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
         cargo run --release --features "vulkan" --target x86_64-pc-windows-msvc "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-    
+
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-x86_64-pc-windows-msvc
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-    
+
     - name: 'Compress binaries'
       if: true
       uses: master-atul/tar-action@v1.0.2
@@ -306,7 +306,7 @@ jobs:
         cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-    
+
     - name: 'Release binaries'
       if: true
       uses: pragmatrix/release-action@exp
@@ -326,31 +326,31 @@ jobs:
     # container: ghcr.io/pragmatrix/rust-skia-windows:latest
     env: 
       SKIA_DEBUG: 0
-    
+
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
-    
+
     - name: Install Rust
       uses: hecrj/setup-rust-action@master
       with:
         rust-version: stable
-    
+
     - name: Install Clippy
       run: rustup component add clippy
       shell: bash
-    
+
     - name: Python Version
       run: python --version
-    
+
     - name: Install LLVM
       run: choco install llvm
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
         rustup target add x86_64-pc-windows-msvc
-    
+
     - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features textlayout'
       shell: bash
       run: |
@@ -375,32 +375,32 @@ jobs:
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
         EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-    
+
     - name: 'Run Clippy'
       shell: bash
       if: true
       run: |
         cargo clippy --release --features "textlayout" --all-targets --target x86_64-pc-windows-msvc -- -D warnings
-    
+
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
         cargo test --all --release --features "textlayout" --all-targets --target x86_64-pc-windows-msvc -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
         cargo run --release --features "textlayout" --target x86_64-pc-windows-msvc "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-    
+
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-x86_64-pc-windows-msvc
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-    
+
     - name: 'Compress binaries'
       if: true
       uses: master-atul/tar-action@v1.0.2
@@ -409,7 +409,7 @@ jobs:
         cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-    
+
     - name: 'Release binaries'
       if: true
       uses: pragmatrix/release-action@exp
@@ -429,31 +429,31 @@ jobs:
     # container: ghcr.io/pragmatrix/rust-skia-windows:latest
     env: 
       SKIA_DEBUG: 0
-    
+
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
-    
+
     - name: Install Rust
       uses: hecrj/setup-rust-action@master
       with:
         rust-version: stable
-    
+
     - name: Install Clippy
       run: rustup component add clippy
       shell: bash
-    
+
     - name: Python Version
       run: python --version
-    
+
     - name: Install LLVM
       run: choco install llvm
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
         rustup target add x86_64-pc-windows-msvc
-    
+
     - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features gl,textlayout'
       shell: bash
       run: |
@@ -478,32 +478,32 @@ jobs:
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
         EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-    
+
     - name: 'Run Clippy'
       shell: bash
       if: true
       run: |
         cargo clippy --release --features "gl,textlayout" --all-targets --target x86_64-pc-windows-msvc -- -D warnings
-    
+
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
         cargo test --all --release --features "gl,textlayout" --all-targets --target x86_64-pc-windows-msvc -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
         cargo run --release --features "gl,textlayout" --target x86_64-pc-windows-msvc "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-    
+
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-x86_64-pc-windows-msvc
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-    
+
     - name: 'Compress binaries'
       if: true
       uses: master-atul/tar-action@v1.0.2
@@ -512,7 +512,7 @@ jobs:
         cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-    
+
     - name: 'Release binaries'
       if: true
       uses: pragmatrix/release-action@exp
@@ -526,37 +526,37 @@ jobs:
         artifactErrorsFailBuild: true
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
-  windows-release-release-vulkan-textlayout:
+  windows-release-release-textlayout-vulkan:
     runs-on: windows-2022
     # Containers are not supported on Windows.
     # container: ghcr.io/pragmatrix/rust-skia-windows:latest
     env: 
       SKIA_DEBUG: 0
-    
+
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
-    
+
     - name: Install Rust
       uses: hecrj/setup-rust-action@master
       with:
         rust-version: stable
-    
+
     - name: Install Clippy
       run: rustup component add clippy
       shell: bash
-    
+
     - name: Python Version
       run: python --version
-    
+
     - name: Install LLVM
       run: choco install llvm
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
         rustup target add x86_64-pc-windows-msvc
-    
+
     - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features textlayout,vulkan'
       shell: bash
       run: |
@@ -581,32 +581,32 @@ jobs:
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
         EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-    
+
     - name: 'Run Clippy'
       shell: bash
       if: true
       run: |
         cargo clippy --release --features "textlayout,vulkan" --all-targets --target x86_64-pc-windows-msvc -- -D warnings
-    
+
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
         cargo test --all --release --features "textlayout,vulkan" --all-targets --target x86_64-pc-windows-msvc -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
         cargo run --release --features "textlayout,vulkan" --target x86_64-pc-windows-msvc "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-    
+
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-x86_64-pc-windows-msvc
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-    
+
     - name: 'Compress binaries'
       if: true
       uses: master-atul/tar-action@v1.0.2
@@ -615,7 +615,7 @@ jobs:
         cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-    
+
     - name: 'Release binaries'
       if: true
       uses: pragmatrix/release-action@exp
@@ -629,37 +629,37 @@ jobs:
         artifactErrorsFailBuild: true
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
-  windows-release-release-gl-vulkan-textlayout:
+  windows-release-release-gl-textlayout-vulkan:
     runs-on: windows-2022
     # Containers are not supported on Windows.
     # container: ghcr.io/pragmatrix/rust-skia-windows:latest
     env: 
       SKIA_DEBUG: 0
-    
+
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
-    
+
     - name: Install Rust
       uses: hecrj/setup-rust-action@master
       with:
         rust-version: stable
-    
+
     - name: Install Clippy
       run: rustup component add clippy
       shell: bash
-    
+
     - name: Python Version
       run: python --version
-    
+
     - name: Install LLVM
       run: choco install llvm
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
         rustup target add x86_64-pc-windows-msvc
-    
+
     - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features gl,textlayout,vulkan'
       shell: bash
       run: |
@@ -684,32 +684,32 @@ jobs:
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
         EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-    
+
     - name: 'Run Clippy'
       shell: bash
       if: true
       run: |
         cargo clippy --release --features "gl,textlayout,vulkan" --all-targets --target x86_64-pc-windows-msvc -- -D warnings
-    
+
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
         cargo test --all --release --features "gl,textlayout,vulkan" --all-targets --target x86_64-pc-windows-msvc -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
         cargo run --release --features "gl,textlayout,vulkan" --target x86_64-pc-windows-msvc "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-    
+
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-x86_64-pc-windows-msvc
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-    
+
     - name: 'Compress binaries'
       if: true
       uses: master-atul/tar-action@v1.0.2
@@ -718,7 +718,7 @@ jobs:
         cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-    
+
     - name: 'Release binaries'
       if: true
       uses: pragmatrix/release-action@exp
@@ -738,31 +738,31 @@ jobs:
     # container: ghcr.io/pragmatrix/rust-skia-windows:latest
     env: 
       SKIA_DEBUG: 0
-    
+
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
-    
+
     - name: Install Rust
       uses: hecrj/setup-rust-action@master
       with:
         rust-version: stable
-    
+
     - name: Install Clippy
       run: rustup component add clippy
       shell: bash
-    
+
     - name: Python Version
       run: python --version
-    
+
     - name: Install LLVM
       run: choco install llvm
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
         rustup target add x86_64-pc-windows-msvc
-    
+
     - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features d3d'
       shell: bash
       run: |
@@ -787,32 +787,32 @@ jobs:
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
         EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-    
+
     - name: 'Run Clippy'
       shell: bash
       if: true
       run: |
         cargo clippy --release --features "d3d" --all-targets --target x86_64-pc-windows-msvc -- -D warnings
-    
+
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
         cargo test --all --release --features "d3d" --all-targets --target x86_64-pc-windows-msvc -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
         cargo run --release --features "d3d" --target x86_64-pc-windows-msvc "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-    
+
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-x86_64-pc-windows-msvc
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-    
+
     - name: 'Compress binaries'
       if: true
       uses: master-atul/tar-action@v1.0.2
@@ -821,7 +821,7 @@ jobs:
         cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-    
+
     - name: 'Release binaries'
       if: true
       uses: pragmatrix/release-action@exp
@@ -841,31 +841,31 @@ jobs:
     # container: ghcr.io/pragmatrix/rust-skia-windows:latest
     env: 
       SKIA_DEBUG: 0
-    
+
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
-    
+
     - name: Install Rust
       uses: hecrj/setup-rust-action@master
       with:
         rust-version: stable
-    
+
     - name: Install Clippy
       run: rustup component add clippy
       shell: bash
-    
+
     - name: Python Version
       run: python --version
-    
+
     - name: Install LLVM
       run: choco install llvm
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
         rustup target add x86_64-pc-windows-msvc
-    
+
     - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features d3d,textlayout'
       shell: bash
       run: |
@@ -890,32 +890,32 @@ jobs:
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
         EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-    
+
     - name: 'Run Clippy'
       shell: bash
       if: true
       run: |
         cargo clippy --release --features "d3d,textlayout" --all-targets --target x86_64-pc-windows-msvc -- -D warnings
-    
+
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
         cargo test --all --release --features "d3d,textlayout" --all-targets --target x86_64-pc-windows-msvc -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
         cargo run --release --features "d3d,textlayout" --target x86_64-pc-windows-msvc "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-    
+
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-x86_64-pc-windows-msvc
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-    
+
     - name: 'Compress binaries'
       if: true
       uses: master-atul/tar-action@v1.0.2
@@ -924,7 +924,7 @@ jobs:
         cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-    
+
     - name: 'Release binaries'
       if: true
       uses: pragmatrix/release-action@exp
@@ -944,31 +944,31 @@ jobs:
     # container: ghcr.io/pragmatrix/rust-skia-windows:latest
     env: 
       SKIA_DEBUG: 0
-    
+
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
-    
+
     - name: Install Rust
       uses: hecrj/setup-rust-action@master
       with:
         rust-version: stable
-    
+
     - name: Install Clippy
       run: rustup component add clippy
       shell: bash
-    
+
     - name: Python Version
       run: python --version
-    
+
     - name: Install LLVM
       run: choco install llvm
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
         rustup target add x86_64-pc-windows-msvc
-    
+
     - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features d3d,gl,textlayout'
       shell: bash
       run: |
@@ -993,32 +993,32 @@ jobs:
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
         EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-    
+
     - name: 'Run Clippy'
       shell: bash
       if: true
       run: |
         cargo clippy --release --features "d3d,gl,textlayout" --all-targets --target x86_64-pc-windows-msvc -- -D warnings
-    
+
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
         cargo test --all --release --features "d3d,gl,textlayout" --all-targets --target x86_64-pc-windows-msvc -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
         cargo run --release --features "d3d,gl,textlayout" --target x86_64-pc-windows-msvc "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-    
+
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-x86_64-pc-windows-msvc
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-    
+
     - name: 'Compress binaries'
       if: true
       uses: master-atul/tar-action@v1.0.2
@@ -1027,7 +1027,110 @@ jobs:
         cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-    
+
+    - name: 'Release binaries'
+      if: true
+      uses: pragmatrix/release-action@exp
+      with:
+        owner: rust-skia
+        repo: skia-binaries
+        allowUpdates: true
+        replacesArtifacts: true
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
+        artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
+        prerelease: true
+  windows-release-release-gl-svg-textlayout:
+    runs-on: windows-2022
+    # Containers are not supported on Windows.
+    # container: ghcr.io/pragmatrix/rust-skia-windows:latest
+    env: 
+      SKIA_DEBUG: 0
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Install Rust
+      uses: hecrj/setup-rust-action@master
+      with:
+        rust-version: stable
+
+    - name: Install Clippy
+      run: rustup component add clippy
+      shell: bash
+
+    - name: Python Version
+      run: python --version
+
+    - name: Install LLVM
+      run: choco install llvm
+    - name: 'Install Rust target x86_64-pc-windows-msvc'
+      shell: bash
+      run: |
+        rustup target add x86_64-pc-windows-msvc
+
+    - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features gl,svg,textlayout'
+      shell: bash
+      run: |
+        if [ "false" == "true" ]; then
+          TARGET=x86_64-pc-windows-msvc
+          TARGET=${TARGET//-/_}
+          export CC_${TARGET}=x86_64-pc-windows-msvc26-clang.exe
+          export CXX_${TARGET}=x86_64-pc-windows-msvc26-clang++.exe
+          export AR_${TARGET}=llvm-ar
+          TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
+          export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-pc-windows-msvc26-clang.exe
+          echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
+        fi
+        if [ "false" == "true" ]; then
+          source /emsdk/emsdk_env.sh
+        fi
+        cargo clean
+        cargo build -p skia-safe --all-targets --release --features "gl,svg,textlayout" --target x86_64-pc-windows-msvc
+        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
+      env:
+        BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+        EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
+
+    - name: 'Run Clippy'
+      shell: bash
+      if: true
+      run: |
+        cargo clippy --release --features "gl,svg,textlayout" --all-targets --target x86_64-pc-windows-msvc -- -D warnings
+
+    - name: 'Test all workspace projects'
+      shell: bash
+      if: true
+      run: |
+        cargo test --all --release --features "gl,svg,textlayout" --all-targets --target x86_64-pc-windows-msvc -- --nocapture
+
+    - name: 'Generate skia-org example images'
+      shell: bash
+      if: false
+      run: |
+        cargo run --release --features "gl,svg,textlayout" --target x86_64-pc-windows-msvc "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+
+    - name: 'Upload skia-org example images'
+      if: false
+      uses: actions/upload-artifact@v2
+      with:
+        name: skia-org-images-x86_64-pc-windows-msvc
+        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
+
+    - name: 'Compress binaries'
+      if: true
+      uses: master-atul/tar-action@v1.0.2
+      with:
+        command: c
+        cwd: '${{ env.SKIA_STAGING_PATH }}'
+        files: 'skia-binaries'
+        outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+
     - name: 'Release binaries'
       if: true
       uses: pragmatrix/release-action@exp

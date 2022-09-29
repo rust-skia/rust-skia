@@ -21,24 +21,24 @@ jobs:
     env:
       SKIA_DEBUG: 0
       MACOSX_DEPLOYMENT_TARGET: '10.14'
-    
+
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
-    
+
     - name: Install Rust
       uses: hecrj/setup-rust-action@master
       with:
         rust-version: stable
-    
+
     - name: Install Clippy
       run: rustup component add clippy
     - name: 'Install Rust target x86_64-apple-darwin'
       shell: bash
       run: |
         rustup target add x86_64-apple-darwin
-    
+
     - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features gl,metal,svg,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -63,32 +63,32 @@ jobs:
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
         EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-    
+
     - name: 'Run Clippy'
       shell: bash
       if: true
       run: |
         cargo clippy --release --features "gl,metal,svg,textlayout,vulkan,webp" --all-targets --target x86_64-apple-darwin -- -D warnings
-    
+
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
         cargo test --all --release --features "gl,metal,svg,textlayout,vulkan,webp" --all-targets --target x86_64-apple-darwin -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: true
       run: |
         cargo run --release --features "gl,metal,svg,textlayout,vulkan,webp" --target x86_64-apple-darwin "${{ env.SKIA_STAGING_PATH }}/skia-org" --driver cpu --driver pdf --driver svg
-    
+
     - name: 'Upload skia-org example images'
       if: true
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-    
+
     - name: 'Compress binaries'
       if: false
       uses: master-atul/tar-action@v1.0.2
@@ -97,7 +97,7 @@ jobs:
         cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-    
+
     - name: 'Release binaries'
       if: false
       uses: pragmatrix/release-action@exp
@@ -115,7 +115,7 @@ jobs:
       shell: bash
       run: |
         rustup target add aarch64-apple-darwin
-    
+
     - name: 'Build all targets in skia-safe for aarch64-apple-darwin with features gl,metal,svg,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -140,32 +140,32 @@ jobs:
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
         EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-    
+
     - name: 'Run Clippy'
       shell: bash
       if: false
       run: |
         cargo clippy --release --features "gl,metal,svg,textlayout,vulkan,webp" --all-targets --target aarch64-apple-darwin -- -D warnings
-    
+
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
         cargo test --all --release --features "gl,metal,svg,textlayout,vulkan,webp" --all-targets --target aarch64-apple-darwin -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
         cargo run --release --features "gl,metal,svg,textlayout,vulkan,webp" --target aarch64-apple-darwin "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-    
+
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-    
+
     - name: 'Compress binaries'
       if: false
       uses: master-atul/tar-action@v1.0.2
@@ -174,7 +174,7 @@ jobs:
         cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-    
+
     - name: 'Release binaries'
       if: false
       uses: pragmatrix/release-action@exp
@@ -192,7 +192,7 @@ jobs:
       shell: bash
       run: |
         rustup target add aarch64-apple-ios
-    
+
     - name: 'Build all targets in skia-safe for aarch64-apple-ios with features gl,metal,svg,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -217,32 +217,32 @@ jobs:
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
         EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-    
+
     - name: 'Run Clippy'
       shell: bash
       if: false
       run: |
         cargo clippy --release --features "gl,metal,svg,textlayout,vulkan,webp" --all-targets --target aarch64-apple-ios -- -D warnings
-    
+
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
         cargo test --all --release --features "gl,metal,svg,textlayout,vulkan,webp" --all-targets --target aarch64-apple-ios -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
         cargo run --release --features "gl,metal,svg,textlayout,vulkan,webp" --target aarch64-apple-ios "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-    
+
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-    
+
     - name: 'Compress binaries'
       if: false
       uses: master-atul/tar-action@v1.0.2
@@ -251,7 +251,7 @@ jobs:
         cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-    
+
     - name: 'Release binaries'
       if: false
       uses: pragmatrix/release-action@exp
@@ -269,7 +269,7 @@ jobs:
       shell: bash
       run: |
         rustup target add aarch64-apple-ios-sim
-    
+
     - name: 'Build all targets in skia-safe for aarch64-apple-ios-sim with features gl,metal,svg,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -294,32 +294,32 @@ jobs:
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
         EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-    
+
     - name: 'Run Clippy'
       shell: bash
       if: false
       run: |
         cargo clippy --release --features "gl,metal,svg,textlayout,vulkan,webp" --all-targets --target aarch64-apple-ios-sim -- -D warnings
-    
+
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
         cargo test --all --release --features "gl,metal,svg,textlayout,vulkan,webp" --all-targets --target aarch64-apple-ios-sim -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
         cargo run --release --features "gl,metal,svg,textlayout,vulkan,webp" --target aarch64-apple-ios-sim "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-    
+
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-    
+
     - name: 'Compress binaries'
       if: false
       uses: master-atul/tar-action@v1.0.2
@@ -328,7 +328,7 @@ jobs:
         cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-    
+
     - name: 'Release binaries'
       if: false
       uses: pragmatrix/release-action@exp
@@ -346,7 +346,7 @@ jobs:
       shell: bash
       run: |
         rustup target add x86_64-apple-ios
-    
+
     - name: 'Build all targets in skia-safe for x86_64-apple-ios with features gl,metal,svg,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -371,32 +371,32 @@ jobs:
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
         EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-    
+
     - name: 'Run Clippy'
       shell: bash
       if: false
       run: |
         cargo clippy --release --features "gl,metal,svg,textlayout,vulkan,webp" --all-targets --target x86_64-apple-ios -- -D warnings
-    
+
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
         cargo test --all --release --features "gl,metal,svg,textlayout,vulkan,webp" --all-targets --target x86_64-apple-ios -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
         cargo run --release --features "gl,metal,svg,textlayout,vulkan,webp" --target x86_64-apple-ios "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-    
+
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-    
+
     - name: 'Compress binaries'
       if: false
       uses: master-atul/tar-action@v1.0.2
@@ -405,7 +405,7 @@ jobs:
         cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-    
+
     - name: 'Release binaries'
       if: false
       uses: pragmatrix/release-action@exp
@@ -424,24 +424,24 @@ jobs:
     env:
       SKIA_DEBUG: 0
       MACOSX_DEPLOYMENT_TARGET: '10.14'
-    
+
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
-    
+
     - name: Install Rust
       uses: hecrj/setup-rust-action@master
       with:
         rust-version: beta
-    
+
     - name: Install Clippy
       run: rustup component add clippy
     - name: 'Install Rust target x86_64-apple-darwin'
       shell: bash
       run: |
         rustup target add x86_64-apple-darwin
-    
+
     - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features gl,metal,svg,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -466,32 +466,32 @@ jobs:
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
         EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-    
+
     - name: 'Run Clippy'
       shell: bash
       if: true
       run: |
         cargo clippy --release --features "gl,metal,svg,textlayout,vulkan,webp" --all-targets --target x86_64-apple-darwin -- -D warnings
-    
+
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
         cargo test --all --release --features "gl,metal,svg,textlayout,vulkan,webp" --all-targets --target x86_64-apple-darwin -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
         cargo run --release --features "gl,metal,svg,textlayout,vulkan,webp" --target x86_64-apple-darwin "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-    
+
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-    
+
     - name: 'Compress binaries'
       if: false
       uses: master-atul/tar-action@v1.0.2
@@ -500,7 +500,7 @@ jobs:
         cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-    
+
     - name: 'Release binaries'
       if: false
       uses: pragmatrix/release-action@exp
@@ -518,7 +518,7 @@ jobs:
       shell: bash
       run: |
         rustup target add aarch64-apple-darwin
-    
+
     - name: 'Build all targets in skia-safe for aarch64-apple-darwin with features gl,metal,svg,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -543,32 +543,32 @@ jobs:
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
         EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-    
+
     - name: 'Run Clippy'
       shell: bash
       if: false
       run: |
         cargo clippy --release --features "gl,metal,svg,textlayout,vulkan,webp" --all-targets --target aarch64-apple-darwin -- -D warnings
-    
+
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
         cargo test --all --release --features "gl,metal,svg,textlayout,vulkan,webp" --all-targets --target aarch64-apple-darwin -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
         cargo run --release --features "gl,metal,svg,textlayout,vulkan,webp" --target aarch64-apple-darwin "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-    
+
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-    
+
     - name: 'Compress binaries'
       if: false
       uses: master-atul/tar-action@v1.0.2
@@ -577,7 +577,7 @@ jobs:
         cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-    
+
     - name: 'Release binaries'
       if: false
       uses: pragmatrix/release-action@exp
@@ -595,7 +595,7 @@ jobs:
       shell: bash
       run: |
         rustup target add aarch64-apple-ios
-    
+
     - name: 'Build all targets in skia-safe for aarch64-apple-ios with features gl,metal,svg,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -620,32 +620,32 @@ jobs:
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
         EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-    
+
     - name: 'Run Clippy'
       shell: bash
       if: false
       run: |
         cargo clippy --release --features "gl,metal,svg,textlayout,vulkan,webp" --all-targets --target aarch64-apple-ios -- -D warnings
-    
+
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
         cargo test --all --release --features "gl,metal,svg,textlayout,vulkan,webp" --all-targets --target aarch64-apple-ios -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
         cargo run --release --features "gl,metal,svg,textlayout,vulkan,webp" --target aarch64-apple-ios "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-    
+
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-    
+
     - name: 'Compress binaries'
       if: false
       uses: master-atul/tar-action@v1.0.2
@@ -654,7 +654,7 @@ jobs:
         cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-    
+
     - name: 'Release binaries'
       if: false
       uses: pragmatrix/release-action@exp
@@ -672,7 +672,7 @@ jobs:
       shell: bash
       run: |
         rustup target add aarch64-apple-ios-sim
-    
+
     - name: 'Build all targets in skia-safe for aarch64-apple-ios-sim with features gl,metal,svg,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -697,32 +697,32 @@ jobs:
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
         EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-    
+
     - name: 'Run Clippy'
       shell: bash
       if: false
       run: |
         cargo clippy --release --features "gl,metal,svg,textlayout,vulkan,webp" --all-targets --target aarch64-apple-ios-sim -- -D warnings
-    
+
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
         cargo test --all --release --features "gl,metal,svg,textlayout,vulkan,webp" --all-targets --target aarch64-apple-ios-sim -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
         cargo run --release --features "gl,metal,svg,textlayout,vulkan,webp" --target aarch64-apple-ios-sim "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-    
+
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-    
+
     - name: 'Compress binaries'
       if: false
       uses: master-atul/tar-action@v1.0.2
@@ -731,7 +731,7 @@ jobs:
         cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-    
+
     - name: 'Release binaries'
       if: false
       uses: pragmatrix/release-action@exp
@@ -749,7 +749,7 @@ jobs:
       shell: bash
       run: |
         rustup target add x86_64-apple-ios
-    
+
     - name: 'Build all targets in skia-safe for x86_64-apple-ios with features gl,metal,svg,textlayout,vulkan,webp'
       shell: bash
       run: |
@@ -774,32 +774,32 @@ jobs:
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
         EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-    
+
     - name: 'Run Clippy'
       shell: bash
       if: false
       run: |
         cargo clippy --release --features "gl,metal,svg,textlayout,vulkan,webp" --all-targets --target x86_64-apple-ios -- -D warnings
-    
+
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
         cargo test --all --release --features "gl,metal,svg,textlayout,vulkan,webp" --all-targets --target x86_64-apple-ios -- --nocapture
-      
+
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
         cargo run --release --features "gl,metal,svg,textlayout,vulkan,webp" --target x86_64-apple-ios "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-    
+
     - name: 'Upload skia-org example images'
       if: false
       uses: actions/upload-artifact@v2
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-    
+
     - name: 'Compress binaries'
       if: false
       uses: master-atul/tar-action@v1.0.2
@@ -808,7 +808,7 @@ jobs:
         cwd: '${{ env.SKIA_STAGING_PATH }}'
         files: 'skia-binaries'
         outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-    
+
     - name: 'Release binaries'
       if: false
       uses: pragmatrix/release-action@exp
