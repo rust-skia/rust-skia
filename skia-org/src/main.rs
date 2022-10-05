@@ -33,7 +33,7 @@ struct Arguments {
     out_path: PathBuf,
     #[clap(
         long,
-        arg_enum,
+        value_enum,
         help = "In addition with the CPU, render with the given driver."
     )]
     driver: Vec<Driver>,
