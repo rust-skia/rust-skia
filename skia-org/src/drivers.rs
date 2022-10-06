@@ -1,4 +1,4 @@
-use clap::ArgEnum;
+use clap::ValueEnum;
 use skia_safe::Canvas;
 use std::{fmt::Display, path::Path, str::FromStr};
 
@@ -42,7 +42,7 @@ pub trait DrawingDriver {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug, ArgEnum)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, ValueEnum)]
 pub enum Driver {
     Cpu,
     Pdf,
