@@ -192,9 +192,9 @@ pub mod color_filters {
     /// then adds a second color, pinning the result for each component to
     /// [0..255]. The alpha components of the mul and add arguments
     /// are ignored.
-    pub fn lightning(mul: impl Into<Color>, add: impl Into<Color>) -> Option<ColorFilter> {
+    pub fn lighting(mul: impl Into<Color>, add: impl Into<Color>) -> Option<ColorFilter> {
         ColorFilter::from_ptr(unsafe {
-            sb::C_SkColorFilters_Lightning(mul.into().into_native(), add.into().into_native())
+            sb::C_SkColorFilters_Lighting(mul.into().into_native(), add.into().into_native())
         })
     }
 }

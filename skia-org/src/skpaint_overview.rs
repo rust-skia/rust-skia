@@ -2,9 +2,8 @@ use crate::{resources, DrawingDriver};
 use skia_safe::{
     color_filters, corner_path_effect, dash_path_effect, discrete_path_effect, gradient_shader,
     line_2d_path_effect, paint, path_1d_path_effect, path_2d_path_effect, perlin_noise_shader,
-    scalar, shaders, table_color_filter, AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color,
-    Font, MaskFilter, Matrix, Paint, Path, PathEffect, Point, Rect, SamplingOptions, TextBlob,
-    TileMode, Typeface,
+    scalar, shaders, AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color, Font, MaskFilter,
+    Matrix, Paint, Path, PathEffect, Point, Rect, SamplingOptions, TextBlob, TileMode, Typeface,
 };
 use std::path;
 
@@ -362,12 +361,8 @@ fn draw_color_table_color_filter(canvas: &mut Canvas) {
         *v = x.max(0).min(255) as _;
     }
     let mut paint = Paint::default();
-    paint.set_color_filter(table_color_filter::from_argb(
-        None,
-        Some(ct),
-        Some(ct),
-        Some(ct),
-    ));
+    let ct: &_ = ct;
+    paint.set_color_filter(color_filters::table_argb(None, ct, ct, ct));
     canvas.draw_image(&image, (0, 0), Some(&paint));
 }
 

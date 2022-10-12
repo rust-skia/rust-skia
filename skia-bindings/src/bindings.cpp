@@ -1652,7 +1652,7 @@ extern "C" SkColorFilter* C_SkColorFilters_TableARGB(const uint8_t tableA[256], 
     return SkColorFilters::TableARGB(tableA, tableR, tableG, tableB).release();
 }
 
-extern "C" SkColorFilter* C_SkColorFilters_Lightning(SkColor mul, SkColor add) {
+extern "C" SkColorFilter* C_SkColorFilters_Lighting(SkColor mul, SkColor add) {
     return SkColorFilters::Lighting(mul, add).release();
 }
 
@@ -2282,14 +2282,6 @@ extern "C" void C_SkColorMatrix_getRowMajor(const SkColorMatrix* self, float dst
 }
 
 //
-// effects/SkColorMatrixFilter.h
-//
-
-extern "C" SkColorFilter *C_SkColorMatrixFilter_MakeLightingFilter(SkColor mul, SkColor add) {
-    return SkColorMatrixFilter::MakeLightingFilter(mul, add).release();
-}
-
-//
 // effects/SkCornerPathEffect.h
 //
 
@@ -2491,18 +2483,6 @@ extern "C" SkMaskFilter* C_SkShaderMaskFilter_Make(SkShader* shader) {
 
 extern "C" SkPathEffect* C_SkStrokeAndFillePathEffect_Make() {
     return SkStrokeAndFillPathEffect::Make().release();
-}
-
-//
-// effects/SkTableColorFilter.h
-//
-
-extern "C" SkColorFilter* C_SkTableColorFilter_Make(const uint8_t table[256]) {
-    return SkTableColorFilter::Make(table).release();
-}
-
-extern "C" SkColorFilter* C_SkTableColorFilter_MakeARGB(const uint8_t tableA[256], const uint8_t tableR[256], const uint8_t tableG[256], const uint8_t tableB[256]) {
-    return SkTableColorFilter::MakeARGB(tableA, tableR, tableG, tableB).release();
 }
 
 //
