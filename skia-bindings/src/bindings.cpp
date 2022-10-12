@@ -189,6 +189,17 @@ extern "C" SkBlender* C_SkBlender_Deserialize(const void* data, size_t length) {
 }
 
 
+//
+// core/SkColor.h
+//
+
+extern "C" uint32_t C_SkColor4f_toBytes_RGBA(const SkColor4f* color) {
+    return color->toBytes_RGBA();
+}
+
+extern "C" SkColor4f C_SkColor4f_FromBytes_RGBA(uint32_t bytes) {
+    return SkColor4f::FromBytes_RGBA(bytes);
+}
 
 //
 // core/SkCubicMap.h
@@ -1631,6 +1642,18 @@ extern "C" SkColorFilter* C_SkColorFilters_SRGBToLinearGamma() {
 
 extern "C" SkColorFilter* C_SkColorFilters_Lerp(float t, SkColorFilter* dst, SkColorFilter* src) {
     return SkColorFilters::Lerp(t, sp(dst), sp(src)).release();
+}
+
+extern "C" SkColorFilter* C_SkColorFilters_Table(const uint8_t table[256]) {
+    return SkColorFilters::Table(table).release();
+}
+
+extern "C" SkColorFilter* C_SkColorFilters_TableARGB(const uint8_t tableA[256], const uint8_t tableR[256], const uint8_t tableG[256], const uint8_t tableB[256]) {
+    return SkColorFilters::TableARGB(tableA, tableR, tableG, tableB).release();
+}
+
+extern "C" SkColorFilter* C_SkColorFilters_Lightning(SkColor mul, SkColor add) {
+    return SkColorFilters::Lighting(mul, add).release();
 }
 
 //
