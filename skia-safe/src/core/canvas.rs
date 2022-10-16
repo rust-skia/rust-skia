@@ -873,7 +873,7 @@ impl Canvas {
 
     // The save_layer(bounds, paint) variants have been replaced by SaveLayerRec.
 
-    /// Saves [`Matrix`] and clip, and allocates [`Bitmap`] for subsequent drawing.
+    /// Saves [`Matrix`] and clip, and allocates [`Surface`] for subsequent drawing.
     ///
     /// Calling [`Self::restore()`] discards changes to [`Matrix`] and clip, and blends layer with
     /// alpha opacity onto prior layer.
@@ -904,10 +904,10 @@ impl Canvas {
         .unwrap()
     }
 
-    /// Saves [`Matrix`] and clip, and allocates [`Bitmap`] for subsequent drawing.
+    /// Saves [`Matrix`] and clip, and allocates [`Surface`] for subsequent drawing.
     ///
     /// Calling [`Self::restore()`] discards changes to [`Matrix`] and clip,
-    /// and blends [`Bitmap`] with alpha opacity onto the prior layer.
+    /// and blends [`Surface`] with alpha opacity onto the prior layer.
     ///
     /// [`Matrix`] may be changed by [`Self::translate()`], [`Self::scale()`], [`Self::rotate()`],
     /// [`Self::skew()`], [`Self::concat()`], [`Self::set_matrix()`], and [`Self::reset_matrix()`].

@@ -154,6 +154,49 @@ pub mod color_filters {
             sb::C_SkColorFilters_Lerp(t, dst.into().into_ptr(), src.into().into_ptr())
         })
     }
+
+    /// Create a table color filter, copying the table into the filter, and
+    /// applying it to all 4 components.
+    /// `a' = table[a];`
+    /// `r' = table[r];`
+    /// `g' = table[g];`
+    /// `b' = table[b];`
+    /// Components are operated on in unpremultiplied space. If the incoming
+    /// colors are premultiplied, they are temporarily unpremultiplied, then
+    /// the table is applied, and then the result is re-multiplied.
+    pub fn table(table: &[u8; 256]) -> Option<ColorFilter> {
+        ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_Table(table.as_ptr()) })
+    }
+
+    /// Create a table color filter, with a different table for each
+    /// component [A, R, G, B]. If a given table is `None`, then it is
+    /// treated as identity, with the component left unchanged. If a table
+    /// is not `None`, then its contents are copied into the filter.
+    pub fn table_argb<'a>(
+        table_a: impl Into<Option<&'a [u8; 256]>>,
+        table_r: impl Into<Option<&'a [u8; 256]>>,
+        table_g: impl Into<Option<&'a [u8; 256]>>,
+        table_b: impl Into<Option<&'a [u8; 256]>>,
+    ) -> Option<ColorFilter> {
+        ColorFilter::from_ptr(unsafe {
+            sb::C_SkColorFilters_TableARGB(
+                table_a.into().map(|t| t.as_ref()).as_ptr_or_null(),
+                table_r.into().map(|t| t.as_ref()).as_ptr_or_null(),
+                table_g.into().map(|t| t.as_ref()).as_ptr_or_null(),
+                table_b.into().map(|t| t.as_ref()).as_ptr_or_null(),
+            )
+        })
+    }
+
+    /// Create a color filter that multiplies the RGB channels by one color, and
+    /// then adds a second color, pinning the result for each component to
+    /// [0..255]. The alpha components of the mul and add arguments
+    /// are ignored.
+    pub fn lighting(mul: impl Into<Color>, add: impl Into<Color>) -> Option<ColorFilter> {
+        ColorFilter::from_ptr(unsafe {
+            sb::C_SkColorFilters_Lighting(mul.into().into_native(), add.into().into_native())
+        })
+    }
 }
 
 #[cfg(test)]
