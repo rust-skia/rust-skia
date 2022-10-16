@@ -6,7 +6,7 @@ use super::gl;
 use super::mtl;
 #[cfg(feature = "vulkan")]
 use super::vk;
-use super::{BackendAPI, BackendSurfaceMutableState, Mipmapped};
+use super::{BackendAPI, Mipmapped, MutableTextureState};
 use crate::{interop::AsStr, prelude::*, ISize};
 use skia_bindings::{
     self as sb, GrBackendFormat, GrBackendRenderTarget, GrBackendTexture, GrMipmapped,
@@ -648,7 +648,7 @@ impl BackendRenderTarget {
         })
     }
 
-    pub fn set_mutable_stat(&mut self, state: &BackendSurfaceMutableState) {
+    pub fn set_mutable_stat(&mut self, state: &MutableTextureState) {
         unsafe { self.native_mut().setMutableState(state.native()) }
     }
 

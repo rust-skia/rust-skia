@@ -187,6 +187,18 @@ extern "C" void C_GrBackendSurfaceMutableState_destruct(GrBackendSurfaceMutableS
 }
 
 //
+// gpu/MutableTextureState.h
+//
+
+extern "C" void C_MutableTextureState_Construct(skgpu::MutableTextureState* uninitialized) {
+    new(uninitialized)skgpu::MutableTextureState();
+}
+
+extern "C" void C_MutableTextureState_destruct(skgpu::MutableTextureState* self) {
+    self->~MutableTextureState();
+}
+
+//
 // gpu/GrRecordingContext.h
 //
 

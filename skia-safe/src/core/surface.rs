@@ -499,7 +499,7 @@ impl Surface {
     pub fn flush_with_mutable_state<'a>(
         &mut self,
         info: &gpu::FlushInfo,
-        new_state: impl Into<Option<&'a gpu::BackendSurfaceMutableState>>,
+        new_state: impl Into<Option<&'a gpu::MutableTextureState>>,
     ) -> gpu::SemaphoresSubmitted {
         unsafe {
             self.native_mut()
