@@ -157,10 +157,10 @@ pub mod color_filters {
 
     /// Create a table color filter, copying the table into the filter, and
     /// applying it to all 4 components.
-    ///     a' = table[a];
-    ///     r' = table[r];
-    ///     g' = table[g];
-    ///     b' = table[b];
+    /// `a' = table[a];`
+    /// `r' = table[r];`
+    /// `g' = table[g];`
+    /// `b' = table[b];`
     /// Components are operated on in unpremultiplied space. If the incoming
     /// colors are premultiplied, they are temporarily unpremultiplied, then
     /// the table is applied, and then the result is re-multiplied.
