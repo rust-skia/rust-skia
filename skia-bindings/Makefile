@@ -29,3 +29,6 @@ rm-unused:
 rm-externals:
 	rm -rf skia/third_party/externals/*
 
+.PHONY: rm-locks
+rm-locks:
+	find -type f -name 'index.lock' -delete
