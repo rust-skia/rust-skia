@@ -12,9 +12,13 @@ use std::{
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
 pub struct IRect {
+    /// The x coordinate of the rectangle's left edge.
     pub left: i32,
+    /// The y coordinate of the rectangle's top edge.
     pub top: i32,
+    /// The x coordinate of the rectangle's right edge.
     pub right: i32,
+    /// The y coordinate of the rectangle's bottom edge.
     pub bottom: i32,
 }
 
@@ -328,9 +332,13 @@ impl Contains<Rect> for IRect {
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct Rect {
+    /// The x coordinate of the rectangle's left edge.
     pub left: scalar,
+    /// The y coordinate of the rectangle's top edge.
     pub top: scalar,
+    /// The x coordinate of the rectangle's right edge.
     pub right: scalar,
+    /// The y coordinate of the rectangle's bottom edge.
     pub bottom: scalar,
 }
 
