@@ -29,7 +29,7 @@ pub fn render_frame(
 
     let size = {
         let dim = canvas.image_info().dimensions();
-        min(dim.width, dim.height) as i32
+        min(dim.width, dim.height)
     };
 
     let center = (size / 2, size / 2);

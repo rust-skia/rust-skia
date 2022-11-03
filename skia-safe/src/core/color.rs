@@ -330,7 +330,7 @@ impl Color4f {
 
     pub fn to_color(self) -> Color {
         fn c(f: f32) -> u8 {
-            (f.max(0.0).min(1.0) * 255.0) as u8
+            (f.clamp(0.0, 1.0) * 255.0) as u8
         }
         let a = c(self.a);
         let r = c(self.r);

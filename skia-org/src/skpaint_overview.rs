@@ -358,7 +358,7 @@ fn draw_color_table_color_filter(canvas: &mut Canvas) {
     let ct = &mut [0u8; 256];
     for (i, v) in ct.iter_mut().enumerate() {
         let x = (i as i32 - 96) * 255 / 64;
-        *v = x.max(0).min(255) as _;
+        *v = x.clamp(0, 255) as _;
     }
     let mut paint = Paint::default();
     let ct: &_ = ct;

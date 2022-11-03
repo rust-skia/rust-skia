@@ -189,8 +189,11 @@ impl Vertices {
 }
 
 bitflags! {
-    pub struct BuilderFlags: u32 {
+    pub struct BuilderFlags: u32
+    {
+        #[allow(clippy::unnecessary_cast)]
         const HAS_TEX_COORDS = sb::SkVertices_BuilderFlags_kHasTexCoords_BuilderFlag as u32;
+        #[allow(clippy::unnecessary_cast)]
         const HAS_COLORS = sb::SkVertices_BuilderFlags_kHasColors_BuilderFlag as u32;
     }
 }
