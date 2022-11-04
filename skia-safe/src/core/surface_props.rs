@@ -41,8 +41,10 @@ impl Default for PixelGeometry {
 
 bitflags! {
     pub struct SurfacePropsFlags: u32 {
+        #[allow(clippy::unnecessary_cast)]
         const USE_DEVICE_INDEPENDENT_FONTS =
             sb::SkSurfaceProps_Flags_kUseDeviceIndependentFonts_Flag as u32;
+        #[allow(clippy::unnecessary_cast)]
         const DYNAMIC_MSAA =
             sb::SkSurfaceProps_Flags_kDynamicMSAA_Flag as u32;
     }

@@ -3,7 +3,9 @@ use skia_bindings::{self as sb, SkShadowUtils};
 
 bitflags! {
     pub struct ShadowFlags: u32 {
+        #[allow(clippy::unnecessary_cast)]
         const TRANSPARENT_OCCLUDER = sb::SkShadowFlags_kTransparentOccluder_ShadowFlag as u32;
+        #[allow(clippy::unnecessary_cast)]
         const GEOMETRIC_ONLY = sb::SkShadowFlags_kGeometricOnly_ShadowFlag as u32;
         const ALL = Self::TRANSPARENT_OCCLUDER.bits | Self::GEOMETRIC_ONLY.bits;
     }
