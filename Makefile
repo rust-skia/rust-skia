@@ -1,7 +1,5 @@
-# Publishes skia-bindings and skia-safe to crates.io
-# This is temporary and should be automated.
-# prerequisites:
-#   .cargo/credentials
+doc-features-win="gl,vulkan,d3d,textlayout,webp"
+doc-features-docs-rs="gl,textlayout,webp"
 
 .PHONY: all
 all:
@@ -34,6 +32,11 @@ crate-bindings-build:
 	cd skia-bindings && cargo publish -vv --dry-run --features "gl,vulkan,textlayout,d3d"
 	cd skia-bindings && cargo publish -vv --dry-run 
 
+# Publishes skia-bindings and skia-safe to crates.io
+# This is temporary and should be automated.
+# prerequisites:
+#   .cargo/credentials
+
 .PHONY: publish
 publish: package-bindings package-safe publish-bindings wait publish-safe
 
@@ -42,7 +45,10 @@ publish-only: publish-bindings wait publish-safe
 
 .PHONY: publish-bindings
 publish-bindings:
-	cd skia-bindings && cargo publish -vv --no-verify
+	cd skia-bindings && cargo clean
+	cd skia-bindings && cargo build --features ${doc-features-docs-rs}
+	cd skia-bindings && cp src/bindings.rs bindings_docs.rs
+	cd skia-bindings && cargo publish -vv --no-verify --allow-dirty
 
 .PHONY: publish-safe
 publish-safe:
@@ -73,8 +79,6 @@ clean-packages:
 wait: 
 	@echo "published a package, Waiting for crates.io to catch up before publishing the next"
 	sleep 20
-
-doc-features-win="gl,vulkan,d3d,textlayout,webp"
 
 .PHONY: update-doc
 update-doc:

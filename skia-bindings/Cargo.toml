@@ -15,14 +15,15 @@ edition = "2021"
 build = "build.rs"
 links = "skia"
 include = [ 
-	"Cargo.toml", 
-	"build.rs", 
-	"build_support.rs", 
-	"build_support/**/*.rs", 
-	"src/**/*.h", 
-	"src/**/*.cpp", 
-	"src/defaults.rs", 
-	"src/icu.rs", 
+	"Cargo.toml",
+	"bindings_docs.rs",
+	"build.rs",
+	"build_support.rs",
+	"build_support/**/*.rs",
+	"src/**/*.h",
+	"src/**/*.cpp",
+	"src/defaults.rs",
+	"src/icu.rs",
 	"src/impls.rs",
 	"src/lib.rs" ]
 
