@@ -18,7 +18,7 @@ jobs:
       SKIA_DEBUG: 0
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
@@ -86,14 +86,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-unknown-linux-gnu
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -102,7 +102,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -163,14 +163,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -179,7 +179,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -240,14 +240,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -256,7 +256,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -317,14 +317,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-i686-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -333,7 +333,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -394,14 +394,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-wasm32-unknown-emscripten
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -410,7 +410,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -428,7 +428,7 @@ jobs:
       SKIA_DEBUG: 0
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
@@ -496,14 +496,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-unknown-linux-gnu
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -512,7 +512,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -573,14 +573,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -589,7 +589,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -650,14 +650,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -666,7 +666,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -727,14 +727,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-i686-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -743,7 +743,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -804,14 +804,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-wasm32-unknown-emscripten
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -820,7 +820,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -838,7 +838,7 @@ jobs:
       SKIA_DEBUG: 0
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
@@ -906,14 +906,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-unknown-linux-gnu
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -922,7 +922,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -983,14 +983,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -999,7 +999,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1060,14 +1060,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1076,7 +1076,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1137,14 +1137,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-i686-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1153,7 +1153,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1214,14 +1214,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-wasm32-unknown-emscripten
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1230,7 +1230,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1248,7 +1248,7 @@ jobs:
       SKIA_DEBUG: 0
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
@@ -1316,14 +1316,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-unknown-linux-gnu
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1332,7 +1332,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1393,14 +1393,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1409,7 +1409,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1470,14 +1470,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1486,7 +1486,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1547,14 +1547,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-i686-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1563,7 +1563,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1624,14 +1624,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-wasm32-unknown-emscripten
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1640,7 +1640,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1658,7 +1658,7 @@ jobs:
       SKIA_DEBUG: 0
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
@@ -1726,14 +1726,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-unknown-linux-gnu
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1742,7 +1742,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1803,14 +1803,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1819,7 +1819,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1880,14 +1880,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1896,7 +1896,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1957,14 +1957,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-i686-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1973,7 +1973,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2034,14 +2034,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-wasm32-unknown-emscripten
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2050,7 +2050,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2068,7 +2068,7 @@ jobs:
       SKIA_DEBUG: 0
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
@@ -2136,14 +2136,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-unknown-linux-gnu
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2152,7 +2152,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2213,14 +2213,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2229,7 +2229,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2290,14 +2290,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2306,7 +2306,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2367,14 +2367,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-i686-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2383,7 +2383,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2444,14 +2444,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-wasm32-unknown-emscripten
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2460,7 +2460,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2478,7 +2478,7 @@ jobs:
       SKIA_DEBUG: 0
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
@@ -2546,14 +2546,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-unknown-linux-gnu
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2562,7 +2562,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2623,14 +2623,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2639,7 +2639,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2700,14 +2700,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2716,7 +2716,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2777,14 +2777,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-i686-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2793,7 +2793,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2854,14 +2854,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-wasm32-unknown-emscripten
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2870,7 +2870,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2888,7 +2888,7 @@ jobs:
       SKIA_DEBUG: 0
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
@@ -2956,14 +2956,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-unknown-linux-gnu
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2972,7 +2972,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3033,14 +3033,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3049,7 +3049,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3110,14 +3110,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3126,7 +3126,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3187,14 +3187,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-i686-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3203,7 +3203,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3264,14 +3264,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-wasm32-unknown-emscripten
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3280,7 +3280,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3298,7 +3298,7 @@ jobs:
       SKIA_DEBUG: 0
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
@@ -3366,14 +3366,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-unknown-linux-gnu
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3382,7 +3382,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3443,14 +3443,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3459,7 +3459,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3520,14 +3520,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3536,7 +3536,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3597,14 +3597,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-i686-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3613,7 +3613,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3674,14 +3674,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-wasm32-unknown-emscripten
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3690,7 +3690,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3708,7 +3708,7 @@ jobs:
       SKIA_DEBUG: 0
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
@@ -3776,14 +3776,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-unknown-linux-gnu
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3792,7 +3792,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3853,14 +3853,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3869,7 +3869,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3930,14 +3930,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3946,7 +3946,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -4007,14 +4007,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-i686-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -4023,7 +4023,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -4084,14 +4084,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-wasm32-unknown-emscripten
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -4100,7 +4100,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries

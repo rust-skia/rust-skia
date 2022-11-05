@@ -5,9 +5,8 @@ jobs:
   check-fmt:
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
       with:
-        fetch-depth: 1
         submodules: true
     - name: Install Rust
       run: |

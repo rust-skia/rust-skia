@@ -18,12 +18,12 @@ jobs:
       MACOSX_DEPLOYMENT_TARGET: '10.13'
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
     - name: Install Rust
-      uses: hecrj/setup-rust-action@master
+      uses: hecrj/setup-rust-action@v1.4.0
       with:
         rust-version: stable
 
@@ -79,14 +79,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -95,7 +95,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -156,14 +156,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -172,7 +172,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -233,14 +233,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -249,7 +249,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -310,14 +310,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -326,7 +326,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -387,14 +387,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -403,7 +403,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -421,12 +421,12 @@ jobs:
       MACOSX_DEPLOYMENT_TARGET: '10.13'
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
     - name: Install Rust
-      uses: hecrj/setup-rust-action@master
+      uses: hecrj/setup-rust-action@v1.4.0
       with:
         rust-version: stable
 
@@ -482,14 +482,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -498,7 +498,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -559,14 +559,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -575,7 +575,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -636,14 +636,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -652,7 +652,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -713,14 +713,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -729,7 +729,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -790,14 +790,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -806,7 +806,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -824,12 +824,12 @@ jobs:
       MACOSX_DEPLOYMENT_TARGET: '10.13'
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
     - name: Install Rust
-      uses: hecrj/setup-rust-action@master
+      uses: hecrj/setup-rust-action@v1.4.0
       with:
         rust-version: stable
 
@@ -885,14 +885,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -901,7 +901,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -962,14 +962,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -978,7 +978,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1039,14 +1039,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1055,7 +1055,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1116,14 +1116,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1132,7 +1132,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1193,14 +1193,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1209,7 +1209,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1227,12 +1227,12 @@ jobs:
       MACOSX_DEPLOYMENT_TARGET: '10.13'
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
     - name: Install Rust
-      uses: hecrj/setup-rust-action@master
+      uses: hecrj/setup-rust-action@v1.4.0
       with:
         rust-version: stable
 
@@ -1288,14 +1288,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1304,7 +1304,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1365,14 +1365,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1381,7 +1381,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1442,14 +1442,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1458,7 +1458,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1519,14 +1519,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1535,7 +1535,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1596,14 +1596,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1612,7 +1612,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1630,12 +1630,12 @@ jobs:
       MACOSX_DEPLOYMENT_TARGET: '10.13'
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
     - name: Install Rust
-      uses: hecrj/setup-rust-action@master
+      uses: hecrj/setup-rust-action@v1.4.0
       with:
         rust-version: stable
 
@@ -1691,14 +1691,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1707,7 +1707,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1768,14 +1768,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1784,7 +1784,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1845,14 +1845,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1861,7 +1861,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1922,14 +1922,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -1938,7 +1938,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -1999,14 +1999,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2015,7 +2015,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2033,12 +2033,12 @@ jobs:
       MACOSX_DEPLOYMENT_TARGET: '10.13'
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
     - name: Install Rust
-      uses: hecrj/setup-rust-action@master
+      uses: hecrj/setup-rust-action@v1.4.0
       with:
         rust-version: stable
 
@@ -2094,14 +2094,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2110,7 +2110,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2171,14 +2171,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2187,7 +2187,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2248,14 +2248,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2264,7 +2264,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2325,14 +2325,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2341,7 +2341,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2402,14 +2402,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2418,7 +2418,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2436,12 +2436,12 @@ jobs:
       MACOSX_DEPLOYMENT_TARGET: '10.13'
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
     - name: Install Rust
-      uses: hecrj/setup-rust-action@master
+      uses: hecrj/setup-rust-action@v1.4.0
       with:
         rust-version: stable
 
@@ -2497,14 +2497,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2513,7 +2513,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2574,14 +2574,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2590,7 +2590,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2651,14 +2651,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2667,7 +2667,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2728,14 +2728,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2744,7 +2744,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2805,14 +2805,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2821,7 +2821,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2839,12 +2839,12 @@ jobs:
       MACOSX_DEPLOYMENT_TARGET: '10.14'
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
     - name: Install Rust
-      uses: hecrj/setup-rust-action@master
+      uses: hecrj/setup-rust-action@v1.4.0
       with:
         rust-version: stable
 
@@ -2900,14 +2900,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2916,7 +2916,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -2977,14 +2977,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -2993,7 +2993,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3054,14 +3054,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3070,7 +3070,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3131,14 +3131,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3147,7 +3147,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3208,14 +3208,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3224,7 +3224,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3242,12 +3242,12 @@ jobs:
       MACOSX_DEPLOYMENT_TARGET: '10.14'
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
     - name: Install Rust
-      uses: hecrj/setup-rust-action@master
+      uses: hecrj/setup-rust-action@v1.4.0
       with:
         rust-version: stable
 
@@ -3303,14 +3303,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3319,7 +3319,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3380,14 +3380,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3396,7 +3396,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3457,14 +3457,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3473,7 +3473,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3534,14 +3534,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3550,7 +3550,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3611,14 +3611,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3627,7 +3627,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3645,12 +3645,12 @@ jobs:
       MACOSX_DEPLOYMENT_TARGET: '10.13'
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
     - name: Install Rust
-      uses: hecrj/setup-rust-action@master
+      uses: hecrj/setup-rust-action@v1.4.0
       with:
         rust-version: stable
 
@@ -3706,14 +3706,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3722,7 +3722,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3783,14 +3783,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3799,7 +3799,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3860,14 +3860,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3876,7 +3876,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -3937,14 +3937,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -3953,7 +3953,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries
@@ -4014,14 +4014,14 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'
       if: true
-      uses: master-atul/tar-action@v1.0.2
+      uses: a7ul/tar-action@v1.1.2
       with:
         command: c
         cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -4030,7 +4030,7 @@ jobs:
 
     - name: 'Release binaries'
       if: true
-      uses: pragmatrix/release-action@exp
+      uses: pragmatrix/release-action@v1.11.1-rs
       with:
         owner: rust-skia
         repo: skia-binaries

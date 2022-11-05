@@ -5,12 +5,12 @@ env:
   SKIA_DEBUG: $[[skiaDebug]]
 
 steps:
-- uses: actions/checkout@v2
+- uses: actions/checkout@v3
   with:
     submodules: true
 
 - name: Install Rust
-  uses: hecrj/setup-rust-action@master
+  uses: hecrj/setup-rust-action@v1.4.0
   with:
     rust-version: $[[rustToolchain]]
 
