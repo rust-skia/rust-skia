@@ -21,7 +21,7 @@ jobs:
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
@@ -49,7 +49,7 @@ jobs:
       EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
@@ -79,7 +79,7 @@ jobs:
   #   container: ghcr.io/pragmatrix/rust-skia-linux-arm64:latest
 
   #   steps:
-  #   - uses: actions/checkout@v2
+  #   - uses: actions/checkout@v3
   #     with:
   #       submodules: true
 
@@ -95,12 +95,12 @@ jobs:
     - name: Attempt to fix git dubious ownership warnings
       run: git config --global --add safe.directory '*'
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
     - name: Install Rust
-      uses: hecrj/setup-rust-action@master
+      uses: hecrj/setup-rust-action@v1.4.0
       with:
         rust-version: stable
 
@@ -122,7 +122,7 @@ jobs:
     runs-on: windows-2022
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
@@ -149,12 +149,12 @@ jobs:
     runs-on: windows-2022
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
     - name: Install Rust
-      uses: hecrj/setup-rust-action@master
+      uses: hecrj/setup-rust-action@v1.4.0
       with:
         rust-version: nightly
 
