@@ -1,4 +1,5 @@
 doc-features-win="gl,vulkan,d3d,textlayout,webp"
+doc-features-mac="gl,vulkan,metal,textlayout,webp"
 doc-features-docs-rs="gl,textlayout,webp"
 
 .PHONY: all
@@ -85,7 +86,7 @@ update-doc:
 	cargo clean
 	rm -rf rust-skia.github.io
 	git clone git@github.com:rust-skia/rust-skia.github.io.git
-	cd skia-safe && cargo doc --no-deps --lib --features ${doc-features-win}
+	cd skia-safe && cargo doc --no-deps --lib --features ${doc-features-mac}
 	cp -r target/doc rust-skia.github.io/
 	cd rust-skia.github.io && git add --all
 	cd rust-skia.github.io && git commit -m"Auto-Update of /doc" || true
