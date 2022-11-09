@@ -26,7 +26,21 @@ impl PlatformDetails for Android {
             );
         }
 
-        builder.cflags(extra_skia_cflags());
+        let ndk = ndk();
+
+        let major = ndk_major_version(Path::new(&ndk));
+
+        let mut extra_skia_cflags = extra_skia_cflags();
+
+        // Version 23 is the first version using llvm 12
+        // https://github.com/android/ndk/wiki/Changelog-r23#r23b
+        // https://releases.llvm.org/12.0.0/tools/clang/docs/ReleaseNotes.html#new-compiler-flags
+        
+        if major >= 23 && arch == "aarch64" {
+           extra_skia_cflags.push("-mno-outline-atomics".to_string());
+        }
+
+        builder.cflags(extra_skia_cflags);
     }
 
     fn bindgen_args(&self, target: &Target, builder: &mut BindgenArgsBuilder) {
