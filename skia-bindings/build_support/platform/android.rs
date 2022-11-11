@@ -12,9 +12,10 @@ impl PlatformDetails for Android {
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
         // TODO: this may belong into BuildConfiguration
         let (arch, _) = config.target.arch_abi();
+        let ndk = ndk();
 
         builder
-            .arg("ndk", quote(&ndk()))
+            .arg("ndk", quote(&ndk))
             .arg("ndk_api", API_LEVEL)
             .arg("target_cpu", quote(clang::target_arch(arch)))
             .arg("skia_enable_fontmgr_android", yes());
@@ -26,16 +27,12 @@ impl PlatformDetails for Android {
             );
         }
 
-        let ndk = ndk();
-
         let major = ndk_major_version(Path::new(&ndk));
-
         let mut extra_skia_cflags = extra_skia_cflags();
 
         // Version 23 is the first version using llvm 12
         // https://github.com/android/ndk/wiki/Changelog-r23#r23b
         // https://releases.llvm.org/12.0.0/tools/clang/docs/ReleaseNotes.html#new-compiler-flags
-
         if major >= 23 && arch == "aarch64" {
             extra_skia_cflags.push("-mno-outline-atomics".to_string());
         }
