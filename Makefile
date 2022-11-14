@@ -46,10 +46,7 @@ publish-only: publish-bindings wait publish-safe
 
 .PHONY: publish-bindings
 publish-bindings:
-	cd skia-bindings && cargo clean
-	cd skia-bindings && cargo build --features ${doc-features-docs-rs}
-	cd skia-bindings && cp src/bindings.rs bindings_docs.rs
-	cd skia-bindings && cargo publish -vv --no-verify --allow-dirty
+	cd skia-bindings && cargo publish -vv --no-verify
 
 .PHONY: publish-safe
 publish-safe:
