@@ -180,16 +180,6 @@ pub fn generate_bindings(
     bindgen_args.push(format!("-I{}", include_path.display()));
     cc_build.include(include_path);
 
-    // Whether GIF decoding is supported,
-    // is decided by BUILD.gn based on the existence of the libgifcodec directory:
-    if !build
-        .definitions
-        .iter()
-        .any(|(v, _)| v == "SK_USE_LIBGIFCODEC")
-    {
-        cargo::warning("GIF decoding support may be missing, does the directory skia/third_party/externals/libgifcodec/ exist?")
-    }
-
     for (name, value) in &build.definitions {
         match value {
             Some(value) => {
