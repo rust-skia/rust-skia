@@ -632,6 +632,8 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("SkScanlineOrder", rewrite::k_xxx_name),
     // m94: SkRuntimeEffect::ChildType
     ("ChildType", rewrite::k_xxx_name_opt),
+    // m108: SkGradientShader::Interpolation::InPremul
+    ("InPremul", rewrite::k_xxx),
 ];
 
 pub(crate) mod rewrite {
