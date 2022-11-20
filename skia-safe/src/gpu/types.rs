@@ -2,7 +2,10 @@ use skia_bindings as sb;
 use std::ptr;
 
 pub use skia_bindings::GrBackendApi as BackendAPI;
-variant_name!(BackendAPI::Dawn, backend_api_naming);
+variant_name!(BackendAPI::Dawn, gr_backend_api_naming);
+
+pub use skia_bindings::skgpu_BackendApi as BackendApi;
+variant_name!(BackendApi::Metal, skgpu_backend_api_naming);
 
 // TODO: this should be a newtype(bool) I guess with implementations
 //       of From<bool> and Deref?

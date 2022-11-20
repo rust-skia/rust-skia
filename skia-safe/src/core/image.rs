@@ -975,6 +975,8 @@ impl Image {
 
     // TODO:
     // AsyncReadResult, ReadPixelsContext, ReadPixelsCallback, RescaleGamma,
+    // RescaleMode,
+    // asyncReadPixels,
     // asyncRescaleAndReadPixels, asyncRescaleAndReadPixelsYUV420
 
     /// Copies [`Image`] to dst, scaling pixels to fit `dst.width()` and `dst.height()`, and

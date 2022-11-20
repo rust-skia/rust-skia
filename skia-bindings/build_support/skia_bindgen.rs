@@ -180,16 +180,6 @@ pub fn generate_bindings(
     bindgen_args.push(format!("-I{}", include_path.display()));
     cc_build.include(include_path);
 
-    // Whether GIF decoding is supported,
-    // is decided by BUILD.gn based on the existence of the libgifcodec directory:
-    if !build
-        .definitions
-        .iter()
-        .any(|(v, _)| v == "SK_USE_LIBGIFCODEC")
-    {
-        cargo::warning("GIF decoding support may be missing, does the directory skia/third_party/externals/libgifcodec/ exist?")
-    }
-
     for (name, value) in &build.definitions {
         match value {
             Some(value) => {
@@ -632,6 +622,10 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("SkScanlineOrder", rewrite::k_xxx_name),
     // m94: SkRuntimeEffect::ChildType
     ("ChildType", rewrite::k_xxx_name_opt),
+    // m108: SkGradientShader::Interpolation::InPremul
+    ("InPremul", rewrite::k_xxx),
+    // m108: skgpu::BackendApi
+    ("BackendApi", rewrite::k_xxx),
 ];
 
 pub(crate) mod rewrite {

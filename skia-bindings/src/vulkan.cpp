@@ -116,3 +116,19 @@ extern "C" bool C_GrVkYcbcrConversionInfo_Equals(const GrVkYcbcrConversionInfo* 
 extern "C" void C_GrBackendSurfaceMutableState_ConstructVK(GrBackendSurfaceMutableState* uninitialized, VkImageLayout layout, uint32_t queueFamilyIndex) {
     new(uninitialized)GrBackendSurfaceMutableState(layout, queueFamilyIndex);
 }
+
+//
+// gpu/MutableTextureState.h
+//
+
+extern "C" void C_MutableTextureState_ConstructVK(skgpu::MutableTextureState* uninitialized, VkImageLayout layout, uint32_t queueFamilyIndex) {
+    new(uninitialized)skgpu::MutableTextureState(layout, queueFamilyIndex);
+}
+
+extern "C" VkImageLayout C_MutableTextureState_getVkImageLayout(const skgpu::MutableTextureState* self) {
+    return self->getVkImageLayout();
+}
+
+extern "C" uint32_t C_MutableTextureState_getQueueFamilyIndex(const skgpu::MutableTextureState* self) {
+    return self->getQueueFamilyIndex();
+}

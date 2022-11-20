@@ -441,6 +441,7 @@ impl Surface {
     }
 
     // TODO: AsyncReadResult, RescaleGamma (m79, m86)
+    // TODO: wrap asyncReadPixels (m108)
     // TODO: wrap asyncRescaleAndReadPixels (m76, m79, m89)
     // TODO: wrap asyncRescaleAndReadPixelsYUV420 (m77, m79, m89)
 
@@ -499,7 +500,7 @@ impl Surface {
     pub fn flush_with_mutable_state<'a>(
         &mut self,
         info: &gpu::FlushInfo,
-        new_state: impl Into<Option<&'a gpu::BackendSurfaceMutableState>>,
+        new_state: impl Into<Option<&'a gpu::MutableTextureState>>,
     ) -> gpu::SemaphoresSubmitted {
         unsafe {
             self.native_mut()

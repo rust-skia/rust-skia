@@ -5,8 +5,8 @@ use super::gl;
 #[cfg(feature = "vulkan")]
 use super::vk;
 use super::{
-    BackendFormat, BackendRenderTarget, BackendSurfaceMutableState, BackendTexture, ContextOptions,
-    FlushInfo, RecordingContext, SemaphoresSubmitted,
+    BackendFormat, BackendRenderTarget, BackendTexture, ContextOptions, FlushInfo,
+    MutableTextureState, RecordingContext, SemaphoresSubmitted,
 };
 use crate::{image, prelude::*, Data};
 use skia_bindings::{self as sb, GrDirectContext, GrDirectContext_DirectContextID, SkRefCntBase};
@@ -332,7 +332,7 @@ impl DirectContext {
     pub fn set_backend_texture_state(
         &mut self,
         backend_texture: &BackendTexture,
-        state: &BackendSurfaceMutableState,
+        state: &MutableTextureState,
     ) -> bool {
         self.set_backend_texture_state_and_return_previous(backend_texture, state)
             .is_some()
@@ -341,9 +341,9 @@ impl DirectContext {
     pub fn set_backend_texture_state_and_return_previous(
         &mut self,
         backend_texture: &BackendTexture,
-        state: &BackendSurfaceMutableState,
-    ) -> Option<BackendSurfaceMutableState> {
-        let mut previous = BackendSurfaceMutableState::default();
+        state: &MutableTextureState,
+    ) -> Option<MutableTextureState> {
+        let mut previous = MutableTextureState::default();
         unsafe {
             self.native_mut().setBackendTextureState(
                 backend_texture.native(),
@@ -360,7 +360,7 @@ impl DirectContext {
     pub fn set_backend_render_target_state(
         &mut self,
         target: &BackendRenderTarget,
-        state: &BackendSurfaceMutableState,
+        state: &MutableTextureState,
     ) -> bool {
         self.set_backend_render_target_state_and_return_previous(target, state)
             .is_some()
@@ -369,9 +369,9 @@ impl DirectContext {
     pub fn set_backend_render_target_state_and_return_previous(
         &mut self,
         target: &BackendRenderTarget,
-        state: &BackendSurfaceMutableState,
-    ) -> Option<BackendSurfaceMutableState> {
-        let mut previous = BackendSurfaceMutableState::default();
+        state: &MutableTextureState,
+    ) -> Option<MutableTextureState> {
+        let mut previous = MutableTextureState::default();
         unsafe {
             self.native_mut().setBackendRenderTargetState(
                 target.native(),
