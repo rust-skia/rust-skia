@@ -25,8 +25,14 @@ impl Default for MutableTextureState {
 }
 
 impl fmt::Debug for MutableTextureState {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("MutableTextureState").finish()
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut str = f.debug_struct("MutableTextureState");
+        #[cfg(feature = "vulkan")]
+        {
+            str.field("image_layout", &self.vk_image_layout())
+                .field("queue_family_index", &self.queue_family_index());
+        }
+        str.field("backend", &self.backend()).finish()
     }
 }
 

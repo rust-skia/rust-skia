@@ -168,6 +168,8 @@ mod gpu {
     // gpu/yuva_backend_textures.rs
     assert_impl_all!(YUVABackendTextureInfo: Send, Sync);
     assert_impl_all!(YUVABackendTextures: Send, Sync);
+    assert_impl_all!(MutableTextureState: Send, Sync);
+    assert_impl_all!(BackendApi: Send, Sync);
 
     #[cfg(feature = "gl")]
     mod gl {
