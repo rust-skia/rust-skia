@@ -349,6 +349,24 @@ extern "C" {
         self->~TextStyle();
     }
 
+    void C_TextStyle_getForeground(const TextStyle* self, SkPaint* uninitialized) {
+        new (uninitialized) SkPaint(self->getForeground());
+    }
+
+    void C_TextStyle_setForegroundColor(TextStyle* self, const SkPaint* paint) {
+        SkPaint copy(*paint);
+        self->setForegroundColor(copy);
+    }
+
+    void C_TextStyle_getBackground(const TextStyle* self, SkPaint* uninitialized) {
+        new (uninitialized) SkPaint(self->getBackground());
+    }
+
+    void C_TextStyle_setBackgroundColor(TextStyle* self, const SkPaint* paint) {
+        SkPaint copy(*paint);
+        self->setBackgroundColor(copy);
+    }
+
     const TextShadow* C_TextStyle_getShadows(const std::vector<TextShadow>* self, size_t* len_ref) {
         auto len = self->size();
         *len_ref = len;

@@ -409,6 +409,8 @@ const OPAQUE_TYPES: &[&str] = &[
     "skresources::ResourceProvider",
     // m107 (layout failure)
     "skgpu::VulkanMemoryAllocator",
+    // m109 (ParagraphPainter::SkPaintOrID)
+    "std::variant",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[

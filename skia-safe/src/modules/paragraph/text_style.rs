@@ -238,33 +238,21 @@ impl TextStyle {
         self
     }
 
-    pub fn foreground(&self) -> Option<&Paint> {
-        self.native()
-            .fHasForeground
-            .if_true_some(Paint::from_native_ref(&self.native().fForeground))
+    pub fn foreground(&self) -> Paint {
+        Paint::construct(|p| unsafe { sb::C_TextStyle_getForeground(self.native(), p) })
     }
 
-    pub fn set_foreground_color(&mut self, paint: impl Into<Option<Paint>>) -> &mut Self {
-        let n = self.native_mut();
-        n.fHasForeground = paint
-            .into()
-            .map(|paint| n.fForeground.replace_with(paint))
-            .is_some();
+    pub fn set_foreground_color(&mut self, paint: &Paint) -> &mut Self {
+        unsafe { sb::C_TextStyle_setForegroundColor(self.native_mut(), paint.native()) };
         self
     }
 
-    pub fn background(&self) -> Option<&Paint> {
-        self.native()
-            .fHasBackground
-            .if_true_some(Paint::from_native_ref(&self.native().fBackground))
+    pub fn background(&self) -> Paint {
+        Paint::construct(|p| unsafe { sb::C_TextStyle_getBackground(self.native(), p) })
     }
 
-    pub fn set_background_color(&mut self, paint: impl Into<Option<Paint>>) -> &mut Self {
-        let n = self.native_mut();
-        n.fHasBackground = paint
-            .into()
-            .map(|paint| n.fBackground.replace_with(paint))
-            .is_some();
+    pub fn set_background_color(&mut self, paint: &Paint) -> &mut Self {
+        unsafe { sb::C_TextStyle_setBackgroundColor(self.native_mut(), paint.native()) };
         self
     }
 
