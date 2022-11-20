@@ -2,7 +2,8 @@ use crate::{prelude::*, scalar, Color, Color4f, ColorSpace, Matrix, Point, Shade
 use sb::SkGradientShader_Interpolation;
 use skia_bindings as sb;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
+#[repr(C)]
 pub struct Interpolation {
     pub in_premul: interpolation::InPremul,
 }
@@ -14,8 +15,7 @@ native_transmutable!(
 );
 
 pub mod interpolation {
-    use skia_bindings as sb;
-    pub type InPremul = sb::SkGradientShader_Interpolation_InPremul;
+    pub type InPremul = skia_bindings::SkGradientShader_Interpolation_InPremul;
 
     variant_name!(InPremul::Yes, in_premul_type_naming);
 }
@@ -183,10 +183,10 @@ pub fn linear<'a>(
     flags: impl Into<Option<Flags>>,
     local_matrix: impl Into<Option<&'a Matrix>>,
 ) -> Option<Shader> {
-    let flags = flags.into().unwrap_or_default();
     let colors = colors.into();
     let pos = pos.into();
     assert!(pos.is_none() || (pos.unwrap().len() == colors.len()));
+    let flags = flags.into().unwrap_or_default();
     let local_matrix = local_matrix.into();
 
     match colors {
