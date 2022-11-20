@@ -443,6 +443,10 @@ impl BackendTexture {
         format
     }
 
+    pub fn set_mutable_state(&mut self, state: &MutableTextureState) {
+        unsafe { self.native_mut().setMutableState(state.native()) }
+    }
+
     pub fn is_protected(&self) -> bool {
         unsafe { self.native().isProtected() }
     }
@@ -648,7 +652,7 @@ impl BackendRenderTarget {
         })
     }
 
-    pub fn set_mutable_stat(&mut self, state: &MutableTextureState) {
+    pub fn set_mutable_state(&mut self, state: &MutableTextureState) {
         unsafe { self.native_mut().setMutableState(state.native()) }
     }
 

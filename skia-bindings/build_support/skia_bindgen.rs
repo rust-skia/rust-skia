@@ -634,6 +634,8 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("ChildType", rewrite::k_xxx_name_opt),
     // m108: SkGradientShader::Interpolation::InPremul
     ("InPremul", rewrite::k_xxx),
+    // m108: skgpu::BackendApi
+    ("BackendApi", rewrite::k_xxx),
 ];
 
 pub(crate) mod rewrite {

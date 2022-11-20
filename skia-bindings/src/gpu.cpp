@@ -194,8 +194,16 @@ extern "C" void C_MutableTextureState_Construct(skgpu::MutableTextureState* unin
     new(uninitialized)skgpu::MutableTextureState();
 }
 
+extern "C" void C_MutableTextureState_CopyConstruct(skgpu::MutableTextureState* uninitialized, const skgpu::MutableTextureState* state) {
+    new(uninitialized)skgpu::MutableTextureState(*state);
+}
+
 extern "C" void C_MutableTextureState_destruct(skgpu::MutableTextureState* self) {
     self->~MutableTextureState();
+}
+
+extern "C" skgpu::BackendApi C_MutableTextureState_backend(const skgpu::MutableTextureState* self) {
+    return self->backend();
 }
 
 //

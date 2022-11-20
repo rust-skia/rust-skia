@@ -1,3 +1,4 @@
+use super::BackendApi;
 use crate::prelude::*;
 use skia_bindings::{self as sb, skgpu_MutableTextureState};
 use std::fmt;
@@ -8,6 +9,12 @@ unsafe_send_sync!(MutableTextureState);
 impl NativeDrop for skgpu_MutableTextureState {
     fn drop(&mut self) {
         unsafe { sb::C_MutableTextureState_destruct(self) }
+    }
+}
+
+impl NativeClone for skgpu_MutableTextureState {
+    fn clone(&self) -> Self {
+        construct(|s| unsafe { sb::C_MutableTextureState_CopyConstruct(s, self) })
     }
 }
 
@@ -29,5 +36,18 @@ impl MutableTextureState {
         Self::construct(|ptr| unsafe {
             sb::C_MutableTextureState_ConstructVK(ptr, layout, queue_family_index)
         })
+    }
+    #[cfg(feature = "vulkan")]
+    pub fn vk_image_layout(&self) -> sb::VkImageLayout {
+        unsafe { sb::C_MutableTextureState_getVkImageLayout(self.native()) }
+    }
+
+    #[cfg(feature = "vulkan")]
+    pub fn queue_family_index(&self) -> u32 {
+        unsafe { sb::C_MutableTextureState_getQueueFamilyIndex(self.native()) }
+    }
+
+    pub fn backend(&self) -> BackendApi {
+        unsafe { sb::C_MutableTextureState_backend(self.native()) }
     }
 }
