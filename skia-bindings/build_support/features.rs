@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Features {
     /// Build with OpenGL support?
@@ -75,7 +77,7 @@ impl Features {
     }
 
     /// Feature Ids used to look up prebuilt binaries.
-    pub fn ids(&self) -> Vec<&str> {
+    pub fn ids(&self) -> HashSet<&str> {
         let mut feature_ids = Vec::new();
 
         if self.gl {
@@ -115,7 +117,7 @@ impl Features {
             feature_ids.push(feature_id::EMBED_FREETYPE);
         }
 
-        feature_ids
+        feature_ids.into_iter().collect()
     }
 }
 
