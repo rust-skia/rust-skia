@@ -94,6 +94,8 @@ pub fn release_jobs(workflow: &Workflow) -> Vec<Job> {
         HostOS::Linux => {
             jobs.push(release_job("gl,x11"));
             jobs.push(release_job("gl,textlayout,x11"));
+            // Full feature set: See skia-safe/Cargo.toml all-linux
+            jobs.push(release_job("gl,egl,x11,wayland,vulkan,textlayout,svg,webp"))
         }
         HostOS::MacOS => {
             jobs.push(release_job("metal"));

@@ -21,6 +21,7 @@ doctest = false
 
 [features]
 default = ["binary-cache", "embed-icudtl"]
+all-linux = ["gl", "egl", "x11", "wayland", "vulkan", "textlayout", "svg", "webp"]
 gl = ["gpu", "skia-bindings/gl"]
 egl = ["gl", "skia-bindings/egl"]
 x11 = ["gl", "skia-bindings/x11"]
