@@ -1,6 +1,7 @@
 use super::platform;
 use crate::build_support::{cargo, features};
 use std::{
+    collections::HashSet,
     fs, io,
     path::{Path, PathBuf},
 };
@@ -20,7 +21,7 @@ pub mod lib {
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct BinariesConfiguration {
     /// The feature identifiers we built with.
-    pub feature_ids: Vec<String>,
+    pub feature_ids: HashSet<String>,
 
     /// The output directory of the libraries we build and we need to inform cargo about.
     pub output_directory: PathBuf,
