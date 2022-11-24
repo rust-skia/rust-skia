@@ -145,30 +145,31 @@ jobs:
       env:
         RUSTFLAGS: '-Clink-dead-code'
 
-  windows-x86:
-    runs-on: windows-2022
+  # Disabled until: https://github.com/la10736/rstest#169 gets fixed.
+  # windows-x86:
+  #   runs-on: windows-2022
 
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: true
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #     with:
+  #       submodules: true
 
-    - name: Install Rust
-      uses: hecrj/setup-rust-action@v1.4.0
-      with:
-        rust-version: nightly
+  #   - name: Install Rust
+  #     uses: hecrj/setup-rust-action@v1.4.0
+  #     with:
+  #       rust-version: nightly
 
-    - name: Python Version
-      run: python --version
+  #   - name: Python Version
+  #     run: python --version
 
-    - name: Install LLVM
-      run: choco install llvm
+  #   - name: Install LLVM
+  #     run: choco install llvm
 
-    - name: 'Install Rust target i686-pc-windows-msvc'
-      shell: bash
-      run: |
-        rustup target add i686-pc-windows-msvc
+  #   - name: 'Install Rust target i686-pc-windows-msvc'
+  #     shell: bash
+  #     run: |
+  #       rustup target add i686-pc-windows-msvc
     
-    - name: 'Build target i686-pc-windows-msvc (#540)'
-      run: |
-        cargo build --features gl,vulkan,d3d,textlayout,webp --target i686-pc-windows-msvc
+  #   - name: 'Build target i686-pc-windows-msvc (#540)'
+  #     run: |
+  #       cargo build --features gl,vulkan,d3d,textlayout,webp --target i686-pc-windows-msvc
