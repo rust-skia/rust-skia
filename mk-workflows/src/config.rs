@@ -116,7 +116,11 @@ fn freya_release_jobs(workflow: &Workflow) -> Vec<Job> {
             vec![release_job("gl,textlayout,svg")]
         }
         HostOS::Linux => {
-            vec![release_job("gl,textlayout,svg,x11")]
+            vec![
+                release_job("gl,textlayout,svg,x11"),
+                // <https://github.com/rust-skia/rust-skia/issues/737>
+                release_job("gl,textlayout,svg,wayland,x11"),
+            ]
         }
     }
 }
