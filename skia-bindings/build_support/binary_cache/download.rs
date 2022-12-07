@@ -121,10 +121,14 @@ fn filter_skia(p: &Path) -> bool {
             Some(Component::Normal(name)) if name == OsStr::new("infra"))
 }
 
-// Need only `ninja` from `depot_tools/`.
+// Need only `ninja` and what `ninja.py` refers to from `depot_tools/`.
 // <https://github.com/rust-skia/rust-skia/pull/165>
 fn filter_depot_tools(p: &Path) -> bool {
-    p.to_str().unwrap().starts_with("ninja")
+    if p.components().count() != 1 {
+        return false;
+    }
+    let str = p.to_str().unwrap();
+    str.starts_with("ninja") || str.ends_with(".py")
 }
 
 impl binaries_config::BinariesConfiguration {
