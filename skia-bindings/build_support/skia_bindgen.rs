@@ -628,6 +628,10 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("InPremul", rewrite::k_xxx),
     // m108: skgpu::BackendApi
     ("BackendApi", rewrite::k_xxx),
+    // m109: SkGradientShader::Interpolation::ColorSpace
+    ("ColorSpace", rewrite::k_xxx),
+    // m109: SkGradientShader::Interpolation::HueMethod
+    ("HueMethod", rewrite::k_xxx),
 ];
 
 pub(crate) mod rewrite {
