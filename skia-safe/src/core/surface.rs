@@ -441,7 +441,6 @@ impl Surface {
     }
 
     // TODO: AsyncReadResult, RescaleGamma (m79, m86)
-    // TODO: wrap asyncReadPixels (m108)
     // TODO: wrap asyncRescaleAndReadPixels (m76, m79, m89)
     // TODO: wrap asyncRescaleAndReadPixelsYUV420 (m77, m79, m89)
 
