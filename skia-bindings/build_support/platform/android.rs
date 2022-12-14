@@ -109,9 +109,7 @@ pub fn additional_clang_args(target: &str, target_arch: &str) -> Vec<String> {
         args.push(format!("--sysroot={ndk}/sysroot"));
         // note: Adding C++ includes messes with Apple's CLang 11 in the binding generator,
         // Which means that only we support the official LLVM versions for Android builds on macOS.
-        args.push(format!(
-            "-isystem{ndk}/sources/cxx-stl/llvm-libc++/include"
-        ));
+        args.push(format!("-isystem{ndk}/sources/cxx-stl/llvm-libc++/include"));
     } else {
         // NDK versions >= 22 have the sysroot in the llvm prebuilt by
         let host_toolchain = format!("{}/toolchains/llvm/prebuilt/{}", ndk, host_tag());

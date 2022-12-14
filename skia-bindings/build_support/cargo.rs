@@ -171,9 +171,7 @@ pub fn build_release() -> bool {
     match env::var("PROFILE").unwrap().as_str() {
         "release" => true,
         "debug" => false,
-        profile => panic!(
-            "PROFILE '{profile}' is not supported by this build script"
-        ),
+        profile => panic!("PROFILE '{profile}' is not supported by this build script"),
     }
 }
 

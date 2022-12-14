@@ -671,9 +671,7 @@ pub(crate) mod rewrite {
     fn capture(name: &str, variant: &str, pattern: &str) -> String {
         let re = Regex::new(pattern).unwrap();
         re.captures(variant).unwrap_or_else(|| {
-            panic!(
-                "failed to match '{pattern}' on enum variant '{variant}' of enum '{name}'"
-            )
+            panic!("failed to match '{pattern}' on enum variant '{variant}' of enum '{name}'")
         })[1]
             .into()
     }

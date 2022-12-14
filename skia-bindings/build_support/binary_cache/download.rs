@@ -142,9 +142,7 @@ pub fn try_prepare_download(binaries_config: &binaries_config::BinariesConfigura
     env::force_skia_build() || {
         let force_download = env::force_skia_binaries_download();
         if let Some((tag, key)) = should_try_download_binaries(binaries_config, force_download) {
-            println!(
-                "TRYING TO DOWNLOAD AND INSTALL SKIA BINARIES: {tag}/{key}"
-            );
+            println!("TRYING TO DOWNLOAD AND INSTALL SKIA BINARIES: {tag}/{key}");
             let url = binaries::download_url(
                 env::skia_binaries_url().unwrap_or_else(env::skia_binaries_url_default),
                 tag,
