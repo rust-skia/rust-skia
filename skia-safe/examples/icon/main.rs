@@ -25,15 +25,15 @@ fn main() {
         1 => (512, false),
         2 => {
             if args[1].starts_with('-') {
-                panic!("Usage: {}", USAGE)
+                panic!("Usage: {USAGE}")
             } else {
                 match args[1].parse::<i32>() {
                     Ok(integer) => (integer, true),
-                    Err(e) => panic!("Error: {}\nUsage: {}", e, USAGE),
+                    Err(e) => panic!("Error: {e}\nUsage: {USAGE}"),
                 }
             }
         }
-        _ => panic!("Usage: {}", USAGE),
+        _ => panic!("Usage: {USAGE}"),
     };
 
     let fps = 60;
@@ -53,9 +53,9 @@ fn main() {
 
         let file_name = if single_frame {
             frames_left = 0;
-            format!("rust-skia-icon_{}x{}.png", size, size)
+            format!("rust-skia-icon_{size}x{size}.png")
         } else {
-            format!("rust-skia-icon-{:0>4}.png", frame)
+            format!("rust-skia-icon-{frame:0>4}.png")
         };
         let mut file = File::create(file_name).unwrap();
         let image = surface.image_snapshot();
@@ -72,8 +72,8 @@ fn main() {
     }
 
     if !single_frame {
-        eprintln!("Rendered {} frames.          ", frame);
-        eprintln!("Encode as video with:\nffmpeg -framerate {fps} -i rust-skia-icon-%04d.png -vcodec libvpx-vp9 -crf 15 -b:v 0 -auto-alt-ref 0 -pass 1 -f webm /dev/null && ffmpeg -framerate {fps} -i rust-skia-icon-%04d.png -vcodec libvpx-vp9 -pix_fmt yuv444p -crf 15 -b:v 0 -auto-alt-ref 0 -pass 2 rust-skia-icon.webm", fps=fps);
+        eprintln!("Rendered {frame} frames.          ");
+        eprintln!("Encode as video with:\nffmpeg -framerate {fps} -i rust-skia-icon-%04d.png -vcodec libvpx-vp9 -crf 15 -b:v 0 -auto-alt-ref 0 -pass 1 -f webm /dev/null && ffmpeg -framerate {fps} -i rust-skia-icon-%04d.png -vcodec libvpx-vp9 -pix_fmt yuv444p -crf 15 -b:v 0 -auto-alt-ref 0 -pass 2 rust-skia-icon.webm");
         eprintln!("Play in a loop with:\nmpv --loop rust-skia-icon.webm");
     }
 }

@@ -84,7 +84,7 @@ fn build_workflow(workflow: &Workflow, jobs: &[Job]) {
     let output_filename = PathBuf::new()
         .join(".github")
         .join("workflows")
-        .join(format!("{}.yaml", workflow_name));
+        .join(format!("{workflow_name}.yaml"));
 
     let header = build_header(&workflow_name, workflow.kind);
 
@@ -93,7 +93,7 @@ fn build_workflow(workflow: &Workflow, jobs: &[Job]) {
     for job in jobs {
         {
             let job_name = workflow_name.clone() + "-" + &job.name;
-            let job_name = format!("{}:", job_name).indented(1);
+            let job_name = format!("{job_name}:").indented(1);
             parts.push(job_name);
         }
 
@@ -217,13 +217,12 @@ fn render_template(template: &str, replacements: &[(String, String)]) -> String 
     let mut template = template.to_owned();
 
     replacements.iter().for_each(|(pattern, value)| {
-        template = template.replace(&format!("$[[{}]]", pattern), value)
+        template = template.replace(&format!("$[[{pattern}]]"), value)
     });
 
     assert!(
         !template.contains("$[["),
-        "Template contains template patterns after replacement: \n{}",
-        template
+        "Template contains template patterns after replacement: \n{template}"
     );
 
     template

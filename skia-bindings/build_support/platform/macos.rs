@@ -79,7 +79,7 @@ fn deployment_target_6(macosx_deployment_target: &str) -> String {
     // use remove_matches as soon it's stable.
     let split: Vec<_> = macosx_deployment_target.split('.').collect();
     let joined = split.join("");
-    dbg!(format!("{:0<6}", joined))
+    dbg!(format!("{joined:0<6}"))
 }
 
 /// Returns the current SDK path.

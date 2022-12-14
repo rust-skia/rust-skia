@@ -106,28 +106,27 @@ pub fn additional_clang_args(target: &str, target_arch: &str) -> Vec<String> {
     // Version 22 is the first version that moved sysroot to toolchains folder
     if major < 22 {
         // sysroot is just in the ndk directory
-        args.push(format!("--sysroot={}/sysroot", ndk));
+        args.push(format!("--sysroot={ndk}/sysroot"));
         // note: Adding C++ includes messes with Apple's CLang 11 in the binding generator,
         // Which means that only we support the official LLVM versions for Android builds on macOS.
         args.push(format!(
-            "-isystem{}/sources/cxx-stl/llvm-libc++/include",
-            ndk
+            "-isystem{ndk}/sources/cxx-stl/llvm-libc++/include"
         ));
     } else {
         // NDK versions >= 22 have the sysroot in the llvm prebuilt by
         let host_toolchain = format!("{}/toolchains/llvm/prebuilt/{}", ndk, host_tag());
         // sysroot is stored in the prebuilt llvm, under the host
-        args.push(format!("--sysroot={}/sysroot", host_toolchain));
+        args.push(format!("--sysroot={host_toolchain}/sysroot"));
     };
-    args.push(format!("-I{}/sources/android/cpufeatures", ndk));
+    args.push(format!("-I{ndk}/sources/android/cpufeatures"));
 
-    args.push(format!("--target={}", target));
+    args.push(format!("--target={target}"));
     args.extend(extra_skia_cflags());
     args
 }
 
 pub fn extra_skia_cflags() -> Vec<String> {
-    vec![format!("-D__ANDROID_API__={}", API_LEVEL)]
+    vec![format!("-D__ANDROID_API__={API_LEVEL}")]
 }
 
 pub fn link_libraries(features: &Features) -> Vec<&str> {

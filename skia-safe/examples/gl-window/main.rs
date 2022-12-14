@@ -62,8 +62,7 @@ fn main() {
     let pixel_format = windowed_context.get_pixel_format();
 
     println!(
-        "Pixel format of the window's GL context: {:?}",
-        pixel_format
+        "Pixel format of the window's GL context: {pixel_format:?}"
     );
 
     gl::load_with(|s| windowed_context.get_proc_address(s));

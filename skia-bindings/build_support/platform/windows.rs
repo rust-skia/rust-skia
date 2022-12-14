@@ -95,7 +95,7 @@ fn resolve_vc() -> Option<PathBuf> {
     releases
         .iter()
         .flat_map(|r| editions.iter().map(move |e| (r, e)))
-        .map(|((rp, r), ed)| format!("C:\\{}\\Microsoft Visual Studio\\{}\\{}\\VC", rp, r, ed))
+        .map(|((rp, r), ed)| format!("C:\\{rp}\\Microsoft Visual Studio\\{r}\\{ed}\\VC"))
         .map(PathBuf::from)
         .find(|pb| pb.exists())
 }
@@ -121,7 +121,7 @@ mod llvm {
             let common_roots = [
                 "C:\\Program Files\\LLVM".into(),
                 "C:\\LLVM".into(),
-                format!("{}\\scoop\\apps\\llvm\\current", userprofile),
+                format!("{userprofile}\\scoop\\apps\\llvm\\current"),
             ];
             for root in &common_roots {
                 let root = validate_home(root);
@@ -135,7 +135,7 @@ mod llvm {
 
     fn validate_home(home: &str) -> Option<String> {
         let clang_cl: PathBuf = [home, "bin", "clang-cl.exe"].into_iter().collect();
-        eprintln!("Checking for {:?}", clang_cl);
+        eprintln!("Checking for {clang_cl:?}");
         clang_cl.exists().then(|| home.to_string())
     }
 }

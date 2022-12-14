@@ -184,11 +184,11 @@ pub fn generate_bindings(
         match value {
             Some(value) => {
                 cc_defines.push((name, value.as_str()));
-                bindgen_args.push(format!("-D{}={}", name, value));
+                bindgen_args.push(format!("-D{name}={value}"));
             }
             None => {
                 cc_defines.push((name, ""));
-                bindgen_args.push(format!("-D{}", name));
+                bindgen_args.push(format!("-D{name}"));
             }
         }
     }
@@ -207,7 +207,7 @@ pub fn generate_bindings(
 
     let target_str = &target.to_string();
     cc_build.target(target_str);
-    bindgen_args.push(format!("--target={}", target_str));
+    bindgen_args.push(format!("--target={target_str}"));
 
     // Platform specific arguments and flags.
     {
@@ -641,40 +641,38 @@ pub(crate) mod rewrite {
             stripped.into()
         } else {
             panic!(
-                "Variant name '{}' of enum type '{}' is expected to start with a 'k'",
-                variant, name
+                "Variant name '{variant}' of enum type '{name}' is expected to start with a 'k'"
             );
         }
     }
 
     pub fn _k_xxx_enum(name: &str, variant: &str) -> String {
-        capture(name, variant, &format!("k(.*)_{}", name))
+        capture(name, variant, &format!("k(.*)_{name}"))
     }
 
     pub fn k_xxx_name_opt(name: &str, variant: &str) -> String {
-        let suffix = &format!("_{}", name);
+        let suffix = &format!("_{name}");
         if variant.ends_with(suffix) {
-            capture(name, variant, &format!("k(.*){}", suffix))
+            capture(name, variant, &format!("k(.*){suffix}"))
         } else {
             capture(name, variant, "k(.*)")
         }
     }
 
     pub fn k_xxx_name(name: &str, variant: &str) -> String {
-        capture(name, variant, &format!("k(.*)_{}", name))
+        capture(name, variant, &format!("k(.*)_{name}"))
     }
 
     pub fn vk(name: &str, variant: &str) -> String {
         let prefix = name.to_shouty_snake_case();
-        capture(name, variant, &format!("{}_(.*)", prefix))
+        capture(name, variant, &format!("{prefix}_(.*)"))
     }
 
     fn capture(name: &str, variant: &str, pattern: &str) -> String {
         let re = Regex::new(pattern).unwrap();
         re.captures(variant).unwrap_or_else(|| {
             panic!(
-                "failed to match '{}' on enum variant '{}' of enum '{}'",
-                pattern, variant, name
+                "failed to match '{pattern}' on enum variant '{variant}' of enum '{name}'"
             )
         })[1]
             .into()
@@ -712,9 +710,9 @@ pub(crate) mod definitions {
         let mut file = fs::File::create(output_directory.as_ref().join("skia-defines.txt"))?;
         for (name, value) in definitions.iter() {
             if let Some(value) = value {
-                writeln!(file, "-D{}={}", name, value)?;
+                writeln!(file, "-D{name}={value}")?;
             } else {
-                writeln!(file, "-D{}", name)?;
+                writeln!(file, "-D{name}")?;
             }
         }
         writeln!(file)
@@ -787,7 +785,7 @@ pub(crate) mod definitions {
                 if let Some(stripped) = d.strip_prefix(PREFIX) {
                     stripped
                 } else {
-                    panic!("missing '{}' prefix from a definition", PREFIX)
+                    panic!("missing '{PREFIX}' prefix from a definition")
                 }
             })
             .map(|d| {

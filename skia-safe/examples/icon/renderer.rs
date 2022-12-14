@@ -288,7 +288,7 @@ fn triangle(
                         (0.420 * side, 0.50 * side)
                     }
                 }
-                i => panic!("Invalid vertex index {} for triangle.", i),
+                i => panic!("Invalid vertex index {i} for triangle."),
             };
             gradient(&mut paint, center, radii, (color, Color::from(0x00_0000ff)))
         }

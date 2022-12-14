@@ -80,9 +80,9 @@ impl Target {
     pub fn library_to_filename(&self, name: impl AsRef<str>) -> PathBuf {
         let name = name.as_ref();
         if self.is_windows() {
-            format!("{}.lib", name).into()
+            format!("{name}.lib").into()
         } else {
-            format!("lib{}.a", name).into()
+            format!("lib{name}.a").into()
         }
     }
 
@@ -110,7 +110,7 @@ impl Display for Target {
         )?;
 
         if let Some(ref abi) = self.abi {
-            write!(f, "-{}", abi)
+            write!(f, "-{abi}")
         } else {
             Result::Ok(())
         }
@@ -130,7 +130,7 @@ pub fn target_crt_static() -> bool {
 
 pub fn host() -> Target {
     let host_str = env::var("HOST").unwrap();
-    println!("HOST: {}", host_str);
+    println!("HOST: {host_str}");
     parse_target(host_str)
 }
 
@@ -159,7 +159,7 @@ pub fn parse_target(target_str: impl AsRef<str>) -> Target {
             abi: None,
         }
     } else {
-        panic!("Failed to parse TARGET {}", target_str);
+        panic!("Failed to parse TARGET {target_str}");
     }
 }
 
@@ -172,8 +172,7 @@ pub fn build_release() -> bool {
         "release" => true,
         "debug" => false,
         profile => panic!(
-            "PROFILE '{}' is not supported by this build script",
-            profile
+            "PROFILE '{profile}' is not supported by this build script"
         ),
     }
 }

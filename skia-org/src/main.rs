@@ -105,7 +105,7 @@ fn main() {
         if drivers.contains(&Driver::Vulkan) {
             match AshGraphics::vulkan_version() {
                 Some((major, minor, patch)) => {
-                    println!("Detected Vulkan version {}.{}.{}", major, minor, patch)
+                    println!("Detected Vulkan version {major}.{minor}.{patch}")
                 }
                 None => println!("Failed to detect Vulkan version, falling back to 1.0.0"),
             }

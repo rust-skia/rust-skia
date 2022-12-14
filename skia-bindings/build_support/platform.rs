@@ -211,7 +211,7 @@ pub mod prelude {
     pub use crate::build_support::{cargo, clang, features::Features, skia};
 
     pub fn quote(s: &str) -> String {
-        format!("\"{}\"", s)
+        format!("\"{s}\"")
     }
 
     pub fn yes() -> String {
