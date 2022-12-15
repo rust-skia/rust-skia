@@ -218,3 +218,35 @@ pub fn get_metadata() -> Vec<(String, String)> {
         .map(|(a, b)| (a.clone(), b.as_str().unwrap().to_owned()))
         .collect()
 }
+
+#[test]
+fn parse_target_tests() {
+    assert_eq!(
+        parse_target("aarch64-unknown-linux-gnu"),
+        Target {
+            architecture: "aarch64".into(),
+            vendor: "unknown".into(),
+            system: "linux".into(),
+            abi: Some("gnu".into())
+        }
+    );
+    assert_eq!(
+        parse_target("aarch64-unknown-linux"),
+        Target {
+            architecture: "aarch64".into(),
+            vendor: "unknown".into(),
+            system: "linux".into(),
+            abi: None
+        }
+    );
+    assert_eq!(
+        parse_target("aarch64-linux"),
+        Target {
+            architecture: "aarch64".into(),
+            vendor: String::new(),
+            system: "linux".into(),
+            abi: None
+        }
+    );
+    assert!(std::panic::catch_unwind(|| parse_target("garbage")).is_err());
+}
