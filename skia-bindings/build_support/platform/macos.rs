@@ -102,6 +102,6 @@ mod tests {
 
     #[test]
     fn deployment_target_6_digit_conversion() {
-        assert!(deployment_target_6("10.16"), "101600")
+        assert_eq!(deployment_target_6("10.16"), "101600")
     }
 }
