@@ -50,7 +50,7 @@ fn details(target: &Target) -> Box<dyn PlatformDetails> {
         (_, _, "windows", Some("msvc")) if host.is_windows() => Box::new(windows::Msvc),
         (_, _, "windows", _) => Box::new(windows::Generic),
         (_, "unknown", "linux", Some("musl")) => Box::new(alpine::Musl),
-        (_, "unknown", "linux", _) => Box::new(linux::Linux),
+        (_, _, "linux", _) => Box::new(linux::Linux),
         _ => Box::new(generic::Generic),
     }
 }
