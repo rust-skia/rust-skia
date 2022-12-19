@@ -227,10 +227,27 @@ fn decode_base64(value: &str) -> Vec<u8> {
     {
         return Vec::new();
     }
-    match base64::decode_config(input, base64::STANDARD.decode_allow_trailing_bits(true)) {
+
+    match base64::decode(input) {
         Ok(bytes) => bytes,
         Err(_) => Vec::new(),
     }
+}
+
+mod base64 {
+    use base64::{
+        alphabet, decode_engine,
+        engine::fast_portable::{FastPortable, FastPortableConfig},
+    };
+
+    pub fn decode(input: &str) -> Result<Vec<u8>, base64::DecodeError> {
+        decode_engine(input, &ENGINE)
+    }
+
+    const ENGINE: FastPortable = {
+        let fast_portable = FastPortableConfig::new().with_decode_allow_trailing_bits(true);
+        FastPortable::from(&alphabet::STANDARD, fast_portable)
+    };
 }
 
 #[cfg(test)]
