@@ -173,7 +173,9 @@ impl FinalBuildConfiguration {
                 // is not included in the default dependency configuration.
                 // ("paragraph_tests_enabled", no()),
             } else {
-                builder.arg("skia_use_icu", no());
+                builder
+                    .arg("skia_use_icu", no())
+                    .arg("skia_use_harfbuzz", no());
             }
 
             if features.webp_encode || features.webp_decode {
