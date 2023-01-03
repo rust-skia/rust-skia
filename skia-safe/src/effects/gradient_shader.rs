@@ -6,6 +6,8 @@ use skia_bindings as sb;
 #[repr(C)]
 pub struct Interpolation {
     pub in_premul: interpolation::InPremul,
+    pub color_space: interpolation::ColorSpace,
+    pub hue_method: interpolation::HueMethod,
 }
 
 native_transmutable!(
@@ -16,8 +18,13 @@ native_transmutable!(
 
 pub mod interpolation {
     pub type InPremul = skia_bindings::SkGradientShader_Interpolation_InPremul;
-
     variant_name!(InPremul::Yes, in_premul_type_naming);
+
+    pub type ColorSpace = skia_bindings::SkGradientShader_Interpolation_ColorSpace;
+    variant_name!(ColorSpace::HSL, color_space_type_naming);
+
+    pub type HueMethod = skia_bindings::SkGradientShader_Interpolation_HueMethod;
+    variant_name!(HueMethod::Shorter, hue_method_type_naming);
 }
 
 impl From<Flags> for Interpolation {
@@ -27,7 +34,11 @@ impl From<Flags> for Interpolation {
         } else {
             interpolation::InPremul::No
         };
-        Self { in_premul }
+        Self {
+            in_premul,
+            color_space: interpolation::ColorSpace::Destination,
+            hue_method: interpolation::HueMethod::Shorter,
+        }
     }
 }
 

@@ -42,7 +42,7 @@ impl NativeClone for SkBitmap {
 }
 
 impl Default for Bitmap {
-    /// See [RCHandle<SkBitmap>::new()].
+    /// See [`RCHandle<SkBitmap>::new()`].
     fn default() -> Self {
         Self::new()
     }

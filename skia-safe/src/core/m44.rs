@@ -294,6 +294,22 @@ impl V4 {
         Self { x, y, z, w }
     }
 
+    pub fn length_squared(&self) -> scalar {
+        Self::dot(self, self)
+    }
+
+    pub fn length(&self) -> scalar {
+        scalar::sqrt(Self::dot(self, self))
+    }
+
+    pub fn dot(&self, b: &Self) -> scalar {
+        self.x * b.x + self.y * b.y + self.z * b.z + self.w * b.w
+    }
+
+    pub fn normalize(&self) -> Self {
+        (*self) * (1.0 / self.length())
+    }
+
     const COMPONENTS: usize = 4;
 
     pub fn as_array(&self) -> &[f32; Self::COMPONENTS] {

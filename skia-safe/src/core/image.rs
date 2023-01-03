@@ -394,8 +394,7 @@ impl Image {
     /// When [`Image`] is no longer referenced, context releases texture memory
     /// asynchronously.
     ///
-    /// [`gpu::BackendTexture`] created from pixmap is uploaded to match [`crate::Surface`] created with
-    /// `dst_color_space`. [`ColorSpace`] of [`Image`] is determined by `pixmap.color_space()`.
+    /// [`ColorSpace`] of [`Image`] is determined by `pixmap.color_space()`.
     ///
     /// [`Image`] is returned referring to GPU back-end if context is not `None`,
     /// format of data is recognized and supported, and if context supports moving
@@ -406,7 +405,6 @@ impl Image {
     /// - `context`                 GPU context
     /// - `pixmap`                  [`ImageInfo`], pixel address, and row bytes
     /// - `build_mips`               create [`Image`] as mip map if `true`
-    /// - `dst_color_space`           range of colors of matching [`crate::Surface`] on GPU
     /// - `limit_to_max_texture_size`   downscale image to GPU maximum texture size, if necessary
     /// Returns: created [`Image`], or `None`
     #[cfg(feature = "gpu")]
@@ -976,7 +974,6 @@ impl Image {
     // TODO:
     // AsyncReadResult, ReadPixelsContext, ReadPixelsCallback, RescaleGamma,
     // RescaleMode,
-    // asyncReadPixels,
     // asyncRescaleAndReadPixels, asyncRescaleAndReadPixelsYUV420
 
     /// Copies [`Image`] to dst, scaling pixels to fit `dst.width()` and `dst.height()`, and

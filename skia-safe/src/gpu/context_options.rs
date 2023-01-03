@@ -42,6 +42,7 @@ pub struct ContextOptions {
     pub enable_experimental_hardware_tessellation: bool,
     pub reduced_shader_variations: bool,
     pub allow_msaa_on_new_intel: bool,
+    pub always_use_text_storage_when_available: bool,
     pub driver_bug_workarounds: DriverBugWorkarounds,
 }
 unsafe_send_sync!(ContextOptions);
