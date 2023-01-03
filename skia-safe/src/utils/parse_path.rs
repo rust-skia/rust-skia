@@ -34,7 +34,9 @@ pub fn to_svg(path: &Path) -> String {
 }
 
 pub fn to_svg_with_encoding(path: &Path, encoding: PathEncoding) -> String {
-    let mut svg = interop::String::default();
-    unsafe { sb::SkParsePath_ToSVGString(path.native(), svg.native_mut(), encoding) };
-    svg.as_str().into()
+    interop::String::construct(|svg| {
+        unsafe { sb::C_SkParsePath_ToSVGString(path.native(), svg, encoding) };
+    })
+    .as_str()
+    .into()
 }

@@ -1,12 +1,11 @@
 use crate::Blender;
 use crate::{
     prelude::*, scalar, BlendMode, Color, Color4f, ColorFilter, ColorSpace, ImageFilter,
-    MaskFilter, Matrix, Path, PathEffect, Rect, Shader,
+    MaskFilter, PathEffect, Shader,
 };
 use core::fmt;
 
 use skia_bindings::{self as sb, SkPaint};
-use std::ptr;
 
 pub use sb::SkPaint_Style as Style;
 variant_name!(Style::Fill, style_naming);
@@ -213,48 +212,6 @@ impl Paint {
     pub fn set_stroke_join(&mut self, join: Join) -> &mut Self {
         unsafe { self.native_mut().setStrokeJoin(join) }
         self
-    }
-
-    pub fn get_fill_path(
-        &self,
-        src: &Path,
-        cull_rect: Option<&Rect>,
-        res_scale: impl Into<Option<scalar>>,
-    ) -> Option<Path> {
-        let mut r = Path::default();
-
-        let cull_rect_ptr = cull_rect
-            .map(|r| r.native() as *const _)
-            .unwrap_or(ptr::null());
-
-        unsafe {
-            self.native().getFillPath(
-                src.native(),
-                r.native_mut(),
-                cull_rect_ptr,
-                res_scale.into().unwrap_or(1.0),
-            )
-        }
-        .if_true_some(r)
-    }
-
-    pub fn get_fill_path_with_matrix(
-        &self,
-        src: &Path,
-        cull_rect: Option<&Rect>,
-        matrix: &Matrix,
-    ) -> Option<Path> {
-        let mut r = Path::default();
-
-        let cull_rect_ptr = cull_rect
-            .map(|r| r.native() as *const _)
-            .unwrap_or(ptr::null());
-
-        unsafe {
-            self.native()
-                .getFillPath1(src.native(), r.native_mut(), cull_rect_ptr, matrix.native())
-        }
-        .if_true_some(r)
     }
 
     pub fn shader(&self) -> Option<Shader> {
