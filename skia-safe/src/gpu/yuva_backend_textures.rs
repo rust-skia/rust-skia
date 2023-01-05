@@ -130,25 +130,25 @@ impl fmt::Debug for YUVABackendTextures {
 }
 
 impl YUVABackendTextures {
-    pub fn new(
-        info: &YUVAInfo,
-        textures: &[BackendTexture],
-        texture_origin: SurfaceOrigin,
-    ) -> Option<Self> {
-        if textures.len() != info.num_planes() {
-            return None;
-        }
-        let mut textures = textures.to_vec();
-        textures.extend(
-            iter::repeat_with(BackendTexture::new_invalid)
-                .take(textures.len() - YUVAInfo::MAX_PLANES),
-        );
-        assert_eq!(textures.len(), YUVAInfo::MAX_PLANES);
-        let n = unsafe {
-            GrYUVABackendTextures::new(info.native(), textures[0].native(), texture_origin)
-        };
-        Self::native_is_valid(&n).if_true_then_some(|| Self::from_native_c(n))
-    }
+    // pub fn new(
+    //     info: &YUVAInfo,
+    //     textures: &[BackendTexture],
+    //     texture_origin: SurfaceOrigin,
+    // ) -> Option<Self> {
+    //     if textures.len() != info.num_planes() {
+    //         return None;
+    //     }
+    //     let mut textures = textures.to_vec();
+    //     textures.extend(
+    //         iter::repeat_with(BackendTexture::new_invalid)
+    //             .take(textures.len() - YUVAInfo::MAX_PLANES),
+    //     );
+    //     assert_eq!(textures.len(), YUVAInfo::MAX_PLANES);
+    //     let n = unsafe {
+    //         GrYUVABackendTextures::new(info.native(), textures[0].native(), texture_origin)
+    //     };
+    //     Self::native_is_valid(&n).if_true_then_some(|| Self::from_native_c(n))
+    // }
 
     pub fn textures(&self) -> &[BackendTexture] {
         unsafe {

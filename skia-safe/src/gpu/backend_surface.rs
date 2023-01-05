@@ -171,6 +171,7 @@ impl BackendFormat {
     }
 }
 
+/// GrBackendTexture may contain strings, and with SSO we can't move them.
 pub type BackendTexture = Handle<GrBackendTexture>;
 unsafe_send_sync!(BackendTexture);
 
@@ -180,11 +181,13 @@ impl NativeDrop for GrBackendTexture {
     }
 }
 
+/*
 impl NativeClone for GrBackendTexture {
     fn clone(&self) -> Self {
         construct(|texture| unsafe { sb::C_GrBackendTexture_CopyConstruct(texture, self) })
     }
 }
+*/
 
 impl fmt::Debug for BackendTexture {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -667,5 +670,33 @@ impl BackendRenderTarget {
 
     pub(crate) fn native_is_valid(rt: &GrBackendRenderTarget) -> bool {
         rt.fIsValid
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::hint::black_box;
+
+    use super::BackendTexture;
+
+    #[test]
+    fn create_and_destroy_backend_texture() {
+        let texture = force_move(BackendTexture::new_invalid());
+        eprintln!("label: {:?}", &texture.into_native().fLabel);
+        // drop(texture);
+    }
+
+    fn force_move<V>(src: V) -> V {
+        let src = black_box(src);
+        let ptr_before: *const V = &src;
+        eprintln!("before: {:?}", ptr_before);
+
+        let boxed = black_box(Box::new(src));
+        let v = *boxed;
+        let ptr_after: *const V = &v;
+
+        eprintln!("after: {:?}", ptr_after);
+
+        v
     }
 }
