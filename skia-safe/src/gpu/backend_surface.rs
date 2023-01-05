@@ -447,7 +447,7 @@ impl BackendTexture {
     }
 
     pub(crate) unsafe fn native_is_valid(texture: *const GrBackendTexture) -> bool {
-        unsafe { (*texture).fIsValid }
+        (*texture).fIsValid
     }
 
     #[allow(clippy::wrong_self_convention)]
