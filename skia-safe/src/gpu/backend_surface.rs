@@ -171,23 +171,22 @@ impl BackendFormat {
     }
 }
 
-/// GrBackendTexture may contain strings, and with SSO we can't move them.
-pub type BackendTexture = Handle<GrBackendTexture>;
+// GrBackendTexture contains a string `fLabel`, and with SSO on some platforms, it can't be moved.
+// See <https://github.com/rust-skia/rust-skia/issues/750>.
+pub type BackendTexture = RefHandle<GrBackendTexture>;
 unsafe_send_sync!(BackendTexture);
 
 impl NativeDrop for GrBackendTexture {
     fn drop(&mut self) {
-        unsafe { sb::C_GrBackendTexture_destruct(self) }
+        unsafe { sb::C_GrBackendTexture_delete(self) }
     }
 }
 
-/*
-impl NativeClone for GrBackendTexture {
+impl Clone for BackendTexture {
     fn clone(&self) -> Self {
-        construct(|texture| unsafe { sb::C_GrBackendTexture_CopyConstruct(texture, self) })
+        unsafe { Self::from_ptr(sb::C_GrBackendTexture_Clone(self.native())) }.unwrap()
     }
 }
-*/
 
 impl fmt::Debug for BackendTexture {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -215,7 +214,7 @@ impl fmt::Debug for BackendTexture {
 
 impl BackendTexture {
     pub(crate) fn new_invalid() -> Self {
-        Self::construct(|t| unsafe { sb::C_GrBackendTexture_Construct(t) })
+        Self::from_ptr(unsafe { sb::C_GrBackendTexture_New() }).unwrap()
     }
 
     #[cfg(feature = "gl")]
@@ -237,17 +236,14 @@ impl BackendTexture {
         label: impl AsRef<str>,
     ) -> Self {
         let str = label.as_ref().as_bytes();
-        Self::from_native_if_valid(construct(|texture| {
-            sb::C_GrBackendTexture_ConstructGL(
-                texture,
-                width,
-                height,
-                mipmapped,
-                gl_info.native(),
-                str.as_ptr() as _,
-                str.len(),
-            )
-        }))
+        Self::from_ptr(sb::C_GrBackendTexture_NewGL(
+            width,
+            height,
+            mipmapped,
+            gl_info.native(),
+            str.as_ptr() as _,
+            str.len(),
+        ))
         .unwrap()
     }
 
@@ -265,16 +261,13 @@ impl BackendTexture {
         label: impl AsRef<str>,
     ) -> Self {
         let label = label.as_ref().as_bytes();
-        Self::from_native_if_valid(construct(|texture| {
-            sb::C_GrBackendTexture_ConstructVk(
-                texture,
-                width,
-                height,
-                vk_info.native(),
-                label.as_ptr() as _,
-                label.len(),
-            )
-        }))
+        Self::from_native_if_valid(sb::C_GrBackendTexture_NewVk(
+            width,
+            height,
+            vk_info.native(),
+            label.as_ptr() as _,
+            label.len(),
+        ))
         .unwrap()
     }
 
@@ -297,17 +290,14 @@ impl BackendTexture {
         label: impl AsRef<str>,
     ) -> Self {
         let label = label.as_ref().as_bytes();
-        Self::from_native_if_valid(construct(|texture| {
-            sb::C_GrBackendTexture_ConstructMtl(
-                texture,
-                width,
-                height,
-                mipmapped,
-                mtl_info.native(),
-                label.as_ptr() as _,
-                label.len(),
-            )
-        }))
+        Self::from_native_if_valid(sb::C_GrBackendTexture_NewMtl(
+            width,
+            height,
+            mipmapped,
+            mtl_info.native(),
+            label.as_ptr() as _,
+            label.len(),
+        ))
         .unwrap()
     }
 
@@ -324,25 +314,22 @@ impl BackendTexture {
     ) -> Self {
         let label = label.as_ref().as_bytes();
         unsafe {
-            Self::from_native_if_valid(construct(|texture| {
-                sb::C_GrBackendTexture_ConstructD3D(
-                    texture,
-                    width,
-                    height,
-                    d3d_info.native(),
-                    label.as_ptr() as _,
-                    label.len(),
-                )
-            }))
+            Self::from_native_if_valid(sb::C_GrBackendTexture_NewD3D(
+                width,
+                height,
+                d3d_info.native(),
+                label.as_ptr() as _,
+                label.len(),
+            ))
         }
         .unwrap()
     }
 
     pub(crate) unsafe fn from_native_if_valid(
-        backend_texture: GrBackendTexture,
+        backend_texture: *mut GrBackendTexture,
     ) -> Option<BackendTexture> {
-        Self::native_is_valid(&backend_texture)
-            .if_true_then_some(|| BackendTexture::from_native_c(backend_texture))
+        Self::native_is_valid(backend_texture)
+            .if_true_then_some(|| BackendTexture::from_ptr(backend_texture).unwrap())
     }
 
     pub fn dimensions(&self) -> ISize {
@@ -454,16 +441,13 @@ impl BackendTexture {
         unsafe { self.native().isProtected() }
     }
 
-    #[deprecated(
-        note = "Invalid BackendTextures aren't supported anymore",
-        since = "0.37.0"
-    )]
+    #[deprecated(note = "Invalid BackendTextures aren't supported", since = "0.37.0")]
     pub fn is_valid(&self) -> bool {
         self.native().fIsValid
     }
 
-    pub(crate) fn native_is_valid(texture: &GrBackendTexture) -> bool {
-        texture.fIsValid
+    pub(crate) unsafe fn native_is_valid(texture: *const GrBackendTexture) -> bool {
+        unsafe { (*texture).fIsValid }
     }
 
     #[allow(clippy::wrong_self_convention)]
@@ -675,28 +659,18 @@ impl BackendRenderTarget {
 
 #[cfg(test)]
 mod tests {
+    use super::BackendTexture;
     use std::hint::black_box;
 
-    use super::BackendTexture;
-
+    // Regression test for <https://github.com/rust-skia/rust-skia/issues/750>
     #[test]
-    fn create_and_destroy_backend_texture() {
+    fn create_move_and_drop_backend_texture() {
         let texture = force_move(BackendTexture::new_invalid());
-        eprintln!("label: {:?}", &texture.into_native().fLabel);
-        // drop(texture);
+        drop(texture);
     }
 
     fn force_move<V>(src: V) -> V {
         let src = black_box(src);
-        let ptr_before: *const V = &src;
-        eprintln!("before: {:?}", ptr_before);
-
-        let boxed = black_box(Box::new(src));
-        let v = *boxed;
-        let ptr_after: *const V = &v;
-
-        eprintln!("after: {:?}", ptr_after);
-
-        v
+        *black_box(Box::new(src))
     }
 }

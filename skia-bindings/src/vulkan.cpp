@@ -20,13 +20,12 @@ extern "C" void C_GrBackendFormat_ConstructVk2(GrBackendFormat* uninitialized, c
     new(uninitialized)GrBackendFormat(GrBackendFormat::MakeVk(*ycbcrInfo, willUseDRMFormatModifiers));
 }
 
-extern "C" void C_GrBackendTexture_ConstructVk(
-    GrBackendTexture* uninitialized, 
+extern "C" GrBackendTexture* C_GrBackendTexture_NewVk(
     int width, int height,
     const GrVkImageInfo* vkInfo,
     const char* label,
     size_t labelCount) {
-    new(uninitialized)GrBackendTexture(width, height, *vkInfo, std::string_view(label, labelCount));
+    return new GrBackendTexture(width, height, *vkInfo, std::string_view(label, labelCount));
 }
 
 extern "C" void C_GrBackendRenderTarget_ConstructVk(GrBackendRenderTarget* uninitialized, int width, int height, int sampleCnt, const GrVkImageInfo* vkInfo) {
