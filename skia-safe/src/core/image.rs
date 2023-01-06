@@ -802,13 +802,11 @@ impl Image {
         flush_pending_gr_context_io: bool,
     ) -> Option<(gpu::BackendTexture, gpu::SurfaceOrigin)> {
         let mut origin = gpu::SurfaceOrigin::TopLeft;
-        let mut backend_texture = unsafe { sb::GrBackendTexture::new() };
         unsafe {
-            sb::C_SkImage_getBackendTexture(
+            let backend_texture = sb::C_SkImage_getBackendTexture(
                 self.native(),
                 flush_pending_gr_context_io,
                 &mut origin,
-                &mut backend_texture,
             );
             gpu::BackendTexture::from_native_if_valid(backend_texture)
         }

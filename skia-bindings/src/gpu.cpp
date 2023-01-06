@@ -73,11 +73,10 @@ extern "C" SkSurface* C_SkSurface_MakeRenderTarget2(
             budgeted).release();
 }
 
-extern "C" void C_SkSurface_getBackendTexture(
+extern "C" GrBackendTexture* C_SkSurface_getBackendTexture(
         SkSurface* self,
-        SkSurface::BackendHandleAccess handleAccess,
-        GrBackendTexture* backendTexture) {
-    *backendTexture = self->getBackendTexture(handleAccess);
+        SkSurface::BackendHandleAccess handleAccess) {
+    return new GrBackendTexture(self->getBackendTexture(handleAccess));
 }
 
 extern "C" void C_SkSurface_getBackendRenderTarget(
@@ -140,16 +139,16 @@ extern "C" void C_GrBackendRenderTarget_getBackendFormat(const GrBackendRenderTa
 
 // GrBackendTexture
 
-extern "C" void C_GrBackendTexture_Construct(GrBackendTexture* uninitialized) {
-    new(uninitialized) GrBackendTexture();
+extern "C" GrBackendTexture* C_GrBackendTexture_New() {
+    return new GrBackendTexture();
 }
 
-extern "C" void C_GrBackendTexture_CopyConstruct(GrBackendTexture* uninitialized, const GrBackendTexture* texture) {
-    new(uninitialized) GrBackendTexture(*texture);
+extern "C" GrBackendTexture* C_GrBackendTexture_Clone(const GrBackendTexture* texture) {
+    return new GrBackendTexture(*texture);
 }
 
-extern "C" void C_GrBackendTexture_destruct(const GrBackendTexture* self) {
-    self->~GrBackendTexture();
+extern "C" void C_GrBackendTexture_delete(const GrBackendTexture* self) {
+    delete self;
 }
 
 extern "C" void C_GrBackendTexture_getBackendFormat(const GrBackendTexture* self, GrBackendFormat* format) {
@@ -359,13 +358,12 @@ extern "C" SkImage *C_SkImage_MakeTextureFromCompressed(GrDirectContext *context
     return SkImage::MakeTextureFromCompressed(context, sp(data), width, height, type, mipMapped, prot).release();
 }
 
-extern "C" void C_SkImage_getBackendTexture(
+extern "C" GrBackendTexture* C_SkImage_getBackendTexture(
         const SkImage* self,
         bool flushPendingGrContextIO,
-        GrSurfaceOrigin* origin,
-        GrBackendTexture* result)
+        GrSurfaceOrigin* origin)
 {
-    *result = self->getBackendTexture(flushPendingGrContextIO, origin);
+    return new GrBackendTexture(self->getBackendTexture(flushPendingGrContextIO, origin));
 }
 
 extern "C" SkImage* C_SkImage_MakeFromTexture(

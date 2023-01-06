@@ -150,17 +150,22 @@ impl YUVABackendTextures {
         Self::native_is_valid(&n).if_true_then_some(|| Self::from_native_c(n))
     }
 
-    pub fn textures(&self) -> &[BackendTexture] {
+    pub fn textures(&self) -> Vec<BackendTexture> {
         unsafe {
-            let textures = BackendTexture::from_native_ptr(sb::C_GrYUVABackendTextures_textures(
-                self.native(),
-            ));
-            safer::from_raw_parts(textures, self.num_planes())
+            let textures_ptr = sb::C_GrYUVABackendTextures_textures(self.native());
+            let textures = safer::from_raw_parts(textures_ptr, self.num_planes());
+            textures
+                .iter()
+                .map(|native_texture_ref| {
+                    BackendTexture::from_ptr(sb::C_GrBackendTexture_Clone(native_texture_ref))
+                        .unwrap()
+                })
+                .collect()
         }
     }
 
-    pub fn texture(&self, i: usize) -> Option<&BackendTexture> {
-        self.textures().get(i)
+    pub fn texture(&self, i: usize) -> Option<BackendTexture> {
+        self.textures().get(i).cloned()
     }
 
     pub fn yuva_info(&self) -> &YUVAInfo {

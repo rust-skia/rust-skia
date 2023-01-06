@@ -290,14 +290,8 @@ impl Surface {
         handle_access: BackendHandleAccess,
     ) -> Option<gpu::BackendTexture> {
         unsafe {
-            let mut backend_texture = construct(|bt| sb::C_GrBackendTexture_Construct(bt));
-            sb::C_SkSurface_getBackendTexture(
-                self.native_mut(),
-                handle_access,
-                &mut backend_texture as _,
-            );
-
-            gpu::BackendTexture::from_native_if_valid(backend_texture)
+            let ptr = sb::C_SkSurface_getBackendTexture(self.native_mut(), handle_access);
+            gpu::BackendTexture::from_native_if_valid(ptr)
         }
     }
 
