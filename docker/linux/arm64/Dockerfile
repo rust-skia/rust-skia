@@ -33,8 +33,4 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 COPY . /rust-skia/
 WORKDIR /rust-skia/
 
-ENV SKIA_NINJA_COMMAND=/usr/bin/ninja
-
-# RUN cargo build -vv --features "gl"
-
-
+RUN cargo build -vv --features "gl"
