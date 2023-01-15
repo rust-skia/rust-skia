@@ -152,6 +152,7 @@ fn linux_targets() -> Vec<TargetConf> {
         "x86_64-unknown-linux-gnu",
         "egl,x11,wayland",
     )];
+    targets.extend(linux_aarch64_targets());
     targets.extend(android_targets());
     targets.extend(wasm_targets());
     targets
@@ -165,6 +166,14 @@ fn macos_targets() -> Vec<TargetConf> {
         TargetConf::new("aarch64-apple-ios-sim", "metal"),
         TargetConf::new("x86_64-apple-ios", "metal"),
     ]
+}
+
+fn linux_aarch64_targets() -> Vec<TargetConf> {
+    [TargetConf::new(
+        "aarch64-unknown-linux-gnu",
+        "egl,x11,wayland",
+    )]
+    .into()
 }
 
 fn android_targets() -> Vec<TargetConf> {
