@@ -195,7 +195,7 @@ fn main() {
 
     let surface = create_surface(
         &mut window,
-        fb_info.clone(),
+        fb_info,
         &mut gr_context,
         num_samples,
         stencil_size,
@@ -239,7 +239,7 @@ fn main() {
                 WindowEvent::Resized(physical_size) => {
                     env.surface = create_surface(
                         &mut env.window,
-                        fb_info.clone(),
+                        fb_info,
                         &mut env.gr_context,
                         num_samples,
                         stencil_size,
@@ -252,7 +252,6 @@ fn main() {
                         NonZeroU32::new(height).unwrap(),
                     );
                 }
-                WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
                 WindowEvent::KeyboardInput {
                     input:
                         KeyboardInput {
