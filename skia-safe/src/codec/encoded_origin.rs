@@ -7,9 +7,10 @@ use skia_bindings::{self as sb, SkEncodedOrigin};
 
 /// These values match the orientation www.exif.org/Exif2-2.PDF.
 #[repr(i32)]
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug, Default)]
 pub enum EncodedOrigin {
     /// Default
+    #[default]
     TopLeft = SkEncodedOrigin::TopLeft as _,
     /// Reflected across y-axis
     TopRight = SkEncodedOrigin::TopRight as _,
@@ -28,12 +29,6 @@ pub enum EncodedOrigin {
 }
 
 native_transmutable!(SkEncodedOrigin, EncodedOrigin, encoded_origin_layout);
-
-impl Default for EncodedOrigin {
-    fn default() -> Self {
-        EncodedOrigin::TopLeft
-    }
-}
 
 impl EncodedOrigin {
     pub const LAST: Self = EncodedOrigin::LeftBottom;

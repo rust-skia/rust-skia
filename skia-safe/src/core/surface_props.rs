@@ -3,9 +3,10 @@ use skia_bindings::{self as sb, SkPixelGeometry, SkSurfaceProps};
 use std::fmt;
 
 // TODO: use the enum rewriter and strip underscores?
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Default)]
 #[repr(i32)]
 pub enum PixelGeometry {
+    #[default]
     Unknown = SkPixelGeometry::kUnknown_SkPixelGeometry as _,
     RGBH = SkPixelGeometry::kRGB_H_SkPixelGeometry as _,
     BGRH = SkPixelGeometry::kBGR_H_SkPixelGeometry as _,
@@ -30,12 +31,6 @@ impl PixelGeometry {
 
     pub fn is_v(self) -> bool {
         self == PixelGeometry::RGBV || self == PixelGeometry::BGRV
-    }
-}
-
-impl Default for PixelGeometry {
-    fn default() -> Self {
-        PixelGeometry::Unknown
     }
 }
 

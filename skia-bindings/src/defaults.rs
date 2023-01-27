@@ -1,5 +1,5 @@
-//! This file contains Default trait implementations for types that are
-//! re-exported from skia-safe.
+//! This file contains Default trait implementations for types that are re-exported from skia-safe.
+#![allow(clippy::derivable_impls)]
 
 use crate::{
     SkBlendMode, SkBlurStyle, SkCanvas_Lattice_RectType, SkClipOp, SkPaint_Cap, SkPaint_Join,
