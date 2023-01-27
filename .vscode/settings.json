@@ -29,6 +29,7 @@
         "skcanvas",
         "skgpu",
         "skottie",
+        "skpathutils",
         "unoptimized",
         "USERPROFILE",
         "webgl",

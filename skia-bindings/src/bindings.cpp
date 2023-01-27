@@ -38,6 +38,7 @@
 #include "include/core/SkPathBuilder.h"
 #include "include/core/SkPathMeasure.h"
 #include "include/core/SkPathTypes.h"
+#include "include/core/SkPathUtils.h"
 #include "include/core/SkPicture.h"
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkPixelRef.h"
@@ -668,6 +669,14 @@ extern "C" void C_SkPathMeasure_destruct(const SkPathMeasure* self) {
 
 extern "C" void
 C_SkPathTypes_Types(SkPathFillType *, SkPathDirection *, SkPathSegmentMask *, SkPathVerb *) {}
+
+//
+// core/SkPathUtils.h
+//
+
+extern "C" bool C_PathUtils_FillPathWithPaint(const SkPath* src, const SkPaint* paint, SkPath* dst, const SkRect* cullRect, const SkMatrix* matrix) {
+    return skpathutils::FillPathWithPaint(*src, *paint, dst, cullRect, *matrix);
+}
 
 //
 // core/SkCanvas.h
