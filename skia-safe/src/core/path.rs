@@ -21,8 +21,8 @@ variant_name!(ArcSize::Small, arc_size_naming);
 pub use skia_bindings::SkPath_AddPathMode as AddPathMode;
 variant_name!(AddPathMode::Append, append_naming);
 
-/// SegmentMask constants correspond to each drawing Verb type in [`Path`]; for
-/// instance, if [`Path`] only contains lines, only the [`SegmentMask::LINE`] bit is set.
+/// SegmentMask constants correspond to each drawing Verb type in [`crate::Path`]; for instance, if
+/// [`crate::Path`] only contains lines, only the [`crate::path::SegmentMask::LINE`] bit is set.
 pub use path_types::PathSegmentMask as SegmentMask;
 
 /// Verb instructs [`Path`] how to interpret one or more [`Point`] and optional conic weight;

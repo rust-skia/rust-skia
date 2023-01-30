@@ -8,7 +8,7 @@ use skia_bindings as sb;
 /// * `paint` - [`Paint`], from which attributes such as stroke cap, width, miter, and join,
 ///                  as well as `path_effect` will be used.
 /// * `dst` - resulting [`Path`]
-/// * `cull_rect` - optional limit passed to [`PathEffect`]
+/// * `cull_rect` - optional limit passed to [`crate::PathEffect`]
 /// * `matrix` - if scale > 1, increase precision, else if (0 < scale < 1) reduce precision
 ///                  to favor speed and size
 /// Returns: `true` if the dst path was updated, `false` if it was not (e.g. if the path
