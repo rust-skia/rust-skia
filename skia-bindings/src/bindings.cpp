@@ -9,6 +9,7 @@
 // core/
 #include "include/core/SkAnnotation.h"
 #include "include/core/SkBlendMode.h"
+#include "include/core/SkBlurTypes.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkColorFilter.h"
@@ -37,6 +38,7 @@
 #include "include/core/SkPathBuilder.h"
 #include "include/core/SkPathMeasure.h"
 #include "include/core/SkPathTypes.h"
+#include "include/core/SkPathUtils.h"
 #include "include/core/SkPicture.h"
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkPixelRef.h"
@@ -667,6 +669,14 @@ extern "C" void C_SkPathMeasure_destruct(const SkPathMeasure* self) {
 
 extern "C" void
 C_SkPathTypes_Types(SkPathFillType *, SkPathDirection *, SkPathSegmentMask *, SkPathVerb *) {}
+
+//
+// core/SkPathUtils.h
+//
+
+extern "C" bool C_PathUtils_FillPathWithPaint(const SkPath* src, const SkPaint* paint, SkPath* dst, const SkRect* cullRect, const SkMatrix* matrix) {
+    return skpathutils::FillPathWithPaint(*src, *paint, dst, cullRect, *matrix);
+}
 
 //
 // core/SkCanvas.h
@@ -2601,10 +2611,6 @@ SkImageFilter *C_SkImageFilters_Offset(SkScalar dx, SkScalar dy, SkImageFilter *
     return SkImageFilters::Offset(dx, dy, sp(input), *cropRect).release();
 }
 
-SkImageFilter *C_SkImageFilters_Paint(const SkPaint *paint, const SkImageFilters::CropRect *cropRect) {
-    return SkImageFilters::Paint(*paint, *cropRect).release();
-}
-
 SkImageFilter *C_SkImageFilters_Picture(SkPicture *pic, const SkRect *targetRect) {
     return SkImageFilters::Picture(sp(pic), *targetRect).release();
 }
@@ -2814,6 +2820,10 @@ extern "C" SkOrderedFontMgr* C_SkOrderedFontMgr_new() {
 
 extern "C" void C_SkOrderedFontMgr_append(SkOrderedFontMgr* self, SkFontMgr* fontMgr) {
     self->append(sp(fontMgr));
+}
+
+extern "C" void C_SkParsePath_ToSVGString(const SkPath* self, SkString* uninitialized, SkParsePath::PathEncoding encoding) {
+    new (uninitialized) SkString(SkParsePath::ToSVGString(*self, encoding));
 }
 
 //

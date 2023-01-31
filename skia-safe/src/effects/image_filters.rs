@@ -1,7 +1,7 @@
 use crate::{
     prelude::*, scalar, Blender, Color, ColorChannel, ColorFilter, CubicResampler, IPoint, IRect,
-    ISize, Image, ImageFilter, Matrix, Paint, Picture, Point3, Rect, Region, SamplingOptions,
-    Shader, TileMode, Vector,
+    ISize, Image, ImageFilter, Matrix, Picture, Point3, Rect, Region, SamplingOptions, Shader,
+    TileMode, Vector,
 };
 use skia_bindings::{self as sb, SkImageFilter, SkImageFilters_CropRect};
 
@@ -350,12 +350,6 @@ pub fn offset(
             input.into().into_ptr_or_null(),
             crop_rect.into().native(),
         )
-    })
-}
-
-pub fn paint(paint: &Paint, crop_rect: impl Into<CropRect>) -> Option<ImageFilter> {
-    ImageFilter::from_ptr(unsafe {
-        sb::C_SkImageFilters_Paint(paint.native(), crop_rect.into().native())
     })
 }
 
@@ -839,10 +833,6 @@ impl ImageFilter {
         offset(delta, self, crop_rect.into().map(|r| r.into()))
     }
 
-    pub fn from_paint<'a>(paint: &Paint, crop_rect: impl Into<Option<&'a IRect>>) -> Option<Self> {
-        self::paint(paint, crop_rect.into().map(|r| r.into()))
-    }
-
     pub fn from_picture<'a>(
         picture: impl Into<Picture>,
         crop_rect: impl Into<Option<&'a Rect>>,
@@ -876,15 +866,6 @@ impl ArithmeticFPInputs {
             k: [k0, k1, k2, k3],
             enforce_pm_color,
         }
-    }
-}
-
-impl Paint {
-    pub fn as_image_filter<'a>(
-        &self,
-        crop_rect: impl Into<Option<&'a IRect>>,
-    ) -> Option<ImageFilter> {
-        paint(self, crop_rect.into().map(|r| r.into()))
     }
 }
 
