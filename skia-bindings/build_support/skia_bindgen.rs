@@ -295,7 +295,6 @@ const OPAQUE_TYPES: &[&str] = &[
     "std::atomic",
     "std::function",
     "std::unique_ptr",
-    "SkAutoTMalloc",
     "SkTHashMap",
     // Ubuntu 18 LLVM 6: all types derived from SkWeakRefCnt
     "SkWeakRefCnt",
@@ -411,6 +410,8 @@ const OPAQUE_TYPES: &[&str] = &[
     "skgpu::VulkanMemoryAllocator",
     // m109 (ParagraphPainter::SkPaintOrID)
     "std::variant",
+    // m111 Used in SkTextBlobBuilder
+    "skia_private::AutoTMalloc",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[
