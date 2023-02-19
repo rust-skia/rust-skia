@@ -1,8 +1,8 @@
 use crate::{artifact, drivers::DrawingDriver, Driver};
 use skia_safe::{
     gpu,
-    gpu::{d3d, Protected},
-    Budgeted, Canvas, ImageInfo, Surface,
+    gpu::{d3d, Budgeted, Protected},
+    Canvas, ImageInfo, Surface,
 };
 use std::{ffi, path::Path, ptr};
 use winapi::{
