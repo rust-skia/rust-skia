@@ -4,7 +4,7 @@ use foreign_types_shared::ForeignType;
 use metal_rs::*;
 use skia_safe::{
     gpu::{self, mtl},
-    Budgeted, Canvas, ImageInfo, Surface,
+    Canvas, ImageInfo, Surface,
 };
 use std::{path::Path, ptr};
 
@@ -56,7 +56,7 @@ impl DrawingDriver for Metal {
         let image_info = ImageInfo::new_n32_premul((width * 2, height * 2), None);
         let mut surface = Surface::new_render_target(
             &mut self.context,
-            Budgeted::Yes,
+            gpu::Budgeted::Yes,
             &image_info,
             None,
             gpu::SurfaceOrigin::TopLeft,

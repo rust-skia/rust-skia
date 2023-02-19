@@ -886,7 +886,7 @@ impl Canvas {
     /// [`Rect`] bounds suggests but does not define layer size. To clip drawing to a specific
     /// rectangle, use [`Self::clip_rect()`].
     ///
-    /// alpha of zero is fully transparent, 255 is fully opaque.
+    /// alpha of zero is fully transparent, 1.0 is fully opaque.
     ///
     /// Call [`Self::restore_to_count()`] with result to restore this and subsequent saves.
     ///
@@ -895,13 +895,18 @@ impl Canvas {
     /// Returns depth of saved stack
     ///
     /// example: <https://fiddle.skia.org/c/@Canvas_saveLayerAlpha>
-    pub fn save_layer_alpha(&mut self, bounds: impl Into<Option<Rect>>, alpha: u8cpu) -> usize {
+    pub fn save_layer_alpha_f(&mut self, bounds: impl Into<Option<Rect>>, alpha: f32) -> usize {
         unsafe {
             self.native_mut()
-                .saveLayerAlpha(bounds.into().native().as_ptr_or_null(), alpha)
+                .saveLayerAlphaf(bounds.into().native().as_ptr_or_null(), alpha)
         }
         .try_into()
         .unwrap()
+    }
+
+    /// Helper that accepts an int between 0 and 255, and divides it by 255.0
+    pub fn save_layer_alpha(&mut self, bounds: impl Into<Option<Rect>>, alpha: u8cpu) -> usize {
+        self.save_layer_alpha_f(bounds, alpha as f32 * (1.0 / 255.0))
     }
 
     /// Saves [`Matrix`] and clip, and allocates [`Surface`] for subsequent drawing.

@@ -1113,7 +1113,7 @@ impl Image {
         context: &mut gpu::DirectContext,
         mipmapped: gpu::Mipmapped,
     ) -> Option<Image> {
-        self.new_texture_image_budgeted(context, mipmapped, crate::Budgeted::Yes)
+        self.new_texture_image_budgeted(context, mipmapped, crate::gpu::Budgeted::Yes)
     }
 
     /// Returns [`Image`] backed by GPU texture associated with context. Returned [`Image`] is
@@ -1140,7 +1140,7 @@ impl Image {
         &self,
         direct_context: &mut gpu::DirectContext,
         mipmapped: gpu::Mipmapped,
-        budgeted: crate::Budgeted,
+        budgeted: gpu::Budgeted,
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_makeTextureImage(

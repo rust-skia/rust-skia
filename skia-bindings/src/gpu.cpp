@@ -48,7 +48,7 @@ extern "C" SkSurface* C_SkSurface_MakeFromBackendRenderTarget(
 
 extern "C" SkSurface* C_SkSurface_MakeRenderTarget(
     GrRecordingContext* context,
-    SkBudgeted budgeted,
+    skgpu::Budgeted budgeted,
     const SkImageInfo* imageInfo,
     int sampleCount, GrSurfaceOrigin surfaceOrigin,
     const SkSurfaceProps* surfaceProps,
@@ -66,7 +66,7 @@ extern "C" SkSurface* C_SkSurface_MakeRenderTarget(
 extern "C" SkSurface* C_SkSurface_MakeRenderTarget2(
         GrRecordingContext* context,
         const SkSurfaceCharacterization& characterization,
-        SkBudgeted budgeted) {
+        skgpu::Budgeted budgeted) {
     return SkSurface::MakeRenderTarget(
             context,
             characterization,
@@ -415,6 +415,6 @@ extern "C" SkImage* C_SkImage_makeTextureImage(
         const SkImage* self,
         GrDirectContext* context,
         GrMipMapped mipMapped,
-        SkBudgeted budgeted) {
+        skgpu::Budgeted budgeted) {
     return self->makeTextureImage(context, mipMapped, budgeted).release();
 }
