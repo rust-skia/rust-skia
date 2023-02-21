@@ -96,7 +96,7 @@ fn main() {
         })
         .unwrap();
     println!("Picked a config with {} samples", gl_config.num_samples());
-    let mut window = window.expect("Could not create window with opencl context");
+    let mut window = window.expect("Could not create window with OpenGL context");
     let raw_window_handle = window.raw_window_handle();
 
     // The context creation part. It can be created before surface and that's how
@@ -133,7 +133,7 @@ fn main() {
         gl_config
             .display()
             .create_window_surface(&gl_config, &attrs)
-            .expect("Coluld not create gl window surface")
+            .expect("Could not create gl window surface")
     };
 
     let gl_context = not_current_gl_context
