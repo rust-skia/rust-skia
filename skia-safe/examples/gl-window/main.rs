@@ -15,9 +15,15 @@ fn main() {
     println!("This example is not supported on Emscripten (https://github.com/rust-windowing/glutin/issues/1349)")
 }
 
+#[cfg(target_os = "ios")]
+fn main() {
+    println!("This example is not supported on iOS (https://github.com/rust-windowing/glutin/issues/1448)")
+}
+
 #[cfg(all(
     not(target_os = "android"),
     not(target_os = "emscripten"),
+    not(target_os = "ios"),
     not(feature = "gl")
 ))]
 fn main() {
@@ -27,6 +33,7 @@ fn main() {
 #[cfg(all(
     not(target_os = "android"),
     not(target_os = "emscripten"),
+    not(target_os = "ios"),
     feature = "gl"
 ))]
 fn main() {
