@@ -2,14 +2,6 @@ use crate::prelude::*;
 use skia_bindings::SkFourByteTag;
 use std::ops::Deref;
 
-#[allow(non_camel_case_types)]
-pub(crate) type u8cpu = skia_bindings::U8CPU;
-
-// TODO: U16CPU?
-
-pub(crate) const SK_MAX_S32: i32 = std::i32::MAX;
-pub(crate) const SK_MIN_S32: i32 = -SK_MAX_S32;
-
 //
 // FourByteTag
 //
@@ -84,5 +76,3 @@ pub type Unichar = skia_bindings::SkUnichar;
 #[cfg(feature = "gpu")]
 #[deprecated(since = "0.0.0", note = "Use gpu::Budgeted")]
 pub type Budgeted = crate::gpu::Budgeted;
-
-// TODO: BackingFit

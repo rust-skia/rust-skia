@@ -1,5 +1,5 @@
-use crate::{prelude::*, u8cpu};
-use skia_bindings::{self as sb, SkColor, SkColor4f, SkHSVToColor, SkPMColor, SkRGBToHSV};
+use crate::prelude::*;
+use skia_bindings::{self as sb, SkColor, SkColor4f, SkHSVToColor, SkPMColor, SkRGBToHSV, U8CPU};
 use std::ops::{BitAnd, BitOr, Index, IndexMut, Mul};
 
 // TODO: What should we do with SkAlpha?
@@ -69,10 +69,10 @@ impl Color {
         Self(argb)
     }
 
-    // note: we don't use the u8cpu type in the arguments here, because we trust the Rust
-    // compiler to optimize the storage type.
+    // Don't use the u8cpu type in the arguments here, because we trust the Rust compiler to
+    // optimize the storage type.
     pub const fn from_argb(a: u8, r: u8, g: u8, b: u8) -> Color {
-        Self(((a as u8cpu) << 24) | ((r as u8cpu) << 16) | ((g as u8cpu) << 8) | (b as u8cpu))
+        Self(((a as U8CPU) << 24) | ((r as U8CPU) << 16) | ((g as U8CPU) << 8) | (b as U8CPU))
     }
 
     pub const fn from_rgb(r: u8, g: u8, b: u8) -> Color {
@@ -177,7 +177,7 @@ impl HSV {
 
 pub type PMColor = SkPMColor;
 
-pub fn pre_multiply_argb(a: u8cpu, r: u8cpu, g: u8cpu, b: u8cpu) -> PMColor {
+pub fn pre_multiply_argb(a: U8CPU, r: U8CPU, g: U8CPU, b: U8CPU) -> PMColor {
     unsafe { sb::SkPreMultiplyARGB(a, r, g, b) }
 }
 

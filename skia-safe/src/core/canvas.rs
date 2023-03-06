@@ -1,14 +1,14 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
 use crate::{
-    prelude::*, scalar, u8cpu, Bitmap, BlendMode, ClipOp, Color, Color4f, Data, Drawable,
-    FilterMode, Font, GlyphId, IPoint, IRect, ISize, Image, ImageFilter, ImageInfo, Matrix, Paint,
-    Path, Picture, Pixmap, Point, QuickReject, RRect, RSXform, Rect, Region, SamplingOptions,
-    Shader, Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices, M44,
+    prelude::*, scalar, Bitmap, BlendMode, ClipOp, Color, Color4f, Data, Drawable, FilterMode,
+    Font, GlyphId, IPoint, IRect, ISize, Image, ImageFilter, ImageInfo, Matrix, Paint, Path,
+    Picture, Pixmap, Point, QuickReject, RRect, RSXform, Rect, Region, SamplingOptions, Shader,
+    Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices, M44,
 };
 use skia_bindings::{
     self as sb, SkAutoCanvasRestore, SkCanvas, SkCanvas_SaveLayerRec, SkImageFilter, SkPaint,
-    SkRect,
+    SkRect, U8CPU,
 };
 use std::{
     convert::TryInto,
@@ -905,7 +905,7 @@ impl Canvas {
     }
 
     /// Helper that accepts an int between 0 and 255, and divides it by 255.0
-    pub fn save_layer_alpha(&mut self, bounds: impl Into<Option<Rect>>, alpha: u8cpu) -> usize {
+    pub fn save_layer_alpha(&mut self, bounds: impl Into<Option<Rect>>, alpha: U8CPU) -> usize {
         self.save_layer_alpha_f(bounds, alpha as f32 * (1.0 / 255.0))
     }
 
