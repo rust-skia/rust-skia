@@ -74,5 +74,5 @@ pub type Unichar = skia_bindings::SkUnichar;
 // pub(crate) const MSEC_MAX: u32 = std::i32::MAX as u32;
 
 #[cfg(feature = "gpu")]
-#[deprecated(since = "0.0.0", note = "Use gpu::Budgeted")]
+#[deprecated(since = "0.60.0", note = "Use gpu::Budgeted")]
 pub type Budgeted = crate::gpu::Budgeted;
