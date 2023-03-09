@@ -31,4 +31,5 @@ rm-externals:
 
 .PHONY: rm-locks
 rm-locks:
-	find -type f -name 'index.lock' -delete
+	find . -type f -name 'index.lock' -print0 | xargs -0 rm
+	find . -type f -name 'HEAD.lock' -print0 | xargs -0 rm

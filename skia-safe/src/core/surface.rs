@@ -138,7 +138,7 @@ impl Surface {
 
     pub fn new_render_target(
         context: &mut gpu::RecordingContext,
-        budgeted: crate::Budgeted,
+        budgeted: gpu::Budgeted,
         image_info: &ImageInfo,
         sample_count: impl Into<Option<usize>>,
         surface_origin: impl Into<Option<gpu::SurfaceOrigin>>,
@@ -163,7 +163,7 @@ impl Surface {
     pub fn new_render_target_with_characterization(
         context: &mut gpu::RecordingContext,
         characterization: &SurfaceCharacterization,
-        budgeted: crate::Budgeted,
+        budgeted: gpu::Budgeted,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
             sb::C_SkSurface_MakeRenderTarget2(

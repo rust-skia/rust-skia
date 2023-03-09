@@ -52,14 +52,15 @@ impl Shaper {
         })
     }
 
-    pub fn new_shape_dont_wrap_or_reorder(font_mgr: impl Into<Option<FontMgr>>) -> Option<Self> {
-        #[cfg(feature = "embed-icudtl")]
-        crate::icu::init();
+    // m111: This needs the SkUnicode module
+    // pub fn new_shape_dont_wrap_or_reorder(font_mgr: impl Into<Option<FontMgr>>) -> Option<Self> {
+    //     #[cfg(feature = "embed-icudtl")]
+    //     crate::icu::init();
 
-        Self::from_ptr(unsafe {
-            sb::C_SkShaper_MakeShapeDontWrapOrReorder(font_mgr.into().into_ptr_or_null())
-        })
-    }
+    //     Self::from_ptr(unsafe {
+    //         sb::C_SkShaper_MakeShapeDontWrapOrReorder(font_mgr.into().into_ptr_or_null())
+    //     })
+    // }
 
     pub fn purge_harf_buzz_cache() {
         unsafe { sb::SkShaper_PurgeHarfBuzzCache() }

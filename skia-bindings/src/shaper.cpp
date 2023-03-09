@@ -26,9 +26,10 @@ extern "C" SkShaper* C_SkShaper_MakeShapeThenWrap(SkFontMgr* fontMgr) {
     return SkShaper::MakeShapeThenWrap(sk_sp<SkFontMgr>(fontMgr)).release();
 }
 
-extern "C" SkShaper* C_SkShaper_MakeShapeDontWrapOrReorder(SkFontMgr* fontMgr) {
-    return SkShaper::MakeShapeDontWrapOrReorder(sk_sp<SkFontMgr>(fontMgr)).release();
-}
+// m111: For this to work, `SkUnicode` needs to be supported.
+// extern "C" SkShaper* C_SkShaper_MakeShapeDontWrapOrReorder(SkFontMgr* fontMgr) {
+//     return SkShaper::MakeShapeDontWrapOrReorder(sk_sp<SkFontMgr>(fontMgr)).release();
+// }
 
 extern "C" SkShaper* C_SkShaper_MakeCoreText() {
 #ifdef SK_SHAPER_CORETEXT_AVAILABLE
