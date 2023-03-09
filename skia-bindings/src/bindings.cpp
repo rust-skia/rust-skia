@@ -20,6 +20,7 @@
 #include "include/core/SkDeferredDisplayListRecorder.h"
 #include "include/core/SkDrawable.h"
 #include "include/core/SkDocument.h"
+#include "include/core/SkEncodedImageFormat.h"
 #include "include/core/SkFlattenable.h"
 #include "include/core/SkFont.h"
 #include "include/core/SkFontArguments.h"

@@ -566,7 +566,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("GrGLFormat", rewrite::k_xxx),
     ("GrSurfaceOrigin", rewrite::k_xxx_name),
     ("GrBackendApi", rewrite::k_xxx),
-    ("GrMipmapped", rewrite::k_xxx),
+    ("Mipmapped", rewrite::k_xxx),
     ("GrRenderable", rewrite::k_xxx),
     ("GrProtected", rewrite::k_xxx),
     //
