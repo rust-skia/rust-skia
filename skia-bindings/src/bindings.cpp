@@ -108,6 +108,10 @@ extern "C" SkCodec* C_SkCodec_MakeFromData(SkData* data) {
     return SkCodec::MakeFromData(sp(data)).release();
 }
 
+extern "C" void C_SkCodec_delete(SkCodec* self) {
+    delete self;
+}
+
 extern "C" void C_SkCodec_getInfo(const SkCodec* self, SkImageInfo* info) {
     *info = self->getInfo();
 }
