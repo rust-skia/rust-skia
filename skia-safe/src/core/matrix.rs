@@ -7,7 +7,7 @@ use std::{
 };
 
 pub use skia_bindings::SkApplyPerspectiveClip as ApplyPerspectiveClip;
-variant_name!(ApplyPerspectiveClip::Yes, perspective_clip_naming);
+variant_name!(ApplyPerspectiveClip::Yes);
 
 bitflags! {
     // m85: On Windows the SkMatrix_TypeMask is defined as i32,
@@ -27,7 +27,7 @@ impl TypeMask {
 }
 
 pub use skia_bindings::SkMatrix_ScaleToFit as ScaleToFit;
-variant_name!(ScaleToFit::Fill, scale_to_fit_naming);
+variant_name!(ScaleToFit::Fill);
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]

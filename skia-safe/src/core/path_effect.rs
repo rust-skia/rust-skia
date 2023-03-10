@@ -1,4 +1,5 @@
 use crate::{prelude::*, scalar, Matrix, NativeFlattenable, Path, Rect, StrokeRec};
+use sb::SkPathEffect_INHERITED;
 use skia_bindings::{self as sb, SkFlattenable, SkPathEffect, SkPathEffect_DashType, SkRefCntBase};
 use std::fmt;
 
@@ -10,6 +11,7 @@ pub struct DashInfo {
 
 pub type PathEffect = RCHandle<SkPathEffect>;
 unsafe_send_sync!(PathEffect);
+require_type_equality!(SkPathEffect_INHERITED, SkFlattenable);
 
 impl NativeBase<SkRefCntBase> for SkPathEffect {}
 impl NativeBase<SkFlattenable> for SkPathEffect {}

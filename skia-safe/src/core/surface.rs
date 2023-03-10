@@ -8,23 +8,18 @@ use skia_bindings::{self as sb, SkRefCntBase, SkSurface};
 use std::{fmt, ptr};
 
 pub use skia_bindings::SkSurface_ContentChangeMode as ContentChangeMode;
-variant_name!(ContentChangeMode::Retain, content_change_mode_naming);
+variant_name!(ContentChangeMode::Retain);
 
 #[cfg(feature = "gpu")]
 pub use skia_bindings::SkSurface_BackendHandleAccess as BackendHandleAccess;
 #[cfg(feature = "gpu")]
-variant_name!(
-    BackendHandleAccess::FlushWrite,
-    backend_handle_access_naming
-);
+variant_name!(BackendHandleAccess::FlushWrite);
 
 pub use skia_bindings::SkSurface_BackendSurfaceAccess as BackendSurfaceAccess;
-variant_name!(
-    BackendSurfaceAccess::Present,
-    surface_backend_surface_access_naming
-);
+variant_name!(BackendSurfaceAccess::Present);
 
 pub type Surface = RCHandle<SkSurface>;
+require_type_equality!(sb::SkSurface_INHERITED, sb::SkRefCnt);
 
 impl NativeRefCountedBase for SkSurface {
     type Base = SkRefCntBase;

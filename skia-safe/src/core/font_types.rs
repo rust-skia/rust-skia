@@ -14,4 +14,4 @@ pub enum TextEncoding {
 native_transmutable!(SkTextEncoding, TextEncoding, text_encoding_layout);
 
 pub use skia_bindings::SkFontHinting as FontHinting;
-variant_name!(FontHinting::Full, font_hinting_naming);
+variant_name!(FontHinting::Full);

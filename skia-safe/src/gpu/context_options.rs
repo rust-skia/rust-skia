@@ -3,12 +3,9 @@ use skia_bindings::{self as sb, GrContextOptions};
 use std::os::raw;
 
 pub use skia_bindings::GrContextOptions_Enable as Enable;
-variant_name!(Enable::Yes, enable_naming);
+variant_name!(Enable::Yes);
 pub use skia_bindings::GrContextOptions_ShaderCacheStrategy as ShaderCacheStrategy;
-variant_name!(
-    ShaderCacheStrategy::BackendSource,
-    shader_cache_strategy_naming
-);
+variant_name!(ShaderCacheStrategy::BackendSource);
 
 #[repr(C)]
 #[derive(Debug)]

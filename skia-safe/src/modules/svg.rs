@@ -15,6 +15,7 @@ use crate::{
 };
 
 pub type Dom = RCHandle<sb::SkSVGDOM>;
+require_base_type!(sb::SkSVGDOM, sb::SkRefCnt);
 
 unsafe impl Send for Dom {}
 

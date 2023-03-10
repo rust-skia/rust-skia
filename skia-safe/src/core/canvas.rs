@@ -145,7 +145,7 @@ impl<'a> SaveLayerRec<'a> {
 
 /// Selects if an array of points are drawn as discrete points, as lines, or as an open polygon.
 pub use sb::SkCanvas_PointMode as PointMode;
-variant_name!(PointMode::Polygon, point_mode_naming);
+variant_name!(PointMode::Polygon);
 
 /// [`SrcRectConstraint`] controls the behavior at the edge of source [`Rect`], provided to
 /// [`Canvas::draw_image_rect()`] when there is any filtering. If kStrict is set, then extra code is
@@ -153,7 +153,7 @@ variant_name!(PointMode::Polygon, point_mode_naming);
 ///
 /// [`SrcRectConstraint::Strict`] disables the use of mipmaps and anisotropic filtering.
 pub use sb::SkCanvas_SrcRectConstraint as SrcRectConstraint;
-variant_name!(SrcRectConstraint::Fast, src_rect_constraint_naming);
+variant_name!(SrcRectConstraint::Fast);
 
 /// Provides access to Canvas's pixels.
 ///
@@ -2322,7 +2322,7 @@ pub mod lattice {
     /// Optional setting per rectangular grid entry to make it transparent,
     /// or to fill the grid entry with a color.
     pub use sb::SkCanvas_Lattice_RectType as RectType;
-    variant_name!(RectType::FixedColor, rect_type_naming);
+    variant_name!(RectType::FixedColor);
 }
 
 #[derive(Debug)]

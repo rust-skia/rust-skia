@@ -3,6 +3,7 @@ use skia_bindings::{self as sb, GrGLInterface, SkRefCntBase};
 use std::{ffi::c_void, fmt, os::raw};
 
 pub type Interface = RCHandle<GrGLInterface>;
+require_type_equality!(sb::GrGLInterface_INHERITED, sb::SkRefCnt);
 
 impl NativeRefCountedBase for GrGLInterface {
     type Base = SkRefCntBase;

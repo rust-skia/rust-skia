@@ -6,18 +6,15 @@ use std::{
 };
 
 pub use sb::skia_textlayout_Affinity as Affinity;
-variant_name!(Affinity::Downstream, affinity_naming);
+variant_name!(Affinity::Downstream);
 pub use sb::skia_textlayout_RectHeightStyle as RectHeightStyle;
-variant_name!(
-    RectHeightStyle::IncludeLineSpacingBottom,
-    rect_height_style_naming
-);
+variant_name!(RectHeightStyle::IncludeLineSpacingBottom);
 pub use sb::skia_textlayout_RectWidthStyle as RectWidthStyle;
-variant_name!(RectWidthStyle::Max, rect_width_style_naming);
+variant_name!(RectWidthStyle::Max);
 pub use sb::skia_textlayout_TextAlign as TextAlign;
-variant_name!(TextAlign::End, text_align_naming);
+variant_name!(TextAlign::End);
 pub use sb::skia_textlayout_TextDirection as TextDirection;
-variant_name!(TextDirection::LTR, text_direction_naming);
+variant_name!(TextDirection::LTR);
 
 pub use sb::skia_textlayout_PositionWithAffinity as PositionWithAffinity;
 
@@ -86,12 +83,9 @@ pub const EMPTY_RANGE: Range<usize> = Range {
 };
 
 pub use sb::skia_textlayout_TextBaseline as TextBaseline;
-variant_name!(TextBaseline::Alphabetic, text_baseline_naming);
+variant_name!(TextBaseline::Alphabetic);
 
 pub use sb::skia_textlayout_TextHeightBehavior as TextHeightBehavior;
-variant_name!(
-    TextHeightBehavior::DisableFirstAscent,
-    text_height_behavior_naming
-);
+variant_name!(TextHeightBehavior::DisableFirstAscent);
 
 // m84: LineMetricStyle is declared but not used in the public API yet.

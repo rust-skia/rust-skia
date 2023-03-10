@@ -8,6 +8,7 @@ use std::{convert::TryInto, fmt, ptr, slice};
 
 pub type TextBlob = RCHandle<SkTextBlob>;
 unsafe_send_sync!(TextBlob);
+require_base_type!(SkTextBlob, sb::SkNVRefCnt);
 
 impl NativeRefCounted for SkTextBlob {
     fn _ref(&self) {

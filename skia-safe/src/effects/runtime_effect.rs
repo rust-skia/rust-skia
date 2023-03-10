@@ -65,7 +65,7 @@ pub mod uniform {
     use skia_bindings as sb;
 
     pub use sb::SkRuntimeEffect_Uniform_Type as Type;
-    variant_name!(Type::Float2x2, type_naming);
+    variant_name!(Type::Float2x2);
 
     bitflags! {
         pub struct Flags : u32 {
@@ -79,7 +79,7 @@ pub mod uniform {
 }
 
 pub use sb::SkRuntimeEffect_ChildType as ChildType;
-variant_name!(ChildType::Shader, child_type_naming);
+variant_name!(ChildType::Shader);
 
 #[deprecated(since = "0.41.0", note = "Use Child")]
 pub type Varying = Child;

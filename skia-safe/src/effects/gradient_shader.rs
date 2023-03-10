@@ -18,13 +18,13 @@ native_transmutable!(
 
 pub mod interpolation {
     pub type InPremul = skia_bindings::SkGradientShader_Interpolation_InPremul;
-    variant_name!(InPremul::Yes, in_premul_type_naming);
+    variant_name!(InPremul::Yes);
 
     pub type ColorSpace = skia_bindings::SkGradientShader_Interpolation_ColorSpace;
-    variant_name!(ColorSpace::HSL, color_space_type_naming);
+    variant_name!(ColorSpace::HSL);
 
     pub type HueMethod = skia_bindings::SkGradientShader_Interpolation_HueMethod;
-    variant_name!(HueMethod::Shorter, hue_method_type_naming);
+    variant_name!(HueMethod::Shorter);
 }
 
 impl From<Flags> for Interpolation {

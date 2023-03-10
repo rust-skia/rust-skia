@@ -1,6 +1,6 @@
 use crate::{interop::DynamicMemoryWStream, prelude::*, Canvas, Data, Rect, Size};
 use core::fmt;
-use skia_bindings::{SkDocument, SkRefCntBase};
+use skia_bindings::{self as sb, SkDocument, SkRefCntBase};
 use std::{pin::Pin, ptr};
 
 pub struct Document<State = state::Open> {
@@ -11,6 +11,8 @@ pub struct Document<State = state::Open> {
 
     state: State,
 }
+
+require_type_equality!(sb::SkDocument_INHERITED, sb::SkRefCnt);
 
 impl NativeRefCountedBase for SkDocument {
     type Base = SkRefCntBase;

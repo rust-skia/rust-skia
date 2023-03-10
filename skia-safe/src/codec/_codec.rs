@@ -7,7 +7,7 @@ use skia_bindings::{self as sb, SkCodec, SkCodec_Options, SkRefCntBase};
 use std::{ffi, fmt, mem, ptr};
 
 pub use sb::SkCodec_Result as Result;
-variant_name!(Result::IncompleteInput, result_naming);
+variant_name!(Result::IncompleteInput);
 
 // TODO: implement Display
 
@@ -18,10 +18,10 @@ pub fn result_to_string(result: Result) -> &'static str {
 }
 
 pub use sb::SkCodec_SelectionPolicy as SelectionPolicy;
-variant_name!(SelectionPolicy::PreferStillImage, selection_policy_naming);
+variant_name!(SelectionPolicy::PreferStillImage);
 
 pub use sb::SkCodec_ZeroInitialized as ZeroInitialized;
-variant_name!(ZeroInitialized::Yes, zero_initialized_naming);
+variant_name!(ZeroInitialized::Yes);
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct Options {
@@ -32,7 +32,7 @@ pub struct Options {
 }
 
 pub use sb::SkCodec_SkScanlineOrder as ScanlineOrder;
-variant_name!(ScanlineOrder::BottomUp, scanline_order_naming);
+variant_name!(ScanlineOrder::BottomUp);
 
 pub type Codec = RCHandle<SkCodec>;
 

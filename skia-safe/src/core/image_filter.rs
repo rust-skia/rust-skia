@@ -3,10 +3,11 @@ use skia_bindings::{self as sb, SkColorFilter, SkFlattenable, SkImageFilter, SkR
 use std::{fmt, ptr};
 
 pub use skia_bindings::SkImageFilter_MapDirection as MapDirection;
-variant_name!(MapDirection::Forward, map_direction_naming);
+variant_name!(MapDirection::Forward);
 
 pub type ImageFilter = RCHandle<SkImageFilter>;
 unsafe_send_sync!(ImageFilter);
+require_base_type!(SkImageFilter, SkFlattenable);
 
 impl NativeBase<SkRefCntBase> for SkImageFilter {}
 impl NativeBase<SkFlattenable> for SkImageFilter {}

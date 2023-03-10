@@ -9,6 +9,7 @@ use crate::{
 use skia_bindings::{self as sb, GrRecordingContext, SkRefCntBase};
 
 pub type RecordingContext = RCHandle<GrRecordingContext>;
+require_type_equality!(sb::GrRecordingContext_INHERITED, sb::GrImageContext);
 
 impl NativeRefCountedBase for GrRecordingContext {
     type Base = SkRefCntBase;

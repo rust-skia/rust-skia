@@ -742,8 +742,7 @@ where
         np as _
     }
 
-    /// Runs a test that proves that the native and the rust
-    /// type are of the same size.
+    /// Runs a test that proves that the native and the Rust type are of the same size.
     fn test_layout() {
         assert_eq!(mem::size_of::<Self>(), mem::size_of::<NT>());
     }

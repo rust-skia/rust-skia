@@ -5,7 +5,7 @@ use yuva_pixmap_info::SupportedDataTypes;
 
 /// Data type for Y, U, V, and possibly A channels independent of how values are packed into planes.
 pub use yuva_pixmap_info::DataType;
-variant_name!(DataType::Float16, data_type_naming);
+variant_name!(DataType::Float16);
 
 /// [YUVAInfo] combined with per-plane [ColorType]s and row bytes. Fully specifies the [Pixmap]`s
 /// for a YUVA image without the actual pixel memory and data.

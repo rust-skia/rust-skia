@@ -3,7 +3,7 @@ use skia_bindings::{self as sb, SkColorInfo, SkImageInfo};
 use std::{fmt, mem};
 
 pub use skia_bindings::SkYUVColorSpace as YUVColorSpace;
-variant_name!(YUVColorSpace::JPEG, yuv_color_space_naming);
+variant_name!(YUVColorSpace::JPEG);
 
 pub type ColorInfo = Handle<SkColorInfo>;
 unsafe_send_sync!(ColorInfo);

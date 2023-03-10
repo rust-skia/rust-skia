@@ -13,6 +13,24 @@ macro_rules! native_transmutable {
     };
 }
 
+#[macro_export]
+macro_rules! require_type_equality {
+    ($t: ty, $nt: ty) => {
+        const _: fn(&$t) = |a| {
+            let _: &$nt = a;
+        };
+    };
+}
+
+#[macro_export]
+macro_rules! require_base_type {
+    ($t: ty, $nt: ty) => {
+        const _: fn(&$t) = |a| {
+            let _: &$nt = &(a._base);
+        };
+    };
+}
+
 /// Macro that implements Send and Sync.
 #[macro_export]
 macro_rules! unsafe_send_sync {
@@ -25,10 +43,9 @@ macro_rules! unsafe_send_sync {
 /// Macro that verifies a variant name at compile time.
 #[macro_export]
 macro_rules! variant_name {
-    ($t:expr, $test_fn:ident) => {
-        #[test]
-        fn $test_fn() {
+    ($t:expr) => {
+        const _: fn() = || {
             let _ = $t;
-        }
+        };
     };
 }

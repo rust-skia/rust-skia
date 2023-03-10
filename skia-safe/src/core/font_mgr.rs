@@ -4,10 +4,12 @@ use crate::{
     FontStyle, Typeface, Unichar,
 };
 use core::fmt;
+use sb::SkRefCnt;
 use skia_bindings::{self as sb, SkFontMgr, SkFontStyleSet, SkRefCntBase};
 use std::{ffi::CString, mem, os::raw::c_char};
 
 pub type FontStyleSet = RCHandle<SkFontStyleSet>;
+require_type_equality!(sb::SkFontStyleSet_INHERITED, sb::SkRefCnt);
 
 impl NativeBase<SkRefCntBase> for SkFontStyleSet {}
 
@@ -83,6 +85,7 @@ impl FontStyleSet {
 }
 
 pub type FontMgr = RCHandle<SkFontMgr>;
+require_type_equality!(sb::SkFontMgr_INHERITED, SkRefCnt);
 
 impl NativeBase<SkRefCntBase> for SkFontMgr {}
 

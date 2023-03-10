@@ -6,7 +6,7 @@ use skia_bindings::{self as sb, SkFont, SkFont_PrivFlags};
 use std::{fmt, ptr};
 
 pub use skia_bindings::SkFont_Edging as Edging;
-variant_name!(Edging::Alias, edging_naming);
+variant_name!(Edging::Alias);
 
 pub type Font = Handle<SkFont>;
 unsafe_send_sync!(Font);

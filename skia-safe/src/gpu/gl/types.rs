@@ -3,9 +3,9 @@ use crate::prelude::*;
 use skia_bindings::{self as sb, GrGLFramebufferInfo, GrGLSurfaceInfo, GrGLTextureInfo};
 
 pub use skia_bindings::GrGLFormat as Format;
-variant_name!(Format::ALPHA8, format_naming);
+variant_name!(Format::ALPHA8);
 pub use skia_bindings::GrGLStandard as Standard;
-variant_name!(Standard::GLES, standard_naming);
+variant_name!(Standard::GLES);
 pub use skia_bindings::GrGLenum as Enum;
 pub use skia_bindings::GrGLuint as UInt;
 

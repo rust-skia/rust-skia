@@ -21,6 +21,7 @@ impl<'a> GradientInfo<'a> {
 
 pub type Shader = RCHandle<SkShader>;
 unsafe_send_sync!(Shader);
+require_type_equality!(sb::SkShader_INHERITED, SkFlattenable);
 
 impl NativeBase<SkRefCntBase> for SkShader {}
 impl NativeBase<SkFlattenable> for SkShader {}

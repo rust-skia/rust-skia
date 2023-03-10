@@ -9,6 +9,7 @@ use std::{
 
 pub type DataTable = RCHandle<SkDataTable>;
 unsafe_send_sync!(DataTable);
+require_type_equality!(sb::SkDataTable_INHERITED, sb::SkRefCnt);
 
 impl NativeRefCountedBase for SkDataTable {
     type Base = SkRefCntBase;

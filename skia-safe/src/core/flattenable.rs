@@ -9,6 +9,8 @@ use std::ffi::CStr;
 // TODO: getFlattenableType()?
 // TODO: serialize() with SkSerialProcs?
 
+require_type_equality!(sb::SkFlattenable_INHERITED, sb::SkRefCnt);
+
 pub trait Flattenable: Sized {
     fn type_name(&self) -> &CStr;
     fn serialize(&self) -> Data;

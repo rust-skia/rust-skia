@@ -8,6 +8,7 @@ use std::{
 
 pub type Data = RCHandle<SkData>;
 unsafe_send_sync!(Data);
+require_base_type!(SkData, sb::SkNVRefCnt);
 
 impl NativeRefCounted for SkData {
     fn _ref(&self) {
