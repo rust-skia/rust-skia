@@ -3,7 +3,7 @@ use crate::{
     IRect, ISize, Image, ImageInfo, Pixmap, YUVAPixmapInfo, YUVAPixmaps,
 };
 use ffi::CStr;
-use skia_bindings::{self as sb, SkCodec, SkCodec_Options, SkRefCntBase};
+use skia_bindings::{self as sb, SkCodec, SkCodec_Options};
 use std::{ffi, fmt, mem, ptr};
 
 pub use sb::SkCodec_Result as Result;
@@ -34,12 +34,12 @@ pub struct Options {
 pub use sb::SkCodec_SkScanlineOrder as ScanlineOrder;
 variant_name!(ScanlineOrder::BottomUp, scanline_order_naming);
 
-pub type Codec = RCHandle<SkCodec>;
+pub type Codec = RefHandle<SkCodec>;
 
-impl NativeBase<SkRefCntBase> for SkCodec {}
-
-impl NativeRefCountedBase for SkCodec {
-    type Base = SkRefCntBase;
+impl NativeDrop for SkCodec {
+    fn drop(&mut self) {
+        unsafe { sb::C_SkCodec_delete(self) }
+    }
 }
 
 impl fmt::Debug for Codec {
