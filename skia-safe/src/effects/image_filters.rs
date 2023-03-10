@@ -367,7 +367,7 @@ pub fn picture<'a>(
 }
 
 pub use skia_bindings::SkImageFilters_Dither as Dither;
-variant_name!(Dither::Yes, dither_naming);
+variant_name!(Dither::Yes);
 
 pub fn shader(shader: impl Into<Shader>, crop_rect: impl Into<CropRect>) -> Option<ImageFilter> {
     shader_with_dither(shader, Dither::No, crop_rect)

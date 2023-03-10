@@ -30,6 +30,7 @@ native_transmutable!(
 );
 
 pub type DirectContext = RCHandle<GrDirectContext>;
+require_type_equality!(sb::GrDirectContext_INHERITED, sb::GrRecordingContext);
 
 impl NativeRefCountedBase for GrDirectContext {
     type Base = SkRefCntBase;

@@ -1,13 +1,13 @@
 use skia_bindings::{SkCubicResampler, SkSamplingOptions};
 
 pub use skia_bindings::SkFilterMode as FilterMode;
-variant_name!(FilterMode::Linear, filter_mode_naming);
+variant_name!(FilterMode::Linear);
 
 #[deprecated(since = "0.38.0", note = "Use FilterMode")]
 pub type SamplingMode = FilterMode;
 
 pub use skia_bindings::SkMipmapMode as MipmapMode;
-variant_name!(MipmapMode::Nearest, mipmap_mode_naming);
+variant_name!(MipmapMode::Nearest);
 
 /// Specify `b` and `c` (each between 0...1) to create a shader that applies the corresponding
 /// cubic reconstruction filter to the image.

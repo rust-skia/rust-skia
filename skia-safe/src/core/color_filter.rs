@@ -4,6 +4,7 @@ use std::fmt;
 
 pub type ColorFilter = RCHandle<SkColorFilter>;
 unsafe_send_sync!(ColorFilter);
+require_type_equality!(sb::SkColorFilter_INHERITED, SkFlattenable);
 
 impl NativeBase<SkRefCntBase> for SkColorFilter {}
 

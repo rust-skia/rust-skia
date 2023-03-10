@@ -3,7 +3,7 @@ use skia_bindings::{self as sb, SkPathBuilder};
 use std::{fmt, mem};
 
 pub use skia_bindings::SkPathBuilder_ArcSize as ArcSize;
-variant_name!(ArcSize::Large, arc_size_naming);
+variant_name!(ArcSize::Large);
 
 pub type PathBuilder = Handle<SkPathBuilder>;
 unsafe_send_sync!(PathBuilder);

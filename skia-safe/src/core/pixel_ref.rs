@@ -4,6 +4,7 @@ use std::{fmt, os::raw::c_void};
 
 pub type PixelRef = RCHandle<SkPixelRef>;
 unsafe_send_sync!(PixelRef);
+require_type_equality!(sb::SkPixelRef_INHERITED, sb::SkRefCnt);
 
 impl NativeRefCountedBase for SkPixelRef {
     type Base = SkRefCntBase;

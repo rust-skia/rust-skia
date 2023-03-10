@@ -14,10 +14,7 @@ pub type FontId = TypefaceId;
 pub type FontTableTag = skia_bindings::SkFontTableTag;
 
 pub use skia_bindings::SkTypeface_SerializeBehavior as SerializeBehavior;
-variant_name!(
-    SerializeBehavior::DontIncludeData,
-    serialize_behavior_naming
-);
+variant_name!(SerializeBehavior::DontIncludeData);
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct LocalizedString {
@@ -27,6 +24,7 @@ pub struct LocalizedString {
 
 pub type Typeface = RCHandle<SkTypeface>;
 unsafe_send_sync!(Typeface);
+require_base_type!(SkTypeface, sb::SkWeakRefCnt);
 
 impl NativeRefCountedBase for SkTypeface {
     type Base = SkRefCntBase;

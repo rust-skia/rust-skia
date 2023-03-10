@@ -14,12 +14,12 @@ pub use path_types::PathFillType as FillType;
 /// Four oval parts with radii (rx, ry) start at last [`Path`] [`Point`] and ends at (x, y).
 /// ArcSize and Direction select one of the four oval parts.
 pub use skia_bindings::SkPath_ArcSize as ArcSize;
-variant_name!(ArcSize::Small, arc_size_naming);
+variant_name!(ArcSize::Small);
 
 /// AddPathMode chooses how `add_path()` appends. Adding one [`Path`] to another can extend
 /// the last contour or start a new contour.
 pub use skia_bindings::SkPath_AddPathMode as AddPathMode;
-variant_name!(AddPathMode::Append, append_naming);
+variant_name!(AddPathMode::Append);
 
 /// SegmentMask constants correspond to each drawing Verb type in [`crate::Path`]; for instance, if
 /// [`crate::Path`] only contains lines, only the [`crate::path::SegmentMask::LINE`] bit is set.
@@ -28,7 +28,7 @@ pub use path_types::PathSegmentMask as SegmentMask;
 /// Verb instructs [`Path`] how to interpret one or more [`Point`] and optional conic weight;
 /// manage contour, and terminate [`Path`].
 pub use skia_bindings::SkPath_Verb as Verb;
-variant_name!(Verb::Line, verb_naming);
+variant_name!(Verb::Line);
 
 /// Iterates through verb array, and associated [`Point`] array and conic weight.
 /// Provides options to treat open contours as closed, and to ignore

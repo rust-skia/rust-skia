@@ -3,10 +3,10 @@ use skia_bindings::{self as sb, SkRRect};
 use std::{fmt, mem, ptr};
 
 pub use skia_bindings::SkRRect_Type as Type;
-variant_name!(Type::Complex, rrect_type_naming);
+variant_name!(Type::Complex);
 
 pub use skia_bindings::SkRRect_Corner as Corner;
-variant_name!(Corner::LowerLeft, rrect_corner_naming);
+variant_name!(Corner::LowerLeft);
 
 #[derive(Copy, Clone)]
 #[repr(transparent)]

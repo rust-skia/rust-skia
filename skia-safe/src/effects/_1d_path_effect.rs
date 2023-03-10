@@ -16,7 +16,7 @@ pub mod path_1d_path_effect {
     use skia_bindings::C_SkPath1DPathEffect_Make;
 
     pub use skia_bindings::SkPath1DPathEffect_Style as Style;
-    variant_name!(Style::Translate, style_naming);
+    variant_name!(Style::Translate);
 
     pub fn new(path: &Path, advance: scalar, phase: scalar, style: Style) -> Option<PathEffect> {
         PathEffect::from_ptr(unsafe {

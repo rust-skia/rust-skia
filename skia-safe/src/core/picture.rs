@@ -23,7 +23,7 @@ impl fmt::Debug for Picture {
 impl Picture {
     // TODO: wrap MakeFromStream
 
-    // TODO: may support SkSerialProces in MakeFromData?
+    // TODO: may support SkSerialProcs in MakeFromData?
 
     pub fn from_data(data: &Data) -> Option<Picture> {
         Picture::from_ptr(unsafe { sb::C_SkPicture_MakeFromData(data.native()) })

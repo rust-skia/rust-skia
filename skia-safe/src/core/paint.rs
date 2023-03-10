@@ -8,13 +8,13 @@ use core::fmt;
 use skia_bindings::{self as sb, SkPaint};
 
 pub use sb::SkPaint_Style as Style;
-variant_name!(Style::Fill, style_naming);
+variant_name!(Style::Fill);
 
 pub use sb::SkPaint_Cap as Cap;
-variant_name!(Cap::Butt, cap_naming);
+variant_name!(Cap::Butt);
 
 pub use sb::SkPaint_Join as Join;
-variant_name!(Join::Miter, join_naming);
+variant_name!(Join::Miter);
 
 pub type Paint = Handle<SkPaint>;
 unsafe_send_sync!(Paint);

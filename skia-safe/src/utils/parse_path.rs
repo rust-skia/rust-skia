@@ -13,7 +13,7 @@ pub fn from_svg(svg: impl AsRef<str>) -> Option<Path> {
 }
 
 pub use skia_bindings::SkParsePath_PathEncoding as PathEncoding;
-variant_name!(PathEncoding::Absolute, path_encoding_naming);
+variant_name!(PathEncoding::Absolute);
 
 impl Path {
     pub fn from_svg(svg: impl AsRef<str>) -> Option<Path> {

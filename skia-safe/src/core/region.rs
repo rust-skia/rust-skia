@@ -38,7 +38,7 @@ impl fmt::Debug for Region {
 }
 
 pub use skia_bindings::SkRegion_Op as RegionOp;
-variant_name!(RegionOp::ReverseDifference, region_op_naming);
+variant_name!(RegionOp::ReverseDifference);
 
 impl Region {
     pub fn new() -> Region {
