@@ -79,14 +79,16 @@ fn main() {
     let display_builder = DisplayBuilder::new().with_window_builder(Some(winit_window_builder));
     let (window, gl_config) = display_builder
         .build(&el, template, |configs| {
-            // Find the config with the maximum number of samples, so our display will
-            // be smooth.
+            // Find the config with the minimum number of samples. Usually Skia takes care of
+            // anti-aliasing and may not be able to create appropriate Surfaces for samples > 0.
+            // See https://github.com/rust-skia/rust-skia/issues/782
+            // And https://github.com/rust-skia/rust-skia/issues/764
             configs
                 .reduce(|accum, config| {
                     let transparency_check = config.supports_transparency().unwrap_or(false)
                         & !accum.supports_transparency().unwrap_or(false);
 
-                    if transparency_check || config.num_samples() > accum.num_samples() {
+                    if transparency_check || config.num_samples() < accum.num_samples() {
                         config
                     } else {
                         accum
