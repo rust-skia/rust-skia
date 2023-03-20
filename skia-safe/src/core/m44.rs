@@ -1,9 +1,8 @@
 use crate::{prelude::*, scalar, Matrix, Rect, Scalars};
-use bitflags::_core::ops::{AddAssign, MulAssign};
 use skia_bindings::{self as sb, SkM44, SkV2, SkV3, SkV4};
 use std::{
     f32,
-    ops::{Add, Div, DivAssign, Index, Mul, Neg, Sub, SubAssign},
+    ops::{Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Neg, Sub, SubAssign},
     slice,
 };
 
