@@ -255,11 +255,14 @@ fn main() {
                     );
                     /* First resize the opengl drawable */
                     let (width, height): (u32, u32) = physical_size.into();
-                    env.gl_surface.resize(
-                        &env.gl_context,
-                        NonZeroU32::new(width).unwrap(),
-                        NonZeroU32::new(height).unwrap(),
-                    );
+                    if let Some((width, height)) = NonZeroU32::new(width).zip(NonZeroU32::new(height)) {
+                        env.gl_surface.resize(
+                            &env.gl_context,
+                            width,
+                            height,
+                        );
+                    }
+                    
                 }
                 WindowEvent::KeyboardInput {
                     input:
