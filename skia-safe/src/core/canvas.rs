@@ -26,6 +26,7 @@ bitflags! {
     /// [`SaveLayerFlags`] provides options that may be used in any combination in [`SaveLayerRec`],
     /// defining how layer allocated by [`Canvas::save_layer()`] operates. It may be set to zero,
     /// [`PRESERVE_LCD_TEXT`], [`INIT_WITH_PREVIOUS`], or both flags.
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct SaveLayerFlags: u32 {
         const PRESERVE_LCD_TEXT = sb::SkCanvas_SaveLayerFlagsSet_kPreserveLCDText_SaveLayerFlag as _;
         /// initializes with previous contents

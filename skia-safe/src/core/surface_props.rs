@@ -35,6 +35,7 @@ impl PixelGeometry {
 }
 
 bitflags! {
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct SurfacePropsFlags: u32 {
         #[allow(clippy::unnecessary_cast)]
         const USE_DEVICE_INDEPENDENT_FONTS =

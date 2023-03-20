@@ -44,6 +44,7 @@ impl PartialEq for Alloc {
 }
 
 bitflags! {
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct AllocFlag : u32 {
         const NONCOHERENT = sb::skgpu_VulkanAlloc_Flag::kNoncoherent_Flag as _;
         const MAPPABLE = sb::skgpu_VulkanAlloc_Flag::kMappable_Flag as _;

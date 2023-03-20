@@ -2,7 +2,7 @@ use crate::{prelude::*, scalar};
 use skia_bindings::{self as sb, SkFontMetrics};
 
 bitflags! {
-    #[derive(Default)]
+    #[derive(Debug, Default, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct Flags: u32 {
         const UNDERLINE_THICKNESS_IS_VALID = sb::SkFontMetrics_FontMetricsFlags_kUnderlineThicknessIsValid_Flag as _;
         const UNDERLINE_POSITION_IS_VALID = sb::SkFontMetrics_FontMetricsFlags_kUnderlinePositionIsValid_Flag as _;

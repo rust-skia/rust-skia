@@ -35,7 +35,7 @@ impl DerefMut for Canvas {
 }
 
 bitflags! {
-    #[derive(Default)]
+    #[derive(Default, Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct Flags : u32 {
         const CONVERT_TEXT_TO_PATHS = sb::SkSVGCanvas_kConvertTextToPaths_Flag as _;
         const NO_PRETTY_XML = sb::SkSVGCanvas_kNoPrettyXML_Flag as _;
