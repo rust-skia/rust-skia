@@ -80,6 +80,7 @@ impl Default for SurfaceInfo {
 }
 
 bitflags! {
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct BackendState: u32 {
         const RENDER_TARGET = sb::GrGLBackendState_kRenderTarget_GrGLBackendState as _;
         const TEXTURE_BINDING = sb::GrGLBackendState_kTextureBinding_GrGLBackendState as _;

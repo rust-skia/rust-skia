@@ -46,7 +46,7 @@ gpu = []
 shaper = ["textlayout", "skia-bindings/shaper"]
 
 [dependencies]
-bitflags = "1.2"
+bitflags = "2.0"
 lazy_static = "1.4"
 skia-bindings = { version = "=0.60.0", path = "../skia-bindings", default-features = false }
 

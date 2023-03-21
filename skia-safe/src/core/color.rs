@@ -193,16 +193,17 @@ fn color_channel_naming() {
 }
 
 bitflags! {
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct ColorChannelFlag: u32 {
         const RED = sb::SkColorChannelFlag::kRed_SkColorChannelFlag as _;
         const GREEN = sb::SkColorChannelFlag::kGreen_SkColorChannelFlag as _;
         const BLUE = sb::SkColorChannelFlag::kBlue_SkColorChannelFlag as _;
         const ALPHA = sb::SkColorChannelFlag::kAlpha_SkColorChannelFlag as _;
         const GRAY = sb::SkColorChannelFlag::kGray_SkColorChannelFlag as _;
-        const GRAY_ALPHA = Self::GRAY.bits | Self::ALPHA.bits;
-        const RG = Self::RED.bits | Self::GREEN.bits;
-        const RGB = Self::RG.bits | Self::BLUE.bits;
-        const RGBA = Self::RGB.bits | Self::ALPHA.bits;
+        const GRAY_ALPHA = Self::GRAY.bits() | Self::ALPHA.bits();
+        const RG = Self::RED.bits() | Self::GREEN.bits();
+        const RGB = Self::RG.bits() | Self::BLUE.bits();
+        const RGBA = Self::RGB.bits() | Self::ALPHA.bits();
     }
 }
 

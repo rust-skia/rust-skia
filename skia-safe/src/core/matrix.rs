@@ -13,6 +13,7 @@ bitflags! {
     // m85: On Windows the SkMatrix_TypeMask is defined as i32,
     // but we stick to u32 (macOS / Linux), because there is no need to leak
     // the platform difference to the Rust side.
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct TypeMask: u32 {
         const IDENTITY = sb::SkMatrix_TypeMask_kIdentity_Mask as _;
         const TRANSLATE = sb::SkMatrix_TypeMask_kTranslate_Mask as _;

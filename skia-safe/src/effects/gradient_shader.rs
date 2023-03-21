@@ -175,6 +175,7 @@ impl Shader {
 }
 
 bitflags! {
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct Flags: u32 {
         const INTERPOLATE_COLORS_IN_PREMUL = sb::SkGradientShader_Flags_kInterpolateColorsInPremul_Flag as _;
     }

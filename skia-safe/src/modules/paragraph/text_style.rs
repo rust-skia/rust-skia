@@ -10,6 +10,7 @@ use skia_bindings as sb;
 use std::{fmt, ops::Range};
 
 bitflags! {
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct TextDecoration: u32 {
         const NO_DECORATION = sb::skia_textlayout_TextDecoration::kNoDecoration as _;
         const UNDERLINE = sb::skia_textlayout_TextDecoration::kUnderline as _;

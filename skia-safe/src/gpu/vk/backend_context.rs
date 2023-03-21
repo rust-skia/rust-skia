@@ -6,6 +6,7 @@ use skia_bindings::{self as sb, GrVkExtensionFlags, GrVkFeatureFlags};
 use std::{cell::RefCell, ffi, fmt, mem, ops::Deref, os::raw, ptr};
 
 bitflags! {
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct ExtensionFlags : u32 {
         const EXT_DEBUG_REPORT = sb::GrVkExtensionFlags_kEXT_debug_report_GrVkExtensionFlag as _;
         const NV_GLSL_SHADER = sb::GrVkExtensionFlags_kNV_glsl_shader_GrVkExtensionFlag as _;
@@ -20,6 +21,7 @@ bitflags! {
 native_transmutable!(GrVkExtensionFlags, ExtensionFlags, extension_flags_layout);
 
 bitflags! {
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct FeatureFlags: u32 {
         const GEOMETRY_SHADER = sb::GrVkFeatureFlags_kGeometryShader_GrVkFeatureFlag as _;
         const DUAL_SRC_BLEND = sb::GrVkFeatureFlags_kDualSrcBlend_GrVkFeatureFlag as _;

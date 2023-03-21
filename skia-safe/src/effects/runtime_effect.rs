@@ -68,6 +68,7 @@ pub mod uniform {
     variant_name!(Type::Float2x2);
 
     bitflags! {
+        #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
         pub struct Flags : u32 {
             const ARRAY = sb::SkRuntimeEffect_Uniform_Flags_kArray_Flag as _;
             const COLOR = sb::SkRuntimeEffect_Uniform_Flags_kColor_Flag as _;
