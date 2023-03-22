@@ -113,6 +113,10 @@ impl FontMgr {
         FontMgr::from_ptr(unsafe { sb::C_SkFontMgr_RefDefault() }).unwrap()
     }
 
+    pub fn empty() -> Self {
+        FontMgr::from_ptr(unsafe { sb::C_SkFontMgr_RefEmpty() }).unwrap()
+    }
+
     pub fn count_families(&self) -> usize {
         unsafe { self.native().countFamilies().try_into().unwrap() }
     }
