@@ -1443,6 +1443,10 @@ extern "C" SkFontMgr* C_SkFontMgr_RefDefault() {
     return SkFontMgr::RefDefault().release();
 }
 
+extern "C" SkFontMgr* C_SkFontMgr_RefEmpty() {
+    return SkFontMgr::RefEmpty().release();
+}
+
 //
 // core/SkFontParameters.h
 //
