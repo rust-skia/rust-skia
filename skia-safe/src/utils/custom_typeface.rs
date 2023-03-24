@@ -1,4 +1,7 @@
-use crate::{prelude::*, Drawable, FontMetrics, FontStyle, GlyphId, Path, Rect, Typeface};
+use crate::{
+    prelude::*, typeface::FactoryId, Data, Drawable, FontArguments, FontMetrics, FontStyle,
+    GlyphId, Path, Rect, Typeface,
+};
 use skia_bindings::{self as sb, SkCustomTypefaceBuilder};
 use std::fmt;
 
@@ -63,6 +66,17 @@ impl CustomTypefaceBuilder {
 
     pub fn detach(&mut self) -> Option<Typeface> {
         Typeface::from_ptr(unsafe { sb::C_SkCustomTypefaceBuilder_detach(self.native_mut()) })
+    }
+
+    pub const FACTORY_ID: FactoryId = FactoryId::from_chars('u', 's', 'e', 'r');
+
+    // TODO: MakeFromStream
+    // TODO: This is a stand-in for `from_stream`.
+
+    pub fn from_data(data: impl Into<Data>, font_arguments: &FontArguments) -> Option<Typeface> {
+        Typeface::from_ptr(unsafe {
+            sb::C_SkCustomTypefaceBuilder_FromData(data.into().into_ptr(), font_arguments.native())
+        })
     }
 }
 

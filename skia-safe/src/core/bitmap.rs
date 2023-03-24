@@ -733,6 +733,8 @@ impl Bitmap {
             .if_true_then_some(|| pixmap.borrows(self))
     }
 
+    /// Make a shader with the specified tiling, matrix and sampling.  
+    /// Defaults to clamp in both X and Y.
     pub fn to_shader<'a>(
         &self,
         tile_modes: impl Into<Option<(TileMode, TileMode)>>,

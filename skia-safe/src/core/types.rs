@@ -6,7 +6,7 @@ use std::ops::Deref;
 // FourByteTag
 //
 
-#[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Default, Debug)]
 #[repr(transparent)]
 pub struct FourByteTag(SkFourByteTag);
 
