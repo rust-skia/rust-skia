@@ -82,7 +82,6 @@ pub fn set_flags(flags: impl AsRef<str>) {
 
 // TODO: ImageGeneratorFromEncodedDataFactory
 // TODO: SetOpenTypeSVGDecoderFactory & GetOpenTypeSVGDecoderFactory
-// TODO: SetVariableColrV1EnabledFunc & GetVariableColrV1Enabled
 
 pub fn allow_jit() {
     unsafe { SkGraphics::AllowJIT() }

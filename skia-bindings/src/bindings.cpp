@@ -1,6 +1,7 @@
 #include <cassert>
 #include <tuple>
 #include <vector>
+#include <memory>
 
 #include "bindings.h"
 // codec/
@@ -20,6 +21,7 @@
 #include "include/core/SkDeferredDisplayListRecorder.h"
 #include "include/core/SkDrawable.h"
 #include "include/core/SkDocument.h"
+#include "include/core/SkEncodedImageFormat.h"
 #include "include/core/SkFlattenable.h"
 #include "include/core/SkFont.h"
 #include "include/core/SkFontArguments.h"
@@ -1992,6 +1994,10 @@ extern "C" SkShader* C_SkShaders_Blend(SkBlender* blender, SkShader* dst, SkShad
     return SkShaders::Blend(sp(blender), sp(dst), sp(src)).release();
 }
 
+extern "C" SkShader* C_SkShaders_CoordClamp(SkShader* shader, const SkRect* subset) {
+    return SkShaders::CoordClamp(sp(shader), *subset).release();
+}
+
 extern "C" SkShader* C_SkShader_Deserialize(const void* data, size_t length) {
     // note: dynamic_cast may lead to a linker error here on iOS x86_64
     // https://github.com/rust-skia/rust-skia/issues/146
@@ -2816,6 +2822,10 @@ extern "C" SkTypeface *C_SkCustomTypefaceBuilder_detach(SkCustomTypefaceBuilder 
 extern "C" void
 C_SkCustomTypefaceBuilder_setGlyph(SkCustomTypefaceBuilder *self, SkGlyphID glyph, float advance, SkDrawable* drawable, const SkRect* bounds) {
     self->setGlyph(glyph, advance, sp(drawable), *bounds);
+}
+
+extern "C" SkTypeface* C_SkCustomTypefaceBuilder_FromData(SkData* data, const SkFontArguments* fontArguments) {
+    return SkCustomTypefaceBuilder::MakeFromStream(SkMemoryStream::Make(sp(data)), *fontArguments).release();
 }
 
 extern "C" SkCanvas* C_SkMakeNullCanvas() {

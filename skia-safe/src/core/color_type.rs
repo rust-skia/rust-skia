@@ -16,6 +16,7 @@ pub enum ColorType {
     BGRA1010102 = SkColorType::kBGRA_1010102_SkColorType as _,
     RGB101010x = SkColorType::kRGB_101010x_SkColorType as _,
     BGR101010x = SkColorType::kBGR_101010x_SkColorType as _,
+    BGR101010xXR = SkColorType::kBGR_101010x_XR_SkColorType as _,
     Gray8 = SkColorType::kGray_8_SkColorType as _,
     RGBAF16Norm = SkColorType::kRGBA_F16Norm_SkColorType as _,
     RGBAF16 = SkColorType::kRGBA_F16_SkColorType as _,

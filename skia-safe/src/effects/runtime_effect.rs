@@ -435,4 +435,5 @@ impl ChildPtr {
     }
 }
 
-// TODO: wrap SkRuntimeEffectBuilder, SkRuntimeShaderBuilder, SkRuntimeBlendBuilder
+// TODO: wrap SkRuntimeEffectBuilder, SkRuntimeShaderBuilder, SkRuntimeColorFilterBuilder,
+// SkRuntimeBlendBuilder

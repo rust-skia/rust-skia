@@ -3,7 +3,7 @@ use crate::{
     font_parameters::VariationAxis,
     interop::{self, MemoryStream, NativeStreamBase, StreamAsset},
     prelude::*,
-    Data, FontArguments, FontStyle, GlyphId, Rect, TextEncoding, Unichar,
+    Data, FontArguments, FontStyle, FourByteTag, GlyphId, Rect, TextEncoding, Unichar,
 };
 use skia_bindings::{self as sb, SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings};
 use std::{ffi, fmt, mem, ptr};
@@ -21,6 +21,8 @@ pub struct LocalizedString {
     pub string: String,
     pub language: String,
 }
+
+pub type FactoryId = FourByteTag;
 
 pub type Typeface = RCHandle<SkTypeface>;
 unsafe_send_sync!(Typeface);
@@ -49,7 +51,6 @@ impl fmt::Debug for Typeface {
 }
 
 impl Typeface {
-    // Canonical new:
     pub fn new(family_name: impl AsRef<str>, font_style: FontStyle) -> Option<Self> {
         Self::from_name(family_name, font_style)
     }
@@ -294,6 +295,8 @@ impl Typeface {
     pub fn bounds(&self) -> Rect {
         Rect::from_native_c(unsafe { sb::C_SkTypeface_getBounds(self.native()) })
     }
+
+    // TODO: Register()
 }
 
 pub type LocalizedStringsIter = RefHandle<SkTypeface_LocalizedStrings>;

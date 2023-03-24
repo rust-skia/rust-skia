@@ -97,7 +97,7 @@ impl Shader {
 }
 
 pub mod shaders {
-    use crate::{prelude::*, Blender, Color, Color4f, ColorSpace, Shader};
+    use crate::{prelude::*, Blender, Color, Color4f, ColorSpace, Rect, Shader};
     use skia_bindings as sb;
 
     pub fn empty() -> Shader {
@@ -129,5 +129,11 @@ pub mod shaders {
             )
         })
         .unwrap()
+    }
+
+    pub fn coord_clamp(shader: impl Into<Shader>, rect: impl AsRef<Rect>) -> Option<Shader> {
+        Shader::from_ptr(unsafe {
+            sb::C_SkShaders_CoordClamp(shader.into().into_ptr(), rect.as_ref().native())
+        })
     }
 }
