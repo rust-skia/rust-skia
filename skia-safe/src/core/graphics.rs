@@ -1,5 +1,4 @@
 use skia_bindings::SkGraphics;
-use std::ffi::CString;
 
 pub fn init() {
     unsafe { SkGraphics::Init() };
@@ -73,11 +72,6 @@ pub fn set_resource_cache_single_allocation_byte_limit(new_limit: Option<usize>)
 
 pub fn purge_all_caches() {
     unsafe { SkGraphics::PurgeAllCaches() }
-}
-
-pub fn set_flags(flags: impl AsRef<str>) {
-    let c_str = CString::new(flags.as_ref()).unwrap();
-    unsafe { SkGraphics::SetFlags(c_str.as_ptr()) }
 }
 
 // TODO: ImageGeneratorFromEncodedDataFactory

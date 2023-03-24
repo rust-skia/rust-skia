@@ -314,7 +314,7 @@ extern "C" void C_SkSurfaceCharacterization_createColorSpace(const SkSurfaceChar
 // core/SkImage.h
 //
 
-extern "C" SkImage *C_SkImage_MakeRasterFromCompressed(SkData *data, int width, int height, SkImage::CompressionType
+extern "C" SkImage *C_SkImage_MakeRasterFromCompressed(SkData *data, int width, int height, SkTextureCompressionType
 type) {
     return SkImage::MakeRasterFromCompressed(sp(data), width, height, type).release();
 }

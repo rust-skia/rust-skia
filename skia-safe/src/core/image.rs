@@ -20,7 +20,7 @@ pub use super::CubicResampler;
 ///   kBC1_RGB8_UNORM     | RGB_S3TC_DXT1_EXT   | N/A                  | BC1_RGB_UNORM
 ///  --------------------------------------------------------------------------------------
 ///   kBC1_RGBA8_UNORM    | RGBA_S3TC_DXT1_EXT  | BC1_RGBA (macOS-only)| BC1_RGBA_UNORM
-pub use skia_bindings::SkImage_CompressionType as CompressionType;
+pub use skia_bindings::SkTextureCompressionType as CompressionType;
 variant_name!(CompressionType::BC1_RGBA8_UNORM);
 
 pub use skia_bindings::SkImage_BitDepth as BitDepth;
