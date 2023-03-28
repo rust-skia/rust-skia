@@ -3,7 +3,7 @@ use crate::{
     IRect, ISize, Image, ImageInfo, Pixmap, YUVAPixmapInfo, YUVAPixmaps,
 };
 use ffi::CStr;
-use skia_bindings::{self as sb, SkCodec, SkCodec_Options};
+use skia_bindings::{self as sb, SkCodec, SkCodec_Options, SkCodec_FrameInfo};
 use std::{ffi, fmt, mem, ptr};
 
 pub use sb::SkCodec_Result as Result;
@@ -28,11 +28,14 @@ pub struct Options {
     pub zero_initialized: ZeroInitialized,
     pub subset: Option<IRect>,
     pub frame_index: usize,
-    pub prior_frame: usize,
+    // allow `SkCodec_kNoFrame`
+    pub prior_frame: u64,
 }
 
 pub use sb::SkCodec_SkScanlineOrder as ScanlineOrder;
 variant_name!(ScanlineOrder::BottomUp);
+
+pub use sb::SkCodec_kNoFrame as NoFrame;
 
 pub type Codec = RefHandle<SkCodec>;
 
@@ -281,8 +284,9 @@ impl Codec {
             .unwrap()
     }
 
-    // TODO: FrameInfo
-    // TODO: getFrameInfo
+    pub fn get_frame_info(&mut self) -> SkCodec_FrameInfo {
+        unsafe { sb::SkCodec_getFrameInfo(self.native_mut()) }
+    }
 
     pub fn get_repetition_count(&mut self) -> Option<usize> {
         const REPETITION_COUNT_INFINITE: i32 = -1;
