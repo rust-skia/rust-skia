@@ -284,8 +284,10 @@ impl Codec {
             .unwrap()
     }
 
-    pub fn get_frame_info(&mut self) -> SkCodec_FrameInfo {
-        unsafe { sb::SkCodec_getFrameInfo(self.native_mut()) }
+    pub fn get_frame_info(&mut self, index: i32) -> SkCodec_FrameInfo {
+        let infos = SkCodec_FrameInfo {};
+        unsafe { sb::C_SkCodec_getFrameInfo(self.native_mut(), index, &mut infos) };
+        infos
     }
 
     pub fn get_repetition_count(&mut self) -> Option<usize> {
