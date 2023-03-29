@@ -7,6 +7,7 @@
 // codec/
 #include "include/codec/SkEncodedOrigin.h"
 #include "include/codec/SkCodec.h"
+#include "include/codec/SkCodecAnimation.h"
 // core/
 #include "include/core/SkAnnotation.h"
 #include "include/core/SkBlendMode.h"

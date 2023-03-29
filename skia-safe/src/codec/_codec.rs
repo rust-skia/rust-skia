@@ -1,3 +1,4 @@
+use super::codec_animation;
 use crate::{
     prelude::*, yuva_pixmap_info::SupportedDataTypes, AlphaType, Data, EncodedImageFormat,
     EncodedOrigin, IRect, ISize, Image, ImageInfo, Pixmap, YUVAPixmapInfo, YUVAPixmaps,
@@ -40,6 +41,8 @@ pub struct FrameInfo {
     pub fully_received: bool,
     pub alpha_type: AlphaType,
     pub has_alpha_within_bounds: bool,
+    pub disposal_method: codec_animation::DisposalMethod,
+    pub blend: codec_animation::Blend,
     pub rect: IRect,
 }
 
@@ -304,19 +307,15 @@ impl Codec {
     }
 
     pub fn get_frame_info(&mut self, index: usize) -> Option<FrameInfo> {
-        let mut infos = FrameInfo::default();
-        let has_frame = unsafe {
+        let mut info = FrameInfo::default();
+        unsafe {
             sb::C_SkCodec_getFrameInfo(
                 self.native_mut(),
                 index.try_into().unwrap(),
-                infos.native_mut(),
+                info.native_mut(),
             )
-        };
-        if has_frame {
-            Some(infos)
-        } else {
-            None
         }
+        .then_some(info)
     }
 
     pub fn get_repetition_count(&mut self) -> Option<usize> {

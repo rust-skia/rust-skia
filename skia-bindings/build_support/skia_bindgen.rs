@@ -633,6 +633,9 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("ColorSpace", rewrite::k_xxx),
     // m109: SkGradientShader::Interpolation::HueMethod
     ("HueMethod", rewrite::k_xxx),
+    // SkCodecAnimation
+    ("DisposalMethod", rewrite::k_xxx),
+    ("Blend", rewrite::k_xxx),
 ];
 
 pub(crate) mod rewrite {
