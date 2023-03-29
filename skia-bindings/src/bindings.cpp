@@ -166,6 +166,10 @@ extern "C" int C_SkCodec_getFrameCount(SkCodec* self) {
     return self->getFrameCount();
 }
 
+extern "C" void C_SkFrameInfo_Construct(SkCodec::FrameInfo* uninitialized) {
+    new (uninitialized) SkCodec::FrameInfo();
+}
+
 extern "C" bool C_SkCodec_getFrameInfo(SkCodec* self, int index, SkCodec::FrameInfo* info) {
     return self->getFrameInfo(index, info);
 }

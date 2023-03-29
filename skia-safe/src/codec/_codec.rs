@@ -3,7 +3,7 @@ use crate::{
     IRect, ISize, Image, ImageInfo, Pixmap, YUVAPixmapInfo, YUVAPixmaps,
 };
 use ffi::CStr;
-use skia_bindings::{self as sb, SkCodec, SkCodec_Options, SkCodec_FrameInfo};
+use skia_bindings::{self as sb, SkCodec, SkCodec_Options, SkCodec_FrameInfo, SkAlphaType};
 use std::{ffi, fmt, mem, ptr};
 
 pub use sb::SkCodec_Result as Result;
@@ -29,7 +29,26 @@ pub struct Options {
     pub subset: Option<IRect>,
     pub frame_index: usize,
     // allow `SkCodec_kNoFrame`
-    pub prior_frame: u64,
+    pub prior_frame: i32,
+}
+
+#[repr(C)] 
+#[derive(Copy, Clone, Debug)] 
+pub struct FrameInfo { 
+    pub required_frame: i32,
+    pub duration: i32,
+    pub fully_received: bool,
+    pub alpha_type: SkAlphaType,
+    pub has_alpha_within_bounds: bool,
+    pub rect: IRect,
+} 
+ 
+native_transmutable!(SkCodec_FrameInfo, FrameInfo, frameinfo_layout); 
+
+impl Default for FrameInfo {
+    fn default() -> Self {
+        Self::construct(|frame_info| unsafe { sb::C_SkFrameInfo_Construct(frame_info) })
+    }
 }
 
 pub use sb::SkCodec_SkScanlineOrder as ScanlineOrder;
@@ -284,9 +303,9 @@ impl Codec {
             .unwrap()
     }
 
-    pub fn get_frame_info(&mut self, index: i32) -> SkCodec_FrameInfo {
-        let infos = SkCodec_FrameInfo {};
-        unsafe { sb::C_SkCodec_getFrameInfo(self.native_mut(), index, &mut infos) };
+    pub fn get_frame_info(&mut self, index: i32) -> FrameInfo {
+        let mut infos = FrameInfo::default();
+        unsafe { sb::C_SkCodec_getFrameInfo(self.native_mut(), index, infos.native_mut()) };
         infos
     }
 
