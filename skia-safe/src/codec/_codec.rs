@@ -176,7 +176,7 @@ impl Codec {
             fZeroInitialized: options.zero_initialized,
             fSubset: options.subset.native().as_ptr_or_null(),
             fFrameIndex: options.frame_index.try_into().unwrap(),
-            fPriorFrame: options.prior_frame.try_into().unwrap(),
+            fPriorFrame: options.prior_frame,
         }
     }
 
