@@ -1,9 +1,9 @@
 use crate::{
-    prelude::*, yuva_pixmap_info::SupportedDataTypes, Data, EncodedImageFormat, EncodedOrigin,
-    IRect, ISize, Image, ImageInfo, Pixmap, YUVAPixmapInfo, YUVAPixmaps,
+    prelude::*, yuva_pixmap_info::SupportedDataTypes, AlphaType, Data, EncodedImageFormat,
+    EncodedOrigin, IRect, ISize, Image, ImageInfo, Pixmap, YUVAPixmapInfo, YUVAPixmaps,
 };
 use ffi::CStr;
-use skia_bindings::{self as sb, SkAlphaType, SkCodec, SkCodec_FrameInfo, SkCodec_Options};
+use skia_bindings::{self as sb, SkCodec, SkCodec_FrameInfo, SkCodec_Options};
 use std::{ffi, fmt, mem, ptr};
 
 pub use sb::SkCodec_Result as Result;
@@ -38,7 +38,7 @@ pub struct FrameInfo {
     pub required_frame: i32,
     pub duration: i32,
     pub fully_received: bool,
-    pub alpha_type: SkAlphaType,
+    pub alpha_type: AlphaType,
     pub has_alpha_within_bounds: bool,
     pub rect: IRect,
 }
