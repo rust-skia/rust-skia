@@ -303,10 +303,14 @@ impl Codec {
             .unwrap()
     }
 
-    pub fn get_frame_info(&mut self, index: i32) -> FrameInfo {
+    pub fn get_frame_info(&mut self, index: usize) -> Option<FrameInfo> {
         let mut infos = FrameInfo::default();
-        unsafe { sb::C_SkCodec_getFrameInfo(self.native_mut(), index, infos.native_mut()) };
-        infos
+        let has_frame = unsafe { sb::C_SkCodec_getFrameInfo(self.native_mut(), index.try_into().unwrap(), infos.native_mut()) };
+        if has_frame {
+            Some(infos)
+        } else {
+            None
+        }
     }
 
     pub fn get_repetition_count(&mut self) -> Option<usize> {
