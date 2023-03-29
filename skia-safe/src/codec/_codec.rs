@@ -305,7 +305,13 @@ impl Codec {
 
     pub fn get_frame_info(&mut self, index: usize) -> Option<FrameInfo> {
         let mut infos = FrameInfo::default();
-        let has_frame = unsafe { sb::C_SkCodec_getFrameInfo(self.native_mut(), index.try_into().unwrap(), infos.native_mut()) };
+        let has_frame = unsafe {
+            sb::C_SkCodec_getFrameInfo(
+                self.native_mut(),
+                index.try_into().unwrap(),
+                infos.native_mut(),
+            )
+        };
         if has_frame {
             Some(infos)
         } else {
