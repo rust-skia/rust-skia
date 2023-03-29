@@ -29,8 +29,7 @@ pub struct Options {
     pub zero_initialized: ZeroInitialized,
     pub subset: Option<IRect>,
     pub frame_index: usize,
-    // allow `SkCodec_kNoFrame`
-    pub prior_frame: i32,
+    pub prior_frame: Option<usize>,
 }
 
 #[repr(C)]
@@ -56,8 +55,6 @@ impl Default for FrameInfo {
 
 pub use sb::SkCodec_SkScanlineOrder as ScanlineOrder;
 variant_name!(ScanlineOrder::BottomUp);
-
-pub use sb::SkCodec_kNoFrame as NoFrame;
 
 pub type Codec = RefHandle<SkCodec>;
 
@@ -179,7 +176,10 @@ impl Codec {
             fZeroInitialized: options.zero_initialized,
             fSubset: options.subset.native().as_ptr_or_null(),
             fFrameIndex: options.frame_index.try_into().unwrap(),
-            fPriorFrame: options.prior_frame,
+            fPriorFrame: match options.prior_frame {
+                None => sb::SkCodec_kNoFrame,
+                Some(frame) => frame.try_into().expect("invalid prior frame"),
+            },
         }
     }
 
