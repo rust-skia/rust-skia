@@ -3,7 +3,7 @@ use crate::{
     IRect, ISize, Image, ImageInfo, Pixmap, YUVAPixmapInfo, YUVAPixmaps,
 };
 use ffi::CStr;
-use skia_bindings::{self as sb, SkCodec, SkCodec_Options, SkCodec_FrameInfo, SkAlphaType};
+use skia_bindings::{self as sb, SkAlphaType, SkCodec, SkCodec_FrameInfo, SkCodec_Options};
 use std::{ffi, fmt, mem, ptr};
 
 pub use sb::SkCodec_Result as Result;
@@ -32,18 +32,18 @@ pub struct Options {
     pub prior_frame: i32,
 }
 
-#[repr(C)] 
-#[derive(Copy, Clone, Debug)] 
-pub struct FrameInfo { 
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct FrameInfo {
     pub required_frame: i32,
     pub duration: i32,
     pub fully_received: bool,
     pub alpha_type: SkAlphaType,
     pub has_alpha_within_bounds: bool,
     pub rect: IRect,
-} 
- 
-native_transmutable!(SkCodec_FrameInfo, FrameInfo, frameinfo_layout); 
+}
+
+native_transmutable!(SkCodec_FrameInfo, FrameInfo, frameinfo_layout);
 
 impl Default for FrameInfo {
     fn default() -> Self {
