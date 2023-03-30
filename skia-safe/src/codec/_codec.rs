@@ -1,9 +1,10 @@
+use super::codec_animation;
 use crate::{
-    prelude::*, yuva_pixmap_info::SupportedDataTypes, Data, EncodedImageFormat, EncodedOrigin,
-    IRect, ISize, Image, ImageInfo, Pixmap, YUVAPixmapInfo, YUVAPixmaps,
+    prelude::*, yuva_pixmap_info::SupportedDataTypes, AlphaType, Data, EncodedImageFormat,
+    EncodedOrigin, IRect, ISize, Image, ImageInfo, Pixmap, YUVAPixmapInfo, YUVAPixmaps,
 };
 use ffi::CStr;
-use skia_bindings::{self as sb, SkCodec, SkCodec_Options};
+use skia_bindings::{self as sb, SkCodec, SkCodec_FrameInfo, SkCodec_Options};
 use std::{ffi, fmt, mem, ptr};
 
 pub use sb::SkCodec_Result as Result;
@@ -28,7 +29,28 @@ pub struct Options {
     pub zero_initialized: ZeroInitialized,
     pub subset: Option<IRect>,
     pub frame_index: usize,
-    pub prior_frame: usize,
+    pub prior_frame: Option<usize>,
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct FrameInfo {
+    pub required_frame: i32,
+    pub duration: i32,
+    pub fully_received: bool,
+    pub alpha_type: AlphaType,
+    pub has_alpha_within_bounds: bool,
+    pub disposal_method: codec_animation::DisposalMethod,
+    pub blend: codec_animation::Blend,
+    pub rect: IRect,
+}
+
+native_transmutable!(SkCodec_FrameInfo, FrameInfo, frameinfo_layout);
+
+impl Default for FrameInfo {
+    fn default() -> Self {
+        Self::construct(|frame_info| unsafe { sb::C_SkFrameInfo_Construct(frame_info) })
+    }
 }
 
 pub use sb::SkCodec_SkScanlineOrder as ScanlineOrder;
@@ -154,7 +176,10 @@ impl Codec {
             fZeroInitialized: options.zero_initialized,
             fSubset: options.subset.native().as_ptr_or_null(),
             fFrameIndex: options.frame_index.try_into().unwrap(),
-            fPriorFrame: options.prior_frame.try_into().unwrap(),
+            fPriorFrame: match options.prior_frame {
+                None => sb::SkCodec_kNoFrame,
+                Some(frame) => frame.try_into().expect("invalid prior frame"),
+            },
         }
     }
 
@@ -281,8 +306,17 @@ impl Codec {
             .unwrap()
     }
 
-    // TODO: FrameInfo
-    // TODO: getFrameInfo
+    pub fn get_frame_info(&mut self, index: usize) -> Option<FrameInfo> {
+        let mut info = FrameInfo::default();
+        unsafe {
+            sb::C_SkCodec_getFrameInfo(
+                self.native_mut(),
+                index.try_into().unwrap(),
+                info.native_mut(),
+            )
+        }
+        .then_some(info)
+    }
 
     pub fn get_repetition_count(&mut self) -> Option<usize> {
         const REPETITION_COUNT_INFINITE: i32 = -1;
