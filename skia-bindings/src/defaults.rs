@@ -75,18 +75,6 @@ pub mod textlayout {
         }
     }
 
-    impl Default for crate::skia_textlayout_RectHeightStyle {
-        fn default() -> Self {
-            Self::Tight
-        }
-    }
-
-    impl Default for crate::skia_textlayout_RectWidthStyle {
-        fn default() -> Self {
-            Self::Tight
-        }
-    }
-
     impl Default for crate::skia_textlayout_TextAlign {
         fn default() -> Self {
             Self::Left
@@ -126,12 +114,6 @@ pub mod textlayout {
     impl Default for crate::skia_textlayout_StyleType {
         fn default() -> Self {
             Self::AllAttributes
-        }
-    }
-
-    impl Default for crate::skia_textlayout_PlaceholderAlignment {
-        fn default() -> Self {
-            Self::Baseline
         }
     }
 }

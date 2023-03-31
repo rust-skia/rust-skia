@@ -70,6 +70,8 @@ impl Paragraph {
         unsafe { sb::C_Paragraph_paint(self.native_mut_force(), canvas.native_mut(), p.x, p.y) }
     }
 
+    /// Returns a vector of bounding boxes that enclose all text between
+    /// start and end glyph indexes, including start and excluding end
     pub fn get_rects_for_range(
         &self,
         range: Range<usize>,
@@ -87,8 +89,8 @@ impl Paragraph {
                 self.native_mut_force(),
                 range.start.try_into().unwrap(),
                 range.end.try_into().unwrap(),
-                rect_height_style,
-                rect_width_style,
+                rect_height_style.into_native(),
+                rect_width_style.into_native(),
                 VecSink::new(&mut set_tb).native_mut(),
             );
         }
@@ -111,6 +113,8 @@ impl Paragraph {
         result
     }
 
+    /// Returns the index of the glyph that corresponds to the provided coordinate,
+    /// with the top left corner as the origin, and +y direction as down
     pub fn get_glyph_position_at_coordinate(&self, p: impl Into<Point>) -> PositionWithAffinity {
         let p = p.into();
         let mut r = Default::default();
@@ -120,6 +124,8 @@ impl Paragraph {
         r
     }
 
+    /// Finds the first and last glyphs that define a word containing
+    /// the glyph at index offset
     pub fn get_word_boundary(&self, offset: u32) -> Range<usize> {
         let mut range: [usize; 2] = Default::default();
         unsafe {
@@ -152,6 +158,8 @@ impl Paragraph {
         unsafe { sb::C_Paragraph_markDirty(self.native_mut()) }
     }
 
+    /// This function will return the number of unresolved glyphs or
+    /// `None` if not applicable (has not been shaped yet - valid case)
     pub fn unresolved_glyphs(&mut self) -> Option<usize> {
         unsafe { sb::C_Paragraph_unresolvedGlyphs(self.native_mut()) }
             .try_into()

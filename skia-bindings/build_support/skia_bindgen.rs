@@ -573,8 +573,6 @@ const ENUM_TABLE: &[EnumEntry] = &[
     // DartTypes.h
     //
     ("Affinity", rewrite::k_xxx),
-    ("RectHeightStyle", rewrite::k_xxx),
-    ("RectWidthStyle", rewrite::k_xxx),
     ("TextAlign", rewrite::k_xxx),
     ("TextDirection", rewrite::k_xxx_uppercase),
     ("TextBaseline", rewrite::k_xxx),
@@ -586,7 +584,6 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("TextDecorationStyle", rewrite::k_xxx),
     ("TextDecorationMode", rewrite::k_xxx),
     ("StyleType", rewrite::k_xxx),
-    ("PlaceholderAlignment", rewrite::k_xxx),
     //
     // Vk*
     //
