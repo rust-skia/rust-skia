@@ -1,7 +1,7 @@
 use std::{
     fs,
     io::{self, Error, ErrorKind, Read},
-    path::PathBuf,
+    path::Path,
 };
 
 /// Download a file from the given URL and return the data.
@@ -9,8 +9,8 @@ pub fn download(url: impl AsRef<str>) -> io::Result<Vec<u8>> {
     let url = url.as_ref();
 
     // `file` URL, empty hostname, absolute path
-    if let Some(file_path) = url.strip_prefix("file:///") {
-        return fs::read(PathBuf::from(format!("/{}", file_path)));
+    if let Some(file_path) = url.strip_prefix("file://") {
+        return fs::read(Path::new(file_path));
     }
 
     // `file` URLs with non-empty hostname or relative paths are unsupported.
