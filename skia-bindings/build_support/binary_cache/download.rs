@@ -100,7 +100,7 @@ fn download_dependencies() {
     }
 }
 
-fn dir_not_empty(dir_path: &PathBuf) -> bool {
+fn dir_not_empty(dir_path: &Path) -> bool {
     dir_path
         .read_dir()
         .map(|mut contents| contents.next().is_some())
