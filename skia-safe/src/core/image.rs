@@ -1042,9 +1042,7 @@ impl Image {
     }
 
     /// See [`Self::encode_to_data_with_quality`]
-    #[deprecated(since = "0.62.0", note = "Use encode_to_data_with_context")]
     pub fn encode_to_data(&self, image_format: EncodedImageFormat) -> Option<Data> {
-        #[allow(deprecated)]
         self.encode_to_data_with_quality(image_format, 100)
     }
 
@@ -1070,7 +1068,6 @@ impl Image {
     /// Returns: encoded [`Image`], or `None`
     ///
     /// example: <https://fiddle.skia.org/c/@Image_encodeToData>
-    #[deprecated(since = "0.62.0", note = "Use encode_to_data_with_context")]
     pub fn encode_to_data_with_quality(
         &self,
         image_format: EncodedImageFormat,
