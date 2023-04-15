@@ -1,7 +1,11 @@
 #![cfg(feature = "textlayout")]
-use skia_safe::shaper::run_handler::{Buffer, RunInfo};
-use skia_safe::shaper::RunHandler;
-use skia_safe::{Font, GlyphId, Point, Shaper};
+use skia_safe::{
+    shaper::{
+        run_handler::{Buffer, RunInfo},
+        RunHandler,
+    },
+    GlyphId, Point,
+};
 
 #[derive(Default, Debug)]
 pub struct DebugRunHandler {
@@ -40,17 +44,31 @@ impl RunHandler for DebugRunHandler {
     }
 }
 
-#[test]
-#[serial_test::serial]
-fn test_rtl_text_shaping() {
-    skia_bindings::icu::init();
+#[cfg(test)]
+mod tests {
+    use crate::DebugRunHandler;
+    use skia_safe::{Font, Shaper};
 
-    let shaper = Shaper::new(None);
-    shaper.shape(
-        "العربية",
-        &Font::default(),
-        false,
-        10000.0,
-        &mut DebugRunHandler::default(),
-    );
+    #[test]
+    #[serial_test::serial]
+    fn test_rtl_text_shaping() {
+        skia_bindings::icu::init();
+
+        let shaper = Shaper::new(None);
+        shaper.shape(
+            "العربية",
+            &Font::default(),
+            false,
+            10000.0,
+            &mut DebugRunHandler::default(),
+        );
+    }
+
+    #[test]
+    #[serial_test::serial]
+    fn test_skunicode_parameterized_shaper() {
+        skia_bindings::icu::init();
+
+        Shaper::new_shape_dont_wrap_or_reorder(None).expect("Shaper");
+    }
 }
