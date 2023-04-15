@@ -8,6 +8,7 @@ mod direct_context;
 mod driver_bug_workarounds;
 #[cfg(feature = "gl")]
 pub mod gl;
+mod gpu_types;
 #[cfg(feature = "metal")]
 pub mod mtl;
 mod mutable_texture_state;
@@ -23,6 +24,7 @@ pub use backend_surface_mutable_state::*;
 pub use context_options::ContextOptions;
 pub use direct_context::*;
 pub use driver_bug_workarounds::DriverBugWorkarounds;
+pub use gpu_types::*;
 pub use mutable_texture_state::*;
 pub use recording_context::*;
 pub use types::*;
