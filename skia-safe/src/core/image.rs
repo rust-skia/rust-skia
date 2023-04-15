@@ -337,7 +337,7 @@ impl Image {
     /// * `color_space`           This describes the color space of this image's contents, as
     ///                           seen after sampling. In general, if the format of the backend
     ///                           texture is SRGB, some linear `color_space` should be supplied
-    ///                           (e.g., [`ColorSpace::MakeSRGBLinear()`])). If the format of the
+    ///                           (e.g., [`ColorSpace::new_srgb_linear()`])). If the format of the
     ///                           backend texture is linear, then the `color_space` should include
     ///                           a description of the transfer function as
     ///                           well (e.g., [`ColorSpace::MakeSRGB`]()).
@@ -1017,7 +1017,7 @@ impl Image {
     ///  error. When used, quality equaling 100 encodes with the least error. quality may
     ///  be ignored by the encoder.
     ///
-    ///  * `context` - the [`DirectContext`] in play, if it exists; can be `None`
+    ///  * `context` - the [`gpu::DirectContext`] in play, if it exists; can be `None`
     ///  * `encoded_image_format` - one of: [`EncodedImageFormat::JPEG`], [`EncodedImageFormat::PNG`],
     ///                             [`EncodedImageFormat::WEBP`]
     ///  * `quality` - encoder specific metric with 100 equaling best
