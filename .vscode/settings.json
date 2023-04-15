@@ -47,5 +47,8 @@
         "webgl",
         "wuffs",
         "Yocto"
+    ],
+    "C_Cpp.default.defines": [
+        "SK_GANESH"
     ]
 }

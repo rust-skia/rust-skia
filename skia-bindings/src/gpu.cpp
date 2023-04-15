@@ -1,9 +1,5 @@
 #include "bindings.h"
 
-#ifndef SK_GANESH
-    #define SK_GANESH
-#endif
-
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/GrBackendDrawableInfo.h"
 #include "include/gpu/GrYUVABackendTextures.h"
