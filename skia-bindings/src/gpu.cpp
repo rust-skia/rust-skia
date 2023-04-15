@@ -416,6 +416,10 @@ extern "C" SkImage* C_SkImage_MakeFromYUVAPixmaps(
     return SkImage::MakeFromYUVAPixmaps(context, *pixmaps, buildMips, limitToMaxTextureSize, sp(imageColorSpace)).release();
 }
 
+extern "C" SkData* C_SkImage_encodeToDataWithContext(const SkImage* self, GrDirectContext* context, SkEncodedImageFormat imageFormat, int quality) {
+    return self->encodeToData(context, imageFormat, quality).release();
+}
+
 extern "C" SkImage* C_SkImage_makeTextureImage(
         const SkImage* self,
         GrDirectContext* context,

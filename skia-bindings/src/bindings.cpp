@@ -1827,7 +1827,7 @@ extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromPicture(
         SkImage::BitDepth bd,
         SkColorSpace *cs,
         const SkSurfaceProps* props) {
-    return 
+    return
         SkImageGenerator::MakeFromPicture(
             *size,
             sp(picture),

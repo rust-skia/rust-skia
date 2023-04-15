@@ -1,27 +1,17 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
-use crate::SurfaceProps;
 use crate::{
     prelude::*, AlphaType, Bitmap, ColorSpace, ColorType, Data, EncodedImageFormat, IPoint, IRect,
     ISize, ImageFilter, ImageGenerator, ImageInfo, Matrix, Paint, Picture, Pixmap, SamplingOptions,
-    Shader, TileMode,
+    Shader, SurfaceProps, TextureCompressionType, TileMode,
 };
 use skia_bindings::{self as sb, SkImage, SkRefCntBase};
 use std::{fmt, mem, ptr};
 
 pub use super::CubicResampler;
 
-/// Experimental:
-///   Skia                | GL_COMPRESSED_*     | MTLPixelFormat*      | VK_FORMAT_*_BLOCK
-///  --------------------------------------------------------------------------------------
-///   kETC2_RGB8_UNORM    | ETC1_RGB8           | ETC2_RGB8 (iOS-only) | ETC2_R8G8B8_UNORM
-///                       | RGB8_ETC2           |                      |
-///  --------------------------------------------------------------------------------------
-///   kBC1_RGB8_UNORM     | RGB_S3TC_DXT1_EXT   | N/A                  | BC1_RGB_UNORM
-///  --------------------------------------------------------------------------------------
-///   kBC1_RGBA8_UNORM    | RGBA_S3TC_DXT1_EXT  | BC1_RGBA (macOS-only)| BC1_RGBA_UNORM
-pub use skia_bindings::SkTextureCompressionType as CompressionType;
-variant_name!(CompressionType::BC1_RGBA8_UNORM);
+#[deprecated(since = "0.0.0", note = "Use TextureCompressionType")]
+pub use crate::TextureCompressionType as CompressionType;
 
 pub use skia_bindings::SkImage_BitDepth as BitDepth;
 variant_name!(BitDepth::F16);
@@ -206,7 +196,7 @@ impl Image {
     pub fn new_raster_from_compressed(
         data: impl Into<Data>,
         dimensions: impl Into<ISize>,
-        ct: CompressionType,
+        ct: TextureCompressionType,
     ) -> Option<Image> {
         let dimensions = dimensions.into();
         Image::from_ptr(unsafe {
@@ -297,7 +287,7 @@ impl Image {
         context: &mut gpu::DirectContext,
         data: Data,
         dimensions: impl Into<ISize>,
-        ct: CompressionType,
+        ct: TextureCompressionType,
         mipmapped: impl Into<Option<gpu::Mipmapped>>,
         is_protected: impl Into<Option<gpu::Protected>>,
     ) -> Option<Image> {
@@ -324,7 +314,7 @@ impl Image {
         _context: &mut gpu::RecordingContext,
         _data: Data,
         _dimensions: impl Into<ISize>,
-        _ct: CompressionType,
+        _ct: TextureCompressionType,
     ) -> ! {
         panic!("Removed without replacement.")
     }
@@ -339,18 +329,21 @@ impl Image {
     /// Note: When using a DDL recording context, `texture_release_proc` will be called on the
     /// GPU thread after the DDL is played back on the direct context.
     ///
-    /// - `context`              GPU context
-    /// - `backend_texture`       texture residing on GPU
-    /// - `color_space`           This describes the color space of this image's contents, as
-    ///                            seen after sampling. In general, if the format of the backend
-    ///                            texture is SRGB, some linear `color_space` should be supplied
-    ///                            (e.g., [`ColorSpace::new_srgb_linear()`]). If the format of the
-    ///                            backend texture is linear, then the `color_space` should include
-    ///                            a description of the transfer function as
-    ///                            well (e.g., [`ColorSpace::new_srgb()`]).
-    /// - `texture_release_proc`   function called when texture can be released
-    /// - `release_context`       state passed to `texture_release_proc`
-    /// Returns: created [`Image`], or `None`
+    /// * `context`               GPU context
+    /// * `backend_texture`       Texture residing on GPU
+    /// * `origin`                Origin of `backend_texture`
+    /// * `color_type`            Color type of the resulting image
+    /// * `alpha_type`            Alpha type of the resulting image
+    /// * `color_space`           This describes the color space of this image's contents, as
+    ///                           seen after sampling. In general, if the format of the backend
+    ///                           texture is SRGB, some linear `color_space` should be supplied
+    ///                           (e.g., [`ColorSpace::MakeSRGBLinear()`])). If the format of the
+    ///                           backend texture is linear, then the `color_space` should include
+    ///                           a description of the transfer function as
+    ///                           well (e.g., [`ColorSpace::MakeSRGB`]()).
+    /// * `texture_release_proc`  Function called when texture can be released
+    /// * `release_context`       State passed to `texture_release_proc`
+    /// Returns: Created [`Image`], or `None`
     #[cfg(feature = "gpu")]
     // TODO: add variant with TextureReleaseProc
     pub fn from_texture(
@@ -1008,8 +1001,50 @@ impl Image {
         }
     }
 
+    /// Encodes [`Image`] pixels, returning result as [`Data`].
+    ///
+    ///  Returns `None` if encoding fails, or if `encoded_image_format` is not supported.
+    ///
+    ///  [`Image`] encoding in a format requires both building with one or more of:
+    ///  SK_ENCODE_JPEG, SK_ENCODE_PNG, SK_ENCODE_WEBP; and platform support
+    ///  for the encoded format.
+    ///
+    ///  If SK_BUILD_FOR_MAC or SK_BUILD_FOR_IOS is defined, `encoded_image_format` can
+    ///  additionally be one of: [`EncodedImageFormat::ICO`], [`EncodedImageFormat::BMP`],
+    ///  [`EncodedImageFormat::GIF`].
+    ///
+    ///  quality is a platform and format specific metric trading off size and encoding
+    ///  error. When used, quality equaling 100 encodes with the least error. quality may
+    ///  be ignored by the encoder.
+    ///
+    ///  * `context` - the [`DirectContext`] in play, if it exists; can be `None`
+    ///  * `encoded_image_format` - one of: [`EncodedImageFormat::JPEG`], [`EncodedImageFormat::PNG`],
+    ///                             [`EncodedImageFormat::WEBP`]
+    ///  * `quality` - encoder specific metric with 100 equaling best
+    ///  Returns: encoded [`Image`], or `None`
+    ///
+    ///  example: <https://fiddle.skia.org/c/@Image_encodeToData>
+    #[cfg(feature = "gpu")]
+    pub fn encode_to_data_with_context<'a>(
+        &self,
+        context: impl Into<Option<&'a mut gpu::DirectContext>>,
+        image_format: EncodedImageFormat,
+        quality: impl Into<Option<i32>>,
+    ) -> Option<Data> {
+        Data::from_ptr(unsafe {
+            sb::C_SkImage_encodeToDataWithContext(
+                self.native(),
+                context.into().native_ptr_or_null_mut(),
+                image_format,
+                quality.into().unwrap_or(100),
+            )
+        })
+    }
+
     /// See [`Self::encode_to_data_with_quality`]
+    #[deprecated(since = "0.0.0", note = "Use encode_to_data_with_context")]
     pub fn encode_to_data(&self, image_format: EncodedImageFormat) -> Option<Data> {
+        #[allow(deprecated)]
         self.encode_to_data_with_quality(image_format, 100)
     }
 
@@ -1035,6 +1070,7 @@ impl Image {
     /// Returns: encoded [`Image`], or `None`
     ///
     /// example: <https://fiddle.skia.org/c/@Image_encodeToData>
+    #[deprecated(since = "0.0.0", note = "Use encode_to_data_with_context")]
     pub fn encode_to_data_with_quality(
         &self,
         image_format: EncodedImageFormat,
@@ -1042,8 +1078,6 @@ impl Image {
     ) -> Option<Data> {
         Data::from_ptr(unsafe { sb::C_SkImage_encodeToData(self.native(), image_format, quality) })
     }
-
-    // TODO: encodeToData()
 
     /// Returns encoded [`Image`] pixels as [`Data`], if [`Image`] was created from supported
     /// encoded stream format. Platform support for formats vary and may require building

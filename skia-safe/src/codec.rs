@@ -2,7 +2,9 @@
 
 mod _codec;
 pub mod codec_animation;
-pub use _codec::*;
-
+mod encoded_image_format;
 mod encoded_origin;
+
+pub use _codec::*;
+pub use encoded_image_format::*;
 pub use encoded_origin::*;
