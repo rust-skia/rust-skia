@@ -17,6 +17,12 @@ impl NativeDrop for SkFont {
     }
 }
 
+impl NativeClone for SkFont {
+    fn clone(&self) -> Self {
+        construct(|f| unsafe { sb::C_SkFont_CopyConstruct(f, self) })
+    }
+}
+
 impl NativePartialEq for SkFont {
     fn eq(&self, rhs: &Self) -> bool {
         unsafe { sb::C_SkFont_Equals(self, rhs) }

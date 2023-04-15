@@ -50,3 +50,32 @@ impl<T: 'static> VecSink<'_, T> {
         (rust_fn)(safer::from_raw_parts_mut(ptr, len));
     }
 }
+
+#[derive(Debug)]
+pub struct Sink<'a, T> {
+    sink: sb::Sink<T>,
+    pd: PhantomData<&'a mut T>,
+}
+
+impl<T: 'static> Sink<'_, T> {
+    /// Create a new sink that calls back into the closure given.
+    pub fn new(v: &mut dyn FnMut(&T)) -> Sink<T> {
+        Sink {
+            sink: sb::Sink {
+                fn_trait: unsafe { mem::transmute(v) },
+                set_fn: Some(Self::set_fn),
+                _phantom_0: PhantomData,
+            },
+            pd: PhantomData,
+        }
+    }
+
+    pub fn native_mut(&mut self) -> &mut sb::Sink<T> {
+        &mut self.sink
+    }
+
+    unsafe extern "C" fn set_fn(ptr: *const T, rust_fn: TraitObject) {
+        let rust_fn: &mut dyn FnMut(&T) = mem::transmute(rust_fn);
+        (rust_fn)(&*ptr);
+    }
+}
