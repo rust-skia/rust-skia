@@ -10,7 +10,7 @@ use std::{fmt, mem, ptr};
 
 pub use super::CubicResampler;
 
-#[deprecated(since = "0.0.0", note = "Use TextureCompressionType")]
+#[deprecated(since = "0.62.0", note = "Use TextureCompressionType")]
 pub use crate::TextureCompressionType as CompressionType;
 
 pub use skia_bindings::SkImage_BitDepth as BitDepth;
@@ -1042,7 +1042,7 @@ impl Image {
     }
 
     /// See [`Self::encode_to_data_with_quality`]
-    #[deprecated(since = "0.0.0", note = "Use encode_to_data_with_context")]
+    #[deprecated(since = "0.62.0", note = "Use encode_to_data_with_context")]
     pub fn encode_to_data(&self, image_format: EncodedImageFormat) -> Option<Data> {
         #[allow(deprecated)]
         self.encode_to_data_with_quality(image_format, 100)
@@ -1070,7 +1070,7 @@ impl Image {
     /// Returns: encoded [`Image`], or `None`
     ///
     /// example: <https://fiddle.skia.org/c/@Image_encodeToData>
-    #[deprecated(since = "0.0.0", note = "Use encode_to_data_with_context")]
+    #[deprecated(since = "0.62.0", note = "Use encode_to_data_with_context")]
     pub fn encode_to_data_with_quality(
         &self,
         image_format: EncodedImageFormat,
