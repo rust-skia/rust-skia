@@ -305,13 +305,12 @@ impl FontInfo {
 
 #[cfg(test)]
 mod tests {
+    use super::Paragraph;
     use crate::{
         icu,
         textlayout::{FontCollection, ParagraphBuilder, ParagraphStyle, TextStyle},
         FontMgr,
     };
-
-    use super::Paragraph;
 
     #[test]
     #[serial_test::serial]
