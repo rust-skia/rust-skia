@@ -175,7 +175,6 @@ impl Paragraph {
 
     // TODO: wrap visit()
 
-    #[must_use]
     pub fn get_line_number_at(&self, code_unit_index: TextIndex) -> Option<usize> {
         // Returns -1 if `code_unit_index` is out of range.
         unsafe { sb::C_Paragraph_getLineNumberAt(self.native(), code_unit_index) }
@@ -183,7 +182,6 @@ impl Paragraph {
             .ok()
     }
 
-    #[must_use]
     pub fn get_line_metrics_at(&self, line_number: usize) -> Option<LineMetrics> {
         let mut r = None;
         let mut set_lm = |lm: &sb::skia_textlayout_LineMetrics| {
