@@ -771,6 +771,9 @@ pub(crate) mod definitions {
             files.extend(vec![
                 "obj/modules/skshaper/skshaper.ninja".into(),
                 "obj/modules/skparagraph/skparagraph.ninja".into(),
+                // shaper.cpp includes SkLoadICU.h
+                "obj/third_party/icu/icu.ninja".into(),
+                "obj/modules/skunicode/skunicode.ninja".into(),
             ]);
         }
         if features.svg {
