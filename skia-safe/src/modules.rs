@@ -10,6 +10,5 @@ pub use shaper::{icu, Shaper};
 // Export everything below paragraph under textlayout
 #[cfg(feature = "textlayout")]
 pub mod textlayout {
-    use crate::paragraph;
-    pub use paragraph::*;
+    pub use super::paragraph::*;
 }

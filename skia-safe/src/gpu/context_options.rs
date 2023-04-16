@@ -40,6 +40,8 @@ pub struct ContextOptions {
     pub reduced_shader_variations: bool,
     pub allow_msaa_on_new_intel: bool,
     pub always_use_text_storage_when_available: bool,
+    context_delete_context: sb::GrDirectContextDestroyedContext,
+    context_delete_proc: sb::GrDirectContextDestroyedProc,
     pub driver_bug_workarounds: DriverBugWorkarounds,
 }
 unsafe_send_sync!(ContextOptions);

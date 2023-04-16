@@ -125,6 +125,11 @@ pub fn generate_bindings(
         .allowlist_type("VkPhysicalDeviceFeatures2").
         // m91: These functions are not actually implemented.
         blocklist_function("SkCustomTypefaceBuilder_setGlyph[123].*")
+        // m113: `SkUnicode` pulls in an impl block that forwards static functions that may not be
+        // linked into the final executable.
+        .blocklist_type("SkUnicode")
+        .raw_line("pub enum SkUnicode {}")
+
         // misc
         .allowlist_var("SK_Color.*")
         .allowlist_var("kAll_GrBackendState")
@@ -412,6 +417,8 @@ const OPAQUE_TYPES: &[&str] = &[
     "std::variant",
     // m111 Used in SkTextBlobBuilder
     "skia_private::AutoTMalloc",
+    // Pulled in by `SkData`.
+    "FILE",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[
@@ -520,7 +527,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     // SkImage_*
     ("BitDepth", rewrite::k_xxx),
     ("CachingHint", rewrite::k_xxx_name),
-    ("CompressionType", rewrite::k_xxx),
+    ("SkTextureCompressionType", rewrite::k_xxx),
     // SkImageFilter_MapDirection
     ("MapDirection", rewrite::k_xxx_name),
     // SkCodec_Result
@@ -567,8 +574,8 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("GrSurfaceOrigin", rewrite::k_xxx_name),
     ("GrBackendApi", rewrite::k_xxx),
     ("Mipmapped", rewrite::k_xxx),
-    ("GrRenderable", rewrite::k_xxx),
-    ("GrProtected", rewrite::k_xxx),
+    ("Renderable", rewrite::k_xxx),
+    ("Protected", rewrite::k_xxx),
     //
     // DartTypes.h
     //
@@ -764,6 +771,9 @@ pub(crate) mod definitions {
             files.extend(vec![
                 "obj/modules/skshaper/skshaper.ninja".into(),
                 "obj/modules/skparagraph/skparagraph.ninja".into(),
+                // shaper.cpp includes SkLoadICU.h
+                "obj/third_party/icu/icu.ninja".into(),
+                "obj/modules/skunicode/skunicode.ninja".into(),
             ]);
         }
         if features.svg {

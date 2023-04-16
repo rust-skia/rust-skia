@@ -1,4 +1,5 @@
 #include "bindings.h"
+
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/GrBackendDrawableInfo.h"
 #include "include/gpu/GrYUVABackendTextures.h"
@@ -224,7 +225,7 @@ extern "C" void C_GrRecordingContext_defaultBackendFormat(const GrRecordingConte
 }
 
 // GrContext_Base.h
-extern "C" void C_GrRecordingContext_compressedBackendFormat(const GrRecordingContext* self, SkImage::CompressionType compressionType, GrBackendFormat* backendFormat) {
+extern "C" void C_GrRecordingContext_compressedBackendFormat(const GrRecordingContext* self, SkTextureCompressionType compressionType, GrBackendFormat* backendFormat) {
     *backendFormat = self->compressedBackendFormat(compressionType);
 }
 
@@ -244,7 +245,7 @@ extern "C" void C_GrDirectContext_flushAndSubmit(GrDirectContext* self) {
     self->flushAndSubmit();
 }
 
-extern "C" void C_GrDirectContext_compressedBackendFormat(const GrDirectContext* self, SkImage::CompressionType compression, GrBackendFormat* result) {
+extern "C" void C_GrDirectContext_compressedBackendFormat(const GrDirectContext* self, SkTextureCompressionType compression, GrBackendFormat* result) {
     *result = self->compressedBackendFormat(compression);
 }
 
@@ -353,7 +354,7 @@ extern "C" void C_SkDrawable_GpuDrawHandler_draw(SkDrawable::GpuDrawHandler *sel
 
 
 extern "C" SkImage *C_SkImage_MakeTextureFromCompressed(GrDirectContext *context, SkData *data, int width, int height,
-                                                SkImage::CompressionType type, GrMipMapped mipMapped,
+                                                SkTextureCompressionType type, GrMipMapped mipMapped,
                                                 GrProtected prot) {
     return SkImage::MakeTextureFromCompressed(context, sp(data), width, height, type, mipMapped, prot).release();
 }
@@ -409,6 +410,10 @@ extern "C" SkImage* C_SkImage_MakeFromYUVAPixmaps(
     SkColorSpace* imageColorSpace
 ) {
     return SkImage::MakeFromYUVAPixmaps(context, *pixmaps, buildMips, limitToMaxTextureSize, sp(imageColorSpace)).release();
+}
+
+extern "C" SkData* C_SkImage_encodeToDataWithContext(const SkImage* self, GrDirectContext* context, SkEncodedImageFormat imageFormat, int quality) {
+    return self->encodeToData(context, imageFormat, quality).release();
 }
 
 extern "C" SkImage* C_SkImage_makeTextureImage(

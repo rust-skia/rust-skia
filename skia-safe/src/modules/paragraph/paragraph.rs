@@ -1,5 +1,12 @@
-use super::{PositionWithAffinity, RectHeightStyle, RectWidthStyle, TextBox};
-use crate::{interop::VecSink, prelude::*, scalar, textlayout::LineMetrics, Canvas, Point};
+use super::{
+    LineMetrics, PositionWithAffinity, RectHeightStyle, RectWidthStyle, TextBox, TextDirection,
+    TextIndex, TextRange,
+};
+use crate::{
+    interop::{Sink, VecSink},
+    prelude::*,
+    scalar, Canvas, Font, Point, Rect,
+};
 use skia_bindings as sb;
 use std::{fmt, ops::Range};
 
@@ -98,7 +105,7 @@ impl Paragraph {
     }
 
     pub fn get_rects_for_placeholders(&self) -> Vec<TextBox> {
-        let mut result: Vec<TextBox> = Vec::new();
+        let mut result = Vec::new();
 
         let mut set_tb = |tbs: &[sb::skia_textlayout_TextBox]| {
             result = tbs.iter().map(TextBox::from_native_ref).cloned().collect();
@@ -167,16 +174,138 @@ impl Paragraph {
     }
 
     // TODO: wrap visit()
+
+    pub fn get_line_number_at(&self, code_unit_index: TextIndex) -> Option<usize> {
+        // Returns -1 if `code_unit_index` is out of range.
+        unsafe { sb::C_Paragraph_getLineNumberAt(self.native(), code_unit_index) }
+            .try_into()
+            .ok()
+    }
+
+    pub fn get_line_metrics_at(&self, line_number: usize) -> Option<LineMetrics> {
+        let mut r = None;
+        let mut set_lm = |lm: &sb::skia_textlayout_LineMetrics| {
+            r = Some(LineMetrics::from_native_ref(lm));
+        };
+        unsafe {
+            sb::C_Paragraph_getLineMetricsAt(
+                self.native(),
+                line_number,
+                Sink::new(&mut set_lm).native_mut(),
+            )
+        }
+        r
+    }
+
+    pub fn get_actual_text_range(&self, line_number: usize, include_spaces: bool) -> TextRange {
+        let mut range = [0usize; 2];
+        unsafe {
+            sb::C_Paragraph_getActualTextRange(
+                self.native(),
+                line_number,
+                include_spaces,
+                range.as_mut_ptr(),
+            )
+        }
+        TextRange {
+            start: range[0],
+            end: range[1],
+        }
+    }
+
+    pub fn get_glyph_cluster_at(&self, code_unit_index: TextIndex) -> Option<GlyphClusterInfo> {
+        let mut r = None;
+        let mut set_fn = |gci: &sb::skia_textlayout_Paragraph_GlyphClusterInfo| {
+            r = Some(GlyphClusterInfo::from_native_ref(gci))
+        };
+        unsafe {
+            sb::C_Paragraph_getGlyphClusterAt(
+                self.native(),
+                code_unit_index,
+                Sink::new(&mut set_fn).native_mut(),
+            )
+        }
+        r
+    }
+
+    pub fn get_closest_glyph_cluster_at(&self, d: impl Into<Point>) -> Option<GlyphClusterInfo> {
+        let mut r = None;
+        let mut set_fn = |gci: &sb::skia_textlayout_Paragraph_GlyphClusterInfo| {
+            r = Some(GlyphClusterInfo::from_native_ref(gci))
+        };
+        let d = d.into();
+        unsafe {
+            sb::C_Paragraph_getClosestGlyphClusterAt(
+                self.native(),
+                d.x,
+                d.y,
+                Sink::new(&mut set_fn).native_mut(),
+            )
+        }
+        r
+    }
+
+    pub fn get_font_at(&self, code_unit_index: TextIndex) -> Font {
+        Font::construct(|f| unsafe { sb::C_Paragraph_getFontAt(self.native(), code_unit_index, f) })
+    }
+
+    pub fn get_fonts(&self) -> Vec<FontInfo> {
+        let mut result = Vec::new();
+        let mut set_fn = |fis: &[sb::skia_textlayout_Paragraph_FontInfo]| {
+            result = fis.iter().map(FontInfo::from_native_ref).collect();
+        };
+        unsafe { sb::C_Paragraph_getFonts(self.native(), VecSink::new(&mut set_fn).native_mut()) }
+        result
+    }
 }
 
-#[deprecated(since = "0.41.0", note = "Use Vec<TextBox>")]
-pub type TextBoxes = Vec<TextBox>;
+#[derive(Clone, PartialEq, Debug)]
+pub struct GlyphClusterInfo {
+    pub bounds: Rect,
+    pub text_range: TextRange,
+    pub position: TextDirection,
+}
 
-#[deprecated(since = "0.41.0", note = "Use Vec<LineMetrics>")]
-pub type LineMetricsVector<'a> = Vec<LineMetrics<'a>>;
+impl GlyphClusterInfo {
+    fn from_native_ref(native: &sb::skia_textlayout_Paragraph_GlyphClusterInfo) -> Self {
+        unsafe {
+            Self {
+                bounds: *Rect::from_native_ptr(&native.fBounds),
+                text_range: TextRange {
+                    start: native.fClusterTextRange.start,
+                    end: native.fClusterTextRange.end,
+                },
+                position: native.fGlyphClusterPosition,
+            }
+        }
+    }
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub struct FontInfo {
+    pub font: Font,
+    pub text_range: TextRange,
+}
+
+impl FontInfo {
+    pub fn new(font: Font, text_range: TextRange) -> Self {
+        Self { font, text_range }
+    }
+
+    fn from_native_ref(native: &sb::skia_textlayout_Paragraph_FontInfo) -> Self {
+        Self {
+            font: Font::from_native_ref(&native.fFont).clone(),
+            text_range: TextRange {
+                start: native.fTextRange.start,
+                end: native.fTextRange.end,
+            },
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {
+    use super::Paragraph;
     use crate::{
         icu,
         textlayout::{FontCollection, ParagraphBuilder, ParagraphStyle, TextStyle},
@@ -186,24 +315,11 @@ mod tests {
     #[test]
     #[serial_test::serial]
     fn test_line_metrics() {
-        icu::init();
-
-        let mut font_collection = FontCollection::new();
-        font_collection.set_default_font_manager(FontMgr::new(), None);
-        let paragraph_style = ParagraphStyle::new();
-        let mut paragraph_builder = ParagraphBuilder::new(&paragraph_style, font_collection);
-        let ts = TextStyle::new();
-        paragraph_builder.push_style(&ts);
-        paragraph_builder.add_text(LOREM_IPSUM);
-        let mut paragraph = paragraph_builder.build();
-        paragraph.layout(256.0);
-
+        let paragraph = mk_lorem_ipsum_paragraph();
         let line_metrics = paragraph.get_line_metrics();
         for (line, lm) in line_metrics.iter().enumerate() {
             println!("line {}: width: {}", line + 1, lm.width)
         }
-
-        static LOREM_IPSUM: &str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at leo at nulla tincidunt placerat. Proin eget purus augue. Quisque et est ullamcorper, pellentesque felis nec, pulvinar massa. Aliquam imperdiet, nulla ut dictum euismod, purus dui pulvinar risus, eu suscipit elit neque ac est. Nullam eleifend justo quis placerat ultricies. Vestibulum ut elementum velit. Praesent et dolor sit amet purus bibendum mattis. Aliquam erat volutpat.";
     }
 
     /// Regression test for <https://github.com/rust-skia/rust-skia/issues/585>
@@ -224,5 +340,31 @@ mod tests {
 
         let line_metrics = &paragraph.get_line_metrics()[0];
         line_metrics.get_style_metrics(line_metrics.start_index..line_metrics.end_index);
+    }
+
+    #[test]
+    #[serial_test::serial]
+    fn test_font_infos() {
+        let paragraph = mk_lorem_ipsum_paragraph();
+        let infos = paragraph.get_fonts();
+        assert!(!infos.is_empty())
+    }
+
+    fn mk_lorem_ipsum_paragraph() -> Paragraph {
+        icu::init();
+
+        let mut font_collection = FontCollection::new();
+        font_collection.set_default_font_manager(FontMgr::new(), None);
+        let paragraph_style = ParagraphStyle::new();
+        let mut paragraph_builder = ParagraphBuilder::new(&paragraph_style, font_collection);
+        let ts = TextStyle::new();
+        paragraph_builder.push_style(&ts);
+        paragraph_builder.add_text(LOREM_IPSUM);
+        let mut paragraph = paragraph_builder.build();
+        paragraph.layout(256.0);
+
+        return paragraph;
+
+        static LOREM_IPSUM: &str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at leo at nulla tincidunt placerat. Proin eget purus augue. Quisque et est ullamcorper, pellentesque felis nec, pulvinar massa. Aliquam imperdiet, nulla ut dictum euismod, purus dui pulvinar risus, eu suscipit elit neque ac est. Nullam eleifend justo quis placerat ultricies. Vestibulum ut elementum velit. Praesent et dolor sit amet purus bibendum mattis. Aliquam erat volutpat.";
     }
 }

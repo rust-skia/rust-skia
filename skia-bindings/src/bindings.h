@@ -44,6 +44,15 @@ template<typename T> struct VecSink {
     }
 };
 
+template<typename T> struct Sink {
+    TraitObject fn_trait;
+    void (*set_fn)(const T *, TraitObject);
+
+    void set(const T& value) {
+        set_fn(&value, fn_trait);
+    }
+};
+
 struct SkStrings {
     std::vector<SkString> strings;
 };

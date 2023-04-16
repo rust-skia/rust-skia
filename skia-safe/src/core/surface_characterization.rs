@@ -60,7 +60,7 @@ impl fmt::Debug for SurfaceCharacterization {
     }
 }
 
-// TODO: there is an alternative for when SK_SUPPORT_GPU is not set, of which the
+// TODO: there is an alternative for when SK_GANESH is not set, of which the
 //       layout differs, should we support that?
 impl SurfaceCharacterization {
     #[cfg(feature = "gpu")]

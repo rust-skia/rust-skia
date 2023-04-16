@@ -10,7 +10,7 @@ mod macros;
 pub mod codec;
 #[deprecated(since = "0.33.1", note = "use codec::Result")]
 pub use codec::Result as CodecResult;
-pub use codec::{Codec, EncodedOrigin};
+pub use codec::{Codec, EncodedImageFormat, EncodedOrigin};
 
 mod core;
 mod docs;

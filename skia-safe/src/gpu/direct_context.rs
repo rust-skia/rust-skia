@@ -8,7 +8,7 @@ use super::{
     BackendFormat, BackendRenderTarget, BackendTexture, ContextOptions, FlushInfo,
     MutableTextureState, RecordingContext, SemaphoresSubmitted,
 };
-use crate::{image, prelude::*, Data};
+use crate::{prelude::*, Data, TextureCompressionType};
 use skia_bindings::{self as sb, GrDirectContext, GrDirectContext_DirectContextID, SkRefCntBase};
 use std::{
     fmt,
@@ -30,7 +30,6 @@ native_transmutable!(
 );
 
 pub type DirectContext = RCHandle<GrDirectContext>;
-require_type_equality!(sb::GrDirectContext_INHERITED, sb::GrRecordingContext);
 
 impl NativeRefCountedBase for GrDirectContext {
     type Base = SkRefCntBase;
@@ -310,7 +309,7 @@ impl DirectContext {
     // TODO: wrap updateBackendTexture (several variants)
     //       introduced in m84
 
-    pub fn compressed_backend_format(&self, compression: image::CompressionType) -> BackendFormat {
+    pub fn compressed_backend_format(&self, compression: TextureCompressionType) -> BackendFormat {
         let mut backend_format = BackendFormat::new_invalid();
         unsafe {
             sb::C_GrDirectContext_compressedBackendFormat(

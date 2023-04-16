@@ -103,6 +103,8 @@
 #include "include/utils/SkShadowUtils.h"
 #include "include/utils/SkTextUtils.h"
 
+extern "C" void C_Bindings_Types(Sink<bool>) {}
+
 //
 // codec/SkCodec.h
 //
@@ -314,7 +316,7 @@ extern "C" void C_SkSurfaceCharacterization_createColorSpace(const SkSurfaceChar
 // core/SkImage.h
 //
 
-extern "C" SkImage *C_SkImage_MakeRasterFromCompressed(SkData *data, int width, int height, SkImage::CompressionType
+extern "C" SkImage *C_SkImage_MakeRasterFromCompressed(SkData *data, int width, int height, SkTextureCompressionType
 type) {
     return SkImage::MakeRasterFromCompressed(sp(data), width, height, type).release();
 }
@@ -1351,6 +1353,10 @@ extern "C" void C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(SkFont* unini
     new(uninitialized) SkFont(sp(typeface), size, scaleX, skewX);
 }
 
+extern "C" void C_SkFont_CopyConstruct(SkFont* uninitialized, const SkFont* font) {
+    new(uninitialized) SkFont(*font);
+}
+
 extern "C" void C_SkFont_destruct(SkFont* self) {
     self->~SkFont();
 }
@@ -1827,7 +1833,7 @@ extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromPicture(
         SkImage::BitDepth bd,
         SkColorSpace *cs,
         const SkSurfaceProps* props) {
-    return 
+    return
         SkImageGenerator::MakeFromPicture(
             *size,
             sp(picture),

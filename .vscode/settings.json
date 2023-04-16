@@ -10,6 +10,7 @@
         "CLANGCC",
         "CLANGCXX",
         "cmath",
+        "CORETEXT",
         "cpufeatures",
         "EMCC",
         "emscripten",
@@ -18,8 +19,10 @@
         "Fira",
         "frameinfo",
         "fvisibility",
+        "GANESH",
         "heightmaps",
         "isystem",
+        "kjlubick",
         "libcanvasnative",
         "libcxx",
         "macabi",
@@ -36,6 +39,7 @@
         "skottie",
         "skpathutils",
         "styleset",
+        "subrectangle",
         "subsetted",
         "Tahoma",
         "unoptimized",
@@ -43,5 +47,11 @@
         "webgl",
         "wuffs",
         "Yocto"
+    ],
+    "C_Cpp.default.defines": [
+        "SK_GANESH",
+        "SK_USING_THIRD_PARTY_ICU",
+        "SK_UNICODE_ICU_IMPLEMENTATION",
+        "SK_SHAPER_HARFBUZZ_AVAILABLE",
     ]
 }

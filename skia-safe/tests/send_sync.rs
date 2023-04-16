@@ -240,6 +240,8 @@ mod textlayout {
     // ParagraphCache seems to be fully thread safe, but I don't think it is itself meant to be shared between threads.
     assert_not_impl_any!(ParagraphCache: Send, Sync);
     assert_impl_all!(Paragraph: Send, Sync);
+    assert_impl_all!(paragraph::FontInfo: Send, Sync);
+    assert_impl_all!(paragraph::GlyphClusterInfo: Send, Sync);
     assert_impl_all!(ParagraphBuilder: Send, Sync);
     assert_impl_all!(StrutStyle: Send, Sync);
     assert_impl_all!(TextShadow: Send, Sync);

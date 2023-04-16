@@ -269,9 +269,51 @@ extern "C" {
     void C_Paragraph_markDirty(Paragraph* self) {
         self->markDirty();
     }
-    
+
     int32_t C_Paragraph_unresolvedGlyphs(Paragraph* self) {
         return self->unresolvedGlyphs();
+    }
+
+    int C_Paragraph_getLineNumberAt(const Paragraph* self, TextIndex codeUnitIndex) {
+        return self->getLineNumberAt(codeUnitIndex);
+    }
+
+    void C_Paragraph_getLineMetricsAt(const Paragraph* self, size_t lineNumber, Sink<LineMetrics>* lineMetrics) {
+        LineMetrics lm;
+        if (self->getLineMetricsAt(lineNumber, &lm)) {
+            lineMetrics->set(lm);
+        }
+    }
+
+    void C_Paragraph_getActualTextRange(const Paragraph* self, size_t lineNumber, bool includeSpaces, size_t r[2]) {
+        auto range = self->getActualTextRange(lineNumber, includeSpaces);
+        r[0] = range.start;
+        r[1] = range.end;
+    }
+
+    void C_Paragraph_getGlyphClusterAt(const Paragraph* self, TextIndex codeUnitIndex, Sink<Paragraph::GlyphClusterInfo>* r) {
+        Paragraph::GlyphClusterInfo gci;
+        // Most likely const, implementation does not seem to mutate Paragraph.
+        if (const_cast<Paragraph*>(self)->getGlyphClusterAt(codeUnitIndex, &gci)) {
+            r->set(gci);
+        }
+    }
+
+    void C_Paragraph_getClosestGlyphClusterAt(const Paragraph* self, SkScalar dx, SkScalar dy, Sink<Paragraph::GlyphClusterInfo>* r) {
+        Paragraph::GlyphClusterInfo gci;
+        // Most likely const, implementation does not seem to mutate Paragraph.
+        if (const_cast<Paragraph*>(self)->getClosestGlyphClusterAt(dx, dy, &gci)) {
+            r->set(gci);
+        }
+    }
+
+    void C_Paragraph_getFontAt(const Paragraph* self, TextIndex codeUnitIndex, SkFont* uninitialized) {
+        new (uninitialized) SkFont(self->getFontAt(codeUnitIndex));
+    }
+
+    void C_Paragraph_getFonts(const Paragraph* self, VecSink<Paragraph::FontInfo>* r) {
+        auto fonts = self->getFonts();
+        r->set(fonts);
     }
 }
 
