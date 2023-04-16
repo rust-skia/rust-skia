@@ -49,6 +49,9 @@
         "Yocto"
     ],
     "C_Cpp.default.defines": [
-        "SK_GANESH"
+        "SK_GANESH",
+        "SK_USING_THIRD_PARTY_ICU",
+        "SK_UNICODE_ICU_IMPLEMENTATION",
+        "SK_SHAPER_HARFBUZZ_AVAILABLE",
     ]
 }
