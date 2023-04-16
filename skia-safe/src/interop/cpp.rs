@@ -1,3 +1,4 @@
+#![allow(unused)]
 use crate::prelude::safer;
 use sb::TraitObject;
 use skia_bindings as sb;
@@ -23,7 +24,6 @@ impl<T: 'static> VecSink<'_, T> {
         }
     }
 
-    #[allow(unused)]
     pub fn new_mut(v: &mut dyn FnMut(&mut [T])) -> VecSink<T> {
         VecSink {
             sink: sb::VecSink {
@@ -44,7 +44,6 @@ impl<T: 'static> VecSink<'_, T> {
         (rust_fn)(safer::from_raw_parts(ptr, len));
     }
 
-    #[allow(unused)]
     unsafe extern "C" fn set_fn_mut(ptr: *mut T, len: usize, rust_fn: TraitObject) {
         let rust_fn: &mut dyn FnMut(&mut [T]) = mem::transmute(rust_fn);
         (rust_fn)(safer::from_raw_parts_mut(ptr, len));
