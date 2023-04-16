@@ -125,6 +125,11 @@ pub fn generate_bindings(
         .allowlist_type("VkPhysicalDeviceFeatures2").
         // m91: These functions are not actually implemented.
         blocklist_function("SkCustomTypefaceBuilder_setGlyph[123].*")
+        // m113: `SkUnicode` pulls in an impl block that forwards static functions that may not be
+        // linked into the final executable.
+        .blocklist_type("SkUnicode")
+        .raw_line("pub enum SkUnicode {}")
+
         // misc
         .allowlist_var("SK_Color.*")
         .allowlist_var("kAll_GrBackendState")
