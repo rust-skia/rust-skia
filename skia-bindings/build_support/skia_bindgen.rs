@@ -417,6 +417,8 @@ const OPAQUE_TYPES: &[&str] = &[
     "std::variant",
     // m111 Used in SkTextBlobBuilder
     "skia_private::AutoTMalloc",
+    // Pulled in by `SkData`.
+    "FILE",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[
