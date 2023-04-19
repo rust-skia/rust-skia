@@ -36,6 +36,9 @@ pub struct BinariesConfiguration {
     /// with.
     pub binding_libraries: Vec<String>,
 
+    /// Files that are generated in the binding process (this is `bindings.rs`).
+    pub binding_files: Vec<PathBuf>,
+
     /// Additional files relative to the output_directory
     /// that are needed to build dependent projects.
     pub additional_files: Vec<PathBuf>,
@@ -54,6 +57,7 @@ impl BinariesConfiguration {
 
         let mut ninja_built_libraries = Vec::new();
         let mut binding_libraries = Vec::new();
+        let binding_files = vec!["bindings.rs".into()];
         let mut additional_files = Vec::new();
         let feature_ids = features.ids();
 
@@ -88,6 +92,7 @@ impl BinariesConfiguration {
             link_libraries,
             ninja_built_libraries,
             binding_libraries,
+            binding_files,
             additional_files,
             skia_debug,
         }
@@ -119,9 +124,9 @@ impl BinariesConfiguration {
     }
 
     /// Import library and additional files from `from_dir` to the output directory.
-    pub fn import(&self, from_dir: &Path, import_bindings_libraries: bool) -> io::Result<()> {
+    pub fn import(&self, from_dir: &Path, import_bindings: bool) -> io::Result<()> {
         let output_directory = &self.output_directory;
-        self.copy_libs_and_additional_files(from_dir, output_directory, import_bindings_libraries)
+        self.copy_libs_and_additional_files(from_dir, output_directory, import_bindings)
     }
 
     /// Export library and additional files from the output directory to a `to_dir`.
@@ -134,19 +139,25 @@ impl BinariesConfiguration {
         &self,
         from_dir: &Path,
         to_dir: &Path,
-        copy_bindings_libraries: bool,
+        copy_bindings: bool,
     ) -> io::Result<()> {
         fs::create_dir_all(to_dir)?;
 
         let target = cargo::target();
 
-        for lib in self.built_libraries(copy_bindings_libraries) {
+        for lib in self.built_libraries(copy_bindings) {
             let filename = &target.library_to_filename(lib);
             copy(filename, from_dir, to_dir)?;
         }
 
         for filename in &self.additional_files {
             copy(filename, from_dir, to_dir)?;
+        }
+
+        if copy_bindings {
+            for filename in &self.binding_files {
+                copy(filename, from_dir, to_dir)?;
+            }
         }
 
         return Ok(());

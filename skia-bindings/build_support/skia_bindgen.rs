@@ -78,12 +78,6 @@ pub fn generate_bindings(
         })
         .size_t_is_usize(true)
         .parse_callbacks(Box::new(ParseCallbacks))
-        .raw_line("#![allow(clippy::all)]")
-        // https://github.com/rust-lang/rust-bindgen/issues/1651
-        .raw_line("#![allow(unknown_lints)]")
-        .raw_line("#![allow(deref_nullptr)]")
-        // GrVkBackendContext contains u128 fields on macOS
-        .raw_line("#![allow(improper_ctypes)]")
         .allowlist_function("C_.*")
         .constified_enum(".*Mask")
         .constified_enum(".*Flags")
@@ -253,9 +247,8 @@ pub fn generate_bindings(
         builder = builder.clang_args(bindgen_args);
 
         let bindings = builder.generate().expect("Unable to generate bindings");
-        let out_path = PathBuf::from("src");
         bindings
-            .write_to_file(out_path.join("bindings.rs"))
+            .write_to_file(output_directory.join("bindings.rs"))
             .expect("Couldn't write bindings!");
     }
 }

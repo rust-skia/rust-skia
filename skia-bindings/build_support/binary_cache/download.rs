@@ -1,4 +1,4 @@
-use super::{binaries, env, git, utils, SRC_BINDINGS_RS};
+use super::{binaries, env, git, utils};
 use crate::build_support::{binaries_config, cargo};
 use flate2::read::GzDecoder;
 use std::{
@@ -211,9 +211,7 @@ fn download_and_install(url: impl AsRef<str>, output_directory: &Path) -> io::Re
         output_directory.to_str().unwrap()
     );
     binaries::unpack(Cursor::new(archive), output_directory)?;
-    // TODO: Verify key?
-    println!("INSTALLING BINDINGS");
-    fs::copy(output_directory.join("bindings.rs"), SRC_BINDINGS_RS)?;
+    // TODO: verify key
 
     Ok(())
 }
