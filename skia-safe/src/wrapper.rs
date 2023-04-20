@@ -1,7 +1,7 @@
-///! FFI interoperability for skia-safe's wrapper types.
-///!
-///! This module is only meant to be used by external code. Internal code should continue to use the traits in
-///! the `prelude` module.
+//! FFI interoperability for skia-safe's wrapper types.
+//!
+//! This module is only meant to be used by external code. Internal code should continue to use the traits in
+//! the `prelude` module.
 use crate::prelude::*;
 
 /// This trait supports the conversion of a wrapper into it's wrapped C/C++ pointer and back.
