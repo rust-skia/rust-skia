@@ -512,6 +512,7 @@ fn new_clone_drop() {
 #[test]
 fn can_compare() {
     let r1 = Region::new();
+    #[allow(clippy::redundant_clone)]
     let r2 = r1.clone();
     assert!(r1 == r2);
 }
