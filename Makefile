@@ -49,7 +49,7 @@ crate-post-release-test:
 publish: package-bindings package-safe publish-bindings wait publish-safe
 
 .PHONY: publish-only
-publish-only: publish-bindings wait publish-safe
+publish-only: publish-bindings publish-safe
 
 .PHONY: publish-bindings
 publish-bindings:
@@ -78,12 +78,6 @@ package-safe:
 .PHONY: clean-packages
 clean-packages:
 	rm -rf target/package
-
-
-.PHONY: wait
-wait: 
-	@echo "published a package, Waiting for crates.io to catch up before publishing the next"
-	sleep 20
 
 .PHONY: update-doc
 update-doc:
