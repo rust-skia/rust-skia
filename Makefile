@@ -33,6 +33,13 @@ crate-bindings-build:
 	cd skia-bindings && cargo publish -vv --dry-run --features "gl,vulkan,textlayout"
 	cd skia-bindings && cargo publish -vv --dry-run 
 
+.PHONY: crate-post-release-test
+crate-post-release-test:
+	rm -rf /tmp/skia-test
+	cd /tmp && cargo new skia-test
+	cd /tmp/skia-test && cargo add skia-safe
+	cd /tmp/skia-test && cargo run
+
 # Publishes skia-bindings and skia-safe to crates.io
 # This is temporary and should be automated.
 # prerequisites:
