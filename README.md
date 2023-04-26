@@ -23,11 +23,11 @@ We (slowly) [add more documentation](https://github.com/rust-skia/rust-skia/issu
 
 A prerelease crate is available from [crates.io](https://crates.io/crates/skia-safe) and invoking
 
-```toml
+```bash
 cargo add skia-safe
 ```
 
-in your project's folder should get you started. And take a look at the [gl-window](https://github.com/rust-skia/rust-skia/tree/master/skia-safe/examples/gl-window) example if you plan to render to a window.
+in your project's folder should get you started. And you might want to take a look at the [gl-window](https://github.com/rust-skia/rust-skia/tree/master/skia-safe/examples/gl-window) example if you plan to render to a window.
 
 **On Linux** you may run into trouble when **OpenSSL libraries** are missing. On **Debian** and **Ubuntu** they can be installed with:
 
