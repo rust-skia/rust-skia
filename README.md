@@ -7,7 +7,7 @@ Skia Submodule Status: chrome/m113 ([upstream changes][skia-upstream], [our chan
 [skia-upstream]: https://github.com/rust-skia/skia/compare/m113-0.61.8...google:chrome/m113
 [skia-ours]: https://github.com/google/skia/compare/chrome/m113...rust-skia:m113-0.61.8
 
-## Goals
+## About
 
 This project provides _up to date_ safe bindings that bridge idiomatic Rust with Skia's C++ API on desktop and mobile platforms, including GPU rendering backends for [Vulkan](<https://en.wikipedia.org/wiki/Vulkan_(API)>), [Metal](<https://en.wikipedia.org/wiki/Metal_(API)>), [OpenGL](https://en.wikipedia.org/wiki/OpenGL), and [Direct3D](https://en.wikipedia.org/wiki/Direct3D).
 
@@ -21,14 +21,13 @@ We (slowly) [add more documentation](https://github.com/rust-skia/rust-skia/issu
 
 ### Crate
 
-A prerelease crate is available from [crates.io](https://crates.io/crates/skia-safe) and adding
+A prerelease crate is available from [crates.io](https://crates.io/crates/skia-safe) and invoking
 
 ```toml
-[dependencies]
-skia-safe = "0"
+cargo add skia-safe
 ```
 
-to your `Cargo.toml` should get you started.
+in your project's folder should get you started. And take a look at the [gl-window](https://github.com/rust-skia/rust-skia/tree/master/skia-safe/examples/gl-window) example if you plan to render to a window.
 
 **On Linux** you may run into trouble when **OpenSSL libraries** are missing. On **Debian** and **Ubuntu** they can be installed with:
 
