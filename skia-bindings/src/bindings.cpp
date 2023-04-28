@@ -11,6 +11,7 @@
 // core/
 #include "include/core/SkAnnotation.h"
 #include "include/core/SkBlendMode.h"
+#include "include/core/SkBitmap.h"
 #include "include/core/SkBlurTypes.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
@@ -30,7 +31,6 @@
 #include "include/core/SkFontMgr.h"
 #include "include/core/SkGraphics.h"
 #include "include/core/SkImage.h"
-#include "include/core/SkImageEncoder.h"
 #include "include/core/SkImageFilter.h"
 #include "include/core/SkImageGenerator.h"
 #include "include/core/SkImageInfo.h"
@@ -316,37 +316,33 @@ extern "C" void C_SkSurfaceCharacterization_createColorSpace(const SkSurfaceChar
 // core/SkImage.h
 //
 
-extern "C" SkImage *C_SkImage_MakeRasterFromCompressed(SkData *data, int width, int height, SkTextureCompressionType
+extern "C" SkImage* C_SkImages_RasterFromBitmap(const SkBitmap* bitmap) {
+    return SkImages::RasterFromBitmap(*bitmap).release();
+}
+
+extern "C" SkImage *C_SkImages_RasterFromCompressedTextureData(SkData *data, int width, int height, SkTextureCompressionType
 type) {
-    return SkImage::MakeRasterFromCompressed(sp(data), width, height, type).release();
+    return SkImages::RasterFromCompressedTextureData(sp(data), width, height, type).release();
 }
 
-extern "C" SkImage* C_SkImage_MakeRasterData(const SkImageInfo* info, SkData* pixels, size_t rowBytes) {
-    return SkImage::MakeRasterData(*info, sp(pixels), rowBytes).release();
+extern "C" SkImage* C_SkImages_DeferredFromEncodedData(SkData* encoded, const SkAlphaType* alphaType) {
+    return SkImages::DeferredFromEncodedData(sp(encoded), opt(alphaType)).release();
 }
 
-extern "C" SkImage* C_SkImage_MakeFromBitmap(const SkBitmap* bitmap) {
-    return SkImage::MakeFromBitmap(*bitmap).release();
+extern "C" SkImage* C_SkImages_DeferredFromGenerator(SkImageGenerator* imageGenerator) {
+    return SkImages::DeferredFromGenerator(std::unique_ptr<SkImageGenerator>(imageGenerator)).release();
 }
 
-extern "C" SkImage* C_SkImage_MakeFromGenerator(SkImageGenerator* imageGenerator) {
-    return SkImage::MakeFromGenerator(std::unique_ptr<SkImageGenerator>(imageGenerator)).release();
-}
-
-extern "C" SkImage* C_SkImage_MakeFromEncoded(SkData* encoded, const SkAlphaType* alphaType) {
-    return SkImage::MakeFromEncoded(sp(encoded), opt(alphaType)).release();
-}
-
-extern "C" SkImage* C_SkImage_MakeFromPicture(
+extern "C" SkImage* C_SkImages_DeferredFromPicture(
         SkPicture* picture,
         const SkISize* dimensions,
         const SkMatrix* matrix,
         const SkPaint* paint,
-        SkImage::BitDepth bitDepth,
+        SkImages::BitDepth bitDepth,
         SkColorSpace* colorSpace,
         const SkSurfaceProps* props) {
-    return 
-        SkImage::MakeFromPicture(
+    return
+        SkImages::DeferredFromPicture(
             sp(picture),
             *dimensions,
             matrix,
@@ -357,10 +353,14 @@ extern "C" SkImage* C_SkImage_MakeFromPicture(
         ).release();
 }
 
+extern "C" SkImage* C_SkImages_RasterFromData(const SkImageInfo* info, SkData* pixels, size_t rowBytes) {
+    return SkImages::RasterFromData(*info, sp(pixels), rowBytes).release();
+}
+
 
 extern "C" SkShader* C_SkImage_makeShader(
-    const SkImage* self, 
-    SkTileMode tileMode1, SkTileMode tileMode2, 
+    const SkImage* self,
+    SkTileMode tileMode1, SkTileMode tileMode2,
     const SkSamplingOptions* samplingOptions, const SkMatrix* localMatrix) {
     return self->makeShader(tileMode1, tileMode2, *samplingOptions, localMatrix).release();
 }
@@ -372,9 +372,9 @@ extern "C" SkShader* C_SkImage_makeRawShader(
     return self->makeRawShader(tileMode1, tileMode2, *samplingOptions, localMatrix).release();
 }
 
-extern "C" SkData* C_SkImage_encodeToData(const SkImage* self, SkEncodedImageFormat imageFormat, int quality) {
-    return self->encodeToData(imageFormat, quality).release();
-}
+// extern "C" SkData* C_SkImage_encodeToData(const SkImage* self, SkEncodedImageFormat imageFormat, int quality) {
+//     return self->encodeToData(imageFormat, quality).release();
+// }
 
 extern "C" SkData* C_SkImage_refEncodedData(const SkImage* self) {
     return self->refEncodedData().release();
@@ -415,13 +415,13 @@ extern "C" SkImage* C_SkImage_reinterpretColorSpace(const SkImage* self, SkColor
 // core/SkImageEncoder.h
 //
 
-extern "C" SkData *C_SkEncodePixmap(const SkPixmap *src, SkEncodedImageFormat format, int quality) {
-    return SkEncodePixmap(*src, format, quality).release();
-}
+// extern "C" SkData *C_SkEncodePixmap(const SkPixmap *src, SkEncodedImageFormat format, int quality) {
+//     return SkEncodePixmap(*src, format, quality).release();
+// }
 
-extern "C" SkData *C_SkEncodeBitmap(const SkBitmap *src, SkEncodedImageFormat format, int quality) {
-    return SkEncodeBitmap(*src, format, quality).release();
-}
+// extern "C" SkData *C_SkEncodeBitmap(const SkBitmap *src, SkEncodedImageFormat format, int quality) {
+//     return SkEncodeBitmap(*src, format, quality).release();
+// }
 
 //
 // core/SkData.h
@@ -1444,11 +1444,11 @@ extern "C" void C_SkFontStyleSet_getStyle(SkFontStyleSet* self, int index, SkFon
 }
 
 extern "C" SkTypeface* C_SkFontStyleSet_createTypeface(SkFontStyleSet* self, int index) {
-    return self->createTypeface(index);
+    return self->createTypeface(index).release();
 }
 
 extern "C" SkTypeface* C_SkFontStyleSet_matchStyle(SkFontStyleSet* self, const SkFontStyle* pattern) {
-    return self->matchStyle(*pattern);
+    return self->matchStyle(*pattern).release();
 }
 
 // note: this function _consumes_ / deletes the stream.
@@ -1825,25 +1825,25 @@ extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromEncoded(SkData *data, co
     return SkImageGenerator::MakeFromEncoded(sp(data), opt(alphaType)).release();
 }
 
-extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromPicture(
-        const SkISize *size,
-        SkPicture *picture,
-        const SkMatrix *matrix,
-        const SkPaint *paint,
-        SkImage::BitDepth bd,
-        SkColorSpace *cs,
-        const SkSurfaceProps* props) {
-    return
-        SkImageGenerator::MakeFromPicture(
-            *size,
-            sp(picture),
-            matrix,
-            paint,
-            bd,
-            sp(cs),
-            *props
-        ).release();
-}
+// extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromPicture(
+//         const SkISize *size,
+//         SkPicture *picture,
+//         const SkMatrix *matrix,
+//         const SkPaint *paint,
+//         SkImages::BitDepth bd,
+//         SkColorSpace *cs,
+//         const SkSurfaceProps* props) {
+//     return
+//         SkImageGenerator::MakeFromPicture(
+//             *size,
+//             sp(picture),
+//             matrix,
+//             paint,
+//             bd,
+//             sp(cs),
+//             *props
+//         ).release();
+// }
 
 //
 // core/SkString.h
