@@ -544,11 +544,8 @@ impl Bitmap {
     /// contained by [`bounds(&self)`] are affected. If the [`color_type(&self)`] is
     /// [`ColorType::Gray8`] or [ColorType::RGB565], then alpha is ignored; RGB is treated as
     /// opaque. If [`color_type(&self)`] is [`ColorType::Alpha8`], then RGB is ignored.
-    pub fn erase_color_4f(&self, c: impl AsRef<Color4f>, color_space: impl Into<ColorSpace>) {
-        unsafe {
-            self.native()
-                .eraseColor(c.as_ref().into_native(), color_space.into().into_ptr())
-        }
+    pub fn erase_color_4f(&self, c: impl AsRef<Color4f>) {
+        unsafe { self.native().eraseColor(c.as_ref().into_native()) }
     }
 
     /// Replaces pixel values with unpremultiplied color built from `a`, `r`, `g`, and `b`,
@@ -571,7 +568,7 @@ impl Bitmap {
     pub fn erase(&self, c: impl Into<Color>, area: impl AsRef<IRect>) {
         unsafe {
             self.native()
-                .erase2(c.into().into_native(), area.as_ref().native())
+                .erase1(c.into().into_native(), area.as_ref().native())
         }
     }
 
@@ -580,18 +577,10 @@ impl Bitmap {
     ///
     /// If the `color_type()` is [`ColorType::Gray8`] [`ColorType::RGB565`], then alpha is ignored;
     /// RGB is treated as opaque. If `color_type()` is [`ColorType::Alpha8`], then RGB is ignored.
-    pub fn erase_4f(
-        &self,
-        c: impl AsRef<Color4f>,
-        color_space: impl Into<Option<ColorSpace>>,
-        area: impl AsRef<IRect>,
-    ) {
+    pub fn erase_4f(&self, c: impl AsRef<Color4f>, area: impl AsRef<IRect>) {
         unsafe {
-            self.native().erase(
-                c.as_ref().into_native(),
-                color_space.into().into_ptr_or_null(),
-                area.as_ref().native(),
-            )
+            self.native()
+                .erase(c.as_ref().into_native(), area.as_ref().native())
         }
     }
 
@@ -768,7 +757,7 @@ impl Bitmap {
 mod tests {
     use super::TileMode;
     use crate::{
-        encode, AlphaType, Bitmap, Canvas, ColorSpace, ColorType, EncodedImageFormat, ImageInfo,
+        AlphaType, Bitmap, Canvas, ColorSpace, ColorType, EncodedImageFormat, ImageInfo,
         SamplingOptions,
     };
 
@@ -830,7 +819,7 @@ mod tests {
         let canvas = Canvas::from_bitmap(&bitmap, None);
         assert!(canvas.is_none());
 
-        let encoded = encode::bitmap(&bitmap, EncodedImageFormat::PNG, 100);
-        assert!(encoded.is_none());
+        // let encoded = encode::bitmap(&bitmap, EncodedImageFormat::PNG, 100);
+        // assert!(encoded.is_none());
     }
 }

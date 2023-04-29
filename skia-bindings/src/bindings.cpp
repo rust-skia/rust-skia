@@ -1451,6 +1451,34 @@ extern "C" SkTypeface* C_SkFontStyleSet_matchStyle(SkFontStyleSet* self, const S
     return self->matchStyle(*pattern).release();
 }
 
+extern "C" SkFontStyleSet* C_SkFontStyleSet_CreateEmpty() {
+    return SkFontStyleSet::CreateEmpty().release();
+}
+
+
+extern "C" SkFontStyleSet* C_SkFontMgr_createStyleSet(const SkFontMgr* self, int index) {
+    return self->createStyleSet(index).release();
+}
+
+extern "C" SkFontStyleSet* C_SkFontMgr_matchFamily(const SkFontMgr* self, const char familyName[]) {
+    return self->matchFamily(familyName).release();
+}
+
+extern "C" SkTypeface* C_SkFontMgr_matchFamilyStyle(
+    const SkFontMgr* self,
+    const char familyName[],
+    const SkFontStyle* style) {
+    return self->matchFamilyStyle(familyName, *style).release();
+}
+
+extern "C" SkTypeface* C_SkFontMgr_matchFamilyStyleCharacter(
+    const SkFontMgr* self,
+    const char familyName[], const SkFontStyle* style,
+    const char* bcp47[], int bcp47Count,
+    SkUnichar character) {
+    return self->matchFamilyStyleCharacter(familyName, *style, bcp47, bcp47Count, character).release();
+}
+
 // note: this function _consumes_ / deletes the stream.
 extern "C" SkTypeface* C_SkFontMgr_makeFromStream(const SkFontMgr* self, SkStreamAsset* stream, int ttcIndex) {
     return self->makeFromStream(std::unique_ptr<SkStreamAsset>(stream), ttcIndex).release();

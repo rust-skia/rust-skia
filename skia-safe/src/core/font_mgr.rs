@@ -4,12 +4,10 @@ use crate::{
     FontStyle, Typeface, Unichar,
 };
 use core::fmt;
-use sb::SkRefCnt;
 use skia_bindings::{self as sb, SkFontMgr, SkFontStyleSet, SkRefCntBase};
 use std::{ffi::CString, mem, os::raw::c_char};
 
 pub type FontStyleSet = RCHandle<SkFontStyleSet>;
-require_type_equality!(sb::SkFontStyleSet_INHERITED, sb::SkRefCnt);
 
 impl NativeBase<SkRefCntBase> for SkFontStyleSet {}
 
@@ -80,12 +78,11 @@ impl FontStyleSet {
     }
 
     pub fn new_empty() -> Self {
-        FontStyleSet::from_ptr(unsafe { SkFontStyleSet::CreateEmpty() }).unwrap()
+        FontStyleSet::from_ptr(unsafe { sb::C_SkFontStyleSet_CreateEmpty() }).unwrap()
     }
 }
 
 pub type FontMgr = RCHandle<SkFontMgr>;
-require_type_equality!(sb::SkFontMgr_INHERITED, SkRefCnt);
 
 impl NativeBase<SkRefCntBase> for SkFontMgr {}
 
@@ -142,13 +139,18 @@ impl FontMgr {
 
     pub fn new_style_set(&self, index: usize) -> FontStyleSet {
         assert!(index < self.count_families());
-        FontStyleSet::from_ptr(unsafe { self.native().createStyleSet(index.try_into().unwrap()) })
-            .unwrap()
+        FontStyleSet::from_ptr(unsafe {
+            sb::C_SkFontMgr_createStyleSet(self.native(), index.try_into().unwrap())
+        })
+        .unwrap()
     }
 
     pub fn match_family(&self, family_name: impl AsRef<str>) -> FontStyleSet {
         let family_name = CString::new(family_name.as_ref()).unwrap();
-        FontStyleSet::from_ptr(unsafe { self.native().matchFamily(family_name.as_ptr()) }).unwrap()
+        FontStyleSet::from_ptr(unsafe {
+            sb::C_SkFontMgr_matchFamily(self.native(), family_name.as_ptr())
+        })
+        .unwrap()
     }
 
     pub fn match_family_style(
@@ -158,8 +160,7 @@ impl FontMgr {
     ) -> Option<Typeface> {
         let family_name = CString::new(family_name.as_ref()).unwrap();
         Typeface::from_ptr(unsafe {
-            self.native()
-                .matchFamilyStyle(family_name.as_ptr(), style.native())
+            sb::C_SkFontMgr_matchFamilyStyle(self.native(), family_name.as_ptr(), style.native())
         })
     }
 
@@ -178,7 +179,8 @@ impl FontMgr {
         let mut bcp_47: Vec<*const c_char> = bcp_47.iter().map(|cs| cs.as_ptr()).collect();
 
         Typeface::from_ptr(unsafe {
-            self.native().matchFamilyStyleCharacter(
+            sb::C_SkFontMgr_matchFamilyStyleCharacter(
+                self.native(),
                 family_name.as_ptr(),
                 style.native(),
                 bcp_47.as_mut_ptr(),
