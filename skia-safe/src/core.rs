@@ -113,7 +113,7 @@ pub use font_metrics::FontMetrics;
 pub use font_mgr::*;
 pub use font_style::FontStyle;
 pub use font_types::*;
-pub use image::Image;
+pub use image::{images, Image};
 pub use image_encoder::*;
 pub use image_filter::ImageFilter;
 pub use image_generator::*;

@@ -366,10 +366,22 @@ extern "C" SkShader* C_SkImage_makeShader(
 }
 
 extern "C" SkShader* C_SkImage_makeRawShader(
-    const SkImage* self, 
-    SkTileMode tileMode1, SkTileMode tileMode2, 
+    const SkImage* self,
+    SkTileMode tileMode1, SkTileMode tileMode2,
     const SkSamplingOptions* samplingOptions, const SkMatrix* localMatrix) {
     return self->makeRawShader(tileMode1, tileMode2, *samplingOptions, localMatrix).release();
+}
+
+extern "C" bool C_SkImage_isTextureBacked(const SkImage* self) {
+    return self->isTextureBacked();
+}
+
+extern "C" size_t C_SkImage_textureSize(const SkImage* self) {
+    return self->textureSize();
+}
+
+extern "C" bool C_SkImage_isValid(const SkImage* self, GrRecordingContext* context) {
+    return self->isValid(context);
 }
 
 // extern "C" SkData* C_SkImage_encodeToData(const SkImage* self, SkEncodedImageFormat imageFormat, int quality) {
