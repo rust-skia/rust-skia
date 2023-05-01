@@ -25,9 +25,21 @@ impl Bitmap {
     }
 }
 
+#[cfg(feature = "gpu")]
+impl crate::Image {
+    pub fn encode<'a>(
+        &self,
+        context: impl Into<Option<&'a mut crate::gpu::DirectContext>>,
+        format: EncodedImageFormat,
+        quality: impl Into<Option<i32>>,
+    ) -> Option<crate::Data> {
+        crate::encode::image(context, self, format, quality)
+    }
+}
+
 pub mod encode {
     use super::{jpeg_encoder, png_encoder};
-    use crate::{prelude::*, Bitmap, EncodedImageFormat, Pixmap};
+    use crate::{Bitmap, EncodedImageFormat, Pixmap};
 
     pub fn pixmap(
         bitmap: &Pixmap,
@@ -38,8 +50,10 @@ pub mod encode {
         let quality = quality.into().unwrap_or(100).clamp(0, 100);
         match format {
             EncodedImageFormat::JPEG => {
-                let mut opts = jpeg_encoder::Options::default();
-                opts.quality = quality.try_into().ok()?;
+                let opts = jpeg_encoder::Options {
+                    quality,
+                    ..jpeg_encoder::Options::default()
+                };
                 jpeg_encoder::encode(bitmap, &mut data, &opts)
             }
             EncodedImageFormat::PNG => {
@@ -80,11 +94,13 @@ pub mod encode {
         image_format: EncodedImageFormat,
         quality: impl Into<Option<i32>>,
     ) -> Option<crate::Data> {
-        let quality = quality.into().unwrap_or(100).clamp(0, 100);
+        let quality: i32 = quality.into().unwrap_or(100).clamp(0, 100);
         match image_format {
             EncodedImageFormat::JPEG => {
-                let mut opts = jpeg_encoder::Options::default();
-                opts.quality = quality.try_into().ok()?;
+                let opts = jpeg_encoder::Options {
+                    quality,
+                    ..jpeg_encoder::Options::default()
+                };
                 jpeg_encoder::encode_image(context, image, &opts)
             }
             EncodedImageFormat::PNG => {

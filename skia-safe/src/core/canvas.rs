@@ -540,6 +540,14 @@ impl Canvas {
         })
     }
 
+    /// Returns the [`gpu::DirectContext`].
+    /// This is a rust-skia helper with the intend to make it simpler to call [`Image::encode`].
+    #[cfg(feature = "gpu")]
+    pub fn direct_context(&mut self) -> Option<gpu::DirectContext> {
+        self.recording_context()
+            .and_then(|mut c| c.as_direct_context())
+    }
+
     /// Sometimes a canvas is owned by a surface. If it is, [`Self::surface()`] will return a bare
     /// pointer to that surface, else this will return `None`.
     ///

@@ -1,9 +1,6 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
-use crate::{
-    image, prelude::*, AlphaType, ColorSpace, Data, ISize, ImageInfo, Matrix, Paint, Picture,
-    SurfaceProps,
-};
+use crate::{prelude::*, AlphaType, Data, ImageInfo};
 use skia_bindings::{self as sb, SkImageGenerator};
 use std::{fmt, ptr};
 

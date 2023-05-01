@@ -478,6 +478,12 @@ impl Surface {
         gpu::RecordingContext::from_unshared_ptr(unsafe { self.native_mut().recordingContext() })
     }
 
+    /// rust-skia helper, not in Skia
+    pub fn direct_context(&mut self) -> Option<gpu::DirectContext> {
+        self.recording_context()
+            .and_then(|mut ctx| ctx.as_direct_context())
+    }
+
     /// Retrieves the back-end texture. If [`Surface`] has no back-end texture, `None`
     /// is returned.
     ///

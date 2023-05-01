@@ -398,13 +398,10 @@ impl<'a> RustWStream<'a> {
                 let mut written = 0;
                 while written != count {
                     match val.write(&buf[written..]) {
-                        Ok(res) => {
-                            if res == 0 {
-                                return false;
-                            }
+                        Ok(res) if res != 0 => {
                             written += res;
                         }
-                        Err(_) => return false,
+                        _ => return false,
                     }
                 }
                 true
@@ -422,7 +419,10 @@ impl<'a> RustWStream<'a> {
             // This is OK because we just abort if it panics anyway.
             let mut val = std::panic::AssertUnwindSafe(val);
             match std::panic::catch_unwind(move || {
-                val.flush();
+                // Not sure what could be done to handle a flush() error.
+                // Idea: use a with_stream method on the RustWStream that takes a closure, stores
+                // the flush() result and then return a result from with_stream.
+                let _flush_result_ignored = val.flush();
             }) {
                 Ok(_) => {}
                 Err(_) => {

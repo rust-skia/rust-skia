@@ -296,12 +296,11 @@ impl Image {
     /// - `image_generator`   stock or custom routines to retrieve [`Image`]
     /// Returns: created [`Image`], or `None`
     #[deprecated(since = "0.0.0", note = "use images::deferred_from_generator()")]
-    pub fn from_generator(mut image_generator: ImageGenerator) -> Option<Image> {
+    pub fn from_generator(image_generator: ImageGenerator) -> Option<Image> {
         images::deferred_from_generator(image_generator)
     }
 
     /// See [`Self::from_encoded_with_alpha_type()`]
-    #[deprecated(since = "0.0.0", note = "use images::deferred_from_encoded_data()")]
     pub fn from_encoded(data: impl Into<Data>) -> Option<Image> {
         images::deferred_from_encoded_data(data, None)
     }
@@ -326,7 +325,6 @@ impl Image {
     /// Returns: created [`Image`], or `None`
     ///
     /// example: <https://fiddle.skia.org/c/@Image_MakeFromEncoded>
-    #[deprecated(since = "0.0.0", note = "use images::deferred_from_encoded_data()")]
     pub fn from_encoded_with_alpha_type(
         data: impl Into<Data>,
         alpha_type: impl Into<Option<AlphaType>>,
@@ -1160,25 +1158,23 @@ impl Image {
     ///
     ///  example: <https://fiddle.skia.org/c/@Image_encodeToData>
     #[cfg(feature = "gpu")]
+    #[deprecated(since = "0.0.0", note = "Use encode")]
     pub fn encode_to_data_with_context<'a>(
         &self,
         context: impl Into<Option<&'a mut gpu::DirectContext>>,
         image_format: EncodedImageFormat,
         quality: impl Into<Option<i32>>,
     ) -> Option<Data> {
-        Data::from_ptr(unsafe {
-            sb::C_SkImage_encodeToDataWithContext(
-                self.native(),
-                context.into().native_ptr_or_null_mut(),
-                image_format,
-                quality.into().unwrap_or(100),
-            )
-        })
+        self.encode(context, image_format, quality)
     }
 
     /// See [`Self::encode_to_data_with_quality`]
+    #[deprecated(
+        since = "0.0.0",
+        note = "Support for encoding GPU backed images without a context was removed, use `encode_to_data_with_context` instead"
+    )]
     pub fn encode_to_data(&self, image_format: EncodedImageFormat) -> Option<Data> {
-        self.encode_to_data_with_quality(image_format, 100)
+        self.encode(None, image_format, 100)
     }
 
     /// Encodes [`Image`] pixels, returning result as [`Data`].
@@ -1203,12 +1199,16 @@ impl Image {
     /// Returns: encoded [`Image`], or `None`
     ///
     /// example: <https://fiddle.skia.org/c/@Image_encodeToData>
+    #[deprecated(
+        since = "0.0.0",
+        note = "Support for encoding GPU backed images without a context was removed, use `encode_to_data_with_context` instead"
+    )]
     pub fn encode_to_data_with_quality(
         &self,
         image_format: EncodedImageFormat,
         quality: i32,
     ) -> Option<Data> {
-        Data::from_ptr(unsafe { sb::C_SkImage_encodeToData(self.native(), image_format, quality) })
+        self.encode(None, image_format, quality)
     }
 
     /// Returns encoded [`Image`] pixels as [`Data`], if [`Image`] was created from supported

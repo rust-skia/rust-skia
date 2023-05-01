@@ -59,7 +59,7 @@ fn main() {
         };
         let mut file = File::create(file_name).unwrap();
         let image = surface.image_snapshot();
-        match image.encode_to_data(EncodedImageFormat::PNG) {
+        match image.encode(None, EncodedImageFormat::PNG, 100) {
             Some(data) => {
                 file.write_all(data.as_bytes()).unwrap();
             }

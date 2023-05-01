@@ -148,7 +148,6 @@ fn main() {
 }
 
 pub(crate) mod resources {
-
     use skia_safe::{Data, Image};
 
     pub fn color_wheel() -> Image {
