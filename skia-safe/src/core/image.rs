@@ -6,7 +6,7 @@ use crate::{
     Shader, SurfaceProps, TextureCompressionType, TileMode,
 };
 use skia_bindings::{self as sb, SkImage, SkRefCntBase};
-use std::{fmt, mem, ptr};
+use std::{fmt, ptr};
 
 pub use super::CubicResampler;
 
@@ -1309,14 +1309,7 @@ impl Image {
         mipmapped: gpu::Mipmapped,
         budgeted: gpu::Budgeted,
     ) -> Option<Image> {
-        Image::from_ptr(unsafe {
-            sb::C_SkImage_makeTextureImage(
-                self.native(),
-                direct_context.native_mut(),
-                mipmapped,
-                budgeted.into_native(),
-            )
-        })
+        gpu::images::texture_from_image(direct_context, self, mipmapped, budgeted)
     }
 
     #[deprecated(since = "0.54.0", note = "use to_non_texture_image()")]

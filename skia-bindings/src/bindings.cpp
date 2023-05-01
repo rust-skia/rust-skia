@@ -88,6 +88,10 @@
 #include "include/effects/SkTableMaskFilter.h"
 #include "include/effects/SkTrimPathEffect.h"
 
+// encode/
+#include "include/encode/SkPngEncoder.h"
+#include "include/encode/SkJpegEncoder.h"
+
 // pathops/
 #include "include/pathops/SkPathOps.h"
 
@@ -2570,7 +2574,7 @@ extern "C" SkPathEffect *C_SkTrimPathEffect_Make(SkScalar startT, SkScalar stopT
 
 //
 // effects/SkImageFilters.h
-// 
+//
 
 extern "C" {
 
@@ -2762,6 +2766,62 @@ C_SkImageFilters_SpotLitSpecular(const SkPoint3 &location,
 }
 
 //
+// encode/
+//
+
+extern "C" {
+
+bool C_SkPngEncoder_Encode(SkWStream* stream, const SkPixmap* pixmap,
+    SkDataTable* comments, SkPngEncoder::FilterFlag filterFlags, int zLibLevel) {
+
+    auto options = SkPngEncoder::Options();
+    options.fComments = sp(comments);
+    options.fFilterFlags = filterFlags;
+    options.fZLibLevel = zLibLevel;
+
+    return SkPngEncoder::Encode(stream, *pixmap, options);
+}
+
+SkData* C_SkPngEncoder_EncodeImage(GrDirectContext* ctx, const SkImage* img,
+    SkDataTable* comments, SkPngEncoder::FilterFlag filterFlags, int zLibLevel) {
+
+    auto options = SkPngEncoder::Options();
+    options.fComments = sp(comments);
+    options.fFilterFlags = filterFlags;
+    options.fZLibLevel = zLibLevel;
+
+    return SkPngEncoder::Encode(ctx, img, options).release();
+}
+
+bool C_SkJpegEncoder_Encode(SkWStream* stream, const SkPixmap* pixmap, 
+    int quality,
+    SkJpegEncoder::Downsample downsample, 
+    SkJpegEncoder::AlphaOption alphaOption, 
+    const SkData* xmpMetadata) {
+    auto options = SkJpegEncoder::Options();
+    options.fQuality = quality;
+    options.fDownsample = downsample;
+    options.fAlphaOption = alphaOption;
+    options.xmpMetadata = xmpMetadata;
+    return SkJpegEncoder::Encode(stream, *pixmap, options);
+}
+
+SkData* C_SkJpegEncoder_EncodeImage(GrDirectContext* ctx, const SkImage* img, 
+    int quality,
+    SkJpegEncoder::Downsample downsample, 
+    SkJpegEncoder::AlphaOption alphaOption, 
+    const SkData* xmpMetadata) {
+    auto options = SkJpegEncoder::Options();
+    options.fQuality = quality;
+    options.fDownsample = downsample;
+    options.fAlphaOption = alphaOption;
+    options.xmpMetadata = xmpMetadata;
+    return SkJpegEncoder::Encode(ctx, img, options).release();
+}
+
+}
+
+//
 // docs/SkPDFDocument.h
 //
 
@@ -2916,11 +2976,11 @@ class RustStream : public SkStream {
 
 public:
     RustStream(
-            void *data,
-            size_t length,
-            size_t (*read)(void *, void *, size_t),
-            bool (*seekAbsolute)(void *, size_t),
-            bool (*seekRelative)(void *, long)
+        void *data,
+        size_t length,
+        size_t (*read)(void *, void *, size_t),
+        bool (*seekAbsolute)(void *, size_t),
+        bool (*seekRelative)(void *, long)
     );
 
     size_t read(void *buffer, size_t count);
@@ -3011,4 +3071,52 @@ extern "C" void C_RustStream_destruct(
     RustStream *stream
 ) {
     stream->~RustStream();
+}
+
+class RustWStream : public SkWStream {
+    void *m_data;
+    size_t m_length;
+
+    bool (*m_write)(void *, const void *, size_t);
+    void (*m_flush)(void *);
+
+public:
+    RustWStream(
+        void* data,
+        bool (*write)(void *, const void *, size_t),
+        void (*flush)(void *)
+    ) :
+        m_data(data),
+        m_write(write),
+        m_flush(flush) 
+    {}
+
+    bool write(const void *buffer, size_t count) {
+        auto r = (this->m_write)(this->m_data, buffer, count);
+        if (r) {
+            this->m_length += count;
+        }
+        return r;
+    }
+
+    void flush() {
+        (this->m_flush)(this->m_data);
+    }
+
+    size_t bytesWritten() const {
+        return this->m_length;
+    }
+};
+
+extern "C" void C_RustWStream_construct(
+        RustWStream *out,
+        void *data,
+        bool (*write)(void *, const void *, size_t),
+        void (*flush)(void *)
+) {
+    new(out) RustWStream(data, write, flush);
+}
+
+extern "C" void C_RustWStream_destruct(RustWStream *stream) {
+    stream->~RustWStream();
 }

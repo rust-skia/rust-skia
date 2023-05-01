@@ -436,8 +436,3 @@ extern "C" GrBackendTexture* C_SkImages_GetBackendTextureFromImage(
     SkImages::GetBackendTextureFromImage(self, texture, flushPendingGrContextIO, origin);
     return texture;
 }
-
-// extern "C" SkData* C_SkImage_encodeToDataWithContext(const SkImage* self, GrDirectContext* context, SkEncodedImageFormat imageFormat, int quality) {
-//     return self->encodeToData(context, imageFormat, quality).release();
-// }
-

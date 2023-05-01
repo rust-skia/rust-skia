@@ -53,6 +53,9 @@ impl Configuration {
             if features.svg {
                 sources.push("src/svg.cpp".into());
             }
+            if features.webp_encode {
+                sources.push("src/webp-encode.cpp".into());
+            }
             sources
         };
 
@@ -633,6 +636,10 @@ const ENUM_TABLE: &[EnumEntry] = &[
     // SkCodecAnimation
     ("DisposalMethod", rewrite::k_xxx),
     ("Blend", rewrite::k_xxx),
+    // SkJpegEncoder.h
+    ("AlphaOption", rewrite::k_xxx),
+    // SkWebpEncoder.h
+    ("Compression", rewrite::k_xxx),
 ];
 
 pub(crate) mod rewrite {

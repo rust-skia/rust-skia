@@ -1,4 +1,4 @@
-use crate::gpu::{BackendTexture, RecordingContext, YUVABackendTextures};
+use crate::gpu::{BackendTexture, Budgeted, RecordingContext, YUVABackendTextures};
 use crate::{
     gpu::{DirectContext, Mipmapped, Protected, SurfaceOrigin},
     AlphaType, Data, ISize, Image, TextureCompressionType,
@@ -152,7 +152,39 @@ pub fn texture_from_compressed_texture_data(
     })
 }
 
-// TODO: TextureFromImage
+///  Returns [`Image`] backed by GPU texture associated with context. Returned [`Image`] is
+///  compatible with [`Surface`] created with `dst_color_space`. The returned [`Image`] respects
+///  mipmapped setting; if mipmapped equals [`Mipmapped::Yes`], the backing texture
+///  allocates mip map levels.
+///  The mipmapped parameter is effectively treated as `No` if MIP maps are not supported by the
+///  GPU.
+///  Returns original [`Image`] if the image is already texture-backed, the context matches, and
+///  mipmapped is compatible with the backing GPU texture. skgpu::Budgeted is ignored in this
+///  case.
+///  Returns `None` if context is `None`, or if [`Image`] was created with another
+///  [`DirectContext`].
+///  * `direct_context` - the [`DirectContext`] in play, if it exists
+///  * `image` - a non-null pointer to an [`Image`].
+///  * `mipmapped` - Whether created [`Image`] texture must allocate mip map levels.
+///                  Defaults to `No`.
+///  * `budgeted` - Whether to count a newly created texture for the returned image
+///                 counts against the context's budget. Defaults to `Yes`.
+///  Returns: created [`Image`], or `None`
+pub fn texture_from_image(
+    direct_context: &mut DirectContext,
+    image: &Image,
+    mipmapped: Mipmapped,
+    budgeted: Budgeted,
+) -> Option<Image> {
+    Image::from_ptr(unsafe {
+        sb::C_SkImages_TextureFromImage(
+            direct_context.native_mut(),
+            image.native(),
+            mipmapped,
+            budgeted.into_native(),
+        )
+    })
+}
 
 /// Creates a GPU-backed [`Image`] from [`YUVAPixmaps`].
 /// The image will remain planar with each plane converted to a texture using the passed
