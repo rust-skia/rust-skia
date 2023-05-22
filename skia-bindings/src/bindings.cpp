@@ -58,6 +58,7 @@
 #include "include/core/SkSurfaceCharacterization.h"
 #include "include/core/SkSwizzle.h"
 #include "include/core/SkTextBlob.h"
+#include "include/core/SkTextureCompressionType.h"
 #include "include/core/SkTypeface.h"
 #include "include/core/SkTypes.h"
 #include "include/core/SkVertices.h"

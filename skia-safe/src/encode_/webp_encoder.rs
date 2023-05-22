@@ -35,16 +35,30 @@ pub fn encode<W: io::Write>(pixmap: &Pixmap, writer: &mut W, options: &Options) 
 }
 
 #[cfg(feature = "gpu")]
-pub fn encode_image<'a>(
-    context: impl Into<Option<&'a mut crate::gpu::DirectContext>>,
+pub fn encode_image(
+    context: impl Into<Option<crate::gpu::DirectContext>>,
     img: &crate::Image,
     options: &Options,
 ) -> Option<crate::Data> {
-    use crate::Data;
-
-    Data::from_ptr(unsafe {
+    crate::Data::from_ptr(unsafe {
         skia_bindings::C_SkWebpEncoder_EncodeImage(
-            context.into().native_ptr_or_null_mut(),
+            context.into().into_ptr_or_null(),
+            img.native(),
+            options.compression,
+            options.quality,
+        )
+    })
+}
+
+#[cfg(not(feature = "gpu"))]
+pub fn encode_image<'a>(
+    context: Option<()>,
+    img: &crate::Image,
+    options: &Options,
+) -> Option<crate::Data> {
+    crate::Data::from_ptr(unsafe {
+        skia_bindings::C_SkWebpEncoder_EncodeImage(
+            std::ptr::null_mut(),
             img.native(),
             options.compression,
             options.quality,

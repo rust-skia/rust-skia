@@ -10,20 +10,16 @@ use std::{fmt, ptr};
 
 pub use super::CubicResampler;
 
-#[deprecated(since = "0.62.0", note = "Use TextureCompressionType")]
-pub use crate::TextureCompressionType as CompressionType;
-
 #[deprecated(since = "0.0.0", note = "Use images::BitDepth")]
 pub use images::BitDepth;
 
 pub mod images {
-    use std::{mem, ptr};
-
     use crate::{
         prelude::*, AlphaType, Bitmap, ColorSpace, Data, ISize, Image, ImageGenerator, ImageInfo,
         Matrix, Paint, Picture, SurfaceProps, TextureCompressionType,
     };
     use skia_bindings as sb;
+    use std::{mem, ptr};
 
     /// Creates a CPU-backed [`Image`] from `bitmap`, sharing or copying `bitmap` pixels. If the bitmap
     /// is marked immutable, and its pixel memory is shareable, it may be shared
@@ -1159,9 +1155,9 @@ impl Image {
     ///  example: <https://fiddle.skia.org/c/@Image_encodeToData>
     #[cfg(feature = "gpu")]
     #[deprecated(since = "0.0.0", note = "Use encode")]
-    pub fn encode_to_data_with_context<'a>(
+    pub fn encode_to_data_with_context(
         &self,
-        context: impl Into<Option<&'a mut gpu::DirectContext>>,
+        context: impl Into<Option<gpu::DirectContext>>,
         image_format: EncodedImageFormat,
         quality: impl Into<Option<i32>>,
     ) -> Option<Data> {

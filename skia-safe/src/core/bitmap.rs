@@ -756,10 +756,7 @@ impl Bitmap {
 #[cfg(test)]
 mod tests {
     use super::TileMode;
-    use crate::{
-        AlphaType, Bitmap, Canvas, ColorSpace, ColorType, EncodedImageFormat, ImageInfo,
-        SamplingOptions,
-    };
+    use crate::{AlphaType, Bitmap, Canvas, ColorSpace, ColorType, ImageInfo, SamplingOptions};
 
     #[test]
     fn create_clone_and_drop() {

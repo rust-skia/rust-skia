@@ -13,7 +13,7 @@ pub fn draw_image_on_surface(
     func(canvas);
     let image = surface.image_snapshot();
     let data = image
-        .encode(&mut surface.direct_context(), EncodedImageFormat::PNG, None)
+        .encode(surface.direct_context(), EncodedImageFormat::PNG, None)
         .unwrap();
     write_file(data.as_bytes(), path, name, "png");
 }

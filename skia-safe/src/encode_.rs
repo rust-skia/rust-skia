@@ -27,13 +27,25 @@ impl Bitmap {
 
 #[cfg(feature = "gpu")]
 impl crate::Image {
-    pub fn encode<'a>(
+    pub fn encode(
         &self,
-        context: impl Into<Option<&'a mut crate::gpu::DirectContext>>,
+        context: impl Into<Option<crate::gpu::DirectContext>>,
         format: EncodedImageFormat,
         quality: impl Into<Option<i32>>,
     ) -> Option<crate::Data> {
         crate::encode::image(context, self, format, quality)
+    }
+}
+
+#[cfg(not(feature = "gpu"))]
+impl crate::Image {
+    pub fn encode(
+        &self,
+        _context: Option<()>,
+        format: EncodedImageFormat,
+        quality: impl Into<Option<i32>>,
+    ) -> Option<crate::Data> {
+        crate::encode::image(None, self, format, quality)
     }
 }
 
@@ -88,8 +100,45 @@ pub mod encode {
     }
 
     #[cfg(feature = "gpu")]
-    pub fn image<'a>(
-        context: impl Into<Option<&'a mut crate::gpu::DirectContext>>,
+    pub fn image(
+        context: impl Into<Option<crate::gpu::DirectContext>>,
+        image: &crate::Image,
+        image_format: EncodedImageFormat,
+        quality: impl Into<Option<i32>>,
+    ) -> Option<crate::Data> {
+        let quality: i32 = quality.into().unwrap_or(100).clamp(0, 100);
+        match image_format {
+            EncodedImageFormat::JPEG => {
+                let opts = jpeg_encoder::Options {
+                    quality,
+                    ..jpeg_encoder::Options::default()
+                };
+                jpeg_encoder::encode_image(context, image, &opts)
+            }
+            EncodedImageFormat::PNG => {
+                let opts = png_encoder::Options::default();
+                png_encoder::encode_image(context, image, &opts)
+            }
+            #[cfg(feature = "webp-encode")]
+            EncodedImageFormat::WEBP => {
+                use super::webp_encoder;
+                let mut opts = webp_encoder::Options::default();
+                if quality == 100 {
+                    opts.compression = webp_encoder::Compression::Lossless;
+                    opts.quality = 75.0;
+                } else {
+                    opts.compression = webp_encoder::Compression::Lossy;
+                    opts.quality = quality as _;
+                }
+                webp_encoder::encode_image(context, image, &opts)
+            }
+            _ => None,
+        }
+    }
+
+    #[cfg(not(feature = "gpu"))]
+    pub fn image(
+        context: Option<()>,
         image: &crate::Image,
         image_format: EncodedImageFormat,
         quality: impl Into<Option<i32>>,
