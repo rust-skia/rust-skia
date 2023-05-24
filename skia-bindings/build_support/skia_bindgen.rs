@@ -361,7 +361,9 @@ const OPAQUE_TYPES: &[&str] = &[
     "SkPicture_AbortCallback",
     "SkPixelRef_GenIDChangeListener",
     "SkRasterHandleAllocator",
-    "SkRefCnt",
+    // m114: Must keep `SkRefCnt`, because otherwise bindgen would add an additional vtable because
+    // of its newly introduced virtual functions.
+    // "SkRefCnt",
     "SkShader",
     "SkStream",
     "SkStreamAsset",
