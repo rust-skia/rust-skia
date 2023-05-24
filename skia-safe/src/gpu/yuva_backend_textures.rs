@@ -141,7 +141,7 @@ impl YUVABackendTextures {
         let mut textures = textures.to_vec();
         textures.extend(
             iter::repeat_with(BackendTexture::new_invalid)
-                .take(textures.len() - YUVAInfo::MAX_PLANES),
+                .take(YUVAInfo::MAX_PLANES - textures.len()),
         );
         assert_eq!(textures.len(), YUVAInfo::MAX_PLANES);
         let n = unsafe {
