@@ -207,6 +207,14 @@ pub fn generate_bindings(
         cc_args.push(cpp17.into());
     }
 
+    // Disable RTTI. Otherwise RustWStream may cause compilation errors.
+    bindgen_args.push("-fno-rtti".into());
+    if target.builds_with_msvc() {
+        cc_args.push("/GR-".into());
+    } else {
+        cc_args.push("-fno-rtti".into());
+    }
+
     let target_str = &target.to_string();
     cc_build.target(target_str);
     bindgen_args.push(format!("--target={target_str}"));
