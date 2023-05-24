@@ -425,6 +425,8 @@ const OPAQUE_TYPES: &[&str] = &[
     "skia_private::AutoTMalloc",
     // Pulled in by `SkData`.
     "FILE",
+    // m114: Results in wrongly sized template specializations.
+    "skia_private::THashMap",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[
