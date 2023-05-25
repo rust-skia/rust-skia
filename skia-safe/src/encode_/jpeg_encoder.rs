@@ -9,7 +9,7 @@ variant_name!(AlphaOption::BlendOnBlack);
 pub enum Downsample {
     BothDirections,
     Horizontal,
-    None,
+    No,
 }
 
 impl Downsample {
@@ -17,7 +17,7 @@ impl Downsample {
         match self {
             Downsample::BothDirections => SkJpegEncoder_Downsample::k420,
             Downsample::Horizontal => SkJpegEncoder_Downsample::k422,
-            Downsample::None => SkJpegEncoder_Downsample::k444,
+            Downsample::No => SkJpegEncoder_Downsample::k444,
         }
     }
 }
@@ -58,6 +58,8 @@ pub fn encode<W: io::Write>(pixmap: &Pixmap, writer: &mut W, options: &Options) 
         )
     }
 }
+
+// TODO: encode YUVAPixmaps
 
 #[cfg(feature = "gpu")]
 pub fn encode_image(

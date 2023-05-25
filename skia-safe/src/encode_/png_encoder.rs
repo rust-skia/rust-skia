@@ -12,7 +12,7 @@ bitflags! {
         const UP = sb::SkPngEncoder_FilterFlag::kUp as _;
         const AVG = sb::SkPngEncoder_FilterFlag::kAvg as _;
         const PAETH = sb::SkPngEncoder_FilterFlag::kPaeth as _;
-        const ALL = Self::NONE.bits() | Self::SUB.bits() | Self::UP.bits() |Self::AVG.bits() | Self::PAETH.bits();
+        const ALL = Self::NONE.bits() | Self::SUB.bits() | Self::UP.bits() | Self::AVG.bits() | Self::PAETH.bits();
     }
 }
 native_transmutable!(sb::SkPngEncoder_FilterFlag, FilterFlag, filter_flag_layout);
