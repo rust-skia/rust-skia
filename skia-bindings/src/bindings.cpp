@@ -1883,6 +1883,10 @@ extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromEncoded(SkData *data, co
     return SkImageGenerator::MakeFromEncoded(sp(data), opt(alphaType)).release();
 }
 
+extern "C" bool C_SkImageGenerator_isTextureGenerator(const SkImageGenerator *self) {
+    return self->isTextureGenerator();
+}
+
 // extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromPicture(
 //         const SkISize *size,
 //         SkPicture *picture,

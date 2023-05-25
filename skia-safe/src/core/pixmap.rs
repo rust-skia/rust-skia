@@ -243,15 +243,13 @@ impl<'pixels> Pixmap<'pixels> {
     pub unsafe fn read_pixels_to_pixmap(&self, dst: &mut Pixmap, src: impl Into<IPoint>) -> bool {
         let row_bytes = dst.row_bytes();
         let len = usize::try_from(dst.height()).unwrap() * row_bytes;
-        unsafe {
-            let addr = dst.writable_addr() as *mut raw::c_char;
-            self.read_pixels(
-                dst.info(),
-                safer::from_raw_parts_mut(addr, len),
-                row_bytes,
-                src,
-            )
-        }
+        let addr = dst.writable_addr() as *mut raw::c_char;
+        self.read_pixels(
+            dst.info(),
+            safer::from_raw_parts_mut(addr, len),
+            row_bytes,
+            src,
+        )
     }
 
     /// # Safety
@@ -262,18 +260,16 @@ impl<'pixels> Pixmap<'pixels> {
         sampling: impl Into<SamplingOptions>,
     ) -> bool {
         let sampling = sampling.into();
-        unsafe { self.native().scalePixels(dst.native(), sampling.native()) }
+        self.native().scalePixels(dst.native(), sampling.native())
     }
 
     /// # Safety
     /// Unsafe in that it modifies the underlying pixels of `self`.
     pub unsafe fn erase(&mut self, color: impl Into<Color>, subset: Option<&IRect>) -> bool {
         let color = color.into().into_native();
-        unsafe {
-            match subset {
-                Some(subset) => self.native().erase(color, subset.native()),
-                None => self.native().erase(color, self.bounds().native()),
-            }
+        match subset {
+            Some(subset) => self.native().erase(color, subset.native()),
+            None => self.native().erase(color, self.bounds().native()),
         }
     }
 
@@ -281,10 +277,8 @@ impl<'pixels> Pixmap<'pixels> {
     /// Unsafe in that it modifies the underlying pixels of `self`.
     pub unsafe fn erase_4f(&mut self, color: impl AsRef<Color4f>, subset: Option<&IRect>) -> bool {
         let color = color.as_ref();
-        unsafe {
-            self.native()
-                .erase1(color.native(), subset.native_ptr_or_null())
-        }
+        self.native()
+            .erase1(color.native(), subset.native_ptr_or_null())
     }
 
     fn from_native_c(pixmap: SkPixmap) -> Self {

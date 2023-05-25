@@ -1,6 +1,6 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
-use crate::{prelude::*, AlphaType, Data, ImageInfo};
+use crate::{prelude::*, yuva_pixmap_info, AlphaType, Data, ImageInfo, YUVAPixmapInfo};
 use skia_bindings::{self as sb, SkImageGenerator};
 use std::{fmt, ptr};
 
@@ -51,12 +51,20 @@ impl ImageGenerator {
 
     // TODO: m86: get_pixels(&Pixmap)
 
-    // TODO: generateTexture()
+    pub fn query_yuva_info(
+        &self,
+        supported_data_types: &yuva_pixmap_info::SupportedDataTypes,
+    ) -> Option<YUVAPixmapInfo> {
+        YUVAPixmapInfo::new_if_valid(|info| unsafe {
+            self.native()
+                .queryYUVAInfo(supported_data_types.native(), info)
+        })
+    }
 
-    #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.29.0", note = "removed without replacement")]
-    pub fn textures_are_cacheable(&self) -> ! {
-        unimplemented!("removed without replacement")
+    // TODO: getYUVAPlanes()
+
+    pub fn is_texture_generator(&self) -> bool {
+        unsafe { sb::C_SkImageGenerator_isTextureGenerator(self.native()) }
     }
 
     pub fn from_encoded(encoded: impl Into<Data>) -> Option<Self> {
