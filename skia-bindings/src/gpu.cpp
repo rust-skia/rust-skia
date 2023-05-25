@@ -301,6 +301,19 @@ extern "C" GrBackendApi C_GrBackendDrawableInfo_backend(const GrBackendDrawableI
 // gpu/GrYUVABackendTextures.h
 //
 
+extern "C" void C_GrYUVABackendTextures_construct(
+    GrYUVABackendTextures* uninitialized,
+    const SkYUVAInfo& yuvaInfo,
+    const GrBackendTexture* const *backend_textures,
+    GrSurfaceOrigin textureOrigin
+) {
+    GrBackendTexture textures[SkYUVAInfo::kMaxPlanes];
+    for (int i = 0; i < SkYUVAInfo::kMaxPlanes; ++i) {
+        textures[i] = *backend_textures[i];
+    }
+    new(uninitialized) GrYUVABackendTextures(yuvaInfo, textures, textureOrigin);
+}
+
 extern "C" void C_GrYUVABackendTextureInfo_destruct(GrYUVABackendTextureInfo* self) {
     self->~GrYUVABackendTextureInfo();
 }
