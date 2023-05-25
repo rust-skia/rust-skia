@@ -3017,18 +3017,19 @@ public:
 };
 
 RustStream::RustStream(
-        void *data,
-        size_t length,
-        size_t (*read)(void *, void *, size_t),
-        bool (*seekAbsolute)(void *, size_t),
-        bool (*seekRelative)(void *, long)
+    void *data,
+    size_t length,
+    size_t (*read)(void *, void *, size_t),
+    bool (*seekAbsolute)(void *, size_t),
+    bool (*seekRelative)(void *, long)
 ) :
-        m_data(data),
-        m_length(length),
-        m_isEof(false),
-        m_read(read),
-        m_seekAbsolute(seekAbsolute),
-        m_seekRelative(seekRelative) {}
+    m_data(data),
+    m_length(length),
+    m_isEof(false),
+    m_read(read),
+    m_seekAbsolute(seekAbsolute),
+    m_seekRelative(seekRelative) 
+{}
 
 size_t RustStream::read(void *buffer, size_t count) {
     if (this->m_isEof) return 0;
@@ -3075,12 +3076,12 @@ bool RustStream::isAtEnd() const {
 }
 
 extern "C" void C_RustStream_construct(
-        RustStream *out,
-        void *data,
-        size_t length,
-        size_t (*read)(void *, void *, size_t),
-        bool (*seekAbsolute)(void *, size_t),
-        bool (*seekRelative)(void *, long)
+    RustStream *out,
+    void *data,
+    size_t length,
+    size_t (*read)(void *, void *, size_t),
+    bool (*seekAbsolute)(void *, size_t),
+    bool (*seekRelative)(void *, long)
 ) {
     new(out) RustStream(data, length, read, seekAbsolute, seekRelative);
 }
@@ -3127,10 +3128,10 @@ public:
 };
 
 extern "C" void C_RustWStream_construct(
-        RustWStream *out,
-        void *data,
-        bool (*write)(void *, const void *, size_t),
-        void (*flush)(void *)
+    RustWStream *out,
+    void *data,
+    bool (*write)(void *, const void *, size_t),
+    void (*flush)(void *)
 ) {
     new(out) RustWStream(data, write, flush);
 }
