@@ -8,7 +8,7 @@ use super::{
     BackendFormat, BackendRenderTarget, BackendTexture, ContextOptions, FlushInfo,
     MutableTextureState, RecordingContext, SemaphoresSubmitted,
 };
-use crate::{prelude::*, Data, TextureCompressionType};
+use crate::{prelude::*, Data, Image, TextureCompressionType};
 use skia_bindings::{self as sb, GrDirectContext, GrDirectContext_DirectContextID, SkRefCntBase};
 use std::{
     fmt,
@@ -276,6 +276,30 @@ impl DirectContext {
         } else {
             let info = FlushInfo::default();
             unsafe { n.flush(info.native()) }
+        }
+    }
+
+    pub fn flush_image_with_info(
+        &mut self,
+        image: &Image,
+        info: &FlushInfo,
+    ) -> SemaphoresSubmitted {
+        unsafe {
+            sb::C_GrDirectContext_flushImageWithInfo(
+                self.native_mut(),
+                image.clone().into_ptr(),
+                info.native(),
+            )
+        }
+    }
+
+    pub fn flush_image(&mut self, image: &Image) {
+        unsafe { sb::C_GrDirectContext_flushImage(self.native_mut(), image.clone().into_ptr()) }
+    }
+
+    pub fn flush_and_submit_image(&mut self, image: &Image) {
+        unsafe {
+            sb::C_GrDirectContext_flushAndSubmitImage(self.native_mut(), image.clone().into_ptr())
         }
     }
 

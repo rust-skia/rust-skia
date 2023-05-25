@@ -246,6 +246,18 @@ extern "C" void C_GrDirectContext_flushAndSubmit(GrDirectContext* self) {
     self->flushAndSubmit();
 }
 
+extern "C" GrSemaphoresSubmitted C_GrDirectContext_flushImageWithInfo(GrDirectContext* self, SkImage* image, const GrFlushInfo* info) {
+    return self->flush(sp(image), *info);
+}
+
+extern "C" void C_GrDirectContext_flushImage(GrDirectContext* self, SkImage* image) {
+    self->flush(sp(image));
+}
+
+extern "C" void C_GrDirectContext_flushAndSubmitImage(GrDirectContext* self, SkImage* image) {
+    self->flushAndSubmit(sp(image));
+}
+
 extern "C" void C_GrDirectContext_compressedBackendFormat(const GrDirectContext* self, SkTextureCompressionType compression, GrBackendFormat* result) {
     *result = self->compressedBackendFormat(compression);
 }
