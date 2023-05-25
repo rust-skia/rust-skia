@@ -8,6 +8,7 @@
 #include "include/codec/SkEncodedOrigin.h"
 #include "include/codec/SkCodec.h"
 #include "include/codec/SkCodecAnimation.h"
+#include "include/codec/SkPixmapUtils.h"
 // core/
 #include "include/core/SkAnnotation.h"
 #include "include/core/SkBlendMode.h"
@@ -192,6 +193,18 @@ extern "C" int C_SkCodec_getRepetitionCount(SkCodec* self) {
 
 extern "C" void C_SkEncodedOriginToMatrix(SkEncodedOrigin origin, int w, int h, SkMatrix* matrix) {
     *matrix = SkEncodedOriginToMatrix(origin, w, h);
+}
+
+//
+// codec/SkPixmapUtils.h
+//
+
+extern "C" bool C_SkPixmapUtils_Orient(const SkPixmap& dst, const SkPixmap& src, SkEncodedOrigin origin) {
+    return SkPixmapUtils::Orient(dst, src, origin);
+}
+
+extern "C" void C_SkPixmapUtils_SwapWidthHeight(SkImageInfo* uninitialized, const SkImageInfo& info) {
+    new (uninitialized) SkImageInfo(SkPixmapUtils::SwapWidthHeight(info));
 }
 
 //
