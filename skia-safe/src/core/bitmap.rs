@@ -716,10 +716,9 @@ impl Bitmap {
     /// and leave pixmap unchanged.
     ///
     /// example: <https://fiddle.skia.org/c/@Bitmap_peekPixels>
-    pub fn peek_pixels(&self) -> Option<Borrows<Pixmap>> {
+    pub fn peek_pixels(&self) -> Option<Pixmap> {
         let mut pixmap = Pixmap::default();
-        unsafe { self.native().peekPixels(pixmap.native_mut()) }
-            .if_true_then_some(|| pixmap.borrows(self))
+        unsafe { self.native().peekPixels(pixmap.native_mut()) }.if_true_then_some(|| pixmap)
     }
 
     /// Make a shader with the specified tiling, matrix and sampling.  

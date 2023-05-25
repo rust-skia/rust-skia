@@ -87,7 +87,6 @@ mod core {
     assert_impl_all!(Picture: Send, Sync);
     assert_not_impl_any!(PictureRecorder: Send, Sync);
     assert_impl_all!(PixelRef: Send, Sync);
-    assert_impl_all!(Pixmap: Send, Sync);
     assert_impl_all!(Region: Send, Sync);
     assert_not_impl_any!(region::Iterator: Send, Sync);
     assert_not_impl_any!(region::Cliperator: Send, Sync);

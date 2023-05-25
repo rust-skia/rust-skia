@@ -179,7 +179,7 @@ impl YUVAPixmapInfo {
         // Can't return a Vec<Pixmap> because Pixmaps can't be cloned.
         let mut pixmaps: [Pixmap; Self::MAX_PLANES] = Default::default();
         self.native()
-            .initPixmapsFromSingleAllocation(memory, pixmaps.native_mut().as_mut_ptr())
+            .initPixmapsFromSingleAllocation(memory, pixmaps[0].native_mut())
             .if_true_some(pixmaps)
     }
 
@@ -272,7 +272,7 @@ impl YUVAPixmaps {
         pixmaps: &[Pixmap; Self::MAX_PLANES],
     ) -> Option<Self> {
         Self::try_construct(|pms| {
-            sb::C_SkYUVAPixmaps_FromExternalPixmaps(pms, info.native(), pixmaps.native().as_ptr());
+            sb::C_SkYUVAPixmaps_FromExternalPixmaps(pms, info.native(), pixmaps[0].native());
             Self::native_is_valid(pms)
         })
     }

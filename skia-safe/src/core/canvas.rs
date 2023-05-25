@@ -613,10 +613,9 @@ impl Canvas {
     /// Returns [`Pixmap`] if [`Canvas`] has direct access to pixels
     ///
     /// example: <https://fiddle.skia.org/c/@Canvas_peekPixels>
-    pub fn peek_pixels(&mut self) -> Option<Borrows<Pixmap>> {
+    pub fn peek_pixels(&mut self) -> Option<Pixmap> {
         let mut pixmap = Pixmap::default();
-        unsafe { self.native_mut().peekPixels(pixmap.native_mut()) }
-            .if_true_then_some(move || pixmap.borrows(self))
+        unsafe { self.native_mut().peekPixels(pixmap.native_mut()) }.if_true_some(pixmap)
     }
 
     /// Copies [`Rect`] of pixels from [`Canvas`] into `dst_pixels`. [`Matrix`] and clip are

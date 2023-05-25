@@ -687,10 +687,9 @@ impl Surface {
         }
     }
 
-    pub fn peek_pixels(&mut self) -> Option<Borrows<Pixmap>> {
+    pub fn peek_pixels(&mut self) -> Option<Pixmap> {
         let mut pm = Pixmap::default();
-        unsafe { self.native_mut().peekPixels(pm.native_mut()) }
-            .if_true_then_some(move || pm.borrows(self))
+        unsafe { self.native_mut().peekPixels(pm.native_mut()) }.if_true_some(pm)
     }
 
     // TODO: why is self mut?

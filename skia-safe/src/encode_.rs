@@ -5,7 +5,7 @@ pub mod png_encoder;
 #[cfg(feature = "webp-encode")]
 pub mod webp_encoder;
 
-impl Pixmap {
+impl Pixmap<'_> {
     pub fn encode(
         &self,
         format: EncodedImageFormat,

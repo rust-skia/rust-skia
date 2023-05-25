@@ -3,10 +3,13 @@ use crate::{
     SamplingOptions,
 };
 use skia_bindings::{self as sb, SkPixmap};
-use std::{convert::TryInto, ffi::c_void, fmt, mem, os::raw, ptr, slice};
+use std::{convert::TryInto, ffi::c_void, fmt, marker::PhantomData, mem, os::raw, ptr, slice};
 
-pub type Pixmap = Handle<SkPixmap>;
-unsafe_send_sync!(Pixmap);
+#[repr(transparent)]
+pub struct Pixmap<'a> {
+    inner: Handle<SkPixmap>,
+    pd: PhantomData<&'a [u8]>,
+}
 
 impl NativeDrop for SkPixmap {
     fn drop(&mut self) {
@@ -14,7 +17,7 @@ impl NativeDrop for SkPixmap {
     }
 }
 
-impl Default for Pixmap {
+impl Default for Pixmap<'_> {
     fn default() -> Self {
         Self::from_native_c(SkPixmap {
             fPixels: ptr::null(),
@@ -24,7 +27,7 @@ impl Default for Pixmap {
     }
 }
 
-impl fmt::Debug for Pixmap {
+impl fmt::Debug for Pixmap<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Pixmap")
             .field("row_bytes", &self.row_bytes())
@@ -33,24 +36,19 @@ impl fmt::Debug for Pixmap {
     }
 }
 
-impl Pixmap {
-    pub fn new<'pixels>(
-        info: &ImageInfo,
-        pixels: &'pixels [u8],
-        row_bytes: usize,
-    ) -> Borrows<'pixels, Self> {
+impl<'pixels> Pixmap<'pixels> {
+    pub fn new(info: &ImageInfo, pixels: &'pixels [u8], row_bytes: usize) -> Self {
         let width: usize = info.width().try_into().unwrap();
         let height: usize = info.height().try_into().unwrap();
 
         assert!(row_bytes >= width * info.bytes_per_pixel());
         assert!(pixels.len() >= height * row_bytes);
 
-        let pm = Pixmap::from_native_c(SkPixmap {
+        Pixmap::from_native_c(SkPixmap {
             fPixels: pixels.as_ptr() as _,
             fRowBytes: row_bytes,
             fInfo: info.native().clone(),
-        });
-        pm.borrows(pixels)
+        })
     }
 
     pub fn reset(&mut self) -> &mut Self {
@@ -58,7 +56,7 @@ impl Pixmap {
         self
     }
 
-    // TODO: Add reset function that borrows pixels?
+    // TODO: reset() function that re-borrows pixels?
 
     pub fn set_color_space(&mut self, color_space: impl Into<Option<ColorSpace>>) -> &mut Self {
         unsafe {
@@ -67,7 +65,7 @@ impl Pixmap {
         self
     }
 
-    pub fn extract_subset(&self, area: impl AsRef<IRect>) -> Option<Pixmap> {
+    pub fn extract_subset(&self, area: impl AsRef<IRect>) -> Option<Self> {
         let mut pixmap = Pixmap::default();
         unsafe {
             self.native()
@@ -214,7 +212,7 @@ impl Pixmap {
     }
 
     /// Access the underlying pixels as a byte array. This is a rust-skia specific function.
-    pub fn bytes(&self) -> Option<&[u8]> {
+    pub fn bytes(&self) -> Option<&'pixels [u8]> {
         let addr = unsafe { self.addr() }.into_option()?;
         let len = self.compute_byte_size();
         return Some(unsafe { slice::from_raw_parts(addr as *const u8, len) });
@@ -225,7 +223,7 @@ impl Pixmap {
     /// The `Pixel` type must implement the _unsafe_ trait [`Pixel`] and must return `true` in
     /// [`Pixel::matches_color_type()`] when matched against the [`ColorType`] of this Pixmap's
     /// pixels.
-    pub fn pixels<P: Pixel>(&self) -> Option<&[P]> {
+    pub fn pixels<P: Pixel>(&self) -> Option<&'pixels [P]> {
         let addr = unsafe { self.addr() }.into_option()?;
 
         let info = self.info();
@@ -240,7 +238,9 @@ impl Pixmap {
         None
     }
 
-    pub fn read_pixels_to_pixmap(&self, dst: &Pixmap, src: impl Into<IPoint>) -> bool {
+    /// # Safety
+    /// Unsafe in that it modifies the underlying pixels of `dst`.
+    pub unsafe fn read_pixels_to_pixmap(&self, dst: &mut Pixmap, src: impl Into<IPoint>) -> bool {
         let row_bytes = dst.row_bytes();
         let len = usize::try_from(dst.height()).unwrap() * row_bytes;
         unsafe {
@@ -254,12 +254,20 @@ impl Pixmap {
         }
     }
 
-    pub fn scale_pixels(&self, dst: &Pixmap, sampling: impl Into<SamplingOptions>) -> bool {
+    /// # Safety
+    /// Unsafe in that it modifies the underlying pixels of `dst`.
+    pub unsafe fn scale_pixels(
+        &self,
+        dst: &mut Pixmap,
+        sampling: impl Into<SamplingOptions>,
+    ) -> bool {
         let sampling = sampling.into();
         unsafe { self.native().scalePixels(dst.native(), sampling.native()) }
     }
 
-    pub fn erase(&self, color: impl Into<Color>, subset: Option<&IRect>) -> bool {
+    /// # Safety
+    /// Unsafe in that it modifies the underlying pixels of `self`.
+    pub unsafe fn erase(&mut self, color: impl Into<Color>, subset: Option<&IRect>) -> bool {
         let color = color.into().into_native();
         unsafe {
             match subset {
@@ -269,12 +277,40 @@ impl Pixmap {
         }
     }
 
-    pub fn erase_4f(&self, color: impl AsRef<Color4f>, subset: Option<&IRect>) -> bool {
+    /// # Safety
+    /// Unsafe in that it modifies the underlying pixels of `self`.
+    pub unsafe fn erase_4f(&mut self, color: impl AsRef<Color4f>, subset: Option<&IRect>) -> bool {
         let color = color.as_ref();
         unsafe {
             self.native()
                 .erase1(color.native(), subset.native_ptr_or_null())
         }
+    }
+
+    fn from_native_c(pixmap: SkPixmap) -> Self {
+        Self {
+            inner: Handle::from_native_c(pixmap),
+            pd: PhantomData,
+        }
+    }
+
+    #[must_use]
+    pub(crate) fn from_native_ref(n: &SkPixmap) -> &Self {
+        unsafe { transmute_ref(n) }
+    }
+
+    #[must_use]
+    pub(crate) fn from_native_ptr(np: *const SkPixmap) -> *const Self {
+        // Should be safe as long `Pixmap` is represented with repr(Transparent).
+        np as _
+    }
+
+    pub(crate) fn native_mut(&mut self) -> &mut SkPixmap {
+        self.inner.native_mut()
+    }
+
+    pub(crate) fn native(&self) -> &SkPixmap {
+        self.inner.native()
     }
 }
 
