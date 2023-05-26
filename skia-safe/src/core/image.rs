@@ -10,7 +10,7 @@ use std::{fmt, ptr};
 
 pub use super::CubicResampler;
 
-#[deprecated(since = "0.0.0", note = "Use images::BitDepth")]
+#[deprecated(since = "0.63.0", note = "Use images::BitDepth")]
 pub use images::BitDepth;
 
 pub mod images {
@@ -254,7 +254,7 @@ impl Image {
     /// - `pixels`     address or pixel storage
     /// - `rowBytes`   size of pixel row or larger
     /// Returns: [`Image`] sharing pixels, or `None`
-    #[deprecated(since = "0.0.0", note = "use images::raster_from_data()")]
+    #[deprecated(since = "0.63.0", note = "use images::raster_from_data()")]
     pub fn from_raster_data(
         info: &ImageInfo,
         pixels: impl Into<Data>,
@@ -278,7 +278,7 @@ impl Image {
     /// Returns: created [`Image`], or `None`
     ///
     /// example: <https://fiddle.skia.org/c/@Image_MakeFromBitmap>
-    #[deprecated(since = "0.0.0", note = "use images::raster_from_bitmap()")]
+    #[deprecated(since = "0.63.0", note = "use images::raster_from_bitmap()")]
     pub fn from_bitmap(bitmap: &Bitmap) -> Option<Image> {
         images::raster_from_bitmap(bitmap)
     }
@@ -293,7 +293,7 @@ impl Image {
     ///
     /// - `image_generator`   stock or custom routines to retrieve [`Image`]
     /// Returns: created [`Image`], or `None`
-    #[deprecated(since = "0.0.0", note = "use images::deferred_from_generator()")]
+    #[deprecated(since = "0.63.0", note = "use images::deferred_from_generator()")]
     pub fn from_generator(image_generator: ImageGenerator) -> Option<Image> {
         images::deferred_from_generator(image_generator)
     }
@@ -346,7 +346,7 @@ impl Image {
     /// - `ty`        type of compression used
     /// Returns: created [`Image`], or `None`
     #[deprecated(
-        since = "0.0.0",
+        since = "0.63.0",
         note = "use images::raster_from_compressed_texture_data()"
     )]
     pub fn new_raster_from_compressed(
@@ -358,7 +358,7 @@ impl Image {
     }
 
     /// See [`Self::from_picture_with_props()`]
-    #[deprecated(since = "0.0.0", note = "use images::deferred_from_picture()")]
+    #[deprecated(since = "0.63.0", note = "use images::deferred_from_picture()")]
     pub fn from_picture(
         picture: impl Into<Picture>,
         dimensions: impl Into<ISize>,
@@ -392,7 +392,7 @@ impl Image {
     /// - `color_space`  range of colors; may be `None`
     /// - `props`        props to use when rasterizing the picture
     /// Returns: created [`Image`], or `None`
-    #[deprecated(since = "0.0.0", note = "use images::deferred_from_picture()")]
+    #[deprecated(since = "0.63.0", note = "use images::deferred_from_picture()")]
     pub fn from_picture_with_props(
         picture: impl Into<Picture>,
         dimensions: impl Into<ISize>,
@@ -432,7 +432,7 @@ impl Image {
     /// Returns: created [`Image`], or `None`
     #[cfg(feature = "gpu")]
     #[deprecated(
-        since = "0.0.0",
+        since = "0.63.0",
         note = "use gpu::images::texture_from_compressed_texture_data()"
     )]
     pub fn new_texture_from_compressed(
@@ -548,7 +548,7 @@ impl Image {
     /// Returns: created [`Image`], or `None`
     #[cfg(feature = "gpu")]
     #[deprecated(
-        since = "0.0.0",
+        since = "0.63.0",
         note = "use gpu::images::cross_context_texture_from_pixmap()"
     )]
     pub fn new_cross_context_from_pixmap(
@@ -579,7 +579,7 @@ impl Image {
     /// - `color_space`       range of colors; may be `None`
     /// Returns: created [`Image`], or `None`
     #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.0.0", note = "use gpu::images::adopt_texture_from()")]
+    #[deprecated(since = "0.63.0", note = "use gpu::images::adopt_texture_from()")]
     pub fn from_adopted_texture(
         context: &mut gpu::RecordingContext,
         backend_texture: &gpu::BackendTexture,
@@ -613,7 +613,7 @@ impl Image {
     /// Returns: created [`Image`], or `None`
     #[cfg(feature = "gpu")]
     #[deprecated(
-        since = "0.0.0",
+        since = "0.63.0",
         note = "use gpu::images::texture_from_yuva_textures()"
     )]
     pub fn from_yuva_textures(
@@ -647,7 +647,10 @@ impl Image {
     /// - `image_color_space`         range of colors of the resulting image; may be `None`
     /// Returns: created [`Image`], or `None`
     #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.0.0", note = "use gpu::images::texture_from_yuva_pixmaps()")]
+    #[deprecated(
+        since = "0.63.0",
+        note = "use gpu::images::texture_from_yuva_pixmaps()"
+    )]
     pub fn from_yuva_pixmaps(
         context: &mut gpu::RecordingContext,
         yuva_pixmaps: &crate::YUVAPixmaps,
@@ -880,7 +883,7 @@ impl Image {
 
     /// See [`Self::flush_with_info()`]
     #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.0.0", note = "use gpu::DirectContext::flush()")]
+    #[deprecated(since = "0.63.0", note = "use gpu::DirectContext::flush()")]
     pub fn flush<'a>(
         &self,
         context: &mut gpu::DirectContext,
@@ -912,7 +915,7 @@ impl Image {
     /// Version of `flush()` that uses a default [`gpu::FlushInfo`]. Also submits the flushed work to the
     /// GPU.
     #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.0.0", note = "use gpu::DirectContext::flush_and_submit()")]
+    #[deprecated(since = "0.63.0", note = "use gpu::DirectContext::flush_and_submit()")]
     pub fn flush_and_submit(&self, context: &mut gpu::DirectContext) {
         context.flush_and_submit();
     }
@@ -927,7 +930,7 @@ impl Image {
     /// Returns: back-end API texture handle; invalid on failure
     #[cfg(feature = "gpu")]
     #[deprecated(
-        since = "0.0.0",
+        since = "0.63.0",
         note = "use gpu::images::get_backend_texture_from_image()"
     )]
     pub fn backend_texture(
@@ -1155,7 +1158,7 @@ impl Image {
     ///
     ///  example: <https://fiddle.skia.org/c/@Image_encodeToData>
     #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.0.0", note = "Use encode")]
+    #[deprecated(since = "0.63.0", note = "Use encode")]
     pub fn encode_to_data_with_context(
         &self,
         context: impl Into<Option<gpu::DirectContext>>,
@@ -1167,7 +1170,7 @@ impl Image {
 
     /// See [`Self::encode_to_data_with_quality`]
     #[deprecated(
-        since = "0.0.0",
+        since = "0.63.0",
         note = "Support for encoding GPU backed images without a context was removed, use `encode_to_data_with_context` instead"
     )]
     pub fn encode_to_data(&self, image_format: EncodedImageFormat) -> Option<Data> {
@@ -1197,7 +1200,7 @@ impl Image {
     ///
     /// example: <https://fiddle.skia.org/c/@Image_encodeToData>
     #[deprecated(
-        since = "0.0.0",
+        since = "0.63.0",
         note = "Support for encoding GPU backed images without a context was removed, use `encode_to_data_with_context` instead"
     )]
     pub fn encode_to_data_with_quality(
