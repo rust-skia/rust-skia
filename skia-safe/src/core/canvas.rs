@@ -541,7 +541,7 @@ impl Canvas {
     }
 
     /// Returns the [`gpu::DirectContext`].
-    /// This is a rust-skia helper with the intend to make it simpler to call [`Image::encode`].
+    /// This is a rust-skia helper for that makes it simpler to call [`Image::encode`].
     #[cfg(feature = "gpu")]
     pub fn direct_context(&mut self) -> Option<gpu::DirectContext> {
         self.recording_context()

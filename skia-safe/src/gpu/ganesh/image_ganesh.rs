@@ -4,6 +4,8 @@ use crate::{
     AlphaType, Data, ISize, Image, TextureCompressionType,
 };
 use crate::{prelude::*, ColorSpace, ColorType, Pixmap};
+#[allow(unused)] // docs only
+use crate::{ImageInfo, Surface, YUVAInfo, YUVAPixmaps};
 use skia_bindings as sb;
 
 /// Creates GPU-backed [`Image`] from `backend_texture` associated with context.
@@ -50,10 +52,10 @@ pub fn adopt_texture_from(
 /// * `color_space` - This describes the color space of this image's contents, as
 ///                            seen after sampling. In general, if the format of the backend
 ///                            texture is SRGB, some linear `color_space` should be supplied
-///                            (e.g., [`ColorSpace::MakeSRGBLinear()`]). If the format of the
+///                            (e.g., [`ColorSpace::new_srgb_linear()`]). If the format of the
 ///                            backend texture is linear, then the `color_space` should include
 ///                            a description of the transfer function as
-///                            well (e.g., [`ColorSpace::MakeSRGB()`]).
+///                            well (e.g., [`ColorSpace::new_srgb()`]).
 /// * `texture_release_proc` - function called when texture can be released
 /// * `release_context` - state passed to `texture_release_proc`
 /// Returns: created [`Image`], or `None`
@@ -123,7 +125,7 @@ pub fn cross_context_texture_from_pixmap(
 /// * `data` - compressed data to store in [`Image`]
 /// * `width` - width of full [`Image`]
 /// * `height` - height of full [`Image`]
-/// * `type` - type of compression used
+/// * `ty` - type of compression used
 /// * `mipmapped` - does 'data' contain data for all the mipmap levels?
 /// * `is_protected` - do the contents of 'data' require DRM protection (on Vulkan)?
 /// Returns: created [`Image`], or `None`
@@ -131,7 +133,7 @@ pub fn texture_from_compressed_texture_data(
     context: &mut DirectContext,
     data: Data,
     dimensions: impl Into<ISize>,
-    ct: TextureCompressionType,
+    ty: TextureCompressionType,
     mipmapped: impl Into<Option<Mipmapped>>,
     is_protected: impl Into<Option<Protected>>,
 ) -> Option<Image> {
@@ -145,7 +147,7 @@ pub fn texture_from_compressed_texture_data(
             data.into_ptr(),
             dimensions.width,
             dimensions.height,
-            ct,
+            ty,
             mipmapped,
             is_protected,
         )
@@ -221,7 +223,7 @@ pub fn texture_from_yuva_pixmaps(
     })
 }
 
-/// Creates a GPU-backed [`Image`] from YUV[A] planar textures. This requires that the textures
+/// Creates a GPU-backed [`Image`] from `YUV[A]` planar textures. This requires that the textures
 /// stay valid for the lifetime of the image. The ReleaseContext can be used to know when it is
 /// safe to either delete or overwrite the textures. If ReleaseProc is provided it is also called
 /// before return on failure.

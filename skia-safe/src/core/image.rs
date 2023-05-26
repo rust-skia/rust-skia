@@ -14,6 +14,8 @@ pub use super::CubicResampler;
 pub use images::BitDepth;
 
 pub mod images {
+    #[allow(unused)] // doc only
+    use crate::ColorType;
     use crate::{
         prelude::*, AlphaType, Bitmap, ColorSpace, Data, ISize, Image, ImageGenerator, ImageInfo,
         Matrix, Paint, Picture, SurfaceProps, TextureCompressionType,
@@ -341,7 +343,7 @@ impl Image {
     /// - `data`      compressed data to store in [`Image`]
     /// - `width`     width of full [`Image`]
     /// - `height`    height of full [`Image`]
-    /// - `type`      type of compression used
+    /// - `ty`        type of compression used
     /// Returns: created [`Image`], or `None`
     #[deprecated(
         since = "0.0.0",
@@ -424,7 +426,7 @@ impl Image {
     /// - `data`         compressed data to store in [`Image`]
     /// - `width`        width of full [`Image`]
     /// - `height`       height of full [`Image`]
-    /// - `ty`         type of compression used
+    /// - `ty`           type of compression used
     /// - `mipmapped`    does 'data' contain data for all the mipmap levels?
     /// - `is_protected`  do the contents of 'data' require DRM protection (on Vulkan)?
     /// Returns: created [`Image`], or `None`

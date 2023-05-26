@@ -38,7 +38,7 @@ impl Default for Options {
 }
 
 impl Options {
-    fn comments_native(&self) -> Option<DataTable> {
+    fn comments_to_data_table(&self) -> Option<DataTable> {
         let mut comments = Vec::with_capacity(self.comments.len() * 2);
         for c in self.comments.iter() {
             comments.push(CString::new(c.keyword.as_str()).ok()?);
@@ -65,7 +65,7 @@ impl Comment {
 }
 
 pub fn encode<W: io::Write>(pixmap: &Pixmap, writer: &mut W, options: &Options) -> bool {
-    let Some(comments) = options.comments_native() else {
+    let Some(comments) = options.comments_to_data_table() else {
         return false;
     };
 
@@ -92,7 +92,7 @@ pub fn encode_image(
         sb::C_SkPngEncoder_EncodeImage(
             context.into().into_ptr_or_null(),
             img.native(),
-            options.comments_native()?.into_ptr(),
+            options.comments_to_data_table()?.into_ptr(),
             options.filter_flags.into_native(),
             options.z_lib_level,
         )
@@ -109,7 +109,7 @@ pub fn encode_image(
         sb::C_SkPngEncoder_EncodeImage(
             std::ptr::null_mut(),
             img.native(),
-            options.comments_native()?.into_ptr(),
+            options.comments_to_data_table()?.into_ptr(),
             options.filter_flags.into_native(),
             options.z_lib_level,
         )

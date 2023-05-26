@@ -814,8 +814,5 @@ mod tests {
 
         let canvas = Canvas::from_bitmap(&bitmap, None);
         assert!(canvas.is_none());
-
-        // let encoded = encode::bitmap(&bitmap, EncodedImageFormat::PNG, 100);
-        // assert!(encoded.is_none());
     }
 }

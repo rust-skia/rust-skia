@@ -402,10 +402,6 @@ extern "C" bool C_SkImage_isValid(const SkImage* self, GrRecordingContext* conte
     return self->isValid(context);
 }
 
-// extern "C" SkData* C_SkImage_encodeToData(const SkImage* self, SkEncodedImageFormat imageFormat, int quality) {
-//     return self->encodeToData(imageFormat, quality).release();
-// }
-
 extern "C" SkData* C_SkImage_refEncodedData(const SkImage* self) {
     return self->refEncodedData().release();
 }
@@ -440,18 +436,6 @@ extern "C" SkImage* C_SkImage_makeColorSpace(const SkImage* self, SkColorSpace* 
 extern "C" SkImage* C_SkImage_reinterpretColorSpace(const SkImage* self, SkColorSpace* newColorSpace) {
     return self->reinterpretColorSpace(sp(newColorSpace)).release();
 }
-
-//
-// core/SkImageEncoder.h
-//
-
-// extern "C" SkData *C_SkEncodePixmap(const SkPixmap *src, SkEncodedImageFormat format, int quality) {
-//     return SkEncodePixmap(*src, format, quality).release();
-// }
-
-// extern "C" SkData *C_SkEncodeBitmap(const SkBitmap *src, SkEncodedImageFormat format, int quality) {
-//     return SkEncodeBitmap(*src, format, quality).release();
-// }
 
 //
 // core/SkData.h
@@ -1886,26 +1870,6 @@ extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromEncoded(SkData *data, co
 extern "C" bool C_SkImageGenerator_isTextureGenerator(const SkImageGenerator *self) {
     return self->isTextureGenerator();
 }
-
-// extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromPicture(
-//         const SkISize *size,
-//         SkPicture *picture,
-//         const SkMatrix *matrix,
-//         const SkPaint *paint,
-//         SkImages::BitDepth bd,
-//         SkColorSpace *cs,
-//         const SkSurfaceProps* props) {
-//     return
-//         SkImageGenerator::MakeFromPicture(
-//             *size,
-//             sp(picture),
-//             matrix,
-//             paint,
-//             bd,
-//             sp(cs),
-//             *props
-//         ).release();
-// }
 
 //
 // core/SkString.h
