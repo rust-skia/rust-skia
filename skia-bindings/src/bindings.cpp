@@ -199,7 +199,7 @@ extern "C" void C_SkEncodedOriginToMatrix(SkEncodedOrigin origin, int w, int h, 
 // codec/SkPixmapUtils.h
 //
 
-extern "C" bool C_SkPixmapUtils_Orient(const SkPixmap& dst, const SkPixmap& src, SkEncodedOrigin origin) {
+extern "C" bool C_SkPixmapUtils_Orient(SkPixmap& dst, const SkPixmap& src, SkEncodedOrigin origin) {
     return SkPixmapUtils::Orient(dst, src, origin);
 }
 

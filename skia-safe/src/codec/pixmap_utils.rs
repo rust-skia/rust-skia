@@ -6,7 +6,7 @@ use skia_bindings as sb;
 /// # Safety
 /// Unsafe in that it modifies the underlying pixels of `dst`.
 pub unsafe fn orient(dst: &mut Pixmap, src: &Pixmap, origin: EncodedOrigin) -> bool {
-    sb::C_SkPixmapUtils_Orient(dst.native(), src.native(), origin.into_native())
+    sb::C_SkPixmapUtils_Orient(dst.native_mut(), src.native(), origin.into_native())
 }
 
 /// Return a copy of the provided ImageInfo with the width and height swapped.

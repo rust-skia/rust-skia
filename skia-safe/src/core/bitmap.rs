@@ -190,7 +190,7 @@ impl Bitmap {
 
     /// Returns pixel address, the base address corresponding to the pixel origin.
     pub fn pixels(&mut self) -> *mut ffi::c_void {
-        unsafe { self.pixmap().writable_addr() }
+        self.pixmap().writable_addr()
     }
 
     /// Returns minimum memory required for pixel storage.  
@@ -718,7 +718,7 @@ impl Bitmap {
     /// example: <https://fiddle.skia.org/c/@Bitmap_peekPixels>
     pub fn peek_pixels(&self) -> Option<Pixmap> {
         let mut pixmap = Pixmap::default();
-        unsafe { self.native().peekPixels(pixmap.native_mut()) }.if_true_then_some(|| pixmap)
+        unsafe { self.native().peekPixels(pixmap.native_mut()) }.if_true_some(pixmap)
     }
 
     /// Make a shader with the specified tiling, matrix and sampling.  
