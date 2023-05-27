@@ -93,7 +93,10 @@ impl Canvas {
     #[inline]
     pub fn data(&mut self) -> Data {
         let image = self.surface.image_snapshot();
-        image.encode_to_data(EncodedImageFormat::PNG).unwrap()
+        let context = self.surface.direct_context();
+        image
+            .encode(context, EncodedImageFormat::PNG, None)
+            .unwrap()
     }
 
     #[inline]

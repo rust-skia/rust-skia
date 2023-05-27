@@ -540,6 +540,14 @@ impl Canvas {
         })
     }
 
+    /// Returns the [`gpu::DirectContext`].
+    /// This is a rust-skia helper for that makes it simpler to call [`Image::encode`].
+    #[cfg(feature = "gpu")]
+    pub fn direct_context(&mut self) -> Option<gpu::DirectContext> {
+        self.recording_context()
+            .and_then(|mut c| c.as_direct_context())
+    }
+
     /// Sometimes a canvas is owned by a surface. If it is, [`Self::surface()`] will return a bare
     /// pointer to that surface, else this will return `None`.
     ///
@@ -605,10 +613,9 @@ impl Canvas {
     /// Returns [`Pixmap`] if [`Canvas`] has direct access to pixels
     ///
     /// example: <https://fiddle.skia.org/c/@Canvas_peekPixels>
-    pub fn peek_pixels(&mut self) -> Option<Borrows<Pixmap>> {
+    pub fn peek_pixels(&mut self) -> Option<Pixmap> {
         let mut pixmap = Pixmap::default();
-        unsafe { self.native_mut().peekPixels(pixmap.native_mut()) }
-            .if_true_then_some(move || pixmap.borrows(self))
+        unsafe { self.native_mut().peekPixels(pixmap.native_mut()) }.if_true_some(pixmap)
     }
 
     /// Copies [`Rect`] of pixels from [`Canvas`] into `dst_pixels`. [`Matrix`] and clip are

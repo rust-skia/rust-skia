@@ -208,13 +208,10 @@ impl Codec {
         &self,
         supported_data_types: &SupportedDataTypes,
     ) -> Option<YUVAPixmapInfo> {
-        let mut pixmap_info = YUVAPixmapInfo::new_invalid();
-        let r = unsafe {
+        YUVAPixmapInfo::new_if_valid(|pixmap_info| unsafe {
             self.native()
-                .queryYUVAInfo(supported_data_types.native(), &mut pixmap_info)
-        };
-        (r && YUVAPixmapInfo::native_is_valid(&pixmap_info))
-            .if_true_then_some(|| YUVAPixmapInfo::from_native_c(pixmap_info))
+                .queryYUVAInfo(supported_data_types.native(), pixmap_info)
+        })
     }
 
     pub fn get_yuva_planes(&mut self, pixmaps: &YUVAPixmaps) -> Result {

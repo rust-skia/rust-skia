@@ -190,7 +190,7 @@ impl Bitmap {
 
     /// Returns pixel address, the base address corresponding to the pixel origin.
     pub fn pixels(&mut self) -> *mut ffi::c_void {
-        unsafe { self.pixmap().writable_addr() }
+        self.pixmap().writable_addr()
     }
 
     /// Returns minimum memory required for pixel storage.  
@@ -544,11 +544,8 @@ impl Bitmap {
     /// contained by [`bounds(&self)`] are affected. If the [`color_type(&self)`] is
     /// [`ColorType::Gray8`] or [ColorType::RGB565], then alpha is ignored; RGB is treated as
     /// opaque. If [`color_type(&self)`] is [`ColorType::Alpha8`], then RGB is ignored.
-    pub fn erase_color_4f(&self, c: impl AsRef<Color4f>, color_space: impl Into<ColorSpace>) {
-        unsafe {
-            self.native()
-                .eraseColor(c.as_ref().into_native(), color_space.into().into_ptr())
-        }
+    pub fn erase_color_4f(&self, c: impl AsRef<Color4f>) {
+        unsafe { self.native().eraseColor(c.as_ref().into_native()) }
     }
 
     /// Replaces pixel values with unpremultiplied color built from `a`, `r`, `g`, and `b`,
@@ -571,7 +568,7 @@ impl Bitmap {
     pub fn erase(&self, c: impl Into<Color>, area: impl AsRef<IRect>) {
         unsafe {
             self.native()
-                .erase2(c.into().into_native(), area.as_ref().native())
+                .erase1(c.into().into_native(), area.as_ref().native())
         }
     }
 
@@ -580,18 +577,10 @@ impl Bitmap {
     ///
     /// If the `color_type()` is [`ColorType::Gray8`] [`ColorType::RGB565`], then alpha is ignored;
     /// RGB is treated as opaque. If `color_type()` is [`ColorType::Alpha8`], then RGB is ignored.
-    pub fn erase_4f(
-        &self,
-        c: impl AsRef<Color4f>,
-        color_space: impl Into<Option<ColorSpace>>,
-        area: impl AsRef<IRect>,
-    ) {
+    pub fn erase_4f(&self, c: impl AsRef<Color4f>, area: impl AsRef<IRect>) {
         unsafe {
-            self.native().erase(
-                c.as_ref().into_native(),
-                color_space.into().into_ptr_or_null(),
-                area.as_ref().native(),
-            )
+            self.native()
+                .erase(c.as_ref().into_native(), area.as_ref().native())
         }
     }
 
@@ -727,10 +716,9 @@ impl Bitmap {
     /// and leave pixmap unchanged.
     ///
     /// example: <https://fiddle.skia.org/c/@Bitmap_peekPixels>
-    pub fn peek_pixels(&self) -> Option<Borrows<Pixmap>> {
+    pub fn peek_pixels(&self) -> Option<Pixmap> {
         let mut pixmap = Pixmap::default();
-        unsafe { self.native().peekPixels(pixmap.native_mut()) }
-            .if_true_then_some(|| pixmap.borrows(self))
+        unsafe { self.native().peekPixels(pixmap.native_mut()) }.if_true_some(pixmap)
     }
 
     /// Make a shader with the specified tiling, matrix and sampling.  
@@ -767,10 +755,7 @@ impl Bitmap {
 #[cfg(test)]
 mod tests {
     use super::TileMode;
-    use crate::{
-        encode, AlphaType, Bitmap, Canvas, ColorSpace, ColorType, EncodedImageFormat, ImageInfo,
-        SamplingOptions,
-    };
+    use crate::{AlphaType, Bitmap, Canvas, ColorSpace, ColorType, ImageInfo, SamplingOptions};
 
     #[test]
     fn create_clone_and_drop() {
@@ -829,8 +814,5 @@ mod tests {
 
         let canvas = Canvas::from_bitmap(&bitmap, None);
         assert!(canvas.is_none());
-
-        let encoded = encode::bitmap(&bitmap, EncodedImageFormat::PNG, 100);
-        assert!(encoded.is_none());
     }
 }

@@ -3,6 +3,7 @@
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/GrBackendDrawableInfo.h"
 #include "include/gpu/GrYUVABackendTextures.h"
+#include "include/gpu/ganesh/SkImageGanesh.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkDrawable.h"
 #include "include/core/SkSurface.h"
@@ -245,6 +246,18 @@ extern "C" void C_GrDirectContext_flushAndSubmit(GrDirectContext* self) {
     self->flushAndSubmit();
 }
 
+extern "C" GrSemaphoresSubmitted C_GrDirectContext_flushImageWithInfo(GrDirectContext* self, SkImage* image, const GrFlushInfo* info) {
+    return self->flush(sp(image), *info);
+}
+
+extern "C" void C_GrDirectContext_flushImage(GrDirectContext* self, SkImage* image) {
+    self->flush(sp(image));
+}
+
+extern "C" void C_GrDirectContext_flushAndSubmitImage(GrDirectContext* self, SkImage* image) {
+    self->flushAndSubmit(sp(image));
+}
+
 extern "C" void C_GrDirectContext_compressedBackendFormat(const GrDirectContext* self, SkTextureCompressionType compression, GrBackendFormat* result) {
     *result = self->compressedBackendFormat(compression);
 }
@@ -362,77 +375,76 @@ extern "C" void C_SkDrawable_GpuDrawHandler_draw(SkDrawable::GpuDrawHandler *sel
 }
 
 //
-// core/SkImage.h
+// gpu/ganesh/SkImageGanesh.h
 //
 
-
-extern "C" SkImage *C_SkImage_MakeTextureFromCompressed(GrDirectContext *context, SkData *data, int width, int height,
-                                                SkTextureCompressionType type, GrMipMapped mipMapped,
-                                                GrProtected prot) {
-    return SkImage::MakeTextureFromCompressed(context, sp(data), width, height, type, mipMapped, prot).release();
-}
-
-extern "C" GrBackendTexture* C_SkImage_getBackendTexture(
-        const SkImage* self,
-        bool flushPendingGrContextIO,
-        GrSurfaceOrigin* origin)
-{
-    return new GrBackendTexture(self->getBackendTexture(flushPendingGrContextIO, origin));
-}
-
-extern "C" SkImage* C_SkImage_MakeFromTexture(
+extern "C" SkImage* C_SkImages_AdoptTextureFrom(
         GrRecordingContext* context,
         const GrBackendTexture* backendTexture,
         GrSurfaceOrigin origin,
         SkColorType colorType,
         SkAlphaType alphaType,
         SkColorSpace* colorSpace) {
-    return SkImage::MakeFromTexture(context, *backendTexture, origin, colorType, alphaType, sp(colorSpace)).release();
+    return SkImages::AdoptTextureFrom(context, *backendTexture, origin, colorType, alphaType, sp(colorSpace)).release();
 }
 
-extern "C" SkImage* C_SkImage_MakeCrossContextFromPixmap(
+extern "C" SkImage* C_SkImages_BorrowTextureFrom(
+        GrRecordingContext* context,
+        const GrBackendTexture* backendTexture,
+        GrSurfaceOrigin origin,
+        SkColorType colorType,
+        SkAlphaType alphaType,
+        SkColorSpace* colorSpace) {
+    return SkImages::BorrowTextureFrom(context, *backendTexture, origin, colorType, alphaType, sp(colorSpace)).release();
+}
+
+extern "C" SkImage* C_SkImages_CrossContextTextureFromPixmap(
         GrDirectContext* context,
         const SkPixmap* pixmap,
         bool buildMips,
         bool limitToMaxTextureSize) {
-    return SkImage::MakeCrossContextFromPixmap(context, *pixmap, buildMips, limitToMaxTextureSize).release();
+    return SkImages::CrossContextTextureFromPixmap(context, *pixmap, buildMips, limitToMaxTextureSize).release();
 }
 
-extern "C" SkImage* C_SkImage_MakeFromAdoptedTexture(
-        GrRecordingContext* context,
-        const GrBackendTexture* backendTexture,
-        GrSurfaceOrigin origin,
-        SkColorType colorType,
-        SkAlphaType alphaType,
-        SkColorSpace* colorSpace) {
-    return SkImage::MakeFromAdoptedTexture(context, *backendTexture, origin, colorType, alphaType, sp(colorSpace)).release();
+extern "C" SkImage *C_SkImages_TextureFromCompressedTextureData(GrDirectContext *context, SkData *data, int width, int height,
+                                                SkTextureCompressionType type, GrMipMapped mipMapped,
+                                                GrProtected prot) {
+    return SkImages::TextureFromCompressedTextureData(context, sp(data), width, height, type, mipMapped, prot).release();
 }
 
-extern "C" SkImage* C_SkImage_MakeFromYUVATextures(
-    GrRecordingContext* context,
-    const GrYUVABackendTextures* yuvaTextures,
-    SkColorSpace* imageColorSpace) {
-    return SkImage::MakeFromYUVATextures(context, *yuvaTextures, sp(imageColorSpace)).release();
+extern "C" SkImage* C_SkImages_TextureFromImage(
+        GrDirectContext* context,
+        const SkImage* self,
+        GrMipMapped mipMapped,
+        skgpu::Budgeted budgeted) {
+    return SkImages::TextureFromImage(context, self, mipMapped, budgeted).release();
 }
 
-extern "C" SkImage* C_SkImage_MakeFromYUVAPixmaps(
+extern "C" SkImage* C_SkImages_TextureFromYUVAPixmaps(
     GrRecordingContext* context,
     const SkYUVAPixmaps* pixmaps,
     GrMipmapped buildMips,
     bool limitToMaxTextureSize,
     SkColorSpace* imageColorSpace
 ) {
-    return SkImage::MakeFromYUVAPixmaps(context, *pixmaps, buildMips, limitToMaxTextureSize, sp(imageColorSpace)).release();
+    return SkImages::TextureFromYUVAPixmaps(context, *pixmaps, buildMips, limitToMaxTextureSize, sp(imageColorSpace)).release();
 }
 
-extern "C" SkData* C_SkImage_encodeToDataWithContext(const SkImage* self, GrDirectContext* context, SkEncodedImageFormat imageFormat, int quality) {
-    return self->encodeToData(context, imageFormat, quality).release();
+
+extern "C" SkImage* C_SkImages_TextureFromYUVATextures(
+    GrRecordingContext* context,
+    const GrYUVABackendTextures* yuvaTextures,
+    SkColorSpace* imageColorSpace) {
+    return SkImages::TextureFromYUVATextures(context, *yuvaTextures, sp(imageColorSpace)).release();
 }
 
-extern "C" SkImage* C_SkImage_makeTextureImage(
+extern "C" GrBackendTexture* C_SkImages_GetBackendTextureFromImage(
         const SkImage* self,
-        GrDirectContext* context,
-        GrMipMapped mipMapped,
-        skgpu::Budgeted budgeted) {
-    return self->makeTextureImage(context, mipMapped, budgeted).release();
+        bool flushPendingGrContextIO,
+        GrSurfaceOrigin* origin)
+{
+    auto texture = new GrBackendTexture();
+    // TODO: Might need to check the return value, only the validity of the texture is checked by the caller.
+    SkImages::GetBackendTextureFromImage(self, texture, flushPendingGrContextIO, origin);
+    return texture;
 }

@@ -469,6 +469,19 @@ impl Surface {
     }
 }
 
+#[cfg(not(feature = "gpu"))]
+impl Surface {
+    /// Returns the recording context being used by the [`Surface`].
+    pub fn recording_context(&mut self) -> Option<()> {
+        None
+    }
+
+    /// Returns the recording context being used by the [`Surface`].
+    pub fn direct_context(&mut self) -> Option<()> {
+        None
+    }
+}
+
 #[cfg(feature = "gpu")]
 impl Surface {
     /// Returns the recording context being used by the [`Surface`].
@@ -476,6 +489,12 @@ impl Surface {
     /// Returns: the recording context, if available; `None` otherwise
     pub fn recording_context(&mut self) -> Option<gpu::RecordingContext> {
         gpu::RecordingContext::from_unshared_ptr(unsafe { self.native_mut().recordingContext() })
+    }
+
+    /// rust-skia helper, not in Skia
+    pub fn direct_context(&mut self) -> Option<gpu::DirectContext> {
+        self.recording_context()
+            .and_then(|mut ctx| ctx.as_direct_context())
     }
 
     /// Retrieves the back-end texture. If [`Surface`] has no back-end texture, `None`
@@ -668,10 +687,9 @@ impl Surface {
         }
     }
 
-    pub fn peek_pixels(&mut self) -> Option<Borrows<Pixmap>> {
+    pub fn peek_pixels(&mut self) -> Option<Pixmap> {
         let mut pm = Pixmap::default();
-        unsafe { self.native_mut().peekPixels(pm.native_mut()) }
-            .if_true_then_some(move || pm.borrows(self))
+        unsafe { self.native_mut().peekPixels(pm.native_mut()) }.if_true_some(pm)
     }
 
     // TODO: why is self mut?

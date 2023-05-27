@@ -53,6 +53,9 @@ impl Configuration {
             if features.svg {
                 sources.push("src/svg.cpp".into());
             }
+            if features.webp_encode {
+                sources.push("src/webp-encode.cpp".into());
+            }
             sources
         };
 
@@ -204,6 +207,14 @@ pub fn generate_bindings(
         cc_args.push(cpp17.into());
     }
 
+    // Disable RTTI. Otherwise RustWStream may cause compilation errors.
+    bindgen_args.push("-fno-rtti".into());
+    if target.builds_with_msvc() {
+        cc_args.push("/GR-".into());
+    } else {
+        cc_args.push("-fno-rtti".into());
+    }
+
     let target_str = &target.to_string();
     cc_build.target(target_str);
     bindgen_args.push(format!("--target={target_str}"));
@@ -350,7 +361,9 @@ const OPAQUE_TYPES: &[&str] = &[
     "SkPicture_AbortCallback",
     "SkPixelRef_GenIDChangeListener",
     "SkRasterHandleAllocator",
-    "SkRefCnt",
+    // m114: Must keep `SkRefCnt`, because otherwise bindgen would add an additional vtable because
+    // of its newly introduced virtual functions.
+    // "SkRefCnt",
     "SkShader",
     "SkStream",
     "SkStreamAsset",
@@ -412,6 +425,8 @@ const OPAQUE_TYPES: &[&str] = &[
     "skia_private::AutoTMalloc",
     // Pulled in by `SkData`.
     "FILE",
+    // m114: Results in wrongly sized template specializations.
+    "skia_private::THashMap",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[
@@ -633,6 +648,10 @@ const ENUM_TABLE: &[EnumEntry] = &[
     // SkCodecAnimation
     ("DisposalMethod", rewrite::k_xxx),
     ("Blend", rewrite::k_xxx),
+    // SkJpegEncoder.h
+    ("AlphaOption", rewrite::k_xxx),
+    // SkWebpEncoder.h
+    ("Compression", rewrite::k_xxx),
 ];
 
 pub(crate) mod rewrite {

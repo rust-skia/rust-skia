@@ -43,6 +43,9 @@ bitflags! {
         #[allow(clippy::unnecessary_cast)]
         const DYNAMIC_MSAA =
             sb::SkSurfaceProps_Flags_kDynamicMSAA_Flag as u32;
+        #[allow(clippy::unnecessary_cast)]
+        const ALWAYS_DITHER =
+            sb::SkSurfaceProps_Flags_kAlwaysDither_Flag as u32;
     }
 }
 
@@ -112,6 +115,10 @@ impl SurfaceProps {
     pub fn is_use_device_independent_fonts(self) -> bool {
         self.flags()
             .contains(SurfacePropsFlags::USE_DEVICE_INDEPENDENT_FONTS)
+    }
+
+    pub fn is_always_dither(self) -> bool {
+        self.flags().contains(SurfacePropsFlags::ALWAYS_DITHER)
     }
 }
 

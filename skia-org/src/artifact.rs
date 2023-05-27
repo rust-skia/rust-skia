@@ -12,7 +12,9 @@ pub fn draw_image_on_surface(
     canvas.scale((2.0, 2.0));
     func(canvas);
     let image = surface.image_snapshot();
-    let data = image.encode_to_data(EncodedImageFormat::PNG).unwrap();
+    let data = image
+        .encode(surface.direct_context(), EncodedImageFormat::PNG, None)
+        .unwrap();
     write_file(data.as_bytes(), path, name, "png");
 }
 

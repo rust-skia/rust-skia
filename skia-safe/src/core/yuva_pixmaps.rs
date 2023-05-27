@@ -179,7 +179,7 @@ impl YUVAPixmapInfo {
         // Can't return a Vec<Pixmap> because Pixmaps can't be cloned.
         let mut pixmaps: [Pixmap; Self::MAX_PLANES] = Default::default();
         self.native()
-            .initPixmapsFromSingleAllocation(memory, pixmaps.native_mut().as_mut_ptr())
+            .initPixmapsFromSingleAllocation(memory, pixmaps[0].native_mut())
             .if_true_some(pixmaps)
     }
 
@@ -188,14 +188,23 @@ impl YUVAPixmapInfo {
         unsafe { self.native().isSupported(data_types.native()) }
     }
 
+    pub(crate) fn new_if_valid(
+        set_pixmap_info: impl Fn(&mut SkYUVAPixmapInfo) -> bool,
+    ) -> Option<Self> {
+        let mut pixmap_info = Self::new_invalid();
+        let r = set_pixmap_info(&mut pixmap_info);
+        (r && Self::native_is_valid(&pixmap_info))
+            .if_true_then_some(|| YUVAPixmapInfo::from_native_c(pixmap_info))
+    }
+
     /// Returns `true` if this has been configured with a non-empty dimensioned [YUVAInfo] with
     /// compatible color types and row bytes.
-    pub(crate) fn native_is_valid(info: *const SkYUVAPixmapInfo) -> bool {
+    fn native_is_valid(info: *const SkYUVAPixmapInfo) -> bool {
         unsafe { sb::C_SkYUVAPixmapInfo_isValid(info) }
     }
 
     /// Creates a native default instance that is invalid.
-    pub(crate) fn new_invalid() -> SkYUVAPixmapInfo {
+    fn new_invalid() -> SkYUVAPixmapInfo {
         construct(|pi| unsafe { sb::C_SkYUVAPixmapInfo_Construct(pi) })
     }
 }
@@ -272,7 +281,7 @@ impl YUVAPixmaps {
         pixmaps: &[Pixmap; Self::MAX_PLANES],
     ) -> Option<Self> {
         Self::try_construct(|pms| {
-            sb::C_SkYUVAPixmaps_FromExternalPixmaps(pms, info.native(), pixmaps.native().as_ptr());
+            sb::C_SkYUVAPixmaps_FromExternalPixmaps(pms, info.native(), pixmaps[0].native());
             Self::native_is_valid(pms)
         })
     }

@@ -15,6 +15,7 @@ pub use codec::{Codec, EncodedImageFormat, EncodedOrigin};
 mod core;
 mod docs;
 mod effects;
+mod encode_;
 #[cfg(feature = "gpu")]
 pub mod gpu;
 mod interop;
@@ -38,10 +39,11 @@ pub use crate::prelude::{Borrows, ConditionallySend, Handle, RCHandle, RefHandle
 
 /// All Sk* types are accessible via skia_safe::
 pub use crate::core::*;
-pub use crate::docs::*;
-pub use crate::effects::*;
-pub use crate::modules::*;
-pub use crate::pathops::*;
+pub use docs::*;
+pub use effects::*;
+pub use encode_::*;
+pub use modules::*;
+pub use pathops::*;
 
 #[cfg(test)]
 mod transmutation_tests {

@@ -206,8 +206,7 @@ impl<'a> RustStream<'a> {
                 let mut out_bytes = 0;
                 let mut count = count;
 
-                // This is OK because we just abort if it panics anyway, we don't try
-                // to continue at all.
+                // This is OK because we just abort if it panics anyway.
                 let mut val = std::panic::AssertUnwindSafe(val);
 
                 let out_bytes = match std::panic::catch_unwind(move || {
@@ -342,6 +341,95 @@ impl<'a> RustStream<'a> {
                 );
             }),
             _phantom: PhantomData,
+        }
+    }
+}
+
+#[allow(unused)]
+pub struct RustWStream<'a> {
+    inner: Handle<sb::RustWStream>,
+    _phantom: PhantomData<&'a mut ()>,
+}
+
+#[allow(unused)]
+impl RustWStream<'_> {
+    pub fn stream_mut(&mut self) -> &mut SkWStream {
+        self.inner.native_mut().base_mut()
+    }
+}
+
+impl NativeBase<SkWStream> for sb::RustWStream {}
+
+impl NativeDrop for sb::RustWStream {
+    fn drop(&mut self) {
+        unsafe { sb::C_RustWStream_destruct(self) }
+    }
+}
+
+impl<'a> RustWStream<'a> {
+    pub fn new<T: io::Write>(writer: &'a mut T) -> Self {
+        return RustWStream {
+            inner: Handle::construct(|ptr| unsafe {
+                sb::C_RustWStream_construct(
+                    ptr,
+                    writer as *mut T as *mut ffi::c_void,
+                    Some(write_trampoline::<T>),
+                    Some(flush_trampoline::<T>),
+                );
+            }),
+            _phantom: PhantomData,
+        };
+
+        unsafe extern "C" fn write_trampoline<T: io::Write>(
+            val: *mut ffi::c_void,
+            buf: *const ffi::c_void,
+            count: usize,
+        ) -> bool {
+            if count == 0 {
+                return true;
+            }
+            let buf: &[u8] = std::slice::from_raw_parts(buf as _, count as _);
+            let val: &mut T = &mut *(val as *mut _);
+
+            // This is OK because we just abort if it panics anyway.
+            let mut val = std::panic::AssertUnwindSafe(val);
+
+            match std::panic::catch_unwind(move || {
+                let mut written = 0;
+                while written != count {
+                    match val.write(&buf[written..]) {
+                        Ok(res) if res != 0 => {
+                            written += res;
+                        }
+                        _ => return false,
+                    }
+                }
+                true
+            }) {
+                Ok(res) => res,
+                Err(_) => {
+                    println!("Panic in FFI callback for `SkWStream::write`");
+                    std::process::abort();
+                }
+            }
+        }
+
+        unsafe extern "C" fn flush_trampoline<T: io::Write>(val: *mut ffi::c_void) {
+            let val: &mut T = &mut *(val as *mut _);
+            // This is OK because we just abort if it panics anyway.
+            let mut val = std::panic::AssertUnwindSafe(val);
+            match std::panic::catch_unwind(move || {
+                // Not sure what could be done to handle a flush() error.
+                // Idea: use a with_stream method on the RustWStream that takes a closure, stores
+                // the flush() result and then return a result from with_stream.
+                let _flush_result_ignored = val.flush();
+            }) {
+                Ok(_) => {}
+                Err(_) => {
+                    println!("Panic in FFI callback for `SkWStream::flush`");
+                    std::process::abort();
+                }
+            }
         }
     }
 }

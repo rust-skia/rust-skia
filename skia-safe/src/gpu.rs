@@ -6,6 +6,7 @@ pub mod context_options;
 pub mod d3d;
 mod direct_context;
 mod driver_bug_workarounds;
+mod ganesh;
 #[cfg(feature = "gl")]
 pub mod gl;
 mod gpu_types;
@@ -24,6 +25,7 @@ pub use backend_surface_mutable_state::*;
 pub use context_options::ContextOptions;
 pub use direct_context::*;
 pub use driver_bug_workarounds::DriverBugWorkarounds;
+pub use ganesh::image_ganesh as images;
 pub use gpu_types::*;
 pub use mutable_texture_state::*;
 pub use recording_context::*;
