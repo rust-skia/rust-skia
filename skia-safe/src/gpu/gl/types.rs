@@ -1,5 +1,4 @@
-use crate::gpu;
-use crate::prelude::*;
+use crate::{gpu, prelude::*};
 use skia_bindings::{self as sb, GrGLFramebufferInfo, GrGLSurfaceInfo, GrGLTextureInfo};
 
 pub use skia_bindings::GrGLFormat as Format;
@@ -9,15 +8,27 @@ variant_name!(Standard::GLES);
 pub use skia_bindings::GrGLenum as Enum;
 pub use skia_bindings::GrGLuint as UInt;
 
-#[derive(Copy, Clone, Eq, Default, Debug)]
+#[derive(Copy, Clone, Eq, Debug)]
 #[repr(C)]
 pub struct TextureInfo {
     pub target: Enum,
     pub id: Enum,
     pub format: Enum,
+    pub protected: gpu::Protected,
 }
 
-native_transmutable!(GrGLTextureInfo, TextureInfo, text_info_layout);
+native_transmutable!(GrGLTextureInfo, TextureInfo, texture_info_layout);
+
+impl Default for TextureInfo {
+    fn default() -> Self {
+        Self {
+            target: 0,
+            id: 0,
+            format: 0,
+            protected: gpu::Protected::No,
+        }
+    }
+}
 
 impl PartialEq for TextureInfo {
     fn eq(&self, other: &Self) -> bool {
@@ -30,16 +41,17 @@ impl TextureInfo {
         Self {
             target,
             id,
-            format: 0,
+            ..Default::default()
         }
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(C)]
 pub struct FramebufferInfo {
     pub fboid: UInt,
     pub format: Enum,
+    pub protected: gpu::Protected,
 }
 
 native_transmutable!(
@@ -48,9 +60,22 @@ native_transmutable!(
     framebuffer_info_layout
 );
 
+impl Default for FramebufferInfo {
+    fn default() -> Self {
+        Self {
+            fboid: 0,
+            format: 0,
+            protected: gpu::Protected::No,
+        }
+    }
+}
+
 impl FramebufferInfo {
     pub fn from_fboid(fboid: UInt) -> Self {
-        Self { fboid, format: 0 }
+        Self {
+            fboid,
+            ..Default::default()
+        }
     }
 }
 

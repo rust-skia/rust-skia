@@ -429,6 +429,10 @@ extern "C" SkImage *C_SkImage_makeWithFilter(const SkImage *self, GrRecordingCon
     return self->makeWithFilter(context, filter, *subset, *clipBounds, outSubset, offset).release();
 }
 
+extern "C" bool C_SkImage_isLazyGenerated(const SkImage* self) {
+    return self->isLazyGenerated();
+}
+
 extern "C" SkImage* C_SkImage_makeColorSpace(const SkImage* self, SkColorSpace* target, GrDirectContext* direct) {
     return self->makeColorSpace(sp(target), direct).release();
 }
@@ -1863,9 +1867,9 @@ extern "C" SkData *C_SkImageGenerator_refEncodedData(SkImageGenerator *self) {
     return self->refEncodedData().release();
 }
 
-extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromEncoded(SkData *data, const SkAlphaType* alphaType) {
-    return SkImageGenerator::MakeFromEncoded(sp(data), opt(alphaType)).release();
-}
+// extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromEncoded(SkData *data, const SkAlphaType* alphaType) {
+//     return SkImageGenerator::MakeFromEncoded(sp(data), opt(alphaType)).release();
+// }
 
 extern "C" bool C_SkImageGenerator_isTextureGenerator(const SkImageGenerator *self) {
     return self->isTextureGenerator();

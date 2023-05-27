@@ -558,7 +558,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("GradientType", rewrite::k_xxx_name),
     // SkSurface_*
     ("ContentChangeMode", rewrite::k_xxx_name),
-    ("BackendHandleAccess", rewrite::k_xxx_name),
+    ("BackendHandleAccess", rewrite::k_xxx),
     // SkTextUtils_Align
     // We need name_opt to cover SkSVGPreserveAspectRatio_Align
     ("Align", rewrite::k_xxx_name_opt),

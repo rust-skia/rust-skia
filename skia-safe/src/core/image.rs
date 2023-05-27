@@ -1444,7 +1444,7 @@ impl Image {
     /// example: <https://fiddle.skia.org/c/@Image_isLazyGenerated_a>
     /// example: <https://fiddle.skia.org/c/@Image_isLazyGenerated_b>
     pub fn is_lazy_generated(&self) -> bool {
-        unsafe { self.native().isLazyGenerated() }
+        unsafe { sb::C_SkImage_isLazyGenerated(self.native()) }
     }
 
     /// See [`Self::new_color_space_with_context`]

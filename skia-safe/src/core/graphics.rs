@@ -83,6 +83,6 @@ pub fn allow_jit() {
 
 // TODO: SetPathAnalyticAADecider
 
-pub fn set_force_analytic_aa(force_analytic_aa: bool) {
-    unsafe { SkGraphics::SetForceAnalyticAA(force_analytic_aa) }
-}
+// pub fn set_force_analytic_aa(force_analytic_aa: bool) {
+//     unsafe { SkGraphics::SetForceAnalyticAA(force_analytic_aa) }
+// }

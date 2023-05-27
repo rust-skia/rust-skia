@@ -88,6 +88,14 @@ extern "C" void C_SkSurface_getBackendRenderTarget(
     *backendRenderTarget = self->getBackendRenderTarget(handleAccess);
 }
 
+extern "C" bool C_SkSurface_replaceBackendTexture(
+        SkSurface* self,
+        const GrBackendTexture* backendTexture,
+        GrSurfaceOrigin origin,
+        SkSurface::ContentChangeMode contentChangeMode) {
+    return self->replaceBackendTexture(*backendTexture, origin, contentChangeMode);
+}
+
 //
 // core/SkSurfaceCharacterization.h
 //

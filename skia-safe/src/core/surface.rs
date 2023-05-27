@@ -569,12 +569,11 @@ impl Surface {
         mode: impl Into<Option<ContentChangeMode>>,
     ) -> bool {
         unsafe {
-            self.native_mut().replaceBackendTexture(
+            sb::C_SkSurface_replaceBackendTexture(
+                self.native_mut(),
                 backend_texture.native(),
                 origin,
                 mode.into().unwrap_or(ContentChangeMode::Retain),
-                None,
-                ptr::null_mut(),
             )
         }
     }

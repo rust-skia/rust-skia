@@ -167,6 +167,7 @@ fn main() {
         FramebufferInfo {
             fboid: fboid.try_into().unwrap(),
             format: skia_safe::gpu::gl::Format::RGBA8.into(),
+            ..Default::default()
         }
     };
 
