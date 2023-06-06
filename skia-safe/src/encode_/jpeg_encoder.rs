@@ -24,7 +24,7 @@ impl Downsample {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Options {
-    pub quality: i32,
+    pub quality: u32,
     pub downsample: Downsample,
     pub alpha_option: AlphaOption,
     pub xmp_metadata: Option<String>,

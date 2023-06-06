@@ -9,7 +9,7 @@ impl Pixmap<'_> {
     pub fn encode(
         &self,
         format: EncodedImageFormat,
-        quality: impl Into<Option<i32>>,
+        quality: impl Into<Option<u32>>,
     ) -> Option<Vec<u8>> {
         crate::encode::pixmap(self, format, quality)
     }
@@ -19,7 +19,7 @@ impl Bitmap {
     pub fn encode(
         &self,
         format: EncodedImageFormat,
-        quality: impl Into<Option<i32>>,
+        quality: impl Into<Option<u32>>,
     ) -> Option<Vec<u8>> {
         crate::encode::bitmap(self, format, quality)
     }
@@ -31,7 +31,7 @@ impl crate::Image {
         &self,
         context: impl Into<Option<crate::gpu::DirectContext>>,
         format: EncodedImageFormat,
-        quality: impl Into<Option<i32>>,
+        quality: impl Into<Option<u32>>,
     ) -> Option<crate::Data> {
         crate::encode::image(context, self, format, quality)
     }
@@ -43,7 +43,7 @@ impl crate::Image {
         &self,
         _context: Option<()>,
         format: EncodedImageFormat,
-        quality: impl Into<Option<i32>>,
+        quality: impl Into<Option<u32>>,
     ) -> Option<crate::Data> {
         crate::encode::image(None, self, format, quality)
     }
@@ -56,7 +56,7 @@ pub mod encode {
     pub fn pixmap(
         bitmap: &Pixmap,
         format: EncodedImageFormat,
-        quality: impl Into<Option<i32>>,
+        quality: impl Into<Option<u32>>,
     ) -> Option<Vec<u8>> {
         let mut data = Vec::new();
         let quality = quality.into().unwrap_or(100).clamp(0, 100);
@@ -93,7 +93,7 @@ pub mod encode {
     pub fn bitmap(
         bitmap: &Bitmap,
         format: EncodedImageFormat,
-        quality: impl Into<Option<i32>>,
+        quality: impl Into<Option<u32>>,
     ) -> Option<Vec<u8>> {
         let pixels = bitmap.peek_pixels()?;
         pixmap(&pixels, format, quality)
@@ -104,9 +104,9 @@ pub mod encode {
         context: impl Into<Option<crate::gpu::DirectContext>>,
         image: &crate::Image,
         image_format: EncodedImageFormat,
-        quality: impl Into<Option<i32>>,
+        quality: impl Into<Option<u32>>,
     ) -> Option<crate::Data> {
-        let quality: i32 = quality.into().unwrap_or(100).clamp(0, 100);
+        let quality = quality.into().unwrap_or(100).clamp(0, 100);
         match image_format {
             EncodedImageFormat::JPEG => {
                 let opts = jpeg_encoder::Options {
@@ -141,9 +141,9 @@ pub mod encode {
         context: Option<()>,
         image: &crate::Image,
         image_format: EncodedImageFormat,
-        quality: impl Into<Option<i32>>,
+        quality: impl Into<Option<u32>>,
     ) -> Option<crate::Data> {
-        let quality: i32 = quality.into().unwrap_or(100).clamp(0, 100);
+        let quality = quality.into().unwrap_or(100).clamp(0, 100);
         match image_format {
             EncodedImageFormat::JPEG => {
                 let opts = jpeg_encoder::Options {

@@ -1166,7 +1166,7 @@ impl Image {
         &self,
         context: impl Into<Option<gpu::DirectContext>>,
         image_format: EncodedImageFormat,
-        quality: impl Into<Option<i32>>,
+        quality: impl Into<Option<u32>>,
     ) -> Option<Data> {
         self.encode(context, image_format, quality)
     }
@@ -1209,7 +1209,7 @@ impl Image {
     pub fn encode_to_data_with_quality(
         &self,
         image_format: EncodedImageFormat,
-        quality: i32,
+        quality: u32,
     ) -> Option<Data> {
         self.encode(None, image_format, quality)
     }
