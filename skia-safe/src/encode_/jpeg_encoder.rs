@@ -13,7 +13,7 @@ pub enum Downsample {
 }
 
 impl Downsample {
-    pub fn native(&self) -> SkJpegEncoder_Downsample {
+    fn native(&self) -> SkJpegEncoder_Downsample {
         match self {
             Downsample::BothDirections => SkJpegEncoder_Downsample::k420,
             Downsample::Horizontal => SkJpegEncoder_Downsample::k422,
