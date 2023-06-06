@@ -10,6 +10,9 @@ use std::{fmt, ptr};
 
 pub use super::CubicResampler;
 
+#[deprecated(since = "0.62.0", note = "Use TextureCompressionType")]
+pub use crate::TextureCompressionType as CompressionType;
+
 #[deprecated(since = "0.63.0", note = "Use images::BitDepth")]
 pub use images::BitDepth;
 
