@@ -146,3 +146,8 @@ diff-skia:
 	cd /tmp/rust-skia-cmp/skia-bindings/skia && ${rust-skia-logs} >/tmp/rust-skia-cmp-master.txt
 	cd skia-bindings/skia && ${rust-skia-logs} >/tmp/rust-skia-cmp-current.txt
 	diff /tmp/rust-skia-cmp-master.txt /tmp/rust-skia-cmp-current.txt
+
+# Diffs the public skia-safe API with the latest on crates.io using cargo public-api
+.PHONY: diff-api
+diff-api:
+	cargo public-api -p skia-safe -s --features=all-macos diff latest -- >skia-safe-api.diff
