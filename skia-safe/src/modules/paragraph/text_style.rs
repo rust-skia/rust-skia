@@ -315,7 +315,52 @@ impl TextStyle {
         Decoration::from_native_ref(&self.native().fDecoration)
     }
 
+    pub fn decoration_type(&self) -> TextDecoration {
+        self.decoration().ty
+    }
+
+    pub fn decoration_mode(&self) -> TextDecorationMode {
+        self.decoration().mode
+    }
+
+    pub fn decoration_color(&self) -> Color {
+        self.decoration().color
+    }
+
+    pub fn decoration_style(&self) -> TextDecorationStyle {
+        self.decoration().style
+    }
+
+    pub fn decoration_thickness_multiplier(&self) -> scalar {
+        self.decoration().thickness_multiplier
+    }
+
+    pub fn set_decoration(&mut self, decoration: TextDecoration) {
+        self.decoration_mut_internal().ty = decoration;
+    }
+
+    pub fn set_decoration_mode(&mut self, mode: TextDecorationMode) {
+        self.decoration_mut_internal().mode = mode;
+    }
+
+    pub fn set_decoration_style(&mut self, style: TextDecorationStyle) {
+        self.decoration_mut_internal().style = style;
+    }
+
+    pub fn set_decoration_color(&mut self, color: impl Into<Color>) {
+        self.decoration_mut_internal().color = color.into();
+    }
+
+    pub fn set_decoration_thickness_multiplier(&mut self, multiplier: scalar) {
+        self.decoration_mut_internal().thickness_multiplier = multiplier;
+    }
+
+    #[deprecated(since = "0.63.1", note = "use set_decoration* functions instead")]
     pub fn decoration_mut(&mut self) -> &mut Decoration {
+        self.decoration_mut_internal()
+    }
+
+    fn decoration_mut_internal(&mut self) -> &mut Decoration {
         Decoration::from_native_ref_mut(&mut self.native_mut().fDecoration)
     }
 
