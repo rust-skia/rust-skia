@@ -65,8 +65,11 @@ pub struct Decoration {
 impl Default for Decoration {
     fn default() -> Self {
         Self {
-            thickness_multiplier: 1.0,
-            ..Default::default()
+            ty: TextDecoration::default(),
+            mode: TextDecoration::default(),
+            color: Color::default(),
+            style: TextDecorationStyle::default(),
+            thickness_multiplier: 1.0
         }
     }
 }
