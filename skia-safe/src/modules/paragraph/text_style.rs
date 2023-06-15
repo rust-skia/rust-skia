@@ -69,7 +69,7 @@ impl Default for Decoration {
             mode: TextDecoration::default(),
             color: Color::default(),
             style: TextDecorationStyle::default(),
-            thickness_multiplier: 1.0
+            thickness_multiplier: 1.0,
         }
     }
 }
