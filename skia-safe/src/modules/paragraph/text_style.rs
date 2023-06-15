@@ -53,13 +53,25 @@ fn style_type_member_naming() {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, PartialEq, Default, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Decoration {
     pub ty: TextDecoration,
     pub mode: TextDecorationMode,
     pub color: Color,
     pub style: TextDecorationStyle,
     pub thickness_multiplier: scalar,
+}
+
+impl Default for Decoration {
+    fn default() -> Self {
+        Self {
+            ty: TextDecoration::default(),
+            mode: TextDecoration::default(),
+            color: Color::default(),
+            style: TextDecorationStyle::default(),
+            thickness_multiplier: 1.0
+        }
+    }
 }
 
 native_transmutable!(
