@@ -53,13 +53,25 @@ fn style_type_member_naming() {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, PartialEq, Default, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Decoration {
     pub ty: TextDecoration,
     pub mode: TextDecorationMode,
     pub color: Color,
     pub style: TextDecorationStyle,
     pub thickness_multiplier: scalar,
+}
+
+impl Default for Decoration {
+    fn default() -> Self {
+        Self {
+            ty: TextDecoration::default(),
+            mode: TextDecorationMode::default(),
+            color: Color::TRANSPARENT,
+            style: TextDecorationStyle::default(),
+            thickness_multiplier: 1.0,
+        }
+    }
 }
 
 native_transmutable!(
@@ -335,7 +347,11 @@ impl TextStyle {
         self.decoration().thickness_multiplier
     }
 
-    pub fn set_decoration(&mut self, decoration: TextDecoration) {
+    pub fn set_decoration(&mut self, decoration: &Decoration) {
+        *self.decoration_mut_internal() = *decoration;
+    }
+
+    pub fn set_decoration_type(&mut self, decoration: TextDecoration) {
         self.decoration_mut_internal().ty = decoration;
     }
 
@@ -355,7 +371,7 @@ impl TextStyle {
         self.decoration_mut_internal().thickness_multiplier = multiplier;
     }
 
-    #[deprecated(since = "0.63.1", note = "use set_decoration* functions instead")]
+    #[deprecated(since = "0.63.1", note = "use set_decoration()")]
     pub fn decoration_mut(&mut self) -> &mut Decoration {
         self.decoration_mut_internal()
     }
