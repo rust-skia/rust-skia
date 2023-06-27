@@ -151,3 +151,14 @@ diff-skia:
 .PHONY: diff-api
 diff-api:
 	cargo public-api -p skia-safe -s --features=all-macos diff latest -- >skia-safe-api.diff
+
+bindings-latest = find target -name "bindings.rs" -exec ls -t {} + | head -n 1
+
+.PHONY: find-bindings
+find-bindings:
+	${bindings-latest}
+
+.PHONY: open-bindings
+open-bindings:
+	code `${bindings-latest}`
+
