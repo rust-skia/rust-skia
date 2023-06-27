@@ -451,6 +451,16 @@ const BLOCKLISTED_TYPES: &[&str] = &[
     // create invalid identifiers.
     "SkSVGFontWeight",
     "SkSVGFontWeight_Type",
+    // m115 unused Linux
+    "std::__uset_hashtable.*",
+    "std::unordered_set.*",
+    // m115 unused Windows
+    "std::_List_unchecked.*",
+    "std::_Hash.*",
+    "std::_List_const.*",
+    "std::list.*",
+    "std::list__Unchecked.*",
+    "std::_List_iterator.*",
 ];
 
 #[derive(Debug)]
