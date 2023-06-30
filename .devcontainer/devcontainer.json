@@ -1,0 +1,13 @@
+{
+	"name": "Rust-Skia ARM64 DevContainer",
+	"image": "ghcr.io/pragmatrix/rust-skia-linux-arm64:latest",
+	"containerEnv": {
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"rust-lang.rust-analyzer"
+			]
+		}
+	}
+}
