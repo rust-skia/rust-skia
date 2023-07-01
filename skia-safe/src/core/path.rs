@@ -36,7 +36,9 @@ variant_name!(Verb::Line);
 #[repr(C)]
 pub struct Iter<'a>(SkPath_Iter, PhantomData<&'a Handle<SkPath>>);
 
-impl NativeAccess<SkPath_Iter> for Iter<'_> {
+impl NativeAccess for Iter<'_> {
+    type Native = SkPath_Iter;
+
     fn native(&self) -> &SkPath_Iter {
         &self.0
     }
@@ -177,7 +179,9 @@ impl<'a> Iterator for Iter<'a> {
 pub struct RawIter<'a>(SkPath_RawIter, PhantomData<&'a Handle<SkPath>>);
 
 #[allow(deprecated)]
-impl NativeAccess<SkPath_RawIter> for RawIter<'_> {
+impl NativeAccess for RawIter<'_> {
+    type Native = SkPath_RawIter;
+
     fn native(&self) -> &SkPath_RawIter {
         &self.0
     }

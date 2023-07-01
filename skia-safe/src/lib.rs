@@ -45,6 +45,25 @@ pub use encode_::*;
 pub use modules::*;
 pub use pathops::*;
 
+#[cfg(not(feature = "gpu"))]
+pub mod gpu {
+    use std::ptr;
+
+    use crate::prelude::NativePointerOrNullMut;
+
+    pub enum RecordingContext {}
+
+    pub enum DirectContext {}
+
+    impl NativePointerOrNullMut for Option<&mut DirectContext> {
+        type Native = skia_bindings::GrDirectContext;
+
+        fn native_ptr_or_null_mut(&mut self) -> *mut skia_bindings::GrDirectContext {
+            ptr::null_mut()
+        }
+    }
+}
+
 #[cfg(test)]
 mod transmutation_tests {
     use crate::{prelude::NativeTransmutableSliceAccess, Point};

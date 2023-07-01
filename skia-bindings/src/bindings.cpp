@@ -406,7 +406,7 @@ extern "C" SkData* C_SkImage_refEncodedData(const SkImage* self) {
     return self->refEncodedData().release();
 }
 
-extern "C" SkImage* C_SkImage_makeSubset(const SkImage* self, const SkIRect* subset, GrDirectContext* direct) {
+extern "C" SkImage* C_SkImage_makeSubset(const SkImage* self, GrDirectContext* direct, const SkIRect* subset) {
     return self->makeSubset(*subset, direct).release();
 }
 
@@ -1812,6 +1812,10 @@ extern "C" bool C_SkDeferredDisplayList_unique(const SkDeferredDisplayList* self
 
 extern "C" SkDrawable* C_SkDrawable_Deserialize(const void* data, size_t length) {
     return SkDrawable::Deserialize(data, length).release();
+}
+
+extern "C" SkPicture* C_SkDrawable_makePictureSnapshot(SkDrawable* self) {
+    return self->makePictureSnapshot().release();
 }
 
 extern "C" SkRect C_SkDrawable_getBounds(SkDrawable* self) {

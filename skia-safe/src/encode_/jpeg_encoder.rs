@@ -61,9 +61,8 @@ pub fn encode<W: io::Write>(pixmap: &Pixmap, writer: &mut W, options: &Options) 
 
 // TODO: encode YUVAPixmaps
 
-#[cfg(feature = "gpu")]
-pub fn encode_image(
-    context: impl Into<Option<crate::gpu::DirectContext>>,
+pub fn encode_image<'a>(
+    context: impl Into<Option<&'a mut crate::gpu::DirectContext>>,
     img: &crate::Image,
     options: &Options,
 ) -> Option<crate::Data> {
@@ -71,27 +70,7 @@ pub fn encode_image(
 
     Data::from_ptr(unsafe {
         skia_bindings::C_SkJpegEncoder_EncodeImage(
-            context.into().into_ptr_or_null(),
-            img.native(),
-            options.quality as _,
-            options.downsample.native(),
-            options.alpha_option,
-            xml_metadata.as_ref().native_ptr_or_null(),
-        )
-    })
-}
-
-#[cfg(not(feature = "gpu"))]
-pub fn encode_image(
-    _context: Option<()>,
-    img: &crate::Image,
-    options: &Options,
-) -> Option<crate::Data> {
-    let xml_metadata = options.xmp_metadata.as_ref().map(Data::new_str);
-
-    Data::from_ptr(unsafe {
-        skia_bindings::C_SkJpegEncoder_EncodeImage(
-            std::ptr::null_mut(),
+            context.into().native_ptr_or_null_mut(),
             img.native(),
             options.quality as _,
             options.downsample.native(),

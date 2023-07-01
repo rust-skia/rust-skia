@@ -213,7 +213,9 @@ impl<'a> From<&'a [RSXform]> for GlyphPositions<'a> {
 #[repr(transparent)]
 pub struct Canvas(SkCanvas);
 
-impl NativeAccess<SkCanvas> for Canvas {
+impl NativeAccess for Canvas {
+    type Native = SkCanvas;
+
     fn native(&self) -> &SkCanvas {
         &self.0
     }
@@ -2355,7 +2357,9 @@ impl<'a> DerefMut for AutoRestoredCanvas<'a> {
     }
 }
 
-impl<'a> NativeAccess<SkAutoCanvasRestore> for AutoRestoredCanvas<'a> {
+impl<'a> NativeAccess for AutoRestoredCanvas<'a> {
+    type Native = SkAutoCanvasRestore;
+
     fn native(&self) -> &SkAutoCanvasRestore {
         &self.restore
     }

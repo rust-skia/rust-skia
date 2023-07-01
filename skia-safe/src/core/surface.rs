@@ -472,12 +472,12 @@ impl Surface {
 #[cfg(not(feature = "gpu"))]
 impl Surface {
     /// Returns the recording context being used by the [`Surface`].
-    pub fn recording_context(&mut self) -> Option<()> {
+    pub fn recording_context(&mut self) -> Option<crate::gpu::RecordingContext> {
         None
     }
 
     /// Returns the recording context being used by the [`Surface`].
-    pub fn direct_context(&mut self) -> Option<()> {
+    pub fn direct_context(&mut self) -> Option<crate::gpu::DirectContext> {
         None
     }
 }

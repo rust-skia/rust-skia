@@ -41,7 +41,9 @@ impl NativeStreamBase for SkStreamAsset {
     }
 }
 
-impl NativeAccess<SkStreamAsset> for StreamAsset {
+impl NativeAccess for StreamAsset {
+    type Native = SkStreamAsset;
+
     fn native(&self) -> &SkStreamAsset {
         unsafe { self.0.as_ref() }
     }
@@ -78,7 +80,9 @@ impl Drop for MemoryStream<'_> {
     }
 }
 
-impl NativeAccess<SkMemoryStream> for MemoryStream<'_> {
+impl NativeAccess for MemoryStream<'_> {
+    type Native = SkMemoryStream;
+
     fn native(&self) -> &SkMemoryStream {
         unsafe { self.native.as_ref() }
     }

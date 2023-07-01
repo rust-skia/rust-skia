@@ -1168,7 +1168,8 @@ impl Image {
         image_format: EncodedImageFormat,
         quality: impl Into<Option<u32>>,
     ) -> Option<Data> {
-        self.encode(context, image_format, quality)
+        let mut context = context.into();
+        self.encode(context.as_mut(), image_format, quality)
     }
 
     /// See [`Self::encode_to_data_with_quality`]
@@ -1228,10 +1229,9 @@ impl Image {
     }
 
     /// See [`Self::new_subset_with_context`]
+    #[deprecated(since = "0.0.0", note = "use make_subset()")]
     pub fn new_subset(&self, rect: impl AsRef<IRect>) -> Option<Image> {
-        Image::from_ptr(unsafe {
-            sb::C_SkImage_makeSubset(self.native(), rect.as_ref().native(), ptr::null_mut())
-        })
+        self.make_subset(None, rect)
     }
 
     /// Returns subset of this image.
@@ -1250,17 +1250,45 @@ impl Image {
     /// Returns: the subsetted image, or `None`
     ///
     /// example: <https://fiddle.skia.org/c/@Image_makeSubset>
+
     #[cfg(feature = "gpu")]
+    #[deprecated(since = "0.0.0", note = "use make_subset()")]
     pub fn new_subset_with_context<'a>(
         &self,
         rect: impl AsRef<IRect>,
         direct: impl Into<Option<&'a mut gpu::DirectContext>>,
     ) -> Option<Image> {
+        self.make_subset(direct, rect)
+    }
+
+    /// Returns subset of this image.
+    ///
+    /// Returns `None` if any of the following are true:
+    ///     - Subset is empty
+    ///     - Subset is not contained inside the image's bounds
+    ///     - Pixels in the source image could not be read or copied
+    ///     - This image is texture-backed and the provided context is null or does not match
+    ///     the source image's context.
+    ///
+    /// If the source image was texture-backed, the resulting image will be texture-backed also.
+    /// Otherwise, the returned image will be raster-backed.
+    ///
+    /// * `direct` - the [`DirectContext`] of the source image (`None` is ok if the source image
+    ///                 is not texture-backed).
+    /// * `subset` - bounds of returned [`Image`]
+    /// Returns: the subsetted image, or `None`
+    ///
+    /// example: <https://fiddle.skia.org/c/@Image_makeSubset>
+    pub fn make_subset<'a>(
+        &self,
+        direct: impl Into<Option<&'a mut crate::gpu::DirectContext>>,
+        subset: impl AsRef<IRect>,
+    ) -> Option<Image> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_makeSubset(
                 self.native(),
-                rect.as_ref().native(),
                 direct.into().native_ptr_or_null_mut(),
+                subset.as_ref().native(),
             )
         })
     }

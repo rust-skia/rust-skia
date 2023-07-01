@@ -85,7 +85,9 @@ pub mod pdf {
     #[repr(transparent)]
     pub struct StructureElementNode(ptr::NonNull<SkPDF_StructureElementNode>);
 
-    impl NativeAccess<SkPDF_StructureElementNode> for StructureElementNode {
+    impl NativeAccess for StructureElementNode {
+        type Native = SkPDF_StructureElementNode;
+
         fn native(&self) -> &SkPDF_StructureElementNode {
             unsafe { self.0.as_ref() }
         }
