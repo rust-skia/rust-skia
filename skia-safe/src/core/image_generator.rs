@@ -67,9 +67,12 @@ impl ImageGenerator {
         unsafe { sb::C_SkImageGenerator_isTextureGenerator(self.native()) }
     }
 
-    // pub fn from_encoded(encoded: impl Into<Data>) -> Option<Self> {
-    //     Self::from_ptr(unsafe {
-    //         sb::C_SkImageGenerator_MakeFromEncoded(encoded.into().into_ptr(), ptr::null())
-    //     })
-    // }
+    #[deprecated(
+        since = "0.0.0",
+        note = "Removed, will return `None`. Use Image::deferred_from_encoded_data() or Codec::from_data()"
+    )]
+    pub fn from_encoded(_encoded: impl Into<Data>) -> Option<Self> {
+        debug_assert!(false, "Removed, will return `None` in release builds");
+        None
+    }
 }
