@@ -12,6 +12,7 @@
         "CLANGCC",
         "CLANGCXX",
         "cmath",
+        "Codepoints",
         "CORETEXT",
         "cpufeatures",
         "Downsample",

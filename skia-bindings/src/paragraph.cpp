@@ -274,6 +274,12 @@ extern "C" {
         return self->unresolvedGlyphs();
     }
 
+    void C_Paragraph_unresolvedCodepoints(Paragraph* self, VecSink<SkUnichar>* result) {
+        auto set = self->unresolvedCodepoints();
+        std::vector<SkUnichar> vec(set.begin(), set.end());
+        result->set(vec);
+    }
+
     int C_Paragraph_getLineNumberAt(const Paragraph* self, TextIndex codeUnitIndex) {
         return self->getLineNumberAt(codeUnitIndex);
     }
@@ -348,6 +354,12 @@ extern "C" {
 
     Paragraph* C_ParagraphBuilder_Build(ParagraphBuilder* self) {
         return self->Build().release();
+    }
+
+    void C_ParagraphBuilder_getText(ParagraphBuilder* self, char** text, size_t* len) {
+        auto span = self->getText();
+        *text = span.data();
+        *len = span.size();
     }
 
     void C_ParagraphBuilder_Reset(ParagraphBuilder* self) {
