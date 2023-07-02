@@ -44,6 +44,10 @@ impl TextureInfo {
             ..Default::default()
         }
     }
+
+    pub fn is_protected(&self) -> bool {
+        self.protected == gpu::Protected::Yes
+    }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -76,6 +80,10 @@ impl FramebufferInfo {
             fboid,
             ..Default::default()
         }
+    }
+
+    pub fn is_protected(&self) -> bool {
+        self.protected == gpu::Protected::Yes
     }
 }
 
