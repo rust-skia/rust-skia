@@ -2405,8 +2405,8 @@ impl AutoCanvasRestore {
 #[cfg(test)]
 mod tests {
     use crate::{
-        canvas::SaveLayerFlags, canvas::SaveLayerRec, AlphaType, Canvas, ClipOp, Color, ColorType,
-        ImageInfo, OwnedCanvas, Rect,
+        canvas::SaveLayerFlags, canvas::SaveLayerRec, surfaces, AlphaType, Canvas, ClipOp, Color,
+        ColorType, ImageInfo, OwnedCanvas, Rect,
     };
 
     #[test]
@@ -2481,7 +2481,8 @@ mod tests {
     /// Regression test for: <https://github.com/rust-skia/rust-skia/issues/427>
     #[test]
     fn test_local_and_device_clip_bounds() {
-        let mut surface = crate::Surface::new_raster_n32_premul((100, 100)).unwrap();
+        let mut surface =
+            surfaces::raster(&ImageInfo::new_n32_premul((100, 100), None), 0, None).unwrap();
         let _ = surface.canvas().device_clip_bounds();
         let _ = surface.canvas().local_clip_bounds();
         let _ = surface.canvas().local_to_device();

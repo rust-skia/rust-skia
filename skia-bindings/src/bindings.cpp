@@ -250,20 +250,16 @@ extern "C" SkPoint C_SkCubicMap_computeFromT(const SkCubicMap* self, float t) {
 // core/SkSurface.h
 //
 
-extern "C" SkSurface* C_SkSurface_MakeRasterDirect(const SkImageInfo* imageInfo, void* pixels, size_t rowBytes, const SkSurfaceProps* surfaceProps) {
-    return SkSurface::MakeRasterDirect(*imageInfo, pixels, rowBytes, surfaceProps).release();
+extern "C" SkSurface* C_SkSurfaces_Null(int width, int height) {
+    return SkSurfaces::Null(width, height).release();
 }
 
-extern "C" SkSurface* C_SkSurface_MakeRaster(const SkImageInfo* imageInfo, size_t rowBytes, const SkSurfaceProps* surfaceProps) {
-    return SkSurface::MakeRaster(*imageInfo, rowBytes, surfaceProps).release();
+extern "C" SkSurface* C_SkSurfaces_Raster(const SkImageInfo* imageInfo, size_t rowBytes, const SkSurfaceProps* surfaceProps) {
+    return SkSurfaces::Raster(*imageInfo, rowBytes, surfaceProps).release();
 }
 
-extern "C" SkSurface* C_SkSurface_MakeRasterN32Premul(int width, int height, const SkSurfaceProps* surfaceProps) {
-    return SkSurface::MakeRasterN32Premul(width, height, surfaceProps).release();
-}
-
-extern "C" SkSurface* C_SkSurface_MakeNull(int width, int height) {
-    return SkSurface::MakeNull(width, height).release();
+extern "C" SkSurface* C_SkSurfaces_WrapPixels(const SkImageInfo* imageInfo, void* pixels, size_t rowBytes, const SkSurfaceProps* surfaceProps) {
+    return SkSurfaces::WrapPixels(*imageInfo, pixels, rowBytes, surfaceProps).release();
 }
 
 extern "C" int C_SkSurface_width(const SkSurface* self) {

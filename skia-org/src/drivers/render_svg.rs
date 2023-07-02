@@ -1,6 +1,8 @@
-use crate::{artifact, DrawingDriver, Driver};
-use skia_safe::{svg, Canvas, Rect, Surface};
 use std::path::Path;
+
+use skia_safe::{surfaces, svg, Canvas, Rect};
+
+use crate::{artifact, DrawingDriver, Driver};
 
 pub struct RenderSvg;
 
@@ -25,7 +27,7 @@ impl DrawingDriver for RenderSvg {
 
         let svg_dom = svg::Dom::from_bytes(svg).unwrap();
 
-        let mut surface = Surface::new_raster_n32_premul((width * 2, height * 2)).unwrap();
+        let mut surface = surfaces::raster_n32_premul((width * 2, height * 2)).unwrap();
 
         artifact::draw_image_on_surface(&mut surface, path, name, |canvas| svg_dom.render(canvas));
     }
