@@ -276,6 +276,26 @@ pub fn magnifier(
     })
 }
 
+pub fn magnifier2(
+    lens_bounds: impl AsRef<Rect>,
+    zoom_amount: scalar,
+    inset: scalar,
+    sampling_options: SamplingOptions,
+    input: impl Into<Option<ImageFilter>>,
+    crop_rect: impl Into<CropRect>,
+) -> Option<ImageFilter> {
+    ImageFilter::from_ptr(unsafe {
+        sb::C_SkImageFilters_Magnifier2(
+            lens_bounds.as_ref().native(),
+            zoom_amount,
+            inset,
+            sampling_options.native(),
+            input.into().into_ptr_or_null(),
+            crop_rect.into().native(),
+        )
+    })
+}
+
 #[allow(clippy::too_many_arguments)]
 pub fn matrix_convolution(
     kernel_size: impl Into<ISize>,
@@ -768,6 +788,7 @@ impl ImageFilter {
         )
     }
 
+    #[deprecated(since = "0.0.0", note = "use magnifier2() instead")]
     pub fn magnifier<'a>(
         self,
         crop_rect: impl Into<Option<&'a IRect>>,
@@ -775,6 +796,24 @@ impl ImageFilter {
         inset: scalar,
     ) -> Option<Self> {
         magnifier(src_rect, inset, self, crop_rect.into().map(|r| r.into()))
+    }
+
+    pub fn magnifier2<'a>(
+        self,
+        lens_bounds: impl AsRef<Rect>,
+        zoom_amount: scalar,
+        inset: scalar,
+        sampling_options: SamplingOptions,
+        crop_rect: impl Into<Option<&'a IRect>>,
+    ) -> Option<Self> {
+        magnifier2(
+            lens_bounds,
+            zoom_amount,
+            inset,
+            sampling_options,
+            self,
+            crop_rect.into().map(|r| r.into()),
+        )
     }
 
     #[allow(clippy::too_many_arguments)]

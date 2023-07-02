@@ -2625,16 +2625,29 @@ SkImageFilter *C_SkImageFilters_DropShadowOnly(SkScalar dx, SkScalar dy,
     return SkImageFilters::DropShadowOnly(dx, dy, sigmaX, sigmaY, color, sp(input), *cropRect).release();
 }
 
-SkImageFilter *C_SkImageFilters_Image(SkImage *image, const SkRect *srcRect,
-                                      const SkRect *dstRect, const SkSamplingOptions *sampling)
+SkImageFilter *C_SkImageFilters_Image(
+    SkImage *image, const SkRect *srcRect,
+    const SkRect *dstRect, const SkSamplingOptions *sampling)
 {
     return SkImageFilters::Image(sp(image), *srcRect, *dstRect, *sampling).release();
 }
 
-SkImageFilter *C_SkImageFilters_Magnifier(const SkRect *srcRect, SkScalar inset,
-                                          SkImageFilter *input,
-                                          const SkImageFilters::CropRect *cropRect) {
+SkImageFilter *C_SkImageFilters_Magnifier(
+    const SkRect *srcRect, SkScalar inset,
+    SkImageFilter *input,
+    const SkImageFilters::CropRect *cropRect) {
     return SkImageFilters::Magnifier(*srcRect, inset, sp(input), *cropRect).release();
+}
+
+SkImageFilter *C_SkImageFilters_Magnifier2(
+    const SkRect *lensBounds,
+    SkScalar zoomAmount,
+    SkScalar inset,
+    const SkSamplingOptions *sampling,
+    SkImageFilter *input,
+    const SkImageFilters::CropRect &cropRect)
+{
+    return SkImageFilters::Magnifier(*lensBounds, zoomAmount, inset, *sampling, sp(input), cropRect).release();
 }
 
 SkImageFilter *C_SkImageFilters_MatrixConvolution(const SkISize *kernelSize,
