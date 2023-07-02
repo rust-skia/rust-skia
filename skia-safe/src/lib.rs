@@ -45,6 +45,7 @@ pub use encode_::*;
 pub use modules::*;
 pub use pathops::*;
 
+/// Stubs for types that are only available with the `gpu` feature.
 #[cfg(not(feature = "gpu"))]
 pub mod gpu {
     use std::ptr;
@@ -52,6 +53,14 @@ pub mod gpu {
     use crate::prelude::NativePointerOrNullMut;
 
     pub enum RecordingContext {}
+
+    impl NativePointerOrNullMut for Option<&mut RecordingContext> {
+        type Native = skia_bindings::GrRecordingContext;
+
+        fn native_ptr_or_null_mut(&mut self) -> *mut skia_bindings::GrRecordingContext {
+            ptr::null_mut()
+        }
+    }
 
     pub enum DirectContext {}
 

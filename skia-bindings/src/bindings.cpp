@@ -414,12 +414,12 @@ extern "C" SkImage* C_SkImage_withDefaultMipmaps(const SkImage* self) {
     return self->withDefaultMipmaps().release();
 }
 
-extern "C" SkImage* C_SkImage_makeNonTextureImage(const SkImage* self) {
-    return self->makeNonTextureImage().release();
+extern "C" SkImage* C_SkImage_makeNonTextureImage(const SkImage* self, GrDirectContext* context) {
+    return self->makeNonTextureImage(context).release();
 }
 
-extern "C" SkImage* C_SkImage_makeRasterImage(const SkImage* self, SkImage::CachingHint cachingHint) {
-    return self->makeRasterImage(cachingHint).release();
+extern "C" SkImage* C_SkImage_makeRasterImage(const SkImage* self, GrDirectContext* context, SkImage::CachingHint cachingHint) {
+    return self->makeRasterImage(context, cachingHint).release();
 }
 
 extern "C" SkImage *C_SkImage_makeWithFilter(const SkImage *self, GrRecordingContext *context,
@@ -433,8 +433,8 @@ extern "C" bool C_SkImage_isLazyGenerated(const SkImage* self) {
     return self->isLazyGenerated();
 }
 
-extern "C" SkImage* C_SkImage_makeColorSpace(const SkImage* self, SkColorSpace* target, GrDirectContext* direct) {
-    return self->makeColorSpace(sp(target), direct).release();
+extern "C" SkImage* C_SkImage_makeColorSpace(const SkImage* self, GrDirectContext* direct, SkColorSpace* target) {
+    return self->makeColorSpace(direct, sp(target)).release();
 }
 
 extern "C" SkImage* C_SkImage_reinterpretColorSpace(const SkImage* self, SkColorSpace* newColorSpace) {

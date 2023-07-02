@@ -1,9 +1,7 @@
-#[cfg(feature = "gpu")]
-use crate::gpu;
 use crate::{
-    prelude::*, AlphaType, Bitmap, ColorSpace, ColorType, Data, EncodedImageFormat, IPoint, IRect,
-    ISize, ImageFilter, ImageGenerator, ImageInfo, Matrix, Paint, Picture, Pixmap, SamplingOptions,
-    Shader, SurfaceProps, TextureCompressionType, TileMode,
+    gpu, prelude::*, AlphaType, Bitmap, ColorSpace, ColorType, Data, EncodedImageFormat, IPoint,
+    IRect, ISize, ImageFilter, ImageGenerator, ImageInfo, Matrix, Paint, Picture, Pixmap,
+    SamplingOptions, Shader, SurfaceProps, TextureCompressionType, TileMode,
 };
 use skia_bindings::{self as sb, SkImage, SkRefCntBase};
 use std::{fmt, ptr};
@@ -1281,7 +1279,7 @@ impl Image {
     /// example: <https://fiddle.skia.org/c/@Image_makeSubset>
     pub fn make_subset<'a>(
         &self,
-        direct: impl Into<Option<&'a mut crate::gpu::DirectContext>>,
+        direct: impl Into<Option<&'a mut gpu::DirectContext>>,
         subset: impl AsRef<IRect>,
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
@@ -1311,7 +1309,7 @@ impl Image {
         context: &mut gpu::DirectContext,
         mipmapped: gpu::Mipmapped,
     ) -> Option<Image> {
-        self.new_texture_image_budgeted(context, mipmapped, crate::gpu::Budgeted::Yes)
+        self.new_texture_image_budgeted(context, mipmapped, gpu::Budgeted::Yes)
     }
 
     /// Returns [`Image`] backed by GPU texture associated with context. Returned [`Image`] is
@@ -1343,9 +1341,20 @@ impl Image {
         gpu::images::texture_from_image(direct_context, self, mipmapped, budgeted)
     }
 
-    #[deprecated(since = "0.54.0", note = "use to_non_texture_image()")]
-    pub fn new_non_texture_image(&self) -> Option<Image> {
-        self.to_non_texture_image()
+    /// Returns raster image or lazy image. Copies [`Image`] backed by GPU texture into
+    /// CPU memory if needed. Returns original [`Image`] if decoded in raster bitmap,
+    /// or if encoded in a stream.
+    ///
+    /// Returns `None` if backed by GPU texture and copy fails.
+    ///
+    /// Returns: raster image, lazy image, or `None`
+    ///
+    /// example: <https://fiddle.skia.org/c/@Image_makeNonTextureImage>
+    #[deprecated(since = "0.0.0", note = "use make_non_texture_image()")]
+    pub fn to_non_texture_image(&self) -> Option<Image> {
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_makeNonTextureImage(self.native(), ptr::null_mut())
+        })
     }
 
     /// Returns raster image or lazy image. Copies [`Image`] backed by GPU texture into
@@ -1357,18 +1366,16 @@ impl Image {
     /// Returns: raster image, lazy image, or `None`
     ///
     /// example: <https://fiddle.skia.org/c/@Image_makeNonTextureImage>
-    pub fn to_non_texture_image(&self) -> Option<Image> {
-        Image::from_ptr(unsafe { sb::C_SkImage_makeNonTextureImage(self.native()) })
-    }
-
-    #[deprecated(since = "0.54.0", note = "use to_raster_image()")]
-    pub fn new_raster_image(&self) -> Option<Image> {
-        self.to_raster_image(None)
-    }
-
-    #[deprecated(since = "0.54.0", note = "use to_raster_image()")]
-    pub fn new_raster_image_with_caching_hint(&self, caching_hint: CachingHint) -> Option<Image> {
-        self.to_raster_image(caching_hint)
+    pub fn make_non_texture_image<'a>(
+        &self,
+        context: impl Into<Option<&'a mut gpu::DirectContext>>,
+    ) -> Option<Image> {
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_makeNonTextureImage(
+                self.native(),
+                context.into().native_ptr_or_null_mut(),
+            )
+        })
     }
 
     /// Returns raster image. Copies [`Image`] backed by GPU texture into CPU memory,
@@ -1383,12 +1390,41 @@ impl Image {
     /// Returns: raster image, or `None`
     ///
     /// example: <https://fiddle.skia.org/c/@Image_makeRasterImage>
+    #[deprecated(since = "0.0.0", note = "use make_raster_image()")]
     pub fn to_raster_image(&self, caching_hint: impl Into<Option<CachingHint>>) -> Option<Image> {
         let caching_hint = caching_hint.into().unwrap_or(CachingHint::Disallow);
-        Image::from_ptr(unsafe { sb::C_SkImage_makeRasterImage(self.native(), caching_hint) })
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_makeRasterImage(self.native(), ptr::null_mut(), caching_hint)
+        })
     }
 
-    // TODO: rename to with_filter()?
+    /// Returns raster image. Copies [`Image`] backed by GPU texture into CPU memory,
+    /// or decodes [`Image`] from lazy image. Returns original [`Image`] if decoded in
+    /// raster bitmap.
+    ///
+    /// Returns `None` if copy, decode, or pixel read fails.
+    ///
+    /// If `caching_hint` is [`CachingHint::Allow`], pixels may be retained locally.
+    /// If `caching_hint` is [`CachingHint::Disallow`], pixels are not added to the local cache.
+    ///
+    /// Returns: raster image, or `None`
+    ///
+    /// example: <https://fiddle.skia.org/c/@Image_makeRasterImage>
+    pub fn make_raster_image<'a>(
+        &self,
+        context: impl Into<Option<&'a mut gpu::DirectContext>>,
+        caching_hint: impl Into<Option<CachingHint>>,
+    ) -> Option<Image> {
+        let caching_hint = caching_hint.into().unwrap_or(CachingHint::Disallow);
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_makeRasterImage(
+                self.native(),
+                context.into().native_ptr_or_null_mut(),
+                caching_hint,
+            )
+        })
+    }
+
     /// Creates filtered [`Image`]. filter processes original [`Image`], potentially changing
     /// color, position, and size. subset is the bounds of original [`Image`] processed
     /// by filter. `clip_bounds` is the expected bounds of the filtered [`Image`]. `out_subset`
@@ -1412,7 +1448,6 @@ impl Image {
     /// - `out_subset`    storage for returned [`Image`] bounds
     /// - `offset`       storage for returned [`Image`] translation
     /// Returns: filtered [`Image`], or `None`
-    #[cfg(feature = "gpu")]
     pub fn new_with_filter(
         &self,
         mut context: Option<&mut gpu::RecordingContext>,
@@ -1437,31 +1472,6 @@ impl Image {
         .map(|image| (image, out_subset, offset))
     }
 
-    // TODO: bad API design here: two different API surfaces depending on a feature.
-    #[cfg(not(feature = "gpu"))]
-    pub fn new_with_filter(
-        &self,
-        filter: &ImageFilter,
-        clip_bounds: impl Into<IRect>,
-        subset: impl Into<IRect>,
-    ) -> Option<(Image, IRect, IPoint)> {
-        let mut out_subset = IRect::default();
-        let mut offset = IPoint::default();
-
-        Image::from_ptr(unsafe {
-            sb::C_SkImage_makeWithFilter(
-                self.native(),
-                std::ptr::null_mut(),
-                filter.native(),
-                subset.into().native(),
-                clip_bounds.into().native(),
-                out_subset.native_mut(),
-                offset.native_mut(),
-            )
-        })
-        .map(|image| (image, out_subset, offset))
-    }
-
     // TODO: MakeBackendTextureFromSkImage()
 
     /// Returns `true` if [`Image`] is backed by an image-generator or other service that creates
@@ -1476,14 +1486,9 @@ impl Image {
     }
 
     /// See [`Self::new_color_space_with_context`]
+    #[deprecated(since = "0.0.0", note = "use make_color_space()")]
     pub fn new_color_space(&self, color_space: impl Into<Option<ColorSpace>>) -> Option<Image> {
-        Image::from_ptr(unsafe {
-            sb::C_SkImage_makeColorSpace(
-                self.native(),
-                color_space.into().into_ptr_or_null(),
-                ptr::null_mut(),
-            )
-        })
+        self.make_color_space(None, color_space)
     }
 
     /// Creates [`Image`] in target [`ColorSpace`].
@@ -1501,17 +1506,40 @@ impl Image {
     /// Returns: created [`Image`] in target [`ColorSpace`]
     ///
     /// example: <https://fiddle.skia.org/c/@Image_makeColorSpace>
-    #[cfg(feature = "gpu")]
+    #[deprecated(since = "0.0.0", note = "use make_color_space()")]
     pub fn new_color_space_with_context<'a>(
         &self,
         color_space: impl Into<Option<ColorSpace>>,
         direct: impl Into<Option<&'a mut gpu::DirectContext>>,
     ) -> Option<Image> {
+        self.make_color_space(direct, color_space)
+    }
+
+    /// Creates [`Image`] in target [`ColorSpace`].
+    /// Returns `None` if [`Image`] could not be created.
+    ///
+    /// Returns original [`Image`] if it is in target [`ColorSpace`].
+    /// Otherwise, converts pixels from [`Image`] [`ColorSpace`] to target [`ColorSpace`].
+    /// If [`Image`] `color_space()` returns `None`, [`Image`] [`ColorSpace`] is assumed to be `s_rgb`.
+    ///
+    /// If this image is texture-backed, the context parameter is required and must match the
+    /// context of the source image.
+    ///
+    /// - `direct`   The [`gpu::DirectContext`] in play, if it exists
+    /// - `target`   [`ColorSpace`] describing color range of returned [`Image`]
+    /// Returns: created [`Image`] in target [`ColorSpace`]
+    ///
+    /// example: <https://fiddle.skia.org/c/@Image_makeColorSpace>
+    pub fn make_color_space<'a>(
+        &self,
+        direct: impl Into<Option<&'a mut gpu::DirectContext>>,
+        color_space: impl Into<Option<ColorSpace>>,
+    ) -> Option<Image> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_makeColorSpace(
                 self.native(),
-                color_space.into().into_ptr_or_null(),
                 direct.into().native_ptr_or_null_mut(),
+                color_space.into().into_ptr_or_null(),
             )
         })
     }
