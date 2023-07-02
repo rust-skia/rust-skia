@@ -448,12 +448,20 @@ extern "C" SkImage* C_SkImages_TextureFromYUVATextures(
 }
 
 extern "C" GrBackendTexture* C_SkImages_GetBackendTextureFromImage(
-        const SkImage* self,
-        bool flushPendingGrContextIO,
-        GrSurfaceOrigin* origin)
+    const SkImage* self,
+    bool flushPendingGrContextIO,
+    GrSurfaceOrigin* origin)
 {
     auto texture = new GrBackendTexture();
     // TODO: Might need to check the return value, only the validity of the texture is checked by the caller.
     SkImages::GetBackendTextureFromImage(self, texture, flushPendingGrContextIO, origin);
     return texture;
+}
+
+extern "C" SkImage* C_SkImages_SubsetTextureFrom(
+    GrDirectContext* context,
+    const SkImage* image,
+    const SkIRect* subset) 
+{
+    return SkImages::SubsetTextureFrom(context, image, *subset).release();
 }

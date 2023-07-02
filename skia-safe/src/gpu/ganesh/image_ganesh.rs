@@ -1,12 +1,15 @@
-use crate::gpu::{BackendTexture, Budgeted, RecordingContext, YUVABackendTextures};
+use skia_bindings as sb;
+
 use crate::{
-    gpu::{DirectContext, Mipmapped, Protected, SurfaceOrigin},
-    AlphaType, Data, ISize, Image, TextureCompressionType,
+    gpu::{
+        BackendTexture, Budgeted, DirectContext, Mipmapped, Protected, RecordingContext,
+        SurfaceOrigin, YUVABackendTextures,
+    },
+    prelude::*,
+    AlphaType, ColorSpace, ColorType, Data, IRect, ISize, Image, Pixmap, TextureCompressionType,
 };
-use crate::{prelude::*, ColorSpace, ColorType, Pixmap};
 #[allow(unused)] // docs only
 use crate::{ImageInfo, Surface, YUVAInfo, YUVAPixmaps};
-use skia_bindings as sb;
 
 /// Creates GPU-backed [`Image`] from `backend_texture` associated with context.
 /// Skia will assume ownership of the resource and will release it when no longer needed.
@@ -280,3 +283,28 @@ pub fn get_backend_texture_from_image(
 
 // TODO: MakeBackendTextureFromImage
 // TODO: GetBackendTextureFromImage (legacy name)
+
+/// Returns subset of this image as a texture-backed image.
+///
+/// Returns `None` if any of the following are true:
+///   - Subset is empty
+///   - Subset is not contained inside the image's bounds
+///   - Pixels in the source image could not be read or copied
+///   - The source image is texture-backed and context does not match the source image's context.
+///
+/// * `context` - the [`DirectContext`] to which the subset should be uploaded.
+/// * `subset` - bounds of returned [`Image`]
+/// Returns: the subsetted image, uploaded as a texture, or `None`
+pub fn subset_texture_from(
+    context: &mut DirectContext,
+    image: &Image,
+    subset: impl AsRef<IRect>,
+) -> Option<Image> {
+    Image::from_ptr(unsafe {
+        sb::C_SkImages_SubsetTextureFrom(
+            context.native_mut(),
+            image.native(),
+            subset.as_ref().native(),
+        )
+    })
+}
