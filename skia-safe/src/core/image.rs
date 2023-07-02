@@ -15,14 +15,16 @@ pub use crate::TextureCompressionType as CompressionType;
 pub use images::BitDepth;
 
 pub mod images {
+    use std::{mem, ptr};
+
+    use skia_bindings as sb;
+
     #[allow(unused)] // doc only
     use crate::ColorType;
     use crate::{
         prelude::*, AlphaType, Bitmap, ColorSpace, Data, ISize, Image, ImageGenerator, ImageInfo,
         Matrix, Paint, Picture, SurfaceProps, TextureCompressionType,
     };
-    use skia_bindings as sb;
-    use std::{mem, ptr};
 
     /// Creates a CPU-backed [`Image`] from `bitmap`, sharing or copying `bitmap` pixels. If the bitmap
     /// is marked immutable, and its pixel memory is shareable, it may be shared

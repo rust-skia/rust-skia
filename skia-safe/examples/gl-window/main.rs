@@ -37,6 +37,12 @@ fn main() {
     feature = "gl"
 ))]
 fn main() {
+    use std::{
+        ffi::CString,
+        num::NonZeroU32,
+        time::{Duration, Instant},
+    };
+
     use gl::types::*;
     use gl_rs as gl;
     use glutin::{
@@ -51,22 +57,14 @@ fn main() {
     };
     use glutin_winit::DisplayBuilder;
     use raw_window_handle::HasRawWindowHandle;
-
-    use std::{
-        ffi::CString,
-        num::NonZeroU32,
-        time::{Duration, Instant},
+    use skia_safe::{
+        gpu::{self, gl::FramebufferInfo, BackendRenderTarget, SurfaceOrigin},
+        Color, ColorType, Surface,
     };
-
     use winit::{
         event::{Event, KeyboardInput, VirtualKeyCode, WindowEvent},
         event_loop::{ControlFlow, EventLoop},
         window::{Window, WindowBuilder},
-    };
-
-    use skia_safe::{
-        gpu::{gl::FramebufferInfo, BackendRenderTarget, SurfaceOrigin},
-        Color, ColorType, Surface,
     };
 
     let el = EventLoop::new();
@@ -190,7 +188,7 @@ fn main() {
         let backend_render_target =
             BackendRenderTarget::new_gl(size, num_samples, stencil_size, fb_info);
 
-        Surface::from_backend_render_target(
+        gpu::surfaces::wrap_backend_render_target(
             gr_context,
             &backend_render_target,
             SurfaceOrigin::BottomLeft,

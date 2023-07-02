@@ -26,6 +26,7 @@ pub use context_options::ContextOptions;
 pub use direct_context::*;
 pub use driver_bug_workarounds::DriverBugWorkarounds;
 pub use ganesh::image_ganesh as images;
+pub use ganesh::surface_ganesh as surfaces;
 pub use gpu_types::*;
 pub use mutable_texture_state::*;
 pub use recording_context::*;

@@ -4,6 +4,7 @@
 #include "include/gpu/GrBackendDrawableInfo.h"
 #include "include/gpu/GrYUVABackendTextures.h"
 #include "include/gpu/ganesh/SkImageGanesh.h"
+#include "include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkDrawable.h"
 #include "include/core/SkPicture.h"
@@ -14,80 +15,6 @@
 //
 // core/SkSurface.h
 //
-
-extern "C" SkSurface* C_SkSurface_MakeFromBackendTexture(
-        GrRecordingContext* context,
-        const GrBackendTexture* backendTexture,
-        GrSurfaceOrigin origin,
-        int sampleCnt,
-        SkColorType colorType,
-        SkColorSpace* colorSpace,
-        const SkSurfaceProps* surfaceProps) {
-    return SkSurface::MakeFromBackendTexture(
-            context,
-            *backendTexture,
-            origin,
-            sampleCnt,
-            colorType,
-            sp(colorSpace), surfaceProps).release();
-}
-
-extern "C" SkSurface* C_SkSurface_MakeFromBackendRenderTarget(
-        GrRecordingContext* context,
-        const GrBackendRenderTarget* backendRenderTarget,
-        GrSurfaceOrigin origin,
-        SkColorType colorType,
-        SkColorSpace* colorSpace,
-        const SkSurfaceProps* surfaceProps
-        ) {
-    return SkSurface::MakeFromBackendRenderTarget(
-            context,
-            *backendRenderTarget,
-            origin,
-            colorType,
-            sp(colorSpace),
-            surfaceProps).release();
-}
-
-extern "C" SkSurface* C_SkSurface_MakeRenderTarget(
-    GrRecordingContext* context,
-    skgpu::Budgeted budgeted,
-    const SkImageInfo* imageInfo,
-    int sampleCount, GrSurfaceOrigin surfaceOrigin,
-    const SkSurfaceProps* surfaceProps,
-    bool shouldCreateWithMips) {
-    return SkSurface::MakeRenderTarget(
-            context,
-            budgeted,
-            *imageInfo,
-            sampleCount,
-            surfaceOrigin,
-            surfaceProps,
-            shouldCreateWithMips).release();
-}
-
-extern "C" SkSurface* C_SkSurface_MakeRenderTarget2(
-        GrRecordingContext* context,
-        const SkSurfaceCharacterization& characterization,
-        skgpu::Budgeted budgeted) {
-    return SkSurface::MakeRenderTarget(
-            context,
-            characterization,
-            budgeted).release();
-}
-
-extern "C" GrBackendTexture* C_SkSurface_getBackendTexture(
-        SkSurface* self,
-        SkSurface::BackendHandleAccess handleAccess) {
-    return new GrBackendTexture(self->getBackendTexture(handleAccess));
-}
-
-extern "C" void C_SkSurface_getBackendRenderTarget(
-        SkSurface* self,
-        SkSurface::BackendHandleAccess handleAccess,
-        GrBackendRenderTarget *backendRenderTarget) {
-    *backendRenderTarget = self->getBackendRenderTarget(handleAccess);
-}
 
 extern "C" bool C_SkSurface_replaceBackendTexture(
         SkSurface* self,
@@ -464,4 +391,86 @@ extern "C" SkImage* C_SkImages_SubsetTextureFrom(
     const SkIRect* subset) 
 {
     return SkImages::SubsetTextureFrom(context, image, *subset).release();
+}
+
+//
+// gpu/ganesh/SkSurfaceGanesh.h
+//
+
+extern "C" SkSurface* C_SkSurfaces_RenderTarget(
+    GrRecordingContext* context,
+    skgpu::Budgeted budgeted,
+    const SkImageInfo* imageInfo,
+    int sampleCount, GrSurfaceOrigin surfaceOrigin,
+    const SkSurfaceProps* surfaceProps,
+    bool shouldCreateWithMips) {
+    return SkSurfaces::RenderTarget(
+            context,
+            budgeted,
+            *imageInfo,
+            sampleCount,
+            surfaceOrigin,
+            surfaceProps,
+            shouldCreateWithMips).release();
+}
+
+extern "C" SkSurface* C_SkSurfaces_RenderTarget2(
+    GrRecordingContext* context,
+    const SkSurfaceCharacterization& characterization,
+    skgpu::Budgeted budgeted) 
+{
+    return SkSurfaces::RenderTarget(
+            context,
+            characterization,
+            budgeted).release();
+}
+
+extern "C" SkSurface* C_SkSurfaces_WrapBackendTexture(
+        GrRecordingContext* context,
+        const GrBackendTexture* backendTexture,
+        GrSurfaceOrigin origin,
+        int sampleCnt,
+        SkColorType colorType,
+        SkColorSpace* colorSpace,
+        const SkSurfaceProps* surfaceProps) {
+    return SkSurfaces::WrapBackendTexture(
+            context,
+            *backendTexture,
+            origin,
+            sampleCnt,
+            colorType,
+            sp(colorSpace), surfaceProps).release();
+}
+
+extern "C" SkSurface* C_SkSurfaces_WrapBackendRenderTarget(
+    GrRecordingContext* context,
+    const GrBackendRenderTarget* backendRenderTarget,
+    GrSurfaceOrigin origin,
+    SkColorType colorType,
+    SkColorSpace* colorSpace,
+    const SkSurfaceProps* surfaceProps
+    )
+{
+    return SkSurfaces::WrapBackendRenderTarget(
+            context,
+            *backendRenderTarget,
+            origin,
+            colorType,
+            sp(colorSpace),
+            surfaceProps).release();
+}
+
+extern "C" GrBackendTexture* C_SkSurfaces_GetBackendTexture(
+    SkSurface* self,
+    SkSurface::BackendHandleAccess handleAccess) 
+{
+    return new GrBackendTexture(self->getBackendTexture(handleAccess));
+}
+
+extern "C" void C_SkSurfaces_GetBackendRenderTarget(
+    SkSurface* self,
+    SkSurface::BackendHandleAccess handleAccess,
+    GrBackendRenderTarget *backendRenderTarget) 
+{
+    *backendRenderTarget = self->getBackendRenderTarget(handleAccess);
 }

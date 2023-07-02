@@ -266,6 +266,7 @@ impl Surface {
     /// * `surface_props` - LCD striping orientation and setting for device independent
     ///                            fonts; may be `None`
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
+    #[deprecated(since = "0.0.0", note = "use gpu::surfaces::wrap_backend_texture()")]
     pub fn from_backend_texture(
         context: &mut gpu::RecordingContext,
         backend_texture: &gpu::BackendTexture,
@@ -275,17 +276,15 @@ impl Surface {
         color_space: impl Into<Option<crate::ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            sb::C_SkSurface_MakeFromBackendTexture(
-                context.native_mut(),
-                backend_texture.native(),
-                origin,
-                sample_cnt.into().unwrap_or(0).try_into().unwrap(),
-                color_type.into_native(),
-                color_space.into().into_ptr_or_null(),
-                surface_props.native_ptr_or_null(),
-            )
-        })
+        gpu::surfaces::wrap_backend_texture(
+            context,
+            backend_texture,
+            origin,
+            sample_cnt,
+            color_type,
+            color_space,
+            surface_props,
+        )
     }
 
     /// Wraps a GPU-backed buffer into [`Surface`]. Caller must ensure `backend_render_target`
@@ -304,6 +303,10 @@ impl Surface {
     /// * `surface_props` - LCD striping orientation and setting for device independent
     ///                                 fonts; may be `None`
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
+    #[deprecated(
+        since = "0.0.0",
+        note = "use gpu::surfaces::wrap_backend_render_target()"
+    )]
     pub fn from_backend_render_target(
         context: &mut gpu::RecordingContext,
         backend_render_target: &gpu::BackendRenderTarget,
@@ -312,16 +315,14 @@ impl Surface {
         color_space: impl Into<Option<crate::ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            sb::C_SkSurface_MakeFromBackendRenderTarget(
-                context.native_mut(),
-                backend_render_target.native(),
-                origin,
-                color_type.into_native(),
-                color_space.into().into_ptr_or_null(),
-                surface_props.native_ptr_or_null(),
-            )
-        })
+        gpu::surfaces::wrap_backend_render_target(
+            context,
+            backend_render_target,
+            origin,
+            color_type,
+            color_space,
+            surface_props,
+        )
     }
 
     /// Returns [`Surface`] on GPU indicated by context. Allocates memory for
@@ -347,6 +348,7 @@ impl Surface {
     ///                              fonts; may be `None`
     /// * `should_create_with_mips` - hint that [`Surface`] will host mip map images
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
+    #[deprecated(since = "0.0.0", note = "use gpu::surfaces::render_target()")]
     pub fn new_render_target(
         context: &mut gpu::RecordingContext,
         budgeted: gpu::Budgeted,
@@ -356,19 +358,15 @@ impl Surface {
         surface_props: Option<&SurfaceProps>,
         should_create_with_mips: impl Into<Option<bool>>,
     ) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            sb::C_SkSurface_MakeRenderTarget(
-                context.native_mut(),
-                budgeted.into_native(),
-                image_info.native(),
-                sample_count.into().unwrap_or(0).try_into().unwrap(),
-                surface_origin
-                    .into()
-                    .unwrap_or(gpu::SurfaceOrigin::BottomLeft),
-                surface_props.native_ptr_or_null(),
-                should_create_with_mips.into().unwrap_or_default(),
-            )
-        })
+        gpu::surfaces::render_target(
+            context,
+            budgeted,
+            image_info,
+            sample_count,
+            surface_origin,
+            surface_props,
+            should_create_with_mips,
+        )
     }
 
     /// Returns [`Surface`] on GPU indicated by context that is compatible with the provided
@@ -377,18 +375,16 @@ impl Surface {
     /// * `context` - GPU context
     /// * `characterization` - description of the desired [`Surface`]
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
+    #[deprecated(
+        since = "0.0.0",
+        note = "use gpu::surfaces::render_target_with_characterization()"
+    )]
     pub fn new_render_target_with_characterization(
         context: &mut gpu::RecordingContext,
         characterization: &SurfaceCharacterization,
         budgeted: gpu::Budgeted,
     ) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            sb::C_SkSurface_MakeRenderTarget2(
-                context.native_mut(),
-                characterization.native(),
-                budgeted.into_native(),
-            )
-        })
+        gpu::surfaces::render_target_with_characterization(context, characterization, budgeted)
     }
 
     /// Creates [`Surface`] from CAMetalLayer.
@@ -599,14 +595,12 @@ impl Surface {
     /// The returned [`gpu::BackendTexture`] should be discarded if the [`Surface`] is drawn to or deleted.
     ///
     /// Returns: GPU texture reference; `None` on failure
+    #[deprecated(since = "0.0.0", note = "use gpu::surfaces::get_backend_texture()")]
     pub fn get_backend_texture(
         &mut self,
         handle_access: BackendHandleAccess,
     ) -> Option<gpu::BackendTexture> {
-        unsafe {
-            let ptr = sb::C_SkSurface_getBackendTexture(self.native_mut(), handle_access);
-            gpu::BackendTexture::from_native_if_valid(ptr)
-        }
+        gpu::surfaces::get_backend_texture(self, handle_access)
     }
 
     /// Retrieves the back-end render target. If [`Surface`] has no back-end render target, `None`
@@ -616,21 +610,15 @@ impl Surface {
     /// or deleted.
     ///
     /// Returns: GPU render target reference; `None` on failure
+    #[deprecated(
+        since = "0.0.0",
+        note = "use gpu::surfaces::get_backend_render_target()"
+    )]
     pub fn get_backend_render_target(
         &mut self,
         handle_access: BackendHandleAccess,
     ) -> Option<gpu::BackendRenderTarget> {
-        unsafe {
-            let mut backend_render_target =
-                construct(|rt| sb::C_GrBackendRenderTarget_Construct(rt));
-            sb::C_SkSurface_getBackendRenderTarget(
-                self.native_mut(),
-                handle_access,
-                &mut backend_render_target,
-            );
-
-            gpu::BackendRenderTarget::from_native_c_if_valid(backend_render_target)
-        }
+        gpu::surfaces::get_backend_render_target(self, handle_access)
     }
 
     // TODO: support variant with TextureReleaseProc and ReleaseContext
