@@ -1,3 +1,7 @@
+use std::fmt;
+
+use skia_bindings as sb;
+
 use super::{FontFamilies, TextAlign, TextDirection, TextStyle};
 use crate::{
     interop::{self, AsStr, FromStrs, SetStr},
@@ -5,8 +9,6 @@ use crate::{
     prelude::*,
     scalar, FontStyle,
 };
-use skia_bindings as sb;
-use std::fmt;
 
 pub type StrutStyle = Handle<sb::skia_textlayout_StrutStyle>;
 unsafe_send_sync!(StrutStyle);

@@ -70,9 +70,12 @@ impl ParagraphBuilder {
         }
     }
 
-    // pub fn get_paragraph_style(&self) -> &ParagraphStyle {
-    //     ParagraphStyle::from_native_ref(&self.native().fParagraphStyle)
-    // }
+    pub fn get_paragraph_style(&self) -> ParagraphStyle {
+        ParagraphStyle::from_ptr(unsafe { sb::C_ParagraphBuilder_getParagraphStyle(self.native()) })
+            .unwrap()
+    }
+
+    // TODO: Wrap SetWords*, SetGraphemeBreaks*, setLineBreaks*, setUnicode.
 
     pub fn reset(&mut self) {
         unsafe { sb::C_ParagraphBuilder_Reset(self.native_mut()) }

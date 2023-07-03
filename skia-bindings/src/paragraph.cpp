@@ -362,6 +362,10 @@ extern "C" {
         *len = span.size();
     }
 
+    ParagraphStyle* C_ParagraphBuilder_getParagraphStyle(const ParagraphBuilder* self) {
+        return new ParagraphStyle(self->getParagraphStyle());
+    }
+
     void C_ParagraphBuilder_Reset(ParagraphBuilder* self) {
         return self->Reset();
     }
@@ -407,18 +411,16 @@ extern "C" {
         new (uninitialized) SkPaint(self->getForeground());
     }
 
-    void C_TextStyle_setForegroundColor(TextStyle* self, const SkPaint* paint) {
-        SkPaint copy(*paint);
-        self->setForegroundColor(copy);
+    void C_TextStyle_setForegroundPaint(TextStyle* self, const SkPaint* paint) {
+        self->setForegroundPaint(*paint);
     }
 
     void C_TextStyle_getBackground(const TextStyle* self, SkPaint* uninitialized) {
         new (uninitialized) SkPaint(self->getBackground());
     }
 
-    void C_TextStyle_setBackgroundColor(TextStyle* self, const SkPaint* paint) {
-        SkPaint copy(*paint);
-        self->setBackgroundColor(copy);
+    void C_TextStyle_setBackgroundPaint(TextStyle* self, const SkPaint* paint) {
+        self->setBackgroundColor(*paint);
     }
 
     const TextShadow* C_TextStyle_getShadows(const std::vector<TextShadow>* self, size_t* len_ref) {

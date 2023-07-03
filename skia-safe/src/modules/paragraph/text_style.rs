@@ -299,9 +299,14 @@ impl TextStyle {
         Paint::construct(|p| unsafe { sb::C_TextStyle_getForeground(self.native(), p) })
     }
 
-    pub fn set_foreground_color(&mut self, paint: &Paint) -> &mut Self {
-        unsafe { sb::C_TextStyle_setForegroundColor(self.native_mut(), paint.native()) };
+    pub fn set_foreground_paint(&mut self, paint: &Paint) -> &mut Self {
+        unsafe { sb::C_TextStyle_setForegroundPaint(self.native_mut(), paint.native()) };
         self
+    }
+
+    #[deprecated(since = "0.0.0", note = "use set_foreground_paint()")]
+    pub fn set_foreground_color(&mut self, paint: &Paint) -> &mut Self {
+        self.set_foreground_paint(paint)
     }
 
     pub fn clear_foreground_color(&mut self) -> &mut Self {
@@ -313,9 +318,14 @@ impl TextStyle {
         Paint::construct(|p| unsafe { sb::C_TextStyle_getBackground(self.native(), p) })
     }
 
-    pub fn set_background_color(&mut self, paint: &Paint) -> &mut Self {
-        unsafe { sb::C_TextStyle_setBackgroundColor(self.native_mut(), paint.native()) };
+    pub fn set_background_paint(&mut self, paint: &Paint) -> &mut Self {
+        unsafe { sb::C_TextStyle_setBackgroundPaint(self.native_mut(), paint.native()) };
         self
+    }
+
+    #[deprecated(since = "0.0.0", note = "use set_background_paint()")]
+    pub fn set_background_color(&mut self, paint: &Paint) -> &mut Self {
+        self.set_background_paint(paint)
     }
 
     pub fn clear_background_color(&mut self) -> &mut Self {
