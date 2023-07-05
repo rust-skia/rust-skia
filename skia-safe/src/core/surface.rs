@@ -621,9 +621,9 @@ impl Surface {
     /// Returns: drawing [`Canvas`] for [`Surface`]
     ///
     /// example: <https://fiddle.skia.org/c/@Surface_getCanvas>
-    pub fn canvas(&mut self) -> &mut Canvas {
-        let canvas_ref = unsafe { &mut *self.native_mut().getCanvas() };
-        Canvas::borrow_from_native_mut(canvas_ref)
+    pub fn canvas(&mut self) -> &Canvas {
+        let canvas_ref = unsafe { &*self.native_mut().getCanvas() };
+        Canvas::borrow_from_native(canvas_ref)
     }
 
     // TODO: capabilities()
@@ -702,7 +702,7 @@ impl Surface {
     /// example: <https://fiddle.skia.org/c/@Surface_draw>
     pub fn draw(
         &mut self,
-        canvas: &mut Canvas,
+        canvas: &Canvas,
         offset: impl Into<Point>,
         sampling: impl Into<SamplingOptions>,
         paint: Option<&Paint>,
@@ -960,11 +960,11 @@ mod tests {
         let mut surface = surfaces::raster_n32_premul((16, 16)).unwrap();
 
         // option1:
-        // - An &mut canvas can be drawn to.
+        // - An &canvas can be drawn to.
         {
-            let mut canvas = Canvas::new(ISize::new(16, 16), None).unwrap();
-            surface.draw(&mut canvas, (5.0, 5.0), SamplingOptions::default(), None);
-            surface.draw(&mut canvas, (10.0, 10.0), SamplingOptions::default(), None);
+            let canvas = Canvas::new(ISize::new(16, 16), None).unwrap();
+            surface.draw(&canvas, (5.0, 5.0), SamplingOptions::default(), None);
+            surface.draw(&canvas, (10.0, 10.0), SamplingOptions::default(), None);
         }
 
         // option2:

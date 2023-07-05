@@ -18,10 +18,10 @@ impl DrawingDriver for RenderSvg {
         size @ (width, height): (i32, i32),
         path: &Path,
         name: &str,
-        draw: impl Fn(&mut Canvas),
+        draw: impl Fn(&Canvas),
     ) {
-        let mut canvas = svg::Canvas::new(Rect::from_size(size), None);
-        draw(&mut canvas);
+        let canvas = svg::Canvas::new(Rect::from_size(size), None);
+        draw(&canvas);
         let data = canvas.end();
         let svg = data.as_bytes();
 

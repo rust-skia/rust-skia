@@ -1,11 +1,8 @@
-use crate::{interop::DynamicMemoryWStream, prelude::*, Data, Rect};
+use std::{fmt, ops::Deref, pin::Pin, ptr};
+
 use skia_bindings::{self as sb, SkCanvas};
-use std::{
-    fmt,
-    ops::{Deref, DerefMut},
-    pin::Pin,
-    ptr,
-};
+
+use crate::{interop::DynamicMemoryWStream, prelude::*, Data, Rect};
 
 pub struct Canvas {
     canvas: *mut SkCanvas,
@@ -25,12 +22,6 @@ impl Deref for Canvas {
 
     fn deref(&self) -> &Self::Target {
         crate::Canvas::borrow_from_native(unsafe { &*self.canvas })
-    }
-}
-
-impl DerefMut for Canvas {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        crate::Canvas::borrow_from_native_mut(unsafe { &mut *self.canvas })
     }
 }
 
@@ -94,7 +85,7 @@ mod tests {
     fn test_svg() {
         use crate::Paint;
 
-        let mut canvas = Canvas::new(Rect::from_size((20, 20)), None);
+        let canvas = Canvas::new(Rect::from_size((20, 20)), None);
         let paint = Paint::default();
         canvas.draw_circle((10, 10), 10.0, &paint);
         let data = canvas.end();
@@ -107,7 +98,7 @@ mod tests {
     #[test]
     fn test_svg_without_ending() {
         use crate::Paint;
-        let mut canvas = Canvas::new(Rect::from_size((20, 20)), None);
+        let canvas = Canvas::new(Rect::from_size((20, 20)), None);
         let paint = Paint::default();
         canvas.draw_circle((10, 10), 10.0, &paint);
     }

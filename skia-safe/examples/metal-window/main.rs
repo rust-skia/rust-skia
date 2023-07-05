@@ -127,7 +127,7 @@ fn main() {
 
 /// Renders a rectangle that occupies exactly half of the canvas
 #[cfg(all(target_os = "macos", feature = "metal"))]
-fn draw(canvas: &mut Canvas) {
+fn draw(canvas: &Canvas) {
     let canvas_size = Size::from(canvas.base_layer_size());
 
     canvas.clear(Color4f::new(1.0, 1.0, 1.0, 1.0));

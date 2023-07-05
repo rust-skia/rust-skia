@@ -10,7 +10,7 @@ pub fn draw(driver: &mut impl DrawingDriver, path: &path::Path) {
     driver.draw_image_256(&path, "lorem-ipsum", draw_lorem_ipsum);
 }
 
-fn draw_lorem_ipsum(canvas: &mut Canvas) {
+fn draw_lorem_ipsum(canvas: &Canvas) {
     let mut font_collection = FontCollection::new();
     font_collection.set_default_font_manager(FontMgr::new(), None);
     let paragraph_style = ParagraphStyle::new();

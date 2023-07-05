@@ -33,14 +33,14 @@ impl fmt::Debug for Drawable {
 }
 
 impl Drawable {
-    pub fn draw(&mut self, canvas: &mut Canvas, matrix: Option<&Matrix>) {
+    pub fn draw(&mut self, canvas: &Canvas, matrix: Option<&Matrix>) {
         unsafe {
             self.native_mut()
                 .draw(canvas.native_mut(), matrix.native_ptr_or_null())
         }
     }
 
-    pub fn draw_at(&mut self, canvas: &mut Canvas, point: impl Into<Point>) {
+    pub fn draw_at(&mut self, canvas: &Canvas, point: impl Into<Point>) {
         let point = point.into();
         unsafe {
             self.native_mut()

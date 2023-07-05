@@ -11,7 +11,7 @@ pub fn draw(driver: &mut impl DrawingDriver, path: &path::Path) {
     driver.draw_image_256(&path, "hello-skia", draw_hello_skia);
 }
 
-fn draw_heptagram(canvas: &mut Canvas) {
+fn draw_heptagram(canvas: &Canvas) {
     const SCALE: scalar = 256.0;
     const R: scalar = 0.45 * SCALE;
     #[allow(clippy::excessive_precision)]
@@ -32,7 +32,7 @@ fn draw_heptagram(canvas: &mut Canvas) {
         .draw_path(&path, &p);
 }
 
-fn draw_rotated_rectangle(canvas: &mut Canvas) {
+fn draw_rotated_rectangle(canvas: &Canvas) {
     canvas.save();
     canvas.translate((128.0, 128.0)).rotate(45.0, None);
     let rect = Rect::from_point_and_size((-90.5, -90.5), (181.0, 181.0));
@@ -42,7 +42,7 @@ fn draw_rotated_rectangle(canvas: &mut Canvas) {
     canvas.restore();
 }
 
-fn draw_hello_skia(canvas: &mut Canvas) {
+fn draw_hello_skia(canvas: &Canvas) {
     let image = resources::color_wheel();
 
     canvas.draw_color(Color::WHITE, BlendMode::default());

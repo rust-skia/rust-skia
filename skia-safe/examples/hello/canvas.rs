@@ -101,7 +101,7 @@ impl Canvas {
     }
 
     #[inline]
-    fn canvas(&mut self) -> &mut skia_safe::Canvas {
+    fn canvas(&mut self) -> &skia_safe::Canvas {
         self.surface.canvas()
     }
 }

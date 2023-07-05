@@ -180,7 +180,7 @@ impl Dom {
         Self::from_ptr(out).ok_or(LoadError)
     }
 
-    pub fn render(&self, canvas: &mut Canvas) {
+    pub fn render(&self, canvas: &Canvas) {
         // TODO: may be we should init ICU whenever we expose a Canvas?
         #[cfg(all(feature = "embed-icudtl", feature = "textlayout"))]
         crate::icu::init();
@@ -266,8 +266,8 @@ mod tests {
             <path d="M31,3h38l28,28v38l-28,28h-38l-28-28v-38z" fill="#a23"/>
             <text x="50" y="68" font-size="48" fill="#FFF" text-anchor="middle"><![CDATA[410]]></text>
             </svg>"##;
-        let mut canvas = Canvas::new((256, 256), None).unwrap();
+        let canvas = Canvas::new((256, 256), None).unwrap();
         let dom = str::parse::<Dom>(svg).unwrap();
-        dom.render(&mut canvas)
+        dom.render(&canvas)
     }
 }

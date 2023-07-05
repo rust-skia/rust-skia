@@ -23,7 +23,7 @@ pub fn render_frame(
     frame: usize,
     fps: usize,
     bpm: usize,
-    canvas: &mut skia_safe::canvas::Canvas,
+    canvas: &skia_safe::canvas::Canvas,
 ) -> usize {
     let step = 12.0 * bpm as f32 / 60.0 / fps as f32;
     let frame_count = (360.0 / step) as usize;
@@ -119,7 +119,7 @@ pub fn render_frame(
 }
 
 fn chain_ring(
-    canvas: &mut skia_safe::canvas::Canvas,
+    canvas: &skia_safe::canvas::Canvas,
     center: (i32, i32),
     radius: i32,
     rotation: f32,
@@ -253,7 +253,7 @@ fn chain_ring(
 
 #[allow(clippy::many_single_char_names)]
 fn triangle(
-    canvas: &mut skia_safe::canvas::Canvas,
+    canvas: &skia_safe::canvas::Canvas,
     center: (i32, i32),
     radius: i32,
     degrees: f32,

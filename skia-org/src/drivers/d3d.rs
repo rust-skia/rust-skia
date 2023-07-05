@@ -71,7 +71,7 @@ impl DrawingDriver for D3D {
         (width, height): (i32, i32),
         path: &Path,
         name: &str,
-        func: impl Fn(&mut Canvas),
+        func: impl Fn(&Canvas),
     ) {
         let image_info = ImageInfo::new_n32_premul((width * 2, height * 2), None);
         let mut surface = gpu::surfaces::render_target(
@@ -88,7 +88,7 @@ impl DrawingDriver for D3D {
         artifact::draw_image_on_surface(&mut surface, path, name, func);
     }
 
-    fn draw_image_256(&mut self, path: &Path, name: &str, func: impl Fn(&mut Canvas)) {
+    fn draw_image_256(&mut self, path: &Path, name: &str, func: impl Fn(&Canvas)) {
         self.draw_image((256, 256), path, name, func)
     }
 }

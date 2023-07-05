@@ -157,7 +157,7 @@ impl RefHandle<Sk3DView> {
         m
     }
 
-    pub fn apply_to_canvas(&self, canvas: &mut Canvas) -> &Self {
+    pub fn apply_to_canvas(&self, canvas: &Canvas) -> &Self {
         unsafe { self.native().applyToCanvas(canvas.native_mut()) }
         self
     }
@@ -173,10 +173,10 @@ fn test_canvas_passing_syntax() {
     use crate::utils::new_null_canvas;
     use crate::Surface;
 
-    let mut null_canvas = new_null_canvas();
+    let null_canvas = new_null_canvas();
     let view = View3D::default();
     // as mutable reference
-    view.apply_to_canvas(&mut null_canvas);
+    view.apply_to_canvas(&null_canvas);
 
     // and one with a mutable reference to a shared Canvas:
     let mut surface = Surface::new_raster_n32_premul((100, 100)).unwrap();

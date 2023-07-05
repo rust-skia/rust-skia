@@ -11,13 +11,7 @@ impl DrawingDriver for Pdf {
         Self
     }
 
-    fn draw_image(
-        &mut self,
-        size: (i32, i32),
-        path: &Path,
-        name: &str,
-        func: impl Fn(&mut Canvas),
-    ) {
+    fn draw_image(&mut self, size: (i32, i32), path: &Path, name: &str, func: impl Fn(&Canvas)) {
         let mut document = skia_safe::pdf::new_document(None).begin_page(size, None);
         func(document.canvas());
         let data = document.end_page().close();

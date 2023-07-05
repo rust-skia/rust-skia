@@ -123,8 +123,8 @@ impl Document<state::OnPage> {
     }
 
     /// Borrows the canvas for the current page on the document.
-    pub fn canvas(&mut self) -> &mut Canvas {
-        Canvas::borrow_from_native_mut(unsafe { self.state.canvas.as_mut() })
+    pub fn canvas(&mut self) -> &Canvas {
+        Canvas::borrow_from_native(unsafe { self.state.canvas.as_ref() })
     }
 
     /// Ends the page.

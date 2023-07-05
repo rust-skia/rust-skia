@@ -51,7 +51,7 @@ impl DrawingDriver for Metal {
         (width, height): (i32, i32),
         path: &Path,
         name: &str,
-        func: impl Fn(&mut Canvas),
+        func: impl Fn(&Canvas),
     ) {
         let _image_pool = AutoreleasePool::new();
 
