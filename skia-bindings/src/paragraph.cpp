@@ -142,7 +142,7 @@ extern "C" {
     void C_StrutStyle_CopyConstruct(StrutStyle* uninitialized, const StrutStyle* other) {
         new(uninitialized) StrutStyle(*other);
     }
-    
+
     void C_StrutStyle_destruct(StrutStyle* self) {
         self->~StrutStyle();
     }
@@ -163,11 +163,11 @@ extern "C" {
 }
 
 extern "C" {
-    ParagraphStyle* C_ParagraphStyle_New() {
+    ParagraphStyle* C_ParagraphStyle_new() {
         return new ParagraphStyle();
     }
 
-    ParagraphStyle* C_ParagraphStyle_NewCopy(const ParagraphStyle* other) {
+    ParagraphStyle* C_ParagraphStyle_newCopy(const ParagraphStyle* other) {
         return new ParagraphStyle(*other);
     }
 

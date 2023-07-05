@@ -173,7 +173,7 @@ extern "C" void C_GrBackendFormat_ConstructGL(GrBackendFormat* uninitialized, Gr
     new(uninitialized)GrBackendFormat(GrBackendFormat::MakeGL(format, target));
 }
 
-extern "C" GrBackendTexture* C_GrBackendTexture_NewGL(
+extern "C" GrBackendTexture* C_GrBackendTexture_newGL(
     int width, int height,
     GrMipMapped mipMapped,
     const GrGLTextureInfo* glInfo,

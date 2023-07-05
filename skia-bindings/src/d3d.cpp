@@ -29,7 +29,7 @@ extern "C" void C_GrBackendFormat_ConstructDxgi(GrBackendFormat* uninitialized, 
     new(uninitialized)GrBackendFormat(GrBackendFormat::MakeDxgi(format));
 }
 
-extern "C" GrBackendTexture* C_GrBackendTexture_NewD3D(
+extern "C" GrBackendTexture* C_GrBackendTexture_newD3D(
     int width, int height,
     const GrD3DTextureResourceInfo* resourceInfo, 
     const char* label,

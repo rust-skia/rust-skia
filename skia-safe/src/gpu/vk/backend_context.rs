@@ -40,7 +40,7 @@ pub struct BackendContext<'a> {
 
 impl<'a> Drop for BackendContext<'a> {
     fn drop(&mut self) {
-        unsafe { sb::C_GrVkBackendContext_Delete(self.native.as_ptr()) }
+        unsafe { sb::C_GrVkBackendContext_delete(self.native.as_ptr()) }
     }
 }
 
@@ -106,7 +106,7 @@ impl BackendContext<'_> {
             device_extensions.iter().map(|cs| cs.as_ptr()).collect();
 
         let resolver = Self::begin_resolving_proc(get_proc);
-        let native = sb::C_GrVkBackendContext_New(
+        let native = sb::C_GrVkBackendContext_new(
             instance as _,
             physical_device as _,
             device as _,

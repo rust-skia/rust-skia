@@ -96,7 +96,7 @@ extern "C" void C_GrBackendFormat_ConstructMtl(GrBackendFormat* uninitialized, G
 }
 
 
-extern "C" GrBackendTexture* C_GrBackendTexture_NewMtl(
+extern "C" GrBackendTexture* C_GrBackendTexture_newMtl(
     int width, int height,
     GrMipMapped mipMapped,
     const GrMtlTextureInfo* mtlInfo,

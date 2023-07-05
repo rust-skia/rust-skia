@@ -1,5 +1,10 @@
 //! Tests for the various image encoder and decoders skia-safe supports by default.
-use skia_safe::{codec, Bitmap, Data, EncodedImageFormat};
+use std::io;
+
+use skia_safe::{
+    codec::{self, Decoder},
+    Bitmap, Data, EncodedImageFormat,
+};
 
 /// The supported encoders.
 const STANDARD_ENCODERS: &[EncodedImageFormat] =
@@ -51,7 +56,8 @@ fn test_supported_encoders() {
 fn test_supported_decoders() {
     let supported: Vec<EncodedImageFormat> = DECODER_TESTS
         .iter()
-        .filter(|(format, bytes)| {
+        .filter(|(format, test_decoder, bytes)| {
+            test_decoder(bytes);
             let data = Data::new_copy(bytes);
             if let Some(codec) = codec::Codec::from_data(data) {
                 codec.encoded_format() == *format
@@ -59,46 +65,65 @@ fn test_supported_decoders() {
                 false
             }
         })
-        .map(|(format, _bytes)| *format)
+        .map(|(format, ..)| *format)
         .collect();
 
     assert_eq!(supported, supported_decoders());
 }
 
-type DecoderTest = (EncodedImageFormat, &'static [u8]);
+type DecoderTest = (EncodedImageFormat, fn(bytes: &[u8]), &'static [u8]);
 
 // image files copied from skia/resources/images
 const DECODER_TESTS: &[DecoderTest] = &[
     (
         EncodedImageFormat::BMP,
+        test_decoder::<codec::BmpDecoder>,
         include_bytes!("images/randPixels.bmp"),
     ),
-    (EncodedImageFormat::GIF, include_bytes!("images/box.gif")),
+    (
+        EncodedImageFormat::GIF,
+        test_decoder::<codec::GifDecoder>,
+        include_bytes!("images/box.gif"),
+    ),
     (
         EncodedImageFormat::ICO,
+        test_decoder::<codec::IcoDecoder>,
         include_bytes!("images/color_wheel.ico"),
     ),
     (
         EncodedImageFormat::JPEG,
+        test_decoder::<codec::JpegDecoder>,
         include_bytes!("images/color_wheel.jpg"),
     ),
     (
         EncodedImageFormat::PNG,
+        test_decoder::<codec::PngDecoder>,
         include_bytes!("images/mandrill_16.png"),
     ),
     (
         EncodedImageFormat::WBMP,
+        test_decoder::<codec::WbmpDecoder>,
         include_bytes!("images/mandrill.wbmp"),
     ),
+    #[cfg(feature = "webp-decode")]
     (
         EncodedImageFormat::WEBP,
+        test_decoder::<codec::WebpDecoder>,
         include_bytes!("images/color_wheel.webp"),
     ),
-    (
-        EncodedImageFormat::DNG,
-        include_bytes!("images/sample_1mp.dng"),
-    ),
+    // (
+    //     EncodedImageFormat::DNG,
+    //     include_bytes!("images/sample_1mp.dng"),
+    // ),
 ];
+
+fn test_decoder<D: Decoder>(bytes: &[u8]) {
+    assert!(D::is_format(bytes));
+    let stream = &mut io::Cursor::new(bytes);
+    let codec = D::decode_stream(stream).expect("decode_stream");
+    let d = codec.dimensions();
+    assert!(d.width > 0 && d.height > 0);
+}
 
 /// An exhaustive match for proving that we test all formats defined in Skia.
 /// If the match is not exhaustive anymore, update [ALL] below.

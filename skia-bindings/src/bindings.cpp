@@ -9,6 +9,18 @@
 #include "include/codec/SkCodec.h"
 #include "include/codec/SkCodecAnimation.h"
 #include "include/codec/SkPixmapUtils.h"
+
+#include "include/codec/SkBmpDecoder.h"
+#include "include/codec/SkGifDecoder.h"
+#include "include/codec/SkIcoDecoder.h"
+#include "include/codec/SkJpegDecoder.h"
+#include "include/codec/SkPngDecoder.h"
+#include "include/codec/SkWbmpDecoder.h"
+
+#if defined(SK_CODEC_DECODES_WEBP)
+#include "include/codec/SkWebpDecoder.h"
+#endif
+
 // core/
 #include "include/core/SkAnnotation.h"
 #include "include/core/SkBlendMode.h"
@@ -206,6 +218,71 @@ extern "C" bool C_SkPixmapUtils_Orient(SkPixmap& dst, const SkPixmap& src, SkEnc
 extern "C" void C_SkPixmapUtils_SwapWidthHeight(SkImageInfo* uninitialized, const SkImageInfo& info) {
     new (uninitialized) SkImageInfo(SkPixmapUtils::SwapWidthHeight(info));
 }
+
+//
+// codec/*Decoder.h
+//
+
+extern "C" bool C_SkBmpDecoder_IsBmp(const char* buf, size_t size) {
+    return SkBmpDecoder::IsBmp(buf, size);
+}
+
+
+extern "C" SkCodec* C_SkBmpDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
+    return SkBmpDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
+}
+
+extern "C" bool C_SkGifDecoder_IsGif(const char* buf, size_t size) {
+    return SkGifDecoder::IsGif(buf, size);
+}
+
+extern "C" SkCodec* C_SkGifDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
+    return SkGifDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
+}
+
+extern "C" bool C_SkIcoDecoder_IsIco(const char* buf, size_t size) {
+    return SkIcoDecoder::IsIco(buf, size);
+}
+
+extern "C" SkCodec* C_SkIcoDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
+    return SkIcoDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
+}
+
+extern "C" bool C_SkJpegDecoder_IsJpeg(const char* buf, size_t size) {
+    return SkJpegDecoder::IsJpeg(buf, size);
+}
+
+extern "C" SkCodec* C_SkJpegDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
+    return SkJpegDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
+}
+
+extern "C" bool C_SkPngDecoder_IsPng(const char* buf, size_t size) {
+    return SkPngDecoder::IsPng(buf, size);
+}
+
+extern "C" SkCodec* C_SkPngDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
+    return SkPngDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
+}
+
+extern "C" bool C_SkWbmpDecoder_IsWbmp(const char* buf, size_t size) {
+    return SkWbmpDecoder::IsWbmp(buf, size);
+}
+
+extern "C" SkCodec* C_SkWbmpDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
+    return SkWbmpDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
+}
+
+#if defined(SK_CODEC_DECODES_WEBP)
+
+extern "C" bool C_SkWebpDecoder_IsWebp(const char* buf, size_t size) {
+    return SkWebpDecoder::IsWebp(buf, size);
+}
+
+extern "C" SkCodec* C_SkWebpDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
+    return SkWebpDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
+}
+
+#endif
 
 //
 // core/
@@ -2833,7 +2910,7 @@ extern "C" void C_SkPDF_AttributeList_appendFloatArray(SkPDF::AttributeList *sel
     self->appendFloatArray(owner, name, v);
 }
 
-extern "C" SkPDF::StructureElementNode *C_SkPDF_StructureElementNode_New() {
+extern "C" SkPDF::StructureElementNode *C_SkPDF_StructureElementNode_new() {
     return new SkPDF::StructureElementNode();
 }
 
@@ -3056,21 +3133,21 @@ bool RustStream::isAtEnd() const {
     return this->m_isEof;
 }
 
-extern "C" void C_RustStream_construct(
-    RustStream *out,
+extern "C" RustStream* C_RustStream_new(
     void *data,
     size_t length,
     size_t (*read)(void *, void *, size_t),
     bool (*seekAbsolute)(void *, size_t),
     bool (*seekRelative)(void *, long)
 ) {
-    new(out) RustStream(data, length, read, seekAbsolute, seekRelative);
+    return new RustStream(data, length, read, seekAbsolute, seekRelative);
 }
 
-extern "C" void C_RustStream_destruct(
+extern "C" void C_RustStream_delete(
     RustStream *stream
 ) {
-    stream->~RustStream();
+
+    delete stream;
 }
 
 class RustWStream : public SkWStream {

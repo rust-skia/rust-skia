@@ -160,7 +160,7 @@ impl NativeDrop for sb::skia_textlayout_ParagraphStyle {
 
 impl Clone for ParagraphStyle {
     fn clone(&self) -> Self {
-        Self::from_ptr(unsafe { sb::C_ParagraphStyle_NewCopy(self.native()) }).unwrap()
+        Self::from_ptr(unsafe { sb::C_ParagraphStyle_newCopy(self.native()) }).unwrap()
     }
 }
 
@@ -198,7 +198,7 @@ impl fmt::Debug for ParagraphStyle {
 
 impl ParagraphStyle {
     pub fn new() -> Self {
-        Self::from_ptr(unsafe { sb::C_ParagraphStyle_New() }).unwrap()
+        Self::from_ptr(unsafe { sb::C_ParagraphStyle_new() }).unwrap()
     }
 
     pub fn strut_style(&self) -> &StrutStyle {

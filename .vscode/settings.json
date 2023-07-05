@@ -25,6 +25,7 @@
         "fvisibility",
         "GANESH",
         "González",
+        "hashtable",
         "heightmaps",
         "isystem",
         "kjlubick",
@@ -53,6 +54,7 @@
         "Tahoma",
         "unoptimized",
         "USERPROFILE",
+        "uset",
         "webgl",
         "wuffs",
         "Yocto"
@@ -62,5 +64,6 @@
         "SK_USING_THIRD_PARTY_ICU",
         "SK_UNICODE_ICU_IMPLEMENTATION",
         "SK_SHAPER_HARFBUZZ_AVAILABLE",
-    ]
+        "SK_CODEC_DECODES_WEBP"
+    ],
 }

@@ -1,11 +1,14 @@
+use std::marker::PhantomData;
+use std::{ffi, ffi::CStr, fmt, io, mem, ptr, result};
+
+use skia_bindings::{self as sb, SkCodec, SkCodec_FrameInfo, SkCodec_Options, SkStream};
+
 use super::codec_animation;
+use crate::interop::RustStream;
 use crate::{
     prelude::*, yuva_pixmap_info::SupportedDataTypes, AlphaType, Data, EncodedImageFormat,
     EncodedOrigin, IRect, ISize, Image, ImageInfo, Pixmap, YUVAPixmapInfo, YUVAPixmaps,
 };
-use ffi::CStr;
-use skia_bindings::{self as sb, SkCodec, SkCodec_FrameInfo, SkCodec_Options};
-use std::{ffi, fmt, mem, ptr};
 
 pub use sb::SkCodec_Result as Result;
 variant_name!(Result::IncompleteInput);
@@ -56,7 +59,10 @@ impl Default for FrameInfo {
 pub use sb::SkCodec_SkScanlineOrder as ScanlineOrder;
 variant_name!(ScanlineOrder::BottomUp);
 
-pub type Codec = RefHandle<SkCodec>;
+pub struct Codec<'a> {
+    inner: RefHandle<SkCodec>,
+    pd: PhantomData<&'a mut dyn io::Read>,
+}
 
 impl NativeDrop for SkCodec {
     fn drop(&mut self) {
@@ -64,7 +70,7 @@ impl NativeDrop for SkCodec {
     }
 }
 
-impl fmt::Debug for Codec {
+impl fmt::Debug for Codec<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Codec")
             .field("info", &self.info())
@@ -78,12 +84,12 @@ impl fmt::Debug for Codec {
     }
 }
 
-impl Codec {
+impl Codec<'_> {
     // TODO: wrap MakeFromStream
     // TODO: wrap from_data with SkPngChunkReader
 
-    pub fn from_data(data: impl Into<Data>) -> Option<Codec> {
-        Codec::from_ptr(unsafe { sb::C_SkCodec_MakeFromData(data.into().into_ptr()) })
+    pub fn from_data(data: impl Into<Data>) -> Option<Codec<'static>> {
+        Self::from_ptr(unsafe { sb::C_SkCodec_MakeFromData(data.into().into_ptr()) })
     }
 
     pub fn info(&self) -> ImageInfo {
@@ -326,4 +332,44 @@ impl Codec {
     }
 
     // TODO: Register
+
+    fn native(&self) -> &SkCodec {
+        self.inner.native()
+    }
+
+    fn native_mut(&mut self) -> &mut SkCodec {
+        self.inner.native_mut()
+    }
+
+    pub(crate) fn from_ptr<'a>(codec: *mut SkCodec) -> Option<Codec<'a>> {
+        RefHandle::from_ptr(codec).map(|inner| Codec {
+            inner,
+            pd: PhantomData,
+        })
+    }
+}
+
+pub trait Decoder {
+    const ID: &'static str;
+    fn is_format(data: &[u8]) -> bool;
+
+    // TODO: decode_data (use std::io::Cursor in the meantime).
+
+    fn decode_stream(stream: &mut impl io::Read) -> result::Result<Codec, Result>;
+}
+
+pub(crate) fn decode_stream(
+    stream: &mut impl io::Read,
+    native_decode_fn: unsafe extern "C" fn(
+        stream: *mut SkStream,
+        result: *mut Result,
+    ) -> *mut SkCodec,
+) -> result::Result<Codec, Result> {
+    let stream = RustStream::new(stream);
+    let mut result = Result::Unimplemented;
+    let codec = unsafe { native_decode_fn(stream.into_native(), &mut result) };
+    if result == Result::Success {
+        return Ok(Codec::from_ptr(codec).expect("codec"));
+    }
+    Err(result)
 }

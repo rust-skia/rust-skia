@@ -77,7 +77,7 @@ extern "C" void C_GrBackendRenderTarget_getBackendFormat(const GrBackendRenderTa
 
 // GrBackendTexture
 
-extern "C" GrBackendTexture* C_GrBackendTexture_New() {
+extern "C" GrBackendTexture* C_GrBackendTexture_new() {
     return new GrBackendTexture();
 }
 
