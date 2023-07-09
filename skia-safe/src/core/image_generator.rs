@@ -68,7 +68,7 @@ impl ImageGenerator {
     }
 
     #[deprecated(
-        since = "0.0.0",
+        since = "0.64.0",
         note = "Removed, will return `None`. Use Image::deferred_from_encoded_data() or Codec::from_data()"
     )]
     pub fn from_encoded(_encoded: impl Into<Data>) -> Option<Self> {

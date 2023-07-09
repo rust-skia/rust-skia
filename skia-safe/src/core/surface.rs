@@ -185,7 +185,7 @@ impl Surface {
     /// * `surface_props` - LCD striping orientation and setting for device independent fonts;
     ///                      may be `None`
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
-    #[deprecated(since = "0.0.0", note = "use surfaces::wrap_pixels()")]
+    #[deprecated(since = "0.64.0", note = "use surfaces::wrap_pixels()")]
     pub fn new_raster_direct<'pixels>(
         image_info: &ImageInfo,
         pixels: &'pixels mut [u8],
@@ -214,7 +214,7 @@ impl Surface {
     /// * `surface_props` - LCD striping orientation and setting for device independent fonts;
     ///                      may be `None`
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
-    #[deprecated(since = "0.0.0", note = "use surfaces::raster()")]
+    #[deprecated(since = "0.64.0", note = "use surfaces::raster()")]
     pub fn new_raster(
         image_info: &ImageInfo,
         row_bytes: impl Into<Option<usize>>,
@@ -240,7 +240,7 @@ impl Surface {
     /// * `surface_props` - LCD striping orientation and setting for device independent
     ///                      fonts; may be `None`
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
-    #[deprecated(since = "0.0.0", note = "use surfaces::raster_n32_premul()")]
+    #[deprecated(since = "0.64.0", note = "use surfaces::raster_n32_premul()")]
     pub fn new_raster_n32_premul(size: impl Into<ISize>) -> Option<Self> {
         surfaces::raster_n32_premul(size)
     }
@@ -266,7 +266,7 @@ impl Surface {
     /// * `surface_props` - LCD striping orientation and setting for device independent
     ///                            fonts; may be `None`
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
-    #[deprecated(since = "0.0.0", note = "use gpu::surfaces::wrap_backend_texture()")]
+    #[deprecated(since = "0.64.0", note = "use gpu::surfaces::wrap_backend_texture()")]
     pub fn from_backend_texture(
         context: &mut gpu::RecordingContext,
         backend_texture: &gpu::BackendTexture,
@@ -304,7 +304,7 @@ impl Surface {
     ///                                 fonts; may be `None`
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
     #[deprecated(
-        since = "0.0.0",
+        since = "0.64.0",
         note = "use gpu::surfaces::wrap_backend_render_target()"
     )]
     pub fn from_backend_render_target(
@@ -348,7 +348,7 @@ impl Surface {
     ///                              fonts; may be `None`
     /// * `should_create_with_mips` - hint that [`Surface`] will host mip map images
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
-    #[deprecated(since = "0.0.0", note = "use gpu::surfaces::render_target()")]
+    #[deprecated(since = "0.64.0", note = "use gpu::surfaces::render_target()")]
     pub fn new_render_target(
         context: &mut gpu::RecordingContext,
         budgeted: gpu::Budgeted,
@@ -376,7 +376,7 @@ impl Surface {
     /// * `characterization` - description of the desired [`Surface`]
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
     #[deprecated(
-        since = "0.0.0",
+        since = "0.64.0",
         note = "use gpu::surfaces::render_target_with_characterization()"
     )]
     pub fn new_render_target_with_characterization(
@@ -513,7 +513,7 @@ impl Surface {
     /// Returns: [`Surface`] if width and height are positive; otherwise, `None`
     ///
     /// example: <https://fiddle.skia.org/c/@Surface_MakeNull>
-    #[deprecated(since = "0.0.0", note = "use surfaces::null()")]
+    #[deprecated(since = "0.64.0", note = "use surfaces::null()")]
     pub fn new_null(size: impl Into<ISize>) -> Option<Self> {
         surfaces::null(size)
     }
@@ -595,7 +595,7 @@ impl Surface {
     /// The returned [`gpu::BackendTexture`] should be discarded if the [`Surface`] is drawn to or deleted.
     ///
     /// Returns: GPU texture reference; `None` on failure
-    #[deprecated(since = "0.0.0", note = "use gpu::surfaces::get_backend_texture()")]
+    #[deprecated(since = "0.64.0", note = "use gpu::surfaces::get_backend_texture()")]
     pub fn get_backend_texture(
         &mut self,
         handle_access: BackendHandleAccess,
@@ -611,7 +611,7 @@ impl Surface {
     ///
     /// Returns: GPU render target reference; `None` on failure
     #[deprecated(
-        since = "0.0.0",
+        since = "0.64.0",
         note = "use gpu::surfaces::get_backend_render_target()"
     )]
     pub fn get_backend_render_target(

@@ -304,7 +304,7 @@ impl TextStyle {
         self
     }
 
-    #[deprecated(since = "0.0.0", note = "use set_foreground_paint()")]
+    #[deprecated(since = "0.64.0", note = "use set_foreground_paint()")]
     pub fn set_foreground_color(&mut self, paint: &Paint) -> &mut Self {
         self.set_foreground_paint(paint)
     }
@@ -323,7 +323,7 @@ impl TextStyle {
         self
     }
 
-    #[deprecated(since = "0.0.0", note = "use set_background_paint()")]
+    #[deprecated(since = "0.64.0", note = "use set_background_paint()")]
     pub fn set_background_color(&mut self, paint: &Paint) -> &mut Self {
         self.set_background_paint(paint)
     }

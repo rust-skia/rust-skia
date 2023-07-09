@@ -788,7 +788,7 @@ impl ImageFilter {
         )
     }
 
-    #[deprecated(since = "0.0.0", note = "use magnifier2() instead")]
+    #[deprecated(since = "0.64.0", note = "use magnifier2() instead")]
     pub fn magnifier<'a>(
         self,
         crop_rect: impl Into<Option<&'a IRect>>,

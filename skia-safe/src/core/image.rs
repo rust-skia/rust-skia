@@ -1229,7 +1229,7 @@ impl Image {
     }
 
     /// See [`Self::new_subset_with_context`]
-    #[deprecated(since = "0.0.0", note = "use make_subset()")]
+    #[deprecated(since = "0.64.0", note = "use make_subset()")]
     pub fn new_subset(&self, rect: impl AsRef<IRect>) -> Option<Image> {
         self.make_subset(None, rect)
     }
@@ -1252,7 +1252,7 @@ impl Image {
     /// example: <https://fiddle.skia.org/c/@Image_makeSubset>
 
     #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.0.0", note = "use make_subset()")]
+    #[deprecated(since = "0.64.0", note = "use make_subset()")]
     pub fn new_subset_with_context<'a>(
         &self,
         rect: impl AsRef<IRect>,
@@ -1352,7 +1352,7 @@ impl Image {
     /// Returns: raster image, lazy image, or `None`
     ///
     /// example: <https://fiddle.skia.org/c/@Image_makeNonTextureImage>
-    #[deprecated(since = "0.0.0", note = "use make_non_texture_image()")]
+    #[deprecated(since = "0.64.0", note = "use make_non_texture_image()")]
     pub fn to_non_texture_image(&self) -> Option<Image> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_makeNonTextureImage(self.native(), ptr::null_mut())
@@ -1392,7 +1392,7 @@ impl Image {
     /// Returns: raster image, or `None`
     ///
     /// example: <https://fiddle.skia.org/c/@Image_makeRasterImage>
-    #[deprecated(since = "0.0.0", note = "use make_raster_image()")]
+    #[deprecated(since = "0.64.0", note = "use make_raster_image()")]
     pub fn to_raster_image(&self, caching_hint: impl Into<Option<CachingHint>>) -> Option<Image> {
         let caching_hint = caching_hint.into().unwrap_or(CachingHint::Disallow);
         Image::from_ptr(unsafe {
@@ -1488,7 +1488,7 @@ impl Image {
     }
 
     /// See [`Self::new_color_space_with_context`]
-    #[deprecated(since = "0.0.0", note = "use make_color_space()")]
+    #[deprecated(since = "0.64.0", note = "use make_color_space()")]
     pub fn new_color_space(&self, color_space: impl Into<Option<ColorSpace>>) -> Option<Image> {
         self.make_color_space(None, color_space)
     }
@@ -1508,7 +1508,7 @@ impl Image {
     /// Returns: created [`Image`] in target [`ColorSpace`]
     ///
     /// example: <https://fiddle.skia.org/c/@Image_makeColorSpace>
-    #[deprecated(since = "0.0.0", note = "use make_color_space()")]
+    #[deprecated(since = "0.64.0", note = "use make_color_space()")]
     pub fn new_color_space_with_context<'a>(
         &self,
         color_space: impl Into<Option<ColorSpace>>,
