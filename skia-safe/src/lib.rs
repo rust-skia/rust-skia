@@ -48,10 +48,14 @@ pub use pathops::*;
 /// Stubs for types that are only available with the `gpu` feature.
 #[cfg(not(feature = "gpu"))]
 pub mod gpu {
-    use std::ptr;
+    use std::{
+        ops::{Deref, DerefMut},
+        ptr,
+    };
 
-    use crate::prelude::NativePointerOrNullMut;
+    use crate::prelude::*;
 
+    #[derive(Debug)]
     pub enum RecordingContext {}
 
     impl NativePointerOrNullMut for Option<&mut RecordingContext> {
@@ -62,7 +66,22 @@ pub mod gpu {
         }
     }
 
+    #[derive(Debug)]
     pub enum DirectContext {}
+
+    impl Deref for DirectContext {
+        type Target = RecordingContext;
+
+        fn deref(&self) -> &Self::Target {
+            unsafe { transmute_ref(self) }
+        }
+    }
+
+    impl DerefMut for DirectContext {
+        fn deref_mut(&mut self) -> &mut Self::Target {
+            unsafe { transmute_ref_mut(self) }
+        }
+    }
 
     impl NativePointerOrNullMut for Option<&mut DirectContext> {
         type Native = skia_bindings::GrDirectContext;
