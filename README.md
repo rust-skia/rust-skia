@@ -4,8 +4,8 @@
 
 Skia Submodule Status: chrome/m115 ([upstream changes][skia-upstream], [our changes][skia-ours]).
 
-[skia-upstream]: https://github.com/rust-skia/skia/compare/m115-0.63.1...google:chrome/m115
-[skia-ours]: https://github.com/google/skia/compare/chrome/m115...rust-skia:m115-0.63.1
+[skia-upstream]: https://github.com/rust-skia/skia/compare/m115-0.63.2...google:chrome/m115
+[skia-ours]: https://github.com/google/skia/compare/chrome/m115...rust-skia:m115-0.63.2
 
 ## About
 
