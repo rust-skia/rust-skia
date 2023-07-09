@@ -1264,19 +1264,17 @@ impl Image {
     /// Returns subset of this image.
     ///
     /// Returns `None` if any of the following are true:
-    ///     - Subset is empty
-    ///     - Subset is not contained inside the image's bounds
+    ///     - Subset is empty - Subset is not contained inside the image's bounds
     ///     - Pixels in the source image could not be read or copied
-    ///     - This image is texture-backed and the provided context is null or does not match
-    ///     the source image's context.
+    ///     - This image is texture-backed and the provided context is null or does not match the
+    ///     source image's context.
     ///
     /// If the source image was texture-backed, the resulting image will be texture-backed also.
     /// Otherwise, the returned image will be raster-backed.
     ///
-    /// * `direct` - the [`DirectContext`] of the source image (`None` is ok if the source image
-    ///                 is not texture-backed).
-    /// * `subset` - bounds of returned [`Image`]
-    /// Returns: the subsetted image, or `None`
+    /// * `direct` - the [`gpu::DirectContext`] of the source image (`None` is ok if the source
+    ///                 image is not texture-backed).
+    /// * `subset` - bounds of returned [`Image`] Returns: the subsetted image, or `None`
     ///
     /// example: <https://fiddle.skia.org/c/@Image_makeSubset>
     pub fn make_subset<'a>(

@@ -5,29 +5,29 @@ use crate::{
 
 use skia_bindings as sb;
 
-/// Returns [`Surface`] on GPU indicated by context. Allocates memory for
-/// pixels, based on the width, height, and [`crate::ColorType`] in [`ImageInfo`].  budgeted
-/// selects whether allocation for pixels is tracked by context. `image_info`
-/// describes the pixel format in [`crate::ColorType`], and transparency in
-/// [`crate::AlphaType`], and color matching in [`crate::ColorSpace`].
+/// Returns [`Surface`] on GPU indicated by context. Allocates memory for pixels, based on the
+/// width, height, and [`crate::ColorType`] in [`ImageInfo`].  budgeted selects whether allocation
+/// for pixels is tracked by context. `image_info` describes the pixel format in
+/// [`crate::ColorType`], and transparency in [`crate::AlphaType`], and color matching in
+/// [`crate::ColorSpace`].
 ///
-/// `sample_count` requests the number of samples per pixel.
-/// Pass zero to disable multi-sample anti-aliasing.  The request is rounded
-/// up to the next supported count, or rounded down if it is larger than the
-/// maximum supported count.
+/// `sample_count` requests the number of samples per pixel. Pass zero to disable multi-sample
+/// anti-aliasing.  The request is rounded up to the next supported count, or rounded down if it is
+/// larger than the maximum supported count.
 ///
 /// `surface_origin` pins either the top-left or the bottom-left corner to the origin.
 ///
-/// `should_create_with_mips` hints that [`Image`] returned by [`Image::image_snapshot`] is mip map.
+/// `should_create_with_mips` hints that [`crate::Image`] returned by [`Surface::image_snapshot`] is
+/// mip map.
 ///
 /// * `context` - GPU context
-/// * `image_info` - width, height, [`crate::ColorType`], [`crate::AlphaType`], [`crate::ColorSpace`];
-///                              width, or height, or both, may be zero
+/// * `image_info` - width, height, [`crate::ColorType`], [`crate::AlphaType`],
+///                              [`crate::ColorSpace`]; width, or height, or both, may be zero
 /// * `sample_count` - samples per pixel, or 0 to disable full scene anti-aliasing
-/// * `surface_props` - LCD striping orientation and setting for device independent
-///                              fonts; may be `None`
-/// * `should_create_with_mips` - hint that [`Surface`] will host mip map images
-/// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
+/// * `surface_props` - LCD striping orientation and setting for device independent fonts; may be
+///                              `None`
+/// * `should_create_with_mips` - hint that [`Surface`] will host mip map images Returns:
+/// [`Surface`] if all parameters are valid; otherwise, `None`
 pub fn render_target(
     context: &mut gpu::RecordingContext,
     budgeted: gpu::Budgeted,

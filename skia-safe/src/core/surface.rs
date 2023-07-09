@@ -12,12 +12,13 @@ pub mod surfaces {
 
     use crate::{prelude::*, ISize, ImageInfo, Surface, SurfaceProps};
 
-    /// Returns [`Surface`] without backing pixels. Drawing to [`Canvas`] returned from [`Surface`]
-    /// has no effect. Calling [`Self::image_snapshot()`] on returned [`Surface`] returns `None`.
+    /// Returns [`Surface`] without backing pixels. Drawing to [`crate::Canvas`] returned from
+    /// [`Surface`] has no effect. Calling [`Surface::image_snapshot()`] on returned [`Surface`]
+    /// returns `None`.
     ///
     /// * `width` - one or greater
-    /// * `height` - one or greater
-    /// Returns: [`Surface`] if width and height are positive; otherwise, `None`
+    /// * `height` - one or greater Returns: [`Surface`] if width and height are positive;
+    /// otherwise, `None`
     ///
     /// example: <https://fiddle.skia.org/c/@Surface_MakeNull>
     pub fn null(size: impl Into<ISize>) -> Option<Surface> {
@@ -25,8 +26,8 @@ pub mod surfaces {
         Surface::from_ptr(unsafe { sb::C_SkSurfaces_Null(size.width, size.height) })
     }
 
-    /// Allocates raster [`Surface`]. [`Canvas`] returned by [`Surface`] draws directly into pixels.
-    /// Allocates and zeroes pixel memory. Pixel memory size is height times width times
+    /// Allocates raster [`Surface`]. [`crate::Canvas`] returned by [`Surface`] draws directly into
+    /// pixels. Allocates and zeroes pixel memory. Pixel memory size is height times width times
     /// four. Pixel memory is deleted when [`Surface`] is deleted.
     ///
     /// Internally, sets [`ImageInfo`] to width, height, native color type, and
@@ -39,32 +40,32 @@ pub mod surfaces {
     ///
     /// * `width` - pixel column count; must be greater than zero
     /// * `height` - pixel row count; must be greater than zero
-    /// * `surface_props` - LCD striping orientation and setting for device independent
-    ///                      fonts; may be `None`
-    /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
+    /// * `surface_props` - LCD striping orientation and setting for device independent fonts; may
+    ///                      be `None` Returns: [`Surface`] if all parameters are valid; otherwise,
+    /// `None`
     pub fn raster_n32_premul(size: impl Into<ISize>) -> Option<Surface> {
         raster(&ImageInfo::new_n32_premul(size, None), None, None)
     }
 
-    /// Allocates raster [`Surface`]. [`Canvas`] returned by [`Surface`] draws directly into pixels.
-    /// Allocates and zeroes pixel memory. Pixel memory size is `image_info.height()` times
-    /// `row_bytes`, or times `image_info.min_row_bytes()` if `row_bytes` is zero.
-    /// Pixel memory is deleted when [`Surface`] is deleted.
+    /// Allocates raster [`Surface`]. [`crate::Canvas`] returned by [`Surface`] draws directly into
+    /// pixels. Allocates and zeroes pixel memory. Pixel memory size is `image_info.height()` times
+    /// `row_bytes`, or times `image_info.min_row_bytes()` if `row_bytes` is zero. Pixel memory is
+    /// deleted when [`Surface`] is deleted.
     ///
-    /// [`Surface`] is returned if all parameters are valid.
-    /// Valid parameters include:
-    /// info dimensions are greater than zero;
-    /// info contains [`crate::ColorType`] and [`crate::AlphaType`] supported by raster surface;
-    /// `row_bytes` is large enough to contain info width pixels of [`crate::ColorType`], or is zero.
+    /// [`Surface`] is returned if all parameters are valid. Valid parameters include: info
+    /// dimensions are greater than zero; info contains [`crate::ColorType`] and
+    /// [`crate::AlphaType`] supported by raster surface; `row_bytes` is large enough to contain
+    /// info width pixels of [`crate::ColorType`], or is zero.
     ///
     /// If `row_bytes` is zero, a suitable value will be chosen internally.
     ///
-    /// * `image_info` - width, height, [`crate::ColorType`], [`crate::AlphaType`], [`crate::ColorSpace`],
-    ///                      of raster surface; width and height must be greater than zero
+    /// * `image_info` - width, height, [`crate::ColorType`], [`crate::AlphaType`],
+    ///                      [`crate::ColorSpace`], of raster surface; width and height must be
+    ///                      greater than zero
     /// * `row_bytes` - interval from one [`Surface`] row to the next; may be zero
-    /// * `surface_props` - LCD striping orientation and setting for device independent fonts;
-    ///                      may be `None`
-    /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
+    /// * `surface_props` - LCD striping orientation and setting for device independent fonts; may
+    ///                      be `None` Returns: [`Surface`] if all parameters are valid; otherwise,
+    /// `None`
     pub fn raster(
         image_info: &ImageInfo,
         row_bytes: impl Into<Option<usize>>,
@@ -79,26 +80,26 @@ pub mod surfaces {
         })
     }
 
-    /// Allocates raster [`Surface`]. [`Canvas`] returned by [`Surface`] draws directly into pixels.
+    /// Allocates raster [`Surface`]. [`crate::Canvas`] returned by [`Surface`] draws directly into
+    /// pixels.
     ///
-    /// [`Surface`] is returned if all parameters are valid.
-    /// Valid parameters include:
-    /// info dimensions are greater than zero;
-    /// info contains [`crate::ColorType`] and [`crate::AlphaType`] supported by raster surface;
-    /// pixels is not `None`;
-    /// `row_bytes` is large enough to contain info width pixels of [`crate::ColorType`].
+    /// [`Surface`] is returned if all parameters are valid. Valid parameters include: info
+    /// dimensions are greater than zero; info contains [`crate::ColorType`] and
+    /// [`crate::AlphaType`] supported by raster surface; pixels is not `None`; `row_bytes` is large
+    /// enough to contain info width pixels of [`crate::ColorType`].
     ///
-    /// Pixel buffer size should be info height times computed `row_bytes`.
-    /// Pixels are not initialized.
-    /// To access pixels after drawing, [`Surface::peek_pixels()`] or [`Surface::read_pixels()`].
+    /// Pixel buffer size should be info height times computed `row_bytes`. Pixels are not
+    /// initialized. To access pixels after drawing, [`Surface::peek_pixels()`] or
+    /// [`Surface::read_pixels()`].
     ///
-    /// * `image_info` - width, height, [`crate::ColorType`], [`crate::AlphaType`], [`crate::ColorSpace`],
-    ///                      of raster surface; width and height must be greater than zero
+    /// * `image_info` - width, height, [`crate::ColorType`], [`crate::AlphaType`],
+    ///                      [`crate::ColorSpace`], of raster surface; width and height must be
+    ///                      greater than zero
     /// * `pixels` - pointer to destination pixels buffer
     /// * `row_bytes` - interval from one [`Surface`] row to the next
-    /// * `surface_props` - LCD striping orientation and setting for device independent fonts;
-    ///                      may be `None`
-    /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
+    /// * `surface_props` - LCD striping orientation and setting for device independent fonts; may
+    ///                      be `None` Returns: [`Surface`] if all parameters are valid; otherwise,
+    /// `None`
     pub fn wrap_pixels<'pixels>(
         image_info: &ImageInfo,
         pixels: &'pixels mut [u8],
