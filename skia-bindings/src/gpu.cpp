@@ -461,16 +461,16 @@ extern "C" SkSurface* C_SkSurfaces_WrapBackendRenderTarget(
 }
 
 extern "C" GrBackendTexture* C_SkSurfaces_GetBackendTexture(
-    SkSurface* self,
+    SkSurface* surface,
     SkSurface::BackendHandleAccess handleAccess) 
 {
-    return new GrBackendTexture(self->getBackendTexture(handleAccess));
+    return new GrBackendTexture(SkSurfaces::GetBackendTexture(surface, handleAccess));
 }
 
 extern "C" void C_SkSurfaces_GetBackendRenderTarget(
-    SkSurface* self,
+    SkSurface* surface,
     SkSurface::BackendHandleAccess handleAccess,
     GrBackendRenderTarget *backendRenderTarget) 
 {
-    *backendRenderTarget = self->getBackendRenderTarget(handleAccess);
+    *backendRenderTarget = SkSurfaces::GetBackendRenderTarget(surface, handleAccess);
 }
