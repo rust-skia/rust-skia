@@ -1944,10 +1944,6 @@ extern "C" SkData *C_SkImageGenerator_refEncodedData(SkImageGenerator *self) {
     return self->refEncodedData().release();
 }
 
-// extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromEncoded(SkData *data, const SkAlphaType* alphaType) {
-//     return SkImageGenerator::MakeFromEncoded(sp(data), opt(alphaType)).release();
-// }
-
 extern "C" bool C_SkImageGenerator_isTextureGenerator(const SkImageGenerator *self) {
     return self->isTextureGenerator();
 }
