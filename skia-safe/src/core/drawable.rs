@@ -77,7 +77,7 @@ impl Drawable {
     }
 
     pub fn bounds(&mut self) -> Rect {
-        Rect::from_native_c(unsafe { sb::C_SkDrawable_getBounds(self.native_mut()) })
+        Rect::construct(|r| unsafe { sb::C_SkDrawable_getBounds(self.native_mut(), r) })
     }
 
     pub fn approximate_bytes_used(&mut self) -> usize {

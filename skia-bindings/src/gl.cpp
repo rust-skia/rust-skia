@@ -11,7 +11,7 @@
 #include "include/gpu/gl/GrGLExtensions.h"
 #include "include/gpu/gl/GrGLInterface.h"
 #include "include/gpu/gl/GrGLAssembleInterface.h"
-#include "src/gpu/gl/GrGLDefines.h"
+#include "src/gpu/ganesh/gl/GrGLDefines.h"
 
 // Additional types not yet referenced.
 extern "C" void C_GrGLTypes(GrGLSurfaceInfo *) {};

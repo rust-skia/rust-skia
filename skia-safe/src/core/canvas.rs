@@ -1225,7 +1225,7 @@ impl Canvas {
     ///
     /// example: <https://fiddle.skia.org/c/@Canvas_getLocalClipBounds>
     pub fn local_clip_bounds(&self) -> Option<Rect> {
-        let r = Rect::from_native_c(unsafe { sb::C_SkCanvas_getLocalClipBounds(self.native()) });
+        let r = Rect::construct(|r| unsafe { sb::C_SkCanvas_getLocalClipBounds(self.native(), r) });
         r.is_empty().if_false_some(r)
     }
 
@@ -1238,7 +1238,8 @@ impl Canvas {
     ///
     /// example: <https://fiddle.skia.org/c/@Canvas_getDeviceClipBounds>
     pub fn device_clip_bounds(&self) -> Option<IRect> {
-        let r = IRect::from_native_c(unsafe { sb::C_SkCanvas_getDeviceClipBounds(self.native()) });
+        let r =
+            IRect::construct(|r| unsafe { sb::C_SkCanvas_getDeviceClipBounds(self.native(), r) });
         r.is_empty().if_false_some(r)
     }
 

@@ -7,6 +7,7 @@
 #include "include/core/SkColorSpace.h"
 #include "include/core/SkSurface.h"
 #include "include/gpu/mtl/GrMtlBackendContext.h"
+#include "include/gpu/GrBackendSurface.h"
 #include "include/gpu/GrDirectContext.h"
 
 extern "C" void C_GrMtlTypes(GrMTLTextureUsage*, GrMtlSurfaceInfo *) {};
@@ -15,28 +16,28 @@ extern "C" void C_GrMtlTypes(GrMTLTextureUsage*, GrMtlSurfaceInfo *) {};
 // core/SkSurface.h
 //
 
-extern "C" SkSurface *C_SkSurface_MakeFromCAMetalLayer(GrRecordingContext *context,
-                                                       GrMTLHandle layer,
-                                                       GrSurfaceOrigin origin,
-                                                       int sampleCnt,
-                                                       SkColorType colorType,
-                                                       SkColorSpace *colorSpace,
-                                                       const SkSurfaceProps *surfaceProps,
-                                                       GrMTLHandle *drawable) {
-    return SkSurface::MakeFromCAMetalLayer(context, layer, origin, sampleCnt, colorType, sp(colorSpace), surfaceProps,
-                                           drawable).release();
-}
+// extern "C" SkSurface *C_SkSurface_MakeFromCAMetalLayer(GrRecordingContext *context,
+//                                                        GrMTLHandle layer,
+//                                                        GrSurfaceOrigin origin,
+//                                                        int sampleCnt,
+//                                                        SkColorType colorType,
+//                                                        SkColorSpace *colorSpace,
+//                                                        const SkSurfaceProps *surfaceProps,
+//                                                        GrMTLHandle *drawable) {
+//     return SkSurface::MakeFromCAMetalLayer(context, layer, origin, sampleCnt, colorType, sp(colorSpace), surfaceProps,
+//                                            drawable).release();
+// }
 
-extern "C" SkSurface *C_SkSurface_MakeFromMTKView(GrRecordingContext *context,
-                                                  GrMTLHandle mtkView,
-                                                  GrSurfaceOrigin origin,
-                                                  int sampleCnt,
-                                                  SkColorType colorType,
-                                                  SkColorSpace *colorSpace,
-                                                  const SkSurfaceProps *surfaceProps) {
-    return SkSurface::MakeFromMTKView(context, mtkView, origin, sampleCnt, colorType, sp(colorSpace), surfaceProps
-    ).release();
-}
+// extern "C" SkSurface *C_SkSurface_MakeFromMTKView(GrRecordingContext *context,
+//                                                   GrMTLHandle mtkView,
+//                                                   GrSurfaceOrigin origin,
+//                                                   int sampleCnt,
+//                                                   SkColorType colorType,
+//                                                   SkColorSpace *colorSpace,
+//                                                   const SkSurfaceProps *surfaceProps) {
+//     return SkSurface::MakeFromMTKView(context, mtkView, origin, sampleCnt, colorType, sp(colorSpace), surfaceProps
+//     ).release();
+// }
 
 //
 // gpu/GrDirectContext.h

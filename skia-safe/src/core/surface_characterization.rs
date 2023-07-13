@@ -163,25 +163,25 @@ impl SurfaceCharacterization {
     }
 
     pub fn is_textureable(&self) -> bool {
-        self.native().fIsTextureable == sb::SkSurfaceCharacterization_Textureable::kYes
+        self.native().fIsTextureable == sb::GrSurfaceCharacterization_Textureable::kYes
     }
 
     pub fn is_mip_mapped(&self) -> bool {
-        self.native().fIsMipMapped == sb::SkSurfaceCharacterization_MipMapped::kYes
+        self.native().fIsMipMapped == sb::GrSurfaceCharacterization_MipMapped::kYes
     }
 
     pub fn uses_glfbo0(&self) -> bool {
-        self.native().fUsesGLFBO0 == sb::SkSurfaceCharacterization_UsesGLFBO0::kYes
+        self.native().fUsesGLFBO0 == sb::GrSurfaceCharacterization_UsesGLFBO0::kYes
     }
 
     pub fn vk_rt_supports_input_attachment(&self) -> bool {
         self.native().fVkRTSupportsInputAttachment
-            == sb::SkSurfaceCharacterization_VkRTSupportsInputAttachment::kYes
+            == sb::GrSurfaceCharacterization_VkRTSupportsInputAttachment::kYes
     }
 
     pub fn vulkan_secondary_cb_compatible(&self) -> bool {
         self.native().fVulkanSecondaryCBCompatible
-            == sb::SkSurfaceCharacterization_VulkanSecondaryCBCompatible::kYes
+            == sb::GrSurfaceCharacterization_VulkanSecondaryCBCompatible::kYes
     }
 
     pub fn is_protected(&self) -> gpu::Protected {

@@ -3,8 +3,8 @@ use std::{fmt, ptr};
 use skia_bindings::{self as sb, SkRefCntBase, SkSurface};
 
 use crate::{
-    gpu, prelude::*, Bitmap, Canvas, DeferredDisplayList, IPoint, IRect, ISize, IVector, Image,
-    ImageInfo, Paint, Pixmap, Point, SamplingOptions, SurfaceCharacterization, SurfaceProps,
+    gpu, prelude::*, Bitmap, Canvas, IPoint, IRect, ISize, Image, ImageInfo, Paint, Pixmap, Point,
+    SamplingOptions, SurfaceCharacterization, SurfaceProps,
 };
 
 pub mod surfaces {
@@ -138,8 +138,8 @@ pub use skia_bindings::SkSurface_BackendHandleAccess as BackendHandleAccess;
 #[cfg(feature = "gpu")]
 variant_name!(BackendHandleAccess::FlushWrite);
 
-pub use skia_bindings::SkSurface_BackendSurfaceAccess as BackendSurfaceAccess;
-variant_name!(BackendSurfaceAccess::Present);
+// pub use skia_bindings::SkSurface_BackendSurfaceAccess as BackendSurfaceAccess;
+// variant_name!(BackendSurfaceAccess::Present);
 
 /// [`Surface`] is responsible for managing the pixels that a canvas draws into. The pixels can be
 /// allocated either in CPU memory (a raster surface) or on the GPU (a `RenderTarget` surface).
@@ -388,109 +388,109 @@ impl Surface {
         gpu::surfaces::render_target_with_characterization(context, characterization, budgeted)
     }
 
-    /// Creates [`Surface`] from CAMetalLayer.
-    /// Returned [`Surface`] takes a reference on the CAMetalLayer. The ref on the layer will be
-    /// released when the [`Surface`] is destroyed.
-    ///
-    /// Only available when Metal API is enabled.
-    ///
-    /// Will grab the current drawable from the layer and use its texture as a `backend_rt` to
-    /// create a renderable surface.
-    ///
-    /// * `context` - GPU context
-    /// * `layer` - [`gpu::mtl::Handle`] (expected to be a CAMetalLayer*)
-    /// * `sample_cnt` - samples per pixel, or 0 to disable full scene anti-aliasing
-    /// * `color_space` - range of colors; may be `None`
-    /// * `surface_props` - LCD striping orientation and setting for device independent
-    ///                        fonts; may be `None`
-    /// * `drawable` - Pointer to drawable to be filled in when this surface is
-    ///                        instantiated; may not be `None`
-    /// Returns: created [`Surface`], or `None`
-    #[allow(clippy::missing_safety_doc)]
-    #[allow(clippy::too_many_arguments)]
-    #[cfg(feature = "metal")]
-    pub unsafe fn from_ca_metal_layer(
-        context: &mut gpu::RecordingContext,
-        layer: gpu::mtl::Handle,
-        origin: gpu::SurfaceOrigin,
-        sample_cnt: impl Into<Option<usize>>,
-        color_type: crate::ColorType,
-        color_space: impl Into<Option<crate::ColorSpace>>,
-        surface_props: Option<&SurfaceProps>,
-        drawable: *mut gpu::mtl::Handle,
-    ) -> Option<Self> {
-        Self::from_ptr(sb::C_SkSurface_MakeFromCAMetalLayer(
-            context.native_mut(),
-            layer,
-            origin,
-            sample_cnt.into().unwrap_or(0).try_into().unwrap(),
-            color_type.into_native(),
-            color_space.into().into_ptr_or_null(),
-            surface_props.native_ptr_or_null(),
-            drawable,
-        ))
-    }
+    // Creates [`Surface`] from CAMetalLayer.
+    // Returned [`Surface`] takes a reference on the CAMetalLayer. The ref on the layer will be
+    // released when the [`Surface`] is destroyed.
+    //
+    // Only available when Metal API is enabled.
+    //
+    // Will grab the current drawable from the layer and use its texture as a `backend_rt` to
+    // create a renderable surface.
+    //
+    // * `context` - GPU context
+    // * `layer` - [`gpu::mtl::Handle`] (expected to be a CAMetalLayer*)
+    // * `sample_cnt` - samples per pixel, or 0 to disable full scene anti-aliasing
+    // * `color_space` - range of colors; may be `None`
+    // * `surface_props` - LCD striping orientation and setting for device independent
+    //                        fonts; may be `None`
+    // * `drawable` - Pointer to drawable to be filled in when this surface is
+    //                        instantiated; may not be `None`
+    // Returns: created [`Surface`], or `None`
+    // #[allow(clippy::missing_safety_doc)]
+    // #[allow(clippy::too_many_arguments)]
+    // #[cfg(feature = "metal")]
+    // pub unsafe fn from_ca_metal_layer(
+    //     context: &mut gpu::RecordingContext,
+    //     layer: gpu::mtl::Handle,
+    //     origin: gpu::SurfaceOrigin,
+    //     sample_cnt: impl Into<Option<usize>>,
+    //     color_type: crate::ColorType,
+    //     color_space: impl Into<Option<crate::ColorSpace>>,
+    //     surface_props: Option<&SurfaceProps>,
+    //     drawable: *mut gpu::mtl::Handle,
+    // ) -> Option<Self> {
+    //     Self::from_ptr(sb::C_SkSurface_MakeFromCAMetalLayer(
+    //         context.native_mut(),
+    //         layer,
+    //         origin,
+    //         sample_cnt.into().unwrap_or(0).try_into().unwrap(),
+    //         color_type.into_native(),
+    //         color_space.into().into_ptr_or_null(),
+    //         surface_props.native_ptr_or_null(),
+    //         drawable,
+    //     ))
+    // }
 
-    #[allow(clippy::missing_safety_doc)]
-    #[cfg(feature = "metal")]
-    #[deprecated(since = "0.36.0", note = "use from_mtk_view()")]
-    pub unsafe fn from_ca_mtk_view(
-        context: &mut gpu::DirectContext,
-        mtk_view: gpu::mtl::Handle,
-        origin: gpu::SurfaceOrigin,
-        sample_count: impl Into<Option<usize>>,
-        color_type: crate::ColorType,
-        color_space: impl Into<Option<crate::ColorSpace>>,
-        surface_props: Option<&SurfaceProps>,
-    ) -> Option<Self> {
-        Self::from_mtk_view(
-            context,
-            mtk_view,
-            origin,
-            sample_count,
-            color_type,
-            color_space,
-            surface_props,
-        )
-    }
+    // #[allow(clippy::missing_safety_doc)]
+    // #[cfg(feature = "metal")]
+    // #[deprecated(since = "0.36.0", note = "use from_mtk_view()")]
+    // pub unsafe fn from_ca_mtk_view(
+    //     context: &mut gpu::DirectContext,
+    //     mtk_view: gpu::mtl::Handle,
+    //     origin: gpu::SurfaceOrigin,
+    //     sample_count: impl Into<Option<usize>>,
+    //     color_type: crate::ColorType,
+    //     color_space: impl Into<Option<crate::ColorSpace>>,
+    //     surface_props: Option<&SurfaceProps>,
+    // ) -> Option<Self> {
+    //     Self::from_mtk_view(
+    //         context,
+    //         mtk_view,
+    //         origin,
+    //         sample_count,
+    //         color_type,
+    //         color_space,
+    //         surface_props,
+    //     )
+    // }
 
-    /// Creates [`Surface`] from MTKView.
-    /// Returned [`Surface`] takes a reference on the `MTKView`. The ref on the layer will be
-    /// released when the [`Surface`] is destroyed.
-    ///
-    /// Only available when Metal API is enabled.
-    ///
-    /// Will grab the current drawable from the layer and use its texture as a `backend_rt` to
-    /// create a renderable surface.
-    ///
-    /// * `context` - GPU context
-    /// * `layer` - [`gpu::mtl::Handle`] (expected to be a `MTKView*`)
-    /// * `sample_cnt` - samples per pixel, or 0 to disable full scene anti-aliasing
-    /// * `color_space` - range of colors; may be `None`
-    /// * `surface_props` - LCD striping orientation and setting for device independent
-    ///                        fonts; may be `None`
-    /// Returns: created [`Surface`], or `None`
-    #[allow(clippy::missing_safety_doc)]
-    #[cfg(feature = "metal")]
-    pub unsafe fn from_mtk_view(
-        context: &mut gpu::RecordingContext,
-        mtk_view: gpu::mtl::Handle,
-        origin: gpu::SurfaceOrigin,
-        sample_count: impl Into<Option<usize>>,
-        color_type: crate::ColorType,
-        color_space: impl Into<Option<crate::ColorSpace>>,
-        surface_props: Option<&SurfaceProps>,
-    ) -> Option<Self> {
-        Self::from_ptr(sb::C_SkSurface_MakeFromMTKView(
-            context.native_mut(),
-            mtk_view,
-            origin,
-            sample_count.into().unwrap_or(0).try_into().unwrap(),
-            color_type.into_native(),
-            color_space.into().into_ptr_or_null(),
-            surface_props.native_ptr_or_null(),
-        ))
-    }
+    // Creates [`Surface`] from MTKView.
+    // Returned [`Surface`] takes a reference on the `MTKView`. The ref on the layer will be
+    // released when the [`Surface`] is destroyed.
+    //
+    // Only available when Metal API is enabled.
+    //
+    // Will grab the current drawable from the layer and use its texture as a `backend_rt` to
+    // create a renderable surface.
+    //
+    // * `context` - GPU context
+    // * `layer` - [`gpu::mtl::Handle`] (expected to be a `MTKView*`)
+    // * `sample_cnt` - samples per pixel, or 0 to disable full scene anti-aliasing
+    // * `color_space` - range of colors; may be `None`
+    // * `surface_props` - LCD striping orientation and setting for device independent
+    //                        fonts; may be `None`
+    // Returns: created [`Surface`], or `None`
+    // #[allow(clippy::missing_safety_doc)]
+    // #[cfg(feature = "metal")]
+    // pub unsafe fn from_mtk_view(
+    //     context: &mut gpu::RecordingContext,
+    //     mtk_view: gpu::mtl::Handle,
+    //     origin: gpu::SurfaceOrigin,
+    //     sample_count: impl Into<Option<usize>>,
+    //     color_type: crate::ColorType,
+    //     color_space: impl Into<Option<crate::ColorSpace>>,
+    //     surface_props: Option<&SurfaceProps>,
+    // ) -> Option<Self> {
+    //     Self::from_ptr(sb::C_SkSurface_MakeFromMTKView(
+    //         context.native_mut(),
+    //         mtk_view,
+    //         origin,
+    //         sample_count.into().unwrap_or(0).try_into().unwrap(),
+    //         color_type.into_native(),
+    //         color_space.into().into_ptr_or_null(),
+    //         surface_props.native_ptr_or_null(),
+    //     ))
+    // }
 }
 
 impl Surface {
@@ -995,57 +995,57 @@ impl Surface {
         self.flush_with_mutable_state(&info, None);
     }
 
-    /// Issues pending [`Surface`] commands to the GPU-backed API objects and resolves any [`Surface`]
-    /// MSAA. A call to [`gpu::DirectContext::submit`] is always required to ensure work is actually sent
-    /// to the gpu. Some specific API details:
-    ///     GL: Commands are actually sent to the driver, but `gl_flush` is never called. Thus some
-    ///         sync objects from the flush will not be valid until a submission occurs.
-    ///
-    ///     Vulkan/Metal/D3D/Dawn: Commands are recorded to the backend APIs corresponding command
-    ///         buffer or encoder objects. However, these objects are not sent to the gpu until a
-    ///         submission occurs.
-    ///
-    /// The work that is submitted to the GPU will be dependent on the BackendSurfaceAccess that is
-    /// passed in.
-    ///
-    /// If [`BackendSurfaceAccess::NoAccess`] is passed in all commands will be issued to the GPU.
-    ///
-    /// If [`BackendSurfaceAccess::Present`] is passed in and the backend API is not Vulkan, it is
-    /// treated the same as `k_no_access`. If the backend API is Vulkan, the VkImage that backs the
-    /// [`Surface`] will be transferred back to its original queue. If the [`Surface`] was created by
-    /// wrapping a VkImage, the queue will be set to the queue which was originally passed in on
-    /// the [`gpu::vk::ImageInfo`]. Additionally, if the original queue was not external or foreign the
-    /// layout of the VkImage will be set to `VK_IMAGE_LAYOUT_PRESENT_SRC_KHR`.
-    ///
-    /// The [`gpu::FlushInfo`] describes additional options to flush. Please see documentation at
-    /// [`gpu::FlushInfo`] for more info.
-    ///
-    /// If the return is [`gpu::SemaphoresSubmitted::Yes`], only initialized `BackendSemaphores` will be
-    /// submitted to the gpu during the next submit call (it is possible Skia failed to create a
-    /// subset of the semaphores). The client should not wait on these semaphores until after submit
-    /// has been called, but must keep them alive until then. If a submit flag was passed in with
-    /// the flush these valid semaphores can we waited on immediately. If this call returns
-    /// [`gpu::SemaphoresSubmitted::No`], the GPU backend will not submit any semaphores to be signaled on
-    /// the GPU. Thus the client should not have the GPU wait on any of the semaphores passed in
-    /// with the [`gpu::FlushInfo`]. Regardless of whether semaphores were submitted to the GPU or not, the
-    /// client is still responsible for deleting any initialized semaphores.
-    /// Regardless of semaphore submission the context will still be flushed. It should be
-    /// emphasized that a return value of [`gpu::SemaphoresSubmitted::No`] does not mean the flush did not
-    /// happen. It simply means there were no semaphores submitted to the GPU. A caller should only
-    /// take this as a failure if they passed in semaphores to be submitted.
-    ///
-    /// Pending surface commands are flushed regardless of the return result.
-    ///
-    /// * `access` - type of access the call will do on the backend object after flush
-    /// * `info` - flush options
-    #[cfg(feature = "gpu")]
-    pub fn flush_with_access_info(
-        &mut self,
-        access: BackendSurfaceAccess,
-        info: &gpu::FlushInfo,
-    ) -> gpu::SemaphoresSubmitted {
-        unsafe { self.native_mut().flush(access, info.native()) }
-    }
+    // Issues pending [`Surface`] commands to the GPU-backed API objects and resolves any [`Surface`]
+    // MSAA. A call to [`gpu::DirectContext::submit`] is always required to ensure work is actually sent
+    // to the gpu. Some specific API details:
+    //     GL: Commands are actually sent to the driver, but `gl_flush` is never called. Thus some
+    //         sync objects from the flush will not be valid until a submission occurs.
+    //
+    //     Vulkan/Metal/D3D/Dawn: Commands are recorded to the backend APIs corresponding command
+    //         buffer or encoder objects. However, these objects are not sent to the gpu until a
+    //         submission occurs.
+    //
+    // The work that is submitted to the GPU will be dependent on the BackendSurfaceAccess that is
+    // passed in.
+    //
+    // If [`BackendSurfaceAccess::NoAccess`] is passed in all commands will be issued to the GPU.
+    //
+    // If [`BackendSurfaceAccess::Present`] is passed in and the backend API is not Vulkan, it is
+    // treated the same as `k_no_access`. If the backend API is Vulkan, the VkImage that backs the
+    // [`Surface`] will be transferred back to its original queue. If the [`Surface`] was created by
+    // wrapping a VkImage, the queue will be set to the queue which was originally passed in on
+    // the [`gpu::vk::ImageInfo`]. Additionally, if the original queue was not external or foreign the
+    // layout of the VkImage will be set to `VK_IMAGE_LAYOUT_PRESENT_SRC_KHR`.
+    //
+    // The [`gpu::FlushInfo`] describes additional options to flush. Please see documentation at
+    // [`gpu::FlushInfo`] for more info.
+    //
+    // If the return is [`gpu::SemaphoresSubmitted::Yes`], only initialized `BackendSemaphores` will be
+    // submitted to the gpu during the next submit call (it is possible Skia failed to create a
+    // subset of the semaphores). The client should not wait on these semaphores until after submit
+    // has been called, but must keep them alive until then. If a submit flag was passed in with
+    // the flush these valid semaphores can we waited on immediately. If this call returns
+    // [`gpu::SemaphoresSubmitted::No`], the GPU backend will not submit any semaphores to be signaled on
+    // the GPU. Thus the client should not have the GPU wait on any of the semaphores passed in
+    // with the [`gpu::FlushInfo`]. Regardless of whether semaphores were submitted to the GPU or not, the
+    // client is still responsible for deleting any initialized semaphores.
+    // Regardless of semaphore submission the context will still be flushed. It should be
+    // emphasized that a return value of [`gpu::SemaphoresSubmitted::No`] does not mean the flush did not
+    // happen. It simply means there were no semaphores submitted to the GPU. A caller should only
+    // take this as a failure if they passed in semaphores to be submitted.
+    //
+    // Pending surface commands are flushed regardless of the return result.
+    //
+    // * `access` - type of access the call will do on the backend object after flush
+    // * `info` - flush options
+    // #[cfg(feature = "gpu")]
+    // pub fn flush_with_access_info(
+    //     &mut self,
+    //     access: BackendSurfaceAccess,
+    //     info: &gpu::FlushInfo,
+    // ) -> gpu::SemaphoresSubmitted {
+    //     unsafe { self.native_mut().flush(access, info.native()) }
+    // }
 
     /// Issues pending [`Surface`] commands to the GPU-backed API objects and resolves any [`Surface`]
     /// MSAA. A call to [`gpu::DirectContext::submit`] is always required to ensure work is actually sent
@@ -1120,44 +1120,44 @@ impl Surface {
         unsafe { self.native().characterize(sc.native_mut()) }.if_true_some(sc)
     }
 
-    /// Draws the deferred display list created via a [`crate::DeferredDisplayListRecorder`].
-    /// If the deferred display list is not compatible with this [`Surface`], the draw is skipped
-    /// and `false` is return.
-    ///
-    /// The `offset.x` and `offset.y` parameters are experimental and, if not both zero, will cause
-    /// the draw to be ignored.
-    /// When implemented, if `offset.x` or `offset.y` are non-zero, the DDL will be drawn offset by that
-    /// amount into the surface.
-    ///
-    /// * `deferred_display_list` - drawing commands
-    /// * `offset.x` - x-offset at which to draw the DDL
-    /// * `offset.y` - y-offset at which to draw the DDL
-    /// Returns: `false` if `deferred_display_list` is not compatible
-    ///
-    /// example: <https://fiddle.skia.org/c/@Surface_draw_2>
-    pub fn draw_display_list_with_offset(
-        &mut self,
-        deferred_display_list: impl Into<DeferredDisplayList>,
-        offset: impl Into<IVector>,
-    ) -> bool {
-        let offset = offset.into();
-        unsafe {
-            sb::C_SkSurface_draw(
-                self.native_mut(),
-                deferred_display_list.into().into_ptr() as *const _,
-                offset.x,
-                offset.y,
-            )
-        }
-    }
+    // Draws the deferred display list created via a [`crate::DeferredDisplayListRecorder`].
+    // If the deferred display list is not compatible with this [`Surface`], the draw is skipped
+    // and `false` is return.
+    //
+    // The `offset.x` and `offset.y` parameters are experimental and, if not both zero, will cause
+    // the draw to be ignored.
+    // When implemented, if `offset.x` or `offset.y` are non-zero, the DDL will be drawn offset by that
+    // amount into the surface.
+    //
+    // * `deferred_display_list` - drawing commands
+    // * `offset.x` - x-offset at which to draw the DDL
+    // * `offset.y` - y-offset at which to draw the DDL
+    // Returns: `false` if `deferred_display_list` is not compatible
+    //
+    // example: <https://fiddle.skia.org/c/@Surface_draw_2>
+    // pub fn draw_display_list_with_offset(
+    //     &mut self,
+    //     deferred_display_list: impl Into<DeferredDisplayList>,
+    //     offset: impl Into<IVector>,
+    // ) -> bool {
+    //     let offset = offset.into();
+    //     unsafe {
+    //         sb::C_SkSurface_draw(
+    //             self.native_mut(),
+    //             deferred_display_list.into().into_ptr() as *const _,
+    //             offset.x,
+    //             offset.y,
+    //         )
+    //     }
+    // }
 
-    /// See [`Self::draw_display_list_with_offset`].
-    pub fn draw_display_list(
-        &mut self,
-        deferred_display_list: impl Into<DeferredDisplayList>,
-    ) -> bool {
-        self.draw_display_list_with_offset(deferred_display_list, IVector::default())
-    }
+    // See [`Self::draw_display_list_with_offset`].
+    // pub fn draw_display_list(
+    //     &mut self,
+    //     deferred_display_list: impl Into<DeferredDisplayList>,
+    // ) -> bool {
+    //     self.draw_display_list_with_offset(deferred_display_list, IVector::default())
+    // }
 }
 
 #[test]

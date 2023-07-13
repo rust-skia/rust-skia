@@ -293,7 +293,7 @@ impl Typeface {
     // TODO: createScalerContext()
 
     pub fn bounds(&self) -> Rect {
-        Rect::from_native_c(unsafe { sb::C_SkTypeface_getBounds(self.native()) })
+        Rect::construct(|r| unsafe { sb::C_SkTypeface_getBounds(self.native(), r) })
     }
 
     // TODO: Register()

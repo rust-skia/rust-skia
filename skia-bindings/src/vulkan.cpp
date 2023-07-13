@@ -4,6 +4,7 @@
 
 #include "include/gpu/GrBackendDrawableInfo.h"
 #include "include/gpu/GrBackendSurface.h"
+#include "include/gpu/GrBackendSurfaceMutableState.h"
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/vk/GrVkTypes.h"
 #include "include/gpu/vk/GrVkBackendContext.h"

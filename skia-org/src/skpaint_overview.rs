@@ -1,9 +1,9 @@
 use crate::{resources, DrawingDriver};
 use skia_safe::{
     color_filters, corner_path_effect, dash_path_effect, discrete_path_effect, gradient_shader,
-    line_2d_path_effect, paint, path_1d_path_effect, path_2d_path_effect, perlin_noise_shader,
-    scalar, shaders, AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color, Font, MaskFilter,
-    Matrix, Paint, Path, PathEffect, Point, Rect, SamplingOptions, TextBlob, TileMode, Typeface,
+    line_2d_path_effect, paint, path_1d_path_effect, path_2d_path_effect, scalar,
+    AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color, Font, MaskFilter, Matrix, Paint, Path,
+    PathEffect, Point, Rect, SamplingOptions, TextBlob, TileMode, Typeface,
 };
 use std::path;
 
@@ -26,17 +26,17 @@ pub fn draw(driver: &mut impl DrawingDriver, path: &path::Path) {
         draw_two_point_conical_shader,
     );
     driver.draw_image_256(path, "08-sweep-gradient-shader", draw_sweep_gradient_shader);
-    driver.draw_image_256(
-        path,
-        "09-fractal-perlin-noise-shader",
-        draw_fractal_perlin_noise_shader,
-    );
-    driver.draw_image_256(
-        path,
-        "10-turbulence-perlin-noise-shader",
-        draw_turbulence_perlin_noise_shader,
-    );
-    driver.draw_image_256(path, "11-compose-shader", draw_compose_shader);
+    // driver.draw_image_256(
+    //     path,
+    //     "09-fractal-perlin-noise-shader",
+    //     draw_fractal_perlin_noise_shader,
+    // );
+    // driver.draw_image_256(
+    //     path,
+    //     "10-turbulence-perlin-noise-shader",
+    //     draw_turbulence_perlin_noise_shader,
+    // );
+    // driver.draw_image_256(path, "11-compose-shader", draw_compose_shader);
     driver.draw_image_256(path, "12-mask-filter", draw_mask_filter);
     driver.draw_image((256, 128), path, "13-color-filter", draw_color_filter);
     driver.draw_image_256(path, "14-table-color-filter", draw_color_table_color_filter);
@@ -275,44 +275,44 @@ fn draw_sweep_gradient_shader(canvas: &mut Canvas) {
     canvas.draw_paint(paint);
 }
 
-fn draw_fractal_perlin_noise_shader(canvas: &mut Canvas) {
-    canvas.clear(Color::WHITE);
-    let paint = &mut Paint::default();
-    paint.set_shader(perlin_noise_shader::fractal_noise(
-        (0.05, 0.05),
-        4,
-        0.0,
-        None,
-    ));
-    canvas.draw_paint(paint);
-}
+// fn draw_fractal_perlin_noise_shader(canvas: &mut Canvas) {
+//     canvas.clear(Color::WHITE);
+//     let paint = &mut Paint::default();
+//     paint.set_shader(perlin_noise_shader::fractal_noise(
+//         (0.05, 0.05),
+//         4,
+//         0.0,
+//         None,
+//     ));
+//     canvas.draw_paint(paint);
+// }
 
-fn draw_turbulence_perlin_noise_shader(canvas: &mut Canvas) {
-    canvas.clear(Color::WHITE);
-    let paint = &mut Paint::default();
-    paint.set_shader(perlin_noise_shader::turbulence((0.05, 0.05), 4, 0.0, None));
-    canvas.draw_paint(paint);
-}
+// fn draw_turbulence_perlin_noise_shader(canvas: &mut Canvas) {
+//     canvas.clear(Color::WHITE);
+//     let paint = &mut Paint::default();
+//     paint.set_shader(perlin_noise_shader::turbulence((0.05, 0.05), 4, 0.0, None));
+//     canvas.draw_paint(paint);
+// }
 
-fn draw_compose_shader(canvas: &mut Canvas) {
-    let colors = [Color::BLUE, Color::YELLOW];
-    let paint = &mut Paint::default();
-    paint.set_shader(shaders::blend(
-        BlendMode::Difference,
-        gradient_shader::radial(
-            (128.0, 128.0),
-            180.0,
-            colors.as_ref(),
-            None,
-            TileMode::Clamp,
-            None,
-            None,
-        )
-        .unwrap(),
-        perlin_noise_shader::turbulence((0.025, 0.025), 2, 0.0, None).unwrap(),
-    ));
-    canvas.draw_paint(paint);
-}
+// fn draw_compose_shader(canvas: &mut Canvas) {
+//     let colors = [Color::BLUE, Color::YELLOW];
+//     let paint = &mut Paint::default();
+//     paint.set_shader(shaders::blend(
+//         BlendMode::Difference,
+//         gradient_shader::radial(
+//             (128.0, 128.0),
+//             180.0,
+//             colors.as_ref(),
+//             None,
+//             TileMode::Clamp,
+//             None,
+//             None,
+//         )
+//         .unwrap(),
+//         perlin_noise_shader::turbulence((0.025, 0.025), 2, 0.0, None).unwrap(),
+//     ));
+//     canvas.draw_paint(paint);
+// }
 
 fn draw_mask_filter(canvas: &mut Canvas) {
     // TODO: make BlendMode optional in draw_color.
