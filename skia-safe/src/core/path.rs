@@ -771,6 +771,7 @@ impl Path {
     /// example: <https://fiddle.skia.org/c/@Path_isLine>
     pub fn is_line(&self) -> Option<(Point, Point)> {
         let mut line = [Point::default(); 2];
+        #[allow(clippy::tuple_array_conversions)]
         unsafe { self.native().isLine(line.native_mut().as_mut_ptr()) }
             .if_true_some((line[0], line[1]))
     }

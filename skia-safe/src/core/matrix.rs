@@ -768,6 +768,7 @@ impl Matrix {
     pub fn min_max_scales(&self) -> (scalar, scalar) {
         let mut r: [scalar; 2] = Default::default();
         unsafe { self.native().getMinMaxScales(r.as_mut_ptr()) };
+        #[allow(clippy::tuple_array_conversions)]
         (r[0], r[1])
     }
 

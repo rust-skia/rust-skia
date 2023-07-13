@@ -71,6 +71,7 @@ impl Shader {
                 self.native()
                     .isAImage(matrix.native_mut(), tile_mode.as_mut_ptr()),
             );
+            #[allow(clippy::tuple_array_conversions)]
             image.map(|i| (i, matrix, (tile_mode[0], tile_mode[1])))
         }
     }
