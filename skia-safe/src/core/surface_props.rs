@@ -55,7 +55,7 @@ impl Default for SurfacePropsFlags {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct SurfaceProps(SkSurfaceProps);
 
