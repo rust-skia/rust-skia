@@ -805,7 +805,7 @@ pub(crate) mod definitions {
     }
 
     fn combine(a: Definitions, b: Definitions) -> Definitions {
-        remove_duplicates(a.into_iter().chain(b.into_iter()).collect())
+        remove_duplicates(a.into_iter().chain(b).collect())
     }
 
     fn remove_duplicates(mut definitions: Definitions) -> Definitions {
