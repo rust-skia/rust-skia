@@ -20,7 +20,7 @@ extern "C" void C_GrBackendFormat_ConstructVk2(GrBackendFormat* uninitialized, c
     new(uninitialized)GrBackendFormat(GrBackendFormat::MakeVk(*ycbcrInfo, willUseDRMFormatModifiers));
 }
 
-extern "C" GrBackendTexture* C_GrBackendTexture_NewVk(
+extern "C" GrBackendTexture* C_GrBackendTexture_newVk(
     int width, int height,
     const GrVkImageInfo* vkInfo,
     const char* label,
@@ -41,7 +41,7 @@ extern "C" void C_GPU_VK_Types(GrVkExtensionFlags *, GrVkFeatureFlags *, VkBuffe
 typedef PFN_vkVoidFunction (*GetProcFn)(const char* name, VkInstance instance, VkDevice device);
 typedef const void* (*GetProcFnVoidPtr)(const char* name, VkInstance instance, VkDevice device);
 
-extern "C" void *C_GrVkBackendContext_New(
+extern "C" void *C_GrVkBackendContext_new(
     void *instance,
     void *physicalDevice,
     void *device,
@@ -71,7 +71,7 @@ extern "C" void *C_GrVkBackendContext_New(
     return &context;
 }
 
-extern "C" void C_GrVkBackendContext_Delete(void* vkBackendContext) {
+extern "C" void C_GrVkBackendContext_delete(void* vkBackendContext) {
     auto bc = static_cast<GrVkBackendContext*>(vkBackendContext);
     if (bc) {
         delete bc->fVkExtensions;

@@ -142,7 +142,7 @@ extern "C" {
     void C_StrutStyle_CopyConstruct(StrutStyle* uninitialized, const StrutStyle* other) {
         new(uninitialized) StrutStyle(*other);
     }
-    
+
     void C_StrutStyle_destruct(StrutStyle* self) {
         self->~StrutStyle();
     }
@@ -163,11 +163,11 @@ extern "C" {
 }
 
 extern "C" {
-    ParagraphStyle* C_ParagraphStyle_New() {
+    ParagraphStyle* C_ParagraphStyle_new() {
         return new ParagraphStyle();
     }
 
-    ParagraphStyle* C_ParagraphStyle_NewCopy(const ParagraphStyle* other) {
+    ParagraphStyle* C_ParagraphStyle_newCopy(const ParagraphStyle* other) {
         return new ParagraphStyle(*other);
     }
 
@@ -274,6 +274,12 @@ extern "C" {
         return self->unresolvedGlyphs();
     }
 
+    void C_Paragraph_unresolvedCodepoints(Paragraph* self, VecSink<SkUnichar>* result) {
+        auto set = self->unresolvedCodepoints();
+        std::vector<SkUnichar> vec(set.begin(), set.end());
+        result->set(vec);
+    }
+
     int C_Paragraph_getLineNumberAt(const Paragraph* self, TextIndex codeUnitIndex) {
         return self->getLineNumberAt(codeUnitIndex);
     }
@@ -350,6 +356,16 @@ extern "C" {
         return self->Build().release();
     }
 
+    void C_ParagraphBuilder_getText(ParagraphBuilder* self, char** text, size_t* len) {
+        auto span = self->getText();
+        *text = span.data();
+        *len = span.size();
+    }
+
+    ParagraphStyle* C_ParagraphBuilder_getParagraphStyle(const ParagraphBuilder* self) {
+        return new ParagraphStyle(self->getParagraphStyle());
+    }
+
     void C_ParagraphBuilder_Reset(ParagraphBuilder* self) {
         return self->Reset();
     }
@@ -395,18 +411,16 @@ extern "C" {
         new (uninitialized) SkPaint(self->getForeground());
     }
 
-    void C_TextStyle_setForegroundColor(TextStyle* self, const SkPaint* paint) {
-        SkPaint copy(*paint);
-        self->setForegroundColor(copy);
+    void C_TextStyle_setForegroundPaint(TextStyle* self, const SkPaint* paint) {
+        self->setForegroundPaint(*paint);
     }
 
     void C_TextStyle_getBackground(const TextStyle* self, SkPaint* uninitialized) {
         new (uninitialized) SkPaint(self->getBackground());
     }
 
-    void C_TextStyle_setBackgroundColor(TextStyle* self, const SkPaint* paint) {
-        SkPaint copy(*paint);
-        self->setBackgroundColor(copy);
+    void C_TextStyle_setBackgroundPaint(TextStyle* self, const SkPaint* paint) {
+        self->setBackgroundColor(*paint);
     }
 
     const TextShadow* C_TextStyle_getShadows(const std::vector<TextShadow>* self, size_t* len_ref) {

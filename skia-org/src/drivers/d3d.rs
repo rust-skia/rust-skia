@@ -1,10 +1,9 @@
-use crate::{artifact, drivers::DrawingDriver, Driver};
-use skia_safe::{
-    gpu,
-    gpu::{d3d, Budgeted, Protected},
-    Canvas, ImageInfo, Surface,
-};
 use std::{ffi, path::Path, ptr};
+
+use skia_safe::{
+    gpu::{self, d3d, Budgeted, Protected},
+    Canvas, ImageInfo,
+};
 use winapi::{
     shared::{
         dxgi,
@@ -15,6 +14,8 @@ use winapi::{
     Interface,
 };
 use wio::com::ComPtr;
+
+use crate::{artifact, drivers::DrawingDriver, Driver};
 
 pub struct D3D {
     context: gpu::DirectContext,
@@ -73,7 +74,7 @@ impl DrawingDriver for D3D {
         func: impl Fn(&mut Canvas),
     ) {
         let image_info = ImageInfo::new_n32_premul((width * 2, height * 2), None);
-        let mut surface = Surface::new_render_target(
+        let mut surface = gpu::surfaces::render_target(
             &mut self.context,
             Budgeted::Yes,
             &image_info,

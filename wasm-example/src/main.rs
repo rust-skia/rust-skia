@@ -58,6 +58,7 @@ fn create_gpu_state() -> GpuState {
         FramebufferInfo {
             fboid: fboid.try_into().unwrap(),
             format: skia_safe::gpu::gl::Format::RGBA8.into(),
+            protected: skia_safe::gpu::Protected::No,
         }
     };
 

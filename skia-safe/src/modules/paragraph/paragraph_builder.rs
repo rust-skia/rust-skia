@@ -1,7 +1,9 @@
+use std::{fmt, os::raw, ptr, str};
+
+use skia_bindings as sb;
+
 use super::{FontCollection, Paragraph, ParagraphStyle, PlaceholderStyle, TextStyle};
 use crate::prelude::*;
-use skia_bindings as sb;
-use std::{fmt, os::raw};
 
 pub type ParagraphBuilder = RefHandle<sb::skia_textlayout_ParagraphBuilder>;
 unsafe_send_sync!(ParagraphBuilder);
@@ -57,6 +59,23 @@ impl ParagraphBuilder {
     pub fn build(&mut self) -> Paragraph {
         Paragraph::from_ptr(unsafe { sb::C_ParagraphBuilder_Build(self.native_mut()) }).unwrap()
     }
+
+    pub fn get_text(&mut self) -> &str {
+        unsafe {
+            let mut ptr = ptr::null_mut();
+            let mut len = 0;
+            sb::C_ParagraphBuilder_getText(self.native_mut(), &mut ptr, &mut len);
+            // ptr may indeed be `null` if there is no text.
+            str::from_utf8_unchecked(safer::from_raw_parts(ptr as *const u8, len))
+        }
+    }
+
+    pub fn get_paragraph_style(&self) -> ParagraphStyle {
+        ParagraphStyle::from_ptr(unsafe { sb::C_ParagraphBuilder_getParagraphStyle(self.native()) })
+            .unwrap()
+    }
+
+    // TODO: Wrap SetWords*, SetGraphemeBreaks*, setLineBreaks*, setUnicode.
 
     pub fn reset(&mut self) {
         unsafe { sb::C_ParagraphBuilder_Reset(self.native_mut()) }

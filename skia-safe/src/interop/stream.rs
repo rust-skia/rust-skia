@@ -7,7 +7,7 @@ use crate::{prelude::*, Data};
 use skia_bindings::{
     self as sb, SkDynamicMemoryWStream, SkMemoryStream, SkStream, SkStreamAsset, SkWStream,
 };
-use std::{ffi, fmt, io, marker::PhantomData, ptr};
+use std::{ffi, fmt, io, marker::PhantomData, mem, ptr};
 
 /// Trait representing an Skia allocated Stream type with a base class of SkStream.
 #[repr(transparent)]
@@ -41,7 +41,9 @@ impl NativeStreamBase for SkStreamAsset {
     }
 }
 
-impl NativeAccess<SkStreamAsset> for StreamAsset {
+impl NativeAccess for StreamAsset {
+    type Native = SkStreamAsset;
+
     fn native(&self) -> &SkStreamAsset {
         unsafe { self.0.as_ref() }
     }
@@ -78,7 +80,9 @@ impl Drop for MemoryStream<'_> {
     }
 }
 
-impl NativeAccess<SkMemoryStream> for MemoryStream<'_> {
+impl NativeAccess for MemoryStream<'_> {
+    type Native = SkMemoryStream;
+
     fn native(&self) -> &SkMemoryStream {
         unsafe { self.native.as_ref() }
     }
@@ -166,7 +170,8 @@ impl DynamicMemoryWStream {
 
 #[allow(unused)]
 pub struct RustStream<'a> {
-    inner: Handle<sb::RustStream>,
+    // This can't be a handle, because we need to be able to create a "deletable" C++ SkStream*.
+    inner: RefHandle<sb::RustStream>,
     _phantom: PhantomData<&'a mut ()>,
 }
 
@@ -175,13 +180,19 @@ impl RustStream<'_> {
     pub fn stream_mut(&mut self) -> &mut SkStream {
         self.inner.native_mut().base_mut()
     }
+
+    pub fn into_native(mut self) -> *mut SkStream {
+        let stream = self.inner.native_mut().base_mut() as *mut _;
+        mem::forget(self.inner);
+        stream
+    }
 }
 
 impl NativeBase<SkStream> for sb::RustStream {}
 
 impl NativeDrop for sb::RustStream {
     fn drop(&mut self) {
-        unsafe { sb::C_RustStream_destruct(self) }
+        unsafe { sb::C_RustStream_delete(self) }
     }
 }
 
@@ -330,16 +341,16 @@ impl<'a> RustStream<'a> {
         }
 
         RustStream {
-            inner: Handle::construct(|ptr| unsafe {
-                sb::C_RustStream_construct(
-                    ptr,
+            inner: RefHandle::from_ptr(unsafe {
+                sb::C_RustStream_new(
                     val as *mut T as *mut ffi::c_void,
                     length,
                     Some(read_trampoline::<T>),
                     seek_start,
                     seek_current,
-                );
-            }),
+                )
+            })
+            .unwrap(),
             _phantom: PhantomData,
         }
     }

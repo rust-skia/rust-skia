@@ -56,6 +56,7 @@ variant_name!(Siting::Centered);
 pub fn subsampling_factors(subsampling: Subsampling) -> (i32, i32) {
     let mut factors: [i32; 2] = Default::default();
     unsafe { sb::C_SkYUVAInfo_SubsamplingFactors(subsampling.into_native(), &mut factors[0]) };
+    #[allow(clippy::tuple_array_conversions)]
     (factors[0], factors[1])
 }
 
@@ -76,6 +77,7 @@ pub fn plane_subsampling_factors(
             &mut factors[0],
         )
     };
+    #[allow(clippy::tuple_array_conversions)]
     (factors[0], factors[1])
 }
 

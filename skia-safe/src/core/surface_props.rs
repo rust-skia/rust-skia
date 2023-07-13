@@ -55,17 +55,11 @@ impl Default for SurfacePropsFlags {
     }
 }
 
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct SurfaceProps(SkSurfaceProps);
 
 native_transmutable!(SkSurfaceProps, SurfaceProps, surface_props_layout);
-
-impl Clone for SurfaceProps {
-    fn clone(&self) -> Self {
-        Self::from_native_c(unsafe { SkSurfaceProps::new2(self.native()) })
-    }
-}
 
 impl PartialEq for SurfaceProps {
     fn eq(&self, other: &Self) -> bool {

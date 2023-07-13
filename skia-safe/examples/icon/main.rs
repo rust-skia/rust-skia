@@ -7,17 +7,17 @@
 
 #![allow(clippy::many_single_char_names)]
 
+use std::{fs::File, io::Write};
+
+use skia_safe::{surfaces, Color, EncodedImageFormat};
+
 mod renderer;
+
 use renderer::render_frame;
 
 const USAGE: &str = r#"icon [size]
 With <size> parameter, produce a single PNG image.
 Without parameters, produce PNG frames for the whole animation."#;
-
-use std::fs::File;
-use std::io::Write;
-
-use skia_safe::{Color, EncodedImageFormat, Surface};
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -40,7 +40,7 @@ fn main() {
     let bpm = 60;
 
     let mut surface =
-        Surface::new_raster_n32_premul((size, size)).expect("No SKIA surface available.");
+        surfaces::raster_n32_premul((size, size)).expect("No SKIA surface available.");
 
     let mut frame: usize = 0;
     let mut frames_left = 1;

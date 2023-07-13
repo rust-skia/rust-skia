@@ -9,6 +9,18 @@
 #include "include/codec/SkCodec.h"
 #include "include/codec/SkCodecAnimation.h"
 #include "include/codec/SkPixmapUtils.h"
+
+#include "include/codec/SkBmpDecoder.h"
+#include "include/codec/SkGifDecoder.h"
+#include "include/codec/SkIcoDecoder.h"
+#include "include/codec/SkJpegDecoder.h"
+#include "include/codec/SkPngDecoder.h"
+#include "include/codec/SkWbmpDecoder.h"
+
+#if defined(SK_CODEC_DECODES_WEBP)
+#include "include/codec/SkWebpDecoder.h"
+#endif
+
 // core/
 #include "include/core/SkAnnotation.h"
 #include "include/core/SkBlendMode.h"
@@ -208,6 +220,71 @@ extern "C" void C_SkPixmapUtils_SwapWidthHeight(SkImageInfo* uninitialized, cons
 }
 
 //
+// codec/*Decoder.h
+//
+
+extern "C" bool C_SkBmpDecoder_IsBmp(const char* buf, size_t size) {
+    return SkBmpDecoder::IsBmp(buf, size);
+}
+
+
+extern "C" SkCodec* C_SkBmpDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
+    return SkBmpDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
+}
+
+extern "C" bool C_SkGifDecoder_IsGif(const char* buf, size_t size) {
+    return SkGifDecoder::IsGif(buf, size);
+}
+
+extern "C" SkCodec* C_SkGifDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
+    return SkGifDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
+}
+
+extern "C" bool C_SkIcoDecoder_IsIco(const char* buf, size_t size) {
+    return SkIcoDecoder::IsIco(buf, size);
+}
+
+extern "C" SkCodec* C_SkIcoDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
+    return SkIcoDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
+}
+
+extern "C" bool C_SkJpegDecoder_IsJpeg(const char* buf, size_t size) {
+    return SkJpegDecoder::IsJpeg(buf, size);
+}
+
+extern "C" SkCodec* C_SkJpegDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
+    return SkJpegDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
+}
+
+extern "C" bool C_SkPngDecoder_IsPng(const char* buf, size_t size) {
+    return SkPngDecoder::IsPng(buf, size);
+}
+
+extern "C" SkCodec* C_SkPngDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
+    return SkPngDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
+}
+
+extern "C" bool C_SkWbmpDecoder_IsWbmp(const char* buf, size_t size) {
+    return SkWbmpDecoder::IsWbmp(buf, size);
+}
+
+extern "C" SkCodec* C_SkWbmpDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
+    return SkWbmpDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
+}
+
+#if defined(SK_CODEC_DECODES_WEBP)
+
+extern "C" bool C_SkWebpDecoder_IsWebp(const char* buf, size_t size) {
+    return SkWebpDecoder::IsWebp(buf, size);
+}
+
+extern "C" SkCodec* C_SkWebpDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
+    return SkWebpDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
+}
+
+#endif
+
+//
 // core/
 //
 
@@ -250,20 +327,16 @@ extern "C" SkPoint C_SkCubicMap_computeFromT(const SkCubicMap* self, float t) {
 // core/SkSurface.h
 //
 
-extern "C" SkSurface* C_SkSurface_MakeRasterDirect(const SkImageInfo* imageInfo, void* pixels, size_t rowBytes, const SkSurfaceProps* surfaceProps) {
-    return SkSurface::MakeRasterDirect(*imageInfo, pixels, rowBytes, surfaceProps).release();
+extern "C" SkSurface* C_SkSurfaces_Null(int width, int height) {
+    return SkSurfaces::Null(width, height).release();
 }
 
-extern "C" SkSurface* C_SkSurface_MakeRaster(const SkImageInfo* imageInfo, size_t rowBytes, const SkSurfaceProps* surfaceProps) {
-    return SkSurface::MakeRaster(*imageInfo, rowBytes, surfaceProps).release();
+extern "C" SkSurface* C_SkSurfaces_Raster(const SkImageInfo* imageInfo, size_t rowBytes, const SkSurfaceProps* surfaceProps) {
+    return SkSurfaces::Raster(*imageInfo, rowBytes, surfaceProps).release();
 }
 
-extern "C" SkSurface* C_SkSurface_MakeRasterN32Premul(int width, int height, const SkSurfaceProps* surfaceProps) {
-    return SkSurface::MakeRasterN32Premul(width, height, surfaceProps).release();
-}
-
-extern "C" SkSurface* C_SkSurface_MakeNull(int width, int height) {
-    return SkSurface::MakeNull(width, height).release();
+extern "C" SkSurface* C_SkSurfaces_WrapPixels(const SkImageInfo* imageInfo, void* pixels, size_t rowBytes, const SkSurfaceProps* surfaceProps) {
+    return SkSurfaces::WrapPixels(*imageInfo, pixels, rowBytes, surfaceProps).release();
 }
 
 extern "C" int C_SkSurface_width(const SkSurface* self) {
@@ -406,7 +479,7 @@ extern "C" SkData* C_SkImage_refEncodedData(const SkImage* self) {
     return self->refEncodedData().release();
 }
 
-extern "C" SkImage* C_SkImage_makeSubset(const SkImage* self, const SkIRect* subset, GrDirectContext* direct) {
+extern "C" SkImage* C_SkImage_makeSubset(const SkImage* self, GrDirectContext* direct, const SkIRect* subset) {
     return self->makeSubset(*subset, direct).release();
 }
 
@@ -414,12 +487,12 @@ extern "C" SkImage* C_SkImage_withDefaultMipmaps(const SkImage* self) {
     return self->withDefaultMipmaps().release();
 }
 
-extern "C" SkImage* C_SkImage_makeNonTextureImage(const SkImage* self) {
-    return self->makeNonTextureImage().release();
+extern "C" SkImage* C_SkImage_makeNonTextureImage(const SkImage* self, GrDirectContext* context) {
+    return self->makeNonTextureImage(context).release();
 }
 
-extern "C" SkImage* C_SkImage_makeRasterImage(const SkImage* self, SkImage::CachingHint cachingHint) {
-    return self->makeRasterImage(cachingHint).release();
+extern "C" SkImage* C_SkImage_makeRasterImage(const SkImage* self, GrDirectContext* context, SkImage::CachingHint cachingHint) {
+    return self->makeRasterImage(context, cachingHint).release();
 }
 
 extern "C" SkImage *C_SkImage_makeWithFilter(const SkImage *self, GrRecordingContext *context,
@@ -429,8 +502,12 @@ extern "C" SkImage *C_SkImage_makeWithFilter(const SkImage *self, GrRecordingCon
     return self->makeWithFilter(context, filter, *subset, *clipBounds, outSubset, offset).release();
 }
 
-extern "C" SkImage* C_SkImage_makeColorSpace(const SkImage* self, SkColorSpace* target, GrDirectContext* direct) {
-    return self->makeColorSpace(sp(target), direct).release();
+extern "C" bool C_SkImage_isLazyGenerated(const SkImage* self) {
+    return self->isLazyGenerated();
+}
+
+extern "C" SkImage* C_SkImage_makeColorSpace(const SkImage* self, GrDirectContext* direct, SkColorSpace* target) {
+    return self->makeColorSpace(direct, sp(target)).release();
 }
 
 extern "C" SkImage* C_SkImage_reinterpretColorSpace(const SkImage* self, SkColorSpace* newColorSpace) {
@@ -1810,6 +1887,10 @@ extern "C" SkDrawable* C_SkDrawable_Deserialize(const void* data, size_t length)
     return SkDrawable::Deserialize(data, length).release();
 }
 
+extern "C" SkPicture* C_SkDrawable_makePictureSnapshot(SkDrawable* self) {
+    return self->makePictureSnapshot().release();
+}
+
 extern "C" SkRect C_SkDrawable_getBounds(SkDrawable* self) {
     return self->getBounds();
 }
@@ -1861,10 +1942,6 @@ extern "C" void C_SkImageGenerator_delete(SkImageGenerator *self) {
 
 extern "C" SkData *C_SkImageGenerator_refEncodedData(SkImageGenerator *self) {
     return self->refEncodedData().release();
-}
-
-extern "C" SkImageGenerator *C_SkImageGenerator_MakeFromEncoded(SkData *data, const SkAlphaType* alphaType) {
-    return SkImageGenerator::MakeFromEncoded(sp(data), opt(alphaType)).release();
 }
 
 extern "C" bool C_SkImageGenerator_isTextureGenerator(const SkImageGenerator *self) {
@@ -2621,16 +2698,29 @@ SkImageFilter *C_SkImageFilters_DropShadowOnly(SkScalar dx, SkScalar dy,
     return SkImageFilters::DropShadowOnly(dx, dy, sigmaX, sigmaY, color, sp(input), *cropRect).release();
 }
 
-SkImageFilter *C_SkImageFilters_Image(SkImage *image, const SkRect *srcRect,
-                                      const SkRect *dstRect, const SkSamplingOptions *sampling)
+SkImageFilter *C_SkImageFilters_Image(
+    SkImage *image, const SkRect *srcRect,
+    const SkRect *dstRect, const SkSamplingOptions *sampling)
 {
     return SkImageFilters::Image(sp(image), *srcRect, *dstRect, *sampling).release();
 }
 
-SkImageFilter *C_SkImageFilters_Magnifier(const SkRect *srcRect, SkScalar inset,
-                                          SkImageFilter *input,
-                                          const SkImageFilters::CropRect *cropRect) {
+SkImageFilter *C_SkImageFilters_Magnifier(
+    const SkRect *srcRect, SkScalar inset,
+    SkImageFilter *input,
+    const SkImageFilters::CropRect *cropRect) {
     return SkImageFilters::Magnifier(*srcRect, inset, sp(input), *cropRect).release();
+}
+
+SkImageFilter *C_SkImageFilters_Magnifier2(
+    const SkRect *lensBounds,
+    SkScalar zoomAmount,
+    SkScalar inset,
+    const SkSamplingOptions *sampling,
+    SkImageFilter *input,
+    const SkImageFilters::CropRect &cropRect)
+{
+    return SkImageFilters::Magnifier(*lensBounds, zoomAmount, inset, *sampling, sp(input), cropRect).release();
 }
 
 SkImageFilter *C_SkImageFilters_MatrixConvolution(const SkISize *kernelSize,
@@ -2816,7 +2906,7 @@ extern "C" void C_SkPDF_AttributeList_appendFloatArray(SkPDF::AttributeList *sel
     self->appendFloatArray(owner, name, v);
 }
 
-extern "C" SkPDF::StructureElementNode *C_SkPDF_StructureElementNode_New() {
+extern "C" SkPDF::StructureElementNode *C_SkPDF_StructureElementNode_new() {
     return new SkPDF::StructureElementNode();
 }
 
@@ -3039,21 +3129,21 @@ bool RustStream::isAtEnd() const {
     return this->m_isEof;
 }
 
-extern "C" void C_RustStream_construct(
-    RustStream *out,
+extern "C" RustStream* C_RustStream_new(
     void *data,
     size_t length,
     size_t (*read)(void *, void *, size_t),
     bool (*seekAbsolute)(void *, size_t),
     bool (*seekRelative)(void *, long)
 ) {
-    new(out) RustStream(data, length, read, seekAbsolute, seekRelative);
+    return new RustStream(data, length, read, seekAbsolute, seekRelative);
 }
 
-extern "C" void C_RustStream_destruct(
+extern "C" void C_RustStream_delete(
     RustStream *stream
 ) {
-    stream->~RustStream();
+
+    delete stream;
 }
 
 class RustWStream : public SkWStream {

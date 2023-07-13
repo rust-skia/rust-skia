@@ -151,7 +151,7 @@ pub use scalar_::*;
 pub use shader::{shaders, Shader};
 pub use size::*;
 pub use stroke_rec::StrokeRec;
-pub use surface::Surface;
+pub use surface::{surfaces, Surface};
 pub use surface_characterization::*;
 pub use surface_props::*;
 pub use swizzle::*;

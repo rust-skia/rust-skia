@@ -27,6 +27,15 @@ mod codec {
     assert_impl_all!(codec::SelectionPolicy: Send, Sync);
     assert_impl_all!(codec::ZeroInitialized: Send, Sync);
     assert_impl_all!(codec::ScanlineOrder: Send, Sync);
+
+    assert_impl_all!(codec::BmpDecoder: Send, Sync);
+    assert_impl_all!(codec::GifDecoder: Send, Sync);
+    assert_impl_all!(codec::IcoDecoder: Send, Sync);
+    assert_impl_all!(codec::JpegDecoder: Send, Sync);
+    assert_impl_all!(codec::PngDecoder: Send, Sync);
+    assert_impl_all!(codec::WbmpDecoder: Send, Sync);
+    #[cfg(feature = "webp_decode")]
+    assert_impl_all!(codec::WebpDecoder: Send, Sync);
 }
 
 mod core {

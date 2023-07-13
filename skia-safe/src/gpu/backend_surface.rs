@@ -214,7 +214,7 @@ impl fmt::Debug for BackendTexture {
 
 impl BackendTexture {
     pub(crate) fn new_invalid() -> Self {
-        Self::from_ptr(unsafe { sb::C_GrBackendTexture_New() }).unwrap()
+        Self::from_ptr(unsafe { sb::C_GrBackendTexture_new() }).unwrap()
     }
 
     #[cfg(feature = "gl")]
@@ -236,7 +236,7 @@ impl BackendTexture {
         label: impl AsRef<str>,
     ) -> Self {
         let str = label.as_ref().as_bytes();
-        Self::from_ptr(sb::C_GrBackendTexture_NewGL(
+        Self::from_ptr(sb::C_GrBackendTexture_newGL(
             width,
             height,
             mipmapped,
@@ -261,7 +261,7 @@ impl BackendTexture {
         label: impl AsRef<str>,
     ) -> Self {
         let label = label.as_ref().as_bytes();
-        Self::from_native_if_valid(sb::C_GrBackendTexture_NewVk(
+        Self::from_native_if_valid(sb::C_GrBackendTexture_newVk(
             width,
             height,
             vk_info.native(),
@@ -290,7 +290,7 @@ impl BackendTexture {
         label: impl AsRef<str>,
     ) -> Self {
         let label = label.as_ref().as_bytes();
-        Self::from_native_if_valid(sb::C_GrBackendTexture_NewMtl(
+        Self::from_native_if_valid(sb::C_GrBackendTexture_newMtl(
             width,
             height,
             mipmapped,
@@ -314,7 +314,7 @@ impl BackendTexture {
     ) -> Self {
         let label = label.as_ref().as_bytes();
         unsafe {
-            Self::from_native_if_valid(sb::C_GrBackendTexture_NewD3D(
+            Self::from_native_if_valid(sb::C_GrBackendTexture_newD3D(
                 width,
                 height,
                 d3d_info.native(),

@@ -451,6 +451,16 @@ const BLOCKLISTED_TYPES: &[&str] = &[
     // create invalid identifiers.
     "SkSVGFontWeight",
     "SkSVGFontWeight_Type",
+    // m115 unused Linux
+    "std::__uset_hashtable.*",
+    "std::unordered_set.*",
+    // m115 unused Windows
+    "std::_List_unchecked.*",
+    "std::_Hash.*",
+    "std::_List_const.*",
+    "std::list.*",
+    "std::list__Unchecked.*",
+    "std::_List_iterator.*",
 ];
 
 #[derive(Debug)]
@@ -558,7 +568,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("GradientType", rewrite::k_xxx_name),
     // SkSurface_*
     ("ContentChangeMode", rewrite::k_xxx_name),
-    ("BackendHandleAccess", rewrite::k_xxx_name),
+    ("BackendHandleAccess", rewrite::k_xxx),
     // SkTextUtils_Align
     // We need name_opt to cover SkSVGPreserveAspectRatio_Align
     ("Align", rewrite::k_xxx_name_opt),
@@ -795,7 +805,7 @@ pub(crate) mod definitions {
     }
 
     fn combine(a: Definitions, b: Definitions) -> Definitions {
-        remove_duplicates(a.into_iter().chain(b.into_iter()).collect())
+        remove_duplicates(a.into_iter().chain(b).collect())
     }
 
     fn remove_duplicates(mut definitions: Definitions) -> Definitions {

@@ -32,6 +32,10 @@ pub fn purge_font_cache() {
     unsafe { SkGraphics::PurgeFontCache() }
 }
 
+pub fn purge_pinned_font_cache() {
+    unsafe { SkGraphics::PurgePinnedFontCache() }
+}
+
 pub fn resource_cache_total_bytes_used() -> usize {
     unsafe { SkGraphics::GetResourceCacheTotalBytesUsed() }
 }
@@ -79,10 +83,4 @@ pub fn purge_all_caches() {
 
 pub fn allow_jit() {
     unsafe { SkGraphics::AllowJIT() }
-}
-
-// TODO: SetPathAnalyticAADecider
-
-pub fn set_force_analytic_aa(force_analytic_aa: bool) {
-    unsafe { SkGraphics::SetForceAnalyticAA(force_analytic_aa) }
 }

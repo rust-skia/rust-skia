@@ -728,12 +728,24 @@ impl Rect {
 
 impl Contains<Point> for Rect {
     fn contains(&self, p: Point) -> bool {
+        self.contains(&p)
+    }
+}
+
+impl Contains<&Point> for Rect {
+    fn contains(&self, p: &Point) -> bool {
         p.x >= self.left && p.x < self.right && p.y >= self.top && p.y < self.bottom
     }
 }
 
 impl Contains<Rect> for Rect {
     fn contains(&self, r: Rect) -> bool {
+        self.contains(&r)
+    }
+}
+
+impl Contains<&Rect> for Rect {
+    fn contains(&self, r: &Rect) -> bool {
         // TODO: can we eliminate the this->is_empty check?
         !r.is_empty()
             && !self.is_empty()
@@ -746,6 +758,12 @@ impl Contains<Rect> for Rect {
 
 impl Contains<IRect> for Rect {
     fn contains(&self, r: IRect) -> bool {
+        self.contains(&r)
+    }
+}
+
+impl Contains<&IRect> for Rect {
+    fn contains(&self, r: &IRect) -> bool {
         // TODO: can we eliminate the this->isEmpty check?
         !r.is_empty()
             && !self.is_empty()

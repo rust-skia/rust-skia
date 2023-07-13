@@ -1,3 +1,7 @@
+use std::{fmt, ops::Range};
+
+use skia_bindings as sb;
+
 use super::{
     LineMetrics, PositionWithAffinity, RectHeightStyle, RectWidthStyle, TextBox, TextDirection,
     TextIndex, TextRange,
@@ -5,10 +9,8 @@ use super::{
 use crate::{
     interop::{Sink, VecSink},
     prelude::*,
-    scalar, Canvas, Font, Point, Rect,
+    scalar, Canvas, Font, Point, Rect, Unichar,
 };
-use skia_bindings as sb;
-use std::{fmt, ops::Range};
 
 pub type Paragraph = RefHandle<sb::skia_textlayout_Paragraph>;
 unsafe_send_sync!(Paragraph);
@@ -171,6 +173,23 @@ impl Paragraph {
         unsafe { sb::C_Paragraph_unresolvedGlyphs(self.native_mut()) }
             .try_into()
             .ok()
+    }
+
+    pub fn unresolved_codepoints(&mut self) -> Vec<Unichar> {
+        let mut result = Vec::new();
+
+        let mut set_chars = |chars: &[Unichar]| {
+            result = chars.to_vec();
+        };
+
+        unsafe {
+            sb::C_Paragraph_unresolvedCodepoints(
+                self.native_mut_force(),
+                VecSink::new(&mut set_chars).native_mut(),
+            )
+        }
+
+        result
     }
 
     // TODO: wrap visit()

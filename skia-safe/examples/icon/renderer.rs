@@ -1,6 +1,7 @@
 // Author: Alberto González Palomo https://sentido-labs.com
 // ©2019 Alberto González Palomo https://sentido-labs.com
 // Released under the MIT license: https://opensource.org/licenses/MIT
+#![allow(unknown_lints)]
 #![allow(clippy::unusual_byte_groupings)]
 use skia_safe::{
     gradient_shader, Color, Matrix, Paint, PaintJoin, PaintStyle, Path, Point, TileMode,
@@ -333,6 +334,7 @@ fn triangle(
 fn gradient(paint: &mut Paint, center: (f32, f32), radii: (f32, f32), colors: (Color, Color)) {
     let mut matrix = Matrix::scale((1.0, radii.1 / radii.0));
     matrix.post_translate((center.0, center.1));
+    #[allow(clippy::tuple_array_conversions)]
     paint.set_shader(gradient_shader::radial(
         (0.0, 0.0),
         radii.0,

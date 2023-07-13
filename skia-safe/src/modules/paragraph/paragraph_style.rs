@@ -1,3 +1,7 @@
+use std::fmt;
+
+use skia_bindings as sb;
+
 use super::{FontFamilies, TextAlign, TextDirection, TextStyle};
 use crate::{
     interop::{self, AsStr, FromStrs, SetStr},
@@ -5,8 +9,6 @@ use crate::{
     prelude::*,
     scalar, FontStyle,
 };
-use skia_bindings as sb;
-use std::fmt;
 
 pub type StrutStyle = Handle<sb::skia_textlayout_StrutStyle>;
 unsafe_send_sync!(StrutStyle);
@@ -158,7 +160,7 @@ impl NativeDrop for sb::skia_textlayout_ParagraphStyle {
 
 impl Clone for ParagraphStyle {
     fn clone(&self) -> Self {
-        Self::from_ptr(unsafe { sb::C_ParagraphStyle_NewCopy(self.native()) }).unwrap()
+        Self::from_ptr(unsafe { sb::C_ParagraphStyle_newCopy(self.native()) }).unwrap()
     }
 }
 
@@ -196,7 +198,7 @@ impl fmt::Debug for ParagraphStyle {
 
 impl ParagraphStyle {
     pub fn new() -> Self {
-        Self::from_ptr(unsafe { sb::C_ParagraphStyle_New() }).unwrap()
+        Self::from_ptr(unsafe { sb::C_ParagraphStyle_new() }).unwrap()
     }
 
     pub fn strut_style(&self) -> &StrutStyle {

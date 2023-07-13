@@ -1,11 +1,133 @@
-#[cfg(feature = "gpu")]
-use crate::gpu;
+use std::{fmt, ptr};
+
+use skia_bindings::{self as sb, SkRefCntBase, SkSurface};
+
 use crate::{
-    prelude::*, Bitmap, Canvas, DeferredDisplayList, IPoint, IRect, ISize, IVector, Image,
+    gpu, prelude::*, Bitmap, Canvas, DeferredDisplayList, IPoint, IRect, ISize, IVector, Image,
     ImageInfo, Paint, Pixmap, Point, SamplingOptions, SurfaceCharacterization, SurfaceProps,
 };
-use skia_bindings::{self as sb, SkRefCntBase, SkSurface};
-use std::{fmt, ptr};
+
+pub mod surfaces {
+    use skia_bindings::{self as sb};
+
+    use crate::{prelude::*, ISize, ImageInfo, Surface, SurfaceProps};
+
+    /// Returns [`Surface`] without backing pixels. Drawing to [`crate::Canvas`] returned from
+    /// [`Surface`] has no effect. Calling [`Surface::image_snapshot()`] on returned [`Surface`]
+    /// returns `None`.
+    ///
+    /// * `width` - one or greater
+    /// * `height` - one or greater Returns: [`Surface`] if width and height are positive;
+    /// otherwise, `None`
+    ///
+    /// example: <https://fiddle.skia.org/c/@Surface_MakeNull>
+    pub fn null(size: impl Into<ISize>) -> Option<Surface> {
+        let size = size.into();
+        Surface::from_ptr(unsafe { sb::C_SkSurfaces_Null(size.width, size.height) })
+    }
+
+    /// Allocates raster [`Surface`]. [`crate::Canvas`] returned by [`Surface`] draws directly into
+    /// pixels. Allocates and zeroes pixel memory. Pixel memory size is height times width times
+    /// four. Pixel memory is deleted when [`Surface`] is deleted.
+    ///
+    /// Internally, sets [`ImageInfo`] to width, height, native color type, and
+    /// [`crate::AlphaType::Premul`].
+    ///
+    /// [`Surface`] is returned if width and height are greater than zero.
+    ///
+    /// Use to create [`Surface`] that matches [`crate::PMColor`], the native pixel arrangement on
+    /// the platform. [`Surface`] drawn to output device skips converting its pixel format.
+    ///
+    /// * `width` - pixel column count; must be greater than zero
+    /// * `height` - pixel row count; must be greater than zero
+    /// * `surface_props` - LCD striping orientation and setting for device independent fonts; may
+    ///                      be `None` Returns: [`Surface`] if all parameters are valid; otherwise,
+    /// `None`
+    pub fn raster_n32_premul(size: impl Into<ISize>) -> Option<Surface> {
+        raster(&ImageInfo::new_n32_premul(size, None), None, None)
+    }
+
+    /// Allocates raster [`Surface`]. [`crate::Canvas`] returned by [`Surface`] draws directly into
+    /// pixels. Allocates and zeroes pixel memory. Pixel memory size is `image_info.height()` times
+    /// `row_bytes`, or times `image_info.min_row_bytes()` if `row_bytes` is zero. Pixel memory is
+    /// deleted when [`Surface`] is deleted.
+    ///
+    /// [`Surface`] is returned if all parameters are valid. Valid parameters include: info
+    /// dimensions are greater than zero; info contains [`crate::ColorType`] and
+    /// [`crate::AlphaType`] supported by raster surface; `row_bytes` is large enough to contain
+    /// info width pixels of [`crate::ColorType`], or is zero.
+    ///
+    /// If `row_bytes` is zero, a suitable value will be chosen internally.
+    ///
+    /// * `image_info` - width, height, [`crate::ColorType`], [`crate::AlphaType`],
+    ///                      [`crate::ColorSpace`], of raster surface; width and height must be
+    ///                      greater than zero
+    /// * `row_bytes` - interval from one [`Surface`] row to the next; may be zero
+    /// * `surface_props` - LCD striping orientation and setting for device independent fonts; may
+    ///                      be `None` Returns: [`Surface`] if all parameters are valid; otherwise,
+    /// `None`
+    pub fn raster(
+        image_info: &ImageInfo,
+        row_bytes: impl Into<Option<usize>>,
+        surface_props: Option<&SurfaceProps>,
+    ) -> Option<Surface> {
+        Surface::from_ptr(unsafe {
+            sb::C_SkSurfaces_Raster(
+                image_info.native(),
+                row_bytes.into().unwrap_or_default(),
+                surface_props.native_ptr_or_null(),
+            )
+        })
+    }
+
+    /// Allocates raster [`Surface`]. [`crate::Canvas`] returned by [`Surface`] draws directly into
+    /// pixels.
+    ///
+    /// [`Surface`] is returned if all parameters are valid. Valid parameters include: info
+    /// dimensions are greater than zero; info contains [`crate::ColorType`] and
+    /// [`crate::AlphaType`] supported by raster surface; pixels is not `None`; `row_bytes` is large
+    /// enough to contain info width pixels of [`crate::ColorType`].
+    ///
+    /// Pixel buffer size should be info height times computed `row_bytes`. Pixels are not
+    /// initialized. To access pixels after drawing, [`Surface::peek_pixels()`] or
+    /// [`Surface::read_pixels()`].
+    ///
+    /// * `image_info` - width, height, [`crate::ColorType`], [`crate::AlphaType`],
+    ///                      [`crate::ColorSpace`], of raster surface; width and height must be
+    ///                      greater than zero
+    /// * `pixels` - pointer to destination pixels buffer
+    /// * `row_bytes` - interval from one [`Surface`] row to the next
+    /// * `surface_props` - LCD striping orientation and setting for device independent fonts; may
+    ///                      be `None` Returns: [`Surface`] if all parameters are valid; otherwise,
+    /// `None`
+    pub fn wrap_pixels<'pixels>(
+        image_info: &ImageInfo,
+        pixels: &'pixels mut [u8],
+        row_bytes: impl Into<Option<usize>>,
+        surface_props: Option<&SurfaceProps>,
+    ) -> Option<Borrows<'pixels, Surface>> {
+        let row_bytes = row_bytes
+            .into()
+            .unwrap_or_else(|| image_info.min_row_bytes());
+
+        if pixels.len() < image_info.compute_byte_size(row_bytes) {
+            return None;
+        };
+
+        Surface::from_ptr(unsafe {
+            sb::C_SkSurfaces_WrapPixels(
+                image_info.native(),
+                pixels.as_mut_ptr() as _,
+                row_bytes,
+                surface_props.native_ptr_or_null(),
+            )
+        })
+        .map(move |surface| surface.borrows(pixels))
+    }
+
+    // TODO: WrapPixels(&Pixmap)
+    // TODO: WrapPixelsReleaseProc()?
+}
 
 /// ContentChangeMode members are parameters to [`Surface::notify_content_will_change()`].
 pub use skia_bindings::SkSurface_ContentChangeMode as ContentChangeMode;
@@ -64,33 +186,15 @@ impl Surface {
     /// * `surface_props` - LCD striping orientation and setting for device independent fonts;
     ///                      may be `None`
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
+    #[deprecated(since = "0.64.0", note = "use surfaces::wrap_pixels()")]
     pub fn new_raster_direct<'pixels>(
         image_info: &ImageInfo,
         pixels: &'pixels mut [u8],
         row_bytes: impl Into<Option<usize>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Borrows<'pixels, Surface>> {
-        let row_bytes = row_bytes
-            .into()
-            .unwrap_or_else(|| image_info.min_row_bytes());
-
-        if pixels.len() < image_info.compute_byte_size(row_bytes) {
-            return None;
-        };
-
-        Self::from_ptr(unsafe {
-            sb::C_SkSurface_MakeRasterDirect(
-                image_info.native(),
-                pixels.as_mut_ptr() as _,
-                row_bytes,
-                surface_props.native_ptr_or_null(),
-            )
-        })
-        .map(move |surface| surface.borrows(pixels))
+        surfaces::wrap_pixels(image_info, pixels, row_bytes, surface_props)
     }
-
-    // TODO: MakeRasterDirect(&Pixmap)
-    // TODO: MakeRasterDirectReleaseProc()?
 
     /// Allocates raster [`Surface`]. [`Canvas`] returned by [`Surface`] draws directly into pixels.
     /// Allocates and zeroes pixel memory. Pixel memory size is `image_info.height()` times
@@ -111,18 +215,13 @@ impl Surface {
     /// * `surface_props` - LCD striping orientation and setting for device independent fonts;
     ///                      may be `None`
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
+    #[deprecated(since = "0.64.0", note = "use surfaces::raster()")]
     pub fn new_raster(
         image_info: &ImageInfo,
         row_bytes: impl Into<Option<usize>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            sb::C_SkSurface_MakeRaster(
-                image_info.native(),
-                row_bytes.into().unwrap_or_default(),
-                surface_props.native_ptr_or_null(),
-            )
-        })
+        surfaces::raster(image_info, row_bytes, surface_props)
     }
 
     /// Allocates raster [`Surface`]. [`Canvas`] returned by [`Surface`] draws directly into pixels.
@@ -142,11 +241,9 @@ impl Surface {
     /// * `surface_props` - LCD striping orientation and setting for device independent
     ///                      fonts; may be `None`
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
+    #[deprecated(since = "0.64.0", note = "use surfaces::raster_n32_premul()")]
     pub fn new_raster_n32_premul(size: impl Into<ISize>) -> Option<Self> {
-        let size = size.into();
-        Self::from_ptr(unsafe {
-            sb::C_SkSurface_MakeRasterN32Premul(size.width, size.height, ptr::null())
-        })
+        surfaces::raster_n32_premul(size)
     }
 }
 
@@ -170,6 +267,7 @@ impl Surface {
     /// * `surface_props` - LCD striping orientation and setting for device independent
     ///                            fonts; may be `None`
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
+    #[deprecated(since = "0.64.0", note = "use gpu::surfaces::wrap_backend_texture()")]
     pub fn from_backend_texture(
         context: &mut gpu::RecordingContext,
         backend_texture: &gpu::BackendTexture,
@@ -179,17 +277,15 @@ impl Surface {
         color_space: impl Into<Option<crate::ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            sb::C_SkSurface_MakeFromBackendTexture(
-                context.native_mut(),
-                backend_texture.native(),
-                origin,
-                sample_cnt.into().unwrap_or(0).try_into().unwrap(),
-                color_type.into_native(),
-                color_space.into().into_ptr_or_null(),
-                surface_props.native_ptr_or_null(),
-            )
-        })
+        gpu::surfaces::wrap_backend_texture(
+            context,
+            backend_texture,
+            origin,
+            sample_cnt,
+            color_type,
+            color_space,
+            surface_props,
+        )
     }
 
     /// Wraps a GPU-backed buffer into [`Surface`]. Caller must ensure `backend_render_target`
@@ -208,6 +304,10 @@ impl Surface {
     /// * `surface_props` - LCD striping orientation and setting for device independent
     ///                                 fonts; may be `None`
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
+    #[deprecated(
+        since = "0.64.0",
+        note = "use gpu::surfaces::wrap_backend_render_target()"
+    )]
     pub fn from_backend_render_target(
         context: &mut gpu::RecordingContext,
         backend_render_target: &gpu::BackendRenderTarget,
@@ -216,16 +316,14 @@ impl Surface {
         color_space: impl Into<Option<crate::ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            sb::C_SkSurface_MakeFromBackendRenderTarget(
-                context.native_mut(),
-                backend_render_target.native(),
-                origin,
-                color_type.into_native(),
-                color_space.into().into_ptr_or_null(),
-                surface_props.native_ptr_or_null(),
-            )
-        })
+        gpu::surfaces::wrap_backend_render_target(
+            context,
+            backend_render_target,
+            origin,
+            color_type,
+            color_space,
+            surface_props,
+        )
     }
 
     /// Returns [`Surface`] on GPU indicated by context. Allocates memory for
@@ -251,6 +349,7 @@ impl Surface {
     ///                              fonts; may be `None`
     /// * `should_create_with_mips` - hint that [`Surface`] will host mip map images
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
+    #[deprecated(since = "0.64.0", note = "use gpu::surfaces::render_target()")]
     pub fn new_render_target(
         context: &mut gpu::RecordingContext,
         budgeted: gpu::Budgeted,
@@ -260,19 +359,15 @@ impl Surface {
         surface_props: Option<&SurfaceProps>,
         should_create_with_mips: impl Into<Option<bool>>,
     ) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            sb::C_SkSurface_MakeRenderTarget(
-                context.native_mut(),
-                budgeted.into_native(),
-                image_info.native(),
-                sample_count.into().unwrap_or(0).try_into().unwrap(),
-                surface_origin
-                    .into()
-                    .unwrap_or(gpu::SurfaceOrigin::BottomLeft),
-                surface_props.native_ptr_or_null(),
-                should_create_with_mips.into().unwrap_or_default(),
-            )
-        })
+        gpu::surfaces::render_target(
+            context,
+            budgeted,
+            image_info,
+            sample_count,
+            surface_origin,
+            surface_props,
+            should_create_with_mips,
+        )
     }
 
     /// Returns [`Surface`] on GPU indicated by context that is compatible with the provided
@@ -281,18 +376,16 @@ impl Surface {
     /// * `context` - GPU context
     /// * `characterization` - description of the desired [`Surface`]
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
+    #[deprecated(
+        since = "0.64.0",
+        note = "use gpu::surfaces::render_target_with_characterization()"
+    )]
     pub fn new_render_target_with_characterization(
         context: &mut gpu::RecordingContext,
         characterization: &SurfaceCharacterization,
         budgeted: gpu::Budgeted,
     ) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            sb::C_SkSurface_MakeRenderTarget2(
-                context.native_mut(),
-                characterization.native(),
-                budgeted.into_native(),
-            )
-        })
+        gpu::surfaces::render_target_with_characterization(context, characterization, budgeted)
     }
 
     /// Creates [`Surface`] from CAMetalLayer.
@@ -421,9 +514,9 @@ impl Surface {
     /// Returns: [`Surface`] if width and height are positive; otherwise, `None`
     ///
     /// example: <https://fiddle.skia.org/c/@Surface_MakeNull>
+    #[deprecated(since = "0.64.0", note = "use surfaces::null()")]
     pub fn new_null(size: impl Into<ISize>) -> Option<Self> {
-        let size = size.into();
-        Self::from_ptr(unsafe { sb::C_SkSurface_MakeNull(size.width, size.height) })
+        surfaces::null(size)
     }
 
     /// Returns pixel count in each row; may be zero or greater.
@@ -472,12 +565,12 @@ impl Surface {
 #[cfg(not(feature = "gpu"))]
 impl Surface {
     /// Returns the recording context being used by the [`Surface`].
-    pub fn recording_context(&mut self) -> Option<()> {
+    pub fn recording_context(&self) -> Option<gpu::RecordingContext> {
         None
     }
 
     /// Returns the recording context being used by the [`Surface`].
-    pub fn direct_context(&mut self) -> Option<()> {
+    pub fn direct_context(&self) -> Option<gpu::DirectContext> {
         None
     }
 }
@@ -487,12 +580,12 @@ impl Surface {
     /// Returns the recording context being used by the [`Surface`].
     ///
     /// Returns: the recording context, if available; `None` otherwise
-    pub fn recording_context(&mut self) -> Option<gpu::RecordingContext> {
-        gpu::RecordingContext::from_unshared_ptr(unsafe { self.native_mut().recordingContext() })
+    pub fn recording_context(&self) -> Option<gpu::RecordingContext> {
+        gpu::RecordingContext::from_unshared_ptr(unsafe { self.native().recordingContext() })
     }
 
     /// rust-skia helper, not in Skia
-    pub fn direct_context(&mut self) -> Option<gpu::DirectContext> {
+    pub fn direct_context(&self) -> Option<gpu::DirectContext> {
         self.recording_context()
             .and_then(|mut ctx| ctx.as_direct_context())
     }
@@ -503,14 +596,12 @@ impl Surface {
     /// The returned [`gpu::BackendTexture`] should be discarded if the [`Surface`] is drawn to or deleted.
     ///
     /// Returns: GPU texture reference; `None` on failure
+    #[deprecated(since = "0.64.0", note = "use gpu::surfaces::get_backend_texture()")]
     pub fn get_backend_texture(
         &mut self,
         handle_access: BackendHandleAccess,
     ) -> Option<gpu::BackendTexture> {
-        unsafe {
-            let ptr = sb::C_SkSurface_getBackendTexture(self.native_mut(), handle_access);
-            gpu::BackendTexture::from_native_if_valid(ptr)
-        }
+        gpu::surfaces::get_backend_texture(self, handle_access)
     }
 
     /// Retrieves the back-end render target. If [`Surface`] has no back-end render target, `None`
@@ -520,21 +611,15 @@ impl Surface {
     /// or deleted.
     ///
     /// Returns: GPU render target reference; `None` on failure
+    #[deprecated(
+        since = "0.64.0",
+        note = "use gpu::surfaces::get_backend_render_target()"
+    )]
     pub fn get_backend_render_target(
         &mut self,
         handle_access: BackendHandleAccess,
     ) -> Option<gpu::BackendRenderTarget> {
-        unsafe {
-            let mut backend_render_target =
-                construct(|rt| sb::C_GrBackendRenderTarget_Construct(rt));
-            sb::C_SkSurface_getBackendRenderTarget(
-                self.native_mut(),
-                handle_access,
-                &mut backend_render_target,
-            );
-
-            gpu::BackendRenderTarget::from_native_c_if_valid(backend_render_target)
-        }
+        gpu::surfaces::get_backend_render_target(self, handle_access)
     }
 
     // TODO: support variant with TextureReleaseProc and ReleaseContext
@@ -569,12 +654,11 @@ impl Surface {
         mode: impl Into<Option<ContentChangeMode>>,
     ) -> bool {
         unsafe {
-            self.native_mut().replaceBackendTexture(
+            sb::C_SkSurface_replaceBackendTexture(
+                self.native_mut(),
                 backend_texture.native(),
                 origin,
                 mode.into().unwrap_or(ContentChangeMode::Retain),
-                None,
-                ptr::null_mut(),
             )
         }
     }
@@ -1078,8 +1162,8 @@ impl Surface {
 
 #[test]
 fn create() {
-    assert!(Surface::new_raster_n32_premul((0, 0)).is_none());
-    let surface = Surface::new_raster_n32_premul((1, 1)).unwrap();
+    assert!(surfaces::raster_n32_premul((0, 0)).is_none());
+    let surface = surfaces::raster_n32_premul((1, 1)).unwrap();
     assert_eq!(1, surface.native().ref_counted_base()._ref_cnt())
 }
 
@@ -1093,7 +1177,7 @@ fn test_raster_direct() {
     );
     let min_row_bytes = image_info.min_row_bytes();
     let mut pixels = vec![0u8; image_info.compute_byte_size(min_row_bytes)];
-    let mut surface = Surface::new_raster_direct(
+    let mut surface = surfaces::wrap_pixels(
         &image_info,
         pixels.as_mut_slice(),
         Some(min_row_bytes),
@@ -1106,7 +1190,7 @@ fn test_raster_direct() {
 
 #[test]
 fn test_drawing_owned_as_exclusive_ref_ergonomics() {
-    let mut surface = Surface::new_raster_n32_premul((16, 16)).unwrap();
+    let mut surface = surfaces::raster_n32_premul((16, 16)).unwrap();
 
     // option1:
     // - An &mut canvas can be drawn to.
@@ -1119,7 +1203,7 @@ fn test_drawing_owned_as_exclusive_ref_ergonomics() {
     // option2:
     // - A canvas from another surface can be drawn to.
     {
-        let mut surface2 = Surface::new_raster_n32_premul((16, 16)).unwrap();
+        let mut surface2 = surfaces::raster_n32_premul((16, 16)).unwrap();
         let canvas = surface2.canvas();
         surface.draw(canvas, (5.0, 5.0), SamplingOptions::default(), None);
         surface.draw(canvas, (10.0, 10.0), SamplingOptions::default(), None);
