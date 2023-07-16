@@ -29,6 +29,7 @@
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkColorFilter.h"
+#include "include/core/SkColorTable.h"
 #include "include/core/SkContourMeasure.h"
 #include "include/core/SkCoverageMode.h"
 #include "include/core/SkCubicMap.h"
@@ -1805,6 +1806,10 @@ extern "C" SkColorFilter* C_SkColorFilters_TableARGB(const uint8_t tableA[256], 
     return SkColorFilters::TableARGB(tableA, tableR, tableG, tableB).release();
 }
 
+extern "C" SkColorFilter* C_SkColorFilters_Table2(SkColorTable* table) {
+    return SkColorFilters::Table(sp(table)).release();
+}
+
 extern "C" SkColorFilter* C_SkColorFilters_Lighting(SkColor mul, SkColor add) {
     return SkColorFilters::Lighting(mul, add).release();
 }
@@ -1848,6 +1853,24 @@ extern "C" SkDataTable *C_SkDataTable_MakeCopyArrays(const void *const *ptrs,
 
 extern "C" SkDataTable *C_SkDataTable_MakeCopyArray(const void *array, size_t elemSize, int count) {
     return SkDataTable::MakeCopyArray(array, elemSize, count).release();
+}
+
+//
+// core/SkColorTable.h
+//
+
+extern "C" SkColorTable* C_SkColorTable_Make(const uint8_t tableA[256], const uint8_t tableR[256], const uint8_t tableG[256], const uint8_t tableB[256]) {
+    return SkColorTable::Make(tableA, tableR, tableG, tableB).release();
+}
+
+extern "C" const uint8_t* C_SkColorTable_getTable(const SkColorTable* self, size_t index) {
+    switch (index) {
+        case 0: return self->alphaTable();
+        case 1: return self->redTable();
+        case 2: return self->greenTable();
+        case 3: return self->blueTable();
+        default: return nullptr;
+    }
 }
 
 //
