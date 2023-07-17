@@ -64,6 +64,7 @@ impl fmt::Debug for SurfaceCharacterization {
 //       layout differs, should we support that?
 impl SurfaceCharacterization {
     #[cfg(feature = "gpu")]
+    #[must_use]
     pub fn resized(&self, size: impl Into<crate::ISize>) -> Self {
         let size = size.into();
         Self::construct(|sc| unsafe {
@@ -76,6 +77,7 @@ impl SurfaceCharacterization {
         })
     }
 
+    #[must_use]
     pub fn with_color_space(&self, color_space: impl Into<Option<ColorSpace>>) -> Self {
         let mut characterization = Self::default();
         unsafe {
@@ -89,6 +91,7 @@ impl SurfaceCharacterization {
     }
 
     #[cfg(feature = "gpu")]
+    #[must_use]
     pub fn with_backend_format(
         &self,
         color_type: crate::ColorType,
@@ -105,6 +108,7 @@ impl SurfaceCharacterization {
     }
 
     #[cfg(feature = "gl")]
+    #[must_use]
     pub fn with_fbo0(&self, uses_glfbo0: bool) -> Self {
         Self::construct(|sc| unsafe {
             sb::C_SkSurfaceCharacterization_createFBO0(self.native(), uses_glfbo0, sc)

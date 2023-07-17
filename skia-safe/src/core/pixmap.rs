@@ -110,7 +110,7 @@ impl Pixmap {
     }
 
     pub fn color_space(&self) -> Option<ColorSpace> {
-        self.info().color_space()
+        ColorSpace::from_unshared_ptr(unsafe { self.native().colorSpace() })
     }
 
     pub fn is_opaque(&self) -> bool {
@@ -285,9 +285,14 @@ impl Pixmap {
 }
 
 /// Implement this trait to use a pixel type in [`Handle<Pixmap>::pixels()`].
+///
+/// # Safety
+///
+/// This trait is unsafe because external [`Pixel`] implementations may lie about their
+/// [`ColorType`] or fail to match the alignment of the pixels stored in [`Handle<Pixmap>`].
 pub unsafe trait Pixel: Copy {
     /// `true` if the type matches the color type's format.
-    fn matches_color_type(_ct: ColorType) -> bool;
+    fn matches_color_type(ct: ColorType) -> bool;
 }
 
 unsafe impl Pixel for u8 {
@@ -340,13 +345,13 @@ unsafe impl Pixel for (f32, f32, f32, f32) {
 
 unsafe impl Pixel for u32 {
     fn matches_color_type(ct: ColorType) -> bool {
-        ct == ColorType::n32()
+        ct == ColorType::N32
     }
 }
 
 unsafe impl Pixel for Color {
     fn matches_color_type(ct: ColorType) -> bool {
-        ct == ColorType::n32()
+        ct == ColorType::N32
     }
 }
 

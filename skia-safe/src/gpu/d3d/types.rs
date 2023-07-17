@@ -1,10 +1,12 @@
 use super::{ID3D12Resource, D3D12_RESOURCE_STATES, DXGI_FORMAT};
 use crate::{gpu, prelude::*};
-use skia_bindings::{GrD3DAlloc, GrD3DMemoryAllocator, GrD3DTextureResourceInfo, SkRefCntBase};
-use std::fmt;
+use skia_bindings::{
+    GrD3DAlloc, GrD3DMemoryAllocator, GrD3DSurfaceInfo, GrD3DTextureResourceInfo, SkRefCntBase,
+};
+use std::{fmt, os::raw::c_uint};
 use winapi::{
     shared::dxgiformat,
-    shared::dxgitype,
+    shared::{dxgiformat::DXGI_FORMAT_UNKNOWN, dxgitype},
     um::{d3d12, unknwnbase::IUnknown},
 };
 
@@ -87,6 +89,7 @@ impl TextureResourceInfo {
         }
     }
 
+    #[must_use]
     pub fn with_state(self, resource_state: D3D12_RESOURCE_STATES) -> Self {
         Self {
             resource_state,
@@ -115,3 +118,28 @@ pub struct FenceInfo {
 }
 
 unsafe_send_sync!(FenceInfo);
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(C)]
+pub struct SurfaceInfo {
+    pub sample_count: u32,
+    pub level_count: u32,
+    pub protected: gpu::Protected,
+
+    pub format: DXGI_FORMAT,
+    pub sample_quality_pattern: c_uint,
+}
+
+native_transmutable!(GrD3DSurfaceInfo, SurfaceInfo, surface_info_layout);
+
+impl Default for SurfaceInfo {
+    fn default() -> Self {
+        Self {
+            sample_count: 1,
+            level_count: 0,
+            protected: gpu::Protected::No,
+            format: DXGI_FORMAT_UNKNOWN,
+            sample_quality_pattern: dxgitype::DXGI_STANDARD_MULTISAMPLE_QUALITY_PATTERN,
+        }
+    }
+}

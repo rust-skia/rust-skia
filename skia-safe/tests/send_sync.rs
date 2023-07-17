@@ -178,6 +178,7 @@ mod gpu {
         assert_not_impl_any!(Interface: Send, Sync);
         assert_impl_all!(TextureInfo: Send, Sync);
         assert_impl_all!(FramebufferInfo: Send, Sync);
+        assert_impl_all!(SurfaceInfo: Send, Sync);
     }
 
     #[cfg(feature = "metal")]
@@ -185,6 +186,7 @@ mod gpu {
         use skia_safe::gpu::mtl::*;
         use static_assertions::*;
         assert_impl_all!(TextureInfo: Send, Sync);
+        assert_impl_all!(SurfaceInfo: Send, Sync);
         assert_impl_all!(BackendContext: Send, Sync);
     }
 
@@ -203,6 +205,7 @@ mod gpu {
         // GetProc could be Send & Sync , but does it make sense (it's already Copy & Clone)
         assert_not_impl_any!(GetProcOf: Send, Sync);
         assert_impl_all!(DrawableInfo: Send, Sync);
+        assert_impl_all!(SurfaceInfo: Send, Sync);
         assert_impl_all!(BackendDrawableInfo: Send, Sync);
         // Note that we can't make most of vk.rs re-export of native Vulkan types Send nor Sync,
         // because they are just re-exports of simple pointers, which already implement
@@ -218,6 +221,7 @@ mod gpu {
         assert_not_impl_any!(BackendContext: Sync);
         assert_impl_all!(TextureResourceInfo: Send, Sync);
         assert_impl_all!(FenceInfo: Send, Sync);
+        assert_impl_all!(SurfaceInfo: Send, Sync);
         assert_impl_all!(Alloc: Send, Sync);
         assert_impl_all!(MemoryAllocator: Send, Sync);
     }
@@ -242,6 +246,7 @@ mod textlayout {
     assert_impl_all!(TextStyle: Send, Sync);
     assert_impl_all!(Block: Send, Sync);
     assert_impl_all!(Placeholder: Send, Sync);
+    assert_impl_all!(FontArguments: Send, Sync);
     assert_not_impl_any!(TypefaceFontStyleSet: Send, Sync);
     assert_not_impl_any!(TypefaceFontProvider: Send, Sync);
     assert_not_impl_any!(FontFamilies: Send, Sync);

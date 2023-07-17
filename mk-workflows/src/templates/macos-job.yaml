@@ -15,7 +15,3 @@ steps:
 
 - name: Install Clippy
   run: rustup component add clippy
-
-# remove LLVM on macOS so that only Apple's clang is used
-- name: Remove LLVM (macOS)
-  run: brew uninstall llvm

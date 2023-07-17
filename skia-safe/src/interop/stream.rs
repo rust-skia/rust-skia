@@ -1,14 +1,13 @@
-//! SkStream and relatives.
+//! `SkStream` and relatives.
 //! This implementation covers the minimal subset to interface with Rust streams.
 //!
-//! Bindings that wrap functions that use Skia stream types, _must_ use Rust streams instead.
+//! Bindings that wrap functions that use Skia stream types _must_ use Rust streams instead.
 
-use crate::prelude::*;
-use crate::Data;
-use skia_bindings as sb;
-use skia_bindings::{SkDynamicMemoryWStream, SkMemoryStream, SkStream, SkStreamAsset, SkWStream};
-use std::ptr;
-use std::{fmt, marker::PhantomData};
+use crate::{prelude::*, Data};
+use skia_bindings::{
+    self as sb, SkDynamicMemoryWStream, SkMemoryStream, SkStream, SkStreamAsset, SkWStream,
+};
+use std::{fmt, marker::PhantomData, ptr};
 
 /// Trait representing an Skia allocated Stream type with a base class of SkStream.
 #[repr(transparent)]
@@ -68,6 +67,14 @@ impl NativeBase<SkStream> for SkMemoryStream {}
 impl NativeStreamBase for SkMemoryStream {
     fn as_stream_mut(&mut self) -> &mut SkStream {
         self.base_mut()
+    }
+}
+
+impl Drop for MemoryStream<'_> {
+    fn drop(&mut self) {
+        unsafe {
+            sb::C_SkStream_delete(self.native_mut().as_stream_mut());
+        }
     }
 }
 

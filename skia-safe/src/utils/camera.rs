@@ -29,6 +29,7 @@ impl Patch3D {
         self
     }
 
+    #[must_use]
     pub fn transform(&self, m: &M44) -> Self {
         let mut dst = Patch3D::default();
         unsafe { self.native().transform(m.native(), dst.native_mut()) }

@@ -1,4 +1,8 @@
-use build_support::{binaries_config, cargo, features, skia, skia_bindgen};
+use build_support::{
+    binaries_config,
+    cargo::{self, Target},
+    features, skia, skia_bindgen,
+};
 
 mod build_support;
 
@@ -28,7 +32,7 @@ fn build_from_source(
     skia_source_dir: &std::path::Path,
     skia_debug: bool,
     offline: bool,
-) {
+) -> skia::FinalBuildConfiguration {
     let build_config = skia::BuildConfiguration::from_features(features, skia_debug);
     let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
         &build_config,
@@ -43,6 +47,8 @@ fn build_from_source(
         skia::env::gn_command(),
         offline,
     );
+
+    final_configuration
 }
 
 fn generate_bindings(
@@ -50,6 +56,8 @@ fn generate_bindings(
     definitions: Vec<skia_bindgen::Definition>,
     binaries_config: &binaries_config::BinariesConfiguration,
     skia_source_dir: &std::path::Path,
+    target: Target,
+    sysroot: Option<&str>,
 ) {
     // Emit the ninja definitions, to help debug build consistency.
     skia_bindgen::definitions::save_definitions(&definitions, &binaries_config.output_directory)
@@ -60,7 +68,12 @@ fn generate_bindings(
         definitions,
         skia_source_dir,
     );
-    skia_bindgen::generate_bindings(&bindings_config, &binaries_config.output_directory);
+    skia_bindgen::generate_bindings(
+        &bindings_config,
+        &binaries_config.output_directory,
+        target,
+        sysroot,
+    );
 }
 
 fn main() {
@@ -88,11 +101,18 @@ fn main() {
             binaries_config.import(&search_path, false).unwrap();
 
             let definitions = skia_bindgen::definitions::from_env();
-            generate_bindings(&features, definitions, &binaries_config, &source_dir);
+            generate_bindings(
+                &features,
+                definitions,
+                &binaries_config,
+                &source_dir,
+                cargo::target(),
+                None,
+            );
         } else {
             println!("STARTING OFFLINE BUILD");
 
-            build_from_source(
+            let final_build_configuration = build_from_source(
                 features.clone(),
                 &binaries_config,
                 &source_dir,
@@ -103,7 +123,17 @@ fn main() {
                 &features,
                 &binaries_config.output_directory,
             );
-            generate_bindings(&features, definitions, &binaries_config, &source_dir);
+            generate_bindings(
+                &features,
+                definitions,
+                &binaries_config,
+                &source_dir,
+                final_build_configuration.target,
+                final_build_configuration
+                    .sysroot
+                    .as_ref()
+                    .map(AsRef::as_ref),
+            );
         }
     } else {
         //
@@ -124,7 +154,7 @@ fn main() {
             println!("STARTING A FULL BUILD");
 
             let source_dir = std::env::current_dir().unwrap().join("skia");
-            build_from_source(
+            let final_build_configuration = build_from_source(
                 features.clone(),
                 &binaries_config,
                 &source_dir,
@@ -135,7 +165,17 @@ fn main() {
                 &features,
                 &binaries_config.output_directory,
             );
-            generate_bindings(&features, definitions, &binaries_config, &source_dir);
+            generate_bindings(
+                &features,
+                definitions,
+                &binaries_config,
+                &source_dir,
+                final_build_configuration.target,
+                final_build_configuration
+                    .sysroot
+                    .as_ref()
+                    .map(AsRef::as_ref),
+            );
         }
     };
 

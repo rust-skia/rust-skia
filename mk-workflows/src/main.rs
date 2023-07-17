@@ -79,7 +79,7 @@ fn build_workflow(workflow: &Workflow, jobs: &[Job]) {
     let job_template = workflow.job_template;
     let targets = &workflow.targets;
 
-    let workflow_name = format!("{}-{}", host_os.to_string(), workflow.kind.to_string());
+    let workflow_name = format!("{}-{}", host_os, workflow.kind);
     let output_filename = PathBuf::new()
         .join(".github")
         .join("workflows")
@@ -185,6 +185,7 @@ fn build_target(workflow: &Workflow, job: &Job, target: &Target) -> String {
     let template_arguments: &[(&'static str, &dyn fmt::Display)] = &[
         ("target", &target.target),
         ("androidEnv", &target.android_env),
+        ("emscriptenEnv", &target.emscripten_env),
         ("androidAPILevel", &config::DEFAULT_ANDROID_API_LEVEL),
         ("features", &features),
         ("runTests", &native_target),
@@ -219,12 +220,11 @@ fn render_template(template: &str, replacements: &[(String, String)]) -> String 
         template = template.replace(&format!("$[[{}]]", pattern), value)
     });
 
-    if template.contains("$[[") {
-        panic!(
-            "Template contains template patterns after replacement: \n{}",
-            template
-        );
-    }
+    assert!(
+        !template.contains("$[["),
+        "Template contains template patterns after replacement: \n{}",
+        template
+    );
 
     template
 }
@@ -233,6 +233,7 @@ fn render_template(template: &str, replacements: &[(String, String)]) -> String 
 struct Target {
     target: &'static str,
     android_env: bool,
+    emscripten_env: bool,
     platform_features: Features,
 }
 

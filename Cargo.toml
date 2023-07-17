@@ -4,5 +4,11 @@ members = [
     "skia-bindings",
     "skia-safe",
     "skia-org",
-	"mk-workflows"
+    "mk-workflows"
 ]
+
+[profile.release]
+# We want to build skia-org with with lto="thin"
+# https://github.com/rust-skia/rust-skia/issues/565
+lto = "thin"
+

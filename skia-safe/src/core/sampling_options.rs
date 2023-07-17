@@ -59,6 +59,7 @@ pub struct FilterOptions {
 #[derive(Copy, Clone, PartialEq, Debug)]
 #[allow(deprecated)]
 pub struct SamplingOptions {
+    pub max_aniso: i32,
     pub use_cubic: bool,
     pub cubic: CubicResampler,
     pub filter: FilterMode,
@@ -70,6 +71,7 @@ native_transmutable!(SkSamplingOptions, SamplingOptions, sampling_options_layout
 impl Default for SamplingOptions {
     fn default() -> Self {
         Self {
+            max_aniso: 0,
             use_cubic: false,
             // ignored
             cubic: CubicResampler { b: 0.0, c: 0.0 },
@@ -92,10 +94,8 @@ impl SamplingOptions {
 impl From<FilterMode> for SamplingOptions {
     fn from(fm: FilterMode) -> Self {
         Self {
-            use_cubic: false,
-            cubic: CubicResampler { b: 0.0, c: 0.0 },
             filter: fm,
-            mipmap: MipmapMode::None,
+            ..Default::default()
         }
     }
 }
@@ -104,10 +104,9 @@ impl From<FilterMode> for SamplingOptions {
 impl From<FilterOptions> for SamplingOptions {
     fn from(filter: FilterOptions) -> Self {
         Self {
-            use_cubic: false,
-            cubic: CubicResampler { b: 0.0, c: 0.0 },
             filter: filter.sampling,
             mipmap: filter.mipmap,
+            ..Default::default()
         }
     }
 }
@@ -120,5 +119,18 @@ impl From<CubicResampler> for SamplingOptions {
             cubic,
             ..Default::default()
         }
+    }
+}
+
+impl SamplingOptions {
+    pub fn from_aniso(max_aniso: i32) -> Self {
+        Self {
+            max_aniso: max_aniso.max(1),
+            ..Default::default()
+        }
+    }
+
+    pub fn is_aniso(&self) -> bool {
+        self.max_aniso != 0
     }
 }

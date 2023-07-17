@@ -1,12 +1,10 @@
-use crate::artifact;
-use crate::drivers::DrawingDriver;
+use crate::{artifact, drivers::DrawingDriver, Driver};
 use skia_safe::{
     gpu,
     gpu::{d3d, Protected},
     Budgeted, Canvas, ImageInfo, Surface,
 };
-use std::path::Path;
-use std::{ffi, ptr};
+use std::{ffi, path::Path, ptr};
 use winapi::{
     shared::{
         dxgi,
@@ -23,7 +21,7 @@ pub struct D3D {
 }
 
 impl DrawingDriver for D3D {
-    const NAME: &'static str = "d3d";
+    const DRIVER: Driver = Driver::D3d;
 
     fn new() -> Self {
         let factory: ComPtr<dxgi::IDXGIFactory1> =

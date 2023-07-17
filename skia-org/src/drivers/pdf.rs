@@ -1,12 +1,11 @@
-use crate::artifact;
-use crate::drivers::DrawingDriver;
+use crate::{artifact, drivers::DrawingDriver, Driver};
 use skia_safe::Canvas;
 use std::path::Path;
 
 pub struct Pdf;
 
 impl DrawingDriver for Pdf {
-    const NAME: &'static str = "pdf";
+    const DRIVER: Driver = Driver::Pdf;
 
     fn new() -> Self {
         Self

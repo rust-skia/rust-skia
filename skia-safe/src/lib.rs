@@ -1,5 +1,9 @@
 #![macro_use]
 #![allow(clippy::upper_case_acronyms)]
+#![allow(clippy::non_send_fields_in_send_ty)]
+// https://github.com/rust-lang/rust/issues/93367
+#![allow(unknown_lints)]
+#![allow(suspicious_auto_trait_impls)]
 
 mod macros;
 

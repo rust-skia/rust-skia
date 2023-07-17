@@ -1,4 +1,4 @@
-use super::{FontFamilies, TextBaseline, TextShadow};
+use super::{FontArguments, FontFamilies, TextBaseline, TextShadow};
 use crate::{
     interop::{self, AsStr, FromStrs, SetStr},
     prelude::*,
@@ -187,6 +187,7 @@ impl fmt::Debug for TextStyle {
             .field("font_features", &self.font_features())
             .field("font_size", &self.font_size())
             .field("font_families", &self.font_families())
+            .field("baseline_shift", &self.baseline_shift())
             .field("height", &self.height())
             .field("height_override", &self.height_override())
             .field("half_leading", &self.half_leading())
@@ -205,8 +206,15 @@ impl TextStyle {
         TextStyle::construct(|ts| unsafe { sb::C_TextStyle_Construct(ts) })
     }
 
+    #[deprecated(since = "0.51.0", note = "Use clone_for_placeholder")]
+    #[must_use]
     pub fn to_placeholder(&self) -> Self {
-        TextStyle::from_native_c(unsafe { sb::skia_textlayout_TextStyle::new(self.native(), true) })
+        self.clone_for_placeholder()
+    }
+
+    #[must_use]
+    pub fn clone_for_placeholder(&self) -> Self {
+        Self::construct(|ts| unsafe { sb::C_TextStyle_cloneForPlaceholder(self.native(), ts) })
     }
 
     pub fn equals(&self, other: &TextStyle) -> bool {
@@ -312,6 +320,24 @@ impl TextStyle {
         unsafe { sb::C_TextStyle_resetFontFeatures(self.native_mut()) }
     }
 
+    pub fn font_arguments(&self) -> Option<&FontArguments> {
+        unsafe { sb::C_TextStyle_getFontArguments(self.native()) }
+            .into_option()
+            .map(|ptr| FontArguments::from_native_ref(unsafe { &*ptr }))
+    }
+
+    pub fn set_font_arguments<'fa>(
+        &mut self,
+        arguments: impl Into<Option<&'fa crate::FontArguments<'fa, 'fa>>>,
+    ) {
+        unsafe {
+            sb::C_TextStyle_setFontArguments(
+                self.native_mut(),
+                arguments.into().native_ptr_or_null(),
+            )
+        }
+    }
+
     pub fn font_size(&self) -> scalar {
         self.native().fFontSize
     }
@@ -335,6 +361,15 @@ impl TextStyle {
         unsafe {
             sb::C_TextStyle_setFontFamilies(self.native_mut(), families.as_ptr(), families.len())
         }
+        self
+    }
+
+    pub fn baseline_shift(&self) -> scalar {
+        self.native().fBaselineShift
+    }
+
+    pub fn set_baseline_shift(&mut self, baseline_shift: scalar) -> &mut Self {
+        self.native_mut().fBaselineShift = baseline_shift;
         self
     }
 
@@ -518,5 +553,23 @@ impl Placeholder {
             blocks_before,
             text_before,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn getting_setting_comparing_font_arguments() {
+        let mut ts = TextStyle::new();
+        let mut fa = crate::FontArguments::default();
+        fa.set_collection_index(100);
+        ts.set_font_arguments(&fa);
+        let tl_fa: FontArguments = fa.into();
+        let fa = ts.font_arguments().unwrap();
+        assert_eq!(tl_fa, *fa);
+        let default_fa: FontArguments = crate::FontArguments::default().into();
+        assert_ne!(default_fa, *fa);
     }
 }

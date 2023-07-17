@@ -29,7 +29,7 @@ fn main() {
             } else {
                 match args[1].parse::<i32>() {
                     Ok(integer) => (integer, true),
-                    Err(e) => panic!("Error: {}\nUsage: {}", e.to_string(), USAGE),
+                    Err(e) => panic!("Error: {}\nUsage: {}", e, USAGE),
                 }
             }
         }

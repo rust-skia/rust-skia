@@ -65,15 +65,29 @@ impl BackendFormat {
     }
 
     #[cfg(feature = "vulkan")]
-    pub fn new_vulkan(format: vk::Format) -> Self {
-        Self::construct(|bf| unsafe { sb::C_GrBackendFormat_ConstructVk(bf, format) })
-            .assert_valid()
+    pub fn new_vulkan(
+        format: vk::Format,
+        will_use_drm_format_modifiers: impl Into<Option<bool>>,
+    ) -> Self {
+        let will_use_drm_format_modifiers = will_use_drm_format_modifiers.into().unwrap_or(false);
+        Self::construct(|bf| unsafe {
+            sb::C_GrBackendFormat_ConstructVk(bf, format, will_use_drm_format_modifiers)
+        })
+        .assert_valid()
     }
 
     #[cfg(feature = "vulkan")]
-    pub fn new_vulkan_ycbcr(conversion_info: &vk::YcbcrConversionInfo) -> Self {
+    pub fn new_vulkan_ycbcr(
+        conversion_info: &vk::YcbcrConversionInfo,
+        will_use_drm_format_modifiers: impl Into<Option<bool>>,
+    ) -> Self {
+        let will_use_drm_format_modifiers = will_use_drm_format_modifiers.into().unwrap_or(false);
         Self::construct(|bf| unsafe {
-            sb::C_GrBackendFormat_ConstructVk2(bf, conversion_info.native())
+            sb::C_GrBackendFormat_ConstructVk2(
+                bf,
+                conversion_info.native(),
+                will_use_drm_format_modifiers,
+            )
         })
         .assert_valid()
     }
@@ -103,10 +117,12 @@ impl BackendFormat {
 
     #[cfg(feature = "gl")]
     pub fn as_gl_format(&self) -> gl::Format {
-        unsafe {
-            #[allow(clippy::map_clone)]
-            self.native().asGLFormat()
-        }
+        unsafe { self.native().asGLFormat() }
+    }
+
+    #[cfg(feature = "gl")]
+    pub fn as_gl_format_enum(&self) -> gl::Enum {
+        unsafe { self.native().asGLFormatEnum() }
     }
 
     #[cfg(feature = "vulkan")]
@@ -129,6 +145,7 @@ impl BackendFormat {
             .if_true_some(d3d::DXGI_FORMAT::from_native_c(f))
     }
 
+    #[must_use]
     pub fn to_texture_2d(&self) -> Self {
         let mut new = Self::new_invalid();
         unsafe { sb::C_GrBackendFormat_makeTexture2D(self.native(), new.native_mut()) };

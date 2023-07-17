@@ -9,25 +9,40 @@ fn main() {
     println!("This example is not supported on Android (https://github.com/rust-windowing/winit/issues/948).")
 }
 
-#[cfg(all(not(target_os = "android"), not(feature = "gl")))]
+#[cfg(target_os = "emscripten")]
 fn main() {
-    println!("To run this example, invoke cargo with --feature \"gl\".")
+    println!("This example is not supported on Emscripten (https://github.com/rust-windowing/glutin/issues/1349)")
 }
 
-#[cfg(all(not(target_os = "android"), feature = "gl"))]
+#[cfg(all(
+    not(target_os = "android"),
+    not(target_os = "emscripten"),
+    not(feature = "gl")
+))]
 fn main() {
-    use skia_safe::gpu::gl::FramebufferInfo;
-    use skia_safe::gpu::{BackendRenderTarget, SurfaceOrigin};
-    use skia_safe::{Color, ColorType, Surface};
-    use std::convert::TryInto;
+    println!("To run this example, invoke cargo with --features \"gl\".")
+}
 
-    use glutin::event::{Event, KeyboardInput, VirtualKeyCode, WindowEvent};
-    use glutin::event_loop::{ControlFlow, EventLoop};
-    use glutin::window::WindowBuilder;
-    use glutin::GlProfile;
-    type WindowedContext = glutin::ContextWrapper<glutin::PossiblyCurrent, glutin::window::Window>;
+#[cfg(all(
+    not(target_os = "android"),
+    not(target_os = "emscripten"),
+    feature = "gl"
+))]
+fn main() {
     use gl::types::*;
     use gl_rs as gl;
+    use glutin::{
+        event::{Event, KeyboardInput, VirtualKeyCode, WindowEvent},
+        event_loop::{ControlFlow, EventLoop},
+        window::WindowBuilder,
+        GlProfile,
+    };
+    use skia_safe::{
+        gpu::{gl::FramebufferInfo, BackendRenderTarget, SurfaceOrigin},
+        Color, ColorType, Surface,
+    };
+
+    type WindowedContext = glutin::ContextWrapper<glutin::PossiblyCurrent, glutin::window::Window>;
 
     let el = EventLoop::new();
     let wb = WindowBuilder::new().with_title("rust-skia-gl-window");
@@ -36,8 +51,10 @@ fn main() {
         .with_depth_buffer(0)
         .with_stencil_buffer(8)
         .with_pixel_format(24, 8)
-        .with_double_buffer(Some(true))
         .with_gl_profile(GlProfile::Core);
+
+    #[cfg(not(feature = "wayland"))]
+    let cb = cb.with_double_buffer(Some(true));
 
     let windowed_context = cb.build_windowed(wb, &el).unwrap();
 

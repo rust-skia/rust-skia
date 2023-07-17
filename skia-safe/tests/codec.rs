@@ -118,6 +118,7 @@ fn test_encoder_enum() {
         EncodedImageFormat::DNG => {}
         EncodedImageFormat::HEIF => {}
         EncodedImageFormat::AVIF => {}
+        EncodedImageFormat::JPEGXL => {}
     }
 }
 

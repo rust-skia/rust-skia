@@ -1,5 +1,6 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
+use crate::SurfaceProps;
 use crate::{
     prelude::*, AlphaType, Bitmap, ColorSpace, ColorType, Data, EncodedImageFormat, IPoint, IRect,
     ISize, ImageFilter, ImageGenerator, ImageInfo, Matrix, Paint, Picture, Pixmap, SamplingOptions,
@@ -74,12 +75,86 @@ impl Image {
     }
 
     pub fn from_encoded(data: impl Into<Data>) -> Option<Image> {
-        Image::from_ptr(unsafe { sb::C_SkImage_MakeFromEncoded(data.into().into_ptr()) })
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_MakeFromEncoded(data.into().into_ptr(), ptr::null())
+        })
+    }
+
+    pub fn from_encoded_with_alpha_type(
+        data: impl Into<Data>,
+        alpha_type: impl Into<Option<AlphaType>>,
+    ) -> Option<Image> {
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_MakeFromEncoded(
+                data.into().into_ptr(),
+                alpha_type
+                    .into()
+                    .map(|at| &at as *const _)
+                    .unwrap_or(ptr::null()),
+            )
+        })
     }
 
     #[deprecated(since = "0.35.0", note = "Removed without replacement")]
     pub fn decode_to_raster(_encoded: &[u8], _subset: impl Into<Option<IRect>>) -> ! {
         panic!("Removed without replacement")
+    }
+
+    pub fn new_raster_from_compressed(
+        data: impl Into<Data>,
+        dimensions: impl Into<ISize>,
+        ct: CompressionType,
+    ) -> Option<Image> {
+        let dimensions = dimensions.into();
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_MakeRasterFromCompressed(
+                data.into().into_ptr(),
+                dimensions.width,
+                dimensions.height,
+                ct,
+            )
+        })
+    }
+
+    pub fn from_picture(
+        picture: impl Into<Picture>,
+        dimensions: impl Into<ISize>,
+        matrix: Option<&Matrix>,
+        paint: Option<&Paint>,
+        bit_depth: BitDepth,
+        color_space: impl Into<Option<ColorSpace>>,
+    ) -> Option<Image> {
+        Self::from_picture_with_props(
+            picture,
+            dimensions,
+            matrix,
+            paint,
+            bit_depth,
+            color_space,
+            SurfaceProps::default(),
+        )
+    }
+
+    pub fn from_picture_with_props(
+        picture: impl Into<Picture>,
+        dimensions: impl Into<ISize>,
+        matrix: Option<&Matrix>,
+        paint: Option<&Paint>,
+        bit_depth: BitDepth,
+        color_space: impl Into<Option<ColorSpace>>,
+        props: SurfaceProps,
+    ) -> Option<Image> {
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_MakeFromPicture(
+                picture.into().into_ptr(),
+                dimensions.into().native(),
+                matrix.native_ptr_or_null(),
+                paint.native_ptr_or_null(),
+                bit_depth,
+                color_space.into().into_ptr_or_null(),
+                props.native(),
+            )
+        })
     }
 
     #[cfg(feature = "gpu")]
@@ -117,22 +192,6 @@ impl Image {
         _ct: CompressionType,
     ) -> ! {
         panic!("Removed without replacement.")
-    }
-
-    pub fn new_raster_from_compressed(
-        data: impl Into<Data>,
-        dimensions: impl Into<ISize>,
-        ct: CompressionType,
-    ) -> Option<Image> {
-        let dimensions = dimensions.into();
-        Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeRasterFromCompressed(
-                data.into().into_ptr(),
-                dimensions.width,
-                dimensions.height,
-                ct,
-            )
-        })
     }
 
     #[cfg(feature = "gpu")]
@@ -193,7 +252,7 @@ impl Image {
         backend_texture: &gpu::BackendTexture,
         texture_origin: gpu::SurfaceOrigin,
         color_type: ColorType,
-        alpha_type: AlphaType,
+        alpha_type: impl Into<Option<AlphaType>>,
         color_space: impl Into<Option<ColorSpace>>,
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
@@ -202,7 +261,7 @@ impl Image {
                 backend_texture.native(),
                 texture_origin,
                 color_type.into_native(),
-                alpha_type,
+                alpha_type.into().unwrap_or(AlphaType::Premul),
                 color_space.into().into_ptr_or_null(),
             )
         })
@@ -252,26 +311,6 @@ impl Image {
         _image_color_space: impl Into<Option<ColorSpace>>,
     ) -> ! {
         panic!("Removed without replacement")
-    }
-
-    pub fn from_picture(
-        picture: impl Into<Picture>,
-        dimensions: impl Into<ISize>,
-        matrix: Option<&Matrix>,
-        paint: Option<&Paint>,
-        bit_depth: BitDepth,
-        color_space: impl Into<Option<ColorSpace>>,
-    ) -> Option<Image> {
-        Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeFromPicture(
-                picture.into().into_ptr(),
-                dimensions.into().native(),
-                matrix.native_ptr_or_null(),
-                paint.native_ptr_or_null(),
-                bit_depth,
-                color_space.into().into_ptr_or_null(),
-            )
-        })
     }
 
     // TODO: MakePromiseTexture
@@ -343,6 +382,28 @@ impl Image {
         })
     }
 
+    pub fn to_raw_shader<'a>(
+        &self,
+        tile_modes: impl Into<Option<(TileMode, TileMode)>>,
+        sampling: impl Into<SamplingOptions>,
+        local_matrix: impl Into<Option<&'a Matrix>>,
+    ) -> Option<Shader> {
+        let tile_modes = tile_modes.into();
+        let tm1 = tile_modes.map(|(tm, _)| tm).unwrap_or_default();
+        let tm2 = tile_modes.map(|(_, tm)| tm).unwrap_or_default();
+        let sampling = sampling.into();
+
+        Shader::from_ptr(unsafe {
+            sb::C_SkImage_makeRawShader(
+                self.native(),
+                tm1,
+                tm2,
+                sampling.native(),
+                local_matrix.into().native_ptr_or_null(),
+            )
+        })
+    }
+
     pub fn peek_pixels(&self) -> Option<Borrows<Pixmap>> {
         let mut pixmap = Pixmap::default();
         unsafe { self.native().peekPixels(pixmap.native_mut()) }
@@ -364,31 +425,32 @@ impl Image {
     }
 
     #[cfg(feature = "gpu")]
-    pub fn flush_with_info(
-        &mut self,
+    pub fn flush<'a>(
+        &self,
         context: &mut gpu::DirectContext,
-        flush_info: &gpu::FlushInfo,
+        flush_info: impl Into<Option<&'a gpu::FlushInfo>>,
     ) -> gpu::SemaphoresSubmitted {
+        let flush_info_default = gpu::FlushInfo::default();
+        let flush_info = flush_info.into().unwrap_or(&flush_info_default);
         unsafe {
-            self.native_mut()
+            self.native()
                 .flush(context.native_mut(), flush_info.native())
         }
     }
 
-    // TODO: m86: implement new flush() variant that is based on flush_with_info() as soon the old
-    // flush() is removed.
     #[cfg(feature = "gpu")]
-    #[deprecated(
-        since = "0.33.0",
-        note = "use flushAndSubmit() or flush_with_info(,&gpu::FlushInfo::default())"
-    )]
-    pub fn flush(&mut self, context: &mut gpu::DirectContext) {
-        self.flush_and_submit(context)
+    #[deprecated(since = "0.46.0", note = "use flush()")]
+    pub fn flush_with_info(
+        &self,
+        context: &mut gpu::DirectContext,
+        flush_info: &gpu::FlushInfo,
+    ) -> gpu::SemaphoresSubmitted {
+        self.flush(context, flush_info)
     }
 
     #[cfg(feature = "gpu")]
-    pub fn flush_and_submit(&mut self, context: &mut gpu::DirectContext) {
-        unsafe { self.native_mut().flushAndSubmit(context.native_mut()) }
+    pub fn flush_and_submit(&self, context: &mut gpu::DirectContext) {
+        unsafe { self.native().flushAndSubmit(context.native_mut()) }
     }
 
     #[cfg(feature = "gpu")]

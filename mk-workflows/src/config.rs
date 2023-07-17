@@ -52,6 +52,7 @@ pub fn qa_jobs() -> Vec<Job> {
             example_args: Some("--driver cpu --driver pdf --driver svg".into()),
             ..Job::default()
         },
+        /*
         Job {
             name: "stable-all-features-debug",
             toolchain: "stable",
@@ -59,6 +60,7 @@ pub fn qa_jobs() -> Vec<Job> {
             skia_debug: true,
             ..Job::default()
         },
+        */
         Job {
             name: "beta-all-features",
             toolchain: "beta",
@@ -125,6 +127,7 @@ fn linux_targets() -> Vec<Target> {
         ..Default::default()
     }];
     targets.extend(android_targets());
+    targets.extend(wasm_targets());
     targets
 }
 
@@ -142,6 +145,11 @@ fn macos_targets() -> Vec<Target> {
         },
         Target {
             target: "aarch64-apple-ios",
+            platform_features: "metal".into(),
+            ..Default::default()
+        },
+        Target {
+            target: "aarch64-apple-ios-sim",
             platform_features: "metal".into(),
             ..Default::default()
         },
@@ -171,5 +179,14 @@ fn android_targets() -> Vec<Target> {
             ..Default::default()
         },
     ]
+    .into()
+}
+
+fn wasm_targets() -> Vec<Target> {
+    [Target {
+        target: "wasm32-unknown-emscripten",
+        emscripten_env: true,
+        ..Default::default()
+    }]
     .into()
 }

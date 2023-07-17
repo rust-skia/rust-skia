@@ -28,7 +28,6 @@ pub struct ContextOptions {
     pub glyphs_as_paths_font_size: f32,
     pub allow_multiple_glyph_cache_textures: Enable,
     pub avoid_stencil_buffers: bool,
-    pub sharpen_mipmapped_textures: bool,
     pub use_draw_instead_of_clear: Enable,
     pub reduce_ops_task_splitting: Enable,
     pub prefer_external_images_over_es3: bool,
@@ -42,6 +41,7 @@ pub struct ContextOptions {
     pub suppress_mipmap_support: bool,
     pub enable_experimental_hardware_tessellation: bool,
     pub reduced_shader_variations: bool,
+    pub allow_msaa_on_new_intel: bool,
     pub driver_bug_workarounds: DriverBugWorkarounds,
 }
 unsafe_send_sync!(ContextOptions);
@@ -59,3 +59,5 @@ impl ContextOptions {
 }
 
 native_transmutable!(GrContextOptions, ContextOptions, context_options_layout);
+
+// TODO: PersistentCache, ShaderErrorHandler

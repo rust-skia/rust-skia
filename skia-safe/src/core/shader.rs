@@ -90,6 +90,7 @@ impl Shader {
         unsafe { sb::C_SkShader_isAImage(self.native()) }
     }
 
+    #[must_use]
     pub fn with_local_matrix(&self, matrix: &Matrix) -> Self {
         Self::from_ptr(unsafe {
             sb::C_SkShader_makeWithLocalMatrix(self.native(), matrix.native())
@@ -97,6 +98,7 @@ impl Shader {
         .unwrap()
     }
 
+    #[must_use]
     pub fn with_color_filter(&self, color_filter: impl Into<ColorFilter>) -> Self {
         Self::from_ptr(unsafe {
             sb::C_SkShader_makeWithColorFilter(self.native(), color_filter.into().into_ptr())

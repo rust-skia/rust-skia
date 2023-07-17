@@ -54,13 +54,12 @@ impl ParagraphBuilder {
         self
     }
 
-    pub fn set_paragraph_style(&mut self, style: &ParagraphStyle) -> &mut Self {
-        unsafe { sb::C_ParagraphBuilder_setParagraphStyle(self.native_mut(), style.native()) }
-        self
-    }
-
     pub fn build(&mut self) -> Paragraph {
         Paragraph::from_ptr(unsafe { sb::C_ParagraphBuilder_Build(self.native_mut()) }).unwrap()
+    }
+
+    pub fn reset(&mut self) {
+        unsafe { sb::C_ParagraphBuilder_Reset(self.native_mut()) }
     }
 
     pub fn new(style: &ParagraphStyle, font_collection: impl Into<FontCollection>) -> Self {
@@ -70,6 +69,6 @@ impl ParagraphBuilder {
         Self::from_ptr(unsafe {
             sb::C_ParagraphBuilder_make(style.native(), font_collection.into().into_ptr())
         })
-        .unwrap()
+        .expect("Unicode initialization error")
     }
 }

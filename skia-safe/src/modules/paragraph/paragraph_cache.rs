@@ -1,7 +1,6 @@
-use std::fmt;
-
 use crate::prelude::*;
 use skia_bindings::{self as sb, skia_textlayout_ParagraphCache};
+use std::fmt;
 
 pub type ParagraphCache = Handle<skia_textlayout_ParagraphCache>;
 

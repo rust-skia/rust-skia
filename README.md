@@ -2,14 +2,14 @@
 
 [![crates.io](https://img.shields.io/crates/v/skia-safe)](https://crates.io/crates/skia-safe) [![license](https://img.shields.io/crates/l/skia-safe)](LICENSE) [![Windows QA](https://github.com/rust-skia/rust-skia/actions/workflows/windows-qa.yaml/badge.svg?branch=master)](https://github.com/rust-skia/rust-skia/actions/workflows/windows-qa.yaml) [![Linux QA](https://github.com/rust-skia/rust-skia/actions/workflows/linux-qa.yaml/badge.svg?branch=master)](https://github.com/rust-skia/rust-skia/actions/workflows/linux-qa.yaml) [![macOS QA](https://github.com/rust-skia/rust-skia/actions/workflows/macos-qa.yaml/badge.svg?branch=master)](https://github.com/rust-skia/rust-skia/actions/workflows/macos-qa.yaml)
 
-Skia Submodule Status: chrome/m94 ([upstream changes][skia-upstream], [our changes][skia-ours]).
+Skia Submodule Status: chrome/m104 ([upstream changes][skia-upstream], [our changes][skia-ours]).
 
-[skia-upstream]: https://github.com/rust-skia/skia/compare/m94-0.42.1...google:chrome/m94
-[skia-ours]: https://github.com/google/skia/compare/chrome/m94...rust-skia:m94-0.42.1
+[skia-upstream]: https://github.com/rust-skia/skia/compare/m104-0.52.1...google:chrome/m104
+[skia-ours]: https://github.com/google/skia/compare/chrome/m104...rust-skia:m104-0.52.1
 
 ## Goals
 
-This project provides _up to date_ safe bindings that bridge idiomatic Rust with Skia's C++ API on desktop and mobile platforms, including GPU rendering backends for [Vulkan](https://en.wikipedia.org/wiki/Vulkan_(API)), [Metal](https://en.wikipedia.org/wiki/Metal_(API)), [OpenGL](https://en.wikipedia.org/wiki/OpenGL), and [Direct3D](https://en.wikipedia.org/wiki/Direct3D).
+This project provides _up to date_ safe bindings that bridge idiomatic Rust with Skia's C++ API on desktop and mobile platforms, including GPU rendering backends for [Vulkan](<https://en.wikipedia.org/wiki/Vulkan_(API)>), [Metal](<https://en.wikipedia.org/wiki/Metal_(API)>), [OpenGL](https://en.wikipedia.org/wiki/OpenGL), and [Direct3D](https://en.wikipedia.org/wiki/Direct3D).
 
 ## Status
 
@@ -40,17 +40,16 @@ For other platforms, more information is available at the [OpenSSL crate documen
 
 ### Platform Support, Build Targets, and Prebuilt Binaries
 
-Because building Skia takes a lot of time and needs tools that may be missing, the skia-bindings crate's `build.rs` tries to download prebuilt binaries from [the skia-binaries repository](<https://github.com/rust-skia/skia-binaries/releases>).
+Because building Skia takes a lot of time and needs tools that may be missing, the skia-bindings crate's `build.rs` tries to download prebuilt binaries from [the skia-binaries repository](https://github.com/rust-skia/skia-binaries/releases).
 
-| Platform | Binaries |
-| -------- | -------- |
-|  Windows | `x86_64-pc-windows-msvc` |
-| Linux Ubuntu 16, 18<br />CentOS 7, 8 | `x86_64-unknown-linux-gnu` |
-| macOS    | `x86_64-apple-darwin` |
-| Android  | `aarch64-linux-android`<br/>`x86_64-linux-android` |
-| iOS      | `aarch64-apple-ios`<br/>`x86_64-apple-ios` |
-
-There no support for WebAssembly yet. If you'd like to help out, take a look at issue [#39](https://github.com/rust-skia/rust-skia/issues/39).
+| Platform                          | Binaries                                           |
+| --------------------------------- | -------------------------------------------------- |
+| Windows                           | `x86_64-pc-windows-msvc`                           |
+| Linux Ubuntu 16+<br />CentOS 7, 8 | `x86_64-unknown-linux-gnu`                         |
+| macOS                             | `x86_64-apple-darwin`                              |
+| Android                           | `aarch64-linux-android`<br/>`x86_64-linux-android` |
+| iOS                               | `aarch64-apple-ios`<br/>`x86_64-apple-ios`         |
+| WebAssembly                       | `wasm32-unknown-emscripten`                        |
 
 ### Wrappers & Codecs & Supported Features
 
@@ -58,19 +57,17 @@ The supported wrappers, Skia codecs, and additional Skia features are documented
 
 ## Building
 
-If the target platform or feature configuration is not available as a prebuilt binary, skia-bindings' `build.rs` will try to build Skia and generate the Rust bindings. 
+If the target platform or feature configuration is not available as a prebuilt binary, skia-bindings' `build.rs` will try to build Skia and generate the Rust bindings.
 
-To prepare for that, **LLVM** and **Python 2** are needed:
+To prepare for that, **LLVM** and **Python 3** are needed:
 
 **LLVM**
 
-We recommend the version that comes preinstalled with your platform, or, if not available, the [latest official LLVM release](http://releases.llvm.org/download.html). To see which version of LLVM/Clang is installed on your system, use `clang --version`. 
+We recommend the version that comes preinstalled with your platform, or, if not available, the [latest official LLVM release](http://releases.llvm.org/download.html). To see which version of LLVM/Clang is installed on your system, use `clang --version`.
 
-**Python 2**
+**Python 3**
 
-Python version 2.7 _must_ be available.
-
-The build script probes for `python --version` and `python2 --version` and uses the first one that looks like a version 2 executable for building Skia.
+The build script probes for `python --version` and `python3 --version` and uses the first one that looks like a version 3 executable for building Skia.
 
 ### On macOS
 
@@ -88,9 +85,9 @@ The build script probes for `python --version` and `python2 --version` and uses 
   sudo open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg
   ```
 
-  If not installed, the Skia build _may_ fail to build `SkJpegUtility.cpp` and the binding generation _will_ fail with  `'TargetConditionals.h' file not found` . Also note that the Command Line Tools _and_ SDK headers _should_ be reinstalled after an update of XCode.
+  If not installed, the Skia build _may_ fail to build `SkJpegUtility.cpp` and the binding generation _will_ fail with `'TargetConditionals.h' file not found` . Also note that the Command Line Tools _and_ SDK headers _should_ be reinstalled after an update of XCode.
 
-- As an alternative to Apple's XCode LLVM, install LLVM via `brew install llvm` or `brew install llvm` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` like instructed. 
+- As an alternative to Apple's XCode LLVM, install LLVM via `brew install llvm` or `brew install llvm` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` like instructed.
 
   If the environment variables are not set, [bindgen](https://github.com/rust-lang/rust-bindgen) will most likely use the wrong `libclang.dylib` and cause confusing compilation errors (see #228).
 
@@ -98,20 +95,20 @@ The build script probes for `python --version` and `python2 --version` and uses 
 
 - Have the latest versions of `git` and Rust ready.
 
-- [Install Visual Studio 2019 Build Tools](https://visualstudio.microsoft.com/downloads/) or one of the IDE releases. If you installed the IDE, make sure that the [Desktop Development with C++ workload](https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=vs-2019) is installed.
+- [Install Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) or one of the other IDE editions. If you installed the IDE, make sure that the [Desktop Development with C++ workload](https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=msvc-170) is installed.
 
 - Install the [latest LLVM](http://releases.llvm.org/download.html) distribution.
 
   If the environment variable `LLVM_HOME` is not defined, the build script will look for LLVM installations located at `C:\Program Files\LLVM\`, `C:\LLVM\`, and `%USERPROFILE%\scoop\apps\llvm\current\`.
-  
+
 - [MSYS2](https://www.msys2.org/):
-  
-  - Install Python2 with `pacman -S python2`.
-  
+
+  - Install Python 3 with `pacman -S python`.
+
 - Windows Shell (`Cmd.exe`):
-  
-  - Download and install Python version 2 from [python.org](https://www.python.org/downloads/release/python-2716/).
-  
+
+  - Download and install Python 3 from [python.org](https://www.python.org/downloads).
+
 - Install and select the MSVC toolchain:
   ```bash
   rustup default stable-msvc
@@ -122,15 +119,16 @@ The build script probes for `python --version` and `python2 --version` and uses 
 #### Ubuntu 16+
 
 - LLVM/Clang should be available already, if not, [install the latest version](http://releases.llvm.org/download.html).
-
 - If OpenGL libraries are missing, install the drivers for you graphics card, or a mesa package like `libgl1-mesa-dev`.
+- For **X11**, build with feature `x11`.
+- For **Wayland**, install `libwayland-dev` and build with the `wayland` feature.
 
 #### CentOS 7
 
 - Install the following packages:
 
   ```bash
-  sudo yum install gcc openssl-devel libX11-devel python2 fontconfig-devel mesa-libGL-devel
+  sudo yum install gcc openssl-devel libX11-devel python3 fontconfig-devel mesa-libGL-devel
   ```
 
 - [Install and enable the LLVM toolset 7](https://www.softwarecollections.org/en/scls/rhscl/llvm-toolset-7.0/)
@@ -142,13 +140,13 @@ The build script probes for `python --version` and `python2 --version` and uses 
 - Install the following packages:
 
   ```bash
-  sudo yum install gcc openssl-devel libX11-devel python2 clang fontconfig-devel mesa-libGL-devel
+  sudo yum install gcc openssl-devel libX11-devel python3 clang fontconfig-devel mesa-libGL-devel
   ```
 
-- Set `/usr/bin/python2` as the default `python` command:
+- Set `/usr/bin/python3` as the default `python` command:
 
   ```bash
-  sudo alternatives --set python /usr/bin/python2
+  sudo alternatives --set python /usr/bin/python3
   ```
 
 ### For Android
@@ -201,6 +199,7 @@ export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android26-clang.c
 
 cargo build -vv --target aarch64-linux-android
 ```
+
 _Notes:_
 
 - The `CARGO_TARGET_${TARGET}_LINKER` environment variable name [needs to be all uppercase](https://github.com/rust-lang/cargo/issues/1109#issuecomment-386850387).
@@ -210,6 +209,54 @@ _Notes:_
 ### For iOS
 
 Compilation to iOS is supported on macOS targeting the iOS simulator (`--target x86_64-apple-ios`) and 64 bit ARM devices (`--target aarch64-apple-ios`). The ARM64**e** architecture is [not supported yet](https://github.com/rust-lang/rust/issues/73628).
+
+### For WebAssembly
+
+Install `emscripten` version 3.1.1 or superior. In the examples below, we assume
+`emsdk` version `3.1.1` was installed with [asdf](http://asdf-vm.com/).
+
+Build with the `wasm32-unknown-emscripten` target (`wasm32-unknown-unknown` is
+unsupported because it is [fundamentally incompatible with linking C code](https://github.com/rustwasm/team/issues/291#issuecomment-645482430):
+
+```bash
+export EMSDK=~/.asdf/installs/emsdk/3.1.1
+export EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0"
+
+cargo build --target wasm32-unknown-emscripten
+```
+
+The `EMSDK` environment variable must be set to the root of your `emscripten` SDK.
+
+In `EMCC_CFLAGS`, `-s ERROR_ON_UNDEFINED_SYMBOLS` is a
+[workaround](https://github.com/rust-lang/rust/issues/85821#issuecomment-969369677) to build with
+`emscripten > 2.0.9`.
+
+If you want to enable WebGL, you will also have to set `MAX_WEBGL_VERSION=2`:
+
+```bash
+export EMSDK=~/.asdf/installs/emsdk/3.1.1
+export EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
+
+cargo build --target wasm32-unknown-emscripten --features gl
+```
+
+On MacOS there is a problem with the OS version of `ar` so you will have to install the GNU version from homebrew:
+
+```bash
+brew install binutils
+```
+
+Then prepend `binutils` path for the build. The path depends on your CPU
+architecture, and can be retrieved with `brew info binutils`. Here is an
+example for Apple silicon:
+
+```bash
+export EMSDK=~/.asdf/installs/emsdk/3.1.1
+export EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0"
+export PATH="/opt/homebrew/opt/binutils/bin:$PATH"
+
+cargo build --target wasm32-unknown-emscripten
+```
 
 ### Skia
 
@@ -248,7 +295,8 @@ cargo run -- [OUTPUT_DIR] --driver opengl
 ```
 
 And to show the drivers that are supported
-```bash 
+
+```bash
 cargo run -- --help
 ```
 
@@ -295,6 +343,8 @@ More details can be found at [CONTRIBUTING.md](https://github.com/rust-skia/rust
 
 - Denis Kolodin ([@DenisKolodin](https://github.com/DenisKolodin)) added build support for Android.
 - Alberto González Palomo ([@AlbertoGP](https://github.com/AlbertoGP)) designed the Rust-Skia Logo and the example program that renders it.
+- Luper Rouch ([@flupke](https://github.com/flupke), sponsored by [Jitter](https://jitter.video/))
+  added build support for the `wasm32-unknown-emscripten` target.
 
 ## Maintainers
 
@@ -304,5 +354,3 @@ More details can be found at [CONTRIBUTING.md](https://github.com/rust-skia/rust
 ## License
 
 MIT
-
-  

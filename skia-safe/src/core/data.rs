@@ -84,6 +84,10 @@ impl Data {
         Data::from_ptr(sb::C_SkData_MakeUninitialized(length)).unwrap()
     }
 
+    pub fn new_zero_initialized(length: usize) -> Data {
+        Data::from_ptr(unsafe { sb::C_SkData_MakeZeroInitialized(length) }).unwrap()
+    }
+
     // TODO: use Range as stand in for offset / length?
     pub fn new_subset(data: &Data, offset: usize, length: usize) -> Data {
         Data::from_ptr(unsafe { sb::C_SkData_MakeSubset(data.native(), offset, length) }).unwrap()

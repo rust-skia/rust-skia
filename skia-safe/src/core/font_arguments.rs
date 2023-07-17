@@ -1,8 +1,9 @@
 use crate::prelude::*;
+use sb::SkFontArguments_Palette;
 use skia_bindings::{self as sb, SkFontArguments, SkFontArguments_VariationPosition};
 use std::{fmt, marker::PhantomData, mem};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct VariationPosition<'a> {
     pub coordinates: &'a [variation_position::Coordinate],
 }
@@ -25,27 +26,52 @@ pub mod variation_position {
     );
 }
 
-#[repr(C)]
-pub struct FontArguments<'a> {
-    args: SkFontArguments,
-    pd: PhantomData<&'a [variation_position::Coordinate]>,
+#[derive(Clone, Debug)]
+pub struct Palette<'a> {
+    pub index: i32,
+    pub overrides: &'a [palette::Override],
 }
 
-native_transmutable!(SkFontArguments, FontArguments<'_>, font_arguments_layout);
+pub mod palette {
+    use crate::Color;
+    use skia_bindings::SkFontArguments_Palette_Override;
 
-impl Drop for FontArguments<'_> {
+    #[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
+    #[repr(C)]
+    pub struct Override {
+        pub index: i32,
+        pub color: Color,
+    }
+
+    native_transmutable!(SkFontArguments_Palette_Override, Override, override_layout);
+}
+
+#[repr(C)]
+pub struct FontArguments<'vp, 'p> {
+    args: SkFontArguments,
+    pd_vp: PhantomData<&'vp [variation_position::Coordinate]>,
+    pd_p: PhantomData<&'p [palette::Override]>,
+}
+
+native_transmutable!(
+    SkFontArguments,
+    FontArguments<'_, '_>,
+    font_arguments_layout
+);
+
+impl Drop for FontArguments<'_, '_> {
     fn drop(&mut self) {
         unsafe { sb::C_SkFontArguments_destruct(self.native_mut()) }
     }
 }
 
-impl Default for FontArguments<'_> {
+impl Default for FontArguments<'_, '_> {
     fn default() -> Self {
         FontArguments::new()
     }
 }
 
-impl fmt::Debug for FontArguments<'_> {
+impl fmt::Debug for FontArguments<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("FontArguments")
             .field("collection_index", &self.collection_index())
@@ -53,11 +79,12 @@ impl fmt::Debug for FontArguments<'_> {
                 "variation_design_position",
                 &self.variation_design_position(),
             )
+            .field("palette", &self.palette())
             .finish()
     }
 }
 
-impl FontArguments<'_> {
+impl FontArguments<'_, '_> {
     pub fn new() -> Self {
         Self::construct(|fa| unsafe {
             sb::C_SkFontArguments_construct(fa);
@@ -70,7 +97,7 @@ impl FontArguments<'_> {
     }
 
     // This function consumes self for it to be able to change its lifetime,
-    // because it borrows the coordinates referenced by VariationPosition.
+    // because it borrows the coordinates referenced by [`VariationPosition`].
     //
     // If we would return `Self`, position's Coordinates would not be borrowed.
     pub fn set_variation_design_position(mut self, position: VariationPosition) -> FontArguments {
@@ -97,6 +124,33 @@ impl FontArguments<'_> {
                 coordinates: safer::from_raw_parts(
                     position.coordinates as *const _,
                     position.coordinateCount.try_into().unwrap(),
+                ),
+            }
+        }
+    }
+
+    // This function consumes `self` for it to be able to change its lifetime, because it borrows
+    // the coordinates referenced by `[Palette]`.
+    pub fn set_palette(mut self, palette: Palette) -> FontArguments {
+        let palette = SkFontArguments_Palette {
+            index: palette.index,
+            overrides: palette.overrides.native().as_ptr(),
+            overrideCount: palette.overrides.len().try_into().unwrap(),
+        };
+        unsafe {
+            sb::C_SkFontArguments_setPalette(self.native_mut(), palette);
+            mem::transmute(self)
+        }
+    }
+
+    pub fn palette(&self) -> Palette {
+        unsafe {
+            let palette = sb::C_SkFontArguments_getPalette(self.native());
+            Palette {
+                index: palette.index,
+                overrides: safer::from_raw_parts(
+                    palette.overrides as *const _,
+                    palette.overrideCount.try_into().unwrap(),
                 ),
             }
         }

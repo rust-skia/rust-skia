@@ -5,9 +5,10 @@ use std::{
 };
 use Platform::*;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 enum Platform {
     IOSSimulator,
+    IOSM1Simulator,
     IOSDevice,
     Catalyst,
 }
@@ -17,16 +18,18 @@ impl Platform {
         match () {
             () if abi == Some("macabi") => Catalyst,
             () if arch == "x86_64" => IOSSimulator,
+            () if arch == "aarch64" && abi == Some("sim") => IOSM1Simulator,
             () => IOSDevice,
         }
     }
 
     fn flags(self) -> &'static str {
         match self {
-            IOSSimulator => "-mios-simulator-version-min=10.0",
             IOSDevice => "-miphoneos-version-min=10.0",
-            // If we go below 13.0, the Skia build emits warnings.
-            Catalyst => "-miphoneos-version-min=13.0",
+            IOSSimulator => "-mios-simulator-version-min=10.0",
+            IOSM1Simulator => "-mios-simulator-version-min=14.0",
+            // m100: XCode 13.2 fails to build with version 13
+            Catalyst => "-miphoneos-version-min=14.0",
         }
     }
 
@@ -47,16 +50,28 @@ impl Platform {
 
     fn sdk_name(self) -> &'static str {
         match self {
-            IOSSimulator => "iphonesimulator",
+            IOSSimulator | IOSM1Simulator => "iphonesimulator",
             IOSDevice => "iphoneos",
             Catalyst => "macosx",
         }
     }
 }
 
+pub fn is_simulator(arch: &str, abi: Option<&str>) -> bool {
+    Platform::new(arch, abi) == Platform::IOSSimulator
+}
+
+pub fn specific_target(arch: &str, abi: Option<&str>) -> Option<String> {
+    if let IOSM1Simulator = Platform::new(arch, abi) {
+        Some("arm64-apple-ios14.0.0-simulator".into())
+    } else {
+        None
+    }
+}
+
 // TODO: add support for 32 bit devices and simulators.
-pub fn extra_skia_cflags(arch: &str, abi: Option<&str>, flags: &mut Vec<&str>) {
-    flags.push(Platform::new(arch, abi).flags());
+pub fn extra_skia_cflags(arch: &str, abi: Option<&str>) -> Vec<String> {
+    vec![Platform::new(arch, abi).flags().into()]
 }
 
 pub fn additional_clang_args(arch: &str, abi: Option<&str>) -> Vec<String> {
@@ -67,7 +82,7 @@ pub fn additional_clang_args(arch: &str, abi: Option<&str>) -> Vec<String> {
     args.push(platform.flags().into());
 
     match platform {
-        IOSSimulator => {
+        IOSSimulator | IOSM1Simulator => {
             args.push("-m64".into());
         }
         IOSDevice | Catalyst => {

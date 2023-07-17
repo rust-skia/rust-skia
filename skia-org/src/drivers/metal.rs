@@ -1,12 +1,12 @@
-use crate::artifact;
-use crate::drivers::DrawingDriver;
+use crate::{artifact, drivers::DrawingDriver, Driver};
 use cocoa::foundation::NSAutoreleasePool;
 use foreign_types_shared::ForeignType;
 use metal_rs::*;
-use skia_safe::gpu::{self, mtl};
-use skia_safe::{Budgeted, Canvas, ImageInfo, Surface};
-use std::path::Path;
-use std::ptr;
+use skia_safe::{
+    gpu::{self, mtl},
+    Budgeted, Canvas, ImageInfo, Surface,
+};
+use std::{path::Path, ptr};
 
 #[allow(dead_code)]
 pub struct Metal {
@@ -18,7 +18,7 @@ pub struct Metal {
 }
 
 impl DrawingDriver for Metal {
-    const NAME: &'static str = "metal";
+    const DRIVER: Driver = Driver::Metal;
 
     fn new() -> Self {
         let pool = AutoreleasePool::new();

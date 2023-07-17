@@ -1,6 +1,7 @@
 //! Full build support for the Skia library.
 
 use super::{llvm, vs};
+use crate::build_support::cargo::Target;
 use crate::build_support::{android, binaries_config, cargo, clang, features, ios};
 use std::env;
 use std::path::{Path, PathBuf};
@@ -27,19 +28,46 @@ pub struct BuildConfiguration {
 
     /// C++ compiler to use
     cxx: String,
+
+    /// The target (arch-vendor-os-abi)
+    target: Target,
 }
 
 /// Builds a Skia configuration from a Features set.
 impl BuildConfiguration {
     pub fn from_features(features: features::Features, skia_debug: bool) -> Self {
+        // Yocto SDKs set CLANGCC/CLANGCXX, which is a better choice to determine clang,
+        // as CC/CXX are likely referring to gcc.
+        let cc = cargo::env_var("CLANGCC")
+            .or_else(|| cargo::env_var("CC"))
+            .unwrap_or_else(|| "clang".to_string());
+        let cxx = cargo::env_var("CLANGCXX")
+            .or_else(|| cargo::env_var("CXX"))
+            .unwrap_or_else(|| "clang++".to_string());
+
+        // It's possible that the provided command line for the compiler already includes --target.
+        // We assume that it's most specific/appropriate, extract and use is. It might for example include
+        // a vendor infix, while cargo targets usually don't.
+        let target = cc
+            .find("--target=")
+            .map(|target_option_offset| {
+                let target_tail = &cc[(target_option_offset + "--target=".len())..];
+                let target_str = target_tail
+                    .split_once(' ')
+                    .map_or(target_tail, |(target_str, ..)| target_str);
+                cargo::parse_target(target_str)
+            })
+            .unwrap_or_else(cargo::target);
+
         BuildConfiguration {
             on_windows: cargo::host().is_windows(),
             // `OPT_LEVEL` is set by Cargo itself.
             opt_level: cargo::env_var("OPT_LEVEL"),
             features,
             skia_debug,
-            cc: cargo::env_var("CC").unwrap_or_else(|| "clang".to_string()),
-            cxx: cargo::env_var("CXX").unwrap_or_else(|| "clang++".to_string()),
+            cc,
+            cxx,
+            target,
         }
     }
 }
@@ -55,6 +83,12 @@ pub struct FinalBuildConfiguration {
 
     /// Whether to use system libraries or not.
     pub use_system_libraries: bool,
+
+    /// The target (arch-vendor-os-abi)
+    pub target: Target,
+
+    /// An optional target sysroot
+    pub sysroot: Option<String>,
 }
 
 impl FinalBuildConfiguration {
@@ -65,6 +99,10 @@ impl FinalBuildConfiguration {
     ) -> FinalBuildConfiguration {
         let features = &build.features;
 
+        // SDKROOT is the environment variable used on macOS to specify the sysroot. SDKTARGETSYSROOT is the environment
+        // variable set in Yocto Linux SDKs when cross-compiling.
+        let sysroot = cargo::env_var("SDKTARGETSYSROOT").or_else(|| cargo::env_var("SDKROOT"));
+
         let gn_args = {
             fn quote(s: &str) -> String {
                 format!("\"{}\"", s)
@@ -74,6 +112,7 @@ impl FinalBuildConfiguration {
                 ("is_official_build", yes_if(!build.skia_debug)),
                 ("is_debug", yes_if(build.skia_debug)),
                 ("skia_enable_gpu", yes_if(features.gpu())),
+                ("skia_enable_skottie", no()),
                 ("skia_use_gl", yes_if(features.gl)),
                 ("skia_use_egl", yes_if(features.egl)),
                 ("skia_use_x11", yes_if(features.x11)),
@@ -135,20 +174,21 @@ impl FinalBuildConfiguration {
                 args.push(("skia_use_system_libwebp", yes_if(use_system_libraries)))
             }
 
+            if features.embed_freetype {
+                args.push(("skia_use_system_freetype2", no()));
+            }
+
             let mut use_expat = true;
 
             // target specific gn args.
-            let target = cargo::target();
-            let target_str: &str = &format!("--target={}", target.to_string());
+            let target = &build.target;
+            let mut target_str = format!("--target={}", target);
             let mut set_target = true;
-            let sysroot_arg;
-            let opt_level_arg;
-            let mut cflags: Vec<&str> = vec![];
-            let mut asmflags: Vec<&str> = vec![];
+            let mut cflags: Vec<String> = Vec::new();
+            let mut asmflags: Vec<String> = Vec::new();
 
-            if let Some(sysroot) = cargo::env_var("SDKROOT") {
-                sysroot_arg = format!("--sysroot={}", sysroot);
-                cflags.push(&sysroot_arg);
+            if let Some(sysroot) = &sysroot {
+                cflags.push(format!("--sysroot={}", sysroot));
             }
 
             let jpeg_sys_cflags: Vec<String>;
@@ -157,7 +197,7 @@ impl FinalBuildConfiguration {
                 jpeg_sys_cflags = std::env::split_paths(&paths)
                     .map(|arg| format!("-I{}", arg.display()))
                     .collect();
-                cflags.extend(jpeg_sys_cflags.iter().map(|x| -> &str { x.as_ref() }));
+                cflags.extend(jpeg_sys_cflags);
                 args.push(("skia_use_system_libjpeg_turbo", yes()));
             } else {
                 args.push((
@@ -174,26 +214,27 @@ impl FinalBuildConfiguration {
                 */
                 // When targeting windows `-O` isn't supported.
                 if !target.is_windows() {
-                    opt_level_arg = format!("-O{}", opt_level);
-                    cflags.push(&opt_level_arg);
+                    cflags.push(format!("-O{}", opt_level));
                 }
             }
 
             match target.as_strs() {
-                (_, _, "windows", Some("msvc")) if build.on_windows => {
+                (arch, _, "windows", Some("msvc")) if build.on_windows => {
                     if let Some(win_vc) = vs::resolve_win_vc() {
                         args.push(("win_vc", quote(win_vc.to_str().unwrap())))
                     }
-                    // Code on MSVC needs to be compiled differently (e.g. with /MT or /MD) depending on the runtime being linked.
-                    // (See https://doc.rust-lang.org/reference/linkage.html#static-and-dynamic-c-runtimes)
-                    // When static feature is enabled (target-feature=+crt-static) the C runtime should be statically linked
-                    // and the compiler has to place the library name LIBCMT.lib into the .obj
-                    // See https://docs.microsoft.com/en-us/cpp/build/reference/md-mt-ld-use-run-time-library?view=vs-2019
+                    // Code on MSVC needs to be compiled differently (e.g. with /MT or /MD)
+                    // depending on the runtime being linked. (See
+                    // https://doc.rust-lang.org/reference/linkage.html#static-and-dynamic-c-runtimes)
+                    // When static feature is enabled (target-feature=+crt-static) the C runtime
+                    // should be statically linked and the compiler has to place the library name
+                    // LIBCMT.lib into the .obj See
+                    // https://docs.microsoft.com/en-us/cpp/build/reference/md-mt-ld-use-run-time-library?view=vs-2019
                     if cargo::target_crt_static() {
-                        cflags.push("/MT");
+                        cflags.push("/MT".into());
                     } else {
                         // otherwise the C runtime should be linked dynamically
-                        cflags.push("/MD");
+                        cflags.push("/MD".into());
                     }
                     // Tell Skia's build system where LLVM is supposed to be located.
                     if let Some(llvm_home) = llvm::win::find_llvm_home() {
@@ -203,18 +244,27 @@ impl FinalBuildConfiguration {
                             "Unable to locate LLVM installation. skia-bindings can not be built."
                         );
                     }
+                    // Setting `target_cpu` to `i686` or `x86`, nightly builds would lead to
+                    // > 'C:/Program' is not recognized as an internal or external command
+                    // Without it, the executables pop out just fine. See the GH job
+                    // `supplemental-builds/windows-x86`.
+                    if arch != "i686" {
+                        args.push(("target_cpu", quote(clang::target_arch(arch))));
+                    }
                 }
                 (arch, "linux", "android", _) | (arch, "linux", "androideabi", _) => {
                     args.push(("ndk", quote(&android::ndk())));
-                    // TODO: make API-level configurable?
                     args.push(("ndk_api", android::API_LEVEL.into()));
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
-                    args.push(("skia_use_system_freetype2", yes_if(use_system_libraries)));
+                    if !features.embed_freetype {
+                        args.push(("skia_use_system_freetype2", yes_if(use_system_libraries)));
+                    }
                     args.push(("skia_enable_fontmgr_android", yes()));
                     // Enabling fontmgr_android implicitly enables expat.
                     // We make this explicit to avoid relying on an expat installed
                     // in the system.
                     use_expat = true;
+                    cflags.extend(android::extra_skia_cflags())
                 }
                 (_, "apple", "darwin", _) => {
                     args.push(("skia_use_system_freetype2", no()));
@@ -223,11 +273,35 @@ impl FinalBuildConfiguration {
                 (arch, _, "ios", abi) => {
                     args.push(("target_os", quote("ios")));
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
-                    ios::extra_skia_cflags(arch, abi, &mut cflags);
+                    // m100: Needed for aarch64 simulators, requires cherry Skia pick
+                    // 0361abf39d1504966799b1cdb5450e07f88b2bc2 (until milestone 102).
+                    if ios::is_simulator(arch, abi) {
+                        args.push(("ios_use_simulator", yes()));
+                    }
+                    if let Some(specific_target) = ios::specific_target(arch, abi) {
+                        target_str = format!("--target={}", specific_target);
+                    }
+                    cflags.extend(ios::extra_skia_cflags(arch, abi));
                 }
-                (arch, _, os, _) => {
-                    let skia_target_os = match os {
-                        "darwin" => {
+                ("wasm32", "unknown", "emscripten", _) => {
+                    args.push(("cc", quote("emcc")));
+                    args.push(("cxx", quote("em++")));
+                    args.push(("skia_gl_standard", quote("webgl")));
+                    args.push(("skia_use_freetype", yes()));
+                    args.push(("skia_use_system_freetype2", no()));
+                    args.push(("skia_use_webgl", yes_if(features.gpu())));
+                    args.push(("target_cpu", quote("wasm")));
+
+                    // The custom embedded font manager is enabled by default on WASM, but depends
+                    // on the undefined symbol `SK_EMBEDDED_FONTS`. Enable the custom empty font
+                    // manager instead so typeface creation still works.
+                    // See https://github.com/rust-skia/rust-skia/issues/648
+                    args.push(("skia_enable_fontmgr_custom_embedded", no()));
+                    args.push(("skia_enable_fontmgr_custom_empty", yes()));
+                }
+                (arch, _, os, abi) => {
+                    let skia_target_os = match (os, abi) {
+                        ("darwin", _) => {
                             // Skia will take care to set a specific `-target` for the current macOS
                             // version. So we don't push another target `--target` that may
                             // conflict.
@@ -237,8 +311,17 @@ impl FinalBuildConfiguration {
                             cargo::rerun_if_env_var_changed("MACOSX_DEPLOYMENT_TARGET");
                             "mac"
                         }
-                        "windows" => "win",
-                        _ => os,
+                        ("windows", _) => "win",
+                        ("linux", Some("musl")) => {
+                            let cpp = "10.3.1";
+                            cflags.push(format!("-I/usr/include/c++/{}", cpp));
+                            cflags.push(format!(
+                                "-I/usr/include/c++/{}/{}-alpine-linux-musl",
+                                cpp, arch
+                            ));
+                            os
+                        }
+                        (_, _) => os,
                     };
                     args.push(("target_os", quote(skia_target_os)));
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
@@ -253,14 +336,18 @@ impl FinalBuildConfiguration {
             }
 
             if set_target {
-                cflags.push(target_str);
+                cflags.push(target_str.clone());
                 asmflags.push(target_str);
             }
 
             if !cflags.is_empty() {
                 let cflags = format!(
                     "[{}]",
-                    cflags.into_iter().map(quote).collect::<Vec<_>>().join(",")
+                    cflags
+                        .into_iter()
+                        .map(|s| quote(&s))
+                        .collect::<Vec<_>>()
+                        .join(",")
                 );
                 args.push(("extra_cflags", cflags));
             }
@@ -270,7 +357,7 @@ impl FinalBuildConfiguration {
                     "[{}]",
                     asmflags
                         .into_iter()
-                        .map(quote)
+                        .map(|s| quote(&s))
                         .collect::<Vec<_>>()
                         .join(",")
                 );
@@ -286,6 +373,8 @@ impl FinalBuildConfiguration {
             skia_source_dir: skia_source_dir.into(),
             gn_args,
             use_system_libraries,
+            target: build.target.clone(),
+            sysroot,
         }
     }
 }
@@ -312,8 +401,8 @@ pub fn build(
     gn_command: Option<PathBuf>,
     offline: bool,
 ) {
-    let python2 = &prerequisites::locate_python2_cmd();
-    println!("Python 2 found: {:?}", python2);
+    let python = &prerequisites::locate_python3_cmd();
+    println!("Python 3 found: {:?}", python);
 
     let ninja = ninja_command.unwrap_or_else(|| {
         env::current_dir()
@@ -327,7 +416,11 @@ pub fn build(
         #[cfg(feature = "binary-cache")]
         crate::build_support::binary_cache::resolve_dependencies();
         assert!(
-            Command::new(python2)
+            Command::new(python)
+                // Explicitly providing `GIT_SYNC_DEPS_PATH` fixes a problem with `git-sync-deps`
+                // accidentally resolving an absolute directory for `GIT_SYNC_DEPS_PATH` when MingW
+                // Python 3 runs on Windows under MSys.
+                .env("GIT_SYNC_DEPS_PATH", "skia/DEPS")
                 .arg("skia/tools/git-sync-deps")
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit())
@@ -338,7 +431,7 @@ pub fn build(
         );
     }
 
-    configure_skia(build, config, python2, gn_command.as_deref());
+    configure_skia(build, config, python, gn_command.as_deref());
     build_skia(config, &ninja);
 }
 
@@ -346,7 +439,7 @@ pub fn build(
 pub fn configure_skia(
     build: &FinalBuildConfiguration,
     config: &binaries_config::BinariesConfiguration,
-    python2: &Path,
+    python: &Path,
     gn_command: Option<&Path>,
 ) {
     let gn_args = build
@@ -366,7 +459,7 @@ pub fn configure_skia(
         .args(&[
             "gen",
             config.output_directory.to_str().unwrap(),
-            &format!("--script-executable={}", python2.to_str().unwrap()),
+            &format!("--script-executable={}", python.to_str().unwrap()),
             &format!("--args={}", gn_args),
         ])
         .envs(env::vars())
@@ -376,9 +469,11 @@ pub fn configure_skia(
         .output()
         .expect("gn error");
 
-    if output.status.code() != Some(0) {
-        panic!("{:?}", String::from_utf8(output.stdout).unwrap());
-    }
+    assert!(
+        output.status.code() == Some(0),
+        "{:?}",
+        String::from_utf8(output.stdout).unwrap()
+    );
 }
 
 /// Builds Skia.
@@ -387,8 +482,10 @@ pub fn configure_skia(
 /// contains a fully configured Skia source tree generated by gn.
 pub fn build_skia(config: &binaries_config::BinariesConfiguration, ninja_command: &Path) {
     let ninja_status = Command::new(ninja_command)
-        .args(&config.ninja_built_libraries)
+        // Order of arguments do matter here: See <https://github.com/rust-skia/rust-skia/pull/643>
+        // for details.
         .args(&["-C", config.output_directory.to_str().unwrap()])
+        .args(&config.ninja_built_libraries)
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .status();
@@ -406,21 +503,21 @@ mod prerequisites {
     use std::process::Command;
 
     /// Resolves the full path
-    pub fn locate_python2_cmd() -> PathBuf {
-        const PYTHON_CMDS: [&str; 2] = ["python", "python2"];
+    pub fn locate_python3_cmd() -> PathBuf {
+        const PYTHON_CMDS: [&str; 2] = ["python", "python3"];
         for python in PYTHON_CMDS.as_ref() {
             println!("Probing '{}'", python);
-            if let Some(true) = is_python_version_2(python) {
+            if let Some(true) = is_python_version_3(python) {
                 return python.into();
             }
         }
 
-        panic!(">>>>> Probing for Python 2 failed, please make sure that it's available in PATH, probed executables are: {:?} <<<<<", PYTHON_CMDS);
+        panic!(">>>>> Probing for Python 3 failed, please make sure that it's available in PATH, probed executables are: {:?} <<<<<", PYTHON_CMDS);
     }
 
-    /// Returns true if the given python executable is python version 2.
-    /// or None if the executable was not found.
-    fn is_python_version_2(exe: impl AsRef<str>) -> Option<bool> {
+    /// Returns `true` if the given python executable identifies itself as a python version 3
+    /// executable. Returns `None` if the executable was not found.
+    fn is_python_version_3(exe: impl AsRef<str>) -> Option<bool> {
         Command::new(exe.as_ref())
             .arg("--version")
             .output()
@@ -432,7 +529,7 @@ mod prerequisites {
                 }
                 // Don't parse version output, for example output
                 // might be "Python 2.7.15+"
-                str.starts_with("Python 2.")
+                str.starts_with("Python 3.")
             })
             .ok()
     }

@@ -52,6 +52,10 @@ impl Uniform {
         self.flags().contains(uniform::Flags::ARRAY)
     }
 
+    pub fn is_color(&self) -> bool {
+        self.flags().contains(uniform::Flags::COLOR)
+    }
+
     pub fn size_in_bytes(&self) -> usize {
         unsafe { self.native().sizeInBytes() }
     }
@@ -66,7 +70,9 @@ pub mod uniform {
     bitflags! {
         pub struct Flags : u32 {
             const ARRAY = sb::SkRuntimeEffect_Uniform_Flags_kArray_Flag as _;
-            const SRGB_UNPREMUL = sb::SkRuntimeEffect_Uniform_Flags_kSRGBUnpremul_Flag as _;
+            const COLOR = sb::SkRuntimeEffect_Uniform_Flags_kColor_Flag as _;
+            const VERTEX = sb::SkRuntimeEffect_Uniform_Flags_kVertex_Flag as _;
+            const FRAGMENT = sb::SkRuntimeEffect_Uniform_Flags_kFragment_Flag as _;
         }
     }
 }
@@ -119,9 +125,9 @@ impl NativeRefCountedBase for SkRuntimeEffect {
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct Options {
-    pub force_no_inline: bool,
+    pub force_unoptimized: bool,
     enforce_es2_restrictions: bool,
-    allow_frag_coord: bool,
+    use_private_rt_shader_module: bool,
 }
 
 native_transmutable!(SkRuntimeEffect_Options, Options, options_layout);
@@ -129,9 +135,9 @@ native_transmutable!(SkRuntimeEffect_Options, Options, options_layout);
 impl Default for Options {
     fn default() -> Self {
         Options {
-            force_no_inline: false,
+            force_unoptimized: false,
             enforce_es2_restrictions: true,
-            allow_frag_coord: false,
+            use_private_rt_shader_module: false,
         }
     }
 }
@@ -195,7 +201,6 @@ impl RuntimeEffect {
         uniforms: impl Into<Data>,
         children: &[ChildPtr],
         local_matrix: impl Into<Option<&'a Matrix>>,
-        is_opaque: bool,
     ) -> Option<Shader> {
         let mut children: Vec<_> = children
             .iter()
@@ -212,7 +217,6 @@ impl RuntimeEffect {
                 children_ptr,
                 children.len(),
                 local_matrix.into().native_ptr_or_null(),
-                is_opaque,
             )
         })
     }
@@ -296,6 +300,8 @@ impl RuntimeEffect {
         })
     }
 
+    // TODO: wrap MakeTraced
+
     pub fn source(&self) -> &str {
         let mut len = 0;
         let ptr = unsafe { sb::C_SkRuntimeEffect_source(self.native(), &mut len) };
@@ -374,6 +380,8 @@ impl From<Blender> for ChildPtr {
         Self::Blender(blender)
     }
 }
+
+// TODO: Create `ChildPtr` from a Flattenable?
 
 impl ChildPtr {
     pub fn ty(&self) -> ChildType {

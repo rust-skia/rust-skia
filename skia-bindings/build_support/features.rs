@@ -30,6 +30,9 @@ pub struct Features {
     /// Support the decoding of the WEBP image format to bitmap data.
     pub webp_decode: bool,
 
+    /// Build with FreeType embedded.
+    pub embed_freetype: bool,
+
     /// Build with animation support (yet unsupported, no wrappers).
     pub animation: bool,
 
@@ -54,6 +57,7 @@ impl Default for Features {
             text_layout: cfg!(feature = "textlayout"),
             webp_encode: cfg!(feature = "webp-encode"),
             webp_decode: cfg!(feature = "webp-decode"),
+            embed_freetype: cfg!(feature = "embed-freetype"),
             animation: false,
             dng: false,
             particles: false,
@@ -100,6 +104,9 @@ impl Features {
         if self.webp_decode {
             feature_ids.push(feature_id::WEBPD);
         }
+        if self.embed_freetype {
+            feature_ids.push(feature_id::EMBED_FREETYPE);
+        }
 
         feature_ids
     }
@@ -117,4 +124,5 @@ mod feature_id {
     pub const EGL: &str = "egl";
     pub const X11: &str = "x11";
     pub const WAYLAND: &str = "wayland";
+    pub const EMBED_FREETYPE: &str = "freetype";
 }

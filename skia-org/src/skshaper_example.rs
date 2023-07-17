@@ -1,11 +1,9 @@
 use crate::DrawingDriver;
-use skia_safe::{icu, Canvas, Font, Paint, Point, Shaper, Typeface};
+use skia_safe::{Canvas, Font, Paint, Point, Shaper, Typeface};
 use std::path;
 
 pub fn draw(driver: &mut impl DrawingDriver, path: &path::Path) {
     let path = path.join("SkShaper-Example");
-
-    icu::init();
 
     driver.draw_image_256(&path, "rtl-shaped", draw_rtl_shaped);
     driver.draw_image_256(&path, "rtl-unshaped", draw_rtl_unshaped);

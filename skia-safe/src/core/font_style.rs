@@ -6,7 +6,7 @@ use std::{fmt, ops::Deref};
 ///
 /// Use Weight::from() to create a weight from an i32.
 /// Use *weight to pull out the wrapped value of the Weight.
-#[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
 #[repr(transparent)]
 pub struct Weight(i32);
 
@@ -44,7 +44,7 @@ impl Weight {
 ///
 /// To create a width of a font from an i32, use Width::from().
 /// To access the underlying value of the font weight, dereference *weight.
-#[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
 #[repr(transparent)]
 pub struct Width(i32);
 

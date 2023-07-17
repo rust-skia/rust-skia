@@ -1,6 +1,6 @@
 use crate::{
-    prelude::*, AlphaType, Color, ColorSpace, ColorType, IPoint, IRect, ISize, Image, ImageInfo,
-    Matrix, Paint, PixelRef, Pixmap, SamplingOptions, Shader, TileMode,
+    prelude::*, AlphaType, Color, Color4f, ColorSpace, ColorType, IPoint, IRect, ISize, Image,
+    ImageInfo, Matrix, Paint, PixelRef, Pixmap, SamplingOptions, Shader, TileMode,
 };
 use skia_bindings::{self as sb, SkBitmap};
 use std::{ffi, fmt, ptr};
@@ -110,7 +110,7 @@ impl Bitmap {
     /// Returns [ColorSpace], the range of colors, associated with [ImageInfo]. The returned
     /// [ColorSpace] is immutable.
     pub fn color_space(&self) -> Option<ColorSpace> {
-        self.pixmap().color_space()
+        ColorSpace::from_unshared_ptr(unsafe { self.native().colorSpace() })
     }
 
     /// Returns number of bytes per pixel required by [ColorType].
@@ -540,8 +540,22 @@ impl Bitmap {
     /// contained by [bounds(&self)] are affected. If the [color_type(&self)] is [ColorType::Gray8]
     /// or [ColorType::RGB565], then alpha is ignored; RGB is treated as opaque. If
     /// [color_type(&self)] is [ColorType::Alpha8], then RGB is ignored.
+    ///
+    /// Input color is ultimately converted to an [`Color4f`], so [`Self::erase_color_4f`] will have
+    /// higher color resolution.
     pub fn erase_color(&self, c: impl Into<Color>) {
-        unsafe { self.native().eraseColor(c.into().into_native()) }
+        unsafe { self.native().eraseColor1(c.into().into_native()) }
+    }
+
+    /// Replaces pixel values with `c`, interpreted as being in the sRGB [ColorSpace]. All pixels
+    /// contained by [bounds(&self)] are affected. If the [color_type(&self)] is [ColorType::Gray8]
+    /// or [ColorType::RGB565], then alpha is ignored; RGB is treated as opaque. If
+    /// [color_type(&self)] is [ColorType::Alpha8], then RGB is ignored.
+    pub fn erase_color_4f(&self, c: impl AsRef<Color4f>, color_space: impl Into<ColorSpace>) {
+        unsafe {
+            self.native()
+                .eraseColor(c.as_ref().into_native(), color_space.into().into_ptr())
+        }
     }
 
     /// Replaces pixel values with unpremultiplied color built from `a`, `r`, `g`, and `b`,
@@ -558,10 +572,33 @@ impl Bitmap {
     ///
     /// If the `color_type()` is [ColorType::Gray8] [ColorType::RGB565], then alpha is ignored; RGB
     /// is treated as opaque. If `color_type()` is [ColorType::Alpha8], then RGB is ignored.
+    ///
+    /// Input color is ultimately converted to an SkColor4f, so [`Self::erase_4f`] will have higher
+    /// color resolution.
     pub fn erase(&self, c: impl Into<Color>, area: impl AsRef<IRect>) {
         unsafe {
             self.native()
-                .erase(c.into().into_native(), area.as_ref().native())
+                .erase1(c.into().into_native(), area.as_ref().native())
+        }
+    }
+
+    /// Replaces pixel values inside area with c. interpreted as being in the sRGB [ColorSpace]. If
+    /// area does not intersect `bounds()`, call has no effect.
+    ///
+    /// If the `color_type()` is [ColorType::Gray8] [ColorType::RGB565], then alpha is ignored; RGB
+    /// is treated as opaque. If `color_type()` is [ColorType::Alpha8], then RGB is ignored.
+    pub fn erase_4f(
+        &self,
+        c: impl AsRef<Color4f>,
+        color_space: impl Into<Option<ColorSpace>>,
+        area: impl AsRef<IRect>,
+    ) {
+        unsafe {
+            self.native().erase(
+                c.as_ref().into_native(),
+                color_space.into().into_ptr_or_null(),
+                area.as_ref().native(),
+            )
         }
     }
 

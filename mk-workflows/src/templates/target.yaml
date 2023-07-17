@@ -15,6 +15,9 @@
       export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=$[[target]]$[[androidAPILevel]]-clang$[[hostBinExt]]
       echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
     fi
+    if [ "$[[emscriptenEnv]]" == "true" ]; then
+      source /emsdk/emsdk_env.sh
+    fi
     cargo clean
     cargo build -p skia-safe --all-targets --release --features "$[[features]]" --target $[[target]]
     echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
@@ -22,6 +25,7 @@
     echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
   env:
     BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+    EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
 
 - name: 'Run Clippy'
   shell: bash
@@ -59,7 +63,7 @@
 
 - name: 'Release binaries'
   if: $[[releaseBinaries]]
-  uses: ncipollo/release-action@v1
+  uses: pragmatrix/release-action@exp
   with:
     owner: rust-skia
     repo: skia-binaries

@@ -1,7 +1,7 @@
 [package]
 name = "skia-org"
 
-description = "Example drawings for skia-safe, mostly ported from the skia.org website."
+description = "Renders examples from skia.org with rust-skia"
 homepage = "https://github.com/rust-skia/rust-skia"
 repository = "https://github.com/rust-skia/rust-skia"
 readme = "README.md"
@@ -13,7 +13,7 @@ license = "MIT"
 
 version = "1.0.0"
 authors = ["Armin Sander <armin@replicator.org>"]
-edition = "2018"
+edition = "2021"
 
 default-run = "skia-org"
 
@@ -39,8 +39,8 @@ offscreen_gl_context = { git = "https://github.com/rust-skia/rust-offscreen-rend
 # sparkle 0.1.9 fails to compile on macOS targeting aarch64-linux-android
 # sparkle 0.1.25 is incompatible with offscreen_gl_context
 sparkle = { version = "=0.1.24", optional = true }
-clap = "2.33.0"
-ash = { version = "0.33", optional = true }
+clap = { version = "3.0.7", features = ["derive"] }
+ash = { version = "0.37.0", optional = true }
 # need to rename the package because of the feature with the same name.
 metal-rs = { package = "metal", version = "0.23.0", optional = true }
 # ... to access raw metal ptrs.

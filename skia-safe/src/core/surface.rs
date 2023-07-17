@@ -10,7 +10,9 @@ use std::{fmt, ptr};
 pub use skia_bindings::SkSurface_ContentChangeMode as ContentChangeMode;
 variant_name!(ContentChangeMode::Retain, content_change_mode_naming);
 
+#[cfg(feature = "gpu")]
 pub use skia_bindings::SkSurface_BackendHandleAccess as BackendHandleAccess;
+#[cfg(feature = "gpu")]
 variant_name!(
     BackendHandleAccess::FlushWrite,
     backend_handle_access_naming
@@ -134,6 +136,44 @@ impl Surface {
         })
     }
 
+    pub fn new_render_target(
+        context: &mut gpu::RecordingContext,
+        budgeted: crate::Budgeted,
+        image_info: &ImageInfo,
+        sample_count: impl Into<Option<usize>>,
+        surface_origin: impl Into<Option<gpu::SurfaceOrigin>>,
+        surface_props: Option<&SurfaceProps>,
+        should_create_with_mips: impl Into<Option<bool>>,
+    ) -> Option<Self> {
+        Self::from_ptr(unsafe {
+            sb::C_SkSurface_MakeRenderTarget(
+                context.native_mut(),
+                budgeted.into_native(),
+                image_info.native(),
+                sample_count.into().unwrap_or(0).try_into().unwrap(),
+                surface_origin
+                    .into()
+                    .unwrap_or(gpu::SurfaceOrigin::BottomLeft),
+                surface_props.native_ptr_or_null(),
+                should_create_with_mips.into().unwrap_or_default(),
+            )
+        })
+    }
+
+    pub fn new_render_target_with_characterization(
+        context: &mut gpu::RecordingContext,
+        characterization: &SurfaceCharacterization,
+        budgeted: crate::Budgeted,
+    ) -> Option<Self> {
+        Self::from_ptr(unsafe {
+            sb::C_SkSurface_MakeRenderTarget2(
+                context.native_mut(),
+                characterization.native(),
+                budgeted.into_native(),
+            )
+        })
+    }
+
     #[allow(clippy::missing_safety_doc)]
     #[allow(clippy::too_many_arguments)]
     #[cfg(feature = "metal")]
@@ -159,9 +199,10 @@ impl Surface {
         ))
     }
 
+    #[allow(clippy::missing_safety_doc)]
     #[cfg(feature = "metal")]
     #[deprecated(since = "0.36.0", note = "use from_mtk_view()")]
-    pub fn from_ca_mtk_view(
+    pub unsafe fn from_ca_mtk_view(
         context: &mut gpu::DirectContext,
         mtk_view: gpu::mtl::Handle,
         origin: gpu::SurfaceOrigin,
@@ -181,8 +222,9 @@ impl Surface {
         )
     }
 
+    #[allow(clippy::missing_safety_doc)]
     #[cfg(feature = "metal")]
-    pub fn from_mtk_view(
+    pub unsafe fn from_mtk_view(
         context: &mut gpu::RecordingContext,
         mtk_view: gpu::mtl::Handle,
         origin: gpu::SurfaceOrigin,
@@ -191,52 +233,15 @@ impl Surface {
         color_space: impl Into<Option<crate::ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            sb::C_SkSurface_MakeFromMTKView(
-                context.native_mut(),
-                mtk_view,
-                origin,
-                sample_count.into().unwrap_or(0).try_into().unwrap(),
-                color_type.into_native(),
-                color_space.into().into_ptr_or_null(),
-                surface_props.native_ptr_or_null(),
-            )
-        })
-    }
-    pub fn new_render_target(
-        context: &mut gpu::RecordingContext,
-        budgeted: crate::Budgeted,
-        image_info: &ImageInfo,
-        sample_count: impl Into<Option<usize>>,
-        surface_origin: gpu::SurfaceOrigin,
-        surface_props: Option<&SurfaceProps>,
-        should_create_with_mips: impl Into<Option<bool>>,
-    ) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            sb::C_SkSurface_MakeRenderTarget(
-                context.native_mut(),
-                budgeted.into_native(),
-                image_info.native(),
-                sample_count.into().unwrap_or(0).try_into().unwrap(),
-                surface_origin,
-                surface_props.native_ptr_or_null(),
-                should_create_with_mips.into().unwrap_or_default(),
-            )
-        })
-    }
-
-    pub fn new_render_target_with_characterization(
-        context: &mut gpu::RecordingContext,
-        characterization: &SurfaceCharacterization,
-        budgeted: crate::Budgeted,
-    ) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            sb::C_SkSurface_MakeRenderTarget2(
-                context.native_mut(),
-                characterization.native(),
-                budgeted.into_native(),
-            )
-        })
+        Self::from_ptr(sb::C_SkSurface_MakeFromMTKView(
+            context.native_mut(),
+            mtk_view,
+            origin,
+            sample_count.into().unwrap_or(0).try_into().unwrap(),
+            color_type.into_native(),
+            color_space.into().into_ptr_or_null(),
+            surface_props.native_ptr_or_null(),
+        ))
     }
 }
 
@@ -345,6 +350,8 @@ impl Surface {
         let canvas_ref = unsafe { &mut *self.native_mut().getCanvas() };
         Canvas::borrow_from_native_mut(canvas_ref)
     }
+
+    // TODO: capabilities()
 
     // TODO: why is self mutable here?
     pub fn new_surface(&mut self, info: &ImageInfo) -> Option<Surface> {
@@ -464,6 +471,11 @@ impl Surface {
         unsafe {
             self.native_mut().flushAndSubmit(true);
         }
+    }
+
+    #[cfg(feature = "gpu")]
+    pub fn resolve_msaa(&mut self) {
+        unsafe { self.native_mut().resolveMSAA() }
     }
 
     // After deprecated since 0.30.0 (m85), the default flush() behavior changed in m86.

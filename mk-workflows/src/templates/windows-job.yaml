@@ -1,4 +1,4 @@
-runs-on: windows-2019
+runs-on: windows-2022
 # Containers are not supported on Windows.
 # container: ghcr.io/pragmatrix/rust-skia-windows:latest
 env: 
@@ -17,12 +17,6 @@ steps:
 - name: Install Clippy
   run: rustup component add clippy
   shell: bash
-
-- name: Setup Python 2
-  uses: actions/setup-python@v2
-  with:
-    python-version: '2.7.18'
-    architecture: 'x64'
 
 - name: Python Version
   run: python --version

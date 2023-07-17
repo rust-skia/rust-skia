@@ -80,6 +80,10 @@ impl Drawable {
         Rect::from_native_c(unsafe { sb::C_SkDrawable_getBounds(self.native_mut()) })
     }
 
+    pub fn approximate_bytes_used(&mut self) -> usize {
+        unsafe { self.native_mut().approximateBytesUsed() }
+    }
+
     pub fn notify_drawing_changed(&mut self) {
         unsafe { self.native_mut().notifyDrawingChanged() }
     }

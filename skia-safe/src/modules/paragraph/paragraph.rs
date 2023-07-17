@@ -79,11 +79,7 @@ impl Paragraph {
         let mut result: Vec<TextBox> = Vec::new();
 
         let mut set_tb = |tbs: &[sb::skia_textlayout_TextBox]| {
-            result = tbs
-                .iter()
-                .map(|tb| TextBox::from_native_ref(tb))
-                .cloned()
-                .collect();
+            result = tbs.iter().map(TextBox::from_native_ref).cloned().collect();
         };
 
         unsafe {
@@ -103,11 +99,7 @@ impl Paragraph {
         let mut result: Vec<TextBox> = Vec::new();
 
         let mut set_tb = |tbs: &[sb::skia_textlayout_TextBox]| {
-            result = tbs
-                .iter()
-                .map(|tb| TextBox::from_native_ref(tb))
-                .cloned()
-                .collect();
+            result = tbs.iter().map(TextBox::from_native_ref).cloned().collect();
         };
 
         unsafe {
@@ -139,10 +131,7 @@ impl Paragraph {
     pub fn get_line_metrics(&self) -> Vec<LineMetrics> {
         let mut result: Vec<LineMetrics> = Vec::new();
         let mut set_lm = |lms: &[sb::skia_textlayout_LineMetrics]| {
-            result = lms
-                .iter()
-                .map(|lm| LineMetrics::from_native_ref(lm))
-                .collect();
+            result = lms.iter().map(LineMetrics::from_native_ref).collect();
         };
 
         unsafe {

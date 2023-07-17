@@ -8,6 +8,10 @@ pub fn ndk() -> String {
     cargo::env_var("ANDROID_NDK").expect("ANDROID_NDK variable not set")
 }
 
+pub fn extra_skia_cflags() -> Vec<String> {
+    vec![format!("-D__ANDROID_API__={}", API_LEVEL)]
+}
+
 pub fn additional_clang_args(target: &str, target_arch: &str) -> Vec<String> {
     let mut args: Vec<String> = Vec::new();
 
@@ -28,6 +32,7 @@ pub fn additional_clang_args(target: &str, target_arch: &str) -> Vec<String> {
         ndk
     ));
     args.push(format!("--target={}", target));
+    args.extend(extra_skia_cflags());
     args
 }
 

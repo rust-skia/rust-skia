@@ -1,5 +1,4 @@
-use crate::artifact;
-use crate::drivers::DrawingDriver;
+use crate::{artifact, drivers::DrawingDriver, Driver};
 use skia_safe::{gpu, Budgeted, Canvas, ImageInfo, Surface};
 use std::path::Path;
 
@@ -8,7 +7,7 @@ pub struct OpenGl {
 }
 
 impl DrawingDriver for OpenGl {
-    const NAME: &'static str = "opengl";
+    const DRIVER: Driver = Driver::OpenGl;
 
     fn new() -> Self {
         Self {

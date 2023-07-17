@@ -16,7 +16,39 @@
 // m84: needs definition of SkFontData
 #include "src/core/SkFontDescriptor.h"
 
+#include <optional>
+
 using namespace skia::textlayout;
+
+//
+// FontArguments.h
+//
+
+extern "C" {
+    void C_FontArguments_Construct(const SkFontArguments* fontArguments, FontArguments* uninitialized) {
+        new (uninitialized) FontArguments(*fontArguments);
+    }
+
+    void C_FontArguments_CopyConstruct(FontArguments* uninitialized, const FontArguments* self) {
+        new (uninitialized) FontArguments(*self);
+    }
+
+    void C_FontArguments_destruct(FontArguments* self) {
+        self->~FontArguments();
+    }
+
+    bool C_FontArguments_Equals(const FontArguments* lhs, const FontArguments* rhs) {
+        return *lhs == *rhs;
+    }
+
+    size_t C_FontArguments_hash(const FontArguments* self) {
+        return std::hash<FontArguments>{}(*self);
+    }
+
+    SkTypeface* C_FontArguments_cloneTypeface(const FontArguments* self, SkTypeface* tf) {
+        return self->CloneTypeface(sp(tf)).release();
+    }
+}
 
 //
 // FontCollection.h
@@ -55,8 +87,15 @@ extern "C" {
         return self->getFallbackManager().release();
     }
 
-    void C_FontCollection_findTypefaces(FontCollection* self, const SkStrings* familyNames, SkFontStyle fontStyle, VecSink<sk_sp<SkTypeface>>* typefaces) {
-        auto tfs = self->findTypefaces(familyNames->strings, fontStyle);
+    void C_FontCollection_findTypefaces(
+        FontCollection* self, 
+        const SkStrings* familyNames, 
+        SkFontStyle fontStyle,
+        const FontArguments* fontArguments,
+        VecSink<sk_sp<SkTypeface>>* typefaces) {
+        // TODO: Don't create a copy of `fontArguments`.
+        auto fa = fontArguments ? std::optional(*fontArguments) : std::nullopt;
+        auto tfs = self->findTypefaces(familyNames->strings, fontStyle, fa);
         typefaces->set(tfs);
     }
 
@@ -265,12 +304,12 @@ extern "C" {
         self->addPlaceholder(*placeholderStyle);
     }
 
-    void C_ParagraphBuilder_setParagraphStyle(ParagraphBuilder* self, const ParagraphStyle* style) {
-        self->setParagraphStyle(*style);
-    }
-
     Paragraph* C_ParagraphBuilder_Build(ParagraphBuilder* self) {
         return self->Build().release();
+    }
+
+    void C_ParagraphBuilder_Reset(ParagraphBuilder* self) {
+        return self->Reset();
     }
 
     ParagraphBuilder* C_ParagraphBuilder_make(const ParagraphStyle* style, const FontCollection* fontCollection) {
@@ -299,6 +338,11 @@ extern "C" {
 
     void C_TextStyle_CopyConstruct(TextStyle* uninitialized, const TextStyle* other) {
         new(uninitialized) TextStyle(*other);
+    }
+
+    void C_TextStyle_cloneForPlaceholder(const TextStyle* self, TextStyle* uninitialized) {
+        // m102: We assume that they just forgot to mark `TextStyle::cloneForPlaceholder` as const.
+        new (uninitialized) TextStyle(const_cast<TextStyle*>(self)->cloneForPlaceholder());
     }
 
     void C_TextStyle_destruct(TextStyle* self) {
@@ -332,7 +376,16 @@ extern "C" {
     void C_TextStyle_resetFontFeatures(TextStyle* self) {
         self->resetFontFeatures();
     }
-    
+
+    const FontArguments* C_TextStyle_getFontArguments(const TextStyle* self) {
+        auto& fontArguments = self->getFontArguments();
+        return fontArguments ? &*fontArguments : nullptr;
+    }
+
+    void C_TextStyle_setFontArguments(TextStyle* self, const SkFontArguments* arguments) {
+        self->setFontArguments(arguments ? std::optional(*arguments) : std::nullopt);
+    }
+
     const SkString* C_TextStyle_getFontFamilies(const TextStyle* self, size_t* count) {
         auto& v = self->getFontFamilies();
         *count = v.size();

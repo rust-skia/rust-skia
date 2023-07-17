@@ -129,6 +129,7 @@ impl Point3 {
         Self { x, y, z }
     }
 
+    #[must_use]
     pub fn cross(&self, vec: Self) -> Self {
         Self::cross_product(*self, vec)
     }

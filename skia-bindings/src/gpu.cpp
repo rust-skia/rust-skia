@@ -213,6 +213,10 @@ extern "C" bool C_GrRecordingContext_abandoned(GrRecordingContext* self) {
     return self->abandoned();
 }
 
+extern "C" int C_GrRecordingContext_maxSurfaceSampleCountForColorType(const GrRecordingContext* self, SkColorType colorType) {
+    return self->maxSurfaceSampleCountForColorType(colorType);
+}
+
 //
 // gpu/GrDirectContext.h
 //

@@ -13,6 +13,9 @@
 #include "include/gpu/gl/GrGLAssembleInterface.h"
 #include "src/gpu/gl/GrGLDefines.h"
 
+// Additional types not yet referenced.
+extern "C" void C_GrGLTypes(GrGLSurfaceInfo *) {};
+
 // core/SurfaceCharacterization.h
 
 extern "C" void C_SkSurfaceCharacterization_createFBO0(
@@ -60,6 +63,7 @@ extern "C" GrGLFormat C_GrGLFormatFromGLEnum(GrGLenum glFormat) {
         case GR_GL_LUMINANCE16F:         return GrGLFormat::kLUMINANCE16F;
         case GR_GL_R16F:                 return GrGLFormat::kR16F;
         case GR_GL_RGB8:                 return GrGLFormat::kRGB8;
+        case GR_GL_RGBX8:                return GrGLFormat::kRGBX8;
         case GR_GL_RG8:                  return GrGLFormat::kRG8;
         case GR_GL_RGB10_A2:             return GrGLFormat::kRGB10_A2;
         case GR_GL_RGBA4:                return GrGLFormat::kRGBA4;
@@ -93,6 +97,7 @@ extern "C" GrGLenum C_GrGLFormatToEnum(GrGLFormat format) {
         case GrGLFormat::kLUMINANCE16F:         return GR_GL_LUMINANCE16F;
         case GrGLFormat::kR16F:                 return GR_GL_R16F;
         case GrGLFormat::kRGB8:                 return GR_GL_RGB8;
+        case GrGLFormat::kRGBX8:                return GR_GL_RGBX8;
         case GrGLFormat::kRG8:                  return GR_GL_RG8;
         case GrGLFormat::kRGB10_A2:             return GR_GL_RGB10_A2;
         case GrGLFormat::kRGBA4:                return GR_GL_RGBA4;
