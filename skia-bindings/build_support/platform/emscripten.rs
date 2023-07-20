@@ -9,6 +9,7 @@ impl PlatformDetails for Emscripten {
         builder
             .arg("cc", quote("emcc"))
             .arg("cxx", quote("em++"))
+            .arg("ar", quote("emar"))
             .arg("skia_gl_standard", quote("webgl"))
             .arg("skia_use_freetype", yes())
             .arg("skia_use_system_freetype2", no())
