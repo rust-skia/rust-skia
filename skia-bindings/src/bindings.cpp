@@ -34,7 +34,6 @@
 #include "include/core/SkCoverageMode.h"
 #include "include/core/SkCubicMap.h"
 #include "include/core/SkDataTable.h"
-#include "include/core/SkDeferredDisplayListRecorder.h"
 #include "include/core/SkDrawable.h"
 #include "include/core/SkDocument.h"
 #include "include/core/SkEncodedImageFormat.h"
@@ -374,10 +373,6 @@ extern "C" SkSurface *C_SkSurface_makeSurface2(
 extern "C" const SkSurfaceProps* C_SkSurface_props(const SkSurface* self) {
     return &self->props();
 }
-
-// extern "C" bool C_SkSurface_draw(SkSurface* self, const SkDeferredDisplayList* displayList, int xOffset, int yOffset) {
-//     return self->draw(sp(displayList), xOffset, yOffset);
-// }
 
 //
 // core/SkSurfaceCharacterization.h
@@ -1871,34 +1866,6 @@ extern "C" const uint8_t* C_SkColorTable_getTable(const SkColorTable* self, size
         case 3: return self->blueTable();
         default: return nullptr;
     }
-}
-
-//
-// core/SkDeferredDisplayListRecorder.h
-//
-
-extern "C" void C_SkDeferredDisplayListRecorder_destruct(SkDeferredDisplayListRecorder* self) {
-    self->~SkDeferredDisplayListRecorder();
-}
-
-extern "C" SkDeferredDisplayList* C_SkDeferredDisplayListRecorder_detach(SkDeferredDisplayListRecorder* self) {
-    return self->detach().release();
-}
-
-//
-// core/SkDeferredDisplayList.h
-//
-
-extern "C" void C_SkDeferredDisplayList_ref(const SkDeferredDisplayList* self) {
-    self->ref();
-}
-
-extern "C" void C_SkDeferredDisplayList_unref(const SkDeferredDisplayList* self) {
-    self->unref();
-}
-
-extern "C" bool C_SkDeferredDisplayList_unique(const SkDeferredDisplayList* self) {
-    return self->unique();
 }
 
 //
