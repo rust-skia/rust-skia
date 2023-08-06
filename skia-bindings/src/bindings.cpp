@@ -287,7 +287,8 @@ extern "C" SkCodec* C_SkWebpDecoder_Decode(SkStream* stream, SkCodec::Result* re
 // core/
 //
 
-extern "C" void C_Core_Types(SkGraphics *, SkCoverageMode *, SkColorChannelFlag *) {};
+extern "C" void C_Core_Types(
+    SkGraphics *, SkCoverageMode *, SkColorChannelFlag *, SkSurfaces::BackendSurfaceAccess) {};
 
 //
 // core/SkBlender.h
