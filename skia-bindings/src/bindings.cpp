@@ -72,6 +72,7 @@
 #include "include/core/SkSwizzle.h"
 #include "include/core/SkTextBlob.h"
 #include "include/core/SkTextureCompressionType.h"
+#include "include/core/SkTiledImageUtils.h"
 #include "include/core/SkTypeface.h"
 #include "include/core/SkTypes.h"
 #include "include/core/SkVertices.h"
@@ -859,8 +860,6 @@ extern "C" void C_SkCanvas_discard(SkCanvas* self) {
 // core/SkAutoCanvasRestore.h
 //
 
-#undef SkAutoCanvasRestore
-
 extern "C" void C_SkAutoCanvasRestore_Construct(SkAutoCanvasRestore* uninitialized, SkCanvas* canvas, bool doSave) {
     new(uninitialized) SkAutoCanvasRestore(canvas, doSave);
 }
@@ -1139,8 +1138,8 @@ extern "C" bool C_SkBitmap_extractAlpha(const SkBitmap* self, SkBitmap* dst, con
 }
 
 extern "C" SkShader* C_SkBitmap_makeShader(
-    const SkBitmap* self, 
-    SkTileMode tmx, SkTileMode tmy, 
+    const SkBitmap* self,
+    SkTileMode tmx, SkTileMode tmy,
     const SkSamplingOptions* sampling,
     const SkMatrix* localMatrix) {
     return self->makeShader(tmx, tmy, *sampling, localMatrix).release();
@@ -1192,8 +1191,8 @@ extern "C" void C_SkPicture_approximateBytesUsed(const SkPicture* self, size_t* 
 }
 
 extern "C" SkShader *C_SkPicture_makeShader(
-    const SkPicture *self, 
-    SkTileMode tmx, SkTileMode tmy, 
+    const SkPicture *self,
+    SkTileMode tmx, SkTileMode tmy,
     SkFilterMode mode,
     const SkMatrix *localMatrix, const SkRect *tileRect)
 {
@@ -2153,6 +2152,21 @@ extern "C" SkData* C_SkDynamicMemoryWStream_detachAsData(SkDynamicMemoryWStream*
 
 extern "C" SkStreamAsset* C_SkDynamicMemoryWStream_detachAsStream(SkDynamicMemoryWStream* self) {
     return self->detachAsStream().release();
+}
+
+//
+// core/SkTiledImageUtils.h
+//
+
+SK_API void C_SkTiledImageUtils_DrawImageRect(
+    SkCanvas* canvas,
+    const SkImage* image,
+    const SkRect& src,
+    const SkRect& dst,
+    const SkSamplingOptions* sampling,
+    const SkPaint* paint,
+    SkCanvas::SrcRectConstraint constraint) {
+    SkTiledImageUtils::DrawImageRect(canvas, image, src, dst, *sampling, paint, constraint);
 }
 
 //

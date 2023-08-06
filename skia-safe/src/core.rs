@@ -73,6 +73,7 @@ mod swizzle;
 mod text_blob;
 mod texture_compression_type;
 mod tile_mode;
+mod tiled_image_utils;
 mod time;
 mod trace_memory_dump;
 pub mod typeface;
