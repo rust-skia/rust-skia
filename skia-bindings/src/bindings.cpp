@@ -2365,13 +2365,13 @@ extern "C" SkShader* C_SkGradientShader_MakeSweepWithInterpolation(SkScalar cx, 
 // effects/SkPerlinNoiseShader.h
 //
 
-// extern "C" SkShader* C_SkPerlinNoiseShader_MakeFractalNoise(SkScalar baseFrequencyX, SkScalar baseFrequencyY, int numOctaves, SkScalar seed, const SkISize* tileSize) {
-//     return SkPerlinNoiseShader::MakeFractalNoise(baseFrequencyX, baseFrequencyY, numOctaves, seed, tileSize).release();
-// }
+extern "C" SkShader* C_SkShaders_MakeFractalNoise(SkScalar baseFrequencyX, SkScalar baseFrequencyY, int numOctaves, SkScalar seed, const SkISize* tileSize) {
+    return SkShaders::MakeFractalNoise(baseFrequencyX, baseFrequencyY, numOctaves, seed, tileSize).release();
+}
 
-// extern "C" SkShader* C_SkPerlinNoiseShader_MakeTurbulence(SkScalar baseFrequencyX, SkScalar baseFrequencyY, int numOctaves, SkScalar seed, const SkISize* tileSize) {
-//     return SkPerlinNoiseShader::MakeTurbulence(baseFrequencyX, baseFrequencyY, numOctaves, seed, tileSize).release();
-// }
+extern "C" SkShader* C_SkShaders_MakeTurbulence(SkScalar baseFrequencyX, SkScalar baseFrequencyY, int numOctaves, SkScalar seed, const SkISize* tileSize) {
+    return SkShaders::MakeTurbulence(baseFrequencyX, baseFrequencyY, numOctaves, seed, tileSize).release();
+}
 
 //
 // effects/SkPath1DPathEffect.h
@@ -2642,12 +2642,6 @@ extern "C" SkPathEffect *C_SkTrimPathEffect_Make(SkScalar startT, SkScalar stopT
 
 extern "C" {
 
-// SkImageFilter *
-// C_SkImageFilters_AlphaThreshold(const SkRegion &region, SkScalar innerMin, SkScalar outerMax, SkImageFilter *input,
-//                                 const SkImageFilters::CropRect *cropRect) {
-//     return SkImageFilters::AlphaThreshold(region, innerMin, outerMax, sp(input), *cropRect).release();
-// }
-
 SkImageFilter *C_SkImageFilters_Arithmetic(float k1, float k2, float k3, float k4, bool enforcePMColor,
                                            SkImageFilter *background,
                                            SkImageFilter *foreground,
@@ -2710,14 +2704,7 @@ SkImageFilter *C_SkImageFilters_Image(
     return SkImageFilters::Image(sp(image), *srcRect, *dstRect, *sampling).release();
 }
 
-// SkImageFilter *C_SkImageFilters_Magnifier(
-//     const SkRect *srcRect, SkScalar inset,
-//     SkImageFilter *input,
-//     const SkImageFilters::CropRect *cropRect) {
-//     return SkImageFilters::Magnifier(*srcRect, inset, sp(input), *cropRect).release();
-// }
-
-SkImageFilter *C_SkImageFilters_Magnifier2(
+SkImageFilter *C_SkImageFilters_Magnifier(
     const SkRect *lensBounds,
     SkScalar zoomAmount,
     SkScalar inset,

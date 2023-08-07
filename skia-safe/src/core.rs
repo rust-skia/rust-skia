@@ -147,7 +147,7 @@ pub use sampling_options::{
     CubicResampler, FilterMode, FilterOptions, MipmapMode, SamplingMode, SamplingOptions,
 };
 pub use scalar_::*;
-pub use shader::{shaders, Shader};
+pub use shader::Shader;
 pub use size::*;
 pub use stroke_rec::StrokeRec;
 pub use surface::{surfaces, Surface};
@@ -175,4 +175,10 @@ pub trait Contains<T> {
 
 pub trait QuickReject<T> {
     fn quick_reject(&self, other: &T) -> bool;
+}
+
+pub mod shaders {
+    pub use super::shader::shaders::*;
+    #[allow(deprecated)]
+    pub use crate::effects::perlin_noise_shader::*;
 }
