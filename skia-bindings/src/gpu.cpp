@@ -475,3 +475,8 @@ extern "C" void C_SkSurfaces_GetBackendRenderTarget(
 {
     *backendRenderTarget = SkSurfaces::GetBackendRenderTarget(surface, handleAccess);
 }
+
+extern "C" void C_SkSurfaces_ResolveMSAA(SkSurface* surface)
+{
+    SkSurfaces::ResolveMSAA(surface);
+}

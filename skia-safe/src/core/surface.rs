@@ -1092,9 +1092,9 @@ impl Surface {
     /// outside of Skia, the only way to trigger a resolve is either to call this command or use
     /// [`Self::flush()`].
     #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.0.0", note = "No alternative")]
+    #[deprecated(since = "0.0.0", note = "Use gpu::surfaces::resolve_msaa")]
     pub fn resolve_msaa(&mut self) {
-        unsafe { self.native_mut().resolveMSAA() }
+        gpu::surfaces::resolve_msaa(self)
     }
 
     /// Call to ensure all reads/writes of the surface have been issued to the underlying 3D API.
