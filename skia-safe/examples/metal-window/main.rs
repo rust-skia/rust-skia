@@ -111,7 +111,7 @@ fn main() {
 
                         draw(surface.canvas());
 
-                        surface.flush_and_submit();
+                        context.flush_and_submit();
                         drop(surface);
 
                         let command_buffer = command_queue.new_command_buffer();
