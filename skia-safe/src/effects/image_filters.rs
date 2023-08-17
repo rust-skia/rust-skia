@@ -554,22 +554,6 @@ pub fn spot_lit_specular(
 }
 
 impl ImageFilter {
-    // pub fn alpha_threshold<'a>(
-    //     self,
-    //     crop_rect: impl Into<Option<&'a IRect>>,
-    //     region: &Region,
-    //     inner_min: scalar,
-    //     outer_max: scalar,
-    // ) -> Option<Self> {
-    //     alpha_threshold(
-    //         region,
-    //         inner_min,
-    //         outer_max,
-    //         self,
-    //         crop_rect.into().map(|r| r.into()),
-    //     )
-    // }
-
     pub fn arithmetic<'a>(
         inputs: impl Into<ArithmeticFPInputs>,
         background: impl Into<Option<Self>>,
