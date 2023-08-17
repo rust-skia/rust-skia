@@ -2,7 +2,7 @@ use crate::build_support::cargo;
 
 /// Returns `true` if the download of prebuilt binaries should be forced.
 ///
-/// This can be used to test and downlaod prebuilt binaries from within a repository build.
+/// This can be used to test and download prebuilt binaries from within a repository build.
 /// If this environment variable is not set, binaries are downloaded from crate builds only.
 pub fn force_skia_binaries_download() -> bool {
     cargo::env_var("FORCE_SKIA_BINARIES_DOWNLOAD").is_some()
