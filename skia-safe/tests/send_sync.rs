@@ -104,7 +104,6 @@ mod core {
     assert_impl_all!(RSXform: Send, Sync);
     assert_impl_all!(Shader: Send, Sync);
     assert_not_impl_any!(Surface: Send, Sync);
-    assert_impl_all!(SurfaceCharacterization: Send, Sync);
     assert_impl_all!(SurfaceProps: Send, Sync);
     assert_impl_all!(TextBlob: Send, Sync);
     assert_impl_all!(TextBlobBuilder: Send, Sync);

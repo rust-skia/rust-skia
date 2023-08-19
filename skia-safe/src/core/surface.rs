@@ -4,7 +4,7 @@ use skia_bindings::{self as sb, SkRefCntBase, SkSurface};
 
 use crate::{
     gpu, prelude::*, Bitmap, Canvas, IPoint, IRect, ISize, Image, ImageInfo, Paint, Pixmap, Point,
-    SamplingOptions, SurfaceCharacterization, SurfaceProps,
+    SamplingOptions, SurfaceProps,
 };
 
 pub mod surfaces {
@@ -473,18 +473,6 @@ impl Surface {
 }
 
 impl Surface {
-    /// Is this surface compatible with the provided characterization?
-    ///
-    /// This method can be used to determine if an existing [`Surface`] is a viable destination
-    /// for an `DeferredDisplayList`.
-    ///
-    /// * `characterization` - The characterization for which a compatibility check is desired
-    /// Returns: `true` if this surface is compatible with the characterization;
-    ///                          `false` otherwise
-    pub fn is_compatible(&self, characterization: &SurfaceCharacterization) -> bool {
-        unsafe { self.native().isCompatible(characterization.native()) }
-    }
-
     /// Returns [`Surface`] without backing pixels. Drawing to [`Canvas`] returned from [`Surface`]
     /// has no effect. Calling [`Self::image_snapshot()`] on returned [`Surface`] returns `None`.
     ///
@@ -930,22 +918,6 @@ impl Surface {
     }
 
     // TODO: wait()
-
-    /// Initializes [`SurfaceCharacterization`] that can be used to perform GPU back-end
-    /// processing in a separate thread. Typically this is used to divide drawing
-    /// into multiple tiles. `DeferredDisplayListRecorder` records the drawing commands
-    /// for each tile.
-    ///
-    /// Return `true` if [`Surface`] supports characterization. raster surface returns `false`.
-    ///
-    /// * `characterization` - properties for parallel drawing
-    /// Returns: `true` if supported
-    ///
-    /// example: <https://fiddle.skia.org/c/@Surface_characterize>
-    pub fn characterize(&self) -> Option<SurfaceCharacterization> {
-        let mut sc = SurfaceCharacterization::default();
-        unsafe { self.native().characterize(sc.native_mut()) }.if_true_some(sc)
-    }
 }
 
 pub use surfaces::BackendSurfaceAccess;
@@ -1074,28 +1046,6 @@ impl Surface {
     #[deprecated(since = "0.65.0", note = "Use gpu::surfaces::resolve_msaa")]
     pub fn resolve_msaa(&mut self) {
         gpu::surfaces::resolve_msaa(self)
-    }
-
-    /// Call to ensure all reads/writes of the surface have been issued to the underlying 3D API.
-    /// Skia will correctly order its own draws and pixel operations. This must to be used to ensure
-    /// correct ordering when the surface backing store is accessed outside Skia (e.g. direct use of
-    /// the 3D API or a windowing system). [`gpu::DirectContext`] has additional flush and submit methods
-    /// that apply to all surfaces and images created from a [`gpu::DirectContext`]. This is equivalent
-    /// to calling [`Self::flush()`] with a default [`gpu::FlushInfo`] followed by
-    /// [`gpu::DirectContext::submit`].
-    #[deprecated(since = "0.65.0", note = "Use DirectContext::flush*()")]
-    pub fn flush_and_submit(&mut self) {
-        unsafe {
-            self.native_mut().flushAndSubmit(false);
-        }
-    }
-
-    /// See [`Self::flush_and_submit()`].
-    #[deprecated(since = "0.65.0", note = "Use DirectContext::flush*()")]
-    pub fn flush_submit_and_sync_cpu(&mut self) {
-        unsafe {
-            self.native_mut().flushAndSubmit(true);
-        }
     }
 
     // After deprecated since 0.30.0 (m85), the default flush() behavior changed in m86.

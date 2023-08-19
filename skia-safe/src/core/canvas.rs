@@ -480,20 +480,6 @@ impl Canvas {
         SurfaceProps::from_native_c(unsafe { self.native().getTopProps() })
     }
 
-    /// Triggers the immediate execution of all pending draw operations.
-    /// If [`Canvas`] is associated with GPU surface, resolves all pending GPU operations.
-    /// If [`Canvas`] is associated with raster surface, has no effect; raster draw operations are
-    /// never deferred.
-    ///
-    /// DEPRECATED: Replace usage with GrDirectContext::flush()
-    #[deprecated(since = "0.38.0", note = "Replace usage with DirectContext::flush()")]
-    pub fn flush(&mut self) -> &mut Self {
-        unsafe {
-            self.native_mut().flush();
-        }
-        self
-    }
-
     /// Gets the size of the base or root layer in global canvas coordinates. The
     /// origin of the base layer is always (0,0). The area available for drawing may be
     /// smaller (due to clipping or saveLayer).
