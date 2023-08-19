@@ -476,7 +476,7 @@ impl Surface {
     /// Is this surface compatible with the provided characterization?
     ///
     /// This method can be used to determine if an existing [`Surface`] is a viable destination
-    /// for an [`DeferredDisplayList`].
+    /// for an `DeferredDisplayList`.
     ///
     /// * `characterization` - The characterization for which a compatibility check is desired
     /// Returns: `true` if this surface is compatible with the characterization;
@@ -933,7 +933,7 @@ impl Surface {
 
     /// Initializes [`SurfaceCharacterization`] that can be used to perform GPU back-end
     /// processing in a separate thread. Typically this is used to divide drawing
-    /// into multiple tiles. [`crate::DeferredDisplayListRecorder`] records the drawing commands
+    /// into multiple tiles. `DeferredDisplayListRecorder` records the drawing commands
     /// for each tile.
     ///
     /// Return `true` if [`Surface`] supports characterization. raster surface returns `false`.

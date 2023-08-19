@@ -196,7 +196,7 @@ pub fn get_backend_render_target(
 /// This call is most useful when the [`Surface`] is created by wrapping a single sampled gpu
 /// texture, but asking Skia to render with MSAA. If the client wants to use the wrapped texture
 /// outside of Skia, the only way to trigger a resolve is either to call this command or use
-/// [`DirectContext::flush`].
+/// [`gpu::DirectContext::flush`].
 pub fn resolve_msaa(surface: &mut Surface) {
     unsafe { sb::C_SkSurfaces_ResolveMSAA(surface.native_mut()) }
 }

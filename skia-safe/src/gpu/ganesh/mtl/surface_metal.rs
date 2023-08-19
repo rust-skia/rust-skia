@@ -11,7 +11,7 @@ use skia_bindings as sb;
 /// create a renderable surface.
 ///
 /// * `context` - GPU context
-/// * `layer` - [`MTLHandle`] (expected to be a CAMetalLayer*)
+/// * `layer` - [`gpu::mtl::Handle`] (expected to be a CAMetalLayer*)
 /// * `sample_cnt` - samples per pixel, or 0 to disable full scene anti-aliasing
 /// * `color_space` - range of colors; may be `None`
 /// * `surface_props` - LCD striping orientation and setting for device independent
@@ -53,7 +53,7 @@ pub unsafe fn wrap_ca_metal_layer(
 /// create a renderable surface.
 ///
 /// * `context` - GPU context
-/// * `layer` - [`MTLHandle`] (expected to be a MTKView*)
+/// * `layer` - [`gpu::mtl::Handle`] (expected to be a MTKView*)
 /// * `sample_cnt` - samples per pixel, or 0 to disable full scene anti-aliasing
 /// * `color_space` - range of colors; may be `None`
 /// * `surface_props` - LCD striping orientation and setting for device independent
