@@ -406,7 +406,7 @@ impl Surface {
     /// * `drawable` - Pointer to drawable to be filled in when this surface is
     ///                        instantiated; may not be `None`
     /// Returns: created [`Surface`], or `None`
-    #[deprecated(since = "0.0.0", note = "Use gpu::surfaces::wrap_ca_metal_layer")]
+    #[deprecated(since = "0.65.0", note = "Use gpu::surfaces::wrap_ca_metal_layer")]
     #[allow(clippy::missing_safety_doc)]
     #[allow(clippy::too_many_arguments)]
     #[cfg(feature = "metal")]
@@ -448,7 +448,7 @@ impl Surface {
     /// * `surface_props` - LCD striping orientation and setting for device independent
     ///                        fonts; may be `None`
     /// Returns: created [`Surface`], or `None`
-    #[deprecated(since = "0.0.0", note = "Use gpu::surfaces::wrap_mtk_view")]
+    #[deprecated(since = "0.65.0", note = "Use gpu::surfaces::wrap_mtk_view")]
     #[allow(clippy::missing_safety_doc)]
     #[cfg(feature = "metal")]
     pub unsafe fn from_mtk_view(
@@ -995,7 +995,7 @@ impl Surface {
     /// * `access` - type of access the call will do on the backend object after flush
     /// * `info` - flush options
     #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.0.0", note = "Use DirectContext::flush*()")]
+    #[deprecated(since = "0.65.0", note = "Use DirectContext::flush*()")]
     pub fn flush_with_access_info(
         &mut self,
         access: BackendSurfaceAccess,
@@ -1048,7 +1048,7 @@ impl Surface {
     /// * `info` - flush options
     /// * `access` - optional state change request after flush
     #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.0.0", note = "Use DirectContext::flush*()")]
+    #[deprecated(since = "0.65.0", note = "Use DirectContext::flush*()")]
     pub fn flush_with_mutable_state<'a>(
         &mut self,
         info: &gpu::FlushInfo,
@@ -1071,7 +1071,7 @@ impl Surface {
     /// outside of Skia, the only way to trigger a resolve is either to call this command or use
     /// [`Self::flush()`].
     #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.0.0", note = "Use gpu::surfaces::resolve_msaa")]
+    #[deprecated(since = "0.65.0", note = "Use gpu::surfaces::resolve_msaa")]
     pub fn resolve_msaa(&mut self) {
         gpu::surfaces::resolve_msaa(self)
     }
@@ -1083,7 +1083,7 @@ impl Surface {
     /// that apply to all surfaces and images created from a [`gpu::DirectContext`]. This is equivalent
     /// to calling [`Self::flush()`] with a default [`gpu::FlushInfo`] followed by
     /// [`gpu::DirectContext::submit`].
-    #[deprecated(since = "0.0.0", note = "Use DirectContext::flush*()")]
+    #[deprecated(since = "0.65.0", note = "Use DirectContext::flush*()")]
     pub fn flush_and_submit(&mut self) {
         unsafe {
             self.native_mut().flushAndSubmit(false);
@@ -1091,7 +1091,7 @@ impl Surface {
     }
 
     /// See [`Self::flush_and_submit()`].
-    #[deprecated(since = "0.0.0", note = "Use DirectContext::flush*()")]
+    #[deprecated(since = "0.65.0", note = "Use DirectContext::flush*()")]
     pub fn flush_submit_and_sync_cpu(&mut self) {
         unsafe {
             self.native_mut().flushAndSubmit(true);
@@ -1103,7 +1103,7 @@ impl Surface {
 
     /// See [`Self::flush_with_mutable_state()`].
     #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.0.0", note = "Use DirectContext::flush*()")]
+    #[deprecated(since = "0.65.0", note = "Use DirectContext::flush*()")]
     pub fn flush(&mut self) {
         let info = gpu::FlushInfo::default();
         #[allow(deprecated)]

@@ -12,7 +12,7 @@ pub mod image_filters;
 pub mod luma_color_filter;
 mod op_path_effect;
 pub mod overdraw_color_filter;
-#[deprecated(since = "0.0.0", note = "Use the skia_safe::shaders module")]
+#[deprecated(since = "0.65.0", note = "Use the skia_safe::shaders module")]
 pub mod perlin_noise_shader;
 pub mod runtime_effect;
 pub mod shader_mask_filter;
