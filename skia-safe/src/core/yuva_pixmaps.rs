@@ -362,16 +362,6 @@ pub mod yuva_pixmap_info {
     }
 
     impl SupportedDataTypes {
-        /// Init based on texture formats supported by the context.
-        // #[cfg(feature = "gpu")]
-        // pub fn from_context(context: &crate::gpu::RecordingContext) -> Self {
-        //     Handle::from_native_c(unsafe {
-        //         sb::SkYUVAPixmapInfo_SupportedDataTypes::new(
-        //             context.native() as *const _ as *const sb::GrImageContext
-        //         )
-        //     })
-        // }
-
         /// All legal combinations of [PlaneConfig] and [DataType] are supported.
         pub fn all() -> Self {
             Self::construct(|sdt| unsafe { sb::C_SkYUVAPixmapInfo_SupportedDataTypes_All(sdt) })

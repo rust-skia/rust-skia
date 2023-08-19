@@ -53,6 +53,7 @@ mod core {
     assert_impl_all!(Color: Send, Sync);
     assert_impl_all!(ColorFilter: Send, Sync);
     assert_impl_all!(ColorSpace: Send, Sync);
+    assert_impl_all!(ColorTable: Send, Sync);
     assert_impl_all!(ContourMeasure: Send, Sync);
     assert_impl_all!(ContourMeasureIter: Send, Sync);
     assert_impl_all!(CubicMap: Send, Sync);

@@ -1,6 +1,6 @@
 use std::fmt;
 
-use skia_bindings::{self as sb, SkColorTable, SkRefCntBase};
+use skia_bindings::{self as sb, SkColorTable, SkRefCnt, SkRefCntBase};
 
 use crate::prelude::*;
 
@@ -8,6 +8,8 @@ use crate::prelude::*;
 /// of `SkColorFilters::Table`, and provides a way to share the table data between client code and
 /// the returned [`ColorFilter`]. Once created, an [`ColorTable`] is immutable.
 pub type ColorTable = RCHandle<SkColorTable>;
+unsafe_send_sync!(ColorTable);
+require_base_type!(SkColorTable, SkRefCnt);
 
 impl NativeRefCountedBase for SkColorTable {
     type Base = SkRefCntBase;
