@@ -406,53 +406,31 @@ impl Surface {
     // * `drawable` - Pointer to drawable to be filled in when this surface is
     //                        instantiated; may not be `None`
     // Returns: created [`Surface`], or `None`
-    // #[allow(clippy::missing_safety_doc)]
-    // #[allow(clippy::too_many_arguments)]
-    // #[cfg(feature = "metal")]
-    // pub unsafe fn from_ca_metal_layer(
-    //     context: &mut gpu::RecordingContext,
-    //     layer: gpu::mtl::Handle,
-    //     origin: gpu::SurfaceOrigin,
-    //     sample_cnt: impl Into<Option<usize>>,
-    //     color_type: crate::ColorType,
-    //     color_space: impl Into<Option<crate::ColorSpace>>,
-    //     surface_props: Option<&SurfaceProps>,
-    //     drawable: *mut gpu::mtl::Handle,
-    // ) -> Option<Self> {
-    //     Self::from_ptr(sb::C_SkSurface_MakeFromCAMetalLayer(
-    //         context.native_mut(),
-    //         layer,
-    //         origin,
-    //         sample_cnt.into().unwrap_or(0).try_into().unwrap(),
-    //         color_type.into_native(),
-    //         color_space.into().into_ptr_or_null(),
-    //         surface_props.native_ptr_or_null(),
-    //         drawable,
-    //     ))
-    // }
-
-    // #[allow(clippy::missing_safety_doc)]
-    // #[cfg(feature = "metal")]
-    // #[deprecated(since = "0.36.0", note = "use from_mtk_view()")]
-    // pub unsafe fn from_ca_mtk_view(
-    //     context: &mut gpu::DirectContext,
-    //     mtk_view: gpu::mtl::Handle,
-    //     origin: gpu::SurfaceOrigin,
-    //     sample_count: impl Into<Option<usize>>,
-    //     color_type: crate::ColorType,
-    //     color_space: impl Into<Option<crate::ColorSpace>>,
-    //     surface_props: Option<&SurfaceProps>,
-    // ) -> Option<Self> {
-    //     Self::from_mtk_view(
-    //         context,
-    //         mtk_view,
-    //         origin,
-    //         sample_count,
-    //         color_type,
-    //         color_space,
-    //         surface_props,
-    //     )
-    // }
+    #[deprecated(since = "0.0.0", note = "Use gpu::surfaces::wrap_ca_metal_layer")]
+    #[allow(clippy::missing_safety_doc)]
+    #[allow(clippy::too_many_arguments)]
+    #[cfg(feature = "metal")]
+    pub unsafe fn from_ca_metal_layer(
+        context: &mut gpu::RecordingContext,
+        layer: gpu::mtl::Handle,
+        origin: gpu::SurfaceOrigin,
+        sample_cnt: impl Into<Option<usize>>,
+        color_type: crate::ColorType,
+        color_space: impl Into<Option<crate::ColorSpace>>,
+        surface_props: Option<&SurfaceProps>,
+        drawable: *mut gpu::mtl::Handle,
+    ) -> Option<Self> {
+        gpu::surfaces::wrap_ca_metal_layer(
+            context,
+            layer,
+            origin,
+            sample_cnt,
+            color_type,
+            color_space,
+            surface_props,
+            drawable,
+        )
+    }
 
     // Creates [`Surface`] from MTKView.
     // Returned [`Surface`] takes a reference on the `MTKView`. The ref on the layer will be
@@ -470,27 +448,28 @@ impl Surface {
     // * `surface_props` - LCD striping orientation and setting for device independent
     //                        fonts; may be `None`
     // Returns: created [`Surface`], or `None`
-    // #[allow(clippy::missing_safety_doc)]
-    // #[cfg(feature = "metal")]
-    // pub unsafe fn from_mtk_view(
-    //     context: &mut gpu::RecordingContext,
-    //     mtk_view: gpu::mtl::Handle,
-    //     origin: gpu::SurfaceOrigin,
-    //     sample_count: impl Into<Option<usize>>,
-    //     color_type: crate::ColorType,
-    //     color_space: impl Into<Option<crate::ColorSpace>>,
-    //     surface_props: Option<&SurfaceProps>,
-    // ) -> Option<Self> {
-    //     Self::from_ptr(sb::C_SkSurface_MakeFromMTKView(
-    //         context.native_mut(),
-    //         mtk_view,
-    //         origin,
-    //         sample_count.into().unwrap_or(0).try_into().unwrap(),
-    //         color_type.into_native(),
-    //         color_space.into().into_ptr_or_null(),
-    //         surface_props.native_ptr_or_null(),
-    //     ))
-    // }
+    #[deprecated(since = "0.0.0", note = "Use gpu::surfaces::wrap_mtk_view")]
+    #[allow(clippy::missing_safety_doc)]
+    #[cfg(feature = "metal")]
+    pub unsafe fn from_mtk_view(
+        context: &mut gpu::RecordingContext,
+        mtk_view: gpu::mtl::Handle,
+        origin: gpu::SurfaceOrigin,
+        sample_count: impl Into<Option<usize>>,
+        color_type: crate::ColorType,
+        color_space: impl Into<Option<crate::ColorSpace>>,
+        surface_props: Option<&SurfaceProps>,
+    ) -> Option<Self> {
+        gpu::surfaces::wrap_mtk_view(
+            context,
+            mtk_view,
+            origin,
+            sample_count,
+            color_type,
+            color_space,
+            surface_props,
+        )
+    }
 }
 
 impl Surface {

@@ -1,2 +1,4 @@
 pub mod image_ganesh;
+#[cfg(feature = "metal")]
+pub mod mtl;
 pub mod surface_ganesh;
