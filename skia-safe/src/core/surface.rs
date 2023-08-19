@@ -370,24 +370,6 @@ impl Surface {
         )
     }
 
-    /// Returns [`Surface`] on GPU indicated by context that is compatible with the provided
-    /// characterization. budgeted selects whether allocation for pixels is tracked by context.
-    ///
-    /// * `context` - GPU context
-    /// * `characterization` - description of the desired [`Surface`]
-    /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
-    #[deprecated(
-        since = "0.64.0",
-        note = "use gpu::surfaces::render_target_with_characterization()"
-    )]
-    pub fn new_render_target_with_characterization(
-        context: &mut gpu::RecordingContext,
-        characterization: &SurfaceCharacterization,
-        budgeted: gpu::Budgeted,
-    ) -> Option<Self> {
-        gpu::surfaces::render_target_with_characterization(context, characterization, budgeted)
-    }
-
     /// Creates [`Surface`] from CAMetalLayer.
     /// Returned [`Surface`] takes a reference on the CAMetalLayer. The ref on the layer will be
     /// released when the [`Surface`] is destroyed.
@@ -923,115 +905,6 @@ impl Surface {
 pub use surfaces::BackendSurfaceAccess;
 
 impl Surface {
-    /// Issues pending [`Surface`] commands to the GPU-backed API objects and resolves any [`Surface`]
-    /// MSAA. A call to [`gpu::DirectContext::submit`] is always required to ensure work is actually sent
-    /// to the gpu. Some specific API details:
-    ///     GL: Commands are actually sent to the driver, but `gl_flush` is never called. Thus some
-    ///         sync objects from the flush will not be valid until a submission occurs.
-    ///
-    ///     Vulkan/Metal/D3D/Dawn: Commands are recorded to the backend APIs corresponding command
-    ///         buffer or encoder objects. However, these objects are not sent to the gpu until a
-    ///         submission occurs.
-    ///
-    /// The work that is submitted to the GPU will be dependent on the BackendSurfaceAccess that is
-    /// passed in.
-    ///
-    /// If [`BackendSurfaceAccess::NoAccess`] is passed in all commands will be issued to the GPU.
-    ///
-    /// If [`BackendSurfaceAccess::Present`] is passed in and the backend API is not Vulkan, it is
-    /// treated the same as `k_no_access`. If the backend API is Vulkan, the VkImage that backs the
-    /// [`Surface`] will be transferred back to its original queue. If the [`Surface`] was created by
-    /// wrapping a VkImage, the queue will be set to the queue which was originally passed in on
-    /// the [`gpu::vk::ImageInfo`]. Additionally, if the original queue was not external or foreign the
-    /// layout of the VkImage will be set to `VK_IMAGE_LAYOUT_PRESENT_SRC_KHR`.
-    ///
-    /// The [`gpu::FlushInfo`] describes additional options to flush. Please see documentation at
-    /// [`gpu::FlushInfo`] for more info.
-    ///
-    /// If the return is [`gpu::SemaphoresSubmitted::Yes`], only initialized `BackendSemaphores` will be
-    /// submitted to the gpu during the next submit call (it is possible Skia failed to create a
-    /// subset of the semaphores). The client should not wait on these semaphores until after submit
-    /// has been called, but must keep them alive until then. If a submit flag was passed in with
-    /// the flush these valid semaphores can we waited on immediately. If this call returns
-    /// [`gpu::SemaphoresSubmitted::No`], the GPU backend will not submit any semaphores to be signaled on
-    /// the GPU. Thus the client should not have the GPU wait on any of the semaphores passed in
-    /// with the [`gpu::FlushInfo`]. Regardless of whether semaphores were submitted to the GPU or not, the
-    /// client is still responsible for deleting any initialized semaphores.
-    /// Regardless of semaphore submission the context will still be flushed. It should be
-    /// emphasized that a return value of [`gpu::SemaphoresSubmitted::No`] does not mean the flush did not
-    /// happen. It simply means there were no semaphores submitted to the GPU. A caller should only
-    /// take this as a failure if they passed in semaphores to be submitted.
-    ///
-    /// Pending surface commands are flushed regardless of the return result.
-    ///
-    /// * `access` - type of access the call will do on the backend object after flush
-    /// * `info` - flush options
-    #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.65.0", note = "Use DirectContext::flush*()")]
-    pub fn flush_with_access_info(
-        &mut self,
-        access: BackendSurfaceAccess,
-        info: &gpu::FlushInfo,
-    ) -> gpu::SemaphoresSubmitted {
-        unsafe { self.native_mut().flush(access, info.native()) }
-    }
-
-    /// Issues pending [`Surface`] commands to the GPU-backed API objects and resolves any [`Surface`]
-    /// MSAA. A call to [`gpu::DirectContext::submit`] is always required to ensure work is actually sent
-    /// to the gpu. Some specific API details:
-    ///     GL: Commands are actually sent to the driver, but `gl_flush` is never called. Thus some
-    ///         sync objects from the flush will not be valid until a submission occurs.
-    ///
-    ///     Vulkan/Metal/D3D/Dawn: Commands are recorded to the backend APIs corresponding command
-    ///         buffer or encoder objects. However, these objects are not sent to the gpu until a
-    ///         submission occurs.
-    ///
-    /// The [`gpu::FlushInfo`] describes additional options to flush. Please see documentation at
-    /// [`gpu::FlushInfo`] for more info.
-    ///
-    /// If a [`gpu::MutableTextureState`] is passed in, at the end of the flush we will transition
-    /// the surface to be in the state requested by the skgpu::MutableTextureState. If the surface
-    /// (or [`Image`] or `BackendSurface` wrapping the same backend object) is used again after this
-    /// flush the state may be changed and no longer match what is requested here. This is often
-    /// used if the surface will be used for presenting or external use and the client wants backend
-    /// object to be prepped for that use. A `finished_proc` or semaphore on the [`gpu::FlushInfo`] will also
-    /// include the work for any requested state change.
-    ///
-    /// If the backend API is Vulkan, the caller can set the skgpu::MutableTextureState's
-    /// VkImageLayout to VK_IMAGE_LAYOUT_UNDEFINED or `queue_family_index` to VK_QUEUE_FAMILY_IGNORED to
-    /// tell Skia to not change those respective states.
-    ///
-    /// If the return is [`gpu::SemaphoresSubmitted::Yes`], only initialized `BackendSemaphores` will be
-    /// submitted to the gpu during the next submit call (it is possible Skia failed to create a
-    /// subset of the semaphores). The client should not wait on these semaphores until after submit
-    /// has been called, but must keep them alive until then. If a submit flag was passed in with
-    /// the flush these valid semaphores can we waited on immediately. If this call returns
-    /// [`gpu::SemaphoresSubmitted::No`], the GPU backend will not submit any semaphores to be signaled on
-    /// the GPU. Thus the client should not have the GPU wait on any of the semaphores passed in
-    /// with the [`gpu::FlushInfo`]. Regardless of whether semaphores were submitted to the GPU or not, the
-    /// client is still responsible for deleting any initialized semaphores.
-    /// Regardless of semaphore submission the context will still be flushed. It should be
-    /// emphasized that a return value of [`gpu::SemaphoresSubmitted::No`] does not mean the flush did not
-    /// happen. It simply means there were no semaphores submitted to the GPU. A caller should only
-    /// take this as a failure if they passed in semaphores to be submitted.
-    ///
-    /// Pending surface commands are flushed regardless of the return result.
-    ///
-    /// * `info` - flush options
-    /// * `access` - optional state change request after flush
-    #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.65.0", note = "Use DirectContext::flush*()")]
-    pub fn flush_with_mutable_state<'a>(
-        &mut self,
-        info: &gpu::FlushInfo,
-        new_state: impl Into<Option<&'a gpu::MutableTextureState>>,
-    ) -> gpu::SemaphoresSubmitted {
-        unsafe {
-            self.native_mut()
-                .flush1(info.native(), new_state.into().native_ptr_or_null())
-        }
-    }
-
     /// If a surface is GPU texture backed, is being drawn with MSAA, and there is a resolve
     /// texture, this call will insert a resolve command into the stream of gpu commands. In order
     /// for the resolve to actually have an effect, the work still needs to be flushed and submitted
@@ -1046,18 +919,6 @@ impl Surface {
     #[deprecated(since = "0.65.0", note = "Use gpu::surfaces::resolve_msaa")]
     pub fn resolve_msaa(&mut self) {
         gpu::surfaces::resolve_msaa(self)
-    }
-
-    // After deprecated since 0.30.0 (m85), the default flush() behavior changed in m86.
-    // For more information, take a look at the documentation in Skia's SkSurface.h
-
-    /// See [`Self::flush_with_mutable_state()`].
-    #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.65.0", note = "Use DirectContext::flush*()")]
-    pub fn flush(&mut self) {
-        let info = gpu::FlushInfo::default();
-        #[allow(deprecated)]
-        self.flush_with_mutable_state(&info, None);
     }
 }
 

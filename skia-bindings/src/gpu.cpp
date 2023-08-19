@@ -7,10 +7,10 @@
 #include "include/gpu/ganesh/SkImageGanesh.h"
 #include "include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "include/core/SkCanvas.h"
+#include "include/core/SkColorSpace.h"
 #include "include/core/SkDrawable.h"
 #include "include/core/SkPicture.h"
 #include "include/core/SkSurface.h"
-#include "include/core/SkSurfaceCharacterization.h"
 #include "include/core/SkImageGenerator.h"
 
 //
@@ -23,27 +23,6 @@ extern "C" bool C_SkSurface_replaceBackendTexture(
         GrSurfaceOrigin origin,
         SkSurface::ContentChangeMode contentChangeMode) {
     return self->replaceBackendTexture(*backendTexture, origin, contentChangeMode);
-}
-
-//
-// core/SkSurfaceCharacterization.h
-//
-
-extern "C" void C_SkSurfaceCharacterization_createResized(
-    const SkSurfaceCharacterization* self, int width, int height, SkSurfaceCharacterization* uninitialized) {
-    new(uninitialized) SkSurfaceCharacterization(self->createResized(width, height));
-}
-
-extern "C" void C_SkSurfaceCharacterization_createBackendFormat(
-    const SkSurfaceCharacterization* self, 
-    SkColorType colorType, 
-    const GrBackendFormat* backendFormat,
-    SkSurfaceCharacterization* uninitialized) {
-    new(uninitialized) SkSurfaceCharacterization(self->createBackendFormat(colorType, *backendFormat));
-}
-
-extern "C" const SkImageInfo* C_SkSurfaceCharacterization_imageInfo(const SkSurfaceCharacterization* self) {
-    return &self->imageInfo();
 }
 
 //
@@ -413,17 +392,6 @@ extern "C" SkSurface* C_SkSurfaces_RenderTarget(
             surfaceOrigin,
             surfaceProps,
             shouldCreateWithMips).release();
-}
-
-extern "C" SkSurface* C_SkSurfaces_RenderTarget2(
-    GrRecordingContext* context,
-    const SkSurfaceCharacterization& characterization,
-    skgpu::Budgeted budgeted) 
-{
-    return SkSurfaces::RenderTarget(
-            context,
-            characterization,
-            budgeted).release();
 }
 
 extern "C" SkSurface* C_SkSurfaces_WrapBackendTexture(

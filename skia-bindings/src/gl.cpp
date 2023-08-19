@@ -6,7 +6,7 @@
     #define SK_GL
 #endif
 
-#include "include/core/SkSurfaceCharacterization.h"
+#include "include/gpu/GrBackendSurface.h"
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/gl/GrGLExtensions.h"
 #include "include/gpu/gl/GrGLInterface.h"
@@ -15,15 +15,6 @@
 
 // Additional types not yet referenced.
 extern "C" void C_GrGLTypes(GrGLSurfaceInfo *) {};
-
-// core/SurfaceCharacterization.h
-
-extern "C" void C_SkSurfaceCharacterization_createFBO0(
-    const SkSurfaceCharacterization* self, 
-    bool usesGLFBO0, 
-    SkSurfaceCharacterization* uninitialized) {
-    new(uninitialized) SkSurfaceCharacterization(self->createFBO0(usesGLFBO0));
-}
 
 //
 // GrGLTextureInfo

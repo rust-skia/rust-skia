@@ -226,39 +226,6 @@ impl RuntimeEffect {
         })
     }
 
-    #[cfg(feature = "gpu")]
-    pub fn make_image<'a>(
-        &self,
-        context: &mut crate::gpu::RecordingContext,
-        uniforms: impl Into<Data>,
-        children: impl Into<Option<&'a [ChildPtr]>>,
-        local_matrix: impl Into<Option<&'a Matrix>>,
-        result_info: crate::ImageInfo,
-        mipmapped: bool,
-    ) -> Option<crate::Image> {
-        let mut children: Vec<_> = children
-            .into()
-            .map(|c| c.iter().map(|child_ptr| child_ptr.native()).collect())
-            .unwrap_or_default();
-        let children_ptr = children
-            .first_mut()
-            .map(|c| c.deref_mut() as *mut _)
-            .unwrap_or(ptr::null_mut());
-
-        crate::Image::from_ptr(unsafe {
-            sb::C_SkRuntimeEffect_makeImage(
-                self.native(),
-                context.native_mut(),
-                uniforms.into().into_ptr(),
-                children_ptr,
-                children.len(),
-                local_matrix.into().native_ptr_or_null(),
-                result_info.native(),
-                mipmapped,
-            )
-        })
-    }
-
     pub fn make_color_filter<'a>(
         &self,
         inputs: impl Into<Data>,
