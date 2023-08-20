@@ -2,6 +2,7 @@
 
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/GrBackendDrawableInfo.h"
+#include "include/gpu/GrBackendSurfaceMutableState.h"
 #include "include/gpu/GrYUVABackendTextures.h"
 #include "include/gpu/ganesh/SkImageGanesh.h"
 #include "include/gpu/ganesh/SkSurfaceGanesh.h"
@@ -470,7 +471,12 @@ extern "C" GrBackendTexture* C_SkSurfaces_GetBackendTexture(
 extern "C" void C_SkSurfaces_GetBackendRenderTarget(
     SkSurface* surface,
     SkSurface::BackendHandleAccess handleAccess,
-    GrBackendRenderTarget *backendRenderTarget) 
+    GrBackendRenderTarget *backendRenderTarget)
 {
     *backendRenderTarget = SkSurfaces::GetBackendRenderTarget(surface, handleAccess);
+}
+
+extern "C" void C_SkSurfaces_ResolveMSAA(SkSurface* surface)
+{
+    SkSurfaces::ResolveMSAA(surface);
 }

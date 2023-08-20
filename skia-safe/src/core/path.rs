@@ -918,7 +918,7 @@ impl Path {
     ///
     /// example: <https://fiddle.skia.org/c/@Path_computeTightBounds>
     pub fn compute_tight_bounds(&self) -> Rect {
-        Rect::from_native_c(unsafe { sb::C_SkPath_computeTightBounds(self.native()) })
+        Rect::construct(|r| unsafe { sb::C_SkPath_computeTightBounds(self.native(), r) })
     }
 
     /// Returns `true` if rect is contained by [`Path`].

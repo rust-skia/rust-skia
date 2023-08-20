@@ -80,7 +80,7 @@ impl ColorFilter {
 }
 
 pub mod color_filters {
-    use crate::{prelude::*, Color4f, ColorSpace};
+    use crate::{prelude::*, Color4f, ColorSpace, ColorTable};
     use crate::{scalar, BlendMode, Color, ColorFilter, ColorMatrix};
     use skia_bindings as sb;
 
@@ -187,6 +187,11 @@ pub mod color_filters {
                 table_b.into().map(|t| t.as_ref()).as_ptr_or_null(),
             )
         })
+    }
+
+    /// Create a table color filter that holds a ref to the shared color table.
+    pub fn table_from_color_table(table: impl Into<ColorTable>) -> Option<ColorFilter> {
+        ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_Table2(table.into().into_ptr()) })
     }
 
     /// Create a color filter that multiplies the RGB channels by one color, and

@@ -15,14 +15,13 @@ mod clip_op;
 mod color;
 pub mod color_filter;
 mod color_space;
+mod color_table;
 mod color_type;
 pub mod contour_measure;
 mod coverage_mode;
 mod cubic_map;
 mod data;
 mod data_table;
-mod deferred_display_list;
-mod deferred_display_list_recorder;
 pub mod document;
 pub mod drawable;
 mod flattenable;
@@ -74,6 +73,7 @@ mod swizzle;
 mod text_blob;
 mod texture_compression_type;
 mod tile_mode;
+pub mod tiled_image_utils;
 mod time;
 mod trace_memory_dump;
 pub mod typeface;
@@ -95,14 +95,13 @@ pub use clip_op::*;
 pub use color::*;
 pub use color_filter::{color_filters, ColorFilter};
 pub use color_space::*;
+pub use color_table::*;
 pub use color_type::*;
 pub use contour_measure::{ContourMeasure, ContourMeasureIter};
 pub use coverage_mode::*;
 pub use cubic_map::*;
 pub use data::*;
 pub use data_table::*;
-pub use deferred_display_list::*;
-pub use deferred_display_list_recorder::*;
 pub use document::Document;
 pub use drawable::Drawable;
 pub use flattenable::*;
@@ -148,7 +147,7 @@ pub use sampling_options::{
     CubicResampler, FilterMode, FilterOptions, MipmapMode, SamplingMode, SamplingOptions,
 };
 pub use scalar_::*;
-pub use shader::{shaders, Shader};
+pub use shader::Shader;
 pub use size::*;
 pub use stroke_rec::StrokeRec;
 pub use surface::{surfaces, Surface};
@@ -176,4 +175,64 @@ pub trait Contains<T> {
 
 pub trait QuickReject<T> {
     fn quick_reject(&self, other: &T) -> bool;
+}
+
+pub mod shaders {
+    pub use super::shader::shaders::*;
+    use crate::{prelude::*, scalar, ISize, Shader};
+    use skia_bindings as sb;
+
+    impl Shader {
+        pub fn fractal_perlin_noise(
+            base_frequency: (scalar, scalar),
+            num_octaves: usize,
+            seed: scalar,
+            tile_size: impl Into<Option<ISize>>,
+        ) -> Option<Self> {
+            fractal_noise(base_frequency, num_octaves, seed, tile_size)
+        }
+
+        pub fn turbulence_perlin_noise(
+            base_frequency: (scalar, scalar),
+            num_octaves: usize,
+            seed: scalar,
+            tile_size: impl Into<Option<ISize>>,
+        ) -> Option<Self> {
+            turbulence(base_frequency, num_octaves, seed, tile_size)
+        }
+    }
+
+    pub fn fractal_noise(
+        base_frequency: (scalar, scalar),
+        num_octaves: usize,
+        seed: scalar,
+        tile_size: impl Into<Option<ISize>>,
+    ) -> Option<Shader> {
+        Shader::from_ptr(unsafe {
+            sb::C_SkShaders_MakeFractalNoise(
+                base_frequency.0,
+                base_frequency.1,
+                num_octaves.try_into().unwrap(),
+                seed,
+                tile_size.into().native().as_ptr_or_null(),
+            )
+        })
+    }
+
+    pub fn turbulence(
+        base_frequency: (scalar, scalar),
+        num_octaves: usize,
+        seed: scalar,
+        tile_size: impl Into<Option<ISize>>,
+    ) -> Option<Shader> {
+        Shader::from_ptr(unsafe {
+            sb::C_SkShaders_MakeTurbulence(
+                base_frequency.0,
+                base_frequency.1,
+                num_octaves.try_into().unwrap(),
+                seed,
+                tile_size.into().native().as_ptr_or_null(),
+            )
+        })
+    }
 }

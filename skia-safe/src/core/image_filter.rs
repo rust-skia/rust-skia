@@ -48,13 +48,14 @@ impl ImageFilter {
         map_direction: MapDirection,
         input_rect: impl Into<Option<&'a IRect>>,
     ) -> IRect {
-        IRect::from_native_c(unsafe {
+        IRect::construct(|r| unsafe {
             sb::C_SkImageFilter_filterBounds(
                 self.native(),
                 src.as_ref().native(),
                 ctm.native(),
                 map_direction,
                 input_rect.into().native_ptr_or_null(),
+                r,
             )
         })
     }
@@ -106,8 +107,8 @@ impl ImageFilter {
     }
 
     pub fn compute_fast_bounds(&self, bounds: impl AsRef<Rect>) -> Rect {
-        Rect::from_native_c(unsafe {
-            sb::C_SkImageFilter_computeFastBounds(self.native(), bounds.as_ref().native())
+        Rect::construct(|r| unsafe {
+            sb::C_SkImageFilter_computeFastBounds(self.native(), bounds.as_ref().native(), r)
         })
     }
 

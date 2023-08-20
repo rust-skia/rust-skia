@@ -186,3 +186,17 @@ pub fn get_backend_render_target(
         gpu::BackendRenderTarget::from_native_c_if_valid(backend_render_target)
     }
 }
+
+/// If a surface is a Ganesh-backed surface, is being drawn with MSAA, and there is a resolve
+/// texture, this call will insert a resolve command into the stream of gpu commands. In order
+/// for the resolve to actually have an effect, the work still needs to be flushed and submitted
+/// to the GPU after recording the resolve command. If a resolve is not supported or the
+/// [`Surface`] has no dirty work to resolve, then this call is a no-op.
+///
+/// This call is most useful when the [`Surface`] is created by wrapping a single sampled gpu
+/// texture, but asking Skia to render with MSAA. If the client wants to use the wrapped texture
+/// outside of Skia, the only way to trigger a resolve is either to call this command or use
+/// [`gpu::DirectContext::flush`].
+pub fn resolve_msaa(surface: &mut Surface) {
+    unsafe { sb::C_SkSurfaces_ResolveMSAA(surface.native_mut()) }
+}

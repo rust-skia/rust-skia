@@ -42,7 +42,7 @@ impl Picture {
     }
 
     pub fn cull_rect(&self) -> Rect {
-        Rect::from_native_c(unsafe { sb::C_SkPicture_cullRect(self.native()) })
+        Rect::construct(|r| unsafe { sb::C_SkPicture_cullRect(self.native(), r) })
     }
 
     pub fn unique_id(&self) -> u32 {

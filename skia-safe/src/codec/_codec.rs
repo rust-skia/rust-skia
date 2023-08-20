@@ -103,7 +103,7 @@ impl Codec<'_> {
     }
 
     pub fn bounds(&self) -> IRect {
-        IRect::from_native_c(unsafe { sb::C_SkCodec_bounds(self.native()) })
+        IRect::construct(|r| unsafe { sb::C_SkCodec_bounds(self.native(), r) })
     }
 
     // TODO: getICCProfile

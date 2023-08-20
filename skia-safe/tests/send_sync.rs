@@ -53,14 +53,13 @@ mod core {
     assert_impl_all!(Color: Send, Sync);
     assert_impl_all!(ColorFilter: Send, Sync);
     assert_impl_all!(ColorSpace: Send, Sync);
+    assert_impl_all!(ColorTable: Send, Sync);
     assert_impl_all!(ContourMeasure: Send, Sync);
     assert_impl_all!(ContourMeasureIter: Send, Sync);
     assert_impl_all!(CubicMap: Send, Sync);
     assert_impl_all!(CubicResampler: Send, Sync);
     assert_impl_all!(Data: Send, Sync);
     assert_impl_all!(DataTable: Send, Sync);
-    assert_impl_all!(DeferredDisplayList: Send, Sync);
-    assert_not_impl_any!(DeferredDisplayListRecorder: Send, Sync);
     assert_not_impl_any!(Document: Send, Sync);
     assert_not_impl_any!(Drawable: Send, Sync);
     assert_impl_all!(Font: Send, Sync);

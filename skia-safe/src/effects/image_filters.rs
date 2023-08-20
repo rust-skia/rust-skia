@@ -1,7 +1,7 @@
 use crate::{
     prelude::*, scalar, Blender, Color, ColorChannel, ColorFilter, CubicResampler, IPoint, IRect,
-    ISize, Image, ImageFilter, Matrix, Picture, Point3, Rect, Region, SamplingOptions, Shader,
-    TileMode, Vector,
+    ISize, Image, ImageFilter, Matrix, Picture, Point3, Rect, SamplingOptions, Shader, TileMode,
+    Vector,
 };
 use skia_bindings::{self as sb, SkImageFilter, SkImageFilters_CropRect};
 
@@ -68,24 +68,6 @@ impl From<&Rect> for CropRect {
     fn from(r: &Rect) -> Self {
         Self(*r)
     }
-}
-
-pub fn alpha_threshold(
-    region: &Region,
-    inner_min: scalar,
-    outer_max: scalar,
-    input: impl Into<Option<ImageFilter>>,
-    crop_rect: impl Into<CropRect>,
-) -> Option<ImageFilter> {
-    ImageFilter::from_ptr(unsafe {
-        sb::C_SkImageFilters_AlphaThreshold(
-            region.native(),
-            inner_min,
-            outer_max,
-            input.into().into_ptr_or_null(),
-            crop_rect.into().native(),
-        )
-    })
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -261,22 +243,6 @@ pub fn image<'a>(
 }
 
 pub fn magnifier(
-    src_rect: impl AsRef<Rect>,
-    inset: scalar,
-    input: impl Into<Option<ImageFilter>>,
-    crop_rect: impl Into<CropRect>,
-) -> Option<ImageFilter> {
-    ImageFilter::from_ptr(unsafe {
-        sb::C_SkImageFilters_Magnifier(
-            src_rect.as_ref().native(),
-            inset,
-            input.into().into_ptr_or_null(),
-            crop_rect.into().native(),
-        )
-    })
-}
-
-pub fn magnifier2(
     lens_bounds: impl AsRef<Rect>,
     zoom_amount: scalar,
     inset: scalar,
@@ -285,7 +251,7 @@ pub fn magnifier2(
     crop_rect: impl Into<CropRect>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
-        sb::C_SkImageFilters_Magnifier2(
+        sb::C_SkImageFilters_Magnifier(
             lens_bounds.as_ref().native(),
             zoom_amount,
             inset,
@@ -588,22 +554,6 @@ pub fn spot_lit_specular(
 }
 
 impl ImageFilter {
-    pub fn alpha_threshold<'a>(
-        self,
-        crop_rect: impl Into<Option<&'a IRect>>,
-        region: &Region,
-        inner_min: scalar,
-        outer_max: scalar,
-    ) -> Option<Self> {
-        alpha_threshold(
-            region,
-            inner_min,
-            outer_max,
-            self,
-            crop_rect.into().map(|r| r.into()),
-        )
-    }
-
     pub fn arithmetic<'a>(
         inputs: impl Into<ArithmeticFPInputs>,
         background: impl Into<Option<Self>>,
@@ -788,17 +738,7 @@ impl ImageFilter {
         )
     }
 
-    #[deprecated(since = "0.64.0", note = "use magnifier2() instead")]
     pub fn magnifier<'a>(
-        self,
-        crop_rect: impl Into<Option<&'a IRect>>,
-        src_rect: impl AsRef<Rect>,
-        inset: scalar,
-    ) -> Option<Self> {
-        magnifier(src_rect, inset, self, crop_rect.into().map(|r| r.into()))
-    }
-
-    pub fn magnifier2<'a>(
         self,
         lens_bounds: impl AsRef<Rect>,
         zoom_amount: scalar,
@@ -806,7 +746,7 @@ impl ImageFilter {
         sampling_options: SamplingOptions,
         crop_rect: impl Into<Option<&'a IRect>>,
     ) -> Option<Self> {
-        magnifier2(
+        magnifier(
             lens_bounds,
             zoom_amount,
             inset,

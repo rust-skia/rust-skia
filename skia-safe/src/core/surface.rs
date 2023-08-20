@@ -3,14 +3,17 @@ use std::{fmt, ptr};
 use skia_bindings::{self as sb, SkRefCntBase, SkSurface};
 
 use crate::{
-    gpu, prelude::*, Bitmap, Canvas, DeferredDisplayList, IPoint, IRect, ISize, IVector, Image,
-    ImageInfo, Paint, Pixmap, Point, SamplingOptions, SurfaceCharacterization, SurfaceProps,
+    gpu, prelude::*, Bitmap, Canvas, IPoint, IRect, ISize, Image, ImageInfo, Paint, Pixmap, Point,
+    SamplingOptions, SurfaceCharacterization, SurfaceProps,
 };
 
 pub mod surfaces {
     use skia_bindings::{self as sb};
 
     use crate::{prelude::*, ISize, ImageInfo, Surface, SurfaceProps};
+
+    pub use sb::SkSurfaces_BackendSurfaceAccess as BackendSurfaceAccess;
+    variant_name!(BackendSurfaceAccess::Present);
 
     /// Returns [`Surface`] without backing pixels. Drawing to [`crate::Canvas`] returned from
     /// [`Surface`] has no effect. Calling [`Surface::image_snapshot()`] on returned [`Surface`]
@@ -137,9 +140,6 @@ variant_name!(ContentChangeMode::Retain);
 pub use skia_bindings::SkSurface_BackendHandleAccess as BackendHandleAccess;
 #[cfg(feature = "gpu")]
 variant_name!(BackendHandleAccess::FlushWrite);
-
-pub use skia_bindings::SkSurface_BackendSurfaceAccess as BackendSurfaceAccess;
-variant_name!(BackendSurfaceAccess::Present);
 
 /// [`Surface`] is responsible for managing the pixels that a canvas draws into. The pixels can be
 /// allocated either in CPU memory (a raster surface) or on the GPU (a `RenderTarget` surface).
@@ -406,6 +406,7 @@ impl Surface {
     /// * `drawable` - Pointer to drawable to be filled in when this surface is
     ///                        instantiated; may not be `None`
     /// Returns: created [`Surface`], or `None`
+    #[deprecated(since = "0.65.0", note = "Use gpu::surfaces::wrap_ca_metal_layer")]
     #[allow(clippy::missing_safety_doc)]
     #[allow(clippy::too_many_arguments)]
     #[cfg(feature = "metal")]
@@ -419,38 +420,15 @@ impl Surface {
         surface_props: Option<&SurfaceProps>,
         drawable: *mut gpu::mtl::Handle,
     ) -> Option<Self> {
-        Self::from_ptr(sb::C_SkSurface_MakeFromCAMetalLayer(
-            context.native_mut(),
+        gpu::surfaces::wrap_ca_metal_layer(
+            context,
             layer,
             origin,
-            sample_cnt.into().unwrap_or(0).try_into().unwrap(),
-            color_type.into_native(),
-            color_space.into().into_ptr_or_null(),
-            surface_props.native_ptr_or_null(),
-            drawable,
-        ))
-    }
-
-    #[allow(clippy::missing_safety_doc)]
-    #[cfg(feature = "metal")]
-    #[deprecated(since = "0.36.0", note = "use from_mtk_view()")]
-    pub unsafe fn from_ca_mtk_view(
-        context: &mut gpu::DirectContext,
-        mtk_view: gpu::mtl::Handle,
-        origin: gpu::SurfaceOrigin,
-        sample_count: impl Into<Option<usize>>,
-        color_type: crate::ColorType,
-        color_space: impl Into<Option<crate::ColorSpace>>,
-        surface_props: Option<&SurfaceProps>,
-    ) -> Option<Self> {
-        Self::from_mtk_view(
-            context,
-            mtk_view,
-            origin,
-            sample_count,
+            sample_cnt,
             color_type,
             color_space,
             surface_props,
+            drawable,
         )
     }
 
@@ -470,6 +448,7 @@ impl Surface {
     /// * `surface_props` - LCD striping orientation and setting for device independent
     ///                        fonts; may be `None`
     /// Returns: created [`Surface`], or `None`
+    #[deprecated(since = "0.65.0", note = "Use gpu::surfaces::wrap_mtk_view")]
     #[allow(clippy::missing_safety_doc)]
     #[cfg(feature = "metal")]
     pub unsafe fn from_mtk_view(
@@ -481,15 +460,15 @@ impl Surface {
         color_space: impl Into<Option<crate::ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
-        Self::from_ptr(sb::C_SkSurface_MakeFromMTKView(
-            context.native_mut(),
+        gpu::surfaces::wrap_mtk_view(
+            context,
             mtk_view,
             origin,
-            sample_count.into().unwrap_or(0).try_into().unwrap(),
-            color_type.into_native(),
-            color_space.into().into_ptr_or_null(),
-            surface_props.native_ptr_or_null(),
-        ))
+            sample_count,
+            color_type,
+            color_space,
+            surface_props,
+        )
     }
 }
 
@@ -497,7 +476,7 @@ impl Surface {
     /// Is this surface compatible with the provided characterization?
     ///
     /// This method can be used to determine if an existing [`Surface`] is a viable destination
-    /// for an [`DeferredDisplayList`].
+    /// for an `DeferredDisplayList`.
     ///
     /// * `characterization` - The characterization for which a compatibility check is desired
     /// Returns: `true` if this surface is compatible with the characterization;
@@ -950,51 +929,28 @@ impl Surface {
         SurfaceProps::from_native_ref(unsafe { &*sb::C_SkSurface_props(self.native()) })
     }
 
-    /// Call to ensure all reads/writes of the surface have been issued to the underlying 3D API.
-    /// Skia will correctly order its own draws and pixel operations. This must to be used to ensure
-    /// correct ordering when the surface backing store is accessed outside Skia (e.g. direct use of
-    /// the 3D API or a windowing system). [`gpu::DirectContext`] has additional flush and submit methods
-    /// that apply to all surfaces and images created from a [`gpu::DirectContext`]. This is equivalent
-    /// to calling [`Self::flush()`] with a default [`gpu::FlushInfo`] followed by
-    /// [`gpu::DirectContext::submit`].
-    pub fn flush_and_submit(&mut self) {
-        unsafe {
-            self.native_mut().flushAndSubmit(false);
-        }
-    }
+    // TODO: wait()
 
-    /// See [`Self::flush_and_submit()`].
-    pub fn flush_submit_and_sync_cpu(&mut self) {
-        unsafe {
-            self.native_mut().flushAndSubmit(true);
-        }
-    }
-
-    /// If a surface is GPU texture backed, is being drawn with MSAA, and there is a resolve
-    /// texture, this call will insert a resolve command into the stream of gpu commands. In order
-    /// for the resolve to actually have an effect, the work still needs to be flushed and submitted
-    /// to the GPU after recording the resolve command. If a resolve is not supported or the
-    /// [`Surface`] has no dirty work to resolve, then this call is a no-op.
+    /// Initializes [`SurfaceCharacterization`] that can be used to perform GPU back-end
+    /// processing in a separate thread. Typically this is used to divide drawing
+    /// into multiple tiles. `DeferredDisplayListRecorder` records the drawing commands
+    /// for each tile.
     ///
-    /// This call is most useful when the [`Surface`] is created by wrapping a single sampled gpu
-    /// texture, but asking Skia to render with MSAA. If the client wants to use the wrapped texture
-    /// outside of Skia, the only way to trigger a resolve is either to call this command or use
-    /// [`Self::flush()`].
-    #[cfg(feature = "gpu")]
-    pub fn resolve_msaa(&mut self) {
-        unsafe { self.native_mut().resolveMSAA() }
+    /// Return `true` if [`Surface`] supports characterization. raster surface returns `false`.
+    ///
+    /// * `characterization` - properties for parallel drawing
+    /// Returns: `true` if supported
+    ///
+    /// example: <https://fiddle.skia.org/c/@Surface_characterize>
+    pub fn characterize(&self) -> Option<SurfaceCharacterization> {
+        let mut sc = SurfaceCharacterization::default();
+        unsafe { self.native().characterize(sc.native_mut()) }.if_true_some(sc)
     }
+}
 
-    // After deprecated since 0.30.0 (m85), the default flush() behavior changed in m86.
-    // For more information, take a look at the documentation in Skia's SkSurface.h
+pub use surfaces::BackendSurfaceAccess;
 
-    /// See [`Self::flush_with_mutable_state()`].
-    #[cfg(feature = "gpu")]
-    pub fn flush(&mut self) {
-        let info = gpu::FlushInfo::default();
-        self.flush_with_mutable_state(&info, None);
-    }
-
+impl Surface {
     /// Issues pending [`Surface`] commands to the GPU-backed API objects and resolves any [`Surface`]
     /// MSAA. A call to [`gpu::DirectContext::submit`] is always required to ensure work is actually sent
     /// to the gpu. Some specific API details:
@@ -1039,6 +995,7 @@ impl Surface {
     /// * `access` - type of access the call will do on the backend object after flush
     /// * `info` - flush options
     #[cfg(feature = "gpu")]
+    #[deprecated(since = "0.65.0", note = "Use DirectContext::flush*()")]
     pub fn flush_with_access_info(
         &mut self,
         access: BackendSurfaceAccess,
@@ -1091,6 +1048,7 @@ impl Surface {
     /// * `info` - flush options
     /// * `access` - optional state change request after flush
     #[cfg(feature = "gpu")]
+    #[deprecated(since = "0.65.0", note = "Use DirectContext::flush*()")]
     pub fn flush_with_mutable_state<'a>(
         &mut self,
         info: &gpu::FlushInfo,
@@ -1102,110 +1060,108 @@ impl Surface {
         }
     }
 
-    // TODO: wait()
-
-    /// Initializes [`SurfaceCharacterization`] that can be used to perform GPU back-end
-    /// processing in a separate thread. Typically this is used to divide drawing
-    /// into multiple tiles. [`crate::DeferredDisplayListRecorder`] records the drawing commands
-    /// for each tile.
+    /// If a surface is GPU texture backed, is being drawn with MSAA, and there is a resolve
+    /// texture, this call will insert a resolve command into the stream of gpu commands. In order
+    /// for the resolve to actually have an effect, the work still needs to be flushed and submitted
+    /// to the GPU after recording the resolve command. If a resolve is not supported or the
+    /// [`Surface`] has no dirty work to resolve, then this call is a no-op.
     ///
-    /// Return `true` if [`Surface`] supports characterization. raster surface returns `false`.
-    ///
-    /// * `characterization` - properties for parallel drawing
-    /// Returns: `true` if supported
-    ///
-    /// example: <https://fiddle.skia.org/c/@Surface_characterize>
-    pub fn characterize(&self) -> Option<SurfaceCharacterization> {
-        let mut sc = SurfaceCharacterization::default();
-        unsafe { self.native().characterize(sc.native_mut()) }.if_true_some(sc)
+    /// This call is most useful when the [`Surface`] is created by wrapping a single sampled gpu
+    /// texture, but asking Skia to render with MSAA. If the client wants to use the wrapped texture
+    /// outside of Skia, the only way to trigger a resolve is either to call this command or use
+    /// [`Self::flush()`].
+    #[cfg(feature = "gpu")]
+    #[deprecated(since = "0.65.0", note = "Use gpu::surfaces::resolve_msaa")]
+    pub fn resolve_msaa(&mut self) {
+        gpu::surfaces::resolve_msaa(self)
     }
 
-    /// Draws the deferred display list created via a [`crate::DeferredDisplayListRecorder`].
-    /// If the deferred display list is not compatible with this [`Surface`], the draw is skipped
-    /// and `false` is return.
-    ///
-    /// The `offset.x` and `offset.y` parameters are experimental and, if not both zero, will cause
-    /// the draw to be ignored.
-    /// When implemented, if `offset.x` or `offset.y` are non-zero, the DDL will be drawn offset by that
-    /// amount into the surface.
-    ///
-    /// * `deferred_display_list` - drawing commands
-    /// * `offset.x` - x-offset at which to draw the DDL
-    /// * `offset.y` - y-offset at which to draw the DDL
-    /// Returns: `false` if `deferred_display_list` is not compatible
-    ///
-    /// example: <https://fiddle.skia.org/c/@Surface_draw_2>
-    pub fn draw_display_list_with_offset(
-        &mut self,
-        deferred_display_list: impl Into<DeferredDisplayList>,
-        offset: impl Into<IVector>,
-    ) -> bool {
-        let offset = offset.into();
+    /// Call to ensure all reads/writes of the surface have been issued to the underlying 3D API.
+    /// Skia will correctly order its own draws and pixel operations. This must to be used to ensure
+    /// correct ordering when the surface backing store is accessed outside Skia (e.g. direct use of
+    /// the 3D API or a windowing system). [`gpu::DirectContext`] has additional flush and submit methods
+    /// that apply to all surfaces and images created from a [`gpu::DirectContext`]. This is equivalent
+    /// to calling [`Self::flush()`] with a default [`gpu::FlushInfo`] followed by
+    /// [`gpu::DirectContext::submit`].
+    #[deprecated(since = "0.65.0", note = "Use DirectContext::flush*()")]
+    pub fn flush_and_submit(&mut self) {
         unsafe {
-            sb::C_SkSurface_draw(
-                self.native_mut(),
-                deferred_display_list.into().into_ptr() as *const _,
-                offset.x,
-                offset.y,
-            )
+            self.native_mut().flushAndSubmit(false);
         }
     }
 
-    /// See [`Self::draw_display_list_with_offset`].
-    pub fn draw_display_list(
-        &mut self,
-        deferred_display_list: impl Into<DeferredDisplayList>,
-    ) -> bool {
-        self.draw_display_list_with_offset(deferred_display_list, IVector::default())
+    /// See [`Self::flush_and_submit()`].
+    #[deprecated(since = "0.65.0", note = "Use DirectContext::flush*()")]
+    pub fn flush_submit_and_sync_cpu(&mut self) {
+        unsafe {
+            self.native_mut().flushAndSubmit(true);
+        }
+    }
+
+    // After deprecated since 0.30.0 (m85), the default flush() behavior changed in m86.
+    // For more information, take a look at the documentation in Skia's SkSurface.h
+
+    /// See [`Self::flush_with_mutable_state()`].
+    #[cfg(feature = "gpu")]
+    #[deprecated(since = "0.65.0", note = "Use DirectContext::flush*()")]
+    pub fn flush(&mut self) {
+        let info = gpu::FlushInfo::default();
+        #[allow(deprecated)]
+        self.flush_with_mutable_state(&info, None);
     }
 }
 
-#[test]
-fn create() {
-    assert!(surfaces::raster_n32_premul((0, 0)).is_none());
-    let surface = surfaces::raster_n32_premul((1, 1)).unwrap();
-    assert_eq!(1, surface.native().ref_counted_base()._ref_cnt())
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[test]
-fn test_raster_direct() {
-    let image_info = ImageInfo::new(
-        (20, 20),
-        crate::ColorType::RGBA8888,
-        crate::AlphaType::Unpremul,
-        None,
-    );
-    let min_row_bytes = image_info.min_row_bytes();
-    let mut pixels = vec![0u8; image_info.compute_byte_size(min_row_bytes)];
-    let mut surface = surfaces::wrap_pixels(
-        &image_info,
-        pixels.as_mut_slice(),
-        Some(min_row_bytes),
-        None,
-    )
-    .unwrap();
-    let paint = Paint::default();
-    surface.canvas().draw_circle((10, 10), 10.0, &paint);
-}
-
-#[test]
-fn test_drawing_owned_as_exclusive_ref_ergonomics() {
-    let mut surface = surfaces::raster_n32_premul((16, 16)).unwrap();
-
-    // option1:
-    // - An &mut canvas can be drawn to.
-    {
-        let mut canvas = Canvas::new(ISize::new(16, 16), None).unwrap();
-        surface.draw(&mut canvas, (5.0, 5.0), SamplingOptions::default(), None);
-        surface.draw(&mut canvas, (10.0, 10.0), SamplingOptions::default(), None);
+    #[test]
+    fn create() {
+        assert!(surfaces::raster_n32_premul((0, 0)).is_none());
+        let surface = surfaces::raster_n32_premul((1, 1)).unwrap();
+        assert_eq!(1, surface.native().ref_counted_base()._ref_cnt())
     }
 
-    // option2:
-    // - A canvas from another surface can be drawn to.
-    {
-        let mut surface2 = surfaces::raster_n32_premul((16, 16)).unwrap();
-        let canvas = surface2.canvas();
-        surface.draw(canvas, (5.0, 5.0), SamplingOptions::default(), None);
-        surface.draw(canvas, (10.0, 10.0), SamplingOptions::default(), None);
+    #[test]
+    fn test_raster_direct() {
+        let image_info = ImageInfo::new(
+            (20, 20),
+            crate::ColorType::RGBA8888,
+            crate::AlphaType::Unpremul,
+            None,
+        );
+        let min_row_bytes = image_info.min_row_bytes();
+        let mut pixels = vec![0u8; image_info.compute_byte_size(min_row_bytes)];
+        let mut surface = surfaces::wrap_pixels(
+            &image_info,
+            pixels.as_mut_slice(),
+            Some(min_row_bytes),
+            None,
+        )
+        .unwrap();
+        let paint = Paint::default();
+        surface.canvas().draw_circle((10, 10), 10.0, &paint);
+    }
+
+    #[test]
+    fn test_drawing_owned_as_exclusive_ref_ergonomics() {
+        let mut surface = surfaces::raster_n32_premul((16, 16)).unwrap();
+
+        // option1:
+        // - An &mut canvas can be drawn to.
+        {
+            let mut canvas = Canvas::new(ISize::new(16, 16), None).unwrap();
+            surface.draw(&mut canvas, (5.0, 5.0), SamplingOptions::default(), None);
+            surface.draw(&mut canvas, (10.0, 10.0), SamplingOptions::default(), None);
+        }
+
+        // option2:
+        // - A canvas from another surface can be drawn to.
+        {
+            let mut surface2 = surfaces::raster_n32_premul((16, 16)).unwrap();
+            let canvas = surface2.canvas();
+            surface.draw(canvas, (5.0, 5.0), SamplingOptions::default(), None);
+            surface.draw(canvas, (10.0, 10.0), SamplingOptions::default(), None);
+        }
     }
 }

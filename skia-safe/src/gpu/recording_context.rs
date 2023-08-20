@@ -7,7 +7,6 @@ use skia_bindings::{self as sb, GrRecordingContext, SkRefCntBase};
 use std::fmt;
 
 pub type RecordingContext = RCHandle<GrRecordingContext>;
-require_type_equality!(sb::GrRecordingContext_INHERITED, sb::GrImageContext);
 
 impl NativeRefCountedBase for GrRecordingContext {
     type Base = SkRefCntBase;
