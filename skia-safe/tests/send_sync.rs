@@ -249,6 +249,8 @@ mod textlayout {
     assert_not_impl_any!(ParagraphCache: Send, Sync);
     assert_impl_all!(Paragraph: Send, Sync);
     assert_impl_all!(paragraph::FontInfo: Send, Sync);
+    assert_not_impl_all!(paragraph::VisitorInfo: Send, Sync);
+    assert_impl_all!(paragraph::VisitorFlags: Send, Sync);
     assert_impl_all!(paragraph::GlyphClusterInfo: Send, Sync);
     assert_impl_all!(ParagraphBuilder: Send, Sync);
     assert_impl_all!(StrutStyle: Send, Sync);
