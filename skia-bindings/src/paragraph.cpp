@@ -280,6 +280,14 @@ extern "C" {
         result->set(vec);
     }
 
+    void C_Paragraph_visit(Paragraph* self, void* ctx, void (*visit)(void *, size_t, const Paragraph::VisitorInfo *)) {
+        auto visitFn = [ctx,visit](int i, const Paragraph::VisitorInfo *info_)
+        {
+            visit(ctx, i, info_);
+        };
+        self->visit(visitFn);
+    }
+
     int C_Paragraph_getLineNumberAt(const Paragraph* self, TextIndex codeUnitIndex) {
         return self->getLineNumberAt(codeUnitIndex);
     }

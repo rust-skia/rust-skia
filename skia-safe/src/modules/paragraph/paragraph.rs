@@ -1,4 +1,4 @@
-use std::{fmt, ops::Range};
+use std::{ffi, fmt, ops::Range};
 
 use skia_bindings as sb;
 
@@ -192,7 +192,31 @@ impl Paragraph {
         result
     }
 
-    // TODO: wrap visit()
+    pub fn visit<'a, F>(&mut self, mut visitor: F)
+    where
+        F: FnMut(usize, Option<&'a VisitorInfo>),
+    {
+        unsafe {
+            sb::C_Paragraph_visit(
+                self.native_mut(),
+                &mut visitor as *mut F as *mut _,
+                Some(visitor_trampoline::<'a, F>),
+            );
+        }
+
+        unsafe extern "C" fn visitor_trampoline<'a, F: FnMut(usize, Option<&'a VisitorInfo>)>(
+            ctx: *mut ffi::c_void,
+            index: usize,
+            info: *const sb::skia_textlayout_Paragraph_VisitorInfo,
+        ) {
+            let info = if info.is_null() {
+                None
+            } else {
+                Some(VisitorInfo::from_native_ref(&*info))
+            };
+            (*(ctx as *mut F))(index, info)
+        }
+    }
 
     pub fn get_line_number_at(&self, code_unit_index: TextIndex) -> Option<usize> {
         // Returns -1 if `code_unit_index` is out of range.
@@ -275,6 +299,74 @@ impl Paragraph {
         };
         unsafe { sb::C_Paragraph_getFonts(self.native(), VecSink::new(&mut set_fn).native_mut()) }
         result
+    }
+}
+
+pub type VisitorInfo = Handle<sb::skia_textlayout_Paragraph_VisitorInfo>;
+
+impl NativeDrop for sb::skia_textlayout_Paragraph_VisitorInfo {
+    fn drop(&mut self) {
+        panic!("Internal error, Paragraph visitor info do not exist in Rust")
+    }
+}
+
+impl fmt::Debug for VisitorInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("VisitorInfo")
+            .field("font", &self.font())
+            .field("origin", &self.origin())
+            .field("advance_x", &self.advance_x())
+            .field("count", &self.count())
+            .field("glyphs", &self.glyphs())
+            .field("positions", &self.positions())
+            .field("utf8_starts", &self.utf8_starts())
+            .finish()
+    }
+}
+
+impl VisitorInfo {
+    pub fn font(&self) -> &Font {
+        Font::from_native_ref(unsafe { &*self.native().font })
+    }
+
+    pub fn origin(&self) -> Point {
+        Point::from_native_c(self.native().origin)
+    }
+
+    pub fn advance_x(&self) -> scalar {
+        self.native().advanceX
+    }
+
+    pub fn count(&self) -> usize {
+        self.native().count as usize
+    }
+
+    pub fn glyphs(&self) -> &[u16] {
+        unsafe { safer::from_raw_parts(self.native().glyphs, self.count()) }
+    }
+
+    pub fn positions(&self) -> &[Point] {
+        unsafe {
+            safer::from_raw_parts(
+                Point::from_native_ptr(self.native().positions),
+                self.count(),
+            )
+        }
+    }
+
+    pub fn utf8_starts(&self) -> &[u32] {
+        unsafe { safer::from_raw_parts(self.native().utf8Starts, self.count() + 1) }
+    }
+
+    pub fn flags(&self) -> VisitorFlags {
+        VisitorFlags::from_bits_truncate(self.native().flags)
+    }
+}
+
+bitflags! {
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    pub struct VisitorFlags: u32 {
+        const WHITE_SPACE = sb::skia_textlayout_Paragraph_VisitorFlags_kWhiteSpace_VisitorFlag as _;
     }
 }
 
@@ -367,6 +459,16 @@ mod tests {
         let paragraph = mk_lorem_ipsum_paragraph();
         let infos = paragraph.get_fonts();
         assert!(!infos.is_empty())
+    }
+
+    #[test]
+    #[serial_test::serial]
+    fn test_visit() {
+        let mut paragraph = mk_lorem_ipsum_paragraph();
+        let visitor = |line, info| {
+            println!("line {}: {:?}", line, info);
+        };
+        paragraph.visit(visitor);
     }
 
     fn mk_lorem_ipsum_paragraph() -> Paragraph {
