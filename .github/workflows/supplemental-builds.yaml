@@ -107,8 +107,8 @@ jobs:
     - name: Python Version
       run: python --version
 
-    - name: Install LLVM
-      run: choco install llvm
+    - name: Upgrade LLVM
+      run: choco upgrade llvm
 
     - name: 'Build with RUSTFLAGS=-Clink-dead-code (#318)'
       run: |
@@ -135,8 +135,8 @@ jobs:
   #   - name: Python Version
   #     run: python --version
 
-  #   - name: Install LLVM
-  #     run: choco install llvm
+  #   - name: Upgrade LLVM
+  #     run: choco upgrade llvm
 
   #   - name: 'Build with RUSTFLAGS=-Clink-dead-code (#318)'
   #     run: |
@@ -162,8 +162,8 @@ jobs:
     - name: Python Version
       run: python --version
 
-    - name: Install LLVM
-      run: choco install llvm
+    - name: Upgrade LLVM
+      run: choco upgrade llvm
 
     - name: 'Install Rust target i686-pc-windows-msvc'
       shell: bash

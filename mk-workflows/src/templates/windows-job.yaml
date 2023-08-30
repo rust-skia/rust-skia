@@ -21,5 +21,5 @@ steps:
 - name: Python Version
   run: python --version
 
-- name: Install LLVM
-  run: choco install llvm
+- name: Upgrade LLVM
+  run: choco upgrade llvm
