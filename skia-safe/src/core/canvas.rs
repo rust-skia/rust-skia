@@ -756,7 +756,10 @@ impl Canvas {
     #[must_use]
     pub fn read_pixels_to_bitmap(&mut self, bitmap: &mut Bitmap, src: impl Into<IPoint>) -> bool {
         let src = src.into();
-        unsafe { self.native_mut().readPixels2(bitmap.native(), src.x, src.y) }
+        unsafe {
+            self.native_mut()
+                .readPixels2(bitmap.native_mut(), src.x, src.y)
+        }
     }
 
     /// Copies [`Rect`] from pixels to [`Canvas`]. [`Matrix`] and clip are ignored.

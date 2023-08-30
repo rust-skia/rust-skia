@@ -46,7 +46,7 @@ impl<'pixels> Pixmap<'pixels> {
         }
 
         Some(Pixmap::from_native_c(SkPixmap {
-            fPixels: pixels.as_ptr() as _,
+            fPixels: pixels.as_mut_ptr() as _,
             fRowBytes: row_bytes,
             fInfo: info.native().clone(),
         }))

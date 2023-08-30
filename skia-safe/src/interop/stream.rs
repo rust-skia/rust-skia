@@ -220,7 +220,7 @@ impl<'a> RustStream<'a> {
                 // This is OK because we just abort if it panics anyway.
                 let mut val = std::panic::AssertUnwindSafe(val);
 
-                let out_bytes = match std::panic::catch_unwind(move || {
+                match std::panic::catch_unwind(move || {
                     while count > 0 {
                         let bytes = match val.read(&mut buf[..count.min(BUF_SIZE)]) {
                             Ok(0) => break,
@@ -239,9 +239,7 @@ impl<'a> RustStream<'a> {
                         println!("Panic in FFI callback for `SkStream::read`");
                         std::process::abort();
                     }
-                };
-
-                out_bytes
+                }
             } else {
                 let buf: &mut [u8] = std::slice::from_raw_parts_mut(buf as _, count as _);
 
