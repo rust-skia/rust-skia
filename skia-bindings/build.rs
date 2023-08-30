@@ -1,9 +1,10 @@
+use std::{fs, io};
+
 use build_support::{
     binaries_config,
     cargo::{self, Target},
     features, skia, skia_bindgen,
 };
-use std::{fs, io};
 
 mod build_support;
 
@@ -170,8 +171,11 @@ fn generate_bindings(
 /// On docs.rs, rustdoc runs inside a container with no networking, so copy a pre-generated
 /// `bindings.rs` file.
 fn fake_bindings() -> Result<(), io::Error> {
-    println!("COPYING bindings_docs.rs to src/bindings.rs");
-    fs::copy("bindings_docs.rs", "src/bindings.rs").map(|_| ())
+    println!("COPYING bindings_docs.rs to OUT_DIR/skia/bindings.rs");
+    let bindings_target = cargo::output_directory()
+        .join(binaries_config::SKIA_OUTPUT_DIR)
+        .join("bindings.rs");
+    fs::copy("bindings_docs.rs", bindings_target).map(|_| ())
 }
 
 /// Environment variables used by this build script.

@@ -16,7 +16,7 @@ build = "build.rs"
 links = "skia"
 include = [
 	"Cargo.toml",
-	# "bindings_docs.rs",
+	"bindings_docs.rs",
 	"build.rs",
 	"build_support.rs",
 	"build_support/**/*.rs",

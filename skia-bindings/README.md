@@ -18,9 +18,9 @@ To configure and build Skia, [`build_support/skia.rs`](build_support/skia.rs) do
 
 ### Binding Generation
 
-`src/bindings.rs` and `src/shaper.cpp` contain the C++ code that Rust needs to interact with Skia's codebase. These files are processed by the [Rust's binding generator](<https://github.com/rust-lang/rust-bindgen>) that uses libclang for the layout computation _and also_ compiled by [clang](https://clang.llvm.org/).
+The files `src/*.cpp` contain the C++ code that Rust needs to interact with Skia's codebase. These files are processed by the [Rust's binding generator](<https://github.com/rust-lang/rust-bindgen>) that uses libclang for the layout computation _and_ are also compiled by [clang](https://clang.llvm.org/).
 
-If both steps went well, the resulting Rust binding code is written to `src/bindings.rs`, and the `skia-bindings` library is found in the output directory alongside where Skia was built previously.
+If both steps went well, the resulting Rust binding code is written to `OUT_DIR/skia/bindings.rs`, and the `skia-bindings` library is found in the output directory.
 
 ### Debug Builds
 
@@ -30,13 +30,13 @@ By default, and for performance reasons, Skia is built in release mode even when
 
 Because building Skia _and_ creating the bindings is slow and depend on a number of components that lie outside the Rust ecosystem, we decided to experiment with prebuilt binaries.
 
-Whenever a new version of `rust-skia` is built from the `release` branch on our CI server, the resulting Skia library, `skia-bindings` library, _and_ `bindings.rs` are uploaded to the releases tab of the [skia-binaries repository](<https://github.com/rust-skia/skia-binaries/releases>).
+Whenever a new version of `rust-skia` is built from the `release` branch on our CI server, the resulting Skia libraries, `skia-bindings` library, _and_ `bindings.rs` are compressed and uploaded to the releases tab of the [skia-binaries repository](<https://github.com/rust-skia/skia-binaries/releases>).
 
 And whenever the build script detects that `skia-bindings` is built from inside a crate _and_ a prebuilt archive is available that matches the repository's hash, platform, and features, it downloads the package, unpacks it, and skips the full build step of Skia and the bindings.
 
 ### Changing the executable used as `ninja` and `gn`
 
-On some systems, the bundled `ninja` and `gn` executables may not work (as is on NixOS.) To remedy
+On some systems, the bundled `ninja` and `gn` executables may not work (as it does on NixOS). To remedy
 this, the executables used can be set using the following environment variables:
 
 | Variable             | Description                                                                                                | Default                                    |
