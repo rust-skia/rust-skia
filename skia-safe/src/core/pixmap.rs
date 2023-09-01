@@ -66,6 +66,7 @@ impl<'pixels> Pixmap<'pixels> {
         self
     }
 
+    #[must_use]
     pub fn extract_subset(&self, area: impl AsRef<IRect>) -> Option<Self> {
         let mut pixmap = Pixmap::default();
         unsafe {

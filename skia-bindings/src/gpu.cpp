@@ -267,7 +267,7 @@ extern "C" const GrBackendTexture* C_GrYUVABackendTextures_textures(const GrYUVA
 // core/SkCanvas.h
 //
 
-extern "C" GrRecordingContext* C_SkCanvas_recordingContext(SkCanvas* self) {
+extern "C" GrRecordingContext* C_SkCanvas_recordingContext(const SkCanvas* self) {
     return self->recordingContext();
 }
 

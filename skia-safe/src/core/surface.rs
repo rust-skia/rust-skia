@@ -850,6 +850,7 @@ impl Surface {
     // TODO: AsyncReadResult, RescaleGamma (m79, m86)
     // TODO: wrap asyncRescaleAndReadPixels (m76, m79, m89)
     // TODO: wrap asyncRescaleAndReadPixelsYUV420 (m77, m79, m89)
+    // TODO: wrap asyncRescaleAndReadPixelsYUVA420 (m117)
 
     /// Copies [`crate::Rect`] of pixels from the src [`Pixmap`] to the [`Surface`].
     ///

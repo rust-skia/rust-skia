@@ -2133,7 +2133,7 @@ extern "C" SkStreamAsset* C_SkDynamicMemoryWStream_detachAsStream(SkDynamicMemor
 // core/SkTiledImageUtils.h
 //
 
-SK_API void C_SkTiledImageUtils_DrawImageRect(
+extern "C" void C_SkTiledImageUtils_DrawImageRect(
     SkCanvas* canvas,
     const SkImage* image,
     const SkRect& src,
@@ -2142,6 +2142,13 @@ SK_API void C_SkTiledImageUtils_DrawImageRect(
     const SkPaint* paint,
     SkCanvas::SrcRectConstraint constraint) {
     SkTiledImageUtils::DrawImageRect(canvas, image, src, dst, *sampling, paint, constraint);
+}
+
+extern "C" void C_SkTiledImageUtils_GetImageKeyValues(
+    const SkImage* image,
+    uint32_t keyValues[SkTiledImageUtils::kNumImageKeyValues]
+) {
+    SkTiledImageUtils::GetImageKeyValues(image, keyValues);
 }
 
 //

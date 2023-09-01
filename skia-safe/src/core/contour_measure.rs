@@ -38,6 +38,7 @@ impl ContourMeasure {
         unsafe { sb::C_SkContourMeasure_length(self.native()) }
     }
 
+    #[must_use]
     pub fn pos_tan(&self, distance: scalar) -> Option<(Point, Vector)> {
         let mut p = Point::default();
         let mut v = Vector::default();
@@ -48,6 +49,7 @@ impl ContourMeasure {
         .if_true_some((p, v))
     }
 
+    #[must_use]
     pub fn get_matrix(
         &self,
         distance: scalar,
@@ -68,6 +70,7 @@ impl ContourMeasure {
         .if_true_some(m)
     }
 
+    #[must_use]
     pub fn segment(
         &self,
         start_d: scalar,

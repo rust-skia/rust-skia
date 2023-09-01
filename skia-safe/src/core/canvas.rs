@@ -516,22 +516,22 @@ impl Canvas {
         })
     }
 
-    /// Returns GPU context of the GPU surface associated with [`Canvas`].
+    /// Returns Ganesh context of the GPU surface associated with [`Canvas`].
     ///
     /// Returns GPU context, if available; `None` otherwise
     ///
     /// example: <https://fiddle.skia.org/c/@Canvas_recordingContext>
     #[cfg(feature = "gpu")]
-    pub fn recording_context(&mut self) -> Option<gpu::RecordingContext> {
+    pub fn recording_context(&self) -> Option<gpu::RecordingContext> {
         gpu::RecordingContext::from_unshared_ptr(unsafe {
-            sb::C_SkCanvas_recordingContext(self.native_mut())
+            sb::C_SkCanvas_recordingContext(self.native())
         })
     }
 
     /// Returns the [`gpu::DirectContext`].
     /// This is a rust-skia helper for that makes it simpler to call [`Image::encode`].
     #[cfg(feature = "gpu")]
-    pub fn direct_context(&mut self) -> Option<gpu::DirectContext> {
+    pub fn direct_context(&self) -> Option<gpu::DirectContext> {
         self.recording_context()
             .and_then(|mut c| c.as_direct_context())
     }
