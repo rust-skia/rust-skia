@@ -96,7 +96,7 @@ fn main() {
         })
         .unwrap();
     println!("Picked a config with {} samples", gl_config.num_samples());
-    let mut window = window.expect("Could not create window with OpenGL context");
+    let window = window.expect("Could not create window with OpenGL context");
     let raw_window_handle = window.raw_window_handle();
 
     // The context creation part. It can be created before surface and that's how
@@ -174,7 +174,7 @@ fn main() {
     )));
 
     fn create_surface(
-        window: &mut Window,
+        window: &Window,
         fb_info: FramebufferInfo,
         gr_context: &mut skia_safe::gpu::DirectContext,
         num_samples: usize,
@@ -201,13 +201,7 @@ fn main() {
     let num_samples = gl_config.num_samples() as usize;
     let stencil_size = gl_config.stencil_size() as usize;
 
-    let surface = create_surface(
-        &mut window,
-        fb_info,
-        &mut gr_context,
-        num_samples,
-        stencil_size,
-    );
+    let surface = create_surface(&window, fb_info, &mut gr_context, num_samples, stencil_size);
 
     let mut frame = 0usize;
 
@@ -246,7 +240,7 @@ fn main() {
                 }
                 WindowEvent::Resized(physical_size) => {
                     env.surface = create_surface(
-                        &mut env.window,
+                        &env.window,
                         fb_info,
                         &mut env.gr_context,
                         num_samples,
