@@ -408,7 +408,9 @@ impl DirectContext {
         .if_true_some(previous)
     }
 
-    // TODO: wrap deleteBackendTexture(),
+    pub fn delete_backend_texture(&mut self, texture: &BackendTexture) {
+        unsafe { self.native_mut().deleteBackendTexture(texture.native()) }
+    }
 
     pub fn precompile_shader(&mut self, key: &Data, data: &Data) -> bool {
         unsafe {
