@@ -310,6 +310,15 @@ impl ParagraphStyle {
         self.native_mut().fReplaceTabCharacters = value;
         self
     }
+
+    pub fn apply_rounding_hack(&self) -> bool {
+        self.native().fApplyRoundingHack
+    }
+
+    pub fn set_apply_rounding_hack(&mut self, value: bool) -> &mut Self {
+        self.native_mut().fApplyRoundingHack = value;
+        self
+    }
 }
 
 #[cfg(test)]
