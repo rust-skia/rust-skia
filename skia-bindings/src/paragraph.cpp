@@ -288,6 +288,22 @@ extern "C" {
         self->visit(visitFn);
     }
 
+    int C_Paragraph_getPath(Paragraph* self, int lineNumber, SkPath* path) {
+        return self->getPath(lineNumber, path);
+    }
+
+    void C_Paragraph_GetPath(SkTextBlob* textBlob, SkPath* uninitialized) {
+        new (uninitialized) SkPath(Paragraph::GetPath(textBlob));
+    }
+
+    bool C_Paragraph_containsEmoji(Paragraph* self, SkTextBlob* textBlob) {
+        return self->containsEmoji(textBlob);
+    }
+
+    bool C_Paragraph_containsColorFontOrBitmap(Paragraph* self, SkTextBlob* textBlob) {
+        return self->containsColorFontOrBitmap(textBlob);
+    }
+
     int C_Paragraph_getLineNumberAt(const Paragraph* self, TextIndex codeUnitIndex) {
         return self->getLineNumberAt(codeUnitIndex);
     }

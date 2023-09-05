@@ -9,7 +9,7 @@ use super::{
 use crate::{
     interop::{Sink, VecSink},
     prelude::*,
-    scalar, Canvas, Font, Point, Rect, Unichar,
+    scalar, Canvas, Font, Path, Point, Rect, TextBlob, Unichar,
 };
 
 pub type Paragraph = RefHandle<sb::skia_textlayout_Paragraph>;
@@ -215,6 +215,32 @@ impl Paragraph {
                 Some(VisitorInfo::from_native_ref(&*info))
             };
             (*(ctx as *mut F))(index, info)
+        }
+    }
+
+    pub fn get_path_at(&mut self, line_number: usize) -> (usize, Path) {
+        let mut path = Path::default();
+        let unconverted_glyphs = unsafe {
+            sb::C_Paragraph_getPath(
+                self.native_mut(),
+                line_number.try_into().unwrap(),
+                path.native_mut(),
+            )
+        };
+        (unconverted_glyphs.try_into().unwrap(), path)
+    }
+
+    pub fn get_path(text_blob: &mut TextBlob) -> Path {
+        Path::construct(|p| unsafe { sb::C_Paragraph_GetPath(text_blob.native_mut(), p) })
+    }
+
+    pub fn contains_emoji(&mut self, text_blob: &mut TextBlob) -> bool {
+        unsafe { sb::C_Paragraph_containsEmoji(self.native_mut(), text_blob.native_mut()) }
+    }
+
+    pub fn contains_color_font_or_bitmap(&mut self, text_blob: &mut TextBlob) -> bool {
+        unsafe {
+            sb::C_Paragraph_containsColorFontOrBitmap(self.native_mut(), text_blob.native_mut())
         }
     }
 
