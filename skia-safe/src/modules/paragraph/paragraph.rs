@@ -9,7 +9,7 @@ use super::{
 use crate::{
     interop::{Sink, VecSink},
     prelude::*,
-    scalar, Canvas, Font, Path, Point, Rect, TextBlob, Unichar,
+    scalar, Canvas, Font, Path, Point, Rect, Size, TextBlob, Unichar,
 };
 
 pub type Paragraph = RefHandle<sb::skia_textlayout_Paragraph>;
@@ -218,6 +218,35 @@ impl Paragraph {
         }
     }
 
+    pub fn extended_visit<'a, F>(&mut self, mut visitor: F)
+    where
+        F: FnMut(usize, Option<&'a ExtendedVisitorInfo>),
+    {
+        unsafe {
+            sb::C_Paragraph_extendedVisit(
+                self.native_mut(),
+                &mut visitor as *mut F as *mut _,
+                Some(visitor_trampoline::<'a, F>),
+            );
+        }
+
+        unsafe extern "C" fn visitor_trampoline<
+            'a,
+            F: FnMut(usize, Option<&'a ExtendedVisitorInfo>),
+        >(
+            ctx: *mut ffi::c_void,
+            index: usize,
+            info: *const sb::skia_textlayout_Paragraph_ExtendedVisitorInfo,
+        ) {
+            let info = if info.is_null() {
+                None
+            } else {
+                Some(ExtendedVisitorInfo::from_native_ref(&*info))
+            };
+            (*(ctx as *mut F))(index, info)
+        }
+    }
+
     pub fn get_path_at(&mut self, line_number: usize) -> (usize, Path) {
         let mut path = Path::default();
         let unconverted_glyphs = unsafe {
@@ -332,7 +361,7 @@ pub type VisitorInfo = Handle<sb::skia_textlayout_Paragraph_VisitorInfo>;
 
 impl NativeDrop for sb::skia_textlayout_Paragraph_VisitorInfo {
     fn drop(&mut self) {
-        panic!("Internal error, Paragraph visitor info do not exist in Rust")
+        panic!("Internal error, Paragraph visitor can't be created in Rust")
     }
 }
 
@@ -346,6 +375,7 @@ impl fmt::Debug for VisitorInfo {
             .field("glyphs", &self.glyphs())
             .field("positions", &self.positions())
             .field("utf8_starts", &self.utf8_starts())
+            .field("flags", &self.flags())
             .finish()
     }
 }
@@ -378,6 +408,74 @@ impl VisitorInfo {
                 self.count(),
             )
         }
+    }
+
+    pub fn utf8_starts(&self) -> &[u32] {
+        unsafe { safer::from_raw_parts(self.native().utf8Starts, self.count() + 1) }
+    }
+
+    pub fn flags(&self) -> VisitorFlags {
+        VisitorFlags::from_bits_truncate(self.native().flags)
+    }
+}
+
+pub type ExtendedVisitorInfo = Handle<sb::skia_textlayout_Paragraph_ExtendedVisitorInfo>;
+
+impl NativeDrop for sb::skia_textlayout_Paragraph_ExtendedVisitorInfo {
+    fn drop(&mut self) {
+        panic!("Internal error, Paragraph extended visitor info can't be created in Rust")
+    }
+}
+
+impl fmt::Debug for ExtendedVisitorInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("VisitorInfo")
+            .field("font", &self.font())
+            .field("origin", &self.origin())
+            .field("advance", &self.advance())
+            .field("count", &self.count())
+            .field("glyphs", &self.glyphs())
+            .field("positions", &self.positions())
+            .field("bounds", &self.bounds())
+            .field("utf8_starts", &self.utf8_starts())
+            .field("flags", &self.flags())
+            .finish()
+    }
+}
+
+impl ExtendedVisitorInfo {
+    pub fn font(&self) -> &Font {
+        Font::from_native_ref(unsafe { &*self.native().font })
+    }
+
+    pub fn origin(&self) -> Point {
+        Point::from_native_c(self.native().origin)
+    }
+
+    pub fn advance(&self) -> Size {
+        Size::from_native_c(self.native().advance)
+    }
+
+    pub fn count(&self) -> usize {
+        self.native().count as usize
+    }
+
+    pub fn glyphs(&self) -> &[u16] {
+        unsafe { safer::from_raw_parts(self.native().glyphs, self.count()) }
+    }
+
+    pub fn positions(&self) -> &[Point] {
+        unsafe {
+            safer::from_raw_parts(
+                Point::from_native_ptr(self.native().positions),
+                self.count(),
+            )
+        }
+    }
+
+    pub fn bounds(&self) -> &[Rect] {
+        let ptr = Rect::from_native_ptr(self.native().bounds);
+        unsafe { safer::from_raw_parts(ptr, self.count()) }
     }
 
     pub fn utf8_starts(&self) -> &[u32] {
@@ -495,6 +593,16 @@ mod tests {
             println!("line {}: {:?}", line, info);
         };
         paragraph.visit(visitor);
+    }
+
+    #[test]
+    #[serial_test::serial]
+    fn test_extended_visit() {
+        let mut paragraph = mk_lorem_ipsum_paragraph();
+        let visitor = |line, info| {
+            println!("line {}: {:?}", line, info);
+        };
+        paragraph.extended_visit(visitor);
     }
 
     fn mk_lorem_ipsum_paragraph() -> Paragraph {
