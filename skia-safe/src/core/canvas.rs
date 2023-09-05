@@ -316,7 +316,7 @@ impl Canvas {
     ///
     /// Pixel buffer size should be info height times computed `row_bytes`.
     /// Pixels are not initialized.
-    /// To access pixels after drawing, call [`Self::flush()`] or [`Self::peek_pixels()`].
+    /// To access pixels after drawing, call `flush()` or [`Self::peek_pixels()`].
     ///
     /// - `info` width, height, [`crate::ColorType`], [`crate::AlphaType`], [`crate::ColorSpace`],
     ///   of raster surface; width, or height, or both, may be zero
@@ -351,7 +351,7 @@ impl Canvas {
     /// calls draw into pixels.
     /// [`crate::ColorType`] is set to [`crate::ColorType::n32()`].
     /// [`crate::AlphaType`] is set to [`crate::AlphaType::Premul`].
-    /// To access pixels after drawing, call [`Self::flush()`] or [`Self::peek_pixels()`].
+    /// To access pixels after drawing, call `flush()` or [`Self::peek_pixels()`].
     ///
     /// [`OwnedCanvas`] is returned if all parameters are valid.
     /// Valid parameters include:
