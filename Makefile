@@ -57,8 +57,15 @@ publish-bindings: bindings-docs
 	cd skia-bindings && cargo publish -vv --no-verify --allow-dirty
 
 # Generates /tmp/bindings.rs with docs-rs features.
+
 .PHONY: bindings-docs
 bindings-docs:
+	cargo build -vv --features ${doc-features-docs-rs}
+	cp `${bindings-latest}` /tmp/bindings.rs
+
+
+.PHONY: bindings-docs-docker
+bindings-docs-docker:
 	docker build -f bindings-docs/Dockerfile . -t skia-bindings-docs
 	docker run -d --name skia-bindings-docs-container skia-bindings-docs
 	docker cp skia-bindings-docs-container:/tmp/bindings_docs.rs /tmp/bindings.rs
