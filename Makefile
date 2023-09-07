@@ -59,8 +59,9 @@ publish-bindings: bindings-docs
 # Generates /tmp/bindings.rs with docs-rs features.
 .PHONY: bindings-docs
 bindings-docs:
-	cargo build -v --features ${doc-features-docs-rs}
-	cp `${bindings-latest}` /tmp/bindings.rs
+	docker build -f bindings-docs/Dockerfile . -t skia-bindings-docs
+	docker run -d --name skia-bindings-docs-container skia-bindings-docs
+	docker cp skia-bindings-docs-container:/tmp/bindings_docs.rs /tmp/bindings.rs
 
 .PHONY: publish-safe
 publish-safe:
