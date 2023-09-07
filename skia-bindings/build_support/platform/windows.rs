@@ -19,9 +19,13 @@ impl PlatformDetails for Msvc {
 
         // Tell Skia's build system where LLVM is supposed to be located.
         if let Some(llvm_home) = llvm::find_home() {
+            let clang_version_dir = llvm::clang_version_dir(&llvm_home)
+                .unwrap_or_else(|| panic!("Unable to locate Clang's version directory"));
+
             builder.arg("clang_win", quote(&llvm_home));
+            builder.arg("clang_win_version", quote(&clang_version_dir));
         } else {
-            panic!("Unable to locate LLVM installation. skia-bindings can not be built.");
+            panic!("Unable to locate LLVM installation");
         }
 
         // Setting `target_cpu` to `i686` or `x86`, nightly builds would lead to
@@ -102,9 +106,9 @@ fn resolve_vc() -> Option<PathBuf> {
 
 mod llvm {
     use crate::build_support::cargo;
-    use std::path::PathBuf;
+    use std::{fs, path::PathBuf};
 
-    /// Locate the LLVM installation which can be used to build skia.
+    /// Locate the LLVM installation which can be used to build Skia.
     /// If the environment variable `LLVM_HOME` is present it will
     /// be used. Otherwise we search a set of common paths:
     ///   - C:\Program Files\LLVM
@@ -133,9 +137,42 @@ mod llvm {
         }
     }
 
+    /// Return the clang's highest version directory by scanning the directories in
+    /// `LLVM_HOME\lib\clang\*`.
+    pub fn clang_version_dir(home: &str) -> Option<String> {
+        let path: PathBuf = [home, "lib", "clang"].into_iter().collect();
+        let mut highest_version = None;
+        let mut highest_version_path = None;
+        for entry in fs::read_dir(&path).ok()? {
+            let entry = entry.ok()?;
+            let path = entry.path();
+            if path.is_dir() {
+                if let Some(v) = parse_version(path.file_name()?.to_str()?) {
+                    if Some(v) > highest_version {
+                        highest_version = Some(v);
+                        highest_version_path = Some(path);
+                    }
+                }
+            }
+        }
+        let path = highest_version_path?;
+        Some(path.to_str()?.to_string())
+    }
+
     fn validate_home(home: &str) -> Option<String> {
         let clang_cl: PathBuf = [home, "bin", "clang-cl.exe"].into_iter().collect();
         eprintln!("Checking for {clang_cl:?}");
         clang_cl.exists().then(|| home.to_string())
+    }
+
+    fn parse_version(s: &str) -> Option<(usize, usize, usize)> {
+        let v: Result<Vec<_>, _> = s.split('.').map(|s| s.parse()).collect();
+        let v = v.ok()?;
+        match v.len() {
+            1 => Some((v[0], 0, 0)),
+            2 => Some((v[0], v[1], 0)),
+            3 => Some((v[0], v[1], v[2])),
+            _ => None,
+        }
     }
 }

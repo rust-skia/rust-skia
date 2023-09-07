@@ -35,8 +35,8 @@ jobs:
     - name: Python Version
       run: python --version
 
-    - name: Install LLVM
-      run: choco install llvm
+    - name: Upgrade LLVM
+      run: choco upgrade llvm
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
@@ -138,8 +138,8 @@ jobs:
     - name: Python Version
       run: python --version
 
-    - name: Install LLVM
-      run: choco install llvm
+    - name: Upgrade LLVM
+      run: choco upgrade llvm
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
@@ -241,8 +241,8 @@ jobs:
     - name: Python Version
       run: python --version
 
-    - name: Install LLVM
-      run: choco install llvm
+    - name: Upgrade LLVM
+      run: choco upgrade llvm
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
@@ -344,8 +344,8 @@ jobs:
     - name: Python Version
       run: python --version
 
-    - name: Install LLVM
-      run: choco install llvm
+    - name: Upgrade LLVM
+      run: choco upgrade llvm
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
@@ -447,8 +447,8 @@ jobs:
     - name: Python Version
       run: python --version
 
-    - name: Install LLVM
-      run: choco install llvm
+    - name: Upgrade LLVM
+      run: choco upgrade llvm
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
@@ -550,8 +550,8 @@ jobs:
     - name: Python Version
       run: python --version
 
-    - name: Install LLVM
-      run: choco install llvm
+    - name: Upgrade LLVM
+      run: choco upgrade llvm
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
@@ -653,8 +653,8 @@ jobs:
     - name: Python Version
       run: python --version
 
-    - name: Install LLVM
-      run: choco install llvm
+    - name: Upgrade LLVM
+      run: choco upgrade llvm
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
@@ -756,8 +756,8 @@ jobs:
     - name: Python Version
       run: python --version
 
-    - name: Install LLVM
-      run: choco install llvm
+    - name: Upgrade LLVM
+      run: choco upgrade llvm
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
@@ -859,8 +859,8 @@ jobs:
     - name: Python Version
       run: python --version
 
-    - name: Install LLVM
-      run: choco install llvm
+    - name: Upgrade LLVM
+      run: choco upgrade llvm
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
@@ -962,8 +962,8 @@ jobs:
     - name: Python Version
       run: python --version
 
-    - name: Install LLVM
-      run: choco install llvm
+    - name: Upgrade LLVM
+      run: choco upgrade llvm
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
@@ -1065,8 +1065,8 @@ jobs:
     - name: Python Version
       run: python --version
 
-    - name: Install LLVM
-      run: choco install llvm
+    - name: Upgrade LLVM
+      run: choco upgrade llvm
     - name: 'Install Rust target x86_64-pc-windows-msvc'
       shell: bash
       run: |
