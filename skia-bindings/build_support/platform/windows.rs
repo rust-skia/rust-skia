@@ -147,7 +147,7 @@ mod llvm {
             let entry = entry.ok()?;
             let path = entry.path();
             if path.is_dir() {
-                if let Some(v) = parse_version(path.to_str()?) {
+                if let Some(v) = parse_version(path.file_name()?.to_str()?) {
                     if Some(v) > highest_version {
                         highest_version = Some(v);
                         highest_version_path = Some(path);
