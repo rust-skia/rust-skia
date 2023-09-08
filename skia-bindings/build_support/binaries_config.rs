@@ -6,6 +6,9 @@ use std::{
     path::{Path, PathBuf},
 };
 
+pub const SKIA_OUTPUT_DIR: &str = "skia";
+const ICUDTL_DAT: &str = "icudtl.dat";
+
 /// The libraries to link with.
 pub mod lib {
     pub const SKIA: &str = "skia";
@@ -46,9 +49,6 @@ pub struct BinariesConfiguration {
     /// `true` if the skia libraries are built with debugging information.
     pub skia_debug: bool,
 }
-
-const SKIA_OUTPUT_DIR: &str = "skia";
-const ICUDTL_DAT: &str = "icudtl.dat";
 
 impl BinariesConfiguration {
     /// Build a binaries configuration from a set of Skia features.
