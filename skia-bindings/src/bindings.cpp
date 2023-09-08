@@ -68,7 +68,6 @@
 #include "include/core/SkStream.h"
 #include "include/core/SkStrokeRec.h"
 #include "include/core/SkSurface.h"
-#include "include/core/SkSurfaceCharacterization.h"
 #include "include/core/SkSwizzle.h"
 #include "include/core/SkTextBlob.h"
 #include "include/core/SkTextureCompressionType.h"
@@ -377,30 +376,6 @@ extern "C" const SkSurfaceProps* C_SkSurface_props(const SkSurface* self) {
 }
 
 //
-// core/SkSurfaceCharacterization.h
-//
-
-extern "C" void C_SkSurfaceCharacterization_Construct(SkSurfaceCharacterization* uninitialized) {
-    new(uninitialized)SkSurfaceCharacterization();
-}
-
-extern "C" void C_SkSurfaceCharacterization_CopyConstruct(SkSurfaceCharacterization* uninitialized, const SkSurfaceCharacterization* from) {
-    new(uninitialized)SkSurfaceCharacterization(*from);
-}
-
-extern "C" void C_SkSurfaceCharacterization_destruct(SkSurfaceCharacterization* self) {
-    self->~SkSurfaceCharacterization();
-}
-
-extern "C" bool C_SkSurfaceCharacterization_equals(const SkSurfaceCharacterization* self, const SkSurfaceCharacterization* rhs) {
-    return *self == *rhs;
-}
-
-extern "C" void C_SkSurfaceCharacterization_createColorSpace(const SkSurfaceCharacterization* self, SkColorSpace* cs, SkSurfaceCharacterization* out) {
-    *out = self->createColorSpace(sp(cs));
-}
-
-//
 // core/SkImage.h
 //
 
@@ -476,8 +451,8 @@ extern "C" SkData* C_SkImage_refEncodedData(const SkImage* self) {
     return self->refEncodedData().release();
 }
 
-extern "C" SkImage* C_SkImage_makeSubset(const SkImage* self, GrDirectContext* direct, const SkIRect* subset) {
-    return self->makeSubset(*subset, direct).release();
+extern "C" SkImage* C_SkImage_makeSubset(const SkImage* self, GrDirectContext* context, const SkIRect* subset) {
+    return self->makeSubset(context, *subset).release();
 }
 
 extern "C" SkImage* C_SkImage_withDefaultMipmaps(const SkImage* self) {
@@ -2158,7 +2133,7 @@ extern "C" SkStreamAsset* C_SkDynamicMemoryWStream_detachAsStream(SkDynamicMemor
 // core/SkTiledImageUtils.h
 //
 
-SK_API void C_SkTiledImageUtils_DrawImageRect(
+extern "C" void C_SkTiledImageUtils_DrawImageRect(
     SkCanvas* canvas,
     const SkImage* image,
     const SkRect& src,
@@ -2167,6 +2142,13 @@ SK_API void C_SkTiledImageUtils_DrawImageRect(
     const SkPaint* paint,
     SkCanvas::SrcRectConstraint constraint) {
     SkTiledImageUtils::DrawImageRect(canvas, image, src, dst, *sampling, paint, constraint);
+}
+
+extern "C" void C_SkTiledImageUtils_GetImageKeyValues(
+    const SkImage* image,
+    uint32_t keyValues[SkTiledImageUtils::kNumImageKeyValues]
+) {
+    SkTiledImageUtils::GetImageKeyValues(image, keyValues);
 }
 
 //
@@ -2541,21 +2523,6 @@ SkShader *C_SkRuntimeEffect_makeShader(
         sp(uniforms),
         SkSpan<SkRuntimeEffect::ChildPtr>(children, childCount), 
         localMatrix).release();
-}
-
-SkImage *C_SkRuntimeEffect_makeImage(
-    const SkRuntimeEffect *self,
-    GrRecordingContext* context,
-    const SkData *uniforms,
-    SkRuntimeEffect::ChildPtr *children, size_t childCount,
-    const SkMatrix *localMatrix,
-    const SkImageInfo *resultInfo,
-    bool mipmapped) {
-    return self->makeImage(
-        context,
-        sp(uniforms),
-        SkSpan<SkRuntimeEffect::ChildPtr>(children, childCount),
-        localMatrix, *resultInfo, mipmapped).release();
 }
 
 SkColorFilter *C_SkRuntimeEffect_makeColorFilter(

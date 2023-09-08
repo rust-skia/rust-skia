@@ -1,7 +1,4 @@
-use crate::{
-    gpu, prelude::*, surface::BackendHandleAccess, ImageInfo, Surface, SurfaceCharacterization,
-    SurfaceProps,
-};
+use crate::{gpu, prelude::*, surface::BackendHandleAccess, ImageInfo, Surface, SurfaceProps};
 
 use skia_bindings as sb;
 
@@ -48,26 +45,6 @@ pub fn render_target(
                 .unwrap_or(gpu::SurfaceOrigin::BottomLeft),
             surface_props.native_ptr_or_null(),
             should_create_with_mips.into().unwrap_or_default(),
-        )
-    })
-}
-
-/// Returns [`Surface`] on GPU indicated by context that is compatible with the provided
-/// characterization. budgeted selects whether allocation for pixels is tracked by context.
-///
-/// * `context` - GPU context
-/// * `characterization` - description of the desired [`Surface`]
-/// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
-pub fn render_target_with_characterization(
-    context: &mut gpu::RecordingContext,
-    characterization: &SurfaceCharacterization,
-    budgeted: gpu::Budgeted,
-) -> Option<Surface> {
-    Surface::from_ptr(unsafe {
-        sb::C_SkSurfaces_RenderTarget2(
-            context.native_mut(),
-            characterization.native(),
-            budgeted.into_native(),
         )
     })
 }

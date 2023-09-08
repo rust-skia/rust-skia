@@ -1,3 +1,12 @@
+use std::{
+    fmt,
+    ops::{Deref, DerefMut},
+    ptr,
+    time::Duration,
+};
+
+use skia_bindings::{self as sb, GrDirectContext, GrDirectContext_DirectContextID, SkRefCntBase};
+
 #[cfg(feature = "d3d")]
 use super::d3d;
 #[cfg(feature = "gl")]
@@ -8,14 +17,7 @@ use super::{
     BackendFormat, BackendRenderTarget, BackendTexture, ContextOptions, FlushInfo,
     MutableTextureState, RecordingContext, SemaphoresSubmitted,
 };
-use crate::{prelude::*, Data, Image, TextureCompressionType};
-use skia_bindings::{self as sb, GrDirectContext, GrDirectContext_DirectContextID, SkRefCntBase};
-use std::{
-    fmt,
-    ops::{Deref, DerefMut},
-    ptr,
-    time::Duration,
-};
+use crate::{prelude::*, surfaces, Data, Image, Surface, TextureCompressionType};
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -303,6 +305,48 @@ impl DirectContext {
         }
     }
 
+    pub fn flush_surface_with_access(
+        &mut self,
+        surface: &mut Surface,
+        access: surfaces::BackendSurfaceAccess,
+        info: &FlushInfo,
+    ) -> SemaphoresSubmitted {
+        unsafe {
+            self.native_mut()
+                .flush3(surface.native_mut(), access, info.native())
+        }
+    }
+
+    pub fn flush_surface_with_texture_state(
+        &mut self,
+        surface: &mut Surface,
+        info: &FlushInfo,
+        new_state: Option<&MutableTextureState>,
+    ) -> SemaphoresSubmitted {
+        unsafe {
+            self.native_mut().flush5(
+                surface.native_mut(),
+                info.native(),
+                new_state.native_ptr_or_null(),
+            )
+        }
+    }
+
+    pub fn flush_and_submit_surface(
+        &mut self,
+        surface: &mut Surface,
+        sync_cpu: impl Into<Option<bool>>,
+    ) {
+        unsafe {
+            self.native_mut()
+                .flushAndSubmit1(surface.native_mut(), sync_cpu.into().unwrap_or(false))
+        }
+    }
+
+    pub fn flush_surface(&mut self, surface: &mut Surface) {
+        unsafe { self.native_mut().flush7(surface.native_mut()) }
+    }
+
     pub fn submit(&mut self, sync_cpu: impl Into<Option<bool>>) -> bool {
         unsafe { self.native_mut().submit(sync_cpu.into().unwrap_or(false)) }
     }
@@ -408,7 +452,9 @@ impl DirectContext {
         .if_true_some(previous)
     }
 
-    // TODO: wrap deleteBackendTexture(),
+    pub fn delete_backend_texture(&mut self, texture: &BackendTexture) {
+        unsafe { self.native_mut().deleteBackendTexture(texture.native()) }
+    }
 
     pub fn precompile_shader(&mut self, key: &Data, data: &Data) -> bool {
         unsafe {

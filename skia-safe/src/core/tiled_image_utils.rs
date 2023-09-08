@@ -1,4 +1,4 @@
-use skia_bindings::C_SkTiledImageUtils_DrawImageRect;
+use skia_bindings::{self as sb, C_SkTiledImageUtils_DrawImageRect};
 
 use crate::{canvas, prelude::*, scalar, Canvas, Image, Paint, Point, Rect, SamplingOptions};
 
@@ -39,4 +39,12 @@ pub fn draw_image(
     let dst = Rect::from_xywh(p.x, p.y, image.width() as scalar, image.height() as scalar);
 
     draw_image_rect(canvas, image, src, dst, sampling, paint, constraint)
+}
+
+pub const NUM_IMAGE_KEY_VALUES: usize = 5;
+
+pub fn get_image_key_values(image: &Image) -> [u32; NUM_IMAGE_KEY_VALUES] {
+    let mut key_values = [0u32; NUM_IMAGE_KEY_VALUES];
+    unsafe { sb::C_SkTiledImageUtils_GetImageKeyValues(image.native(), key_values.as_mut_ptr()) }
+    key_values
 }

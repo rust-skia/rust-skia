@@ -80,7 +80,3 @@ pub fn purge_all_caches() {
 
 // TODO: ImageGeneratorFromEncodedDataFactory
 // TODO: SetOpenTypeSVGDecoderFactory & GetOpenTypeSVGDecoderFactory
-
-pub fn allow_jit() {
-    unsafe { SkGraphics::AllowJIT() }
-}

@@ -316,7 +316,7 @@ impl Canvas {
     ///
     /// Pixel buffer size should be info height times computed `row_bytes`.
     /// Pixels are not initialized.
-    /// To access pixels after drawing, call [`Self::flush()`] or [`Self::peek_pixels()`].
+    /// To access pixels after drawing, call `flush()` or [`Self::peek_pixels()`].
     ///
     /// - `info` width, height, [`crate::ColorType`], [`crate::AlphaType`], [`crate::ColorSpace`],
     ///   of raster surface; width, or height, or both, may be zero
@@ -351,7 +351,7 @@ impl Canvas {
     /// calls draw into pixels.
     /// [`crate::ColorType`] is set to [`crate::ColorType::n32()`].
     /// [`crate::AlphaType`] is set to [`crate::AlphaType::Premul`].
-    /// To access pixels after drawing, call [`Self::flush()`] or [`Self::peek_pixels()`].
+    /// To access pixels after drawing, call `flush()` or [`Self::peek_pixels()`].
     ///
     /// [`OwnedCanvas`] is returned if all parameters are valid.
     /// Valid parameters include:
@@ -480,20 +480,6 @@ impl Canvas {
         SurfaceProps::from_native_c(unsafe { self.native().getTopProps() })
     }
 
-    /// Triggers the immediate execution of all pending draw operations.
-    /// If [`Canvas`] is associated with GPU surface, resolves all pending GPU operations.
-    /// If [`Canvas`] is associated with raster surface, has no effect; raster draw operations are
-    /// never deferred.
-    ///
-    /// DEPRECATED: Replace usage with GrDirectContext::flush()
-    #[deprecated(since = "0.38.0", note = "Replace usage with DirectContext::flush()")]
-    pub fn flush(&mut self) -> &mut Self {
-        unsafe {
-            self.native_mut().flush();
-        }
-        self
-    }
-
     /// Gets the size of the base or root layer in global canvas coordinates. The
     /// origin of the base layer is always (0,0). The area available for drawing may be
     /// smaller (due to clipping or saveLayer).
@@ -530,22 +516,22 @@ impl Canvas {
         })
     }
 
-    /// Returns GPU context of the GPU surface associated with [`Canvas`].
+    /// Returns Ganesh context of the GPU surface associated with [`Canvas`].
     ///
     /// Returns GPU context, if available; `None` otherwise
     ///
     /// example: <https://fiddle.skia.org/c/@Canvas_recordingContext>
     #[cfg(feature = "gpu")]
-    pub fn recording_context(&mut self) -> Option<gpu::RecordingContext> {
+    pub fn recording_context(&self) -> Option<gpu::RecordingContext> {
         gpu::RecordingContext::from_unshared_ptr(unsafe {
-            sb::C_SkCanvas_recordingContext(self.native_mut())
+            sb::C_SkCanvas_recordingContext(self.native())
         })
     }
 
     /// Returns the [`gpu::DirectContext`].
     /// This is a rust-skia helper for that makes it simpler to call [`Image::encode`].
     #[cfg(feature = "gpu")]
-    pub fn direct_context(&mut self) -> Option<gpu::DirectContext> {
+    pub fn direct_context(&self) -> Option<gpu::DirectContext> {
         self.recording_context()
             .and_then(|mut c| c.as_direct_context())
     }

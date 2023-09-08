@@ -24,7 +24,7 @@ impl NativeDrop for GrBackendFormat {
 
 impl NativeClone for GrBackendFormat {
     fn clone(&self) -> Self {
-        unsafe { GrBackendFormat::new(self) }
+        unsafe { GrBackendFormat::new1(self) }
     }
 }
 

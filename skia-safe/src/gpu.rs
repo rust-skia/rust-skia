@@ -41,6 +41,15 @@ pub mod surfaces {
     pub use super::ganesh::surface_ganesh::*;
 }
 
+#[cfg(feature = "gl")]
+pub use ganesh::gl::backend_formats;
+
+#[cfg(feature = "gl")]
+pub use ganesh::gl::backend_textures;
+
+#[cfg(feature = "gl")]
+pub use ganesh::gl::backend_render_targets;
+
 #[cfg(test)]
 mod tests {
     use super::{DirectContext, RecordingContext};

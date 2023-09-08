@@ -1100,9 +1100,14 @@ impl Image {
     }
 
     // TODO:
-    // AsyncReadResult, ReadPixelsContext, ReadPixelsCallback, RescaleGamma,
+    // AsyncReadResult,
+    // ReadPixelsContext,
+    // ReadPixelsCallback,
+    // RescaleGamma,
     // RescaleMode,
-    // asyncRescaleAndReadPixels, asyncRescaleAndReadPixelsYUV420
+    // asyncRescaleAndReadPixels,
+    // asyncRescaleAndReadPixelsYUV420,
+    // asyncRescaleAndReadPixelsYUVA420
 
     /// Copies [`Image`] to dst, scaling pixels to fit `dst.width()` and `dst.height()`, and
     /// converting pixels to match `dst.color_type()` and `dst.alpha_type()`. Returns `true` if
