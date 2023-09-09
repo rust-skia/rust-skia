@@ -52,7 +52,11 @@ publish: package-bindings package-safe publish-bindings wait publish-safe
 publish-only: publish-bindings publish-safe
 
 .PHONY: publish-bindings
-publish-bindings: bindings-docs
+publish-bindings:
+	cd skia-bindings && cargo publish -vv --no-verify --allow-dirty
+
+.PHONY: publish-bindings-docs
+publish-bindings-docs: bindings-docs
 	cd skia-bindings && cp /tmp/bindings.rs bindings_docs.rs
 	cd skia-bindings && cargo publish -vv --no-verify --allow-dirty
 
