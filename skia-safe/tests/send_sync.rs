@@ -164,7 +164,6 @@ mod gpu {
     assert_impl_all!(BackendFormat: Send, Sync);
     assert_impl_all!(BackendTexture: Send, Sync);
     assert_impl_all!(BackendRenderTarget: Send, Sync);
-    assert_impl_all!(BackendSurfaceMutableState: Send, Sync);
     assert_impl_all!(ContextOptions: Send, Sync);
     assert_impl_all!(DriverBugWorkarounds: Send, Sync);
     // The Context* implementations check for single ownership before mutation, so no Send and Sync

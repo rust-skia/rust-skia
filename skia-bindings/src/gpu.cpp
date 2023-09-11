@@ -2,8 +2,8 @@
 
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/GrBackendDrawableInfo.h"
-#include "include/gpu/GrBackendSurfaceMutableState.h"
 #include "include/gpu/GrYUVABackendTextures.h"
+#include "include/gpu/MutableTextureState.h"
 #include "include/gpu/ganesh/SkImageGanesh.h"
 #include "include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "include/core/SkCanvas.h"
@@ -89,18 +89,6 @@ extern "C" bool C_GrBackendFormat_Equals(const GrBackendFormat* lhs, const GrBac
 
 extern "C" void C_GrBackendFormat_makeTexture2D(const GrBackendFormat* self, GrBackendFormat* format) {
     *format = self->makeTexture2D();
-}
-
-//
-// gpu/GrBackendSurfaceMutableState.h
-//
-
-extern "C" void C_GrBackendSurfaceMutableState_Construct(GrBackendSurfaceMutableState* uninitialized) {
-    new(uninitialized)GrBackendSurfaceMutableState();
-}
-
-extern "C" void C_GrBackendSurfaceMutableState_destruct(GrBackendSurfaceMutableState* self) {
-    self->~GrBackendSurfaceMutableState();
 }
 
 //

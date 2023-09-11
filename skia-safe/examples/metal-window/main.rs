@@ -94,7 +94,6 @@ fn main() {
 
                             let backend_render_target = BackendRenderTarget::new_metal(
                                 (drawable_size.width as i32, drawable_size.height as i32),
-                                1,
                                 &texture_info,
                             );
 

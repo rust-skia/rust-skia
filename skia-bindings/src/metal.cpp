@@ -107,6 +107,6 @@ extern "C" GrBackendTexture* C_GrBackendTexture_newMtl(
     return new GrBackendTexture(width, height, mipMapped, *mtlInfo, std::string_view(label, labelCount));
 }
 
-extern "C" void C_GrBackendRenderTarget_ConstructMtl(GrBackendRenderTarget* uninitialized, int width, int height, int sampleCnt, const GrMtlTextureInfo* mtlInfo) {
-    new(uninitialized)GrBackendRenderTarget(width, height, sampleCnt, *mtlInfo);
+extern "C" void C_GrBackendRenderTargets_ConstructMtl(GrBackendRenderTarget* uninitialized, int width, int height, const GrMtlTextureInfo* mtlInfo) {
+    new(uninitialized)GrBackendRenderTarget(width, height, *mtlInfo);
 }

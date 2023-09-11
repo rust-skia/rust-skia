@@ -60,7 +60,7 @@ impl BackendFormat {
 
     #[cfg(feature = "gl")]
     pub fn new_gl(format: gl::Enum, target: gl::Enum) -> Self {
-        Self::construct(|bf| unsafe { sb::C_GrBackendFormat_ConstructGL(bf, format, target) })
+        Self::construct(|bf| unsafe { sb::C_GrBackendFormats_ConstructGL(bf, format, target) })
             .assert_valid()
     }
 
@@ -117,12 +117,12 @@ impl BackendFormat {
 
     #[cfg(feature = "gl")]
     pub fn as_gl_format(&self) -> gl::Format {
-        unsafe { self.native().asGLFormat() }
+        unsafe { sb::C_GrBackendFormats_AsGLFormat(self.native()) }
     }
 
     #[cfg(feature = "gl")]
     pub fn as_gl_format_enum(&self) -> gl::Enum {
-        unsafe { self.native().asGLFormatEnum() }
+        unsafe { sb::C_GrBackendFormats_AsGLFormatEnum(self.native()) }
     }
 
     #[cfg(feature = "vulkan")]
@@ -367,17 +367,16 @@ impl BackendTexture {
 
     #[cfg(feature = "gl")]
     pub fn gl_texture_info(&self) -> Option<gl::TextureInfo> {
+        let mut texture_info = gl::TextureInfo::default();
         unsafe {
-            let mut texture_info = gl::TextureInfo::default();
-            self.native()
-                .getGLTextureInfo(texture_info.native_mut())
+            sb::C_GrBackendTextures_GetGLTextureInfo(self.native(), texture_info.native_mut())
                 .if_true_some(texture_info)
         }
     }
 
     #[cfg(feature = "gl")]
     pub fn gl_texture_parameters_modified(&mut self) {
-        unsafe { self.native_mut().glTextureParametersModified() }
+        unsafe { sb::C_GrBackendTextures_GLTextureParametersModified(self.native_mut()) }
     }
 
     #[cfg(feature = "vulkan")]
@@ -519,36 +518,16 @@ impl BackendRenderTarget {
     }
 
     #[cfg(feature = "vulkan")]
-    pub fn new_vulkan(
-        (width, height): (i32, i32),
-        sample_count: impl Into<Option<usize>>,
-        info: &vk::ImageInfo,
-    ) -> Self {
+    pub fn new_vulkan((width, height): (i32, i32), info: &vk::ImageInfo) -> Self {
         Self::construct(|target| unsafe {
-            sb::C_GrBackendRenderTarget_ConstructVk(
-                target,
-                width,
-                height,
-                sample_count.into().unwrap_or(0).try_into().unwrap(),
-                info.native(),
-            )
+            sb::C_GrBackendRenderTargets_ConstructVk(target, width, height, info.native())
         })
     }
 
     #[cfg(feature = "metal")]
-    pub fn new_metal(
-        (width, height): (i32, i32),
-        sample_cnt: i32,
-        mtl_info: &mtl::TextureInfo,
-    ) -> Self {
+    pub fn new_metal((width, height): (i32, i32), mtl_info: &mtl::TextureInfo) -> Self {
         Self::construct(|target| unsafe {
-            sb::C_GrBackendRenderTarget_ConstructMtl(
-                target,
-                width,
-                height,
-                sample_cnt,
-                mtl_info.native(),
-            )
+            sb::C_GrBackendRenderTargets_ConstructMtl(target, width, height, mtl_info.native())
         })
     }
 
@@ -597,7 +576,10 @@ impl BackendRenderTarget {
     #[cfg(feature = "gl")]
     pub fn gl_framebuffer_info(&self) -> Option<gl::FramebufferInfo> {
         let mut info = gl::FramebufferInfo::default();
-        unsafe { self.native().getGLFramebufferInfo(info.native_mut()) }.if_true_some(info)
+        unsafe {
+            sb::C_GrBackendRenderTargets_GetGLFramebufferInfo(self.native(), info.native_mut())
+        }
+        .if_true_some(info)
     }
 
     #[cfg(feature = "vulkan")]

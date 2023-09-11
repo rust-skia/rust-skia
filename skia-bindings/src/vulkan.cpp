@@ -4,8 +4,9 @@
 
 #include "include/gpu/GrBackendDrawableInfo.h"
 #include "include/gpu/GrBackendSurface.h"
-#include "include/gpu/GrBackendSurfaceMutableState.h"
 #include "include/gpu/GrDirectContext.h"
+#include "include/gpu/MutableTextureState.h"
+#include "include/gpu/ganesh/vk/GrVkBackendSurface.h"
 #include "include/gpu/vk/GrVkTypes.h"
 #include "include/gpu/vk/GrVkBackendContext.h"
 #include "include/gpu/vk/GrVkExtensions.h"
@@ -29,8 +30,8 @@ extern "C" GrBackendTexture* C_GrBackendTexture_newVk(
     return new GrBackendTexture(width, height, *vkInfo, std::string_view(label, labelCount));
 }
 
-extern "C" void C_GrBackendRenderTarget_ConstructVk(GrBackendRenderTarget* uninitialized, int width, int height, int sampleCnt, const GrVkImageInfo* vkInfo) {
-    new(uninitialized)GrBackendRenderTarget(width, height, sampleCnt, *vkInfo);
+extern "C" void C_GrBackendRenderTargets_ConstructVk(GrBackendRenderTarget* uninitialized, int width, int height, const GrVkImageInfo* vkInfo) {
+    new (uninitialized) GrBackendRenderTarget(GrBackendRenderTargets::MakeVk(width, height, *vkInfo));
 }
 
 extern "C" bool C_GrBackendDrawableInfo_getVkDrawableInfo(const GrBackendDrawableInfo* self, GrVkDrawableInfo* info) {
@@ -107,14 +108,6 @@ extern "C" bool C_GrVkAlloc_Equals(const GrVkAlloc* lhs, const GrVkAlloc* rhs) {
 
 extern "C" bool C_GrVkYcbcrConversionInfo_Equals(const GrVkYcbcrConversionInfo* lhs, const GrVkYcbcrConversionInfo* rhs) {
     return *lhs == *rhs;
-}
-
-//
-// gpu/GrBackendSurfaceMutableState.h
-//
-
-extern "C" void C_GrBackendSurfaceMutableState_ConstructVK(GrBackendSurfaceMutableState* uninitialized, VkImageLayout layout, uint32_t queueFamilyIndex) {
-    new(uninitialized)GrBackendSurfaceMutableState(layout, queueFamilyIndex);
 }
 
 //
