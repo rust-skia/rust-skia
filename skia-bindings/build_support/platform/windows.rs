@@ -90,7 +90,10 @@ fn generic_link_libraries(features: &Features) -> Vec<String> {
 /// TODO: sophisticate: <https://github.com/alexcrichton/cc-rs/blob/master/src/windows_registry.rs0>
 fn resolve_vc() -> Option<PathBuf> {
     if let Some(install_dir) = cargo::env_var("VCINSTALLDIR") {
-        return Some(PathBuf::from(install_dir));
+        // vcvars.bat may end up setting VCINSTALLDIR to a path with trailing backslash, we
+        // invoke GN  as win_vc="the path", and we end up with "foo\", which erroneously
+        // escapes the quote instead of closing.
+        return Some(PathBuf::from(install_dir.trim_end_matches('\\')));
     }
 
     let releases = [("Program Files", "2022"), ("Program Files (x86)", "2019")];
