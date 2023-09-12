@@ -69,6 +69,7 @@ impl DrawingDriver for Vulkan {
             gpu::SurfaceOrigin::TopLeft,
             None,
             false,
+            None,
         )
         .unwrap();
 

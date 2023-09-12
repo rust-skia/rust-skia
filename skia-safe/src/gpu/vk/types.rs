@@ -168,6 +168,7 @@ impl YcbcrConversionInfo {
 
     pub fn is_valid(&self) -> bool {
         self.ycbcr_model != vk::SamplerYcbcrModelConversion::RGB_IDENTITY
+            || self.external_format != 0
     }
 }
 

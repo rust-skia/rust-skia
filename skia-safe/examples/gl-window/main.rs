@@ -57,14 +57,15 @@ fn main() {
     };
     use glutin_winit::DisplayBuilder;
     use raw_window_handle::HasRawWindowHandle;
-    use skia_safe::{
-        gpu::{self, gl::FramebufferInfo, BackendRenderTarget, SurfaceOrigin},
-        Color, ColorType, Surface,
-    };
     use winit::{
         event::{Event, KeyboardInput, VirtualKeyCode, WindowEvent},
         event_loop::{ControlFlow, EventLoop},
         window::{Window, WindowBuilder},
+    };
+
+    use skia_safe::{
+        gpu::{self, backend_render_targets, gl::FramebufferInfo, SurfaceOrigin},
+        Color, ColorType, Surface,
     };
 
     let el = EventLoop::new();
@@ -186,7 +187,7 @@ fn main() {
             size.height.try_into().expect("Could not convert height"),
         );
         let backend_render_target =
-            BackendRenderTarget::new_gl(size, num_samples, stencil_size, fb_info);
+            backend_render_targets::make_gl(size, num_samples, stencil_size, fb_info);
 
         gpu::surfaces::wrap_backend_render_target(
             gr_context,

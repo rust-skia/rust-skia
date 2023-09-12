@@ -587,6 +587,7 @@ const ENUM_TABLE: &[EnumEntry] = &[
     //
     // gpu/
     //
+    ("Origin", rewrite::k_xxx),
     ("GrGLStandard", rewrite::k_xxx_name),
     ("GrGLFormat", rewrite::k_xxx),
     ("GrSurfaceOrigin", rewrite::k_xxx_name),

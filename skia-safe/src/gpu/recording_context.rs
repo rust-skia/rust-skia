@@ -100,6 +100,10 @@ impl RecordingContext {
         }
     }
 
+    pub fn supports_protected_content(&self) -> bool {
+        unsafe { self.native().supportsProtectedContent() }
+    }
+
     pub fn max_surface_sample_count_for_color_type(&self, color_type: ColorType) -> usize {
         unsafe {
             sb::C_GrRecordingContext_maxSurfaceSampleCountForColorType(

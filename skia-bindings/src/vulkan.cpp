@@ -125,3 +125,16 @@ extern "C" VkImageLayout C_MutableTextureState_getVkImageLayout(const skgpu::Mut
 extern "C" uint32_t C_MutableTextureState_getQueueFamilyIndex(const skgpu::MutableTextureState* self) {
     return self->getQueueFamilyIndex();
 }
+
+//
+// gpu/ganesh/vk
+//
+
+extern "C" bool C_GrBackendFormats_AsVkFormat(const GrBackendFormat* format, VkFormat* vkFormat) {
+    return GrBackendFormats::AsVkFormat(*format, vkFormat);
+}
+
+extern "C" const GrVkYcbcrConversionInfo* C_GrBackendFormats_GetVkYcbcrConversionInfo(const GrBackendFormat* format) {
+    return GrBackendFormats::GetVkYcbcrConversionInfo(*format);
+}
+

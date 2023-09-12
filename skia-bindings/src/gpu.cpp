@@ -13,6 +13,8 @@
 #include "include/core/SkSurface.h"
 #include "include/core/SkImageGenerator.h"
 
+extern "C" void C_GpuUnreferencedTypes(skgpu::Origin *) {}
+
 //
 // core/SkSurface.h
 //
@@ -373,9 +375,11 @@ extern "C" SkSurface* C_SkSurfaces_RenderTarget(
     GrRecordingContext* context,
     skgpu::Budgeted budgeted,
     const SkImageInfo* imageInfo,
-    int sampleCount, GrSurfaceOrigin surfaceOrigin,
+    int sampleCount,
+    GrSurfaceOrigin surfaceOrigin,
     const SkSurfaceProps* surfaceProps,
-    bool shouldCreateWithMips) {
+    bool shouldCreateWithMips,
+    bool isProtected) {
     return SkSurfaces::RenderTarget(
             context,
             budgeted,
@@ -383,7 +387,8 @@ extern "C" SkSurface* C_SkSurfaces_RenderTarget(
             sampleCount,
             surfaceOrigin,
             surfaceProps,
-            shouldCreateWithMips).release();
+            shouldCreateWithMips, 
+            isProtected).release();
 }
 
 extern "C" SkSurface* C_SkSurfaces_WrapBackendTexture(

@@ -31,7 +31,7 @@ pub mod backend_textures {
     };
 
     #[allow(clippy::missing_safety_doc)]
-    pub unsafe fn new_gl(
+    pub unsafe fn make_gl(
         (width, height): (i32, i32),
         mipmapped: Mipmapped,
         gl_info: gl::TextureInfo,

@@ -367,6 +367,7 @@ impl Surface {
             surface_origin,
             surface_props,
             should_create_with_mips,
+            None,
         )
     }
 
