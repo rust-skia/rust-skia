@@ -14,5 +14,3 @@ pub struct DateTime {
 }
 
 native_transmutable!(SkTime_DateTime, DateTime, date_time_layout);
-
-// TODO: may wrap SkAutoTime?

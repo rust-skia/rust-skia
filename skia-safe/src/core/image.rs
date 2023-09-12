@@ -22,8 +22,8 @@ pub mod images {
     #[allow(unused)] // doc only
     use crate::ColorType;
     use crate::{
-        prelude::*, AlphaType, Bitmap, ColorSpace, Data, ISize, Image, ImageGenerator, ImageInfo,
-        Matrix, Paint, Picture, SurfaceProps, TextureCompressionType,
+        prelude::*, AlphaType, Bitmap, ColorSpace, Data, IPoint, IRect, ISize, Image, ImageFilter,
+        ImageGenerator, ImageInfo, Matrix, Paint, Picture, SurfaceProps, TextureCompressionType,
     };
 
     /// Creates a CPU-backed [`Image`] from `bitmap`, sharing or copying `bitmap` pixels. If the bitmap
@@ -185,6 +185,49 @@ pub mod images {
         Image::from_ptr(unsafe {
             sb::C_SkImages_RasterFromData(info.native(), pixels.into().into_ptr(), row_bytes)
         })
+    }
+
+    /// Creates a filtered [`Image`] on the CPU. filter processes the src image, potentially
+    /// changing the color, position, and size. subset is the bounds of src that are processed by
+    /// filter. `clip_bounds` is the expected bounds of the filtered [`Image`]. `out_subset` is
+    /// required storage for the actual bounds of the filtered [`Image`]. `offset` is required
+    /// storage for translation of returned [`Image`].
+    ///
+    /// Returns `None` a filtered result could not be created.
+    ///
+    /// Useful for animation of [`ImageFilter`] that varies size from frame to frame. `out_subset`
+    /// describes the valid bounds of returned image. offset translates the returned [`Image`] to
+    /// keep subsequent animation frames aligned with respect to each other.
+    ///
+    /// * `src` - the image to be filtered
+    /// * `filter` - the image filter to be applied
+    /// * `subset` - bounds of [`Image`] processed by filter
+    /// * `clip_bounds` - expected bounds of filtered [`Image`]
+    /// Returns filtered SkImage, or `None`:
+    /// * `out_subset` - storage for returned [`Image`] bounds
+    /// * `offset` - storage for returned [`Image`] translation Returns: filtered [`Image`], or
+    /// `None`
+    pub fn make_with_filter(
+        image: impl Into<Image>,
+        image_filter: &ImageFilter,
+        subset: impl AsRef<IRect>,
+        clip_bounds: impl AsRef<IRect>,
+    ) -> Option<(Image, IRect, IPoint)> {
+        let mut out_subset = IRect::default();
+        let mut offset = IPoint::default();
+
+        unsafe {
+            Image::from_ptr(sb::C_SkImages_MakeWithFilter(
+                image.into().into_ptr(),
+                image_filter.native(),
+                subset.as_ref().native(),
+                clip_bounds.as_ref().native(),
+                out_subset.native_mut(),
+                offset.native_mut(),
+            ))
+        }
+        .map(|i| (i, out_subset, offset));
+        None
     }
 }
 
@@ -1453,6 +1496,7 @@ impl Image {
     /// - `out_subset`    storage for returned [`Image`] bounds
     /// - `offset`       storage for returned [`Image`] translation
     /// Returns: filtered [`Image`], or `None`
+    #[deprecated(since = "0.0.0", note = "use images::make_with_filter()")]
     pub fn new_with_filter(
         &self,
         mut context: Option<&mut gpu::RecordingContext>,

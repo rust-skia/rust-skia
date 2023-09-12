@@ -420,6 +420,9 @@ extern "C" SkImage* C_SkImages_RasterFromData(const SkImageInfo* info, SkData* p
     return SkImages::RasterFromData(*info, sp(pixels), rowBytes).release();
 }
 
+extern "C" SkImage* C_SkImages_MakeWithFilter(SkImage* image, const SkImageFilter* imageFilter, const SkIRect* subset, const SkIRect* clipBounds, SkIRect* outSubset, SkIPoint* offset) {
+    return SkImages::MakeWithFilter(sk_sp(image), imageFilter, *subset, *clipBounds, outSubset, offset).release();
+}
 
 extern "C" SkShader* C_SkImage_makeShader(
     const SkImage* self,
