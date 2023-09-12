@@ -2,7 +2,7 @@ pub mod pdf {
     use crate::{
         interop::{AsStr, DynamicMemoryWStream, SetStr},
         prelude::*,
-        scalar, DateTime, Document,
+        scalar, Document,
     };
     use skia_bindings::{
         self as sb, SkPDF_AttributeList, SkPDF_Metadata, SkPDF_StructureElementNode,
@@ -203,6 +203,8 @@ pub mod pdf {
             self.native().fLang.as_str()
         }
     }
+
+    pub use crate::DateTime;
 
     #[derive(Default, Debug)]
     pub struct Metadata {

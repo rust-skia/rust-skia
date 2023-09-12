@@ -214,6 +214,10 @@ pub fn drop_shadow_only(
     })
 }
 
+pub fn empty() -> ImageFilter {
+    ImageFilter::from_ptr(unsafe { sb::C_SkImageFilters_Empty() }).unwrap()
+}
+
 pub fn image<'a>(
     image: impl Into<Image>,
     src_rect: impl Into<Option<&'a Rect>>,

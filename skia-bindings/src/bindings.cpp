@@ -2667,6 +2667,10 @@ SkImageFilter *C_SkImageFilters_DropShadowOnly(SkScalar dx, SkScalar dy,
     return SkImageFilters::DropShadowOnly(dx, dy, sigmaX, sigmaY, color, sp(input), *cropRect).release();
 }
 
+SkImageFilter* C_SkImageFilters_Empty() {
+    return SkImageFilters::Empty().release();
+}
+
 SkImageFilter *C_SkImageFilters_Image(
     SkImage *image, const SkRect *srcRect,
     const SkRect *dstRect, const SkSamplingOptions *sampling)
