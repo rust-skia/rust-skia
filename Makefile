@@ -53,7 +53,7 @@ publish-only: publish-bindings publish-safe
 
 .PHONY: publish-bindings
 publish-bindings:
-	cd skia-bindings && cargo publish -vv --no-verify --allow-dirty
+	cd skia-bindings && cargo publish -vv --no-verify
 
 .PHONY: publish-bindings-docs
 publish-bindings-docs: bindings-docs
