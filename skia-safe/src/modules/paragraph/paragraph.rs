@@ -13,7 +13,8 @@ use crate::{
 };
 
 pub type Paragraph = RefHandle<sb::skia_textlayout_Paragraph>;
-unsafe_send_sync!(Paragraph);
+// <https://github.com/rust-skia/rust-skia/issues/537>
+// unsafe_send_sync!(Paragraph);
 
 impl NativeDrop for sb::skia_textlayout_Paragraph {
     fn drop(&mut self) {
