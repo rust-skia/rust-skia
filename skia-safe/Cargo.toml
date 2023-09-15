@@ -12,7 +12,7 @@ keywords = ["skia", "rust-bindings", "vulkan", "opengl", "pdf"]
 categories = ["api-bindings", "graphics", "multimedia::images", "rendering::graphics-api", "visualization"] 
 license = "MIT"
 
-version = "0.66.2"
+version = "0.67.0"
 authors = ["Armin Sander <armin@replicator.org>"]
 edition = "2021"
 
