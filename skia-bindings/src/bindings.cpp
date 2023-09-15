@@ -1912,6 +1912,10 @@ extern "C" SkData *C_SkImageGenerator_refEncodedData(SkImageGenerator *self) {
     return self->refEncodedData().release();
 }
 
+extern "C" bool C_SkImageGenerator_isProtected(const SkImageGenerator* self) {
+    return self->isProtected();
+}
+
 extern "C" bool C_SkImageGenerator_isTextureGenerator(const SkImageGenerator *self) {
     return self->isTextureGenerator();
 }

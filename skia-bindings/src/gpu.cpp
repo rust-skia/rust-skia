@@ -35,10 +35,6 @@ extern "C" bool C_SkImageGenerator_isValid(const SkImageGenerator* self, GrRecor
     return self->isValid(context);
 }
 
-extern "C" bool C_SkImageGenerator_isProtected(const SkImageGenerator* self) {
-    return self->isProtected();
-}
-
 //
 // gpu/GrBackendSurface.h
 //
