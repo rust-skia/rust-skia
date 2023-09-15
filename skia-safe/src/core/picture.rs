@@ -37,7 +37,7 @@ impl Picture {
 
     // TODO: AbortCallback and the function that use it.
 
-    pub fn playback(&self, canvas: &mut Canvas) {
+    pub fn playback(&self, canvas: &Canvas) {
         unsafe { sb::C_SkPicture_playback(self.native(), canvas.native_mut()) }
     }
 

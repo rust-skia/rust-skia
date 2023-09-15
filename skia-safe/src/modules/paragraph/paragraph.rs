@@ -75,7 +75,7 @@ impl Paragraph {
         unsafe { sb::C_Paragraph_layout(self.native_mut(), width) }
     }
 
-    pub fn paint(&self, canvas: &mut Canvas, p: impl Into<Point>) {
+    pub fn paint(&self, canvas: &Canvas, p: impl Into<Point>) {
         let p = p.into();
         unsafe { sb::C_Paragraph_paint(self.native_mut_force(), canvas.native_mut(), p.x, p.y) }
     }

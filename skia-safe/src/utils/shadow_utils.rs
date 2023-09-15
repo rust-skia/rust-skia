@@ -14,7 +14,7 @@ bitflags! {
 
 #[allow(clippy::too_many_arguments)]
 pub fn draw_shadow(
-    canvas: &mut Canvas,
+    canvas: &Canvas,
     path: &Path,
     z_plane_params: impl Into<Point3>,
     light_pos: impl Into<Point3>,

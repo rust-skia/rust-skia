@@ -7,7 +7,7 @@ pub mod annotate {
         SkAnnotateLinkToDestination, SkAnnotateNamedDestination, SkAnnotateRectWithURL,
     };
 
-    pub fn rect_with_url(canvas: &mut Canvas, rect: impl AsRef<Rect>, data: &Data) {
+    pub fn rect_with_url(canvas: &Canvas, rect: impl AsRef<Rect>, data: &Data) {
         unsafe {
             SkAnnotateRectWithURL(
                 canvas.native_mut(),
@@ -17,7 +17,7 @@ pub mod annotate {
         }
     }
 
-    pub fn named_destination(canvas: &mut Canvas, point: impl Into<Point>, data: &Data) {
+    pub fn named_destination(canvas: &Canvas, point: impl Into<Point>, data: &Data) {
         unsafe {
             SkAnnotateNamedDestination(
                 canvas.native_mut(),
@@ -27,7 +27,7 @@ pub mod annotate {
         }
     }
 
-    pub fn link_to_destination(canvas: &mut Canvas, rect: impl AsRef<Rect>, data: &Data) {
+    pub fn link_to_destination(canvas: &Canvas, rect: impl AsRef<Rect>, data: &Data) {
         unsafe {
             SkAnnotateLinkToDestination(
                 canvas.native_mut(),

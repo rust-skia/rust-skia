@@ -18,7 +18,7 @@ impl DrawingDriver for Cpu {
         (width, height): (i32, i32),
         path: &Path,
         name: &str,
-        func: impl Fn(&mut Canvas),
+        func: impl Fn(&Canvas),
     ) {
         let mut surface = surfaces::raster_n32_premul((width * 2, height * 2)).unwrap();
         artifact::draw_image_on_surface(&mut surface, path, name, func);

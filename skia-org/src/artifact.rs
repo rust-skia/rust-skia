@@ -5,7 +5,7 @@ pub fn draw_image_on_surface(
     surface: &mut Surface,
     path: &Path,
     name: &str,
-    func: impl Fn(&mut Canvas),
+    func: impl Fn(&Canvas),
 ) {
     let canvas = surface.canvas();
 

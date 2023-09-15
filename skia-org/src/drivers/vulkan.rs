@@ -58,7 +58,7 @@ impl DrawingDriver for Vulkan {
         (width, height): (i32, i32),
         path: &Path,
         name: &str,
-        func: impl Fn(&mut Canvas),
+        func: impl Fn(&Canvas),
     ) {
         let image_info = ImageInfo::new_n32_premul((width * 2, height * 2), None);
         let mut surface = gpu::surfaces::render_target(

@@ -12,7 +12,7 @@ pub fn draw(driver: &mut impl DrawingDriver, path: &path::Path) {
 const RTL_TEXT: &str = "العربية";
 const TEXT_POS: Point = Point::new(0.0, 64.0);
 
-fn draw_rtl_shaped(canvas: &mut Canvas) {
+fn draw_rtl_shaped(canvas: &Canvas) {
     let mut paint = Paint::default();
     paint.set_anti_alias(true);
 
@@ -26,7 +26,7 @@ fn draw_rtl_shaped(canvas: &mut Canvas) {
     }
 }
 
-fn draw_rtl_unshaped(canvas: &mut Canvas) {
+fn draw_rtl_unshaped(canvas: &Canvas) {
     let mut paint = Paint::default();
     paint.set_anti_alias(true);
 

@@ -50,7 +50,7 @@ pub fn draw(driver: &mut impl DrawingDriver, path: &path::Path) {
     driver.draw_image_256(path, "22-sum-path-effect", draw_sum_path_effect);
 }
 
-fn draw_three_paints(canvas: &mut Canvas) {
+fn draw_three_paints(canvas: &Canvas) {
     let (paint1, paint2, paint3) = (
         &mut Paint::default(),
         &mut Paint::default(),
@@ -90,7 +90,7 @@ fn draw_three_paints(canvas: &mut Canvas) {
         .draw_text_blob(&blob2, (20.0, 224.0), paint3);
 }
 
-fn draw_fill_and_stroke(canvas: &mut Canvas) {
+fn draw_fill_and_stroke(canvas: &Canvas) {
     let fill_paint = &mut Paint::default();
     let stroke_paint = &mut Paint::default();
     stroke_paint
@@ -113,7 +113,7 @@ fn draw_fill_and_stroke(canvas: &mut Canvas) {
     canvas.draw_text_blob(&blob, (20, 220), fill_paint);
 }
 
-fn draw_gradient(canvas: &mut Canvas) {
+fn draw_gradient(canvas: &Canvas) {
     let points: (Point, Point) = ((0.0, 0.0).into(), (256.0, 256.0).into());
     let colors = [Color::BLUE, Color::YELLOW];
     let paint = &mut Paint::default();
@@ -129,8 +129,8 @@ fn draw_gradient(canvas: &mut Canvas) {
     canvas.draw_paint(paint);
 }
 
-fn draw_transfer_modes(canvas: &mut Canvas) {
-    fn draw_str(c: &mut Canvas, text: &str, x: scalar, y: scalar, font: &Font, paint: &Paint) {
+fn draw_transfer_modes(canvas: &Canvas) {
+    fn draw_str(c: &Canvas, text: &str, x: scalar, y: scalar, font: &Font, paint: &Paint) {
         c.draw_text_blob(TextBlob::from_str(text, font).unwrap(), (x, y), paint);
     }
 
@@ -213,7 +213,7 @@ fn draw_transfer_modes(canvas: &mut Canvas) {
     }
 }
 
-fn draw_bitmap_shader(canvas: &mut Canvas) {
+fn draw_bitmap_shader(canvas: &Canvas) {
     let image = resources::color_wheel();
 
     canvas.clear(Color::WHITE);
@@ -228,7 +228,7 @@ fn draw_bitmap_shader(canvas: &mut Canvas) {
     canvas.draw_paint(paint);
 }
 
-fn draw_radial_gradient_shader(canvas: &mut Canvas) {
+fn draw_radial_gradient_shader(canvas: &Canvas) {
     let colors = [Color::BLUE, Color::YELLOW];
     let mut paint = Paint::default();
     paint.set_shader(gradient_shader::radial(
@@ -243,7 +243,7 @@ fn draw_radial_gradient_shader(canvas: &mut Canvas) {
     canvas.draw_paint(&paint);
 }
 
-fn draw_two_point_conical_shader(canvas: &mut Canvas) {
+fn draw_two_point_conical_shader(canvas: &Canvas) {
     let colors = [Color::BLUE, Color::YELLOW];
     let paint = &mut Paint::default();
     paint.set_shader(gradient_shader::two_point_conical(
@@ -260,7 +260,7 @@ fn draw_two_point_conical_shader(canvas: &mut Canvas) {
     canvas.draw_paint(paint);
 }
 
-fn draw_sweep_gradient_shader(canvas: &mut Canvas) {
+fn draw_sweep_gradient_shader(canvas: &Canvas) {
     let colors = [Color::CYAN, Color::MAGENTA, Color::YELLOW, Color::CYAN];
     let paint = &mut Paint::default();
     paint.set_shader(gradient_shader::sweep(
@@ -275,21 +275,21 @@ fn draw_sweep_gradient_shader(canvas: &mut Canvas) {
     canvas.draw_paint(paint);
 }
 
-fn draw_fractal_perlin_noise_shader(canvas: &mut Canvas) {
+fn draw_fractal_perlin_noise_shader(canvas: &Canvas) {
     canvas.clear(Color::WHITE);
     let paint = &mut Paint::default();
     paint.set_shader(shaders::fractal_noise((0.05, 0.05), 4, 0.0, None));
     canvas.draw_paint(paint);
 }
 
-fn draw_turbulence_perlin_noise_shader(canvas: &mut Canvas) {
+fn draw_turbulence_perlin_noise_shader(canvas: &Canvas) {
     canvas.clear(Color::WHITE);
     let paint = &mut Paint::default();
     paint.set_shader(shaders::turbulence((0.05, 0.05), 4, 0.0, None));
     canvas.draw_paint(paint);
 }
 
-fn draw_compose_shader(canvas: &mut Canvas) {
+fn draw_compose_shader(canvas: &Canvas) {
     let colors = [Color::BLUE, Color::YELLOW];
     let paint = &mut Paint::default();
     paint.set_shader(shaders::blend(
@@ -309,7 +309,7 @@ fn draw_compose_shader(canvas: &mut Canvas) {
     canvas.draw_paint(paint);
 }
 
-fn draw_mask_filter(canvas: &mut Canvas) {
+fn draw_mask_filter(canvas: &Canvas) {
     // TODO: make BlendMode optional in draw_color.
     canvas.draw_color(
         Color::from_argb(0xFF, 0xFF, 0xFF, 0xFF),
@@ -322,8 +322,8 @@ fn draw_mask_filter(canvas: &mut Canvas) {
     canvas.draw_text_blob(blob, (0, 160), paint);
 }
 
-fn draw_color_filter(c: &mut Canvas) {
-    fn f(c: &mut Canvas, (x, y): (scalar, scalar), color_matrix: &[scalar; 20]) {
+fn draw_color_filter(c: &Canvas) {
+    fn f(c: &Canvas, (x, y): (scalar, scalar), color_matrix: &[scalar; 20]) {
         let paint = &mut Paint::default();
         paint.set_color_filter(color_filters::matrix_row_major(color_matrix));
 
@@ -346,7 +346,7 @@ fn draw_color_filter(c: &mut Canvas) {
     f(c, (512.0, 0.0), &grayscale);
 }
 
-fn draw_color_table_color_filter(canvas: &mut Canvas) {
+fn draw_color_table_color_filter(canvas: &Canvas) {
     let image = resources::mandrill();
 
     canvas.scale((0.5, 0.5));
@@ -361,7 +361,7 @@ fn draw_color_table_color_filter(canvas: &mut Canvas) {
     canvas.draw_image(&image, (0, 0), Some(&paint));
 }
 
-fn draw_path_2d_effect(canvas: &mut Canvas) {
+fn draw_path_2d_effect(canvas: &Canvas) {
     let scale = 10.0;
     let path = &mut Path::default();
     let pts: [i8; 28] = [
@@ -385,7 +385,7 @@ fn draw_path_2d_effect(canvas: &mut Canvas) {
     canvas.draw_rect(bounds, paint);
 }
 
-fn draw_line_2d_effect(canvas: &mut Canvas) {
+fn draw_line_2d_effect(canvas: &Canvas) {
     let paint = &mut Paint::default();
     let lattice = &mut Matrix::default();
     lattice.set_scale((8.0, 8.0), None).pre_rotate(30.0, None);
@@ -397,7 +397,7 @@ fn draw_line_2d_effect(canvas: &mut Canvas) {
     canvas.draw_rect(bounds, paint);
 }
 
-fn draw_path_1d_effect(canvas: &mut Canvas) {
+fn draw_path_1d_effect(canvas: &Canvas) {
     let paint = &mut Paint::default();
     let path = &mut Path::default();
     path.add_oval(Rect::from_size((16.0, 6.0)), None);
@@ -427,7 +427,7 @@ fn star() -> Path {
     path
 }
 
-fn draw_corner_path_effect(canvas: &mut Canvas) {
+fn draw_corner_path_effect(canvas: &Canvas) {
     let paint = &mut Paint::default();
     paint
         .set_path_effect(corner_path_effect::new(32.0))
@@ -437,7 +437,7 @@ fn draw_corner_path_effect(canvas: &mut Canvas) {
     canvas.draw_path(&star(), paint);
 }
 
-fn draw_dash_path_effect(canvas: &mut Canvas) {
+fn draw_dash_path_effect(canvas: &Canvas) {
     const INTERVALS: [scalar; 4] = [10.0, 5.0, 2.0, 5.0];
     let paint = &mut Paint::default();
     paint
@@ -449,7 +449,7 @@ fn draw_dash_path_effect(canvas: &mut Canvas) {
     canvas.draw_path(&star(), paint);
 }
 
-fn draw_discrete_path_effect(canvas: &mut Canvas) {
+fn draw_discrete_path_effect(canvas: &Canvas) {
     let paint = &mut Paint::default();
     paint
         .set_path_effect(discrete_path_effect::new(10.0, 4.0, None))
@@ -460,7 +460,7 @@ fn draw_discrete_path_effect(canvas: &mut Canvas) {
     canvas.draw_path(&star(), paint);
 }
 
-fn draw_compose_path_effect(canvas: &mut Canvas) {
+fn draw_compose_path_effect(canvas: &Canvas) {
     const INTERVALS: [scalar; 4] = [10.0, 5.0, 2.0, 5.0];
     let paint = &mut Paint::default();
     paint
@@ -475,7 +475,7 @@ fn draw_compose_path_effect(canvas: &mut Canvas) {
     canvas.draw_path(&star(), paint);
 }
 
-fn draw_sum_path_effect(canvas: &mut Canvas) {
+fn draw_sum_path_effect(canvas: &Canvas) {
     let paint = &mut Paint::default();
     paint
         .set_path_effect(PathEffect::sum(

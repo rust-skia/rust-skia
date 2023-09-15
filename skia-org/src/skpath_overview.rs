@@ -12,7 +12,7 @@ pub fn draw(driver: &mut impl DrawingDriver, path: &path::Path) {
     driver.draw_image_256(&path, "example5", draw_example5);
 }
 
-fn draw_example1(canvas: &mut Canvas) {
+fn draw_example1(canvas: &Canvas) {
     let mut paint = Paint::default();
     paint.set_anti_alias(true);
     let mut path = Path::default();
@@ -29,7 +29,7 @@ fn draw_example1(canvas: &mut Canvas) {
     canvas.draw_path(&path, &paint);
 }
 
-fn draw_example2(canvas: &mut Canvas) {
+fn draw_example2(canvas: &Canvas) {
     let mut paint = Paint::default();
     paint.set_anti_alias(true);
     let mut path = Path::default();
@@ -47,7 +47,7 @@ fn draw_example2(canvas: &mut Canvas) {
     canvas.draw_path(&path, &paint);
 }
 
-fn draw_example3(canvas: &mut Canvas) {
+fn draw_example3(canvas: &Canvas) {
     let mut paint = Paint::default();
     paint.set_anti_alias(true);
     canvas
@@ -65,7 +65,7 @@ fn draw_example3(canvas: &mut Canvas) {
     canvas.draw_path(&path, &paint);
 }
 
-fn draw_example4(canvas: &mut Canvas) {
+fn draw_example4(canvas: &Canvas) {
     let mut paint = Paint::default();
     paint
         .set_anti_alias(true)
@@ -79,7 +79,7 @@ fn draw_example4(canvas: &mut Canvas) {
     canvas.draw_path(&path, &paint);
 }
 
-fn draw_example5(canvas: &mut Canvas) {
+fn draw_example5(canvas: &Canvas) {
     let mut paint = Paint::default();
     paint
         .set_anti_alias(true)

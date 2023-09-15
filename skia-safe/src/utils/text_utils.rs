@@ -6,7 +6,7 @@ pub use skia_bindings::SkTextUtils_Align as Align;
 variant_name!(Align::Center);
 
 pub fn draw_str(
-    canvas: &mut Canvas,
+    canvas: &Canvas,
     text: impl AsRef<str>,
     p: impl Into<Point>,
     font: &Font,
