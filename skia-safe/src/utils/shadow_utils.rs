@@ -13,7 +13,7 @@ bitflags! {
         #[allow(clippy::unnecessary_cast)]
         const CONCAVE_BLUR_ONLY = sb::SkShadowFlags_kConcaveBlurOnly_ShadowFlag as u32;
         const ALL = Self::TRANSPARENT_OCCLUDER.bits() | Self::GEOMETRIC_ONLY.bits()
-            | Self::GEOMETRIC_ONLY.bits() | Self::CONCAVE_BLUR_ONLY.bits();
+            | Self::DIRECTIONAL_LIGHT.bits() | Self::CONCAVE_BLUR_ONLY.bits();
     }
 }
 
