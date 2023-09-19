@@ -63,7 +63,7 @@ lazy_static = { version = "1.4.0", optional = true }
 
 [build-dependencies]
 cc = "1.0.37"
-bindgen = "0.61.0"
+bindgen = "0.68.1"
 
 # For enum variant name replacements.
 regex = "1.4.5"
