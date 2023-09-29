@@ -67,7 +67,7 @@ impl BackendFormat {
     }
 
     #[cfg(feature = "vulkan")]
-    #[deprecated(since = "0.0.0", note = "use gpu::backend_formats::make_vk()")]
+    #[deprecated(since = "0.67.0", note = "use gpu::backend_formats::make_vk()")]
     pub fn new_vulkan(
         format: vk::Format,
         will_use_drm_format_modifiers: impl Into<Option<bool>>,
@@ -76,7 +76,7 @@ impl BackendFormat {
     }
 
     #[cfg(feature = "vulkan")]
-    #[deprecated(since = "0.0.0", note = "use gpu::backend_formats::make_vk_ycbcr()")]
+    #[deprecated(since = "0.67.0", note = "use gpu::backend_formats::make_vk_ycbcr()")]
     pub fn new_vulkan_ycbcr(
         conversion_info: &vk::YcbcrConversionInfo,
         will_use_drm_format_modifiers: impl Into<Option<bool>>,
@@ -211,7 +211,7 @@ impl BackendTexture {
 
     #[cfg(feature = "gl")]
     #[allow(clippy::missing_safety_doc)]
-    #[deprecated(since = "0.0.0", note = "use gpu::backend_textures::make_gl()")]
+    #[deprecated(since = "0.67.0", note = "use gpu::backend_textures::make_gl()")]
     pub unsafe fn new_gl(
         (width, height): (i32, i32),
         mipmapped: super::Mipmapped,
@@ -222,7 +222,7 @@ impl BackendTexture {
 
     #[cfg(feature = "gl")]
     #[allow(clippy::missing_safety_doc)]
-    #[deprecated(since = "0.0.0", note = "use gpu::backend_textures::make_gl()")]
+    #[deprecated(since = "0.67.0", note = "use gpu::backend_textures::make_gl()")]
     pub unsafe fn new_gl_with_label(
         (width, height): (i32, i32),
         mipmapped: super::Mipmapped,
@@ -234,14 +234,14 @@ impl BackendTexture {
 
     #[cfg(feature = "vulkan")]
     #[allow(clippy::missing_safety_doc)]
-    #[deprecated(since = "0.0.0", note = "use gpu::backend_textures::make_vk()")]
+    #[deprecated(since = "0.67.0", note = "use gpu::backend_textures::make_vk()")]
     pub unsafe fn new_vulkan((width, height): (i32, i32), vk_info: &vk::ImageInfo) -> Self {
         super::backend_textures::make_vk((width, height), vk_info, "")
     }
 
     #[cfg(feature = "vulkan")]
     #[allow(clippy::missing_safety_doc)]
-    #[deprecated(since = "0.0.0", note = "use gpu::backend_textures::make_vk()")]
+    #[deprecated(since = "0.67.0", note = "use gpu::backend_textures::make_vk()")]
     pub unsafe fn new_vulkan_with_label(
         (width, height): (i32, i32),
         vk_info: &vk::ImageInfo,
@@ -470,7 +470,7 @@ impl fmt::Debug for BackendRenderTarget {
 
 impl BackendRenderTarget {
     #[cfg(feature = "gl")]
-    #[deprecated(since = "0.0.0", note = "use gpu::backend_render_targets::make_gl()")]
+    #[deprecated(since = "0.67.0", note = "use gpu::backend_render_targets::make_gl()")]
     pub fn new_gl(
         (width, height): (i32, i32),
         sample_count: impl Into<Option<usize>>,
@@ -481,7 +481,7 @@ impl BackendRenderTarget {
     }
 
     #[cfg(feature = "vulkan")]
-    #[deprecated(since = "0.0.0", note = "use gpu::backend_render_targets::make_vk()")]
+    #[deprecated(since = "0.67.0", note = "use gpu::backend_render_targets::make_vk()")]
     pub fn new_vulkan((width, height): (i32, i32), info: &vk::ImageInfo) -> Self {
         super::backend_render_targets::make_vk((width, height), info)
     }

@@ -1496,7 +1496,7 @@ impl Image {
     /// - `out_subset`    storage for returned [`Image`] bounds
     /// - `offset`       storage for returned [`Image`] translation
     /// Returns: filtered [`Image`], or `None`
-    #[deprecated(since = "0.0.0", note = "use images::make_with_filter()")]
+    #[deprecated(since = "0.67.0", note = "use images::make_with_filter()")]
     pub fn new_with_filter(
         &self,
         mut context: Option<&mut gpu::RecordingContext>,
