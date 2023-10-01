@@ -40,6 +40,10 @@ impl ImageGenerator {
         unsafe { sb::C_SkImageGenerator_isValid(self.native(), context.native_ptr_or_null_mut()) }
     }
 
+    pub fn is_protected(self) -> bool {
+        unsafe { sb::C_SkImageGenerator_isProtected(self.native()) }
+    }
+
     #[must_use]
     pub fn get_pixels(&mut self, info: &ImageInfo, pixels: &mut [u8], row_bytes: usize) -> bool {
         assert!(info.valid_pixels(row_bytes, pixels));

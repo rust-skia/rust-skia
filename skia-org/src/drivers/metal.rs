@@ -64,6 +64,7 @@ impl DrawingDriver for Metal {
             gpu::SurfaceOrigin::TopLeft,
             None,
             false,
+            None,
         )
         .unwrap();
 

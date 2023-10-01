@@ -420,6 +420,9 @@ extern "C" SkImage* C_SkImages_RasterFromData(const SkImageInfo* info, SkData* p
     return SkImages::RasterFromData(*info, sp(pixels), rowBytes).release();
 }
 
+extern "C" SkImage* C_SkImages_MakeWithFilter(SkImage* image, const SkImageFilter* imageFilter, const SkIRect* subset, const SkIRect* clipBounds, SkIRect* outSubset, SkIPoint* offset) {
+    return SkImages::MakeWithFilter(sk_sp(image), imageFilter, *subset, *clipBounds, outSubset, offset).release();
+}
 
 extern "C" SkShader* C_SkImage_makeShader(
     const SkImage* self,
@@ -1909,6 +1912,10 @@ extern "C" SkData *C_SkImageGenerator_refEncodedData(SkImageGenerator *self) {
     return self->refEncodedData().release();
 }
 
+extern "C" bool C_SkImageGenerator_isProtected(const SkImageGenerator* self) {
+    return self->isProtected();
+}
+
 extern "C" bool C_SkImageGenerator_isTextureGenerator(const SkImageGenerator *self) {
     return self->isTextureGenerator();
 }
@@ -2662,6 +2669,10 @@ SkImageFilter *C_SkImageFilters_DropShadowOnly(SkScalar dx, SkScalar dy,
                                                SkColor color, SkImageFilter *input,
                                                const SkImageFilters::CropRect *cropRect) {
     return SkImageFilters::DropShadowOnly(dx, dy, sigmaX, sigmaY, color, sp(input), *cropRect).release();
+}
+
+SkImageFilter* C_SkImageFilters_Empty() {
+    return SkImageFilters::Empty().release();
 }
 
 SkImageFilter *C_SkImageFilters_Image(

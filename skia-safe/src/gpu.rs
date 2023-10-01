@@ -1,6 +1,5 @@
 mod backend_drawable_info;
 mod backend_surface;
-mod backend_surface_mutable_state;
 pub mod context_options;
 #[cfg(feature = "d3d")]
 pub mod d3d;
@@ -21,7 +20,6 @@ mod yuva_backend_textures;
 
 pub use backend_drawable_info::*;
 pub use backend_surface::*;
-pub use backend_surface_mutable_state::*;
 pub use context_options::ContextOptions;
 pub use direct_context::*;
 pub use driver_bug_workarounds::DriverBugWorkarounds;
@@ -41,14 +39,32 @@ pub mod surfaces {
     pub use super::ganesh::surface_ganesh::*;
 }
 
-#[cfg(feature = "gl")]
-pub use ganesh::gl::backend_formats;
+pub mod backend_formats {
+    use super::ganesh;
 
-#[cfg(feature = "gl")]
-pub use ganesh::gl::backend_textures;
+    #[cfg(feature = "gl")]
+    pub use ganesh::gl::backend_formats::*;
+    #[cfg(feature = "vulkan")]
+    pub use ganesh::vk::backend_formats::*;
+}
 
-#[cfg(feature = "gl")]
-pub use ganesh::gl::backend_render_targets;
+pub mod backend_textures {
+    use super::ganesh;
+
+    #[cfg(feature = "gl")]
+    pub use ganesh::gl::backend_textures::*;
+    #[cfg(feature = "vulkan")]
+    pub use ganesh::vk::backend_textures::*;
+}
+
+pub mod backend_render_targets {
+    use super::ganesh;
+
+    #[cfg(feature = "gl")]
+    pub use ganesh::gl::backend_render_targets::*;
+    #[cfg(feature = "vulkan")]
+    pub use ganesh::vk::backend_render_targets::*;
+}
 
 #[cfg(test)]
 mod tests {

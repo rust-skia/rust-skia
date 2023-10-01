@@ -2,7 +2,7 @@ use skia_bindings as sb;
 use std::ptr;
 
 pub use skia_bindings::GrBackendApi as BackendAPI;
-variant_name!(BackendAPI::Dawn);
+variant_name!(BackendAPI::OpenGL);
 
 #[deprecated(since = "0.35.0", note = "Use Mipmapped (with a lowercase 'm')")]
 pub use skia_bindings::GrMipmapped as MipMapped;

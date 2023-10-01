@@ -2,8 +2,8 @@
 
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/GrBackendDrawableInfo.h"
-#include "include/gpu/GrBackendSurfaceMutableState.h"
 #include "include/gpu/GrYUVABackendTextures.h"
+#include "include/gpu/MutableTextureState.h"
 #include "include/gpu/ganesh/SkImageGanesh.h"
 #include "include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "include/core/SkCanvas.h"
@@ -12,6 +12,8 @@
 #include "include/core/SkPicture.h"
 #include "include/core/SkSurface.h"
 #include "include/core/SkImageGenerator.h"
+
+extern "C" void C_GpuUnreferencedTypes(skgpu::Origin *) {}
 
 //
 // core/SkSurface.h
@@ -89,18 +91,6 @@ extern "C" bool C_GrBackendFormat_Equals(const GrBackendFormat* lhs, const GrBac
 
 extern "C" void C_GrBackendFormat_makeTexture2D(const GrBackendFormat* self, GrBackendFormat* format) {
     *format = self->makeTexture2D();
-}
-
-//
-// gpu/GrBackendSurfaceMutableState.h
-//
-
-extern "C" void C_GrBackendSurfaceMutableState_Construct(GrBackendSurfaceMutableState* uninitialized) {
-    new(uninitialized)GrBackendSurfaceMutableState();
-}
-
-extern "C" void C_GrBackendSurfaceMutableState_destruct(GrBackendSurfaceMutableState* self) {
-    self->~GrBackendSurfaceMutableState();
 }
 
 //
@@ -381,9 +371,11 @@ extern "C" SkSurface* C_SkSurfaces_RenderTarget(
     GrRecordingContext* context,
     skgpu::Budgeted budgeted,
     const SkImageInfo* imageInfo,
-    int sampleCount, GrSurfaceOrigin surfaceOrigin,
+    int sampleCount,
+    GrSurfaceOrigin surfaceOrigin,
     const SkSurfaceProps* surfaceProps,
-    bool shouldCreateWithMips) {
+    bool shouldCreateWithMips,
+    bool isProtected) {
     return SkSurfaces::RenderTarget(
             context,
             budgeted,
@@ -391,7 +383,8 @@ extern "C" SkSurface* C_SkSurfaces_RenderTarget(
             sampleCount,
             surfaceOrigin,
             surfaceProps,
-            shouldCreateWithMips).release();
+            shouldCreateWithMips, 
+            isProtected).release();
 }
 
 extern "C" SkSurface* C_SkSurfaces_WrapBackendTexture(

@@ -1,6 +1,6 @@
-doc-features-win="gl,vulkan,d3d,textlayout,webp"
-doc-features-mac="gl,vulkan,metal,textlayout,webp"
-doc-features-docs-rs="gl,textlayout,webp"
+doc-features-win="gl,vulkan,d3d,textlayout,svg,webp"
+doc-features-mac="gl,vulkan,metal,textlayout,svg,webp"
+doc-features-docs-rs="gl,textlayout,svg,webp"
 
 .PHONY: all
 all:
@@ -109,6 +109,10 @@ update-doc:
 	cd rust-skia.github.io && git commit -m"Auto-Update of /doc" || true
 	cd rust-skia.github.io && git push origin master	
 	rm -rf rust-skia.github.io
+
+.PHONY: doc
+doc:
+	cargo doc --no-deps --features ${doc-features-mac}
 
 build-flags-win=--release --features "gl,vulkan,d3d,textlayout,webp"
 

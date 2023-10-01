@@ -1,6 +1,6 @@
-use crate::{gpu, prelude::*, surface::BackendHandleAccess, ImageInfo, Surface, SurfaceProps};
-
 use skia_bindings as sb;
+
+use crate::{gpu, prelude::*, surface::BackendHandleAccess, ImageInfo, Surface, SurfaceProps};
 
 /// Returns [`Surface`] on GPU indicated by context. Allocates memory for pixels, based on the
 /// width, height, and [`crate::ColorType`] in [`ImageInfo`].  budgeted selects whether allocation
@@ -25,6 +25,7 @@ use skia_bindings as sb;
 ///                              `None`
 /// * `should_create_with_mips` - hint that [`Surface`] will host mip map images Returns:
 /// [`Surface`] if all parameters are valid; otherwise, `None`
+#[allow(clippy::too_many_arguments)]
 pub fn render_target(
     context: &mut gpu::RecordingContext,
     budgeted: gpu::Budgeted,
@@ -33,6 +34,7 @@ pub fn render_target(
     surface_origin: impl Into<Option<gpu::SurfaceOrigin>>,
     surface_props: Option<&SurfaceProps>,
     should_create_with_mips: impl Into<Option<bool>>,
+    is_protected: impl Into<Option<bool>>,
 ) -> Option<Surface> {
     Surface::from_ptr(unsafe {
         sb::C_SkSurfaces_RenderTarget(
@@ -44,7 +46,8 @@ pub fn render_target(
                 .into()
                 .unwrap_or(gpu::SurfaceOrigin::BottomLeft),
             surface_props.native_ptr_or_null(),
-            should_create_with_mips.into().unwrap_or_default(),
+            should_create_with_mips.into().unwrap_or(false),
+            is_protected.into().unwrap_or(false),
         )
     })
 }

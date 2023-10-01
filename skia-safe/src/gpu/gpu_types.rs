@@ -36,3 +36,6 @@ variant_name!(Protected::Yes);
 //       of From<bool> and Deref?
 pub use skia_bindings::GrRenderable as Renderable;
 variant_name!(Renderable::No);
+
+pub use skia_bindings::skgpu_Origin as Origin;
+variant_name!(Origin::TopLeft);

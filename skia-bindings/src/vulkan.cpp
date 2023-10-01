@@ -4,8 +4,9 @@
 
 #include "include/gpu/GrBackendDrawableInfo.h"
 #include "include/gpu/GrBackendSurface.h"
-#include "include/gpu/GrBackendSurfaceMutableState.h"
 #include "include/gpu/GrDirectContext.h"
+#include "include/gpu/MutableTextureState.h"
+#include "include/gpu/ganesh/vk/GrVkBackendSurface.h"
 #include "include/gpu/vk/GrVkTypes.h"
 #include "include/gpu/vk/GrVkBackendContext.h"
 #include "include/gpu/vk/GrVkExtensions.h"
@@ -29,8 +30,8 @@ extern "C" GrBackendTexture* C_GrBackendTexture_newVk(
     return new GrBackendTexture(width, height, *vkInfo, std::string_view(label, labelCount));
 }
 
-extern "C" void C_GrBackendRenderTarget_ConstructVk(GrBackendRenderTarget* uninitialized, int width, int height, int sampleCnt, const GrVkImageInfo* vkInfo) {
-    new(uninitialized)GrBackendRenderTarget(width, height, sampleCnt, *vkInfo);
+extern "C" void C_GrBackendRenderTargets_ConstructVk(GrBackendRenderTarget* uninitialized, int width, int height, const GrVkImageInfo* vkInfo) {
+    new (uninitialized) GrBackendRenderTarget(GrBackendRenderTargets::MakeVk(width, height, *vkInfo));
 }
 
 extern "C" bool C_GrBackendDrawableInfo_getVkDrawableInfo(const GrBackendDrawableInfo* self, GrVkDrawableInfo* info) {
@@ -110,14 +111,6 @@ extern "C" bool C_GrVkYcbcrConversionInfo_Equals(const GrVkYcbcrConversionInfo* 
 }
 
 //
-// gpu/GrBackendSurfaceMutableState.h
-//
-
-extern "C" void C_GrBackendSurfaceMutableState_ConstructVK(GrBackendSurfaceMutableState* uninitialized, VkImageLayout layout, uint32_t queueFamilyIndex) {
-    new(uninitialized)GrBackendSurfaceMutableState(layout, queueFamilyIndex);
-}
-
-//
 // gpu/MutableTextureState.h
 //
 
@@ -132,3 +125,16 @@ extern "C" VkImageLayout C_MutableTextureState_getVkImageLayout(const skgpu::Mut
 extern "C" uint32_t C_MutableTextureState_getQueueFamilyIndex(const skgpu::MutableTextureState* self) {
     return self->getQueueFamilyIndex();
 }
+
+//
+// gpu/ganesh/vk
+//
+
+extern "C" bool C_GrBackendFormats_AsVkFormat(const GrBackendFormat* format, VkFormat* vkFormat) {
+    return GrBackendFormats::AsVkFormat(*format, vkFormat);
+}
+
+extern "C" const GrVkYcbcrConversionInfo* C_GrBackendFormats_GetVkYcbcrConversionInfo(const GrBackendFormat* format) {
+    return GrBackendFormats::GetVkYcbcrConversionInfo(*format);
+}
+

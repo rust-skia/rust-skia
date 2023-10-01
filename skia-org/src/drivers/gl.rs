@@ -33,6 +33,7 @@ impl DrawingDriver for OpenGl {
             gpu::SurfaceOrigin::BottomLeft,
             None,
             false,
+            None,
         )
         .unwrap();
 

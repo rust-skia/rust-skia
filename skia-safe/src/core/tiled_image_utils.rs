@@ -41,7 +41,7 @@ pub fn draw_image(
     draw_image_rect(canvas, image, src, dst, sampling, paint, constraint)
 }
 
-pub const NUM_IMAGE_KEY_VALUES: usize = 5;
+pub const NUM_IMAGE_KEY_VALUES: usize = 6;
 
 pub fn get_image_key_values(image: &Image) -> [u32; NUM_IMAGE_KEY_VALUES] {
     let mut key_values = [0u32; NUM_IMAGE_KEY_VALUES];
