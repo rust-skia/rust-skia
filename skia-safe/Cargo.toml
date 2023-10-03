@@ -48,7 +48,7 @@ shaper = ["textlayout", "skia-bindings/shaper"]
 [dependencies]
 bitflags = "2.0"
 lazy_static = "1.4"
-skia-bindings = { version = "=0.66.3", path = "../skia-bindings", default-features = false }
+skia-bindings = { version = "=0.67.0", path = "../skia-bindings", default-features = false }
 
 # D3D types
 winapi = { version = "0.3.9", features = ["d3d12", "dxgi"], optional = true }
