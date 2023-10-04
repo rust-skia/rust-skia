@@ -86,9 +86,8 @@ pub mod backend_textures {
         unsafe {
             // constructor not available.
             let mut image_info = ImageInfo::default();
-            texture
-                .native()
-                .getVkImageInfo(image_info.native_mut())
+
+            sb::C_GrBackendTextures_GetVkImageInfo(texture.native(), image_info.native_mut())
                 .if_true_some(image_info)
         }
     }
@@ -97,7 +96,7 @@ pub mod backend_textures {
         texture: &mut BackendTexture,
         layout: ImageLayout,
     ) -> &mut BackendTexture {
-        unsafe { texture.native_mut().setVkImageLayout(layout) }
+        unsafe { sb::C_GrBackendTextures_SetVkImageLayout(texture.native_mut(), layout) }
         texture
     }
 }
@@ -121,14 +120,15 @@ pub mod backend_render_targets {
 
     pub fn get_vk_image_info(target: &BackendRenderTarget) -> Option<ImageInfo> {
         let mut info = ImageInfo::default();
-        unsafe { target.native().getVkImageInfo(info.native_mut()) }.if_true_some(info)
+        unsafe { sb::C_GrBackendRenderTargets_GetVkImageInfo(target.native(), info.native_mut()) }
+            .if_true_some(info)
     }
 
     pub fn set_vk_image_layout(
         target: &mut BackendRenderTarget,
         layout: ImageLayout,
     ) -> &mut BackendRenderTarget {
-        unsafe { target.native_mut().setVkImageLayout(layout) }
+        unsafe { sb::C_GrBackendRenderTargets_SetVkImageLayout(target.native_mut(), layout) }
         target
     }
 }

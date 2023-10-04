@@ -5,7 +5,7 @@ pub mod pdf {
         scalar, Document,
     };
     use skia_bindings::{
-        self as sb, SkPDF_AttributeList, SkPDF_Metadata, SkPDF_StructureElementNode,
+        self as sb, SkPDF_AttributeList, SkPDF_DateTime, SkPDF_Metadata, SkPDF_StructureElementNode,
     };
     use std::{ffi::CString, fmt, mem, ptr};
 
@@ -204,7 +204,20 @@ pub mod pdf {
         }
     }
 
-    pub use crate::DateTime;
+    #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
+    #[repr(C)]
+    pub struct DateTime {
+        pub time_zone_minutes: i16,
+        pub year: u16,
+        pub month: u8,
+        pub day_of_week: u8,
+        pub day: u8,
+        pub hour: u8,
+        pub minute: u8,
+        pub second: u8,
+    }
+
+    native_transmutable!(SkPDF_DateTime, DateTime, date_time_layout);
 
     #[derive(Default, Debug)]
     pub struct Metadata {

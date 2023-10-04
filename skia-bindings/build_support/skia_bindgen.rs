@@ -663,6 +663,9 @@ const ENUM_TABLE: &[EnumEntry] = &[
     ("AlphaOption", rewrite::k_xxx),
     // SkWebpEncoder.h
     ("Compression", rewrite::k_xxx),
+    // m118:
+    ("GrPurgeResourceOptions", rewrite::k_xxx),
+    ("GrSyncCpu", rewrite::k_xxx),
 ];
 
 pub(crate) mod rewrite {

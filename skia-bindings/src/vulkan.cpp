@@ -15,11 +15,11 @@
 extern "C" void C_GrVkTypes(GrVkSurfaceInfo *) {};
 
 extern "C" void C_GrBackendFormat_ConstructVk(GrBackendFormat* uninitialized, VkFormat format, bool willUseDRMFormatModifiers) {
-    new(uninitialized)GrBackendFormat(GrBackendFormat::MakeVk(format, willUseDRMFormatModifiers));
+    new(uninitialized)GrBackendFormat(GrBackendFormats::MakeVk(format, willUseDRMFormatModifiers));
 }
 
 extern "C" void C_GrBackendFormat_ConstructVk2(GrBackendFormat* uninitialized, const GrVkYcbcrConversionInfo* ycbcrInfo,  bool willUseDRMFormatModifiers) {
-    new(uninitialized)GrBackendFormat(GrBackendFormat::MakeVk(*ycbcrInfo, willUseDRMFormatModifiers));
+    new(uninitialized)GrBackendFormat(GrBackendFormats::MakeVk(*ycbcrInfo, willUseDRMFormatModifiers));
 }
 
 extern "C" GrBackendTexture* C_GrBackendTexture_newVk(
@@ -27,7 +27,7 @@ extern "C" GrBackendTexture* C_GrBackendTexture_newVk(
     const GrVkImageInfo* vkInfo,
     const char* label,
     size_t labelCount) {
-    return new GrBackendTexture(width, height, *vkInfo, std::string_view(label, labelCount));
+    return new GrBackendTexture(GrBackendTextures::MakeVk(width, height, *vkInfo, std::string_view(label, labelCount)));
 }
 
 extern "C" void C_GrBackendRenderTargets_ConstructVk(GrBackendRenderTarget* uninitialized, int width, int height, const GrVkImageInfo* vkInfo) {
@@ -138,3 +138,18 @@ extern "C" const GrVkYcbcrConversionInfo* C_GrBackendFormats_GetVkYcbcrConversio
     return GrBackendFormats::GetVkYcbcrConversionInfo(*format);
 }
 
+extern "C" bool C_GrBackendTextures_GetVkImageInfo(const GrBackendTexture* texture, GrVkImageInfo* imageInfo) {
+    return GrBackendTextures::GetVkImageInfo(*texture, imageInfo);
+}
+
+extern "C" void C_GrBackendTextures_SetVkImageLayout(GrBackendTexture* texture, VkImageLayout imageLayout) {
+    GrBackendTextures::SetVkImageLayout(texture, imageLayout);
+}
+
+extern "C" bool C_GrBackendRenderTargets_GetVkImageInfo(const GrBackendRenderTarget* renderTarget, GrVkImageInfo* imageInfo) {
+    return GrBackendRenderTargets::GetVkImageInfo(*renderTarget, imageInfo);
+}
+
+extern "C" void C_GrBackendRenderTargets_SetVkImageLayout(GrBackendRenderTarget* renderTarget, VkImageLayout imageLayout) {
+    GrBackendRenderTargets::SetVkImageLayout(renderTarget, imageLayout);
+}

@@ -8,6 +8,7 @@
 #include "include/codec/SkEncodedOrigin.h"
 #include "include/codec/SkCodec.h"
 #include "include/codec/SkCodecAnimation.h"
+#include "include/codec/SkEncodedImageFormat.h"
 #include "include/codec/SkPixmapUtils.h"
 
 #include "include/codec/SkBmpDecoder.h"
@@ -36,7 +37,6 @@
 #include "include/core/SkDataTable.h"
 #include "include/core/SkDrawable.h"
 #include "include/core/SkDocument.h"
-#include "include/core/SkEncodedImageFormat.h"
 #include "include/core/SkFlattenable.h"
 #include "include/core/SkFont.h"
 #include "include/core/SkFontArguments.h"
@@ -90,14 +90,14 @@
 #include "include/effects/SkHighContrastFilter.h"
 #include "include/effects/SkImageFilters.h"
 #include "include/effects/SkLumaColorFilter.h"
-#include "include/effects/SkOpPathEffect.h"
+// #include "include/effects/SkOpPathEffect.h"
 #include "include/effects/SkOverdrawColorFilter.h"
 
 #include "include/effects/SkRuntimeEffect.h"
 
 #include "include/effects/SkPerlinNoiseShader.h"
 #include "include/effects/SkShaderMaskFilter.h"
-#include "include/effects/SkStrokeAndFillPathEffect.h"
+// #include "include/effects/SkStrokeAndFillPathEffect.h"
 #include "include/effects/SkTableMaskFilter.h"
 #include "include/effects/SkTrimPathEffect.h"
 
@@ -470,12 +470,12 @@ extern "C" SkImage* C_SkImage_makeRasterImage(const SkImage* self, GrDirectConte
     return self->makeRasterImage(context, cachingHint).release();
 }
 
-extern "C" SkImage *C_SkImage_makeWithFilter(const SkImage *self, GrRecordingContext *context,
-                                             const SkImageFilter *filter, const SkIRect *subset,
-                                             const SkIRect *clipBounds, SkIRect *outSubset,
-                                             SkIPoint *offset) {
-    return self->makeWithFilter(context, filter, *subset, *clipBounds, outSubset, offset).release();
-}
+// extern "C" SkImage *C_SkImage_makeWithFilter(const SkImage *self, GrRecordingContext *context,
+//                                              const SkImageFilter *filter, const SkIRect *subset,
+//                                              const SkIRect *clipBounds, SkIRect *outSubset,
+//                                              SkIPoint *offset) {
+//     return self->makeWithFilter(context, filter, *subset, *clipBounds, outSubset, offset).release();
+// }
 
 extern "C" bool C_SkImage_isLazyGenerated(const SkImage* self) {
     return self->isLazyGenerated();
@@ -2457,25 +2457,25 @@ extern "C" SkColorFilter* C_SkLumaColorFilter_Make() {
 // effects/SkOpPathEffect.h
 //
 
-extern "C" {
+// extern "C" {
 
-SkPathEffect* C_SkMergePathEffect_Make(SkPathEffect* one, SkPathEffect* two, SkPathOp op) {
-    return SkMergePathEffect::Make(sp(one), sp(two), op).release();
-}
+// SkPathEffect* C_SkMergePathEffect_Make(SkPathEffect* one, SkPathEffect* two, SkPathOp op) {
+//     return SkMergePathEffect::Make(sp(one), sp(two), op).release();
+// }
 
-SkPathEffect* C_SkMatrixPathEffect_MakeTranslate(SkScalar dx, SkScalar dy) {
-    return SkMatrixPathEffect::MakeTranslate(dx, dy).release();
-}
+// SkPathEffect* C_SkMatrixPathEffect_MakeTranslate(SkScalar dx, SkScalar dy) {
+//     return SkMatrixPathEffect::MakeTranslate(dx, dy).release();
+// }
 
-SkPathEffect* C_SkMatrixPathEffect_Make(const SkMatrix* m) {
-    return SkMatrixPathEffect::Make(*m).release();
-}
+// SkPathEffect* C_SkMatrixPathEffect_Make(const SkMatrix* m) {
+//     return SkMatrixPathEffect::Make(*m).release();
+// }
 
-SkPathEffect* C_SkStrokePathEffect_Make(SkScalar width, SkPaint::Join join, SkPaint::Cap cap, SkScalar miter) {
-    return SkStrokePathEffect::Make(width, join, cap, miter).release();
-}
+// SkPathEffect* C_SkStrokePathEffect_Make(SkScalar width, SkPaint::Join join, SkPaint::Cap cap, SkScalar miter) {
+//     return SkStrokePathEffect::Make(width, join, cap, miter).release();
+// }
 
-}
+// }
 
 //
 // effects/SkOverdrawColorFilter.h
@@ -2598,9 +2598,9 @@ extern "C" SkMaskFilter* C_SkShaderMaskFilter_Make(SkShader* shader) {
 // effects/SkStrokeAndFillPathEffect.h
 //
 
-extern "C" SkPathEffect* C_SkStrokeAndFillePathEffect_Make() {
-    return SkStrokeAndFillPathEffect::Make().release();
-}
+// extern "C" SkPathEffect* C_SkStrokeAndFillePathEffect_Make() {
+//     return SkStrokeAndFillPathEffect::Make().release();
+// }
 
 //
 // effects/SkTrimPathEffect.h
