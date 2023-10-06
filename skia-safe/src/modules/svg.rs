@@ -113,9 +113,9 @@ extern "C" fn handle_load(
                 )
             };
 
-            match ureq::get(&path).call() {
+            match reqwest::blocking::get(&path) {
                 Ok(response) => {
-                    let mut reader = response.into_reader();
+                    let mut reader = response.bytes().unwrap().as_ref();
                     let mut data = Vec::new();
                     if reader.read_to_end(&mut data).is_err() {
                         data.clear();
