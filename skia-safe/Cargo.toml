@@ -69,7 +69,7 @@ static_assertions = "1.1"
 glutin = "0.30.6"
 glutin-winit = { version = "0.3"}
 winit = { version = "0.28.1"}
-raw-window-handle = { version = "0.5.0" }
+raw-window-handle = { version = "0.6.0" }
 gl-rs = { package = "gl", version = "0.14.0" }
 
 # metal-window
