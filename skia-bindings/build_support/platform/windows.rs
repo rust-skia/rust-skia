@@ -1,6 +1,7 @@
+use std::path::PathBuf;
+
 use super::prelude::*;
 use crate::build_support::{cargo, clang};
-use std::path::PathBuf;
 
 pub struct Msvc;
 
@@ -146,7 +147,7 @@ mod llvm {
         let path: PathBuf = [home, "lib", "clang"].into_iter().collect();
         let mut highest_version = None;
         let mut highest_version_path = None;
-        for entry in fs::read_dir(&path).ok()? {
+        for entry in fs::read_dir(path).ok()? {
             let entry = entry.ok()?;
             let path = entry.path();
             if path.is_dir() {
