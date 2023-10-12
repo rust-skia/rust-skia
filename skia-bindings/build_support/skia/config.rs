@@ -188,6 +188,18 @@ impl FinalBuildConfiguration {
 
             if features.embed_freetype {
                 builder.arg("skia_use_system_freetype2", no());
+            } else {
+                // third_party/freetype2/BUILD.gn hard-codes /usr/include/freetype2
+                // as include path. When cross-compiling against a sysroot, we don't
+                // want the host directory, we want the path from the sysroot, so prepend
+                // a `=` to substitute the sysroot if present.
+                // Ideally we'd overwrite the skia_system_freetype2_include_path
+                // argument, but somehow that doesn't accept a `=`. So change it to
+                // a non-existent path, append a sysroot prefixed include path, as well
+                // as the previous fallback that's used if no sysroot is specified.
+                builder.arg("skia_system_freetype2_include_path", "\"/does/not/exist\"");
+                builder.cflag("-I=/usr/include/freetype2");
+                builder.cflag("-I/usr/include/freetype2");
             }
 
             // target specific gn args.
