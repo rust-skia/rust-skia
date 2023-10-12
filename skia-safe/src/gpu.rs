@@ -40,30 +40,24 @@ pub mod surfaces {
 }
 
 pub mod backend_formats {
-    use super::ganesh;
-
     #[cfg(feature = "gl")]
-    pub use ganesh::gl::backend_formats::*;
+    pub use super::ganesh::gl::backend_formats::*;
     #[cfg(feature = "vulkan")]
-    pub use ganesh::vk::backend_formats::*;
+    pub use super::ganesh::vk::backend_formats::*;
 }
 
 pub mod backend_textures {
-    use super::ganesh;
-
     #[cfg(feature = "gl")]
-    pub use ganesh::gl::backend_textures::*;
+    pub use super::ganesh::gl::backend_textures::*;
     #[cfg(feature = "vulkan")]
-    pub use ganesh::vk::backend_textures::*;
+    pub use super::ganesh::vk::backend_textures::*;
 }
 
 pub mod backend_render_targets {
-    use super::ganesh;
-
     #[cfg(feature = "gl")]
-    pub use ganesh::gl::backend_render_targets::*;
+    pub use super::ganesh::gl::backend_render_targets::*;
     #[cfg(feature = "vulkan")]
-    pub use ganesh::vk::backend_render_targets::*;
+    pub use super::ganesh::vk::backend_render_targets::*;
 }
 
 #[cfg(test)]
