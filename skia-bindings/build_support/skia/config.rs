@@ -256,7 +256,7 @@ pub fn build(
             .join(ninja::default_exe_name())
     });
 
-    if !offline && !build.use_system_libraries {
+    if !offline {
         println!("Synchronizing Skia dependencies");
         #[cfg(feature = "binary-cache")]
         crate::build_support::binary_cache::resolve_dependencies();
