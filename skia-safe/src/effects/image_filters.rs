@@ -884,7 +884,7 @@ mod tests {
         assert_eq!(cr(None), CropRect::NO_CROP_RECT);
         assert_eq!(cr(CropRect::NO_CROP_RECT), CropRect::NO_CROP_RECT);
         #[allow(clippy::needless_borrow)]
-        let cr_ref = cr(&CropRect::NO_CROP_RECT);
+        let cr_ref = cr(CropRect::NO_CROP_RECT);
         assert_eq!(cr_ref, CropRect::NO_CROP_RECT);
         let irect = IRect {
             left: 1,
@@ -894,7 +894,7 @@ mod tests {
         };
         assert_eq!(cr(irect), CropRect(Rect::from(irect)));
         #[allow(clippy::needless_borrow)]
-        let cr_by_ref = cr(&irect);
+        let cr_by_ref = cr(irect);
         assert_eq!(cr_by_ref, CropRect(Rect::from(irect)));
         let rect = Rect {
             left: 1.0,
@@ -904,7 +904,7 @@ mod tests {
         };
         assert_eq!(cr(rect), CropRect(rect));
         #[allow(clippy::needless_borrow)]
-        let cr_by_ref = cr(&rect);
+        let cr_by_ref = cr(rect);
         assert_eq!(cr_by_ref, CropRect(rect));
     }
 }
