@@ -53,7 +53,7 @@ impl BuildConfiguration {
         // It's possible that the provided command line for the compiler already includes --target.
         // We assume that it's most specific/appropriate, extract and use is. It might for example include
         // a vendor infix, while cargo targets usually don't.
-        let target = cc
+        let mut target = cc
             .find("--target=")
             .map(|target_option_offset| {
                 let target_tail = &cc[(target_option_offset + "--target=".len())..];
@@ -63,6 +63,10 @@ impl BuildConfiguration {
                 cargo::parse_target(target_str)
             })
             .unwrap_or_else(cargo::target);
+
+        if target.architecture == "riscv64gc" {
+            target.architecture = "riscv64".to_string();
+        }
 
         BuildConfiguration {
             on_windows: cargo::host().is_windows(),
