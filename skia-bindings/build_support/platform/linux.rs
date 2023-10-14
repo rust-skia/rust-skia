@@ -34,5 +34,26 @@ pub fn link_libraries(features: &Features) -> Vec<String> {
         }
     }
 
+    if skia::env::use_system_libraries() {
+        libs.push("png16");
+        libs.push("z");
+        libs.push("icudata");
+        libs.push("icui18n");
+        libs.push("icuio");
+        libs.push("icutest");
+        libs.push("icutu");
+        libs.push("icuuc");
+        libs.push("harfbuzz");
+        libs.push("expat");
+
+        if features.webp_encode || features.webp_decode {
+            libs.push("webp");
+        }
+    }
+
+    if skia::env::use_system_libraries() || cfg!(feature = "use-system-jpeg-turbo") {
+        libs.push("jpeg");
+    }
+
     libs.iter().map(|l| l.to_string()).collect()
 }
