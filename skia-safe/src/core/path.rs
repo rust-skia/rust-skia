@@ -669,10 +669,10 @@ impl Path {
 
     /// Specifies whether [`Path`] is volatile; whether it will be altered or discarded
     /// by the caller after it is drawn. [`Path`] by default have volatile set `false`, allowing
-    /// `BaseDevice` to attach a cache of data which speeds repeated drawing.
+    /// `Device` to attach a cache of data which speeds repeated drawing.
     ///
     /// Mark temporary paths, discarded or modified after use, as volatile
-    /// to inform `BaseDevice` that the path need not be cached.
+    /// to inform `Device` that the path need not be cached.
     ///
     /// Mark animating [`Path`] volatile to improve performance.
     /// Mark unchanging [`Path`] non-volatile to improve repeated rendering.

@@ -190,7 +190,7 @@ impl<'a> From<&'a [RSXform]> for GlyphPositions<'a> {
 ///  [`Canvas`] provides an interface for drawing, and how the drawing is clipped and transformed.
 ///  [`Canvas`] contains a stack of [`Matrix`] and clip values.
 ///
-///  [`Canvas`] and [`Paint`] together provide the state to draw into [`Surface`] or `BaseDevice`.
+///  [`Canvas`] and [`Paint`] together provide the state to draw into [`Surface`] or `Device`.
 ///  Each [`Canvas`] draw call transforms the geometry of the object by the concatenation of all
 ///  [`Matrix`] values in the stack. The transformed geometry is clipped by the intersection
 ///  of all of clip values in the stack. The [`Canvas`] draw calls use [`Paint`] to supply drawing
@@ -203,7 +203,7 @@ impl<'a> From<&'a [RSXform]> for GlyphPositions<'a> {
 ///
 ///  To draw to a document, obtain [`Canvas`] from SVG canvas, document PDF, or
 ///  [`crate::PictureRecorder`]. [`crate::Document`] based [`Canvas`] and other [`Canvas`]
-///  subclasses reference BaseDevice describing the destination.
+///  subclasses reference Device describing the destination.
 ///
 ///  [`Canvas`] can be constructed to draw to [`Bitmap`] without first creating raster surface.
 ///  This approach may be deprecated in the future.
@@ -564,7 +564,7 @@ impl Canvas {
 
     /// Returns `true` if [`Canvas`] has direct access to its pixels.
     ///
-    /// Pixels are readable when `BaseDevice` is raster. Pixels are not readable when [`Canvas`] is
+    /// Pixels are readable when `Device` is raster. Pixels are not readable when [`Canvas`] is
     /// returned from GPU surface, returned by [`crate::Document::begin_page()`], returned by
     /// [`Handle<SkPictureRecorder>::begin_recording()`], or [`Canvas`] is the base of a utility
     /// class like `DebugCanvas`.
@@ -588,7 +588,7 @@ impl Canvas {
     /// Copies each readable pixel intersecting both rectangles, without scaling,
     /// converting to `dst_info.color_type()` and `dst_info.alpha_type()` if required.
     ///
-    /// Pixels are readable when `BaseDevice` is raster, or backed by a GPU.
+    /// Pixels are readable when `Device` is raster, or backed by a GPU.
     /// Pixels are not readable when [`Canvas`] is returned by [`crate::Document::begin_page()`],
     /// returned by [`Handle<SkPictureRecorder>::begin_recording()`], or [`Canvas`] is the base of a
     /// utility class like `DebugCanvas`.
@@ -646,7 +646,7 @@ impl Canvas {
     /// Copies each readable pixel intersecting both rectangles, without scaling,
     /// converting to `pixmap.color_type()` and `pixmap.alpha_type()` if required.
     ///
-    /// Pixels are readable when `BaseDevice` is raster, or backed by a GPU. Pixels are not readable
+    /// Pixels are readable when `Device` is raster, or backed by a GPU. Pixels are not readable
     /// when [`Canvas`] is returned by [`crate::Document::begin_page()`], returned by
     /// [`Handle<SkPictureRecorder>::begin_recording()`], or [`Canvas`] is the base of a utility
     /// class like `DebugCanvas`.
@@ -687,7 +687,7 @@ impl Canvas {
     /// Copies each readable pixel intersecting both rectangles, without scaling,
     /// converting to `bitmap.color_type()` and `bitmap.alpha_type()` if required.
     ///
-    /// Pixels are readable when `BaseDevice` is raster, or backed by a GPU. Pixels are not readable
+    /// Pixels are readable when `Device` is raster, or backed by a GPU. Pixels are not readable
     /// when [`Canvas`] is returned by [`crate::Document::begin_page()`], returned by
     /// [`Handle<SkPictureRecorder>::begin_recording()`], or [`Canvas`] is the base of a utility
     /// class like DebugCanvas.
@@ -730,7 +730,7 @@ impl Canvas {
     /// Copies each readable pixel intersecting both rectangles, without scaling,
     /// converting to `image_info().color_type()` and `image_info().alpha_type()` if required.
     ///
-    /// Pixels are writable when `BaseDevice` is raster, or backed by a GPU.
+    /// Pixels are writable when `Device` is raster, or backed by a GPU.
     /// Pixels are not writable when [`Canvas`] is returned by [`crate::Document::begin_page()`],
     /// returned by [`Handle<SkPictureRecorder>::begin_recording()`], or [`Canvas`] is the base of a
     /// utility class like `DebugCanvas`.
@@ -787,7 +787,7 @@ impl Canvas {
     /// Copies each readable pixel intersecting both rectangles, without scaling,
     /// converting to `image_info().color_type()` and `image_info().alpha_type()` if required.
     ///
-    /// Pixels are writable when `BaseDevice` is raster, or backed by a GPU. Pixels are not writable
+    /// Pixels are writable when `Device` is raster, or backed by a GPU. Pixels are not writable
     /// when [`Canvas`] is returned by [`crate::Document::begin_page()`], returned by
     /// [`Handle<SkPictureRecorder>::begin_recording()`], or [`Canvas`] is the base of a utility
     /// class like `DebugCanvas`.
@@ -1191,7 +1191,7 @@ impl Canvas {
     ///
     /// Unlike [`Self::local_clip_bounds()`], returned [`IRect`] is not outset.
     ///
-    /// Returns bounds of clip in `BaseDevice` coordinates
+    /// Returns bounds of clip in `Device` coordinates
     ///
     /// example: <https://fiddle.skia.org/c/@Canvas_getDeviceClipBounds>
     pub fn device_clip_bounds(&self) -> Option<IRect> {
@@ -1229,13 +1229,13 @@ impl Canvas {
     /// such as drawing with [`BlendMode`], return undefined results. `discard()` does
     /// not change clip or [`Matrix`].
     ///
-    /// `discard()` may do nothing, depending on the implementation of [`Surface`] or `BaseDevice`
+    /// `discard()` may do nothing, depending on the implementation of [`Surface`] or `Device`
     /// that created [`Canvas`].
     ///
     /// `discard()` allows optimized performance on subsequent draws by removing
-    /// cached data associated with [`Surface`] or `BaseDevice`.
+    /// cached data associated with [`Surface`] or `Device`.
     /// It is not necessary to call `discard()` once done with [`Canvas`];
-    /// any cached data is deleted when owning [`Surface`] or `BaseDevice` is deleted.
+    /// any cached data is deleted when owning [`Surface`] or `Device` is deleted.
     pub fn discard(&self) -> &Self {
         unsafe { sb::C_SkCanvas_discard(self.native_mut()) }
         self

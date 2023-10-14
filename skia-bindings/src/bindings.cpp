@@ -1714,6 +1714,10 @@ extern "C" SkColorFilter* C_SkColorFilter_makeComposed(const SkColorFilter* self
     return self->makeComposed(sp(inner)).release();
 }
 
+extern "C" SkColorFilter* C_SkColorFilter_withWorkingColorSpace(const SkColorFilter* self, SkColorSpace* colorSpace) {
+    return self->makeWithWorkingColorSpace(sp(colorSpace)).release();
+}
+
 extern "C" SkColorFilter* C_SkColorFilter_Deserialize(const void* data, size_t length) {
     return SkColorFilter::Deserialize(data, length).release();
 }
@@ -2066,6 +2070,10 @@ extern "C" SkShader* C_SkShader_makeWithLocalMatrix(const SkShader* self, const 
 
 extern "C" SkShader* C_SkShader_makeWithColorFilter(const SkShader* self, SkColorFilter* colorFilter) {
     return self->makeWithColorFilter(sp(colorFilter)).release();
+}
+
+extern "C" SkShader* C_SkShader_makeWithWorkingColorSpace(const SkShader* self, SkColorSpace* colorSpace) {
+    return self->makeWithWorkingColorSpace(sp(colorSpace)).release();
 }
 
 extern "C" SkShader* C_SkShaders_Empty() {
