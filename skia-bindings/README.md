@@ -34,6 +34,16 @@ Whenever a new version of `rust-skia` is built from the `release` branch on our 
 
 And whenever the build script detects that `skia-bindings` is built from inside a crate _and_ a prebuilt archive is available that matches the repository's hash, platform, and features, it downloads the package, unpacks it, and skips the full build step of Skia and the bindings.
 
+### Prebuilt Binaries in an Offline Environment
+
+Some users may not have a stable internet connection or are building `skia-bindings` in an offline environment. You may download binaries manually from the [skia-binaries repository](<https://github.com/rust-skia/skia-binaries/releases>) in an environment where you do have internet access.
+
+To use the binaries in an offline build, the environment variable `SKIA_BINARIES_URL` must be set. This environment variable must point to the `tar.gz` file where the binaries are located, prepended with `file://`.
+
+```bash
+export SKIA_BINARIES_URL='file://path/to/skia-binaries.tar.gz'
+```
+
 ### Changing the executable used as `ninja` and `gn`
 
 On some systems, the bundled `ninja` and `gn` executables may not work (as it does on NixOS). To remedy
