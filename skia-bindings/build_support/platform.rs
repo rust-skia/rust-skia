@@ -33,10 +33,17 @@ pub fn link_libraries(features: &Features, target: &Target) -> Vec<String> {
     details(target).link_libraries(features)
 }
 
+pub fn filter_features(target: &Target, features: Features) -> Features {
+    details(target).filter_platform_features(features)
+}
+
 pub trait PlatformDetails {
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder);
     fn bindgen_args(&self, _target: &Target, _builder: &mut BindgenArgsBuilder) {}
     fn link_libraries(&self, features: &Features) -> Vec<String>;
+    fn filter_platform_features(&self, features: Features) -> Features {
+        features
+    }
 }
 
 #[allow(clippy::type_complexity)]

@@ -12,7 +12,6 @@ impl PlatformDetails for Emscripten {
             .arg("ar", quote("emar"))
             .arg("skia_gl_standard", quote("webgl"))
             .arg("skia_use_freetype", yes())
-            .arg("skia_use_system_freetype2", no())
             .arg("skia_use_webgl", yes_if(features.gpu()))
             .arg("target_cpu", quote("wasm"));
 
@@ -55,5 +54,10 @@ impl PlatformDetails for Emscripten {
 
     fn link_libraries(&self, features: &Features) -> Vec<String> {
         generic::link_libraries(features)
+    }
+
+    fn filter_platform_features(&self, mut features: Features) -> Features {
+        features.embed_freetype = true;
+        features
     }
 }

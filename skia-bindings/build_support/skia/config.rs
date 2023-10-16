@@ -106,7 +106,7 @@ impl FinalBuildConfiguration {
         use_system_libraries: bool,
         skia_source_dir: &Path,
     ) -> FinalBuildConfiguration {
-        let features = &build.features;
+        let features = platform::filter_features(&build.target, build.features.clone());
 
         // `SDKROOT` is the environment variable used on macOS to specify the sysroot.
         // `SDKTARGETSYSROOT` is the environment variable set in Yocto Linux SDKs when
