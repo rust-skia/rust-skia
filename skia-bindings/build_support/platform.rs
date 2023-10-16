@@ -45,6 +45,7 @@ fn details(target: &Target) -> Box<dyn PlatformDetails> {
     match target.as_strs() {
         ("wasm32", "unknown", "emscripten", _) => Box::new(emscripten::Emscripten),
         (_, "linux", "android", _) | (_, "linux", "androideabi", _) => Box::new(android::Android),
+        ("x86_64", "apple", "ios", Some("macabi")) => Box::new(macos::MacOs),
         (_, "apple", "darwin", _) => Box::new(macos::MacOs),
         (_, "apple", "ios", _) => Box::new(ios::Ios),
         (_, _, "windows", Some("msvc")) if host.is_windows() => Box::new(windows::Msvc),
