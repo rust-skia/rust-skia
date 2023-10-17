@@ -33,15 +33,23 @@ pub fn link_libraries(features: &Features, target: &Target) -> Vec<String> {
     details(target).link_libraries(features)
 }
 
-pub fn filter_features(target: &Target, features: Features) -> Features {
-    details(target).filter_platform_features(features)
+pub fn filter_features(
+    target: &Target,
+    use_system_libraries: bool,
+    features: Features,
+) -> Features {
+    details(target).filter_platform_features(use_system_libraries, features)
 }
 
 pub trait PlatformDetails {
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder);
     fn bindgen_args(&self, _target: &Target, _builder: &mut BindgenArgsBuilder) {}
     fn link_libraries(&self, features: &Features) -> Vec<String>;
-    fn filter_platform_features(&self, features: Features) -> Features {
+    fn filter_platform_features(
+        &self,
+        _use_system_libraries: bool,
+        features: Features,
+    ) -> Features {
         features
     }
 }
@@ -65,25 +73,19 @@ fn details(target: &Target) -> Box<dyn PlatformDetails> {
 #[derive(Debug)]
 pub struct GnArgsBuilder {
     target_arch: String,
-    use_system_libraries: bool,
     target_str: Option<String>,
     gn_args: Vec<(String, String)>,
     skia_cflags: Vec<String>,
 }
 
 impl GnArgsBuilder {
-    pub fn new(target: &Target, use_system_libraries: bool) -> Self {
+    pub fn new(target: &Target) -> Self {
         Self {
             target_arch: target.architecture.clone(),
-            use_system_libraries,
             target_str: Some(target.to_string()),
             gn_args: Vec::default(),
             skia_cflags: Vec::default(),
         }
-    }
-
-    pub fn use_system_libraries(&self) -> bool {
-        self.use_system_libraries
     }
 
     /// Overwrite the default target.

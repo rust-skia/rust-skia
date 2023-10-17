@@ -56,7 +56,11 @@ impl PlatformDetails for Emscripten {
         generic::link_libraries(features)
     }
 
-    fn filter_platform_features(&self, mut features: Features) -> Features {
+    fn filter_platform_features(
+        &self,
+        _use_system_libraries: bool,
+        mut features: Features,
+    ) -> Features {
         features.embed_freetype = true;
         features
     }

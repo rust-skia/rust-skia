@@ -106,14 +106,15 @@ impl FinalBuildConfiguration {
         use_system_libraries: bool,
         skia_source_dir: &Path,
     ) -> FinalBuildConfiguration {
-        let features = platform::filter_features(&build.target, build.features.clone());
+        let features =
+            platform::filter_features(&build.target, use_system_libraries, build.features.clone());
 
         // `SDKROOT` is the environment variable used on macOS to specify the sysroot.
         // `SDKTARGETSYSROOT` is the environment variable set in Yocto Linux SDKs when
         // cross-compiling.
         let sysroot = cargo::env_var("SDKTARGETSYSROOT").or_else(|| cargo::env_var("SDKROOT"));
 
-        let mut builder = GnArgsBuilder::new(&build.target, use_system_libraries);
+        let mut builder = GnArgsBuilder::new(&build.target);
 
         let gn_args = {
             builder
