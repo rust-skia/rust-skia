@@ -83,17 +83,13 @@ impl fmt::Debug for DirectContext {
 }
 
 impl DirectContext {
+    // Deprecated in Skia
     #[cfg(feature = "gl")]
     pub fn new_gl<'a>(
         interface: impl Into<Option<gl::Interface>>,
         options: impl Into<Option<&'a ContextOptions>>,
     ) -> Option<DirectContext> {
-        DirectContext::from_ptr(unsafe {
-            sb::C_GrDirectContext_MakeGL(
-                interface.into().into_ptr_or_null(),
-                options.into().native_ptr_or_null(),
-            )
-        })
+        crate::gpu::direct_contexts::make_gl(interface, options)
     }
 
     #[cfg(feature = "vulkan")]
@@ -153,6 +149,10 @@ impl DirectContext {
             sb::GrDirectContext_abandonContext(self.native_mut() as *mut _ as _)
         }
         self
+    }
+
+    pub fn is_device_lost(&mut self) -> bool {
+        unsafe { self.native_mut().isDeviceLost() }
     }
 
     // TODO: threadSafeProxy()
@@ -223,13 +223,13 @@ impl DirectContext {
     pub fn perform_deferred_cleanup(
         &mut self,
         not_used: Duration,
-        scratch_resources_only: impl Into<Option<bool>>,
+        opts: impl Into<Option<PurgeResourceOptions>>,
     ) -> &mut Self {
         unsafe {
             sb::C_GrDirectContext_performDeferredCleanup(
                 self.native_mut(),
                 not_used.as_millis().try_into().unwrap(),
-                scratch_resources_only.into().unwrap_or(false),
+                opts.into().unwrap_or(PurgeResourceOptions::AllResources),
             )
         }
         self

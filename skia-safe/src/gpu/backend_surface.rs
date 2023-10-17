@@ -118,6 +118,7 @@ impl BackendFormat {
         super::backend_formats::as_gl_format_enum(self)
     }
 
+    // Deprecated in Skia
     #[cfg(feature = "vulkan")]
     pub fn as_vk_format(&self) -> Option<vk::Format> {
         super::backend_formats::as_vk_format(self)
@@ -362,6 +363,7 @@ impl BackendTexture {
         super::backend_textures::get_vk_image_info(self)
     }
 
+    // Deprecated in Skia
     #[cfg(feature = "vulkan")]
     pub fn set_vulkan_image_layout(&mut self, layout: vk::ImageLayout) -> &mut Self {
         super::backend_textures::set_vk_image_layout(self, layout)
