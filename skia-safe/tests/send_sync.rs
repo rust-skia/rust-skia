@@ -27,6 +27,15 @@ mod codec {
     assert_impl_all!(codec::SelectionPolicy: Send, Sync);
     assert_impl_all!(codec::ZeroInitialized: Send, Sync);
     assert_impl_all!(codec::ScanlineOrder: Send, Sync);
+
+    assert_impl_all!(codec::BmpDecoder: Send, Sync);
+    assert_impl_all!(codec::GifDecoder: Send, Sync);
+    assert_impl_all!(codec::IcoDecoder: Send, Sync);
+    assert_impl_all!(codec::JpegDecoder: Send, Sync);
+    assert_impl_all!(codec::PngDecoder: Send, Sync);
+    assert_impl_all!(codec::WbmpDecoder: Send, Sync);
+    #[cfg(feature = "webp_decode")]
+    assert_impl_all!(codec::WebpDecoder: Send, Sync);
 }
 
 mod core {
@@ -44,14 +53,13 @@ mod core {
     assert_impl_all!(Color: Send, Sync);
     assert_impl_all!(ColorFilter: Send, Sync);
     assert_impl_all!(ColorSpace: Send, Sync);
+    assert_impl_all!(ColorTable: Send, Sync);
     assert_impl_all!(ContourMeasure: Send, Sync);
     assert_impl_all!(ContourMeasureIter: Send, Sync);
     assert_impl_all!(CubicMap: Send, Sync);
     assert_impl_all!(CubicResampler: Send, Sync);
     assert_impl_all!(Data: Send, Sync);
     assert_impl_all!(DataTable: Send, Sync);
-    assert_impl_all!(DeferredDisplayList: Send, Sync);
-    assert_not_impl_any!(DeferredDisplayListRecorder: Send, Sync);
     assert_not_impl_any!(Document: Send, Sync);
     assert_not_impl_any!(Drawable: Send, Sync);
     assert_impl_all!(Font: Send, Sync);
@@ -87,7 +95,7 @@ mod core {
     assert_impl_all!(Picture: Send, Sync);
     assert_not_impl_any!(PictureRecorder: Send, Sync);
     assert_impl_all!(PixelRef: Send, Sync);
-    assert_impl_all!(Pixmap: Send, Sync);
+    assert_not_impl_any!(Pixmap: Send, Sync);
     assert_impl_all!(Region: Send, Sync);
     assert_not_impl_any!(region::Iterator: Send, Sync);
     assert_not_impl_any!(region::Cliperator: Send, Sync);
@@ -96,7 +104,6 @@ mod core {
     assert_impl_all!(RSXform: Send, Sync);
     assert_impl_all!(Shader: Send, Sync);
     assert_not_impl_any!(Surface: Send, Sync);
-    assert_impl_all!(SurfaceCharacterization: Send, Sync);
     assert_impl_all!(SurfaceProps: Send, Sync);
     assert_impl_all!(TextBlob: Send, Sync);
     assert_impl_all!(TextBlobBuilder: Send, Sync);
@@ -137,7 +144,7 @@ mod docs {
 }
 
 mod effects {
-    use skia_safe::{image_filters, runtime_effect, RuntimeEffect};
+    use skia_safe::{gradient_shader, image_filters, runtime_effect, RuntimeEffect};
     use static_assertions::*;
 
     assert_impl_all!(runtime_effect::Uniform: Send, Sync);
@@ -147,6 +154,7 @@ mod effects {
     assert_impl_all!(runtime_effect::Options: Send, Sync);
     assert_impl_all!(image_filters::CropRect: Send, Sync);
     assert_impl_all!(image_filters::Dither: Send, Sync);
+    assert_impl_all!(gradient_shader::Interpolation: Send, Sync);
 }
 
 #[cfg(feature = "gpu")]
@@ -168,6 +176,8 @@ mod gpu {
     // gpu/yuva_backend_textures.rs
     assert_impl_all!(YUVABackendTextureInfo: Send, Sync);
     assert_impl_all!(YUVABackendTextures: Send, Sync);
+    assert_impl_all!(MutableTextureState: Send, Sync);
+    assert_impl_all!(BackendApi: Send, Sync);
 
     #[cfg(feature = "gl")]
     mod gl {
@@ -237,6 +247,11 @@ mod textlayout {
     // ParagraphCache seems to be fully thread safe, but I don't think it is itself meant to be shared between threads.
     assert_not_impl_any!(ParagraphCache: Send, Sync);
     assert_impl_all!(Paragraph: Send, Sync);
+    assert_impl_all!(paragraph::FontInfo: Send, Sync);
+    assert_not_impl_all!(paragraph::VisitorInfo: Send, Sync);
+    assert_not_impl_all!(paragraph::ExtendedVisitorInfo: Send, Sync);
+    assert_impl_all!(paragraph::VisitorFlags: Send, Sync);
+    assert_impl_all!(paragraph::GlyphClusterInfo: Send, Sync);
     assert_impl_all!(ParagraphBuilder: Send, Sync);
     assert_impl_all!(StrutStyle: Send, Sync);
     assert_impl_all!(TextShadow: Send, Sync);
@@ -275,6 +290,15 @@ mod svg {
     use skia_safe::svg::*;
     use static_assertions::*;
     assert_not_impl_any!(Canvas: Send, Sync);
+}
+
+#[cfg(feature = "svg")]
+mod render_svg {
+    use skia_safe::svg::*;
+    use static_assertions::*;
+
+    assert_impl_all!(Dom: Send, Sync);
+    assert_impl_all!(LoadError: Send, Sync);
 }
 
 mod utils {

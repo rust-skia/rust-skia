@@ -9,22 +9,20 @@ keywords = ["skia", "rust-bindings", "vulkan", "opengl", "pdf"]
 categories = ["external-ffi-bindings", "graphics", "multimedia::images", "rendering::graphics-api", "visualization"]
 license = "MIT"
 
-version = "0.53.0"
+version = "0.66.1"
 authors = ["LongYinan <lynweklm@gmail.com>", "Armin Sander <armin@replicator.org>"]
 edition = "2021"
 build = "build.rs"
 links = "skia"
-include = [ 
-	"Cargo.toml", 
-	"build.rs", 
-	"build_support.rs", 
-	"build_support/**/*.rs", 
-	"src/**/*.h", 
-	"src/**/*.cpp", 
-	"src/defaults.rs", 
-	"src/icu.rs", 
-	"src/impls.rs",
-	"src/lib.rs" ]
+include = [
+	"Cargo.toml",
+	"bindings_docs.rs",
+	"build.rs",
+	"build_support.rs",
+	"build_support/**/*.rs",
+	"src/**/*.h",
+	"src/**/*.cpp",
+	"src/*.rs" ]
 
 [lib]
 doctest = false
@@ -32,8 +30,8 @@ doctest = false
 # Metadata used from inside the packaged crate that defines where to download skia and depot_tools archives from.
 # Note: use short hashes here because of filesystem path size restrictions.
 [package.metadata]
-skia = "m104-0.52.1"
-depot_tools = "fade894"
+skia = "m117-0.65.1"
+depot_tools = "73a2624"
 
 [features]
 default = ["binary-cache", "embed-icudtl"]
@@ -50,15 +48,15 @@ webp-encode = []
 webp-decode = []
 # sys libraries
 use-system-jpeg-turbo = ["mozjpeg-sys"]
-# deprecated since 0.25.0
-svg = []
+# `textlayout` because `SkSVGTextContext::SkSVGTextContext()` invokes `SkShaper::Make`.
+svg = ["textlayout"]
 shaper = ["textlayout"]
 binary-cache = ["ureq", "flate2", "tar"]
 embed-icudtl = ["lazy_static"]
 embed-freetype = []
 
 [dependencies]
-mozjpeg-sys = { version = "1", features = ["with_simd"], optional = true }
+mozjpeg-sys = { version = "2", features = ["with_simd"], optional = true }
 lazy_static = { version = "1.4.0", optional = true }
 
 [build-dependencies]
@@ -78,4 +76,16 @@ tar = { version = "0.4.26", optional = true }
 # the matching prebuilt binaries.
 serde_json = "1.0.39"
 # For reading Cargo.toml from within a package.
-toml = "0.5.1"
+toml = "0.7.0"
+
+[dev-dependencies]
+# build dependencies duplicated for testing :(
+cc = "1.0.37"
+bindgen = "0.68.1"
+regex = "1.4.5"
+heck = "0.4.0"
+ureq = { version = "2.0.1" }
+flate2 = { version = "1.0.7" }
+tar = { version = "0.4.26" }
+serde_json = "1.0.39"
+toml = "0.7.0"

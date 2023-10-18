@@ -1,7 +1,7 @@
 use crate::{
     prelude::*,
     private::safe32::{sk32, sk64},
-    scalar, Contains, IPoint, ISize, IVector, Point, Size, Vector,
+    Contains, IPoint, ISize, IVector, Point, Size, Vector,
 };
 use skia_bindings::{self as sb, SkIRect, SkRect};
 use std::{
@@ -12,9 +12,13 @@ use std::{
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
 pub struct IRect {
+    /// The x coordinate of the rectangle's left edge.
     pub left: i32,
+    /// The y coordinate of the rectangle's top edge.
     pub top: i32,
+    /// The x coordinate of the rectangle's right edge.
     pub right: i32,
+    /// The y coordinate of the rectangle's bottom edge.
     pub bottom: i32,
 }
 
@@ -235,6 +239,7 @@ impl IRect {
         self.left <= r.left && self.top <= r.top && self.right >= r.right && self.bottom >= r.bottom
     }
 
+    #[must_use]
     pub fn intersect(a: &Self, b: &Self) -> Option<Self> {
         let mut r = Self::default();
         unsafe { r.native_mut().intersect(a.native(), b.native()) }.if_true_some(r)
@@ -328,10 +333,14 @@ impl Contains<Rect> for IRect {
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct Rect {
-    pub left: scalar,
-    pub top: scalar,
-    pub right: scalar,
-    pub bottom: scalar,
+    /// The x coordinate of the rectangle's left edge.
+    pub left: f32,
+    /// The y coordinate of the rectangle's top edge.
+    pub top: f32,
+    /// The x coordinate of the rectangle's right edge.
+    pub right: f32,
+    /// The y coordinate of the rectangle's bottom edge.
+    pub bottom: f32,
 }
 
 native_transmutable!(SkRect, Rect, rect_layout);
@@ -343,7 +352,8 @@ impl AsRef<Rect> for Rect {
 }
 
 impl Rect {
-    pub fn new(left: scalar, top: scalar, right: scalar, bottom: scalar) -> Self {
+    #[must_use]
+    pub fn new(left: f32, top: f32, right: f32, bottom: f32) -> Self {
         Self {
             left,
             top,
@@ -356,38 +366,50 @@ impl Rect {
         Self::new(0.0, 0.0, 0.0, 0.0)
     }
 
-    pub fn from_wh(w: scalar, h: scalar) -> Self {
+    #[must_use]
+    pub fn from_wh(w: f32, h: f32) -> Self {
         Self::new(0.0, 0.0, w, h)
     }
 
+    #[must_use]
     pub fn from_iwh(w: i32, h: i32) -> Self {
-        Self::from_wh(w as scalar, h as scalar)
+        Self::from_wh(w as f32, h as f32)
     }
 
+    #[must_use]
     pub fn from_size(size: impl Into<Size>) -> Self {
         (Point::default(), size.into()).into()
     }
 
-    pub fn from_xywh(x: scalar, y: scalar, w: scalar, h: scalar) -> Self {
+    #[must_use]
+    pub fn from_ltrb(l: f32, t: f32, b: f32, r: f32) -> Self {
+        Self::new(l, t, b, r)
+    }
+
+    #[must_use]
+    pub fn from_xywh(x: f32, y: f32, w: f32, h: f32) -> Self {
         Self::new(x, y, x + w, y + h)
     }
 
+    #[must_use]
     pub fn from_point_and_size(p: impl Into<Point>, sz: impl Into<Size>) -> Self {
         (p.into(), sz.into()).into()
     }
 
+    #[must_use]
     pub fn from_isize(isize: impl Into<ISize>) -> Self {
         let isize = isize.into();
         Self::from_iwh(isize.width, isize.height)
     }
 
+    #[must_use]
     pub fn from_irect(irect: impl AsRef<IRect>) -> Self {
         let irect = irect.as_ref();
         Self::new(
-            irect.left as scalar,
-            irect.top as scalar,
-            irect.right as scalar,
-            irect.bottom as scalar,
+            irect.left as f32,
+            irect.top as f32,
+            irect.right as f32,
+            irect.bottom as f32,
         )
     }
 
@@ -416,27 +438,27 @@ impl Rect {
         !accum.is_nan()
     }
 
-    pub const fn x(&self) -> scalar {
+    pub const fn x(&self) -> f32 {
         self.left
     }
 
-    pub const fn y(&self) -> scalar {
+    pub const fn y(&self) -> f32 {
         self.top
     }
 
-    pub const fn left(&self) -> scalar {
+    pub const fn left(&self) -> f32 {
         self.left
     }
 
-    pub const fn top(&self) -> scalar {
+    pub const fn top(&self) -> f32 {
         self.top
     }
 
-    pub const fn right(&self) -> scalar {
+    pub const fn right(&self) -> f32 {
         self.right
     }
 
-    pub const fn bottom(&self) -> scalar {
+    pub const fn bottom(&self) -> f32 {
         self.bottom
     }
 
@@ -444,20 +466,20 @@ impl Rect {
         (self.width(), self.height()).into()
     }
 
-    pub fn width(&self) -> scalar {
+    pub fn width(&self) -> f32 {
         self.native().fRight - self.native().fLeft
     }
 
-    pub fn height(&self) -> scalar {
+    pub fn height(&self) -> f32 {
         self.native().fBottom - self.native().fTop
     }
 
-    pub fn center_x(&self) -> scalar {
+    pub fn center_x(&self) -> f32 {
         // don't use (fLeft + fBottom) * 0.5 as that might overflow before the 0.5
         self.left * 0.5 + self.right * 0.5
     }
 
-    pub fn center_y(&self) -> scalar {
+    pub fn center_y(&self) -> f32 {
         // don't use (fTop + fBottom) * 0.5 as that might overflow before the 0.5
         self.top * 0.5 + self.bottom * 0.5
     }
@@ -481,7 +503,7 @@ impl Rect {
         *self = Self::from_irect(irect)
     }
 
-    pub fn set_ltrb(&mut self, left: scalar, top: scalar, right: scalar, bottom: scalar) {
+    pub fn set_ltrb(&mut self, left: f32, top: f32, right: f32, bottom: f32) {
         *self = Self::new(left, top, right, bottom)
     }
 
@@ -523,11 +545,11 @@ impl Rect {
         .if_true_some(r)
     }
 
-    pub fn set_xywh(&mut self, x: scalar, y: scalar, width: scalar, height: scalar) {
+    pub fn set_xywh(&mut self, x: f32, y: f32, width: f32, height: f32) {
         *self = Self::from_xywh(x, y, width, height)
     }
 
-    pub fn set_wh(&mut self, w: scalar, h: scalar) {
+    pub fn set_wh(&mut self, w: f32, h: f32) {
         *self = Self::from_wh(w, h)
     }
 
@@ -621,16 +643,7 @@ impl Rect {
     }
 
     #[allow(clippy::too_many_arguments)]
-    fn intersects_(
-        al: scalar,
-        at: scalar,
-        ar: scalar,
-        ab: scalar,
-        bl: scalar,
-        bt: scalar,
-        br: scalar,
-        bb: scalar,
-    ) -> bool {
+    fn intersects_(al: f32, at: f32, ar: f32, ab: f32, bl: f32, bt: f32, br: f32, bb: f32) -> bool {
         let l = al.max(bl);
         let r = ar.min(br);
         let t = at.max(bt);
@@ -705,7 +718,7 @@ impl Rect {
         )
     }
 
-    pub fn as_scalars(&self) -> &[scalar; 4] {
+    pub fn as_scalars(&self) -> &[f32; 4] {
         unsafe { transmute_ref(&self.left) }
     }
 
@@ -720,12 +733,24 @@ impl Rect {
 
 impl Contains<Point> for Rect {
     fn contains(&self, p: Point) -> bool {
+        self.contains(&p)
+    }
+}
+
+impl Contains<&Point> for Rect {
+    fn contains(&self, p: &Point) -> bool {
         p.x >= self.left && p.x < self.right && p.y >= self.top && p.y < self.bottom
     }
 }
 
 impl Contains<Rect> for Rect {
     fn contains(&self, r: Rect) -> bool {
+        self.contains(&r)
+    }
+}
+
+impl Contains<&Rect> for Rect {
+    fn contains(&self, r: &Rect) -> bool {
         // TODO: can we eliminate the this->is_empty check?
         !r.is_empty()
             && !self.is_empty()
@@ -738,13 +763,19 @@ impl Contains<Rect> for Rect {
 
 impl Contains<IRect> for Rect {
     fn contains(&self, r: IRect) -> bool {
+        self.contains(&r)
+    }
+}
+
+impl Contains<&IRect> for Rect {
+    fn contains(&self, r: &IRect) -> bool {
         // TODO: can we eliminate the this->isEmpty check?
         !r.is_empty()
             && !self.is_empty()
-            && self.left <= r.left as scalar
-            && self.top <= r.top as scalar
-            && self.right >= r.right as scalar
-            && self.bottom >= r.bottom as scalar
+            && self.left <= r.left as f32
+            && self.top <= r.top as f32
+            && self.right >= r.right as f32
+            && self.bottom >= r.bottom as f32
     }
 }
 

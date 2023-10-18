@@ -16,7 +16,7 @@ fn draw_lorem_ipsum(canvas: &mut Canvas) {
     let paragraph_style = ParagraphStyle::new();
     let mut paragraph_builder = ParagraphBuilder::new(&paragraph_style, font_collection);
     let mut ts = TextStyle::new();
-    ts.set_foreground_color(Paint::default());
+    ts.set_foreground_paint(&Paint::default());
     paragraph_builder.push_style(&ts);
     paragraph_builder.add_text(LOREM_IPSUM);
     let mut paragraph = paragraph_builder.build();

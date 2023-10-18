@@ -13,7 +13,7 @@ pub fn from_svg(svg: impl AsRef<str>) -> Option<Path> {
 }
 
 pub use skia_bindings::SkParsePath_PathEncoding as PathEncoding;
-variant_name!(PathEncoding::Absolute, path_encoding_naming);
+variant_name!(PathEncoding::Absolute);
 
 impl Path {
     pub fn from_svg(svg: impl AsRef<str>) -> Option<Path> {
@@ -34,7 +34,28 @@ pub fn to_svg(path: &Path) -> String {
 }
 
 pub fn to_svg_with_encoding(path: &Path, encoding: PathEncoding) -> String {
-    let mut svg = interop::String::default();
-    unsafe { sb::SkParsePath_ToSVGString(path.native(), svg.native_mut(), encoding) };
-    svg.as_str().into()
+    interop::String::construct(|svg| {
+        unsafe { sb::C_SkParsePath_ToSVGString(path.native(), svg, encoding) };
+    })
+    .as_str()
+    .into()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Path;
+
+    #[test]
+    fn simple_path_to_svg_and_back() {
+        let mut path = Path::default();
+        path.move_to((0, 0));
+        path.line_to((100, 100));
+        path.line_to((0, 100));
+        path.close();
+
+        let svg = Path::to_svg(&path);
+        assert_eq!(svg, "M0 0L100 100L0 100L0 0Z");
+        // And back. Someone may find why they are not equal.
+        let _recreated = Path::from_svg(svg).expect("Failed to parse SVG path");
+    }
 }

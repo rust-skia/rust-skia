@@ -1,6 +1,6 @@
 use skia_safe::{
-    gpu::gl::FramebufferInfo, gpu::BackendRenderTarget, gpu::DirectContext, Color, Paint,
-    PaintStyle, Surface,
+    gpu::{self, gl::FramebufferInfo, BackendRenderTarget, DirectContext},
+    Color, Paint, PaintStyle, Surface,
 };
 use std::boxed::Box;
 
@@ -58,6 +58,7 @@ fn create_gpu_state() -> GpuState {
         FramebufferInfo {
             fboid: fboid.try_into().unwrap(),
             format: skia_safe::gpu::gl::Format::RGBA8.into(),
+            protected: skia_safe::gpu::Protected::No,
         }
     };
 
@@ -72,7 +73,7 @@ fn create_surface(gpu_state: &mut GpuState, width: i32, height: i32) -> Surface 
     let backend_render_target =
         BackendRenderTarget::new_gl((width, height), 1, 8, gpu_state.framebuffer_info);
 
-    Surface::from_backend_render_target(
+    gpu::surfaces::wrap_backend_render_target(
         &mut gpu_state.context,
         &backend_render_target,
         skia_safe::gpu::SurfaceOrigin::BottomLeft,
@@ -118,7 +119,10 @@ pub extern "C" fn draw_circle(state: *mut State, x: i32, y: i32) {
     let state = unsafe { state.as_mut() }.expect("got an invalid state pointer");
     //state.surface.canvas().clear(Color::WHITE);
     render_circle(&mut state.surface, x as f32, y as f32, 50.);
-    state.surface.flush();
+    state
+        .gpu_state
+        .context
+        .flush_and_submit_surface(&mut state.surface, None);
 }
 
 /// The main function is called by emscripten when the WASM object is created.

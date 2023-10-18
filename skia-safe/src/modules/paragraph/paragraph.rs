@@ -1,7 +1,16 @@
-use super::{PositionWithAffinity, RectHeightStyle, RectWidthStyle, TextBox};
-use crate::{interop::VecSink, prelude::*, scalar, textlayout::LineMetrics, Canvas, Point};
+use std::{ffi, fmt, ops::Range};
+
 use skia_bindings as sb;
-use std::{fmt, ops::Range};
+
+use super::{
+    LineMetrics, PositionWithAffinity, RectHeightStyle, RectWidthStyle, TextBox, TextDirection,
+    TextIndex, TextRange,
+};
+use crate::{
+    interop::{Sink, VecSink},
+    prelude::*,
+    scalar, Canvas, Font, Path, Point, Rect, Size, TextBlob, Unichar,
+};
 
 pub type Paragraph = RefHandle<sb::skia_textlayout_Paragraph>;
 unsafe_send_sync!(Paragraph);
@@ -70,6 +79,8 @@ impl Paragraph {
         unsafe { sb::C_Paragraph_paint(self.native_mut_force(), canvas.native_mut(), p.x, p.y) }
     }
 
+    /// Returns a vector of bounding boxes that enclose all text between
+    /// start and end glyph indexes, including start and excluding end
     pub fn get_rects_for_range(
         &self,
         range: Range<usize>,
@@ -87,8 +98,8 @@ impl Paragraph {
                 self.native_mut_force(),
                 range.start.try_into().unwrap(),
                 range.end.try_into().unwrap(),
-                rect_height_style,
-                rect_width_style,
+                rect_height_style.into_native(),
+                rect_width_style.into_native(),
                 VecSink::new(&mut set_tb).native_mut(),
             );
         }
@@ -96,7 +107,7 @@ impl Paragraph {
     }
 
     pub fn get_rects_for_placeholders(&self) -> Vec<TextBox> {
-        let mut result: Vec<TextBox> = Vec::new();
+        let mut result = Vec::new();
 
         let mut set_tb = |tbs: &[sb::skia_textlayout_TextBox]| {
             result = tbs.iter().map(TextBox::from_native_ref).cloned().collect();
@@ -111,6 +122,8 @@ impl Paragraph {
         result
     }
 
+    /// Returns the index of the glyph that corresponds to the provided coordinate,
+    /// with the top left corner as the origin, and +y direction as down
     pub fn get_glyph_position_at_coordinate(&self, p: impl Into<Point>) -> PositionWithAffinity {
         let p = p.into();
         let mut r = Default::default();
@@ -120,6 +133,8 @@ impl Paragraph {
         r
     }
 
+    /// Finds the first and last glyphs that define a word containing
+    /// the glyph at index offset
     pub fn get_word_boundary(&self, offset: u32) -> Range<usize> {
         let mut range: [usize; 2] = Default::default();
         unsafe {
@@ -152,23 +167,380 @@ impl Paragraph {
         unsafe { sb::C_Paragraph_markDirty(self.native_mut()) }
     }
 
+    /// This function will return the number of unresolved glyphs or
+    /// `None` if not applicable (has not been shaped yet - valid case)
     pub fn unresolved_glyphs(&mut self) -> Option<usize> {
         unsafe { sb::C_Paragraph_unresolvedGlyphs(self.native_mut()) }
             .try_into()
             .ok()
     }
 
-    // TODO: wrap visit()
+    pub fn unresolved_codepoints(&mut self) -> Vec<Unichar> {
+        let mut result = Vec::new();
+
+        let mut set_chars = |chars: &[Unichar]| {
+            result = chars.to_vec();
+        };
+
+        unsafe {
+            sb::C_Paragraph_unresolvedCodepoints(
+                self.native_mut_force(),
+                VecSink::new(&mut set_chars).native_mut(),
+            )
+        }
+
+        result
+    }
+
+    pub fn visit<'a, F>(&mut self, mut visitor: F)
+    where
+        F: FnMut(usize, Option<&'a VisitorInfo>),
+    {
+        unsafe {
+            sb::C_Paragraph_visit(
+                self.native_mut(),
+                &mut visitor as *mut F as *mut _,
+                Some(visitor_trampoline::<'a, F>),
+            );
+        }
+
+        unsafe extern "C" fn visitor_trampoline<'a, F: FnMut(usize, Option<&'a VisitorInfo>)>(
+            ctx: *mut ffi::c_void,
+            index: usize,
+            info: *const sb::skia_textlayout_Paragraph_VisitorInfo,
+        ) {
+            let info = if info.is_null() {
+                None
+            } else {
+                Some(VisitorInfo::from_native_ref(&*info))
+            };
+            (*(ctx as *mut F))(index, info)
+        }
+    }
+
+    pub fn extended_visit<'a, F>(&mut self, mut visitor: F)
+    where
+        F: FnMut(usize, Option<&'a ExtendedVisitorInfo>),
+    {
+        unsafe {
+            sb::C_Paragraph_extendedVisit(
+                self.native_mut(),
+                &mut visitor as *mut F as *mut _,
+                Some(visitor_trampoline::<'a, F>),
+            );
+        }
+
+        unsafe extern "C" fn visitor_trampoline<
+            'a,
+            F: FnMut(usize, Option<&'a ExtendedVisitorInfo>),
+        >(
+            ctx: *mut ffi::c_void,
+            index: usize,
+            info: *const sb::skia_textlayout_Paragraph_ExtendedVisitorInfo,
+        ) {
+            let info = if info.is_null() {
+                None
+            } else {
+                Some(ExtendedVisitorInfo::from_native_ref(&*info))
+            };
+            (*(ctx as *mut F))(index, info)
+        }
+    }
+
+    pub fn get_path_at(&mut self, line_number: usize) -> (usize, Path) {
+        let mut path = Path::default();
+        let unconverted_glyphs = unsafe {
+            sb::C_Paragraph_getPath(
+                self.native_mut(),
+                line_number.try_into().unwrap(),
+                path.native_mut(),
+            )
+        };
+        (unconverted_glyphs.try_into().unwrap(), path)
+    }
+
+    pub fn get_path(text_blob: &mut TextBlob) -> Path {
+        Path::construct(|p| unsafe { sb::C_Paragraph_GetPath(text_blob.native_mut(), p) })
+    }
+
+    pub fn contains_emoji(&mut self, text_blob: &mut TextBlob) -> bool {
+        unsafe { sb::C_Paragraph_containsEmoji(self.native_mut(), text_blob.native_mut()) }
+    }
+
+    pub fn contains_color_font_or_bitmap(&mut self, text_blob: &mut TextBlob) -> bool {
+        unsafe {
+            sb::C_Paragraph_containsColorFontOrBitmap(self.native_mut(), text_blob.native_mut())
+        }
+    }
+
+    pub fn get_line_number_at(&self, code_unit_index: TextIndex) -> Option<usize> {
+        // Returns -1 if `code_unit_index` is out of range.
+        unsafe { sb::C_Paragraph_getLineNumberAt(self.native(), code_unit_index) }
+            .try_into()
+            .ok()
+    }
+
+    pub fn get_line_metrics_at(&self, line_number: usize) -> Option<LineMetrics> {
+        let mut r = None;
+        let mut set_lm = |lm: &sb::skia_textlayout_LineMetrics| {
+            r = Some(LineMetrics::from_native_ref(lm));
+        };
+        unsafe {
+            sb::C_Paragraph_getLineMetricsAt(
+                self.native(),
+                line_number,
+                Sink::new(&mut set_lm).native_mut(),
+            )
+        }
+        r
+    }
+
+    pub fn get_actual_text_range(&self, line_number: usize, include_spaces: bool) -> TextRange {
+        let mut range = [0usize; 2];
+        unsafe {
+            sb::C_Paragraph_getActualTextRange(
+                self.native(),
+                line_number,
+                include_spaces,
+                range.as_mut_ptr(),
+            )
+        }
+        TextRange {
+            start: range[0],
+            end: range[1],
+        }
+    }
+
+    pub fn get_glyph_cluster_at(&self, code_unit_index: TextIndex) -> Option<GlyphClusterInfo> {
+        let mut r = None;
+        let mut set_fn = |gci: &sb::skia_textlayout_Paragraph_GlyphClusterInfo| {
+            r = Some(GlyphClusterInfo::from_native_ref(gci))
+        };
+        unsafe {
+            sb::C_Paragraph_getGlyphClusterAt(
+                self.native(),
+                code_unit_index,
+                Sink::new(&mut set_fn).native_mut(),
+            )
+        }
+        r
+    }
+
+    pub fn get_closest_glyph_cluster_at(&self, d: impl Into<Point>) -> Option<GlyphClusterInfo> {
+        let mut r = None;
+        let mut set_fn = |gci: &sb::skia_textlayout_Paragraph_GlyphClusterInfo| {
+            r = Some(GlyphClusterInfo::from_native_ref(gci))
+        };
+        let d = d.into();
+        unsafe {
+            sb::C_Paragraph_getClosestGlyphClusterAt(
+                self.native(),
+                d.x,
+                d.y,
+                Sink::new(&mut set_fn).native_mut(),
+            )
+        }
+        r
+    }
+
+    pub fn get_font_at(&self, code_unit_index: TextIndex) -> Font {
+        Font::construct(|f| unsafe { sb::C_Paragraph_getFontAt(self.native(), code_unit_index, f) })
+    }
+
+    pub fn get_fonts(&self) -> Vec<FontInfo> {
+        let mut result = Vec::new();
+        let mut set_fn = |fis: &[sb::skia_textlayout_Paragraph_FontInfo]| {
+            result = fis.iter().map(FontInfo::from_native_ref).collect();
+        };
+        unsafe { sb::C_Paragraph_getFonts(self.native(), VecSink::new(&mut set_fn).native_mut()) }
+        result
+    }
 }
 
-#[deprecated(since = "0.41.0", note = "Use Vec<TextBox>")]
-pub type TextBoxes = Vec<TextBox>;
+pub type VisitorInfo = Handle<sb::skia_textlayout_Paragraph_VisitorInfo>;
 
-#[deprecated(since = "0.41.0", note = "Use Vec<LineMetrics>")]
-pub type LineMetricsVector<'a> = Vec<LineMetrics<'a>>;
+impl NativeDrop for sb::skia_textlayout_Paragraph_VisitorInfo {
+    fn drop(&mut self) {
+        panic!("Internal error, Paragraph visitor can't be created in Rust")
+    }
+}
+
+impl fmt::Debug for VisitorInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("VisitorInfo")
+            .field("font", &self.font())
+            .field("origin", &self.origin())
+            .field("advance_x", &self.advance_x())
+            .field("count", &self.count())
+            .field("glyphs", &self.glyphs())
+            .field("positions", &self.positions())
+            .field("utf8_starts", &self.utf8_starts())
+            .field("flags", &self.flags())
+            .finish()
+    }
+}
+
+impl VisitorInfo {
+    pub fn font(&self) -> &Font {
+        Font::from_native_ref(unsafe { &*self.native().font })
+    }
+
+    pub fn origin(&self) -> Point {
+        Point::from_native_c(self.native().origin)
+    }
+
+    pub fn advance_x(&self) -> scalar {
+        self.native().advanceX
+    }
+
+    pub fn count(&self) -> usize {
+        self.native().count as usize
+    }
+
+    pub fn glyphs(&self) -> &[u16] {
+        unsafe { safer::from_raw_parts(self.native().glyphs, self.count()) }
+    }
+
+    pub fn positions(&self) -> &[Point] {
+        unsafe {
+            safer::from_raw_parts(
+                Point::from_native_ptr(self.native().positions),
+                self.count(),
+            )
+        }
+    }
+
+    pub fn utf8_starts(&self) -> &[u32] {
+        unsafe { safer::from_raw_parts(self.native().utf8Starts, self.count() + 1) }
+    }
+
+    pub fn flags(&self) -> VisitorFlags {
+        VisitorFlags::from_bits_truncate(self.native().flags)
+    }
+}
+
+pub type ExtendedVisitorInfo = Handle<sb::skia_textlayout_Paragraph_ExtendedVisitorInfo>;
+
+impl NativeDrop for sb::skia_textlayout_Paragraph_ExtendedVisitorInfo {
+    fn drop(&mut self) {
+        panic!("Internal error, Paragraph extended visitor info can't be created in Rust")
+    }
+}
+
+impl fmt::Debug for ExtendedVisitorInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("VisitorInfo")
+            .field("font", &self.font())
+            .field("origin", &self.origin())
+            .field("advance", &self.advance())
+            .field("count", &self.count())
+            .field("glyphs", &self.glyphs())
+            .field("positions", &self.positions())
+            .field("bounds", &self.bounds())
+            .field("utf8_starts", &self.utf8_starts())
+            .field("flags", &self.flags())
+            .finish()
+    }
+}
+
+impl ExtendedVisitorInfo {
+    pub fn font(&self) -> &Font {
+        Font::from_native_ref(unsafe { &*self.native().font })
+    }
+
+    pub fn origin(&self) -> Point {
+        Point::from_native_c(self.native().origin)
+    }
+
+    pub fn advance(&self) -> Size {
+        Size::from_native_c(self.native().advance)
+    }
+
+    pub fn count(&self) -> usize {
+        self.native().count as usize
+    }
+
+    pub fn glyphs(&self) -> &[u16] {
+        unsafe { safer::from_raw_parts(self.native().glyphs, self.count()) }
+    }
+
+    pub fn positions(&self) -> &[Point] {
+        unsafe {
+            safer::from_raw_parts(
+                Point::from_native_ptr(self.native().positions),
+                self.count(),
+            )
+        }
+    }
+
+    pub fn bounds(&self) -> &[Rect] {
+        let ptr = Rect::from_native_ptr(self.native().bounds);
+        unsafe { safer::from_raw_parts(ptr, self.count()) }
+    }
+
+    pub fn utf8_starts(&self) -> &[u32] {
+        unsafe { safer::from_raw_parts(self.native().utf8Starts, self.count() + 1) }
+    }
+
+    pub fn flags(&self) -> VisitorFlags {
+        VisitorFlags::from_bits_truncate(self.native().flags)
+    }
+}
+
+bitflags! {
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    pub struct VisitorFlags: u32 {
+        const WHITE_SPACE = sb::skia_textlayout_Paragraph_VisitorFlags_kWhiteSpace_VisitorFlag as _;
+    }
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub struct GlyphClusterInfo {
+    pub bounds: Rect,
+    pub text_range: TextRange,
+    pub position: TextDirection,
+}
+
+impl GlyphClusterInfo {
+    fn from_native_ref(native: &sb::skia_textlayout_Paragraph_GlyphClusterInfo) -> Self {
+        unsafe {
+            Self {
+                bounds: *Rect::from_native_ptr(&native.fBounds),
+                text_range: TextRange {
+                    start: native.fClusterTextRange.start,
+                    end: native.fClusterTextRange.end,
+                },
+                position: native.fGlyphClusterPosition,
+            }
+        }
+    }
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub struct FontInfo {
+    pub font: Font,
+    pub text_range: TextRange,
+}
+
+impl FontInfo {
+    pub fn new(font: Font, text_range: TextRange) -> Self {
+        Self { font, text_range }
+    }
+
+    fn from_native_ref(native: &sb::skia_textlayout_Paragraph_FontInfo) -> Self {
+        Self {
+            font: Font::from_native_ref(&native.fFont).clone(),
+            text_range: TextRange {
+                start: native.fTextRange.start,
+                end: native.fTextRange.end,
+            },
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {
+    use super::Paragraph;
     use crate::{
         icu,
         textlayout::{FontCollection, ParagraphBuilder, ParagraphStyle, TextStyle},
@@ -178,24 +550,11 @@ mod tests {
     #[test]
     #[serial_test::serial]
     fn test_line_metrics() {
-        icu::init();
-
-        let mut font_collection = FontCollection::new();
-        font_collection.set_default_font_manager(FontMgr::new(), None);
-        let paragraph_style = ParagraphStyle::new();
-        let mut paragraph_builder = ParagraphBuilder::new(&paragraph_style, font_collection);
-        let ts = TextStyle::new();
-        paragraph_builder.push_style(&ts);
-        paragraph_builder.add_text(LOREM_IPSUM);
-        let mut paragraph = paragraph_builder.build();
-        paragraph.layout(256.0);
-
+        let paragraph = mk_lorem_ipsum_paragraph();
         let line_metrics = paragraph.get_line_metrics();
         for (line, lm) in line_metrics.iter().enumerate() {
             println!("line {}: width: {}", line + 1, lm.width)
         }
-
-        static LOREM_IPSUM: &str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at leo at nulla tincidunt placerat. Proin eget purus augue. Quisque et est ullamcorper, pellentesque felis nec, pulvinar massa. Aliquam imperdiet, nulla ut dictum euismod, purus dui pulvinar risus, eu suscipit elit neque ac est. Nullam eleifend justo quis placerat ultricies. Vestibulum ut elementum velit. Praesent et dolor sit amet purus bibendum mattis. Aliquam erat volutpat.";
     }
 
     /// Regression test for <https://github.com/rust-skia/rust-skia/issues/585>
@@ -216,5 +575,51 @@ mod tests {
 
         let line_metrics = &paragraph.get_line_metrics()[0];
         line_metrics.get_style_metrics(line_metrics.start_index..line_metrics.end_index);
+    }
+
+    #[test]
+    #[serial_test::serial]
+    fn test_font_infos() {
+        let paragraph = mk_lorem_ipsum_paragraph();
+        let infos = paragraph.get_fonts();
+        assert!(!infos.is_empty())
+    }
+
+    #[test]
+    #[serial_test::serial]
+    fn test_visit() {
+        let mut paragraph = mk_lorem_ipsum_paragraph();
+        let visitor = |line, info| {
+            println!("line {}: {:?}", line, info);
+        };
+        paragraph.visit(visitor);
+    }
+
+    #[test]
+    #[serial_test::serial]
+    fn test_extended_visit() {
+        let mut paragraph = mk_lorem_ipsum_paragraph();
+        let visitor = |line, info| {
+            println!("line {}: {:?}", line, info);
+        };
+        paragraph.extended_visit(visitor);
+    }
+
+    fn mk_lorem_ipsum_paragraph() -> Paragraph {
+        icu::init();
+
+        let mut font_collection = FontCollection::new();
+        font_collection.set_default_font_manager(FontMgr::new(), None);
+        let paragraph_style = ParagraphStyle::new();
+        let mut paragraph_builder = ParagraphBuilder::new(&paragraph_style, font_collection);
+        let ts = TextStyle::new();
+        paragraph_builder.push_style(&ts);
+        paragraph_builder.add_text(LOREM_IPSUM);
+        let mut paragraph = paragraph_builder.build();
+        paragraph.layout(256.0);
+
+        return paragraph;
+
+        static LOREM_IPSUM: &str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at leo at nulla tincidunt placerat. Proin eget purus augue. Quisque et est ullamcorper, pellentesque felis nec, pulvinar massa. Aliquam imperdiet, nulla ut dictum euismod, purus dui pulvinar risus, eu suscipit elit neque ac est. Nullam eleifend justo quis placerat ultricies. Vestibulum ut elementum velit. Praesent et dolor sit amet purus bibendum mattis. Aliquam erat volutpat.";
     }
 }

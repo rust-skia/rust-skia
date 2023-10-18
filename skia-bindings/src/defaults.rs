@@ -1,5 +1,5 @@
-//! This file contains Default trait implementations for types that are
-//! re-exported from skia-safe.
+//! This file contains Default trait implementations for types that are re-exported from skia-safe.
+#![allow(clippy::derivable_impls)]
 
 use crate::{
     SkBlendMode, SkBlurStyle, SkCanvas_Lattice_RectType, SkClipOp, SkPaint_Cap, SkPaint_Join,
@@ -75,18 +75,6 @@ pub mod textlayout {
         }
     }
 
-    impl Default for crate::skia_textlayout_RectHeightStyle {
-        fn default() -> Self {
-            Self::Tight
-        }
-    }
-
-    impl Default for crate::skia_textlayout_RectWidthStyle {
-        fn default() -> Self {
-            Self::Tight
-        }
-    }
-
     impl Default for crate::skia_textlayout_TextAlign {
         fn default() -> Self {
             Self::Left
@@ -126,12 +114,6 @@ pub mod textlayout {
     impl Default for crate::skia_textlayout_StyleType {
         fn default() -> Self {
             Self::AllAttributes
-        }
-    }
-
-    impl Default for crate::skia_textlayout_PlaceholderAlignment {
-        fn default() -> Self {
-            Self::Baseline
         }
     }
 }

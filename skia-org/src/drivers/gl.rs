@@ -1,6 +1,8 @@
-use crate::{artifact, drivers::DrawingDriver, Driver};
-use skia_safe::{gpu, Budgeted, Canvas, ImageInfo, Surface};
 use std::path::Path;
+
+use skia_safe::{gpu, Canvas, ImageInfo};
+
+use crate::{artifact, drivers::DrawingDriver, Driver};
 
 pub struct OpenGl {
     context: gpu::DirectContext,
@@ -23,9 +25,9 @@ impl DrawingDriver for OpenGl {
         func: impl Fn(&mut Canvas),
     ) {
         let image_info = ImageInfo::new_n32_premul((width * 2, height * 2), None);
-        let mut surface = Surface::new_render_target(
+        let mut surface = gpu::surfaces::render_target(
             &mut self.context,
-            Budgeted::Yes,
+            gpu::Budgeted::Yes,
             &image_info,
             None,
             gpu::SurfaceOrigin::BottomLeft,

@@ -3,10 +3,13 @@ use crate::{
     SamplingOptions,
 };
 use skia_bindings::{self as sb, SkPixmap};
-use std::{convert::TryInto, ffi::c_void, fmt, mem, os::raw, ptr, slice};
+use std::{ffi::c_void, fmt, marker::PhantomData, mem, os::raw, ptr, slice};
 
-pub type Pixmap = Handle<SkPixmap>;
-unsafe_send_sync!(Pixmap);
+#[repr(transparent)]
+pub struct Pixmap<'a> {
+    inner: Handle<SkPixmap>,
+    pd: PhantomData<&'a mut [u8]>,
+}
 
 impl NativeDrop for SkPixmap {
     fn drop(&mut self) {
@@ -14,7 +17,7 @@ impl NativeDrop for SkPixmap {
     }
 }
 
-impl Default for Pixmap {
+impl Default for Pixmap<'_> {
     fn default() -> Self {
         Self::from_native_c(SkPixmap {
             fPixels: ptr::null(),
@@ -24,7 +27,7 @@ impl Default for Pixmap {
     }
 }
 
-impl fmt::Debug for Pixmap {
+impl fmt::Debug for Pixmap<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Pixmap")
             .field("row_bytes", &self.row_bytes())
@@ -33,24 +36,20 @@ impl fmt::Debug for Pixmap {
     }
 }
 
-impl Pixmap {
-    pub fn new<'pixels>(
-        info: &ImageInfo,
-        pixels: &'pixels [u8],
-        row_bytes: usize,
-    ) -> Borrows<'pixels, Self> {
-        let width: usize = info.width().try_into().unwrap();
-        let height: usize = info.height().try_into().unwrap();
+impl<'pixels> Pixmap<'pixels> {
+    pub fn new(info: &ImageInfo, pixels: &'pixels mut [u8], row_bytes: usize) -> Option<Self> {
+        if row_bytes < info.min_row_bytes() {
+            return None;
+        }
+        if pixels.len() < info.compute_byte_size(row_bytes) {
+            return None;
+        }
 
-        assert!(row_bytes >= width * info.bytes_per_pixel());
-        assert!(pixels.len() >= height * row_bytes);
-
-        let pm = Pixmap::from_native_c(SkPixmap {
-            fPixels: pixels.as_ptr() as _,
+        Some(Pixmap::from_native_c(SkPixmap {
+            fPixels: pixels.as_mut_ptr() as _,
             fRowBytes: row_bytes,
             fInfo: info.native().clone(),
-        });
-        pm.borrows(pixels)
+        }))
     }
 
     pub fn reset(&mut self) -> &mut Self {
@@ -58,7 +57,7 @@ impl Pixmap {
         self
     }
 
-    // TODO: Add reset function that borrows pixels?
+    // TODO: reset() function that re-borrows pixels?
 
     pub fn set_color_space(&mut self, color_space: impl Into<Option<ColorSpace>>) -> &mut Self {
         unsafe {
@@ -67,7 +66,8 @@ impl Pixmap {
         self
     }
 
-    pub fn extract_subset(&self, area: impl AsRef<IRect>) -> Option<Pixmap> {
+    #[must_use]
+    pub fn extract_subset(&self, area: impl AsRef<IRect>) -> Option<Self> {
         let mut pixmap = Pixmap::default();
         unsafe {
             self.native()
@@ -84,8 +84,7 @@ impl Pixmap {
         self.native().fRowBytes
     }
 
-    #[allow(clippy::missing_safety_doc)]
-    pub unsafe fn addr(&self) -> *const c_void {
+    pub fn addr(&self) -> *const c_void {
         self.native().fPixels
     }
 
@@ -143,6 +142,12 @@ impl Pixmap {
         Color::from_native_c(unsafe { self.native().getColor(p.x, p.y) })
     }
 
+    pub fn get_color_4f(&self, p: impl Into<IPoint>) -> Color4f {
+        let p = p.into();
+        self.assert_pixel_exists(p);
+        Color4f::from_native_c(unsafe { self.native().getColor4f(p.x, p.y) })
+    }
+
     pub fn get_alpha_f(&self, p: impl Into<IPoint>) -> f32 {
         let p = p.into();
         self.assert_pixel_exists(p);
@@ -152,28 +157,27 @@ impl Pixmap {
     // Helper to test if the pixel does exist physically in memory.
     fn assert_pixel_exists(&self, p: impl Into<IPoint>) {
         let p = p.into();
-        assert!(!unsafe { self.addr() }.is_null());
+        assert!(!self.addr().is_null());
         assert!(p.x >= 0 && p.x < self.width());
         assert!(p.y >= 0 && p.y < self.height());
     }
 
-    #[allow(clippy::missing_safety_doc)]
-    pub unsafe fn addr_at(&self, p: impl Into<IPoint>) -> *const c_void {
+    pub fn addr_at(&self, p: impl Into<IPoint>) -> *const c_void {
         let p = p.into();
-        (self.addr() as *const raw::c_char).add(self.info().compute_offset(p, self.row_bytes()))
-            as _
+        unsafe {
+            (self.addr() as *const raw::c_char).add(self.info().compute_offset(p, self.row_bytes()))
+                as _
+        }
     }
 
     // TODO: addr8(), addr16(), addr32(), addr64(), addrF16(),
     //       addr8_at(), addr16_at(), addr32_at(), addr64_at(), addrF16_at()
 
-    #[allow(clippy::missing_safety_doc)]
-    pub unsafe fn writable_addr(&self) -> *mut c_void {
+    pub fn writable_addr(&self) -> *mut c_void {
         self.addr() as _
     }
 
-    #[allow(clippy::missing_safety_doc)]
-    pub unsafe fn writable_addr_at(&self, p: impl Into<IPoint>) -> *mut c_void {
+    pub fn writable_addr_at(&self, p: impl Into<IPoint>) -> *mut c_void {
         self.addr_at(p) as _
     }
 
@@ -208,10 +212,16 @@ impl Pixmap {
     }
 
     /// Access the underlying pixels as a byte array. This is a rust-skia specific function.
-    pub fn bytes(&self) -> Option<&[u8]> {
-        let addr = unsafe { self.addr() }.into_option()?;
+    pub fn bytes(&self) -> Option<&'pixels [u8]> {
+        let addr = self.addr().into_option()?;
         let len = self.compute_byte_size();
         return Some(unsafe { slice::from_raw_parts(addr as *const u8, len) });
+    }
+
+    pub fn bytes_mut(&mut self) -> Option<&'pixels mut [u8]> {
+        let addr = self.writable_addr().into_option()?;
+        let len = self.compute_byte_size();
+        return Some(unsafe { slice::from_raw_parts_mut(addr.as_ptr() as *mut u8, len) });
     }
 
     /// Access the underlying pixels. This is a rust-skia specific function.
@@ -219,8 +229,8 @@ impl Pixmap {
     /// The `Pixel` type must implement the _unsafe_ trait [`Pixel`] and must return `true` in
     /// [`Pixel::matches_color_type()`] when matched against the [`ColorType`] of this Pixmap's
     /// pixels.
-    pub fn pixels<P: Pixel>(&self) -> Option<&[P]> {
-        let addr = unsafe { self.addr() }.into_option()?;
+    pub fn pixels<P: Pixel>(&self) -> Option<&'pixels [P]> {
+        let addr = self.addr().into_option()?;
 
         let info = self.info();
         let ct = info.color_type();
@@ -234,26 +244,19 @@ impl Pixmap {
         None
     }
 
-    pub fn read_pixels_to_pixmap(&self, dst: &Pixmap, src: impl Into<IPoint>) -> bool {
-        let row_bytes = dst.row_bytes();
-        let len = usize::try_from(dst.height()).unwrap() * row_bytes;
-        unsafe {
-            let addr = dst.writable_addr() as *mut raw::c_char;
-            self.read_pixels(
-                dst.info(),
-                safer::from_raw_parts_mut(addr, len),
-                row_bytes,
-                src,
-            )
-        }
+    pub fn read_pixels_to_pixmap(&self, dst: &mut Pixmap, src: impl Into<IPoint>) -> bool {
+        let Some(dst_bytes) = dst.bytes_mut() else {
+            return false;
+        };
+        self.read_pixels(dst.info(), dst_bytes, dst.row_bytes(), src)
     }
 
-    pub fn scale_pixels(&self, dst: &Pixmap, sampling: impl Into<SamplingOptions>) -> bool {
+    pub fn scale_pixels(&self, dst: &mut Pixmap, sampling: impl Into<SamplingOptions>) -> bool {
         let sampling = sampling.into();
         unsafe { self.native().scalePixels(dst.native(), sampling.native()) }
     }
 
-    pub fn erase(&self, color: impl Into<Color>, subset: Option<&IRect>) -> bool {
+    pub fn erase(&mut self, color: impl Into<Color>, subset: Option<&IRect>) -> bool {
         let color = color.into().into_native();
         unsafe {
             match subset {
@@ -263,24 +266,38 @@ impl Pixmap {
         }
     }
 
-    pub fn erase_4f(&self, color: impl AsRef<Color4f>, subset: Option<&IRect>) -> bool {
-        self.erase_with_colorspace(color, None, subset)
-    }
-
-    pub fn erase_with_colorspace(
-        &self,
-        color: impl AsRef<Color4f>,
-        cs: Option<&ColorSpace>,
-        subset: Option<&IRect>,
-    ) -> bool {
+    pub fn erase_4f(&mut self, color: impl AsRef<Color4f>, subset: Option<&IRect>) -> bool {
         let color = color.as_ref();
         unsafe {
-            self.native().erase1(
-                color.native(),
-                cs.native_ptr_or_null_mut_force(),
-                subset.native_ptr_or_null(),
-            )
+            self.native()
+                .erase1(color.native(), subset.native_ptr_or_null())
         }
+    }
+
+    fn from_native_c(pixmap: SkPixmap) -> Self {
+        Self {
+            inner: Handle::from_native_c(pixmap),
+            pd: PhantomData,
+        }
+    }
+
+    #[must_use]
+    pub(crate) fn from_native_ref(n: &SkPixmap) -> &Self {
+        unsafe { transmute_ref(n) }
+    }
+
+    #[must_use]
+    pub(crate) fn from_native_ptr(np: *const SkPixmap) -> *const Self {
+        // Should be safe as long `Pixmap` is represented with repr(Transparent).
+        np as _
+    }
+
+    pub(crate) fn native_mut(&mut self) -> &mut SkPixmap {
+        self.inner.native_mut()
+    }
+
+    pub(crate) fn native(&self) -> &SkPixmap {
+        self.inner.native()
     }
 }
 
@@ -358,5 +375,35 @@ unsafe impl Pixel for Color {
 unsafe impl Pixel for Color4f {
     fn matches_color_type(ct: ColorType) -> bool {
         ct == ColorType::RGBAF32
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn pixmap_mutably_borrows_pixels() {
+        let mut pixels = [0u8; 2 * 2 * 4];
+        let info = ImageInfo::new(
+            (2, 2),
+            ColorType::RGBA8888,
+            AlphaType::Premul,
+            ColorSpace::new_srgb(),
+        );
+        let mut pixmap = Pixmap::new(&info, &mut pixels, info.min_row_bytes()).unwrap();
+        // this must fail to compile:
+        // let _pixel = pixels[0];
+        // use `.bytes()`, or `bytes_mut()` instead.
+        pixmap.reset();
+    }
+
+    #[test]
+    fn addr_may_return_null_from_a_default_pixmap() {
+        let pixmap = Pixmap::default();
+        assert!(pixmap.addr().is_null());
+        assert!(pixmap.writable_addr().is_null());
+        assert!(pixmap.addr_at((10, 10)).is_null());
+        assert!(pixmap.writable_addr_at((10, 10)).is_null());
     }
 }

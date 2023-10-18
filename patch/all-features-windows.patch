@@ -3,11 +3,11 @@ index eca516a4..6a697344 100644
 --- a/skia-bindings/Cargo.toml
 +++ b/skia-bindings/Cargo.toml
 @@ -36,7 +36,7 @@ skia = "m91-0.39.3"
- depot_tools = "fade894"
+ depot_tools = "73a2624"
  
  [features]
 -default = ["binary-cache", "embed-icudtl"]
-+default = ["binary-cache", "embed-icudtl", "gl", "vulkan", "d3d", "textlayout", "webp"]
++default = ["binary-cache", "embed-icudtl", "gl", "vulkan", "d3d", "textlayout", "svg", "webp"]
  gl = []
  egl = []
  wayland = []
@@ -20,7 +20,7 @@ index 3c085d6b..321d86b0 100644
  
  [features]
 -default = []
-+default = ["gl", "vulkan", "d3d", "textlayout", "webp"]
++default = ["gl", "vulkan", "d3d", "textlayout", "svg", "webp"]
  gl = ["offscreen_gl_context", "sparkle", "skia-safe/gl"]
  egl = ["gl", "skia-safe/egl"]
  x11 = ["gl", "skia-safe/x11"]
@@ -33,7 +33,7 @@ index 6ddd6479..0f84729f 100644
  
  [features]
 -default = ["binary-cache", "embed-icudtl"]
-+default = ["binary-cache", "embed-icudtl", "gl", "vulkan", "d3d", "textlayout", "webp"]
- gl = ["gpu", "skia-bindings/gl"]
- egl = ["gl", "skia-bindings/egl"]
- x11 = ["gl", "skia-bindings/x11"]
++default = ["binary-cache", "embed-icudtl", "gl", "vulkan", "d3d", "textlayout", "svg", "webp"]
+ all-linux = ["gl", "egl", "vulkan", "x11", "wayland", "textlayout", "svg", "webp"]
+ all-windows = ["gl", "vulkan", "d3d", "textlayout", "svg", "webp"]
+ all-macos = ["gl", "vulkan", "metal", "textlayout", "svg", "webp"]

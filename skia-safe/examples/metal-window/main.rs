@@ -9,20 +9,16 @@ fn main() {
 }
 
 #[cfg(all(target_os = "macos", feature = "metal"))]
-use skia_safe::{scalar, Canvas, Color4f, ColorType, Paint, Point, Rect, Size, Surface};
+use skia_safe::{scalar, Canvas, Color4f, ColorType, Paint, Point, Rect, Size};
 
 #[cfg(all(target_os = "macos", feature = "metal"))]
 fn main() {
     use cocoa::{appkit::NSView, base::id as cocoa_id};
-
     use core_graphics_types::geometry::CGSize;
-
     use foreign_types_shared::{ForeignType, ForeignTypeRef};
     use metal_rs::{Device, MTLPixelFormat, MetalLayer};
     use objc::{rc::autoreleasepool, runtime::YES};
-
-    use skia_safe::gpu::{mtl, BackendRenderTarget, DirectContext, SurfaceOrigin};
-
+    use skia_safe::gpu::{self, mtl, BackendRenderTarget, DirectContext, SurfaceOrigin};
     use winit::{
         dpi::LogicalSize,
         event::{Event, WindowEvent},
@@ -102,7 +98,7 @@ fn main() {
                                 &texture_info,
                             );
 
-                            Surface::from_backend_render_target(
+                            gpu::surfaces::wrap_backend_render_target(
                                 &mut context,
                                 &backend_render_target,
                                 SurfaceOrigin::TopLeft,
@@ -115,7 +111,7 @@ fn main() {
 
                         draw(surface.canvas());
 
-                        surface.flush_and_submit();
+                        context.flush_and_submit();
                         drop(surface);
 
                         let command_buffer = command_queue.new_command_buffer();

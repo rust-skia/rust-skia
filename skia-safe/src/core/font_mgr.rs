@@ -78,7 +78,7 @@ impl FontStyleSet {
     }
 
     pub fn new_empty() -> Self {
-        FontStyleSet::from_ptr(unsafe { SkFontStyleSet::CreateEmpty() }).unwrap()
+        FontStyleSet::from_ptr(unsafe { sb::C_SkFontStyleSet_CreateEmpty() }).unwrap()
     }
 }
 
@@ -110,6 +110,10 @@ impl FontMgr {
         FontMgr::from_ptr(unsafe { sb::C_SkFontMgr_RefDefault() }).unwrap()
     }
 
+    pub fn empty() -> Self {
+        FontMgr::from_ptr(unsafe { sb::C_SkFontMgr_RefEmpty() }).unwrap()
+    }
+
     pub fn count_families(&self) -> usize {
         unsafe { self.native().countFamilies().try_into().unwrap() }
     }
@@ -135,13 +139,18 @@ impl FontMgr {
 
     pub fn new_style_set(&self, index: usize) -> FontStyleSet {
         assert!(index < self.count_families());
-        FontStyleSet::from_ptr(unsafe { self.native().createStyleSet(index.try_into().unwrap()) })
-            .unwrap()
+        FontStyleSet::from_ptr(unsafe {
+            sb::C_SkFontMgr_createStyleSet(self.native(), index.try_into().unwrap())
+        })
+        .unwrap()
     }
 
     pub fn match_family(&self, family_name: impl AsRef<str>) -> FontStyleSet {
         let family_name = CString::new(family_name.as_ref()).unwrap();
-        FontStyleSet::from_ptr(unsafe { self.native().matchFamily(family_name.as_ptr()) }).unwrap()
+        FontStyleSet::from_ptr(unsafe {
+            sb::C_SkFontMgr_matchFamily(self.native(), family_name.as_ptr())
+        })
+        .unwrap()
     }
 
     pub fn match_family_style(
@@ -151,8 +160,7 @@ impl FontMgr {
     ) -> Option<Typeface> {
         let family_name = CString::new(family_name.as_ref()).unwrap();
         Typeface::from_ptr(unsafe {
-            self.native()
-                .matchFamilyStyle(family_name.as_ptr(), style.native())
+            sb::C_SkFontMgr_matchFamilyStyle(self.native(), family_name.as_ptr(), style.native())
         })
     }
 
@@ -171,7 +179,8 @@ impl FontMgr {
         let mut bcp_47: Vec<*const c_char> = bcp_47.iter().map(|cs| cs.as_ptr()).collect();
 
         Typeface::from_ptr(unsafe {
-            self.native().matchFamilyStyleCharacter(
+            sb::C_SkFontMgr_matchFamilyStyleCharacter(
+                self.native(),
                 family_name.as_ptr(),
                 style.native(),
                 bcp_47.as_mut_ptr(),
@@ -217,18 +226,18 @@ mod tests {
     fn create_all_typefaces() {
         let font_mgr = FontMgr::default();
         let families = font_mgr.count_families();
-        println!("FontMgr families: {}", families);
+        println!("FontMgr families: {families}");
         // test requires that the font manager returns at least one family for now.
         assert!(families > 0);
         // print all family names and styles
         for i in 0..families {
             let name = font_mgr.family_name(i);
-            println!("font_family: {}", name);
+            println!("font_family: {name}");
             let mut style_set = font_mgr.new_style_set(i);
             for style_index in 0..style_set.count() {
                 let (_, style_name) = style_set.style(style_index);
                 if let Some(style_name) = style_name {
-                    println!("  style: {}", style_name);
+                    println!("  style: {style_name}");
                 }
                 let face = style_set.new_typeface(style_index);
                 drop(face);

@@ -1,8 +1,9 @@
 use crate::drivers::DrawingDriver;
 use clap::Parser;
+use std::path::{Path, PathBuf};
+
 #[cfg(feature = "gl")]
 use offscreen_gl_context::{GLContext, GLVersion, NativeGLContext};
-use std::path::{Path, PathBuf};
 
 #[cfg(feature = "vulkan")]
 extern crate ash;
@@ -32,7 +33,7 @@ struct Arguments {
     out_path: PathBuf,
     #[clap(
         long,
-        arg_enum,
+        value_enum,
         help = "In addition with the CPU, render with the given driver."
     )]
     driver: Vec<Driver>,
@@ -61,8 +62,17 @@ fn main() {
         draw_all(&mut drivers::Svg::new(), &out_path);
     }
 
+    #[cfg(feature = "svg")]
+    {
+        use drivers::render_svg::*;
+        if drivers.contains(&Driver::RenderSvg) {
+            draw_all(&mut RenderSvg::new(), &out_path);
+        }
+    }
+
     #[cfg(feature = "gl")]
     {
+        use drivers::gl::*;
         if drivers.contains(&Driver::OpenGl) {
             let context = GLContext::<NativeGLContext>::create(
                 sparkle::gl::GlType::Gl,
@@ -72,7 +82,7 @@ fn main() {
             .unwrap();
 
             context.make_current().unwrap();
-            draw_all(&mut drivers::OpenGl::new(), &out_path);
+            draw_all(&mut OpenGl::new(), &out_path);
         }
 
         if drivers.contains(&Driver::OpenGlEs) {
@@ -84,23 +94,23 @@ fn main() {
             .unwrap();
 
             context.make_current().unwrap();
-            draw_all(&mut drivers::OpenGl::new(), &out_path);
+            draw_all(&mut OpenGl::new(), &out_path);
         }
     }
 
     #[cfg(feature = "vulkan")]
     {
-        use drivers::vulkan::AshGraphics;
+        use drivers::vulkan::{AshGraphics, Vulkan};
 
         if drivers.contains(&Driver::Vulkan) {
             match AshGraphics::vulkan_version() {
                 Some((major, minor, patch)) => {
-                    println!("Detected Vulkan version {}.{}.{}", major, minor, patch)
+                    println!("Detected Vulkan version {major}.{minor}.{patch}")
                 }
                 None => println!("Failed to detect Vulkan version, falling back to 1.0.0"),
             }
 
-            draw_all(&mut drivers::Vulkan::new(), &out_path)
+            draw_all(&mut Vulkan::new(), &out_path)
         }
     }
 
@@ -138,7 +148,6 @@ fn main() {
 }
 
 pub(crate) mod resources {
-
     use skia_safe::{Data, Image};
 
     pub fn color_wheel() -> Image {

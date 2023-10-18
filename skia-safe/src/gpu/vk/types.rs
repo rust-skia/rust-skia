@@ -3,12 +3,12 @@ use crate::{
     prelude::*,
 };
 use skia_bindings::{
-    self as sb, GrVkAlloc, GrVkBackendMemory, GrVkDrawableInfo, GrVkImageInfo, GrVkSurfaceInfo,
-    GrVkYcbcrConversionInfo,
+    self as sb, skgpu_VulkanBackendMemory, GrVkAlloc, GrVkDrawableInfo, GrVkImageInfo,
+    GrVkSurfaceInfo, GrVkYcbcrConversionInfo,
 };
 use std::{ffi::CStr, os::raw, ptr};
 
-pub type GraphicsBackendMemory = GrVkBackendMemory;
+pub type GraphicsBackendMemory = skgpu_VulkanBackendMemory;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
@@ -44,10 +44,11 @@ impl PartialEq for Alloc {
 }
 
 bitflags! {
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct AllocFlag : u32 {
-        const NONCOHERENT = sb::GrVkAlloc_Flag_kNoncoherent_Flag as _;
-        const MAPPABLE = sb::GrVkAlloc_Flag_kMappable_Flag as _;
-        const LAZILY_ALLOCATED = sb::GrVkAlloc_Flag_kLazilyAllocated_Flag as _;
+        const NONCOHERENT = sb::skgpu_VulkanAlloc_Flag::kNoncoherent_Flag as _;
+        const MAPPABLE = sb::skgpu_VulkanAlloc_Flag::kMappable_Flag as _;
+        const LAZILY_ALLOCATED = sb::skgpu_VulkanAlloc_Flag::kLazilyAllocated_Flag as _;
     }
 }
 

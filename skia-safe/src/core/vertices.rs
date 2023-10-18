@@ -1,4 +1,5 @@
 use crate::{prelude::*, Color, Point, Rect};
+use sb::SkNVRefCnt;
 use skia_bindings::{self as sb, SkPoint, SkVertices, SkVertices_Builder};
 use std::{fmt, ptr, slice};
 
@@ -16,10 +17,11 @@ pub struct Bone {
 }
 
 pub use skia_bindings::SkVertices_VertexMode as VertexMode;
-variant_name!(VertexMode::Triangles, vertex_mode_naming);
+variant_name!(VertexMode::Triangles);
 
 pub type Vertices = RCHandle<SkVertices>;
 unsafe_send_sync!(Vertices);
+require_base_type!(SkVertices, SkNVRefCnt);
 
 impl NativeRefCounted for SkVertices {
     fn _ref(&self) {
@@ -189,8 +191,12 @@ impl Vertices {
 }
 
 bitflags! {
-    pub struct BuilderFlags: u32 {
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    pub struct BuilderFlags: u32
+    {
+        #[allow(clippy::unnecessary_cast)]
         const HAS_TEX_COORDS = sb::SkVertices_BuilderFlags_kHasTexCoords_BuilderFlag as u32;
+        #[allow(clippy::unnecessary_cast)]
         const HAS_COLORS = sb::SkVertices_BuilderFlags_kHasColors_BuilderFlag as u32;
     }
 }

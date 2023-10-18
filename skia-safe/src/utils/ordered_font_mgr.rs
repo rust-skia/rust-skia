@@ -7,6 +7,7 @@ use std::{
 };
 
 pub type OrderedFontMgr = RCHandle<SkOrderedFontMgr>;
+require_base_type!(SkOrderedFontMgr, sb::SkFontMgr);
 
 impl NativeRefCountedBase for SkOrderedFontMgr {
     type Base = SkRefCntBase;

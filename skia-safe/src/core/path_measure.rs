@@ -11,10 +11,11 @@ impl NativeDrop for SkPathMeasure {
 }
 
 bitflags! {
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct MatrixFlags : u32 {
         const GET_POSITION = sb::SkPathMeasure_MatrixFlags_kGetPosition_MatrixFlag as _;
         const GET_TANGENT = sb::SkPathMeasure_MatrixFlags_kGetTangent_MatrixFlag as _;
-        const GET_POS_AND_TAN = Self::GET_POSITION.bits | Self::GET_TANGENT.bits;
+        const GET_POS_AND_TAN = Self::GET_POSITION.bits() | Self::GET_TANGENT.bits();
     }
 }
 
@@ -82,7 +83,8 @@ impl PathMeasure {
         unsafe { self.native_mut().getLength() }
     }
 
-    // TODO: rename to get_pos_tan(), because the function has arguments?
+    // TODO: rename to get_pos_tan(), because the function expects arguments?
+    #[must_use]
     pub fn pos_tan(&mut self, distance: scalar) -> Option<(Point, Vector)> {
         let mut position = Point::default();
         let mut tangent = Vector::default();
@@ -93,7 +95,8 @@ impl PathMeasure {
         .if_true_some((position, tangent))
     }
 
-    // TODO: rename to get_matrix(), because the function has arguments?
+    // TODO: rename to get_matrix(), because the function expects arguments?
+    #[must_use]
     pub fn matrix(
         &mut self,
         distance: scalar,

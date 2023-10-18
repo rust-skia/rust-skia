@@ -2,10 +2,13 @@ use crate::{prelude::*, scalar, Canvas, Color, Matrix, Path, Point3, Rect};
 use skia_bindings::{self as sb, SkShadowUtils};
 
 bitflags! {
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct ShadowFlags: u32 {
+        #[allow(clippy::unnecessary_cast)]
         const TRANSPARENT_OCCLUDER = sb::SkShadowFlags_kTransparentOccluder_ShadowFlag as u32;
+        #[allow(clippy::unnecessary_cast)]
         const GEOMETRIC_ONLY = sb::SkShadowFlags_kGeometricOnly_ShadowFlag as u32;
-        const ALL = Self::TRANSPARENT_OCCLUDER.bits | Self::GEOMETRIC_ONLY.bits;
+        const ALL = Self::TRANSPARENT_OCCLUDER.bits() | Self::GEOMETRIC_ONLY.bits();
     }
 }
 

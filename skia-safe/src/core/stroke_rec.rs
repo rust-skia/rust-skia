@@ -3,10 +3,10 @@ use skia_bindings::{self as sb, SkStrokeRec};
 use std::fmt;
 
 pub use sb::SkStrokeRec_InitStyle as InitStyle;
-variant_name!(InitStyle::Hairline, init_style_naming);
+variant_name!(InitStyle::Hairline);
 
 pub use sb::SkStrokeRec_Style as Style;
-variant_name!(Style::Stroke, style_naming);
+variant_name!(Style::Stroke);
 
 pub type StrokeRec = Handle<SkStrokeRec>;
 unsafe_send_sync!(StrokeRec);

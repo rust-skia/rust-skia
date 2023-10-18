@@ -1,5 +1,6 @@
 pub mod sk64 {
-    use crate::{SK_MAX_S32, SK_MIN_S32};
+    const SK_MAX_S32: i32 = std::i32::MAX;
+    const SK_MIN_S32: i32 = -SK_MAX_S32;
 
     pub fn pin_to_s32(x: i64) -> i32 {
         if x < i64::from(SK_MIN_S32) {

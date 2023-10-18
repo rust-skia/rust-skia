@@ -18,6 +18,7 @@ pub mod variation {
 
     impl Axis {
         pub const fn new(tag: FourByteTag, min: f32, def: f32, max: f32, hidden: bool) -> Self {
+            #[allow(clippy::bool_to_int_with_if)]
             Axis {
                 tag,
                 min,

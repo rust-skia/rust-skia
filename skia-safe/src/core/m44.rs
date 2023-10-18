@@ -1,9 +1,8 @@
 use crate::{prelude::*, scalar, Matrix, Rect, Scalars};
-use bitflags::_core::ops::{AddAssign, MulAssign};
 use skia_bindings::{self as sb, SkM44, SkV2, SkV3, SkV4};
 use std::{
     f32,
-    ops::{Add, Div, DivAssign, Index, Mul, Neg, Sub, SubAssign},
+    ops::{Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Neg, Sub, SubAssign},
     slice,
 };
 
@@ -102,6 +101,14 @@ impl Mul<V2> for scalar {
 
     fn mul(self, v: V2) -> Self::Output {
         V2::new(v.x * self, v.y * self)
+    }
+}
+
+impl Div<V2> for scalar {
+    type Output = V2;
+
+    fn div(self, v: V2) -> Self::Output {
+        V2::new(self / v.x, self / v.y)
     }
 }
 
@@ -284,6 +291,22 @@ native_transmutable!(SkV4, V4, v4_layout);
 impl V4 {
     pub const fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
         Self { x, y, z, w }
+    }
+
+    pub fn length_squared(&self) -> scalar {
+        Self::dot(self, self)
+    }
+
+    pub fn length(&self) -> scalar {
+        scalar::sqrt(Self::dot(self, self))
+    }
+
+    pub fn dot(&self, b: &Self) -> scalar {
+        self.x * b.x + self.y * b.y + self.z * b.z + self.w * b.w
+    }
+
+    pub fn normalize(&self) -> Self {
+        (*self) * (1.0 / self.length())
     }
 
     const COMPONENTS: usize = 4;
@@ -698,6 +721,7 @@ impl M44 {
         self.mat.are_finite()
     }
 
+    #[must_use]
     pub fn invert(&self) -> Option<M44> {
         let mut m = Self::default();
         unsafe { self.native().invert(m.native_mut()) }.if_true_some(m)

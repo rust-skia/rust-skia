@@ -77,7 +77,7 @@ impl Width {
 }
 
 pub use skia_bindings::SkFontStyle_Slant as Slant;
-variant_name!(Slant::Upright, slant_naming);
+variant_name!(Slant::Upright);
 
 // TODO: implement Display
 #[derive(Copy, Clone)]

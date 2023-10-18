@@ -3,7 +3,7 @@ use skia_bindings::{self as sb, SkPathBuilder};
 use std::{fmt, mem};
 
 pub use skia_bindings::SkPathBuilder_ArcSize as ArcSize;
-variant_name!(ArcSize::Large, arc_size_naming);
+variant_name!(ArcSize::Large);
 
 pub type PathBuilder = Handle<SkPathBuilder>;
 unsafe_send_sync!(PathBuilder);
@@ -48,7 +48,7 @@ impl PathBuilder {
     }
 
     pub fn compute_bounds(&self) -> Rect {
-        Rect::from_native_c(unsafe { sb::C_SkPathBuilder_computeBounds(self.native()) })
+        Rect::construct(|r| unsafe { sb::C_SkPathBuilder_computeBounds(self.native(), r) })
     }
 
     pub fn snapshot(&self) -> Path {

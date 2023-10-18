@@ -6,6 +6,7 @@ use skia_bindings::{self as sb, GrVkExtensionFlags, GrVkFeatureFlags};
 use std::{cell::RefCell, ffi, fmt, mem, ops::Deref, os::raw, ptr};
 
 bitflags! {
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct ExtensionFlags : u32 {
         const EXT_DEBUG_REPORT = sb::GrVkExtensionFlags_kEXT_debug_report_GrVkExtensionFlag as _;
         const NV_GLSL_SHADER = sb::GrVkExtensionFlags_kNV_glsl_shader_GrVkExtensionFlag as _;
@@ -20,6 +21,7 @@ bitflags! {
 native_transmutable!(GrVkExtensionFlags, ExtensionFlags, extension_flags_layout);
 
 bitflags! {
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct FeatureFlags: u32 {
         const GEOMETRY_SHADER = sb::GrVkFeatureFlags_kGeometryShader_GrVkFeatureFlag as _;
         const DUAL_SRC_BLEND = sb::GrVkFeatureFlags_kDualSrcBlend_GrVkFeatureFlag as _;
@@ -38,7 +40,7 @@ pub struct BackendContext<'a> {
 
 impl<'a> Drop for BackendContext<'a> {
     fn drop(&mut self) {
-        unsafe { sb::C_GrVkBackendContext_Delete(self.native.as_ptr()) }
+        unsafe { sb::C_GrVkBackendContext_delete(self.native.as_ptr()) }
     }
 }
 
@@ -104,7 +106,7 @@ impl BackendContext<'_> {
             device_extensions.iter().map(|cs| cs.as_ptr()).collect();
 
         let resolver = Self::begin_resolving_proc(get_proc);
-        let native = sb::C_GrVkBackendContext_New(
+        let native = sb::C_GrVkBackendContext_new(
             instance as _,
             physical_device as _,
             device as _,

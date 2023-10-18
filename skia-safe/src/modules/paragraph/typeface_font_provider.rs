@@ -12,6 +12,7 @@ use std::{
 };
 
 pub type TypefaceFontStyleSet = RCHandle<sb::skia_textlayout_TypefaceFontStyleSet>;
+require_base_type!(sb::skia_textlayout_TypefaceFontStyleSet, sb::SkFontStyleSet);
 
 impl NativeRefCountedBase for sb::skia_textlayout_TypefaceFontStyleSet {
     type Base = sb::SkRefCntBase;
@@ -61,6 +62,7 @@ impl TypefaceFontStyleSet {
 }
 
 pub type TypefaceFontProvider = RCHandle<sb::skia_textlayout_TypefaceFontProvider>;
+require_base_type!(sb::skia_textlayout_TypefaceFontProvider, sb::SkFontMgr);
 
 impl NativeRefCountedBase for sb::skia_textlayout_TypefaceFontProvider {
     type Base = sb::SkRefCntBase;

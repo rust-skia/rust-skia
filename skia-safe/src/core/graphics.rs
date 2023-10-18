@@ -1,5 +1,4 @@
 use skia_bindings::SkGraphics;
-use std::ffi::CString;
 
 pub fn init() {
     unsafe { SkGraphics::Init() };
@@ -31,6 +30,10 @@ pub fn set_font_cache_count_limit(count: i32) -> i32 {
 
 pub fn purge_font_cache() {
     unsafe { SkGraphics::PurgeFontCache() }
+}
+
+pub fn purge_pinned_font_cache() {
+    unsafe { SkGraphics::PurgePinnedFontCache() }
 }
 
 pub fn resource_cache_total_bytes_used() -> usize {
@@ -75,14 +78,5 @@ pub fn purge_all_caches() {
     unsafe { SkGraphics::PurgeAllCaches() }
 }
 
-pub fn set_flags(flags: impl AsRef<str>) {
-    let c_str = CString::new(flags.as_ref()).unwrap();
-    unsafe { SkGraphics::SetFlags(c_str.as_ptr()) }
-}
-
 // TODO: ImageGeneratorFromEncodedDataFactory
 // TODO: SetOpenTypeSVGDecoderFactory & GetOpenTypeSVGDecoderFactory
-
-pub fn allow_jit() {
-    unsafe { SkGraphics::AllowJIT() }
-}

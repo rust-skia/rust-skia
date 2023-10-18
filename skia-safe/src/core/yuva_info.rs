@@ -26,7 +26,7 @@ impl NativeDrop for SkYUVAInfo {
 /// RGB                      0:R,    1:G, 2:B
 /// RGBA                     0:R,    1:G, 2:B, 3:A
 pub use sb::SkYUVAInfo_PlaneConfig as PlaneConfig;
-variant_name!(PlaneConfig::YUV, plane_config_naming);
+variant_name!(PlaneConfig::YUV);
 
 /// UV subsampling is also specified in the enum value names using J:a:b notation (e.g. 4:2:0 is
 /// 1/2 horizontal and 1/2 vertical resolution for U and V). If alpha is present it is not sub-
@@ -50,12 +50,13 @@ native_transmutable!(SkYUVAInfo_Subsampling, Subsampling, subsampling_layout);
 ///
 /// Currently only centered siting is supported but will expand to support additional sitings.
 pub use sb::SkYUVAInfo_Siting as Siting;
-variant_name!(Siting::Centered, siting_naming);
+variant_name!(Siting::Centered);
 
 /// Ratio of Y/A values to U/V values in x and y.
 pub fn subsampling_factors(subsampling: Subsampling) -> (i32, i32) {
     let mut factors: [i32; 2] = Default::default();
     unsafe { sb::C_SkYUVAInfo_SubsamplingFactors(subsampling.into_native(), &mut factors[0]) };
+    #[allow(clippy::tuple_array_conversions)]
     (factors[0], factors[1])
 }
 
@@ -76,6 +77,7 @@ pub fn plane_subsampling_factors(
             &mut factors[0],
         )
     };
+    #[allow(clippy::tuple_array_conversions)]
     (factors[0], factors[1])
 }
 

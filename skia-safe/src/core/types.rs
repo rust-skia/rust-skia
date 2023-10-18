@@ -1,20 +1,12 @@
 use crate::prelude::*;
-use skia_bindings::{SkBudgeted, SkFourByteTag};
+use skia_bindings::SkFourByteTag;
 use std::ops::Deref;
-
-#[allow(non_camel_case_types)]
-pub(crate) type u8cpu = skia_bindings::U8CPU;
-
-// TODO: U16CPU?
-
-pub(crate) const SK_MAX_S32: i32 = std::i32::MAX;
-pub(crate) const SK_MIN_S32: i32 = -SK_MAX_S32;
 
 //
 // FourByteTag
 //
 
-#[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Default, Debug)]
 #[repr(transparent)]
 pub struct FourByteTag(SkFourByteTag);
 
@@ -81,22 +73,6 @@ pub type Unichar = skia_bindings::SkUnichar;
 // pub(crate) type MSec = skia_bindings::SkMSec;
 // pub(crate) const MSEC_MAX: u32 = std::i32::MAX as u32;
 
-#[repr(C)]
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-pub struct Budgeted(bool);
-
-native_transmutable!(SkBudgeted, Budgeted, budgeted_layout);
-
-#[allow(non_upper_case_globals)]
-impl Budgeted {
-    #[deprecated(since = "0.29.0", note = "use No")]
-    pub const NO: Budgeted = Budgeted(false);
-    #[deprecated(since = "0.29.0", note = "use Yes")]
-    pub const YES: Budgeted = Budgeted(true);
-
-    // we want this look like enum case names.
-    pub const No: Budgeted = Budgeted(false);
-    pub const Yes: Budgeted = Budgeted(true);
-}
-
-// TODO: BackingFit
+#[cfg(feature = "gpu")]
+#[deprecated(since = "0.60.0", note = "Use gpu::Budgeted")]
+pub type Budgeted = crate::gpu::Budgeted;

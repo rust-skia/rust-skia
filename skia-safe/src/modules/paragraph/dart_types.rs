@@ -6,18 +6,58 @@ use std::{
 };
 
 pub use sb::skia_textlayout_Affinity as Affinity;
-variant_name!(Affinity::Downstream, affinity_naming);
-pub use sb::skia_textlayout_RectHeightStyle as RectHeightStyle;
-variant_name!(
-    RectHeightStyle::IncludeLineSpacingBottom,
-    rect_height_style_naming
+variant_name!(Affinity::Downstream);
+
+#[repr(i32)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Default)]
+pub enum RectHeightStyle {
+    /// Provide tight bounding boxes that fit heights per run.
+    #[default]
+    Tight,
+    // The height of the boxes will be the maximum height of all runs in the
+    // line. All rects in the same line will be the same height.
+    Max,
+    // Extends the top and/or bottom edge of the bounds to fully cover any line
+    // spacing. The top edge of each line should be the same as the bottom edge
+    // of the line above. There should be no gaps in vertical coverage given any
+    // ParagraphStyle line_height.
+    //
+    // The top and bottom of each rect will cover half of the
+    // space above and half of the space below the line.
+    IncludeLineSpacingMiddle,
+    // The line spacing will be added to the top of the rect.
+    IncludeLineSpacingTop,
+    // The line spacing will be added to the bottom of the rect.
+    IncludeLineSpacingBottom,
+    Strut,
+}
+native_transmutable!(
+    sb::skia_textlayout_RectHeightStyle,
+    RectHeightStyle,
+    rect_height_style_layout
 );
-pub use sb::skia_textlayout_RectWidthStyle as RectWidthStyle;
-variant_name!(RectWidthStyle::Max, rect_width_style_naming);
+
+#[repr(i32)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Default)]
+pub enum RectWidthStyle {
+    /// Provide tight bounding boxes that fit widths to the runs of each line
+    /// independently.
+    #[default]
+    Tight,
+    /// Extends the width of the last rect of each line to match the position of
+    /// the widest rect over all the lines.
+    Max,
+}
+native_transmutable!(
+    sb::skia_textlayout_RectWidthStyle,
+    RectWidthStyle,
+    rect_width_style_layout
+);
+
 pub use sb::skia_textlayout_TextAlign as TextAlign;
-variant_name!(TextAlign::End, text_align_naming);
+variant_name!(TextAlign::End);
 pub use sb::skia_textlayout_TextDirection as TextDirection;
-variant_name!(TextDirection::LTR, text_direction_naming);
+variant_name!(TextDirection::LTR);
 
 pub use sb::skia_textlayout_PositionWithAffinity as PositionWithAffinity;
 
@@ -86,12 +126,9 @@ pub const EMPTY_RANGE: Range<usize> = Range {
 };
 
 pub use sb::skia_textlayout_TextBaseline as TextBaseline;
-variant_name!(TextBaseline::Alphabetic, text_baseline_naming);
+variant_name!(TextBaseline::Alphabetic);
 
 pub use sb::skia_textlayout_TextHeightBehavior as TextHeightBehavior;
-variant_name!(
-    TextHeightBehavior::DisableFirstAscent,
-    text_height_behavior_naming
-);
+variant_name!(TextHeightBehavior::DisableFirstAscent);
 
 // m84: LineMetricStyle is declared but not used in the public API yet.

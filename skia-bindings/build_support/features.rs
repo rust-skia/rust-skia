@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Features {
     /// Build with OpenGL support?
@@ -23,6 +25,9 @@ pub struct Features {
 
     /// Features related to text layout. Modules skshaper and skparagraph.
     pub text_layout: bool,
+
+    /// Support for rendering SVG.
+    pub svg: bool,
 
     /// Support the encoding of bitmap data to the WEBP image format.
     pub webp_encode: bool,
@@ -55,6 +60,7 @@ impl Default for Features {
             metal: cfg!(feature = "metal"),
             d3d: cfg!(feature = "d3d"),
             text_layout: cfg!(feature = "textlayout"),
+            svg: cfg!(feature = "svg"),
             webp_encode: cfg!(feature = "webp-encode"),
             webp_decode: cfg!(feature = "webp-decode"),
             embed_freetype: cfg!(feature = "embed-freetype"),
@@ -71,7 +77,7 @@ impl Features {
     }
 
     /// Feature Ids used to look up prebuilt binaries.
-    pub fn ids(&self) -> Vec<&str> {
+    pub fn ids(&self) -> HashSet<&str> {
         let mut feature_ids = Vec::new();
 
         if self.gl {
@@ -98,6 +104,9 @@ impl Features {
         if self.text_layout {
             feature_ids.push(feature_id::TEXTLAYOUT);
         }
+        if self.svg {
+            feature_ids.push(feature_id::SVG);
+        }
         if self.webp_encode {
             feature_ids.push(feature_id::WEBPE);
         }
@@ -108,7 +117,7 @@ impl Features {
             feature_ids.push(feature_id::EMBED_FREETYPE);
         }
 
-        feature_ids
+        feature_ids.into_iter().collect()
     }
 }
 
@@ -119,6 +128,7 @@ mod feature_id {
     pub const METAL: &str = "metal";
     pub const D3D: &str = "d3d";
     pub const TEXTLAYOUT: &str = "textlayout";
+    pub const SVG: &str = "svg";
     pub const WEBPE: &str = "webpe";
     pub const WEBPD: &str = "webpd";
     pub const EGL: &str = "egl";

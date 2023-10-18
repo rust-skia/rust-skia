@@ -10,6 +10,9 @@ use skia_bindings as sb;
 use std::{fmt, ops::Range};
 
 bitflags! {
+    /// Multiple decorations can be applied at once. Ex: Underline and overline is
+    /// (0x1 | 0x2)
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct TextDecoration: u32 {
         const NO_DECORATION = sb::skia_textlayout_TextDecoration::kNoDecoration as _;
         const UNDERLINE = sb::skia_textlayout_TextDecoration::kUnderline as _;
@@ -50,7 +53,7 @@ fn style_type_member_naming() {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, PartialEq, Default, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Decoration {
     pub ty: TextDecoration,
     pub mode: TextDecorationMode,
@@ -59,14 +62,60 @@ pub struct Decoration {
     pub thickness_multiplier: scalar,
 }
 
+impl Default for Decoration {
+    fn default() -> Self {
+        Self {
+            ty: TextDecoration::default(),
+            mode: TextDecorationMode::default(),
+            color: Color::TRANSPARENT,
+            style: TextDecorationStyle::default(),
+            thickness_multiplier: 1.0,
+        }
+    }
+}
+
 native_transmutable!(
     sb::skia_textlayout_Decoration,
     Decoration,
     decoration_layout
 );
 
-pub use sb::skia_textlayout_PlaceholderAlignment as PlaceholderAlignment;
-variant_name!(PlaceholderAlignment::Baseline, placeholder_alignment_naming);
+/// Where to vertically align the placeholder relative to the surrounding text.
+#[repr(i32)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Default)]
+pub enum PlaceholderAlignment {
+    /// Match the baseline of the placeholder with the baseline.
+    #[default]
+    Baseline,
+
+    /// Align the bottom edge of the placeholder with the baseline such that the
+    /// placeholder sits on top of the baseline.
+    AboveBaseline,
+
+    /// Align the top edge of the placeholder with the baseline specified in
+    /// such that the placeholder hangs below the baseline.
+    BelowBaseline,
+
+    /// Align the top edge of the placeholder with the top edge of the font.
+    /// When the placeholder is very tall, the extra space will hang from
+    /// the top and extend through the bottom of the line.
+    Top,
+
+    /// Align the bottom edge of the placeholder with the top edge of the font.
+    /// When the placeholder is very tall, the extra space will rise from
+    /// the bottom and extend through the top of the line.
+    Bottom,
+
+    /// Align the middle of the placeholder with the middle of the text. When the
+    /// placeholder is very tall, the extra space will grow equally from
+    /// the top and bottom of the line.
+    Middle,
+}
+native_transmutable!(
+    sb::skia_textlayout_PlaceholderAlignment,
+    PlaceholderAlignment,
+    placeholder_alignment_layout
+);
 
 pub type FontFeature = Handle<sb::skia_textlayout_FontFeature>;
 unsafe_send_sync!(FontFeature);
@@ -115,6 +164,14 @@ pub struct PlaceholderStyle {
     pub height: scalar,
     pub alignment: PlaceholderAlignment,
     pub baseline: TextBaseline,
+    /// Distance from the top edge of the rect to the baseline position. This
+    /// baseline will be aligned against the alphabetic baseline of the surrounding
+    /// text.
+    ///
+    /// Positive values drop the baseline lower (positions the rect higher) and
+    /// small or negative values will cause the rect to be positioned underneath
+    /// the line. When baseline == height, the bottom edge of the rect will rest on
+    /// the alphabetic baseline.
     pub baseline_offset: scalar,
 }
 
@@ -238,33 +295,41 @@ impl TextStyle {
         self
     }
 
-    pub fn foreground(&self) -> Option<&Paint> {
-        self.native()
-            .fHasForeground
-            .if_true_some(Paint::from_native_ref(&self.native().fForeground))
+    pub fn foreground(&self) -> Paint {
+        Paint::construct(|p| unsafe { sb::C_TextStyle_getForeground(self.native(), p) })
     }
 
-    pub fn set_foreground_color(&mut self, paint: impl Into<Option<Paint>>) -> &mut Self {
-        let n = self.native_mut();
-        n.fHasForeground = paint
-            .into()
-            .map(|paint| n.fForeground.replace_with(paint))
-            .is_some();
+    pub fn set_foreground_paint(&mut self, paint: &Paint) -> &mut Self {
+        unsafe { sb::C_TextStyle_setForegroundPaint(self.native_mut(), paint.native()) };
         self
     }
 
-    pub fn background(&self) -> Option<&Paint> {
-        self.native()
-            .fHasBackground
-            .if_true_some(Paint::from_native_ref(&self.native().fBackground))
+    #[deprecated(since = "0.64.0", note = "use set_foreground_paint()")]
+    pub fn set_foreground_color(&mut self, paint: &Paint) -> &mut Self {
+        self.set_foreground_paint(paint)
     }
 
-    pub fn set_background_color(&mut self, paint: impl Into<Option<Paint>>) -> &mut Self {
-        let n = self.native_mut();
-        n.fHasBackground = paint
-            .into()
-            .map(|paint| n.fBackground.replace_with(paint))
-            .is_some();
+    pub fn clear_foreground_color(&mut self) -> &mut Self {
+        self.native_mut().fHasForeground = false;
+        self
+    }
+
+    pub fn background(&self) -> Paint {
+        Paint::construct(|p| unsafe { sb::C_TextStyle_getBackground(self.native(), p) })
+    }
+
+    pub fn set_background_paint(&mut self, paint: &Paint) -> &mut Self {
+        unsafe { sb::C_TextStyle_setBackgroundPaint(self.native_mut(), paint.native()) };
+        self
+    }
+
+    #[deprecated(since = "0.64.0", note = "use set_background_paint()")]
+    pub fn set_background_color(&mut self, paint: &Paint) -> &mut Self {
+        self.set_background_paint(paint)
+    }
+
+    pub fn clear_background_color(&mut self) -> &mut Self {
+        self.native_mut().fHasBackground = false;
         self
     }
 
@@ -272,7 +337,56 @@ impl TextStyle {
         Decoration::from_native_ref(&self.native().fDecoration)
     }
 
+    pub fn decoration_type(&self) -> TextDecoration {
+        self.decoration().ty
+    }
+
+    pub fn decoration_mode(&self) -> TextDecorationMode {
+        self.decoration().mode
+    }
+
+    pub fn decoration_color(&self) -> Color {
+        self.decoration().color
+    }
+
+    pub fn decoration_style(&self) -> TextDecorationStyle {
+        self.decoration().style
+    }
+
+    pub fn decoration_thickness_multiplier(&self) -> scalar {
+        self.decoration().thickness_multiplier
+    }
+
+    pub fn set_decoration(&mut self, decoration: &Decoration) {
+        *self.decoration_mut_internal() = *decoration;
+    }
+
+    pub fn set_decoration_type(&mut self, decoration: TextDecoration) {
+        self.decoration_mut_internal().ty = decoration;
+    }
+
+    pub fn set_decoration_mode(&mut self, mode: TextDecorationMode) {
+        self.decoration_mut_internal().mode = mode;
+    }
+
+    pub fn set_decoration_style(&mut self, style: TextDecorationStyle) {
+        self.decoration_mut_internal().style = style;
+    }
+
+    pub fn set_decoration_color(&mut self, color: impl Into<Color>) {
+        self.decoration_mut_internal().color = color.into();
+    }
+
+    pub fn set_decoration_thickness_multiplier(&mut self, multiplier: scalar) {
+        self.decoration_mut_internal().thickness_multiplier = multiplier;
+    }
+
+    #[deprecated(since = "0.63.1", note = "use set_decoration()")]
     pub fn decoration_mut(&mut self) -> &mut Decoration {
+        self.decoration_mut_internal()
+    }
+
+    fn decoration_mut_internal(&mut self) -> &mut Decoration {
         Decoration::from_native_ref_mut(&mut self.native_mut().fDecoration)
     }
 
@@ -326,6 +440,7 @@ impl TextStyle {
             .map(|ptr| FontArguments::from_native_ref(unsafe { &*ptr }))
     }
 
+    /// The contents of the [`crate::FontArguments`] will be copied into the [`TextStyle`].
     pub fn set_font_arguments<'fa>(
         &mut self,
         arguments: impl Into<Option<&'fa crate::FontArguments<'fa, 'fa>>>,

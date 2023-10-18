@@ -38,7 +38,7 @@ impl fmt::Debug for Region {
 }
 
 pub use skia_bindings::SkRegion_Op as RegionOp;
-variant_name!(RegionOp::ReverseDifference, region_op_naming);
+variant_name!(RegionOp::ReverseDifference);
 
 impl Region {
     pub fn new() -> Region {
@@ -512,6 +512,7 @@ fn new_clone_drop() {
 #[test]
 fn can_compare() {
     let r1 = Region::new();
+    #[allow(clippy::redundant_clone)]
     let r2 = r1.clone();
     assert!(r1 == r2);
 }

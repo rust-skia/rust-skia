@@ -4,9 +4,12 @@ env:
   SKIA_DEBUG: $[[skiaDebug]]
 
 steps:
-- uses: actions/checkout@v2
+- uses: actions/checkout@v3
   with:
     submodules: true
+
+- name: Fix git dubious ownership errors when synchronizing Skia dependencies
+  run: git config --global --add safe.directory '*'
 
 - name: Prepare Rustup
   run: (cd /github/home && ln -s /root/.cargo)

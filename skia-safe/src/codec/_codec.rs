@@ -1,13 +1,17 @@
+use std::marker::PhantomData;
+use std::{ffi, ffi::CStr, fmt, io, mem, ptr, result};
+
+use skia_bindings::{self as sb, SkCodec, SkCodec_FrameInfo, SkCodec_Options, SkStream};
+
+use super::codec_animation;
+use crate::interop::RustStream;
 use crate::{
-    prelude::*, yuva_pixmap_info::SupportedDataTypes, Data, EncodedImageFormat, EncodedOrigin,
-    IRect, ISize, Image, ImageInfo, Pixmap, YUVAPixmapInfo, YUVAPixmaps,
+    prelude::*, yuva_pixmap_info::SupportedDataTypes, AlphaType, Data, EncodedImageFormat,
+    EncodedOrigin, IRect, ISize, Image, ImageInfo, Pixmap, YUVAPixmapInfo, YUVAPixmaps,
 };
-use ffi::CStr;
-use skia_bindings::{self as sb, SkCodec, SkCodec_Options, SkRefCntBase};
-use std::{ffi, fmt, mem, ptr};
 
 pub use sb::SkCodec_Result as Result;
-variant_name!(Result::IncompleteInput, result_naming);
+variant_name!(Result::IncompleteInput);
 
 // TODO: implement Display
 
@@ -18,31 +22,55 @@ pub fn result_to_string(result: Result) -> &'static str {
 }
 
 pub use sb::SkCodec_SelectionPolicy as SelectionPolicy;
-variant_name!(SelectionPolicy::PreferStillImage, selection_policy_naming);
+variant_name!(SelectionPolicy::PreferStillImage);
 
 pub use sb::SkCodec_ZeroInitialized as ZeroInitialized;
-variant_name!(ZeroInitialized::Yes, zero_initialized_naming);
+variant_name!(ZeroInitialized::Yes);
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct Options {
     pub zero_initialized: ZeroInitialized,
     pub subset: Option<IRect>,
     pub frame_index: usize,
-    pub prior_frame: usize,
+    pub prior_frame: Option<usize>,
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct FrameInfo {
+    pub required_frame: i32,
+    pub duration: i32,
+    pub fully_received: bool,
+    pub alpha_type: AlphaType,
+    pub has_alpha_within_bounds: bool,
+    pub disposal_method: codec_animation::DisposalMethod,
+    pub blend: codec_animation::Blend,
+    pub rect: IRect,
+}
+
+native_transmutable!(SkCodec_FrameInfo, FrameInfo, frameinfo_layout);
+
+impl Default for FrameInfo {
+    fn default() -> Self {
+        Self::construct(|frame_info| unsafe { sb::C_SkFrameInfo_Construct(frame_info) })
+    }
 }
 
 pub use sb::SkCodec_SkScanlineOrder as ScanlineOrder;
-variant_name!(ScanlineOrder::BottomUp, scanline_order_naming);
+variant_name!(ScanlineOrder::BottomUp);
 
-pub type Codec = RCHandle<SkCodec>;
-
-impl NativeBase<SkRefCntBase> for SkCodec {}
-
-impl NativeRefCountedBase for SkCodec {
-    type Base = SkRefCntBase;
+pub struct Codec<'a> {
+    inner: RefHandle<SkCodec>,
+    pd: PhantomData<&'a mut dyn io::Read>,
 }
 
-impl fmt::Debug for Codec {
+impl NativeDrop for SkCodec {
+    fn drop(&mut self) {
+        unsafe { sb::C_SkCodec_delete(self) }
+    }
+}
+
+impl fmt::Debug for Codec<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Codec")
             .field("info", &self.info())
@@ -56,12 +84,12 @@ impl fmt::Debug for Codec {
     }
 }
 
-impl Codec {
+impl Codec<'_> {
     // TODO: wrap MakeFromStream
     // TODO: wrap from_data with SkPngChunkReader
 
-    pub fn from_data(data: impl Into<Data>) -> Option<Codec> {
-        Codec::from_ptr(unsafe { sb::C_SkCodec_MakeFromData(data.into().into_ptr()) })
+    pub fn from_data(data: impl Into<Data>) -> Option<Codec<'static>> {
+        Self::from_ptr(unsafe { sb::C_SkCodec_MakeFromData(data.into().into_ptr()) })
     }
 
     pub fn info(&self) -> ImageInfo {
@@ -75,7 +103,7 @@ impl Codec {
     }
 
     pub fn bounds(&self) -> IRect {
-        IRect::from_native_c(unsafe { sb::C_SkCodec_bounds(self.native()) })
+        IRect::construct(|r| unsafe { sb::C_SkCodec_bounds(self.native(), r) })
     }
 
     // TODO: getICCProfile
@@ -154,7 +182,10 @@ impl Codec {
             fZeroInitialized: options.zero_initialized,
             fSubset: options.subset.native().as_ptr_or_null(),
             fFrameIndex: options.frame_index.try_into().unwrap(),
-            fPriorFrame: options.prior_frame.try_into().unwrap(),
+            fPriorFrame: match options.prior_frame {
+                None => sb::SkCodec_kNoFrame,
+                Some(frame) => frame.try_into().expect("invalid prior frame"),
+            },
         }
     }
 
@@ -183,13 +214,10 @@ impl Codec {
         &self,
         supported_data_types: &SupportedDataTypes,
     ) -> Option<YUVAPixmapInfo> {
-        let mut pixmap_info = YUVAPixmapInfo::new_invalid();
-        let r = unsafe {
+        YUVAPixmapInfo::new_if_valid(|pixmap_info| unsafe {
             self.native()
-                .queryYUVAInfo(supported_data_types.native(), &mut pixmap_info)
-        };
-        (r && YUVAPixmapInfo::native_is_valid(&pixmap_info))
-            .if_true_then_some(|| YUVAPixmapInfo::from_native_c(pixmap_info))
+                .queryYUVAInfo(supported_data_types.native(), pixmap_info)
+        })
     }
 
     pub fn get_yuva_planes(&mut self, pixmaps: &YUVAPixmaps) -> Result {
@@ -281,8 +309,17 @@ impl Codec {
             .unwrap()
     }
 
-    // TODO: FrameInfo
-    // TODO: getFrameInfo
+    pub fn get_frame_info(&mut self, index: usize) -> Option<FrameInfo> {
+        let mut info = FrameInfo::default();
+        unsafe {
+            sb::C_SkCodec_getFrameInfo(
+                self.native_mut(),
+                index.try_into().unwrap(),
+                info.native_mut(),
+            )
+        }
+        .then_some(info)
+    }
 
     pub fn get_repetition_count(&mut self) -> Option<usize> {
         const REPETITION_COUNT_INFINITE: i32 = -1;
@@ -295,4 +332,44 @@ impl Codec {
     }
 
     // TODO: Register
+
+    fn native(&self) -> &SkCodec {
+        self.inner.native()
+    }
+
+    fn native_mut(&mut self) -> &mut SkCodec {
+        self.inner.native_mut()
+    }
+
+    pub(crate) fn from_ptr<'a>(codec: *mut SkCodec) -> Option<Codec<'a>> {
+        RefHandle::from_ptr(codec).map(|inner| Codec {
+            inner,
+            pd: PhantomData,
+        })
+    }
+}
+
+pub trait Decoder {
+    const ID: &'static str;
+    fn is_format(data: &[u8]) -> bool;
+
+    // TODO: decode_data (use std::io::Cursor in the meantime).
+
+    fn decode_stream(stream: &mut impl io::Read) -> result::Result<Codec, Result>;
+}
+
+pub(crate) fn decode_stream(
+    stream: &mut impl io::Read,
+    native_decode_fn: unsafe extern "C" fn(
+        stream: *mut SkStream,
+        result: *mut Result,
+    ) -> *mut SkCodec,
+) -> result::Result<Codec, Result> {
+    let stream = RustStream::new(stream);
+    let mut result = Result::Unimplemented;
+    let codec = unsafe { native_decode_fn(stream.into_native(), &mut result) };
+    if result == Result::Success {
+        return Ok(Codec::from_ptr(codec).expect("codec"));
+    }
+    Err(result)
 }

@@ -28,26 +28,23 @@ metal = ["metal-rs", "foreign-types-shared", "cocoa", "objc", "skia-safe/metal"]
 d3d = ["skia-safe/d3d", "winapi", "wio"]
 textlayout = ["skia-safe/textlayout"]
 webp = ["skia-safe/webp"]
+svg = ["skia-safe/svg"]
 
 [dependencies]
 skia-safe = { path = "../skia-safe" }
 
 # 0.25.1 fails to build on iOS targets on macOS: https://github.com/servo/rust-offscreen-rendering-context/pull/150 
-offscreen_gl_context = { git = "https://github.com/rust-skia/rust-offscreen-rendering-context", rev = "1b9c74737635add2b9076e12df129cc3326c1287", optional = true }
-# offscreen_gl_context = "0.25.1"
-# for offscreen_gl_context 0.25
-# sparkle 0.1.9 fails to compile on macOS targeting aarch64-linux-android
-# sparkle 0.1.25 is incompatible with offscreen_gl_context
-sparkle = { version = "=0.1.24", optional = true }
-clap = { version = "3.0.7", features = ["derive"] }
+offscreen_gl_context = { git = "https://github.com/rust-skia/rust-offscreen-rendering-context", rev = "82b022cd0e42baaabfb82c319c9785a84a04f395", optional = true }
+sparkle = { version = "0.1.25", optional = true }
+clap = { version = "4.0.7", features = ["derive"] }
 ash = { version = "0.37.0", optional = true }
 # need to rename the package because of the feature with the same name.
-metal-rs = { package = "metal", version = "0.23.0", optional = true }
+metal-rs = { package = "metal", version = "0.24.0", optional = true }
 # ... to access raw metal ptrs.
 foreign-types-shared = { version = "0.1.1", optional = true }
 # ... for that NSAutoReleasePool to be able to free metal devices.
-cocoa = { version = "0.24", optional = true }
+cocoa = { version = "0.25", optional = true }
 objc = { version = "0.2.4", optional = true }
 # d3d
-winapi = { version = "0.3.9", optional = true, features = ["d3d12", "dxgi"] }
+winapi = { version = "0.3.9", optional = true, features = ["d3d12", "dxgi", "winerror", "guiddef"] }
 wio = { version = "0.2.2", optional = true }

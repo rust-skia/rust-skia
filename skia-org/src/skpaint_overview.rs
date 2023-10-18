@@ -1,10 +1,9 @@
 use crate::{resources, DrawingDriver};
 use skia_safe::{
     color_filters, corner_path_effect, dash_path_effect, discrete_path_effect, gradient_shader,
-    line_2d_path_effect, paint, path_1d_path_effect, path_2d_path_effect, perlin_noise_shader,
-    scalar, shaders, table_color_filter, AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color,
-    Font, MaskFilter, Matrix, Paint, Path, PathEffect, Point, Rect, SamplingOptions, TextBlob,
-    TileMode, Typeface,
+    line_2d_path_effect, paint, path_1d_path_effect, path_2d_path_effect, scalar, shaders,
+    AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color, Font, MaskFilter, Matrix, Paint, Path,
+    PathEffect, Point, Rect, SamplingOptions, TextBlob, TileMode, Typeface,
 };
 use std::path;
 
@@ -279,19 +278,14 @@ fn draw_sweep_gradient_shader(canvas: &mut Canvas) {
 fn draw_fractal_perlin_noise_shader(canvas: &mut Canvas) {
     canvas.clear(Color::WHITE);
     let paint = &mut Paint::default();
-    paint.set_shader(perlin_noise_shader::fractal_noise(
-        (0.05, 0.05),
-        4,
-        0.0,
-        None,
-    ));
+    paint.set_shader(shaders::fractal_noise((0.05, 0.05), 4, 0.0, None));
     canvas.draw_paint(paint);
 }
 
 fn draw_turbulence_perlin_noise_shader(canvas: &mut Canvas) {
     canvas.clear(Color::WHITE);
     let paint = &mut Paint::default();
-    paint.set_shader(perlin_noise_shader::turbulence((0.05, 0.05), 4, 0.0, None));
+    paint.set_shader(shaders::turbulence((0.05, 0.05), 4, 0.0, None));
     canvas.draw_paint(paint);
 }
 
@@ -310,7 +304,7 @@ fn draw_compose_shader(canvas: &mut Canvas) {
             None,
         )
         .unwrap(),
-        perlin_noise_shader::turbulence((0.025, 0.025), 2, 0.0, None).unwrap(),
+        shaders::turbulence((0.025, 0.025), 2, 0.0, None).unwrap(),
     ));
     canvas.draw_paint(paint);
 }
@@ -359,15 +353,11 @@ fn draw_color_table_color_filter(canvas: &mut Canvas) {
     let ct = &mut [0u8; 256];
     for (i, v) in ct.iter_mut().enumerate() {
         let x = (i as i32 - 96) * 255 / 64;
-        *v = x.max(0).min(255) as _;
+        *v = x.clamp(0, 255) as _;
     }
     let mut paint = Paint::default();
-    paint.set_color_filter(table_color_filter::from_argb(
-        None,
-        Some(ct),
-        Some(ct),
-        Some(ct),
-    ));
+    let ct: &_ = ct;
+    paint.set_color_filter(color_filters::table_argb(None, ct, ct, ct));
     canvas.draw_image(&image, (0, 0), Some(&paint));
 }
 

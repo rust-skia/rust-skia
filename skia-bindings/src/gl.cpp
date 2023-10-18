@@ -6,24 +6,16 @@
     #define SK_GL
 #endif
 
-#include "include/core/SkSurfaceCharacterization.h"
+#include "include/gpu/GrBackendSurface.h"
 #include "include/gpu/GrDirectContext.h"
+#include "include/gpu/ganesh/gl/GrGLBackendSurface.h"
 #include "include/gpu/gl/GrGLExtensions.h"
 #include "include/gpu/gl/GrGLInterface.h"
 #include "include/gpu/gl/GrGLAssembleInterface.h"
-#include "src/gpu/gl/GrGLDefines.h"
+#include "src/gpu/ganesh/gl/GrGLDefines.h"
 
 // Additional types not yet referenced.
 extern "C" void C_GrGLTypes(GrGLSurfaceInfo *) {};
-
-// core/SurfaceCharacterization.h
-
-extern "C" void C_SkSurfaceCharacterization_createFBO0(
-    const SkSurfaceCharacterization* self, 
-    bool usesGLFBO0, 
-    SkSurfaceCharacterization* uninitialized) {
-    new(uninitialized) SkSurfaceCharacterization(self->createFBO0(usesGLFBO0));
-}
 
 //
 // GrGLTextureInfo
@@ -160,9 +152,9 @@ extern "C" GrDirectContext* C_GrDirectContext_MakeGL(GrGLInterface* interface, c
     if (interface) {
         if (options) {
             return GrDirectContext::MakeGL(sp(interface), *options).release();
-        } 
+        }
         return GrDirectContext::MakeGL(sp(interface)).release();
-    } 
+    }
     if (options) {
         return GrDirectContext::MakeGL(*options).release();
     }
@@ -173,10 +165,56 @@ extern "C" void C_GrBackendFormat_ConstructGL(GrBackendFormat* uninitialized, Gr
     new(uninitialized)GrBackendFormat(GrBackendFormat::MakeGL(format, target));
 }
 
-extern "C" void C_GrBackendTexture_ConstructGL(GrBackendTexture* uninitialized, int width, int height, GrMipMapped mipMapped, const GrGLTextureInfo* glInfo) {
-    new(uninitialized)GrBackendTexture(width, height, mipMapped, *glInfo);
+extern "C" GrBackendTexture* C_GrBackendTexture_newGL(
+    int width, int height,
+    GrMipMapped mipMapped,
+    const GrGLTextureInfo* glInfo,
+    const char* label,
+    size_t labelCount) {
+    return new GrBackendTexture(width, height, mipMapped, *glInfo, std::string_view(label, labelCount));
 }
 
 extern "C" void C_GrBackendRenderTarget_ConstructGL(GrBackendRenderTarget* uninitialized, int width, int height, int sampleCnt, int stencilBits, const GrGLFramebufferInfo* glInfo) {
     new(uninitialized)GrBackendRenderTarget(width, height, sampleCnt, stencilBits, *glInfo);
+}
+
+//
+// gpu/ganesh/gl
+//
+
+extern "C" void C_GrBackendFormats_ConstructGL(GrBackendFormat* uninitialized, GrGLenum format, GrGLenum target) {
+    new (uninitialized) GrBackendFormat(GrBackendFormats::MakeGL(format, target));
+}
+
+extern "C" GrGLFormat C_GrBackendFormats_AsGLFormat(const GrBackendFormat* format) {
+    return GrBackendFormats::AsGLFormat(*format);
+}
+
+extern "C" GrGLenum C_GrBackendFormats_AsGLFormatEnum(const GrBackendFormat* format) {
+    return GrBackendFormats::AsGLFormatEnum(*format);
+}
+
+extern "C" GrBackendTexture* C_GrBackendTextures_newGL(
+    int width, int height,
+    GrMipMapped mipMapped,
+    const GrGLTextureInfo* glInfo,
+    const char* label,
+    size_t labelCount) {
+    return new GrBackendTexture(GrBackendTextures::MakeGL(width, height, mipMapped, *glInfo, std::string_view(label, labelCount)));
+}
+
+extern "C" bool C_GrBackendTextures_GetGLTextureInfo(const GrBackendTexture* texture, GrGLTextureInfo* info) {
+    return GrBackendTextures::GetGLTextureInfo(*texture, info);
+}
+
+extern "C" void C_GrBackendTextures_GLTextureParametersModified(GrBackendTexture* texture) {
+    GrBackendTextures::GLTextureParametersModified(texture);
+}
+
+extern "C" void C_GrBackendRenderTargets_ConstructGL(GrBackendRenderTarget* uninitialized, int width, int height, int sampleCnt, int stencilBits, const GrGLFramebufferInfo* glInfo) {
+    new(uninitialized)GrBackendRenderTarget(GrBackendRenderTargets::MakeGL(width, height, sampleCnt, stencilBits, *glInfo));
+}
+
+extern "C" bool C_GrBackendRenderTargets_GetGLFramebufferInfo(const GrBackendRenderTarget* self, GrGLFramebufferInfo* info) {
+    return GrBackendRenderTargets::GetGLFramebufferInfo(*self, info);
 }

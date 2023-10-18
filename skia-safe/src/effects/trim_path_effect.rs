@@ -2,7 +2,7 @@ use crate::{scalar, PathEffect};
 use skia_bindings as sb;
 
 pub use skia_bindings::SkTrimPathEffect_Mode as Mode;
-variant_name!(Mode::Inverted, mode_naming);
+variant_name!(Mode::Inverted);
 
 impl PathEffect {
     pub fn trim(

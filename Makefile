@@ -1,7 +1,6 @@
-# Publishes skia-bindings and skia-safe to crates.io
-# This is temporary and should be automated.
-# prerequisites:
-#   .cargo/credentials
+doc-features-win="gl,vulkan,d3d,textlayout,webp"
+doc-features-mac="gl,vulkan,metal,textlayout,webp"
+doc-features-docs-rs="gl,textlayout,webp"
 
 .PHONY: all
 all:
@@ -31,18 +30,49 @@ crate-bindings-binaries:
 .PHONY: crate-bindings-build
 crate-bindings-build: export FORCE_SKIA_BUILD=1
 crate-bindings-build: 
-	cd skia-bindings && cargo publish -vv --dry-run --features "gl,vulkan,textlayout,d3d"
+	cd skia-bindings && cargo publish -vv --dry-run --features "gl,vulkan,textlayout"
 	cd skia-bindings && cargo publish -vv --dry-run 
+
+.PHONY: crate-post-release-test
+crate-post-release-test:
+	rm -rf /tmp/skia-test
+	cd /tmp && cargo new skia-test
+	cd /tmp/skia-test && cargo add skia-safe
+	cd /tmp/skia-test && cargo run
+
+# Publishes skia-bindings and skia-safe to crates.io
+# This is temporary and should be automated.
+# prerequisites:
+#   .cargo/credentials
 
 .PHONY: publish
 publish: package-bindings package-safe publish-bindings wait publish-safe
 
 .PHONY: publish-only
-publish-only: publish-bindings wait publish-safe
+publish-only: publish-bindings publish-safe
 
 .PHONY: publish-bindings
 publish-bindings:
 	cd skia-bindings && cargo publish -vv --no-verify
+
+.PHONY: publish-bindings-docs
+publish-bindings-docs: bindings-docs
+	cd skia-bindings && cp /tmp/bindings.rs bindings_docs.rs
+	cd skia-bindings && cargo publish -vv --no-verify --allow-dirty
+
+# Generates /tmp/bindings.rs with docs-rs features.
+
+.PHONY: bindings-docs
+bindings-docs:
+	cargo build -vv --features ${doc-features-docs-rs}
+	cp `${bindings-latest}` /tmp/bindings.rs
+
+
+.PHONY: bindings-docs-docker
+bindings-docs-docker:
+	docker build -f bindings-docs/Dockerfile . -t skia-bindings-docs
+	docker run -d --name skia-bindings-docs-container skia-bindings-docs
+	docker cp skia-bindings-docs-container:/tmp/bindings_docs.rs /tmp/bindings.rs
 
 .PHONY: publish-safe
 publish-safe:
@@ -68,19 +98,13 @@ package-safe:
 clean-packages:
 	rm -rf target/package
 
-
-.PHONY: wait
-wait: 
-	@echo "published a package, Waiting for crates.io to catch up before publishing the next"
-	sleep 20
-
 .PHONY: update-doc
 update-doc:
 	cargo clean
 	rm -rf rust-skia.github.io
 	git clone git@github.com:rust-skia/rust-skia.github.io.git
-	cd skia-safe && cargo doc --no-deps --lib --features gl,vulkan,d3d,textlayout
-	cp -r target/doc rust-skia.github.io/doc
+	cd skia-safe && cargo doc --no-deps --lib --features ${doc-features-mac}
+	cp -r target/doc rust-skia.github.io/
 	cd rust-skia.github.io && git add --all
 	cd rust-skia.github.io && git commit -m"Auto-Update of /doc" || true
 	cd rust-skia.github.io && git push origin master	
@@ -130,4 +154,30 @@ prepare-local-build:
 build-local-build:
 	cargo clean
 	SKIA_SOURCE_DIR=$(shell pwd)/skia-bindings/skia SKIA_BUILD_DEFINES=`cat tmp/skia-defines.txt` SKIA_LIBRARY_SEARCH_PATH=$(shell pwd)/tmp cargo build --release --no-default-features -vv --features ${local-build-features}
+
+# Diffs the rust skia commits of the current branch with what is commited to the master branch.
+rust-skia-logs = git log --oneline | head -n 1000 | grep rust-skia | cut -d' ' -f2-
+.PHONY: diff-skia
+diff-skia:
+	rm -rf /tmp/rust-skia-cmp
+	git clone . /tmp/rust-skia-cmp
+	cd /tmp/rust-skia-cmp && git checkout master && git submodule update --init
+	cd /tmp/rust-skia-cmp/skia-bindings/skia && ${rust-skia-logs} >/tmp/rust-skia-cmp-master.txt
+	cd skia-bindings/skia && ${rust-skia-logs} >/tmp/rust-skia-cmp-current.txt
+	diff /tmp/rust-skia-cmp-master.txt /tmp/rust-skia-cmp-current.txt
+
+# Diffs the public skia-safe API with the latest on crates.io using cargo public-api
+.PHONY: diff-api
+diff-api:
+	cargo public-api -p skia-safe -s --features=all-macos diff latest -- >skia-safe-api.diff
+
+bindings-latest = find target -name "bindings.rs" -exec ls -t {} + | head -n 1
+
+.PHONY: locate-bindings
+locate-bindings:
+	${bindings-latest}
+
+.PHONY: open-bindings
+open-bindings:
+	code `${bindings-latest}`
 

@@ -2,28 +2,14 @@ use skia_bindings as sb;
 use std::ptr;
 
 pub use skia_bindings::GrBackendApi as BackendAPI;
-variant_name!(BackendAPI::Dawn, backend_api_naming);
-
-// TODO: this should be a newtype(bool) I guess with implementations
-//       of From<bool> and Deref?
-pub use skia_bindings::GrMipmapped as Mipmapped;
+variant_name!(BackendAPI::Dawn);
 
 #[deprecated(since = "0.35.0", note = "Use Mipmapped (with a lowercase 'm')")]
 pub use skia_bindings::GrMipmapped as MipMapped;
-variant_name!(Mipmapped::Yes, mipmapped_naming);
-
-// TODO: this should be a newtype(bool) I guess with implementations
-//       of From<bool> and Deref?
-pub use skia_bindings::GrRenderable as Renderable;
-variant_name!(Renderable::No, renderable_naming);
-
-// TODO: this should be a newtype(bool) I guess with implementations
-//       of From<bool> and Deref?
-pub use skia_bindings::GrProtected as Protected;
-variant_name!(Protected::Yes, protected_naming);
+variant_name!(MipMapped::Yes);
 
 pub use skia_bindings::GrSurfaceOrigin as SurfaceOrigin;
-variant_name!(SurfaceOrigin::BottomLeft, surface_origin_naming);
+variant_name!(SurfaceOrigin::BottomLeft);
 
 // Note: BackendState is in gl/types.rs/
 
@@ -56,6 +42,6 @@ impl Default for FlushInfo {
 native_transmutable!(sb::GrFlushInfo, FlushInfo, flush_info_layout);
 
 pub use sb::GrSemaphoresSubmitted as SemaphoresSubmitted;
-variant_name!(SemaphoresSubmitted::Yes, semaphores_submitted_naming);
+variant_name!(SemaphoresSubmitted::Yes);
 
 // TODO: wrap GrPrepareForExternalIORequests

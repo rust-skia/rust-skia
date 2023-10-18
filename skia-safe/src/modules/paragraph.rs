@@ -6,7 +6,7 @@ mod font_arguments;
 mod font_collection;
 mod metrics;
 #[allow(clippy::module_inception)]
-mod paragraph;
+pub mod paragraph;
 mod paragraph_builder;
 mod paragraph_cache;
 mod paragraph_style;
@@ -18,7 +18,7 @@ pub use dart_types::*;
 pub use font_arguments::*;
 pub use font_collection::*;
 pub use metrics::*;
-pub use paragraph::*;
+pub use paragraph::Paragraph;
 pub use paragraph_builder::*;
 pub use paragraph_cache::*;
 pub use paragraph_style::*;

@@ -1,21 +1,20 @@
 use crate::Blender;
 use crate::{
     prelude::*, scalar, BlendMode, Color, Color4f, ColorFilter, ColorSpace, ImageFilter,
-    MaskFilter, Matrix, Path, PathEffect, Rect, Shader,
+    MaskFilter, PathEffect, Shader,
 };
 use core::fmt;
 
 use skia_bindings::{self as sb, SkPaint};
-use std::ptr;
 
 pub use sb::SkPaint_Style as Style;
-variant_name!(Style::Fill, style_naming);
+variant_name!(Style::Fill);
 
 pub use sb::SkPaint_Cap as Cap;
-variant_name!(Cap::Butt, cap_naming);
+variant_name!(Cap::Butt);
 
 pub use sb::SkPaint_Join as Join;
-variant_name!(Join::Miter, join_naming);
+variant_name!(Join::Miter);
 
 pub type Paint = Handle<SkPaint>;
 unsafe_send_sync!(Paint);
@@ -215,48 +214,6 @@ impl Paint {
         self
     }
 
-    pub fn get_fill_path(
-        &self,
-        src: &Path,
-        cull_rect: Option<&Rect>,
-        res_scale: impl Into<Option<scalar>>,
-    ) -> Option<Path> {
-        let mut r = Path::default();
-
-        let cull_rect_ptr = cull_rect
-            .map(|r| r.native() as *const _)
-            .unwrap_or(ptr::null());
-
-        unsafe {
-            self.native().getFillPath(
-                src.native(),
-                r.native_mut(),
-                cull_rect_ptr,
-                res_scale.into().unwrap_or(1.0),
-            )
-        }
-        .if_true_some(r)
-    }
-
-    pub fn get_fill_path_with_matrix(
-        &self,
-        src: &Path,
-        cull_rect: Option<&Rect>,
-        matrix: &Matrix,
-    ) -> Option<Path> {
-        let mut r = Path::default();
-
-        let cull_rect_ptr = cull_rect
-            .map(|r| r.native() as *const _)
-            .unwrap_or(ptr::null());
-
-        unsafe {
-            self.native()
-                .getFillPath1(src.native(), r.native_mut(), cull_rect_ptr, matrix.native())
-        }
-        .if_true_some(r)
-    }
-
     pub fn shader(&self) -> Option<Shader> {
         Shader::from_unshared_ptr(self.native().fShader.fPtr)
     }
@@ -395,8 +352,8 @@ fn set_color4f_color_space() {
     let mut paint = Paint::default();
     let color = Color4f::from(Color::DARK_GRAY);
     let color_space = ColorSpace::new_srgb();
-    paint.set_color4f(&color, None);
-    paint.set_color4f(&color, &color_space);
+    paint.set_color4f(color, None);
+    paint.set_color4f(color, &color_space);
     let color2 = Color4f::from(Color::DARK_GRAY);
     paint.set_color4f(color2, Some(&color_space));
 }

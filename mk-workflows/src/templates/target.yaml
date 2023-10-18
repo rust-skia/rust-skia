@@ -11,6 +11,7 @@
       TARGET=${TARGET//-/_}
       export CC_${TARGET}=$[[target]]$[[androidAPILevel]]-clang$[[hostBinExt]]
       export CXX_${TARGET}=$[[target]]$[[androidAPILevel]]-clang++$[[hostBinExt]]
+      export AR_${TARGET}=llvm-ar
       TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
       export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=$[[target]]$[[androidAPILevel]]-clang$[[hostBinExt]]
       echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
@@ -38,7 +39,7 @@
   if: $[[runTests]]
   run: |
     cargo test --all --release --features "$[[features]]" --all-targets --target $[[target]] -- --nocapture
-  
+
 - name: 'Generate skia-org example images'
   shell: bash
   if: $[[generateArtifacts]]
@@ -47,14 +48,14 @@
 
 - name: 'Upload skia-org example images'
   if: $[[generateArtifacts]]
-  uses: actions/upload-artifact@v2
+  uses: actions/upload-artifact@v3.1.1
   with:
     name: skia-org-images-$[[target]]
     path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
 - name: 'Compress binaries'
   if: $[[releaseBinaries]]
-  uses: master-atul/tar-action@v1.0.2
+  uses: a7ul/tar-action@v1.1.2
   with:
     command: c
     cwd: '${{ env.SKIA_STAGING_PATH }}'
@@ -63,7 +64,7 @@
 
 - name: 'Release binaries'
   if: $[[releaseBinaries]]
-  uses: pragmatrix/release-action@exp
+  uses: pragmatrix/release-action@v1.11.1-rs
   with:
     owner: rust-skia
     repo: skia-binaries

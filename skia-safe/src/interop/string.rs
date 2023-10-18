@@ -66,7 +66,29 @@ impl AsStr for SkString {
             let ptr = sb::C_SkString_c_str_size(self, &mut size) as *const u8;
             safer::from_raw_parts(ptr, size)
         };
-        str::from_utf8(slice).unwrap()
+        std::str::from_utf8(slice).unwrap_or_default()
+    }
+}
+
+impl AsStr for sb::std_string_view {
+    fn as_str(&self) -> &str {
+        let slice = unsafe {
+            let mut size = 0;
+            let ptr = sb::C_string_view_ptr_size(self, &mut size) as *const u8;
+            safer::from_raw_parts(ptr, size)
+        };
+        str::from_utf8(slice).unwrap_or_default()
+    }
+}
+
+impl AsStr for sb::std_string {
+    fn as_str(&self) -> &str {
+        let slice = unsafe {
+            let mut size = 0;
+            let ptr = sb::C_string_ptr_size(self, &mut size) as *const u8;
+            safer::from_raw_parts(ptr, size)
+        };
+        str::from_utf8(slice).unwrap_or_default()
     }
 }
 
@@ -100,16 +122,21 @@ impl FromStrs for Vec<String> {
     }
 }
 
-#[test]
-fn string_from_rust_and_back() {
-    let str = "Hello";
-    let string = String::from_str(str);
-    assert_eq!(str, string.as_str())
-}
+#[cfg(test)]
+mod tests {
+    use super::{SetStr, String};
 
-#[test]
-fn set_string() {
-    let mut hello = String::from_str("Hello");
-    hello.set_str(String::from_str("World"));
-    assert_eq!("World", hello.as_str());
+    #[test]
+    fn string_from_rust_and_back() {
+        let str = "Hello";
+        let string = String::from_str(str);
+        assert_eq!(str, string.as_str())
+    }
+
+    #[test]
+    fn set_string() {
+        let mut hello = String::from_str("Hello");
+        hello.set_str(String::from_str("World"));
+        assert_eq!("World", hello.as_str());
+    }
 }

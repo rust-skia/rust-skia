@@ -1,5 +1,6 @@
 use super::Data;
 use crate::prelude::*;
+use sb::SkNVRefCnt;
 use skia_bindings::{self as sb, SkColorSpace, SkColorSpacePrimaries};
 use std::fmt;
 
@@ -101,6 +102,7 @@ pub mod named_transfer_fn {
 
 pub type ColorSpace = RCHandle<SkColorSpace>;
 unsafe_send_sync!(ColorSpace);
+require_base_type!(SkColorSpace, SkNVRefCnt);
 
 impl NativeRefCounted for SkColorSpace {
     fn _ref(&self) {

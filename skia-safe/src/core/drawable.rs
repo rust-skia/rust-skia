@@ -1,8 +1,10 @@
+use std::fmt;
+
+use skia_bindings::{self as sb, SkDrawable, SkFlattenable, SkRefCntBase};
+
 #[cfg(feature = "gpu")]
 use crate::gpu;
-use crate::{prelude::*, Canvas, Matrix, NativeFlattenable, Point, Rect};
-use skia_bindings::{self as sb, SkDrawable, SkFlattenable, SkRefCntBase};
-use std::fmt;
+use crate::{prelude::*, Canvas, Matrix, NativeFlattenable, Picture, Point, Rect};
 
 pub type Drawable = RCHandle<SkDrawable>;
 
@@ -65,19 +67,17 @@ impl Drawable {
         })
     }
 
-    // TODO: clarify ref-counter situation here, return value is SkPicture*
-    /*
-    pub fn new_picture_snapshot(&mut self) -> Option<Picture> {
-        unimplemented!()
+    pub fn make_picture_snapshot(&mut self) -> Picture {
+        Picture::from_ptr(unsafe { sb::C_SkDrawable_makePictureSnapshot(self.native_mut()) })
+            .expect("Internal error: SkDrawable::makePictureSnapshot returned null")
     }
-    */
 
     pub fn generation_id(&mut self) -> u32 {
         unsafe { self.native_mut().getGenerationID() }
     }
 
     pub fn bounds(&mut self) -> Rect {
-        Rect::from_native_c(unsafe { sb::C_SkDrawable_getBounds(self.native_mut()) })
+        Rect::construct(|r| unsafe { sb::C_SkDrawable_getBounds(self.native_mut(), r) })
     }
 
     pub fn approximate_bytes_used(&mut self) -> usize {

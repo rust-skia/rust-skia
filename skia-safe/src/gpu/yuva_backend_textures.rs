@@ -138,29 +138,44 @@ impl YUVABackendTextures {
         if textures.len() != info.num_planes() {
             return None;
         }
-        let mut textures = textures.to_vec();
-        textures.extend(
-            iter::repeat_with(BackendTexture::new_invalid)
-                .take(textures.len() - YUVAInfo::MAX_PLANES),
-        );
-        assert_eq!(textures.len(), YUVAInfo::MAX_PLANES);
-        let n = unsafe {
-            GrYUVABackendTextures::new(info.native(), textures[0].native(), texture_origin)
-        };
+        let new_invalid = BackendTexture::new_invalid();
+        let new_invalid_ptr = new_invalid.native() as *const _;
+
+        let mut texture_handles = textures
+            .iter()
+            .map(|tex| tex.native() as *const _)
+            .collect::<Vec<_>>();
+        texture_handles
+            .extend(iter::repeat(new_invalid_ptr).take(YUVAInfo::MAX_PLANES - textures.len()));
+        assert_eq!(texture_handles.len(), YUVAInfo::MAX_PLANES);
+
+        let n = construct(|cloned| unsafe {
+            sb::C_GrYUVABackendTextures_construct(
+                cloned,
+                info.native(),
+                texture_handles.as_ptr(),
+                texture_origin,
+            )
+        });
         Self::native_is_valid(&n).if_true_then_some(|| Self::from_native_c(n))
     }
 
-    pub fn textures(&self) -> &[BackendTexture] {
+    pub fn textures(&self) -> Vec<BackendTexture> {
         unsafe {
-            let textures = BackendTexture::from_native_ptr(sb::C_GrYUVABackendTextures_textures(
-                self.native(),
-            ));
-            safer::from_raw_parts(textures, self.num_planes())
+            let textures_ptr = sb::C_GrYUVABackendTextures_textures(self.native());
+            let textures = safer::from_raw_parts(textures_ptr, self.num_planes());
+            textures
+                .iter()
+                .map(|native_texture_ref| {
+                    BackendTexture::from_ptr(sb::C_GrBackendTexture_Clone(native_texture_ref))
+                        .unwrap()
+                })
+                .collect()
         }
     }
 
-    pub fn texture(&self, i: usize) -> Option<&BackendTexture> {
-        self.textures().get(i)
+    pub fn texture(&self, i: usize) -> Option<BackendTexture> {
+        self.textures().get(i).cloned()
     }
 
     pub fn yuva_info(&self) -> &YUVAInfo {

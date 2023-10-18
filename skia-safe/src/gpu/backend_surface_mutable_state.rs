@@ -20,7 +20,7 @@ impl Default for BackendSurfaceMutableState {
 }
 
 impl fmt::Debug for BackendSurfaceMutableState {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("BackendSurfaceMutableState").finish()
     }
 }

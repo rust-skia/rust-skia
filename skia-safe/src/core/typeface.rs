@@ -3,7 +3,7 @@ use crate::{
     font_parameters::VariationAxis,
     interop::{self, MemoryStream, NativeStreamBase, StreamAsset},
     prelude::*,
-    Data, FontArguments, FontStyle, GlyphId, Rect, TextEncoding, Unichar,
+    Data, FontArguments, FontStyle, FourByteTag, GlyphId, Rect, TextEncoding, Unichar,
 };
 use skia_bindings::{self as sb, SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings};
 use std::{ffi, fmt, mem, ptr};
@@ -14,10 +14,7 @@ pub type FontId = TypefaceId;
 pub type FontTableTag = skia_bindings::SkFontTableTag;
 
 pub use skia_bindings::SkTypeface_SerializeBehavior as SerializeBehavior;
-variant_name!(
-    SerializeBehavior::DontIncludeData,
-    serialize_behavior_naming
-);
+variant_name!(SerializeBehavior::DontIncludeData);
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct LocalizedString {
@@ -25,8 +22,11 @@ pub struct LocalizedString {
     pub language: String,
 }
 
+pub type FactoryId = FourByteTag;
+
 pub type Typeface = RCHandle<SkTypeface>;
 unsafe_send_sync!(Typeface);
+require_base_type!(SkTypeface, sb::SkWeakRefCnt);
 
 impl NativeRefCountedBase for SkTypeface {
     type Base = SkRefCntBase;
@@ -51,7 +51,6 @@ impl fmt::Debug for Typeface {
 }
 
 impl Typeface {
-    // Canonical new:
     pub fn new(family_name: impl AsRef<str>, font_style: FontStyle) -> Option<Self> {
         Self::from_name(family_name, font_style)
     }
@@ -294,8 +293,10 @@ impl Typeface {
     // TODO: createScalerContext()
 
     pub fn bounds(&self) -> Rect {
-        Rect::from_native_c(unsafe { sb::C_SkTypeface_getBounds(self.native()) })
+        Rect::construct(|r| unsafe { sb::C_SkTypeface_getBounds(self.native(), r) })
     }
+
+    // TODO: Register()
 }
 
 pub type LocalizedStringsIter = RefHandle<SkTypeface_LocalizedStrings>;

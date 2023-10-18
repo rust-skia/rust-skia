@@ -1,10 +1,12 @@
-use crate::{artifact, drivers::DrawingDriver, Driver};
+use std::{convert::TryInto, ffi::CString, os::raw, path::Path, ptr};
+
 use ash::{
     vk::{self, Handle},
     Entry, Instance,
 };
-use skia_safe::{gpu, Budgeted, Canvas, ImageInfo, Surface};
-use std::{convert::TryInto, ffi::CString, os::raw, path::Path, ptr};
+use skia_safe::{gpu, Canvas, ImageInfo};
+
+use crate::{artifact, drivers::DrawingDriver, Driver};
 
 #[allow(dead_code)]
 pub struct Vulkan {
@@ -59,9 +61,9 @@ impl DrawingDriver for Vulkan {
         func: impl Fn(&mut Canvas),
     ) {
         let image_info = ImageInfo::new_n32_premul((width * 2, height * 2), None);
-        let mut surface = Surface::new_render_target(
+        let mut surface = gpu::surfaces::render_target(
             &mut self.context,
-            Budgeted::Yes,
+            gpu::Budgeted::Yes,
             &image_info,
             None,
             gpu::SurfaceOrigin::TopLeft,

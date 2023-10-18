@@ -1,12 +1,10 @@
-use std::fmt;
-
 use crate::{
     gpu::{BackendAPI, BackendFormat, DirectContext, Renderable},
-    image,
     prelude::*,
-    ColorType,
+    ColorType, TextureCompressionType,
 };
 use skia_bindings::{self as sb, GrRecordingContext, SkRefCntBase};
+use std::fmt;
 
 pub type RecordingContext = RCHandle<GrRecordingContext>;
 
@@ -59,7 +57,7 @@ impl RecordingContext {
     // From GrContext_Base
     pub fn compressed_backend_format(
         &self,
-        compression_type: image::CompressionType,
+        compression_type: TextureCompressionType,
     ) -> BackendFormat {
         let mut format = BackendFormat::new_invalid();
         unsafe {

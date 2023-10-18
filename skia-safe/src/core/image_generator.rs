@@ -1,11 +1,8 @@
 #[cfg(feature = "gpu")]
 use crate::gpu;
-use crate::{
-    image, prelude::*, AlphaType, ColorSpace, Data, ISize, ImageInfo, Matrix, Paint, Picture,
-    SurfaceProps,
-};
+use crate::{prelude::*, yuva_pixmap_info, Data, ImageInfo, YUVAPixmapInfo};
 use skia_bindings::{self as sb, SkImageGenerator};
-use std::{fmt, ptr};
+use std::fmt;
 
 pub type ImageGenerator = RefHandle<SkImageGenerator>;
 unsafe_send_sync!(ImageGenerator);
@@ -54,73 +51,28 @@ impl ImageGenerator {
 
     // TODO: m86: get_pixels(&Pixmap)
 
-    // TODO: generateTexture()
-
-    #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.29.0", note = "removed without replacement")]
-    pub fn textures_are_cacheable(&self) -> ! {
-        unimplemented!("removed without replacement")
-    }
-
-    pub fn from_encoded(encoded: impl Into<Data>) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            sb::C_SkImageGenerator_MakeFromEncoded(encoded.into().into_ptr(), ptr::null())
+    pub fn query_yuva_info(
+        &self,
+        supported_data_types: &yuva_pixmap_info::SupportedDataTypes,
+    ) -> Option<YUVAPixmapInfo> {
+        YUVAPixmapInfo::new_if_valid(|info| unsafe {
+            self.native()
+                .queryYUVAInfo(supported_data_types.native(), info)
         })
     }
 
-    pub fn from_encoded_with_alpha_type(
-        encoded: impl Into<Data>,
-        alpha_type: impl Into<Option<AlphaType>>,
-    ) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            sb::C_SkImageGenerator_MakeFromEncoded(
-                encoded.into().into_ptr(),
-                alpha_type
-                    .into()
-                    .map(|at| &at as *const _)
-                    .unwrap_or(ptr::null()),
-            )
-        })
+    // TODO: getYUVAPlanes()
+
+    pub fn is_texture_generator(&self) -> bool {
+        unsafe { sb::C_SkImageGenerator_isTextureGenerator(self.native()) }
     }
 
-    pub fn from_picture(
-        size: ISize,
-        picture: impl Into<Picture>,
-        matrix: Option<&Matrix>,
-        paint: Option<&Paint>,
-        bit_depth: image::BitDepth,
-        color_space: impl Into<Option<ColorSpace>>,
-    ) -> Option<Self> {
-        Self::from_picture_with_props(
-            size,
-            picture,
-            matrix,
-            paint,
-            bit_depth,
-            color_space,
-            SurfaceProps::default(),
-        )
-    }
-
-    pub fn from_picture_with_props(
-        size: ISize,
-        picture: impl Into<Picture>,
-        matrix: Option<&Matrix>,
-        paint: Option<&Paint>,
-        bit_depth: image::BitDepth,
-        color_space: impl Into<Option<ColorSpace>>,
-        props: SurfaceProps,
-    ) -> Option<Self> {
-        Self::from_ptr(unsafe {
-            sb::C_SkImageGenerator_MakeFromPicture(
-                size.native(),
-                picture.into().into_ptr(),
-                matrix.native_ptr_or_null(),
-                paint.native_ptr_or_null(),
-                bit_depth,
-                color_space.into().into_ptr_or_null(),
-                props.native(),
-            )
-        })
+    #[deprecated(
+        since = "0.64.0",
+        note = "Removed, will return `None`. Use Image::deferred_from_encoded_data() or Codec::from_data()"
+    )]
+    pub fn from_encoded(_encoded: impl Into<Data>) -> Option<Self> {
+        debug_assert!(false, "Removed, will return `None` in release builds");
+        None
     }
 }

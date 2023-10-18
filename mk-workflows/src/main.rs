@@ -1,8 +1,9 @@
-#![allow(clippy::upper_case_acronyms)]
-// Allow uppercase acronyms like QA and MacOS.
-
 //! This program builds the github workflow files for the rust-skia project.
-use std::{fmt, fs, ops::Deref, path::PathBuf};
+
+// Allow uppercase acronyms like QA and MacOS.
+#![allow(clippy::upper_case_acronyms)]
+
+use std::{collections::HashSet, fmt, fs, ops::Sub, path::PathBuf};
 
 mod config;
 
@@ -65,7 +66,7 @@ impl fmt::Display for HostOS {
 
 #[derive(Default)]
 pub struct Job {
-    name: &'static str,
+    name: String,
     toolchain: &'static str,
     features: Features,
     skia_debug: bool,
@@ -83,7 +84,7 @@ fn build_workflow(workflow: &Workflow, jobs: &[Job]) {
     let output_filename = PathBuf::new()
         .join(".github")
         .join("workflows")
-        .join(format!("{}.yaml", workflow_name));
+        .join(format!("{workflow_name}.yaml"));
 
     let header = build_header(&workflow_name, workflow.kind);
 
@@ -91,8 +92,8 @@ fn build_workflow(workflow: &Workflow, jobs: &[Job]) {
 
     for job in jobs {
         {
-            let job_name = workflow_name.clone() + "-" + job.name;
-            let job_name = format!("{}:", job_name).indented(1);
+            let job_name = workflow_name.clone() + "-" + &job.name;
+            let job_name = format!("{job_name}:").indented(1);
             parts.push(job_name);
         }
 
@@ -160,13 +161,12 @@ fn macosx_deployment_target(
             .iter()
             .any(|target| effective_features(workflow, job, target).contains(&metal))
         {
-            Some("10.14")
+            return Some("10.14");
         } else {
-            Some("10.13")
+            return Some("10.13");
         }
-    } else {
-        None
     }
+    None
 }
 
 fn build_target(workflow: &Workflow, job: &Job, target: &Target) -> String {
@@ -210,20 +210,19 @@ fn effective_features(workflow: &Workflow, job: &Job, target: &Target) -> Featur
     if workflow.kind == WorkflowKind::QA {
         features = features.join(&target.platform_features);
     }
-    features
+    features.sub(&target.disabled_features)
 }
 
 fn render_template(template: &str, replacements: &[(String, String)]) -> String {
     let mut template = template.to_owned();
 
     replacements.iter().for_each(|(pattern, value)| {
-        template = template.replace(&format!("$[[{}]]", pattern), value)
+        template = template.replace(&format!("$[[{pattern}]]"), value)
     });
 
     assert!(
         !template.contains("$[["),
-        "Template contains template patterns after replacement: \n{}",
-        template
+        "Template contains template patterns after replacement: \n{template}"
     );
 
     template
@@ -234,40 +233,49 @@ struct Target {
     target: &'static str,
     android_env: bool,
     emscripten_env: bool,
+    /// Platform specific features.
     platform_features: Features,
+    /// Features currently disabled for some reason.
+    disabled_features: Features,
 }
 
 #[derive(Clone, Default, Debug)]
-struct Features(Vec<String>);
+struct Features(HashSet<String>);
 
 impl Features {
+    #[must_use]
     pub fn join(&self, other: &Self) -> Self {
         let mut features = self.0.clone();
         features.extend(other.0.iter().cloned());
-        features.sort();
-        features.dedup();
         Self(features)
     }
-}
 
-impl Deref for Features {
-    type Target = Vec<String>;
+    #[must_use]
+    pub fn sub(&mut self, other: &Self) -> Self {
+        Self(self.0.sub(&other.0))
+    }
 
-    fn deref(&self) -> &Self::Target {
-        &self.0
+    pub fn contains(&self, feature: impl AsRef<str>) -> bool {
+        self.0.contains(feature.as_ref())
+    }
+
+    /// Create a stable, comparable name for a feature combination, separated by a separator.
+    pub fn name(&self, separator: &str) -> String {
+        let mut strings: Vec<_> = self.0.iter().map(|s| s.as_str()).collect();
+        strings.sort();
+        strings.join(separator)
     }
 }
 
 impl fmt::Display for Features {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> std::fmt::Result {
-        let features = self.0.join(",");
-        f.write_str(&features)
+        f.write_str(&self.name(","))
     }
 }
 
 impl From<&str> for Features {
     fn from(s: &str) -> Self {
-        let strs: Vec<String> = s
+        let strs: HashSet<String> = s
             .split(',')
             .filter_map(|s| {
                 let f = s.trim().to_owned();
@@ -289,7 +297,16 @@ trait Indented {
 impl Indented for String {
     fn indented(&self, i: usize) -> String {
         let prefix: String = "  ".repeat(i);
-        let indented_lines: Vec<String> = self.lines().map(|l| prefix.clone() + l).collect();
+        let indented_lines: Vec<String> = self
+            .lines()
+            .map(|l| {
+                if !l.is_empty() {
+                    prefix.clone() + l
+                } else {
+                    "".into()
+                }
+            })
+            .collect();
 
         indented_lines.join("\n")
     }

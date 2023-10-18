@@ -3,12 +3,9 @@ use skia_bindings::{self as sb, GrContextOptions};
 use std::os::raw;
 
 pub use skia_bindings::GrContextOptions_Enable as Enable;
-variant_name!(Enable::Yes, enable_naming);
+variant_name!(Enable::Yes);
 pub use skia_bindings::GrContextOptions_ShaderCacheStrategy as ShaderCacheStrategy;
-variant_name!(
-    ShaderCacheStrategy::BackendSource,
-    shader_cache_strategy_naming
-);
+variant_name!(ShaderCacheStrategy::BackendSource);
 
 #[repr(C)]
 #[derive(Debug)]
@@ -42,6 +39,9 @@ pub struct ContextOptions {
     pub enable_experimental_hardware_tessellation: bool,
     pub reduced_shader_variations: bool,
     pub allow_msaa_on_new_intel: bool,
+    pub always_use_text_storage_when_available: bool,
+    context_delete_context: sb::GrDirectContextDestroyedContext,
+    context_delete_proc: sb::GrDirectContextDestroyedProc,
     pub driver_bug_workarounds: DriverBugWorkarounds,
 }
 unsafe_send_sync!(ContextOptions);

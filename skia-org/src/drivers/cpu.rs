@@ -1,6 +1,8 @@
-use crate::{artifact, drivers::DrawingDriver, Driver};
-use skia_safe::{Canvas, Surface};
 use std::path::Path;
+
+use skia_safe::{surfaces, Canvas};
+
+use crate::{artifact, drivers::DrawingDriver, Driver};
 
 pub struct Cpu;
 
@@ -18,7 +20,7 @@ impl DrawingDriver for Cpu {
         name: &str,
         func: impl Fn(&mut Canvas),
     ) {
-        let mut surface = Surface::new_raster_n32_premul((width * 2, height * 2)).unwrap();
+        let mut surface = surfaces::raster_n32_premul((width * 2, height * 2)).unwrap();
         artifact::draw_image_on_surface(&mut surface, path, name, func);
     }
 }

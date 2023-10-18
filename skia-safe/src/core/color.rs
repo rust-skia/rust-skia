@@ -1,5 +1,5 @@
-use crate::{prelude::*, u8cpu};
-use skia_bindings::{self as sb, SkColor, SkColor4f, SkHSVToColor, SkPMColor, SkRGBToHSV};
+use crate::prelude::*;
+use skia_bindings::{self as sb, SkColor, SkColor4f, SkHSVToColor, SkPMColor, SkRGBToHSV, U8CPU};
 use std::ops::{BitAnd, BitOr, Index, IndexMut, Mul};
 
 // TODO: What should we do with SkAlpha?
@@ -69,10 +69,10 @@ impl Color {
         Self(argb)
     }
 
-    // note: we don't use the u8cpu type in the arguments here, because we trust the Rust
-    // compiler to optimize the storage type.
+    // Don't use the u8cpu type in the arguments here, because we trust the Rust compiler to
+    // optimize the storage type.
     pub const fn from_argb(a: u8, r: u8, g: u8, b: u8) -> Color {
-        Self(((a as u8cpu) << 24) | ((r as u8cpu) << 16) | ((g as u8cpu) << 8) | (b as u8cpu))
+        Self(((a as U8CPU) << 24) | ((r as U8CPU) << 16) | ((g as U8CPU) << 8) | (b as U8CPU))
     }
 
     pub const fn from_rgb(r: u8, g: u8, b: u8) -> Color {
@@ -177,7 +177,7 @@ impl HSV {
 
 pub type PMColor = SkPMColor;
 
-pub fn pre_multiply_argb(a: u8cpu, r: u8cpu, g: u8cpu, b: u8cpu) -> PMColor {
+pub fn pre_multiply_argb(a: U8CPU, r: U8CPU, g: U8CPU, b: U8CPU) -> PMColor {
     unsafe { sb::SkPreMultiplyARGB(a, r, g, b) }
 }
 
@@ -193,16 +193,17 @@ fn color_channel_naming() {
 }
 
 bitflags! {
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct ColorChannelFlag: u32 {
         const RED = sb::SkColorChannelFlag::kRed_SkColorChannelFlag as _;
         const GREEN = sb::SkColorChannelFlag::kGreen_SkColorChannelFlag as _;
         const BLUE = sb::SkColorChannelFlag::kBlue_SkColorChannelFlag as _;
         const ALPHA = sb::SkColorChannelFlag::kAlpha_SkColorChannelFlag as _;
         const GRAY = sb::SkColorChannelFlag::kGray_SkColorChannelFlag as _;
-        const GRAY_ALPHA = Self::GRAY.bits | Self::ALPHA.bits;
-        const RG = Self::RED.bits | Self::GREEN.bits;
-        const RGB = Self::RG.bits | Self::BLUE.bits;
-        const RGBA = Self::RGB.bits | Self::ALPHA.bits;
+        const GRAY_ALPHA = Self::GRAY.bits() | Self::ALPHA.bits();
+        const RG = Self::RED.bits() | Self::GREEN.bits();
+        const RGB = Self::RG.bits() | Self::BLUE.bits();
+        const RGBA = Self::RGB.bits() | Self::ALPHA.bits();
     }
 }
 
@@ -330,7 +331,7 @@ impl Color4f {
 
     pub fn to_color(self) -> Color {
         fn c(f: f32) -> u8 {
-            (f.max(0.0).min(1.0) * 255.0) as u8
+            (f.clamp(0.0, 1.0) * 255.0) as u8
         }
         let a = c(self.a);
         let r = c(self.r);
@@ -342,8 +343,16 @@ impl Color4f {
     // TODO: FromPMColor
     // TODO: premul()
     // TODO: unpremul()
-    // TODO: toBytes_RGBA()
-    // TODO: FromBytes_RGBA
+
+    #[must_use]
+    pub fn to_bytes(self) -> u32 {
+        unsafe { sb::C_SkColor4f_toBytes_RGBA(self.native()) }
+    }
+
+    #[must_use]
+    pub fn from_bytes_rgba(color: u32) -> Self {
+        Self::from_native_c(unsafe { sb::C_SkColor4f_FromBytes_RGBA(color) })
+    }
 
     #[must_use]
     pub fn to_opaque(self) -> Self {

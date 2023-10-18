@@ -4,6 +4,7 @@ use std::fmt;
 
 pub type ColorFilter = RCHandle<SkColorFilter>;
 unsafe_send_sync!(ColorFilter);
+require_type_equality!(sb::SkColorFilter_INHERITED, SkFlattenable);
 
 impl NativeBase<SkRefCntBase> for SkColorFilter {}
 
@@ -79,7 +80,7 @@ impl ColorFilter {
 }
 
 pub mod color_filters {
-    use crate::prelude::*;
+    use crate::{prelude::*, Color4f, ColorSpace, ColorTable};
     use crate::{scalar, BlendMode, Color, ColorFilter, ColorMatrix};
     use skia_bindings as sb;
 
@@ -102,6 +103,8 @@ pub mod color_filters {
             .unwrap()
     }
 
+    // A version of Matrix which operates in HSLA space instead of RGBA.
+    // I.e. HSLA-to-RGBA(Matrix(RGBA-to-HSLA(input))).
     pub fn hsla_matrix_of_color_matrix(color_matrix: &ColorMatrix) -> ColorFilter {
         ColorFilter::from_ptr(unsafe {
             sb::C_SkColorFilters_HSLAMatrixOfColorMatrix(color_matrix.native())
@@ -109,6 +112,7 @@ pub mod color_filters {
         .unwrap()
     }
 
+    /// See [`hsla_matrix_of_color_matrix()`]
     pub fn hsla_matrix(row_major: &[f32; 20]) -> ColorFilter {
         ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_HSLAMatrix(row_major.as_ptr()) })
             .unwrap()
@@ -116,6 +120,22 @@ pub mod color_filters {
 
     pub fn blend(c: impl Into<Color>, mode: BlendMode) -> Option<ColorFilter> {
         ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_Blend(c.into().into_native(), mode) })
+    }
+
+    /// Blends between the constant color (src) and input color (dst) based on the [`BlendMode`].
+    /// If the color space is `None`, the constant color is assumed to be defined in sRGB.
+    pub fn blend_with_color_space(
+        c: impl Into<Color4f>,
+        color_space: impl Into<Option<ColorSpace>>,
+        mode: BlendMode,
+    ) -> Option<ColorFilter> {
+        ColorFilter::from_ptr(unsafe {
+            sb::C_SkColorFilters_Blend2(
+                c.into().native(),
+                color_space.into().into_ptr_or_null(),
+                mode,
+            )
+        })
     }
 
     pub fn linear_to_srgb_gamma() -> ColorFilter {
@@ -133,6 +153,54 @@ pub mod color_filters {
     ) -> Option<ColorFilter> {
         ColorFilter::from_ptr(unsafe {
             sb::C_SkColorFilters_Lerp(t, dst.into().into_ptr(), src.into().into_ptr())
+        })
+    }
+
+    /// Create a table color filter, copying the table into the filter, and
+    /// applying it to all 4 components.
+    /// `a' = table[a];`
+    /// `r' = table[r];`
+    /// `g' = table[g];`
+    /// `b' = table[b];`
+    /// Components are operated on in unpremultiplied space. If the incoming
+    /// colors are premultiplied, they are temporarily unpremultiplied, then
+    /// the table is applied, and then the result is re-multiplied.
+    pub fn table(table: &[u8; 256]) -> Option<ColorFilter> {
+        ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_Table(table.as_ptr()) })
+    }
+
+    /// Create a table color filter, with a different table for each
+    /// component [A, R, G, B]. If a given table is `None`, then it is
+    /// treated as identity, with the component left unchanged. If a table
+    /// is not `None`, then its contents are copied into the filter.
+    pub fn table_argb<'a>(
+        table_a: impl Into<Option<&'a [u8; 256]>>,
+        table_r: impl Into<Option<&'a [u8; 256]>>,
+        table_g: impl Into<Option<&'a [u8; 256]>>,
+        table_b: impl Into<Option<&'a [u8; 256]>>,
+    ) -> Option<ColorFilter> {
+        ColorFilter::from_ptr(unsafe {
+            sb::C_SkColorFilters_TableARGB(
+                table_a.into().map(|t| t.as_ref()).as_ptr_or_null(),
+                table_r.into().map(|t| t.as_ref()).as_ptr_or_null(),
+                table_g.into().map(|t| t.as_ref()).as_ptr_or_null(),
+                table_b.into().map(|t| t.as_ref()).as_ptr_or_null(),
+            )
+        })
+    }
+
+    /// Create a table color filter that holds a ref to the shared color table.
+    pub fn table_from_color_table(table: impl Into<ColorTable>) -> Option<ColorFilter> {
+        ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_Table2(table.into().into_ptr()) })
+    }
+
+    /// Create a color filter that multiplies the RGB channels by one color, and
+    /// then adds a second color, pinning the result for each component to
+    /// [0..255]. The alpha components of the mul and add arguments
+    /// are ignored.
+    pub fn lighting(mul: impl Into<Color>, add: impl Into<Color>) -> Option<ColorFilter> {
+        ColorFilter::from_ptr(unsafe {
+            sb::C_SkColorFilters_Lighting(mul.into().into_native(), add.into().into_native())
         })
     }
 }

@@ -1,12 +1,14 @@
-use crate::{artifact, drivers::DrawingDriver, Driver};
+use std::{path::Path, ptr};
+
 use cocoa::foundation::NSAutoreleasePool;
 use foreign_types_shared::ForeignType;
 use metal_rs::*;
 use skia_safe::{
     gpu::{self, mtl},
-    Budgeted, Canvas, ImageInfo, Surface,
+    Canvas, ImageInfo,
 };
-use std::{path::Path, ptr};
+
+use crate::{artifact, drivers::DrawingDriver, Driver};
 
 #[allow(dead_code)]
 pub struct Metal {
@@ -54,9 +56,9 @@ impl DrawingDriver for Metal {
         let _image_pool = AutoreleasePool::new();
 
         let image_info = ImageInfo::new_n32_premul((width * 2, height * 2), None);
-        let mut surface = Surface::new_render_target(
+        let mut surface = gpu::surfaces::render_target(
             &mut self.context,
-            Budgeted::Yes,
+            gpu::Budgeted::Yes,
             &image_info,
             None,
             gpu::SurfaceOrigin::TopLeft,

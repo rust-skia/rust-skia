@@ -7,12 +7,13 @@ use std::{
 };
 
 pub use skia_bindings::SkApplyPerspectiveClip as ApplyPerspectiveClip;
-variant_name!(ApplyPerspectiveClip::Yes, perspective_clip_naming);
+variant_name!(ApplyPerspectiveClip::Yes);
 
 bitflags! {
     // m85: On Windows the SkMatrix_TypeMask is defined as i32,
     // but we stick to u32 (macOS / Linux), because there is no need to leak
     // the platform difference to the Rust side.
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct TypeMask: u32 {
         const IDENTITY = sb::SkMatrix_TypeMask_kIdentity_Mask as _;
         const TRANSLATE = sb::SkMatrix_TypeMask_kTranslate_Mask as _;
@@ -27,7 +28,7 @@ impl TypeMask {
 }
 
 pub use skia_bindings::SkMatrix_ScaleToFit as ScaleToFit;
-variant_name!(ScaleToFit::Fill, scale_to_fit_naming);
+variant_name!(ScaleToFit::Fill);
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
@@ -135,6 +136,7 @@ impl Matrix {
         Self::scale(scale)
     }
 
+    #[must_use]
     pub fn scale((sx, sy): (scalar, scalar)) -> Self {
         let mut m = Self::new();
         m.set_scale((sx, sy), None);
@@ -146,34 +148,40 @@ impl Matrix {
         Self::translate(d)
     }
 
+    #[must_use]
     pub fn translate(d: impl Into<Vector>) -> Self {
         let mut m = Self::new();
         m.set_translate(d);
         m
     }
 
+    #[must_use]
     pub fn rotate_deg(deg: scalar) -> Self {
         let mut m = Self::new();
         m.set_rotate(deg, None);
         m
     }
 
+    #[must_use]
     pub fn rotate_deg_pivot(deg: scalar, pivot: impl Into<Point>) -> Self {
         let mut m = Self::new();
         m.set_rotate(deg, pivot.into());
         m
     }
 
+    #[must_use]
     pub fn rotate_rad(rad: scalar) -> Self {
         Self::rotate_deg(scalar_::radians_to_degrees(rad))
     }
 
+    #[must_use]
     pub fn skew((kx, ky): (scalar, scalar)) -> Self {
         let mut m = Self::new();
         m.set_skew((kx, ky), None);
         m
     }
 
+    #[must_use]
     pub fn rect_to_rect(
         src: impl AsRef<Rect>,
         dst: impl AsRef<Rect>,
@@ -182,6 +190,7 @@ impl Matrix {
         Self::from_rect_to_rect(src, dst, scale_to_fit.into().unwrap_or(ScaleToFit::Fill))
     }
 
+    #[must_use]
     #[allow(clippy::too_many_arguments)]
     pub fn new_all(
         scale_x: scalar,
@@ -764,9 +773,11 @@ impl Matrix {
         unsafe { self.native().getMaxScale() }
     }
 
+    #[must_use]
     pub fn min_max_scales(&self) -> (scalar, scalar) {
         let mut r: [scalar; 2] = Default::default();
         unsafe { self.native().getMinMaxScales(r.as_mut_ptr()) };
+        #[allow(clippy::tuple_array_conversions)]
         (r[0], r[1])
     }
 

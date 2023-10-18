@@ -4,8 +4,8 @@
 
 #include "include/gpu/GrBackendDrawableInfo.h"
 #include "include/gpu/GrBackendSurface.h"
+#include "include/gpu/GrBackendSurfaceMutableState.h"
 #include "include/gpu/GrDirectContext.h"
-#include "include/gpu/vk/GrVkVulkan.h"
 #include "include/gpu/vk/GrVkTypes.h"
 #include "include/gpu/vk/GrVkBackendContext.h"
 #include "include/gpu/vk/GrVkExtensions.h"
@@ -21,8 +21,12 @@ extern "C" void C_GrBackendFormat_ConstructVk2(GrBackendFormat* uninitialized, c
     new(uninitialized)GrBackendFormat(GrBackendFormat::MakeVk(*ycbcrInfo, willUseDRMFormatModifiers));
 }
 
-extern "C" void C_GrBackendTexture_ConstructVk(GrBackendTexture* uninitialized, int width, int height, const GrVkImageInfo* vkInfo) {
-    new(uninitialized)GrBackendTexture(width, height, *vkInfo);
+extern "C" GrBackendTexture* C_GrBackendTexture_newVk(
+    int width, int height,
+    const GrVkImageInfo* vkInfo,
+    const char* label,
+    size_t labelCount) {
+    return new GrBackendTexture(width, height, *vkInfo, std::string_view(label, labelCount));
 }
 
 extern "C" void C_GrBackendRenderTarget_ConstructVk(GrBackendRenderTarget* uninitialized, int width, int height, int sampleCnt, const GrVkImageInfo* vkInfo) {
@@ -35,15 +39,10 @@ extern "C" bool C_GrBackendDrawableInfo_getVkDrawableInfo(const GrBackendDrawabl
 
 extern "C" void C_GPU_VK_Types(GrVkExtensionFlags *, GrVkFeatureFlags *, VkBuffer *) {}
 
-// The GrVkBackendContext struct binding's length is too short
-// because of the std::function that is used in it.
-// TODO: verify if this is actually true for the latest bindings (it doesn't seem so, because all skia-bindings testcases work and 
-// GrVkBackendContext seems to be generated).
-
 typedef PFN_vkVoidFunction (*GetProcFn)(const char* name, VkInstance instance, VkDevice device);
 typedef const void* (*GetProcFnVoidPtr)(const char* name, VkInstance instance, VkDevice device);
 
-extern "C" void *C_GrVkBackendContext_New(
+extern "C" void *C_GrVkBackendContext_new(
     void *instance,
     void *physicalDevice,
     void *device,
@@ -73,7 +72,7 @@ extern "C" void *C_GrVkBackendContext_New(
     return &context;
 }
 
-extern "C" void C_GrVkBackendContext_Delete(void* vkBackendContext) {
+extern "C" void C_GrVkBackendContext_delete(void* vkBackendContext) {
     auto bc = static_cast<GrVkBackendContext*>(vkBackendContext);
     if (bc) {
         delete bc->fVkExtensions;
@@ -116,4 +115,20 @@ extern "C" bool C_GrVkYcbcrConversionInfo_Equals(const GrVkYcbcrConversionInfo* 
 
 extern "C" void C_GrBackendSurfaceMutableState_ConstructVK(GrBackendSurfaceMutableState* uninitialized, VkImageLayout layout, uint32_t queueFamilyIndex) {
     new(uninitialized)GrBackendSurfaceMutableState(layout, queueFamilyIndex);
+}
+
+//
+// gpu/MutableTextureState.h
+//
+
+extern "C" void C_MutableTextureState_ConstructVK(skgpu::MutableTextureState* uninitialized, VkImageLayout layout, uint32_t queueFamilyIndex) {
+    new(uninitialized)skgpu::MutableTextureState(layout, queueFamilyIndex);
+}
+
+extern "C" VkImageLayout C_MutableTextureState_getVkImageLayout(const skgpu::MutableTextureState* self) {
+    return self->getVkImageLayout();
+}
+
+extern "C" uint32_t C_MutableTextureState_getQueueFamilyIndex(const skgpu::MutableTextureState* self) {
+    return self->getQueueFamilyIndex();
 }

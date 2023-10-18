@@ -7,6 +7,7 @@ use std::fmt;
 /// and destination color (from the canvas) into a final color.
 pub type Blender = RCHandle<SkBlender>;
 unsafe_send_sync!(Blender);
+require_base_type!(SkBlender, SkFlattenable);
 
 impl NativeRefCountedBase for SkBlender {
     type Base = SkRefCntBase;

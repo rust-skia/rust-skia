@@ -1,25 +1,4 @@
-use crate::{prelude::*, scalar, ISize, Shader};
-use skia_bindings as sb;
-
-impl Shader {
-    pub fn fractal_perlin_noise(
-        base_frequency: (scalar, scalar),
-        num_octaves: usize,
-        seed: scalar,
-        tile_size: impl Into<Option<ISize>>,
-    ) -> Option<Self> {
-        fractal_noise(base_frequency, num_octaves, seed, tile_size)
-    }
-
-    pub fn turbulence_perlin_noise(
-        base_frequency: (scalar, scalar),
-        num_octaves: usize,
-        seed: scalar,
-        tile_size: impl Into<Option<ISize>>,
-    ) -> Option<Self> {
-        turbulence(base_frequency, num_octaves, seed, tile_size)
-    }
-}
+use crate::{scalar, shaders, ISize, Shader};
 
 pub fn fractal_noise(
     base_frequency: (scalar, scalar),
@@ -27,15 +6,7 @@ pub fn fractal_noise(
     seed: scalar,
     tile_size: impl Into<Option<ISize>>,
 ) -> Option<Shader> {
-    Shader::from_ptr(unsafe {
-        sb::C_SkPerlinNoiseShader_MakeFractalNoise(
-            base_frequency.0,
-            base_frequency.1,
-            num_octaves.try_into().unwrap(),
-            seed,
-            tile_size.into().native().as_ptr_or_null(),
-        )
-    })
+    shaders::fractal_noise(base_frequency, num_octaves, seed, tile_size)
 }
 
 pub fn turbulence(
@@ -44,13 +15,5 @@ pub fn turbulence(
     seed: scalar,
     tile_size: impl Into<Option<ISize>>,
 ) -> Option<Shader> {
-    Shader::from_ptr(unsafe {
-        sb::C_SkPerlinNoiseShader_MakeTurbulence(
-            base_frequency.0,
-            base_frequency.1,
-            num_octaves.try_into().unwrap(),
-            seed,
-            tile_size.into().native().as_ptr_or_null(),
-        )
-    })
+    shaders::turbulence(base_frequency, num_octaves, seed, tile_size)
 }

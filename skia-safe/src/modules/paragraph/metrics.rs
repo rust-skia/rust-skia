@@ -6,6 +6,24 @@ use std::{marker::PhantomData, ops::Range, ptr};
 #[derive(Clone, Debug)]
 pub struct StyleMetrics<'a> {
     pub text_style: &'a TextStyle,
+
+    /// [`FontMetrics`] contains the following metrics:
+    ///
+    /// * Top                 distance to reserve above baseline
+    /// * Ascent              distance to reserve below baseline
+    /// * Descent             extent below baseline
+    /// * Bottom              extent below baseline
+    /// * Leading             distance to add between lines
+    /// * AvgCharWidth        average character width
+    /// * MaxCharWidth        maximum character width
+    /// * XMin                minimum x
+    /// * XMax                maximum x
+    /// * XHeight             height of lower-case 'x'
+    /// * CapHeight           height of an upper-case letter
+    /// * UnderlineThickness  underline thickness
+    /// * UnderlinePosition   underline position relative to baseline
+    /// * StrikeoutThickness  strikeout thickness
+    /// * StrikeoutPosition   strikeout position relative to baseline
     pub font_metrics: FontMetrics,
 }
 
@@ -26,19 +44,43 @@ impl<'a> StyleMetrics<'a> {
 
 #[derive(Clone, Debug)]
 pub struct LineMetrics<'a> {
+    // The following fields are used in the layout process itself.
+    /// The index in the text buffer the line begins.
     pub start_index: usize,
+    /// The index in the text buffer the line ends.
     pub end_index: usize,
     pub end_excluding_whitespaces: usize,
     pub end_including_newline: usize,
     pub hard_break: bool,
+
+    // The following fields are tracked after or during layout to provide to
+    // the user as well as for computing bounding boxes.
+    /// The final computed ascent and descent for the line. This can be impacted by
+    /// the strut, height, scaling, as well as outlying runs that are very tall.
+    ///
+    /// The top edge is `baseline - ascent` and the bottom edge is `baseline +
+    /// descent`. Ascent and descent are provided as positive numbers. Raw numbers
+    /// for specific runs of text can be obtained in run_metrics_map. These values
+    /// are the cumulative metrics for the entire line.
     pub ascent: f64,
     pub descent: f64,
     pub unscaled_ascent: f64,
+    /// Total height of the paragraph including the current line.
+    ///
+    /// The height of the current line is `round(ascent + descent)`.
     pub height: f64,
+    /// Width of the line.
     pub width: f64,
+    /// The left edge of the line. The right edge can be obtained with `left +
+    /// width`
     pub left: f64,
+    /// The y position of the baseline for this line from the top of the paragraph.
     pub baseline: f64,
+    /// Zero indexed line number
     pub line_number: usize,
+    /// Mapping between text index ranges and the FontMetrics associated with
+    /// them. The first run will be keyed under start_index. The metrics here
+    /// are before layout and are the base values we calculate from.
     style_metrics: Vec<sb::IndexedStyleMetrics>,
     pd: PhantomData<&'a StyleMetrics<'a>>,
 }

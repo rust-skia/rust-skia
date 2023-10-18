@@ -72,13 +72,17 @@ impl Target {
         self.system == "windows"
     }
 
+    pub fn builds_with_msvc(&self) -> bool {
+        self.abi.as_deref() == Some("msvc")
+    }
+
     /// Convert a library name to a filename.
     pub fn library_to_filename(&self, name: impl AsRef<str>) -> PathBuf {
         let name = name.as_ref();
         if self.is_windows() {
-            format!("{}.lib", name).into()
+            format!("{name}.lib").into()
         } else {
-            format!("lib{}.a", name).into()
+            format!("lib{name}.a").into()
         }
     }
 
@@ -89,6 +93,11 @@ impl Target {
             self.system.as_str(),
             self.abi.as_deref(),
         )
+    }
+
+    pub fn arch_abi(&self) -> (&str, Option<&str>) {
+        let (arch, _vendor, _system, abi) = self.as_strs();
+        (arch, abi)
     }
 }
 
@@ -101,7 +110,7 @@ impl Display for Target {
         )?;
 
         if let Some(ref abi) = self.abi {
-            write!(f, "-{}", abi)
+            write!(f, "-{abi}")
         } else {
             Result::Ok(())
         }
@@ -121,26 +130,36 @@ pub fn target_crt_static() -> bool {
 
 pub fn host() -> Target {
     let host_str = env::var("HOST").unwrap();
-    println!("HOST: {}", host_str);
+    println!("HOST: {host_str}");
     parse_target(host_str)
 }
 
 pub fn parse_target(target_str: impl AsRef<str>) -> Target {
     let target_str = target_str.as_ref();
     let target: Vec<String> = target_str.split('-').map(|s| s.into()).collect();
-    assert!(target.len() >= 3, "Failed to parse TARGET {}", target_str);
 
-    let abi = if target.len() > 3 {
-        Some(target[3].clone())
+    if target.len() >= 3 {
+        let abi = if target.len() > 3 {
+            Some(target[3].clone())
+        } else {
+            None
+        };
+
+        Target {
+            architecture: target[0].clone(),
+            vendor: target[1].clone(),
+            system: target[2].clone(),
+            abi,
+        }
+    } else if target.len() == 2 {
+        Target {
+            architecture: target[0].clone(),
+            vendor: String::new(),
+            system: target[1].clone(),
+            abi: None,
+        }
     } else {
-        None
-    };
-
-    Target {
-        architecture: target[0].clone(),
-        vendor: target[1].clone(),
-        system: target[2].clone(),
-        abi,
+        panic!("Failed to parse TARGET {target_str}");
     }
 }
 
@@ -152,10 +171,7 @@ pub fn build_release() -> bool {
     match env::var("PROFILE").unwrap().as_str() {
         "release" => true,
         "debug" => false,
-        profile => panic!(
-            "PROFILE '{}' is not supported by this build script",
-            profile
-        ),
+        profile => panic!("PROFILE '{profile}' is not supported by this build script"),
     }
 }
 
@@ -201,4 +217,36 @@ pub fn get_metadata() -> Vec<(String, String)> {
         .iter()
         .map(|(a, b)| (a.clone(), b.as_str().unwrap().to_owned()))
         .collect()
+}
+
+#[test]
+fn parse_target_tests() {
+    assert_eq!(
+        parse_target("aarch64-unknown-linux-gnu"),
+        Target {
+            architecture: "aarch64".into(),
+            vendor: "unknown".into(),
+            system: "linux".into(),
+            abi: Some("gnu".into())
+        }
+    );
+    assert_eq!(
+        parse_target("aarch64-unknown-linux"),
+        Target {
+            architecture: "aarch64".into(),
+            vendor: "unknown".into(),
+            system: "linux".into(),
+            abi: None
+        }
+    );
+    assert_eq!(
+        parse_target("aarch64-linux"),
+        Target {
+            architecture: "aarch64".into(),
+            vendor: String::new(),
+            system: "linux".into(),
+            abi: None
+        }
+    );
+    assert!(std::panic::catch_unwind(|| parse_target("garbage")).is_err());
 }
