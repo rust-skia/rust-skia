@@ -1,11 +1,16 @@
-use super::prelude::*;
-use crate::build_support::clang;
 use std::{
     path::PathBuf,
     process::{Command, Stdio},
 };
 
+use super::prelude::*;
+use crate::build_support::clang;
+
 pub struct Ios;
+
+const MIN_IOS_VERSION: &str = "11.0";
+const MIN_IOS_VERSION_M1: &str = "14.0";
+const MIN_IOS_VERSION_CATALYST: &str = "14.0";
 
 impl PlatformDetails for Ios {
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
@@ -66,7 +71,7 @@ fn specific_target(arch: &str, abi: Option<&str>) -> Option<String> {
 
 // TODO: add support for 32 bit devices and simulators.
 fn extra_skia_cflags(arch: &str, abi: Option<&str>) -> Vec<String> {
-    vec![IosPlatform::new(arch, abi).flags().into()]
+    vec![IosPlatform::new(arch, abi).flags()]
 }
 
 fn additional_clang_args(arch: &str, abi: Option<&str>) -> Vec<String> {
@@ -74,7 +79,7 @@ fn additional_clang_args(arch: &str, abi: Option<&str>) -> Vec<String> {
 
     let platform = IosPlatform::new(arch, abi);
 
-    args.push(platform.flags().into());
+    args.push(platform.flags());
 
     use IosPlatform::*;
     match platform {
@@ -113,14 +118,14 @@ impl IosPlatform {
         }
     }
 
-    fn flags(self) -> &'static str {
+    fn flags(self) -> String {
         use IosPlatform::*;
         match self {
-            Device => "-miphoneos-version-min=10.0",
-            Simulator => "-mios-simulator-version-min=10.0",
-            M1Simulator => "-mios-simulator-version-min=14.0",
+            Device => format!("-miphoneos-version-min={MIN_IOS_VERSION}"),
+            Simulator => format!("-mios-simulator-version-min={MIN_IOS_VERSION}"),
+            M1Simulator => format!("-mios-simulator-version-min={MIN_IOS_VERSION_M1}"),
             // m100: XCode 13.2 fails to build with version 13
-            Catalyst => "-miphoneos-version-min=14.0",
+            Catalyst => format!("-miphoneos-version-min={MIN_IOS_VERSION_CATALYST}"),
         }
     }
 
