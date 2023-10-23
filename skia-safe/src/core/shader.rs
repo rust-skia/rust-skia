@@ -69,7 +69,7 @@ impl fmt::Debug for Shader {
 /// to be modified.
 impl Shader {
     /// Returns `true` if the shader is guaranteed to produce only opaque
-    /// colors, subject to the [`Paint`] using the shader to apply an opaque
+    /// colors, subject to the [`crate::Paint`] using the shader to apply an opaque
     /// alpha value. Subclasses should override this to allow some
     /// optimizations.
     pub fn is_opaque(&self) -> bool {

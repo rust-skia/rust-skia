@@ -34,7 +34,7 @@ pub enum ColorType {
     RGBA10x6 = SkColorType::kRGBA_10x6_SkColorType as _,
     /// pixel with grayscale level in 8-bit byte
     Gray8 = SkColorType::kGray_8_SkColorType as _,
-    /// pixel with half floats in [0,1] for red, green, blue, alpha in 64-bit word
+    /// pixel with half floats in `[0,1]` for red, green, blue, alpha in 64-bit word
     RGBAF16Norm = SkColorType::kRGBA_F16Norm_SkColorType as _,
     /// pixel with half floats for red, green, blue, alpha in 64-bit word
     RGBAF16 = SkColorType::kRGBA_F16_SkColorType as _,

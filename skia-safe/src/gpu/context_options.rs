@@ -28,7 +28,7 @@ pub struct ContextOptions {
     pub max_texture_size_override: raw::c_int,
 
     /// The threshold in bytes above which we will use a buffer mapping API to map vertex and index
-    /// buffers to CPU memory in order to update them.  A value of -1 means the [`Context`] should
+    /// buffers to CPU memory in order to update them.  A value of -1 means the `Context` should
     /// deduce the optimal value for this platform.
     pub buffer_map_threshold: raw::c_int,
 
@@ -98,7 +98,7 @@ pub struct ContextOptions {
 
     /// Disables correctness workarounds that are enabled for particular GPUs, OSes, or drivers.
     /// This does not affect code path choices that are made for performance reasons nor does it
-    /// override other [`ContextOption`] settings.
+    /// override other [`ContextOptions`] settings.
     pub disable_driver_correctness_workarounds: bool,
 
     /// Maximum number of GPU programs or pipelines to keep active in the runtime cache.
@@ -107,7 +107,7 @@ pub struct ContextOptions {
     /// Cache in which to store compiled shader binaries between runs.
     persistent_cache: *mut sb::GrContextOptions_PersistentCache,
 
-    /// This affects the usage of the PersistentCache. We can cache [`SL`], backend source (GLSL), or
+    /// This affects the usage of the PersistentCache. We can cache `SL`, backend source (GLSL), or
     /// backend binaries (GL program binaries). By default we cache binaries, but if the driver's
     /// binary loading/storing is believed to have bugs, this can be limited to caching GLSL.
     /// Caching GLSL strings still saves CPU work when a GL program is created.
@@ -123,7 +123,7 @@ pub struct ContextOptions {
     /// If 0, Ganesh will disable internal code paths that use multisampling.
     pub internal_multisample_count: raw::c_int,
 
-    /// In Skia's vulkan backend a single [`Context`] submit equates to the submission of a single
+    /// In Skia's vulkan backend a single `Context` submit equates to the submission of a single
     /// primary command buffer to the VkQueue. This value specifies how many vulkan secondary command
     /// buffers we will cache for reuse on a given primary command buffer. A single submit may use
     /// more than this many secondary command buffers, but after the primary command buffer is

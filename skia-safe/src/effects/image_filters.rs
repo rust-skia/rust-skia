@@ -105,7 +105,7 @@ pub fn arithmetic(
     })
 }
 
-/// This filter takes an [`BlendMode`] and uses it to composite the two filters together.
+/// This filter takes an [`crate::BlendMode`] and uses it to composite the two filters together.
 /// * `blender` - The blender that defines the compositing operation
 /// * `background` - The Dst pixels used in blending, if null the source bitmap is used.
 /// * `foreground` - The Src pixels used in blending, if null the source bitmap is used.
@@ -200,7 +200,7 @@ pub fn crop(
 
 /// Create a filter that moves each pixel in its color input based on an (x,y) vector encoded
 /// in its displacement input filter. Two color components of the displacement image are
-/// mapped into a vector as scale * (color[xChannel], color[yChannel]), where the channel
+/// mapped into a vector as `scale * (color[xChannel], color[yChannel])`, where the channel
 /// selectors are one of R, G, B, or A.
 /// * `x_channel_selector` - RGBA channel that encodes the x displacement per pixel.
 /// * `y_channel_selector` - RGBA channel that encodes the y displacement per pixel.
@@ -294,7 +294,7 @@ pub fn empty() -> ImageFilter {
     ImageFilter::from_ptr(unsafe { sb::C_SkImageFilters_Empty() }).unwrap()
 }
 /// Create a filter that draws the 'src_rect' portion of image into 'dst_rect' using the given
-/// filter quality. Similar to [`Canvas::draw_image_rect`].
+/// filter quality. Similar to [`crate::Canvas::draw_image_rect()`].
 ///
 /// * `image` - The image that is output by the filter, subset by 'srcRect'.
 /// * `src_rect` - The source pixels sampled into 'dstRect'
@@ -405,7 +405,7 @@ pub fn matrix_convolution(
 
 /// Create a filter that transforms the input image by 'matrix'. This matrix transforms the
 /// local space, which means it effectively happens prior to any transformation coming from the
-/// [`Canvas`] initiating the filtering.
+/// [`crate::Canvas`] initiating the filtering.
 /// * `matrix` - The matrix to apply to the original content.
 /// * `sampling` - How the image will be sampled when it is transformed
 /// * `input` - The image filter to transform, or null to use the source image.
