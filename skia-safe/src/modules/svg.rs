@@ -115,13 +115,23 @@ extern "C" fn handle_load(
 
             match reqwest::blocking::get(&path) {
                 Ok(response) => {
-                    let mut reader = response.bytes().unwrap().as_ref();
-                    let mut data = Vec::new();
-                    if reader.read_to_end(&mut data).is_err() {
-                        data.clear();
-                    };
-                    let data = Data::new_copy(&data);
-                    data.into_ptr()
+                    match response.bytes() {
+                        Ok(bytes) => {
+                            let mut reader = bytes.as_ref();
+                            let mut data = Vec::new();
+                            return if let Err(_) = reader.read_to_end(&mut data) {
+                                let data = Data::new_empty();
+                                data.into_ptr()
+                            } else {
+                                let data = Data::new_copy(data.as_slice());
+                                data.into_ptr()
+                            }
+                        }
+                        Err(_) => {
+                            let data = Data::new_empty();
+                            data.into_ptr()
+                        }
+                    }
                 }
                 Err(_) => {
                     let data = Data::new_empty();
@@ -266,6 +276,18 @@ mod tests {
             <path d="M31,3h38l28,28v38l-28,28h-38l-28-28v-38z" fill="#a23"/>
             <text x="50" y="68" font-size="48" fill="#FFF" text-anchor="middle"><![CDATA[410]]></text>
             </svg>"##;
+        let canvas = Canvas::new((256, 256), None).unwrap();
+        let dom = str::parse::<Dom>(svg).unwrap();
+        dom.render(&canvas)
+    }
+
+    #[test]
+    fn render_remote_resource_svg() {
+        let svg = r##" <svg version="1.1"
+        xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 128 128">
+        <image width="128" height="128" transform="rotate(45)" transform-origin="64 64"
+            xlink:href="https://www.rust-lang.org/logos/rust-logo-128x128.png"/>
+        </svg>"##;
         let canvas = Canvas::new((256, 256), None).unwrap();
         let dom = str::parse::<Dom>(svg).unwrap();
         dom.render(&canvas)
