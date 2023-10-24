@@ -1,7 +1,7 @@
 use std::{
     error::Error,
     fmt,
-    io::{self, Read},
+    io::{self},
     str::FromStr,
 };
 
@@ -117,15 +117,9 @@ extern "C" fn handle_load(
                 Ok(response) => {
                     match response.bytes() {
                         Ok(bytes) => {
-                            let mut reader = bytes.as_ref();
-                            let mut data = Vec::new();
-                            return if let Err(_) = reader.read_to_end(&mut data) {
-                                let data = Data::new_empty();
-                                data.into_ptr()
-                            } else {
-                                let data = Data::new_copy(data.as_slice());
-                                data.into_ptr()
-                            }
+                            let reader = bytes.as_ref();
+                            let data = Data::new_copy(reader);
+                            data.into_ptr()
                         }
                         Err(_) => {
                             let data = Data::new_empty();
