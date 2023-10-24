@@ -54,19 +54,18 @@ pub trait PlatformDetails {
     }
 }
 
-#[allow(clippy::type_complexity)]
-fn details(target: &Target) -> Box<dyn PlatformDetails> {
+fn details(target: &Target) -> &dyn PlatformDetails {
     let host = cargo::host();
     match target.as_strs() {
-        ("wasm32", "unknown", "emscripten", _) => Box::new(emscripten::Emscripten),
-        (_, "linux", "android", _) | (_, "linux", "androideabi", _) => Box::new(android::Android),
-        (_, "apple", "darwin", _) => Box::new(macos::MacOs),
-        (_, "apple", "ios", _) => Box::new(ios::Ios),
-        (_, _, "windows", Some("msvc")) if host.is_windows() => Box::new(windows::Msvc),
-        (_, _, "windows", _) => Box::new(windows::Generic),
-        (_, "unknown", "linux", Some("musl")) => Box::new(alpine::Musl),
-        (_, _, "linux", _) => Box::new(linux::Linux),
-        _ => Box::new(generic::Generic),
+        ("wasm32", "unknown", "emscripten", _) => &emscripten::Emscripten,
+        (_, "linux", "android", _) | (_, "linux", "androideabi", _) => &android::Android,
+        (_, "apple", "darwin", _) => &macos::MacOs,
+        (_, "apple", "ios", _) => &ios::Ios,
+        (_, _, "windows", Some("msvc")) if host.is_windows() => &windows::Msvc,
+        (_, _, "windows", _) => &windows::Generic,
+        (_, "unknown", "linux", Some("musl")) => &alpine::Musl,
+        (_, _, "linux", _) => &linux::Linux,
+        _ => &generic::Generic,
     }
 }
 
