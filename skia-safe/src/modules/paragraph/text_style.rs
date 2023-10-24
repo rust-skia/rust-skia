@@ -236,7 +236,9 @@ impl fmt::Debug for TextStyle {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("TextStyle")
             .field("color", &self.color())
+            .field("has_foreground", &self.has_foreground())
             .field("foreground", &self.foreground())
+            .field("has_background", &self.has_background())
             .field("background", &self.background())
             .field("decoration", &self.decoration())
             .field("font_style", &self.font_style())
@@ -295,6 +297,10 @@ impl TextStyle {
         self
     }
 
+    pub fn has_foreground(&self) -> bool {
+        self.native().fHasForeground
+    }
+
     pub fn foreground(&self) -> Paint {
         Paint::construct(|p| unsafe { sb::C_TextStyle_getForeground(self.native(), p) })
     }
@@ -312,6 +318,10 @@ impl TextStyle {
     pub fn clear_foreground_color(&mut self) -> &mut Self {
         self.native_mut().fHasForeground = false;
         self
+    }
+
+    pub fn has_background(&self) -> bool {
+        self.native().fHasBackground
     }
 
     pub fn background(&self) -> Paint {
