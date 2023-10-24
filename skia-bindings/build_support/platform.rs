@@ -205,16 +205,14 @@ impl BindgenArgsBuilder {
         });
     }
 
+    // TODO: only return one Vec<>
     pub fn into_bindgen_and_cc_args(mut self) -> (Vec<String>, Vec<String>) {
-        let mut cc_build_args = Vec::new();
-
         if let Some(sysroot) = &self.sysroot {
             let sysroot_arg = format!("{}{}", self.sysroot_prefix, sysroot);
             self.arg(&sysroot_arg);
-            cc_build_args.push(sysroot_arg);
         }
 
-        (self.bindgen_clang_args.into_iter().collect(), cc_build_args)
+        (self.bindgen_clang_args.clone(), self.bindgen_clang_args)
     }
 }
 
