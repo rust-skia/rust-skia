@@ -8,9 +8,11 @@ use crate::build_support::clang;
 
 pub struct Ios;
 
-const MIN_IOS_VERSION: &str = "11.0";
-const MIN_IOS_VERSION_M1: &str = "14.0";
-const MIN_IOS_VERSION_CATALYST: &str = "14.0";
+// m119: The use of value() in `effects/SkImageFilters.h` requires iOS12
+const MIN_IOS_VERSION: &str = "12";
+const MIN_IOS_VERSION_M1: &str = "14";
+// m100: XCode 13.2 fails to build with version 13
+const MIN_IOS_VERSION_CATALYST: &str = "14";
 
 impl PlatformDetails for Ios {
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
@@ -66,12 +68,12 @@ fn is_simulator(arch: &str, abi: Option<&str>) -> bool {
 
 fn specific_target(arch: &str, abi: Option<&str>) -> Option<String> {
     (IosPlatform::new(arch, abi) == IosPlatform::M1Simulator)
-        .then(|| "arm64-apple-ios14.0.0-simulator".into())
+        .then(|| format!("arm64-apple-ios{MIN_IOS_VERSION_M1}.0.0-simulator"))
 }
 
 // TODO: add support for 32 bit devices and simulators.
 fn extra_skia_cflags(arch: &str, abi: Option<&str>) -> Vec<String> {
-    vec![IosPlatform::new(arch, abi).flags()]
+    IosPlatform::new(arch, abi).flags()
 }
 
 fn additional_clang_args(arch: &str, abi: Option<&str>) -> Vec<String> {
@@ -79,7 +81,7 @@ fn additional_clang_args(arch: &str, abi: Option<&str>) -> Vec<String> {
 
     let platform = IosPlatform::new(arch, abi);
 
-    args.push(platform.flags());
+    args.extend(platform.flags());
 
     use IosPlatform::*;
     match platform {
@@ -118,14 +120,36 @@ impl IosPlatform {
         }
     }
 
-    fn flags(self) -> String {
-        use IosPlatform::*;
+    fn flags(self) -> Vec<String> {
+        let ios_version = self.min_ios_version();
+
+        let platform_variant = if self.is_simulator() {
+            "ios-simulator"
+        } else {
+            "iphoneos"
+        };
+
+        let min_version = format!("-m{platform_variant}-version-min={ios_version}.0");
+        let max_version = format!("-D__IPHONE_OS_VERSION_MAX_ALLOWED={ios_version}0000");
+
+        vec![min_version, max_version]
+    }
+
+    fn is_simulator(self) -> bool {
         match self {
-            Device => format!("-miphoneos-version-min={MIN_IOS_VERSION}"),
-            Simulator => format!("-mios-simulator-version-min={MIN_IOS_VERSION}"),
-            M1Simulator => format!("-mios-simulator-version-min={MIN_IOS_VERSION_M1}"),
-            // m100: XCode 13.2 fails to build with version 13
-            Catalyst => format!("-miphoneos-version-min={MIN_IOS_VERSION_CATALYST}"),
+            IosPlatform::Device => false,
+            IosPlatform::Simulator => true,
+            IosPlatform::M1Simulator => true,
+            IosPlatform::Catalyst => false,
+        }
+    }
+
+    fn min_ios_version(self) -> &'static str {
+        match self {
+            IosPlatform::Device => MIN_IOS_VERSION,
+            IosPlatform::Simulator => MIN_IOS_VERSION,
+            IosPlatform::M1Simulator => MIN_IOS_VERSION_M1,
+            IosPlatform::Catalyst => MIN_IOS_VERSION_CATALYST,
         }
     }
 
