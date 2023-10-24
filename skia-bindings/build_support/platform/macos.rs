@@ -13,8 +13,7 @@ impl PlatformDetails for MacOs {
         // don't push another target `--target` that may conflict.
         builder.target(None);
 
-        // Add macOS specific environment variables that affect the output of a
-        // build.
+        // Add macOS specific environment variables that affect the output of a build.
         cargo::rerun_if_env_var_changed("MACOSX_DEPLOYMENT_TARGET");
 
         builder.target_os_and_default_cpu("mac");
@@ -79,7 +78,7 @@ fn deployment_target_6(macosx_deployment_target: &str) -> String {
     // use remove_matches as soon it's stable.
     let split: Vec<_> = macosx_deployment_target.split('.').collect();
     let joined = split.join("");
-    dbg!(format!("{joined:0<6}"))
+    format!("{joined:0<6}")
 }
 
 /// Returns the current SDK path.
