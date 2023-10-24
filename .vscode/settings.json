@@ -42,6 +42,7 @@
         "nobuiltininc",
         "Noncopyable",
         "objc",
+        "objcc",
         "Paeth",
         "Procs",
         "rasterizing",
