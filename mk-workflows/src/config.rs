@@ -1,5 +1,5 @@
 use crate::{
-    Features, HostOS, Job, Target, Workflow, WorkflowKind, LINUX_JOB, MACOS_JOB, WINDOWS_JOB,
+    Features, HostOS, Job, TargetConf, Workflow, WorkflowKind, LINUX_JOB, MACOS_JOB, WINDOWS_JOB,
 };
 
 pub const DEFAULT_ANDROID_API_LEVEL: usize = 26;
@@ -143,85 +143,41 @@ fn release_job(features: impl Into<Features>) -> Job {
     }
 }
 
-fn windows_targets() -> Vec<Target> {
-    [Target {
-        target: "x86_64-pc-windows-msvc",
-        platform_features: "d3d".into(),
-        ..Target::default()
-    }]
-    .into()
+fn windows_targets() -> Vec<TargetConf> {
+    [TargetConf::new("x86_64-pc-windows-msvc", "d3d")].into()
 }
 
-fn linux_targets() -> Vec<Target> {
-    let mut targets = vec![Target {
-        target: "x86_64-unknown-linux-gnu",
-        platform_features: "egl,x11,wayland".into(),
-        ..Default::default()
-    }];
+fn linux_targets() -> Vec<TargetConf> {
+    let mut targets = vec![TargetConf::new(
+        "x86_64-unknown-linux-gnu",
+        "egl,x11,wayland",
+    )];
     targets.extend(android_targets());
     targets.extend(wasm_targets());
     targets
 }
 
-fn macos_targets() -> Vec<Target> {
+fn macos_targets() -> Vec<TargetConf> {
     vec![
-        Target {
-            target: "x86_64-apple-darwin",
-            platform_features: "metal".into(),
-            ..Default::default()
-        },
-        Target {
-            target: "aarch64-apple-darwin",
-            platform_features: "metal".into(),
-            ..Default::default()
-        },
-        Target {
-            target: "aarch64-apple-ios",
-            platform_features: "metal".into(),
-            ..Default::default()
-        },
-        Target {
-            target: "aarch64-apple-ios-sim",
-            platform_features: "metal".into(),
-            ..Default::default()
-        },
-        Target {
-            target: "x86_64-apple-ios",
-            platform_features: "metal".into(),
-            ..Default::default()
-        },
+        TargetConf::new("x86_64-apple-darwin", "metal"),
+        TargetConf::new("aarch64-apple-darwin", "metal"),
+        TargetConf::new("aarch64-apple-ios", "metal"),
+        TargetConf::new("aarch64-apple-ios-sim", "metal"),
+        TargetConf::new("x86_64-apple-ios", "metal"),
     ]
 }
 
-fn android_targets() -> Vec<Target> {
+fn android_targets() -> Vec<TargetConf> {
     [
-        Target {
-            target: "aarch64-linux-android",
-            android_env: true,
-            ..Default::default()
-        },
-        Target {
-            target: "x86_64-linux-android",
-            android_env: true,
-            ..Default::default()
-        },
-        Target {
-            target: "i686-linux-android",
-            android_env: true,
-            ..Default::default()
-        },
+        TargetConf::new("aarch64-linux-android", ""),
+        TargetConf::new("x86_64-linux-android", ""),
+        TargetConf::new("i686-linux-android", ""),
     ]
     .into()
 }
 
-fn wasm_targets() -> Vec<Target> {
-    [Target {
-        target: "wasm32-unknown-emscripten",
-        emscripten_env: true,
-        // `svg` does not build in skia-safe because of the `ureq` dependency (although it builds in
-        // skia-bindings just fine): <https://github.com/briansmith/ring/issues/1043>
-        disabled_features: "svg".into(),
-        ..Default::default()
-    }]
-    .into()
+fn wasm_targets() -> Vec<TargetConf> {
+    // `svg` does not build in skia-safe because of the `ureq` dependency (although it builds in
+    // skia-bindings just fine): <https://github.com/briansmith/ring/issues/1043>
+    [TargetConf::new("wasm32-unknown-emscripten", "").disable("svg")].into()
 }
