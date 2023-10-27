@@ -174,7 +174,7 @@ fn macosx_deployment_target(
 
 fn build_target(workflow: &Workflow, job: &Job, target: &TargetConf) -> String {
     let features = effective_features(workflow, job, target);
-    let native_target = workflow.host_target == &target.target.to_string();
+    let native_target = workflow.host_target == target.target.to_string();
     let example_args = if native_target {
         job.example_args.clone()
     } else {
