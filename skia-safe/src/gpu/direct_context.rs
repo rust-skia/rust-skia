@@ -15,7 +15,7 @@ use super::gl;
 use super::vk;
 use super::{
     BackendFormat, BackendRenderTarget, BackendTexture, ContextOptions, FlushInfo,
-    MutableTextureState, RecordingContext, SemaphoresSubmitted,
+    MutableTextureState, PurgeResourceOptions, RecordingContext, SemaphoresSubmitted, SyncCpu,
 };
 use crate::{prelude::*, surfaces, Data, Image, Surface, TextureCompressionType};
 
@@ -83,17 +83,13 @@ impl fmt::Debug for DirectContext {
 }
 
 impl DirectContext {
+    // Deprecated in Skia
     #[cfg(feature = "gl")]
     pub fn new_gl<'a>(
         interface: impl Into<Option<gl::Interface>>,
         options: impl Into<Option<&'a ContextOptions>>,
     ) -> Option<DirectContext> {
-        DirectContext::from_ptr(unsafe {
-            sb::C_GrDirectContext_MakeGL(
-                interface.into().into_ptr_or_null(),
-                options.into().native_ptr_or_null(),
-            )
-        })
+        crate::gpu::direct_contexts::make_gl(interface, options)
     }
 
     #[cfg(feature = "vulkan")]
@@ -153,6 +149,10 @@ impl DirectContext {
             sb::GrDirectContext_abandonContext(self.native_mut() as *mut _ as _)
         }
         self
+    }
+
+    pub fn is_device_lost(&mut self) -> bool {
+        unsafe { self.native_mut().isDeviceLost() }
     }
 
     // TODO: threadSafeProxy()
@@ -223,33 +223,32 @@ impl DirectContext {
     pub fn perform_deferred_cleanup(
         &mut self,
         not_used: Duration,
-        scratch_resources_only: impl Into<Option<bool>>,
+        opts: impl Into<Option<PurgeResourceOptions>>,
     ) -> &mut Self {
         unsafe {
             sb::C_GrDirectContext_performDeferredCleanup(
                 self.native_mut(),
                 not_used.as_millis().try_into().unwrap(),
-                scratch_resources_only.into().unwrap_or(false),
+                opts.into().unwrap_or(PurgeResourceOptions::AllResources),
             )
         }
         self
     }
 
-    pub fn purge_unlocked_resources(
+    pub fn purge_unlocked_resource_bytes(
         &mut self,
-        bytes_to_purge: Option<usize>,
+        bytes_to_purge: usize,
         prefer_scratch_resources: bool,
     ) -> &mut Self {
         unsafe {
-            match bytes_to_purge {
-                Some(bytes_to_purge) => self
-                    .native_mut()
-                    .purgeUnlockedResources(bytes_to_purge, prefer_scratch_resources),
-                None => self
-                    .native_mut()
-                    .purgeUnlockedResources1(prefer_scratch_resources),
-            }
+            self.native_mut()
+                .purgeUnlockedResources(bytes_to_purge, prefer_scratch_resources)
         }
+        self
+    }
+
+    pub fn purge_unlocked_resources(&mut self, opts: PurgeResourceOptions) -> &mut Self {
+        unsafe { self.native_mut().purgeUnlockedResources1(opts) }
         self
     }
 
@@ -262,7 +261,7 @@ impl DirectContext {
 
     pub fn flush_submit_and_sync_cpu(&mut self) -> &mut Self {
         self.flush(&FlushInfo::default());
-        self.submit(true);
+        self.submit(SyncCpu::Yes);
         self
     }
 
@@ -324,7 +323,7 @@ impl DirectContext {
         new_state: Option<&MutableTextureState>,
     ) -> SemaphoresSubmitted {
         unsafe {
-            self.native_mut().flush5(
+            self.native_mut().flush4(
                 surface.native_mut(),
                 info.native(),
                 new_state.native_ptr_or_null(),
@@ -335,20 +334,23 @@ impl DirectContext {
     pub fn flush_and_submit_surface(
         &mut self,
         surface: &mut Surface,
-        sync_cpu: impl Into<Option<bool>>,
+        sync_cpu: impl Into<Option<SyncCpu>>,
     ) {
         unsafe {
             self.native_mut()
-                .flushAndSubmit1(surface.native_mut(), sync_cpu.into().unwrap_or(false))
+                .flushAndSubmit1(surface.native_mut(), sync_cpu.into().unwrap_or(SyncCpu::No))
         }
     }
 
     pub fn flush_surface(&mut self, surface: &mut Surface) {
-        unsafe { self.native_mut().flush7(surface.native_mut()) }
+        unsafe { self.native_mut().flush5(surface.native_mut()) }
     }
 
-    pub fn submit(&mut self, sync_cpu: impl Into<Option<bool>>) -> bool {
-        unsafe { self.native_mut().submit(sync_cpu.into().unwrap_or(false)) }
+    pub fn submit(&mut self, sync_cpu: impl Into<Option<SyncCpu>>) -> bool {
+        unsafe {
+            self.native_mut()
+                .submit(sync_cpu.into().unwrap_or(SyncCpu::No))
+        }
     }
 
     pub fn check_async_work_completion(&mut self) {

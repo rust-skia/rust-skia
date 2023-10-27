@@ -44,4 +44,8 @@ native_transmutable!(sb::GrFlushInfo, FlushInfo, flush_info_layout);
 pub use sb::GrSemaphoresSubmitted as SemaphoresSubmitted;
 variant_name!(SemaphoresSubmitted::Yes);
 
-// TODO: wrap GrPrepareForExternalIORequests
+pub use sb::GrPurgeResourceOptions as PurgeResourceOptions;
+variant_name!(PurgeResourceOptions::AllResources);
+
+pub use sb::GrSyncCpu as SyncCpu;
+variant_name!(SyncCpu::Yes);

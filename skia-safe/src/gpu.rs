@@ -60,6 +60,11 @@ pub mod backend_render_targets {
     pub use super::ganesh::vk::backend_render_targets::*;
 }
 
+pub mod direct_contexts {
+    #[cfg(feature = "gl")]
+    pub use super::ganesh::gl::direct_contexts::*;
+}
+
 #[cfg(test)]
 mod tests {
     use super::{DirectContext, RecordingContext};

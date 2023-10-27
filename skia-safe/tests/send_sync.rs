@@ -140,7 +140,9 @@ mod docs {
 
     assert_impl_all!(pdf::AttributeList: Send, Sync);
     assert_not_impl_any!(pdf::StructureElementNode: Send, Sync);
+    assert_impl_all!(pdf::DateTime: Send, Sync);
     assert_not_impl_any!(pdf::Metadata: Send, Sync);
+    assert_impl_all!(pdf::CompressionLevel: Send, Sync);
 }
 
 mod effects {
@@ -177,6 +179,15 @@ mod gpu {
     assert_impl_all!(YUVABackendTextures: Send, Sync);
     assert_impl_all!(MutableTextureState: Send, Sync);
     assert_impl_all!(BackendApi: Send, Sync);
+
+    // gpu/types.rs
+    assert_impl_all!(BackendAPI: Send, Sync);
+    assert_impl_all!(MipMapped: Send, Sync);
+    assert_impl_all!(SurfaceOrigin: Send, Sync);
+    assert_not_impl_any!(FlushInfo: Send, Sync);
+    assert_impl_all!(SemaphoresSubmitted: Send, Sync);
+    assert_impl_all!(PurgeResourceOptions: Send, Sync);
+    assert_impl_all!(SyncCpu: Send, Sync);
 
     #[cfg(feature = "gl")]
     mod gl {
@@ -246,11 +257,13 @@ mod textlayout {
     // ParagraphCache seems to be fully thread safe, but I don't think it is itself meant to be shared between threads.
     assert_not_impl_any!(ParagraphCache: Send, Sync);
     assert_not_impl_any!(Paragraph: Send, Sync);
+    assert_impl_all!(paragraph::GlyphInfo: Send, Sync);
     assert_impl_all!(paragraph::FontInfo: Send, Sync);
     assert_not_impl_any!(paragraph::VisitorInfo: Send, Sync);
     assert_not_impl_any!(paragraph::ExtendedVisitorInfo: Send, Sync);
     assert_impl_all!(paragraph::VisitorFlags: Send, Sync);
     assert_impl_all!(paragraph::GlyphClusterInfo: Send, Sync);
+
     assert_impl_all!(ParagraphBuilder: Send, Sync);
     assert_impl_all!(StrutStyle: Send, Sync);
     assert_impl_all!(TextShadow: Send, Sync);

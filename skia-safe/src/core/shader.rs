@@ -1,9 +1,11 @@
-use crate::{
-    gradient_shader, prelude::*, scalar, Color, ColorFilter, Image, Matrix, NativeFlattenable,
-    TileMode,
-};
-use skia_bindings::{self as sb, SkFlattenable, SkRefCntBase, SkShader};
 use std::fmt;
+
+use skia_bindings::{self as sb, SkFlattenable, SkRefCntBase, SkShader};
+
+use crate::{
+    gradient_shader, prelude::*, scalar, Color, ColorFilter, ColorSpace, Image, Matrix,
+    NativeFlattenable, TileMode,
+};
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct GradientInfo<'a> {
@@ -58,11 +60,23 @@ impl fmt::Debug for Shader {
     }
 }
 
+/// Shaders specify the source color(s) for what is being drawn. If a paint
+/// has no shader, then the paint's color is used. If the paint has a
+/// shader, then the shader's color(s) are use instead, but they are
+/// modulated by the paint's alpha. This makes it easy to create a shader
+/// once (e.g. bitmap tiling or gradient) and then change its transparency
+/// w/o having to modify the original shader... only the paint's alpha needs
+/// to be modified.
 impl Shader {
+    /// Returns `true` if the shader is guaranteed to produce only opaque
+    /// colors, subject to the [`crate::Paint`] using the shader to apply an opaque
+    /// alpha value. Subclasses should override this to allow some
+    /// optimizations.
     pub fn is_opaque(&self) -> bool {
         unsafe { sb::C_SkShader_isOpaque(self.native()) }
     }
-
+    /// Returns iff this shader is backed by a single [`Image`].
+    /// If not, returns `None`.
     pub fn image(&self) -> Option<(Image, Matrix, (TileMode, TileMode))> {
         unsafe {
             let mut matrix = Matrix::default();
@@ -80,6 +94,8 @@ impl Shader {
         unsafe { sb::C_SkShader_isAImage(self.native()) }
     }
 
+    /// Return a shader that will apply the specified `local_matrix` to this shader.
+    /// The specified matrix will be applied before any matrix associated with this shader.
     #[must_use]
     pub fn with_local_matrix(&self, matrix: &Matrix) -> Self {
         Self::from_ptr(unsafe {
@@ -88,10 +104,25 @@ impl Shader {
         .unwrap()
     }
 
+    /// Create a new shader that produces the same colors as invoking this shader and then applying
+    /// the color filter.
     #[must_use]
     pub fn with_color_filter(&self, color_filter: impl Into<ColorFilter>) -> Self {
         Self::from_ptr(unsafe {
             sb::C_SkShader_makeWithColorFilter(self.native(), color_filter.into().into_ptr())
+        })
+        .unwrap()
+    }
+
+    /// Return a shader that will compute this shader in a specific color space.
+    /// By default, all shaders operate in the destination (surface) color space.
+    /// The results of a shader are still always converted to the destination - this
+    /// API has no impact on simple shaders or images. Primarily, it impacts shaders
+    /// that perform mathematical operations, like Blend shaders, or runtime shaders.
+    #[must_use]
+    pub fn with_working_color_space(&self, color_space: impl Into<ColorSpace>) -> Self {
+        Self::from_ptr(unsafe {
+            sb::C_SkShader_makeWithWorkingColorSpace(self.native(), color_space.into().into_ptr())
         })
         .unwrap()
     }

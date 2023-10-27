@@ -248,6 +248,11 @@ impl Paragraph {
         }
     }
 
+    /// Returns path for a given line
+    ///
+    ///  * `line_number` - a line number
+    ///  * `dest` - a resulting path
+    ///  Returns: a number glyphs that could not be converted to path
     pub fn get_path_at(&mut self, line_number: usize) -> (usize, Path) {
         let mut path = Path::default();
         let unconverted_glyphs = unsafe {
@@ -260,20 +265,40 @@ impl Paragraph {
         (unconverted_glyphs.try_into().unwrap(), path)
     }
 
+    /// Returns path for a text blob
+    ///
+    /// * `text_blob` - a text blob
+    /// Returns: a path
     pub fn get_path(text_blob: &mut TextBlob) -> Path {
         Path::construct(|p| unsafe { sb::C_Paragraph_GetPath(text_blob.native_mut(), p) })
     }
 
+    /// Checks if a given text blob contains
+    /// glyph with emoji
+    ///
+    /// * `text_blob` - a text blob
+    /// Returns: `true` if there is such a glyph
     pub fn contains_emoji(&mut self, text_blob: &mut TextBlob) -> bool {
         unsafe { sb::C_Paragraph_containsEmoji(self.native_mut(), text_blob.native_mut()) }
     }
 
+    /// Checks if a given text blob contains colored font or bitmap
+    ///
+    /// * `text_blob` - a text blob
+    /// Returns: `true` if there is such a glyph
     pub fn contains_color_font_or_bitmap(&mut self, text_blob: &mut TextBlob) -> bool {
         unsafe {
             sb::C_Paragraph_containsColorFontOrBitmap(self.native_mut(), text_blob.native_mut())
         }
     }
 
+    /// Finds the line number of the line that contains the given UTF-8 index.
+    ///
+    ///  * `index` - a UTF-8 TextIndex into the paragraph
+    ///  Returns: the line number the glyph that corresponds to the
+    ///           given `code_unit_index` is in, or -1 if the `code_unit_index`
+    ///           is out of bounds, or when the glyph is truncated or
+    ///           ellipsized away.
     pub fn get_line_number_at(&self, code_unit_index: TextIndex) -> Option<usize> {
         // Returns -1 if `code_unit_index` is out of range.
         unsafe { sb::C_Paragraph_getLineNumberAt(self.native(), code_unit_index) }
@@ -281,6 +306,27 @@ impl Paragraph {
             .ok()
     }
 
+    /// Finds the line number of the line that contains the given UTF-16 index.
+    ///
+    /// * `index` - a UTF-16 offset into the paragraph
+    /// Returns: the line number the glyph that corresponds to the
+    ///          given `code_unit_index` is in, or -1 if the `code_unit_index`
+    ///          is out of bounds, or when the glyph is truncated or
+    ///          ellipsized away.
+    pub fn get_line_number_at_utf16_offset(&self, code_unit_index: TextIndex) -> Option<usize> {
+        // Returns -1 if `code_unit_index` is out of range.
+        unsafe {
+            sb::C_Paragraph_getLineNumberAtUTF16Offset(self.native_mut_force(), code_unit_index)
+        }
+        .try_into()
+        .ok()
+    }
+
+    /// Returns line metrics info for the line
+    ///
+    /// * `line_number` - a line number
+    /// * `line_metrics` - an address to return the info (in case of null just skipped)
+    /// Returns: `true` if the line is found; `false` if not
     pub fn get_line_metrics_at(&self, line_number: usize) -> Option<LineMetrics> {
         let mut r = None;
         let mut set_lm = |lm: &sb::skia_textlayout_LineMetrics| {
@@ -296,6 +342,11 @@ impl Paragraph {
         r
     }
 
+    /// Returns the visible text on the line (excluding a possible ellipsis)
+    ///
+    /// * `line_number` - a line number
+    /// * `include_spaces` - indicates if the whitespaces should be included
+    /// Returns: the range of the text that is shown in the line
     pub fn get_actual_text_range(&self, line_number: usize, include_spaces: bool) -> TextRange {
         let mut range = [0usize; 2];
         unsafe {
@@ -312,6 +363,11 @@ impl Paragraph {
         }
     }
 
+    /// Finds a glyph cluster for text index
+    ///
+    /// * `code_unit_index` - a text index
+    /// * `glyph_info` - a glyph cluster info filled if not null
+    /// Returns: `true` if glyph cluster was found; `false` if not
     pub fn get_glyph_cluster_at(&self, code_unit_index: TextIndex) -> Option<GlyphClusterInfo> {
         let mut r = None;
         let mut set_fn = |gci: &sb::skia_textlayout_Paragraph_GlyphClusterInfo| {
@@ -327,6 +383,13 @@ impl Paragraph {
         r
     }
 
+    /// Finds the closest glyph cluster for a visual text position
+    ///
+    /// * `dx` - x coordinate
+    /// * `dy` - y coordinate
+    /// * `glyph_info` - a glyph cluster info filled if not null
+    /// Returns: `true` if glyph cluster was found; `false` if not
+    ///          (which usually means the paragraph is empty)
     pub fn get_closest_glyph_cluster_at(&self, d: impl Into<Point>) -> Option<GlyphClusterInfo> {
         let mut r = None;
         let mut set_fn = |gci: &sb::skia_textlayout_Paragraph_GlyphClusterInfo| {
@@ -344,10 +407,58 @@ impl Paragraph {
         r
     }
 
+    /// Retrieves the information associated with the glyph located at the given
+    ///  `code_unit_index`.
+    ///
+    /// * `code_unit_index` - a UTF-16 offset into the paragraph
+    /// * `glyph_info` - an optional GlyphInfo struct to hold the
+    ///                  information associated with the glyph found at the
+    ///                  given index
+    /// Returns: `false` only if the offset is out of bounds
+    pub fn get_glyph_info_at_utf16_offset(&mut self, code_unit_index: usize) -> Option<GlyphInfo> {
+        GlyphInfo::try_construct(|gi| unsafe {
+            sb::C_Paragraph_getGlyphInfoAtUTF16Offset(self.native_mut(), code_unit_index, gi)
+        })
+    }
+
+    /// Finds the information associated with the closest glyph to the given
+    /// paragraph coordinates.
+    ///
+    /// * `d` - x/y coordinate
+    /// * `glyph_info` - an optional GlyphInfo struct to hold the
+    ///                  information associated with the glyph found. The
+    ///                  text indices and text ranges are described using
+    ///                   UTF-16 offsets
+    /// Returns: `true` if a grapheme cluster was found; `false` if not
+    ///          (which usually means the paragraph is empty)
+    pub fn get_closest_utf16_glyph_info_at(&mut self, d: impl Into<Point>) -> Option<GlyphInfo> {
+        let d = d.into();
+        GlyphInfo::try_construct(|gi| unsafe {
+            sb::C_Paragraph_getClosestUTF16GlyphInfoAt(self.native_mut(), d.x, d.y, gi)
+        })
+    }
+
+    /// Returns the font that is used to shape the text at the position
+    ///
+    /// * `code_unit_index` - text index
+    /// Returns: font info or an empty font info if the text is not found
     pub fn get_font_at(&self, code_unit_index: TextIndex) -> Font {
         Font::construct(|f| unsafe { sb::C_Paragraph_getFontAt(self.native(), code_unit_index, f) })
     }
 
+    /// Returns the font used to shape the text at the given UTF-16 offset.
+    ///
+    /// * `code_unit_index` - a UTF-16 offset in the paragraph
+    /// Returns: font info or an empty font info if the text is not found
+    pub fn get_font_at_utf16_offset(&mut self, code_unit_index: usize) -> Font {
+        Font::construct(|f| unsafe {
+            sb::C_Paragraph_getFontAtUTF16Offset(self.native_mut(), code_unit_index, f)
+        })
+    }
+
+    /// Returns the information about all the fonts used to shape the paragraph text
+    ///
+    /// Returns: a list of fonts and text ranges
     pub fn get_fonts(&self) -> Vec<FontInfo> {
         let mut result = Vec::new();
         let mut set_fn = |fis: &[sb::skia_textlayout_Paragraph_FontInfo]| {
@@ -516,6 +627,22 @@ impl GlyphClusterInfo {
         }
     }
 }
+
+/// The glyph and grapheme cluster information associated with a unicode
+/// codepoint in the paragraph.
+#[repr(C)]
+#[derive(Clone, PartialEq, Debug)]
+pub struct GlyphInfo {
+    pub grapheme_layout_bounds: Rect,
+    pub grapheme_cluster_text_range: TextRange,
+    pub text_direction: TextDirection,
+    pub is_ellipsis: bool,
+}
+native_transmutable!(
+    sb::skia_textlayout_Paragraph_GlyphInfo,
+    GlyphInfo,
+    glyph_info_layout
+);
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct FontInfo {

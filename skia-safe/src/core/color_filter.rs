@@ -34,7 +34,16 @@ impl fmt::Debug for ColorFilter {
     }
 }
 
+/// ColorFilters are optional objects in the drawing pipeline. When present in
+/// a paint, they are called with the "src" colors, and return new colors, which
+/// are then passed onto the next stage (either ImageFilter or Xfermode).
+///
+/// All subclasses are required to be reentrant-safe : it must be legal to share
+/// the same instance between several threads.
 impl ColorFilter {
+    /// If the filter can be represented by a source color plus Mode, this
+    /// returns the color and mode appropriately.
+    /// If not, this returns `None` and ignores the parameters.
     pub fn to_a_color_mode(&self) -> Option<(Color, BlendMode)> {
         let mut color: Color = 0.into();
         let mut mode: BlendMode = Default::default();
@@ -42,11 +51,15 @@ impl ColorFilter {
             .if_true_some((color, mode))
     }
 
+    /// If the filter can be represented by a 5x4 matrix, this
+    /// returns the matrix appropriately.
+    /// If not, this returns `None` and ignores the parameter.
     pub fn to_a_color_matrix(&self) -> Option<[scalar; 20]> {
         let mut matrix: [scalar; 20] = Default::default();
         unsafe { self.native().asAColorMatrix(&mut matrix[0]) }.if_true_some(matrix)
     }
 
+    /// Returns `true` if the filter is guaranteed to never change the alpha of a color it filters.
     pub fn is_alpha_unchanged(&self) -> bool {
         unsafe { self.native().isAlphaUnchanged() }
     }
@@ -56,6 +69,8 @@ impl ColorFilter {
         Color::from_native_c(unsafe { self.native().filterColor(color.into().into_native()) })
     }
 
+    /// Converts the src color (in src colorspace), into the dst colorspace,
+    /// then applies this filter to it, returning the filtered color in the dst colorspace.
     pub fn filter_color4f(
         &self,
         color: impl AsRef<Color4f>,
@@ -72,9 +87,22 @@ impl ColorFilter {
         })
     }
 
+    /// Construct a color filter whose effect is to first apply the inner filter and then apply
+    /// this filter, applied to the output of the inner filter.
+    ///
+    /// result = this(inner(...))
     pub fn composed(&self, inner: impl Into<ColorFilter>) -> Option<Self> {
         ColorFilter::from_ptr(unsafe {
             sb::C_SkColorFilter_makeComposed(self.native(), inner.into().into_ptr())
+        })
+    }
+
+    /// Return a color filter that will compute this filter in a specific color space. By default
+    /// all filters operate in the destination (surface) color space. This allows filters like Blend
+    /// and Matrix, or runtime color filters to perform their math in a known space.
+    pub fn with_working_color_space(&self, color_space: impl Into<ColorSpace>) -> Option<Self> {
+        ColorFilter::from_ptr(unsafe {
+            sb::C_SkColorFilter_withWorkingColorSpace(self.native(), color_space.into().into_ptr())
         })
     }
 }
@@ -91,6 +119,26 @@ pub mod color_filters {
         ColorFilter::from_ptr(unsafe {
             sb::C_SkColorFilters_Compose(outer.into().into_ptr(), inner.into().into_ptr())
         })
+    }
+
+    /// Blends between the constant color (src) and input color (dst) based on the [`BlendMode`].
+    /// If the color space is `None`, the constant color is assumed to be defined in sRGB.
+    pub fn blend_with_color_space(
+        c: impl Into<Color4f>,
+        color_space: impl Into<Option<ColorSpace>>,
+        mode: BlendMode,
+    ) -> Option<ColorFilter> {
+        ColorFilter::from_ptr(unsafe {
+            sb::C_SkColorFilters_Blend2(
+                c.into().native(),
+                color_space.into().into_ptr_or_null(),
+                mode,
+            )
+        })
+    }
+
+    pub fn blend(c: impl Into<Color>, mode: BlendMode) -> Option<ColorFilter> {
+        ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_Blend(c.into().into_native(), mode) })
     }
 
     pub fn matrix(color_matrix: &ColorMatrix) -> ColorFilter {
@@ -116,26 +164,6 @@ pub mod color_filters {
     pub fn hsla_matrix(row_major: &[f32; 20]) -> ColorFilter {
         ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_HSLAMatrix(row_major.as_ptr()) })
             .unwrap()
-    }
-
-    pub fn blend(c: impl Into<Color>, mode: BlendMode) -> Option<ColorFilter> {
-        ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_Blend(c.into().into_native(), mode) })
-    }
-
-    /// Blends between the constant color (src) and input color (dst) based on the [`BlendMode`].
-    /// If the color space is `None`, the constant color is assumed to be defined in sRGB.
-    pub fn blend_with_color_space(
-        c: impl Into<Color4f>,
-        color_space: impl Into<Option<ColorSpace>>,
-        mode: BlendMode,
-    ) -> Option<ColorFilter> {
-        ColorFilter::from_ptr(unsafe {
-            sb::C_SkColorFilters_Blend2(
-                c.into().native(),
-                color_space.into().into_ptr_or_null(),
-                mode,
-            )
-        })
     }
 
     pub fn linear_to_srgb_gamma() -> ColorFilter {

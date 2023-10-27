@@ -1,15 +1,26 @@
-use super::prelude::*;
-use crate::build_support::clang;
 use std::{
     path::PathBuf,
     process::{Command, Stdio},
 };
 
+use super::prelude::*;
+use crate::build_support::clang;
+
 pub struct Ios;
+
+// m119: The use of value() in `effects/SkImageFilters.h` requires iOS12
+const MIN_IOS_VERSION: &str = "12";
+const MIN_IOS_VERSION_M1: &str = "14";
+// m100: XCode 13.2 fails to build with version 13
+const MIN_IOS_VERSION_CATALYST: &str = "14";
 
 impl PlatformDetails for Ios {
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
         let (arch, abi) = config.target.arch_abi();
+
+        // Set minimum target for consistency (this is actually not required, because it is set it
+        // in the extra_cflags, too).
+        builder.arg("ios_min_target", quote(&format!("{MIN_IOS_VERSION}.0")));
 
         builder.target_os_and_default_cpu("ios");
 
@@ -30,7 +41,14 @@ impl PlatformDetails for Ios {
         builder.args(additional_clang_args(
             &target.architecture,
             target.abi.as_deref(),
-        ))
+        ));
+
+        // TODO: duplicated from gn_args, target overrides should probably a separated from Gn and
+        // bindgen args.
+        let (arch, abi) = target.arch_abi();
+        if let Some(specific_target) = specific_target(arch, abi) {
+            builder.override_target(&specific_target);
+        }
     }
 
     fn link_libraries(&self, features: &Features) -> Vec<String> {
@@ -61,12 +79,12 @@ fn is_simulator(arch: &str, abi: Option<&str>) -> bool {
 
 fn specific_target(arch: &str, abi: Option<&str>) -> Option<String> {
     (IosPlatform::new(arch, abi) == IosPlatform::M1Simulator)
-        .then(|| "arm64-apple-ios14.0.0-simulator".into())
+        .then(|| format!("arm64-apple-ios{MIN_IOS_VERSION_M1}.0-simulator"))
 }
 
 // TODO: add support for 32 bit devices and simulators.
 fn extra_skia_cflags(arch: &str, abi: Option<&str>) -> Vec<String> {
-    vec![IosPlatform::new(arch, abi).flags().into()]
+    IosPlatform::new(arch, abi).flags()
 }
 
 fn additional_clang_args(arch: &str, abi: Option<&str>) -> Vec<String> {
@@ -74,7 +92,7 @@ fn additional_clang_args(arch: &str, abi: Option<&str>) -> Vec<String> {
 
     let platform = IosPlatform::new(arch, abi);
 
-    args.push(platform.flags().into());
+    args.extend(platform.flags());
 
     use IosPlatform::*;
     match platform {
@@ -113,14 +131,42 @@ impl IosPlatform {
         }
     }
 
-    fn flags(self) -> &'static str {
-        use IosPlatform::*;
+    fn flags(self) -> Vec<String> {
+        let ios_version = self.min_ios_version();
+
+        let platform_variant = if self.is_simulator() {
+            "ios-simulator"
+        } else {
+            "iphoneos"
+        };
+
+        // m119: We have to set -m version-min in cflags, otherwise effects/SkImageFilters.h does
+        // not compile: `error: 'value' is unavailable: introduced in iOS 12.0`
+        let min_version = format!("-m{platform_variant}-version-min={ios_version}.0");
+        // Even though version-min is defined, This must be defined, too. Otherwise MAX_ALLOWED gets
+        // ignored and set to the highest version, which in turn sets the wrong
+        // GR_METAL_SDK_VERSION.
+        let min_required = format!("-D__IPHONE_OS_VERSION_MIN_REQUIRED={ios_version}0000");
+        let max_version = format!("-D__IPHONE_OS_VERSION_MAX_ALLOWED={ios_version}0000");
+
+        vec![min_version, min_required, max_version]
+    }
+
+    fn is_simulator(self) -> bool {
         match self {
-            Device => "-miphoneos-version-min=10.0",
-            Simulator => "-mios-simulator-version-min=10.0",
-            M1Simulator => "-mios-simulator-version-min=14.0",
-            // m100: XCode 13.2 fails to build with version 13
-            Catalyst => "-miphoneos-version-min=14.0",
+            IosPlatform::Device => false,
+            IosPlatform::Simulator => true,
+            IosPlatform::M1Simulator => true,
+            IosPlatform::Catalyst => false,
+        }
+    }
+
+    fn min_ios_version(self) -> &'static str {
+        match self {
+            IosPlatform::Device => MIN_IOS_VERSION,
+            IosPlatform::Simulator => MIN_IOS_VERSION,
+            IosPlatform::M1Simulator => MIN_IOS_VERSION_M1,
+            IosPlatform::Catalyst => MIN_IOS_VERSION_CATALYST,
         }
     }
 

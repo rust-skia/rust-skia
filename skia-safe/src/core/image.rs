@@ -1499,26 +1499,12 @@ impl Image {
     #[deprecated(since = "0.67.0", note = "use images::make_with_filter()")]
     pub fn new_with_filter(
         &self,
-        mut context: Option<&mut gpu::RecordingContext>,
+        _context: Option<&mut gpu::RecordingContext>,
         filter: &ImageFilter,
         clip_bounds: impl Into<IRect>,
         subset: impl Into<IRect>,
     ) -> Option<(Image, IRect, IPoint)> {
-        let mut out_subset = IRect::default();
-        let mut offset = IPoint::default();
-
-        Image::from_ptr(unsafe {
-            sb::C_SkImage_makeWithFilter(
-                self.native(),
-                context.native_ptr_or_null_mut(),
-                filter.native(),
-                subset.into().native(),
-                clip_bounds.into().native(),
-                out_subset.native_mut(),
-                offset.native_mut(),
-            )
-        })
-        .map(|image| (image, out_subset, offset))
+        images::make_with_filter(self, filter, subset.into(), clip_bounds.into())
     }
 
     // TODO: MakeBackendTextureFromSkImage()

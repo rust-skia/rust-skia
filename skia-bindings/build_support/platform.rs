@@ -23,7 +23,13 @@ pub fn gn_args(config: &BuildConfiguration, mut builder: GnArgsBuilder) -> Vec<(
     builder.into_gn_args()
 }
 
-pub fn bindgen_and_cc_args(target: &Target, sysroot: Option<&str>) -> (Vec<String>, Vec<String>) {
+#[derive(Clone, Debug)]
+pub struct BindgenAndCCArgs {
+    pub args: Vec<String>,
+    pub target_override: Option<String>,
+}
+
+pub fn bindgen_and_cc_args(target: &Target, sysroot: Option<&str>) -> BindgenAndCCArgs {
     let mut builder = BindgenArgsBuilder::new(sysroot);
     details(target).bindgen_args(target, &mut builder);
     builder.into_bindgen_and_cc_args()
@@ -54,19 +60,18 @@ pub trait PlatformDetails {
     }
 }
 
-#[allow(clippy::type_complexity)]
-fn details(target: &Target) -> Box<dyn PlatformDetails> {
+fn details(target: &Target) -> &dyn PlatformDetails {
     let host = cargo::host();
     match target.as_strs() {
-        ("wasm32", "unknown", "emscripten", _) => Box::new(emscripten::Emscripten),
-        (_, "linux", "android", _) | (_, "linux", "androideabi", _) => Box::new(android::Android),
-        (_, "apple", "darwin", _) => Box::new(macos::MacOs),
-        (_, "apple", "ios", _) => Box::new(ios::Ios),
-        (_, _, "windows", Some("msvc")) if host.is_windows() => Box::new(windows::Msvc),
-        (_, _, "windows", _) => Box::new(windows::Generic),
-        (_, "unknown", "linux", Some("musl")) => Box::new(alpine::Musl),
-        (_, _, "linux", _) => Box::new(linux::Linux),
-        _ => Box::new(generic::Generic),
+        ("wasm32", "unknown", "emscripten", _) => &emscripten::Emscripten,
+        (_, "linux", "android", _) | (_, "linux", "androideabi", _) => &android::Android,
+        (_, "apple", "darwin", _) => &macos::MacOs,
+        (_, "apple", "ios", _) => &ios::Ios,
+        (_, _, "windows", Some("msvc")) if host.is_windows() => &windows::Msvc,
+        (_, _, "windows", _) => &windows::Generic,
+        (_, "unknown", "linux", Some("musl")) => &alpine::Musl,
+        (_, _, "linux", _) => &linux::Linux,
+        _ => &generic::Generic,
     }
 }
 
@@ -137,7 +142,8 @@ impl GnArgsBuilder {
                     .collect::<Vec<_>>()
                     .join(",")
             );
-            self.arg("extra_cflags", cflags);
+
+            self.arg("extra_cflags", cflags.clone());
         }
 
         if !asmflags.is_empty() {
@@ -161,7 +167,8 @@ pub struct BindgenArgsBuilder {
     /// sysroot if set explicitly.
     sysroot: Option<String>,
     sysroot_prefix: String,
-    bindgen_clang_args: Vec<String>,
+    bindgen_and_cc_args: Vec<String>,
+    target_override: Option<String>,
 }
 
 impl BindgenArgsBuilder {
@@ -169,7 +176,8 @@ impl BindgenArgsBuilder {
         Self {
             sysroot: sysroot.map(|s| s.into()),
             sysroot_prefix: "--sysroot=".into(),
-            bindgen_clang_args: Vec::new(),
+            bindgen_and_cc_args: Vec::new(),
+            target_override: None,
         }
     }
 
@@ -190,7 +198,7 @@ impl BindgenArgsBuilder {
 
     /// Set a Bindgen Clang arg.
     pub fn arg(&mut self, arg: impl Into<String>) -> &mut Self {
-        self.bindgen_clang_args.push(arg.into());
+        self.bindgen_and_cc_args.push(arg.into());
         self
     }
 
@@ -201,16 +209,21 @@ impl BindgenArgsBuilder {
         });
     }
 
-    pub fn into_bindgen_and_cc_args(mut self) -> (Vec<String>, Vec<String>) {
-        let mut cc_build_args = Vec::new();
-
+    // TODO: only return one Vec<>
+    pub fn into_bindgen_and_cc_args(mut self) -> BindgenAndCCArgs {
         if let Some(sysroot) = &self.sysroot {
             let sysroot_arg = format!("{}{}", self.sysroot_prefix, sysroot);
             self.arg(&sysroot_arg);
-            cc_build_args.push(sysroot_arg);
         }
 
-        (self.bindgen_clang_args.into_iter().collect(), cc_build_args)
+        BindgenAndCCArgs {
+            args: self.bindgen_and_cc_args,
+            target_override: self.target_override,
+        }
+    }
+
+    pub fn override_target(&mut self, target: &str) {
+        self.target_override = Some(target.to_owned());
     }
 }
 

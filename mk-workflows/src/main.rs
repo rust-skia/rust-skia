@@ -5,7 +5,10 @@
 
 use std::{collections::HashSet, fmt, fs, ops::Sub, path::PathBuf};
 
+use target::Target;
+
 mod config;
+mod target;
 
 const QA_WORKFLOW: &str = include_str!("templates/qa-workflow.yaml");
 const RELEASE_WORKFLOW: &str = include_str!("templates/release-workflow.yaml");
@@ -26,7 +29,7 @@ pub struct Workflow {
     host_os: HostOS,
     host_target: &'static str,
     job_template: &'static str,
-    targets: Vec<Target>,
+    targets: Vec<TargetConf>,
     host_bin_ext: &'static str,
 }
 
@@ -132,7 +135,7 @@ fn build_header(workflow_name: &str, workflow_kind: WorkflowKind) -> String {
     render_template(workflow, &replacements)
 }
 
-fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[Target]) -> String {
+fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[TargetConf]) -> String {
     let skia_debug = if job.skia_debug { "1" } else { "0" };
 
     let mut replacements = vec![
@@ -153,7 +156,7 @@ fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[Target])
 fn macosx_deployment_target(
     workflow: &Workflow,
     job: &Job,
-    targets: &[Target],
+    targets: &[TargetConf],
 ) -> Option<&'static str> {
     if let HostOS::MacOS = workflow.host_os {
         let metal = "metal".to_owned();
@@ -169,9 +172,9 @@ fn macosx_deployment_target(
     None
 }
 
-fn build_target(workflow: &Workflow, job: &Job, target: &Target) -> String {
+fn build_target(workflow: &Workflow, job: &Job, target: &TargetConf) -> String {
     let features = effective_features(workflow, job, target);
-    let native_target = workflow.host_target == target.target;
+    let native_target = workflow.host_target == target.target.to_string();
     let example_args = if native_target {
         job.example_args.clone()
     } else {
@@ -184,8 +187,8 @@ fn build_target(workflow: &Workflow, job: &Job, target: &Target) -> String {
 
     let template_arguments: &[(&'static str, &dyn fmt::Display)] = &[
         ("target", &target.target),
-        ("androidEnv", &target.android_env),
-        ("emscriptenEnv", &target.emscripten_env),
+        ("androidEnv", &target.android_env()),
+        ("emscriptenEnv", &target.emscripten_env()),
         ("androidAPILevel", &config::DEFAULT_ANDROID_API_LEVEL),
         ("features", &features),
         ("runTests", &native_target),
@@ -204,7 +207,7 @@ fn build_target(workflow: &Workflow, job: &Job, target: &Target) -> String {
     render_template(TARGET_TEMPLATE, &replacements)
 }
 
-fn effective_features(workflow: &Workflow, job: &Job, target: &Target) -> Features {
+fn effective_features(workflow: &Workflow, job: &Job, target: &TargetConf) -> Features {
     let mut features = job.features.clone();
     // if we are releasing binaries, we want the exact set of features specified.
     if workflow.kind == WorkflowKind::QA {
@@ -228,15 +231,36 @@ fn render_template(template: &str, replacements: &[(String, String)]) -> String 
     template
 }
 
-#[derive(Clone, Default, Debug)]
-struct Target {
-    target: &'static str,
-    android_env: bool,
-    emscripten_env: bool,
+#[derive(Clone, Debug)]
+struct TargetConf {
+    target: Target,
     /// Platform specific features.
     platform_features: Features,
     /// Features currently disabled for some reason.
     disabled_features: Features,
+}
+
+impl TargetConf {
+    pub fn new(target: impl AsRef<str>, platform_features: impl Into<Features>) -> Self {
+        Self {
+            target: target.as_ref().parse().unwrap(),
+            platform_features: platform_features.into(),
+            disabled_features: Features::default(),
+        }
+    }
+
+    pub fn disable(mut self, disabled_features: impl Into<Features>) -> Self {
+        self.disabled_features = disabled_features.into();
+        self
+    }
+
+    pub fn android_env(&self) -> bool {
+        self.target.is_android()
+    }
+
+    pub fn emscripten_env(&self) -> bool {
+        self.target.is_emscripten()
+    }
 }
 
 #[derive(Clone, Default, Debug)]

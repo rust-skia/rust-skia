@@ -172,8 +172,8 @@ extern "C" void C_GrDirectContext_directContextId(const GrDirectContext* self, G
     *r = self->directContextID();
 }
 
-extern "C" void C_GrDirectContext_performDeferredCleanup(GrDirectContext* self, long msNotUsed, bool scratchResourcesOnly) {
-    self->performDeferredCleanup(std::chrono::milliseconds(msNotUsed), scratchResourcesOnly);
+extern "C" void C_GrDirectContext_performDeferredCleanup(GrDirectContext* self, long msNotUsed, GrPurgeResourceOptions opts) {
+    self->performDeferredCleanup(std::chrono::milliseconds(msNotUsed), opts);
 }
 
 //
