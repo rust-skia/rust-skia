@@ -18,6 +18,9 @@ impl PlatformDetails for Ios {
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
         let (arch, abi) = config.target.arch_abi();
 
+        // m119: Set minimum target
+        builder.arg("ios_min_target", quote(&format!("{MIN_IOS_VERSION}.0")));
+
         builder.target_os_and_default_cpu("ios");
 
         // m100: Needed for aarch64 simulators, requires cherry Skia pick
