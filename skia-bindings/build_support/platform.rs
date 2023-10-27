@@ -137,11 +137,7 @@ impl GnArgsBuilder {
                     .join(",")
             );
 
-            // We set c and cc flags separately and don't touch extra_cflags, this way the
-            // `cflags_objcc` can be set, which we need for __IPHONE_OS_VERSION_MAX_ALLOWED for example.
-            self.arg("extra_cflags_c", cflags.clone());
-            // Gn note: `extra_cflags_cc` get copied to `cflags_objcc`
-            self.arg("extra_cflags_cc", cflags);
+            self.arg("extra_cflags", cflags.clone());
         }
 
         if !asmflags.is_empty() {

@@ -18,7 +18,8 @@ impl PlatformDetails for Ios {
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
         let (arch, abi) = config.target.arch_abi();
 
-        // m119: Set minimum target
+        // Set minimum target for consistency (this is actually not required, because it is set it
+        // in the extra_cflags, too).
         builder.arg("ios_min_target", quote(&format!("{MIN_IOS_VERSION}.0")));
 
         builder.target_os_and_default_cpu("ios");
@@ -132,10 +133,16 @@ impl IosPlatform {
             "iphoneos"
         };
 
+        // m119: We have to set -m version-min in cflags, otherwise effects/SkImageFilters.h does
+        // not compile: `error: 'value' is unavailable: introduced in iOS 12.0`
         let min_version = format!("-m{platform_variant}-version-min={ios_version}.0");
+        // Even though version-min is defined, This must be defined, too. Otherwise MAX_ALLOWED gets
+        // ignored and set to the highest version, which in turn sets the wrong
+        // GR_METAL_SDK_VERSION.
+        let min_required = format!("-D__IPHONE_OS_VERSION_MIN_REQUIRED={ios_version}0000");
         let max_version = format!("-D__IPHONE_OS_VERSION_MAX_ALLOWED={ios_version}0000");
 
-        vec![min_version, max_version]
+        vec![min_version, min_required, max_version]
     }
 
     fn is_simulator(self) -> bool {
