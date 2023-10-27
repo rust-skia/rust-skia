@@ -66,9 +66,11 @@ fn flags() -> Vec<String> {
 
     if let Some(deployment_target) = deployment_target {
         let deployment_target = deployment_target_6(&deployment_target);
-        return vec![format!(
-            "-D__MAC_OS_X_VERSION_MAX_ALLOWED={deployment_target}"
-        )];
+        // Both of them are needed, so that GR_METAL_SDK_VERSION is set to the correct version.
+        return vec![
+            format!("-D__MAC_OS_X_VERSION_MIN_REQUIRED={deployment_target}"),
+            format!("-D__MAC_OS_X_VERSION_MAX_ALLOWED={deployment_target}"),
+        ];
     }
     Vec::new()
 }
