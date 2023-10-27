@@ -215,15 +215,28 @@ pub fn generate_bindings(
         cc_args.push("-fno-rtti".into());
     }
 
-    let target_str = &target.to_string();
-    cc_build.target(target_str);
-    bindgen_args.push(format!("--target={target_str}"));
-
-    // Platform specific arguments and flags.
+    // Set platform specific arguments and flags and target.
     {
-        let (bindgen, cc) = platform::bindgen_and_cc_args(&target, sysroot);
-        bindgen_args.extend(bindgen);
-        cc_args.extend(cc);
+        let args = platform::bindgen_and_cc_args(&target, sysroot);
+
+        bindgen_args.extend(args.args.clone());
+        cc_args.extend(args.args);
+
+        let mut target_str = &target.to_string();
+        let mut override_target = false;
+        if let Some(target) = &args.target_override {
+            target_str = target;
+            override_target = true;
+        }
+
+        // If we use the target() function for override targets, cc will override it based on the
+        // environment, for example when targeting the ios simulator.
+        if override_target {
+            cc_args.push(format!("--target={target_str}"));
+        } else {
+            cc_build.target(target_str);
+        }
+        bindgen_args.push(format!("--target={target_str}"));
     }
 
     {

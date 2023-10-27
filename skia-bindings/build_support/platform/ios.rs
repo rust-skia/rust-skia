@@ -41,7 +41,14 @@ impl PlatformDetails for Ios {
         builder.args(additional_clang_args(
             &target.architecture,
             target.abi.as_deref(),
-        ))
+        ));
+
+        // TODO: duplicated from gn_args, target overrides should probably a separated from Gn and
+        // bindgen args.
+        let (arch, abi) = target.arch_abi();
+        if let Some(specific_target) = specific_target(arch, abi) {
+            builder.override_target(&specific_target);
+        }
     }
 
     fn link_libraries(&self, features: &Features) -> Vec<String> {
@@ -72,7 +79,7 @@ fn is_simulator(arch: &str, abi: Option<&str>) -> bool {
 
 fn specific_target(arch: &str, abi: Option<&str>) -> Option<String> {
     (IosPlatform::new(arch, abi) == IosPlatform::M1Simulator)
-        .then(|| format!("arm64-apple-ios{MIN_IOS_VERSION_M1}.0.0-simulator"))
+        .then(|| format!("arm64-apple-ios{MIN_IOS_VERSION_M1}.0-simulator"))
 }
 
 // TODO: add support for 32 bit devices and simulators.

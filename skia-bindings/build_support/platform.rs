@@ -23,7 +23,13 @@ pub fn gn_args(config: &BuildConfiguration, mut builder: GnArgsBuilder) -> Vec<(
     builder.into_gn_args()
 }
 
-pub fn bindgen_and_cc_args(target: &Target, sysroot: Option<&str>) -> (Vec<String>, Vec<String>) {
+#[derive(Clone, Debug)]
+pub struct BindgenAndCCArgs {
+    pub args: Vec<String>,
+    pub target_override: Option<String>,
+}
+
+pub fn bindgen_and_cc_args(target: &Target, sysroot: Option<&str>) -> BindgenAndCCArgs {
     let mut builder = BindgenArgsBuilder::new(sysroot);
     details(target).bindgen_args(target, &mut builder);
     builder.into_bindgen_and_cc_args()
@@ -161,7 +167,8 @@ pub struct BindgenArgsBuilder {
     /// sysroot if set explicitly.
     sysroot: Option<String>,
     sysroot_prefix: String,
-    bindgen_clang_args: Vec<String>,
+    bindgen_and_cc_args: Vec<String>,
+    target_override: Option<String>,
 }
 
 impl BindgenArgsBuilder {
@@ -169,7 +176,8 @@ impl BindgenArgsBuilder {
         Self {
             sysroot: sysroot.map(|s| s.into()),
             sysroot_prefix: "--sysroot=".into(),
-            bindgen_clang_args: Vec::new(),
+            bindgen_and_cc_args: Vec::new(),
+            target_override: None,
         }
     }
 
@@ -190,7 +198,7 @@ impl BindgenArgsBuilder {
 
     /// Set a Bindgen Clang arg.
     pub fn arg(&mut self, arg: impl Into<String>) -> &mut Self {
-        self.bindgen_clang_args.push(arg.into());
+        self.bindgen_and_cc_args.push(arg.into());
         self
     }
 
@@ -202,13 +210,20 @@ impl BindgenArgsBuilder {
     }
 
     // TODO: only return one Vec<>
-    pub fn into_bindgen_and_cc_args(mut self) -> (Vec<String>, Vec<String>) {
+    pub fn into_bindgen_and_cc_args(mut self) -> BindgenAndCCArgs {
         if let Some(sysroot) = &self.sysroot {
             let sysroot_arg = format!("{}{}", self.sysroot_prefix, sysroot);
             self.arg(&sysroot_arg);
         }
 
-        (self.bindgen_clang_args.clone(), self.bindgen_clang_args)
+        BindgenAndCCArgs {
+            args: self.bindgen_and_cc_args,
+            target_override: self.target_override,
+        }
+    }
+
+    pub fn override_target(&mut self, target: &str) {
+        self.target_override = Some(target.to_owned());
     }
 }
 
