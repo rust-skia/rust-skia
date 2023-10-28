@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   linux-qa-stable-all-features:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
     env: 
       SKIA_DEBUG: 0
@@ -427,7 +427,7 @@ jobs:
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   linux-qa-beta-all-features:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
     env: 
       SKIA_DEBUG: 0
