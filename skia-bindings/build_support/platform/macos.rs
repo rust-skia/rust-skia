@@ -13,9 +13,6 @@ impl PlatformDetails for MacOs {
         // don't push another target `--target` that may conflict.
         builder.target(None);
 
-        // Add macOS specific environment variables that affect the output of a build.
-        cargo::rerun_if_env_var_changed("MACOSX_DEPLOYMENT_TARGET");
-
         builder.target_os_and_default_cpu("mac");
         builder.cflags(flags());
     }
