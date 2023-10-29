@@ -128,7 +128,7 @@ impl FontMgr {
         family_name.as_str().into()
     }
 
-    pub fn family_names(&self) -> impl Iterator<Item = String> + '_ {
+    pub fn family_names(&self) -> impl Iterator<Item = String> + Captures<&Self> {
         (0..self.count_families()).map(move |i| self.family_name(i))
     }
 

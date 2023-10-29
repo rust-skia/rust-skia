@@ -133,7 +133,7 @@ impl YUVAPixmapInfo {
     }
 
     /// Row bytes for all planes.
-    pub fn row_bytes_iter(&self) -> impl Iterator<Item = usize> + '_ {
+    pub fn row_bytes_iter(&self) -> impl Iterator<Item = usize> + Captures<&Self> {
         (0..self.num_planes()).map(move |i| self.row_bytes(i).unwrap())
     }
 

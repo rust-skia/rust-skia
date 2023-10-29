@@ -900,6 +900,12 @@ impl<E> AsPointerOrNullMut<E> for Option<Vec<E>> {
     }
 }
 
+// impl Trait + 'a or '_ is almost always wrong:
+// <https://www.youtube.com/watch?v=CWiz_RtA1Hw>
+pub trait Captures<U> {}
+
+impl<T: ?Sized, U> Captures<U> for T {}
+
 // Wraps a handle so that the Rust's borrow checker assumes it represents
 // something that borrows something else.
 #[repr(transparent)]
