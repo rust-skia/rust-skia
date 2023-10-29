@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   linux-release-release:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
     env: 
       SKIA_DEBUG: 0
@@ -422,7 +422,7 @@ jobs:
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   linux-release-release-gl:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
     env: 
       SKIA_DEBUG: 0
@@ -832,7 +832,7 @@ jobs:
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   linux-release-release-vulkan:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
     env: 
       SKIA_DEBUG: 0
@@ -1242,7 +1242,7 @@ jobs:
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   linux-release-release-textlayout:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
     env: 
       SKIA_DEBUG: 0
@@ -1652,7 +1652,7 @@ jobs:
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   linux-release-release-gl-textlayout:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
     env: 
       SKIA_DEBUG: 0
@@ -2062,7 +2062,7 @@ jobs:
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   linux-release-release-textlayout-vulkan:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
     env: 
       SKIA_DEBUG: 0
@@ -2472,7 +2472,7 @@ jobs:
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   linux-release-release-gl-textlayout-vulkan:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
     env: 
       SKIA_DEBUG: 0
@@ -2882,7 +2882,7 @@ jobs:
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   linux-release-release-gl-x11:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
     env: 
       SKIA_DEBUG: 0
@@ -3292,7 +3292,7 @@ jobs:
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   linux-release-release-gl-textlayout-x11:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
     env: 
       SKIA_DEBUG: 0
@@ -3702,7 +3702,7 @@ jobs:
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   linux-release-release-egl-gl-svg-textlayout-vulkan-wayland-webp-x11:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
     env: 
       SKIA_DEBUG: 0
@@ -4112,7 +4112,7 @@ jobs:
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   linux-release-release-gl-svg-textlayout-x11:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
     env: 
       SKIA_DEBUG: 0
@@ -4522,7 +4522,7 @@ jobs:
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
   linux-release-release-gl-svg-textlayout-wayland-x11:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
     env: 
       SKIA_DEBUG: 0
