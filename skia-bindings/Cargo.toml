@@ -30,7 +30,7 @@ doctest = false
 # Metadata used from inside the packaged crate that defines where to download skia and depot_tools archives from.
 # Note: use short hashes here because of filesystem path size restrictions.
 [package.metadata]
-skia = "m119-0.67.3"
+skia = "m120-0.68.0"
 depot_tools = "73a2624"
 
 [features]
