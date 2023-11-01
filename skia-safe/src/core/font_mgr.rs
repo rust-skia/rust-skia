@@ -92,6 +92,7 @@ impl NativeRefCountedBase for SkFontMgr {
 
 impl Default for FontMgr {
     fn default() -> Self {
+        #[allow(deprecated)]
         Self::new()
     }
 }
@@ -106,6 +107,7 @@ impl fmt::Debug for FontMgr {
 }
 
 impl FontMgr {
+    #[deprecated(since = "0.0.0", note = "Will be removed")]
     pub fn new() -> Self {
         FontMgr::from_ptr(unsafe { sb::C_SkFontMgr_RefDefault() }).unwrap()
     }

@@ -1,12 +1,12 @@
 use crate::{
     font_arguments,
     font_parameters::VariationAxis,
-    interop::{self, MemoryStream, NativeStreamBase, StreamAsset},
+    interop::{self, MemoryStream, NativeStreamBase, RustStream, RustWStream, StreamAsset},
     prelude::*,
-    Data, FontArguments, FontStyle, FourByteTag, GlyphId, Rect, TextEncoding, Unichar,
+    Data, FontArguments, FontMgr, FontStyle, FourByteTag, GlyphId, Rect, TextEncoding, Unichar,
 };
 use skia_bindings::{self as sb, SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings};
-use std::{ffi, fmt, mem, ptr};
+use std::{ffi, fmt, io, mem, ptr};
 
 pub type TypefaceId = skia_bindings::SkTypefaceID;
 #[deprecated(since = "0.49.0", note = "use TypefaceId")]
@@ -51,7 +51,12 @@ impl fmt::Debug for Typeface {
 }
 
 impl Typeface {
+    #[deprecated(
+        since = "0.0.0",
+        note = "call FontMgr::match_family_style or FontMgr::legacy_make_typeface"
+    )]
     pub fn new(family_name: impl AsRef<str>, font_style: FontStyle) -> Option<Self> {
+        #[allow(deprecated)]
         Self::from_name(family_name, font_style)
     }
 
@@ -111,14 +116,16 @@ impl Typeface {
         self.native().fUniqueID
     }
 
-    // TODO: wrap SkTypeface::UniqueID()?
-
     // Decided not to support PartialEq instead of this function,
     // because Skia does not support the operator ==.
     pub fn equal(face_a: impl AsRef<Typeface>, face_b: impl AsRef<Typeface>) -> bool {
         unsafe { SkTypeface::Equal(face_a.as_ref().native(), face_b.as_ref().native()) }
     }
 
+    #[deprecated(
+        since = "0.0.0",
+        note = "call FontMgr::match_family_style or FontMgr::legacy_make_typeface"
+    )]
     pub fn from_name(family_name: impl AsRef<str>, font_style: FontStyle) -> Option<Typeface> {
         let family_name = ffi::CString::new(family_name.as_ref()).ok()?;
         Typeface::from_ptr(unsafe {
@@ -126,11 +133,7 @@ impl Typeface {
         })
     }
 
-    // from_file is unsupported, because it is unclear what the
-    // encoding of the path name is. from_data can be used instead.
-
-    // TODO: MakeFromStream()?
-
+    #[deprecated(since = "0.0.0", note = "call FontMgr::make_from_data instead")]
     pub fn from_data(data: impl Into<Data>, index: impl Into<Option<usize>>) -> Option<Typeface> {
         Typeface::from_ptr(unsafe {
             sb::C_SkTypeface_MakeFromData(
@@ -144,7 +147,10 @@ impl Typeface {
         Typeface::from_ptr(unsafe { sb::C_SkTypeface_makeClone(self.native(), arguments.native()) })
     }
 
-    // TODO: serialize(Write)?
+    pub fn serialize_stream(&self, mut write: impl io::Write, behavior: SerializeBehavior) {
+        let mut stream = RustWStream::new(&mut write);
+        unsafe { sb::C_SkTypeface_serialize2(self.native(), stream.stream_mut(), behavior) }
+    }
 
     // TODO: return Data as impl Deref<[u8]> / Borrow<[u8]> here?
     pub fn serialize(&self, behavior: SerializeBehavior) -> Data {
@@ -153,10 +159,24 @@ impl Typeface {
 
     // TODO: Deserialize(Read?)
 
+    #[deprecated(since = "0.0.0", note = "use make_deserialize()")]
     pub fn deserialize(data: &[u8]) -> Option<Typeface> {
         let mut stream = MemoryStream::from_bytes(data);
         Typeface::from_ptr(unsafe {
             sb::C_SkTypeface_MakeDeserialize(stream.native_mut().as_stream_mut())
+        })
+    }
+
+    pub fn make_deserialize(
+        mut data: impl io::Read,
+        last_resort_mgr: impl Into<Option<FontMgr>>,
+    ) -> Option<Typeface> {
+        let mut stream = RustStream::new(&mut data);
+        Typeface::from_ptr(unsafe {
+            sb::C_SkTypeface_MakeDeserialize2(
+                stream.stream_mut(),
+                last_resort_mgr.into().into_ptr_or_null(),
+            )
         })
     }
 
@@ -335,6 +355,8 @@ impl Iterator for LocalizedStringsIter {
 
 #[cfg(test)]
 mod tests {
+    use std::io::Cursor;
+
     use super::{SerializeBehavior, Typeface};
 
     #[test]
@@ -345,12 +367,14 @@ mod tests {
         // (which is probably OK, because Roboto _is_ the default font, so we do another
         // serialization / deserialization and compare the family name with already deserialized
         // one.)
-        let deserialized = Typeface::deserialize(&serialized).unwrap();
+        let deserialized =
+            Typeface::make_deserialize(Cursor::new(serialized.as_bytes()), None).unwrap();
         let serialized2 = deserialized.serialize(SerializeBehavior::DoIncludeData);
-        let deserialized2 = Typeface::deserialize(&serialized2).unwrap();
+        let deserialized2 =
+            Typeface::make_deserialize(Cursor::new(serialized2.as_bytes()), None).unwrap();
 
         // why aren't they not equal?
-        // assert!(Typeface::equal(&tf, &deserialized));
+        assert!(!Typeface::equal(&tf, &deserialized));
         assert_eq!(deserialized.family_name(), deserialized2.family_name());
     }
 
