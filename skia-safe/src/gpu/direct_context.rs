@@ -67,7 +67,6 @@ impl fmt::Debug for DirectContext {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("DirectContext")
             .field("base", self as &RecordingContext)
-            .field("resource_cache_limits", &self.resource_cache_limits())
             .field("resource_cache_limit", &self.resource_cache_limit())
             .field("resource_cache_usage", &self.resource_cache_usage())
             .field(
@@ -166,19 +165,6 @@ impl DirectContext {
             sb::GrDirectContext_releaseResourcesAndAbandonContext(self.native_mut() as *mut _ as _)
         }
         self
-    }
-
-    pub fn resource_cache_limits(&self) -> ResourceCacheLimits {
-        let mut resources = 0;
-        let mut resource_bytes = 0;
-        unsafe {
-            self.native()
-                .getResourceCacheLimits(&mut resources, &mut resource_bytes)
-        }
-        ResourceCacheLimits {
-            max_resources: resources.try_into().unwrap(),
-            max_resource_bytes: resource_bytes,
-        }
     }
 
     pub fn resource_cache_limit(&self) -> usize {
