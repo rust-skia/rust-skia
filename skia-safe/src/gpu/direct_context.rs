@@ -91,6 +91,7 @@ impl DirectContext {
         crate::gpu::direct_contexts::make_gl(interface, options)
     }
 
+    // Deprecated in Skia
     #[cfg(feature = "vulkan")]
     pub fn new_vulkan<'a>(
         backend_context: &vk::BackendContext,
