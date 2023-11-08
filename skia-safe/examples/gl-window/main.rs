@@ -55,6 +55,7 @@ fn main() {
     use glutin_winit::DisplayBuilder;
     use raw_window_handle::HasRawWindowHandle;
     use winit::{
+        dpi::LogicalSize,
         event::{Event, KeyEvent, Modifiers, WindowEvent},
         event_loop::{ControlFlow, EventLoop},
         window::{Window, WindowBuilder},
@@ -66,7 +67,9 @@ fn main() {
     };
 
     let el = EventLoop::new().expect("Failed to create event loop");
-    let winit_window_builder = WindowBuilder::new().with_title("rust-skia-gl-window");
+    let winit_window_builder = WindowBuilder::new()
+        .with_title("rust-skia-gl-window")
+        .with_inner_size(LogicalSize::new(800, 800));
 
     let template = ConfigTemplateBuilder::new()
         .with_alpha_size(8)
@@ -166,10 +169,6 @@ fn main() {
             ..Default::default()
         }
     };
-
-    _ = window.request_inner_size(winit::dpi::Size::new(winit::dpi::LogicalSize::new(
-        1024.0, 1024.0,
-    )));
 
     fn create_surface(
         window: &Window,
