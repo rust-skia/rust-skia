@@ -75,7 +75,8 @@ gl-rs = { package = "gl", version = "0.14.0" }
 # metal-window
 [target.'cfg(target_os = "macos")'.dev-dependencies]
 metal-rs = { package = "metal", version = "0.24.0" }
-winit = "0.28.1"
+winit = "0.29.3"
+raw-window-handle = { version = "0.6.0" }
 objc = "0.2.7"
 cocoa = "0.25.0"
 core-graphics-types = "0.1.1"
