@@ -47,18 +47,15 @@ fn main() {
     use gl_rs as gl;
     use glutin::{
         config::{ConfigTemplateBuilder, GlConfig},
-        context::{
-            ContextApi, ContextAttributesBuilder, NotCurrentGlContextSurfaceAccessor,
-            PossiblyCurrentContext,
-        },
+        context::{ContextApi, ContextAttributesBuilder, PossiblyCurrentContext},
         display::{GetGlDisplay, GlDisplay},
-        prelude::GlSurface,
+        prelude::{GlSurface, NotCurrentGlContext},
         surface::{Surface as GlutinSurface, SurfaceAttributesBuilder, WindowSurface},
     };
     use glutin_winit::DisplayBuilder;
     use raw_window_handle::HasRawWindowHandle;
     use winit::{
-        event::{Event, KeyboardInput, VirtualKeyCode, WindowEvent},
+        event::{Event, KeyEvent, Modifiers, WindowEvent},
         event_loop::{ControlFlow, EventLoop},
         window::{Window, WindowBuilder},
     };
@@ -68,7 +65,7 @@ fn main() {
         Color, ColorType, Surface,
     };
 
-    let el = EventLoop::new();
+    let el = EventLoop::new().expect("Failed to create event loop");
     let winit_window_builder = WindowBuilder::new().with_title("rust-skia-gl-window");
 
     let template = ConfigTemplateBuilder::new()
@@ -170,7 +167,7 @@ fn main() {
         }
     };
 
-    window.set_inner_size(winit::dpi::Size::new(winit::dpi::LogicalSize::new(
+    _ = window.request_inner_size(winit::dpi::Size::new(winit::dpi::LogicalSize::new(
         1024.0, 1024.0,
     )));
 
@@ -226,17 +223,16 @@ fn main() {
         window,
     };
     let mut previous_frame_start = Instant::now();
+    let mut modifiers = Modifiers::default();
 
-    el.run(move |event, _, control_flow| {
+    el.run(move |event, window_target| {
         let frame_start = Instant::now();
         let mut draw_frame = false;
 
-        #[allow(deprecated)]
-        match event {
-            Event::LoopDestroyed => {}
-            Event::WindowEvent { event, .. } => match event {
+        if let Event::WindowEvent { event, .. } = event {
+            match event {
                 WindowEvent::CloseRequested => {
-                    *control_flow = ControlFlow::Exit;
+                    window_target.exit();
                     return;
                 }
                 WindowEvent::Resized(physical_size) => {
@@ -256,29 +252,22 @@ fn main() {
                         NonZeroU32::new(height.max(1)).unwrap(),
                     );
                 }
+                WindowEvent::ModifiersChanged(new_modifiers) => modifiers = new_modifiers,
                 WindowEvent::KeyboardInput {
-                    input:
-                        KeyboardInput {
-                            virtual_keycode,
-                            modifiers,
-                            ..
-                        },
+                    event: KeyEvent { logical_key, .. },
                     ..
                 } => {
-                    if modifiers.logo() {
-                        if let Some(VirtualKeyCode::Q) = virtual_keycode {
-                            *control_flow = ControlFlow::Exit;
-                        }
+                    if modifiers.state().super_key() && logical_key == "q" {
+                        window_target.exit();
                     }
                     frame = frame.saturating_sub(10);
                     env.window.request_redraw();
                 }
+                WindowEvent::RedrawRequested => {
+                    draw_frame = true;
+                }
                 _ => (),
-            },
-            Event::RedrawRequested(_) => {
-                draw_frame = true;
             }
-            _ => (),
         }
         let expected_frame_length_seconds = 1.0 / 20.0;
         let frame_duration = Duration::from_secs_f32(expected_frame_length_seconds);
@@ -296,6 +285,9 @@ fn main() {
             env.gl_surface.swap_buffers(&env.gl_context).unwrap();
         }
 
-        *control_flow = ControlFlow::WaitUntil(previous_frame_start + frame_duration)
-    });
+        window_target.set_control_flow(ControlFlow::WaitUntil(
+            previous_frame_start + frame_duration,
+        ))
+    })
+    .expect("run() failed");
 }
