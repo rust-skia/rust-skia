@@ -208,28 +208,8 @@ fn decode_base64(value: &str) -> Vec<u8> {
         .chars()
         .filter(|&c| !is_html_space(c))
         .collect::<String>();
-    let mut input = &*without_spaces;
 
-    if input.len() % 4 == 0 {
-        if input.ends_with("==") {
-            input = &input[..input.len() - 2]
-        } else if input.ends_with('=') {
-            input = &input[..input.len() - 1]
-        }
-    }
-
-    if input.len() % 4 == 1 {
-        return Vec::new();
-    }
-
-    if input
-        .chars()
-        .any(|c| c != '+' && c != '/' && !c.is_alphanumeric())
-    {
-        return Vec::new();
-    }
-
-    match base64::decode(input) {
+    match base64::decode(&without_spaces) {
         Ok(bytes) => bytes,
         Err(_) => Vec::new(),
     }
