@@ -235,6 +235,7 @@ mod base64 {
 #[cfg(test)]
 mod tests {
     use crate::Canvas;
+    use crate::modules::svg::decode_base64;
 
     use super::Dom;
 
@@ -249,5 +250,26 @@ mod tests {
         let canvas = Canvas::new((256, 256), None).unwrap();
         let dom = str::parse::<Dom>(svg).unwrap();
         dom.render(&canvas)
+    }
+
+    #[test]
+    fn decoding_base64() {
+        use std::str::from_utf8;
+
+        // padding length of 0-2 should be supported
+        assert_eq!("Hello", from_utf8(&decode_base64("SGVsbG8=")).unwrap());
+        assert_eq!("Hello!", from_utf8(&decode_base64("SGVsbG8h")).unwrap());
+        assert_eq!("Hello!!", from_utf8(&decode_base64("SGVsbG8hIQ==")).unwrap());
+
+        // padding length of 3 is invalid
+        assert_eq!(0, decode_base64("SGVsbG8hIQ===").len());
+
+        // if input length divided by 4 gives a remainder of 1 after padding removal, it's invalid
+        assert_eq!(0, decode_base64("SGVsbG8hh").len());
+        assert_eq!(0, decode_base64("SGVsbG8hh=").len());
+        assert_eq!(0, decode_base64("SGVsbG8hh==").len());
+
+        // invalid characters in the input
+        assert_eq!(0, decode_base64("$GVsbG8h").len());
     }
 }
