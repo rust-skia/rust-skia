@@ -234,8 +234,8 @@ mod base64 {
 
 #[cfg(test)]
 mod tests {
-    use crate::Canvas;
     use crate::modules::svg::decode_base64;
+    use crate::Canvas;
 
     use super::Dom;
 
@@ -259,7 +259,10 @@ mod tests {
         // padding length of 0-2 should be supported
         assert_eq!("Hello", from_utf8(&decode_base64("SGVsbG8=")).unwrap());
         assert_eq!("Hello!", from_utf8(&decode_base64("SGVsbG8h")).unwrap());
-        assert_eq!("Hello!!", from_utf8(&decode_base64("SGVsbG8hIQ==")).unwrap());
+        assert_eq!(
+            "Hello!!",
+            from_utf8(&decode_base64("SGVsbG8hIQ==")).unwrap()
+        );
 
         // padding length of 3 is invalid
         assert_eq!(0, decode_base64("SGVsbG8hIQ===").len());
