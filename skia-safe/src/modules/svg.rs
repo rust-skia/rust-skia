@@ -208,28 +208,8 @@ fn decode_base64(value: &str) -> Vec<u8> {
         .chars()
         .filter(|&c| !is_html_space(c))
         .collect::<String>();
-    let mut input = &*without_spaces;
 
-    if input.len() % 4 == 0 {
-        if input.ends_with("==") {
-            input = &input[..input.len() - 2]
-        } else if input.ends_with('=') {
-            input = &input[..input.len() - 1]
-        }
-    }
-
-    if input.len() % 4 == 1 {
-        return Vec::new();
-    }
-
-    if input
-        .chars()
-        .any(|c| c != '+' && c != '/' && !c.is_alphanumeric())
-    {
-        return Vec::new();
-    }
-
-    match base64::decode(input) {
+    match base64::decode(&without_spaces) {
         Ok(bytes) => bytes,
         Err(_) => Vec::new(),
     }
@@ -254,6 +234,7 @@ mod base64 {
 
 #[cfg(test)]
 mod tests {
+    use crate::modules::svg::decode_base64;
     use crate::Canvas;
 
     use super::Dom;
@@ -269,5 +250,29 @@ mod tests {
         let mut canvas = Canvas::new((256, 256), None).unwrap();
         let dom = str::parse::<Dom>(svg).unwrap();
         dom.render(&mut canvas)
+    }
+
+    #[test]
+    fn decoding_base64() {
+        use std::str::from_utf8;
+
+        // padding length of 0-2 should be supported
+        assert_eq!("Hello", from_utf8(&decode_base64("SGVsbG8=")).unwrap());
+        assert_eq!("Hello!", from_utf8(&decode_base64("SGVsbG8h")).unwrap());
+        assert_eq!(
+            "Hello!!",
+            from_utf8(&decode_base64("SGVsbG8hIQ==")).unwrap()
+        );
+
+        // padding length of 3 is invalid
+        assert_eq!(0, decode_base64("SGVsbG8hIQ===").len());
+
+        // if input length divided by 4 gives a remainder of 1 after padding removal, it's invalid
+        assert_eq!(0, decode_base64("SGVsbG8hh").len());
+        assert_eq!(0, decode_base64("SGVsbG8hh=").len());
+        assert_eq!(0, decode_base64("SGVsbG8hh==").len());
+
+        // invalid characters in the input
+        assert_eq!(0, decode_base64("$GVsbG8h").len());
     }
 }
