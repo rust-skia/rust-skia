@@ -730,6 +730,7 @@ pub(crate) mod rewrite {
     }
 }
 
+#[allow(unused)]
 pub use definitions::{Definition, Definitions};
 
 pub(crate) mod definitions {
