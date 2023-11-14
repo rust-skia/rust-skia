@@ -17,18 +17,8 @@ pub mod svg;
 pub mod vulkan;
 
 pub use cpu::Cpu;
-#[cfg(feature = "d3d")]
-pub use d3d::D3D;
-#[cfg(feature = "gl")]
-pub use gl::OpenGl;
-#[cfg(feature = "metal")]
-pub use metal::Metal;
 pub use pdf::Pdf;
-#[cfg(feature = "svg")]
-pub use render_svg::RenderSvg;
 pub use svg::Svg;
-#[cfg(feature = "vulkan")]
-pub use vulkan::Vulkan;
 
 pub trait DrawingDriver {
     const DRIVER: Driver;

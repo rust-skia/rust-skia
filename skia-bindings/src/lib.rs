@@ -14,7 +14,6 @@ mod defaults;
 pub use defaults::*;
 
 mod impls;
-pub use impls::*;
 
 #[cfg(feature = "textlayout")]
 pub mod icu;
