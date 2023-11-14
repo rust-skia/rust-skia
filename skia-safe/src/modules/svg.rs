@@ -1,8 +1,9 @@
 use std::{
     error::Error,
+    ffi::CStr,
     fmt,
     io::{self, Read},
-    str::FromStr,
+    os::raw,
 };
 
 use skia_bindings as sb;
@@ -11,15 +12,12 @@ use skia_bindings::{SkData, SkTypeface};
 use crate::{
     interop::{MemoryStream, NativeStreamBase, RustStream},
     prelude::*,
-    Canvas, Data, RCHandle, Size, Typeface,
+    Canvas, Data, FontMgr, RCHandle, Size, Typeface,
 };
 
 pub type Dom = RCHandle<sb::SkSVGDOM>;
 require_base_type!(sb::SkSVGDOM, sb::SkRefCnt);
-
-unsafe impl Send for Dom {}
-
-unsafe impl Sync for Dom {}
+unsafe_send_sync!(Dom);
 
 impl NativeRefCounted for sb::SkSVGDOM {
     fn _ref(&self) {
@@ -59,15 +57,34 @@ impl From<LoadError> for io::Error {
     }
 }
 
+#[repr(C)]
+struct LoadContext {
+    font_mgr: FontMgr,
+}
+
+impl LoadContext {
+    fn new(font_mgr: FontMgr) -> Self {
+        Self { font_mgr }
+    }
+
+    fn native(&mut self) -> *mut raw::c_void {
+        self as *mut _ as _
+    }
+}
+
 extern "C" fn handle_load_type_face(
-    resource_path: *const ::std::os::raw::c_char,
-    resource_name: *const ::std::os::raw::c_char,
+    resource_path: *const raw::c_char,
+    resource_name: *const raw::c_char,
+    load_context: *mut raw::c_void,
 ) -> *mut SkTypeface {
-    let data = Data::from_ptr(handle_load(resource_path, resource_name));
+    // loop {}
+    let data = Data::from_ptr(handle_load(resource_path, resource_name, load_context));
     match data {
         None => {}
         Some(data) => {
-            if let Some(typeface) = Typeface::from_data(data, None) {
+            let load_context: &mut LoadContext =
+                unsafe { &mut *(load_context as *mut LoadContext) };
+            if let Some(typeface) = load_context.font_mgr.new_from_data(&data, None) {
                 return typeface.into_ptr();
             }
         }
@@ -77,8 +94,9 @@ extern "C" fn handle_load_type_face(
 }
 
 extern "C" fn handle_load(
-    resource_path: *const ::std::os::raw::c_char,
-    resource_name: *const ::std::os::raw::c_char,
+    resource_path: *const raw::c_char,
+    resource_name: *const raw::c_char,
+    _load_context: *mut raw::c_void,
 ) -> *mut SkData {
     unsafe {
         let mut is_base64 = false;
@@ -86,8 +104,8 @@ extern "C" fn handle_load(
             is_base64 = true;
         }
 
-        let resource_path = std::ffi::CStr::from_ptr(resource_path);
-        let resource_name = std::ffi::CStr::from_ptr(resource_name);
+        let resource_path = CStr::from_ptr(resource_path);
+        let resource_name = CStr::from_ptr(resource_name);
 
         if resource_path.to_string_lossy().is_empty() {
             is_base64 = true;
@@ -138,43 +156,41 @@ impl fmt::Debug for Dom {
     }
 }
 
-impl FromStr for Dom {
-    type Err = LoadError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Self::from_bytes(s.as_bytes())
-    }
-}
-
 impl Dom {
-    fn handle_load_base64(data: &str) -> Data {
-        let data: Vec<_> = data.split(',').collect();
-        if data.len() > 1 {
-            let result = decode_base64(data[1]);
-            return Data::new_copy(result.as_slice());
-        }
-        Data::new_empty()
-    }
-
-    pub fn read<R: io::Read>(mut reader: R) -> Result<Self, LoadError> {
+    pub fn read<R: io::Read>(
+        mut reader: R,
+        font_mgr: impl Into<FontMgr>,
+    ) -> Result<Self, LoadError> {
         let mut reader = RustStream::new(&mut reader);
         let stream = reader.stream_mut();
+        let mut load_context = LoadContext::new(font_mgr.into());
 
         let out = unsafe {
-            sb::C_SkSVGDOM_MakeFromStream(stream, Some(handle_load), Some(handle_load_type_face))
+            sb::C_SkSVGDOM_MakeFromStream(
+                stream,
+                Some(handle_load),
+                Some(handle_load_type_face),
+                load_context.native(),
+            )
         };
 
         Self::from_ptr(out).ok_or(LoadError)
     }
 
-    pub fn from_bytes(svg: &[u8]) -> Result<Self, LoadError> {
+    pub fn from_str(svg: impl AsRef<str>, font_mgr: impl Into<FontMgr>) -> Result<Self, LoadError> {
+        Self::from_bytes(svg.as_ref().as_bytes(), font_mgr)
+    }
+
+    pub fn from_bytes(svg: &[u8], font_mgr: impl Into<FontMgr>) -> Result<Self, LoadError> {
         let mut ms = MemoryStream::from_bytes(svg);
+        let mut load_context = LoadContext::new(font_mgr.into());
 
         let out = unsafe {
             sb::C_SkSVGDOM_MakeFromStream(
                 ms.native_mut().as_stream_mut(),
                 Some(handle_load),
                 Some(handle_load_type_face),
+                load_context.native(),
             )
         };
         Self::from_ptr(out).ok_or(LoadError)
@@ -191,6 +207,15 @@ impl Dom {
     pub fn set_container_size(&mut self, size: impl Into<Size>) {
         let size = size.into();
         unsafe { sb::C_SkSVGDOM_setContainerSize(self.native_mut(), size.native()) }
+    }
+
+    fn handle_load_base64(data: &str) -> Data {
+        let data: Vec<_> = data.split(',').collect();
+        if data.len() > 1 {
+            let result = decode_base64(data[1]);
+            return Data::new_copy(result.as_slice());
+        }
+        Data::new_empty()
     }
 }
 
@@ -234,10 +259,13 @@ mod base64 {
 
 #[cfg(test)]
 mod tests {
-    use crate::modules::svg::decode_base64;
-    use crate::Canvas;
+    use std::fs;
+    use std::io::Write;
+    use std::path::Path;
 
     use super::Dom;
+    use crate::modules::svg::decode_base64;
+    use crate::{surfaces, Canvas, FontMgr, Surface};
 
     #[test]
     fn render_simple_svg() {
@@ -247,9 +275,26 @@ mod tests {
             <path d="M31,3h38l28,28v38l-28,28h-38l-28-28v-38z" fill="#a23"/>
             <text x="50" y="68" font-size="48" fill="#FFF" text-anchor="middle"><![CDATA[410]]></text>
             </svg>"##;
-        let canvas = Canvas::new((256, 256), None).unwrap();
-        let dom = str::parse::<Dom>(svg).unwrap();
-        dom.render(&canvas)
+        let mut surface = surfaces::raster_n32_premul((256, 256)).unwrap();
+        let canvas = surface.canvas();
+        let font_mgr = FontMgr::new();
+        let dom = Dom::from_str(svg, font_mgr).unwrap();
+        dom.render(&canvas);
+        let image = surface.image_snapshot();
+        let data = image
+            .encode(None, crate::EncodedImageFormat::PNG, None)
+            .unwrap();
+        write_file(data.as_bytes(), &Path::new("/tmp"), "test", "png");
+
+        pub fn write_file(bytes: &[u8], path: &std::path::Path, name: &str, ext: &str) {
+            fs::create_dir_all(path).expect("failed to create directory");
+
+            let mut file_path = path.join(name);
+            file_path.set_extension(ext);
+
+            let mut file = fs::File::create(file_path).expect("failed to create file");
+            file.write_all(bytes).expect("failed to write to file");
+        }
     }
 
     #[test]
