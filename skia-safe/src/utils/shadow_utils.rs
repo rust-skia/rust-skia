@@ -68,7 +68,7 @@ pub fn local_bounds(
 impl Canvas {
     #[allow(clippy::too_many_arguments)]
     pub fn draw_shadow(
-        &mut self,
+        &self,
         path: &Path,
         z_plane_params: impl Into<Point3>,
         light_pos: impl Into<Point3>,
@@ -76,7 +76,7 @@ impl Canvas {
         ambient_color: impl Into<Color>,
         spot_color: impl Into<Color>,
         flags: impl Into<Option<ShadowFlags>>,
-    ) -> &mut Self {
+    ) -> &Self {
         draw_shadow(
             self,
             path,
