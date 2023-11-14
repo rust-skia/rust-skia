@@ -40,27 +40,19 @@ pub mod annotate {
 
 impl Canvas {
     // TODO: accept str or the Url type from the url crate?
-    pub fn annotate_rect_with_url(&mut self, rect: impl AsRef<Rect>, data: &Data) -> &mut Self {
+    pub fn annotate_rect_with_url(&self, rect: impl AsRef<Rect>, data: &Data) -> &Self {
         annotate::rect_with_url(self, rect, data);
         self
     }
 
     // TODO: is data a string here, and if so, of what encoding?
-    pub fn annotate_named_destination(
-        &mut self,
-        point: impl Into<Point>,
-        data: &Data,
-    ) -> &mut Self {
+    pub fn annotate_named_destination(&self, point: impl Into<Point>, data: &Data) -> &Self {
         annotate::named_destination(self, point, data);
         self
     }
 
     // TODO: use str?
-    pub fn annotate_link_to_destination(
-        &mut self,
-        rect: impl AsRef<Rect>,
-        data: &Data,
-    ) -> &mut Self {
+    pub fn annotate_link_to_destination(&self, rect: impl AsRef<Rect>, data: &Data) -> &Self {
         annotate::link_to_destination(self, rect, data);
         self
     }
