@@ -1,5 +1,4 @@
 use crate::{prelude::*, Canvas, Font, Paint, Path, Point, TextEncoding};
-use core::borrow::BorrowMut;
 use skia_bindings::SkTextUtils;
 
 pub use skia_bindings::SkTextUtils_Align as Align;
@@ -32,14 +31,14 @@ pub fn draw_str(
 
 impl Canvas {
     pub fn draw_str_align(
-        &mut self,
+        &self,
         text: impl AsRef<str>,
         p: impl Into<Point>,
         font: &Font,
         paint: &Paint,
         align: Align,
-    ) -> &mut Self {
-        draw_str(self.borrow_mut(), text, p, font, paint, align);
+    ) -> &Self {
+        draw_str(self, text, p, font, paint, align);
         self
     }
 }
