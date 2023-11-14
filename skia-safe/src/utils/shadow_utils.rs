@@ -76,7 +76,7 @@ impl Canvas {
         ambient_color: impl Into<Color>,
         spot_color: impl Into<Color>,
         flags: impl Into<Option<ShadowFlags>>,
-    ) -> &mut Self {
+    ) -> &Self {
         draw_shadow(
             self,
             path,
