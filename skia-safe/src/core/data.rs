@@ -1,10 +1,13 @@
-use crate::prelude::*;
-use skia_bindings::{self as sb, SkData};
 use std::{
     ffi::{CStr, CString},
-    fmt,
+    fmt, io,
     ops::Deref,
+    path::Path,
 };
+
+use skia_bindings::{self as sb, SkData};
+
+use crate::{interop::RustStream, prelude::*};
 
 pub type Data = RCHandle<SkData>;
 unsafe_send_sync!(Data);
@@ -108,9 +111,24 @@ impl Data {
         Data::from_ptr(unsafe { sb::C_SkData_MakeWithCString(cstr.as_ptr()) }).unwrap()
     }
 
-    // TODO: MakeFromFileName (not sure if we need that)
-    // TODO: MakeFromFile (not sure if we need that)
-    // TODO: MakeFromStream
+    /// Create a new `Data` referencing the file with the specified path. If the file cannot be
+    /// opened, the path contains 0 bytes, or the path is not valid UTF-8, this returns `None`.
+    ///
+    /// This function opens the file as a memory mapped file for the lifetime of `Data` returned.
+    pub fn from_filename(path: impl AsRef<Path>) -> Option<Self> {
+        let path = CString::new(path.as_ref().to_str()?).ok()?;
+        Data::from_ptr(unsafe { sb::C_SkData_MakeFromFileName(path.as_ptr()) })
+    }
+
+    // TODO: MakeFromFile (is there a way to wrap this safely?)
+
+    /// Attempt to read size bytes into a [`Data`]. If the read succeeds, return the data,
+    /// else return `None`. Either way the stream's cursor may have been changed as a result
+    /// of calling read().
+    pub fn from_stream(mut stream: impl io::Read, size: usize) -> Option<Self> {
+        let mut stream = RustStream::new(&mut stream);
+        Data::from_ptr(unsafe { sb::C_SkData_MakeFromStream(stream.stream_mut(), size) })
+    }
 
     pub fn new_empty() -> Self {
         Data::from_ptr(unsafe { sb::C_SkData_MakeEmpty() }).unwrap()
@@ -118,16 +136,37 @@ impl Data {
 }
 
 #[cfg(test)]
-impl RefCount for SkData {
-    fn ref_cnt(&self) -> usize {
-        self._base.ref_cnt()
-    }
-}
+mod tests {
+    use super::*;
 
-#[test]
-fn data_supports_equals() {
-    let x: &[u8] = &[1u8, 2u8, 3u8];
-    let d1 = Data::new_copy(x);
-    let d2 = Data::new_copy(x);
-    assert!(d1 == d2)
+    impl RefCount for SkData {
+        fn ref_cnt(&self) -> usize {
+            self._base.ref_cnt()
+        }
+    }
+
+    #[test]
+    fn data_supports_equals() {
+        let x: &[u8] = &[1u8, 2u8, 3u8];
+        let d1 = Data::new_copy(x);
+        let d2 = Data::new_copy(x);
+        assert!(d1 == d2)
+    }
+
+    #[test]
+    fn from_stream_empty() {
+        let data = [];
+        let cursor = io::Cursor::new(data);
+        let data = Data::from_stream(cursor, 0).unwrap();
+        assert_eq!(data.len(), 0);
+    }
+
+    #[test]
+    fn from_stream() {
+        let data = [1u8];
+        let cursor = io::Cursor::new(data);
+        let data = Data::from_stream(cursor, 1).unwrap();
+        assert_eq!(data.len(), 1);
+        assert_eq!(data[0], 1u8);
+    }
 }
