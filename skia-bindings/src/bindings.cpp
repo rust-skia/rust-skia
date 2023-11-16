@@ -520,6 +520,14 @@ extern "C" SkData* C_SkData_MakeWithoutCopy(const void* data, size_t length) {
     return SkData::MakeWithoutCopy(data, length).release();
 }
 
+extern "C" SkData* C_SkData_MakeFromFileName(const char cstr[]) {
+    return SkData::MakeFromFileName(cstr).release();
+}
+
+extern "C" SkData* C_SkData_MakeFromStream(SkStream* stream, size_t size) {
+    return SkData::MakeFromStream(stream, size).release();
+}
+
 extern "C" SkData* C_SkData_MakeEmpty() {
     return SkData::MakeEmpty().release();
 }
