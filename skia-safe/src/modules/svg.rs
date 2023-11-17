@@ -77,7 +77,6 @@ extern "C" fn handle_load_type_face(
     resource_name: *const raw::c_char,
     load_context: *mut raw::c_void,
 ) -> *mut SkTypeface {
-    // loop {}
     let data = Data::from_ptr(handle_load(resource_path, resource_name, load_context));
     match data {
         None => {}
@@ -259,10 +258,10 @@ mod base64 {
 
 #[cfg(test)]
 mod tests {
-    use std::{fs, io::Write, path::Path};
+    use std::{fs::File, io::Write, path::Path};
 
     use super::Dom;
-    use crate::{modules::svg::decode_base64, surfaces, FontMgr, Surface};
+    use crate::{modules::svg::decode_base64, surfaces, EncodedImageFormat, FontMgr, Surface};
 
     #[test]
     fn render_simple_svg() {
@@ -281,20 +280,14 @@ mod tests {
         // write_surface_to_tmp(surface);
     }
 
+    #[allow(unused)]
     fn write_surface_to_tmp(surface: &mut Surface) {
         let image = surface.image_snapshot();
-        let data = image
-            .encode(None, crate::EncodedImageFormat::PNG, None)
-            .unwrap();
-        write_file(data.as_bytes(), &Path::new("/tmp"), "test", "png");
+        let data = image.encode(None, EncodedImageFormat::PNG, None).unwrap();
+        write_file(data.as_bytes(), &Path::new("/tmp/test.png"));
 
-        pub fn write_file(bytes: &[u8], path: &std::path::Path, name: &str, ext: &str) {
-            fs::create_dir_all(path).expect("failed to create directory");
-
-            let mut file_path = path.join(name);
-            file_path.set_extension(ext);
-
-            let mut file = fs::File::create(file_path).expect("failed to create file");
+        pub fn write_file(bytes: &[u8], path: &Path) {
+            let mut file = File::create(path).expect("failed to create file");
             file.write_all(bytes).expect("failed to write to file");
         }
     }
