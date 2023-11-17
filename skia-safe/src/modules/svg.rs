@@ -259,18 +259,16 @@ mod base64 {
 
 #[cfg(test)]
 mod tests {
-    use std::fs;
-    use std::io::Write;
-    use std::path::Path;
+    use std::{fs, io::Write, path::Path};
 
     use super::Dom;
-    use crate::modules::svg::decode_base64;
-    use crate::{surfaces, Canvas, FontMgr, Surface};
+    use crate::{modules::svg::decode_base64, surfaces, FontMgr, Surface};
 
     #[test]
     fn render_simple_svg() {
         // https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/410.svg
-        let svg = r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        // Note: height and width must be set
+        let svg = r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" height = "256" width = "256">
             <path d="M30,1h40l29,29v40l-29,29h-40l-29-29v-40z" stroke="#;000" fill="none"/>
             <path d="M31,3h38l28,28v38l-28,28h-38l-28-28v-38z" fill="#a23"/>
             <text x="50" y="68" font-size="48" fill="#FFF" text-anchor="middle"><![CDATA[410]]></text>
@@ -279,7 +277,11 @@ mod tests {
         let canvas = surface.canvas();
         let font_mgr = FontMgr::new();
         let dom = Dom::from_str(svg, font_mgr).unwrap();
-        dom.render(&canvas);
+        dom.render(canvas);
+        // write_surface_to_tmp(surface);
+    }
+
+    fn write_surface_to_tmp(surface: &mut Surface) {
         let image = surface.image_snapshot();
         let data = image
             .encode(None, crate::EncodedImageFormat::PNG, None)
