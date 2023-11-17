@@ -284,7 +284,7 @@ mod tests {
     fn write_surface_to_tmp(surface: &mut Surface) {
         let image = surface.image_snapshot();
         let data = image.encode(None, EncodedImageFormat::PNG, None).unwrap();
-        write_file(data.as_bytes(), &Path::new("/tmp/test.png"));
+        write_file(data.as_bytes(), Path::new("/tmp/test.png"));
 
         pub fn write_file(bytes: &[u8], path: &Path) {
             let mut file = File::create(path).expect("failed to create file");
