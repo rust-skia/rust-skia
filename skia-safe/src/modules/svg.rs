@@ -57,6 +57,7 @@ impl From<LoadError> for io::Error {
     }
 }
 
+#[derive(Debug)]
 #[repr(C)]
 struct LoadContext {
     font_mgr: FontMgr,
@@ -277,11 +278,11 @@ mod tests {
         let font_mgr = FontMgr::new();
         let dom = Dom::from_str(svg, font_mgr).unwrap();
         dom.render(canvas);
-        // write_surface_to_tmp(surface);
+        // save_surface_to_tmp(surface);
     }
 
     #[allow(unused)]
-    fn write_surface_to_tmp(surface: &mut Surface) {
+    fn save_surface_to_tmp(surface: &mut Surface) {
         let image = surface.image_snapshot();
         let data = image.encode(None, EncodedImageFormat::PNG, None).unwrap();
         write_file(data.as_bytes(), Path::new("/tmp/test.png"));
