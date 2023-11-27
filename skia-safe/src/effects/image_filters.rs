@@ -205,15 +205,15 @@ pub fn crop(
 /// * `x_channel_selector` - RGBA channel that encodes the x displacement per pixel.
 /// * `y_channel_selector` - RGBA channel that encodes the y displacement per pixel.
 /// * `scale` - Scale applied to displacement extracted from image.
-/// * `displacement` - The filter defining the displacement image, or null to use source.
-/// * `color` - The filter providing the color pixels to be displaced. If null,
+/// * `displacement` - The filter defining the displacement image, or `None` to use source.
+/// * `color` - The filter providing the color pixels to be displaced. If `None`,
 ///                         it will use the source.
 /// * `crop_rect` - Optional rectangle that crops the color input and output.
 pub fn displacement_map(
     (x_channel_selector, y_channel_selector): (ColorChannel, ColorChannel),
     scale: scalar,
     displacement: impl Into<Option<ImageFilter>>,
-    color: impl Into<ImageFilter>,
+    color: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<CropRect>,
 ) -> Option<ImageFilter> {
     ImageFilter::from_ptr(unsafe {
@@ -222,7 +222,7 @@ pub fn displacement_map(
             y_channel_selector,
             scale,
             displacement.into().into_ptr_or_null(),
-            color.into().into_ptr(),
+            color.into().into_ptr_or_null(),
             crop_rect.into().native(),
         )
     })
@@ -838,14 +838,14 @@ impl ImageFilter {
     pub fn displacement_map_effect<'a>(
         channel_selectors: (ColorChannel, ColorChannel),
         scale: scalar,
-        displacement: impl Into<ImageFilter>,
-        color: impl Into<ImageFilter>,
+        displacement: impl Into<Option<ImageFilter>>,
+        color: impl Into<Option<ImageFilter>>,
         crop_rect: impl Into<Option<&'a IRect>>,
     ) -> Option<Self> {
         displacement_map(
             channel_selectors,
             scale,
-            displacement.into(),
+            displacement,
             color,
             crop_rect.into().map(|r| r.into()),
         )
