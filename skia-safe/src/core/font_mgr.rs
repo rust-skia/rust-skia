@@ -92,7 +92,6 @@ impl NativeRefCountedBase for SkFontMgr {
 
 impl Default for FontMgr {
     fn default() -> Self {
-        #[allow(deprecated)]
         Self::new()
     }
 }
