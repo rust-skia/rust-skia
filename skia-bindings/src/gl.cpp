@@ -9,6 +9,7 @@
 #include "include/gpu/GrBackendSurface.h"
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/ganesh/gl/GrGLBackendSurface.h"
+#include "include/gpu/ganesh/gl/GrGLDirectContext.h"
 #include "include/gpu/gl/GrGLExtensions.h"
 #include "include/gpu/gl/GrGLInterface.h"
 #include "include/gpu/gl/GrGLAssembleInterface.h"
@@ -151,14 +152,14 @@ extern "C" const GrGLInterface* C_GrGLInterface_MakeAssembledInterface(void *ctx
 extern "C" GrDirectContext* C_GrDirectContext_MakeGL(GrGLInterface* interface, const GrContextOptions* options) {
     if (interface) {
         if (options) {
-            return GrDirectContext::MakeGL(sp(interface), *options).release();
+            return GrDirectContexts::MakeGL(sp(interface), *options).release();
         }
-        return GrDirectContext::MakeGL(sp(interface)).release();
+        return GrDirectContexts::MakeGL(sp(interface)).release();
     }
     if (options) {
-        return GrDirectContext::MakeGL(*options).release();
+        return GrDirectContexts::MakeGL(*options).release();
     }
-    return GrDirectContext::MakeGL().release();
+    return GrDirectContexts::MakeGL().release();
 }
 
 //

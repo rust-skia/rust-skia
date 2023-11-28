@@ -106,6 +106,7 @@ impl fmt::Debug for FontMgr {
 }
 
 impl FontMgr {
+    // Deprecated by Skia
     pub fn new() -> Self {
         FontMgr::from_ptr(unsafe { sb::C_SkFontMgr_RefDefault() }).unwrap()
     }

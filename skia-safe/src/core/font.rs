@@ -180,10 +180,6 @@ impl Font {
         Typeface::from_unshared_ptr(self.native().fTypeface.fPtr)
     }
 
-    pub fn typeface_or_default(&self) -> Typeface {
-        Typeface::from_unshared_ptr(unsafe { self.native().getTypefaceOrDefault() }).unwrap()
-    }
-
     pub fn size(&self) -> scalar {
         self.native().fSize
     }
