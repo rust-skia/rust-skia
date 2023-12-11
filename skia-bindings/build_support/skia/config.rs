@@ -283,6 +283,7 @@ pub fn build(
                 // accidentally resolving an absolute directory for `GIT_SYNC_DEPS_PATH` when MingW
                 // Python 3 runs on Windows under MSys.
                 .env("GIT_SYNC_DEPS_PATH", "skia/DEPS")
+                .env("GIT_SYNC_DEPS_SKIP_EMSDK", "1")
                 .arg("skia/tools/git-sync-deps")
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit())
