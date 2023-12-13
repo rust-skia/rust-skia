@@ -51,9 +51,14 @@ use-system-jpeg-turbo = ["mozjpeg-sys"]
 # `textlayout` because `SkSVGTextContext::SkSVGTextContext()` invokes `SkShaper::Make`.
 svg = ["textlayout"]
 shaper = ["textlayout"]
-binary-cache = ["ureq", "flate2", "tar"]
+# will use curl to download binaries
+binary-cache = ["flate2", "tar"]
 embed-icudtl = ["lazy_static"]
 embed-freetype = []
+# will use ureq to download binaries. 
+no-curl = ["ureq", "binary-cache"]
+# will use toml crate to parse Cargo.toml
+use-toml = ["dep:toml"]
 
 [dependencies]
 mozjpeg-sys = { version = "2", features = ["with_simd"], optional = true }
@@ -74,9 +79,9 @@ tar = { version = "0.4.26", optional = true }
 
 # For reading .cargo.vcs_info.json to get the repository sha1 that is used to download
 # the matching prebuilt binaries.
-serde_json = "1.0.39"
-# For reading Cargo.toml from within a package.
-toml = "0.8.0"
+tinyjson = "2"
+# For reading Cargo.toml from within a package when manual parsing fails.
+toml = { version = "0.8", optional = true }
 
 [dev-dependencies]
 # build dependencies duplicated for testing :(
@@ -87,5 +92,5 @@ heck = "0.4.0"
 ureq = { version = "2.8.0" }
 flate2 = { version = "1.0.7" }
 tar = { version = "0.4.26" }
-serde_json = "1.0.39"
-toml = "0.8.0"
+tinyjson = "2"
+toml = "0.8"

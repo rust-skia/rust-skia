@@ -184,10 +184,22 @@ pub fn is_crate() -> bool {
 // of the repository the crate was packaged from.
 pub fn crate_repository_hash() -> io::Result<String> {
     let vcs_info = fs::read_to_string(".cargo_vcs_info.json")?;
-    let value: serde_json::Value = serde_json::from_str(&vcs_info)?;
-    let git = value.get("git").expect("failed to get 'git' property");
-    let sha1 = git.get("sha1").expect("failed to get 'sha1' property");
-    Ok(sha1.as_str().unwrap().into())
+    let value: tinyjson::JsonValue = vcs_info
+        .parse()
+        .expect("failed to parse cargo_vcs_info.json");
+    let sha1: String = value
+        .get::<std::collections::HashMap<String, tinyjson::JsonValue>>()
+        .expect("failed to parse cargo vcs info json into object")
+        .get("git")
+        .expect("failed to get 'git' property")
+        .get::<std::collections::HashMap<String, tinyjson::JsonValue>>()
+        .expect("failed to parse 'git' property of vcs info into object")
+        .get("sha1")
+        .expect("failed to get 'sha1' property")
+        .get::<String>()
+        .expect("failed to parse string from 'sha1' property")
+        .clone();
+    Ok(sha1)
 }
 
 pub fn package_version() -> String {
@@ -196,13 +208,69 @@ pub fn package_version() -> String {
 
 /// Parses Cargo.toml and returns the metadata specified in the [package.metadata] section.
 pub fn get_metadata() -> Vec<(String, String)> {
-    use toml::{de, value};
-
     let cargo_toml = PathBuf::from(
         env::var("CARGO_MANIFEST_DIR").expect("missing environment variable CARGO_MANIFEST_DIR"),
     )
     .join("Cargo.toml");
     let str = fs::read_to_string(cargo_toml).expect("Failed to read Cargo.toml");
+    #[cfg(not(feature = "use-toml"))]
+    return manually_parse_metdata(&str);
+    #[cfg(feature = "use-toml")]
+    return parse_metadata_with_toml(&str);
+}
+/// a manual function to parse metadata without depending on a separate toml crate
+/// as we control the Cargo.toml file, we can make sure to ensure that this will always work
+fn manually_parse_metdata(s: &str) -> Vec<(String, String)> {
+    let mut deps = vec![];
+    let mut lines = s.lines();
+    // skip until we get to metdata line.
+    while let Some(line) = lines.next() {
+        if line == "[package.metadata]" {
+            break;
+        }
+    }
+    // start parsing key/value pairs from metadata section until the beginning of next section or eof
+    while let Some(dep) = lines.next() {
+        let dep = dep.trim();
+        // if its a comment or empty newline (spaces will be trimmed), we move to next line
+        if dep.starts_with(['#']) || dep.is_empty() {
+            continue;
+        }
+        // if its the start of a new table, then time to exit
+        if dep.starts_with(['[']) {
+            break;
+        }
+        let mut tokens = dep.split_ascii_whitespace();
+        let name = match tokens.next() {
+            Some(name) => name.to_string(),
+            None => break,
+        };
+        if !tokens
+            .next()
+            .map(|e| {
+                // if its a key/value pair, then the middle token must be equals sign
+                e.trim() == "="
+            })
+            .unwrap_or_default()
+        {
+            break;
+        }
+        let value = match tokens.next() {
+            Some(v) => v.trim().trim_matches('"').to_string(),
+            None => break,
+        };
+        deps.push((name, value));
+    }
+    println!("printing metadata from Cargo manifest");
+    for (k, v) in deps.iter() {
+        println!("key: {k}\tvalue: {v}");
+    }
+    deps
+}
+/// when manual parsing fails, we can fallback to toml crate
+#[cfg(feature = "use-toml")]
+fn parse_metadata_with_toml(str: &str) -> Vec<(String, String)> {
+    use toml::{de, value};
     let root: value::Table =
         de::from_str::<value::Table>(&str).expect("Failed to parse Cargo.toml");
     let manifest_table: &value::Table = root

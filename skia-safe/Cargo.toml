@@ -40,6 +40,9 @@ use-system-jpeg-turbo = ["skia-bindings/use-system-jpeg-turbo"]
 binary-cache = ["skia-bindings/binary-cache"]
 embed-icudtl = ["skia-bindings/embed-icudtl"]
 embed-freetype = ["skia-bindings/embed-freetype"]
+# uses ureq to download binary artefacts. enable this if you don't have curl installed
+no-curl = ["skia-bindings/no-curl"]
+use-toml = ["skia-bindings/use-toml"]
 
 # implied only, do not use
 gpu = []
