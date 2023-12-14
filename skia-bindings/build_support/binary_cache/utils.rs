@@ -18,7 +18,7 @@ pub fn download(url: impl AsRef<str>) -> io::Result<Vec<u8>> {
         eprintln!("Unsupported file: URL {}", url);
         return Err(Error::from(ErrorKind::Unsupported));
     }
-
+    /*
     let resp = ureq::get(url).call();
     match resp {
         Ok(resp) => {
@@ -28,5 +28,40 @@ pub fn download(url: impl AsRef<str>) -> io::Result<Vec<u8>> {
             Ok(data)
         }
         Err(error) => Err(io::Error::new(io::ErrorKind::Other, error.to_string())),
+    }
+    */
+    println!("using curl to download {url}");
+    let resp = std::process::Command::new("curl")
+        // follow redirects
+        .arg("-L")
+        // fail fast with no "error pages" output. more of a hint though, so we might still get error on stdout.
+        // so make sure to check the actual status returned.
+        .arg("-f")
+        // silent. no progress or error messages. only pure "response data"
+        .arg("-s")
+        .arg(&url)
+        .output();
+    match resp {
+        Ok(out) => {
+            // ideally, we would redirect response to a file directly, but lets take it one step at a time.
+            let result = out.stdout;
+            if out.status.success() {
+                println!("curl success");
+                Ok(result)
+            } else {
+                Err(io::Error::new(
+                    io::ErrorKind::Other,
+                    format!(
+                        "curl error code: {:?}\ncurl stderr: {:?}",
+                        out.status.code(),
+                        std::str::from_utf8(&out.stderr)
+                    ),
+                ))
+            }
+        }
+        Err(e) => Err(io::Error::new(
+            io::ErrorKind::Other,
+            format!("curl command error : {e:#?}"),
+        )),
     }
 }
