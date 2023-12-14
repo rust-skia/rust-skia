@@ -39,7 +39,7 @@ pub fn download(url: impl AsRef<str>) -> io::Result<Vec<u8>> {
         .arg("-f")
         // silent. no progress or error messages. only pure "response data"
         .arg("-s")
-        .arg(&url)
+        .arg(url)
         .output();
     match resp {
         Ok(out) => {
