@@ -1,11 +1,13 @@
-use crate::{resources, DrawingDriver};
+use std::path;
+
 use skia_safe::{
     color_filters, corner_path_effect, dash_path_effect, discrete_path_effect, gradient_shader,
     line_2d_path_effect, paint, path_1d_path_effect, path_2d_path_effect, scalar, shaders,
-    AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color, Font, MaskFilter, Matrix, Paint, Path,
-    PathEffect, Point, Rect, SamplingOptions, TextBlob, TileMode, Typeface,
+    AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color, Font, FontMgr, FontStyle, MaskFilter,
+    Matrix, Paint, Path, PathEffect, Point, Rect, SamplingOptions, TextBlob, TileMode,
 };
-use std::path;
+
+use crate::{helper::default_typeface, resources, DrawingDriver};
 
 pub fn draw(driver: &mut impl DrawingDriver, path: &path::Path) {
     let path = &path.join("SkPaint-Overview");
@@ -74,12 +76,12 @@ fn draw_three_paints(canvas: &Canvas) {
 
     let blob1 = TextBlob::from_str(
         "Skia!",
-        &Font::from_typeface_with_params(Typeface::default(), 64.0, 1.0, 0.0),
+        &Font::from_typeface_with_params(default_typeface(), 64.0, 1.0, 0.0),
     )
     .unwrap();
     let blob2 = TextBlob::from_str(
         "Skia!",
-        &Font::from_typeface_with_params(Typeface::default(), 64.0, 1.5, 0.0),
+        &Font::from_typeface_with_params(default_typeface(), 64.0, 1.5, 0.0),
     )
     .unwrap();
 
@@ -104,7 +106,12 @@ fn draw_fill_and_stroke(canvas: &Canvas) {
     stroke_paint.set_stroke_width(5.0);
     canvas.draw_oval(Rect::from_point_and_size((150, 10), (60, 20)), stroke_paint);
 
-    let blob = TextBlob::from_str("SKIA", &Font::from_typeface(Typeface::default(), 80.0)).unwrap();
+    let font_mgr = FontMgr::default();
+    let default_typeface = font_mgr
+        .legacy_make_typeface(None, FontStyle::normal())
+        .unwrap();
+
+    let blob = TextBlob::from_str("SKIA", &Font::from_typeface(default_typeface, 80.0)).unwrap();
 
     fill_paint.set_color(Color::from_argb(0xFF, 0xFF, 0x00, 0x00));
     canvas.draw_text_blob(&blob, (20, 120), fill_paint);
@@ -172,7 +179,7 @@ fn draw_transfer_modes(canvas: &Canvas) {
         &mut Paint::default(),
     );
     stroke.set_style(paint::Style::Stroke);
-    let font = &Font::from_typeface(Typeface::default(), 24.0);
+    let font = &Font::from_typeface(default_typeface(), 24.0);
     let src_points: (Point, Point) = ((0.0, 0.0).into(), (64.0, 0.0).into());
     let src_colors = [Color::MAGENTA & 0x00_FF_FF_FF, Color::MAGENTA];
     src.set_shader(gradient_shader::linear(
@@ -317,8 +324,7 @@ fn draw_mask_filter(canvas: &Canvas) {
     );
     let paint = &mut Paint::default();
     paint.set_mask_filter(MaskFilter::blur(BlurStyle::Normal, 5.0, None));
-    let blob =
-        TextBlob::from_str("Skia", &Font::from_typeface(Typeface::default(), 120.0)).unwrap();
+    let blob = TextBlob::from_str("Skia", &Font::from_typeface(default_typeface(), 120.0)).unwrap();
     canvas.draw_text_blob(blob, (0, 160), paint);
 }
 

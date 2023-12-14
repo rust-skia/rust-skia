@@ -16,6 +16,7 @@ extern crate objc;
 
 mod artifact;
 mod drivers;
+mod helper;
 mod skcanvas_overview;
 mod skpaint_overview;
 #[cfg(feature = "textlayout")]

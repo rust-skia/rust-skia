@@ -60,12 +60,12 @@ extern "C" GrDirectContext *C_GrContext_MakeMetal(
 //
 
 extern "C" void C_GrMtlBackendContext_Construct(
-    GrMtlBackendContext* unintialized, 
+    GrMtlBackendContext* uninitialized, 
     const void* device, const void* queue, const void* binaryArchive) {
-    new (unintialized) GrMtlBackendContext();
-    unintialized->fDevice.retain(device);
-    unintialized->fQueue.retain(queue);
-    unintialized->fBinaryArchive.retain(binaryArchive);
+    new (uninitialized) GrMtlBackendContext();
+    uninitialized->fDevice.retain(device);
+    uninitialized->fQueue.retain(queue);
+    uninitialized->fBinaryArchive.retain(binaryArchive);
 }
 
 extern "C" void C_GrMtlBackendContext_Destruct(GrMtlBackendContext* self) {
@@ -76,9 +76,9 @@ extern "C" void C_GrMtlBackendContext_Destruct(GrMtlBackendContext* self) {
 // gpu/mtl/GrMtlTypes.h
 //
 
-extern "C" void C_GrMtlTextureInfo_Construct(GrMtlTextureInfo* unintialized, const void* texture) {
-    new (unintialized) GrMtlTextureInfo();
-    unintialized->fTexture.retain(texture);
+extern "C" void C_GrMtlTextureInfo_Construct(GrMtlTextureInfo* uninitialized, const void* texture) {
+    new (uninitialized) GrMtlTextureInfo();
+    uninitialized->fTexture.retain(texture);
 }
 
 extern "C" void C_GrMtlTextureInfo_Destruct(GrMtlTextureInfo* self) {
@@ -100,7 +100,7 @@ extern "C" void C_GrBackendFormat_ConstructMtl(GrBackendFormat* uninitialized, G
 
 extern "C" GrBackendTexture* C_GrBackendTexture_newMtl(
     int width, int height,
-    GrMipMapped mipMapped,
+    skgpu::Mipmapped mipMapped,
     const GrMtlTextureInfo* mtlInfo,
     const char* label,
     size_t labelCount) {

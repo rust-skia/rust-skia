@@ -5,7 +5,7 @@ pub use skia_bindings::GrBackendApi as BackendAPI;
 variant_name!(BackendAPI::OpenGL);
 
 #[deprecated(since = "0.35.0", note = "Use Mipmapped (with a lowercase 'm')")]
-pub use skia_bindings::GrMipmapped as MipMapped;
+pub use skia_bindings::skgpu_Mipmapped as MipMapped;
 variant_name!(MipMapped::Yes);
 
 pub use skia_bindings::GrSurfaceOrigin as SurfaceOrigin;

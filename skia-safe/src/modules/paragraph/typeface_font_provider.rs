@@ -137,7 +137,7 @@ mod tests {
     use crate::{
         prelude::{NativeAccess, NativeRefCounted, NativeRefCountedBase},
         textlayout::FontCollection,
-        Typeface,
+        FontMgr, FontStyle,
     };
 
     #[test]
@@ -146,7 +146,9 @@ mod tests {
         let mut style_set = TypefaceFontStyleSet::new("");
         assert_eq!(style_set.native().ref_counted_base()._ref_cnt(), 1);
 
-        let tf = Typeface::default();
+        let tf = FontMgr::new()
+            .legacy_make_typeface(None, FontStyle::default())
+            .unwrap();
         let base_cnt = tf.native().ref_counted_base()._ref_cnt();
 
         let tfclone = tf.clone();
@@ -164,7 +166,9 @@ mod tests {
     #[serial_test::serial]
     fn treat_font_provider_as_font_mgr() {
         let mut font_collection = FontCollection::new();
-        let typeface = Typeface::default();
+        let typeface = FontMgr::new()
+            .legacy_make_typeface(None, FontStyle::default())
+            .unwrap();
         let mut manager = TypefaceFontProvider::new();
         manager.register_typeface(typeface, Some("AlArabiya"));
         assert_eq!(font_collection.font_managers_count(), 0);

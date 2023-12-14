@@ -1332,10 +1332,6 @@ extern "C" bool C_SkTypeface_isItalic(const SkTypeface* self) {
     return self->isItalic();
 }
 
-extern "C" SkTypeface* C_SkTypeface_MakeDefault() {
-    return SkTypeface::MakeDefault().release();
-}
-
 extern "C" SkTypeface* C_SkTypeface_MakeFromName(const char familyName[], SkFontStyle fontStyle) {
     return SkTypeface::MakeFromName(familyName, fontStyle).release();
 }
@@ -1412,16 +1408,16 @@ extern "C" SkData* C_SkFlattenable_serialize(const SkFlattenable* self) {
 // core/SkFont.h
 //
 
-extern "C" void C_SkFont_ConstructFromTypeface(SkFont* uninitialized, SkTypeface* typeface) {
-    new(uninitialized) SkFont(sp(typeface));
+extern "C" void C_SkFont_ConstructFromTypeface(SkFont* uninitialized, SkTypeface* typeface_) {
+    new(uninitialized) SkFont(sp(typeface_));
 }
 
-extern "C" void C_SkFont_ConstructFromTypefaceWithSize(SkFont* uninitialized, SkTypeface* typeface, SkScalar size) {
-    new(uninitialized) SkFont(sp(typeface), size);
+extern "C" void C_SkFont_ConstructFromTypefaceWithSize(SkFont* uninitialized, SkTypeface* typeface_, SkScalar size) {
+    new(uninitialized) SkFont(sp(typeface_), size);
 }
 
-extern "C" void C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(SkFont* uninitialized, SkTypeface* typeface, SkScalar size, SkScalar scaleX, SkScalar skewX) {
-    new(uninitialized) SkFont(sp(typeface), size, scaleX, skewX);
+extern "C" void C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(SkFont* uninitialized, SkTypeface* typeface_, SkScalar size, SkScalar scaleX, SkScalar skewX) {
+    new(uninitialized) SkFont(sp(typeface_), size, scaleX, skewX);
 }
 
 extern "C" void C_SkFont_CopyConstruct(SkFont* uninitialized, const SkFont* font) {
@@ -1553,6 +1549,10 @@ extern "C" SkTypeface* C_SkFontMgr_matchFamilyStyleCharacter(
 // note: this function _consumes_ / deletes the stream.
 extern "C" SkTypeface* C_SkFontMgr_makeFromStream(const SkFontMgr* self, SkStreamAsset* stream, int ttcIndex) {
     return self->makeFromStream(std::unique_ptr<SkStreamAsset>(stream), ttcIndex).release();
+}
+
+extern "C" SkTypeface* C_SkFontMgr_legacyMakeTypeface(const SkFontMgr* self, const char familyName[], SkFontStyle style) {
+    return self->legacyMakeTypeface(familyName, style).release();
 }
 
 extern "C" SkFontMgr* C_SkFontMgr_RefDefault() {

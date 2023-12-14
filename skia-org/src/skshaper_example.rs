@@ -1,6 +1,8 @@
-use crate::DrawingDriver;
-use skia_safe::{Canvas, Font, Paint, Point, Shaper, Typeface};
 use std::path;
+
+use skia_safe::{Canvas, Font, FontMgr, Paint, Point, Shaper};
+
+use crate::{helper::default_typeface, DrawingDriver};
 
 pub fn draw(driver: &mut impl DrawingDriver, path: &path::Path) {
     let path = path.join("SkShaper-Example");
@@ -16,9 +18,9 @@ fn draw_rtl_shaped(canvas: &Canvas) {
     let mut paint = Paint::default();
     paint.set_anti_alias(true);
 
-    let font = &Font::from_typeface(Typeface::default(), 64.0);
+    let font = &Font::from_typeface(default_typeface(), 64.0);
 
-    let shaper = Shaper::new(None);
+    let shaper = Shaper::new(FontMgr::new());
     if let Some((blob, _)) =
         shaper.shape_text_blob(RTL_TEXT, font, false, 10000.0, Point::default())
     {
@@ -30,7 +32,7 @@ fn draw_rtl_unshaped(canvas: &Canvas) {
     let mut paint = Paint::default();
     paint.set_anti_alias(true);
 
-    let font = &Font::from_typeface(Typeface::default(), 64.0);
+    let font = &Font::from_typeface(default_typeface(), 64.0);
 
     let shaper = Shaper::new_primitive();
     if let Some((blob, _)) =
