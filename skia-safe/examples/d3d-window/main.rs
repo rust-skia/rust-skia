@@ -55,12 +55,13 @@ fn main() -> anyhow::Result<()> {
     unsafe { D3D12CreateDevice(&adapter, D3D_FEATURE_LEVEL_11_0, &mut device) }?;
     let device = device.unwrap();
 
-    let command_queue =
-        unsafe { device.CreateCommandQueue::<ID3D12CommandQueue>(&D3D12_COMMAND_QUEUE_DESC {
+    let command_queue = unsafe {
+        device.CreateCommandQueue::<ID3D12CommandQueue>(&D3D12_COMMAND_QUEUE_DESC {
             Flags: D3D12_COMMAND_QUEUE_FLAG_NONE,
             Type: D3D12_COMMAND_LIST_TYPE_DIRECT,
             ..Default::default()
-        }) }?;
+        })
+    }?;
 
     let swap_chain_desc = DXGI_SWAP_CHAIN_DESC1 {
         BufferCount: FRAME_COUNT,
