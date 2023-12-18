@@ -6,6 +6,7 @@ fn main() {
 
 #[cfg(all(target_os = "windows", feature = "d3d"))]
 fn main() -> anyhow::Result<()> {
+    // NOTE: Most of code is from https://github.com/microsoft/windows-rs/blob/02db74cf5c4796d970e6d972cdc7bc3967380079/crates/samples/windows/direct3d12/src/main.rs
     let event_loop = winit::event_loop::EventLoop::new()?;
     let winit_window_builder = winit::window::WindowBuilder::new()
         .with_title("rust-skia-gl-window")
@@ -135,7 +136,6 @@ fn main() -> anyhow::Result<()> {
                     window.inner_size().width as i32,
                     window.inner_size().height as i32,
                 ),
-                // &skia_safe::gpu::d3d::TextureResourceInfo::from_resource(render_targets.pop().unwrap()),
                 &skia_safe::gpu::d3d::TextureResourceInfo {
                     resource: render_target.clone(),
                     alloc: None,
