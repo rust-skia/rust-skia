@@ -1,10 +1,10 @@
-// #[cfg(not(all(target_os = "windows", feature = "d3d")))]
-// fn main() {
-//     println!("This example requires the `d3d` feature to be enabled on Windows.");
-//     println!("Run it with `cargo run --example d3d-window --features d3d`");
-// }
+#[cfg(not(all(target_os = "windows", feature = "d3d")))]
+fn main() {
+    println!("This example requires the `d3d` feature to be enabled on Windows.");
+    println!("Run it with `cargo run --example d3d-window --features d3d`");
+}
 
-// #[cfg(all(target_os = "windows", feature = "d3d"))]
+#[cfg(all(target_os = "windows", feature = "d3d"))]
 fn main() -> anyhow::Result<()> {
     let event_loop = winit::event_loop::EventLoop::new()?;
     let winit_window_builder = winit::window::WindowBuilder::new()
