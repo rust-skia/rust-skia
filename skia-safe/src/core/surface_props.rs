@@ -1,6 +1,8 @@
-use crate::prelude::*;
-use skia_bindings::{self as sb, SkPixelGeometry, SkSurfaceProps};
 use std::fmt;
+
+use skia_bindings::{self as sb, SkPixelGeometry, SkSurfaceProps};
+
+use crate::prelude::*;
 
 // TODO: use the enum rewriter and strip underscores?
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Default)]

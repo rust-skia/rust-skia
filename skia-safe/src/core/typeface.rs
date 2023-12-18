@@ -1,4 +1,4 @@
-use std::{ffi, fmt, io, ptr};
+use std::{ffi, fmt, io, mem, ptr};
 
 use skia_bindings::{self as sb, SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings};
 
@@ -11,8 +11,6 @@ use crate::{
 };
 
 pub type TypefaceId = skia_bindings::SkTypefaceID;
-#[deprecated(since = "0.49.0", note = "use TypefaceId")]
-pub type FontId = TypefaceId;
 pub type FontTableTag = skia_bindings::SkFontTableTag;
 
 pub use skia_bindings::SkTypeface_SerializeBehavior as SerializeBehavior;
