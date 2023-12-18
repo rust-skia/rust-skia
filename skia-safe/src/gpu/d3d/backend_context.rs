@@ -11,6 +11,5 @@ pub struct BackendContext {
     pub memory_allocator: Option<MemoryAllocator>,
     pub protected_context: gpu::Protected,
 }
-unsafe impl Send for BackendContext {}
 
 native_transmutable!(GrD3DBackendContext, BackendContext, backend_context_layout);
