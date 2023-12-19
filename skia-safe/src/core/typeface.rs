@@ -133,7 +133,7 @@ impl Typeface {
         })
     }
 
-    #[deprecated(since = "0.69.0", note = "call FontMgr::make_from_data instead")]
+    #[deprecated(since = "0.69.0", note = "call FontMgr::new_from_data instead")]
     pub fn from_data(data: impl Into<Data>, index: impl Into<Option<usize>>) -> Option<Typeface> {
         Typeface::from_ptr(unsafe {
             sb::C_SkTypeface_MakeFromData(
