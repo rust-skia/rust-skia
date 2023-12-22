@@ -8,7 +8,13 @@ readme = "README.md"
 # 5 max
 keywords = ["skia", "rust-bindings", "vulkan", "opengl", "pdf"]
 # 6 max
-categories = ["api-bindings", "graphics", "multimedia::images", "rendering::graphics-api", "visualization"] 
+categories = [
+    "api-bindings",
+    "graphics",
+    "multimedia::images",
+    "rendering::graphics-api",
+    "visualization",
+]
 license = "MIT"
 
 version = "1.0.0"
@@ -25,7 +31,7 @@ x11 = ["gl", "skia-safe/x11"]
 wayland = ["egl", "skia-safe/wayland"]
 vulkan = ["ash", "skia-safe/vulkan"]
 metal = ["metal-rs", "foreign-types-shared", "cocoa", "objc", "skia-safe/metal"]
-d3d = ["skia-safe/d3d", "winapi", "wio"]
+d3d = ["skia-safe/d3d", "windows"]
 textlayout = ["skia-safe/textlayout"]
 webp = ["skia-safe/webp"]
 svg = ["skia-safe/svg"]
@@ -46,5 +52,12 @@ foreign-types-shared = { version = "0.1.1", optional = true }
 cocoa = { version = "0.25", optional = true }
 objc = { version = "0.2.4", optional = true }
 # d3d
-winapi = { version = "0.3.9", optional = true, features = ["d3d12", "dxgi", "winerror", "guiddef"] }
-wio = { version = "0.2.2", optional = true }
+windows = { version = "0.52.0", features = [
+    "Win32",
+    "Win32_Graphics",
+    "Win32_Graphics_Dxgi",
+    "Win32_Graphics_Direct3D12",
+    "Win32_Graphics_Direct3D",
+    "Win32_Foundation",
+    "Win32_Graphics_Dxgi_Common",
+], optional = true }

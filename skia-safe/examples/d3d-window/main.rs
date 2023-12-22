@@ -11,10 +11,6 @@ fn main() -> anyhow::Result<()> {
     use anyhow::Result;
     use skia_safe::Color;
     use std::sync::{Arc, Mutex, OnceLock};
-    use windows::Win32::Graphics::{
-        Direct3D12::D3D12_RESOURCE_STATE_COMMON,
-        Dxgi::Common::DXGI_STANDARD_MULTISAMPLE_QUALITY_PATTERN,
-    };
     use windows::{
         core::ComInterface,
         Win32::{
@@ -26,9 +22,13 @@ fn main() -> anyhow::Result<()> {
                     ID3D12Resource, D3D12_COMMAND_LIST_TYPE_DIRECT, D3D12_COMMAND_QUEUE_DESC,
                     D3D12_COMMAND_QUEUE_FLAG_NONE, D3D12_CPU_DESCRIPTOR_HANDLE,
                     D3D12_DESCRIPTOR_HEAP_DESC, D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
+                    D3D12_RESOURCE_STATE_COMMON,
                 },
                 Dxgi::{
-                    Common::{DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SAMPLE_DESC},
+                    Common::{
+                        DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SAMPLE_DESC,
+                        DXGI_STANDARD_MULTISAMPLE_QUALITY_PATTERN,
+                    },
                     CreateDXGIFactory1, IDXGIAdapter1, IDXGIFactory4, IDXGISwapChain3,
                     DXGI_ADAPTER_FLAG, DXGI_ADAPTER_FLAG_NONE, DXGI_ADAPTER_FLAG_SOFTWARE,
                     DXGI_SWAP_CHAIN_DESC1, DXGI_SWAP_EFFECT_FLIP_DISCARD,
