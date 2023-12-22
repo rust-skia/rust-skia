@@ -7,12 +7,6 @@ fn main() {
 #[cfg(all(target_os = "windows", feature = "d3d"))]
 fn main() -> anyhow::Result<()> {
     // NOTE: Most of code is from https://github.com/microsoft/windows-rs/blob/02db74cf5c4796d970e6d972cdc7bc3967380079/crates/samples/windows/direct3d12/src/main.rs
-    let event_loop = winit::event_loop::EventLoop::new()?;
-    let winit_window_builder = winit::window::WindowBuilder::new()
-        .with_title("rust-skia-gl-window")
-        .with_inner_size(winit::dpi::LogicalSize::new(800, 800));
-
-    let window = winit_window_builder.build(&event_loop)?;
 
     use anyhow::Result;
     use skia_safe::Color;
@@ -43,6 +37,13 @@ fn main() -> anyhow::Result<()> {
             },
         },
     };
+
+    let event_loop = winit::event_loop::EventLoop::new()?;
+    let winit_window_builder = winit::window::WindowBuilder::new()
+        .with_title("rust-skia-gl-window")
+        .with_inner_size(winit::dpi::LogicalSize::new(800, 800));
+
+    let window = winit_window_builder.build(&event_loop)?;
 
     const FRAME_COUNT: u32 = 2;
     let id: u64 = window.id().into();
@@ -266,7 +267,7 @@ fn main() -> anyhow::Result<()> {
                 state.y += 10.0;
             }
 
-            render(&state);
+            render(state);
         }
         _ => {}
     };
