@@ -46,6 +46,7 @@ pub use modules::*;
 pub use pathops::*;
 
 /// Stubs for types that are only available with the `gpu` feature.
+#[allow(unknown_lints, clippy::uninhabited_references)]
 #[cfg(not(feature = "gpu"))]
 pub mod gpu {
     use std::{
