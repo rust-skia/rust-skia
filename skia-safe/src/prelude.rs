@@ -580,25 +580,27 @@ impl<N: NativeRefCounted> RCHandle<N> {
     }
 }
 
-#[cfg(tests)]
+#[cfg(test)]
 mod rc_handle_tests {
-    use crate::prelude::RCHandle;
-    use crate::Typeface;
-    use skia_bindings::SkTypeface;
     use std::ptr;
+
+    use skia_bindings::SkTypeface;
+
+    use crate::prelude::NativeAccess;
+    use crate::Typeface;
 
     #[test]
     fn rc_native_ref_null() {
         let f: *mut SkTypeface = ptr::null_mut();
-        let r = Typeface::from_native_ref(&f);
+        let r = Typeface::from_unshared_ptr(f);
         assert!(r.is_none())
     }
 
     #[test]
     fn rc_native_ref_non_null() {
-        let tf = Typeface::default();
-        let f: *mut SkTypeface = tf.0;
-        let r = Typeface::from_native_ref(&f);
+        let mut tf = Typeface::default();
+        let f: *mut SkTypeface = tf.native_mut();
+        let r = Typeface::from_unshared_ptr(f);
         assert!(r.is_some())
     }
 }

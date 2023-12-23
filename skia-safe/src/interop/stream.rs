@@ -220,7 +220,7 @@ impl<'a> RustStream<'a> {
                 // This is OK because we just abort if it panics anyway.
                 let mut val = std::panic::AssertUnwindSafe(val);
 
-                match std::panic::catch_unwind(move || {
+                let reader = move || {
                     while count > 0 {
                         let bytes = match val.read(&mut buf[..count.min(BUF_SIZE)]) {
                             Ok(0) => break,
@@ -233,7 +233,9 @@ impl<'a> RustStream<'a> {
                     }
 
                     out_bytes
-                }) {
+                };
+
+                match std::panic::catch_unwind(reader) {
                     Ok(res) => res,
                     Err(_) => {
                         println!("Panic in FFI callback for `SkStream::read`");
@@ -403,7 +405,7 @@ impl<'a> RustWStream<'a> {
             // This is OK because we just abort if it panics anyway.
             let mut val = std::panic::AssertUnwindSafe(val);
 
-            match std::panic::catch_unwind(move || {
+            let writer = move || {
                 let mut written = 0;
                 while written != count {
                     match val.write(&buf[written..]) {
@@ -414,7 +416,9 @@ impl<'a> RustWStream<'a> {
                     }
                 }
                 true
-            }) {
+            };
+
+            match std::panic::catch_unwind(writer) {
                 Ok(res) => res,
                 Err(_) => {
                     println!("Panic in FFI callback for `SkWStream::write`");
@@ -427,12 +431,15 @@ impl<'a> RustWStream<'a> {
             let val: &mut T = &mut *(val as *mut _);
             // This is OK because we just abort if it panics anyway.
             let mut val = std::panic::AssertUnwindSafe(val);
-            match std::panic::catch_unwind(move || {
+
+            let flusher = move || {
                 // Not sure what could be done to handle a flush() error.
                 // Idea: use a with_stream method on the RustWStream that takes a closure, stores
                 // the flush() result and then return a result from with_stream.
                 let _flush_result_ignored = val.flush();
-            }) {
+            };
+
+            match std::panic::catch_unwind(flusher) {
                 Ok(_) => {}
                 Err(_) => {
                     println!("Panic in FFI callback for `SkWStream::flush`");
