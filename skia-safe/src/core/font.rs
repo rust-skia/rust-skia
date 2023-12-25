@@ -1,9 +1,11 @@
-use crate::{
-    interop::VecSink, prelude::*, scalar, FontHinting, FontMetrics, GlyphId, Paint, Path, Point,
-    Rect, TextEncoding, Typeface, Unichar,
-};
-use skia_bindings::{self as sb, SkFont, SkFont_PrivFlags};
 use std::{fmt, ptr};
+
+use skia_bindings::{self as sb, SkFont, SkFont_PrivFlags};
+
+use crate::{
+    interop::VecSink, prelude::*, scalar, EncodedText, FontHinting, FontMetrics, GlyphId, Paint,
+    Path, Point, Rect, Typeface, Unichar,
+};
 
 pub use skia_bindings::SkFont_Edging as Edging;
 variant_name!(Edging::Alias);
@@ -213,20 +215,20 @@ impl Font {
     }
 
     pub fn str_to_glyphs(&self, str: impl AsRef<str>, glyphs: &mut [GlyphId]) -> usize {
-        self.text_to_glyphs(str.as_ref().as_bytes(), TextEncoding::UTF8, glyphs)
+        self.text_to_glyphs(str.as_ref().as_bytes(), glyphs)
     }
 
-    pub fn text_to_glyphs(
+    pub fn text_to_glyphs<'a>(
         &self,
-        text: &[u8],
-        encoding: TextEncoding,
+        text: impl Into<EncodedText<'a>>,
         glyphs: &mut [GlyphId],
     ) -> usize {
+        let (ptr, size, encoding) = text.into().raw();
         unsafe {
             self.native()
                 .textToGlyphs(
-                    text.as_ptr() as _,
-                    text.len(),
+                    ptr,
+                    size,
                     encoding.into_native(),
                     glyphs.as_mut_ptr(),
                     // don't fail if glyphs.len() is too large to fit into an i32.
@@ -242,15 +244,16 @@ impl Font {
     }
 
     pub fn count_str(&self, str: impl AsRef<str>) -> usize {
-        self.count_text(str.as_ref().as_bytes(), TextEncoding::UTF8)
+        self.count_text(str.as_ref().as_bytes())
     }
 
-    pub fn count_text(&self, text: &[u8], encoding: TextEncoding) -> usize {
+    pub fn count_text<'a>(&self, text: impl Into<EncodedText<'a>>) -> usize {
+        let (ptr, size, encoding) = text.into().raw();
         unsafe {
             self.native()
                 .textToGlyphs(
-                    text.as_ptr() as _,
-                    text.len(),
+                    ptr,
+                    size,
                     encoding.into_native(),
                     ptr::null_mut(),
                     i32::max_value(),
@@ -262,35 +265,35 @@ impl Font {
 
     // convenience function
     pub fn str_to_glyphs_vec(&self, str: impl AsRef<str>) -> Vec<GlyphId> {
-        let str = str.as_ref().as_bytes();
-        self.text_to_glyphs_vec(str, TextEncoding::UTF8)
+        self.text_to_glyphs_vec(str.as_ref().as_bytes())
     }
 
     // convenience function
-    pub fn text_to_glyphs_vec(&self, text: &[u8], encoding: TextEncoding) -> Vec<GlyphId> {
-        let count = self.count_text(text, encoding);
+    pub fn text_to_glyphs_vec<'a>(&self, text: impl Into<EncodedText<'a>>) -> Vec<GlyphId> {
+        let text = text.into();
+        let count = self.count_text(text);
         let mut glyphs: Vec<GlyphId> = vec![Default::default(); count];
-        let resulting_count = self.text_to_glyphs(text, encoding, glyphs.as_mut_slice());
+        let resulting_count = self.text_to_glyphs(text, glyphs.as_mut_slice());
         assert_eq!(count, resulting_count);
         glyphs
     }
 
     pub fn measure_str(&self, str: impl AsRef<str>, paint: Option<&Paint>) -> (scalar, Rect) {
         let bytes = str.as_ref().as_bytes();
-        self.measure_text(bytes, TextEncoding::UTF8, paint)
+        self.measure_text(bytes, paint)
     }
 
-    pub fn measure_text(
+    pub fn measure_text<'a>(
         &self,
-        text: &[u8],
-        encoding: TextEncoding,
+        text: impl Into<EncodedText<'a>>,
         paint: Option<&Paint>,
     ) -> (scalar, Rect) {
         let mut bounds = Rect::default();
+        let (ptr, size, encoding) = text.into().raw();
         let width = unsafe {
             self.native().measureText(
-                text.as_ptr() as _,
-                text.len(),
+                ptr,
+                size,
                 encoding.into_native(),
                 bounds.native_mut(),
                 paint.native_ptr_or_null(),

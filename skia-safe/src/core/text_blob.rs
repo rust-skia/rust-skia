@@ -1,10 +1,12 @@
-use crate::{
-    prelude::*, scalar, Font, GlyphId, Paint, Point, RSXform, Rect, TextEncoding, Typeface,
-};
+use std::{convert::TryInto, fmt, ptr, slice};
+
 use skia_bindings::{
     self as sb, SkTextBlob, SkTextBlobBuilder, SkTextBlob_Iter, SkTextBlob_Iter_Run, SkTypeface,
 };
-use std::{convert::TryInto, fmt, ptr, slice};
+
+use crate::{
+    prelude::*, scalar, EncodedText, Font, GlyphId, Paint, Point, RSXform, Rect, Typeface,
+};
 
 pub type TextBlob = RCHandle<SkTextBlob>;
 unsafe_send_sync!(TextBlob);
@@ -66,34 +68,30 @@ impl TextBlob {
     }
 
     pub fn from_str(str: impl AsRef<str>, font: &Font) -> Option<TextBlob> {
-        Self::from_text(str.as_ref().as_bytes(), TextEncoding::UTF8, font)
+        Self::from_text(str.as_ref().as_bytes(), font)
     }
 
-    pub fn from_text(text: &[u8], encoding: TextEncoding, font: &Font) -> Option<TextBlob> {
+    pub fn from_text<'a>(text: impl Into<EncodedText<'a>>, font: &Font) -> Option<TextBlob> {
+        let (ptr, size, encoding) = text.into().raw();
         TextBlob::from_ptr(unsafe {
-            sb::C_SkTextBlob_MakeFromText(
-                text.as_ptr() as _,
-                text.len(),
-                font.native(),
-                encoding.into_native(),
-            )
+            sb::C_SkTextBlob_MakeFromText(ptr, size, font.native(), encoding.into_native())
         })
     }
 
-    pub fn from_pos_text_h(
-        text: &[u8],
+    pub fn from_pos_text_h<'a>(
+        text: impl Into<EncodedText<'a>>,
         x_pos: &[scalar],
         const_y: scalar,
         font: &Font,
-        encoding: impl Into<Option<TextEncoding>>,
     ) -> Option<TextBlob> {
-        let encoding = encoding.into().unwrap_or_default();
-        // TODO: avoid that verification somehow.
-        assert_eq!(x_pos.len(), font.count_text(text, encoding));
+        let text = text.into();
+        // TODO: avoid that somehow.
+        assert_eq!(x_pos.len(), font.count_text(text));
+        let (ptr, size, encoding) = text.raw();
         TextBlob::from_ptr(unsafe {
             sb::C_SkTextBlob_MakeFromPosTextH(
-                text.as_ptr() as _,
-                text.len(),
+                ptr,
+                size,
                 x_pos.as_ptr(),
                 const_y,
                 font.native(),
@@ -102,19 +100,19 @@ impl TextBlob {
         })
     }
 
-    pub fn from_pos_text(
-        text: &[u8],
+    pub fn from_pos_text<'a>(
+        text: impl Into<EncodedText<'a>>,
         pos: &[Point],
         font: &Font,
-        encoding: impl Into<Option<TextEncoding>>,
     ) -> Option<TextBlob> {
-        let encoding = encoding.into().unwrap_or_default();
-        // TODO: avoid that verification somehow.
-        assert_eq!(pos.len(), font.count_text(text, encoding));
+        let text = text.into();
+        // TODO: avoid that somehow.
+        assert_eq!(pos.len(), font.count_text(text));
+        let (ptr, size, encoding) = text.raw();
         TextBlob::from_ptr(unsafe {
             sb::C_SkTextBlob_MakeFromPosText(
-                text.as_ptr() as _,
-                text.len(),
+                ptr,
+                size,
                 pos.native().as_ptr(),
                 font.native(),
                 encoding.into_native(),
@@ -122,19 +120,19 @@ impl TextBlob {
         })
     }
 
-    pub fn from_rsxform(
-        text: &[u8],
+    pub fn from_rsxform<'a>(
+        text: impl Into<EncodedText<'a>>,
         xform: &[RSXform],
         font: &Font,
-        encoding: impl Into<Option<TextEncoding>>,
     ) -> Option<TextBlob> {
-        let encoding = encoding.into().unwrap_or_default();
-        // TODO: avoid that verification somehow.
-        assert_eq!(xform.len(), font.count_text(text, encoding));
+        let text = text.into();
+        // TODO: avoid that somehow.
+        assert_eq!(xform.len(), font.count_text(text));
+        let (ptr, size, encoding) = text.raw();
         TextBlob::from_ptr(unsafe {
             sb::C_SkTextBlob_MakeFromRSXform(
-                text.as_ptr() as _,
-                text.len(),
+                ptr,
+                size,
                 xform.native().as_ptr(),
                 font.native(),
                 encoding.into_native(),
