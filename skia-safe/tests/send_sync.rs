@@ -236,9 +236,7 @@ mod gpu {
     mod d3d {
         use skia_safe::gpu::d3d::*;
         use static_assertions::*;
-        // not sure if BackendContext is Sync, so we'd set it to Send only for now.
-        assert_impl_all!(BackendContext: Send);
-        assert_not_impl_any!(BackendContext: Sync);
+        assert_impl_all!(BackendContext: Send, Sync);
         assert_impl_all!(TextureResourceInfo: Send, Sync);
         assert_impl_all!(FenceInfo: Send, Sync);
         assert_impl_all!(SurfaceInfo: Send, Sync);
