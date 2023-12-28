@@ -8,9 +8,16 @@ fn main() {
 fn main() -> anyhow::Result<()> {
     // NOTE: Most of code is from https://github.com/microsoft/windows-rs/blob/02db74cf5c4796d970e6d972cdc7bc3967380079/crates/samples/windows/direct3d12/src/main.rs
 
+    use std::ptr;
+
     use anyhow::Result;
-    use skia_safe::Color;
-    use std::sync::{Arc, Mutex, OnceLock};
+    use skia_safe::{
+        gpu::{
+            d3d::{BackendContext, TextureResourceInfo},
+            surfaces, BackendRenderTarget, DirectContext, Protected, SurfaceOrigin,
+        },
+        paint, Color, ColorType, Paint, Rect,
+    };
     use windows::{
         core::ComInterface,
         Win32::{
@@ -36,6 +43,10 @@ fn main() -> anyhow::Result<()> {
                 },
             },
         },
+    };
+    use winit::{
+        event::{Event, WindowEvent},
+        keyboard::{Key, NamedKey},
     };
 
     let event_loop = winit::event_loop::EventLoop::new()?;
@@ -119,26 +130,25 @@ fn main() -> anyhow::Result<()> {
         render_targets
     };
 
-    let backend_context = skia_safe::gpu::d3d::BackendContext {
+    let backend_context = BackendContext {
         adapter,
         device: device.clone(),
         queue: command_queue,
         memory_allocator: None,
-        protected_context: skia_safe::gpu::Protected::No,
+        protected_context: Protected::No,
     };
 
-    let mut context =
-        unsafe { skia_safe::gpu::DirectContext::new_d3d(&backend_context, None).unwrap() };
+    let mut context = unsafe { DirectContext::new_d3d(&backend_context, None).unwrap() };
 
     let mut surfaces = render_targets
         .iter()
         .map(|render_target| {
-            let backend_render_target = skia_safe::gpu::BackendRenderTarget::new_d3d(
+            let backend_render_target = BackendRenderTarget::new_d3d(
                 (
                     window.inner_size().width as i32,
                     window.inner_size().height as i32,
                 ),
-                &skia_safe::gpu::d3d::TextureResourceInfo {
+                &TextureResourceInfo {
                     resource: render_target.clone(),
                     alloc: None,
                     resource_state: D3D12_RESOURCE_STATE_COMMON,
@@ -146,15 +156,15 @@ fn main() -> anyhow::Result<()> {
                     sample_count: 1,
                     level_count: 0,
                     sample_quality_pattern: DXGI_STANDARD_MULTISAMPLE_QUALITY_PATTERN,
-                    protected: skia_safe::gpu::Protected::No,
+                    protected: Protected::No,
                 },
             );
 
-            skia_safe::gpu::surfaces::wrap_backend_render_target(
+            surfaces::wrap_backend_render_target(
                 &mut context,
                 &backend_render_target,
-                skia_safe::gpu::SurfaceOrigin::BottomLeft,
-                skia_safe::ColorType::RGBA8888,
+                SurfaceOrigin::BottomLeft,
+                ColorType::RGBA8888,
                 None,
                 None,
             )
@@ -172,18 +182,17 @@ fn main() -> anyhow::Result<()> {
             if (DXGI_ADAPTER_FLAG(desc.Flags as i32) & DXGI_ADAPTER_FLAG_SOFTWARE)
                 != DXGI_ADAPTER_FLAG_NONE
             {
-                // Don't select the Basic Render Driver adapter. If you want a
-                // software adapter, pass in "/warp" on the command line.
+                // Don't select the Basic Render Driver adapter.
                 continue;
             }
 
-            // Check to see whether the adapter supports Direct3D 12, but don't
-            // create the actual device yet.
+            // Check to see whether the adapter supports Direct3D 12, but don't create the actual
+            // device yet.
             if unsafe {
                 D3D12CreateDevice(
                     &adapter,
                     D3D_FEATURE_LEVEL_11_0,
-                    std::ptr::null_mut::<Option<ID3D12Device>>(),
+                    ptr::null_mut::<Option<ID3D12Device>>(),
                 )
             }
             .is_ok()
@@ -197,38 +206,33 @@ fn main() -> anyhow::Result<()> {
 
     let mut skia_context = context;
 
-    println!("cool. skia inited");
+    println!("Skia initialized with {} surfaces.", surfaces.len());
+    println!("Use Arrow Keys to move the rectangle.");
+
+    let mut next_surface_index = 0;
+
+    struct State {
+        x: f32,
+        y: f32,
+    }
 
     let mut render = |state: &State| {
-        // I believe you can do better than this. It's very rough code.
-        static NEXT_SURFACE_INDEX: OnceLock<Arc<Mutex<usize>>> = OnceLock::new();
-        let mut surface_index = NEXT_SURFACE_INDEX
-            .get_or_init(|| Arc::new(Mutex::new(0)))
-            .lock()
-            .unwrap();
-        {
-            let this_index = *surface_index;
-            *surface_index += 1;
-            if *surface_index >= surfaces.len() {
-                *surface_index = 0;
-            }
-            let surface = &mut surfaces[this_index];
-            let canvas = surface.canvas();
+        let this_index = next_surface_index;
+        next_surface_index = (next_surface_index + 1) % surfaces.len();
 
-            canvas.clear(skia_safe::Color::BLUE);
+        let surface = &mut surfaces[this_index];
+        let canvas = surface.canvas();
 
-            let mut paint = skia_safe::Paint::default();
-            paint.set_color(Color::RED);
-            paint.set_style(skia_safe::paint::Style::StrokeAndFill);
-            paint.set_anti_alias(true);
-            paint.set_stroke_width(10.0);
+        canvas.clear(Color::BLUE);
 
-            canvas.draw_rect(
-                skia_safe::Rect::from_xywh(state.x, state.y, 200.0, 200.0),
-                &paint,
-            );
-            skia_context.flush_surface(surface);
-        }
+        let mut paint = Paint::default();
+        paint.set_color(Color::RED);
+        paint.set_style(paint::Style::StrokeAndFill);
+        paint.set_anti_alias(true);
+        paint.set_stroke_width(10.0);
+
+        canvas.draw_rect(Rect::from_xywh(state.x, state.y, 200.0, 200.0), &paint);
+        skia_context.flush_surface(surface);
 
         skia_context.submit(None);
 
@@ -240,48 +244,43 @@ fn main() -> anyhow::Result<()> {
         // }
     };
 
+    enum ControlFlow {
+        Continue,
+        Exit,
+    }
+
+    use ControlFlow::*;
+
     let mut handle_event = |event, state: &mut State| match event {
-        winit::event::WindowEvent::RedrawRequested => {
+        WindowEvent::RedrawRequested => {
             render(state);
+            Continue
         }
-        winit::event::WindowEvent::KeyboardInput {
-            device_id: _,
-            event,
-            is_synthetic: _,
-        } => {
-            if event.logical_key
-                == winit::keyboard::Key::Named(winit::keyboard::NamedKey::ArrowLeft)
-            {
-                state.x -= 10.0;
-            } else if event.logical_key
-                == winit::keyboard::Key::Named(winit::keyboard::NamedKey::ArrowRight)
-            {
-                state.x += 10.0;
-            } else if event.logical_key
-                == winit::keyboard::Key::Named(winit::keyboard::NamedKey::ArrowUp)
-            {
-                state.y -= 10.0;
-            } else if event.logical_key
-                == winit::keyboard::Key::Named(winit::keyboard::NamedKey::ArrowDown)
-            {
-                state.y += 10.0;
+        WindowEvent::KeyboardInput { event, .. } => {
+            match event.logical_key {
+                Key::Named(NamedKey::ArrowLeft) => state.x -= 10.0,
+                Key::Named(NamedKey::ArrowRight) => state.x += 10.0,
+                Key::Named(NamedKey::ArrowUp) => state.y += 10.0,
+                Key::Named(NamedKey::ArrowDown) => state.y -= 10.0,
+                Key::Named(NamedKey::Escape) => return Exit,
+                _ => {}
             }
 
             render(state);
+            Continue
         }
-        _ => {}
+        WindowEvent::CloseRequested => Exit,
+        _ => Continue,
     };
-
-    struct State {
-        x: f32,
-        y: f32,
-    }
 
     let mut state = State { x: 100.0, y: 100.0 };
 
-    event_loop.run(move |event, _| {
-        if let winit::event::Event::WindowEvent { event, .. } = event {
-            handle_event(event, &mut state);
+    event_loop.run(move |event, window| {
+        if let Event::WindowEvent { event, .. } = event {
+            match handle_event(event, &mut state) {
+                Continue => {}
+                Exit => window.exit(),
+            }
         }
     })?;
 
