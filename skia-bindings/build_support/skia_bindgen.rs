@@ -734,14 +734,15 @@ pub(crate) mod rewrite {
 pub use definitions::{Definition, Definitions};
 
 pub(crate) mod definitions {
-    use super::env;
-    use crate::build_support::features;
     use std::{
         collections::HashSet,
         fs,
         io::Write,
         path::{Path, PathBuf},
     };
+
+    use super::env;
+    use crate::build_support::features;
 
     /// A preprocessor definition.
     pub type Definition = (String, Option<String>);
@@ -773,16 +774,17 @@ pub(crate) mod definitions {
     // Extracts definitions from ninja files that need to be parsed for build consistency.
     pub fn from_ninja_features(
         features: &features::Features,
+        use_system_libraries: bool,
         output_directory: &Path,
     ) -> Definitions {
-        let ninja_files = ninja_files_for_features(features);
-        from_ninja_files(ninja_files, output_directory)
+        let ninja_files = ninja_files_for_features(features, use_system_libraries);
+        from_ninja_files(&ninja_files, output_directory)
     }
 
-    fn from_ninja_files(ninja_files: Vec<PathBuf>, output_directory: &Path) -> Definitions {
+    fn from_ninja_files(ninja_files: &[PathBuf], output_directory: &Path) -> Definitions {
         let mut definitions = Vec::new();
 
-        for ninja_file in &ninja_files {
+        for ninja_file in ninja_files {
             let ninja_file = output_directory.join(ninja_file);
             let contents = fs::read_to_string(ninja_file).unwrap();
             definitions = combine(definitions, from_ninja_file_content(contents))
@@ -805,16 +807,21 @@ pub(crate) mod definitions {
         from_defines_str(defines)
     }
 
-    fn ninja_files_for_features(features: &features::Features) -> Vec<PathBuf> {
+    fn ninja_files_for_features(
+        features: &features::Features,
+        use_system_libraries: bool,
+    ) -> Vec<PathBuf> {
         let mut files = vec!["obj/skia.ninja".into()];
         if features.text_layout {
             files.extend(vec![
                 "obj/modules/skshaper/skshaper.ninja".into(),
                 "obj/modules/skparagraph/skparagraph.ninja".into(),
-                // shaper.cpp includes SkLoadICU.h
-                "obj/third_party/icu/icu.ninja".into(),
                 "obj/modules/skunicode/skunicode.ninja".into(),
             ]);
+            // shaper.cpp includes SkLoadICU.h
+            if !use_system_libraries {
+                files.push("obj/third_party/icu/icu.ninja".into())
+            }
         }
         if features.svg {
             files.push("obj/modules/svg/svg.ninja".into());
