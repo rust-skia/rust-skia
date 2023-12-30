@@ -42,6 +42,7 @@ pub use crate::core::*;
 pub use docs::*;
 pub use effects::*;
 pub use encode_::*;
+#[allow(unused_imports)]
 pub use modules::*;
 pub use pathops::*;
 

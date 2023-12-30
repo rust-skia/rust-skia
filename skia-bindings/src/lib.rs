@@ -11,6 +11,7 @@
 include!(concat!(env!("OUT_DIR"), "/skia/bindings.rs"));
 
 mod defaults;
+#[allow(unused_imports)]
 pub use defaults::*;
 
 mod impls;
