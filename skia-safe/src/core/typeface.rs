@@ -194,15 +194,11 @@ impl Typeface {
     }
 
     pub fn str_to_glyphs(&self, str: impl AsRef<str>, glyphs: &mut [GlyphId]) -> usize {
-        self.text_to_glyphs(str.as_ref().as_bytes(), glyphs)
+        self.text_to_glyphs(str.as_ref(), glyphs)
     }
 
-    pub fn text_to_glyphs<'a>(
-        &self,
-        text: impl Into<EncodedText<'a>>,
-        glyphs: &mut [GlyphId],
-    ) -> usize {
-        let (ptr, size, encoding) = text.into().raw();
+    pub fn text_to_glyphs(&self, text: impl EncodedText, glyphs: &mut [GlyphId]) -> usize {
+        let (ptr, size, encoding) = text.as_raw();
         unsafe {
             self.native().textToGlyphs(
                 ptr,

@@ -68,26 +68,25 @@ impl TextBlob {
     }
 
     pub fn from_str(str: impl AsRef<str>, font: &Font) -> Option<TextBlob> {
-        Self::from_text(str.as_ref().as_bytes(), font)
+        Self::from_text(str.as_ref(), font)
     }
 
-    pub fn from_text<'a>(text: impl Into<EncodedText<'a>>, font: &Font) -> Option<TextBlob> {
-        let (ptr, size, encoding) = text.into().raw();
+    pub fn from_text(text: impl EncodedText, font: &Font) -> Option<TextBlob> {
+        let (ptr, size, encoding) = text.as_raw();
         TextBlob::from_ptr(unsafe {
             sb::C_SkTextBlob_MakeFromText(ptr, size, font.native(), encoding.into_native())
         })
     }
 
-    pub fn from_pos_text_h<'a>(
-        text: impl Into<EncodedText<'a>>,
+    pub fn from_pos_text_h(
+        text: impl EncodedText,
         x_pos: &[scalar],
         const_y: scalar,
         font: &Font,
     ) -> Option<TextBlob> {
-        let text = text.into();
         // TODO: avoid that somehow.
-        assert_eq!(x_pos.len(), font.count_text(text));
-        let (ptr, size, encoding) = text.raw();
+        assert_eq!(x_pos.len(), font.count_text(&text));
+        let (ptr, size, encoding) = text.as_raw();
         TextBlob::from_ptr(unsafe {
             sb::C_SkTextBlob_MakeFromPosTextH(
                 ptr,
@@ -101,14 +100,13 @@ impl TextBlob {
     }
 
     pub fn from_pos_text<'a>(
-        text: impl Into<EncodedText<'a>>,
+        text: impl EncodedText,
         pos: &[Point],
         font: &Font,
     ) -> Option<TextBlob> {
-        let text = text.into();
         // TODO: avoid that somehow.
+        let (ptr, size, encoding) = text.as_raw();
         assert_eq!(pos.len(), font.count_text(text));
-        let (ptr, size, encoding) = text.raw();
         TextBlob::from_ptr(unsafe {
             sb::C_SkTextBlob_MakeFromPosText(
                 ptr,
@@ -120,15 +118,14 @@ impl TextBlob {
         })
     }
 
-    pub fn from_rsxform<'a>(
-        text: impl Into<EncodedText<'a>>,
+    pub fn from_rsxform(
+        text: impl EncodedText,
         xform: &[RSXform],
         font: &Font,
     ) -> Option<TextBlob> {
-        let text = text.into();
         // TODO: avoid that somehow.
+        let (ptr, size, encoding) = text.as_raw();
         assert_eq!(xform.len(), font.count_text(text));
-        let (ptr, size, encoding) = text.raw();
         TextBlob::from_ptr(unsafe {
             sb::C_SkTextBlob_MakeFromRSXform(
                 ptr,

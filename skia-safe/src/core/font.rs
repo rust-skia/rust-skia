@@ -215,15 +215,11 @@ impl Font {
     }
 
     pub fn str_to_glyphs(&self, str: impl AsRef<str>, glyphs: &mut [GlyphId]) -> usize {
-        self.text_to_glyphs(str.as_ref().as_bytes(), glyphs)
+        self.text_to_glyphs(str.as_ref(), glyphs)
     }
 
-    pub fn text_to_glyphs<'a>(
-        &self,
-        text: impl Into<EncodedText<'a>>,
-        glyphs: &mut [GlyphId],
-    ) -> usize {
-        let (ptr, size, encoding) = text.into().raw();
+    pub fn text_to_glyphs(&self, text: impl EncodedText, glyphs: &mut [GlyphId]) -> usize {
+        let (ptr, size, encoding) = text.as_raw();
         unsafe {
             self.native()
                 .textToGlyphs(
@@ -244,11 +240,11 @@ impl Font {
     }
 
     pub fn count_str(&self, str: impl AsRef<str>) -> usize {
-        self.count_text(str.as_ref().as_bytes())
+        self.count_text(str.as_ref())
     }
 
-    pub fn count_text<'a>(&self, text: impl Into<EncodedText<'a>>) -> usize {
-        let (ptr, size, encoding) = text.into().raw();
+    pub fn count_text(&self, text: impl EncodedText) -> usize {
+        let (ptr, size, encoding) = text.as_raw();
         unsafe {
             self.native()
                 .textToGlyphs(
@@ -265,13 +261,12 @@ impl Font {
 
     // convenience function
     pub fn str_to_glyphs_vec(&self, str: impl AsRef<str>) -> Vec<GlyphId> {
-        self.text_to_glyphs_vec(str.as_ref().as_bytes())
+        self.text_to_glyphs_vec(str.as_ref())
     }
 
     // convenience function
-    pub fn text_to_glyphs_vec<'a>(&self, text: impl Into<EncodedText<'a>>) -> Vec<GlyphId> {
-        let text = text.into();
-        let count = self.count_text(text);
+    pub fn text_to_glyphs_vec<'a>(&self, text: impl EncodedText) -> Vec<GlyphId> {
+        let count = self.count_text(&text);
         let mut glyphs: Vec<GlyphId> = vec![Default::default(); count];
         let resulting_count = self.text_to_glyphs(text, glyphs.as_mut_slice());
         assert_eq!(count, resulting_count);
@@ -279,17 +274,16 @@ impl Font {
     }
 
     pub fn measure_str(&self, str: impl AsRef<str>, paint: Option<&Paint>) -> (scalar, Rect) {
-        let bytes = str.as_ref().as_bytes();
-        self.measure_text(bytes, paint)
+        self.measure_text(str.as_ref(), paint)
     }
 
     pub fn measure_text<'a>(
         &self,
-        text: impl Into<EncodedText<'a>>,
+        text: impl EncodedText,
         paint: Option<&Paint>,
     ) -> (scalar, Rect) {
         let mut bounds = Rect::default();
-        let (ptr, size, encoding) = text.into().raw();
+        let (ptr, size, encoding) = text.as_raw();
         let width = unsafe {
             self.native().measureText(
                 ptr,

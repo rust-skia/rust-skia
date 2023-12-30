@@ -18,13 +18,13 @@ pub fn draw_str(
 
 pub fn draw_text<'a>(
     canvas: &Canvas,
-    text: impl Into<EncodedText<'a>>,
+    text: impl EncodedText,
     p: impl Into<Point>,
     font: &Font,
     paint: &Paint,
     align: Align,
 ) {
-    let (ptr, size, encoding) = text.into().raw();
+    let (ptr, size, encoding) = text.as_raw();
     let p = p.into();
     unsafe {
         SkTextUtils::Draw(
@@ -55,7 +55,7 @@ impl Canvas {
 
     pub fn draw_text_align<'a>(
         &self,
-        text: impl Into<EncodedText<'a>>,
+        text: impl EncodedText,
         p: impl Into<Point>,
         font: &Font,
         paint: &Paint,
@@ -66,8 +66,8 @@ impl Canvas {
     }
 }
 
-pub fn get_path<'a>(text: impl Into<EncodedText<'a>>, p: impl Into<Point>, font: &Font) -> Path {
-    let (ptr, size, encoding) = text.into().raw();
+pub fn get_path<'a>(text: impl EncodedText, p: impl Into<Point>, font: &Font) -> Path {
+    let (ptr, size, encoding) = text.as_raw();
     let p = p.into();
     let mut path = Path::default();
     unsafe {
