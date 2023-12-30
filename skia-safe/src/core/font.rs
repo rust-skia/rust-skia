@@ -265,7 +265,7 @@ impl Font {
     }
 
     // convenience function
-    pub fn text_to_glyphs_vec<'a>(&self, text: impl EncodedText) -> Vec<GlyphId> {
+    pub fn text_to_glyphs_vec(&self, text: impl EncodedText) -> Vec<GlyphId> {
         let count = self.count_text(&text);
         let mut glyphs: Vec<GlyphId> = vec![Default::default(); count];
         let resulting_count = self.text_to_glyphs(text, glyphs.as_mut_slice());
@@ -277,11 +277,7 @@ impl Font {
         self.measure_text(str.as_ref(), paint)
     }
 
-    pub fn measure_text<'a>(
-        &self,
-        text: impl EncodedText,
-        paint: Option<&Paint>,
-    ) -> (scalar, Rect) {
+    pub fn measure_text(&self, text: impl EncodedText, paint: Option<&Paint>) -> (scalar, Rect) {
         let mut bounds = Rect::default();
         let (ptr, size, encoding) = text.as_raw();
         let width = unsafe {

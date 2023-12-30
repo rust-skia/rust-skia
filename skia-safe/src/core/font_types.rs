@@ -17,11 +17,11 @@ pub enum TextEncoding {
 
 native_transmutable!(SkTextEncoding, TextEncoding, text_encoding_layout);
 
-/// Trait representing a text in a specific encoding.
+/// Trait representing encoded text.
 ///
-/// Functions that expect `EncodedText` may be passed `String`, `&String``, `str`, or `&str`
-/// representing UTF-8 encoded text. In addition to that, &[u16], [u16], or &[GlyphId], [GlyphId],
-/// are interpreted as `GlyphId` slices.
+/// Functions that expect `EncodedText` may be passed `String`, `&String``, `&str` representing
+/// UTF-8 encoded text. In addition to that, &[u16], [u16], or &[GlyphId], [GlyphId], are
+/// interpreted as `GlyphId` slices.
 ///
 /// To use UTF16 or UTF32 encodings, use [`skia_safe::as_utf16_unchecked`] or
 /// [`skia_safe::as_utf32_unchecked`].
@@ -30,12 +30,18 @@ pub trait EncodedText {
 }
 
 /// Treat a `&[u16]` as UTF16 encoded text.
-pub unsafe fn as_utf16_unchecked<'a>(slice: &'a [u16]) -> impl EncodedText + Captures<&'a [u16]> {
+///
+/// # Safety
+/// The slice may not represent a UTF16 encoded string.
+pub unsafe fn as_utf16_unchecked(slice: &[u16]) -> impl EncodedText + Captures<&'_ [u16]> {
     UTF16Slice(slice)
 }
 
 /// Treat a `&[u32]` as UTF32 encoded text.
-pub unsafe fn as_utf32_unchecked<'a>(slice: &'a [u32]) -> impl EncodedText + Captures<&'a [u32]> {
+///
+/// # Safety
+/// The slice may not represent an actual UTF32 encoded string.
+pub unsafe fn as_utf32_unchecked(slice: &[u32]) -> impl EncodedText + Captures<&'_ [u32]> {
     UTF32Slice(slice)
 }
 
@@ -72,7 +78,17 @@ impl EncodedText for &str {
     }
 }
 
-impl EncodedText for [GlyphId] {
+impl EncodedText for &[GlyphId] {
+    fn as_raw(&self) -> (*const ffi::c_void, usize, TextEncoding) {
+        (
+            self.as_ptr() as _,
+            mem::size_of_val(*self),
+            TextEncoding::GlyphId,
+        )
+    }
+}
+
+impl<const N: usize> EncodedText for [GlyphId; N] {
     fn as_raw(&self) -> (*const ffi::c_void, usize, TextEncoding) {
         (
             self.as_ptr() as _,
@@ -99,6 +115,9 @@ mod tests {
     fn glyph_id_size() {
         let glyphs = [0u16, 1u16];
         assert_eq!(glyphs.as_raw().1, 4);
+
+        let glyphs = [0u16, 1u16].as_slice();
+        assert_eq!(glyphs.as_raw().1, 4);
     }
 
     #[test]
@@ -111,5 +130,22 @@ mod tests {
     fn utf32_size() {
         let utf16 = unsafe { as_utf32_unchecked(&[0u32, 1u32]) };
         assert_eq!(utf16.as_raw().1, 8);
+    }
+
+    #[test]
+    fn usage() {
+        test("Hello");
+        test("Hello".to_string());
+        let x = &"Hello".to_string();
+        test(x);
+        test(unsafe { as_utf16_unchecked(&[1, 2]) });
+        test(unsafe { as_utf32_unchecked(&[1, 2]) });
+        // glyph Ids
+        test([10u16, 11u16]);
+        let x = &[10u16, 11u16];
+        test(x);
+        test([10u16, 11u16].as_slice());
+
+        fn test(_et: impl EncodedText) {}
     }
 }

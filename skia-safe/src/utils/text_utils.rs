@@ -16,7 +16,7 @@ pub fn draw_str(
     draw_text(canvas, text.as_ref(), p, font, paint, align)
 }
 
-pub fn draw_text<'a>(
+pub fn draw_text(
     canvas: &Canvas,
     text: impl EncodedText,
     p: impl Into<Point>,
@@ -53,7 +53,7 @@ impl Canvas {
         self.draw_text_align(text.as_ref(), p, font, paint, align)
     }
 
-    pub fn draw_text_align<'a>(
+    pub fn draw_text_align(
         &self,
         text: impl EncodedText,
         p: impl Into<Point>,
@@ -66,7 +66,7 @@ impl Canvas {
     }
 }
 
-pub fn get_path<'a>(text: impl EncodedText, p: impl Into<Point>, font: &Font) -> Path {
+pub fn get_path(text: impl EncodedText, p: impl Into<Point>, font: &Font) -> Path {
     let (ptr, size, encoding) = text.as_raw();
     let p = p.into();
     let mut path = Path::default();

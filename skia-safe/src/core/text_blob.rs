@@ -99,11 +99,7 @@ impl TextBlob {
         })
     }
 
-    pub fn from_pos_text<'a>(
-        text: impl EncodedText,
-        pos: &[Point],
-        font: &Font,
-    ) -> Option<TextBlob> {
+    pub fn from_pos_text(text: impl EncodedText, pos: &[Point], font: &Font) -> Option<TextBlob> {
         // TODO: avoid that somehow.
         let (ptr, size, encoding) = text.as_raw();
         assert_eq!(pos.len(), font.count_text(text));
