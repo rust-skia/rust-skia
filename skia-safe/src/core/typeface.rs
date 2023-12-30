@@ -1,12 +1,14 @@
+use std::{ffi, fmt, io, ptr};
+
+use skia_bindings::{self as sb, SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings};
+
 use crate::{
     font_arguments,
     font_parameters::VariationAxis,
     interop::{self, MemoryStream, NativeStreamBase, RustStream, RustWStream, StreamAsset},
     prelude::*,
-    Data, FontArguments, FontMgr, FontStyle, FourByteTag, GlyphId, Rect, TextEncoding, Unichar,
+    Data, EncodedText, FontArguments, FontMgr, FontStyle, FourByteTag, GlyphId, Rect, Unichar,
 };
-use skia_bindings::{self as sb, SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings};
-use std::{ffi, fmt, io, mem, ptr};
 
 pub type TypefaceId = skia_bindings::SkTypefaceID;
 #[deprecated(since = "0.49.0", note = "use TypefaceId")]
@@ -192,20 +194,15 @@ impl Typeface {
     }
 
     pub fn str_to_glyphs(&self, str: impl AsRef<str>, glyphs: &mut [GlyphId]) -> usize {
-        self.text_to_glyphs(str.as_ref().as_bytes(), TextEncoding::UTF8, glyphs)
+        self.text_to_glyphs(str.as_ref(), glyphs)
     }
 
-    pub fn text_to_glyphs<C>(
-        &self,
-        text: &[C],
-        encoding: TextEncoding,
-        glyphs: &mut [GlyphId],
-    ) -> usize {
-        let byte_length = mem::size_of_val(text);
+    pub fn text_to_glyphs(&self, text: impl EncodedText, glyphs: &mut [GlyphId]) -> usize {
+        let (ptr, size, encoding) = text.as_raw();
         unsafe {
             self.native().textToGlyphs(
-                text.as_ptr() as _,
-                byte_length,
+                ptr,
+                size,
                 encoding.into_native(),
                 glyphs.as_mut_ptr(),
                 glyphs.len().try_into().unwrap(),

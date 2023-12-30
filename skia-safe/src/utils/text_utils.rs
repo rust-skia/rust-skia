@@ -1,5 +1,6 @@
-use crate::{prelude::*, Canvas, Font, Paint, Path, Point, TextEncoding};
 use skia_bindings::SkTextUtils;
+
+use crate::{prelude::*, Canvas, EncodedText, Font, Paint, Path, Point};
 
 pub use skia_bindings::SkTextUtils_Align as Align;
 variant_name!(Align::Center);
@@ -12,14 +13,25 @@ pub fn draw_str(
     paint: &Paint,
     align: Align,
 ) {
-    let text = text.as_ref().as_bytes();
+    draw_text(canvas, text.as_ref(), p, font, paint, align)
+}
+
+pub fn draw_text(
+    canvas: &Canvas,
+    text: impl EncodedText,
+    p: impl Into<Point>,
+    font: &Font,
+    paint: &Paint,
+    align: Align,
+) {
+    let (ptr, size, encoding) = text.as_raw();
     let p = p.into();
     unsafe {
         SkTextUtils::Draw(
             canvas.native_mut(),
-            text.as_ptr() as _,
-            text.len(),
-            TextEncoding::UTF8.into_native(),
+            ptr,
+            size,
+            encoding.into_native(),
             p.x,
             p.y,
             font.native(),
@@ -38,20 +50,31 @@ impl Canvas {
         paint: &Paint,
         align: Align,
     ) -> &Self {
-        draw_str(self, text, p, font, paint, align);
+        self.draw_text_align(text.as_ref(), p, font, paint, align)
+    }
+
+    pub fn draw_text_align(
+        &self,
+        text: impl EncodedText,
+        p: impl Into<Point>,
+        font: &Font,
+        paint: &Paint,
+        align: Align,
+    ) -> &Self {
+        draw_text(self, text, p, font, paint, align);
         self
     }
 }
 
-pub fn get_path(text: impl AsRef<str>, p: impl Into<Point>, font: &Font) -> Path {
-    let text = text.as_ref().as_bytes();
+pub fn get_path(text: impl EncodedText, p: impl Into<Point>, font: &Font) -> Path {
+    let (ptr, size, encoding) = text.as_raw();
     let p = p.into();
     let mut path = Path::default();
     unsafe {
         SkTextUtils::GetPath(
-            text.as_ptr() as _,
-            text.len(),
-            TextEncoding::UTF8.into_native(),
+            ptr,
+            size,
+            encoding.into_native(),
             p.x,
             p.y,
             font.native(),
@@ -63,6 +86,6 @@ pub fn get_path(text: impl AsRef<str>, p: impl Into<Point>, font: &Font) -> Path
 
 impl Path {
     pub fn from_str(text: impl AsRef<str>, p: impl Into<Point>, font: &Font) -> Self {
-        get_path(text, p, font)
+        get_path(text.as_ref(), p, font)
     }
 }
