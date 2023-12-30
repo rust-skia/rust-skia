@@ -167,6 +167,23 @@ impl FontCollection {
         Typeface::from_ptr(unsafe { sb::C_FontCollection_defaultFallback2(self.native_mut()) })
     }
 
+    pub fn default_emoji_fallback(
+        &mut self,
+        emoji_start: Unichar,
+        font_style: FontStyle,
+        locale: impl AsRef<str>,
+    ) -> Option<Typeface> {
+        let locale = interop::String::from_str(locale.as_ref());
+        Typeface::from_ptr(unsafe {
+            sb::C_FontCollection_defaultEmojiFallback(
+                self.native_mut(),
+                emoji_start,
+                font_style.into_native(),
+                locale.native(),
+            )
+        })
+    }
+
     pub fn disable_font_fallback(&mut self) {
         unsafe { self.native_mut().disableFontFallback() }
     }

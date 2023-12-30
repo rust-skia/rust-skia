@@ -107,6 +107,10 @@ extern "C" {
         return self->defaultFallback().release();
     }
 
+    SkTypeface* C_FontCollection_defaultEmojiFallback(FontCollection* self, SkUnichar emojiStart, SkFontStyle fontStyle, const SkString* locale) {
+        return self->defaultEmojiFallback(emojiStart, fontStyle, *locale).release();
+    }
+
     bool C_FontCollection_fontFallbackEnabled(const FontCollection* self) {
         return const_cast<FontCollection*>(self)->fontFallbackEnabled();
     }
