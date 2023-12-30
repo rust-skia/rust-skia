@@ -1,4 +1,4 @@
-use std::{ffi, fmt, io, mem, ptr};
+use std::{ffi, fmt, io, ptr};
 
 use skia_bindings::{self as sb, SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings};
 
