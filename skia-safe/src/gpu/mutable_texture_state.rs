@@ -40,8 +40,7 @@ impl MutableTextureState {
 
     #[cfg(feature = "vulkan")]
     pub fn new_vk(layout: crate::gpu::vk::ImageLayout, queue_family_index: u32) -> Self {
-        Self::from_ptr(unsafe { sb::C_MutableTextureState_ConstructVK(layout, queue_family_index) })
-            .unwrap()
+        crate::gpu::vk::mutable_texture_states::new_vulkan(layout, queue_family_index)
     }
 
     #[cfg(feature = "vulkan")]

@@ -11,6 +11,7 @@
 #include "include/gpu/vk/GrVkTypes.h"
 #include "include/gpu/vk/GrVkBackendContext.h"
 #include "include/gpu/vk/GrVkExtensions.h"
+#include "include/gpu/vk/VulkanMutableTextureState.h"
 
 // Additional types not yet referenced.
 extern "C" void C_GrVkTypes(GrVkSurfaceInfo *) {};
@@ -103,22 +104,6 @@ extern "C" bool C_GrVkYcbcrConversionInfo_Equals(const GrVkYcbcrConversionInfo* 
 }
 
 //
-// gpu/MutableTextureState.h
-//
-
-extern "C" skgpu::MutableTextureState* C_MutableTextureState_ConstructVK(VkImageLayout layout, uint32_t queueFamilyIndex) {
-    return new skgpu::MutableTextureState(layout, queueFamilyIndex);
-}
-
-extern "C" VkImageLayout C_MutableTextureState_getVkImageLayout(const skgpu::MutableTextureState* self) {
-    return self->getVkImageLayout();
-}
-
-extern "C" uint32_t C_MutableTextureState_getQueueFamilyIndex(const skgpu::MutableTextureState* self) {
-    return self->getQueueFamilyIndex();
-}
-
-//
 // gpu/ganesh/vk
 //
 
@@ -153,4 +138,27 @@ extern "C" GrDirectContext* C_GrDirectContexts_MakeVulkan(
         return GrDirectContexts::MakeVulkan(*vkBackendContext, *options).release();
     }
     return GrDirectContexts::MakeVulkan(*vkBackendContext).release();
+}
+
+// MutableTextureState.h
+
+
+extern "C" skgpu::MutableTextureState* C_MutableTextureStates_ConstructVulkan(VkImageLayout layout, uint32_t queueFamilyIndex) {
+    return new skgpu::MutableTextureState(layout, queueFamilyIndex);
+}
+
+extern "C" VkImageLayout C_MutableTextureState_getVkImageLayout(const skgpu::MutableTextureState* self) {
+    return self->getVkImageLayout();
+}
+
+extern "C" VkImageLayout C_MutableTextureStates_getVkImageLayout(const skgpu::MutableTextureState* self) {
+    return skgpu::MutableTextureStates::GetVkImageLayout(self);
+}
+
+extern "C" uint32_t C_MutableTextureState_getQueueFamilyIndex(const skgpu::MutableTextureState* self) {
+    return self->getQueueFamilyIndex();
+}
+
+extern "C" uint32_t C_MutableTextureStates_getVkQueueFamilyIndex(const skgpu::MutableTextureState* self) {
+    return skgpu::MutableTextureStates::GetVkQueueFamilyIndex(self);
 }

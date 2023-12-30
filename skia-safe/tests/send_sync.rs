@@ -182,7 +182,6 @@ mod gpu {
 
     // gpu/types.rs
     assert_impl_all!(BackendAPI: Send, Sync);
-    assert_impl_all!(MipMapped: Send, Sync);
     assert_impl_all!(SurfaceOrigin: Send, Sync);
     assert_not_impl_any!(FlushInfo: Send, Sync);
     assert_impl_all!(SemaphoresSubmitted: Send, Sync);
