@@ -104,6 +104,8 @@ pub fn wrap_backend_texture(
 ///
 /// * `context` - GPU context
 /// * `backend_render_target` - GPU intermediate memory buffer
+/// * `origin` - origin of canvas
+/// * `color_type` - type of colors in the buffer
 /// * `color_space` - range of colors
 /// * `surface_props` - LCD striping orientation and setting for device independent
 ///                                 fonts; may be `None`
