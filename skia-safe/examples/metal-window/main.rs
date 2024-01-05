@@ -51,6 +51,7 @@ fn main() {
         layer.set_device(&device);
         layer.set_pixel_format(MTLPixelFormat::BGRA8Unorm);
         layer.set_presents_with_transaction(false);
+        layer.set_framebuffer_only(false);
 
         unsafe {
             let view = match raw_window_handle {
