@@ -106,12 +106,7 @@ fn draw_fill_and_stroke(canvas: &Canvas) {
     stroke_paint.set_stroke_width(5.0);
     canvas.draw_oval(Rect::from_point_and_size((150, 10), (60, 20)), stroke_paint);
 
-    let font_mgr = FontMgr::default();
-    let default_typeface = font_mgr
-        .legacy_make_typeface(None, FontStyle::normal())
-        .unwrap();
-
-    let blob = TextBlob::from_str("SKIA", &Font::from_typeface(default_typeface, 80.0)).unwrap();
+    let blob = TextBlob::from_str("SKIA", &Font::from_typeface(default_typeface(), 80.0)).unwrap();
 
     fill_paint.set_color(Color::from_argb(0xFF, 0xFF, 0x00, 0x00));
     canvas.draw_text_blob(&blob, (20, 120), fill_paint);
