@@ -34,7 +34,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features '
+    - name: 'Build skia-safe for x86_64-apple-darwin with features '
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -111,7 +111,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-darwin with features '
+    - name: 'Build skia-safe for aarch64-apple-darwin with features '
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -188,7 +188,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios with features '
+    - name: 'Build skia-safe for aarch64-apple-ios with features '
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -265,7 +265,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios-sim
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios-sim with features '
+    - name: 'Build skia-safe for aarch64-apple-ios-sim with features '
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -342,7 +342,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-ios with features '
+    - name: 'Build skia-safe for x86_64-apple-ios with features '
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -437,7 +437,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features gl'
+    - name: 'Build skia-safe for x86_64-apple-darwin with features gl'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -514,7 +514,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-darwin with features gl'
+    - name: 'Build skia-safe for aarch64-apple-darwin with features gl'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -591,7 +591,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios with features gl'
+    - name: 'Build skia-safe for aarch64-apple-ios with features gl'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -668,7 +668,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios-sim
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios-sim with features gl'
+    - name: 'Build skia-safe for aarch64-apple-ios-sim with features gl'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -745,7 +745,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-ios with features gl'
+    - name: 'Build skia-safe for x86_64-apple-ios with features gl'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -840,7 +840,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features vulkan'
+    - name: 'Build skia-safe for x86_64-apple-darwin with features vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -917,7 +917,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-darwin with features vulkan'
+    - name: 'Build skia-safe for aarch64-apple-darwin with features vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -994,7 +994,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios with features vulkan'
+    - name: 'Build skia-safe for aarch64-apple-ios with features vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1071,7 +1071,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios-sim
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios-sim with features vulkan'
+    - name: 'Build skia-safe for aarch64-apple-ios-sim with features vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1148,7 +1148,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-ios with features vulkan'
+    - name: 'Build skia-safe for x86_64-apple-ios with features vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1243,7 +1243,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features textlayout'
+    - name: 'Build skia-safe for x86_64-apple-darwin with features textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1320,7 +1320,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-darwin with features textlayout'
+    - name: 'Build skia-safe for aarch64-apple-darwin with features textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1397,7 +1397,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios with features textlayout'
+    - name: 'Build skia-safe for aarch64-apple-ios with features textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1474,7 +1474,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios-sim
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios-sim with features textlayout'
+    - name: 'Build skia-safe for aarch64-apple-ios-sim with features textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1551,7 +1551,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-ios with features textlayout'
+    - name: 'Build skia-safe for x86_64-apple-ios with features textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1646,7 +1646,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features gl,textlayout'
+    - name: 'Build skia-safe for x86_64-apple-darwin with features gl,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1723,7 +1723,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-darwin with features gl,textlayout'
+    - name: 'Build skia-safe for aarch64-apple-darwin with features gl,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1800,7 +1800,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios with features gl,textlayout'
+    - name: 'Build skia-safe for aarch64-apple-ios with features gl,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1877,7 +1877,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios-sim
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios-sim with features gl,textlayout'
+    - name: 'Build skia-safe for aarch64-apple-ios-sim with features gl,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1954,7 +1954,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-ios with features gl,textlayout'
+    - name: 'Build skia-safe for x86_64-apple-ios with features gl,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2049,7 +2049,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features textlayout,vulkan'
+    - name: 'Build skia-safe for x86_64-apple-darwin with features textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2126,7 +2126,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-darwin with features textlayout,vulkan'
+    - name: 'Build skia-safe for aarch64-apple-darwin with features textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2203,7 +2203,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios with features textlayout,vulkan'
+    - name: 'Build skia-safe for aarch64-apple-ios with features textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2280,7 +2280,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios-sim
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios-sim with features textlayout,vulkan'
+    - name: 'Build skia-safe for aarch64-apple-ios-sim with features textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2357,7 +2357,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-ios with features textlayout,vulkan'
+    - name: 'Build skia-safe for x86_64-apple-ios with features textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2452,7 +2452,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features gl,textlayout,vulkan'
+    - name: 'Build skia-safe for x86_64-apple-darwin with features gl,textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2529,7 +2529,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-darwin with features gl,textlayout,vulkan'
+    - name: 'Build skia-safe for aarch64-apple-darwin with features gl,textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2606,7 +2606,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios with features gl,textlayout,vulkan'
+    - name: 'Build skia-safe for aarch64-apple-ios with features gl,textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2683,7 +2683,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios-sim
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios-sim with features gl,textlayout,vulkan'
+    - name: 'Build skia-safe for aarch64-apple-ios-sim with features gl,textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2760,7 +2760,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-ios with features gl,textlayout,vulkan'
+    - name: 'Build skia-safe for x86_64-apple-ios with features gl,textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2855,7 +2855,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features metal'
+    - name: 'Build skia-safe for x86_64-apple-darwin with features metal'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2932,7 +2932,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-darwin with features metal'
+    - name: 'Build skia-safe for aarch64-apple-darwin with features metal'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3009,7 +3009,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios with features metal'
+    - name: 'Build skia-safe for aarch64-apple-ios with features metal'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3086,7 +3086,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios-sim
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios-sim with features metal'
+    - name: 'Build skia-safe for aarch64-apple-ios-sim with features metal'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3163,7 +3163,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-ios with features metal'
+    - name: 'Build skia-safe for x86_64-apple-ios with features metal'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3258,7 +3258,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features metal,textlayout'
+    - name: 'Build skia-safe for x86_64-apple-darwin with features metal,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3335,7 +3335,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-darwin with features metal,textlayout'
+    - name: 'Build skia-safe for aarch64-apple-darwin with features metal,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3412,7 +3412,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios with features metal,textlayout'
+    - name: 'Build skia-safe for aarch64-apple-ios with features metal,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3489,7 +3489,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios-sim
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios-sim with features metal,textlayout'
+    - name: 'Build skia-safe for aarch64-apple-ios-sim with features metal,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3566,7 +3566,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-ios with features metal,textlayout'
+    - name: 'Build skia-safe for x86_64-apple-ios with features metal,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3661,7 +3661,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features gl,svg,textlayout'
+    - name: 'Build skia-safe for x86_64-apple-darwin with features gl,svg,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3738,7 +3738,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-darwin with features gl,svg,textlayout'
+    - name: 'Build skia-safe for aarch64-apple-darwin with features gl,svg,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3815,7 +3815,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios with features gl,svg,textlayout'
+    - name: 'Build skia-safe for aarch64-apple-ios with features gl,svg,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3892,7 +3892,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios-sim
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios-sim with features gl,svg,textlayout'
+    - name: 'Build skia-safe for aarch64-apple-ios-sim with features gl,svg,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3969,7 +3969,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-ios with features gl,svg,textlayout'
+    - name: 'Build skia-safe for x86_64-apple-ios with features gl,svg,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then

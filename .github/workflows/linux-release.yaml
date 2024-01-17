@@ -41,7 +41,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for x86_64-unknown-linux-gnu with features '
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features '
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -118,7 +118,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for aarch64-unknown-linux-gnu with features '
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features '
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -195,7 +195,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build all targets in skia-safe for aarch64-linux-android with features '
+    - name: 'Build skia-safe for aarch64-linux-android with features '
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -272,7 +272,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build all targets in skia-safe for x86_64-linux-android with features '
+    - name: 'Build skia-safe for x86_64-linux-android with features '
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -349,7 +349,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build all targets in skia-safe for i686-linux-android with features '
+    - name: 'Build skia-safe for i686-linux-android with features '
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -426,7 +426,7 @@ jobs:
       run: |
         rustup target add wasm32-unknown-emscripten
 
-    - name: 'Build all targets in skia-safe for wasm32-unknown-emscripten with features '
+    - name: 'Build skia-safe for wasm32-unknown-emscripten with features '
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -528,7 +528,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for x86_64-unknown-linux-gnu with features gl'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features gl'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -605,7 +605,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for aarch64-unknown-linux-gnu with features gl'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features gl'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -682,7 +682,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build all targets in skia-safe for aarch64-linux-android with features gl'
+    - name: 'Build skia-safe for aarch64-linux-android with features gl'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -759,7 +759,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build all targets in skia-safe for x86_64-linux-android with features gl'
+    - name: 'Build skia-safe for x86_64-linux-android with features gl'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -836,7 +836,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build all targets in skia-safe for i686-linux-android with features gl'
+    - name: 'Build skia-safe for i686-linux-android with features gl'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -913,7 +913,7 @@ jobs:
       run: |
         rustup target add wasm32-unknown-emscripten
 
-    - name: 'Build all targets in skia-safe for wasm32-unknown-emscripten with features gl'
+    - name: 'Build skia-safe for wasm32-unknown-emscripten with features gl'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1015,7 +1015,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for x86_64-unknown-linux-gnu with features vulkan'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1092,7 +1092,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for aarch64-unknown-linux-gnu with features vulkan'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1169,7 +1169,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build all targets in skia-safe for aarch64-linux-android with features vulkan'
+    - name: 'Build skia-safe for aarch64-linux-android with features vulkan'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -1246,7 +1246,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build all targets in skia-safe for x86_64-linux-android with features vulkan'
+    - name: 'Build skia-safe for x86_64-linux-android with features vulkan'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -1323,7 +1323,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build all targets in skia-safe for i686-linux-android with features vulkan'
+    - name: 'Build skia-safe for i686-linux-android with features vulkan'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -1400,7 +1400,7 @@ jobs:
       run: |
         rustup target add wasm32-unknown-emscripten
 
-    - name: 'Build all targets in skia-safe for wasm32-unknown-emscripten with features vulkan'
+    - name: 'Build skia-safe for wasm32-unknown-emscripten with features vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1502,7 +1502,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for x86_64-unknown-linux-gnu with features textlayout'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1579,7 +1579,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for aarch64-unknown-linux-gnu with features textlayout'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1656,7 +1656,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build all targets in skia-safe for aarch64-linux-android with features textlayout'
+    - name: 'Build skia-safe for aarch64-linux-android with features textlayout'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -1733,7 +1733,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build all targets in skia-safe for x86_64-linux-android with features textlayout'
+    - name: 'Build skia-safe for x86_64-linux-android with features textlayout'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -1810,7 +1810,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build all targets in skia-safe for i686-linux-android with features textlayout'
+    - name: 'Build skia-safe for i686-linux-android with features textlayout'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -1887,7 +1887,7 @@ jobs:
       run: |
         rustup target add wasm32-unknown-emscripten
 
-    - name: 'Build all targets in skia-safe for wasm32-unknown-emscripten with features textlayout'
+    - name: 'Build skia-safe for wasm32-unknown-emscripten with features textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1989,7 +1989,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for x86_64-unknown-linux-gnu with features gl,textlayout'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features gl,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2066,7 +2066,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for aarch64-unknown-linux-gnu with features gl,textlayout'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features gl,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2143,7 +2143,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build all targets in skia-safe for aarch64-linux-android with features gl,textlayout'
+    - name: 'Build skia-safe for aarch64-linux-android with features gl,textlayout'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -2220,7 +2220,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build all targets in skia-safe for x86_64-linux-android with features gl,textlayout'
+    - name: 'Build skia-safe for x86_64-linux-android with features gl,textlayout'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -2297,7 +2297,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build all targets in skia-safe for i686-linux-android with features gl,textlayout'
+    - name: 'Build skia-safe for i686-linux-android with features gl,textlayout'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -2374,7 +2374,7 @@ jobs:
       run: |
         rustup target add wasm32-unknown-emscripten
 
-    - name: 'Build all targets in skia-safe for wasm32-unknown-emscripten with features gl,textlayout'
+    - name: 'Build skia-safe for wasm32-unknown-emscripten with features gl,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2476,7 +2476,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for x86_64-unknown-linux-gnu with features textlayout,vulkan'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2553,7 +2553,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for aarch64-unknown-linux-gnu with features textlayout,vulkan'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2630,7 +2630,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build all targets in skia-safe for aarch64-linux-android with features textlayout,vulkan'
+    - name: 'Build skia-safe for aarch64-linux-android with features textlayout,vulkan'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -2707,7 +2707,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build all targets in skia-safe for x86_64-linux-android with features textlayout,vulkan'
+    - name: 'Build skia-safe for x86_64-linux-android with features textlayout,vulkan'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -2784,7 +2784,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build all targets in skia-safe for i686-linux-android with features textlayout,vulkan'
+    - name: 'Build skia-safe for i686-linux-android with features textlayout,vulkan'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -2861,7 +2861,7 @@ jobs:
       run: |
         rustup target add wasm32-unknown-emscripten
 
-    - name: 'Build all targets in skia-safe for wasm32-unknown-emscripten with features textlayout,vulkan'
+    - name: 'Build skia-safe for wasm32-unknown-emscripten with features textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2963,7 +2963,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for x86_64-unknown-linux-gnu with features gl,textlayout,vulkan'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features gl,textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3040,7 +3040,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for aarch64-unknown-linux-gnu with features gl,textlayout,vulkan'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features gl,textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3117,7 +3117,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build all targets in skia-safe for aarch64-linux-android with features gl,textlayout,vulkan'
+    - name: 'Build skia-safe for aarch64-linux-android with features gl,textlayout,vulkan'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -3194,7 +3194,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build all targets in skia-safe for x86_64-linux-android with features gl,textlayout,vulkan'
+    - name: 'Build skia-safe for x86_64-linux-android with features gl,textlayout,vulkan'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -3271,7 +3271,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build all targets in skia-safe for i686-linux-android with features gl,textlayout,vulkan'
+    - name: 'Build skia-safe for i686-linux-android with features gl,textlayout,vulkan'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -3348,7 +3348,7 @@ jobs:
       run: |
         rustup target add wasm32-unknown-emscripten
 
-    - name: 'Build all targets in skia-safe for wasm32-unknown-emscripten with features gl,textlayout,vulkan'
+    - name: 'Build skia-safe for wasm32-unknown-emscripten with features gl,textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3450,7 +3450,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for x86_64-unknown-linux-gnu with features gl,x11'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features gl,x11'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3527,7 +3527,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for aarch64-unknown-linux-gnu with features gl,x11'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features gl,x11'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3604,7 +3604,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build all targets in skia-safe for aarch64-linux-android with features gl,x11'
+    - name: 'Build skia-safe for aarch64-linux-android with features gl,x11'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -3681,7 +3681,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build all targets in skia-safe for x86_64-linux-android with features gl,x11'
+    - name: 'Build skia-safe for x86_64-linux-android with features gl,x11'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -3758,7 +3758,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build all targets in skia-safe for i686-linux-android with features gl,x11'
+    - name: 'Build skia-safe for i686-linux-android with features gl,x11'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -3835,7 +3835,7 @@ jobs:
       run: |
         rustup target add wasm32-unknown-emscripten
 
-    - name: 'Build all targets in skia-safe for wasm32-unknown-emscripten with features gl,x11'
+    - name: 'Build skia-safe for wasm32-unknown-emscripten with features gl,x11'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3937,7 +3937,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for x86_64-unknown-linux-gnu with features gl,textlayout,x11'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features gl,textlayout,x11'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -4014,7 +4014,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for aarch64-unknown-linux-gnu with features gl,textlayout,x11'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features gl,textlayout,x11'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -4091,7 +4091,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build all targets in skia-safe for aarch64-linux-android with features gl,textlayout,x11'
+    - name: 'Build skia-safe for aarch64-linux-android with features gl,textlayout,x11'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -4168,7 +4168,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build all targets in skia-safe for x86_64-linux-android with features gl,textlayout,x11'
+    - name: 'Build skia-safe for x86_64-linux-android with features gl,textlayout,x11'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -4245,7 +4245,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build all targets in skia-safe for i686-linux-android with features gl,textlayout,x11'
+    - name: 'Build skia-safe for i686-linux-android with features gl,textlayout,x11'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -4322,7 +4322,7 @@ jobs:
       run: |
         rustup target add wasm32-unknown-emscripten
 
-    - name: 'Build all targets in skia-safe for wasm32-unknown-emscripten with features gl,textlayout,x11'
+    - name: 'Build skia-safe for wasm32-unknown-emscripten with features gl,textlayout,x11'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -4424,7 +4424,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for x86_64-unknown-linux-gnu with features egl,gl,svg,textlayout,vulkan,wayland,webp,x11'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features egl,gl,svg,textlayout,vulkan,wayland,webp,x11'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -4501,7 +4501,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for aarch64-unknown-linux-gnu with features egl,gl,svg,textlayout,vulkan,wayland,webp,x11'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features egl,gl,svg,textlayout,vulkan,wayland,webp,x11'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -4578,7 +4578,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build all targets in skia-safe for aarch64-linux-android with features egl,gl,svg,textlayout,vulkan,wayland,webp,x11'
+    - name: 'Build skia-safe for aarch64-linux-android with features egl,gl,svg,textlayout,vulkan,wayland,webp,x11'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -4655,7 +4655,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build all targets in skia-safe for x86_64-linux-android with features egl,gl,svg,textlayout,vulkan,wayland,webp,x11'
+    - name: 'Build skia-safe for x86_64-linux-android with features egl,gl,svg,textlayout,vulkan,wayland,webp,x11'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -4732,7 +4732,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build all targets in skia-safe for i686-linux-android with features egl,gl,svg,textlayout,vulkan,wayland,webp,x11'
+    - name: 'Build skia-safe for i686-linux-android with features egl,gl,svg,textlayout,vulkan,wayland,webp,x11'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -4809,7 +4809,7 @@ jobs:
       run: |
         rustup target add wasm32-unknown-emscripten
 
-    - name: 'Build all targets in skia-safe for wasm32-unknown-emscripten with features egl,gl,textlayout,vulkan,wayland,webp,x11'
+    - name: 'Build skia-safe for wasm32-unknown-emscripten with features egl,gl,textlayout,vulkan,wayland,webp,x11'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -4911,7 +4911,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for x86_64-unknown-linux-gnu with features gl,svg,textlayout,x11'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features gl,svg,textlayout,x11'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -4988,7 +4988,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for aarch64-unknown-linux-gnu with features gl,svg,textlayout,x11'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features gl,svg,textlayout,x11'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -5065,7 +5065,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build all targets in skia-safe for aarch64-linux-android with features gl,svg,textlayout,x11'
+    - name: 'Build skia-safe for aarch64-linux-android with features gl,svg,textlayout,x11'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -5142,7 +5142,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build all targets in skia-safe for x86_64-linux-android with features gl,svg,textlayout,x11'
+    - name: 'Build skia-safe for x86_64-linux-android with features gl,svg,textlayout,x11'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -5219,7 +5219,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build all targets in skia-safe for i686-linux-android with features gl,svg,textlayout,x11'
+    - name: 'Build skia-safe for i686-linux-android with features gl,svg,textlayout,x11'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -5296,7 +5296,7 @@ jobs:
       run: |
         rustup target add wasm32-unknown-emscripten
 
-    - name: 'Build all targets in skia-safe for wasm32-unknown-emscripten with features gl,textlayout,x11'
+    - name: 'Build skia-safe for wasm32-unknown-emscripten with features gl,textlayout,x11'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -5398,7 +5398,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for x86_64-unknown-linux-gnu with features gl,svg,textlayout,wayland,x11'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features gl,svg,textlayout,wayland,x11'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -5475,7 +5475,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build all targets in skia-safe for aarch64-unknown-linux-gnu with features gl,svg,textlayout,wayland,x11'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features gl,svg,textlayout,wayland,x11'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -5552,7 +5552,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build all targets in skia-safe for aarch64-linux-android with features gl,svg,textlayout,wayland,x11'
+    - name: 'Build skia-safe for aarch64-linux-android with features gl,svg,textlayout,wayland,x11'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -5629,7 +5629,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build all targets in skia-safe for x86_64-linux-android with features gl,svg,textlayout,wayland,x11'
+    - name: 'Build skia-safe for x86_64-linux-android with features gl,svg,textlayout,wayland,x11'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -5706,7 +5706,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build all targets in skia-safe for i686-linux-android with features gl,svg,textlayout,wayland,x11'
+    - name: 'Build skia-safe for i686-linux-android with features gl,svg,textlayout,wayland,x11'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -5783,7 +5783,7 @@ jobs:
       run: |
         rustup target add wasm32-unknown-emscripten
 
-    - name: 'Build all targets in skia-safe for wasm32-unknown-emscripten with features gl,textlayout,wayland,x11'
+    - name: 'Build skia-safe for wasm32-unknown-emscripten with features gl,textlayout,wayland,x11'
       shell: bash
       run: |
         if [ "false" == "true" ]; then

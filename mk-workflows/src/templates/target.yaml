@@ -3,7 +3,7 @@
   run: |
     rustup target add $[[target]]
 
-- name: 'Build all targets in skia-safe for $[[target]] with features $[[features]]'
+- name: 'Build skia-safe for $[[target]] with features $[[features]]'
   shell: bash
   run: |
     if [ "$[[androidEnv]]" == "true" ]; then

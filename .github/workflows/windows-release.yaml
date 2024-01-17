@@ -42,7 +42,7 @@ jobs:
       run: |
         rustup target add x86_64-pc-windows-msvc
 
-    - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features '
+    - name: 'Build skia-safe for x86_64-pc-windows-msvc with features '
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -145,7 +145,7 @@ jobs:
       run: |
         rustup target add x86_64-pc-windows-msvc
 
-    - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features gl'
+    - name: 'Build skia-safe for x86_64-pc-windows-msvc with features gl'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -248,7 +248,7 @@ jobs:
       run: |
         rustup target add x86_64-pc-windows-msvc
 
-    - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features vulkan'
+    - name: 'Build skia-safe for x86_64-pc-windows-msvc with features vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -351,7 +351,7 @@ jobs:
       run: |
         rustup target add x86_64-pc-windows-msvc
 
-    - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features textlayout'
+    - name: 'Build skia-safe for x86_64-pc-windows-msvc with features textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -454,7 +454,7 @@ jobs:
       run: |
         rustup target add x86_64-pc-windows-msvc
 
-    - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features gl,textlayout'
+    - name: 'Build skia-safe for x86_64-pc-windows-msvc with features gl,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -557,7 +557,7 @@ jobs:
       run: |
         rustup target add x86_64-pc-windows-msvc
 
-    - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features textlayout,vulkan'
+    - name: 'Build skia-safe for x86_64-pc-windows-msvc with features textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -660,7 +660,7 @@ jobs:
       run: |
         rustup target add x86_64-pc-windows-msvc
 
-    - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features gl,textlayout,vulkan'
+    - name: 'Build skia-safe for x86_64-pc-windows-msvc with features gl,textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -763,7 +763,7 @@ jobs:
       run: |
         rustup target add x86_64-pc-windows-msvc
 
-    - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features d3d'
+    - name: 'Build skia-safe for x86_64-pc-windows-msvc with features d3d'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -866,7 +866,7 @@ jobs:
       run: |
         rustup target add x86_64-pc-windows-msvc
 
-    - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features d3d,textlayout'
+    - name: 'Build skia-safe for x86_64-pc-windows-msvc with features d3d,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -969,7 +969,7 @@ jobs:
       run: |
         rustup target add x86_64-pc-windows-msvc
 
-    - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features d3d,gl,textlayout'
+    - name: 'Build skia-safe for x86_64-pc-windows-msvc with features d3d,gl,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1072,7 +1072,7 @@ jobs:
       run: |
         rustup target add x86_64-pc-windows-msvc
 
-    - name: 'Build all targets in skia-safe for x86_64-pc-windows-msvc with features gl,svg,textlayout'
+    - name: 'Build skia-safe for x86_64-pc-windows-msvc with features gl,svg,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
