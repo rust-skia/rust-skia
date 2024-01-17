@@ -3,7 +3,7 @@ use std::io;
 
 use skia_safe::{
     codec::{self, codecs::Decoder},
-    Bitmap, Data, EncodedImageFormat,
+    Bitmap, Codec, Data, EncodedImageFormat,
 };
 
 /// The supported encoders.
@@ -69,6 +69,24 @@ fn test_supported_decoders() {
         .collect();
 
     assert_eq!(supported, supported_decoders());
+}
+
+#[test]
+fn test_from_stream() {
+    let all_decoders: Vec<_> = DECODER_TESTS
+        .iter()
+        .map(|(_, decoder_fn, _)| decoder_fn())
+        .collect();
+
+    for (format, _, bytes) in DECODER_TESTS {
+        let mut cursor = io::Cursor::new(*bytes);
+        match Codec::from_stream(&mut cursor, &all_decoders, None) {
+            Ok(codec) => assert_eq!(codec.encoded_format(), *format),
+            Err(err) => {
+                panic!("Stream decoding of {format:?} failed: {err:?}");
+            }
+        }
+    }
 }
 
 type DecoderTest = (EncodedImageFormat, fn() -> Decoder, &'static [u8]);

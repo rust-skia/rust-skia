@@ -124,6 +124,10 @@ extern "C" void C_Bindings_Types(Sink<bool>) {}
 // codec/SkCodec.h
 //
 
+extern "C" SkCodec* C_SkCodec_MakeFromStream(SkStream* stream, const SkCodecs::Decoder* decoders, size_t decodersCount, SkCodec::Result* result, SkCodec::SelectionPolicy selectionPolicy) {
+    return SkCodec::MakeFromStream(std::unique_ptr<SkStream>(stream), SkSpan(decoders, decodersCount), result, nullptr, selectionPolicy).release();
+}
+
 extern "C" SkCodec* C_SkCodec_MakeFromData(SkData* data) {
     return SkCodec::MakeFromData(sp(data)).release();
 }

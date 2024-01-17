@@ -1,12 +1,17 @@
-use std::marker::PhantomData;
-use std::{ffi, ffi::CStr, fmt, io, mem, ptr};
+use std::{
+    ffi::{self, CStr},
+    fmt, io,
+    marker::PhantomData,
+    mem, ptr, result,
+};
 
 use skia_bindings::{self as sb, SkCodec, SkCodec_FrameInfo, SkCodec_Options};
 
 use super::codec_animation;
 use crate::{
-    prelude::*, yuva_pixmap_info::SupportedDataTypes, AlphaType, Data, EncodedImageFormat,
-    EncodedOrigin, IRect, ISize, Image, ImageInfo, Pixmap, YUVAPixmapInfo, YUVAPixmaps,
+    interop::RustStream, prelude::*, yuva_pixmap_info::SupportedDataTypes, AlphaType, Data,
+    EncodedImageFormat, EncodedOrigin, IRect, ISize, Image, ImageInfo, Pixmap, YUVAPixmapInfo,
+    YUVAPixmaps,
 };
 
 pub use sb::SkCodec_Result as Result;
@@ -84,7 +89,31 @@ impl fmt::Debug for Codec<'_> {
 }
 
 impl Codec<'_> {
-    // TODO: wrap MakeFromStream
+    pub fn from_stream<'a, T: io::Read + io::Seek>(
+        stream: &'a mut T,
+        decoders: &[codecs::Decoder],
+        selection_policy: impl Into<Option<SelectionPolicy>>,
+    ) -> result::Result<Codec<'a>, Result> {
+        let stream = RustStream::new_seekable(stream);
+        let mut result = Result::Unimplemented;
+        let codec = unsafe {
+            sb::C_SkCodec_MakeFromStream(
+                // Transfer ownership of the SkStream to the Codec.
+                stream.into_native(),
+                decoders.as_ptr() as _,
+                decoders.len(),
+                &mut result,
+                selection_policy
+                    .into()
+                    .unwrap_or(SelectionPolicy::PreferStillImage),
+            )
+        };
+        if result != Result::Success {
+            return Err(result);
+        }
+        Ok(Codec::from_ptr(codec).expect("Codec is null"))
+    }
+
     // TODO: wrap from_data with SkPngChunkReader
 
     pub fn from_data(data: impl Into<Data>) -> Option<Codec<'static>> {
