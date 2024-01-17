@@ -440,6 +440,8 @@ const OPAQUE_TYPES: &[&str] = &[
     "FILE",
     // m114: Results in wrongly sized template specializations.
     "skia_private::THashMap",
+    // m121:
+    "skgpu::MutableTextureState",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[

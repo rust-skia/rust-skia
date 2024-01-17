@@ -63,6 +63,8 @@ pub mod backend_render_targets {
 pub mod direct_contexts {
     #[cfg(feature = "gl")]
     pub use super::ganesh::gl::direct_contexts::*;
+    #[cfg(feature = "vulkan")]
+    pub use super::ganesh::vk::direct_contexts::*;
 }
 
 #[cfg(test)]

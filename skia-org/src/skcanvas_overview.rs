@@ -1,8 +1,10 @@
-use crate::{resources, DrawingDriver};
-use skia_safe::{
-    paint, scalar, BlendMode, Canvas, Color, Font, Paint, Path, RRect, Rect, TextBlob, Typeface,
-};
 use std::path;
+
+use skia_safe::{
+    paint, scalar, BlendMode, Canvas, Color, Font, Paint, Path, RRect, Rect, TextBlob,
+};
+
+use crate::{helper::default_typeface, resources, DrawingDriver};
 
 pub fn draw(driver: &mut impl DrawingDriver, path: &path::Path) {
     let path = path.join("SkCanvas-Overview");
@@ -81,7 +83,7 @@ fn draw_hello_skia(canvas: &Canvas) {
 
     let text = TextBlob::from_str(
         "Hello, Skia!",
-        &Font::from_typeface(&Typeface::default(), 18.0),
+        &Font::from_typeface(default_typeface(), 18.0),
     )
     .unwrap();
     canvas.draw_text_blob(&text, (50, 25), &paint2);

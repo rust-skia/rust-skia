@@ -425,17 +425,28 @@ impl Font {
     }
 }
 
-#[test]
-fn test_flags() {
-    let mut font = Font::new(Typeface::default(), 10.0);
+#[cfg(test)]
+mod tests {
+    use crate::{FontMgr, FontStyle};
 
-    font.set_force_auto_hinting(true);
-    assert!(font.is_force_auto_hinting());
-    font.set_force_auto_hinting(false);
-    assert!(!font.is_force_auto_hinting());
+    use super::*;
 
-    font.set_embolden(true);
-    assert!(font.is_embolden());
-    font.set_embolden(false);
-    assert!(!font.is_embolden());
+    #[test]
+    fn test_flags() {
+        let font_mgr = FontMgr::new();
+        let typeface = font_mgr
+            .legacy_make_typeface(None, FontStyle::normal())
+            .unwrap();
+        let mut font = Font::new(typeface, 10.0);
+
+        font.set_force_auto_hinting(true);
+        assert!(font.is_force_auto_hinting());
+        font.set_force_auto_hinting(false);
+        assert!(!font.is_force_auto_hinting());
+
+        font.set_embolden(true);
+        assert!(font.is_embolden());
+        font.set_embolden(false);
+        assert!(!font.is_embolden());
+    }
 }

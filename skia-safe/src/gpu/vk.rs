@@ -1,11 +1,13 @@
+use std::{ops::Deref, ptr};
+
 use skia_bindings as sb;
-use std::ops::Deref;
-use std::ptr;
 
 mod backend_context;
-pub use backend_context::*;
-
+mod mutable_texture_state;
 mod types;
+
+pub use backend_context::*;
+pub use mutable_texture_state::*;
 pub use types::*;
 
 //

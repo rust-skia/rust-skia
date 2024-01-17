@@ -584,10 +584,9 @@ impl<N: NativeRefCounted> RCHandle<N> {
 mod rc_handle_tests {
     use std::ptr;
 
-    use skia_bindings::SkTypeface;
+    use skia_bindings::{SkFontMgr, SkTypeface};
 
-    use crate::prelude::NativeAccess;
-    use crate::Typeface;
+    use crate::{prelude::NativeAccess, FontMgr, Typeface};
 
     #[test]
     fn rc_native_ref_null() {
@@ -598,9 +597,9 @@ mod rc_handle_tests {
 
     #[test]
     fn rc_native_ref_non_null() {
-        let mut tf = Typeface::default();
-        let f: *mut SkTypeface = tf.native_mut();
-        let r = Typeface::from_unshared_ptr(f);
+        let mut font_mgr = FontMgr::new();
+        let f: *mut SkFontMgr = font_mgr.native_mut();
+        let r = FontMgr::from_unshared_ptr(f);
         assert!(r.is_some())
     }
 }

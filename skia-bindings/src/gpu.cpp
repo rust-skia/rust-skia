@@ -97,16 +97,12 @@ extern "C" void C_GrBackendFormat_makeTexture2D(const GrBackendFormat* self, GrB
 // gpu/MutableTextureState.h
 //
 
-extern "C" void C_MutableTextureState_Construct(skgpu::MutableTextureState* uninitialized) {
-    new(uninitialized)skgpu::MutableTextureState();
+extern "C" skgpu::MutableTextureState* C_MutableTextureState_Construct() {
+    return new skgpu::MutableTextureState();
 }
 
-extern "C" void C_MutableTextureState_CopyConstruct(skgpu::MutableTextureState* uninitialized, const skgpu::MutableTextureState* state) {
-    new(uninitialized)skgpu::MutableTextureState(*state);
-}
-
-extern "C" void C_MutableTextureState_destruct(skgpu::MutableTextureState* self) {
-    self->~MutableTextureState();
+extern "C" skgpu::MutableTextureState* C_MutableTextureState_CopyConstruct(const skgpu::MutableTextureState* state) {
+    return new skgpu::MutableTextureState(*state);
 }
 
 extern "C" skgpu::BackendApi C_MutableTextureState_backend(const skgpu::MutableTextureState* self) {
@@ -313,7 +309,7 @@ extern "C" SkImage* C_SkImages_CrossContextTextureFromPixmap(
 }
 
 extern "C" SkImage *C_SkImages_TextureFromCompressedTextureData(GrDirectContext *context, SkData *data, int width, int height,
-                                                SkTextureCompressionType type, GrMipMapped mipMapped,
+                                                SkTextureCompressionType type, skgpu::Mipmapped mipMapped,
                                                 GrProtected prot) {
     return SkImages::TextureFromCompressedTextureData(context, sp(data), width, height, type, mipMapped, prot).release();
 }
@@ -321,7 +317,7 @@ extern "C" SkImage *C_SkImages_TextureFromCompressedTextureData(GrDirectContext 
 extern "C" SkImage* C_SkImages_TextureFromImage(
         GrDirectContext* context,
         const SkImage* self,
-        GrMipMapped mipMapped,
+        skgpu::Mipmapped mipMapped,
         skgpu::Budgeted budgeted) {
     return SkImages::TextureFromImage(context, self, mipMapped, budgeted).release();
 }
@@ -329,7 +325,7 @@ extern "C" SkImage* C_SkImages_TextureFromImage(
 extern "C" SkImage* C_SkImages_TextureFromYUVAPixmaps(
     GrRecordingContext* context,
     const SkYUVAPixmaps* pixmaps,
-    GrMipmapped buildMips,
+    skgpu::Mipmapped buildMips,
     bool limitToMaxTextureSize,
     SkColorSpace* imageColorSpace
 ) {

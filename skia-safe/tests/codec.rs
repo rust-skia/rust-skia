@@ -2,8 +2,8 @@
 use std::io;
 
 use skia_safe::{
-    codec::{self, Decoder},
-    Bitmap, Data, EncodedImageFormat,
+    codec::{self, codecs::Decoder},
+    Bitmap, Codec, Data, EncodedImageFormat,
 };
 
 /// The supported encoders.
@@ -56,8 +56,8 @@ fn test_supported_encoders() {
 fn test_supported_decoders() {
     let supported: Vec<EncodedImageFormat> = DECODER_TESTS
         .iter()
-        .filter(|(format, test_decoder, bytes)| {
-            test_decoder(bytes);
+        .filter(|(format, decoder_f, bytes)| {
+            test_decoder(decoder_f(), bytes);
             let data = Data::new_copy(bytes);
             if let Some(codec) = codec::Codec::from_data(data) {
                 codec.encoded_format() == *format
@@ -71,56 +71,72 @@ fn test_supported_decoders() {
     assert_eq!(supported, supported_decoders());
 }
 
-type DecoderTest = (EncodedImageFormat, fn(bytes: &[u8]), &'static [u8]);
+#[test]
+fn test_from_stream() {
+    let all_decoders: Vec<_> = DECODER_TESTS
+        .iter()
+        .map(|(_, decoder_fn, _)| decoder_fn())
+        .collect();
+
+    for (format, _, bytes) in DECODER_TESTS {
+        let mut cursor = io::Cursor::new(*bytes);
+        match Codec::from_stream(&mut cursor, &all_decoders, None) {
+            Ok(codec) => assert_eq!(codec.encoded_format(), *format),
+            Err(err) => {
+                panic!("Stream decoding of {format:?} failed: {err:?}");
+            }
+        }
+    }
+}
+
+type DecoderTest = (EncodedImageFormat, fn() -> Decoder, &'static [u8]);
 
 // image files copied from skia/resources/images
 const DECODER_TESTS: &[DecoderTest] = &[
     (
         EncodedImageFormat::BMP,
-        test_decoder::<codec::BmpDecoder>,
+        codec::bmp_decoder::decoder,
         include_bytes!("images/randPixels.bmp"),
     ),
     (
         EncodedImageFormat::GIF,
-        test_decoder::<codec::GifDecoder>,
+        codec::gif_decoder::decoder,
         include_bytes!("images/box.gif"),
     ),
     (
         EncodedImageFormat::ICO,
-        test_decoder::<codec::IcoDecoder>,
+        codec::ico_decoder::decoder,
         include_bytes!("images/color_wheel.ico"),
     ),
     (
         EncodedImageFormat::JPEG,
-        test_decoder::<codec::JpegDecoder>,
+        codec::jpeg_decoder::decoder,
         include_bytes!("images/color_wheel.jpg"),
     ),
     (
         EncodedImageFormat::PNG,
-        test_decoder::<codec::PngDecoder>,
+        codec::png_decoder::decoder,
         include_bytes!("images/mandrill_16.png"),
     ),
     (
         EncodedImageFormat::WBMP,
-        test_decoder::<codec::WbmpDecoder>,
+        codec::wbmp_decoder::decoder,
         include_bytes!("images/mandrill.wbmp"),
     ),
     #[cfg(feature = "webp-decode")]
     (
         EncodedImageFormat::WEBP,
-        test_decoder::<codec::WebpDecoder>,
+        codec::webp_decoder::decoder,
         include_bytes!("images/color_wheel.webp"),
     ),
-    // (
-    //     EncodedImageFormat::DNG,
-    //     include_bytes!("images/sample_1mp.dng"),
-    // ),
 ];
 
-fn test_decoder<D: Decoder>(bytes: &[u8]) {
-    assert!(D::is_format(bytes));
+fn test_decoder(decoder: Decoder, bytes: &[u8]) {
+    assert!(decoder.is_format(bytes));
     let stream = &mut io::Cursor::new(bytes);
-    let codec = D::decode_stream(stream).expect("decode_stream");
+    let codec = decoder
+        .from_stream(stream)
+        .expect("decoder.from_stream returned an error");
     let d = codec.dimensions();
     assert!(d.width > 0 && d.height > 0);
 }

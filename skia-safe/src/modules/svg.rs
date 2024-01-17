@@ -12,7 +12,7 @@ use skia_bindings::{SkData, SkTypeface};
 use crate::{
     interop::{MemoryStream, NativeStreamBase, RustStream},
     prelude::*,
-    Canvas, Data, FontMgr, RCHandle, Size, Typeface,
+    Canvas, Data, FontMgr, FontStyle, RCHandle, Size,
 };
 
 pub type Dom = RCHandle<sb::SkSVGDOM>;
@@ -79,18 +79,18 @@ extern "C" fn handle_load_type_face(
     load_context: *mut raw::c_void,
 ) -> *mut SkTypeface {
     let data = Data::from_ptr(handle_load(resource_path, resource_name, load_context));
-    match data {
-        None => {}
-        Some(data) => {
-            let load_context: &mut LoadContext =
-                unsafe { &mut *(load_context as *mut LoadContext) };
-            if let Some(typeface) = load_context.font_mgr.new_from_data(&data, None) {
-                return typeface.into_ptr();
-            }
+    let load_context: &mut LoadContext = unsafe { &mut *(load_context as *mut LoadContext) };
+    if let Some(data) = data {
+        if let Some(typeface) = load_context.font_mgr.new_from_data(&data, None) {
+            return typeface.into_ptr();
         }
     }
 
-    Typeface::default().into_ptr()
+    load_context
+        .font_mgr
+        .legacy_make_typeface(None, FontStyle::default())
+        .unwrap()
+        .into_ptr()
 }
 
 extern "C" fn handle_load(

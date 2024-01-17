@@ -17,7 +17,7 @@ fn sendable_implements_send() {
 }
 
 mod codec {
-    use skia_safe::{codec, Codec};
+    use skia_safe::{codec, codecs, Codec};
     use static_assertions::*;
 
     // Codec seems to call into SkPngChunkReader*
@@ -28,14 +28,7 @@ mod codec {
     assert_impl_all!(codec::ZeroInitialized: Send, Sync);
     assert_impl_all!(codec::ScanlineOrder: Send, Sync);
 
-    assert_impl_all!(codec::BmpDecoder: Send, Sync);
-    assert_impl_all!(codec::GifDecoder: Send, Sync);
-    assert_impl_all!(codec::IcoDecoder: Send, Sync);
-    assert_impl_all!(codec::JpegDecoder: Send, Sync);
-    assert_impl_all!(codec::PngDecoder: Send, Sync);
-    assert_impl_all!(codec::WbmpDecoder: Send, Sync);
-    #[cfg(feature = "webp_decode")]
-    assert_impl_all!(codec::WebpDecoder: Send, Sync);
+    assert_impl_all!(codecs::Decoder: Send, Sync);
 }
 
 mod core {
@@ -182,7 +175,6 @@ mod gpu {
 
     // gpu/types.rs
     assert_impl_all!(BackendAPI: Send, Sync);
-    assert_impl_all!(MipMapped: Send, Sync);
     assert_impl_all!(SurfaceOrigin: Send, Sync);
     assert_not_impl_any!(FlushInfo: Send, Sync);
     assert_impl_all!(SemaphoresSubmitted: Send, Sync);

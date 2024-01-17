@@ -180,7 +180,7 @@ extern "C" GrGLenum C_GrBackendFormats_AsGLFormatEnum(const GrBackendFormat* for
 
 extern "C" GrBackendTexture* C_GrBackendTextures_newGL(
     int width, int height,
-    GrMipMapped mipMapped,
+    skgpu::Mipmapped mipMapped,
     const GrGLTextureInfo* glInfo,
     const char* label,
     size_t labelCount) {

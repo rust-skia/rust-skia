@@ -1,8 +1,6 @@
 use std::fmt;
 
-use skia_bindings::{
-    self as sb, GrBackendFormat, GrBackendRenderTarget, GrBackendTexture, GrMipmapped,
-};
+use skia_bindings::{self as sb, GrBackendFormat, GrBackendRenderTarget, GrBackendTexture};
 
 #[cfg(feature = "d3d")]
 use super::d3d;
@@ -338,7 +336,7 @@ impl BackendTexture {
     }
 
     pub fn has_mipmaps(&self) -> bool {
-        self.native().fMipmapped == GrMipmapped::Yes
+        self.native().fMipmapped == Mipmapped::Yes
     }
 
     pub fn backend(&self) -> BackendAPI {

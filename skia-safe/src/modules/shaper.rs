@@ -728,7 +728,6 @@ impl Shaper {
 }
 
 pub mod icu {
-
     /// On Windows, and if the default feature "embed-icudtl" is _not_ set, this function writes the
     /// file `icudtl.dat` into the current executable's directory making sure that it's available
     /// when text shaping is used in Skia.
@@ -752,7 +751,7 @@ pub mod icu {
         let mut text_blob_builder_run_handler =
             crate::shaper::TextBlobBuilderRunHandler::new(str, crate::Point::default());
 
-        let shaper = crate::Shaper::new(None);
+        let shaper = crate::Shaper::new(crate::FontMgr::new());
 
         shaper.shape(
             "العربية",

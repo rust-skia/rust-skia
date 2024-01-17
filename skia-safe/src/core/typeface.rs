@@ -11,8 +11,6 @@ use crate::{
 };
 
 pub type TypefaceId = skia_bindings::SkTypefaceID;
-#[deprecated(since = "0.49.0", note = "use TypefaceId")]
-pub type FontId = TypefaceId;
 pub type FontTableTag = skia_bindings::SkFontTableTag;
 
 pub use skia_bindings::SkTypeface_SerializeBehavior as SerializeBehavior;
@@ -32,12 +30,6 @@ require_base_type!(SkTypeface, sb::SkWeakRefCnt);
 
 impl NativeRefCountedBase for SkTypeface {
     type Base = SkRefCntBase;
-}
-
-impl Default for Typeface {
-    fn default() -> Self {
-        Typeface::from_ptr(unsafe { sb::C_SkTypeface_MakeDefault() }).unwrap()
-    }
 }
 
 impl fmt::Debug for Typeface {
@@ -354,11 +346,16 @@ impl Iterator for LocalizedStringsIter {
 mod tests {
     use std::io::Cursor;
 
+    use crate::{FontMgr, FontStyle};
+
     use super::{SerializeBehavior, Typeface};
 
     #[test]
     fn serialize_and_deserialize_default_typeface() {
-        let tf = Typeface::default();
+        let tf = FontMgr::new()
+            .legacy_make_typeface(None, FontStyle::normal())
+            .unwrap();
+
         let serialized = tf.serialize(SerializeBehavior::DoIncludeData);
         // On Android, the deserialized typeface name changes from sans-serif to Roboto.
         // (which is probably OK, because Roboto _is_ the default font, so we do another
@@ -378,7 +375,8 @@ mod tests {
     #[test]
     fn family_name_iterator_owns_the_strings_and_returns_at_least_one_name_for_the_default_typeface(
     ) {
-        let tf = Typeface::default();
+        let fm = FontMgr::default();
+        let tf = fm.legacy_make_typeface(None, FontStyle::normal()).unwrap();
         let family_names = tf.new_family_name_iterator();
         drop(tf);
 
@@ -392,7 +390,9 @@ mod tests {
 
     #[test]
     fn get_font_data_of_default() {
-        let tf = Typeface::default();
+        let tf = FontMgr::new()
+            .legacy_make_typeface(None, FontStyle::normal())
+            .unwrap();
         let (data, _ttc_index) = tf.to_font_data().unwrap();
         assert!(!data.is_empty());
     }

@@ -124,8 +124,16 @@ extern "C" void C_Bindings_Types(Sink<bool>) {}
 // codec/SkCodec.h
 //
 
+extern "C" SkCodec* C_SkCodec_MakeFromStream(SkStream* stream, const SkCodecs::Decoder* decoders, size_t decodersCount, SkCodec::Result* result, SkCodec::SelectionPolicy selectionPolicy) {
+    return SkCodec::MakeFromStream(std::unique_ptr<SkStream>(stream), SkSpan(decoders, decodersCount), result, nullptr, selectionPolicy).release();
+}
+
 extern "C" SkCodec* C_SkCodec_MakeFromData(SkData* data) {
     return SkCodec::MakeFromData(sp(data)).release();
+}
+
+extern "C" SkCodec* C_SkCodec_MakeFromData2(SkData* data, const SkCodecs::Decoder* decoders, size_t decodersCount) {
+    return SkCodec::MakeFromData(sp(data), SkSpan(decoders, decodersCount)).release();
 }
 
 extern "C" void C_SkCodec_delete(SkCodec* self) {
@@ -196,6 +204,61 @@ extern "C" int C_SkCodec_getRepetitionCount(SkCodec* self) {
     return self->getRepetitionCount();
 }
 
+// SkCodecs
+
+extern "C" void C_SkCodecs_Decoder_CopyConstruct(SkCodecs::Decoder* uninitialized, const SkCodecs::Decoder* decoder) {
+    new (uninitialized) SkCodecs::Decoder(*decoder);
+}
+
+extern "C" const char* C_SkCodecs_Decoder_getId(const SkCodecs::Decoder* decoder, size_t* len) {
+    *len = decoder->id.size();
+    return decoder->id.data();
+}
+
+extern "C" SkCodec* C_SkCodecs_Decoder_MakeFromStream(const SkCodecs::Decoder* decoder, SkStream* stream, SkCodec::Result* result, SkCodecs::DecodeContext context) {
+    return decoder->makeFromStream(std::unique_ptr<SkStream>(stream), result, context).release();
+}
+
+extern "C" void C_SkCodecs_Decoder_destruct(SkCodecs::Decoder* decoder) {
+    decoder->~Decoder();
+}
+
+//
+// codec/*Decoder.h
+//
+
+extern "C" void C_SkBmpDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
+    new (uninitialized) SkCodecs::Decoder(SkBmpDecoder::Decoder());
+}
+
+extern "C" void C_SkGifDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
+    new (uninitialized) SkCodecs::Decoder(SkGifDecoder::Decoder());
+}
+
+extern "C" void C_SkIcoDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
+    new (uninitialized) SkCodecs::Decoder(SkIcoDecoder::Decoder());
+}
+
+extern "C" void C_SkJpegDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
+    new (uninitialized) SkCodecs::Decoder(SkJpegDecoder::Decoder());
+}
+
+extern "C" void C_SkPngDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
+    new (uninitialized) SkCodecs::Decoder(SkPngDecoder::Decoder());
+}
+
+extern "C" void C_SkWbmpDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
+    new (uninitialized) SkCodecs::Decoder(SkWbmpDecoder::Decoder());
+}
+
+#if defined(SK_CODEC_DECODES_WEBP)
+
+extern "C" void C_SkWebpDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
+    new (uninitialized) SkCodecs::Decoder(SkWebpDecoder::Decoder());
+}
+
+#endif
+
 //
 // codec/SkEncodedOrigin.h
 //
@@ -215,71 +278,6 @@ extern "C" bool C_SkPixmapUtils_Orient(SkPixmap& dst, const SkPixmap& src, SkEnc
 extern "C" void C_SkPixmapUtils_SwapWidthHeight(SkImageInfo* uninitialized, const SkImageInfo& info) {
     new (uninitialized) SkImageInfo(SkPixmapUtils::SwapWidthHeight(info));
 }
-
-//
-// codec/*Decoder.h
-//
-
-extern "C" bool C_SkBmpDecoder_IsBmp(const char* buf, size_t size) {
-    return SkBmpDecoder::IsBmp(buf, size);
-}
-
-
-extern "C" SkCodec* C_SkBmpDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
-    return SkBmpDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
-}
-
-extern "C" bool C_SkGifDecoder_IsGif(const char* buf, size_t size) {
-    return SkGifDecoder::IsGif(buf, size);
-}
-
-extern "C" SkCodec* C_SkGifDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
-    return SkGifDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
-}
-
-extern "C" bool C_SkIcoDecoder_IsIco(const char* buf, size_t size) {
-    return SkIcoDecoder::IsIco(buf, size);
-}
-
-extern "C" SkCodec* C_SkIcoDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
-    return SkIcoDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
-}
-
-extern "C" bool C_SkJpegDecoder_IsJpeg(const char* buf, size_t size) {
-    return SkJpegDecoder::IsJpeg(buf, size);
-}
-
-extern "C" SkCodec* C_SkJpegDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
-    return SkJpegDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
-}
-
-extern "C" bool C_SkPngDecoder_IsPng(const char* buf, size_t size) {
-    return SkPngDecoder::IsPng(buf, size);
-}
-
-extern "C" SkCodec* C_SkPngDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
-    return SkPngDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
-}
-
-extern "C" bool C_SkWbmpDecoder_IsWbmp(const char* buf, size_t size) {
-    return SkWbmpDecoder::IsWbmp(buf, size);
-}
-
-extern "C" SkCodec* C_SkWbmpDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
-    return SkWbmpDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
-}
-
-#if defined(SK_CODEC_DECODES_WEBP)
-
-extern "C" bool C_SkWebpDecoder_IsWebp(const char* buf, size_t size) {
-    return SkWebpDecoder::IsWebp(buf, size);
-}
-
-extern "C" SkCodec* C_SkWebpDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
-    return SkWebpDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
-}
-
-#endif
 
 //
 // core/
@@ -1332,10 +1330,6 @@ extern "C" bool C_SkTypeface_isItalic(const SkTypeface* self) {
     return self->isItalic();
 }
 
-extern "C" SkTypeface* C_SkTypeface_MakeDefault() {
-    return SkTypeface::MakeDefault().release();
-}
-
 extern "C" SkTypeface* C_SkTypeface_MakeFromName(const char familyName[], SkFontStyle fontStyle) {
     return SkTypeface::MakeFromName(familyName, fontStyle).release();
 }
@@ -1412,16 +1406,16 @@ extern "C" SkData* C_SkFlattenable_serialize(const SkFlattenable* self) {
 // core/SkFont.h
 //
 
-extern "C" void C_SkFont_ConstructFromTypeface(SkFont* uninitialized, SkTypeface* typeface) {
-    new(uninitialized) SkFont(sp(typeface));
+extern "C" void C_SkFont_ConstructFromTypeface(SkFont* uninitialized, SkTypeface* typeface_) {
+    new(uninitialized) SkFont(sp(typeface_));
 }
 
-extern "C" void C_SkFont_ConstructFromTypefaceWithSize(SkFont* uninitialized, SkTypeface* typeface, SkScalar size) {
-    new(uninitialized) SkFont(sp(typeface), size);
+extern "C" void C_SkFont_ConstructFromTypefaceWithSize(SkFont* uninitialized, SkTypeface* typeface_, SkScalar size) {
+    new(uninitialized) SkFont(sp(typeface_), size);
 }
 
-extern "C" void C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(SkFont* uninitialized, SkTypeface* typeface, SkScalar size, SkScalar scaleX, SkScalar skewX) {
-    new(uninitialized) SkFont(sp(typeface), size, scaleX, skewX);
+extern "C" void C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(SkFont* uninitialized, SkTypeface* typeface_, SkScalar size, SkScalar scaleX, SkScalar skewX) {
+    new(uninitialized) SkFont(sp(typeface_), size, scaleX, skewX);
 }
 
 extern "C" void C_SkFont_CopyConstruct(SkFont* uninitialized, const SkFont* font) {
@@ -1553,6 +1547,10 @@ extern "C" SkTypeface* C_SkFontMgr_matchFamilyStyleCharacter(
 // note: this function _consumes_ / deletes the stream.
 extern "C" SkTypeface* C_SkFontMgr_makeFromStream(const SkFontMgr* self, SkStreamAsset* stream, int ttcIndex) {
     return self->makeFromStream(std::unique_ptr<SkStreamAsset>(stream), ttcIndex).release();
+}
+
+extern "C" SkTypeface* C_SkFontMgr_legacyMakeTypeface(const SkFontMgr* self, const char familyName[], SkFontStyle style) {
+    return self->legacyMakeTypeface(familyName, style).release();
 }
 
 extern "C" SkFontMgr* C_SkFontMgr_RefDefault() {

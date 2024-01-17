@@ -7,9 +7,11 @@
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/MutableTextureState.h"
 #include "include/gpu/ganesh/vk/GrVkBackendSurface.h"
+#include "include/gpu/ganesh/vk/GrVkDirectContext.h"
 #include "include/gpu/vk/GrVkTypes.h"
 #include "include/gpu/vk/GrVkBackendContext.h"
 #include "include/gpu/vk/GrVkExtensions.h"
+#include "include/gpu/vk/VulkanMutableTextureState.h"
 
 // Additional types not yet referenced.
 extern "C" void C_GrVkTypes(GrVkSurfaceInfo *) {};
@@ -89,15 +91,6 @@ extern "C" void C_GrVkBackendContext_setMaxAPIVersion(GrVkBackendContext *self, 
     self->fMaxAPIVersion = maxAPIVersion;
 }
 
-extern "C" GrDirectContext* C_GrDirectContext_MakeVulkan(
-    const GrVkBackendContext* vkBackendContext,
-    const GrContextOptions* options) {
-    if (options) {
-        return GrDirectContext::MakeVulkan(*vkBackendContext, *options).release();
-    }
-    return GrDirectContext::MakeVulkan(*vkBackendContext).release();
-}
-
 //
 // GrVkTypes.h
 //
@@ -108,22 +101,6 @@ extern "C" bool C_GrVkAlloc_Equals(const GrVkAlloc* lhs, const GrVkAlloc* rhs) {
 
 extern "C" bool C_GrVkYcbcrConversionInfo_Equals(const GrVkYcbcrConversionInfo* lhs, const GrVkYcbcrConversionInfo* rhs) {
     return *lhs == *rhs;
-}
-
-//
-// gpu/MutableTextureState.h
-//
-
-extern "C" void C_MutableTextureState_ConstructVK(skgpu::MutableTextureState* uninitialized, VkImageLayout layout, uint32_t queueFamilyIndex) {
-    new(uninitialized)skgpu::MutableTextureState(layout, queueFamilyIndex);
-}
-
-extern "C" VkImageLayout C_MutableTextureState_getVkImageLayout(const skgpu::MutableTextureState* self) {
-    return self->getVkImageLayout();
-}
-
-extern "C" uint32_t C_MutableTextureState_getQueueFamilyIndex(const skgpu::MutableTextureState* self) {
-    return self->getQueueFamilyIndex();
 }
 
 //
@@ -152,4 +129,36 @@ extern "C" bool C_GrBackendRenderTargets_GetVkImageInfo(const GrBackendRenderTar
 
 extern "C" void C_GrBackendRenderTargets_SetVkImageLayout(GrBackendRenderTarget* renderTarget, VkImageLayout imageLayout) {
     GrBackendRenderTargets::SetVkImageLayout(renderTarget, imageLayout);
+}
+
+extern "C" GrDirectContext* C_GrDirectContexts_MakeVulkan(
+    const GrVkBackendContext* vkBackendContext,
+    const GrContextOptions* options) {
+    if (options) {
+        return GrDirectContexts::MakeVulkan(*vkBackendContext, *options).release();
+    }
+    return GrDirectContexts::MakeVulkan(*vkBackendContext).release();
+}
+
+// MutableTextureState.h
+
+
+extern "C" skgpu::MutableTextureState* C_MutableTextureStates_ConstructVulkan(VkImageLayout layout, uint32_t queueFamilyIndex) {
+    return new skgpu::MutableTextureState(layout, queueFamilyIndex);
+}
+
+extern "C" VkImageLayout C_MutableTextureState_getVkImageLayout(const skgpu::MutableTextureState* self) {
+    return self->getVkImageLayout();
+}
+
+extern "C" VkImageLayout C_MutableTextureStates_getVkImageLayout(const skgpu::MutableTextureState* self) {
+    return skgpu::MutableTextureStates::GetVkImageLayout(self);
+}
+
+extern "C" uint32_t C_MutableTextureState_getQueueFamilyIndex(const skgpu::MutableTextureState* self) {
+    return self->getQueueFamilyIndex();
+}
+
+extern "C" uint32_t C_MutableTextureStates_getVkQueueFamilyIndex(const skgpu::MutableTextureState* self) {
+    return skgpu::MutableTextureStates::GetVkQueueFamilyIndex(self);
 }

@@ -97,15 +97,7 @@ impl DirectContext {
         backend_context: &vk::BackendContext,
         options: impl Into<Option<&'a ContextOptions>>,
     ) -> Option<DirectContext> {
-        unsafe {
-            let end_resolving = backend_context.begin_resolving();
-            let context = DirectContext::from_ptr(sb::C_GrDirectContext_MakeVulkan(
-                backend_context.native.as_ptr() as _,
-                options.into().native_ptr_or_null(),
-            ));
-            drop(end_resolving);
-            context
-        }
+        crate::gpu::direct_contexts::make_vulkan(backend_context, options)
     }
 
     #[cfg(feature = "metal")]

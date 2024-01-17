@@ -1,11 +1,11 @@
+use skia_bindings::{self as sb, SkFontMgr, SkFontStyleSet, SkRefCntBase};
+use std::{ffi::CString, fmt, mem, os::raw::c_char, ptr};
+
 use crate::{
     interop::{self, DynamicMemoryWStream},
     prelude::*,
     FontStyle, Typeface, Unichar,
 };
-use core::fmt;
-use skia_bindings::{self as sb, SkFontMgr, SkFontStyleSet, SkRefCntBase};
-use std::{ffi::CString, mem, os::raw::c_char};
 
 pub type FontStyleSet = RCHandle<SkFontStyleSet>;
 
@@ -211,6 +211,24 @@ impl FontMgr {
                 self.native(),
                 stream_ptr,
                 ttc_index.into().unwrap_or_default().try_into().unwrap(),
+            )
+        })
+    }
+
+    pub fn legacy_make_typeface<'a>(
+        &self,
+        family_name: impl Into<Option<&'a str>>,
+        style: FontStyle,
+    ) -> Option<Typeface> {
+        let family_name: Option<CString> = family_name
+            .into()
+            .and_then(|family_name| CString::new(family_name).ok());
+
+        Typeface::from_ptr(unsafe {
+            sb::C_SkFontMgr_legacyMakeTypeface(
+                self.native(),
+                family_name.map(|n| n.as_ptr()).unwrap_or(ptr::null()),
+                style.into_native(),
             )
         })
     }
