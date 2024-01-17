@@ -206,6 +206,10 @@ extern "C" int C_SkCodec_getRepetitionCount(SkCodec* self) {
 
 // SkCodecs
 
+extern "C" void C_SkCodecs_Decoder_CopyConstruct(SkCodecs::Decoder* uninitialized, const SkCodecs::Decoder* decoder) {
+    new (uninitialized) SkCodecs::Decoder(*decoder);
+}
+
 extern "C" const char* C_SkCodecs_Decoder_getId(const SkCodecs::Decoder* decoder, size_t* len) {
     *len = decoder->id.size();
     return decoder->id.data();

@@ -414,6 +414,12 @@ pub mod codecs {
         }
     }
 
+    impl NativeClone for SkCodecs_Decoder {
+        fn clone(&self) -> Self {
+            construct(|d| unsafe { sb::C_SkCodecs_Decoder_CopyConstruct(d, self) })
+        }
+    }
+
     impl Decoder {
         pub fn id(&self) -> &'static str {
             let mut len: usize = 0;
