@@ -132,6 +132,10 @@ extern "C" SkCodec* C_SkCodec_MakeFromData(SkData* data) {
     return SkCodec::MakeFromData(sp(data)).release();
 }
 
+extern "C" SkCodec* C_SkCodec_MakeFromData2(SkData* data, const SkCodecs::Decoder* decoders, size_t decodersCount) {
+    return SkCodec::MakeFromData(sp(data), SkSpan(decoders, decodersCount)).release();
+}
+
 extern "C" void C_SkCodec_delete(SkCodec* self) {
     delete self;
 }

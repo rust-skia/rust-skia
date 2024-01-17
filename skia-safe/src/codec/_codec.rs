@@ -116,8 +116,22 @@ impl Codec<'_> {
 
     // TODO: wrap from_data with SkPngChunkReader
 
+    // TODO: Deprecated in Skia
     pub fn from_data(data: impl Into<Data>) -> Option<Codec<'static>> {
         Self::from_ptr(unsafe { sb::C_SkCodec_MakeFromData(data.into().into_ptr()) })
+    }
+
+    pub fn from_data_with_decoders(
+        data: impl Into<Data>,
+        decoders: &[codecs::Decoder],
+    ) -> Option<Codec<'static>> {
+        Self::from_ptr(unsafe {
+            sb::C_SkCodec_MakeFromData2(
+                data.into().into_ptr(),
+                decoders.as_ptr() as _,
+                decoders.len(),
+            )
+        })
     }
 
     pub fn info(&self) -> ImageInfo {
