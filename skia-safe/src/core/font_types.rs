@@ -23,8 +23,8 @@ native_transmutable!(SkTextEncoding, TextEncoding, text_encoding_layout);
 /// UTF-8 encoded text. In addition to that, &[u16], [u16], or &[GlyphId], [GlyphId], are
 /// interpreted as `GlyphId` slices.
 ///
-/// To use UTF16 or UTF32 encodings, use [`skia_safe::as_utf16_unchecked`] or
-/// [`skia_safe::as_utf32_unchecked`].
+/// To use UTF16 or UTF32 encodings, use [`as_utf16_unchecked`] or
+/// [`as_utf32_unchecked`].
 pub trait EncodedText {
     fn as_raw(&self) -> (*const ffi::c_void, usize, TextEncoding);
 }
