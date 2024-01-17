@@ -3,7 +3,7 @@
   run: |
     rustup target add $[[target]]
 
-- name: 'Build all targets in skia-safe for $[[target]] with features $[[features]]'
+- name: 'Build skia-safe for $[[target]] with features $[[features]]'
   shell: bash
   run: |
     if [ "$[[androidEnv]]" == "true" ]; then
@@ -20,7 +20,7 @@
       source /emsdk/emsdk_env.sh
     fi
     cargo clean
-    cargo build -p skia-safe --all-targets --release --features "$[[features]]" --target $[[target]]
+    cargo build -p skia-safe --release --features "$[[features]]" --target $[[target]]
     echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
     echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
     echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}

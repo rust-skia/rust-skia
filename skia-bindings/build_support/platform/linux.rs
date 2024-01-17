@@ -4,7 +4,14 @@ pub struct Linux;
 
 impl PlatformDetails for Linux {
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
-        gn_args(config, builder)
+        gn_args(config, builder);
+
+        let target = &config.target;
+        builder.cflags(flags(target));
+    }
+
+    fn bindgen_args(&self, target: &Target, builder: &mut BindgenArgsBuilder) {
+        builder.args(flags(target))
     }
 
     fn link_libraries(&self, features: &Features) -> Vec<String> {
@@ -56,4 +63,20 @@ pub fn link_libraries(features: &Features) -> Vec<String> {
     }
 
     libs.iter().map(|l| l.to_string()).collect()
+}
+
+fn flags(target: &Target) -> Vec<String> {
+    // Set additional includes when cross-compiling.
+    // TODO: Resolve the C++ version. This is specific to Ubuntu 18.
+    if *target != cargo::host() {
+        let cpp = "7";
+        let target_path_component = target.include_path_component();
+        [
+            format!("-I/usr/{target_path_component}/include/c++/{cpp}/{target_path_component}"),
+            format!("-I/usr/{target_path_component}/include"),
+        ]
+        .into()
+    } else {
+        Vec::new()
+    }
 }

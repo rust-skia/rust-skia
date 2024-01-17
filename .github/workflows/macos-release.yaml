@@ -34,7 +34,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features '
+    - name: 'Build skia-safe for x86_64-apple-darwin with features '
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -51,7 +51,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "" --target x86_64-apple-darwin
+        cargo build -p skia-safe --release --features "" --target x86_64-apple-darwin
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -111,7 +111,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-darwin with features '
+    - name: 'Build skia-safe for aarch64-apple-darwin with features '
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -128,7 +128,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "" --target aarch64-apple-darwin
+        cargo build -p skia-safe --release --features "" --target aarch64-apple-darwin
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -188,7 +188,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios with features '
+    - name: 'Build skia-safe for aarch64-apple-ios with features '
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -205,7 +205,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "" --target aarch64-apple-ios
+        cargo build -p skia-safe --release --features "" --target aarch64-apple-ios
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -265,7 +265,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios-sim
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios-sim with features '
+    - name: 'Build skia-safe for aarch64-apple-ios-sim with features '
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -282,7 +282,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "" --target aarch64-apple-ios-sim
+        cargo build -p skia-safe --release --features "" --target aarch64-apple-ios-sim
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -342,7 +342,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-ios with features '
+    - name: 'Build skia-safe for x86_64-apple-ios with features '
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -359,7 +359,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "" --target x86_64-apple-ios
+        cargo build -p skia-safe --release --features "" --target x86_64-apple-ios
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -437,7 +437,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features gl'
+    - name: 'Build skia-safe for x86_64-apple-darwin with features gl'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -454,7 +454,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "gl" --target x86_64-apple-darwin
+        cargo build -p skia-safe --release --features "gl" --target x86_64-apple-darwin
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -514,7 +514,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-darwin with features gl'
+    - name: 'Build skia-safe for aarch64-apple-darwin with features gl'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -531,7 +531,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "gl" --target aarch64-apple-darwin
+        cargo build -p skia-safe --release --features "gl" --target aarch64-apple-darwin
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -591,7 +591,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios with features gl'
+    - name: 'Build skia-safe for aarch64-apple-ios with features gl'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -608,7 +608,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "gl" --target aarch64-apple-ios
+        cargo build -p skia-safe --release --features "gl" --target aarch64-apple-ios
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -668,7 +668,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios-sim
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios-sim with features gl'
+    - name: 'Build skia-safe for aarch64-apple-ios-sim with features gl'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -685,7 +685,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "gl" --target aarch64-apple-ios-sim
+        cargo build -p skia-safe --release --features "gl" --target aarch64-apple-ios-sim
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -745,7 +745,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-ios with features gl'
+    - name: 'Build skia-safe for x86_64-apple-ios with features gl'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -762,7 +762,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "gl" --target x86_64-apple-ios
+        cargo build -p skia-safe --release --features "gl" --target x86_64-apple-ios
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -840,7 +840,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features vulkan'
+    - name: 'Build skia-safe for x86_64-apple-darwin with features vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -857,7 +857,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "vulkan" --target x86_64-apple-darwin
+        cargo build -p skia-safe --release --features "vulkan" --target x86_64-apple-darwin
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -917,7 +917,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-darwin with features vulkan'
+    - name: 'Build skia-safe for aarch64-apple-darwin with features vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -934,7 +934,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "vulkan" --target aarch64-apple-darwin
+        cargo build -p skia-safe --release --features "vulkan" --target aarch64-apple-darwin
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -994,7 +994,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios with features vulkan'
+    - name: 'Build skia-safe for aarch64-apple-ios with features vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1011,7 +1011,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "vulkan" --target aarch64-apple-ios
+        cargo build -p skia-safe --release --features "vulkan" --target aarch64-apple-ios
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -1071,7 +1071,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios-sim
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios-sim with features vulkan'
+    - name: 'Build skia-safe for aarch64-apple-ios-sim with features vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1088,7 +1088,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "vulkan" --target aarch64-apple-ios-sim
+        cargo build -p skia-safe --release --features "vulkan" --target aarch64-apple-ios-sim
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -1148,7 +1148,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-ios with features vulkan'
+    - name: 'Build skia-safe for x86_64-apple-ios with features vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1165,7 +1165,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "vulkan" --target x86_64-apple-ios
+        cargo build -p skia-safe --release --features "vulkan" --target x86_64-apple-ios
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -1243,7 +1243,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features textlayout'
+    - name: 'Build skia-safe for x86_64-apple-darwin with features textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1260,7 +1260,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "textlayout" --target x86_64-apple-darwin
+        cargo build -p skia-safe --release --features "textlayout" --target x86_64-apple-darwin
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -1320,7 +1320,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-darwin with features textlayout'
+    - name: 'Build skia-safe for aarch64-apple-darwin with features textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1337,7 +1337,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "textlayout" --target aarch64-apple-darwin
+        cargo build -p skia-safe --release --features "textlayout" --target aarch64-apple-darwin
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -1397,7 +1397,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios with features textlayout'
+    - name: 'Build skia-safe for aarch64-apple-ios with features textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1414,7 +1414,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "textlayout" --target aarch64-apple-ios
+        cargo build -p skia-safe --release --features "textlayout" --target aarch64-apple-ios
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -1474,7 +1474,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios-sim
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios-sim with features textlayout'
+    - name: 'Build skia-safe for aarch64-apple-ios-sim with features textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1491,7 +1491,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "textlayout" --target aarch64-apple-ios-sim
+        cargo build -p skia-safe --release --features "textlayout" --target aarch64-apple-ios-sim
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -1551,7 +1551,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-ios with features textlayout'
+    - name: 'Build skia-safe for x86_64-apple-ios with features textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1568,7 +1568,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "textlayout" --target x86_64-apple-ios
+        cargo build -p skia-safe --release --features "textlayout" --target x86_64-apple-ios
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -1646,7 +1646,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features gl,textlayout'
+    - name: 'Build skia-safe for x86_64-apple-darwin with features gl,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1663,7 +1663,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "gl,textlayout" --target x86_64-apple-darwin
+        cargo build -p skia-safe --release --features "gl,textlayout" --target x86_64-apple-darwin
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -1723,7 +1723,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-darwin with features gl,textlayout'
+    - name: 'Build skia-safe for aarch64-apple-darwin with features gl,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1740,7 +1740,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "gl,textlayout" --target aarch64-apple-darwin
+        cargo build -p skia-safe --release --features "gl,textlayout" --target aarch64-apple-darwin
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -1800,7 +1800,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios with features gl,textlayout'
+    - name: 'Build skia-safe for aarch64-apple-ios with features gl,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1817,7 +1817,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "gl,textlayout" --target aarch64-apple-ios
+        cargo build -p skia-safe --release --features "gl,textlayout" --target aarch64-apple-ios
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -1877,7 +1877,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios-sim
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios-sim with features gl,textlayout'
+    - name: 'Build skia-safe for aarch64-apple-ios-sim with features gl,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1894,7 +1894,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "gl,textlayout" --target aarch64-apple-ios-sim
+        cargo build -p skia-safe --release --features "gl,textlayout" --target aarch64-apple-ios-sim
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -1954,7 +1954,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-ios with features gl,textlayout'
+    - name: 'Build skia-safe for x86_64-apple-ios with features gl,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1971,7 +1971,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "gl,textlayout" --target x86_64-apple-ios
+        cargo build -p skia-safe --release --features "gl,textlayout" --target x86_64-apple-ios
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -2049,7 +2049,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features textlayout,vulkan'
+    - name: 'Build skia-safe for x86_64-apple-darwin with features textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2066,7 +2066,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "textlayout,vulkan" --target x86_64-apple-darwin
+        cargo build -p skia-safe --release --features "textlayout,vulkan" --target x86_64-apple-darwin
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -2126,7 +2126,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-darwin with features textlayout,vulkan'
+    - name: 'Build skia-safe for aarch64-apple-darwin with features textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2143,7 +2143,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "textlayout,vulkan" --target aarch64-apple-darwin
+        cargo build -p skia-safe --release --features "textlayout,vulkan" --target aarch64-apple-darwin
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -2203,7 +2203,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios with features textlayout,vulkan'
+    - name: 'Build skia-safe for aarch64-apple-ios with features textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2220,7 +2220,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "textlayout,vulkan" --target aarch64-apple-ios
+        cargo build -p skia-safe --release --features "textlayout,vulkan" --target aarch64-apple-ios
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -2280,7 +2280,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios-sim
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios-sim with features textlayout,vulkan'
+    - name: 'Build skia-safe for aarch64-apple-ios-sim with features textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2297,7 +2297,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "textlayout,vulkan" --target aarch64-apple-ios-sim
+        cargo build -p skia-safe --release --features "textlayout,vulkan" --target aarch64-apple-ios-sim
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -2357,7 +2357,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-ios with features textlayout,vulkan'
+    - name: 'Build skia-safe for x86_64-apple-ios with features textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2374,7 +2374,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "textlayout,vulkan" --target x86_64-apple-ios
+        cargo build -p skia-safe --release --features "textlayout,vulkan" --target x86_64-apple-ios
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -2452,7 +2452,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features gl,textlayout,vulkan'
+    - name: 'Build skia-safe for x86_64-apple-darwin with features gl,textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2469,7 +2469,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan" --target x86_64-apple-darwin
+        cargo build -p skia-safe --release --features "gl,textlayout,vulkan" --target x86_64-apple-darwin
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -2529,7 +2529,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-darwin with features gl,textlayout,vulkan'
+    - name: 'Build skia-safe for aarch64-apple-darwin with features gl,textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2546,7 +2546,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan" --target aarch64-apple-darwin
+        cargo build -p skia-safe --release --features "gl,textlayout,vulkan" --target aarch64-apple-darwin
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -2606,7 +2606,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios with features gl,textlayout,vulkan'
+    - name: 'Build skia-safe for aarch64-apple-ios with features gl,textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2623,7 +2623,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan" --target aarch64-apple-ios
+        cargo build -p skia-safe --release --features "gl,textlayout,vulkan" --target aarch64-apple-ios
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -2683,7 +2683,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios-sim
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios-sim with features gl,textlayout,vulkan'
+    - name: 'Build skia-safe for aarch64-apple-ios-sim with features gl,textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2700,7 +2700,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan" --target aarch64-apple-ios-sim
+        cargo build -p skia-safe --release --features "gl,textlayout,vulkan" --target aarch64-apple-ios-sim
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -2760,7 +2760,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-ios with features gl,textlayout,vulkan'
+    - name: 'Build skia-safe for x86_64-apple-ios with features gl,textlayout,vulkan'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2777,7 +2777,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "gl,textlayout,vulkan" --target x86_64-apple-ios
+        cargo build -p skia-safe --release --features "gl,textlayout,vulkan" --target x86_64-apple-ios
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -2855,7 +2855,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features metal'
+    - name: 'Build skia-safe for x86_64-apple-darwin with features metal'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2872,7 +2872,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "metal" --target x86_64-apple-darwin
+        cargo build -p skia-safe --release --features "metal" --target x86_64-apple-darwin
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -2932,7 +2932,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-darwin with features metal'
+    - name: 'Build skia-safe for aarch64-apple-darwin with features metal'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2949,7 +2949,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "metal" --target aarch64-apple-darwin
+        cargo build -p skia-safe --release --features "metal" --target aarch64-apple-darwin
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -3009,7 +3009,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios with features metal'
+    - name: 'Build skia-safe for aarch64-apple-ios with features metal'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3026,7 +3026,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "metal" --target aarch64-apple-ios
+        cargo build -p skia-safe --release --features "metal" --target aarch64-apple-ios
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -3086,7 +3086,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios-sim
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios-sim with features metal'
+    - name: 'Build skia-safe for aarch64-apple-ios-sim with features metal'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3103,7 +3103,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "metal" --target aarch64-apple-ios-sim
+        cargo build -p skia-safe --release --features "metal" --target aarch64-apple-ios-sim
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -3163,7 +3163,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-ios with features metal'
+    - name: 'Build skia-safe for x86_64-apple-ios with features metal'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3180,7 +3180,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "metal" --target x86_64-apple-ios
+        cargo build -p skia-safe --release --features "metal" --target x86_64-apple-ios
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -3258,7 +3258,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features metal,textlayout'
+    - name: 'Build skia-safe for x86_64-apple-darwin with features metal,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3275,7 +3275,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "metal,textlayout" --target x86_64-apple-darwin
+        cargo build -p skia-safe --release --features "metal,textlayout" --target x86_64-apple-darwin
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -3335,7 +3335,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-darwin with features metal,textlayout'
+    - name: 'Build skia-safe for aarch64-apple-darwin with features metal,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3352,7 +3352,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "metal,textlayout" --target aarch64-apple-darwin
+        cargo build -p skia-safe --release --features "metal,textlayout" --target aarch64-apple-darwin
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -3412,7 +3412,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios with features metal,textlayout'
+    - name: 'Build skia-safe for aarch64-apple-ios with features metal,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3429,7 +3429,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "metal,textlayout" --target aarch64-apple-ios
+        cargo build -p skia-safe --release --features "metal,textlayout" --target aarch64-apple-ios
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -3489,7 +3489,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios-sim
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios-sim with features metal,textlayout'
+    - name: 'Build skia-safe for aarch64-apple-ios-sim with features metal,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3506,7 +3506,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "metal,textlayout" --target aarch64-apple-ios-sim
+        cargo build -p skia-safe --release --features "metal,textlayout" --target aarch64-apple-ios-sim
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -3566,7 +3566,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-ios with features metal,textlayout'
+    - name: 'Build skia-safe for x86_64-apple-ios with features metal,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3583,7 +3583,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "metal,textlayout" --target x86_64-apple-ios
+        cargo build -p skia-safe --release --features "metal,textlayout" --target x86_64-apple-ios
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -3661,7 +3661,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-darwin with features gl,svg,textlayout'
+    - name: 'Build skia-safe for x86_64-apple-darwin with features gl,svg,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3678,7 +3678,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "gl,svg,textlayout" --target x86_64-apple-darwin
+        cargo build -p skia-safe --release --features "gl,svg,textlayout" --target x86_64-apple-darwin
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -3738,7 +3738,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-darwin
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-darwin with features gl,svg,textlayout'
+    - name: 'Build skia-safe for aarch64-apple-darwin with features gl,svg,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3755,7 +3755,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "gl,svg,textlayout" --target aarch64-apple-darwin
+        cargo build -p skia-safe --release --features "gl,svg,textlayout" --target aarch64-apple-darwin
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -3815,7 +3815,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios with features gl,svg,textlayout'
+    - name: 'Build skia-safe for aarch64-apple-ios with features gl,svg,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3832,7 +3832,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "gl,svg,textlayout" --target aarch64-apple-ios
+        cargo build -p skia-safe --release --features "gl,svg,textlayout" --target aarch64-apple-ios
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -3892,7 +3892,7 @@ jobs:
       run: |
         rustup target add aarch64-apple-ios-sim
 
-    - name: 'Build all targets in skia-safe for aarch64-apple-ios-sim with features gl,svg,textlayout'
+    - name: 'Build skia-safe for aarch64-apple-ios-sim with features gl,svg,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3909,7 +3909,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "gl,svg,textlayout" --target aarch64-apple-ios-sim
+        cargo build -p skia-safe --release --features "gl,svg,textlayout" --target aarch64-apple-ios-sim
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -3969,7 +3969,7 @@ jobs:
       run: |
         rustup target add x86_64-apple-ios
 
-    - name: 'Build all targets in skia-safe for x86_64-apple-ios with features gl,svg,textlayout'
+    - name: 'Build skia-safe for x86_64-apple-ios with features gl,svg,textlayout'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3986,7 +3986,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --all-targets --release --features "gl,svg,textlayout" --target x86_64-apple-ios
+        cargo build -p skia-safe --release --features "gl,svg,textlayout" --target x86_64-apple-ios
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}

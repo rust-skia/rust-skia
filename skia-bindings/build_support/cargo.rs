@@ -99,6 +99,16 @@ impl Target {
         let (arch, _vendor, _system, abi) = self.as_strs();
         (arch, abi)
     }
+
+    // A path component for building Linux include paths, separated by `-` without vendor.
+    pub fn include_path_component(&self) -> String {
+        let abi = self
+            .abi
+            .as_deref()
+            .map(|abi| format!("-{abi}"))
+            .unwrap_or_default();
+        format!("{}-{}{}", self.architecture, self.system, abi)
+    }
 }
 
 impl Display for Target {
