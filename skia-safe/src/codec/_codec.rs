@@ -1,10 +1,9 @@
 use std::marker::PhantomData;
-use std::{ffi, ffi::CStr, fmt, io, mem, ptr, result};
+use std::{ffi, ffi::CStr, fmt, io, mem, ptr};
 
-use skia_bindings::{self as sb, SkCodec, SkCodec_FrameInfo, SkCodec_Options, SkStream};
+use skia_bindings::{self as sb, SkCodec, SkCodec_FrameInfo, SkCodec_Options};
 
 use super::codec_animation;
-use crate::interop::RustStream;
 use crate::{
     prelude::*, yuva_pixmap_info::SupportedDataTypes, AlphaType, Data, EncodedImageFormat,
     EncodedOrigin, IRect, ISize, Image, ImageInfo, Pixmap, YUVAPixmapInfo, YUVAPixmaps,
@@ -349,27 +348,65 @@ impl Codec<'_> {
     }
 }
 
-pub trait Decoder {
-    const ID: &'static str;
-    fn is_format(data: &[u8]) -> bool;
+pub mod codecs {
+    use std::{fmt, io, ptr, result, str};
 
-    // TODO: decode_data (use std::io::Cursor in the meantime).
+    use skia_bindings::{self as sb, SkCodecs_Decoder};
 
-    fn decode_stream(stream: &mut impl io::Read) -> result::Result<Codec, Result>;
-}
+    use super::{safer, Result};
+    use crate::{interop::RustStream, prelude::*, Codec};
 
-pub(crate) fn decode_stream(
-    stream: &mut impl io::Read,
-    native_decode_fn: unsafe extern "C" fn(
-        stream: *mut SkStream,
-        result: *mut Result,
-    ) -> *mut SkCodec,
-) -> result::Result<Codec, Result> {
-    let stream = RustStream::new(stream);
-    let mut result = Result::Unimplemented;
-    let codec = unsafe { native_decode_fn(stream.into_native(), &mut result) };
-    if result == Result::Success {
-        return Ok(Codec::from_ptr(codec).expect("codec"));
+    pub type Decoder = Handle<SkCodecs_Decoder>;
+    unsafe_send_sync!(Decoder);
+
+    impl fmt::Debug for Decoder {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            f.debug_struct("Decoder").field("id", &self.id()).finish()
+        }
     }
-    Err(result)
+
+    impl NativeDrop for SkCodecs_Decoder {
+        fn drop(&mut self) {
+            unsafe { sb::C_SkCodecs_Decoder_destruct(self) }
+        }
+    }
+
+    impl Decoder {
+        pub fn id(&self) -> &'static str {
+            let mut len: usize = 0;
+            let ptr = unsafe { sb::C_SkCodecs_Decoder_getId(self.native(), &mut len) };
+            let chars = unsafe { safer::from_raw_parts(ptr as _, len) };
+            str::from_utf8(chars).expect("Invalid UTF-8 decoder id")
+        }
+
+        pub fn is_format(&self, data: &[u8]) -> bool {
+            unsafe {
+                (self.native().isFormat.expect("Decoder::isFormat is null"))(
+                    data.as_ptr() as _,
+                    data.len(),
+                )
+            }
+        }
+
+        pub fn from_stream<'a>(
+            &self,
+            stream: &'a mut impl io::Read,
+        ) -> result::Result<Codec<'a>, Result> {
+            let stream = RustStream::new(stream);
+            let mut result = Result::Unimplemented;
+            let codec = unsafe {
+                sb::C_SkCodecs_Decoder_MakeFromStream(
+                    self.native(),
+                    // Transfer ownership of the SkStream to the Codec.
+                    stream.into_native(),
+                    &mut result,
+                    ptr::null_mut(),
+                )
+            };
+            if result != Result::Success {
+                return Err(result);
+            }
+            Ok(Codec::from_ptr(codec).expect("Codec is null"))
+        }
+    }
 }

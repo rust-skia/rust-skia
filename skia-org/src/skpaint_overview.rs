@@ -3,8 +3,8 @@ use std::path;
 use skia_safe::{
     color_filters, corner_path_effect, dash_path_effect, discrete_path_effect, gradient_shader,
     line_2d_path_effect, paint, path_1d_path_effect, path_2d_path_effect, scalar, shaders,
-    AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color, Font, FontMgr, FontStyle, MaskFilter,
-    Matrix, Paint, Path, PathEffect, Point, Rect, SamplingOptions, TextBlob, TileMode,
+    AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color, Font, MaskFilter, Matrix, Paint, Path,
+    PathEffect, Point, Rect, SamplingOptions, TextBlob, TileMode,
 };
 
 use crate::{helper::default_typeface, resources, DrawingDriver};

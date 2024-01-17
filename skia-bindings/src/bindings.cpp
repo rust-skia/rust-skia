@@ -196,6 +196,57 @@ extern "C" int C_SkCodec_getRepetitionCount(SkCodec* self) {
     return self->getRepetitionCount();
 }
 
+// SkCodecs
+
+extern "C" const char* C_SkCodecs_Decoder_getId(const SkCodecs::Decoder* decoder, size_t* len) {
+    *len = decoder->id.size();
+    return decoder->id.data();
+}
+
+extern "C" SkCodec* C_SkCodecs_Decoder_MakeFromStream(const SkCodecs::Decoder* decoder, SkStream* stream, SkCodec::Result* result, SkCodecs::DecodeContext context) {
+    return decoder->makeFromStream(std::unique_ptr<SkStream>(stream), result, context).release();
+}
+
+extern "C" void C_SkCodecs_Decoder_destruct(SkCodecs::Decoder* decoder) {
+    decoder->~Decoder();
+}
+
+//
+// codec/*Decoder.h
+//
+
+extern "C" void C_SkBmpDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
+    new (uninitialized) SkCodecs::Decoder(SkBmpDecoder::Decoder());
+}
+
+extern "C" void C_SkGifDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
+    new (uninitialized) SkCodecs::Decoder(SkGifDecoder::Decoder());
+}
+
+extern "C" void C_SkIcoDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
+    new (uninitialized) SkCodecs::Decoder(SkIcoDecoder::Decoder());
+}
+
+extern "C" void C_SkJpegDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
+    new (uninitialized) SkCodecs::Decoder(SkJpegDecoder::Decoder());
+}
+
+extern "C" void C_SkPngDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
+    new (uninitialized) SkCodecs::Decoder(SkPngDecoder::Decoder());
+}
+
+extern "C" void C_SkWbmpDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
+    new (uninitialized) SkCodecs::Decoder(SkWbmpDecoder::Decoder());
+}
+
+#if defined(SK_CODEC_DECODES_WEBP)
+
+extern "C" void C_SkWebpDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
+    new (uninitialized) SkCodecs::Decoder(SkWebpDecoder::Decoder());
+}
+
+#endif
+
 //
 // codec/SkEncodedOrigin.h
 //
@@ -215,71 +266,6 @@ extern "C" bool C_SkPixmapUtils_Orient(SkPixmap& dst, const SkPixmap& src, SkEnc
 extern "C" void C_SkPixmapUtils_SwapWidthHeight(SkImageInfo* uninitialized, const SkImageInfo& info) {
     new (uninitialized) SkImageInfo(SkPixmapUtils::SwapWidthHeight(info));
 }
-
-//
-// codec/*Decoder.h
-//
-
-extern "C" bool C_SkBmpDecoder_IsBmp(const char* buf, size_t size) {
-    return SkBmpDecoder::IsBmp(buf, size);
-}
-
-
-extern "C" SkCodec* C_SkBmpDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
-    return SkBmpDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
-}
-
-extern "C" bool C_SkGifDecoder_IsGif(const char* buf, size_t size) {
-    return SkGifDecoder::IsGif(buf, size);
-}
-
-extern "C" SkCodec* C_SkGifDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
-    return SkGifDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
-}
-
-extern "C" bool C_SkIcoDecoder_IsIco(const char* buf, size_t size) {
-    return SkIcoDecoder::IsIco(buf, size);
-}
-
-extern "C" SkCodec* C_SkIcoDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
-    return SkIcoDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
-}
-
-extern "C" bool C_SkJpegDecoder_IsJpeg(const char* buf, size_t size) {
-    return SkJpegDecoder::IsJpeg(buf, size);
-}
-
-extern "C" SkCodec* C_SkJpegDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
-    return SkJpegDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
-}
-
-extern "C" bool C_SkPngDecoder_IsPng(const char* buf, size_t size) {
-    return SkPngDecoder::IsPng(buf, size);
-}
-
-extern "C" SkCodec* C_SkPngDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
-    return SkPngDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
-}
-
-extern "C" bool C_SkWbmpDecoder_IsWbmp(const char* buf, size_t size) {
-    return SkWbmpDecoder::IsWbmp(buf, size);
-}
-
-extern "C" SkCodec* C_SkWbmpDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
-    return SkWbmpDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
-}
-
-#if defined(SK_CODEC_DECODES_WEBP)
-
-extern "C" bool C_SkWebpDecoder_IsWebp(const char* buf, size_t size) {
-    return SkWebpDecoder::IsWebp(buf, size);
-}
-
-extern "C" SkCodec* C_SkWebpDecoder_Decode(SkStream* stream, SkCodec::Result* result) {
-    return SkWebpDecoder::Decode(std::unique_ptr<SkStream>(stream), result, nullptr).release();
-}
-
-#endif
 
 //
 // core/
