@@ -247,7 +247,7 @@ mod tests {
         let font_mgr = FontMgr::default();
         let families = font_mgr.count_families();
         println!("FontMgr families: {families}");
-        // test requires that the font manager returns at least one family for now.
+        // This test requires that the default system font manager returns at least one family for now.
         assert!(families > 0);
         // print all family names and styles
         for i in 0..families {
