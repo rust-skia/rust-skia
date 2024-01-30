@@ -1563,7 +1563,6 @@ extern "C" SkFontMgr* C_SkFontMgr_NewSystem() {
 #elif defined(SK_FONTMGR_CORETEXT_AVAILABLE)
     fontMgr = SkFontMgr_New_CoreText(nullptr);
 #elif defined(SK_FONTMGR_DIRECTWRITE_AVAILABLE)
-    // On windows, both GDI and DIRECTWRITE FontMgr are available, Skia prefers DIRECTWRITE
     fontMgr = SkFontMgr_New_DirectWrite();
 #elif defined(SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE)
     fontMgr = SkFontMgr_New_Custom_Directory("/usr/share/fonts/");
