@@ -1330,20 +1330,6 @@ extern "C" bool C_SkTypeface_isItalic(const SkTypeface* self) {
     return self->isItalic();
 }
 
-extern "C" SkTypeface* C_SkTypeface_MakeFromName(const char familyName[], SkFontStyle fontStyle) {
-    return SkTypeface::MakeFromName(familyName, fontStyle).release();
-}
-
-/*
-extern "C" SkTypeface* C_SkTypeface_MakeFromFile(const char path[], int index) {
-    return SkTypeface::MakeFromFile(path, index).release();
-}
-*/
-
-extern "C" SkTypeface* C_SkTypeface_MakeFromData(SkData* data, int index) {
-    return SkTypeface::MakeFromData(sp(data), index).release();
-}
-
 extern "C" SkTypeface* C_SkTypeface_makeClone(const SkTypeface* self, const SkFontArguments* arguments) {
     return self->makeClone(*arguments).release();
 }
@@ -1356,11 +1342,7 @@ extern "C" void C_SkTypeface_serialize2(const SkTypeface* self, SkWStream* strea
     self->serialize(stream, behavior);
 }
 
-extern "C" SkTypeface* C_SkTypeface_MakeDeserialize(SkStream* stream) {
-    return SkTypeface::MakeDeserialize(stream).release();
-}
-
-extern "C" SkTypeface* C_SkTypeface_MakeDeserialize2(SkStream* stream, SkFontMgr* lastResortFontMgr) {
+extern "C" SkTypeface* C_SkTypeface_MakeDeserialize(SkStream* stream, SkFontMgr* lastResortFontMgr) {
     return SkTypeface::MakeDeserialize(stream, sp(lastResortFontMgr)).release();
 }
 
