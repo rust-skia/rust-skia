@@ -1535,8 +1535,42 @@ extern "C" SkTypeface* C_SkFontMgr_legacyMakeTypeface(const SkFontMgr* self, con
     return self->legacyMakeTypeface(familyName, style).release();
 }
 
-extern "C" SkFontMgr* C_SkFontMgr_RefDefault() {
-    return SkFontMgr::RefDefault().release();
+#if defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
+#include "include/ports/SkFontMgr_fontconfig.h"
+#endif
+
+#if defined(SK_FONTMGR_CORETEXT_AVAILABLE)
+#include "include/ports/SkFontMgr_mac_ct.h"
+#endif
+
+#if defined(SK_FONTMGR_DIRECTWRITE_AVAILABLE)
+#include "include/ports/SkTypeface_win.h"
+#endif
+
+#if defined(SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE)
+#include "include/ports/SkFontMgr_directory.h"
+#endif
+
+#include "include/ports/SkFontMgr_empty.h"
+
+/// Creates a new system font manager, empty if none is available.
+///
+/// From skia/tools/fiddle/examples.cpp
+extern "C" SkFontMgr* C_SkFontMgr_NewSystem() {
+    sk_sp<SkFontMgr> fontMgr;
+#if defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
+    fontMgr = SkFontMgr_New_FontConfig(nullptr);
+#elif defined(SK_FONTMGR_CORETEXT_AVAILABLE)
+    fontMgr = SkFontMgr_New_CoreText(nullptr);
+#elif defined(SK_FONTMGR_DIRECTWRITE_AVAILABLE)
+    // On windows, both GDI and DIRECTWRITE FontMgr are available, Skia prefers DIRECTWRITE
+    fontMgr = SkFontMgr_New_DirectWrite();
+#elif defined(SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE)
+    fontMgr = SkFontMgr_New_Custom_Directory("/usr/share/fonts/");
+#else
+    fontMgr = SkFontMgr_New_Custom_Empty();
+#endif
+    return fontMgr.release();
 }
 
 extern "C" SkFontMgr* C_SkFontMgr_RefEmpty() {

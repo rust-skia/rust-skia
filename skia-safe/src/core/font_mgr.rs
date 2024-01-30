@@ -106,9 +106,10 @@ impl fmt::Debug for FontMgr {
 }
 
 impl FontMgr {
-    // Deprecated by Skia
+    // Deprecated by Skia, but we continue to support it. This returns a font manager with
+    // system fonts for the current platform.
     pub fn new() -> Self {
-        FontMgr::from_ptr(unsafe { sb::C_SkFontMgr_RefDefault() }).unwrap()
+        FontMgr::from_ptr(unsafe { sb::C_SkFontMgr_NewSystem() }).unwrap()
     }
 
     pub fn empty() -> Self {
