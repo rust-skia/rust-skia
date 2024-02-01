@@ -1,11 +1,11 @@
-use std::{ffi, fmt, io, ptr};
+use std::{fmt, io, ptr};
 
 use skia_bindings::{self as sb, SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings};
 
 use crate::{
     font_arguments,
     font_parameters::VariationAxis,
-    interop::{self, MemoryStream, NativeStreamBase, RustStream, RustWStream, StreamAsset},
+    interop::{self, NativeStreamBase, RustStream, RustWStream, StreamAsset},
     prelude::*,
     Data, EncodedText, FontArguments, FontMgr, FontStyle, FourByteTag, GlyphId, Rect, Unichar,
 };
