@@ -109,7 +109,7 @@ pub mod pdf {
 
     impl Default for StructureElementNode {
         fn default() -> Self {
-            Self::new("")
+            Self(ptr::NonNull::new(unsafe { sb::C_SkPDF_StructureElementNode_new() }).unwrap())
         }
     }
 
