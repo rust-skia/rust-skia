@@ -173,7 +173,7 @@ impl Drop for EndResolving {
 }
 
 thread_local! {
-    static THREAD_LOCAL_GET_PROC: RefCell<Option<TraitObject>> = RefCell::new(None);
+    static THREAD_LOCAL_GET_PROC: RefCell<Option<TraitObject>> = const { RefCell::new(None) };
 }
 
 // https://doc.rust-lang.org/1.19.0/std/raw/struct.TraitObject.html
