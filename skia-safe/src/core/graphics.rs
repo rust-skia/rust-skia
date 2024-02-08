@@ -28,6 +28,14 @@ pub fn set_font_cache_count_limit(count: i32) -> i32 {
     unsafe { SkGraphics::SetFontCacheCountLimit(count) }
 }
 
+pub fn typeface_cache_count_limit() -> i32 {
+    unsafe { SkGraphics::GetTypefaceCacheCountLimit() }
+}
+
+pub fn set_typeface_cache_count_limit(count: i32) -> i32 {
+    unsafe { SkGraphics::SetTypefaceCacheCountLimit(count) }
+}
+
 pub fn purge_font_cache() {
     unsafe { SkGraphics::PurgeFontCache() }
 }

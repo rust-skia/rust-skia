@@ -106,9 +106,10 @@ impl fmt::Debug for FontMgr {
 }
 
 impl FontMgr {
-    // Deprecated by Skia
+    // Deprecated by Skia, but we continue to support it. This returns a font manager with
+    // system fonts for the current platform.
     pub fn new() -> Self {
-        FontMgr::from_ptr(unsafe { sb::C_SkFontMgr_RefDefault() }).unwrap()
+        FontMgr::from_ptr(unsafe { sb::C_SkFontMgr_NewSystem() }).unwrap()
     }
 
     pub fn empty() -> Self {
@@ -246,7 +247,7 @@ mod tests {
         let font_mgr = FontMgr::default();
         let families = font_mgr.count_families();
         println!("FontMgr families: {families}");
-        // test requires that the font manager returns at least one family for now.
+        // This test requires that the default system font manager returns at least one family for now.
         assert!(families > 0);
         // print all family names and styles
         for i in 0..families {

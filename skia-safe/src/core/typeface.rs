@@ -1,11 +1,11 @@
-use std::{ffi, fmt, io, ptr};
+use std::{fmt, io, ptr};
 
 use skia_bindings::{self as sb, SkRefCntBase, SkTypeface, SkTypeface_LocalizedStrings};
 
 use crate::{
     font_arguments,
     font_parameters::VariationAxis,
-    interop::{self, MemoryStream, NativeStreamBase, RustStream, RustWStream, StreamAsset},
+    interop::{self, NativeStreamBase, RustStream, RustWStream, StreamAsset},
     prelude::*,
     Data, EncodedText, FontArguments, FontMgr, FontStyle, FourByteTag, GlyphId, Rect, Unichar,
 };
@@ -38,22 +38,12 @@ impl fmt::Debug for Typeface {
             .field("font_style", &self.font_style())
             .field("is_fixed_pitch", &self.is_fixed_pitch())
             .field("unique_id", &self.unique_id())
-            .field("family_name", &self.family_name())
             .field("bounds", &self.bounds())
             .finish()
     }
 }
 
 impl Typeface {
-    #[deprecated(
-        since = "0.69.0",
-        note = "call FontMgr::match_family_style or FontMgr::legacy_make_typeface"
-    )]
-    pub fn new(family_name: impl AsRef<str>, font_style: FontStyle) -> Option<Self> {
-        #[allow(deprecated)]
-        Self::from_name(family_name, font_style)
-    }
-
     pub fn font_style(&self) -> FontStyle {
         FontStyle::from_native_c(self.native().fStyle)
     }
@@ -116,27 +106,6 @@ impl Typeface {
         unsafe { SkTypeface::Equal(face_a.as_ref().native(), face_b.as_ref().native()) }
     }
 
-    #[deprecated(
-        since = "0.69.0",
-        note = "call FontMgr::match_family_style or FontMgr::legacy_make_typeface"
-    )]
-    pub fn from_name(family_name: impl AsRef<str>, font_style: FontStyle) -> Option<Typeface> {
-        let family_name = ffi::CString::new(family_name.as_ref()).ok()?;
-        Typeface::from_ptr(unsafe {
-            sb::C_SkTypeface_MakeFromName(family_name.as_ptr(), *font_style.native())
-        })
-    }
-
-    #[deprecated(since = "0.69.0", note = "call FontMgr::new_from_data instead")]
-    pub fn from_data(data: impl Into<Data>, index: impl Into<Option<usize>>) -> Option<Typeface> {
-        Typeface::from_ptr(unsafe {
-            sb::C_SkTypeface_MakeFromData(
-                data.into().into_ptr(),
-                index.into().unwrap_or_default().try_into().unwrap(),
-            )
-        })
-    }
-
     pub fn clone_with_arguments(&self, arguments: &FontArguments) -> Option<Typeface> {
         Typeface::from_ptr(unsafe { sb::C_SkTypeface_makeClone(self.native(), arguments.native()) })
     }
@@ -151,15 +120,7 @@ impl Typeface {
         Data::from_ptr(unsafe { sb::C_SkTypeface_serialize(self.native(), behavior) }).unwrap()
     }
 
-    // TODO: Deserialize(Read?)
-
-    #[deprecated(since = "0.69.0", note = "use make_deserialize()")]
-    pub fn deserialize(data: &[u8]) -> Option<Typeface> {
-        let mut stream = MemoryStream::from_bytes(data);
-        Typeface::from_ptr(unsafe {
-            sb::C_SkTypeface_MakeDeserialize(stream.native_mut().as_stream_mut())
-        })
-    }
+    // TODO: Wrap Deserialize(Read?)
 
     pub fn make_deserialize(
         mut data: impl io::Read,
@@ -167,7 +128,7 @@ impl Typeface {
     ) -> Option<Typeface> {
         let mut stream = RustStream::new(&mut data);
         Typeface::from_ptr(unsafe {
-            sb::C_SkTypeface_MakeDeserialize2(
+            sb::C_SkTypeface_MakeDeserialize(
                 stream.stream_mut(),
                 last_resort_mgr.into().into_ptr_or_null(),
             )

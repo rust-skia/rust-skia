@@ -17,6 +17,7 @@
         "Codepoints",
         "CORETEXT",
         "cpufeatures",
+        "DIRECTWRITE",
         "Downsample",
         "downsampling",
         "EMCC",

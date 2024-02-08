@@ -178,8 +178,9 @@ impl Font {
         }
     }
 
-    pub fn typeface(&self) -> Option<Typeface> {
+    pub fn typeface(&self) -> Typeface {
         Typeface::from_unshared_ptr(self.native().fTypeface.fPtr)
+            .expect("typeface is expected to be non-null")
     }
 
     pub fn size(&self) -> scalar {
