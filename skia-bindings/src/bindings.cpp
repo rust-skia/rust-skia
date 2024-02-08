@@ -763,6 +763,14 @@ extern "C" bool C_PathUtils_FillPathWithPaint(const SkPath* src, const SkPaint* 
 // Note: bindgen layout is broken, so we are forced to allocate Canvas instances on the heap only.
 //
 
+extern "C" void C_SkCanvas_SaveLayerRec_Construct(SkCanvas::SaveLayerRec* uninitialized) {
+    new (uninitialized) SkCanvas::SaveLayerRec();
+}
+
+extern "C" void C_SkCanvas_SaveLayerRec_destruct(SkCanvas::SaveLayerRec* self) {
+    self->~SaveLayerRec();
+}
+
 extern "C" SkCanvas* C_SkCanvas_newEmpty() {
     return new SkCanvas();
 }

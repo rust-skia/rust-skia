@@ -1,4 +1,3 @@
-use std::mem::MaybeUninit;
 use std::{
     cell::UnsafeCell, convert::TryInto, ffi::CString, fmt, marker::PhantomData, mem, ops::Deref,
     ptr, slice,
@@ -42,7 +41,7 @@ pub struct SaveLayerRec<'a> {
     // we would store a reference to a pointer only.
     bounds: Option<&'a SkRect>,
     paint: Option<&'a SkPaint>,
-    filters: MaybeUninit<SkCanvas_FilterSpan>,
+    filters: SkCanvas_FilterSpan,
     backdrop: Option<&'a SkImageFilter>,
     flags: SaveLayerFlags,
     experimental_backdrop_scale: scalar,
@@ -53,6 +52,22 @@ native_transmutable!(
     SaveLayerRec<'_>,
     save_layer_rec_layout
 );
+
+impl<'a> Default for SaveLayerRec<'a> {
+    /// Sets [`Self::bounds`], [`Self::paint`], and [`Self::backdrop`] to `None`. Clears
+    /// [`Self::flags`].
+    ///
+    /// Returns empty [`SaveLayerRec`]
+    fn default() -> Self {
+        SaveLayerRec::construct(|slr| unsafe { sb::C_SkCanvas_SaveLayerRec_Construct(slr) })
+    }
+}
+
+impl Drop for SaveLayerRec<'_> {
+    fn drop(&mut self) {
+        unsafe { sb::C_SkCanvas_SaveLayerRec_destruct(self.native_mut()) }
+    }
+}
 
 impl fmt::Debug for SaveLayerRec<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -72,40 +87,19 @@ impl fmt::Debug for SaveLayerRec<'_> {
     }
 }
 
-impl<'a> Default for SaveLayerRec<'a> {
-    /// Sets [`Self::bounds`], [`Self::paint`], and [`Self::backdrop`] to `None`. Clears
-    /// [`Self::flags`].
-    ///
-    /// Returns empty [`SaveLayerRec`]
-    fn default() -> Self {
-        SaveLayerRec {
-            bounds: None,
-            paint: None,
-            filters: MaybeUninit::uninit(),
-            backdrop: None,
-            flags: SaveLayerFlags::empty(),
-            experimental_backdrop_scale: 1.0,
-        }
-    }
-}
-
 impl<'a> SaveLayerRec<'a> {
     /// Hints at layer size limit
     #[must_use]
-    pub fn bounds(self, bounds: &'a Rect) -> Self {
-        Self {
-            bounds: Some(bounds.native()),
-            ..self
-        }
+    pub fn bounds(mut self, bounds: &'a Rect) -> Self {
+        self.bounds = Some(bounds.native());
+        self
     }
 
     /// Modifies overlay
     #[must_use]
-    pub fn paint(self, paint: &'a Paint) -> Self {
-        Self {
-            paint: Some(paint.native()),
-            ..self
-        }
+    pub fn paint(mut self, paint: &'a Paint) -> Self {
+        self.paint = Some(paint.native());
+        self
     }
 
     /// If not `None`, this triggers the same initialization behavior as setting
@@ -113,17 +107,16 @@ impl<'a> SaveLayerRec<'a> {
     /// the new layer, rather than initializing the new layer with transparent-black. This is then
     /// filtered by [`Self::backdrop`] (respecting the current clip).
     #[must_use]
-    pub fn backdrop(self, backdrop: &'a ImageFilter) -> Self {
-        Self {
-            backdrop: Some(backdrop.native()),
-            ..self
-        }
+    pub fn backdrop(mut self, backdrop: &'a ImageFilter) -> Self {
+        self.backdrop = Some(backdrop.native());
+        self
     }
 
     /// Preserves LCD text, creates with prior layer contents
     #[must_use]
-    pub fn flags(self, flags: SaveLayerFlags) -> Self {
-        Self { flags, ..self }
+    pub fn flags(mut self, flags: SaveLayerFlags) -> Self {
+        self.flags = flags;
+        self
     }
 }
 
