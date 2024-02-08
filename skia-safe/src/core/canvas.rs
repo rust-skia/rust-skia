@@ -1,8 +1,10 @@
+use std::mem::MaybeUninit;
 use std::{
     cell::UnsafeCell, convert::TryInto, ffi::CString, fmt, marker::PhantomData, mem, ops::Deref,
     ptr, slice,
 };
 
+use sb::SkCanvas_FilterSpan;
 use skia_bindings::{
     self as sb, SkAutoCanvasRestore, SkCanvas, SkCanvas_SaveLayerRec, SkImageFilter, SkPaint,
     SkRect, U8CPU,
@@ -40,6 +42,7 @@ pub struct SaveLayerRec<'a> {
     // we would store a reference to a pointer only.
     bounds: Option<&'a SkRect>,
     paint: Option<&'a SkPaint>,
+    filters: MaybeUninit<SkCanvas_FilterSpan>,
     backdrop: Option<&'a SkImageFilter>,
     flags: SaveLayerFlags,
     experimental_backdrop_scale: scalar,
@@ -78,6 +81,7 @@ impl<'a> Default for SaveLayerRec<'a> {
         SaveLayerRec {
             bounds: None,
             paint: None,
+            filters: MaybeUninit::uninit(),
             backdrop: None,
             flags: SaveLayerFlags::empty(),
             experimental_backdrop_scale: 1.0,
