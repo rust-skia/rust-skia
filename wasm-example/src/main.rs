@@ -1,5 +1,5 @@
 use skia_safe::{
-    gpu::{self, gl::FramebufferInfo, BackendRenderTarget, DirectContext},
+    gpu::{self, gl::FramebufferInfo, DirectContext},
     Color, Paint, PaintStyle, Surface,
 };
 use std::boxed::Box;
@@ -50,7 +50,8 @@ fn init_gl() {
 ///
 /// This needs to be done once per WebGL context.
 fn create_gpu_state() -> GpuState {
-    let context = skia_safe::gpu::DirectContext::new_gl(None, None).unwrap();
+    let interface = skia_safe::gpu::gl::Interface::new_native().unwrap();
+    let context = skia_safe::gpu::DirectContext::new_gl(interface, None).unwrap();
     let framebuffer_info = {
         let mut fboid: gl::types::GLint = 0;
         unsafe { gl::GetIntegerv(gl::FRAMEBUFFER_BINDING, &mut fboid) };
@@ -71,7 +72,7 @@ fn create_gpu_state() -> GpuState {
 /// Create the Skia surface that will be used for rendering.
 fn create_surface(gpu_state: &mut GpuState, width: i32, height: i32) -> Surface {
     let backend_render_target =
-        BackendRenderTarget::new_gl((width, height), 1, 8, gpu_state.framebuffer_info);
+        gpu::backend_render_targets::make_gl((width, height), 1, 8, gpu_state.framebuffer_info);
 
     gpu::surfaces::wrap_backend_render_target(
         &mut gpu_state.context,
@@ -106,16 +107,18 @@ pub extern "C" fn init(width: i32, height: i32) -> Box<State> {
 /// Resize the Skia surface
 ///
 /// This is called from JS when the window is resized.
+/// # Safety
 #[no_mangle]
-pub extern "C" fn resize_surface(state: *mut State, width: i32, height: i32) {
+pub unsafe extern "C" fn resize_surface(state: *mut State, width: i32, height: i32) {
     let state = unsafe { state.as_mut() }.expect("got an invalid state pointer");
     let surface = create_surface(&mut state.gpu_state, width, height);
     state.set_surface(surface);
 }
 
 /// Draw a black circle at the specified coordinates.
+/// # Safety
 #[no_mangle]
-pub extern "C" fn draw_circle(state: *mut State, x: i32, y: i32) {
+pub unsafe extern "C" fn draw_circle(state: *mut State, x: i32, y: i32) {
     let state = unsafe { state.as_mut() }.expect("got an invalid state pointer");
     //state.surface.canvas().clear(Color::WHITE);
     render_circle(&mut state.surface, x as f32, y as f32, 50.);
