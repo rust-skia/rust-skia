@@ -10,15 +10,12 @@ impl NativeDrop for SkColorMatrix {
 }
 
 impl PartialEq for ColorMatrix {
-    // False positive on unconditional recursion,
-    // see <https://github.com/rust-lang/rust-clippy/issues?q=is%3Aissue+unconditional_recursion>
-    #[allow(clippy::unconditional_recursion)]
     fn eq(&self, other: &Self) -> bool {
         let mut array_self = [0.0f32; 20];
         let mut array_other = [0.0f32; 20];
         self.get_row_major(&mut array_self);
         other.get_row_major(&mut array_other);
-        array_self.eq(&array_other)
+        array_self == array_other
     }
 }
 

@@ -37,12 +37,8 @@ impl Deref for Data {
 impl PartialEq for Data {
     // Although there is an implementation in SkData for equality testing, we
     // prefer to stay on the Rust side for that.
-    //
-    // False positive on unconditional recursion,
-    // see <https://github.com/rust-lang/rust-clippy/issues?q=is%3Aissue+unconditional_recursion>
-    #[allow(clippy::unconditional_recursion)]
     fn eq(&self, other: &Self) -> bool {
-        self.deref().eq(other.deref())
+        self.deref() == other.deref()
     }
 }
 
