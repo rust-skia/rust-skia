@@ -257,6 +257,10 @@ pub mod pdf {
         pub creation: Option<DateTime>,
         /// The date and time the document was most recently modified.
         pub modified: Option<DateTime>,
+        /// The natural language of the text in the PDF. If `lang` is empty, the root
+        /// StructureElementNode::lang will be used (if not empty). Text not in
+        /// this language should be marked with StructureElementNode::lang.
+        pub lang: String,
         /// The DPI (pixels-per-inch) at which features without native PDF support
         /// will be rasterized (e.g. draw image with perspective, draw text with
         /// perspective, ...)  A larger DPI would create a PDF that reflects the
@@ -292,6 +296,7 @@ pub mod pdf {
                 producer: format!("Skia/PDF m{}", MILESTONE),
                 creation: Default::default(),
                 modified: Default::default(),
+                lang: Default::default(),
                 raster_dpi: Default::default(),
                 pdf_a: Default::default(),
                 encoding_quality: Default::default(),
@@ -327,6 +332,7 @@ pub mod pdf {
             if let Some(modified) = metadata.modified {
                 internal.fModified = modified.into_native();
             }
+            internal.fLang.set_str(&metadata.lang);
             if let Some(raster_dpi) = metadata.raster_dpi {
                 internal.fRasterDPI = raster_dpi;
             }
