@@ -1,4 +1,4 @@
-use crate::{prelude::*, scalar, Matrix, Path, Point, Vector};
+use crate::{prelude::*, scalar, ContourMeasure, Matrix, Path, Point, Vector};
 use skia_bindings::{self as sb, SkPathMeasure};
 use std::fmt;
 
@@ -38,6 +38,7 @@ impl fmt::Debug for PathMeasure {
             // .field("length", &self.length())
             // .field("is_closed", &self.is_closed())
             // .field("next_contour", &self.next_contour())
+            .field("current_measure", &self.current_measure())
             .finish()
     }
 }
@@ -45,7 +46,7 @@ impl fmt::Debug for PathMeasure {
 /// Warning: Even if you pass in a `PathMeasure` with multiple contours, most of this struct's functions, including `length` only return the value for the first contour on the path (which is why they aren't `const`). You must exhaust `PathMeasure::next_contour`.
 ///
 /// ```
-/// use skia_safe::{PathMeasure, Point};
+/// use skia_safe::{PathMeasure, Point, Path};
 /// use std::f64::consts::PI;
 /// let mut path = Path::circle((0., 0.), 10.0, None);
 /// path.add_path(&Path::circle((100., 100.), 27.0, None), Point::default(), None);
@@ -138,5 +139,29 @@ impl PathMeasure {
     // TODO: rename to has_next_contour()?
     pub fn next_contour(&mut self) -> bool {
         unsafe { self.native_mut().nextContour() }
+    }
+
+    pub fn current_measure(&self) -> &Option<ContourMeasure> {
+        ContourMeasure::from_unshared_ptr_ref(&self.native().fContour.fPtr)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{Path, PathMeasure, Point};
+
+    #[test]
+    fn current_measure() {
+        let mut path = Path::circle((0., 0.), 10.0, None);
+        path.add_path(
+            &Path::circle((100., 100.), 27.0, None),
+            Point::default(),
+            None,
+        );
+        let mut measure = PathMeasure::new(&path, false, None);
+        while measure.next_contour() {
+            eprintln!("contour: {:?}", measure.current_measure());
+        }
+        assert!(measure.current_measure().is_none());
     }
 }
