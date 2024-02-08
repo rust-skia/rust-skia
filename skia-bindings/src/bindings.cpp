@@ -1535,41 +1535,63 @@ extern "C" SkTypeface* C_SkFontMgr_legacyMakeTypeface(const SkFontMgr* self, con
     return self->legacyMakeTypeface(familyName, style).release();
 }
 
-#if defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
-#include "include/ports/SkFontMgr_fontconfig.h"
+// From skia/tools/FontToolUtils.cpp
+
+#if defined(SK_BUILD_FOR_WIN) && (defined(SK_FONTMGR_GDI_AVAILABLE) || defined(SK_FONTMGR_DIRECTWRITE_AVAILABLE))
+#include "include/ports/SkTypeface_win.h"
 #endif
 
-#if defined(SK_FONTMGR_CORETEXT_AVAILABLE)
+#if defined(SK_BUILD_FOR_ANDROID) && defined(SK_FONTMGR_ANDROID_AVAILABLE)
+#include "include/ports/SkFontMgr_android.h"
+#endif
+
+#if defined(SK_FONTMGR_CORETEXT_AVAILABLE) && (defined(SK_BUILD_FOR_IOS) || defined(SK_BUILD_FOR_MAC))
 #include "include/ports/SkFontMgr_mac_ct.h"
 #endif
 
-#if defined(SK_FONTMGR_DIRECTWRITE_AVAILABLE)
-#include "include/ports/SkTypeface_win.h"
+#if defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
+#include "include/ports/SkFontMgr_fontconfig.h"
 #endif
 
 #if defined(SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE)
 #include "include/ports/SkFontMgr_directory.h"
 #endif
 
+#if defined(SK_FONTMGR_FREETYPE_EMPTY_AVAILABLE)
 #include "include/ports/SkFontMgr_empty.h"
+#endif
+
+#ifndef SK_FONT_FILE_PREFIX
+#  if defined(SK_BUILD_FOR_MAC) || defined(SK_BUILD_FOR_IOS)
+#    define SK_FONT_FILE_PREFIX "/System/Library/Fonts/"
+#  else
+#    define SK_FONT_FILE_PREFIX "/usr/share/fonts/"
+#  endif
+#endif
 
 /// Creates a new system font manager, empty if none is available.
-///
-/// From skia/tools/fiddle/examples.cpp
 extern "C" SkFontMgr* C_SkFontMgr_NewSystem() {
-    sk_sp<SkFontMgr> fontMgr;
-#if defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
-    fontMgr = SkFontMgr_New_FontConfig(nullptr);
-#elif defined(SK_FONTMGR_CORETEXT_AVAILABLE)
-    fontMgr = SkFontMgr_New_CoreText(nullptr);
-#elif defined(SK_FONTMGR_DIRECTWRITE_AVAILABLE)
-    fontMgr = SkFontMgr_New_DirectWrite();
+    sk_sp<SkFontMgr> mgr;
+#if defined(SK_BUILD_FOR_WIN) && defined(SK_FONTMGR_GDI_AVAILABLE)
+    mgr = SkFontMgr_New_GDI();
+#elif defined(SK_BUILD_FOR_ANDROID) && defined(SK_FONTMGR_ANDROID_AVAILABLE)
+    mgr = SkFontMgr_New_Android(nullptr);
+#elif defined(SK_BUILD_FOR_WIN) && defined(SK_FONTMGR_DIRECTWRITE_AVAILABLE)
+    mgr = SkFontMgr_New_DirectWrite();
+#elif defined(SK_FONTMGR_CORETEXT_AVAILABLE) && (defined(SK_BUILD_FOR_IOS) || defined(SK_BUILD_FOR_MAC))
+    mgr = SkFontMgr_New_CoreText(nullptr);
+#elif defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
+    mgr = SkFontMgr_New_FontConfig(nullptr);
 #elif defined(SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE)
-    fontMgr = SkFontMgr_New_Custom_Directory("/usr/share/fonts/");
+    // In particular, this is used on ChromeOS, which is Linux-like but doesn't have
+    // FontConfig.
+    mgr = SkFontMgr_New_Custom_Directory(SK_FONT_FILE_PREFIX);
+#elif defined(SK_FONTMGR_FREETYPE_EMPTY_AVAILABLE)
+    mgr = SkFontMgr_New_Custom_Empty();
 #else
-    fontMgr = SkFontMgr_New_Custom_Empty();
+    mgr = SkFontMgr::RefEmpty();
 #endif
-    return fontMgr.release();
+    return mgr.release();
 }
 
 extern "C" SkFontMgr* C_SkFontMgr_RefEmpty() {
