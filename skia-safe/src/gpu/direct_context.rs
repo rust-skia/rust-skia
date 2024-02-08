@@ -85,7 +85,7 @@ impl DirectContext {
     // Deprecated in Skia
     #[cfg(feature = "gl")]
     pub fn new_gl<'a>(
-        interface: impl Into<Option<gl::Interface>>,
+        interface: impl Into<gl::Interface>,
         options: impl Into<Option<&'a ContextOptions>>,
     ) -> Option<DirectContext> {
         crate::gpu::direct_contexts::make_gl(interface, options)
