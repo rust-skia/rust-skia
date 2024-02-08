@@ -746,16 +746,21 @@ pub mod icu {
     #[test]
     #[serial_test::serial]
     fn test_text_blob_builder_run_handler() {
+        use crate::{Font, FontMgr, FontStyle};
         init();
         let str = "العربية";
         let mut text_blob_builder_run_handler =
             crate::shaper::TextBlobBuilderRunHandler::new(str, crate::Point::default());
 
-        let shaper = crate::Shaper::new(crate::FontMgr::new());
-
+        let font_mgr = FontMgr::new();
+        let default_typeface = font_mgr
+            .legacy_make_typeface(None, FontStyle::default())
+            .unwrap();
+        let default_font = Font::new(default_typeface, 10.0);
+        let shaper = crate::Shaper::new(font_mgr);
         shaper.shape(
-            "العربية",
-            &crate::Font::default(),
+            str,
+            &default_font,
             false,
             10000.0,
             &mut text_blob_builder_run_handler,
