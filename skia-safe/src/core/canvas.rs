@@ -120,24 +120,6 @@ impl<'a> SaveLayerRec<'a> {
         }
     }
 
-    #[deprecated(
-        since = "0.33.0",
-        note = "removed without replacement, does not set clip_mask"
-    )]
-    #[must_use]
-    pub fn clip_mask(self, _clip_mask: &'a Image) -> Self {
-        self
-    }
-
-    #[deprecated(
-        since = "0.33.0",
-        note = "removed without replacement, does not set clip_matrix"
-    )]
-    #[must_use]
-    pub fn clip_matrix(self, _clip_matrix: &'a Matrix) -> Self {
-        self
-    }
-
     /// Preserves LCD text, creates with prior layer contents
     #[must_use]
     pub fn flags(self, flags: SaveLayerFlags) -> Self {
