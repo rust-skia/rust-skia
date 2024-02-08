@@ -7,12 +7,12 @@ pub mod direct_contexts {
     };
 
     pub fn make_gl<'a>(
-        interface: impl Into<Option<gl::Interface>>,
+        interface: impl Into<gl::Interface>,
         options: impl Into<Option<&'a ContextOptions>>,
     ) -> Option<DirectContext> {
         DirectContext::from_ptr(unsafe {
             sb::C_GrDirectContext_MakeGL(
-                interface.into().into_ptr_or_null(),
+                interface.into().into_ptr(),
                 options.into().native_ptr_or_null(),
             )
         })
