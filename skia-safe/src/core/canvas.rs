@@ -2021,7 +2021,7 @@ impl Canvas {
     /// * `mode` - [`BlendMode`] combining colors and sprites
     /// * `sampling` - [`SamplingOptions`] used when sampling from the atlas image
     /// * `cull_rect` - bounds of transformed sprites for efficient clipping; may be `None`
-    /// * `paint` - [`ColorFilter`], [`ImageFilter`], [`BlendMode`], and so on; may be `None`
+    /// * `paint` - [`crate::ColorFilter`], [`ImageFilter`], [`BlendMode`], and so on; may be `None`
     #[allow(clippy::too_many_arguments)]
     pub fn draw_atlas<'a>(
         &self,
