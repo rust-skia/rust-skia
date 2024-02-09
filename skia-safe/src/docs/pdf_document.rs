@@ -1,13 +1,15 @@
 pub mod pdf {
-    use crate::{
-        interop::{AsStr, DynamicMemoryWStream, SetStr},
-        prelude::*,
-        scalar, Document, MILESTONE,
-    };
+    use std::{ffi::CString, fmt, io, mem, ptr};
+
     use skia_bindings::{
         self as sb, SkPDF_AttributeList, SkPDF_DateTime, SkPDF_Metadata, SkPDF_StructureElementNode,
     };
-    use std::{ffi::CString, fmt, mem, ptr};
+
+    use crate::{
+        interop::{AsStr, RustWStream, SetStr},
+        prelude::*,
+        scalar, Document, MILESTONE,
+    };
 
     pub type AttributeList = Handle<SkPDF_AttributeList>;
     unsafe_send_sync!(AttributeList);
@@ -316,7 +318,10 @@ pub mod pdf {
     /// * `metadata` - a PDFmetadata object.  Any fields may be left empty.
     ///
     /// @returns NULL if there is an error, otherwise a newly created PDF-backed [`Document`].
-    pub fn new_document(metadata: Option<&Metadata>) -> Document {
+    pub fn new_document<'a>(
+        writer: &'a mut impl io::Write,
+        metadata: Option<&Metadata>,
+    ) -> Document<'a> {
         let mut md = InternalMetadata::default();
         if let Some(metadata) = metadata {
             let internal = md.native_mut();
@@ -347,15 +352,13 @@ pub mod pdf {
         #[cfg(all(feature = "textlayout", feature = "embed-icudtl"))]
         crate::icu::init();
 
-        // we can't move the memory stream around anymore as soon it's referred by
-        // the document.
-        let mut memory_stream = Box::pin(DynamicMemoryWStream::new());
+        let mut stream = RustWStream::new(writer);
         let document = RCHandle::from_ptr(unsafe {
-            sb::C_SkPDF_MakeDocument(memory_stream.native_mut().base_mut(), md.native())
+            sb::C_SkPDF_MakeDocument(stream.stream_mut(), md.native())
         })
         .unwrap();
 
-        Document::new(memory_stream, document)
+        Document::new(stream, document)
     }
 
     //
@@ -377,9 +380,13 @@ pub mod pdf {
     }
 }
 
-#[test]
-fn create_attribute_list() {
-    use pdf::AttributeList;
-    let mut _al = AttributeList::default();
-    _al.append_float_array("Owner", "Name", &[1.0, 2.0, 3.0]);
+#[cfg(test)]
+mod tests {
+    use super::pdf;
+
+    #[test]
+    fn create_attribute_list() {
+        let mut _al = pdf::AttributeList::default();
+        _al.append_float_array("Owner", "Name", &[1.0, 2.0, 3.0]);
+    }
 }

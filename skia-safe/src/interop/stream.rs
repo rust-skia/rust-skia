@@ -7,7 +7,7 @@ use crate::{prelude::*, Data};
 use skia_bindings::{
     self as sb, SkDynamicMemoryWStream, SkMemoryStream, SkStream, SkStreamAsset, SkWStream,
 };
-use std::{ffi, fmt, io, marker::PhantomData, mem, ptr};
+use std::{ffi, fmt, io, marker::PhantomData, mem, pin::Pin, ptr};
 
 /// Trait representing an Skia allocated Stream type with a base class of SkStream.
 #[repr(transparent)]
@@ -319,7 +319,9 @@ unsafe extern "C" fn seek_current_trampoline<T: io::Seek>(
 
 #[allow(unused)]
 pub struct RustWStream<'a> {
-    inner: Handle<sb::RustWStream>,
+    /// We need to be able to refer to the inner RustWStream to be referred to by pointer, so box
+    /// it.
+    inner: Pin<Box<Handle<sb::RustWStream>>>,
     _phantom: PhantomData<&'a mut ()>,
 }
 
@@ -341,14 +343,14 @@ impl NativeDrop for sb::RustWStream {
 impl<'a> RustWStream<'a> {
     pub fn new<T: io::Write>(writer: &'a mut T) -> Self {
         return RustWStream {
-            inner: Handle::construct(|ptr| unsafe {
+            inner: Box::pin(Handle::construct(|ptr| unsafe {
                 sb::C_RustWStream_construct(
                     ptr,
                     writer as *mut T as *mut ffi::c_void,
                     Some(write_trampoline::<T>),
                     Some(flush_trampoline::<T>),
                 );
-            }),
+            })),
             _phantom: PhantomData,
         };
 
