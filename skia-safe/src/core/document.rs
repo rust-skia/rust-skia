@@ -1,13 +1,13 @@
-use crate::{interop::DynamicMemoryWStream, prelude::*, Canvas, Data, Rect, Size};
-use core::fmt;
-use skia_bindings::{self as sb, SkDocument, SkRefCntBase};
-use std::{pin::Pin, ptr};
+use std::{fmt, ptr};
 
-pub struct Document<State = state::Open> {
-    // note: order matters here, first the document must be
-    // dropped _and then_ the stream.
+use skia_bindings::{self as sb, SkDocument, SkRefCntBase};
+
+use crate::{interop::RustWStream, prelude::*, Canvas, Rect, Size};
+
+pub struct Document<'a, State = state::Open> {
+    // Order matters here, first the document must be dropped _and then_ the stream.
     document: RCHandle<SkDocument>,
-    stream: Pin<Box<DynamicMemoryWStream>>,
+    stream: RustWStream<'a>,
 
     state: State,
 }
@@ -18,7 +18,7 @@ impl NativeRefCountedBase for SkDocument {
     type Base = SkRefCntBase;
 }
 
-impl<State: fmt::Debug> fmt::Debug for Document<State> {
+impl<State: fmt::Debug> fmt::Debug for Document<'_, State> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Document")
             .field("state", &self.state)
@@ -27,9 +27,11 @@ impl<State: fmt::Debug> fmt::Debug for Document<State> {
 }
 
 pub mod state {
-    use crate::Canvas;
-    use skia_bindings::SkCanvas;
     use std::{fmt, ptr};
+
+    use skia_bindings::SkCanvas;
+
+    use crate::Canvas;
 
     /// Document is currently open. May contain several pages.
     #[derive(Debug)]
@@ -56,18 +58,15 @@ pub mod state {
     }
 }
 
-impl<State> Document<State> {
+impl<State> Document<'_, State> {
     pub fn abort(mut self) {
         unsafe { self.document.native_mut().abort() }
         drop(self)
     }
 }
 
-impl Document<state::Open> {
-    pub(crate) fn new(
-        stream: Pin<Box<DynamicMemoryWStream>>,
-        document: RCHandle<SkDocument>,
-    ) -> Self {
+impl<'a> Document<'a, state::Open> {
+    pub(crate) fn new(stream: RustWStream<'a>, document: RCHandle<SkDocument>) -> Self {
         Document {
             document,
             stream,
@@ -86,7 +85,7 @@ impl Document<state::Open> {
         mut self,
         size: impl Into<Size>,
         content: Option<&Rect>,
-    ) -> Document<state::OnPage> {
+    ) -> Document<'a, state::OnPage> {
         let size = size.into();
         let canvas = unsafe {
             self.document.native_mut().beginPage(
@@ -103,20 +102,20 @@ impl Document<state::Open> {
                 canvas: ptr::NonNull::new(canvas).unwrap(),
                 page: self.state.pages + 1,
             },
-        } as _
+        }
     }
 
     /// Close the document and return the encoded representation.
+    ///
     /// This function consumes and drops the document.
-    pub fn close(mut self) -> Data {
+    pub fn close(mut self) {
         unsafe {
             self.document.native_mut().close();
         };
-        self.stream.detach_as_data()
     }
 }
 
-impl Document<state::OnPage> {
+impl<'a> Document<'a, state::OnPage> {
     /// The current page we are currently drawing on.
     pub fn page(&self) -> usize {
         self.state.page
@@ -128,9 +127,10 @@ impl Document<state::OnPage> {
     }
 
     /// Ends the page.
+    ///
     /// This function consumes the document and returns a new open document that
     /// contains the pages drawn so far.
-    pub fn end_page(mut self) -> Document {
+    pub fn end_page(mut self) -> Document<'a> {
         unsafe {
             self.document.native_mut().endPage();
         }
@@ -143,9 +143,9 @@ impl Document<state::OnPage> {
             },
         }
 
-        // TODO: think about providing a close() function that implicitly ends the page
+        // TODO: Think about providing a close() function that implicitly ends the page
         //       and calls close() on the Open document.
-        // TODO: think about providing a begin_page() function that implicitly ends the
+        // TODO: Think about providing a begin_page() function that implicitly ends the
         //       current page.
     }
 }

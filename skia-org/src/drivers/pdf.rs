@@ -12,9 +12,10 @@ impl DrawingDriver for Pdf {
     }
 
     fn draw_image(&mut self, size: (i32, i32), path: &Path, name: &str, func: impl Fn(&Canvas)) {
-        let mut document = skia_safe::pdf::new_document(None).begin_page(size, None);
+        let mut memory = Vec::new();
+        let mut document = skia_safe::pdf::new_document(&mut memory, None).begin_page(size, None);
         func(document.canvas());
-        let data = document.end_page().close();
-        artifact::write_file(data.as_bytes(), path, name, "pdf");
+        document.end_page().close();
+        artifact::write_file(&memory, path, name, "pdf");
     }
 }
