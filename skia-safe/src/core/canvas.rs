@@ -2000,7 +2000,60 @@ impl Canvas {
         self
     }
 
-    // TODO: drawAtlas
+    /// Draws a set of sprites from atlas, using clip, [`Matrix`], and optional [`Paint`] paint.
+    /// paint uses anti-alias, alpha, [`crate::ColorFilter`], [`ImageFilter`], and [`BlendMode`]
+    /// to draw, if present. For each entry in the array, [`Rect`] tex locates sprite in
+    /// atlas, and [`RSXform`] xform transforms it into destination space.
+    ///
+    /// [`crate::MaskFilter`] and [`crate::PathEffect`] on paint are ignored.
+    ///
+    /// xform, tex, and colors if present, must contain the same number of entries.
+    /// Optional colors are applied for each sprite using [`BlendMode`] mode, treating
+    /// sprite as source and colors as destination.
+    /// Optional `cull_rect` is a conservative bounds of all transformed sprites.
+    /// If `cull_rect` is outside of clip, canvas can skip drawing.
+    ///
+    /// * `atlas` - [`Image`] containing sprites
+    /// * `xform` - [`RSXform`] mappings for sprites in atlas
+    /// * `tex` - [`Rect`] locations of sprites in atlas
+    /// * `colors` - one per sprite, blended with sprite using [`BlendMode`]; may be `None`
+    /// * `count` - number of sprites to draw
+    /// * `mode` - [`BlendMode`] combining colors and sprites
+    /// * `sampling` - [`SamplingOptions`] used when sampling from the atlas image
+    /// * `cull_rect` - bounds of transformed sprites for efficient clipping; may be `None`
+    /// * `paint` - [`ColorFilter`], [`ImageFilter`], [`BlendMode`], and so on; may be `None`
+    #[allow(clippy::too_many_arguments)]
+    pub fn draw_atlas<'a>(
+        &self,
+        atlas: &Image,
+        xform: &[RSXform],
+        tex: &[Rect],
+        colors: impl Into<Option<&'a [Color]>>,
+        mode: BlendMode,
+        sampling: impl Into<SamplingOptions>,
+        cull_rect: impl Into<Option<Rect>>,
+        paint: impl Into<Option<&'a Paint>>,
+    ) {
+        let count = xform.len();
+        assert_eq!(tex.len(), count);
+        let colors = colors.into();
+        if let Some(color_slice) = colors {
+            assert_eq!(color_slice.len(), count);
+        }
+        unsafe {
+            self.native_mut().drawAtlas(
+                atlas.native(),
+                xform.native().as_ptr(),
+                tex.native().as_ptr(),
+                colors.native().as_ptr_or_null(),
+                count.try_into().unwrap(),
+                mode,
+                sampling.into().native(),
+                cull_rect.into().native().as_ptr_or_null(),
+                paint.into().native_ptr_or_null(),
+            )
+        }
+    }
 
     /// Draws [`Drawable`] drawable using clip and [`Matrix`], concatenated with
     /// optional matrix.
