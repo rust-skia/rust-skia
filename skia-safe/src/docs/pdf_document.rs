@@ -317,7 +317,7 @@ pub mod pdf {
     ///
     /// * `metadata` - a PDFmetadata object.  Any fields may be left empty.
     ///
-    /// @returns NULL if there is an error, otherwise a newly created PDF-backed [`Document`].
+    /// @returns `None` if there is an error, otherwise a newly created PDF-backed [`Document`].
     pub fn new_document<'a>(
         writer: &'a mut impl io::Write,
         metadata: Option<&Metadata>,
