@@ -18,19 +18,6 @@ pub fn download(url: impl AsRef<str>) -> io::Result<Vec<u8>> {
         eprintln!("Unsupported file: URL {}", url);
         return Err(Error::from(ErrorKind::Unsupported));
     }
-    /*
-    let resp = ureq::get(url).call();
-    match resp {
-        Ok(resp) => {
-            let mut reader = resp.into_reader();
-            let mut data = Vec::new();
-            reader.read_to_end(&mut data)?;
-            Ok(data)
-        }
-        Err(error) => Err(io::Error::new(io::ErrorKind::Other, error.to_string())),
-    }
-    */
-    println!("using curl to download {url}");
     let resp = std::process::Command::new("curl")
         // follow redirects
         .arg("-L")
@@ -46,7 +33,6 @@ pub fn download(url: impl AsRef<str>) -> io::Result<Vec<u8>> {
             // ideally, we would redirect response to a file directly, but lets take it one step at a time.
             let result = out.stdout;
             if out.status.success() {
-                println!("curl success");
                 Ok(result)
             } else {
                 Err(io::Error::new(
