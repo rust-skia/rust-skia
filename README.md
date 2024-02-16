@@ -39,16 +39,16 @@ For other platforms, more information is available at the [OpenSSL crate documen
 
 ### Platform Support, Build Targets, and Prebuilt Binaries
 
-Because building Skia takes a lot of time and needs tools that may be missing, the skia-bindings crate's `build.rs` tries to download prebuilt binaries from [the skia-binaries repository](https://github.com/rust-skia/skia-binaries/releases).
+Because building Skia takes a lot of time and needs tools that may be missing, the skia-bindings crate's `build.rs` attempts to download prebuilt binaries from [the skia-binaries repository](https://github.com/rust-skia/skia-binaries/releases) using the `curl` command line tool.
 
-| Platform                          | Binaries                                           |
-| --------------------------------- | -------------------------------------------------- |
-| Windows                           | `x86_64-pc-windows-msvc`                           |
-| Linux Ubuntu 16+<br />CentOS 7, 8 | `x86_64-unknown-linux-gnu`                         |
-| macOS                             | `x86_64-apple-darwin`                              |
-| Android                           | `aarch64-linux-android`<br/>`x86_64-linux-android` |
-| iOS                               | `aarch64-apple-ios`<br/>`x86_64-apple-ios`         |
-| WebAssembly                       | `wasm32-unknown-emscripten`                        |
+| Platform                          | Binaries                                                   |
+| --------------------------------- | ---------------------------------------------------------- |
+| Windows                           | `x86_64-pc-windows-msvc`                                   |
+| Linux Ubuntu 16+<br />CentOS 7, 8 | `x86_64-unknown-linux-gnu`<br/>`aarch64-unknown-linux-gnu` |
+| macOS                             | `x86_64-apple-darwin`<br/>`aarch64-apple-darwin`           |
+| Android                           | `aarch64-linux-android`<br/>`x86_64-linux-android`         |
+| iOS                               | `aarch64-apple-ios`<br/>`x86_64-apple-ios`                 |
+| WebAssembly                       | `wasm32-unknown-emscripten`                                |
 
 ### Wrappers & Codecs & Supported Features
 
