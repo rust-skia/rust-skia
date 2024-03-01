@@ -1534,6 +1534,10 @@ extern "C" SkTypeface* C_SkFontMgr_matchFamilyStyleCharacter(
     return self->matchFamilyStyleCharacter(familyName, *style, bcp47, bcp47Count, character).release();
 }
 
+extern "C" SkTypeface* C_SkFontMgr_makeFromData(const SkFontMgr* self, SkData* data, int ttcIndex) {
+    return self->makeFromData(sp(data), ttcIndex).release();
+}
+
 // note: this function _consumes_ / deletes the stream.
 extern "C" SkTypeface* C_SkFontMgr_makeFromStream(const SkFontMgr* self, SkStreamAsset* stream, int ttcIndex) {
     return self->makeFromStream(std::unique_ptr<SkStreamAsset>(stream), ttcIndex).release();
