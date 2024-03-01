@@ -3,6 +3,10 @@ use super::{generic, prelude::*};
 pub struct Linux;
 
 impl PlatformDetails for Linux {
+    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
+        true
+    }
+
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
         gn_args(config, builder);
 

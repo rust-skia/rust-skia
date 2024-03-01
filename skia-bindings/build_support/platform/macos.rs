@@ -8,6 +8,10 @@ use super::prelude::*;
 pub struct MacOs;
 
 impl PlatformDetails for MacOs {
+    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
+        false
+    }
+
     fn gn_args(&self, _config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
         // Skia will take care to set a specific `--target` for the current macOS version. So we
         // don't push another target `--target` that may conflict.

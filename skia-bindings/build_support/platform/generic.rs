@@ -3,6 +3,10 @@ use super::prelude::*;
 pub struct Generic;
 
 impl PlatformDetails for Generic {
+    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
+        true
+    }
+
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
         gn_args(config, builder)
     }

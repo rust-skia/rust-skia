@@ -3,6 +3,10 @@ use super::{generic, prelude::*};
 pub struct Emscripten;
 
 impl PlatformDetails for Emscripten {
+    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
+        true
+    }
+
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
         let features = &config.features;
 
@@ -11,7 +15,6 @@ impl PlatformDetails for Emscripten {
             .arg("cxx", quote("em++"))
             .arg("ar", quote("emar"))
             .arg("skia_gl_standard", quote("webgl"))
-            .arg("skia_use_freetype", yes())
             .arg("skia_use_webgl", yes_if(features.gpu()))
             .arg("target_cpu", quote("wasm"));
 
