@@ -849,17 +849,49 @@ pub(crate) mod definitions {
                 if let Some(stripped) = d.strip_prefix(PREFIX) {
                     stripped
                 } else {
-                    panic!("missing '{PREFIX}' prefix from a definition")
+                    panic!("Missing '{PREFIX}' prefix from a definition")
                 }
             })
             .map(|d| {
                 let items: Vec<&str> = d.splitn(2, '=').collect();
                 match items.len() {
                     1 => (items[0].to_string(), None),
-                    2 => (items[0].to_string(), Some(items[1].to_string())),
-                    _ => panic!("internal error"),
+                    2 => (items[0].to_string(), Some(unescape_ninja(items[1]))),
+                    _ => panic!("Internal error"),
                 }
             })
             .collect()
+    }
+
+    fn unescape_ninja(input: &str) -> String {
+        unescape(&unescape(input, '$'), '\\')
+    }
+
+    fn unescape(input: &str, escape_character: char) -> String {
+        let mut result = String::with_capacity(input.len());
+        let mut chars = input.chars().peekable();
+
+        while let Some(ch) = chars.next() {
+            if ch == escape_character {
+                if let Some(&next_ch) = chars.peek() {
+                    chars.next();
+                    result.push(next_ch);
+                }
+            } else {
+                result.push(ch);
+            }
+        }
+
+        result
+    }
+
+    #[cfg(test)]
+    mod tests {
+        #[test]
+        fn properly_unescape_trivial_abi() {
+            // This happens if SKIA_DEBUG=1
+            let str = r#"\[\[clang$:$:trivial_abi\]\]"#;
+            assert_eq!(super::unescape_ninja(str), "[[clang::trivial_abi]]");
+        }
     }
 }

@@ -45,6 +45,7 @@
         "objc",
         "objcc",
         "Paeth",
+        "peekable",
         "Procs",
         "rasterizing",
         "RGBX",
