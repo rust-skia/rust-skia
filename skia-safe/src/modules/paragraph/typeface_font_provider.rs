@@ -106,15 +106,15 @@ impl TypefaceFontProvider {
         Self::from_ptr(unsafe { sb::C_TypefaceFontProvider_new() }).unwrap()
     }
 
-    pub fn register_typeface(
+    pub fn register_typeface<'a>(
         &mut self,
         typeface: Typeface,
-        alias: Option<impl AsRef<str>>,
+        alias: impl Into<Option<&'a str>>,
     ) -> usize {
         unsafe {
-            match alias {
+            match alias.into() {
                 Some(alias) => {
-                    let alias = interop::String::from_str(alias.as_ref());
+                    let alias = interop::String::from_str(alias);
                     sb::C_TypefaceFontProvider_registerTypeface(
                         self.native_mut(),
                         typeface.into_ptr(),

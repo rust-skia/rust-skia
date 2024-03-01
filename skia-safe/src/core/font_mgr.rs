@@ -197,6 +197,21 @@ impl FontMgr {
         panic!("Removed without replacement")
     }
 
+    // pub fn new_from_data(
+    //     &self,
+    //     bytes: &[u8],
+    //     ttc_index: impl Into<Option<usize>>,
+    // ) -> Option<Typeface> {
+    //     let data: Data = Data::new_copy(bytes);
+    //     Typeface::from_ptr(unsafe {
+    //         sb::C_SkFontMgr_makeFromData(
+    //             self.native(),
+    //             data.into_ptr(),
+    //             ttc_index.into().unwrap_or_default().try_into().unwrap(),
+    //         )
+    //     })
+    // }
+
     pub fn new_from_data(
         &self,
         bytes: &[u8],
@@ -206,7 +221,7 @@ impl FontMgr {
         let mut stream = stream.detach_as_stream();
         Typeface::from_ptr(unsafe {
             let stream_ptr = stream.native_mut() as *mut _;
-            // makeFromStream takes ownership of the stream, so don't call drop on it.
+            // makeFromStream takes ownership of the stream, so don't drop it.
             mem::forget(stream);
             sb::C_SkFontMgr_makeFromStream(
                 self.native(),
