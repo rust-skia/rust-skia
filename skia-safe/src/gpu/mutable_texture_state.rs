@@ -45,12 +45,14 @@ impl MutableTextureState {
 
     #[cfg(feature = "vulkan")]
     pub fn vk_image_layout(&self) -> sb::VkImageLayout {
-        unsafe { sb::C_MutableTextureState_getVkImageLayout(self.native()) }
+        assert_eq!(self.backend(), BackendApi::Vulkan);
+        unsafe { sb::C_MutableTextureStates_getVkImageLayout(self.native()) }
     }
 
     #[cfg(feature = "vulkan")]
     pub fn queue_family_index(&self) -> u32 {
-        unsafe { sb::C_MutableTextureState_getQueueFamilyIndex(self.native()) }
+        assert_eq!(self.backend(), BackendApi::Vulkan);
+        unsafe { sb::C_MutableTextureStates_getVkQueueFamilyIndex(self.native()) }
     }
 
     pub fn backend(&self) -> BackendApi {
