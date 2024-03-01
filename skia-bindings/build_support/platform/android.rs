@@ -9,6 +9,10 @@ pub struct Android;
 const API_LEVEL: &str = "26";
 
 impl PlatformDetails for Android {
+    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
+        true
+    }
+
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
         // TODO: this may belong into BuildConfiguration
         let (arch, _) = config.target.arch_abi();

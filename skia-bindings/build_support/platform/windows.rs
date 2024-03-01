@@ -6,6 +6,10 @@ use crate::build_support::{cargo, clang};
 pub struct Msvc;
 
 impl PlatformDetails for Msvc {
+    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
+        false
+    }
+
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
         if let Some(win_vc) = resolve_vc() {
             builder.arg(
@@ -66,6 +70,10 @@ impl PlatformDetails for Msvc {
 pub struct Generic;
 
 impl PlatformDetails for Generic {
+    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
+        false
+    }
+
     fn gn_args(&self, _config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
         builder.target_os_and_default_cpu("win");
     }

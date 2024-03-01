@@ -15,6 +15,10 @@ const MIN_IOS_VERSION_M1: &str = "14";
 const MIN_IOS_VERSION_CATALYST: &str = "14";
 
 impl PlatformDetails for Ios {
+    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
+        false
+    }
+
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
         let (arch, abi) = config.target.arch_abi();
 

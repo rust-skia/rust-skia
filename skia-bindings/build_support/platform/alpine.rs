@@ -3,6 +3,10 @@ use super::{linux, prelude::*};
 pub struct Musl;
 
 impl PlatformDetails for Musl {
+    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
+        true
+    }
+
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
         linux::gn_args(config, builder);
         let target = &config.target;

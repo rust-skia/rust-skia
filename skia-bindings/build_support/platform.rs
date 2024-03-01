@@ -18,6 +18,10 @@ pub mod linux;
 pub mod macos;
 mod windows;
 
+pub fn uses_freetype(config: &BuildConfiguration) -> bool {
+    details(&config.target).uses_freetype(config)
+}
+
 pub fn gn_args(config: &BuildConfiguration, mut builder: GnArgsBuilder) -> Vec<(String, String)> {
     details(&config.target).gn_args(config, &mut builder);
     builder.into_gn_args()
@@ -48,6 +52,8 @@ pub fn filter_features(
 }
 
 pub trait PlatformDetails {
+    /// We need this information relatively early on to help parameterizing GN.
+    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool;
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder);
     fn bindgen_args(&self, _target: &Target, _builder: &mut BindgenArgsBuilder) {}
     fn link_libraries(&self, features: &Features) -> Vec<String>;
