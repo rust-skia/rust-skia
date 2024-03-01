@@ -3,7 +3,8 @@ use std::{ffi::CString, fmt, mem, os::raw::c_char, ptr};
 
 use crate::{
     interop::{self, DynamicMemoryWStream},
-    prelude::*, FontStyle, Typeface, Unichar,
+    prelude::*,
+    FontStyle, Typeface, Unichar,
 };
 
 pub type FontStyleSet = RCHandle<SkFontStyleSet>;
