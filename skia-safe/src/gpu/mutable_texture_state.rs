@@ -3,7 +3,7 @@ use std::fmt;
 use skia_bindings::{self as sb, skgpu_MutableTextureState, SkRefCntBase};
 
 use super::BackendApi;
-use crate::prelude::*;
+use crate::{gpu, prelude::*};
 
 pub type MutableTextureState = RCHandle<skgpu_MutableTextureState>;
 unsafe_send_sync!(MutableTextureState);
@@ -23,8 +23,14 @@ impl fmt::Debug for MutableTextureState {
         let mut str = f.debug_struct("MutableTextureState");
         #[cfg(feature = "vulkan")]
         {
-            str.field("image_layout", &self.vk_image_layout())
-                .field("queue_family_index", &self.queue_family_index());
+            str.field(
+                "image_layout",
+                &gpu::vk::mutable_texture_states::get_vk_image_layout(self),
+            )
+            .field(
+                "queue_family_index",
+                &gpu::vk::mutable_texture_states::get_vk_queue_family_index(self),
+            );
         }
         str.field("backend", &self.backend()).finish()
     }
@@ -39,20 +45,30 @@ impl MutableTextureState {
     }
 
     #[cfg(feature = "vulkan")]
+    #[deprecated(
+        since = "0.0.0",
+        note = "use gpu::vk::mutable_texture_states::new_vulkan()"
+    )]
     pub fn new_vk(layout: crate::gpu::vk::ImageLayout, queue_family_index: u32) -> Self {
         crate::gpu::vk::mutable_texture_states::new_vulkan(layout, queue_family_index)
     }
 
     #[cfg(feature = "vulkan")]
+    #[deprecated(
+        since = "0.0.0",
+        note = "use gpu::vk::mutable_texture_states::get_vk_image_layout()"
+    )]
     pub fn vk_image_layout(&self) -> sb::VkImageLayout {
-        assert_eq!(self.backend(), BackendApi::Vulkan);
-        unsafe { sb::C_MutableTextureStates_getVkImageLayout(self.native()) }
+        crate::gpu::vk::mutable_texture_states::get_vk_image_layout(self)
     }
 
     #[cfg(feature = "vulkan")]
+    #[deprecated(
+        since = "0.0.0",
+        note = "use gpu::vk::mutable_texture_states::get_vk_queue_family_index()"
+    )]
     pub fn queue_family_index(&self) -> u32 {
-        assert_eq!(self.backend(), BackendApi::Vulkan);
-        unsafe { sb::C_MutableTextureStates_getVkQueueFamilyIndex(self.native()) }
+        crate::gpu::vk::mutable_texture_states::get_vk_queue_family_index(self)
     }
 
     pub fn backend(&self) -> BackendApi {
