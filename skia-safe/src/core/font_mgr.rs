@@ -3,8 +3,7 @@ use std::{ffi::CString, fmt, mem, os::raw::c_char, ptr};
 
 use crate::{
     interop::{self, DynamicMemoryWStream},
-    prelude::*,
-    Data, FontStyle, Typeface, Unichar,
+    prelude::*, FontStyle, Typeface, Unichar,
 };
 
 pub type FontStyleSet = RCHandle<SkFontStyleSet>;
@@ -221,7 +220,7 @@ impl FontMgr {
         let mut stream = stream.detach_as_stream();
         Typeface::from_ptr(unsafe {
             let stream_ptr = stream.native_mut() as *mut _;
-            // makeFromStream takes ownership of the stream, so don't drop on it.
+            // makeFromStream takes ownership of the stream, so don't drop it.
             mem::forget(stream);
             sb::C_SkFontMgr_makeFromStream(
                 self.native(),
