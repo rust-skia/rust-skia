@@ -1584,12 +1584,13 @@ extern "C" SkTypeface* C_SkFontMgr_legacyMakeTypeface(const SkFontMgr* self, con
 /// Creates a new system font manager, empty if none is available.
 extern "C" SkFontMgr* C_SkFontMgr_NewSystem() {
     sk_sp<SkFontMgr> mgr;
-#if defined(SK_BUILD_FOR_WIN) && defined(SK_FONTMGR_GDI_AVAILABLE)
+// Prefer DirectWrite over GDI, see <https://github.com/rust-skia/rust-skia/issues/948>
+#if defined(SK_BUILD_FOR_WIN) && defined(SK_FONTMGR_DIRECTWRITE_AVAILABLE)
+    mgr = SkFontMgr_New_DirectWrite();
+#elif defined(SK_BUILD_FOR_WIN) && defined(SK_FONTMGR_GDI_AVAILABLE)
     mgr = SkFontMgr_New_GDI();
 #elif defined(SK_BUILD_FOR_ANDROID) && defined(SK_FONTMGR_ANDROID_AVAILABLE)
     mgr = SkFontMgr_New_Android(nullptr);
-#elif defined(SK_BUILD_FOR_WIN) && defined(SK_FONTMGR_DIRECTWRITE_AVAILABLE)
-    mgr = SkFontMgr_New_DirectWrite();
 #elif defined(SK_FONTMGR_CORETEXT_AVAILABLE) && (defined(SK_BUILD_FOR_IOS) || defined(SK_BUILD_FOR_MAC))
     mgr = SkFontMgr_New_CoreText(nullptr);
 #elif defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
