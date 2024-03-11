@@ -91,15 +91,13 @@ impl fmt::Debug for SurfaceProps {
 }
 
 impl SurfaceProps {
-    // TODO: do we need to wrap the constructor(s) with InitType?
-
     pub fn new(flags: SurfacePropsFlags, pixel_geometry: PixelGeometry) -> SurfaceProps {
         Self::from_native_c(unsafe {
             SkSurfaceProps::new1(flags.bits(), pixel_geometry.into_native())
         })
     }
 
-    pub fn new2(
+    pub fn new_with_text_properties(
         flags: SurfacePropsFlags,
         pixel_geometry: PixelGeometry,
         text_contrast: scalar,
@@ -121,7 +119,7 @@ impl SurfaceProps {
 
     #[must_use]
     pub fn clone_with_pixel_geometry(&self, new_pixel_geometry: PixelGeometry) -> Self {
-        Self::new2(
+        Self::new_with_text_properties(
             self.flags(),
             new_pixel_geometry,
             self.text_contrast(),
