@@ -46,7 +46,7 @@ impl MutableTextureState {
 
     #[cfg(feature = "vulkan")]
     #[deprecated(
-        since = "0.0.0",
+        since = "0.72.0",
         note = "use gpu::vk::mutable_texture_states::new_vulkan()"
     )]
     pub fn new_vk(layout: crate::gpu::vk::ImageLayout, queue_family_index: u32) -> Self {
@@ -55,7 +55,7 @@ impl MutableTextureState {
 
     #[cfg(feature = "vulkan")]
     #[deprecated(
-        since = "0.0.0",
+        since = "0.72.0",
         note = "use gpu::vk::mutable_texture_states::get_vk_image_layout()"
     )]
     pub fn vk_image_layout(&self) -> sb::VkImageLayout {
@@ -64,7 +64,7 @@ impl MutableTextureState {
 
     #[cfg(feature = "vulkan")]
     #[deprecated(
-        since = "0.0.0",
+        since = "0.72.0",
         note = "use gpu::vk::mutable_texture_states::get_vk_queue_family_index()"
     )]
     pub fn queue_family_index(&self) -> u32 {
