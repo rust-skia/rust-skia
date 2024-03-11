@@ -2,7 +2,7 @@ use std::fmt;
 
 use skia_bindings::{self as sb, SkPixelGeometry, SkSurfaceProps};
 
-use crate::prelude::*;
+use crate::{prelude::*, scalar};
 
 // TODO: use the enum rewriter and strip underscores?
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Default)]
@@ -39,6 +39,8 @@ impl PixelGeometry {
 bitflags! {
     #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct SurfacePropsFlags: u32 {
+        #[allow(clippy::unnecessary_cast)]
+        const DEFAULT = sb::SkSurfaceProps_Flags_kDefault_Flag as u32;
         #[allow(clippy::unnecessary_cast)]
         const USE_DEVICE_INDEPENDENT_FONTS =
             sb::SkSurfaceProps_Flags_kUseDeviceIndependentFonts_Flag as u32;
@@ -82,16 +84,32 @@ impl fmt::Debug for SurfaceProps {
         f.debug_struct("SurfaceProps")
             .field("flags", &self.flags())
             .field("pixel_geometry", &self.pixel_geometry())
+            .field("text_contrast", &self.text_contrast())
+            .field("text_gamma", &self.text_gamma())
             .finish()
     }
 }
 
 impl SurfaceProps {
-    // TODO: do we need to wrap the constructor(s) with InitType?
-
     pub fn new(flags: SurfacePropsFlags, pixel_geometry: PixelGeometry) -> SurfaceProps {
         Self::from_native_c(unsafe {
             SkSurfaceProps::new1(flags.bits(), pixel_geometry.into_native())
+        })
+    }
+
+    pub fn new_with_text_properties(
+        flags: SurfacePropsFlags,
+        pixel_geometry: PixelGeometry,
+        text_contrast: scalar,
+        text_gamma: scalar,
+    ) -> SurfaceProps {
+        Self::from_native_c(unsafe {
+            SkSurfaceProps::new2(
+                flags.bits(),
+                pixel_geometry.into_native(),
+                text_contrast,
+                text_gamma,
+            )
         })
     }
 
@@ -101,11 +119,24 @@ impl SurfaceProps {
 
     #[must_use]
     pub fn clone_with_pixel_geometry(&self, new_pixel_geometry: PixelGeometry) -> Self {
-        Self::new(self.flags(), new_pixel_geometry)
+        Self::new_with_text_properties(
+            self.flags(),
+            new_pixel_geometry,
+            self.text_contrast(),
+            self.text_gamma(),
+        )
     }
 
     pub fn pixel_geometry(self) -> PixelGeometry {
         PixelGeometry::from_native_c(self.native().fPixelGeometry)
+    }
+
+    pub fn text_contrast(self) -> scalar {
+        self.native().fTextContrast
+    }
+
+    pub fn text_gamma(self) -> scalar {
+        self.native().fTextGamma
     }
 
     pub fn is_use_device_independent_fonts(self) -> bool {

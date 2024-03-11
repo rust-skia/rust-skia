@@ -193,6 +193,7 @@ impl RefCount for SkColorSpace {
 }
 
 #[test]
+#[serial_test::serial]
 pub fn create_and_clone_colorspaces() {
     ColorSpace::new_srgb();
     let x = ColorSpace::new_srgb_linear();
@@ -201,6 +202,7 @@ pub fn create_and_clone_colorspaces() {
 }
 
 #[test]
+#[serial_test::serial]
 pub fn serialize_and_deserialize() {
     // TODO: it seems that the deserializer deduplicates the
     // srgb colorspace, so fix this test as soon we can create

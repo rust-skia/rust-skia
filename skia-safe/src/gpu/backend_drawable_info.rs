@@ -1,3 +1,5 @@
+// This file moved to gpu/ganesh/vk in Skia.
+// But as long it is used without enabling the vulkan feature, it must stay here.
 #[cfg(feature = "vulkan")]
 use crate::gpu::vk;
 use crate::{gpu::BackendAPI, prelude::*};
