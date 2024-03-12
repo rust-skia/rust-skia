@@ -19,7 +19,7 @@ fn main() -> anyhow::Result<()> {
         paint, Color, ColorType, Paint, Rect,
     };
     use windows::{
-        core::ComInterface,
+        core::Interface,
         Win32::{
             Foundation::HWND,
             Graphics::{
