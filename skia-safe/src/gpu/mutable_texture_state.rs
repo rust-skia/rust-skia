@@ -3,7 +3,7 @@ use std::fmt;
 use skia_bindings::{self as sb, skgpu_MutableTextureState, SkRefCntBase};
 
 use super::BackendApi;
-use crate::{gpu, prelude::*};
+use crate::prelude::*;
 
 pub type MutableTextureState = RCHandle<skgpu_MutableTextureState>;
 unsafe_send_sync!(MutableTextureState);
@@ -25,11 +25,11 @@ impl fmt::Debug for MutableTextureState {
         {
             str.field(
                 "image_layout",
-                &gpu::vk::mutable_texture_states::get_vk_image_layout(self),
+                &crate::gpu::vk::mutable_texture_states::get_vk_image_layout(self),
             )
             .field(
                 "queue_family_index",
-                &gpu::vk::mutable_texture_states::get_vk_queue_family_index(self),
+                &crate::gpu::vk::mutable_texture_states::get_vk_queue_family_index(self),
             );
         }
         str.field("backend", &self.backend()).finish()
