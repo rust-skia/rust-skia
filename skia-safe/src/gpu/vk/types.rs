@@ -175,8 +175,8 @@ impl YcbcrConversionInfo {
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
 pub struct ImageInfo {
-    pub image: vk::Image,
-    pub alloc: Alloc,
+    image: vk::Image,
+    alloc: Alloc,
     pub tiling: vk::ImageTiling,
     pub layout: vk::ImageLayout,
     pub format: vk::Format,
@@ -284,6 +284,28 @@ impl ImageInfo {
             info.protected,
             info.sharing_mode,
         )
+    }
+}
+
+impl ImageInfo {
+    pub fn image(&self) -> &vk::Image {
+        &self.image
+    }
+
+    /// # Safety
+    /// `image` must outlive usages of `self`.
+    pub unsafe fn set_image(&mut self, image: vk::Image) {
+        self.image = image
+    }
+
+    pub fn alloc(&self) -> &Alloc {
+        &self.alloc
+    }
+
+    /// # Safety
+    /// `alloc` must outlive usages of `self`.
+    pub unsafe fn set_alloc(&mut self, alloc: Alloc) {
+        self.alloc = alloc;
     }
 }
 
