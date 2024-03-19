@@ -57,7 +57,6 @@ pub struct FilterOptions {
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Debug)]
-#[allow(deprecated)]
 pub struct SamplingOptions {
     pub max_aniso: i32,
     pub use_cubic: bool,
