@@ -1,5 +1,6 @@
-use crate::{prelude::*, scalar, PathEffect};
 use skia_bindings as sb;
+
+use crate::{scalar, PathEffect};
 
 impl PathEffect {
     pub fn dash(intervals: &[scalar], phase: scalar) -> Option<Self> {

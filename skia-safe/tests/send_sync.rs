@@ -272,7 +272,6 @@ mod textlayout {
 #[cfg(feature = "textlayout")]
 mod shaper {
     use skia_safe::shaper::*;
-    use skia_safe::Shaper;
     use static_assertions::*;
     assert_impl_all!(Shaper: Send, Sync);
     assert_not_impl_any!(FontRunIterator: Send, Sync);

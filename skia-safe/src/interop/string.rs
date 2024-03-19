@@ -19,9 +19,9 @@ impl AsRef<str> for String {
     }
 }
 
-impl ToString for String {
-    fn to_string(&self) -> std::string::String {
-        self.as_str().into()
+impl fmt::Display for String {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.as_str().fmt(f)
     }
 }
 

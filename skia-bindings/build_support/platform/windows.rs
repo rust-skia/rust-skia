@@ -1,7 +1,6 @@
 use std::path::PathBuf;
 
 use super::prelude::*;
-use crate::build_support::{cargo, clang};
 
 pub struct Msvc;
 

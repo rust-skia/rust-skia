@@ -1,9 +1,7 @@
 //! Full build support for the Skia library.
 
 use crate::build_support::{
-    binaries_config,
-    cargo::{self, Target},
-    features,
+    binaries_config, features,
     platform::{self, prelude::*},
 };
 use std::{

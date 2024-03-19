@@ -396,7 +396,7 @@ pub mod codecs {
 
     use skia_bindings::{self as sb, SkCodecs_Decoder};
 
-    use super::{safer, Result};
+    use super::Result;
     use crate::{interop::RustStream, prelude::*, Codec};
 
     pub type Decoder = Handle<SkCodecs_Decoder>;
