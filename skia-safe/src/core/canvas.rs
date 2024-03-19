@@ -1,7 +1,4 @@
-use std::{
-    cell::UnsafeCell, convert::TryInto, ffi::CString, fmt, marker::PhantomData, mem, ops::Deref,
-    ptr, slice,
-};
+use std::{cell::UnsafeCell, ffi::CString, fmt, marker::PhantomData, mem, ops::Deref, ptr, slice};
 
 use sb::SkCanvas_FilterSpan;
 use skia_bindings::{

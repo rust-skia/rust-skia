@@ -1,9 +1,16 @@
-use super::{Device, GetProc, GetProcOf, Instance, PhysicalDevice, Queue, Version};
-use crate::{gpu, prelude::*};
-use ffi::CString;
-use raw::c_char;
+use std::{
+    cell::RefCell,
+    ffi::{self, CString},
+    fmt, mem,
+    ops::Deref,
+    os::raw::{self, c_char},
+    ptr,
+};
+
 use skia_bindings::{self as sb, GrVkExtensionFlags, GrVkFeatureFlags};
-use std::{cell::RefCell, ffi, fmt, mem, ops::Deref, os::raw, ptr};
+
+use super::{Device, GetProc, GetProcOf, Instance, PhysicalDevice, Queue, Version};
+use crate::gpu;
 
 bitflags! {
     #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]

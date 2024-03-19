@@ -1,5 +1,4 @@
 use skia_bindings as sb;
-use std::convert::TryInto;
 
 pub fn swap_rb(dest: &mut [u32], src: &[u32]) {
     assert_eq!(dest.len(), src.len());

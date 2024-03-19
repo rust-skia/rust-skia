@@ -4,7 +4,6 @@ use std::{
 };
 
 use super::prelude::*;
-use crate::build_support::clang;
 
 pub struct Ios;
 

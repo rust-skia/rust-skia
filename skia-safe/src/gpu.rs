@@ -22,7 +22,7 @@ pub use backend_drawable_info::*;
 pub use backend_surface::*;
 pub use context_options::ContextOptions;
 pub use direct_context::*;
-pub use driver_bug_workarounds::DriverBugWorkarounds;
+pub use driver_bug_workarounds::*;
 pub use ganesh::image_ganesh as images;
 pub use gpu_types::*;
 pub use mutable_texture_state::*;

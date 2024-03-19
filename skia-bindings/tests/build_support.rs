@@ -1,6 +1,6 @@
+#![allow(dead_code)]
 #[path = "../build_support"]
 mod build_support {
-    #![allow(dead_code)]
 
     pub mod binaries_config;
     #[cfg(feature = "binary-cache")]

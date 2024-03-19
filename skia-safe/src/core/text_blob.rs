@@ -1,4 +1,4 @@
-use std::{convert::TryInto, fmt, ptr, slice};
+use std::{fmt, ptr, slice};
 
 use skia_bindings::{
     self as sb, SkTextBlob, SkTextBlobBuilder, SkTextBlob_Iter, SkTextBlob_Iter_Run, SkTypeface,

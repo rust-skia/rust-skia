@@ -1,4 +1,4 @@
-use std::{convert::TryInto, ffi::CString, os::raw, path::Path, ptr};
+use std::{ffi::CString, os::raw, path::Path, ptr};
 
 use ash::{
     vk::{self, Handle},
