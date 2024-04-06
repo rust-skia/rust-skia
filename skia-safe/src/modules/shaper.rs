@@ -1,10 +1,15 @@
-use crate::{prelude::*, scalar, Font, FontMgr, FourByteTag, Point, TextBlob};
+use std::{ffi::CStr, fmt, marker::PhantomData, os::raw};
+
 use skia_bindings::{
     self as sb, RustRunHandler, SkShaper, SkShaper_BiDiRunIterator, SkShaper_FontRunIterator,
     SkShaper_LanguageRunIterator, SkShaper_RunHandler, SkShaper_RunIterator,
     SkShaper_ScriptRunIterator, SkTextBlobBuilderRunHandler,
 };
-use std::{ffi::CStr, fmt, marker::PhantomData, os::raw};
+
+use crate::{prelude::*, scalar, Font, FontMgr, FourByteTag, Point, TextBlob};
+
+pub mod core_text;
+pub mod harfbuzz;
 
 pub use run_handler::RunHandler;
 
@@ -31,7 +36,7 @@ impl fmt::Debug for Shaper {
 
 impl Shaper {
     pub fn new_primitive() -> Self {
-        Self::from_ptr(unsafe { sb::C_SkShaper_MakePrimitive() }).unwrap()
+        shapers::primitive()
     }
 
     pub fn new_shaper_driven_wrapper(font_mgr: impl Into<Option<FontMgr>>) -> Option<Self> {
@@ -564,15 +569,18 @@ impl Shaper {
 }
 
 mod rust_run_handler {
-    use crate::prelude::*;
-    use crate::shaper::run_handler::RunInfo;
-    use crate::shaper::{AsNativeRunHandler, RunHandler};
+    use std::mem;
+
     use skia_bindings as sb;
     use skia_bindings::{
         RustRunHandler, RustRunHandler_Param, SkShaper_RunHandler, SkShaper_RunHandler_Buffer,
         SkShaper_RunHandler_RunInfo, TraitObject,
     };
-    use std::mem;
+
+    use crate::{
+        prelude::*,
+        shaper::{run_handler::RunInfo, AsNativeRunHandler, RunHandler},
+    };
 
     impl NativeBase<SkShaper_RunHandler> for RustRunHandler {}
 
@@ -724,6 +732,24 @@ impl Shaper {
             )
         };
         builder.make_blob().map(|tb| (tb, builder.end_point()))
+    }
+}
+
+pub mod shapers {
+    use skia_bindings as sb;
+
+    use super::{BiDiRunIterator, ScriptRunIterator, Shaper};
+
+    pub fn primitive() -> Shaper {
+        Shaper::from_ptr(unsafe { sb::C_SkShaper_MakePrimitive() }).unwrap()
+    }
+
+    pub fn trivial_bidi_run_iterator(bidi_level: u8, utf8_bytes: usize) -> BiDiRunIterator {
+        Shaper::new_trivial_bidi_run_iterator(bidi_level, utf8_bytes)
+    }
+
+    pub fn trivial_script_run_iterator(bidi_level: u8, utf8_bytes: usize) -> ScriptRunIterator {
+        Shaper::new_trivial_script_run_iterator(bidi_level, utf8_bytes)
     }
 }
 
