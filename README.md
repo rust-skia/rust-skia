@@ -4,8 +4,8 @@
 
 Skia Submodule Status: chrome/m124 ([upstream changes][skia-upstream], [our changes][skia-ours]).
 
-[skia-upstream]: https://github.com/rust-skia/skia/compare/m124-0.72.0...google:chrome/m124
-[skia-ours]: https://github.com/google/skia/compare/chrome/m124...rust-skia:m124-0.72.0
+[skia-upstream]: https://github.com/rust-skia/skia/compare/m124-0.72.2...google:chrome/m124
+[skia-ours]: https://github.com/google/skia/compare/chrome/m124...rust-skia:m124-0.72.2
 
 ## About
 
