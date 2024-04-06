@@ -223,6 +223,10 @@ extern "C" void C_SkCodecs_Decoder_destruct(SkCodecs::Decoder* decoder) {
     decoder->~Decoder();
 }
 
+extern "C" SkImage* C_SkCodecs_DeferredImage(SkCodec* codec, const SkAlphaType* alphaType) {
+    return SkCodecs::DeferredImage(std::unique_ptr<SkCodec>(codec), alphaType ? std::optional(*alphaType) : std::nullopt).release();
+}
+
 //
 // codec/*Decoder.h
 //

@@ -81,7 +81,9 @@ fn test_from_stream() {
     for (format, _, bytes) in DECODER_TESTS {
         let mut cursor = io::Cursor::new(*bytes);
         match Codec::from_stream(&mut cursor, &all_decoders, None) {
-            Ok(codec) => assert_eq!(codec.encoded_format(), *format),
+            Ok(codec) => {
+                assert_eq!(codec.encoded_format(), *format)
+            }
             Err(err) => {
                 panic!("Stream decoding of {format:?} failed: {err:?}");
             }
