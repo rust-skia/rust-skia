@@ -43,7 +43,7 @@ skia-safe = { path = "../skia-safe" }
 offscreen_gl_context = { git = "https://github.com/rust-skia/rust-offscreen-rendering-context", rev = "82b022cd0e42baaabfb82c319c9785a84a04f395", optional = true }
 sparkle = { version = "0.1.25", optional = true }
 clap = { version = "4.0.7", features = ["derive"] }
-ash = { version = "0.37.0", optional = true }
+ash = { version = "0.38.0", optional = true }
 # need to rename the package because of the feature with the same name.
 metal-rs = { package = "metal", version = "0.24.0", optional = true }
 # ... to access raw metal ptrs.

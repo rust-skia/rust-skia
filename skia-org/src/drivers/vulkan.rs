@@ -100,7 +100,7 @@ impl AshGraphics {
     pub fn vulkan_version() -> Option<(usize, usize, usize)> {
         let entry = unsafe { Entry::load() }.unwrap();
 
-        let detected_version = entry.try_enumerate_instance_version().unwrap_or(None);
+        let detected_version = unsafe { entry.try_enumerate_instance_version().unwrap_or(None) };
 
         detected_version.map(|ver| {
             (
@@ -114,7 +114,8 @@ impl AshGraphics {
     pub unsafe fn new(app_name: &str) -> AshGraphics {
         let entry = Entry::load().unwrap();
 
-        let minimum_version = vk::make_api_version(0, 1, 0, 0);
+        // Minimum version supported by Skia.
+        let minimum_version = vk::make_api_version(0, 1, 1, 0);
 
         let instance: Instance = {
             let api_version = Self::vulkan_version()
@@ -129,10 +130,15 @@ impl AshGraphics {
                 .unwrap_or(minimum_version);
 
             let app_name = CString::new(app_name).unwrap();
-            let layer_names: [&CString; 0] = []; // [CString::new("VK_LAYER_LUNARG_standard_validation").unwrap()];
-            let extension_names_raw = []; // extension_names();
+            let layer_names: [&CString; 0] = [];
+            // let layer_names: [&CString; 1] = [&CString::new("VK_LAYER_LUNARG_standard_validation").unwrap()];
+            let extension_names_raw = [
+                // These extensions are needed to support MoltenVK on macOS.
+                vk::KHR_GET_PHYSICAL_DEVICE_PROPERTIES2_NAME.as_ptr(),
+                vk::KHR_PORTABILITY_ENUMERATION_NAME.as_ptr(),
+            ];
 
-            let app_info = vk::ApplicationInfo::builder()
+            let app_info = vk::ApplicationInfo::default()
                 .application_name(&app_name)
                 .application_version(0)
                 .engine_name(&app_name)
@@ -144,20 +150,22 @@ impl AshGraphics {
                 .map(|raw_name| raw_name.as_ptr())
                 .collect();
 
-            let create_info = vk::InstanceCreateInfo::builder()
+            let create_info = vk::InstanceCreateInfo::default()
                 .application_info(&app_info)
                 .enabled_layer_names(&layers_names_raw)
-                .enabled_extension_names(&extension_names_raw);
+                .enabled_extension_names(&extension_names_raw)
+                // Flag is needed to support MoltenVK on macOS.
+                .flags(vk::InstanceCreateFlags::ENUMERATE_PORTABILITY_KHR);
 
             entry
                 .create_instance(&create_info, None)
-                .expect("Failed to create a Vulkan instance.")
+                .expect("Failed to create a Vulkan instance")
         };
 
         let (physical_device, queue_family_index) = {
             let physical_devices = instance
                 .enumerate_physical_devices()
-                .expect("Failed to enumerate Vulkan physical devices.");
+                .expect("Failed to enumerate Vulkan physical devices");
 
             physical_devices
                 .iter()
@@ -169,15 +177,11 @@ impl AshGraphics {
                         .find_map(|(index, info)| {
                             let supports_graphic =
                                 info.queue_flags.contains(vk::QueueFlags::GRAPHICS);
-                            if supports_graphic {
-                                Some((*physical_device, index))
-                            } else {
-                                None
-                            }
+                            supports_graphic.then_some((*physical_device, index))
                         })
                 })
                 .find_map(|v| v)
-                .expect("Failed to find a suitable Vulkan device.")
+                .expect("Failed to find a suitable Vulkan device")
         };
 
         let device: ash::Device = {
@@ -185,14 +189,13 @@ impl AshGraphics {
 
             let priorities = [1.0];
 
-            let queue_info = [vk::DeviceQueueCreateInfo::builder()
+            let queue_info = [vk::DeviceQueueCreateInfo::default()
                 .queue_family_index(queue_family_index as _)
-                .queue_priorities(&priorities)
-                .build()];
+                .queue_priorities(&priorities)];
 
             let device_extension_names_raw = [];
 
-            let device_create_info = vk::DeviceCreateInfo::builder()
+            let device_create_info = vk::DeviceCreateInfo::default()
                 .queue_create_infos(&queue_info)
                 .enabled_extension_names(&device_extension_names_raw)
                 .enabled_features(&features);
