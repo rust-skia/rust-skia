@@ -1,6 +1,17 @@
 {
-    "version": "0.2.0",
     "configurations": [
+        {
+            "name": "(OSX) Launch",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceRoot}/target/debug/skia-org",
+            "args": [],
+            "cwd": "${workspaceRoot}",
+            "osx" : {
+                "MIMode": "lldb",
+                "miDebuggerPath": "/usr/bin/lldb",
+            }
+        },
         {
             "name": "(Windows) Launch",
             "type": "cppvsdbg",
@@ -12,13 +23,5 @@
             "environment": [],
             "console": "externalTerminal"
         },
-        {
-            "name": "(OSX) Launch",
-            "type": "lldb",
-            "request": "launch",
-            "program": "${workspaceRoot}/target/debug/skia-org",
-            "args": [],
-            "cwd": "${workspaceRoot}"
-        }
     ]
 }
