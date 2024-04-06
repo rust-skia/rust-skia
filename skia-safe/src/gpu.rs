@@ -63,8 +63,15 @@ pub mod backend_render_targets {
 pub mod direct_contexts {
     #[cfg(feature = "gl")]
     pub use super::ganesh::gl::direct_contexts::*;
+    #[cfg(feature = "metal")]
+    pub use super::ganesh::mtl::direct_contexts::*;
     #[cfg(feature = "vulkan")]
     pub use super::ganesh::vk::direct_contexts::*;
+}
+
+pub mod interfaces {
+    #[cfg(all(feature = "gl", target_arch = "wasm32"))]
+    pub use super::ganesh::gl::interfaces::*;
 }
 
 #[cfg(test)]
