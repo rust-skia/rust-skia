@@ -113,8 +113,8 @@ extern "C" SkShaper::LanguageRunIterator* C_SkShaper_MakeStdLanguageRunIterator(
     return SkShaper::MakeStdLanguageRunIterator(utf8, utf8Bytes).release();
 }
 
-extern "C" SkShaper::LanguageRunIterator* C_SkShaper_TrivialLanguageRunIterator_new(const char* utf8, size_t utf8Bytes) {
-    return new SkShaper::TrivialLanguageRunIterator(utf8, utf8Bytes);
+extern "C" SkShaper::LanguageRunIterator* C_SkShaper_TrivialLanguageRunIterator_new(const char* language, size_t utf8Bytes) {
+    return new SkShaper::TrivialLanguageRunIterator(language, utf8Bytes);
 }
 
 extern "C" void C_SkShaper_RunHandler_delete(SkShaper::RunHandler* self) {

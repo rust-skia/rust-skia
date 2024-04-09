@@ -1,4 +1,9 @@
-use std::{ffi::CStr, fmt, marker::PhantomData, os::raw};
+use std::{
+    ffi::{CStr, CString},
+    fmt,
+    marker::PhantomData,
+    os::raw,
+};
 
 use skia_bindings::{
     self as sb, RustRunHandler, SkShaper, SkShaper_BiDiRunIterator, SkShaper_FontRunIterator,
@@ -317,13 +322,13 @@ impl Shaper {
         })
     }
 
-    pub fn new_trivial_language_run_iterator(language: impl AsRef<str>) -> LanguageRunIterator {
-        let bytes = language.as_ref().as_bytes();
+    pub fn new_trivial_language_run_iterator(
+        language: impl AsRef<str>,
+        utf8_bytes: usize,
+    ) -> LanguageRunIterator {
+        let language = CString::new(language.as_ref()).unwrap();
         LanguageRunIterator::from_ptr(unsafe {
-            sb::C_SkShaper_TrivialLanguageRunIterator_new(
-                bytes.as_ptr() as *const raw::c_char,
-                bytes.len(),
-            )
+            sb::C_SkShaper_TrivialLanguageRunIterator_new(language.as_ptr(), utf8_bytes)
         })
         .unwrap()
     }
