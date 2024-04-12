@@ -127,6 +127,11 @@ impl SurfaceProps {
         )
     }
 
+    pub const MAX_CONTRAST_INCLUSIVE: scalar = 1.;
+    pub const MIN_CONTRAST_INCLUSIVE: scalar = 0.;
+    pub const MAX_GAMMA_EXCLUSIVE: scalar = 4.;
+    pub const MIN_GAMMA_INCLUSIVE: scalar = 0.;
+
     pub fn pixel_geometry(self) -> PixelGeometry {
         PixelGeometry::from_native_c(self.native().fPixelGeometry)
     }

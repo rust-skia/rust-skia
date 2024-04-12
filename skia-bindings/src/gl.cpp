@@ -10,6 +10,7 @@
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/ganesh/gl/GrGLBackendSurface.h"
 #include "include/gpu/ganesh/gl/GrGLDirectContext.h"
+#include "include/gpu/ganesh/gl/GrGLMakeWebGLInterface.h"
 #include "include/gpu/gl/GrGLExtensions.h"
 #include "include/gpu/gl/GrGLInterface.h"
 #include "include/gpu/gl/GrGLAssembleInterface.h"
@@ -202,3 +203,11 @@ extern "C" void C_GrBackendRenderTargets_ConstructGL(GrBackendRenderTarget* unin
 extern "C" bool C_GrBackendRenderTargets_GetGLFramebufferInfo(const GrBackendRenderTarget* self, GrGLFramebufferInfo* info) {
     return GrBackendRenderTargets::GetGLFramebufferInfo(*self, info);
 }
+
+#if SK_ASSUME_WEBGL
+
+extern "C" const GrGLInterface* C_GrGLInterfaces_MakeWebGL() {
+    return GrGLInterfaces::MakeWebGL().release();
+}
+
+#endif

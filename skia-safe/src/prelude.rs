@@ -949,6 +949,12 @@ impl<T: Sized> BorrowsFrom for T {
     }
 }
 
+impl<'a, H> Borrows<'a, H> {
+    pub(crate) unsafe fn unchecked_new(h: H) -> Self {
+        Self(h, PhantomData)
+    }
+}
+
 /// Declares a base class for a native type.
 pub trait NativeBase<Base> {
     fn base(&self) -> &Base {

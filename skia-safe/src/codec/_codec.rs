@@ -170,6 +170,9 @@ impl Codec<'_> {
         unsafe { sb::C_SkCodec_getEncodedFormat(self.native()) }
     }
 
+    // TODO: May wrap `getEncodedData()`. But how? It would return the stream, which is already
+    // mutably borrowed.
+
     pub fn get_pixels_with_options(
         &mut self,
         info: &ImageInfo,
@@ -397,7 +400,7 @@ pub mod codecs {
     use skia_bindings::{self as sb, SkCodecs_Decoder};
 
     use super::Result;
-    use crate::{interop::RustStream, prelude::*, Codec};
+    use crate::{interop::RustStream, prelude::*, AlphaType, Codec, Image};
 
     pub type Decoder = Handle<SkCodecs_Decoder>;
     unsafe_send_sync!(Decoder);
@@ -457,5 +460,20 @@ pub mod codecs {
             }
             Ok(Codec::from_ptr(codec).expect("Codec is null"))
         }
+    }
+
+    // TODO: wrap Register()
+
+    pub fn deferred_image(
+        codec: Codec<'_>,
+        alpha_type: impl Into<Option<AlphaType>>,
+    ) -> Option<Borrows<'_, Image>> {
+        let alpha_type: Option<AlphaType> = alpha_type.into();
+        // Even though codec is getting consumed / moved here, we need to preserve the borrow of the
+        // input stream.
+        Image::from_ptr(unsafe {
+            sb::C_SkCodecs_DeferredImage(codec.inner.into_ptr(), alpha_type.as_ptr_or_null())
+        })
+        .map(|h| unsafe { Borrows::unchecked_new(h) })
     }
 }
