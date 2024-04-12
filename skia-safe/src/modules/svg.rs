@@ -163,11 +163,13 @@ impl Dom {
     ) -> Result<Self, LoadError> {
         let mut reader = RustStream::new(&mut reader);
         let stream = reader.stream_mut();
-        let mut load_context = LoadContext::new(font_mgr.into());
+        let font_mgr = font_mgr.into();
+        let mut load_context = LoadContext::new(font_mgr.clone());
 
         let out = unsafe {
             sb::C_SkSVGDOM_MakeFromStream(
                 stream,
+                font_mgr.into_ptr(),
                 Some(handle_load),
                 Some(handle_load_type_face),
                 load_context.native(),
@@ -183,11 +185,13 @@ impl Dom {
 
     pub fn from_bytes(svg: &[u8], font_mgr: impl Into<FontMgr>) -> Result<Self, LoadError> {
         let mut ms = MemoryStream::from_bytes(svg);
-        let mut load_context = LoadContext::new(font_mgr.into());
+        let font_mgr = font_mgr.into();
+        let mut load_context = LoadContext::new(font_mgr.clone());
 
         let out = unsafe {
             sb::C_SkSVGDOM_MakeFromStream(
                 ms.native_mut().as_stream_mut(),
+                font_mgr.into_ptr(),
                 Some(handle_load),
                 Some(handle_load_type_face),
                 load_context.native(),
@@ -278,7 +282,7 @@ mod tests {
         let font_mgr = FontMgr::new();
         let dom = Dom::from_str(svg, font_mgr).unwrap();
         dom.render(canvas);
-        // save_surface_to_tmp(surface);
+        // save_surface_to_tmp(&mut surface);
     }
 
     #[allow(unused)]

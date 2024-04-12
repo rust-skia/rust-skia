@@ -52,10 +52,11 @@ public:
 };
 
 
-extern "C" SkSVGDOM* C_SkSVGDOM_MakeFromStream(SkStream& stream, loadSkData loadCb, loadSkTypeface loadTfCb, void* loadContext) {
+extern "C" SkSVGDOM* C_SkSVGDOM_MakeFromStream(SkStream& stream, SkFontMgr* fontMgr, loadSkData loadCb, loadSkTypeface loadTfCb, void* loadContext) {
     auto provider = sk_make_sp<ImageResourceProvider>(loadCb, loadTfCb, loadContext);
     auto builder = SkSVGDOM::Builder();
     builder.setResourceProvider(provider);
+    builder.setFontManager(sp(fontMgr));
     return builder.make(stream).release();
 }
 
