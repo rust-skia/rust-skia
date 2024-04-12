@@ -1961,40 +1961,45 @@ impl Path {
     }
 }
 
-#[test]
-fn test_get_points() {
-    let mut p = Path::new();
-    p.add_rect(Rect::new(0.0, 0.0, 10.0, 10.0), None);
-    let points_count = p.count_points();
-    let mut points = vec![Point::default(); points_count];
-    let count_returned = p.get_points(&mut points);
-    assert_eq!(count_returned, points.len());
-    assert_eq!(count_returned, 4);
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[test]
-fn test_fill_type() {
-    let mut p = Path::default();
-    assert_eq!(p.fill_type(), PathFillType::Winding);
-    p.set_fill_type(PathFillType::EvenOdd);
-    assert_eq!(p.fill_type(), PathFillType::EvenOdd);
-    assert!(!p.is_inverse_fill_type());
-    p.toggle_inverse_fill_type();
-    assert_eq!(p.fill_type(), PathFillType::InverseEvenOdd);
-    assert!(p.is_inverse_fill_type());
-}
+    #[test]
+    fn test_get_points() {
+        let mut p = Path::new();
+        p.add_rect(Rect::new(0.0, 0.0, 10.0, 10.0), None);
+        let points_count = p.count_points();
+        let mut points = vec![Point::default(); points_count];
+        let count_returned = p.get_points(&mut points);
+        assert_eq!(count_returned, points.len());
+        assert_eq!(count_returned, 4);
+    }
 
-#[test]
-fn test_is_volatile() {
-    let mut p = Path::default();
-    assert!(!p.is_volatile());
-    p.set_is_volatile(true);
-    assert!(p.is_volatile());
-}
+    #[test]
+    fn test_fill_type() {
+        let mut p = Path::default();
+        assert_eq!(p.fill_type(), PathFillType::Winding);
+        p.set_fill_type(PathFillType::EvenOdd);
+        assert_eq!(p.fill_type(), PathFillType::EvenOdd);
+        assert!(!p.is_inverse_fill_type());
+        p.toggle_inverse_fill_type();
+        assert_eq!(p.fill_type(), PathFillType::InverseEvenOdd);
+        assert!(p.is_inverse_fill_type());
+    }
 
-#[test]
-fn test_path_rect() {
-    let r = Rect::new(0.0, 0.0, 100.0, 100.0);
-    let path = Path::rect(r, None);
-    assert_eq!(*path.bounds(), r);
+    #[test]
+    fn test_is_volatile() {
+        let mut p = Path::default();
+        assert!(!p.is_volatile());
+        p.set_is_volatile(true);
+        assert!(p.is_volatile());
+    }
+
+    #[test]
+    fn test_path_rect() {
+        let r = Rect::new(0.0, 0.0, 100.0, 100.0);
+        let path = Path::rect(r, None);
+        assert_eq!(*path.bounds(), r);
+    }
 }
