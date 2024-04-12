@@ -367,9 +367,14 @@ impl PathBuilder {
     }
 }
 
-#[test]
-fn test_creation_snapshot_and_detach() {
-    let mut builder = PathBuilder::new();
-    let _path = builder.snapshot();
-    let _path = builder.detach();
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_creation_snapshot_and_detach() {
+        let mut builder = PathBuilder::new();
+        let _path = builder.snapshot();
+        let _path = builder.detach();
+    }
 }
