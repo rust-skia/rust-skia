@@ -170,7 +170,6 @@ impl FinalBuildConfiguration {
                     .arg("skia_use_harfbuzz", yes())
                     .arg("skia_pdf_subset_harfbuzz", yes())
                     .arg("skia_use_system_harfbuzz", yes_if(use_system_libraries))
-                    .arg("skia_use_sfntly", no())
                     .arg("skia_enable_skparagraph", yes());
                 // note: currently, tests need to be enabled, because modules/skparagraph
                 // is not included in the default dependency configuration.
