@@ -17,7 +17,8 @@ pub mod lib {
     pub const SK_PARAGRAPH: &str = "skparagraph";
     pub const SVG: &str = "svg";
     pub const SK_RESOURCES: &str = "skresources";
-    pub const SK_UNICODE: &str = "skunicode";
+    pub const SK_UNICODE_CORE: &str = "skunicode_core";
+    pub const SK_UNICODE_ICU: &str = "skunicode_icu";
 }
 
 /// The configuration of the resulting binaries.
@@ -67,8 +68,8 @@ impl BinariesConfiguration {
             }
             ninja_built_libraries.push(lib::SK_PARAGRAPH.into());
             ninja_built_libraries.push(lib::SK_SHAPER.into());
-            // Since M94, icu sources are embedded in skunicode
-            ninja_built_libraries.push(lib::SK_UNICODE.into());
+            ninja_built_libraries.push(lib::SK_UNICODE_CORE.into());
+            ninja_built_libraries.push(lib::SK_UNICODE_ICU.into());
         }
         if features.svg {
             ninja_built_libraries.push(lib::SVG.into());

@@ -830,7 +830,8 @@ pub(crate) mod definitions {
             files.extend(vec![
                 "obj/modules/skshaper/skshaper.ninja".into(),
                 "obj/modules/skparagraph/skparagraph.ninja".into(),
-                "obj/modules/skunicode/skunicode.ninja".into(),
+                "obj/modules/skunicode/skunicode_core.ninja".into(),
+                "obj/modules/skunicode/skunicode_icu.ninja".into(),
             ]);
             // shaper.cpp includes SkLoadICU.h
             if !use_system_libraries {
