@@ -84,6 +84,7 @@ pub struct YcbcrConversionInfo {
     pub chroma_filter: vk::Filter,
     pub force_explicit_reconstruction: vk::Bool32,
     pub format_features: vk::FormatFeatureFlags,
+    pub components: vk::ComponentMapping,
 }
 
 native_transmutable!(
@@ -110,6 +111,12 @@ impl Default for YcbcrConversionInfo {
             chroma_filter: vk::Filter::NEAREST,
             force_explicit_reconstruction: 0,
             format_features: 0,
+            components: vk::ComponentMapping {
+                r: vk::ComponentSwizzle::VK_COMPONENT_SWIZZLE_IDENTITY,
+                g: vk::ComponentSwizzle::VK_COMPONENT_SWIZZLE_IDENTITY,
+                b: vk::ComponentSwizzle::VK_COMPONENT_SWIZZLE_IDENTITY,
+                a: vk::ComponentSwizzle::VK_COMPONENT_SWIZZLE_IDENTITY,
+            },
         }
     }
 }
@@ -139,6 +146,7 @@ impl YcbcrConversionInfo {
             chroma_filter,
             force_explicit_reconstruction,
             format_features,
+            ..YcbcrConversionInfo::default()
         }
     }
 
