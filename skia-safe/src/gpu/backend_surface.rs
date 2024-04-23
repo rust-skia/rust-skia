@@ -124,7 +124,7 @@ impl BackendFormat {
 
     #[cfg(feature = "metal")]
     pub fn as_mtl_format(&self) -> Option<mtl::PixelFormat> {
-        let pixel_format = unsafe { self.native().asMtlFormat() };
+        let pixel_format = unsafe { sb::C_GrBackendFormats_AsMtlFormat(self.native()) };
         // Mtl's PixelFormat == 0 is invalid.
         (pixel_format != 0).if_true_some(pixel_format)
     }
@@ -371,8 +371,7 @@ impl BackendTexture {
     pub fn metal_texture_info(&self) -> Option<mtl::TextureInfo> {
         unsafe {
             let mut texture_info = mtl::TextureInfo::default();
-            self.native()
-                .getMtlTextureInfo(texture_info.native_mut())
+            sb::C_GrBackendTextures_GetMtlTextureInfo(self.native(), texture_info.native_mut())
                 .if_true_some(texture_info)
         }
     }
@@ -556,7 +555,8 @@ impl BackendRenderTarget {
     #[cfg(feature = "metal")]
     pub fn metal_texture_info(&self) -> Option<mtl::TextureInfo> {
         let mut info = mtl::TextureInfo::default();
-        unsafe { self.native().getMtlTextureInfo(info.native_mut()) }.if_true_some(info)
+        unsafe { sb::C_GrBackendRenderTargets_GetMtlTextureInfo(self.native(), info.native_mut()) }
+            .if_true_some(info)
     }
 
     #[cfg(feature = "d3d")]

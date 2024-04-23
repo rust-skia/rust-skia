@@ -73,7 +73,6 @@ fn main() {
         mtl::BackendContext::new(
             device.as_ptr() as mtl::Handle,
             command_queue.as_ptr() as mtl::Handle,
-            std::ptr::null(),
         )
     };
 

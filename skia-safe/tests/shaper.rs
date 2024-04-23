@@ -63,12 +63,4 @@ mod tests {
             &mut DebugRunHandler::default(),
         );
     }
-
-    #[test]
-    #[serial_test::serial]
-    fn test_skunicode_parameterized_shaper() {
-        skia_bindings::icu::init();
-
-        Shaper::new_shape_dont_wrap_or_reorder(None).expect("Shaper");
-    }
 }

@@ -7,11 +7,29 @@
 #include "include/core/SkColorSpace.h"
 #include "include/core/SkSurface.h"
 #include "include/gpu/ganesh/mtl/SkSurfaceMetal.h"
-#include "include/gpu/mtl/GrMtlBackendContext.h"
+#include "include/gpu/ganesh/mtl/GrMtlBackendContext.h"
+#include "include/gpu/ganesh/mtl/GrMtlBackendSurface.h"
+#include "include/gpu/ganesh/mtl/GrMtlDirectContext.h"
 #include "include/gpu/GrBackendSurface.h"
 #include "include/gpu/GrDirectContext.h"
 
 extern "C" void C_GrMtlTypes(GrMTLTextureUsage*, GrMtlSurfaceInfo *) {};
+
+//
+// gpu/ganesh/mtl/GrMtlBackendSurface.h
+//
+
+extern "C" GrMTLPixelFormat C_GrBackendFormats_AsMtlFormat(const GrBackendFormat* backendFormat) {
+    return GrBackendFormats::AsMtlFormat(*backendFormat);
+}
+
+extern "C" bool C_GrBackendTextures_GetMtlTextureInfo(const GrBackendTexture* backendTexture, GrMtlTextureInfo* textureInfo) {
+    return GrBackendTextures::GetMtlTextureInfo(*backendTexture, textureInfo);
+}
+
+extern "C" bool C_GrBackendRenderTargets_GetMtlTextureInfo(const GrBackendRenderTarget* target, GrMtlTextureInfo* info) {
+    return GrBackendRenderTargets::GetMtlTextureInfo(*target, info);
+}
 
 //
 // gpu/ganesh/mtl/SkSurfaceMetal.h
@@ -50,9 +68,9 @@ extern "C" GrDirectContext *C_GrContext_MakeMetal(
 {
     if (options)
     {
-        return GrDirectContext::MakeMetal(*context, *options).release();
+        return GrDirectContexts::MakeMetal(*context, *options).release();
     }
-    return GrDirectContext::MakeMetal(*context).release();
+    return GrDirectContexts::MakeMetal(*context).release();
 }
 
 //
@@ -60,12 +78,11 @@ extern "C" GrDirectContext *C_GrContext_MakeMetal(
 //
 
 extern "C" void C_GrMtlBackendContext_Construct(
-    GrMtlBackendContext* uninitialized, 
-    const void* device, const void* queue, const void* binaryArchive) {
+    GrMtlBackendContext* uninitialized,
+    const void* device, const void* queue) {
     new (uninitialized) GrMtlBackendContext();
     uninitialized->fDevice.retain(device);
     uninitialized->fQueue.retain(queue);
-    uninitialized->fBinaryArchive.retain(binaryArchive);
 }
 
 extern "C" void C_GrMtlBackendContext_Destruct(GrMtlBackendContext* self) {
@@ -94,7 +111,7 @@ extern "C" bool C_GrMtlTextureInfo_Equals(const GrMtlTextureInfo* lhs, const GrM
 //
 
 extern "C" void C_GrBackendFormat_ConstructMtl(GrBackendFormat* uninitialized, GrMTLPixelFormat format) {
-    new(uninitialized)GrBackendFormat(GrBackendFormat::MakeMtl(format));
+    new(uninitialized)GrBackendFormat(GrBackendFormats::MakeMtl(format));
 }
 
 
@@ -104,9 +121,10 @@ extern "C" GrBackendTexture* C_GrBackendTexture_newMtl(
     const GrMtlTextureInfo* mtlInfo,
     const char* label,
     size_t labelCount) {
-    return new GrBackendTexture(width, height, mipMapped, *mtlInfo, std::string_view(label, labelCount));
+    return new GrBackendTexture(GrBackendTextures::MakeMtl(width, height, mipMapped, *mtlInfo, std::string_view(label, labelCount)));
 }
 
 extern "C" void C_GrBackendRenderTargets_ConstructMtl(GrBackendRenderTarget* uninitialized, int width, int height, const GrMtlTextureInfo* mtlInfo) {
-    new(uninitialized)GrBackendRenderTarget(width, height, *mtlInfo);
+    new(uninitialized)GrBackendRenderTarget(GrBackendRenderTargets::MakeMtl(width, height, *mtlInfo));
 }
+

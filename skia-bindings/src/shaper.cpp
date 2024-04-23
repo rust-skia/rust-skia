@@ -2,7 +2,6 @@
 
 #include "include/core/SkFontMgr.h"
 #include "modules/skshaper/include/SkShaper.h"
-#include "modules/skunicode/include/SkUnicode.h"
 
 #if defined(_WIN32)
 #include "third_party/icu/SkLoadICU.h"
@@ -18,15 +17,6 @@ extern "C" SkShaper* C_SkShaper_MakeShaperDrivenWrapper(SkFontMgr* fontMgr) {
 
 extern "C" SkShaper* C_SkShaper_MakeShapeThenWrap(SkFontMgr* fontMgr) {
     return SkShaper::MakeShapeThenWrap(sk_sp<SkFontMgr>(fontMgr)).release();
-}
-
-extern "C" SkShaper* C_SkShaper_MakeShapeDontWrapOrReorder(SkFontMgr* fontMgr) {
-    auto unicode = SkUnicode::Make();
-    if (!unicode) {
-        return nullptr;
-    }
-
-    return SkShaper::MakeShapeDontWrapOrReorder(std::move(unicode), sk_sp<SkFontMgr>(fontMgr)).release();
 }
 
 extern "C" SkShaper* C_SkShaper_MakeCoreText() {
