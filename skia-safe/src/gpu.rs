@@ -42,6 +42,8 @@ pub mod surfaces {
 pub mod backend_formats {
     #[cfg(feature = "gl")]
     pub use super::ganesh::gl::backend_formats::*;
+    #[cfg(feature = "metal")]
+    pub use super::ganesh::mtl::backend_formats::*;
     #[cfg(feature = "vulkan")]
     pub use super::ganesh::vk::backend_formats::*;
 }
@@ -49,6 +51,8 @@ pub mod backend_formats {
 pub mod backend_textures {
     #[cfg(feature = "gl")]
     pub use super::ganesh::gl::backend_textures::*;
+    #[cfg(feature = "metal")]
+    pub use super::ganesh::mtl::backend_textures::*;
     #[cfg(feature = "vulkan")]
     pub use super::ganesh::vk::backend_textures::*;
 }
@@ -56,6 +60,8 @@ pub mod backend_textures {
 pub mod backend_render_targets {
     #[cfg(feature = "gl")]
     pub use super::ganesh::gl::backend_render_targets::*;
+    #[cfg(feature = "metal")]
+    pub use super::ganesh::mtl::backend_render_targets::*;
     #[cfg(feature = "vulkan")]
     pub use super::ganesh::vk::backend_render_targets::*;
 }

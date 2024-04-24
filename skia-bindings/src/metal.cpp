@@ -19,12 +19,29 @@ extern "C" void C_GrMtlTypes(GrMTLTextureUsage*, GrMtlSurfaceInfo *) {};
 // gpu/ganesh/mtl/GrMtlBackendSurface.h
 //
 
+extern "C" void C_GrBackendFormats_ConstructMtl(GrBackendFormat* uninitialized, GrMTLPixelFormat format) {
+    new(uninitialized)GrBackendFormat(GrBackendFormats::MakeMtl(format));
+}
+
 extern "C" GrMTLPixelFormat C_GrBackendFormats_AsMtlFormat(const GrBackendFormat* backendFormat) {
     return GrBackendFormats::AsMtlFormat(*backendFormat);
 }
 
+extern "C" GrBackendTexture* C_GrBackendTextures_newMtl(
+    int width, int height,
+    skgpu::Mipmapped mipMapped,
+    const GrMtlTextureInfo* mtlInfo,
+    const char* label,
+    size_t labelCount) {
+    return new GrBackendTexture(GrBackendTextures::MakeMtl(width, height, mipMapped, *mtlInfo, std::string_view(label, labelCount)));
+}
+
 extern "C" bool C_GrBackendTextures_GetMtlTextureInfo(const GrBackendTexture* backendTexture, GrMtlTextureInfo* textureInfo) {
     return GrBackendTextures::GetMtlTextureInfo(*backendTexture, textureInfo);
+}
+
+extern "C" void C_GrBackendRenderTargets_ConstructMtl(GrBackendRenderTarget* uninitialized, int width, int height, const GrMtlTextureInfo* mtlInfo) {
+    new(uninitialized)GrBackendRenderTarget(GrBackendRenderTargets::MakeMtl(width, height, *mtlInfo));
 }
 
 extern "C" bool C_GrBackendRenderTargets_GetMtlTextureInfo(const GrBackendRenderTarget* target, GrMtlTextureInfo* info) {
@@ -105,26 +122,3 @@ extern "C" void C_GrMtlTextureInfo_Destruct(GrMtlTextureInfo* self) {
 extern "C" bool C_GrMtlTextureInfo_Equals(const GrMtlTextureInfo* lhs, const GrMtlTextureInfo* rhs) {
     return *lhs == *rhs;
 }
-
-//
-// gpu/GrBackendSurface.h
-//
-
-extern "C" void C_GrBackendFormat_ConstructMtl(GrBackendFormat* uninitialized, GrMTLPixelFormat format) {
-    new(uninitialized)GrBackendFormat(GrBackendFormats::MakeMtl(format));
-}
-
-
-extern "C" GrBackendTexture* C_GrBackendTexture_newMtl(
-    int width, int height,
-    skgpu::Mipmapped mipMapped,
-    const GrMtlTextureInfo* mtlInfo,
-    const char* label,
-    size_t labelCount) {
-    return new GrBackendTexture(GrBackendTextures::MakeMtl(width, height, mipMapped, *mtlInfo, std::string_view(label, labelCount)));
-}
-
-extern "C" void C_GrBackendRenderTargets_ConstructMtl(GrBackendRenderTarget* uninitialized, int width, int height, const GrMtlTextureInfo* mtlInfo) {
-    new(uninitialized)GrBackendRenderTarget(GrBackendRenderTargets::MakeMtl(width, height, *mtlInfo));
-}
-

@@ -35,7 +35,7 @@ impl DrawingDriver for Metal {
             )
         };
 
-        let context = gpu::DirectContext::new_metal(&backend, None).unwrap();
+        let context = gpu::direct_contexts::make_metal(&backend, None).unwrap();
 
         Self {
             context,

@@ -14,7 +14,7 @@ impl DrawingDriver for OpenGl {
     fn new() -> Self {
         let interface = gpu::gl::Interface::new_native().unwrap();
         Self {
-            context: gpu::DirectContext::new_gl(interface, None).unwrap(),
+            context: gpu::direct_contexts::make_gl(interface, None).unwrap(),
         }
     }
 
