@@ -1092,6 +1092,10 @@ extern "C" bool C_SkBitmap_ComputeIsOpaque(const SkBitmap* self) {
     return SkBitmap::ComputeIsOpaque(*self);
 }
 
+extern "C" bool C_SkBitmap_setColorSpace(SkBitmap* self, SkColorSpace* colorSpace) {
+    self->setColorSpace(sp(colorSpace));
+}
+
 extern "C" bool C_SkBitmap_tryAllocN32Pixels(SkBitmap* self, int width, int height, bool isOpaque) {
     return self->tryAllocN32Pixels(width, height, isOpaque);
 }
@@ -2153,6 +2157,14 @@ extern "C" SkShader* C_SkShaders_Blend(SkBlender* blender, SkShader* dst, SkShad
 
 extern "C" SkShader* C_SkShaders_CoordClamp(SkShader* shader, const SkRect* subset) {
     return SkShaders::CoordClamp(sp(shader), *subset).release();
+}
+
+extern "C" SkShader* C_SkShaders_Image(SkImage* image, SkTileMode tmx, SkTileMode tmy, const SkSamplingOptions& options, const SkMatrix* localMatrix) {
+    return SkShaders::Image(sp(image), tmx, tmy, options, localMatrix).release();
+}
+
+extern "C" SkShader* C_SkShaders_RawImage(SkImage* image, SkTileMode tmx, SkTileMode tmy, const SkSamplingOptions& options, const SkMatrix* localMatrix) {
+    return SkShaders::RawImage(sp(image), tmx, tmy, options, localMatrix).release();
 }
 
 extern "C" SkShader* C_SkShader_Deserialize(const void* data, size_t length) {

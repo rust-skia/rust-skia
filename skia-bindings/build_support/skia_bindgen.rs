@@ -365,8 +365,6 @@ const OPAQUE_TYPES: &[&str] = &[
     "SkBitmap_HeapAllocator",
     "SkColorFilter",
     "SkDeque_F2BIter",
-    "SkDrawLooper",
-    "SkDrawLooper_Context",
     "SkDrawable_GpuDrawHandler",
     "SkFlattenable",
     "SkFontMgr",
