@@ -70,7 +70,7 @@ pub struct TextBox {
 
 native_transmutable!(sb::skia_textlayout_TextBox, TextBox, text_box_layout);
 
-pub const EMPTY_INDEX: usize = std::usize::MAX;
+pub const EMPTY_INDEX: usize = usize::MAX;
 
 pub trait RangeExtensions {
     fn width(&self) -> usize;

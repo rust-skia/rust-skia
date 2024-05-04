@@ -248,7 +248,7 @@ impl ParagraphStyle {
     }
 
     pub fn set_max_lines(&mut self, lines: impl Into<Option<usize>>) -> &mut Self {
-        self.native_mut().fLinesLimit = lines.into().unwrap_or(usize::max_value());
+        self.native_mut().fLinesLimit = lines.into().unwrap_or(usize::MAX);
         self
     }
 

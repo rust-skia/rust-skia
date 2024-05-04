@@ -231,7 +231,7 @@ impl Font {
                     // don't fail if glyphs.len() is too large to fit into an i32.
                     glyphs
                         .len()
-                        .min(i32::max_value().try_into().unwrap())
+                        .min(i32::MAX.try_into().unwrap())
                         .try_into()
                         .unwrap(),
                 )
@@ -248,13 +248,7 @@ impl Font {
         let (ptr, size, encoding) = text.as_raw();
         unsafe {
             self.native()
-                .textToGlyphs(
-                    ptr,
-                    size,
-                    encoding.into_native(),
-                    ptr::null_mut(),
-                    i32::max_value(),
-                )
+                .textToGlyphs(ptr, size, encoding.into_native(), ptr::null_mut(), i32::MAX)
                 .try_into()
                 .unwrap()
         }

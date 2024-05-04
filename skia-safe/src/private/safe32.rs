@@ -1,5 +1,5 @@
 pub mod sk64 {
-    const SK_MAX_S32: i32 = std::i32::MAX;
+    const SK_MAX_S32: i32 = i32::MAX;
     const SK_MIN_S32: i32 = -SK_MAX_S32;
 
     pub fn pin_to_s32(x: i64) -> i32 {
