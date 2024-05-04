@@ -597,7 +597,7 @@ mod rust_run_handler {
 
     pub unsafe fn new_param(run_handler: &mut dyn RunHandler) -> RustRunHandler_Param {
         RustRunHandler_Param {
-            trait_: mem::transmute(run_handler),
+            trait_: mem::transmute::<&mut dyn RunHandler, TraitObject>(run_handler),
             beginLine: Some(begin_line),
             runInfo: Some(run_info),
             commitRunInfo: Some(commit_run_info),

@@ -351,7 +351,7 @@ impl PathBuilder {
 
     pub fn toggle_inverse_fill_type(&mut self) -> &mut Self {
         let n = self.native_mut();
-        n.fFillType = unsafe { mem::transmute(n.fFillType as i32 ^ 2) };
+        n.fFillType = unsafe { mem::transmute::<i32, sb::SkPathFillType>(n.fFillType as i32 ^ 2) };
         self
     }
 

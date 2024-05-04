@@ -164,8 +164,11 @@ impl BackendContext<'_> {
     // TODO: This is a mess, highly unsafe, and needs to be simplified / rewritten
     //       by someone who understands Rust better.
     unsafe fn begin_resolving_proc(get_proc_trait_object: &dyn GetProc) -> impl Drop {
-        THREAD_LOCAL_GET_PROC
-            .with(|get_proc| *get_proc.borrow_mut() = Some(mem::transmute(get_proc_trait_object)));
+        THREAD_LOCAL_GET_PROC.with(|get_proc| {
+            *get_proc.borrow_mut() = Some(mem::transmute::<&dyn GetProc, TraitObject>(
+                get_proc_trait_object,
+            ))
+        });
 
         EndResolving {}
     }

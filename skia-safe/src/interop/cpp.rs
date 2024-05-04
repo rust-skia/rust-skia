@@ -16,7 +16,7 @@ impl<T: 'static> VecSink<'_, T> {
     pub fn new(v: &mut dyn FnMut(&[T])) -> VecSink<T> {
         VecSink {
             sink: sb::VecSink {
-                fn_trait: unsafe { mem::transmute(v) },
+                fn_trait: unsafe { mem::transmute::<&mut dyn FnMut(&[T]), TraitObject>(v) },
                 set_fn: Some(Self::set_fn),
                 _phantom_0: PhantomData,
             },
@@ -27,7 +27,7 @@ impl<T: 'static> VecSink<'_, T> {
     pub fn new_mut(v: &mut dyn FnMut(&mut [T])) -> VecSink<T> {
         VecSink {
             sink: sb::VecSink {
-                fn_trait: unsafe { mem::transmute(v) },
+                fn_trait: unsafe { mem::transmute::<&mut dyn FnMut(&mut [T]), TraitObject>(v) },
                 set_fn: Some(Self::set_fn_mut),
                 _phantom_0: PhantomData,
             },
@@ -61,7 +61,7 @@ impl<T: 'static> Sink<'_, T> {
     pub fn new(v: &mut dyn FnMut(&T)) -> Sink<T> {
         Sink {
             sink: sb::Sink {
-                fn_trait: unsafe { mem::transmute(v) },
+                fn_trait: unsafe { mem::transmute::<&mut dyn FnMut(&T), TraitObject>(v) },
                 set_fn: Some(Self::set_fn),
                 _phantom_0: PhantomData,
             },
