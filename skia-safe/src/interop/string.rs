@@ -1,6 +1,9 @@
-use crate::prelude::*;
-use skia_bindings::{self as sb, SkString};
+#![allow(dead_code)]
 use std::{fmt, str};
+
+use skia_bindings::{self as sb, SkString};
+
+use crate::prelude::*;
 
 pub type String = Handle<SkString>;
 unsafe_send_sync!(String);

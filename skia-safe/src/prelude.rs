@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use std::{
     hash::{Hash, Hasher},
     marker::PhantomData,
