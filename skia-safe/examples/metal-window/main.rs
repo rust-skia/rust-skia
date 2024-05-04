@@ -183,13 +183,13 @@ mod window {
                 )
             };
 
-            let context = gpu::direct_contexts::make_metal(&backend, None).unwrap();
+            let skia_context = gpu::direct_contexts::make_metal(&backend, None).unwrap();
 
             Self {
                 window,
                 metal_layer,
                 command_queue,
-                skia: context,
+                skia: skia_context,
             }
         }
     }
