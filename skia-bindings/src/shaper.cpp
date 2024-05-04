@@ -202,13 +202,16 @@ extern "C" SkShaper* C_SkShapers_Primitive_PrimitiveText() {
 }
 
 extern "C" SkShaper::BiDiRunIterator* C_SkShapers_Primitive_TrivialBidiRunIterator_new(uint8_t bidiLevel, size_t utf8Bytes) {
-    return SkShapers::Primitive::TrivialBiDiRunIterator(bidiLevel, utf8Bytes).release();
+    // m125: This function is not yet implemented.
+    // return SkShapers::Primitive::TrivialBiDiRunIterator(bidiLevel, utf8Bytes).release();
+    return new SkShaper::TrivialBiDiRunIterator(bidiLevel, utf8Bytes);
 }
 
 extern "C" SkShaper::ScriptRunIterator* C_SkShapers_Primitive_TrivialScriptRunIterator_new(uint8_t bidiLevel, size_t utf8Bytes) {
-    return SkShapers::Primitive::TrivialScriptRunIterator(bidiLevel, utf8Bytes).release();
+    // m125: This function is not yet implemented.
+    // return SkShapers::Primitive::TrivialScriptRunIterator(bidiLevel, utf8Bytes).release();
+    return new SkShaper::TrivialScriptRunIterator(bidiLevel, utf8Bytes);
 }
-
 
 // SkShapers::HB
 
