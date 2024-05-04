@@ -197,7 +197,7 @@ impl Bitmap {
     ///
     /// This changes [`ColorSpace`] in [`PixelRef`]; all bitmaps sharing [`PixelRef`]
     /// are affected.
-    pub fn set_color_space(&mut self, color_space: impl Into<Option<ColorSpace>>) -> bool {
+    pub fn set_color_space(&mut self, color_space: impl Into<Option<ColorSpace>>) {
         unsafe {
             sb::C_SkBitmap_setColorSpace(self.native_mut(), color_space.into().into_ptr_or_null())
         }

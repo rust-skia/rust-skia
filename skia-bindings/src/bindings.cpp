@@ -1092,7 +1092,7 @@ extern "C" bool C_SkBitmap_ComputeIsOpaque(const SkBitmap* self) {
     return SkBitmap::ComputeIsOpaque(*self);
 }
 
-extern "C" bool C_SkBitmap_setColorSpace(SkBitmap* self, SkColorSpace* colorSpace) {
+extern "C" void C_SkBitmap_setColorSpace(SkBitmap* self, SkColorSpace* colorSpace) {
     self->setColorSpace(sp(colorSpace));
 }
 
