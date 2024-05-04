@@ -2,22 +2,13 @@
 
 #include "include/core/SkFontMgr.h"
 #include "modules/skshaper/include/SkShaper.h"
+#include "modules/skshaper/include/SkShaper_harfbuzz.h"
+#include "modules/skshaper/include/SkShaper_skunicode.h"
+#include "modules/skunicode/include/SkUnicode_icu.h"
 
 #if defined(_WIN32)
 #include "third_party/icu/SkLoadICU.h"
 #endif
-
-extern "C" SkShaper* C_SkShaper_MakePrimitive() {
-    return SkShaper::MakePrimitive().release();
-}
-
-extern "C" SkShaper* C_SkShaper_MakeShaperDrivenWrapper(SkFontMgr* fontMgr) {
-    return SkShaper::MakeShaperDrivenWrapper(sk_sp<SkFontMgr>(fontMgr)).release();
-}
-
-extern "C" SkShaper* C_SkShaper_MakeShapeThenWrap(SkFontMgr* fontMgr) {
-    return SkShaper::MakeShapeThenWrap(sk_sp<SkFontMgr>(fontMgr)).release();
-}
 
 extern "C" SkShaper* C_SkShaper_MakeCoreText() {
 #ifdef SK_SHAPER_CORETEXT_AVAILABLE
@@ -75,10 +66,6 @@ extern "C" SkShaper::BiDiRunIterator* C_SkShaper_MakeIcuBidiRunIterator(const ch
     return SkShaper::MakeIcuBiDiRunIterator(utf8, utf8Bytes, bidiLevel).release();
 }
 
-extern "C" SkShaper::BiDiRunIterator* C_SkShaper_TrivialBidiRunIterator_new(uint8_t bidiLevel, size_t utf8Bytes) {
-    return new SkShaper::TrivialBiDiRunIterator(bidiLevel, utf8Bytes);
-}
-
 extern "C" SkFourByteTag C_SkShaper_ScriptRunIterator_currentScript(const SkShaper::ScriptRunIterator* self) {
     return self->currentScript();
 }
@@ -89,10 +76,6 @@ extern "C" SkShaper::ScriptRunIterator* C_SkShaper_MakeScriptRunIterator(const c
 
 extern "C" SkShaper::ScriptRunIterator* C_SkShaper_MakeHbIcuScriptRunIterator(const char* utf8, size_t utf8Bytes) {
     return SkShaper::MakeHbIcuScriptRunIterator(utf8, utf8Bytes).release();
-}
-
-extern "C" SkShaper::ScriptRunIterator* C_SkShaper_TrivialScriptRunIterator_new(uint8_t bidiLevel, size_t utf8Bytes) {
-    return new SkShaper::TrivialScriptRunIterator(bidiLevel, utf8Bytes);
 }
 
 extern "C" const char* C_SkShaper_LanguageRunIterator_currentLanguage(const SkShaper::LanguageRunIterator* self) {
@@ -210,4 +193,55 @@ extern "C" SkTextBlob* C_SkTextBlobBuilderRunHandler_makeBlob(SkTextBlobBuilderR
 
 extern "C" SkPoint C_SkTextBlobBuilderRunHandler_endPoint(SkTextBlobBuilderRunHandler* self) {
     return self->endPoint();
+}
+
+// SkShapers::Primitive
+
+extern "C" SkShaper* C_SkShapers_Primitive_PrimitiveText() {
+    return SkShapers::Primitive::PrimitiveText().release();
+}
+
+extern "C" SkShaper::BiDiRunIterator* C_SkShapers_Primitive_TrivialBidiRunIterator_new(uint8_t bidiLevel, size_t utf8Bytes) {
+    return SkShapers::Primitive::TrivialBiDiRunIterator(bidiLevel, utf8Bytes).release();
+}
+
+extern "C" SkShaper::ScriptRunIterator* C_SkShapers_Primitive_TrivialScriptRunIterator_new(uint8_t bidiLevel, size_t utf8Bytes) {
+    return SkShapers::Primitive::TrivialScriptRunIterator(bidiLevel, utf8Bytes).release();
+}
+
+
+// SkShapers::HB
+
+extern "C" SkShaper* C_SkShapers_HB_ShaperDrivenWrapper(SkFontMgr* fontMgr) {
+    auto unicode = SkUnicodes::ICU::Make();
+    if (!unicode) {
+        return nullptr;
+    }
+    return SkShapers::HB::ShaperDrivenWrapper(std::move(unicode), sk_sp<SkFontMgr>(fontMgr)).release();
+}
+
+extern "C" SkShaper* C_SkShapers_HB_ShapeThenWrap(SkFontMgr* fontMgr) {
+    auto unicode = SkUnicodes::ICU::Make();
+    if (!unicode) {
+        return nullptr;
+    }
+    return SkShapers::HB::ShapeThenWrap(std::move(unicode), sk_sp<SkFontMgr>(fontMgr)).release();
+}
+
+extern "C" SkShaper* C_SkShapers_HB_ShapeDontWrapOrReorder(SkFontMgr* fontMgr) {
+    auto unicode = SkUnicodes::ICU::Make();
+    if (!unicode) {
+        return nullptr;
+    }
+    return SkShapers::HB::ShapeDontWrapOrReorder(std::move(unicode), sk_sp<SkFontMgr>(fontMgr)).release();
+}
+
+// SkShapers::unicode
+
+extern "C" SkShaper::BiDiRunIterator* C_SkShapers_unicode_BidiRunIterator(const char* utf8, size_t utf8Bytes, uint8_t bidiLevel) {
+    auto unicode = SkUnicodes::ICU::Make();
+    if (!unicode) {
+        return nullptr;
+    }
+    return SkShapers::unicode::BidiRunIterator(std::move(unicode), utf8, utf8Bytes, bidiLevel).release();
 }

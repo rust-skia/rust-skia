@@ -75,7 +75,7 @@ impl ParagraphBuilder {
             .unwrap()
     }
 
-    // TODO: Wrap SetWords*, SetGraphemeBreaks*, setLineBreaks*, setUnicode.
+    // TODO: Wrap SetWords*, SetGraphemeBreaks*, setLineBreaks*, getClientICUData, setUnicode.
 
     pub fn reset(&mut self) {
         unsafe { sb::C_ParagraphBuilder_Reset(self.native_mut()) }
