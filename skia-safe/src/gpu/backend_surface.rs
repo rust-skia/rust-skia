@@ -83,7 +83,7 @@ impl BackendFormat {
     }
 
     #[cfg(feature = "metal")]
-    #[deprecated(since = "0.0.0", note = "use gpu::backend_formats::make_mtl()")]
+    #[deprecated(since = "0.74.0", note = "use gpu::backend_formats::make_mtl()")]
     pub fn new_metal(format: mtl::PixelFormat) -> Self {
         super::backend_formats::make_mtl(format)
     }
@@ -249,7 +249,7 @@ impl BackendTexture {
 
     #[cfg(feature = "metal")]
     #[allow(clippy::missing_safety_doc)]
-    #[deprecated(since = "0.0.0", note = "use gpu::backend_textures::make_mtl()")]
+    #[deprecated(since = "0.74.0", note = "use gpu::backend_textures::make_mtl()")]
     pub unsafe fn new_metal(
         (width, height): (i32, i32),
         mipmapped: super::Mipmapped,
@@ -260,7 +260,7 @@ impl BackendTexture {
 
     #[cfg(feature = "metal")]
     #[allow(clippy::missing_safety_doc)]
-    #[deprecated(since = "0.0.0", note = "use gpu::backend_textures::make_mtl()")]
+    #[deprecated(since = "0.74.0", note = "use gpu::backend_textures::make_mtl()")]
     pub unsafe fn new_metal_with_label(
         (width, height): (i32, i32),
         mipmapped: super::Mipmapped,
@@ -473,7 +473,7 @@ impl BackendRenderTarget {
     }
 
     #[cfg(feature = "metal")]
-    #[deprecated(since = "0.0.0", note = "use gpu::backend_render_targets::make_mtl()")]
+    #[deprecated(since = "0.74.0", note = "use gpu::backend_render_targets::make_mtl()")]
     pub fn new_metal((width, height): (i32, i32), mtl_info: &mtl::TextureInfo) -> Self {
         super::backend_render_targets::make_mtl((width, height), mtl_info)
     }

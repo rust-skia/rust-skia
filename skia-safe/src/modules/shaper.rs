@@ -41,7 +41,7 @@ impl fmt::Debug for Shaper {
 }
 
 impl Shaper {
-    #[deprecated(since = "0.0.0", note = "use shapers::primitive::primitive_text()")]
+    #[deprecated(since = "0.74.0", note = "use shapers::primitive::primitive_text()")]
     pub fn new_primitive() -> Self {
         crate::shapers::primitive::primitive_text()
     }
@@ -57,7 +57,7 @@ impl Shaper {
     }
 
     #[deprecated(
-        since = "0.0.0",
+        since = "0.74.0",
         note = "use shapers::hb::shape_dont_wrap_or_reorder()"
     )]
     pub fn new_shape_dont_wrap_or_reorder(
@@ -213,7 +213,7 @@ impl Shaper {
     }
 
     #[deprecated(
-        since = "0.0.0",
+        since = "0.74.0",
         note = "use shapers::primitive::trivial_bidi_run_iterator()"
     )]
     pub fn new_trivial_bidi_run_iterator(bidi_level: u8, utf8_bytes: usize) -> BiDiRunIterator {
@@ -273,7 +273,7 @@ impl Shaper {
     }
 
     #[deprecated(
-        since = "0.0.0",
+        since = "0.74.0",
         note = "use shapers::primitive::trivial_script_run_iterator"
     )]
     pub fn new_trivial_script_run_iterator(bidi_level: u8, utf8_bytes: usize) -> ScriptRunIterator {
@@ -740,13 +740,13 @@ impl Shaper {
 pub mod shapers {
     use super::{BiDiRunIterator, ScriptRunIterator, Shaper};
 
-    #[deprecated(since = "0.0.0", note = "use shapers::primitive::primitive_text()")]
+    #[deprecated(since = "0.74.0", note = "use shapers::primitive::primitive_text()")]
     pub fn primitive() -> Shaper {
         primitive::primitive_text()
     }
 
     #[deprecated(
-        since = "0.0.0",
+        since = "0.74.0",
         note = "use shapers::primitive::trivial_bidi_run_iterator()"
     )]
     pub fn trivial_bidi_run_iterator(bidi_level: u8, utf8_bytes: usize) -> BiDiRunIterator {
@@ -754,7 +754,7 @@ pub mod shapers {
     }
 
     #[deprecated(
-        since = "0.0.0",
+        since = "0.74.0",
         note = "use shapers::primitive::trivial_script_run_iterator()"
     )]
     pub fn trivial_script_run_iterator(bidi_level: u8, utf8_bytes: usize) -> ScriptRunIterator {

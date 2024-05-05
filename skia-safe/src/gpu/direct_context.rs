@@ -84,7 +84,7 @@ impl fmt::Debug for DirectContext {
 impl DirectContext {
     // Removed from Skia
     #[cfg(feature = "gl")]
-    #[deprecated(since = "0.0.0", note = "use gpu::direct_contexts::make_gl()")]
+    #[deprecated(since = "0.74.0", note = "use gpu::direct_contexts::make_gl()")]
     pub fn new_gl<'a>(
         interface: impl Into<gl::Interface>,
         options: impl Into<Option<&'a ContextOptions>>,
@@ -94,7 +94,7 @@ impl DirectContext {
 
     // Removed from Skia
     #[cfg(feature = "vulkan")]
-    #[deprecated(since = "0.0.0", note = "use gpu::direct_contexts::make_vulkan()")]
+    #[deprecated(since = "0.74.0", note = "use gpu::direct_contexts::make_vulkan()")]
     pub fn new_vulkan<'a>(
         backend_context: &vk::BackendContext,
         options: impl Into<Option<&'a ContextOptions>>,
@@ -103,7 +103,7 @@ impl DirectContext {
     }
 
     #[cfg(feature = "metal")]
-    #[deprecated(since = "0.0.0", note = "use gpu::direct_contexts::make_metal()")]
+    #[deprecated(since = "0.74.0", note = "use gpu::direct_contexts::make_metal()")]
     pub fn new_metal<'a>(
         backend_context: &crate::gpu::mtl::BackendContext,
         options: impl Into<Option<&'a ContextOptions>>,
