@@ -111,6 +111,7 @@ impl From<crate::GrGLFormat> for crate::GrGLenum {
         unsafe { crate::C_GrGLFormatToEnum(format) }
     }
 }
+
 #[cfg(feature = "vulkan")]
 mod vulkan {
     impl PartialEq for crate::VkComponentMapping {

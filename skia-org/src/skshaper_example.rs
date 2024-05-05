@@ -1,6 +1,6 @@
 use std::path;
 
-use skia_safe::{shaper::shapers, Canvas, Font, FontMgr, Paint, Point, Shaper};
+use skia_safe::{shapers, Canvas, Font, FontMgr, Paint, Point, Shaper};
 
 use crate::{helper::default_typeface, DrawingDriver};
 

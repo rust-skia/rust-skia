@@ -13,9 +13,10 @@ use skia_bindings::{
 
 use crate::{prelude::*, scalar, Font, FontMgr, FourByteTag, Point, TextBlob};
 
-pub mod core_text;
-pub mod harfbuzz;
-pub mod unicode;
+// The following three are re-exported in `modules.rs` via `mod shapers {}`.
+pub(crate) mod core_text;
+pub(crate) mod harfbuzz;
+pub(crate) mod unicode;
 
 pub use run_handler::RunHandler;
 
@@ -737,7 +738,7 @@ impl Shaper {
     }
 }
 
-pub mod shapers {
+pub(crate) mod shapers {
     use super::{BiDiRunIterator, ScriptRunIterator, Shaper};
 
     #[deprecated(since = "0.74.0", note = "use shapers::primitive::primitive_text()")]

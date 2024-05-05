@@ -9,8 +9,6 @@ mod ganesh;
 #[cfg(feature = "gl")]
 pub mod gl;
 mod gpu_types;
-#[cfg(feature = "metal")]
-pub mod mtl;
 mod mutable_texture_state;
 mod recording_context;
 mod types;
@@ -33,9 +31,14 @@ pub use yuva_backend_textures::*;
 #[deprecated(since = "0.37.0", note = "Use RecordingContext or DirectContext")]
 pub type Context = DirectContext;
 
+#[cfg(feature = "metal")]
+pub mod mtl {
+    pub use super::ganesh::mtl::{types::*, BackendContext};
+}
+
 pub mod surfaces {
     #[cfg(feature = "metal")]
-    pub use super::ganesh::mtl::*;
+    pub use super::ganesh::mtl::surface_metal::*;
     pub use super::ganesh::surface_ganesh::*;
 }
 
