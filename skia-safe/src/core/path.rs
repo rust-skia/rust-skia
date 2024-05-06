@@ -948,10 +948,36 @@ impl Path {
     ///
     /// example: <https://fiddle.skia.org/c/@Path_incReserve>
     pub fn inc_reserve(&mut self, extra_pt_count: usize) -> &mut Self {
+        self.inc_reserve_with_verb_and_conic(extra_pt_count, None, None);
+        self
+    }
+
+    /// Grows [`Path`] verb array and [`Point`] array to contain `extra_pt_count` additional [`Point`].
+    /// May improve performance and use less memory by
+    /// reducing the number and size of allocations when creating [`Path`].
+    ///
+    /// * `extra_pt_count` - number of additional [`Point`] to allocate
+    /// * `extra_verb_count` - number of additional verbs
+    /// * `extra_conic_count` - number of additional conics
+    ///
+    /// example: <https://fiddle.skia.org/c/@Path_incReserve>
+    pub fn inc_reserve_with_verb_and_conic(
+        &mut self,
+        extra_pt_count: usize,
+        extra_verb_count: impl Into<Option<usize>>,
+        extract_conic_count: impl Into<Option<usize>>,
+    ) -> &mut Self {
+        let extra_verb_count = extra_verb_count.into().unwrap_or_default();
+        let extra_conic_count = extract_conic_count.into().unwrap_or_default();
+
         unsafe {
-            self.native_mut()
-                .incReserve(extra_pt_count.try_into().unwrap())
+            self.native_mut().incReserve(
+                extra_pt_count.try_into().unwrap(),
+                extra_verb_count.try_into().unwrap(),
+                extra_conic_count.try_into().unwrap(),
+            )
         }
+
         self
     }
 

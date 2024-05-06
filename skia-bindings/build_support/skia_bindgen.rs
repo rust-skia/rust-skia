@@ -1,8 +1,10 @@
 //! Full build support for the SkiaBindings library, and bindings.rs file.
-use crate::build_support::{binaries_config, cargo, cargo::Target, features, platform};
+use std::path::{Path, PathBuf};
+
 use bindgen::{CodegenConfig, EnumVariation, RustTarget};
 use cc::Build;
-use std::path::{Path, PathBuf};
+
+use crate::build_support::{binaries_config, cargo, cargo::Target, features, platform};
 
 pub mod env {
     use crate::build_support::cargo;
@@ -363,8 +365,6 @@ const OPAQUE_TYPES: &[&str] = &[
     "SkBitmap_HeapAllocator",
     "SkColorFilter",
     "SkDeque_F2BIter",
-    "SkDrawLooper",
-    "SkDrawLooper_Context",
     "SkDrawable_GpuDrawHandler",
     "SkFlattenable",
     "SkFontMgr",
@@ -788,22 +788,32 @@ pub(crate) mod definitions {
 
         for ninja_file in ninja_files {
             let ninja_file = output_directory.join(ninja_file);
-            let contents = fs::read_to_string(ninja_file).unwrap();
-            definitions = combine(definitions, from_ninja_file_content(contents))
+            let contents = fs::read_to_string(&ninja_file).unwrap_or_else(|err| {
+                panic!(
+                    "Failed to read ninja file: `{}`: {err}",
+                    ninja_file.display()
+                )
+            });
+            definitions = combine(definitions, from_ninja_file_content(&ninja_file, contents))
         }
 
         definitions
     }
 
     /// Parse a defines = line from a ninja build file.
-    fn from_ninja_file_content(ninja_file: impl AsRef<str>) -> Definitions {
+    fn from_ninja_file_content(file_path: &Path, contents: impl AsRef<str>) -> Definitions {
         let defines = {
             let prefix = "defines = ";
-            let defines = ninja_file
+            let defines = contents
                 .as_ref()
                 .lines()
                 .find(|s| s.starts_with(prefix))
-                .expect("missing a line with the prefix 'defines =' in a .ninja file");
+                .unwrap_or_else(|| {
+                    panic!(
+                        "Missing a line starting with `defines =` in: {}",
+                        file_path.display()
+                    )
+                });
             &defines[prefix.len()..]
         };
         from_defines_str(defines)
@@ -818,7 +828,8 @@ pub(crate) mod definitions {
             files.extend(vec![
                 "obj/modules/skshaper/skshaper.ninja".into(),
                 "obj/modules/skparagraph/skparagraph.ninja".into(),
-                "obj/modules/skunicode/skunicode.ninja".into(),
+                "obj/modules/skunicode/skunicode_core.ninja".into(),
+                "obj/modules/skunicode/skunicode_icu.ninja".into(),
             ]);
             // shaper.cpp includes SkLoadICU.h
             if !use_system_libraries {

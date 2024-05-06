@@ -15,6 +15,7 @@ pub mod textlayout {
 
 #[cfg(feature = "textlayout")]
 pub mod shapers {
+    // Re-exports `shapers::primitive`.
     pub use crate::shaper::shapers::*;
 
     pub mod ct {
@@ -23,5 +24,9 @@ pub mod shapers {
 
     pub mod hb {
         pub use crate::shaper::harfbuzz::*;
+    }
+
+    pub mod unicode {
+        pub use crate::shaper::unicode::*;
     }
 }

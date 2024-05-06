@@ -44,7 +44,7 @@ impl DrawingDriver for Vulkan {
                 )
             };
 
-            gpu::DirectContext::new_vulkan(&backend_context, None).unwrap()
+            gpu::direct_contexts::make_vulkan(&backend_context, None).unwrap()
         };
 
         Self {

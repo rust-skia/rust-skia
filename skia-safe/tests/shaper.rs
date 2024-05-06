@@ -47,13 +47,11 @@ impl RunHandler for DebugRunHandler {
 #[cfg(test)]
 mod tests {
     use crate::DebugRunHandler;
-    use skia_safe::{Font, Shaper};
+    use skia_safe::{shapers, Font, Shaper};
 
     #[test]
     #[serial_test::serial]
     fn test_rtl_text_shaping() {
-        skia_bindings::icu::init();
-
         let shaper = Shaper::new(None);
         shaper.shape(
             "العربية",
@@ -67,8 +65,6 @@ mod tests {
     #[test]
     #[serial_test::serial]
     fn test_skunicode_parameterized_shaper() {
-        skia_bindings::icu::init();
-
-        Shaper::new_shape_dont_wrap_or_reorder(None).expect("Shaper");
+        shapers::hb::shape_dont_wrap_or_reorder(None).expect("Shaper");
     }
 }

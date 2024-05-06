@@ -1,5 +1,4 @@
-//! This file contains implementations for types that are
-//! re-exported in skia-safe.
+//! This file contains implementations for types that are re-exported in skia-safe.
 //!
 //! We could provide trait implementations in skia-safe, but then users of the library would have to
 //! import the implementation type _and_ the trait.
@@ -111,6 +110,17 @@ impl From<crate::GrGLFormat> for crate::GrGLenum {
     fn from(format: crate::GrGLFormat) -> Self {
         unsafe { crate::C_GrGLFormatToEnum(format) }
     }
+}
+
+#[cfg(feature = "vulkan")]
+mod vulkan {
+    impl PartialEq for crate::VkComponentMapping {
+        fn eq(&self, other: &Self) -> bool {
+            self.r == other.r && self.g == other.g && self.b == other.b && self.a == other.a
+        }
+    }
+
+    impl Eq for crate::VkComponentMapping {}
 }
 
 #[cfg(feature = "d3d")]

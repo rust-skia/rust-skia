@@ -13,8 +13,10 @@ use skia_bindings::{
 
 use crate::{prelude::*, scalar, Font, FontMgr, FourByteTag, Point, TextBlob};
 
-pub mod core_text;
-pub mod harfbuzz;
+// The following three are re-exported in `modules.rs` via `mod shapers {}`.
+pub(crate) mod core_text;
+pub(crate) mod harfbuzz;
+pub(crate) mod unicode;
 
 pub use run_handler::RunHandler;
 
@@ -40,35 +42,29 @@ impl fmt::Debug for Shaper {
 }
 
 impl Shaper {
+    #[deprecated(since = "0.74.0", note = "use shapers::primitive::primitive_text()")]
     pub fn new_primitive() -> Self {
-        shapers::primitive()
+        crate::shapers::primitive::primitive_text()
     }
 
-    pub fn new_shaper_driven_wrapper(font_mgr: impl Into<Option<FontMgr>>) -> Option<Self> {
-        #[cfg(feature = "embed-icudtl")]
-        crate::icu::init();
-
-        Self::from_ptr(unsafe {
-            sb::C_SkShaper_MakeShaperDrivenWrapper(font_mgr.into().into_ptr_or_null())
-        })
+    pub fn new_shaper_driven_wrapper(
+        fallback_font_mgr: impl Into<Option<FontMgr>>,
+    ) -> Option<Self> {
+        crate::shapers::hb::shaper_driven_wrapper(fallback_font_mgr)
     }
 
-    pub fn new_shape_then_wrap(font_mgr: impl Into<Option<FontMgr>>) -> Option<Self> {
-        #[cfg(feature = "embed-icudtl")]
-        crate::icu::init();
-
-        Self::from_ptr(unsafe {
-            sb::C_SkShaper_MakeShapeThenWrap(font_mgr.into().into_ptr_or_null())
-        })
+    pub fn new_shape_then_wrap(fallback_font_mgr: impl Into<Option<FontMgr>>) -> Option<Self> {
+        crate::shapers::hb::shape_then_wrap(fallback_font_mgr)
     }
 
-    pub fn new_shape_dont_wrap_or_reorder(font_mgr: impl Into<Option<FontMgr>>) -> Option<Self> {
-        #[cfg(feature = "embed-icudtl")]
-        crate::icu::init();
-
-        Self::from_ptr(unsafe {
-            sb::C_SkShaper_MakeShapeDontWrapOrReorder(font_mgr.into().into_ptr_or_null())
-        })
+    #[deprecated(
+        since = "0.74.0",
+        note = "use shapers::hb::shape_dont_wrap_or_reorder()"
+    )]
+    pub fn new_shape_dont_wrap_or_reorder(
+        fallback_font_mgr: impl Into<Option<FontMgr>>,
+    ) -> Option<Self> {
+        crate::shapers::hb::shape_dont_wrap_or_reorder(fallback_font_mgr)
     }
 
     pub fn purge_harf_buzz_cache() {
@@ -217,11 +213,12 @@ impl Shaper {
         .map(|i| i.borrows(utf8))
     }
 
+    #[deprecated(
+        since = "0.74.0",
+        note = "use shapers::primitive::trivial_bidi_run_iterator()"
+    )]
     pub fn new_trivial_bidi_run_iterator(bidi_level: u8, utf8_bytes: usize) -> BiDiRunIterator {
-        BiDiRunIterator::from_ptr(unsafe {
-            sb::C_SkShaper_TrivialBidiRunIterator_new(bidi_level, utf8_bytes)
-        })
-        .unwrap()
+        shapers::primitive::trivial_bidi_run_iterator(bidi_level, utf8_bytes)
     }
 }
 
@@ -276,11 +273,12 @@ impl Shaper {
         .borrows(utf8)
     }
 
+    #[deprecated(
+        since = "0.74.0",
+        note = "use shapers::primitive::trivial_script_run_iterator"
+    )]
     pub fn new_trivial_script_run_iterator(bidi_level: u8, utf8_bytes: usize) -> ScriptRunIterator {
-        ScriptRunIterator::from_ptr(unsafe {
-            sb::C_SkShaper_TrivialScriptRunIterator_new(bidi_level, utf8_bytes)
-        })
-        .unwrap()
+        shapers::primitive::trivial_script_run_iterator(bidi_level, utf8_bytes)
     }
 }
 
@@ -740,21 +738,52 @@ impl Shaper {
     }
 }
 
-pub mod shapers {
-    use skia_bindings as sb;
-
+pub(crate) mod shapers {
     use super::{BiDiRunIterator, ScriptRunIterator, Shaper};
 
+    #[deprecated(since = "0.74.0", note = "use shapers::primitive::primitive_text()")]
     pub fn primitive() -> Shaper {
-        Shaper::from_ptr(unsafe { sb::C_SkShaper_MakePrimitive() }).unwrap()
+        primitive::primitive_text()
     }
 
+    #[deprecated(
+        since = "0.74.0",
+        note = "use shapers::primitive::trivial_bidi_run_iterator()"
+    )]
     pub fn trivial_bidi_run_iterator(bidi_level: u8, utf8_bytes: usize) -> BiDiRunIterator {
-        Shaper::new_trivial_bidi_run_iterator(bidi_level, utf8_bytes)
+        primitive::trivial_bidi_run_iterator(bidi_level, utf8_bytes)
     }
 
+    #[deprecated(
+        since = "0.74.0",
+        note = "use shapers::primitive::trivial_script_run_iterator()"
+    )]
     pub fn trivial_script_run_iterator(bidi_level: u8, utf8_bytes: usize) -> ScriptRunIterator {
-        Shaper::new_trivial_script_run_iterator(bidi_level, utf8_bytes)
+        primitive::trivial_script_run_iterator(bidi_level, utf8_bytes)
+    }
+
+    pub mod primitive {
+        use skia_bindings as sb;
+
+        use crate::shaper::{BiDiRunIterator, ScriptRunIterator, Shaper};
+
+        pub fn primitive_text() -> Shaper {
+            Shaper::from_ptr(unsafe { sb::C_SkShapers_Primitive_PrimitiveText() }).unwrap()
+        }
+
+        pub fn trivial_bidi_run_iterator(bidi_level: u8, utf8_bytes: usize) -> BiDiRunIterator {
+            BiDiRunIterator::from_ptr(unsafe {
+                sb::C_SkShapers_Primitive_TrivialBidiRunIterator_new(bidi_level, utf8_bytes)
+            })
+            .unwrap()
+        }
+
+        pub fn trivial_script_run_iterator(bidi_level: u8, utf8_bytes: usize) -> ScriptRunIterator {
+            ScriptRunIterator::from_ptr(unsafe {
+                sb::C_SkShapers_Primitive_TrivialScriptRunIterator_new(bidi_level, utf8_bytes)
+            })
+            .unwrap()
+        }
     }
 }
 

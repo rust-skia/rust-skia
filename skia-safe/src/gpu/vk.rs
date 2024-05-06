@@ -18,6 +18,8 @@ pub use sb::VkBool32 as Bool32;
 pub use sb::VkBuffer as Buffer;
 pub use sb::VkChromaLocation as ChromaLocation;
 pub use sb::VkCommandBuffer as CommandBuffer;
+pub use sb::VkComponentMapping as ComponentMapping;
+pub use sb::VkComponentSwizzle as ComponentSwizzle;
 pub use sb::VkDevice as Device;
 pub use sb::VkDeviceMemory as DeviceMemory;
 pub use sb::VkDeviceSize as DeviceSize;

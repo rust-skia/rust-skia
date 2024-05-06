@@ -129,8 +129,12 @@ impl Shader {
 }
 
 pub mod shaders {
-    use crate::{prelude::*, Blender, Color, Color4f, ColorSpace, Rect, Shader};
     use skia_bindings as sb;
+
+    use crate::{
+        prelude::*, Blender, Color, Color4f, ColorSpace, Image, Matrix, Rect, SamplingOptions,
+        Shader, TileMode,
+    };
 
     pub fn empty() -> Shader {
         Shader::from_ptr(unsafe { sb::C_SkShaders_Empty() }).unwrap()
@@ -166,6 +170,43 @@ pub mod shaders {
     pub fn coord_clamp(shader: impl Into<Shader>, rect: impl AsRef<Rect>) -> Option<Shader> {
         Shader::from_ptr(unsafe {
             sb::C_SkShaders_CoordClamp(shader.into().into_ptr(), rect.as_ref().native())
+        })
+    }
+
+    /// Create an [`Shader`] that will sample the 'image'. This is equivalent to [`Image::to_shader`].
+    pub fn image<'a>(
+        image: impl Into<Image>,
+        tm: (TileMode, TileMode),
+        options: &SamplingOptions,
+        matrix: impl Into<Option<&'a Matrix>>,
+    ) -> Option<Shader> {
+        Shader::from_ptr(unsafe {
+            sb::C_SkShaders_Image(
+                image.into().into_ptr(),
+                tm.0,
+                tm.1,
+                options.native(),
+                matrix.into().native_ptr_or_null(),
+            )
+        })
+    }
+
+    /// Create an [`Shader`] that will sample 'image' with minimal processing. This is equivalent to
+    /// [`Image::to_raw_shader`].
+    pub fn raw_image<'a>(
+        image: impl Into<Image>,
+        tm: (TileMode, TileMode),
+        options: &SamplingOptions,
+        matrix: impl Into<Option<&'a Matrix>>,
+    ) -> Option<Shader> {
+        Shader::from_ptr(unsafe {
+            sb::C_SkShaders_RawImage(
+                image.into().into_ptr(),
+                tm.0,
+                tm.1,
+                options.native(),
+                matrix.into().native_ptr_or_null(),
+            )
         })
     }
 }

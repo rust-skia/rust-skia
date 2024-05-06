@@ -18,7 +18,7 @@ fn main() {
     use foreign_types_shared::{ForeignType, ForeignTypeRef};
     use metal_rs::{Device, MTLPixelFormat, MetalLayer};
     use objc::{rc::autoreleasepool, runtime::YES};
-    use skia_safe::gpu::{self, mtl, BackendRenderTarget, DirectContext, SurfaceOrigin};
+    use skia_safe::gpu::{self, mtl, SurfaceOrigin};
     use winit::{
         dpi::LogicalSize,
         event::{Event, WindowEvent},
@@ -73,11 +73,10 @@ fn main() {
         mtl::BackendContext::new(
             device.as_ptr() as mtl::Handle,
             command_queue.as_ptr() as mtl::Handle,
-            std::ptr::null(),
         )
     };
 
-    let mut context = DirectContext::new_metal(&backend, None).unwrap();
+    let mut context = gpu::direct_contexts::make_metal(&backend, None).unwrap();
 
     events_loop
         .run(move |event, window_target| {
@@ -104,10 +103,14 @@ fn main() {
                                         drawable.texture().as_ptr() as mtl::Handle,
                                     );
 
-                                    let backend_render_target = BackendRenderTarget::new_metal(
-                                        (drawable_size.width as i32, drawable_size.height as i32),
-                                        &texture_info,
-                                    );
+                                    let backend_render_target =
+                                        gpu::backend_render_targets::make_mtl(
+                                            (
+                                                drawable_size.width as i32,
+                                                drawable_size.height as i32,
+                                            ),
+                                            &texture_info,
+                                        );
 
                                     gpu::surfaces::wrap_backend_render_target(
                                         &mut context,

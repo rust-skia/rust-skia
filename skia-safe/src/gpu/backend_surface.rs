@@ -83,9 +83,9 @@ impl BackendFormat {
     }
 
     #[cfg(feature = "metal")]
+    #[deprecated(since = "0.74.0", note = "use gpu::backend_formats::make_mtl()")]
     pub fn new_metal(format: mtl::PixelFormat) -> Self {
-        Self::construct(|bf| unsafe { sb::C_GrBackendFormat_ConstructMtl(bf, format) })
-            .assert_valid()
+        super::backend_formats::make_mtl(format)
     }
 
     #[cfg(feature = "d3d")]
@@ -124,9 +124,7 @@ impl BackendFormat {
 
     #[cfg(feature = "metal")]
     pub fn as_mtl_format(&self) -> Option<mtl::PixelFormat> {
-        let pixel_format = unsafe { self.native().asMtlFormat() };
-        // Mtl's PixelFormat == 0 is invalid.
-        (pixel_format != 0).if_true_some(pixel_format)
+        super::backend_formats::as_mtl_format(self)
     }
 
     #[cfg(feature = "d3d")]
@@ -251,32 +249,25 @@ impl BackendTexture {
 
     #[cfg(feature = "metal")]
     #[allow(clippy::missing_safety_doc)]
+    #[deprecated(since = "0.74.0", note = "use gpu::backend_textures::make_mtl()")]
     pub unsafe fn new_metal(
         (width, height): (i32, i32),
         mipmapped: super::Mipmapped,
         mtl_info: &mtl::TextureInfo,
     ) -> Self {
-        Self::new_metal_with_label((width, height), mipmapped, mtl_info, "")
+        super::backend_textures::make_mtl((width, height), mipmapped, mtl_info, "")
     }
 
     #[cfg(feature = "metal")]
     #[allow(clippy::missing_safety_doc)]
+    #[deprecated(since = "0.74.0", note = "use gpu::backend_textures::make_mtl()")]
     pub unsafe fn new_metal_with_label(
         (width, height): (i32, i32),
         mipmapped: super::Mipmapped,
         mtl_info: &mtl::TextureInfo,
         label: impl AsRef<str>,
     ) -> Self {
-        let label = label.as_ref().as_bytes();
-        Self::from_native_if_valid(sb::C_GrBackendTexture_newMtl(
-            width,
-            height,
-            mipmapped,
-            mtl_info.native(),
-            label.as_ptr() as _,
-            label.len(),
-        ))
-        .unwrap()
+        super::backend_textures::make_mtl((width, height), mipmapped, mtl_info, label)
     }
 
     #[cfg(feature = "d3d")]
@@ -369,12 +360,7 @@ impl BackendTexture {
 
     #[cfg(feature = "metal")]
     pub fn metal_texture_info(&self) -> Option<mtl::TextureInfo> {
-        unsafe {
-            let mut texture_info = mtl::TextureInfo::default();
-            self.native()
-                .getMtlTextureInfo(texture_info.native_mut())
-                .if_true_some(texture_info)
-        }
+        super::backend_textures::get_mtl_texture_info(self)
     }
 
     #[cfg(feature = "d3d")]
@@ -487,10 +473,9 @@ impl BackendRenderTarget {
     }
 
     #[cfg(feature = "metal")]
+    #[deprecated(since = "0.74.0", note = "use gpu::backend_render_targets::make_mtl()")]
     pub fn new_metal((width, height): (i32, i32), mtl_info: &mtl::TextureInfo) -> Self {
-        Self::construct(|target| unsafe {
-            sb::C_GrBackendRenderTargets_ConstructMtl(target, width, height, mtl_info.native())
-        })
+        super::backend_render_targets::make_mtl((width, height), mtl_info)
     }
 
     #[cfg(feature = "d3d")]
@@ -555,8 +540,7 @@ impl BackendRenderTarget {
 
     #[cfg(feature = "metal")]
     pub fn metal_texture_info(&self) -> Option<mtl::TextureInfo> {
-        let mut info = mtl::TextureInfo::default();
-        unsafe { self.native().getMtlTextureInfo(info.native_mut()) }.if_true_some(info)
+        super::backend_render_targets::get_mtl_texture_info(self)
     }
 
     #[cfg(feature = "d3d")]

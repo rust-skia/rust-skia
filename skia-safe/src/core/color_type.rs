@@ -29,6 +29,8 @@ pub enum ColorType {
     BGR101010x = SkColorType::kBGR_101010x_SkColorType as _,
     /// pixel with 10 bits each for blue, green, red; in 32-bit word, extended range
     BGR101010xXR = SkColorType::kBGR_101010x_XR_SkColorType as _,
+    /// pixel with 10 bits each for blue, green, red, alpha; in 64-bit word, extended range
+    BGRA10101010XR = SkColorType::kBGRA_10101010_XR_SkColorType as _,
     /// pixel with 10 used bits (most significant) followed by 6 unused
     /// bits for red, green, blue, alpha; in 64-bit word
     RGBA10x6 = SkColorType::kRGBA_10x6_SkColorType as _,

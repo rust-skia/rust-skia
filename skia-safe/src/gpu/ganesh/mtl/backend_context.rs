@@ -29,9 +29,7 @@ impl BackendContext {
     ///
     /// This function retains all the non-`null` handles passed to it and releases them as soon the
     /// [BackendContext] is dropped.
-    pub unsafe fn new(device: Handle, queue: Handle, binary_archive: Handle) -> Self {
-        BackendContext::construct(|bc| {
-            sb::C_GrMtlBackendContext_Construct(bc, device, queue, binary_archive)
-        })
+    pub unsafe fn new(device: Handle, queue: Handle) -> Self {
+        BackendContext::construct(|bc| sb::C_GrMtlBackendContext_Construct(bc, device, queue))
     }
 }

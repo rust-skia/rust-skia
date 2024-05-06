@@ -1,9 +1,11 @@
+use std::{ffi, fmt, ptr};
+
+use skia_bindings::{self as sb, SkBitmap};
+
 use crate::{
     prelude::*, AlphaType, Color, Color4f, ColorSpace, ColorType, IPoint, IRect, ISize, Image,
     ImageInfo, Matrix, Paint, PixelRef, Pixmap, SamplingOptions, Shader, TileMode,
 };
-use skia_bindings::{self as sb, SkBitmap};
-use std::{ffi, fmt, ptr};
 
 /// [`Bitmap`] describes a two-dimensional raster pixel array. [`Bitmap`] is built on [`ImageInfo`],
 /// containing integer width and height, [`ColorType`] and [`AlphaType`] describing the pixel
@@ -186,6 +188,19 @@ impl Bitmap {
     /// This changes [`AlphaType`] in [`PixelRef`]; all bitmaps sharing [`PixelRef`] are affected.
     pub fn set_alpha_type(&mut self, alpha_type: AlphaType) -> bool {
         unsafe { self.native_mut().setAlphaType(alpha_type) }
+    }
+
+    /// Sets the [`ColorSpace`] associated with this [`Bitmap`].
+    ///
+    /// The raw pixel data is not altered by this call; no conversion is
+    /// performed.
+    ///
+    /// This changes [`ColorSpace`] in [`PixelRef`]; all bitmaps sharing [`PixelRef`]
+    /// are affected.
+    pub fn set_color_space(&mut self, color_space: impl Into<Option<ColorSpace>>) {
+        unsafe {
+            sb::C_SkBitmap_setColorSpace(self.native_mut(), color_space.into().into_ptr_or_null())
+        }
     }
 
     /// Returns pixel address, the base address corresponding to the pixel origin.

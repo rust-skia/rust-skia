@@ -62,6 +62,7 @@
         "Subsetter",
         "subsetting",
         "Tahoma",
+        "Unicodes",
         "unoptimized",
         "USERPROFILE",
         "uset",
@@ -72,6 +73,7 @@
     "C_Cpp.default.defines": [
         "SK_GANESH",
         "SK_USING_THIRD_PARTY_ICU",
+        "SK_SHAPER_UNICODE_AVAILABLE",
         "SK_UNICODE_ICU_IMPLEMENTATION",
         "SK_SHAPER_HARFBUZZ_AVAILABLE",
         "SK_CODEC_DECODES_WEBP"

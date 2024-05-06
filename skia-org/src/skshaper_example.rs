@@ -1,6 +1,6 @@
 use std::path;
 
-use skia_safe::{Canvas, Font, FontMgr, Paint, Point, Shaper};
+use skia_safe::{shapers, Canvas, Font, FontMgr, Paint, Point, Shaper};
 
 use crate::{helper::default_typeface, DrawingDriver};
 
@@ -34,7 +34,7 @@ fn draw_rtl_unshaped(canvas: &Canvas) {
 
     let font = &Font::from_typeface(default_typeface(), 64.0);
 
-    let shaper = Shaper::new_primitive();
+    let shaper = shapers::primitive::primitive_text();
     if let Some((blob, _)) =
         shaper.shape_text_blob(RTL_TEXT, font, false, 10000.0, Point::default())
     {

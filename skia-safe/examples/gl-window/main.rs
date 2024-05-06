@@ -156,7 +156,7 @@ fn main() {
     })
     .expect("Could not create interface");
 
-    let mut gr_context = skia_safe::gpu::DirectContext::new_gl(interface, None)
+    let mut gr_context = skia_safe::gpu::direct_contexts::make_gl(interface, None)
         .expect("Could not create direct context");
 
     let fb_info = {
