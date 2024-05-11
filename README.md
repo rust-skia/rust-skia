@@ -217,14 +217,14 @@ Compilation to iOS is supported on macOS targeting the iOS simulator (`--target 
 
 ### For WebAssembly
 
-Install `emscripten` version 3.1.1 or superior. In the examples below, we assume
-`emsdk` version `3.1.1` was installed with [asdf](http://asdf-vm.com/).
+Install `emscripten` version 3.1.57 or superior. In the examples below, we assume
+`emsdk` version `3.1.57` was installed with [asdf](http://asdf-vm.com/).
 
 Build with the `wasm32-unknown-emscripten` target (`wasm32-unknown-unknown` is
 unsupported because it is [fundamentally incompatible with linking C code](https://github.com/rustwasm/team/issues/291#issuecomment-645482430):
 
 ```bash
-export EMSDK=~/.asdf/installs/emsdk/3.1.1
+export EMSDK=~/.asdf/installs/emsdk/3.1.57
 export EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0"
 
 cargo build --target wasm32-unknown-emscripten
@@ -239,7 +239,7 @@ In `EMCC_CFLAGS`, `-s ERROR_ON_UNDEFINED_SYMBOLS` is a
 If you want to enable WebGL, you will also have to set `MAX_WEBGL_VERSION=2`:
 
 ```bash
-export EMSDK=~/.asdf/installs/emsdk/3.1.1
+export EMSDK=~/.asdf/installs/emsdk/3.1.57
 export EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
 
 cargo build --target wasm32-unknown-emscripten --features gl
@@ -256,7 +256,7 @@ architecture, and can be retrieved with `brew info binutils`. Here is an
 example for Apple silicon:
 
 ```bash
-export EMSDK=~/.asdf/installs/emsdk/3.1.1
+export EMSDK=~/.asdf/installs/emsdk/3.1.57
 export EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0"
 export PATH="/opt/homebrew/opt/binutils/bin:$PATH"
 
