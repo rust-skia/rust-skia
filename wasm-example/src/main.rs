@@ -1,8 +1,9 @@
+use std::boxed::Box;
+
 use skia_safe::{
     gpu::{self, gl::FramebufferInfo, DirectContext},
     Color, Paint, PaintStyle, Surface,
 };
-use std::boxed::Box;
 
 extern "C" {
     pub fn emscripten_GetProcAddress(
@@ -51,7 +52,7 @@ fn init_gl() {
 /// This needs to be done once per WebGL context.
 fn create_gpu_state() -> GpuState {
     let interface = skia_safe::gpu::gl::Interface::new_native().unwrap();
-    let context = skia_safe::gpu::DirectContext::new_gl(interface, None).unwrap();
+    let context = skia_safe::gpu::direct_contexts::make_gl(interface, None).unwrap();
     let framebuffer_info = {
         let mut fboid: gl::types::GLint = 0;
         unsafe { gl::GetIntegerv(gl::FRAMEBUFFER_BINDING, &mut fboid) };
