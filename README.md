@@ -217,7 +217,7 @@ Compilation to iOS is supported on macOS targeting the iOS simulator (`--target 
 
 ### For WebAssembly
 
-Install `emscripten` version 3.1.57 or superior. In the examples below, we assume
+Install `emscripten` version 3.1.57 or superior and make sure that llvm / clang 16+ is installed. In the examples below, we assume
 `emsdk` version `3.1.57` was installed with [asdf](http://asdf-vm.com/).
 
 Build with the `wasm32-unknown-emscripten` target (`wasm32-unknown-unknown` is
