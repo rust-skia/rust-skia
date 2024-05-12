@@ -444,6 +444,8 @@ const OPAQUE_TYPES: &[&str] = &[
     "skia_private::THashMap",
     // m121:
     "skgpu::MutableTextureState",
+    // emscripten: Uses SkLRUCache (which is blocklisted)
+    "skia::textlayout::ParagraphCache",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[
