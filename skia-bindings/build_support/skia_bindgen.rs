@@ -410,6 +410,8 @@ const OPAQUE_TYPES: &[&str] = &[
     "std::tuple",
     // Homebrew macOS LLVM 13
     "std::tuple_.*",
+    // Since 3.1.57 of the emsdk: <https://github.com/rust-skia/rust-skia/issues/975>
+    "std::__2::tuple.*",
     // m93: private, exposed by Paint::asBlendMode(), fails layout tests.
     "skstd::optional",
     // m100
@@ -427,6 +429,8 @@ const OPAQUE_TYPES: &[&str] = &[
     "FILE",
     // m114: Results in wrongly sized template specializations.
     "skia_private::THashMap",
+    // emscripten: Uses SkLRUCache (which is blocklisted)
+    "skia::textlayout::ParagraphCache",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[
