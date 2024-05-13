@@ -129,6 +129,10 @@ extern "C" {
         self->~ParagraphCache();
     }
 
+    void C_ParagraphCache_turnOn(ParagraphCache* self, bool value) {
+        self->turnOn(value);
+    }
+
     int C_ParagraphCache_count(ParagraphCache* self) {
         return self->count();
     }

@@ -34,7 +34,7 @@ impl ParagraphCache {
     }
 
     pub fn turn_on(&mut self, value: bool) {
-        self.native_mut().fCacheIsOn = value
+        unsafe { sb::C_ParagraphCache_turnOn(self.native_mut(), value) }
     }
 
     pub fn count(&mut self) -> i32 {
