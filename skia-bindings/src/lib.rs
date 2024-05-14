@@ -8,6 +8,15 @@
 // GrVkBackendContext contains u128 fields on macOS
 #![allow(improper_ctypes)]
 
+#[allow(unused)]
+type std___1_string_view = std_string_view;
+#[allow(unused)]
+type std___2_string_view = std_string_view;
+#[allow(unused)]
+type std___1_string = std_string;
+#[allow(unused)]
+type std___2_string = std_string;
+
 include!(concat!(env!("OUT_DIR"), "/skia/bindings.rs"));
 
 mod defaults;

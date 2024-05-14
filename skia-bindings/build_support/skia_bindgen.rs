@@ -1,7 +1,7 @@
 //! Full build support for the SkiaBindings library, and bindings.rs file.
 use std::path::{Path, PathBuf};
 
-use bindgen::{CodegenConfig, EnumVariation, RustTarget};
+use bindgen::{callbacks::ItemKind, CodegenConfig, EnumVariation, RustTarget};
 use cc::Build;
 
 use crate::build_support::{binaries_config, cargo, cargo::Target, features, platform};
@@ -425,6 +425,8 @@ const OPAQUE_TYPES: &[&str] = &[
     "std::tuple_.*",
     // Since 3.1.57 of the emsdk: <https://github.com/rust-skia/rust-skia/issues/975>
     "std::__2::tuple.*",
+    // clang 18
+    "std::__1::tuple.*",
     // m93: private, exposed by Paint::asBlendMode(), fails layout tests.
     "skstd::optional",
     // m100
@@ -500,9 +502,23 @@ impl bindgen::callbacks::ParseCallbacks for ParseCallbacks {
                 .map(|(_, replacer)| replacer(enum_name, original_variant_name))
         })
     }
+
+    fn item_name(&self, original_item_name: &str) -> Option<String> {
+        ITEM_TABLE
+            .iter()
+            .find(|(original, _)| *original == original_item_name)
+            .map(|(_, replacement)| replacement.to_string())
+    }
 }
 
 type EnumEntry = (&'static str, fn(&str, &str) -> String);
+
+const ITEM_TABLE: &[(&str, &str)] = &[
+    ("std___1_string_view", "std_string_view"),
+    ("std___2_string_view", "std_string_view"),
+    ("std___1_string", "std_string"),
+    ("std___2_string", "std_string"),
+];
 
 const ENUM_TABLE: &[EnumEntry] = &[
     //

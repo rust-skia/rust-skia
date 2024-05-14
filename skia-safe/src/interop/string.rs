@@ -73,19 +73,7 @@ impl AsStr for SkString {
     }
 }
 
-// Since 3.1.57 of the emsdk: <https://github.com/rust-skia/rust-skia/issues/975>
-#[cfg(not(target_arch = "wasm32"))]
-mod std_cpp {
-    pub type StringView = skia_bindings::std_string_view;
-    pub type String = skia_bindings::std_string;
-}
-#[cfg(target_arch = "wasm32")]
-mod std_cpp {
-    pub type StringView = skia_bindings::std___2_string_view;
-    pub type String = skia_bindings::std___2_string;
-}
-
-impl AsStr for std_cpp::StringView {
+impl AsStr for sb::std_string_view {
     fn as_str(&self) -> &str {
         let slice = unsafe {
             let mut size = 0;
@@ -96,7 +84,7 @@ impl AsStr for std_cpp::StringView {
     }
 }
 
-impl AsStr for std_cpp::String {
+impl AsStr for sb::std_string {
     fn as_str(&self) -> &str {
         let slice = unsafe {
             let mut size = 0;
