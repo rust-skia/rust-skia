@@ -1,0 +1,15 @@
+{
+	"name": "Rust-Skia ARM64 DevContainer Ubuntu 20.04 + clang-18",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"containerEnv": {
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"rust-lang.rust-analyzer"
+			]
+		}
+	}
+}
