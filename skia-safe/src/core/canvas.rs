@@ -2,12 +2,13 @@ use std::{cell::UnsafeCell, ffi::CString, fmt, marker::PhantomData, mem, ops::De
 
 use sb::SkCanvas_FilterSpan;
 use skia_bindings::{
-    self as sb, SkAutoCanvasRestore, SkCanvas, SkCanvas_SaveLayerRec, SkImageFilter, SkPaint,
-    SkRect, U8CPU,
+    self as sb, SkAutoCanvasRestore, SkCanvas, SkCanvas_SaveLayerRec, SkColorSpace, SkImageFilter,
+    SkPaint, SkRect, U8CPU,
 };
 
 #[cfg(feature = "gpu")]
 use crate::gpu;
+use crate::ColorSpace;
 use crate::{
     prelude::*, scalar, Bitmap, BlendMode, ClipOp, Color, Color4f, Data, Drawable, FilterMode,
     Font, GlyphId, IPoint, IRect, ISize, Image, ImageFilter, ImageInfo, Matrix, Paint, Path,
@@ -40,6 +41,7 @@ pub struct SaveLayerRec<'a> {
     paint: Option<&'a SkPaint>,
     filters: SkCanvas_FilterSpan,
     backdrop: Option<&'a SkImageFilter>,
+    color_space: Option<&'a SkColorSpace>,
     flags: SaveLayerFlags,
     experimental_backdrop_scale: scalar,
 }
@@ -75,6 +77,10 @@ impl fmt::Debug for SaveLayerRec<'_> {
                 "backdrop",
                 &ImageFilter::from_unshared_ptr_ref(&(self.backdrop.as_ptr_or_null() as *mut _)),
             )
+            .field(
+                "color_space",
+                &ColorSpace::from_unshared_ptr_ref(&(self.color_space.as_ptr_or_null() as *mut _)),
+            )
             .field("flags", &self.flags)
             .field(
                 "experimental_backdrop_scale",
@@ -106,6 +112,14 @@ impl<'a> SaveLayerRec<'a> {
     #[must_use]
     pub fn backdrop(mut self, backdrop: &'a ImageFilter) -> Self {
         self.backdrop = Some(backdrop.native());
+        self
+    }
+
+    /// If not `None`, this triggers a color space conversion when the layer is restored. It
+    /// will be as if the layer's contents are drawn in this color space. Filters from
+    /// `backdrop` and `paint` will be applied in this color space.
+    pub fn color_space(mut self, color_space: &'a ColorSpace) -> Self {
+        self.color_space = Some(color_space.native());
         self
     }
 
