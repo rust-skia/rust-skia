@@ -2,7 +2,7 @@
     #define SK_VULKAN
 #endif
 
-#include "include/gpu/GrBackendDrawableInfo.h"
+#include "include/gpu/ganesh/vk/GrBackendDrawableInfo.h"
 #include "include/gpu/GrBackendSurface.h"
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/MutableTextureState.h"
