@@ -1,7 +1,7 @@
 //! Full build support for the SkiaBindings library, and bindings.rs file.
 use std::path::{Path, PathBuf};
 
-use bindgen::{callbacks::ItemKind, CodegenConfig, EnumVariation, RustTarget};
+use bindgen::{CodegenConfig, EnumVariation, RustTarget};
 use cc::Build;
 
 use crate::build_support::{binaries_config, cargo, cargo::Target, features, platform};
