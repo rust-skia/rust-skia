@@ -8,13 +8,13 @@ use skia_bindings::{
 
 #[cfg(feature = "gpu")]
 use crate::gpu;
-use crate::ColorSpace;
 use crate::{
     prelude::*, scalar, Bitmap, BlendMode, ClipOp, Color, Color4f, Data, Drawable, FilterMode,
     Font, GlyphId, IPoint, IRect, ISize, Image, ImageFilter, ImageInfo, Matrix, Paint, Path,
     Picture, Pixmap, Point, QuickReject, RRect, RSXform, Rect, Region, SamplingOptions, Shader,
     Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices, M44,
 };
+use crate::{Arc, ColorSpace};
 
 pub use lattice::Lattice;
 
@@ -1480,6 +1480,34 @@ impl Canvas {
                 paint.native(),
             )
         }
+        self
+    }
+
+    /// Draws arc using clip, [`Matrix`], and [`Paint`] paint.
+    ///
+    /// Arc is part of oval bounded by oval, sweeping from `start_angle` to `start_angle` plus
+    /// `sweep_angle`. `start_angle` and `sweep_angle` are in degrees.
+    ///
+    /// `start_angle` of zero places start point at the right middle edge of oval.
+    /// A positive `sweep_angle` places arc end point clockwise from start point;
+    /// a negative `sweep_angle` places arc end point counterclockwise from start point.
+    /// `sweep_angle` may exceed 360 degrees, a full circle.
+    /// If `use_center` is `true`, draw a wedge that includes lines from oval
+    /// center to arc end points. If `use_center` is `false`, draw arc between end points.
+    ///
+    /// If [`Rect`] oval is empty or `sweep_angle` is zero, nothing is drawn.
+    ///
+    /// - `arc` [`Arc`] SkArc specifying oval, startAngle, sweepAngle, and arc-vs-wedge
+    /// - `paint` [`Paint`] stroke or fill, blend, color, and so on, used to draw
+
+    pub fn draw_arc_2(&self, arc: &Arc, paint: &Paint) -> &Self {
+        self.draw_arc(
+            arc.oval,
+            arc.start_angle,
+            arc.sweep_angle,
+            arc.is_wedge(),
+            paint,
+        );
         self
     }
 

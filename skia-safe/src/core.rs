@@ -5,6 +5,7 @@
 
 mod alpha_type;
 mod annotation;
+pub mod arc;
 mod bbh_factory;
 mod bitmap;
 mod blend_mode;
@@ -120,6 +121,7 @@ pub use milestone::*;
 pub use paint::Paint;
 pub use tile_mode::*;
 // We keep these around for the time being.
+pub use arc::Arc;
 pub use paint::Cap as PaintCap;
 pub use paint::Join as PaintJoin;
 pub use paint::Style as PaintStyle;

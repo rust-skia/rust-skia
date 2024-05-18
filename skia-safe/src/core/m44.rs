@@ -1,10 +1,12 @@
-use crate::{prelude::*, scalar, Matrix, Rect, Scalars};
-use skia_bindings::{self as sb, SkM44, SkV2, SkV3, SkV4};
 use std::{
     f32,
     ops::{Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Neg, Sub, SubAssign},
     slice,
 };
+
+use skia_bindings::{self as sb, SkM44, SkV2, SkV3, SkV4};
+
+use crate::{prelude::*, private::is_finite, scalar, Matrix, Rect};
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
@@ -718,7 +720,7 @@ impl M44 {
     }
 
     pub fn is_finite(&self) -> bool {
-        self.mat.are_finite()
+        is_finite(&self.mat)
     }
 
     #[must_use]
