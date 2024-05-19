@@ -37,6 +37,9 @@ impl Configuration {
             if features.gl {
                 sources.push("src/gl.cpp".into());
             }
+            if features.egl {
+                sources.push("src/egl.cpp".into());
+            }
             if features.vulkan {
                 sources.push("src/vulkan.cpp".into());
             }

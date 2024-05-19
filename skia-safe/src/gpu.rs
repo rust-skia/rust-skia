@@ -79,8 +79,14 @@ pub mod direct_contexts {
 }
 
 pub mod interfaces {
+    #[cfg(feature = "egl")]
+    pub use super::ganesh::gl::make_egl_interface::interfaces::*;
+    #[cfg(target_os = "ios")]
+    pub use super::ganesh::gl::make_ios_interface::interfaces::*;
+    #[cfg(target_os = "macos")]
+    pub use super::ganesh::gl::make_mac_interface::interfaces::*;
     #[cfg(all(feature = "gl", target_arch = "wasm32"))]
-    pub use super::ganesh::gl::interfaces::*;
+    pub use super::ganesh::gl::make_web_gl_interface::interfaces::*;
 }
 
 #[cfg(test)]

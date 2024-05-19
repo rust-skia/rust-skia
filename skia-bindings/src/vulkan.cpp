@@ -103,6 +103,10 @@ extern "C" bool C_GrVkYcbcrConversionInfo_Equals(const GrVkYcbcrConversionInfo* 
     return *lhs == *rhs;
 }
 
+extern "C" uint32_t C_GrVkYcbcrConversionInfo_nonFormatInfoAsUint32(const GrVkYcbcrConversionInfo* self) {
+    return self->nonFormatInfoAsUInt32();
+}
+
 //
 // gpu/ganesh/vk
 //
