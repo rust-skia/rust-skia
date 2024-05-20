@@ -60,7 +60,7 @@ mozjpeg-sys = { version = "2", features = ["with_simd"], optional = true }
 lazy_static = { version = "1.4.0", optional = true }
 
 [build-dependencies]
-cc = "1.0.37"
+cc = "1.0.98"
 bindgen = "0.69.1"
 
 # For enum variant name replacements.
