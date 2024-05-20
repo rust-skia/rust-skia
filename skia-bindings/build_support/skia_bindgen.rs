@@ -496,7 +496,7 @@ impl bindgen::callbacks::ParseCallbacks for ParseCallbacks {
         _variant_value: bindgen::callbacks::EnumVariantValue,
     ) -> Option<String> {
         enum_name.and_then(|enum_name| {
-            ENUM_TABLE
+            ENUM_REWRITES
                 .iter()
                 .find(|n| n.0 == enum_name)
                 .map(|(_, replacer)| replacer(enum_name, original_variant_name))
@@ -504,7 +504,7 @@ impl bindgen::callbacks::ParseCallbacks for ParseCallbacks {
     }
 
     fn item_name(&self, original_item_name: &str) -> Option<String> {
-        ITEM_TABLE
+        ITEM_RENAMES
             .iter()
             .find(|(original, _)| *original == original_item_name)
             .map(|(_, replacement)| replacement.to_string())
@@ -513,14 +513,14 @@ impl bindgen::callbacks::ParseCallbacks for ParseCallbacks {
 
 type EnumEntry = (&'static str, fn(&str, &str) -> String);
 
-const ITEM_TABLE: &[(&str, &str)] = &[
+const ITEM_RENAMES: &[(&str, &str)] = &[
     ("std___1_string_view", "std_string_view"),
     ("std___2_string_view", "std_string_view"),
     ("std___1_string", "std_string"),
     ("std___2_string", "std_string"),
 ];
 
-const ENUM_TABLE: &[EnumEntry] = &[
+const ENUM_REWRITES: &[EnumEntry] = &[
     //
     // codec/
     //

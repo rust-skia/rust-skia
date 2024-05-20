@@ -2,12 +2,14 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 #![allow(clippy::all)]
-// https://github.com/rust-lang/rust-bindgen/issues/1651
+// <https://github.com/rust-lang/rust-bindgen/issues/1651>
 #![allow(unknown_lints)]
 #![allow(deref_nullptr)]
 // GrVkBackendContext contains u128 fields on macOS
 #![allow(improper_ctypes)]
 
+// The following type aliases are needed because of name mangling changes introduced with clang 18,
+// (this works together with `ITEM_RENAMES` in `skia_bindgen.rs`)
 #[allow(unused)]
 type std___1_string_view = std_string_view;
 #[allow(unused)]
