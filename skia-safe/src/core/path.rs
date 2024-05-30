@@ -615,7 +615,7 @@ impl Path {
     }
 
     ///  Returns `true` if path is representable as an oval arc. In other words, could this
-    ///  path be drawn using [`Canvas::draw_arc`].
+    ///  path be drawn using [`crate::Canvas::draw_arc`].
     ///
     ///  arc  receives parameters of arc
     ///
