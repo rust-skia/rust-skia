@@ -21,13 +21,13 @@ native_transmutable!(sb::SkArc, Arc, arc_layout);
 
 impl Arc {
     pub fn new(
-        oval: &Rect,
+        oval: impl AsRef<Rect>,
         start_angle_degrees: scalar,
         sweep_angle_degrees: scalar,
         ty: Type,
     ) -> Self {
         Self {
-            oval: *oval,
+            oval: *oval.as_ref(),
             start_angle: start_angle_degrees,
             sweep_angle: sweep_angle_degrees,
             ty,
