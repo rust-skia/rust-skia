@@ -46,6 +46,7 @@ use-system-jpeg-turbo = ["skia-bindings/use-system-jpeg-turbo"]
 binary-cache = ["skia-bindings/binary-cache"]
 embed-icudtl = ["skia-bindings/embed-icudtl"]
 embed-freetype = ["skia-bindings/embed-freetype"]
+freetype-woff2 = ["skia-bindings/freetype-woff2"]
 
 # implied only, do not use
 gpu = []

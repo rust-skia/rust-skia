@@ -46,6 +46,9 @@ pub struct Features {
 
     /// Build the particles module (unsupported, no wrappers).
     pub particles: bool,
+
+    /// Build with FreeType WOFF2 support.
+    pub freetype_woff2: bool,
 }
 
 impl Default for Features {
@@ -67,6 +70,7 @@ impl Default for Features {
             animation: false,
             dng: false,
             particles: false,
+            freetype_woff2: cfg!(feature = "freetype-woff2"),
         }
     }
 }

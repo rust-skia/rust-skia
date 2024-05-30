@@ -54,6 +54,7 @@ shaper = ["textlayout"]
 binary-cache = ["flate2", "tar"]
 embed-icudtl = ["lazy_static"]
 embed-freetype = []
+freetype-woff2 = []
 
 [dependencies]
 mozjpeg-sys = { version = "2", features = ["with_simd"], optional = true }

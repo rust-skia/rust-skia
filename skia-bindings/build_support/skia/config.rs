@@ -135,6 +135,7 @@ impl FinalBuildConfiguration {
                 .arg("skia_use_system_zlib", yes_if(use_system_libraries))
                 .arg("skia_use_xps", no())
                 .arg("skia_use_dng_sdk", yes_if(features.dng))
+                .arg("skia_use_freetype_woff2", yes_if(features.freetype_woff2))
                 .arg("cc", quote(&build.cc))
                 .arg("cxx", quote(&build.cxx));
 
