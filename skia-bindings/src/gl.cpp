@@ -211,3 +211,23 @@ extern "C" const GrGLInterface* C_GrGLInterfaces_MakeWebGL() {
 }
 
 #endif
+
+#if defined(SK_BUILD_FOR_IOS)
+
+#include "include/gpu/ganesh/gl/ios/GrGLMakeIOSInterface.h"
+
+extern "C" const GrGLInterface* C_GrGLInterfaces_MakeIOS() {
+    return GrGLInterfaces::MakeIOS().release();
+}
+
+#endif
+
+#if defined(SK_BUILD_FOR_MAC)
+
+#include "include/gpu/ganesh/gl/mac/GrGLMakeMacInterface.h"
+
+extern "C" const GrGLInterface* C_GrGLInterfaces_MakeMac() {
+    return GrGLInterfaces::MakeMac().release();
+}
+
+#endif

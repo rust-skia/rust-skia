@@ -1,9 +1,11 @@
+use std::{fmt, marker::PhantomData, mem::forget, ptr};
+
+use skia_bindings::{self as sb, SkPath, SkPath_Iter, SkPath_RawIter};
+
 use crate::{
     interop::DynamicMemoryWStream, matrix::ApplyPerspectiveClip, path_types, prelude::*, scalar,
-    Data, Matrix, PathDirection, PathFillType, Point, RRect, Rect, Vector,
+    Arc, Data, Matrix, PathDirection, PathFillType, Point, RRect, Rect, Vector,
 };
-use skia_bindings::{self as sb, SkPath, SkPath_Iter, SkPath_RawIter};
-use std::{fmt, marker::PhantomData, mem::forget, ptr};
 
 #[deprecated(since = "0.25.0", note = "use PathDirection")]
 pub use path_types::PathDirection as Direction;
@@ -13,12 +15,12 @@ pub use path_types::PathFillType as FillType;
 
 /// Four oval parts with radii (rx, ry) start at last [`Path`] [`Point`] and ends at (x, y).
 /// ArcSize and Direction select one of the four oval parts.
-pub use skia_bindings::SkPath_ArcSize as ArcSize;
+pub use sb::SkPath_ArcSize as ArcSize;
 variant_name!(ArcSize::Small);
 
 /// AddPathMode chooses how `add_path()` appends. Adding one [`Path`] to another can extend
 /// the last contour or start a new contour.
-pub use skia_bindings::SkPath_AddPathMode as AddPathMode;
+pub use sb::SkPath_AddPathMode as AddPathMode;
 variant_name!(AddPathMode::Append);
 
 /// SegmentMask constants correspond to each drawing Verb type in [`crate::Path`]; for instance, if
@@ -27,7 +29,7 @@ pub use path_types::PathSegmentMask as SegmentMask;
 
 /// Verb instructs [`Path`] how to interpret one or more [`Point`] and optional conic weight;
 /// manage contour, and terminate [`Path`].
-pub use skia_bindings::SkPath_Verb as Verb;
+pub use sb::SkPath_Verb as Verb;
 variant_name!(Verb::Line);
 
 /// Iterates through verb array, and associated [`Point`] array and conic weight.
@@ -148,7 +150,7 @@ impl Iter<'_> {
     }
 }
 
-impl<'a> Iterator for Iter<'a> {
+impl Iterator for Iter<'_> {
     type Item = (Verb, Vec<Point>);
 
     /// Returns next [`Verb`] in verb array, and advances [`Iter`].
@@ -480,6 +482,18 @@ impl Path {
         Self::construct(|path| unsafe { sb::C_SkPath_Construct(path) })
     }
 
+    /// Returns a copy of this path in the current state.
+    pub fn snapshot(&self) -> Self {
+        self.clone()
+    }
+
+    /// Returns a copy of this path in the current state, and resets the path to empty.
+    pub fn detach(&mut self) -> Self {
+        let result = self.clone();
+        self.reset();
+        result
+    }
+
     /// Returns `true` if [`Path`] contain equal verbs and equal weights.
     /// If [`Path`] contain one or more conics, the weights must match.
     ///
@@ -598,6 +612,18 @@ impl Path {
     pub fn is_rrect(&self) -> Option<RRect> {
         let mut rrect = RRect::default();
         unsafe { self.native().isRRect(rrect.native_mut()) }.if_true_some(rrect)
+    }
+
+    ///  Returns `true` if path is representable as an oval arc. In other words, could this
+    ///  path be drawn using [`crate::Canvas::draw_arc`].
+    ///
+    ///  arc  receives parameters of arc
+    ///
+    /// * `arc` - storage for arc; may be `None`
+    /// Returns: `true` if [`Path`] contains only a single arc from an oval
+    pub fn is_arc(&self) -> Option<Arc> {
+        let mut arc = Arc::default();
+        unsafe { self.native().isArc(arc.native_mut()) }.if_true_some(arc)
     }
 
     /// Sets [`Path`] to its initial state.
@@ -1551,6 +1577,25 @@ impl Path {
         unsafe {
             self.native_mut()
                 .addOval1(oval.as_ref().native(), dir, start.try_into().unwrap())
+        };
+        self
+    }
+
+    /// Experimental, subject to change or removal.
+    ///
+    /// Adds an "open" oval to [`Path`]. This follows canvas2D semantics: The oval is not
+    /// a separate contour. If the path was empty, then [`Verb::Move`] is appended. Otherwise,
+    /// [`Verb::Line`] is appended. Four [`Verb::Conic`] are appended. [`Verb::Close`] is not appended.
+    pub fn add_open_oval(
+        &mut self,
+        oval: impl AsRef<Rect>,
+        dir_start: Option<(PathDirection, usize)>,
+    ) -> &mut Self {
+        let dir = dir_start.map(|ds| ds.0).unwrap_or_default();
+        let start = dir_start.map(|ds| ds.1).unwrap_or_default();
+        unsafe {
+            self.native_mut()
+                .addOpenOval(oval.as_ref().native(), dir, start.try_into().unwrap())
         };
         self
     }

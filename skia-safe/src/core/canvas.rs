@@ -2,8 +2,8 @@ use std::{cell::UnsafeCell, ffi::CString, fmt, marker::PhantomData, mem, ops::De
 
 use sb::SkCanvas_FilterSpan;
 use skia_bindings::{
-    self as sb, SkAutoCanvasRestore, SkCanvas, SkCanvas_SaveLayerRec, SkImageFilter, SkPaint,
-    SkRect, U8CPU,
+    self as sb, SkAutoCanvasRestore, SkCanvas, SkCanvas_SaveLayerRec, SkColorSpace, SkImageFilter,
+    SkPaint, SkRect, U8CPU,
 };
 
 #[cfg(feature = "gpu")]
@@ -14,6 +14,7 @@ use crate::{
     Picture, Pixmap, Point, QuickReject, RRect, RSXform, Rect, Region, SamplingOptions, Shader,
     Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices, M44,
 };
+use crate::{Arc, ColorSpace};
 
 pub use lattice::Lattice;
 
@@ -40,6 +41,7 @@ pub struct SaveLayerRec<'a> {
     paint: Option<&'a SkPaint>,
     filters: SkCanvas_FilterSpan,
     backdrop: Option<&'a SkImageFilter>,
+    color_space: Option<&'a SkColorSpace>,
     flags: SaveLayerFlags,
     experimental_backdrop_scale: scalar,
 }
@@ -75,6 +77,10 @@ impl fmt::Debug for SaveLayerRec<'_> {
                 "backdrop",
                 &ImageFilter::from_unshared_ptr_ref(&(self.backdrop.as_ptr_or_null() as *mut _)),
             )
+            .field(
+                "color_space",
+                &ColorSpace::from_unshared_ptr_ref(&(self.color_space.as_ptr_or_null() as *mut _)),
+            )
             .field("flags", &self.flags)
             .field(
                 "experimental_backdrop_scale",
@@ -106,6 +112,14 @@ impl<'a> SaveLayerRec<'a> {
     #[must_use]
     pub fn backdrop(mut self, backdrop: &'a ImageFilter) -> Self {
         self.backdrop = Some(backdrop.native());
+        self
+    }
+
+    /// If not `None`, this triggers a color space conversion when the layer is restored. It
+    /// will be as if the layer's contents are drawn in this color space. Filters from
+    /// `backdrop` and `paint` will be applied in this color space.
+    pub fn color_space(mut self, color_space: &'a ColorSpace) -> Self {
+        self.color_space = Some(color_space.native());
         self
     }
 
@@ -1466,6 +1480,34 @@ impl Canvas {
                 paint.native(),
             )
         }
+        self
+    }
+
+    /// Draws arc using clip, [`Matrix`], and [`Paint`] paint.
+    ///
+    /// Arc is part of oval bounded by oval, sweeping from `start_angle` to `start_angle` plus
+    /// `sweep_angle`. `start_angle` and `sweep_angle` are in degrees.
+    ///
+    /// `start_angle` of zero places start point at the right middle edge of oval.
+    /// A positive `sweep_angle` places arc end point clockwise from start point;
+    /// a negative `sweep_angle` places arc end point counterclockwise from start point.
+    /// `sweep_angle` may exceed 360 degrees, a full circle.
+    /// If `use_center` is `true`, draw a wedge that includes lines from oval
+    /// center to arc end points. If `use_center` is `false`, draw arc between end points.
+    ///
+    /// If [`Rect`] oval is empty or `sweep_angle` is zero, nothing is drawn.
+    ///
+    /// - `arc` [`Arc`] SkArc specifying oval, startAngle, sweepAngle, and arc-vs-wedge
+    /// - `paint` [`Paint`] stroke or fill, blend, color, and so on, used to draw
+
+    pub fn draw_arc_2(&self, arc: &Arc, paint: &Paint) -> &Self {
+        self.draw_arc(
+            arc.oval,
+            arc.start_angle,
+            arc.sweep_angle,
+            arc.is_wedge(),
+            paint,
+        );
         self
     }
 

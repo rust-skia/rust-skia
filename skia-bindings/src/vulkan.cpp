@@ -2,7 +2,7 @@
     #define SK_VULKAN
 #endif
 
-#include "include/gpu/GrBackendDrawableInfo.h"
+#include "include/gpu/ganesh/vk/GrBackendDrawableInfo.h"
 #include "include/gpu/GrBackendSurface.h"
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/MutableTextureState.h"
@@ -101,6 +101,10 @@ extern "C" bool C_GrVkAlloc_Equals(const GrVkAlloc* lhs, const GrVkAlloc* rhs) {
 
 extern "C" bool C_GrVkYcbcrConversionInfo_Equals(const GrVkYcbcrConversionInfo* lhs, const GrVkYcbcrConversionInfo* rhs) {
     return *lhs == *rhs;
+}
+
+extern "C" uint32_t C_GrVkYcbcrConversionInfo_nonFormatInfoAsUint32(const GrVkYcbcrConversionInfo* self) {
+    return self->nonFormatInfoAsUInt32();
 }
 
 //

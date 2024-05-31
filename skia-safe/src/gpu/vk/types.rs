@@ -178,6 +178,34 @@ impl YcbcrConversionInfo {
         self.ycbcr_model != vk::SamplerYcbcrModelConversion::RGB_IDENTITY
             || self.external_format != 0
     }
+
+    pub fn non_format_info_as_u32(&self) -> u32 {
+        unsafe { sb::C_GrVkYcbcrConversionInfo_nonFormatInfoAsUint32(self.native()) }
+    }
+
+    pub const USES_EXTERNAL_FORMAT_BITS: i32 =
+        sb::skgpu_VulkanYcbcrConversionInfo_kUsesExternalFormatBits;
+    pub const YCBCR_MODEL_BITS: i32 = sb::skgpu_VulkanYcbcrConversionInfo_kYcbcrModelBits;
+    pub const YCBCR_RANGE_BITS: i32 = sb::skgpu_VulkanYcbcrConversionInfo_kYcbcrRangeBits;
+    pub const X_CHROMA_OFFSET_BITS: i32 = sb::skgpu_VulkanYcbcrConversionInfo_kXChromaOffsetBits;
+    pub const Y_CHROMA_OFFSET_BITS: i32 = sb::skgpu_VulkanYcbcrConversionInfo_kYChromaOffsetBits;
+    pub const CHROMA_FILTER_BITS: i32 = sb::skgpu_VulkanYcbcrConversionInfo_kChromaFilterBits;
+    pub const FORCE_EXPLICIT_RECON_BITS: i32 =
+        sb::skgpu_VulkanYcbcrConversionInfo_kForceExplicitReconBits;
+    pub const COMPONENT_BITS: i32 = sb::skgpu_VulkanYcbcrConversionInfo_kComponentBits;
+    pub const USES_EXTERNAL_FORMAT_SHIFT: i32 =
+        sb::skgpu_VulkanYcbcrConversionInfo_kUsesExternalFormatShift;
+    pub const YCBCR_MODEL_SHIFT: i32 = sb::skgpu_VulkanYcbcrConversionInfo_kYcbcrModelShift;
+    pub const YCBCR_RANGE_SHIFT: i32 = sb::skgpu_VulkanYcbcrConversionInfo_kYcbcrRangeShift;
+    pub const X_CHROMA_OFFSET_SHIFT: i32 = sb::skgpu_VulkanYcbcrConversionInfo_kXChromaOffsetShift;
+    pub const Y_CHROMA_OFFSET_SHIFT: i32 = sb::skgpu_VulkanYcbcrConversionInfo_kYChromaOffsetShift;
+    pub const CHROMA_FILTER_SHIFT: i32 = sb::skgpu_VulkanYcbcrConversionInfo_kChromaFilterShift;
+    pub const FORCE_EXPLICIT_RECON_SHIFT: i32 =
+        sb::skgpu_VulkanYcbcrConversionInfo_kForceExplicitReconShift;
+    pub const COMPONENT_R_SHIFT: i32 = sb::skgpu_VulkanYcbcrConversionInfo_kComponentRShift;
+    pub const COMPONENT_G_SHIFT: i32 = sb::skgpu_VulkanYcbcrConversionInfo_kComponentGShift;
+    pub const COMPONENT_B_SHIFT: i32 = sb::skgpu_VulkanYcbcrConversionInfo_kComponentBShift;
+    pub const COMPONENT_A_SHIFT: i32 = sb::skgpu_VulkanYcbcrConversionInfo_kComponentAShift;
 }
 
 #[derive(Copy, Clone, Debug)]

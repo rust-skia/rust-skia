@@ -1,4 +1,4 @@
-use crate::{prelude::*, scalar};
+use crate::{prelude::*, private::is_finite, scalar};
 use skia_bindings::SkPoint3;
 use std::ops::{Add, AddAssign, Mul, Neg, Sub, SubAssign};
 
@@ -100,17 +100,7 @@ impl Point3 {
     }
 
     pub fn is_finite(&self) -> bool {
-        let mut accum = 0.0;
-        accum *= self.x;
-        accum *= self.y;
-        accum *= self.z;
-
-        // accum is either NaN or it is finite (zero).
-        debug_assert!(accum == 0.0 || accum.is_nan());
-
-        // value==value will be true iff value is not NaN
-        // TODO: is it faster to say !accum or accum==accum?
-        !accum.is_nan()
+        is_finite(&[self.x, self.y, self.z])
     }
 
     pub fn dot_product(a: Self, b: Self) -> scalar {
