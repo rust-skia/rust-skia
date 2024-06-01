@@ -750,4 +750,16 @@ mod tests {
 
         static LOREM_IPSUM: &str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at leo at nulla tincidunt placerat. Proin eget purus augue. Quisque et est ullamcorper, pellentesque felis nec, pulvinar massa. Aliquam imperdiet, nulla ut dictum euismod, purus dui pulvinar risus, eu suscipit elit neque ac est. Nullam eleifend justo quis placerat ultricies. Vestibulum ut elementum velit. Praesent et dolor sit amet purus bibendum mattis. Aliquam erat volutpat.";
     }
+
+    /// <https://github.com/rust-skia/rust-skia/issues/984>
+    #[test]
+    #[serial_test::serial]
+    fn skia_crash_macos() {
+        let mut font_collection = FontCollection::new();
+        font_collection.set_dynamic_font_manager(FontMgr::default());
+        let mut p = ParagraphBuilder::new(&ParagraphStyle::new(), font_collection);
+        p.add_text("👋test test 🦀");
+        let mut paragraph = p.build();
+        paragraph.layout(200.);
+    }
 }
