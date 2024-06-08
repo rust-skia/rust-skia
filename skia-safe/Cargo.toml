@@ -79,7 +79,7 @@ static_assertions = "1.1"
 # gl-window
 [target.'cfg(all(not(target_os = "android"), not(target_os = "emscripten"), not(target_os = "ios")))'.dev-dependencies]
 glutin = "0.31.1"
-glutin-winit = { version = "0.4" }
+glutin-winit = { version = "0.5" }
 winit = { version = "0.29.3" }
 raw-window-handle = { version = "0.5.0" }
 gl-rs = { package = "gl", version = "0.14.0" }
