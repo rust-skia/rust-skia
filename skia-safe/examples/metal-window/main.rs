@@ -21,7 +21,7 @@ fn main() {
     };
 
     use skia_safe::{
-        gpu::{self, mtl, BackendRenderTarget, SurfaceOrigin},
+        gpu::{self, backend_render_targets, mtl, SurfaceOrigin},
         scalar, ColorType,
     };
 
@@ -65,7 +65,7 @@ fn main() {
                             let texture_info =
                                 mtl::TextureInfo::new(drawable.texture().as_ptr() as mtl::Handle);
 
-                            let backend_render_target = BackendRenderTarget::new_metal(
+                            let backend_render_target = backend_render_targets::make_mtl(
                                 (drawable_width as i32, drawable_height as i32),
                                 &texture_info,
                             );
