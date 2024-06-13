@@ -21,6 +21,7 @@ use crate::{ImageInfo, Surface, YUVAInfo, YUVAPixmaps};
 /// * `color_type` - color type of the resulting image
 /// * `alpha_type` - alpha type of the resulting image
 /// * `color_space` - range of colors; may be `None`
+///
 /// Returns: created [`Image`], or `None`
 pub fn adopt_texture_from(
     context: &mut RecordingContext,
@@ -61,6 +62,7 @@ pub fn adopt_texture_from(
 ///                            well (e.g., [`ColorSpace::new_srgb()`]).
 /// * `texture_release_proc` - function called when texture can be released
 /// * `release_context` - state passed to `texture_release_proc`
+///
 /// Returns: created [`Image`], or `None`
 // TODO: add variant with TextureReleaseProc
 pub fn borrow_texture_from(
@@ -99,6 +101,7 @@ pub fn borrow_texture_from(
 /// * `pixmap` - [`ImageInfo`], pixel address, and row bytes
 /// * `build_mips` - create [`Image`] as mip map if `true`
 /// * `limit_to_max_texture_size` - downscale image to GPU maximum texture size, if necessary
+///
 /// Returns: created [`Image`], or `None`
 pub fn cross_context_texture_from_pixmap(
     context: &mut DirectContext,
@@ -131,6 +134,7 @@ pub fn cross_context_texture_from_pixmap(
 /// * `ty` - type of compression used
 /// * `mipmapped` - does 'data' contain data for all the mipmap levels?
 /// * `is_protected` - do the contents of 'data' require DRM protection (on Vulkan)?
+///
 /// Returns: created [`Image`], or `None`
 pub fn texture_from_compressed_texture_data(
     context: &mut DirectContext,
@@ -174,7 +178,8 @@ pub fn texture_from_compressed_texture_data(
 ///                  Defaults to `No`.
 ///  * `budgeted` - Whether to count a newly created texture for the returned image
 ///                 counts against the context's budget. Defaults to `Yes`.
-///  Returns: created [`Image`], or `None`
+///  
+/// Returns: created [`Image`], or `None`
 pub fn texture_from_image(
     direct_context: &mut DirectContext,
     image: &Image,
@@ -207,6 +212,7 @@ pub fn texture_from_image(
 ///                  silently ignored if the context does not support mip maps.
 /// * `limit_to_max_texture_size` - downscale image to GPU maximum texture size, if necessary
 /// * `image_color_space` - range of colors of the resulting image; may be `None`
+///
 /// Returns: created [`Image`], or `None`
 pub fn texture_from_yuva_pixmaps(
     context: &mut RecordingContext,
@@ -237,6 +243,7 @@ pub fn texture_from_yuva_pixmaps(
 ///                         may be `None`
 /// * `texture_release_proc` - called when the backend textures can be released
 /// * `release_context` - state passed to `texture_release_proc`
+///
 /// Returns: created [`Image`], or `None`
 pub fn texture_from_yuva_textures(
     context: &mut RecordingContext,
@@ -264,6 +271,7 @@ pub fn texture_from_yuva_textures(
 /// * `out_texture` - Will be set to the underlying texture of the image if non-null.
 /// * `flush_pending_gr_context_io` - flag to flush outstanding requests
 /// * `origin` - Will be set to the origin orientation of the image if non-null.
+///
 /// Returns: `None` if a Ganesh backend texture cannot be retrieved.
 pub fn get_backend_texture_from_image(
     image: &Image,
@@ -294,6 +302,7 @@ pub fn get_backend_texture_from_image(
 ///
 /// * `context` - the [`DirectContext`] to which the subset should be uploaded.
 /// * `subset` - bounds of returned [`Image`]
+///
 /// Returns: the subsetted image, uploaded as a texture, or `None`
 pub fn subset_texture_from(
     context: &mut DirectContext,

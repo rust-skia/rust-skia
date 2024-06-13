@@ -11,6 +11,7 @@ use skia_bindings as sb;
 /// * `cull_rect` - optional limit passed to [`crate::PathEffect`]
 /// * `matrix` - if scale > 1, increase precision, else if (0 < scale < 1) reduce precision
 ///                  to favor speed and size
+///
 /// Returns: `true` if the dst path was updated, `false` if it was not (e.g. if the path
 ///                  represents hairline and cannot be filled).
 pub fn fill_path_with_paint<'a>(

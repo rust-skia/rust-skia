@@ -18,6 +18,7 @@ use skia_bindings as sb;
 ///                        fonts; may be `None`
 /// * `drawable` - Pointer to drawable to be filled in when this surface is
 ///                        instantiated; may not be `None`
+///
 /// Returns: created [`Surface`], or `None`
 #[allow(clippy::missing_safety_doc)]
 #[allow(clippy::too_many_arguments)]
@@ -58,6 +59,7 @@ pub unsafe fn wrap_ca_metal_layer(
 /// * `color_space` - range of colors; may be `None`
 /// * `surface_props` - LCD striping orientation and setting for device independent
 ///                        fonts; may be `None`
+///
 /// Returns: created [`Surface`], or `None`
 #[allow(clippy::missing_safety_doc)]
 #[cfg(feature = "metal")]

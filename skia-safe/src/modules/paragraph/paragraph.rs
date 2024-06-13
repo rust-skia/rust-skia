@@ -252,7 +252,8 @@ impl Paragraph {
     ///
     ///  * `line_number` - a line number
     ///  * `dest` - a resulting path
-    ///  Returns: a number glyphs that could not be converted to path
+    ///  
+    /// Returns: a number glyphs that could not be converted to path
     pub fn get_path_at(&mut self, line_number: usize) -> (usize, Path) {
         let mut path = Path::default();
         let unconverted_glyphs = unsafe {
@@ -268,6 +269,7 @@ impl Paragraph {
     /// Returns path for a text blob
     ///
     /// * `text_blob` - a text blob
+    ///
     /// Returns: a path
     pub fn get_path(text_blob: &mut TextBlob) -> Path {
         Path::construct(|p| unsafe { sb::C_Paragraph_GetPath(text_blob.native_mut(), p) })
@@ -277,6 +279,7 @@ impl Paragraph {
     /// glyph with emoji
     ///
     /// * `text_blob` - a text blob
+    ///
     /// Returns: `true` if there is such a glyph
     pub fn contains_emoji(&mut self, text_blob: &mut TextBlob) -> bool {
         unsafe { sb::C_Paragraph_containsEmoji(self.native_mut(), text_blob.native_mut()) }
@@ -285,6 +288,7 @@ impl Paragraph {
     /// Checks if a given text blob contains colored font or bitmap
     ///
     /// * `text_blob` - a text blob
+    ///
     /// Returns: `true` if there is such a glyph
     pub fn contains_color_font_or_bitmap(&mut self, text_blob: &mut TextBlob) -> bool {
         unsafe {
@@ -295,6 +299,7 @@ impl Paragraph {
     /// Finds the line number of the line that contains the given UTF-8 index.
     ///
     ///  * `index` - a UTF-8 TextIndex into the paragraph
+    ///
     ///  Returns: the line number the glyph that corresponds to the
     ///           given `code_unit_index` is in, or -1 if the `code_unit_index`
     ///           is out of bounds, or when the glyph is truncated or
@@ -309,6 +314,7 @@ impl Paragraph {
     /// Finds the line number of the line that contains the given UTF-16 index.
     ///
     /// * `index` - a UTF-16 offset into the paragraph
+    ///
     /// Returns: the line number the glyph that corresponds to the
     ///          given `code_unit_index` is in, or -1 if the `code_unit_index`
     ///          is out of bounds, or when the glyph is truncated or
@@ -326,6 +332,7 @@ impl Paragraph {
     ///
     /// * `line_number` - a line number
     /// * `line_metrics` - an address to return the info (in case of null just skipped)
+    ///
     /// Returns: `true` if the line is found; `false` if not
     pub fn get_line_metrics_at(&self, line_number: usize) -> Option<LineMetrics> {
         let mut r = None;
@@ -346,6 +353,7 @@ impl Paragraph {
     ///
     /// * `line_number` - a line number
     /// * `include_spaces` - indicates if the whitespaces should be included
+    ///
     /// Returns: the range of the text that is shown in the line
     pub fn get_actual_text_range(&self, line_number: usize, include_spaces: bool) -> TextRange {
         let mut range = [0usize; 2];
@@ -367,6 +375,7 @@ impl Paragraph {
     ///
     /// * `code_unit_index` - a text index
     /// * `glyph_info` - a glyph cluster info filled if not null
+    ///
     /// Returns: `true` if glyph cluster was found; `false` if not
     pub fn get_glyph_cluster_at(&self, code_unit_index: TextIndex) -> Option<GlyphClusterInfo> {
         let mut r = None;
@@ -388,6 +397,7 @@ impl Paragraph {
     /// * `dx` - x coordinate
     /// * `dy` - y coordinate
     /// * `glyph_info` - a glyph cluster info filled if not null
+    ///
     /// Returns: `true` if glyph cluster was found; `false` if not
     ///          (which usually means the paragraph is empty)
     pub fn get_closest_glyph_cluster_at(&self, d: impl Into<Point>) -> Option<GlyphClusterInfo> {
@@ -414,6 +424,7 @@ impl Paragraph {
     /// * `glyph_info` - an optional GlyphInfo struct to hold the
     ///                  information associated with the glyph found at the
     ///                  given index
+    ///
     /// Returns: `false` only if the offset is out of bounds
     pub fn get_glyph_info_at_utf16_offset(&mut self, code_unit_index: usize) -> Option<GlyphInfo> {
         GlyphInfo::try_construct(|gi| unsafe {
@@ -429,6 +440,7 @@ impl Paragraph {
     ///                  information associated with the glyph found. The
     ///                  text indices and text ranges are described using
     ///                   UTF-16 offsets
+    ///
     /// Returns: `true` if a grapheme cluster was found; `false` if not
     ///          (which usually means the paragraph is empty)
     pub fn get_closest_utf16_glyph_info_at(&mut self, d: impl Into<Point>) -> Option<GlyphInfo> {
@@ -441,6 +453,7 @@ impl Paragraph {
     /// Returns the font that is used to shape the text at the position
     ///
     /// * `code_unit_index` - text index
+    ///
     /// Returns: font info or an empty font info if the text is not found
     pub fn get_font_at(&self, code_unit_index: TextIndex) -> Font {
         Font::construct(|f| unsafe { sb::C_Paragraph_getFontAt(self.native(), code_unit_index, f) })
@@ -449,6 +462,7 @@ impl Paragraph {
     /// Returns the font used to shape the text at the given UTF-16 offset.
     ///
     /// * `code_unit_index` - a UTF-16 offset in the paragraph
+    ///
     /// Returns: font info or an empty font info if the text is not found
     pub fn get_font_at_utf16_offset(&mut self, code_unit_index: usize) -> Font {
         Font::construct(|f| unsafe {

@@ -23,8 +23,9 @@ use crate::{gpu, prelude::*, surface::BackendHandleAccess, ImageInfo, Surface, S
 /// * `sample_count` - samples per pixel, or 0 to disable full scene anti-aliasing
 /// * `surface_props` - LCD striping orientation and setting for device independent fonts; may be
 ///                              `None`
-/// * `should_create_with_mips` - hint that [`Surface`] will host mip map images Returns:
-/// [`Surface`] if all parameters are valid; otherwise, `None`
+/// * `should_create_with_mips` - hint that [`Surface`] will host mip map images
+///
+/// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
 #[allow(clippy::too_many_arguments)]
 pub fn render_target(
     context: &mut gpu::RecordingContext,
@@ -69,6 +70,7 @@ pub fn render_target(
 /// * `color_space` - range of colors; may be `None`
 /// * `surface_props` - LCD striping orientation and setting for device independent
 ///                            fonts; may be `None`
+///
 /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
 pub fn wrap_backend_texture(
     context: &mut gpu::RecordingContext,
@@ -109,6 +111,7 @@ pub fn wrap_backend_texture(
 /// * `color_space` - range of colors
 /// * `surface_props` - LCD striping orientation and setting for device independent
 ///                                 fonts; may be `None`
+///
 /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
 pub fn wrap_backend_render_target(
     context: &mut gpu::RecordingContext,

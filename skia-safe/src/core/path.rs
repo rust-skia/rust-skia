@@ -85,6 +85,7 @@ impl Iter<'_> {
     ///
     /// * `path` - [`Path`] to iterate
     /// * `force_close` - `true` if open contours generate [`Verb::Close`]
+    ///
     /// Returns: [`Iter`] of path
     ///
     /// example: <https://fiddle.skia.org/c/@Path_Iter_const_SkPath>
@@ -159,6 +160,7 @@ impl Iterator for Iter<'_> {
     /// Zero to four [`Point`] are stored in pts, depending on the returned [`Verb`].
     ///
     /// * `pts` - storage for [`Point`] data describing returned [`Verb`]
+    ///
     /// Returns: next [`Verb`] from verb array
     ///
     /// example: <https://fiddle.skia.org/c/@Path_RawIter_next>
@@ -266,6 +268,7 @@ impl NativeClone for SkPath {
     /// pointers are not exposed.
     ///
     /// * `path` - [`Path`] to copy by value
+    ///
     /// Returns: copy of [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_copy_const_SkPath>
@@ -280,6 +283,7 @@ impl NativePartialEq for SkPath {
     ///
     /// * `a` - [`Path`] to compare
     /// * `b` - [`Path`] to compare
+    ///
     /// Returns: `true` if [`Path`] pair are equivalent
     fn eq(&self, rhs: &Self) -> bool {
         unsafe { sb::C_SkPath_Equals(self, rhs) }
@@ -502,6 +506,7 @@ impl Path {
     /// conic weight values.
     ///
     /// * `compare` - [`Path`] to compare
+    ///
     /// Returns: `true` if [`Path`] verb array and weights are equivalent
     ///
     /// example: <https://fiddle.skia.org/c/@Path_isInterpolatable>
@@ -526,6 +531,7 @@ impl Path {
     /// * `weight` - contribution of this [`Point`] array, and
     ///                one minus contribution of ending [`Point`] array
     /// * `out` - [`Path`] replaced by interpolated averages
+    ///
     /// Returns: `true` if [`Path`] contain same number of [`Point`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_interpolate>
@@ -590,6 +596,7 @@ impl Path {
     /// bounds is unmodified if oval is not found.
     ///
     /// * `bounds` - storage for bounding [`Rect`] of oval; may be `None`
+    ///
     /// Returns: `true` if [`Path`] is recognized as an oval or circle
     ///
     /// example: <https://fiddle.skia.org/c/@Path_isOval>
@@ -606,6 +613,7 @@ impl Path {
     /// rrect is unmodified if [`RRect`] is not found.
     ///
     /// * `rrect` - storage for bounding [`Rect`] of [`RRect`]; may be `None`
+    ///
     /// Returns: `true` if [`Path`] contains only [`RRect`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_isRRect>
@@ -620,6 +628,7 @@ impl Path {
     ///  arc  receives parameters of arc
     ///
     /// * `arc` - storage for arc; may be `None`
+    ///
     /// Returns: `true` if [`Path`] contains only a single arc from an oval
     pub fn is_arc(&self) -> Option<Arc> {
         let mut arc = Arc::default();
@@ -707,6 +716,7 @@ impl Path {
     /// GPU surface [`Path`] draws are affected by volatile for some shadows and concave geometries.
     ///
     /// * `is_volatile` - `true` if caller will alter [`Path`] after drawing
+    ///
     /// Returns: reference to [`Path`]
     pub fn set_is_volatile(&mut self, is_volatile: bool) -> &mut Self {
         self.native_mut().set_fIsVolatile(is_volatile as _);
@@ -723,6 +733,7 @@ impl Path {
     /// * `p1` - line start point
     /// * `p2` - line end point
     /// * `exact` - if `false`, allow nearly equals
+    ///
     /// Returns: `true` if line is degenerate; its length is effectively zero
     ///
     /// example: <https://fiddle.skia.org/c/@Path_IsLineDegenerate>
@@ -739,6 +750,7 @@ impl Path {
     /// * `p3` - quad end point
     /// * `exact` - if `true`, returns `true` only if p1, p2, and p3 are equal;
     ///               if `false`, returns `true` if p1, p2, and p3 are equal or nearly equal
+    ///
     /// Returns: `true` if quad is degenerate; its length is effectively zero
     pub fn is_quad_degenerate(
         p1: impl Into<Point>,
@@ -766,6 +778,7 @@ impl Path {
     /// * `p4` - cubic end point
     /// * `exact` - if `true`, returns `true` only if p1, p2, p3, and p4 are equal;
     ///               if `false`, returns `true` if p1, p2, p3, and p4 are equal or nearly equal
+    ///
     /// Returns: `true` if cubic is degenerate; its length is effectively zero
     pub fn is_cubic_degenerate(
         p1: impl Into<Point>,
@@ -792,6 +805,7 @@ impl Path {
     /// Returns `false` if [`Path`] is not one line; line is unaltered.
     ///
     /// * `line` - storage for line. May be `None`
+    ///
     /// Returns: `true` if [`Path`] contains exactly one line
     ///
     /// example: <https://fiddle.skia.org/c/@Path_isLine>
@@ -817,6 +831,7 @@ impl Path {
     /// Returns (0, 0) if index is out of range.
     ///
     /// * `index` - [`Point`] array element selector
+    ///
     /// Returns: [`Point`] array value or (0, 0)
     ///
     /// example: <https://fiddle.skia.org/c/@Path_getPoint>
@@ -839,6 +854,7 @@ impl Path {
     ///
     /// * `points` - storage for [`Path`] [`Point`] array. May be `None`
     /// * `max` - maximum to copy; must be greater than or equal to zero
+    ///
     /// Returns: [`Path`] [`Point`] array length
     ///
     /// example: <https://fiddle.skia.org/c/@Path_getPoints>
@@ -868,6 +884,7 @@ impl Path {
     ///
     /// * `verbs` - storage for verbs, may be `None`
     /// * `max` - maximum number to copy into verbs
+    ///
     /// Returns: the actual number of verbs in the path
     ///
     /// example: <https://fiddle.skia.org/c/@Path_getVerbs>
@@ -956,6 +973,7 @@ impl Path {
     /// the [`Point`] or line described by rect is contained by [`Path`].
     ///
     /// * `rect` - [`Rect`], line, or [`Point`] checked for containment
+    ///
     /// Returns: `true` if rect is contained
     ///
     /// example: <https://fiddle.skia.org/c/@Path_conservativelyContainsRect>
@@ -1016,6 +1034,7 @@ impl Path {
     ///
     /// * `x` - x-axis value of contour start
     /// * `y` - y-axis value of contour start
+    ///
     /// Returns: reference to [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_moveTo>
@@ -1034,6 +1053,7 @@ impl Path {
     ///
     /// * `dx` - offset from last point to contour start on x-axis
     /// * `dy` - offset from last point to contour start on y-axis
+    ///
     /// Returns: reference to [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_rMoveTo>
@@ -1053,6 +1073,7 @@ impl Path {
     ///
     /// * `x` - end of added line on x-axis
     /// * `y` - end of added line on y-axis
+    ///
     /// Returns: reference to [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_lineTo>
@@ -1074,6 +1095,7 @@ impl Path {
     ///
     /// * `dx` - offset from last point to line end on x-axis
     /// * `dy` - offset from last point to line end on y-axis
+    ///
     /// Returns: reference to [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_rLineTo>
@@ -1099,6 +1121,7 @@ impl Path {
     /// * `y1` - control [`Point`] of quad on y-axis
     /// * `x2` - end [`Point`] of quad on x-axis
     /// * `y2` - end [`Point`] of quad on y-axis
+    ///
     /// Returns: reference to [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_quadTo>
@@ -1126,6 +1149,7 @@ impl Path {
     /// * `dy1` - offset from last point to quad control on y-axis
     /// * `dx2` - offset from last point to quad end on x-axis
     /// * `dy2` - offset from last point to quad end on y-axis
+    ///
     /// Returns: reference to [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Conic_Weight_a>
@@ -1160,6 +1184,7 @@ impl Path {
     /// * `x2` - end [`Point`] of conic on x-axis
     /// * `y2` - end [`Point`] of conic on y-axis
     /// * `w` - weight of added conic
+    ///
     /// Returns: reference to [`Path`]
     pub fn conic_to(&mut self, p1: impl Into<Point>, p2: impl Into<Point>, w: scalar) -> &mut Self {
         let p1 = p1.into();
@@ -1193,6 +1218,7 @@ impl Path {
     /// * `dx2` - offset from last point to conic end on x-axis
     /// * `dy2` - offset from last point to conic end on y-axis
     /// * `w` - weight of added conic
+    ///
     /// Returns: reference to [`Path`]
     pub fn r_conic_to(
         &mut self,
@@ -1221,6 +1247,7 @@ impl Path {
     /// * `y2` - second control [`Point`] of cubic on y-axis
     /// * `x3` - end [`Point`] of cubic on x-axis
     /// * `y3` - end [`Point`] of cubic on y-axis
+    ///
     /// Returns: reference to [`Path`]
     pub fn cubic_to(
         &mut self,
@@ -1254,6 +1281,7 @@ impl Path {
     /// * `dy2` - offset from last point to second cubic control on y-axis
     /// * `dx3` - offset from last point to cubic end on x-axis
     /// * `dy3` - offset from last point to cubic end on y-axis
+    ///
     /// Returns: reference to [`Path`]
     pub fn r_cubic_to(
         &mut self,
@@ -1282,6 +1310,7 @@ impl Path {
     /// * `start_angle` - starting angle of arc in degrees
     /// * `sweep_angle` - sweep, in degrees. Positive is clockwise; treated modulo 360
     /// * `force_move_to` - `true` to start a new contour with arc
+    ///
     /// Returns: reference to [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_arcTo>
@@ -1322,6 +1351,7 @@ impl Path {
     /// * `p2.x` - x-axis value end of second tangent
     /// * `p2.y` - y-axis value end of second tangent
     /// * `radius` - distance from arc to circle center
+    ///
     /// Returns: reference to [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_arcTo_2_a>
@@ -1362,8 +1392,8 @@ impl Path {
     /// * `sweep` - chooses clockwise or counterclockwise arc
     /// * `end.x` - end of arc
     /// * `end.y` - end of arc
+    ///
     /// Returns: reference to [`Path`]
-
     pub fn arc_to_rotated(
         &mut self,
         r: impl Into<Point>,
@@ -1404,6 +1434,7 @@ impl Path {
     /// * `sweep` - chooses clockwise or counterclockwise arc
     /// * `d.x` - x-axis offset end of arc from last [`Path`] [`Point`]
     /// * `d.y` - y-axis offset end of arc from last [`Path`] [`Point`]
+    ///
     /// Returns: reference to [`Path`]
     pub fn r_arc_to_rotated(
         &mut self,
@@ -1463,6 +1494,7 @@ impl Path {
     /// * `w` - conic weight
     /// * `pts` - storage for quad array
     /// * `pow2` - quad count, as power of two, normally 0 to 5 (1 to 32 quad curves)
+    ///
     /// Returns: number of quad curves written to pts
     pub fn convert_conic_to_quads(
         p0: impl Into<Point>,
@@ -1539,6 +1571,7 @@ impl Path {
     /// * `rect` - [`Rect`] to add as a closed contour
     /// * `dir` - [`Direction`] to orient the new contour
     /// * `start` - initial corner of [`Rect`] to add
+    ///
     /// Returns: reference to [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_addRect_2>
@@ -1564,6 +1597,7 @@ impl Path {
     /// * `oval` - bounds of ellipse added
     /// * `dir` - [`Direction`] to wind ellipse
     /// * `start` - index of initial point of ellipse
+    ///
     /// Returns: reference to [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_addOval_2>
@@ -1609,6 +1643,7 @@ impl Path {
     /// * `p` - center of circle
     /// * `radius` - distance from center to edge
     /// * `dir` - [`Direction`] to wind circle
+    ///
     /// Returns: reference to [`Path`]
     pub fn add_circle(
         &mut self,
@@ -1634,6 +1669,7 @@ impl Path {
     /// * `oval` - bounds of ellipse containing arc
     /// * `start_angle` - starting angle of arc in degrees
     /// * `sweep_angle` - sweep, in degrees. Positive is clockwise; treated modulo 360
+    ///
     /// Returns: reference to [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_addArc>
@@ -1669,6 +1705,7 @@ impl Path {
     /// * `rx` - x-axis radius of rounded corners on the [`RRect`]
     /// * `ry` - y-axis radius of rounded corners on the [`RRect`]
     /// * `dir` - [`Direction`] to wind [`RRect`]
+    ///
     /// Returns: reference to [`Path`]
     pub fn add_round_rect(
         &mut self,
@@ -1691,6 +1728,7 @@ impl Path {
     /// * `rrect` - bounds and radii of rounded rectangle
     /// * `dir` - [`PathDirection`] to wind [`RRect`]
     /// * `start` - index of initial point of [`RRect`]
+    ///
     /// Returns: reference to [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_addRRect_2>
@@ -1718,6 +1756,7 @@ impl Path {
     ///
     /// * `pts` - slice of line sharing end and start [`Point`]
     /// * `close` - `true` to add line connecting contour end and start
+    ///
     /// Returns: reference to [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_addPoly>
@@ -1741,6 +1780,7 @@ impl Path {
     /// * `d.x` - offset added to src [`Point`] array x-axis coordinates
     /// * `d.y` - offset added to src [`Point`] array y-axis coordinates
     /// * `mode` - [`AddPathMode::Append`] or [`AddPathMode::Extend`]
+    ///
     /// Returns: reference to [`Path`]
     pub fn add_path(
         &mut self,
@@ -1766,6 +1806,7 @@ impl Path {
     /// * `src` - [`Path`] verbs, [`Point`], and conic weights to add
     /// * `matrix` - transform applied to src
     /// * `mode` - [`AddPathMode::Append`] or [`AddPathMode::Extend`]
+    ///
     /// Returns: reference to [`Path`]
     pub fn add_path_matrix(
         &mut self,
@@ -1785,6 +1826,7 @@ impl Path {
     /// Reversed src always appends a new contour to [`Path`].
     ///
     /// * `src` - [`Path`] verbs, [`Point`], and conic weights to add
+    ///
     /// Returns: reference to [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_reverseAddPath>
@@ -1797,6 +1839,7 @@ impl Path {
     ///
     /// * `dx` - offset added to [`Point`] array x-axis coordinates
     /// * `dy` - offset added to [`Point`] array y-axis coordinates
+    ///
     /// Returns: overwritten, translated copy of [`Path`]; may be `None`
     ///
     /// example: <https://fiddle.skia.org/c/@Path_offset>
@@ -1928,6 +1971,7 @@ impl Path {
     ///
     /// * `p.x` - x-axis value of containment test
     /// * `p.y` - y-axis value of containment test
+    ///
     /// Returns: `true` if [`Point`] is in [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_contains>

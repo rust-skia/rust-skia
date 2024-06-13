@@ -20,8 +20,9 @@ pub mod surfaces {
     /// returns `None`.
     ///
     /// * `width` - one or greater
-    /// * `height` - one or greater Returns: [`Surface`] if width and height are positive;
-    /// otherwise, `None`
+    /// * `height` - one or greater
+    ///
+    /// Returns: [`Surface`] if width and height are positive; otherwise, `None`
     ///
     /// example: <https://fiddle.skia.org/c/@Surface_MakeNull>
     pub fn null(size: impl Into<ISize>) -> Option<Surface> {
@@ -44,8 +45,9 @@ pub mod surfaces {
     /// * `width` - pixel column count; must be greater than zero
     /// * `height` - pixel row count; must be greater than zero
     /// * `surface_props` - LCD striping orientation and setting for device independent fonts; may
-    ///                      be `None` Returns: [`Surface`] if all parameters are valid; otherwise,
-    /// `None`
+    ///    be `None`
+    ///
+    /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
     pub fn raster_n32_premul(size: impl Into<ISize>) -> Option<Surface> {
         raster(&ImageInfo::new_n32_premul(size, None), None, None)
     }
@@ -67,8 +69,9 @@ pub mod surfaces {
     ///                      greater than zero
     /// * `row_bytes` - interval from one [`Surface`] row to the next; may be zero
     /// * `surface_props` - LCD striping orientation and setting for device independent fonts; may
-    ///                      be `None` Returns: [`Surface`] if all parameters are valid; otherwise,
-    /// `None`
+    ///   be `None`
+    ///
+    /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
     pub fn raster(
         image_info: &ImageInfo,
         row_bytes: impl Into<Option<usize>>,
@@ -101,8 +104,9 @@ pub mod surfaces {
     /// * `pixels` - pointer to destination pixels buffer
     /// * `row_bytes` - interval from one [`Surface`] row to the next
     /// * `surface_props` - LCD striping orientation and setting for device independent fonts; may
-    ///                      be `None` Returns: [`Surface`] if all parameters are valid; otherwise,
-    /// `None`
+    ///                      be `None`
+    ///
+    /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
     pub fn wrap_pixels<'pixels>(
         image_info: &ImageInfo,
         pixels: &'pixels mut [u8],
@@ -185,6 +189,7 @@ impl Surface {
     /// * `row_bytes` - interval from one [`Surface`] row to the next
     /// * `surface_props` - LCD striping orientation and setting for device independent fonts;
     ///                      may be `None`
+    ///
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
     #[deprecated(since = "0.64.0", note = "use surfaces::wrap_pixels()")]
     pub fn new_raster_direct<'pixels>(
@@ -214,6 +219,7 @@ impl Surface {
     /// * `row_bytes` - interval from one [`Surface`] row to the next; may be zero
     /// * `surface_props` - LCD striping orientation and setting for device independent fonts;
     ///                      may be `None`
+    ///
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
     #[deprecated(since = "0.64.0", note = "use surfaces::raster()")]
     pub fn new_raster(
@@ -240,6 +246,7 @@ impl Surface {
     /// * `height` - pixel row count; must be greater than zero
     /// * `surface_props` - LCD striping orientation and setting for device independent
     ///                      fonts; may be `None`
+    ///
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
     #[deprecated(since = "0.64.0", note = "use surfaces::raster_n32_premul()")]
     pub fn new_raster_n32_premul(size: impl Into<ISize>) -> Option<Self> {
@@ -266,6 +273,7 @@ impl Surface {
     /// * `color_space` - range of colors; may be `None`
     /// * `surface_props` - LCD striping orientation and setting for device independent
     ///                            fonts; may be `None`
+    ///
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
     #[deprecated(since = "0.64.0", note = "use gpu::surfaces::wrap_backend_texture()")]
     pub fn from_backend_texture(
@@ -303,6 +311,7 @@ impl Surface {
     /// * `color_space` - range of colors
     /// * `surface_props` - LCD striping orientation and setting for device independent
     ///                                 fonts; may be `None`
+    ///
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
     #[deprecated(
         since = "0.64.0",
@@ -348,6 +357,7 @@ impl Surface {
     /// * `surface_props` - LCD striping orientation and setting for device independent
     ///                              fonts; may be `None`
     /// * `should_create_with_mips` - hint that [`Surface`] will host mip map images
+    ///
     /// Returns: [`Surface`] if all parameters are valid; otherwise, `None`
     #[deprecated(since = "0.64.0", note = "use gpu::surfaces::render_target()")]
     pub fn new_render_target(
@@ -388,6 +398,7 @@ impl Surface {
     ///                        fonts; may be `None`
     /// * `drawable` - Pointer to drawable to be filled in when this surface is
     ///                        instantiated; may not be `None`
+    ///
     /// Returns: created [`Surface`], or `None`
     #[deprecated(since = "0.65.0", note = "Use gpu::surfaces::wrap_ca_metal_layer")]
     #[allow(clippy::missing_safety_doc)]
@@ -430,6 +441,7 @@ impl Surface {
     /// * `color_space` - range of colors; may be `None`
     /// * `surface_props` - LCD striping orientation and setting for device independent
     ///                        fonts; may be `None`
+    ///
     /// Returns: created [`Surface`], or `None`
     #[deprecated(since = "0.65.0", note = "Use gpu::surfaces::wrap_mtk_view")]
     #[allow(clippy::missing_safety_doc)]
@@ -461,6 +473,7 @@ impl Surface {
     ///
     /// * `width` - one or greater
     /// * `height` - one or greater
+    ///
     /// Returns: [`Surface`] if width and height are positive; otherwise, `None`
     ///
     /// example: <https://fiddle.skia.org/c/@Surface_MakeNull>
@@ -640,6 +653,7 @@ impl Surface {
     ///
     /// * `image_info` - width, height, [`crate::ColorType`], [`crate::AlphaType`], [`crate::ColorSpace`],
     ///                   of [`Surface`]; width and height must be greater than zero
+    ///
     /// Returns: compatible [`Surface`] or `None`
     ///
     /// example: <https://fiddle.skia.org/c/@Surface_makeSurface>
@@ -753,6 +767,7 @@ impl Surface {
     /// * `dst` - storage for pixels copied from [`Surface`]
     /// * `src_x` - offset into readable pixels on x-axis; may be negative
     /// * `src_y` - offset into readable pixels on y-axis; may be negative
+    ///
     /// Returns: `true` if pixels were copied
     ///
     /// example: <https://fiddle.skia.org/c/@Surface_readPixels>    
@@ -788,6 +803,7 @@ impl Surface {
     /// * `dst_row_bytes` - size of one destination row; `dst_info.width()` times pixel size, or larger
     /// * `src.x` - offset into readable pixels on x-axis; may be negative
     /// * `src.y` - offset into readable pixels on y-axis; may be negative
+    ///
     /// Returns: `true` if pixels were copied
     pub fn read_pixels(
         &mut self,
@@ -840,6 +856,7 @@ impl Surface {
     /// * `dst` - storage for pixels copied from [`Surface`]
     /// * `src.x` - offset into readable pixels on x-axis; may be negative
     /// * `src.y` - offset into readable pixels on y-axis; may be negative
+    ///
     /// Returns: `true` if pixels were copied
     ///
     /// example: <https://fiddle.skia.org/c/@Surface_readPixels_3>
