@@ -7,22 +7,18 @@
 #![allow(deref_nullptr)]
 // GrVkBackendContext contains u128 fields on macOS
 #![allow(improper_ctypes)]
+#![allow(dead_code)]
 
 // The following type aliases are needed because of name mangling changes introduced with clang 18,
 // (this works together with `ITEM_RENAMES` in `skia_bindgen.rs`)
-#[allow(unused)]
 type std___1_string_view = std_string_view;
-#[allow(unused)]
 type std___2_string_view = std_string_view;
-#[allow(unused)]
 type std___1_string = std_string;
-#[allow(unused)]
 type std___2_string = std_string;
 
 include!(concat!(env!("OUT_DIR"), "/skia/bindings.rs"));
 
 mod defaults;
-#[allow(unused_imports)]
 pub use defaults::*;
 
 mod impls;
