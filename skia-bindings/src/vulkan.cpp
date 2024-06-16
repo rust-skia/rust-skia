@@ -40,7 +40,7 @@ extern "C" bool C_GrBackendDrawableInfo_getVkDrawableInfo(const GrBackendDrawabl
     return self->getVkDrawableInfo(info);
 }
 
-extern "C" void C_GPU_VK_Types(GrVkExtensionFlags *, GrVkFeatureFlags *, VkBuffer *) {}
+extern "C" void C_GPU_VK_Types(VkBuffer *) {}
 
 typedef PFN_vkVoidFunction (*GetProcFn)(const char* name, VkInstance instance, VkDevice device);
 typedef const void* (*GetProcFnVoidPtr)(const char* name, VkInstance instance, VkDevice device);
@@ -101,10 +101,6 @@ extern "C" bool C_GrVkAlloc_Equals(const GrVkAlloc* lhs, const GrVkAlloc* rhs) {
 
 extern "C" bool C_GrVkYcbcrConversionInfo_Equals(const GrVkYcbcrConversionInfo* lhs, const GrVkYcbcrConversionInfo* rhs) {
     return *lhs == *rhs;
-}
-
-extern "C" uint32_t C_GrVkYcbcrConversionInfo_nonFormatInfoAsUint32(const GrVkYcbcrConversionInfo* self) {
-    return self->nonFormatInfoAsUInt32();
 }
 
 //
