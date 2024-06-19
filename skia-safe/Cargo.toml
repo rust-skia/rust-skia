@@ -75,20 +75,18 @@ base64 = { version = "0.22.0", optional = true }
 [dev-dependencies]
 serial_test = "3.0"
 static_assertions = "1.1"
+winit = "0.30.2"
 
 # gl-window
 [target.'cfg(all(not(target_os = "android"), not(target_os = "emscripten"), not(target_os = "ios")))'.dev-dependencies]
-glutin = "0.31.1"
-glutin-winit = "0.4"
-# As long there is no glutin-winit port for winit 0.30, we stick to 0.29
-winit = "0.29.15"
+glutin = "0.32.0"
+glutin-winit = "0.5.0"
 raw-window-handle = "0.5.0"
 gl-rs = { version = "0.14.0", package = "gl" }
 
 # metal-window
 [target.'cfg(target_os = "macos")'.dev-dependencies]
 metal-rs = { package = "metal", version = "0.24.0" }
-winit-30 = { package = "winit", version = "0.30.1" }
 raw-window-handle = { version = "0.6.0" }
 objc = "0.2.7"
 cocoa = "0.25.0"
@@ -107,4 +105,3 @@ windows = { version = "0.56.0", features = [
     "Win32_Foundation",
     "Win32_Graphics_Dxgi_Common",
 ] }
-winit-30 = { package = "winit", version = "0.30.1" }
