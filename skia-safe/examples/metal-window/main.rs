@@ -13,7 +13,7 @@ fn main() {
     use core_graphics_types::geometry::CGSize;
     use foreign_types_shared::ForeignTypeRef;
     use objc::rc::autoreleasepool;
-    use winit_30::{
+    use winit::{
         application::ApplicationHandler,
         event::WindowEvent,
         event_loop::{ActiveEventLoop, EventLoop},
@@ -114,7 +114,7 @@ mod window {
         gpu::{self, mtl, DirectContext},
         Canvas, Color4f, Paint, Point, Rect,
     };
-    use winit_30::{
+    use winit::{
         dpi::{LogicalSize, Size},
         event_loop::ActiveEventLoop,
         raw_window_handle::HasWindowHandle,
