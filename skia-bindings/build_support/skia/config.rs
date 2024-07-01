@@ -286,6 +286,10 @@ pub fn build(
                 // Python 3 runs on Windows under MSys.
                 .env("GIT_SYNC_DEPS_PATH", "skia/DEPS")
                 .env("GIT_SYNC_DEPS_SKIP_EMSDK", "1")
+                .env(
+                    "GIT_SYNC_DEPS_SKIP_FETCH_GN",
+                    if gn_command.is_some() { "1" } else { "0" }
+                )
                 .arg("skia/tools/git-sync-deps")
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit())
