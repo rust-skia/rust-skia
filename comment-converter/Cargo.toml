@@ -6,4 +6,4 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.61"
 heck = "0.5.0"
-rstest = "0.20.0"
+rstest = "0.21.0"
