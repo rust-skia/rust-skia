@@ -301,7 +301,7 @@ fn main() {
                     self.env.window.request_redraw();
                 }
                 WindowEvent::RedrawRequested => {
-                    draw_frame = true;
+                    // draw_frame = true;
                 }
                 _ => (),
             }
@@ -323,11 +323,11 @@ fn main() {
                     .gl_surface
                     .swap_buffers(&self.env.gl_context)
                     .unwrap();
-
-                event_loop.set_control_flow(ControlFlow::WaitUntil(
-                    self.previous_frame_start + frame_duration,
-                ));
             }
+
+            event_loop.set_control_flow(ControlFlow::WaitUntil(
+                self.previous_frame_start + frame_duration,
+            ));
         }
     }
 
