@@ -18,7 +18,7 @@ jobs:
       SKIA_DEBUG: 0
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: taiki-e/checkout-action@v1
       with:
         submodules: true
 
@@ -505,7 +505,7 @@ jobs:
       SKIA_DEBUG: 0
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: taiki-e/checkout-action@v1
       with:
         submodules: true
 
@@ -992,7 +992,7 @@ jobs:
       SKIA_DEBUG: 0
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: taiki-e/checkout-action@v1
       with:
         submodules: true
 
@@ -1479,7 +1479,7 @@ jobs:
       SKIA_DEBUG: 0
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: taiki-e/checkout-action@v1
       with:
         submodules: true
 
@@ -1966,7 +1966,7 @@ jobs:
       SKIA_DEBUG: 0
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: taiki-e/checkout-action@v1
       with:
         submodules: true
 
@@ -2453,7 +2453,7 @@ jobs:
       SKIA_DEBUG: 0
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: taiki-e/checkout-action@v1
       with:
         submodules: true
 
@@ -2940,7 +2940,7 @@ jobs:
       SKIA_DEBUG: 0
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: taiki-e/checkout-action@v1
       with:
         submodules: true
 
@@ -3427,7 +3427,7 @@ jobs:
       SKIA_DEBUG: 0
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: taiki-e/checkout-action@v1
       with:
         submodules: true
 
@@ -3914,7 +3914,7 @@ jobs:
       SKIA_DEBUG: 0
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: taiki-e/checkout-action@v1
       with:
         submodules: true
 
@@ -4401,7 +4401,7 @@ jobs:
       SKIA_DEBUG: 0
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: taiki-e/checkout-action@v1
       with:
         submodules: true
 
@@ -4888,7 +4888,7 @@ jobs:
       SKIA_DEBUG: 0
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: taiki-e/checkout-action@v1
       with:
         submodules: true
 
@@ -5375,7 +5375,7 @@ jobs:
       SKIA_DEBUG: 0
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: taiki-e/checkout-action@v1
       with:
         submodules: true
 

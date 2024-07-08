@@ -4,7 +4,7 @@ env:
   SKIA_DEBUG: $[[skiaDebug]]
 
 steps:
-- uses: actions/checkout@v3
+- uses: taiki-e/checkout-action@v1
   with:
     submodules: true
 
