@@ -5,6 +5,9 @@
 #include "modules/skshaper/include/SkShaper_harfbuzz.h"
 #include "modules/skshaper/include/SkShaper_skunicode.h"
 #include "modules/skunicode/include/SkUnicode_icu.h"
+#ifdef SK_SHAPER_CORETEXT_AVAILABLE
+#include "modules/skshaper/include/SkShaper_coretext.h"
+#endif
 
 #if defined(_WIN32)
 #include "third_party/icu/SkLoadICU.h"
@@ -12,7 +15,7 @@
 
 extern "C" SkShaper* C_SkShaper_MakeCoreText() {
 #ifdef SK_SHAPER_CORETEXT_AVAILABLE
-    return SkShaper::MakeCoreText().release();
+    return SkShapers::CT::CoreText().release();
 #else
     return nullptr;
 #endif
