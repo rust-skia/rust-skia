@@ -3,7 +3,7 @@ use skia_bindings as sb;
 
 impl MaskFilter {
     #[deprecated(
-        since = "0.0.0",
+        since = "0.76.0",
         note = "ShaderMaskFilters will be deleted entirely in an upcoming Skia release."
     )]
     pub fn from_shader(shader: impl Into<Shader>) -> MaskFilter {
@@ -13,7 +13,7 @@ impl MaskFilter {
 }
 
 #[deprecated(
-    since = "0.0.0",
+    since = "0.76.0",
     note = "ShaderMaskFilters will be deleted entirely in an upcoming Skia release."
 )]
 pub fn new(shader: impl Into<Shader>) -> MaskFilter {

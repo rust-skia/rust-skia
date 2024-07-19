@@ -2,7 +2,7 @@ use skia_bindings::{self as sb, skgpu_VulkanBackendMemory, GrVkAlloc, GrVkYcbcrC
 
 use crate::{gpu::vk, prelude::*};
 
-#[deprecated(since = "0.0.0", note = "Use BackendMemory")]
+#[deprecated(since = "0.76.0", note = "Use BackendMemory")]
 pub type GraphicsBackendMemory = skgpu_VulkanBackendMemory;
 pub type BackendMemory = skgpu_VulkanBackendMemory;
 
