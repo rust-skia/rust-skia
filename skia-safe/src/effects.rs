@@ -16,6 +16,7 @@ pub mod perlin_noise_shader;
 pub mod runtime_effect;
 pub mod shader_mask_filter;
 pub mod table_color_filter;
+pub mod table_mask_filter;
 pub mod trim_path_effect;
 
 pub use _1d_path_effect::*;
