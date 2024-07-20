@@ -80,7 +80,7 @@ static_assertions = "1.1"
 [target.'cfg(all(not(target_os = "android"), not(target_os = "emscripten"), not(target_os = "ios")))'.dev-dependencies]
 glutin = "0.31.1"
 glutin-winit = { version = "0.4" }
-winit = { version = "0.29.3" }
+winit = { version = "0.30.4" }
 raw-window-handle = { version = "0.5.0" }
 gl-rs = { package = "gl", version = "0.14.0" }
 
@@ -106,4 +106,4 @@ windows = { version = "0.56.0", features = [
     "Win32_Foundation",
     "Win32_Graphics_Dxgi_Common",
 ] }
-winit = "0.29.4"
+winit = "0.30.4"
