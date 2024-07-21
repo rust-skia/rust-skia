@@ -8,7 +8,7 @@ fn main() {
 fn main() -> anyhow::Result<()> {
     // NOTE: Most of code is from https://github.com/microsoft/windows-rs/blob/02db74cf5c4796d970e6d972cdc7bc3967380079/crates/samples/windows/direct3d12/src/main.rs
 
-    use winit_30::{
+    use winit::{
         application::ApplicationHandler,
         event::WindowEvent,
         event_loop::{ActiveEventLoop, EventLoop},
@@ -89,7 +89,7 @@ mod window {
             },
         },
     };
-    use winit_30::{
+    use winit::{
         dpi::{LogicalSize, Size},
         event_loop::ActiveEventLoop,
         window::{Window, WindowAttributes},
