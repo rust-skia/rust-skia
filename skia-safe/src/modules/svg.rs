@@ -238,10 +238,7 @@ fn decode_base64(value: &str) -> Vec<u8> {
         .filter(|&c| !is_html_space(c))
         .collect::<String>();
 
-    match base64::decode(&without_spaces) {
-        Ok(bytes) => bytes,
-        Err(_) => Vec::new(),
-    }
+    base64::decode(&without_spaces).unwrap_or_default()
 }
 
 mod base64 {
