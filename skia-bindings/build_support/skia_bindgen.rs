@@ -485,6 +485,8 @@ const BLOCKLISTED_TYPES: &[&str] = &[
     "std::list.*",
     "std::list__Unchecked.*",
     "std::_List_iterator.*",
+    // <https://github.com/rust-skia/rust-skia/issues/1009> (feature vulkan)
+    "PFN_vkVoidFunction",
 ];
 
 #[derive(Debug)]
