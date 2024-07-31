@@ -70,8 +70,7 @@ impl FontStyleSet {
         })
     }
 
-    pub fn match_style(&mut self, index: usize, pattern: FontStyle) -> Option<Typeface> {
-        assert!(index < self.count());
+    pub fn match_style(&mut self, pattern: FontStyle) -> Option<Typeface> {
         Typeface::from_ptr(unsafe {
             sb::C_SkFontStyleSet_matchStyle(self.native_mut(), pattern.native())
         })
