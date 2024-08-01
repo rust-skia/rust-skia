@@ -290,26 +290,17 @@ const ALLOWLISTED_FUNCTIONS: &[&str] = &[
     "SkColorTypeIsAlwaysOpaque",
     "SkColorTypeValidateAlphaType",
     "SkRGBToHSV",
-    // this function does not allowlist (probably because of inlining):
-    "SkColorToHSV",
     "SkHSVToColor",
     "SkPreMultiplyARGB",
     "SkPreMultiplyColor",
     "SkBlendMode_AsCoeff",
     "SkBlendMode_Name",
     "SkSwapRB",
-    // functions for which the doc generation fails
-    "SkColorFilter_asComponentTable",
     // pathops/
     "Op",
     "Simplify",
     "TightBounds",
     "AsWinding",
-    // utils/
-    "Sk3LookAt",
-    "Sk3Perspective",
-    "Sk3MapPts",
-    "SkUnitCubicInterp",
 ];
 
 const OPAQUE_TYPES: &[&str] = &[
