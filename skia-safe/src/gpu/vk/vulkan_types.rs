@@ -1,4 +1,6 @@
-use skia_bindings::{self as sb, skgpu_VulkanBackendMemory, GrVkAlloc, GrVkYcbcrConversionInfo};
+use skia_bindings::{
+    self as sb, skgpu_VulkanAlloc, skgpu_VulkanBackendMemory, skgpu_VulkanYcbcrConversionInfo,
+};
 
 use crate::{gpu::vk, prelude::*};
 
@@ -18,7 +20,7 @@ pub struct Alloc {
 }
 unsafe_send_sync!(Alloc);
 
-native_transmutable!(GrVkAlloc, Alloc, alloc_layout);
+native_transmutable!(skgpu_VulkanAlloc, Alloc, alloc_layout);
 
 impl Default for Alloc {
     fn default() -> Self {
@@ -35,7 +37,7 @@ impl Default for Alloc {
 
 impl PartialEq for Alloc {
     fn eq(&self, other: &Self) -> bool {
-        unsafe { sb::C_GrVkAlloc_Equals(self.native(), other.native()) }
+        unsafe { sb::C_VulkanAlloc_Equals(self.native(), other.native()) }
     }
 }
 
@@ -84,14 +86,14 @@ pub struct YcbcrConversionInfo {
 }
 
 native_transmutable!(
-    GrVkYcbcrConversionInfo,
+    skgpu_VulkanYcbcrConversionInfo,
     YcbcrConversionInfo,
     ycbcr_conversion_info_layout
 );
 
 impl PartialEq for YcbcrConversionInfo {
     fn eq(&self, other: &Self) -> bool {
-        unsafe { sb::C_GrVkYcbcrConversionInfo_Equals(self.native(), other.native()) }
+        unsafe { sb::C_VulkanYcbcrConversionInfo_Equals(self.native(), other.native()) }
     }
 }
 
