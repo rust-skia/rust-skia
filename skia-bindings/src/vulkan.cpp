@@ -9,8 +9,8 @@
 #include "include/gpu/ganesh/vk/GrVkBackendSurface.h"
 #include "include/gpu/ganesh/vk/GrVkDirectContext.h"
 #include "include/gpu/vk/GrVkTypes.h"
-#include "include/gpu/vk/GrVkBackendContext.h"
-#include "include/gpu/vk/GrVkExtensions.h"
+#include "include/gpu/vk/VulkanBackendContext.h"
+#include "include/gpu/vk/VulkanExtensions.h"
 #include "include/gpu/vk/VulkanMutableTextureState.h"
 
 // Additional types not yet referenced.
@@ -20,7 +20,7 @@ extern "C" void C_GrBackendFormat_ConstructVk(GrBackendFormat* uninitialized, Vk
     new(uninitialized)GrBackendFormat(GrBackendFormats::MakeVk(format, willUseDRMFormatModifiers));
 }
 
-extern "C" void C_GrBackendFormat_ConstructVk2(GrBackendFormat* uninitialized, const GrVkYcbcrConversionInfo* ycbcrInfo,  bool willUseDRMFormatModifiers) {
+extern "C" void C_GrBackendFormat_ConstructVk2(GrBackendFormat* uninitialized, const skgpu::VulkanYcbcrConversionInfo* ycbcrInfo,  bool willUseDRMFormatModifiers) {
     new(uninitialized)GrBackendFormat(GrBackendFormats::MakeVk(*ycbcrInfo, willUseDRMFormatModifiers));
 }
 
@@ -45,7 +45,7 @@ extern "C" void C_GPU_VK_Types(VkBuffer *) {}
 typedef PFN_vkVoidFunction (*GetProcFn)(const char* name, VkInstance instance, VkDevice device);
 typedef const void* (*GetProcFnVoidPtr)(const char* name, VkInstance instance, VkDevice device);
 
-extern "C" void *C_GrVkBackendContext_new(
+extern "C" void *C_VulkanBackendContext_new(
     void *instance,
     void *physicalDevice,
     void *device,
@@ -62,9 +62,9 @@ extern "C" void *C_GrVkBackendContext_new(
     auto vkDevice = static_cast<VkDevice>(device);
     auto vkGetProc = *(reinterpret_cast<GetProcFn *>(&getProc));
 
-    auto &extensions = *new GrVkExtensions();
+    auto &extensions = *new skgpu::VulkanExtensions();
     extensions.init(vkGetProc, vkInstance, vkPhysicalDevice, instanceExtensionCount, instanceExtensions, deviceExtensionCount, deviceExtensions);
-    auto &context = *new GrVkBackendContext();
+    auto &context = *new skgpu::VulkanBackendContext();
     context.fInstance = vkInstance;
     context.fPhysicalDevice = vkPhysicalDevice;
     context.fDevice = vkDevice;
@@ -75,31 +75,31 @@ extern "C" void *C_GrVkBackendContext_new(
     return &context;
 }
 
-extern "C" void C_GrVkBackendContext_delete(void* vkBackendContext) {
-    auto bc = static_cast<GrVkBackendContext*>(vkBackendContext);
+extern "C" void C_VulkanBackendContext_delete(void* vkBackendContext) {
+    auto bc = static_cast<skgpu::VulkanBackendContext*>(vkBackendContext);
     if (bc) {
         delete bc->fVkExtensions;
     }
     delete bc;
 }
 
-extern "C" void C_GrVkBackendContext_setProtectedContext(GrVkBackendContext *self, GrProtected protectedContext) {
+extern "C" void C_VulkanBackendContext_setProtectedContext(skgpu::VulkanBackendContext *self, GrProtected protectedContext) {
     self->fProtectedContext = protectedContext;
 }
 
-extern "C" void C_GrVkBackendContext_setMaxAPIVersion(GrVkBackendContext *self, uint32_t maxAPIVersion) {
+extern "C" void C_VulkanBackendContext_setMaxAPIVersion(skgpu::VulkanBackendContext *self, uint32_t maxAPIVersion) {
     self->fMaxAPIVersion = maxAPIVersion;
 }
 
 //
-// GrVkTypes.h
+// VulkanTypes.h
 //
 
-extern "C" bool C_GrVkAlloc_Equals(const GrVkAlloc* lhs, const GrVkAlloc* rhs) {
+extern "C" bool C_VulkanAlloc_Equals(const skgpu::VulkanAlloc* lhs, const skgpu::VulkanAlloc* rhs) {
     return *lhs == *rhs;
 }
 
-extern "C" bool C_GrVkYcbcrConversionInfo_Equals(const GrVkYcbcrConversionInfo* lhs, const GrVkYcbcrConversionInfo* rhs) {
+extern "C" bool C_VulkanYcbcrConversionInfo_Equals(const skgpu::VulkanYcbcrConversionInfo* lhs, const skgpu::VulkanYcbcrConversionInfo* rhs) {
     return *lhs == *rhs;
 }
 
@@ -111,7 +111,7 @@ extern "C" bool C_GrBackendFormats_AsVkFormat(const GrBackendFormat* format, VkF
     return GrBackendFormats::AsVkFormat(*format, vkFormat);
 }
 
-extern "C" const GrVkYcbcrConversionInfo* C_GrBackendFormats_GetVkYcbcrConversionInfo(const GrBackendFormat* format) {
+extern "C" const skgpu::VulkanYcbcrConversionInfo* C_GrBackendFormats_GetVkYcbcrConversionInfo(const GrBackendFormat* format) {
     return GrBackendFormats::GetVkYcbcrConversionInfo(*format);
 }
 
@@ -132,7 +132,7 @@ extern "C" void C_GrBackendRenderTargets_SetVkImageLayout(GrBackendRenderTarget*
 }
 
 extern "C" GrDirectContext* C_GrDirectContexts_MakeVulkan(
-    const GrVkBackendContext* vkBackendContext,
+    const skgpu::VulkanBackendContext* vkBackendContext,
     const GrContextOptions* options) {
     if (options) {
         return GrDirectContexts::MakeVulkan(*vkBackendContext, *options).release();

@@ -21,7 +21,7 @@ pub struct BackendContext<'a> {
 
 impl<'a> Drop for BackendContext<'a> {
     fn drop(&mut self) {
-        unsafe { sb::C_GrVkBackendContext_delete(self.native.as_ptr()) }
+        unsafe { sb::C_VulkanBackendContext_delete(self.native.as_ptr()) }
     }
 }
 
@@ -87,7 +87,7 @@ impl BackendContext<'_> {
             device_extensions.iter().map(|cs| cs.as_ptr()).collect();
 
         let resolver = Self::begin_resolving_proc(get_proc);
-        let native = sb::C_GrVkBackendContext_new(
+        let native = sb::C_VulkanBackendContext_new(
             instance as _,
             physical_device as _,
             device as _,
@@ -108,7 +108,7 @@ impl BackendContext<'_> {
 
     pub fn set_protected_context(&mut self, protected_context: gpu::Protected) -> &mut Self {
         unsafe {
-            sb::C_GrVkBackendContext_setProtectedContext(
+            sb::C_VulkanBackendContext_setProtectedContext(
                 self.native.as_ptr() as _,
                 protected_context,
             )
@@ -118,7 +118,7 @@ impl BackendContext<'_> {
 
     pub fn set_max_api_version(&mut self, version: impl Into<Version>) -> &mut Self {
         unsafe {
-            sb::C_GrVkBackendContext_setMaxAPIVersion(
+            sb::C_VulkanBackendContext_setMaxAPIVersion(
                 self.native.as_ptr() as _,
                 *version.into().deref(),
             )
