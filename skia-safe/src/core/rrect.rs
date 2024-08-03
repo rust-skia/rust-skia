@@ -202,6 +202,10 @@ impl RRect {
         Vector::from_native_c(self.native().fRadii[corner as usize])
     }
 
+    pub fn radii_ref(&self) -> &[Vector; 4] {
+        Vector::from_native_array_ref(&self.native().fRadii)
+    }
+
     pub fn bounds(&self) -> &Rect {
         self.rect()
     }

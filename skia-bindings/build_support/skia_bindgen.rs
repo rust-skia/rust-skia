@@ -301,6 +301,7 @@ const ALLOWLISTED_FUNCTIONS: &[&str] = &[
     "Simplify",
     "TightBounds",
     "AsWinding",
+    "SkYUVColorSpaceIsLimitedRange",
 ];
 
 const OPAQUE_TYPES: &[&str] = &[

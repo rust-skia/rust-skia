@@ -948,6 +948,23 @@ impl Image {
         unsafe { sb::C_SkImage_isValid(self.native(), context.native_mut()) }
     }
 
+    /// Create a new image by copying this image and scaling to fit the [`ImageInfo`]'s dimensions
+    /// and converting the pixels into the ImageInfo's [`crate::ColorInfo`].
+    ///
+    /// This is done retaining the domain (backend) of the image (e.g. gpu, raster).
+    ///
+    /// Returns `None` if the requested [`crate::ColorInfo`] is not supported, its dimesions are out
+    /// of range.
+    pub fn make_scaled(
+        &self,
+        info: &ImageInfo,
+        scaling: impl Into<SamplingOptions>,
+    ) -> Option<Image> {
+        Image::from_ptr(unsafe {
+            sb::C_SkImage_makeScaled(self.native(), info.native(), scaling.into().native())
+        })
+    }
+
     /// See [`Self::flush_with_info()`]
     #[cfg(feature = "gpu")]
     #[deprecated(since = "0.63.0", note = "use gpu::DirectContext::flush()")]
