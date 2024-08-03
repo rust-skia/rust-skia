@@ -83,7 +83,7 @@ mod window {
                     },
                     CreateDXGIFactory1, IDXGIAdapter1, IDXGIFactory4, IDXGISwapChain3,
                     DXGI_ADAPTER_FLAG, DXGI_ADAPTER_FLAG_NONE, DXGI_ADAPTER_FLAG_SOFTWARE,
-                    DXGI_SWAP_CHAIN_DESC1, DXGI_SWAP_EFFECT_FLIP_DISCARD,
+                    DXGI_PRESENT, DXGI_SWAP_CHAIN_DESC1, DXGI_SWAP_EFFECT_FLIP_DISCARD,
                     DXGI_USAGE_RENDER_TARGET_OUTPUT,
                 },
             },
@@ -128,7 +128,7 @@ mod window {
                 .create_window(window_attributes)
                 .expect("Failed to create window");
 
-            let hwnd = HWND(u64::from(window.id()) as isize);
+            let hwnd = HWND(u64::from(window.id()) as *mut _);
             let (width, height) = window.inner_size().into();
 
             let factory: IDXGIFactory4 = unsafe { CreateDXGIFactory1() }?;
@@ -204,8 +204,7 @@ mod window {
                 for i in 0.. {
                     let adapter = unsafe { factory.EnumAdapters1(i) }?;
 
-                    let mut adapter_desc = Default::default();
-                    unsafe { adapter.GetDesc1(&mut adapter_desc) }?;
+                    let adapter_desc = unsafe { adapter.GetDesc1() }?;
 
                     if (DXGI_ADAPTER_FLAG(adapter_desc.Flags as _) & DXGI_ADAPTER_FLAG_SOFTWARE)
                         != DXGI_ADAPTER_FLAG_NONE
@@ -257,7 +256,7 @@ mod window {
 
             self.direct_context.flush_and_submit_surface(surface, None);
 
-            unsafe { self.swap_chain.Present(1, 0) }.unwrap();
+            unsafe { self.swap_chain.Present(1, DXGI_PRESENT::default()) }.unwrap();
 
             // NOTE: If you get some error when you render, you can check it with:
             // unsafe {
