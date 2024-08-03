@@ -450,6 +450,10 @@ extern "C" bool C_SkImage_isValid(const SkImage* self, GrRecordingContext* conte
     return self->isValid(context);
 }
 
+extern "C" SkImage* C_SkImage_makeScaled(const SkImage* self, const SkImageInfo* info, const SkSamplingOptions* sampling) {
+    return self->makeScaled(*info, *sampling).release();
+}
+
 extern "C" SkData* C_SkImage_refEncodedData(const SkImage* self) {
     return self->refEncodedData().release();
 }
