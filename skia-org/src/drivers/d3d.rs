@@ -90,8 +90,7 @@ fn get_hardware_adapter(factory: &IDXGIFactory4) -> windows::core::Result<IDXGIA
     for i in 0.. {
         let adapter = unsafe { factory.EnumAdapters1(i)? };
 
-        let mut desc = Default::default();
-        unsafe { adapter.GetDesc1(&mut desc)? };
+        let desc = unsafe { adapter.GetDesc1()? };
 
         if (DXGI_ADAPTER_FLAG(desc.Flags as i32) & DXGI_ADAPTER_FLAG_SOFTWARE)
             != DXGI_ADAPTER_FLAG_NONE
