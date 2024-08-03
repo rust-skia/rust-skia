@@ -5,7 +5,10 @@
 //!
 //! See also: <https://github.com/rust-lang/rfcs/issues/1880>
 
-use crate::{SkAlphaType, SkBlendMode, SkBlendModeCoeff, SkPathFillType, SkPathVerb, SkPath_Verb};
+use crate::{
+    SkAlphaType, SkBlendMode, SkBlendModeCoeff, SkPathFillType, SkPathVerb, SkPath_Verb,
+    SkYUVColorSpace,
+};
 use std::ffi::CStr;
 
 impl SkBlendMode {
@@ -95,6 +98,12 @@ impl SkPathFillType {
 impl SkAlphaType {
     pub fn is_opaque(self) -> bool {
         self == SkAlphaType::Opaque
+    }
+}
+
+impl SkYUVColorSpace {
+    pub fn is_limited_range(self) -> bool {
+        unsafe { crate::SkYUVColorSpaceIsLimitedRange(self) }
     }
 }
 

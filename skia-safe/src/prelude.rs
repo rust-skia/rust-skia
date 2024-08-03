@@ -742,14 +742,19 @@ where
         r
     }
 
-    /// Provides access to the Rust value through a
-    /// transmuted reference to the native value.
+    /// Returns a reference to the Rust value by ransmuting a reference to the native value.
     fn from_native_ref(nt: &NT) -> &Self {
         unsafe { transmute_ref(nt) }
     }
 
-    /// Provides access to the Rust value through a
-    /// transmuted reference to the native mutable value.
+    /// Returns a reference to the Rust array reference by transmuting a reference to the native
+    /// array.
+    fn from_native_array_ref<const N: usize>(nt: &[NT; N]) -> &[Self; N] {
+        unsafe { transmute_ref(nt) }
+    }
+
+    /// Returns a reference to the Rust value through a transmuted reference to the native mutable
+    /// value.
     fn from_native_ref_mut(nt: &mut NT) -> &mut Self {
         unsafe { transmute_ref_mut(nt) }
     }
