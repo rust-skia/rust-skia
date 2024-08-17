@@ -62,7 +62,7 @@ lazy_static = { version = "1.4.0", optional = true }
 
 [build-dependencies]
 cc = "1.0.98"
-bindgen = "0.69.1"
+bindgen = "0.70.0"
 
 # For enum variant name replacements.
 regex = "1.4.5"
@@ -82,7 +82,7 @@ toml = "0.8.0"
 [dev-dependencies]
 # build dependencies duplicated for testing :(
 cc = "1.0.37"
-bindgen = "0.69.1"
+bindgen = "0.70.0"
 regex = "1.4.5"
 heck = "0.5.0"
 # ureq = { version = "2.8.0" }
