@@ -49,7 +49,7 @@ metal-rs = { package = "metal", version = "0.24.0", optional = true }
 # ... to access raw metal ptrs.
 foreign-types-shared = { version = "0.1.1", optional = true }
 # ... for that NSAutoReleasePool to be able to free metal devices.
-cocoa = { version = "0.25", optional = true }
+cocoa = { version = "0.26", optional = true }
 objc = { version = "0.2.4", optional = true }
 # d3d
 windows = { version = "0.58.0", features = [
