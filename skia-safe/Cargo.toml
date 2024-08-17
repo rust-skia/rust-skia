@@ -89,7 +89,7 @@ gl-rs = { version = "0.14.0", package = "gl" }
 metal-rs = { package = "metal", version = "0.24.0" }
 raw-window-handle = "0.6.0"
 objc = "0.2.7"
-cocoa = "0.25.0"
+cocoa = "0.26.0"
 core-graphics-types = "0.1.1"
 foreign-types-shared = "0.1.1"
 
