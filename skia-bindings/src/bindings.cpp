@@ -24,6 +24,7 @@
 
 // core/
 #include "include/core/SkAnnotation.h"
+#include "include/core/SkArc.h"
 #include "include/core/SkBlendMode.h"
 #include "include/core/SkBitmap.h"
 #include "include/core/SkBlurTypes.h"
@@ -288,7 +289,7 @@ extern "C" void C_SkPixmapUtils_SwapWidthHeight(SkImageInfo* uninitialized, cons
 //
 
 extern "C" void C_Core_Types(
-    SkGraphics *, SkCoverageMode *, SkColorChannelFlag *, SkSurfaces::BackendSurfaceAccess) {};
+    SkArc *, SkGraphics *, SkCoverageMode *, SkColorChannelFlag *, SkSurfaces::BackendSurfaceAccess) {};
 
 //
 // core/SkBlender.h
