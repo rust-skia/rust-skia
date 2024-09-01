@@ -9,9 +9,6 @@
 
 #include "include/core/SkStream.h"
 
-extern "C" void C_Resource_Types(const skresources::ExternalTrackAsset *)
-{}
-
 extern "C" bool C_ImageAsset_isMultiFrame(skresources::ImageAsset* self) {
     return self->isMultiFrame();
 }
@@ -25,9 +22,9 @@ extern "C" skresources::ImageAsset* C_MultiFrameImageAsset_Make(
 namespace ResourceProvider { 
     extern "C" {
         typedef void (*Drop)(TraitObject);
+
         typedef SkData *(*Load)(TraitObject, const char resource_path[], const char resource_name[]);
         typedef skresources::ImageAsset* (*LoadImageAsset)(TraitObject, const char resource_path[], const char resource_name[], const char resource_id[]);
-        typedef skresources::ExternalTrackAsset *(*LoadAudioAsset)(TraitObject, const char resource_path[], const char resource_name[], const char resource_id[]);
         typedef SkTypeface *(*LoadTypeface)(TraitObject, const char name[], const char url[]);
     }
 }
@@ -71,7 +68,7 @@ private:
     Param _param;
 };
 
-extern "C" RustResourceProvider* C_RustResourceProvider_New(const RustResourceProvider::Param* param) {
+extern "C" skresources::ResourceProvider* C_RustResourceProvider_New(const RustResourceProvider::Param* param) {
     return new RustResourceProvider(*param);
 }
 
