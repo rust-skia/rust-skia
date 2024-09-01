@@ -9,9 +9,73 @@
 
 #include "include/core/SkStream.h"
 
+extern "C" void C_Resource_Types(const skresources::ExternalTrackAsset *)
+{}
+
+extern "C" bool C_ImageAsset_isMultiFrame(skresources::ImageAsset* self) {
+    return self->isMultiFrame();
+}
+
+extern "C" skresources::ImageAsset* C_MultiFrameImageAsset_Make(
+    SkData* data, skresources::ImageDecodeStrategy decodeStrategy)
+{
+    return skresources::MultiFrameImageAsset::Make(sp(data), decodeStrategy).release();
+}
+
+namespace ResourceProvider { 
+    extern "C" {
+        typedef void (*Drop)(TraitObject);
+        typedef SkData *(*Load)(TraitObject, const char resource_path[], const char resource_name[]);
+        typedef skresources::ImageAsset* (*LoadImageAsset)(TraitObject, const char resource_path[], const char resource_name[], const char resource_id[]);
+        typedef skresources::ExternalTrackAsset *(*LoadAudioAsset)(TraitObject, const char resource_path[], const char resource_name[], const char resource_id[]);
+        typedef SkTypeface *(*LoadTypeface)(TraitObject, const char name[], const char url[]);
+    }
+}
+
+class RustResourceProvider final : public skresources::ResourceProvider {
+public:
+    struct Param {
+        TraitObject trait;
+        ::ResourceProvider::Drop drop;
+        ::ResourceProvider::Load load;
+        ::ResourceProvider::LoadImageAsset loadImageAsset;
+        ::ResourceProvider::LoadTypeface loadTypeface;
+    };
+
+    explicit RustResourceProvider(const Param& param) 
+    : _param(param)
+    {
+    }
+
+    virtual ~RustResourceProvider() {
+        _param.drop(_param.trait);
+    }
+
+    sk_sp<SkData> load(const char resource_path[],
+                       const char resource_name[]) const override {
+        return sk_sp<SkData>(_param.load(_param.trait, resource_path, resource_name));
+    }
+
+    sk_sp<skresources::ImageAsset> loadImageAsset(const char resource_path[],
+                                                  const char resource_name[],
+                                                  const char resource_id[]) const override {
+        return sk_sp<skresources::ImageAsset>(_param.loadImageAsset(_param.trait, resource_path, resource_name, resource_id));
+    }
+
+    sk_sp<SkTypeface> loadTypeface(const char name[],
+                                   const char url[]) const override {
+        return sk_sp<SkTypeface>(_param.loadTypeface(_param.trait, name, url));
+    }
+ 
+private:
+    Param _param;
+};
+
+extern "C" RustResourceProvider* C_RustResourceProvider_New(const RustResourceProvider::Param* param) {
+    return new RustResourceProvider(*param);
+}
 
 typedef SkData* (*loadSkData)(const char resource_path[], const char resource_name[], void* context);
-
 typedef SkTypeface* (*loadSkTypeface)(const char resource_path[], const char resource_name[], void* context);
 
 class ImageResourceProvider final : public skresources::ResourceProvider {
