@@ -104,6 +104,7 @@ pub fn release_jobs(workflow: &Workflow) -> Vec<Job> {
     }
 
     jobs.extend(freya_release_jobs(workflow));
+    jobs.extend(vizia_release_jobs(workflow));
 
     jobs
 }
@@ -121,6 +122,24 @@ fn freya_release_jobs(workflow: &Workflow) -> Vec<Job> {
                 // <https://github.com/rust-skia/rust-skia/issues/737>
                 release_job("gl,textlayout,svg,wayland,x11"),
             ]
+        }
+    }
+}
+
+/// Specific binary releases for the Vizia GUI library <https://github.com/vizia/vizia>
+/// <https://github.com/rust-skia/rust-skia/discussions/961#discussioncomment-10485430>
+fn vizia_release_jobs(workflow: &Workflow) -> Vec<Job> {
+    match workflow.host_os {
+        HostOS::MacOS => {
+            vec![release_job("gl,vulkan,textlayout,svg")]
+        }
+        HostOS::Windows => {
+            vec![release_job("gl,vulkan,textlayout,svg,d3d")]
+        }
+        HostOS::Linux => {
+            // vec![release_job("gl,vulkan,textlayout,svg,wayland,x11")]
+            // Alternative: Use the full feature set `gl,vulkan,textlayout,svg,wayland,x11,webp`
+            vec![]
         }
     }
 }
