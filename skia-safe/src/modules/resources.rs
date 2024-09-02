@@ -1,11 +1,12 @@
 use std::{borrow::Cow, ffi, mem, os::raw, ptr};
 
+use helpers::ResourceKind;
 use skia_bindings::{
     self as sb, skresources_ImageAsset, skresources_ResourceProvider, RustResourceProvider_Param,
     SkData, SkRefCnt, SkRefCntBase, SkTypeface, TraitObject,
 };
 
-use crate::{prelude::*, Data, Typeface};
+use crate::{prelude::*, Data, FontMgr, Typeface};
 
 pub type ImageAsset = RCHandle<skresources_ImageAsset>;
 require_base_type!(skresources_ImageAsset, SkRefCnt);
@@ -20,8 +21,6 @@ impl ImageAsset {
     }
 
     // TODO: wrap getFrameData()
-
-    // MultiFrameImageAsset
 
     pub fn from_data(
         data: impl Into<Data>,
@@ -51,12 +50,17 @@ variant_name!(ImageDecodeStrategy::LazyDecode);
 
 pub trait ResourceProvider {
     fn load(&self, resource_path: &str, resource_name: &str) -> Option<Data>;
+
     fn load_image_asset(
         &self,
         resource_path: &str,
         resource_name: &str,
-        resource_id: &str,
-    ) -> Option<ImageAsset>;
+        _resource_id: &str,
+    ) -> Option<ImageAsset> {
+        let data = self.load(resource_path, resource_name)?;
+        ImageAsset::from_data(data, None)
+    }
+
     fn load_typeface(&self, name: &str, url: &str) -> Option<Typeface>;
 }
 
@@ -151,5 +155,151 @@ impl From<Box<dyn ResourceProvider>> for NativeResourceProvider {
             }
             "".into()
         }
+    }
+}
+
+/// A resource provider that loads only local / inline base64 resources.
+pub struct LocalResourceProvider {
+    font_mgr: FontMgr,
+}
+
+impl ResourceProvider for LocalResourceProvider {
+    fn load(&self, resource_path: &str, resource_name: &str) -> Option<Data> {
+        match helpers::identify_resource_kind(resource_path, resource_name) {
+            ResourceKind::Base64(data) => Some(data),
+            ResourceKind::DownloadFrom(_) => None,
+        }
+    }
+
+    fn load_typeface(&self, name: &str, url: &str) -> Option<Typeface> {
+        helpers::load_typeface_via_font_mgr(self, &self.font_mgr, name, url)
+    }
+}
+
+#[cfg(feature = "ureq")]
+#[derive(Debug)]
+/// A resource provider that uses ureq for downloading resources.
+pub struct UReqResourceProvider {
+    font_mgr: FontMgr,
+}
+
+#[cfg(feature = "ureq")]
+impl UReqResourceProvider {
+    pub fn new(font_mgr: impl Into<FontMgr>) -> Self {
+        Self {
+            font_mgr: font_mgr.into(),
+        }
+    }
+}
+
+#[cfg(feature = "ureq")]
+impl ResourceProvider for UReqResourceProvider {
+    fn load(&self, resource_path: &str, resource_name: &str) -> Option<Data> {
+        match helpers::identify_resource_kind(resource_path, resource_name) {
+            ResourceKind::Base64(data) => Some(data),
+            ResourceKind::DownloadFrom(url) => match ureq::get(&url).call() {
+                Ok(response) => {
+                    let mut reader = response.into_reader();
+                    let mut data = Vec::new();
+                    if reader.read_to_end(&mut data).is_err() {
+                        data.clear();
+                    };
+                    Some(Data::new_copy(&data))
+                }
+                Err(_) => None,
+            },
+        }
+    }
+
+    fn load_typeface(&self, name: &str, url: &str) -> Option<Typeface> {
+        helpers::load_typeface_via_font_mgr(self, &self.font_mgr, name, url)
+    }
+}
+
+/// Helpers that assist in implementing resource providers
+pub mod helpers {
+    use super::ResourceProvider;
+    use crate::{Data, FontMgr, FontStyle, Typeface};
+
+    /// Load a typeface via the `load()` function and generate it using a `FontMgr` instance.
+    pub fn load_typeface_via_font_mgr(
+        provider: &dyn ResourceProvider,
+        font_mgr: &FontMgr,
+        name: &str,
+        url: &str,
+    ) -> Option<Typeface> {
+        if let Some(data) = provider.load(url, name) {
+            return font_mgr.new_from_data(&data, None);
+        }
+        // Try to provide the default font if downloading fails.
+        font_mgr.legacy_make_typeface(None, FontStyle::default())
+    }
+
+    #[derive(Debug)]
+    pub enum ResourceKind {
+        /// Data is base64, return it as is.
+        Base64(Data),
+        /// Attempt to download the data from the given Url.
+        DownloadFrom(String),
+    }
+
+    /// Figure out the kind of data that should be loaded.
+    pub fn identify_resource_kind(resource_path: &str, resource_name: &str) -> ResourceKind {
+        const IS_WINDOWS_TARGET: bool = cfg!(target_os = "windows");
+
+        if resource_path.is_empty() && (!IS_WINDOWS_TARGET || resource_name.starts_with("data:")) {
+            return ResourceKind::Base64(load_base64(resource_name));
+        }
+
+        ResourceKind::DownloadFrom(if IS_WINDOWS_TARGET {
+            resource_name.to_string()
+        } else {
+            format!("{resource_path}/{resource_name}")
+        })
+    }
+
+    /// Try to load base64 data. Returns empty if data can not be loaded.
+    fn load_base64(data: &str) -> Data {
+        let data: Vec<_> = data.split(',').collect();
+        if data.len() > 1 {
+            let result = decode_base64(data[1]);
+            return Data::new_copy(result.as_slice());
+        }
+        Data::new_empty()
+    }
+
+    type StaticCharVec = &'static [char];
+
+    const HTML_SPACE_CHARACTERS: StaticCharVec =
+        &['\u{0020}', '\u{0009}', '\u{000a}', '\u{000c}', '\u{000d}'];
+
+    // https://github.com/servo/servo/blob/1610bd2bc83cea8ff0831cf999c4fba297788f64/components/script/dom/window.rs#L575
+    fn decode_base64(value: &str) -> Vec<u8> {
+        fn is_html_space(c: char) -> bool {
+            HTML_SPACE_CHARACTERS.iter().any(|&m| m == c)
+        }
+        let without_spaces = value
+            .chars()
+            .filter(|&c| !is_html_space(c))
+            .collect::<String>();
+
+        base64::decode(&without_spaces).unwrap_or_default()
+    }
+
+    mod base64 {
+        use base64::{
+            alphabet,
+            engine::{self, GeneralPurposeConfig},
+            Engine,
+        };
+
+        pub fn decode(input: &str) -> Result<Vec<u8>, base64::DecodeError> {
+            ENGINE.decode(input)
+        }
+
+        const ENGINE: engine::GeneralPurpose = engine::GeneralPurpose::new(
+            &alphabet::STANDARD,
+            GeneralPurposeConfig::new().with_decode_allow_trailing_bits(true),
+        );
     }
 }
