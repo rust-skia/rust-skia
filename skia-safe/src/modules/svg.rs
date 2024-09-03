@@ -125,7 +125,11 @@ mod tests {
     use std::{fs::File, io::Write, path::Path};
 
     use super::Dom;
-    use crate::{surfaces, EncodedImageFormat, FontMgr, Surface};
+    use crate::{
+        prelude::{NativeAccess, NativeRefCounted},
+        resources::{LocalResourceProvider, NativeResourceProvider},
+        surfaces, EncodedImageFormat, FontMgr, Surface,
+    };
 
     #[test]
     fn render_simple_svg() {
@@ -143,6 +147,28 @@ mod tests {
         dom.render(canvas);
         // Uncomment to save the image to /tmp
         // save_surface_to_tmp(&mut surface);
+    }
+
+    #[test]
+    fn resource_provider_and_font_mgr_get_dropped_after_drop_of_dom() {
+        let svg = r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" height = "256" width = "256">
+            </svg>"##;
+        let mut surface = surfaces::raster_n32_premul((256, 256)).unwrap();
+        let canvas = surface.canvas();
+        let font_mgr = FontMgr::new();
+        let provider: NativeResourceProvider = font_mgr.clone().into();
+        let dom = Dom::from_str(svg, provider.clone(), font_mgr.clone()).unwrap();
+        dom.render(canvas);
+        // Dom keeps the resource provider even afer rendering.
+        assert!(provider.native()._ref_cnt() >= 2);
+        // And at least two of the font managers are referred to (one in the resource provider, and the other in the Dom)
+        assert!(font_mgr.native()._ref_cnt() >= 3);
+        drop(dom);
+        // now it's free.
+        assert_eq!(1, provider.native()._ref_cnt());
+        drop(provider);
+        // and so is the font mgr
+        assert_eq!(1, font_mgr.native()._ref_cnt());
     }
 
     // Run this manually (needs network connectivity)
