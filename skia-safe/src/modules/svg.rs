@@ -200,6 +200,54 @@ mod tests {
         let font_mgr = FontMgr::new();
         let dom = Dom::from_str(svg, font_mgr.clone(), font_mgr).unwrap();
         dom.render(canvas);
+        // Uncomment to save the image to /tmp
+        // save_surface_to_tmp(&mut surface);
+    }
+
+    // Run this manually (needs network connectivity)
+    #[cfg(feature = "ureq")]
+    #[test]
+    #[ignore]
+    fn render_svg_with_ureq_resource_provider() {
+        use crate::resources::UReqResourceProvider;
+
+        let svg = r##"
+            <svg version="1.1"
+            xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+            width="128" height="128">
+            <image width="128" height="128" transform="rotate(45)" transform-origin="64 64"
+                xlink:href="https://www.rust-lang.org/logos/rust-logo-128x128.png"/>
+            </svg>"##;
+        let mut surface = surfaces::raster_n32_premul((256, 256)).unwrap();
+        let canvas = surface.canvas();
+        let font_mgr = FontMgr::new();
+        let resource_provider = UReqResourceProvider::new(font_mgr.clone());
+        let dom = Dom::from_str(svg, resource_provider, font_mgr).unwrap();
+        dom.render(canvas);
+        // Uncomment to save the image to /tmp
+        // save_surface_to_tmp(&mut surface);
+    }
+
+    // Just a testcase to see if a download error is handled.
+    #[cfg(feature = "ureq")]
+    #[test]
+    fn render_svg_with_ureq_resource_provider_with_missing_resource() {
+        use crate::resources::UReqResourceProvider;
+
+        let svg = r##"
+            <svg version="1.1"
+            xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+            width="128" height="128">
+            <image width="128" height="128" transform="rotate(45)" transform-origin="64 64"
+                xlink:href="https://www.not-existing.org/logos/rust-logo-128x128.png"/>
+            </svg>"##;
+        let mut surface = surfaces::raster_n32_premul((256, 256)).unwrap();
+        let canvas = surface.canvas();
+        let font_mgr = FontMgr::new();
+        let resource_provider = UReqResourceProvider::new(font_mgr.clone());
+        let dom = Dom::from_str(svg, resource_provider, font_mgr).unwrap();
+        dom.render(canvas);
+        // Uncomment to save the image to /tmp
         // save_surface_to_tmp(&mut surface);
     }
 
@@ -267,10 +315,10 @@ mod tests {
     }
 
     #[allow(unused)]
-    fn save_surface_to_tmp(surface: &mut Surface) {
+    fn save_to_tmp(surface: &mut Surface) {
         let image = surface.image_snapshot();
         let data = image.encode(None, EncodedImageFormat::PNG, None).unwrap();
-        write_file(data.as_bytes(), Path::new("/tmp/test.png"));
+        write_file(data.as_bytes(), Path::new("/tmp/svg-test.png"));
 
         pub fn write_file(bytes: &[u8], path: &Path) {
             let mut file = File::create(path).expect("failed to create file");

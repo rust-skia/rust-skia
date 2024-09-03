@@ -41,12 +41,7 @@ impl ImageAsset {
 pub use sb::skresources_ImageDecodeStrategy as ImageDecodeStrategy;
 variant_name!(ImageDecodeStrategy::LazyDecode);
 
-// pub type ExternalTrackAsset = RCHandle<skresources_ExternalTrackAsset>;
-// require_base_type!(skresources_ExternalTrackAsset, SkRefCnt);
-
-// impl NativeRefCountedBase for skresources_ExternalTrackAsset {
-//     type Base = SkRefCntBase;
-// }
+// TODO: Wrap ExternalTrackAsset
 
 pub trait ResourceProvider {
     fn load(&self, resource_path: &str, resource_name: &str) -> Option<Data>;
@@ -168,7 +163,7 @@ impl ResourceProvider for LocalResourceProvider {
     fn load(&self, resource_path: &str, resource_name: &str) -> Option<Data> {
         match helpers::identify_resource_kind(resource_path, resource_name) {
             ResourceKind::Base64(data) => Some(data),
-            ResourceKind::DownloadFrom(_) => None,
+            ResourceKind::DownloadFromUrl(_) => None,
         }
     }
 
@@ -213,7 +208,7 @@ impl ResourceProvider for UReqResourceProvider {
     fn load(&self, resource_path: &str, resource_name: &str) -> Option<Data> {
         match helpers::identify_resource_kind(resource_path, resource_name) {
             ResourceKind::Base64(data) => Some(data),
-            ResourceKind::DownloadFrom(url) => match ureq::get(&url).call() {
+            ResourceKind::DownloadFromUrl(url) => match ureq::get(&url).call() {
                 Ok(response) => {
                     let mut reader = response.into_reader();
                     let mut data = Vec::new();
@@ -256,7 +251,7 @@ pub mod helpers {
         /// Data is base64, return it as is.
         Base64(Data),
         /// Attempt to download the data from the given Url.
-        DownloadFrom(String),
+        DownloadFromUrl(String),
     }
 
     /// Figure out the kind of data that should be loaded.
@@ -267,7 +262,7 @@ pub mod helpers {
             return ResourceKind::Base64(load_base64(resource_name));
         }
 
-        ResourceKind::DownloadFrom(if IS_WINDOWS_TARGET {
+        ResourceKind::DownloadFromUrl(if IS_WINDOWS_TARGET {
             resource_name.to_string()
         } else {
             format!("{resource_path}/{resource_name}")
