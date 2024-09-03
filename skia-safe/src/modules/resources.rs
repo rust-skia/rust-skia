@@ -159,6 +159,7 @@ impl From<Box<dyn ResourceProvider>> for NativeResourceProvider {
 }
 
 /// A resource provider that loads only local / inline base64 resources.
+#[derive(Debug)]
 pub struct LocalResourceProvider {
     font_mgr: FontMgr,
 }
@@ -172,7 +173,22 @@ impl ResourceProvider for LocalResourceProvider {
     }
 
     fn load_typeface(&self, name: &str, url: &str) -> Option<Typeface> {
-        helpers::load_typeface_via_font_mgr(self, &self.font_mgr, name, url)
+        helpers::load_typeface(self, &self.font_mgr, name, url)
+    }
+}
+
+impl LocalResourceProvider {
+    pub fn new(font_mgr: impl Into<FontMgr>) -> Self {
+        Self {
+            font_mgr: font_mgr.into(),
+        }
+    }
+}
+
+/// Support a direct conversion from a [`FontMgr`] nito a local native resource provider.
+impl From<FontMgr> for NativeResourceProvider {
+    fn from(font_mgr: FontMgr) -> Self {
+        LocalResourceProvider::new(font_mgr).into()
     }
 }
 
@@ -212,7 +228,7 @@ impl ResourceProvider for UReqResourceProvider {
     }
 
     fn load_typeface(&self, name: &str, url: &str) -> Option<Typeface> {
-        helpers::load_typeface_via_font_mgr(self, &self.font_mgr, name, url)
+        helpers::load_typeface(self, &self.font_mgr, name, url)
     }
 }
 
@@ -222,7 +238,7 @@ pub mod helpers {
     use crate::{Data, FontMgr, FontStyle, Typeface};
 
     /// Load a typeface via the `load()` function and generate it using a `FontMgr` instance.
-    pub fn load_typeface_via_font_mgr(
+    pub fn load_typeface(
         provider: &dyn ResourceProvider,
         font_mgr: &FontMgr,
         name: &str,
@@ -301,5 +317,29 @@ pub mod helpers {
             &alphabet::STANDARD,
             GeneralPurposeConfig::new().with_decode_allow_trailing_bits(true),
         );
+    }
+
+    #[test]
+    fn decoding_base64() {
+        use std::str::from_utf8;
+
+        // padding length of 0-2 should be supported
+        assert_eq!("Hello", from_utf8(&decode_base64("SGVsbG8=")).unwrap());
+        assert_eq!("Hello!", from_utf8(&decode_base64("SGVsbG8h")).unwrap());
+        assert_eq!(
+            "Hello!!",
+            from_utf8(&decode_base64("SGVsbG8hIQ==")).unwrap()
+        );
+
+        // padding length of 3 is invalid
+        assert_eq!(0, decode_base64("SGVsbG8hIQ===").len());
+
+        // if input length divided by 4 gives a remainder of 1 after padding removal, it's invalid
+        assert_eq!(0, decode_base64("SGVsbG8hh").len());
+        assert_eq!(0, decode_base64("SGVsbG8hh=").len());
+        assert_eq!(0, decode_base64("SGVsbG8hh==").len());
+
+        // invalid characters in the input
+        assert_eq!(0, decode_base64("$GVsbG8h").len());
     }
 }
