@@ -1,6 +1,6 @@
 use std::{
     error::Error,
-    ffi::CStr,
+    ffi::{c_char, CStr},
     fmt,
     io::{self, Read},
     os::raw,
@@ -220,6 +220,46 @@ impl Dom {
             return Data::new_copy(result.as_slice());
         }
         Data::new_empty()
+    }
+
+    pub fn root(&self) -> DomSVG {
+        DomSVG::from_ptr(unsafe { sb::C_SkSVGDOM_getRoot(self.native()) }).unwrap()
+    }
+}
+
+pub type DomSVG = RCHandle<sb::SkSVGSVG>;
+require_base_type!(sb::SkSVGSVG, sb::SkRefCnt);
+unsafe_send_sync!(DomSVG);
+
+impl NativeRefCounted for sb::SkSVGSVG {
+    fn _ref(&self) {
+        unsafe { sb::C_SkSVGSVG_ref(self) }
+    }
+
+    fn _unref(&self) {
+        unsafe { sb::C_SkSVGSVG_unref(self) }
+    }
+
+    fn unique(&self) -> bool {
+        unsafe { sb::C_SkSVGSVG_unique(self) }
+    }
+}
+
+impl DomSVG {
+    pub fn intrinsic_size(&self) -> Size {
+        Size::from_native_c(unsafe { sb::C_SkSVGSVG_intrinsicSize(self.native()) })
+    }
+
+    pub fn set_attribute(&mut self, attribute: impl AsRef<str>, value: impl AsRef<str>) -> bool {
+        let attribute: &str = attribute.as_ref();
+        let value: &str = value.as_ref();
+        unsafe {
+            sb::C_SkSVGSVG_parseAndSetAttribute(
+                self.native_mut(),
+                attribute.as_ptr() as *const c_char,
+                value.as_ptr() as *const c_char,
+            )
+        }
     }
 }
 

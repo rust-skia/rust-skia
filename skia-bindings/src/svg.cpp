@@ -5,6 +5,8 @@
 
 #include "modules/svg/include/SkSVGDOM.h"
 #include "modules/svg/include/SkSVGNode.h"
+#include "modules/svg/include/SkSVGSVG.h"
+#include "modules/svg/include/SkSVGRenderContext.h"
 #include "modules/skresources/include/SkResources.h"
 
 #include "include/core/SkStream.h"
@@ -74,4 +76,29 @@ extern "C" bool C_SkSVGDOM_unique(const SkSVGDOM* self) {
 
 extern "C" void C_SkSVGDOM_setContainerSize(SkSVGDOM* self, const SkSize& size){
     self->setContainerSize(size);
+}
+
+extern "C" SkSVGSVG* C_SkSVGDOM_getRoot(const SkSVGDOM* self){
+    return self->getRoot();
+}
+
+
+extern "C" void C_SkSVGSVG_ref(const SkSVGSVG* self) {
+    self->ref();
+}
+
+extern "C" void C_SkSVGSVG_unref(const SkSVGSVG* self) {
+    self->unref();
+}
+
+extern "C" bool C_SkSVGSVG_unique(const SkSVGSVG* self) {
+    return self->unique();
+}
+
+extern "C" SkSize C_SkSVGSVG_intrinsicSize(const SkSVGSVG* self) {
+    return self->intrinsicSize(SkSVGLengthContext(SkSize::Make(0, 0)));
+}
+
+extern "C" bool C_SkSVGSVG_parseAndSetAttribute(SkSVGSVG* self, const char* name, const char* value){
+    return self->parseAndSetAttribute(name, value);
 }
