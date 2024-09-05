@@ -49,7 +49,11 @@ fn main() {
     let mgr = skia_safe::FontMgr::default();
     let dom: skia_safe::svg::Dom = skia_safe::svg::Dom::from_bytes(data.as_bytes(), mgr).unwrap();
 
-    dom.root();
-    // println!("{:?}", dom.root().set_attribute("width", "100"));
-    // println!("{:?}", dom.root().intrinsic_size());
+    println!("{:?}", dom.root().intrinsic_size());
+    println!("{:?}", dom.root().set_attribute("x", "50"));
+    println!("{:?}", dom.root().set_attribute("HEIGHT", "50"));
+    println!("{:?}", dom.root().set_attribute("Width", "50"));
+    println!("{:?}", dom.root().set_attribute("color", "red"));
+    println!("{:?}", dom.root().set_attribute("opacity", "5"));
+    println!("{:?}", dom.root().intrinsic_size());
 }

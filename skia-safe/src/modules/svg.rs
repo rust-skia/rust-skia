@@ -223,12 +223,12 @@ impl Dom {
     }
 
     pub fn root(&self) -> DomSVG {
-        DomSVG::from_ptr(unsafe { sb::C_SkSVGDOM_getRoot(self.native()) }).unwrap()
+        DomSVG::from_unshared_ptr(unsafe { sb::C_SkSVGDOM_getRoot(self.native()) }).unwrap()
     }
 }
 
 pub type DomSVG = RCHandle<sb::SkSVGSVG>;
-require_base_type!(sb::SkSVGSVG, sb::SkRefCnt);
+require_base_type!(sb::SkSVGSVG, sb::SkSVGContainer);
 unsafe_send_sync!(DomSVG);
 
 impl NativeRefCounted for sb::SkSVGSVG {
