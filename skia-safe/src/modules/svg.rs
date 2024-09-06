@@ -1,6 +1,6 @@
 use std::{
     error::Error,
-    ffi::{c_char, CStr},
+    ffi::{CStr, CString},
     fmt,
     io::{self, Read},
     os::raw,
@@ -251,15 +251,71 @@ impl DomSVG {
     }
 
     pub fn set_attribute(&mut self, attribute: impl AsRef<str>, value: impl AsRef<str>) -> bool {
-        let attribute: &str = attribute.as_ref();
-        let value: &str = value.as_ref();
+        let attribute = CString::new(attribute.as_ref()).unwrap();
+        let value = CString::new(value.as_ref()).unwrap();
         unsafe {
             sb::C_SkSVGSVG_parseAndSetAttribute(
                 self.native_mut(),
-                attribute.as_ptr() as *const c_char,
-                value.as_ptr() as *const c_char,
+                attribute.as_ptr(),
+                value.as_ptr(),
             )
         }
+    }
+
+    pub fn set_x(&mut self, x: DomSVGLength) {
+        unsafe {
+            sb::C_SkSVGSVG_setX(self.native_mut(), *x.native());
+        }
+    }
+
+    pub fn set_y(&mut self, y: DomSVGLength) {
+        unsafe {
+            sb::C_SkSVGSVG_setY(self.native_mut(), *y.native());
+        }
+    }
+
+    pub fn set_width(&mut self, width: DomSVGLength) {
+        unsafe {
+            sb::C_SkSVGSVG_setWidth(self.native_mut(), *width.native());
+        }
+    }
+
+    pub fn set_height(&mut self, height: DomSVGLength) {
+        unsafe {
+            sb::C_SkSVGSVG_setHeight(self.native_mut(), *height.native());
+        }
+    }
+}
+
+use crate::scalar;
+
+#[repr(C)]
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub enum SvgUnit {
+    Unknown,
+    Number,
+    Percentage,
+    EMS,
+    EXS,
+    PX,
+    CM,
+    MM,
+    IN,
+    PT,
+    PC,
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub struct DomSVGLength {
+    pub value: scalar,
+    pub unit: SvgUnit,
+}
+native_transmutable!(sb::SkSVGLength, DomSVGLength, svg_unit_length);
+
+impl DomSVGLength {
+    pub fn new(value: scalar, unit: SvgUnit) -> Self {
+        Self { value, unit }
     }
 }
 

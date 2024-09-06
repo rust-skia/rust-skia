@@ -50,10 +50,21 @@ fn main() {
     let dom: skia_safe::svg::Dom = skia_safe::svg::Dom::from_bytes(data.as_bytes(), mgr).unwrap();
 
     println!("{:?}", dom.root().intrinsic_size());
-    println!("{:?}", dom.root().set_attribute("x", "50"));
-    println!("{:?}", dom.root().set_attribute("HEIGHT", "50"));
-    println!("{:?}", dom.root().set_attribute("Width", "50"));
     println!("{:?}", dom.root().set_attribute("color", "red"));
     println!("{:?}", dom.root().set_attribute("opacity", "5"));
+    println!(
+        "{:?}",
+        dom.root().set_width(skia_safe::svg::DomSVGLength::new(
+            50.,
+            skia_safe::svg::SvgUnit::PX
+        ))
+    );
+    println!(
+        "{:?}",
+        dom.root().set_height(skia_safe::svg::DomSVGLength::new(
+            600.,
+            skia_safe::svg::SvgUnit::CM
+        ))
+    );
     println!("{:?}", dom.root().intrinsic_size());
 }

@@ -3,6 +3,8 @@
 #include "include/core/SkCanvas.h"
 #include "include/svg/SkSVGCanvas.h"
 
+
+#include "modules/svg/include/SkSVGTypes.h"
 #include "modules/svg/include/SkSVGDOM.h"
 #include "modules/svg/include/SkSVGNode.h"
 #include "modules/svg/include/SkSVGSVG.h"
@@ -101,4 +103,20 @@ extern "C" SkSize C_SkSVGSVG_intrinsicSize(const SkSVGSVG* self) {
 
 extern "C" bool C_SkSVGSVG_parseAndSetAttribute(SkSVGSVG* self, const char* name, const char* value){
     return self->parseAndSetAttribute(name, value);
+}
+
+extern "C" void C_SkSVGSVG_setX(SkSVGSVG* self, const SkSVGLength x){
+    return self->setX(x);
+}
+
+extern "C" void C_SkSVGSVG_setY(SkSVGSVG* self, const SkSVGLength y){
+    return self->setY(y);
+}
+
+extern "C" void C_SkSVGSVG_setWidth(SkSVGSVG* self, const SkSVGLength width){
+    return self->setWidth(width);
+}
+
+extern "C" void C_SkSVGSVG_setHeight(SkSVGSVG* self, const SkSVGLength height){
+    return self->setHeight(height);
 }
