@@ -12,7 +12,7 @@ use skia_bindings::{SkData, SkTypeface};
 use crate::{
     interop::{MemoryStream, NativeStreamBase, RustStream},
     prelude::*,
-    Canvas, Data, FontMgr, FontStyle, Size,
+    scalar, Canvas, Data, FontMgr, FontStyle, Size,
 };
 
 pub type Dom = RCHandle<sb::SkSVGDOM>;
@@ -286,8 +286,6 @@ impl DomSVG {
         }
     }
 }
-
-use crate::scalar;
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Debug)]
