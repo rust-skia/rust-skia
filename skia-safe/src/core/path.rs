@@ -4,7 +4,7 @@ use skia_bindings::{self as sb, SkPath, SkPath_Iter, SkPath_RawIter};
 
 use crate::{
     interop::DynamicMemoryWStream, matrix::ApplyPerspectiveClip, path_types, prelude::*, scalar,
-    Arc, Data, Matrix, PathDirection, PathFillType, Point, RRect, Rect, Vector,
+    Data, Matrix, PathDirection, PathFillType, Point, RRect, Rect, Vector,
 };
 
 #[deprecated(since = "0.25.0", note = "use PathDirection")]
@@ -620,19 +620,6 @@ impl Path {
     pub fn is_rrect(&self) -> Option<RRect> {
         let mut rrect = RRect::default();
         unsafe { self.native().isRRect(rrect.native_mut()) }.if_true_some(rrect)
-    }
-
-    ///  Returns `true` if path is representable as an oval arc. In other words, could this
-    ///  path be drawn using [`crate::Canvas::draw_arc`].
-    ///
-    ///  arc  receives parameters of arc
-    ///
-    /// * `arc` - storage for arc; may be `None`
-    ///
-    /// Returns: `true` if [`Path`] contains only a single arc from an oval
-    pub fn is_arc(&self) -> Option<Arc> {
-        let mut arc = Arc::default();
-        unsafe { self.native().isArc(arc.native_mut()) }.if_true_some(arc)
     }
 
     /// Sets [`Path`] to its initial state.
@@ -1611,25 +1598,6 @@ impl Path {
         unsafe {
             self.native_mut()
                 .addOval1(oval.as_ref().native(), dir, start.try_into().unwrap())
-        };
-        self
-    }
-
-    /// Experimental, subject to change or removal.
-    ///
-    /// Adds an "open" oval to [`Path`]. This follows canvas2D semantics: The oval is not
-    /// a separate contour. If the path was empty, then [`Verb::Move`] is appended. Otherwise,
-    /// [`Verb::Line`] is appended. Four [`Verb::Conic`] are appended. [`Verb::Close`] is not appended.
-    pub fn add_open_oval(
-        &mut self,
-        oval: impl AsRef<Rect>,
-        dir_start: Option<(PathDirection, usize)>,
-    ) -> &mut Self {
-        let dir = dir_start.map(|ds| ds.0).unwrap_or_default();
-        let start = dir_start.map(|ds| ds.1).unwrap_or_default();
-        unsafe {
-            self.native_mut()
-                .addOpenOval(oval.as_ref().native(), dir, start.try_into().unwrap())
         };
         self
     }

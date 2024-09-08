@@ -2,9 +2,8 @@ use crate::{prelude::*, BlendMode, NativeFlattenable};
 use skia_bindings::{self as sb, SkBlender, SkFlattenable, SkRefCntBase};
 use std::fmt;
 
-/// Blender represents a custom blend function in the Skia pipeline. When an Blender is present in a
-/// paint, the [`BlendMode`] is ignored. A blender combines a source color (the result of our paint)
-/// and destination color (from the canvas) into a final color.
+/// [`Blender`] represents a custom blend function in the Skia pipeline.  A blender combines a source
+/// color (the result of our paint) and destination color (from the canvas) into a final color.
 pub type Blender = RCHandle<SkBlender>;
 unsafe_send_sync!(Blender);
 require_base_type!(SkBlender, SkFlattenable);

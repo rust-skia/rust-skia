@@ -689,7 +689,7 @@ impl Bitmap {
     ///
     /// `src_x` and `src_y` may be negative to copy only top or left of source. Returns `false` if
     /// [`Self::width()`] or [`Self::height()`] is zero or negative. Returns `false` if `abs(src_x)`
-    /// >= [`Self::width()`], or if `abs(src_y)` >= [`Self::height()`].
+    /// `>=` [`Self::width()`], or if `abs(src_y) >=` [`Self::height()`].
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn read_pixels(
         &self,

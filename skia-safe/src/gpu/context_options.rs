@@ -132,6 +132,15 @@ pub struct ContextOptions {
     /// A value of -1 means we will pick a limit value internally.
     pub max_cached_vulkan_secondary_command_buffers: raw::c_int,
 
+    /// If Skia is creating a default VMA allocator for the Vulkan backend this value will be used
+    /// for the `preferred_large_heap_block_size`. If the value is not set, then Skia will use an
+    /// internally defined default size.
+    ///
+    /// However, it is highly discouraged to have Skia make a default allocator (and support for
+    /// doing so will be removed soon,  b/321962001). Instead clients should create their own
+    /// allocator to pass into Skia where they can fine tune this value themeselves.
+    vulkan_vma_large_heap_block_size: [u64; 2],
+
     /// If `true`, the caps will never support mipmaps.
     pub suppress_mipmap_support: bool,
 

@@ -141,13 +141,18 @@ pub mod color_filters {
         ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_Blend(c.into().into_native(), mode) })
     }
 
-    pub fn matrix(color_matrix: &ColorMatrix) -> ColorFilter {
-        ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_Matrix(color_matrix.native()) })
+    pub use sb::SkColorFilters_Clamp as Clamp;
+    variant_name!(Clamp::No);
+
+    pub fn matrix(color_matrix: &ColorMatrix, clamp: impl Into<Option<Clamp>>) -> ColorFilter {
+        let clamp = clamp.into().unwrap_or(Clamp::Yes);
+        ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_Matrix(color_matrix.native(), clamp) })
             .unwrap()
     }
 
-    pub fn matrix_row_major(array: &[scalar; 20]) -> ColorFilter {
-        ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_MatrixRowMajor(array.as_ptr()) })
+    pub fn matrix_row_major(array: &[scalar; 20], clamp: impl Into<Option<Clamp>>) -> ColorFilter {
+        let clamp = clamp.into().unwrap_or(Clamp::Yes);
+        ColorFilter::from_ptr(unsafe { sb::C_SkColorFilters_MatrixRowMajor(array.as_ptr(), clamp) })
             .unwrap()
     }
 

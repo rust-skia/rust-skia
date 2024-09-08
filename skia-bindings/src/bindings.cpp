@@ -24,6 +24,7 @@
 
 // core/
 #include "include/core/SkAnnotation.h"
+#include "include/core/SkArc.h"
 #include "include/core/SkBlendMode.h"
 #include "include/core/SkBitmap.h"
 #include "include/core/SkBlurTypes.h"
@@ -288,7 +289,7 @@ extern "C" void C_SkPixmapUtils_SwapWidthHeight(SkImageInfo* uninitialized, cons
 //
 
 extern "C" void C_Core_Types(
-    SkGraphics *, SkCoverageMode *, SkColorChannelFlag *, SkSurfaces::BackendSurfaceAccess) {};
+    SkArc *, SkGraphics *, SkCoverageMode *, SkColorChannelFlag *, SkSurfaces::BackendSurfaceAccess) {};
 
 //
 // core/SkBlender.h
@@ -1814,12 +1815,12 @@ extern "C" SkColorFilter* C_SkColorFilters_Blend(const SkColor c, SkBlendMode bl
 }
 
 
-extern "C" SkColorFilter* C_SkColorFilters_Matrix(const SkColorMatrix* colorMatrix) {
-    return SkColorFilters::Matrix(*colorMatrix).release();
+extern "C" SkColorFilter* C_SkColorFilters_Matrix(const SkColorMatrix* colorMatrix, SkColorFilters::Clamp clamp) {
+    return SkColorFilters::Matrix(*colorMatrix, clamp).release();
 }
 
-extern "C" SkColorFilter* C_SkColorFilters_MatrixRowMajor(const SkScalar array[20]) {
-    return SkColorFilters::Matrix(array).release();
+extern "C" SkColorFilter* C_SkColorFilters_MatrixRowMajor(const SkScalar array[20], SkColorFilters::Clamp clamp) {
+    return SkColorFilters::Matrix(array, clamp).release();
 }
 
 extern "C" SkColorFilter* C_SkColorFilters_HSLAMatrixOfColorMatrix(const SkColorMatrix& colorMatrix) {
@@ -2714,16 +2715,16 @@ SkImageFilter *C_SkImageFilters_DisplacementMap(SkColorChannel xChannelSelector,
 
 SkImageFilter *C_SkImageFilters_DropShadow(SkScalar dx, SkScalar dy,
                                            SkScalar sigmaX, SkScalar sigmaY,
-                                           SkColor color, SkImageFilter *input,
+                                           SkColor4f color, SkColorSpace *colorSpace, SkImageFilter *input,
                                            const SkRect *cropRect) {
-    return SkImageFilters::DropShadow(dx, dy, sigmaX, sigmaY, color, sp(input), cropRect).release();
+    return SkImageFilters::DropShadow(dx, dy, sigmaX, sigmaY, color, sp(colorSpace), sp(input), cropRect).release();
 }
 
 SkImageFilter *C_SkImageFilters_DropShadowOnly(SkScalar dx, SkScalar dy,
                                                SkScalar sigmaX, SkScalar sigmaY,
-                                               SkColor color, SkImageFilter *input,
+                                               SkColor4f color, SkColorSpace* colorSpace, SkImageFilter *input,
                                                const SkRect *cropRect) {
-    return SkImageFilters::DropShadowOnly(dx, dy, sigmaX, sigmaY, color, sp(input), cropRect).release();
+    return SkImageFilters::DropShadowOnly(dx, dy, sigmaX, sigmaY, color, sp(colorSpace), sp(input), cropRect).release();
 }
 
 SkImageFilter* C_SkImageFilters_Empty() {

@@ -749,7 +749,9 @@ impl Surface {
     /// Copies each readable pixel intersecting both rectangles, without scaling,
     /// converting to `dst_color_type()` and `dst_alpha_type()` if required.
     ///
-    /// Pixels are readable when [`Surface`] is raster, or backed by a GPU.
+    /// Pixels are readable when [`Surface`] is raster, or backed by a Ganesh GPU backend. Graphite
+    /// has deprecated this API in favor of the equivalent asynchronous API on
+    /// `skgpu::graphite::Context` (with an optional explicit synchonization).
     ///
     /// The destination pixel storage must be allocated by the caller.
     ///
@@ -783,7 +785,9 @@ impl Surface {
     /// Copies each readable pixel intersecting both rectangles, without scaling,
     /// converting to `dst_info_color_type()` and `dst_info_alpha_type()` if required.
     ///
-    /// Pixels are readable when [`Surface`] is raster, or backed by a GPU.
+    /// Pixels are readable when [`Surface`] is raster, or backed by a Ganesh GPU backend. Graphite
+    /// has deprecated this API in favor of the equivalent asynchronous API on
+    /// `skgpu::graphite::Context` (with an optional explicit synchonization).
     ///
     /// The destination pixel storage must be allocated by the caller.
     ///
@@ -837,7 +841,9 @@ impl Surface {
     /// Copies each readable pixel intersecting both rectangles, without scaling,
     /// converting to `bitmap.color_type()` and `bitmap.alpha_type()` if required.
     ///
-    /// Pixels are readable when [`Surface`] is raster, or backed by a GPU.
+    /// Pixels are readable when [`Surface`] is raster, or backed by a Ganesh GPU backend. Graphite
+    /// has deprecated this API in favor of the equivalent asynchronous API on
+    /// `skgpu::graphite::Context` (with an optional explicit synchonization).
     ///
     /// The destination pixel storage must be allocated by the caller.
     ///
