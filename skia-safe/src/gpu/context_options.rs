@@ -134,7 +134,7 @@ pub struct ContextOptions {
 
     /// If Skia is creating a default VMA allocator for the Vulkan backend this value will be used
     /// for the `preferred_large_heap_block_size`. If the value is not set, then Skia will use an
-    /// inernally defined default size.
+    /// internally defined default size.
     ///
     /// However, it is highly discouraged to have Skia make a default allocator (and support for
     /// doing so will be removed soon,  b/321962001). Instead clients should create their own
