@@ -39,6 +39,8 @@ pub struct Options {
     pub prior_frame: Option<usize>,
 }
 
+pub const NO_FRAME: i32 = sb::SkCodec_kNoFrame;
+
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct FrameInfo {

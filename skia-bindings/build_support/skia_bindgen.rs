@@ -698,6 +698,8 @@ const ENUM_REWRITES: &[EnumEntry] = &[
     // m118:
     ("GrPurgeResourceOptions", rewrite::k_xxx),
     ("GrSyncCpu", rewrite::k_xxx),
+    // m129:
+    ("Clamp", rewrite::k_xxx), // SkColorFilters
 ];
 
 pub(crate) mod rewrite {

@@ -1815,12 +1815,12 @@ extern "C" SkColorFilter* C_SkColorFilters_Blend(const SkColor c, SkBlendMode bl
 }
 
 
-extern "C" SkColorFilter* C_SkColorFilters_Matrix(const SkColorMatrix* colorMatrix) {
-    return SkColorFilters::Matrix(*colorMatrix).release();
+extern "C" SkColorFilter* C_SkColorFilters_Matrix(const SkColorMatrix* colorMatrix, SkColorFilters::Clamp clamp) {
+    return SkColorFilters::Matrix(*colorMatrix, clamp).release();
 }
 
-extern "C" SkColorFilter* C_SkColorFilters_MatrixRowMajor(const SkScalar array[20]) {
-    return SkColorFilters::Matrix(array).release();
+extern "C" SkColorFilter* C_SkColorFilters_MatrixRowMajor(const SkScalar array[20], SkColorFilters::Clamp clamp) {
+    return SkColorFilters::Matrix(array, clamp).release();
 }
 
 extern "C" SkColorFilter* C_SkColorFilters_HSLAMatrixOfColorMatrix(const SkColorMatrix& colorMatrix) {

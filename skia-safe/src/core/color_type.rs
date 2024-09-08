@@ -40,6 +40,8 @@ pub enum ColorType {
     RGBAF16Norm = SkColorType::kRGBA_F16Norm_SkColorType as _,
     /// pixel with half floats for red, green, blue, alpha in 64-bit word
     RGBAF16 = SkColorType::kRGBA_F16_SkColorType as _,
+    /// pixel with half floats for red, green, blue; in 64-bit word
+    RGBF16F16F16x = SkColorType::kRGB_F16F16F16x_SkColorType as _,
     /// pixel using C float for red, green, blue, alpha; in 128-bit word
     RGBAF32 = SkColorType::kRGBA_F32_SkColorType as _,
 

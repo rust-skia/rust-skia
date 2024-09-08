@@ -1028,6 +1028,9 @@ impl Image {
     /// Copies [`crate::Rect`] of pixels from [`Image`] to `dst_pixels`. Copy starts at offset (`src_x`, `src_y`),
     /// and does not exceed [`Image`] (width(), height()).
     ///
+    /// Graphite has deprecated this API in favor of the equivalent asynchronous API on
+    /// `skgpu::graphite::Context` (with an optional explicit synchonization).
+    ///
     /// `dst_info` specifies width, height, [`ColorType`], [`AlphaType`], and [`ColorSpace`] of
     /// destination. `dst_row_bytes` specifies the gap from one destination row to the next.
     /// Returns `true` if pixels are copied. Returns `false` if:
@@ -1089,6 +1092,9 @@ impl Image {
 
     /// Copies a [`crate::Rect`] of pixels from [`Image`] to dst. Copy starts at (`src_x`, `src_y`), and
     /// does not exceed [`Image`] (width(), height()).
+    ///
+    /// Graphite has deprecated this API in favor of the equivalent asynchronous API on
+    /// `skgpu::graphite::Context` (with an optional explicit synchonization).
     ///
     /// dst specifies width, height, [`ColorType`], [`AlphaType`], [`ColorSpace`], pixel storage,
     /// and row bytes of destination. dst.`row_bytes()` specifics the gap from one destination
