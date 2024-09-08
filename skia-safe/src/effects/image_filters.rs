@@ -3,9 +3,9 @@ use std::ptr;
 use skia_bindings::{self as sb, SkImageFilter, SkRect};
 
 use crate::{
-    prelude::*, scalar, Blender, Color, ColorChannel, ColorFilter, CubicResampler, IPoint, IRect,
-    ISize, Image, ImageFilter, Matrix, Picture, Point3, Rect, SamplingOptions, Shader, TileMode,
-    Vector,
+    prelude::*, scalar, Blender, Color, Color4f, ColorChannel, ColorFilter, ColorSpace,
+    CubicResampler, IPoint, IRect, ISize, Image, ImageFilter, Matrix, Picture, Point3, Rect,
+    SamplingOptions, Shader, TileMode, Vector,
 };
 
 /// This is just a convenience type to allow passing [`IRect`]s, [`Rect`]s, and optional references
@@ -234,12 +234,14 @@ pub fn displacement_map(
 /// * `sigma_x` - The blur radius for the shadow, along the X axis.
 /// * `sigma_y` - The blur radius for the shadow, along the Y axis.
 /// * `color` - The color of the drop shadow.
+/// * `color_space` - The color space of the drop shadow color.
 /// * `input` - The input filter, or will use the source bitmap if this is null.
 /// * `crop_rect` - Optional rectangle that crops the input and output.
 pub fn drop_shadow(
     offset: impl Into<Vector>,
     (sigma_x, sigma_y): (scalar, scalar),
-    color: impl Into<Color>,
+    color: impl Into<Color4f>,
+    color_space: impl Into<Option<ColorSpace>>,
     input: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<CropRect>,
 ) -> Option<ImageFilter> {
@@ -252,6 +254,7 @@ pub fn drop_shadow(
             sigma_x,
             sigma_y,
             color.into_native(),
+            color_space.into().into_ptr_or_null(),
             input.into().into_ptr_or_null(),
             crop_rect.into().native(),
         )
@@ -265,12 +268,14 @@ pub fn drop_shadow(
 /// * `sigma_x` - The blur radius for the shadow, along the X axis.
 /// * `sigma_y` - The blur radius for the shadow, along the Y axis.
 /// * `color` - The color of the drop shadow.
+/// * `color_space` - The color space of the drop shadow color.
 /// * `input` - The input filter, or will use the source bitmap if this is null.
 /// * `crop_rect` - Optional rectangle that crops the input and output.
 pub fn drop_shadow_only(
     offset: impl Into<Vector>,
     (sigma_x, sigma_y): (scalar, scalar),
-    color: impl Into<Color>,
+    color: impl Into<Color4f>,
+    color_space: impl Into<Option<ColorSpace>>,
     input: impl Into<Option<ImageFilter>>,
     crop_rect: impl Into<CropRect>,
 ) -> Option<ImageFilter> {
@@ -283,6 +288,7 @@ pub fn drop_shadow_only(
             sigma_x,
             sigma_y,
             color.into_native(),
+            color_space.into().into_ptr_or_null(),
             input.into().into_ptr_or_null(),
             crop_rect.into().native(),
         )
