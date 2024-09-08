@@ -44,6 +44,11 @@ impl PlatformDetails for Msvc {
             }
         }
 
+        // Disable `[[clang::trivial_abi]]` because it leads to ABI mismatches if the
+        // bindings are compiled with a compiler other than clang (e.g. MSVC).
+        // (see <https://groups.google.com/g/skia-discuss/c/3rpeWuPcD9Y/m/CySLakaTAAAJ>)
+        builder.arg("is_trivial_abi", no());
+
         // Code on MSVC needs to be compiled differently (e.g. with /MT or /MD)
         // depending on the runtime being linked. (See
         // <https://doc.rust-lang.org/reference/linkage.html#static-and-dynamic-c-runtimes>)
