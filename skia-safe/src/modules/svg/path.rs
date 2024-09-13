@@ -6,19 +6,8 @@ use skia_bindings as sb;
 
 pub type SvgPath = RCHandle<sb::SkSVGPath>;
 
-impl NativeBase<sb::SkRefCnt> for sb::SkSVGPath {}
-impl NativeRefCounted for sb::SkSVGPath {
-    fn _ref(&self) {
-        self.base()._base._ref();
-    }
-
-    fn _unref(&self) {
-        self.base()._base._unref();
-    }
-
-    fn unique(&self) -> bool {
-        self.base()._base.unique()
-    }
+impl NativeRefCountedBase for sb::SkSVGPath {
+    type Base = sb::SkRefCntBase;
 }
 
 impl fmt::Debug for SvgPath {

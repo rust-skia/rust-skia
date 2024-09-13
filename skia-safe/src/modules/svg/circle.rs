@@ -6,19 +6,8 @@ use skia_bindings as sb;
 
 pub type SvgCircle = RCHandle<sb::SkSVGCircle>;
 
-impl NativeBase<sb::SkRefCnt> for sb::SkSVGCircle {}
-impl NativeRefCounted for sb::SkSVGCircle {
-    fn _ref(&self) {
-        self.base()._base._ref();
-    }
-
-    fn _unref(&self) {
-        self.base()._base._unref();
-    }
-
-    fn unique(&self) -> bool {
-        self.base()._base.unique()
-    }
+impl NativeRefCountedBase for sb::SkSVGCircle {
+    type Base = sb::SkRefCntBase;
 }
 
 impl fmt::Debug for SvgCircle {

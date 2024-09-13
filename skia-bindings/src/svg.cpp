@@ -132,15 +132,6 @@ extern "C" void C_SkSVGTypes(
     SkSVGValue*
 ) {};
 
-#define IMPL_REF_COUNTED(name)                                                 \
-extern "C" void C_##name##_ref(const name* self) { self->ref(); }              \
-extern "C" void C_##name##_unref(const name* self) { self->unref(); }          \
-extern "C" bool C_##name##_unique(const name* self) { return self->unique(); } \
-
-IMPL_REF_COUNTED(SkSVGNode);
-IMPL_REF_COUNTED(SkSVGSVG);
-IMPL_REF_COUNTED(SkRefCnt);
-
 extern "C" SkSize C_SkSVGSVG_intrinsicSize(const SkSVGSVG* self) {
     return self->intrinsicSize(SkSVGLengthContext(SkSize::Make(0, 0)));
 }
@@ -395,6 +386,7 @@ extern "C" void C_SkSVGColor_Color(SkSVGColor* uninitialized, const SkSVGColorTy
     new(uninitialized)SkSVGColor(color);
 }
 
+// Hacky way to access the SkSVGContainer::fChildren property (should be safe)
 class SkSVGContainerAccessor : public SkSVGSVG {
     public:
         bool hasChild() const {
@@ -405,12 +397,8 @@ class SkSVGContainerAccessor : public SkSVGSVG {
             return fChildren.size();
         }
 
-        skia_private::TArray<sk_sp<SkSVGNode>> children() const {
-            for (const auto& child : fChildren) {
-                printf("Hi???: %d \n", static_cast<int>(child->tag()));
-            }
-
-            return fChildren;
+        const sk_sp<SkSVGNode>* children() const {
+            return fChildren.data();
         }
 };
 
@@ -426,10 +414,9 @@ extern "C" int C_SkSVGSVG_childrenCount(const SkSVGSVG& self) {
     return static_cast<const SkSVGContainerAccessor&>(self).childrenCount();
 }
 
-extern "C" void C_SkSVGSVG_children(const SkSVGSVG& self, VecSink<sk_sp<SkSVGNode>>* vs) {
-    auto children = static_cast<const SkSVGContainerAccessor&>(self).children();
-
-    vs->set(children.data(), children.size());
+// Getting mutable child references from a non-mutable reference seems unsafe, perhaps we should split this into two methods?
+extern "C" const sk_sp<SkSVGNode>* C_SkSVGSVG_children(const SkSVGSVG& self) {
+    return static_cast<const SkSVGContainerAccessor&>(self).children();
 }
 
 extern "C" SkSVGTag C_SkSVGNode_tag(const SkSVGNode& self) {

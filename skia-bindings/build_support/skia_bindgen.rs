@@ -739,7 +739,8 @@ pub(crate) mod rewrite {
             capture(name, variant, "k(.*)")
         };
 
-        if value.parse::<usize>().is_ok() { // it's a FontWeight::Type
+        if value.parse::<usize>().is_ok() {
+            // it's a FontWeight::Type
             format!("W{value}") // W(eight)
         } else {
             value

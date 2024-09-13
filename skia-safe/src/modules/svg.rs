@@ -234,7 +234,8 @@ impl Dom {
     }
 
     pub fn root(&self) -> SvgSpecNode<Svg, sb::SkSVGSVG> {
-        SvgSpecNode::from_unshared_ptr(unsafe { sb::C_SkSVGDOM_getRoot(self.native()) as *mut _ }).unwrap()
+        SvgSpecNode::from_unshared_ptr(unsafe { sb::C_SkSVGDOM_getRoot(self.native()) as *mut _ })
+            .unwrap()
     }
 }
 

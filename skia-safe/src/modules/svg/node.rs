@@ -49,20 +49,9 @@ pub type NodeTag = sb::SkSVGTag;
 type SkSvgNode = RCHandle<sb::SkSVGNode>;
 
 require_base_type!(sb::SkSVGSVG, sb::SkSVGContainer);
-unsafe_send_sync!(SkSvgNode);
 
-impl NativeRefCounted for sb::SkSVGNode {
-    fn _ref(&self) {
-        unsafe { sb::C_SkSVGNode_ref(self) }
-    }
-
-    fn _unref(&self) {
-        unsafe { sb::C_SkSVGNode_unref(self) }
-    }
-
-    fn unique(&self) -> bool {
-        unsafe { sb::C_SkSVGNode_unique(self) }
-    }
+impl NativeRefCountedBase for sb::SkSVGNode {
+    type Base = sb::SkRefCntBase;
 }
 
 pub struct SvgNode {
@@ -112,6 +101,7 @@ impl fmt::Debug for SvgNode {
     }
 }
 
+/// TODO: Implement bindings for the remaining classes that inherit SkSVGNode
 impl SvgNode {
     pub fn from_ptr(ptr: *mut sb::SkSVGNode) -> Option<Self> {
         let node = SkSvgNode::from_ptr(ptr)?;
@@ -245,23 +235,6 @@ impl SvgNode {
         self.node.into_ptr()
     }
 
-    // pub fn intrinsic_size(&self) -> Size {
-    //     Size::from_native_c(unsafe { sb::C_SkSVGSVG_intrinsicSize(self.native()) })
-    // }
-
-    // pub fn set_attribute(&mut self, attribute: impl AsRef<str>, value: impl AsRef<str>) -> bool {
-    //     let attribute = CString::new(attribute.as_ref()).unwrap();
-    //     let value = CString::new(value.as_ref()).unwrap();
-
-    //     unsafe {
-    //         sb::C_SkSVGSVG_parseAndSetAttribute(
-    //             self.native_mut(),
-    //             attribute.as_ptr(),
-    //             value.as_ptr(),
-    //         )
-    //     }
-    // }
-
     pub fn attributes(&self) -> &NodeAttributes {
         &self.attributes
     }
@@ -312,6 +285,7 @@ impl SvgNode {
     }
 }
 
+/// TODO: It looks pretty dirty. Perhaps there are ways of a cleaner implementation?
 pub struct SvgSpecNode<T: AsTag<N>, N> {
     node: SkSvgNode,
     tag: NodeTag,
@@ -396,23 +370,6 @@ impl<N: NativeRefCounted, T: AsTag<N>> SvgSpecNode<T, N> {
     pub fn into_ptr(self) -> *mut sb::SkSVGNode {
         self.node.into_ptr()
     }
-
-    // pub fn intrinsic_size(&self) -> Size {
-    //     Size::from_native_c(unsafe { sb::C_SkSVGSVG_intrinsicSize(self.native()) })
-    // }
-
-    // pub fn set_attribute(&mut self, attribute: impl AsRef<str>, value: impl AsRef<str>) -> bool {
-    //     let attribute = CString::new(attribute.as_ref()).unwrap();
-    //     let value = CString::new(value.as_ref()).unwrap();
-
-    //     unsafe {
-    //         sb::C_SkSVGSVG_parseAndSetAttribute(
-    //             self.native_mut(),
-    //             attribute.as_ptr(),
-    //             value.as_ptr(),
-    //         )
-    //     }
-    // }
 
     pub fn tag(&self) -> NodeTag {
         self.tag

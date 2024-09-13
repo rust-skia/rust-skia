@@ -6,19 +6,8 @@ use skia_bindings as sb;
 
 pub type SvgTextLiteral = RCHandle<sb::SkSVGTextLiteral>;
 
-impl NativeBase<sb::SkRefCnt> for sb::SkSVGTextLiteral {}
-impl NativeRefCounted for sb::SkSVGTextLiteral {
-    fn _ref(&self) {
-        self.base()._base._ref();
-    }
-
-    fn _unref(&self) {
-        self.base()._base._unref();
-    }
-
-    fn unique(&self) -> bool {
-        self.base()._base.unique()
-    }
+impl NativeRefCountedBase for sb::SkSVGTextLiteral {
+    type Base = sb::SkRefCntBase;
 }
 
 impl fmt::Debug for SvgTextLiteral {
