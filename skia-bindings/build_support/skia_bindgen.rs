@@ -465,10 +465,6 @@ const BLOCKLISTED_TYPES: &[&str] = &[
     // Linux LLVM9 c++17 with SKIA_DEBUG=1
     "std::__cxx.*",
     "std::array.*",
-    // These two are not used with feature `svg` and conflict with the `Type` rewriter that would
-    // create invalid identifiers.
-    "SkSVGFontWeight",
-    "SkSVGFontWeight_Type",
     // m115 unused Linux
     "std::__uset_hashtable.*",
     "std::unordered_set.*",
@@ -548,6 +544,15 @@ const ENUM_REWRITES: &[EnumEntry] = &[
     ("SkPathVerb", rewrite::k_xxx),
     ("SkPathOp", rewrite::k_xxx_name),
     ("SkTileMode", rewrite::k_xxx),
+    // svg/
+    ("Unit", rewrite::k_xxx),
+    ("Scale", rewrite::k_xxx),
+    ("SkSVGLineCap", rewrite::k_xxx),
+    ("SkSVGColorspace", rewrite::k_xxx),
+    ("SkSVGDisplay", rewrite::k_xxx),
+    ("SkSVGAttribute", rewrite::k_xxx),
+    ("SkSVGTag", rewrite::k_xxx),
+    ("LengthType", rewrite::k_xxx),
     // SkPaint_Style
     // SkStrokeRec_Style
     // SkPath1DPathEffect_Style
@@ -728,10 +733,16 @@ pub(crate) mod rewrite {
 
     pub fn k_xxx_name_opt(name: &str, variant: &str) -> String {
         let suffix = &format!("_{name}");
-        if variant.ends_with(suffix) {
+        let value = if variant.ends_with(suffix) {
             capture(name, variant, &format!("k(.*){suffix}"))
         } else {
             capture(name, variant, "k(.*)")
+        };
+
+        if value.parse::<usize>().is_ok() { // it's a FontWeight::Type
+            format!("W{value}") // W(eight)
+        } else {
+            value
         }
     }
 

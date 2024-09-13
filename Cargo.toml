@@ -5,11 +5,11 @@ members = [
     "skia-safe",
     "skia-org",
     "mk-workflows",
-    "comment-converter"
+    "comment-converter",
+    "skia-macros",
 ]
 
 [profile.release]
 # We want to build skia-org with with lto="thin"
 # https://github.com/rust-skia/rust-skia/issues/565
 lto = "thin"
-

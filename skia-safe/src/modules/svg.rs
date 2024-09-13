@@ -1,21 +1,32 @@
+mod circle;
+mod color;
+mod font;
+mod iri;
+mod node;
+mod paint;
+mod path;
+mod svg;
+mod text;
+
+pub use self::{color::*, font::*, iri::*, node::*, paint::*};
+use crate::{
+    interop::{MemoryStream, NativeStreamBase, RustStream},
+    prelude::*,
+    Canvas, Data, FontMgr, FontStyle, Size,
+};
+use skia_bindings as sb;
+use skia_bindings::{SkData, SkTypeface};
 use std::{
     error::Error,
-    ffi::{CStr, CString},
+    ffi::CStr,
     fmt,
     io::{self, Read},
     os::raw,
 };
-
-use skia_bindings as sb;
-use skia_bindings::{SkData, SkTypeface};
-
-use crate::{
-    interop::{MemoryStream, NativeStreamBase, RustStream},
-    prelude::*,
-    scalar, Canvas, Data, FontMgr, FontStyle, Size,
-};
+use svg::Svg;
 
 pub type Dom = RCHandle<sb::SkSVGDOM>;
+
 require_base_type!(sb::SkSVGDOM, sb::SkRefCnt);
 unsafe_send_sync!(Dom);
 
@@ -222,98 +233,8 @@ impl Dom {
         Data::new_empty()
     }
 
-    pub fn root(&self) -> DomSVG {
-        DomSVG::from_unshared_ptr(unsafe { sb::C_SkSVGDOM_getRoot(self.native()) }).unwrap()
-    }
-}
-
-pub type DomSVG = RCHandle<sb::SkSVGSVG>;
-require_base_type!(sb::SkSVGSVG, sb::SkSVGContainer);
-unsafe_send_sync!(DomSVG);
-
-impl NativeRefCounted for sb::SkSVGSVG {
-    fn _ref(&self) {
-        unsafe { sb::C_SkSVGSVG_ref(self) }
-    }
-
-    fn _unref(&self) {
-        unsafe { sb::C_SkSVGSVG_unref(self) }
-    }
-
-    fn unique(&self) -> bool {
-        unsafe { sb::C_SkSVGSVG_unique(self) }
-    }
-}
-
-impl DomSVG {
-    pub fn intrinsic_size(&self) -> Size {
-        Size::from_native_c(unsafe { sb::C_SkSVGSVG_intrinsicSize(self.native()) })
-    }
-
-    pub fn set_attribute(&mut self, attribute: impl AsRef<str>, value: impl AsRef<str>) -> bool {
-        let attribute = CString::new(attribute.as_ref()).unwrap();
-        let value = CString::new(value.as_ref()).unwrap();
-        unsafe {
-            sb::C_SkSVGSVG_parseAndSetAttribute(
-                self.native_mut(),
-                attribute.as_ptr(),
-                value.as_ptr(),
-            )
-        }
-    }
-
-    pub fn set_x(&mut self, x: DomSVGLength) {
-        unsafe {
-            sb::C_SkSVGSVG_setX(self.native_mut(), *x.native());
-        }
-    }
-
-    pub fn set_y(&mut self, y: DomSVGLength) {
-        unsafe {
-            sb::C_SkSVGSVG_setY(self.native_mut(), *y.native());
-        }
-    }
-
-    pub fn set_width(&mut self, width: DomSVGLength) {
-        unsafe {
-            sb::C_SkSVGSVG_setWidth(self.native_mut(), *width.native());
-        }
-    }
-
-    pub fn set_height(&mut self, height: DomSVGLength) {
-        unsafe {
-            sb::C_SkSVGSVG_setHeight(self.native_mut(), *height.native());
-        }
-    }
-}
-
-#[repr(C)]
-#[derive(Copy, Clone, PartialEq, Debug)]
-pub enum SvgUnit {
-    Unknown,
-    Number,
-    Percentage,
-    EMS,
-    EXS,
-    PX,
-    CM,
-    MM,
-    IN,
-    PT,
-    PC,
-}
-
-#[repr(C)]
-#[derive(Copy, Clone, PartialEq, Debug)]
-pub struct DomSVGLength {
-    pub value: scalar,
-    pub unit: SvgUnit,
-}
-native_transmutable!(sb::SkSVGLength, DomSVGLength, svg_unit_length);
-
-impl DomSVGLength {
-    pub fn new(value: scalar, unit: SvgUnit) -> Self {
-        Self { value, unit }
+    pub fn root(&self) -> SvgSpecNode<Svg, sb::SkSVGSVG> {
+        SvgSpecNode::from_unshared_ptr(unsafe { sb::C_SkSVGDOM_getRoot(self.native()) as *mut _ }).unwrap()
     }
 }
 
