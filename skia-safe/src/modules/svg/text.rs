@@ -1,6 +1,6 @@
 use std::fmt;
 
-use super::{NodeTag, SvgNode, Tagged};
+use super::{NodeTag, Tagged};
 use crate::prelude::*;
 use skia_bindings as sb;
 

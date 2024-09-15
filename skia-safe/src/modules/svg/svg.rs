@@ -1,7 +1,7 @@
 use std::fmt;
 
 use super::{node::SvgLength, NodeTag, SvgNode, Tagged};
-use crate::{interop::VecSink, prelude::*, Rect};
+use crate::{prelude::*, Rect};
 use skia_bindings as sb;
 
 pub type Svg = RCHandle<sb::SkSVGSVG>;
@@ -38,18 +38,15 @@ impl Svg {
 
     pub fn children(&self) -> Vec<SvgNode> {
         unsafe {
-            let mut r: Vec<_> = Vec::new();
-            let mut set = |nodes: &[sb::sk_sp<sb::SkSVGNode>]| {
-                r = nodes
-                    .into_iter()
-                    .map(|value| SvgNode::from_unshared_ptr(value.fPtr))
-                    .flatten()
-                    .collect()
-            };
+            let value = safer::from_raw_parts(
+                sb::C_SkSVGSVG_children(self.native()),
+                self.children_count(),
+            );
 
-            sb::C_SkSVGSVG_children(self.native(), VecSink::new(&mut set).native_mut());
-
-            r
+            value
+                .into_iter()
+                .map(|value| SvgNode::from_unshared_ptr(value.fPtr).unwrap_unchecked())
+                .collect()
         }
     }
 
