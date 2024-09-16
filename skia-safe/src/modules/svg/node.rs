@@ -1,11 +1,11 @@
 use super::{
     circle::SvgCircle,
     color::SvgColor,
+    element::Svg,
     font::{SvgFontFamily, SvgFontSize, SvgFontStyle, SvgFontWeight},
     iri::SvgIriFunc,
     paint::SvgPaint,
     path::SvgPath,
-    svg::Svg,
     text::SvgTextLiteral,
 };
 use crate::{prelude::*, scalar, Color};

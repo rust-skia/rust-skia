@@ -1,11 +1,11 @@
 mod circle;
 mod color;
+mod element;
 mod font;
 mod iri;
 mod node;
 mod paint;
 mod path;
-mod svg;
 mod text;
 
 pub use self::{color::*, font::*, iri::*, node::*, paint::*};
@@ -14,6 +14,7 @@ use crate::{
     prelude::*,
     Canvas, Data, FontMgr, FontStyle, Size,
 };
+use element::Svg;
 use skia_bindings as sb;
 use skia_bindings::{SkData, SkTypeface};
 use std::{
@@ -23,7 +24,6 @@ use std::{
     io::{self, Read},
     os::raw,
 };
-use svg::Svg;
 
 pub type Dom = RCHandle<sb::SkSVGDOM>;
 

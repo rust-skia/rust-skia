@@ -48,23 +48,26 @@ fn main() {
 
     let mgr = skia_safe::FontMgr::default();
     let dom: skia_safe::svg::Dom = skia_safe::svg::Dom::from_bytes(data.as_bytes(), mgr).unwrap();
+    let mut root = dom.root();
 
-    println!("{:?}", dom.root().intrinsic_size());
-    println!("{:?}", dom.root().set_attribute("color", "red"));
-    println!("{:?}", dom.root().set_attribute("opacity", "5"));
+    // println!("{:?}", dom.attributes().intrinsic_size());
+    // println!("{:?}", dom.attributes().set_attribute("color", "red"));
+    // println!("{:?}", dom.attributes().set_attribute("opacity", "5"));
     println!(
         "{:?}",
-        dom.root().set_width(skia_safe::svg::DomSVGLength::new(
-            50.,
-            skia_safe::svg::SvgUnit::PX
-        ))
+        root.attributes_mut()
+            .set_width(skia_safe::svg::SvgLength::new(
+                50.,
+                skia_safe::svg::SvgUnit::PX
+            ))
     );
     println!(
         "{:?}",
-        dom.root().set_height(skia_safe::svg::DomSVGLength::new(
-            600.,
-            skia_safe::svg::SvgUnit::CM
-        ))
+        root.attributes_mut()
+            .set_height(skia_safe::svg::SvgLength::new(
+                600.,
+                skia_safe::svg::SvgUnit::CM
+            ))
     );
-    println!("{:?}", dom.root().intrinsic_size());
+    // println!("{:?}", dom.root().intrinsic_size());
 }

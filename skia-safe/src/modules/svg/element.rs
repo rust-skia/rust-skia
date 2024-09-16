@@ -44,7 +44,7 @@ impl Svg {
             );
 
             value
-                .into_iter()
+                .iter()
                 .map(|value| SvgNode::from_unshared_ptr(value.fPtr).unwrap_unchecked())
                 .collect()
         }

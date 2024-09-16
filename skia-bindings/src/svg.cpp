@@ -144,8 +144,8 @@ extern "C" bool C_SkSVGSVG_parseAndSetAttribute(SkSVGSVG* self, const char* name
 extern "C" bool C_SkSVGNode_has##attr_name(const SkSVGNode& self)  {             \
     return self.get##attr_name().isValue();                                      \
 }                                                                                \
-extern "C" const attr_type& C_SkSVGNode_get##attr_name(const SkSVGNode& self)  { \
-    return *self.get##attr_name();                                               \
+extern "C" const attr_type* C_SkSVGNode_get##attr_name(const SkSVGNode& self)  { \
+    return &*self.get##attr_name();                                               \
 }                                                                                \
 extern "C" void C_SkSVGNode_set##attr_name(SkSVGNode* self, const attr_type x) { \
     return self->set##attr_name(SkSVGProperty<attr_type, attr_inheritable>(x));  \
@@ -155,8 +155,8 @@ extern "C" void C_SkSVGNode_set##attr_name(SkSVGNode* self, const attr_type x) {
 extern "C" bool C_SkSVGNode_has##attr_name(const SkSVGNode& self)  {              \
     return self.get##attr_name().isValue();                                       \
 }                                                                                 \
-extern "C" const attr_type& C_SkSVGNode_get##attr_name(const SkSVGNode& self)  {  \
-    return *self.get##attr_name();                                                \
+extern "C" const attr_type* C_SkSVGNode_get##attr_name(const SkSVGNode& self)  {  \
+    return &*self.get##attr_name();                                                \
 }                                                                                 \
 extern "C" void C_SkSVGNode_set##attr_name(SkSVGNode* self, const attr_type& x) { \
     return self->set##attr_name(SkSVGProperty<attr_type, attr_inheritable>(x));   \
@@ -171,8 +171,8 @@ extern "C" attr_type* C_##type##_get##attr_name(const type& self)  {       \
 }                                                                          \
 
 #define SVG_ATTRIBUTE(type, attr_name, attr_type)                          \
-extern "C" const attr_type& C_##type##_get##attr_name(const type& self)  { \
-    return self.get##attr_name();                                          \
+extern "C" const attr_type* C_##type##_get##attr_name(const type& self)  { \
+    return &self.get##attr_name();                                          \
 }                                                                          \
 extern "C" void C_##type##_set##attr_name(type* self, const attr_type x) { \
     return self->set##attr_name(x);                                        \
@@ -182,8 +182,8 @@ extern "C" void C_##type##_set##attr_name(type* self, const attr_type x) { \
 extern "C" bool C_##type##_has##attr_name(const type& self)  {             \
     return self.get##attr_name().isValid();                                \
 }                                                                          \
-extern "C" const attr_type& C_##type##_get##attr_name(const type& self)  { \
-    return *self.get##attr_name();                                         \
+extern "C" const attr_type* C_##type##_get##attr_name(const type& self)  { \
+    return &*self.get##attr_name();                                         \
 }                                                                          \
 extern "C" void C_##type##_set##attr_name(type* self, const attr_type x) { \
     return self->set##attr_name(x);                                        \
