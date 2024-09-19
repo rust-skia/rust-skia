@@ -269,23 +269,28 @@ pub mod helpers {
         })
     }
 
-    /// Try to load base64 data. Returns empty if data can not be loaded.
+    /// Try to parse base64 data from an data: URL. Returns empty [`Data`] if data can not be parsed.
     fn load_base64(data: &str) -> Data {
         let data: Vec<_> = data.split(',').collect();
-        if data.len() > 1 {
-            let result = decode_base64(data[1]);
-            return Data::new_copy(result.as_slice());
+        if data.is_empty() || !data[0].ends_with(";base64") {
+            return Data::new_empty();
         }
-        Data::new_empty()
+
+        // remove spaces
+        let spaces_removed = remove_html_space_characters(data[1]);
+        // decode %xx
+        let percent_decoded =
+            percent_encoding::percent_decode_str(&spaces_removed).decode_utf8_lossy();
+        // decode base64
+        let result = decode_base64(&percent_decoded);
+        return Data::new_copy(result.as_slice());
     }
 
-    type StaticCharVec = &'static [char];
-
-    const HTML_SPACE_CHARACTERS: StaticCharVec =
+    const HTML_SPACE_CHARACTERS: &[char] =
         &['\u{0020}', '\u{0009}', '\u{000a}', '\u{000c}', '\u{000d}'];
 
     // https://github.com/servo/servo/blob/1610bd2bc83cea8ff0831cf999c4fba297788f64/components/script/dom/window.rs#L575
-    fn decode_base64(value: &str) -> Vec<u8> {
+    fn remove_html_space_characters(value: &str) -> String {
         fn is_html_space(c: char) -> bool {
             HTML_SPACE_CHARACTERS.iter().any(|&m| m == c)
         }
@@ -294,7 +299,11 @@ pub mod helpers {
             .filter(|&c| !is_html_space(c))
             .collect::<String>();
 
-        base64::decode(&without_spaces).unwrap_or_default()
+        without_spaces
+    }
+
+    fn decode_base64(value: &str) -> Vec<u8> {
+        base64::decode(value).unwrap_or_default()
     }
 
     mod base64 {
