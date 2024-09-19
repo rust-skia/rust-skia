@@ -8,8 +8,6 @@ pub type SvgIriFuncKind = sb::SkSVGFuncIRI_Type;
 
 pub type SvgIri = Handle<sb::SkSVGIRI>;
 
-unsafe_send_sync!(SvgIri);
-
 impl NativeDrop for sb::SkSVGIRI {
     fn drop(&mut self) {
         unsafe { sb::C_SkSVGIRI_destruct(self) }

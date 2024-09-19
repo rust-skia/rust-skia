@@ -85,6 +85,10 @@ impl Parse for Attr {
 
 struct Data {
     name: Ident,
+    bracket_token: token::Bracket,
+    native: Ident,
+    comma_token: Token![,],
+    native_mut: Ident,
     fat_arrow_token: Token![=>],
     brace_token: token::Brace,
     attrs: Punctuated<Attr, Token![,]>,
@@ -92,29 +96,39 @@ struct Data {
 
 impl Parse for Data {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let content;
+        let bracket_content;
+        let brace_content;
 
         Ok(Self {
             name: input.parse()?,
+            bracket_token: bracketed!(bracket_content in input),
+            native: bracket_content.parse()?,
+            comma_token: bracket_content.parse()?,
+            native_mut: bracket_content.parse()?,
             fat_arrow_token: input.parse()?,
-            brace_token: braced!(content in input),
-            attrs: Punctuated::parse_separated_nonempty(&content)?,
+            brace_token: braced!(brace_content in input),
+            attrs: Punctuated::parse_separated_nonempty(&brace_content)?,
         })
     }
 }
 
 fn attrs2(input: TokenStream) -> TokenStream2 {
-    let data = match Data::parse.parse(input) {
+    let Data {
+        name,
+        native,
+        native_mut,
+        attrs,
+        ..
+    } = match Data::parse.parse(input) {
         Ok(data) => data,
         Err(error) => return error.into_compile_error(),
     };
 
-    let attrs = data
-        .attrs
+    let attrs = attrs
         .into_iter()
         .map(
             |Attr {
-                 name,
+                 name: attr,
                  optional,
                  copy,
                  ty,
@@ -133,7 +147,7 @@ fn attrs2(input: TokenStream) -> TokenStream2 {
                  ..
              }| {
                 let native_name = Ident::new(
-                    &name
+                    &attr
                         .to_string()
                         .split('_')
                         .fold(String::new(), |mut data, word| {
@@ -145,18 +159,18 @@ fn attrs2(input: TokenStream) -> TokenStream2 {
                 );
 
                 let native_has_name = Ident::new(
-                    &format!("C_{}_has{native_name}", data.name),
+                    &format!("C_{name}_has{native_name}"),
                     Span::call_site(),
                 );
 
-                let get_name = Ident::new(&format!("get_{name}"), Span::call_site());
+                let get_name = Ident::new(&format!("get_{attr}"), Span::call_site());
                 let native_get_name = Ident::new(
-                    &format!("C_{}_get{native_name}", data.name),
+                    &format!("C_{name}_get{native_name}"),
                     Span::call_site(),
                 );
-                let set_name = Ident::new(&format!("set_{name}"), Span::call_site());
+                let set_name = Ident::new(&format!("set_{attr}"), Span::call_site());
                 let native_set_name = Ident::new(
-                    &format!("C_{}_set{native_name}", data.name),
+                    &format!("C_{name}_set{native_name}"),
                     Span::call_site(),
                 );
 
@@ -164,8 +178,8 @@ fn attrs2(input: TokenStream) -> TokenStream2 {
                     [true, true] => quote! {
                         pub fn #get_name(&self) -> Option<#ty> {
                             unsafe {
-                                if sb::#native_has_name(self.native()) {
-                                    let #getter_name = sb::#native_get_name(self.native()).as_ref().map(|value| *value);
+                                if sb::#native_has_name(self.#native()) {
+                                    let #getter_name = sb::#native_get_name(self.#native()).as_ref().map(|value| *value);
 
                                     #getter_body
                                 } else {
@@ -177,8 +191,8 @@ fn attrs2(input: TokenStream) -> TokenStream2 {
                     [true, false] => quote! {
                         pub fn #get_name(&self) -> Option<&#ty> {
                             unsafe {
-                                if sb::#native_has_name(self.native()) {
-                                    let #getter_name = sb::#native_get_name(self.native()).as_ref();
+                                if sb::#native_has_name(self.#native()) {
+                                    let #getter_name = sb::#native_get_name(self.#native()).as_ref();
 
                                     #getter_body
                                 } else {
@@ -190,7 +204,7 @@ fn attrs2(input: TokenStream) -> TokenStream2 {
                     [false, true] => quote! {
                         pub fn #get_name(&self) -> #ty {
                             unsafe {
-                                let #getter_name = *sb::#native_get_name(self.native()).as_ref().unwrap_unchecked();
+                                let #getter_name = *sb::#native_get_name(self.#native()).as_ref().unwrap_unchecked();
 
                                 #getter_body
                             }
@@ -199,7 +213,7 @@ fn attrs2(input: TokenStream) -> TokenStream2 {
                     [false, false] => quote! {
                         pub fn #get_name(&self) -> &#ty {
                             unsafe {
-                                let #getter_name = sb::#native_get_name(self.native()).as_ref().unwrap_unchecked();
+                                let #getter_name = sb::#native_get_name(self.#native()).as_ref().unwrap_unchecked();
 
                                 #getter_body
                             }
@@ -212,7 +226,7 @@ fn attrs2(input: TokenStream) -> TokenStream2 {
 
                     pub fn #set_name(&mut self, #setter_name: #ty) {
                         unsafe {
-                            sb::#native_set_name(self.native_mut(), #setter_body)
+                            sb::#native_set_name(self.#native_mut(), #setter_body)
                         }
                     }
                 }

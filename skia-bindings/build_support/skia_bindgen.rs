@@ -427,6 +427,7 @@ const OPAQUE_TYPES: &[&str] = &[
     // m100
     "std::optional",
     // Feature `svg`:
+    "SkSVGProperty",
     "SkSVGNode",
     "SkTLazy",             // causes wrong layouts in SkSVGSVG
     "SkTCopyOnFirstWrite", // causes wrong layouts in SkSVGRenderContext

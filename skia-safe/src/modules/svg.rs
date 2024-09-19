@@ -1,12 +1,17 @@
 mod circle;
 mod color;
 mod element;
+mod ellipse;
 mod font;
+mod image;
 mod iri;
+mod line;
 mod node;
 mod paint;
 mod path;
+mod rect;
 mod text;
+mod using;
 
 pub use self::{color::*, font::*, iri::*, node::*, paint::*};
 use crate::{
@@ -233,9 +238,11 @@ impl Dom {
         Data::new_empty()
     }
 
-    pub fn root(&self) -> SvgSpecNode<Svg, sb::SkSVGSVG> {
-        SvgSpecNode::from_unshared_ptr(unsafe { sb::C_SkSVGDOM_getRoot(self.native()) as *mut _ })
-            .unwrap()
+    pub fn root(&self) -> Svg {
+        unsafe {
+            Svg::from_unshared_ptr(sb::C_SkSVGDOM_getRoot(self.native()) as *mut _)
+                .unwrap_unchecked()
+        }
     }
 }
 
