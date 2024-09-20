@@ -1,4 +1,4 @@
-use std::{borrow::Cow, ffi, mem, os::raw, ptr};
+use std::{borrow::Cow, ffi::CStr, mem, os::raw, ptr};
 
 use helpers::ResourceKind;
 use skia_bindings::{
@@ -146,7 +146,7 @@ impl From<Box<dyn ResourceProvider>> for NativeResourceProvider {
 
         unsafe fn uncstr(ptr: *const raw::c_char) -> Cow<'static, str> {
             if !ptr.is_null() {
-                return ffi::CStr::from_ptr(ptr).to_string_lossy();
+                return CStr::from_ptr(ptr).to_string_lossy();
             }
             "".into()
         }
@@ -180,7 +180,7 @@ impl LocalResourceProvider {
     }
 }
 
-/// Support a direct conversion from a [`FontMgr`] nito a local native resource provider.
+/// Support a direct conversion from a [`FontMgr`] into a local native resource provider.
 impl From<FontMgr> for NativeResourceProvider {
     fn from(font_mgr: FontMgr) -> Self {
         LocalResourceProvider::new(font_mgr).into()

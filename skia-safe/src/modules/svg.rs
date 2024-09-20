@@ -112,13 +112,12 @@ impl Dom {
 
 #[cfg(test)]
 mod tests {
-    use std::{fs::File, io::Write, path::Path};
 
     use super::Dom;
     use crate::{
         prelude::{NativeAccess, NativeRefCounted},
         resources::NativeResourceProvider,
-        surfaces, EncodedImageFormat, FontMgr, Surface,
+        surfaces, FontMgr, Surface,
     };
 
     #[test]
@@ -148,7 +147,7 @@ mod tests {
         let provider: NativeResourceProvider = font_mgr.clone().into();
         let dom = Dom::from_str(svg, provider.clone(), font_mgr.clone()).unwrap();
         dom.render(canvas);
-        // Dom keeps the resource provider even afer rendering.
+        // Dom keeps the resource provider even after rendering.
         assert!(provider.native()._ref_cnt() >= 2);
         // And at least two of the font managers are referred to (one in the resource provider, and the other in the Dom)
         assert!(font_mgr.native()._ref_cnt() >= 3);
@@ -183,7 +182,7 @@ mod tests {
         save_to_tmp(&mut surface, "svg-with-ureq");
     }
 
-    // A testcase to see if a download error is handled.
+    // A test case to see if a download error is handled.
     #[cfg(feature = "ureq")]
     #[test]
     fn render_svg_with_ureq_resource_provider_with_missing_resource() {
@@ -241,6 +240,9 @@ mod tests {
 
     #[cfg(feature = "save-svg-images")]
     fn save_to_tmp(surface: &mut Surface, name: &str) {
+        use crate::EncodedImageFormat;
+        use std::{fs::File, io::Write, path::Path};
+
         let image = surface.image_snapshot();
         let data = image.encode(None, EncodedImageFormat::PNG, None).unwrap();
         write_file(data.as_bytes(), Path::new(&format!("/tmp/svg-{name}.png")));
@@ -252,5 +254,5 @@ mod tests {
     }
 
     #[cfg(not(feature = "save-svg-images"))]
-    fn save_to_tmp(surface: &mut Surface, name: &str) {}
+    fn save_to_tmp(_surface: &mut Surface, _name: &str) {}
 }
