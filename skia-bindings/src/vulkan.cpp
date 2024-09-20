@@ -1,7 +1,3 @@
-#ifndef SK_VULKAN
-    #define SK_VULKAN
-#endif
-
 #include "include/gpu/ganesh/vk/GrBackendDrawableInfo.h"
 #include "include/gpu/GrBackendSurface.h"
 #include "include/gpu/GrDirectContext.h"

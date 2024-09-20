@@ -1,6 +1,5 @@
 #include "bindings.h"
 
-
 #include "include/gpu/ganesh/vk/GrBackendDrawableInfo.h"
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/GrYUVABackendTextures.h"
