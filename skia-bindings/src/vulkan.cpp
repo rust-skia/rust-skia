@@ -12,6 +12,34 @@
 // Additional types not yet referenced.
 extern "C" void C_GrVkTypes(GrVkSurfaceInfo *) {};
 
+//
+// gpu/ganesh/vk/GrBackendDrawableInfo.h
+//
+
+extern "C" void C_GrBackendDrawableInfo_Construct(GrBackendDrawableInfo* uninitialized) {
+    new(uninitialized) GrBackendDrawableInfo();
+}
+
+extern "C" void C_GrBackendDrawableInfo_Construct2(GrBackendDrawableInfo* uninitialized, const GrVkDrawableInfo* info) {
+    new(uninitialized) GrBackendDrawableInfo(*info);
+}
+
+extern "C" void C_GrBackendDrawableInfo_destruct(GrBackendDrawableInfo* self) {
+    self->~GrBackendDrawableInfo();
+}
+
+extern "C" bool C_GrBackendDrawableInfo_isValid(const GrBackendDrawableInfo* self) {
+    return self->isValid();
+}
+
+extern "C" GrBackendApi C_GrBackendDrawableInfo_backend(const GrBackendDrawableInfo* self) {
+    return self->backend();
+}
+
+//
+// gpu/GrBackendSurface.h
+//
+
 extern "C" void C_GrBackendFormat_ConstructVk(GrBackendFormat* uninitialized, VkFormat format, bool willUseDRMFormatModifiers) {
     new(uninitialized)GrBackendFormat(GrBackendFormats::MakeVk(format, willUseDRMFormatModifiers));
 }

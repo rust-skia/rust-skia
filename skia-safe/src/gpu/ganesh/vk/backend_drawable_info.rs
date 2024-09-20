@@ -1,10 +1,11 @@
-// This file moved to gpu/ganesh/vk in Skia.
-// But as long it is used without enabling the vulkan feature, it must stay here.
-#[cfg(feature = "vulkan")]
-use crate::gpu::vk;
-use crate::{gpu::BackendAPI, prelude::*};
-use skia_bindings::{self as sb, GrBackendDrawableInfo};
 use std::fmt;
+
+use skia_bindings::{self as sb, GrBackendDrawableInfo};
+
+use crate::{
+    gpu::{vk, BackendAPI},
+    prelude::*,
+};
 
 pub type BackendDrawableInfo = Handle<GrBackendDrawableInfo>;
 unsafe_send_sync!(BackendDrawableInfo);

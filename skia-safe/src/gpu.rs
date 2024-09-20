@@ -1,4 +1,3 @@
-mod backend_drawable_info;
 mod backend_surface;
 pub mod context_options;
 #[cfg(feature = "d3d")]
@@ -16,7 +15,6 @@ mod types;
 pub mod vk;
 mod yuva_backend_textures;
 
-pub use backend_drawable_info::*;
 pub use backend_surface::*;
 pub use context_options::ContextOptions;
 pub use direct_context::*;

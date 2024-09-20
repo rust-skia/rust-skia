@@ -12,6 +12,8 @@ pub use vulkan_backend_context::*;
 pub use vulkan_mutable_texture_state::*;
 pub use vulkan_types::*;
 
+pub use crate::gpu::ganesh::vk::BackendDrawableInfo;
+
 //
 // Additional Vulkan re-exports and definitions.
 //
