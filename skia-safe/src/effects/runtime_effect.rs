@@ -451,7 +451,7 @@ impl RuntimeShaderBuilder {
     pub fn set_uniform_int(&mut self, name: impl AsRef<str>, data: &[i32]) {
         let name = name.as_ref();
         unsafe {
-            sb::C_SkRuntimeShaderBuilder_setUniformFloat(
+            sb::C_SkRuntimeShaderBuilder_setUniformInt(
                 self.native_mut() as _,
                 name.as_bytes().as_ptr() as _,
                 name.len(),
