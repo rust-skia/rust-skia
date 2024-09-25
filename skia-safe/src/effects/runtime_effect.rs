@@ -404,9 +404,8 @@ impl ChildPtr {
     }
 }
 
-// TODO: wrap SkRuntimeEffectBuilder, SkRuntimeShaderBuilder, SkRuntimeColorFilterBuilder,
+// TODO: wrap SkRuntimeEffectBuilder, SkRuntimeColorFilterBuilder,
 // SkRuntimeBlendBuilder
-
 
 pub type RuntimeShaderBuilder = Handle<sb::SkRuntimeShaderBuilder>;
 unsafe_send_sync!(RuntimeShaderBuilder);
@@ -420,9 +419,9 @@ impl NativeDrop for sb::SkRuntimeShaderBuilder {
 }
 
 impl RuntimeShaderBuilder {
-    pub fn new(effect: &mut RuntimeEffect) -> Self {
+    pub fn new(effect: RuntimeEffect) -> Self {
         Self::construct(|builder| unsafe {
-            let effect: *mut SkRuntimeEffect = effect.native_mut_force() as _;
+            let effect: *mut SkRuntimeEffect = effect.into_ptr() as _;
             sb::C_SkRuntimeShaderBuilder_Construct(builder, effect)
         })
     }
