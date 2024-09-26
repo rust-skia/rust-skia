@@ -1,96 +1,64 @@
 use super::{
-    circle::SvgCircle,
-    color::SvgColor,
-    element::Svg,
-    ellipse::SvgEllipse,
-    font::{SvgFontFamily, SvgFontSize, SvgFontStyle, SvgFontWeight},
-    image::SvgImage,
-    iri::SvgIriFunc,
-    line::SvgLine,
-    paint::SvgPaint,
-    path::SvgPath,
-    rect::SvgRect,
-    text::SvgTextLiteral,
-    using::SvgUse,
+    element::Svg, pattern::SvgPattern, DebugAttributes, SvgCircle, SvgClipPath, SvgColor,
+    SvgColorSpace, SvgDefs, SvgDisplay, SvgEllipse, SvgFeBlend, SvgFeColorMatrix,
+    SvgFeComponentTransfer, SvgFeComposite, SvgFeDiffuseLighting, SvgFeDisplacementMap,
+    SvgFeDistantLight, SvgFeFlood, SvgFeFunc, SvgFeGaussianBlur, SvgFeImage, SvgFeMerge,
+    SvgFeMergeNode, SvgFeMorphology, SvgFeOffset, SvgFePointLight, SvgFeSpecularLighting,
+    SvgFeSpotLight, SvgFeTurbulence, SvgFillRule, SvgFilter, SvgFontFamily, SvgFontSize,
+    SvgFontStyle, SvgFontWeight, SvgG, SvgImage, SvgIriFunc, SvgLength, SvgLine, SvgLineCap,
+    SvgLineJoin, SvgLinearGradient, SvgMask, SvgPaint, SvgPath, SvgPoly, SvgRadialGradient,
+    SvgRect, SvgStop, SvgTSpan, SvgText, SvgTextAnchor, SvgTextLiteral, SvgTextPath, SvgUse,
+    SvgVisibility,
 };
 use crate::{prelude::*, scalar, Color};
 use skia_bindings as sb;
-use std::{
-    fmt,
-    ops::{Deref, DerefMut},
-};
-
-pub type SvgFillRule = sb::SkSVGFillRule_Type;
-pub type SvgColorSpace = sb::SkSVGColorspace;
-pub type SvgDisplay = sb::SkSVGDisplay;
-pub type SvgLineCap = sb::SkSVGLineCap;
-pub type SvgVisibility = sb::SkSVGVisibility_Type;
-pub type SvgLineJoin = sb::SkSVGLineJoin_Type;
-pub type SvgTextAnchor = sb::SkSVGTextAnchor_Type;
-pub type SvgUnit = sb::SkSVGLength_Unit;
-
-#[repr(C)]
-#[derive(Copy, Clone, PartialEq, Debug)]
-pub struct SvgLength {
-    pub value: scalar,
-    pub unit: SvgUnit,
-}
-
-native_transmutable!(sb::SkSVGLength, SvgLength, svg_length_layout);
-
-impl SvgLength {
-    pub fn new(value: scalar, unit: SvgUnit) -> Self {
-        Self { value, unit }
-    }
-}
 
 #[derive(Debug)]
-/// TODO (Aiving): Implement bindings for the remaining classes that inherit SkSVGNode
 pub enum Node {
     Circle(SvgCircle),
-    ClipPath,
-    Defs,
+    ClipPath(SvgClipPath),
+    Defs(SvgDefs),
     Ellipse(SvgEllipse),
-    FeBlend,
-    FeColorMatrix,
-    FeComponentTransfer,
-    FeComposite,
-    FeDiffuseLighting,
-    FeDisplacementMap,
-    FeDistantLight,
-    FeFlood,
-    FeFuncA,
-    FeFuncR,
-    FeFuncG,
-    FeFuncB,
-    FeGaussianBlur,
-    FeImage,
-    FeMerge,
-    FeMergeNode,
-    FeMorphology,
-    FeOffset,
-    FePointLight,
-    FeSpecularLighting,
-    FeSpotLight,
-    FeTurbulence,
-    Filter,
-    G,
+    FeBlend(SvgFeBlend),
+    FeColorMatrix(SvgFeColorMatrix),
+    FeComponentTransfer(SvgFeComponentTransfer),
+    FeComposite(SvgFeComposite),
+    FeDiffuseLighting(SvgFeDiffuseLighting),
+    FeDisplacementMap(SvgFeDisplacementMap),
+    FeDistantLight(SvgFeDistantLight),
+    FeFlood(SvgFeFlood),
+    FeFuncA(SvgFeFunc),
+    FeFuncR(SvgFeFunc),
+    FeFuncG(SvgFeFunc),
+    FeFuncB(SvgFeFunc),
+    FeGaussianBlur(SvgFeGaussianBlur),
+    FeImage(SvgFeImage),
+    FeMerge(SvgFeMerge),
+    FeMergeNode(SvgFeMergeNode),
+    FeMorphology(SvgFeMorphology),
+    FeOffset(SvgFeOffset),
+    FePointLight(SvgFePointLight),
+    FeSpecularLighting(SvgFeSpecularLighting),
+    FeSpotLight(SvgFeSpotLight),
+    FeTurbulence(SvgFeTurbulence),
+    Filter(SvgFilter),
+    G(SvgG),
     Image(SvgImage),
     Line(SvgLine),
-    LinearGradient,
-    Mask,
+    LinearGradient(SvgLinearGradient),
+    Mask(SvgMask),
     Path(SvgPath),
-    Pattern,
-    Polygon,
-    Polyline,
-    RadialGradient,
+    Pattern(SvgPattern),
+    Polygon(SvgPoly),
+    Polyline(SvgPoly),
+    RadialGradient(SvgRadialGradient),
     Rect(SvgRect),
-    Stop,
+    Stop(SvgStop),
     Svg(Svg),
-    Text,
+    Text(SvgText),
     TextLiteral(SvgTextLiteral),
-    TextPath,
-    TSpan,
+    TextPath(SvgTextPath),
+    TSpan(SvgTSpan),
     Use(SvgUse),
 }
 
@@ -99,96 +67,95 @@ impl Node {
         let tag = unsafe { sb::C_SkSVGNode_tag(ptr as *const _) };
 
         Some(match tag {
-            NodeTag::Circle => Self::Circle(SvgNode::from_unshared_ptr(ptr)?),
-            NodeTag::ClipPath => Self::ClipPath,
-            NodeTag::Defs => Self::Defs,
-            NodeTag::Ellipse => Self::Ellipse(SvgNode::from_unshared_ptr(ptr)?),
-            NodeTag::FeBlend => Self::FeBlend,
-            NodeTag::FeColorMatrix => Self::FeColorMatrix,
-            NodeTag::FeComponentTransfer => Self::FeComponentTransfer,
-            NodeTag::FeComposite => Self::FeComposite,
-            NodeTag::FeDiffuseLighting => Self::FeDiffuseLighting,
-            NodeTag::FeDisplacementMap => Self::FeDisplacementMap,
-            NodeTag::FeDistantLight => Self::FeDistantLight,
-            NodeTag::FeFlood => Self::FeFlood,
-            NodeTag::FeFuncA => Self::FeFuncA,
-            NodeTag::FeFuncR => Self::FeFuncR,
-            NodeTag::FeFuncG => Self::FeFuncG,
-            NodeTag::FeFuncB => Self::FeFuncB,
-            NodeTag::FeGaussianBlur => Self::FeGaussianBlur,
-            NodeTag::FeImage => Self::FeImage,
-            NodeTag::FeMerge => Self::FeMerge,
-            NodeTag::FeMergeNode => Self::FeMergeNode,
-            NodeTag::FeMorphology => Self::FeMorphology,
-            NodeTag::FeOffset => Self::FeOffset,
-            NodeTag::FePointLight => Self::FePointLight,
-            NodeTag::FeSpecularLighting => Self::FeSpecularLighting,
-            NodeTag::FeSpotLight => Self::FeSpotLight,
-            NodeTag::FeTurbulence => Self::FeTurbulence,
-            NodeTag::Filter => Self::Filter,
-            NodeTag::G => Self::G,
-            NodeTag::Image => Self::Image(SvgNode::from_unshared_ptr(ptr)?),
-            NodeTag::Line => Self::Line(SvgNode::from_unshared_ptr(ptr)?),
-            NodeTag::LinearGradient => Self::LinearGradient,
-            NodeTag::Mask => Self::Mask,
-            NodeTag::Path => Self::Path(SvgNode::from_unshared_ptr(ptr)?),
-            NodeTag::Pattern => Self::Pattern,
-            NodeTag::Polygon => Self::Polygon,
-            NodeTag::Polyline => Self::Polyline,
-            NodeTag::RadialGradient => Self::RadialGradient,
-            NodeTag::Rect => Self::Rect(SvgNode::from_unshared_ptr(ptr)?),
-            NodeTag::Stop => Self::Stop,
-            NodeTag::Svg => Self::Svg(SvgNode::from_unshared_ptr(ptr)?),
-            NodeTag::Text => Self::Text,
-            NodeTag::TextLiteral => Self::TextLiteral(SvgNode::from_unshared_ptr(ptr)?),
-            NodeTag::TextPath => Self::TextPath,
-            NodeTag::TSpan => Self::TSpan,
-            NodeTag::Use => Self::Use(SvgNode::from_unshared_ptr(ptr)?),
+            NodeTag::Circle => Self::Circle(SvgCircle::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::ClipPath => Self::ClipPath(SvgClipPath::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Defs => Self::Defs(SvgDefs::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Ellipse => Self::Ellipse(SvgEllipse::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeBlend => Self::FeBlend(SvgFeBlend::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeColorMatrix => {
+                Self::FeColorMatrix(SvgFeColorMatrix::from_unshared_ptr(ptr as *mut _)?)
+            }
+            NodeTag::FeComponentTransfer => {
+                Self::FeComponentTransfer(SvgFeComponentTransfer::from_unshared_ptr(ptr as *mut _)?)
+            }
+            NodeTag::FeComposite => {
+                Self::FeComposite(SvgFeComposite::from_unshared_ptr(ptr as *mut _)?)
+            }
+            NodeTag::FeDiffuseLighting => {
+                Self::FeDiffuseLighting(SvgFeDiffuseLighting::from_unshared_ptr(ptr as *mut _)?)
+            }
+            NodeTag::FeDisplacementMap => {
+                Self::FeDisplacementMap(SvgFeDisplacementMap::from_unshared_ptr(ptr as *mut _)?)
+            }
+            NodeTag::FeDistantLight => {
+                Self::FeDistantLight(SvgFeDistantLight::from_unshared_ptr(ptr as *mut _)?)
+            }
+            NodeTag::FeFlood => Self::FeFlood(SvgFeFlood::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeFuncA => Self::FeFuncA(SvgFeFunc::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeFuncR => Self::FeFuncR(SvgFeFunc::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeFuncG => Self::FeFuncG(SvgFeFunc::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeFuncB => Self::FeFuncB(SvgFeFunc::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeGaussianBlur => {
+                Self::FeGaussianBlur(SvgFeGaussianBlur::from_unshared_ptr(ptr as *mut _)?)
+            }
+            NodeTag::FeImage => Self::FeImage(SvgFeImage::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeMerge => Self::FeMerge(SvgFeMerge::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeMergeNode => {
+                Self::FeMergeNode(SvgFeMergeNode::from_unshared_ptr(ptr as *mut _)?)
+            }
+            NodeTag::FeMorphology => {
+                Self::FeMorphology(SvgFeMorphology::from_unshared_ptr(ptr as *mut _)?)
+            }
+            NodeTag::FeOffset => Self::FeOffset(SvgFeOffset::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FePointLight => {
+                Self::FePointLight(SvgFePointLight::from_unshared_ptr(ptr as *mut _)?)
+            }
+            NodeTag::FeSpecularLighting => {
+                Self::FeSpecularLighting(SvgFeSpecularLighting::from_unshared_ptr(ptr as *mut _)?)
+            }
+            NodeTag::FeSpotLight => {
+                Self::FeSpotLight(SvgFeSpotLight::from_unshared_ptr(ptr as *mut _)?)
+            }
+            NodeTag::FeTurbulence => {
+                Self::FeTurbulence(SvgFeTurbulence::from_unshared_ptr(ptr as *mut _)?)
+            }
+            NodeTag::Filter => Self::Filter(SvgFilter::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::G => Self::G(SvgG::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Image => Self::Image(SvgImage::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Line => Self::Line(SvgLine::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::LinearGradient => {
+                Self::LinearGradient(SvgLinearGradient::from_unshared_ptr(ptr as *mut _)?)
+            }
+            NodeTag::Mask => Self::Mask(SvgMask::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Path => Self::Path(SvgPath::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Pattern => Self::Pattern(SvgPattern::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Polygon => Self::Polygon(SvgPoly::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Polyline => Self::Polyline(SvgPoly::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::RadialGradient => {
+                Self::RadialGradient(SvgRadialGradient::from_unshared_ptr(ptr as *mut _)?)
+            }
+            NodeTag::Rect => Self::Rect(SvgRect::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Stop => Self::Stop(SvgStop::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Svg => Self::Svg(Svg::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Text => Self::Text(SvgText::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::TextLiteral => {
+                Self::TextLiteral(SvgTextLiteral::from_unshared_ptr(ptr as *mut _)?)
+            }
+            NodeTag::TextPath => Self::TextPath(SvgTextPath::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::TSpan => Self::TSpan(SvgTSpan::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Use => Self::Use(SvgUse::from_unshared_ptr(ptr as *mut _)?),
         })
     }
 }
 
 pub type NodeTag = sb::SkSVGTag;
 
-type SkSvgNode = RCHandle<sb::SkSVGNode>;
+pub type SvgNode = RCHandle<sb::SkSVGNode>;
 
-impl NativeRefCountedBase for sb::SkSVGNode {
-    type Base = sb::SkRefCntBase;
-}
+impl DebugAttributes for SvgNode {
+    const NAME: &'static str = "Node";
 
-pub struct SvgNode<N: Tagged + NativeRefCounted> {
-    node: SkSvgNode,
-    tag: NodeTag,
-    data: RCHandle<N>,
-}
-
-impl<T: Tagged + NativeRefCounted> Deref for SvgNode<T> {
-    type Target = RCHandle<T>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.data
-    }
-}
-
-impl<T: Tagged + NativeRefCounted> DerefMut for SvgNode<T> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.data
-    }
-}
-
-impl<T: Tagged + NativeRefCounted> fmt::Debug for SvgNode<T>
-where
-    Self: TaggedDebug,
-{
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let name = if self.tag == NodeTag::Svg {
-            "Svg".into()
-        } else {
-            format!("Svg{:?}", self.tag)
-        };
-
-        let mut builder = f.debug_struct(&name);
-
+    fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         builder
             .field("clip_rule", &self.get_clip_rule())
             .field("color_interpolation", &self.get_color_interpolation())
@@ -222,74 +189,20 @@ where
             .field("flood_color", &self.get_flood_color())
             .field("flood_opacity", &self.get_flood_opacity())
             .field("lighting_color", &self.get_lighting_color());
-
-        self._dbg(&mut builder);
-
-        builder.finish()
     }
 }
 
-impl<T: Tagged + NativeRefCounted> SvgNode<T> {
-    pub fn from_ptr(ptr: *mut sb::SkSVGNode) -> Option<Self> {
-        let node = SkSvgNode::from_ptr(ptr)?;
-        let tag = unsafe { sb::C_SkSVGNode_tag(ptr as *const _) };
+impl NativeRefCountedBase for sb::SkSVGNode {
+    type Base = sb::SkRefCntBase;
+}
 
-        if tag == T::TAG {
-            Some(Self {
-                node,
-                tag,
-                data: RCHandle::<T>::from_ptr(ptr as *mut _)?,
-            })
-        } else {
-            None
-        }
-    }
-
-    pub fn from_unshared_ptr(ptr: *mut sb::SkSVGNode) -> Option<Self> {
-        let node = SkSvgNode::from_unshared_ptr(ptr)?;
-        let tag = unsafe { sb::C_SkSVGNode_tag(ptr as *const _) };
-
-        if tag == T::TAG {
-            Some(Self {
-                node,
-                tag,
-                data: RCHandle::<T>::from_unshared_ptr(ptr as *mut _)?,
-            })
-        } else {
-            None
-        }
-    }
-
-    pub fn native(&self) -> &T {
-        self.data.native()
-    }
-
-    pub fn native_node(&self) -> &sb::SkSVGNode {
-        self.node.native()
-    }
-
-    pub fn native_mut(&mut self) -> &mut T {
-        self.data.native_mut()
-    }
-
-    pub fn native_node_mut(&mut self) -> &mut sb::SkSVGNode {
-        self.node.native_mut()
-    }
-
-    pub fn into_ptr(self) -> *mut T {
-        self.data.into_ptr()
-    }
-
-    pub fn into_node_ptr(self) -> *mut sb::SkSVGNode {
-        self.node.into_ptr()
-    }
-
+impl SvgNode {
     pub fn tag(&self) -> NodeTag {
-        self.tag
+        unsafe { sb::C_SkSVGNode_tag(self.native()) }
     }
 
     skia_macros::attrs! {
-        SkSVGNode[native_node, native_node_mut] => {
+        SkSVGNode[native, native_mut] => {
             // inherited
             clip_rule?: SvgFillRule [get(value) => value.map(|value| &value.fType), set(value) => sb::SkSVGFillRule { fType: value }],
             color_interpolation?: SvgColorSpace [get(value) => value, set(value) => value],
@@ -324,12 +237,4 @@ impl<T: Tagged + NativeRefCounted> SvgNode<T> {
             lighting_color?: SvgColor [get(value) => value.map(SvgColor::from_native_ref), set(value) => value.native()]
         }
     }
-}
-
-pub trait Tagged {
-    const TAG: NodeTag;
-}
-
-pub trait TaggedDebug {
-    fn _dbg(&self, f: &mut fmt::DebugStruct);
 }

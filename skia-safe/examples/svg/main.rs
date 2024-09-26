@@ -1,3 +1,9 @@
+#[cfg(not(feature = "svg"))]
+fn main() {
+    println!("To run this example, invoke cargo with --features \"svg\".");
+}
+
+#[cfg(feature = "svg")]
 fn main() {
     let data = r#"
         <svg width="100" height="200" viewBox="0 0 1200 800" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41421;">

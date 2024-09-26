@@ -5,6 +5,7 @@
 
 #include "modules/svg/include/SkSVGCircle.h"
 #include "modules/svg/include/SkSVGClipPath.h"
+#include "modules/svg/include/SkSVGContainer.h"
 #include "modules/svg/include/SkSVGDefs.h"
 #include "modules/svg/include/SkSVGDOM.h"
 #include "modules/svg/include/SkSVGEllipse.h"
@@ -47,7 +48,6 @@
 #include "modules/skresources/include/SkResources.h"
 
 #include "include/core/SkStream.h"
-
 
 typedef SkData* (*loadSkData)(const char resource_path[], const char resource_name[], void* context);
 
@@ -129,7 +129,8 @@ extern "C" void C_SkSVGTypes(
     SkSVGHiddenContainer*,
     SkSVGText*,
     SkSVGTSpan*,
-    SkSVGValue*
+    SkSVGValue*,
+    SkSVGDefs*
 ) {};
 
 extern "C" SkSize C_SkSVGSVG_intrinsicSize(const SkSVGSVG* self) {
@@ -141,37 +142,37 @@ extern "C" bool C_SkSVGSVG_parseAndSetAttribute(SkSVGSVG* self, const char* name
 }
 
 #define SVG_PRES_ATTR(attr_name, attr_type, attr_inheritable)                    \
-extern "C" bool C_SkSVGNode_has##attr_name(const SkSVGNode& self)  {             \
+extern "C" bool C_SkSVGNode_has##attr_name(const SkSVGNode& self) {              \
     return self.get##attr_name().isValue();                                      \
 }                                                                                \
-extern "C" const attr_type* C_SkSVGNode_get##attr_name(const SkSVGNode& self)  { \
-    return &*self.get##attr_name();                                               \
+extern "C" const attr_type* C_SkSVGNode_get##attr_name(const SkSVGNode& self) {  \
+    return &*self.get##attr_name();                                              \
 }                                                                                \
 extern "C" void C_SkSVGNode_set##attr_name(SkSVGNode* self, const attr_type x) { \
     return self->set##attr_name(SkSVGProperty<attr_type, attr_inheritable>(x));  \
 }                                                                                \
 
 #define SVG_PRES_REF_ATTR(attr_name, attr_type, attr_inheritable)                 \
-extern "C" bool C_SkSVGNode_has##attr_name(const SkSVGNode& self)  {              \
+extern "C" bool C_SkSVGNode_has##attr_name(const SkSVGNode& self) {               \
     return self.get##attr_name().isValue();                                       \
 }                                                                                 \
-extern "C" const attr_type* C_SkSVGNode_get##attr_name(const SkSVGNode& self)  {  \
-    return &*self.get##attr_name();                                                \
+extern "C" const attr_type* C_SkSVGNode_get##attr_name(const SkSVGNode& self) {   \
+    return &*self.get##attr_name();                                               \
 }                                                                                 \
 extern "C" void C_SkSVGNode_set##attr_name(SkSVGNode* self, const attr_type& x) { \
     return self->set##attr_name(SkSVGProperty<attr_type, attr_inheritable>(x));   \
 }                                                                                 \
 
 #define SVG_ATTRIBUTE_ARRAY(type, attr_name, attr_type)                    \
-extern "C" size_t C_##type##_get##attr_name##Count(const type& self)  {    \
+extern "C" size_t C_##type##_get##attr_name##Count(const type& self) {     \
     return self.get##attr_name().size();                                   \
 }                                                                          \
-extern "C" attr_type* C_##type##_get##attr_name(const type& self)  {       \
+extern "C" attr_type* C_##type##_get##attr_name(const type& self) {        \
     return self.get##attr_name().data();                                   \
 }                                                                          \
 
 #define SVG_ATTRIBUTE(type, attr_name, attr_type)                          \
-extern "C" const attr_type* C_##type##_get##attr_name(const type& self)  { \
+extern "C" const attr_type* C_##type##_get##attr_name(const type& self) {  \
     return &self.get##attr_name();                                          \
 }                                                                          \
 extern "C" void C_##type##_set##attr_name(type* self, const attr_type x) { \
@@ -179,10 +180,10 @@ extern "C" void C_##type##_set##attr_name(type* self, const attr_type x) { \
 }                                                                          \
 
 #define SVG_OPTIONAL_ATTRIBUTE(type, attr_name, attr_type)                 \
-extern "C" bool C_##type##_has##attr_name(const type& self)  {             \
+extern "C" bool C_##type##_has##attr_name(const type& self) {              \
     return self.get##attr_name().isValid();                                \
 }                                                                          \
-extern "C" const attr_type* C_##type##_get##attr_name(const type& self)  { \
+extern "C" const attr_type* C_##type##_get##attr_name(const type& self) {  \
     return &*self.get##attr_name();                                         \
 }                                                                          \
 extern "C" void C_##type##_set##attr_name(type* self, const attr_type x) { \
@@ -211,7 +212,7 @@ SVG_ATTRIBUTE(SkSVGFeBlend, Mode, SkSVGFeBlend::Mode);
 SVG_ATTRIBUTE(SkSVGFeBlend, In2, SkSVGFeInputType);
 
 SVG_ATTRIBUTE(SkSVGFeColorMatrix, Type, SkSVGFeColorMatrixType);
-SVG_ATTRIBUTE(SkSVGFeColorMatrix, Values, SkSVGFeColorMatrixValues);
+SVG_ATTRIBUTE_ARRAY(SkSVGFeColorMatrix, Values, const SkSVGNumberType);
 
 SVG_ATTRIBUTE(SkSVGFeFunc, Amplitude  , SkSVGNumberType);
 SVG_ATTRIBUTE(SkSVGFeFunc, Exponent   , SkSVGNumberType);
@@ -241,6 +242,11 @@ SVG_ATTRIBUTE(SkSVGFeImage, PreserveAspectRatio, SkSVGPreserveAspectRatio);
 SVG_ATTRIBUTE(SkSVGFeLighting, SurfaceScale, SkSVGNumberType);
 SVG_OPTIONAL_ATTRIBUTE(SkSVGFeLighting, KernelUnitLength, SkSVGFeLighting::KernelUnitLength);
 
+SVG_ATTRIBUTE(SkSVGFeSpecularLighting, SpecularConstant, SkSVGNumberType);
+SVG_ATTRIBUTE(SkSVGFeSpecularLighting, SpecularExponent, SkSVGNumberType);
+
+SVG_ATTRIBUTE(SkSVGFeDiffuseLighting, DiffuseConstant, SkSVGNumberType);
+
 SVG_ATTRIBUTE(SkSVGFeDistantLight, Azimuth  , SkSVGNumberType);
 SVG_ATTRIBUTE(SkSVGFeDistantLight, Elevation, SkSVGNumberType);
 
@@ -255,6 +261,7 @@ SVG_ATTRIBUTE(SkSVGFeSpotLight, PointsAtX       , SkSVGNumberType);
 SVG_ATTRIBUTE(SkSVGFeSpotLight, PointsAtY       , SkSVGNumberType);
 SVG_ATTRIBUTE(SkSVGFeSpotLight, PointsAtZ       , SkSVGNumberType);
 SVG_ATTRIBUTE(SkSVGFeSpotLight, SpecularExponent, SkSVGNumberType);
+SVG_OPTIONAL_ATTRIBUTE(SkSVGFeSpotLight, LimitingConeAngle, SkSVGNumberType);
 
 SVG_ATTRIBUTE(SkSVGFeMergeNode, In, SkSVGFeInputType);
 
@@ -314,7 +321,7 @@ SVG_OPTIONAL_ATTRIBUTE(SkSVGPattern, Width           , SkSVGLength);
 SVG_OPTIONAL_ATTRIBUTE(SkSVGPattern, Height          , SkSVGLength);
 SVG_OPTIONAL_ATTRIBUTE(SkSVGPattern, PatternTransform, SkSVGTransformType);
 
-SVG_ATTRIBUTE(SkSVGPoly, Points, SkSVGPointsType);
+SVG_ATTRIBUTE_ARRAY(SkSVGPoly, Points, const SkPoint);
 
 SVG_ATTRIBUTE(SkSVGRadialGradient, Cx, SkSVGLength);
 SVG_ATTRIBUTE(SkSVGRadialGradient, Cy, SkSVGLength);
@@ -387,7 +394,7 @@ extern "C" void C_SkSVGColor_Color(SkSVGColor* uninitialized, const SkSVGColorTy
 }
 
 // Hacky way to access the SkSVGContainer::fChildren property (should be safe)
-class SkSVGContainerAccessor : public SkSVGSVG {
+class SkSVGContainerAccessor : public SkSVGContainer {
     public:
         bool hasChild() const {
             return !fChildren.empty();
@@ -402,21 +409,25 @@ class SkSVGContainerAccessor : public SkSVGSVG {
         }
 };
 
-extern "C" void C_SkSVGSVG_appendChild(SkSVGSVG* self, SkSVGNode* node) {
+extern "C" void C_SkSVGContainer_appendChild(SkSVGContainer* self, SkSVGNode* node) {
     self->appendChild(sk_sp<SkSVGNode>(node));
 }
 
-extern "C" bool C_SkSVGSVG_hasChildren(const SkSVGSVG& self) {
+extern "C" bool C_SkSVGContainer_hasChildren(const SkSVGContainer& self) {
     return static_cast<const SkSVGContainerAccessor&>(self).hasChild();
 }
 
-extern "C" int C_SkSVGSVG_childrenCount(const SkSVGSVG& self) {
+extern "C" int C_SkSVGContainer_childrenCount(const SkSVGContainer& self) {
     return static_cast<const SkSVGContainerAccessor&>(self).childrenCount();
 }
 
 // Getting mutable child references from a non-mutable reference seems unsafe, perhaps we should split this into two methods?
-extern "C" const sk_sp<SkSVGNode>* C_SkSVGSVG_children(const SkSVGSVG& self) {
+extern "C" const sk_sp<SkSVGNode>* C_SkSVGContainer_children(const SkSVGContainer& self) {
     return static_cast<const SkSVGContainerAccessor&>(self).children();
+}
+
+extern "C" void C_SkSVGTransformableNode_setTransform(SkSVGTransformableNode* self, const SkMatrix value) {
+    self->setTransform(value);
 }
 
 extern "C" SkSVGTag C_SkSVGNode_tag(const SkSVGNode& self) {

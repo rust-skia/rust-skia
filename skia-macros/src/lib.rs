@@ -8,7 +8,7 @@ use syn::{
     braced, bracketed, parenthesized,
     parse::{Parse, ParseStream, Parser},
     punctuated::Punctuated,
-    token, Expr, Ident, Token, Type,
+    token, Expr, Ident, LitStr, Token, Type,
 };
 
 struct Property {
@@ -31,9 +31,34 @@ impl Parse for Property {
     }
 }
 
+struct AttrName {
+    value: Ident,
+    alias: Option<LitStr>,
+}
+
+impl Parse for AttrName {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        Ok(if input.peek(LitStr) {
+            Self {
+                alias: input.parse()?,
+                value: {
+                    input.parse::<Token![as]>()?;
+
+                    input.parse()?
+                },
+            }
+        } else {
+            Self {
+                value: input.parse()?,
+                alias: None,
+            }
+        })
+    }
+}
+
 struct Attr {
     copy: Option<Token![*]>,
-    name: Ident,
+    name: AttrName,
     optional: Option<Token![?]>,
     colon_token: Token![:],
     ty: Type,
@@ -86,9 +111,9 @@ impl Parse for Attr {
 struct Data {
     name: Ident,
     bracket_token: token::Bracket,
-    native: Ident,
+    native: Expr,
     comma_token: Token![,],
-    native_mut: Ident,
+    native_mut: Expr,
     fat_arrow_token: Token![=>],
     brace_token: token::Brace,
     attrs: Punctuated<Attr, Token![,]>,
@@ -128,7 +153,10 @@ fn attrs2(input: TokenStream) -> TokenStream2 {
         .into_iter()
         .map(
             |Attr {
-                 name: attr,
+                 name: AttrName {
+                    value: attr,
+                    alias,
+                },
                  optional,
                  copy,
                  ty,
@@ -147,8 +175,7 @@ fn attrs2(input: TokenStream) -> TokenStream2 {
                  ..
              }| {
                 let native_name = Ident::new(
-                    &attr
-                        .to_string()
+                    &alias.map(|alias| alias.value()).unwrap_or_else(|| attr.to_string())
                         .split('_')
                         .fold(String::new(), |mut data, word| {
                             write!(data, "{}{}", &word[0..1].to_uppercase(), &word[1..]).unwrap();

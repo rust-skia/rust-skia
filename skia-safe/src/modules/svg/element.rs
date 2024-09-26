@@ -1,23 +1,22 @@
-use std::fmt;
-
-use super::{node::SvgLength, Node, NodeTag, SvgNode, Tagged, TaggedDebug};
-use crate::{prelude::*, Rect};
+use super::{DebugAttributes, Inherits, SvgContainer, SvgLength, SvgPreserveAspectRatio};
+use crate::{prelude::*, Rect, Size};
 use skia_bindings as sb;
 
-pub type Svg = SvgNode<sb::SkSVGSVG>;
+pub type Svg = Inherits<sb::SkSVGSVG, SvgContainer>;
 
-impl Tagged for sb::SkSVGSVG {
-    const TAG: NodeTag = NodeTag::Svg;
-}
+impl DebugAttributes for Svg {
+    const NAME: &'static str = "Svg";
 
-impl TaggedDebug for Svg {
-    fn _dbg(&self, f: &mut fmt::DebugStruct) {
-        f.field("x", &self.get_x())
-            .field("y", &self.get_y())
-            .field("width", &self.get_width())
-            .field("height", &self.get_height())
-            .field("view_box", &self.get_view_box())
-            .field("children", &self.children());
+    fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
+        self.base._dbg(
+            builder
+                .field("x", &self.get_x())
+                .field("y", &self.get_y())
+                .field("width", &self.get_width())
+                .field("height", &self.get_height())
+                .field("preserve_aspect_ratio", self.get_preserve_aspect_ratio())
+                .field("view_box", &self.get_view_box()),
+        );
     }
 }
 
@@ -26,30 +25,22 @@ impl NativeRefCountedBase for sb::SkSVGSVG {
 }
 
 impl Svg {
-    pub fn append_child<N: Tagged + NativeRefCounted>(&mut self, node: SvgNode<N>) {
-        unsafe { sb::C_SkSVGSVG_appendChild(self.native_mut(), node.into_node_ptr()) }
+    pub fn from_ptr(node: *mut sb::SkSVGSVG) -> Option<Self> {
+        let base = SvgContainer::from_ptr(node as *mut _)?;
+        let data = RCHandle::from_ptr(node)?;
+
+        Some(Self { base, data })
     }
 
-    pub fn has_children(&self) -> bool {
-        unsafe { sb::C_SkSVGSVG_hasChildren(self.native()) }
+    pub fn from_unshared_ptr(node: *mut sb::SkSVGSVG) -> Option<Self> {
+        let base = SvgContainer::from_unshared_ptr(node as *mut _)?;
+        let data = RCHandle::from_unshared_ptr(node)?;
+
+        Some(Self { base, data })
     }
 
-    pub fn children_count(&self) -> usize {
-        unsafe { usize::try_from(sb::C_SkSVGSVG_childrenCount(self.native())).unwrap_or_default() }
-    }
-
-    pub fn children(&self) -> Vec<Node> {
-        unsafe {
-            let value = safer::from_raw_parts(
-                sb::C_SkSVGSVG_children(self.native()),
-                self.children_count(),
-            );
-
-            value
-                .iter()
-                .map(|value| Node::from_unshared_ptr(value.fPtr).unwrap_unchecked())
-                .collect()
-        }
+    pub fn intrinsic_size(&self) -> Size {
+        unsafe { Size::from_native_c(sb::C_SkSVGSVG_intrinsicSize(self.native())) }
     }
 
     skia_macros::attrs! {
@@ -58,7 +49,7 @@ impl Svg {
             y: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
             width: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
             height: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
-            // PreserveAspectRatio: SkSVGPreserveAspectRatio [get(value) => value, set(value) => value],
+            preserve_aspect_ratio: SvgPreserveAspectRatio [get(value) => SvgPreserveAspectRatio::from_native_ref(value), set(value) => value.into_native()],
             view_box?: Rect [get(value) => value.map(Rect::from_native_ref), set(value) => value.into_native()]
         }
     }

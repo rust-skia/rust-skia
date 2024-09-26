@@ -1,11 +1,11 @@
-use super::{DebugAttributes, Inherits, SvgContainer, SvgIri, SvgLength, SvgPreserveAspectRatio};
+use super::{DebugAttributes, Inherits, SvgBoundingBoxUnits, SvgContainer, SvgLength};
 use crate::prelude::*;
 use skia_bindings as sb;
 
-pub type SvgImage = Inherits<sb::SkSVGImage, SvgContainer>;
+pub type SvgFilter = Inherits<sb::SkSVGFilter, SvgContainer>;
 
-impl DebugAttributes for SvgImage {
-    const NAME: &'static str = "Image";
+impl DebugAttributes for SvgFilter {
+    const NAME: &'static str = "Filter";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.base._dbg(
@@ -14,25 +14,25 @@ impl DebugAttributes for SvgImage {
                 .field("y", &self.get_y())
                 .field("width", &self.get_width())
                 .field("height", &self.get_height())
-                .field("href", &self.get_href())
-                .field("preserve_aspect_ratio", self.get_preserve_aspect_ratio()),
+                .field("filter_units", self.get_filter_units())
+                .field("primitive_units", self.get_primitive_units()),
         );
     }
 }
 
-impl NativeRefCountedBase for sb::SkSVGImage {
+impl NativeRefCountedBase for sb::SkSVGFilter {
     type Base = sb::SkRefCntBase;
 }
 
-impl SvgImage {
-    pub fn from_ptr(node: *mut sb::SkSVGImage) -> Option<Self> {
+impl SvgFilter {
+    pub fn from_ptr(node: *mut sb::SkSVGFilter) -> Option<Self> {
         let base = SvgContainer::from_ptr(node as *mut _)?;
         let data = RCHandle::from_ptr(node)?;
 
         Some(Self { base, data })
     }
 
-    pub fn from_unshared_ptr(node: *mut sb::SkSVGImage) -> Option<Self> {
+    pub fn from_unshared_ptr(node: *mut sb::SkSVGFilter) -> Option<Self> {
         let base = SvgContainer::from_unshared_ptr(node as *mut _)?;
         let data = RCHandle::from_unshared_ptr(node)?;
 
@@ -40,13 +40,13 @@ impl SvgImage {
     }
 
     skia_macros::attrs! {
-        SkSVGImage[native, native_mut] => {
+        SkSVGFilter[native, native_mut] => {
             x: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
             y: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
             width: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
             height: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
-            href: SvgIri [get(value) => SvgIri::from_native_ref(value), set(value) => value.into_native()],
-            preserve_aspect_ratio: SvgPreserveAspectRatio [get(value) => SvgPreserveAspectRatio::from_native_ref(value), set(value) => value.into_native()]
+            filter_units: SvgBoundingBoxUnits [get(value) => &value.fType, set(value) => sb::SkSVGObjectBoundingBoxUnits { fType: value }],
+            primitive_units: SvgBoundingBoxUnits [get(value) => &value.fType, set(value) => sb::SkSVGObjectBoundingBoxUnits { fType: value }]
         }
     }
 }

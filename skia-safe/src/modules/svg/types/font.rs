@@ -1,8 +1,7 @@
-use std::fmt;
-
-use super::node::SvgLength;
+use super::SvgLength;
 use crate::{interop::AsStr, prelude::*};
 use skia_bindings as sb;
+use std::fmt;
 
 pub type SvgFontStyle = sb::SkSVGFontStyle_Type;
 pub type SvgFontWeight = sb::SkSVGFontWeight_Type;

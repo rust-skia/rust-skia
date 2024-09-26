@@ -1,11 +1,14 @@
-use super::{DebugAttributes, Inherits, SvgContainer, SvgIri, SvgLength, SvgPreserveAspectRatio};
-use crate::prelude::*;
+use super::SvgShape;
+use crate::{
+    prelude::*,
+    svg::{DebugAttributes, Inherits, SvgLength},
+};
 use skia_bindings as sb;
 
-pub type SvgImage = Inherits<sb::SkSVGImage, SvgContainer>;
+pub type SvgRect = Inherits<sb::SkSVGRect, SvgShape>;
 
-impl DebugAttributes for SvgImage {
-    const NAME: &'static str = "Image";
+impl DebugAttributes for SvgRect {
+    const NAME: &'static str = "Rect";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.base._dbg(
@@ -14,39 +17,39 @@ impl DebugAttributes for SvgImage {
                 .field("y", &self.get_y())
                 .field("width", &self.get_width())
                 .field("height", &self.get_height())
-                .field("href", &self.get_href())
-                .field("preserve_aspect_ratio", self.get_preserve_aspect_ratio()),
+                .field("rx", &self.get_rx())
+                .field("ry", &self.get_ry()),
         );
     }
 }
 
-impl NativeRefCountedBase for sb::SkSVGImage {
+impl NativeRefCountedBase for sb::SkSVGRect {
     type Base = sb::SkRefCntBase;
 }
 
-impl SvgImage {
-    pub fn from_ptr(node: *mut sb::SkSVGImage) -> Option<Self> {
-        let base = SvgContainer::from_ptr(node as *mut _)?;
+impl SvgRect {
+    pub fn from_ptr(node: *mut sb::SkSVGRect) -> Option<Self> {
+        let base = SvgShape::from_ptr(node as *mut _)?;
         let data = RCHandle::from_ptr(node)?;
 
         Some(Self { base, data })
     }
 
-    pub fn from_unshared_ptr(node: *mut sb::SkSVGImage) -> Option<Self> {
-        let base = SvgContainer::from_unshared_ptr(node as *mut _)?;
+    pub fn from_unshared_ptr(node: *mut sb::SkSVGRect) -> Option<Self> {
+        let base = SvgShape::from_unshared_ptr(node as *mut _)?;
         let data = RCHandle::from_unshared_ptr(node)?;
 
         Some(Self { base, data })
     }
 
     skia_macros::attrs! {
-        SkSVGImage[native, native_mut] => {
+        SkSVGRect[native, native_mut] => {
             x: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
             y: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
             width: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
             height: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
-            href: SvgIri [get(value) => SvgIri::from_native_ref(value), set(value) => value.into_native()],
-            preserve_aspect_ratio: SvgPreserveAspectRatio [get(value) => SvgPreserveAspectRatio::from_native_ref(value), set(value) => value.into_native()]
+            rx?: SvgLength [get(value) => value.map(SvgLength::from_native_ref), set(value) => value.into_native()],
+            ry?: SvgLength [get(value) => value.map(SvgLength::from_native_ref), set(value) => value.into_native()]
         }
     }
 }

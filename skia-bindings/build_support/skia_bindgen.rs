@@ -549,6 +549,7 @@ const ENUM_REWRITES: &[EnumEntry] = &[
     ("Unit", rewrite::k_xxx),
     ("Scale", rewrite::k_xxx),
     ("SkSVGLineCap", rewrite::k_xxx),
+    ("SkSVGXmlSpace", rewrite::k_xxx),
     ("SkSVGColorspace", rewrite::k_xxx),
     ("SkSVGDisplay", rewrite::k_xxx),
     ("SkSVGAttribute", rewrite::k_xxx),
