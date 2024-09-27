@@ -2644,23 +2644,30 @@ bool C_SkRuntimeEffect_allowBlender(const SkRuntimeEffect* self) {
     return self->allowBlender();
 }
 
-
 void C_SkRuntimeShaderBuilder_Construct(SkRuntimeShaderBuilder *uninitialized,
                                         SkRuntimeEffect *effect) {
   new (uninitialized) SkRuntimeShaderBuilder(sp(effect));
 }
+
+void C_SkRuntimeShaderBuilder_destruct(SkRuntimeShaderBuilder *self) {
+  self->~SkRuntimeShaderBuilder();
+}
+
 const SkRuntimeEffect *
 C_SkRuntimeShaderBuilder_effect(const SkRuntimeShaderBuilder *self) {
   return self->effect();
 }
+
 sk_sp<const SkData>
 C_SkRuntimeShaderBuilder_uniforms(const SkRuntimeShaderBuilder *self) {
   return self->uniforms();
 }
+
 SkSpan<const SkRuntimeEffect::ChildPtr>
 C_SkRuntimeShaderBuilder_children(const SkRuntimeShaderBuilder *self) {
   return self->children();
 }
+
 SkShader *
 C_SkRuntimeShaderBuilder_makeShader(const SkRuntimeShaderBuilder *self,
                                     const SkMatrix *localMatrix) {

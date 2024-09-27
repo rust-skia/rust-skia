@@ -413,7 +413,7 @@ unsafe_send_sync!(RuntimeShaderBuilder);
 impl NativeDrop for sb::SkRuntimeShaderBuilder {
     fn drop(&mut self) {
         unsafe {
-            sb::SkRuntimeShaderBuilder_SkRuntimeShaderBuilder_destructor(self);
+            sb::C_SkRuntimeShaderBuilder_destruct(self);
         }
     }
 }
