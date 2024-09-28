@@ -23,7 +23,7 @@ impl CropRect {
     }
 
     fn native(&self) -> *const SkRect {
-        match self.0 {
+        match &self.0 {
             None => ptr::null(),
             Some(r) => r.native(),
         }
