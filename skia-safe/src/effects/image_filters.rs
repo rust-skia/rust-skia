@@ -246,14 +246,13 @@ pub fn drop_shadow(
     crop_rect: impl Into<CropRect>,
 ) -> Option<ImageFilter> {
     let delta = offset.into();
-    let color = color.into();
     ImageFilter::from_ptr(unsafe {
         sb::C_SkImageFilters_DropShadow(
             delta.x,
             delta.y,
             sigma_x,
             sigma_y,
-            color.into_native(),
+            color.into().native(),
             color_space.into().into_ptr_or_null(),
             input.into().into_ptr_or_null(),
             crop_rect.into().native(),
@@ -280,14 +279,14 @@ pub fn drop_shadow_only(
     crop_rect: impl Into<CropRect>,
 ) -> Option<ImageFilter> {
     let delta = offset.into();
-    let color = color.into();
+
     ImageFilter::from_ptr(unsafe {
         sb::C_SkImageFilters_DropShadowOnly(
             delta.x,
             delta.y,
             sigma_x,
             sigma_y,
-            color.into_native(),
+            color.into().native(),
             color_space.into().into_ptr_or_null(),
             input.into().into_ptr_or_null(),
             crop_rect.into().native(),
@@ -1161,5 +1160,17 @@ mod tests {
         #[allow(clippy::needless_borrow)]
         let cr_by_ref = cr(rect);
         assert_eq!(cr_by_ref, CropRect(Some(rect)));
+    }
+
+    #[test]
+    fn test_drop_shadow_only() {
+        let rect = Rect {
+            left: 1.0,
+            top: 2.0,
+            right: 3.0,
+            bottom: 4.0,
+        };
+
+        let _ = super::drop_shadow_only((10., 10.), (1.0, 1.0), 0x404040, None, None, rect);
     }
 }
