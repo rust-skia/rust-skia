@@ -4,12 +4,12 @@ use skia_safe::{gpu, Canvas, ImageInfo};
 
 use crate::{artifact, drivers::DrawingDriver, Driver};
 
-pub struct OpenGl {
+pub struct Gl {
     context: gpu::DirectContext,
 }
 
-impl DrawingDriver for OpenGl {
-    const DRIVER: Driver = Driver::OpenGl;
+impl DrawingDriver for Gl {
+    const DRIVER: Driver = Driver::Gl;
 
     fn new() -> Self {
         let interface = gpu::gl::Interface::new_native().unwrap();

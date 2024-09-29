@@ -30,13 +30,9 @@ pub use drivers::Driver;
 #[derive(Parser)]
 #[clap(about)]
 struct Arguments {
-    #[clap(default_value = ".", help = "The output path to render into.")]
+    #[clap(default_value = ".", help = "The path to render into.")]
     out_path: PathBuf,
-    #[clap(
-        long,
-        value_enum,
-        help = "In addition with the CPU, render with the given driver."
-    )]
+    #[clap(long, value_enum, help = "Render with the given driver.")]
     driver: Vec<Driver>,
 }
 
@@ -74,7 +70,7 @@ fn main() {
     #[cfg(feature = "gl")]
     {
         use drivers::gl::*;
-        if drivers.contains(&Driver::OpenGl) {
+        if drivers.contains(&Driver::Gl) {
             let context = GLContext::<NativeGLContext>::create(
                 sparkle::gl::GlType::Gl,
                 GLVersion::MajorMinor(3, 3),
@@ -83,10 +79,10 @@ fn main() {
             .unwrap();
 
             context.make_current().unwrap();
-            draw_all(&mut OpenGl::new(), &out_path);
+            draw_all(&mut Gl::new(), &out_path);
         }
 
-        if drivers.contains(&Driver::OpenGlEs) {
+        if drivers.contains(&Driver::GlEs) {
             let context = GLContext::<NativeGLContext>::create(
                 sparkle::gl::GlType::Gles,
                 GLVersion::MajorMinor(3, 3),
@@ -95,7 +91,7 @@ fn main() {
             .unwrap();
 
             context.make_current().unwrap();
-            draw_all(&mut OpenGl::new(), &out_path);
+            draw_all(&mut Gl::new(), &out_path);
         }
     }
 
