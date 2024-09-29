@@ -2715,16 +2715,16 @@ SkImageFilter *C_SkImageFilters_DisplacementMap(SkColorChannel xChannelSelector,
 
 SkImageFilter *C_SkImageFilters_DropShadow(SkScalar dx, SkScalar dy,
                                            SkScalar sigmaX, SkScalar sigmaY,
-                                           SkColor4f color, SkColorSpace *colorSpace, SkImageFilter *input,
+                                           const SkColor4f* color, SkColorSpace *colorSpace, SkImageFilter *input,
                                            const SkRect *cropRect) {
-    return SkImageFilters::DropShadow(dx, dy, sigmaX, sigmaY, color, sp(colorSpace), sp(input), cropRect).release();
+    return SkImageFilters::DropShadow(dx, dy, sigmaX, sigmaY, *color, sp(colorSpace), sp(input), cropRect).release();
 }
 
 SkImageFilter *C_SkImageFilters_DropShadowOnly(SkScalar dx, SkScalar dy,
                                                SkScalar sigmaX, SkScalar sigmaY,
-                                               SkColor4f color, SkColorSpace* colorSpace, SkImageFilter *input,
+                                               const SkColor4f* color, SkColorSpace* colorSpace, SkImageFilter *input,
                                                const SkRect *cropRect) {
-    return SkImageFilters::DropShadowOnly(dx, dy, sigmaX, sigmaY, color, sp(colorSpace), sp(input), cropRect).release();
+    return SkImageFilters::DropShadowOnly(dx, dy, sigmaX, sigmaY, *color, sp(colorSpace), sp(input), cropRect).release();
 }
 
 SkImageFilter* C_SkImageFilters_Empty() {
