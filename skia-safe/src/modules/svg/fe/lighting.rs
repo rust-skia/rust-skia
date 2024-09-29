@@ -116,10 +116,8 @@ impl DebugAttributes for SvgFeDiffuseLighting {
     const NAME: &'static str = "FeDiffuseLighting";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.base._dbg(
-            builder
-                .field("diffuse_constant", &self.get_diffuse_constant())
-        );
+        self.base
+            ._dbg(builder.field("diffuse_constant", &self.get_diffuse_constant()));
     }
 }
 

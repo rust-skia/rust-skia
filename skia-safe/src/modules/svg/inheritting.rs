@@ -41,7 +41,10 @@ impl<N: NativeRefCounted, B> IntoPtr<N> for Inherits<N, B> {
     }
 }
 
-impl<N: NativeRefCounted, B> Debug for Inherits<N, B> where Self: DebugAttributes {
+impl<N: NativeRefCounted, B> Debug for Inherits<N, B>
+where
+    Self: DebugAttributes,
+{
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let mut builder = f.debug_struct(Self::NAME);
 

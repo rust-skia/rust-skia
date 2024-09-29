@@ -5,6 +5,11 @@ fn main() {
 
 #[cfg(feature = "svg")]
 fn main() {
+    use skia_safe::{
+        svg::{Dom, SvgLength, SvgUnit},
+        Color, FontMgr,
+    };
+
     let data = r#"
         <svg width="100" height="200" viewBox="0 0 1200 800" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41421;">
             <g id="Layer-1" serif:id="Layer 1">
@@ -52,28 +57,17 @@ fn main() {
             </defs>
         </svg>"#;
 
-    let mgr = skia_safe::FontMgr::default();
-    let dom: skia_safe::svg::Dom = skia_safe::svg::Dom::from_bytes(data.as_bytes(), mgr).unwrap();
+    let mgr = FontMgr::default();
+    let dom: Dom = Dom::from_bytes(data.as_bytes(), mgr).unwrap();
     let mut root = dom.root();
 
-    // println!("{:?}", dom.attributes().intrinsic_size());
-    // println!("{:?}", dom.attributes().set_attribute("color", "red"));
-    // println!("{:?}", dom.attributes().set_attribute("opacity", "5"));
-    println!(
-        "{:?}",
-        root.attributes_mut()
-            .set_width(skia_safe::svg::SvgLength::new(
-                50.,
-                skia_safe::svg::SvgUnit::PX
-            ))
-    );
-    println!(
-        "{:?}",
-        root.attributes_mut()
-            .set_height(skia_safe::svg::SvgLength::new(
-                600.,
-                skia_safe::svg::SvgUnit::CM
-            ))
-    );
-    // println!("{:?}", dom.root().intrinsic_size());
+    println!("{:?}", root.intrinsic_size());
+
+    root.set_color(Color::RED);
+    root.set_opacity(0.5);
+
+    root.set_width(SvgLength::new(50., SvgUnit::PX));
+    root.set_height(SvgLength::new(600., SvgUnit::CM));
+
+    println!("{:?}", root.intrinsic_size());
 }

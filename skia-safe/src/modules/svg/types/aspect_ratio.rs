@@ -16,4 +16,8 @@ impl SvgPreserveAspectRatio {
     }
 }
 
-native_transmutable!(sb::SkSVGPreserveAspectRatio, SvgPreserveAspectRatio, svg_preserve_aspect_ratio_layout);
+native_transmutable!(
+    sb::SkSVGPreserveAspectRatio,
+    SvgPreserveAspectRatio,
+    svg_preserve_aspect_ratio_layout
+);

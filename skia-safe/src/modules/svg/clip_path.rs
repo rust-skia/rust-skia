@@ -8,10 +8,8 @@ impl DebugAttributes for SvgClipPath {
     const NAME: &'static str = "ClipPath";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.base._dbg(
-            builder
-                .field("clip_path_units", self.get_clip_path_units()),
-        );
+        self.base
+            ._dbg(builder.field("clip_path_units", self.get_clip_path_units()));
     }
 }
 
