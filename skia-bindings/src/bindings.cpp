@@ -2682,7 +2682,6 @@ void C_SkRuntimeShaderBuilder_setUniformFloat(SkRuntimeShaderBuilder *self,
   using float2 = std::array<float, 2>;
   using float3 = std::array<float, 3>;
   using float4 = std::array<float, 4>;
-  using float2x2 = std::array<float, 4>;
   using float3x3 = std::array<float, 9>;
   using float4x4 = std::array<float, 16>;
 
