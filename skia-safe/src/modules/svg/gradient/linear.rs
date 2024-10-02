@@ -1,17 +1,24 @@
-use super::SvgGradient;
 use crate::{
     prelude::*,
-    svg::{DebugAttributes, Inherits, SvgLength},
+    svg::{DebugAttributes, HasBase, Length},
 };
 use skia_bindings as sb;
 
-pub type SvgLinearGradient = Inherits<sb::SkSVGLinearGradient, SvgGradient>;
+pub type LinearGradient = RCHandle<sb::SkSVGLinearGradient>;
 
-impl DebugAttributes for SvgLinearGradient {
+impl NativeRefCountedBase for sb::SkSVGLinearGradient {
+    type Base = sb::SkRefCntBase;
+}
+
+impl HasBase for sb::SkSVGLinearGradient {
+    type Base = sb::SkSVGGradient;
+}
+
+impl DebugAttributes for LinearGradient {
     const NAME: &'static str = "LinearGradient";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.base._dbg(
+        self.as_base()._dbg(
             builder
                 .field("x1", &self.get_x1())
                 .field("y1", &self.get_y1())
@@ -21,31 +28,13 @@ impl DebugAttributes for SvgLinearGradient {
     }
 }
 
-impl NativeRefCountedBase for sb::SkSVGLinearGradient {
-    type Base = sb::SkRefCntBase;
-}
-
-impl SvgLinearGradient {
-    pub fn from_ptr(node: *mut sb::SkSVGLinearGradient) -> Option<Self> {
-        let base = SvgGradient::from_ptr(node as *mut _)?;
-        let data = RCHandle::from_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
-    pub fn from_unshared_ptr(node: *mut sb::SkSVGLinearGradient) -> Option<Self> {
-        let base = SvgGradient::from_unshared_ptr(node as *mut _)?;
-        let data = RCHandle::from_unshared_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
+impl LinearGradient {
     skia_macros::attrs! {
         SkSVGLinearGradient[native, native_mut] => {
-            x1: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
-            y1: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
-            x2: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
-            y2: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()]
+            x1: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
+            y1: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
+            x2: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
+            y2: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()]
         }
     }
 }

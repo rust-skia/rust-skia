@@ -1,33 +1,21 @@
-use super::{DebugAttributes, Inherits, SvgContainer};
+use super::{DebugAttributes, HasBase};
 use crate::prelude::*;
 use skia_bindings as sb;
 
-pub type SvgDefs = Inherits<sb::SkSVGDefs, SvgContainer>;
-
-impl DebugAttributes for SvgDefs {
-    const NAME: &'static str = "Defs";
-
-    fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.base._dbg(builder);
-    }
-}
+pub type Defs = RCHandle<sb::SkSVGDefs>;
 
 impl NativeRefCountedBase for sb::SkSVGDefs {
     type Base = sb::SkRefCntBase;
 }
 
-impl SvgDefs {
-    pub fn from_ptr(node: *mut sb::SkSVGDefs) -> Option<Self> {
-        let base = SvgContainer::from_ptr(node as *mut _)?;
-        let data = RCHandle::from_ptr(node)?;
+impl HasBase for sb::SkSVGDefs {
+    type Base = sb::SkSVGContainer;
+}
 
-        Some(Self { base, data })
-    }
+impl DebugAttributes for Defs {
+    const NAME: &'static str = "Defs";
 
-    pub fn from_unshared_ptr(node: *mut sb::SkSVGDefs) -> Option<Self> {
-        let base = SvgContainer::from_unshared_ptr(node as *mut _)?;
-        let data = RCHandle::from_unshared_ptr(node)?;
-
-        Some(Self { base, data })
+    fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
+        self.as_base()._dbg(builder);
     }
 }

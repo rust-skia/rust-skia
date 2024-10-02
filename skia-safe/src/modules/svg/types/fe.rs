@@ -2,17 +2,17 @@ use crate::interop::AsStr;
 use skia_bindings as sb;
 use std::fmt;
 
-pub type SvgFeInputType = sb::SkSVGFeInputType_Type;
+pub type FeInputType = sb::SkSVGFeInputType_Type;
 
 #[repr(C)]
-pub struct SvgFeInput {
-    kind: SvgFeInputType,
+pub struct FeInput {
+    kind: FeInputType,
     id: sb::SkString,
 }
 
-native_transmutable!(sb::SkSVGFeInputType, SvgFeInput, svg_fe_input_layout);
+native_transmutable!(sb::SkSVGFeInputType, FeInput, svg_fe_input_layout);
 
-impl fmt::Debug for SvgFeInput {
+impl fmt::Debug for FeInput {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("SvgFeInput")
             .field("kind", &self.kind())
@@ -21,13 +21,13 @@ impl fmt::Debug for SvgFeInput {
     }
 }
 
-impl SvgFeInput {
-    pub fn kind(&self) -> SvgFeInputType {
+impl FeInput {
+    pub fn kind(&self) -> FeInputType {
         self.kind
     }
 
     pub fn id(&self) -> Option<&str> {
-        if self.kind == SvgFeInputType::FilterPrimitiveReference {
+        if self.kind == FeInputType::FilterPrimitiveReference {
             Some(self.id.as_str())
         } else {
             None
@@ -36,56 +36,56 @@ impl SvgFeInput {
 
     pub fn source_graphic() -> Self {
         Self {
-            kind: SvgFeInputType::SourceGraphic,
+            kind: FeInputType::SourceGraphic,
             id: crate::interop::String::default().into_native(),
         }
     }
 
     pub fn source_alpha() -> Self {
         Self {
-            kind: SvgFeInputType::SourceAlpha,
+            kind: FeInputType::SourceAlpha,
             id: crate::interop::String::default().into_native(),
         }
     }
 
     pub fn background_image() -> Self {
         Self {
-            kind: SvgFeInputType::BackgroundImage,
+            kind: FeInputType::BackgroundImage,
             id: crate::interop::String::default().into_native(),
         }
     }
 
     pub fn background_alpha() -> Self {
         Self {
-            kind: SvgFeInputType::BackgroundAlpha,
+            kind: FeInputType::BackgroundAlpha,
             id: crate::interop::String::default().into_native(),
         }
     }
 
     pub fn fill_paint() -> Self {
         Self {
-            kind: SvgFeInputType::FillPaint,
+            kind: FeInputType::FillPaint,
             id: crate::interop::String::default().into_native(),
         }
     }
 
     pub fn stroke_paint() -> Self {
         Self {
-            kind: SvgFeInputType::StrokePaint,
+            kind: FeInputType::StrokePaint,
             id: crate::interop::String::default().into_native(),
         }
     }
 
     pub fn unspecified() -> Self {
         Self {
-            kind: SvgFeInputType::Unspecified,
+            kind: FeInputType::Unspecified,
             id: crate::interop::String::default().into_native(),
         }
     }
 
     pub fn new<T: AsRef<str>>(id: T) -> Self {
         Self {
-            kind: SvgFeInputType::FilterPrimitiveReference,
+            kind: FeInputType::FilterPrimitiveReference,
             id: crate::interop::String::from_str(id.as_ref()).into_native(),
         }
     }

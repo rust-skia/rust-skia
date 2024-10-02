@@ -1,17 +1,24 @@
-use super::SvgShape;
 use crate::{
     prelude::*,
-    svg::{DebugAttributes, Inherits, SvgLength},
+    svg::{DebugAttributes, HasBase, Length},
 };
 use skia_bindings as sb;
 
-pub type SvgCircle = Inherits<sb::SkSVGCircle, SvgShape>;
+pub type Circle = RCHandle<sb::SkSVGCircle>;
 
-impl DebugAttributes for SvgCircle {
+impl NativeRefCountedBase for sb::SkSVGCircle {
+    type Base = sb::SkRefCntBase;
+}
+
+impl HasBase for sb::SkSVGCircle {
+    type Base = sb::SkSVGShape;
+}
+
+impl DebugAttributes for Circle {
     const NAME: &'static str = "Circle";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.base._dbg(
+        self.as_base()._dbg(
             builder
                 .field("cx", &self.get_cx())
                 .field("cy", &self.get_cy())
@@ -20,30 +27,12 @@ impl DebugAttributes for SvgCircle {
     }
 }
 
-impl NativeRefCountedBase for sb::SkSVGCircle {
-    type Base = sb::SkRefCntBase;
-}
-
-impl SvgCircle {
-    pub fn from_ptr(node: *mut sb::SkSVGCircle) -> Option<Self> {
-        let base = SvgShape::from_ptr(node as *mut _)?;
-        let data = RCHandle::from_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
-    pub fn from_unshared_ptr(node: *mut sb::SkSVGCircle) -> Option<Self> {
-        let base = SvgShape::from_unshared_ptr(node as *mut _)?;
-        let data = RCHandle::from_unshared_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
+impl Circle {
     skia_macros::attrs! {
         SkSVGCircle[native, native_mut] => {
-            cx: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
-            cy: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
-            r: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()]
+            cx: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
+            cy: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
+            r: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()]
         }
     }
 }

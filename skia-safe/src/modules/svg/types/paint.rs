@@ -1,11 +1,11 @@
-use super::color::SvgColor;
+use super::color::Fill;
 use crate::{prelude::*, Color};
 use skia_bindings as sb;
 use std::fmt;
 
-pub type SvgPaint = Handle<sb::SkSVGPaint>;
+pub type Paint = Handle<sb::SkSVGPaint>;
 
-unsafe_send_sync!(SvgPaint);
+unsafe_send_sync!(Paint);
 
 impl NativeDrop for sb::SkSVGPaint {
     fn drop(&mut self) {
@@ -13,7 +13,7 @@ impl NativeDrop for sb::SkSVGPaint {
     }
 }
 
-impl fmt::Debug for SvgPaint {
+impl fmt::Debug for Paint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.is_color() {
             f.debug_tuple("SvgPaint::Color")
@@ -27,7 +27,7 @@ impl fmt::Debug for SvgPaint {
     }
 }
 
-impl SvgPaint {
+impl Paint {
     pub fn color(&self) -> Option<Color> {
         let paint = self.native();
 
@@ -57,21 +57,21 @@ impl SvgPaint {
 
     pub fn from_color(color: Color) -> Self {
         Self::construct(|uninitialized| unsafe {
-            let color = SvgColor::from_color(color);
+            let color = Fill::from_color(color);
 
-            sb::C_SkSVGPaint_Color(uninitialized, color.native())
+            sb::C_SkSVGPaint_Construct1(uninitialized, color.native())
         })
     }
 
     pub fn current_color() -> Self {
         Self::construct(|uninitialized| unsafe {
-            let color = SvgColor::current_color();
+            let color = Fill::current_color();
 
-            sb::C_SkSVGPaint_Color(uninitialized, color.native())
+            sb::C_SkSVGPaint_Construct1(uninitialized, color.native())
         })
     }
 
     pub fn none() -> Self {
-        Self::construct(|uninitialized| unsafe { sb::C_SkSVGPaint_None(uninitialized) })
+        Self::construct(|uninitialized| unsafe { sb::C_SkSVGPaint_Construct(uninitialized) })
     }
 }

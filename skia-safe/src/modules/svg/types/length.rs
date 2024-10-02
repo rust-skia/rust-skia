@@ -2,19 +2,19 @@ use skia_bindings as sb;
 
 use crate::scalar;
 
-pub type SvgUnit = sb::SkSVGLength_Unit;
+pub type LengthUnit = sb::SkSVGLength_Unit;
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Debug)]
-pub struct SvgLength {
+pub struct Length {
     pub value: scalar,
-    pub unit: SvgUnit,
+    pub unit: LengthUnit,
 }
 
-native_transmutable!(sb::SkSVGLength, SvgLength, svg_length_layout);
+native_transmutable!(sb::SkSVGLength, Length, svg_length_layout);
 
-impl SvgLength {
-    pub fn new(value: scalar, unit: SvgUnit) -> Self {
+impl Length {
+    pub fn new(value: scalar, unit: LengthUnit) -> Self {
         Self { value, unit }
     }
 }

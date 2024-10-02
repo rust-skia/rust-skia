@@ -1,4 +1,4 @@
-use super::{DebugAttributes, Inherits, SvgFe};
+use super::{DebugAttributes, HasBase};
 use crate::{prelude::*, scalar};
 use skia_bindings as sb;
 
@@ -28,13 +28,21 @@ native_transmutable!(
     svg_kernel_unit_length_layout
 );
 
-pub type SvgFeLighting = Inherits<sb::SkSVGFeLighting, SvgFe>;
+pub type SvgFeLighting = RCHandle<sb::SkSVGFeLighting>;
+
+impl NativeRefCountedBase for sb::SkSVGFeLighting {
+    type Base = sb::SkRefCntBase;
+}
+
+impl HasBase for sb::SkSVGFeLighting {
+    type Base = sb::SkSVGFe;
+}
 
 impl DebugAttributes for SvgFeLighting {
     const NAME: &'static str = "FeLighting";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.base._dbg(
+        self.as_base()._dbg(
             builder
                 .field("surface_scale", &self.get_surface_scale())
                 .field("kernel_unit_length", &self.get_kernel_unit_length()),
@@ -42,25 +50,7 @@ impl DebugAttributes for SvgFeLighting {
     }
 }
 
-impl NativeRefCountedBase for sb::SkSVGFeLighting {
-    type Base = sb::SkRefCntBase;
-}
-
 impl SvgFeLighting {
-    pub fn from_ptr(node: *mut sb::SkSVGFeLighting) -> Option<Self> {
-        let base = SvgFe::from_ptr(node as *mut _)?;
-        let data = RCHandle::from_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
-    pub fn from_unshared_ptr(node: *mut sb::SkSVGFeLighting) -> Option<Self> {
-        let base = SvgFe::from_unshared_ptr(node as *mut _)?;
-        let data = RCHandle::from_unshared_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
     skia_macros::attrs! {
         SkSVGFeLighting[native, native_mut] => {
             *surface_scale: scalar [get(value) => value, set(value) => value],
@@ -69,13 +59,21 @@ impl SvgFeLighting {
     }
 }
 
-pub type SvgFeSpecularLighting = Inherits<sb::SkSVGFeSpecularLighting, SvgFeLighting>;
+pub type FeSpecularLighting = RCHandle<sb::SkSVGFeSpecularLighting>;
 
-impl DebugAttributes for SvgFeSpecularLighting {
+impl NativeRefCountedBase for sb::SkSVGFeSpecularLighting {
+    type Base = sb::SkRefCntBase;
+}
+
+impl HasBase for sb::SkSVGFeSpecularLighting {
+    type Base = sb::SkSVGFeLighting;
+}
+
+impl DebugAttributes for FeSpecularLighting {
     const NAME: &'static str = "FeSpecularLighting";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.base._dbg(
+        self.as_base()._dbg(
             builder
                 .field("specular_constant", &self.get_specular_constant())
                 .field("specular_exponent", &self.get_specular_exponent()),
@@ -83,25 +81,7 @@ impl DebugAttributes for SvgFeSpecularLighting {
     }
 }
 
-impl NativeRefCountedBase for sb::SkSVGFeSpecularLighting {
-    type Base = sb::SkRefCntBase;
-}
-
-impl SvgFeSpecularLighting {
-    pub fn from_ptr(node: *mut sb::SkSVGFeSpecularLighting) -> Option<Self> {
-        let base = SvgFeLighting::from_ptr(node as *mut _)?;
-        let data = RCHandle::from_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
-    pub fn from_unshared_ptr(node: *mut sb::SkSVGFeSpecularLighting) -> Option<Self> {
-        let base = SvgFeLighting::from_unshared_ptr(node as *mut _)?;
-        let data = RCHandle::from_unshared_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
+impl FeSpecularLighting {
     skia_macros::attrs! {
         SkSVGFeSpecularLighting[native, native_mut] => {
             *specular_constant: scalar [get(value) => value, set(value) => value],
@@ -110,36 +90,26 @@ impl SvgFeSpecularLighting {
     }
 }
 
-pub type SvgFeDiffuseLighting = Inherits<sb::SkSVGFeDiffuseLighting, SvgFeLighting>;
-
-impl DebugAttributes for SvgFeDiffuseLighting {
-    const NAME: &'static str = "FeDiffuseLighting";
-
-    fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.base
-            ._dbg(builder.field("diffuse_constant", &self.get_diffuse_constant()));
-    }
-}
+pub type FeDiffuseLighting = RCHandle<sb::SkSVGFeDiffuseLighting>;
 
 impl NativeRefCountedBase for sb::SkSVGFeDiffuseLighting {
     type Base = sb::SkRefCntBase;
 }
 
-impl SvgFeDiffuseLighting {
-    pub fn from_ptr(node: *mut sb::SkSVGFeDiffuseLighting) -> Option<Self> {
-        let base = SvgFeLighting::from_ptr(node as *mut _)?;
-        let data = RCHandle::from_ptr(node)?;
+impl HasBase for sb::SkSVGFeDiffuseLighting {
+    type Base = sb::SkSVGFeLighting;
+}
 
-        Some(Self { base, data })
+impl DebugAttributes for FeDiffuseLighting {
+    const NAME: &'static str = "FeDiffuseLighting";
+
+    fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
+        self.as_base()
+            ._dbg(builder.field("diffuse_constant", &self.get_diffuse_constant()));
     }
+}
 
-    pub fn from_unshared_ptr(node: *mut sb::SkSVGFeDiffuseLighting) -> Option<Self> {
-        let base = SvgFeLighting::from_unshared_ptr(node as *mut _)?;
-        let data = RCHandle::from_unshared_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
+impl FeDiffuseLighting {
     skia_macros::attrs! {
         SkSVGFeDiffuseLighting[native, native_mut] => {
             *diffuse_constant: scalar [get(value) => value, set(value) => value]

@@ -6,7 +6,7 @@ fn main() {
 #[cfg(feature = "svg")]
 fn main() {
     use skia_safe::{
-        svg::{Dom, SvgLength, SvgUnit},
+        svg::{Dom, Length, LengthUnit},
         Color, FontMgr,
     };
 
@@ -66,8 +66,16 @@ fn main() {
     root.set_color(Color::RED);
     root.set_opacity(0.5);
 
-    root.set_width(SvgLength::new(50., SvgUnit::PX));
-    root.set_height(SvgLength::new(600., SvgUnit::CM));
+    root.set_width(Length::new(50., LengthUnit::PX));
+    root.set_height(Length::new(600., LengthUnit::CM));
 
     println!("{:?}", root.intrinsic_size());
+
+    let children = root.children();
+
+    println!("{children:#?}");
+
+    // new lines (and spaces after them) are represented by the parser as TextLiteral
+    // text literal, <g />, text literal, <defs /> and text literal
+    assert_eq!(children.len(), 5);
 }

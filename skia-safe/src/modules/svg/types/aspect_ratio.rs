@@ -1,23 +1,23 @@
 use skia_bindings as sb;
 
-pub type SvgAlign = sb::SkSVGPreserveAspectRatio_Align;
-pub type SvgScale = sb::SkSVGPreserveAspectRatio_Scale;
+pub type Align = sb::SkSVGPreserveAspectRatio_Align;
+pub type Scale = sb::SkSVGPreserveAspectRatio_Scale;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct SvgPreserveAspectRatio {
-    pub align: SvgAlign,
-    pub scale: SvgScale,
+pub struct PreserveAspectRatio {
+    pub align: Align,
+    pub scale: Scale,
 }
 
-impl SvgPreserveAspectRatio {
-    pub fn new(align: SvgAlign, scale: SvgScale) -> Self {
+impl PreserveAspectRatio {
+    pub fn new(align: Align, scale: Scale) -> Self {
         Self { align, scale }
     }
 }
 
 native_transmutable!(
     sb::SkSVGPreserveAspectRatio,
-    SvgPreserveAspectRatio,
+    PreserveAspectRatio,
     svg_preserve_aspect_ratio_layout
 );

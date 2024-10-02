@@ -1,40 +1,30 @@
-use super::SvgShape;
 use crate::{
     prelude::*,
-    svg::{DebugAttributes, Inherits},
+    svg::{DebugAttributes, HasBase},
     Point,
 };
 use skia_bindings as sb;
 
-pub type SvgPoly = Inherits<sb::SkSVGPoly, SvgShape>;
-
-impl DebugAttributes for SvgPoly {
-    const NAME: &'static str = "Poly";
-
-    fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.base._dbg(builder.field("points", &self.get_points()));
-    }
-}
+pub type Poly = RCHandle<sb::SkSVGPoly>;
 
 impl NativeRefCountedBase for sb::SkSVGPoly {
     type Base = sb::SkRefCntBase;
 }
 
-impl SvgPoly {
-    pub fn from_ptr(node: *mut sb::SkSVGPoly) -> Option<Self> {
-        let base = SvgShape::from_ptr(node as *mut _)?;
-        let data = RCHandle::from_ptr(node)?;
+impl HasBase for sb::SkSVGPoly {
+    type Base = sb::SkSVGShape;
+}
 
-        Some(Self { base, data })
+impl DebugAttributes for Poly {
+    const NAME: &'static str = "Poly";
+
+    fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
+        self.as_base()
+            ._dbg(builder.field("points", &self.get_points()));
     }
+}
 
-    pub fn from_unshared_ptr(node: *mut sb::SkSVGPoly) -> Option<Self> {
-        let base = SvgShape::from_unshared_ptr(node as *mut _)?;
-        let data = RCHandle::from_unshared_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
+impl Poly {
     pub fn get_points(&self) -> &[Point] {
         unsafe {
             safer::from_raw_parts(

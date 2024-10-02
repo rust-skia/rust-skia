@@ -1,17 +1,25 @@
 use crate::{
     prelude::*,
     scalar,
-    svg::{DebugAttributes, Inherits, SvgContainer},
+    svg::{DebugAttributes, HasBase},
 };
 use skia_bindings as sb;
 
-pub type SvgFeDistantLight = Inherits<sb::SkSVGFeDistantLight, SvgContainer>;
+pub type FeDistantLight = RCHandle<sb::SkSVGFeDistantLight>;
 
-impl DebugAttributes for SvgFeDistantLight {
+impl NativeRefCountedBase for sb::SkSVGFeDistantLight {
+    type Base = sb::SkRefCntBase;
+}
+
+impl HasBase for sb::SkSVGFeDistantLight {
+    type Base = sb::SkSVGContainer;
+}
+
+impl DebugAttributes for FeDistantLight {
     const NAME: &'static str = "FeDistantLight";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.base._dbg(
+        self.as_base()._dbg(
             builder
                 .field("azimuth", &self.get_azimuth())
                 .field("elevation", &self.get_elevation()),
@@ -19,25 +27,7 @@ impl DebugAttributes for SvgFeDistantLight {
     }
 }
 
-impl NativeRefCountedBase for sb::SkSVGFeDistantLight {
-    type Base = sb::SkRefCntBase;
-}
-
-impl SvgFeDistantLight {
-    pub fn from_ptr(node: *mut sb::SkSVGFeDistantLight) -> Option<Self> {
-        let base = SvgContainer::from_ptr(node as *mut _)?;
-        let data = RCHandle::from_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
-    pub fn from_unshared_ptr(node: *mut sb::SkSVGFeDistantLight) -> Option<Self> {
-        let base = SvgContainer::from_unshared_ptr(node as *mut _)?;
-        let data = RCHandle::from_unshared_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
+impl FeDistantLight {
     skia_macros::attrs! {
         SkSVGFeDistantLight[native, native_mut] => {
             *azimuth: scalar [get(value) => value, set(value) => value],
@@ -46,13 +36,21 @@ impl SvgFeDistantLight {
     }
 }
 
-pub type SvgFePointLight = Inherits<sb::SkSVGFePointLight, SvgContainer>;
+pub type FePointLight = RCHandle<sb::SkSVGFePointLight>;
 
-impl DebugAttributes for SvgFePointLight {
+impl NativeRefCountedBase for sb::SkSVGFePointLight {
+    type Base = sb::SkRefCntBase;
+}
+
+impl HasBase for sb::SkSVGFePointLight {
+    type Base = sb::SkSVGContainer;
+}
+
+impl DebugAttributes for FePointLight {
     const NAME: &'static str = "FePointLight";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.base._dbg(
+        self.as_base()._dbg(
             builder
                 .field("x", &self.get_x())
                 .field("y", &self.get_y())
@@ -61,25 +59,7 @@ impl DebugAttributes for SvgFePointLight {
     }
 }
 
-impl NativeRefCountedBase for sb::SkSVGFePointLight {
-    type Base = sb::SkRefCntBase;
-}
-
-impl SvgFePointLight {
-    pub fn from_ptr(node: *mut sb::SkSVGFePointLight) -> Option<Self> {
-        let base = SvgContainer::from_ptr(node as *mut _)?;
-        let data = RCHandle::from_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
-    pub fn from_unshared_ptr(node: *mut sb::SkSVGFePointLight) -> Option<Self> {
-        let base = SvgContainer::from_unshared_ptr(node as *mut _)?;
-        let data = RCHandle::from_unshared_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
+impl FePointLight {
     skia_macros::attrs! {
         SkSVGFePointLight[native, native_mut] => {
             *x: scalar [get(value) => value, set(value) => value],
@@ -89,13 +69,21 @@ impl SvgFePointLight {
     }
 }
 
-pub type SvgFeSpotLight = Inherits<sb::SkSVGFeSpotLight, SvgContainer>;
+pub type FeSpotLight = RCHandle<sb::SkSVGFeSpotLight>;
 
-impl DebugAttributes for SvgFeSpotLight {
+impl NativeRefCountedBase for sb::SkSVGFeSpotLight {
+    type Base = sb::SkRefCntBase;
+}
+
+impl HasBase for sb::SkSVGFeSpotLight {
+    type Base = sb::SkSVGContainer;
+}
+
+impl DebugAttributes for FeSpotLight {
     const NAME: &'static str = "FeSpotLight";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.base._dbg(
+        self.as_base()._dbg(
             builder
                 .field("x", &self.get_x())
                 .field("y", &self.get_y())
@@ -109,25 +97,7 @@ impl DebugAttributes for SvgFeSpotLight {
     }
 }
 
-impl NativeRefCountedBase for sb::SkSVGFeSpotLight {
-    type Base = sb::SkRefCntBase;
-}
-
-impl SvgFeSpotLight {
-    pub fn from_ptr(node: *mut sb::SkSVGFeSpotLight) -> Option<Self> {
-        let base = SvgContainer::from_ptr(node as *mut _)?;
-        let data = RCHandle::from_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
-    pub fn from_unshared_ptr(node: *mut sb::SkSVGFeSpotLight) -> Option<Self> {
-        let base = SvgContainer::from_unshared_ptr(node as *mut _)?;
-        let data = RCHandle::from_unshared_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
+impl FeSpotLight {
     skia_macros::attrs! {
         SkSVGFeSpotLight[native, native_mut] => {
             *x: scalar [get(value) => value, set(value) => value],

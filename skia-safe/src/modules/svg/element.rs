@@ -1,14 +1,22 @@
-use super::{DebugAttributes, Inherits, SvgContainer, SvgLength, SvgPreserveAspectRatio};
+use super::{DebugAttributes, HasBase, Length, PreserveAspectRatio};
 use crate::{prelude::*, Rect, Size};
 use skia_bindings as sb;
 
-pub type Svg = Inherits<sb::SkSVGSVG, SvgContainer>;
+pub type Svg = RCHandle<sb::SkSVGSVG>;
+
+impl NativeRefCountedBase for sb::SkSVGSVG {
+    type Base = sb::SkRefCntBase;
+}
+
+impl HasBase for sb::SkSVGSVG {
+    type Base = sb::SkSVGContainer;
+}
 
 impl DebugAttributes for Svg {
     const NAME: &'static str = "Svg";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.base._dbg(
+        self.as_base()._dbg(
             builder
                 .field("x", &self.get_x())
                 .field("y", &self.get_y())
@@ -20,36 +28,18 @@ impl DebugAttributes for Svg {
     }
 }
 
-impl NativeRefCountedBase for sb::SkSVGSVG {
-    type Base = sb::SkRefCntBase;
-}
-
 impl Svg {
-    pub fn from_ptr(node: *mut sb::SkSVGSVG) -> Option<Self> {
-        let base = SvgContainer::from_ptr(node as *mut _)?;
-        let data = RCHandle::from_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
-    pub fn from_unshared_ptr(node: *mut sb::SkSVGSVG) -> Option<Self> {
-        let base = SvgContainer::from_unshared_ptr(node as *mut _)?;
-        let data = RCHandle::from_unshared_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
     pub fn intrinsic_size(&self) -> Size {
         unsafe { Size::from_native_c(sb::C_SkSVGSVG_intrinsicSize(self.native())) }
     }
 
     skia_macros::attrs! {
         SkSVGSVG[native, native_mut] => {
-            x: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
-            y: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
-            width: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
-            height: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
-            preserve_aspect_ratio: SvgPreserveAspectRatio [get(value) => SvgPreserveAspectRatio::from_native_ref(value), set(value) => value.into_native()],
+            x: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
+            y: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
+            width: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
+            height: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
+            preserve_aspect_ratio: PreserveAspectRatio [get(value) => PreserveAspectRatio::from_native_ref(value), set(value) => value.into_native()],
             view_box?: Rect [get(value) => value.map(Rect::from_native_ref), set(value) => value.into_native()]
         }
     }

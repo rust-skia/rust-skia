@@ -1,14 +1,22 @@
-use super::{DebugAttributes, Inherits, SvgFe};
+use super::{DebugAttributes, HasBase};
 use crate::{prelude::*, scalar};
 use skia_bindings as sb;
 
-pub type SvgFeOffset = Inherits<sb::SkSVGFeOffset, SvgFe>;
+pub type FeOffset = RCHandle<sb::SkSVGFeOffset>;
 
-impl DebugAttributes for SvgFeOffset {
+impl NativeRefCountedBase for sb::SkSVGFeOffset {
+    type Base = sb::SkRefCntBase;
+}
+
+impl HasBase for sb::SkSVGFeOffset {
+    type Base = sb::SkSVGFe;
+}
+
+impl DebugAttributes for FeOffset {
     const NAME: &'static str = "FeOffset";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.base._dbg(
+        self.as_base()._dbg(
             builder
                 .field("dx", &self.get_dx())
                 .field("dy", &self.get_dy()),
@@ -16,25 +24,7 @@ impl DebugAttributes for SvgFeOffset {
     }
 }
 
-impl NativeRefCountedBase for sb::SkSVGFeOffset {
-    type Base = sb::SkRefCntBase;
-}
-
-impl SvgFeOffset {
-    pub fn from_ptr(node: *mut sb::SkSVGFeOffset) -> Option<Self> {
-        let base = SvgFe::from_ptr(node as *mut _)?;
-        let data = RCHandle::from_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
-    pub fn from_unshared_ptr(node: *mut sb::SkSVGFeOffset) -> Option<Self> {
-        let base = SvgFe::from_unshared_ptr(node as *mut _)?;
-        let data = RCHandle::from_unshared_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
+impl FeOffset {
     skia_macros::attrs! {
         SkSVGFeOffset[native, native_mut] => {
             *dx: scalar [get(value) => value, set(value) => value],

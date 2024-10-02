@@ -1,4 +1,4 @@
-use super::{DebugAttributes, Inherits, SvgFe};
+use super::{DebugAttributes, HasBase};
 use crate::{prelude::*, scalar};
 use skia_bindings as sb;
 
@@ -25,36 +25,26 @@ native_transmutable!(
     std_deviation_layout
 );
 
-pub type SvgFeGaussianBlur = Inherits<sb::SkSVGFeGaussianBlur, SvgFe>;
-
-impl DebugAttributes for SvgFeGaussianBlur {
-    const NAME: &'static str = "FeGaussianBlur";
-
-    fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.base
-            ._dbg(builder.field("std_deviation", self.get_std_deviation()));
-    }
-}
+pub type FeGaussianBlur = RCHandle<sb::SkSVGFeGaussianBlur>;
 
 impl NativeRefCountedBase for sb::SkSVGFeGaussianBlur {
     type Base = sb::SkRefCntBase;
 }
 
-impl SvgFeGaussianBlur {
-    pub fn from_ptr(node: *mut sb::SkSVGFeGaussianBlur) -> Option<Self> {
-        let base = SvgFe::from_ptr(node as *mut _)?;
-        let data = RCHandle::from_ptr(node)?;
+impl HasBase for sb::SkSVGFeGaussianBlur {
+    type Base = sb::SkSVGFe;
+}
 
-        Some(Self { base, data })
+impl DebugAttributes for FeGaussianBlur {
+    const NAME: &'static str = "FeGaussianBlur";
+
+    fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
+        self.as_base()
+            ._dbg(builder.field("std_deviation", self.get_std_deviation()));
     }
+}
 
-    pub fn from_unshared_ptr(node: *mut sb::SkSVGFeGaussianBlur) -> Option<Self> {
-        let base = SvgFe::from_unshared_ptr(node as *mut _)?;
-        let data = RCHandle::from_unshared_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
+impl FeGaussianBlur {
     skia_macros::attrs! {
         SkSVGFeGaussianBlur[native, native_mut] => {
             std_deviation: StdDeviation [get(value) => StdDeviation::from_native_ref(value), set(value) => value.into_native()]

@@ -1,14 +1,22 @@
-use super::{DebugAttributes, Inherits, SvgBoundingBoxUnits, SvgContainer, SvgLength};
+use super::{BoundingBoxUnits, DebugAttributes, HasBase, Length};
 use crate::prelude::*;
 use skia_bindings as sb;
 
-pub type SvgMask = Inherits<sb::SkSVGMask, SvgContainer>;
+pub type Mask = RCHandle<sb::SkSVGMask>;
 
-impl DebugAttributes for SvgMask {
+impl HasBase for sb::SkSVGMask {
+    type Base = sb::SkSVGContainer;
+}
+
+impl NativeRefCountedBase for sb::SkSVGMask {
+    type Base = sb::SkRefCntBase;
+}
+
+impl DebugAttributes for Mask {
     const NAME: &'static str = "Mask";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.base._dbg(
+        self.as_base()._dbg(
             builder
                 .field("x", &self.get_x())
                 .field("y", &self.get_y())
@@ -20,33 +28,15 @@ impl DebugAttributes for SvgMask {
     }
 }
 
-impl NativeRefCountedBase for sb::SkSVGMask {
-    type Base = sb::SkRefCntBase;
-}
-
-impl SvgMask {
-    pub fn from_ptr(node: *mut sb::SkSVGMask) -> Option<Self> {
-        let base = SvgContainer::from_ptr(node as *mut _)?;
-        let data = RCHandle::from_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
-    pub fn from_unshared_ptr(node: *mut sb::SkSVGMask) -> Option<Self> {
-        let base = SvgContainer::from_unshared_ptr(node as *mut _)?;
-        let data = RCHandle::from_unshared_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
+impl Mask {
     skia_macros::attrs! {
         SkSVGMask[native, native_mut] => {
-            x: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
-            y: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
-            width: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
-            height: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
-            mask_units: SvgBoundingBoxUnits [get(value) => &value.fType, set(value) => sb::SkSVGObjectBoundingBoxUnits { fType: value }],
-            mask_content_units: SvgBoundingBoxUnits [get(value) => &value.fType, set(value) => sb::SkSVGObjectBoundingBoxUnits { fType: value }]
+            x: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
+            y: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
+            width: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
+            height: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
+            mask_units: BoundingBoxUnits [get(value) => &value.fType, set(value) => sb::SkSVGObjectBoundingBoxUnits { fType: value }],
+            mask_content_units: BoundingBoxUnits [get(value) => &value.fType, set(value) => sb::SkSVGObjectBoundingBoxUnits { fType: value }]
         }
     }
 }

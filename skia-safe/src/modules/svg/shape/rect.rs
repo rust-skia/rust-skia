@@ -1,17 +1,24 @@
-use super::SvgShape;
 use crate::{
     prelude::*,
-    svg::{DebugAttributes, Inherits, SvgLength},
+    svg::{DebugAttributes, HasBase, Length},
 };
 use skia_bindings as sb;
 
-pub type SvgRect = Inherits<sb::SkSVGRect, SvgShape>;
+pub type Rect = RCHandle<sb::SkSVGRect>;
 
-impl DebugAttributes for SvgRect {
+impl NativeRefCountedBase for sb::SkSVGRect {
+    type Base = sb::SkRefCntBase;
+}
+
+impl HasBase for sb::SkSVGRect {
+    type Base = sb::SkSVGShape;
+}
+
+impl DebugAttributes for Rect {
     const NAME: &'static str = "Rect";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.base._dbg(
+        self.as_base()._dbg(
             builder
                 .field("x", &self.get_x())
                 .field("y", &self.get_y())
@@ -23,33 +30,15 @@ impl DebugAttributes for SvgRect {
     }
 }
 
-impl NativeRefCountedBase for sb::SkSVGRect {
-    type Base = sb::SkRefCntBase;
-}
-
-impl SvgRect {
-    pub fn from_ptr(node: *mut sb::SkSVGRect) -> Option<Self> {
-        let base = SvgShape::from_ptr(node as *mut _)?;
-        let data = RCHandle::from_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
-    pub fn from_unshared_ptr(node: *mut sb::SkSVGRect) -> Option<Self> {
-        let base = SvgShape::from_unshared_ptr(node as *mut _)?;
-        let data = RCHandle::from_unshared_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
+impl Rect {
     skia_macros::attrs! {
         SkSVGRect[native, native_mut] => {
-            x: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
-            y: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
-            width: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
-            height: SvgLength [get(value) => SvgLength::from_native_ref(value), set(value) => value.into_native()],
-            rx?: SvgLength [get(value) => value.map(SvgLength::from_native_ref), set(value) => value.into_native()],
-            ry?: SvgLength [get(value) => value.map(SvgLength::from_native_ref), set(value) => value.into_native()]
+            x: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
+            y: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
+            width: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
+            height: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
+            rx?: Length [get(value) => value.map(Length::from_native_ref), set(value) => value.into_native()],
+            ry?: Length [get(value) => value.map(Length::from_native_ref), set(value) => value.into_native()]
         }
     }
 }

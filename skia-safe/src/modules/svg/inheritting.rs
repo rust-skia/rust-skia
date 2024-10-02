@@ -1,47 +1,34 @@
-use super::{IntoPtr, NativeAccess, NativeRefCounted, RCHandle};
+use super::{transmute_ref, transmute_ref_mut, NativeRefCounted, RCHandle};
 use std::{
     fmt::{Debug, DebugStruct, Formatter, Result},
     ops::{Deref, DerefMut},
 };
 
-pub struct Inherits<N: NativeRefCounted, B> {
-    pub(crate) base: B,
-    pub(crate) data: RCHandle<N>,
+pub trait HasBase {
+    type Base: NativeRefCounted;
 }
 
-impl<N: NativeRefCounted, B> Deref for Inherits<N, B> {
-    type Target = B;
+impl<T: NativeRefCounted + HasBase> RCHandle<T> {
+    pub(super) fn as_base(&self) -> &RCHandle<T::Base> {
+        unsafe { transmute_ref(self) }
+    }
+}
+
+impl<T: NativeRefCounted + HasBase> Deref for RCHandle<T> {
+    type Target = RCHandle<T::Base>;
 
     fn deref(&self) -> &Self::Target {
-        &self.base
+        self.as_base()
     }
 }
 
-impl<N: NativeRefCounted, B> DerefMut for Inherits<N, B> {
+impl<T: NativeRefCounted + HasBase> DerefMut for RCHandle<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.base
+        unsafe { transmute_ref_mut(self) }
     }
 }
 
-impl<N: NativeRefCounted, B> NativeAccess for Inherits<N, B> {
-    type Native = N;
-
-    fn native(&self) -> &Self::Native {
-        self.data.native()
-    }
-
-    fn native_mut(&mut self) -> &mut Self::Native {
-        self.data.native_mut()
-    }
-}
-
-impl<N: NativeRefCounted, B> IntoPtr<N> for Inherits<N, B> {
-    fn into_ptr(self) -> *mut N {
-        self.data.into_ptr()
-    }
-}
-
-impl<N: NativeRefCounted, B> Debug for Inherits<N, B>
+impl<N: NativeRefCounted> Debug for RCHandle<N>
 where
     Self: DebugAttributes,
 {

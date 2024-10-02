@@ -3,10 +3,10 @@ use std::fmt;
 use crate::{interop::AsStr, prelude::*};
 use skia_bindings as sb;
 
-pub type SvgIriKind = sb::SkSVGIRI_Type;
-pub type SvgIriFuncKind = sb::SkSVGFuncIRI_Type;
+pub type IriKind = sb::SkSVGIRI_Type;
+pub type IriFuncKind = sb::SkSVGFuncIRI_Type;
 
-pub type SvgIri = Handle<sb::SkSVGIRI>;
+pub type Iri = Handle<sb::SkSVGIRI>;
 
 impl NativeDrop for sb::SkSVGIRI {
     fn drop(&mut self) {
@@ -14,13 +14,13 @@ impl NativeDrop for sb::SkSVGIRI {
     }
 }
 
-impl Default for SvgIri {
+impl Default for Iri {
     fn default() -> Self {
-        Self::construct(|uninitialized| unsafe { sb::C_SkSVGIRI_new(uninitialized) })
+        Self::construct(|uninitialized| unsafe { sb::C_SkSVGIRI_Construct(uninitialized) })
     }
 }
 
-impl fmt::Debug for SvgIri {
+impl fmt::Debug for Iri {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("SvgIri")
             .field("data", &self.data())
@@ -28,16 +28,16 @@ impl fmt::Debug for SvgIri {
     }
 }
 
-impl SvgIri {
+impl Iri {
     pub fn data(&self) -> &str {
         self.native().fIRI.as_str()
     }
 
-    pub fn new<T: AsRef<str>>(value: T, kind: SvgIriKind) -> Self {
+    pub fn new<T: AsRef<str>>(value: T, kind: IriKind) -> Self {
         Self::construct(|uninitialized| unsafe {
             let iri = crate::interop::String::from_str(value.as_ref());
 
-            sb::C_SkSVGIRI_new1(uninitialized, kind, iri.native())
+            sb::C_SkSVGIRI_Construct1(uninitialized, kind, iri.native())
         })
     }
 }
@@ -60,27 +60,27 @@ impl fmt::Debug for SvgIriFunc {
 }
 
 impl SvgIriFunc {
-    pub fn iri(&self) -> Option<&SvgIri> {
+    pub fn iri(&self) -> Option<&Iri> {
         let func = self.native();
 
-        if matches!(func.fType, SvgIriFuncKind::IRI) {
-            Some(SvgIri::from_native_ref(&self.native().fIRI))
+        if matches!(func.fType, IriFuncKind::IRI) {
+            Some(Iri::from_native_ref(&self.native().fIRI))
         } else {
             None
         }
     }
 
-    pub fn kind(&self) -> SvgIriFuncKind {
+    pub fn kind(&self) -> IriFuncKind {
         self.native().fType
     }
 
-    pub fn from_iri(value: SvgIri) -> Self {
+    pub fn from_iri(value: Iri) -> Self {
         Self::construct(|uninitialized| unsafe {
-            sb::C_SkSVGFuncIRI_IRI(uninitialized, value.native())
+            sb::C_SkSVGFuncIRI_Construct1(uninitialized, value.native())
         })
     }
 
     pub fn none() -> Self {
-        Self::construct(|uninitialized| unsafe { sb::C_SkSVGFuncIRI_None(uninitialized) })
+        Self::construct(|uninitialized| unsafe { sb::C_SkSVGFuncIRI_Construct(uninitialized) })
     }
 }

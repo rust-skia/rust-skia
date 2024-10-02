@@ -10,12 +10,13 @@ pub use self::{aspect_ratio::*, color::*, fe::*, font::*, iri::*, length::*, pai
 
 use skia_bindings as sb;
 
-pub type SvgFillRule = sb::SkSVGFillRule_Type;
-pub type SvgColorSpace = sb::SkSVGColorspace;
-pub type SvgDisplay = sb::SkSVGDisplay;
-pub type SvgLineCap = sb::SkSVGLineCap;
-pub type SvgVisibility = sb::SkSVGVisibility_Type;
-pub type SvgLineJoin = sb::SkSVGLineJoin_Type;
-pub type SvgTextAnchor = sb::SkSVGTextAnchor_Type;
-pub type SvgBoundingBoxUnits = sb::SkSVGObjectBoundingBoxUnits_Type;
-pub type SvgSpreadMethod = sb::SkSVGSpreadMethod_Type;
+pub type FillRule = sb::SkSVGFillRule_Type;
+pub type ColorSpace = sb::SkSVGColorspace;
+pub type Display = sb::SkSVGDisplay;
+pub type LineCap = sb::SkSVGLineCap;
+pub type Visibility = sb::SkSVGVisibility_Type;
+pub type LineJoin = sb::SkSVGLineJoin_Type;
+pub type TextAnchor = sb::SkSVGTextAnchor_Type;
+pub type BoundingBoxUnits = sb::SkSVGObjectBoundingBoxUnits_Type;
+pub type SpreadMethod = sb::SkSVGSpreadMethod_Type;
+pub type XmlSpace = sb::SkSVGXmlSpace;

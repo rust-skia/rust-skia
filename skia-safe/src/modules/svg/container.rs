@@ -1,38 +1,29 @@
-use super::{DebugAttributes, Inherits, Node, SvgTransformableNode};
+use super::{DebugAttributes, HasBase, Node, SvgNode};
 use crate::prelude::*;
 use skia_bindings as sb;
 
-pub type SvgContainer = Inherits<sb::SkSVGContainer, SvgTransformableNode>;
+pub type SvgContainer = RCHandle<sb::SkSVGContainer>;
 
-impl DebugAttributes for SvgContainer {
-    const NAME: &'static str = "Container";
-
-    fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.base._dbg(builder.field("children", &self.children()));
-    }
+impl HasBase for sb::SkSVGContainer {
+    type Base = sb::SkSVGTransformableNode;
 }
 
 impl NativeRefCountedBase for sb::SkSVGContainer {
     type Base = sb::SkRefCntBase;
 }
 
+impl DebugAttributes for SvgContainer {
+    const NAME: &'static str = "Container";
+
+    fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
+        self.as_base()
+            ._dbg(builder.field("children", &self.children()));
+    }
+}
+
 impl SvgContainer {
-    pub fn from_ptr(node: *mut sb::SkSVGContainer) -> Option<Self> {
-        let base = SvgTransformableNode::from_ptr(node as *mut _)?;
-        let data = RCHandle::from_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
-    pub fn from_unshared_ptr(node: *mut sb::SkSVGContainer) -> Option<Self> {
-        let base = SvgTransformableNode::from_unshared_ptr(node as *mut _)?;
-        let data = RCHandle::from_unshared_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
-    pub fn append_child<N: NativeRefCounted, B>(&mut self, node: Inherits<N, B>) {
-        unsafe { sb::C_SkSVGContainer_appendChild(self.native_mut(), node.into_ptr() as *mut _) }
+    pub fn append_child(&mut self, node: SvgNode) {
+        unsafe { sb::C_SkSVGContainer_appendChild(self.native_mut(), node.into_ptr()) }
     }
 
     pub fn has_children(&self) -> bool {

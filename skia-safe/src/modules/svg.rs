@@ -19,29 +19,29 @@ mod types;
 mod using;
 
 pub use self::{
-    clip_path::SvgClipPath,
+    clip_path::ClipPath,
     container::SvgContainer,
-    defs::SvgDefs,
+    defs::Defs,
     fe::*,
-    filter::SvgFilter,
-    g::SvgG,
+    filter::Filter,
+    g::G,
     gradient::*,
-    image::SvgImage,
+    image::Image,
     inheritting::*,
-    mask::SvgMask,
+    mask::Mask,
     node::*,
     shape::*,
-    stop::SvgStop,
-    text::{SvgTSpan, SvgText, SvgTextLiteral, SvgTextPath},
+    stop::Stop,
+    text::{TSpan, Text, TextLiteral, TextPath},
     transformable::SvgTransformableNode,
     types::*,
-    using::SvgUse,
+    using::Use,
 };
 
 use crate::{
     interop::{MemoryStream, NativeStreamBase, RustStream},
     prelude::*,
-    Canvas, Data, FontMgr, FontStyle, Size,
+    Canvas, Data, FontMgr, FontStyle as SkFontStyle, Size,
 };
 use element::Svg;
 use skia_bindings as sb;
@@ -128,7 +128,7 @@ extern "C" fn handle_load_type_face(
 
     load_context
         .font_mgr
-        .legacy_make_typeface(None, FontStyle::default())
+        .legacy_make_typeface(None, SkFontStyle::default())
         .unwrap()
         .into_ptr()
 }
@@ -313,7 +313,7 @@ mod tests {
     use crate::{
         modules::svg::decode_base64,
         surfaces,
-        svg::{SvgLength, SvgUnit},
+        svg::{Length, LengthUnit},
         EncodedImageFormat, FontMgr, Surface,
     };
 
@@ -390,8 +390,8 @@ mod tests {
         println!("{:#?}", root.get_transform());
         println!("{:#?}", root.intrinsic_size());
 
-        root.set_width(SvgLength::new(50., SvgUnit::PX));
-        root.set_height(SvgLength::new(600., SvgUnit::CM));
+        root.set_width(Length::new(50., LengthUnit::PX));
+        root.set_height(Length::new(600., LengthUnit::CM));
 
         println!("{:#?}", root.intrinsic_size());
         println!("{:#?}", root.children());

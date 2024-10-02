@@ -1,39 +1,30 @@
-use super::{DebugAttributes, Inherits, SvgContainer, SvgFeInput};
+use super::{DebugAttributes, FeInput, HasBase};
 use crate::prelude::*;
 use skia_bindings as sb;
 
-pub type SvgFeMergeNode = Inherits<sb::SkSVGFeMergeNode, SvgContainer>;
-
-impl DebugAttributes for SvgFeMergeNode {
-    const NAME: &'static str = "FeMergeNode";
-
-    fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.base._dbg(builder.field("input", self.get_input()));
-    }
-}
+pub type FeMergeNode = RCHandle<sb::SkSVGFeMergeNode>;
 
 impl NativeRefCountedBase for sb::SkSVGFeMergeNode {
     type Base = sb::SkRefCntBase;
 }
 
-impl SvgFeMergeNode {
-    pub fn from_ptr(node: *mut sb::SkSVGFeMergeNode) -> Option<Self> {
-        let base = SvgContainer::from_ptr(node as *mut _)?;
-        let data = RCHandle::from_ptr(node)?;
+impl HasBase for sb::SkSVGFeMergeNode {
+    type Base = sb::SkSVGContainer;
+}
 
-        Some(Self { base, data })
+impl DebugAttributes for FeMergeNode {
+    const NAME: &'static str = "FeMergeNode";
+
+    fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
+        self.as_base()
+            ._dbg(builder.field("input", self.get_input()));
     }
+}
 
-    pub fn from_unshared_ptr(node: *mut sb::SkSVGFeMergeNode) -> Option<Self> {
-        let base = SvgContainer::from_unshared_ptr(node as *mut _)?;
-        let data = RCHandle::from_unshared_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
+impl FeMergeNode {
     skia_macros::attrs! {
         SkSVGFeMergeNode[native, native_mut] => {
-            "in" as input: SvgFeInput [get(value) => SvgFeInput::from_native_ref(value), set(value) => value.into_native()]
+            "in" as input: FeInput [get(value) => FeInput::from_native_ref(value), set(value) => value.into_native()]
         }
     }
 }

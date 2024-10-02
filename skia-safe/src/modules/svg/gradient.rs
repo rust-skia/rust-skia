@@ -1,21 +1,27 @@
 mod linear;
 mod radial;
 
-pub use self::{linear::SvgLinearGradient, radial::SvgRadialGradient};
+pub use self::{linear::LinearGradient, radial::RadialGradient};
 
-use super::{
-    DebugAttributes, Inherits, SvgBoundingBoxUnits, SvgContainer, SvgIri, SvgSpreadMethod,
-};
+use super::{BoundingBoxUnits, DebugAttributes, HasBase, Iri, SpreadMethod};
 use crate::{prelude::*, Matrix};
 use skia_bindings as sb;
 
-pub type SvgGradient = Inherits<sb::SkSVGGradient, SvgContainer>;
+pub type SvgGradient = RCHandle<sb::SkSVGGradient>;
+
+impl NativeRefCountedBase for sb::SkSVGGradient {
+    type Base = sb::SkRefCntBase;
+}
+
+impl HasBase for sb::SkSVGGradient {
+    type Base = sb::SkSVGContainer;
+}
 
 impl DebugAttributes for SvgGradient {
     const NAME: &'static str = "Gradient";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.base._dbg(
+        self.as_base()._dbg(
             builder
                 .field("href", self.get_href())
                 .field("gradient_transform", self.get_gradient_transform())
@@ -25,31 +31,13 @@ impl DebugAttributes for SvgGradient {
     }
 }
 
-impl NativeRefCountedBase for sb::SkSVGGradient {
-    type Base = sb::SkRefCntBase;
-}
-
 impl SvgGradient {
-    pub fn from_ptr(node: *mut sb::SkSVGGradient) -> Option<Self> {
-        let base = SvgContainer::from_ptr(node as *mut _)?;
-        let data = RCHandle::from_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
-    pub fn from_unshared_ptr(node: *mut sb::SkSVGGradient) -> Option<Self> {
-        let base = SvgContainer::from_unshared_ptr(node as *mut _)?;
-        let data = RCHandle::from_unshared_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
     skia_macros::attrs! {
         SkSVGGradient[native, native_mut] => {
-            href: SvgIri [get(value) => SvgIri::from_native_ref(value), set(value) => value.into_native()],
+            href: Iri [get(value) => Iri::from_native_ref(value), set(value) => value.into_native()],
             gradient_transform: Matrix [get(value) => Matrix::from_native_ref(value), set(value) => value.into_native()],
-            spread_method: SvgSpreadMethod [get(value) => &value.fType, set(value) => sb::SkSVGSpreadMethod { fType: value }],
-            gradient_units: SvgBoundingBoxUnits [get(value) => &value.fType, set(value) => sb::SkSVGObjectBoundingBoxUnits { fType: value }]
+            spread_method: SpreadMethod [get(value) => &value.fType, set(value) => sb::SkSVGSpreadMethod { fType: value }],
+            gradient_units: BoundingBoxUnits [get(value) => &value.fType, set(value) => sb::SkSVGObjectBoundingBoxUnits { fType: value }]
         }
     }
 }

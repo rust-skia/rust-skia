@@ -173,7 +173,7 @@ extern "C" attr_type* C_##type##_get##attr_name(const type& self) {        \
 
 #define SVG_ATTRIBUTE(type, attr_name, attr_type)                          \
 extern "C" const attr_type* C_##type##_get##attr_name(const type& self) {  \
-    return &self.get##attr_name();                                          \
+    return &self.get##attr_name();                                         \
 }                                                                          \
 extern "C" void C_##type##_set##attr_name(type* self, const attr_type x) { \
     return self->set##attr_name(x);                                        \
@@ -184,7 +184,7 @@ extern "C" bool C_##type##_has##attr_name(const type& self) {              \
     return self.get##attr_name().isValid();                                \
 }                                                                          \
 extern "C" const attr_type* C_##type##_get##attr_name(const type& self) {  \
-    return &*self.get##attr_name();                                         \
+    return &*self.get##attr_name();                                        \
 }                                                                          \
 extern "C" void C_##type##_set##attr_name(type* self, const attr_type x) { \
     return self->set##attr_name(x);                                        \
@@ -361,35 +361,35 @@ SVG_ATTRIBUTE(SkSVGUse, X   , SkSVGLength);
 SVG_ATTRIBUTE(SkSVGUse, Y   , SkSVGLength);
 SVG_ATTRIBUTE(SkSVGUse, Href, SkSVGIRI   );
 
-extern "C" void C_SkSVGIRI_new(SkSVGIRI* uninitialized) {
+extern "C" void C_SkSVGIRI_Construct(SkSVGIRI* uninitialized) {
     new(uninitialized)SkSVGIRI();
 }
 
-extern "C" void C_SkSVGIRI_new1(SkSVGIRI* uninitialized, const SkSVGIRI::Type t, const SkSVGStringType& iri) {
+extern "C" void C_SkSVGIRI_Construct1(SkSVGIRI* uninitialized, const SkSVGIRI::Type t, const SkSVGStringType& iri) {
     new(uninitialized)SkSVGIRI(t, iri);
 }
 
-extern "C" void C_SkSVGFuncIRI_None(SkSVGFuncIRI* uninitialized) {
+extern "C" void C_SkSVGFuncIRI_Construct(SkSVGFuncIRI* uninitialized) {
     new(uninitialized)SkSVGFuncIRI();
 }
 
-extern "C" void C_SkSVGFuncIRI_IRI(SkSVGFuncIRI* uninitialized, const SkSVGIRI& iri) {
+extern "C" void C_SkSVGFuncIRI_Construct1(SkSVGFuncIRI* uninitialized, const SkSVGIRI& iri) {
     new(uninitialized)SkSVGFuncIRI(SkSVGIRI(iri));
 }
 
-extern "C" void C_SkSVGPaint_None(SkSVGPaint* uninitialized) {
+extern "C" void C_SkSVGPaint_Construct(SkSVGPaint* uninitialized) {
     new(uninitialized)SkSVGPaint();
 }
 
-extern "C" void C_SkSVGPaint_Color(SkSVGPaint* uninitialized, const SkSVGColor& color) {
+extern "C" void C_SkSVGPaint_Construct1(SkSVGPaint* uninitialized, const SkSVGColor& color) {
     new(uninitialized)SkSVGPaint(color);
 }
 
-extern "C" void C_SkSVGColor_CurrentColor(SkSVGColor* uninitialized) {
+extern "C" void C_SkSVGColor_Construct(SkSVGColor* uninitialized) {
     new(uninitialized)SkSVGColor(SkSVGColor::Type::kCurrentColor, std::vector<SkString>());
 }
 
-extern "C" void C_SkSVGColor_Color(SkSVGColor* uninitialized, const SkSVGColorType color) {
+extern "C" void C_SkSVGColor_Construct1(SkSVGColor* uninitialized, const SkSVGColorType color) {
     new(uninitialized)SkSVGColor(color);
 }
 
@@ -426,7 +426,7 @@ extern "C" const sk_sp<SkSVGNode>* C_SkSVGContainer_children(const SkSVGContaine
     return static_cast<const SkSVGContainerAccessor&>(self).children();
 }
 
-extern "C" void C_SkSVGTransformableNode_setTransform(SkSVGTransformableNode* self, const SkMatrix value) {
+extern "C" void C_SkSVGTransformableNode_setTransform(SkSVGTransformableNode* self, const SkMatrix& value) {
     self->setTransform(value);
 }
 

@@ -1,65 +1,62 @@
 use super::{
-    element::Svg, pattern::SvgPattern, DebugAttributes, SvgCircle, SvgClipPath, SvgColor,
-    SvgColorSpace, SvgDefs, SvgDisplay, SvgEllipse, SvgFeBlend, SvgFeColorMatrix,
-    SvgFeComponentTransfer, SvgFeComposite, SvgFeDiffuseLighting, SvgFeDisplacementMap,
-    SvgFeDistantLight, SvgFeFlood, SvgFeFunc, SvgFeGaussianBlur, SvgFeImage, SvgFeMerge,
-    SvgFeMergeNode, SvgFeMorphology, SvgFeOffset, SvgFePointLight, SvgFeSpecularLighting,
-    SvgFeSpotLight, SvgFeTurbulence, SvgFillRule, SvgFilter, SvgFontFamily, SvgFontSize,
-    SvgFontStyle, SvgFontWeight, SvgG, SvgImage, SvgIriFunc, SvgLength, SvgLine, SvgLineCap,
-    SvgLineJoin, SvgLinearGradient, SvgMask, SvgPaint, SvgPath, SvgPoly, SvgRadialGradient,
-    SvgRect, SvgStop, SvgTSpan, SvgText, SvgTextAnchor, SvgTextLiteral, SvgTextPath, SvgUse,
-    SvgVisibility,
+    element::Svg, pattern::Pattern, Circle, ClipPath, ColorSpace, DebugAttributes, Defs, Display,
+    Ellipse, FeBlend, FeColorMatrix, FeComponentTransfer, FeComposite, FeDiffuseLighting,
+    FeDisplacementMap, FeDistantLight, FeFlood, FeFunc, FeGaussianBlur, FeImage, FeMerge,
+    FeMergeNode, FeMorphology, FeOffset, FePointLight, FeSpecularLighting, FeSpotLight,
+    FeTurbulence, Fill, FillRule, Filter, FontFamily, FontSize, FontStyle, FontWeight, Image,
+    Length, Line, LineCap, LineJoin, LinearGradient, Mask, Paint, Path, Poly, RadialGradient, Rect,
+    Stop, SvgIriFunc, TSpan, Text, TextAnchor, TextLiteral, TextPath, Use, Visibility, G,
 };
 use crate::{prelude::*, scalar, Color};
 use skia_bindings as sb;
 
 #[derive(Debug)]
 pub enum Node {
-    Circle(SvgCircle),
-    ClipPath(SvgClipPath),
-    Defs(SvgDefs),
-    Ellipse(SvgEllipse),
-    FeBlend(SvgFeBlend),
-    FeColorMatrix(SvgFeColorMatrix),
-    FeComponentTransfer(SvgFeComponentTransfer),
-    FeComposite(SvgFeComposite),
-    FeDiffuseLighting(SvgFeDiffuseLighting),
-    FeDisplacementMap(SvgFeDisplacementMap),
-    FeDistantLight(SvgFeDistantLight),
-    FeFlood(SvgFeFlood),
-    FeFuncA(SvgFeFunc),
-    FeFuncR(SvgFeFunc),
-    FeFuncG(SvgFeFunc),
-    FeFuncB(SvgFeFunc),
-    FeGaussianBlur(SvgFeGaussianBlur),
-    FeImage(SvgFeImage),
-    FeMerge(SvgFeMerge),
-    FeMergeNode(SvgFeMergeNode),
-    FeMorphology(SvgFeMorphology),
-    FeOffset(SvgFeOffset),
-    FePointLight(SvgFePointLight),
-    FeSpecularLighting(SvgFeSpecularLighting),
-    FeSpotLight(SvgFeSpotLight),
-    FeTurbulence(SvgFeTurbulence),
-    Filter(SvgFilter),
-    G(SvgG),
-    Image(SvgImage),
-    Line(SvgLine),
-    LinearGradient(SvgLinearGradient),
-    Mask(SvgMask),
-    Path(SvgPath),
-    Pattern(SvgPattern),
-    Polygon(SvgPoly),
-    Polyline(SvgPoly),
-    RadialGradient(SvgRadialGradient),
-    Rect(SvgRect),
-    Stop(SvgStop),
+    Circle(Circle),
+    ClipPath(ClipPath),
+    Defs(Defs),
+    Ellipse(Ellipse),
+    FeBlend(FeBlend),
+    FeColorMatrix(FeColorMatrix),
+    FeComponentTransfer(FeComponentTransfer),
+    FeComposite(FeComposite),
+    FeDiffuseLighting(FeDiffuseLighting),
+    FeDisplacementMap(FeDisplacementMap),
+    FeDistantLight(FeDistantLight),
+    FeFlood(FeFlood),
+    FeFuncA(FeFunc),
+    FeFuncR(FeFunc),
+    FeFuncG(FeFunc),
+    FeFuncB(FeFunc),
+    FeGaussianBlur(FeGaussianBlur),
+    FeImage(FeImage),
+    FeMerge(FeMerge),
+    FeMergeNode(FeMergeNode),
+    FeMorphology(FeMorphology),
+    FeOffset(FeOffset),
+    FePointLight(FePointLight),
+    FeSpecularLighting(FeSpecularLighting),
+    FeSpotLight(FeSpotLight),
+    FeTurbulence(FeTurbulence),
+    Filter(Filter),
+    G(G),
+    Image(Image),
+    Line(Line),
+    LinearGradient(LinearGradient),
+    Mask(Mask),
+    Path(Path),
+    Pattern(Pattern),
+    Polygon(Poly),
+    Polyline(Poly),
+    RadialGradient(RadialGradient),
+    Rect(Rect),
+    Stop(Stop),
     Svg(Svg),
-    Text(SvgText),
-    TextLiteral(SvgTextLiteral),
-    TextPath(SvgTextPath),
-    TSpan(SvgTSpan),
-    Use(SvgUse),
+    Text(Text),
+    TextLiteral(TextLiteral),
+    TextPath(TextPath),
+    TSpan(TSpan),
+    Use(Use),
 }
 
 impl Node {
@@ -67,83 +64,83 @@ impl Node {
         let tag = unsafe { sb::C_SkSVGNode_tag(ptr as *const _) };
 
         Some(match tag {
-            NodeTag::Circle => Self::Circle(SvgCircle::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::ClipPath => Self::ClipPath(SvgClipPath::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::Defs => Self::Defs(SvgDefs::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::Ellipse => Self::Ellipse(SvgEllipse::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::FeBlend => Self::FeBlend(SvgFeBlend::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Circle => Self::Circle(Circle::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::ClipPath => Self::ClipPath(ClipPath::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Defs => Self::Defs(Defs::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Ellipse => Self::Ellipse(Ellipse::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeBlend => Self::FeBlend(FeBlend::from_unshared_ptr(ptr as *mut _)?),
             NodeTag::FeColorMatrix => {
-                Self::FeColorMatrix(SvgFeColorMatrix::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeColorMatrix(FeColorMatrix::from_unshared_ptr(ptr as *mut _)?)
             }
             NodeTag::FeComponentTransfer => {
-                Self::FeComponentTransfer(SvgFeComponentTransfer::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeComponentTransfer(FeComponentTransfer::from_unshared_ptr(ptr as *mut _)?)
             }
             NodeTag::FeComposite => {
-                Self::FeComposite(SvgFeComposite::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeComposite(FeComposite::from_unshared_ptr(ptr as *mut _)?)
             }
             NodeTag::FeDiffuseLighting => {
-                Self::FeDiffuseLighting(SvgFeDiffuseLighting::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeDiffuseLighting(FeDiffuseLighting::from_unshared_ptr(ptr as *mut _)?)
             }
             NodeTag::FeDisplacementMap => {
-                Self::FeDisplacementMap(SvgFeDisplacementMap::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeDisplacementMap(FeDisplacementMap::from_unshared_ptr(ptr as *mut _)?)
             }
             NodeTag::FeDistantLight => {
-                Self::FeDistantLight(SvgFeDistantLight::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeDistantLight(FeDistantLight::from_unshared_ptr(ptr as *mut _)?)
             }
-            NodeTag::FeFlood => Self::FeFlood(SvgFeFlood::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::FeFuncA => Self::FeFuncA(SvgFeFunc::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::FeFuncR => Self::FeFuncR(SvgFeFunc::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::FeFuncG => Self::FeFuncG(SvgFeFunc::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::FeFuncB => Self::FeFuncB(SvgFeFunc::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeFlood => Self::FeFlood(FeFlood::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeFuncA => Self::FeFuncA(FeFunc::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeFuncR => Self::FeFuncR(FeFunc::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeFuncG => Self::FeFuncG(FeFunc::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeFuncB => Self::FeFuncB(FeFunc::from_unshared_ptr(ptr as *mut _)?),
             NodeTag::FeGaussianBlur => {
-                Self::FeGaussianBlur(SvgFeGaussianBlur::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeGaussianBlur(FeGaussianBlur::from_unshared_ptr(ptr as *mut _)?)
             }
-            NodeTag::FeImage => Self::FeImage(SvgFeImage::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::FeMerge => Self::FeMerge(SvgFeMerge::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeImage => Self::FeImage(FeImage::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeMerge => Self::FeMerge(FeMerge::from_unshared_ptr(ptr as *mut _)?),
             NodeTag::FeMergeNode => {
-                Self::FeMergeNode(SvgFeMergeNode::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeMergeNode(FeMergeNode::from_unshared_ptr(ptr as *mut _)?)
             }
             NodeTag::FeMorphology => {
-                Self::FeMorphology(SvgFeMorphology::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeMorphology(FeMorphology::from_unshared_ptr(ptr as *mut _)?)
             }
-            NodeTag::FeOffset => Self::FeOffset(SvgFeOffset::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeOffset => Self::FeOffset(FeOffset::from_unshared_ptr(ptr as *mut _)?),
             NodeTag::FePointLight => {
-                Self::FePointLight(SvgFePointLight::from_unshared_ptr(ptr as *mut _)?)
+                Self::FePointLight(FePointLight::from_unshared_ptr(ptr as *mut _)?)
             }
             NodeTag::FeSpecularLighting => {
-                Self::FeSpecularLighting(SvgFeSpecularLighting::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeSpecularLighting(FeSpecularLighting::from_unshared_ptr(ptr as *mut _)?)
             }
             NodeTag::FeSpotLight => {
-                Self::FeSpotLight(SvgFeSpotLight::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeSpotLight(FeSpotLight::from_unshared_ptr(ptr as *mut _)?)
             }
             NodeTag::FeTurbulence => {
-                Self::FeTurbulence(SvgFeTurbulence::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeTurbulence(FeTurbulence::from_unshared_ptr(ptr as *mut _)?)
             }
-            NodeTag::Filter => Self::Filter(SvgFilter::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::G => Self::G(SvgG::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::Image => Self::Image(SvgImage::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::Line => Self::Line(SvgLine::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Filter => Self::Filter(Filter::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::G => Self::G(G::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Image => Self::Image(Image::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Line => Self::Line(Line::from_unshared_ptr(ptr as *mut _)?),
             NodeTag::LinearGradient => {
-                Self::LinearGradient(SvgLinearGradient::from_unshared_ptr(ptr as *mut _)?)
+                Self::LinearGradient(LinearGradient::from_unshared_ptr(ptr as *mut _)?)
             }
-            NodeTag::Mask => Self::Mask(SvgMask::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::Path => Self::Path(SvgPath::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::Pattern => Self::Pattern(SvgPattern::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::Polygon => Self::Polygon(SvgPoly::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::Polyline => Self::Polyline(SvgPoly::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Mask => Self::Mask(Mask::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Path => Self::Path(Path::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Pattern => Self::Pattern(Pattern::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Polygon => Self::Polygon(Poly::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Polyline => Self::Polyline(Poly::from_unshared_ptr(ptr as *mut _)?),
             NodeTag::RadialGradient => {
-                Self::RadialGradient(SvgRadialGradient::from_unshared_ptr(ptr as *mut _)?)
+                Self::RadialGradient(RadialGradient::from_unshared_ptr(ptr as *mut _)?)
             }
-            NodeTag::Rect => Self::Rect(SvgRect::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::Stop => Self::Stop(SvgStop::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Rect => Self::Rect(Rect::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Stop => Self::Stop(Stop::from_unshared_ptr(ptr as *mut _)?),
             NodeTag::Svg => Self::Svg(Svg::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::Text => Self::Text(SvgText::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Text => Self::Text(Text::from_unshared_ptr(ptr as *mut _)?),
             NodeTag::TextLiteral => {
-                Self::TextLiteral(SvgTextLiteral::from_unshared_ptr(ptr as *mut _)?)
+                Self::TextLiteral(TextLiteral::from_unshared_ptr(ptr as *mut _)?)
             }
-            NodeTag::TextPath => Self::TextPath(SvgTextPath::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::TSpan => Self::TSpan(SvgTSpan::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::Use => Self::Use(SvgUse::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::TextPath => Self::TextPath(TextPath::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::TSpan => Self::TSpan(TSpan::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::Use => Self::Use(Use::from_unshared_ptr(ptr as *mut _)?),
         })
     }
 }
@@ -204,37 +201,37 @@ impl SvgNode {
     skia_macros::attrs! {
         SkSVGNode[native, native_mut] => {
             // inherited
-            clip_rule?: SvgFillRule [get(value) => value.map(|value| &value.fType), set(value) => sb::SkSVGFillRule { fType: value }],
-            color_interpolation?: SvgColorSpace [get(value) => value, set(value) => value],
-            color_interpolation_filters?: SvgColorSpace [get(value) => value, set(value) => value],
+            clip_rule?: FillRule [get(value) => value.map(|value| &value.fType), set(value) => sb::SkSVGFillRule { fType: value }],
+            color_interpolation?: ColorSpace [get(value) => value, set(value) => value],
+            color_interpolation_filters?: ColorSpace [get(value) => value, set(value) => value],
             color?: Color [get(value) => value.map(Color::from_native_ref), set(value) => value.into_native()],
-            fill_rule?: SvgFillRule [get(value) => value.map(|value| &value.fType), set(value) => sb::SkSVGFillRule { fType: value }],
-            fill?: SvgPaint [get(value) => value.map(SvgPaint::from_native_ref), set(value) => value.native()],
+            fill_rule?: FillRule [get(value) => value.map(|value| &value.fType), set(value) => sb::SkSVGFillRule { fType: value }],
+            fill?: Paint [get(value) => value.map(Paint::from_native_ref), set(value) => value.native()],
             *fill_opacity?: scalar [get(value) => value, set(value) => value],
-            font_family?: SvgFontFamily [get(value) => value.map(SvgFontFamily::from_native_ref), set(value) => value.into_native()],
-            font_size?: SvgFontSize [get(value) => value.map(SvgFontSize::from_native_ref), set(value) => value.into_native()],
-            font_style?: SvgFontStyle [get(value) => value.map(|value| &value.fType), set(value) => sb::SkSVGFontStyle { fType: value }],
-            font_weight?: SvgFontWeight [get(value) => value.map(|value| &value.fType), set(value) => sb::SkSVGFontWeight { fType: value }],
-            stroke?: SvgPaint [get(value) => value.map(SvgPaint::from_native_ref), set(value) => value.native()],
-            stroke_line_cap?: SvgLineCap [get(value) => value, set(value) => value],
-            stroke_line_join?: SvgLineJoin [get(value) => value.map(|value| &value.fType), set(value) => sb::SkSVGLineJoin { fType: value }],
+            font_family?: FontFamily [get(value) => value.map(FontFamily::from_native_ref), set(value) => value.into_native()],
+            font_size?: FontSize [get(value) => value.map(FontSize::from_native_ref), set(value) => value.into_native()],
+            font_style?: FontStyle [get(value) => value.map(|value| &value.fType), set(value) => sb::SkSVGFontStyle { fType: value }],
+            font_weight?: FontWeight [get(value) => value.map(|value| &value.fType), set(value) => sb::SkSVGFontWeight { fType: value }],
+            stroke?: Paint [get(value) => value.map(Paint::from_native_ref), set(value) => value.native()],
+            stroke_line_cap?: LineCap [get(value) => value, set(value) => value],
+            stroke_line_join?: LineJoin [get(value) => value.map(|value| &value.fType), set(value) => sb::SkSVGLineJoin { fType: value }],
             *stroke_miter_limit?: scalar [get(value) => value, set(value) => value],
             *stroke_opacity?: scalar [get(value) => value, set(value) => value],
-            stroke_width?: SvgLength [get(value) => value.map(SvgLength::from_native_ref), set(value) => value.into_native()],
-            text_anchor?: SvgTextAnchor [get(value) => value.map(|value| &value.fType), set(value) => sb::SkSVGTextAnchor { fType: value }],
-            visibility?: SvgVisibility [get(value) => value.map(|value| &value.fType), set(value) => sb::SkSVGVisibility { fType: value }],
+            stroke_width?: Length [get(value) => value.map(Length::from_native_ref), set(value) => value.into_native()],
+            text_anchor?: TextAnchor [get(value) => value.map(|value| &value.fType), set(value) => sb::SkSVGTextAnchor { fType: value }],
+            visibility?: Visibility [get(value) => value.map(|value| &value.fType), set(value) => sb::SkSVGVisibility { fType: value }],
 
             // not inherited
             clip_path?: SvgIriFunc [get(value) => value.map(SvgIriFunc::from_native_ref), set(value) => value.native()],
-            display?: SvgDisplay [get(value) => value, set(value) => value],
+            display?: Display [get(value) => value, set(value) => value],
             mask?: SvgIriFunc [get(value) => value.map(SvgIriFunc::from_native_ref), set(value) => value.native()],
             filter?: SvgIriFunc [get(value) => value.map(SvgIriFunc::from_native_ref), set(value) => value.native()],
             *opacity?: scalar [get(value) => value, set(value) => value],
-            stop_color?: SvgColor [get(value) => value.map(SvgColor::from_native_ref), set(value) => value.native()],
+            stop_color?: Fill [get(value) => value.map(Fill::from_native_ref), set(value) => value.native()],
             *stop_opacity?: scalar [get(value) => value, set(value) => value],
-            flood_color?: SvgColor [get(value) => value.map(SvgColor::from_native_ref), set(value) => value.native()],
+            flood_color?: Fill [get(value) => value.map(Fill::from_native_ref), set(value) => value.native()],
             *flood_opacity?: scalar [get(value) => value, set(value) => value],
-            lighting_color?: SvgColor [get(value) => value.map(SvgColor::from_native_ref), set(value) => value.native()]
+            lighting_color?: Fill [get(value) => value.map(Fill::from_native_ref), set(value) => value.native()]
         }
     }
 }

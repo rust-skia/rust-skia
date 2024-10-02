@@ -1,4 +1,4 @@
-use super::{DebugAttributes, Inherits, SvgFe};
+use super::{DebugAttributes, HasBase};
 use crate::{prelude::*, scalar};
 use skia_bindings as sb;
 
@@ -26,13 +26,21 @@ native_transmutable!(
 );
 
 pub type SvgFeTurbulenceType = sb::SkSVGFeTurbulenceType_Type;
-pub type SvgFeTurbulence = Inherits<sb::SkSVGFeTurbulence, SvgFe>;
+pub type FeTurbulence = RCHandle<sb::SkSVGFeTurbulence>;
 
-impl DebugAttributes for SvgFeTurbulence {
+impl NativeRefCountedBase for sb::SkSVGFeTurbulence {
+    type Base = sb::SkRefCntBase;
+}
+
+impl HasBase for sb::SkSVGFeTurbulence {
+    type Base = sb::SkSVGFe;
+}
+
+impl DebugAttributes for FeTurbulence {
     const NAME: &'static str = "FeTurbulence";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.base._dbg(
+        self.as_base()._dbg(
             builder
                 .field("base_frequency", self.get_base_frequency())
                 .field("num_octaves", &self.get_num_octaves())
@@ -42,25 +50,7 @@ impl DebugAttributes for SvgFeTurbulence {
     }
 }
 
-impl NativeRefCountedBase for sb::SkSVGFeTurbulence {
-    type Base = sb::SkRefCntBase;
-}
-
-impl SvgFeTurbulence {
-    pub fn from_ptr(node: *mut sb::SkSVGFeTurbulence) -> Option<Self> {
-        let base = SvgFe::from_ptr(node as *mut _)?;
-        let data = RCHandle::from_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
-    pub fn from_unshared_ptr(node: *mut sb::SkSVGFeTurbulence) -> Option<Self> {
-        let base = SvgFe::from_unshared_ptr(node as *mut _)?;
-        let data = RCHandle::from_unshared_ptr(node)?;
-
-        Some(Self { base, data })
-    }
-
+impl FeTurbulence {
     skia_macros::attrs! {
         SkSVGFeTurbulence[native, native_mut] => {
             base_frequency: SvgFeTurbulenceBaseFrequency [get(value) => SvgFeTurbulenceBaseFrequency::from_native_ref(value), set(value) => value.into_native()],

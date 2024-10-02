@@ -1,21 +1,21 @@
-use super::SvgLength;
+use super::Length;
 use crate::{interop::AsStr, prelude::*};
 use skia_bindings as sb;
 use std::fmt;
 
-pub type SvgFontStyle = sb::SkSVGFontStyle_Type;
-pub type SvgFontWeight = sb::SkSVGFontWeight_Type;
+pub type FontStyle = sb::SkSVGFontStyle_Type;
+pub type FontWeight = sb::SkSVGFontWeight_Type;
 
 #[repr(C)]
 #[derive(Copy, Clone)]
-pub struct SvgFontSize {
+pub struct FontSize {
     ty: sb::SkSVGFontSize_Type,
     size: sb::SkSVGLength,
 }
 
-native_transmutable!(sb::SkSVGFontSize, SvgFontSize, svg_font_size_layout);
+native_transmutable!(sb::SkSVGFontSize, FontSize, svg_font_size_layout);
 
-impl fmt::Debug for SvgFontSize {
+impl fmt::Debug for FontSize {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("SvgFontSize")
             .field("size", &self.size())
@@ -23,10 +23,10 @@ impl fmt::Debug for SvgFontSize {
     }
 }
 
-impl SvgFontSize {
-    pub fn size(&self) -> Option<&SvgLength> {
+impl FontSize {
+    pub fn size(&self) -> Option<&Length> {
         if self.ty == sb::SkSVGFontSize_Type::Length {
-            Some(SvgLength::from_native_ref(&self.size))
+            Some(Length::from_native_ref(&self.size))
         } else {
             None
         }
@@ -42,7 +42,7 @@ impl SvgFontSize {
         }
     }
 
-    pub fn new(size: SvgLength) -> Self {
+    pub fn new(size: Length) -> Self {
         Self {
             ty: sb::SkSVGFontSize_Type::Length,
             size: size.into_native(),
@@ -51,12 +51,12 @@ impl SvgFontSize {
 }
 
 #[repr(C)]
-pub struct SvgFontFamily {
+pub struct FontFamily {
     ty: sb::SkSVGFontFamily_Type,
     family: sb::SkString,
 }
 
-impl fmt::Debug for SvgFontFamily {
+impl fmt::Debug for FontFamily {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("SvgFontFamily")
             .field("family", &self.family())
@@ -64,7 +64,7 @@ impl fmt::Debug for SvgFontFamily {
     }
 }
 
-impl SvgFontFamily {
+impl FontFamily {
     pub fn family(&self) -> Option<&str> {
         if self.ty == sb::SkSVGFontFamily_Type::Family {
             Some(self.family.as_str())
@@ -88,4 +88,4 @@ impl SvgFontFamily {
     }
 }
 
-native_transmutable!(sb::SkSVGFontFamily, SvgFontFamily, svg_font_family_layout);
+native_transmutable!(sb::SkSVGFontFamily, FontFamily, svg_font_family_layout);
