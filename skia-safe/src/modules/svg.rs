@@ -385,7 +385,7 @@ mod tests {
 
         let mgr = FontMgr::default();
         let dom = Dom::from_bytes(data.as_bytes(), mgr).unwrap();
-        let mut root = dom.root();
+        let root = dom.root();
 
         println!("{:#?}", root.get_transform());
         println!("{:#?}", root.intrinsic_size());
