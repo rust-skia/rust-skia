@@ -26,7 +26,7 @@ impl DebugAttributes for FeOffset {
 
 impl FeOffset {
     skia_macros::attrs! {
-        SkSVGFeOffset[native, native_mut] => {
+        SkSVGFeOffset => {
             *dx: scalar [get(value) => value, set(value) => value],
             *dy: scalar [get(value) => value, set(value) => value]
         }

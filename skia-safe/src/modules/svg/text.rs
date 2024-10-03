@@ -95,7 +95,7 @@ impl SvgTextContainer {
     }
 
     skia_macros::attrs! {
-        SkSVGTextContainer[native, native_mut] => {
+        SkSVGTextContainer => {
             xml_space: XmlSpace [get(value) => value, set(value) => value]
         }
     }
@@ -161,7 +161,7 @@ impl DebugAttributes for TextPath {
 
 impl TextPath {
     skia_macros::attrs! {
-        SkSVGTextPath[native, native_mut] => {
+        SkSVGTextPath => {
             href: Iri [get(value) => Iri::from_native_ref(value), set(value) => value.into_native()],
             start_offset: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()]
         }
@@ -188,7 +188,7 @@ impl DebugAttributes for TextLiteral {
 
 impl TextLiteral {
     skia_macros::attrs! {
-        SkSVGTextLiteral[native, native_mut] => {
+        SkSVGTextLiteral => {
             text: crate::interop::String [get(value) => crate::interop::String::from_native_ref(value), set(value) => value.into_native()]
         }
     }

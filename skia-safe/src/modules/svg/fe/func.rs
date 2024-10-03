@@ -45,7 +45,7 @@ impl FeFunc {
     }
 
     skia_macros::attrs! {
-        SkSVGFeFunc[native, native_mut] => {
+        SkSVGFeFunc => {
             *amplitude: scalar [get(value) => value, set(value) => value],
             *exponent: scalar [get(value) => value, set(value) => value],
             *intercept: scalar [get(value) => value, set(value) => value],

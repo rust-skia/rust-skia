@@ -31,7 +31,7 @@ impl DebugAttributes for FeComposite {
 
 impl FeComposite {
     skia_macros::attrs! {
-        SkSVGFeComposite[native, native_mut] => {
+        SkSVGFeComposite => {
             "in2" as input2: FeInput [get(value) => FeInput::from_native_ref(value), set(value) => value.into_native()],
             *k1: scalar [get(value) => value, set(value) => value],
             *k2: scalar [get(value) => value, set(value) => value],

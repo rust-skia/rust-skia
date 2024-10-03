@@ -32,7 +32,7 @@ impl DebugAttributes for Rect {
 
 impl Rect {
     skia_macros::attrs! {
-        SkSVGRect[native, native_mut] => {
+        SkSVGRect => {
             x: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
             y: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
             width: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],

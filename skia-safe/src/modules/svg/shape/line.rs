@@ -30,7 +30,7 @@ impl DebugAttributes for Line {
 
 impl Line {
     skia_macros::attrs! {
-        SkSVGLine[native, native_mut] => {
+        SkSVGLine => {
             x1: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
             y1: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
             x2: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],

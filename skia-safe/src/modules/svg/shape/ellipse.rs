@@ -30,7 +30,7 @@ impl DebugAttributes for Ellipse {
 
 impl Ellipse {
     skia_macros::attrs! {
-        SkSVGEllipse[native, native_mut] => {
+        SkSVGEllipse => {
             cx: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
             cy: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
             rx?: Length [get(value) => value.map(Length::from_native_ref), set(value) => value.into_native()],

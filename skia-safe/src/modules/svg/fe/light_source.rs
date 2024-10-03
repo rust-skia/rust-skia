@@ -29,7 +29,7 @@ impl DebugAttributes for FeDistantLight {
 
 impl FeDistantLight {
     skia_macros::attrs! {
-        SkSVGFeDistantLight[native, native_mut] => {
+        SkSVGFeDistantLight => {
             *azimuth: scalar [get(value) => value, set(value) => value],
             *elevation: scalar [get(value) => value, set(value) => value]
         }
@@ -61,7 +61,7 @@ impl DebugAttributes for FePointLight {
 
 impl FePointLight {
     skia_macros::attrs! {
-        SkSVGFePointLight[native, native_mut] => {
+        SkSVGFePointLight => {
             *x: scalar [get(value) => value, set(value) => value],
             *y: scalar [get(value) => value, set(value) => value],
             *z: scalar [get(value) => value, set(value) => value]
@@ -99,7 +99,7 @@ impl DebugAttributes for FeSpotLight {
 
 impl FeSpotLight {
     skia_macros::attrs! {
-        SkSVGFeSpotLight[native, native_mut] => {
+        SkSVGFeSpotLight => {
             *x: scalar [get(value) => value, set(value) => value],
             *y: scalar [get(value) => value, set(value) => value],
             *z: scalar [get(value) => value, set(value) => value],

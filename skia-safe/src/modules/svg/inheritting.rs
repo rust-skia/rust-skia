@@ -1,7 +1,7 @@
-use super::{transmute_ref, transmute_ref_mut, NativeRefCounted, RCHandle};
+use super::{transmute_ref, NativeRefCounted, RCHandle};
 use std::{
     fmt::{Debug, DebugStruct, Formatter, Result},
-    ops::{Deref, DerefMut},
+    ops::Deref,
 };
 
 pub trait HasBase {
@@ -19,12 +19,6 @@ impl<T: NativeRefCounted + HasBase> Deref for RCHandle<T> {
 
     fn deref(&self) -> &Self::Target {
         self.as_base()
-    }
-}
-
-impl<T: NativeRefCounted + HasBase> DerefMut for RCHandle<T> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        unsafe { transmute_ref_mut(self) }
     }
 }
 

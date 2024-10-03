@@ -46,7 +46,7 @@ impl DebugAttributes for FeGaussianBlur {
 
 impl FeGaussianBlur {
     skia_macros::attrs! {
-        SkSVGFeGaussianBlur[native, native_mut] => {
+        SkSVGFeGaussianBlur => {
             std_deviation: StdDeviation [get(value) => StdDeviation::from_native_ref(value), set(value) => value.into_native()]
         }
     }

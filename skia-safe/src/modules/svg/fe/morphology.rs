@@ -46,7 +46,7 @@ impl DebugAttributes for FeMorphology {
 
 impl FeMorphology {
     skia_macros::attrs! {
-        SkSVGFeMorphology[native, native_mut] => {
+        SkSVGFeMorphology => {
             operator: SvgFeMorphologyOperator [get(value) => value, set(value) => value],
             radius: Radius [get(value) => Radius::from_native_ref(value), set(value) => value.into_native()]
         }

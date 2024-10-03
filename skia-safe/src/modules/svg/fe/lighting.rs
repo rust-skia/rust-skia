@@ -52,7 +52,7 @@ impl DebugAttributes for SvgFeLighting {
 
 impl SvgFeLighting {
     skia_macros::attrs! {
-        SkSVGFeLighting[native, native_mut] => {
+        SkSVGFeLighting => {
             *surface_scale: scalar [get(value) => value, set(value) => value],
             *kernel_unit_length?: KernelUnitLength [get(value) => value.map(KernelUnitLength::from_native_c), set(value) => value.into_native()]
         }
@@ -83,7 +83,7 @@ impl DebugAttributes for FeSpecularLighting {
 
 impl FeSpecularLighting {
     skia_macros::attrs! {
-        SkSVGFeSpecularLighting[native, native_mut] => {
+        SkSVGFeSpecularLighting => {
             *specular_constant: scalar [get(value) => value, set(value) => value],
             *specular_exponent: scalar [get(value) => value, set(value) => value]
         }
@@ -111,7 +111,7 @@ impl DebugAttributes for FeDiffuseLighting {
 
 impl FeDiffuseLighting {
     skia_macros::attrs! {
-        SkSVGFeDiffuseLighting[native, native_mut] => {
+        SkSVGFeDiffuseLighting => {
             *diffuse_constant: scalar [get(value) => value, set(value) => value]
         }
     }

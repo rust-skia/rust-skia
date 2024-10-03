@@ -52,7 +52,7 @@ impl DebugAttributes for FeTurbulence {
 
 impl FeTurbulence {
     skia_macros::attrs! {
-        SkSVGFeTurbulence[native, native_mut] => {
+        SkSVGFeTurbulence => {
             base_frequency: SvgFeTurbulenceBaseFrequency [get(value) => SvgFeTurbulenceBaseFrequency::from_native_ref(value), set(value) => value.into_native()],
             *num_octaves: i32 [get(value) => value, set(value) => value],
             *seed: scalar [get(value) => value, set(value) => value],

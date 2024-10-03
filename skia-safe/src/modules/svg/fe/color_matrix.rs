@@ -40,7 +40,7 @@ impl FeColorMatrix {
     }
 
     skia_macros::attrs! {
-        SkSVGFeColorMatrix[native, native_mut] => {
+        SkSVGFeColorMatrix => {
             "type" as kind: SvgFeColorMatrixKind [get(value) => value, set(value) => value]
         }
     }

@@ -28,7 +28,7 @@ impl DebugAttributes for FeImage {
 
 impl FeImage {
     skia_macros::attrs! {
-        SkSVGFeImage[native, native_mut] => {
+        SkSVGFeImage => {
             href: Iri [get(value) => Iri::from_native_ref(value), set(value) => value.into_native()],
             preserve_aspect_ratio: PreserveAspectRatio [get(value) => PreserveAspectRatio::from_native_ref(value), set(value) => value.into_native()]
         }

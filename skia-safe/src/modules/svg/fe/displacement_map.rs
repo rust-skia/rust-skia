@@ -29,7 +29,7 @@ impl DebugAttributes for FeDisplacementMap {
 
 impl FeDisplacementMap {
     skia_macros::attrs! {
-        SkSVGFeDisplacementMap[native, native_mut] => {
+        SkSVGFeDisplacementMap => {
             "in2" as input2: FeInput [get(value) => FeInput::from_native_ref(value), set(value) => value.into_native()],
             x_channel_selector: SvgChannelSelector [get(value) => value, set(value) => value],
             y_channel_selector: SvgChannelSelector [get(value) => value, set(value) => value],

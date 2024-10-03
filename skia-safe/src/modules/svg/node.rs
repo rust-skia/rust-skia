@@ -199,7 +199,7 @@ impl SvgNode {
     }
 
     skia_macros::attrs! {
-        SkSVGNode[native, native_mut] => {
+        SkSVGNode => {
             // inherited
             clip_rule?: FillRule [get(value) => value.map(|value| &value.fType), set(value) => sb::SkSVGFillRule { fType: value }],
             color_interpolation?: ColorSpace [get(value) => value, set(value) => value],

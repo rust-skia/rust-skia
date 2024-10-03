@@ -23,7 +23,7 @@ impl DebugAttributes for FeMergeNode {
 
 impl FeMergeNode {
     skia_macros::attrs! {
-        SkSVGFeMergeNode[native, native_mut] => {
+        SkSVGFeMergeNode => {
             "in" as input: FeInput [get(value) => FeInput::from_native_ref(value), set(value) => value.into_native()]
         }
     }

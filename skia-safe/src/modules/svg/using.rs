@@ -27,7 +27,7 @@ impl DebugAttributes for Use {
 
 impl Use {
     skia_macros::attrs! {
-        SkSVGUse[native, native_mut] => {
+        SkSVGUse => {
             x: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
             y: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
             href: Iri [get(value) => Iri::from_native_ref(value), set(value) => value.into_native()]

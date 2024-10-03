@@ -52,7 +52,7 @@ impl DebugAttributes for SvgFe {
 
 impl SvgFe {
     skia_macros::attrs! {
-        SkSVGFe[native, native_mut] => {
+        SkSVGFe => {
             "in" as input: FeInput [get(value) => FeInput::from_native_ref(value), set(value) => value.into_native()],
             result: crate::interop::String [get(value) => crate::interop::String::from_native_ref(value), set(value) => value.into_native()],
             x?: Length [get(value) => value.map(Length::from_native_ref), set(value) => value.into_native()],

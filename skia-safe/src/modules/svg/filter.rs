@@ -30,7 +30,7 @@ impl HasBase for sb::SkSVGFilter {
 
 impl Filter {
     skia_macros::attrs! {
-        SkSVGFilter[native, native_mut] => {
+        SkSVGFilter => {
             x: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
             y: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
             width: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],

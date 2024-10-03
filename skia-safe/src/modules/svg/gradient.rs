@@ -33,7 +33,7 @@ impl DebugAttributes for SvgGradient {
 
 impl SvgGradient {
     skia_macros::attrs! {
-        SkSVGGradient[native, native_mut] => {
+        SkSVGGradient => {
             href: Iri [get(value) => Iri::from_native_ref(value), set(value) => value.into_native()],
             gradient_transform: Matrix [get(value) => Matrix::from_native_ref(value), set(value) => value.into_native()],
             spread_method: SpreadMethod [get(value) => &value.fType, set(value) => sb::SkSVGSpreadMethod { fType: value }],

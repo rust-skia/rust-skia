@@ -27,7 +27,7 @@ impl DebugAttributes for FeBlend {
 
 impl FeBlend {
     skia_macros::attrs! {
-        SkSVGFeBlend[native, native_mut] => {
+        SkSVGFeBlend => {
             "in2" as input2: FeInput [get(value) => FeInput::from_native_ref(value), set(value) => value.into_native()],
             mode: SvgFeBlendMode [get(value) => value, set(value) => value]
         }

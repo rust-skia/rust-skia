@@ -26,7 +26,7 @@ edition = "2021"
 doctest = false
 
 [features]
-default = ["binary-cache", "embed-icudtl", "svg"]
+default = ["binary-cache", "embed-icudtl"]
 all-linux = [
     "gl",
     "egl",
