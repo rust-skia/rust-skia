@@ -2,12 +2,11 @@ use std::{ops::Deref, ptr};
 
 use skia_bindings as sb;
 
-mod vk_types;
 mod vulkan_backend_context;
 mod vulkan_mutable_texture_state;
 mod vulkan_types;
 
-pub use vk_types::*;
+pub use super::ganesh::vk::vk_types::*;
 pub use vulkan_backend_context::*;
 pub use vulkan_mutable_texture_state::*;
 pub use vulkan_types::*;

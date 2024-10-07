@@ -2,8 +2,11 @@ use std::{ffi::CStr, os::raw, ptr};
 
 use skia_bindings::{GrVkDrawableInfo, GrVkImageInfo, GrVkSurfaceInfo};
 
-use super::{Alloc, YcbcrConversionInfo};
-use crate::gpu::{self, vk, Protected};
+use crate::gpu::{
+    self,
+    vk::{self, Alloc, YcbcrConversionInfo},
+    Protected,
+};
 
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
