@@ -64,7 +64,7 @@ impl ColorFilter {
         unsafe { self.native().isAlphaUnchanged() }
     }
 
-    #[deprecated(since = "0.0.0", note = "Use filter_color4f()")]
+    #[deprecated(since = "0.79.0", note = "Use filter_color4f()")]
     pub fn filter_color(&self, color: impl Into<Color>) -> Color {
         self.filter_color4f(color.into(), None, None).to_color()
     }
