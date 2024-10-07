@@ -350,7 +350,8 @@ More details can be found at [CONTRIBUTING.md](https://github.com/rust-skia/rust
 - Alberto González Palomo ([@AlbertoGP](https://github.com/AlbertoGP)) designed the Rust-Skia Logo and the example program that renders it.
 - Luper Rouch ([@flupke](https://github.com/flupke), sponsored by [Jitter](https://jitter.video/))
   added build support for the `wasm32-unknown-emscripten` target.
-- Osei Fortune ([@triniwiz](https://github.com/triniwiz)) contributed rendering SVG files.
+- Osei Fortune ([@triniwiz](https://github.com/triniwiz)) and Savchenko Ivan ([@Aiving](https://github.com/Aiving))
+  contributed rendering SVG files.
 
 ## Maintainers
 
