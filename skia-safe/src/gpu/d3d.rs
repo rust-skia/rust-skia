@@ -1,6 +1,6 @@
 use skia_bindings as sb;
 
-pub use ganesh::d3d::{backend_context::*, types::*};
+pub use super::ganesh::d3d::{backend_context::*, types::*};
 
 // re-export D3D types we use
 

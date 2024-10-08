@@ -79,7 +79,7 @@ pub mod interfaces {
     #[cfg(target_arch = "wasm32")]
     pub use super::ganesh::gl::make_web_gl_interface::interfaces::*;
     #[cfg(target_os = "windows")]
-    pub use super::ganesh::gl::make_web_gl_interface::interfaces::*;
+    pub use super::ganesh::gl::make_win_interface::interfaces::*;
 }
 
 #[cfg(test)]

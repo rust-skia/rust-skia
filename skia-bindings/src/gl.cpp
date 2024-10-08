@@ -234,7 +234,7 @@ extern "C" const GrGLInterface* C_GrGLInterfaces_MakeMac() {
 
 #if defined(SK_BUILD_FOR_WIN)
 
-#include "include/gpu/ganesh/gl/mac/GrGLMakeWinInterface.h"
+#include "include/gpu/ganesh/gl/win/GrGLMakeWinInterface.h"
 
 extern "C" const GrGLInterface* C_GrGLInterfaces_MakeWin() {
     return GrGLInterfaces::MakeWin().release();
