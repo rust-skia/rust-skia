@@ -7,9 +7,9 @@ mod mutable_texture_state;
 #[cfg(feature = "vulkan")]
 pub mod vk;
 
+pub use context_options::ContextOptions;
 pub use ganesh::backend_surface::*;
 pub use ganesh::context_options;
-pub use ganesh::context_options::ContextOptions;
 pub use ganesh::direct_context::*;
 pub use ganesh::driver_bug_workarounds::*;
 pub use ganesh::image_ganesh as images;
