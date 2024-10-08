@@ -2,8 +2,6 @@ use std::fmt;
 
 use skia_bindings::{self as sb, SkDrawable, SkFlattenable, SkRefCntBase};
 
-#[cfg(feature = "gpu")]
-use crate::gpu;
 use crate::{prelude::*, Canvas, Matrix, NativeFlattenable, Picture, Point, Rect};
 
 pub type Drawable = RCHandle<SkDrawable>;
@@ -51,7 +49,7 @@ impl Drawable {
     #[cfg(feature = "gpu")]
     pub fn snap_gpu_draw_handler(
         &mut self,
-        api: gpu::BackendAPI,
+        api: crate::gpu::BackendAPI,
         matrix: &Matrix,
         clip_bounds: impl Into<crate::IRect>,
         buffer_info: &crate::ImageInfo,
@@ -112,8 +110,9 @@ pub mod gpu_draw_handler {
         }
     }
 
+    #[cfg(feature = "vulkan")]
     impl GPUDrawHandler {
-        pub fn draw(&mut self, info: &gpu::BackendDrawableInfo) {
+        pub fn draw(&mut self, info: &gpu::vk::BackendDrawableInfo) {
             unsafe {
                 sb::C_SkDrawable_GpuDrawHandler_draw(self.native_mut(), info.native());
             }

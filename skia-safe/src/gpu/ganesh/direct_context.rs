@@ -7,17 +7,14 @@ use std::{
 
 use skia_bindings::{self as sb, GrDirectContext, GrDirectContext_DirectContextID, SkRefCntBase};
 
-#[cfg(feature = "d3d")]
-use super::d3d;
-#[cfg(feature = "gl")]
-use super::gl;
-#[cfg(feature = "vulkan")]
-use super::vk;
-use super::{
-    BackendFormat, BackendRenderTarget, BackendTexture, ContextOptions, FlushInfo,
-    MutableTextureState, PurgeResourceOptions, RecordingContext, SemaphoresSubmitted, SyncCpu,
+use crate::{
+    gpu::{
+        BackendFormat, BackendRenderTarget, BackendTexture, ContextOptions, FlushInfo,
+        MutableTextureState, PurgeResourceOptions, RecordingContext, SemaphoresSubmitted, SyncCpu,
+    },
+    prelude::*,
+    surfaces, Data, Image, Surface, TextureCompressionType,
 };
-use crate::{prelude::*, surfaces, Data, Image, Surface, TextureCompressionType};
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -86,7 +83,7 @@ impl DirectContext {
     #[cfg(feature = "gl")]
     #[deprecated(since = "0.74.0", note = "use gpu::direct_contexts::make_gl()")]
     pub fn new_gl<'a>(
-        interface: impl Into<gl::Interface>,
+        interface: impl Into<crate::gpu::gl::Interface>,
         options: impl Into<Option<&'a ContextOptions>>,
     ) -> Option<DirectContext> {
         crate::gpu::direct_contexts::make_gl(interface, options)
@@ -96,7 +93,7 @@ impl DirectContext {
     #[cfg(feature = "vulkan")]
     #[deprecated(since = "0.74.0", note = "use gpu::direct_contexts::make_vulkan()")]
     pub fn new_vulkan<'a>(
-        backend_context: &vk::BackendContext,
+        backend_context: &crate::gpu::vk::BackendContext,
         options: impl Into<Option<&'a ContextOptions>>,
     ) -> Option<DirectContext> {
         crate::gpu::direct_contexts::make_vulkan(backend_context, options)
@@ -114,7 +111,7 @@ impl DirectContext {
     #[cfg(feature = "d3d")]
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn new_d3d<'a>(
-        backend_context: &d3d::BackendContext,
+        backend_context: &crate::gpu::d3d::BackendContext,
         options: impl Into<Option<&'a ContextOptions>>,
     ) -> Option<DirectContext> {
         DirectContext::from_ptr(sb::C_GrDirectContext_MakeDirect3D(

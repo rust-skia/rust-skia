@@ -428,6 +428,7 @@ const OPAQUE_TYPES: &[&str] = &[
     "std::optional",
     // Feature `svg`:
     "SkSVGNode",
+    "SkTLazy",
     "skresources::ResourceProvider",
     // m107 (layout failure)
     "skgpu::VulkanMemoryAllocator",
@@ -843,6 +844,9 @@ pub(crate) mod definitions {
         use_system_libraries: bool,
     ) -> Vec<PathBuf> {
         let mut files = vec!["obj/skia.ninja".into()];
+        if features.gpu() {
+            files.push("obj/gpu.ninja".into());
+        }
         if features.text_layout {
             files.extend(vec![
                 "obj/modules/skshaper/skshaper.ninja".into(),
