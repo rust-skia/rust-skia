@@ -1,5 +1,7 @@
 #[cfg(feature = "textlayout")]
 pub(crate) mod paragraph;
+#[cfg(feature = "svg")]
+pub mod resources;
 #[cfg(feature = "textlayout")]
 pub mod shaper;
 #[cfg(feature = "svg")]
