@@ -220,6 +220,14 @@ extern "C" void C_GrYUVABackendTextures_destruct(GrYUVABackendTextures* self) {
     self->~GrYUVABackendTextures();
 }
 
+extern "C" const SkYUVAInfo* C_GrYUVABackendTextures_yuvaInfo(const GrYUVABackendTextures* self) {
+    return &self->yuvaInfo();
+}
+
+extern "C" GrSurfaceOrigin C_GrYUVABackendTextures_textureOrigin(const GrYUVABackendTextures* self) {
+    return self->textureOrigin();
+}
+
 extern "C" const GrBackendTexture* C_GrYUVABackendTextures_textures(const GrYUVABackendTextures* self) {
     return self->textures().data();
 }

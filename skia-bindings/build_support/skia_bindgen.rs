@@ -16,6 +16,9 @@ pub mod env {
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Configuration {
+    /// The features active.
+    pub features: features::Features,
+
     /// The binding source files to compile.
     pub binding_sources: Vec<PathBuf>,
 
@@ -65,6 +68,7 @@ impl Configuration {
         };
 
         Self {
+            features: features.clone(),
             skia_source_dir: skia_source_dir.into(),
             binding_sources,
             definitions,
@@ -132,6 +136,7 @@ pub fn generate_bindings(
         .blocklist_type("SkUnicode")
         .raw_line("pub enum SkUnicode {}")
 
+
         // misc
         .allowlist_var("SK_Color.*")
         .allowlist_var("kAll_GrBackendState")
@@ -139,6 +144,19 @@ pub fn generate_bindings(
         .clang_arg("-std=c++17")
         .clang_args(&["-x", "c++"])
         .clang_arg("-v");
+
+    // gpu builds
+
+    if build.features.gpu() {
+        builder = builder
+            // bindgen 0.70 alignment problems on i686-linux-android
+            .blocklist_type("GrBackendFormat_AnyFormatData")
+            .raw_line("#[repr(C, align(8))] pub struct GrBackendFormat_AnyFormatData { data: [u8;GrBackendFormat_kMaxSubclassSize + 1] }")
+            .blocklist_type("GrBackendTexture_AnyTextureData")
+            .raw_line("#[repr(C, align(8))] pub struct GrBackendTexture_AnyTextureData { data: [u8;GrBackendTexture_kMaxSubclassSize + 1] }")
+            .blocklist_type("GrBackendRenderTarget_AnyRenderTargetData")
+            .raw_line("#[repr(C, align(8))] pub struct GrBackendRenderTarget_AnyRenderTargetData { data: [u8;GrBackendRenderTarget_kMaxSubclassSize + 1] }");
+    }
 
     // Don't generate destructors for Windows targets:
     // <https://github.com/rust-skia/rust-skia/issues/318>
@@ -444,6 +462,9 @@ const OPAQUE_TYPES: &[&str] = &[
     "skgpu::MutableTextureState",
     // emscripten: Uses SkLRUCache (which is blocklisted)
     "skia::textlayout::ParagraphCache",
+    // Fix bindgen 0.70 layout failures
+    "skgpu::VulkanBackendContext",
+    "GrYUVABackendTextures",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[

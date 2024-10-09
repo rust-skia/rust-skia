@@ -61,8 +61,8 @@ mozjpeg-sys = { version = "2", features = ["with_simd"], optional = true }
 lazy_static = { version = "1.4.0", optional = true }
 
 [build-dependencies]
-cc = "1.0.98"
-bindgen = "0.69.1"
+cc = { version = "1.1.28" }
+bindgen = { version = "0.70.1" }
 
 # For enum variant name replacements.
 regex = "1.4.5"
@@ -81,8 +81,8 @@ toml = "0.8.0"
 
 [dev-dependencies]
 # build dependencies duplicated for testing :(
-cc = "1.0.37"
-bindgen = "0.69.1"
+cc = { version = "1.1.28" }
+bindgen = { version = "0.70.1" }
 regex = "1.4.5"
 heck = "0.5.0"
 # ureq = { version = "2.8.0" }
