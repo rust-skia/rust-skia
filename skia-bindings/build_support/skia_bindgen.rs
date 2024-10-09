@@ -131,6 +131,13 @@ pub fn generate_bindings(
         // linked into the final executable.
         .blocklist_type("SkUnicode")
         .raw_line("pub enum SkUnicode {}")
+        // bindgen 0.70 alignment problems on i686-linux-android
+        .blocklist_type("GrBackendFormat_AnyFormatData")
+        .raw_line("#[repr(C, align(8))] pub struct GrBackendFormat_AnyFormatData { data: [u8;GrBackendFormat_kMaxSubclassSize + 1] }")
+        .blocklist_type("GrBackendTexture_AnyTextureData")
+        .raw_line("#[repr(C, align(8))] pub struct GrBackendTexture_AnyTextureData { data: [u8;GrBackendTexture_kMaxSubclassSize + 1] }")
+        .blocklist_type("GrBackendRenderTarget_AnyRenderTargetData")
+        .raw_line("#[repr(C, align(8))] pub struct GrBackendRenderTarget_AnyRenderTargetData { data: [u8;GrBackendRenderTarget_kMaxSubclassSize + 1] }")
 
         // misc
         .allowlist_var("SK_Color.*")
@@ -446,6 +453,7 @@ const OPAQUE_TYPES: &[&str] = &[
     "skia::textlayout::ParagraphCache",
     // Fix bindgen 0.70 layout failures
     "skgpu::VulkanBackendContext",
+    "GrYUVABackendTextures",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[
