@@ -142,6 +142,7 @@ impl FinalBuildConfiguration {
             if features.vulkan {
                 builder
                     .arg("skia_use_vulkan", yes())
+                    .arg("skia_use_vma", no())
                     .arg("skia_enable_spirv_validation", no());
             }
 
