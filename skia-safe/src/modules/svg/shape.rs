@@ -11,9 +11,9 @@ use super::{DebugAttributes, HasBase};
 use crate::prelude::*;
 use skia_bindings as sb;
 
-pub type SvgShape = RCHandle<sb::SkSVGShape>;
+pub type Shape = RCHandle<sb::SkSVGShape>;
 
-impl DebugAttributes for SvgShape {
+impl DebugAttributes for Shape {
     const NAME: &'static str = "Shape";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
