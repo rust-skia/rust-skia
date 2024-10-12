@@ -27,7 +27,7 @@ impl Container {
     }
 
     pub fn has_children(&self) -> bool {
-        unsafe { sb::C_SkSVGContainer_hasChildren(self.native()) }
+        self.children_count() != 0
     }
 
     pub fn children_count(&self) -> usize {

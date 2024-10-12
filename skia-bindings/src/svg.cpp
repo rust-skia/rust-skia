@@ -396,10 +396,6 @@ extern "C" void C_SkSVGColor_Construct1(SkSVGColor* uninitialized, const SkSVGCo
 // Hacky way to access the SkSVGContainer::fChildren property (should be safe)
 class SkSVGContainerAccessor : public SkSVGContainer {
     public:
-        bool hasChild() const {
-            return !fChildren.empty();
-        }
-
         int childrenCount() const {
             return fChildren.size();
         }
@@ -411,10 +407,6 @@ class SkSVGContainerAccessor : public SkSVGContainer {
 
 extern "C" void C_SkSVGContainer_appendChild(SkSVGContainer* self, SkSVGNode* node) {
     self->appendChild(sk_sp<SkSVGNode>(node));
-}
-
-extern "C" bool C_SkSVGContainer_hasChildren(const SkSVGContainer& self) {
-    return static_cast<const SkSVGContainerAccessor&>(self).hasChild();
 }
 
 extern "C" int C_SkSVGContainer_childrenCount(const SkSVGContainer& self) {
