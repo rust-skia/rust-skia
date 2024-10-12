@@ -9,7 +9,7 @@ use std::{
 };
 
 use skia_bindings::{
-    C_SkRefCntBase_ref, C_SkRefCntBase_unique, C_SkRefCntBase_unref, SkRefCnt, SkRefCntBase,
+    sk_sp, C_SkRefCntBase_ref, C_SkRefCntBase_unique, C_SkRefCntBase_unref, SkRefCnt, SkRefCntBase,
 };
 
 /// Convert any reference into any other.
@@ -575,6 +575,12 @@ impl<N: NativeRefCounted> RCHandle<N> {
         unsafe { transmute_ref(n) }
     }
 
+    /// Create a reference to a all non-null sk_sp<N> slice.
+    pub(crate) fn from_non_null_sp_slice(sp_slice: &[sk_sp<N>]) -> &[Self] {
+        debug_assert!(sp_slice.iter().all(|v| !v.fPtr.is_null()));
+        unsafe { mem::transmute(sp_slice) }
+    }
+
     /// Returns the pointer to the handle.
     #[allow(unused)]
     pub(crate) fn as_ptr(&self) -> &NonNull<N> {
@@ -1037,5 +1043,20 @@ pub(crate) mod safer {
             ptr
         };
         slice::from_raw_parts_mut(ptr, len)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use skia_bindings::{sk_sp, SkFontMgr};
+
+    use crate::RCHandle;
+
+    #[test]
+    fn sp_equals_size_of_rc_handle() {
+        assert_eq!(
+            size_of::<sk_sp<SkFontMgr>>(),
+            size_of::<RCHandle<SkFontMgr>>()
+        )
     }
 }
