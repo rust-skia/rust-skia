@@ -1,10 +1,13 @@
-use super::Length;
-use crate::{interop::AsStr, prelude::*};
-use skia_bindings as sb;
 use std::fmt;
 
+use super::Length;
+use crate::{interop, prelude::*};
+use skia_bindings as sb;
+
 pub type FontStyle = sb::SkSVGFontStyle_Type;
+variant_name!(FontStyle::Normal);
 pub type FontWeight = sb::SkSVGFontWeight_Type;
+variant_name!(FontWeight::Lighter);
 
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -51,9 +54,10 @@ impl FontSize {
 }
 
 #[repr(C)]
+#[derive(Clone)]
 pub struct FontFamily {
     ty: sb::SkSVGFontFamily_Type,
-    family: sb::SkString,
+    family: interop::String,
 }
 
 impl fmt::Debug for FontFamily {
@@ -76,14 +80,14 @@ impl FontFamily {
     pub fn inherit() -> Self {
         Self {
             ty: sb::SkSVGFontFamily_Type::Inherit,
-            family: crate::interop::String::default().into_native(),
+            family: interop::String::default(),
         }
     }
 
     pub fn new<T: AsRef<str>>(family: T) -> Self {
         Self {
             ty: sb::SkSVGFontFamily_Type::Family,
-            family: crate::interop::String::from_str(family.as_ref()).into_native(),
+            family: interop::String::from_str(family.as_ref()),
         }
     }
 }

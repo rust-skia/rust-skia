@@ -5,7 +5,7 @@ mod element;
 pub mod fe;
 mod filter;
 mod g;
-pub mod gradient;
+mod gradient;
 mod image;
 mod inheritting;
 mod mask;
@@ -24,7 +24,7 @@ pub use self::{
     defs::Defs,
     filter::Filter,
     g::G,
-    gradient::Gradient,
+    gradient::*,
     image::Image,
     inheritting::*,
     mask::Mask,
@@ -37,14 +37,6 @@ pub use self::{
     using::Use,
 };
 
-use crate::{
-    interop::{MemoryStream, NativeStreamBase, RustStream},
-    prelude::*,
-    Canvas, Data, FontMgr, FontStyle as SkFontStyle, Size,
-};
-use element::Svg;
-use skia_bindings as sb;
-use skia_bindings::{SkData, SkTypeface};
 use std::{
     error::Error,
     ffi::CStr,
@@ -52,6 +44,16 @@ use std::{
     io::{self, Read},
     os::raw,
 };
+
+use crate::{
+    interop::{MemoryStream, NativeStreamBase, RustStream},
+    prelude::*,
+    Canvas, Data, FontMgr, FontStyle as SkFontStyle, Size,
+};
+use element::Svg;
+
+use skia_bindings as sb;
+use skia_bindings::{SkData, SkTypeface};
 
 pub type Dom = RCHandle<sb::SkSVGDOM>;
 

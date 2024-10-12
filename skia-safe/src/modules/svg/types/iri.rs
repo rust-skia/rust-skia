@@ -1,6 +1,9 @@
 use std::fmt;
 
-use crate::{interop::AsStr, prelude::*};
+use crate::{
+    interop::{self, AsStr},
+    prelude::*,
+};
 use skia_bindings as sb;
 
 pub type IriKind = sb::SkSVGIRI_Type;
@@ -35,7 +38,7 @@ impl Iri {
 
     pub fn new<T: AsRef<str>>(value: T, kind: IriKind) -> Self {
         Self::construct(|uninitialized| unsafe {
-            let iri = crate::interop::String::from_str(value.as_ref());
+            let iri = interop::String::from_str(value.as_ref());
 
             sb::C_SkSVGIRI_Construct1(uninitialized, kind, iri.native())
         })

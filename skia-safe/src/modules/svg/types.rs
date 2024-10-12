@@ -1,11 +1,13 @@
-mod aspect_ratio;
 mod color;
 mod font;
 mod iri;
 mod length;
 mod paint;
+pub mod preserve_aspect_ratio;
 
-pub use self::{aspect_ratio::*, color::*, font::*, iri::*, length::*, paint::*};
+pub use self::{
+    color::*, font::*, iri::*, length::*, paint::*, preserve_aspect_ratio::PreserveAspectRatio,
+};
 
 use skia_bindings as sb;
 

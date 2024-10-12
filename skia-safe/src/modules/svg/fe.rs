@@ -6,17 +6,18 @@ mod func;
 mod gaussian_blur;
 mod image;
 mod light_source;
-mod lighting;
-mod merge;
-mod morphology;
+pub mod lighting;
+mod merge_node;
+pub mod morphology;
 mod offset;
 mod turbulence;
 mod types;
 
 pub use self::{
     blend::*, color_matrix::*, composite::*, displacement_map::*, func::*, gaussian_blur::*,
-    image::*, light_source::*, lighting::*, merge::*, morphology::*, offset::*, turbulence::*,
-    types::*,
+    image::*, light_source::*, lighting::Diffuse as DiffuseLighting, lighting::Lighting,
+    lighting::Specular as SpecularLighting, merge_node::*, morphology::Morphology, offset::*,
+    turbulence::*, types::*,
 };
 
 use super::{DebugAttributes, HasBase, Length};

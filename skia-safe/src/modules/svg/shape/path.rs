@@ -1,7 +1,6 @@
 use crate::{
     prelude::*,
     svg::{DebugAttributes, HasBase},
-    Path as SkPath,
 };
 use skia_bindings as sb;
 
@@ -26,7 +25,7 @@ impl DebugAttributes for Path {
 impl Path {
     skia_macros::attrs! {
         SkSVGPath => {
-            path: SkPath [get(value) => SkPath::from_native_ref(value), set(value) => value.into_native()]
+            path: crate::Path [get(value) => crate::Path::from_native_ref(value), set(value) => value.into_native()]
         }
     }
 }

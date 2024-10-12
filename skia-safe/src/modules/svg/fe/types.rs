@@ -6,6 +6,7 @@ use skia_bindings as sb;
 pub type InputType = sb::SkSVGFeInputType_Type;
 variant_name!("InputType::SourceGraphic");
 
+#[repr(C)]
 #[derive(Clone)]
 pub struct Input {
     kind: InputType,

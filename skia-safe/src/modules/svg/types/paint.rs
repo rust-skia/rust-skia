@@ -5,8 +5,6 @@ use std::fmt;
 
 pub type Paint = Handle<sb::SkSVGPaint>;
 
-unsafe_send_sync!(Paint);
-
 impl NativeDrop for sb::SkSVGPaint {
     fn drop(&mut self) {
         unsafe { sb::C_SkSVGPaint_destruct(self) }

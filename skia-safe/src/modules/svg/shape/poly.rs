@@ -19,22 +19,21 @@ impl DebugAttributes for Poly {
     const NAME: &'static str = "Poly";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.as_base()
-            ._dbg(builder.field("points", &self.get_points()));
+        self.as_base()._dbg(builder.field("points", &self.points()));
     }
 }
 
 impl Poly {
-    pub fn get_points(&self) -> &[Point] {
+    pub fn points(&self) -> &[Point] {
         unsafe {
             safer::from_raw_parts(
                 Point::from_native_ptr(sb::C_SkSVGPoly_getPoints(self.native())),
-                self.get_points_count(),
+                self.points_count(),
             )
         }
     }
 
-    pub fn get_points_count(&self) -> usize {
+    pub(crate) fn points_count(&self) -> usize {
         unsafe { sb::C_SkSVGPoly_getPointsCount(self.native()) }
     }
 }

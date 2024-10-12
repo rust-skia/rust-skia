@@ -21,7 +21,8 @@ impl Radius {
 
 native_transmutable!(sb::SkSVGFeMorphology_Radius, Radius, svg_radius_layout);
 
-pub type MorphologyOperator = sb::SkSVGFeMorphology_Operator;
+pub type Operator = sb::SkSVGFeMorphology_Operator;
+variant_name!(Operator::Dilate);
 pub type Morphology = RCHandle<sb::SkSVGFeMorphology>;
 
 impl NativeRefCountedBase for sb::SkSVGFeMorphology {
@@ -47,7 +48,7 @@ impl DebugAttributes for Morphology {
 impl Morphology {
     skia_macros::attrs! {
         SkSVGFeMorphology => {
-            operator: MorphologyOperator [get(value) => value, set(value) => value],
+            operator: Operator [get(value) => value, set(value) => value],
             radius: Radius [get(value) => Radius::from_native_ref(value), set(value) => value.into_native()]
         }
     }

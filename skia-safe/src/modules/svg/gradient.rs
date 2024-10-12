@@ -1,7 +1,7 @@
 mod linear;
 mod radial;
 
-pub use self::{linear::Linear, radial::Radial};
+pub use self::{linear::Linear as LinearGradient, radial::Radial as RadialGradient};
 
 use super::{BoundingBoxUnits, DebugAttributes, HasBase, Iri, SpreadMethod};
 use crate::{prelude::*, Matrix};

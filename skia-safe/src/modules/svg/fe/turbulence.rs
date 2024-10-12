@@ -26,6 +26,8 @@ native_transmutable!(
 );
 
 pub type TurbulenceType = sb::SkSVGFeTurbulenceType_Type;
+variant_name!(TurbulenceType::FractalNoise);
+
 pub type Turbulence = RCHandle<sb::SkSVGFeTurbulence>;
 
 impl NativeRefCountedBase for sb::SkSVGFeTurbulence {
