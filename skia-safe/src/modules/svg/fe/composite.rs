@@ -32,7 +32,7 @@ impl DebugAttributes for Composite {
 }
 
 impl Composite {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGFeComposite => {
             "in2" as input2: Input [get(value) => Input::from_native_ref(value), set(value) => value.into_native()],
             *k1: scalar [get(value) => value, set(value) => value],

@@ -33,7 +33,7 @@ impl Svg {
         unsafe { Size::from_native_c(sb::C_SkSVGSVG_intrinsicSize(self.native())) }
     }
 
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGSVG => {
             x: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
             y: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],

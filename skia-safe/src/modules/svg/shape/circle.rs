@@ -28,7 +28,7 @@ impl DebugAttributes for Circle {
 }
 
 impl Circle {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGCircle => {
             cx: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
             cy: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],

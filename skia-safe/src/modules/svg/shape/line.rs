@@ -29,7 +29,7 @@ impl DebugAttributes for Line {
 }
 
 impl Line {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGLine => {
             x1: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
             y1: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],

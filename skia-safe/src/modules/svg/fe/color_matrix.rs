@@ -28,7 +28,7 @@ impl DebugAttributes for ColorMatrix {
 }
 
 impl ColorMatrix {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGFeColorMatrix => {
             "type" as kind: ColorMatrixKind [get(value) => value, set(value) => value]
         }

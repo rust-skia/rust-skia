@@ -28,7 +28,7 @@ impl DebugAttributes for Blend {
 }
 
 impl Blend {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGFeBlend => {
             "in2" as input2: Input [get(value) => Input::from_native_ref(value), set(value) => value.into_native()],
             mode: BlendMode [get(value) => value, set(value) => value]

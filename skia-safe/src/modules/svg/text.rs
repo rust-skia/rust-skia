@@ -94,7 +94,7 @@ impl TextContainer {
         unsafe { sb::C_SkSVGTextContainer_getRotateCount(self.native()) }
     }
 
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGTextContainer => {
             xml_space: XmlSpace [get(value) => value, set(value) => value]
         }
@@ -160,7 +160,7 @@ impl DebugAttributes for TextPath {
 }
 
 impl TextPath {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGTextPath => {
             href: Iri [get(value) => Iri::from_native_ref(value), set(value) => value.into_native()],
             start_offset: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()]
@@ -187,7 +187,7 @@ impl DebugAttributes for TextLiteral {
 }
 
 impl TextLiteral {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGTextLiteral => {
             text: str [
                 get(value) => interop::String::from_native_ref(value).as_str(),

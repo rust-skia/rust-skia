@@ -54,7 +54,7 @@ impl DebugAttributes for Fe {
 }
 
 impl Fe {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGFe => {
             "in" as input: Input [get(value) => Input::from_native_ref(value), set(value) => value.into_native()],
             result: crate::interop::String [get(value) => crate::interop::String::from_native_ref(value), set(value) => value.into_native()],

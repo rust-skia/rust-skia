@@ -22,7 +22,7 @@ impl HasBase for sb::SkSVGClipPath {
 }
 
 impl ClipPath {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGClipPath => {
             clip_path_units: BoundingBoxUnits [get(value) => &value.fType, set(value) => sb::SkSVGObjectBoundingBoxUnits { fType: value }]
         }

@@ -27,7 +27,7 @@ impl DebugAttributes for Image {
 }
 
 impl Image {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGFeImage => {
             href: Iri [get(value) => Iri::from_native_ref(value), set(value) => value.into_native()],
             preserve_aspect_ratio: PreserveAspectRatio [get(value) => PreserveAspectRatio::from_native_ref(value), set(value) => value.into_native()]

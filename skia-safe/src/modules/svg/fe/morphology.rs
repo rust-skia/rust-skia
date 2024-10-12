@@ -46,7 +46,7 @@ impl DebugAttributes for Morphology {
 }
 
 impl Morphology {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGFeMorphology => {
             operator: Operator [get(value) => value, set(value) => value],
             radius: Radius [get(value) => Radius::from_native_ref(value), set(value) => value.into_native()]

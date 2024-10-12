@@ -1,4 +1,4 @@
-use super::{DebugAttributes, Input, HasBase};
+use super::{DebugAttributes, HasBase, Input};
 use crate::{prelude::*, scalar};
 use skia_bindings as sb;
 
@@ -30,7 +30,7 @@ impl DebugAttributes for DisplacementMap {
 }
 
 impl DisplacementMap {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGFeDisplacementMap => {
             "in2" as input2: Input [get(value) => Input::from_native_ref(value), set(value) => value.into_native()],
             x_channel_selector: ChannelSelector [get(value) => value, set(value) => value],

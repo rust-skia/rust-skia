@@ -32,7 +32,7 @@ impl DebugAttributes for Gradient {
 }
 
 impl Gradient {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGGradient => {
             href: Iri [get(value) => Iri::from_native_ref(value), set(value) => value.into_native()],
             gradient_transform: Matrix [get(value) => Matrix::from_native_ref(value), set(value) => value.into_native()],

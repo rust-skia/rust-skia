@@ -29,7 +29,7 @@ impl DebugAttributes for Image {
 }
 
 impl Image {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGImage => {
             x: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
             y: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],

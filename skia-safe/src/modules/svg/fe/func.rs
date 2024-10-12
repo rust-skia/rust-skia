@@ -46,7 +46,7 @@ impl Func {
         unsafe { sb::C_SkSVGFeFunc_getTableValuesCount(self.native()) }
     }
 
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGFeFunc => {
             *amplitude: scalar [get(value) => value, set(value) => value],
             *exponent: scalar [get(value) => value, set(value) => value],

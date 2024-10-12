@@ -28,7 +28,7 @@ impl DebugAttributes for DistantLight {
 }
 
 impl DistantLight {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGFeDistantLight => {
             *azimuth: scalar [get(value) => value, set(value) => value],
             *elevation: scalar [get(value) => value, set(value) => value]
@@ -60,7 +60,7 @@ impl DebugAttributes for PointLight {
 }
 
 impl PointLight {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGFePointLight => {
             *x: scalar [get(value) => value, set(value) => value],
             *y: scalar [get(value) => value, set(value) => value],
@@ -98,7 +98,7 @@ impl DebugAttributes for SpotLight {
 }
 
 impl SpotLight {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGFeSpotLight => {
             *x: scalar [get(value) => value, set(value) => value],
             *y: scalar [get(value) => value, set(value) => value],

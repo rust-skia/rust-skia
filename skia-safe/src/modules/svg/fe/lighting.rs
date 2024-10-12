@@ -51,7 +51,7 @@ impl DebugAttributes for Lighting {
 }
 
 impl Lighting {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGFeLighting => {
             *surface_scale: scalar [get(value) => value, set(value) => value],
             *kernel_unit_length?: KernelUnitLength [get(value) => value.map(KernelUnitLength::from_native_c), set(value) => value.into_native()]
@@ -82,7 +82,7 @@ impl DebugAttributes for Specular {
 }
 
 impl Specular {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGFeSpecularLighting => {
             *specular_constant: scalar [get(value) => value, set(value) => value],
             *specular_exponent: scalar [get(value) => value, set(value) => value]
@@ -110,7 +110,7 @@ impl DebugAttributes for Diffuse {
 }
 
 impl Diffuse {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGFeDiffuseLighting => {
             *diffuse_constant: scalar [get(value) => value, set(value) => value]
         }

@@ -70,7 +70,7 @@ impl Node {
         TypedNode::from_ptr(self.into_ptr())
     }
 
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGNode => {
             // inherited
             clip_rule?: FillRule [get(value) => value.map(|value| &value.fType), set(value) => sb::SkSVGFillRule { fType: value }],

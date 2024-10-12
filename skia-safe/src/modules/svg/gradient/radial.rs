@@ -28,7 +28,7 @@ impl DebugAttributes for Radial {
 }
 
 impl Radial {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGRadialGradient => {
             cx: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
             cy: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],

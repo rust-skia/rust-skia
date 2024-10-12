@@ -1,12 +1,12 @@
 [workspace]
 resolver = "2"
 members = [
-    "skia-bindings",
     "skia-safe",
+    "skia-svg-macros",
+    "skia-bindings",
     "skia-org",
     "mk-workflows",
     "comment-converter",
-    "skia-macros",
 ]
 
 [profile.release]

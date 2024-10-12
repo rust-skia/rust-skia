@@ -25,7 +25,7 @@ impl DebugAttributes for Offset {
 }
 
 impl Offset {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGFeOffset => {
             *dx: scalar [get(value) => value, set(value) => value],
             *dy: scalar [get(value) => value, set(value) => value]

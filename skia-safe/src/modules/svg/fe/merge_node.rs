@@ -1,4 +1,4 @@
-use super::{DebugAttributes, Input, HasBase};
+use super::{DebugAttributes, HasBase, Input};
 use crate::prelude::*;
 use skia_bindings as sb;
 
@@ -22,7 +22,7 @@ impl DebugAttributes for MergeNode {
 }
 
 impl MergeNode {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGFeMergeNode => {
             "in" as input: Input [get(value) => Input::from_native_ref(value), set(value) => value.into_native()]
         }

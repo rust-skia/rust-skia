@@ -29,7 +29,7 @@ impl DebugAttributes for Linear {
 }
 
 impl Linear {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGLinearGradient => {
             x1: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
             y1: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],

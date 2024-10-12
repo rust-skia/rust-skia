@@ -45,7 +45,7 @@ impl DebugAttributes for GaussianBlur {
 }
 
 impl GaussianBlur {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGFeGaussianBlur => {
             std_deviation: StdDeviation [get(value) => StdDeviation::from_native_ref(value), set(value) => value.into_native()]
         }

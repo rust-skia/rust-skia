@@ -25,7 +25,7 @@ impl DebugAttributes for Stop {
 }
 
 impl Stop {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGStop => {
             offset: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()]
         }

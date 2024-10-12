@@ -29,7 +29,7 @@ impl HasBase for sb::SkSVGFilter {
 }
 
 impl Filter {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGFilter => {
             x: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
             y: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],

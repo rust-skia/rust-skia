@@ -21,7 +21,7 @@ impl HasBase for sb::SkSVGPattern {
 }
 
 impl Pattern {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGPattern => {
             href: Iri [get(value) => Iri::from_native_ref(value), set(value) => value.into_native()],
             x?: Length [get(value) => value.map(Length::from_native_ref), set(value) => value.into_native()],

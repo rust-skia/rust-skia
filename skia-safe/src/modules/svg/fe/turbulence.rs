@@ -53,7 +53,7 @@ impl DebugAttributes for Turbulence {
 }
 
 impl Turbulence {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGFeTurbulence => {
             base_frequency: TurbulenceBaseFrequency [get(value) => TurbulenceBaseFrequency::from_native_ref(value), set(value) => value.into_native()],
             *num_octaves: i32 [get(value) => value, set(value) => value],
