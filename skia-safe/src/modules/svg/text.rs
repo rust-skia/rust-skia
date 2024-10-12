@@ -1,8 +1,8 @@
 use super::{DebugAttributes, HasBase, Iri, Length, XmlSpace};
-use crate::{prelude::*, scalar};
+use crate::{interop, prelude::*, scalar};
 use skia_bindings as sb;
 
-type SvgTextContainer = RCHandle<sb::SkSVGTextContainer>;
+type TextContainer = RCHandle<sb::SkSVGTextContainer>;
 
 impl NativeRefCountedBase for sb::SkSVGTextContainer {
     type Base = sb::SkRefCntBase;
@@ -12,85 +12,85 @@ impl HasBase for sb::SkSVGTextContainer {
     type Base = sb::SkSVGContainer;
 }
 
-impl DebugAttributes for SvgTextContainer {
+impl DebugAttributes for TextContainer {
     const NAME: &'static str = "TextContainer";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("x", &self.get_x())
-                .field("y", &self.get_y())
-                .field("dx", &self.get_dx())
-                .field("dy", &self.get_dy())
-                .field("rotate", &self.get_rotate())
+                .field("x", &self.x())
+                .field("y", &self.y())
+                .field("dx", &self.dx())
+                .field("dy", &self.dy())
+                .field("rotate", &self.rotate())
                 .field("xml_space", &self.get_xml_space()),
         );
     }
 }
 
-impl SvgTextContainer {
-    pub fn get_x(&self) -> &[Length] {
+impl TextContainer {
+    pub fn x(&self) -> &[Length] {
         unsafe {
             safer::from_raw_parts(
                 Length::from_native_ptr(sb::C_SkSVGTextContainer_getX(self.native())),
-                self.get_x_count(),
+                self.x_count(),
             )
         }
     }
 
-    pub fn get_x_count(&self) -> usize {
+    pub(crate) fn x_count(&self) -> usize {
         unsafe { sb::C_SkSVGTextContainer_getXCount(self.native()) }
     }
 
-    pub fn get_y(&self) -> &[Length] {
+    pub fn y(&self) -> &[Length] {
         unsafe {
             safer::from_raw_parts(
                 Length::from_native_ptr(sb::C_SkSVGTextContainer_getY(self.native())),
-                self.get_y_count(),
+                self.y_count(),
             )
         }
     }
 
-    pub fn get_y_count(&self) -> usize {
+    pub(crate) fn y_count(&self) -> usize {
         unsafe { sb::C_SkSVGTextContainer_getYCount(self.native()) }
     }
 
-    pub fn get_dx(&self) -> &[Length] {
+    pub fn dx(&self) -> &[Length] {
         unsafe {
             safer::from_raw_parts(
                 Length::from_native_ptr(sb::C_SkSVGTextContainer_getDx(self.native())),
-                self.get_dx_count(),
+                self.dx_count(),
             )
         }
     }
 
-    pub fn get_dx_count(&self) -> usize {
+    pub(crate) fn dx_count(&self) -> usize {
         unsafe { sb::C_SkSVGTextContainer_getDxCount(self.native()) }
     }
 
-    pub fn get_dy(&self) -> &[Length] {
+    pub fn dy(&self) -> &[Length] {
         unsafe {
             safer::from_raw_parts(
                 Length::from_native_ptr(sb::C_SkSVGTextContainer_getDy(self.native())),
-                self.get_dy_count(),
+                self.dy_count(),
             )
         }
     }
 
-    pub fn get_dy_count(&self) -> usize {
+    pub(crate) fn dy_count(&self) -> usize {
         unsafe { sb::C_SkSVGTextContainer_getDyCount(self.native()) }
     }
 
-    pub fn get_rotate(&self) -> &[scalar] {
+    pub fn rotate(&self) -> &[scalar] {
         unsafe {
             safer::from_raw_parts(
                 sb::C_SkSVGTextContainer_getRotate(self.native()),
-                self.get_rotate_count(),
+                self.rotate_count(),
             )
         }
     }
 
-    pub fn get_rotate_count(&self) -> usize {
+    pub(crate) fn rotate_count(&self) -> usize {
         unsafe { sb::C_SkSVGTextContainer_getRotateCount(self.native()) }
     }
 
@@ -189,7 +189,10 @@ impl DebugAttributes for TextLiteral {
 impl TextLiteral {
     skia_macros::attrs! {
         SkSVGTextLiteral => {
-            text: crate::interop::String [get(value) => crate::interop::String::from_native_ref(value), set(value) => value.into_native()]
+            text: str [
+                get(value) => interop::String::from_native_ref(value).as_str(),
+                set(&value) => interop::String::from_str(value).into_native()
+            ]
         }
     }
 }

@@ -12,21 +12,24 @@ use syn::{
 };
 
 struct Property {
-    paren_token: token::Paren,
-    name: Ident,
-    fat_arrow_token: Token![=>],
+    by_ref: Option<Token![&]>,
+    ident: Ident,
     body: Expr,
 }
 
 impl Parse for Property {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let content;
+        parenthesized!(content in input);
+        let by_ref = content.parse()?;
+        let ident = content.parse()?;
+        input.parse::<Token![=>]>()?;
+        let body = input.parse()?;
 
         Ok(Self {
-            paren_token: parenthesized!(content in input),
-            name: content.parse()?,
-            fat_arrow_token: input.parse()?,
-            body: input.parse()?,
+            by_ref,
+            ident,
+            body,
         })
     }
 }
@@ -147,15 +150,15 @@ fn attrs2(input: TokenStream) -> TokenStream2 {
                  ty,
                  getter:
                      Property {
-                         name: getter_name,
+                         ident: getter_name,
                          body: getter_body,
                          ..
                      },
                  setter:
                      Property {
-                         name: setter_name,
+                         by_ref: setter_ref,
+                         ident: setter_name,
                          body: setter_body,
-                         ..
                      },
                  ..
              }| {
@@ -236,7 +239,7 @@ fn attrs2(input: TokenStream) -> TokenStream2 {
                 quote! {
                     #getter
 
-                    pub fn #set_name(&self, #setter_name: #ty) {
+                    pub fn #set_name(&self, #setter_name: #setter_ref #ty) {
                         unsafe {
                             sb::#native_set_name(self.native_mut_force(), #setter_body)
                         }
