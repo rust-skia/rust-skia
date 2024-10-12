@@ -1,12 +1,19 @@
-use super::{ID3D12Resource, D3D12_RESOURCE_STATES, DXGI_FORMAT};
-use crate::{gpu, prelude::*};
+use std::{fmt, os::raw::c_uint};
+
 use skia_bindings::{
     GrD3DAlloc, GrD3DMemoryAllocator, GrD3DSurfaceInfo, GrD3DTextureResourceInfo, SkRefCntBase,
 };
-use std::{fmt, os::raw::c_uint};
 use windows::Win32::Graphics::{
     Direct3D12::{ID3D12Fence, D3D12_RESOURCE_STATE_COMMON},
     Dxgi::Common::{DXGI_FORMAT_UNKNOWN, DXGI_STANDARD_MULTISAMPLE_QUALITY_PATTERN},
+};
+
+use crate::{
+    gpu::{
+        self,
+        d3d::{ID3D12Resource, D3D12_RESOURCE_STATES, DXGI_FORMAT},
+    },
+    prelude::*,
 };
 
 // TODO: add remaining cp functions to ComPtr via traits (get, reset, retain).

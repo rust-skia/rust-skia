@@ -1,6 +1,9 @@
-use super::{ID3D12CommandQueue, ID3D12Device, IDXGIAdapter1, MemoryAllocator};
-use crate::gpu;
 use skia_bindings::GrD3DBackendContext;
+
+use crate::gpu::{
+    self,
+    d3d::{ID3D12CommandQueue, ID3D12Device, IDXGIAdapter1, MemoryAllocator},
+};
 
 #[repr(C)]
 #[derive(Clone, Debug)]

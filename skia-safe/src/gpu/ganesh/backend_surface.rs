@@ -2,16 +2,17 @@ use std::fmt;
 
 use skia_bindings::{self as sb, GrBackendFormat, GrBackendRenderTarget, GrBackendTexture};
 
-#[cfg(feature = "d3d")]
-use super::d3d;
-#[cfg(feature = "gl")]
-use super::gl;
-#[cfg(feature = "metal")]
-use super::mtl;
-#[cfg(feature = "vulkan")]
-use super::vk;
-use super::{BackendAPI, Mipmapped, MutableTextureState};
+use crate::gpu;
 use crate::{interop::AsStr, prelude::*, ISize};
+#[cfg(feature = "d3d")]
+use gpu::d3d;
+#[cfg(feature = "gl")]
+use gpu::gl;
+#[cfg(feature = "metal")]
+use gpu::mtl;
+#[cfg(feature = "vulkan")]
+use gpu::vk;
+use gpu::{BackendAPI, Mipmapped, MutableTextureState};
 
 pub type BackendFormat = Handle<GrBackendFormat>;
 unsafe_send_sync!(BackendFormat);
@@ -70,7 +71,7 @@ impl BackendFormat {
         format: vk::Format,
         will_use_drm_format_modifiers: impl Into<Option<bool>>,
     ) -> Self {
-        super::backend_formats::make_vk(format, will_use_drm_format_modifiers)
+        gpu::backend_formats::make_vk(format, will_use_drm_format_modifiers)
     }
 
     #[cfg(feature = "vulkan")]
@@ -79,13 +80,13 @@ impl BackendFormat {
         conversion_info: &vk::YcbcrConversionInfo,
         will_use_drm_format_modifiers: impl Into<Option<bool>>,
     ) -> Self {
-        super::backend_formats::make_vk_ycbcr(conversion_info, will_use_drm_format_modifiers)
+        gpu::backend_formats::make_vk_ycbcr(conversion_info, will_use_drm_format_modifiers)
     }
 
     #[cfg(feature = "metal")]
     #[deprecated(since = "0.74.0", note = "use gpu::backend_formats::make_mtl()")]
     pub fn new_metal(format: mtl::PixelFormat) -> Self {
-        super::backend_formats::make_mtl(format)
+        gpu::backend_formats::make_mtl(format)
     }
 
     #[cfg(feature = "d3d")]
@@ -108,23 +109,23 @@ impl BackendFormat {
 
     #[cfg(feature = "gl")]
     pub fn as_gl_format(&self) -> gl::Format {
-        super::backend_formats::as_gl_format(self)
+        gpu::backend_formats::as_gl_format(self)
     }
 
     #[cfg(feature = "gl")]
     pub fn as_gl_format_enum(&self) -> gl::Enum {
-        super::backend_formats::as_gl_format_enum(self)
+        gpu::backend_formats::as_gl_format_enum(self)
     }
 
     // Deprecated in Skia
     #[cfg(feature = "vulkan")]
     pub fn as_vk_format(&self) -> Option<vk::Format> {
-        super::backend_formats::as_vk_format(self)
+        gpu::backend_formats::as_vk_format(self)
     }
 
     #[cfg(feature = "metal")]
     pub fn as_mtl_format(&self) -> Option<mtl::PixelFormat> {
-        super::backend_formats::as_mtl_format(self)
+        gpu::backend_formats::as_mtl_format(self)
     }
 
     #[cfg(feature = "d3d")]
@@ -211,10 +212,10 @@ impl BackendTexture {
     #[deprecated(since = "0.67.0", note = "use gpu::backend_textures::make_gl()")]
     pub unsafe fn new_gl(
         (width, height): (i32, i32),
-        mipmapped: super::Mipmapped,
+        mipmapped: gpu::Mipmapped,
         gl_info: gl::TextureInfo,
     ) -> Self {
-        super::backend_textures::make_gl((width, height), mipmapped, gl_info, "")
+        gpu::backend_textures::make_gl((width, height), mipmapped, gl_info, "")
     }
 
     #[cfg(feature = "gl")]
@@ -222,18 +223,18 @@ impl BackendTexture {
     #[deprecated(since = "0.67.0", note = "use gpu::backend_textures::make_gl()")]
     pub unsafe fn new_gl_with_label(
         (width, height): (i32, i32),
-        mipmapped: super::Mipmapped,
+        mipmapped: gpu::Mipmapped,
         gl_info: gl::TextureInfo,
         label: impl AsRef<str>,
     ) -> Self {
-        super::backend_textures::make_gl((width, height), mipmapped, gl_info, label)
+        gpu::backend_textures::make_gl((width, height), mipmapped, gl_info, label)
     }
 
     #[cfg(feature = "vulkan")]
     #[allow(clippy::missing_safety_doc)]
     #[deprecated(since = "0.67.0", note = "use gpu::backend_textures::make_vk()")]
     pub unsafe fn new_vulkan((width, height): (i32, i32), vk_info: &vk::ImageInfo) -> Self {
-        super::backend_textures::make_vk((width, height), vk_info, "")
+        gpu::backend_textures::make_vk((width, height), vk_info, "")
     }
 
     #[cfg(feature = "vulkan")]
@@ -244,7 +245,7 @@ impl BackendTexture {
         vk_info: &vk::ImageInfo,
         label: impl AsRef<str>,
     ) -> Self {
-        super::backend_textures::make_vk((width, height), vk_info, label)
+        gpu::backend_textures::make_vk((width, height), vk_info, label)
     }
 
     #[cfg(feature = "metal")]
@@ -252,10 +253,10 @@ impl BackendTexture {
     #[deprecated(since = "0.74.0", note = "use gpu::backend_textures::make_mtl()")]
     pub unsafe fn new_metal(
         (width, height): (i32, i32),
-        mipmapped: super::Mipmapped,
+        mipmapped: gpu::Mipmapped,
         mtl_info: &mtl::TextureInfo,
     ) -> Self {
-        super::backend_textures::make_mtl((width, height), mipmapped, mtl_info, "")
+        gpu::backend_textures::make_mtl((width, height), mipmapped, mtl_info, "")
     }
 
     #[cfg(feature = "metal")]
@@ -263,11 +264,11 @@ impl BackendTexture {
     #[deprecated(since = "0.74.0", note = "use gpu::backend_textures::make_mtl()")]
     pub unsafe fn new_metal_with_label(
         (width, height): (i32, i32),
-        mipmapped: super::Mipmapped,
+        mipmapped: gpu::Mipmapped,
         mtl_info: &mtl::TextureInfo,
         label: impl AsRef<str>,
     ) -> Self {
-        super::backend_textures::make_mtl((width, height), mipmapped, mtl_info, label)
+        gpu::backend_textures::make_mtl((width, height), mipmapped, mtl_info, label)
     }
 
     #[cfg(feature = "d3d")]
@@ -337,30 +338,30 @@ impl BackendTexture {
     // Deprecated in Skia
     #[cfg(feature = "gl")]
     pub fn gl_texture_info(&self) -> Option<gl::TextureInfo> {
-        super::backend_textures::get_gl_texture_info(self)
+        gpu::backend_textures::get_gl_texture_info(self)
     }
 
     // Deprecated in Skia
     #[cfg(feature = "gl")]
     pub fn gl_texture_parameters_modified(&mut self) {
-        super::backend_textures::gl_texture_parameters_modified(self)
+        gpu::backend_textures::gl_texture_parameters_modified(self)
     }
 
     // Deprecated in Skia
     #[cfg(feature = "vulkan")]
     pub fn vulkan_image_info(&self) -> Option<vk::ImageInfo> {
-        super::backend_textures::get_vk_image_info(self)
+        gpu::backend_textures::get_vk_image_info(self)
     }
 
     // Deprecated in Skia
     #[cfg(feature = "vulkan")]
     pub fn set_vulkan_image_layout(&mut self, layout: vk::ImageLayout) -> &mut Self {
-        super::backend_textures::set_vk_image_layout(self, layout)
+        gpu::backend_textures::set_vk_image_layout(self, layout)
     }
 
     #[cfg(feature = "metal")]
     pub fn metal_texture_info(&self) -> Option<mtl::TextureInfo> {
-        super::backend_textures::get_mtl_texture_info(self)
+        gpu::backend_textures::get_mtl_texture_info(self)
     }
 
     #[cfg(feature = "d3d")]
@@ -463,19 +464,19 @@ impl BackendRenderTarget {
         stencil_bits: usize,
         info: gl::FramebufferInfo,
     ) -> Self {
-        super::backend_render_targets::make_gl((width, height), sample_count, stencil_bits, info)
+        gpu::backend_render_targets::make_gl((width, height), sample_count, stencil_bits, info)
     }
 
     #[cfg(feature = "vulkan")]
     #[deprecated(since = "0.67.0", note = "use gpu::backend_render_targets::make_vk()")]
     pub fn new_vulkan((width, height): (i32, i32), info: &vk::ImageInfo) -> Self {
-        super::backend_render_targets::make_vk((width, height), info)
+        gpu::backend_render_targets::make_vk((width, height), info)
     }
 
     #[cfg(feature = "metal")]
     #[deprecated(since = "0.74.0", note = "use gpu::backend_render_targets::make_mtl()")]
     pub fn new_metal((width, height): (i32, i32), mtl_info: &mtl::TextureInfo) -> Self {
-        super::backend_render_targets::make_mtl((width, height), mtl_info)
+        gpu::backend_render_targets::make_mtl((width, height), mtl_info)
     }
 
     #[cfg(feature = "d3d")]
@@ -523,24 +524,24 @@ impl BackendRenderTarget {
     // Deprecated in Skia
     #[cfg(feature = "gl")]
     pub fn gl_framebuffer_info(&self) -> Option<gl::FramebufferInfo> {
-        super::backend_render_targets::get_gl_framebuffer_info(self)
+        gpu::backend_render_targets::get_gl_framebuffer_info(self)
     }
 
     // Deprecated in Skia
     #[cfg(feature = "vulkan")]
     pub fn vulkan_image_info(&self) -> Option<vk::ImageInfo> {
-        super::backend_render_targets::get_vk_image_info(self)
+        gpu::backend_render_targets::get_vk_image_info(self)
     }
 
     // Deprecated in Skia
     #[cfg(feature = "vulkan")]
     pub fn set_vulkan_image_layout(&mut self, layout: vk::ImageLayout) -> &mut Self {
-        super::backend_render_targets::set_vk_image_layout(self, layout)
+        gpu::backend_render_targets::set_vk_image_layout(self, layout)
     }
 
     #[cfg(feature = "metal")]
     pub fn metal_texture_info(&self) -> Option<mtl::TextureInfo> {
-        super::backend_render_targets::get_mtl_texture_info(self)
+        gpu::backend_render_targets::get_mtl_texture_info(self)
     }
 
     #[cfg(feature = "d3d")]

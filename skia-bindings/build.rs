@@ -86,6 +86,7 @@ fn main() -> Result<(), io::Error> {
 
         if build_skia {
             println!("STARTING A FULL BUILD");
+            println!("HOST: {}", cargo::host());
 
             let source_dir = std::env::current_dir().unwrap().join("skia");
             let final_build_configuration = build_from_source(

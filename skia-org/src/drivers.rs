@@ -38,9 +38,9 @@ pub enum Driver {
     Pdf,
     Svg,
     #[cfg(feature = "gl")]
-    OpenGl,
+    Gl,
     #[cfg(feature = "gl")]
-    OpenGlEs,
+    GlEs,
     #[cfg(feature = "vulkan")]
     Vulkan,
     #[cfg(feature = "metal")]
@@ -61,9 +61,9 @@ impl FromStr for Driver {
             "pdf" => Pdf,
             "svg" => Svg,
             #[cfg(feature = "gl")]
-            "opengl" => OpenGl,
+            "gl" => Gl,
             #[cfg(feature = "gl")]
-            "opengl-es" => OpenGlEs,
+            "gl-es" => GlEs,
             #[cfg(feature = "vulkan")]
             "vulkan" => Vulkan,
             #[cfg(feature = "metal")]
@@ -83,9 +83,9 @@ impl Display for Driver {
             Pdf => "pdf",
             Svg => "svg",
             #[cfg(feature = "gl")]
-            OpenGl => "opengl",
+            Gl => "gl",
             #[cfg(feature = "gl")]
-            OpenGlEs => "opengl-es",
+            GlEs => "gl-es",
             #[cfg(feature = "vulkan")]
             Vulkan => "vulkan",
             #[cfg(feature = "metal")]

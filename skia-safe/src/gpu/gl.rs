@@ -1,8 +1,1 @@
-mod extensions;
-pub use extensions::*;
-
-mod interface;
-pub use interface::*;
-
-mod types;
-pub use types::*;
+pub use crate::gpu::ganesh::gl::{extensions::*, interface::*, types::*};

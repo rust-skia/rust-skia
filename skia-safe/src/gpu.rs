@@ -1,32 +1,22 @@
-mod backend_drawable_info;
-mod backend_surface;
-pub mod context_options;
 #[cfg(feature = "d3d")]
 pub mod d3d;
-mod direct_context;
-mod driver_bug_workarounds;
 mod ganesh;
 #[cfg(feature = "gl")]
 pub mod gl;
-mod gpu_types;
 mod mutable_texture_state;
-mod recording_context;
-mod types;
 #[cfg(feature = "vulkan")]
 pub mod vk;
-mod yuva_backend_textures;
 
-pub use backend_drawable_info::*;
-pub use backend_surface::*;
 pub use context_options::ContextOptions;
-pub use direct_context::*;
-pub use driver_bug_workarounds::*;
+pub use ganesh::backend_surface::*;
+pub use ganesh::context_options;
+pub use ganesh::direct_context::*;
+pub use ganesh::driver_bug_workarounds::*;
 pub use ganesh::image_ganesh as images;
-pub use gpu_types::*;
+pub use ganesh::recording_context::*;
+pub use ganesh::types::*;
+pub use ganesh::yuva_backend_textures::*;
 pub use mutable_texture_state::*;
-pub use recording_context::*;
-pub use types::*;
-pub use yuva_backend_textures::*;
 
 #[deprecated(since = "0.37.0", note = "Use RecordingContext or DirectContext")]
 pub type Context = DirectContext;
@@ -88,6 +78,8 @@ pub mod interfaces {
     pub use super::ganesh::gl::make_mac_interface::interfaces::*;
     #[cfg(target_arch = "wasm32")]
     pub use super::ganesh::gl::make_web_gl_interface::interfaces::*;
+    #[cfg(target_os = "windows")]
+    pub use super::ganesh::gl::make_win_interface::interfaces::*;
 }
 
 #[cfg(test)]

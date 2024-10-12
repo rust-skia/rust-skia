@@ -206,7 +206,6 @@ mod gpu {
     #[cfg(feature = "vulkan")]
     mod vulkan {
         use skia_safe::gpu::vk::*;
-        use skia_safe::gpu::BackendDrawableInfo;
         use static_assertions::*;
         // TODO: BackendContext is referencing get_proc and is used only temporarily for building
         //       the context.
