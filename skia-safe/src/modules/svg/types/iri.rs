@@ -42,7 +42,7 @@ impl Iri {
     }
 }
 
-pub type SvgIriFunc = Handle<sb::SkSVGFuncIRI>;
+pub type IriFunc = Handle<sb::SkSVGFuncIRI>;
 
 impl NativeDrop for sb::SkSVGFuncIRI {
     fn drop(&mut self) {
@@ -50,7 +50,7 @@ impl NativeDrop for sb::SkSVGFuncIRI {
     }
 }
 
-impl fmt::Debug for SvgIriFunc {
+impl fmt::Debug for IriFunc {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("SvgIriFunc")
             .field("kind", &self.kind())
@@ -59,7 +59,7 @@ impl fmt::Debug for SvgIriFunc {
     }
 }
 
-impl SvgIriFunc {
+impl IriFunc {
     pub fn iri(&self) -> Option<&Iri> {
         let func = self.native();
 

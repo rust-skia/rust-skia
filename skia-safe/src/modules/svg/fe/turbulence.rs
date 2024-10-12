@@ -4,12 +4,12 @@ use skia_bindings as sb;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct SvgFeTurbulenceBaseFrequency {
-    x: scalar,
-    y: scalar,
+pub struct TurbulenceBaseFrequency {
+    pub x: scalar,
+    pub y: scalar,
 }
 
-impl SvgFeTurbulenceBaseFrequency {
+impl TurbulenceBaseFrequency {
     pub fn new(x: scalar, y: scalar) -> Self {
         Self { x, y }
     }
@@ -21,12 +21,12 @@ impl SvgFeTurbulenceBaseFrequency {
 
 native_transmutable!(
     sb::SkSVGFeTurbulenceBaseFrequency,
-    SvgFeTurbulenceBaseFrequency,
+    TurbulenceBaseFrequency,
     svg_fe_turbulence_base_frequency_layout
 );
 
-pub type SvgFeTurbulenceType = sb::SkSVGFeTurbulenceType_Type;
-pub type FeTurbulence = RCHandle<sb::SkSVGFeTurbulence>;
+pub type TurbulenceType = sb::SkSVGFeTurbulenceType_Type;
+pub type Turbulence = RCHandle<sb::SkSVGFeTurbulence>;
 
 impl NativeRefCountedBase for sb::SkSVGFeTurbulence {
     type Base = sb::SkRefCntBase;
@@ -36,7 +36,7 @@ impl HasBase for sb::SkSVGFeTurbulence {
     type Base = sb::SkSVGFe;
 }
 
-impl DebugAttributes for FeTurbulence {
+impl DebugAttributes for Turbulence {
     const NAME: &'static str = "FeTurbulence";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
@@ -50,13 +50,13 @@ impl DebugAttributes for FeTurbulence {
     }
 }
 
-impl FeTurbulence {
+impl Turbulence {
     skia_macros::attrs! {
         SkSVGFeTurbulence => {
-            base_frequency: SvgFeTurbulenceBaseFrequency [get(value) => SvgFeTurbulenceBaseFrequency::from_native_ref(value), set(value) => value.into_native()],
+            base_frequency: TurbulenceBaseFrequency [get(value) => TurbulenceBaseFrequency::from_native_ref(value), set(value) => value.into_native()],
             *num_octaves: i32 [get(value) => value, set(value) => value],
             *seed: scalar [get(value) => value, set(value) => value],
-            turbulence_type: SvgFeTurbulenceType [get(value) => &value.fType, set(value) => sb::SkSVGFeTurbulenceType { fType: value }]
+            turbulence_type: TurbulenceType [get(value) => &value.fType, set(value) => sb::SkSVGFeTurbulenceType { fType: value }]
         }
     }
 }

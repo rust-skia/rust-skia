@@ -2,8 +2,10 @@ use super::{DebugAttributes, HasBase};
 use crate::{prelude::*, scalar};
 use skia_bindings as sb;
 
-pub type SvgFeFuncKind = sb::SkSVGFeFuncType;
-pub type FeFunc = RCHandle<sb::SkSVGFeFunc>;
+pub type FuncKind = sb::SkSVGFeFuncType;
+variant_name!(FuncKind::Identity);
+
+pub type Func = RCHandle<sb::SkSVGFeFunc>;
 
 impl NativeRefCountedBase for sb::SkSVGFeFunc {
     type Base = sb::SkRefCntBase;
@@ -13,7 +15,7 @@ impl HasBase for sb::SkSVGFeFunc {
     type Base = sb::SkSVGFe;
 }
 
-impl DebugAttributes for FeFunc {
+impl DebugAttributes for Func {
     const NAME: &'static str = "FeFunc";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
@@ -24,14 +26,14 @@ impl DebugAttributes for FeFunc {
                 .field("intercept", &self.get_intercept())
                 .field("offset", &self.get_offset())
                 .field("slope", &self.get_slope())
-                .field("table_values", &self.get_table_values())
+                .field("table_values", &self.table_values())
                 .field("kind", self.get_kind()),
         );
     }
 }
 
-impl FeFunc {
-    pub fn get_table_values(&self) -> &[scalar] {
+impl Func {
+    pub fn table_values(&self) -> &[scalar] {
         unsafe {
             safer::from_raw_parts(
                 sb::C_SkSVGFeFunc_getTableValues(self.native()),
@@ -40,7 +42,7 @@ impl FeFunc {
         }
     }
 
-    pub fn get_table_values_count(&self) -> usize {
+    pub(crate) fn get_table_values_count(&self) -> usize {
         unsafe { sb::C_SkSVGFeFunc_getTableValuesCount(self.native()) }
     }
 
@@ -51,7 +53,7 @@ impl FeFunc {
             *intercept: scalar [get(value) => value, set(value) => value],
             *offset: scalar [get(value) => value, set(value) => value],
             *slope: scalar [get(value) => value, set(value) => value],
-            "type" as kind: SvgFeFuncKind [get(value) => value, set(value) => value]
+            "type" as kind: FuncKind [get(value) => value, set(value) => value]
         }
     }
 }

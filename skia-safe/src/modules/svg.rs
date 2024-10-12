@@ -2,7 +2,7 @@ mod clip_path;
 mod container;
 mod defs;
 mod element;
-mod fe;
+pub mod fe;
 mod filter;
 mod g;
 mod gradient;
@@ -20,9 +20,8 @@ mod using;
 
 pub use self::{
     clip_path::ClipPath,
-    container::SvgContainer,
+    container::Container,
     defs::Defs,
-    fe::*,
     filter::Filter,
     g::G,
     gradient::*,

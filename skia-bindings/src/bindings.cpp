@@ -2000,6 +2000,10 @@ extern "C" void C_SkString_destruct(SkString* self) {
     self->~SkString();
 }
 
+extern "C" void C_SkString_CopyConstruct(SkString* uninitialized, const SkString* str) {
+    new (uninitialized) SkString(*str);
+}
+
 extern "C" const char* C_SkString_c_str_size(const SkString* self, size_t* size) {
     *size = self->size();
     return self->c_str();

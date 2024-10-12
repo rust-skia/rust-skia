@@ -730,6 +730,9 @@ const ENUM_REWRITES: &[EnumEntry] = &[
     ("GrSyncCpu", rewrite::k_xxx),
     // m129:
     ("Clamp", rewrite::k_xxx), // SkColorFilters
+    ("SkSVGFeColorMatrixType", rewrite::k_xxx),
+    ("SkSVGFeCompositeOperator", rewrite::k_xxx),
+    ("SkSVGFeFuncType", rewrite::k_xxx),
 ];
 
 pub(crate) mod rewrite {

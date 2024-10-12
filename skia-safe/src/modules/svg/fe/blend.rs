@@ -1,9 +1,11 @@
-use super::{DebugAttributes, FeInput, HasBase};
+use super::{DebugAttributes, HasBase, Input};
 use crate::prelude::*;
 use skia_bindings as sb;
 
-pub type SvgFeBlendMode = sb::SkSVGFeBlend_Mode;
-pub type FeBlend = RCHandle<sb::SkSVGFeBlend>;
+pub type BlendMode = sb::SkSVGFeBlend_Mode;
+variant_name!(BlendMode::Multiply);
+
+pub type Blend = RCHandle<sb::SkSVGFeBlend>;
 
 impl NativeRefCountedBase for sb::SkSVGFeBlend {
     type Base = sb::SkRefCntBase;
@@ -13,7 +15,7 @@ impl HasBase for sb::SkSVGFeBlend {
     type Base = sb::SkSVGFe;
 }
 
-impl DebugAttributes for FeBlend {
+impl DebugAttributes for Blend {
     const NAME: &'static str = "FeBlend";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
@@ -25,11 +27,11 @@ impl DebugAttributes for FeBlend {
     }
 }
 
-impl FeBlend {
+impl Blend {
     skia_macros::attrs! {
         SkSVGFeBlend => {
-            "in2" as input2: FeInput [get(value) => FeInput::from_native_ref(value), set(value) => value.into_native()],
-            mode: SvgFeBlendMode [get(value) => value, set(value) => value]
+            "in2" as input2: Input [get(value) => Input::from_native_ref(value), set(value) => value.into_native()],
+            mode: BlendMode [get(value) => value, set(value) => value]
         }
     }
 }

@@ -1,8 +1,8 @@
-use super::{DebugAttributes, FeInput, HasBase};
+use super::{DebugAttributes, Input, HasBase};
 use crate::prelude::*;
 use skia_bindings as sb;
 
-pub type FeMergeNode = RCHandle<sb::SkSVGFeMergeNode>;
+pub type MergeNode = RCHandle<sb::SkSVGFeMergeNode>;
 
 impl NativeRefCountedBase for sb::SkSVGFeMergeNode {
     type Base = sb::SkRefCntBase;
@@ -12,7 +12,7 @@ impl HasBase for sb::SkSVGFeMergeNode {
     type Base = sb::SkSVGContainer;
 }
 
-impl DebugAttributes for FeMergeNode {
+impl DebugAttributes for MergeNode {
     const NAME: &'static str = "FeMergeNode";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
@@ -21,10 +21,10 @@ impl DebugAttributes for FeMergeNode {
     }
 }
 
-impl FeMergeNode {
+impl MergeNode {
     skia_macros::attrs! {
         SkSVGFeMergeNode => {
-            "in" as input: FeInput [get(value) => FeInput::from_native_ref(value), set(value) => value.into_native()]
+            "in" as input: Input [get(value) => Input::from_native_ref(value), set(value) => value.into_native()]
         }
     }
 }

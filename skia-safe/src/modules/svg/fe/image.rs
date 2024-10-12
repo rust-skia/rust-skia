@@ -4,7 +4,7 @@ use crate::{
 };
 use skia_bindings as sb;
 
-pub type FeImage = RCHandle<sb::SkSVGFeImage>;
+pub type Image = RCHandle<sb::SkSVGFeImage>;
 
 impl NativeRefCountedBase for sb::SkSVGFeImage {
     type Base = sb::SkRefCntBase;
@@ -14,7 +14,7 @@ impl HasBase for sb::SkSVGFeImage {
     type Base = sb::SkSVGFe;
 }
 
-impl DebugAttributes for FeImage {
+impl DebugAttributes for Image {
     const NAME: &'static str = "FeImage";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
@@ -26,7 +26,7 @@ impl DebugAttributes for FeImage {
     }
 }
 
-impl FeImage {
+impl Image {
     skia_macros::attrs! {
         SkSVGFeImage => {
             href: Iri [get(value) => Iri::from_native_ref(value), set(value) => value.into_native()],

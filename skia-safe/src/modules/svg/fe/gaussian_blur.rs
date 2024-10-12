@@ -5,8 +5,8 @@ use skia_bindings as sb;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct StdDeviation {
-    x: scalar,
-    y: scalar,
+    pub x: scalar,
+    pub y: scalar,
 }
 
 impl StdDeviation {
@@ -25,7 +25,7 @@ native_transmutable!(
     std_deviation_layout
 );
 
-pub type FeGaussianBlur = RCHandle<sb::SkSVGFeGaussianBlur>;
+pub type GaussianBlur = RCHandle<sb::SkSVGFeGaussianBlur>;
 
 impl NativeRefCountedBase for sb::SkSVGFeGaussianBlur {
     type Base = sb::SkRefCntBase;
@@ -35,7 +35,7 @@ impl HasBase for sb::SkSVGFeGaussianBlur {
     type Base = sb::SkSVGFe;
 }
 
-impl DebugAttributes for FeGaussianBlur {
+impl DebugAttributes for GaussianBlur {
     const NAME: &'static str = "FeGaussianBlur";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
@@ -44,7 +44,7 @@ impl DebugAttributes for FeGaussianBlur {
     }
 }
 
-impl FeGaussianBlur {
+impl GaussianBlur {
     skia_macros::attrs! {
         SkSVGFeGaussianBlur => {
             std_deviation: StdDeviation [get(value) => StdDeviation::from_native_ref(value), set(value) => value.into_native()]

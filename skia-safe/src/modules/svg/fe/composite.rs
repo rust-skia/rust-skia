@@ -1,9 +1,11 @@
-use super::{DebugAttributes, FeInput, HasBase};
+use super::{DebugAttributes, HasBase, Input};
 use crate::{prelude::*, scalar};
 use skia_bindings as sb;
 
-pub type SvgFeCompositeOperator = sb::SkSVGFeCompositeOperator;
-pub type FeComposite = RCHandle<sb::SkSVGFeComposite>;
+pub type CompositeOperator = sb::SkSVGFeCompositeOperator;
+variant_name!(CompositeOperator::Out);
+
+pub type Composite = RCHandle<sb::SkSVGFeComposite>;
 
 impl NativeRefCountedBase for sb::SkSVGFeComposite {
     type Base = sb::SkRefCntBase;
@@ -13,7 +15,7 @@ impl HasBase for sb::SkSVGFeComposite {
     type Base = sb::SkSVGFe;
 }
 
-impl DebugAttributes for FeComposite {
+impl DebugAttributes for Composite {
     const NAME: &'static str = "FeComposite";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
@@ -29,15 +31,15 @@ impl DebugAttributes for FeComposite {
     }
 }
 
-impl FeComposite {
+impl Composite {
     skia_macros::attrs! {
         SkSVGFeComposite => {
-            "in2" as input2: FeInput [get(value) => FeInput::from_native_ref(value), set(value) => value.into_native()],
+            "in2" as input2: Input [get(value) => Input::from_native_ref(value), set(value) => value.into_native()],
             *k1: scalar [get(value) => value, set(value) => value],
             *k2: scalar [get(value) => value, set(value) => value],
             *k3: scalar [get(value) => value, set(value) => value],
             *k4: scalar [get(value) => value, set(value) => value],
-            operator: SvgFeCompositeOperator [get(value) => value, set(value) => value]
+            operator: CompositeOperator [get(value) => value, set(value) => value]
         }
     }
 }

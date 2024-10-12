@@ -5,7 +5,7 @@ use crate::{
 };
 use skia_bindings as sb;
 
-pub type FeDistantLight = RCHandle<sb::SkSVGFeDistantLight>;
+pub type DistantLight = RCHandle<sb::SkSVGFeDistantLight>;
 
 impl NativeRefCountedBase for sb::SkSVGFeDistantLight {
     type Base = sb::SkRefCntBase;
@@ -15,7 +15,7 @@ impl HasBase for sb::SkSVGFeDistantLight {
     type Base = sb::SkSVGContainer;
 }
 
-impl DebugAttributes for FeDistantLight {
+impl DebugAttributes for DistantLight {
     const NAME: &'static str = "FeDistantLight";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
@@ -27,7 +27,7 @@ impl DebugAttributes for FeDistantLight {
     }
 }
 
-impl FeDistantLight {
+impl DistantLight {
     skia_macros::attrs! {
         SkSVGFeDistantLight => {
             *azimuth: scalar [get(value) => value, set(value) => value],
@@ -36,7 +36,7 @@ impl FeDistantLight {
     }
 }
 
-pub type FePointLight = RCHandle<sb::SkSVGFePointLight>;
+pub type PointLight = RCHandle<sb::SkSVGFePointLight>;
 
 impl NativeRefCountedBase for sb::SkSVGFePointLight {
     type Base = sb::SkRefCntBase;
@@ -46,7 +46,7 @@ impl HasBase for sb::SkSVGFePointLight {
     type Base = sb::SkSVGContainer;
 }
 
-impl DebugAttributes for FePointLight {
+impl DebugAttributes for PointLight {
     const NAME: &'static str = "FePointLight";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
@@ -59,7 +59,7 @@ impl DebugAttributes for FePointLight {
     }
 }
 
-impl FePointLight {
+impl PointLight {
     skia_macros::attrs! {
         SkSVGFePointLight => {
             *x: scalar [get(value) => value, set(value) => value],
@@ -69,7 +69,7 @@ impl FePointLight {
     }
 }
 
-pub type FeSpotLight = RCHandle<sb::SkSVGFeSpotLight>;
+pub type SpotLight = RCHandle<sb::SkSVGFeSpotLight>;
 
 impl NativeRefCountedBase for sb::SkSVGFeSpotLight {
     type Base = sb::SkRefCntBase;
@@ -79,7 +79,7 @@ impl HasBase for sb::SkSVGFeSpotLight {
     type Base = sb::SkSVGContainer;
 }
 
-impl DebugAttributes for FeSpotLight {
+impl DebugAttributes for SpotLight {
     const NAME: &'static str = "FeSpotLight";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
@@ -97,7 +97,7 @@ impl DebugAttributes for FeSpotLight {
     }
 }
 
-impl FeSpotLight {
+impl SpotLight {
     skia_macros::attrs! {
         SkSVGFeSpotLight => {
             *x: scalar [get(value) => value, set(value) => value],

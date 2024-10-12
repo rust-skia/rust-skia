@@ -5,8 +5,8 @@ use skia_bindings as sb;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct KernelUnitLength {
-    dx: scalar,
-    dy: scalar,
+    pub dx: scalar,
+    pub dy: scalar,
 }
 
 impl KernelUnitLength {
@@ -28,7 +28,7 @@ native_transmutable!(
     svg_kernel_unit_length_layout
 );
 
-pub type SvgFeLighting = RCHandle<sb::SkSVGFeLighting>;
+pub type Lighting = RCHandle<sb::SkSVGFeLighting>;
 
 impl NativeRefCountedBase for sb::SkSVGFeLighting {
     type Base = sb::SkRefCntBase;
@@ -38,7 +38,7 @@ impl HasBase for sb::SkSVGFeLighting {
     type Base = sb::SkSVGFe;
 }
 
-impl DebugAttributes for SvgFeLighting {
+impl DebugAttributes for Lighting {
     const NAME: &'static str = "FeLighting";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
@@ -50,7 +50,7 @@ impl DebugAttributes for SvgFeLighting {
     }
 }
 
-impl SvgFeLighting {
+impl Lighting {
     skia_macros::attrs! {
         SkSVGFeLighting => {
             *surface_scale: scalar [get(value) => value, set(value) => value],
@@ -59,7 +59,7 @@ impl SvgFeLighting {
     }
 }
 
-pub type FeSpecularLighting = RCHandle<sb::SkSVGFeSpecularLighting>;
+pub type SpecularLighting = RCHandle<sb::SkSVGFeSpecularLighting>;
 
 impl NativeRefCountedBase for sb::SkSVGFeSpecularLighting {
     type Base = sb::SkRefCntBase;
@@ -69,7 +69,7 @@ impl HasBase for sb::SkSVGFeSpecularLighting {
     type Base = sb::SkSVGFeLighting;
 }
 
-impl DebugAttributes for FeSpecularLighting {
+impl DebugAttributes for SpecularLighting {
     const NAME: &'static str = "FeSpecularLighting";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
@@ -81,7 +81,7 @@ impl DebugAttributes for FeSpecularLighting {
     }
 }
 
-impl FeSpecularLighting {
+impl SpecularLighting {
     skia_macros::attrs! {
         SkSVGFeSpecularLighting => {
             *specular_constant: scalar [get(value) => value, set(value) => value],
@@ -90,7 +90,7 @@ impl FeSpecularLighting {
     }
 }
 
-pub type FeDiffuseLighting = RCHandle<sb::SkSVGFeDiffuseLighting>;
+pub type DiffuseLighting = RCHandle<sb::SkSVGFeDiffuseLighting>;
 
 impl NativeRefCountedBase for sb::SkSVGFeDiffuseLighting {
     type Base = sb::SkRefCntBase;
@@ -100,7 +100,7 @@ impl HasBase for sb::SkSVGFeDiffuseLighting {
     type Base = sb::SkSVGFeLighting;
 }
 
-impl DebugAttributes for FeDiffuseLighting {
+impl DebugAttributes for DiffuseLighting {
     const NAME: &'static str = "FeDiffuseLighting";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
@@ -109,7 +109,7 @@ impl DebugAttributes for FeDiffuseLighting {
     }
 }
 
-impl FeDiffuseLighting {
+impl DiffuseLighting {
     skia_macros::attrs! {
         SkSVGFeDiffuseLighting => {
             *diffuse_constant: scalar [get(value) => value, set(value) => value]

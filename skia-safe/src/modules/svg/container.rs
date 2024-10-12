@@ -2,7 +2,7 @@ use super::{DebugAttributes, HasBase, Node, SvgNode};
 use crate::prelude::*;
 use skia_bindings as sb;
 
-pub type SvgContainer = RCHandle<sb::SkSVGContainer>;
+pub type Container = RCHandle<sb::SkSVGContainer>;
 
 impl HasBase for sb::SkSVGContainer {
     type Base = sb::SkSVGTransformableNode;
@@ -12,7 +12,7 @@ impl NativeRefCountedBase for sb::SkSVGContainer {
     type Base = sb::SkRefCntBase;
 }
 
-impl DebugAttributes for SvgContainer {
+impl DebugAttributes for Container {
     const NAME: &'static str = "Container";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
@@ -21,7 +21,7 @@ impl DebugAttributes for SvgContainer {
     }
 }
 
-impl SvgContainer {
+impl Container {
     pub fn append_child(&mut self, node: SvgNode) {
         unsafe { sb::C_SkSVGContainer_appendChild(self.native_mut(), node.into_ptr()) }
     }

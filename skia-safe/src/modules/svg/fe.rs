@@ -11,20 +11,22 @@ mod merge;
 mod morphology;
 mod offset;
 mod turbulence;
+mod types;
 
 pub use self::{
     blend::*, color_matrix::*, composite::*, displacement_map::*, func::*, gaussian_blur::*,
     image::*, light_source::*, lighting::*, merge::*, morphology::*, offset::*, turbulence::*,
+    types::*,
 };
 
-use super::{DebugAttributes, FeInput, HasBase, Length};
+use super::{DebugAttributes, HasBase, Length};
 use crate::prelude::*;
 use skia_bindings as sb;
 
-pub type SvgFe = RCHandle<sb::SkSVGFe>;
-pub type FeComponentTransfer = SvgFe;
-pub type FeFlood = SvgFe;
-pub type FeMerge = SvgFe;
+pub type Fe = RCHandle<sb::SkSVGFe>;
+pub type ComponentTransfer = Fe;
+pub type Flood = Fe;
+pub type Merge = Fe;
 
 impl NativeRefCountedBase for sb::SkSVGFe {
     type Base = sb::SkRefCntBase;
@@ -34,7 +36,7 @@ impl HasBase for sb::SkSVGFe {
     type Base = sb::SkSVGContainer;
 }
 
-impl DebugAttributes for SvgFe {
+impl DebugAttributes for Fe {
     const NAME: &'static str = "Fe";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
@@ -50,10 +52,10 @@ impl DebugAttributes for SvgFe {
     }
 }
 
-impl SvgFe {
+impl Fe {
     skia_macros::attrs! {
         SkSVGFe => {
-            "in" as input: FeInput [get(value) => FeInput::from_native_ref(value), set(value) => value.into_native()],
+            "in" as input: Input [get(value) => Input::from_native_ref(value), set(value) => value.into_native()],
             result: crate::interop::String [get(value) => crate::interop::String::from_native_ref(value), set(value) => value.into_native()],
             x?: Length [get(value) => value.map(Length::from_native_ref), set(value) => value.into_native()],
             y?: Length [get(value) => value.map(Length::from_native_ref), set(value) => value.into_native()],

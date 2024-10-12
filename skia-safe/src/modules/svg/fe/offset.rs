@@ -2,7 +2,7 @@ use super::{DebugAttributes, HasBase};
 use crate::{prelude::*, scalar};
 use skia_bindings as sb;
 
-pub type FeOffset = RCHandle<sb::SkSVGFeOffset>;
+pub type Offset = RCHandle<sb::SkSVGFeOffset>;
 
 impl NativeRefCountedBase for sb::SkSVGFeOffset {
     type Base = sb::SkRefCntBase;
@@ -12,7 +12,7 @@ impl HasBase for sb::SkSVGFeOffset {
     type Base = sb::SkSVGFe;
 }
 
-impl DebugAttributes for FeOffset {
+impl DebugAttributes for Offset {
     const NAME: &'static str = "FeOffset";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
@@ -24,7 +24,7 @@ impl DebugAttributes for FeOffset {
     }
 }
 
-impl FeOffset {
+impl Offset {
     skia_macros::attrs! {
         SkSVGFeOffset => {
             *dx: scalar [get(value) => value, set(value) => value],

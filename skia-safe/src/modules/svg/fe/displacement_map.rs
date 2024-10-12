@@ -1,9 +1,11 @@
-use super::{DebugAttributes, FeInput, HasBase};
+use super::{DebugAttributes, Input, HasBase};
 use crate::{prelude::*, scalar};
 use skia_bindings as sb;
 
-pub type SvgChannelSelector = sb::SkSVGFeDisplacementMap_ChannelSelector;
-pub type FeDisplacementMap = RCHandle<sb::SkSVGFeDisplacementMap>;
+pub type ChannelSelector = sb::SkSVGFeDisplacementMap_ChannelSelector;
+variant_name!(ChannelSelector::R);
+
+pub type DisplacementMap = RCHandle<sb::SkSVGFeDisplacementMap>;
 
 impl NativeRefCountedBase for sb::SkSVGFeDisplacementMap {
     type Base = sb::SkRefCntBase;
@@ -13,7 +15,7 @@ impl HasBase for sb::SkSVGFeDisplacementMap {
     type Base = sb::SkSVGFe;
 }
 
-impl DebugAttributes for FeDisplacementMap {
+impl DebugAttributes for DisplacementMap {
     const NAME: &'static str = "FeDisplacementMap";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
@@ -27,12 +29,12 @@ impl DebugAttributes for FeDisplacementMap {
     }
 }
 
-impl FeDisplacementMap {
+impl DisplacementMap {
     skia_macros::attrs! {
         SkSVGFeDisplacementMap => {
-            "in2" as input2: FeInput [get(value) => FeInput::from_native_ref(value), set(value) => value.into_native()],
-            x_channel_selector: SvgChannelSelector [get(value) => value, set(value) => value],
-            y_channel_selector: SvgChannelSelector [get(value) => value, set(value) => value],
+            "in2" as input2: Input [get(value) => Input::from_native_ref(value), set(value) => value.into_native()],
+            x_channel_selector: ChannelSelector [get(value) => value, set(value) => value],
+            y_channel_selector: ChannelSelector [get(value) => value, set(value) => value],
             scale: scalar [get(value) => value, set(value) => value]
         }
     }

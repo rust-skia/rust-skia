@@ -5,8 +5,8 @@ use skia_bindings as sb;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct Radius {
-    x: scalar,
-    y: scalar,
+    pub x: scalar,
+    pub y: scalar,
 }
 
 impl Radius {
@@ -21,8 +21,8 @@ impl Radius {
 
 native_transmutable!(sb::SkSVGFeMorphology_Radius, Radius, svg_radius_layout);
 
-pub type SvgFeMorphologyOperator = sb::SkSVGFeMorphology_Operator;
-pub type FeMorphology = RCHandle<sb::SkSVGFeMorphology>;
+pub type MorphologyOperator = sb::SkSVGFeMorphology_Operator;
+pub type Morphology = RCHandle<sb::SkSVGFeMorphology>;
 
 impl NativeRefCountedBase for sb::SkSVGFeMorphology {
     type Base = sb::SkRefCntBase;
@@ -32,7 +32,7 @@ impl HasBase for sb::SkSVGFeMorphology {
     type Base = sb::SkSVGFe;
 }
 
-impl DebugAttributes for FeMorphology {
+impl DebugAttributes for Morphology {
     const NAME: &'static str = "FeMorphology";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
@@ -44,10 +44,10 @@ impl DebugAttributes for FeMorphology {
     }
 }
 
-impl FeMorphology {
+impl Morphology {
     skia_macros::attrs! {
         SkSVGFeMorphology => {
-            operator: SvgFeMorphologyOperator [get(value) => value, set(value) => value],
+            operator: MorphologyOperator [get(value) => value, set(value) => value],
             radius: Radius [get(value) => Radius::from_native_ref(value), set(value) => value.into_native()]
         }
     }

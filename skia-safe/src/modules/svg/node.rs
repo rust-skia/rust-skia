@@ -1,11 +1,8 @@
 use super::{
-    element::Svg, pattern::Pattern, Circle, ClipPath, ColorSpace, DebugAttributes, Defs, Display,
-    Ellipse, FeBlend, FeColorMatrix, FeComponentTransfer, FeComposite, FeDiffuseLighting,
-    FeDisplacementMap, FeDistantLight, FeFlood, FeFunc, FeGaussianBlur, FeImage, FeMerge,
-    FeMergeNode, FeMorphology, FeOffset, FePointLight, FeSpecularLighting, FeSpotLight,
-    FeTurbulence, Fill, FillRule, Filter, FontFamily, FontSize, FontStyle, FontWeight, Image,
-    Length, Line, LineCap, LineJoin, LinearGradient, Mask, Paint, Path, Poly, RadialGradient, Rect,
-    Stop, SvgIriFunc, TSpan, Text, TextAnchor, TextLiteral, TextPath, Use, Visibility, G,
+    element::Svg, fe, pattern::Pattern, Circle, ClipPath, ColorSpace, DebugAttributes, Defs,
+    Display, Ellipse, Fill, FillRule, Filter, FontFamily, FontSize, FontStyle, FontWeight, Image,
+    IriFunc, Length, Line, LineCap, LineJoin, LinearGradient, Mask, Paint, Path, Poly,
+    RadialGradient, Rect, Stop, TSpan, Text, TextAnchor, TextLiteral, TextPath, Use, Visibility, G,
 };
 use crate::{prelude::*, scalar, Color};
 use skia_bindings as sb;
@@ -16,28 +13,28 @@ pub enum Node {
     ClipPath(ClipPath),
     Defs(Defs),
     Ellipse(Ellipse),
-    FeBlend(FeBlend),
-    FeColorMatrix(FeColorMatrix),
-    FeComponentTransfer(FeComponentTransfer),
-    FeComposite(FeComposite),
-    FeDiffuseLighting(FeDiffuseLighting),
-    FeDisplacementMap(FeDisplacementMap),
-    FeDistantLight(FeDistantLight),
-    FeFlood(FeFlood),
-    FeFuncA(FeFunc),
-    FeFuncR(FeFunc),
-    FeFuncG(FeFunc),
-    FeFuncB(FeFunc),
-    FeGaussianBlur(FeGaussianBlur),
-    FeImage(FeImage),
-    FeMerge(FeMerge),
-    FeMergeNode(FeMergeNode),
-    FeMorphology(FeMorphology),
-    FeOffset(FeOffset),
-    FePointLight(FePointLight),
-    FeSpecularLighting(FeSpecularLighting),
-    FeSpotLight(FeSpotLight),
-    FeTurbulence(FeTurbulence),
+    FeBlend(fe::Blend),
+    FeColorMatrix(fe::ColorMatrix),
+    FeComponentTransfer(fe::ComponentTransfer),
+    FeComposite(fe::Composite),
+    FeDiffuseLighting(fe::DiffuseLighting),
+    FeDisplacementMap(fe::DisplacementMap),
+    FeDistantLight(fe::DistantLight),
+    FeFlood(fe::Flood),
+    FeFuncA(fe::Func),
+    FeFuncR(fe::Func),
+    FeFuncG(fe::Func),
+    FeFuncB(fe::Func),
+    FeGaussianBlur(fe::GaussianBlur),
+    FeImage(fe::Image),
+    FeMerge(fe::Merge),
+    FeMergeNode(fe::MergeNode),
+    FeMorphology(fe::Morphology),
+    FeOffset(fe::Offset),
+    FePointLight(fe::PointLight),
+    FeSpecularLighting(fe::SpecularLighting),
+    FeSpotLight(fe::SpotLight),
+    FeTurbulence(fe::Turbulence),
     Filter(Filter),
     G(G),
     Image(Image),
@@ -68,53 +65,53 @@ impl Node {
             NodeTag::ClipPath => Self::ClipPath(ClipPath::from_unshared_ptr(ptr as *mut _)?),
             NodeTag::Defs => Self::Defs(Defs::from_unshared_ptr(ptr as *mut _)?),
             NodeTag::Ellipse => Self::Ellipse(Ellipse::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::FeBlend => Self::FeBlend(FeBlend::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeBlend => Self::FeBlend(fe::Blend::from_unshared_ptr(ptr as *mut _)?),
             NodeTag::FeColorMatrix => {
-                Self::FeColorMatrix(FeColorMatrix::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeColorMatrix(fe::ColorMatrix::from_unshared_ptr(ptr as *mut _)?)
             }
             NodeTag::FeComponentTransfer => {
-                Self::FeComponentTransfer(FeComponentTransfer::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeComponentTransfer(fe::ComponentTransfer::from_unshared_ptr(ptr as *mut _)?)
             }
             NodeTag::FeComposite => {
-                Self::FeComposite(FeComposite::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeComposite(fe::Composite::from_unshared_ptr(ptr as *mut _)?)
             }
             NodeTag::FeDiffuseLighting => {
-                Self::FeDiffuseLighting(FeDiffuseLighting::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeDiffuseLighting(fe::DiffuseLighting::from_unshared_ptr(ptr as *mut _)?)
             }
             NodeTag::FeDisplacementMap => {
-                Self::FeDisplacementMap(FeDisplacementMap::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeDisplacementMap(fe::DisplacementMap::from_unshared_ptr(ptr as *mut _)?)
             }
             NodeTag::FeDistantLight => {
-                Self::FeDistantLight(FeDistantLight::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeDistantLight(fe::DistantLight::from_unshared_ptr(ptr as *mut _)?)
             }
-            NodeTag::FeFlood => Self::FeFlood(FeFlood::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::FeFuncA => Self::FeFuncA(FeFunc::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::FeFuncR => Self::FeFuncR(FeFunc::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::FeFuncG => Self::FeFuncG(FeFunc::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::FeFuncB => Self::FeFuncB(FeFunc::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeFlood => Self::FeFlood(fe::Flood::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeFuncA => Self::FeFuncA(fe::Func::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeFuncR => Self::FeFuncR(fe::Func::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeFuncG => Self::FeFuncG(fe::Func::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeFuncB => Self::FeFuncB(fe::Func::from_unshared_ptr(ptr as *mut _)?),
             NodeTag::FeGaussianBlur => {
-                Self::FeGaussianBlur(FeGaussianBlur::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeGaussianBlur(fe::GaussianBlur::from_unshared_ptr(ptr as *mut _)?)
             }
-            NodeTag::FeImage => Self::FeImage(FeImage::from_unshared_ptr(ptr as *mut _)?),
-            NodeTag::FeMerge => Self::FeMerge(FeMerge::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeImage => Self::FeImage(fe::Image::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeMerge => Self::FeMerge(fe::Merge::from_unshared_ptr(ptr as *mut _)?),
             NodeTag::FeMergeNode => {
-                Self::FeMergeNode(FeMergeNode::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeMergeNode(fe::MergeNode::from_unshared_ptr(ptr as *mut _)?)
             }
             NodeTag::FeMorphology => {
-                Self::FeMorphology(FeMorphology::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeMorphology(fe::Morphology::from_unshared_ptr(ptr as *mut _)?)
             }
-            NodeTag::FeOffset => Self::FeOffset(FeOffset::from_unshared_ptr(ptr as *mut _)?),
+            NodeTag::FeOffset => Self::FeOffset(fe::Offset::from_unshared_ptr(ptr as *mut _)?),
             NodeTag::FePointLight => {
-                Self::FePointLight(FePointLight::from_unshared_ptr(ptr as *mut _)?)
+                Self::FePointLight(fe::PointLight::from_unshared_ptr(ptr as *mut _)?)
             }
             NodeTag::FeSpecularLighting => {
-                Self::FeSpecularLighting(FeSpecularLighting::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeSpecularLighting(fe::SpecularLighting::from_unshared_ptr(ptr as *mut _)?)
             }
             NodeTag::FeSpotLight => {
-                Self::FeSpotLight(FeSpotLight::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeSpotLight(fe::SpotLight::from_unshared_ptr(ptr as *mut _)?)
             }
             NodeTag::FeTurbulence => {
-                Self::FeTurbulence(FeTurbulence::from_unshared_ptr(ptr as *mut _)?)
+                Self::FeTurbulence(fe::Turbulence::from_unshared_ptr(ptr as *mut _)?)
             }
             NodeTag::Filter => Self::Filter(Filter::from_unshared_ptr(ptr as *mut _)?),
             NodeTag::G => Self::G(G::from_unshared_ptr(ptr as *mut _)?),
@@ -222,10 +219,10 @@ impl SvgNode {
             visibility?: Visibility [get(value) => value.map(|value| &value.fType), set(value) => sb::SkSVGVisibility { fType: value }],
 
             // not inherited
-            clip_path?: SvgIriFunc [get(value) => value.map(SvgIriFunc::from_native_ref), set(value) => value.native()],
+            clip_path?: IriFunc [get(value) => value.map(IriFunc::from_native_ref), set(value) => value.native()],
             display?: Display [get(value) => value, set(value) => value],
-            mask?: SvgIriFunc [get(value) => value.map(SvgIriFunc::from_native_ref), set(value) => value.native()],
-            filter?: SvgIriFunc [get(value) => value.map(SvgIriFunc::from_native_ref), set(value) => value.native()],
+            mask?: IriFunc [get(value) => value.map(IriFunc::from_native_ref), set(value) => value.native()],
+            filter?: IriFunc [get(value) => value.map(IriFunc::from_native_ref), set(value) => value.native()],
             *opacity?: scalar [get(value) => value, set(value) => value],
             stop_color?: Fill [get(value) => value.map(Fill::from_native_ref), set(value) => value.native()],
             *stop_opacity?: scalar [get(value) => value, set(value) => value],
