@@ -5,7 +5,7 @@ mod element;
 pub mod fe;
 mod filter;
 mod g;
-mod gradient;
+pub mod gradient;
 mod image;
 mod inheritting;
 mod mask;
@@ -24,7 +24,7 @@ pub use self::{
     defs::Defs,
     filter::Filter,
     g::G,
-    gradient::*,
+    gradient::Gradient,
     image::Image,
     inheritting::*,
     mask::Mask,

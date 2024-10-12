@@ -4,7 +4,7 @@ use crate::{
 };
 use skia_bindings as sb;
 
-pub type LinearGradient = RCHandle<sb::SkSVGLinearGradient>;
+pub type Linear = RCHandle<sb::SkSVGLinearGradient>;
 
 impl NativeRefCountedBase for sb::SkSVGLinearGradient {
     type Base = sb::SkRefCntBase;
@@ -14,7 +14,7 @@ impl HasBase for sb::SkSVGLinearGradient {
     type Base = sb::SkSVGGradient;
 }
 
-impl DebugAttributes for LinearGradient {
+impl DebugAttributes for Linear {
     const NAME: &'static str = "LinearGradient";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
@@ -28,7 +28,7 @@ impl DebugAttributes for LinearGradient {
     }
 }
 
-impl LinearGradient {
+impl Linear {
     skia_macros::attrs! {
         SkSVGLinearGradient => {
             x1: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],

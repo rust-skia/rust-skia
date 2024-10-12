@@ -4,7 +4,7 @@ use crate::{
 };
 use skia_bindings as sb;
 
-pub type RadialGradient = RCHandle<sb::SkSVGRadialGradient>;
+pub type Radial = RCHandle<sb::SkSVGRadialGradient>;
 
 impl NativeRefCountedBase for sb::SkSVGRadialGradient {
     type Base = sb::SkRefCntBase;
@@ -14,7 +14,7 @@ impl HasBase for sb::SkSVGRadialGradient {
     type Base = sb::SkSVGGradient;
 }
 
-impl DebugAttributes for RadialGradient {
+impl DebugAttributes for Radial {
     const NAME: &'static str = "RadialGradient";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
@@ -27,7 +27,7 @@ impl DebugAttributes for RadialGradient {
     }
 }
 
-impl RadialGradient {
+impl Radial {
     skia_macros::attrs! {
         SkSVGRadialGradient => {
             cx: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],

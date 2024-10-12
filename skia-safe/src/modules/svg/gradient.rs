@@ -1,13 +1,13 @@
 mod linear;
 mod radial;
 
-pub use self::{linear::LinearGradient, radial::RadialGradient};
+pub use self::{linear::Linear, radial::Radial};
 
 use super::{BoundingBoxUnits, DebugAttributes, HasBase, Iri, SpreadMethod};
 use crate::{prelude::*, Matrix};
 use skia_bindings as sb;
 
-pub type SvgGradient = RCHandle<sb::SkSVGGradient>;
+pub type Gradient = RCHandle<sb::SkSVGGradient>;
 
 impl NativeRefCountedBase for sb::SkSVGGradient {
     type Base = sb::SkRefCntBase;
@@ -17,7 +17,7 @@ impl HasBase for sb::SkSVGGradient {
     type Base = sb::SkSVGContainer;
 }
 
-impl DebugAttributes for SvgGradient {
+impl DebugAttributes for Gradient {
     const NAME: &'static str = "Gradient";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
@@ -31,7 +31,7 @@ impl DebugAttributes for SvgGradient {
     }
 }
 
-impl SvgGradient {
+impl Gradient {
     skia_macros::attrs! {
         SkSVGGradient => {
             href: Iri [get(value) => Iri::from_native_ref(value), set(value) => value.into_native()],

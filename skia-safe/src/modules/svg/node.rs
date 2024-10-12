@@ -1,8 +1,8 @@
 use super::{
-    element::Svg, fe, pattern::Pattern, Circle, ClipPath, ColorSpace, DebugAttributes, Defs,
-    Display, Ellipse, Fill, FillRule, Filter, FontFamily, FontSize, FontStyle, FontWeight, Image,
-    IriFunc, Length, Line, LineCap, LineJoin, LinearGradient, Mask, Paint, Path, Poly,
-    RadialGradient, Rect, Stop, TSpan, Text, TextAnchor, TextLiteral, TextPath, Use, Visibility, G,
+    element::Svg, fe, gradient, pattern::Pattern, Circle, ClipPath, ColorSpace, DebugAttributes,
+    Defs, Display, Ellipse, Fill, FillRule, Filter, FontFamily, FontSize, FontStyle, FontWeight,
+    Image, IriFunc, Length, Line, LineCap, LineJoin, Mask, Paint, Path, Poly, Rect, Stop, TSpan,
+    Text, TextAnchor, TextLiteral, TextPath, Use, Visibility, G,
 };
 use crate::{prelude::*, scalar, Color};
 use skia_bindings as sb;
@@ -39,13 +39,13 @@ pub enum Node {
     G(G),
     Image(Image),
     Line(Line),
-    LinearGradient(LinearGradient),
+    LinearGradient(gradient::Linear),
     Mask(Mask),
     Path(Path),
     Pattern(Pattern),
     Polygon(Poly),
     Polyline(Poly),
-    RadialGradient(RadialGradient),
+    RadialGradient(gradient::Radial),
     Rect(Rect),
     Stop(Stop),
     Svg(Svg),
@@ -118,7 +118,7 @@ impl Node {
             NodeTag::Image => Self::Image(Image::from_unshared_ptr(ptr as *mut _)?),
             NodeTag::Line => Self::Line(Line::from_unshared_ptr(ptr as *mut _)?),
             NodeTag::LinearGradient => {
-                Self::LinearGradient(LinearGradient::from_unshared_ptr(ptr as *mut _)?)
+                Self::LinearGradient(gradient::Linear::from_unshared_ptr(ptr as *mut _)?)
             }
             NodeTag::Mask => Self::Mask(Mask::from_unshared_ptr(ptr as *mut _)?),
             NodeTag::Path => Self::Path(Path::from_unshared_ptr(ptr as *mut _)?),
@@ -126,7 +126,7 @@ impl Node {
             NodeTag::Polygon => Self::Polygon(Poly::from_unshared_ptr(ptr as *mut _)?),
             NodeTag::Polyline => Self::Polyline(Poly::from_unshared_ptr(ptr as *mut _)?),
             NodeTag::RadialGradient => {
-                Self::RadialGradient(RadialGradient::from_unshared_ptr(ptr as *mut _)?)
+                Self::RadialGradient(gradient::Radial::from_unshared_ptr(ptr as *mut _)?)
             }
             NodeTag::Rect => Self::Rect(Rect::from_unshared_ptr(ptr as *mut _)?),
             NodeTag::Stop => Self::Stop(Stop::from_unshared_ptr(ptr as *mut _)?),
