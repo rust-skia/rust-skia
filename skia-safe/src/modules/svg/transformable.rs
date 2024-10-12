@@ -17,7 +17,7 @@ impl DebugAttributes for SvgTransformableNode {
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()
-            ._dbg(builder.field("transform", self.get_transform()));
+            ._dbg(builder.field("transform", self.transform()));
     }
 }
 
@@ -26,7 +26,7 @@ impl SvgTransformableNode {
         unsafe { sb::C_SkSVGTransformableNode_setTransform(self.native_mut(), transform.native()) }
     }
 
-    pub fn get_transform(&self) -> &Matrix {
+    pub fn transform(&self) -> &Matrix {
         Matrix::from_native_ref(&self.native().fTransform)
     }
 }

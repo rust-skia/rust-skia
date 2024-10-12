@@ -388,7 +388,7 @@ mod tests {
         let dom = Dom::from_bytes(data.as_bytes(), mgr).unwrap();
         let root = dom.root();
 
-        println!("{:#?}", root.get_transform());
+        println!("{:#?}", root.transform());
         println!("{:#?}", root.intrinsic_size());
 
         root.set_width(Length::new(50., LengthUnit::PX));
