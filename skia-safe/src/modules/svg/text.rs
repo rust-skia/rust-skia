@@ -23,7 +23,7 @@ impl DebugAttributes for TextContainer {
                 .field("dx", &self.dx())
                 .field("dy", &self.dy())
                 .field("rotate", &self.rotate())
-                .field("xml_space", &self.get_xml_space()),
+                .field("xml_space", &self.xml_space()),
         );
     }
 }
@@ -153,8 +153,8 @@ impl DebugAttributes for TextPath {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("href", &self.get_href())
-                .field("start_offset", &self.get_start_offset()),
+                .field("href", &self.href())
+                .field("start_offset", &self.start_offset()),
         );
     }
 }
@@ -182,7 +182,7 @@ impl DebugAttributes for TextLiteral {
     const NAME: &'static str = "TextLiteral";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.as_base()._dbg(builder.field("text", &self.get_text()));
+        self.as_base()._dbg(builder.field("text", &self.text()));
     }
 }
 

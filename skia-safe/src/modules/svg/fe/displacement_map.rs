@@ -21,10 +21,10 @@ impl DebugAttributes for DisplacementMap {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("input2", self.get_input2())
-                .field("x_channel_selector", self.get_x_channel_selector())
-                .field("y_channel_selector", self.get_y_channel_selector())
-                .field("scale", self.get_scale()),
+                .field("input2", self.input2())
+                .field("x_channel_selector", self.x_channel_selector())
+                .field("y_channel_selector", self.y_channel_selector())
+                .field("scale", self.scale()),
         );
     }
 }

@@ -44,10 +44,10 @@ impl DebugAttributes for Turbulence {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("base_frequency", self.get_base_frequency())
-                .field("num_octaves", &self.get_num_octaves())
-                .field("seed", &self.get_seed())
-                .field("turbulence_type", self.get_turbulence_type()),
+                .field("base_frequency", self.base_frequency())
+                .field("num_octaves", &self.num_octaves())
+                .field("seed", &self.seed())
+                .field("turbulence_type", self.turbulence_type()),
         );
     }
 }

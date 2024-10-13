@@ -20,8 +20,8 @@ impl DebugAttributes for Image {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("href", &self.get_href())
-                .field("preserve_aspect_ratio", self.get_preserve_aspect_ratio()),
+                .field("href", &self.href())
+                .field("preserve_aspect_ratio", self.preserve_aspect_ratio()),
         );
     }
 }

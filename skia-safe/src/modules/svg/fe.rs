@@ -43,12 +43,12 @@ impl DebugAttributes for Fe {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("input", self.get_input())
-                .field("result", self.get_result())
-                .field("x", &self.get_x())
-                .field("y", &self.get_y())
-                .field("width", &self.get_width())
-                .field("height", &self.get_height()),
+                .field("input", self.input())
+                .field("result", self.result())
+                .field("x", &self.x())
+                .field("y", &self.y())
+                .field("width", &self.width())
+                .field("height", &self.height()),
         );
     }
 }

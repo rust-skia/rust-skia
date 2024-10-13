@@ -22,7 +22,7 @@ impl DebugAttributes for ColorMatrix {
         self.as_base()._dbg(
             builder
                 .field("values", &self.values())
-                .field("kind", self.get_kind()),
+                .field("kind", self.kind()),
         );
     }
 }

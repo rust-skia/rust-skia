@@ -23,10 +23,10 @@ impl DebugAttributes for Gradient {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("href", self.get_href())
-                .field("gradient_transform", self.get_gradient_transform())
-                .field("spread_method", self.get_spread_method())
-                .field("gradient_units", self.get_gradient_units()),
+                .field("href", self.href())
+                .field("gradient_transform", self.gradient_transform())
+                .field("spread_method", self.spread_method())
+                .field("gradient_units", self.gradient_units()),
         );
     }
 }

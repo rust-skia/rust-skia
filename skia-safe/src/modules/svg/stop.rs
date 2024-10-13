@@ -19,8 +19,7 @@ impl DebugAttributes for Stop {
     const NAME: &'static str = "Stop";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.as_base()
-            ._dbg(builder.field("offset", &self.get_offset()));
+        self.as_base()._dbg(builder.field("offset", &self.offset()));
     }
 }
 

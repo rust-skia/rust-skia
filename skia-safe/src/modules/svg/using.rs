@@ -18,9 +18,9 @@ impl DebugAttributes for Use {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("x", &self.get_x())
-                .field("y", &self.get_y())
-                .field("href", &self.get_href()),
+                .field("x", &self.x())
+                .field("y", &self.y())
+                .field("href", &self.href()),
         );
     }
 }

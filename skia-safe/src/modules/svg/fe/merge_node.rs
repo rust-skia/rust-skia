@@ -17,7 +17,7 @@ impl DebugAttributes for MergeNode {
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()
-            ._dbg(builder.field("input", self.get_input()));
+            ._dbg(builder.field("input", self.input()));
     }
 }
 

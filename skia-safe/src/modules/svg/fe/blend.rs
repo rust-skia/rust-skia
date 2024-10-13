@@ -21,8 +21,8 @@ impl DebugAttributes for Blend {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("input2", self.get_input2())
-                .field("mode", self.get_mode()),
+                .field("input2", self.input2())
+                .field("mode", self.mode()),
         );
     }
 }

@@ -18,7 +18,7 @@ impl DebugAttributes for Path {
     const NAME: &'static str = "Path";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.as_base()._dbg(builder.field("path", &self.get_path()));
+        self.as_base()._dbg(builder.field("path", &self.path()));
     }
 }
 

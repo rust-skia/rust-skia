@@ -20,9 +20,9 @@ impl DebugAttributes for Circle {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("cx", &self.get_cx())
-                .field("cy", &self.get_cy())
-                .field("r", &self.get_r()),
+                .field("cx", &self.cx())
+                .field("cy", &self.cy())
+                .field("r", &self.r()),
         );
     }
 }

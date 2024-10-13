@@ -44,8 +44,8 @@ impl DebugAttributes for Lighting {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("surface_scale", &self.get_surface_scale())
-                .field("kernel_unit_length", &self.get_kernel_unit_length()),
+                .field("surface_scale", &self.surface_scale())
+                .field("kernel_unit_length", &self.kernel_unit_length()),
         );
     }
 }
@@ -75,8 +75,8 @@ impl DebugAttributes for Specular {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("specular_constant", &self.get_specular_constant())
-                .field("specular_exponent", &self.get_specular_exponent()),
+                .field("specular_constant", &self.specular_constant())
+                .field("specular_exponent", &self.specular_exponent()),
         );
     }
 }
@@ -105,7 +105,7 @@ impl DebugAttributes for Diffuse {
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()
-            ._dbg(builder.field("diffuse_constant", &self.get_diffuse_constant()));
+            ._dbg(builder.field("diffuse_constant", &self.diffuse_constant()));
     }
 }
 

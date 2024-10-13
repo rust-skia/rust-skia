@@ -39,8 +39,8 @@ impl DebugAttributes for Morphology {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("operator", self.get_operator())
-                .field("radius", &self.get_radius()),
+                .field("operator", self.operator())
+                .field("radius", &self.radius()),
         );
     }
 }

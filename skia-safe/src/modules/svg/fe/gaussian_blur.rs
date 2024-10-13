@@ -40,7 +40,7 @@ impl DebugAttributes for GaussianBlur {
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()
-            ._dbg(builder.field("std_deviation", self.get_std_deviation()));
+            ._dbg(builder.field("std_deviation", self.std_deviation()));
     }
 }
 

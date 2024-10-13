@@ -21,13 +21,13 @@ impl DebugAttributes for Func {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("amplitude", &self.get_amplitude())
-                .field("exponent", &self.get_exponent())
-                .field("intercept", &self.get_intercept())
-                .field("offset", &self.get_offset())
-                .field("slope", &self.get_slope())
+                .field("amplitude", &self.amplitude())
+                .field("exponent", &self.exponent())
+                .field("intercept", &self.intercept())
+                .field("offset", &self.offset())
+                .field("slope", &self.slope())
                 .field("table_values", &self.table_values())
-                .field("kind", self.get_kind()),
+                .field("kind", self.kind()),
         );
     }
 }
@@ -37,12 +37,12 @@ impl Func {
         unsafe {
             safer::from_raw_parts(
                 sb::C_SkSVGFeFunc_getTableValues(self.native()),
-                self.get_table_values_count(),
+                self.table_values_count(),
             )
         }
     }
 
-    pub(crate) fn get_table_values_count(&self) -> usize {
+    pub(crate) fn table_values_count(&self) -> usize {
         unsafe { sb::C_SkSVGFeFunc_getTableValuesCount(self.native()) }
     }
 

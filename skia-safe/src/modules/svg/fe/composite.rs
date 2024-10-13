@@ -21,12 +21,12 @@ impl DebugAttributes for Composite {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("input2", self.get_input2())
-                .field("k1", &self.get_k1())
-                .field("k2", &self.get_k2())
-                .field("k3", &self.get_k3())
-                .field("k4", &self.get_k4())
-                .field("operator", self.get_operator()),
+                .field("input2", self.input2())
+                .field("k1", &self.k1())
+                .field("k2", &self.k2())
+                .field("k3", &self.k3())
+                .field("k4", &self.k4())
+                .field("operator", self.operator()),
         );
     }
 }

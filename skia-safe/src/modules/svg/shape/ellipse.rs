@@ -20,10 +20,10 @@ impl DebugAttributes for Ellipse {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("cx", &self.get_cx())
-                .field("cy", &self.get_cy())
-                .field("rx", &self.get_rx())
-                .field("ry", &self.get_ry()),
+                .field("cx", &self.cx())
+                .field("cy", &self.cy())
+                .field("rx", &self.rx())
+                .field("ry", &self.ry()),
         );
     }
 }

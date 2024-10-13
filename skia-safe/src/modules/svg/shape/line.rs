@@ -20,10 +20,10 @@ impl DebugAttributes for Line {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("x1", &self.get_x1())
-                .field("y1", &self.get_y1())
-                .field("x2", &self.get_x2())
-                .field("y2", &self.get_y2()),
+                .field("x1", &self.x1())
+                .field("y1", &self.y1())
+                .field("x2", &self.x2())
+                .field("y2", &self.y2()),
         );
     }
 }

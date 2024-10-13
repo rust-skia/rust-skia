@@ -21,8 +21,8 @@ impl DebugAttributes for DistantLight {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("azimuth", &self.get_azimuth())
-                .field("elevation", &self.get_elevation()),
+                .field("azimuth", &self.azimuth())
+                .field("elevation", &self.elevation()),
         );
     }
 }
@@ -52,9 +52,9 @@ impl DebugAttributes for PointLight {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("x", &self.get_x())
-                .field("y", &self.get_y())
-                .field("z", &self.get_z()),
+                .field("x", &self.x())
+                .field("y", &self.y())
+                .field("z", &self.z()),
         );
     }
 }
@@ -85,14 +85,14 @@ impl DebugAttributes for SpotLight {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("x", &self.get_x())
-                .field("y", &self.get_y())
-                .field("z", &self.get_z())
-                .field("points_at_x", &self.get_points_at_x())
-                .field("points_at_y", &self.get_points_at_y())
-                .field("points_at_z", &self.get_points_at_z())
-                .field("specular_exponent", &self.get_specular_exponent())
-                .field("limiting_cone_angle", &self.get_limiting_cone_angle()),
+                .field("x", &self.x())
+                .field("y", &self.y())
+                .field("z", &self.z())
+                .field("points_at_x", &self.points_at_x())
+                .field("points_at_y", &self.points_at_y())
+                .field("points_at_z", &self.points_at_z())
+                .field("specular_exponent", &self.specular_exponent())
+                .field("limiting_cone_angle", &self.limiting_cone_angle()),
         );
     }
 }

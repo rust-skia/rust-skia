@@ -9,7 +9,7 @@ impl DebugAttributes for ClipPath {
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()
-            ._dbg(builder.field("clip_path_units", self.get_clip_path_units()));
+            ._dbg(builder.field("clip_path_units", self.clip_path_units()));
     }
 }
 

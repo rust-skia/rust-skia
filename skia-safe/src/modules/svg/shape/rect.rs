@@ -20,12 +20,12 @@ impl DebugAttributes for Rect {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("x", &self.get_x())
-                .field("y", &self.get_y())
-                .field("width", &self.get_width())
-                .field("height", &self.get_height())
-                .field("rx", &self.get_rx())
-                .field("ry", &self.get_ry()),
+                .field("x", &self.x())
+                .field("y", &self.y())
+                .field("width", &self.width())
+                .field("height", &self.height())
+                .field("rx", &self.rx())
+                .field("ry", &self.ry()),
         );
     }
 }

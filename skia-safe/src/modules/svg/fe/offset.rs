@@ -18,8 +18,8 @@ impl DebugAttributes for Offset {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("dx", &self.get_dx())
-                .field("dy", &self.get_dy()),
+                .field("dx", &self.dx())
+                .field("dy", &self.dy()),
         );
     }
 }

@@ -16,38 +16,38 @@ impl DebugAttributes for Node {
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         builder
-            .field("clip_rule", &self.get_clip_rule())
-            .field("color_interpolation", &self.get_color_interpolation())
+            .field("clip_rule", &self.clip_rule())
+            .field("color_interpolation", &self.color_interpolation())
             .field(
                 "color_interpolation_filters",
-                &self.get_color_interpolation_filters(),
+                &self.color_interpolation_filters(),
             )
-            .field("color", &self.get_color())
-            .field("fill_rule", &self.get_fill_rule())
-            .field("fill", &self.get_fill())
-            .field("fill_opacity", &self.get_fill_opacity())
-            .field("font_family", &self.get_font_family())
-            .field("font_size", &self.get_font_size())
-            .field("font_style", &self.get_font_style())
-            .field("font_weight", &self.get_font_weight())
-            .field("stroke", &self.get_stroke())
-            .field("stroke_line_cap", &self.get_stroke_line_cap())
-            .field("stroke_line_join", &self.get_stroke_line_join())
-            .field("stroke_miter_limit", &self.get_stroke_miter_limit())
-            .field("stroke_opacity", &self.get_stroke_opacity())
-            .field("stroke_width", &self.get_stroke_width())
-            .field("text_anchor", &self.get_text_anchor())
-            .field("visibility", &self.get_visibility())
-            .field("clip_path", &self.get_clip_path())
-            .field("display", &self.get_display())
-            .field("mask", &self.get_mask())
-            .field("filter", &self.get_filter())
-            .field("opacity", &self.get_opacity())
-            .field("stop_color", &self.get_stop_color())
-            .field("stop_opacity", &self.get_stop_opacity())
-            .field("flood_color", &self.get_flood_color())
-            .field("flood_opacity", &self.get_flood_opacity())
-            .field("lighting_color", &self.get_lighting_color());
+            .field("color", &self.color())
+            .field("fill_rule", &self.fill_rule())
+            .field("fill", &self.fill())
+            .field("fill_opacity", &self.fill_opacity())
+            .field("font_family", &self.font_family())
+            .field("font_size", &self.font_size())
+            .field("font_style", &self.font_style())
+            .field("font_weight", &self.font_weight())
+            .field("stroke", &self.stroke())
+            .field("stroke_line_cap", &self.stroke_line_cap())
+            .field("stroke_line_join", &self.stroke_line_join())
+            .field("stroke_miter_limit", &self.stroke_miter_limit())
+            .field("stroke_opacity", &self.stroke_opacity())
+            .field("stroke_width", &self.stroke_width())
+            .field("text_anchor", &self.text_anchor())
+            .field("visibility", &self.visibility())
+            .field("clip_path", &self.clip_path())
+            .field("display", &self.display())
+            .field("mask", &self.mask())
+            .field("filter", &self.filter())
+            .field("opacity", &self.opacity())
+            .field("stop_color", &self.stop_color())
+            .field("stop_opacity", &self.stop_opacity())
+            .field("flood_color", &self.flood_color())
+            .field("flood_opacity", &self.flood_opacity())
+            .field("lighting_color", &self.lighting_color());
     }
 }
 

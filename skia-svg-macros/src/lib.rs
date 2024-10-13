@@ -178,7 +178,7 @@ fn attrs2(input: TokenStream) -> TokenStream2 {
                     Span::call_site(),
                 );
 
-                let get_name = Ident::new(&format!("get_{attr}"), Span::call_site());
+                let get_name = Ident::new(&format!("{attr}"), Span::call_site());
                 let native_get_name = Ident::new(
                     &format!("C_{name}_get{native_name}"),
                     Span::call_site(),
