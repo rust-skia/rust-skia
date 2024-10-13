@@ -1,12 +1,12 @@
-use super::{DebugAttributes, HasBase};
-use crate::{prelude::*, scalar};
+use super::{DebugAttributes, NodeSubtype};
+use crate::{impl_default_make, prelude::*, scalar};
 use skia_bindings as sb;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct StdDeviation {
-    x: scalar,
-    y: scalar,
+    pub x: scalar,
+    pub y: scalar,
 }
 
 impl StdDeviation {
@@ -25,27 +25,25 @@ native_transmutable!(
     std_deviation_layout
 );
 
-pub type FeGaussianBlur = RCHandle<sb::SkSVGFeGaussianBlur>;
+pub type GaussianBlur = RCHandle<sb::SkSVGFeGaussianBlur>;
 
-impl NativeRefCountedBase for sb::SkSVGFeGaussianBlur {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeGaussianBlur {
+impl NodeSubtype for sb::SkSVGFeGaussianBlur {
     type Base = sb::SkSVGFe;
 }
 
-impl DebugAttributes for FeGaussianBlur {
+impl_default_make!(GaussianBlur, sb::C_SkSVGFeGaussianBlur_Make);
+
+impl DebugAttributes for GaussianBlur {
     const NAME: &'static str = "FeGaussianBlur";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()
-            ._dbg(builder.field("std_deviation", self.get_std_deviation()));
+            ._dbg(builder.field("std_deviation", self.std_deviation()));
     }
 }
 
-impl FeGaussianBlur {
-    skia_macros::attrs! {
+impl GaussianBlur {
+    skia_svg_macros::attrs! {
         SkSVGFeGaussianBlur => {
             std_deviation: StdDeviation [get(value) => StdDeviation::from_native_ref(value), set(value) => value.into_native()]
         }

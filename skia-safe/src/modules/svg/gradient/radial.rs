@@ -1,34 +1,33 @@
 use crate::{
+    impl_default_make,
     prelude::*,
-    svg::{DebugAttributes, HasBase, Length},
+    svg::{DebugAttributes, Length, NodeSubtype},
 };
 use skia_bindings as sb;
 
-pub type RadialGradient = RCHandle<sb::SkSVGRadialGradient>;
+pub type Radial = RCHandle<sb::SkSVGRadialGradient>;
 
-impl NativeRefCountedBase for sb::SkSVGRadialGradient {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGRadialGradient {
+impl NodeSubtype for sb::SkSVGRadialGradient {
     type Base = sb::SkSVGGradient;
 }
 
-impl DebugAttributes for RadialGradient {
+impl_default_make!(Radial, sb::C_SkSVGRadialGradient_Make);
+
+impl DebugAttributes for Radial {
     const NAME: &'static str = "RadialGradient";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("cx", &self.get_cx())
-                .field("cy", &self.get_cy())
-                .field("r", &self.get_r()),
+                .field("cx", &self.cx())
+                .field("cy", &self.cy())
+                .field("r", &self.r()),
         );
     }
 }
 
-impl RadialGradient {
-    skia_macros::attrs! {
+impl Radial {
+    skia_svg_macros::attrs! {
         SkSVGRadialGradient => {
             cx: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
             cy: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],

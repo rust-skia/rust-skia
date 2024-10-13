@@ -11,8 +11,6 @@ pub enum ColorKind {
 
 pub type Fill = Handle<sb::SkSVGColor>;
 
-unsafe_send_sync!(Fill);
-
 impl NativeDrop for sb::SkSVGColor {
     fn drop(&mut self) {
         unsafe { sb::C_SkSVGColor_destruct(self) }
@@ -40,7 +38,7 @@ impl Fill {
     }
 
     pub fn kind(&self) -> ColorKind {
-        match &self.native().fType {
+        match self.native().fType {
             sb::SkSVGColor_Type::Color => ColorKind::Color,
             sb::SkSVGColor_Type::CurrentColor | sb::SkSVGColor_Type::ICCColor => {
                 ColorKind::CurrentColor

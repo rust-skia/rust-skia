@@ -6,7 +6,7 @@ fn main() {
 #[cfg(feature = "svg")]
 fn main() {
     use skia_safe::{
-        svg::{Dom, Length, LengthUnit},
+        svg::{Dom, Length, LengthUnit, Svg},
         Color, FontMgr,
     };
 
@@ -59,7 +59,7 @@ fn main() {
 
     let mgr = FontMgr::default();
     let dom: Dom = Dom::from_bytes(data.as_bytes(), mgr).unwrap();
-    let root = dom.root();
+    let mut root: Svg = dom.root();
 
     println!("{:?}", root.intrinsic_size());
 
@@ -71,7 +71,7 @@ fn main() {
 
     println!("{:?}", root.intrinsic_size());
 
-    let children = root.children();
+    let children = root.children_typed();
 
     println!("{children:#?}");
 

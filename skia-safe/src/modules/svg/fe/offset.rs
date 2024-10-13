@@ -1,31 +1,26 @@
-use super::{DebugAttributes, HasBase};
-use crate::{prelude::*, scalar};
+use super::{DebugAttributes, NodeSubtype};
+use crate::{impl_default_make, prelude::*, scalar};
 use skia_bindings as sb;
 
-pub type FeOffset = RCHandle<sb::SkSVGFeOffset>;
+pub type Offset = RCHandle<sb::SkSVGFeOffset>;
 
-impl NativeRefCountedBase for sb::SkSVGFeOffset {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeOffset {
+impl NodeSubtype for sb::SkSVGFeOffset {
     type Base = sb::SkSVGFe;
 }
 
-impl DebugAttributes for FeOffset {
+impl_default_make!(Offset, sb::C_SkSVGFeOffset_Make);
+
+impl DebugAttributes for Offset {
     const NAME: &'static str = "FeOffset";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.as_base()._dbg(
-            builder
-                .field("dx", &self.get_dx())
-                .field("dy", &self.get_dy()),
-        );
+        self.as_base()
+            ._dbg(builder.field("dx", &self.dx()).field("dy", &self.dy()));
     }
 }
 
-impl FeOffset {
-    skia_macros::attrs! {
+impl Offset {
+    skia_svg_macros::attrs! {
         SkSVGFeOffset => {
             *dx: scalar [get(value) => value, set(value) => value],
             *dy: scalar [get(value) => value, set(value) => value]

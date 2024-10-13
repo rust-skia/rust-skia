@@ -396,10 +396,6 @@ extern "C" void C_SkSVGColor_Construct1(SkSVGColor* uninitialized, const SkSVGCo
 // Hacky way to access the SkSVGContainer::fChildren property (should be safe)
 class SkSVGContainerAccessor : public SkSVGContainer {
     public:
-        bool hasChild() const {
-            return !fChildren.empty();
-        }
-
         int childrenCount() const {
             return fChildren.size();
         }
@@ -411,10 +407,6 @@ class SkSVGContainerAccessor : public SkSVGContainer {
 
 extern "C" void C_SkSVGContainer_appendChild(SkSVGContainer* self, SkSVGNode* node) {
     self->appendChild(sk_sp<SkSVGNode>(node));
-}
-
-extern "C" bool C_SkSVGContainer_hasChildren(const SkSVGContainer& self) {
-    return static_cast<const SkSVGContainerAccessor&>(self).hasChild();
 }
 
 extern "C" int C_SkSVGContainer_childrenCount(const SkSVGContainer& self) {
@@ -482,3 +474,83 @@ SVG_PRES_ATTR(StopOpacity              , SkSVGNumberType, false)
 SVG_PRES_REF_ATTR(FloodColor           , SkSVGColor     , false)
 SVG_PRES_ATTR(FloodOpacity             , SkSVGNumberType, false)
 SVG_PRES_REF_ATTR(LightingColor        , SkSVGColor     , false)
+
+#define SVG_MAKE(type)               \
+extern "C" type* C_##type##_Make() { \
+    return type::Make().release();   \
+}
+
+SVG_MAKE(SkSVGFeBlend)
+SVG_MAKE(SkSVGFeColorMatrix)
+SVG_MAKE(SkSVGFeComposite)
+SVG_MAKE(SkSVGFeDisplacementMap)
+SVG_MAKE(SkSVGFeFlood)
+
+extern "C" SkSVGFeFunc* C_SkSVGFeFunc_MakeFuncA() {
+    return SkSVGFeFunc::MakeFuncA().release();
+}
+extern "C" SkSVGFeFunc* C_SkSVGFeFunc_MakeFuncR() {
+    return SkSVGFeFunc::MakeFuncR().release();
+}
+extern "C" SkSVGFeFunc* C_SkSVGFeFunc_MakeFuncG() {
+    return SkSVGFeFunc::MakeFuncG().release();
+}
+extern "C" SkSVGFeFunc* C_SkSVGFeFunc_MakeFuncB() {
+    return SkSVGFeFunc::MakeFuncB().release();
+}
+
+SVG_MAKE(SkSVGFeComponentTransfer)
+SVG_MAKE(SkSVGFeGaussianBlur)
+SVG_MAKE(SkSVGFeImage)
+
+SVG_MAKE(SkSVGFeDistantLight)
+SVG_MAKE(SkSVGFePointLight)
+SVG_MAKE(SkSVGFeSpotLight)
+
+SVG_MAKE(SkSVGFeSpecularLighting)
+SVG_MAKE(SkSVGFeDiffuseLighting)
+
+SVG_MAKE(SkSVGFeMergeNode)
+SVG_MAKE(SkSVGFeMerge)
+
+SVG_MAKE(SkSVGFeMorphology)
+SVG_MAKE(SkSVGFeOffset)
+SVG_MAKE(SkSVGFeTurbulence)
+
+SVG_MAKE(SkSVGLinearGradient)
+SVG_MAKE(SkSVGRadialGradient)
+
+SVG_MAKE(SkSVGCircle)
+SVG_MAKE(SkSVGEllipse)
+SVG_MAKE(SkSVGLine)
+SVG_MAKE(SkSVGPath)
+
+extern "C" SkSVGPoly* C_SkSVGPoly_MakePolygon() {
+    return SkSVGPoly::MakePolygon().release();
+}
+
+extern "C" SkSVGPoly* C_SkSVGPoly_MakePolyline() {
+    return SkSVGPoly::MakePolyline().release();
+}
+
+SVG_MAKE(SkSVGRect)
+
+SVG_MAKE(SkSVGClipPath)
+SVG_MAKE(SkSVGDefs)
+SVG_MAKE(SkSVGFilter)
+SVG_MAKE(SkSVGG)
+SVG_MAKE(SkSVGImage)
+SVG_MAKE(SkSVGMask)
+SVG_MAKE(SkSVGPattern)
+SVG_MAKE(SkSVGStop)
+
+extern "C" SkSVGSVG* C_SkSVGSVG_Make(SkSVGSVG::Type t) {
+    return SkSVGSVG::Make(t).release();
+}
+
+SVG_MAKE(SkSVGText)
+SVG_MAKE(SkSVGTSpan)
+SVG_MAKE(SkSVGTextLiteral)
+SVG_MAKE(SkSVGTextPath)
+
+SVG_MAKE(SkSVGUse)

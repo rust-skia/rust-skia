@@ -1,12 +1,12 @@
-use super::{DebugAttributes, HasBase};
-use crate::{prelude::*, scalar};
+use super::{DebugAttributes, NodeSubtype};
+use crate::{impl_default_make, prelude::*, scalar};
 use skia_bindings as sb;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct KernelUnitLength {
-    dx: scalar,
-    dy: scalar,
+    pub dx: scalar,
+    pub dy: scalar,
 }
 
 impl KernelUnitLength {
@@ -28,30 +28,26 @@ native_transmutable!(
     svg_kernel_unit_length_layout
 );
 
-pub type SvgFeLighting = RCHandle<sb::SkSVGFeLighting>;
+pub type Lighting = RCHandle<sb::SkSVGFeLighting>;
 
-impl NativeRefCountedBase for sb::SkSVGFeLighting {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeLighting {
+impl NodeSubtype for sb::SkSVGFeLighting {
     type Base = sb::SkSVGFe;
 }
 
-impl DebugAttributes for SvgFeLighting {
+impl DebugAttributes for Lighting {
     const NAME: &'static str = "FeLighting";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("surface_scale", &self.get_surface_scale())
-                .field("kernel_unit_length", &self.get_kernel_unit_length()),
+                .field("surface_scale", &self.surface_scale())
+                .field("kernel_unit_length", &self.kernel_unit_length()),
         );
     }
 }
 
-impl SvgFeLighting {
-    skia_macros::attrs! {
+impl Lighting {
+    skia_svg_macros::attrs! {
         SkSVGFeLighting => {
             *surface_scale: scalar [get(value) => value, set(value) => value],
             *kernel_unit_length?: KernelUnitLength [get(value) => value.map(KernelUnitLength::from_native_c), set(value) => value.into_native()]
@@ -59,30 +55,28 @@ impl SvgFeLighting {
     }
 }
 
-pub type FeSpecularLighting = RCHandle<sb::SkSVGFeSpecularLighting>;
+pub type Specular = RCHandle<sb::SkSVGFeSpecularLighting>;
 
-impl NativeRefCountedBase for sb::SkSVGFeSpecularLighting {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeSpecularLighting {
+impl NodeSubtype for sb::SkSVGFeSpecularLighting {
     type Base = sb::SkSVGFeLighting;
 }
 
-impl DebugAttributes for FeSpecularLighting {
+impl_default_make!(Specular, sb::C_SkSVGFeSpecularLighting_Make);
+
+impl DebugAttributes for Specular {
     const NAME: &'static str = "FeSpecularLighting";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("specular_constant", &self.get_specular_constant())
-                .field("specular_exponent", &self.get_specular_exponent()),
+                .field("specular_constant", &self.specular_constant())
+                .field("specular_exponent", &self.specular_exponent()),
         );
     }
 }
 
-impl FeSpecularLighting {
-    skia_macros::attrs! {
+impl Specular {
+    skia_svg_macros::attrs! {
         SkSVGFeSpecularLighting => {
             *specular_constant: scalar [get(value) => value, set(value) => value],
             *specular_exponent: scalar [get(value) => value, set(value) => value]
@@ -90,27 +84,25 @@ impl FeSpecularLighting {
     }
 }
 
-pub type FeDiffuseLighting = RCHandle<sb::SkSVGFeDiffuseLighting>;
+pub type Diffuse = RCHandle<sb::SkSVGFeDiffuseLighting>;
 
-impl NativeRefCountedBase for sb::SkSVGFeDiffuseLighting {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeDiffuseLighting {
+impl NodeSubtype for sb::SkSVGFeDiffuseLighting {
     type Base = sb::SkSVGFeLighting;
 }
 
-impl DebugAttributes for FeDiffuseLighting {
+impl_default_make!(Diffuse, sb::C_SkSVGFeDiffuseLighting_Make);
+
+impl DebugAttributes for Diffuse {
     const NAME: &'static str = "FeDiffuseLighting";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()
-            ._dbg(builder.field("diffuse_constant", &self.get_diffuse_constant()));
+            ._dbg(builder.field("diffuse_constant", &self.diffuse_constant()));
     }
 }
 
-impl FeDiffuseLighting {
-    skia_macros::attrs! {
+impl Diffuse {
+    skia_svg_macros::attrs! {
         SkSVGFeDiffuseLighting => {
             *diffuse_constant: scalar [get(value) => value, set(value) => value]
         }

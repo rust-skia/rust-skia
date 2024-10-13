@@ -1,8 +1,14 @@
-use super::{DebugAttributes, HasBase, Iri, Length};
-use crate::{prelude::*, Matrix};
+use super::{DebugAttributes, Iri, Length, NodeSubtype};
+use crate::{impl_default_make, prelude::*, Matrix};
 use skia_bindings as sb;
 
 pub type Pattern = RCHandle<sb::SkSVGPattern>;
+
+impl NodeSubtype for sb::SkSVGPattern {
+    type Base = sb::SkSVGContainer;
+}
+
+impl_default_make!(Pattern, sb::C_SkSVGPattern_Make);
 
 impl DebugAttributes for Pattern {
     const NAME: &'static str = "Pattern";
@@ -12,16 +18,8 @@ impl DebugAttributes for Pattern {
     }
 }
 
-impl NativeRefCountedBase for sb::SkSVGPattern {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGPattern {
-    type Base = sb::SkSVGContainer;
-}
-
 impl Pattern {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGPattern => {
             href: Iri [get(value) => Iri::from_native_ref(value), set(value) => value.into_native()],
             x?: Length [get(value) => value.map(Length::from_native_ref), set(value) => value.into_native()],

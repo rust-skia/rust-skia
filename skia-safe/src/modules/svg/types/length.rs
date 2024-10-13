@@ -3,6 +3,7 @@ use skia_bindings as sb;
 use crate::scalar;
 
 pub type LengthUnit = sb::SkSVGLength_Unit;
+variant_name!(LengthUnit::Number);
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Debug)]

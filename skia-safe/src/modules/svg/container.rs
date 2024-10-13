@@ -1,52 +1,45 @@
-use super::{DebugAttributes, HasBase, Node, SvgNode};
+use super::{DebugAttributes, Node, NodeSubtype, TypedNode};
 use crate::prelude::*;
 use skia_bindings as sb;
 
-pub type SvgContainer = RCHandle<sb::SkSVGContainer>;
+pub type Container = RCHandle<sb::SkSVGContainer>;
 
-impl HasBase for sb::SkSVGContainer {
+impl NodeSubtype for sb::SkSVGContainer {
     type Base = sb::SkSVGTransformableNode;
 }
 
-impl NativeRefCountedBase for sb::SkSVGContainer {
-    type Base = sb::SkRefCntBase;
-}
-
-impl DebugAttributes for SvgContainer {
+impl DebugAttributes for Container {
     const NAME: &'static str = "Container";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()
-            ._dbg(builder.field("children", &self.children()));
+            ._dbg(builder.field("children", &self.children_typed()));
     }
 }
 
-impl SvgContainer {
-    pub fn append_child(&mut self, node: SvgNode) {
-        unsafe { sb::C_SkSVGContainer_appendChild(self.native_mut(), node.into_ptr()) }
+impl Container {
+    pub fn append_child(&mut self, node: impl Into<Node>) {
+        unsafe { sb::C_SkSVGContainer_appendChild(self.native_mut(), node.into().into_ptr()) }
     }
 
-    pub fn has_children(&self) -> bool {
-        unsafe { sb::C_SkSVGContainer_hasChildren(self.native()) }
-    }
-
-    pub fn children_count(&self) -> usize {
+    pub fn children(&self) -> &[Node] {
         unsafe {
-            usize::try_from(sb::C_SkSVGContainer_childrenCount(self.native())).unwrap_or_default()
-        }
-    }
-
-    pub fn children(&self) -> Vec<Node> {
-        unsafe {
-            let value = safer::from_raw_parts(
+            let sp_slice = safer::from_raw_parts(
                 sb::C_SkSVGContainer_children(self.native()),
                 self.children_count(),
             );
 
-            value
-                .iter()
-                .map(|value| Node::from_unshared_ptr(value.fPtr).unwrap_unchecked())
-                .collect()
+            RCHandle::from_non_null_sp_slice(sp_slice)
+        }
+    }
+
+    pub fn children_typed(&self) -> Vec<TypedNode> {
+        self.children().iter().cloned().map(|n| n.typed()).collect()
+    }
+
+    pub(crate) fn children_count(&self) -> usize {
+        unsafe {
+            usize::try_from(sb::C_SkSVGContainer_childrenCount(self.native())).unwrap_or_default()
         }
     }
 }

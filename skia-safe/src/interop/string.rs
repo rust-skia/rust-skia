@@ -1,9 +1,8 @@
 #![allow(dead_code)]
 use std::{fmt, str};
 
-use skia_bindings::{self as sb, SkString};
-
 use crate::prelude::*;
+use skia_bindings::{self as sb, SkString};
 
 pub type String = Handle<SkString>;
 unsafe_send_sync!(String);
@@ -13,6 +12,12 @@ impl NativeDrop for SkString {
         unsafe {
             sb::C_SkString_destruct(self);
         }
+    }
+}
+
+impl NativeClone for SkString {
+    fn clone(&self) -> Self {
+        construct(|unitialized| unsafe { sb::C_SkString_CopyConstruct(unitialized, self) })
     }
 }
 

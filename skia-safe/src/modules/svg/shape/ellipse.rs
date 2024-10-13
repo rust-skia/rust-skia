@@ -1,18 +1,17 @@
 use crate::{
+    impl_default_make,
     prelude::*,
-    svg::{DebugAttributes, HasBase, Length},
+    svg::{DebugAttributes, Length, NodeSubtype},
 };
 use skia_bindings as sb;
 
 pub type Ellipse = RCHandle<sb::SkSVGEllipse>;
 
-impl NativeRefCountedBase for sb::SkSVGEllipse {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGEllipse {
+impl NodeSubtype for sb::SkSVGEllipse {
     type Base = sb::SkSVGShape;
 }
+
+impl_default_make!(Ellipse, sb::C_SkSVGEllipse_Make);
 
 impl DebugAttributes for Ellipse {
     const NAME: &'static str = "Ellipse";
@@ -20,16 +19,16 @@ impl DebugAttributes for Ellipse {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("cx", &self.get_cx())
-                .field("cy", &self.get_cy())
-                .field("rx", &self.get_rx())
-                .field("ry", &self.get_ry()),
+                .field("cx", &self.cx())
+                .field("cy", &self.cy())
+                .field("rx", &self.rx())
+                .field("ry", &self.ry()),
         );
     }
 }
 
 impl Ellipse {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGEllipse => {
             cx: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
             cy: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],

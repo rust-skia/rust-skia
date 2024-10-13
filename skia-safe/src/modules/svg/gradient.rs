@@ -1,38 +1,34 @@
 mod linear;
 mod radial;
 
-pub use self::{linear::LinearGradient, radial::RadialGradient};
+pub use self::{linear::Linear as LinearGradient, radial::Radial as RadialGradient};
 
-use super::{BoundingBoxUnits, DebugAttributes, HasBase, Iri, SpreadMethod};
+use super::{BoundingBoxUnits, DebugAttributes, Iri, NodeSubtype, SpreadMethod};
 use crate::{prelude::*, Matrix};
 use skia_bindings as sb;
 
-pub type SvgGradient = RCHandle<sb::SkSVGGradient>;
+pub type Gradient = RCHandle<sb::SkSVGGradient>;
 
-impl NativeRefCountedBase for sb::SkSVGGradient {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGGradient {
+impl NodeSubtype for sb::SkSVGGradient {
     type Base = sb::SkSVGContainer;
 }
 
-impl DebugAttributes for SvgGradient {
+impl DebugAttributes for Gradient {
     const NAME: &'static str = "Gradient";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("href", self.get_href())
-                .field("gradient_transform", self.get_gradient_transform())
-                .field("spread_method", self.get_spread_method())
-                .field("gradient_units", self.get_gradient_units()),
+                .field("href", self.href())
+                .field("gradient_transform", self.gradient_transform())
+                .field("spread_method", self.spread_method())
+                .field("gradient_units", self.gradient_units()),
         );
     }
 }
 
-impl SvgGradient {
-    skia_macros::attrs! {
+impl Gradient {
+    skia_svg_macros::attrs! {
         SkSVGGradient => {
             href: Iri [get(value) => Iri::from_native_ref(value), set(value) => value.into_native()],
             gradient_transform: Matrix [get(value) => Matrix::from_native_ref(value), set(value) => value.into_native()],

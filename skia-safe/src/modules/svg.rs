@@ -1,51 +1,43 @@
 mod clip_path;
 mod container;
 mod defs;
-mod element;
-mod fe;
+pub mod fe;
 mod filter;
 mod g;
 mod gradient;
 mod image;
-mod inheritting;
 mod mask;
 mod node;
+mod node_hierarchy;
 mod pattern;
 mod shape;
 mod stop;
+mod svg_;
 mod text;
-mod transformable;
+mod transformable_node;
 mod types;
-mod using;
+mod r#use;
 
 pub use self::{
     clip_path::ClipPath,
-    container::SvgContainer,
+    container::Container,
     defs::Defs,
-    fe::*,
     filter::Filter,
     g::G,
     gradient::*,
     image::Image,
-    inheritting::*,
     mask::Mask,
     node::*,
+    node_hierarchy::*,
+    r#use::Use,
     shape::*,
     stop::Stop,
+    svg_::*,
     text::{TSpan, Text, TextLiteral, TextPath},
-    transformable::SvgTransformableNode,
+    transformable_node::TransformableNode,
     types::*,
-    using::Use,
 };
 
-use crate::{
-    interop::{MemoryStream, NativeStreamBase, RustStream},
-    prelude::*,
-    Canvas, Data, FontMgr, FontStyle as SkFontStyle, Size,
-};
-use element::Svg;
-use skia_bindings as sb;
-use skia_bindings::{SkData, SkTypeface};
 use std::{
     error::Error,
     ffi::CStr,
@@ -53,6 +45,15 @@ use std::{
     io::{self, Read},
     os::raw,
 };
+
+use crate::{
+    interop::{MemoryStream, NativeStreamBase, RustStream},
+    prelude::*,
+    Canvas, Data, FontMgr, FontStyle as SkFontStyle, Size,
+};
+
+use skia_bindings as sb;
+use skia_bindings::{SkData, SkTypeface};
 
 pub type Dom = RCHandle<sb::SkSVGDOM>;
 
@@ -305,6 +306,18 @@ mod base64 {
     );
 }
 
+// TODO: Prelude candidate.
+#[macro_export]
+macro_rules! impl_default_make {
+    ($type:ty, $make_fn:path) => {
+        impl Default for $type {
+            fn default() -> Self {
+                Self::from_ptr(unsafe { $make_fn() }).unwrap()
+            }
+        }
+    };
+}
+
 #[cfg(test)]
 mod tests {
     use std::{fs::File, io::Write, path::Path};
@@ -385,16 +398,16 @@ mod tests {
 
         let mgr = FontMgr::default();
         let dom = Dom::from_bytes(data.as_bytes(), mgr).unwrap();
-        let root = dom.root();
+        let mut root = dom.root();
 
-        println!("{:#?}", root.get_transform());
+        println!("{:#?}", root.transform());
         println!("{:#?}", root.intrinsic_size());
 
         root.set_width(Length::new(50., LengthUnit::PX));
         root.set_height(Length::new(600., LengthUnit::CM));
 
         println!("{:#?}", root.intrinsic_size());
-        println!("{:#?}", root.children());
+        println!("{:#?}", root.children_typed());
     }
 
     #[allow(unused)]

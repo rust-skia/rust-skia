@@ -1,6 +1,9 @@
 use std::fmt;
 
-use crate::{interop::AsStr, prelude::*};
+use crate::{
+    interop::{self, AsStr},
+    prelude::*,
+};
 use skia_bindings as sb;
 
 pub type IriKind = sb::SkSVGIRI_Type;
@@ -35,14 +38,14 @@ impl Iri {
 
     pub fn new<T: AsRef<str>>(value: T, kind: IriKind) -> Self {
         Self::construct(|uninitialized| unsafe {
-            let iri = crate::interop::String::from_str(value.as_ref());
+            let iri = interop::String::from_str(value.as_ref());
 
             sb::C_SkSVGIRI_Construct1(uninitialized, kind, iri.native())
         })
     }
 }
 
-pub type SvgIriFunc = Handle<sb::SkSVGFuncIRI>;
+pub type IriFunc = Handle<sb::SkSVGFuncIRI>;
 
 impl NativeDrop for sb::SkSVGFuncIRI {
     fn drop(&mut self) {
@@ -50,7 +53,7 @@ impl NativeDrop for sb::SkSVGFuncIRI {
     }
 }
 
-impl fmt::Debug for SvgIriFunc {
+impl fmt::Debug for IriFunc {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("SvgIriFunc")
             .field("kind", &self.kind())
@@ -59,7 +62,7 @@ impl fmt::Debug for SvgIriFunc {
     }
 }
 
-impl SvgIriFunc {
+impl IriFunc {
     pub fn iri(&self) -> Option<&Iri> {
         let func = self.native();
 

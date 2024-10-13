@@ -1,12 +1,12 @@
-use super::{DebugAttributes, HasBase};
-use crate::{prelude::*, scalar};
+use super::{DebugAttributes, NodeSubtype};
+use crate::{impl_default_make, prelude::*, scalar};
 use skia_bindings as sb;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct Radius {
-    x: scalar,
-    y: scalar,
+    pub x: scalar,
+    pub y: scalar,
 }
 
 impl Radius {
@@ -21,33 +21,33 @@ impl Radius {
 
 native_transmutable!(sb::SkSVGFeMorphology_Radius, Radius, svg_radius_layout);
 
-pub type SvgFeMorphologyOperator = sb::SkSVGFeMorphology_Operator;
-pub type FeMorphology = RCHandle<sb::SkSVGFeMorphology>;
+pub type Operator = sb::SkSVGFeMorphology_Operator;
+variant_name!(Operator::Dilate);
 
-impl NativeRefCountedBase for sb::SkSVGFeMorphology {
-    type Base = sb::SkRefCntBase;
-}
+pub type Morphology = RCHandle<sb::SkSVGFeMorphology>;
 
-impl HasBase for sb::SkSVGFeMorphology {
+impl NodeSubtype for sb::SkSVGFeMorphology {
     type Base = sb::SkSVGFe;
 }
 
-impl DebugAttributes for FeMorphology {
+impl_default_make!(Morphology, sb::C_SkSVGFeMorphology_Make);
+
+impl DebugAttributes for Morphology {
     const NAME: &'static str = "FeMorphology";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("operator", self.get_operator())
-                .field("radius", &self.get_radius()),
+                .field("operator", self.operator())
+                .field("radius", &self.radius()),
         );
     }
 }
 
-impl FeMorphology {
-    skia_macros::attrs! {
+impl Morphology {
+    skia_svg_macros::attrs! {
         SkSVGFeMorphology => {
-            operator: SvgFeMorphologyOperator [get(value) => value, set(value) => value],
+            operator: Operator [get(value) => value, set(value) => value],
             radius: Radius [get(value) => Radius::from_native_ref(value), set(value) => value.into_native()]
         }
     }

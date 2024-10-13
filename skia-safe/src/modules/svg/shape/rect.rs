@@ -1,18 +1,17 @@
 use crate::{
+    impl_default_make,
     prelude::*,
-    svg::{DebugAttributes, HasBase, Length},
+    svg::{DebugAttributes, Length, NodeSubtype},
 };
 use skia_bindings as sb;
 
 pub type Rect = RCHandle<sb::SkSVGRect>;
 
-impl NativeRefCountedBase for sb::SkSVGRect {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGRect {
+impl NodeSubtype for sb::SkSVGRect {
     type Base = sb::SkSVGShape;
 }
+
+impl_default_make!(Rect, sb::C_SkSVGRect_Make);
 
 impl DebugAttributes for Rect {
     const NAME: &'static str = "Rect";
@@ -20,18 +19,18 @@ impl DebugAttributes for Rect {
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(
             builder
-                .field("x", &self.get_x())
-                .field("y", &self.get_y())
-                .field("width", &self.get_width())
-                .field("height", &self.get_height())
-                .field("rx", &self.get_rx())
-                .field("ry", &self.get_ry()),
+                .field("x", &self.x())
+                .field("y", &self.y())
+                .field("width", &self.width())
+                .field("height", &self.height())
+                .field("rx", &self.rx())
+                .field("ry", &self.ry()),
         );
     }
 }
 
 impl Rect {
-    skia_macros::attrs! {
+    skia_svg_macros::attrs! {
         SkSVGRect => {
             x: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],
             y: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],

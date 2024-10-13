@@ -1,30 +1,43 @@
-use super::{DebugAttributes, FeInput, HasBase};
-use crate::prelude::*;
+use super::{DebugAttributes, Input, NodeSubtype};
+use crate::{impl_default_make, prelude::*};
 use skia_bindings as sb;
 
-pub type FeMergeNode = RCHandle<sb::SkSVGFeMergeNode>;
+pub type MergeNode = RCHandle<sb::SkSVGFeMergeNode>;
 
-impl NativeRefCountedBase for sb::SkSVGFeMergeNode {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeMergeNode {
+impl NodeSubtype for sb::SkSVGFeMergeNode {
     type Base = sb::SkSVGContainer;
 }
 
-impl DebugAttributes for FeMergeNode {
+impl_default_make!(MergeNode, sb::C_SkSVGFeMergeNode_Make);
+
+impl DebugAttributes for MergeNode {
     const NAME: &'static str = "FeMergeNode";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.as_base()
-            ._dbg(builder.field("input", self.get_input()));
+        self.as_base()._dbg(builder.field("input", self.input()));
     }
 }
 
-impl FeMergeNode {
-    skia_macros::attrs! {
+impl MergeNode {
+    skia_svg_macros::attrs! {
         SkSVGFeMergeNode => {
-            "in" as input: FeInput [get(value) => FeInput::from_native_ref(value), set(value) => value.into_native()]
+            "in" as input: Input [get(value) => Input::from_native_ref(value), set(value) => value.into_native()]
         }
+    }
+}
+
+pub type Merge = RCHandle<sb::SkSVGFeMerge>;
+
+impl NodeSubtype for sb::SkSVGFeMerge {
+    type Base = sb::SkSVGFe;
+}
+
+impl_default_make!(Merge, sb::C_SkSVGFeMerge_Make);
+
+impl DebugAttributes for Merge {
+    const NAME: &'static str = "FeMerge";
+
+    fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
+        self.as_base()._dbg(builder);
     }
 }
