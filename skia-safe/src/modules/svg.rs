@@ -7,7 +7,7 @@ mod filter;
 mod g;
 mod gradient;
 mod image;
-mod inheritting;
+mod inheriting;
 mod mask;
 mod node;
 mod pattern;
@@ -26,7 +26,7 @@ pub use self::{
     g::G,
     gradient::*,
     image::Image,
-    inheritting::*,
+    inheriting::*,
     mask::Mask,
     node::*,
     shape::*,
