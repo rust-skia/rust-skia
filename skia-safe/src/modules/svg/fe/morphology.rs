@@ -1,4 +1,4 @@
-use super::{DebugAttributes, HasBase};
+use super::{DebugAttributes, NodeSubtype};
 use crate::{impl_default_make, prelude::*, scalar};
 use skia_bindings as sb;
 
@@ -26,11 +26,7 @@ variant_name!(Operator::Dilate);
 
 pub type Morphology = RCHandle<sb::SkSVGFeMorphology>;
 
-impl NativeRefCountedBase for sb::SkSVGFeMorphology {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeMorphology {
+impl NodeSubtype for sb::SkSVGFeMorphology {
     type Base = sb::SkSVGFe;
 }
 

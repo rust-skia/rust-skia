@@ -1,14 +1,10 @@
-use super::{BoundingBoxUnits, DebugAttributes, HasBase};
+use super::{BoundingBoxUnits, DebugAttributes, NodeSubtype};
 use crate::{impl_default_make, prelude::*};
 use skia_bindings as sb;
 
 pub type ClipPath = RCHandle<sb::SkSVGClipPath>;
 
-impl NativeRefCountedBase for sb::SkSVGClipPath {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGClipPath {
+impl NodeSubtype for sb::SkSVGClipPath {
     type Base = sb::SkSVGContainer;
 }
 

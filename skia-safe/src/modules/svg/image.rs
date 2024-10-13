@@ -1,14 +1,10 @@
-use super::{DebugAttributes, HasBase, Iri, Length, PreserveAspectRatio};
+use super::{DebugAttributes, Iri, Length, NodeSubtype, PreserveAspectRatio};
 use crate::{impl_default_make, prelude::*};
 use skia_bindings as sb;
 
 pub type Image = RCHandle<sb::SkSVGImage>;
 
-impl NativeRefCountedBase for sb::SkSVGImage {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGImage {
+impl NodeSubtype for sb::SkSVGImage {
     type Base = sb::SkSVGContainer;
 }
 

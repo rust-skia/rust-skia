@@ -6,7 +6,7 @@ mod filter;
 mod g;
 mod gradient;
 mod image;
-mod inheriting;
+mod node_hierarchy;
 mod mask;
 mod node;
 mod pattern;
@@ -26,7 +26,7 @@ pub use self::{
     g::G,
     gradient::*,
     image::Image,
-    inheriting::*,
+    node_hierarchy::*,
     mask::Mask,
     node::*,
     r#use::Use,

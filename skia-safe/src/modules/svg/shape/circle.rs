@@ -1,15 +1,13 @@
 use crate::{
-    impl_default_make, prelude::*, svg::{DebugAttributes, HasBase, Length}
+    impl_default_make,
+    prelude::*,
+    svg::{DebugAttributes, NodeSubtype, Length},
 };
 use skia_bindings as sb;
 
 pub type Circle = RCHandle<sb::SkSVGCircle>;
 
-impl NativeRefCountedBase for sb::SkSVGCircle {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGCircle {
+impl NodeSubtype for sb::SkSVGCircle {
     type Base = sb::SkSVGShape;
 }
 

@@ -1,14 +1,10 @@
-use super::{DebugAttributes, HasBase, Iri, Length, XmlSpace};
+use super::{DebugAttributes, Iri, Length, NodeSubtype, XmlSpace};
 use crate::{impl_default_make, interop, prelude::*, scalar};
 use skia_bindings as sb;
 
 type TextContainer = RCHandle<sb::SkSVGTextContainer>;
 
-impl NativeRefCountedBase for sb::SkSVGTextContainer {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGTextContainer {
+impl NodeSubtype for sb::SkSVGTextContainer {
     type Base = sb::SkSVGContainer;
 }
 
@@ -103,11 +99,7 @@ impl TextContainer {
 
 pub type Text = RCHandle<sb::SkSVGText>;
 
-impl NativeRefCountedBase for sb::SkSVGText {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGText {
+impl NodeSubtype for sb::SkSVGText {
     type Base = sb::SkSVGTextContainer;
 }
 
@@ -123,11 +115,7 @@ impl DebugAttributes for Text {
 
 pub type TSpan = RCHandle<sb::SkSVGTSpan>;
 
-impl NativeRefCountedBase for sb::SkSVGTSpan {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGTSpan {
+impl NodeSubtype for sb::SkSVGTSpan {
     type Base = sb::SkSVGTextContainer;
 }
 
@@ -143,11 +131,7 @@ impl DebugAttributes for TSpan {
 
 pub type TextLiteral = RCHandle<sb::SkSVGTextLiteral>;
 
-impl NativeRefCountedBase for sb::SkSVGTextLiteral {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGTextLiteral {
+impl NodeSubtype for sb::SkSVGTextLiteral {
     type Base = sb::SkSVGTransformableNode;
 }
 
@@ -174,11 +158,7 @@ impl TextLiteral {
 
 pub type TextPath = RCHandle<sb::SkSVGTextPath>;
 
-impl NativeRefCountedBase for sb::SkSVGTextPath {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGTextPath {
+impl NodeSubtype for sb::SkSVGTextPath {
     type Base = sb::SkSVGTextContainer;
 }
 

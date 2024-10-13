@@ -21,17 +21,13 @@ pub use self::{
     offset::*, turbulence::*, types::*,
 };
 
-use super::{DebugAttributes, HasBase, Length};
+use super::{DebugAttributes, NodeSubtype, Length};
 use crate::prelude::*;
 use skia_bindings as sb;
 
 pub type Fe = RCHandle<sb::SkSVGFe>;
 
-impl NativeRefCountedBase for sb::SkSVGFe {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFe {
+impl NodeSubtype for sb::SkSVGFe {
     type Base = sb::SkSVGContainer;
 }
 

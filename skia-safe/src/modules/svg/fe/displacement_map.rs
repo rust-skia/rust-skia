@@ -1,4 +1,4 @@
-use super::{DebugAttributes, HasBase, Input};
+use super::{DebugAttributes, NodeSubtype, Input};
 use crate::{impl_default_make, prelude::*, scalar};
 use skia_bindings as sb;
 
@@ -7,11 +7,7 @@ variant_name!(ChannelSelector::R);
 
 pub type DisplacementMap = RCHandle<sb::SkSVGFeDisplacementMap>;
 
-impl NativeRefCountedBase for sb::SkSVGFeDisplacementMap {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeDisplacementMap {
+impl NodeSubtype for sb::SkSVGFeDisplacementMap {
     type Base = sb::SkSVGFe;
 }
 

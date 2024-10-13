@@ -1,4 +1,4 @@
-use super::{BoundingBoxUnits, DebugAttributes, HasBase, Length};
+use super::{BoundingBoxUnits, DebugAttributes, Length, NodeSubtype};
 use crate::{impl_default_make, prelude::*};
 use skia_bindings as sb;
 
@@ -20,11 +20,7 @@ impl DebugAttributes for Filter {
     }
 }
 
-impl NativeRefCountedBase for sb::SkSVGFilter {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFilter {
+impl NodeSubtype for sb::SkSVGFilter {
     type Base = sb::SkSVGContainer;
 }
 

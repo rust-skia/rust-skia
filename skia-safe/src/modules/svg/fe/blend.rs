@@ -1,4 +1,4 @@
-use super::{DebugAttributes, HasBase, Input};
+use super::{DebugAttributes, Input, NodeSubtype};
 use crate::{impl_default_make, prelude::*};
 use skia_bindings as sb;
 
@@ -7,11 +7,7 @@ variant_name!(BlendMode::Multiply);
 
 pub type Blend = RCHandle<sb::SkSVGFeBlend>;
 
-impl NativeRefCountedBase for sb::SkSVGFeBlend {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeBlend {
+impl NodeSubtype for sb::SkSVGFeBlend {
     type Base = sb::SkSVGFe;
 }
 

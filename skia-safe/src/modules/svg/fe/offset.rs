@@ -1,14 +1,10 @@
-use super::{DebugAttributes, HasBase};
+use super::{DebugAttributes, NodeSubtype};
 use crate::{impl_default_make, prelude::*, scalar};
 use skia_bindings as sb;
 
 pub type Offset = RCHandle<sb::SkSVGFeOffset>;
 
-impl NativeRefCountedBase for sb::SkSVGFeOffset {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeOffset {
+impl NodeSubtype for sb::SkSVGFeOffset {
     type Base = sb::SkSVGFe;
 }
 

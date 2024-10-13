@@ -1,17 +1,13 @@
 use crate::{
     impl_default_make,
     prelude::*,
-    svg::{DebugAttributes, HasBase},
+    svg::{DebugAttributes, NodeSubtype},
 };
 use skia_bindings as sb;
 
 pub type Path = RCHandle<sb::SkSVGPath>;
 
-impl NativeRefCountedBase for sb::SkSVGPath {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGPath {
+impl NodeSubtype for sb::SkSVGPath {
     type Base = sb::SkSVGShape;
 }
 

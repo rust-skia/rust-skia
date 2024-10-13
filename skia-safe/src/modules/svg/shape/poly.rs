@@ -1,17 +1,13 @@
 use crate::{
     prelude::*,
-    svg::{DebugAttributes, HasBase},
+    svg::{DebugAttributes, NodeSubtype},
     Point,
 };
 use skia_bindings as sb;
 
 pub type Poly = RCHandle<sb::SkSVGPoly>;
 
-impl NativeRefCountedBase for sb::SkSVGPoly {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGPoly {
+impl NodeSubtype for sb::SkSVGPoly {
     type Base = sb::SkSVGShape;
 }
 

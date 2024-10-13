@@ -1,17 +1,13 @@
 use crate::{
     impl_default_make,
     prelude::*,
-    svg::{DebugAttributes, HasBase, Length},
+    svg::{DebugAttributes, NodeSubtype, Length},
 };
 use skia_bindings as sb;
 
 pub type Ellipse = RCHandle<sb::SkSVGEllipse>;
 
-impl NativeRefCountedBase for sb::SkSVGEllipse {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGEllipse {
+impl NodeSubtype for sb::SkSVGEllipse {
     type Base = sb::SkSVGShape;
 }
 

@@ -1,4 +1,4 @@
-use super::{DebugAttributes, HasBase};
+use super::{DebugAttributes, NodeSubtype};
 use crate::{impl_default_make, prelude::*, scalar};
 use skia_bindings as sb;
 
@@ -30,11 +30,7 @@ native_transmutable!(
 
 pub type Lighting = RCHandle<sb::SkSVGFeLighting>;
 
-impl NativeRefCountedBase for sb::SkSVGFeLighting {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeLighting {
+impl NodeSubtype for sb::SkSVGFeLighting {
     type Base = sb::SkSVGFe;
 }
 
@@ -61,11 +57,7 @@ impl Lighting {
 
 pub type Specular = RCHandle<sb::SkSVGFeSpecularLighting>;
 
-impl NativeRefCountedBase for sb::SkSVGFeSpecularLighting {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeSpecularLighting {
+impl NodeSubtype for sb::SkSVGFeSpecularLighting {
     type Base = sb::SkSVGFeLighting;
 }
 
@@ -94,11 +86,7 @@ impl Specular {
 
 pub type Diffuse = RCHandle<sb::SkSVGFeDiffuseLighting>;
 
-impl NativeRefCountedBase for sb::SkSVGFeDiffuseLighting {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeDiffuseLighting {
+impl NodeSubtype for sb::SkSVGFeDiffuseLighting {
     type Base = sb::SkSVGFeLighting;
 }
 

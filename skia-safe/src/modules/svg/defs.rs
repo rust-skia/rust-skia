@@ -1,14 +1,10 @@
-use super::{DebugAttributes, HasBase};
+use super::{DebugAttributes, NodeSubtype};
 use crate::{impl_default_make, prelude::*};
 use skia_bindings as sb;
 
 pub type Defs = RCHandle<sb::SkSVGDefs>;
 
-impl NativeRefCountedBase for sb::SkSVGDefs {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGDefs {
+impl NodeSubtype for sb::SkSVGDefs {
     type Base = sb::SkSVGContainer;
 }
 

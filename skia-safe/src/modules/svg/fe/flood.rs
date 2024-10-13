@@ -1,14 +1,10 @@
-use super::{DebugAttributes, HasBase};
+use super::{DebugAttributes, NodeSubtype};
 use crate::{impl_default_make, prelude::*};
 use skia_bindings as sb;
 
 pub type Flood = RCHandle<sb::SkSVGFeFlood>;
 
-impl NativeRefCountedBase for sb::SkSVGFeFlood {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeFlood {
+impl NodeSubtype for sb::SkSVGFeFlood {
     type Base = sb::SkSVGFe;
 }
 

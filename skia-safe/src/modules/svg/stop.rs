@@ -1,4 +1,4 @@
-use super::HasBase;
+use super::NodeSubtype;
 use crate::{
     impl_default_make,
     prelude::*,
@@ -8,11 +8,7 @@ use skia_bindings as sb;
 
 pub type Stop = RCHandle<sb::SkSVGStop>;
 
-impl NativeRefCountedBase for sb::SkSVGStop {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGStop {
+impl NodeSubtype for sb::SkSVGStop {
     type Base = sb::SkSVGContainer;
 }
 

@@ -1,4 +1,4 @@
-use super::{DebugAttributes, HasBase, Input};
+use super::{DebugAttributes, NodeSubtype, Input};
 use crate::{impl_default_make, prelude::*, scalar};
 use skia_bindings as sb;
 
@@ -7,11 +7,7 @@ variant_name!(CompositeOperator::Out);
 
 pub type Composite = RCHandle<sb::SkSVGFeComposite>;
 
-impl NativeRefCountedBase for sb::SkSVGFeComposite {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeComposite {
+impl NodeSubtype for sb::SkSVGFeComposite {
     type Base = sb::SkSVGFe;
 }
 

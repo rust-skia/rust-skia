@@ -1,14 +1,10 @@
-use super::{DebugAttributes, HasBase, Iri, Length};
+use super::{DebugAttributes, Iri, Length, NodeSubtype};
 use crate::{impl_default_make, prelude::*, Matrix};
 use skia_bindings as sb;
 
 pub type Pattern = RCHandle<sb::SkSVGPattern>;
 
-impl NativeRefCountedBase for sb::SkSVGPattern {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGPattern {
+impl NodeSubtype for sb::SkSVGPattern {
     type Base = sb::SkSVGContainer;
 }
 

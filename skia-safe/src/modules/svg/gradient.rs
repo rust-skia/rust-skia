@@ -3,17 +3,13 @@ mod radial;
 
 pub use self::{linear::Linear as LinearGradient, radial::Radial as RadialGradient};
 
-use super::{BoundingBoxUnits, DebugAttributes, HasBase, Iri, SpreadMethod};
+use super::{BoundingBoxUnits, DebugAttributes, Iri, NodeSubtype, SpreadMethod};
 use crate::{prelude::*, Matrix};
 use skia_bindings as sb;
 
 pub type Gradient = RCHandle<sb::SkSVGGradient>;
 
-impl NativeRefCountedBase for sb::SkSVGGradient {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGGradient {
+impl NodeSubtype for sb::SkSVGGradient {
     type Base = sb::SkSVGContainer;
 }
 

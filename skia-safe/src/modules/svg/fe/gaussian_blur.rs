@@ -1,4 +1,4 @@
-use super::{DebugAttributes, HasBase};
+use super::{DebugAttributes, NodeSubtype};
 use crate::{impl_default_make, prelude::*, scalar};
 use skia_bindings as sb;
 
@@ -27,11 +27,7 @@ native_transmutable!(
 
 pub type GaussianBlur = RCHandle<sb::SkSVGFeGaussianBlur>;
 
-impl NativeRefCountedBase for sb::SkSVGFeGaussianBlur {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeGaussianBlur {
+impl NodeSubtype for sb::SkSVGFeGaussianBlur {
     type Base = sb::SkSVGFe;
 }
 

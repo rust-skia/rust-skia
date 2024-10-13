@@ -1,15 +1,11 @@
-use super::{DebugAttributes, HasBase, Node};
+use super::{DebugAttributes, Node, NodeSubtype};
 use crate::prelude::*;
 use skia_bindings as sb;
 
 pub type Container = RCHandle<sb::SkSVGContainer>;
 
-impl HasBase for sb::SkSVGContainer {
+impl NodeSubtype for sb::SkSVGContainer {
     type Base = sb::SkSVGTransformableNode;
-}
-
-impl NativeRefCountedBase for sb::SkSVGContainer {
-    type Base = sb::SkRefCntBase;
 }
 
 impl DebugAttributes for Container {

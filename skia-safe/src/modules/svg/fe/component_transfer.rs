@@ -1,4 +1,4 @@
-use super::{DebugAttributes, HasBase};
+use super::{DebugAttributes, NodeSubtype};
 use crate::{impl_default_make, prelude::*, scalar};
 use skia_bindings as sb;
 
@@ -7,11 +7,7 @@ variant_name!(FuncKind::Identity);
 
 pub type Func = RCHandle<sb::SkSVGFeFunc>;
 
-impl NativeRefCountedBase for sb::SkSVGFeFunc {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeFunc {
+impl NodeSubtype for sb::SkSVGFeFunc {
     type Base = sb::SkSVGFe;
 }
 
@@ -78,11 +74,7 @@ impl Func {
 
 pub type ComponentTransfer = RCHandle<sb::SkSVGFeComponentTransfer>;
 
-impl NativeRefCountedBase for sb::SkSVGFeComponentTransfer {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeComponentTransfer {
+impl NodeSubtype for sb::SkSVGFeComponentTransfer {
     type Base = sb::SkSVGFe;
 }
 

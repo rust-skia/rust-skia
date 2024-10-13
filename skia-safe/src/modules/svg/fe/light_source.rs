@@ -2,17 +2,13 @@ use crate::{
     impl_default_make,
     prelude::*,
     scalar,
-    svg::{DebugAttributes, HasBase},
+    svg::{DebugAttributes, NodeSubtype},
 };
 use skia_bindings as sb;
 
 pub type DistantLight = RCHandle<sb::SkSVGFeDistantLight>;
 
-impl NativeRefCountedBase for sb::SkSVGFeDistantLight {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeDistantLight {
+impl NodeSubtype for sb::SkSVGFeDistantLight {
     type Base = sb::SkSVGContainer;
 }
 
@@ -41,11 +37,7 @@ impl DistantLight {
 
 pub type PointLight = RCHandle<sb::SkSVGFePointLight>;
 
-impl NativeRefCountedBase for sb::SkSVGFePointLight {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFePointLight {
+impl NodeSubtype for sb::SkSVGFePointLight {
     type Base = sb::SkSVGContainer;
 }
 
@@ -76,11 +68,7 @@ impl PointLight {
 
 pub type SpotLight = RCHandle<sb::SkSVGFeSpotLight>;
 
-impl NativeRefCountedBase for sb::SkSVGFeSpotLight {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeSpotLight {
+impl NodeSubtype for sb::SkSVGFeSpotLight {
     type Base = sb::SkSVGContainer;
 }
 

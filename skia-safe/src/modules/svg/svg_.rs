@@ -1,4 +1,4 @@
-use super::{DebugAttributes, HasBase, Length, PreserveAspectRatio};
+use super::{DebugAttributes, Length, NodeSubtype, PreserveAspectRatio};
 use crate::{prelude::*, Rect, Size};
 use skia_bindings as sb;
 
@@ -7,11 +7,7 @@ variant_name!(SvgKind::Inner);
 
 pub type Svg = RCHandle<sb::SkSVGSVG>;
 
-impl NativeRefCountedBase for sb::SkSVGSVG {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGSVG {
+impl NodeSubtype for sb::SkSVGSVG {
     type Base = sb::SkSVGContainer;
 }
 

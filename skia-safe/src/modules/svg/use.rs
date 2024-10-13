@@ -1,14 +1,10 @@
-use super::{DebugAttributes, HasBase, Iri, Length};
+use super::{DebugAttributes, Iri, Length, NodeSubtype};
 use crate::{impl_default_make, prelude::*};
 use skia_bindings as sb;
 
 pub type Use = RCHandle<sb::SkSVGUse>;
 
-impl NativeRefCountedBase for sb::SkSVGUse {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGUse {
+impl NodeSubtype for sb::SkSVGUse {
     type Base = sb::SkSVGTransformableNode;
 }
 

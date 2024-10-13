@@ -1,17 +1,13 @@
 use crate::{
     impl_default_make,
     prelude::*,
-    svg::{DebugAttributes, HasBase, Length},
+    svg::{DebugAttributes, NodeSubtype, Length},
 };
 use skia_bindings as sb;
 
 pub type Linear = RCHandle<sb::SkSVGLinearGradient>;
 
-impl NativeRefCountedBase for sb::SkSVGLinearGradient {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGLinearGradient {
+impl NodeSubtype for sb::SkSVGLinearGradient {
     type Base = sb::SkSVGGradient;
 }
 

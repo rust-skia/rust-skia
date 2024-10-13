@@ -1,4 +1,4 @@
-use super::{DebugAttributes, HasBase};
+use super::{DebugAttributes, NodeSubtype};
 use crate::{impl_default_make, prelude::*, scalar};
 use skia_bindings as sb;
 
@@ -7,11 +7,7 @@ variant_name!(ColorMatrixKind::Matrix);
 
 pub type ColorMatrix = RCHandle<sb::SkSVGFeColorMatrix>;
 
-impl NativeRefCountedBase for sb::SkSVGFeColorMatrix {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeColorMatrix {
+impl NodeSubtype for sb::SkSVGFeColorMatrix {
     type Base = sb::SkSVGFe;
 }
 

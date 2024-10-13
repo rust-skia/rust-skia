@@ -1,14 +1,10 @@
-use super::{DebugAttributes, HasBase, Input};
+use super::{DebugAttributes, NodeSubtype, Input};
 use crate::{impl_default_make, prelude::*};
 use skia_bindings as sb;
 
 pub type MergeNode = RCHandle<sb::SkSVGFeMergeNode>;
 
-impl NativeRefCountedBase for sb::SkSVGFeMergeNode {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeMergeNode {
+impl NodeSubtype for sb::SkSVGFeMergeNode {
     type Base = sb::SkSVGContainer;
 }
 
@@ -32,11 +28,7 @@ impl MergeNode {
 
 pub type Merge = RCHandle<sb::SkSVGFeMerge>;
 
-impl NativeRefCountedBase for sb::SkSVGFeMerge {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGFeMerge {
+impl NodeSubtype for sb::SkSVGFeMerge {
     type Base = sb::SkSVGFe;
 }
 
