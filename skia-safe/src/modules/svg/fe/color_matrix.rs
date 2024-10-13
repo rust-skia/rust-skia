@@ -1,5 +1,5 @@
 use super::{DebugAttributes, HasBase};
-use crate::{prelude::*, scalar};
+use crate::{impl_default_make, prelude::*, scalar};
 use skia_bindings as sb;
 
 pub type ColorMatrixKind = sb::SkSVGFeColorMatrixType;
@@ -14,6 +14,8 @@ impl NativeRefCountedBase for sb::SkSVGFeColorMatrix {
 impl HasBase for sb::SkSVGFeColorMatrix {
     type Base = sb::SkSVGFe;
 }
+
+impl_default_make!(ColorMatrix, sb::C_SkSVGFeColorMatrix_Make);
 
 impl DebugAttributes for ColorMatrix {
     const NAME: &'static str = "FeColorMatrix";

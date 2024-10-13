@@ -1,4 +1,5 @@
 use crate::{
+    impl_default_make,
     prelude::*,
     svg::{DebugAttributes, HasBase},
 };
@@ -13,6 +14,8 @@ impl NativeRefCountedBase for sb::SkSVGPath {
 impl HasBase for sb::SkSVGPath {
     type Base = sb::SkSVGShape;
 }
+
+impl_default_make!(Path, sb::C_SkSVGPath_Make);
 
 impl DebugAttributes for Path {
     const NAME: &'static str = "Path";

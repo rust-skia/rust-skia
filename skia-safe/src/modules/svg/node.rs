@@ -1,8 +1,8 @@
 use super::{
-    element::Svg, fe, pattern::Pattern, Circle, ClipPath, ColorSpace, DebugAttributes, Defs,
-    Display, Ellipse, Fill, FillRule, Filter, FontFamily, FontSize, FontStyle, FontWeight, Image,
-    IriFunc, Length, Line, LineCap, LineJoin, LinearGradient, Mask, Paint, Path, Poly,
-    RadialGradient, Rect, Stop, TSpan, Text, TextAnchor, TextLiteral, TextPath, Use, Visibility, G,
+    fe, pattern::Pattern, svg_::Svg, Circle, ClipPath, ColorSpace, DebugAttributes, Defs, Display,
+    Ellipse, Fill, FillRule, Filter, FontFamily, FontSize, FontStyle, FontWeight, Image, IriFunc,
+    Length, Line, LineCap, LineJoin, LinearGradient, Mask, Paint, Path, Poly, RadialGradient, Rect,
+    Stop, TSpan, Text, TextAnchor, TextLiteral, TextPath, Use, Visibility, G,
 };
 use crate::{prelude::*, scalar, Color};
 use skia_bindings as sb;
@@ -10,6 +10,10 @@ use skia_bindings as sb;
 pub type NodeTag = sb::SkSVGTag;
 
 pub type Node = RCHandle<sb::SkSVGNode>;
+
+impl NativeRefCountedBase for sb::SkSVGNode {
+    type Base = sb::SkRefCntBase;
+}
 
 impl DebugAttributes for Node {
     const NAME: &'static str = "Node";
@@ -51,10 +55,6 @@ impl DebugAttributes for Node {
     }
 }
 
-impl NativeRefCountedBase for sb::SkSVGNode {
-    type Base = sb::SkRefCntBase;
-}
-
 impl From<TypedNode> for Node {
     fn from(value: TypedNode) -> Self {
         value.into_node()
@@ -65,6 +65,11 @@ impl Node {
     pub fn tag(&self) -> NodeTag {
         unsafe { sb::C_SkSVGNode_tag(self.native()) }
     }
+
+    // TODO: wrap appendChild()
+    // TODO: wrap render(), asPaint(), asPath(), objectBoundingBox()
+    // TODO: wrap setAttribute().
+    // TODO: wrap parseAndSetAttribute()
 
     pub fn typed(self) -> TypedNode {
         TypedNode::from_ptr(self.into_ptr())

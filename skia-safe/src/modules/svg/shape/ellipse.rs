@@ -1,4 +1,5 @@
 use crate::{
+    impl_default_make,
     prelude::*,
     svg::{DebugAttributes, HasBase, Length},
 };
@@ -13,6 +14,8 @@ impl NativeRefCountedBase for sb::SkSVGEllipse {
 impl HasBase for sb::SkSVGEllipse {
     type Base = sb::SkSVGShape;
 }
+
+impl_default_make!(Ellipse, sb::C_SkSVGEllipse_Make);
 
 impl DebugAttributes for Ellipse {
     const NAME: &'static str = "Ellipse";

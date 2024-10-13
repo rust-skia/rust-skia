@@ -1,16 +1,8 @@
 use super::{DebugAttributes, HasBase, Iri, Length};
-use crate::{prelude::*, Matrix};
+use crate::{impl_default_make, prelude::*, Matrix};
 use skia_bindings as sb;
 
 pub type Pattern = RCHandle<sb::SkSVGPattern>;
-
-impl DebugAttributes for Pattern {
-    const NAME: &'static str = "Pattern";
-
-    fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.as_base()._dbg(builder);
-    }
-}
 
 impl NativeRefCountedBase for sb::SkSVGPattern {
     type Base = sb::SkRefCntBase;
@@ -18,6 +10,16 @@ impl NativeRefCountedBase for sb::SkSVGPattern {
 
 impl HasBase for sb::SkSVGPattern {
     type Base = sb::SkSVGContainer;
+}
+
+impl_default_make!(Pattern, sb::C_SkSVGPattern_Make);
+
+impl DebugAttributes for Pattern {
+    const NAME: &'static str = "Pattern";
+
+    fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
+        self.as_base()._dbg(builder);
+    }
 }
 
 impl Pattern {

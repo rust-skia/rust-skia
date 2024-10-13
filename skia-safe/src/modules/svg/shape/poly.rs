@@ -24,6 +24,14 @@ impl DebugAttributes for Poly {
 }
 
 impl Poly {
+    pub fn polygon() -> Self {
+        Self::from_ptr(unsafe { sb::C_SkSVGPoly_MakePolygon() }).unwrap()
+    }
+
+    pub fn polyline() -> Self {
+        Self::from_ptr(unsafe { sb::C_SkSVGPoly_MakePolyline() }).unwrap()
+    }
+
     pub fn points(&self) -> &[Point] {
         unsafe {
             safer::from_raw_parts(

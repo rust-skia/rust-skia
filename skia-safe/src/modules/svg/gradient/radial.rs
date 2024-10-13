@@ -1,4 +1,5 @@
 use crate::{
+    impl_default_make,
     prelude::*,
     svg::{DebugAttributes, HasBase, Length},
 };
@@ -13,6 +14,8 @@ impl NativeRefCountedBase for sb::SkSVGRadialGradient {
 impl HasBase for sb::SkSVGRadialGradient {
     type Base = sb::SkSVGGradient;
 }
+
+impl_default_make!(Radial, sb::C_SkSVGRadialGradient_Make);
 
 impl DebugAttributes for Radial {
     const NAME: &'static str = "RadialGradient";

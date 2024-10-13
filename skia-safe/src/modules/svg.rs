@@ -1,7 +1,6 @@
 mod clip_path;
 mod container;
 mod defs;
-mod element;
 pub mod fe;
 mod filter;
 mod g;
@@ -13,10 +12,11 @@ mod node;
 mod pattern;
 mod shape;
 mod stop;
+mod svg_;
 mod text;
-mod transformable;
+mod transformable_node;
 mod types;
-mod using;
+mod r#use;
 
 pub use self::{
     clip_path::ClipPath,
@@ -29,12 +29,13 @@ pub use self::{
     inheriting::*,
     mask::Mask,
     node::*,
+    r#use::Use,
     shape::*,
     stop::Stop,
+    svg_::*,
     text::{TSpan, Text, TextLiteral, TextPath},
-    transformable::SvgTransformableNode,
+    transformable_node::TransformableNode,
     types::*,
-    using::Use,
 };
 
 use std::{
@@ -50,7 +51,6 @@ use crate::{
     prelude::*,
     Canvas, Data, FontMgr, FontStyle as SkFontStyle, Size,
 };
-use element::Svg;
 
 use skia_bindings as sb;
 use skia_bindings::{SkData, SkTypeface};
@@ -304,6 +304,18 @@ mod base64 {
         &alphabet::STANDARD,
         GeneralPurposeConfig::new().with_decode_allow_trailing_bits(true),
     );
+}
+
+// TODO: Prelude candidate.
+#[macro_export]
+macro_rules! impl_default_make {
+    ($type:ty, $make_fn:path) => {
+        impl Default for $type {
+            fn default() -> Self {
+                Self::from_ptr(unsafe { $make_fn() }).unwrap()
+            }
+        }
+    };
 }
 
 #[cfg(test)]

@@ -1,5 +1,5 @@
 use super::{DebugAttributes, HasBase};
-use crate::{prelude::*, scalar};
+use crate::{impl_default_make, prelude::*, scalar};
 use skia_bindings as sb;
 
 #[repr(C)]
@@ -37,6 +37,8 @@ impl NativeRefCountedBase for sb::SkSVGFeTurbulence {
 impl HasBase for sb::SkSVGFeTurbulence {
     type Base = sb::SkSVGFe;
 }
+
+impl_default_make!(Turbulence, sb::C_SkSVGFeTurbulence_Make);
 
 impl DebugAttributes for Turbulence {
     const NAME: &'static str = "FeTurbulence";

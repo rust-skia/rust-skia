@@ -1,4 +1,5 @@
 use crate::{
+    impl_default_make,
     prelude::*,
     scalar,
     svg::{DebugAttributes, HasBase},
@@ -14,6 +15,8 @@ impl NativeRefCountedBase for sb::SkSVGFeDistantLight {
 impl HasBase for sb::SkSVGFeDistantLight {
     type Base = sb::SkSVGContainer;
 }
+
+impl_default_make!(DistantLight, sb::C_SkSVGFeDistantLight_Make);
 
 impl DebugAttributes for DistantLight {
     const NAME: &'static str = "FeDistantLight";
@@ -45,6 +48,8 @@ impl NativeRefCountedBase for sb::SkSVGFePointLight {
 impl HasBase for sb::SkSVGFePointLight {
     type Base = sb::SkSVGContainer;
 }
+
+impl_default_make!(PointLight, sb::C_SkSVGFePointLight_Make);
 
 impl DebugAttributes for PointLight {
     const NAME: &'static str = "FePointLight";
@@ -78,6 +83,8 @@ impl NativeRefCountedBase for sb::SkSVGFeSpotLight {
 impl HasBase for sb::SkSVGFeSpotLight {
     type Base = sb::SkSVGContainer;
 }
+
+impl_default_make!(SpotLight, sb::C_SkSVGFeSpotLight_Make);
 
 impl DebugAttributes for SpotLight {
     const NAME: &'static str = "FeSpotLight";

@@ -1,5 +1,5 @@
 use super::{DebugAttributes, HasBase};
-use crate::{prelude::*, scalar};
+use crate::{impl_default_make, prelude::*, scalar};
 use skia_bindings as sb;
 
 #[repr(C)]
@@ -34,6 +34,8 @@ impl NativeRefCountedBase for sb::SkSVGFeGaussianBlur {
 impl HasBase for sb::SkSVGFeGaussianBlur {
     type Base = sb::SkSVGFe;
 }
+
+impl_default_make!(GaussianBlur, sb::C_SkSVGFeGaussianBlur_Make);
 
 impl DebugAttributes for GaussianBlur {
     const NAME: &'static str = "FeGaussianBlur";

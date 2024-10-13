@@ -2,6 +2,9 @@ use super::{DebugAttributes, HasBase, Length, PreserveAspectRatio};
 use crate::{prelude::*, Rect, Size};
 use skia_bindings as sb;
 
+pub type SvgKind = sb::SkSVGSVG_Type;
+variant_name!(SvgKind::Inner);
+
 pub type Svg = RCHandle<sb::SkSVGSVG>;
 
 impl NativeRefCountedBase for sb::SkSVGSVG {
@@ -10,6 +13,12 @@ impl NativeRefCountedBase for sb::SkSVGSVG {
 
 impl HasBase for sb::SkSVGSVG {
     type Base = sb::SkSVGContainer;
+}
+
+impl Default for Svg {
+    fn default() -> Self {
+        Self::new(SvgKind::Inner)
+    }
 }
 
 impl DebugAttributes for Svg {
@@ -29,8 +38,8 @@ impl DebugAttributes for Svg {
 }
 
 impl Svg {
-    pub fn intrinsic_size(&self) -> Size {
-        unsafe { Size::from_native_c(sb::C_SkSVGSVG_intrinsicSize(self.native())) }
+    pub fn new(kind: SvgKind) -> Self {
+        Self::from_ptr(unsafe { sb::C_SkSVGSVG_Make(kind) }).unwrap()
     }
 
     skia_svg_macros::attrs! {
@@ -43,4 +52,10 @@ impl Svg {
             view_box?: Rect [get(value) => value.map(Rect::from_native_ref), set(value) => value.into_native()]
         }
     }
+
+    pub fn intrinsic_size(&self) -> Size {
+        unsafe { Size::from_native_c(sb::C_SkSVGSVG_intrinsicSize(self.native())) }
+    }
+
+    // TODO: wrap renderNode()
 }

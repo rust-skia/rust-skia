@@ -1,4 +1,5 @@
 use crate::{
+    impl_default_make,
     prelude::*,
     svg::{DebugAttributes, HasBase, Length},
 };
@@ -13,6 +14,8 @@ impl NativeRefCountedBase for sb::SkSVGLine {
 impl HasBase for sb::SkSVGLine {
     type Base = sb::SkSVGShape;
 }
+
+impl_default_make!(Line, sb::C_SkSVGLine_Make);
 
 impl DebugAttributes for Line {
     const NAME: &'static str = "Line";

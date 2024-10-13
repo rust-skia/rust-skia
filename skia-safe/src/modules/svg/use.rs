@@ -1,5 +1,5 @@
 use super::{DebugAttributes, HasBase, Iri, Length};
-use crate::prelude::*;
+use crate::{impl_default_make, prelude::*};
 use skia_bindings as sb;
 
 pub type Use = RCHandle<sb::SkSVGUse>;
@@ -11,6 +11,8 @@ impl NativeRefCountedBase for sb::SkSVGUse {
 impl HasBase for sb::SkSVGUse {
     type Base = sb::SkSVGTransformableNode;
 }
+
+impl_default_make!(Use, sb::C_SkSVGUse_Make);
 
 impl DebugAttributes for Use {
     const NAME: &'static str = "Use";

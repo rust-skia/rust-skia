@@ -1,6 +1,5 @@
 use crate::{
-    prelude::*,
-    svg::{DebugAttributes, HasBase, Length},
+    impl_default_make, prelude::*, svg::{DebugAttributes, HasBase, Length}
 };
 use skia_bindings as sb;
 
@@ -13,6 +12,8 @@ impl NativeRefCountedBase for sb::SkSVGCircle {
 impl HasBase for sb::SkSVGCircle {
     type Base = sb::SkSVGShape;
 }
+
+impl_default_make!(Circle, sb::C_SkSVGCircle_Make);
 
 impl DebugAttributes for Circle {
     const NAME: &'static str = "Circle";

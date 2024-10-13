@@ -1,5 +1,5 @@
 use super::{DebugAttributes, HasBase, Input};
-use crate::{prelude::*, scalar};
+use crate::{impl_default_make, prelude::*, scalar};
 use skia_bindings as sb;
 
 pub type ChannelSelector = sb::SkSVGFeDisplacementMap_ChannelSelector;
@@ -14,6 +14,10 @@ impl NativeRefCountedBase for sb::SkSVGFeDisplacementMap {
 impl HasBase for sb::SkSVGFeDisplacementMap {
     type Base = sb::SkSVGFe;
 }
+
+impl_default_make!(DisplacementMap, sb::C_SkSVGFeDisplacementMap_Make);
+
+// TODO: Wrap resolveColorSpace
 
 impl DebugAttributes for DisplacementMap {
     const NAME: &'static str = "FeDisplacementMap";

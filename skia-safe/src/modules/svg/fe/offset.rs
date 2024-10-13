@@ -1,5 +1,5 @@
 use super::{DebugAttributes, HasBase};
-use crate::{prelude::*, scalar};
+use crate::{impl_default_make, prelude::*, scalar};
 use skia_bindings as sb;
 
 pub type Offset = RCHandle<sb::SkSVGFeOffset>;
@@ -11,6 +11,8 @@ impl NativeRefCountedBase for sb::SkSVGFeOffset {
 impl HasBase for sb::SkSVGFeOffset {
     type Base = sb::SkSVGFe;
 }
+
+impl_default_make!(Offset, sb::C_SkSVGFeOffset_Make);
 
 impl DebugAttributes for Offset {
     const NAME: &'static str = "FeOffset";

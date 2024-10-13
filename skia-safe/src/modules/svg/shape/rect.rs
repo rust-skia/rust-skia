@@ -1,4 +1,5 @@
 use crate::{
+    impl_default_make,
     prelude::*,
     svg::{DebugAttributes, HasBase, Length},
 };
@@ -13,6 +14,8 @@ impl NativeRefCountedBase for sb::SkSVGRect {
 impl HasBase for sb::SkSVGRect {
     type Base = sb::SkSVGShape;
 }
+
+impl_default_make!(Rect, sb::C_SkSVGRect_Make);
 
 impl DebugAttributes for Rect {
     const NAME: &'static str = "Rect";

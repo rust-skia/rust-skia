@@ -1,5 +1,5 @@
 use super::{DebugAttributes, HasBase};
-use crate::{prelude::*, scalar};
+use crate::{impl_default_make, prelude::*, scalar};
 use skia_bindings as sb;
 
 pub type FuncKind = sb::SkSVGFeFuncType;
@@ -33,6 +33,22 @@ impl DebugAttributes for Func {
 }
 
 impl Func {
+    pub fn func_a() -> Self {
+        Self::from_ptr(unsafe { sb::C_SkSVGFeFunc_MakeFuncA() }).unwrap()
+    }
+
+    pub fn func_r() -> Self {
+        Self::from_ptr(unsafe { sb::C_SkSVGFeFunc_MakeFuncR() }).unwrap()
+    }
+
+    pub fn func_g() -> Self {
+        Self::from_ptr(unsafe { sb::C_SkSVGFeFunc_MakeFuncG() }).unwrap()
+    }
+
+    pub fn func_b() -> Self {
+        Self::from_ptr(unsafe { sb::C_SkSVGFeFunc_MakeFuncB() }).unwrap()
+    }
+
     pub fn table_values(&self) -> &[scalar] {
         unsafe {
             safer::from_raw_parts(
@@ -46,6 +62,8 @@ impl Func {
         unsafe { sb::C_SkSVGFeFunc_getTableValuesCount(self.native()) }
     }
 
+    // TODO: wrap getTable()
+
     skia_svg_macros::attrs! {
         SkSVGFeFunc => {
             *amplitude: scalar [get(value) => value, set(value) => value],
@@ -55,5 +73,25 @@ impl Func {
             *slope: scalar [get(value) => value, set(value) => value],
             "type" as kind: FuncKind [get(value) => value, set(value) => value]
         }
+    }
+}
+
+pub type ComponentTransfer = RCHandle<sb::SkSVGFeComponentTransfer>;
+
+impl NativeRefCountedBase for sb::SkSVGFeComponentTransfer {
+    type Base = sb::SkRefCntBase;
+}
+
+impl HasBase for sb::SkSVGFeComponentTransfer {
+    type Base = sb::SkSVGFe;
+}
+
+impl_default_make!(ComponentTransfer, sb::C_SkSVGFeComponentTransfer_Make);
+
+impl DebugAttributes for ComponentTransfer {
+    const NAME: &'static str = "FeComponentTransfer";
+
+    fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
+        self.as_base()._dbg(builder);
     }
 }

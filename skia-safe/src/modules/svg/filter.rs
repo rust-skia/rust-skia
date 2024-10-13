@@ -1,5 +1,5 @@
 use super::{BoundingBoxUnits, DebugAttributes, HasBase, Length};
-use crate::prelude::*;
+use crate::{impl_default_make, prelude::*};
 use skia_bindings as sb;
 
 pub type Filter = RCHandle<sb::SkSVGFilter>;
@@ -28,7 +28,12 @@ impl HasBase for sb::SkSVGFilter {
     type Base = sb::SkSVGContainer;
 }
 
+impl_default_make!(Filter, sb::C_SkSVGFilter_Make);
+
 impl Filter {
+    // TODO: wrap applyProperties()
+    // TODO: wrap buildFilterDAG
+
     skia_svg_macros::attrs! {
         SkSVGFilter => {
             x: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],

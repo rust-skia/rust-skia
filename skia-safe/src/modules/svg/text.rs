@@ -1,5 +1,5 @@
 use super::{DebugAttributes, HasBase, Iri, Length, XmlSpace};
-use crate::{interop, prelude::*, scalar};
+use crate::{impl_default_make, interop, prelude::*, scalar};
 use skia_bindings as sb;
 
 type TextContainer = RCHandle<sb::SkSVGTextContainer>;
@@ -111,6 +111,8 @@ impl HasBase for sb::SkSVGText {
     type Base = sb::SkSVGTextContainer;
 }
 
+impl_default_make!(Text, sb::C_SkSVGText_Make);
+
 impl DebugAttributes for Text {
     const NAME: &'static str = "Text";
 
@@ -129,6 +131,8 @@ impl HasBase for sb::SkSVGTSpan {
     type Base = sb::SkSVGTextContainer;
 }
 
+impl_default_make!(TSpan, sb::C_SkSVGTSpan_Make);
+
 impl DebugAttributes for TSpan {
     const NAME: &'static str = "TSpan";
 
@@ -146,6 +150,8 @@ impl NativeRefCountedBase for sb::SkSVGTextLiteral {
 impl HasBase for sb::SkSVGTextLiteral {
     type Base = sb::SkSVGTransformableNode;
 }
+
+impl_default_make!(TextLiteral, sb::C_SkSVGTextLiteral_Make);
 
 impl DebugAttributes for TextLiteral {
     const NAME: &'static str = "TextLiteral";
@@ -175,6 +181,8 @@ impl NativeRefCountedBase for sb::SkSVGTextPath {
 impl HasBase for sb::SkSVGTextPath {
     type Base = sb::SkSVGTextContainer;
 }
+
+impl_default_make!(TextPath, sb::C_SkSVGTextPath_Make);
 
 impl DebugAttributes for TextPath {
     const NAME: &'static str = "TextPath";

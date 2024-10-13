@@ -1,5 +1,5 @@
 use super::{DebugAttributes, HasBase, Iri, Length, PreserveAspectRatio};
-use crate::prelude::*;
+use crate::{impl_default_make, prelude::*};
 use skia_bindings as sb;
 
 pub type Image = RCHandle<sb::SkSVGImage>;
@@ -11,6 +11,8 @@ impl NativeRefCountedBase for sb::SkSVGImage {
 impl HasBase for sb::SkSVGImage {
     type Base = sb::SkSVGContainer;
 }
+
+impl_default_make!(Image, sb::C_SkSVGImage_Make);
 
 impl DebugAttributes for Image {
     const NAME: &'static str = "Image";
@@ -29,6 +31,8 @@ impl DebugAttributes for Image {
 }
 
 impl Image {
+    // TODO: wrap LoadImage
+
     skia_svg_macros::attrs! {
         SkSVGImage => {
             x: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()],

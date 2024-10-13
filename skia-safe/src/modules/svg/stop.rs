@@ -1,5 +1,6 @@
 use super::HasBase;
 use crate::{
+    impl_default_make,
     prelude::*,
     svg::{DebugAttributes, Length},
 };
@@ -14,6 +15,8 @@ impl NativeRefCountedBase for sb::SkSVGStop {
 impl HasBase for sb::SkSVGStop {
     type Base = sb::SkSVGContainer;
 }
+
+impl_default_make!(Stop, sb::C_SkSVGStop_Make);
 
 impl DebugAttributes for Stop {
     const NAME: &'static str = "Stop";

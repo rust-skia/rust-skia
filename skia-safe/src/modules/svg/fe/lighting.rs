@@ -1,5 +1,5 @@
 use super::{DebugAttributes, HasBase};
-use crate::{prelude::*, scalar};
+use crate::{impl_default_make, prelude::*, scalar};
 use skia_bindings as sb;
 
 #[repr(C)]
@@ -69,6 +69,8 @@ impl HasBase for sb::SkSVGFeSpecularLighting {
     type Base = sb::SkSVGFeLighting;
 }
 
+impl_default_make!(Specular, sb::C_SkSVGFeSpecularLighting_Make);
+
 impl DebugAttributes for Specular {
     const NAME: &'static str = "FeSpecularLighting";
 
@@ -99,6 +101,8 @@ impl NativeRefCountedBase for sb::SkSVGFeDiffuseLighting {
 impl HasBase for sb::SkSVGFeDiffuseLighting {
     type Base = sb::SkSVGFeLighting;
 }
+
+impl_default_make!(Diffuse, sb::C_SkSVGFeDiffuseLighting_Make);
 
 impl DebugAttributes for Diffuse {
     const NAME: &'static str = "FeDiffuseLighting";

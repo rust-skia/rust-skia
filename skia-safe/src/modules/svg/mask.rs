@@ -1,5 +1,5 @@
 use super::{BoundingBoxUnits, DebugAttributes, HasBase, Length};
-use crate::prelude::*;
+use crate::{impl_default_make, prelude::*};
 use skia_bindings as sb;
 
 pub type Mask = RCHandle<sb::SkSVGMask>;
@@ -11,6 +11,8 @@ impl HasBase for sb::SkSVGMask {
 impl NativeRefCountedBase for sb::SkSVGMask {
     type Base = sb::SkRefCntBase;
 }
+
+impl_default_make!(Mask, sb::C_SkSVGMask_Make);
 
 impl DebugAttributes for Mask {
     const NAME: &'static str = "Mask";

@@ -1,23 +1,24 @@
 mod blend;
 mod color_matrix;
+mod component_transfer;
 mod composite;
 mod displacement_map;
-mod func;
+mod flood;
 mod gaussian_blur;
 mod image;
 mod light_source;
 pub mod lighting;
-mod merge_node;
+mod merge;
 pub mod morphology;
 mod offset;
 mod turbulence;
 mod types;
 
 pub use self::{
-    blend::*, color_matrix::*, composite::*, displacement_map::*, func::*, gaussian_blur::*,
-    image::*, light_source::*, lighting::Diffuse as DiffuseLighting, lighting::Lighting,
-    lighting::Specular as SpecularLighting, merge_node::*, morphology::Morphology, offset::*,
-    turbulence::*, types::*,
+    blend::*, color_matrix::*, component_transfer::*, composite::*, displacement_map::*, flood::*,
+    gaussian_blur::*, image::*, light_source::*, lighting::Diffuse as DiffuseLighting,
+    lighting::Lighting, lighting::Specular as SpecularLighting, merge::*, morphology::Morphology,
+    offset::*, turbulence::*, types::*,
 };
 
 use super::{DebugAttributes, HasBase, Length};
@@ -25,9 +26,6 @@ use crate::prelude::*;
 use skia_bindings as sb;
 
 pub type Fe = RCHandle<sb::SkSVGFe>;
-pub type ComponentTransfer = Fe;
-pub type Flood = Fe;
-pub type Merge = Fe;
 
 impl NativeRefCountedBase for sb::SkSVGFe {
     type Base = sb::SkRefCntBase;
@@ -54,6 +52,12 @@ impl DebugAttributes for Fe {
 }
 
 impl Fe {
+    // TODO: Wrap IsFilterEffect (via typed)
+    // TODO: Wrap makeImageFilter()
+    // TODO: Wrap resolveFilterSubregion()
+    // TODO: Wrap resolveColorSpace()
+    // TODO: Wrap applyProperties()
+
     skia_svg_macros::attrs! {
         SkSVGFe => {
             "in" as input: Input [get(value) => Input::from_native_ref(value), set(value) => value.into_native()],

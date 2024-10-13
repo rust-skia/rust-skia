@@ -1,5 +1,5 @@
 use super::{DebugAttributes, HasBase};
-use crate::prelude::*;
+use crate::{impl_default_make, prelude::*};
 use skia_bindings as sb;
 
 pub type G = RCHandle<sb::SkSVGG>;
@@ -11,6 +11,8 @@ impl DebugAttributes for G {
         self.as_base()._dbg(builder);
     }
 }
+
+impl_default_make!(G, sb::C_SkSVGG_Make);
 
 impl NativeRefCountedBase for sb::SkSVGG {
     type Base = sb::SkRefCntBase;

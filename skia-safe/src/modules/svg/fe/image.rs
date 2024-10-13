@@ -1,4 +1,5 @@
 use crate::{
+    impl_default_make,
     prelude::*,
     svg::{DebugAttributes, HasBase, Iri, PreserveAspectRatio},
 };
@@ -13,6 +14,8 @@ impl NativeRefCountedBase for sb::SkSVGFeImage {
 impl HasBase for sb::SkSVGFeImage {
     type Base = sb::SkSVGFe;
 }
+
+impl_default_make!(Image, sb::C_SkSVGFeImage_Make);
 
 impl DebugAttributes for Image {
     const NAME: &'static str = "FeImage";

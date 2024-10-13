@@ -1,5 +1,5 @@
 use super::{DebugAttributes, HasBase, Input};
-use crate::{prelude::*, scalar};
+use crate::{impl_default_make, prelude::*, scalar};
 use skia_bindings as sb;
 
 pub type CompositeOperator = sb::SkSVGFeCompositeOperator;
@@ -14,6 +14,8 @@ impl NativeRefCountedBase for sb::SkSVGFeComposite {
 impl HasBase for sb::SkSVGFeComposite {
     type Base = sb::SkSVGFe;
 }
+
+impl_default_make!(Composite, sb::C_SkSVGFeComposite_Make);
 
 impl DebugAttributes for Composite {
     const NAME: &'static str = "FeComposite";

@@ -1,5 +1,5 @@
 use super::{DebugAttributes, HasBase};
-use crate::{prelude::*, scalar};
+use crate::{impl_default_make, prelude::*, scalar};
 use skia_bindings as sb;
 
 #[repr(C)]
@@ -23,6 +23,7 @@ native_transmutable!(sb::SkSVGFeMorphology_Radius, Radius, svg_radius_layout);
 
 pub type Operator = sb::SkSVGFeMorphology_Operator;
 variant_name!(Operator::Dilate);
+
 pub type Morphology = RCHandle<sb::SkSVGFeMorphology>;
 
 impl NativeRefCountedBase for sb::SkSVGFeMorphology {
@@ -32,6 +33,8 @@ impl NativeRefCountedBase for sb::SkSVGFeMorphology {
 impl HasBase for sb::SkSVGFeMorphology {
     type Base = sb::SkSVGFe;
 }
+
+impl_default_make!(Morphology, sb::C_SkSVGFeMorphology_Make);
 
 impl DebugAttributes for Morphology {
     const NAME: &'static str = "FeMorphology";
