@@ -239,9 +239,9 @@ fn attrs2(input: TokenStream) -> TokenStream2 {
                 quote! {
                     #getter
 
-                    pub fn #set_name(&self, #setter_name: #setter_ref #ty) {
+                    pub fn #set_name(&mut self, #setter_name: #setter_ref #ty) {
                         unsafe {
-                            sb::#native_set_name(self.native_mut_force(), #setter_body)
+                            sb::#native_set_name(self.native_mut(), #setter_body)
                         }
                     }
                 }

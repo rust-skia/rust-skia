@@ -59,7 +59,7 @@ fn main() {
 
     let mgr = FontMgr::default();
     let dom: Dom = Dom::from_bytes(data.as_bytes(), mgr).unwrap();
-    let root = dom.root();
+    let mut root = dom.root();
 
     println!("{:?}", root.intrinsic_size());
 
