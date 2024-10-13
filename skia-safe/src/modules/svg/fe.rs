@@ -21,7 +21,7 @@ pub use self::{
     offset::*, turbulence::*, types::*,
 };
 
-use super::{DebugAttributes, NodeSubtype, Length};
+use super::{DebugAttributes, Length, NodeSubtype};
 use crate::prelude::*;
 use skia_bindings as sb;
 

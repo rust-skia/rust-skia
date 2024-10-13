@@ -1,7 +1,7 @@
 use crate::{
     impl_default_make,
     prelude::*,
-    svg::{DebugAttributes, NodeSubtype, Iri, PreserveAspectRatio},
+    svg::{DebugAttributes, Iri, NodeSubtype, PreserveAspectRatio},
 };
 use skia_bindings as sb;
 

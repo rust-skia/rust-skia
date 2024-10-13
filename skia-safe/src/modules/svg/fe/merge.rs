@@ -1,4 +1,4 @@
-use super::{DebugAttributes, NodeSubtype, Input};
+use super::{DebugAttributes, Input, NodeSubtype};
 use crate::{impl_default_make, prelude::*};
 use skia_bindings as sb;
 
