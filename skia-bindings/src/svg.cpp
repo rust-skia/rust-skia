@@ -110,56 +110,6 @@ extern "C" skresources::ResourceProvider* C_RustResourceProvider_New(const RustR
     return new RustResourceProvider(*param);
 }
 
-typedef SkData* (*loadSkData)(const char resource_path[], const char resource_name[], void* context);
-typedef SkTypeface* (*loadSkTypeface)(const char resource_path[], const char resource_name[], void* context);
-
-class ImageResourceProvider final : public skresources::ResourceProvider {
-
-private:
-    loadSkData _loadCb;
-    loadSkTypeface _loadTfCb;
-    void* _loadContext;
-
-public:
-    struct Param {
-        TraitObject trait;
-        ::ResourceProvider::Drop drop;
-        ::ResourceProvider::Load load;
-        ::ResourceProvider::LoadImageAsset loadImageAsset;
-        ::ResourceProvider::LoadTypeface loadTypeface;
-    };
-
-    explicit RustResourceProvider(const Param& param) 
-    : _param(param) 
-    { }
-
-    virtual ~RustResourceProvider() {
-        _param.drop(_param.trait);
-    }
-
-    sk_sp<SkData> load(const char resource_path[], const char resource_name[]) const override {
-        return sk_sp<SkData>(_param.load(_param.trait, resource_path, resource_name));
-    }
-
-    sk_sp<skresources::ImageAsset> loadImageAsset(
-        const char resource_path[],
-        const char resource_name[],
-        const char resource_id[]) const override {
-        return sk_sp<skresources::ImageAsset>(_param.loadImageAsset(_param.trait, resource_path, resource_name, resource_id));
-    }
-
-    sk_sp<SkTypeface> loadTypeface(const char name[], const char url[]) const override {
-        return sk_sp<SkTypeface>(_param.loadTypeface(_param.trait, name, url));
-    }
- 
-private:
-    Param _param;
-};
-
-extern "C" skresources::ResourceProvider* C_RustResourceProvider_New(const RustResourceProvider::Param* param) {
-    return new RustResourceProvider(*param);
-}
-
 extern "C" SkSVGDOM* C_SkSVGDOM_MakeFromStream(
     SkStream& stream,
     skresources::ResourceProvider* provider,
