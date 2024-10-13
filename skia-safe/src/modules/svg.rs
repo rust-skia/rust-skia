@@ -44,14 +44,13 @@ use std::{
     io::{self},
 };
 
-use skia_bindings::{self as sb, SkData, SkTypeface, SkRefCntBase};
-
 use super::resources::NativeResourceProvider;
 use crate::{
     interop::{MemoryStream, NativeStreamBase, RustStream},
     prelude::*,
-    Canvas, Data, FontMgr, FontStyle as SkFontStyle, Size,
+    Canvas, FontMgr, Size,
 };
+use skia_bindings::{self as sb, SkRefCntBase};
 
 pub type Dom = RCHandle<sb::SkSVGDOM>;
 
@@ -137,6 +136,13 @@ impl Dom {
         Self::from_ptr(out).ok_or(LoadError)
     }
 
+    pub fn root(&self) -> Svg {
+        unsafe {
+            Svg::from_unshared_ptr(sb::C_SkSVGDOM_getRoot(self.native()) as *mut _)
+                .unwrap_unchecked()
+        }
+    }
+
     pub fn render(&self, canvas: &Canvas) {
         // TODO: may be we should init ICU whenever we expose a Canvas?
         #[cfg(all(feature = "embed-icudtl", feature = "textlayout"))]
@@ -170,8 +176,6 @@ mod tests {
     use crate::{
         prelude::{NativeAccess, NativeRefCounted},
         resources::NativeResourceProvider,
-        
-        modules::svg::decode_base64,
         surfaces,
         svg::{Length, LengthUnit},
         FontMgr, Surface,
@@ -275,6 +279,44 @@ mod tests {
         save_to_tmp(&mut surface, "svg-with-base64-image-escaped-encoding");
     }
 
+    // data: (gif image from <https://www.rfc-editor.org/rfc/rfc2397>)
+    #[test]
+    fn svg_with_base64_image2() {
+        let svg = r##"<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="256" height="256">
+            <image width="256" height="256" xlink:href="data:image/gif;base64,R0lGODdhMAAwAPAAAAAAAP///ywAAAAAMAAw
+                AAAC8IyPqcvt3wCcDkiLc7C0qwyGHhSWpjQu5yqmCYsapyuvUUlvONmOZtfzgFz
+                ByTB10QgxOR0TqBQejhRNzOfkVJ+5YiUqrXF5Y5lKh/DeuNcP5yLWGsEbtLiOSp
+                a/TPg7JpJHxyendzWTBfX0cxOnKPjgBzi4diinWGdkF8kjdfnycQZXZeYGejmJl
+                ZeGl9i2icVqaNVailT6F5iJ90m6mvuTS4OK05M0vDk0Q4XUtwvKOzrcd3iq9uis
+                F81M1OIcR7lEewwcLp7tuNNkM3uNna3F2JQFo97Vriy/Xl4/f1cf5VWzXyym7PH
+                hhx4dbgYKAAA7"/>
+            </svg>"##;
+        let mut surface = surfaces::raster_n32_premul((256, 256)).unwrap();
+        let canvas = surface.canvas();
+        let font_mgr = FontMgr::new();
+        let dom = Dom::from_str(svg, font_mgr.clone(), font_mgr).unwrap();
+        dom.render(canvas);
+        save_to_tmp(&mut surface, "svg-with-base64-image2");
+    }
+
+    #[cfg(feature = "save-svg-images")]
+    fn save_to_tmp(surface: &mut Surface, name: &str) {
+        use crate::EncodedImageFormat;
+        use std::{fs::File, io::Write, path::Path};
+
+        let image = surface.image_snapshot();
+        let data = image.encode(None, EncodedImageFormat::PNG, None).unwrap();
+        write_file(data.as_bytes(), Path::new(&format!("/tmp/svg-{name}.png")));
+
+        pub fn write_file(bytes: &[u8], path: &Path) {
+            let mut file = File::create(path).expect("failed to create file");
+            file.write_all(bytes).expect("failed to write to file");
+        }
+    }
+
+    #[cfg(not(feature = "save-svg-images"))]
+    fn save_to_tmp(_surface: &mut Surface, _name: &str) {}
+
     #[test]
     fn test_svg_attributes() {
         let data = r#"
@@ -325,7 +367,7 @@ mod tests {
             </svg>"#;
 
         let mgr = FontMgr::default();
-        let dom = Dom::from_bytes(data.as_bytes(), mgr).unwrap();
+        let dom = Dom::from_bytes(data.as_bytes(), mgr.clone(), mgr).unwrap();
         let mut root = dom.root();
 
         println!("{:#?}", root.transform());
@@ -337,42 +379,4 @@ mod tests {
         println!("{:#?}", root.intrinsic_size());
         println!("{:#?}", root.children_typed());
     }
-
-    // data: (gif image from <https://www.rfc-editor.org/rfc/rfc2397>)
-    #[test]
-    fn svg_with_base64_image2() {
-        let svg = r##"<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="256" height="256">
-            <image width="256" height="256" xlink:href="data:image/gif;base64,R0lGODdhMAAwAPAAAAAAAP///ywAAAAAMAAw
-                AAAC8IyPqcvt3wCcDkiLc7C0qwyGHhSWpjQu5yqmCYsapyuvUUlvONmOZtfzgFz
-                ByTB10QgxOR0TqBQejhRNzOfkVJ+5YiUqrXF5Y5lKh/DeuNcP5yLWGsEbtLiOSp
-                a/TPg7JpJHxyendzWTBfX0cxOnKPjgBzi4diinWGdkF8kjdfnycQZXZeYGejmJl
-                ZeGl9i2icVqaNVailT6F5iJ90m6mvuTS4OK05M0vDk0Q4XUtwvKOzrcd3iq9uis
-                F81M1OIcR7lEewwcLp7tuNNkM3uNna3F2JQFo97Vriy/Xl4/f1cf5VWzXyym7PH
-                hhx4dbgYKAAA7"/>
-            </svg>"##;
-        let mut surface = surfaces::raster_n32_premul((256, 256)).unwrap();
-        let canvas = surface.canvas();
-        let font_mgr = FontMgr::new();
-        let dom = Dom::from_str(svg, font_mgr.clone(), font_mgr).unwrap();
-        dom.render(canvas);
-        save_to_tmp(&mut surface, "svg-with-base64-image2");
-    }
-
-    #[cfg(feature = "save-svg-images")]
-    fn save_to_tmp(surface: &mut Surface, name: &str) {
-        use crate::EncodedImageFormat;
-        use std::{fs::File, io::Write, path::Path};
-
-        let image = surface.image_snapshot();
-        let data = image.encode(None, EncodedImageFormat::PNG, None).unwrap();
-        write_file(data.as_bytes(), Path::new(&format!("/tmp/svg-{name}.png")));
-
-        pub fn write_file(bytes: &[u8], path: &Path) {
-            let mut file = File::create(path).expect("failed to create file");
-            file.write_all(bytes).expect("failed to write to file");
-        }
-    }
-
-    #[cfg(not(feature = "save-svg-images"))]
-    fn save_to_tmp(_surface: &mut Surface, _name: &str) {}
 }
