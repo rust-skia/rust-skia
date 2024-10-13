@@ -22,10 +22,6 @@ impl Container {
         unsafe { sb::C_SkSVGContainer_appendChild(self.native_mut(), node.into().into_ptr()) }
     }
 
-    pub fn has_children(&self) -> bool {
-        self.children_count() != 0
-    }
-
     pub fn children(&self) -> &[Node] {
         unsafe {
             let sp_slice = safer::from_raw_parts(
@@ -41,7 +37,7 @@ impl Container {
         self.children().iter().cloned().map(|n| n.typed()).collect()
     }
 
-    pub fn children_count(&self) -> usize {
+    pub(crate) fn children_count(&self) -> usize {
         unsafe {
             usize::try_from(sb::C_SkSVGContainer_childrenCount(self.native())).unwrap_or_default()
         }
