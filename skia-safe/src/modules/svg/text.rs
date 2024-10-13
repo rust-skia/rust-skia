@@ -137,6 +137,35 @@ impl DebugAttributes for TSpan {
     }
 }
 
+pub type TextLiteral = RCHandle<sb::SkSVGTextLiteral>;
+
+impl NativeRefCountedBase for sb::SkSVGTextLiteral {
+    type Base = sb::SkRefCntBase;
+}
+
+impl HasBase for sb::SkSVGTextLiteral {
+    type Base = sb::SkSVGTransformableNode;
+}
+
+impl DebugAttributes for TextLiteral {
+    const NAME: &'static str = "TextLiteral";
+
+    fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
+        self.as_base()._dbg(builder.field("text", &self.text()));
+    }
+}
+
+impl TextLiteral {
+    skia_svg_macros::attrs! {
+        SkSVGTextLiteral => {
+            text: str [
+                get(value) => interop::String::from_native_ref(value).as_str(),
+                set(&value) => interop::String::from_str(value).into_native()
+            ]
+        }
+    }
+}
+
 pub type TextPath = RCHandle<sb::SkSVGTextPath>;
 
 impl NativeRefCountedBase for sb::SkSVGTextPath {
@@ -164,35 +193,6 @@ impl TextPath {
         SkSVGTextPath => {
             href: Iri [get(value) => Iri::from_native_ref(value), set(value) => value.into_native()],
             start_offset: Length [get(value) => Length::from_native_ref(value), set(value) => value.into_native()]
-        }
-    }
-}
-
-pub type TextLiteral = RCHandle<sb::SkSVGTextLiteral>;
-
-impl NativeRefCountedBase for sb::SkSVGTextLiteral {
-    type Base = sb::SkRefCntBase;
-}
-
-impl HasBase for sb::SkSVGTextLiteral {
-    type Base = sb::SkSVGTransformableNode;
-}
-
-impl DebugAttributes for TextLiteral {
-    const NAME: &'static str = "TextLiteral";
-
-    fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.as_base()._dbg(builder.field("text", &self.text()));
-    }
-}
-
-impl TextLiteral {
-    skia_svg_macros::attrs! {
-        SkSVGTextLiteral => {
-            text: str [
-                get(value) => interop::String::from_native_ref(value).as_str(),
-                set(&value) => interop::String::from_str(value).into_native()
-            ]
         }
     }
 }
