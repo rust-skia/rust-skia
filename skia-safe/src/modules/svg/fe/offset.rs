@@ -16,11 +16,8 @@ impl DebugAttributes for Offset {
     const NAME: &'static str = "FeOffset";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.as_base()._dbg(
-            builder
-                .field("dx", &self.dx())
-                .field("dy", &self.dy()),
-        );
+        self.as_base()
+            ._dbg(builder.field("dx", &self.dx()).field("dy", &self.dy()));
     }
 }
 

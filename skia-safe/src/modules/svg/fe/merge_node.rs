@@ -16,8 +16,7 @@ impl DebugAttributes for MergeNode {
     const NAME: &'static str = "FeMergeNode";
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
-        self.as_base()
-            ._dbg(builder.field("input", self.input()));
+        self.as_base()._dbg(builder.field("input", self.input()));
     }
 }
 
