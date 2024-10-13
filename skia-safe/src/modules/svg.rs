@@ -6,9 +6,9 @@ mod filter;
 mod g;
 mod gradient;
 mod image;
-mod node_hierarchy;
 mod mask;
 mod node;
+mod node_hierarchy;
 mod pattern;
 mod shape;
 mod stop;
@@ -26,9 +26,9 @@ pub use self::{
     g::G,
     gradient::*,
     image::Image,
-    node_hierarchy::*,
     mask::Mask,
     node::*,
+    node_hierarchy::*,
     r#use::Use,
     shape::*,
     stop::Stop,
@@ -407,7 +407,7 @@ mod tests {
         root.set_height(Length::new(600., LengthUnit::CM));
 
         println!("{:#?}", root.intrinsic_size());
-        println!("{:#?}", root.children());
+        println!("{:#?}", root.children_typed());
     }
 
     #[allow(unused)]

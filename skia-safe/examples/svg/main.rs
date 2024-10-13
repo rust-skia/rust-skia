@@ -71,7 +71,7 @@ fn main() {
 
     println!("{:?}", root.intrinsic_size());
 
-    let children = root.children();
+    let children = root.children_typed();
 
     println!("{children:#?}");
 

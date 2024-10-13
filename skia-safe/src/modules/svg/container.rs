@@ -1,4 +1,4 @@
-use super::{DebugAttributes, Node, NodeSubtype};
+use super::{DebugAttributes, Node, NodeSubtype, TypedNode};
 use crate::prelude::*;
 use skia_bindings as sb;
 
@@ -13,7 +13,7 @@ impl DebugAttributes for Container {
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()
-            ._dbg(builder.field("children", &self.children()));
+            ._dbg(builder.field("children", &self.children_typed()));
     }
 }
 
@@ -35,6 +35,10 @@ impl Container {
 
             RCHandle::from_non_null_sp_slice(sp_slice)
         }
+    }
+
+    pub fn children_typed(&self) -> Vec<TypedNode> {
+        self.children().iter().cloned().map(|n| n.typed()).collect()
     }
 
     pub fn children_count(&self) -> usize {
