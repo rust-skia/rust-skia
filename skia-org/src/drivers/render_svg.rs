@@ -29,7 +29,7 @@ impl DrawingDriver for RenderSvg {
         let data = canvas.end();
         let svg = data.as_bytes();
 
-        let svg_dom = svg::Dom::from_bytes(svg, &self.font_mgr).unwrap();
+        let svg_dom = svg::Dom::from_bytes(svg, self.font_mgr.clone(), &self.font_mgr).unwrap();
 
         let mut surface = surfaces::raster_n32_premul((width * 2, height * 2)).unwrap();
 
