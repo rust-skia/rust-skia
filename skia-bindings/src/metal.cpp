@@ -6,12 +6,12 @@
 
 #include "include/core/SkColorSpace.h"
 #include "include/core/SkSurface.h"
+#include "include/gpu/ganesh/GrBackendSurface.h"
+#include "include/gpu/ganesh/GrDirectContext.h"
 #include "include/gpu/ganesh/mtl/SkSurfaceMetal.h"
 #include "include/gpu/ganesh/mtl/GrMtlBackendContext.h"
 #include "include/gpu/ganesh/mtl/GrMtlBackendSurface.h"
 #include "include/gpu/ganesh/mtl/GrMtlDirectContext.h"
-#include "include/gpu/GrBackendSurface.h"
-#include "include/gpu/GrDirectContext.h"
 
 extern "C" void C_GrMtlTypes(GrMTLTextureUsage*, GrMtlSurfaceInfo *) {};
 
