@@ -239,7 +239,6 @@ pub mod color_filters {
 }
 
 #[cfg(test)]
-
 mod tests {
     use crate::prelude::*;
     use crate::{color_filters, BlendMode, Color, Color4f, ColorSpace};

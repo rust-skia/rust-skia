@@ -40,7 +40,6 @@ pub mod images {
     /// * `bitmap` - [`ImageInfo`], row bytes, and pixels
     ///
     /// Returns: created [`Image`], or `None`
-
     pub fn raster_from_bitmap(bitmap: &Bitmap) -> Option<Image> {
         Image::from_ptr(unsafe { sb::C_SkImages_RasterFromBitmap(bitmap.native()) })
     }
@@ -953,7 +952,7 @@ impl Image {
     ///
     /// This is done retaining the domain (backend) of the image (e.g. gpu, raster).
     ///
-    /// Returns `None` if the requested [`crate::ColorInfo`] is not supported, its dimesions are out
+    /// Returns `None` if the requested [`crate::ColorInfo`] is not supported, its dimensions are out
     /// of range.
     pub fn make_scaled(
         &self,
@@ -1029,7 +1028,7 @@ impl Image {
     /// and does not exceed [`Image`] (width(), height()).
     ///
     /// Graphite has deprecated this API in favor of the equivalent asynchronous API on
-    /// `skgpu::graphite::Context` (with an optional explicit synchonization).
+    /// `skgpu::graphite::Context` (with an optional explicit synchronization).
     ///
     /// `dst_info` specifies width, height, [`ColorType`], [`AlphaType`], and [`ColorSpace`] of
     /// destination. `dst_row_bytes` specifies the gap from one destination row to the next.
@@ -1094,7 +1093,7 @@ impl Image {
     /// does not exceed [`Image`] (width(), height()).
     ///
     /// Graphite has deprecated this API in favor of the equivalent asynchronous API on
-    /// `skgpu::graphite::Context` (with an optional explicit synchonization).
+    /// `skgpu::graphite::Context` (with an optional explicit synchronization).
     ///
     /// dst specifies width, height, [`ColorType`], [`AlphaType`], [`ColorSpace`], pixel storage,
     /// and row bytes of destination. dst.`row_bytes()` specifics the gap from one destination
@@ -1349,7 +1348,6 @@ impl Image {
     /// Returns: the subsetted image, or `None`
     ///
     /// example: <https://fiddle.skia.org/c/@Image_makeSubset>
-
     #[cfg(feature = "gpu")]
     #[deprecated(since = "0.64.0", note = "use make_subset()")]
     pub fn new_subset_with_context<'a>(

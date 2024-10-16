@@ -748,7 +748,7 @@ where
         r
     }
 
-    /// Returns a reference to the Rust value by ransmuting a reference to the native value.
+    /// Returns a reference to the Rust value by transmuting a reference to the native value.
     fn from_native_ref(nt: &NT) -> &Self {
         unsafe { transmute_ref(nt) }
     }
@@ -927,7 +927,7 @@ impl<T: ?Sized, U> Captures<U> for T {}
 #[repr(transparent)]
 pub struct Borrows<'a, H>(H, PhantomData<&'a ()>);
 
-impl<'a, H> Deref for Borrows<'a, H> {
+impl<H> Deref for Borrows<'_, H> {
     type Target = H;
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -936,13 +936,13 @@ impl<'a, H> Deref for Borrows<'a, H> {
 
 // TODO: this is most likely unsafe because someone could replace the
 // value the reference is pointing to.
-impl<'a, H> DerefMut for Borrows<'a, H> {
+impl<H> DerefMut for Borrows<'_, H> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
 }
 
-impl<'a, H> Borrows<'a, H> {
+impl<H> Borrows<'_, H> {
     /// Notify that the borrowed dependency is not referred to anymore and return the handle.
     /// # Safety
     /// The borrowed dependency must be removed before calling `release()`.
@@ -961,7 +961,7 @@ impl<T: Sized> BorrowsFrom for T {
     }
 }
 
-impl<'a, H> Borrows<'a, H> {
+impl<H> Borrows<'_, H> {
     pub(crate) unsafe fn unchecked_new(h: H) -> Self {
         Self(h, PhantomData)
     }

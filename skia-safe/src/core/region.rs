@@ -450,7 +450,7 @@ impl<'a> Cliperator<'a> {
     }
 }
 
-impl<'a> iter::Iterator for Cliperator<'a> {
+impl iter::Iterator for Cliperator<'_> {
     type Item = IRect;
     fn next(&mut self) -> Option<Self::Item> {
         if self.is_done() {
@@ -488,7 +488,7 @@ impl<'a> Spanerator<'a> {
     }
 }
 
-impl<'a> iter::Iterator for Spanerator<'a> {
+impl iter::Iterator for Spanerator<'_> {
     type Item = (i32, i32);
 
     fn next(&mut self) -> Option<Self::Item> {

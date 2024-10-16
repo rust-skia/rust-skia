@@ -19,7 +19,7 @@ pub struct BackendContext<'a> {
     get_proc: &'a dyn GetProc,
 }
 
-impl<'a> Drop for BackendContext<'a> {
+impl Drop for BackendContext<'_> {
     fn drop(&mut self) {
         unsafe { sb::C_VulkanBackendContext_delete(self.native.as_ptr()) }
     }

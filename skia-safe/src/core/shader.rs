@@ -15,7 +15,7 @@ pub struct GradientInfo<'a> {
     pub gradient_flags: gradient_shader::Flags,
 }
 
-impl<'a> GradientInfo<'a> {
+impl GradientInfo<'_> {
     pub fn color_count(&self) -> usize {
         self.colors.len()
     }
