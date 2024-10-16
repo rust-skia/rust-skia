@@ -52,7 +52,7 @@ native_transmutable!(
     save_layer_rec_layout
 );
 
-impl<'a> Default for SaveLayerRec<'a> {
+impl Default for SaveLayerRec<'_> {
     /// Sets [`Self::bounds`], [`Self::paint`], and [`Self::backdrop`] to `None`. Clears
     /// [`Self::flags`].
     ///
@@ -1513,7 +1513,6 @@ impl Canvas {
     ///
     /// - `arc` [`Arc`] SkArc specifying oval, startAngle, sweepAngle, and arc-vs-wedge
     /// - `paint` [`Paint`] stroke or fill, blend, color, and so on, used to draw
-
     pub fn draw_arc_2(&self, arc: &Arc, paint: &Paint) -> &Self {
         self.draw_arc(
             arc.oval,
@@ -2327,7 +2326,7 @@ pub mod lattice {
         pd: PhantomData<&'a Lattice<'a>>,
     }
 
-    impl<'a> Lattice<'a> {
+    impl Lattice<'_> {
         pub(crate) fn native(&self) -> Ref {
             if let Some(rect_types) = self.rect_types {
                 let rect_count = (self.x_divs.len() + 1) * (self.y_divs.len() + 1);
@@ -2370,14 +2369,14 @@ pub struct AutoRestoredCanvas<'a> {
     restore: SkAutoCanvasRestore,
 }
 
-impl<'a> Deref for AutoRestoredCanvas<'a> {
+impl Deref for AutoRestoredCanvas<'_> {
     type Target = Canvas;
     fn deref(&self) -> &Self::Target {
         self.canvas
     }
 }
 
-impl<'a> NativeAccess for AutoRestoredCanvas<'a> {
+impl NativeAccess for AutoRestoredCanvas<'_> {
     type Native = SkAutoCanvasRestore;
 
     fn native(&self) -> &SkAutoCanvasRestore {
@@ -2389,14 +2388,14 @@ impl<'a> NativeAccess for AutoRestoredCanvas<'a> {
     }
 }
 
-impl<'a> Drop for AutoRestoredCanvas<'a> {
+impl Drop for AutoRestoredCanvas<'_> {
     /// Restores [`Canvas`] to saved state. Drop is called when container goes out of scope.
     fn drop(&mut self) {
         unsafe { sb::C_SkAutoCanvasRestore_destruct(self.native_mut()) }
     }
 }
 
-impl<'a> AutoRestoredCanvas<'a> {
+impl AutoRestoredCanvas<'_> {
     /// Restores [`Canvas`] to saved state immediately. Subsequent calls and [`Self::drop()`] have
     /// no effect.
     pub fn restore(&mut self) {

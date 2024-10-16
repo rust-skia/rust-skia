@@ -216,13 +216,13 @@ impl<'pixels> Pixmap<'pixels> {
     pub fn bytes(&self) -> Option<&'pixels [u8]> {
         let addr = self.addr().into_option()?;
         let len = self.compute_byte_size();
-        return Some(unsafe { slice::from_raw_parts(addr as *const u8, len) });
+        Some(unsafe { slice::from_raw_parts(addr as *const u8, len) })
     }
 
     pub fn bytes_mut(&mut self) -> Option<&'pixels mut [u8]> {
         let addr = self.writable_addr().into_option()?;
         let len = self.compute_byte_size();
-        return Some(unsafe { slice::from_raw_parts_mut(addr.as_ptr() as *mut u8, len) });
+        Some(unsafe { slice::from_raw_parts_mut(addr.as_ptr() as *mut u8, len) })
     }
 
     /// Access the underlying pixels. This is a rust-skia specific function.

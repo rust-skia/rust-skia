@@ -359,7 +359,7 @@ pub mod run_handler {
         pub utf8_range: Range<usize>,
     }
 
-    impl<'a> RunInfo<'a> {
+    impl RunInfo<'_> {
         pub(crate) fn from_native(ri: &SkShaper_RunHandler_RunInfo) -> Self {
             // TODO: should we avoid that copy and wrap RunInfo with functions?
             let utf8_range = ri.utf8Range;

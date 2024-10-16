@@ -362,7 +362,6 @@ impl ImageInfo {
 }
 
 #[cfg(test)]
-
 mod tests {
     use crate::prelude::*;
     use crate::{AlphaType, ColorSpace, ImageInfo};
