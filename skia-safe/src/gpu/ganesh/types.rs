@@ -85,3 +85,43 @@ variant_name!(PurgeResourceOptions::AllResources);
 
 pub use sb::GrSyncCpu as SyncCpu;
 variant_name!(SyncCpu::Yes);
+
+pub use sb::GrMarkFrameBoundary as MarkFrameBoundary;
+variant_name!(MarkFrameBoundary::Yes);
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct SubmitInfo {
+    pub sync: SyncCpu,
+    pub mark_boundary: MarkFrameBoundary,
+    pub frame_id: u64,
+}
+native_transmutable!(sb::GrSubmitInfo, SubmitInfo, submit_info_layout);
+
+impl Default for SubmitInfo {
+    fn default() -> Self {
+        Self {
+            sync: SyncCpu::No,
+            mark_boundary: MarkFrameBoundary::No,
+            frame_id: 0,
+        }
+    }
+}
+
+impl From<SyncCpu> for SubmitInfo {
+    fn from(sync: SyncCpu) -> Self {
+        Self {
+            sync,
+            ..Self::default()
+        }
+    }
+}
+
+impl From<Option<SyncCpu>> for SubmitInfo {
+    fn from(sync_cpu: Option<SyncCpu>) -> Self {
+        match sync_cpu {
+            Some(sync_cpu) => sync_cpu.into(),
+            None => Self::default(),
+        }
+    }
+}
