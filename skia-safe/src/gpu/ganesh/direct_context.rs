@@ -10,7 +10,8 @@ use skia_bindings::{self as sb, GrDirectContext, GrDirectContext_DirectContextID
 use crate::{
     gpu::{
         BackendFormat, BackendRenderTarget, BackendTexture, ContextOptions, FlushInfo,
-        MutableTextureState, PurgeResourceOptions, RecordingContext, SemaphoresSubmitted, SyncCpu,
+        MutableTextureState, PurgeResourceOptions, RecordingContext, SemaphoresSubmitted,
+        SubmitInfo, SyncCpu,
     },
     prelude::*,
     surfaces, Data, Image, Surface, TextureCompressionType,
@@ -323,11 +324,8 @@ impl DirectContext {
         unsafe { self.native_mut().flush5(surface.native_mut()) }
     }
 
-    pub fn submit(&mut self, sync_cpu: impl Into<Option<SyncCpu>>) -> bool {
-        unsafe {
-            self.native_mut()
-                .submit(sync_cpu.into().unwrap_or(SyncCpu::No))
-        }
+    pub fn submit(&mut self, submit_info: impl Into<SubmitInfo>) -> bool {
+        unsafe { self.native_mut().submit(&submit_info.into().into_native()) }
     }
 
     pub fn check_async_work_completion(&mut self) {
@@ -446,5 +444,19 @@ impl DirectContext {
         let mut id = DirectContextId { id: 0 };
         unsafe { sb::C_GrDirectContext_directContextId(self.native(), id.native_mut()) }
         id
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::DirectContext;
+    use crate::gpu::{SubmitInfo, SyncCpu};
+
+    #[allow(unused)]
+    fn submit_invocation(direct_context: &mut DirectContext) {
+        direct_context.submit(SyncCpu::Yes);
+        direct_context.submit(None);
+        direct_context.submit(Some(SyncCpu::Yes));
+        direct_context.submit(SubmitInfo::default());
     }
 }
