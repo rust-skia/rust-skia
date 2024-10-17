@@ -395,7 +395,8 @@ impl<'a> Iterator for Borrows<'a, Handle<SkTextBlob_Iter>> {
 }
 
 #[test]
-fn test_point_size_equals_size_of_two_scalars_used_in_alloc_run_pos() {
+fn test_point_size_and_alignment_equals_size_of_two_scalars_used_in_alloc_run_pos() {
     use std::mem;
-    assert_eq!(mem::size_of::<Point>(), mem::size_of::<[scalar; 2]>())
+    assert_eq!(mem::size_of::<Point>(), mem::size_of::<[scalar; 2]>());
+    assert_eq!(mem::align_of::<Point>(), mem::align_of::<[scalar; 2]>());
 }
