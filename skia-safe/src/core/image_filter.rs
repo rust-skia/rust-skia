@@ -102,7 +102,7 @@ impl ImageFilter {
         })
     }
 
-    pub fn inputs(&self) -> impl Iterator<Item = Option<ImageFilter>> + Captures<&Self> {
+    pub fn inputs(&self) -> impl Iterator<Item = Option<ImageFilter>> + use<'_> {
         (0..self.count_inputs()).map(move |i| self.get_input(i))
     }
 
