@@ -16,12 +16,14 @@ use skia_bindings::{
 pub(crate) unsafe fn transmute_ref<FromT, ToT>(from: &FromT) -> &ToT {
     // TODO: can we do this statically for all instantiations of transmute_ref?
     debug_assert_eq!(mem::size_of::<FromT>(), mem::size_of::<ToT>());
+    debug_assert_eq!(mem::align_of::<FromT>(), mem::align_of::<ToT>());
     &*(from as *const FromT as *const ToT)
 }
 
 pub(crate) unsafe fn transmute_ref_mut<FromT, ToT>(from: &mut FromT) -> &mut ToT {
     // TODO: can we do this statically for all instantiations of transmute_ref_mut?
     debug_assert_eq!(mem::size_of::<FromT>(), mem::size_of::<ToT>());
+    debug_assert_eq!(mem::align_of::<FromT>(), mem::align_of::<ToT>());
     &mut *(from as *mut FromT as *mut ToT)
 }
 
@@ -775,9 +777,11 @@ where
         np as _
     }
 
-    /// Runs a test that proves that the native and the Rust type are of the same size.
+    /// Runs a test that guarantees that the native and the Rust type are of the same size and
+    /// alignment.
     fn test_layout() {
         assert_eq!(mem::size_of::<Self>(), mem::size_of::<NT>());
+        assert_eq!(mem::align_of::<Self>(), mem::align_of::<NT>());
     }
 
     fn construct(construct: impl FnOnce(*mut NT)) -> Self {
@@ -1053,10 +1057,14 @@ mod tests {
     use crate::RCHandle;
 
     #[test]
-    fn sp_equals_size_of_rc_handle() {
+    fn sp_equals_size_and_alignment_of_rc_handle() {
         assert_eq!(
             size_of::<sk_sp<SkFontMgr>>(),
             size_of::<RCHandle<SkFontMgr>>()
-        )
+        );
+        assert_eq!(
+            align_of::<sk_sp<SkFontMgr>>(),
+            align_of::<RCHandle<SkFontMgr>>()
+        );
     }
 }
