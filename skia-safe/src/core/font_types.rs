@@ -2,7 +2,7 @@ use std::{ffi, mem};
 
 use skia_bindings::SkTextEncoding;
 
-use crate::{prelude::*, GlyphId};
+use crate::GlyphId;
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug, Default)]
 #[repr(i32)]
@@ -33,7 +33,7 @@ pub trait EncodedText {
 ///
 /// # Safety
 /// The slice may not represent a UTF16 encoded string.
-pub unsafe fn as_utf16_unchecked(slice: &[u16]) -> impl EncodedText + Captures<&'_ [u16]> {
+pub unsafe fn as_utf16_unchecked(slice: &[u16]) -> impl EncodedText + use<'_> {
     UTF16Slice(slice)
 }
 
@@ -41,7 +41,7 @@ pub unsafe fn as_utf16_unchecked(slice: &[u16]) -> impl EncodedText + Captures<&
 ///
 /// # Safety
 /// The slice may not represent an actual UTF32 encoded string.
-pub unsafe fn as_utf32_unchecked(slice: &[u32]) -> impl EncodedText + Captures<&'_ [u32]> {
+pub unsafe fn as_utf32_unchecked(slice: &[u32]) -> impl EncodedText + use<'_> {
     UTF32Slice(slice)
 }
 
