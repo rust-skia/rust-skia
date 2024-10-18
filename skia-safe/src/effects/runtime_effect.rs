@@ -404,5 +404,59 @@ impl ChildPtr {
     }
 }
 
-// TODO: wrap SkRuntimeEffectBuilder, SkRuntimeShaderBuilder, SkRuntimeColorFilterBuilder,
+// TODO: wrap SkRuntimeEffectBuilder, SkRuntimeColorFilterBuilder,
 // SkRuntimeBlendBuilder
+
+pub type RuntimeShaderBuilder = Handle<sb::SkRuntimeShaderBuilder>;
+unsafe_send_sync!(RuntimeShaderBuilder);
+
+impl NativeDrop for sb::SkRuntimeShaderBuilder {
+    fn drop(&mut self) {
+        unsafe {
+            sb::C_SkRuntimeShaderBuilder_destruct(self);
+        }
+    }
+}
+
+impl RuntimeShaderBuilder {
+    pub fn new(effect: RuntimeEffect) -> Self {
+        Self::construct(|builder| unsafe {
+            let effect: *mut SkRuntimeEffect = effect.into_ptr() as _;
+            sb::C_SkRuntimeShaderBuilder_Construct(builder, effect)
+        })
+    }
+
+    pub fn make_shader(&self, local_matrix: &Matrix) -> Option<Shader> {
+        unsafe {
+            let instance = self.native_mut_force();
+            let shader =
+                sb::C_SkRuntimeShaderBuilder_makeShader(instance, local_matrix.native() as _);
+            Shader::from_ptr(shader)
+        }
+    }
+
+    pub fn set_uniform_float(&mut self, name: impl AsRef<str>, data: &[f32]) {
+        let name = name.as_ref();
+        unsafe {
+            sb::C_SkRuntimeShaderBuilder_setUniformFloat(
+                self.native_mut() as _,
+                name.as_bytes().as_ptr() as _,
+                name.len(),
+                data.as_ptr() as _,
+                data.len(),
+            )
+        };
+    }
+    pub fn set_uniform_int(&mut self, name: impl AsRef<str>, data: &[i32]) {
+        let name = name.as_ref();
+        unsafe {
+            sb::C_SkRuntimeShaderBuilder_setUniformInt(
+                self.native_mut() as _,
+                name.as_bytes().as_ptr() as _,
+                name.len(),
+                data.as_ptr() as _,
+                data.len(),
+            )
+        };
+    }
+}
