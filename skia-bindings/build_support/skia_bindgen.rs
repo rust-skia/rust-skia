@@ -736,6 +736,8 @@ const ENUM_REWRITES: &[EnumEntry] = &[
     ("SkSVGFeFuncType", rewrite::k_xxx),
     // SkSVGFeMorphology::Operator
     ("Operator", rewrite::k_xxx),
+    // SkResources.h
+    ("ImageDecodeStrategy", rewrite::k_xxx),
 ];
 
 pub(crate) mod rewrite {
