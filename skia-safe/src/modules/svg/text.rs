@@ -29,65 +29,44 @@ impl TextContainer {
         unsafe {
             safer::from_raw_parts(
                 Length::from_native_ptr(sb::C_SkSVGTextContainer_getX(self.native())),
-                self.x_count(),
+                sb::C_SkSVGTextContainer_getXCount(self.native()),
             )
         }
-    }
-
-    pub(crate) fn x_count(&self) -> usize {
-        unsafe { sb::C_SkSVGTextContainer_getXCount(self.native()) }
     }
 
     pub fn y(&self) -> &[Length] {
         unsafe {
             safer::from_raw_parts(
                 Length::from_native_ptr(sb::C_SkSVGTextContainer_getY(self.native())),
-                self.y_count(),
+                sb::C_SkSVGTextContainer_getYCount(self.native()),
             )
         }
-    }
-
-    pub(crate) fn y_count(&self) -> usize {
-        unsafe { sb::C_SkSVGTextContainer_getYCount(self.native()) }
     }
 
     pub fn dx(&self) -> &[Length] {
         unsafe {
             safer::from_raw_parts(
                 Length::from_native_ptr(sb::C_SkSVGTextContainer_getDx(self.native())),
-                self.dx_count(),
+                sb::C_SkSVGTextContainer_getDxCount(self.native()),
             )
         }
-    }
-
-    pub(crate) fn dx_count(&self) -> usize {
-        unsafe { sb::C_SkSVGTextContainer_getDxCount(self.native()) }
     }
 
     pub fn dy(&self) -> &[Length] {
         unsafe {
             safer::from_raw_parts(
                 Length::from_native_ptr(sb::C_SkSVGTextContainer_getDy(self.native())),
-                self.dy_count(),
+                sb::C_SkSVGTextContainer_getDyCount(self.native()),
             )
         }
-    }
-
-    pub(crate) fn dy_count(&self) -> usize {
-        unsafe { sb::C_SkSVGTextContainer_getDyCount(self.native()) }
     }
 
     pub fn rotate(&self) -> &[scalar] {
         unsafe {
-            safer::from_raw_parts(
-                sb::C_SkSVGTextContainer_getRotate(self.native()),
-                self.rotate_count(),
-            )
+            safer::from_raw_parts(sb::C_SkSVGTextContainer_getRotate(self.native()), {
+                sb::C_SkSVGTextContainer_getRotateCount(self.native())
+            })
         }
-    }
-
-    pub(crate) fn rotate_count(&self) -> usize {
-        unsafe { sb::C_SkSVGTextContainer_getRotateCount(self.native()) }
     }
 
     skia_svg_macros::attrs! {

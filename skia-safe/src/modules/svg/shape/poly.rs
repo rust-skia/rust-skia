@@ -32,12 +32,8 @@ impl Poly {
         unsafe {
             safer::from_raw_parts(
                 Point::from_native_ptr(sb::C_SkSVGPoly_getPoints(self.native())),
-                self.points_count(),
+                sb::C_SkSVGPoly_getPointsCount(self.native()),
             )
         }
-    }
-
-    pub(crate) fn points_count(&self) -> usize {
-        unsafe { sb::C_SkSVGPoly_getPointsCount(self.native()) }
     }
 }
