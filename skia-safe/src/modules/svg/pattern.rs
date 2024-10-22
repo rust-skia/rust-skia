@@ -15,6 +15,14 @@ impl DebugAttributes for Pattern {
 
     fn _dbg(&self, builder: &mut std::fmt::DebugStruct) {
         self.as_base()._dbg(builder);
+
+        builder
+            .field("href", &self.href())
+            .field("x", &self.x())
+            .field("y", &self.y())
+            .field("width", &self.width())
+            .field("height", &self.height())
+            .field("pattern_transform", &self.pattern_transform());
     }
 }
 

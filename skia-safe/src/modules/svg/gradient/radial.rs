@@ -21,7 +21,9 @@ impl DebugAttributes for Radial {
             builder
                 .field("cx", &self.cx())
                 .field("cy", &self.cy())
-                .field("r", &self.r()),
+                .field("r", &self.r())
+                .field("fx", &self.fx())
+                .field("fy", &self.fy()),
         );
     }
 }
