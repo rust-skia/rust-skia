@@ -272,7 +272,7 @@ pub fn build(
         env::current_dir()
             .unwrap()
             .join("depot_tools")
-            .join(ninja::default_exe_name())
+            .join(ninja::depot_tools_script_name())
     });
 
     if !offline {
@@ -403,7 +403,14 @@ mod prerequisites {
 mod ninja {
     use std::path::PathBuf;
 
-    pub fn default_exe_name() -> PathBuf {
-        if cfg!(windows) { "ninja.exe" } else { "ninja" }.into()
+    use super::cargo;
+
+    pub fn depot_tools_script_name() -> PathBuf {
+        if cargo::host().is_windows() {
+            "ninja.bat"
+        } else {
+            "ninja"
+        }
+        .into()
     }
 }
