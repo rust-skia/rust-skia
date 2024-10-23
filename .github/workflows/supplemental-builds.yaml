@@ -110,6 +110,9 @@ jobs:
     - name: Upgrade LLVM
       run: choco upgrade llvm
 
+    - name: Install Ninja
+      run: choco install ninja
+
     - name: 'Build with RUSTFLAGS=-Clink-dead-code (#318)'
       run: |
         # See https://github.com/rust-lang/rust/issues/90056 why we have to provide a target.
@@ -136,6 +139,9 @@ jobs:
 
     - name: Upgrade LLVM
       run: choco upgrade llvm
+
+    - name: Install Ninja
+      run: choco install ninja
 
     - name: 'Build with RUSTFLAGS=-Clink-dead-code (#318)'
       run: |
