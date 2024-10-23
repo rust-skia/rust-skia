@@ -31,7 +31,7 @@ doctest = false
 # Note: use short hashes here because of filesystem path size restrictions.
 [package.metadata]
 skia = "m130-0.78.1"
-depot_tools = "73a2624"
+depot_tools = "cc924d1"
 
 [features]
 default = ["binary-cache", "embed-icudtl"]
