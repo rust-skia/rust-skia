@@ -58,7 +58,7 @@ The supported wrappers, Skia codecs, and additional Skia features are documented
 
 If the target platform or feature configuration is not available as a prebuilt binary, skia-bindings' `build.rs` will try to build Skia and generate the Rust bindings.
 
-To prepare for that, **LLVM** and **Python 3** are needed:
+For building Skia from source, **LLVM**, **Python 3**, and **Ninja** are required:
 
 **LLVM**
 
@@ -67,6 +67,10 @@ We recommend the version that comes preinstalled with your platform, or, if not 
 **Python 3**
 
 The build script probes for `python --version` and `python3 --version` and uses the first one that looks like a version 3 executable for building Skia.
+
+**Ninja**
+
+The build system for Skia. `ninja` is available as a binary package on all major platforms. Install `ninja` or `ninja-build` and make sure it is available `PATH` with `ninja --version`.
 
 ### On macOS
 
