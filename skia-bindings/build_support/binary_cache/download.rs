@@ -9,9 +9,9 @@ use std::{
     process::{Command, Stdio},
 };
 
-/// Resolve the `skia/` and `depot_tools/` subdirectory contents, either by checking out the
-/// submodules, or when `build.rs` was invoked outside of the git repository by downloading and
-/// unpacking them from GitHub.
+/// Resolve the `skia/` subdirectory contents, either by checking out the submodules, or when
+/// `build.rs` was invoked outside of the git repository by downloading and unpacking them from
+/// GitHub.
 pub fn resolve_dependencies() {
     if cargo::is_crate() {
         // In a crate.
@@ -37,7 +37,7 @@ pub fn resolve_dependencies() {
     }
 }
 
-/// Downloads the `skia` and `depot_tools` from their repositories.
+/// Downloads the `skia` from its repository.
 ///
 /// The hashes are taken from the `Cargo.toml` section `[package.metadata]`.
 fn download_dependencies() {
@@ -117,34 +117,17 @@ struct Dependency {
     pub path_filter: fn(&Path) -> bool,
 }
 
-const DEPENDENCIES: [Dependency; 2] = [
-    Dependency {
-        repo: "skia",
-        url: "https://codeload.github.com/rust-skia/skia/tar.gz",
-        path_filter: filter_skia,
-    },
-    Dependency {
-        repo: "depot_tools",
-        url: "https://codeload.github.com/rust-skia/depot_tools/tar.gz",
-        path_filter: filter_depot_tools,
-    },
-];
+const DEPENDENCIES: &[Dependency] = &[Dependency {
+    repo: "skia",
+    url: "https://codeload.github.com/rust-skia/skia/tar.gz",
+    path_filter: filter_skia,
+}];
 
 // `infra/` contains very long filenames which may hit the max path restriction on Windows.
 // <https://github.com/rust-skia/rust-skia/issues/169>
 fn filter_skia(p: &Path) -> bool {
     !matches!(p.components().next(),
             Some(Component::Normal(name)) if name == OsStr::new("infra"))
-}
-
-// Need only `ninja` and what `ninja.py` refers to from `depot_tools/`.
-// <https://github.com/rust-skia/rust-skia/pull/165>
-fn filter_depot_tools(p: &Path) -> bool {
-    if p.components().count() != 1 {
-        return false;
-    }
-    let str = p.to_str().unwrap();
-    str.starts_with("ninja") || str.ends_with(".py")
 }
 
 impl binaries_config::BinariesConfiguration {
