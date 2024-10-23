@@ -15,3 +15,7 @@ steps:
 
 - name: Install Clippy
   run: rustup component add clippy
+
+- name: Install Ninja
+  run: brew install ninja
+

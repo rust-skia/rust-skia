@@ -23,3 +23,6 @@ steps:
 
 - name: Upgrade LLVM
   run: choco upgrade llvm
+
+- name: Install Ninja
+  run: choco install ninja

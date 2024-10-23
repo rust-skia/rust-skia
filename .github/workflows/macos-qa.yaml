@@ -34,6 +34,9 @@ jobs:
 
     - name: Install Clippy
       run: rustup component add clippy
+
+    - name: Install Ninja
+      run: brew install ninja
     - name: 'Install Rust target x86_64-apple-darwin'
       shell: bash
       run: |
@@ -437,6 +440,9 @@ jobs:
 
     - name: Install Clippy
       run: rustup component add clippy
+
+    - name: Install Ninja
+      run: brew install ninja
     - name: 'Install Rust target x86_64-apple-darwin'
       shell: bash
       run: |
