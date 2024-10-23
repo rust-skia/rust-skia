@@ -82,14 +82,6 @@ The build system for Skia. `ninja` is available as a binary package on all major
 
   or download and install the [Command Line Tools for Xcode](https://developer.apple.com/download/more/).
 
-- **macOS Mojave only**: install the SDK headers:
-
-  ```bash
-  sudo open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg
-  ```
-
-  If not installed, the Skia build _may_ fail to build `SkJpegUtility.cpp` and the binding generation _will_ fail with `'TargetConditionals.h' file not found` . Also note that the Command Line Tools _and_ SDK headers _should_ be reinstalled after an update of XCode.
-
 - As an alternative to Apple's XCode LLVM, install LLVM via `brew install llvm` or `brew install llvm` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` like instructed.
 
   If the environment variables are not set, [bindgen](https://github.com/rust-lang/rust-bindgen) will most likely use the wrong `libclang.dylib` and cause confusing compilation errors (see #228).
@@ -119,38 +111,12 @@ The build system for Skia. `ninja` is available as a binary package on all major
 
 ### On Linux
 
-#### Ubuntu 16+
+#### Ubuntu 20+
 
 - LLVM/Clang should be available already, if not, [install the latest version](http://releases.llvm.org/download.html).
 - If OpenGL libraries are missing, install the drivers for you graphics card, or a mesa package like `libgl1-mesa-dev`.
 - For **X11**, build with feature `x11`.
 - For **Wayland**, install `libwayland-dev` and build with the `wayland` feature.
-
-#### CentOS 7
-
-- Install the following packages:
-
-  ```bash
-  sudo yum install gcc openssl-devel libX11-devel python3 fontconfig-devel mesa-libGL-devel
-  ```
-
-- [Install and enable the LLVM toolset 7](https://www.softwarecollections.org/en/scls/rhscl/llvm-toolset-7.0/)
-
-- [Install and enable the Developer Toolset 8](https://www.softwarecollections.org/en/scls/rhscl/devtoolset-8/)
-
-#### CentOS 8
-
-- Install the following packages:
-
-  ```bash
-  sudo yum install gcc openssl-devel libX11-devel python3 clang fontconfig-devel mesa-libGL-devel
-  ```
-
-- Set `/usr/bin/python3` as the default `python` command:
-
-  ```bash
-  sudo alternatives --set python /usr/bin/python3
-  ```
 
 ### For Android
 
