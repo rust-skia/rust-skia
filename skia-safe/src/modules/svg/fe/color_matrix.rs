@@ -36,12 +36,8 @@ impl ColorMatrix {
         unsafe {
             safer::from_raw_parts(
                 sb::C_SkSVGFeColorMatrix_getValues(self.native()),
-                self.values_count(),
+                sb::C_SkSVGFeColorMatrix_getValuesCount(self.native()),
             )
         }
-    }
-
-    pub(crate) fn values_count(&self) -> usize {
-        unsafe { sb::C_SkSVGFeColorMatrix_getValuesCount(self.native()) }
     }
 }

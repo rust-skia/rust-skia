@@ -49,13 +49,9 @@ impl Func {
         unsafe {
             safer::from_raw_parts(
                 sb::C_SkSVGFeFunc_getTableValues(self.native()),
-                self.table_values_count(),
+                sb::C_SkSVGFeFunc_getTableValuesCount(self.native()),
             )
         }
-    }
-
-    pub(crate) fn table_values_count(&self) -> usize {
-        unsafe { sb::C_SkSVGFeFunc_getTableValuesCount(self.native()) }
     }
 
     // TODO: wrap getTable()
