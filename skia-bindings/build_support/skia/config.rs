@@ -267,13 +267,7 @@ pub fn build(
 ) {
     let python = &prerequisites::locate_python3_cmd();
     println!("Python 3 found: {python:?}");
-
-    let ninja = ninja_command.unwrap_or_else(|| {
-        env::current_dir()
-            .unwrap()
-            .join("depot_tools")
-            .join(ninja::default_exe_name())
-    });
+    let ninja = ninja_command.unwrap_or_else(ninja::exe_name);
 
     if !offline {
         println!("Synchronizing Skia dependencies");
@@ -357,7 +351,7 @@ pub fn build_skia(config: &binaries_config::BinariesConfiguration, ninja_command
 
     assert!(
         ninja_status
-            .expect("failed to run `ninja`, does the directory depot_tools/ exist?")
+            .expect("failed to run `ninja`, does it exist in PATH?")
             .success(),
         "`ninja` returned an error, please check the output for details."
     );
@@ -403,7 +397,14 @@ mod prerequisites {
 mod ninja {
     use std::path::PathBuf;
 
-    pub fn default_exe_name() -> PathBuf {
-        if cfg!(windows) { "ninja.exe" } else { "ninja" }.into()
+    use super::cargo;
+
+    pub fn exe_name() -> PathBuf {
+        if cargo::host().is_windows() {
+            "ninja.exe"
+        } else {
+            "ninja"
+        }
+        .into()
     }
 }

@@ -27,11 +27,10 @@ include = [
 [lib]
 doctest = false
 
-# Metadata used from inside the packaged crate that defines where to download skia and depot_tools archives from.
+# Metadata used from inside the packaged crate that defines where to download the Skia archive from.
 # Note: use short hashes here because of filesystem path size restrictions.
 [package.metadata]
 skia = "m130-0.78.1"
-depot_tools = "73a2624"
 
 [features]
 default = ["binary-cache", "embed-icudtl"]
@@ -68,8 +67,6 @@ bindgen = { version = "0.70.1" }
 regex = "1.4.5"
 heck = "0.5.0"
 
-# For downloading and extracting prebuilt binaries and skia / depot_tools archives:
-# ureq = { version = "2.8.0", optional = true }
 flate2 = { version = "1.0.7", optional = true }
 tar = { version = "0.4.26", optional = true }
 
