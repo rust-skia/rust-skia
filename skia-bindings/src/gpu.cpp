@@ -1,16 +1,16 @@
 #include "bindings.h"
 
-#include "include/gpu/GrDirectContext.h"
-#include "include/gpu/GrYUVABackendTextures.h"
-#include "include/gpu/MutableTextureState.h"
-#include "include/gpu/ganesh/SkImageGanesh.h"
-#include "include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColorSpace.h"
 #include "include/core/SkDrawable.h"
 #include "include/core/SkPicture.h"
 #include "include/core/SkSurface.h"
 #include "include/core/SkImageGenerator.h"
+#include "include/gpu/MutableTextureState.h"
+#include "include/gpu/ganesh/GrDirectContext.h"
+#include "include/gpu/ganesh/GrYUVABackendTextures.h"
+#include "include/gpu/ganesh/SkImageGanesh.h"
+#include "include/gpu/ganesh/SkSurfaceGanesh.h"
 
 extern "C" void C_GpuUnreferencedTypes(skgpu::Origin *) {}
 
