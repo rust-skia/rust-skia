@@ -5,7 +5,7 @@ use crate::{
 };
 use sb::{SkFlattenable, SkRuntimeEffect_Child};
 use skia_bindings::{
-    self as sb, SkRefCntBase, SkRuntimeEffect, SkRuntimeEffect_Options, SkRuntimeEffect_Uniform,
+    self as sb, ShaderBuilderUniformResult, SkRefCntBase, SkRuntimeEffect, SkRuntimeEffect_Options, SkRuntimeEffect_Uniform,
 };
 use std::{fmt, marker::PhantomData, ops::DerefMut, ptr};
 
@@ -434,10 +434,22 @@ impl RuntimeShaderBuilder {
             Shader::from_ptr(shader)
         }
     }
-
-    pub fn set_uniform_float(&mut self, name: impl AsRef<str>, data: &[f32]) {
+    /// Set float uniform values by name. 
+    /// 
+    /// Supported types are `float`, `float2`, `float3`, `float4`, `float2x2`, `float3x3`, `float4x4`.
+    /// 
+    /// The data array must have the correct length for the corresponding uniform type:
+    /// - `float`: `[f32; 1]`
+    /// - `float2`: `[f32; 2]`
+    /// - `float3`: `[f32; 3]`
+    /// - `float4`: `[f32; 4]`
+    /// - `float2x2`: `[f32; 4]`
+    /// - `float3x3`: `[f32; 9]`
+    /// - `float4x4`: `[f32; 16]`
+    /// 
+    pub fn set_uniform_float(&mut self, name: impl AsRef<str>, data: &[f32]) -> Result<(), ()> {
         let name = name.as_ref();
-        unsafe {
+        let result = unsafe {
             sb::C_SkRuntimeShaderBuilder_setUniformFloat(
                 self.native_mut() as _,
                 name.as_bytes().as_ptr() as _,
@@ -446,10 +458,25 @@ impl RuntimeShaderBuilder {
                 data.len(),
             )
         };
+        match result {
+            ShaderBuilderUniformResult::Ok => Ok(()),
+            ShaderBuilderUniformResult::Error => Err(()),
+        }
     }
-    pub fn set_uniform_int(&mut self, name: impl AsRef<str>, data: &[i32]) {
+    /// Set int uniform values by name.
+    /// 
+    /// Supported types are `int`, `int2`, `int3`, `int4`.
+    /// 
+    /// The data array must have the correct length for the corresponding uniform type:
+    /// - `int`: `[i32; 1]`
+    /// - `int2`: `[i32; 2]`
+    /// - `int3`: `[i32; 3]`
+    /// - `int4`: `[i32; 4]`
+    ///
+    /// 
+    pub fn set_uniform_int(&mut self, name: impl AsRef<str>, data: &[i32]) -> Result<(), ()> {
         let name = name.as_ref();
-        unsafe {
+        let result = unsafe {
             sb::C_SkRuntimeShaderBuilder_setUniformInt(
                 self.native_mut() as _,
                 name.as_bytes().as_ptr() as _,
@@ -458,5 +485,9 @@ impl RuntimeShaderBuilder {
                 data.len(),
             )
         };
+        match result {
+            ShaderBuilderUniformResult::Ok => Ok(()),
+            ShaderBuilderUniformResult::Error => Err(()),
+        }
     }
 }

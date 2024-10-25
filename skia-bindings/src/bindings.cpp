@@ -2675,7 +2675,12 @@ C_SkRuntimeShaderBuilder_makeShader(const SkRuntimeShaderBuilder *self,
   return shader.release();
 }
 
-void C_SkRuntimeShaderBuilder_setUniformFloat(SkRuntimeShaderBuilder *self,
+enum class ShaderBuilderUniformResult {
+  Ok,
+  Error
+};
+
+ShaderBuilderUniformResult C_SkRuntimeShaderBuilder_setUniformFloat(SkRuntimeShaderBuilder *self,
                                               const char *name, size_t count,
                                               const float *const values,
                                               size_t len) {
@@ -2688,31 +2693,33 @@ void C_SkRuntimeShaderBuilder_setUniformFloat(SkRuntimeShaderBuilder *self,
   switch (len) {
   case 1:
     self->uniform(std::string_view(name, count)) = *values;
-    break;
+    return ShaderBuilderUniformResult::Ok;
   case 2:
     self->uniform(std::string_view(name, count)) =
         *reinterpret_cast<const float2 *>(values);
-    break;
+    return ShaderBuilderUniformResult::Ok;
   case 3:
     self->uniform(std::string_view(name, count)) =
         *reinterpret_cast<const float3 *>(values);
-    break;
+    return ShaderBuilderUniformResult::Ok;
   case 4:
     self->uniform(std::string_view(name, count)) =
         *reinterpret_cast<const float4 *>(values);
-    break;
+    return ShaderBuilderUniformResult::Ok;
   case 9:
     self->uniform(std::string_view(name, count)) =
         *reinterpret_cast<const float3x3 *>(values);
-    break;
+    return ShaderBuilderUniformResult::Ok;
   case 16:
     self->uniform(std::string_view(name, count)) =
         *reinterpret_cast<const float4x4 *>(values);
-    break;
+    return ShaderBuilderUniformResult::Ok;
   }
+
+  return ShaderBuilderUniformResult::Error;
 }
 
-void C_SkRuntimeShaderBuilder_setUniformInt(SkRuntimeShaderBuilder *self,
+ShaderBuilderUniformResult C_SkRuntimeShaderBuilder_setUniformInt(SkRuntimeShaderBuilder *self,
                                             const char *name, size_t count,
                                             const int *const values,
                                             size_t len) {
@@ -2722,20 +2729,21 @@ void C_SkRuntimeShaderBuilder_setUniformInt(SkRuntimeShaderBuilder *self,
   switch (len) {
   case 1:
     self->uniform(std::string_view(name, count)) = *values;
-    break;
+    return ShaderBuilderUniformResult::Ok;
   case 2:
     self->uniform(std::string_view(name, count)) =
         *reinterpret_cast<const int2 *>(values);
-    break;
+    return ShaderBuilderUniformResult::Ok;
   case 3:
     self->uniform(std::string_view(name, count)) =
         *reinterpret_cast<const int3 *>(values);
-    break;
+    return ShaderBuilderUniformResult::Ok;
   case 4:
     self->uniform(std::string_view(name, count)) =
         *reinterpret_cast<const int4 *>(values);
-    break;
+    return ShaderBuilderUniformResult::Ok;
   }
+  return ShaderBuilderUniformResult::Error;
 }
 }
 
