@@ -100,6 +100,7 @@ pub fn release_jobs(workflow: &Workflow) -> Vec<Job> {
         HostOS::MacOS => {
             jobs.push(release_job("metal"));
             jobs.push(release_job("metal,textlayout"));
+            jobs.push(release_job("metal,gl,textlayout"));
         }
     }
 
