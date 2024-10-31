@@ -5,7 +5,8 @@ use crate::{
 };
 use sb::{SkFlattenable, SkRuntimeEffect_Child};
 use skia_bindings::{
-    self as sb, SkRefCntBase, SkRuntimeEffect, SkRuntimeEffect_Options, SkRuntimeEffect_Uniform,
+    self as sb, ShaderBuilderUniformResult, SkRefCntBase, SkRuntimeEffect, SkRuntimeEffect_Options,
+    SkRuntimeEffect_Uniform,
 };
 use std::{fmt, marker::PhantomData, ops::DerefMut, ptr};
 
@@ -404,5 +405,111 @@ impl ChildPtr {
     }
 }
 
-// TODO: wrap SkRuntimeEffectBuilder, SkRuntimeShaderBuilder, SkRuntimeColorFilterBuilder,
+// TODO: wrap SkRuntimeEffectBuilder, SkRuntimeColorFilterBuilder,
 // SkRuntimeBlendBuilder
+
+pub type RuntimeShaderBuilder = Handle<sb::SkRuntimeShaderBuilder>;
+unsafe_send_sync!(RuntimeShaderBuilder);
+
+#[derive(Debug)]
+pub enum ShaderBuilderError {
+    UniformSizeNotSupported,
+}
+impl fmt::Display for ShaderBuilderError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ShaderBuilderError::UniformSizeNotSupported => write!(f, "Unsupported uniform size"),
+        }
+    }
+}
+impl std::error::Error for ShaderBuilderError {}
+
+impl NativeDrop for sb::SkRuntimeShaderBuilder {
+    fn drop(&mut self) {
+        unsafe {
+            sb::C_SkRuntimeShaderBuilder_destruct(self);
+        }
+    }
+}
+
+impl RuntimeShaderBuilder {
+    pub fn new(effect: RuntimeEffect) -> Self {
+        Self::construct(|builder| unsafe {
+            let effect: *mut SkRuntimeEffect = effect.into_ptr() as _;
+            sb::C_SkRuntimeShaderBuilder_Construct(builder, effect)
+        })
+    }
+
+    pub fn make_shader(&self, local_matrix: &Matrix) -> Option<Shader> {
+        unsafe {
+            let instance = self.native_mut_force();
+            let shader =
+                sb::C_SkRuntimeShaderBuilder_makeShader(instance, local_matrix.native() as _);
+            Shader::from_ptr(shader)
+        }
+    }
+    /// Set float uniform values by name.
+    ///
+    /// Supported types are `float`, `float2`, `float3`, `float4`, `float2x2`, `float3x3`, `float4x4`.
+    ///
+    /// The data array must have the correct length for the corresponding uniform type:
+    /// - `float`: `[f32; 1]`
+    /// - `float2`: `[f32; 2]`
+    /// - `float3`: `[f32; 3]`
+    /// - `float4`: `[f32; 4]`
+    /// - `float2x2`: `[f32; 4]`
+    /// - `float3x3`: `[f32; 9]`
+    /// - `float4x4`: `[f32; 16]`
+    ///
+    pub fn set_uniform_float(
+        &mut self,
+        name: impl AsRef<str>,
+        data: &[f32],
+    ) -> Result<(), ShaderBuilderError> {
+        let name = name.as_ref();
+        let result = unsafe {
+            sb::C_SkRuntimeShaderBuilder_setUniformFloat(
+                self.native_mut() as _,
+                name.as_bytes().as_ptr() as _,
+                name.len(),
+                data.as_ptr() as _,
+                data.len(),
+            )
+        };
+        match result {
+            ShaderBuilderUniformResult::Ok => Ok(()),
+            ShaderBuilderUniformResult::Error => Err(ShaderBuilderError::UniformSizeNotSupported),
+        }
+    }
+    /// Set int uniform values by name.
+    ///
+    /// Supported types are `int`, `int2`, `int3`, `int4`.
+    ///
+    /// The data array must have the correct length for the corresponding uniform type:
+    /// - `int`: `[i32; 1]`
+    /// - `int2`: `[i32; 2]`
+    /// - `int3`: `[i32; 3]`
+    /// - `int4`: `[i32; 4]`
+    ///
+    ///
+    pub fn set_uniform_int(
+        &mut self,
+        name: impl AsRef<str>,
+        data: &[i32],
+    ) -> Result<(), ShaderBuilderError> {
+        let name = name.as_ref();
+        let result = unsafe {
+            sb::C_SkRuntimeShaderBuilder_setUniformInt(
+                self.native_mut() as _,
+                name.as_bytes().as_ptr() as _,
+                name.len(),
+                data.as_ptr() as _,
+                data.len(),
+            )
+        };
+        match result {
+            ShaderBuilderUniformResult::Ok => Ok(()),
+            ShaderBuilderUniformResult::Error => Err(ShaderBuilderError::UniformSizeNotSupported),
+        }
+    }
+}

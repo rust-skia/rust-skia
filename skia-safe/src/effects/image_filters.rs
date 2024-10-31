@@ -486,9 +486,25 @@ pub fn picture<'a>(
     })
 }
 
-// TODO: RuntimeShader
+pub fn runtime_shader(
+    builder: &RuntimeShaderBuilder,
+    child_shader_name: impl AsRef<str>,
+    input: impl Into<Option<ImageFilter>>,
+) -> Option<ImageFilter> {
+    let child_shader_name = child_shader_name.as_ref();
+    unsafe {
+        ImageFilter::from_ptr(sb::C_SkImageFilters_RuntimeShader(
+            builder.native() as *const _,
+            child_shader_name.as_ptr() as *const _,
+            child_shader_name.len(),
+            input.into().into_ptr_or_null(),
+        ))
+    }
+}
 
 pub use skia_bindings::SkImageFilters_Dither as Dither;
+
+use super::runtime_effect::RuntimeShaderBuilder;
 variant_name!(Dither::Yes);
 
 /// Create a filter that fills the output with the per-pixel evaluation of the [`Shader`]. The

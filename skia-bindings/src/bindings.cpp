@@ -2648,6 +2648,92 @@ bool C_SkRuntimeEffect_allowBlender(const SkRuntimeEffect* self) {
     return self->allowBlender();
 }
 
+void C_SkRuntimeShaderBuilder_Construct(SkRuntimeShaderBuilder *uninitialized,
+                                        SkRuntimeEffect *effect) {
+  new (uninitialized) SkRuntimeShaderBuilder(sp(effect));
+}
+
+void C_SkRuntimeShaderBuilder_destruct(SkRuntimeShaderBuilder *self) {
+  self->~SkRuntimeShaderBuilder();
+}
+
+SkShader *
+C_SkRuntimeShaderBuilder_makeShader(const SkRuntimeShaderBuilder *self,
+                                    const SkMatrix *localMatrix) {
+  auto shader = self->makeShader(localMatrix);
+  return shader.release();
+}
+
+enum class ShaderBuilderUniformResult {
+  Ok,
+  Error
+};
+
+ShaderBuilderUniformResult C_SkRuntimeShaderBuilder_setUniformFloat(SkRuntimeShaderBuilder *self,
+                                              const char *name, size_t count,
+                                              const float *const values,
+                                              size_t len) {
+  using float2 = std::array<float, 2>;
+  using float3 = std::array<float, 3>;
+  using float4 = std::array<float, 4>;
+  using float3x3 = std::array<float, 9>;
+  using float4x4 = std::array<float, 16>;
+
+  switch (len) {
+  case 1:
+    self->uniform(std::string_view(name, count)) = *values;
+    return ShaderBuilderUniformResult::Ok;
+  case 2:
+    self->uniform(std::string_view(name, count)) =
+        *reinterpret_cast<const float2 *>(values);
+    return ShaderBuilderUniformResult::Ok;
+  case 3:
+    self->uniform(std::string_view(name, count)) =
+        *reinterpret_cast<const float3 *>(values);
+    return ShaderBuilderUniformResult::Ok;
+  case 4:
+    self->uniform(std::string_view(name, count)) =
+        *reinterpret_cast<const float4 *>(values);
+    return ShaderBuilderUniformResult::Ok;
+  case 9:
+    self->uniform(std::string_view(name, count)) =
+        *reinterpret_cast<const float3x3 *>(values);
+    return ShaderBuilderUniformResult::Ok;
+  case 16:
+    self->uniform(std::string_view(name, count)) =
+        *reinterpret_cast<const float4x4 *>(values);
+    return ShaderBuilderUniformResult::Ok;
+  }
+
+  return ShaderBuilderUniformResult::Error;
+}
+
+ShaderBuilderUniformResult C_SkRuntimeShaderBuilder_setUniformInt(SkRuntimeShaderBuilder *self,
+                                            const char *name, size_t count,
+                                            const int *const values,
+                                            size_t len) {
+  using int2 = std::array<int, 2>;
+  using int3 = std::array<int, 3>;
+  using int4 = std::array<int, 4>;
+  switch (len) {
+  case 1:
+    self->uniform(std::string_view(name, count)) = *values;
+    return ShaderBuilderUniformResult::Ok;
+  case 2:
+    self->uniform(std::string_view(name, count)) =
+        *reinterpret_cast<const int2 *>(values);
+    return ShaderBuilderUniformResult::Ok;
+  case 3:
+    self->uniform(std::string_view(name, count)) =
+        *reinterpret_cast<const int3 *>(values);
+    return ShaderBuilderUniformResult::Ok;
+  case 4:
+    self->uniform(std::string_view(name, count)) =
+        *reinterpret_cast<const int4 *>(values);
+    return ShaderBuilderUniformResult::Ok;
+  }
+  return ShaderBuilderUniformResult::Error;
+}
 }
 
 //
@@ -2865,6 +2951,14 @@ C_SkImageFilters_SpotLitSpecular(const SkPoint3 &location,
                                            cropRect).release();
 }
 
+SkImageFilter *C_SkImageFilters_RuntimeShader(
+    const SkRuntimeShaderBuilder &builder, const char *childShaderName,
+    size_t childShaderNameCount, SkImageFilter *input) {
+  auto imageFilter = SkImageFilters::RuntimeShader(
+      builder, std::string_view(childShaderName, childShaderNameCount),
+      sp(input));
+  return imageFilter.release();
+}
 }
 
 //
