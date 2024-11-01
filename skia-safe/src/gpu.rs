@@ -1,25 +1,23 @@
 #[cfg(feature = "d3d")]
 pub mod d3d;
-mod ganesh;
+pub mod ganesh;
 #[cfg(feature = "gl")]
 pub mod gl;
 mod mutable_texture_state;
+mod types;
 #[cfg(feature = "vulkan")]
 pub mod vk;
 
-pub use context_options::ContextOptions;
-pub use ganesh::backend_surface::*;
-pub use ganesh::context_options;
-pub use ganesh::direct_context::*;
-pub use ganesh::driver_bug_workarounds::*;
-pub use ganesh::image_ganesh as images;
-pub use ganesh::recording_context::*;
-pub use ganesh::types::*;
-pub use ganesh::yuva_backend_textures::*;
-pub use mutable_texture_state::*;
+// Ganesh re-exports (these will probably be conflict with future graphite types)
+pub use ganesh::{
+    context_options::ContextOptions, images, BackendAPI, BackendFormat, BackendRenderTarget,
+    BackendTexture, DirectContext, DirectContextId, DriverBugWorkarounds, FlushInfo,
+    PurgeResourceOptions, RecordingContext, SemaphoresSubmitted, SubmitInfo, SurfaceOrigin,
+    SyncCpu, YUVABackendTextureInfo, YUVABackendTextures,
+};
 
-#[deprecated(since = "0.37.0", note = "Use RecordingContext or DirectContext")]
-pub type Context = DirectContext;
+pub use mutable_texture_state::*;
+pub use types::*;
 
 #[cfg(feature = "metal")]
 pub mod mtl {

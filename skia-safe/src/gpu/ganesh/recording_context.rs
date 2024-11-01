@@ -1,10 +1,11 @@
+use std::fmt;
+
 use crate::{
     gpu::{BackendAPI, BackendFormat, DirectContext, Renderable},
     prelude::*,
     ColorType, TextureCompressionType,
 };
 use skia_bindings::{self as sb, GrRecordingContext, SkRefCntBase};
-use std::fmt;
 
 pub type RecordingContext = RCHandle<GrRecordingContext>;
 
