@@ -2997,12 +2997,18 @@ bool C_SkJpegEncoder_Encode(SkWStream* stream, const SkPixmap* pixmap,
     int quality,
     SkJpegEncoder::Downsample downsample, 
     SkJpegEncoder::AlphaOption alphaOption, 
-    const SkData* xmpMetadata) {
+    const SkData* xmpMetadata, 
+    const SkEncodedOrigin* origin) {
+
     auto options = SkJpegEncoder::Options();
     options.fQuality = quality;
     options.fDownsample = downsample;
     options.fAlphaOption = alphaOption;
     options.xmpMetadata = xmpMetadata;
+    if (origin) {
+        options.fOrigin = *origin;
+    }
+
     return SkJpegEncoder::Encode(stream, *pixmap, options);
 }
 
@@ -3010,12 +3016,18 @@ SkData* C_SkJpegEncoder_EncodeImage(GrDirectContext* ctx, const SkImage* img,
     int quality,
     SkJpegEncoder::Downsample downsample, 
     SkJpegEncoder::AlphaOption alphaOption, 
-    const SkData* xmpMetadata) {
+    const SkData* xmpMetadata,
+    const SkEncodedOrigin* origin) {
+
     auto options = SkJpegEncoder::Options();
     options.fQuality = quality;
     options.fDownsample = downsample;
     options.fAlphaOption = alphaOption;
     options.xmpMetadata = xmpMetadata;
+    if (origin) {
+        options.fOrigin = *origin;
+    }
+
     return SkJpegEncoder::Encode(ctx, img, options).release();
 }
 
