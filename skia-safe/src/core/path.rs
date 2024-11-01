@@ -30,6 +30,8 @@ pub use path_types::PathSegmentMask as SegmentMask;
 /// Verb instructs [`Path`] how to interpret one or more [`Point`] and optional conic weight;
 /// manage contour, and terminate [`Path`].
 pub use sb::SkPath_Verb as Verb;
+
+use super::Arc;
 variant_name!(Verb::Line);
 
 /// Iterates through verb array, and associated [`Point`] array and conic weight.
@@ -304,6 +306,7 @@ impl fmt::Debug for Path {
             .field("is_convex", &self.is_convex())
             .field("is_oval", &self.is_oval())
             .field("is_rrect", &self.is_rrect())
+            .field("is_arcc", &self.is_arc())
             .field("is_empty", &self.is_empty())
             .field("is_last_contour_closed", &self.is_last_contour_closed())
             .field("is_finite", &self.is_finite())
@@ -605,21 +608,24 @@ impl Path {
         unsafe { self.native().isOval(bounds.native_mut()) }.if_true_some(bounds)
     }
 
-    /// Returns `true` if path is representable as [`RRect`].
-    /// Returns `false` if path is representable as oval, circle, or [`Rect`].
+    /// Returns [`RRect`] if path is representable as [`RRect`].
+    /// Returns `None` if path is representable as oval, circle, or [`Rect`].
     ///
-    /// rrect receives bounds of [`RRect`].
-    ///
-    /// rrect is unmodified if [`RRect`] is not found.
-    ///
-    /// * `rrect` - storage for bounding [`Rect`] of [`RRect`]; may be `None`
-    ///
-    /// Returns: `true` if [`Path`] contains only [`RRect`]
+    /// Returns: [`RRect`] if [`Path`] contains only [`RRect`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_isRRect>
     pub fn is_rrect(&self) -> Option<RRect> {
         let mut rrect = RRect::default();
         unsafe { self.native().isRRect(rrect.native_mut()) }.if_true_some(rrect)
+    }
+
+    /// Returns [`Arc`] if path is representable as an oval arc. In other words, could this
+    /// path be drawn using [`Canvas::draw_arc`].
+    ///
+    /// Returns: [`Arc`] if [`Path`] contains only a single arc from an oval
+    pub fn is_arc(&self) -> Option<Arc> {
+        let mut arc = Arc::default();
+        unsafe { self.native().isArc(arc.native_mut()) }.if_true_some(arc)
     }
 
     /// Sets [`Path`] to its initial state.

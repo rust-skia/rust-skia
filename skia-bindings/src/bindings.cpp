@@ -1754,6 +1754,10 @@ extern "C" void C_SkRect_roundIn(const SkRect* self, SkIRect* dst) {
     self->roundIn(dst);
 }
 
+extern "C" void C_SkRect_dumpToString(const SkRect* self, bool asHex, SkString* str) {
+    *str = self->dumpToString(asHex);
+}
+
 extern "C" void C_SkRect_roundOut(const SkRect* self, SkIRect* dst) {
     self->roundOut(dst);
 }

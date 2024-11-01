@@ -12,7 +12,7 @@ use crate::{
     prelude::*, scalar, Bitmap, BlendMode, ClipOp, Color, Color4f, Data, Drawable, FilterMode,
     Font, GlyphId, IPoint, IRect, ISize, Image, ImageFilter, ImageInfo, Matrix, Paint, Path,
     Picture, Pixmap, Point, QuickReject, RRect, RSXform, Rect, Region, SamplingOptions, Shader,
-    Surface, SurfaceProps, TextBlob, TextEncoding, Vector, Vertices, M44,
+    Surface, SurfaceProps, TextBlob, TextEncoding, TileMode, Vector, Vertices, M44,
 };
 use crate::{Arc, ColorSpace};
 
@@ -41,6 +41,7 @@ pub struct SaveLayerRec<'a> {
     paint: Option<&'a SkPaint>,
     filters: SkCanvas_FilterSpan,
     backdrop: Option<&'a SkImageFilter>,
+    backdrop_tile_mode: sb::SkTileMode,
     color_space: Option<&'a SkColorSpace>,
     flags: SaveLayerFlags,
     experimental_backdrop_scale: scalar,
@@ -77,6 +78,7 @@ impl fmt::Debug for SaveLayerRec<'_> {
                 "backdrop",
                 &ImageFilter::from_unshared_ptr_ref(&(self.backdrop.as_ptr_or_null() as *mut _)),
             )
+            .field("backdrop_tile_mode", &self.backdrop_tile_mode)
             .field(
                 "color_space",
                 &ColorSpace::from_unshared_ptr_ref(&(self.color_space.as_ptr_or_null() as *mut _)),
@@ -112,6 +114,15 @@ impl<'a> SaveLayerRec<'a> {
     #[must_use]
     pub fn backdrop(mut self, backdrop: &'a ImageFilter) -> Self {
         self.backdrop = Some(backdrop.native());
+        self
+    }
+
+    /// If the layer is initialized with prior content (and/or with a backdrop filter) and this
+    /// would require sampling outside of the available backdrop, this is the tilemode applied
+    /// to the boundary of the prior layer's image.
+    #[must_use]
+    pub fn backdrop_tile_mode(mut self, backdrop_tile_mode: TileMode) -> Self {
+        self.backdrop_tile_mode = backdrop_tile_mode;
         self
     }
 
