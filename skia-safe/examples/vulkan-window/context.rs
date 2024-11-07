@@ -32,7 +32,7 @@ impl VulkanRenderContext {
     }
 
     fn shared_queue(event_loop: &ActiveEventLoop, window: Arc<Window>) -> Arc<Queue> {
-        let library = VulkanLibrary::new().unwrap();
+        let library = VulkanLibrary::new().expect("Vulkan libraries not found on system");
 
         // The first step of any Vulkan program is to create an instance.
         //
@@ -54,7 +54,7 @@ impl VulkanRenderContext {
                 ..Default::default()
             },
         )
-        .unwrap();
+        .expect(&format!("Could not create instance supporting: {:?}", required_extensions));
 
         // Choose device extensions that we're going to use. In order to present images to a
         // surface, we need a `Swapchain`, which is provided by the `khr_swapchain` extension.
@@ -131,7 +131,7 @@ impl VulkanRenderContext {
                     _ => 5,
                 }
             })
-            .expect("no suitable physical device found");
+            .expect("No suitable physical device found");
 
         // Print out the device we selected
         println!(
@@ -164,7 +164,7 @@ impl VulkanRenderContext {
                 ..Default::default()
             },
         )
-        .unwrap();
+        .expect("Device initialization failed");
 
         // Since we can request multiple queues, the `queues` variable is in fact an iterator. We
         // only use one queue in this example, so we just retrieve the first and only element of
