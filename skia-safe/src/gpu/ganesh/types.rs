@@ -6,7 +6,7 @@ use skia_bindings as sb;
 pub use skia_bindings::GrBackendApi as BackendApi;
 variant_name!(BackendAPI::OpenGL);
 
-#[deprecated(since = "0.0.0", note = "use BackendApi")]
+#[deprecated(since = "0.80.0", note = "use BackendApi")]
 pub use BackendApi as BackendAPI;
 
 pub const METAL_BACKEND: BackendApi = BackendApi::Metal;
