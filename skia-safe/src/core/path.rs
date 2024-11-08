@@ -620,7 +620,7 @@ impl Path {
     }
 
     /// Returns [`Arc`] if path is representable as an oval arc. In other words, could this
-    /// path be drawn using [`Canvas::draw_arc`].
+    /// path be drawn using `Canvas::draw_arc()`.
     ///
     /// Returns: [`Arc`] if [`Path`] contains only a single arc from an oval
     pub fn is_arc(&self) -> Option<Arc> {

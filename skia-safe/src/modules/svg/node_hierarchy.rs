@@ -44,8 +44,9 @@ impl<T: NativeRefCounted + NodeSubtype> Deref for RCHandle<T> {
     }
 }
 
-/// This implementation of [`DerefMut`] causes subsequent UB when the containing [`RcHandle`] gets
-/// overwritten with a base type that does not match the actual underlying type.
+/// This implementation of [`DerefMut`] causes subsequent UB when the containing
+/// [`RCHandle`] gets overwritten by a base type that does not match the actual
+/// underlying type.
 impl<T: NativeRefCounted + NodeSubtype> DerefMut for RCHandle<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.as_base_mut()
