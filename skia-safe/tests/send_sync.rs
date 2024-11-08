@@ -155,6 +155,7 @@ mod effects {
 
 #[cfg(feature = "gpu")]
 mod gpu {
+    use ganesh::MarkFrameBoundary;
     use skia_safe::gpu::*;
     use static_assertions::*;
     assert_impl_all!(BackendFormat: Send, Sync);
@@ -171,16 +172,26 @@ mod gpu {
     // gpu/yuva_backend_textures.rs
     assert_impl_all!(YUVABackendTextureInfo: Send, Sync);
     assert_impl_all!(YUVABackendTextures: Send, Sync);
+
     assert_impl_all!(MutableTextureState: Send, Sync);
     assert_impl_all!(BackendApi: Send, Sync);
 
     // gpu/types.rs
     assert_impl_all!(BackendAPI: Send, Sync);
+    assert_impl_all!(Budgeted: Send, Sync);
+    assert_impl_all!(Mipmapped: Send, Sync);
+    assert_impl_all!(Protected: Send, Sync);
+    assert_impl_all!(Renderable: Send, Sync);
+    assert_impl_all!(Origin: Send, Sync);
+
+    // gpu/ganesh/types.rs
     assert_impl_all!(SurfaceOrigin: Send, Sync);
     assert_not_impl_any!(FlushInfo: Send, Sync);
     assert_impl_all!(SemaphoresSubmitted: Send, Sync);
     assert_impl_all!(PurgeResourceOptions: Send, Sync);
     assert_impl_all!(SyncCpu: Send, Sync);
+    assert_impl_all!(MarkFrameBoundary: Send, Sync);
+    assert_impl_all!(SubmitInfo: Send, Sync);
 
     #[cfg(feature = "gl")]
     mod gl {
