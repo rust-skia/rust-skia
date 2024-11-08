@@ -306,7 +306,7 @@ impl fmt::Debug for Path {
             .field("is_convex", &self.is_convex())
             .field("is_oval", &self.is_oval())
             .field("is_rrect", &self.is_rrect())
-            .field("is_arcc", &self.is_arc())
+            .field("is_arc", &self.is_arc())
             .field("is_empty", &self.is_empty())
             .field("is_last_contour_closed", &self.is_last_contour_closed())
             .field("is_finite", &self.is_finite())
