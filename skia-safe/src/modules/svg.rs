@@ -48,7 +48,7 @@ use super::resources::NativeResourceProvider;
 use crate::{
     interop::{MemoryStream, NativeStreamBase, RustStream},
     prelude::*,
-    Canvas, FontMgr, Size,
+    Canvas, Size,
 };
 use skia_bindings::{self as sb, SkRefCntBase};
 
@@ -94,16 +94,12 @@ impl Dom {
     pub fn read<R: io::Read>(
         mut reader: R,
         resource_provider: impl Into<NativeResourceProvider>,
-        font_mgr: impl Into<FontMgr>,
     ) -> Result<Self, LoadError> {
         let mut reader = RustStream::new(&mut reader);
         let stream = reader.stream_mut();
         let resource_provider = resource_provider.into();
-        let font_mgr = font_mgr.into();
 
-        let out = unsafe {
-            sb::C_SkSVGDOM_MakeFromStream(stream, resource_provider.into_ptr(), font_mgr.into_ptr())
-        };
+        let out = unsafe { sb::C_SkSVGDOM_MakeFromStream(stream, resource_provider.into_ptr()) };
 
         Self::from_ptr(out).ok_or(LoadError)
     }
@@ -111,25 +107,21 @@ impl Dom {
     pub fn from_str(
         svg: impl AsRef<str>,
         resource_provider: impl Into<NativeResourceProvider>,
-        font_mgr: impl Into<FontMgr>,
     ) -> Result<Self, LoadError> {
-        Self::from_bytes(svg.as_ref().as_bytes(), resource_provider, font_mgr)
+        Self::from_bytes(svg.as_ref().as_bytes(), resource_provider)
     }
 
     pub fn from_bytes(
         svg: &[u8],
         resource_provider: impl Into<NativeResourceProvider>,
-        font_mgr: impl Into<FontMgr>,
     ) -> Result<Self, LoadError> {
         let mut ms = MemoryStream::from_bytes(svg);
         let resource_provider = resource_provider.into();
-        let font_mgr = font_mgr.into();
 
         let out = unsafe {
             sb::C_SkSVGDOM_MakeFromStream(
                 ms.native_mut().as_stream_mut(),
                 resource_provider.into_ptr(),
-                font_mgr.into_ptr(),
             )
         };
         Self::from_ptr(out).ok_or(LoadError)
@@ -191,8 +183,7 @@ mod tests {
             </svg>"##;
         let mut surface = surfaces::raster_n32_premul((256, 256)).unwrap();
         let canvas = surface.canvas();
-        let font_mgr = FontMgr::new();
-        let dom = Dom::from_str(svg, font_mgr.clone(), font_mgr).unwrap();
+        let dom = Dom::from_str(svg, FontMgr::new()).unwrap();
         dom.render(canvas);
         save_to_tmp(&mut surface, "simple");
     }
@@ -205,7 +196,7 @@ mod tests {
         let canvas = surface.canvas();
         let font_mgr = FontMgr::new();
         let provider: NativeResourceProvider = font_mgr.clone().into();
-        let dom = Dom::from_str(svg, provider.clone(), font_mgr.clone()).unwrap();
+        let dom = Dom::from_str(svg, provider.clone()).unwrap();
         dom.render(canvas);
         // Dom keeps the resource provider even after rendering.
         assert!(provider.native()._ref_cnt() >= 2);
@@ -235,9 +226,8 @@ mod tests {
             </svg>"##;
         let mut surface = surfaces::raster_n32_premul((256, 256)).unwrap();
         let canvas = surface.canvas();
-        let font_mgr = FontMgr::new();
-        let resource_provider = UReqResourceProvider::new(font_mgr.clone());
-        let dom = Dom::from_str(svg, resource_provider, font_mgr).unwrap();
+        let resource_provider = UReqResourceProvider::new(FontMgr::new());
+        let dom = Dom::from_str(svg, resource_provider).unwrap();
         dom.render(canvas);
         save_to_tmp(&mut surface, "svg-with-ureq");
     }
@@ -257,9 +247,8 @@ mod tests {
             </svg>"##;
         let mut surface = surfaces::raster_n32_premul((256, 256)).unwrap();
         let canvas = surface.canvas();
-        let font_mgr = FontMgr::new();
-        let resource_provider = UReqResourceProvider::new(font_mgr.clone());
-        let dom = Dom::from_str(svg, resource_provider, font_mgr).unwrap();
+        let resource_provider = UReqResourceProvider::new(FontMgr::new());
+        let dom = Dom::from_str(svg, resource_provider).unwrap();
         dom.render(canvas);
         save_to_tmp(&mut surface, "svg-with-ureq-missing-image");
     }
@@ -272,8 +261,7 @@ mod tests {
             </svg>"##;
         let mut surface = surfaces::raster_n32_premul((256, 256)).unwrap();
         let canvas = surface.canvas();
-        let font_mgr = FontMgr::new();
-        let dom = Dom::from_str(svg, font_mgr.clone(), font_mgr).unwrap();
+        let dom = Dom::from_str(svg, FontMgr::new()).unwrap();
         dom.render(canvas);
         save_to_tmp(&mut surface, "svg-with-base64-image-escaped-encoding");
     }
@@ -292,8 +280,7 @@ mod tests {
             </svg>"##;
         let mut surface = surfaces::raster_n32_premul((256, 256)).unwrap();
         let canvas = surface.canvas();
-        let font_mgr = FontMgr::new();
-        let dom = Dom::from_str(svg, font_mgr.clone(), font_mgr).unwrap();
+        let dom = Dom::from_str(svg, FontMgr::new()).unwrap();
         dom.render(canvas);
         save_to_tmp(&mut surface, "svg-with-base64-image2");
     }
@@ -365,8 +352,7 @@ mod tests {
                 </defs>
             </svg>"#;
 
-        let mgr = FontMgr::default();
-        let dom = Dom::from_bytes(data.as_bytes(), mgr.clone(), mgr).unwrap();
+        let dom = Dom::from_bytes(data.as_bytes(), FontMgr::default()).unwrap();
         let mut root = dom.root();
 
         println!("{:#?}", root.transform());

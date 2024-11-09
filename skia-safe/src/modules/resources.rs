@@ -2,8 +2,8 @@ use std::{borrow::Cow, ffi::CStr, mem, os::raw, ptr};
 
 use helpers::ResourceKind;
 use skia_bindings::{
-    self as sb, skresources_ImageAsset, skresources_ResourceProvider, RustResourceProvider_Param,
-    SkData, SkRefCnt, SkRefCntBase, SkTypeface, TraitObject,
+    self as sb, skresources_ImageAsset, RustResourceProvider, RustResourceProvider_Param, SkData,
+    SkFontMgr, SkRefCnt, SkRefCntBase, SkTypeface, TraitObject,
 };
 
 use crate::{prelude::*, Data, FontMgr, Typeface};
@@ -57,11 +57,14 @@ pub trait ResourceProvider {
     }
 
     fn load_typeface(&self, name: &str, url: &str) -> Option<Typeface>;
+
+    /// This is used in the SVG Dom and _should_ be used for ipmlementing load_typeface().
+    fn font_mgr(&self) -> FontMgr;
 }
 
-pub type NativeResourceProvider = RCHandle<skresources_ResourceProvider>;
+pub type NativeResourceProvider = RCHandle<RustResourceProvider>;
 
-impl NativeRefCountedBase for skresources_ResourceProvider {
+impl NativeRefCountedBase for RustResourceProvider {
     type Base = SkRefCntBase;
 }
 
@@ -82,6 +85,7 @@ impl From<Box<dyn ResourceProvider>> for NativeResourceProvider {
             load: Some(load),
             loadImageAsset: Some(load_image_asset),
             loadTypeface: Some(load_typeface),
+            fontMgr: Some(font_mgr),
         };
 
         let skia_resource_provider =
@@ -140,6 +144,10 @@ impl From<Box<dyn ResourceProvider>> for NativeResourceProvider {
             }
         }
 
+        extern "C" fn font_mgr(provider: TraitObject) -> *mut SkFontMgr {
+            unsafe { provider_ref(&provider).font_mgr().into_ptr() }
+        }
+
         unsafe fn provider_ref(provider: &TraitObject) -> &dyn ResourceProvider {
             mem::transmute(*provider)
         }
@@ -169,6 +177,10 @@ impl ResourceProvider for LocalResourceProvider {
 
     fn load_typeface(&self, name: &str, url: &str) -> Option<Typeface> {
         helpers::load_typeface(self, &self.font_mgr, name, url)
+    }
+
+    fn font_mgr(&self) -> FontMgr {
+        self.font_mgr.clone()
     }
 }
 
@@ -224,6 +236,10 @@ impl ResourceProvider for UReqResourceProvider {
 
     fn load_typeface(&self, name: &str, url: &str) -> Option<Typeface> {
         helpers::load_typeface(self, &self.font_mgr, name, url)
+    }
+
+    fn font_mgr(&self) -> FontMgr {
+        self.font_mgr.clone()
     }
 }
 

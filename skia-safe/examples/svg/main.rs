@@ -57,8 +57,7 @@ fn main() {
             </defs>
         </svg>"#;
 
-    let mgr = FontMgr::default();
-    let dom = Dom::from_bytes(data.as_bytes(), mgr.clone(), mgr).unwrap();
+    let dom = Dom::from_bytes(data.as_bytes(), FontMgr::default()).unwrap();
     let mut root = dom.root();
 
     println!("{:?}", root.intrinsic_size());

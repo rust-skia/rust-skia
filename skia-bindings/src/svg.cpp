@@ -66,6 +66,7 @@ namespace ResourceProvider {
         typedef SkData *(*Load)(TraitObject, const char resource_path[], const char resource_name[]);
         typedef skresources::ImageAsset* (*LoadImageAsset)(TraitObject, const char resource_path[], const char resource_name[], const char resource_id[]);
         typedef SkTypeface *(*LoadTypeface)(TraitObject, const char name[], const char url[]);
+        typedef SkFontMgr *(*FontMgr)(TraitObject);
     }
 }
 
@@ -77,6 +78,7 @@ public:
         ::ResourceProvider::Load load;
         ::ResourceProvider::LoadImageAsset loadImageAsset;
         ::ResourceProvider::LoadTypeface loadTypeface;
+        ::ResourceProvider::FontMgr fontMgr;
     };
 
     explicit RustResourceProvider(const Param& param) 
@@ -88,36 +90,40 @@ public:
     }
 
     sk_sp<SkData> load(const char resource_path[], const char resource_name[]) const override {
-        return sk_sp<SkData>(_param.load(_param.trait, resource_path, resource_name));
+        return sp(_param.load(_param.trait, resource_path, resource_name));
     }
 
     sk_sp<skresources::ImageAsset> loadImageAsset(
         const char resource_path[],
         const char resource_name[],
         const char resource_id[]) const override {
-        return sk_sp<skresources::ImageAsset>(_param.loadImageAsset(_param.trait, resource_path, resource_name, resource_id));
+        return sp(_param.loadImageAsset(_param.trait, resource_path, resource_name, resource_id));
     }
 
     sk_sp<SkTypeface> loadTypeface(const char name[], const char url[]) const override {
-        return sk_sp<SkTypeface>(_param.loadTypeface(_param.trait, name, url));
+        return sp(_param.loadTypeface(_param.trait, name, url));
     }
  
+    // This is here to provide access to the FontMgr to the Dom.
+    sk_sp<SkFontMgr> fontMgr() const {
+        return sp(_param.fontMgr(_param.trait));
+    }
+
 private:
     Param _param;
 };
 
-extern "C" skresources::ResourceProvider* C_RustResourceProvider_New(const RustResourceProvider::Param* param) {
+extern "C" RustResourceProvider* C_RustResourceProvider_New(const RustResourceProvider::Param* param) {
     return new RustResourceProvider(*param);
 }
 
 extern "C" SkSVGDOM* C_SkSVGDOM_MakeFromStream(
     SkStream& stream,
-    skresources::ResourceProvider* provider,
-    SkFontMgr* fontMgr) 
+    RustResourceProvider* provider) 
 {
     auto builder = SkSVGDOM::Builder();
+    builder.setFontManager(provider->fontMgr());
     builder.setResourceProvider(sp(provider));
-    builder.setFontManager(sp(fontMgr));
     return builder.make(stream).release();
 }
 
