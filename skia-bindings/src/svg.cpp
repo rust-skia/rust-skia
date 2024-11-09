@@ -121,18 +121,6 @@ extern "C" SkSVGDOM* C_SkSVGDOM_MakeFromStream(
     return builder.make(stream).release();
 }
 
-extern "C" void C_SkSVGDOM_ref(const SkSVGDOM* self) {
-    self->ref();
-}
-
-extern "C" void C_SkSVGDOM_unref(const SkSVGDOM* self) {
-    self->unref();
-}
-
-extern "C" bool C_SkSVGDOM_unique(const SkSVGDOM* self) {
-    return self->unique();
-}
-
 extern "C" void C_SkSVGDOM_setContainerSize(SkSVGDOM* self, const SkSize& size){
     self->setContainerSize(size);
 }
