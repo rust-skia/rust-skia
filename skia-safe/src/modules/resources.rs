@@ -283,7 +283,7 @@ pub mod helpers {
             percent_encoding::percent_decode_str(&spaces_removed).decode_utf8_lossy();
         // decode base64
         let result = decode_base64(&percent_decoded);
-        return Data::new_copy(result.as_slice());
+        Data::new_copy(result.as_slice())
     }
 
     const HTML_SPACE_CHARACTERS: &[char] =
