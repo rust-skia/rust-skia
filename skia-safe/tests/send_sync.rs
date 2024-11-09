@@ -309,7 +309,7 @@ mod render_svg {
     use skia_safe::svg::*;
     use static_assertions::*;
 
-    assert_impl_all!(Dom: Send, Sync);
+    assert_not_impl_any!(Dom: Send, Sync);
     assert_impl_all!(LoadError: Send, Sync);
 }
 

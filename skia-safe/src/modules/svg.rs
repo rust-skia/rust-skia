@@ -55,7 +55,6 @@ use skia_bindings::{self as sb, SkRefCntBase};
 pub type Dom = RCHandle<sb::SkSVGDOM>;
 
 require_base_type!(sb::SkSVGDOM, sb::SkRefCnt);
-unsafe_send_sync!(Dom);
 
 impl NativeRefCountedBase for sb::SkSVGDOM {
     type Base = SkRefCntBase;
