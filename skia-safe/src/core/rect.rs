@@ -1,4 +1,5 @@
 use crate::{
+    interop,
     prelude::*,
     private::{
         is_finite,
@@ -716,6 +717,12 @@ impl Rect {
 
     pub fn dump(&self, as_hex: impl Into<Option<bool>>) {
         unsafe { self.native().dump(as_hex.into().unwrap_or_default()) }
+    }
+
+    pub fn dump_to_string(&self, as_hex: bool) -> String {
+        let mut str = interop::String::default();
+        unsafe { sb::C_SkRect_dumpToString(self.native(), as_hex, str.native_mut()) }
+        str.to_string()
     }
 
     pub fn dump_hex(&self) {

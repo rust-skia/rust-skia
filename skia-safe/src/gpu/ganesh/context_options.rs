@@ -80,6 +80,11 @@ pub struct ContextOptions {
     /// allocating stencil buffers and use alternate rasterization paths, avoiding the leak.
     pub avoid_stencil_buffers: bool,
 
+    /// If `true`, texture fetches from mip-mapped textures will be biased to read larger MIP levels.
+    /// This has the effect of sharpening those textures, at the cost of some aliasing, and possible
+    /// performance impact.
+    pub sharpen_mipmapped_textures: bool,
+
     /// Enables driver workaround to use draws instead of HW clears, e.g. `glClear` on the GL
     /// backend.
     pub use_draw_instead_of_clear: Enable,

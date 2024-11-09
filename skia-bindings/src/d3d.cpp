@@ -6,9 +6,9 @@
     #define SK_DIRECT3D
 #endif
 
-#include "include/gpu/GrBackendSurface.h"
-#include "include/gpu/GrDirectContext.h"
-#include "include/gpu/d3d/GrD3DBackendContext.h"
+#include "include/gpu/ganesh/GrBackendSurface.h"
+#include "include/gpu/ganesh/GrDirectContext.h"
+#include "include/gpu/ganesh/d3d/GrD3DBackendContext.h"
 
 // Additional types not yet referenced.
 extern "C" void C_GrD3DTypes(GrD3DSurfaceInfo *) {};

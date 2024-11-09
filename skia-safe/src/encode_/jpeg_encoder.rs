@@ -1,4 +1,4 @@
-use crate::{interop::RustWStream, prelude::*, Data, Pixmap};
+use crate::{interop::RustWStream, prelude::*, Data, EncodedOrigin, Pixmap};
 use skia_bindings::{SkJpegEncoder_AlphaOption, SkJpegEncoder_Downsample};
 use std::io;
 
@@ -28,6 +28,7 @@ pub struct Options {
     pub downsample: Downsample,
     pub alpha_option: AlphaOption,
     pub xmp_metadata: Option<String>,
+    pub origin: Option<EncodedOrigin>,
     // TODO: ICCProfile
     // TODO: ICCProfileDescription
 }
@@ -39,6 +40,7 @@ impl Default for Options {
             downsample: Downsample::BothDirections,
             alpha_option: AlphaOption::Ignore,
             xmp_metadata: None,
+            origin: None,
         }
     }
 }
@@ -55,6 +57,7 @@ pub fn encode<W: io::Write>(pixmap: &Pixmap, writer: &mut W, options: &Options) 
             options.downsample.native(),
             options.alpha_option,
             xml_metadata.as_ref().native_ptr_or_null(),
+            options.origin.as_ref().native_ptr_or_null(),
         )
     }
 }
@@ -66,7 +69,7 @@ pub fn encode_image<'a>(
     img: &crate::Image,
     options: &Options,
 ) -> Option<crate::Data> {
-    let xml_metadata = options.xmp_metadata.as_ref().map(Data::new_str);
+    let xmp_metadata = options.xmp_metadata.as_ref().map(Data::new_str);
 
     Data::from_ptr(unsafe {
         skia_bindings::C_SkJpegEncoder_EncodeImage(
@@ -75,7 +78,8 @@ pub fn encode_image<'a>(
             options.quality as _,
             options.downsample.native(),
             options.alpha_option,
-            xml_metadata.as_ref().native_ptr_or_null(),
+            xmp_metadata.as_ref().native_ptr_or_null(),
+            options.origin.as_ref().native_ptr_or_null(),
         )
     })
 }

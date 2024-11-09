@@ -1,17 +1,27 @@
-pub mod backend_surface;
+mod backend_surface;
 pub mod context_options;
 #[cfg(feature = "d3d")]
 pub mod d3d;
-pub mod direct_context;
-pub mod driver_bug_workarounds;
+mod direct_context;
+mod driver_bug_workarounds;
 #[cfg(feature = "gl")]
 pub mod gl;
-pub mod image_ganesh;
+mod image_ganesh;
 #[cfg(feature = "metal")]
 pub mod mtl;
-pub mod recording_context;
+mod recording_context;
 pub mod surface_ganesh;
-pub mod types;
+mod types;
 #[cfg(feature = "vulkan")]
 pub mod vk;
-pub mod yuva_backend_textures;
+mod yuva_backend_textures;
+
+pub use backend_surface::*;
+pub use direct_context::*;
+pub use driver_bug_workarounds::*;
+pub mod images {
+    pub use super::image_ganesh::*;
+}
+pub use recording_context::*;
+pub use types::*;
+pub use yuva_backend_textures::*;
