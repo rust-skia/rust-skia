@@ -90,6 +90,29 @@ impl fmt::Debug for Dom {
     }
 }
 
+/// This type represents an SVG as a node-based data structure.
+///
+/// To convert an SVG to a `Dom`, a [`NativeResourceProvider`] is required.
+///
+/// ### Creating a Resource Provider
+///
+/// To create a resource provider, a [`crate::FontMgr`] is required at a minimum.
+///
+/// - If you don't need font support, pass [`crate::FontMgr::new_empty()`] as the resource provider.
+/// - To use the installed fonts on your system, pass [`crate::FontMgr::default()`] as the resource provider.
+///
+/// When you pass a [`crate::FontMgr`] as the resource provider, a
+/// [`crate::resources::LocalResourceProvider`] is created behind the scenes. This provider, in
+/// addition to supporting typefaces, also adds support for `data:` URLs.
+///
+/// ### Supporting External Resources
+///
+/// To support `http://` or `https://` external resources, enable the `ureq` feature and create a
+/// [`crate::resources::UReqResourceProvider`].
+///
+/// ### Custom Resource Providers
+///
+/// If you need more customization, you can implement the trait [`crate::resources::ResourceProvider`].
 impl Dom {
     pub fn read<R: io::Read>(
         mut reader: R,
