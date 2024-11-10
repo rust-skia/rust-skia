@@ -738,6 +738,8 @@ const ENUM_REWRITES: &[EnumEntry] = &[
     ("Operator", rewrite::k_xxx),
     // m131:
     ("GrMarkFrameBoundary", rewrite::k_xxx),
+    // SkResources.h
+    ("ImageDecodeStrategy", rewrite::k_xxx),
 ];
 
 pub(crate) mod rewrite {
