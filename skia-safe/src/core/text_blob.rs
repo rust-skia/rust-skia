@@ -100,9 +100,8 @@ impl TextBlob {
     }
 
     pub fn from_pos_text(text: impl EncodedText, pos: &[Point], font: &Font) -> Option<TextBlob> {
-        // TODO: avoid that somehow.
+        assert_eq!(pos.len(), font.count_text(&text));
         let (ptr, size, encoding) = text.as_raw();
-        assert_eq!(pos.len(), font.count_text(text));
         TextBlob::from_ptr(unsafe {
             sb::C_SkTextBlob_MakeFromPosText(
                 ptr,
@@ -119,9 +118,8 @@ impl TextBlob {
         xform: &[RSXform],
         font: &Font,
     ) -> Option<TextBlob> {
-        // TODO: avoid that somehow.
+        assert_eq!(xform.len(), font.count_text(&text));
         let (ptr, size, encoding) = text.as_raw();
-        assert_eq!(xform.len(), font.count_text(text));
         TextBlob::from_ptr(unsafe {
             sb::C_SkTextBlob_MakeFromRSXform(
                 ptr,
