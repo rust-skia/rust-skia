@@ -1,5 +1,5 @@
 use crate::{prelude::*, FontMgr};
-use skia_bindings::{self as sb, SkOrderedFontMgr, SkRefCntBase};
+use skia_bindings::{self as sb, RustOrderedFontMgr as SkOrderedFontMgr, SkRefCntBase};
 use std::{
     fmt,
     mem::transmute,
@@ -48,12 +48,12 @@ impl fmt::Debug for OrderedFontMgr {
 
 impl OrderedFontMgr {
     pub fn new() -> Self {
-        Self::from_ptr(unsafe { sb::C_SkOrderedFontMgr_new() }).unwrap()
+        Self::from_ptr(unsafe { sb::C_RustOrderedFontMgr_new() }).unwrap()
     }
 
     pub fn append(&mut self, font_mgr: impl Into<FontMgr>) {
         let font_mgr = font_mgr.into();
-        unsafe { sb::C_SkOrderedFontMgr_append(self.native_mut(), font_mgr.into_ptr()) }
+        unsafe { sb::C_RustOrderedFontMgr_append(self.native_mut(), font_mgr.into_ptr()) }
     }
 }
 
