@@ -3278,19 +3278,19 @@ sk_sp<SkTypeface> RustOrderedFontMgr::onMatchFamilyStyleCharacter(
     return nullptr;
 }
 
-sk_sp<SkTypeface> RustOrderedFontMgr::onMakeFromData(sk_sp<SkData>, int ttcIndex) const {
+sk_sp<SkTypeface> RustOrderedFontMgr::onMakeFromData(sk_sp<SkData>, int) const {
     return nullptr;
 }
-sk_sp<SkTypeface> RustOrderedFontMgr::onMakeFromStreamIndex(std::unique_ptr<SkStreamAsset>, int ttcIndex) const {
+sk_sp<SkTypeface> RustOrderedFontMgr::onMakeFromStreamIndex(std::unique_ptr<SkStreamAsset>, int) const {
     return nullptr;
 }
 sk_sp<SkTypeface> RustOrderedFontMgr::onMakeFromStreamArgs(std::unique_ptr<SkStreamAsset>, const SkFontArguments&) const {
     return nullptr;
 }
-sk_sp<SkTypeface> RustOrderedFontMgr::onMakeFromFile(const char path[], int ttcIndex) const {
+sk_sp<SkTypeface> RustOrderedFontMgr::onMakeFromFile(const char[], int) const {
     return nullptr;
 }
-sk_sp<SkTypeface> RustOrderedFontMgr::onLegacyMakeTypeface(const char family[], SkFontStyle) const {
+sk_sp<SkTypeface> RustOrderedFontMgr::onLegacyMakeTypeface(const char[], SkFontStyle) const {
     return nullptr;
 }
 
