@@ -33,6 +33,13 @@ pub struct VulkanRenderer {
     swapchain_is_valid: bool,
 }
 
+impl Drop for VulkanRenderer{
+    fn drop(&mut self){
+        // prevent in-flight commands from trying to draw to the window after it's gone
+        self.skia_ctx.lock().unwrap().abandon();
+    }
+}
+
 impl VulkanRenderer {
     pub fn new(window: Arc<Window>, queue: Arc<Queue>) -> Self {
         // Extract references to key structs from the queue
