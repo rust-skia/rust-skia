@@ -59,7 +59,10 @@ impl OrderedFontMgr {
 
 #[cfg(test)]
 mod tests {
-    use super::OrderedFontMgr;
+    use super::{FontMgr, OrderedFontMgr};
+    use crate::textlayout::TypefaceFontProvider;
+    use std::fs;
+    use std::path::Path;
 
     #[test]
     fn can_use_font_mgr_functions() {
@@ -72,5 +75,38 @@ mod tests {
         let mut ordered = OrderedFontMgr::default();
         let another = OrderedFontMgr::default();
         ordered.append(another);
+    }
+
+    #[test]
+    #[cfg(feature = "textlayout")]
+    fn can_find_fonts_in_multiple_mgrs() {
+        let sys_mgr = FontMgr::default();
+        let single_font_provider = |filename: &str| {
+            let path = Path::new(filename);
+            let font = fs::read(path)
+                .ok()
+                .and_then(|bytes| sys_mgr.new_from_data(&bytes, None))
+                .expect(&format!("failed to load font: {}", filename));
+
+            let mut provider = TypefaceFontProvider::new();
+            provider.register_typeface(font, None);
+            provider
+        };
+
+        // create two TypefaceFontProviders, each with only a single font
+        let bungee_provider = single_font_provider(
+            "../skia-bindings/skia/modules/canvaskit/tests/assets/Bungee-Regular.ttf",
+        );
+        let noto_provider = single_font_provider(
+            "../skia-bindings/skia/modules/canvaskit/tests/assets/NotoSerif-Regular.ttf",
+        );
+
+        // add both providers to an OrderedFontMgr, then ensure both can be found
+        let mut ordered = OrderedFontMgr::new();
+        ordered.append(bungee_provider.clone());
+        ordered.append(noto_provider.clone());
+        assert_eq!(ordered.match_family("Bungee").count(), 1);
+        assert_eq!(ordered.match_family("Noto Serif").count(), 1);
+        assert_eq!(ordered.match_family("Nonesuch").count(), 0);
     }
 }
