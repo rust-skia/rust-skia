@@ -54,7 +54,10 @@ impl VulkanRenderContext {
                 ..Default::default()
             },
         )
-        .expect(&format!("Could not create instance supporting: {:?}", required_extensions));
+        .expect(&format!(
+            "Could not create instance supporting: {:?}",
+            required_extensions
+        ));
 
         // Choose device extensions that we're going to use. In order to present images to a
         // surface, we need a `Swapchain`, which is provided by the `khr_swapchain` extension.

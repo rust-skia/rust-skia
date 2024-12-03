@@ -33,8 +33,8 @@ pub struct VulkanRenderer {
     swapchain_is_valid: bool,
 }
 
-impl Drop for VulkanRenderer{
-    fn drop(&mut self){
+impl Drop for VulkanRenderer {
+    fn drop(&mut self) {
         // prevent in-flight commands from trying to draw to the window after it's gone
         self.skia_ctx.lock().unwrap().abandon();
     }
