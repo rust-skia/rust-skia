@@ -1,5 +1,5 @@
-use std::process::{Command, Stdio};
 use super::{linux, prelude::*};
+use std::process::{Command, Stdio};
 
 pub struct Musl;
 
@@ -31,15 +31,15 @@ fn get_stdlib_version() -> Option<String> {
     if output.status.code() != Some(0) {
         return None;
     }
-    match String::from_utf8(output.stdout).unwrap().trim(){
+    match String::from_utf8(output.stdout).unwrap().trim() {
         "" => None,
-        v => Some(String::from(v))
+        v => Some(String::from(v)),
     }
 }
 
 fn flags(target: &Target) -> Vec<String> {
     let arch = &target.architecture;
-    match get_stdlib_version(){
+    match get_stdlib_version() {
         None => {
             cargo::warning("unable to determine g++ stdlib version");
             vec![]
@@ -47,6 +47,6 @@ fn flags(target: &Target) -> Vec<String> {
         Some(cpp) => vec![
             format!("-I/usr/include/c++/{cpp}"),
             format!("-I/usr/include/c++/{cpp}/{arch}-alpine-linux-musl"),
-        ]
+        ],
     }
 }
