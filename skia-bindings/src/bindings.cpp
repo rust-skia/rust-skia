@@ -3172,6 +3172,140 @@ extern "C" void C_SkParsePath_ToSVGString(const SkPath* self, SkString* uninitia
 }
 
 //
+// Temporary replacement for buggy SkOrderedFontMgr
+//
+
+class RustOrderedFontMgr : public SkFontMgr {
+public:
+    RustOrderedFontMgr();
+    ~RustOrderedFontMgr() override;
+
+    void append(sk_sp<SkFontMgr>);
+protected:
+    int onCountFamilies() const override;
+    void onGetFamilyName(int index, SkString* familyName) const override;
+    sk_sp<SkFontStyleSet> onCreateStyleSet(int index)const override;
+    sk_sp<SkFontStyleSet> onMatchFamily(const char familyName[]) const override;
+    sk_sp<SkTypeface> onMatchFamilyStyle(const char familyName[],
+                                         const SkFontStyle&) const override;
+    sk_sp<SkTypeface> onMatchFamilyStyleCharacter(const char familyName[], const SkFontStyle&,
+                                                  const char* bcp47[], int bcp47Count,
+                                                  SkUnichar character) const override;
+
+    sk_sp<SkTypeface> onMakeFromData(sk_sp<SkData>, int ttcIndex) const override;
+    sk_sp<SkTypeface> onMakeFromStreamIndex(std::unique_ptr<SkStreamAsset>,
+                                            int ttcIndex) const override;
+    sk_sp<SkTypeface> onMakeFromStreamArgs(std::unique_ptr<SkStreamAsset>,
+                                           const SkFontArguments&) const override;
+    sk_sp<SkTypeface> onMakeFromFile(const char path[], int ttcIndex) const override;
+
+    sk_sp<SkTypeface> onLegacyMakeTypeface(const char familyName[], SkFontStyle) const override;
+private:
+    std::vector<sk_sp<SkFontMgr>> fList;
+};
+
+RustOrderedFontMgr::RustOrderedFontMgr() {}
+RustOrderedFontMgr::~RustOrderedFontMgr() {}
+
+void RustOrderedFontMgr::append(sk_sp<SkFontMgr> fm) {
+    fList.push_back(std::move(fm));
+}
+
+int RustOrderedFontMgr::onCountFamilies() const {
+    int count = 0;
+    for (const auto& fm : fList) {
+        count += fm->countFamilies();
+    }
+    return count;
+}
+
+void RustOrderedFontMgr::onGetFamilyName(int index, SkString* familyName) const {
+    for (const auto& fm : fList) {
+        const int count = fm->countFamilies();
+        if (index < count) {
+            return fm->getFamilyName(index, familyName);
+        }
+        index -= count;
+    }
+}
+
+sk_sp<SkFontStyleSet> RustOrderedFontMgr::onCreateStyleSet(int index) const {
+    for (const auto& fm : fList) {
+        const int count = fm->countFamilies();
+        if (index < count) {
+            return fm->createStyleSet(index);
+        }
+        index -= count;
+    }
+    return nullptr;
+}
+
+//
+// This is the one method whose implementation differs from SkOrderedFontMgr. The upstream version
+// terminates the loop if matchFamily returns non-null, but that method *never* returns null. Instead
+// it signals failure by returning a 0-length SkFontStyleSet. Here the loop continues until a non-zero-length
+// set is returned, meaning the entire fList will be reachable, not just the first element.
+//
+sk_sp<SkFontStyleSet> RustOrderedFontMgr::onMatchFamily(const char familyName[]) const {
+    for (const auto& fm : fList) {
+        auto fs = fm->matchFamily(familyName);
+        if (fs->count()>0){
+            return fs;
+        }
+    }
+    return nullptr;
+}
+
+sk_sp<SkTypeface> RustOrderedFontMgr::onMatchFamilyStyle(const char family[], const SkFontStyle& style) const {
+    for (const auto& fm : fList) {
+        if (auto tf = fm->matchFamilyStyle(family, style)) {
+            return tf;
+        }
+    }
+    return nullptr;
+}
+
+sk_sp<SkTypeface> RustOrderedFontMgr::onMatchFamilyStyleCharacter(
+    const char familyName[], const SkFontStyle& style,
+    const char* bcp47[], int bcp47Count,
+    SkUnichar uni) const
+{
+    for (const auto& fm : fList) {
+        if (auto tf = fm->matchFamilyStyleCharacter(familyName, style, bcp47, bcp47Count, uni)) {
+            return tf;
+        }
+    }
+    return nullptr;
+}
+
+sk_sp<SkTypeface> RustOrderedFontMgr::onMakeFromData(sk_sp<SkData>, int ttcIndex) const {
+    return nullptr;
+}
+sk_sp<SkTypeface> RustOrderedFontMgr::onMakeFromStreamIndex(std::unique_ptr<SkStreamAsset>, int ttcIndex) const {
+    return nullptr;
+}
+sk_sp<SkTypeface> RustOrderedFontMgr::onMakeFromStreamArgs(std::unique_ptr<SkStreamAsset>, const SkFontArguments&) const {
+    return nullptr;
+}
+sk_sp<SkTypeface> RustOrderedFontMgr::onMakeFromFile(const char path[], int ttcIndex) const {
+    return nullptr;
+}
+sk_sp<SkTypeface> RustOrderedFontMgr::onLegacyMakeTypeface(const char family[], SkFontStyle) const {
+    return nullptr;
+}
+
+extern "C" RustOrderedFontMgr* C_RustOrderedFontMgr_new() {
+    return new RustOrderedFontMgr();
+}
+
+extern "C" void C_RustOrderedFontMgr_append(RustOrderedFontMgr* self, SkFontMgr* fontMgr) {
+    self->append(sp(fontMgr));
+}
+
+// End of temporary replacement for buggy SkOrderedFontMgr
+
+
+//
 // SkStream <-> RustStream interop
 //
 
