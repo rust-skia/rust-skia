@@ -81,9 +81,9 @@ impl AutoreleasePool {
 
 impl Drop for AutoreleasePool {
     fn drop(&mut self) {
-        #[allow(clippy::let_unit_value)]
         unsafe {
-            // the unit value here is needed  to type the return of msg_send().
+            #[allow(unexpected_cfgs)]
+            // The unit value here is needed to type the return of msg_send().
             let () = msg_send![self.0, release];
         }
     }
