@@ -3240,12 +3240,10 @@ sk_sp<SkFontStyleSet> RustOrderedFontMgr::onCreateStyleSet(int index) const {
     return nullptr;
 }
 
-//
-// This is the one method whose implementation differs from SkOrderedFontMgr. The upstream version
+// This is one of two methods whose implementation differs from SkOrderedFontMgr. The upstream version
 // terminates the loop if matchFamily returns non-null, but that method *never* returns null. Instead
 // it signals failure by returning a 0-length SkFontStyleSet. Here the loop continues until a non-zero-length
 // set is returned, meaning the entire fList will be reachable, not just the first element.
-//
 sk_sp<SkFontStyleSet> RustOrderedFontMgr::onMatchFamily(const char familyName[]) const {
     for (const auto& fm : fList) {
         auto fs = fm->matchFamily(familyName);
@@ -3278,6 +3276,18 @@ sk_sp<SkTypeface> RustOrderedFontMgr::onMatchFamilyStyleCharacter(
     return nullptr;
 }
 
+// This is the other modified method. The upstream SkOrderedFontMgr doesn't implement this and just returns
+// null, making it non-functional as the FontMgr for an SVG ResourceProvider. This version steps through the
+// FontMgr list, looking for a match and then generating the typeface using the proper FontMgr.
+sk_sp<SkTypeface> RustOrderedFontMgr::onLegacyMakeTypeface(const char family[], SkFontStyle style) const {
+    for (const auto& fm : fList) {
+        if (auto tf = fm->matchFamilyStyle(family, style)) {
+            return fm->legacyMakeTypeface(family, style);
+        }
+    }
+    return nullptr;
+}
+
 sk_sp<SkTypeface> RustOrderedFontMgr::onMakeFromData(sk_sp<SkData>, int) const {
     return nullptr;
 }
@@ -3288,9 +3298,6 @@ sk_sp<SkTypeface> RustOrderedFontMgr::onMakeFromStreamArgs(std::unique_ptr<SkStr
     return nullptr;
 }
 sk_sp<SkTypeface> RustOrderedFontMgr::onMakeFromFile(const char[], int) const {
-    return nullptr;
-}
-sk_sp<SkTypeface> RustOrderedFontMgr::onLegacyMakeTypeface(const char[], SkFontStyle) const {
     return nullptr;
 }
 
