@@ -59,10 +59,7 @@ impl OrderedFontMgr {
 
 #[cfg(test)]
 mod tests {
-    use super::{FontMgr, OrderedFontMgr};
-    use crate::textlayout::TypefaceFontProvider;
-    use std::fs;
-    use std::path::Path;
+    use super::OrderedFontMgr;
 
     #[test]
     fn can_use_font_mgr_functions() {
@@ -80,6 +77,11 @@ mod tests {
     #[test]
     #[cfg(feature = "textlayout")]
     fn can_find_fonts_in_multiple_mgrs() {
+        use super::FontMgr;
+        use crate::textlayout::TypefaceFontProvider;
+        use std::fs;
+        use std::path::Path;
+
         let sys_mgr = FontMgr::default();
         let single_font_provider = |filename: &str| {
             let path = Path::new(filename);
