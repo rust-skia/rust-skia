@@ -85,11 +85,8 @@ mod tests {
         let sys_mgr = FontMgr::default();
         let single_font_provider = |filename: &str| {
             let path = Path::new(filename);
-            let font = fs::read(path)
-                .ok()
-                .and_then(|bytes| sys_mgr.new_from_data(&bytes, None))
-                .expect(&format!("failed to load font: {}", filename));
-
+            let font_data = fs::read(path).unwrap();
+            let font = sys_mgr.new_from_data(&font_data, None).unwrap();
             let mut provider = TypefaceFontProvider::new();
             provider.register_typeface(font, None);
             provider
