@@ -1,13 +1,7 @@
-use crate::{prelude::*, scalar, Matrix, NativeFlattenable, Path, Rect, StrokeRec};
+use crate::{prelude::*, Matrix, NativeFlattenable, Path, Rect, StrokeRec};
 use sb::SkPathEffect_INHERITED;
-use skia_bindings::{self as sb, SkFlattenable, SkPathEffect, SkPathEffect_DashType, SkRefCntBase};
+use skia_bindings::{self as sb, SkFlattenable, SkPathEffect, SkRefCntBase};
 use std::fmt;
-
-#[derive(Clone, PartialEq, Debug)]
-pub struct DashInfo {
-    pub intervals: Vec<scalar>,
-    pub phase: scalar,
-}
 
 pub type PathEffect = RCHandle<SkPathEffect>;
 unsafe_send_sync!(PathEffect);
@@ -33,7 +27,6 @@ impl NativeFlattenable for SkPathEffect {
 impl fmt::Debug for PathEffect {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("PathEffect")
-            .field("as_a_dash", &self.as_a_dash())
             .field("needs_ctm", &self.needs_ctm())
             .finish()
     }
@@ -52,28 +45,6 @@ impl PathEffect {
             sb::C_SkPathEffect_MakeCompose(first.into().into_ptr(), second.into().into_ptr())
         })
         .unwrap()
-    }
-
-    // TODO: rename to to_a_dash()?
-    pub fn as_a_dash(&self) -> Option<DashInfo> {
-        let mut dash_info = construct(|di| unsafe { sb::C_SkPathEffect_DashInfo_Construct(di) });
-
-        let dash_type = unsafe { self.native().asADash(&mut dash_info) };
-
-        match dash_type {
-            SkPathEffect_DashType::kDash_DashType => {
-                let mut v: Vec<scalar> = vec![0.0; dash_info.fCount.try_into().unwrap()];
-                dash_info.fIntervals = v.as_mut_ptr();
-                unsafe {
-                    assert_eq!(dash_type, self.native().asADash(&mut dash_info));
-                }
-                Some(DashInfo {
-                    intervals: v,
-                    phase: dash_info.fPhase,
-                })
-            }
-            SkPathEffect_DashType::kNone_DashType => None,
-        }
     }
 
     pub fn filter_path(
