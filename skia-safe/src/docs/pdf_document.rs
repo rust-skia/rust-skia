@@ -345,6 +345,9 @@ pub mod pdf {
             if let Some(encoding_quality) = metadata.encoding_quality {
                 internal.fEncodingQuality = encoding_quality
             }
+            if let Some(structure_element_tree) = &metadata.structure_element_tree_root {
+                internal.fStructureElementTreeRoot = structure_element_tree.0.as_ptr();
+            }
             internal.fCompressionLevel = metadata.compression_level
         }
 
