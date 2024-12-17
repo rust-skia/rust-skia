@@ -1,6 +1,8 @@
 pub mod pdf {
     use std::{ffi::CString, fmt, io, mem, ptr};
 
+    use crate::Canvas;
+
     use skia_bindings::{
         self as sb, SkPDF_AttributeList, SkPDF_DateTime, SkPDF_Metadata, SkPDF_StructureElementNode,
     };
@@ -379,6 +381,12 @@ pub mod pdf {
     impl Default for Handle<SkPDF_Metadata> {
         fn default() -> Self {
             Self::construct(|pdf_md| unsafe { sb::C_SkPDF_Metadata_Construct(pdf_md) })
+        }
+    }
+
+    pub fn set_node_id(canvas: &Canvas, node_id: i32) {
+        unsafe {
+            sb::C_SkPDF_SetNodeId(canvas.native_mut(), node_id);
         }
     }
 }
