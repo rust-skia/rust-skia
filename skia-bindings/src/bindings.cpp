@@ -3071,18 +3071,26 @@ extern "C" void C_SkPDF_StructElementNode_appendChild(SkPDF::StructureElementNod
     self->fChildVector.push_back(std::unique_ptr<SkPDF::StructureElementNode>(node));
 }
 
-extern "C" size_t C_SkPDF_StructureElementNode_getChildVector(const SkPDF::StructureElementNode *self, SkPDF::StructureElementNode **nodes)
+extern "C" size_t C_SkPDF_StructureElementNode_getChildVector(const SkPDF::StructureElementNode *self, SkPDF::StructureElementNode ***nodes)
 {
-    if (self->fChildVector.empty())
-    {
+    if (self == nullptr || nodes == nullptr) {
+        return 0;
+    }
+
+    if (self->fChildVector.empty()) {
         *nodes = nullptr;
         return 0;
     }
-    else
-    {
-        *nodes = &*self->fChildVector.front();
-        return self->fChildVector.size();
+
+    size_t size = self->fChildVector.size();
+    SkPDF::StructureElementNode** nodesArray = new SkPDF::StructureElementNode*[size];
+
+    for (size_t i = 0; i < size; ++i) {
+        nodesArray[i] = self->fChildVector[i].get();
     }
+
+    *nodes = nodesArray;
+    return size;
 }
 
 extern "C" void C_SkPDF_Metadata_Construct(SkPDF::Metadata* uninitialized) {
