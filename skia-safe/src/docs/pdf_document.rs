@@ -175,7 +175,7 @@ pub mod pdf {
             let mut ptr = ptr::null_mut();
             unsafe {
                 let len = sb::C_SkPDF_StructureElementNode_getChildVector(self.native(), &mut ptr);
-                safer::from_raw_parts(ptr as _, len)
+                safer::from_raw_parts(ptr as *const StructureElementNode, len)
             }
         }
 
