@@ -3097,6 +3097,10 @@ extern "C" SkDocument* C_SkPDF_MakeDocument(SkWStream* stream, const SkPDF::Meta
     return SkPDF::MakeDocument(stream, *metadata).release();
 }
 
+extern "C" void C_SkPDF_SetNodeId(SkCanvas* dst, int nodeID) {
+    return SkPDF::SetNodeId(dst, nodeID);
+}
+
 //
 // pathops/
 //
