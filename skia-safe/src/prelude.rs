@@ -556,7 +556,6 @@ impl<N: NativeRefCounted> RCHandle<N> {
     pub(crate) fn from_ptr(ptr: *mut N) -> Option<Self> {
         ptr::NonNull::new(ptr).map(Self)
     }
-
     /// Creates an reference counted handle from a pointer.
     ///
     /// Returns `None` if the pointer is `null`.
