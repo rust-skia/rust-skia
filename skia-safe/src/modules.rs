@@ -1,3 +1,5 @@
+#[cfg(feature = "svg")]
+pub mod image_asset;
 #[cfg(feature = "textlayout")]
 pub(crate) mod paragraph;
 #[cfg(feature = "svg")]

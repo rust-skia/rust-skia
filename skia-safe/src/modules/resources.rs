@@ -1,44 +1,12 @@
-use std::{borrow::Cow, ffi::CStr, mem, os::raw, ptr};
-
+pub use crate::modules::image_asset::{ImageAsset, ImageFrameData};
+use crate::{prelude::*, Data, FontMgr, Typeface};
 use helpers::ResourceKind;
+pub use sb::skresources_ImageDecodeStrategy as ImageDecodeStrategy;
 use skia_bindings::{
     self as sb, skresources_ImageAsset, RustResourceProvider, RustResourceProvider_Param, SkData,
-    SkFontMgr, SkRefCnt, SkRefCntBase, SkTypeface, TraitObject,
+    SkFontMgr, SkRefCntBase, SkTypeface, TraitObject,
 };
-
-use crate::{prelude::*, Data, FontMgr, Typeface};
-
-pub type ImageAsset = RCHandle<skresources_ImageAsset>;
-require_base_type!(skresources_ImageAsset, SkRefCnt);
-
-impl NativeRefCountedBase for skresources_ImageAsset {
-    type Base = SkRefCntBase;
-}
-
-impl ImageAsset {
-    pub fn is_multi_frame(&self) -> bool {
-        unsafe { sb::C_ImageAsset_isMultiFrame(self.native_mut_force()) }
-    }
-
-    // TODO: wrap getFrameData()
-
-    pub fn from_data(
-        data: impl Into<Data>,
-        decode_strategy: impl Into<Option<ImageDecodeStrategy>>,
-    ) -> Option<Self> {
-        let decode_strategy = decode_strategy
-            .into()
-            .unwrap_or(ImageDecodeStrategy::LazyDecode);
-
-        ImageAsset::from_ptr(unsafe {
-            sb::C_MultiFrameImageAsset_Make(data.into().into_ptr(), decode_strategy)
-        })
-    }
-
-    // TODO: Wrapping Make(SkCodec) requires us to put a lifetime on the ImageAsset.
-}
-
-pub use sb::skresources_ImageDecodeStrategy as ImageDecodeStrategy;
+use std::{borrow::Cow, ffi::CStr, mem, os::raw, ptr};
 variant_name!(ImageDecodeStrategy::LazyDecode);
 
 // TODO: Wrap ExternalTrackAsset
