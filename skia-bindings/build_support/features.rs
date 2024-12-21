@@ -118,7 +118,10 @@ impl Features {
             feature_ids.push(feature_id::WEBPD);
         }
         if self.embed_freetype {
-            feature_ids.push(feature_id::EMBED_FREETYPE);
+            feature_ids.push(feature_id::FREETYPE);
+        }
+        if self.freetype_woff2 {
+            feature_ids.push(feature_id::FTWOFF2);
         }
 
         feature_ids.into_iter().collect()
@@ -138,5 +141,6 @@ mod feature_id {
     pub const EGL: &str = "egl";
     pub const X11: &str = "x11";
     pub const WAYLAND: &str = "wayland";
-    pub const EMBED_FREETYPE: &str = "freetype";
+    pub const FREETYPE: &str = "freetype";
+    pub const FTWOFF2: &str = "ftwoff2";
 }
