@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 use std::{
+    fmt::Debug,
     hash::{Hash, Hasher},
     marker::PhantomData,
     mem::{self, MaybeUninit},
@@ -980,8 +981,22 @@ pub struct Sendable<H: ConditionallySend>(H);
 unsafe impl<H: ConditionallySend> Send for Sendable<H> {}
 
 impl<H: ConditionallySend> Sendable<H> {
+    #[deprecated(note = "Use Sendable::into_inner() instead")]
     pub fn unwrap(self) -> H {
         self.0
+    }
+
+    pub fn into_inner(self) -> H {
+        self.0
+    }
+}
+
+impl<H> Debug for Sendable<H>
+where
+    H: Debug + ConditionallySend,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("Sendable").field(&self.0).finish()
     }
 }
 
