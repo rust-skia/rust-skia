@@ -2080,10 +2080,6 @@ extern "C" SkPathEffect* C_SkPathEffect_MakeCompose(SkPathEffect* outer, SkPathE
     return SkPathEffect::MakeCompose(sp(outer), sp(inner)).release();
 }
 
-extern "C" void C_SkPathEffect_DashInfo_Construct(SkPathEffect::DashInfo* uninitialized) {
-    new(uninitialized) SkPathEffect::DashInfo();
-}
-
 extern "C" SkPathEffect* C_SkPathEffect_Deserialize(const void* data, size_t length) {
     return SkPathEffect::Deserialize(data, length).release();
 }
