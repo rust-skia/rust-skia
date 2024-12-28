@@ -3071,7 +3071,7 @@ extern "C" void C_SkPDF_StructElementNode_appendChild(SkPDF::StructureElementNod
     self->fChildVector.push_back(std::unique_ptr<SkPDF::StructureElementNode>(node));
 }
 
-extern "C" size_t C_SkPDF_StructureElementNode_getChildVector(const SkPDF::StructureElementNode *self, SkPDF::StructureElementNode **nodes)
+extern "C" size_t C_SkPDF_StructureElementNode_getChildVector(const SkPDF::StructureElementNode *self, const SkPDF::StructureElementNode ** nodes)
 {
     if (self->fChildVector.empty())
     {
@@ -3080,7 +3080,11 @@ extern "C" size_t C_SkPDF_StructureElementNode_getChildVector(const SkPDF::Struc
     }
     else
     {
-        *nodes = &*self->fChildVector.front();
+        using ElementType = decltype(self->fChildVector)::value_type;
+        static_assert(sizeof(ElementType) == sizeof(SkPDF::StructureElementNode*), "Size mismatch");
+        static_assert(alignof(ElementType) == alignof(SkPDF::StructureElementNode*), "Alignment mismatch");
+
+        *nodes = reinterpret_cast<SkPDF::StructureElementNode const *>(self->fChildVector.data());
         return self->fChildVector.size();
     }
 }

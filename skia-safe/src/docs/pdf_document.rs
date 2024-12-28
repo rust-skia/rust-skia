@@ -174,7 +174,7 @@ pub mod pdf {
         }
 
         pub fn child_vector(&self) -> &[StructureElementNode] {
-            let mut ptr = ptr::null_mut();
+            let mut ptr = ptr::null();
             unsafe {
                 let len = sb::C_SkPDF_StructureElementNode_getChildVector(self.native(), &mut ptr);
                 safer::from_raw_parts(ptr as _, len)
@@ -393,11 +393,23 @@ pub mod pdf {
 
 #[cfg(test)]
 mod tests {
+    use crate::pdf::StructureElementNode;
+
     use super::pdf;
 
     #[test]
     fn create_attribute_list() {
         let mut _al = pdf::AttributeList::default();
         _al.append_float_array("Owner", "Name", &[1.0, 2.0, 3.0]);
+    }
+
+    #[test]
+    fn structure_element_node_child_vector() {
+        let mut root = StructureElementNode::new("root");
+        root.append_child(StructureElementNode::new("nested"));
+        root.append_child(StructureElementNode::new("nested2"));
+        let v = root.child_vector();
+        assert_eq!(v[0].type_string(), "nested");
+        assert_eq!(v[1].type_string(), "nested2");
     }
 }
