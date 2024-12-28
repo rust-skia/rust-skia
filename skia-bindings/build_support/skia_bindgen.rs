@@ -1,7 +1,7 @@
 //! Full build support for the SkiaBindings library, and bindings.rs file.
 use std::path::{Path, PathBuf};
 
-use bindgen::{CodegenConfig, EnumVariation, RustTarget};
+use bindgen::{CodegenConfig, EnumVariation};
 use cc::Build;
 
 use crate::build_support::{binaries_config, cargo, cargo::Target, features, platform};
@@ -166,12 +166,6 @@ pub fn generate_bindings(
             config.remove(CodegenConfig::DESTRUCTORS);
             config
         });
-    }
-
-    // 32-bit Windows needs `thiscall` support.
-    // <https://github.com/rust-skia/rust-skia/issues/540>
-    if target.is_windows() && target.architecture == "i686" {
-        builder = builder.rust_target(RustTarget::Nightly);
     }
 
     for function in ALLOWLISTED_FUNCTIONS {
