@@ -20,6 +20,7 @@ license = "MIT"
 version = "1.0.0"
 authors = ["Armin Sander <armin@replicator.org>"]
 edition = "2021"
+rust-version.workspace = true
 
 default-run = "skia-org"
 

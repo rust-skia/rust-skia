@@ -4,6 +4,7 @@ name = "skia-svg-macros"
 description = "Skia SVG Macros for Dom bindings"
 version = "0.1.0"
 edition = "2021"
+rust-version.workspace = true
 
 homepage = "https://github.com/rust-skia/rust-skia"
 repository = "https://github.com/rust-skia/rust-skia"
