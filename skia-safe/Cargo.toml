@@ -18,7 +18,7 @@ categories = [
 ]
 license = "MIT"
 
-version = "0.80.2"
+version = "0.81.0"
 authors = ["Armin Sander <armin@replicator.org>"]
 edition = "2021"
 rust-version.workspace = true
@@ -59,7 +59,7 @@ shaper = ["textlayout", "skia-bindings/shaper"]
 [dependencies]
 bitflags = "2.0"
 lazy_static = "1.4"
-skia-bindings = { version = "=0.80.1", path = "../skia-bindings", default-features = false }
+skia-bindings = { version = "=0.81.0", path = "../skia-bindings", default-features = false }
 
 # D3D types & ComPtr
 windows = { version = "0.58.0", features = [
