@@ -32,6 +32,7 @@ mod codec {
 }
 
 mod core {
+    use contour_measure::{ForwardVerbIterator, VerbMeasure};
     use skia_safe::*;
     use static_assertions::*;
 
@@ -50,6 +51,8 @@ mod core {
     assert_impl_all!(ColorTable: Send, Sync);
     assert_impl_all!(ContourMeasure: Send, Sync);
     assert_impl_all!(ContourMeasureIter: Send, Sync);
+    assert_impl_all!(ForwardVerbIterator: Send, Sync);
+    assert_impl_all!(VerbMeasure: Send, Sync);
     assert_impl_all!(CubicMap: Send, Sync);
     assert_impl_all!(CubicResampler: Send, Sync);
     assert_impl_all!(Data: Send, Sync);

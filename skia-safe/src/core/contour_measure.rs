@@ -106,6 +106,7 @@ pub struct ForwardVerbIterator<'a> {
     iterator: SkContourMeasure_ForwardVerbIterator,
     contour_measure: &'a ContourMeasure,
 }
+unsafe_send_sync!(ForwardVerbIterator<'_>);
 
 impl fmt::Debug for ForwardVerbIterator<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -142,6 +143,7 @@ pub struct VerbMeasure<'a> {
     verb_measure: SkContourMeasure_VerbMeasure,
     _pd: PhantomData<ForwardVerbIterator<'a>>,
 }
+unsafe_send_sync!(VerbMeasure<'_>);
 
 impl fmt::Debug for VerbMeasure<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
