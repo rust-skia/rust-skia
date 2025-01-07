@@ -161,6 +161,10 @@ extern "C" SkISize C_SkCodec_getScaledDimensions(const SkCodec* self, float desi
     return self->getScaledDimensions(desiredScale);
 }
 
+extern "C" bool C_SkCodec_hasHighBitDepthEncodedData(const SkCodec* self) {
+    return self->hasHighBitDepthEncodedData();
+}
+
 extern "C" bool C_SkCodec_getValidSubset(const SkCodec* self, SkIRect* desiredSubset) {
     return self->getValidSubset(desiredSubset);
 }

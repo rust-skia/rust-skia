@@ -152,6 +152,10 @@ impl Codec<'_> {
 
     // TODO: getICCProfile
 
+    pub fn has_high_bit_depth_encoded_data(&self) -> bool {
+        unsafe { sb::C_SkCodec_hasHighBitDepthEncodedData(self.native()) }
+    }
+
     pub fn origin(&self) -> EncodedOrigin {
         EncodedOrigin::from_native_c(unsafe { sb::C_SkCodec_getOrigin(self.native()) })
     }
