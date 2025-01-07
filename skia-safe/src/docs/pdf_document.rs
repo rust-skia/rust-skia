@@ -132,7 +132,7 @@ pub mod pdf {
 
     /// A node in a PDF structure tree, giving a semantic representation
     /// of the content.  Each node ID is associated with content
-    /// by passing the [`crate::Canvas`] and node ID to [`pdf::set_node_id()`] when drawing.
+    /// by passing the [`crate::Canvas`] and node ID to [`set_node_id()`] when drawing.
     /// NodeIDs should be unique within each tree.
     impl StructureElementNode {
         pub fn new(type_string: impl AsRef<str>) -> Self {
