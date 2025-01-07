@@ -93,7 +93,8 @@ impl ContourMeasure {
     }
 
     pub fn verbs(&self) -> ForwardVerbIterator {
-        let iterator = unsafe { sb::C_SkContourMeasure_begin(self.native()) };
+        let iterator =
+            construct(|iterator| unsafe { sb::C_SkContourMeasure_begin(self.native(), iterator) });
 
         ForwardVerbIterator {
             iterator,
@@ -126,11 +127,15 @@ impl<'a> Iterator for ForwardVerbIterator<'a> {
     type Item = VerbMeasure<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let end = unsafe { sb::C_SkContourMeasure_end(self.contour_measure.native()) };
+        let end = construct(|end| unsafe {
+            sb::C_SkContourMeasure_end(self.contour_measure.native(), end)
+        });
         if unsafe { sb::C_SkContourMeasure_ForwardVerbIterator_Equals(&self.iterator, &end) } {
             return None;
         }
-        let item = unsafe { sb::C_SkContourMeasure_ForwardVerbIterator_item(&self.iterator) };
+        let item = construct(|item| unsafe {
+            sb::C_SkContourMeasure_ForwardVerbIterator_item(&self.iterator, item)
+        });
         unsafe { sb::C_SkContourMeasure_ForwardVerbIterator_next(&mut self.iterator) };
         Some(VerbMeasure {
             verb_measure: item,

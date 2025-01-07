@@ -1887,20 +1887,20 @@ extern "C" bool C_SkContourMeasure_isClosed(const SkContourMeasure* self) {
     return self->isClosed();
 }
 
-extern "C" SkContourMeasure::ForwardVerbIterator C_SkContourMeasure_begin(const SkContourMeasure* self) {
-    return self->begin();
+extern "C" void C_SkContourMeasure_begin(const SkContourMeasure* self, SkContourMeasure::ForwardVerbIterator* uninitialized) {
+    new (uninitialized) SkContourMeasure::ForwardVerbIterator(self->begin());
 }
 
-extern "C" SkContourMeasure::ForwardVerbIterator C_SkContourMeasure_end(const SkContourMeasure* self) {
-    return self->end();
+extern "C" void C_SkContourMeasure_end(const SkContourMeasure* self, SkContourMeasure::ForwardVerbIterator* uninitialized) {
+    new (uninitialized) SkContourMeasure::ForwardVerbIterator(self->end());
 }
 
 extern "C" bool C_SkContourMeasure_ForwardVerbIterator_Equals(const SkContourMeasure::ForwardVerbIterator* a, const SkContourMeasure::ForwardVerbIterator* b) {
     return *const_cast<SkContourMeasure::ForwardVerbIterator*>(a) == *b;
 }
 
-extern "C" SkContourMeasure::VerbMeasure C_SkContourMeasure_ForwardVerbIterator_item(const SkContourMeasure::ForwardVerbIterator* self) {
-    return **self;
+extern "C" void C_SkContourMeasure_ForwardVerbIterator_item(const SkContourMeasure::ForwardVerbIterator* self, SkContourMeasure::VerbMeasure* uninitialized) {
+    new (uninitialized) SkContourMeasure::VerbMeasure(**self);
 }
 
 extern "C" void C_SkContourMeasure_ForwardVerbIterator_next(SkContourMeasure::ForwardVerbIterator* self) {
