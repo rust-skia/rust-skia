@@ -1,6 +1,9 @@
-use crate::{prelude::*, scalar, Matrix, Path, Point, Vector};
-use skia_bindings::{self as sb, SkContourMeasure, SkContourMeasureIter, SkRefCntBase};
-use std::fmt;
+use crate::{prelude::*, scalar, Matrix, Path, PathVerb, Point, Vector};
+use skia_bindings::{
+    self as sb, SkContourMeasure, SkContourMeasureIter, SkContourMeasure_ForwardVerbIterator,
+    SkContourMeasure_VerbMeasure, SkRefCntBase,
+};
+use std::{fmt, marker::PhantomData};
 
 pub type ContourMeasure = RCHandle<SkContourMeasure>;
 unsafe_send_sync!(ContourMeasure);
@@ -88,6 +91,85 @@ impl ContourMeasure {
     pub fn is_closed(&self) -> bool {
         unsafe { sb::C_SkContourMeasure_isClosed(self.native()) }
     }
+
+    pub fn verbs(&self) -> ForwardVerbIterator {
+        let iterator = unsafe { sb::C_SkContourMeasure_begin(self.native()) };
+
+        ForwardVerbIterator {
+            iterator,
+            contour_measure: self,
+        }
+    }
+}
+
+pub struct ForwardVerbIterator<'a> {
+    iterator: SkContourMeasure_ForwardVerbIterator,
+    contour_measure: &'a ContourMeasure,
+}
+
+impl fmt::Debug for ForwardVerbIterator<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ForwardVerbIterator").finish()
+    }
+}
+
+impl PartialEq for ForwardVerbIterator<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sb::C_SkContourMeasure_ForwardVerbIterator_Equals(&self.iterator, &other.iterator)
+        }
+    }
+}
+
+impl<'a> Iterator for ForwardVerbIterator<'a> {
+    type Item = VerbMeasure<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let end = unsafe { sb::C_SkContourMeasure_end(self.contour_measure.native()) };
+        if unsafe { sb::C_SkContourMeasure_ForwardVerbIterator_Equals(&self.iterator, &end) } {
+            return None;
+        }
+        let item = unsafe { sb::C_SkContourMeasure_ForwardVerbIterator_item(&self.iterator) };
+        unsafe { sb::C_SkContourMeasure_ForwardVerbIterator_next(&mut self.iterator) };
+        Some(VerbMeasure {
+            verb_measure: item,
+            _pd: PhantomData,
+        })
+    }
+}
+
+pub struct VerbMeasure<'a> {
+    verb_measure: SkContourMeasure_VerbMeasure,
+    _pd: PhantomData<ForwardVerbIterator<'a>>,
+}
+
+impl fmt::Debug for VerbMeasure<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("VerbMeasure")
+            .field("verb", &self.verb())
+            .field("distance", &self.distance())
+            .field("points", &self.points())
+            .finish()
+    }
+}
+
+impl VerbMeasure<'_> {
+    pub fn verb(&self) -> PathVerb {
+        self.verb_measure.fVerb
+    }
+
+    pub fn distance(&self) -> scalar {
+        self.verb_measure.fDistance
+    }
+
+    pub fn points(&self) -> &[Point] {
+        unsafe {
+            safer::from_raw_parts(
+                Point::from_native_ptr(self.verb_measure.fPts.fPtr),
+                self.verb_measure.fPts.fSize,
+            )
+        }
+    }
 }
 
 pub type ContourMeasureIter = Handle<SkContourMeasureIter>;
@@ -144,5 +226,23 @@ impl ContourMeasureIter {
                 .reset(path.native(), force_closed, res_scale.into().unwrap_or(1.0))
         }
         self
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::ContourMeasureIter;
+    use crate::{Path, Rect};
+
+    #[test]
+    fn contour_and_verb_measure() {
+        let mut p = Path::new();
+        p.add_rect(Rect::new(0.0, 0.0, 10.0, 10.0), None);
+        let measure = ContourMeasureIter::new(&p, true, None);
+        for contour in measure {
+            for verb in contour.verbs() {
+                println!("verb: {verb:?}")
+            }
+        }
     }
 }
