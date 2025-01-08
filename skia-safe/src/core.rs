@@ -31,6 +31,7 @@ pub mod font_arguments;
 pub mod font_metrics;
 mod font_mgr;
 pub mod font_parameters;
+mod font_scanner;
 pub mod font_style;
 mod font_types;
 mod four_byte_tag;

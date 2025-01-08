@@ -1,6 +1,6 @@
-doc-features-win="gl,vulkan,d3d,textlayout,svg,webp"
-doc-features-mac="gl,vulkan,metal,textlayout,svg,webp"
-doc-features-docs-rs="gl,textlayout,svg,webp"
+doc-features-win="gl,vulkan,d3d,textlayout,svg,ureq,webp"
+doc-features-mac="gl,vulkan,metal,textlayout,svg,ureq,webp"
+doc-features-docs-rs="gl,textlayout,svg,ureq,webp"
 
 .PHONY: all
 all:

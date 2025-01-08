@@ -161,6 +161,10 @@ extern "C" SkISize C_SkCodec_getScaledDimensions(const SkCodec* self, float desi
     return self->getScaledDimensions(desiredScale);
 }
 
+extern "C" bool C_SkCodec_hasHighBitDepthEncodedData(const SkCodec* self) {
+    return self->hasHighBitDepthEncodedData();
+}
+
 extern "C" bool C_SkCodec_getValidSubset(const SkCodec* self, SkIRect* desiredSubset) {
     return self->getValidSubset(desiredSubset);
 }
@@ -1883,6 +1887,26 @@ extern "C" bool C_SkContourMeasure_isClosed(const SkContourMeasure* self) {
     return self->isClosed();
 }
 
+extern "C" void C_SkContourMeasure_begin(const SkContourMeasure* self, SkContourMeasure::ForwardVerbIterator* uninitialized) {
+    new (uninitialized) SkContourMeasure::ForwardVerbIterator(self->begin());
+}
+
+extern "C" void C_SkContourMeasure_end(const SkContourMeasure* self, SkContourMeasure::ForwardVerbIterator* uninitialized) {
+    new (uninitialized) SkContourMeasure::ForwardVerbIterator(self->end());
+}
+
+extern "C" bool C_SkContourMeasure_ForwardVerbIterator_Equals(const SkContourMeasure::ForwardVerbIterator* a, const SkContourMeasure::ForwardVerbIterator* b) {
+    return *const_cast<SkContourMeasure::ForwardVerbIterator*>(a) == *b;
+}
+
+extern "C" void C_SkContourMeasure_ForwardVerbIterator_item(const SkContourMeasure::ForwardVerbIterator* self, SkContourMeasure::VerbMeasure* uninitialized) {
+    new (uninitialized) SkContourMeasure::VerbMeasure(**self);
+}
+
+extern "C" void C_SkContourMeasure_ForwardVerbIterator_next(SkContourMeasure::ForwardVerbIterator* self) {
+    ++*self;
+}
+
 //
 // core/SkDataTable.h
 //
@@ -2078,10 +2102,6 @@ extern "C" SkPathEffect* C_SkPathEffect_MakeSum(SkPathEffect* first, SkPathEffec
 
 extern "C" SkPathEffect* C_SkPathEffect_MakeCompose(SkPathEffect* outer, SkPathEffect* inner) {
     return SkPathEffect::MakeCompose(sp(outer), sp(inner)).release();
-}
-
-extern "C" void C_SkPathEffect_DashInfo_Construct(SkPathEffect::DashInfo* uninitialized) {
-    new(uninitialized) SkPathEffect::DashInfo();
 }
 
 extern "C" SkPathEffect* C_SkPathEffect_Deserialize(const void* data, size_t length) {
