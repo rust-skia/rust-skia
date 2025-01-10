@@ -108,6 +108,8 @@ pub fn key(repository_short_hash: &str, features: &HashSet<String>, skia_debug: 
 
 /// Prepare the final download URL for the prebuilt binaries archive.
 pub fn download_url(url_template: String, tag: impl AsRef<str>, key: impl AsRef<str>) -> String {
+    #[allow(unknown_lints)]
+    #[allow(clippy::literal_string_with_formatting_args)]
     url_template
         .replace("{tag}", tag.as_ref())
         .replace("{key}", key.as_ref())
