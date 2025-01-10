@@ -106,6 +106,7 @@ pub fn release_jobs(workflow: &Workflow) -> Vec<Job> {
 
     jobs.extend(freya_release_jobs(workflow));
     jobs.extend(vizia_release_jobs(workflow));
+    jobs.extend(skia_canvas_release_jobs(workflow));
 
     jobs
 }
@@ -141,6 +142,26 @@ fn vizia_release_jobs(workflow: &Workflow) -> Vec<Job> {
             // vec![release_job("gl,vulkan,textlayout,svg,wayland,x11")]
             // Alternative: Use the full feature set `gl,vulkan,textlayout,svg,wayland,x11,webp`
             vec![]
+        }
+    }
+}
+
+// Binaries for Skia Canvas: <https://github.com/samizdatco/skia-canvas>
+// <https://github.com/rust-skia/rust-skia/pull/1068#issuecomment-2518894492>
+fn skia_canvas_release_jobs(workflow: &Workflow) -> Vec<Job> {
+    match workflow.host_os {
+        HostOS::MacOS => {
+            vec![release_job("metal,textlayout,webp,svg")]
+        }
+        HostOS::Windows => {
+            vec![release_job(
+                "vulkan,embed-freetype,freetype-woff2,textlayout,webp,svg",
+            )]
+        }
+        HostOS::Linux => {
+            vec![release_job(
+                "vulkan,embed-freetype,freetype-woff2,textlayout,webp,svg",
+            )]
         }
     }
 }
