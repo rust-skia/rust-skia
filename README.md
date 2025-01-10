@@ -4,8 +4,8 @@
 
 Skia Submodule Status: chrome/m132 ([upstream changes][skia-upstream], [our changes][skia-ours]).
 
-[skia-upstream]: https://github.com/rust-skia/skia/compare/m132-0.80.2...google:chrome/m132
-[skia-ours]: https://github.com/google/skia/compare/chrome/m132...rust-skia:m132-0.80.2
+[skia-upstream]: https://github.com/rust-skia/skia/compare/m132-0.81.0...google:chrome/m132
+[skia-ours]: https://github.com/google/skia/compare/chrome/m132...rust-skia:m132-0.81.0
 
 ## About
 
