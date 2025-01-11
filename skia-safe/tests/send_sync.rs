@@ -7,7 +7,7 @@ fn sendable() {
     let mode = BlendMode::ColorBurn;
     let cf = color_filters::blend(color, mode).unwrap();
     let sendable = cf.wrap_send().ok().unwrap();
-    let _unwrapped = sendable.unwrap();
+    let _unwrapped = sendable.into_inner();
 }
 
 /// Test if Sendable<> is actually sendable for RCHandle types.
