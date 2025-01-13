@@ -56,10 +56,17 @@ save-svg-images = []
 gpu = []
 shaper = ["textlayout", "skia-bindings/shaper"]
 
+# vulkan-window example
+vulkan-window = ["dep:ash", "dep:vulkano", "winit/rwh_05"]
+
 [dependencies]
 bitflags = "2.0"
 lazy_static = "1.4"
 skia-bindings = { version = "=0.81.0", path = "../skia-bindings", default-features = false }
+
+# vulkan-window example
+ash = { version = "^0.37.3", optional = true }
+vulkano = { version = "0.34", optional = true }
 
 # D3D types & ComPtr
 windows = { version = "0.58.0", features = [
