@@ -1,4 +1,4 @@
-use crate::{prelude::*, scalar, BlurStyle, CoverageMode, Matrix, NativeFlattenable, Rect};
+use crate::{prelude::*, scalar, BlurStyle, CoverageMode, Matrix, NativeFlattenable};
 use skia_bindings::{self as sb, SkFlattenable, SkMaskFilter, SkRefCntBase};
 use std::fmt;
 
@@ -45,15 +45,6 @@ impl MaskFilter {
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
             sb::C_SkMaskFilter_MakeBlur(style, sigma, respect_ctm.into().unwrap_or(true))
-        })
-    }
-
-    /// Returns the approximate bounds that would result from filtering the `src` rect. The actual
-    /// result may be different, but it should be contained within the returned bounds.
-    pub fn approximate_filtered_bounds(&self, src: impl AsRef<Rect>) -> Rect {
-        Rect::from_native_c(unsafe {
-            self.native()
-                .approximateFilteredBounds(src.as_ref().native())
         })
     }
 
