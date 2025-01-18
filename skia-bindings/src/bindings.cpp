@@ -1347,14 +1347,6 @@ extern "C" SkTextBlob* C_SkTextBlobBuilder_make(SkTextBlobBuilder* self) {
 // core/SkTypeface.h
 //
 
-extern "C" bool C_SkTypeface_isBold(const SkTypeface* self) {
-    return self->isBold();
-}
-
-extern "C" bool C_SkTypeface_isItalic(const SkTypeface* self) {
-    return self->isItalic();
-}
-
 extern "C" SkTypeface* C_SkTypeface_makeClone(const SkTypeface* self, const SkFontArguments* arguments) {
     return self->makeClone(*arguments).release();
 }

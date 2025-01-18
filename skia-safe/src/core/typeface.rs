@@ -45,19 +45,19 @@ impl fmt::Debug for Typeface {
 
 impl Typeface {
     pub fn font_style(&self) -> FontStyle {
-        FontStyle::from_native_c(self.native().fStyle)
+        FontStyle::from_native_c(unsafe { self.native().fontStyle() })
     }
 
     pub fn is_bold(&self) -> bool {
-        unsafe { sb::C_SkTypeface_isBold(self.native()) }
+        unsafe { self.native().isBold() }
     }
 
     pub fn is_italic(&self) -> bool {
-        unsafe { sb::C_SkTypeface_isItalic(self.native()) }
+        unsafe { self.native().isItalic() }
     }
 
     pub fn is_fixed_pitch(&self) -> bool {
-        self.native().fIsFixedPitch
+        unsafe { self.native().isFixedPitch() }
     }
 
     pub fn variation_design_position(
