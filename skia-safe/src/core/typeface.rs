@@ -245,6 +245,15 @@ impl Typeface {
             .if_true_then_some(|| name.as_str().into())
     }
 
+    pub fn resource_name(&self) -> Option<String> {
+        let mut name = interop::String::default();
+        let num_resources = unsafe { self.native().getResourceName(name.native_mut()) };
+        if num_resources == 0 {
+            return None;
+        }
+        Some(name.as_str().into())
+    }
+
     pub fn to_font_data(&self) -> Option<(Vec<u8>, usize)> {
         let mut ttc_index = 0;
         StreamAsset::from_ptr(unsafe { sb::C_SkTypeface_openStream(self.native(), &mut ttc_index) })

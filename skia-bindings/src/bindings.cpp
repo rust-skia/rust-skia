@@ -979,6 +979,12 @@ extern "C" SkColorSpace* C_SkColorSpace_MakeSRGBLinear() {
     return SkColorSpace::MakeSRGBLinear().release();
 }
 
+extern "C" SkColorSpace* C_SkColorSpace_MakeCICP(
+    SkNamedPrimaries::CicpId colorPrimaries,
+    SkNamedTransferFn::CicpId transferCharacteristics) {
+    return SkColorSpace::MakeCICP(colorPrimaries, transferCharacteristics).release();
+}
+
 extern "C" SkColorSpace* C_SkColorSpace_makeLinearGamma(const SkColorSpace* self) {
     return self->makeLinearGamma().release();
 }
@@ -997,6 +1003,14 @@ extern "C" SkData* C_SkColorSpace_serialize(const SkColorSpace* self) {
 
 extern "C" SkColorSpace* C_SkColorSpace_Deserialize(const void* data, size_t length) {
     return SkColorSpace::Deserialize(data, length).release();
+}
+
+extern "C" uint32_t C_SkColorSpace_transferFnHash(const SkColorSpace* self) {
+    return self->transferFnHash();
+}
+
+extern "C" uint64_t C_SkColorSpace_hash(const SkColorSpace* self) {
+    return self->hash();
 }
 
 //
