@@ -1,4 +1,5 @@
 use skia_bindings as sb;
+use skia_bindings::skgpu_GpuStats;
 
 pub use sb::skgpu_BackendApi as BackendApi;
 variant_name!(BackendApi::Metal);
@@ -27,3 +28,19 @@ variant_name!(Renderable::No);
 
 pub use skia_bindings::skgpu_Origin as Origin;
 variant_name!(Origin::TopLeft);
+
+bitflags! {
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    pub struct GpuStatsFlags : u32 {
+        const NONE = sb::skgpu_GpuStatsFlags_kNone as _;
+        const ELAPSED_TIME = sb::skgpu_GpuStatsFlags_kElapsedTime as _;
+    }
+}
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct GpuStats {
+    pub elapsed_time: u64,
+}
+
+native_transmutable!(skgpu_GpuStats, GpuStats, gpu_stats_layout);
