@@ -241,6 +241,30 @@ Please share your build experience so that we can try to automate the build and 
 
 ## Example Applications
 
+### gl-window
+
+An example that opens an OpenGL Window and draws the rust-skia icon with skia-safe (contributed by [@nornagon](https://github.com/nornagon)).
+
+```bash
+cargo run --example gl-window --features gl
+```
+
+On Linux the feature `x11` needs to be enabled:
+
+```bash
+cargo run --example gl-window --features gl,x11
+```
+
+### vulkan-window
+
+An example application that opens a Window and renders a blue rectangle using [Vulkano](https://github.com/vulkano-rs/vulkano) (contributed by [@samizdatco](https://github.com/samizdatco) in [#1066](https://github.com/rust-skia/rust-skia/pull/1066))
+
+```bash
+cargo run --example vulkan-window --features "vulkan,vulkan-window"
+```
+
+To install Vulkan support for your system, the easiest way is to install the [LunarG SDK](https://vulkan.lunarg.com/sdk/home), and enable "System Global Installation" in the installer.
+
 ### icon
 
 The `icon` example generates the rust-skia icon in the current directory.
@@ -273,20 +297,6 @@ And to show the drivers that are supported
 
 ```bash
 cargo run -- --help
-```
-
-### gl-window
-
-An example that opens an OpenGL Window and draws the rust-skia icon with skia-safe (contributed by [@nornagon](https://github.com/nornagon)).
-
-```bash
-cargo run --example gl-window --features gl
-```
-
-On Linux the feature `x11` needs to be enabled:
-
-```bash
-cargo run --example gl-window --features gl,x11
 ```
 
 ## Example Images
