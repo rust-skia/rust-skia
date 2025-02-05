@@ -1,6 +1,7 @@
 use std::ptr;
 
 use crate::gpu;
+use crate::gpu::GpuStatsFlags;
 use skia_bindings as sb;
 
 pub use skia_bindings::GrBackendApi as BackendApi;
@@ -28,8 +29,10 @@ variant_name!(SurfaceOrigin::BottomLeft);
 pub struct FlushInfo {
     // TODO: wrap access to the following fields in a safe way:
     num_semaphores: usize,
+    gpu_stats_flags: GpuStatsFlags,
     signal_semaphores: *mut sb::GrBackendSemaphore,
     finished_proc: sb::GrGpuFinishedProc,
+    finished_with_stats_proc: sb::GrGpuFinishedWithStatsProc,
     finished_context: sb::GrGpuFinishedContext,
     submitted_proc: sb::GrGpuSubmittedProc,
     submitted_context: sb::GrGpuSubmittedContext,
@@ -39,8 +42,10 @@ impl Default for FlushInfo {
     fn default() -> Self {
         Self {
             num_semaphores: 0,
+            gpu_stats_flags: GpuStatsFlags::NONE,
             signal_semaphores: ptr::null_mut(),
             finished_proc: None,
+            finished_with_stats_proc: None,
             finished_context: ptr::null_mut(),
             submitted_proc: None,
             submitted_context: ptr::null_mut(),

@@ -25,6 +25,7 @@ pub struct Options {
     pub comments: Vec<Comment>,
     // TODO: ICCProfile
     // TODO: ICCProfileDescription
+    // TODO: If SkGainmapInfo get out of private/ : fGainmap fGainmapInfo
 }
 
 impl Default for Options {

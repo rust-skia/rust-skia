@@ -10,8 +10,8 @@ use skia_bindings::{self as sb, GrDirectContext, GrDirectContext_DirectContextID
 use crate::{
     gpu::{
         BackendFormat, BackendRenderTarget, BackendTexture, ContextOptions, FlushInfo,
-        MutableTextureState, PurgeResourceOptions, RecordingContext, SemaphoresSubmitted,
-        SubmitInfo, SyncCpu,
+        GpuStatsFlags, MutableTextureState, PurgeResourceOptions, RecordingContext,
+        SemaphoresSubmitted, SubmitInfo, SyncCpu,
     },
     prelude::*,
     surfaces, Data, Image, Surface, TextureCompressionType,
@@ -228,6 +228,10 @@ impl DirectContext {
     pub fn purge_unlocked_resources(&mut self, opts: PurgeResourceOptions) -> &mut Self {
         unsafe { self.native_mut().purgeUnlockedResources1(opts) }
         self
+    }
+
+    pub fn supported_gpu_stats(&self) -> GpuStatsFlags {
+        GpuStatsFlags::from_bits_truncate(unsafe { self.native().supportedGpuStats() })
     }
 
     // TODO: wait()
