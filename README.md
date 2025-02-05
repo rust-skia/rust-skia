@@ -263,7 +263,7 @@ An example application that opens a Window and renders a blue rectangle using [V
 cargo run --example vulkan-window --features "vulkan,vulkan-window"
 ```
 
-To install Vulkan support for your system, the easiest way is to install the [LunarG SDK](https://vulkan.lunarg.com/sdk/home), and enable "System Global Installation" in the installer.
+To add Vulkan support to your system, the easiest way is to install the [LunarG SDK](https://vulkan.lunarg.com/sdk/home), and enable "System Global Installation" in the installer.
 
 ### icon
 
