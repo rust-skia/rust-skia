@@ -91,7 +91,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: true
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-unknown-linux-gnu
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -168,7 +168,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-unknown-linux-gnu
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -245,7 +245,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -322,7 +322,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -399,7 +399,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-i686-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -476,7 +476,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-wasm32-unknown-emscripten
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -578,7 +578,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-unknown-linux-gnu
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -655,7 +655,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-unknown-linux-gnu
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -732,7 +732,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -809,7 +809,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -886,7 +886,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-i686-linux-android
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -963,7 +963,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-wasm32-unknown-emscripten
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
