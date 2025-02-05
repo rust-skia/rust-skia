@@ -1,6 +1,6 @@
 #[cfg(not(all(feature = "vulkan", feature = "vulkan-window")))]
 fn main() {
-    println!("To run this example, invoke cargo with --features \"vulkan,vulkan-win\".")
+    println!("To run this example, invoke cargo with --features \"vulkan,vulkan-window\".")
 }
 
 #[cfg(all(feature = "vulkan", feature = "vulkan-window"))]
