@@ -45,7 +45,7 @@ impl fmt::Debug for Typeface {
 
 impl Typeface {
     pub fn font_style(&self) -> FontStyle {
-        FontStyle::from_native_c(unsafe { self.native().fontStyle() })
+        FontStyle::construct(|fs| unsafe { sb::C_SkTypeface_fontStyle(self.native(), fs) })
     }
 
     pub fn is_bold(&self) -> bool {

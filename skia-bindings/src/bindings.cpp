@@ -1361,6 +1361,10 @@ extern "C" SkTextBlob* C_SkTextBlobBuilder_make(SkTextBlobBuilder* self) {
 // core/SkTypeface.h
 //
 
+extern "C" void C_SkTypeface_fontStyle(const SkTypeface* self, SkFontStyle* uninitialized) {
+    new (uninitialized) SkFontStyle(self->fontStyle());
+}
+
 extern "C" SkTypeface* C_SkTypeface_makeClone(const SkTypeface* self, const SkFontArguments* arguments) {
     return self->makeClone(*arguments).release();
 }
