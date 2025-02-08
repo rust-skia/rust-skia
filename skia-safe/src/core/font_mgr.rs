@@ -242,7 +242,10 @@ impl FontMgr {
         Typeface::from_ptr(unsafe {
             sb::C_SkFontMgr_legacyMakeTypeface(
                 self.native(),
-                family_name.as_ref().map(|n| n.as_ptr()).unwrap_or(ptr::null()),
+                family_name
+                    .as_ref()
+                    .map(|n| n.as_ptr())
+                    .unwrap_or(ptr::null()),
                 style.into_native(),
             )
         })
