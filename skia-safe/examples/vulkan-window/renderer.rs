@@ -1,8 +1,5 @@
 use ash::vk::Handle;
-use std::{
-    ptr,
-    sync::{Arc, Mutex},
-};
+use std::{ptr, sync::Arc};
 use vulkano::{
     device::Queue,
     image::{view::ImageView, ImageUsage},
@@ -29,14 +26,14 @@ pub struct VulkanRenderer {
     framebuffers: Vec<Arc<Framebuffer>>,
     render_pass: Arc<RenderPass>,
     last_render: Option<Box<dyn GpuFuture>>,
-    skia_ctx: Arc<Mutex<gpu::DirectContext>>,
+    skia_ctx: gpu::DirectContext,
     swapchain_is_valid: bool,
 }
 
 impl Drop for VulkanRenderer {
     fn drop(&mut self) {
         // prevent in-flight commands from trying to draw to the window after it's gone
-        self.skia_ctx.lock().unwrap().abandon();
+        self.skia_ctx.abandon();
     }
 }
 
@@ -232,7 +229,7 @@ impl VulkanRenderer {
             )
             .unwrap();
 
-            Arc::new(Mutex::new(direct_context))
+            direct_context
         };
 
         VulkanRenderer {
@@ -341,7 +338,7 @@ impl VulkanRenderer {
         if let Some((image_index, acquire_future)) = next_frame {
             // pull the appropriate framebuffer from the swapchain and attach a skia Surface to it
             let framebuffer = self.framebuffers[image_index as usize].clone();
-            let mut surface = surface_for_framebuffer(self.skia_ctx.clone(), framebuffer.clone());
+            let mut surface = surface_for_framebuffer(&mut self.skia_ctx, framebuffer.clone());
             let canvas = surface.canvas();
 
             // use the display's DPI to convert the window size to logical coords and pre-scale the
@@ -360,7 +357,7 @@ impl VulkanRenderer {
             f(canvas, size);
 
             // flush the canvas's contents to the framebuffer
-            self.skia_ctx.clone().lock().unwrap().flush_and_submit();
+            self.skia_ctx.flush_and_submit();
 
             // send the framebuffer to the gpu and display it on screen
             self.last_render = self
@@ -384,7 +381,7 @@ impl VulkanRenderer {
 
 // Create a skia `Surface` (and its associated `.canvas()`) whose render target is the specified `Framebuffer`.
 fn surface_for_framebuffer(
-    skia_ctx: Arc<Mutex<gpu::DirectContext>>,
+    skia_ctx: &mut gpu::DirectContext,
     framebuffer: Arc<Framebuffer>,
 ) -> skia_safe::Surface {
     let [width, height] = framebuffer.extent();
@@ -423,7 +420,7 @@ fn surface_for_framebuffer(
     );
 
     surfaces::wrap_backend_render_target(
-        &mut skia_ctx.lock().unwrap(),
+        skia_ctx,
         render_target,
         gpu::SurfaceOrigin::TopLeft,
         color_type,

@@ -13,6 +13,7 @@ use winit::{event_loop::ActiveEventLoop, window::Window};
 
 use super::renderer::VulkanRenderer;
 
+#[derive(Default)]
 pub struct VulkanRenderContext {
     pub queue: Option<Arc<Queue>>,
 }
@@ -41,7 +42,7 @@ impl VulkanRenderContext {
         // All the window-drawing functionalities are part of non-core extensions that we need to
         // enable manually. To do so, we ask `Surface` for the list of extensions required to draw
         // to a window.
-        let required_extensions = Surface::required_extensions(event_loop);
+        let required_extensions = Surface::required_extensions(event_loop).unwrap();
 
         // Now creating the instance.
         let instance = Instance::new(
@@ -54,10 +55,12 @@ impl VulkanRenderContext {
                 ..Default::default()
             },
         )
-        .expect(&format!(
-            "Could not create instance supporting: {:?}",
-            required_extensions
-        ));
+        .unwrap_or_else(|_| {
+            panic!(
+                "Could not create instance supporting: {:?}",
+                required_extensions
+            )
+        });
 
         // Choose device extensions that we're going to use. In order to present images to a
         // surface, we need a `Swapchain`, which is provided by the `khr_swapchain` extension.
@@ -173,11 +176,5 @@ impl VulkanRenderContext {
         // only use one queue in this example, so we just retrieve the first and only element of
         // the iterator.
         queues.next().unwrap()
-    }
-}
-
-impl Default for VulkanRenderContext {
-    fn default() -> Self {
-        VulkanRenderContext { queue: None }
     }
 }

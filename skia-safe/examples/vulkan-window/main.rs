@@ -23,18 +23,10 @@ fn main() {
     use context::VulkanRenderContext;
     use renderer::VulkanRenderer;
 
+    #[derive(Default)]
     struct App {
         render_ctx: VulkanRenderContext, // the shared vulkan device, queue, etc.
         renderer: Option<VulkanRenderer>, // the window-specific skia <-> vulkan bridge
-    }
-
-    impl Default for App {
-        fn default() -> Self {
-            Self {
-                render_ctx: VulkanRenderContext::default(),
-                renderer: None,
-            }
-        }
     }
 
     impl ApplicationHandler for App {
