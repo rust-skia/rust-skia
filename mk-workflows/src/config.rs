@@ -44,7 +44,7 @@ pub fn jobs(workflow: &Workflow) -> Vec<Job> {
 }
 
 pub fn qa_jobs() -> Vec<Job> {
-    const QA_ALL_FEATURES: &str = "gl,vulkan,textlayout,svg,webp";
+    const QA_ALL_FEATURES: &str = "gl,vulkan,textlayout,svg,ureq,webp,vulkan-window";
     [
         Job {
             name: "stable-all-features".into(),
