@@ -18,9 +18,13 @@ pub fn simplify(path: &Path) -> Option<Path> {
     unsafe { sb::Simplify(path.native(), result.native_mut()) }.if_true_some(result)
 }
 
+#[deprecated(
+    since = "0.0.0",
+    note = "Use Path::compute_tight_bounds() and test if the resulting Rect::is_finite()"
+)]
 pub fn tight_bounds(path: &Path) -> Option<Rect> {
-    let mut result = Rect::default();
-    unsafe { sb::TightBounds(path.native(), result.native_mut()) }.if_true_some(result)
+    let rect = path.compute_tight_bounds();
+    rect.is_finite().if_true_some(rect)
 }
 
 pub fn as_winding(path: &Path) -> Option<Path> {
@@ -72,7 +76,12 @@ impl Path {
         simplify(self)
     }
 
+    #[deprecated(
+        since = "0.0.0",
+        note = "Use Path::compute_tight_bounds() and test if the resulting Rect::is_finite()"
+    )]
     pub fn tight_bounds(&self) -> Option<Rect> {
+        #[allow(deprecated)]
         tight_bounds(self)
     }
 
@@ -87,7 +96,7 @@ fn test_tight_bounds() {
     path.add_rect(Rect::from_point_and_size((10.0, 10.0), (10.0, 10.0)), None);
     path.add_rect(Rect::from_point_and_size((15.0, 15.0), (10.0, 10.0)), None);
     let tight_bounds: Rect = Rect::from_point_and_size((10.0, 10.0), (15.0, 15.0));
-    assert_eq!(path.tight_bounds().unwrap(), tight_bounds);
+    assert_eq!(path.compute_tight_bounds(), tight_bounds);
 }
 
 #[test]
@@ -98,7 +107,7 @@ fn test_union() {
     path2.add_rect(Rect::from_point_and_size((15.0, 15.0), (10.0, 10.0)), None);
     let union = path.op(&path2, PathOp::Union).unwrap();
     let expected: Rect = Rect::from_point_and_size((10.0, 10.0), (15.0, 15.0));
-    assert_eq!(union.tight_bounds().unwrap(), expected);
+    assert_eq!(union.compute_tight_bounds(), expected);
 }
 
 #[test]
@@ -109,5 +118,5 @@ fn test_intersect() {
     path2.add_rect(Rect::from_point_and_size((15.0, 15.0), (10.0, 10.0)), None);
     let intersected = path.op(&path2, PathOp::Intersect).unwrap();
     let expected: Rect = Rect::from_point_and_size((15.0, 15.0), (5.0, 5.0));
-    assert_eq!(intersected.tight_bounds().unwrap(), expected);
+    assert_eq!(intersected.compute_tight_bounds(), expected);
 }
