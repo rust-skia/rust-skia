@@ -1,4 +1,4 @@
-use std::{borrow::Cow, ffi::CStr, mem, os::raw, ptr};
+use std::{borrow::Cow, ffi::CStr, io::Read, mem, os::raw, ptr};
 
 use helpers::ResourceKind;
 use skia_bindings::{
@@ -222,7 +222,7 @@ impl ResourceProvider for UReqResourceProvider {
             ResourceKind::Base64(data) => Some(data),
             ResourceKind::DownloadFromUrl(url) => match ureq::get(&url).call() {
                 Ok(response) => {
-                    let mut reader = response.into_reader();
+                    let mut reader = response.into_body().into_reader();
                     let mut data = Vec::new();
                     if reader.read_to_end(&mut data).is_err() {
                         data.clear();
