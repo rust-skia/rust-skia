@@ -224,6 +224,7 @@ impl ResourceProvider for UReqResourceProvider {
                 Ok(response) => {
                     let mut reader = response.into_body().into_reader();
                     let mut data = Vec::new();
+                    use std::io::Read;
                     if reader.read_to_end(&mut data).is_err() {
                         data.clear();
                     };
