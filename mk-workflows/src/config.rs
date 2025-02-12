@@ -44,7 +44,7 @@ pub fn jobs(workflow: &Workflow) -> Vec<Job> {
 }
 
 pub fn qa_jobs() -> Vec<Job> {
-    const QA_ALL_FEATURES: &str = "gl,vulkan,textlayout,svg,webp";
+    const QA_ALL_FEATURES: &str = "gl,vulkan,textlayout,svg,ureq,webp,vulkan-window";
     [
         Job {
             name: "stable-all-features".into(),
@@ -227,7 +227,7 @@ fn android_targets() -> Vec<TargetConf> {
 }
 
 fn wasm_targets() -> Vec<TargetConf> {
-    // `svg` does not build in skia-safe because of the `ureq` dependency (although it builds in
-    // skia-bindings just fine): <https://github.com/briansmith/ring/issues/1043>
-    [TargetConf::new("wasm32-unknown-emscripten", "").disable("svg")].into()
+    // Compiling ureq-proto v0.3.0
+    //   error[E0277]: the trait bound `SystemRandom: ring::rand::SecureRandom` is not satisfied
+    [TargetConf::new("wasm32-unknown-emscripten", "").disable("ureq")].into()
 }
