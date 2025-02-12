@@ -431,7 +431,7 @@ jobs:
       run: |
         rustup target add wasm32-unknown-emscripten
 
-    - name: 'Build skia-safe for wasm32-unknown-emscripten with features gl,textlayout,ureq,vulkan,vulkan-window,webp'
+    - name: 'Build skia-safe for wasm32-unknown-emscripten with features gl,svg,textlayout,vulkan,vulkan-window,webp'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -448,7 +448,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "gl,textlayout,ureq,vulkan,vulkan-window,webp" --target wasm32-unknown-emscripten
+        cargo build -p skia-safe --release --features "gl,svg,textlayout,vulkan,vulkan-window,webp" --target wasm32-unknown-emscripten
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -460,19 +460,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features "gl,textlayout,ureq,vulkan,vulkan-window,webp" --all-targets --target wasm32-unknown-emscripten -- -D warnings
+        cargo clippy --release --features "gl,svg,textlayout,vulkan,vulkan-window,webp" --all-targets --target wasm32-unknown-emscripten -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features "gl,textlayout,ureq,vulkan,vulkan-window,webp" --all-targets --target wasm32-unknown-emscripten -- --nocapture
+        cargo test --all --release --features "gl,svg,textlayout,vulkan,vulkan-window,webp" --all-targets --target wasm32-unknown-emscripten -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features "gl,textlayout,ureq,vulkan,vulkan-window,webp" --target wasm32-unknown-emscripten "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+        cargo run --release --features "gl,svg,textlayout,vulkan,vulkan-window,webp" --target wasm32-unknown-emscripten "${{ env.SKIA_STAGING_PATH }}/skia-org" 
 
     - name: 'Upload skia-org example images'
       if: false
@@ -918,7 +918,7 @@ jobs:
       run: |
         rustup target add wasm32-unknown-emscripten
 
-    - name: 'Build skia-safe for wasm32-unknown-emscripten with features gl,textlayout,ureq,vulkan,vulkan-window,webp'
+    - name: 'Build skia-safe for wasm32-unknown-emscripten with features gl,svg,textlayout,vulkan,vulkan-window,webp'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -935,7 +935,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "gl,textlayout,ureq,vulkan,vulkan-window,webp" --target wasm32-unknown-emscripten
+        cargo build -p skia-safe --release --features "gl,svg,textlayout,vulkan,vulkan-window,webp" --target wasm32-unknown-emscripten
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -947,19 +947,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features "gl,textlayout,ureq,vulkan,vulkan-window,webp" --all-targets --target wasm32-unknown-emscripten -- -D warnings
+        cargo clippy --release --features "gl,svg,textlayout,vulkan,vulkan-window,webp" --all-targets --target wasm32-unknown-emscripten -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features "gl,textlayout,ureq,vulkan,vulkan-window,webp" --all-targets --target wasm32-unknown-emscripten -- --nocapture
+        cargo test --all --release --features "gl,svg,textlayout,vulkan,vulkan-window,webp" --all-targets --target wasm32-unknown-emscripten -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features "gl,textlayout,ureq,vulkan,vulkan-window,webp" --target wasm32-unknown-emscripten "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+        cargo run --release --features "gl,svg,textlayout,vulkan,vulkan-window,webp" --target wasm32-unknown-emscripten "${{ env.SKIA_STAGING_PATH }}/skia-org" 
 
     - name: 'Upload skia-org example images'
       if: false
