@@ -4,6 +4,7 @@
 // https://github.com/rust-lang/rust/issues/93367
 #![allow(unknown_lints)]
 #![allow(clippy::too_long_first_doc_paragraph)]
+#![allow(clippy::doc_overindented_list_items)]
 
 mod macros;
 
