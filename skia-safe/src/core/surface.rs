@@ -686,6 +686,21 @@ impl Surface {
         .unwrap()
     }
 
+    /// Returns an [`Image`] capturing the current [`Surface`] contents. However, the contents of the
+    /// [`Image`] are only valid as long as no other writes to the [`Surface`] occur. If writes to the
+    /// original [`Surface`] happen then contents of the [`Image`] are undefined. However, continued use
+    /// of the [`Image`] should not cause crashes or similar fatal behavior.
+    ///
+    /// This API is useful for cases where the client either immediately destroys the [`Surface`]
+    /// after the [`Image`] is created or knows they will destroy the [`Image`] before writing to the
+    /// [`Surface`] again.
+    ///
+    /// This API can be more performant than [`Self::image_snapshot()`] as it never does an internal copy
+    /// of the data assuming the user frees either the [`Image`] or [`Surface`] as described above.
+    pub fn make_temporary_image(&mut self) -> Option<Image> {
+        Image::from_ptr(unsafe { sb::C_SkSurface_makeTemporaryImage(self.native_mut()) })
+    }
+
     // TODO: combine this function with image_snapshot and make bounds optional()?
 
     /// Like the no-parameter version, this returns an image of the current surface contents.

@@ -364,6 +364,10 @@ extern "C" SkImage* C_SkSurface_makeImageSnapshot(SkSurface* self, const SkIRect
     }
 }
 
+extern "C" SkImage* C_SkSurface_makeTemporaryImage(SkSurface* self) {
+    return self->makeTemporaryImage().release();
+}
+
 extern "C" SkSurface* C_SkSurface_makeSurface(
         SkSurface* self,
         const SkImageInfo* imageInfo) {

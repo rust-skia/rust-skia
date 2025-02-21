@@ -176,6 +176,18 @@ pub mod named_primaries {
     /// first specification referenced in the value's row.
     pub type CicpId = SkNamedPrimaries_CicpId;
     variant_name!(CicpId::GenericFilm);
+
+    /// <https://www.w3.org/TR/css-color-4/#predefined-prophoto-rgb>
+    pub const PRO_PHOTO_RGB: ColorSpacePrimaries = ColorSpacePrimaries {
+        rx: 0.7347,
+        ry: 0.2653,
+        gx: 0.1596,
+        gy: 0.8404,
+        bx: 0.0366,
+        by: 0.0001,
+        wx: 0.34567,
+        wy: 0.35850,
+    };
 }
 
 // TODO: Make the binding generator provide all these constants.
@@ -315,6 +327,21 @@ pub mod named_transfer_fn {
     /// first specification referenced in the value's row.
     pub type CicpId = SkNamedTransferFn_CicpId;
     variant_name!(CicpId::Linear);
+
+    /// <https://w3.org/TR/css-color-4/#valdef-color-prophoto-rgb>
+    /// "The transfer curve is a gamma function with a value of 1/1.8"
+    pub const PRO_PHOTO_RGB: ColorSpaceTransferFn = ColorSpaceTransferFn {
+        g: 1.8,
+        a: 1.0,
+        b: 0.0,
+        c: 0.0,
+        d: 0.0,
+        e: 0.0,
+        f: 0.0,
+    };
+
+    /// <https://www.w3.org/TR/css-color-4/#predefined-a98-rgb>
+    pub const A98_RGB: ColorSpaceTransferFn = DOT22;
 }
 
 // TODO: SkNamedGamut
