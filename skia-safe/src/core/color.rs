@@ -358,6 +358,16 @@ impl Color4f {
     pub fn to_opaque(self) -> Self {
         Self { a: 1.0, ..self }
     }
+
+    #[must_use]
+    pub fn pin_alpha(self) -> Self {
+        Self {
+            r: self.r,
+            g: self.g,
+            b: self.b,
+            a: 0f32.max(self.a.min(1.0)),
+        }
+    }
 }
 
 pub mod colors {
