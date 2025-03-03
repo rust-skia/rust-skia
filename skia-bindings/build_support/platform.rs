@@ -16,6 +16,7 @@ mod generic;
 pub mod ios;
 pub mod linux;
 pub mod macos;
+mod ohos;
 mod windows;
 
 pub fn uses_freetype(config: &BuildConfiguration) -> bool {
@@ -75,6 +76,7 @@ fn details(target: &Target) -> &dyn PlatformDetails {
         (_, "apple", "ios", _) => &ios::Ios,
         (_, _, "windows", Some("msvc")) if host.is_windows() => &windows::Msvc,
         (_, _, "windows", _) => &windows::Generic,
+        (_, "unknown", "linux", Some("ohos")) => &ohos::OpenHarmony,
         (_, "unknown", "linux", Some("musl")) => &alpine::Musl,
         (_, _, "linux", _) => &linux::Linux,
         _ => &generic::Generic,
