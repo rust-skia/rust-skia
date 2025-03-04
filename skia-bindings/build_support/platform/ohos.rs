@@ -12,6 +12,10 @@ impl PlatformDetails for OpenHarmony {
 
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
         linux::gn_args(config, builder);
+
+        // disable fontconfig
+        builder.arg("skia_use_fontconfig", no());
+
         builder.cflags(extra_skia_cflags());
     }
 
@@ -56,7 +60,7 @@ fn ndk() -> String {
         .to_string()
 }
 
-pub fn additional_clang_args(target: &str, target_arch: &str) -> Vec<String> {
+pub fn additional_clang_args(_target: &str, target_arch: &str) -> Vec<String> {
     let mut args: Vec<String> = Vec::new();
 
     match target_arch {
