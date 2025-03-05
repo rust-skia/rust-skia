@@ -1,3 +1,6 @@
 [submodule "skia"]
 	path = skia-bindings/skia
 	url = https://github.com/rust-skia/skia.git
+[submodule "skia-bindings/skia-ohos"]
+	path = skia-bindings/skia-ohos
+	url = https://gitee.com/openharmony/third_party_skia.git

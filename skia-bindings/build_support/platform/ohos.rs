@@ -1,20 +1,22 @@
 use std::path::PathBuf;
 
-use super::{linux, prelude::*};
+use super::prelude::*;
 
 pub struct OpenHarmony;
 
 /// For OpenHarmony, we recommend using API12 as the minimum API level
 impl PlatformDetails for OpenHarmony {
     fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
-        true
+        false
     }
 
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
-        linux::gn_args(config, builder);
+        // linux::gn_args(config, builder);
 
         // disable fontconfig
-        builder.arg("skia_use_fontconfig", no());
+        // builder.arg("skia_use_fontconfig", no());
+
+        builder.target_os_and_default_cpu(&config.target.system);
 
         builder.cflags(extra_skia_cflags());
     }
@@ -60,7 +62,7 @@ fn ndk() -> String {
         .to_string()
 }
 
-pub fn additional_clang_args(_target: &str, target_arch: &str) -> Vec<String> {
+pub fn additional_clang_args(target: &str, target_arch: &str) -> Vec<String> {
     let mut args: Vec<String> = Vec::new();
 
     match target_arch {
@@ -78,7 +80,7 @@ pub fn additional_clang_args(_target: &str, target_arch: &str) -> Vec<String> {
 
     args.push(format!("-sysroot={ndk}/sysroot"));
 
-    args.push(format!("--target=aarch64-linux-ohos"));
+    args.push(format!("--target={target}"));
     args.extend(extra_skia_cflags());
     args
 }
