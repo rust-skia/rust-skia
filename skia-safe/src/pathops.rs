@@ -19,7 +19,7 @@ pub fn simplify(path: &Path) -> Option<Path> {
 }
 
 #[deprecated(
-    since = "0.0.0",
+    since = "0.83.0",
     note = "Use Path::compute_tight_bounds() and test if the resulting Rect::is_finite()"
 )]
 pub fn tight_bounds(path: &Path) -> Option<Rect> {
@@ -77,7 +77,7 @@ impl Path {
     }
 
     #[deprecated(
-        since = "0.0.0",
+        since = "0.83.0",
         note = "Use Path::compute_tight_bounds() and test if the resulting Rect::is_finite()"
     )]
     pub fn tight_bounds(&self) -> Option<Rect> {
