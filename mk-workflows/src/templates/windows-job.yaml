@@ -21,8 +21,9 @@ steps:
 - name: Python Version
   run: python --version
 
-- name: Upgrade LLVM
-  run: choco upgrade llvm
+# 19.1.7 breaks the Skia build, see <https://github.com/rust-skia/rust-skia/issues/1109> for details.
+- name: Install LLVM 19.1.5
+  run: choco install llvm --version=19.1.5 --allow-downgrade
 
 - name: Install Ninja
   run: choco install ninja
