@@ -191,8 +191,8 @@ impl Paint {
         self.native().fMiterLimit
     }
 
-    pub fn set_stroke_miter(&mut self, miter: scalar) -> &mut Self {
-        unsafe { self.native_mut().setStrokeMiter(miter) }
+    pub fn set_stroke_miter(&mut self, miter_limit: scalar) -> &mut Self {
+        unsafe { self.native_mut().setStrokeMiter(miter_limit) }
         self
     }
 

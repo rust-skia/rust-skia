@@ -3,10 +3,10 @@ use crate::{
     prelude::*,
     Blender, ColorFilter, Data, Matrix, Shader,
 };
+use core::ffi;
 use sb::{SkFlattenable, SkRuntimeEffect_Child};
 use skia_bindings::{
-    self as sb, ShaderBuilderUniformResult, SkRefCntBase, SkRuntimeEffect, SkRuntimeEffect_Options,
-    SkRuntimeEffect_Uniform,
+    self as sb, ShaderBuilderUniformResult, SkRefCntBase, SkRuntimeEffect, SkRuntimeEffect_Uniform,
 };
 use std::{fmt, marker::PhantomData, ops::DerefMut, ptr};
 
@@ -126,25 +126,10 @@ impl NativeRefCountedBase for SkRuntimeEffect {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-pub struct Options {
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Default)]
+pub struct Options<'a> {
     pub force_unoptimized: bool,
-    allow_private_access: bool,
-    stable_key: u32,
-    max_version_allowed: sb::SkSL_Version,
-}
-
-native_transmutable!(SkRuntimeEffect_Options, Options, options_layout);
-
-impl Default for Options {
-    fn default() -> Self {
-        Options {
-            force_unoptimized: false,
-            allow_private_access: false,
-            stable_key: 0,
-            max_version_allowed: sb::SkSL_Version::k100,
-        }
-    }
+    pub name: &'a str,
 }
 
 impl fmt::Debug for RuntimeEffect {
@@ -161,47 +146,57 @@ impl fmt::Debug for RuntimeEffect {
 }
 
 impl RuntimeEffect {
-    pub fn make_for_color_filer<'a>(
+    pub fn make_for_color_filter(
         sksl: impl AsRef<str>,
-        options: impl Into<Option<&'a Options>>,
+        options: impl for<'a, 'b> Into<Option<&'a Options<'b>>>,
     ) -> Result<RuntimeEffect, String> {
         let str = interop::String::from_str(sksl);
         let options = options.into().copied().unwrap_or_default();
+        let options = Self::construct_native_options(&options);
         let mut error = interop::String::default();
         RuntimeEffect::from_ptr(unsafe {
-            sb::C_SkRuntimeEffect_MakeForColorFilter(
-                str.native(),
-                options.native(),
-                error.native_mut(),
+            sb::C_SkRuntimeEffect_MakeForColorFilter(str.native(), &options, error.native_mut())
+        })
+        .ok_or_else(|| error.to_string())
+    }
+
+    pub fn make_for_shader(
+        sksl: impl AsRef<str>,
+        options: impl for<'a, 'b> Into<Option<&'a Options<'b>>>,
+    ) -> Result<RuntimeEffect, String> {
+        let str = interop::String::from_str(sksl);
+        let options = options.into().copied().unwrap_or_default();
+        let options = Self::construct_native_options(&options);
+        let mut error = interop::String::default();
+        RuntimeEffect::from_ptr(unsafe {
+            sb::C_SkRuntimeEffect_MakeForShader(str.native(), &options, error.native_mut())
+        })
+        .ok_or_else(|| error.to_string())
+    }
+
+    pub fn make_for_blender(
+        sksl: impl AsRef<str>,
+        options: impl for<'a, 'b> Into<Option<&'a Options<'b>>>,
+    ) -> Result<RuntimeEffect, String> {
+        let str = interop::String::from_str(sksl);
+        let options = options.into().copied().unwrap_or_default();
+        let options = Self::construct_native_options(&options);
+        let mut error = interop::String::default();
+        RuntimeEffect::from_ptr(unsafe {
+            sb::C_SkRuntimeEffect_MakeForBlender(str.native(), &options, error.native_mut())
+        })
+        .ok_or_else(|| error.to_string())
+    }
+
+    fn construct_native_options(options: &Options<'_>) -> sb::SkRuntimeEffect_Options {
+        construct(|opt| unsafe {
+            sb::C_SkRuntimeEffect_Options_Construct(
+                opt,
+                options.force_unoptimized,
+                options.name.as_ptr() as *const ffi::c_char,
+                options.name.len(),
             )
         })
-        .ok_or_else(|| error.to_string())
-    }
-
-    pub fn make_for_shader<'a>(
-        sksl: impl AsRef<str>,
-        options: impl Into<Option<&'a Options>>,
-    ) -> Result<RuntimeEffect, String> {
-        let str = interop::String::from_str(sksl);
-        let options = options.into().copied().unwrap_or_default();
-        let mut error = interop::String::default();
-        RuntimeEffect::from_ptr(unsafe {
-            sb::C_SkRuntimeEffect_MakeForShader(str.native(), options.native(), error.native_mut())
-        })
-        .ok_or_else(|| error.to_string())
-    }
-
-    pub fn make_for_blender<'a>(
-        sksl: impl AsRef<str>,
-        options: impl Into<Option<&'a Options>>,
-    ) -> Result<RuntimeEffect, String> {
-        let str = interop::String::from_str(sksl);
-        let options = options.into().copied().unwrap_or_default();
-        let mut error = interop::String::default();
-        RuntimeEffect::from_ptr(unsafe {
-            sb::C_SkRuntimeEffect_MakeForBlender(str.native(), options.native(), error.native_mut())
-        })
-        .ok_or_else(|| error.to_string())
     }
 
     pub fn make_shader<'a>(
