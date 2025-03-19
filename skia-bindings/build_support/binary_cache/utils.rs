@@ -24,8 +24,8 @@ pub fn download(url: impl AsRef<str>) -> io::Result<Vec<u8>> {
         // fail fast with no "error pages" output. more of a hint though, so we might still get error on stdout.
         // so make sure to check the actual status returned.
         .arg("-f")
-        // silent. no progress or error messages. only pure "response data"
-        .arg("-s")
+        // no progress meter but keep error messages.
+        .arg("--no-progress-meter")
         .arg(url)
         .output();
     match resp {
@@ -39,8 +39,11 @@ pub fn download(url: impl AsRef<str>) -> io::Result<Vec<u8>> {
                     io::ErrorKind::Other,
                     format!(
                         "curl error code: {:?}\ncurl stderr: {:?}",
-                        out.status.code(),
-                        std::str::from_utf8(&out.stderr)
+                        out.status
+                            .code()
+                            .map(|i| i.to_string())
+                            .unwrap_or(String::from("no status code")),
+                        std::str::from_utf8(&out.stderr).unwrap_or("no stderr")
                     ),
                 ))
             }
