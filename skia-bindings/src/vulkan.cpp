@@ -69,7 +69,8 @@ extern "C" void C_GPU_VK_Types(VkBuffer *) {}
 typedef PFN_vkVoidFunction (*GetProcFn)(const char* name, VkInstance instance, VkDevice device);
 typedef const void* (*GetProcFnVoidPtr)(const char* name, VkInstance instance, VkDevice device);
 
-extern "C" void *C_VulkanBackendContext_new(
+extern "C" void C_VulkanBackendContext_Construct(
+    skgpu::VulkanBackendContext* uninitialized,
     void *instance,
     void *physicalDevice,
     void *device,
@@ -88,7 +89,7 @@ extern "C" void *C_VulkanBackendContext_new(
 
     auto &extensions = *new skgpu::VulkanExtensions();
     extensions.init(vkGetProc, vkInstance, vkPhysicalDevice, instanceExtensionCount, instanceExtensions, deviceExtensionCount, deviceExtensions);
-    auto &context = *new skgpu::VulkanBackendContext();
+    auto &context = *new (uninitialized) skgpu::VulkanBackendContext();
     context.fInstance = vkInstance;
     context.fPhysicalDevice = vkPhysicalDevice;
     context.fDevice = vkDevice;
@@ -96,15 +97,11 @@ extern "C" void *C_VulkanBackendContext_new(
     context.fGraphicsQueueIndex = graphicsQueueIndex;
     context.fVkExtensions = &extensions;
     context.fGetProc = vkGetProc;
-    return &context;
 }
 
-extern "C" void C_VulkanBackendContext_delete(void* vkBackendContext) {
-    auto bc = static_cast<skgpu::VulkanBackendContext*>(vkBackendContext);
-    if (bc) {
-        delete bc->fVkExtensions;
-    }
-    delete bc;
+extern "C" void C_VulkanBackendContext_destruct(skgpu::VulkanBackendContext* vkBackendContext) {
+    delete vkBackendContext->fVkExtensions;
+    vkBackendContext->~VulkanBackendContext();
 }
 
 extern "C" void C_VulkanBackendContext_setProtectedContext(skgpu::VulkanBackendContext *self, GrProtected protectedContext) {
