@@ -736,6 +736,8 @@ const ENUM_REWRITES: &[EnumEntry] = &[
     ("ImageDecodeStrategy", rewrite::k_xxx),
     // SkNamedPrimaries::CicpId, SkNamedTransferFn::CicpId
     ("CicpId", rewrite::k_xxx),
+    // `SkCodec::IsAnimated`s
+    ("IsAnimated", rewrite::k_xxx),
 ];
 
 pub(crate) mod rewrite {

@@ -78,6 +78,8 @@
 #include "include/core/SkVertices.h"
 // docs/
 #include "include/docs/SkPDFDocument.h"
+#include "include/docs/SkPDFJpegHelpers.h"
+
 // effects/
 #include "include/effects/Sk1DPathEffect.h"
 #include "include/effects/Sk2DPathEffect.h"
@@ -207,6 +209,10 @@ extern "C" bool C_SkCodec_getFrameInfo(SkCodec* self, int index, SkCodec::FrameI
 
 extern "C" int C_SkCodec_getRepetitionCount(SkCodec* self) {
     return self->getRepetitionCount();
+}
+
+extern "C" SkCodec::IsAnimated C_SkCodec_isAnimated(SkCodec* self) {
+    return self->isAnimated();
 }
 
 // SkCodecs
@@ -2593,6 +2599,12 @@ extern "C" SkColorFilter* C_SkOverdrawColorFilter_MakeWithSkColors(const SkColor
 
 extern "C" {
 
+void C_SkRuntimeEffect_Options_Construct(SkRuntimeEffect::Options* uninitialized, bool forceUnoptimized, const char* name, size_t length) {
+    new (uninitialized) SkRuntimeEffect::Options();
+    uninitialized->forceUnoptimized = forceUnoptimized;
+    uninitialized->fName = std::string_view(name, length);
+}
+
 SkRuntimeEffect *C_SkRuntimeEffect_MakeForColorFilter(
     const SkString *sksl,
     const SkRuntimeEffect::Options *options,
@@ -3132,7 +3144,11 @@ extern "C" void C_SkPDF_Metadata_destruct(SkPDF::Metadata* self) {
 }
 
 extern "C" SkDocument* C_SkPDF_MakeDocument(SkWStream* stream, const SkPDF::Metadata* metadata) {
-    return SkPDF::MakeDocument(stream, *metadata).release();
+    // We want to support JPeg encoding / decoding by default.
+    SkPDF::Metadata meta = *metadata;
+    meta.jpegDecoder = SkPDF::JPEG::Decode;
+    meta.jpegEncoder = SkPDF::JPEG::Encode;
+    return SkPDF::MakeDocument(stream, meta).release();
 }
 
 extern "C" void C_SkPDF_SetNodeId(SkCanvas* dst, int nodeID) {
