@@ -80,7 +80,7 @@ impl Error for LoadError {
 
 impl From<LoadError> for io::Error {
     fn from(other: LoadError) -> Self {
-        io::Error::new(io::ErrorKind::Other, other)
+        io::Error::other(other)
     }
 }
 

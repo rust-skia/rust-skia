@@ -309,7 +309,7 @@ pub mod helpers {
     // https://github.com/servo/servo/blob/1610bd2bc83cea8ff0831cf999c4fba297788f64/components/script/dom/window.rs#L575
     fn remove_html_space_characters(value: &str) -> String {
         fn is_html_space(c: char) -> bool {
-            HTML_SPACE_CHARACTERS.iter().any(|&m| m == c)
+            HTML_SPACE_CHARACTERS.contains(&c)
         }
         let without_spaces = value
             .chars()

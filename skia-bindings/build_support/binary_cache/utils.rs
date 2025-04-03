@@ -35,8 +35,7 @@ pub fn download(url: impl AsRef<str>) -> io::Result<Vec<u8>> {
             if out.status.success() {
                 Ok(result)
             } else {
-                Err(io::Error::new(
-                    io::ErrorKind::Other,
+                Err(io::Error::other(
                     format!(
                         "curl error code: {:?}\ncurl stderr: {:?}",
                         out.status
@@ -48,8 +47,7 @@ pub fn download(url: impl AsRef<str>) -> io::Result<Vec<u8>> {
                 ))
             }
         }
-        Err(e) => Err(io::Error::new(
-            io::ErrorKind::Other,
+        Err(e) => Err(io::Error::other(
             format!("curl command error : {e:#?}"),
         )),
     }
