@@ -35,20 +35,16 @@ pub fn download(url: impl AsRef<str>) -> io::Result<Vec<u8>> {
             if out.status.success() {
                 Ok(result)
             } else {
-                Err(io::Error::other(
-                    format!(
-                        "curl error code: {:?}\ncurl stderr: {:?}",
-                        out.status
-                            .code()
-                            .map(|i| i.to_string())
-                            .unwrap_or(String::from("no status code")),
-                        std::str::from_utf8(&out.stderr).unwrap_or("no stderr")
-                    ),
-                ))
+                Err(io::Error::other(format!(
+                    "curl error code: {:?}\ncurl stderr: {:?}",
+                    out.status
+                        .code()
+                        .map(|i| i.to_string())
+                        .unwrap_or(String::from("no status code")),
+                    std::str::from_utf8(&out.stderr).unwrap_or("no stderr")
+                )))
             }
         }
-        Err(e) => Err(io::Error::other(
-            format!("curl command error : {e:#?}"),
-        )),
+        Err(e) => Err(io::Error::other(format!("curl command error : {e:#?}"))),
     }
 }
