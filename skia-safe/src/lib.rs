@@ -14,6 +14,7 @@ pub use codec::Result as CodecResult;
 pub use codec::{codecs, Codec, EncodedImageFormat, EncodedOrigin};
 
 mod core;
+#[cfg(feature = "pdf")]
 mod docs;
 mod effects;
 mod encode_;
@@ -39,6 +40,7 @@ pub use crate::prelude::{Borrows, ConditionallySend, Handle, RCHandle, RefHandle
 
 /// All Sk* types are accessible via skia_safe::
 pub use crate::core::*;
+#[cfg(feature = "pdf")]
 pub use docs::*;
 pub use effects::*;
 pub use encode_::*;
