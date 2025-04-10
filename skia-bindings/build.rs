@@ -43,6 +43,10 @@ fn main() -> Result<(), io::Error> {
                 None,
             );
         } else {
+            if cfg!(feature = "no-compile") {
+                panic!("refusing to offline-build skia with no-compile feature");
+            }
+
             println!("STARTING OFFLINE BUILD");
 
             let final_build_configuration = build_from_source(
@@ -85,6 +89,10 @@ fn main() -> Result<(), io::Error> {
         //
 
         if build_skia {
+            if cfg!(feature = "no-compile") {
+                panic!("refusing to full-build skia with no-compile feature");
+            }
+
             println!("STARTING A FULL BUILD");
             println!("HOST: {}", cargo::host());
 

@@ -49,6 +49,7 @@ binary-cache = ["skia-bindings/binary-cache"]
 embed-icudtl = ["skia-bindings/embed-icudtl"]
 embed-freetype = ["skia-bindings/embed-freetype"]
 freetype-woff2 = ["skia-bindings/freetype-woff2"]
+no-compile = ["skia-bindings/no-compile"]
 # test only
 save-svg-images = []
 
