@@ -2,6 +2,9 @@ use std::collections::HashSet;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Features {
+    /// Build as a shared library (default is static).
+    pub shared_library: bool,
+
     /// Build with OpenGL support?
     pub gl: bool,
 
@@ -55,6 +58,7 @@ impl Default for Features {
     /// Build a Features set based on the current environment cargo supplies us with.
     fn default() -> Self {
         Features {
+            shared_library: cfg!(feature = "shared-library"),
             gl: cfg!(feature = "gl"),
             egl: cfg!(feature = "egl"),
             wayland: cfg!(feature = "wayland"),
@@ -84,6 +88,9 @@ impl Features {
     pub fn ids(&self) -> HashSet<&str> {
         let mut feature_ids = Vec::new();
 
+        if self.shared_library {
+            feature_ids.push(feature_id::SHARED_LIBRARY);
+        }
         if self.gl {
             feature_ids.push(feature_id::GL);
         }
@@ -130,6 +137,7 @@ impl Features {
 
 /// Feature identifiers define the additional configuration parts of the binaries to download.
 mod feature_id {
+    pub const SHARED_LIBRARY: &str = "shared";
     pub const GL: &str = "gl";
     pub const VULKAN: &str = "vulkan";
     pub const METAL: &str = "metal";

@@ -117,6 +117,7 @@ impl FinalBuildConfiguration {
         let gn_args = {
             builder
                 .arg("is_official_build", yes_if(!build.skia_debug))
+                .arg("is_component_build", yes_if(features.shared_library))
                 .arg("is_debug", yes_if(build.skia_debug))
                 .arg("skia_enable_svg", yes_if(features.svg))
                 .arg("skia_enable_gpu", yes_if(features.gpu()))

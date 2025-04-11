@@ -72,17 +72,28 @@ impl Target {
         self.system == "windows"
     }
 
+    pub fn is_macos(&self) -> bool {
+        self.system == "darwin"
+    }
+
     pub fn builds_with_msvc(&self) -> bool {
         self.abi.as_deref() == Some("msvc")
     }
 
     /// Convert a library name to a filename.
-    pub fn library_to_filename(&self, name: impl AsRef<str>) -> PathBuf {
+    pub fn library_to_filename(&self, name: impl AsRef<str>, shared: bool) -> PathBuf {
         let name = name.as_ref();
-        if self.is_windows() {
-            format!("{name}.lib").into()
+        if shared {
+            match self.system.as_str() {
+                "windows" => format!("{name}.dll").into(),
+                "darwin" => format!("lib{name}.dylib").into(),
+                _ => format!("lib{name}.so").into(),
+            }
         } else {
-            format!("lib{name}.a").into()
+            match self.system.as_str() {
+                "windows" => format!("{name}.lib").into(),
+                _ => format!("lib{name}.a").into(),
+            }
         }
     }
 

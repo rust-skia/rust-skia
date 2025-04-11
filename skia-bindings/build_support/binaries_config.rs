@@ -120,7 +120,14 @@ impl BinariesConfiguration {
 
         let target = cargo::target();
 
-        cargo::add_static_link_libs(&target, self.built_libraries(true));
+        for lib in self.built_libraries(true) {
+            let is_shared = cfg!(feature = "shared-library") && lib != "skia-bindings";
+            if is_shared {
+                cargo::add_link_lib(lib);
+            } else {
+                cargo::add_static_link_lib(&target, lib);
+            }
+        }
         cargo::add_link_libs(&self.link_libraries);
     }
 
@@ -147,7 +154,8 @@ impl BinariesConfiguration {
         let target = cargo::target();
 
         for lib in self.built_libraries(copy_bindings) {
-            let filename = &target.library_to_filename(lib);
+            let is_shared = cfg!(feature = "shared-library") && lib != "skia-bindings";
+            let filename = &target.library_to_filename(lib, is_shared);
             copy(filename, from_dir, to_dir)?;
         }
 

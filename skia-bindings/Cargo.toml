@@ -35,6 +35,7 @@ skia = "m135-0.83.1"
 
 [features]
 default = ["binary-cache", "embed-icudtl"]
+shared-library = []
 gl = []
 egl = []
 wayland = []
