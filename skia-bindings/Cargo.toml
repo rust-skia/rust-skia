@@ -46,6 +46,7 @@ textlayout = []
 webp = ["webp-encode", "webp-decode"]
 webp-encode = []
 webp-decode = []
+pdf = []
 # sys libraries
 use-system-jpeg-turbo = ["mozjpeg-sys"]
 # `textlayout` because `SkSVGTextContext::SkSVGTextContext()` invokes `SkShaper::Make`.

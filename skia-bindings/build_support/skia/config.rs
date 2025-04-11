@@ -120,12 +120,8 @@ impl FinalBuildConfiguration {
                 .arg("is_debug", yes_if(build.skia_debug))
                 .arg("skia_enable_svg", yes_if(features.svg))
                 .arg("skia_enable_gpu", yes_if(features.gpu()))
-                .arg("skia_enable_skottie", no());
-
-            // Always enable PDF document support, because it gets switched off for WASM builds.
-            // See <https://github.com/rust-skia/rust-skia/issues/694>
-            builder
-                .arg("skia_enable_pdf", yes())
+                .arg("skia_enable_skottie", no())
+                .arg("skia_enable_pdf", yes_if(features.pdf))
                 .arg("skia_use_gl", yes_if(features.gl))
                 .arg("skia_use_egl", yes_if(features.egl))
                 .arg("skia_use_x11", yes_if(features.x11))
