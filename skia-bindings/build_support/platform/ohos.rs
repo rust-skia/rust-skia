@@ -14,7 +14,17 @@ impl PlatformDetails for OpenHarmony {
         // linux::gn_args(config, builder);
 
         // disable fontconfig
-        // builder.arg("skia_use_fontconfig", no());
+        builder.arg("skia_use_egl", yes());
+        builder.arg("skia_gl_standard", quote("gles"));
+        builder.arg("skia_use_gl", yes());
+        builder.arg("skia_enable_vulkan_debug_layers", no());
+        builder.arg("skia_use_x11", no());
+        builder.arg("skia_use_fontconfig", no());
+        builder.arg("skia_use_dng_sdk", no());
+        builder.arg("skia_enable_tools", no());
+        builder.arg("skia_use_system_freetype2", no());
+        builder.arg("skia_use_system_libwebp", no());
+        builder.arg("skia_use_system_libpng", no());
 
         builder.target_os_and_default_cpu(&config.target.system);
 
@@ -33,18 +43,6 @@ impl PlatformDetails for OpenHarmony {
             .iter()
             .map(|l| l.to_string())
             .collect()
-    }
-
-    fn filter_platform_features(
-        &self,
-        use_system_libraries: bool,
-        mut features: Features,
-    ) -> Features {
-        if !features.embed_freetype {
-            features.embed_freetype = !use_system_libraries;
-        }
-
-        features
     }
 }
 
@@ -78,7 +76,7 @@ pub fn additional_clang_args(target: &str, target_arch: &str) -> Vec<String> {
 
     let ndk = ndk();
 
-    args.push(format!("-sysroot={ndk}/sysroot"));
+    args.push(format!("--sysroot={ndk}/sysroot"));
 
     args.push(format!("--target={target}"));
     args.extend(extra_skia_cflags());
