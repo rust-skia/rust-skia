@@ -47,6 +47,10 @@ mod core {
     assert_not_impl_any!(OwnedCanvas: Send, Sync);
     assert_impl_all!(Color: Send, Sync);
     assert_impl_all!(ColorFilter: Send, Sync);
+    assert_impl_all!(ColorSpacePrimaries: Send, Sync);
+    assert_impl_all!(named_primaries::CicpId: Send, Sync);
+    assert_impl_all!(ColorSpaceTransferFn: Send, Sync);
+    assert_impl_all!(named_transfer_fn::CicpId: Send, Sync);
     assert_impl_all!(ColorSpace: Send, Sync);
     assert_impl_all!(ColorTable: Send, Sync);
     assert_impl_all!(ContourMeasure: Send, Sync);
@@ -185,6 +189,8 @@ mod gpu {
     assert_impl_all!(Protected: Send, Sync);
     assert_impl_all!(Renderable: Send, Sync);
     assert_impl_all!(Origin: Send, Sync);
+    assert_impl_all!(GpuStatsFlags: Send, Sync);
+    assert_impl_all!(GpuStats: Send, Sync);
 
     // gpu/ganesh/types.rs
     assert_impl_all!(SurfaceOrigin: Send, Sync);

@@ -82,7 +82,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -159,7 +159,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -236,7 +236,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -313,7 +313,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -390,7 +390,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -488,7 +488,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -565,7 +565,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -642,7 +642,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -719,7 +719,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -796,7 +796,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -894,7 +894,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -971,7 +971,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -1048,7 +1048,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -1125,7 +1125,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -1202,7 +1202,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -1300,7 +1300,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -1377,7 +1377,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -1454,7 +1454,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -1531,7 +1531,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -1608,7 +1608,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -1706,7 +1706,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -1783,7 +1783,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -1860,7 +1860,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -1937,7 +1937,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -2014,7 +2014,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -2112,7 +2112,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -2189,7 +2189,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -2266,7 +2266,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -2343,7 +2343,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -2420,7 +2420,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -2518,7 +2518,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -2595,7 +2595,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -2672,7 +2672,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -2749,7 +2749,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -2826,7 +2826,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -2924,7 +2924,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -3001,7 +3001,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -3078,7 +3078,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -3155,7 +3155,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -3232,7 +3232,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -3330,7 +3330,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -3407,7 +3407,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -3484,7 +3484,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -3561,7 +3561,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -3638,7 +3638,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -3736,7 +3736,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -3813,7 +3813,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -3890,7 +3890,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -3967,7 +3967,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -4044,7 +4044,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -4142,7 +4142,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -4219,7 +4219,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -4296,7 +4296,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -4373,7 +4373,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -4450,7 +4450,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -4548,7 +4548,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -4625,7 +4625,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -4702,7 +4702,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -4779,7 +4779,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -4856,7 +4856,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -4954,7 +4954,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -5031,7 +5031,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-darwin
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -5108,7 +5108,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -5185,7 +5185,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-aarch64-apple-ios-sim
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
@@ -5262,7 +5262,7 @@ jobs:
 
     - name: 'Upload skia-org example images'
       if: false
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: skia-org-images-x86_64-apple-ios
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org

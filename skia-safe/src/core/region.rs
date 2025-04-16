@@ -61,11 +61,11 @@ impl Region {
     const RECT_RUN_HEAD_PTR: *mut SkRegion_RunHead = ptr::null_mut();
 
     pub fn is_empty(&self) -> bool {
-        self.native().fRunHead == Self::EMPTY_RUN_HEAD_PTR
+        ptr::eq(self.native().fRunHead, Self::EMPTY_RUN_HEAD_PTR)
     }
 
     pub fn is_rect(&self) -> bool {
-        self.native().fRunHead == Self::RECT_RUN_HEAD_PTR
+        ptr::eq(self.native().fRunHead, Self::RECT_RUN_HEAD_PTR)
     }
 
     pub fn is_complex(&self) -> bool {

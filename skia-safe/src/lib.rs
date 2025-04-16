@@ -4,6 +4,7 @@
 // https://github.com/rust-lang/rust/issues/93367
 #![allow(unknown_lints)]
 #![allow(clippy::too_long_first_doc_paragraph)]
+#![allow(clippy::doc_overindented_list_items)]
 
 mod macros;
 
@@ -13,6 +14,7 @@ pub use codec::Result as CodecResult;
 pub use codec::{codecs, Codec, EncodedImageFormat, EncodedOrigin};
 
 mod core;
+#[cfg(feature = "pdf")]
 mod docs;
 mod effects;
 mod encode_;
@@ -38,6 +40,7 @@ pub use crate::prelude::{Borrows, ConditionallySend, Handle, RCHandle, RefHandle
 
 /// All Sk* types are accessible via skia_safe::
 pub use crate::core::*;
+#[cfg(feature = "pdf")]
 pub use docs::*;
 pub use effects::*;
 pub use encode_::*;

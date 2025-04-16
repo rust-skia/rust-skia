@@ -78,6 +78,8 @@
 #include "include/core/SkVertices.h"
 // docs/
 #include "include/docs/SkPDFDocument.h"
+#include "include/docs/SkPDFJpegHelpers.h"
+
 // effects/
 #include "include/effects/Sk1DPathEffect.h"
 #include "include/effects/Sk2DPathEffect.h"
@@ -207,6 +209,10 @@ extern "C" bool C_SkCodec_getFrameInfo(SkCodec* self, int index, SkCodec::FrameI
 
 extern "C" int C_SkCodec_getRepetitionCount(SkCodec* self) {
     return self->getRepetitionCount();
+}
+
+extern "C" SkCodec::IsAnimated C_SkCodec_isAnimated(SkCodec* self) {
+    return self->isAnimated();
 }
 
 // SkCodecs
@@ -362,6 +368,10 @@ extern "C" SkImage* C_SkSurface_makeImageSnapshot(SkSurface* self, const SkIRect
     } else {
         return self->makeImageSnapshot().release();
     }
+}
+
+extern "C" SkImage* C_SkSurface_makeTemporaryImage(SkSurface* self) {
+    return self->makeTemporaryImage().release();
 }
 
 extern "C" SkSurface* C_SkSurface_makeSurface(
@@ -979,6 +989,12 @@ extern "C" SkColorSpace* C_SkColorSpace_MakeSRGBLinear() {
     return SkColorSpace::MakeSRGBLinear().release();
 }
 
+extern "C" SkColorSpace* C_SkColorSpace_MakeCICP(
+    SkNamedPrimaries::CicpId colorPrimaries,
+    SkNamedTransferFn::CicpId transferCharacteristics) {
+    return SkColorSpace::MakeCICP(colorPrimaries, transferCharacteristics).release();
+}
+
 extern "C" SkColorSpace* C_SkColorSpace_makeLinearGamma(const SkColorSpace* self) {
     return self->makeLinearGamma().release();
 }
@@ -997,6 +1013,14 @@ extern "C" SkData* C_SkColorSpace_serialize(const SkColorSpace* self) {
 
 extern "C" SkColorSpace* C_SkColorSpace_Deserialize(const void* data, size_t length) {
     return SkColorSpace::Deserialize(data, length).release();
+}
+
+extern "C" uint32_t C_SkColorSpace_transferFnHash(const SkColorSpace* self) {
+    return self->transferFnHash();
+}
+
+extern "C" uint64_t C_SkColorSpace_hash(const SkColorSpace* self) {
+    return self->hash();
 }
 
 //
@@ -1347,12 +1371,8 @@ extern "C" SkTextBlob* C_SkTextBlobBuilder_make(SkTextBlobBuilder* self) {
 // core/SkTypeface.h
 //
 
-extern "C" bool C_SkTypeface_isBold(const SkTypeface* self) {
-    return self->isBold();
-}
-
-extern "C" bool C_SkTypeface_isItalic(const SkTypeface* self) {
-    return self->isItalic();
+extern "C" void C_SkTypeface_fontStyle(const SkTypeface* self, SkFontStyle* uninitialized) {
+    new (uninitialized) SkFontStyle(self->fontStyle());
 }
 
 extern "C" SkTypeface* C_SkTypeface_makeClone(const SkTypeface* self, const SkFontArguments* arguments) {
@@ -2579,6 +2599,12 @@ extern "C" SkColorFilter* C_SkOverdrawColorFilter_MakeWithSkColors(const SkColor
 
 extern "C" {
 
+void C_SkRuntimeEffect_Options_Construct(SkRuntimeEffect::Options* uninitialized, bool forceUnoptimized, const char* name, size_t length) {
+    new (uninitialized) SkRuntimeEffect::Options();
+    uninitialized->forceUnoptimized = forceUnoptimized;
+    uninitialized->fName = std::string_view(name, length);
+}
+
 SkRuntimeEffect *C_SkRuntimeEffect_MakeForColorFilter(
     const SkString *sksl,
     const SkRuntimeEffect::Options *options,
@@ -3118,7 +3144,11 @@ extern "C" void C_SkPDF_Metadata_destruct(SkPDF::Metadata* self) {
 }
 
 extern "C" SkDocument* C_SkPDF_MakeDocument(SkWStream* stream, const SkPDF::Metadata* metadata) {
-    return SkPDF::MakeDocument(stream, *metadata).release();
+    // We want to support JPeg encoding / decoding by default.
+    SkPDF::Metadata meta = *metadata;
+    meta.jpegDecoder = SkPDF::JPEG::Decode;
+    meta.jpegEncoder = SkPDF::JPEG::Encode;
+    return SkPDF::MakeDocument(stream, meta).release();
 }
 
 extern "C" void C_SkPDF_SetNodeId(SkCanvas* dst, int nodeID) {

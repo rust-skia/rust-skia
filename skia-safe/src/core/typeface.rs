@@ -45,19 +45,19 @@ impl fmt::Debug for Typeface {
 
 impl Typeface {
     pub fn font_style(&self) -> FontStyle {
-        FontStyle::from_native_c(self.native().fStyle)
+        FontStyle::construct(|fs| unsafe { sb::C_SkTypeface_fontStyle(self.native(), fs) })
     }
 
     pub fn is_bold(&self) -> bool {
-        unsafe { sb::C_SkTypeface_isBold(self.native()) }
+        unsafe { self.native().isBold() }
     }
 
     pub fn is_italic(&self) -> bool {
-        unsafe { sb::C_SkTypeface_isItalic(self.native()) }
+        unsafe { self.native().isItalic() }
     }
 
     pub fn is_fixed_pitch(&self) -> bool {
-        self.native().fIsFixedPitch
+        unsafe { self.native().isFixedPitch() }
     }
 
     pub fn variation_design_position(
@@ -243,6 +243,15 @@ impl Typeface {
         let mut name = interop::String::default();
         unsafe { self.native().getPostScriptName(name.native_mut()) }
             .if_true_then_some(|| name.as_str().into())
+    }
+
+    pub fn resource_name(&self) -> Option<String> {
+        let mut name = interop::String::default();
+        let num_resources = unsafe { self.native().getResourceName(name.native_mut()) };
+        if num_resources == 0 {
+            return None;
+        }
+        Some(name.as_str().into())
     }
 
     pub fn to_font_data(&self) -> Option<(Vec<u8>, usize)> {

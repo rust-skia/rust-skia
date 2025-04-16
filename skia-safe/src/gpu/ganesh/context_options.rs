@@ -13,14 +13,70 @@ variant_name!(ShaderCacheStrategy::BackendSource);
 #[repr(C)]
 #[derive(Debug)]
 pub struct ContextOptions {
-    // Suppress prints for the GrContext.
-    pub suppress_prints: bool,
+    /// If Skia is creating a default VMA allocator for the Vulkan backend this value will be used
+    /// for the `preferred_large_heap_block_size`. If the value is not set, then Skia will use an
+    /// internally defined default size.
+    ///
+    /// However, it is highly discouraged to have Skia make a default allocator (and support for
+    /// doing so will be removed soon,  b/321962001). Instead clients should create their own
+    /// allocator to pass into Skia where they can fine tune this value themeselves.
+    vulkan_vma_large_heap_block_size: [u64; 2],
+
+    /// Optional callback that can be passed into the [`DirectContext`] which will be called when the
+    /// [`DirectContext`] is about to be destroyed. When this call is made, it will be safe for the
+    /// client to delete the GPU backend context that is backing the [`DirectContext`]. The
+    /// [`DirectContextDestroyedContext`] will be passed back to the client in the callback.
+    context_delete_context: sb::GrDirectContextDestroyedContext,
+    context_delete_proc: sb::GrDirectContextDestroyedProc,
+
+    /// Executor to handle threaded work within Ganesh. If this is `None`, then all work will be
+    /// done serially on the main thread. To have worker threads assist with various tasks, set this
+    /// to a valid [`sb::SkExecutor`] instance. Currently, used for software path rendering, but may
+    /// be used for other tasks.
+    executor: *mut sb::SkExecutor,
+
+    /// Cache in which to store compiled shader binaries between runs.
+    persistent_cache: *mut sb::GrContextOptions_PersistentCache,
+
+    /// If present, use this object to report shader compilation failures. If not, report failures
+    /// via [`Debugf`] and assert.
+    shader_error_handler: *mut sb::GrContextOptions_ShaderErrorHandler,
+
+    /// Default minimum size to use when allocating buffers for uploading data to textures. The
+    /// larger the value the more uploads can be packed into one buffer, but at the cost of
+    /// more gpu memory allocated that may not be used. Uploads larger than the minimum will still
+    /// work by allocating a dedicated buffer.
+    pub minimum_staging_buffer_size: usize,
+
+    /// The maximum size of cache textures used for Skia's Glyph cache.
+    pub glyph_cache_texture_maximum_bytes: usize,
 
     /// Controls whether we check for GL errors after functions that allocate resources (e.g.
     /// `glTexImage2d`), at the end of a GPU submission, or checking framebuffer completeness. The
     /// results of shader compilation and program linking are always checked, regardless of this
     /// option. Ignored on backends other than GL.
     pub skip_gl_error_checks: Enable,
+
+    /// Can the glyph atlas use multiple textures. If allowed, the each texture's size is bound by
+    /// `glyph_cache_texture_maximum_bytes`.
+    pub allow_multiple_glyph_cache_textures: Enable,
+
+    /// Enables driver workaround to use draws instead of HW clears, e.g. `glClear` on the GL
+    /// backend.
+    pub use_draw_instead_of_clear: Enable,
+
+    /// Allow Ganesh to more aggressively reorder operations to reduce the number of render passes.
+    /// Offscreen draws will be done upfront instead of interrupting the main render pass when
+    /// possible. May increase VRAM usage, but still observes the resource cache limit.
+    ///
+    /// Enabled by default.
+    pub reduce_ops_task_splitting: Enable,
+
+    /// This affects the usage of the PersistentCache. We can cache `SL`, backend source (GLSL), or
+    /// backend binaries (GL program binaries). By default we cache binaries, but if the driver's
+    /// binary loading/storing is believed to have bugs, this can be limited to caching GLSL.
+    /// Caching GLSL strings still saves CPU work when a GL program is created.
+    pub shader_cache_strategy: ShaderCacheStrategy,
 
     /// Overrides: These options override feature detection using backend API queries. These
     /// overrides can only reduce the feature set or limits, never increase them beyond the detected
@@ -32,13 +88,32 @@ pub struct ContextOptions {
     /// deduce the optimal value for this platform.
     pub buffer_map_threshold: raw::c_int,
 
-    /// Default minimum size to use when allocating buffers for uploading data to textures. The
-    /// larger the value the more uploads can be packed into one buffer, but at the cost of
-    /// more gpu memory allocated that may not be used. Uploads larger than the minimum will still
-    /// work by allocating a dedicated buffer.
-    pub minimum_staging_buffer_size: usize,
+    /// Maximum number of GPU programs or pipelines to keep active in the runtime cache.
+    pub runtime_program_cache_size: raw::c_int,
 
-    executor: *mut sb::SkExecutor,
+    /// Specifies the number of samples Ganesh should use when performing internal draws with MSAA
+    /// (hardware capabilities permitting).
+    ///
+    /// If 0, Ganesh will disable internal code paths that use multisampling.
+    pub internal_multisample_count: raw::c_int,
+
+    /// In Skia's vulkan backend a single `Context` submit equates to the submission of a single
+    /// primary command buffer to the VkQueue. This value specifies how many vulkan secondary command
+    /// buffers we will cache for reuse on a given primary command buffer. A single submit may use
+    /// more than this many secondary command buffers, but after the primary command buffer is
+    /// finished on the GPU it will only hold on to this many secondary command buffers for reuse.
+    ///
+    /// A value of -1 means we will pick a limit value internally.
+    pub max_cached_vulkan_secondary_command_buffers: raw::c_int,
+
+    /// Below this threshold size in device space distance field fonts won't be used. Distance field
+    /// fonts don't support hinting which is more important at smaller sizes.
+    pub min_distance_field_font_size: f32,
+
+    /// Above this threshold size in device space glyphs are drawn as individual paths.
+    pub glyphs_as_paths_font_size: f32,
+
+    pub driver_bug_workarounds: DriverBugWorkarounds,
 
     /// Construct mipmaps manually, via repeated downsampling draw-calls. This is used when
     /// the driver's implementation (`gl_generate_mipmap`) contains bugs. This requires mipmap
@@ -62,20 +137,6 @@ pub struct ContextOptions {
     /// textures from codec-backed images.
     pub disable_gpu_yuv_conversion: bool,
 
-    /// The maximum size of cache textures used for Skia's Glyph cache.
-    pub glyph_cache_texture_maximum_bytes: usize,
-
-    /// Below this threshold size in device space distance field fonts won't be used. Distance field
-    /// fonts don't support hinting which is more important at smaller sizes.
-    pub min_distance_field_font_size: f32,
-
-    /// Above this threshold size in device space glyphs are drawn as individual paths.
-    pub glyphs_as_paths_font_size: f32,
-
-    /// Can the glyph atlas use multiple textures. If allowed, the each texture's size is bound by
-    /// `glyph_cache_texture_maximum_bytes`.
-    pub allow_multiple_glyph_cache_textures: Enable,
-
     /// Bugs on certain drivers cause stencil buffers to leak. This flag causes Skia to avoid
     /// allocating stencil buffers and use alternate rasterization paths, avoiding the leak.
     pub avoid_stencil_buffers: bool,
@@ -84,17 +145,6 @@ pub struct ContextOptions {
     /// This has the effect of sharpening those textures, at the cost of some aliasing, and possible
     /// performance impact.
     pub sharpen_mipmapped_textures: bool,
-
-    /// Enables driver workaround to use draws instead of HW clears, e.g. `glClear` on the GL
-    /// backend.
-    pub use_draw_instead_of_clear: Enable,
-
-    /// Allow Ganesh to more aggressively reorder operations to reduce the number of render passes.
-    /// Offscreen draws will be done upfront instead of interrupting the main render pass when
-    /// possible. May increase VRAM usage, but still observes the resource cache limit.
-    ///
-    /// Enabled by default.
-    pub reduce_ops_task_splitting: Enable,
 
     /// Some ES3 contexts report the ES2 external image extension, but not the ES3 version.
     /// If support for external images is critical, enabling this option will cause Ganesh to limit
@@ -105,46 +155,6 @@ pub struct ContextOptions {
     /// This does not affect code path choices that are made for performance reasons nor does it
     /// override other [`ContextOptions`] settings.
     pub disable_driver_correctness_workarounds: bool,
-
-    /// Maximum number of GPU programs or pipelines to keep active in the runtime cache.
-    pub runtime_program_cache_size: raw::c_int,
-
-    /// Cache in which to store compiled shader binaries between runs.
-    persistent_cache: *mut sb::GrContextOptions_PersistentCache,
-
-    /// This affects the usage of the PersistentCache. We can cache `SL`, backend source (GLSL), or
-    /// backend binaries (GL program binaries). By default we cache binaries, but if the driver's
-    /// binary loading/storing is believed to have bugs, this can be limited to caching GLSL.
-    /// Caching GLSL strings still saves CPU work when a GL program is created.
-    pub shader_cache_strategy: ShaderCacheStrategy,
-
-    /// If present, use this object to report shader compilation failures. If not, report failures
-    /// via [`Debugf`] and assert.
-    shader_error_handler: *mut sb::GrContextOptions_ShaderErrorHandler,
-
-    /// Specifies the number of samples Ganesh should use when performing internal draws with MSAA
-    /// (hardware capabilities permitting).
-    ///
-    /// If 0, Ganesh will disable internal code paths that use multisampling.
-    pub internal_multisample_count: raw::c_int,
-
-    /// In Skia's vulkan backend a single `Context` submit equates to the submission of a single
-    /// primary command buffer to the VkQueue. This value specifies how many vulkan secondary command
-    /// buffers we will cache for reuse on a given primary command buffer. A single submit may use
-    /// more than this many secondary command buffers, but after the primary command buffer is
-    /// finished on the GPU it will only hold on to this many secondary command buffers for reuse.
-    ///
-    /// A value of -1 means we will pick a limit value internally.
-    pub max_cached_vulkan_secondary_command_buffers: raw::c_int,
-
-    /// If Skia is creating a default VMA allocator for the Vulkan backend this value will be used
-    /// for the `preferred_large_heap_block_size`. If the value is not set, then Skia will use an
-    /// internally defined default size.
-    ///
-    /// However, it is highly discouraged to have Skia make a default allocator (and support for
-    /// doing so will be removed soon,  b/321962001). Instead clients should create their own
-    /// allocator to pass into Skia where they can fine tune this value themeselves.
-    vulkan_vma_large_heap_block_size: [u64; 2],
 
     /// If `true`, the caps will never support mipmaps.
     pub suppress_mipmap_support: bool,
@@ -175,13 +185,8 @@ pub struct ContextOptions {
     /// This flag has no impact on non GL backends.
     pub always_use_text_storage_when_available: bool,
 
-    /// Optional callback that can be passed into the [`DirectContext`] which will be called when the
-    /// [`DirectContext`] is about to be destroyed. When this call is made, it will be safe for the
-    /// client to delete the GPU backend context that is backing the [`DirectContext`]. The
-    /// [`DirectContextDestroyedContext`] will be passed back to the client in the callback.
-    context_delete_context: sb::GrDirectContextDestroyedContext,
-    context_delete_proc: sb::GrDirectContextDestroyedProc,
-    pub driver_bug_workarounds: DriverBugWorkarounds,
+    // Suppress prints for the GrContext.
+    pub suppress_prints: bool,
 }
 unsafe_send_sync!(ContextOptions);
 

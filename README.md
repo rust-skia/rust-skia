@@ -2,10 +2,10 @@
 
 [![crates.io](https://img.shields.io/crates/v/skia-safe)](https://crates.io/crates/skia-safe) [![license](https://img.shields.io/crates/l/skia-safe)](LICENSE) [![Windows QA](https://github.com/rust-skia/rust-skia/actions/workflows/windows-qa.yaml/badge.svg?branch=master)](https://github.com/rust-skia/rust-skia/actions/workflows/windows-qa.yaml) [![Linux QA](https://github.com/rust-skia/rust-skia/actions/workflows/linux-qa.yaml/badge.svg?branch=master)](https://github.com/rust-skia/rust-skia/actions/workflows/linux-qa.yaml) [![macOS QA](https://github.com/rust-skia/rust-skia/actions/workflows/macos-qa.yaml/badge.svg?branch=master)](https://github.com/rust-skia/rust-skia/actions/workflows/macos-qa.yaml)
 
-Skia Submodule Status: chrome/m132 ([upstream changes][skia-upstream], [our changes][skia-ours]).
+Skia Submodule Status: chrome/m135 ([upstream changes][skia-upstream], [our changes][skia-ours]).
 
-[skia-upstream]: https://github.com/rust-skia/skia/compare/m132-0.81.0...google:chrome/m132
-[skia-ours]: https://github.com/google/skia/compare/chrome/m132...rust-skia:m132-0.81.0
+[skia-upstream]: https://github.com/rust-skia/skia/compare/m135-0.83.1...google:chrome/m135
+[skia-ours]: https://github.com/google/skia/compare/chrome/m135...rust-skia:m135-0.83.1
 
 ## About
 
@@ -241,6 +241,30 @@ Please share your build experience so that we can try to automate the build and 
 
 ## Example Applications
 
+### gl-window
+
+An example that opens an OpenGL Window and draws the rust-skia icon with skia-safe (contributed by [@nornagon](https://github.com/nornagon)).
+
+```bash
+cargo run --example gl-window --features gl
+```
+
+On Linux the feature `x11` needs to be enabled:
+
+```bash
+cargo run --example gl-window --features gl,x11
+```
+
+### vulkan-window
+
+An example application that opens a Window and renders a blue rectangle using [Vulkano](https://github.com/vulkano-rs/vulkano) (contributed by [@samizdatco](https://github.com/samizdatco) in [#1066](https://github.com/rust-skia/rust-skia/pull/1066))
+
+```bash
+cargo run --example vulkan-window --features "vulkan,vulkan-window"
+```
+
+To add Vulkan support to your system, the easiest way is to install the [LunarG SDK](https://vulkan.lunarg.com/sdk/home), and enable "System Global Installation" in the installer.
+
 ### icon
 
 The `icon` example generates the rust-skia icon in the current directory.
@@ -273,20 +297,6 @@ And to show the drivers that are supported
 
 ```bash
 cargo run -- --help
-```
-
-### gl-window
-
-An example that opens an OpenGL Window and draws the rust-skia icon with skia-safe (contributed by [@nornagon](https://github.com/nornagon)).
-
-```bash
-cargo run --example gl-window --features gl
-```
-
-On Linux the feature `x11` needs to be enabled:
-
-```bash
-cargo run --example gl-window --features gl,x11
 ```
 
 ## Example Images

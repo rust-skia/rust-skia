@@ -35,6 +35,9 @@ pub struct Features {
     /// Support the decoding of the WEBP image format to bitmap data.
     pub webp_decode: bool,
 
+    /// Support PDF rendering
+    pub pdf: bool,
+
     /// Build with FreeType embedded.
     pub embed_freetype: bool,
 
@@ -66,6 +69,7 @@ impl Default for Features {
             svg: cfg!(feature = "svg"),
             webp_encode: cfg!(feature = "webp-encode"),
             webp_decode: cfg!(feature = "webp-decode"),
+            pdf: cfg!(feature = "pdf"),
             embed_freetype: cfg!(feature = "embed-freetype"),
             animation: false,
             dng: false,
@@ -117,6 +121,9 @@ impl Features {
         if self.webp_decode {
             feature_ids.push(feature_id::WEBPD);
         }
+        if self.pdf {
+            feature_ids.push(feature_id::PDF);
+        }
         if self.embed_freetype {
             feature_ids.push(feature_id::FREETYPE);
         }
@@ -138,6 +145,7 @@ mod feature_id {
     pub const SVG: &str = "svg";
     pub const WEBPE: &str = "webpe";
     pub const WEBPD: &str = "webpd";
+    pub const PDF: &str = "pdf";
     pub const EGL: &str = "egl";
     pub const X11: &str = "x11";
     pub const WAYLAND: &str = "wayland";

@@ -145,8 +145,10 @@ impl YUVABackendTextures {
             .iter()
             .map(|tex| tex.native() as *const _)
             .collect::<Vec<_>>();
-        texture_handles
-            .extend(iter::repeat(new_invalid_ptr).take(YUVAInfo::MAX_PLANES - textures.len()));
+        texture_handles.extend(iter::repeat_n(
+            new_invalid_ptr,
+            YUVAInfo::MAX_PLANES - textures.len(),
+        ));
         assert_eq!(texture_handles.len(), YUVAInfo::MAX_PLANES);
 
         let n = construct(|cloned| unsafe {

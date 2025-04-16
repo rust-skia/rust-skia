@@ -64,6 +64,9 @@ impl PlatformDetails for Msvc {
         };
 
         builder.cflag(runtime_library);
+
+        // <https://github.com/llvm/llvm-project/issues/95133>
+        builder.cflag("-D__RTMINTRIN_H");
     }
 
     fn link_libraries(&self, features: &Features) -> Vec<String> {
