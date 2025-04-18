@@ -142,6 +142,7 @@ mod docs {
     assert_not_impl_any!(pdf::StructureElementNode: Send, Sync);
     assert_impl_all!(pdf::DateTime: Send, Sync);
     assert_not_impl_any!(pdf::Metadata: Send, Sync);
+    assert_impl_all!(pdf::Outline: Send, Sync);
     assert_impl_all!(pdf::CompressionLevel: Send, Sync);
 }
 
