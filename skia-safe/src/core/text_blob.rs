@@ -334,7 +334,7 @@ pub type TextBlobIter<'a> = Borrows<'a, Handle<SkTextBlob_Iter>>;
 
 pub struct TextBlobRun<'a> {
     typeface: *mut SkTypeface,
-    pub glyph_indices: &'a [u16],
+    pub glyph_indices: &'a [GlyphId],
 }
 
 impl fmt::Debug for TextBlobRun<'_> {

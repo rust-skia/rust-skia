@@ -1,7 +1,5 @@
-// TODO: wrap for type safety?
 pub type GlyphId = skia_bindings::SkGlyphID;
 
-// TODO: wrap for type safety?
 pub type Unichar = skia_bindings::SkUnichar;
 
 // note std::time::Duration is used in place of MSec in public
