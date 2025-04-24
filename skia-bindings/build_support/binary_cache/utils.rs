@@ -1,5 +1,5 @@
 use std::{
-    fs,
+    fs::{self, File},
     io::{self, Error, ErrorKind, Read},
     path::Path,
 };
@@ -26,14 +26,22 @@ pub fn download(url: impl AsRef<str>) -> io::Result<Vec<u8>> {
         .arg("-f")
         // no progress meter but keep error messages.
         .arg("--no-progress-meter")
+        // resumed transfer offset
+        .arg("-C -")
+        // write output to file named as remote file
+        .arg("-O")
         .arg(url)
         .output();
     match resp {
         Ok(out) => {
-            // ideally, we would redirect response to a file directly, but lets take it one step at a time.
+            // read bytes from the file
             let result = out.stdout;
             if out.status.success() {
-                Ok(result)
+                let file_name = url.split('/').last().unwrap_or_default();
+                let mut file = File::open(file_name)?;
+                let mut buffer = Vec::<u8>::with_capacity(file.metadata()?.len() as usize);
+                file.read_to_end(&mut buffer)?;
+                Ok(buffer)
             } else {
                 Err(io::Error::other(format!(
                     "curl error code: {:?}\ncurl stderr: {:?}",
