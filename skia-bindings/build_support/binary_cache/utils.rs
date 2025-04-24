@@ -1,7 +1,8 @@
 use std::{
+    env,
     fs::{self, File},
     io::{self, Error, ErrorKind, Read},
-    path::Path,
+    path::{Path, PathBuf},
 };
 
 /// Download a file from the given URL and return the data.
@@ -18,6 +19,10 @@ pub fn download(url: impl AsRef<str>) -> io::Result<Vec<u8>> {
         eprintln!("Unsupported file: URL {}", url);
         return Err(Error::from(ErrorKind::Unsupported));
     }
+    // Specify the directory where the downloaded files are stored.
+    let mut file_path = PathBuf::from(env::var("OUT_DIR").unwrap_or_default());
+    // push file name to the path
+    file_path.push(url.split('/').next_back().unwrap_or_default());
     let resp = std::process::Command::new("curl")
         // follow redirects
         .arg("-L")
@@ -27,21 +32,22 @@ pub fn download(url: impl AsRef<str>) -> io::Result<Vec<u8>> {
         // no progress meter but keep error messages.
         .arg("--no-progress-meter")
         // resumed transfer offset
-        .arg("-C -")
-        // write output to file named as remote file
-        .arg("-O")
+        .arg("-C")
+        .arg("-")
+        // directory to save files in
+        .arg("--output")
+        .arg(file_path.to_str().unwrap())
+        // file url
         .arg(url)
         .output();
     match resp {
         Ok(out) => {
             // read bytes from the file
-            let result = out.stdout;
             if out.status.success() {
-                let file_name = url.split('/').last().unwrap_or_default();
-                let mut file = File::open(file_name)?;
-                let mut buffer = Vec::<u8>::with_capacity(file.metadata()?.len() as usize);
-                file.read_to_end(&mut buffer)?;
-                Ok(buffer)
+                let mut file = File::open(file_path)?;
+                let mut result = Vec::<u8>::with_capacity(file.metadata()?.len() as usize);
+                file.read_to_end(&mut result)?;
+                Ok(result)
             } else {
                 Err(io::Error::other(format!(
                     "curl error code: {:?}\ncurl stderr: {:?}",
