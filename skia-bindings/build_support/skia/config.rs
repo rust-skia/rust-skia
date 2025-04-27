@@ -297,12 +297,18 @@ pub fn configure_skia(
     python: &Path,
     gn_command: Option<&Path>,
 ) {
-    let gn_args = build
+    let mut gn_args = build
         .gn_args
         .iter()
         .map(|(name, value)| name.clone() + "=" + value)
         .collect::<Vec<String>>()
         .join(" ");
+
+    if let Some(args) = cargo::env_var("SKIA_GN_ARGS") {
+        gn_args.push_str(
+            format!(" {}", args.as_str()).as_str()
+        );
+    }
 
     let gn_command = gn_command
         .map(|p| p.to_owned())
