@@ -3,7 +3,7 @@ on: [push, pull_request]
 
 jobs:
   check-fmt:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v3
       with:

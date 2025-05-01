@@ -9,7 +9,7 @@ use super::{
 use crate::{
     interop::{Sink, VecSink},
     prelude::*,
-    scalar, Canvas, Font, Path, Point, Rect, Size, TextBlob, Unichar,
+    scalar, Canvas, Font, GlyphId, Path, Point, Rect, Size, TextBlob, Unichar,
 };
 
 pub type Paragraph = RefHandle<sb::skia_textlayout_Paragraph>;
@@ -523,7 +523,7 @@ impl VisitorInfo {
         self.native().count as usize
     }
 
-    pub fn glyphs(&self) -> &[u16] {
+    pub fn glyphs(&self) -> &[GlyphId] {
         unsafe { safer::from_raw_parts(self.native().glyphs, self.count()) }
     }
 
@@ -586,7 +586,7 @@ impl ExtendedVisitorInfo {
         self.native().count as usize
     }
 
-    pub fn glyphs(&self) -> &[u16] {
+    pub fn glyphs(&self) -> &[GlyphId] {
         unsafe { safer::from_raw_parts(self.native().glyphs, self.count()) }
     }
 

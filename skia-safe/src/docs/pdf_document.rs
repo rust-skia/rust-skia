@@ -284,6 +284,8 @@ pub mod pdf {
 
         pub structure_element_tree_root: Option<StructureElementNode>,
 
+        pub outline: Outline,
+
         /// PDF streams may be compressed to save space.
         /// Use this to specify the desired compression vs time tradeoff.
         pub compression_level: CompressionLevel,
@@ -305,10 +307,14 @@ pub mod pdf {
                 pdf_a: Default::default(),
                 encoding_quality: Default::default(),
                 structure_element_tree_root: None,
+                outline: Outline::None,
                 compression_level: Default::default(),
             }
         }
     }
+
+    pub type Outline = skia_bindings::SkPDF_Metadata_Outline;
+    variant_name!(Outline::StructureElements);
 
     pub type CompressionLevel = skia_bindings::SkPDF_Metadata_CompressionLevel;
     variant_name!(CompressionLevel::HighButSlow);
@@ -350,6 +356,7 @@ pub mod pdf {
             if let Some(structure_element_tree) = &metadata.structure_element_tree_root {
                 internal.fStructureElementTreeRoot = structure_element_tree.0.as_ptr();
             }
+            internal.fOutline = metadata.outline;
             internal.fCompressionLevel = metadata.compression_level
         }
 
@@ -382,6 +389,18 @@ pub mod pdf {
         fn default() -> Self {
             Self::construct(|pdf_md| unsafe { sb::C_SkPDF_Metadata_Construct(pdf_md) })
         }
+    }
+
+    pub mod node_id {
+        pub const NOTHING: i32 = 0;
+        pub const OTHER_ARTIFACT: i32 = -1;
+        pub const PAGINATION_ARTIFACT: i32 = -2;
+        pub const PAGINATION_HEADER_ARTIFACT: i32 = -3;
+        pub const PAGINATION_FOOTER_ARTIFACT: i32 = -4;
+        pub const PAGINATION_WATERMARK_ARTIFACT: i32 = -5;
+        pub const LAYOUT_ARTIFACT: i32 = -6;
+        pub const PAGE_ARTIFACT: i32 = -7;
+        pub const BACKGROUND_ARTIFACT: i32 = -8;
     }
 
     pub fn set_node_id(canvas: &Canvas, node_id: i32) {
