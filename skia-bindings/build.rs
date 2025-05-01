@@ -44,7 +44,7 @@ fn main() -> Result<(), io::Error> {
             );
         } else {
             if cfg!(feature = "no-compile") {
-                panic!("refusing to offline-build skia with no-compile feature");
+                panic!("Refusing to offline-build skia with no-compile feature");
             }
 
             println!("STARTING OFFLINE BUILD");
@@ -90,7 +90,7 @@ fn main() -> Result<(), io::Error> {
 
         if build_skia {
             if cfg!(feature = "no-compile") {
-                panic!("refusing to full-build skia with no-compile feature");
+                panic!("Refusing to full-build skia with no-compile feature");
             }
 
             println!("STARTING A FULL BUILD");

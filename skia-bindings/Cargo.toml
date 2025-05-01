@@ -56,6 +56,8 @@ binary-cache = ["flate2", "tar"]
 embed-icudtl = ["lazy_static"]
 embed-freetype = []
 freetype-woff2 = []
+# Panic when any compilation steps are required to run. 
+# See <https://github.com/rust-skia/rust-skia/pull/1121>.
 no-compile = []
 
 [dependencies]
