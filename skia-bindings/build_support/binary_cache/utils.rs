@@ -36,7 +36,7 @@ pub fn download_with_resume_and_cache(url: impl AsRef<str>) -> io::Result<Vec<u8
         return Err(ErrorKind::InvalidInput.into());
     };
 
-    let file_path = out_dir.join(".cache").join("skia-bindings").join(file_name);
+    let file_path = out_dir.join(".cache").join(file_name);
 
     let resp = std::process::Command::new("curl")
         // follow redirects
