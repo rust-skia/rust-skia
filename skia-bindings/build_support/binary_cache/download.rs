@@ -1,6 +1,3 @@
-use super::{binaries, env, git, utils};
-use crate::build_support::{binaries_config, cargo};
-use flate2::read::GzDecoder;
 use std::{
     ffi::OsStr,
     fs,
@@ -8,6 +5,11 @@ use std::{
     path::{Component, Path, PathBuf},
     process::{Command, Stdio},
 };
+
+use flate2::read::GzDecoder;
+
+use super::{binaries, env, git, utils};
+use crate::build_support::{binaries_config, cargo};
 
 /// Resolve the `skia/` subdirectory contents, either by checking out the submodules, or when
 /// `build.rs` was invoked outside of the git repository by downloading and unpacking them from
@@ -73,7 +75,7 @@ fn download_dependencies() {
         // Download
         let archive_url = &format!("{repo_url}/{short_hash}");
         println!("DOWNLOADING: {archive_url}");
-        let archive = utils::download(archive_url)
+        let archive = utils::download_with_resume_and_cache(archive_url)
             .unwrap_or_else(|err| panic!("Failed to download {archive_url} ({err})"));
 
         // Unpack
@@ -188,7 +190,7 @@ fn should_try_download_binaries(
 }
 
 fn download_and_install(url: impl AsRef<str>, output_directory: &Path) -> io::Result<()> {
-    let archive = utils::download(url)?;
+    let archive = utils::download_with_resume_and_cache(url)?;
     println!(
         "UNPACKING ARCHIVE INTO: {}",
         output_directory.to_str().unwrap()
