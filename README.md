@@ -290,7 +290,7 @@ cargo run -- [OUTPUT_DIR]
 to generate some Skia drawn PNG images in the directory `OUTPUT_DIR`. To render with OpenGL, use
 
 ```bash
-cargo run -- [OUTPUT_DIR] --driver opengl
+cargo run --features gl -- [OUTPUT_DIR] --driver gl
 ```
 
 And to show the drivers that are supported
