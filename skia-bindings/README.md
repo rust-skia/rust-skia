@@ -36,7 +36,7 @@ And whenever the build script detects that `skia-bindings` is built from inside 
 
 ### Prebuilt Binaries in an Offline Environment
 
-Some users may not have a stable internet connection or are building `skia-bindings` in an offline environment. You may download binaries manually from the [skia-binaries repository](<https://github.com/rust-skia/skia-binaries/releases>) in an environment where you do have internet access.
+Some users may not have a stable internet connection or are building `skia-bindings` in an offline environment. It is possible to download binaries manually from the [skia-binaries repository](<https://github.com/rust-skia/skia-binaries/releases>) in an environment where internet access is available.
 
 To use the binaries in an offline build, the environment variable `SKIA_BINARIES_URL` must be set. This environment variable must point to the `tar.gz` file where the binaries are located, prepended with `file://`.
 
@@ -56,9 +56,13 @@ this, the executables used can be set using the following environment variables:
 
 ### Changing the Skia source directory
 
-In some cases, one may wish to provide an alternate Skia source directory.  This can be achieved by
+In some cases, an alternate Skia source directory may be provided. This can be achieved by
 setting `SKIA_SOURCE_DIR`, which must be an absolute path to a Skia source directory with all
 dependencies.
+
+### Additional GN arguments
+
+Additional arguments for the `gn` executable can be specified by setting the `SKIA_GN_ARGS` environment variable.
 
 ### Using system libraries
 
@@ -92,7 +96,7 @@ It's possible to cross compile Skia and the Rust bindings for different architec
  When using a Yocto SDK for cross-compiling, all of the above environment variables will be set when entering the Yocto SDK environment by sourcing the `environment-setup-*` script,
  and `CC`/`CXX` are set to cross-compile. That means it is also necessary to set `HOST_CC`, which usually works when set to just `gcc`.
 
- For linking your Rust application, you may also need to instruct cargo to use the correct linker and look for native library dependencies (such as Skia's FreeType dependency) in the sysroot. This can for be done via a `.cargo/config` file or via environment variables. For example if your Rust target platform is `aarch64-unknown-linux-gnu` and you're Yocto SDK's target is `aarch64-poky-linux`:
+ For linking a Rust application, it may also be necessary to instruct cargo to use the correct linker and look for native library dependencies (such as Skia's FreeType dependency) in the sysroot. This can for be done via a `.cargo/config` file or via environment variables. For example if the Rust target platform is `aarch64-unknown-linux-gnu` and the Yocto SDK's target is `aarch64-poky-linux`:
 
  * `CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-poky-linux-g++`
  * `RUSTFLAGS="-Clink-args=--sysroot=$SDKTARGETSYSROOT"`
