@@ -305,9 +305,7 @@ pub fn configure_skia(
         .join(" ");
 
     if let Some(args) = cargo::env_var("SKIA_GN_ARGS") {
-        gn_args.push_str(
-            format!(" {}", args.as_str()).as_str()
-        );
+        gn_args.push_str(format!(" {}", args.as_str()).as_str());
     }
 
     let gn_command = gn_command
