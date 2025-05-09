@@ -148,10 +148,10 @@ impl fmt::Debug for RuntimeEffect {
 impl RuntimeEffect {
     pub fn make_for_color_filter(
         sksl: impl AsRef<str>,
-        options: impl for<'a, 'b> Into<Option<&'a Options<'b>>>,
+        options: Option<&Options<'_>>,
     ) -> Result<RuntimeEffect, String> {
         let str = interop::String::from_str(sksl);
-        let options = options.into().copied().unwrap_or_default();
+        let options = options.copied().unwrap_or_default();
         let options = Self::construct_native_options(&options);
         let mut error = interop::String::default();
         RuntimeEffect::from_ptr(unsafe {
@@ -162,10 +162,10 @@ impl RuntimeEffect {
 
     pub fn make_for_shader(
         sksl: impl AsRef<str>,
-        options: impl for<'a, 'b> Into<Option<&'a Options<'b>>>,
+        options: Option<&Options<'_>>,
     ) -> Result<RuntimeEffect, String> {
         let str = interop::String::from_str(sksl);
-        let options = options.into().copied().unwrap_or_default();
+        let options = options.copied().unwrap_or_default();
         let options = Self::construct_native_options(&options);
         let mut error = interop::String::default();
         RuntimeEffect::from_ptr(unsafe {
@@ -176,10 +176,10 @@ impl RuntimeEffect {
 
     pub fn make_for_blender(
         sksl: impl AsRef<str>,
-        options: impl for<'a, 'b> Into<Option<&'a Options<'b>>>,
+        options: Option<&Options<'_>>,
     ) -> Result<RuntimeEffect, String> {
         let str = interop::String::from_str(sksl);
-        let options = options.into().copied().unwrap_or_default();
+        let options = options.copied().unwrap_or_default();
         let options = Self::construct_native_options(&options);
         let mut error = interop::String::default();
         RuntimeEffect::from_ptr(unsafe {
@@ -506,5 +506,18 @@ impl RuntimeShaderBuilder {
             ShaderBuilderUniformResult::Ok => Ok(()),
             ShaderBuilderUniformResult::Error => Err(ShaderBuilderError::UniformSizeNotSupported),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // <https://github.com/rust-skia/rust-skia/discussions/1133>
+    #[allow(unused)]
+    fn none_cases_compile() {
+        RuntimeEffect::make_for_color_filter("", None);
+        RuntimeEffect::make_for_shader("", None);
+        RuntimeEffect::make_for_blender("", None);
     }
 }
