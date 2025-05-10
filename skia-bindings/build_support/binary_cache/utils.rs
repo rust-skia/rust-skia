@@ -19,7 +19,7 @@ pub fn download_with_resume_and_cache(url: impl AsRef<str>) -> io::Result<Vec<u8
 
     // `file` URLs with non-empty hostname or relative paths are unsupported.
     if url.starts_with("file:") {
-        eprintln!("Unsupported file: URL {}", url);
+        eprintln!("Unsupported file: URL {url}");
         return Err(ErrorKind::Unsupported.into());
     }
 
