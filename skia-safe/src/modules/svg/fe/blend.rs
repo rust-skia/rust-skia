@@ -41,6 +41,6 @@ mod tests {
     #[test]
     pub fn create() {
         let blend = Blend::default();
-        println!("{:?}", blend);
+        println!("{blend:?}");
     }
 }

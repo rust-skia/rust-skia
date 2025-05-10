@@ -299,7 +299,7 @@ pub mod pdf {
                 subject: Default::default(),
                 keywords: Default::default(),
                 creator: Default::default(),
-                producer: format!("Skia/PDF m{}", MILESTONE),
+                producer: format!("Skia/PDF m{MILESTONE}"),
                 creation: Default::default(),
                 modified: Default::default(),
                 lang: Default::default(),

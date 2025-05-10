@@ -732,7 +732,7 @@ mod tests {
     fn test_visit() {
         let mut paragraph = mk_lorem_ipsum_paragraph();
         let visitor = |line, info| {
-            println!("line {}: {:?}", line, info);
+            println!("line {line}: {info:?}");
         };
         paragraph.visit(visitor);
     }
@@ -742,7 +742,7 @@ mod tests {
     fn test_extended_visit() {
         let mut paragraph = mk_lorem_ipsum_paragraph();
         let visitor = |line, info| {
-            println!("line {}: {:?}", line, info);
+            println!("line {line}: {info:?}");
         };
         paragraph.extended_visit(visitor);
     }
