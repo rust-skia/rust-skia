@@ -250,8 +250,6 @@ pub fn generate_bindings(
         // environment, for example when targeting the ios simulator.
         if override_target {
             cc_args.push(format!("--target={target_str}"));
-        } else {
-            cc_build.target(target_str);
         }
         bindgen_args.push(format!("--target={target_str}"));
     }
