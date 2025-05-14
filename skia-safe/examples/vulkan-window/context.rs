@@ -56,10 +56,7 @@ impl VulkanRenderContext {
             },
         )
         .unwrap_or_else(|_| {
-            panic!(
-                "Could not create instance supporting: {:?}",
-                required_extensions
-            )
+            panic!("Could not create instance supporting: {required_extensions:?}")
         });
 
         // Choose device extensions that we're going to use. In order to present images to a

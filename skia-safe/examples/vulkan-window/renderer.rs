@@ -395,7 +395,7 @@ fn surface_for_framebuffer(
             skia_safe::gpu::vk::Format::B8G8R8A8_UNORM,
             ColorType::BGRA8888,
         ),
-        _ => panic!("unsupported color format {:?}", format),
+        _ => panic!("Unsupported color format {format:?}"),
     };
 
     let alloc = vk::Alloc::default();
