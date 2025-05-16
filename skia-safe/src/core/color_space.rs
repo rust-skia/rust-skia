@@ -385,6 +385,10 @@ impl ColorSpace {
         Self::from_ptr(unsafe { sb::C_SkColorSpace_MakeSRGBLinear() }).unwrap()
     }
 
+    pub fn new_icc(data: &[u8]) -> Option<Self> {
+        Self::from_ptr(unsafe { sb::C_SkColorSpace_MakeICC(data.as_ptr() as _, data.len()) })
+    }
+
     // TODO: makeRGB
 
     pub fn new_cicp(

@@ -981,6 +981,14 @@ extern "C" bool C_SkColorSpace_unique(const SkColorSpace* self) {
     return self->unique();
 }
 
+extern "C" SkColorSpace* C_SkColorSpace_MakeICC(const void* buffer, size_t size) {
+    skcms_ICCProfile profile;
+    if (skcms_Parse(buffer, size, &profile)) {
+        return SkColorSpace::Make(profile).release();
+    }
+    return nullptr;
+}
+
 extern "C" SkColorSpace* C_SkColorSpace_MakeSRGB() {
     return SkColorSpace::MakeSRGB().release();
 }
