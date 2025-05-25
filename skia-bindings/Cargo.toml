@@ -34,7 +34,7 @@ doctest = false
 skia = "m137-0.85.0"
 
 [features]
-default = ["binary-cache", "embed-icudtl"]
+default = ["binary-cache", "embed-icudtl", "pdf"]
 gl = []
 egl = []
 wayland = []
