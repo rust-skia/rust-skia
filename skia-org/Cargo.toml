@@ -26,13 +26,13 @@ default-run = "skia-org"
 
 [features]
 default = []
-gl = ["offscreen_gl_context", "sparkle", "skia-safe/gl"]
+gl = ["dep:offscreen_gl_context", "dep:sparkle", "skia-safe/gl"]
 egl = ["gl", "skia-safe/egl"]
 x11 = ["gl", "skia-safe/x11"]
 wayland = ["egl", "skia-safe/wayland"]
-vulkan = ["ash", "skia-safe/vulkan"]
-metal = ["metal-rs", "foreign-types-shared", "cocoa", "objc", "skia-safe/metal"]
-d3d = ["skia-safe/d3d", "windows"]
+vulkan = ["dep:ash", "skia-safe/vulkan"]
+metal = ["dep:metal", "dep:foreign-types-shared", "dep:cocoa", "dep:objc", "skia-safe/metal"]
+d3d = ["skia-safe/d3d", "dep:windows"]
 textlayout = ["skia-safe/textlayout"]
 webp = ["skia-safe/webp"]
 svg = ["skia-safe/svg"]
@@ -46,7 +46,7 @@ sparkle = { version = "0.1.25", optional = true }
 clap = { version = "4.0.7", features = ["derive"] }
 ash = { version = "0.38.0", optional = true }
 # need to rename the package because of the feature with the same name.
-metal-rs = { package = "metal", version = "0.24.0", optional = true }
+metal = { package = "metal", version = "0.24.0", optional = true }
 # ... to access raw metal ptrs.
 foreign-types-shared = { version = "0.1.1", optional = true }
 # ... for that NSAutoReleasePool to be able to free metal devices.
