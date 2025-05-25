@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 #[cfg(not(target_os = "macos"))]
 fn main() {
     println!("This example is only supported on macos")

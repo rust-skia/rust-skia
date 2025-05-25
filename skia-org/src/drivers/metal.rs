@@ -1,14 +1,16 @@
+#![allow(deprecated)]
+
 use std::path::Path;
 
 use cocoa::foundation::NSAutoreleasePool;
 use foreign_types_shared::ForeignType;
-use metal_rs::*;
+use metal::{CommandQueue, Device};
+
+use crate::{artifact, drivers::DrawingDriver, Driver};
 use skia_safe::{
     gpu::{self, mtl},
     Canvas, ImageInfo,
 };
-
-use crate::{artifact, drivers::DrawingDriver, Driver};
 
 #[allow(dead_code)]
 pub struct Metal {
