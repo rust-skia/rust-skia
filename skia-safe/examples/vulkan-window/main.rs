@@ -54,6 +54,7 @@ fn main() {
         ) {
             match event {
                 WindowEvent::CloseRequested => {
+                    self.renderer = None;
                     event_loop.exit();
                 }
                 WindowEvent::Resized(_) => {

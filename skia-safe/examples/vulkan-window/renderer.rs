@@ -1,3 +1,4 @@
+//https://raw.githubusercontent.com/rust-skia/rust-skia/refs/heads/master/skia-safe/examples/vulkan-window/renderer.rs
 use ash::vk::Handle;
 use std::{ptr, sync::Arc};
 use vulkano::{
@@ -16,7 +17,9 @@ use skia_safe::{
     gpu::{self, backend_render_targets, direct_contexts, surfaces, vk},
     ColorType,
 };
-
+use vulkano::format::Format;
+use vulkano::image::view::ImageViewCreateInfo;
+use vulkano::image::ImageSubresourceRange;
 use winit::{dpi::LogicalSize, dpi::PhysicalSize, window::Window};
 
 pub struct VulkanRenderer {
@@ -57,8 +60,8 @@ impl VulkanRenderer {
         let (swapchain, _images) = {
             // Querying the capabilities of the surface. When we create the swapchain we can only
             // pass values that are allowed by the capabilities.
-            let surface_capabilities = device
-                .physical_device()
+            let physical_device = device.physical_device();
+            let surface_capabilities = physical_device
                 .surface_capabilities(&surface, Default::default())
                 .unwrap();
 
@@ -66,7 +69,13 @@ impl VulkanRenderer {
             let (image_format, _) = device
                 .physical_device()
                 .surface_formats(&surface, Default::default())
-                .unwrap()[0];
+                .unwrap()
+                .into_iter()
+                .find(|a| a.0 == Format::B8G8R8A8_UNORM)
+                .unwrap();
+            let present_modes = physical_device
+                .surface_present_modes(&surface, Default::default())
+                .unwrap();
 
             // Please take a look at the docs for the meaning of the parameters we didn't mention.
             Swapchain::new(
@@ -105,7 +114,11 @@ impl VulkanRenderer {
                     //
                     // Only `Fifo` is guaranteed to be supported on every device. For the others, you must call
                     // [`surface_present_modes`] to see if they are supported.
-                    present_mode: PresentMode::Fifo,
+                    present_mode: if present_modes.contains(&PresentMode::Immediate) {
+                        PresentMode::Immediate
+                    } else {
+                        PresentMode::Fifo
+                    },
 
                     // The alpha mode indicates how the alpha value of the final image will behave.
                     // For example, you can choose whether the window will be
@@ -267,6 +280,7 @@ impl VulkanRenderer {
                 .swapchain
                 .recreate(SwapchainCreateInfo {
                     image_extent: window_size.into(),
+                    image_format: Format::B8G8R8A8_UNORM,
                     ..self.swapchain.create_info()
                 })
                 .expect("failed to recreate swapchain");
@@ -279,8 +293,11 @@ impl VulkanRenderer {
             self.framebuffers = new_images
                 .iter()
                 .map(|image| {
-                    let view = ImageView::new_default(image.clone()).unwrap();
-
+                    let mut info = ImageViewCreateInfo::default();
+                    info.format = Format::B8G8R8A8_UNORM;
+                    info.subresource_range =
+                        ImageSubresourceRange::from_parameters(info.format, 1, 1);
+                    let view = ImageView::new(image.clone(), info).unwrap();
                     Framebuffer::new(
                         self.render_pass.clone(),
                         FramebufferCreateInfo {
