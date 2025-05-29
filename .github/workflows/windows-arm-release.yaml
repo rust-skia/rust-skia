@@ -24,7 +24,7 @@ jobs:
         submodules: true
 
     - name: Install Rust
-      uses: hecrj/setup-rust-action@v1.4.0
+      uses: hecrj/setup-rust-action@v2.0.1
       with:
         rust-version: stable
 
@@ -130,7 +130,7 @@ jobs:
         submodules: true
 
     - name: Install Rust
-      uses: hecrj/setup-rust-action@v1.4.0
+      uses: hecrj/setup-rust-action@v2.0.1
       with:
         rust-version: stable
 
@@ -236,7 +236,7 @@ jobs:
         submodules: true
 
     - name: Install Rust
-      uses: hecrj/setup-rust-action@v1.4.0
+      uses: hecrj/setup-rust-action@v2.0.1
       with:
         rust-version: stable
 
@@ -342,7 +342,7 @@ jobs:
         submodules: true
 
     - name: Install Rust
-      uses: hecrj/setup-rust-action@v1.4.0
+      uses: hecrj/setup-rust-action@v2.0.1
       with:
         rust-version: stable
 
@@ -448,7 +448,7 @@ jobs:
         submodules: true
 
     - name: Install Rust
-      uses: hecrj/setup-rust-action@v1.4.0
+      uses: hecrj/setup-rust-action@v2.0.1
       with:
         rust-version: stable
 
@@ -554,7 +554,7 @@ jobs:
         submodules: true
 
     - name: Install Rust
-      uses: hecrj/setup-rust-action@v1.4.0
+      uses: hecrj/setup-rust-action@v2.0.1
       with:
         rust-version: stable
 
@@ -660,7 +660,7 @@ jobs:
         submodules: true
 
     - name: Install Rust
-      uses: hecrj/setup-rust-action@v1.4.0
+      uses: hecrj/setup-rust-action@v2.0.1
       with:
         rust-version: stable
 
