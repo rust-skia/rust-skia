@@ -45,7 +45,7 @@ pub fn download_with_resume_and_cache(url: impl AsRef<str>) -> io::Result<Vec<u8
         // so make sure to check the actual status returned.
         .arg("-f")
         // no progress meter but keep error messages.
-        .arg("--no-progress-meter")
+        .arg("-sS")
         // resumed transfer offset
         .arg("-C")
         .arg("-")
