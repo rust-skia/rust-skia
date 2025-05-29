@@ -95,12 +95,11 @@ pub fn release_jobs(workflow: &Workflow) -> Vec<Job> {
     .into();
 
     match workflow.host_os {
-        HostOS::Windows => {
+        HostOS::Windows | HostOS::WindowsArm => {
             jobs.push(release_job("d3d"));
             jobs.push(release_job("d3d,textlayout"));
             jobs.push(release_job("d3d,gl,textlayout"));
         }
-        HostOS::WindowsArm => {}
         HostOS::Linux => {
             jobs.push(release_job("gl,x11"));
             jobs.push(release_job("gl,textlayout,x11"));
