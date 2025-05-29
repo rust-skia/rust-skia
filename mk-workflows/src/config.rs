@@ -208,7 +208,7 @@ fn windows_targets() -> Vec<TargetConf> {
 }
 
 fn windows_arm_targets() -> Vec<TargetConf> {
-    [TargetConf::new("aarch-pc-windows-msvc", "d3d")].into()
+    [TargetConf::new("aarch64-pc-windows-msvc", "d3d")].into()
 }
 
 fn linux_targets() -> Vec<TargetConf> {
