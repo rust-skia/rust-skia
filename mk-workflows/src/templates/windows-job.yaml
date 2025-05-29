@@ -10,9 +10,7 @@ steps:
     submodules: true
 
 - name: Install Rust
-  uses: hecrj/setup-rust-action@v2.0.1
-  with:
-    rust-version: $[[rustToolchain]]
+  uses: dtolnay/rust-toolchain@$[[rustToolchain]]
 
 - name: Install Clippy
   run: rustup component add clippy
