@@ -28,9 +28,7 @@ jobs:
         submodules: true
 
     - name: Install Rust
-      uses: hecrj/setup-rust-action@v1.4.0
-      with:
-        rust-version: stable
+      uses: dtolnay/rust-toolchain@stable
 
     - name: Install Clippy
       run: rustup component add clippy
@@ -434,9 +432,7 @@ jobs:
         submodules: true
 
     - name: Install Rust
-      uses: hecrj/setup-rust-action@v1.4.0
-      with:
-        rust-version: beta
+      uses: dtolnay/rust-toolchain@beta
 
     - name: Install Clippy
       run: rustup component add clippy
