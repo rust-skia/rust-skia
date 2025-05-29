@@ -19,5 +19,10 @@ steps:
 - name: Python Version
   run: python --version
 
+- name: Install LLVM and Clang
+  uses: KyleMayes/install-llvm-action@v2
+  with:
+    version: "20.1.3"
+
 - name: Install Ninja
   run: choco install ninja
