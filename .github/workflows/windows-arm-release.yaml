@@ -33,9 +33,6 @@ jobs:
     - name: Python Version
       run: python --version
 
-    - name: Upgrade LLVM
-      run: choco upgrade llvm
-
     - name: Install Ninja
       run: choco install ninja
     - name: 'Install Rust target aarch64-pc-windows-msvc'
@@ -136,9 +133,6 @@ jobs:
 
     - name: Python Version
       run: python --version
-
-    - name: Upgrade LLVM
-      run: choco upgrade llvm
 
     - name: Install Ninja
       run: choco install ninja
@@ -241,9 +235,6 @@ jobs:
     - name: Python Version
       run: python --version
 
-    - name: Upgrade LLVM
-      run: choco upgrade llvm
-
     - name: Install Ninja
       run: choco install ninja
     - name: 'Install Rust target aarch64-pc-windows-msvc'
@@ -344,9 +335,6 @@ jobs:
 
     - name: Python Version
       run: python --version
-
-    - name: Upgrade LLVM
-      run: choco upgrade llvm
 
     - name: Install Ninja
       run: choco install ninja
@@ -449,9 +437,6 @@ jobs:
     - name: Python Version
       run: python --version
 
-    - name: Upgrade LLVM
-      run: choco upgrade llvm
-
     - name: Install Ninja
       run: choco install ninja
     - name: 'Install Rust target aarch64-pc-windows-msvc'
@@ -553,9 +538,6 @@ jobs:
     - name: Python Version
       run: python --version
 
-    - name: Upgrade LLVM
-      run: choco upgrade llvm
-
     - name: Install Ninja
       run: choco install ninja
     - name: 'Install Rust target aarch64-pc-windows-msvc'
@@ -656,9 +638,6 @@ jobs:
 
     - name: Python Version
       run: python --version
-
-    - name: Upgrade LLVM
-      run: choco upgrade llvm
 
     - name: Install Ninja
       run: choco install ninja
