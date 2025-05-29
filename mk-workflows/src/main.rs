@@ -14,6 +14,7 @@ const QA_WORKFLOW: &str = include_str!("templates/qa-workflow.yaml");
 const RELEASE_WORKFLOW: &str = include_str!("templates/release-workflow.yaml");
 const LINUX_JOB: &str = include_str!("templates/linux-job.yaml");
 const WINDOWS_JOB: &str = include_str!("templates/windows-job.yaml");
+const WINDOWS_ARM_JOB: &str = include_str!("templates/windows-arm-job.yaml");
 const MACOS_JOB: &str = include_str!("templates/macos-job.yaml");
 const TARGET_TEMPLATE: &str = include_str!("templates/target.yaml");
 
@@ -52,6 +53,7 @@ impl fmt::Display for WorkflowKind {
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 enum HostOS {
     Windows,
+    WindowsArm,
     Linux,
     MacOS,
 }
@@ -61,6 +63,7 @@ impl fmt::Display for HostOS {
         use HostOS::*;
         f.write_str(match self {
             Windows => "windows",
+            WindowsArm => "windows-arm",
             Linux => "linux",
             MacOS => "macos",
         })

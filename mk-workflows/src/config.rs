@@ -1,5 +1,6 @@
 use crate::{
-    Features, HostOS, Job, TargetConf, Workflow, WorkflowKind, LINUX_JOB, MACOS_JOB, WINDOWS_JOB,
+    Features, HostOS, Job, TargetConf, Workflow, WorkflowKind, LINUX_JOB, MACOS_JOB,
+    WINDOWS_ARM_JOB, WINDOWS_JOB,
 };
 
 pub const DEFAULT_ANDROID_API_LEVEL: usize = 26;
@@ -14,6 +15,14 @@ pub fn workflows() -> Vec<Workflow> {
             host_target: "x86_64-pc-windows-msvc",
             job_template: WINDOWS_JOB,
             targets: windows_targets(),
+            host_bin_ext: ".exe",
+        });
+        workflows.push(Workflow {
+            kind,
+            host_os: HostOS::WindowsArm,
+            host_target: "aarch64-pc-windows-msvc",
+            job_template: WINDOWS_ARM_JOB,
+            targets: windows_arm_targets(),
             host_bin_ext: ".exe",
         });
         workflows.push(Workflow {
@@ -86,7 +95,7 @@ pub fn release_jobs(workflow: &Workflow) -> Vec<Job> {
     .into();
 
     match workflow.host_os {
-        HostOS::Windows => {
+        HostOS::Windows | HostOS::WindowsArm => {
             jobs.push(release_job("d3d"));
             jobs.push(release_job("d3d,textlayout"));
             jobs.push(release_job("d3d,gl,textlayout"));
@@ -118,6 +127,9 @@ fn freya_release_jobs(workflow: &Workflow) -> Vec<Job> {
         HostOS::Windows | HostOS::MacOS => {
             vec![release_job("gl,textlayout,svg")]
         }
+        HostOS::WindowsArm => {
+            vec![]
+        }
         HostOS::Linux => {
             vec![
                 release_job("gl,textlayout,svg,x11"),
@@ -138,6 +150,9 @@ fn vizia_release_jobs(workflow: &Workflow) -> Vec<Job> {
         HostOS::Windows => {
             vec![release_job("gl,vulkan,textlayout,svg,d3d")]
         }
+        HostOS::WindowsArm => {
+            vec![]
+        }
         HostOS::Linux => {
             // vec![release_job("gl,vulkan,textlayout,svg,wayland,x11")]
             // Alternative: Use the full feature set `gl,vulkan,textlayout,svg,wayland,x11,webp`
@@ -157,6 +172,9 @@ fn skia_canvas_release_jobs(workflow: &Workflow) -> Vec<Job> {
             vec![release_job(
                 "vulkan,embed-freetype,freetype-woff2,textlayout,webp,svg",
             )]
+        }
+        HostOS::WindowsArm => {
+            vec![]
         }
         HostOS::Linux => {
             vec![release_job(
@@ -186,6 +204,10 @@ fn release_job(features: impl Into<Features>) -> Job {
 
 fn windows_targets() -> Vec<TargetConf> {
     [TargetConf::new("x86_64-pc-windows-msvc", "d3d")].into()
+}
+
+fn windows_arm_targets() -> Vec<TargetConf> {
+    [TargetConf::new("aarch64-pc-windows-msvc", "d3d")].into()
 }
 
 fn linux_targets() -> Vec<TargetConf> {

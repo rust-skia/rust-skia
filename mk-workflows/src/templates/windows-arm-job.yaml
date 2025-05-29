@@ -1,7 +1,7 @@
-runs-on: windows-2022
+runs-on: windows-11-arm
 # Containers are not supported on Windows.
 # container: ghcr.io/pragmatrix/rust-skia-windows:latest
-env: 
+env:
   SKIA_DEBUG: $[[skiaDebug]]
 
 steps:
@@ -19,8 +19,10 @@ steps:
 - name: Python Version
   run: python --version
 
-- name: Upgrade LLVM
-  run: choco upgrade llvm
+- name: Install LLVM and Clang
+  uses: KyleMayes/install-llvm-action@v2
+  with:
+    version: "20.1.3"
 
 - name: Install Ninja
   run: choco install ninja
