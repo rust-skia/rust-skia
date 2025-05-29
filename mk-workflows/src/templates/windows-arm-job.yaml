@@ -1,0 +1,28 @@
+runs-on: windows-11-arm
+# Containers are not supported on Windows.
+# container: ghcr.io/pragmatrix/rust-skia-windows:latest
+env:
+  SKIA_DEBUG: $[[skiaDebug]]
+
+steps:
+- uses: actions/checkout@v3
+  with:
+    submodules: true
+
+- name: Install Rust
+  uses: hecrj/setup-rust-action@v1.4.0
+  with:
+    rust-version: $[[rustToolchain]]
+
+- name: Install Clippy
+  run: rustup component add clippy
+  shell: bash
+
+- name: Python Version
+  run: python --version
+
+- name: Upgrade LLVM
+  run: choco upgrade llvm
+
+- name: Install Ninja
+  run: choco install ninja
