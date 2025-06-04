@@ -88,6 +88,12 @@ impl PlatformDetails for Generic {
     fn link_libraries(&self, features: &Features) -> Vec<String> {
         generic_link_libraries(features)
     }
+
+    fn bindgen_args(&self, target: &Target, builder: &mut BindgenArgsBuilder) {
+        if let Some(specific_target) = specific_target(target) {
+            builder.override_target(specific_target);
+        }
+    }
 }
 
 fn generic_link_libraries(features: &Features) -> Vec<String> {
@@ -194,4 +200,17 @@ mod llvm {
             _ => None,
         }
     }
+}
+
+fn specific_target(target: &Target) -> Option<&'static str> {
+    if target.vendor == "win7" {
+        if target.architecture == "x86_64" {
+            return Some("x86_64-pc-windows-msvc");
+        }
+        if target.architecture == "i686" {
+            return Some("i686-pc-windows-msvc");
+        }
+    }
+
+    None
 }
