@@ -758,6 +758,22 @@ extern "C" void C_SkPathBuilder_detach(SkPathBuilder* self, SkPath* path) {
     *path = self->detach();
 }
 
+extern "C" bool C_SkPathBuilder_isEmpty(const SkPathBuilder* self) {
+    return self->isEmpty();
+}
+
+extern "C" bool C_SkPathBuilder_getLastPt(const SkPathBuilder* self, SkPoint* point) {
+    if (auto last = self->getLastPt()) {
+        *point = *last;
+        return true;
+    }
+    return false;
+}
+
+extern "C" size_t C_SkPathBuilder_countPoints(const SkPathBuilder* self) {
+    return self->countPoints();
+}
+
 //
 // SkPathMeasure
 //

@@ -1,6 +1,10 @@
-use crate::{prelude::*, scalar, Path, PathDirection, PathFillType, Point, RRect, Rect, Vector};
-use skia_bindings::{self as sb, SkPathBuilder};
 use std::{fmt, mem};
+
+use crate::{
+    matrix, prelude::*, scalar, Matrix, Path, PathDirection, PathFillType, Point, RRect, Rect,
+    Vector,
+};
+use skia_bindings::{self as sb, SkPathBuilder};
 
 pub use skia_bindings::SkPathBuilder_ArcSize as ArcSize;
 variant_name!(ArcSize::Large);
@@ -316,12 +320,12 @@ impl PathBuilder {
         self
     }
 
-    pub fn add_polygon(&mut self, pts: &[Point], is_closed: bool) -> &mut Self {
+    pub fn add_polygon(&mut self, pts: &[Point], close: bool) -> &mut Self {
         unsafe {
             self.native_mut().addPolygon(
                 pts.native().as_ptr(),
                 pts.len().try_into().unwrap(),
-                is_closed,
+                close,
             );
         }
         self
@@ -349,21 +353,45 @@ impl PathBuilder {
         self
     }
 
+    pub fn transform(
+        &mut self,
+        matrix: &Matrix,
+        pc: impl Into<Option<matrix::ApplyPerspectiveClip>>,
+    ) -> &mut Self {
+        let pc = pc.into().unwrap_or(matrix::ApplyPerspectiveClip::Yes);
+        unsafe {
+            self.native_mut().transform(matrix.native(), pc);
+        }
+        self
+    }
+
     pub fn toggle_inverse_fill_type(&mut self) -> &mut Self {
         let n = self.native_mut();
         n.fFillType = unsafe { mem::transmute::<i32, sb::SkPathFillType>(n.fFillType as i32 ^ 2) };
         self
     }
 
-    #[deprecated(since = "0.35.0", note = "Removed without replacement")]
-    pub fn make(
-        _points: &[Point],
-        _verbs: &[u8],
-        _conic_weights: &[scalar],
-        _fill_type: PathFillType,
-        _is_volatile: impl Into<Option<bool>>,
-    ) -> ! {
-        panic!("Removed without replacement");
+    pub fn is_empty(&self) -> bool {
+        unsafe { sb::C_SkPathBuilder_isEmpty(self.native()) }
+    }
+
+    pub fn get_last_pt(&self) -> Option<Point> {
+        let mut p = Point::default();
+        unsafe { sb::C_SkPathBuilder_getLastPt(self.native(), p.native_mut()) }
+            .if_true_then_some(|| p)
+    }
+
+    pub fn set_last_pt(&mut self, p: impl Into<Point>) {
+        let p = p.into();
+        unsafe { self.native_mut().setLastPt(p.x, p.y) };
+    }
+
+    pub fn count_points(&self) -> usize {
+        unsafe { sb::C_SkPathBuilder_countPoints(self.native()) }
+    }
+
+    pub fn is_inverse_fill_type(&self) -> bool {
+        PathFillType::is_inverse(self.fill_type())
     }
 }
 
