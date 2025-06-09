@@ -5,8 +5,6 @@ use std::{
     time::Duration,
 };
 
-use skia_bindings::{self as sb, GrDirectContext, GrDirectContext_DirectContextID, SkRefCntBase};
-
 use crate::{
     gpu::{
         BackendFormat, BackendRenderTarget, BackendTexture, ContextOptions, FlushInfo,
@@ -16,6 +14,7 @@ use crate::{
     prelude::*,
     surfaces, Data, Image, Surface, TextureCompressionType,
 };
+use skia_bindings::{self as sb, GrDirectContext, GrDirectContext_DirectContextID, SkRefCntBase};
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -341,8 +340,18 @@ impl DirectContext {
     pub fn supports_distance_field_text(&self) -> bool {
         unsafe { self.native().supportsDistanceFieldText() }
     }
+}
 
-    #[cfg(feature = "vulkan")]
+#[cfg(feature = "vulkan")]
+impl DirectContext {
+    pub fn can_detect_new_vk_pipeline_cache_data(&self) -> bool {
+        unsafe { self.native().canDetectNewVkPipelineCacheData() }
+    }
+
+    pub fn has_new_vk_pipeline_cache_data(&self) -> bool {
+        unsafe { self.native().hasNewVkPipelineCacheData() }
+    }
+
     pub fn store_vk_pipeline_cache_data(&mut self) -> &mut Self {
         unsafe {
             self.native_mut().storeVkPipelineCacheData();
@@ -350,6 +359,15 @@ impl DirectContext {
         self
     }
 
+    pub fn store_vk_pipeline_cache_data_with_max_size(&mut self, max_size: usize) -> &mut Self {
+        unsafe {
+            self.native_mut().storeVkPipelineCacheData1(max_size);
+        }
+        self
+    }
+}
+
+impl DirectContext {
     // TODO: wrap createBackendTexture (several variants)
     //       introduced in m76, m77, and m79
     //       extended in m84 with finishedProc and finishedContext
