@@ -166,7 +166,10 @@ fn vizia_release_jobs(workflow: &Workflow) -> Vec<Job> {
 fn skia_canvas_release_jobs(workflow: &Workflow) -> Vec<Job> {
     match workflow.host_os {
         HostOS::MacOS => {
-            vec![release_job("metal,textlayout,webp,svg")]
+            vec![
+                release_job("textlayout,webp,svg"),
+                release_job("metal,textlayout,webp,svg")
+            ]
         }
         HostOS::Windows => {
             vec![release_job(
