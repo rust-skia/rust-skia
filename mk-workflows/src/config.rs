@@ -174,7 +174,9 @@ fn skia_canvas_release_jobs(workflow: &Workflow) -> Vec<Job> {
             )]
         }
         HostOS::WindowsArm => {
-            vec![]
+            vec![release_job(
+                "vulkan,embed-freetype,freetype-woff2,textlayout,webp,svg",
+            )]
         }
         HostOS::Linux => {
             vec![release_job(
