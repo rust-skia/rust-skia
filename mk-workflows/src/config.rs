@@ -168,7 +168,7 @@ fn skia_canvas_release_jobs(workflow: &Workflow) -> Vec<Job> {
         HostOS::MacOS => {
             vec![
                 release_job("textlayout,webp,svg"),
-                release_job("metal,textlayout,webp,svg")
+                release_job("metal,textlayout,webp,svg"),
             ]
         }
         HostOS::Windows => {
