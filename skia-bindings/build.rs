@@ -15,7 +15,7 @@ fn main() -> Result<(), io::Error> {
     }
 
     let skia_debug = env::is_skia_debug();
-    let features = features::Features::default();
+    let features = features::Features::from_cargo_env();
     let binaries_config =
         binaries_config::BinariesConfiguration::from_features(&features, skia_debug);
 

@@ -3,8 +3,10 @@ use std::{collections::HashSet, ops::Index};
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Features(HashSet<&'static str>);
 
-impl Default for Features {
-    fn default() -> Self {
+impl Features {
+    /// Returns the set of features compatible with this platform and warns about features that were
+    /// configured, but not supported on the target.
+    pub fn from_cargo_env() -> Self {
         let mut features = HashSet::new();
 
         if cfg!(feature = "gl") {
@@ -52,9 +54,7 @@ impl Default for Features {
 
         Features(features)
     }
-}
 
-impl Features {
     pub fn gpu(&self) -> bool {
         self[feature_id::GL]
             || self[feature_id::VULKAN]
