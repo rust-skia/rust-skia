@@ -41,15 +41,6 @@ pub struct Features {
     /// Build with FreeType embedded.
     pub embed_freetype: bool,
 
-    /// Build with animation support (yet unsupported, no wrappers).
-    pub animation: bool,
-
-    /// Support DNG file format (currently unsupported because of build errors).
-    pub dng: bool,
-
-    /// Build the particles module (unsupported, no wrappers).
-    pub particles: bool,
-
     /// Build with FreeType WOFF2 support.
     pub freetype_woff2: bool,
 }
@@ -71,9 +62,6 @@ impl Default for Features {
             webp_decode: cfg!(feature = "webp-decode"),
             pdf: cfg!(feature = "pdf"),
             embed_freetype: cfg!(feature = "embed-freetype"),
-            animation: false,
-            dng: false,
-            particles: false,
             freetype_woff2: cfg!(feature = "freetype-woff2"),
         }
     }
