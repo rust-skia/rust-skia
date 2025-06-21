@@ -114,6 +114,8 @@ impl FinalBuildConfiguration {
 
         let mut builder = GnArgsBuilder::new(&build.target);
 
+        let use_freetype = platform::uses_freetype(build);
+
         let gn_args = {
             builder
                 .arg("is_official_build", yes_if(!build.skia_debug))
@@ -131,7 +133,10 @@ impl FinalBuildConfiguration {
                 .arg("skia_use_system_zlib", yes_if(use_system_libraries))
                 .arg("skia_use_xps", no())
                 .arg("skia_use_dng_sdk", yes_if(features.dng))
-                .arg("skia_use_freetype_woff2", yes_if(features.freetype_woff2))
+                .arg(
+                    "skia_use_freetype_woff2",
+                    yes_if(use_freetype && features.freetype_woff2),
+                )
                 .arg("cc", quote(&build.cc))
                 .arg("cxx", quote(&build.cxx));
 
@@ -181,7 +186,6 @@ impl FinalBuildConfiguration {
                 builder.arg("skia_use_system_libwebp", yes_if(use_system_libraries));
             }
 
-            let use_freetype = platform::uses_freetype(build);
             builder.arg("skia_use_freetype", yes_if(use_freetype));
             if use_freetype {
                 if features.embed_freetype {
