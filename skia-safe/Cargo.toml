@@ -56,7 +56,6 @@ save-svg-images = []
 
 # implied only, do not use
 gpu = []
-shaper = ["textlayout", "skia-bindings/shaper"]
 
 # vulkan-window example
 vulkan-window = ["dep:ash", "dep:vulkano", "winit/rwh_05"]

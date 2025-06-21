@@ -48,12 +48,11 @@ webp-encode = []
 webp-decode = []
 pdf = []
 # sys libraries
-use-system-jpeg-turbo = ["mozjpeg-sys"]
+use-system-jpeg-turbo = ["dep:mozjpeg-sys"]
 # `textlayout` because `SkSVGTextContext::SkSVGTextContext()` invokes `SkShaper::Make`.
 svg = ["textlayout"]
-shaper = ["textlayout"]
-binary-cache = ["flate2", "tar"]
-embed-icudtl = ["lazy_static"]
+binary-cache = ["dep:flate2", "dep:tar"]
+embed-icudtl = ["dep:lazy_static"]
 embed-freetype = []
 freetype-woff2 = []
 # Panic when any compilation steps are required to run. 

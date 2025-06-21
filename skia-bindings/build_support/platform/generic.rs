@@ -3,7 +3,7 @@ use super::prelude::*;
 pub struct Generic;
 
 impl PlatformDetails for Generic {
-    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
+    fn uses_freetype(&self) -> bool {
         true
     }
 
@@ -21,7 +21,7 @@ pub fn gn_args(config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
 }
 
 pub fn link_libraries(features: &Features) -> Vec<String> {
-    if features.gl {
+    if features[feature_id::GL] {
         vec!["GL".into()]
     } else {
         Vec::new()

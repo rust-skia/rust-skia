@@ -9,18 +9,13 @@ use build_support::{
 mod build_support;
 
 fn main() -> Result<(), io::Error> {
-    // since 0.25.0
-    if cfg!(feature = "shaper") {
-        cargo::warning("The feature 'shaper' has been removed. To use the SkShaper bindings, enable the feature 'textlayout'.");
-    }
-
     if env::is_docs_rs_build() {
         println!("DETECTED DOCS_RS BUILD");
         return fake_bindings();
     }
 
     let skia_debug = env::is_skia_debug();
-    let features = features::Features::default();
+    let features = features::Features::from_cargo_env();
     let binaries_config =
         binaries_config::BinariesConfiguration::from_features(&features, skia_debug);
 
