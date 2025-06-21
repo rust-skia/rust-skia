@@ -10,7 +10,7 @@ pub struct Android;
 const API_LEVEL: &str = "26";
 
 impl PlatformDetails for Android {
-    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
+    fn uses_freetype(&self) -> bool {
         true
     }
 

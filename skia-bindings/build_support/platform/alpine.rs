@@ -5,7 +5,7 @@ use super::{linux, prelude::*};
 pub struct Musl;
 
 impl PlatformDetails for Musl {
-    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
+    fn uses_freetype(&self) -> bool {
         true
     }
 

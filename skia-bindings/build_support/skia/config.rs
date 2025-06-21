@@ -115,7 +115,7 @@ impl FinalBuildConfiguration {
 
         let mut builder = GnArgsBuilder::new(&build.target);
 
-        let use_freetype = platform::uses_freetype(build);
+        let use_freetype = platform::uses_freetype(&build.target);
 
         let gn_args = {
             builder

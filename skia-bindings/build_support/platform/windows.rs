@@ -5,7 +5,7 @@ use super::prelude::*;
 pub struct Msvc;
 
 impl PlatformDetails for Msvc {
-    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
+    fn uses_freetype(&self) -> bool {
         false
     }
 
@@ -77,7 +77,7 @@ impl PlatformDetails for Msvc {
 pub struct Generic;
 
 impl PlatformDetails for Generic {
-    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
+    fn uses_freetype(&self) -> bool {
         false
     }
 

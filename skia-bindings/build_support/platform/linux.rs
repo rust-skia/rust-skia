@@ -3,7 +3,7 @@ use super::{generic, prelude::*};
 pub struct Linux;
 
 impl PlatformDetails for Linux {
-    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
+    fn uses_freetype(&self) -> bool {
         true
     }
 

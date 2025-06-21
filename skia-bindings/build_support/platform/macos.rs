@@ -8,7 +8,7 @@ use super::prelude::*;
 pub struct MacOs;
 
 impl PlatformDetails for MacOs {
-    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
+    fn uses_freetype(&self) -> bool {
         false
     }
 

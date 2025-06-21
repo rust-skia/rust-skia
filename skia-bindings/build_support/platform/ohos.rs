@@ -6,7 +6,7 @@ pub struct OpenHarmony;
 
 /// For OpenHarmony, we recommend using API12 as the minimum API level
 impl PlatformDetails for OpenHarmony {
-    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
+    fn uses_freetype(&self) -> bool {
         false
     }
 

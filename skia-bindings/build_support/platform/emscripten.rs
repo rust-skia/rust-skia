@@ -3,7 +3,7 @@ use super::{generic, prelude::*};
 pub struct Emscripten;
 
 impl PlatformDetails for Emscripten {
-    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
+    fn uses_freetype(&self) -> bool {
         true
     }
 
