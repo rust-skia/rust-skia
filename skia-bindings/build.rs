@@ -9,11 +9,6 @@ use build_support::{
 mod build_support;
 
 fn main() -> Result<(), io::Error> {
-    // since 0.25.0
-    if cfg!(feature = "shaper") {
-        cargo::warning("The feature 'shaper' has been removed. To use the SkShaper bindings, enable the feature 'textlayout'.");
-    }
-
     if env::is_docs_rs_build() {
         println!("DETECTED DOCS_RS BUILD");
         return fake_bindings();
