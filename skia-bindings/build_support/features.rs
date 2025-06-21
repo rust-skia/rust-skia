@@ -62,12 +62,8 @@ impl Features {
             || self[feature_id::D3D]
     }
 
-    pub fn ids(&self) -> HashSet<&str> {
-        self.0.clone()
-    }
-
-    pub fn contains(&self, feature: &str) -> bool {
-        self.0.contains(feature)
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
     }
 
     pub fn enable(&mut self, feature: &'static str) {
@@ -84,6 +80,13 @@ impl Features {
         } else {
             self.disable(feature);
         }
+    }
+
+    /// A comparable set of feature ids (sorted and joined by `-`).
+    pub fn to_key(&self) -> String {
+        let mut features: Vec<&str> = self.0.iter().cloned().collect();
+        features.sort();
+        features.join("-")
     }
 }
 

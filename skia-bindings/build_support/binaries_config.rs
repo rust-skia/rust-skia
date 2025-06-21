@@ -1,5 +1,4 @@
 use std::{
-    collections::HashSet,
     fs, io,
     path::{Path, PathBuf},
 };
@@ -7,7 +6,7 @@ use std::{
 use super::platform;
 use crate::build_support::{
     cargo,
-    features::{self, feature_id},
+    features::{self, feature_id, Features},
 };
 
 pub const SKIA_OUTPUT_DIR: &str = "skia";
@@ -28,8 +27,8 @@ pub mod lib {
 /// The configuration of the resulting binaries.
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct BinariesConfiguration {
-    /// The feature identifiers we built with.
-    pub feature_ids: HashSet<String>,
+    /// The features we built with.
+    pub features: Features,
 
     /// The output directory of the libraries we build and we need to inform cargo about.
     pub output_directory: PathBuf,
@@ -64,7 +63,6 @@ impl BinariesConfiguration {
         let mut binding_libraries = Vec::new();
         let binding_files = vec!["bindings.rs".into()];
         let mut additional_files = Vec::new();
-        let feature_ids = features.ids();
 
         if features[feature_id::TEXTLAYOUT] {
             if target.is_windows() {
@@ -92,7 +90,7 @@ impl BinariesConfiguration {
         binding_libraries.push(lib::SKIA_BINDINGS.into());
 
         BinariesConfiguration {
-            feature_ids: feature_ids.into_iter().map(|f| f.to_string()).collect(),
+            features: features.clone(),
             output_directory,
             link_libraries,
             ninja_built_libraries,
