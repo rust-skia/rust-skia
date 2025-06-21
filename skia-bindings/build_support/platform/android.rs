@@ -1,6 +1,8 @@
-use super::prelude::*;
-use regex::Regex;
 use std::{fs::File, io::Read, path::Path};
+
+use regex::Regex;
+
+use super::prelude::*;
 
 pub struct Android;
 
@@ -55,8 +57,8 @@ impl PlatformDetails for Android {
         use_system_libraries: bool,
         mut features: Features,
     ) -> Features {
-        if !features.embed_freetype {
-            features.embed_freetype = !use_system_libraries;
+        if !features[feature_id::EMBED_FREETYPE] {
+            features.set(feature_id::EMBED_FREETYPE, !use_system_libraries);
         }
 
         features
@@ -137,7 +139,7 @@ pub fn extra_skia_cflags() -> Vec<String> {
 
 pub fn link_libraries(features: &Features) -> Vec<&str> {
     let mut libs = vec!["log", "android", "c++_static", "c++abi"];
-    if features.gl {
+    if features[feature_id::GL] {
         libs.extend(vec!["EGL", "GLESv2"])
     };
     libs

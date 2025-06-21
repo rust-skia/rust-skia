@@ -98,10 +98,10 @@ impl PlatformDetails for Generic {
 
 fn generic_link_libraries(features: &Features) -> Vec<String> {
     let mut libs = vec!["usp10", "ole32", "user32", "gdi32", "fontsub"];
-    if features.gl {
+    if features[feature_id::GL] {
         libs.push("opengl32");
     }
-    if features.d3d {
+    if features[feature_id::D3D] {
         libs.extend(["d3d12", "dxgi", "d3dcompiler"]);
     }
 

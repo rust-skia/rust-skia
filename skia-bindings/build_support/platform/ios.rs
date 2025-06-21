@@ -68,7 +68,7 @@ impl PlatformDetails for Ios {
             libs.extend(vec!["framework=MobileCoreServices", "framework=UIKit"]);
         }
 
-        if features.metal {
+        if features[feature_id::METAL] {
             libs.push("framework=Metal");
         }
 

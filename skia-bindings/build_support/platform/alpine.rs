@@ -1,5 +1,6 @@
-use super::{linux, prelude::*};
 use std::process::{Command, Stdio};
+
+use super::{linux, prelude::*};
 
 pub struct Musl;
 

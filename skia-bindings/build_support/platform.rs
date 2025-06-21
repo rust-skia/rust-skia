@@ -1,13 +1,14 @@
 //! All the configuration settings that can be resolved statically for a platform target. From the
 //! environment, and current build configurations.
 
-use self::prelude::quote;
 use super::{
     cargo::{self, Target},
     clang,
     features::Features,
     skia::BuildConfiguration,
 };
+
+use self::prelude::quote;
 
 pub mod alpine;
 pub mod android;
@@ -238,7 +239,7 @@ impl BindgenArgsBuilder {
 pub mod prelude {
     pub use self::{cargo::Target, skia::BuildConfiguration};
     pub use super::{BindgenArgsBuilder, GnArgsBuilder, PlatformDetails};
-    pub use crate::build_support::{cargo, clang, features::Features, skia};
+    pub use crate::build_support::{cargo, clang, features::feature_id, features::Features, skia};
 
     pub fn quote(s: &str) -> String {
         format!("\"{s}\"")

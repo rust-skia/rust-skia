@@ -64,7 +64,7 @@ impl PlatformDetails for Emscripten {
         _use_system_libraries: bool,
         mut features: Features,
     ) -> Features {
-        features.embed_freetype = true;
+        features.enable(feature_id::EMBED_FREETYPE);
         features
     }
 }
