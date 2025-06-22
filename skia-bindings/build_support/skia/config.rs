@@ -119,21 +119,21 @@ impl FinalBuildConfiguration {
             builder
                 .arg("is_official_build", yes_if(!build.skia_debug))
                 .arg("is_debug", yes_if(build.skia_debug))
-                .arg("skia_enable_svg", yes_if(features[feature_id::SVG]))
+                .arg("skia_enable_svg", yes_if(features[feature::SVG]))
                 .arg("skia_enable_gpu", yes_if(features.gpu()))
                 .arg("skia_enable_skottie", no())
-                .arg("skia_enable_pdf", yes_if(features[feature_id::PDF]))
-                .arg("skia_use_gl", yes_if(features[feature_id::GL]))
-                .arg("skia_use_egl", yes_if(features[feature_id::EGL]))
-                .arg("skia_use_x11", yes_if(features[feature_id::X11]))
+                .arg("skia_enable_pdf", yes_if(features[feature::PDF]))
+                .arg("skia_use_gl", yes_if(features[feature::GL]))
+                .arg("skia_use_egl", yes_if(features[feature::EGL]))
+                .arg("skia_use_x11", yes_if(features[feature::X11]))
                 .arg("skia_use_system_libpng", yes_if(use_system_libraries))
                 .arg(
                     "skia_use_libwebp_encode",
-                    yes_if(features[feature_id::WEBPE]),
+                    yes_if(features[feature::WEBP_ENCODE]),
                 )
                 .arg(
                     "skia_use_libwebp_decode",
-                    yes_if(features[feature_id::WEBPD]),
+                    yes_if(features[feature::WEBP_DECODE]),
                 )
                 .arg("skia_use_system_zlib", yes_if(use_system_libraries))
                 .arg("skia_use_xps", no())
@@ -141,17 +141,17 @@ impl FinalBuildConfiguration {
                 .arg("cc", quote(&build.cc))
                 .arg("cxx", quote(&build.cxx));
 
-            if features[feature_id::VULKAN] {
+            if features[feature::VULKAN] {
                 builder
                     .arg("skia_use_vulkan", yes())
                     .arg("skia_enable_spirv_validation", no());
             }
 
-            if features[feature_id::METAL] {
+            if features[feature::METAL] {
                 builder.arg("skia_use_metal", yes());
             }
 
-            if features[feature_id::D3D] {
+            if features[feature::D3D] {
                 builder.arg("skia_use_direct3d", yes());
             }
 
@@ -165,7 +165,7 @@ impl FinalBuildConfiguration {
                     .arg("skia_use_lua", no());
             }
 
-            if features[feature_id::TEXTLAYOUT] {
+            if features[feature::TEXTLAYOUT] {
                 builder
                     .arg("skia_enable_skshaper", yes())
                     .arg("skia_use_icu", yes())
@@ -183,7 +183,7 @@ impl FinalBuildConfiguration {
                     .arg("skia_use_harfbuzz", no());
             }
 
-            if features[feature_id::WEBPE] || features[feature_id::WEBPD] {
+            if features[feature::WEBP_ENCODE] || features[feature::WEBP_DECODE] {
                 builder.arg("skia_use_system_libwebp", yes_if(use_system_libraries));
             }
 
@@ -192,10 +192,10 @@ impl FinalBuildConfiguration {
             if use_freetype {
                 builder.arg(
                     "skia_use_freetype_woff2",
-                    yes_if(features[feature_id::FT_WOFF2]),
+                    yes_if(features[feature::FREETYPE_WOFF2]),
                 );
 
-                if features[feature_id::FT_EMBED] {
+                if features[feature::EMBED_FREETYPE] {
                     builder.arg("skia_use_system_freetype2", no());
                 } else {
                     // third_party/freetype2/BUILD.gn hard-codes /usr/include/freetype2

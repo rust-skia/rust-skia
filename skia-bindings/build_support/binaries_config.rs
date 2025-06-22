@@ -6,7 +6,7 @@ use std::{
 use super::platform;
 use crate::build_support::{
     cargo,
-    features::{self, feature_id, Features},
+    features::{self, feature, Features},
 };
 
 pub const SKIA_OUTPUT_DIR: &str = "skia";
@@ -64,7 +64,7 @@ impl BinariesConfiguration {
         let binding_files = vec!["bindings.rs".into()];
         let mut additional_files = Vec::new();
 
-        if features[feature_id::TEXTLAYOUT] {
+        if features[feature::TEXTLAYOUT] {
             if target.is_windows() {
                 additional_files.push(ICUDTL_DAT.into());
             }
@@ -73,7 +73,7 @@ impl BinariesConfiguration {
             ninja_built_libraries.push(lib::SK_UNICODE_CORE.into());
             ninja_built_libraries.push(lib::SK_UNICODE_ICU.into());
         }
-        if features[feature_id::SVG] {
+        if features[feature::SVG] {
             ninja_built_libraries.push(lib::SVG.into());
             ninja_built_libraries.push(lib::SK_RESOURCES.into());
         }

@@ -8,7 +8,7 @@ use super::{
     features::Features,
     skia::BuildConfiguration,
 };
-use crate::build_support::features::feature_id;
+use crate::build_support::features::feature;
 
 pub mod alpine;
 pub mod android;
@@ -27,7 +27,7 @@ pub fn redundant_features(features: &Features, target: &Target) -> Features {
     let mut redundant = Features::default();
 
     if !uses_freetype(target) {
-        for ft_specific in feature_id::FREETYPE_SPECIFIC {
+        for ft_specific in feature::FREETYPE_SPECIFIC {
             if features[ft_specific] {
                 redundant += ft_specific
             }
@@ -256,7 +256,7 @@ impl BindgenArgsBuilder {
 pub mod prelude {
     pub use self::{cargo::Target, skia::BuildConfiguration};
     pub use super::{BindgenArgsBuilder, GnArgsBuilder, PlatformDetails};
-    pub use crate::build_support::{cargo, clang, features::feature_id, features::Features, skia};
+    pub use crate::build_support::{cargo, clang, features::feature, features::Features, skia};
 
     pub fn quote(s: &str) -> String {
         format!("\"{s}\"")

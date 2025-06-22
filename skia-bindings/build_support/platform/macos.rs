@@ -48,10 +48,10 @@ impl PlatformDetails for MacOs {
 
     fn link_libraries(&self, features: &Features) -> Vec<String> {
         let mut libs = vec!["c++", "framework=ApplicationServices"];
-        if features[feature_id::GL] {
+        if features[feature::GL] {
             libs.push("framework=OpenGL");
         }
-        if features[feature_id::METAL] {
+        if features[feature::METAL] {
             libs.push("framework=Metal");
             // MetalKit was added in m87 BUILD.gn.
             libs.push("framework=MetalKit");
