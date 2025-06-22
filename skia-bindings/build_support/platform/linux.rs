@@ -1,4 +1,5 @@
 use super::{generic, prelude::*};
+use pkg_config;
 
 pub struct Linux;
 
@@ -28,45 +29,66 @@ pub fn gn_args(config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
 }
 
 pub fn link_libraries(features: &Features) -> Vec<String> {
-    let mut libs = vec!["stdc++", "fontconfig", "freetype"];
+    let mut libs = vec!["stdc++".to_string()];
+
+    // Use pkg-config for system libraries when available
+    add_pkg_config_libs(&mut libs, "freetype2", &["freetype"]);
+    add_pkg_config_libs(&mut libs, "fontconfig", &["fontconfig"]);
 
     if features[feature_id::GL] {
         if features[feature_id::EGL] {
-            libs.push("EGL");
+            add_pkg_config_libs(&mut libs, "egl", &["EGL"]);
         }
 
         if features[feature_id::X11] {
-            libs.push("GL");
+            add_pkg_config_libs(&mut libs, "gl", &["GL"]);
         }
 
         if features[feature_id::WAYLAND] {
-            libs.push("wayland-egl");
-            libs.push("GLESv2");
+            add_pkg_config_libs(&mut libs, "wayland-egl", &["wayland-egl"]);
+            libs.push("GLESv2".to_string()); // Fallback for GLESv2
         }
     }
 
     if skia::env::use_system_libraries() {
-        libs.push("png16");
-        libs.push("z");
-        libs.push("icudata");
-        libs.push("icui18n");
-        libs.push("icuio");
-        libs.push("icutest");
-        libs.push("icutu");
-        libs.push("icuuc");
-        libs.push("harfbuzz");
-        libs.push("expat");
+        // Use pkg-config for these libraries
+        add_pkg_config_libs(&mut libs, "libpng", &["png16"]);
+        add_pkg_config_libs(&mut libs, "zlib", &["z"]);
+        add_pkg_config_libs(&mut libs, "harfbuzz", &["harfbuzz"]);
+        add_pkg_config_libs(&mut libs, "expat", &["expat"]);
+
+        // ICU libraries - try pkg-config first, fallback to manual linking
+        add_pkg_config_libs(&mut libs, "icu-uc", &["icuuc"]);
+        add_pkg_config_libs(&mut libs, "icu-i18n", &["icui18n"]);
+        add_pkg_config_libs(&mut libs, "icu-io", &["icuio"]);
+        // Note: removed icutest and icutu as they appear to be development/testing utilities
 
         if features[feature_id::WEBPE] || features[feature_id::WEBPD] {
-            libs.push("webp");
+            add_pkg_config_libs(&mut libs, "libwebp", &["webp"]);
         }
     }
 
     if skia::env::use_system_libraries() || cfg!(feature = "use-system-jpeg-turbo") {
-        libs.push("jpeg");
+        libs.push("jpeg".to_string());
     }
 
-    libs.iter().map(|l| l.to_string()).collect()
+    libs
+}
+
+fn add_pkg_config_libs(libs: &mut Vec<String>, pkg_name: &str, fallback_libs: &[&str]) {
+    match pkg_config::probe_library(pkg_name) {
+        Ok(library) => {
+            for lib in &library.libs {
+                libs.push(lib.clone());
+            }
+        }
+        Err(_) => {
+            // Fallback to hardcoded library names
+            for lib in fallback_libs {
+                libs.push(lib.to_string());
+            }
+        }
+    }
 }
 
 fn flags(target: &Target) -> Vec<String> {
