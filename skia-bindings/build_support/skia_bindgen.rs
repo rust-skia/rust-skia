@@ -512,10 +512,10 @@ impl bindgen::callbacks::ParseCallbacks for ParseCallbacks {
         })
     }
 
-    fn item_name(&self, original_item_name: &str) -> Option<String> {
+    fn item_name(&self, original_item_name: bindgen::callbacks::ItemInfo<'_>) -> Option<String> {
         ITEM_RENAMES
             .iter()
-            .find(|(original, _)| *original == original_item_name)
+            .find(|(original, _)| *original == original_item_name.name)
             .map(|(_, replacement)| replacement.to_string())
     }
 }
