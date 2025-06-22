@@ -134,7 +134,7 @@ fn filter_skia(p: &Path) -> bool {
 
 impl binaries_config::BinariesConfiguration {
     pub fn key(&self, repository_short_hash: &str) -> String {
-        binaries::key(repository_short_hash, &self.feature_ids, self.skia_debug)
+        binaries::key(repository_short_hash, &self.features, self.skia_debug)
     }
 }
 

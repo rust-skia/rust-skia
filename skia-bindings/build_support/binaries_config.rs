@@ -1,9 +1,12 @@
-use super::platform;
-use crate::build_support::{cargo, features};
 use std::{
-    collections::HashSet,
     fs, io,
     path::{Path, PathBuf},
+};
+
+use super::platform;
+use crate::build_support::{
+    cargo,
+    features::{self, feature_id, Features},
 };
 
 pub const SKIA_OUTPUT_DIR: &str = "skia";
@@ -24,8 +27,8 @@ pub mod lib {
 /// The configuration of the resulting binaries.
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct BinariesConfiguration {
-    /// The feature identifiers we built with.
-    pub feature_ids: HashSet<String>,
+    /// The features we built with.
+    pub features: Features,
 
     /// The output directory of the libraries we build and we need to inform cargo about.
     pub output_directory: PathBuf,
@@ -60,9 +63,8 @@ impl BinariesConfiguration {
         let mut binding_libraries = Vec::new();
         let binding_files = vec!["bindings.rs".into()];
         let mut additional_files = Vec::new();
-        let feature_ids = features.ids();
 
-        if features.text_layout {
+        if features[feature_id::TEXTLAYOUT] {
             if target.is_windows() {
                 additional_files.push(ICUDTL_DAT.into());
             }
@@ -71,7 +73,7 @@ impl BinariesConfiguration {
             ninja_built_libraries.push(lib::SK_UNICODE_CORE.into());
             ninja_built_libraries.push(lib::SK_UNICODE_ICU.into());
         }
-        if features.svg {
+        if features[feature_id::SVG] {
             ninja_built_libraries.push(lib::SVG.into());
             ninja_built_libraries.push(lib::SK_RESOURCES.into());
         }
@@ -88,7 +90,7 @@ impl BinariesConfiguration {
         binding_libraries.push(lib::SKIA_BINDINGS.into());
 
         BinariesConfiguration {
-            feature_ids: feature_ids.into_iter().map(|f| f.to_string()).collect(),
+            features: features.clone(),
             output_directory,
             link_libraries,
             ninja_built_libraries,

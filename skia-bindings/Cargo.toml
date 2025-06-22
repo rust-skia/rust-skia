@@ -48,12 +48,11 @@ webp-encode = []
 webp-decode = []
 pdf = []
 # sys libraries
-use-system-jpeg-turbo = ["mozjpeg-sys"]
+use-system-jpeg-turbo = ["dep:mozjpeg-sys"]
 # `textlayout` because `SkSVGTextContext::SkSVGTextContext()` invokes `SkShaper::Make`.
 svg = ["textlayout"]
-shaper = ["textlayout"]
-binary-cache = ["flate2", "tar"]
-embed-icudtl = ["lazy_static"]
+binary-cache = ["dep:flate2", "dep:tar"]
+embed-icudtl = ["dep:lazy_static"]
 embed-freetype = []
 freetype-woff2 = []
 # Panic when any compilation steps are required to run. 
@@ -66,7 +65,7 @@ lazy_static = { version = "1.4.0", optional = true }
 
 [build-dependencies]
 cc = { version = "1.1.28" }
-bindgen = { version = "0.71.1" }
+bindgen = { version = "0.72.0" }
 pkg-config = "0.3.32"
 
 # For enum variant name replacements.
@@ -85,7 +84,7 @@ toml = "0.8.0"
 [dev-dependencies]
 # build dependencies duplicated for testing :(
 cc = { version = "1.1.28" }
-bindgen = { version = "0.71.1" }
+bindgen = { version = "0.72.0" }
 pkg-config = "0.3.32"
 regex = "1.4.5"
 heck = "0.5.0"

@@ -1,7 +1,7 @@
 //! Support for exporting and building prebuilt binaries.
 
 use super::{git, github_actions};
-use crate::build_support::{binaries_config, cargo};
+use crate::build_support::{binaries_config, cargo, features::Features};
 use flate2::read::GzDecoder;
 use std::{
     collections::HashSet,
@@ -70,7 +70,7 @@ pub const ARCHIVE_NAME: &str = "skia-binaries";
 /// Every part of the key is separated by '-' and no grouping / enclosing characters are used
 /// because GitHub strips them from the filenames (tested "<>[]{}()",
 /// and also Unicode characters seem to be stripped).
-pub fn key(repository_short_hash: &str, features: &HashSet<String>, skia_debug: bool) -> String {
+pub fn key(repository_short_hash: &str, features: &Features, skia_debug: bool) -> String {
     let mut components = Vec::new();
 
     fn group(str: impl AsRef<str>) -> String {
@@ -86,13 +86,7 @@ pub fn key(repository_short_hash: &str, features: &HashSet<String>, skia_debug: 
 
     // Features, sorted.
     if !features.is_empty() {
-        let features: String = {
-            let mut features: Vec<String> = features.iter().cloned().collect();
-            features.sort();
-            features.join("-")
-        };
-
-        components.push(group(features));
+        components.push(group(features.to_key()));
     };
 
     if cargo::target_crt_static() {

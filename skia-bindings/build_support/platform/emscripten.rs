@@ -3,7 +3,7 @@ use super::{generic, prelude::*};
 pub struct Emscripten;
 
 impl PlatformDetails for Emscripten {
-    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
+    fn uses_freetype(&self) -> bool {
         true
     }
 
@@ -64,7 +64,7 @@ impl PlatformDetails for Emscripten {
         _use_system_libraries: bool,
         mut features: Features,
     ) -> Features {
-        features.embed_freetype = true;
+        features += feature_id::FT_EMBED;
         features
     }
 }

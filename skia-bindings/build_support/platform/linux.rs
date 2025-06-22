@@ -4,7 +4,7 @@ use pkg_config;
 pub struct Linux;
 
 impl PlatformDetails for Linux {
-    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
+    fn uses_freetype(&self) -> bool {
         true
     }
 
@@ -35,16 +35,16 @@ pub fn link_libraries(features: &Features) -> Vec<String> {
     add_pkg_config_libs(&mut libs, "freetype2", &["freetype"]);
     add_pkg_config_libs(&mut libs, "fontconfig", &["fontconfig"]);
 
-    if features.gl {
-        if features.egl {
+    if features[feature_id::GL] {
+        if features[feature_id::EGL] {
             add_pkg_config_libs(&mut libs, "egl", &["EGL"]);
         }
 
-        if features.x11 {
+        if features[feature_id::X11] {
             add_pkg_config_libs(&mut libs, "gl", &["GL"]);
         }
 
-        if features.wayland {
+        if features[feature_id::WAYLAND] {
             add_pkg_config_libs(&mut libs, "wayland-egl", &["wayland-egl"]);
             libs.push("GLESv2".to_string()); // Fallback for GLESv2
         }
@@ -63,7 +63,7 @@ pub fn link_libraries(features: &Features) -> Vec<String> {
         add_pkg_config_libs(&mut libs, "icu-io", &["icuio"]);
         // Note: removed icutest and icutu as they appear to be development/testing utilities
 
-        if features.webp_encode || features.webp_decode {
+        if features[feature_id::WEBPE] || features[feature_id::WEBPD] {
             add_pkg_config_libs(&mut libs, "libwebp", &["webp"]);
         }
     }

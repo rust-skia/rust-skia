@@ -4,7 +4,12 @@ use std::path::{Path, PathBuf};
 use bindgen::{CodegenConfig, EnumVariation};
 use cc::Build;
 
-use crate::build_support::{binaries_config, cargo, cargo::Target, features, platform};
+use crate::build_support::{
+    binaries_config,
+    cargo::{self, Target},
+    features,
+    platform::{self, prelude::feature_id},
+};
 
 pub mod env {
     use crate::build_support::cargo;
@@ -37,31 +42,31 @@ impl Configuration {
     ) -> Self {
         let binding_sources = {
             let mut sources: Vec<PathBuf> = vec!["src/bindings.cpp".into()];
-            if features.gl {
+            if features[feature_id::GL] {
                 sources.push("src/gl.cpp".into());
             }
-            if features.egl {
+            if features[feature_id::EGL] {
                 sources.push("src/egl.cpp".into());
             }
-            if features.vulkan {
+            if features[feature_id::VULKAN] {
                 sources.push("src/vulkan.cpp".into());
             }
-            if features.metal {
+            if features[feature_id::METAL] {
                 sources.push("src/metal.cpp".into());
             }
-            if features.d3d {
+            if features[feature_id::D3D] {
                 sources.push("src/d3d.cpp".into());
             }
             if features.gpu() {
                 sources.push("src/gpu.cpp".into());
             }
-            if features.text_layout {
+            if features[feature_id::TEXTLAYOUT] {
                 sources.extend(vec!["src/shaper.cpp".into(), "src/paragraph.cpp".into()]);
             }
-            if features.svg {
+            if features[feature_id::SVG] {
                 sources.push("src/svg.cpp".into());
             }
-            if features.webp_encode {
+            if features[feature_id::WEBPE] {
                 sources.push("src/webp-encode.cpp".into());
             }
             sources
@@ -512,10 +517,10 @@ impl bindgen::callbacks::ParseCallbacks for ParseCallbacks {
         })
     }
 
-    fn item_name(&self, original_item_name: &str) -> Option<String> {
+    fn item_name(&self, original_item_name: bindgen::callbacks::ItemInfo<'_>) -> Option<String> {
         ITEM_RENAMES
             .iter()
-            .find(|(original, _)| *original == original_item_name)
+            .find(|(original, _)| *original == original_item_name.name)
             .map(|(_, replacement)| replacement.to_string())
     }
 }
@@ -806,7 +811,7 @@ pub(crate) mod definitions {
     };
 
     use super::env;
-    use crate::build_support::features;
+    use crate::build_support::features::{self, feature_id};
 
     /// A preprocessor definition.
     pub type Definition = (String, Option<String>);
@@ -889,7 +894,7 @@ pub(crate) mod definitions {
         if features.gpu() {
             files.push("obj/gpu.ninja".into());
         }
-        if features.text_layout {
+        if features[feature_id::TEXTLAYOUT] {
             files.extend(vec![
                 "obj/modules/skshaper/skshaper.ninja".into(),
                 "obj/modules/skparagraph/skparagraph.ninja".into(),
@@ -901,7 +906,7 @@ pub(crate) mod definitions {
                 files.push("obj/third_party/icu/icu.ninja".into())
             }
         }
-        if features.svg {
+        if features[feature_id::SVG] {
             files.push("obj/modules/svg/svg.ninja".into());
         }
         files
