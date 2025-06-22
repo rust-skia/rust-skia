@@ -1,14 +1,14 @@
 //! All the configuration settings that can be resolved statically for a platform target. From the
 //! environment, and current build configurations.
 
+use self::prelude::quote;
 use super::{
     cargo::{self, Target},
     clang,
     features::Features,
     skia::BuildConfiguration,
 };
-
-use self::prelude::quote;
+use crate::build_support::features::feature_id;
 
 pub mod alpine;
 pub mod android;
@@ -19,6 +19,23 @@ pub mod linux;
 pub mod macos;
 mod ohos;
 mod windows;
+
+/// Returns the list of redundant features for the given platform.
+///
+/// It currently only checks for freetype dependent features.
+pub fn redundant_features(features: &Features, target: &Target) -> Features {
+    let mut redundant = Features::default();
+
+    if !uses_freetype(target) {
+        for ft_specific in feature_id::FREETYPE_SPECIFIC {
+            if features[ft_specific] {
+                redundant += ft_specific
+            }
+        }
+    }
+
+    redundant
+}
 
 pub fn uses_freetype(target: &Target) -> bool {
     details(target).uses_freetype()

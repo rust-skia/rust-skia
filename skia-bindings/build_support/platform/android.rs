@@ -57,8 +57,8 @@ impl PlatformDetails for Android {
         use_system_libraries: bool,
         mut features: Features,
     ) -> Features {
-        if !features[feature_id::EMBED_FREETYPE] {
-            features.set(feature_id::EMBED_FREETYPE, !use_system_libraries);
+        if !features[feature_id::FT_EMBED] {
+            features.set(feature_id::FT_EMBED, !use_system_libraries);
         }
 
         features

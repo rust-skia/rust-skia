@@ -3,7 +3,7 @@ use std::{fs, io};
 use build_support::{
     binaries_config,
     cargo::{self, Target},
-    features, skia, skia_bindgen,
+    features, platform, skia, skia_bindgen,
 };
 
 mod build_support;
@@ -15,7 +15,31 @@ fn main() -> Result<(), io::Error> {
     }
 
     let skia_debug = env::is_skia_debug();
-    let features = features::Features::from_cargo_env();
+    let cargo_target = cargo::target();
+
+    let features = {
+        let features = features::Features::from_cargo_env();
+        let missing_dependencies = features.missing_dependencies();
+        if !missing_dependencies.is_empty() {
+            return Err(io::Error::other(format!(
+                "Missing dependent features: {missing_dependencies}"
+            )));
+        }
+
+        let redundant_features = platform::redundant_features(&features, &cargo_target);
+        if !redundant_features.is_empty() {
+            cargo::warning(format!("Redundant features: {redundant_features}"));
+            #[cfg(feature = "binary-cache")]
+            if build_support::binary_cache::should_export().is_some() {
+                return Err(io::Error::other(format!(
+                    "Can't produce binaries with redundant features: {redundant_features}"
+                )));
+            }
+        }
+
+        features
+    };
+
     let binaries_config =
         binaries_config::BinariesConfiguration::from_features(&features, skia_debug);
 
@@ -34,7 +58,7 @@ fn main() -> Result<(), io::Error> {
                 definitions,
                 &binaries_config,
                 &source_dir,
-                cargo::target(),
+                cargo_target,
                 None,
             );
         } else {
