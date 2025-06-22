@@ -5855,7 +5855,7 @@ jobs:
         artifactErrorsFailBuild: true
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
-  linux-release-release-embed-freetype-freetype-woff2-svg-textlayout-vulkan-webp:
+  linux-release-release-svg-textlayout-vulkan-webp:
     runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
     env: 
@@ -5885,7 +5885,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features svg,textlayout,vulkan,webp'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -5902,7 +5902,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --target x86_64-unknown-linux-gnu
+        cargo build -p skia-safe --release --features "svg,textlayout,vulkan,webp" --target x86_64-unknown-linux-gnu
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -5914,19 +5914,19 @@ jobs:
       shell: bash
       if: true
       run: |
-        cargo clippy --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --all-targets --target x86_64-unknown-linux-gnu -- -D warnings
+        cargo clippy --release --features "svg,textlayout,vulkan,webp" --all-targets --target x86_64-unknown-linux-gnu -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
-        cargo test --all --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --all-targets --target x86_64-unknown-linux-gnu -- --nocapture
+        cargo test --all --release --features "svg,textlayout,vulkan,webp" --all-targets --target x86_64-unknown-linux-gnu -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --target x86_64-unknown-linux-gnu "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+        cargo run --release --features "svg,textlayout,vulkan,webp" --target x86_64-unknown-linux-gnu "${{ env.SKIA_STAGING_PATH }}/skia-org" 
 
     - name: 'Upload skia-org example images'
       if: false
@@ -5962,7 +5962,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features svg,textlayout,vulkan,webp'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -5979,7 +5979,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --target aarch64-unknown-linux-gnu
+        cargo build -p skia-safe --release --features "svg,textlayout,vulkan,webp" --target aarch64-unknown-linux-gnu
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -5991,19 +5991,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --all-targets --target aarch64-unknown-linux-gnu -- -D warnings
+        cargo clippy --release --features "svg,textlayout,vulkan,webp" --all-targets --target aarch64-unknown-linux-gnu -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --all-targets --target aarch64-unknown-linux-gnu -- --nocapture
+        cargo test --all --release --features "svg,textlayout,vulkan,webp" --all-targets --target aarch64-unknown-linux-gnu -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --target aarch64-unknown-linux-gnu "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+        cargo run --release --features "svg,textlayout,vulkan,webp" --target aarch64-unknown-linux-gnu "${{ env.SKIA_STAGING_PATH }}/skia-org" 
 
     - name: 'Upload skia-org example images'
       if: false
@@ -6039,7 +6039,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build skia-safe for aarch64-linux-android with features embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp'
+    - name: 'Build skia-safe for aarch64-linux-android with features svg,textlayout,vulkan,webp'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -6056,7 +6056,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --target aarch64-linux-android
+        cargo build -p skia-safe --release --features "svg,textlayout,vulkan,webp" --target aarch64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -6068,19 +6068,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --all-targets --target aarch64-linux-android -- -D warnings
+        cargo clippy --release --features "svg,textlayout,vulkan,webp" --all-targets --target aarch64-linux-android -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --all-targets --target aarch64-linux-android -- --nocapture
+        cargo test --all --release --features "svg,textlayout,vulkan,webp" --all-targets --target aarch64-linux-android -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --target aarch64-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+        cargo run --release --features "svg,textlayout,vulkan,webp" --target aarch64-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
 
     - name: 'Upload skia-org example images'
       if: false
@@ -6116,7 +6116,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build skia-safe for x86_64-linux-android with features embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp'
+    - name: 'Build skia-safe for x86_64-linux-android with features svg,textlayout,vulkan,webp'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -6133,7 +6133,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --target x86_64-linux-android
+        cargo build -p skia-safe --release --features "svg,textlayout,vulkan,webp" --target x86_64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -6145,19 +6145,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --all-targets --target x86_64-linux-android -- -D warnings
+        cargo clippy --release --features "svg,textlayout,vulkan,webp" --all-targets --target x86_64-linux-android -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --all-targets --target x86_64-linux-android -- --nocapture
+        cargo test --all --release --features "svg,textlayout,vulkan,webp" --all-targets --target x86_64-linux-android -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --target x86_64-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+        cargo run --release --features "svg,textlayout,vulkan,webp" --target x86_64-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
 
     - name: 'Upload skia-org example images'
       if: false
@@ -6193,7 +6193,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build skia-safe for i686-linux-android with features embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp'
+    - name: 'Build skia-safe for i686-linux-android with features svg,textlayout,vulkan,webp'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -6210,7 +6210,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --target i686-linux-android
+        cargo build -p skia-safe --release --features "svg,textlayout,vulkan,webp" --target i686-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -6222,19 +6222,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --all-targets --target i686-linux-android -- -D warnings
+        cargo clippy --release --features "svg,textlayout,vulkan,webp" --all-targets --target i686-linux-android -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --all-targets --target i686-linux-android -- --nocapture
+        cargo test --all --release --features "svg,textlayout,vulkan,webp" --all-targets --target i686-linux-android -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --target i686-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+        cargo run --release --features "svg,textlayout,vulkan,webp" --target i686-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
 
     - name: 'Upload skia-org example images'
       if: false
@@ -6270,7 +6270,7 @@ jobs:
       run: |
         rustup target add wasm32-unknown-emscripten
 
-    - name: 'Build skia-safe for wasm32-unknown-emscripten with features embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp'
+    - name: 'Build skia-safe for wasm32-unknown-emscripten with features svg,textlayout,vulkan,webp'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -6287,7 +6287,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --target wasm32-unknown-emscripten
+        cargo build -p skia-safe --release --features "svg,textlayout,vulkan,webp" --target wasm32-unknown-emscripten
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -6299,19 +6299,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --all-targets --target wasm32-unknown-emscripten -- -D warnings
+        cargo clippy --release --features "svg,textlayout,vulkan,webp" --all-targets --target wasm32-unknown-emscripten -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --all-targets --target wasm32-unknown-emscripten -- --nocapture
+        cargo test --all --release --features "svg,textlayout,vulkan,webp" --all-targets --target wasm32-unknown-emscripten -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features "embed-freetype,freetype-woff2,svg,textlayout,vulkan,webp" --target wasm32-unknown-emscripten "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+        cargo run --release --features "svg,textlayout,vulkan,webp" --target wasm32-unknown-emscripten "${{ env.SKIA_STAGING_PATH }}/skia-org" 
 
     - name: 'Upload skia-org example images'
       if: false
