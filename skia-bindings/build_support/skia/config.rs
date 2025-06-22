@@ -140,10 +140,6 @@ impl FinalBuildConfiguration {
                 .arg("skia_use_system_zlib", yes_if(use_system_libraries))
                 .arg("skia_use_xps", no())
                 .arg("skia_use_dng_sdk", no())
-                .arg(
-                    "skia_use_freetype_woff2",
-                    yes_if(use_freetype && features[feature_id::FT_WOFF2]),
-                )
                 .arg("cc", quote(&build.cc))
                 .arg("cxx", quote(&build.cxx));
 
@@ -159,6 +155,13 @@ impl FinalBuildConfiguration {
 
             if features[feature_id::D3D] {
                 builder.arg("skia_use_direct3d", yes());
+            }
+
+            if use_freetype {
+                builder.arg(
+                    "skia_use_freetype_woff2",
+                    yes_if(features[feature_id::FT_WOFF2]),
+                )
             }
 
             // further flags that limit the components of Skia debug builds.
