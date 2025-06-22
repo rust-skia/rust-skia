@@ -18,7 +18,7 @@ fn main() -> Result<(), io::Error> {
     let cargo_target = cargo::target();
 
     let features = {
-        let features = features::Features::from_cargo_env();
+        let mut features = features::Features::from_cargo_env();
         let missing_dependencies = features.missing_dependencies();
         if !missing_dependencies.is_empty() {
             return Err(io::Error::other(format!(
@@ -28,13 +28,17 @@ fn main() -> Result<(), io::Error> {
 
         let redundant_features = platform::redundant_features(&features, &cargo_target);
         if !redundant_features.is_empty() {
-            cargo::warning(format!("Redundant features: {redundant_features}"));
             #[cfg(feature = "binary-cache")]
             if build_support::binary_cache::should_export().is_some() {
                 return Err(io::Error::other(format!(
                     "Can't produce binaries with redundant features: {redundant_features}"
                 )));
             }
+            cargo::warning(format!(
+                "Redundant features: {redundant_features}. Disabled for the build and binary download."
+            ));
+            features -= redundant_features;
+            cargo::warning(format!("Final features: {features}"));
         }
 
         features

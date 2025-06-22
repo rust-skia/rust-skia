@@ -163,6 +163,12 @@ impl ops::SubAssign<&'static str> for Features {
     }
 }
 
+impl ops::SubAssign for Features {
+    fn sub_assign(&mut self, rhs: Self) {
+        self.0.retain(|item| !rhs.0.contains(item));
+    }
+}
+
 pub mod feature {
     /// Support PDF rendering.
     pub const PDF: &str = "pdf";
