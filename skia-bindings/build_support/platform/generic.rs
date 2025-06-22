@@ -21,7 +21,7 @@ pub fn gn_args(config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
 }
 
 pub fn link_libraries(features: &Features) -> Vec<String> {
-    if features[feature_id::GL] {
+    if features[feature::GL] {
         vec!["GL".into()]
     } else {
         Vec::new()

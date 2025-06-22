@@ -8,7 +8,7 @@ use crate::build_support::{
     binaries_config,
     cargo::{self, Target},
     features,
-    platform::{self, prelude::feature_id},
+    platform::{self, prelude::feature},
 };
 
 pub mod env {
@@ -42,31 +42,31 @@ impl Configuration {
     ) -> Self {
         let binding_sources = {
             let mut sources: Vec<PathBuf> = vec!["src/bindings.cpp".into()];
-            if features[feature_id::GL] {
+            if features[feature::GL] {
                 sources.push("src/gl.cpp".into());
             }
-            if features[feature_id::EGL] {
+            if features[feature::EGL] {
                 sources.push("src/egl.cpp".into());
             }
-            if features[feature_id::VULKAN] {
+            if features[feature::VULKAN] {
                 sources.push("src/vulkan.cpp".into());
             }
-            if features[feature_id::METAL] {
+            if features[feature::METAL] {
                 sources.push("src/metal.cpp".into());
             }
-            if features[feature_id::D3D] {
+            if features[feature::D3D] {
                 sources.push("src/d3d.cpp".into());
             }
             if features.gpu() {
                 sources.push("src/gpu.cpp".into());
             }
-            if features[feature_id::TEXTLAYOUT] {
+            if features[feature::TEXTLAYOUT] {
                 sources.extend(vec!["src/shaper.cpp".into(), "src/paragraph.cpp".into()]);
             }
-            if features[feature_id::SVG] {
+            if features[feature::SVG] {
                 sources.push("src/svg.cpp".into());
             }
-            if features[feature_id::WEBPE] {
+            if features[feature::WEBP_ENCODE] {
                 sources.push("src/webp-encode.cpp".into());
             }
             sources
@@ -811,7 +811,7 @@ pub(crate) mod definitions {
     };
 
     use super::env;
-    use crate::build_support::features::{self, feature_id};
+    use crate::build_support::features::{self, feature};
 
     /// A preprocessor definition.
     pub type Definition = (String, Option<String>);
@@ -894,7 +894,7 @@ pub(crate) mod definitions {
         if features.gpu() {
             files.push("obj/gpu.ninja".into());
         }
-        if features[feature_id::TEXTLAYOUT] {
+        if features[feature::TEXTLAYOUT] {
             files.extend(vec![
                 "obj/modules/skshaper/skshaper.ninja".into(),
                 "obj/modules/skparagraph/skparagraph.ninja".into(),
@@ -906,7 +906,7 @@ pub(crate) mod definitions {
                 files.push("obj/third_party/icu/icu.ninja".into())
             }
         }
-        if features[feature_id::SVG] {
+        if features[feature::SVG] {
             files.push("obj/modules/svg/svg.ninja".into());
         }
         files

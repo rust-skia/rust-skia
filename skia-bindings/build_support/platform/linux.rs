@@ -35,16 +35,16 @@ pub fn link_libraries(features: &Features) -> Vec<String> {
     add_pkg_config_libs(&mut libs, "freetype2", &["freetype"]);
     add_pkg_config_libs(&mut libs, "fontconfig", &["fontconfig"]);
 
-    if features[feature_id::GL] {
-        if features[feature_id::EGL] {
+    if features[feature::GL] {
+        if features[feature::EGL] {
             add_pkg_config_libs(&mut libs, "egl", &["EGL"]);
         }
 
-        if features[feature_id::X11] {
+        if features[feature::X11] {
             add_pkg_config_libs(&mut libs, "gl", &["GL"]);
         }
 
-        if features[feature_id::WAYLAND] {
+        if features[feature::WAYLAND] {
             add_pkg_config_libs(&mut libs, "wayland-egl", &["wayland-egl"]);
             libs.push("GLESv2".to_string()); // Fallback for GLESv2
         }
@@ -63,7 +63,7 @@ pub fn link_libraries(features: &Features) -> Vec<String> {
         add_pkg_config_libs(&mut libs, "icu-io", &["icuio"]);
         // Note: removed icutest and icutu as they appear to be development/testing utilities
 
-        if features[feature_id::WEBPE] || features[feature_id::WEBPD] {
+        if features[feature::WEBP_ENCODE] || features[feature::WEBP_DECODE] {
             add_pkg_config_libs(&mut libs, "libwebp", &["webp"]);
         }
     }

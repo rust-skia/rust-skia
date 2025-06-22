@@ -57,8 +57,8 @@ impl PlatformDetails for Android {
         use_system_libraries: bool,
         mut features: Features,
     ) -> Features {
-        if !features[feature_id::FT_EMBED] {
-            features.set(feature_id::FT_EMBED, !use_system_libraries);
+        if !features[feature::EMBED_FREETYPE] {
+            features.set(feature::EMBED_FREETYPE, !use_system_libraries);
         }
 
         features
@@ -139,7 +139,7 @@ pub fn extra_skia_cflags() -> Vec<String> {
 
 pub fn link_libraries(features: &Features) -> Vec<&str> {
     let mut libs = vec!["log", "android", "c++_static", "c++abi"];
-    if features[feature_id::GL] {
+    if features[feature::GL] {
         libs.extend(vec!["EGL", "GLESv2"])
     };
     libs

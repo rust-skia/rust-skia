@@ -22,60 +22,57 @@ impl Features {
         let mut features = Self::default();
 
         if cfg!(feature = "pdf") {
-            features += feature_id::PDF;
+            features += feature::PDF;
         }
 
         if cfg!(feature = "gl") {
-            features += feature_id::GL;
+            features += feature::GL;
         }
         if cfg!(feature = "egl") {
-            features += feature_id::EGL;
+            features += feature::EGL;
         }
         if cfg!(feature = "wayland") {
-            features += feature_id::WAYLAND;
+            features += feature::WAYLAND;
         }
         if cfg!(feature = "x11") {
-            features += feature_id::X11;
+            features += feature::X11;
         }
 
         if cfg!(feature = "vulkan") {
-            features += feature_id::VULKAN;
+            features += feature::VULKAN;
         }
         if cfg!(feature = "metal") {
-            features += feature_id::METAL;
+            features += feature::METAL;
         }
         if cfg!(feature = "d3d") {
-            features += feature_id::D3D;
+            features += feature::D3D;
         }
 
         if cfg!(feature = "textlayout") {
-            features += feature_id::TEXTLAYOUT;
+            features += feature::TEXTLAYOUT;
         }
         if cfg!(feature = "svg") {
-            features += feature_id::SVG;
+            features += feature::SVG;
         }
         if cfg!(feature = "webp-encode") {
-            features += feature_id::WEBPE;
+            features += feature::WEBP_ENCODE;
         }
         if cfg!(feature = "webp-decode") {
-            features += feature_id::WEBPD;
+            features += feature::WEBP_DECODE;
         }
 
         if cfg!(feature = "embed-freetype") {
-            features += feature_id::FT_EMBED;
+            features += feature::EMBED_FREETYPE;
         }
         if cfg!(feature = "freetype-woff2") {
-            features += feature_id::FT_WOFF2;
+            features += feature::FREETYPE_WOFF2;
         }
 
         features
     }
 
     pub fn gpu(&self) -> bool {
-        self[feature_id::GL]
-            || self[feature_id::VULKAN]
-            || self[feature_id::METAL]
-            || self[feature_id::D3D]
+        self[feature::GL] || self[feature::VULKAN] || self[feature::METAL] || self[feature::D3D]
     }
 
     pub fn is_empty(&self) -> bool {
@@ -100,7 +97,16 @@ impl Features {
 
     /// A comparable set of feature ids (sorted and joined by `-`).
     pub fn to_key(&self) -> String {
-        let mut features: Vec<&str> = self.0.iter().cloned().collect();
+        let mut features: Vec<_> = self
+            .0
+            .iter()
+            .map(|&f| {
+                feature::KEY_REPLACEMENTS
+                    .iter()
+                    .find_map(|&(orig, repl)| if orig == f { Some(repl) } else { None })
+                    .unwrap_or(f)
+            })
+            .collect();
         features.sort();
         features.join("-")
     }
@@ -111,7 +117,7 @@ impl Features {
     pub fn missing_dependencies(&self) -> Features {
         let mut missing = Features::default();
 
-        for (feature, dependencies) in feature_id::DEPENDENCIES {
+        for (feature, dependencies) in feature::DEPENDENCIES {
             if !self[feature] {
                 continue;
             }
@@ -157,8 +163,13 @@ impl ops::SubAssign<&'static str> for Features {
     }
 }
 
-/// Feature identifiers define the additional configuration parts of the binaries to download.
-pub mod feature_id {
+impl ops::SubAssign for Features {
+    fn sub_assign(&mut self, rhs: Self) {
+        self.0.retain(|item| !rhs.0.contains(item));
+    }
+}
+
+pub mod feature {
     /// Support PDF rendering.
     pub const PDF: &str = "pdf";
 
@@ -183,16 +194,23 @@ pub mod feature_id {
     /// Support for rendering SVG
     pub const SVG: &str = "svg";
     /// Support the encoding of bitmap data to the WEBP image format
-    pub const WEBPE: &str = "webpe";
+    pub const WEBP_ENCODE: &str = "webp-encode";
     /// Support the decoding of the WEBP image format to bitmap data
-    pub const WEBPD: &str = "webpd";
+    pub const WEBP_DECODE: &str = "webp-decode";
 
     /// Build with FreeType embedded
-    pub const FT_EMBED: &str = "freetype";
+    pub const EMBED_FREETYPE: &str = "embed-freetype";
     /// Build with FreeType WOFF2 support
-    pub const FT_WOFF2: &str = "ftwoff2";
+    pub const FREETYPE_WOFF2: &str = "freetype-woff2";
 
-    pub const FREETYPE_SPECIFIC: &[&str] = &[FT_EMBED, FT_WOFF2];
+    pub const FREETYPE_SPECIFIC: &[&str] = &[EMBED_FREETYPE, FREETYPE_WOFF2];
 
     pub const DEPENDENCIES: &[(&str, &[&str])] = &[(EGL, &[GL]), (X11, &[GL]), (WAYLAND, &[EGL])];
+
+    pub const KEY_REPLACEMENTS: &[(&str, &str)] = &[
+        (WEBP_ENCODE, "webpe"),
+        (WEBP_DECODE, "webpd"),
+        (EMBED_FREETYPE, "ftembed"),
+        (FREETYPE_WOFF2, "ftwoff2"),
+    ];
 }
