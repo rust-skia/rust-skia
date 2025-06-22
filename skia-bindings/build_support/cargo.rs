@@ -6,8 +6,8 @@ use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
 use std::{env, fmt, fs, io};
 
-pub fn warning(warn: impl AsRef<str>) {
-    println!("cargo:warning={}", warn.as_ref());
+pub fn warning(warning: impl AsRef<str>) {
+    println!("cargo:warning={}", warning.as_ref());
 }
 
 pub fn output_directory() -> PathBuf {

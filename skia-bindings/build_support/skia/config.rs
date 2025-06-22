@@ -1,13 +1,14 @@
 //! Full build support for the Skia library.
 
-use crate::build_support::{
-    binaries_config, features,
-    platform::{self, prelude::*},
-};
 use std::{
     env,
     path::{Path, PathBuf},
     process::{Command, Stdio},
+};
+
+use crate::build_support::{
+    binaries_config, features,
+    platform::{self, prelude::*},
 };
 
 /// The build configuration for Skia.
@@ -118,34 +119,39 @@ impl FinalBuildConfiguration {
             builder
                 .arg("is_official_build", yes_if(!build.skia_debug))
                 .arg("is_debug", yes_if(build.skia_debug))
-                .arg("skia_enable_svg", yes_if(features.svg))
+                .arg("skia_enable_svg", yes_if(features[feature_id::SVG]))
                 .arg("skia_enable_gpu", yes_if(features.gpu()))
                 .arg("skia_enable_skottie", no())
-                .arg("skia_enable_pdf", yes_if(features.pdf))
-                .arg("skia_use_gl", yes_if(features.gl))
-                .arg("skia_use_egl", yes_if(features.egl))
-                .arg("skia_use_x11", yes_if(features.x11))
+                .arg("skia_enable_pdf", yes_if(features[feature_id::PDF]))
+                .arg("skia_use_gl", yes_if(features[feature_id::GL]))
+                .arg("skia_use_egl", yes_if(features[feature_id::EGL]))
+                .arg("skia_use_x11", yes_if(features[feature_id::X11]))
                 .arg("skia_use_system_libpng", yes_if(use_system_libraries))
-                .arg("skia_use_libwebp_encode", yes_if(features.webp_encode))
-                .arg("skia_use_libwebp_decode", yes_if(features.webp_decode))
+                .arg(
+                    "skia_use_libwebp_encode",
+                    yes_if(features[feature_id::WEBPE]),
+                )
+                .arg(
+                    "skia_use_libwebp_decode",
+                    yes_if(features[feature_id::WEBPD]),
+                )
                 .arg("skia_use_system_zlib", yes_if(use_system_libraries))
                 .arg("skia_use_xps", no())
-                .arg("skia_use_dng_sdk", yes_if(features.dng))
-                .arg("skia_use_freetype_woff2", yes_if(features.freetype_woff2))
+                .arg("skia_use_dng_sdk", no())
                 .arg("cc", quote(&build.cc))
                 .arg("cxx", quote(&build.cxx));
 
-            if features.vulkan {
+            if features[feature_id::VULKAN] {
                 builder
                     .arg("skia_use_vulkan", yes())
                     .arg("skia_enable_spirv_validation", no());
             }
 
-            if features.metal {
+            if features[feature_id::METAL] {
                 builder.arg("skia_use_metal", yes());
             }
 
-            if features.d3d {
+            if features[feature_id::D3D] {
                 builder.arg("skia_use_direct3d", yes());
             }
 
@@ -159,7 +165,7 @@ impl FinalBuildConfiguration {
                     .arg("skia_use_lua", no());
             }
 
-            if features.text_layout {
+            if features[feature_id::TEXTLAYOUT] {
                 builder
                     .arg("skia_enable_skshaper", yes())
                     .arg("skia_use_icu", yes())
@@ -177,14 +183,19 @@ impl FinalBuildConfiguration {
                     .arg("skia_use_harfbuzz", no());
             }
 
-            if features.webp_encode || features.webp_decode {
+            if features[feature_id::WEBPE] || features[feature_id::WEBPD] {
                 builder.arg("skia_use_system_libwebp", yes_if(use_system_libraries));
             }
 
-            let use_freetype = platform::uses_freetype(build);
+            let use_freetype = platform::uses_freetype(&build.target);
             builder.arg("skia_use_freetype", yes_if(use_freetype));
             if use_freetype {
-                if features.embed_freetype {
+                builder.arg(
+                    "skia_use_freetype_woff2",
+                    yes_if(features[feature_id::FT_WOFF2]),
+                );
+
+                if features[feature_id::FT_EMBED] {
                     builder.arg("skia_use_system_freetype2", no());
                 } else {
                     // third_party/freetype2/BUILD.gn hard-codes /usr/include/freetype2

@@ -6,7 +6,7 @@ pub struct OpenHarmony;
 
 /// For OpenHarmony, we recommend using API12 as the minimum API level
 impl PlatformDetails for OpenHarmony {
-    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
+    fn uses_freetype(&self) -> bool {
         false
     }
 
@@ -89,7 +89,7 @@ pub fn extra_skia_cflags() -> Vec<String> {
 
 pub fn link_libraries(features: &Features) -> Vec<&str> {
     let mut libs = vec!["c++_static", "c++abi"];
-    if features.gl {
+    if features[feature_id::GL] {
         libs.extend(vec!["EGL", "GLESv3"])
     };
     libs

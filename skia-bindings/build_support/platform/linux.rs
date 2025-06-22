@@ -3,7 +3,7 @@ use super::{generic, prelude::*};
 pub struct Linux;
 
 impl PlatformDetails for Linux {
-    fn uses_freetype(&self, _config: &BuildConfiguration) -> bool {
+    fn uses_freetype(&self) -> bool {
         true
     }
 
@@ -30,16 +30,16 @@ pub fn gn_args(config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
 pub fn link_libraries(features: &Features) -> Vec<String> {
     let mut libs = vec!["stdc++", "fontconfig", "freetype"];
 
-    if features.gl {
-        if features.egl {
+    if features[feature_id::GL] {
+        if features[feature_id::EGL] {
             libs.push("EGL");
         }
 
-        if features.x11 {
+        if features[feature_id::X11] {
             libs.push("GL");
         }
 
-        if features.wayland {
+        if features[feature_id::WAYLAND] {
             libs.push("wayland-egl");
             libs.push("GLESv2");
         }
@@ -57,7 +57,7 @@ pub fn link_libraries(features: &Features) -> Vec<String> {
         libs.push("harfbuzz");
         libs.push("expat");
 
-        if features.webp_encode || features.webp_decode {
+        if features[feature_id::WEBPE] || features[feature_id::WEBPD] {
             libs.push("webp");
         }
     }
