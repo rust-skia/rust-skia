@@ -115,8 +115,6 @@ impl FinalBuildConfiguration {
 
         let mut builder = GnArgsBuilder::new(&build.target);
 
-        let use_freetype = platform::uses_freetype(&build.target);
-
         let gn_args = {
             builder
                 .arg("is_official_build", yes_if(!build.skia_debug))
@@ -157,13 +155,6 @@ impl FinalBuildConfiguration {
                 builder.arg("skia_use_direct3d", yes());
             }
 
-            if use_freetype {
-                builder.arg(
-                    "skia_use_freetype_woff2",
-                    yes_if(features[feature_id::FT_WOFF2]),
-                )
-            }
-
             // further flags that limit the components of Skia debug builds.
             if build.skia_debug {
                 builder
@@ -196,8 +187,14 @@ impl FinalBuildConfiguration {
                 builder.arg("skia_use_system_libwebp", yes_if(use_system_libraries));
             }
 
+            let use_freetype = platform::uses_freetype(&build.target);
             builder.arg("skia_use_freetype", yes_if(use_freetype));
             if use_freetype {
+                builder.arg(
+                    "skia_use_freetype_woff2",
+                    yes_if(features[feature_id::FT_WOFF2]),
+                );
+
                 if features[feature_id::FT_EMBED] {
                     builder.arg("skia_use_system_freetype2", no());
                 } else {
