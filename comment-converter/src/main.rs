@@ -1,3 +1,6 @@
+#![allow(unknown_lints)]
+#![allow(mismatched_lifetime_syntaxes)]
+
 use anyhow::Result;
 use heck::{ToLowerCamelCase, ToSnakeCase, ToUpperCamelCase};
 use std::{

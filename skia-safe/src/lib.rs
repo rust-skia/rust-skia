@@ -5,6 +5,7 @@
 #![allow(unknown_lints)]
 #![allow(clippy::too_long_first_doc_paragraph)]
 #![allow(clippy::doc_overindented_list_items)]
+#![allow(mismatched_lifetime_syntaxes)]
 
 mod macros;
 
