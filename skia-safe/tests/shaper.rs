@@ -26,7 +26,7 @@ impl RunHandler for DebugRunHandler {
         println!("commit_run_info");
     }
 
-    fn run_buffer(&mut self, info: &RunInfo) -> Buffer {
+    fn run_buffer(&mut self, info: &RunInfo) -> Buffer<'_> {
         println!("run_buffer {}", info.glyph_count);
         let count = info.glyph_count;
         self.glyphs.resize(count, 0);
