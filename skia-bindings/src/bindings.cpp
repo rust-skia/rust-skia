@@ -628,11 +628,11 @@ extern "C" void C_SkPath_Construct(SkPath* uninitialized) {
 }
 
 extern "C" void C_SkPath_Make(SkPath* uninitialized, 
-    const SkPoint pts[], int pointCount,
-    const uint8_t vbs[], int verbCount,
-    const SkScalar ws[], int wCount,
+    const SkPoint pts[], size_t pointCount,
+    const uint8_t vbs[], size_t verbCount,
+    const SkScalar ws[], size_t wCount,
     SkPathFillType ft, bool isVolatile) {
-    new(uninitialized) SkPath(SkPath::Make(pts, pointCount, vbs, verbCount, ws, wCount, ft, isVolatile));
+    new(uninitialized) SkPath(SkPath::Make(SkSpan(pts, pointCount), SkSpan(vbs, verbCount), SkSpan(ws, wCount), ft, isVolatile));
 }
 
 extern "C" void C_SkPath_Rect(SkPath* uninitialized,
@@ -666,10 +666,10 @@ extern "C" void C_SkPath_RRectWithStartIndex(SkPath* uninitialized,
 }
 
 extern "C" void C_SkPath_Polygon(SkPath* uninitialized,
-    const SkPoint pts[], int count, bool isClosed,
+    const SkPoint pts[], size_t count, bool isClosed,
     SkPathFillType ft,
     bool isVolatile) {
-    new(uninitialized) SkPath(SkPath::Polygon(pts, count, isClosed, ft, isVolatile));
+    new(uninitialized) SkPath(SkPath::Polygon(SkSpan(pts, count), isClosed, ft, isVolatile));
 }
 
 extern "C" void C_SkPath_destruct(const SkPath* self) {
@@ -1360,23 +1360,24 @@ extern "C" SkTextBlob* C_SkTextBlob_MakeFromText(const void* text, size_t byteLe
 }
 
 extern "C" SkTextBlob *C_SkTextBlob_MakeFromPosTextH(const void *text, size_t byteLength,
-                                                     const SkScalar xPos[], SkScalar constY, const SkFont *font,
+                                                     const SkScalar xPos[], size_t characterCount, 
+                                                     SkScalar constY, const SkFont *font,
                                                      SkTextEncoding encoding) {
-    return SkTextBlob::MakeFromPosTextH(text, byteLength, xPos, constY, *font, encoding).release();
+    return SkTextBlob::MakeFromPosTextH(text, byteLength, SkSpan(xPos, characterCount), constY, *font, encoding).release();
 }
 
 extern "C" SkTextBlob *C_SkTextBlob_MakeFromPosText(const void *text, size_t byteLength,
-                                                    const SkPoint pos[],
+                                                    const SkPoint pos[], size_t characterCount,
                                                     const SkFont *font,
                                                     SkTextEncoding encoding) {
-    return SkTextBlob::MakeFromPosText(text, byteLength, pos, *font, encoding).release();
+    return SkTextBlob::MakeFromPosText(text, byteLength, SkSpan(pos, characterCount), *font, encoding).release();
 }
 
 extern "C" SkTextBlob *C_SkTextBlob_MakeFromRSXform(const void *text, size_t byteLength,
-                                                    const SkRSXform xform[],
+                                                    const SkRSXform xform[], size_t characterCount,
                                                     const SkFont *font,
                                                     SkTextEncoding encoding) {
-    return SkTextBlob::MakeFromRSXform(text, byteLength, xform, *font, encoding).release();
+    return SkTextBlob::MakeFromRSXform(text, byteLength, SkSpan(xform, characterCount), *font, encoding).release();
 }
 
 extern "C" void C_SkTextBlob_Iter_destruct(SkTextBlob::Iter* self) {
@@ -1504,12 +1505,12 @@ extern "C" void C_SkFont_setTypeface(SkFont* self, SkTypeface* tf) {
 extern "C" void C_SkFont_getIntercepts(
     const SkFont* self, 
     const SkGlyphID glyphs[], 
-    int count, 
+    size_t count, 
     const SkPoint pos[], 
     SkScalar top, SkScalar bottom, 
     const SkPaint* paint, 
     VecSink<SkScalar>* vs) {
-    auto r = self->getIntercepts(glyphs, count, pos, top, bottom, paint);
+    auto r = self->getIntercepts(SkSpan(glyphs, count), SkSpan(pos, count), top, bottom, paint);
     vs->set(r);
 }
 
@@ -2581,8 +2582,8 @@ extern "C" SkPathEffect* C_SkCornerPathEffect_Make(SkScalar radius) {
 // effects/SkDashPathEffect.h
 //
 
-extern "C" SkPathEffect* C_SkDashPathEffect_Make(const SkScalar intervals[], int count, SkScalar phase) {
-    return SkDashPathEffect::Make(intervals, count, phase).release();
+extern "C" SkPathEffect* C_SkDashPathEffect_Make(const SkScalar intervals[], size_t count, SkScalar phase) {
+    return SkDashPathEffect::Make(SkSpan(intervals, count), phase).release();
 }
 
 //
