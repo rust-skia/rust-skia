@@ -646,7 +646,7 @@ extern "C" void C_SkPath_Oval(SkPath* uninitialized,
 }
 
 extern "C" void C_SkPath_OvalWithStartIndex(SkPath* uninitialized,
-    const SkRect& r, SkPathDirection dir, unsigned startIndex) {
+    const SkRect& r, SkPathDirection dir, unsigned int startIndex) {
     new(uninitialized) SkPath(SkPath::Oval(r, dir, startIndex));
 }
 
@@ -712,6 +712,18 @@ extern "C" SkPoint C_SkPath_getPoint(const SkPath* self, int index) {
     return self->getPoint(index);
 }
 
+extern "C" size_t C_SkPath_getPoints(const SkPath* self, SkPoint* points, size_t count) {
+    return self->getPoints(SkSpan(points, count));
+}
+
+extern "C" size_t C_SkPath_getVerbs(const SkPath* self, uint8_t* verbs, size_t count) {
+    return self->getVerbs(SkSpan(verbs, count));
+}
+
+extern "C" void C_SkPath_addPoly(SkPath* self, const SkPoint* points, size_t count, bool close) {
+    self->addPoly(SkSpan(points, count), close);
+}
+
 extern "C" const SkRect* C_SkPath_getBounds(const SkPath* self) {
     return &self->getBounds();
 }
@@ -758,6 +770,14 @@ extern "C" void C_SkPathBuilder_detach(SkPathBuilder* self, SkPath* path) {
     *path = self->detach();
 }
 
+extern "C" void C_SkPathBuilder_polylineTo(SkPathBuilder* self, const SkPoint* points, size_t count) {
+    self->polylineTo(SkSpan(points, count));
+}
+
+extern "C" void C_SkPathBuilder_addPolygon(SkPathBuilder* self, const SkPoint* points, size_t count, bool close) {
+    self->addPolygon(SkSpan(points, count), close);
+}
+
 extern "C" bool C_SkPathBuilder_isEmpty(const SkPathBuilder* self) {
     return self->isEmpty();
 }
@@ -772,6 +792,18 @@ extern "C" bool C_SkPathBuilder_getLastPt(const SkPathBuilder* self, SkPoint* po
 
 extern "C" size_t C_SkPathBuilder_countPoints(const SkPathBuilder* self) {
     return self->countPoints();
+}
+
+extern "C" const SkPoint* C_SkPathBuilder_points(const SkPathBuilder* self, size_t* count) {
+    auto span = self->points();
+    *count = span.size();
+    return span.begin();
+}
+
+extern "C" const uint8_t* C_SkPathBuilder_verbs(const SkPathBuilder* self, size_t* count) {
+    auto span = self->verbs();
+    *count = span.size();
+    return span.begin();
 }
 
 //
@@ -876,6 +908,62 @@ extern "C" void C_SkCanvas_getTotalMatrix(const SkCanvas* self, SkMatrix* matrix
 
 extern "C" void C_SkCanvas_discard(SkCanvas* self) {
     self->discard();
+}
+
+extern "C" void C_SkCanvas_drawPoints(SkCanvas* self, SkCanvas::PointMode mode, const SkPoint* points, size_t pointCount, const SkPaint* paint) {
+    self->drawPoints(mode, SkSpan(points, pointCount), *paint);
+}
+
+extern "C" void C_SkCanvas_drawGlyphs(
+    SkCanvas* self, 
+    const SkGlyphID* glyphs, size_t glyphCount,
+    const SkPoint* positions,
+    SkPoint origin, const SkFont* font, const SkPaint* paint) {
+    self->drawGlyphs(
+        SkSpan(glyphs, glyphCount), 
+        SkSpan(positions, glyphCount),
+        origin, *font, *paint);
+}
+
+extern "C" void C_SkCanvas_drawGlyphs2(
+    SkCanvas* self, 
+    const SkGlyphID* glyphs, size_t glyphCount,
+    const SkPoint* positions,
+    const uint32_t* clusters,
+    const char* utf8Text, size_t textSize,
+    SkPoint origin, const SkFont* font, const SkPaint* paint) {
+    self->drawGlyphs(
+        SkSpan(glyphs, glyphCount), 
+        SkSpan(positions, glyphCount),
+        SkSpan(clusters, glyphCount),
+        SkSpan(utf8Text, textSize), 
+        origin, *font, *paint);
+}
+
+extern "C" void C_SkCanvas_drawGlyphsRSXform(
+    SkCanvas* self, 
+    const SkGlyphID* glyphs, size_t glyphCount,
+    const SkRSXform* xforms,
+    SkPoint origin, const SkFont* font, const SkPaint* paint) {
+    self->drawGlyphsRSXform(
+        SkSpan(glyphs, glyphCount), 
+        SkSpan(xforms, glyphCount),
+        origin, *font, *paint);
+}
+
+extern "C" void C_SkCanvas_drawAtlas(
+    SkCanvas* self,
+    const SkImage* atlas, 
+    const SkRSXform* xform, size_t xformCount,
+    const SkRect* tex, const SkColor* colors, SkBlendMode mode,
+    const SkSamplingOptions* sampling, const SkRect* cullRect, const SkPaint* paint) {
+
+    self->drawAtlas(
+        atlas,
+        SkSpan(xform, xformCount),
+        SkSpan(tex, xformCount),
+        SkSpan(colors, colors == nullptr ? 0 : xformCount),
+        mode, *sampling, cullRect, paint);
 }
 
 //
@@ -1119,6 +1207,30 @@ extern "C" const SkMatrix* C_SkMatrix_InvalidMatrix() {
 
 extern "C" void C_SkMatrix_normalizePerspective(SkMatrix* self) {
     self->normalizePerspective();
+}
+
+extern "C" void C_SkMatrix_mapPoints(const SkMatrix* self, SkPoint* dst, const SkPoint* src, size_t count) {
+    self->mapPoints(SkSpan(dst, count), SkSpan(src, count));
+}
+
+extern "C" void C_SkMatrix_mapHomogeneousPoints(const SkMatrix* self, SkPoint3* dst, const SkPoint3* src, size_t count) {
+    self->mapHomogeneousPoints(SkSpan(dst, count), SkSpan(src, count));
+}
+
+extern "C" void C_SkMatrix_mapPointsToHomogeneous(const SkMatrix* self, SkPoint3* dst, const SkPoint* src, size_t count) {
+    self->mapPointsToHomogeneous(SkSpan(dst, count), SkSpan(src, count));
+}
+
+extern "C" SkPoint C_SkMatrix_mapPoint(const SkMatrix* self, SkPoint p) {
+    return self->mapPoint(p);
+}
+
+extern "C" SkPoint C_SkMatrix_mapPointAffine(const SkMatrix* self, SkPoint p) {
+    return self->mapPointAffine(p);
+}
+
+extern "C" void C_SkMatrix_mapVectors(const SkMatrix* self, SkVector* dst, const SkVector* src, size_t count) {
+    self->mapVectors(SkSpan(dst, count), SkSpan(src, count));
 }
 
 //
@@ -1502,11 +1614,50 @@ extern "C" void C_SkFont_setTypeface(SkFont* self, SkTypeface* tf) {
     self->setTypeface(sp(tf));
 }
 
+extern "C" size_t C_SkFont_textToGlyphs(
+    const SkFont* self,
+    const void* text, size_t byteLength, 
+    SkTextEncoding encoding,
+    SkGlyphID* glyphs, size_t glyphsCount) {
+    self->textToGlyphs(text, byteLength, encoding, SkSpan(glyphs, glyphsCount));
+}
+
+extern "C" void C_SkFont_unicharsToGlyphs(
+    const SkFont* self,
+    const SkUnichar* src, size_t charsCount,
+    SkGlyphID* dst) {
+    self->unicharsToGlyphs(SkSpan(src, charsCount), SkSpan(dst, charsCount));
+}
+
+extern "C" void C_SkFont_getWidthBounds(
+    const SkFont* self,
+    const SkGlyphID* glyphs, size_t glyphCount,
+    SkScalar* widths, SkRect* bounds,
+    const SkPaint* paint) {
+    self->getWidthsBounds(SkSpan(glyphs, glyphCount), SkSpan(widths, glyphCount), SkSpan(bounds, glyphCount), paint);
+}
+
+extern "C" void C_SkFont_getPos(
+    const SkFont* self,
+    const SkGlyphID* glyphs, size_t glyphCount,
+    SkPoint* pos,
+    SkPoint origin) {
+    self->getPos(SkSpan(glyphs, glyphCount), SkSpan(pos, glyphCount), origin);
+}
+
+extern "C" void C_SkFont_getXPos(
+    const SkFont* self,
+    const SkGlyphID* glyphs, size_t glyphCount,
+    SkScalar* xPos,
+    SkScalar origin) {
+    self->getXPos(SkSpan(glyphs, glyphCount), SkSpan(xPos, glyphCount), origin);
+}
+
 extern "C" void C_SkFont_getIntercepts(
     const SkFont* self, 
-    const SkGlyphID glyphs[], 
+    const SkGlyphID* glyphs, 
     size_t count, 
-    const SkPoint pos[], 
+    const SkPoint* pos, 
     SkScalar top, SkScalar bottom, 
     const SkPaint* paint, 
     VecSink<SkScalar>* vs) {
@@ -1793,6 +1944,15 @@ extern "C" bool C_SkIRect_isEmpty(const SkIRect* self) {
 
 extern "C" bool C_SkIRect_contains(const SkIRect* self, const SkRect* rect) {
     return self->contains(*rect);
+}
+
+extern "C" bool C_SkRect_Bounds(const SkPoint* pts, size_t count, SkRect* bounds) {
+    auto boundsOpt = SkRect::Bounds(SkSpan(pts, count));
+    auto hasValue = boundsOpt.has_value();
+    if (hasValue) {
+        *bounds = *boundsOpt;
+    }
+    return hasValue;
 }
 
 extern "C" void C_SkRect_round(const SkRect* self, SkIRect* dst) {

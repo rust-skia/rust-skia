@@ -369,11 +369,11 @@ impl Path {
             sb::C_SkPath_Make(
                 path,
                 points.native().as_ptr(),
-                points.len().try_into().unwrap(),
+                points.len(),
                 verbs.as_ptr(),
-                verbs.len().try_into().unwrap(),
+                verbs.len(),
                 conic_weights.as_ptr(),
-                conic_weights.len().try_into().unwrap(),
+                conic_weights.len(),
                 fill_type,
                 is_volatile.into().unwrap_or(false),
             )
@@ -467,7 +467,7 @@ impl Path {
             sb::C_SkPath_Polygon(
                 path,
                 pts.native().as_ptr(),
-                pts.len().try_into().unwrap(),
+                pts.len(),
                 is_closed,
                 fill_type.into().unwrap_or(FillType::Winding),
                 is_volatile.into().unwrap_or(false),
@@ -841,25 +841,21 @@ impl Path {
         }
     }
 
-    /// Returns number of points in [`Path`]. Up to max points are copied.
-    /// points may be `None`; then, max must be zero.
-    /// If max is greater than number of points, excess points storage is unaltered.
+    /// Returns number of points in [`Path`].
+    /// Copies N points from the path into the span, where N = min(#points, span capacity)
     ///
-    /// * `points` - storage for [`Path`] [`Point`] array. May be `None`
-    /// * `max` - maximum to copy; must be greater than or equal to zero
-    ///
-    /// Returns: [`Path`] [`Point`] array length
+    /// * `points` - span to receive the points. may be empty
+    /// Returns: the number of points in the path
     ///
     /// example: <https://fiddle.skia.org/c/@Path_getPoints>
     pub fn get_points(&self, points: &mut [Point]) -> usize {
         unsafe {
-            self.native().getPoints(
+            sb::C_SkPath_getPoints(
+                self.native(),
                 points.native_mut().as_mut_ptr(),
-                points.len().try_into().unwrap(),
+                points.len(),
             )
         }
-        .try_into()
-        .unwrap()
     }
 
     /// Returns the number of verbs: [`Verb::Move`], [`Verb::Line`], [`Verb::Quad`], [`Verb::Conic`],
@@ -872,22 +868,15 @@ impl Path {
         unsafe { self.native().countVerbs() }.try_into().unwrap()
     }
 
-    /// Returns the number of verbs in the path. Up to max verbs are copied. The
-    /// verbs are copied as one byte per verb.
+    /// Returns number of points in [`Path`].
+    /// Copies N points from the path into the span, where N = min(#points, span capacity)
     ///
-    /// * `verbs` - storage for verbs, may be `None`
-    /// * `max` - maximum number to copy into verbs
-    ///
-    /// Returns: the actual number of verbs in the path
+    /// * `verbs` - span to store the verbs. may be empty.
+    /// Returns: the number of verbs in the path
     ///
     /// example: <https://fiddle.skia.org/c/@Path_getVerbs>
     pub fn get_verbs(&self, verbs: &mut [u8]) -> usize {
-        unsafe {
-            self.native()
-                .getVerbs(verbs.as_mut_ptr(), verbs.len().try_into().unwrap())
-        }
-        .try_into()
-        .unwrap()
+        unsafe { sb::C_SkPath_getVerbs(self.native(), verbs.as_mut_ptr(), verbs.len()) }
     }
 
     /// Returns the approximate byte size of the [`Path`] in memory.
@@ -1660,9 +1649,6 @@ impl Path {
         self
     }
 
-    // Decided to only provide the simpler variant of the two, if radii needs to be specified,
-    // add_rrect can be used.
-
     /// Appends [`RRect`] to [`Path`], creating a new closed contour. [`RRect`] has bounds
     /// equal to rect; each corner is 90 degrees of an ellipse with radii (rx, ry). If
     /// dir is [`Direction::CW`], [`RRect`] starts at top-left of the lower-left corner and
@@ -1694,6 +1680,9 @@ impl Path {
         };
         self
     }
+
+    // No add_round_rect() wiht radii (8 of them). Decided to only provide the simpler variant of
+    // the two, if radii needs to be specified, add_rrect can be used.
 
     /// Adds rrect to [`Path`], creating a new closed contour. If dir is [`Direction::CW`], rrect
     /// winds clockwise; if dir is [`Direction::CCW`], rrect winds counterclockwise.
@@ -1736,13 +1725,10 @@ impl Path {
     /// example: <https://fiddle.skia.org/c/@Path_addPoly>
     pub fn add_poly(&mut self, pts: &[Point], close: bool) -> &mut Self {
         unsafe {
-            self.native_mut()
-                .addPoly(pts.native().as_ptr(), pts.len().try_into().unwrap(), close)
+            sb::C_SkPath_addPoly(self.native_mut(), pts.native().as_ptr(), pts.len(), close);
         };
         self
     }
-
-    // TODO: addPoly(initializer_list)
 
     /// Appends src to [`Path`], offset by `(d.x, d.y)`.
     ///
@@ -2024,7 +2010,7 @@ impl Path {
         }
         .if_true_some(path)
     }
-    /// (See Skia bug 1762.)
+    /// (See skbug.com/40032862)
     /// Returns a non-zero, globally unique value. A different value is returned
     /// if verb array, [`Point`] array, or conic weight changes.
     ///
