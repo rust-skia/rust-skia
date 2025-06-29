@@ -614,55 +614,78 @@ impl Matrix {
         assert!(dst.len() >= src.len());
 
         unsafe {
-            self.native().mapPoints(
+            sb::C_SkMatrix_mapPoints(
+                self.native(),
                 dst.native_mut().as_mut_ptr(),
                 src.native().as_ptr(),
-                src.len().try_into().unwrap(),
+                src.len(),
             )
         };
     }
 
     pub fn map_points_inplace(&self, pts: &mut [Point]) {
         let ptr = pts.native_mut().as_mut_ptr();
-        unsafe {
-            self.native()
-                .mapPoints(ptr, ptr, pts.len().try_into().unwrap())
-        };
+        unsafe { sb::C_SkMatrix_mapPoints(self.native(), ptr, ptr, pts.len()) };
     }
 
     pub fn map_homogeneous_points(&self, dst: &mut [Point3], src: &[Point3]) {
         assert!(dst.len() >= src.len());
 
         unsafe {
-            self.native().mapHomogeneousPoints(
+            sb::C_SkMatrix_mapHomogeneousPoints(
+                self.native(),
                 dst.native_mut().as_mut_ptr(),
                 src.native().as_ptr(),
-                src.len().try_into().unwrap(),
+                src.len(),
             )
         };
     }
 
+    pub fn map_homogeneous_point(&self, src: Point3) -> Point3 {
+        let mut dst = Point3::default();
+        self.map_homogeneous_points(slice::from_mut(&mut dst), &[src]);
+        dst
+    }
+
+    #[deprecated(since = "0.0.0", note = "use map_points_to_homogeneous()")]
     pub fn map_homogeneous_points_2d(&self, dst: &mut [Point3], src: &[Point]) {
+        self.map_points_to_homogeneous(dst, src);
+    }
+
+    pub fn map_points_to_homogeneous(&self, dst: &mut [Point3], src: &[Point]) {
         assert!(dst.len() >= src.len());
 
         unsafe {
-            self.native().mapHomogeneousPoints1(
+            sb::C_SkMatrix_mapPointsToHomogeneous(
+                self.native(),
                 dst.native_mut().as_mut_ptr(),
                 src.native().as_ptr(),
-                src.len().try_into().unwrap(),
+                src.len(),
             )
         };
     }
 
-    pub fn map_point(&self, point: impl Into<Point>) -> Point {
-        let point = point.into();
-        let mut p = Point::default();
-        unsafe { self.native().mapXY(point.x, point.y, p.native_mut()) };
-        p
+    pub fn map_point_to_homogeneous(&self, src: Point) -> Point3 {
+        let mut dst = Point3::default();
+        self.map_points_to_homogeneous(slice::from_mut(&mut dst), &[src]);
+        dst
     }
 
+    #[deprecated(since = "0.0.0", note = "use map_point((x, y))")]
     pub fn map_xy(&self, x: scalar, y: scalar) -> Point {
         self.map_point((x, y))
+    }
+
+    pub fn map_point(&self, point: impl Into<Point>) -> Point {
+        Point::from_native_c(unsafe {
+            sb::C_SkMatrix_mapPoint(self.native(), point.into().into_native())
+        })
+    }
+
+    pub fn map_point_affine(&self, point: impl Into<Point>) -> Point {
+        Point::from_native_c(unsafe {
+            sb::C_SkMatrix_mapPointAffine(self.native(), point.into().into_native())
+        })
     }
 
     pub fn map_origin(&self) -> Point {
@@ -682,20 +705,18 @@ impl Matrix {
     pub fn map_vectors(&self, dst: &mut [Vector], src: &[Vector]) {
         assert!(dst.len() >= src.len());
         unsafe {
-            self.native().mapVectors(
+            sb::C_SkMatrix_mapVectors(
+                self.native(),
                 dst.native_mut().as_mut_ptr(),
                 src.native().as_ptr(),
-                src.len().try_into().unwrap(),
+                src.len(),
             )
         }
     }
 
     pub fn map_vectors_inplace(&self, vecs: &mut [Vector]) {
         let ptr = vecs.native_mut().as_mut_ptr();
-        unsafe {
-            self.native()
-                .mapVectors(ptr, ptr, vecs.len().try_into().unwrap())
-        }
+        unsafe { sb::C_SkMatrix_mapVectors(self.native(), ptr, ptr, vecs.len()) }
     }
 
     pub fn map_vector(&self, vec: impl Into<Vector>) -> Vector {
