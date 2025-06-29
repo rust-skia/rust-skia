@@ -284,6 +284,10 @@ impl IRect {
         )
     }
 
+    pub fn as_i32s(&self) -> &[i32] {
+        unsafe { safer::from_raw_parts(&self.left, 4) }
+    }
+
     #[deprecated(since = "0.27.0", note = "removed without replacement")]
     #[must_use]
     pub fn empty() -> &'static Self {
@@ -498,6 +502,16 @@ impl Rect {
 
     pub fn set_ltrb(&mut self, left: f32, top: f32, right: f32, bottom: f32) {
         *self = Self::new(left, top, right, bottom)
+    }
+
+    pub fn bounds(pts: &[Point]) -> Option<Rect> {
+        let mut bounds = Rect::default();
+        unsafe { sb::C_SkRect_Bounds(pts.native().as_ptr(), pts.len(), bounds.native_mut()) }
+            .if_true_some(bounds)
+    }
+
+    pub fn bounds_or_empty(pts: &[Point]) -> Rect {
+        Self::bounds(pts).unwrap_or_else(|| Self::new_empty())
     }
 
     pub fn set_bounds(&mut self, points: &[Point]) {

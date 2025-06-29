@@ -50,7 +50,7 @@ impl fmt::Debug for Data {
 
 impl Data {
     pub fn size(&self) -> usize {
-        self.native().fSize
+        self.native().fSpan.fSize
     }
 
     pub fn is_empty(&self) -> bool {
@@ -58,7 +58,7 @@ impl Data {
     }
 
     pub fn as_bytes(&self) -> &[u8] {
-        unsafe { safer::from_raw_parts(self.native().fPtr as _, self.size()) }
+        unsafe { safer::from_raw_parts(self.native().fSpan.fPtr as _, self.size()) }
     }
 
     // TODO:
