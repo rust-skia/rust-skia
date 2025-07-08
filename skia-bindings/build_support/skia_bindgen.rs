@@ -481,6 +481,8 @@ const BLOCKLISTED_TYPES: &[&str] = &[
     "SkRuntimeEffect_ConstIterable.*",
     // Linux LLVM9 c++17
     "std::_Rb_tree.*",
+    // archlinux
+    "std::__rb_tree.*",
     // Linux LLVM9 c++17 with SKIA_DEBUG=1
     "std::__cxx.*",
     "std::array.*",
