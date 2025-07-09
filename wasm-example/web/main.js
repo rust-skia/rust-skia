@@ -2,8 +2,8 @@
  * Make a canvas element fit to the display window.
  */
 function resizeCanvasToDisplaySize(canvas) {
-  const width = canvas.clientWidth | 1;
-  const height = canvas.clientHeight | 1;
+  const width = canvas.clientWidth || 1;
+  const height = canvas.clientHeight || 1;
   if (canvas.width !== width || canvas.height !== height) {
     canvas.width = width;
     canvas.height = height;
