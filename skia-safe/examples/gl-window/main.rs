@@ -100,8 +100,10 @@ fn main() {
         .unwrap();
     println!("Picked a config with {} samples", gl_config.num_samples());
     let window = window.expect("Could not create window with OpenGL context");
-    let window_handle = window.window_handle( ).expect( "Failed to retrieve RawWindowHandle" );
-    let raw_window_handle = window_handle.as_raw( );
+    let window_handle = window
+        .window_handle()
+        .expect("Failed to retrieve RawWindowHandle");
+    let raw_window_handle = window_handle.as_raw();
 
     // The context creation part. It can be created before surface and that's how
     // it's expected in multithreaded + multiwindow operation mode, since you
