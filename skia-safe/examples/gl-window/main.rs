@@ -53,8 +53,7 @@ fn main() {
         surface::{Surface as GlutinSurface, SurfaceAttributesBuilder, WindowSurface},
     };
     use glutin_winit::DisplayBuilder;
-    #[allow(deprecated)]
-    use raw_window_handle::HasRawWindowHandle;
+    use raw_window_handle::HasWindowHandle;
     use winit::{
         application::ApplicationHandler,
         dpi::LogicalSize,
@@ -101,10 +100,8 @@ fn main() {
         .unwrap();
     println!("Picked a config with {} samples", gl_config.num_samples());
     let window = window.expect("Could not create window with OpenGL context");
-    #[allow(deprecated)]
-    let raw_window_handle = window
-        .raw_window_handle()
-        .expect("Failed to retrieve RawWindowHandle");
+    let window_handle = window.window_handle( ).expect( "Failed to retrieve RawWindowHandle" );
+    let raw_window_handle = window_handle.as_raw( );
 
     // The context creation part. It can be created before surface and that's how
     // it's expected in multithreaded + multiwindow operation mode, since you
