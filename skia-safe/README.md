@@ -94,7 +94,7 @@ This feature enables support for rendering SVG files (`svg::Dom`).
 
 ### `webp-encode`, `webp-decode`, `webp`
 
-`webp-encode` enables support for encoding Skia bitmaps and images to the [WEBP](https://en.wikipedia.org/wiki/WebP) image format, and `web-decode` enables support for decoding WEBP to Skia bitmaps and images. The `webp` feature can be used as a shorthand to enable the `webp-encode` and `webp-decode` features.
+`webp-encode` enables support for encoding Skia bitmaps and images to the [WEBP](https://en.wikipedia.org/wiki/WebP) image format, and `webp-decode` enables support for decoding WEBP to Skia bitmaps and images. The `webp` feature can be used as a shorthand to enable the `webp-encode` and `webp-decode` features.
 
 ### `binary-cache` (enabled by default)
 
