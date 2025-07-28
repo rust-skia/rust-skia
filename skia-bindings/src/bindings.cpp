@@ -1512,6 +1512,14 @@ extern "C" void C_SkTypeface_fontStyle(const SkTypeface* self, SkFontStyle* unin
     new (uninitialized) SkFontStyle(self->fontStyle());
 }
 
+extern "C" int C_SkTypeface_getVariationDesignPosition(const SkTypeface* self, SkFontArguments::VariationPosition::Coordinate* coordinates, size_t count) {
+    return self->getVariationDesignPosition(SkSpan(coordinates, count));
+}
+
+extern "C" int C_SkTypeface_getVariationDesignParameters(const SkTypeface* self, SkFontParameters::Variation::Axis* parameters, size_t count) {
+    return self->getVariationDesignParameters(SkSpan(parameters, count));
+}
+
 extern "C" SkTypeface* C_SkTypeface_makeClone(const SkTypeface* self, const SkFontArguments* arguments) {
     return self->makeClone(*arguments).release();
 }
@@ -1528,8 +1536,24 @@ extern "C" SkTypeface* C_SkTypeface_MakeDeserialize(SkStream* stream, SkFontMgr*
     return SkTypeface::MakeDeserialize(stream, sp(lastResortFontMgr)).release();
 }
 
+extern "C" void C_SkTypeface_unicharsToGlyphs(const SkTypeface* self, const SkUnichar* uni, size_t uniCount, SkGlyphID* glyphs, size_t glyphsCount) {
+    self->unicharsToGlyphs(SkSpan(uni, uniCount), SkSpan(glyphs, glyphsCount));
+}
+
+extern "C" size_t C_SkTypeface_textToGlyphs(const SkTypeface* self, const void* text, size_t byteLength, SkTextEncoding encoding, SkGlyphID* glyphs, size_t glyphsCount) {
+    return self->textToGlyphs(text, byteLength, encoding, SkSpan(glyphs, glyphsCount));
+}
+
+extern "C" int C_SkTypeface_readTableTags(const SkTypeface* self, SkFontTableTag* tags, size_t count) {
+    return self->readTableTags(SkSpan(tags, count));
+}
+
 extern "C" SkData* C_SkTypeface_copyTableData(const SkTypeface* self, SkFontTableTag tag) {
     return self->copyTableData(tag).release();
+}
+
+extern "C" bool C_SkTypeface_getKerningPairAdjustments(const SkTypeface* self, const SkGlyphID* glyphs, size_t glyphsCount, int32_t* adjustments, size_t adjustmentsCount) {
+    return self->getKerningPairAdjustments(SkSpan(glyphs, glyphsCount), SkSpan(adjustments, adjustmentsCount));
 }
 
 extern "C" SkStreamAsset* C_SkTypeface_openStream(const SkTypeface* self, int* ttcIndex) {
@@ -1953,6 +1977,14 @@ extern "C" bool C_SkRect_Bounds(const SkPoint* pts, size_t count, SkRect* bounds
         *bounds = *boundsOpt;
     }
     return hasValue;
+}
+
+extern "C" bool C_SkRect_setBoundsCheck(SkRect* self, const SkPoint* pts, size_t count) {
+    return self->setBoundsCheck(SkSpan(pts, count));
+}
+
+extern "C" void C_SkRect_setBoundsNoCheck(SkRect* self, const SkPoint* pts, size_t count) {
+    self->setBoundsNoCheck(SkSpan(pts, count));
 }
 
 extern "C" void C_SkRect_round(const SkRect* self, SkIRect* dst) {

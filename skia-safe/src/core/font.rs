@@ -331,7 +331,7 @@ impl Font {
             sb::C_SkFont_getWidthBounds(
                 self.native(),
                 glyphs.as_ptr(),
-                count.try_into().unwrap(),
+                count,
                 widths_ptr,
                 bounds_ptr,
                 paint_ptr,
@@ -384,7 +384,7 @@ impl Font {
         paint: impl Into<Option<&'a Paint>>,
     ) -> Vec<scalar> {
         assert_eq!(glyphs.len(), pos.len());
-        let count = glyphs.len().try_into().unwrap();
+        let count = glyphs.len();
         let mut r: Vec<scalar> = Vec::new();
         let mut set = |scalars: &[scalar]| r = scalars.to_vec();
         unsafe {

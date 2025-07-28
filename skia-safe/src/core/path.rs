@@ -845,6 +845,7 @@ impl Path {
     /// Copies N points from the path into the span, where N = min(#points, span capacity)
     ///
     /// * `points` - span to receive the points. may be empty
+    ///
     /// Returns: the number of points in the path
     ///
     /// example: <https://fiddle.skia.org/c/@Path_getPoints>
@@ -872,6 +873,7 @@ impl Path {
     /// Copies N points from the path into the span, where N = min(#points, span capacity)
     ///
     /// * `verbs` - span to store the verbs. may be empty.
+    ///
     /// Returns: the number of verbs in the path
     ///
     /// example: <https://fiddle.skia.org/c/@Path_getVerbs>
