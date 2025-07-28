@@ -386,8 +386,8 @@ impl Rect {
     }
 
     #[must_use]
-    pub fn from_ltrb(l: f32, t: f32, b: f32, r: f32) -> Self {
-        Self::new(l, t, b, r)
+    pub fn from_ltrb(l: f32, t: f32, r: f32, b: f32) -> Self {
+        Self::new(l, t, r, b)
     }
 
     #[must_use]
