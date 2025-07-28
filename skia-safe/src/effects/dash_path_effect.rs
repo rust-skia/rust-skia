@@ -10,10 +10,6 @@ impl PathEffect {
 
 pub fn new(intervals: &[scalar], phase: scalar) -> Option<PathEffect> {
     PathEffect::from_ptr(unsafe {
-        sb::C_SkDashPathEffect_Make(
-            intervals.as_ptr(),
-            intervals.len().try_into().unwrap(),
-            phase,
-        )
+        sb::C_SkDashPathEffect_Make(intervals.as_ptr(), intervals.len(), phase)
     })
 }
