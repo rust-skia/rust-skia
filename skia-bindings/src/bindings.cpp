@@ -1643,7 +1643,7 @@ extern "C" size_t C_SkFont_textToGlyphs(
     const void* text, size_t byteLength, 
     SkTextEncoding encoding,
     SkGlyphID* glyphs, size_t glyphsCount) {
-    self->textToGlyphs(text, byteLength, encoding, SkSpan(glyphs, glyphsCount));
+    return self->textToGlyphs(text, byteLength, encoding, SkSpan(glyphs, glyphsCount));
 }
 
 extern "C" void C_SkFont_unicharsToGlyphs(
