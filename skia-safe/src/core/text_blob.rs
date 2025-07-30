@@ -92,6 +92,7 @@ impl TextBlob {
                 ptr,
                 size,
                 x_pos.as_ptr(),
+                x_pos.len(),
                 const_y,
                 font.native(),
                 encoding.into_native(),
@@ -107,6 +108,7 @@ impl TextBlob {
                 ptr,
                 size,
                 pos.native().as_ptr(),
+                pos.len(),
                 font.native(),
                 encoding.into_native(),
             )
@@ -125,6 +127,7 @@ impl TextBlob {
                 ptr,
                 size,
                 xform.native().as_ptr(),
+                xform.len(),
                 font.native(),
                 encoding.into_native(),
             )
