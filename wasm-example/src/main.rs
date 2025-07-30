@@ -5,7 +5,7 @@ use skia_safe::{
     Color, Paint, PaintStyle, Surface,
 };
 
-extern "C" {
+unsafe extern "C" {
     pub fn emscripten_GetProcAddress(
         name: *const ::std::os::raw::c_char,
     ) -> *const ::std::os::raw::c_void;
@@ -97,7 +97,7 @@ fn render_circle(surface: &mut Surface, x: f32, y: f32, radius: f32) {
 /// Initialize the renderer.
 ///
 /// This is called from JS after the WebGL context has been created.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn init(width: i32, height: i32) -> Box<State> {
     let mut gpu_state = create_gpu_state();
     let surface = create_surface(&mut gpu_state, width, height);
@@ -109,7 +109,7 @@ pub extern "C" fn init(width: i32, height: i32) -> Box<State> {
 ///
 /// This is called from JS when the window is resized.
 /// # Safety
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn resize_surface(state: *mut State, width: i32, height: i32) {
     let state = unsafe { state.as_mut() }.expect("got an invalid state pointer");
     let surface = create_surface(&mut state.gpu_state, width, height);
@@ -118,7 +118,7 @@ pub unsafe extern "C" fn resize_surface(state: *mut State, width: i32, height: i
 
 /// Draw a black circle at the specified coordinates.
 /// # Safety
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn draw_circle(state: *mut State, x: i32, y: i32) {
     let state = unsafe { state.as_mut() }.expect("got an invalid state pointer");
     //state.surface.canvas().clear(Color::WHITE);
