@@ -30,8 +30,8 @@ extern "C" bool C_SkSurface_replaceBackendTexture(
 // core/SkImageGenerator.h
 //
 
-extern "C" bool C_SkImageGenerator_isValid(const SkImageGenerator* self, GrRecordingContext* context) {
-    return self->isValid(context);
+extern "C" bool C_SkImageGenerator_isValid(const SkImageGenerator* self, SkRecorder* recorder) {
+    return self->isValid(recorder);
 }
 
 //

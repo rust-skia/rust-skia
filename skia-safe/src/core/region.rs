@@ -81,7 +81,12 @@ impl Region {
     }
 
     pub fn get_boundary_path(&self, path: &mut Path) -> bool {
-        unsafe { self.native().getBoundaryPath(path.native_mut()) }
+        unsafe { self.native().getBoundaryPath1(path.native_mut()) }
+    }
+
+    pub fn boundary_path(&self) -> Option<Path> {
+        let mut path = Path::default();
+        unsafe { self.native().getBoundaryPath1(path.native_mut()) }.if_true_some(path)
     }
 
     pub fn set_empty(&mut self) -> bool {

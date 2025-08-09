@@ -187,6 +187,7 @@ impl Matrix {
         dst: impl AsRef<Rect>,
         scale_to_fit: impl Into<Option<ScaleToFit>>,
     ) -> Option<Self> {
+        #[allow(deprecated)]
         Self::from_rect_to_rect(src, dst, scale_to_fit.into().unwrap_or(ScaleToFit::Fill))
     }
 
@@ -538,6 +539,10 @@ impl Matrix {
         self
     }
 
+    #[deprecated(
+        since = "0.0.0",
+        note = "Legacy matrix rect-to-rect function, may be removed soon"
+    )]
     pub fn set_rect_to_rect(
         &mut self,
         src: impl AsRef<Rect>,
@@ -550,24 +555,28 @@ impl Matrix {
         }
     }
 
+    #[deprecated(
+        since = "0.0.0",
+        note = "Legacy matrix rect-to-rect function, may be removed soon"
+    )]
     pub fn from_rect_to_rect(
         src: impl AsRef<Rect>,
         dst: impl AsRef<Rect>,
         stf: ScaleToFit,
     ) -> Option<Self> {
         let mut m = Self::new_identity();
+        #[allow(deprecated)]
         m.set_rect_to_rect(src, dst, stf).if_true_some(m)
     }
 
     pub fn set_poly_to_poly(&mut self, src: &[Point], dst: &[Point]) -> bool {
-        if src.len() != dst.len() {
-            return false;
-        }
         unsafe {
-            self.native_mut().setPolyToPoly(
+            sb::C_SkMatrix_setPolyToPoly(
+                self.native_mut(),
                 src.native().as_ptr(),
+                src.len(),
                 dst.native().as_ptr(),
-                src.len().try_into().unwrap(),
+                dst.len(),
             )
         }
     }

@@ -106,13 +106,10 @@ impl Iter<'_> {
     /// * `force_close` - `true` if open contours generate [`Verb::Close`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_Iter_setPath>
-    pub fn set_path(mut self, path: &Path, force_close: bool) -> Iter {
+    pub fn set_path(&mut self, path: &Path, force_close: bool) {
         unsafe {
             self.0.setPath(path.native(), force_close);
         }
-        let r = Iter(self.0, PhantomData);
-        forget(self);
-        r
     }
 
     /// Returns conic weight if `next()` returned [`Verb::Conic`].

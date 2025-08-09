@@ -1,4 +1,4 @@
-use crate::{prelude::*, scalar, Matrix, Path, PathVerb, Point, Vector};
+use crate::{prelude::*, scalar, Matrix, Path, PathBuilder, PathVerb, Point, Vector};
 use skia_bindings::{
     self as sb, SkContourMeasure, SkContourMeasureIter, SkContourMeasure_ForwardVerbIterator,
     SkContourMeasure_VerbMeasure, SkRefCntBase,
@@ -78,14 +78,17 @@ impl ContourMeasure {
         &self,
         start_d: scalar,
         stop_d: scalar,
+        path_builder: &mut PathBuilder,
         start_with_move_to: bool,
-    ) -> Option<Path> {
-        let mut p = Path::default();
+    ) -> bool {
         unsafe {
-            self.native()
-                .getSegment(start_d, stop_d, p.native_mut(), start_with_move_to)
+            self.native().getSegment(
+                start_d,
+                stop_d,
+                path_builder.native_mut(),
+                start_with_move_to,
+            )
         }
-        .if_true_some(p)
     }
 
     pub fn is_closed(&self) -> bool {

@@ -1,8 +1,8 @@
 use std::{fmt, mem};
 
 use crate::{
-    matrix, path, prelude::*, scalar, Matrix, Path, PathDirection, PathFillType, Point, RRect,
-    Rect, Vector,
+    matrix, path, prelude::*, scalar, Matrix, Path, PathDirection, PathFillType, PathVerb, Point,
+    RRect, Rect, Vector,
 };
 use skia_bindings::{self as sb, SkPathBuilder, SkPath_AddPathMode};
 
@@ -18,6 +18,12 @@ impl NativeDrop for SkPathBuilder {
     }
 }
 
+impl Default for PathBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Clone for PathBuilder {
     fn clone(&self) -> Self {
         Self::construct(|pb| unsafe { sb::C_SkPathBuilder_CopyConstruct(pb, self.native()) })
@@ -29,6 +35,12 @@ impl fmt::Debug for PathBuilder {
         f.debug_struct("PathBuilder")
             .field("fill_type", &self.fill_type())
             .finish()
+    }
+}
+
+impl From<PathBuilder> for Path {
+    fn from(mut value: PathBuilder) -> Self {
+        value.detach()
     }
 }
 
@@ -405,7 +417,7 @@ impl PathBuilder {
 
     pub fn toggle_inverse_fill_type(&mut self) -> &mut Self {
         let n = self.native_mut();
-        n.fFillType = unsafe { mem::transmute::<i32, sb::SkPathFillType>(n.fFillType as i32 ^ 2) };
+        n.fFillType = unsafe { mem::transmute::<u8, sb::SkPathFillType>(n.fFillType as u8 ^ 2) };
         self
     }
 
@@ -440,7 +452,7 @@ impl PathBuilder {
         }
     }
 
-    pub fn verbs(&self) -> &[u8] {
+    pub fn verbs(&self) -> &[PathVerb] {
         unsafe {
             let mut len = 0;
             let verbs = sb::C_SkPathBuilder_verbs(self.native(), &mut len);

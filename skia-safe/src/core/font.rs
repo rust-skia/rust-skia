@@ -404,7 +404,8 @@ impl Font {
 
     pub fn get_path(&self, glyph_id: GlyphId) -> Option<Path> {
         let mut path = Path::default();
-        unsafe { self.native().getPath(glyph_id, path.native_mut()) }.if_true_some(path)
+        unsafe { sb::C_SkFont_getPath(self.native(), glyph_id, path.native_mut()) }
+            .if_true_some(path)
     }
 
     // TODO: getPaths() (needs a function to be passed, but supports a context).

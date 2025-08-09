@@ -1,3 +1,4 @@
+use crate::PathBuilder;
 use crate::{paint, prelude::*, scalar, Paint, Path};
 use skia_bindings::{self as sb, SkStrokeRec};
 use std::fmt;
@@ -142,12 +143,21 @@ impl StrokeRec {
         style == Style::Stroke || style == Style::StrokeAndFill
     }
 
-    pub fn apply_to_path(&self, dst: &mut Path, src: &Path) -> bool {
+    pub fn apply_to_path(&self, dst: &mut PathBuilder, src: &Path) -> bool {
         unsafe { self.native().applyToPath(dst.native_mut(), src.native()) }
     }
 
+    #[deprecated(since = "0.0.0", note = "Use apply_to_path()")]
     pub fn apply_to_path_inplace(&self, path: &mut Path) -> bool {
-        unsafe { self.native().applyToPath(path.native_mut(), path.native()) }
+        let mut builder = PathBuilder::default();
+        let r = unsafe {
+            self.native()
+                .applyToPath(builder.native_mut(), path.native())
+        };
+        if r {
+            *path = builder.into()
+        }
+        r
     }
 
     pub fn apply_to_paint(&self, paint: &mut Paint) {

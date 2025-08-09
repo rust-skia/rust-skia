@@ -61,6 +61,7 @@
 #include "include/core/SkPixelRef.h"
 #include "include/core/SkPoint.h"
 #include "include/core/SkPoint3.h"
+#include "include/core/SkRecorder.h"
 #include "include/core/SkRect.h"
 #include "include/core/SkRefCnt.h"
 #include "include/core/SkRegion.h"
@@ -461,8 +462,8 @@ extern "C" size_t C_SkImage_textureSize(const SkImage* self) {
     return self->textureSize();
 }
 
-extern "C" bool C_SkImage_isValid(const SkImage* self, GrRecordingContext* context) {
-    return self->isValid(context);
+extern "C" bool C_SkImage_isValid(const SkImage* self, SkRecorder* recorder) {
+    return self->isValid(recorder);
 }
 
 extern "C" SkImage* C_SkImage_makeScaled(const SkImage* self, const SkImageInfo* info, const SkSamplingOptions* sampling) {
@@ -473,8 +474,8 @@ extern "C" SkData* C_SkImage_refEncodedData(const SkImage* self) {
     return self->refEncodedData().release();
 }
 
-extern "C" SkImage* C_SkImage_makeSubset(const SkImage* self, GrDirectContext* context, const SkIRect* subset) {
-    return self->makeSubset(context, *subset).release();
+extern "C" SkImage* C_SkImage_makeSubset(const SkImage* self, SkRecorder* recorder, const SkIRect* subset, const SkImage::RequiredProperties* properties) {
+    return self->makeSubset(recorder, *subset, *properties).release();
 }
 
 extern "C" SkImage* C_SkImage_withDefaultMipmaps(const SkImage* self) {
@@ -493,8 +494,8 @@ extern "C" bool C_SkImage_isLazyGenerated(const SkImage* self) {
     return self->isLazyGenerated();
 }
 
-extern "C" SkImage* C_SkImage_makeColorSpace(const SkImage* self, GrDirectContext* direct, SkColorSpace* target) {
-    return self->makeColorSpace(direct, sp(target)).release();
+extern "C" SkImage* C_SkImage_makeColorSpace(const SkImage* self, SkRecorder* recorder, SkColorSpace* target, const SkImage::RequiredProperties* properties) {
+    return self->makeColorSpace(recorder, sp(target), *properties).release();
 }
 
 extern "C" SkImage* C_SkImage_reinterpretColorSpace(const SkImage* self, SkColorSpace* newColorSpace) {
@@ -800,7 +801,7 @@ extern "C" const SkPoint* C_SkPathBuilder_points(const SkPathBuilder* self, size
     return span.begin();
 }
 
-extern "C" const uint8_t* C_SkPathBuilder_verbs(const SkPathBuilder* self, size_t* count) {
+extern "C" const SkPathVerb* C_SkPathBuilder_verbs(const SkPathBuilder* self, size_t* count) {
     auto span = self->verbs();
     *count = span.size();
     return span.begin();
@@ -1187,6 +1188,10 @@ extern "C" bool C_SkMatrix_rectStaysRect(const SkMatrix* self) {
 
 extern "C" bool C_SkMatrix_hasPerspective(const SkMatrix* self) {
     return self->hasPerspective();
+}
+
+extern "C" bool C_SkMatrix_setPolyToPoly(SkMatrix* self, const SkPoint* src, size_t srcLen, const SkPoint* dst, size_t dstLen) {
+    return self->setPolyToPoly(SkSpan(src, srcLen), SkSpan(dst, dstLen));
 }
 
 extern "C" bool C_SkMatrix_invert(const SkMatrix* self, SkMatrix* inverse) {
@@ -1689,6 +1694,15 @@ extern "C" void C_SkFont_getIntercepts(
     vs->set(r);
 }
 
+extern "C" bool C_SkFont_getPath(const SkFont* self, SkGlyphID glyphID, SkPath* pathR) {
+    auto path = self->getPath(glyphID);
+    if (!path) {
+        return false;
+    }
+    *pathR = path.value();
+    return true;
+}
+
 //
 // core/SkFontArguments.h
 //
@@ -1956,6 +1970,18 @@ extern "C" void C_SkPixelRef_notifyAddedToCache(SkPixelRef* self) {
 
 extern "C" bool C_SkPoint_isFinite(const SkPoint* self) {
     return self->isFinite();
+}
+
+//
+// core/SkRecorder.h
+//
+
+extern "C" void C_SkRecorder_delete(SkRecorder* self) {
+    delete self;
+}
+
+extern "C" void C_SkRecorder_type(const SkRecorder* self, SkRecorder::Type* ty) {
+    *ty = self->type();
 }
 
 //

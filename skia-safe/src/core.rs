@@ -59,6 +59,7 @@ mod pixmap;
 mod point;
 mod point3;
 mod raster_handle_allocator;
+pub mod recorder;
 mod rect;
 pub mod region;
 pub mod rrect;
@@ -141,6 +142,7 @@ pub use point::*;
 pub use point3::*;
 #[allow(unused)]
 pub use raster_handle_allocator::*;
+pub use recorder::Recorder;
 pub use rect::*;
 pub use region::Region;
 pub use rrect::RRect;
