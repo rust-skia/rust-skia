@@ -1,9 +1,9 @@
-use skia_bindings::{self as sb, SkPathVerb, SkPath_Verb};
+use skia_bindings as sb;
 
-pub use skia_bindings::SkPathFillType as PathFillType;
+pub use sb::SkPathFillType as PathFillType;
 variant_name!(PathFillType::InverseEvenOdd);
 
-pub use skia_bindings::SkPathDirection as PathDirection;
+pub use sb::SkPathDirection as PathDirection;
 variant_name!(PathDirection::CW);
 
 bitflags! {
@@ -16,7 +16,5 @@ bitflags! {
     }
 }
 
-pub use skia_bindings::SkPathVerb as PathVerb;
+pub use sb::SkPathVerb as PathVerb;
 variant_name!(PathVerb::Conic);
-
-native_transmutable!(SkPath_Verb, SkPathVerb, path_verb_layout);
