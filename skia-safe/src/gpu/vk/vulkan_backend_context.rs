@@ -8,7 +8,6 @@ use std::{
 };
 
 use skia_bindings as sb;
-
 use super::{Device, GetProc, GetProcOf, Instance, PhysicalDevice, Queue, Version};
 use crate::gpu;
 

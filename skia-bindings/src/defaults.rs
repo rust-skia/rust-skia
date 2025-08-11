@@ -4,7 +4,7 @@
 use crate::{
     SkArc_Type, SkBlendMode, SkBlurStyle, SkCanvas_Lattice_RectType, SkClipOp,
     SkPDF_Metadata_CompressionLevel, SkPaint_Cap, SkPaint_Join, SkParsePath_PathEncoding,
-    SkPathDirection, SkTileMode, SkYUVColorSpace,
+    SkPathDirection, SkPathFillType, SkTileMode, SkYUVColorSpace,
 };
 
 impl Default for SkArc_Type {
@@ -16,18 +16,6 @@ impl Default for SkArc_Type {
 impl Default for SkBlendMode {
     fn default() -> Self {
         SkBlendMode::SrcOver
-    }
-}
-
-impl Default for SkPaint_Cap {
-    fn default() -> Self {
-        SkPaint_Cap::Default
-    }
-}
-
-impl Default for SkPaint_Join {
-    fn default() -> Self {
-        SkPaint_Join::Default
     }
 }
 
@@ -50,21 +38,27 @@ impl Default for SkClipOp {
     }
 }
 
-impl Default for SkYUVColorSpace {
+impl Default for SkPaint_Cap {
     fn default() -> Self {
-        SkYUVColorSpace::Identity
+        SkPaint_Cap::Default
+    }
+}
+
+impl Default for SkPaint_Join {
+    fn default() -> Self {
+        SkPaint_Join::Default
+    }
+}
+
+impl Default for SkPathFillType {
+    fn default() -> Self {
+        SkPathFillType::Default
     }
 }
 
 impl Default for SkPathDirection {
     fn default() -> Self {
-        SkPathDirection::CW
-    }
-}
-
-impl Default for SkTileMode {
-    fn default() -> Self {
-        SkTileMode::Clamp
+        SkPathDirection::Default
     }
 }
 
@@ -77,6 +71,18 @@ impl Default for SkParsePath_PathEncoding {
 impl Default for SkPDF_Metadata_CompressionLevel {
     fn default() -> Self {
         SkPDF_Metadata_CompressionLevel::Default
+    }
+}
+
+impl Default for SkTileMode {
+    fn default() -> Self {
+        SkTileMode::Clamp
+    }
+}
+
+impl Default for SkYUVColorSpace {
+    fn default() -> Self {
+        SkYUVColorSpace::Identity
     }
 }
 

@@ -160,6 +160,13 @@ impl PathBuilder {
         self
     }
 
+    pub fn r_move_to(&mut self, pt: impl Into<Point>) -> &mut Self {
+        unsafe {
+            self.native_mut().rMoveTo(pt.into().into_native());
+        }
+        self
+    }
+
     pub fn r_line_to(&mut self, pt: impl Into<Point>) -> &mut Self {
         unsafe {
             self.native_mut().rLineTo(pt.into().into_native());
@@ -290,7 +297,7 @@ impl PathBuilder {
         dir: impl Into<Option<PathDirection>>,
         start_index: impl Into<Option<usize>>,
     ) -> &mut Self {
-        let dir = dir.into().unwrap_or(PathDirection::CW);
+        let dir = dir.into().unwrap_or_default();
         let start_index = start_index.into().unwrap_or(0);
         unsafe {
             self.native_mut()
@@ -305,7 +312,7 @@ impl PathBuilder {
         dir: impl Into<Option<PathDirection>>,
         start_index: impl Into<Option<usize>>,
     ) -> &mut Self {
-        let dir = dir.into().unwrap_or(PathDirection::CW);
+        let dir = dir.into().unwrap_or_default();
         // m86: default start index changed from 0 to 1
         let start_index = start_index.into().unwrap_or(1);
         unsafe {
@@ -321,7 +328,7 @@ impl PathBuilder {
         dir: impl Into<Option<PathDirection>>,
         start_index: impl Into<Option<usize>>,
     ) -> &mut Self {
-        let dir = dir.into().unwrap_or(PathDirection::CW);
+        let dir = dir.into().unwrap_or_default();
         // m86: default start index changed from 0 to 6 or 7 depending on the path's direction.
         let start_index =
             start_index
@@ -344,7 +351,7 @@ impl PathBuilder {
         dir: impl Into<Option<PathDirection>>,
     ) -> &mut Self {
         let center = center.into();
-        let dir = dir.into().unwrap_or(PathDirection::CW);
+        let dir = dir.into().unwrap_or_default();
         unsafe {
             self.native_mut().addCircle(center.x, center.y, radius, dir);
         }
@@ -413,6 +420,10 @@ impl PathBuilder {
             self.native_mut().transform(matrix.native(), pc);
         }
         self
+    }
+
+    pub fn is_finite(&self) -> bool {
+        unsafe { self.native().isFinite() }
     }
 
     pub fn toggle_inverse_fill_type(&mut self) -> &mut Self {

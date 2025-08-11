@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::{prelude::*, yuva_pixmap_info, Data, ImageInfo, YUVAPixmapInfo};
+use crate::{prelude::*, yuva_pixmap_info, Data, ImageInfo, Recorder, YUVAPixmapInfo};
 use skia_bindings::{self as sb, SkImageGenerator};
 
 pub type ImageGenerator = RefHandle<SkImageGenerator>;
@@ -34,8 +34,7 @@ impl ImageGenerator {
         ImageInfo::from_native_ref(&self.native().fInfo)
     }
 
-    #[cfg(feature = "gpu")]
-    pub fn is_valid(&self, mut recorder: Option<&mut crate::Recorder>) -> bool {
+    pub fn is_valid(&self, mut recorder: Option<&mut Recorder>) -> bool {
         unsafe { sb::C_SkImageGenerator_isValid(self.native(), recorder.native_ptr_or_null_mut()) }
     }
 

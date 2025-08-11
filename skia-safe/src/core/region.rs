@@ -1,9 +1,10 @@
-use crate::{prelude::*, Contains, IPoint, IRect, IVector, Path, QuickReject};
+use std::{fmt, iter, marker::PhantomData, mem, ptr};
+
+use crate::{prelude::*, Contains, IPoint, IRect, IVector, Path, PathBuilder, QuickReject};
 use skia_bindings::{
     self as sb, SkRegion, SkRegion_Cliperator, SkRegion_Iterator, SkRegion_RunHead,
     SkRegion_Spanerator,
 };
-use std::{fmt, iter, marker::PhantomData, mem, ptr};
 
 pub type Region = Handle<SkRegion>;
 unsafe_send_sync!(Region);
@@ -78,6 +79,10 @@ impl Region {
 
     pub fn compute_region_complexity(&self) -> usize {
         unsafe { self.native().computeRegionComplexity().try_into().unwrap() }
+    }
+
+    pub fn add_boundary_path(&self, path: &mut PathBuilder) -> bool {
+        unsafe { self.native().addBoundaryPath(path.native_mut()) }
     }
 
     pub fn get_boundary_path(&self, path: &mut Path) -> bool {

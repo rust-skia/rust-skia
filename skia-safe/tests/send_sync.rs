@@ -88,7 +88,8 @@ mod core {
     assert_impl_all!(Matrix: Send, Sync);
     assert_impl_all!(Paint: Send, Sync);
     assert_not_impl_any!(path::Iter: Send, Sync);
-    assert_impl_all!(Path: Send, Sync);
+    assert_impl_all!(Path: Send);
+    assert_not_impl_any!(Path: Sync);
     assert_impl_all!(PathBuilder: Send, Sync);
     assert_impl_all!(PathEffect: Send, Sync);
     assert_not_impl_any!(PathMeasure: Send, Sync);

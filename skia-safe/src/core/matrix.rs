@@ -569,6 +569,11 @@ impl Matrix {
         m.set_rect_to_rect(src, dst, stf).if_true_some(m)
     }
 
+    pub fn poly_to_poly(src: &[Point], dst: &[Point]) -> Option<Matrix> {
+        let mut m = Matrix::new();
+        m.set_poly_to_poly(src, dst).if_true_some(m)
+    }
+
     pub fn set_poly_to_poly(&mut self, src: &[Point], dst: &[Point]) -> bool {
         unsafe {
             sb::C_SkMatrix_setPolyToPoly(
@@ -586,7 +591,6 @@ impl Matrix {
         m.set_poly_to_poly(src, dst).if_true_some(m)
     }
 
-    #[must_use]
     pub fn invert(&self) -> Option<Matrix> {
         let mut m = Matrix::new_identity();
         unsafe { sb::C_SkMatrix_invert(self.native(), m.native_mut()) }.if_true_some(m)

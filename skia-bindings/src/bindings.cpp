@@ -628,6 +628,14 @@ extern "C" void C_SkPath_Construct(SkPath* uninitialized) {
     new(uninitialized) SkPath();
 }
 
+extern "C" void C_SkPath_Raw(SkPath* uninitialized, 
+    const SkPoint pts[], size_t pointCount,
+    const SkPathVerb vbs[], size_t verbCount,
+    const SkScalar ws[], size_t wCount,
+    SkPathFillType ft, bool isVolatile) {
+    new(uninitialized) SkPath(SkPath::Raw(SkSpan(pts, pointCount), SkSpan(vbs, verbCount), SkSpan(ws, wCount), ft, isVolatile));
+}
+
 extern "C" void C_SkPath_Make(SkPath* uninitialized, 
     const SkPoint pts[], size_t pointCount,
     const uint8_t vbs[], size_t verbCount,
@@ -707,6 +715,10 @@ extern "C" SkPath::Verb C_SkPath_RawIter_peek(const SkPath::RawIter* self) {
 
 extern "C" SkPathFillType C_SkPath_getFillType(const SkPath* self) {
     return self->getFillType();
+}
+
+extern "C" void C_SkPath_makeFillType(const SkPath* self, SkPathFillType newFillType, SkPath* uninitialized) {
+    new (uninitialized) SkPath(self->makeFillType(newFillType));
 }
 
 extern "C" SkPoint C_SkPath_getPoint(const SkPath* self, int index) {

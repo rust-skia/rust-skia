@@ -1,3 +1,8 @@
+use std::{
+    cmp::{max, min},
+    mem,
+};
+
 use crate::{
     interop,
     prelude::*,
@@ -8,10 +13,6 @@ use crate::{
     Contains, IPoint, ISize, IVector, Point, Size, Vector,
 };
 use skia_bindings::{self as sb, SkIRect, SkRect};
-use std::{
-    cmp::{max, min},
-    mem,
-};
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
@@ -483,6 +484,22 @@ impl Rect {
 
     pub fn center(&self) -> Point {
         Point::from((self.center_x(), self.center_y()))
+    }
+
+    pub fn tl(&self) -> Point {
+        Point::from((self.left, self.top))
+    }
+
+    pub fn tr(&self) -> Point {
+        Point::from((self.right, self.top))
+    }
+
+    pub fn bl(&self) -> Point {
+        Point::from((self.left, self.bottom))
+    }
+
+    pub fn br(&self) -> Point {
+        Point::from((self.right, self.bottom))
     }
 
     pub fn to_quad(self) -> [Point; 4] {

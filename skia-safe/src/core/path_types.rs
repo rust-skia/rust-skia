@@ -1,9 +1,9 @@
 use skia_bindings as sb;
 
-pub use sb::SkPathFillType as PathFillType;
+pub type PathFillType = sb::SkPathFillType;
 variant_name!(PathFillType::InverseEvenOdd);
 
-pub use sb::SkPathDirection as PathDirection;
+pub type PathDirection = sb::SkPathDirection;
 variant_name!(PathDirection::CW);
 
 bitflags! {
@@ -16,5 +16,5 @@ bitflags! {
     }
 }
 
-pub use sb::SkPathVerb as PathVerb;
+pub type PathVerb = sb::SkPathVerb;
 variant_name!(PathVerb::Conic);
