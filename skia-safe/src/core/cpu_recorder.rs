@@ -30,6 +30,8 @@ pub mod cpu {
         pub(crate) fn from_owned(recorder: &'a mut skcpu_Recorder) -> Self {
             Self(recorder)
         }
+
+        // TODO: Wrap `makeBitmapInfo` if lifetimes can be clarified.
     }
 
     impl recorder::Recorder for Recorder<'_> {
