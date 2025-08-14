@@ -776,12 +776,12 @@ extern "C" void C_SkPathBuilder_destruct(SkPathBuilder* self) {
     self->~SkPathBuilder();
 }
 
-extern "C" void C_SkPathBuilder_snapshot(const SkPathBuilder* self, SkPath* path) {
-    *path = self->snapshot();
+extern "C" void C_SkPathBuilder_snapshot(const SkPathBuilder* self, SkPath* uninitialized) {
+    new (uninitialized) SkPath(self->snapshot());
 }
 
-extern "C" void C_SkPathBuilder_detach(SkPathBuilder* self, SkPath* path) {
-    *path = self->detach();
+extern "C" void C_SkPathBuilder_detach(SkPathBuilder* self, SkPath* uninitialized) {
+    new (uninitialized) SkPath(self->detach());
 }
 
 extern "C" void C_SkPathBuilder_polylineTo(SkPathBuilder* self, const SkPoint* points, size_t count) {

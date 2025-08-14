@@ -68,15 +68,11 @@ impl PathBuilder {
     }
 
     pub fn snapshot(&self) -> Path {
-        let mut path = Path::default();
-        unsafe { sb::C_SkPathBuilder_snapshot(self.native(), path.native_mut()) }
-        path
+        Path::construct(|path| unsafe { sb::C_SkPathBuilder_snapshot(self.native(), path) })
     }
 
     pub fn detach(&mut self) -> Path {
-        let mut path = Path::default();
-        unsafe { sb::C_SkPathBuilder_detach(self.native_mut(), path.native_mut()) }
-        path
+        Path::construct(|path| unsafe { sb::C_SkPathBuilder_detach(self.native_mut(), path) })
     }
 
     pub fn set_fill_type(&mut self, ft: PathFillType) -> &mut Self {
