@@ -240,7 +240,7 @@ impl ContourMeasureIter {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::ContourMeasureIter;
     use crate::{Path, Rect};
 

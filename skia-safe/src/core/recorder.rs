@@ -1,27 +1,39 @@
-use std::{fmt, marker::PhantomData, ptr};
+use std::{cell::UnsafeCell, fmt};
 
+use crate::prelude::*;
 use skia_bindings::{self as sb, SkRecorder};
-
-use crate::prelude::NativeAccess;
 
 pub type Type = skia_bindings::SkRecorder_Type;
 variant_name!(Type::CPU);
 
-pub struct Recorder<'a> {
-    ptr: ptr::NonNull<SkRecorder>,
-    _owned_by: PhantomData<&'a mut ()>,
-    delete_it: bool,
+pub trait Recorder: sealed::AsRecorderRef {
+    fn ty(&self) -> Type;
+    // TODO:
+    // fn cpu_recorder(&mut self) -> &mut cpu::Recorder;
 }
 
-impl Drop for Recorder<'_> {
-    fn drop(&mut self) {
-        if self.delete_it {
-            unsafe { sb::C_SkRecorder_delete(self.native_mut()) }
-        }
+pub(crate) mod sealed {
+    pub trait AsRecorderRef {
+        fn as_recorder_ref(&mut self) -> &mut super::RecorderRef;
     }
 }
 
-impl fmt::Debug for Recorder<'_> {
+#[repr(transparent)]
+pub struct RecorderRef(UnsafeCell<SkRecorder>);
+
+impl NativeAccess for RecorderRef {
+    type Native = SkRecorder;
+
+    fn native(&self) -> &SkRecorder {
+        unsafe { &*self.0.get() }
+    }
+
+    fn native_mut(&mut self) -> &mut SkRecorder {
+        unsafe { &mut (*self.0.get()) }
+    }
+}
+
+impl fmt::Debug for RecorderRef {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Recorder")
             .field("type", &self.ty())
@@ -29,24 +41,48 @@ impl fmt::Debug for Recorder<'_> {
     }
 }
 
-impl NativeAccess for Recorder<'_> {
-    type Native = SkRecorder;
-
-    fn native(&self) -> &SkRecorder {
-        unsafe { self.ptr.as_ref() }
-    }
-
-    fn native_mut(&mut self) -> &mut SkRecorder {
-        unsafe { self.ptr.as_mut() }
+impl RecorderRef {
+    #[allow(unused)] // ... in non-gpu builds.
+    pub(crate) fn from_ref_mut(native: &mut SkRecorder) -> &mut Self {
+        unsafe { transmute_ref_mut(native) }
     }
 }
 
-impl Recorder<'_> {
-    pub fn ty(&self) -> Type {
+impl Recorder for RecorderRef {
+    fn ty(&self) -> Type {
         let mut ty = Type::CPU;
         unsafe {
             sb::C_SkRecorder_type(self.native(), &mut ty);
         }
         ty
+    }
+}
+
+impl sealed::AsRecorderRef for RecorderRef {
+    fn as_recorder_ref(&mut self) -> &mut RecorderRef {
+        self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Recorder, RecorderRef};
+
+    #[test]
+    #[allow(deref_nullptr)]
+    fn passing_the_different_kinds_of_recorder_compiles() {
+        test(None);
+        test(Some(owned_recorder()));
+        test(Some(cpu_recorder()));
+
+        fn test(_recorder: Option<&mut dyn Recorder>) {}
+
+        fn owned_recorder() -> &'static mut RecorderRef {
+            unsafe { &mut *std::ptr::null_mut() }
+        }
+
+        fn cpu_recorder() -> &'static mut crate::cpu::Recorder<'static> {
+            unsafe { &mut *std::ptr::null_mut() }
+        }
     }
 }

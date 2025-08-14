@@ -1998,6 +1998,10 @@ extern "C" void C_SkRecorder_type(const SkRecorder* self, SkRecorder::Type* ty) 
     *ty = self->type();
 }
 
+extern "C" skcpu::Recorder* C_SkRecorder_cpuRecorder(SkRecorder* self) {
+    return self->cpuRecorder();
+}
+
 //
 // core/SkRect.h
 //
@@ -2287,6 +2291,10 @@ extern "C" void C_SkImageGenerator_delete(SkImageGenerator *self) {
 
 extern "C" SkData *C_SkImageGenerator_refEncodedData(SkImageGenerator *self) {
     return self->refEncodedData().release();
+}
+
+extern "C" bool C_SkImageGenerator_isValid(const SkImageGenerator* self, SkRecorder* recorder) {
+    return self->isValid(recorder);
 }
 
 extern "C" bool C_SkImageGenerator_isProtected(const SkImageGenerator* self) {

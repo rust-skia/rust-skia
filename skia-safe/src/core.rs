@@ -20,6 +20,7 @@ mod color_table;
 mod color_type;
 pub mod contour_measure;
 mod coverage_mode;
+mod cpu_recorder;
 mod cubic_map;
 mod data;
 mod data_table;
@@ -126,6 +127,7 @@ pub use paint::Paint;
 pub use tile_mode::*;
 // We keep these around for the time being.
 pub use arc::Arc;
+pub use cpu_recorder::cpu;
 pub use paint::Cap as PaintCap;
 pub use paint::Join as PaintJoin;
 pub use paint::Style as PaintStyle;
@@ -170,7 +172,6 @@ pub use un_pre_multiply::*;
 pub use vertices::Vertices;
 pub use yuva_info::YUVAInfo;
 pub use yuva_pixmaps::{yuva_pixmap_info, YUVAPixmapInfo, YUVAPixmaps};
-
 //
 // Skia specific traits used for overloading functions.
 //

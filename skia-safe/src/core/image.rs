@@ -954,8 +954,15 @@ impl Image {
     /// Returns: `true` if [`Image`] can be drawn
     ///
     /// example: <https://fiddle.skia.org/c/@Image_isValid>
-    pub fn is_valid(&self, mut recorder: Option<&mut Recorder>) -> bool {
-        unsafe { sb::C_SkImage_isValid(self.native(), recorder.native_ptr_or_null_mut()) }
+    pub fn is_valid(&self, recorder: Option<&mut dyn Recorder>) -> bool {
+        unsafe {
+            sb::C_SkImage_isValid(
+                self.native(),
+                recorder
+                    .map(|r| r.as_recorder_ref())
+                    .native_ptr_or_null_mut(),
+            )
+        }
     }
 
     /// Create a new image by copying this image and scaling to fit the [`ImageInfo`]'s dimensions
@@ -1356,14 +1363,16 @@ impl Image {
     /// Returns: the subsetted image, or `None`
     pub fn make_subset(
         &self,
-        mut recorder: Option<&mut Recorder>,
+        recorder: Option<&mut dyn Recorder>,
         subset: impl AsRef<IRect>,
         required_properties: RequiredProperties,
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_makeSubset(
                 self.native(),
-                recorder.native_ptr_or_null_mut(),
+                recorder
+                    .map(|r| r.as_recorder_ref())
+                    .native_ptr_or_null_mut(),
                 subset.as_ref().native(),
                 required_properties.native(),
             )
@@ -1569,14 +1578,16 @@ impl Image {
     /// Returns: created [`Image`] in target [`ColorSpace`]
     pub fn make_color_space(
         &self,
-        mut recorder: Option<&mut Recorder>,
+        recorder: Option<&mut dyn Recorder>,
         color_space: impl Into<Option<ColorSpace>>,
         required_properties: RequiredProperties,
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_makeColorSpace(
                 self.native(),
-                recorder.native_ptr_or_null_mut(),
+                recorder
+                    .map(|r| r.as_recorder_ref())
+                    .native_ptr_or_null_mut(),
                 color_space.into().into_ptr_or_null(),
                 required_properties.native(),
             )

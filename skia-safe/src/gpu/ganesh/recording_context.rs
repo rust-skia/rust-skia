@@ -1,8 +1,10 @@
 use std::fmt;
 
 use crate::{
+    cpu,
     gpu::{BackendAPI, BackendFormat, DirectContext, Renderable},
     prelude::*,
+    recorder::RecorderRef,
     ColorType, TextureCompressionType,
 };
 use skia_bindings::{self as sb, GrRecordingContext, SkRefCntBase};
@@ -114,6 +116,16 @@ impl RecordingContext {
         }
         .try_into()
         .unwrap()
+    }
+
+    pub fn as_recorder(&mut self) -> &mut RecorderRef {
+        RecorderRef::from_ref_mut(unsafe { &mut *self.native_mut().asRecorder() })
+    }
+
+    pub fn make_cpu_recorder(&mut self) -> cpu::Recorder<'_> {
+        cpu::Recorder::from_owned(unsafe {
+            &mut *sb::C_GrRecordingContext_makeCPURecorder(self.native_mut())
+        })
     }
 
     // TODO: Wrap Arenas (if used).

@@ -34,8 +34,15 @@ impl ImageGenerator {
         ImageInfo::from_native_ref(&self.native().fInfo)
     }
 
-    pub fn is_valid(&self, mut recorder: Option<&mut Recorder>) -> bool {
-        unsafe { sb::C_SkImageGenerator_isValid(self.native(), recorder.native_ptr_or_null_mut()) }
+    pub fn is_valid(&self, recorder: Option<&mut dyn Recorder>) -> bool {
+        unsafe {
+            sb::C_SkImageGenerator_isValid(
+                self.native(),
+                recorder
+                    .map(|r| r.as_recorder_ref())
+                    .native_ptr_or_null_mut(),
+            )
+        }
     }
 
     pub fn is_protected(self) -> bool {
