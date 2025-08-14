@@ -102,7 +102,7 @@ where
     }
 
     fn unwrap(self) -> N {
-        self.into_native()
+        self.into_native().into_inner()
     }
 
     fn inner(&self) -> &N {
