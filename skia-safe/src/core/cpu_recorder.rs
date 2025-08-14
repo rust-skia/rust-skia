@@ -4,6 +4,7 @@ pub mod cpu {
 
     #[repr(transparent)]
     pub struct Recorder<'a>(&'a mut skcpu_Recorder);
+    require_base_type!(skcpu_Recorder, sb::SkRecorder);
 
     impl NativeAccess for Recorder<'_> {
         type Native = skcpu_Recorder;
