@@ -68,9 +68,8 @@ impl sealed::AsRecorderRef for RecorderRef {
 mod tests {
     use super::{Recorder, RecorderRef};
 
-    #[test]
     #[allow(deref_nullptr)]
-    fn passing_the_different_kinds_of_recorder_compiles() {
+    fn _passing_the_different_kinds_of_recorder_compiles() {
         test(None);
         test(Some(owned_recorder()));
         test(Some(cpu_recorder()));
