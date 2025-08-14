@@ -359,7 +359,7 @@ extern "C" int C_SkSurface_height(const SkSurface* self) {
     return self->height();
 }
 
-extern "C" void C_SkSurface_imageInfo(SkSurface* self, SkImageInfo* info) {
+extern "C" void C_SkSurface_imageInfo(const SkSurface* self, SkImageInfo* info) {
     *info = self->imageInfo();
 }
 

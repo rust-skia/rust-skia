@@ -498,9 +498,9 @@ impl Surface {
     }
 
     /// Returns an [`ImageInfo`] describing the surface.
-    pub fn image_info(&mut self) -> ImageInfo {
+    pub fn image_info(&self) -> ImageInfo {
         let mut info = ImageInfo::default();
-        unsafe { sb::C_SkSurface_imageInfo(self.native_mut(), info.native_mut()) };
+        unsafe { sb::C_SkSurface_imageInfo(self.native(), info.native_mut()) };
         info
     }
 
