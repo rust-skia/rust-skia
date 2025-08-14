@@ -311,10 +311,10 @@ impl<N: NativeDrop> Handle<N> {
 
     /// Consumes the wrapper and returns the native type.
     #[must_use]
-    pub(crate) fn into_native(mut self) -> UnsafeCell<N> {
+    pub(crate) fn into_native(mut self) -> N {
         let r = mem::replace(&mut self.0, unsafe { mem::zeroed() });
         mem::forget(self);
-        r
+        r.into_inner()
     }
 }
 
