@@ -52,7 +52,7 @@ use-system-jpeg-turbo = ["dep:mozjpeg-sys"]
 # `textlayout` because `SkSVGTextContext::SkSVGTextContext()` invokes `SkShaper::Make`.
 svg = ["textlayout"]
 binary-cache = ["dep:flate2", "dep:tar"]
-embed-icudtl = ["dep:lazy_static"]
+embed-icudtl = []
 embed-freetype = []
 freetype-woff2 = []
 # Panic when any compilation steps are required to run. 
@@ -61,7 +61,6 @@ no-compile = []
 
 [dependencies]
 mozjpeg-sys = { version = "2", features = ["with_simd"], optional = true }
-lazy_static = { version = "1.4.0", optional = true }
 
 [build-dependencies]
 cc = { version = "1.1.28" }
