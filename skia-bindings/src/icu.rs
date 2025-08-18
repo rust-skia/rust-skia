@@ -7,9 +7,7 @@ pub fn init() {
     {
         use std::sync::Mutex;
 
-        lazy_static::lazy_static!(
-            static ref MUTEX : Mutex<()> = Mutex::new(());
-        );
+        static MUTEX: Mutex<()> = Mutex::new(());
 
         // Using `Once` does not work for yet unknown reasons.
         // https://github.com/rust-skia/rust-skia/issues/566

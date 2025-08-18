@@ -62,7 +62,6 @@ vulkan-window = ["dep:ash", "dep:vulkano", "winit/rwh_05"]
 
 [dependencies]
 bitflags = "2.0"
-lazy_static = "1.4"
 skia-bindings = { version = "=0.87.0", path = "../skia-bindings", default-features = false }
 
 # vulkan-window example

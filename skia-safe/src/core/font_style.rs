@@ -145,18 +145,18 @@ impl FontStyle {
 }
 
 mod font_style_static {
+    use std::sync::LazyLock;
+
     use super::{FontStyle, Slant, Weight, Width};
 
-    lazy_static! {
-        pub static ref NORMAL: FontStyle =
-            FontStyle::new(Weight::NORMAL, Width::NORMAL, Slant::Upright);
-        pub static ref BOLD: FontStyle =
-            FontStyle::new(Weight::BOLD, Width::NORMAL, Slant::Upright);
-        pub static ref ITALIC: FontStyle =
-            FontStyle::new(Weight::NORMAL, Width::NORMAL, Slant::Italic);
-        pub static ref BOLD_ITALIC: FontStyle =
-            FontStyle::new(Weight::BOLD, Width::NORMAL, Slant::Italic);
-    }
+    pub static NORMAL: LazyLock<FontStyle> =
+        LazyLock::new(|| FontStyle::new(Weight::NORMAL, Width::NORMAL, Slant::Upright));
+    pub static BOLD: LazyLock<FontStyle> =
+        LazyLock::new(|| FontStyle::new(Weight::BOLD, Width::NORMAL, Slant::Upright));
+    pub static ITALIC: LazyLock<FontStyle> =
+        LazyLock::new(|| FontStyle::new(Weight::NORMAL, Width::NORMAL, Slant::Italic));
+    pub static BOLD_ITALIC: LazyLock<FontStyle> =
+        LazyLock::new(|| FontStyle::new(Weight::BOLD, Width::NORMAL, Slant::Italic));
 }
 
 #[test]
