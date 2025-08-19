@@ -13,7 +13,7 @@ pub mod direct_contexts {
         unsafe {
             let end_resolving = backend_context.begin_resolving();
             let context = DirectContext::from_ptr(sb::C_GrDirectContexts_MakeVulkan(
-                backend_context.native.as_ptr() as _,
+                &backend_context.native,
                 options.into().native_ptr_or_null(),
             ));
             drop(end_resolving);
