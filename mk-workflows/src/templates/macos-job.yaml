@@ -1,4 +1,4 @@
-runs-on: macos-13
+runs-on: macos-14
 env:
   SKIA_DEBUG: $[[skiaDebug]]
   MACOSX_DEPLOYMENT_TARGET: '$[[macosxDeploymentTarget]]'

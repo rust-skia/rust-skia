@@ -36,7 +36,7 @@ pub fn workflows() -> Vec<Workflow> {
         workflows.push(Workflow {
             kind,
             host_os: HostOS::MacOS,
-            host_target: "x86_64-apple-darwin",
+            host_target: "aarch64-apple-darwin",
             job_template: MACOS_JOB,
             targets: macos_targets(),
             host_bin_ext: "",
@@ -222,8 +222,8 @@ fn linux_targets() -> Vec<TargetConf> {
 
 fn macos_targets() -> Vec<TargetConf> {
     vec![
-        TargetConf::new("x86_64-apple-darwin", "metal"),
         TargetConf::new("aarch64-apple-darwin", "metal"),
+        TargetConf::new("x86_64-apple-darwin", "metal"),
         TargetConf::new("aarch64-apple-ios", "metal"),
         TargetConf::new("aarch64-apple-ios-sim", "metal"),
         TargetConf::new("x86_64-apple-ios", "metal"),
