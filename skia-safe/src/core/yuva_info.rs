@@ -44,7 +44,7 @@ pub enum Subsampling {
     S410 = SkYUVAInfo_Subsampling::k410 as _,
 }
 
-native_transmutable!(SkYUVAInfo_Subsampling, Subsampling, subsampling_layout);
+native_transmutable!(SkYUVAInfo_Subsampling, Subsampling);
 
 /// Describes how subsampled chroma values are sited relative to luma values.
 ///

@@ -33,7 +33,7 @@ pub struct FontMetrics {
     strikeout_position: scalar,
 }
 
-native_transmutable!(SkFontMetrics, FontMetrics, font_metrics_layout);
+native_transmutable!(SkFontMetrics, FontMetrics);
 
 impl FontMetrics {
     pub fn underline_thickness(&self) -> Option<scalar> {

@@ -19,11 +19,7 @@ impl StdDeviation {
     }
 }
 
-native_transmutable!(
-    sb::SkSVGFeGaussianBlur_StdDeviation,
-    StdDeviation,
-    std_deviation_layout
-);
+native_transmutable!(sb::SkSVGFeGaussianBlur_StdDeviation, StdDeviation);
 
 pub type GaussianBlur = RCHandle<sb::SkSVGFeGaussianBlur>;
 

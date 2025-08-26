@@ -9,7 +9,7 @@ pub struct ISize {
     pub height: i32,
 }
 
-native_transmutable!(SkISize, ISize, isize_layout);
+native_transmutable!(SkISize, ISize);
 
 impl ISize {
     pub const fn new(w: i32, h: i32) -> ISize {
@@ -57,7 +57,7 @@ pub struct Size {
     pub height: scalar,
 }
 
-native_transmutable!(SkSize, Size, size_layout);
+native_transmutable!(SkSize, Size);
 
 impl Size {
     pub const fn new(w: scalar, h: scalar) -> Size {

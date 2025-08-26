@@ -19,7 +19,7 @@ impl Radius {
     }
 }
 
-native_transmutable!(sb::SkSVGFeMorphology_Radius, Radius, svg_radius_layout);
+native_transmutable!(sb::SkSVGFeMorphology_Radius, Radius);
 
 pub type Operator = sb::SkSVGFeMorphology_Operator;
 variant_name!(Operator::Dilate);

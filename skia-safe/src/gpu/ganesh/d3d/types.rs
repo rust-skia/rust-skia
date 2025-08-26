@@ -89,11 +89,7 @@ impl From<ID3D12Resource> for TextureResourceInfo {
     }
 }
 
-native_transmutable!(
-    GrD3DTextureResourceInfo,
-    TextureResourceInfo,
-    texture_resource_info_layout
-);
+native_transmutable!(GrD3DTextureResourceInfo, TextureResourceInfo);
 
 #[repr(C)]
 #[derive(Clone, Debug)]
@@ -115,7 +111,7 @@ pub struct SurfaceInfo {
     pub sample_quality_pattern: c_uint,
 }
 
-native_transmutable!(GrD3DSurfaceInfo, SurfaceInfo, surface_info_layout);
+native_transmutable!(GrD3DSurfaceInfo, SurfaceInfo);
 
 impl Default for SurfaceInfo {
     fn default() -> Self {

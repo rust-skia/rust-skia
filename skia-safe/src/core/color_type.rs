@@ -119,7 +119,7 @@ pub enum ColorType {
     R8UNorm = SkColorType::kR8_unorm_SkColorType as _,
 }
 
-native_transmutable!(SkColorType, ColorType, color_type_layout);
+native_transmutable!(SkColorType, ColorType);
 
 impl ColorType {
     #[deprecated(since = "0.51.0", note = "Use ColorType::N32 ")]

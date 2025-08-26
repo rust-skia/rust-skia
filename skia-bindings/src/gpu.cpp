@@ -13,7 +13,10 @@
 #include "include/gpu/ganesh/SkImageGanesh.h"
 #include "include/gpu/ganesh/SkSurfaceGanesh.h"
 
-extern "C" void C_GpuUnreferencedTypes(skgpu::Origin *) {}
+// Size / Alignment proxy for GrContextOptions
+typedef std::optional<uint64_t> OptionalU64;
+
+extern "C" void C_GpuUnreferencedTypes(skgpu::Origin *, OptionalU64*) {}
 
 //
 // core/SkSurface.h

@@ -20,7 +20,7 @@ pub struct ContextOptions {
     /// However, it is highly discouraged to have Skia make a default allocator (and support for
     /// doing so will be removed soon,  b/321962001). Instead clients should create their own
     /// allocator to pass into Skia where they can fine tune this value themeselves.
-    vulkan_vma_large_heap_block_size: [u64; 2],
+    vulkan_vma_large_heap_block_size: sb::OptionalU64,
 
     /// Optional callback that can be passed into the [`DirectContext`] which will be called when the
     /// [`DirectContext`] is about to be destroyed. When this call is made, it will be safe for the
@@ -202,6 +202,6 @@ impl ContextOptions {
     }
 }
 
-native_transmutable!(GrContextOptions, ContextOptions, context_options_layout);
+native_transmutable!(GrContextOptions, ContextOptions);
 
 // TODO: PersistentCache, ShaderErrorHandler

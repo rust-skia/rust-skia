@@ -54,7 +54,7 @@ pub struct FrameInfo {
     pub rect: IRect,
 }
 
-native_transmutable!(SkCodec_FrameInfo, FrameInfo, frameinfo_layout);
+native_transmutable!(SkCodec_FrameInfo, FrameInfo);
 
 impl Default for FrameInfo {
     fn default() -> Self {

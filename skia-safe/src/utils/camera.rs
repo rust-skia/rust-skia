@@ -15,7 +15,7 @@ pub struct Patch3D {
     pub origin: V3,
 }
 
-native_transmutable!(SkPatch3D, Patch3D, patch_3d_layout);
+native_transmutable!(SkPatch3D, Patch3D);
 
 impl Default for Patch3D {
     fn default() -> Self {
@@ -57,7 +57,7 @@ pub struct Camera3D {
     need_to_update: bool,
 }
 
-native_transmutable!(SkCamera3D, Camera3D, camera_3d_layout);
+native_transmutable!(SkCamera3D, Camera3D);
 
 impl Default for Camera3D {
     fn default() -> Self {

@@ -16,16 +16,12 @@ use skia_bindings::{
 
 /// Convert any reference into any other.
 pub(crate) unsafe fn transmute_ref<FromT, ToT>(from: &FromT) -> &ToT {
-    // TODO: can we do this statically for all instantiations of transmute_ref?
-    debug_assert_eq!(mem::size_of::<FromT>(), mem::size_of::<ToT>());
-    debug_assert_eq!(mem::align_of::<FromT>(), mem::align_of::<ToT>());
+    assert_layout_compatible::<FromT, ToT>();
     &*(from as *const FromT as *const ToT)
 }
 
 pub(crate) unsafe fn transmute_ref_mut<FromT, ToT>(from: &mut FromT) -> &mut ToT {
-    // TODO: can we do this statically for all instantiations of transmute_ref_mut?
-    debug_assert_eq!(mem::size_of::<FromT>(), mem::size_of::<ToT>());
-    debug_assert_eq!(mem::align_of::<FromT>(), mem::align_of::<ToT>());
+    assert_layout_compatible::<FromT, ToT>();
     &mut *(from as *mut FromT as *mut ToT)
 }
 
@@ -583,7 +579,8 @@ impl<N: NativeRefCounted> RCHandle<N> {
 
     /// Create a reference to a all non-null sk_sp<N> slice.
     pub(crate) fn from_non_null_sp_slice(sp_slice: &[sk_sp<N>]) -> &[Self] {
-        debug_assert!(sp_slice.iter().all(|v| !v.fPtr.is_null()));
+        assert_layout_compatible::<sk_sp<N>, Self>();
+        assert!(sp_slice.iter().all(|v| !v.fPtr.is_null()));
         unsafe { mem::transmute(sp_slice) }
     }
 
@@ -781,13 +778,6 @@ where
         np as _
     }
 
-    /// Runs a test that guarantees that the native and the Rust type are of the same size and
-    /// alignment.
-    fn test_layout() {
-        assert_eq!(mem::size_of::<Self>(), mem::size_of::<NT>());
-        assert_eq!(mem::align_of::<Self>(), mem::align_of::<NT>());
-    }
-
     fn construct(construct: impl FnOnce(*mut NT)) -> Self {
         Self::try_construct(|i| {
             construct(i);
@@ -799,6 +789,18 @@ where
     fn try_construct(construct: impl FnOnce(*mut NT) -> bool) -> Option<Self> {
         self::try_construct(construct).map(|n| Self::from_native_c(n.into_inner()))
     }
+}
+
+/// Tests if T1 and T2 do have the same size and alignment.
+pub(crate) const fn assert_layout_compatible<T1, T2>() {
+    assert!(
+        mem::size_of::<T1>() == mem::size_of::<T2>(),
+        "Type layout verification failed: Size mismatch"
+    );
+    assert!(
+        mem::align_of::<T1>() == mem::align_of::<T2>(),
+        "Type layout verficiation failed: Alignment mismatch"
+    );
 }
 
 pub(crate) trait NativeTransmutableSliceAccess<NT: Sized> {
@@ -1059,24 +1061,5 @@ pub(crate) mod safer {
             ptr
         };
         slice::from_raw_parts_mut(ptr, len)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use skia_bindings::{sk_sp, SkFontMgr};
-
-    use crate::RCHandle;
-
-    #[test]
-    fn sp_equals_size_and_alignment_of_rc_handle() {
-        assert_eq!(
-            size_of::<sk_sp<SkFontMgr>>(),
-            size_of::<RCHandle<SkFontMgr>>()
-        );
-        assert_eq!(
-            align_of::<sk_sp<SkFontMgr>>(),
-            align_of::<RCHandle<SkFontMgr>>()
-        );
     }
 }

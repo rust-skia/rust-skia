@@ -8,7 +8,7 @@ use crate::prelude::*;
 #[repr(transparent)]
 pub struct FourByteTag(SkFourByteTag);
 
-native_transmutable!(SkFourByteTag, FourByteTag, four_byte_tag_layout);
+native_transmutable!(SkFourByteTag, FourByteTag);
 
 impl Deref for FourByteTag {
     type Target = u32;

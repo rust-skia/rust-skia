@@ -11,7 +11,7 @@ pub struct RSXform {
     pub ty: scalar,
 }
 
-native_transmutable!(SkRSXform, RSXform, rsxform_layout);
+native_transmutable!(SkRSXform, RSXform);
 
 impl RSXform {
     pub fn new(scos: scalar, ssin: scalar, t: impl Into<Vector>) -> Self {

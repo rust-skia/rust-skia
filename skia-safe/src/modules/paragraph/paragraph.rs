@@ -652,11 +652,7 @@ pub struct GlyphInfo {
     pub text_direction: TextDirection,
     pub is_ellipsis: bool,
 }
-native_transmutable!(
-    sb::skia_textlayout_Paragraph_GlyphInfo,
-    GlyphInfo,
-    glyph_info_layout
-);
+native_transmutable!(sb::skia_textlayout_Paragraph_GlyphInfo, GlyphInfo);
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct FontInfo {

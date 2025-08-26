@@ -238,7 +238,7 @@ pub mod pdf {
         pub second: u8,
     }
 
-    native_transmutable!(SkPDF_DateTime, DateTime, date_time_layout);
+    native_transmutable!(SkPDF_DateTime, DateTime);
 
     /// Optional metadata to be passed into the PDF factory function.
     #[derive(Debug)]

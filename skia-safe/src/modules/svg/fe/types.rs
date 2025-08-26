@@ -12,7 +12,7 @@ pub struct Input {
     kind: InputType,
     id: interop::String,
 }
-native_transmutable!(sb::SkSVGFeInputType, Input, svg_fe_input_layout);
+native_transmutable!(sb::SkSVGFeInputType, Input);
 
 impl fmt::Debug for Input {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

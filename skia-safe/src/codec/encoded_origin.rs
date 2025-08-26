@@ -28,7 +28,7 @@ pub enum EncodedOrigin {
     LeftBottom = SkEncodedOrigin::LeftBottom as _,
 }
 
-native_transmutable!(SkEncodedOrigin, EncodedOrigin, encoded_origin_layout);
+native_transmutable!(SkEncodedOrigin, EncodedOrigin);
 
 impl EncodedOrigin {
     pub const LAST: Self = EncodedOrigin::LeftBottom;

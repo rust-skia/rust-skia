@@ -37,7 +37,7 @@ pub struct Matrix {
     type_mask: u32,
 }
 
-native_transmutable!(SkMatrix, Matrix, matrix_layout);
+native_transmutable!(SkMatrix, Matrix);
 
 impl PartialEq for Matrix {
     fn eq(&self, rhs: &Self) -> bool {

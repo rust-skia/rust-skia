@@ -17,11 +17,7 @@ pub struct ColorSpacePrimaries {
     pub wy: f32,
 }
 
-native_transmutable!(
-    SkColorSpacePrimaries,
-    ColorSpacePrimaries,
-    color_space_primaries_layout
-);
+native_transmutable!(SkColorSpacePrimaries, ColorSpacePrimaries);
 
 #[derive(Clone, PartialEq, Debug)]
 #[repr(C)]
@@ -35,11 +31,7 @@ pub struct ColorSpaceTransferFn {
     pub f: f32,
 }
 
-native_transmutable!(
-    skcms_TransferFunction,
-    ColorSpaceTransferFn,
-    color_space_transfer_fn_layout
-);
+native_transmutable!(skcms_TransferFunction, ColorSpaceTransferFn);
 
 /// Color primaries defined by ITU-T H.273, table 2. Names are given by the first
 /// specification referenced in the value's row.

@@ -3,13 +3,11 @@
 /// Macro to mark a Rust type as NativeTransmutable and test its layout.
 #[macro_export]
 macro_rules! native_transmutable {
-    ($nt:ty, $rt:ty, $test_fn:ident) => {
+    ($nt:ty, $rt:ty) => {
         impl $crate::prelude::NativeTransmutable<$nt> for $rt {}
-        #[test]
-        fn $test_fn() {
-            use $crate::prelude::NativeTransmutable;
-            <$rt>::test_layout();
-        }
+        const _: () = {
+            $crate::prelude::assert_layout_compatible::<$nt, $rt>();
+        };
     };
 }
 
@@ -44,7 +42,7 @@ macro_rules! unsafe_send_sync {
 #[macro_export]
 macro_rules! variant_name {
     ($t:expr) => {
-        const _: fn() = || {
+        const _: () = {
             let _ = $t;
         };
     };

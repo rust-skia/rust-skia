@@ -46,7 +46,7 @@ impl CubicResampler {
     }
 }
 
-native_transmutable!(SkCubicResampler, CubicResampler, cubic_resampler);
+native_transmutable!(SkCubicResampler, CubicResampler);
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 #[deprecated(since = "0.38.0", note = "Use SamplingOptions")]
@@ -65,7 +65,7 @@ pub struct SamplingOptions {
     pub mipmap: MipmapMode,
 }
 
-native_transmutable!(SkSamplingOptions, SamplingOptions, sampling_options_layout);
+native_transmutable!(SkSamplingOptions, SamplingOptions);
 
 impl Default for SamplingOptions {
     fn default() -> Self {

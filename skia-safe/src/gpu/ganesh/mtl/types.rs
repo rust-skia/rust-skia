@@ -69,7 +69,7 @@ pub struct SurfaceInfo {
     pub storage_mode: StorageMode,
 }
 
-native_transmutable!(GrMtlSurfaceInfo, SurfaceInfo, surface_info_layout);
+native_transmutable!(GrMtlSurfaceInfo, SurfaceInfo);
 
 impl Default for SurfaceInfo {
     fn default() -> Self {

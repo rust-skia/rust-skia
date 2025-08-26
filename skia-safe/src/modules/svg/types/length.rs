@@ -12,7 +12,7 @@ pub struct Length {
     pub unit: LengthUnit,
 }
 
-native_transmutable!(sb::SkSVGLength, Length, svg_length_layout);
+native_transmutable!(sb::SkSVGLength, Length);
 
 impl Length {
     pub fn new(value: scalar, unit: LengthUnit) -> Self {

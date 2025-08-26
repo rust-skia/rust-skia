@@ -16,7 +16,7 @@ pub struct FontSize {
     size: sb::SkSVGLength,
 }
 
-native_transmutable!(sb::SkSVGFontSize, FontSize, svg_font_size_layout);
+native_transmutable!(sb::SkSVGFontSize, FontSize);
 
 impl fmt::Debug for FontSize {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -92,4 +92,4 @@ impl FontFamily {
     }
 }
 
-native_transmutable!(sb::SkSVGFontFamily, FontFamily, svg_font_family_layout);
+native_transmutable!(sb::SkSVGFontFamily, FontFamily);

@@ -10,7 +10,7 @@ use std::{fmt, ops::Deref};
 #[repr(transparent)]
 pub struct Weight(i32);
 
-native_transmutable!(i32, Weight, weight_layout);
+native_transmutable!(i32, Weight);
 
 impl From<i32> for Weight {
     fn from(weight: i32) -> Self {
@@ -48,7 +48,7 @@ impl Weight {
 #[repr(transparent)]
 pub struct Width(i32);
 
-native_transmutable!(i32, Width, width_layout);
+native_transmutable!(i32, Width);
 
 impl From<i32> for Width {
     fn from(width: i32) -> Self {
@@ -84,7 +84,7 @@ variant_name!(Slant::Upright);
 #[repr(transparent)]
 pub struct FontStyle(SkFontStyle);
 
-native_transmutable!(SkFontStyle, FontStyle, font_style_layout);
+native_transmutable!(SkFontStyle, FontStyle);
 
 impl PartialEq for FontStyle {
     fn eq(&self, rhs: &Self) -> bool {

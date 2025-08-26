@@ -19,11 +19,7 @@ pub mod variation_position {
         pub value: f32,
     }
 
-    native_transmutable!(
-        SkFontArguments_VariationPosition_Coordinate,
-        Coordinate,
-        coordinate_layout
-    );
+    native_transmutable!(SkFontArguments_VariationPosition_Coordinate, Coordinate);
 }
 
 #[derive(Clone, Debug)]
@@ -43,7 +39,7 @@ pub mod palette {
         pub color: Color,
     }
 
-    native_transmutable!(SkFontArguments_Palette_Override, Override, override_layout);
+    native_transmutable!(SkFontArguments_Palette_Override, Override);
 }
 
 #[repr(C)]
@@ -53,11 +49,7 @@ pub struct FontArguments<'vp, 'p> {
     pd_p: PhantomData<&'p [palette::Override]>,
 }
 
-native_transmutable!(
-    SkFontArguments,
-    FontArguments<'_, '_>,
-    font_arguments_layout
-);
+native_transmutable!(SkFontArguments, FontArguments<'_, '_>);
 
 impl Drop for FontArguments<'_, '_> {
     fn drop(&mut self) {
