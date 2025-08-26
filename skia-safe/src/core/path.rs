@@ -939,7 +939,7 @@ impl Path {
         self
     }
 
-    /// Exchanges the verb array, [`Point`] array, weights, and [`FillType`] with other.
+    /// Exchanges the verb array, [`Point`] array, weights, and [`PathFillType`] with other.
     /// Cached state is also exchanged. `swap()` internally exchanges pointers, so
     /// it is lightweight and does not allocate memory.
     ///
@@ -1351,7 +1351,7 @@ impl Path {
     /// `arc_to_rotated()` appends up to four conic curves.
     /// `arc_to_rotated()` implements the functionality of SVG arc, although SVG sweep-flag value
     /// is opposite the integer value of sweep; SVG sweep-flag uses 1 for clockwise,
-    /// while [`Direction::CW`] cast to int is zero.
+    /// while [`PathDirection::CW`] cast to int is zero.
     ///
     /// * `r.x` - radius on x-axis before x-axis rotation
     /// * `r.y` - radius on y-axis before x-axis rotation
@@ -1393,7 +1393,7 @@ impl Path {
     /// `arc_to()` appends up to four conic curves.
     /// `arc_to()` implements the functionality of svg arc, although SVG "sweep-flag" value is
     /// opposite the integer value of sweep; SVG "sweep-flag" uses 1 for clockwise, while
-    /// [`Direction::CW`] cast to int is zero.
+    /// [`PathDirection::CW`] cast to int is zero.
     ///
     /// * `r.x` - radius before x-axis rotation
     /// * `r.y` - radius before x-axis rotation
@@ -1457,7 +1457,7 @@ impl Path {
     /// `path.line_to`(...)`
     ///
     /// * `rect` - [`Rect`] to add as a closed contour
-    /// * `dir` - [`Direction`] to orient the new contour
+    /// * `dir` - [`PathDirection`] to orient the new contour
     /// * `start` - initial corner of [`Rect`] to add
     ///
     /// Returns: reference to [`Path`]
@@ -1480,10 +1480,10 @@ impl Path {
     /// Adds oval to [`Path`], appending [`Verb::Move`], four [`Verb::Conic`], and [`Verb::Close`].
     /// Oval is upright ellipse bounded by [`Rect`] oval with radii equal to half oval width
     /// and half oval height. Oval begins at start and continues
-    /// clockwise if dir is [`Direction::CW`], counterclockwise if dir is [`Direction::CCW`].
+    /// clockwise if dir is [`PathDirection::CW`], counterclockwise if dir is [`PathDirection::CCW`].
     ///
     /// * `oval` - bounds of ellipse added
-    /// * `dir` - [`Direction`] to wind ellipse
+    /// * `dir` - [`PathDirection`] to wind ellipse
     /// * `start` - index of initial point of ellipse
     ///
     /// Returns: reference to [`Path`]
@@ -1505,13 +1505,13 @@ impl Path {
 
     /// Adds circle centered at (x, y) of size radius to [`Path`], appending [`Verb::Move`],
     /// four [`Verb::Conic`], and [`Verb::Close`]. Circle begins at: (x + radius, y), continuing
-    /// clockwise if dir is [`Direction::CW`], and counterclockwise if dir is [`Direction::CCW`].
+    /// clockwise if dir is [`PathDirection::CW`], and counterclockwise if dir is [`PathDirection::CCW`].
     ///
     /// Has no effect if radius is zero or negative.
     ///
     /// * `p` - center of circle
     /// * `radius` - distance from center to edge
-    /// * `dir` - [`Direction`] to wind circle
+    /// * `dir` - [`PathDirection`] to wind circle
     ///
     /// Returns: reference to [`Path`]
     pub fn add_circle(
@@ -1557,8 +1557,8 @@ impl Path {
 
     /// Appends [`RRect`] to [`Path`], creating a new closed contour. [`RRect`] has bounds
     /// equal to rect; each corner is 90 degrees of an ellipse with radii (rx, ry). If
-    /// dir is [`Direction::CW`], [`RRect`] starts at top-left of the lower-left corner and
-    /// winds clockwise. If dir is [`Direction::CCW`], [`RRect`] starts at the bottom-left
+    /// dir is [`PathDirection::CW`], [`RRect`] starts at top-left of the lower-left corner and
+    /// winds clockwise. If dir is [`PathDirection::CCW`], [`RRect`] starts at the bottom-left
     /// of the upper-left corner and winds counterclockwise.
     ///
     /// If either rx or ry is too large, rx and ry are scaled uniformly until the
@@ -1570,7 +1570,7 @@ impl Path {
     /// * `rect` - bounds of [`RRect`]
     /// * `rx` - x-axis radius of rounded corners on the [`RRect`]
     /// * `ry` - y-axis radius of rounded corners on the [`RRect`]
-    /// * `dir` - [`Direction`] to wind [`RRect`]
+    /// * `dir` - [`PathDirection`] to wind [`RRect`]
     ///
     /// Returns: reference to [`Path`]
     pub fn add_round_rect(
@@ -1590,8 +1590,8 @@ impl Path {
     // No add_round_rect() wiht radii (8 of them). Decided to only provide the simpler variant of
     // the two, if radii needs to be specified, add_rrect can be used.
 
-    /// Adds rrect to [`Path`], creating a new closed contour. If dir is [`Direction::CW`], rrect
-    /// winds clockwise; if dir is [`Direction::CCW`], rrect winds counterclockwise.
+    /// Adds rrect to [`Path`], creating a new closed contour. If dir is [`PathDirection::CW`], rrect
+    /// winds clockwise; if dir is [`PathDirection::CCW`], rrect winds counterclockwise.
     /// start determines the first point of rrect to add.
     ///
     /// * `rrect` - bounds and radii of rounded rectangle
@@ -1962,7 +1962,7 @@ impl Iterator for RawIter<'_> {
 
 impl Path {
     /// Returns `true` if the point `(p.x, p.y)` is contained by [`Path`], taking into
-    /// account [`FillType`].
+    /// account [`PathFillType`].
     ///
     /// * `p.x` - x-axis value of containment test
     /// * `p.y` - y-axis value of containment test
@@ -2020,7 +2020,7 @@ impl Path {
 
     /// Writes [`Path`] to buffer, returning the buffer written to, wrapped in [`Data`].
     ///
-    /// `serialize()` writes [`FillType`], verb array, [`Point`] array, conic weight, and
+    /// `serialize()` writes [`PathFillType`], verb array, [`Point`] array, conic weight, and
     /// additionally writes computed information like convexity and bounds.
     ///
     /// `serialize()` should only be used in concert with `read_from_memory`().
@@ -2049,10 +2049,10 @@ impl Path {
     /// Returns a non-zero, globally unique value. A different value is returned
     /// if verb array, [`Point`] array, or conic weight changes.
     ///
-    /// Setting [`FillType`] does not change generation identifier.
+    /// Setting [`PathFillType`] does not change generation identifier.
     ///
     /// Each time the path is modified, a different generation identifier will be returned.
-    /// [`FillType`] does affect generation identifier on Android framework.
+    /// [`PathFillType`] does affect generation identifier on Android framework.
     ///
     /// Returns: non-zero, globally unique value
     ///

@@ -1132,7 +1132,7 @@ impl Canvas {
     }
 
     /// Replaces clip with the intersection or difference of clip and `path`,
-    /// with an aliased or anti-aliased clip edge. [`crate::path::FillType`] determines if `path`
+    /// with an aliased or anti-aliased clip edge. [`crate::PathFillType`] determines if `path`
     /// describes the area inside or outside its contours; and if path contour overlaps
     /// itself or another path contour, whether the overlaps form part of the area.
     /// `path` is transformed by [`Matrix`] before it is combined with clip.
@@ -1574,7 +1574,7 @@ impl Canvas {
     /// [`Path`] contains an array of path contour, each of which may be open or closed.
     ///
     /// In `paint`: [`crate::paint::Style`] determines if [`RRect`] is stroked or filled:
-    /// if filled, [`crate::path::FillType`] determines whether path contour describes inside or
+    /// if filled, [`crate::PathFillType`] determines whether path contour describes inside or
     /// outside of fill; if stroked, [`Paint`] stroke width describes the line thickness,
     /// [`crate::paint::Cap`] describes line ends, and [`crate::paint::Join`] describes how
     /// corners are drawn.
