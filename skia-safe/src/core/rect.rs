@@ -27,7 +27,7 @@ pub struct IRect {
     pub bottom: i32,
 }
 
-native_transmutable!(SkIRect, IRect, irect_layout);
+native_transmutable!(SkIRect, IRect);
 
 impl AsRef<IRect> for IRect {
     fn as_ref(&self) -> &IRect {
@@ -352,7 +352,7 @@ pub struct Rect {
     pub bottom: f32,
 }
 
-native_transmutable!(SkRect, Rect, rect_layout);
+native_transmutable!(SkRect, Rect);
 
 impl AsRef<Rect> for Rect {
     fn as_ref(&self) -> &Rect {

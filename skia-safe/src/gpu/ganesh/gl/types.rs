@@ -17,7 +17,7 @@ pub struct TextureInfo {
     pub protected: gpu::Protected,
 }
 
-native_transmutable!(GrGLTextureInfo, TextureInfo, texture_info_layout);
+native_transmutable!(GrGLTextureInfo, TextureInfo);
 
 impl Default for TextureInfo {
     fn default() -> Self {
@@ -58,11 +58,7 @@ pub struct FramebufferInfo {
     pub protected: gpu::Protected,
 }
 
-native_transmutable!(
-    GrGLFramebufferInfo,
-    FramebufferInfo,
-    framebuffer_info_layout
-);
+native_transmutable!(GrGLFramebufferInfo, FramebufferInfo);
 
 impl Default for FramebufferInfo {
     fn default() -> Self {
@@ -98,7 +94,7 @@ pub struct SurfaceInfo {
     pub format: Enum,
 }
 
-native_transmutable!(GrGLSurfaceInfo, SurfaceInfo, surface_info_layout);
+native_transmutable!(GrGLSurfaceInfo, SurfaceInfo);
 
 impl Default for SurfaceInfo {
     fn default() -> Self {

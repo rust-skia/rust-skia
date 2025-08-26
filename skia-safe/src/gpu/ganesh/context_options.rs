@@ -202,6 +202,6 @@ impl ContextOptions {
     }
 }
 
-native_transmutable!(GrContextOptions, ContextOptions, context_options_layout);
+native_transmutable!(GrContextOptions, ContextOptions);
 
 // TODO: PersistentCache, ShaderErrorHandler

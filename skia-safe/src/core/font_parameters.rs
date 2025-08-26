@@ -14,7 +14,7 @@ pub mod variation {
         flags: u16,
     }
 
-    native_transmutable!(SkFontParameters_Variation_Axis, Axis, axis_layout);
+    native_transmutable!(SkFontParameters_Variation_Axis, Axis);
 
     impl Axis {
         pub const fn new(tag: FourByteTag, min: f32, def: f32, max: f32, hidden: bool) -> Self {

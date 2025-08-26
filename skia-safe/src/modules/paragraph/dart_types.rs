@@ -31,11 +31,7 @@ pub enum RectHeightStyle {
     IncludeLineSpacingBottom,
     Strut,
 }
-native_transmutable!(
-    sb::skia_textlayout_RectHeightStyle,
-    RectHeightStyle,
-    rect_height_style_layout
-);
+native_transmutable!(sb::skia_textlayout_RectHeightStyle, RectHeightStyle);
 
 #[repr(i32)]
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Default)]
@@ -48,11 +44,7 @@ pub enum RectWidthStyle {
     /// the widest rect over all the lines.
     Max,
 }
-native_transmutable!(
-    sb::skia_textlayout_RectWidthStyle,
-    RectWidthStyle,
-    rect_width_style_layout
-);
+native_transmutable!(sb::skia_textlayout_RectWidthStyle, RectWidthStyle);
 
 pub use sb::skia_textlayout_TextAlign as TextAlign;
 variant_name!(TextAlign::End);
@@ -68,7 +60,7 @@ pub struct TextBox {
     pub direct: TextDirection,
 }
 
-native_transmutable!(sb::skia_textlayout_TextBox, TextBox, text_box_layout);
+native_transmutable!(sb::skia_textlayout_TextBox, TextBox);
 
 pub const EMPTY_INDEX: usize = usize::MAX;
 

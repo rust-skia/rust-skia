@@ -20,7 +20,7 @@ pub struct Alloc {
 }
 unsafe_send_sync!(Alloc);
 
-native_transmutable!(skgpu_VulkanAlloc, Alloc, alloc_layout);
+native_transmutable!(skgpu_VulkanAlloc, Alloc);
 
 impl Default for Alloc {
     fn default() -> Self {
@@ -85,11 +85,7 @@ pub struct YcbcrConversionInfo {
     pub components: vk::ComponentMapping,
 }
 
-native_transmutable!(
-    skgpu_VulkanYcbcrConversionInfo,
-    YcbcrConversionInfo,
-    ycbcr_conversion_info_layout
-);
+native_transmutable!(skgpu_VulkanYcbcrConversionInfo, YcbcrConversionInfo);
 
 impl PartialEq for YcbcrConversionInfo {
     fn eq(&self, other: &Self) -> bool {

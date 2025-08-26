@@ -22,11 +22,7 @@ pub struct DirectContextId {
     id: u32,
 }
 
-native_transmutable!(
-    GrDirectContext_DirectContextID,
-    DirectContextId,
-    direct_context_id_layout
-);
+native_transmutable!(GrDirectContext_DirectContextID, DirectContextId);
 
 pub type DirectContext = RCHandle<GrDirectContext>;
 

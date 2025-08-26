@@ -339,7 +339,7 @@ impl QuickReject<Region> for Region {
 #[repr(transparent)]
 pub struct Iterator<'a>(SkRegion_Iterator, PhantomData<&'a Region>);
 
-native_transmutable!(SkRegion_Iterator, Iterator<'_>, iterator_layout);
+native_transmutable!(SkRegion_Iterator, Iterator<'_>);
 
 impl fmt::Debug for Iterator<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -423,7 +423,7 @@ fn test_iterator() {
 #[repr(transparent)]
 pub struct Cliperator<'a>(SkRegion_Cliperator, PhantomData<&'a Region>);
 
-native_transmutable!(SkRegion_Cliperator, Cliperator<'_>, cliperator_layout);
+native_transmutable!(SkRegion_Cliperator, Cliperator<'_>);
 
 impl Drop for Cliperator<'_> {
     fn drop(&mut self) {
@@ -476,7 +476,7 @@ impl iter::Iterator for Cliperator<'_> {
 #[repr(transparent)]
 pub struct Spanerator<'a>(SkRegion_Spanerator, PhantomData<&'a Region>);
 
-native_transmutable!(SkRegion_Spanerator, Spanerator<'_>, spanerator_layout);
+native_transmutable!(SkRegion_Spanerator, Spanerator<'_>);
 
 impl Drop for Spanerator<'_> {
     fn drop(&mut self) {

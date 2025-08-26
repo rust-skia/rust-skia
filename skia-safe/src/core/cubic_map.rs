@@ -7,7 +7,7 @@ use skia_bindings::SkCubicMap;
 #[repr(transparent)]
 pub struct CubicMap(SkCubicMap);
 
-native_transmutable!(SkCubicMap, CubicMap, cubic_map_layout);
+native_transmutable!(SkCubicMap, CubicMap);
 
 impl CubicMap {
     pub fn new(p1: impl Into<Point>, p2: impl Into<Point>) -> Self {

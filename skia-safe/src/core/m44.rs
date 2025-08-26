@@ -15,7 +15,7 @@ pub struct V2 {
     pub y: f32,
 }
 
-native_transmutable!(SkV2, V2, v2_layout);
+native_transmutable!(SkV2, V2);
 
 impl V2 {
     pub const fn new(x: f32, y: f32) -> Self {
@@ -159,7 +159,7 @@ pub struct V3 {
     pub z: f32,
 }
 
-native_transmutable!(SkV3, V3, v3_layout);
+native_transmutable!(SkV3, V3);
 
 impl V3 {
     pub const fn new(x: f32, y: f32, z: f32) -> Self {
@@ -288,7 +288,7 @@ pub struct V4 {
     pub w: f32,
 }
 
-native_transmutable!(SkV4, V4, v4_layout);
+native_transmutable!(SkV4, V4);
 
 impl V4 {
     pub const fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
@@ -412,7 +412,7 @@ pub struct M44 {
     mat: [f32; Self::COMPONENTS],
 }
 
-native_transmutable!(SkM44, M44, m44_layout);
+native_transmutable!(SkM44, M44);
 
 impl Default for M44 {
     fn default() -> Self {

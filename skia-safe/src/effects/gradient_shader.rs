@@ -10,11 +10,7 @@ pub struct Interpolation {
     pub hue_method: interpolation::HueMethod,
 }
 
-native_transmutable!(
-    SkGradientShader_Interpolation,
-    Interpolation,
-    interpolation_layout
-);
+native_transmutable!(SkGradientShader_Interpolation, Interpolation);
 
 pub mod interpolation {
     pub type InPremul = skia_bindings::SkGradientShader_Interpolation_InPremul;

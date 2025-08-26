@@ -15,7 +15,7 @@ bitflags! {
         const ALL = Self::NONE.bits() | Self::SUB.bits() | Self::UP.bits() | Self::AVG.bits() | Self::PAETH.bits();
     }
 }
-native_transmutable!(sb::SkPngEncoder_FilterFlag, FilterFlag, filter_flag_layout);
+native_transmutable!(sb::SkPngEncoder_FilterFlag, FilterFlag);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[non_exhaustive]

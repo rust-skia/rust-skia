@@ -26,7 +26,7 @@ pub struct ImageInfo {
 }
 unsafe_send_sync!(ImageInfo);
 
-native_transmutable!(GrVkImageInfo, ImageInfo, image_info_layout);
+native_transmutable!(GrVkImageInfo, ImageInfo);
 
 impl Default for ImageInfo {
     fn default() -> Self {
@@ -182,7 +182,7 @@ pub struct DrawableInfo {
     pub draw_bounds: *mut vk::Rect2D,
 }
 
-native_transmutable!(GrVkDrawableInfo, DrawableInfo, drawable_info_layout);
+native_transmutable!(GrVkDrawableInfo, DrawableInfo);
 unsafe_send_sync!(DrawableInfo);
 
 impl Default for DrawableInfo {
@@ -211,7 +211,7 @@ pub struct SurfaceInfo {
     pub sharing_mode: vk::SharingMode,
 }
 
-native_transmutable!(GrVkSurfaceInfo, SurfaceInfo, surface_info_layout);
+native_transmutable!(GrVkSurfaceInfo, SurfaceInfo);
 
 impl Default for SurfaceInfo {
     fn default() -> Self {

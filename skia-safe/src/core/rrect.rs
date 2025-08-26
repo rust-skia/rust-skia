@@ -12,7 +12,7 @@ variant_name!(Corner::LowerLeft);
 #[repr(transparent)]
 pub struct RRect(SkRRect);
 
-native_transmutable!(SkRRect, RRect, rrect_layout);
+native_transmutable!(SkRRect, RRect);
 
 impl PartialEq for RRect {
     fn eq(&self, rhs: &Self) -> bool {

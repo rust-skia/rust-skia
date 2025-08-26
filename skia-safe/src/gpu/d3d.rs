@@ -13,4 +13,4 @@ pub use windows::Win32::Graphics::Direct3D12::D3D12_RESOURCE_STATES;
 pub use windows::Win32::Graphics::Dxgi::Common::DXGI_FORMAT;
 pub use windows::Win32::Graphics::Dxgi::IDXGIAdapter1;
 
-native_transmutable!(sb::DXGI_FORMAT, DXGI_FORMAT, dxgi_format_layout);
+native_transmutable!(sb::DXGI_FORMAT, DXGI_FORMAT);

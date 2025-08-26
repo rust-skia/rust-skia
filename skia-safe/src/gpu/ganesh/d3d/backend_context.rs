@@ -15,4 +15,4 @@ pub struct BackendContext {
     pub protected_context: gpu::Protected,
 }
 
-native_transmutable!(GrD3DBackendContext, BackendContext, backend_context_layout);
+native_transmutable!(GrD3DBackendContext, BackendContext);

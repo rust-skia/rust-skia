@@ -7,7 +7,7 @@ variant_name!(BackendApi::Metal);
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct Budgeted(bool);
-native_transmutable!(sb::skgpu_Budgeted, Budgeted, budgeted_layout);
+native_transmutable!(sb::skgpu_Budgeted, Budgeted);
 
 #[allow(non_upper_case_globals)]
 impl Budgeted {
@@ -43,4 +43,4 @@ pub struct GpuStats {
     pub elapsed_time: u64,
 }
 
-native_transmutable!(skgpu_GpuStats, GpuStats, gpu_stats_layout);
+native_transmutable!(skgpu_GpuStats, GpuStats);

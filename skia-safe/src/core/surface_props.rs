@@ -16,7 +16,7 @@ pub enum PixelGeometry {
     BGRV = SkPixelGeometry::kBGR_V_SkPixelGeometry as _,
 }
 
-native_transmutable!(SkPixelGeometry, PixelGeometry, pixel_geometry_layout);
+native_transmutable!(SkPixelGeometry, PixelGeometry);
 
 impl PixelGeometry {
     pub fn is_rgb(self) -> bool {
@@ -63,7 +63,7 @@ impl Default for SurfacePropsFlags {
 #[repr(transparent)]
 pub struct SurfaceProps(SkSurfaceProps);
 
-native_transmutable!(SkSurfaceProps, SurfaceProps, surface_props_layout);
+native_transmutable!(SkSurfaceProps, SurfaceProps);
 
 impl PartialEq for SurfaceProps {
     fn eq(&self, other: &Self) -> bool {

@@ -53,7 +53,7 @@ impl Default for FlushInfo {
     }
 }
 
-native_transmutable!(sb::GrFlushInfo, FlushInfo, flush_info_layout);
+native_transmutable!(sb::GrFlushInfo, FlushInfo);
 
 pub use sb::GrSemaphoresSubmitted as SemaphoresSubmitted;
 variant_name!(SemaphoresSubmitted::Yes);
@@ -74,7 +74,7 @@ pub struct SubmitInfo {
     pub mark_boundary: MarkFrameBoundary,
     pub frame_id: u64,
 }
-native_transmutable!(sb::GrSubmitInfo, SubmitInfo, submit_info_layout);
+native_transmutable!(sb::GrSubmitInfo, SubmitInfo);
 
 impl Default for SubmitInfo {
     fn default() -> Self {

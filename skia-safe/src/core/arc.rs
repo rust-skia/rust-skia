@@ -17,7 +17,7 @@ pub struct Arc {
     pub sweep_angle: scalar,
     pub ty: Type,
 }
-native_transmutable!(sb::SkArc, Arc, arc_layout);
+native_transmutable!(sb::SkArc, Arc);
 
 impl Arc {
     pub fn new(

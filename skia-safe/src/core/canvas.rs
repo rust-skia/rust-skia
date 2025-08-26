@@ -47,11 +47,7 @@ pub struct SaveLayerRec<'a> {
     experimental_backdrop_scale: scalar,
 }
 
-native_transmutable!(
-    SkCanvas_SaveLayerRec,
-    SaveLayerRec<'_>,
-    save_layer_rec_layout
-);
+native_transmutable!(SkCanvas_SaveLayerRec, SaveLayerRec<'_>);
 
 impl Default for SaveLayerRec<'_> {
     /// Sets [`Self::bounds`], [`Self::paint`], and [`Self::backdrop`] to `None`. Clears

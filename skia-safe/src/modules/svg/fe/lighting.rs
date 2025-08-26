@@ -22,11 +22,7 @@ impl KernelUnitLength {
     }
 }
 
-native_transmutable!(
-    sb::SkSVGFeLighting_KernelUnitLength,
-    KernelUnitLength,
-    svg_kernel_unit_length_layout
-);
+native_transmutable!(sb::SkSVGFeLighting_KernelUnitLength, KernelUnitLength);
 
 pub type Lighting = RCHandle<sb::SkSVGFeLighting>;
 

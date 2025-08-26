@@ -19,11 +19,7 @@ impl TurbulenceBaseFrequency {
     }
 }
 
-native_transmutable!(
-    sb::SkSVGFeTurbulenceBaseFrequency,
-    TurbulenceBaseFrequency,
-    svg_fe_turbulence_base_frequency_layout
-);
+native_transmutable!(sb::SkSVGFeTurbulenceBaseFrequency, TurbulenceBaseFrequency);
 
 pub type TurbulenceType = sb::SkSVGFeTurbulenceType_Type;
 variant_name!(TurbulenceType::FractalNoise);

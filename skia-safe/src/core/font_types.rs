@@ -15,7 +15,7 @@ pub enum TextEncoding {
     GlyphId = SkTextEncoding::kGlyphID as _,
 }
 
-native_transmutable!(SkTextEncoding, TextEncoding, text_encoding_layout);
+native_transmutable!(SkTextEncoding, TextEncoding);
 
 /// Trait representing encoded text.
 ///

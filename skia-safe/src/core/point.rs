@@ -11,7 +11,7 @@ pub struct IPoint {
     pub y: i32,
 }
 
-native_transmutable!(SkIPoint, IPoint, ipoint_layout);
+native_transmutable!(SkIPoint, IPoint);
 
 impl Neg for IPoint {
     type Output = IPoint;
@@ -103,7 +103,7 @@ pub struct Point {
     pub y: scalar,
 }
 
-native_transmutable!(SkPoint, Point, point_layout);
+native_transmutable!(SkPoint, Point);
 
 impl Neg for Point {
     type Output = Point;

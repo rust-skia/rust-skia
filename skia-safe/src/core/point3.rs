@@ -13,7 +13,7 @@ pub struct Point3 {
     pub z: scalar,
 }
 
-native_transmutable!(SkPoint3, Point3, point3_layout);
+native_transmutable!(SkPoint3, Point3);
 
 impl From<(scalar, scalar, scalar)> for Point3 {
     fn from((x, y, z): (scalar, scalar, scalar)) -> Self {

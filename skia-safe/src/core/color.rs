@@ -14,7 +14,7 @@ use std::ops::{BitAnd, BitOr, Index, IndexMut, Mul};
 #[repr(transparent)]
 pub struct Color(SkColor);
 
-native_transmutable!(SkColor, Color, color_layout);
+native_transmutable!(SkColor, Color);
 
 impl From<u32> for Color {
     fn from(argb: u32) -> Self {
@@ -218,7 +218,7 @@ pub struct Color4f {
     pub a: f32,
 }
 
-native_transmutable!(SkColor4f, Color4f, color4f_layout);
+native_transmutable!(SkColor4f, Color4f);
 
 impl AsRef<Self> for Color4f {
     fn as_ref(&self) -> &Self {

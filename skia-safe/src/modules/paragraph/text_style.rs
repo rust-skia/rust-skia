@@ -74,11 +74,7 @@ impl Default for Decoration {
     }
 }
 
-native_transmutable!(
-    sb::skia_textlayout_Decoration,
-    Decoration,
-    decoration_layout
-);
+native_transmutable!(sb::skia_textlayout_Decoration, Decoration);
 
 /// Where to vertically align the placeholder relative to the surrounding text.
 #[repr(i32)]
@@ -113,8 +109,7 @@ pub enum PlaceholderAlignment {
 }
 native_transmutable!(
     sb::skia_textlayout_PlaceholderAlignment,
-    PlaceholderAlignment,
-    placeholder_alignment_layout
+    PlaceholderAlignment
 );
 
 pub type FontFeature = Handle<sb::skia_textlayout_FontFeature>;
@@ -175,11 +170,7 @@ pub struct PlaceholderStyle {
     pub baseline_offset: scalar,
 }
 
-native_transmutable!(
-    sb::skia_textlayout_PlaceholderStyle,
-    PlaceholderStyle,
-    placeholder_style_layout
-);
+native_transmutable!(sb::skia_textlayout_PlaceholderStyle, PlaceholderStyle);
 
 impl PartialEq for PlaceholderStyle {
     fn eq(&self, other: &Self) -> bool {
@@ -602,7 +593,7 @@ pub struct Block {
     pub style: TextStyle,
 }
 
-native_transmutable!(sb::skia_textlayout_Block, Block, block_layout);
+native_transmutable!(sb::skia_textlayout_Block, Block);
 
 impl Default for Block {
     fn default() -> Self {
@@ -644,11 +635,7 @@ pub struct Placeholder {
     pub text_before: TextRange,
 }
 
-native_transmutable!(
-    sb::skia_textlayout_Placeholder,
-    Placeholder,
-    placeholder_layout
-);
+native_transmutable!(sb::skia_textlayout_Placeholder, Placeholder);
 
 impl Default for Placeholder {
     fn default() -> Self {

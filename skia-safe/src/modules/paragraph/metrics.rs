@@ -27,11 +27,7 @@ pub struct StyleMetrics<'a> {
     pub font_metrics: FontMetrics,
 }
 
-native_transmutable!(
-    skia_textlayout_StyleMetrics,
-    StyleMetrics<'_>,
-    style_metrics_layout
-);
+native_transmutable!(skia_textlayout_StyleMetrics, StyleMetrics<'_>);
 
 impl<'a> StyleMetrics<'a> {
     pub fn new(style: &'a TextStyle, metrics: impl Into<Option<FontMetrics>>) -> Self {
