@@ -144,7 +144,7 @@ pub use point::*;
 pub use point3::*;
 #[allow(unused)]
 pub use raster_handle_allocator::*;
-pub use recorder::Recorder;
+pub use recorder::{Recorder, RecorderRef};
 pub use rect::*;
 pub use region::Region;
 pub use rrect::RRect;

@@ -31,9 +31,10 @@ mod codec {
     assert_impl_all!(codecs::Decoder: Send, Sync);
 }
 
+#[allow(deprecated)]
 mod core {
     use contour_measure::{ForwardVerbIterator, VerbMeasure};
-    use skia_safe::*;
+    use skia_safe::{recorder::RecorderRef, *};
     use static_assertions::*;
 
     assert_impl_all!(Arc: Send, Sync);
@@ -78,6 +79,7 @@ mod core {
     assert_impl_all!(Image: Send, Sync);
     assert_impl_all!(image::CubicResampler: Send, Sync);
     assert_impl_all!(image::BitDepth: Send, Sync);
+    assert_impl_all!(image::RequiredProperties: Send, Sync);
 
     assert_impl_all!(ImageFilter: Send, Sync);
     assert_impl_all!(ImageGenerator: Send, Sync);
@@ -87,16 +89,30 @@ mod core {
     assert_impl_all!(MaskFilter: Send, Sync);
     assert_impl_all!(Matrix: Send, Sync);
     assert_impl_all!(Paint: Send, Sync);
-    assert_not_impl_any!(path::Iter: Send, Sync);
+
     assert_impl_all!(Path: Send);
     assert_not_impl_any!(Path: Sync);
+    assert_not_impl_any!(path::Iter: Send, Sync);
+    assert_not_impl_any!(path::RawIter: Send, Sync);
+    assert_impl_all!(path::ArcSize: Send, Sync);
+    assert_impl_all!(path::SegmentMask: Send, Sync);
+    assert_impl_all!(path::Verb: Send, Sync);
+
     assert_impl_all!(PathBuilder: Send, Sync);
+    assert_impl_all!(PathDirection: Send, Sync);
     assert_impl_all!(PathEffect: Send, Sync);
+    assert_impl_all!(PathFillType: Send, Sync);
     assert_not_impl_any!(PathMeasure: Send, Sync);
+    assert_impl_all!(PathVerb: Send, Sync);
+
     assert_impl_all!(Picture: Send, Sync);
     assert_not_impl_any!(PictureRecorder: Send, Sync);
     assert_impl_all!(PixelRef: Send, Sync);
     assert_not_impl_any!(Pixmap: Send, Sync);
+
+    assert_not_impl_any!(dyn Recorder: Send, Sync);
+    assert_not_impl_any!(RecorderRef: Send, Sync);
+
     assert_impl_all!(Region: Send, Sync);
     assert_not_impl_any!(region::Iterator: Send, Sync);
     assert_not_impl_any!(region::Cliperator: Send, Sync);
