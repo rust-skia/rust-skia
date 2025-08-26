@@ -540,7 +540,7 @@ impl Matrix {
     }
 
     #[deprecated(
-        since = "0.0.0",
+        since = "0.88.0",
         note = "Legacy matrix rect-to-rect function, may be removed soon"
     )]
     pub fn set_rect_to_rect(
@@ -556,7 +556,7 @@ impl Matrix {
     }
 
     #[deprecated(
-        since = "0.0.0",
+        since = "0.88.0",
         note = "Legacy matrix rect-to-rect function, may be removed soon"
     )]
     pub fn from_rect_to_rect(
@@ -660,7 +660,7 @@ impl Matrix {
         dst
     }
 
-    #[deprecated(since = "0.0.0", note = "use map_points_to_homogeneous()")]
+    #[deprecated(since = "0.88.0", note = "use map_points_to_homogeneous()")]
     pub fn map_homogeneous_points_2d(&self, dst: &mut [Point3], src: &[Point]) {
         self.map_points_to_homogeneous(dst, src);
     }
@@ -684,7 +684,7 @@ impl Matrix {
         dst
     }
 
-    #[deprecated(since = "0.0.0", note = "use map_point((x, y))")]
+    #[deprecated(since = "0.88.0", note = "use map_point((x, y))")]
     pub fn map_xy(&self, x: scalar, y: scalar) -> Point {
         self.map_point((x, y))
     }

@@ -96,7 +96,7 @@ impl PathMeasure {
         .if_true_some((position, tangent))
     }
 
-    #[deprecated(since = "0.0.0", note = "Use get_matrix()")]
+    #[deprecated(since = "0.88.0", note = "Use get_matrix()")]
     #[must_use]
     pub fn matrix(
         &mut self,
@@ -134,7 +134,7 @@ impl PathMeasure {
         }
     }
 
-    #[deprecated(since = "0.0.0", note = "Use get_segment()")]
+    #[deprecated(since = "0.88.0", note = "Use get_segment()")]
     pub fn segment(
         &mut self,
         start_d: scalar,

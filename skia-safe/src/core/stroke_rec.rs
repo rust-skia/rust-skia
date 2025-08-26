@@ -147,7 +147,7 @@ impl StrokeRec {
         unsafe { self.native().applyToPath(dst.native_mut(), src.native()) }
     }
 
-    #[deprecated(since = "0.0.0", note = "Use apply_to_path()")]
+    #[deprecated(since = "0.88.0", note = "Use apply_to_path()")]
     pub fn apply_to_path_inplace(&self, path: &mut Path) -> bool {
         let mut builder = PathBuilder::default();
         let r = unsafe {

@@ -134,7 +134,6 @@ impl Path {
     /// A legal sequence of verbs consists of any number of Contours. A contour always begins
     /// with a Move verb, followed by 0 or more segments: Line, Quad, Conic, Cubic, followed
     /// by an optional Close.
-    #[deprecated(since = "0.0.0", note = "use raw()")]
     pub fn raw(
         points: &[Point],
         verbs: &[PathVerb],
@@ -174,7 +173,7 @@ impl Path {
     /// A legal sequence of verbs consists of any number of Contours. A contour always begins
     /// with a Move verb, followed by 0 or more segments: Line, Quad, Conic, Cubic, followed
     /// by an optional Close.
-    #[deprecated(since = "0.0.0", note = "use raw()")]
+    #[deprecated(since = "0.88.0", note = "use raw()")]
     pub fn new_from(
         points: &[Point],
         verbs: &[u8],

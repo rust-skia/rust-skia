@@ -180,7 +180,7 @@ impl Typeface {
         unsafe { self.native().countTables().try_into().unwrap() }
     }
 
-    #[deprecated(since = "0.0.0", note = "use read_table_tags")]
+    #[deprecated(since = "0.88.0", note = "use read_table_tags")]
     pub fn table_tags(&self) -> Option<Vec<FontTableTag>> {
         self.read_table_tags()
     }
