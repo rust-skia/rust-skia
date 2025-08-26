@@ -25,6 +25,7 @@
 // core/
 #include "include/core/SkAnnotation.h"
 #include "include/core/SkArc.h"
+#include "include/core/SkBBHFactory.h"
 #include "include/core/SkBlendMode.h"
 #include "include/core/SkBitmap.h"
 #include "include/core/SkBlurTypes.h"
@@ -1732,6 +1733,12 @@ extern "C" void C_SkPictureRecorder_Construct(SkPictureRecorder *uninitialized) 
 
 extern "C" void C_SkPictureRecorder_destruct(SkPictureRecorder *self) {
     self->~SkPictureRecorder();
+}
+
+extern "C" SkCanvas* C_SkPictureRecorder_beginRecording(SkPictureRecorder *self, const SkRect* bounds, bool useBBH) {
+    std::unique_ptr<SkBBHFactory> factory;
+    if (useBBH) factory = std::make_unique<SkRTreeFactory>();
+    return self->beginRecording(*bounds, factory.get());
 }
 
 extern "C" SkPicture* C_SkPictureRecorder_finishRecordingAsPicture(SkPictureRecorder* self, const SkRect* cullRect) {
