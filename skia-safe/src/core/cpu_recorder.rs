@@ -1,5 +1,7 @@
 pub mod cpu {
-    use crate::{prelude::*, recorder};
+    use std::fmt;
+
+    use crate::{prelude::*, recorder, Recorder as _};
     use skia_bindings::{self as sb, skcpu_Recorder};
 
     #[repr(transparent)]
@@ -15,6 +17,12 @@ pub mod cpu {
 
         fn native_mut(&mut self) -> &mut Self::Native {
             self.0
+        }
+    }
+
+    impl fmt::Debug for Recorder<'_> {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            f.debug_struct("Recorder").field("ty", &self.ty()).finish()
         }
     }
 

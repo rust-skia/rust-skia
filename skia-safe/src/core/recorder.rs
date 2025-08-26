@@ -6,7 +6,7 @@ use skia_bindings::{self as sb, SkRecorder};
 pub type Type = skia_bindings::SkRecorder_Type;
 variant_name!(Type::CPU);
 
-pub trait Recorder: sealed::AsRecorderRef {
+pub trait Recorder: sealed::AsRecorderRef + fmt::Debug {
     fn ty(&self) -> Type;
     // TODO:
     // fn cpu_recorder(&mut self) -> &mut cpu::Recorder;
