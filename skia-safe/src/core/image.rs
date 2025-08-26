@@ -256,11 +256,7 @@ pub struct RequiredProperties {
     pub mipmapped: bool,
 }
 
-native_transmutable!(
-    sb::SkImage_RequiredProperties,
-    RequiredProperties,
-    required_properties_layout
-);
+native_transmutable!(sb::SkImage_RequiredProperties, RequiredProperties);
 
 /// [`Image`] describes a two dimensional array of pixels to draw. The pixels may be
 /// decoded in a raster bitmap, encoded in a [`Picture`] or compressed data stream,
