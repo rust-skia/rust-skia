@@ -13,10 +13,6 @@ impl PlatformDetails for MacOs {
     }
 
     fn gn_args(&self, _config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
-        // Skia will take care to set a specific `--target` for the current macOS version. So we
-        // don't push another target `--target` that may conflict.
-        builder.target(None);
-
         builder.target_os_and_default_cpu("mac");
         builder.cflags(flags());
     }
